@@ -1,0 +1,17 @@
+{
+  "schema_version": "0.1",
+  "tasks": [
+    {"id": "T1_particle_rollout", "track": "numerical_particle_dynamics", "required": ["position", "velocity", "valid", "identity"], "primary_metrics": ["position_rmse_over_dp", "ade_m", "fde_m"], "report_by": ["family", "horizon", "split"]},
+    {"id": "T2_material_transport", "track": "material_tracing", "required": ["material_tracer_position", "source_label", "destination_spec"], "primary_metrics": ["destination_mass_tv", "first_passage_event_accuracy", "first_passage_time_mae_s"], "report_by": ["source", "destination", "family", "split"]},
+    {"id": "T3_interaction_observables", "track": "physical_observation", "required": ["observable_reference", "observable_units", "validation_scope"], "primary_metrics": ["surface_rmse_m", "impact_peak_error", "impact_time_error_s", "rigid_body_displacement_rmse_m"], "report_by": ["observable", "resolution", "family"]},
+    {"id": "T4_outcome_classification", "track": "material_history", "required": ["terminal_destination", "event_history"], "primary_metrics": ["macro_f1", "destination_mass_tv"], "report_by": ["family", "split"]}
+  ],
+  "global_rules": {
+    "rollout": "autonomous after the provided conditioning prefix; no teacher forcing in scored frames",
+    "normalization": "fit on train split only and publish constants",
+    "aggregation": "publish per-case values; headline is macro average over cases, then families",
+    "missingness": "never encode missing particles or predictions as physical zeros",
+    "uncertainty": "report each seed and bootstrap confidence intervals over cases; do not treat frames as independent samples",
+    "comparability": "metrics outside a case's validation_scope are diagnostic, not benchmark truth"
+  }
+}

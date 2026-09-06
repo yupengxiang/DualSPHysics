@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/lagrangian-fluid-v0.1/release-manifest.schema.json",
+  "title": "Lagrangian fluid benchmark release manifest v0.1",
+  "type": "object",
+  "required": ["schema_version", "release_id", "cases"],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "release_id": {"type": "string", "minLength": 1},
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["case_id", "family", "lineage_group_id", "split", "hdf5", "physics", "geometry", "control", "numerics", "observation", "quality"],
+        "properties": {
+          "case_id": {"type": "string"},
+          "family": {"enum": ["F1", "F2", "F3", "F4", "F5", "F6"]},
+          "lineage_group_id": {"type": "string"},
+          "split": {"enum": ["train", "validation", "interpolation", "single_axis_extrapolation", "joint_extrapolation", "topology_extrapolation", "test"]},
+          "hdf5": {"type": "string"},
+          "physics": {"type": "object"},
+          "geometry": {"type": "object"},
+          "control": {"type": "object"},
+          "numerics": {"type": "object", "required": ["particle_spacing_m", "boundary_formulation", "solver_version"]},
+          "observation": {"type": "object", "required": ["frame_interval_s", "event_sampling"]},
+          "quality": {"type": "object", "required": ["gate_status", "numerical_loss_fraction", "validation_scope"]}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

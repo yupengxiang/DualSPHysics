@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "adversarial_test_count": 8,
+  "detected_count": 8,
+  "strict_pass": true,
+  "attacks": [
+    {
+      "attack": "non_monotonic_time",
+      "detected": true,
+      "reason": "time must be finite, one-dimensional, and strictly increasing"
+    },
+    {
+      "attack": "nan_under_valid_mask",
+      "detected": true,
+      "reason": "non-finite value under valid mask"
+    },
+    {
+      "attack": "improper_moving_frame",
+      "detected": true,
+      "reason": "transform rotation is not proper orthonormal"
+    },
+    {
+      "attack": "split_by_frames_or_resolution",
+      "detected": true,
+      "reason": "lineage crosses splits: {'same-physics': ['test', 'train']}"
+    },
+    {
+      "attack": "survivor_renormalized_transport",
+      "detected": true,
+      "reason": "prediction destination labels differ; missing=['loss'], extra=[]"
+    },
+    {
+      "attack": "undersampled_impact_event",
+      "detected": true,
+      "reason": "event window has 1 samples; requires 3"
+    },
+    {
+      "attack": "missing_predictions_encoded_as_nan",
+      "detected": true,
+      "reason": "non-finite value under valid mask"
+    },
+    {
+      "attack": "per_frame_identity_permutation",
+      "detected": true,
+      "reason": "midpoint residual changed from 0 to 0.8 m"
+    }
+  ]
+}
