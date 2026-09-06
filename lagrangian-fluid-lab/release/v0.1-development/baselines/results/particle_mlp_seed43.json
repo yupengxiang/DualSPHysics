@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "route": "particle_mlp",
+  "seed": 43,
+  "device": "cuda",
+  "torch_version": "2.11.0+cu128",
+  "cuda_visible_device_name": "NVIDIA RTX 6000 Ada Generation",
+  "parameter_count": 18691,
+  "epochs": 5,
+  "maximum_particles_per_training_frame": 128,
+  "training_transition_frames": 792,
+  "training_seconds": 13.466492354869843,
+  "inference_seconds": 0.1513517419807613,
+  "peak_gpu_memory_bytes": 20417024,
+  "history": [
+    {
+      "epoch": 1,
+      "train_mse": 0.003196035161516817,
+      "validation_one_step_rmse_over_dp": 0.05121638088639974
+    },
+    {
+      "epoch": 2,
+      "train_mse": 0.001703221471996245,
+      "validation_one_step_rmse_over_dp": 0.04909460310093052
+    },
+    {
+      "epoch": 3,
+      "train_mse": 0.0016154882627339394,
+      "validation_one_step_rmse_over_dp": 0.0507285335495393
+    },
+    {
+      "epoch": 4,
+      "train_mse": 0.0016452419559144149,
+      "validation_one_step_rmse_over_dp": 0.04935153341204474
+    },
+    {
+      "epoch": 5,
+      "train_mse": 0.0013846069402020614,
+      "validation_one_step_rmse_over_dp": 0.04867032314431266
+    }
+  ],
+  "test_rollout": {
+    "F1_twin_obstacle": {
+      "frames_predicted": 13,
+      "particles": 1170,
+      "learned_rmse_m": 0.1803635060787201,
+      "learned_rmse_over_dp": 4.509087562561035,
+      "learned_fde_m": 0.24599170684814453,
+      "constant_velocity_rmse_m": 0.15145491063594818,
+      "constant_velocity_rmse_over_dp": 3.7863729000091553,
+      "constant_velocity_fde_m": 0.17692194879055023
+    },
+    "W06_standard_fast_center": {
+      "frames_predicted": 250,
+      "particles": 1764,
+      "learned_rmse_m": 4.178110599517822,
+      "learned_rmse_over_dp": 167.12442016601562,
+      "learned_fde_m": 6.6880316734313965,
+      "constant_velocity_rmse_m": 0.7176046967506409,
+      "constant_velocity_rmse_over_dp": 28.704187393188477,
+      "constant_velocity_fde_m": 0.7861647605895996
+    },
+    "F3_transverse_slosh": {
+      "frames_predicted": 15,
+      "particles": 1638,
+      "learned_rmse_m": 0.12416728585958481,
+      "learned_rmse_over_dp": 3.104182243347168,
+      "learned_fde_m": 0.20918424427509308,
+      "constant_velocity_rmse_m": 0.20360837876796722,
+      "constant_velocity_rmse_over_dp": 5.090209484100342,
+      "constant_velocity_fde_m": 0.3354337811470032
+    }
+  },
+  "limitations": "tiny heterogeneous development pilot; no boundary geometry input; results are pipeline evidence, not a publishable ranking"
+}

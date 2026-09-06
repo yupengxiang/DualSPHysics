@@ -49,9 +49,16 @@ the exact solver configuration and executable.
   padded HDF5 trajectories with validity masks.
 - Structural and semantic quality gates passed 29 probes and rejected one
   deliberately retained coarse-resolution failure.
+- W00--W12 then exercised protected provenance, identity/reference-frame
+  semantics, independent material tracing, calibration, three external
+  validation anchors, a real 12-case rotating-cup matrix, causal design cards,
+  open/multiresolution lifecycle extensions, a release schema, a 13-case
+  development package, and six real learned-baseline runs.
 
-See [reports/findings.md](reports/findings.md) for conclusions and
-`reports/runtime/quality-gates.json` for machine-readable decisions.
+See [campaigns/v0.1-candidate/W12-CONCLUSION.md](campaigns/v0.1-candidate/W12-CONCLUSION.md)
+for the current freeze decision and `campaigns/v0.1-candidate/work-packages.json`
+for package status. The original broad-pass findings remain in
+[reports/findings.md](reports/findings.md).
 
 ## Reproduce the exploration
 
@@ -113,7 +120,9 @@ capacity estimates.
 
 ## Next decision gate
 
-Before producing a large dataset, run paired resolution studies and external
-validation for one representative case in each retained family. Only then freeze
-the physical parameter ranges, target particle tier (Tiny/Standard/Gold), material
-trajectory definition, and group-aware train/validation/test splits.
+The engineering, identity, material, causal-split and metric contracts are ready
+to freeze, but the formal dataset is not. Close family-specific validation gaps
+first: F1 impact pressure, F2 pouring resolution and external observation, F3
+impact timing/cadence, an external F4 anchor, stable validated F5 run-up, and a
+three-dimensional F6 Test 14 implementation. Only passing families should enter
+a 20--30 case development tranche before formal production scale is chosen.
