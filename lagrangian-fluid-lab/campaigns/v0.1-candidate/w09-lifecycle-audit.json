@@ -1,0 +1,285 @@
+{
+  "schema_version": 1,
+  "scope": "bounded W09 lifecycle audit",
+  "software_evidence": {
+    "solver": "DualSPHysics 5.4.355",
+    "official_release_note": "https://github.com/DualSPHysics/DualSPHysics/blob/master/CHANGES.txt",
+    "official_partvtk_help": "https://github.com/DualSPHysics/DualSPHysics/blob/master/doc/help/PartVTK_Help.out"
+  },
+  "open_boundary": {
+    "status": "extension_only",
+    "identity_semantics": "particle_id tracks a solver particle only during its valid lifetime",
+    "mass_semantics": "resident mass is not conserved mass; a control-volume balance requires signed boundary flux and exterior destinations",
+    "required_schema": [
+      "birth_time",
+      "death_time",
+      "valid",
+      "boundary_event",
+      "boundary_id",
+      "signed_mass_flux"
+    ],
+    "evidence": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/data-official/O4_impinging_jet.h5",
+      "case_id": "O4_impinging_jet",
+      "identity_key_declared": "particle_id",
+      "frames": 11,
+      "time_start_s": 0.0,
+      "time_end_s": 0.0300004,
+      "identity_slots": 19119,
+      "identities_ever_valid": 19119,
+      "valid_initial": 519,
+      "valid_final": 10353,
+      "born_after_initial": 18600,
+      "initial_missing_at_final": 511,
+      "multiple_validity_episodes": 0,
+      "raw_particle_id_duplicates": 0,
+      "compound_identity_duplicates": 0,
+      "resident_fluid_mass_kg_per_frame": [
+        0.5190000534057617,
+        2.379000186920166,
+        4.23900032043457,
+        6.099000930786133,
+        7.682001113891602,
+        9.077000617980957,
+        9.808000564575195,
+        10.28499984741211,
+        10.265000343322754,
+        10.3410005569458,
+        10.35300064086914
+      ],
+      "zones": {
+        "0": {
+          "identity_slots": 19119,
+          "valid_particles_per_frame": [
+            519,
+            2379,
+            4239,
+            6099,
+            7682,
+            9077,
+            9808,
+            10285,
+            10265,
+            10341,
+            10353
+          ],
+          "fluid_particles_per_frame": [
+            519,
+            2379,
+            4239,
+            6099,
+            7682,
+            9077,
+            9808,
+            10285,
+            10265,
+            10341,
+            10353
+          ],
+          "resident_fluid_mass_kg_per_frame": [
+            0.5190000534057617,
+            2.379000186920166,
+            4.23900032043457,
+            6.099000930786133,
+            7.682001113891602,
+            9.077000617980957,
+            9.808000564575195,
+            10.28499984741211,
+            10.265000343322754,
+            10.3410005569458,
+            10.35300064086914
+          ],
+          "fluid_particle_mass_values_kg": [
+            0.0010000000474974513
+          ]
+        }
+      }
+    }
+  },
+  "variable_resolution": {
+    "status": "extension_only",
+    "identity_semantics": "(zone, particle_id) identifies a numerical node; no cross-zone material lineage is inferred",
+    "mass_semantics": "zone outputs overlap and use different particle masses; summing all resident zone mass is not a global material balance",
+    "fluid_particle_mass_values_kg": [
+      0.02500000037252903,
+      0.10000000149011612,
+      0.4000000059604645
+    ],
+    "required_schema": [
+      "particle_zone",
+      "valid",
+      "zone_priority",
+      "overlap_mask",
+      "numerical_node_id"
+    ],
+    "tracer_requirement": "advect independent passive tracers on a composite velocity field with an explicit finest-zone precedence/blending rule",
+    "evidence": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/data-official/O6_falling_wedge_vres.h5",
+      "case_id": "O6_falling_wedge_vres",
+      "identity_key_declared": "(particle_zone, particle_id)",
+      "frames": 11,
+      "time_start_s": 0.0,
+      "time_end_s": 0.025001,
+      "identity_slots": 21439,
+      "identities_ever_valid": 21439,
+      "valid_initial": 16479,
+      "valid_final": 19895,
+      "born_after_initial": 4960,
+      "initial_missing_at_final": 1209,
+      "multiple_validity_episodes": 38,
+      "raw_particle_id_duplicates": 9027,
+      "compound_identity_duplicates": 0,
+      "resident_fluid_mass_kg_per_frame": [
+        4707.40087890625,
+        4701.62548828125,
+        4698.42578125,
+        4710.2509765625,
+        4706.8505859375,
+        4699.55078125,
+        4711.12548828125,
+        4705.55078125,
+        4704.92529296875,
+        4702.32568359375,
+        4699.27587890625
+      ],
+      "zones": {
+        "0": {
+          "identity_slots": 11285,
+          "valid_particles_per_frame": [
+            11285,
+            11236,
+            11187,
+            11187,
+            11138,
+            11089,
+            11089,
+            11041,
+            11018,
+            11000,
+            10969
+          ],
+          "fluid_particles_per_frame": [
+            11285,
+            11236,
+            11187,
+            11187,
+            11138,
+            11089,
+            11089,
+            11041,
+            11018,
+            11000,
+            10969
+          ],
+          "resident_fluid_mass_kg_per_frame": [
+            4514.0009765625,
+            4494.40087890625,
+            4474.80078125,
+            4474.80078125,
+            4455.20068359375,
+            4435.6005859375,
+            4435.6005859375,
+            4416.40087890625,
+            4407.20068359375,
+            4400.0009765625,
+            4387.6005859375
+          ],
+          "fluid_particle_mass_values_kg": [
+            0.4000000059604645
+          ]
+        },
+        "1": {
+          "identity_slots": 2360,
+          "valid_particles_per_frame": [
+            1100,
+            1119,
+            1170,
+            1176,
+            1234,
+            1264,
+            1303,
+            1360,
+            1389,
+            1383,
+            1433
+          ],
+          "fluid_particles_per_frame": [
+            1100,
+            1119,
+            1170,
+            1176,
+            1234,
+            1264,
+            1303,
+            1360,
+            1389,
+            1383,
+            1433
+          ],
+          "resident_fluid_mass_kg_per_frame": [
+            110.00001525878906,
+            111.90000915527344,
+            117.00001525878906,
+            117.60000610351562,
+            123.40001678466797,
+            126.40001678466797,
+            130.30001831054688,
+            136.00003051757812,
+            138.9000244140625,
+            138.30001831054688,
+            143.30001831054688
+          ],
+          "fluid_particle_mass_values_kg": [
+            0.10000000149011612
+          ]
+        },
+        "2": {
+          "identity_slots": 7794,
+          "valid_particles_per_frame": [
+            4094,
+            4571,
+            5023,
+            5472,
+            5888,
+            6260,
+            6567,
+            6884,
+            7111,
+            7319,
+            7493
+          ],
+          "fluid_particles_per_frame": [
+            3336,
+            3813,
+            4265,
+            4714,
+            5130,
+            5502,
+            5809,
+            6126,
+            6353,
+            6561,
+            6735
+          ],
+          "resident_fluid_mass_kg_per_frame": [
+            83.40000915527344,
+            95.32501220703125,
+            106.62500762939453,
+            117.85000610351562,
+            128.25003051757812,
+            137.55001831054688,
+            145.22500610351562,
+            153.1500244140625,
+            158.82501220703125,
+            164.0250244140625,
+            168.37503051757812
+          ],
+          "fluid_particle_mass_values_kg": [
+            0.02500000037252903
+          ]
+        }
+      }
+    }
+  },
+  "core_release_decision": "exclude both features from v0.1 core trajectories; retain as bounded protocol extensions"
+}
