@@ -1,0 +1,54 @@
+from __future__ import annotations
+
+import h5py
+import numpy as np
+import pytest
+
+from scripts.transport_metrics import audit_transport
+
+
+def make_h5(path, moving=False):
+    with h5py.File(path, "w") as h5:
+        h5.attrs["case_id"] = "transport-test"
+        h5.create_dataset("time", data=[0.0, 1.0])
+        h5.create_dataset("valid", data=[[1, 1], [1, 0]], dtype=bool)
+        h5.create_dataset("type", data=[[3, 3], [3, -1]])
+        h5.create_dataset("mk", data=[[0, 0], [0, -1]])
+        h5.create_dataset("mass", data=[[2.0, 1.0], [2.0, np.nan]])
+        position = np.zeros((2, 2, 3))
+        position[1, 0] = [2.2 if moving else 0.9, 0, 0.1]
+        position[1, 1] = [0.1, 0, 0.1]
+        h5.create_dataset("position", data=position)
+        if moving:
+            transforms = np.repeat(np.eye(4)[None], 2, axis=0)
+            transforms[1, 0, 3] = 2.0
+            h5.create_dataset("control/receiver_world_from_body", data=transforms)
+
+
+def test_missing_particle_stays_in_initial_mass_denominator(tmp_path):
+    path = tmp_path / "case.h5"
+    make_h5(path)
+    report = audit_transport(path, {
+        "lifecycle_model": "closed", "sources": {"mode": "mk"},
+        "destination_frame": {"kind": "world"},
+        "destinations": [{"name": "right", "type": "halfspace", "normal": [1, 0, 0],
+                          "offset": 0.8, "side": "ge"}],
+    })
+    source = report["sources"]["0"]
+    assert source["initial_mass_kg"] == pytest.approx(3.0)
+    assert source["mass_fraction"]["right"] == pytest.approx(2 / 3)
+    assert source["mass_fraction"]["numerical_loss"] == pytest.approx(1 / 3)
+    assert source["closure_error_kg"] == pytest.approx(0.0)
+
+
+def test_destination_can_be_defined_in_moving_body_frame(tmp_path):
+    path = tmp_path / "case.h5"
+    make_h5(path, moving=True)
+    report = audit_transport(path, {
+        "lifecycle_model": "closed", "sources": {"mode": "mk"},
+        "destination_frame": {"kind": "moving_affine",
+                              "world_from_frame_dataset": "control/receiver_world_from_body"},
+        "destinations": [{"name": "receiver", "type": "aabb",
+                          "min": [0.0, -0.2, 0.0], "max": [0.4, 0.2, 0.4]}],
+    })
+    assert report["sources"]["0"]["mass_fraction"]["receiver"] == pytest.approx(2 / 3)

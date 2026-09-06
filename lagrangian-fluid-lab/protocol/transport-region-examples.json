@@ -1,0 +1,22 @@
+{
+  "world_fixed_weir": {
+    "lifecycle_model": "closed",
+    "sources": {"mode": "mk"},
+    "destination_frame": {"kind": "world"},
+    "destinations": [
+      {"name": "downstream", "type": "halfspace", "normal": [1, 0, 0], "offset": 0.74, "side": "ge"},
+      {"name": "upstream", "type": "halfspace", "normal": [1, 0, 0], "offset": 0.64, "side": "le"}
+    ]
+  },
+  "future_rotating_receiver": {
+    "lifecycle_model": "closed",
+    "sources": {"mode": "mk"},
+    "destination_frame": {
+      "kind": "moving_affine",
+      "world_from_frame_dataset": "control/receiver_world_from_body"
+    },
+    "destinations": [
+      {"name": "inside_receiver", "type": "aabb", "min": [-0.2, -0.2, 0.0], "max": [0.2, 0.2, 0.4]}
+    ]
+  }
+}

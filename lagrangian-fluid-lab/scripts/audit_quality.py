@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Apply structural and semantic quality gates to all normalized probes."""
+"""Reconcile planned cases with evidence and apply exploratory or strict gates."""
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -12,12 +13,16 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "reports" / "runtime"
-JSON_REPORT = RUNTIME / "quality-gates.json"
-MD_REPORT = ROOT / "reports" / "findings.md"
+DEFAULT_REGISTRY = ROOT / "campaigns" / "v0.1-candidate" / "case-registry.json"
+DEFAULT_REPORT = ROOT / "campaigns" / "v0.1-candidate" / "w01-quality-strict.json"
 
 
-def load(name):
-    return json.loads((RUNTIME / name).read_text())
+def load(path: Path):
+    return json.loads(path.read_text())
+
+
+def case_map(path: Path):
+    return {case["id"]: case for case in load(path).get("cases", [])}
 
 
 def inspect_h5(path: Path):
@@ -52,123 +57,157 @@ def inspect_h5(path: Path):
 
 
 def assess(audit, target_time, solver_status):
+    """Assess one case. Missing evidence is unknown, never an implicit zero/pass."""
+    if audit is None:
+        return {
+            "observed_status": "unknown", "solver_status": solver_status,
+            "issues": ["trajectory audit is missing"], "warnings": [],
+            "excluded_particles": None,
+        }
     issues = []
     warnings = []
-    h5_path = ROOT / audit["hdf5"]
+    h5_relative = audit.get("hdf5")
+    h5_path = ROOT / h5_relative if h5_relative else None
     if solver_status != "completed":
         issues.append(f"solver status is {solver_status}")
-    if not h5_path.is_file():
+    if h5_path is None or not h5_path.is_file():
         issues.append("normalized HDF5 is missing")
     else:
         issues.extend(inspect_h5(h5_path))
-    if audit["frames"] < 2:
+    if audit.get("frames", 0) < 2:
         issues.append("fewer than two saved frames")
-    if target_time is not None and audit["time_end"] < 0.99 * target_time:
-        issues.append(f"ended at {audit['time_end']:.6g}s before target {target_time:.6g}s")
-    if audit["density_min"] < 650 or audit["density_max"] > 1350:
+    if target_time is None:
+        issues.append("target time evidence is unknown")
+    elif audit.get("time_end") is None or audit["time_end"] < 0.99 * target_time:
+        issues.append(f"run did not reach 99% of target time {target_time:.6g}s")
+    if audit.get("density_min") is None or audit.get("density_max") is None:
+        issues.append("density range evidence is unknown")
+    elif audit["density_min"] < 650 or audit["density_max"] > 1350:
         issues.append("density left the broad 650--1350 kg/m^3 sanity range")
 
-    mechanism = audit["mechanism"]
+    mechanism = audit.get("mechanism", "unknown")
     open_boundary = "open-boundary" in mechanism
     variable_resolution = "variable-resolution" in mechanism
-    initial = audit.get("particles_initial", audit["ids_common_first_last"])
-    excluded = audit.get("excluded_particles") or 0
-    excluded_fraction = excluded / max(1, initial)
+    initial = audit.get("particles_initial", audit.get("ids_common_first_last"))
+    excluded = audit.get("excluded_particles")
+    if initial is None:
+        issues.append("initial particle count evidence is unknown")
+    if excluded is None:
+        issues.append("excluded particle evidence is unknown")
     if open_boundary:
-        introduced = audit.get("identities_introduced_after_initial", 0)
-        if introduced <= 0 or audit.get("particles_final", initial) <= initial:
+        introduced = audit.get("identities_introduced_after_initial")
+        final = audit.get("particles_final")
+        if introduced is None or final is None:
+            issues.append("open-boundary lifecycle evidence is unknown")
+        elif introduced <= 0:
             issues.append("open-boundary probe did not demonstrate particle injection")
-        warnings.append("identity retention is intentionally not a quality gate for open boundaries")
+        warnings.append("open boundaries require flux/lifecycle gates; retention is descriptive only")
     elif variable_resolution:
-        if audit["identity_retention"] < 0.85:
-            issues.append("too few initial (zone,idp) numerical nodes survive to the final frame")
-        warnings.append("(zone,idp) tracks numerical nodes, not material identity through split/merge")
-    else:
-        if audit["identity_retention"] < 0.95:
-            issues.append(f"closed-domain identity retention is only {audit['identity_retention']:.3f}")
+        if audit.get("identity_key") != "(zone,idp)":
+            issues.append("variable-resolution output lacks a composite (zone,idp) key")
+        warnings.append("node retention is not a physical mass or material-lineage gate")
+    elif initial is not None and excluded is not None:
+        retention = audit.get("identity_retention")
+        if retention is None or retention < 0.95:
+            issues.append(f"closed-domain identity retention is {retention!r}")
+        excluded_fraction = excluded / max(1, initial)
         if excluded_fraction > 0.05:
             issues.append(f"excluded-particle fraction is {excluded_fraction:.3f}")
-    if initial < 500:
-        warnings.append("very small probe (<500 initial dynamic particles); useful for plumbing only")
-    if audit.get("identity_key") == "(zone,idp)":
-        warnings.append("composite zone-aware identity is required")
+    if initial is not None and initial < 500:
+        warnings.append("very small probe (<500 initial dynamic particles); plumbing evidence only")
     return {
-        "id": audit["id"], "family": audit["family"], "mechanism": mechanism,
-        "status": "usable_probe" if not issues else "quality_failed",
+        "observed_status": "usable_probe" if not issues else "quality_failed",
         "solver_status": solver_status, "target_time": target_time,
-        "time_end": audit["time_end"], "frames": audit["frames"],
+        "time_end": audit.get("time_end"), "frames": audit.get("frames"),
         "particles_initial": initial, "particles_final": audit.get("particles_final"),
-        "identity_retention": audit["identity_retention"],
+        "identity_retention": audit.get("identity_retention"),
         "excluded_particles": excluded, "issues": issues, "warnings": warnings,
-        "hdf5": audit["hdf5"],
+        "hdf5": h5_relative,
+    }
+
+
+def reconcile(registry, evidence):
+    results = []
+    for planned in registry["cases"]:
+        origin = planned["origin"]
+        prepared = evidence[origin]["prepared"].get(planned["id"])
+        run = evidence[origin]["runs"].get(planned["id"])
+        audit = evidence[origin]["audits"].get(planned["id"])
+        missing_stages = []
+        if prepared is None:
+            missing_stages.append("prepare")
+        if run is None:
+            missing_stages.append("run")
+        if audit is None:
+            missing_stages.append("audit")
+        target_time = None if prepared is None else prepared.get("time_max", prepared.get("tmax"))
+        solver_status = "missing" if run is None else run.get("status", "unknown")
+        result = {**planned, **assess(audit, target_time, solver_status),
+                  "missing_stages": missing_stages}
+        expected = planned.get("expected_outcome", "usable_probe")
+        observed = result["observed_status"]
+        if missing_stages or observed == "unknown":
+            result["disposition"] = "missing_evidence"
+        elif observed == expected == "usable_probe":
+            result["disposition"] = "accepted_probe"
+        elif observed == expected == "quality_failed":
+            result["disposition"] = "expected_failure"
+        else:
+            result["disposition"] = "unexpected_outcome"
+        results.append(result)
+    planned_ids = {case["id"] for case in registry["cases"]}
+    extra = sorted({case_id for group in evidence.values() for stage in group.values()
+                    for case_id in stage if case_id not in planned_ids})
+    return results, extra
+
+
+def build_report(registry_path=DEFAULT_REGISTRY):
+    registry = load(Path(registry_path))
+    evidence = {
+        "custom": {
+            "prepared": case_map(RUNTIME / "prepare-summary.json"),
+            "runs": case_map(RUNTIME / "run-summary.json"),
+            "audits": case_map(RUNTIME / "trajectory-audit.json"),
+        },
+        "official": {
+            "prepared": case_map(RUNTIME / "official-prepare-summary.json"),
+            "runs": case_map(RUNTIME / "official-run-summary.json"),
+            "audits": case_map(RUNTIME / "official-trajectory-audit.json"),
+        },
+    }
+    results, unplanned = reconcile(registry, evidence)
+    blockers = [case for case in results if case["disposition"] in
+                {"missing_evidence", "unexpected_outcome"}]
+    counts = {name: sum(case["disposition"] == name for case in results) for name in
+              ("accepted_probe", "expected_failure", "missing_evidence", "unexpected_outcome")}
+    return {
+        "schema_version": 2, "registry": str(Path(registry_path).relative_to(ROOT)),
+        "mode_semantics": {
+            "exploratory": "always writes evidence; quality outcomes remain visible",
+            "strict": "nonzero exit for missing evidence, unplanned evidence, or unexpected outcome",
+        },
+        "planned_total": len(results), "counts": counts, "unplanned_evidence_ids": unplanned,
+        "strict_pass": not blockers and not unplanned, "cases": results,
     }
 
 
 def main():
-    groups = [
-        ("custom", load("trajectory-audit.json"), load("prepare-summary.json"), load("run-summary.json")),
-        ("official", load("official-trajectory-audit.json"), load("official-prepare-summary.json"),
-         load("official-run-summary.json")),
-    ]
-    results = []
-    for origin, audits, prepared, runs in groups:
-        targets = {r["id"]: r.get("time_max", r.get("tmax")) for r in prepared["cases"]}
-        statuses = {r["id"]: r["status"] for r in runs["cases"]}
-        for audit in audits["cases"]:
-            item = assess(audit, targets.get(audit["id"]), statuses.get(audit["id"], "missing"))
-            item["origin"] = origin
-            results.append(item)
-    usable = [r for r in results if r["status"] == "usable_probe"]
-    failed = [r for r in results if r["status"] == "quality_failed"]
-    report = {
-        "schema_version": 1,
-        "policy": {
-            "closed_identity_retention_min": 0.95,
-            "closed_excluded_fraction_max": 0.05,
-            "density_sanity_kg_m3": [650, 1350],
-            "time_completion_fraction_min": 0.99,
-            "exceptions": ["open-boundary lifecycle", "variable-resolution composite identity"],
-        },
-        "total": len(results), "usable": len(usable), "quality_failed": len(failed),
-        "cases": sorted(results, key=lambda r: r["id"]),
-    }
-    JSON_REPORT.write_text(json.dumps(report, indent=2) + "\n")
-
-    lines = [
-        "# Exploratory run findings", "",
-        f"The end-to-end pipeline produced **{len(results)} normalized probes**: "
-        f"**{len(usable)} passed** the current exploratory quality gates and "
-        f"**{len(failed)} failed** them.", "",
-        "A solver return code is deliberately not treated as proof of dataset quality. "
-        "Each case must also reach its target time, satisfy HDF5 structural checks, keep density "
-        "within a broad sanity range, and obey lifecycle rules appropriate to its boundary model.", "",
-        "## Quality failures", "",
-    ]
-    if failed:
-        for item in failed:
-            lines.append(f"- `{item['id']}`: {'; '.join(item['issues'])}")
-    else:
-        lines.append("- None")
-    lines += [
-        "", "## Semantics established", "",
-        "- Closed, fixed-resolution cases can use stable `Idp` trajectories; shifting is disabled in the custom probes.",
-        "- Open boundaries need birth/death masks. The impinging-jet probe injects new IDs, so a fixed conserved particle set is invalid.",
-        "- Variable resolution needs `(Zone, Idp)` to identify exported numerical nodes. Split/merge continuity requires a separate lineage representation.",
-        "- Floating-body boundary particles are preserved with `Type=2` and can be tracked alongside `Type=3` fluid particles.",
-        "", "## Most important resolution result", "",
-        "The coarse wave-runup probe (`dp=0.04 m`) completed normally but lost 21,695 of 21,723 initial fluid identities. "
-        "The refined probe (`dp=0.025 m`) retained essentially all particles (one exclusion). This is the clearest proof that "
-        "workflow smoke tests and scientifically usable dataset runs must be reported separately.", "",
-        "## Scope warning", "",
-        "These are mechanism and plumbing probes, not converged CFD benchmarks. They establish installation, case generation, "
-        "multi-GPU scheduling, raw-output retention, trajectory normalization, and failure detection. Resolution studies, validation "
-        "against experiments, nondimensional coverage, and train/validation/test split design remain future work.", "",
-    ]
-    MD_REPORT.write_text("\n".join(lines))
-    print(f"total={len(results)} usable={len(usable)} quality_failed={len(failed)}")
-    for item in failed:
-        print(f"FAIL {item['id']}: {'; '.join(item['issues'])}")
-    return 1 if any(item["solver_status"] != "completed" for item in results) else 0
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", choices=("exploratory", "strict"), default="exploratory")
+    parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
+    parser.add_argument("--output", type=Path, default=DEFAULT_REPORT)
+    args = parser.parse_args()
+    report = build_report(args.registry)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(report, indent=2) + "\n")
+    print(f"planned={report['planned_total']} strict_pass={report['strict_pass']} "
+          f"counts={report['counts']} unplanned={len(report['unplanned_evidence_ids'])}")
+    for case in report["cases"]:
+        if case["disposition"] not in {"accepted_probe", "expected_failure"}:
+            print(f"BLOCK {case['id']}: {case['disposition']}: " + "; ".join(case["issues"]))
+    if args.mode == "strict" and not report["strict_pass"]:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":

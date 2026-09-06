@@ -13,6 +13,11 @@ import h5py
 import numpy as np
 import pandas as pd
 
+try:
+    from .trajectory_io import normalize_streaming
+except ImportError:  # Direct script execution.
+    from trajectory_io import normalize_streaming
+
 
 LAB_ROOT = Path(__file__).resolve().parents[1]
 RUN_SUMMARY = LAB_ROOT / "reports" / "runtime" / "run-summary.json"
@@ -49,7 +54,7 @@ def read_frame(path):
     return time_value, frame
 
 
-def normalize(record, csv_paths, run_root=None, data_root=None):
+def normalize_legacy(record, csv_paths, run_root=None, data_root=None):
     run_root = run_root or (LAB_ROOT / "runs")
     data_root = data_root or DATA_ROOT
     loaded = [read_frame(path) for path in csv_paths]
@@ -185,6 +190,13 @@ def normalize(record, csv_paths, run_root=None, data_root=None):
         "hdf5_bytes": out_path.stat().st_size,
     }
     return audit
+
+
+def normalize(record, csv_paths, run_root=None, data_root=None, **kwargs):
+    """Production path: frame-streamed, resumable, and atomically committed."""
+    return normalize_streaming(
+        record, csv_paths, run_root or (LAB_ROOT / "runs"), data_root or DATA_ROOT,
+        LAB_ROOT, **kwargs)
 
 
 def main():

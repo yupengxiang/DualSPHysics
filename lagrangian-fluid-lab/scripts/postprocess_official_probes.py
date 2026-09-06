@@ -8,7 +8,10 @@ import os
 from pathlib import Path
 import subprocess
 
-from postprocess_cases import LAB_ROOT, normalize
+try:
+    from .postprocess_cases import LAB_ROOT, normalize
+except ImportError:  # Direct script execution.
+    from postprocess_cases import LAB_ROOT, normalize
 
 
 RUN_ROOT = LAB_ROOT / "runs-official"
