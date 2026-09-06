@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "scope": "empirical W02 audit; not a formal benchmark result",
+  "binary_under_test": "DualSPHysics 5.4.355 / GenCase 5.4.354.01",
+  "controlled_shift_probes": {
+    "W02_shift_off": {
+      "intervals": 100,
+      "particle_interval_samples": 163800,
+      "identity_retention": 1.0,
+      "midpoint_displacement_residual_m": {
+        "median": 1.5097130101909124e-06,
+        "p95": 6.328948667645747e-06,
+        "max": 5.000920387719922e-05
+      },
+      "midpoint_displacement_residual_over_dp": {
+        "median": 3.774282525477281e-05,
+        "p95": 0.00015822371669114367,
+        "max": 0.0012502300969299805
+      },
+      "midpoint_speed_m_per_s": {
+        "median": 0.37951695919036865,
+        "p95": 0.6504355072975159
+      },
+      "shifting": 0,
+      "attempt_directory": "campaigns/v0.1-candidate/runs/W02_shift_off/attempts/20260906T183247.026936Z-831c0b3b.complete"
+    },
+    "W02_shift_full": {
+      "intervals": 100,
+      "particle_interval_samples": 163800,
+      "identity_retention": 1.0,
+      "midpoint_displacement_residual_m": {
+        "median": 3.1635098713244477e-06,
+        "p95": 2.697322954047322e-05,
+        "max": 0.00021881745384525126
+      },
+      "midpoint_displacement_residual_over_dp": {
+        "median": 7.908774678311119e-05,
+        "p95": 0.0006743307385118305,
+        "max": 0.005470436346131281
+      },
+      "midpoint_speed_m_per_s": {
+        "median": 0.37913477420806885,
+        "p95": 0.6502823829650879
+      },
+      "shifting": 3,
+      "attempt_directory": "campaigns/v0.1-candidate/runs/W02_shift_full/attempts/20260906T183247.023208Z-675e53f3.complete"
+    }
+  },
+  "shift_residual_median_ratio_full_over_off": 2.095437907714926,
+  "reference_frame_probes": {
+    "motion_formulation": {
+      "particle_type_query": "-all,+moving",
+      "frames": 11,
+      "common_boundary_particles": 282,
+      "boundary_displacement_median_m": 0.001498257911945702,
+      "boundary_displacement_max_m": 0.0019977369209181915,
+      "observed_coordinate_interpretation": "world/inertial coordinates: moving tank boundary coordinates change"
+    },
+    "accelerated_frame_formulation": {
+      "particle_type_query": "-all,+fixed",
+      "frames": 11,
+      "common_boundary_particles": 282,
+      "boundary_displacement_median_m": 0.0,
+      "boundary_displacement_max_m": 0.0,
+      "observed_coordinate_interpretation": "tank-attached coordinates: fixed boundaries remain fixed while AccInput supplies non-inertial forcing"
+    }
+  },
+  "first_round_case_dimensionality": {
+    "3D": 24,
+    "2D": 6
+  },
+  "claims": {
+    "idp": "Stable in these fixed-resolution probes; it identifies numerical SPH particles, not independently verified material parcels.",
+    "position_velocity": "With shifting disabled, exported velocity approximately transports exported position over a short output interval. With shifting enabled, position includes additional numerical shifting displacement, so Vel alone is not the full trajectory derivative.",
+    "reference_frames": "Motion and AccInput formulations expose different coordinate conventions and must carry explicit world/body transform metadata.",
+    "scope_limit": "No claim is made here for variable-resolution split/merge identity; its (Zone,Idp) key remains numerical-node identity only."
+  },
+  "run_results": null
+}
