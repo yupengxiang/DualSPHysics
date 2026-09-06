@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "release_id": "v0.1-development-pilot",
+  "formal_release": false,
+  "material_tracers_per_fluid_case": 32,
+  "cases": [
+    {"case_id": "F1_dam_break_plain", "source_hdf5": "campaigns/v0.1-candidate/data/F1_dam_break_plain.h5", "family": "F1", "split": "train", "lineage_group_id": "F1_plain", "dp": 0.04, "mechanism": "collapse-runup-return", "validation_scope": ["numerical_particle_rollout", "material_tracer_consistency"]},
+    {"case_id": "F1_opposing_columns", "source_hdf5": "campaigns/v0.1-candidate/data/F1_opposing_columns.h5", "family": "F1", "split": "train", "lineage_group_id": "F1_opposing", "dp": 0.04, "mechanism": "collapse-collision-reseparation", "validation_scope": ["numerical_particle_rollout", "material_tracer_consistency"]},
+    {"case_id": "F1_center_obstacle", "source_hdf5": "campaigns/v0.1-candidate/data/F1_center_obstacle.h5", "family": "F1", "split": "validation", "lineage_group_id": "F1_single_obstacle", "dp": 0.04, "mechanism": "split-around-obstacle", "validation_scope": ["numerical_particle_rollout", "material_tracer_consistency"]},
+    {"case_id": "F1_twin_obstacle", "source_hdf5": "campaigns/v0.1-candidate/data/F1_twin_obstacle.h5", "family": "F1", "split": "test", "lineage_group_id": "F1_twin_obstacle", "dp": 0.04, "mechanism": "multi-path-split-remerge", "validation_scope": ["numerical_particle_rollout", "material_tracer_consistency"]},
+
+    {"case_id": "W06_narrow_slow_center", "source_hdf5": "campaigns/v0.1-candidate/data/w06/W06_narrow_slow_center.h5", "family": "F2", "split": "train", "lineage_group_id": "F2_narrow_slow", "dp": 0.025, "mechanism": "rotating-cup-pour", "validation_scope": ["numerical_particle_rollout", "material_source_destination_mechanism"]},
+    {"case_id": "W06_standard_slow_center", "source_hdf5": "campaigns/v0.1-candidate/data/w06/W06_standard_slow_center.h5", "family": "F2", "split": "train", "lineage_group_id": "F2_standard_slow", "dp": 0.025, "mechanism": "rotating-cup-pour", "validation_scope": ["numerical_particle_rollout", "material_source_destination_mechanism"]},
+    {"case_id": "W06_wide_slow_center", "source_hdf5": "campaigns/v0.1-candidate/data/w06/W06_wide_slow_center.h5", "family": "F2", "split": "train", "lineage_group_id": "F2_wide_slow", "dp": 0.025, "mechanism": "rotating-cup-pour", "validation_scope": ["numerical_particle_rollout", "material_source_destination_mechanism"]},
+    {"case_id": "W06_narrow_fast_center", "source_hdf5": "campaigns/v0.1-candidate/data/w06/W06_narrow_fast_center.h5", "family": "F2", "split": "validation", "lineage_group_id": "F2_narrow_fast", "dp": 0.025, "mechanism": "rotating-cup-pour", "validation_scope": ["numerical_particle_rollout", "material_source_destination_mechanism"]},
+    {"case_id": "W06_standard_fast_center", "source_hdf5": "campaigns/v0.1-candidate/data/w06/W06_standard_fast_center.h5", "family": "F2", "split": "test", "lineage_group_id": "F2_standard_fast", "dp": 0.025, "mechanism": "rotating-cup-pour", "validation_scope": ["numerical_particle_rollout", "material_source_destination_mechanism"]},
+
+    {"case_id": "F3_impulse_slosh", "source_hdf5": "campaigns/v0.1-candidate/data/F3_impulse_slosh.h5", "family": "F3", "split": "train", "lineage_group_id": "F3_unbaffled_longitudinal", "dp": 0.04, "mechanism": "free-surface-phase-memory", "validation_scope": ["numerical_particle_rollout", "material_tracer_consistency"]},
+    {"case_id": "F3_baffled_slosh", "source_hdf5": "campaigns/v0.1-candidate/data/F3_baffled_slosh.h5", "family": "F3", "split": "validation", "lineage_group_id": "F3_baffled", "dp": 0.04, "mechanism": "baffle-exchange-repeated-impact", "validation_scope": ["numerical_particle_rollout", "material_tracer_consistency"]},
+    {"case_id": "F3_transverse_slosh", "source_hdf5": "campaigns/v0.1-candidate/data/F3_transverse_slosh.h5", "family": "F3", "split": "test", "lineage_group_id": "F3_transverse", "dp": 0.04, "mechanism": "transverse-slosh", "validation_scope": ["numerical_particle_rollout", "material_tracer_consistency"]},
+
+    {"case_id": "W05_F6_fine", "source_hdf5": "campaigns/v0.1-candidate/data/w05/W05_F6_fine.h5", "family": "F6", "split": "test", "lineage_group_id": "F6_fekken_fine", "dp": 0.05, "mechanism": "two-dimensional-floating-cylinder", "validation_scope": ["rigid_body_displacement_against_fekken_2d"]}
+  ]
+}
