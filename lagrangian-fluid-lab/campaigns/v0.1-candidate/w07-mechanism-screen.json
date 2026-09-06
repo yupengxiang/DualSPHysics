@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "scope": "W07 six-family mechanism screening; no formal production",
+  "source_evidence": [
+    "w01-streaming-audits.json",
+    "w01-quality-strict.json",
+    "w04-calibration.json",
+    "w05-validation-anchors.json",
+    "w06-rotating-pour.json"
+  ],
+  "observed_family_map": {
+    "F1": {
+      "probe_mechanisms": [
+        "dam_break_plain",
+        "center_obstacle",
+        "twin_obstacle",
+        "opposing_columns"
+      ],
+      "external_anchor": "SPHERIC Test 02 at dp=0.04/0.03/0.02 m",
+      "evidence": "H2/H4 surface RMSE converged near 0.04 m; H1 and pressure errors were non-monotonic.",
+      "disposition": "retain_development_macro_only",
+      "blocking_gap": "impact pressure and near-gate H1 are not production validated"
+    },
+    "F2": {
+      "probe_mechanisms": [
+        "rotating_cup_12_case_matrix"
+      ],
+      "external_anchor": null,
+      "evidence": "Nine partial-capture and three complete-miss cases; five near-receiver cases have zero numerical loss.",
+      "disposition": "retain_five_closed_domain_candidates",
+      "blocking_gap": "cup-lip topology, resolution sensitivity, and external observation are absent"
+    },
+    "F3": {
+      "probe_mechanisms": [
+        "impulse_slosh",
+        "baffled_slosh",
+        "transverse_slosh"
+      ],
+      "external_anchor": "SPHERIC Test 10 at dp=0.008/0.006/0.004 m",
+      "evidence": "Fine resolution recovers the first pressure-peak magnitude (3.045 versus 3.683 kPa), but timing remains 45 ms late.",
+      "disposition": "retain_fine_event_anchor",
+      "blocking_gap": "coarse and medium impact pressure are unresolved"
+    },
+    "F4": {
+      "probe_mechanisms": [
+        "head_on_columns",
+        "oblique_columns",
+        "drop_onto_pool"
+      ],
+      "external_anchor": null,
+      "evidence": "Three qualitative topology probes completed with retained identities.",
+      "disposition": "provisional_mechanism_only",
+      "blocking_gap": "no external validation or resolution study"
+    },
+    "F5": {
+      "probe_mechanisms": [
+        "low_weir",
+        "notched_weir",
+        "wet_bed_overtop",
+        "solitary_wave",
+        "wave_runup"
+      ],
+      "external_anchor": null,
+      "evidence": "The coarse wave-runup probe failed catastrophically; a refined probe is exploratory only.",
+      "disposition": "provisional_high_risk",
+      "blocking_gap": "run-up/overtopping observation anchor and stable resolution envelope are absent"
+    },
+    "F6": {
+      "probe_mechanisms": [
+        "floating_box",
+        "heavy_box_entry",
+        "twin_floaters",
+        "2d_floating_cylinder"
+      ],
+      "external_anchor": "Fekken 2-D floating-cylinder displacement at dp=0.10/0.075/0.05 m",
+      "evidence": "Displacement RMSE improved from 0.353 to 0.0765 m with refinement.",
+      "disposition": "retain_limited_2d_surrogate",
+      "blocking_gap": "SPHERIC Test 14 custom 3-D moving-body case remains unresolved"
+    }
+  },
+  "candidate_design": {
+    "total": 144,
+    "per_family": 24,
+    "execution_status": "planned_not_run",
+    "formal_production_authorized": false
+  },
+  "screening_decision": {
+    "retain": [
+      "F1",
+      "F2",
+      "F3",
+      "F6"
+    ],
+    "provisional": [
+      "F4",
+      "F5"
+    ],
+    "release_ready": [],
+    "additional_w07_gpu_runs": 0,
+    "reason": "Current gaps are validation, resolution, observation cadence, and protocol gaps; more coarse visual probes would not close them."
+  },
+  "next_gate": "W08 must convert selected axes into explicit train/interpolation/extrapolation groups without authorizing the 144-card matrix."
+}
