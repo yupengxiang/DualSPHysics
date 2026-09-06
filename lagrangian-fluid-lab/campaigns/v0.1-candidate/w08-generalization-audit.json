@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "audit": {
+    "cards": 204,
+    "unique_execution_units": 196,
+    "duplicate_cards_reusable_within_split": 8,
+    "cross_split_signature_leakage": {},
+    "families": [
+      "F1",
+      "F2",
+      "F3",
+      "F6"
+    ]
+  },
+  "single_axis_protocol": {
+    "train": [
+      0.2,
+      0.35,
+      0.5,
+      0.65,
+      0.8
+    ],
+    "interpolation": [
+      0.275,
+      0.425,
+      0.575,
+      0.725
+    ],
+    "extrapolation": [
+      0.05,
+      0.95
+    ]
+  },
+  "two_axis_protocol": {
+    "train": "3x3 interior grid at normalized 0.3/0.5/0.7",
+    "interpolation": "four cell centers at normalized 0.4/0.6",
+    "single_axis_extrapolation": "one axis at 0.1/0.9 while the other remains in the training grid",
+    "joint_extrapolation": "four 0.1/0.9 corners"
+  },
+  "topology_holdouts": {
+    "F1": "twin",
+    "F2": "spout",
+    "F3": "perforated_proxy",
+    "F6": "twin_free"
+  },
+  "release_constraints": [
+    "No random frame split.",
+    "All windows, particles, tracers, and derived targets from one simulation inherit one split.",
+    "Replicate resolutions and numerical variants stay grouped with the same physical lineage.",
+    "Topology holdouts are separate from continuous-axis claims and are not silently pooled."
+  ],
+  "execution_decision": "planned_not_run_until_W10_schema_and_family_resolution_gates"
+}
