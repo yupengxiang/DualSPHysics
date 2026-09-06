@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "method": {
+    "name": "independent passive tracer",
+    "velocity_interpolation": "24-neighbour inverse-distance Shepard; no Idp lookup after t=0",
+    "time_integration": "Heun / explicit trapezoidal",
+    "support_rule": "unreliable if nearest source sample exceeds 1.75 dp at any substep",
+    "important_non_claim": "This is an independent consistency check, not experimental ground truth."
+  },
+  "fixed_resolution_endpoint_audit": {
+    "shift_off": {
+      "seed_count": 256,
+      "reliable_endpoint_count": 256,
+      "reliable_fraction": 1.0,
+      "endpoint_error_over_dp": {
+        "median": 0.0009176309708929453,
+        "p95": 0.004530728062324324,
+        "max": 0.014659035626006778
+      },
+      "nearest_support_distance_over_dp": {
+        "median": 0.00820606872649263,
+        "p95": 0.047268608122246515
+      }
+    },
+    "shift_full": {
+      "seed_count": 256,
+      "reliable_endpoint_count": 256,
+      "reliable_fraction": 1.0,
+      "endpoint_error_over_dp": {
+        "median": 0.0011345274369231662,
+        "p95": 0.004441989742405595,
+        "max": 0.015359021405995613
+      },
+      "nearest_support_distance_over_dp": {
+        "median": 0.011862006132529477,
+        "p95": 0.05312217774692858
+      }
+    }
+  },
+  "output_cadence_sensitivity_shift_off": {
+    "1": {
+      "nominal_output_dt_s": 0.002565999999999985,
+      "endpoint_error_over_dp": {
+        "median": 0.0009176309708929453,
+        "p95": 0.004530728062324324,
+        "max": 0.014659035626006778
+      },
+      "reliable_fraction": 1.0
+    },
+    "2": {
+      "nominal_output_dt_s": 0.00513199999999997,
+      "endpoint_error_over_dp": {
+        "median": 0.0009148246001994272,
+        "p95": 0.00456541094781124,
+        "max": 0.014669903920766548
+      },
+      "reliable_fraction": 1.0
+    },
+    "5": {
+      "nominal_output_dt_s": 0.012829999999999925,
+      "endpoint_error_over_dp": {
+        "median": 0.0010942076754676155,
+        "p95": 0.004850565884197332,
+        "max": 0.017965108487278156
+      },
+      "reliable_fraction": 1.0
+    },
+    "10": {
+      "nominal_output_dt_s": 0.02565999999999985,
+      "endpoint_error_over_dp": {
+        "median": 0.0013398570963798723,
+        "p95": 0.006141100226158985,
+        "max": 0.03517363367411694
+      },
+      "reliable_fraction": 1.0
+    }
+  },
+  "two_source_material_transport": {
+    "seed_count": 200,
+    "reliable_endpoint_count": 164,
+    "reliable_fraction": 0.82,
+    "endpoint_error_over_dp": {
+      "median": 0.07514219976613588,
+      "p95": 0.2643796160152139,
+      "max": 0.31138630691067243
+    },
+    "nearest_support_distance_over_dp": {
+      "median": 0.4696341031033362,
+      "p95": 1.6139871112820625
+    },
+    "source_destination_comparison": {
+      "1": {
+        "count": 88,
+        "destinations": [
+          "x_lt_0.4",
+          "0.4_le_x_lt_0.8",
+          "x_ge_0.8"
+        ],
+        "sph_particle_fraction": [
+          0.8295454545454546,
+          0.17045454545454544,
+          0.0
+        ],
+        "independent_tracer_fraction": [
+          0.9545454545454546,
+          0.045454545454545456,
+          0.0
+        ],
+        "total_variation_distance": 0.125
+      },
+      "2": {
+        "count": 76,
+        "destinations": [
+          "x_lt_0.4",
+          "0.4_le_x_lt_0.8",
+          "x_ge_0.8"
+        ],
+        "sph_particle_fraction": [
+          0.631578947368421,
+          0.3684210526315789,
+          0.0
+        ],
+        "independent_tracer_fraction": [
+          0.32894736842105265,
+          0.6710526315789473,
+          0.0
+        ],
+        "total_variation_distance": 0.30263157894736836
+      }
+    }
+  },
+  "official_tracerparts_assessment": {
+    "version": "5.4.266.02",
+    "result": "not independent",
+    "reason": "TracerParts selects existing simulated particles by Id/position/type and renders their tails; it does not inject separately integrated material tracers."
+  }
+}
