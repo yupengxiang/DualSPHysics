@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "scope": "fundamental calibration, not formal validation",
+  "static_hydrostatic": {
+    "duration_s": 0.2,
+    "fluid_particles": 1872,
+    "center_of_mass_drift_over_dp": 0.1503889113664627,
+    "final_speed_m_per_s": {
+      "median": 0.05131347477436066,
+      "p95": 0.21345090866088867
+    },
+    "pressure_depth_slope_pa_per_m": -5972.568044210302,
+    "expected_hydrostatic_slope_pa_per_m": -9810.0,
+    "relative_slope_error": 0.39117553066153904,
+    "pressure_fit_intercept_pa": 2160.215799415477
+  },
+  "ballistic_translation": {
+    "comparison_frames": 4,
+    "comparison_end_s": 0.150057,
+    "initial_com_velocity_m_per_s": [
+      1.100002408027649,
+      0.0,
+      0.0
+    ],
+    "com_ballistic_error_over_dp": {
+      "max": 0.018577691878181726,
+      "final": 0.018577691878181726
+    },
+    "scope": "pre-impact center-of-mass motion only"
+  },
+  "viscous_poiseuille": {
+    "fluid_samples": 2525,
+    "analytical_half_height_m": 0.5,
+    "kinematic_viscosity_m2_per_s": 0.1,
+    "body_acceleration_m_per_s2": 0.8,
+    "analytical_centerline_speed_m_per_s": 1.0,
+    "velocity_rmse_m_per_s": 0.11015573143959045,
+    "velocity_mae_m_per_s": 0.10977932810783386,
+    "simulated_max_speed_m_per_s": 1.1173746585845947
+  },
+  "prescribed_small_sloshing": {
+    "frames": 418,
+    "duration_s": 8.34002,
+    "fluid_com_dominant_period_s": 1.8400000000000016,
+    "fluid_com_dominant_frequency_hz": 0.5434782608695647,
+    "prescribed_tank_period_s": 1.6362750000000004,
+    "relative_forcing_frequency_error": 0.12450535515118255,
+    "linear_fundamental_period_s": 1.917089509458158,
+    "note": "frequency-lock check under a prescribed approximately four-degree rotation; not a free-decay validation"
+  },
+  "floating_buoyancy": {
+    "frames": 301,
+    "floating_particle_count": 342,
+    "release_time_s": 1.0,
+    "maximum_downward_displacement_m": 5.317111968994141,
+    "fekken_displacement_rmse_m": 0.35871065829425625,
+    "fekken_displacement_mae_m": 0.26871020396988643,
+    "note": "coarse dp=0.1 calibration; external curve is an anchor, not a passed production resolution"
+  },
+  "run_results": [
+    {
+      "case_id": "W04_poiseuille",
+      "attempt_id": "20260906T184119.167742Z-5fd68eae",
+      "status": "completed",
+      "elapsed_seconds": 22.835566824069247,
+      "frames": 251,
+      "gpu_at_launch": {
+        "index": 4,
+        "uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+        "memory_used_mib": 18,
+        "utilization_percent": 0
+      }
+    },
+    {
+      "case_id": "W04_small_slosh",
+      "attempt_id": "20260906T184119.128832Z-0c1fdea4",
+      "status": "completed",
+      "elapsed_seconds": 39.30962896696292,
+      "frames": 418,
+      "gpu_at_launch": {
+        "index": 5,
+        "uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+        "memory_used_mib": 18,
+        "utilization_percent": 0
+      }
+    },
+    {
+      "case_id": "W04_floating_sphere",
+      "attempt_id": "20260906T184119.136440Z-e9ec329e",
+      "status": "completed",
+      "elapsed_seconds": 16.494018209865317,
+      "frames": 301,
+      "gpu_at_launch": {
+        "index": 6,
+        "uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+        "memory_used_mib": 18,
+        "utilization_percent": 0
+      }
+    }
+  ]
+}
