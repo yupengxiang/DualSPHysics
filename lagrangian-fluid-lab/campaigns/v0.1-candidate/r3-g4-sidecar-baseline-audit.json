@@ -1,0 +1,3070 @@
+{
+  "schema_version": 1,
+  "scope": "R3-G4 corrected development baseline audit",
+  "execution_status": "complete",
+  "config": {
+    "schema_version": 1,
+    "scope": "R3-G4 corrected development baselines",
+    "routes": [
+      "particle_mlp",
+      "deepset_context",
+      "local_interaction",
+      "physics_residual"
+    ],
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "epochs_requested": 8,
+    "min_epochs": 3,
+    "early_stopping": {
+      "selection_metric": "validation_autonomous_rmse_over_dp",
+      "patience": 2,
+      "min_delta": 1e-05
+    },
+    "maximum_particles_per_training_frame": 256,
+    "validation_particles": 512,
+    "hidden_width": 128,
+    "learning_rate": 0.001,
+    "smooth_output_cap": {
+      "normalized_units": 8.0,
+      "function": "8*tanh(raw/8)",
+      "applied_in": [
+        "train",
+        "validation",
+        "rollout"
+      ]
+    },
+    "position_clip_dp": 0.0,
+    "rollout": "autonomous from frame zero; current prescribed controls only",
+    "primary_families": [
+      "F1",
+      "F2",
+      "F3"
+    ],
+    "excluded_cases": {
+      "W05_F6_fine": "contains type-2 floating-body particles but no fluid type-3 state; no coupled body predictor is defined"
+    },
+    "allowed_gpu_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "budget_rule": "at most 8 epochs per route/seed, stop after 3 epochs plus 2 stale autonomous-validation epochs; measured wall time is reported",
+    "formal_gate": "development evidence only; constant-velocity degradation is diagnostic, never a physical-scene admission gate",
+    "known_pilot_limitations": [
+      "W11 has no complete boundary triangle sidecars, so boundary availability is explicit but false",
+      "density, pressure and mass are initial-only features unless a future model predicts them",
+      "T2 material transport and T3 external observables are not scored by this particle rollout experiment"
+    ]
+  },
+  "run_manifest": {
+    "path": "lagrangian-fluid-lab/experiments/r3_g4_sidecar_run_manifest.json",
+    "status": "complete",
+    "run_count": 12,
+    "physical_gpu_gate": true,
+    "physical_gpu_audit": {
+      "pass": true,
+      "issues": [],
+      "entry_count": 12,
+      "expected_count": 12,
+      "combinations": [
+        [
+          "deepset_context",
+          17
+        ],
+        [
+          "deepset_context",
+          29
+        ],
+        [
+          "deepset_context",
+          43
+        ],
+        [
+          "local_interaction",
+          17
+        ],
+        [
+          "local_interaction",
+          29
+        ],
+        [
+          "local_interaction",
+          43
+        ],
+        [
+          "particle_mlp",
+          17
+        ],
+        [
+          "particle_mlp",
+          29
+        ],
+        [
+          "particle_mlp",
+          43
+        ],
+        [
+          "physics_residual",
+          17
+        ],
+        [
+          "physics_residual",
+          29
+        ],
+        [
+          "physics_residual",
+          43
+        ]
+      ],
+      "expected_combinations": [
+        [
+          "deepset_context",
+          17
+        ],
+        [
+          "deepset_context",
+          29
+        ],
+        [
+          "deepset_context",
+          43
+        ],
+        [
+          "local_interaction",
+          17
+        ],
+        [
+          "local_interaction",
+          29
+        ],
+        [
+          "local_interaction",
+          43
+        ],
+        [
+          "particle_mlp",
+          17
+        ],
+        [
+          "particle_mlp",
+          29
+        ],
+        [
+          "particle_mlp",
+          43
+        ],
+        [
+          "physics_residual",
+          17
+        ],
+        [
+          "physics_residual",
+          29
+        ],
+        [
+          "physics_residual",
+          43
+        ]
+      ],
+      "allowed_indices": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "allowed_uuids": [
+        "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+        "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+        "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+        "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32"
+      ]
+    },
+    "artifact_provenance_gate": true,
+    "artifact_provenance_issues": [],
+    "allowed_gpu_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "runs": [
+      {
+        "route": "particle_mlp",
+        "seed": 17,
+        "physical_gpu_index": 4,
+        "gpu_uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 13.857580997049809,
+        "output": "experiments/r3_g4_sidecar_results/particle_mlp_seed17.json",
+        "checkpoint": "experiments/r3_g4_sidecar_checkpoints/particle_mlp_seed17.pt",
+        "log": "experiments/r3_g4_sidecar_logs/particle_mlp_seed17.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "particle_mlp",
+          "--seed",
+          "17",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_results/particle_mlp_seed17.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_checkpoints/particle_mlp_seed17.pt"
+        ]
+      },
+      {
+        "route": "particle_mlp",
+        "seed": 29,
+        "physical_gpu_index": 5,
+        "gpu_uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 15.31178265879862,
+        "output": "experiments/r3_g4_sidecar_results/particle_mlp_seed29.json",
+        "checkpoint": "experiments/r3_g4_sidecar_checkpoints/particle_mlp_seed29.pt",
+        "log": "experiments/r3_g4_sidecar_logs/particle_mlp_seed29.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "particle_mlp",
+          "--seed",
+          "29",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_results/particle_mlp_seed29.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_checkpoints/particle_mlp_seed29.pt"
+        ]
+      },
+      {
+        "route": "particle_mlp",
+        "seed": 43,
+        "physical_gpu_index": 6,
+        "gpu_uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 14.238552234135568,
+        "output": "experiments/r3_g4_sidecar_results/particle_mlp_seed43.json",
+        "checkpoint": "experiments/r3_g4_sidecar_checkpoints/particle_mlp_seed43.pt",
+        "log": "experiments/r3_g4_sidecar_logs/particle_mlp_seed43.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "particle_mlp",
+          "--seed",
+          "43",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_results/particle_mlp_seed43.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_checkpoints/particle_mlp_seed43.pt"
+        ]
+      },
+      {
+        "route": "deepset_context",
+        "seed": 17,
+        "physical_gpu_index": 7,
+        "gpu_uuid": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 16.77473710780032,
+        "output": "experiments/r3_g4_sidecar_results/deepset_context_seed17.json",
+        "checkpoint": "experiments/r3_g4_sidecar_checkpoints/deepset_context_seed17.pt",
+        "log": "experiments/r3_g4_sidecar_logs/deepset_context_seed17.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "deepset_context",
+          "--seed",
+          "17",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_results/deepset_context_seed17.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_checkpoints/deepset_context_seed17.pt"
+        ]
+      },
+      {
+        "route": "deepset_context",
+        "seed": 29,
+        "physical_gpu_index": 4,
+        "gpu_uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 16.52628156496212,
+        "output": "experiments/r3_g4_sidecar_results/deepset_context_seed29.json",
+        "checkpoint": "experiments/r3_g4_sidecar_checkpoints/deepset_context_seed29.pt",
+        "log": "experiments/r3_g4_sidecar_logs/deepset_context_seed29.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "deepset_context",
+          "--seed",
+          "29",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_results/deepset_context_seed29.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_checkpoints/deepset_context_seed29.pt"
+        ]
+      },
+      {
+        "route": "deepset_context",
+        "seed": 43,
+        "physical_gpu_index": 5,
+        "gpu_uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 13.158365793991834,
+        "output": "experiments/r3_g4_sidecar_results/deepset_context_seed43.json",
+        "checkpoint": "experiments/r3_g4_sidecar_checkpoints/deepset_context_seed43.pt",
+        "log": "experiments/r3_g4_sidecar_logs/deepset_context_seed43.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "deepset_context",
+          "--seed",
+          "43",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_results/deepset_context_seed43.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_checkpoints/deepset_context_seed43.pt"
+        ]
+      },
+      {
+        "route": "local_interaction",
+        "seed": 17,
+        "physical_gpu_index": 6,
+        "gpu_uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 20.85157520021312,
+        "output": "experiments/r3_g4_sidecar_results/local_interaction_seed17.json",
+        "checkpoint": "experiments/r3_g4_sidecar_checkpoints/local_interaction_seed17.pt",
+        "log": "experiments/r3_g4_sidecar_logs/local_interaction_seed17.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "local_interaction",
+          "--seed",
+          "17",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_results/local_interaction_seed17.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_checkpoints/local_interaction_seed17.pt"
+        ]
+      },
+      {
+        "route": "local_interaction",
+        "seed": 29,
+        "physical_gpu_index": 7,
+        "gpu_uuid": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 20.146222796989605,
+        "output": "experiments/r3_g4_sidecar_results/local_interaction_seed29.json",
+        "checkpoint": "experiments/r3_g4_sidecar_checkpoints/local_interaction_seed29.pt",
+        "log": "experiments/r3_g4_sidecar_logs/local_interaction_seed29.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "local_interaction",
+          "--seed",
+          "29",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_results/local_interaction_seed29.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_checkpoints/local_interaction_seed29.pt"
+        ]
+      },
+      {
+        "route": "local_interaction",
+        "seed": 43,
+        "physical_gpu_index": 4,
+        "gpu_uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 20.474187729181722,
+        "output": "experiments/r3_g4_sidecar_results/local_interaction_seed43.json",
+        "checkpoint": "experiments/r3_g4_sidecar_checkpoints/local_interaction_seed43.pt",
+        "log": "experiments/r3_g4_sidecar_logs/local_interaction_seed43.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "local_interaction",
+          "--seed",
+          "43",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_results/local_interaction_seed43.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_checkpoints/local_interaction_seed43.pt"
+        ]
+      },
+      {
+        "route": "physics_residual",
+        "seed": 17,
+        "physical_gpu_index": 5,
+        "gpu_uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 16.251345481956378,
+        "output": "experiments/r3_g4_sidecar_results/physics_residual_seed17.json",
+        "checkpoint": "experiments/r3_g4_sidecar_checkpoints/physics_residual_seed17.pt",
+        "log": "experiments/r3_g4_sidecar_logs/physics_residual_seed17.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "physics_residual",
+          "--seed",
+          "17",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_results/physics_residual_seed17.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_checkpoints/physics_residual_seed17.pt"
+        ]
+      },
+      {
+        "route": "physics_residual",
+        "seed": 29,
+        "physical_gpu_index": 6,
+        "gpu_uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 13.343709755921736,
+        "output": "experiments/r3_g4_sidecar_results/physics_residual_seed29.json",
+        "checkpoint": "experiments/r3_g4_sidecar_checkpoints/physics_residual_seed29.pt",
+        "log": "experiments/r3_g4_sidecar_logs/physics_residual_seed29.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "physics_residual",
+          "--seed",
+          "29",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_results/physics_residual_seed29.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_checkpoints/physics_residual_seed29.pt"
+        ]
+      },
+      {
+        "route": "physics_residual",
+        "seed": 43,
+        "physical_gpu_index": 7,
+        "gpu_uuid": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 12.570770763792098,
+        "output": "experiments/r3_g4_sidecar_results/physics_residual_seed43.json",
+        "checkpoint": "experiments/r3_g4_sidecar_checkpoints/physics_residual_seed43.pt",
+        "log": "experiments/r3_g4_sidecar_logs/physics_residual_seed43.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "physics_residual",
+          "--seed",
+          "43",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_results/physics_residual_seed43.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_sidecar_checkpoints/physics_residual_seed43.pt"
+        ]
+      }
+    ]
+  },
+  "run_count": 12,
+  "expected_run_count": 12,
+  "route_seed_gate": true,
+  "routes": {
+    "particle_mlp": {
+      "route": "particle_mlp",
+      "run_count": 3,
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "route_seed_combinations": [
+        [
+          17,
+          "particle_mlp"
+        ],
+        [
+          29,
+          "particle_mlp"
+        ],
+        [
+          43,
+          "particle_mlp"
+        ]
+      ],
+      "parameter_count": 22531,
+      "epochs_run": {
+        "17": 4,
+        "29": 4,
+        "43": 4
+      },
+      "best_epoch": {
+        "17": 2,
+        "29": 2,
+        "43": 2
+      },
+      "training_seconds": {
+        "mean": 10.641234021012982,
+        "sample_std": 0.9259344324672488,
+        "values": [
+          9.800565238110721,
+          11.633679914986715,
+          10.48945690994151
+        ],
+        "n": 3
+      },
+      "inference_seconds": {
+        "mean": 0.3154190006510665,
+        "sample_std": 0.0030829771035816057,
+        "values": [
+          0.31222064094617963,
+          0.3183719231747091,
+          0.3156644378323108
+        ],
+        "n": 3
+      },
+      "peak_gpu_memory_bytes": 20785152,
+      "per_case": {
+        "F1_twin_obstacle": {
+          "family": "F1",
+          "background_id": "F1_twin_obstacle",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 3.808797836303711,
+            "sample_std": 1.0181675966352768,
+            "values": [
+              3.3439157009124756,
+              3.1060497760772705,
+              4.976428031921387
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.11622976511716843,
+            "sample_std": 0.025375362164928313,
+            "values": [
+              0.10104303061962128,
+              0.10212218016386032,
+              0.14552408456802368
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.22512414554754892,
+            "sample_std": 0.14218904693464007,
+            "values": [
+              0.13884896039962769,
+              0.1472858339548111,
+              0.389237642288208
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.6553622980912527,
+            "sample_std": 0.29976731659391403,
+            "values": [
+              0.4860668182373047,
+              0.47854354977607727,
+              1.001476526260376
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.1119690090417862,
+            "sample_std": 0.0552439338254911,
+            "values": [
+              0.08991437405347824,
+              0.07115920633077621,
+              0.17483344674110413
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 3.7863729000091553,
+          "constant_velocity_position_fde_m": 0.17692194879055023,
+          "degradation_ratio_vs_constant": 1.0059225377126753,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "sidecar_world_triangles"
+          ],
+          "boundary_available": true,
+          "boundary_provenance_by_seed": {
+            "17": {
+              "path": "sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F1_twin_obstacle",
+              "frame_count": 14,
+              "triangle_count": 124,
+              "static_triangle_count": 124,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle_MkCells.vtk",
+              "source_hdf5": "data/F1_twin_obstacle.h5",
+              "source_geometry_sha256": "d43f9d74a89ed5727a5db2f796d90dd5b4b6535d4667f265ddbfa488d6c3d7ac"
+            },
+            "29": {
+              "path": "sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F1_twin_obstacle",
+              "frame_count": 14,
+              "triangle_count": 124,
+              "static_triangle_count": 124,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle_MkCells.vtk",
+              "source_hdf5": "data/F1_twin_obstacle.h5",
+              "source_geometry_sha256": "d43f9d74a89ed5727a5db2f796d90dd5b4b6535d4667f265ddbfa488d6c3d7ac"
+            },
+            "43": {
+              "path": "sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F1_twin_obstacle",
+              "frame_count": 14,
+              "triangle_count": 124,
+              "static_triangle_count": 124,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle_MkCells.vtk",
+              "source_hdf5": "data/F1_twin_obstacle.h5",
+              "source_geometry_sha256": "d43f9d74a89ed5727a5db2f796d90dd5b4b6535d4667f265ddbfa488d6c3d7ac"
+            }
+          },
+          "boundary_provenance_consistent": true,
+          "boundary_provenance_valid": true,
+          "mass_identity_preserved": true
+        },
+        "F3_transverse_slosh": {
+          "family": "F3",
+          "background_id": "F3_transverse",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 2.8298986752827964,
+            "sample_std": 0.6084434318685221,
+            "values": [
+              2.9692442417144775,
+              2.163869857788086,
+              3.356581926345825
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.09413162122170131,
+            "sample_std": 0.019071926822507922,
+            "values": [
+              0.10001734644174576,
+              0.0728105902671814,
+              0.10956692695617676
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.20649265249570212,
+            "sample_std": 0.047409711466603416,
+            "values": [
+              0.20839886367321014,
+              0.1581585854291916,
+              0.2529205083847046
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.3427889446417491,
+            "sample_std": 0.07141115167246578,
+            "values": [
+              0.3321162164211273,
+              0.27731484174728394,
+              0.41893577575683594
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.10914347320795059,
+            "sample_std": 0.025153602870473926,
+            "values": [
+              0.11441368609666824,
+              0.08177231252193451,
+              0.13124442100524902
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 5.090209484100342,
+          "constant_velocity_position_fde_m": 0.33543384075164795,
+          "degradation_ratio_vs_constant": 0.555949354171415,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "sidecar_world_triangles"
+          ],
+          "boundary_available": true,
+          "boundary_provenance_by_seed": {
+            "17": {
+              "path": "sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F3_transverse_slosh",
+              "frame_count": 16,
+              "triangle_count": 28,
+              "static_triangle_count": 28,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh_MkCells.vtk",
+              "source_hdf5": "data/F3_transverse_slosh.h5",
+              "source_geometry_sha256": "d8a60a82fbfbe538b97c4ff91b036de91a7da48e003224f47e15af7c204a8640"
+            },
+            "29": {
+              "path": "sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F3_transverse_slosh",
+              "frame_count": 16,
+              "triangle_count": 28,
+              "static_triangle_count": 28,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh_MkCells.vtk",
+              "source_hdf5": "data/F3_transverse_slosh.h5",
+              "source_geometry_sha256": "d8a60a82fbfbe538b97c4ff91b036de91a7da48e003224f47e15af7c204a8640"
+            },
+            "43": {
+              "path": "sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F3_transverse_slosh",
+              "frame_count": 16,
+              "triangle_count": 28,
+              "static_triangle_count": 28,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh_MkCells.vtk",
+              "source_hdf5": "data/F3_transverse_slosh.h5",
+              "source_geometry_sha256": "d8a60a82fbfbe538b97c4ff91b036de91a7da48e003224f47e15af7c204a8640"
+            }
+          },
+          "boundary_provenance_consistent": true,
+          "boundary_provenance_valid": true,
+          "mass_identity_preserved": true
+        },
+        "W06_standard_fast_center": {
+          "family": "F2",
+          "background_id": "F2_standard_fast",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 31.07366879781087,
+            "sample_std": 12.567358183080808,
+            "values": [
+              18.454349517822266,
+              43.58841323852539,
+              31.17824363708496
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.6411927044391632,
+            "sample_std": 0.2740907050802355,
+            "values": [
+              0.3596871793270111,
+              0.90721195936203,
+              0.6566789746284485
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 1.0466471115748088,
+            "sample_std": 0.4821091796946599,
+            "values": [
+              0.5688486099243164,
+              1.5329543352127075,
+              1.0381383895874023
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 1.3799176216125488,
+            "sample_std": 0.5237551985408135,
+            "values": [
+              1.0328336954116821,
+              1.1245434284210205,
+              1.9823757410049438
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.6656766136487325,
+            "sample_std": 0.36128383218148336,
+            "values": [
+              0.28999924659729004,
+              1.0106009244918823,
+              0.6964296698570251
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 28.704187393188477,
+          "constant_velocity_position_fde_m": 0.7861647605895996,
+          "degradation_ratio_vs_constant": 1.0825482837108524,
+          "control_sources": [
+            "known_prescribed_control_schedule"
+          ],
+          "boundary_sources": [
+            "sidecar_world_triangles"
+          ],
+          "boundary_available": true,
+          "boundary_provenance_by_seed": {
+            "17": {
+              "path": "sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "W06_standard_fast_center",
+              "frame_count": 251,
+              "triangle_count": 68,
+              "static_triangle_count": 40,
+              "moving_triangle_count": 28,
+              "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_fast_center/generated/W06_standard_fast_center_MkCells.vtk",
+              "source_hdf5": "data/W06_standard_fast_center.h5",
+              "source_geometry_sha256": "49c7d5e2252af7adce4b550294308873e98931ee4c2c1630f9be699a3866618f"
+            },
+            "29": {
+              "path": "sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "W06_standard_fast_center",
+              "frame_count": 251,
+              "triangle_count": 68,
+              "static_triangle_count": 40,
+              "moving_triangle_count": 28,
+              "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_fast_center/generated/W06_standard_fast_center_MkCells.vtk",
+              "source_hdf5": "data/W06_standard_fast_center.h5",
+              "source_geometry_sha256": "49c7d5e2252af7adce4b550294308873e98931ee4c2c1630f9be699a3866618f"
+            },
+            "43": {
+              "path": "sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "W06_standard_fast_center",
+              "frame_count": 251,
+              "triangle_count": 68,
+              "static_triangle_count": 40,
+              "moving_triangle_count": 28,
+              "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_fast_center/generated/W06_standard_fast_center_MkCells.vtk",
+              "source_hdf5": "data/W06_standard_fast_center.h5",
+              "source_geometry_sha256": "49c7d5e2252af7adce4b550294308873e98931ee4c2c1630f9be699a3866618f"
+            }
+          },
+          "boundary_provenance_consistent": true,
+          "boundary_provenance_valid": true,
+          "mass_identity_preserved": true
+        }
+      },
+      "per_family": {
+        "F1": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.808797836303711,
+            "q025": 3.808797836303711,
+            "q975": 3.808797836303711,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 31.07366879781087,
+            "q025": 31.07366879781087,
+            "q975": 31.07366879781087,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 2.8298986752827964,
+            "q025": 2.8298986752827964,
+            "q975": 2.8298986752827964,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "per_background": {
+        "F1_twin_obstacle": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.808797836303711,
+            "q025": 3.808797836303711,
+            "q975": 3.808797836303711,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2_standard_fast": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 31.07366879781087,
+            "q025": 31.07366879781087,
+            "q975": 31.07366879781087,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3_transverse": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 2.8298986752827964,
+            "q025": 2.8298986752827964,
+            "q975": 2.8298986752827964,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "macro_position_rmse_over_dp": {
+        "case_values": [
+          3.808797836303711,
+          2.8298986752827964,
+          31.07366879781087
+        ],
+        "bootstrap": {
+          "estimate": 12.570788436465792,
+          "q025": 2.8298986752827964,
+          "q975": 31.07366879781087,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_velocity_rmse_mps": {
+        "case_values": [
+          0.6553622980912527,
+          0.3427889446417491,
+          1.3799176216125488
+        ],
+        "bootstrap": {
+          "estimate": 0.7926896214485168,
+          "q025": 0.3427889446417491,
+          "q975": 1.3799176216125488,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_com_rmse_m": {
+        "case_values": [
+          0.1119690090417862,
+          0.10914347320795059,
+          0.6656766136487325
+        ],
+        "bootstrap": {
+          "estimate": 0.2955963652994898,
+          "q025": 0.10914347320795059,
+          "q975": 0.6656766136487325,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      }
+    },
+    "deepset_context": {
+      "route": "deepset_context",
+      "run_count": 3,
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "route_seed_combinations": [
+        [
+          17,
+          "deepset_context"
+        ],
+        [
+          29,
+          "deepset_context"
+        ],
+        [
+          43,
+          "deepset_context"
+        ]
+      ],
+      "parameter_count": 55427,
+      "epochs_run": {
+        "17": 3,
+        "29": 4,
+        "43": 3
+      },
+      "best_epoch": {
+        "17": 1,
+        "29": 2,
+        "43": 1
+      },
+      "training_seconds": {
+        "mean": 10.888213359595587,
+        "sample_std": 1.7776087567440986,
+        "values": [
+          11.979520606808364,
+          11.848109224112704,
+          8.837010247865692
+        ],
+        "n": 3
+      },
+      "inference_seconds": {
+        "mean": 0.4043113875668496,
+        "sample_std": 0.12680541658680247,
+        "values": [
+          0.5507177968975157,
+          0.32924105785787106,
+          0.33297530794516206
+        ],
+        "n": 3
+      },
+      "peak_gpu_memory_bytes": 24021504,
+      "per_case": {
+        "F1_twin_obstacle": {
+          "family": "F1",
+          "background_id": "F1_twin_obstacle",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 3.6372197469075522,
+            "sample_std": 0.9338416848389235,
+            "values": [
+              4.715380668640137,
+              3.1135361194610596,
+              3.08274245262146
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.10664947579304378,
+            "sample_std": 0.02283070078901632,
+            "values": [
+              0.13287733495235443,
+              0.09584107249975204,
+              0.09123001992702484
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.19913276533285776,
+            "sample_std": 0.1275123030000886,
+            "values": [
+              0.34635916352272034,
+              0.1271560788154602,
+              0.12388305366039276
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.6167963743209839,
+            "sample_std": 0.25619081660410586,
+            "values": [
+              0.9126087427139282,
+              0.46665042638778687,
+              0.4711299538612366
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.09070230027039845,
+            "sample_std": 0.03605134646793145,
+            "values": [
+              0.1322973668575287,
+              0.07134955376386642,
+              0.06845998018980026
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 3.7863729000091553,
+          "constant_velocity_position_fde_m": 0.17692194879055023,
+          "degradation_ratio_vs_constant": 0.960607907081407,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "sidecar_world_triangles"
+          ],
+          "boundary_available": true,
+          "boundary_provenance_by_seed": {
+            "17": {
+              "path": "sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F1_twin_obstacle",
+              "frame_count": 14,
+              "triangle_count": 124,
+              "static_triangle_count": 124,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle_MkCells.vtk",
+              "source_hdf5": "data/F1_twin_obstacle.h5",
+              "source_geometry_sha256": "d43f9d74a89ed5727a5db2f796d90dd5b4b6535d4667f265ddbfa488d6c3d7ac"
+            },
+            "29": {
+              "path": "sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F1_twin_obstacle",
+              "frame_count": 14,
+              "triangle_count": 124,
+              "static_triangle_count": 124,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle_MkCells.vtk",
+              "source_hdf5": "data/F1_twin_obstacle.h5",
+              "source_geometry_sha256": "d43f9d74a89ed5727a5db2f796d90dd5b4b6535d4667f265ddbfa488d6c3d7ac"
+            },
+            "43": {
+              "path": "sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F1_twin_obstacle",
+              "frame_count": 14,
+              "triangle_count": 124,
+              "static_triangle_count": 124,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle_MkCells.vtk",
+              "source_hdf5": "data/F1_twin_obstacle.h5",
+              "source_geometry_sha256": "d43f9d74a89ed5727a5db2f796d90dd5b4b6535d4667f265ddbfa488d6c3d7ac"
+            }
+          },
+          "boundary_provenance_consistent": true,
+          "boundary_provenance_valid": true,
+          "mass_identity_preserved": true
+        },
+        "F3_transverse_slosh": {
+          "family": "F3",
+          "background_id": "F3_transverse",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 1.3171005646387737,
+            "sample_std": 0.19966866236887335,
+            "values": [
+              1.1347379684448242,
+              1.2861119508743286,
+              1.530451774597168
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.043852473298708596,
+            "sample_std": 0.0065848975773792175,
+            "values": [
+              0.037219177931547165,
+              0.043950360268354416,
+              0.05038788169622421
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.08278865863879521,
+            "sample_std": 0.018609192292582618,
+            "values": [
+              0.06350420415401459,
+              0.08422208577394485,
+              0.10063968598842621
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.16992323597272238,
+            "sample_std": 0.019616948440883582,
+            "values": [
+              0.15155267715454102,
+              0.16763173043727875,
+              0.19058530032634735
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.04090171928207079,
+            "sample_std": 0.01346486747289684,
+            "values": [
+              0.026649117469787598,
+              0.04264748468995094,
+              0.053408555686473846
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 5.090209484100342,
+          "constant_velocity_position_fde_m": 0.33543384075164795,
+          "degradation_ratio_vs_constant": 0.2587517407196772,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "sidecar_world_triangles"
+          ],
+          "boundary_available": true,
+          "boundary_provenance_by_seed": {
+            "17": {
+              "path": "sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F3_transverse_slosh",
+              "frame_count": 16,
+              "triangle_count": 28,
+              "static_triangle_count": 28,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh_MkCells.vtk",
+              "source_hdf5": "data/F3_transverse_slosh.h5",
+              "source_geometry_sha256": "d8a60a82fbfbe538b97c4ff91b036de91a7da48e003224f47e15af7c204a8640"
+            },
+            "29": {
+              "path": "sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F3_transverse_slosh",
+              "frame_count": 16,
+              "triangle_count": 28,
+              "static_triangle_count": 28,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh_MkCells.vtk",
+              "source_hdf5": "data/F3_transverse_slosh.h5",
+              "source_geometry_sha256": "d8a60a82fbfbe538b97c4ff91b036de91a7da48e003224f47e15af7c204a8640"
+            },
+            "43": {
+              "path": "sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F3_transverse_slosh",
+              "frame_count": 16,
+              "triangle_count": 28,
+              "static_triangle_count": 28,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh_MkCells.vtk",
+              "source_hdf5": "data/F3_transverse_slosh.h5",
+              "source_geometry_sha256": "d8a60a82fbfbe538b97c4ff91b036de91a7da48e003224f47e15af7c204a8640"
+            }
+          },
+          "boundary_provenance_consistent": true,
+          "boundary_provenance_valid": true,
+          "mass_identity_preserved": true
+        },
+        "W06_standard_fast_center": {
+          "family": "F2",
+          "background_id": "F2_standard_fast",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 23.559518814086914,
+            "sample_std": 5.415946025757854,
+            "values": [
+              28.790910720825195,
+              23.911460876464844,
+              17.976184844970703
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.45642679929733276,
+            "sample_std": 0.10310152104833183,
+            "values": [
+              0.5417004227638245,
+              0.48573601245880127,
+              0.34184396266937256
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.6089488466580709,
+            "sample_std": 0.026586035507369113,
+            "values": [
+              0.5786631107330322,
+              0.6197445392608643,
+              0.6284388899803162
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 1.0283117095629375,
+            "sample_std": 0.2405292768980988,
+            "values": [
+              1.304677963256836,
+              0.9140158891677856,
+              0.8662412762641907
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.3420406977335612,
+            "sample_std": 0.10912821234609237,
+            "values": [
+              0.36205437779426575,
+              0.43977686762809753,
+              0.2242908477783203
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 7.98689846308894e-05,
+            "sample_std": 0.00013833713932963823,
+            "values": [
+              0.00023960695389266818,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 28.704187393188477,
+          "constant_velocity_position_fde_m": 0.7861647605895996,
+          "degradation_ratio_vs_constant": 0.8207694052219574,
+          "control_sources": [
+            "known_prescribed_control_schedule"
+          ],
+          "boundary_sources": [
+            "sidecar_world_triangles"
+          ],
+          "boundary_available": true,
+          "boundary_provenance_by_seed": {
+            "17": {
+              "path": "sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "W06_standard_fast_center",
+              "frame_count": 251,
+              "triangle_count": 68,
+              "static_triangle_count": 40,
+              "moving_triangle_count": 28,
+              "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_fast_center/generated/W06_standard_fast_center_MkCells.vtk",
+              "source_hdf5": "data/W06_standard_fast_center.h5",
+              "source_geometry_sha256": "49c7d5e2252af7adce4b550294308873e98931ee4c2c1630f9be699a3866618f"
+            },
+            "29": {
+              "path": "sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "W06_standard_fast_center",
+              "frame_count": 251,
+              "triangle_count": 68,
+              "static_triangle_count": 40,
+              "moving_triangle_count": 28,
+              "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_fast_center/generated/W06_standard_fast_center_MkCells.vtk",
+              "source_hdf5": "data/W06_standard_fast_center.h5",
+              "source_geometry_sha256": "49c7d5e2252af7adce4b550294308873e98931ee4c2c1630f9be699a3866618f"
+            },
+            "43": {
+              "path": "sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "W06_standard_fast_center",
+              "frame_count": 251,
+              "triangle_count": 68,
+              "static_triangle_count": 40,
+              "moving_triangle_count": 28,
+              "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_fast_center/generated/W06_standard_fast_center_MkCells.vtk",
+              "source_hdf5": "data/W06_standard_fast_center.h5",
+              "source_geometry_sha256": "49c7d5e2252af7adce4b550294308873e98931ee4c2c1630f9be699a3866618f"
+            }
+          },
+          "boundary_provenance_consistent": true,
+          "boundary_provenance_valid": true,
+          "mass_identity_preserved": true
+        }
+      },
+      "per_family": {
+        "F1": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.6372197469075522,
+            "q025": 3.6372197469075522,
+            "q975": 3.6372197469075522,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 23.559518814086914,
+            "q025": 23.559518814086914,
+            "q975": 23.559518814086914,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 1.3171005646387737,
+            "q025": 1.3171005646387737,
+            "q975": 1.3171005646387737,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "per_background": {
+        "F1_twin_obstacle": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.6372197469075522,
+            "q025": 3.6372197469075522,
+            "q975": 3.6372197469075522,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2_standard_fast": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 23.559518814086914,
+            "q025": 23.559518814086914,
+            "q975": 23.559518814086914,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3_transverse": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 1.3171005646387737,
+            "q025": 1.3171005646387737,
+            "q975": 1.3171005646387737,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "macro_position_rmse_over_dp": {
+        "case_values": [
+          3.6372197469075522,
+          1.3171005646387737,
+          23.559518814086914
+        ],
+        "bootstrap": {
+          "estimate": 9.504613041877747,
+          "q025": 1.3171005646387737,
+          "q975": 23.559518814086914,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_velocity_rmse_mps": {
+        "case_values": [
+          0.6167963743209839,
+          0.16992323597272238,
+          1.0283117095629375
+        ],
+        "bootstrap": {
+          "estimate": 0.6050104399522146,
+          "q025": 0.16992323597272238,
+          "q975": 1.0283117095629375,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_com_rmse_m": {
+        "case_values": [
+          0.09070230027039845,
+          0.04090171928207079,
+          0.3420406977335612
+        ],
+        "bootstrap": {
+          "estimate": 0.15788157242867681,
+          "q025": 0.04090171928207079,
+          "q975": 0.3420406977335612,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      }
+    },
+    "local_interaction": {
+      "route": "local_interaction",
+      "run_count": 3,
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "route_seed_combinations": [
+        [
+          17,
+          "local_interaction"
+        ],
+        [
+          29,
+          "local_interaction"
+        ],
+        [
+          43,
+          "local_interaction"
+        ]
+      ],
+      "parameter_count": 23555,
+      "epochs_run": {
+        "17": 5,
+        "29": 4,
+        "43": 4
+      },
+      "best_epoch": {
+        "17": 3,
+        "29": 2,
+        "43": 2
+      },
+      "training_seconds": {
+        "mean": 15.670643895709267,
+        "sample_std": 0.6519646038728614,
+        "values": [
+          16.422445967094973,
+          15.328699873993173,
+          15.260785846039653
+        ],
+        "n": 3
+      },
+      "inference_seconds": {
+        "mean": 0.5068810109514743,
+        "sample_std": 0.009192348444375758,
+        "values": [
+          0.4965747988317162,
+          0.5098350800108165,
+          0.5142331540118903
+        ],
+        "n": 3
+      },
+      "peak_gpu_memory_bytes": 47194112,
+      "per_case": {
+        "F1_twin_obstacle": {
+          "family": "F1",
+          "background_id": "F1_twin_obstacle",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 3.863468805948893,
+            "sample_std": 1.0609658604338479,
+            "values": [
+              3.376664400100708,
+              3.1332619190216064,
+              5.080480098724365
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.11775943885246913,
+            "sample_std": 0.026731926584620647,
+            "values": [
+              0.10018926113843918,
+              0.10456584393978119,
+              0.148523211479187
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.2643249531586965,
+            "sample_std": 0.10901476750698462,
+            "values": [
+              0.24393628537654877,
+              0.1669439822435379,
+              0.3820945918560028
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.7275030612945557,
+            "sample_std": 0.20836920822523497,
+            "values": [
+              0.7390773296356201,
+              0.5135879516601562,
+              0.9298439025878906
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.11614579210678737,
+            "sample_std": 0.05541552469576636,
+            "values": [
+              0.09531599283218384,
+              0.07416345924139023,
+              0.17895792424678802
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 3.7863729000091553,
+          "constant_velocity_position_fde_m": 0.17692194879055023,
+          "degradation_ratio_vs_constant": 1.0203614139377428,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "sidecar_world_triangles"
+          ],
+          "boundary_available": true,
+          "boundary_provenance_by_seed": {
+            "17": {
+              "path": "sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F1_twin_obstacle",
+              "frame_count": 14,
+              "triangle_count": 124,
+              "static_triangle_count": 124,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle_MkCells.vtk",
+              "source_hdf5": "data/F1_twin_obstacle.h5",
+              "source_geometry_sha256": "d43f9d74a89ed5727a5db2f796d90dd5b4b6535d4667f265ddbfa488d6c3d7ac"
+            },
+            "29": {
+              "path": "sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F1_twin_obstacle",
+              "frame_count": 14,
+              "triangle_count": 124,
+              "static_triangle_count": 124,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle_MkCells.vtk",
+              "source_hdf5": "data/F1_twin_obstacle.h5",
+              "source_geometry_sha256": "d43f9d74a89ed5727a5db2f796d90dd5b4b6535d4667f265ddbfa488d6c3d7ac"
+            },
+            "43": {
+              "path": "sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F1_twin_obstacle",
+              "frame_count": 14,
+              "triangle_count": 124,
+              "static_triangle_count": 124,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle_MkCells.vtk",
+              "source_hdf5": "data/F1_twin_obstacle.h5",
+              "source_geometry_sha256": "d43f9d74a89ed5727a5db2f796d90dd5b4b6535d4667f265ddbfa488d6c3d7ac"
+            }
+          },
+          "boundary_provenance_consistent": true,
+          "boundary_provenance_valid": true,
+          "mass_identity_preserved": true
+        },
+        "F3_transverse_slosh": {
+          "family": "F3",
+          "background_id": "F3_transverse",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 3.0960376262664795,
+            "sample_std": 0.4177948679711324,
+            "values": [
+              3.4298126697540283,
+              2.627490997314453,
+              3.230809211730957
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.10317428161700566,
+            "sample_std": 0.011588044712043291,
+            "values": [
+              0.11397131532430649,
+              0.0909309983253479,
+              0.10462053120136261
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.22943519552548727,
+            "sample_std": 0.041632535311617425,
+            "values": [
+              0.25647786259651184,
+              0.1814931035041809,
+              0.25033462047576904
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.3888799846172333,
+            "sample_std": 0.06918538836204742,
+            "values": [
+              0.42643627524375916,
+              0.3090382516384125,
+              0.4311654269695282
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.11998906234900157,
+            "sample_std": 0.017000822243759647,
+            "values": [
+              0.13334378600120544,
+              0.10085110366344452,
+              0.12577229738235474
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 5.090209484100342,
+          "constant_velocity_position_fde_m": 0.33543384075164795,
+          "degradation_ratio_vs_constant": 0.6082338331923646,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "sidecar_world_triangles"
+          ],
+          "boundary_available": true,
+          "boundary_provenance_by_seed": {
+            "17": {
+              "path": "sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F3_transverse_slosh",
+              "frame_count": 16,
+              "triangle_count": 28,
+              "static_triangle_count": 28,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh_MkCells.vtk",
+              "source_hdf5": "data/F3_transverse_slosh.h5",
+              "source_geometry_sha256": "d8a60a82fbfbe538b97c4ff91b036de91a7da48e003224f47e15af7c204a8640"
+            },
+            "29": {
+              "path": "sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F3_transverse_slosh",
+              "frame_count": 16,
+              "triangle_count": 28,
+              "static_triangle_count": 28,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh_MkCells.vtk",
+              "source_hdf5": "data/F3_transverse_slosh.h5",
+              "source_geometry_sha256": "d8a60a82fbfbe538b97c4ff91b036de91a7da48e003224f47e15af7c204a8640"
+            },
+            "43": {
+              "path": "sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F3_transverse_slosh",
+              "frame_count": 16,
+              "triangle_count": 28,
+              "static_triangle_count": 28,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh_MkCells.vtk",
+              "source_hdf5": "data/F3_transverse_slosh.h5",
+              "source_geometry_sha256": "d8a60a82fbfbe538b97c4ff91b036de91a7da48e003224f47e15af7c204a8640"
+            }
+          },
+          "boundary_provenance_consistent": true,
+          "boundary_provenance_valid": true,
+          "mass_identity_preserved": true
+        },
+        "W06_standard_fast_center": {
+          "family": "F2",
+          "background_id": "F2_standard_fast",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 47.31836128234863,
+            "sample_std": 20.13652182648769,
+            "values": [
+              46.19478225708008,
+              67.99314880371094,
+              27.767152786254883
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.8276619712511698,
+            "sample_std": 0.20711375848742314,
+            "values": [
+              0.872836172580719,
+              1.0084601640701294,
+              0.6016895771026611
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 1.5233158667882283,
+            "sample_std": 0.6300532044359085,
+            "values": [
+              1.8639506101608276,
+              1.9097237586975098,
+              0.7962732315063477
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 2.0283385515213013,
+            "sample_std": 0.2074041032021972,
+            "values": [
+              1.823705792427063,
+              2.2384071350097656,
+              2.022902727127075
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.8608519037564596,
+            "sample_std": 0.27785826306532013,
+            "values": [
+              0.9215110540390015,
+              1.1033694744110107,
+              0.5576751828193665
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0010173847316704459,
+            "sample_std": 0.0012743699166597256,
+            "values": [
+              0.00043839758125472413,
+              0.002478458049886621,
+              0.00013529856386999245
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 28.704187393188477,
+          "constant_velocity_position_fde_m": 0.7861647605895996,
+          "degradation_ratio_vs_constant": 1.6484828723483498,
+          "control_sources": [
+            "known_prescribed_control_schedule"
+          ],
+          "boundary_sources": [
+            "sidecar_world_triangles"
+          ],
+          "boundary_available": true,
+          "boundary_provenance_by_seed": {
+            "17": {
+              "path": "sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "W06_standard_fast_center",
+              "frame_count": 251,
+              "triangle_count": 68,
+              "static_triangle_count": 40,
+              "moving_triangle_count": 28,
+              "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_fast_center/generated/W06_standard_fast_center_MkCells.vtk",
+              "source_hdf5": "data/W06_standard_fast_center.h5",
+              "source_geometry_sha256": "49c7d5e2252af7adce4b550294308873e98931ee4c2c1630f9be699a3866618f"
+            },
+            "29": {
+              "path": "sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "W06_standard_fast_center",
+              "frame_count": 251,
+              "triangle_count": 68,
+              "static_triangle_count": 40,
+              "moving_triangle_count": 28,
+              "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_fast_center/generated/W06_standard_fast_center_MkCells.vtk",
+              "source_hdf5": "data/W06_standard_fast_center.h5",
+              "source_geometry_sha256": "49c7d5e2252af7adce4b550294308873e98931ee4c2c1630f9be699a3866618f"
+            },
+            "43": {
+              "path": "sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "W06_standard_fast_center",
+              "frame_count": 251,
+              "triangle_count": 68,
+              "static_triangle_count": 40,
+              "moving_triangle_count": 28,
+              "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_fast_center/generated/W06_standard_fast_center_MkCells.vtk",
+              "source_hdf5": "data/W06_standard_fast_center.h5",
+              "source_geometry_sha256": "49c7d5e2252af7adce4b550294308873e98931ee4c2c1630f9be699a3866618f"
+            }
+          },
+          "boundary_provenance_consistent": true,
+          "boundary_provenance_valid": true,
+          "mass_identity_preserved": true
+        }
+      },
+      "per_family": {
+        "F1": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.863468805948893,
+            "q025": 3.863468805948893,
+            "q975": 3.863468805948893,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 47.31836128234863,
+            "q025": 47.31836128234863,
+            "q975": 47.31836128234863,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.0960376262664795,
+            "q025": 3.0960376262664795,
+            "q975": 3.0960376262664795,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "per_background": {
+        "F1_twin_obstacle": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.863468805948893,
+            "q025": 3.863468805948893,
+            "q975": 3.863468805948893,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2_standard_fast": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 47.31836128234863,
+            "q025": 47.31836128234863,
+            "q975": 47.31836128234863,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3_transverse": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.0960376262664795,
+            "q025": 3.0960376262664795,
+            "q975": 3.0960376262664795,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "macro_position_rmse_over_dp": {
+        "case_values": [
+          3.863468805948893,
+          3.0960376262664795,
+          47.31836128234863
+        ],
+        "bootstrap": {
+          "estimate": 18.092622571521336,
+          "q025": 3.0960376262664795,
+          "q975": 47.31836128234863,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_velocity_rmse_mps": {
+        "case_values": [
+          0.7275030612945557,
+          0.3888799846172333,
+          2.0283385515213013
+        ],
+        "bootstrap": {
+          "estimate": 1.0482405324776967,
+          "q025": 0.3888799846172333,
+          "q975": 2.0283385515213013,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_com_rmse_m": {
+        "case_values": [
+          0.11614579210678737,
+          0.11998906234900157,
+          0.8608519037564596
+        ],
+        "bootstrap": {
+          "estimate": 0.3656622527374162,
+          "q025": 0.11614579210678737,
+          "q975": 0.8608519037564596,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      }
+    },
+    "physics_residual": {
+      "route": "physics_residual",
+      "run_count": 3,
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "route_seed_combinations": [
+        [
+          17,
+          "physics_residual"
+        ],
+        [
+          29,
+          "physics_residual"
+        ],
+        [
+          43,
+          "physics_residual"
+        ]
+      ],
+      "parameter_count": 22531,
+      "epochs_run": {
+        "17": 5,
+        "29": 4,
+        "43": 3
+      },
+      "best_epoch": {
+        "17": 3,
+        "29": 2,
+        "43": 1
+      },
+      "training_seconds": {
+        "mean": 9.987214409047738,
+        "sample_std": 2.064884420604221,
+        "values": [
+          12.226846994133666,
+          9.575763900065795,
+          8.159032332943752
+        ],
+        "n": 3
+      },
+      "inference_seconds": {
+        "mean": 0.3189346049912274,
+        "sample_std": 0.007113241941319095,
+        "values": [
+          0.3107253909111023,
+          0.3232733360491693,
+          0.32280508801341057
+        ],
+        "n": 3
+      },
+      "peak_gpu_memory_bytes": 20806656,
+      "per_case": {
+        "F1_twin_obstacle": {
+          "family": "F1",
+          "background_id": "F1_twin_obstacle",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 3.261685609817505,
+            "sample_std": 0.5954445492449717,
+            "values": [
+              2.6493003368377686,
+              3.297152519226074,
+              3.838603973388672
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.10536253452301025,
+            "sample_std": 0.02339773376421746,
+            "values": [
+              0.07984338700771332,
+              0.1104387640953064,
+              0.12580545246601105
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.15240367750326791,
+            "sample_std": 0.044956974364682746,
+            "values": [
+              0.10244682431221008,
+              0.1651606410741806,
+              0.18960356712341309
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.49775291482607525,
+            "sample_std": 0.013148210449410495,
+            "values": [
+              0.4831080734729767,
+              0.5016080737113953,
+              0.5085425972938538
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.08034361029664676,
+            "sample_std": 0.03690257810980063,
+            "values": [
+              0.041550155729055405,
+              0.08447268605232239,
+              0.11500798910856247
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 3.7863729000091553,
+          "constant_velocity_position_fde_m": 0.17692194879055023,
+          "degradation_ratio_vs_constant": 0.8614274652688377,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "sidecar_world_triangles"
+          ],
+          "boundary_available": true,
+          "boundary_provenance_by_seed": {
+            "17": {
+              "path": "sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F1_twin_obstacle",
+              "frame_count": 14,
+              "triangle_count": 124,
+              "static_triangle_count": 124,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle_MkCells.vtk",
+              "source_hdf5": "data/F1_twin_obstacle.h5",
+              "source_geometry_sha256": "d43f9d74a89ed5727a5db2f796d90dd5b4b6535d4667f265ddbfa488d6c3d7ac"
+            },
+            "29": {
+              "path": "sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F1_twin_obstacle",
+              "frame_count": 14,
+              "triangle_count": 124,
+              "static_triangle_count": 124,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle_MkCells.vtk",
+              "source_hdf5": "data/F1_twin_obstacle.h5",
+              "source_geometry_sha256": "d43f9d74a89ed5727a5db2f796d90dd5b4b6535d4667f265ddbfa488d6c3d7ac"
+            },
+            "43": {
+              "path": "sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F1_twin_obstacle",
+              "frame_count": 14,
+              "triangle_count": 124,
+              "static_triangle_count": 124,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle_MkCells.vtk",
+              "source_hdf5": "data/F1_twin_obstacle.h5",
+              "source_geometry_sha256": "d43f9d74a89ed5727a5db2f796d90dd5b4b6535d4667f265ddbfa488d6c3d7ac"
+            }
+          },
+          "boundary_provenance_consistent": true,
+          "boundary_provenance_valid": true,
+          "mass_identity_preserved": true
+        },
+        "F3_transverse_slosh": {
+          "family": "F3",
+          "background_id": "F3_transverse",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 2.731117089589437,
+            "sample_std": 0.49526621226964507,
+            "values": [
+              3.302180528640747,
+              2.4190611839294434,
+              2.47210955619812
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.0959992582599322,
+            "sample_std": 0.012949856389167637,
+            "values": [
+              0.11095093190670013,
+              0.08833802491426468,
+              0.08870881795883179
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.17719617982705435,
+            "sample_std": 0.050735193410320005,
+            "values": [
+              0.23542849719524384,
+              0.14252954721450806,
+              0.15363049507141113
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.30036521951357525,
+            "sample_std": 0.06304771808187812,
+            "values": [
+              0.3727956712245941,
+              0.25779491662979126,
+              0.27050507068634033
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.10490221281846364,
+            "sample_std": 0.020127853092541722,
+            "values": [
+              0.12811288237571716,
+              0.09225808829069138,
+              0.09433566778898239
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 5.090209484100342,
+          "constant_velocity_position_fde_m": 0.33543384075164795,
+          "degradation_ratio_vs_constant": 0.5365431615575528,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "sidecar_world_triangles"
+          ],
+          "boundary_available": true,
+          "boundary_provenance_by_seed": {
+            "17": {
+              "path": "sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F3_transverse_slosh",
+              "frame_count": 16,
+              "triangle_count": 28,
+              "static_triangle_count": 28,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh_MkCells.vtk",
+              "source_hdf5": "data/F3_transverse_slosh.h5",
+              "source_geometry_sha256": "d8a60a82fbfbe538b97c4ff91b036de91a7da48e003224f47e15af7c204a8640"
+            },
+            "29": {
+              "path": "sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F3_transverse_slosh",
+              "frame_count": 16,
+              "triangle_count": 28,
+              "static_triangle_count": 28,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh_MkCells.vtk",
+              "source_hdf5": "data/F3_transverse_slosh.h5",
+              "source_geometry_sha256": "d8a60a82fbfbe538b97c4ff91b036de91a7da48e003224f47e15af7c204a8640"
+            },
+            "43": {
+              "path": "sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "F3_transverse_slosh",
+              "frame_count": 16,
+              "triangle_count": 28,
+              "static_triangle_count": 28,
+              "moving_triangle_count": 0,
+              "source_vtk": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh_MkCells.vtk",
+              "source_hdf5": "data/F3_transverse_slosh.h5",
+              "source_geometry_sha256": "d8a60a82fbfbe538b97c4ff91b036de91a7da48e003224f47e15af7c204a8640"
+            }
+          },
+          "boundary_provenance_consistent": true,
+          "boundary_provenance_valid": true,
+          "mass_identity_preserved": true
+        },
+        "W06_standard_fast_center": {
+          "family": "F2",
+          "background_id": "F2_standard_fast",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 27.19192059834798,
+            "sample_std": 2.709633060970371,
+            "values": [
+              27.80329704284668,
+              24.228832244873047,
+              29.54363250732422
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.5627467830975851,
+            "sample_std": 0.07150193085784524,
+            "values": [
+              0.5717482566833496,
+              0.48717033863067627,
+              0.6293217539787292
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.959550698598226,
+            "sample_std": 0.32525474692801154,
+            "values": [
+              1.0532594919204712,
+              0.5977286100387573,
+              1.2276639938354492
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.9783549507459005,
+            "sample_std": 0.10668735341026027,
+            "values": [
+              0.9070514440536499,
+              0.9270064234733582,
+              1.1010069847106934
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.5591437121232351,
+            "sample_std": 0.07347891846870981,
+            "values": [
+              0.5575816631317139,
+              0.48645827174186707,
+              0.6333912014961243
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 28.704187393188477,
+          "constant_velocity_position_fde_m": 0.7861647605895996,
+          "degradation_ratio_vs_constant": 0.9473154639730593,
+          "control_sources": [
+            "known_prescribed_control_schedule"
+          ],
+          "boundary_sources": [
+            "sidecar_world_triangles"
+          ],
+          "boundary_available": true,
+          "boundary_provenance_by_seed": {
+            "17": {
+              "path": "sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "W06_standard_fast_center",
+              "frame_count": 251,
+              "triangle_count": 68,
+              "static_triangle_count": 40,
+              "moving_triangle_count": 28,
+              "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_fast_center/generated/W06_standard_fast_center_MkCells.vtk",
+              "source_hdf5": "data/W06_standard_fast_center.h5",
+              "source_geometry_sha256": "49c7d5e2252af7adce4b550294308873e98931ee4c2c1630f9be699a3866618f"
+            },
+            "29": {
+              "path": "sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "W06_standard_fast_center",
+              "frame_count": 251,
+              "triangle_count": 68,
+              "static_triangle_count": 40,
+              "moving_triangle_count": 28,
+              "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_fast_center/generated/W06_standard_fast_center_MkCells.vtk",
+              "source_hdf5": "data/W06_standard_fast_center.h5",
+              "source_geometry_sha256": "49c7d5e2252af7adce4b550294308873e98931ee4c2c1630f9be699a3866618f"
+            },
+            "43": {
+              "path": "sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+              "schema_version": "boundary-sidecar-v1",
+              "coordinate_frame": "world",
+              "case_id": "W06_standard_fast_center",
+              "frame_count": 251,
+              "triangle_count": 68,
+              "static_triangle_count": 40,
+              "moving_triangle_count": 28,
+              "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_fast_center/generated/W06_standard_fast_center_MkCells.vtk",
+              "source_hdf5": "data/W06_standard_fast_center.h5",
+              "source_geometry_sha256": "49c7d5e2252af7adce4b550294308873e98931ee4c2c1630f9be699a3866618f"
+            }
+          },
+          "boundary_provenance_consistent": true,
+          "boundary_provenance_valid": true,
+          "mass_identity_preserved": true
+        }
+      },
+      "per_family": {
+        "F1": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.261685609817505,
+            "q025": 3.261685609817505,
+            "q975": 3.261685609817505,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 27.19192059834798,
+            "q025": 27.19192059834798,
+            "q975": 27.19192059834798,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 2.731117089589437,
+            "q025": 2.731117089589437,
+            "q975": 2.731117089589437,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "per_background": {
+        "F1_twin_obstacle": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.261685609817505,
+            "q025": 3.261685609817505,
+            "q975": 3.261685609817505,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2_standard_fast": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 27.19192059834798,
+            "q025": 27.19192059834798,
+            "q975": 27.19192059834798,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3_transverse": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 2.731117089589437,
+            "q025": 2.731117089589437,
+            "q975": 2.731117089589437,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "macro_position_rmse_over_dp": {
+        "case_values": [
+          3.261685609817505,
+          2.731117089589437,
+          27.19192059834798
+        ],
+        "bootstrap": {
+          "estimate": 11.061574432584974,
+          "q025": 2.731117089589437,
+          "q975": 27.19192059834798,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_velocity_rmse_mps": {
+        "case_values": [
+          0.49775291482607525,
+          0.30036521951357525,
+          0.9783549507459005
+        ],
+        "bootstrap": {
+          "estimate": 0.592157695028517,
+          "q025": 0.30036521951357525,
+          "q975": 0.9783549507459005,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_com_rmse_m": {
+        "case_values": [
+          0.08034361029664676,
+          0.10490221281846364,
+          0.5591437121232351
+        ],
+        "bootstrap": {
+          "estimate": 0.2481298450794485,
+          "q025": 0.08034361029664676,
+          "q975": 0.5591437121232351,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      }
+    }
+  },
+  "case_count_per_route": {
+    "particle_mlp": 3,
+    "deepset_context": 3,
+    "local_interaction": 3,
+    "physics_residual": 3
+  },
+  "boundary_geometry_gate": true,
+  "nonfinite_rollout_gate": true,
+  "physics_budget": {
+    "status": "diagnostic_only",
+    "mass_identity_preservation_reported": true,
+    "predicted_density_pressure": false,
+    "material_transport_scored": false
+  },
+  "degradation_policy": "diagnostic_per_case; never a physical-scene admission gate",
+  "formal_ready": false,
+  "open_blockers": [
+    "only T1 particle rollout is scored; material transport and external observable tracks remain separate",
+    "F6 free-body case has no fluid state in the pilot and is excluded until a coupled body-state route exists"
+  ]
+}
