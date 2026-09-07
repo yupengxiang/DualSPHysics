@@ -23,6 +23,6 @@
 ## 仍然不能宣称什么
 
 1. sidecar 只解决“插值时看见哪些有限壁面”的几何输入问题，不提供外部实验验证。
-2. W11 release manifest 尚未链接这些 sidecar，材料 destination regions 和 wall-aware transport contract 也尚未冻结。
+2. 12 个 F1/F2/F3 sidecar 已复制到 development release 并由 release manifest 链接；但材料 destination regions 和 wall-aware transport contract 仍尚未冻结，F6 也没有 sidecar。
 3. 需要用这些 sidecar 重跑示踪 convergence matrix，比较 wall-aware 与无壁面结果、支持半径、可靠率和质量加权目的地统计；之后才可决定是否把材料轨迹升级为 benchmark target。
 4. 任何分辨率或几何定义变化都必须重新生成 sidecar，并通过源 VTK、frame axis 和 triangle hash 审计；不能复用旧 sidecar。

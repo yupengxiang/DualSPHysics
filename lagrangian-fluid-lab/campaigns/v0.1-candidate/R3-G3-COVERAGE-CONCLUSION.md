@@ -21,12 +21,12 @@ W08 的 204 张卡和 196 个唯一 execution unit 全部仍是 `planned_not_run
 
 ## 训练/评测覆盖
 
-W11 development pilot 为 13 例（train 6、validation 3、test 4）。T1 粒子 rollout 所需字段在 13 例都有；T2 只有 12 例具备候选 material 组，但仍缺 wall-aware destination specification，不能作为完整材料输运任务；T3 的外部 observable reference 和 T4 的 terminal destination/event history 均为 0 例。selection 与 release 的 ID、split、谱系、校验和及 root-attribute 交叉审计单独记录。W12 真实 autonomous baseline 有两个路线、三种子，但实际测试案例只有 3 个（其中 2 个在 30-case registry 内），不能代表 13 例 pilot 或六个家族。
+W11 development pilot 为 13 例（train 6、validation 3、test 4）。T1 粒子 rollout 所需字段在 13 例都有；其中 12 个流体案例现在已经链接有限边界三角形 sidecar，但 HDF5/material 仍声明 `wall_visibility` 未提供，且没有 wall-aware destination specification，所以 T2 完整任务仍为 0 例；T3 的外部 observable reference 和 T4 的 terminal destination/event history 均为 0 例。selection 与 release 的 ID、split、谱系、校验和及 root-attribute 交叉审计单独记录。W12 真实 autonomous baseline 有两个路线、三种子，但实际测试案例只有 3 个（其中 2 个在 30-case registry 内），不能代表 13 例 pilot 或六个家族。
 
 ## 判定和下一步
 
 “每族至少三个背景”在现有探针层面满足，但这是 breadth gate，不是 acceptance gate。所有家族的 reference-quality gate 仍未通过，因此当前没有任何 family 可以直接进入正式 v0.1 或 20–30 例生产 tranche。
 
-下一步应先为每个 topology holdout 建立可执行 definition、独立 lineage 和 `topology_extrapolation` split，至少生成并结构审计一个 case；随后补齐 wall-aware destination sidecar、T3/T4 任务字段，再按通过 reference/resolution 门的家族运行小规模 development tranche。不要把 W08 204 张卡一次性提交给 GPU。
+下一步应先为每个 topology holdout 建立可执行 definition、独立 lineage 和 `topology_extrapolation` split，至少生成并结构审计一个 case；随后把已生成的边界 sidecar 纳入 wall-aware material contract，补齐 destination、T3/T4 任务字段，再按通过 reference/resolution 门的家族运行小规模 development tranche。不要把 W08 204 张卡一次性提交给 GPU。
 
 机器可读明细见 `r3-g3-coverage-audit.json`。

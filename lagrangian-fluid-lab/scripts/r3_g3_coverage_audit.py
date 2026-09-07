@@ -445,6 +445,55 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def audit_boundary_sidecar(path: Path, case_id: str, solver_path: Path) -> dict[str, Any]:
+    """Validate a linked finite-triangle sidecar against its solver export."""
+    if not path.is_file():
+        return {"case_id": case_id, "path": str(path), "pass": False, "issues": ["missing sidecar"]}
+    issues = []
+    try:
+        with h5py.File(path, "r") as sidecar, h5py.File(solver_path, "r") as solver:
+            required = ("time", "triangles_world", "triangle_mk", "triangle_type")
+            missing = [name for name in required if name not in sidecar]
+            if missing:
+                issues.append(f"missing datasets: {missing}")
+            if not missing:
+                time = np.asarray(sidecar["time"][:], dtype=float)
+                solver_time = np.asarray(solver["time"][:], dtype=float)
+                triangles = np.asarray(sidecar["triangles_world"][:], dtype=float)
+                kind = np.asarray(sidecar["triangle_type"][:])
+                if not np.array_equal(time, solver_time):
+                    issues.append("sidecar time axis differs from solver export")
+                if triangles.ndim != 4 or triangles.shape[0] != len(time) or triangles.shape[2:] != (3, 3):
+                    issues.append("triangles_world shape is not [T,N,3,3]")
+                if len(sidecar["triangle_mk"]) != triangles.shape[1] or len(kind) != triangles.shape[1]:
+                    issues.append("triangle labels do not match triangle axis")
+                if not np.all(np.isin(kind, (0, 1))):
+                    issues.append("triangle_type contains a non-boundary type")
+                if not np.all(np.isfinite(triangles)):
+                    issues.append("triangle coordinates are non-finite")
+                if triangles.size:
+                    area2 = np.linalg.norm(np.cross(triangles[:, :, 1] - triangles[:, :, 0],
+                                                     triangles[:, :, 2] - triangles[:, :, 0]), axis=-1)
+                    if not np.all(area2 > 1e-12):
+                        issues.append("sidecar contains degenerate triangles")
+            attr_case = sidecar.attrs.get("case_id")
+            if isinstance(attr_case, bytes):
+                attr_case = attr_case.decode()
+            if str(attr_case) != case_id:
+                issues.append(f"sidecar case_id mismatch: {attr_case!r}")
+            coordinate_frame = sidecar.attrs.get("coordinate_frame")
+            if isinstance(coordinate_frame, bytes):
+                coordinate_frame = coordinate_frame.decode()
+            if coordinate_frame != "world":
+                issues.append(f"sidecar coordinate frame is not world: {coordinate_frame!r}")
+    except (OSError, ValueError, KeyError) as error:
+        issues.append(f"sidecar unreadable: {error}")
+    return {
+        "case_id": case_id, "path": str(path), "sha256": _sha256(path),
+        "bytes": path.stat().st_size, "pass": not issues, "issues": issues,
+    }
+
+
 def release_integrity_audit() -> dict[str, Any]:
     """Cross-check W11 selection, release manifest and published bytes."""
 
@@ -463,6 +512,7 @@ def release_integrity_audit() -> dict[str, Any]:
     field_mismatches = []
     checksum_failures = []
     contract_failures = []
+    sidecar_audits = []
     for case_id in sorted(set(selected) & set(published)):
         source = selected[case_id]
         entry = published[case_id]
@@ -490,6 +540,9 @@ def release_integrity_audit() -> dict[str, Any]:
                 mismatches = {name: {"expected": expected, "actual": attr_text(name)} for name, expected in expected_attrs.items() if attr_text(name) != str(expected)}
                 if mismatches:
                     contract_failures.append({"case_id": case_id, "attribute_mismatches": mismatches})
+        sidecar = entry.get("boundary_sidecar") or (entry.get("geometry") or {}).get("boundary_sidecar")
+        if isinstance(sidecar, str):
+            sidecar_audits.append(audit_boundary_sidecar(RELEASE / sidecar, case_id, path))
     return {
         "selection_release_id_match": selection.get("release_id") == manifest.get("release_id"),
         "formal_release_is_false": selection.get("formal_release") is False and manifest.get("formal_release") is False,
@@ -498,12 +551,15 @@ def release_integrity_audit() -> dict[str, Any]:
         "missing_from_release": missing_from_release, "unexpected_in_release": unexpected_in_release,
         "field_mismatches": field_mismatches, "checksum_failures": checksum_failures,
         "release_contract_failures": contract_failures,
+        "boundary_sidecar_audits": sidecar_audits,
+        "boundary_sidecar_failures": [item for item in sidecar_audits if not item["pass"]],
         "pass": (
             selection.get("release_id") == manifest.get("release_id")
             and selection.get("formal_release") is False and manifest.get("formal_release") is False
             and not missing_from_release and not unexpected_in_release and not field_mismatches
             and not duplicate_selection_ids and not duplicate_manifest_ids
             and not checksum_failures and not contract_failures
+            and not any(not item["pass"] for item in sidecar_audits)
         ),
     }
 
@@ -745,7 +801,7 @@ def build_report() -> dict[str, Any]:
             "the four declared topology holdouts have zero W08 controlled cards; W07 topology cards are design-only",
             "F2 spout and F3 perforated_proxy have no incidental materialized case; F1/F6 matching cases are not linked to W08 topology_extrapolation",
             "all six families fail the reference-quality gate (partial anchors or no anchor)",
-            "W11 T2 has candidate tracer fields but no wall-aware destination specification; T3 and T4 fields are absent",
+            "W11 T2 has candidate tracer fields and finite geometry sidecars for 12 fluid cases, but wall_visibility remains unset and no destination specification is declared; T3 and T4 fields are absent",
             "the development pilot has 13 cases but only 3 cases are covered by learned autonomous baseline results",
             "Test14 F6 execution exists but its current DBC proxy is scientifically rejected",
         ],
@@ -777,13 +833,13 @@ W08 的 204 张卡和 196 个唯一 execution unit 全部仍是 `planned_not_run
 
 ## 训练/评测覆盖
 
-W11 development pilot 为 13 例（train 6、validation 3、test 4）。T1 粒子 rollout 所需字段在 13 例都有；T2 只有 12 例具备候选 material 组，但仍缺 wall-aware destination specification，不能作为完整材料输运任务；T3 的外部 observable reference 和 T4 的 terminal destination/event history 均为 0 例。selection 与 release 的 ID、split、谱系、校验和及 root-attribute 交叉审计单独记录。W12 真实 autonomous baseline 有两个路线、三种子，但实际测试案例只有 3 个（其中 2 个在 30-case registry 内），不能代表 13 例 pilot 或六个家族。
+W11 development pilot 为 13 例（train 6、validation 3、test 4）。T1 粒子 rollout 所需字段在 13 例都有；其中 12 个流体案例现在已经链接有限边界三角形 sidecar，但 HDF5/material 仍声明 `wall_visibility` 未提供，且没有 wall-aware destination specification，所以 T2 完整任务仍为 0 例；T3 的外部 observable reference 和 T4 的 terminal destination/event history 均为 0 例。selection 与 release 的 ID、split、谱系、校验和及 root-attribute 交叉审计单独记录。W12 真实 autonomous baseline 有两个路线、三种子，但实际测试案例只有 3 个（其中 2 个在 30-case registry 内），不能代表 13 例 pilot 或六个家族。
 
 ## 判定和下一步
 
 “每族至少三个背景”在现有探针层面满足，但这是 breadth gate，不是 acceptance gate。所有家族的 reference-quality gate 仍未通过，因此当前没有任何 family 可以直接进入正式 v0.1 或 20–30 例生产 tranche。
 
-下一步应先为每个 topology holdout 建立可执行 definition、独立 lineage 和 `topology_extrapolation` split，至少生成并结构审计一个 case；随后补齐 wall-aware destination sidecar、T3/T4 任务字段，再按通过 reference/resolution 门的家族运行小规模 development tranche。不要把 W08 204 张卡一次性提交给 GPU。
+下一步应先为每个 topology holdout 建立可执行 definition、独立 lineage 和 `topology_extrapolation` split，至少生成并结构审计一个 case；随后把已生成的边界 sidecar 纳入 wall-aware material contract，补齐 destination、T3/T4 任务字段，再按通过 reference/resolution 门的家族运行小规模 development tranche。不要把 W08 204 张卡一次性提交给 GPU。
 
 机器可读明细见 `r3-g3-coverage-audit.json`。
 '''

@@ -46,6 +46,9 @@ def test_g3_keeps_registry_and_pilot_baseline_denominators_separate():
     assert report["registry_stage_counts"]["learned_baseline_evaluated_cases"] == 2
     assert report["registry_stage_counts"]["learned_baseline_evaluated_pilot_cases"] == 3
     assert report["development_pilot"]["release_integrity"]["pass"]
+    sidecars = report["development_pilot"]["release_integrity"]["boundary_sidecar_audits"]
+    assert len(sidecars) == 12
+    assert all(item["pass"] for item in sidecars)
 
 
 def test_registry_stage_audit_distinguishes_quality_from_execution():
