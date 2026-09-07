@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "scope": "R3-G4 corrected development baselines",
+  "routes": ["particle_mlp", "deepset_context", "local_interaction", "physics_residual"],
+  "seeds": [17, 29, 43],
+  "epochs_requested": 8,
+  "min_epochs": 3,
+  "early_stopping": {
+    "selection_metric": "validation_autonomous_rmse_over_dp",
+    "patience": 2,
+    "min_delta": 0.00001
+  },
+  "maximum_particles_per_training_frame": 256,
+  "validation_particles": 512,
+  "hidden_width": 128,
+  "learning_rate": 0.001,
+  "smooth_output_cap": {
+    "normalized_units": 8.0,
+    "function": "8*tanh(raw/8)",
+    "applied_in": ["train", "validation", "rollout"]
+  },
+  "position_clip_dp": 0.0,
+  "rollout": "autonomous from frame zero; current prescribed controls only",
+  "primary_families": ["F1", "F2", "F3"],
+  "excluded_cases": {
+    "W05_F6_fine": "contains type-2 floating-body particles but no fluid type-3 state; no coupled body predictor is defined"
+  },
+  "allowed_gpu_indices": [4, 5, 6, 7],
+  "budget_rule": "at most 8 epochs per route/seed, stop after 3 epochs plus 2 stale autonomous-validation epochs; measured wall time is reported",
+  "formal_gate": "development evidence only; constant-velocity degradation is diagnostic, never a physical-scene admission gate",
+  "known_pilot_limitations": [
+    "W11 has no complete boundary triangle sidecars, so boundary availability is explicit but false",
+    "density, pressure and mass are initial-only features unless a future model predicts them",
+    "T2 material transport and T3 external observables are not scored by this particle rollout experiment"
+  ]
+}
