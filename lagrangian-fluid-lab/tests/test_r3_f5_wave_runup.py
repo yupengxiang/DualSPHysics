@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from scripts.r3_f5_wave_runup import (
     EXTERNAL_GAUGES,
     RESOLUTIONS,
     _excluded_particles,
     _read_gauge,
     _restore_input_assets,
+    compare_resolution_matrix,
     _run_tag,
     configure_definition,
 )
@@ -70,6 +73,29 @@ def test_run_tag_separates_parameterizations_to_prevent_stale_frame_mixing():
 def test_excluded_particle_parser_handles_solver_dot_leader():
     assert _excluded_particles("Excluded particles...............: 1") == 1
     assert _excluded_particles("Excluded particles...............: 21,695") == 21695
+
+
+def test_resolution_comparison_reports_offset_corrected_sensitivity(tmp_path):
+    runs = []
+    for label, dp, offset in (("coarse", 0.03, 0.20), ("medium", 0.025, 0.25)):
+        directory = tmp_path / label
+        directory.mkdir()
+        (directory / "GaugesSWL_WG1.csv").write_text(
+            "time [s];swlx [m];swly [m];swlz [m]\n"
+            f"0;3.1;0.18;{offset}\n"
+            f"1;3.1;0.18;{offset + 0.01}\n"
+            f"2;3.1;0.18;{offset + 0.02}\n"
+        )
+        runs.append({"label": label, "dp_m": dp, "status": "completed", "output_dir": str(directory)})
+
+    report = compare_resolution_matrix(runs)
+
+    gauge = report["pairs"][0]["gauges"]["WG1"]
+    assert gauge["status"] == "computed"
+    assert gauge["initial_offset_m"] == pytest.approx(-0.05)
+    assert gauge["raw_swl_rmse_m"] == pytest.approx(0.05)
+    assert gauge["normalized_eta_rmse_m"] == pytest.approx(0.0)
+    assert report["acceptance_threshold_declared"] is False
 
 
 def test_restore_input_assets_recovers_same_directory_gencase_inputs(tmp_path):

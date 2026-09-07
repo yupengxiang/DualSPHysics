@@ -274,10 +274,10 @@ def run_case(prepared: dict[str, Any], gpu: int, *, tmax_s: float, tout_s: float
     }
 
 
-def _read_gauge(path: Path) -> dict[str, Any]:
+def _load_gauge(path: Path) -> np.ndarray:
     lines = path.read_text(errors="replace").splitlines()
     if not lines:
-        return {"path": str(path), "rows": 0, "issues": ["empty gauge output"]}
+        return np.empty((0, 0), dtype=np.float64)
     rows: list[list[float]] = []
     for line in lines[1:]:
         fields = line.replace(";", " ").split()
@@ -287,7 +287,11 @@ def _read_gauge(path: Path) -> dict[str, Any]:
             continue
         if len(values) >= 4:
             rows.append(values)
-    data = np.asarray(rows, dtype=np.float64)
+    return np.asarray(rows, dtype=np.float64)
+
+
+def _read_gauge(path: Path) -> dict[str, Any]:
+    data = _load_gauge(path)
     issues: list[str] = []
     if data.ndim != 2 or data.shape[1] < 4 or len(data) < 2 or not np.all(np.isfinite(data[:, :4])):
         issues.append("gauge output has fewer than two finite rows with time and SWL fields")
@@ -310,7 +314,7 @@ def _read_gauge(path: Path) -> dict[str, Any]:
 
 
 def summarize_gauges(run: dict[str, Any]) -> dict[str, Any]:
-    directory = LAB / str(run["output_dir"])
+    directory = LAB / str(run.get("output_dir", f"{RUN_ROOT.relative_to(LAB)}/{run['label']}"))
     gauges = {
         path.stem.removeprefix("GaugesSWL_"): _read_gauge(path)
         for path in sorted(directory.glob("GaugesSWL_WG*.csv"))
@@ -320,6 +324,78 @@ def summarize_gauges(run: dict[str, Any]) -> dict[str, Any]:
         "gauge_count": len(gauges),
         "gauges": gauges,
         "all_structural_pass": bool(gauges) and all(not item["issues"] for item in gauges.values()),
+    }
+
+
+def compare_resolution_matrix(runs: Iterable[dict[str, Any]]) -> dict[str, Any]:
+    """Compare SWL histories after removing each resolution's t=0 offset.
+
+    The absolute SWL emitted by a discrete mass-threshold line changes with
+    ``dp`` even when the physical free-surface perturbation is similar.  The
+    normalized ``eta = swlz - swlz(t=0)`` comparison exposes that numerical
+    sensitivity while retaining the raw initial levels in the report.  This
+    is diagnostic only; an acceptance threshold is intentionally not chosen
+    here.
+    """
+
+    records = [run for run in runs if run.get("status") == "completed"]
+    records.sort(key=lambda run: float(run.get("dp_m", 0.0)), reverse=True)
+    pairs: list[dict[str, Any]] = []
+    for left_index, left in enumerate(records):
+        for right in records[left_index + 1:]:
+            left_dir = LAB / str(left.get("output_dir", f"{RUN_ROOT.relative_to(LAB)}/{left['label']}"))
+            right_dir = LAB / str(right.get("output_dir", f"{RUN_ROOT.relative_to(LAB)}/{right['label']}"))
+            gauge_names = sorted(
+                {path.stem.removeprefix("GaugesSWL_") for path in left_dir.glob("GaugesSWL_WG*.csv")}
+                & {path.stem.removeprefix("GaugesSWL_") for path in right_dir.glob("GaugesSWL_WG*.csv")}
+            )
+            pair: dict[str, Any] = {
+                "left": {"label": left["label"], "dp_m": left["dp_m"]},
+                "right": {"label": right["label"], "dp_m": right["dp_m"]},
+                "gauges": {},
+            }
+            for gauge_name in gauge_names:
+                left_data = _load_gauge(left_dir / f"GaugesSWL_{gauge_name}.csv")
+                right_data = _load_gauge(right_dir / f"GaugesSWL_{gauge_name}.csv")
+                if left_data.ndim != 2 or right_data.ndim != 2 or len(left_data) < 2 or len(right_data) < 2:
+                    pair["gauges"][gauge_name] = {"status": "insufficient_rows"}
+                    continue
+                overlap_end = min(float(left_data[-1, 0]), float(right_data[-1, 0]))
+                samples = max(2, min(800, len(left_data), len(right_data)))
+                grid = np.linspace(0.0, overlap_end, samples)
+                left_swl = np.interp(grid, left_data[:, 0], left_data[:, 3])
+                right_swl = np.interp(grid, right_data[:, 0], right_data[:, 3])
+                left_eta = left_swl - float(left_data[0, 3])
+                right_eta = right_swl - float(right_data[0, 3])
+                delta_raw = left_swl - right_swl
+                delta_eta = left_eta - right_eta
+                pair["gauges"][gauge_name] = {
+                    "status": "computed",
+                    "overlap_end_s": overlap_end,
+                    "samples": samples,
+                    "left_initial_swl_m": float(left_data[0, 3]),
+                    "right_initial_swl_m": float(right_data[0, 3]),
+                    "raw_swl_rmse_m": float(np.sqrt(np.mean(delta_raw ** 2))),
+                    "raw_swl_max_abs_m": float(np.max(np.abs(delta_raw))),
+                    "initial_offset_m": float(left_data[0, 3] - right_data[0, 3]),
+                    "normalized_eta_rmse_m": float(np.sqrt(np.mean(delta_eta ** 2))),
+                    "normalized_eta_max_abs_m": float(np.max(np.abs(delta_eta))),
+                }
+            pairs.append(pair)
+    computed = [
+        gauge
+        for pair in pairs
+        for gauge in pair["gauges"].values()
+        if gauge.get("status") == "computed"
+    ]
+    return {
+        "status": "diagnostic_only",
+        "normalization": "subtract each gauge's first finite SWL sample",
+        "acceptance_threshold_declared": False,
+        "pair_count": len(pairs),
+        "computed_gauge_comparisons": len(computed),
+        "max_normalized_eta_rmse_m": max((item["normalized_eta_rmse_m"] for item in computed), default=None),
+        "pairs": pairs,
     }
 
 
@@ -383,6 +459,7 @@ def build_report(
         "gpu_policy": _gpu_inventory(),
         "prepared_cases": prepared,
         "runs": report_runs,
+        "resolution_comparison": compare_resolution_matrix(report_runs),
         "limitations": [
             "This probe does not validate any custom F5 weir case.",
             "A solver return code and dynamic gauge output are not external physical acceptance.",
@@ -395,6 +472,15 @@ def build_report(
 def render_conclusion(report: dict[str, Any]) -> str:
     runs = report.get("runs", [])
     completed = sum(run.get("status") == "completed" for run in runs)
+    comparison = report.get("resolution_comparison", {})
+    max_rmse = comparison.get("max_normalized_eta_rmse_m")
+    if max_rmse is None:
+        sensitivity_note = "当前尚未形成跨分辨率 gauge 比较。"
+    else:
+        sensitivity_note = (
+            f"去除各自初始 SWL 偏置后，当前矩阵最大 gauge RMSE 为 {max_rmse * 1000:.2f} mm；"
+            "该数值仅用于暴露离散敏感性，尚未声明 admission threshold。"
+        )
     return f"""# R3 F5 WaveRunup 外部波高计执行探针
 
 状态：**candidate-only；不授权正式数据发布**。
@@ -403,7 +489,9 @@ def render_conclusion(report: dict[str, Any]) -> str:
 
 这条路径验证的是“外部观测能否被同一套 DualSPHysics 输出链读取和记录”，不是验证波高或 run-up 的物理正确性。正式对齐仍需：覆盖参考主要事件的至少 16 s 运行、三分辨率、外部参考与模型时间偏移、重复时间戳处理规则，以及不确定度感知的全时程/首达/峰值/回流指标。
 
-    官方 0.040 m 粗版本保留为已知粒子逸出压力测试对照；本探针的新分辨率梯度固定为 0.030/0.025/0.020 m，仍需逐级完成三分辨率误差与拓扑检查。自建 F5 堰案例在获得相容外部观测前仍只能作为机制探针。机器可读详情见 `r3-f5-wave-runup.json`。
+{sensitivity_note}
+
+官方 0.040 m 粗版本保留为已知粒子逸出压力测试对照；本探针的新分辨率梯度固定为 0.030/0.025/0.020 m，仍需逐级完成三分辨率误差与拓扑检查。自建 F5 堰案例在获得相容外部观测前仍只能作为机制探针。机器可读详情见 `r3-f5-wave-runup.json`。
 """
 
 
@@ -415,6 +503,7 @@ def main() -> int:
     parser.add_argument("--tout", type=float, default=DEFAULT_TOUT_S)
     parser.add_argument("--gauge-cadence", type=float, default=GAUGE_CADENCE_S)
     parser.add_argument("--run", action="store_true", help="run prepared cases on the explicitly listed GPUs")
+    parser.add_argument("--analyze-existing", action="store_true", help="refresh resolution diagnostics from an existing report without running the solver")
     parser.add_argument("--output", type=Path, default=DEFAULT_REPORT)
     parser.add_argument("--conclusion", type=Path, default=DEFAULT_CONCLUSION)
     args = parser.parse_args()
@@ -424,6 +513,23 @@ def main() -> int:
     disallowed = sorted(set(args.gpus) - set(policy["allowed_gpu_indices"]))
     if disallowed:
         parser.error(f"GPU indices are outside the physical allowlist: {disallowed}")
+
+    if args.analyze_existing:
+        if not args.output.is_file():
+            parser.error(f"existing report not found: {args.output}")
+        report = json.loads(args.output.read_text())
+        report["resolution_comparison"] = compare_resolution_matrix(report.get("runs", []))
+        report["analysis_refresh"] = "resolution_comparison computed from retained run outputs"
+        args.output.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
+        args.conclusion.parent.mkdir(parents=True, exist_ok=True)
+        args.conclusion.write_text(render_conclusion(report))
+        print(json.dumps({
+            "status": report.get("status"),
+            "formal_release_authorized": report.get("formal_release_authorized", False),
+            "run_count": len(report.get("runs", [])),
+            "computed_gauge_comparisons": report["resolution_comparison"]["computed_gauge_comparisons"],
+        }, indent=2))
+        return 0
 
     prepared = [
         prepare_case(label, RESOLUTIONS[label], gauge_cadence_s=args.gauge_cadence, tmax_s=args.tmax)
