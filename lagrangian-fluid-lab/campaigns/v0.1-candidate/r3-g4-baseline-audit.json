@@ -1,0 +1,2435 @@
+{
+  "schema_version": 1,
+  "scope": "R3-G4 corrected development baseline audit",
+  "execution_status": "complete",
+  "config": {
+    "schema_version": 1,
+    "scope": "R3-G4 corrected development baselines",
+    "routes": [
+      "particle_mlp",
+      "deepset_context",
+      "local_interaction",
+      "physics_residual"
+    ],
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "epochs_requested": 8,
+    "min_epochs": 3,
+    "early_stopping": {
+      "selection_metric": "validation_autonomous_rmse_over_dp",
+      "patience": 2,
+      "min_delta": 1e-05
+    },
+    "maximum_particles_per_training_frame": 256,
+    "validation_particles": 512,
+    "hidden_width": 128,
+    "learning_rate": 0.001,
+    "smooth_output_cap": {
+      "normalized_units": 8.0,
+      "function": "8*tanh(raw/8)",
+      "applied_in": [
+        "train",
+        "validation",
+        "rollout"
+      ]
+    },
+    "position_clip_dp": 0.0,
+    "rollout": "autonomous from frame zero; current prescribed controls only",
+    "primary_families": [
+      "F1",
+      "F2",
+      "F3"
+    ],
+    "excluded_cases": {
+      "W05_F6_fine": "contains type-2 floating-body particles but no fluid type-3 state; no coupled body predictor is defined"
+    },
+    "allowed_gpu_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "budget_rule": "at most 8 epochs per route/seed, stop after 3 epochs plus 2 stale autonomous-validation epochs; measured wall time is reported",
+    "formal_gate": "development evidence only; constant-velocity degradation is diagnostic, never a physical-scene admission gate",
+    "known_pilot_limitations": [
+      "W11 has no complete boundary triangle sidecars, so boundary availability is explicit but false",
+      "density, pressure and mass are initial-only features unless a future model predicts them",
+      "T2 material transport and T3 external observables are not scored by this particle rollout experiment"
+    ]
+  },
+  "run_manifest": {
+    "path": "lagrangian-fluid-lab/experiments/r3_g4_run_manifest.json",
+    "status": "complete",
+    "run_count": 12,
+    "physical_gpu_gate": true,
+    "allowed_gpu_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "runs": [
+      {
+        "route": "particle_mlp",
+        "seed": 17,
+        "physical_gpu_index": 4,
+        "gpu_uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 21.057863703928888,
+        "output": "experiments/r3_g4_results/particle_mlp_seed17.json",
+        "checkpoint": "release/v0.1-development/baselines/checkpoints/r3_g4/particle_mlp_seed17.pt",
+        "log": "experiments/r3_g4_logs/particle_mlp_seed17.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "particle_mlp",
+          "--seed",
+          "17",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_results/particle_mlp_seed17.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/baselines/checkpoints/r3_g4/particle_mlp_seed17.pt"
+        ]
+      },
+      {
+        "route": "particle_mlp",
+        "seed": 29,
+        "physical_gpu_index": 5,
+        "gpu_uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 20.608847914030775,
+        "output": "experiments/r3_g4_results/particle_mlp_seed29.json",
+        "checkpoint": "release/v0.1-development/baselines/checkpoints/r3_g4/particle_mlp_seed29.pt",
+        "log": "experiments/r3_g4_logs/particle_mlp_seed29.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "particle_mlp",
+          "--seed",
+          "29",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_results/particle_mlp_seed29.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/baselines/checkpoints/r3_g4/particle_mlp_seed29.pt"
+        ]
+      },
+      {
+        "route": "particle_mlp",
+        "seed": 43,
+        "physical_gpu_index": 6,
+        "gpu_uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 14.254913663957268,
+        "output": "experiments/r3_g4_results/particle_mlp_seed43.json",
+        "checkpoint": "release/v0.1-development/baselines/checkpoints/r3_g4/particle_mlp_seed43.pt",
+        "log": "experiments/r3_g4_logs/particle_mlp_seed43.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "particle_mlp",
+          "--seed",
+          "43",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_results/particle_mlp_seed43.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/baselines/checkpoints/r3_g4/particle_mlp_seed43.pt"
+        ]
+      },
+      {
+        "route": "deepset_context",
+        "seed": 17,
+        "physical_gpu_index": 7,
+        "gpu_uuid": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 23.547410643892363,
+        "output": "experiments/r3_g4_results/deepset_context_seed17.json",
+        "checkpoint": "release/v0.1-development/baselines/checkpoints/r3_g4/deepset_context_seed17.pt",
+        "log": "experiments/r3_g4_logs/deepset_context_seed17.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "deepset_context",
+          "--seed",
+          "17",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_results/deepset_context_seed17.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/baselines/checkpoints/r3_g4/deepset_context_seed17.pt"
+        ]
+      },
+      {
+        "route": "deepset_context",
+        "seed": 29,
+        "physical_gpu_index": 4,
+        "gpu_uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 21.170728724217042,
+        "output": "experiments/r3_g4_results/deepset_context_seed29.json",
+        "checkpoint": "release/v0.1-development/baselines/checkpoints/r3_g4/deepset_context_seed29.pt",
+        "log": "experiments/r3_g4_logs/deepset_context_seed29.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "deepset_context",
+          "--seed",
+          "29",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_results/deepset_context_seed29.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/baselines/checkpoints/r3_g4/deepset_context_seed29.pt"
+        ]
+      },
+      {
+        "route": "deepset_context",
+        "seed": 43,
+        "physical_gpu_index": 5,
+        "gpu_uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 16.679856413044035,
+        "output": "experiments/r3_g4_results/deepset_context_seed43.json",
+        "checkpoint": "release/v0.1-development/baselines/checkpoints/r3_g4/deepset_context_seed43.pt",
+        "log": "experiments/r3_g4_logs/deepset_context_seed43.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "deepset_context",
+          "--seed",
+          "43",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_results/deepset_context_seed43.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/baselines/checkpoints/r3_g4/deepset_context_seed43.pt"
+        ]
+      },
+      {
+        "route": "local_interaction",
+        "seed": 17,
+        "physical_gpu_index": 6,
+        "gpu_uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 21.11703016795218,
+        "output": "experiments/r3_g4_results/local_interaction_seed17.json",
+        "checkpoint": "release/v0.1-development/baselines/checkpoints/r3_g4/local_interaction_seed17.pt",
+        "log": "experiments/r3_g4_logs/local_interaction_seed17.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "local_interaction",
+          "--seed",
+          "17",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_results/local_interaction_seed17.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/baselines/checkpoints/r3_g4/local_interaction_seed17.pt"
+        ]
+      },
+      {
+        "route": "local_interaction",
+        "seed": 29,
+        "physical_gpu_index": 7,
+        "gpu_uuid": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 26.965364353032783,
+        "output": "experiments/r3_g4_results/local_interaction_seed29.json",
+        "checkpoint": "release/v0.1-development/baselines/checkpoints/r3_g4/local_interaction_seed29.pt",
+        "log": "experiments/r3_g4_logs/local_interaction_seed29.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "local_interaction",
+          "--seed",
+          "29",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_results/local_interaction_seed29.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/baselines/checkpoints/r3_g4/local_interaction_seed29.pt"
+        ]
+      },
+      {
+        "route": "local_interaction",
+        "seed": 43,
+        "physical_gpu_index": 4,
+        "gpu_uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 20.0080990830902,
+        "output": "experiments/r3_g4_results/local_interaction_seed43.json",
+        "checkpoint": "release/v0.1-development/baselines/checkpoints/r3_g4/local_interaction_seed43.pt",
+        "log": "experiments/r3_g4_logs/local_interaction_seed43.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "local_interaction",
+          "--seed",
+          "43",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_results/local_interaction_seed43.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/baselines/checkpoints/r3_g4/local_interaction_seed43.pt"
+        ]
+      },
+      {
+        "route": "physics_residual",
+        "seed": 17,
+        "physical_gpu_index": 5,
+        "gpu_uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 22.139237622031942,
+        "output": "experiments/r3_g4_results/physics_residual_seed17.json",
+        "checkpoint": "release/v0.1-development/baselines/checkpoints/r3_g4/physics_residual_seed17.pt",
+        "log": "experiments/r3_g4_logs/physics_residual_seed17.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "physics_residual",
+          "--seed",
+          "17",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_results/physics_residual_seed17.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/baselines/checkpoints/r3_g4/physics_residual_seed17.pt"
+        ]
+      },
+      {
+        "route": "physics_residual",
+        "seed": 29,
+        "physical_gpu_index": 6,
+        "gpu_uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 16.047502162866294,
+        "output": "experiments/r3_g4_results/physics_residual_seed29.json",
+        "checkpoint": "release/v0.1-development/baselines/checkpoints/r3_g4/physics_residual_seed29.pt",
+        "log": "experiments/r3_g4_logs/physics_residual_seed29.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "physics_residual",
+          "--seed",
+          "29",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_results/physics_residual_seed29.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/baselines/checkpoints/r3_g4/physics_residual_seed29.pt"
+        ]
+      },
+      {
+        "route": "physics_residual",
+        "seed": 43,
+        "physical_gpu_index": 7,
+        "gpu_uuid": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+        "gpu_name": null,
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 14.55423477012664,
+        "output": "experiments/r3_g4_results/physics_residual_seed43.json",
+        "checkpoint": "release/v0.1-development/baselines/checkpoints/r3_g4/physics_residual_seed43.pt",
+        "log": "experiments/r3_g4_logs/physics_residual_seed43.log",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_baselines.py",
+          "--manifest",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+          "--route",
+          "physics_residual",
+          "--seed",
+          "43",
+          "--epochs",
+          "8",
+          "--min-epochs",
+          "3",
+          "--patience",
+          "2",
+          "--min-delta",
+          "1e-05",
+          "--max-particles",
+          "256",
+          "--validation-particles",
+          "512",
+          "--hidden",
+          "128",
+          "--learning-rate",
+          "0.001",
+          "--clip-dp",
+          "0.0",
+          "--device",
+          "cuda",
+          "--output",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/experiments/r3_g4_results/physics_residual_seed43.json",
+          "--checkpoint",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/baselines/checkpoints/r3_g4/physics_residual_seed43.pt"
+        ]
+      }
+    ]
+  },
+  "run_count": 12,
+  "expected_run_count": 12,
+  "route_seed_gate": true,
+  "routes": {
+    "particle_mlp": {
+      "route": "particle_mlp",
+      "run_count": 3,
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "route_seed_combinations": [
+        [
+          17,
+          "particle_mlp"
+        ],
+        [
+          29,
+          "particle_mlp"
+        ],
+        [
+          43,
+          "particle_mlp"
+        ]
+      ],
+      "parameter_count": 22531,
+      "epochs_run": {
+        "17": 4,
+        "29": 4,
+        "43": 3
+      },
+      "best_epoch": {
+        "17": 2,
+        "29": 2,
+        "43": 1
+      },
+      "training_seconds": {
+        "mean": 13.331822603475302,
+        "sample_std": 3.2118590025343092,
+        "values": [
+          15.362371635157615,
+          15.004240634152666,
+          9.628855541115627
+        ],
+        "n": 3
+      },
+      "inference_seconds": {
+        "mean": 0.43569630361162126,
+        "sample_std": 0.1023559865744237,
+        "values": [
+          0.5212193138431758,
+          0.4635825799778104,
+          0.32228701701387763
+        ],
+        "n": 3
+      },
+      "peak_gpu_memory_bytes": 20785152,
+      "per_case": {
+        "F1_twin_obstacle": {
+          "family": "F1",
+          "background_id": "F1_twin_obstacle",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 3.8694256941477456,
+            "sample_std": 0.6214873994217706,
+            "values": [
+              4.438379287719727,
+              3.963717222213745,
+              3.2061805725097656
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.1261084054907163,
+            "sample_std": 0.02160587114785198,
+            "values": [
+              0.1432759314775467,
+              0.1332017183303833,
+              0.1018475666642189
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.19205970565478006,
+            "sample_std": 0.05105241155906606,
+            "values": [
+              0.23544536530971527,
+              0.20493003726005554,
+              0.1358037143945694
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.5189253191153208,
+            "sample_std": 0.0441881122072947,
+            "values": [
+              0.5630041360855103,
+              0.5191431045532227,
+              0.4746287167072296
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.11462171375751495,
+            "sample_std": 0.03317212360284239,
+            "values": [
+              0.14539895951747894,
+              0.1189805120229721,
+              0.07948566973209381
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 3.7863729000091553,
+          "constant_velocity_position_fde_m": 0.17692194879055023,
+          "degradation_ratio_vs_constant": 1.0219346578722845,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "missing_boundary_sidecar"
+          ],
+          "boundary_available": false,
+          "mass_identity_preserved": true
+        },
+        "F3_transverse_slosh": {
+          "family": "F3",
+          "background_id": "F3_transverse",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 2.0503466526667276,
+            "sample_std": 0.7166075494860459,
+            "values": [
+              2.7041332721710205,
+              2.162712574005127,
+              1.2841941118240356
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.07141643265883128,
+            "sample_std": 0.022852211298685816,
+            "values": [
+              0.09211303293704987,
+              0.0752442255616188,
+              0.046892039477825165
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.13205385829011598,
+            "sample_std": 0.06758576762641244,
+            "values": [
+              0.18915525078773499,
+              0.14957277476787567,
+              0.05743354931473732
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.24458003540833792,
+            "sample_std": 0.07533227045242377,
+            "values": [
+              0.3031376898288727,
+              0.27100759744644165,
+              0.1595948189496994
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.076310895383358,
+            "sample_std": 0.030708755652836213,
+            "values": [
+              0.10394503176212311,
+              0.08173684030771255,
+              0.04325081408023834
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 5.090209484100342,
+          "constant_velocity_position_fde_m": 0.33543384075164795,
+          "degradation_ratio_vs_constant": 0.4028020180841559,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "missing_boundary_sidecar"
+          ],
+          "boundary_available": false,
+          "mass_identity_preserved": true
+        },
+        "W06_standard_fast_center": {
+          "family": "F2",
+          "background_id": "F2_standard_fast",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 50.34132639567057,
+            "sample_std": 21.13184390922286,
+            "values": [
+              25.980682373046875,
+              61.307525634765625,
+              63.73577117919922
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 1.0323087573051453,
+            "sample_std": 0.43896723380655445,
+            "values": [
+              0.5258978009223938,
+              1.3043075799942017,
+              1.2667208909988403
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 2.098262389500936,
+            "sample_std": 0.8712495867857721,
+            "values": [
+              1.289633870124817,
+              1.984246850013733,
+              3.020906448364258
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 1.5009220043818157,
+            "sample_std": 0.22753882737335274,
+            "values": [
+              1.3475134372711182,
+              1.3929014205932617,
+              1.762351155281067
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 1.1823742588361104,
+            "sample_std": 0.5662856098229168,
+            "values": [
+              0.5300315022468567,
+              1.4696086645126343,
+              1.5474826097488403
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 28.704187393188477,
+          "constant_velocity_position_fde_m": 0.7861647605895996,
+          "degradation_ratio_vs_constant": 1.7537973016305142,
+          "control_sources": [
+            "known_prescribed_control_schedule"
+          ],
+          "boundary_sources": [
+            "missing_boundary_sidecar"
+          ],
+          "boundary_available": false,
+          "mass_identity_preserved": true
+        }
+      },
+      "per_family": {
+        "F1": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.8694256941477456,
+            "q025": 3.8694256941477456,
+            "q975": 3.8694256941477456,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 50.34132639567057,
+            "q025": 50.34132639567057,
+            "q975": 50.34132639567057,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 2.0503466526667276,
+            "q025": 2.0503466526667276,
+            "q975": 2.0503466526667276,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "per_background": {
+        "F1_twin_obstacle": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.8694256941477456,
+            "q025": 3.8694256941477456,
+            "q975": 3.8694256941477456,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2_standard_fast": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 50.34132639567057,
+            "q025": 50.34132639567057,
+            "q975": 50.34132639567057,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3_transverse": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 2.0503466526667276,
+            "q025": 2.0503466526667276,
+            "q975": 2.0503466526667276,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "macro_position_rmse_over_dp": {
+        "case_values": [
+          3.8694256941477456,
+          2.0503466526667276,
+          50.34132639567057
+        ],
+        "bootstrap": {
+          "estimate": 18.75369958082835,
+          "q025": 2.0503466526667276,
+          "q975": 50.34132639567057,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_velocity_rmse_mps": {
+        "case_values": [
+          0.5189253191153208,
+          0.24458003540833792,
+          1.5009220043818157
+        ],
+        "bootstrap": {
+          "estimate": 0.7548091196351582,
+          "q025": 0.24458003540833792,
+          "q975": 1.5009220043818157,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_com_rmse_m": {
+        "case_values": [
+          0.11462171375751495,
+          0.076310895383358,
+          1.1823742588361104
+        ],
+        "bootstrap": {
+          "estimate": 0.45776895599232775,
+          "q025": 0.076310895383358,
+          "q975": 1.1823742588361104,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      }
+    },
+    "deepset_context": {
+      "route": "deepset_context",
+      "run_count": 3,
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "route_seed_combinations": [
+        [
+          17,
+          "deepset_context"
+        ],
+        [
+          29,
+          "deepset_context"
+        ],
+        [
+          43,
+          "deepset_context"
+        ]
+      ],
+      "parameter_count": 55427,
+      "epochs_run": {
+        "17": 5,
+        "29": 4,
+        "43": 3
+      },
+      "best_epoch": {
+        "17": 3,
+        "29": 2,
+        "43": 1
+      },
+      "training_seconds": {
+        "mean": 15.447600089401627,
+        "sample_std": 3.0574500721198734,
+        "values": [
+          18.185815225122496,
+          16.00842369813472,
+          12.148561344947666
+        ],
+        "n": 3
+      },
+      "inference_seconds": {
+        "mean": 0.38870716902116936,
+        "sample_std": 0.0838358699008314,
+        "values": [
+          0.33688850002363324,
+          0.48543014796450734,
+          0.34380285907536745
+        ],
+        "n": 3
+      },
+      "peak_gpu_memory_bytes": 24021504,
+      "per_case": {
+        "F1_twin_obstacle": {
+          "family": "F1",
+          "background_id": "F1_twin_obstacle",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 3.14030392964681,
+            "sample_std": 0.15860529905919044,
+            "values": [
+              3.297835350036621,
+              3.142430305480957,
+              2.9806461334228516
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.09521319468816121,
+            "sample_std": 0.005897876228497767,
+            "values": [
+              0.09653054922819138,
+              0.10034099966287613,
+              0.08876803517341614
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.13600484281778336,
+            "sample_std": 0.017803696535601373,
+            "values": [
+              0.1537850797176361,
+              0.13605166971683502,
+              0.11817777901887894
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.5007551610469818,
+            "sample_std": 0.060307007870299405,
+            "values": [
+              0.570379912853241,
+              0.4670521318912506,
+              0.46483343839645386
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.07161694765090942,
+            "sample_std": 0.01152490408264123,
+            "values": [
+              0.08372295647859573,
+              0.0703500509262085,
+              0.06077783554792404
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 3.7863729000091553,
+          "constant_velocity_position_fde_m": 0.17692194879055023,
+          "degradation_ratio_vs_constant": 0.8293699571004264,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "missing_boundary_sidecar"
+          ],
+          "boundary_available": false,
+          "mass_identity_preserved": true
+        },
+        "F3_transverse_slosh": {
+          "family": "F3",
+          "background_id": "F3_transverse",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 1.249433736006419,
+            "sample_std": 0.4815234716094224,
+            "values": [
+              1.0892612934112549,
+              0.8684088587760925,
+              1.7906310558319092
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.04199190499881903,
+            "sample_std": 0.01600464791408995,
+            "values": [
+              0.035853125154972076,
+              0.02996542491018772,
+              0.0601571649312973
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.07775086537003517,
+            "sample_std": 0.036352078764520526,
+            "values": [
+              0.06891554594039917,
+              0.046630848199129105,
+              0.11770620197057724
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.1660048613945643,
+            "sample_std": 0.03673190046328865,
+            "values": [
+              0.16123828291893005,
+              0.13188894093036652,
+              0.20488736033439636
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.03915800526738167,
+            "sample_std": 0.023772122093245508,
+            "values": [
+              0.031879864633083344,
+              0.019875790923833847,
+              0.06571836024522781
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 5.090209484100342,
+          "constant_velocity_position_fde_m": 0.33543384075164795,
+          "degradation_ratio_vs_constant": 0.2454582154053032,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "missing_boundary_sidecar"
+          ],
+          "boundary_available": false,
+          "mass_identity_preserved": true
+        },
+        "W06_standard_fast_center": {
+          "family": "F2",
+          "background_id": "F2_standard_fast",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 26.396507898966473,
+            "sample_std": 5.655337869916812,
+            "values": [
+              32.46685791015625,
+              25.446035385131836,
+              21.276630401611328
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.47498442729314166,
+            "sample_std": 0.06256195198902066,
+            "values": [
+              0.4922502338886261,
+              0.5271003246307373,
+              0.40560272336006165
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.9799536466598511,
+            "sample_std": 0.2544343416135077,
+            "values": [
+              1.265772819519043,
+              0.7781595587730408,
+              0.8959285616874695
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 1.1489386161168416,
+            "sample_std": 0.3761407245449189,
+            "values": [
+              1.5831732749938965,
+              0.9239447116851807,
+              0.9396978616714478
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.38383281230926514,
+            "sample_std": 0.09060053462595385,
+            "values": [
+              0.2987772822380066,
+              0.4791111648082733,
+              0.3736099898815155
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 28.704187393188477,
+          "constant_velocity_position_fde_m": 0.7861647605895996,
+          "degradation_ratio_vs_constant": 0.9196047788215869,
+          "control_sources": [
+            "known_prescribed_control_schedule"
+          ],
+          "boundary_sources": [
+            "missing_boundary_sidecar"
+          ],
+          "boundary_available": false,
+          "mass_identity_preserved": true
+        }
+      },
+      "per_family": {
+        "F1": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.14030392964681,
+            "q025": 3.14030392964681,
+            "q975": 3.14030392964681,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 26.396507898966473,
+            "q025": 26.396507898966473,
+            "q975": 26.396507898966473,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 1.249433736006419,
+            "q025": 1.249433736006419,
+            "q975": 1.249433736006419,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "per_background": {
+        "F1_twin_obstacle": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.14030392964681,
+            "q025": 3.14030392964681,
+            "q975": 3.14030392964681,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2_standard_fast": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 26.396507898966473,
+            "q025": 26.396507898966473,
+            "q975": 26.396507898966473,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3_transverse": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 1.249433736006419,
+            "q025": 1.249433736006419,
+            "q975": 1.249433736006419,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "macro_position_rmse_over_dp": {
+        "case_values": [
+          3.14030392964681,
+          1.249433736006419,
+          26.396507898966473
+        ],
+        "bootstrap": {
+          "estimate": 10.262081854873234,
+          "q025": 1.249433736006419,
+          "q975": 26.396507898966473,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_velocity_rmse_mps": {
+        "case_values": [
+          0.5007551610469818,
+          0.1660048613945643,
+          1.1489386161168416
+        ],
+        "bootstrap": {
+          "estimate": 0.6052328795194626,
+          "q025": 0.1660048613945643,
+          "q975": 1.1489386161168416,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_com_rmse_m": {
+        "case_values": [
+          0.07161694765090942,
+          0.03915800526738167,
+          0.38383281230926514
+        ],
+        "bootstrap": {
+          "estimate": 0.16486925507585207,
+          "q025": 0.03915800526738167,
+          "q975": 0.38383281230926514,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      }
+    },
+    "local_interaction": {
+      "route": "local_interaction",
+      "run_count": 3,
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "route_seed_combinations": [
+        [
+          17,
+          "local_interaction"
+        ],
+        [
+          29,
+          "local_interaction"
+        ],
+        [
+          43,
+          "local_interaction"
+        ]
+      ],
+      "parameter_count": 23555,
+      "epochs_run": {
+        "17": 4,
+        "29": 6,
+        "43": 4
+      },
+      "best_epoch": {
+        "17": 2,
+        "29": 4,
+        "43": 2
+      },
+      "training_seconds": {
+        "mean": 18.26383326970972,
+        "sample_std": 3.1158264855321027,
+        "values": [
+          16.98561933892779,
+          21.8154995131772,
+          15.990380957024172
+        ],
+        "n": 3
+      },
+      "inference_seconds": {
+        "mean": 0.5028273242060095,
+        "sample_std": 0.025411179783107234,
+        "values": [
+          0.4882472997996956,
+          0.5321694388985634,
+          0.4880652339197695
+        ],
+        "n": 3
+      },
+      "peak_gpu_memory_bytes": 47194112,
+      "per_case": {
+        "F1_twin_obstacle": {
+          "family": "F1",
+          "background_id": "F1_twin_obstacle",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 4.354780912399292,
+            "sample_std": 1.6195991871125386,
+            "values": [
+              3.802194595336914,
+              3.0837900638580322,
+              6.17835807800293
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.13312023878097534,
+            "sample_std": 0.0416639976700733,
+            "values": [
+              0.12307008355855942,
+              0.09740056842565536,
+              0.17889006435871124
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.2733813325564067,
+            "sample_std": 0.20480751562213323,
+            "values": [
+              0.18883635103702545,
+              0.1243811696767807,
+              0.5069264769554138
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.738100508848826,
+            "sample_std": 0.40699596184661835,
+            "values": [
+              0.5056877732276917,
+              0.5005640983581543,
+              1.2080496549606323
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.13716335346301398,
+            "sample_std": 0.08192330883896072,
+            "values": [
+              0.11405064910650253,
+              0.06927928328514099,
+              0.22816012799739838
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 3.7863729000091553,
+          "constant_velocity_position_fde_m": 0.17692194879055023,
+          "degradation_ratio_vs_constant": 1.1501193958969975,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "missing_boundary_sidecar"
+          ],
+          "boundary_available": false,
+          "mass_identity_preserved": true
+        },
+        "F3_transverse_slosh": {
+          "family": "F3",
+          "background_id": "F3_transverse",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 4.493979295094808,
+            "sample_std": 2.1661769362794745,
+            "values": [
+              4.764571189880371,
+              2.205219268798828,
+              6.512147426605225
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.14792281140883765,
+            "sample_std": 0.06117165638751131,
+            "values": [
+              0.16214999556541443,
+              0.08089125901460648,
+              0.200727179646492
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.3310874750216802,
+            "sample_std": 0.20414544830137096,
+            "values": [
+              0.32572025060653687,
+              0.12967856228351593,
+              0.5378636121749878
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.5617697636286417,
+            "sample_std": 0.2925930904441137,
+            "values": [
+              0.48259440064430237,
+              0.31691208481788635,
+              0.8858028054237366
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.17615931977828345,
+            "sample_std": 0.08924875740224783,
+            "values": [
+              0.1883918046951294,
+              0.0814252719283104,
+              0.2586608827114105
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 5.090209484100342,
+          "constant_velocity_position_fde_m": 0.33543384075164795,
+          "degradation_ratio_vs_constant": 0.8828672590258014,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "missing_boundary_sidecar"
+          ],
+          "boundary_available": false,
+          "mass_identity_preserved": true
+        },
+        "W06_standard_fast_center": {
+          "family": "F2",
+          "background_id": "F2_standard_fast",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 73.01725006103516,
+            "sample_std": 21.7782629473211,
+            "values": [
+              49.896392822265625,
+              93.14285278320312,
+              76.01250457763672
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 1.22324134906133,
+            "sample_std": 0.4543422872672449,
+            "values": [
+              0.6986150145530701,
+              1.484031081199646,
+              1.4870779514312744
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 2.7730132738749185,
+            "sample_std": 1.2739124023623363,
+            "values": [
+              1.3414931297302246,
+              3.781886577606201,
+              3.19566011428833
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 3.2097363471984863,
+            "sample_std": 1.1159518659880705,
+            "values": [
+              1.9215686321258545,
+              3.882395029067993,
+              3.8252453804016113
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 1.361011544863383,
+            "sample_std": 0.5678013196535127,
+            "values": [
+              0.7096219062805176,
+              1.7512586116790771,
+              1.6221541166305542
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0011882086167800453,
+            "sample_std": 0.0010171536240504457,
+            "values": [
+              0.0009289493575207861,
+              0.0023099017384731672,
+              0.00032577475434618293
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 28.704187393188477,
+          "constant_velocity_position_fde_m": 0.7861647605895996,
+          "degradation_ratio_vs_constant": 2.5437839107182736,
+          "control_sources": [
+            "known_prescribed_control_schedule"
+          ],
+          "boundary_sources": [
+            "missing_boundary_sidecar"
+          ],
+          "boundary_available": false,
+          "mass_identity_preserved": true
+        }
+      },
+      "per_family": {
+        "F1": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 4.354780912399292,
+            "q025": 4.354780912399292,
+            "q975": 4.354780912399292,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 73.01725006103516,
+            "q025": 73.01725006103516,
+            "q975": 73.01725006103516,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 4.493979295094808,
+            "q025": 4.493979295094808,
+            "q975": 4.493979295094808,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "per_background": {
+        "F1_twin_obstacle": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 4.354780912399292,
+            "q025": 4.354780912399292,
+            "q975": 4.354780912399292,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2_standard_fast": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 73.01725006103516,
+            "q025": 73.01725006103516,
+            "q975": 73.01725006103516,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3_transverse": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 4.493979295094808,
+            "q025": 4.493979295094808,
+            "q975": 4.493979295094808,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "macro_position_rmse_over_dp": {
+        "case_values": [
+          4.354780912399292,
+          4.493979295094808,
+          73.01725006103516
+        ],
+        "bootstrap": {
+          "estimate": 27.28867008950975,
+          "q025": 4.354780912399292,
+          "q975": 73.01725006103516,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_velocity_rmse_mps": {
+        "case_values": [
+          0.738100508848826,
+          0.5617697636286417,
+          3.2097363471984863
+        ],
+        "bootstrap": {
+          "estimate": 1.5032022065586512,
+          "q025": 0.5617697636286417,
+          "q975": 3.2097363471984863,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_com_rmse_m": {
+        "case_values": [
+          0.13716335346301398,
+          0.17615931977828345,
+          1.361011544863383
+        ],
+        "bootstrap": {
+          "estimate": 0.5581114060348935,
+          "q025": 0.13716335346301398,
+          "q975": 1.361011544863383,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      }
+    },
+    "physics_residual": {
+      "route": "physics_residual",
+      "run_count": 3,
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "route_seed_combinations": [
+        [
+          17,
+          "physics_residual"
+        ],
+        [
+          29,
+          "physics_residual"
+        ],
+        [
+          43,
+          "physics_residual"
+        ]
+      ],
+      "parameter_count": 22531,
+      "epochs_run": {
+        "17": 5,
+        "29": 4,
+        "43": 3
+      },
+      "best_epoch": {
+        "17": 3,
+        "29": 2,
+        "43": 1
+      },
+      "training_seconds": {
+        "mean": 12.530190649675205,
+        "sample_std": 3.8693543588778176,
+        "values": [
+          16.91465599904768,
+          11.082438233075663,
+          9.593477716902271
+        ],
+        "n": 3
+      },
+      "inference_seconds": {
+        "mean": 0.32404402107931674,
+        "sample_std": 0.009621608094167419,
+        "values": [
+          0.3351483349688351,
+          0.31818202207796276,
+          0.31880170619115233
+        ],
+        "n": 3
+      },
+      "peak_gpu_memory_bytes": 20806656,
+      "per_case": {
+        "F1_twin_obstacle": {
+          "family": "F1",
+          "background_id": "F1_twin_obstacle",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 3.4654130935668945,
+            "sample_std": 0.3174345056117612,
+            "values": [
+              3.1892025470733643,
+              3.3948428630828857,
+              3.8121938705444336
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.11032768090565999,
+            "sample_std": 0.012935123783861604,
+            "values": [
+              0.09684202820062637,
+              0.11150990426540375,
+              0.12263111025094986
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.15430464347203574,
+            "sample_std": 0.02946570809763777,
+            "values": [
+              0.12290078401565552,
+              0.1586674302816391,
+              0.18134571611881256
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.49388204018274945,
+            "sample_std": 0.01274179793880525,
+            "values": [
+              0.4833827614784241,
+              0.49020546674728394,
+              0.5080578923225403
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.0936336616675059,
+            "sample_std": 0.018074243981855927,
+            "values": [
+              0.07856111228466034,
+              0.08866825699806213,
+              0.11367161571979523
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 3.7863729000091553,
+          "constant_velocity_position_fde_m": 0.17692194879055023,
+          "degradation_ratio_vs_constant": 0.9152329115704677,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "missing_boundary_sidecar"
+          ],
+          "boundary_available": false,
+          "mass_identity_preserved": true
+        },
+        "F3_transverse_slosh": {
+          "family": "F3",
+          "background_id": "F3_transverse",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 2.946463108062744,
+            "sample_std": 0.7790824455037856,
+            "values": [
+              3.8460605144500732,
+              2.5002472400665283,
+              2.493081569671631
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.10282689829667409,
+            "sample_std": 0.02281348237919584,
+            "values": [
+              0.12915770709514618,
+              0.09034804999828339,
+              0.08897493779659271
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.1965931554635366,
+            "sample_std": 0.07000242787695035,
+            "values": [
+              0.27739381790161133,
+              0.1542486995458603,
+              0.15813694894313812
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.32647472620010376,
+            "sample_std": 0.09152536794651171,
+            "values": [
+              0.43213167786598206,
+              0.2715607285499573,
+              0.27573177218437195
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.1140567809343338,
+            "sample_std": 0.03197434954767475,
+            "values": [
+              0.1509762853384018,
+              0.09586475044488907,
+              0.09532930701971054
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 5.090209484100342,
+          "constant_velocity_position_fde_m": 0.33543384075164795,
+          "degradation_ratio_vs_constant": 0.5788490861262678,
+          "control_sources": [
+            "missing_control_group"
+          ],
+          "boundary_sources": [
+            "missing_boundary_sidecar"
+          ],
+          "boundary_available": false,
+          "mass_identity_preserved": true
+        },
+        "W06_standard_fast_center": {
+          "family": "F2",
+          "background_id": "F2_standard_fast",
+          "split": "test",
+          "seeds": [
+            17,
+            29,
+            43
+          ],
+          "status_by_seed": {
+            "17": "completed",
+            "29": "completed",
+            "43": "completed"
+          },
+          "learned_position_rmse_over_dp": {
+            "mean": 18.596529006958008,
+            "sample_std": 2.119772392647746,
+            "values": [
+              18.164817810058594,
+              20.89892578125,
+              16.72584342956543
+            ],
+            "n": 3
+          },
+          "learned_ade_m": {
+            "mean": 0.3431200583775838,
+            "sample_std": 0.04528684896436604,
+            "values": [
+              0.31086403131484985,
+              0.39489299058914185,
+              0.32360315322875977
+            ],
+            "n": 3
+          },
+          "learned_fde_m": {
+            "mean": 0.5136786699295044,
+            "sample_std": 0.04395974048260089,
+            "values": [
+              0.5287997126579285,
+              0.5480821132659912,
+              0.4641541838645935
+            ],
+            "n": 3
+          },
+          "learned_velocity_rmse_mps": {
+            "mean": 0.85139399766922,
+            "sample_std": 0.02788141110112289,
+            "values": [
+              0.8380753993988037,
+              0.8834370374679565,
+              0.8326695561408997
+            ],
+            "n": 3
+          },
+          "learned_com_rmse_m": {
+            "mean": 0.22615976631641388,
+            "sample_std": 0.13355840743817482,
+            "values": [
+              0.1679038256406784,
+              0.37895071506500244,
+              0.1316247582435608
+            ],
+            "n": 3
+          },
+          "output_saturation_fraction": {
+            "mean": 0.0,
+            "sample_std": 0.0,
+            "values": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "n": 3
+          },
+          "constant_velocity_position_rmse_over_dp": 28.704187393188477,
+          "constant_velocity_position_fde_m": 0.7861647605895996,
+          "degradation_ratio_vs_constant": 0.6478681577786444,
+          "control_sources": [
+            "known_prescribed_control_schedule"
+          ],
+          "boundary_sources": [
+            "missing_boundary_sidecar"
+          ],
+          "boundary_available": false,
+          "mass_identity_preserved": true
+        }
+      },
+      "per_family": {
+        "F1": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.4654130935668945,
+            "q025": 3.4654130935668945,
+            "q975": 3.4654130935668945,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 18.596529006958008,
+            "q025": 18.596529006958008,
+            "q975": 18.596529006958008,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 2.946463108062744,
+            "q025": 2.946463108062744,
+            "q975": 2.946463108062744,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "per_background": {
+        "F1_twin_obstacle": {
+          "case_ids": [
+            "F1_twin_obstacle"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 3.4654130935668945,
+            "q025": 3.4654130935668945,
+            "q975": 3.4654130935668945,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F2_standard_fast": {
+          "case_ids": [
+            "W06_standard_fast_center"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 18.596529006958008,
+            "q025": 18.596529006958008,
+            "q975": 18.596529006958008,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        },
+        "F3_transverse": {
+          "case_ids": [
+            "F3_transverse_slosh"
+          ],
+          "position_rmse_over_dp": {
+            "estimate": 2.946463108062744,
+            "q025": 2.946463108062744,
+            "q975": 2.946463108062744,
+            "cases": 1,
+            "draws": 2000,
+            "resampling_unit": "independent physical case, not frame"
+          }
+        }
+      },
+      "macro_position_rmse_over_dp": {
+        "case_values": [
+          3.4654130935668945,
+          2.946463108062744,
+          18.596529006958008
+        ],
+        "bootstrap": {
+          "estimate": 8.336135069529215,
+          "q025": 2.946463108062744,
+          "q975": 18.596529006958008,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_velocity_rmse_mps": {
+        "case_values": [
+          0.49388204018274945,
+          0.32647472620010376,
+          0.85139399766922
+        ],
+        "bootstrap": {
+          "estimate": 0.5572502546840244,
+          "q025": 0.32647472620010376,
+          "q975": 0.85139399766922,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      },
+      "macro_com_rmse_m": {
+        "case_values": [
+          0.0936336616675059,
+          0.1140567809343338,
+          0.22615976631641388
+        ],
+        "bootstrap": {
+          "estimate": 0.14461673630608454,
+          "q025": 0.0936336616675059,
+          "q975": 0.22615976631641388,
+          "cases": 3,
+          "draws": 2000,
+          "resampling_unit": "independent physical case, not frame"
+        }
+      }
+    }
+  },
+  "case_count_per_route": {
+    "particle_mlp": 3,
+    "deepset_context": 3,
+    "local_interaction": 3,
+    "physics_residual": 3
+  },
+  "boundary_geometry_gate": false,
+  "nonfinite_rollout_gate": true,
+  "physics_budget": {
+    "status": "diagnostic_only",
+    "mass_identity_preservation_reported": true,
+    "predicted_density_pressure": false,
+    "material_transport_scored": false
+  },
+  "degradation_policy": "diagnostic_per_case; never a physical-scene admission gate",
+  "formal_ready": false,
+  "open_blockers": [
+    "W11 pilot has no complete boundary triangle sidecars; boundary availability gate is false",
+    "only T1 particle rollout is scored; material transport and external observable tracks remain separate",
+    "F6 free-body case has no fluid state in the pilot and is excluded until a coupled body-state route exists"
+  ]
+}

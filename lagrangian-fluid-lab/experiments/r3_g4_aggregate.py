@@ -142,11 +142,21 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--results-dir", type=Path, required=True)
     parser.add_argument("--config", type=Path, required=True)
+    parser.add_argument("--run-manifest", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--conclusion", type=Path, required=True)
     args = parser.parse_args()
     runs = load_runs(args.results_dir)
     config = json.loads(args.config.read_text())
+    run_manifest = json.loads(args.run_manifest.read_text())
+    physical_runs = run_manifest.get("runs", [])
+    physical_combinations = [(entry.get("route"), int(entry.get("seed"))) for entry in physical_runs]
+    allowed_gpu_indices = set(config.get("allowed_gpu_indices", []))
+    physical_gpu_gate = (
+        run_manifest.get("status") == "complete"
+        and all(int(entry.get("physical_gpu_index", -1)) in allowed_gpu_indices for entry in physical_runs)
+        and len(set(physical_combinations)) == len(physical_combinations)
+    )
     combinations = [(run.get("route"), int(run.get("seed"))) for run in runs]
     expected = [(route, seed) for route in ROUTES for seed in SEEDS]
     routes = {route: aggregate_route(route, runs) for route in ROUTES}
@@ -155,6 +165,11 @@ def main() -> None:
         "schema_version": 1, "scope": "R3-G4 corrected development baseline audit",
         "execution_status": "complete" if len(runs) == len(expected) else "partial",
         "config": config,
+        "run_manifest": {
+            "path": str(args.run_manifest), "status": run_manifest.get("status"),
+            "run_count": len(physical_runs), "physical_gpu_gate": physical_gpu_gate,
+            "allowed_gpu_indices": sorted(allowed_gpu_indices), "runs": physical_runs,
+        },
         "run_count": len(runs), "expected_run_count": len(expected),
         "route_seed_gate": sorted(combinations) == sorted(expected) and len(set(combinations)) == len(combinations),
         "routes": routes,
@@ -179,7 +194,7 @@ def main() -> None:
     args.output.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
     args.conclusion.parent.mkdir(parents=True, exist_ok=True)
     args.conclusion.write_text(conclusion(report))
-    print(json.dumps({"run_count": len(runs), "route_seed_gate": report["route_seed_gate"], "boundary_geometry_gate": report["boundary_geometry_gate"], "routes": {k: v["macro_position_rmse_over_dp"]["bootstrap"] for k, v in routes.items()}}, indent=2))
+    print(json.dumps({"run_count": len(runs), "route_seed_gate": report["route_seed_gate"], "physical_gpu_gate": report["run_manifest"]["physical_gpu_gate"], "boundary_geometry_gate": report["boundary_geometry_gate"], "routes": {k: v["macro_position_rmse_over_dp"]["bootstrap"] for k, v in routes.items()}}, indent=2))
 
 
 if __name__ == "__main__":
