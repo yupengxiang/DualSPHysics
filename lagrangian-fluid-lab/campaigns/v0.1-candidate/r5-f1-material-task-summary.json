@@ -1,0 +1,89 @@
+{
+  "schema_version": "r5-f1-material-task-summary.v1",
+  "experiment_id": "R5_F1_MATERIAL_TASK",
+  "execution_status": "completed",
+  "acceptance_status": "candidate_only_not_physical_acceptance",
+  "formal_material_target_admitted": false,
+  "input_case": "R4_F1_center_obstacle_medium",
+  "input_hdf5_sha256": "7a8d7f3c64a07aec48ee7fd729013d7b125d9eb29852fd8097b4b0ba45ef878c",
+  "input_sidecar_sha256": "18e5e8d0f85a1db874d2f773ae754edf63138a18d0a2d7a47249be5d38d796ae",
+  "transport_spec_sha256": "e5090bebbaf71cc116c5a6833f28c591ece77400e9cec8c1140093ddbe8a6836",
+  "evaluator_sha256": "170bba40cebd9ba46e113960e7560b43393ac393f25718e40c7244206a0892b",
+  "controls": {
+    "seed_counts": [128, 256],
+    "substeps": [2, 4],
+    "configuration_count": 4,
+    "single_process_rerun": true,
+    "solver_rerun": false,
+    "gencase_rerun": false,
+    "gpu_used": false,
+    "visibility_mode": "adaptive_exact_visible_top_k",
+    "visibility_search_width": 96,
+    "visibility_provider": "only single_obstacle component; tank convexity proof; full collision sidecar retained",
+    "collision_provider": "full finite sidecar; tank and obstacle components retained for swept wall crossing",
+    "source_label_measure_only": true,
+    "mass_denominator": "initial valid fluid mass; no survivor renormalization",
+    "censoring": "tracer failure is unknown/censored, never a negative event"
+  },
+  "configurations": [
+    {
+      "config_id": "R4_F1_center_obstacle_medium_seeds128_substeps2",
+      "trajectory_bundle_sha256": "d968b5e1c74f108bef5a1303c4ae1821149f5b51497cfb6a4902fd3b3c131fbe",
+      "trajectory_bundle_bytes": 26087818,
+      "final_tracer_mass_fraction": 1.0,
+      "failure_reason_counts": {"none": 192000},
+      "first_passage_status_counts": {"observed": 47, "right_censored_end_of_window": 81},
+      "terminal_category_counts": {"target": 47, "domain": 81, "legitimate_exit": 0, "numerical_loss": 0, "tracer_unknown": 0},
+      "support_gate_failure_intervals": 0,
+      "mass_closure_error_kg": 0.0,
+      "checks_all_pass": true
+    },
+    {
+      "config_id": "R4_F1_center_obstacle_medium_seeds128_substeps4",
+      "trajectory_bundle_sha256": "ee132d8727f7f5b814623c44d316c168f00b46430df7f861aa4598de40c620dc",
+      "trajectory_bundle_bytes": 26086769,
+      "final_tracer_mass_fraction": 1.0,
+      "failure_reason_counts": {"none": 192000},
+      "first_passage_status_counts": {"observed": 47, "right_censored_end_of_window": 81},
+      "terminal_category_counts": {"target": 47, "domain": 81, "legitimate_exit": 0, "numerical_loss": 0, "tracer_unknown": 0},
+      "support_gate_failure_intervals": 0,
+      "mass_closure_error_kg": 0.0,
+      "checks_all_pass": true
+    },
+    {
+      "config_id": "R4_F1_center_obstacle_medium_seeds256_substeps2",
+      "trajectory_bundle_sha256": "60192e882137d3fbcd10ce795d919b76674d363bf4cdc4732071f823e590698f",
+      "trajectory_bundle_bytes": 52294954,
+      "final_tracer_mass_fraction": 0.9902380952380953,
+      "failure_reason_counts": {"none": 381831, "wall_crossing": 1, "support_distance_exceedance": 2, "censored_after_first_failure": 2166},
+      "first_passage_status_counts": {"observed": 94, "censored_by_tracer_failure": 1, "right_censored_end_of_window": 161},
+      "terminal_category_counts": {"target": 94, "domain": 161, "legitimate_exit": 0, "numerical_loss": 0, "tracer_unknown": 1},
+      "support_gate_failure_intervals": 1019,
+      "mass_closure_error_kg": 0.0,
+      "checks_all_pass": true
+    },
+    {
+      "config_id": "R4_F1_center_obstacle_medium_seeds256_substeps4",
+      "trajectory_bundle_sha256": "37e815007d890f94313d21b218e5d1d378696f37b8f0a29dcd726a4e49787a5f",
+      "trajectory_bundle_bytes": 52292666,
+      "final_tracer_mass_fraction": 0.9902380952380953,
+      "failure_reason_counts": {"none": 381828, "wall_crossing": 1, "support_distance_exceedance": 2, "censored_after_first_failure": 2169},
+      "first_passage_status_counts": {"observed": 94, "censored_by_tracer_failure": 1, "right_censored_end_of_window": 161},
+      "terminal_category_counts": {"target": 94, "domain": 161, "legitimate_exit": 0, "numerical_loss": 0, "tracer_unknown": 1},
+      "support_gate_failure_intervals": 1033,
+      "mass_closure_error_kg": 0.0,
+      "checks_all_pass": true
+    }
+  ],
+  "artifact_storage": {
+    "full_report_local": "campaigns/v0.1-candidate/artifacts/r5-f1-material-task/r5-f1-material-task.json",
+    "full_bundles_local_only": true,
+    "bundles_not_committed": "large generated HDF5 bundles are retained locally and represented here by SHA-256"
+  },
+  "open_blockers": [
+    "source_label is an initial-depth measurement stratum, not a material identity",
+    "formal destination/wall acceptance and external reference validation are incomplete",
+    "solver identity loss is reported separately and is not silently treated as numerical loss",
+    "W06 negative control was not rerun in R5"
+  ]
+}

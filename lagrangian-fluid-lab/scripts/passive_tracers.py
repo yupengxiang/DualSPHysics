@@ -148,26 +148,55 @@ def segment_visibility(query, particle_position, barrier_triangles, *, epsilon=1
     query = np.asarray(query, dtype=np.float64)
     particle_position = np.asarray(particle_position, dtype=np.float64)
     triangles = np.asarray(barrier_triangles, dtype=np.float64)
-    visible = np.ones((len(query), len(particle_position)), dtype=bool)
+    if particle_position.ndim == 2:
+        if particle_position.shape[1:] != (3,):
+            raise ValueError("particle_position must have shape [N,3] or [Q,N,3]")
+        pair_shape = (len(query), len(particle_position))
+        origins = query[:, None, :]
+        direction = particle_position[None, :, :] - origins
+    elif particle_position.ndim == 3:
+        if particle_position.shape[0] != len(query) or particle_position.shape[2:] != (3,):
+            raise ValueError("per-query particle_position must have shape [Q,N,3]")
+        pair_shape = particle_position.shape[:2]
+        origins = query[:, None, :]
+        direction = particle_position - origins
+    else:
+        raise ValueError("particle_position must have shape [N,3] or [Q,N,3]")
+    visible = np.ones(pair_shape, dtype=bool)
     if triangles.size == 0:
         return visible
-    origins = query[:, None, :]
-    direction = particle_position[None, :, :] - origins
+    pair_origins = np.broadcast_to(origins, direction.shape)
+    segment_lower = np.minimum(pair_origins, particle_position)
+    segment_upper = np.maximum(pair_origins, particle_position)
     for triangle in triangles.reshape(-1, 3, 3):
+        # A segment can only intersect a finite triangle when their axis-
+        # aligned bounding boxes overlap.  This broad phase is exact as a
+        # rejection test (it cannot hide a possible intersection), and is
+        # especially important for dense trajectory frames where most
+        # particle pairs are far from a wall component.
+        triangle_lower = np.min(triangle, axis=0) - epsilon
+        triangle_upper = np.max(triangle, axis=0) + epsilon
+        candidate = np.all(segment_upper >= triangle_lower, axis=-1)
+        candidate &= np.all(segment_lower <= triangle_upper, axis=-1)
+        if not candidate.any():
+            continue
+        candidate_indices = np.argwhere(candidate)
+        candidate_origins = pair_origins[candidate]
+        candidate_direction = direction[candidate]
         vertex, edge1, edge2 = triangle[0], triangle[1] - triangle[0], triangle[2] - triangle[0]
-        h = np.cross(direction, edge2)
+        h = np.cross(candidate_direction, edge2)
         determinant = np.einsum("...i,i->...", h, edge1)
         nonparallel = np.abs(determinant) > epsilon
         inverse = np.zeros_like(determinant)
         inverse[nonparallel] = 1.0 / determinant[nonparallel]
-        offset = origins - vertex
+        offset = candidate_origins - vertex
         u = inverse * np.einsum("...i,...i->...", offset, h)
         qvec = np.cross(offset, edge1)
-        v = inverse * np.einsum("...i,...i->...", direction, qvec)
+        v = inverse * np.einsum("...i,...i->...", candidate_direction, qvec)
         distance = inverse * np.einsum("...i,i->...", qvec, edge2)
         blocked = nonparallel & (u >= -epsilon) & (v >= -epsilon) & (u + v <= 1 + epsilon)
         blocked &= (distance > epsilon) & (distance < 1 - epsilon)
-        visible &= ~blocked
+        visible[candidate_indices[:, 0], candidate_indices[:, 1]] &= ~blocked
     return visible
 
 
@@ -476,44 +505,57 @@ def _support_metrics(query: np.ndarray, particle_position: np.ndarray,
                      particle_velocity: np.ndarray, selected: np.ndarray,
                      selected_distance2: np.ndarray, weights: np.ndarray) -> dict[str, np.ndarray]:
     """Compute support quality without treating a neighbour count as a gate."""
+    # Keep the same metrics as the scalar implementation, but evaluate the
+    # fixed-size neighbour support in batches.  This is algebraically the
+    # same weighted covariance/affine fit and avoids one Python-level SVD per
+    # tracer per frame.
     count = len(query)
-    effective = np.zeros(count, dtype=np.float64)
-    ranks = np.zeros(count, dtype=np.int8)
-    anisotropy = np.zeros(count, dtype=np.float64)
-    reconstruction = np.full(count, np.inf, dtype=np.float64)
-    for index in range(count):
-        finite = np.isfinite(selected_distance2[index]) & (weights[index] > 0.0)
-        if not finite.any():
-            continue
-        local_weight = np.asarray(weights[index, finite], dtype=np.float64)
-        local_position = np.asarray(particle_position[selected[index, finite]], dtype=np.float64)
-        local_velocity = np.asarray(particle_velocity[selected[index, finite]], dtype=np.float64)
-        weight_sum = float(local_weight.sum())
-        if weight_sum <= 0.0:
-            continue
-        effective[index] = weight_sum * weight_sum / max(float(np.sum(local_weight * local_weight)), EPSILON)
-        center = np.sum(local_position * local_weight[:, None], axis=0) / weight_sum
-        offsets = local_position - center
-        covariance = (offsets * local_weight[:, None]).T @ offsets / weight_sum
-        eigenvalues = np.linalg.eigvalsh(covariance)
-        largest = float(np.max(eigenvalues)) if len(eigenvalues) else 0.0
-        tolerance = max(largest * 1e-8, 1e-14)
-        positive = eigenvalues[eigenvalues > tolerance]
-        ranks[index] = int(len(positive))
-        if largest > 0.0 and len(positive):
-            anisotropy[index] = float(np.min(positive) / largest)
+    finite = np.isfinite(selected_distance2) & (weights > 0.0)
+    safe_weights = np.where(finite, np.asarray(weights, dtype=np.float64), 0.0)
+    local_position = np.asarray(particle_position[selected], dtype=np.float64)
+    local_velocity = np.asarray(particle_velocity[selected], dtype=np.float64)
+    weight_sum = safe_weights.sum(axis=1)
+    effective = np.divide(
+        weight_sum * weight_sum,
+        np.maximum(np.sum(safe_weights * safe_weights, axis=1), EPSILON),
+        out=np.zeros(count, dtype=np.float64),
+        where=weight_sum > 0.0,
+    )
+    center = np.divide(
+        np.sum(local_position * safe_weights[..., None], axis=1),
+        np.maximum(weight_sum, EPSILON)[:, None],
+    )
+    offsets = local_position - center[:, None, :]
+    covariance = np.einsum("qki,qkj,qk->qij", offsets, offsets, safe_weights)
+    covariance = covariance / np.maximum(weight_sum, EPSILON)[:, None, None]
+    eigenvalues = np.linalg.eigvalsh(covariance)
+    largest = np.max(eigenvalues, axis=1)
+    tolerance = np.maximum(largest * 1e-8, 1e-14)
+    ranks = np.sum(eigenvalues > tolerance[:, None], axis=1).astype(np.int8)
+    positive = np.where(eigenvalues > tolerance[:, None], eigenvalues, np.inf)
+    smallest_positive = np.min(positive, axis=1)
+    anisotropy = np.divide(
+        smallest_positive, largest,
+        out=np.zeros(count, dtype=np.float64),
+        where=(largest > 0.0) & np.isfinite(smallest_positive),
+    )
 
-        # A weighted local affine reconstruction error is an observable of the
-        # support geometry/field, not a hard sample-count heuristic.  The
-        # pseudoinverse handles one-sided, planar, and underdetermined supports
-        # while retaining a finite diagnostic for every usable support.
-        design = np.concatenate((np.ones((len(offsets), 1)), offsets), axis=1)
-        weighted_design = design * np.sqrt(local_weight)[:, None]
-        weighted_velocity = local_velocity * np.sqrt(local_weight)[:, None]
-        coefficients = np.linalg.pinv(weighted_design) @ weighted_velocity
-        predicted = design @ coefficients
-        residual = predicted - local_velocity
-        reconstruction[index] = float(np.sqrt(np.sum(local_weight * np.sum(residual * residual, axis=1)) / weight_sum))
+    # A weighted local affine reconstruction error is an observable of the
+    # support geometry/field, not a hard sample-count heuristic.  Batched
+    # pseudoinverse has the same least-squares semantics as the old scalar
+    # path and retains finite diagnostics for underdetermined supports.
+    design = np.concatenate((np.ones((count, local_position.shape[1], 1)), offsets), axis=2)
+    square_root = np.sqrt(safe_weights)[..., None]
+    weighted_design = design * square_root
+    weighted_velocity = local_velocity * square_root
+    coefficients = np.matmul(np.linalg.pinv(weighted_design), weighted_velocity)
+    predicted = np.matmul(design, coefficients)
+    residual = predicted - local_velocity
+    residual_energy = np.sum(safe_weights * np.sum(residual * residual, axis=2), axis=1)
+    reconstruction = np.sqrt(
+        np.divide(residual_energy, np.maximum(weight_sum, EPSILON), out=np.zeros(count), where=weight_sum > 0.0)
+    )
+    reconstruction[weight_sum <= 0.0] = np.inf
     return {
         "effective_sample_size": effective,
         "geometry_rank": ranks,
@@ -543,21 +585,58 @@ def shepard_velocity_with_diagnostics(query, particle_position, particle_velocit
     result = np.empty_like(query)
     support = np.empty(len(query), dtype=np.float64)
     visible_neighbours = np.empty(len(query), dtype=np.int64)
+    visibility_search_width = np.empty(len(query), dtype=np.int64)
     effective_sample_size = np.empty(len(query), dtype=np.float64)
     geometry_rank = np.empty(len(query), dtype=np.int8)
     anisotropy = np.empty(len(query), dtype=np.float64)
     reconstruction_error = np.empty(len(query), dtype=np.float64)
+    visibility_mode = "no_barrier"
     epsilon2 = float(regularization) ** 2
     for start in range(0, len(query), chunk_size):
         stop = min(start + chunk_size, len(query))
         delta = query[start:stop, None, :] - particle_position[None, :, :]
         distance2 = np.einsum("qpi,qpi->qp", delta, delta)
         if barrier_triangles is not None:
-            visible = segment_visibility(query[start:stop], particle_position, barrier_triangles)
-            distance2[~visible] = np.inf
-            visible_neighbours[start:stop] = visible.sum(axis=1)
+            triangles = np.asarray(barrier_triangles, dtype=np.float64)
+            if triangles.size and len(particle_position) > max(4 * k, 128):
+                # Find the exact top-k visible support without testing every
+                # query against every finite triangle.  The first candidate
+                # pool contains 4k nearest samples; if fewer than k remain
+                # visible, the pool is expanded.  Once k visible samples are
+                # present, every unsearched sample is no closer than the
+                # pool boundary, so the selected visible top-k is exact.
+                candidate_width = min(max(4 * k, k), len(particle_position))
+                candidate_indices = None
+                candidate_visible = None
+                while True:
+                    candidate_indices = np.argpartition(
+                        distance2, candidate_width - 1, axis=1
+                    )[:, :candidate_width]
+                    candidate_position = particle_position[candidate_indices]
+                    candidate_visible = segment_visibility(
+                        query[start:stop], candidate_position, triangles
+                    )
+                    visible_count = candidate_visible.sum(axis=1)
+                    if candidate_width == len(particle_position) or np.all(visible_count >= k):
+                        break
+                    candidate_width = min(len(particle_position), candidate_width * 2)
+                visible = np.zeros_like(distance2, dtype=bool)
+                rows = np.arange(stop - start)[:, None]
+                visible[rows, candidate_indices] = candidate_visible
+                visible_neighbours[start:stop] = visible_count
+                visibility_mode = "adaptive_exact_visible_top_k"
+                visibility_search_width[start:stop] = candidate_width
+            else:
+                visible = segment_visibility(query[start:stop], particle_position, triangles)
+                visible_neighbours[start:stop] = visible.sum(axis=1)
+                visibility_mode = "full_pairwise_exact"
+                visibility_search_width[start:stop] = len(particle_position)
         else:
+            visible = np.ones_like(distance2, dtype=bool)
             visible_neighbours[start:stop] = len(particle_position)
+            visibility_mode = "no_barrier"
+            visibility_search_width[start:stop] = len(particle_position)
+        distance2[~visible] = np.inf
         selected = np.argpartition(distance2, k - 1, axis=1)[:, :k]
         selected_distance2 = np.take_along_axis(distance2, selected, axis=1)
         weights = np.where(np.isfinite(selected_distance2), 1.0 / (selected_distance2 + epsilon2), 0.0)
@@ -581,6 +660,8 @@ def shepard_velocity_with_diagnostics(query, particle_position, particle_velocit
         "interpolation_reconstruction_error_mps": reconstruction_error,
         "visible_neighbours": visible_neighbours,
         "support_distance": support,
+        "visibility_search_width": visibility_search_width,
+        "visibility_mode": visibility_mode,
     }
     return result, support, visible_neighbours, diagnostics
 
@@ -663,6 +744,27 @@ def _support_gate_pass(diagnostics: Mapping[str, np.ndarray], gate: Mapping[str,
     return passed
 
 
+def _visibility_barriers(barrier_provider: Callable[..., Any] | None, barriers: np.ndarray | None) -> np.ndarray | None:
+    """Return the exact finite barriers used for interpolation visibility.
+
+    A provider may expose ``visibility_triangle_indices`` when a closed,
+    convex container component is already guaranteed to contain all solver
+    samples.  Such a component cannot intersect an open segment between two
+    interior samples, but it must still remain in the full collision set used
+    by the swept-wall check below.  The opt-in filter therefore changes only
+    an exact broad-phase shortcut, never wall-crossing classification.
+    """
+    if barriers is None or barrier_provider is None:
+        return barriers
+    indices = getattr(barrier_provider, "visibility_triangle_indices", None)
+    if indices is None:
+        return barriers
+    indices = np.asarray(indices, dtype=np.int64).reshape(-1)
+    if np.any(indices < 0) or np.any(indices >= len(barriers)):
+        raise ValueError("barrier visibility indices are outside the triangle axis")
+    return np.asarray(barriers)[indices]
+
+
 def advect_hdf5(h5_path, initial_positions, *, neighbours=24, regularization=0.004,
                 maximum_support_distance=None, frame_stride=1, substeps_per_interval=1,
                 barrier_provider=None, support_gate: Mapping[str, Any] | None = None):
@@ -685,12 +787,14 @@ def advect_hdf5(h5_path, initial_positions, *, neighbours=24, regularization=0.0
     support_history = []
     reliability_history = [reliable.copy()]
     visibility_history = []
+    visibility_width_history = []
     wall_crossing_history = []
     effective_history = []
     rank_history = []
     anisotropy_history = []
     reconstruction_history = []
     support_gate_history = []
+    visibility_mode = "no_barrier"
     with h5py.File(Path(h5_path), "r") as h5:
         frame_indices = list(range(0, len(h5["time"]), int(frame_stride)))
         if frame_indices[-1] != len(h5["time"]) - 1:
@@ -707,6 +811,7 @@ def advect_hdf5(h5_path, initial_positions, *, neighbours=24, regularization=0.0
                 reliable[:] = False
                 support_history.append(np.full(len(query), np.inf))
                 visibility_history.append(np.zeros(len(query), dtype=np.int64))
+                visibility_width_history.append(np.zeros(len(query), dtype=np.int64))
                 wall_crossing_history.append(np.zeros(len(query), dtype=bool))
                 effective_history.append(np.zeros(len(query), dtype=np.float64))
                 rank_history.append(np.zeros(len(query), dtype=np.int8))
@@ -720,6 +825,7 @@ def advect_hdf5(h5_path, initial_positions, *, neighbours=24, regularization=0.0
             velocity0, velocity1 = h5["velocity"][frame0, common], h5["velocity"][frame1, common]
             interval_support = np.zeros(len(query))
             interval_visible = np.full(len(query), np.iinfo(np.int64).max)
+            interval_visibility_width = np.zeros(len(query), dtype=np.int64)
             interval_crossing = np.zeros(len(query), dtype=bool)
             interval_effective = np.full(len(query), np.inf)
             interval_rank = np.full(len(query), np.iinfo(np.int8).max, dtype=np.int8)
@@ -736,13 +842,16 @@ def advect_hdf5(h5_path, initial_positions, *, neighbours=24, regularization=0.0
                 values1 = (1 - alpha1) * velocity0 + alpha1 * velocity1
                 barriers0 = barrier_provider(h5, frame0, frame1, alpha0) if barrier_provider else None
                 barriers1 = barrier_provider(h5, frame0, frame1, alpha1) if barrier_provider else None
+                visibility0 = _visibility_barriers(barrier_provider, barriers0)
+                visibility1 = _visibility_barriers(barrier_provider, barriers1)
                 v0, support0, visible0, metrics0 = shepard_velocity_with_diagnostics(
                     query, samples0, values0, neighbours=neighbours, regularization=regularization,
-                    barrier_triangles=barriers0)
+                    barrier_triangles=visibility0)
                 predicted = query + np.nan_to_num(v0) * subdt
                 v1, support1, visible1, metrics1 = shepard_velocity_with_diagnostics(
                     predicted, samples1, values1, neighbours=neighbours, regularization=regularization,
-                    barrier_triangles=barriers1)
+                    barrier_triangles=visibility1)
+                visibility_mode = str(metrics0.get("visibility_mode", metrics1.get("visibility_mode", "unknown")))
                 candidate = query + 0.5 * np.nan_to_num(v0 + v1) * subdt
                 crossing = spacetime_swept_wall_blocked(
                     query, candidate,
@@ -764,6 +873,13 @@ def advect_hdf5(h5_path, initial_positions, *, neighbours=24, regularization=0.0
                 interval_gate &= gate0 & gate1 & support_ok
                 interval_support = np.maximum(interval_support, support)
                 interval_visible = np.minimum(interval_visible, np.minimum(visible0, visible1))
+                interval_visibility_width = np.maximum(
+                    interval_visibility_width,
+                    np.maximum(
+                        metrics0["visibility_search_width"],
+                        metrics1["visibility_search_width"],
+                    ),
+                )
                 interval_crossing |= crossing
                 interval_effective = np.minimum(interval_effective, np.minimum(
                     metrics0["effective_sample_size"], metrics1["effective_sample_size"]))
@@ -776,6 +892,7 @@ def advect_hdf5(h5_path, initial_positions, *, neighbours=24, regularization=0.0
                     metrics1["interpolation_reconstruction_error_mps"]))
             support_history.append(interval_support)
             visibility_history.append(interval_visible)
+            visibility_width_history.append(interval_visibility_width)
             wall_crossing_history.append(interval_crossing)
             effective_history.append(interval_effective)
             rank_history.append(interval_rank)
@@ -791,6 +908,8 @@ def advect_hdf5(h5_path, initial_positions, *, neighbours=24, regularization=0.0
         "nearest_support_distance": np.asarray(support_history),
         "reliability_history": np.asarray(reliability_history),
         "minimum_visible_neighbours": np.asarray(visibility_history),
+        "visibility_search_width": np.asarray(visibility_width_history),
+        "visibility_mode": visibility_mode if barrier_provider is not None else "no_barrier",
         "wall_crossing": np.asarray(wall_crossing_history),
         "effective_sample_size": np.asarray(effective_history),
         "support_geometry_rank": np.asarray(rank_history),

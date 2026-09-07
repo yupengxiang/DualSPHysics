@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "round": "R5",
+  "date": "2026-09-08",
+  "branch": "codex/lagrangian-fluid-exploration",
+  "formal_v0_1": "NO_GO",
+  "development_tranche": "NO_GO",
+  "execution_status": "completed_with_findings",
+  "acceptance_status": "candidate_only_no_physical_acceptance",
+  "f1_solver_gate": {
+    "report": "campaigns/v0.1-candidate/r5-f1-solver-gate.json",
+    "execution_status": "completed",
+    "actual_solver_runs": 9,
+    "completed_hdf5_and_frame_audit": 9,
+    "solver_runs_this_final_refresh": 0,
+    "reused_completed_attempts": 9,
+    "gpu_indices_used": [4, 5, 6, 7],
+    "protected_gpu_indices": [0, 1, 2, 3],
+    "protocol": {
+      "time_max_s": 1.5,
+      "time_out_s": 0.001,
+      "particle_spacing_m": [0.035, 0.024, 0.014],
+      "boundary_formulation": "DBC",
+      "boundary_parameter": 1,
+      "verlet_step_algorithm": 1,
+      "verlet_steps": 40,
+      "shifting": 0,
+      "output_cadence_s": 0.001
+    },
+    "qualified_t1_backgrounds": ["plain_dam_break"],
+    "blocked_t1_backgrounds": ["center_obstacle", "twin_obstacle_split_remerge"],
+    "t1_tv": {
+      "plain_dam_break": {"coarse_to_medium": 0.045, "medium_to_fine": 0.023673777203188973},
+      "center_obstacle": {"coarse_to_medium": 0.1790476190476191, "medium_to_fine": 0.11046757164404221},
+      "twin_obstacle_split_remerge": {"coarse_to_medium": 0.05166666666666665, "medium_to_fine": 0.14051039646627883}
+    },
+    "physical_acceptance": false,
+    "external_reference_acceptance": false,
+    "development_tranche_authorized": false
+  },
+  "f1_material_task": {
+    "report": "campaigns/v0.1-candidate/artifacts/r5-f1-material-task/r5-f1-material-task.json",
+    "submitted_summary": "campaigns/v0.1-candidate/r5-f1-material-task-summary.json",
+    "execution_status": "completed",
+    "acceptance_status": "candidate_only_not_physical_acceptance",
+    "input_case": "R4_F1_center_obstacle_medium",
+    "configuration_count": 4,
+    "seed_counts": [128, 256],
+    "substeps": [2, 4],
+    "gpu_used": false,
+    "single_process_rerun": true,
+    "visibility_mode": "adaptive_exact_visible_top_k",
+    "visibility_search_width": 96,
+    "mass_closure_error_kg": [0.0, 0.0, 0.0, 0.0],
+    "source_label_measure_only": true,
+    "formal_material_target_admitted": false,
+    "w06_negative_control_rerun": false
+  },
+  "g4_contract": {
+    "contract": "experiments/r5_g4_contract.py",
+    "snapshot": "campaigns/v0.1-candidate/r5-g4-contract/input-contract.json",
+    "cpu_tests": 16,
+    "contract_id": "r5-g4-input-v1",
+    "contract_hash": "bebcc9dee5aa021496de334155f0d397f4bc6d2a3e16bb40cb87f089e6d1e5fd",
+    "direct_feature_width": 115,
+    "local_interaction_feature_width": 123,
+    "historical_widths_rejected": [43, 51]
+  },
+  "g4_gpu_smoke": {
+    "result": "experiments/r5-g4-smoke/particle_mlp_seed17.json",
+    "route": "particle_mlp",
+    "seed": 17,
+    "device": "cuda:0",
+    "physical_gpu_index": 4,
+    "physical_gpu_uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+    "result_sha256": "3fb28ed85f5768dcade747eae44716c95d4f130a505e8c4e9f8efd828c1b4a7e",
+    "checkpoint_sha256_local_not_committed": "2104d01e3fd8df2d5a34a372719d6192df084e1e601af00f11e8c797301ef38b",
+    "one_step_validation_rmse_over_dp": 0.25507919137367807,
+    "autonomous_validation_rmse_over_dp": 32.731198946634926,
+    "test_rollouts_completed": 3,
+    "result_checkpoint_contract_pair_valid": true,
+    "full_four_route_three_seed_matrix_completed": false
+  },
+  "f6": {
+    "status": "unchanged_candidate_only_rejected",
+    "new_gpu_run": false,
+    "blockers": ["zero-normal/runtime normal semantics", "nominal-wall ghost geometry", "fixed-body force calibration"]
+  },
+  "open_blockers": [
+    "F1 center/twin identity losses are not classified as legal exit versus numerical loss",
+    "F1 T1 is diagnostic only and has no external/reference physical acceptance",
+    "F1 material T2 destination closure and physical reference acceptance are not complete",
+    "G4 four routes by three seeds are not yet uniformly rerun under the current contract",
+    "F6 mDBC physical calibration remains blocked",
+    "no development tranche is authorized"
+  ]
+}

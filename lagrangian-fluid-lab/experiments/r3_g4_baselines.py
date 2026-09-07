@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import random
 import string
 import time
@@ -36,6 +37,27 @@ import h5py
 import numpy as np
 import torch
 from torch import nn
+
+try:
+    from experiments.r5_g4_contract import (
+        ACTIVE_FEATURE_WIDTH,
+        assert_valid_result_checkpoint_pair,
+        build_checkpoint_metadata,
+        build_result_metadata,
+        make_cuda_determinism_policy,
+        route_width,
+        sha256_file,
+    )
+except ModuleNotFoundError:  # direct ``python experiments/r3_g4_baselines.py``
+    from r5_g4_contract import (
+        ACTIVE_FEATURE_WIDTH,
+        assert_valid_result_checkpoint_pair,
+        build_checkpoint_metadata,
+        build_result_metadata,
+        make_cuda_determinism_policy,
+        route_width,
+        sha256_file,
+    )
 
 
 FAMILY_INDEX = {"F1": 0, "F2": 1, "F3": 2, "F4": 3, "F5": 4, "F6": 5}
@@ -1013,21 +1035,40 @@ def rollout(model: nn.Module, route: str, case: dict[str, Any], device: torch.de
 
 
 def train(args: argparse.Namespace) -> dict[str, Any]:
+    device = torch.device(args.device)
+    determinism_policy = make_cuda_determinism_policy(str(device), seed=args.seed, strict=True)
+    if device.type == "cuda":
+        # This must be set before the first CUDA/BLAS operation.  Launchers
+        # also set it in the environment; setdefault keeps an explicit
+        # launcher choice visible while making direct invocations safe.
+        os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+        torch.use_deterministic_algorithms(True)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
-    device = torch.device(args.device)
     if device.type == "cuda":
         torch.cuda.manual_seed_all(args.seed)
-        torch.cuda.reset_peak_memory_stats(device)
+        # PyTorch 2.11 rejects an explicit logical device here until a CUDA
+        # context has been created under a one-device CUDA_VISIBLE_DEVICES
+        # launch.  The no-argument form resets every visible device and is
+        # valid before model construction.
+        torch.cuda.reset_peak_memory_stats()
     cases = load_cases(args.manifest.resolve())
     train_cases = [case for case in cases if case["split"] == "train"]
     validation_cases = [case for case in cases if case["split"] == "validation"]
     test_cases = [case for case in cases if case["split"] == "test"]
     if not train_cases or not validation_cases or not test_cases:
         raise ValueError("manifest must contain train, validation and test fluid cases")
-    model_input_width = feature_width(cases)
-    model = model_for(args.route, model_input_width, args.hidden).to(device)
+    base_feature_width = feature_width(cases)
+    if base_feature_width != ACTIVE_FEATURE_WIDTH:
+        raise ValueError(
+            "R5 G4 training requires the sidecar-aware 115-wide base feature "
+            f"block; loaded manifest produced width {base_feature_width}"
+        )
+    model_input_width = route_width(args.route)
+    model = model_for(args.route, base_feature_width, args.hidden).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate, weight_decay=1e-6)
     rng = np.random.default_rng(args.seed)
     transitions = [(case, frame) for case in train_cases for frame in range(len(case["time"]) - 1)]
@@ -1075,12 +1116,31 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
     rollout_start = time.perf_counter()
     test_rollouts = {case["case_id"]: rollout(model, args.route, case, device, args.clip_dp) for case in test_cases}
     inference_seconds = time.perf_counter() - rollout_start
+    trainer_path = Path(__file__).resolve()
+    config_path = trainer_path.with_name("r3_g4_config.json")
+    run_id = f"r5-g4-{args.route}-seed{args.seed}"
+    result_metadata = build_result_metadata(
+        args.route,
+        args.seed,
+        trainer_sha256=sha256_file(trainer_path),
+        config_sha256=sha256_file(config_path),
+        data_sha256=sha256_file(args.manifest.resolve()),
+        device=str(device),
+        determinism_policy=determinism_policy,
+        feature_width=model_input_width,
+        run_id=run_id,
+        base_feature_width=base_feature_width,
+        model_input_width=model_input_width,
+        first_linear_input_width=model_input_width,
+    )
     result = {
         "schema_version": 2, "scope": "R3-G4 corrected development baseline", "route": args.route, "seed": args.seed,
         "device": str(device), "torch_version": torch.__version__,
         "cuda_visible_device_name": torch.cuda.get_device_name(device) if device.type == "cuda" else None,
         "parameter_count": sum(parameter.numel() for parameter in model.parameters()),
-        "feature_width": model_input_width, "epochs_requested": args.epochs, "epochs_run": len(history),
+        "feature_width": model_input_width, "base_feature_width": base_feature_width,
+        "model_input_width": model_input_width,
+        "epochs_requested": args.epochs, "epochs_run": len(history),
         "best_epoch": best_epoch, "best_validation_autonomous_rmse_over_dp": best_validation,
         "early_stopping": {"patience": args.patience, "min_epochs": args.min_epochs, "min_delta": args.min_delta},
         "maximum_particles_per_training_frame": args.max_particles,
@@ -1106,11 +1166,33 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         "clipping": {"configured_clip_dp": args.clip_dp, "trigger_rate_reported_per_case": True, "note": "optional displacement clip is off in the declared run; smooth output cap is applied consistently in train/validation/rollout"},
         "physics_budget_scope": "diagnostic only: identity mass is preserved by construction; density/pressure are not predicted",
         "limitations": "W11 development pilot; sidecar geometry is a finite per-component candidate input and T2/T3/T4 scoring is not included; not a formal ranking or physical acceptance",
+        "metadata": result_metadata,
     }
+    checkpoint_metadata = build_checkpoint_metadata(
+        args.route,
+        args.seed,
+        trainer_sha256=result_metadata["trainer_sha256"],
+        config_sha256=result_metadata["config_sha256"],
+        data_sha256=result_metadata["data_sha256"],
+        device=str(device),
+        determinism_policy=determinism_policy,
+        feature_width=model_input_width,
+        run_id=run_id,
+        base_feature_width=base_feature_width,
+        model_input_width=model_input_width,
+        first_linear_input_width=model_input_width,
+    )
+    checkpoint = {
+        "metadata": checkpoint_metadata,
+        "state_dict": {
+            key: value.detach().cpu().clone() for key, value in model.state_dict().items()
+        },
+    }
+    assert_valid_result_checkpoint_pair(result, checkpoint, route=args.route)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
     args.checkpoint.parent.mkdir(parents=True, exist_ok=True)
-    torch.save({"state_dict": model.state_dict(), "route": args.route, "seed": args.seed, "feature_width": model_input_width}, args.checkpoint)
+    torch.save(checkpoint, args.checkpoint)
     return result
 
 

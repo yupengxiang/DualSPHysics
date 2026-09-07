@@ -1,0 +1,336 @@
+{
+  "active_base_feature_width": 115,
+  "artifact_binding": {
+    "data_hash_semantics": "hash of the exact data manifest/content used by the run",
+    "hash_algorithm": "sha256",
+    "hash_encoding": "lowercase_hex_64",
+    "required_fields": [
+      "input_contract_id",
+      "input_contract_hash",
+      "contract_hash",
+      "feature_layout_hash",
+      "target_semantics_hash",
+      "rollout_state_hash",
+      "trainer_sha256",
+      "config_sha256",
+      "data_sha256"
+    ]
+  },
+  "base_feature_width": 43,
+  "boundary_component_encoding": {
+    "absent_slot_policy": "all_zero_with_presence_zero",
+    "component_id_in_vector": false,
+    "component_key_in_sidecar_metadata": true,
+    "duplicate_policy": "reject_duplicate_(type,component_id)",
+    "feature_fields": [
+      "presence",
+      "distance",
+      "normal_x",
+      "normal_y",
+      "normal_z",
+      "type",
+      "wall_velocity_x",
+      "wall_velocity_y",
+      "wall_velocity_z"
+    ],
+    "field_missing_policy": "reject_missing_or_nonfinite_present-component_fields",
+    "id": "r5-g4-boundary-set-v1",
+    "key_fields": ["type", "component_id"],
+    "kind": "finite_component_set",
+    "ordering": "lexicographic_by_(type,component_id)",
+    "overflow_policy": "reject_more_than_8_components",
+    "slot_count": 8,
+    "slot_stride": 9,
+    "slot_width": 9
+  },
+  "checkpoint_policy": {
+    "inference_only": {
+      "optimizer_state_allowed": false,
+      "required": ["checkpoint_mode", "resume_capable", "state_dict"],
+      "resume_capable_value": false
+    },
+    "modes": ["inference_only", "resume_training"],
+    "resume_training": {
+      "required": [
+        "checkpoint_mode",
+        "resume_capable",
+        "state_dict",
+        "optimizer_state_dict",
+        "scheduler_state_dict",
+        "rng_state",
+        "epoch",
+        "best_metric"
+      ],
+      "resume_capable_value": true
+    }
+  },
+  "contract_hash": "bebcc9dee5aa021496de334155f0d397f4bc6d2a3e16bb40cb87f089e6d1e5fd",
+  "contract_id": "r5-g4-input-v1",
+  "cuda_determinism_policy": {
+    "id": "r5-g4-cuda-determinism-v1",
+    "record_required_for": "every result and checkpoint, including CPU runs",
+    "strict_cuda_fields": [
+      "mode",
+      "device_type",
+      "seed",
+      "torch_deterministic_algorithms",
+      "cudnn_deterministic",
+      "cudnn_benchmark",
+      "cublas_workspace_config"
+    ]
+  },
+  "feature_layout": {
+    "base": [
+      {
+        "end": 3,
+        "name": "centered_xyz",
+        "scaling": "/length_scale",
+        "source": "current target position minus initial-mass-weighted current-context COM",
+        "start": 0,
+        "width": 3
+      },
+      {
+        "end": 6,
+        "name": "target_velocity_scaled",
+        "scaling": "velocity * dt / dp",
+        "source": "current target velocity state",
+        "start": 3,
+        "width": 3
+      },
+      {
+        "end": 9,
+        "name": "context_com_velocity_scaled",
+        "scaling": "velocity * dt / dp",
+        "source": "initial-mass-weighted current-context COM velocity",
+        "start": 6,
+        "width": 3
+      },
+      {
+        "end": 12,
+        "name": "initial_density_pressure_mass",
+        "scaling": "rho/rho_ref, p/p_scale, m/median(m0)-1",
+        "source": "frame-zero material attributes",
+        "start": 9,
+        "width": 3
+      },
+      {
+        "end": 15,
+        "name": "gravity",
+        "scaling": "gravity * dt^2 / dp",
+        "source": "declared current-case gravity",
+        "start": 12,
+        "width": 3
+      },
+      {
+        "end": 18,
+        "name": "static_physics",
+        "scaling": "contract-defined dimensionless values",
+        "source": "declared density, viscosity and gravity-presence summary",
+        "start": 15,
+        "width": 3
+      },
+      {
+        "end": 28,
+        "name": "current_prescribed_control",
+        "scaling": "contract-defined angle/pose/angular-velocity normalization",
+        "source": "known prescribed control at current physical time",
+        "start": 18,
+        "width": 10
+      },
+      {
+        "end": 35,
+        "name": "current_boundary_summary",
+        "scaling": "availability bit plus bounds / length_scale",
+        "source": "current boundary availability and world-space bounds",
+        "start": 28,
+        "width": 7
+      },
+      {
+        "end": 41,
+        "name": "family_one_hot",
+        "scaling": "one-hot",
+        "source": "case family",
+        "start": 35,
+        "width": 6
+      },
+      {
+        "end": 42,
+        "name": "elapsed_time",
+        "scaling": "time / time_scale",
+        "source": "current physical time",
+        "start": 41,
+        "width": 1
+      },
+      {
+        "end": 43,
+        "name": "dt",
+        "scaling": "dt / time_scale",
+        "source": "current step duration",
+        "start": 42,
+        "width": 1
+      }
+    ],
+    "boundary_component_block": {
+      "absent_slot_policy": "all_zero_with_presence_zero",
+      "component_id_in_vector": false,
+      "component_key_in_sidecar_metadata": true,
+      "duplicate_policy": "reject_duplicate_(type,component_id)",
+      "feature_fields": [
+        "presence",
+        "distance",
+        "normal_x",
+        "normal_y",
+        "normal_z",
+        "type",
+        "wall_velocity_x",
+        "wall_velocity_y",
+        "wall_velocity_z"
+      ],
+      "field_missing_policy": "reject_missing_or_nonfinite_present-component_fields",
+      "id": "r5-g4-boundary-set-v1",
+      "key_fields": ["type", "component_id"],
+      "kind": "finite_component_set",
+      "ordering": "lexicographic_by_(type,component_id)",
+      "overflow_policy": "reject_more_than_8_components",
+      "slot_count": 8,
+      "slot_stride": 9,
+      "slot_width": 9
+    },
+    "routes": {
+      "deepset_context": {
+        "base_feature_width": 115,
+        "local_extension": null,
+        "local_extension_width": 0,
+        "model_input_width": 115
+      },
+      "local_interaction": {
+        "base_feature_width": 115,
+        "local_extension": {
+          "encoding": "inverse-distance-weighted top-k finite neighbours",
+          "end": 123,
+          "fields": [
+            "mean_relative_position_x",
+            "mean_relative_position_y",
+            "mean_relative_position_z",
+            "mean_relative_velocity_x",
+            "mean_relative_velocity_y",
+            "mean_relative_velocity_z",
+            "mean_distance_over_dp",
+            "finite_neighbour_fraction"
+          ],
+          "name": "local_neighbour_summary",
+          "start": 115,
+          "width": 8
+        },
+        "local_extension_width": 8,
+        "model_input_width": 123
+      },
+      "particle_mlp": {
+        "base_feature_width": 115,
+        "local_extension": null,
+        "local_extension_width": 0,
+        "model_input_width": 115
+      },
+      "physics_residual": {
+        "base_feature_width": 115,
+        "local_extension": null,
+        "local_extension_width": 0,
+        "model_input_width": 115
+      }
+    }
+  },
+  "feature_layout_id": "r5-g4-feature-layout-v1",
+  "historical_feature_widths_rejected": [43, 51],
+  "local_extension_width": 8,
+  "missing_mask_policy": {
+    "field_level_missing": "not represented by NaN or an implicit zero; a present component with a missing/nonfinite required field is rejected",
+    "id": "r5-g4-missing-masks-v1",
+    "masks": [
+      {
+        "location": "current_prescribed_control[0]",
+        "meaning": "the current prescribed angle/control record is available",
+        "name": "control_angle_present",
+        "zero_fill": "all control values use the documented zero convention"
+      },
+      {
+        "location": "current_prescribed_control[9]",
+        "meaning": "the current prescribed control schedule is valid and available",
+        "name": "control_schedule_available",
+        "zero_fill": "control fields are zero when unavailable"
+      },
+      {
+        "location": "current_boundary_summary[0]",
+        "meaning": "the current boundary summary is valid and available",
+        "name": "boundary_summary_available",
+        "zero_fill": "six bounds are zero when unavailable"
+      },
+      {
+        "location": "boundary_component_slot[s][0]",
+        "meaning": "canonical slot s contains a valid finite component",
+        "name": "boundary_component_presence",
+        "zero_fill": "the remaining eight values in an absent slot are zero"
+      },
+      {
+        "location": "local_interaction_extension[7]",
+        "meaning": "fraction of finite neighbours contributing to the local summary; zero means no finite support",
+        "name": "local_neighbour_support_fraction",
+        "zero_fill": "all local summary values are zero when no finite support exists"
+      }
+    ],
+    "representation": "in_band_presence_masks_plus_zero_fill"
+  },
+  "rollout_state": {
+    "autonomous_update": "after frame zero, position and velocity are replaced only by the model's own predicted state",
+    "forbidden_inputs": [
+      "future fluid position",
+      "future fluid velocity",
+      "future density",
+      "future pressure",
+      "future free-body pose or velocity"
+    ],
+    "future_reference_is_model_input": false,
+    "id": "r5-g4-rollout-state-v1",
+    "initialization": "position and velocity from solver frame zero; mass from frame-zero material state",
+    "integrator": "v_next = route-specific decoded state; x_next = x_t + 0.5 * (v_t + v_next) * dt",
+    "integrator_id": "trapezoid_predicted_velocity_v1",
+    "known_inputs": "current state, current prescribed control, current boundary geometry, current dt, and frozen initial material attributes",
+    "metrics_may_read_future_reference": true,
+    "state_variables": ["position", "velocity", "mass", "current_frame", "current_time"],
+    "teacher_forcing": "training reads the current solver state at frame t and labels frame t+1"
+  },
+  "schema_version": 1,
+  "target_semantics": {
+    "deepset_context": {
+      "formula": "y_t = v_(t+1) * dt / dp",
+      "id": "direct_next_velocity_scaled_v1",
+      "kind": "next_velocity_scaled",
+      "prediction_is": "next solver velocity state, represented after dt/dp scaling",
+      "shape": [3],
+      "units": "dimensionless normalized velocity-step quantity"
+    },
+    "local_interaction": {
+      "formula": "y_t = v_(t+1) * dt / dp",
+      "id": "direct_next_velocity_scaled_v1",
+      "kind": "next_velocity_scaled",
+      "prediction_is": "next solver velocity state, represented after dt/dp scaling",
+      "shape": [3],
+      "units": "dimensionless normalized velocity-step quantity"
+    },
+    "particle_mlp": {
+      "formula": "y_t = v_(t+1) * dt / dp",
+      "id": "direct_next_velocity_scaled_v1",
+      "kind": "next_velocity_scaled",
+      "prediction_is": "next solver velocity state, represented after dt/dp scaling",
+      "shape": [3],
+      "units": "dimensionless normalized velocity-step quantity"
+    },
+    "physics_residual": {
+      "formula": "y_t = ((v_(t+1) - v_t) / dt) * dt^2 / dp",
+      "id": "acceleration_residual_dt2_over_dp_v1",
+      "kind": "acceleration_residual",
+      "prediction_is": "acceleration residual integrated from the current velocity state",
+      "shape": [3],
+      "units": "dimensionless normalized acceleration residual"
+    }
+  }
+}

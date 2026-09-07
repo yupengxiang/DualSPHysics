@@ -8,6 +8,7 @@ from scripts.passive_tracers import (
     advect_hdf5,
     box_surface_triangles,
     rigid_barrier_provider,
+    segment_visibility,
     shepard_velocity,
     weighted_stratified_seeds,
 )
@@ -57,6 +58,18 @@ def test_visibility_filter_rejects_samples_across_wall():
     assert abs(legacy[0, 1] - 1) > 0.5
     assert visible[0, 1] == pytest.approx(1.0)
     assert count[0] == 12
+
+
+def test_segment_visibility_accepts_per_query_candidate_pools():
+    query = np.asarray([[-0.1, 0.0, 0.0], [0.1, 0.0, 0.0]])
+    candidates = np.asarray([
+        [[-0.2, 0.0, 0.0], [0.2, 0.0, 0.0]],
+        [[-0.2, 0.0, 0.0], [0.2, 0.0, 0.0]],
+    ])
+    wall = np.asarray([[[0.0, -1.0, -1.0], [0.0, 1.0, -1.0], [0.0, 1.0, 1.0]],
+                       [[0.0, -1.0, -1.0], [0.0, 1.0, 1.0], [0.0, -1.0, 1.0]]])
+    visible = segment_visibility(query, candidates, wall)
+    assert visible.tolist() == [[True, False], [False, True]]
 
 
 def test_finite_wall_leaves_real_gap_visible():

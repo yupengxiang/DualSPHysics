@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/lagrangian-fluid/r5-f1-material-task-output.schema.json",
+  "title": "R5 F1 material task evaluator output",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "transport_spec",
+    "input",
+    "hashes",
+    "configurations",
+    "mass_accounting",
+    "checks"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "r5-f1-material-task-output.v1"
+    },
+    "transport_spec": {
+      "type": "object",
+      "required": ["spec_id", "version", "resolved_source_layers"]
+    },
+    "input": {
+      "type": "object",
+      "required": ["hdf5", "sidecar", "identity_key", "initial_fluid_mass_kg"]
+    },
+    "hashes": {
+      "type": "object",
+      "required": [
+        "input_hdf5_sha256",
+        "input_sidecar_sha256",
+        "transport_spec_sha256",
+        "evaluator_sha256"
+      ]
+    },
+    "configurations": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["seed_count", "substeps", "trajectory_bundle", "status"]
+      }
+    },
+    "mass_accounting": {
+      "type": "object",
+      "required": ["initial_mass_kg", "categories", "closure_error_kg", "per_configuration"]
+    },
+    "checks": {
+      "type": "object",
+      "required": [
+        "identity_unique",
+        "destination_disjoint",
+        "mass_closed",
+        "wall_policy_explicit",
+        "tracer_failure_is_censored"
+      ]
+    }
+  }
+}
