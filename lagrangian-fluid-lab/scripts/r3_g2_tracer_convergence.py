@@ -20,8 +20,10 @@ import h5py
 import numpy as np
 
 try:
+    from scripts.boundary_sidecars import sidecar_provider
     from scripts.passive_tracers import advect_hdf5, weighted_stratified_seeds
 except ModuleNotFoundError:  # pragma: no cover - direct script execution
+    from boundary_sidecars import sidecar_provider
     from passive_tracers import advect_hdf5, weighted_stratified_seeds
 
 
@@ -87,7 +89,7 @@ def _solver_reference(h5_path: Path, seed_indices: np.ndarray, stride: int):
 
 def _trajectory_summary(trace: dict, reference_position: np.ndarray,
                         reference_valid: np.ndarray, seeds: dict, dp: float,
-                        elapsed_seconds: float) -> dict:
+                        elapsed_seconds: float, boundary_available: bool = False) -> dict:
     if trace["position"].shape != reference_position.shape:
         raise ValueError("tracer and solver reference axes do not match")
     solver_valid = reference_valid & np.asarray(trace["reliability_history"], dtype=bool)
@@ -137,7 +139,7 @@ def _trajectory_summary(trace: dict, reference_position: np.ndarray,
         "support_p95_over_dp": float(np.quantile(support_finite, 0.95) / dp) if support_finite.size else None,
         "minimum_visible_neighbours": int(np.min(visible_finite)) if visible_finite.size else None,
         "saved_cadence_median_s": float(np.median(np.diff(trace["time"]))),
-        "wall_geometry_available": False,
+        "wall_geometry_available": bool(boundary_available),
         "wall_crossing_rejections": int(np.asarray(trace["wall_crossing"], dtype=bool).sum()),
         "elapsed_seconds": float(elapsed_seconds),
     }
@@ -192,9 +194,11 @@ def _initial_fluid_mass(h5_path: Path) -> float:
 
 
 def run_case(case: dict, h5_path: Path, *, counts=DEFAULT_COUNTS,
-             frame_strides=DEFAULT_FRAME_STRIDES, substeps=DEFAULT_SUBSTEPS):
+             frame_strides=DEFAULT_FRAME_STRIDES, substeps=DEFAULT_SUBSTEPS,
+             sidecar_path: Path | None = None):
     dp = float(case["numerics"]["particle_spacing_m"])
     initial_mass = _initial_fluid_mass(h5_path)
+    barrier = sidecar_provider(sidecar_path) if sidecar_path is not None else None
     traces = {}
     records = []
     for count in counts:
@@ -211,6 +215,7 @@ def run_case(case: dict, h5_path: Path, *, counts=DEFAULT_COUNTS,
                     maximum_support_distance=1.75 * dp,
                     frame_stride=int(stride),
                     substeps_per_interval=int(integration_substeps),
+                    barrier_provider=barrier,
                 )
                 elapsed = wall_time.perf_counter() - started
                 reference_time, reference_position, reference_valid = _solver_reference(
@@ -224,7 +229,8 @@ def run_case(case: dict, h5_path: Path, *, counts=DEFAULT_COUNTS,
                     "frame_stride": int(stride),
                     "tracer_substeps_per_saved_interval": int(integration_substeps),
                     "summary": _trajectory_summary(
-                        trace, reference_position, reference_valid, seeds, dp, elapsed),
+                        trace, reference_position, reference_valid, seeds, dp, elapsed,
+                        boundary_available=sidecar_path is not None),
                 })
 
         # Explicitly expose the otherwise easy-to-miss distinction between
@@ -267,24 +273,30 @@ def _load_cases(manifest_path: Path, selected_ids: tuple[str, ...]):
 
 def build_report(manifest_path: Path = DEFAULT_MANIFEST, selected_ids: tuple[str, ...] = DEFAULT_CASES,
                  *, counts=DEFAULT_COUNTS, frame_strides=DEFAULT_FRAME_STRIDES,
-                 substeps=DEFAULT_SUBSTEPS) -> dict:
+                 substeps=DEFAULT_SUBSTEPS, sidecar_dir: Path | None = None) -> dict:
     selected = _load_cases(manifest_path, selected_ids)
     case_reports = {}
     for case, path in selected:
-        records = run_case(case, path, counts=counts, frame_strides=frame_strides, substeps=substeps)
+        sidecar_path = None
+        if sidecar_dir is not None:
+            sidecar_path = Path(sidecar_dir).resolve() / f"{case['case_id']}.h5"
+            if not sidecar_path.is_file():
+                raise FileNotFoundError(sidecar_path)
+        records = run_case(case, path, counts=counts, frame_strides=frame_strides,
+                           substeps=substeps, sidecar_path=sidecar_path)
         case_reports[case["case_id"]] = {
             "family": case["family"],
             "mechanism": case["physics"].get("mechanism"),
             "hdf5": str(path.relative_to(Path(manifest_path).resolve().parent)),
             "particle_spacing_m": float(case["numerics"]["particle_spacing_m"]),
-            "boundary_sidecar": "missing; numerical probe runs without wall visibility",
+            "boundary_sidecar": str(sidecar_path.relative_to(LAB)) if sidecar_path else "missing; numerical probe runs without wall visibility",
             "settings": records,
         }
     return {
         "schema_version": 1,
         "scope": "R3 G2 independent tracer convergence and sensitivity addendum",
         "execution_status": "complete",
-        "acceptance_status": "candidate_only",
+        "acceptance_status": "candidate_wall_aware_geometry_only" if sidecar_dir else "candidate_only",
         "non_claim": "same-solver numerical consistency; not external physical validation",
         "matrix": {
             "case_ids": list(selected_ids),
@@ -295,7 +307,8 @@ def build_report(manifest_path: Path = DEFAULT_MANIFEST, selected_ids: tuple[str
             "regularization_over_dp": 0.1,
             "maximum_support_over_dp": 1.75,
             "mass_closure_relative_tolerance": 1e-6,
-            "wall_visibility": False,
+            "wall_visibility": sidecar_dir is not None,
+            "sidecar_directory": str(Path(sidecar_dir).resolve().relative_to(LAB)) if sidecar_dir else None,
         },
         "interpretation": {
             "substeps": "compare 1 vs the largest configured substep count at the same saved cadence; substeps cannot recover omitted solver output times",
@@ -306,7 +319,7 @@ def build_report(manifest_path: Path = DEFAULT_MANIFEST, selected_ids: tuple[str
         },
         "cases": case_reports,
         "open_blockers": [
-            "boundary triangle sidecars and destination regions are absent from the development pilot",
+            "destination regions and material task labels are absent from the development pilot",
             "the matrix has one representative case per selected T1 family, not production family coverage",
             "small spill-tail accuracy still requires higher tracer counts and importance sampling on accepted cases",
         ],
@@ -322,10 +335,13 @@ def main() -> None:
     parser.add_argument("--counts", nargs="+", type=int, default=list(DEFAULT_COUNTS))
     parser.add_argument("--frame-strides", nargs="+", type=int, default=list(DEFAULT_FRAME_STRIDES))
     parser.add_argument("--substeps", nargs="+", type=int, default=list(DEFAULT_SUBSTEPS))
+    parser.add_argument("--sidecar-dir", type=Path, default=None,
+                        help="optional finite-boundary sidecar directory for wall-aware tracing")
     args = parser.parse_args()
     case_ids = tuple(args.cases) if args.cases else DEFAULT_CASES
     report = build_report(args.manifest.resolve(), case_ids, counts=tuple(args.counts),
-                          frame_strides=tuple(args.frame_strides), substeps=tuple(args.substeps))
+                          frame_strides=tuple(args.frame_strides), substeps=tuple(args.substeps),
+                          sidecar_dir=args.sidecar_dir.resolve() if args.sidecar_dir else None)
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({
