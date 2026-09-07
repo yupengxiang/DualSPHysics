@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+  W08 F6 topology_extrapolation probe: two independent free rigid bodies.
+  This definition is intentionally outside cases/F6 and is candidate-only;
+  it is not a production or physical-validation input.
+-->
+<case>
+    <casedef>
+        <constantsdef>
+            <gravity x="0" y="0" z="-9.81" />
+            <rhop0 value="1000" />
+            <rhopgradient value="2" />
+            <hswl value="0" auto="true" />
+            <gamma value="7" />
+            <speedsystem value="0" auto="true" />
+            <coefsound value="20" />
+            <speedsound value="0" auto="true" />
+            <coefh value="1.0" />
+            <cflnumber value="0.2" />
+        </constantsdef>
+        <mkconfig boundcount="200" fluidcount="16" />
+        <geometry>
+            <definition dp="0.04">
+                <pointmin x="-0.12" y="-0.12" z="-0.12" />
+                <pointmax x="1.35" y="0.55" z="0.85" />
+            </definition>
+            <commands>
+                <mainlist>
+                    <setshapemode>dp | bound</setshapemode>
+                    <setdrawmode mode="full" />
+
+                    <!-- Shared fluid and fixed tank boundary. -->
+                    <setmkfluid mk="0" />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.06" y="0.04" z="0.04" />
+                        <size x="1.08" y="0.32" z="0.30" />
+                    </drawbox>
+                    <setmkbound mk="0" />
+                    <drawbox>
+                        <boxfill>bottom | left | right | front | back</boxfill>
+                        <point x="0" y="0" z="0" />
+                        <size x="1.2" y="0.4" z="0.6" />
+                    </drawbox>
+
+                    <!-- Body A: void first, then one free rigid-body marker. -->
+                    <setmkvoid />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.26" y="0.08" z="0.27" />
+                        <size x="0.18" y="0.14" z="0.16" />
+                    </drawbox>
+                    <setmkbound mk="5" />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.26" y="0.08" z="0.27" />
+                        <size x="0.18" y="0.14" z="0.16" />
+                    </drawbox>
+
+                    <!-- Body B is offset in y to expose the two-body topology. -->
+                    <setmkvoid />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.78" y="0.20" z="0.27" />
+                        <size x="0.18" y="0.14" z="0.16" />
+                    </drawbox>
+                    <setmkbound mk="6" />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.78" y="0.20" z="0.27" />
+                        <size x="0.18" y="0.14" z="0.16" />
+                    </drawbox>
+                </mainlist>
+            </commands>
+        </geometry>
+        <!-- Both markers are six-degree-of-freedom free bodies. -->
+        <floatings>
+            <floating mkbound="5" rhopbody="700" />
+            <floating mkbound="6" rhopbody="700" />
+        </floatings>
+    </casedef>
+    <execution>
+        <parameters>
+            <parameter key="SavePosDouble" value="0" />
+            <parameter key="StepAlgorithm" value="1" />
+            <parameter key="VerletSteps" value="40" />
+            <parameter key="Kernel" value="2" />
+            <parameter key="ViscoTreatment" value="1" />
+            <parameter key="Visco" value="0.08" />
+            <parameter key="ViscoBoundFactor" value="1" />
+            <parameter key="DensityDT" value="2" />
+            <parameter key="DensityDTvalue" value="0.1" />
+            <parameter key="Shifting" value="0" />
+            <parameter key="RigidAlgorithm" value="1" />
+            <parameter key="FtPause" value="0" />
+            <parameter key="CoefDtMin" value="0.05" />
+            <parameter key="DtIni" value="0" />
+            <parameter key="DtMin" value="0" />
+            <parameter key="DtFixed" value="0" />
+            <parameter key="DtAllParticles" value="0" />
+            <!-- Micro-horizon used only to test solver initialization. -->
+            <parameter key="TimeMax" value="0.02" />
+            <parameter key="TimeOut" value="0.01" />
+            <parameter key="MinFluidStop" value="0" />
+            <parameter key="RhopOutMin" value="700" />
+            <parameter key="RhopOutMax" value="1300" />
+            <simulationdomain>
+                <posmin x="default - 25%" y="default - 25%" z="default - 25%" />
+                <posmax x="default + 25%" y="default + 25%" z="default + 75%" />
+            </simulationdomain>
+        </parameters>
+    </execution>
+</case>

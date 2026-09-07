@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "scope": "W08 F6 twin_free topology_extrapolation; independent candidate-only probe",
+  "formal_release": false,
+  "split": "topology_extrapolation",
+  "inventory": "campaigns/v0.1-candidate/w00-inventory.json",
+  "allowlisted_physical_gpu_indices": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "binary_provenance": {
+    "GenCase_linux64": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "bytes": 5809384,
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226"
+    },
+    "DualSPHysics5.4_linux64": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "bytes": 159206984,
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    }
+  },
+  "materializations": [
+    {
+      "schema_version": 1,
+      "case_id": "W08_F6_topology_twin_free_00",
+      "card_id": "W08_F6_topology_twin_free_00",
+      "family": "F6",
+      "study_id": "W08_F6_topology_holdout",
+      "paired_background_id": "background_F6_topology_holdout_twin_free_v1",
+      "physical_case_id": "physical_W08_F6_topology_twin_free_8fffc509441fc955",
+      "lineage_group_id": "lineage_W08_F6_topology_twin_free_8fffc509441fc955",
+      "execution_unit_id": "sim_W08_F6_topology_twin_free_8fffc509441fc955",
+      "split": "topology_extrapolation",
+      "physics": {
+        "body_configuration": "twin_free",
+        "body_density_ratio": [
+          0.7,
+          0.7
+        ],
+        "entry_froude": 0.0,
+        "body_aspect_ratio": 1.125,
+        "initial_pitch_deg": 0.0,
+        "topology_variant": "two_staggered_free_boxes"
+      },
+      "normalized_intervention": {
+        "body_configuration": "twin_free"
+      },
+      "simulation_signature": "8fffc509441fc955",
+      "definition": "campaigns/v0.1-candidate/cases/w08/topology/F6_twin_free/W08_F6_topology_twin_free_Def.xml",
+      "source_template_definition": "cases/F6/F6_twin_floaters/F6_twin_floaters_Def.xml",
+      "source_template_sha256": "bd73de914fdbebbc77c3b64f60e7d6f4f553fecce0b8de8fdf97ad8a295ab882",
+      "particle_spacing_m": 0.04,
+      "time_max_s": 0.02,
+      "time_out_s": 0.01,
+      "gpu_requested_physical_index": 7,
+      "release_status": "candidate",
+      "formal_production_authorized": false,
+      "physical_acceptance": "rejected_pending_resolution_and_external_reference",
+      "reference_acceptance": "rejected_no_external_anchor",
+      "canonical_stage_eligibility": {
+        "g3_canonical_counted": false,
+        "reason": "micro-horizon initialization probe intentionally omits PartVTK/HDF5 normalization and is not a canonical release materialization"
+      },
+      "provenance": {
+        "definition_is_new_file": true,
+        "reuses_registry_case": false,
+        "registry_case_id_not_reused": "F6_twin_floaters",
+        "upstream_source_modified": false,
+        "geometry_change": "two 0.18 x 0.14 x 0.16 m boxes at (0.26,0.08,0.27) and (0.78,0.20,0.27) m, both marked as free bodies",
+        "binary_source": "W00 allowlisted official DualSPHysics 5.4 package"
+      },
+      "stages": {
+        "gencase": {
+          "definition": "campaigns/v0.1-candidate/cases/w08/topology/F6_twin_free/W08_F6_topology_twin_free_Def.xml",
+          "definition_sha256": "28b3145386671489a48fb0ea8ddb47b51a9859cae60f218d2082abab7d131448",
+          "generated_case_xml": "campaigns/v0.1-candidate/artifacts/w08-f6-twin-free/W08_F6_topology_twin_free_00/generated/W08_F6_topology_twin_free_00.xml",
+          "generated_case_xml_sha256": "e71485be05048b77548640f71cf077670e057bcf0839bbabeb4ac3750378b243",
+          "generated_boundary_vtk": "campaigns/v0.1-candidate/artifacts/w08-f6-twin-free/W08_F6_topology_twin_free_00/generated/W08_F6_topology_twin_free_00_MkCells.vtk",
+          "generated_boundary_vtk_sha256": "b7d6658782adfd9862cae983c6cc07b81f9724f56e7ce81085c04270d03fe0ec",
+          "gencase_command": [
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/w08/topology/F6_twin_free/W08_F6_topology_twin_free_Def",
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/w08-f6-twin-free/W08_F6_topology_twin_free_00/generated/W08_F6_topology_twin_free_00",
+            "-save:all"
+          ],
+          "gencase_returncode": 0,
+          "floating_particles": 250,
+          "fluid_particles": 1916,
+          "total_particles": 3707,
+          "log": "campaigns/v0.1-candidate/artifacts/w08-f6-twin-free/W08_F6_topology_twin_free_00/generated/gencase.stdout.log",
+          "log_sha256": "b82c62c4ca682e55f10dd863bbda44d5bf9d9f9b06b4ab36a4db55ae99b33810"
+        },
+        "solver_initialization": {
+          "status": "completed",
+          "attempt_id": "20260907T075524.663938Z-a3d69220",
+          "attempt_directory": "campaigns/v0.1-candidate/runs/W08_F6_topology_twin_free_00/attempts/20260907T075524.663938Z-a3d69220.complete",
+          "elapsed_seconds": 2.0718569501768798,
+          "returncode": 0,
+          "evidence_files": [
+            "data/Part_0000.bi4",
+            "data/Part_0001.bi4",
+            "data/Part_0002.bi4"
+          ],
+          "gpu_at_launch": {
+            "index": 7,
+            "uuid": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+            "memory_used_mib": 18,
+            "utilization_percent": 0
+          },
+          "solver_command": [
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+            "-gpu:7",
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/w08-f6-twin-free/W08_F6_topology_twin_free_00/generated/W08_F6_topology_twin_free_00",
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/W08_F6_topology_twin_free_00/attempts/20260907T075524.663938Z-a3d69220.partial"
+          ],
+          "required_text_found": true,
+          "process_stdout": "campaigns/v0.1-candidate/runs/W08_F6_topology_twin_free_00/attempts/20260907T075524.663938Z-a3d69220.complete/process.stdout.log",
+          "process_stdout_sha256": "957a1feefe0dabbafa5b8b549309e62dca3ae060e9c9da90cbf62650c40e6e2f",
+          "run_out": "campaigns/v0.1-candidate/runs/W08_F6_topology_twin_free_00/attempts/20260907T075524.663938Z-a3d69220.complete/Run.out",
+          "run_out_sha256": "32a1c5f83ee2686654f1031171a8133ca5e793ea4f8ee4183a7d78947e8ed15f",
+          "chrono_error_lines": [],
+          "chrono_status": "no_error_detected_in_probe_logs"
+        },
+        "structural_audit": {
+          "generated_xml_parse": true,
+          "floating_body_count": 2,
+          "floating_mkbound": [
+            "5",
+            "6"
+          ],
+          "floating_particles": 250,
+          "fluid_particles": 1916,
+          "structural_pass": true,
+          "generated_particle_floating_blocks": 2
+        }
+      },
+      "acceptance": {
+        "status": "candidate",
+        "physical": "rejected",
+        "reference": "rejected",
+        "reason": "two-body free-rigid-body structure and micro-horizon initialization are recorded; no resolution envelope, coupled-body learning contract, or external reference"
+      },
+      "definition_sha256": "28b3145386671489a48fb0ea8ddb47b51a9859cae60f218d2082abab7d131448",
+      "materialization_status": "candidate_structural_pass",
+      "execution_status": "completed"
+    }
+  ],
+  "verification": {
+    "static_definition_xml_parse": "pass",
+    "probe_script_compile": "pass",
+    "w08_generalization_pytest": {
+      "command": ".venv/bin/pytest -q tests/test_w08_generalization_design.py",
+      "passed": 5,
+      "failed": 0
+    },
+    "solver_observation": {
+      "physical_gpu_index": 7,
+      "physical_gpu_uuid": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+      "time_end_s": 0.0202,
+      "steps": 58,
+      "part_files": 3,
+      "excluded_particles": 0,
+      "chrono_error": false
+    }
+  },
+  "updated_at_utc": "2026-09-07T07:56:27.249589+00:00",
+  "allowlisted_gpu_uuids": [
+    "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+    "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+    "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+    "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51"
+  ],
+  "inventory_captured_at_utc": "2026-09-06T18:17:48.310205+00:00",
+  "single_heavy_job_per_gpu": true,
+  "recheck_before_each_batch": true,
+  "forbidden_physical_gpu_indices": [
+    0,
+    1,
+    2,
+    3
+  ]
+}
