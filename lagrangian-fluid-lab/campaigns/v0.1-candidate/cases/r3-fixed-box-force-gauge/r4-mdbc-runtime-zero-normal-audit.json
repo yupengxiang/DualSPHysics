@@ -1,0 +1,2543 @@
+{
+  "schema_version": 1,
+  "audit_id": "R4_F6_MDBC_RUNTIME_ZERO_NORMAL_AUDIT",
+  "audit_execution": {
+    "mode": "cpu_static",
+    "solver_launched_by_audit": false,
+    "cfd_launched_by_audit": false,
+    "gpu_used_by_audit": false,
+    "nvidia_smi_called_by_audit": false,
+    "input_policy": "read existing fixed-box canonical/fine artifacts only",
+    "write_policy": "JSON and Markdown evidence outputs only"
+  },
+  "scope": {
+    "case_root": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge",
+    "cases": [
+      "canonical-2",
+      "fine-3"
+    ],
+    "requested_evidence": [
+      "runtime CfgInit_Normals.vtk and CfgInit_NormalsGhost.vtk",
+      "hdp_Actual.vtk construction faces",
+      "generated Bound.vtk and generated XML/log summaries when available",
+      "zero normals by Mk, six faces, twelve edges, eight corners",
+      "construction-face coincidence and resolution comparison"
+    ]
+  },
+  "thresholds": {
+    "zero_normal_norm_lte_m": 1e-12,
+    "near_zero_normal_norm_lte_m": 1e-08,
+    "face_plane_tolerance_m": 1e-05,
+    "ghost_doubling_abs_tolerance_m": 2e-05,
+    "exact_vector_zero_definition": "all three serialized Normal components equal 0",
+    "topology_partition": "face interior = one incident plane; edge = two; corner = three"
+  },
+  "cases": [
+    {
+      "case_id": "fixed_box_mdbc_canonical",
+      "run_label": "canonical-2",
+      "artifact_directories": {
+        "result": "results/fixed_box_mdbc_canonical/canonical-2-ingested",
+        "generated": "generated/fixed_box_mdbc_canonical"
+      },
+      "source_files": {
+        "definition": {
+          "path": "fixed_box_mdbc_canonical_Def.xml",
+          "required": false,
+          "present": true,
+          "bytes": 5825,
+          "sha256": "7fbf0b443d17c9cd3e50636859fea525bda2f88cc9397484e768bbf16c6f068f"
+        },
+        "normal_vtk": {
+          "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/CfgInit_Normals.vtk",
+          "required": true,
+          "present": true,
+          "bytes": 945873,
+          "sha256": "d9240c3e8e49a2a2dc1beb28b8a737696515ca3749749f0ab340bbd3be60f4ec"
+        },
+        "ghost_vtk": {
+          "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/CfgInit_NormalsGhost.vtk",
+          "required": true,
+          "present": true,
+          "bytes": 945873,
+          "sha256": "b88dd97ed874a02d6937d38e8f86e947775b5f364fd5f4918f7616858feee3e5"
+        },
+        "hdp_actual_vtk": {
+          "path": "generated/fixed_box_mdbc_canonical/fixed_box_mdbc_canonical_hdp_Actual.vtk",
+          "required": true,
+          "present": true,
+          "bytes": 679,
+          "sha256": "277dc0589df9b04036492718d911ed75c44b39e53e097fa953549f1031bd6783"
+        },
+        "bound_vtk": {
+          "path": "generated/fixed_box_mdbc_canonical/fixed_box_mdbc_canonical_Bound.vtk",
+          "required": false,
+          "present": true,
+          "bytes": 968434,
+          "sha256": "757e3315f8ba8e876311d0e0c9ca40ac8fa1951dfa684640b8e4ac3d42ef5403"
+        },
+        "mkcells_vtk": {
+          "path": "generated/fixed_box_mdbc_canonical/fixed_box_mdbc_canonical_MkCells.vtk",
+          "required": false,
+          "present": true,
+          "bytes": 2473,
+          "sha256": "a633cd0157910355a7d4a72e05d54274fc49477a29480a63b0ebbf9fed5975ce"
+        },
+        "generated_xml": {
+          "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/generated_particles.xml",
+          "required": true,
+          "present": true,
+          "bytes": 8910,
+          "sha256": "4312c2ea8f795624f0b9ff35923627b9900a9cd5022903f6c4492e53d6555b3e"
+        },
+        "gencase_log": {
+          "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/gencase.stdout.log",
+          "required": true,
+          "present": true,
+          "bytes": 5760,
+          "sha256": "3a54aed0d645a679048a4f71f616942aed8024cf64426a7efbb6199a2404f624"
+        },
+        "solver_log": {
+          "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/solver.stdout.log",
+          "required": false,
+          "present": true,
+          "bytes": 25342,
+          "sha256": "f227e8e5f19d4e5002ae0eccf77ec8b3f0e967328704f1ff9e411ba1c265a503"
+        },
+        "run_out": {
+          "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/Run.out",
+          "required": false,
+          "present": true,
+          "bytes": 25297,
+          "sha256": "37f6195df1fbde751ad7267608ba48a08a4f15a9983f5744c2c1c461d5faca04"
+        },
+        "run_csv": {
+          "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/Run.csv",
+          "required": false,
+          "present": true,
+          "bytes": 1050,
+          "sha256": "2f3a0535574be214a76d05d3167d6e3f3ad0d89be8075d256625ed90c988426c"
+        },
+        "run_parts_csv": {
+          "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/RunPARTs.csv",
+          "required": false,
+          "present": true,
+          "bytes": 18097,
+          "sha256": "38dade93c9877e8a27ddaca61e908c29f8e5f46e628bb4d4fc49065bb5954d7b"
+        }
+      },
+      "errors": [],
+      "status": "complete",
+      "source_contract": {
+        "path": "fixed_box_mdbc_canonical_Def.xml",
+        "source_dp_m": 0.025,
+        "boundary_parameter": "2",
+        "normal_geometryfile": "[CaseName]_hdp_Actual.vtk",
+        "normal_distanceh": 3.0,
+        "physical_void": {
+          "point_m": [
+            0.5,
+            0.3,
+            0.2
+          ],
+          "size_m": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "max_m": [
+            0.7,
+            0.5,
+            0.4
+          ],
+          "layers_vdp": [],
+          "boxfill": "solid"
+        },
+        "actual_body": {
+          "point_m": [
+            0.5125,
+            0.3125,
+            0.2125
+          ],
+          "size_m": [
+            0.175,
+            0.175,
+            0.175
+          ],
+          "max_m": [
+            0.6875,
+            0.4875,
+            0.38749999999999996
+          ],
+          "layers_vdp": [
+            0.0,
+            -1.0,
+            -2.0
+          ],
+          "boxfill": "solid"
+        },
+        "normal_body": {
+          "point_m": [
+            0.5125,
+            0.3125,
+            0.2125
+          ],
+          "size_m": [
+            0.175,
+            0.175,
+            0.175
+          ],
+          "max_m": [
+            0.6875,
+            0.4875,
+            0.38749999999999996
+          ],
+          "layers_vdp": [
+            0.5
+          ],
+          "boxfill": "solid"
+        }
+      },
+      "generated_summary": {
+        "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/generated_particles.xml",
+        "application": "GenCase v5.4.354.01 (07-04-2025)",
+        "date": "07-09-2026 20:36:08",
+        "particles": {
+          "np": 51801,
+          "nb": 22515,
+          "nbf": 22515,
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1
+        },
+        "summary": {
+          "fixed": {
+            "count": 22515,
+            "id": "0-22514",
+            "mkcount": 2,
+            "mkvalues": "17-18"
+          },
+          "moving": {},
+          "floating": {},
+          "fluid": {
+            "count": 29286,
+            "id": "22515-51800",
+            "mkcount": 1,
+            "mkvalues": "1"
+          }
+        },
+        "blocks": {
+          "fixed": [
+            {
+              "mkbound": 0,
+              "mkfluid": null,
+              "mk": 17,
+              "begin": 0,
+              "count": 22011
+            },
+            {
+              "mkbound": 1,
+              "mkfluid": null,
+              "mk": 18,
+              "begin": 22011,
+              "count": 504
+            }
+          ],
+          "moving": [],
+          "floating": [],
+          "fluid": [
+            {
+              "mkbound": null,
+              "mkfluid": 0,
+              "mk": 1,
+              "begin": 22515,
+              "count": 29286
+            }
+          ]
+        },
+        "body_mk": 18,
+        "constants": {
+          "data2d": false,
+          "cflnumber": 0.2,
+          "gamma": 7.0,
+          "rhop0": 1000.0,
+          "dp": 0.025,
+          "h": 0.043301270189,
+          "b": 308314.28571,
+          "massbound": 0.015625,
+          "massfluid": 0.015625
+        },
+        "vtk_outputs": [
+          {
+            "name": "fixed_box_mdbc_canonical_hdp_Actual.vtk",
+            "mk": "17-18",
+            "mkbound": "0-1"
+          },
+          {
+            "name": "fixed_box_mdbc_canonical__Actual.vtk",
+            "mk": "17-18",
+            "mkbound": "0-1"
+          }
+        ]
+      },
+      "gencase_summary": {
+        "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/gencase.stdout.log",
+        "return_code": 0,
+        "points_loaded": 51801,
+        "particle_summary": {
+          "fixed": 22515,
+          "moving": null,
+          "floating": null,
+          "fluid": 29286
+        },
+        "normal_evaluation": {
+          "particles": 22515,
+          "shapes": 11,
+          "distance_text": "3x H = 0.129904"
+        },
+        "nonzero_particle_normals": {
+          "count": 22515,
+          "total": 22515,
+          "min_size_reported_m": 0.0,
+          "max_size_reported_m": 0.160078
+        },
+        "final_zero_normals_reported": {
+          "count": 0,
+          "total": 22515,
+          "percentage": 0.0
+        },
+        "shape_outputs": {
+          "hdp_Actual.vtk": {
+            "shape_count": 11,
+            "point_count": 16
+          },
+          "_Actual.vtk": {
+            "shape_count": 21,
+            "point_count": 32
+          }
+        }
+      },
+      "existing_solver_log_summary": {
+        "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/solver.stdout.log",
+        "return_code": 0,
+        "execution_kind_in_existing_log": "gpu",
+        "boundary_mode_mdbc": true,
+        "fixed_count": 22515,
+        "moving_count": 0,
+        "floating_count": 0,
+        "fluid_count": 29286,
+        "finished_message_present": true
+      },
+      "body_mk": 18,
+      "resolution": {
+        "source_dp_m": 0.025,
+        "generated_dp_m": 0.025,
+        "h_m": 0.043301270189,
+        "h_over_dp": 1.7320508075599998,
+        "box_min_m": [
+          0.5,
+          0.3,
+          0.2
+        ],
+        "box_max_m": [
+          0.7,
+          0.5,
+          0.4
+        ],
+        "box_size_m": [
+          0.19999999999999996,
+          0.2,
+          0.2
+        ],
+        "box_cells_per_axis_float": [
+          7.999999999999998,
+          8.0,
+          8.0
+        ],
+        "box_cells_per_axis_rounded": [
+          8,
+          8,
+          8
+        ],
+        "nominal_box_nodes_per_axis": [
+          9,
+          9,
+          9
+        ],
+        "runtime_boundary_point_count": 22515,
+        "runtime_body_point_count": 504,
+        "runtime_zero_normal_count": 63,
+        "runtime_zero_normal_fraction": 0.002798134576948701,
+        "runtime_body_zero_normal_count": 63,
+        "runtime_body_zero_normal_fraction": 0.125
+      },
+      "normal_vtk_summary": {
+        "point_count": 22515,
+        "array_names": [
+          "Idp",
+          "Mk",
+          "Normal",
+          "NormalSize"
+        ],
+        "array_metadata": {
+          "point:Idp": {
+            "location": "point",
+            "name": "Idp",
+            "components": 1,
+            "count": 22515,
+            "kind": "int"
+          },
+          "point:Mk": {
+            "location": "point",
+            "name": "Mk",
+            "components": 1,
+            "count": 22515,
+            "kind": "short"
+          },
+          "point:Normal": {
+            "location": "point",
+            "name": "Normal",
+            "components": 3,
+            "count": 22515,
+            "kind": "float"
+          },
+          "point:NormalSize": {
+            "location": "point",
+            "name": "NormalSize",
+            "components": 1,
+            "count": 22515,
+            "kind": "float"
+          }
+        },
+        "finite_arrays": true,
+        "boundary_bbox_m": [
+          [
+            -0.05000000074505806,
+            -0.05000000074505806,
+            -0.05000000074505806
+          ],
+          [
+            1.25,
+            0.8500000238418579,
+            0.800000011920929
+          ]
+        ],
+        "effective_interface_bbox_m": [
+          [
+            0.01249999925494194,
+            0.01249999925494194,
+            0.01249999925494194
+          ],
+          [
+            1.1875000474974513,
+            0.7875000461935997,
+            0.800000011920929
+          ]
+        ],
+        "mk_counts": {
+          "17": 22011,
+          "18": 504
+        }
+      },
+      "ghost_vtk_summary": {
+        "point_count": 22515,
+        "array_names": [
+          "Idp",
+          "Mk",
+          "Normal",
+          "NormalSize"
+        ],
+        "array_metadata": {
+          "point:Idp": {
+            "location": "point",
+            "name": "Idp",
+            "components": 1,
+            "count": 22515,
+            "kind": "int"
+          },
+          "point:Mk": {
+            "location": "point",
+            "name": "Mk",
+            "components": 1,
+            "count": 22515,
+            "kind": "short"
+          },
+          "point:Normal": {
+            "location": "point",
+            "name": "Normal",
+            "components": 3,
+            "count": 22515,
+            "kind": "float"
+          },
+          "point:NormalSize": {
+            "location": "point",
+            "name": "NormalSize",
+            "components": 1,
+            "count": 22515,
+            "kind": "float"
+          }
+        },
+        "finite_arrays": true,
+        "boundary_bbox_m": [
+          [
+            -0.05000000074505806,
+            -0.05000000074505806,
+            -0.05000000074505806
+          ],
+          [
+            1.25,
+            0.8500000238418579,
+            0.800000011920929
+          ]
+        ],
+        "mk_counts": {
+          "17": 22011,
+          "18": 504
+        }
+      },
+      "generated_bound_vtk_summary": {
+        "point_count": 22515,
+        "polygon_count": 0,
+        "vertex_cell_count": 22515,
+        "array_names": [
+          "Idp",
+          "Mk",
+          "Normal",
+          "NormalSize",
+          "Type"
+        ],
+        "array_metadata": {
+          "point:Idp": {
+            "location": "point",
+            "name": "Idp",
+            "components": 1,
+            "count": 22515,
+            "kind": "unsigned_int"
+          },
+          "point:Mk": {
+            "location": "point",
+            "name": "Mk",
+            "components": 1,
+            "count": 22515,
+            "kind": "unsigned_short"
+          },
+          "point:Normal": {
+            "location": "point",
+            "name": "Normal",
+            "components": 3,
+            "count": 22515,
+            "kind": "float"
+          },
+          "point:NormalSize": {
+            "location": "point",
+            "name": "NormalSize",
+            "components": 1,
+            "count": 22515,
+            "kind": "float"
+          },
+          "point:Type": {
+            "location": "point",
+            "name": "Type",
+            "components": 1,
+            "count": 22515,
+            "kind": "unsigned_char"
+          }
+        },
+        "mk_counts": {
+          "17": 22011,
+          "18": 504
+        },
+        "type_counts": {
+          "0": 22515
+        },
+        "normal_exact_vector_zero_count": 0,
+        "normal_threshold_zero_count": 63,
+        "normal_near_zero_count": 63,
+        "normal_norm_range_m": [
+          1.1102230246251565e-16,
+          0.16007810570310424
+        ],
+        "normal_size_exact_zero_count": 0,
+        "normal_size_threshold_zero_count": 63,
+        "normal_size_range_m": [
+          1.1102230246251565e-16,
+          0.16007810831069946
+        ]
+      },
+      "generated_mkcells_vtk_summary": {
+        "point_count": 128,
+        "polygon_count": 32,
+        "vertex_cell_count": 0,
+        "array_names": [
+          "Mk",
+          "Type"
+        ],
+        "array_metadata": {
+          "cell:Mk": {
+            "location": "cell",
+            "name": "Mk",
+            "components": 1,
+            "count": 32,
+            "kind": "unsigned_short"
+          },
+          "cell:Type": {
+            "location": "cell",
+            "name": "Type",
+            "components": 1,
+            "count": 32,
+            "kind": "unsigned_char"
+          }
+        },
+        "mk_counts": {
+          "1": 12,
+          "17": 14,
+          "18": 6
+        },
+        "type_counts": {
+          "0": 20,
+          "3": 12
+        }
+      },
+      "zero_normals": {
+        "definition": "zero iff Euclidean norm of FIELD/Normal <= 1e-12 m",
+        "near_zero_definition": "near-zero iff Euclidean norm of FIELD/Normal <= 1e-8 m",
+        "total_zero_normal_count": 63,
+        "total_zero_normal_fraction": 0.002798134576948701,
+        "total_near_zero_normal_count": 63,
+        "exact_vector_zero_count": 0,
+        "normal_size_threshold_zero_count": 63,
+        "zero_normal_by_mk": {
+          "17": {
+            "particle_count": 22011,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "zero_normal_fraction": 0.0,
+            "normal_norm_min_m": 0.012499975971877575,
+            "normal_norm_max_m": 0.10825317547305482,
+            "normal_size_min_m": 0.012499975971877575,
+            "normal_size_max_m": 0.10825317353010178
+          },
+          "18": {
+            "particle_count": 504,
+            "zero_normal_count": 63,
+            "near_zero_normal_count": 63,
+            "zero_normal_fraction": 0.125,
+            "normal_norm_min_m": 1.1102230246251565e-16,
+            "normal_norm_max_m": 0.16007810570310424,
+            "normal_size_min_m": 1.1102230246251565e-16,
+            "normal_size_max_m": 0.16007810831069946
+          }
+        },
+        "zero_normal_by_mk_counts": {
+          "17": 0,
+          "18": 63
+        },
+        "face_counts_are_incident": true,
+        "face_count_note": "Face rows include edge/corner points incident on that face; the exclusive face interior, edge, and corner partition is reported separately."
+      },
+      "zero_normals_by_topology": {
+        "faces": {
+          "x_min": {
+            "incident_point_count": 179,
+            "incident_zero_normal_count": 63,
+            "incident_near_zero_normal_count": 63,
+            "interior_point_count": 84,
+            "interior_zero_normal_count": 49,
+            "interior_near_zero_normal_count": 49,
+            "plane_axis": "x",
+            "plane_side": "min",
+            "plane_coordinate_m": 0.5
+          },
+          "x_max": {
+            "incident_point_count": 113,
+            "incident_zero_normal_count": 0,
+            "incident_near_zero_normal_count": 0,
+            "interior_point_count": 35,
+            "interior_zero_normal_count": 0,
+            "interior_near_zero_normal_count": 0,
+            "plane_axis": "x",
+            "plane_side": "max",
+            "plane_coordinate_m": 0.7
+          },
+          "y_min": {
+            "incident_point_count": 139,
+            "incident_zero_normal_count": 7,
+            "incident_near_zero_normal_count": 7,
+            "interior_point_count": 35,
+            "interior_zero_normal_count": 0,
+            "interior_near_zero_normal_count": 0,
+            "plane_axis": "y",
+            "plane_side": "min",
+            "plane_coordinate_m": 0.3
+          },
+          "y_max": {
+            "incident_point_count": 140,
+            "incident_zero_normal_count": 7,
+            "incident_near_zero_normal_count": 7,
+            "interior_point_count": 35,
+            "interior_zero_normal_count": 0,
+            "interior_near_zero_normal_count": 0,
+            "plane_axis": "y",
+            "plane_side": "max",
+            "plane_coordinate_m": 0.5
+          },
+          "z_min": {
+            "incident_point_count": 113,
+            "incident_zero_normal_count": 0,
+            "incident_near_zero_normal_count": 0,
+            "interior_point_count": 35,
+            "interior_zero_normal_count": 0,
+            "interior_near_zero_normal_count": 0,
+            "plane_axis": "z",
+            "plane_side": "min",
+            "plane_coordinate_m": 0.2
+          },
+          "z_max": {
+            "incident_point_count": 113,
+            "incident_zero_normal_count": 0,
+            "incident_near_zero_normal_count": 0,
+            "interior_point_count": 35,
+            "interior_zero_normal_count": 0,
+            "interior_near_zero_normal_count": 0,
+            "plane_axis": "z",
+            "plane_side": "max",
+            "plane_coordinate_m": 0.4
+          }
+        },
+        "edges": {
+          "x_min__y_min": {
+            "point_count": 26,
+            "zero_normal_count": 7,
+            "near_zero_normal_count": 7,
+            "faces": [
+              "x_min",
+              "y_min"
+            ]
+          },
+          "x_min__y_max": {
+            "point_count": 27,
+            "zero_normal_count": 7,
+            "near_zero_normal_count": 7,
+            "faces": [
+              "x_min",
+              "y_max"
+            ]
+          },
+          "x_max__y_min": {
+            "point_count": 18,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "y_min"
+            ]
+          },
+          "x_max__y_max": {
+            "point_count": 18,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "y_max"
+            ]
+          },
+          "x_min__z_min": {
+            "point_count": 9,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_min",
+              "z_min"
+            ]
+          },
+          "x_min__z_max": {
+            "point_count": 9,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_min",
+              "z_max"
+            ]
+          },
+          "x_max__z_min": {
+            "point_count": 9,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "z_min"
+            ]
+          },
+          "x_max__z_max": {
+            "point_count": 9,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "z_max"
+            ]
+          },
+          "y_min__z_min": {
+            "point_count": 18,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "y_min",
+              "z_min"
+            ]
+          },
+          "y_min__z_max": {
+            "point_count": 18,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "y_min",
+              "z_max"
+            ]
+          },
+          "y_max__z_min": {
+            "point_count": 18,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "y_max",
+              "z_min"
+            ]
+          },
+          "y_max__z_max": {
+            "point_count": 18,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "y_max",
+              "z_max"
+            ]
+          }
+        },
+        "corners": {
+          "x_min__y_min__z_min": {
+            "point_count": 6,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_min",
+              "y_min",
+              "z_min"
+            ]
+          },
+          "x_min__y_min__z_max": {
+            "point_count": 6,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_min",
+              "y_min",
+              "z_max"
+            ]
+          },
+          "x_min__y_max__z_min": {
+            "point_count": 6,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_min",
+              "y_max",
+              "z_min"
+            ]
+          },
+          "x_min__y_max__z_max": {
+            "point_count": 6,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_min",
+              "y_max",
+              "z_max"
+            ]
+          },
+          "x_max__y_min__z_min": {
+            "point_count": 6,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "y_min",
+              "z_min"
+            ]
+          },
+          "x_max__y_min__z_max": {
+            "point_count": 6,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "y_min",
+              "z_max"
+            ]
+          },
+          "x_max__y_max__z_min": {
+            "point_count": 6,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "y_max",
+              "z_min"
+            ]
+          },
+          "x_max__y_max__z_max": {
+            "point_count": 6,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "y_max",
+              "z_max"
+            ]
+          }
+        },
+        "partition": {
+          "face_interior": {
+            "point_count": 259,
+            "zero_normal_count": 49,
+            "near_zero_normal_count": 49
+          },
+          "edge_excluding_corners": {
+            "point_count": 197,
+            "zero_normal_count": 14,
+            "near_zero_normal_count": 14
+          },
+          "corner": {
+            "point_count": 48,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0
+          },
+          "off_surface_or_unexpected_incidence": {
+            "point_count": 0,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0
+          }
+        },
+        "body_plane_incidence_counts": {
+          "1": 259,
+          "2": 197,
+          "3": 48
+        }
+      },
+      "ghost_contract": {
+        "normal_points_equal_ghost_points_exactly": true,
+        "max_abs_point_difference_m": 0.0,
+        "mk_equal_exactly": true,
+        "normal_vector_max_abs_residual_m": 0.0,
+        "normal_size_max_abs_residual_m": 0.0,
+        "normal_vector_ratio_min_nonzero": 2.0,
+        "normal_vector_ratio_max_nonzero": 2.0,
+        "normal_size_ratio_min_nonzero": 2.0,
+        "normal_size_ratio_max_nonzero": 2.0,
+        "pass": true
+      },
+      "generation_vs_runtime": {
+        "bound_vtk_present": true,
+        "bound_vtk_vs_runtime": {
+          "points_equal_exactly": true,
+          "max_abs_point_difference_m": 0.0,
+          "Mk_equal_exactly": true,
+          "Mk_max_abs_difference": 0.0,
+          "Normal_equal_exactly": true,
+          "Normal_max_abs_difference": 0.0,
+          "NormalSize_equal_exactly": true,
+          "NormalSize_max_abs_difference": 0.0,
+          "bound_threshold_zero_count": 63,
+          "bound_exact_vector_zero_count": 0
+        },
+        "gencase_reported_final_zero_normals": {
+          "count": 0,
+          "total": 22515,
+          "percentage": 0.0
+        },
+        "serialized_generation_threshold_zero_count": 63,
+        "runtime_threshold_zero_count": 63,
+        "runtime_exact_vector_zero_count": 0,
+        "generation_log_to_runtime_threshold_difference": 63,
+        "interpretation": "The existing GenCase line reports exact final zero normals as 0, while the serialized Bound/CfgInit arrays contain machine-epsilon norms that are counted under the explicit <=1e-12 m audit threshold. Bound and runtime arrays are compared directly; no new runtime was run."
+      },
+      "construction_face_overlap": {
+        "hdp_actual_point_count": 16,
+        "hdp_actual_polygon_count": 11,
+        "hdp_actual_cell_mk_counts": {
+          "17": 5,
+          "18": 6
+        },
+        "body_mk": 18,
+        "body_hdp_face_count": 6,
+        "body_hdp_vertex_count": 8,
+        "body_hdp_faces": [
+          {
+            "name": "x_min",
+            "cell_index": 10,
+            "cell_mk": 18,
+            "vertex_ids": [
+              8,
+              12,
+              15,
+              9
+            ],
+            "axis": "x",
+            "side": "min",
+            "coordinate_m": 0.5,
+            "expected_coordinate_m": 0.5,
+            "coordinate_residual_m": 0.0,
+            "max_vertex_residual_to_source_box_m": 0.0,
+            "vertex_bbox_m": [
+              [
+                0.5,
+                0.30000001192092896,
+                0.20000000298023224
+              ],
+              [
+                0.5,
+                0.5,
+                0.4000000059604645
+              ]
+            ]
+          },
+          {
+            "name": "x_max",
+            "cell_index": 9,
+            "cell_mk": 18,
+            "vertex_ids": [
+              11,
+              10,
+              14,
+              13
+            ],
+            "axis": "x",
+            "side": "max",
+            "coordinate_m": 0.699999988079071,
+            "expected_coordinate_m": 0.7,
+            "coordinate_residual_m": 1.1920928910669204e-08,
+            "max_vertex_residual_to_source_box_m": 1.1920928910669204e-08,
+            "vertex_bbox_m": [
+              [
+                0.699999988079071,
+                0.30000001192092896,
+                0.20000000298023224
+              ],
+              [
+                0.699999988079071,
+                0.5,
+                0.4000000059604645
+              ]
+            ]
+          },
+          {
+            "name": "y_min",
+            "cell_index": 7,
+            "cell_mk": 18,
+            "vertex_ids": [
+              8,
+              11,
+              13,
+              12
+            ],
+            "axis": "y",
+            "side": "min",
+            "coordinate_m": 0.30000001192092896,
+            "expected_coordinate_m": 0.3,
+            "coordinate_residual_m": 1.1920928966180355e-08,
+            "max_vertex_residual_to_source_box_m": 1.1920928966180355e-08,
+            "vertex_bbox_m": [
+              [
+                0.5,
+                0.30000001192092896,
+                0.20000000298023224
+              ],
+              [
+                0.699999988079071,
+                0.30000001192092896,
+                0.4000000059604645
+              ]
+            ]
+          },
+          {
+            "name": "y_max",
+            "cell_index": 8,
+            "cell_mk": 18,
+            "vertex_ids": [
+              10,
+              9,
+              15,
+              14
+            ],
+            "axis": "y",
+            "side": "max",
+            "coordinate_m": 0.5,
+            "expected_coordinate_m": 0.5,
+            "coordinate_residual_m": 0.0,
+            "max_vertex_residual_to_source_box_m": 0.0,
+            "vertex_bbox_m": [
+              [
+                0.5,
+                0.5,
+                0.20000000298023224
+              ],
+              [
+                0.699999988079071,
+                0.5,
+                0.4000000059604645
+              ]
+            ]
+          },
+          {
+            "name": "z_min",
+            "cell_index": 5,
+            "cell_mk": 18,
+            "vertex_ids": [
+              8,
+              9,
+              10,
+              11
+            ],
+            "axis": "z",
+            "side": "min",
+            "coordinate_m": 0.20000000298023224,
+            "expected_coordinate_m": 0.2,
+            "coordinate_residual_m": 2.980232227667301e-09,
+            "max_vertex_residual_to_source_box_m": 2.980232227667301e-09,
+            "vertex_bbox_m": [
+              [
+                0.5,
+                0.30000001192092896,
+                0.20000000298023224
+              ],
+              [
+                0.699999988079071,
+                0.5,
+                0.20000000298023224
+              ]
+            ]
+          },
+          {
+            "name": "z_max",
+            "cell_index": 6,
+            "cell_mk": 18,
+            "vertex_ids": [
+              12,
+              13,
+              14,
+              15
+            ],
+            "axis": "z",
+            "side": "max",
+            "coordinate_m": 0.4000000059604645,
+            "expected_coordinate_m": 0.4,
+            "coordinate_residual_m": 5.960464455334602e-09,
+            "max_vertex_residual_to_source_box_m": 5.960464455334602e-09,
+            "vertex_bbox_m": [
+              [
+                0.5,
+                0.30000001192092896,
+                0.4000000059604645
+              ],
+              [
+                0.699999988079071,
+                0.5,
+                0.4000000059604645
+              ]
+            ]
+          }
+        ],
+        "runtime_interface": {
+          "formula": "x_gamma = x_b + n_ghost/2",
+          "face_plane_tolerance_m": 1e-05,
+          "body_interface_point_count": 504,
+          "body_interface_bbox_m": [
+            [
+              0.49999997578561306,
+              0.30000000074505806,
+              0.1999999973922968
+            ],
+            [
+              0.6999999992549419,
+              0.5000000149011612,
+              0.4000000059604645
+            ]
+          ],
+          "body_interface_on_any_hdp_body_face_count": 504,
+          "body_interface_not_on_hdp_body_face_count": 0,
+          "body_interface_face_incidence_counts": {
+            "1": 259,
+            "2": 197,
+            "3": 48
+          },
+          "faces": [
+            {
+              "name": "x_min",
+              "hdp_cell_index": 10,
+              "interface_point_count": 179,
+              "interface_zero_normal_count": 63,
+              "interface_near_zero_normal_count": 63,
+              "max_runtime_plane_residual_to_source_box_m": 2.421438694000244e-08,
+              "all_selected_points_within_construction_rectangle": true
+            },
+            {
+              "name": "x_max",
+              "hdp_cell_index": 9,
+              "interface_point_count": 113,
+              "interface_zero_normal_count": 0,
+              "interface_near_zero_normal_count": 0,
+              "max_runtime_plane_residual_to_source_box_m": 3.427267070144069e-08,
+              "all_selected_points_within_construction_rectangle": true
+            },
+            {
+              "name": "y_min",
+              "hdp_cell_index": 7,
+              "interface_point_count": 139,
+              "interface_zero_normal_count": 7,
+              "interface_near_zero_normal_count": 7,
+              "max_runtime_plane_residual_to_source_box_m": 1.1920928966180355e-08,
+              "all_selected_points_within_construction_rectangle": true
+            },
+            {
+              "name": "y_max",
+              "hdp_cell_index": 8,
+              "interface_point_count": 140,
+              "interface_zero_normal_count": 7,
+              "interface_near_zero_normal_count": 7,
+              "max_runtime_plane_residual_to_source_box_m": 1.4901161193847656e-08,
+              "all_selected_points_within_construction_rectangle": true
+            },
+            {
+              "name": "z_min",
+              "hdp_cell_index": 5,
+              "interface_point_count": 113,
+              "interface_zero_normal_count": 0,
+              "interface_near_zero_normal_count": 0,
+              "max_runtime_plane_residual_to_source_box_m": 1.0430812824591129e-08,
+              "all_selected_points_within_construction_rectangle": true
+            },
+            {
+              "name": "z_max",
+              "hdp_cell_index": 6,
+              "interface_point_count": 113,
+              "interface_zero_normal_count": 0,
+              "interface_near_zero_normal_count": 0,
+              "max_runtime_plane_residual_to_source_box_m": 8.940696738513054e-09,
+              "all_selected_points_within_construction_rectangle": true
+            }
+          ],
+          "all_body_interface_points_match_construction_faces": true
+        },
+        "physical_box_source": "source definition physical mkvoid when available, otherwise hdp body bbox",
+        "hdp_field_names": [
+          "Mk",
+          "ObjId"
+        ]
+      },
+      "generated_count_checks": {
+        "runtime_normal_count_equals_generated_nb": true,
+        "runtime_fixed_count_equals_generated_nbf": true,
+        "runtime_mk_counts": {
+          "17": 22011,
+          "18": 504
+        },
+        "generated_fixed_summary": {
+          "count": 22515,
+          "id": "0-22514",
+          "mkcount": 2,
+          "mkvalues": "17-18"
+        },
+        "generated_body_block": {
+          "mkbound": 1,
+          "mkfluid": null,
+          "mk": 18,
+          "begin": 22011,
+          "count": 504
+        },
+        "runtime_fixed_count_equals_generated_fixed_summary": true
+      },
+      "checks": {
+        "required_arrays_present": true,
+        "finite_arrays": true,
+        "ghost_doubling_pass": true,
+        "runtime_zero_free_pass": false,
+        "construction_face_overlap_pass": true,
+        "runtime_body_topology_partition_pass": true,
+        "generation_log_zero_free_as_reported": true,
+        "serialized_generation_runtime_arrays_match": true
+      }
+    },
+    {
+      "case_id": "fixed_box_mdbc_fine",
+      "run_label": "fine-3",
+      "artifact_directories": {
+        "result": "results/fixed_box_mdbc_fine/fine-3-ingested",
+        "generated": "generated/fixed_box_mdbc_fine"
+      },
+      "source_files": {
+        "definition": {
+          "path": "fixed_box_mdbc_fine_Def.xml",
+          "required": false,
+          "present": true,
+          "bytes": 5297,
+          "sha256": "9ecbb65513361899a9d03fa1927f5eff99719fdefbf11259b050379e62ea69ba"
+        },
+        "normal_vtk": {
+          "path": "results/fixed_box_mdbc_fine/fine-3-ingested/CfgInit_Normals.vtk",
+          "required": true,
+          "present": true,
+          "bytes": 3695362,
+          "sha256": "b4f1c86b48d581473907d1afef29dcaf559976b8bb5e912654c45cf2cd809549"
+        },
+        "ghost_vtk": {
+          "path": "results/fixed_box_mdbc_fine/fine-3-ingested/CfgInit_NormalsGhost.vtk",
+          "required": true,
+          "present": true,
+          "bytes": 3695362,
+          "sha256": "edbc635956c1dc1f5d6398f212716026979c8dae42e00422c804d4f27d58fa8d"
+        },
+        "hdp_actual_vtk": {
+          "path": "generated/fixed_box_mdbc_fine/fixed_box_mdbc_fine_hdp_Actual.vtk",
+          "required": true,
+          "present": true,
+          "bytes": 679,
+          "sha256": "a61e3c84cb3af119af61fe7850cc8f15b7328107d5f2b056e0cf88acf9c49529"
+        },
+        "bound_vtk": {
+          "path": "generated/fixed_box_mdbc_fine/fixed_box_mdbc_fine_Bound.vtk",
+          "required": false,
+          "present": true,
+          "bytes": 3783387,
+          "sha256": "ea8dd0d7b381ac1a48eca20852248fb6443d8f780a1be9b199162eabe51be71e"
+        },
+        "mkcells_vtk": {
+          "path": "generated/fixed_box_mdbc_fine/fixed_box_mdbc_fine_MkCells.vtk",
+          "required": false,
+          "present": true,
+          "bytes": 2473,
+          "sha256": "1832755df0c2be88432fc95240dc4f6d3f59a709257fd62606515fecde61f88f"
+        },
+        "generated_xml": {
+          "path": "results/fixed_box_mdbc_fine/fine-3-ingested/generated_particles.xml",
+          "required": true,
+          "present": true,
+          "bytes": 8363,
+          "sha256": "0d1588efb15b330ade0fdb033a3123486767d187ddd2ee9bd974e7b7230e826e"
+        },
+        "gencase_log": {
+          "path": "results/fixed_box_mdbc_fine/fine-3-ingested/gencase.stdout.log",
+          "required": true,
+          "present": true,
+          "bytes": 5718,
+          "sha256": "3508470fde558b0993cc748f0aee6ffacc52e454191a598ee26d710f9f1e6066"
+        },
+        "solver_log": {
+          "path": "results/fixed_box_mdbc_fine/fine-3-ingested/solver.stdout.log",
+          "required": false,
+          "present": true,
+          "bytes": 33719,
+          "sha256": "b64314ca94f02642bdc635a9fa4a20f2faf2648129749b87f71167e1d32482ca"
+        },
+        "run_out": {
+          "path": "results/fixed_box_mdbc_fine/fine-3-ingested/Run.out",
+          "required": false,
+          "present": true,
+          "bytes": 33674,
+          "sha256": "e192bf8f066a3b985b405079f71e7bada07bb261de52bd5d471b9f07900e51d2"
+        },
+        "run_csv": {
+          "path": "results/fixed_box_mdbc_fine/fine-3-ingested/Run.csv",
+          "required": false,
+          "present": true,
+          "bytes": 1053,
+          "sha256": "121331c51c15f3b1d13ade8c9b2511f8ff7b9669f8c113c799d50c2fc2eab5e7"
+        },
+        "run_parts_csv": {
+          "path": "results/fixed_box_mdbc_fine/fine-3-ingested/RunPARTs.csv",
+          "required": false,
+          "present": true,
+          "bytes": 35556,
+          "sha256": "c64d563806d79d8a91d2c3bdd2add1e6589b21fa4c4dcea9b03c85f3f2604d38"
+        }
+      },
+      "errors": [],
+      "status": "complete",
+      "source_contract": {
+        "path": "fixed_box_mdbc_fine_Def.xml",
+        "source_dp_m": 0.0125,
+        "boundary_parameter": "2",
+        "normal_geometryfile": "[CaseName]_hdp_Actual.vtk",
+        "normal_distanceh": 5.0,
+        "physical_void": {
+          "point_m": [
+            0.5,
+            0.3,
+            0.2
+          ],
+          "size_m": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "max_m": [
+            0.7,
+            0.5,
+            0.4
+          ],
+          "layers_vdp": [],
+          "boxfill": "solid"
+        },
+        "actual_body": {
+          "point_m": [
+            0.50625,
+            0.30625,
+            0.20625
+          ],
+          "size_m": [
+            0.1875,
+            0.1875,
+            0.1875
+          ],
+          "max_m": [
+            0.69375,
+            0.49375,
+            0.39375
+          ],
+          "layers_vdp": [
+            0.0,
+            -1.0,
+            -2.0
+          ],
+          "boxfill": "solid"
+        },
+        "normal_body": {
+          "point_m": [
+            0.50625,
+            0.30625,
+            0.20625
+          ],
+          "size_m": [
+            0.1875,
+            0.1875,
+            0.1875
+          ],
+          "max_m": [
+            0.69375,
+            0.49375,
+            0.39375
+          ],
+          "layers_vdp": [
+            0.5
+          ],
+          "boxfill": "solid"
+        }
+      },
+      "generated_summary": {
+        "path": "results/fixed_box_mdbc_fine/fine-3-ingested/generated_particles.xml",
+        "application": "GenCase v5.4.354.01 (07-04-2025)",
+        "date": "07-09-2026 20:36:10",
+        "particles": {
+          "np": 330040,
+          "nb": 87979,
+          "nbf": 87979,
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1
+        },
+        "summary": {
+          "fixed": {
+            "count": 87979,
+            "id": "0-87978",
+            "mkcount": 2,
+            "mkvalues": "17-18"
+          },
+          "moving": {},
+          "floating": {},
+          "fluid": {
+            "count": 242061,
+            "id": "87979-330039",
+            "mkcount": 1,
+            "mkvalues": "1"
+          }
+        },
+        "blocks": {
+          "fixed": [
+            {
+              "mkbound": 0,
+              "mkfluid": null,
+              "mk": 17,
+              "begin": 0,
+              "count": 83883
+            },
+            {
+              "mkbound": 1,
+              "mkfluid": null,
+              "mk": 18,
+              "begin": 83883,
+              "count": 4096
+            }
+          ],
+          "moving": [],
+          "floating": [],
+          "fluid": [
+            {
+              "mkbound": null,
+              "mkfluid": 0,
+              "mk": 1,
+              "begin": 87979,
+              "count": 242061
+            }
+          ]
+        },
+        "body_mk": 18,
+        "constants": {
+          "data2d": false,
+          "cflnumber": 0.2,
+          "gamma": 7.0,
+          "rhop0": 1000.0,
+          "dp": 0.0125,
+          "h": 0.021650635095,
+          "b": 315321.42857,
+          "massbound": 0.001953125,
+          "massfluid": 0.001953125
+        },
+        "vtk_outputs": [
+          {
+            "name": "fixed_box_mdbc_fine_hdp_Actual.vtk",
+            "mk": "17-18",
+            "mkbound": "0-1"
+          },
+          {
+            "name": "fixed_box_mdbc_fine__Actual.vtk",
+            "mk": "17-18",
+            "mkbound": "0-1"
+          }
+        ]
+      },
+      "gencase_summary": {
+        "path": "results/fixed_box_mdbc_fine/fine-3-ingested/gencase.stdout.log",
+        "return_code": 0,
+        "points_loaded": 330040,
+        "particle_summary": {
+          "fixed": 87979,
+          "moving": null,
+          "floating": null,
+          "fluid": 242061
+        },
+        "normal_evaluation": {
+          "particles": 87979,
+          "shapes": 11,
+          "distance_text": "5x H = 0.108253"
+        },
+        "nonzero_particle_normals": {
+          "count": 87979,
+          "total": 87979,
+          "min_size_reported_m": 0.0,
+          "max_size_reported_m": 0.160078
+        },
+        "final_zero_normals_reported": {
+          "count": 0,
+          "total": 87979,
+          "percentage": 0.0
+        },
+        "shape_outputs": {
+          "hdp_Actual.vtk": {
+            "shape_count": 11,
+            "point_count": 16
+          },
+          "_Actual.vtk": {
+            "shape_count": 21,
+            "point_count": 32
+          }
+        }
+      },
+      "existing_solver_log_summary": {
+        "path": "results/fixed_box_mdbc_fine/fine-3-ingested/solver.stdout.log",
+        "return_code": 0,
+        "execution_kind_in_existing_log": "gpu",
+        "boundary_mode_mdbc": true,
+        "fixed_count": 87979,
+        "moving_count": 0,
+        "floating_count": 0,
+        "fluid_count": 242061,
+        "finished_message_present": true
+      },
+      "body_mk": 18,
+      "resolution": {
+        "source_dp_m": 0.0125,
+        "generated_dp_m": 0.0125,
+        "h_m": 0.021650635095,
+        "h_over_dp": 1.7320508075999999,
+        "box_min_m": [
+          0.5,
+          0.3,
+          0.2
+        ],
+        "box_max_m": [
+          0.7,
+          0.5,
+          0.4
+        ],
+        "box_size_m": [
+          0.19999999999999996,
+          0.2,
+          0.2
+        ],
+        "box_cells_per_axis_float": [
+          15.999999999999996,
+          16.0,
+          16.0
+        ],
+        "box_cells_per_axis_rounded": [
+          16,
+          16,
+          16
+        ],
+        "nominal_box_nodes_per_axis": [
+          17,
+          17,
+          17
+        ],
+        "runtime_boundary_point_count": 87979,
+        "runtime_body_point_count": 4096,
+        "runtime_zero_normal_count": 240,
+        "runtime_zero_normal_fraction": 0.0027279237090669364,
+        "runtime_body_zero_normal_count": 240,
+        "runtime_body_zero_normal_fraction": 0.05859375
+      },
+      "normal_vtk_summary": {
+        "point_count": 87979,
+        "array_names": [
+          "Idp",
+          "Mk",
+          "Normal",
+          "NormalSize"
+        ],
+        "array_metadata": {
+          "point:Idp": {
+            "location": "point",
+            "name": "Idp",
+            "components": 1,
+            "count": 87979,
+            "kind": "int"
+          },
+          "point:Mk": {
+            "location": "point",
+            "name": "Mk",
+            "components": 1,
+            "count": 87979,
+            "kind": "short"
+          },
+          "point:Normal": {
+            "location": "point",
+            "name": "Normal",
+            "components": 3,
+            "count": 87979,
+            "kind": "float"
+          },
+          "point:NormalSize": {
+            "location": "point",
+            "name": "NormalSize",
+            "components": 1,
+            "count": 87979,
+            "kind": "float"
+          }
+        },
+        "finite_arrays": true,
+        "boundary_bbox_m": [
+          [
+            -0.02500000037252903,
+            -0.02500000037252903,
+            -0.02500000037252903
+          ],
+          [
+            1.225000023841858,
+            0.824999988079071,
+            0.800000011920929
+          ]
+        ],
+        "effective_interface_bbox_m": [
+          [
+            0.00624999962747097,
+            0.00624999962747097,
+            0.00624999962747097
+          ],
+          [
+            1.1937500713393092,
+            0.7937500001862645,
+            0.800000011920929
+          ]
+        ],
+        "mk_counts": {
+          "17": 83883,
+          "18": 4096
+        }
+      },
+      "ghost_vtk_summary": {
+        "point_count": 87979,
+        "array_names": [
+          "Idp",
+          "Mk",
+          "Normal",
+          "NormalSize"
+        ],
+        "array_metadata": {
+          "point:Idp": {
+            "location": "point",
+            "name": "Idp",
+            "components": 1,
+            "count": 87979,
+            "kind": "int"
+          },
+          "point:Mk": {
+            "location": "point",
+            "name": "Mk",
+            "components": 1,
+            "count": 87979,
+            "kind": "short"
+          },
+          "point:Normal": {
+            "location": "point",
+            "name": "Normal",
+            "components": 3,
+            "count": 87979,
+            "kind": "float"
+          },
+          "point:NormalSize": {
+            "location": "point",
+            "name": "NormalSize",
+            "components": 1,
+            "count": 87979,
+            "kind": "float"
+          }
+        },
+        "finite_arrays": true,
+        "boundary_bbox_m": [
+          [
+            -0.02500000037252903,
+            -0.02500000037252903,
+            -0.02500000037252903
+          ],
+          [
+            1.225000023841858,
+            0.824999988079071,
+            0.800000011920929
+          ]
+        ],
+        "mk_counts": {
+          "17": 83883,
+          "18": 4096
+        }
+      },
+      "generated_bound_vtk_summary": {
+        "point_count": 87979,
+        "polygon_count": 0,
+        "vertex_cell_count": 87979,
+        "array_names": [
+          "Idp",
+          "Mk",
+          "Normal",
+          "NormalSize",
+          "Type"
+        ],
+        "array_metadata": {
+          "point:Idp": {
+            "location": "point",
+            "name": "Idp",
+            "components": 1,
+            "count": 87979,
+            "kind": "unsigned_int"
+          },
+          "point:Mk": {
+            "location": "point",
+            "name": "Mk",
+            "components": 1,
+            "count": 87979,
+            "kind": "unsigned_short"
+          },
+          "point:Normal": {
+            "location": "point",
+            "name": "Normal",
+            "components": 3,
+            "count": 87979,
+            "kind": "float"
+          },
+          "point:NormalSize": {
+            "location": "point",
+            "name": "NormalSize",
+            "components": 1,
+            "count": 87979,
+            "kind": "float"
+          },
+          "point:Type": {
+            "location": "point",
+            "name": "Type",
+            "components": 1,
+            "count": 87979,
+            "kind": "unsigned_char"
+          }
+        },
+        "mk_counts": {
+          "17": 83883,
+          "18": 4096
+        },
+        "type_counts": {
+          "0": 87979
+        },
+        "normal_exact_vector_zero_count": 0,
+        "normal_threshold_zero_count": 240,
+        "normal_near_zero_count": 496,
+        "normal_norm_range_m": [
+          1.1102230246251565e-16,
+          0.16007810570310424
+        ],
+        "normal_size_exact_zero_count": 0,
+        "normal_size_threshold_zero_count": 240,
+        "normal_size_range_m": [
+          1.1102230246251565e-16,
+          0.16007810831069946
+        ]
+      },
+      "generated_mkcells_vtk_summary": {
+        "point_count": 128,
+        "polygon_count": 32,
+        "vertex_cell_count": 0,
+        "array_names": [
+          "Mk",
+          "Type"
+        ],
+        "array_metadata": {
+          "cell:Mk": {
+            "location": "cell",
+            "name": "Mk",
+            "components": 1,
+            "count": 32,
+            "kind": "unsigned_short"
+          },
+          "cell:Type": {
+            "location": "cell",
+            "name": "Type",
+            "components": 1,
+            "count": 32,
+            "kind": "unsigned_char"
+          }
+        },
+        "mk_counts": {
+          "1": 12,
+          "17": 14,
+          "18": 6
+        },
+        "type_counts": {
+          "0": 20,
+          "3": 12
+        }
+      },
+      "zero_normals": {
+        "definition": "zero iff Euclidean norm of FIELD/Normal <= 1e-12 m",
+        "near_zero_definition": "near-zero iff Euclidean norm of FIELD/Normal <= 1e-8 m",
+        "total_zero_normal_count": 240,
+        "total_zero_normal_fraction": 0.0027279237090669364,
+        "total_near_zero_normal_count": 496,
+        "exact_vector_zero_count": 0,
+        "normal_size_threshold_zero_count": 240,
+        "zero_normal_by_mk": {
+          "17": {
+            "particle_count": 83883,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "zero_normal_fraction": 0.0,
+            "normal_norm_min_m": 0.006249976344406605,
+            "normal_norm_max_m": 0.054126594188920255,
+            "normal_size_min_m": 0.006249976344406605,
+            "normal_size_max_m": 0.054126594215631485
+          },
+          "18": {
+            "particle_count": 4096,
+            "zero_normal_count": 240,
+            "near_zero_normal_count": 496,
+            "zero_normal_fraction": 0.05859375,
+            "normal_norm_min_m": 1.1102230246251565e-16,
+            "normal_norm_max_m": 0.16007810570310424,
+            "normal_size_min_m": 1.1102230246251565e-16,
+            "normal_size_max_m": 0.16007810831069946
+          }
+        },
+        "zero_normal_by_mk_counts": {
+          "17": 0,
+          "18": 240
+        },
+        "face_counts_are_incident": true,
+        "face_count_note": "Face rows include edge/corner points incident on that face; the exclusive face interior, edge, and corner partition is reported separately."
+      },
+      "zero_normals_by_topology": {
+        "faces": {
+          "x_min": {
+            "incident_point_count": 1000,
+            "incident_zero_normal_count": 240,
+            "incident_near_zero_normal_count": 256,
+            "interior_point_count": 680,
+            "interior_zero_normal_count": 225,
+            "interior_near_zero_normal_count": 225,
+            "plane_axis": "x",
+            "plane_side": "min",
+            "plane_coordinate_m": 0.5
+          },
+          "x_max": {
+            "incident_point_count": 742,
+            "incident_zero_normal_count": 0,
+            "incident_near_zero_normal_count": 0,
+            "interior_point_count": 455,
+            "interior_zero_normal_count": 0,
+            "interior_near_zero_normal_count": 0,
+            "plane_axis": "x",
+            "plane_side": "max",
+            "plane_coordinate_m": 0.7
+          },
+          "y_min": {
+            "incident_point_count": 679,
+            "incident_zero_normal_count": 0,
+            "incident_near_zero_normal_count": 0,
+            "interior_point_count": 455,
+            "interior_zero_normal_count": 0,
+            "interior_near_zero_normal_count": 0,
+            "plane_axis": "y",
+            "plane_side": "min",
+            "plane_coordinate_m": 0.3
+          },
+          "y_max": {
+            "incident_point_count": 936,
+            "incident_zero_normal_count": 15,
+            "incident_near_zero_normal_count": 31,
+            "interior_point_count": 455,
+            "interior_zero_normal_count": 0,
+            "interior_near_zero_normal_count": 0,
+            "plane_axis": "y",
+            "plane_side": "max",
+            "plane_coordinate_m": 0.5
+          },
+          "z_min": {
+            "incident_point_count": 742,
+            "incident_zero_normal_count": 0,
+            "incident_near_zero_normal_count": 0,
+            "interior_point_count": 455,
+            "interior_zero_normal_count": 0,
+            "interior_near_zero_normal_count": 0,
+            "plane_axis": "z",
+            "plane_side": "min",
+            "plane_coordinate_m": 0.2
+          },
+          "z_max": {
+            "incident_point_count": 998,
+            "incident_zero_normal_count": 0,
+            "incident_near_zero_normal_count": 256,
+            "interior_point_count": 680,
+            "interior_zero_normal_count": 0,
+            "interior_near_zero_normal_count": 225,
+            "plane_axis": "z",
+            "plane_side": "max",
+            "plane_coordinate_m": 0.4
+          }
+        },
+        "edges": {
+          "x_min__y_min": {
+            "point_count": 49,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_min",
+              "y_min"
+            ]
+          },
+          "x_min__y_max": {
+            "point_count": 115,
+            "zero_normal_count": 15,
+            "near_zero_normal_count": 15,
+            "faces": [
+              "x_min",
+              "y_max"
+            ]
+          },
+          "x_max__y_min": {
+            "point_count": 49,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "y_min"
+            ]
+          },
+          "x_max__y_max": {
+            "point_count": 98,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "y_max"
+            ]
+          },
+          "x_min__z_min": {
+            "point_count": 49,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_min",
+              "z_min"
+            ]
+          },
+          "x_min__z_max": {
+            "point_count": 64,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 15,
+            "faces": [
+              "x_min",
+              "z_max"
+            ]
+          },
+          "x_max__z_min": {
+            "point_count": 49,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "z_min"
+            ]
+          },
+          "x_max__z_max": {
+            "point_count": 49,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "z_max"
+            ]
+          },
+          "y_min__z_min": {
+            "point_count": 49,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "y_min",
+              "z_min"
+            ]
+          },
+          "y_min__z_max": {
+            "point_count": 49,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "y_min",
+              "z_max"
+            ]
+          },
+          "y_max__z_min": {
+            "point_count": 98,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "y_max",
+              "z_min"
+            ]
+          },
+          "y_max__z_max": {
+            "point_count": 113,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 15,
+            "faces": [
+              "y_max",
+              "z_max"
+            ]
+          }
+        },
+        "corners": {
+          "x_min__y_min__z_min": {
+            "point_count": 7,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_min",
+              "y_min",
+              "z_min"
+            ]
+          },
+          "x_min__y_min__z_max": {
+            "point_count": 7,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_min",
+              "y_min",
+              "z_max"
+            ]
+          },
+          "x_min__y_max__z_min": {
+            "point_count": 14,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_min",
+              "y_max",
+              "z_min"
+            ]
+          },
+          "x_min__y_max__z_max": {
+            "point_count": 15,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 1,
+            "faces": [
+              "x_min",
+              "y_max",
+              "z_max"
+            ]
+          },
+          "x_max__y_min__z_min": {
+            "point_count": 7,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "y_min",
+              "z_min"
+            ]
+          },
+          "x_max__y_min__z_max": {
+            "point_count": 7,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "y_min",
+              "z_max"
+            ]
+          },
+          "x_max__y_max__z_min": {
+            "point_count": 14,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "y_max",
+              "z_min"
+            ]
+          },
+          "x_max__y_max__z_max": {
+            "point_count": 14,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0,
+            "faces": [
+              "x_max",
+              "y_max",
+              "z_max"
+            ]
+          }
+        },
+        "partition": {
+          "face_interior": {
+            "point_count": 3180,
+            "zero_normal_count": 225,
+            "near_zero_normal_count": 450
+          },
+          "edge_excluding_corners": {
+            "point_count": 831,
+            "zero_normal_count": 15,
+            "near_zero_normal_count": 45
+          },
+          "corner": {
+            "point_count": 85,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 1
+          },
+          "off_surface_or_unexpected_incidence": {
+            "point_count": 0,
+            "zero_normal_count": 0,
+            "near_zero_normal_count": 0
+          }
+        },
+        "body_plane_incidence_counts": {
+          "1": 3180,
+          "2": 831,
+          "3": 85
+        }
+      },
+      "ghost_contract": {
+        "normal_points_equal_ghost_points_exactly": true,
+        "max_abs_point_difference_m": 0.0,
+        "mk_equal_exactly": true,
+        "normal_vector_max_abs_residual_m": 0.0,
+        "normal_size_max_abs_residual_m": 0.0,
+        "normal_vector_ratio_min_nonzero": 2.0,
+        "normal_vector_ratio_max_nonzero": 2.0,
+        "normal_size_ratio_min_nonzero": 2.0,
+        "normal_size_ratio_max_nonzero": 2.0,
+        "pass": true
+      },
+      "generation_vs_runtime": {
+        "bound_vtk_present": true,
+        "bound_vtk_vs_runtime": {
+          "points_equal_exactly": true,
+          "max_abs_point_difference_m": 0.0,
+          "Mk_equal_exactly": true,
+          "Mk_max_abs_difference": 0.0,
+          "Normal_equal_exactly": true,
+          "Normal_max_abs_difference": 0.0,
+          "NormalSize_equal_exactly": true,
+          "NormalSize_max_abs_difference": 0.0,
+          "bound_threshold_zero_count": 240,
+          "bound_exact_vector_zero_count": 0
+        },
+        "gencase_reported_final_zero_normals": {
+          "count": 0,
+          "total": 87979,
+          "percentage": 0.0
+        },
+        "serialized_generation_threshold_zero_count": 240,
+        "runtime_threshold_zero_count": 240,
+        "runtime_exact_vector_zero_count": 0,
+        "generation_log_to_runtime_threshold_difference": 240,
+        "interpretation": "The existing GenCase line reports exact final zero normals as 0, while the serialized Bound/CfgInit arrays contain machine-epsilon norms that are counted under the explicit <=1e-12 m audit threshold. Bound and runtime arrays are compared directly; no new runtime was run."
+      },
+      "construction_face_overlap": {
+        "hdp_actual_point_count": 16,
+        "hdp_actual_polygon_count": 11,
+        "hdp_actual_cell_mk_counts": {
+          "17": 5,
+          "18": 6
+        },
+        "body_mk": 18,
+        "body_hdp_face_count": 6,
+        "body_hdp_vertex_count": 8,
+        "body_hdp_faces": [
+          {
+            "name": "x_min",
+            "cell_index": 10,
+            "cell_mk": 18,
+            "vertex_ids": [
+              8,
+              12,
+              15,
+              9
+            ],
+            "axis": "x",
+            "side": "min",
+            "coordinate_m": 0.5,
+            "expected_coordinate_m": 0.5,
+            "coordinate_residual_m": 0.0,
+            "max_vertex_residual_to_source_box_m": 0.0,
+            "vertex_bbox_m": [
+              [
+                0.5,
+                0.30000001192092896,
+                0.20000000298023224
+              ],
+              [
+                0.5,
+                0.5,
+                0.4000000059604645
+              ]
+            ]
+          },
+          {
+            "name": "x_max",
+            "cell_index": 9,
+            "cell_mk": 18,
+            "vertex_ids": [
+              11,
+              10,
+              14,
+              13
+            ],
+            "axis": "x",
+            "side": "max",
+            "coordinate_m": 0.699999988079071,
+            "expected_coordinate_m": 0.7,
+            "coordinate_residual_m": 1.1920928910669204e-08,
+            "max_vertex_residual_to_source_box_m": 1.1920928910669204e-08,
+            "vertex_bbox_m": [
+              [
+                0.699999988079071,
+                0.30000001192092896,
+                0.20000000298023224
+              ],
+              [
+                0.699999988079071,
+                0.5,
+                0.4000000059604645
+              ]
+            ]
+          },
+          {
+            "name": "y_min",
+            "cell_index": 7,
+            "cell_mk": 18,
+            "vertex_ids": [
+              8,
+              11,
+              13,
+              12
+            ],
+            "axis": "y",
+            "side": "min",
+            "coordinate_m": 0.30000001192092896,
+            "expected_coordinate_m": 0.3,
+            "coordinate_residual_m": 1.1920928966180355e-08,
+            "max_vertex_residual_to_source_box_m": 1.1920928966180355e-08,
+            "vertex_bbox_m": [
+              [
+                0.5,
+                0.30000001192092896,
+                0.20000000298023224
+              ],
+              [
+                0.699999988079071,
+                0.30000001192092896,
+                0.4000000059604645
+              ]
+            ]
+          },
+          {
+            "name": "y_max",
+            "cell_index": 8,
+            "cell_mk": 18,
+            "vertex_ids": [
+              10,
+              9,
+              15,
+              14
+            ],
+            "axis": "y",
+            "side": "max",
+            "coordinate_m": 0.5,
+            "expected_coordinate_m": 0.5,
+            "coordinate_residual_m": 0.0,
+            "max_vertex_residual_to_source_box_m": 0.0,
+            "vertex_bbox_m": [
+              [
+                0.5,
+                0.5,
+                0.20000000298023224
+              ],
+              [
+                0.699999988079071,
+                0.5,
+                0.4000000059604645
+              ]
+            ]
+          },
+          {
+            "name": "z_min",
+            "cell_index": 5,
+            "cell_mk": 18,
+            "vertex_ids": [
+              8,
+              9,
+              10,
+              11
+            ],
+            "axis": "z",
+            "side": "min",
+            "coordinate_m": 0.20000000298023224,
+            "expected_coordinate_m": 0.2,
+            "coordinate_residual_m": 2.980232227667301e-09,
+            "max_vertex_residual_to_source_box_m": 2.980232227667301e-09,
+            "vertex_bbox_m": [
+              [
+                0.5,
+                0.30000001192092896,
+                0.20000000298023224
+              ],
+              [
+                0.699999988079071,
+                0.5,
+                0.20000000298023224
+              ]
+            ]
+          },
+          {
+            "name": "z_max",
+            "cell_index": 6,
+            "cell_mk": 18,
+            "vertex_ids": [
+              12,
+              13,
+              14,
+              15
+            ],
+            "axis": "z",
+            "side": "max",
+            "coordinate_m": 0.4000000059604645,
+            "expected_coordinate_m": 0.4,
+            "coordinate_residual_m": 5.960464455334602e-09,
+            "max_vertex_residual_to_source_box_m": 5.960464455334602e-09,
+            "vertex_bbox_m": [
+              [
+                0.5,
+                0.30000001192092896,
+                0.4000000059604645
+              ],
+              [
+                0.699999988079071,
+                0.5,
+                0.4000000059604645
+              ]
+            ]
+          }
+        ],
+        "runtime_interface": {
+          "formula": "x_gamma = x_b + n_ghost/2",
+          "face_plane_tolerance_m": 1e-05,
+          "body_interface_point_count": 4096,
+          "body_interface_bbox_m": [
+            [
+              0.49999997578561306,
+              0.29999999701976776,
+              0.19999999180436134
+            ],
+            [
+              0.7000000104308128,
+              0.5000000149011612,
+              0.4000000171363354
+            ]
+          ],
+          "body_interface_on_any_hdp_body_face_count": 4096,
+          "body_interface_not_on_hdp_body_face_count": 0,
+          "body_interface_face_incidence_counts": {
+            "1": 3180,
+            "2": 831,
+            "3": 85
+          },
+          "faces": [
+            {
+              "name": "x_min",
+              "hdp_cell_index": 10,
+              "interface_point_count": 1000,
+              "interface_zero_normal_count": 240,
+              "interface_near_zero_normal_count": 256,
+              "max_runtime_plane_residual_to_source_box_m": 2.421438694000244e-08,
+              "all_selected_points_within_construction_rectangle": true
+            },
+            {
+              "name": "x_max",
+              "hdp_cell_index": 9,
+              "interface_point_count": 742,
+              "interface_zero_normal_count": 0,
+              "interface_near_zero_normal_count": 0,
+              "max_runtime_plane_residual_to_source_box_m": 3.427267070144069e-08,
+              "all_selected_points_within_construction_rectangle": true
+            },
+            {
+              "name": "y_min",
+              "hdp_cell_index": 7,
+              "interface_point_count": 679,
+              "interface_zero_normal_count": 0,
+              "interface_near_zero_normal_count": 0,
+              "max_runtime_plane_residual_to_source_box_m": 2.3096799861566097e-08,
+              "all_selected_points_within_construction_rectangle": true
+            },
+            {
+              "name": "y_max",
+              "hdp_cell_index": 8,
+              "interface_point_count": 936,
+              "interface_zero_normal_count": 15,
+              "interface_near_zero_normal_count": 31,
+              "max_runtime_plane_residual_to_source_box_m": 1.4901161193847656e-08,
+              "all_selected_points_within_construction_rectangle": true
+            },
+            {
+              "name": "z_min",
+              "hdp_cell_index": 5,
+              "interface_point_count": 742,
+              "interface_zero_normal_count": 0,
+              "interface_near_zero_normal_count": 0,
+              "max_runtime_plane_residual_to_source_box_m": 1.0430812824591129e-08,
+              "all_selected_points_within_construction_rectangle": true
+            },
+            {
+              "name": "z_max",
+              "hdp_cell_index": 6,
+              "interface_point_count": 998,
+              "interface_zero_normal_count": 0,
+              "interface_near_zero_normal_count": 256,
+              "max_runtime_plane_residual_to_source_box_m": 1.7136335350720344e-08,
+              "all_selected_points_within_construction_rectangle": true
+            }
+          ],
+          "all_body_interface_points_match_construction_faces": true
+        },
+        "physical_box_source": "source definition physical mkvoid when available, otherwise hdp body bbox",
+        "hdp_field_names": [
+          "Mk",
+          "ObjId"
+        ]
+      },
+      "generated_count_checks": {
+        "runtime_normal_count_equals_generated_nb": true,
+        "runtime_fixed_count_equals_generated_nbf": true,
+        "runtime_mk_counts": {
+          "17": 83883,
+          "18": 4096
+        },
+        "generated_fixed_summary": {
+          "count": 87979,
+          "id": "0-87978",
+          "mkcount": 2,
+          "mkvalues": "17-18"
+        },
+        "generated_body_block": {
+          "mkbound": 1,
+          "mkfluid": null,
+          "mk": 18,
+          "begin": 83883,
+          "count": 4096
+        },
+        "runtime_fixed_count_equals_generated_fixed_summary": true
+      },
+      "checks": {
+        "required_arrays_present": true,
+        "finite_arrays": true,
+        "ghost_doubling_pass": true,
+        "runtime_zero_free_pass": false,
+        "construction_face_overlap_pass": true,
+        "runtime_body_topology_partition_pass": true,
+        "generation_log_zero_free_as_reported": true,
+        "serialized_generation_runtime_arrays_match": true
+      }
+    }
+  ],
+  "resolution_comparison": {
+    "available": true,
+    "canonical_label": "canonical-2",
+    "fine_label": "fine-3",
+    "dp_fine_over_canonical": 0.5,
+    "boundary_particle_count_fine_over_canonical": 3.907572729291583,
+    "body_particle_count_fine_over_canonical": 8.126984126984127,
+    "zero_normal_count": {
+      "canonical-2": 63,
+      "fine-3": 240,
+      "fine_over_canonical": 3.8095238095238093
+    },
+    "zero_normal_fraction": {
+      "canonical-2": 0.002798134576948701,
+      "fine-3": 0.0027279237090669364,
+      "fine_minus_canonical_absolute": -7.021086788176452e-05,
+      "fine_minus_canonical_percentage_points": -0.007021086788176452
+    },
+    "runtime_zero_free_at_both_resolutions": false,
+    "finding": "Refinement increases the absolute thresholded zero-normal count in the existing artifacts while the fraction changes only slightly; neither resolution is zero-free under the stated threshold."
+  },
+  "summary": {
+    "case_count": 2,
+    "complete_case_count": 2,
+    "runtime_zero_free_all_cases": false,
+    "ghost_doubling_pass_all_complete_cases": true,
+    "construction_face_overlap_pass_all_complete_cases": true,
+    "runtime_zero_normal_counts_by_resolution": {
+      "canonical-2": 63,
+      "fine-3": 240
+    },
+    "overall_evidence_status": "complete_with_thresholded_runtime_zero_normals"
+  },
+  "not_audited_or_unavailable": [
+    "No new CPU solver execution or CPU-kernel trace was produced; the existing solver logs are provenance only and identify GPU execution.",
+    "CfgInit_Normals*.vtk are initialization snapshots, not a per-time-step normal history.",
+    "The ghost VTK POINTS are the same x_b boundary coordinates; independent ghost coordinates are not serialized and are inferred as x_b+n_ghost.",
+    "The serialized Bound.vtk Normal field is compared, but no raw in-memory BoundNor pointer/state or CPU reduction trace is available.",
+    "No new CFD/GPU force, pressure, penetration, or physical-acceptance claim is made by this static audit."
+  ]
+}

@@ -1,0 +1,3266 @@
+{
+  "schema_version": 1,
+  "audit_id": "R4_F1_CORE_PREFLIGHT",
+  "generated_at_utc": "2026-09-07T15:15:03.930950+00:00",
+  "scope": "R4 reviewer F1 core mother case A1/A2 CPU GenCase-only preflight",
+  "matrix": {
+    "required_case_count": 9,
+    "selected_case_count": 9,
+    "selected_case_ids": [
+      "R4_F1_plain_dam_break_coarse",
+      "R4_F1_plain_dam_break_medium",
+      "R4_F1_plain_dam_break_fine",
+      "R4_F1_center_obstacle_coarse",
+      "R4_F1_center_obstacle_medium",
+      "R4_F1_center_obstacle_fine",
+      "R4_F1_twin_obstacle_split_remerge_coarse",
+      "R4_F1_twin_obstacle_split_remerge_medium",
+      "R4_F1_twin_obstacle_split_remerge_fine"
+    ],
+    "backgrounds": [
+      "plain_dam_break",
+      "center_obstacle",
+      "twin_obstacle_split_remerge"
+    ],
+    "levels": [
+      "coarse",
+      "medium",
+      "fine"
+    ],
+    "cell_order": "background-major then coarse/medium/fine"
+  },
+  "protocol": {
+    "family": "F1",
+    "time_max_s": 1.5,
+    "time_out_s": 0.001,
+    "integrator": "Verlet",
+    "step_algorithm": 1,
+    "verlet_steps": 40,
+    "boundary_formulation": "DBC",
+    "boundary_parameter": 1,
+    "save_pos_double": 2,
+    "shifting": 0,
+    "spatial_resolution_m": {
+      "coarse": 0.035,
+      "medium": 0.024,
+      "fine": 0.014
+    }
+  },
+  "resource_policy": {
+    "execution_kind": "CPU GenCase-only",
+    "gencase_invocations": 9,
+    "solver_invocations": 0,
+    "cuda_launches": 0,
+    "gpu_indices_used": [],
+    "environment_policy": {
+      "CUDA_VISIBLE_DEVICES": "",
+      "NVIDIA_VISIBLE_DEVICES": "void"
+    },
+    "protected_scopes_untouched": [
+      "vendor/official/DualSPHysics_v5.4",
+      "upstream source trees"
+    ]
+  },
+  "provenance": {
+    "source_templates": "existing local F1 definitions under cases/F1",
+    "r3_matrix_reference": "scripts/r3_g2_f1_f3_matrix.py",
+    "r4_core_audit_reference": "campaigns/v0.1-candidate/R4-CORE-MOTHER-CASE-AUDIT.md",
+    "old_r3_runs_reused_as_new_execution": false,
+    "each_case_has_independent_definition_prefix_and_log": true
+  },
+  "summary": {
+    "gencase_completed_cells": 9,
+    "gencase_failed_or_missing_cells": 0,
+    "structural_anomaly_cases": [],
+    "all_requested_controls_match": true,
+    "resolution_mass_summary": {
+      "plain_dam_break": {
+        "initial_fluid_mass_kg_by_level": {
+          "coarse": 60.025000000000006,
+          "medium": 58.0608,
+          "fine": 58.216704
+        },
+        "mean_initial_fluid_mass_kg": 58.767501333333335,
+        "relative_resolution_mass_spread": 0.03342323487362389,
+        "diagnostic_note": "reported for review; not an acceptance threshold in this GenCase-only preflight"
+      },
+      "center_obstacle": {
+        "initial_fluid_mass_kg_by_level": {
+          "coarse": 60.025000000000006,
+          "medium": 58.0608,
+          "fine": 58.216704
+        },
+        "mean_initial_fluid_mass_kg": 58.767501333333335,
+        "relative_resolution_mass_spread": 0.03342323487362389,
+        "diagnostic_note": "reported for review; not an acceptance threshold in this GenCase-only preflight"
+      },
+      "twin_obstacle_split_remerge": {
+        "initial_fluid_mass_kg_by_level": {
+          "coarse": 60.025000000000006,
+          "medium": 58.0608,
+          "fine": 58.216704
+        },
+        "mean_initial_fluid_mass_kg": 58.767501333333335,
+        "relative_resolution_mass_spread": 0.03342323487362389,
+        "diagnostic_note": "reported for review; not an acceptance threshold in this GenCase-only preflight"
+      }
+    }
+  },
+  "cases": [
+    {
+      "case_id": "R4_F1_plain_dam_break_coarse",
+      "family": "F1",
+      "background_id": "plain_dam_break",
+      "mechanism": "collapse-runup-return",
+      "level": "coarse",
+      "dp_m": 0.035,
+      "time_max_s": 1.5,
+      "time_out_s": 0.001,
+      "source_definition": {
+        "path": "cases/F1/F1_dam_break_plain/F1_dam_break_plain_Def.xml",
+        "exists": true,
+        "bytes": 3059,
+        "sha256": "86a6de6d1f2bf9b585c4ca4e36b338418209122f51c18c1242a75990bd5f760b"
+      },
+      "source_geometry_signature": {
+        "drawbox_count": 2,
+        "boxfill_values": [
+          "solid",
+          "bottom | left | right | front | back"
+        ],
+        "setmkfluid_count": 1,
+        "setmkbound_count": 1,
+        "setmkvoid_count": 0,
+        "floating_section_present": false,
+        "moving_section_present": false,
+        "file_references": []
+      },
+      "definition": {
+        "candidate": {
+          "path": "campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_plain_dam_break_coarse_Def.xml",
+          "exists": true,
+          "bytes": 3182,
+          "sha256": "42fd2bf024281203ac27e7c2dd84af2c0adea9441ca7647bec386d4431bf0851"
+        },
+        "candidate_controls": {
+          "dp_m": 0.035,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "execution_status": "completed",
+      "acceptance_status": "preflight_only_not_physical_acceptance",
+      "validation_scope": "CPU GenCase structural evidence only; no solver trajectory or physical observable",
+      "run": {
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_plain_dam_break_coarse_Def",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_coarse/generated/R4_F1_plain_dam_break_coarse",
+          "-save:all"
+        ],
+        "started_at_utc": "2026-09-07T15:15:02.968340+00:00",
+        "return_code": 0,
+        "error": null,
+        "stdout_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_coarse/generated/gencase.stdout.log",
+          "exists": true,
+          "bytes": 5211,
+          "sha256": "53719a818e98f4bc0760a5d5cd6d25bef77b7f364b5a435116f75d20b9dde2ee"
+        },
+        "environment_policy": {
+          "CUDA_VISIBLE_DEVICES": "",
+          "NVIDIA_VISIBLE_DEVICES": "void",
+          "solver_invocations": 0,
+          "gpu_indices_used": []
+        },
+        "command_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_coarse/generated/gencase.command.json",
+          "exists": true,
+          "bytes": 1013,
+          "sha256": "5fd750ed31c8c5413a06dd0d92728f531adbe17cc7944e0c8a007173cc5995bf"
+        }
+      },
+      "gencase_log_summary": {
+        "log_present": true,
+        "total_particles": 3560,
+        "boundary_particles": 2160,
+        "fixed_particles": 2160,
+        "moving_particles": 0,
+        "floating_particles": 0,
+        "fluid_particles": 1400,
+        "points_loaded": null,
+        "x_range_m": [
+          -0.015,
+          1.21
+        ],
+        "y_range_m": [
+          -0.015,
+          0.405
+        ],
+        "z_range_m": [
+          -0.015,
+          0.615
+        ],
+        "finished_code_0": true,
+        "warning_lines": []
+      },
+      "generated_case": {
+        "generated_xml_present": true,
+        "case_app": "GenCase v5.4.354.01 (07-04-2025)",
+        "particles": {
+          "total_particles": 3560,
+          "boundary_particles": 2160,
+          "fixed_particles": 2160,
+          "fluid_particles": 1400,
+          "fixed_id_range": "0-2159",
+          "fluid_id_range": "2160-3559",
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1
+        },
+        "constants": {
+          "dp_m": 0.035,
+          "rhop0_kg_m3": 1000.0,
+          "massbound_kg": 0.042875,
+          "massfluid_kg": 0.042875
+        },
+        "controls": {
+          "dp_m": 0.035,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "controls_match_requested_protocol": {
+        "dp": true,
+        "time_max": true,
+        "time_out": true,
+        "step_algorithm": true,
+        "verlet_steps": true,
+        "boundary": true
+      },
+      "particle_counts": {
+        "total_particles": 3560,
+        "boundary_particles": 2160,
+        "fixed_particles": 2160,
+        "fluid_particles": 1400,
+        "fixed_id_range": "0-2159",
+        "fluid_id_range": "2160-3559",
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1
+      },
+      "mass_audit": {
+        "fluid_particles": 1400,
+        "boundary_particles": 2160,
+        "rhop0_kg_m3": 1000.0,
+        "dp_m": 0.035,
+        "massfluid_per_particle_kg": 0.042875,
+        "massbound_per_particle_kg": 0.042875,
+        "expected_particle_mass_kg": 0.04287500000000001,
+        "initial_fluid_mass_kg": 60.025000000000006,
+        "initial_boundary_mass_kg": 92.61000000000001,
+        "initial_fluid_mass_from_discrete_volume_kg": 60.02500000000001,
+        "relative_fluid_particle_mass_error": 1.6184009105322978e-16,
+        "anomalies": [],
+        "mass_clean_for_structural_preflight": true
+      },
+      "geometry_audit": {
+        "declared_definition_bounds_m": {
+          "min": [
+            -0.12,
+            -0.12,
+            -0.12
+          ],
+          "max": [
+            1.35,
+            0.55,
+            0.85
+          ]
+        },
+        "vtk": {
+          "all": {
+            "present": true,
+            "declared_points": 3560,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 3560,
+              "finite": true,
+              "min_m": [
+                -0.014999999664723873,
+                -0.014999999664723873,
+                -0.014999999664723873
+              ],
+              "max_m": [
+                1.2100000381469727,
+                0.4050000011920929,
+                0.6150000095367432
+              ]
+            }
+          },
+          "bound": {
+            "present": true,
+            "declared_points": 2160,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 2160,
+              "finite": true,
+              "min_m": [
+                -0.014999999664723873,
+                -0.014999999664723873,
+                -0.014999999664723873
+              ],
+              "max_m": [
+                1.2100000381469727,
+                0.4050000011920929,
+                0.6150000095367432
+              ]
+            }
+          },
+          "fluid": {
+            "present": true,
+            "declared_points": 1400,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 1400,
+              "finite": true,
+              "min_m": [
+                0.054999999701976776,
+                0.054999999701976776,
+                0.054999999701976776
+              ],
+              "max_m": [
+                0.3700000047683716,
+                0.3700000047683716,
+                0.5099999904632568
+              ]
+            }
+          }
+        },
+        "out_of_definition_bounds_counts": {
+          "all": 0,
+          "bound": 0,
+          "fluid": 0
+        },
+        "fluid_boundary_duplicate_positions": 0,
+        "anomalies": [],
+        "geometry_clean_for_structural_preflight": true
+      },
+      "artifacts": {
+        ".xml": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_coarse/generated/R4_F1_plain_dam_break_coarse.xml",
+          "exists": true,
+          "bytes": 4806,
+          "sha256": "eef3d181ec1df1623722ff2d4448bb51ed80214a00df514dc4d67325c8d153c0"
+        },
+        ".bi4": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_coarse/generated/R4_F1_plain_dam_break_coarse.bi4",
+          "exists": true,
+          "bytes": 158070,
+          "sha256": "ebb781ce4c6da9c2d7d6cfe8de15ff771087bff481053fffbda7690c3c2ce827"
+        },
+        ".out": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_coarse/generated/R4_F1_plain_dam_break_coarse.out",
+          "exists": true,
+          "bytes": 5166,
+          "sha256": "b66a9940b0c8f78bfaa5a8f3bca767f280d574eb8da65fe7e2dac5a918a1a93b"
+        },
+        "_All.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_coarse/generated/R4_F1_plain_dam_break_coarse_All.vtk",
+          "exists": true,
+          "bytes": 149791,
+          "sha256": "1ce3c2be61a43ef78a9065e1ab2b797e7f742860ea3bf616679038c140c10cd9"
+        },
+        "_Bound.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_coarse/generated/R4_F1_plain_dam_break_coarse_Bound.vtk",
+          "exists": true,
+          "bytes": 56394,
+          "sha256": "607b88d73bb5e1074b94dbcfc91f39a048544f8bbbda9d430df91a961785fa5f"
+        },
+        "_Fluid.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_coarse/generated/R4_F1_plain_dam_break_coarse_Fluid.vtk",
+          "exists": true,
+          "bytes": 59071,
+          "sha256": "cff67601d218266539ef4ba8757a566b96c0f5bc3e03048fae467f2fc3f2adb4"
+        },
+        "_MkCells.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_coarse/generated/R4_F1_plain_dam_break_coarse_MkCells.vtk",
+          "exists": true,
+          "bytes": 1620,
+          "sha256": "d9460bdf3ec43e6b6178412e909f53ff1ef5f95419f090deede140e8591f473f"
+        }
+      },
+      "structural_anomalies": [],
+      "formal_production_authorized": false
+    },
+    {
+      "case_id": "R4_F1_plain_dam_break_medium",
+      "family": "F1",
+      "background_id": "plain_dam_break",
+      "mechanism": "collapse-runup-return",
+      "level": "medium",
+      "dp_m": 0.024,
+      "time_max_s": 1.5,
+      "time_out_s": 0.001,
+      "source_definition": {
+        "path": "cases/F1/F1_dam_break_plain/F1_dam_break_plain_Def.xml",
+        "exists": true,
+        "bytes": 3059,
+        "sha256": "86a6de6d1f2bf9b585c4ca4e36b338418209122f51c18c1242a75990bd5f760b"
+      },
+      "source_geometry_signature": {
+        "drawbox_count": 2,
+        "boxfill_values": [
+          "solid",
+          "bottom | left | right | front | back"
+        ],
+        "setmkfluid_count": 1,
+        "setmkbound_count": 1,
+        "setmkvoid_count": 0,
+        "floating_section_present": false,
+        "moving_section_present": false,
+        "file_references": []
+      },
+      "definition": {
+        "candidate": {
+          "path": "campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_plain_dam_break_medium_Def.xml",
+          "exists": true,
+          "bytes": 3182,
+          "sha256": "54bfbf679e05253703521fd6be032c889b2517dbc4d41dc4b642517556cf1cf5"
+        },
+        "candidate_controls": {
+          "dp_m": 0.024,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "execution_status": "completed",
+      "acceptance_status": "preflight_only_not_physical_acceptance",
+      "validation_scope": "CPU GenCase structural evidence only; no solver trajectory or physical observable",
+      "run": {
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_plain_dam_break_medium_Def",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_medium/generated/R4_F1_plain_dam_break_medium",
+          "-save:all"
+        ],
+        "started_at_utc": "2026-09-07T15:15:03.008840+00:00",
+        "return_code": 0,
+        "error": null,
+        "stdout_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_medium/generated/gencase.stdout.log",
+          "exists": true,
+          "bytes": 5193,
+          "sha256": "e4ec158a699fc4f2e7bfaa24fcd409a6f5e4992101f39c2e1d0eb3efd9001caa"
+        },
+        "environment_policy": {
+          "CUDA_VISIBLE_DEVICES": "",
+          "NVIDIA_VISIBLE_DEVICES": "void",
+          "solver_invocations": 0,
+          "gpu_indices_used": []
+        },
+        "command_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_medium/generated/gencase.command.json",
+          "exists": true,
+          "bytes": 1013,
+          "sha256": "2a1f6d0248b847491eab19055669bc888f5d5e9c3266cb6d01697e7a8324838d"
+        }
+      },
+      "gencase_log_summary": {
+        "log_present": true,
+        "total_particles": 8468,
+        "boundary_particles": 4268,
+        "fixed_particles": 4268,
+        "moving_particles": 0,
+        "floating_particles": 0,
+        "fluid_particles": 4200,
+        "points_loaded": null,
+        "x_range_m": [
+          0.0,
+          1.2
+        ],
+        "y_range_m": [
+          0.0,
+          0.408
+        ],
+        "z_range_m": [
+          0.0,
+          0.6
+        ],
+        "finished_code_0": true,
+        "warning_lines": []
+      },
+      "generated_case": {
+        "generated_xml_present": true,
+        "case_app": "GenCase v5.4.354.01 (07-04-2025)",
+        "particles": {
+          "total_particles": 8468,
+          "boundary_particles": 4268,
+          "fixed_particles": 4268,
+          "fluid_particles": 4200,
+          "fixed_id_range": "0-4267",
+          "fluid_id_range": "4268-8467",
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1
+        },
+        "constants": {
+          "dp_m": 0.024,
+          "rhop0_kg_m3": 1000.0,
+          "massbound_kg": 0.013824,
+          "massfluid_kg": 0.013824
+        },
+        "controls": {
+          "dp_m": 0.024,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "controls_match_requested_protocol": {
+        "dp": true,
+        "time_max": true,
+        "time_out": true,
+        "step_algorithm": true,
+        "verlet_steps": true,
+        "boundary": true
+      },
+      "particle_counts": {
+        "total_particles": 8468,
+        "boundary_particles": 4268,
+        "fixed_particles": 4268,
+        "fluid_particles": 4200,
+        "fixed_id_range": "0-4267",
+        "fluid_id_range": "4268-8467",
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1
+      },
+      "mass_audit": {
+        "fluid_particles": 4200,
+        "boundary_particles": 4268,
+        "rhop0_kg_m3": 1000.0,
+        "dp_m": 0.024,
+        "massfluid_per_particle_kg": 0.013824,
+        "massbound_per_particle_kg": 0.013824,
+        "expected_particle_mass_kg": 0.013824,
+        "initial_fluid_mass_kg": 58.0608,
+        "initial_boundary_mass_kg": 59.000831999999996,
+        "initial_fluid_mass_from_discrete_volume_kg": 58.0608,
+        "relative_fluid_particle_mass_error": 0.0,
+        "anomalies": [],
+        "mass_clean_for_structural_preflight": true
+      },
+      "geometry_audit": {
+        "declared_definition_bounds_m": {
+          "min": [
+            -0.12,
+            -0.12,
+            -0.12
+          ],
+          "max": [
+            1.35,
+            0.55,
+            0.85
+          ]
+        },
+        "vtk": {
+          "all": {
+            "present": true,
+            "declared_points": 8468,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 8468,
+              "finite": true,
+              "min_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "max_m": [
+                1.2000000476837158,
+                0.40799999237060547,
+                0.6000000238418579
+              ]
+            }
+          },
+          "bound": {
+            "present": true,
+            "declared_points": 4268,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 4268,
+              "finite": true,
+              "min_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "max_m": [
+                1.2000000476837158,
+                0.40799999237060547,
+                0.6000000238418579
+              ]
+            }
+          },
+          "fluid": {
+            "present": true,
+            "declared_points": 4200,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 4200,
+              "finite": true,
+              "min_m": [
+                0.04800000041723251,
+                0.04800000041723251,
+                0.04800000041723251
+              ],
+              "max_m": [
+                0.3840000033378601,
+                0.36000001430511475,
+                0.5040000081062317
+              ]
+            }
+          }
+        },
+        "out_of_definition_bounds_counts": {
+          "all": 0,
+          "bound": 0,
+          "fluid": 0
+        },
+        "fluid_boundary_duplicate_positions": 0,
+        "anomalies": [],
+        "geometry_clean_for_structural_preflight": true
+      },
+      "artifacts": {
+        ".xml": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_medium/generated/R4_F1_plain_dam_break_medium.xml",
+          "exists": true,
+          "bytes": 4794,
+          "sha256": "1f567e4ac24dc17971083dd8f9c51d236953b107acbda6ccda0c3276da139f51"
+        },
+        ".bi4": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_medium/generated/R4_F1_plain_dam_break_medium.bi4",
+          "exists": true,
+          "bytes": 374022,
+          "sha256": "ec04f9965faf4c3f3b2cfd0343b3b3f4d6fdd665d330c04772d0c37d881e5dfa"
+        },
+        ".out": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_medium/generated/R4_F1_plain_dam_break_medium.out",
+          "exists": true,
+          "bytes": 5148,
+          "sha256": "ecc40de8bc2c733b57276e88993c724fe807140a81ed34af54f7dcb8120d3c97"
+        },
+        "_All.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_medium/generated/R4_F1_plain_dam_break_medium_All.vtk",
+          "exists": true,
+          "bytes": 355928,
+          "sha256": "aa26d95745283ccc64cd6ee4c29765c0153490b296c8143ce966c29a70316ba0"
+        },
+        "_Bound.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_medium/generated/R4_F1_plain_dam_break_medium_Bound.vtk",
+          "exists": true,
+          "bytes": 111202,
+          "sha256": "979f2d2a267d03b1cdddb181c285f7f3242c99d05654c5ae061ca4b4ae5cbe06"
+        },
+        "_Fluid.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_medium/generated/R4_F1_plain_dam_break_medium_Fluid.vtk",
+          "exists": true,
+          "bytes": 176671,
+          "sha256": "ad2bcb8796bc2d27e120c1377ab9e1e3086f9f7fc54825e3d0f2151ab671d193"
+        },
+        "_MkCells.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_medium/generated/R4_F1_plain_dam_break_medium_MkCells.vtk",
+          "exists": true,
+          "bytes": 1620,
+          "sha256": "9d353ef797dc04b0fa929c387fd554a4156508259e6d3f110bad966e069b0b6d"
+        }
+      },
+      "structural_anomalies": [],
+      "formal_production_authorized": false
+    },
+    {
+      "case_id": "R4_F1_plain_dam_break_fine",
+      "family": "F1",
+      "background_id": "plain_dam_break",
+      "mechanism": "collapse-runup-return",
+      "level": "fine",
+      "dp_m": 0.014,
+      "time_max_s": 1.5,
+      "time_out_s": 0.001,
+      "source_definition": {
+        "path": "cases/F1/F1_dam_break_plain/F1_dam_break_plain_Def.xml",
+        "exists": true,
+        "bytes": 3059,
+        "sha256": "86a6de6d1f2bf9b585c4ca4e36b338418209122f51c18c1242a75990bd5f760b"
+      },
+      "source_geometry_signature": {
+        "drawbox_count": 2,
+        "boxfill_values": [
+          "solid",
+          "bottom | left | right | front | back"
+        ],
+        "setmkfluid_count": 1,
+        "setmkbound_count": 1,
+        "setmkvoid_count": 0,
+        "floating_section_present": false,
+        "moving_section_present": false,
+        "file_references": []
+      },
+      "definition": {
+        "candidate": {
+          "path": "campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_plain_dam_break_fine_Def.xml",
+          "exists": true,
+          "bytes": 3182,
+          "sha256": "b679569e0297f917d432fe9c95a4b9db6d78c78daee923ce3f872bb4d2c76e0f"
+        },
+        "candidate_controls": {
+          "dp_m": 0.014,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "execution_status": "completed",
+      "acceptance_status": "preflight_only_not_physical_acceptance",
+      "validation_scope": "CPU GenCase structural evidence only; no solver trajectory or physical observable",
+      "run": {
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_plain_dam_break_fine_Def",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_fine/generated/R4_F1_plain_dam_break_fine",
+          "-save:all"
+        ],
+        "started_at_utc": "2026-09-07T15:15:03.073795+00:00",
+        "return_code": 0,
+        "error": null,
+        "stdout_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_fine/generated/gencase.stdout.log",
+          "exists": true,
+          "bytes": 5192,
+          "sha256": "303ec46ec8ee94b68e5f4595b127c7659abbff07781f018e67d8271498bbfbf7"
+        },
+        "environment_policy": {
+          "CUDA_VISIBLE_DEVICES": "",
+          "NVIDIA_VISIBLE_DEVICES": "void",
+          "solver_invocations": 0,
+          "gpu_indices_used": []
+        },
+        "command_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_fine/generated/gencase.command.json",
+          "exists": true,
+          "bytes": 1005,
+          "sha256": "c98fe3fd7f560f4b31a19e06aec8028c4b58b3258f57f73d6ce77dcd7b84b1ea"
+        }
+      },
+      "gencase_log_summary": {
+        "log_present": true,
+        "total_particles": 33202,
+        "boundary_particles": 11986,
+        "fixed_particles": 11986,
+        "moving_particles": 0,
+        "floating_particles": 0,
+        "fluid_particles": 21216,
+        "points_loaded": null,
+        "x_range_m": [
+          0.006,
+          1.196
+        ],
+        "y_range_m": [
+          0.006,
+          0.398
+        ],
+        "z_range_m": [
+          0.006,
+          0.594
+        ],
+        "finished_code_0": true,
+        "warning_lines": []
+      },
+      "generated_case": {
+        "generated_xml_present": true,
+        "case_app": "GenCase v5.4.354.01 (07-04-2025)",
+        "particles": {
+          "total_particles": 33202,
+          "boundary_particles": 11986,
+          "fixed_particles": 11986,
+          "fluid_particles": 21216,
+          "fixed_id_range": "0-11985",
+          "fluid_id_range": "11986-33201",
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1
+        },
+        "constants": {
+          "dp_m": 0.014,
+          "rhop0_kg_m3": 1000.0,
+          "massbound_kg": 0.002744,
+          "massfluid_kg": 0.002744
+        },
+        "controls": {
+          "dp_m": 0.014,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "controls_match_requested_protocol": {
+        "dp": true,
+        "time_max": true,
+        "time_out": true,
+        "step_algorithm": true,
+        "verlet_steps": true,
+        "boundary": true
+      },
+      "particle_counts": {
+        "total_particles": 33202,
+        "boundary_particles": 11986,
+        "fixed_particles": 11986,
+        "fluid_particles": 21216,
+        "fixed_id_range": "0-11985",
+        "fluid_id_range": "11986-33201",
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1
+      },
+      "mass_audit": {
+        "fluid_particles": 21216,
+        "boundary_particles": 11986,
+        "rhop0_kg_m3": 1000.0,
+        "dp_m": 0.014,
+        "massfluid_per_particle_kg": 0.002744,
+        "massbound_per_particle_kg": 0.002744,
+        "expected_particle_mass_kg": 0.0027440000000000003,
+        "initial_fluid_mass_kg": 58.216704,
+        "initial_boundary_mass_kg": 32.889584,
+        "initial_fluid_mass_from_discrete_volume_kg": 58.21670400000001,
+        "relative_fluid_particle_mass_error": 1.5804696391916972e-16,
+        "anomalies": [],
+        "mass_clean_for_structural_preflight": true
+      },
+      "geometry_audit": {
+        "declared_definition_bounds_m": {
+          "min": [
+            -0.12,
+            -0.12,
+            -0.12
+          ],
+          "max": [
+            1.35,
+            0.55,
+            0.85
+          ]
+        },
+        "vtk": {
+          "all": {
+            "present": true,
+            "declared_points": 33202,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 33202,
+              "finite": true,
+              "min_m": [
+                0.006000000052154064,
+                0.006000000052154064,
+                0.006000000052154064
+              ],
+              "max_m": [
+                1.1959999799728394,
+                0.39800000190734863,
+                0.593999981880188
+              ]
+            }
+          },
+          "bound": {
+            "present": true,
+            "declared_points": 11986,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 11986,
+              "finite": true,
+              "min_m": [
+                0.006000000052154064,
+                0.006000000052154064,
+                0.006000000052154064
+              ],
+              "max_m": [
+                1.1959999799728394,
+                0.39800000190734863,
+                0.593999981880188
+              ]
+            }
+          },
+          "fluid": {
+            "present": true,
+            "declared_points": 21216,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 21216,
+              "finite": true,
+              "min_m": [
+                0.03400000184774399,
+                0.03400000184774399,
+                0.03400000184774399
+              ],
+              "max_m": [
+                0.3840000033378601,
+                0.35600000619888306,
+                0.4959999918937683
+              ]
+            }
+          }
+        },
+        "out_of_definition_bounds_counts": {
+          "all": 0,
+          "bound": 0,
+          "fluid": 0
+        },
+        "fluid_boundary_duplicate_positions": 0,
+        "anomalies": [],
+        "geometry_clean_for_structural_preflight": true
+      },
+      "artifacts": {
+        ".xml": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_fine/generated/R4_F1_plain_dam_break_fine.xml",
+          "exists": true,
+          "bytes": 4815,
+          "sha256": "c2f601be302fe2b65a97303124bdf6b3ecea3b9384f5bdb3b0379ce69cb09288"
+        },
+        ".bi4": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_fine/generated/R4_F1_plain_dam_break_fine.bi4",
+          "exists": true,
+          "bytes": 1462316,
+          "sha256": "770499a191f79b97619360ca37444aaa99ae66175be0cb78bc2aeffc178e16a1"
+        },
+        ".out": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_fine/generated/R4_F1_plain_dam_break_fine.out",
+          "exists": true,
+          "bytes": 5147,
+          "sha256": "0d662cc72de7c79abd15ec6851936e2b37245d20202cdfb2da8e90a93c35bee9"
+        },
+        "_All.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_fine/generated/R4_F1_plain_dam_break_fine_All.vtk",
+          "exists": true,
+          "bytes": 1394763,
+          "sha256": "8e1446a2016cd6570a303ee2b2b183687471e866177289ff9a3669444e8e78c1"
+        },
+        "_Bound.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_fine/generated/R4_F1_plain_dam_break_fine_Bound.vtk",
+          "exists": true,
+          "bytes": 311876,
+          "sha256": "afc0197cdea17a606e77112d8020a844f3fefcc4dea8a922161ff86fba1ed7b2"
+        },
+        "_Fluid.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_fine/generated/R4_F1_plain_dam_break_fine_Fluid.vtk",
+          "exists": true,
+          "bytes": 891351,
+          "sha256": "285233e6ba060782f340a7f7e2224e80350c348901b34491568cb2f9d38cf4ce"
+        },
+        "_MkCells.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_plain_dam_break_fine/generated/R4_F1_plain_dam_break_fine_MkCells.vtk",
+          "exists": true,
+          "bytes": 1620,
+          "sha256": "fe3364f5972c16d22ac831e7a44100a087230826f33da8199bccc404f40c2198"
+        }
+      },
+      "structural_anomalies": [],
+      "formal_production_authorized": false
+    },
+    {
+      "case_id": "R4_F1_center_obstacle_coarse",
+      "family": "F1",
+      "background_id": "center_obstacle",
+      "mechanism": "split-around-obstacle",
+      "level": "coarse",
+      "dp_m": 0.035,
+      "time_max_s": 1.5,
+      "time_out_s": 0.001,
+      "source_definition": {
+        "path": "cases/F1/F1_center_obstacle/F1_center_obstacle_Def.xml",
+        "exists": true,
+        "bytes": 3616,
+        "sha256": "60662c0779da976b2c4c60e7d13c80f0cc52f61fcec9679305ad9259bc3fae0a"
+      },
+      "source_geometry_signature": {
+        "drawbox_count": 4,
+        "boxfill_values": [
+          "solid",
+          "bottom | left | right | front | back",
+          "solid",
+          "top | left | right | front | back"
+        ],
+        "setmkfluid_count": 1,
+        "setmkbound_count": 2,
+        "setmkvoid_count": 1,
+        "floating_section_present": false,
+        "moving_section_present": false,
+        "file_references": []
+      },
+      "definition": {
+        "candidate": {
+          "path": "campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_center_obstacle_coarse_Def.xml",
+          "exists": true,
+          "bytes": 3740,
+          "sha256": "a18d3726d472705c8fc746e99cc406735a40b745512b1906e2fce1bd53e2fb45"
+        },
+        "candidate_controls": {
+          "dp_m": 0.035,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "execution_status": "completed",
+      "acceptance_status": "preflight_only_not_physical_acceptance",
+      "validation_scope": "CPU GenCase structural evidence only; no solver trajectory or physical observable",
+      "run": {
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_center_obstacle_coarse_Def",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_coarse/generated/R4_F1_center_obstacle_coarse",
+          "-save:all"
+        ],
+        "started_at_utc": "2026-09-07T15:15:03.297887+00:00",
+        "return_code": 0,
+        "error": null,
+        "stdout_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_coarse/generated/gencase.stdout.log",
+          "exists": true,
+          "bytes": 5260,
+          "sha256": "48dc18e6432482046823a5f472234ed8cddbc186a6f0f071263dfc497c2709a9"
+        },
+        "environment_policy": {
+          "CUDA_VISIBLE_DEVICES": "",
+          "NVIDIA_VISIBLE_DEVICES": "void",
+          "solver_invocations": 0,
+          "gpu_indices_used": []
+        },
+        "command_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_coarse/generated/gencase.command.json",
+          "exists": true,
+          "bytes": 1013,
+          "sha256": "ec3bb240d8e7d3e4e97e44dcc4be41f54017c8a40b7b1bbba33dffc03a143aa9"
+        }
+      },
+      "gencase_log_summary": {
+        "log_present": true,
+        "total_particles": 3680,
+        "boundary_particles": 2280,
+        "fixed_particles": 2280,
+        "moving_particles": 0,
+        "floating_particles": 0,
+        "fluid_particles": 1400,
+        "points_loaded": null,
+        "x_range_m": [
+          -0.015,
+          1.21
+        ],
+        "y_range_m": [
+          -0.015,
+          0.405
+        ],
+        "z_range_m": [
+          -0.015,
+          0.615
+        ],
+        "finished_code_0": true,
+        "warning_lines": []
+      },
+      "generated_case": {
+        "generated_xml_present": true,
+        "case_app": "GenCase v5.4.354.01 (07-04-2025)",
+        "particles": {
+          "total_particles": 3680,
+          "boundary_particles": 2280,
+          "fixed_particles": 2280,
+          "fluid_particles": 1400,
+          "fixed_id_range": "0-2279",
+          "fluid_id_range": "2280-3679",
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1
+        },
+        "constants": {
+          "dp_m": 0.035,
+          "rhop0_kg_m3": 1000.0,
+          "massbound_kg": 0.042875,
+          "massfluid_kg": 0.042875
+        },
+        "controls": {
+          "dp_m": 0.035,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "controls_match_requested_protocol": {
+        "dp": true,
+        "time_max": true,
+        "time_out": true,
+        "step_algorithm": true,
+        "verlet_steps": true,
+        "boundary": true
+      },
+      "particle_counts": {
+        "total_particles": 3680,
+        "boundary_particles": 2280,
+        "fixed_particles": 2280,
+        "fluid_particles": 1400,
+        "fixed_id_range": "0-2279",
+        "fluid_id_range": "2280-3679",
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1
+      },
+      "mass_audit": {
+        "fluid_particles": 1400,
+        "boundary_particles": 2280,
+        "rhop0_kg_m3": 1000.0,
+        "dp_m": 0.035,
+        "massfluid_per_particle_kg": 0.042875,
+        "massbound_per_particle_kg": 0.042875,
+        "expected_particle_mass_kg": 0.04287500000000001,
+        "initial_fluid_mass_kg": 60.025000000000006,
+        "initial_boundary_mass_kg": 97.75500000000001,
+        "initial_fluid_mass_from_discrete_volume_kg": 60.02500000000001,
+        "relative_fluid_particle_mass_error": 1.6184009105322978e-16,
+        "anomalies": [],
+        "mass_clean_for_structural_preflight": true
+      },
+      "geometry_audit": {
+        "declared_definition_bounds_m": {
+          "min": [
+            -0.12,
+            -0.12,
+            -0.12
+          ],
+          "max": [
+            1.35,
+            0.55,
+            0.85
+          ]
+        },
+        "vtk": {
+          "all": {
+            "present": true,
+            "declared_points": 3680,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 3680,
+              "finite": true,
+              "min_m": [
+                -0.014999999664723873,
+                -0.014999999664723873,
+                -0.014999999664723873
+              ],
+              "max_m": [
+                1.2100000381469727,
+                0.4050000011920929,
+                0.6150000095367432
+              ]
+            }
+          },
+          "bound": {
+            "present": true,
+            "declared_points": 2280,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 2280,
+              "finite": true,
+              "min_m": [
+                -0.014999999664723873,
+                -0.014999999664723873,
+                -0.014999999664723873
+              ],
+              "max_m": [
+                1.2100000381469727,
+                0.4050000011920929,
+                0.6150000095367432
+              ]
+            }
+          },
+          "fluid": {
+            "present": true,
+            "declared_points": 1400,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 1400,
+              "finite": true,
+              "min_m": [
+                0.054999999701976776,
+                0.054999999701976776,
+                0.054999999701976776
+              ],
+              "max_m": [
+                0.3700000047683716,
+                0.3700000047683716,
+                0.5099999904632568
+              ]
+            }
+          }
+        },
+        "out_of_definition_bounds_counts": {
+          "all": 0,
+          "bound": 0,
+          "fluid": 0
+        },
+        "fluid_boundary_duplicate_positions": 0,
+        "anomalies": [],
+        "geometry_clean_for_structural_preflight": true
+      },
+      "artifacts": {
+        ".xml": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_coarse/generated/R4_F1_center_obstacle_coarse.xml",
+          "exists": true,
+          "bytes": 5434,
+          "sha256": "c1d6a865eb737ba1dbd3bc1188165d9f821151832c3cb323d486573be0cb3312"
+        },
+        ".bi4": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_coarse/generated/R4_F1_center_obstacle_coarse.bi4",
+          "exists": true,
+          "bytes": 163350,
+          "sha256": "c88b9e12494ccdd73e592fdc3339ceb314ef9b35933e5f2e47e6408a63235229"
+        },
+        ".out": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_coarse/generated/R4_F1_center_obstacle_coarse.out",
+          "exists": true,
+          "bytes": 5215,
+          "sha256": "a88e8719c64e07fbf4f258df402004ae0df562be3f6af4cf1f0331b8961a92e4"
+        },
+        "_All.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_coarse/generated/R4_F1_center_obstacle_coarse_All.vtk",
+          "exists": true,
+          "bytes": 154831,
+          "sha256": "ed5ba286eda3e4e583c7674ec124f99a15e06bb872e7c49dc7d999e9828b3687"
+        },
+        "_Bound.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_coarse/generated/R4_F1_center_obstacle_coarse_Bound.vtk",
+          "exists": true,
+          "bytes": 59514,
+          "sha256": "4c39749c5991f8baa6c4aea68b24ee2ef01c5c5e72da038847e8a913cca3a591"
+        },
+        "_Fluid.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_coarse/generated/R4_F1_center_obstacle_coarse_Fluid.vtk",
+          "exists": true,
+          "bytes": 59071,
+          "sha256": "91356af3fc100fd6b246e8341bfc7a9def0205243e5bcf646168772a1150955e"
+        },
+        "_MkCells.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_coarse/generated/R4_F1_center_obstacle_coarse_MkCells.vtk",
+          "exists": true,
+          "bytes": 3325,
+          "sha256": "80cc9fa6e8058336d17a417284a7fd08e5039c91ed8a721afc9a5e0ccbd7e782"
+        }
+      },
+      "structural_anomalies": [],
+      "formal_production_authorized": false
+    },
+    {
+      "case_id": "R4_F1_center_obstacle_medium",
+      "family": "F1",
+      "background_id": "center_obstacle",
+      "mechanism": "split-around-obstacle",
+      "level": "medium",
+      "dp_m": 0.024,
+      "time_max_s": 1.5,
+      "time_out_s": 0.001,
+      "source_definition": {
+        "path": "cases/F1/F1_center_obstacle/F1_center_obstacle_Def.xml",
+        "exists": true,
+        "bytes": 3616,
+        "sha256": "60662c0779da976b2c4c60e7d13c80f0cc52f61fcec9679305ad9259bc3fae0a"
+      },
+      "source_geometry_signature": {
+        "drawbox_count": 4,
+        "boxfill_values": [
+          "solid",
+          "bottom | left | right | front | back",
+          "solid",
+          "top | left | right | front | back"
+        ],
+        "setmkfluid_count": 1,
+        "setmkbound_count": 2,
+        "setmkvoid_count": 1,
+        "floating_section_present": false,
+        "moving_section_present": false,
+        "file_references": []
+      },
+      "definition": {
+        "candidate": {
+          "path": "campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_center_obstacle_medium_Def.xml",
+          "exists": true,
+          "bytes": 3740,
+          "sha256": "927bc788c6ba08c9b4325be7daace6aa52b75add3bafe898fffb89e29519fa8e"
+        },
+        "candidate_controls": {
+          "dp_m": 0.024,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "execution_status": "completed",
+      "acceptance_status": "preflight_only_not_physical_acceptance",
+      "validation_scope": "CPU GenCase structural evidence only; no solver trajectory or physical observable",
+      "run": {
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_center_obstacle_medium_Def",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_medium/generated/R4_F1_center_obstacle_medium",
+          "-save:all"
+        ],
+        "started_at_utc": "2026-09-07T15:15:03.334046+00:00",
+        "return_code": 0,
+        "error": null,
+        "stdout_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_medium/generated/gencase.stdout.log",
+          "exists": true,
+          "bytes": 5242,
+          "sha256": "0731e2c51f54517f9880c987ac2baf6493841193ba1885ac331e43cfe9a33efb"
+        },
+        "environment_policy": {
+          "CUDA_VISIBLE_DEVICES": "",
+          "NVIDIA_VISIBLE_DEVICES": "void",
+          "solver_invocations": 0,
+          "gpu_indices_used": []
+        },
+        "command_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_medium/generated/gencase.command.json",
+          "exists": true,
+          "bytes": 1013,
+          "sha256": "30e7c1a5eb02b0413ecb7809595593df1f5e1570d96085264fb76d53085ec6b3"
+        }
+      },
+      "gencase_log_summary": {
+        "log_present": true,
+        "total_particles": 8720,
+        "boundary_particles": 4520,
+        "fixed_particles": 4520,
+        "moving_particles": 0,
+        "floating_particles": 0,
+        "fluid_particles": 4200,
+        "points_loaded": null,
+        "x_range_m": [
+          0.0,
+          1.2
+        ],
+        "y_range_m": [
+          0.0,
+          0.408
+        ],
+        "z_range_m": [
+          0.0,
+          0.6
+        ],
+        "finished_code_0": true,
+        "warning_lines": []
+      },
+      "generated_case": {
+        "generated_xml_present": true,
+        "case_app": "GenCase v5.4.354.01 (07-04-2025)",
+        "particles": {
+          "total_particles": 8720,
+          "boundary_particles": 4520,
+          "fixed_particles": 4520,
+          "fluid_particles": 4200,
+          "fixed_id_range": "0-4519",
+          "fluid_id_range": "4520-8719",
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1
+        },
+        "constants": {
+          "dp_m": 0.024,
+          "rhop0_kg_m3": 1000.0,
+          "massbound_kg": 0.013824,
+          "massfluid_kg": 0.013824
+        },
+        "controls": {
+          "dp_m": 0.024,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "controls_match_requested_protocol": {
+        "dp": true,
+        "time_max": true,
+        "time_out": true,
+        "step_algorithm": true,
+        "verlet_steps": true,
+        "boundary": true
+      },
+      "particle_counts": {
+        "total_particles": 8720,
+        "boundary_particles": 4520,
+        "fixed_particles": 4520,
+        "fluid_particles": 4200,
+        "fixed_id_range": "0-4519",
+        "fluid_id_range": "4520-8719",
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1
+      },
+      "mass_audit": {
+        "fluid_particles": 4200,
+        "boundary_particles": 4520,
+        "rhop0_kg_m3": 1000.0,
+        "dp_m": 0.024,
+        "massfluid_per_particle_kg": 0.013824,
+        "massbound_per_particle_kg": 0.013824,
+        "expected_particle_mass_kg": 0.013824,
+        "initial_fluid_mass_kg": 58.0608,
+        "initial_boundary_mass_kg": 62.48448,
+        "initial_fluid_mass_from_discrete_volume_kg": 58.0608,
+        "relative_fluid_particle_mass_error": 0.0,
+        "anomalies": [],
+        "mass_clean_for_structural_preflight": true
+      },
+      "geometry_audit": {
+        "declared_definition_bounds_m": {
+          "min": [
+            -0.12,
+            -0.12,
+            -0.12
+          ],
+          "max": [
+            1.35,
+            0.55,
+            0.85
+          ]
+        },
+        "vtk": {
+          "all": {
+            "present": true,
+            "declared_points": 8720,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 8720,
+              "finite": true,
+              "min_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "max_m": [
+                1.2000000476837158,
+                0.40799999237060547,
+                0.6000000238418579
+              ]
+            }
+          },
+          "bound": {
+            "present": true,
+            "declared_points": 4520,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 4520,
+              "finite": true,
+              "min_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "max_m": [
+                1.2000000476837158,
+                0.40799999237060547,
+                0.6000000238418579
+              ]
+            }
+          },
+          "fluid": {
+            "present": true,
+            "declared_points": 4200,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 4200,
+              "finite": true,
+              "min_m": [
+                0.04800000041723251,
+                0.04800000041723251,
+                0.04800000041723251
+              ],
+              "max_m": [
+                0.3840000033378601,
+                0.36000001430511475,
+                0.5040000081062317
+              ]
+            }
+          }
+        },
+        "out_of_definition_bounds_counts": {
+          "all": 0,
+          "bound": 0,
+          "fluid": 0
+        },
+        "fluid_boundary_duplicate_positions": 0,
+        "anomalies": [],
+        "geometry_clean_for_structural_preflight": true
+      },
+      "artifacts": {
+        ".xml": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_medium/generated/R4_F1_center_obstacle_medium.xml",
+          "exists": true,
+          "bytes": 5422,
+          "sha256": "930e6ca004cc24cf7507d70a2718984178a291e17d5ab5407fc25b3f70245493"
+        },
+        ".bi4": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_medium/generated/R4_F1_center_obstacle_medium.bi4",
+          "exists": true,
+          "bytes": 385110,
+          "sha256": "c9f626ad1e494240a5809681f1607fe95022495435d3a74bbfc80ebffe56e07e"
+        },
+        ".out": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_medium/generated/R4_F1_center_obstacle_medium.out",
+          "exists": true,
+          "bytes": 5197,
+          "sha256": "22ac89eb14d8cebc186ad119945add711c4ba654d7c25002e7f319123bc2d5f1"
+        },
+        "_All.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_medium/generated/R4_F1_center_obstacle_medium_All.vtk",
+          "exists": true,
+          "bytes": 366512,
+          "sha256": "a92feb29f267490db6818b76cb745565aa7c5fc92ff9085da048a83cb7ede6e9"
+        },
+        "_Bound.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_medium/generated/R4_F1_center_obstacle_medium_Bound.vtk",
+          "exists": true,
+          "bytes": 117754,
+          "sha256": "524939304add102b74e7d8d827a778d3cd14a0c47a0f365e141ce8dceab7d848"
+        },
+        "_Fluid.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_medium/generated/R4_F1_center_obstacle_medium_Fluid.vtk",
+          "exists": true,
+          "bytes": 176671,
+          "sha256": "b1f1f31f7dd4ec606f8bb39cf0bc38e58bed7130d937d99810810bfecaa9e549"
+        },
+        "_MkCells.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_medium/generated/R4_F1_center_obstacle_medium_MkCells.vtk",
+          "exists": true,
+          "bytes": 3325,
+          "sha256": "b6f5352fd19690612454be39bbd463d79676ca81d31f5eaa11dc9d1d3ac27d0d"
+        }
+      },
+      "structural_anomalies": [],
+      "formal_production_authorized": false
+    },
+    {
+      "case_id": "R4_F1_center_obstacle_fine",
+      "family": "F1",
+      "background_id": "center_obstacle",
+      "mechanism": "split-around-obstacle",
+      "level": "fine",
+      "dp_m": 0.014,
+      "time_max_s": 1.5,
+      "time_out_s": 0.001,
+      "source_definition": {
+        "path": "cases/F1/F1_center_obstacle/F1_center_obstacle_Def.xml",
+        "exists": true,
+        "bytes": 3616,
+        "sha256": "60662c0779da976b2c4c60e7d13c80f0cc52f61fcec9679305ad9259bc3fae0a"
+      },
+      "source_geometry_signature": {
+        "drawbox_count": 4,
+        "boxfill_values": [
+          "solid",
+          "bottom | left | right | front | back",
+          "solid",
+          "top | left | right | front | back"
+        ],
+        "setmkfluid_count": 1,
+        "setmkbound_count": 2,
+        "setmkvoid_count": 1,
+        "floating_section_present": false,
+        "moving_section_present": false,
+        "file_references": []
+      },
+      "definition": {
+        "candidate": {
+          "path": "campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_center_obstacle_fine_Def.xml",
+          "exists": true,
+          "bytes": 3740,
+          "sha256": "890a1e96c13d328716c9c965334d2c97f8853946b154a9a4b5e8a3959aab66fa"
+        },
+        "candidate_controls": {
+          "dp_m": 0.014,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "execution_status": "completed",
+      "acceptance_status": "preflight_only_not_physical_acceptance",
+      "validation_scope": "CPU GenCase structural evidence only; no solver trajectory or physical observable",
+      "run": {
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_center_obstacle_fine_Def",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_fine/generated/R4_F1_center_obstacle_fine",
+          "-save:all"
+        ],
+        "started_at_utc": "2026-09-07T15:15:03.396906+00:00",
+        "return_code": 0,
+        "error": null,
+        "stdout_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_fine/generated/gencase.stdout.log",
+          "exists": true,
+          "bytes": 5241,
+          "sha256": "57a7ade7dbe80e90ebfe0d0f7073c7ea65f1181e55b1ed8b0e04828a9497a9d5"
+        },
+        "environment_policy": {
+          "CUDA_VISIBLE_DEVICES": "",
+          "NVIDIA_VISIBLE_DEVICES": "void",
+          "solver_invocations": 0,
+          "gpu_indices_used": []
+        },
+        "command_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_fine/generated/gencase.command.json",
+          "exists": true,
+          "bytes": 1005,
+          "sha256": "c14635b2f025beea0194efc4610c925e200b8025d2069607cc3734d58d7e177b"
+        }
+      },
+      "gencase_log_summary": {
+        "log_present": true,
+        "total_particles": 33970,
+        "boundary_particles": 12754,
+        "fixed_particles": 12754,
+        "moving_particles": 0,
+        "floating_particles": 0,
+        "fluid_particles": 21216,
+        "points_loaded": null,
+        "x_range_m": [
+          0.006,
+          1.196
+        ],
+        "y_range_m": [
+          0.006,
+          0.398
+        ],
+        "z_range_m": [
+          0.006,
+          0.594
+        ],
+        "finished_code_0": true,
+        "warning_lines": []
+      },
+      "generated_case": {
+        "generated_xml_present": true,
+        "case_app": "GenCase v5.4.354.01 (07-04-2025)",
+        "particles": {
+          "total_particles": 33970,
+          "boundary_particles": 12754,
+          "fixed_particles": 12754,
+          "fluid_particles": 21216,
+          "fixed_id_range": "0-12753",
+          "fluid_id_range": "12754-33969",
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1
+        },
+        "constants": {
+          "dp_m": 0.014,
+          "rhop0_kg_m3": 1000.0,
+          "massbound_kg": 0.002744,
+          "massfluid_kg": 0.002744
+        },
+        "controls": {
+          "dp_m": 0.014,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "controls_match_requested_protocol": {
+        "dp": true,
+        "time_max": true,
+        "time_out": true,
+        "step_algorithm": true,
+        "verlet_steps": true,
+        "boundary": true
+      },
+      "particle_counts": {
+        "total_particles": 33970,
+        "boundary_particles": 12754,
+        "fixed_particles": 12754,
+        "fluid_particles": 21216,
+        "fixed_id_range": "0-12753",
+        "fluid_id_range": "12754-33969",
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1
+      },
+      "mass_audit": {
+        "fluid_particles": 21216,
+        "boundary_particles": 12754,
+        "rhop0_kg_m3": 1000.0,
+        "dp_m": 0.014,
+        "massfluid_per_particle_kg": 0.002744,
+        "massbound_per_particle_kg": 0.002744,
+        "expected_particle_mass_kg": 0.0027440000000000003,
+        "initial_fluid_mass_kg": 58.216704,
+        "initial_boundary_mass_kg": 34.996976,
+        "initial_fluid_mass_from_discrete_volume_kg": 58.21670400000001,
+        "relative_fluid_particle_mass_error": 1.5804696391916972e-16,
+        "anomalies": [],
+        "mass_clean_for_structural_preflight": true
+      },
+      "geometry_audit": {
+        "declared_definition_bounds_m": {
+          "min": [
+            -0.12,
+            -0.12,
+            -0.12
+          ],
+          "max": [
+            1.35,
+            0.55,
+            0.85
+          ]
+        },
+        "vtk": {
+          "all": {
+            "present": true,
+            "declared_points": 33970,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 33970,
+              "finite": true,
+              "min_m": [
+                0.006000000052154064,
+                0.006000000052154064,
+                0.006000000052154064
+              ],
+              "max_m": [
+                1.1959999799728394,
+                0.39800000190734863,
+                0.593999981880188
+              ]
+            }
+          },
+          "bound": {
+            "present": true,
+            "declared_points": 12754,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 12754,
+              "finite": true,
+              "min_m": [
+                0.006000000052154064,
+                0.006000000052154064,
+                0.006000000052154064
+              ],
+              "max_m": [
+                1.1959999799728394,
+                0.39800000190734863,
+                0.593999981880188
+              ]
+            }
+          },
+          "fluid": {
+            "present": true,
+            "declared_points": 21216,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 21216,
+              "finite": true,
+              "min_m": [
+                0.03400000184774399,
+                0.03400000184774399,
+                0.03400000184774399
+              ],
+              "max_m": [
+                0.3840000033378601,
+                0.35600000619888306,
+                0.4959999918937683
+              ]
+            }
+          }
+        },
+        "out_of_definition_bounds_counts": {
+          "all": 0,
+          "bound": 0,
+          "fluid": 0
+        },
+        "fluid_boundary_duplicate_positions": 0,
+        "anomalies": [],
+        "geometry_clean_for_structural_preflight": true
+      },
+      "artifacts": {
+        ".xml": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_fine/generated/R4_F1_center_obstacle_fine.xml",
+          "exists": true,
+          "bytes": 5444,
+          "sha256": "a1c2c34024d77aedf04ced61b92b74338d5fdd67756bec9c97469c476dea74b8"
+        },
+        ".bi4": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_fine/generated/R4_F1_center_obstacle_fine.bi4",
+          "exists": true,
+          "bytes": 1496108,
+          "sha256": "a2d647064fff438ad405e7ccf4ebebdae5a39ed1d6fcdc0bb199d90c7db1e4b2"
+        },
+        ".out": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_fine/generated/R4_F1_center_obstacle_fine.out",
+          "exists": true,
+          "bytes": 5196,
+          "sha256": "a1f8ca2bc5df2eb85be631f65b7a97af58aab6bc2054cf0240fac9b6f3bea6f2"
+        },
+        "_All.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_fine/generated/R4_F1_center_obstacle_fine_All.vtk",
+          "exists": true,
+          "bytes": 1427019,
+          "sha256": "799f8ee894dae77d5b6dad4b75b1fa93f8253680eacfe5eb8ee6fa3caeb69949"
+        },
+        "_Bound.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_fine/generated/R4_F1_center_obstacle_fine_Bound.vtk",
+          "exists": true,
+          "bytes": 331844,
+          "sha256": "cc72e5bd0f3b73cfbc197697e323512eaa8b1c1555508a3f4560955e55b2eee5"
+        },
+        "_Fluid.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_fine/generated/R4_F1_center_obstacle_fine_Fluid.vtk",
+          "exists": true,
+          "bytes": 891351,
+          "sha256": "2a2e9760d42255633bb7f2d63cdf46660639bfffdc604e208fcbde26864ec7c4"
+        },
+        "_MkCells.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_center_obstacle_fine/generated/R4_F1_center_obstacle_fine_MkCells.vtk",
+          "exists": true,
+          "bytes": 3325,
+          "sha256": "914d2c61ec635344b04efd76c5a19b0000426b6a45f2c857d5ff99fe139f8baf"
+        }
+      },
+      "structural_anomalies": [],
+      "formal_production_authorized": false
+    },
+    {
+      "case_id": "R4_F1_twin_obstacle_split_remerge_coarse",
+      "family": "F1",
+      "background_id": "twin_obstacle_split_remerge",
+      "mechanism": "multi-path-split-remerge",
+      "level": "coarse",
+      "dp_m": 0.035,
+      "time_max_s": 1.5,
+      "time_out_s": 0.001,
+      "source_definition": {
+        "path": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+        "exists": true,
+        "bytes": 4167,
+        "sha256": "a816d5ae86f91d73cb77730042a890c45f8f7b70236f390b4a840047fe94f909"
+      },
+      "source_geometry_signature": {
+        "drawbox_count": 6,
+        "boxfill_values": [
+          "solid",
+          "bottom | left | right | front | back",
+          "solid",
+          "top | left | right | front | back",
+          "solid",
+          "top | left | right | front | back"
+        ],
+        "setmkfluid_count": 1,
+        "setmkbound_count": 3,
+        "setmkvoid_count": 2,
+        "floating_section_present": false,
+        "moving_section_present": false,
+        "file_references": []
+      },
+      "definition": {
+        "candidate": {
+          "path": "campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_coarse_Def.xml",
+          "exists": true,
+          "bytes": 4290,
+          "sha256": "1dddd4f8c06ad46219fa9bdec2b09183f6284aa896465d4ec4a7905f22caaeb9"
+        },
+        "candidate_controls": {
+          "dp_m": 0.035,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "execution_status": "completed",
+      "acceptance_status": "preflight_only_not_physical_acceptance",
+      "validation_scope": "CPU GenCase structural evidence only; no solver trajectory or physical observable",
+      "run": {
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_coarse_Def",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_coarse/generated/R4_F1_twin_obstacle_split_remerge_coarse",
+          "-save:all"
+        ],
+        "started_at_utc": "2026-09-07T15:15:03.609781+00:00",
+        "return_code": 0,
+        "error": null,
+        "stdout_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_coarse/generated/gencase.stdout.log",
+          "exists": true,
+          "bytes": 5459,
+          "sha256": "bdf1ef0796008373502219fdd59af82b1e4484328720110219342cb76b8ec3d5"
+        },
+        "environment_policy": {
+          "CUDA_VISIBLE_DEVICES": "",
+          "NVIDIA_VISIBLE_DEVICES": "void",
+          "solver_invocations": 0,
+          "gpu_indices_used": []
+        },
+        "command_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_coarse/generated/gencase.command.json",
+          "exists": true,
+          "bytes": 1061,
+          "sha256": "d2289a0b3ba101bd399888ef9d45b7d7c27578f2dcc5cdb129473771f5ad6de4"
+        }
+      },
+      "gencase_log_summary": {
+        "log_present": true,
+        "total_particles": 3776,
+        "boundary_particles": 2376,
+        "fixed_particles": 2376,
+        "moving_particles": 0,
+        "floating_particles": 0,
+        "fluid_particles": 1400,
+        "points_loaded": null,
+        "x_range_m": [
+          -0.015,
+          1.21
+        ],
+        "y_range_m": [
+          -0.015,
+          0.405
+        ],
+        "z_range_m": [
+          -0.015,
+          0.615
+        ],
+        "finished_code_0": true,
+        "warning_lines": []
+      },
+      "generated_case": {
+        "generated_xml_present": true,
+        "case_app": "GenCase v5.4.354.01 (07-04-2025)",
+        "particles": {
+          "total_particles": 3776,
+          "boundary_particles": 2376,
+          "fixed_particles": 2376,
+          "fluid_particles": 1400,
+          "fixed_id_range": "0-2375",
+          "fluid_id_range": "2376-3775",
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1
+        },
+        "constants": {
+          "dp_m": 0.035,
+          "rhop0_kg_m3": 1000.0,
+          "massbound_kg": 0.042875,
+          "massfluid_kg": 0.042875
+        },
+        "controls": {
+          "dp_m": 0.035,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "controls_match_requested_protocol": {
+        "dp": true,
+        "time_max": true,
+        "time_out": true,
+        "step_algorithm": true,
+        "verlet_steps": true,
+        "boundary": true
+      },
+      "particle_counts": {
+        "total_particles": 3776,
+        "boundary_particles": 2376,
+        "fixed_particles": 2376,
+        "fluid_particles": 1400,
+        "fixed_id_range": "0-2375",
+        "fluid_id_range": "2376-3775",
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1
+      },
+      "mass_audit": {
+        "fluid_particles": 1400,
+        "boundary_particles": 2376,
+        "rhop0_kg_m3": 1000.0,
+        "dp_m": 0.035,
+        "massfluid_per_particle_kg": 0.042875,
+        "massbound_per_particle_kg": 0.042875,
+        "expected_particle_mass_kg": 0.04287500000000001,
+        "initial_fluid_mass_kg": 60.025000000000006,
+        "initial_boundary_mass_kg": 101.87100000000001,
+        "initial_fluid_mass_from_discrete_volume_kg": 60.02500000000001,
+        "relative_fluid_particle_mass_error": 1.6184009105322978e-16,
+        "anomalies": [],
+        "mass_clean_for_structural_preflight": true
+      },
+      "geometry_audit": {
+        "declared_definition_bounds_m": {
+          "min": [
+            -0.12,
+            -0.12,
+            -0.12
+          ],
+          "max": [
+            1.35,
+            0.55,
+            0.85
+          ]
+        },
+        "vtk": {
+          "all": {
+            "present": true,
+            "declared_points": 3776,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 3776,
+              "finite": true,
+              "min_m": [
+                -0.014999999664723873,
+                -0.014999999664723873,
+                -0.014999999664723873
+              ],
+              "max_m": [
+                1.2100000381469727,
+                0.4050000011920929,
+                0.6150000095367432
+              ]
+            }
+          },
+          "bound": {
+            "present": true,
+            "declared_points": 2376,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 2376,
+              "finite": true,
+              "min_m": [
+                -0.014999999664723873,
+                -0.014999999664723873,
+                -0.014999999664723873
+              ],
+              "max_m": [
+                1.2100000381469727,
+                0.4050000011920929,
+                0.6150000095367432
+              ]
+            }
+          },
+          "fluid": {
+            "present": true,
+            "declared_points": 1400,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 1400,
+              "finite": true,
+              "min_m": [
+                0.054999999701976776,
+                0.054999999701976776,
+                0.054999999701976776
+              ],
+              "max_m": [
+                0.3700000047683716,
+                0.3700000047683716,
+                0.5099999904632568
+              ]
+            }
+          }
+        },
+        "out_of_definition_bounds_counts": {
+          "all": 0,
+          "bound": 0,
+          "fluid": 0
+        },
+        "fluid_boundary_duplicate_positions": 0,
+        "anomalies": [],
+        "geometry_clean_for_structural_preflight": true
+      },
+      "artifacts": {
+        ".xml": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_coarse/generated/R4_F1_twin_obstacle_split_remerge_coarse.xml",
+          "exists": true,
+          "bytes": 6051,
+          "sha256": "d3164173bdf2f4ea9c26a7aafc99054a18bef0379d16b835ec9a4f14b3afc51a"
+        },
+        ".bi4": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_coarse/generated/R4_F1_twin_obstacle_split_remerge_coarse.bi4",
+          "exists": true,
+          "bytes": 167586,
+          "sha256": "007fdfe428abb924dc14d6e91f86ab235ca1c40cee02297b81da703199d9049f"
+        },
+        ".out": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_coarse/generated/R4_F1_twin_obstacle_split_remerge_coarse.out",
+          "exists": true,
+          "bytes": 5414,
+          "sha256": "2f3c198648b189aef90749728140cbc71864a3939a4cd9d411f517e46763b86e"
+        },
+        "_All.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_coarse/generated/R4_F1_twin_obstacle_split_remerge_coarse_All.vtk",
+          "exists": true,
+          "bytes": 158863,
+          "sha256": "ad3f0ad0010d1174ab3de84939ea86e1b5f3c6b18884955a856fa8e5b3bf645c"
+        },
+        "_Bound.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_coarse/generated/R4_F1_twin_obstacle_split_remerge_coarse_Bound.vtk",
+          "exists": true,
+          "bytes": 62010,
+          "sha256": "0cd19cf921f81e8a8e5fdf28e0369c35845dfd2d6d0afa964ef7af4b3d911ede"
+        },
+        "_Fluid.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_coarse/generated/R4_F1_twin_obstacle_split_remerge_coarse_Fluid.vtk",
+          "exists": true,
+          "bytes": 59071,
+          "sha256": "9c2d877e7b09c6c7cea9ddd7146aebb76a48b58020c273a39109196b697fadf3"
+        },
+        "_MkCells.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_coarse/generated/R4_F1_twin_obstacle_split_remerge_coarse_MkCells.vtk",
+          "exists": true,
+          "bytes": 5029,
+          "sha256": "3bd69f4ada8b80401b764b2bbdbc0cce1aab343cec8bee7b427ef5fe6488b023"
+        }
+      },
+      "structural_anomalies": [],
+      "formal_production_authorized": false
+    },
+    {
+      "case_id": "R4_F1_twin_obstacle_split_remerge_medium",
+      "family": "F1",
+      "background_id": "twin_obstacle_split_remerge",
+      "mechanism": "multi-path-split-remerge",
+      "level": "medium",
+      "dp_m": 0.024,
+      "time_max_s": 1.5,
+      "time_out_s": 0.001,
+      "source_definition": {
+        "path": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+        "exists": true,
+        "bytes": 4167,
+        "sha256": "a816d5ae86f91d73cb77730042a890c45f8f7b70236f390b4a840047fe94f909"
+      },
+      "source_geometry_signature": {
+        "drawbox_count": 6,
+        "boxfill_values": [
+          "solid",
+          "bottom | left | right | front | back",
+          "solid",
+          "top | left | right | front | back",
+          "solid",
+          "top | left | right | front | back"
+        ],
+        "setmkfluid_count": 1,
+        "setmkbound_count": 3,
+        "setmkvoid_count": 2,
+        "floating_section_present": false,
+        "moving_section_present": false,
+        "file_references": []
+      },
+      "definition": {
+        "candidate": {
+          "path": "campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_medium_Def.xml",
+          "exists": true,
+          "bytes": 4290,
+          "sha256": "e264e1305b3e155a9b5b873b613e7eccb3751ee5304fa61ff586ea2b85ae5a50"
+        },
+        "candidate_controls": {
+          "dp_m": 0.024,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "execution_status": "completed",
+      "acceptance_status": "preflight_only_not_physical_acceptance",
+      "validation_scope": "CPU GenCase structural evidence only; no solver trajectory or physical observable",
+      "run": {
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_medium_Def",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_medium/generated/R4_F1_twin_obstacle_split_remerge_medium",
+          "-save:all"
+        ],
+        "started_at_utc": "2026-09-07T15:15:03.648453+00:00",
+        "return_code": 0,
+        "error": null,
+        "stdout_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_medium/generated/gencase.stdout.log",
+          "exists": true,
+          "bytes": 5441,
+          "sha256": "1bb683d483a16ca24fbafcc06462001473d57db3ea500659fd7f566ef24286b6"
+        },
+        "environment_policy": {
+          "CUDA_VISIBLE_DEVICES": "",
+          "NVIDIA_VISIBLE_DEVICES": "void",
+          "solver_invocations": 0,
+          "gpu_indices_used": []
+        },
+        "command_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_medium/generated/gencase.command.json",
+          "exists": true,
+          "bytes": 1061,
+          "sha256": "5081b195e7a0042aacfafb1419e1f2c4e98b1dabd2ebef3f35d645a52af145c8"
+        }
+      },
+      "gencase_log_summary": {
+        "log_present": true,
+        "total_particles": 8884,
+        "boundary_particles": 4684,
+        "fixed_particles": 4684,
+        "moving_particles": 0,
+        "floating_particles": 0,
+        "fluid_particles": 4200,
+        "points_loaded": null,
+        "x_range_m": [
+          0.0,
+          1.2
+        ],
+        "y_range_m": [
+          0.0,
+          0.408
+        ],
+        "z_range_m": [
+          0.0,
+          0.6
+        ],
+        "finished_code_0": true,
+        "warning_lines": []
+      },
+      "generated_case": {
+        "generated_xml_present": true,
+        "case_app": "GenCase v5.4.354.01 (07-04-2025)",
+        "particles": {
+          "total_particles": 8884,
+          "boundary_particles": 4684,
+          "fixed_particles": 4684,
+          "fluid_particles": 4200,
+          "fixed_id_range": "0-4683",
+          "fluid_id_range": "4684-8883",
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1
+        },
+        "constants": {
+          "dp_m": 0.024,
+          "rhop0_kg_m3": 1000.0,
+          "massbound_kg": 0.013824,
+          "massfluid_kg": 0.013824
+        },
+        "controls": {
+          "dp_m": 0.024,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "controls_match_requested_protocol": {
+        "dp": true,
+        "time_max": true,
+        "time_out": true,
+        "step_algorithm": true,
+        "verlet_steps": true,
+        "boundary": true
+      },
+      "particle_counts": {
+        "total_particles": 8884,
+        "boundary_particles": 4684,
+        "fixed_particles": 4684,
+        "fluid_particles": 4200,
+        "fixed_id_range": "0-4683",
+        "fluid_id_range": "4684-8883",
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1
+      },
+      "mass_audit": {
+        "fluid_particles": 4200,
+        "boundary_particles": 4684,
+        "rhop0_kg_m3": 1000.0,
+        "dp_m": 0.024,
+        "massfluid_per_particle_kg": 0.013824,
+        "massbound_per_particle_kg": 0.013824,
+        "expected_particle_mass_kg": 0.013824,
+        "initial_fluid_mass_kg": 58.0608,
+        "initial_boundary_mass_kg": 64.751616,
+        "initial_fluid_mass_from_discrete_volume_kg": 58.0608,
+        "relative_fluid_particle_mass_error": 0.0,
+        "anomalies": [],
+        "mass_clean_for_structural_preflight": true
+      },
+      "geometry_audit": {
+        "declared_definition_bounds_m": {
+          "min": [
+            -0.12,
+            -0.12,
+            -0.12
+          ],
+          "max": [
+            1.35,
+            0.55,
+            0.85
+          ]
+        },
+        "vtk": {
+          "all": {
+            "present": true,
+            "declared_points": 8884,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 8884,
+              "finite": true,
+              "min_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "max_m": [
+                1.2000000476837158,
+                0.40799999237060547,
+                0.6000000238418579
+              ]
+            }
+          },
+          "bound": {
+            "present": true,
+            "declared_points": 4684,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 4684,
+              "finite": true,
+              "min_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "max_m": [
+                1.2000000476837158,
+                0.40799999237060547,
+                0.6000000238418579
+              ]
+            }
+          },
+          "fluid": {
+            "present": true,
+            "declared_points": 4200,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 4200,
+              "finite": true,
+              "min_m": [
+                0.04800000041723251,
+                0.04800000041723251,
+                0.04800000041723251
+              ],
+              "max_m": [
+                0.3840000033378601,
+                0.36000001430511475,
+                0.5040000081062317
+              ]
+            }
+          }
+        },
+        "out_of_definition_bounds_counts": {
+          "all": 0,
+          "bound": 0,
+          "fluid": 0
+        },
+        "fluid_boundary_duplicate_positions": 0,
+        "anomalies": [],
+        "geometry_clean_for_structural_preflight": true
+      },
+      "artifacts": {
+        ".xml": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_medium/generated/R4_F1_twin_obstacle_split_remerge_medium.xml",
+          "exists": true,
+          "bytes": 6039,
+          "sha256": "9d70fae9354d48c91531bce9bbc36372e5fa7d598382272f3af4ec503272814c"
+        },
+        ".bi4": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_medium/generated/R4_F1_twin_obstacle_split_remerge_medium.bi4",
+          "exists": true,
+          "bytes": 392338,
+          "sha256": "60fe9aedf5d7f66c191e58c3d6c1345214a56e7fd8b89a884a41ed345e16dd78"
+        },
+        ".out": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_medium/generated/R4_F1_twin_obstacle_split_remerge_medium.out",
+          "exists": true,
+          "bytes": 5396,
+          "sha256": "f327149e6e615f84495d8ed7246f505cfe3c43c2f90298e718be004a3d4097fb"
+        },
+        "_All.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_medium/generated/R4_F1_twin_obstacle_split_remerge_medium_All.vtk",
+          "exists": true,
+          "bytes": 373400,
+          "sha256": "1b1a40688eb4fdffbb0561029e509a14ff0ad9d199e7151f1899d0173335e899"
+        },
+        "_Bound.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_medium/generated/R4_F1_twin_obstacle_split_remerge_medium_Bound.vtk",
+          "exists": true,
+          "bytes": 122018,
+          "sha256": "791f34278f2ab697767ff94cbbdd3c636f08b0188661768abeb9d005fd2e0f7f"
+        },
+        "_Fluid.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_medium/generated/R4_F1_twin_obstacle_split_remerge_medium_Fluid.vtk",
+          "exists": true,
+          "bytes": 176671,
+          "sha256": "eae10ec4fd85b6327dee8d9ac7d9418c41d6052986be6b389735b71082c304c4"
+        },
+        "_MkCells.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_medium/generated/R4_F1_twin_obstacle_split_remerge_medium_MkCells.vtk",
+          "exists": true,
+          "bytes": 5029,
+          "sha256": "9ed0123048f398a40a33d8be6ba8d5c8b9ac82f42cb0f4f7fe66b7fef728d71e"
+        }
+      },
+      "structural_anomalies": [],
+      "formal_production_authorized": false
+    },
+    {
+      "case_id": "R4_F1_twin_obstacle_split_remerge_fine",
+      "family": "F1",
+      "background_id": "twin_obstacle_split_remerge",
+      "mechanism": "multi-path-split-remerge",
+      "level": "fine",
+      "dp_m": 0.014,
+      "time_max_s": 1.5,
+      "time_out_s": 0.001,
+      "source_definition": {
+        "path": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+        "exists": true,
+        "bytes": 4167,
+        "sha256": "a816d5ae86f91d73cb77730042a890c45f8f7b70236f390b4a840047fe94f909"
+      },
+      "source_geometry_signature": {
+        "drawbox_count": 6,
+        "boxfill_values": [
+          "solid",
+          "bottom | left | right | front | back",
+          "solid",
+          "top | left | right | front | back",
+          "solid",
+          "top | left | right | front | back"
+        ],
+        "setmkfluid_count": 1,
+        "setmkbound_count": 3,
+        "setmkvoid_count": 2,
+        "floating_section_present": false,
+        "moving_section_present": false,
+        "file_references": []
+      },
+      "definition": {
+        "candidate": {
+          "path": "campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_fine_Def.xml",
+          "exists": true,
+          "bytes": 4290,
+          "sha256": "d45a39a89eeb3bf622ae92487598f07deaf99d39399c21108af42635a75b453c"
+        },
+        "candidate_controls": {
+          "dp_m": 0.014,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "execution_status": "completed",
+      "acceptance_status": "preflight_only_not_physical_acceptance",
+      "validation_scope": "CPU GenCase structural evidence only; no solver trajectory or physical observable",
+      "run": {
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_fine_Def",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_fine/generated/R4_F1_twin_obstacle_split_remerge_fine",
+          "-save:all"
+        ],
+        "started_at_utc": "2026-09-07T15:15:03.715352+00:00",
+        "return_code": 0,
+        "error": null,
+        "stdout_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_fine/generated/gencase.stdout.log",
+          "exists": true,
+          "bytes": 5440,
+          "sha256": "e1362c269d94bdca95c5b458ae37e413c058ce31352e3814811173bc8b8700a4"
+        },
+        "environment_policy": {
+          "CUDA_VISIBLE_DEVICES": "",
+          "NVIDIA_VISIBLE_DEVICES": "void",
+          "solver_invocations": 0,
+          "gpu_indices_used": []
+        },
+        "command_log": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_fine/generated/gencase.command.json",
+          "exists": true,
+          "bytes": 1053,
+          "sha256": "45d13ef7230a37454fbf4649f58a4cccf7854746e5d494b5f7754d25065de4f6"
+        }
+      },
+      "gencase_log_summary": {
+        "log_present": true,
+        "total_particles": 34378,
+        "boundary_particles": 13162,
+        "fixed_particles": 13162,
+        "moving_particles": 0,
+        "floating_particles": 0,
+        "fluid_particles": 21216,
+        "points_loaded": null,
+        "x_range_m": [
+          0.006,
+          1.196
+        ],
+        "y_range_m": [
+          0.006,
+          0.398
+        ],
+        "z_range_m": [
+          0.006,
+          0.594
+        ],
+        "finished_code_0": true,
+        "warning_lines": []
+      },
+      "generated_case": {
+        "generated_xml_present": true,
+        "case_app": "GenCase v5.4.354.01 (07-04-2025)",
+        "particles": {
+          "total_particles": 34378,
+          "boundary_particles": 13162,
+          "fixed_particles": 13162,
+          "fluid_particles": 21216,
+          "fixed_id_range": "0-13161",
+          "fluid_id_range": "13162-34377",
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1
+        },
+        "constants": {
+          "dp_m": 0.014,
+          "rhop0_kg_m3": 1000.0,
+          "massbound_kg": 0.002744,
+          "massfluid_kg": 0.002744
+        },
+        "controls": {
+          "dp_m": 0.014,
+          "time_max_s": 1.5,
+          "time_out_s": 0.001,
+          "step_algorithm": 1,
+          "integrator": "Verlet",
+          "verlet_steps": 40,
+          "boundary_parameter": 1,
+          "boundary_formulation": "DBC",
+          "save_pos_double": 2,
+          "shifting": 0,
+          "raw_parameters": {
+            "SavePosDouble": "2",
+            "StepAlgorithm": "1",
+            "VerletSteps": "40",
+            "Kernel": "2",
+            "ViscoTreatment": "1",
+            "Visco": "0.08",
+            "ViscoBoundFactor": "1",
+            "DensityDT": "2",
+            "DensityDTvalue": "0.1",
+            "Shifting": "0",
+            "RigidAlgorithm": "1",
+            "FtPause": "0",
+            "CoefDtMin": "0.05",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "DtAllParticles": "0",
+            "TimeMax": "1.5",
+            "TimeOut": "0.001",
+            "MinFluidStop": "0",
+            "RhopOutMin": "700",
+            "RhopOutMax": "1300",
+            "Boundary": "1"
+          }
+        }
+      },
+      "controls_match_requested_protocol": {
+        "dp": true,
+        "time_max": true,
+        "time_out": true,
+        "step_algorithm": true,
+        "verlet_steps": true,
+        "boundary": true
+      },
+      "particle_counts": {
+        "total_particles": 34378,
+        "boundary_particles": 13162,
+        "fixed_particles": 13162,
+        "fluid_particles": 21216,
+        "fixed_id_range": "0-13161",
+        "fluid_id_range": "13162-34377",
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1
+      },
+      "mass_audit": {
+        "fluid_particles": 21216,
+        "boundary_particles": 13162,
+        "rhop0_kg_m3": 1000.0,
+        "dp_m": 0.014,
+        "massfluid_per_particle_kg": 0.002744,
+        "massbound_per_particle_kg": 0.002744,
+        "expected_particle_mass_kg": 0.0027440000000000003,
+        "initial_fluid_mass_kg": 58.216704,
+        "initial_boundary_mass_kg": 36.116527999999995,
+        "initial_fluid_mass_from_discrete_volume_kg": 58.21670400000001,
+        "relative_fluid_particle_mass_error": 1.5804696391916972e-16,
+        "anomalies": [],
+        "mass_clean_for_structural_preflight": true
+      },
+      "geometry_audit": {
+        "declared_definition_bounds_m": {
+          "min": [
+            -0.12,
+            -0.12,
+            -0.12
+          ],
+          "max": [
+            1.35,
+            0.55,
+            0.85
+          ]
+        },
+        "vtk": {
+          "all": {
+            "present": true,
+            "declared_points": 34378,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 34378,
+              "finite": true,
+              "min_m": [
+                0.006000000052154064,
+                0.006000000052154064,
+                0.006000000052154064
+              ],
+              "max_m": [
+                1.1959999799728394,
+                0.39800000190734863,
+                0.593999981880188
+              ]
+            }
+          },
+          "bound": {
+            "present": true,
+            "declared_points": 13162,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 13162,
+              "finite": true,
+              "min_m": [
+                0.006000000052154064,
+                0.006000000052154064,
+                0.006000000052154064
+              ],
+              "max_m": [
+                1.1959999799728394,
+                0.39800000190734863,
+                0.593999981880188
+              ]
+            }
+          },
+          "fluid": {
+            "present": true,
+            "declared_points": 21216,
+            "encoding": "binary_big_endian",
+            "bbox": {
+              "count": 21216,
+              "finite": true,
+              "min_m": [
+                0.03400000184774399,
+                0.03400000184774399,
+                0.03400000184774399
+              ],
+              "max_m": [
+                0.3840000033378601,
+                0.35600000619888306,
+                0.4959999918937683
+              ]
+            }
+          }
+        },
+        "out_of_definition_bounds_counts": {
+          "all": 0,
+          "bound": 0,
+          "fluid": 0
+        },
+        "fluid_boundary_duplicate_positions": 0,
+        "anomalies": [],
+        "geometry_clean_for_structural_preflight": true
+      },
+      "artifacts": {
+        ".xml": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_fine/generated/R4_F1_twin_obstacle_split_remerge_fine.xml",
+          "exists": true,
+          "bytes": 6062,
+          "sha256": "2d693395674c1a0138a581cdbfc76f31bb32b6814032a36b1deedcb98183ba98"
+        },
+        ".bi4": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_fine/generated/R4_F1_twin_obstacle_split_remerge_fine.bi4",
+          "exists": true,
+          "bytes": 1514072,
+          "sha256": "55bf7092457df810a5dbe8a19252c068387b8551f9224cafaf34c1adeb9e2974"
+        },
+        ".out": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_fine/generated/R4_F1_twin_obstacle_split_remerge_fine.out",
+          "exists": true,
+          "bytes": 5395,
+          "sha256": "b3194b782e258239377fd12b8e92698a1b939241a6102ee9723acc43b7d8caee"
+        },
+        "_All.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_fine/generated/R4_F1_twin_obstacle_split_remerge_fine_All.vtk",
+          "exists": true,
+          "bytes": 1444155,
+          "sha256": "9363729576425e775d0c4ed1a27558f2c679b2d578812ae62445d4445ad4fd05"
+        },
+        "_Bound.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_fine/generated/R4_F1_twin_obstacle_split_remerge_fine_Bound.vtk",
+          "exists": true,
+          "bytes": 342452,
+          "sha256": "de4186fc2da34d405a2872ce4252fbcd45f105af28f35f43ba6fa4d0a5b119de"
+        },
+        "_Fluid.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_fine/generated/R4_F1_twin_obstacle_split_remerge_fine_Fluid.vtk",
+          "exists": true,
+          "bytes": 891351,
+          "sha256": "1943af4cf47eefcad213b97f24dfedfe2bfe1d3d6586d4191426f62124ed6009"
+        },
+        "_MkCells.vtk": {
+          "path": "campaigns/v0.1-candidate/artifacts/r4-f1-core-preflight/R4_F1_twin_obstacle_split_remerge_fine/generated/R4_F1_twin_obstacle_split_remerge_fine_MkCells.vtk",
+          "exists": true,
+          "bytes": 5029,
+          "sha256": "533d3040ad35141904a4a41953a574fed181400f4355dd645fd46791e2592910"
+        }
+      },
+      "structural_anomalies": [],
+      "formal_production_authorized": false
+    }
+  ],
+  "acceptance_boundary": {
+    "acceptance_status": "preflight_structural_evidence_only",
+    "physical_acceptance_performed": false,
+    "reference_acceptance_performed": false,
+    "solver_trajectory_available": false,
+    "formal_production_authorized": false,
+    "promotion_decision": "not_performed_by_this_preflight",
+    "required_next_evidence": [
+      "same-protocol solver execution under an explicitly approved resource plan",
+      "identity/time/finite-state and unexplained-loss audit",
+      "T1 resolution and external-observable evaluation",
+      "T2 destination/wall/open-face and mass closure evidence"
+    ]
+  }
+}

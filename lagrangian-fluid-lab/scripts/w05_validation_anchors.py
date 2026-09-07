@@ -205,7 +205,8 @@ def postprocess_f1(record):
     subprocess_checked([
         str(MEASURE), "-dirdata", str(attempt / "data"),
         "-points", str(record["source"] / "pressure.txt"), "-onlytype:+all,+fluid",
-        "-vars:-all,+press", "-kclimit:0.5", "-savecsv", str(out / "pressure"),
+        "-vars:-all,+press", "-kclimit:0.5", "-kcusedummy:0",
+        "-savecsv", str(out / "pressure"),
     ], out / "pressure.stdout.log")
     return attempt
 

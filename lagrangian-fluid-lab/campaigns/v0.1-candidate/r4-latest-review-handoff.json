@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "handoff_id": "R4_LATEST_REVIEW_HANDOFF_2026-09-07",
+  "generated_at": "2026-09-07",
+  "execution_status": "completed_with_findings",
+  "acceptance_status": "formal_v0.1_not_admitted",
+  "decision": {
+    "formal_v0.1": "NO_GO",
+    "development_tranche": "NO_GO",
+    "f1_numerical_route": "GO_T1_ONLY_candidate_only_solver_gate_pending",
+    "f6_mdbc": "candidate_only_rejected",
+    "material_transport": "candidate_only_rejected",
+    "g4_route_ranking": "blocked_until_contract_repair_and_uniform_rerun"
+  },
+  "evidence": {
+    "default_regression": "221 passed",
+    "f6_special_regression": "2 passed",
+    "f1_gencase_preflight": {
+      "completed_cells": 9,
+      "failed_or_missing_cells": 0,
+      "structural_anomaly_cases": 0,
+      "controls_match": true,
+      "physical_acceptance": false
+    },
+    "f1_official_test02": {
+      "resolutions": 3,
+      "time_window_s": [0.0, 2.2],
+      "measuretool_use_dummy_support": false,
+      "acceptance_status": "diagnostic_only_not_physical_acceptance"
+    },
+    "f6_runtime_normals": {
+      "thresholded_zero_normals_by_case": {
+        "canonical-2": 63,
+        "fine-3": 240
+      },
+      "construction_face_overlap": "pass",
+      "physical_acceptance": false
+    },
+    "w06_tracer": {
+      "configs": 4,
+      "represented_initial_mass_kg": 27.5625,
+      "ledger_closure_error_kg": 0.0,
+      "final_reliable_mass_fraction": [0.9376417234, 0.9506802721, 0.9489795918, 0.9472789116],
+      "formal_material_target_admitted": false
+    },
+    "g4": {
+      "current_active_width": 115,
+      "local_interaction_active_width": 123,
+      "historical_result_width": 43,
+      "uniform_four_route_matrix": false,
+      "formal_ready": false
+    }
+  },
+  "open_blockers": [
+    "F1 nine-cell solver trajectories and T1 observables are not executed under one common protocol",
+    "F1 official anchor has not completed full physical Gold acceptance",
+    "F1 resolution distribution screen is not passed by existing R3 evidence",
+    "F6 still lacks fixed-body force-gauge and positive-control physical validation",
+    "Tracer has no formally admitted destination specification/source-destination closure/wall-aware policy",
+    "G4 historical checkpoints are incompatible with the current sidecar-aware input contract",
+    "G4 component slots, provenance, checkpoint state, target semantics and deterministic policy are not frozen"
+  ],
+  "next_bounded_actions": [
+    "Run the nine F1 solver cells with the preflighted uniform controls on explicitly isolated GPUs 4-7",
+    "Close F1 official pressure/elevation/mass/penetration acceptance before family promotion",
+    "Implement fixed-body force gauge and DBC control, then independently test mDBC geometry and Chrono contact",
+    "Freeze and regenerate one real tracer case with explicit source/destination/open-face/support/failure semantics",
+    "Repair the G4 contract and rerun all four routes on seeds 17/29/43 under one current contract",
+    "Allow a 20-30 case development tranche only after the family and task gates pass"
+  ],
+  "resource_boundary": {
+    "gpu_indices_used": [4, 5, 6],
+    "protected_gpu_indices": [0, 1, 2, 3],
+    "upstream_solver_tree_modified": false,
+    "remote_push_performed": false
+  },
+  "reports": {
+    "core_mother_case": "campaigns/v0.1-candidate/r4-core-mother-case-audit.json",
+    "f1_core_preflight": "campaigns/v0.1-candidate/r4-f1-core-preflight.json",
+    "f1_test02_event_window": "campaigns/v0.1-candidate/r4-f1-test02-event-window.json",
+    "f6_mdbc_runtime_normals": "campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/r4-mdbc-runtime-zero-normal-audit.json",
+    "tracer_actual_scenario": "campaigns/v0.1-candidate/r4-tracer-actual-scenario-audit.json",
+    "w06_bounded_experiment": "campaigns/v0.1-candidate/r4-w06-tracer-bounded-experiment.json",
+    "g4_training_contract": "campaigns/v0.1-candidate/r4-g4-training-contract-audit.json"
+  }
+}

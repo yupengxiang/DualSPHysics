@@ -1,0 +1,3240 @@
+{
+  "schema_version": 1,
+  "audit_id": "R4_CORE_MOTHER_CASE_AUDIT",
+  "audit_mode": "read_only_cpu_metadata_audit",
+  "audit_revision": "r4-core-mother-case-audit-v1",
+  "scope": "R4 reviewer package A/D mainline preparation for the first core mother case",
+  "current_conclusion": {
+    "first_core_mother_case": "F1_obstacle_ladder",
+    "formal_execution_authorization": "NO_GO",
+    "development_numerical_route": "GO_T1_ONLY",
+    "go_t1_t2": false,
+    "why_f1_first": [
+      "W05 provides a three-resolution 3D SPHERIC Test 02 anchor.",
+      "F1 custom cases are closed single-source 3D backgrounds, so the A0 reference and A1 candidates share dimensional semantics.",
+      "F3 Test 10 is useful but W05 is 2D while the R3/custom F3 backgrounds are 3D, and its pressure acceptance remains partial."
+    ]
+  },
+  "read_only_policy": {
+    "solver_invocations": 0,
+    "gencase_invocations": 0,
+    "gpu_queries": 0,
+    "writes_performed_by_audit": [
+      "campaigns/v0.1-candidate/r4-core-mother-case-audit.json",
+      "campaigns/v0.1-candidate/R4-CORE-MOTHER-CASE-AUDIT.md"
+    ],
+    "protected_scopes": [
+      "F6 files and reports",
+      "tracer/passive-tracer files and reports",
+      "G4 experiments and reports",
+      "vendor/official source tree",
+      "all pre-existing reports, work packages and run directories"
+    ]
+  },
+  "A0_official_anchor_audit": {
+    "F1": {
+      "official_test": "SPHERIC Test 02",
+      "status": "anchor_present_partial_not_full_gold",
+      "exact_official_physical_source_present": true,
+      "three_resolution_runs_completed": true,
+      "w05_case_ids": [
+        "W05_F1_coarse",
+        "W05_F1_medium",
+        "W05_F1_fine"
+      ],
+      "observed_controls": [
+        {
+          "case_id": "W05_F1_coarse",
+          "evidence_status": "executed",
+          "dp_m": 0.04,
+          "time_max_s": 6.0,
+          "time_end_s": 6.000103,
+          "output_cadence_s": 0.020000343333333333,
+          "frames": 301,
+          "integrator": "Symplectic",
+          "boundary_formulation": "mDBC",
+          "steps": 18636
+        },
+        {
+          "case_id": "W05_F1_medium",
+          "evidence_status": "executed",
+          "dp_m": 0.03,
+          "time_max_s": 6.0,
+          "time_end_s": 6.000166,
+          "output_cadence_s": 0.020000553333333334,
+          "frames": 301,
+          "integrator": "Symplectic",
+          "boundary_formulation": "mDBC",
+          "steps": 24067
+        },
+        {
+          "case_id": "W05_F1_fine",
+          "evidence_status": "executed",
+          "dp_m": 0.02,
+          "time_max_s": 6.0,
+          "time_end_s": 6.000074,
+          "output_cadence_s": 0.020000246666666666,
+          "frames": 301,
+          "integrator": "Symplectic",
+          "boundary_formulation": "mDBC",
+          "steps": 37576
+        }
+      ],
+      "reference_evidence": [
+        {
+          "path": "campaigns/v0.1-candidate/artifacts/w05/external/SPHERIC_Test2.zip",
+          "exists": true,
+          "bytes": 2633596,
+          "sha256": null,
+          "hash_note": "binary payload not hashed by the CPU metadata audit"
+        },
+        {
+          "path": "campaigns/v0.1-candidate/artifacts/w05/external/test2/test_case_2_exp_data.xls",
+          "exists": true,
+          "bytes": 5046272,
+          "sha256": null,
+          "hash_note": "binary payload not hashed by the CPU metadata audit"
+        }
+      ],
+      "external_metrics_summary": {
+        "H2_rmse_m": {
+          "coarse": 0.09390566361051896,
+          "medium": 0.03907953670835095,
+          "fine": 0.03905194207089683
+        },
+        "H4_rmse_m": {
+          "coarse": 0.11326799760996598,
+          "medium": 0.043494791124720614,
+          "fine": 0.04059047167264091
+        },
+        "P1_rmse_pa": {
+          "coarse": 1872.5279704563125,
+          "medium": 3808.2265040258712,
+          "fine": 2483.0589378096515
+        }
+      },
+      "full_gold_equivalence": false,
+      "limitations": "F1 H2/H4 are development-level anchors; H1/H3 and impact pressure are not Gold, and W05 tout=0.02 s undersamples the impulse.",
+      "evidence_paths": [
+        "campaigns/v0.1-candidate/W05-CONCLUSION.md",
+        "campaigns/v0.1-candidate/w05-validation-anchors.json",
+        "campaigns/v0.1-candidate/cases/w05/resolution-matrix.json",
+        "vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml"
+      ]
+    },
+    "F3": {
+      "official_test": "SPHERIC Test 10",
+      "status": "anchor_present_partial_not_full_gold",
+      "exact_official_physical_source_present": true,
+      "three_resolution_runs_completed": true,
+      "w05_case_ids": [
+        "W05_F3_coarse",
+        "W05_F3_medium",
+        "W05_F3_fine"
+      ],
+      "observed_controls": [
+        {
+          "case_id": "W05_F3_coarse",
+          "evidence_status": "executed",
+          "dp_m": 0.008,
+          "time_max_s": 8.35,
+          "time_end_s": 8.350083,
+          "output_cadence_s": 0.005000049700598802,
+          "frames": 1671,
+          "integrator": "Symplectic",
+          "boundary_formulation": "mDBC",
+          "steps": 74737
+        },
+        {
+          "case_id": "W05_F3_medium",
+          "evidence_status": "executed",
+          "dp_m": 0.006,
+          "time_max_s": 8.35,
+          "time_end_s": 8.350014,
+          "output_cadence_s": 0.005000008383233533,
+          "frames": 1671,
+          "integrator": "Symplectic",
+          "boundary_formulation": "mDBC",
+          "steps": 97602
+        },
+        {
+          "case_id": "W05_F3_fine",
+          "evidence_status": "executed",
+          "dp_m": 0.004,
+          "time_max_s": 8.35,
+          "time_end_s": 8.350015,
+          "output_cadence_s": 0.0050000089820359285,
+          "frames": 1671,
+          "integrator": "Symplectic",
+          "boundary_formulation": "mDBC",
+          "steps": 152032
+        }
+      ],
+      "reference_evidence": [
+        {
+          "path": "vendor/official/DualSPHysics_v5.4/examples/mdbc/03_Sloshing/EXP_Pressure_SPHERIC_Benchmark#10.txt",
+          "exists": true,
+          "bytes": 64540,
+          "sha256": "20e5f5019a94b22e22465f5e3d7c85818a1379c317cb2474bdcd6803a9bed526"
+        }
+      ],
+      "external_metrics_summary": {
+        "pressure_rmse_pa": {
+          "coarse": 322.9252114919918,
+          "medium": 338.0046755638419,
+          "fine": 318.16763660365183
+        },
+        "simulated_peak_pa": {
+          "coarse": 535.106,
+          "medium": 617.552,
+          "fine": 3044.97
+        },
+        "experimental_peak_pa": {
+          "coarse": 3683.358623,
+          "medium": 3683.358623,
+          "fine": 3683.358623
+        },
+        "peak_time_error_s": {
+          "coarse": 0.03511000000000042,
+          "medium": 0.04512000000000027,
+          "fine": 0.04510000000000014
+        }
+      },
+      "full_gold_equivalence": false,
+      "limitations": "F3 Test 10 pressure is impulsive and variable; the three resolutions do not jointly converge in full trace, peak and timing.",
+      "evidence_paths": [
+        "campaigns/v0.1-candidate/W05-CONCLUSION.md",
+        "campaigns/v0.1-candidate/w05-validation-anchors.json",
+        "campaigns/v0.1-candidate/cases/w05/resolution-matrix.json",
+        "vendor/official/DualSPHysics_v5.4/examples/mdbc/03_Sloshing/CaseSloshingLR_Def.xml"
+      ]
+    }
+  },
+  "A1_three_background_by_three_resolution_audit": {
+    "scope": "three custom backgrounds by three resolutions; W05 official anchors remain a separate A0 reference",
+    "families": {
+      "F1": {
+        "selected_backgrounds": [
+          "plain_dam_break",
+          "center_obstacle",
+          "twin_obstacle_split_remerge"
+        ],
+        "cell_count": 9,
+        "executed_evidence_cells": 5,
+        "missing_execution_cells": 4,
+        "prepared_only_cells": 0,
+        "target_compatible_cells": 3,
+        "evidence_coverage": "5/9",
+        "target_compatible_coverage": "3/9",
+        "complete": false,
+        "common_protocol_complete": false,
+        "cells": [
+          {
+            "family": "F1",
+            "background_id": "plain_dam_break",
+            "background_label": "plain dam-break",
+            "mechanism": "collapse-runup-return",
+            "level": "coarse",
+            "target_dp_m": 0.035,
+            "target_time_max_s": 1.5,
+            "observed_case": {
+              "case_id": "F1_dam_break_plain",
+              "evidence_status": "executed",
+              "status_reason": "completed solver evidence: status/log, Run.csv and Part_*.bi4",
+              "source_definition": "cases/F1/F1_dam_break_plain/F1_dam_break_plain_Def.xml",
+              "generated_xml": "cases/F1/F1_dam_break_plain/generated/F1_dam_break_plain.xml",
+              "attempt_directory": null,
+              "attempt_id": null,
+              "run_evidence": {
+                "attempt_record": null,
+                "solver_log": "runs/F1_dam_break_plain/solver.stdout.log",
+                "run_csv": "runs/F1_dam_break_plain/Run.csv",
+                "particle_file_count": 12,
+                "particle_file_bytes": 1064496
+              },
+              "observed": {
+                "dp_m": 0.04,
+                "time_max_s": 0.55,
+                "time_end_s": 0.550069,
+                "saved_output_cadence_config_s": 0.05,
+                "output_cadence_s": 0.05000627272727273,
+                "frames": 12,
+                "steps": 1825,
+                "integrator": "Verlet",
+                "step_algorithm": 1,
+                "verlet_steps": 40,
+                "boundary_formulation": "DBC",
+                "configuration": "F1_dam_break_plain - 3D - DBC - Verlet - (40) - Wendland - Visco_Artificial(0.08b1) - DDT2(0.1) - RhopOut(700-1300)"
+              },
+              "target": {
+                "dp_m": 0.035,
+                "time_max_s": 1.5,
+                "saved_output_cadence_s": 0.01,
+                "integrator": "Verlet",
+                "boundary_formulation": "DBC"
+              },
+              "target_matches": {
+                "dp": false,
+                "time_max": false,
+                "saved_cadence": false,
+                "integrator": true,
+                "boundary": true
+              },
+              "target_compatible": false,
+              "evidence_fingerprints": [
+                {
+                  "path": "cases/F1/F1_dam_break_plain/F1_dam_break_plain_Def.xml",
+                  "exists": true,
+                  "bytes": 3059,
+                  "sha256": "86a6de6d1f2bf9b585c4ca4e36b338418209122f51c18c1242a75990bd5f760b"
+                },
+                {
+                  "path": "cases/F1/F1_dam_break_plain/generated/F1_dam_break_plain.xml",
+                  "exists": true,
+                  "bytes": 4662,
+                  "sha256": "9773edf3a2862b11fc83c2095277c9cd97fb0c6594339386396c23ace913f0fb"
+                },
+                {
+                  "path": "cases/F1/F1_dam_break_plain/generated/F1_dam_break_plain.out",
+                  "exists": true,
+                  "bytes": 4724,
+                  "sha256": "d7d371d928cd67f56659db880c94a33af63fc16e2896311653086a60f4de42c6"
+                },
+                {
+                  "path": "runs/F1_dam_break_plain/solver.stdout.log",
+                  "exists": true,
+                  "bytes": 17946,
+                  "sha256": "869d3ca9145b6fb80afe2cfe667eb275e0b9e655d9f2815cd26b0ab5c589f126"
+                },
+                {
+                  "path": "runs/F1_dam_break_plain/Run.csv",
+                  "exists": true,
+                  "bytes": 1002,
+                  "sha256": "8584b1d7c176d0a9dd7c5b088f93c2067895bfe89d3bc41853dc2285ea178e5d"
+                }
+              ]
+            },
+            "evidence_status": "executed",
+            "target_compatible": false,
+            "selection_reason": "single-source closed control for the obstacle ladder"
+          },
+          {
+            "family": "F1",
+            "background_id": "plain_dam_break",
+            "background_label": "plain dam-break",
+            "mechanism": "collapse-runup-return",
+            "level": "medium",
+            "target_dp_m": 0.024,
+            "target_time_max_s": 1.5,
+            "observed_case": {
+              "case_id": "R4_F1_plain_dam_break_medium",
+              "evidence_status": "missing",
+              "status_reason": "no candidate case id supplied",
+              "source_definition": "cases/F1/F1_dam_break_plain/F1_dam_break_plain_Def.xml",
+              "observed": {
+                "dp_m": null,
+                "time_max_s": null,
+                "time_end_s": null,
+                "output_cadence_s": null,
+                "frames": null,
+                "integrator": null,
+                "boundary_formulation": null
+              },
+              "target_matches": {
+                "dp": false,
+                "time_max": false,
+                "saved_cadence": false,
+                "integrator": false,
+                "boundary": false
+              },
+              "target_compatible": false,
+              "evidence_fingerprints": []
+            },
+            "evidence_status": "missing",
+            "target_compatible": false,
+            "selection_reason": "single-source closed control for the obstacle ladder"
+          },
+          {
+            "family": "F1",
+            "background_id": "plain_dam_break",
+            "background_label": "plain dam-break",
+            "mechanism": "collapse-runup-return",
+            "level": "fine",
+            "target_dp_m": 0.014,
+            "target_time_max_s": 1.5,
+            "observed_case": {
+              "case_id": "R4_F1_plain_dam_break_fine",
+              "evidence_status": "missing",
+              "status_reason": "no candidate case id supplied",
+              "source_definition": "cases/F1/F1_dam_break_plain/F1_dam_break_plain_Def.xml",
+              "observed": {
+                "dp_m": null,
+                "time_max_s": null,
+                "time_end_s": null,
+                "output_cadence_s": null,
+                "frames": null,
+                "integrator": null,
+                "boundary_formulation": null
+              },
+              "target_matches": {
+                "dp": false,
+                "time_max": false,
+                "saved_cadence": false,
+                "integrator": false,
+                "boundary": false
+              },
+              "target_compatible": false,
+              "evidence_fingerprints": []
+            },
+            "evidence_status": "missing",
+            "target_compatible": false,
+            "selection_reason": "single-source closed control for the obstacle ladder"
+          },
+          {
+            "family": "F1",
+            "background_id": "center_obstacle",
+            "background_label": "center obstacle",
+            "mechanism": "split-around-obstacle",
+            "level": "coarse",
+            "target_dp_m": 0.035,
+            "target_time_max_s": 1.5,
+            "observed_case": {
+              "case_id": "F1_center_obstacle",
+              "evidence_status": "executed",
+              "status_reason": "completed solver evidence: status/log, Run.csv and Part_*.bi4",
+              "source_definition": "cases/F1/F1_center_obstacle/F1_center_obstacle_Def.xml",
+              "generated_xml": "cases/F1/F1_center_obstacle/generated/F1_center_obstacle.xml",
+              "attempt_directory": null,
+              "attempt_id": null,
+              "run_evidence": {
+                "attempt_record": null,
+                "solver_log": "runs/F1_center_obstacle/solver.stdout.log",
+                "run_csv": "runs/F1_center_obstacle/Run.csv",
+                "particle_file_count": 13,
+                "particle_file_bytes": 1190644
+              },
+              "observed": {
+                "dp_m": 0.04,
+                "time_max_s": 0.6,
+                "time_end_s": 0.60006,
+                "saved_output_cadence_config_s": 0.05,
+                "output_cadence_s": 0.050005,
+                "frames": 13,
+                "steps": 2007,
+                "integrator": "Verlet",
+                "step_algorithm": 1,
+                "verlet_steps": 40,
+                "boundary_formulation": "DBC",
+                "configuration": "F1_center_obstacle - 3D - DBC - Verlet - (40) - Wendland - Visco_Artificial(0.08b1) - DDT2(0.1) - RhopOut(700-1300)"
+              },
+              "target": {
+                "dp_m": 0.035,
+                "time_max_s": 1.5,
+                "saved_output_cadence_s": 0.01,
+                "integrator": "Verlet",
+                "boundary_formulation": "DBC"
+              },
+              "target_matches": {
+                "dp": false,
+                "time_max": false,
+                "saved_cadence": false,
+                "integrator": true,
+                "boundary": true
+              },
+              "target_compatible": false,
+              "evidence_fingerprints": [
+                {
+                  "path": "cases/F1/F1_center_obstacle/F1_center_obstacle_Def.xml",
+                  "exists": true,
+                  "bytes": 3616,
+                  "sha256": "60662c0779da976b2c4c60e7d13c80f0cc52f61fcec9679305ad9259bc3fae0a"
+                },
+                {
+                  "path": "cases/F1/F1_center_obstacle/generated/F1_center_obstacle.xml",
+                  "exists": true,
+                  "bytes": 5289,
+                  "sha256": "361fd4c4f5363af7e1932cc26ff798a2b96e23df2a96217df0d1ff70c4ba29de"
+                },
+                {
+                  "path": "cases/F1/F1_center_obstacle/generated/F1_center_obstacle.out",
+                  "exists": true,
+                  "bytes": 4773,
+                  "sha256": "95dbd9c735ca76e824814acade87b0776cc85ea96a5595bdda5ec00664cecff5"
+                },
+                {
+                  "path": "runs/F1_center_obstacle/solver.stdout.log",
+                  "exists": true,
+                  "bytes": 18114,
+                  "sha256": "a3382ba2a07a9c0d09f41b6105cb534578a2386ee239e65e9e96137e72f0e904"
+                },
+                {
+                  "path": "runs/F1_center_obstacle/Run.csv",
+                  "exists": true,
+                  "bytes": 1004,
+                  "sha256": "643ab2e8a89811f2eb735d7ac0153d2070450e2b806b7e905f8d7a442524a18b"
+                }
+              ]
+            },
+            "evidence_status": "executed",
+            "target_compatible": false,
+            "selection_reason": "single-source one-obstacle topology between plain and twin"
+          },
+          {
+            "family": "F1",
+            "background_id": "center_obstacle",
+            "background_label": "center obstacle",
+            "mechanism": "split-around-obstacle",
+            "level": "medium",
+            "target_dp_m": 0.024,
+            "target_time_max_s": 1.5,
+            "observed_case": {
+              "case_id": "R4_F1_center_obstacle_medium",
+              "evidence_status": "missing",
+              "status_reason": "no candidate case id supplied",
+              "source_definition": "cases/F1/F1_center_obstacle/F1_center_obstacle_Def.xml",
+              "observed": {
+                "dp_m": null,
+                "time_max_s": null,
+                "time_end_s": null,
+                "output_cadence_s": null,
+                "frames": null,
+                "integrator": null,
+                "boundary_formulation": null
+              },
+              "target_matches": {
+                "dp": false,
+                "time_max": false,
+                "saved_cadence": false,
+                "integrator": false,
+                "boundary": false
+              },
+              "target_compatible": false,
+              "evidence_fingerprints": []
+            },
+            "evidence_status": "missing",
+            "target_compatible": false,
+            "selection_reason": "single-source one-obstacle topology between plain and twin"
+          },
+          {
+            "family": "F1",
+            "background_id": "center_obstacle",
+            "background_label": "center obstacle",
+            "mechanism": "split-around-obstacle",
+            "level": "fine",
+            "target_dp_m": 0.014,
+            "target_time_max_s": 1.5,
+            "observed_case": {
+              "case_id": "R4_F1_center_obstacle_fine",
+              "evidence_status": "missing",
+              "status_reason": "no candidate case id supplied",
+              "source_definition": "cases/F1/F1_center_obstacle/F1_center_obstacle_Def.xml",
+              "observed": {
+                "dp_m": null,
+                "time_max_s": null,
+                "time_end_s": null,
+                "output_cadence_s": null,
+                "frames": null,
+                "integrator": null,
+                "boundary_formulation": null
+              },
+              "target_matches": {
+                "dp": false,
+                "time_max": false,
+                "saved_cadence": false,
+                "integrator": false,
+                "boundary": false
+              },
+              "target_compatible": false,
+              "evidence_fingerprints": []
+            },
+            "evidence_status": "missing",
+            "target_compatible": false,
+            "selection_reason": "single-source one-obstacle topology between plain and twin"
+          },
+          {
+            "family": "F1",
+            "background_id": "twin_obstacle_split_remerge",
+            "background_label": "twin obstacle split-remerge",
+            "mechanism": "multi-path-split-remerge",
+            "level": "coarse",
+            "target_dp_m": 0.035,
+            "target_time_max_s": 1.5,
+            "observed_case": {
+              "case_id": "R3_F1_twin_obstacle_split_remerge_massmatched_coarse",
+              "evidence_status": "executed",
+              "status_reason": "completed solver evidence: status/log, Run.csv and Part_*.bi4",
+              "source_definition": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+              "generated_xml": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/generated/R3_F1_twin_obstacle_split_remerge_massmatched_coarse.xml",
+              "attempt_directory": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/attempts/20260907T013643.049422Z-e12a66ce.complete",
+              "attempt_id": "20260907T013643.049422Z-e12a66ce",
+              "run_evidence": {
+                "attempt_record": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/attempts/20260907T013643.049422Z-e12a66ce.complete/attempt.json",
+                "solver_log": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/attempts/20260907T013643.049422Z-e12a66ce.complete/process.stdout.log",
+                "run_csv": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/attempts/20260907T013643.049422Z-e12a66ce.complete/Run.csv",
+                "particle_file_count": 151,
+                "particle_file_bytes": 25388385
+              },
+              "observed": {
+                "dp_m": 0.035,
+                "time_max_s": 1.5,
+                "time_end_s": 1.50019,
+                "saved_output_cadence_config_s": 0.01,
+                "output_cadence_s": 0.010001266666666666,
+                "frames": 151,
+                "steps": 5508,
+                "integrator": "Verlet",
+                "step_algorithm": 1,
+                "verlet_steps": 40,
+                "boundary_formulation": "DBC",
+                "configuration": "R3_F1_twin_obstacle_split_remerge_massmatched_coarse - 3D - SvPosDouble - DBC - Verlet - (40) - Wendland - Visco_Artificial(0.08b1) - DDT2(0.1) - RhopOut(700-1300)"
+              },
+              "target": {
+                "dp_m": 0.035,
+                "time_max_s": 1.5,
+                "saved_output_cadence_s": 0.01,
+                "integrator": "Verlet",
+                "boundary_formulation": "DBC"
+              },
+              "target_matches": {
+                "dp": true,
+                "time_max": true,
+                "saved_cadence": true,
+                "integrator": true,
+                "boundary": true
+              },
+              "target_compatible": true,
+              "evidence_fingerprints": [
+                {
+                  "path": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+                  "exists": true,
+                  "bytes": 4167,
+                  "sha256": "a816d5ae86f91d73cb77730042a890c45f8f7b70236f390b4a840047fe94f909"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/generated/R3_F1_twin_obstacle_split_remerge_massmatched_coarse.xml",
+                  "exists": true,
+                  "bytes": 5928,
+                  "sha256": "96f72912115e910d3f2391c7e57289da0f4c530d02a36a49a8aad540137a8629"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/generated/gencase.stdout.log",
+                  "exists": true,
+                  "bytes": 5561,
+                  "sha256": "049552b59009419715dd38d562ebb2501ee307ce78862c9084f164a1730c0161"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/generated/R3_F1_twin_obstacle_split_remerge_massmatched_coarse.out",
+                  "exists": true,
+                  "bytes": 5516,
+                  "sha256": "9f5e04dc2c9c2e405a9be475617cd8531d9c9ec99e0ed0a40d4e431aeee7c5a8"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/attempts/20260907T013643.049422Z-e12a66ce.complete/attempt.json",
+                  "exists": true,
+                  "bytes": 4907,
+                  "sha256": "8aa8f0fa63073dd801128292a92273a6934507f53731cf245f6eb187d5f65d9c"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/attempts/20260907T013643.049422Z-e12a66ce.complete/process.stdout.log",
+                  "exists": true,
+                  "bytes": 31505,
+                  "sha256": "7040d49ad3c19e39da6b0366b9a29bb705d58f3701d7ccd2502a7555b4300dd8"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/attempts/20260907T013643.049422Z-e12a66ce.complete/Run.csv",
+                  "exists": true,
+                  "bytes": 1086,
+                  "sha256": "61b7b683568316f9568b6eee5af7047d78a28a042f587758f364a5e3bb2fd93c"
+                }
+              ]
+            },
+            "evidence_status": "executed",
+            "target_compatible": true,
+            "selection_reason": "the only F1 custom background with an R3 three-resolution run"
+          },
+          {
+            "family": "F1",
+            "background_id": "twin_obstacle_split_remerge",
+            "background_label": "twin obstacle split-remerge",
+            "mechanism": "multi-path-split-remerge",
+            "level": "medium",
+            "target_dp_m": 0.024,
+            "target_time_max_s": 1.5,
+            "observed_case": {
+              "case_id": "R3_F1_twin_obstacle_split_remerge_massmatched_medium",
+              "evidence_status": "executed",
+              "status_reason": "completed solver evidence: status/log, Run.csv and Part_*.bi4",
+              "source_definition": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+              "generated_xml": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_medium/generated/R3_F1_twin_obstacle_split_remerge_massmatched_medium.xml",
+              "attempt_directory": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_medium/attempts/20260907T013643.044262Z-83b41b5c.complete",
+              "attempt_id": "20260907T013643.044262Z-83b41b5c",
+              "run_evidence": {
+                "attempt_record": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_medium/attempts/20260907T013643.044262Z-83b41b5c.complete/attempt.json",
+                "solver_log": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_medium/attempts/20260907T013643.044262Z-83b41b5c.complete/process.stdout.log",
+                "run_csv": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_medium/attempts/20260907T013643.044262Z-83b41b5c.complete/Run.csv",
+                "particle_file_count": 151,
+                "particle_file_bytes": 59325937
+              },
+              "observed": {
+                "dp_m": 0.024,
+                "time_max_s": 1.5,
+                "time_end_s": 1.50016,
+                "saved_output_cadence_config_s": 0.01,
+                "output_cadence_s": 0.010001066666666666,
+                "frames": 151,
+                "steps": 8357,
+                "integrator": "Verlet",
+                "step_algorithm": 1,
+                "verlet_steps": 40,
+                "boundary_formulation": "DBC",
+                "configuration": "R3_F1_twin_obstacle_split_remerge_massmatched_medium - 3D - SvPosDouble - DBC - Verlet - (40) - Wendland - Visco_Artificial(0.08b1) - DDT2(0.1) - RhopOut(700-1300)"
+              },
+              "target": {
+                "dp_m": 0.024,
+                "time_max_s": 1.5,
+                "saved_output_cadence_s": 0.01,
+                "integrator": "Verlet",
+                "boundary_formulation": "DBC"
+              },
+              "target_matches": {
+                "dp": true,
+                "time_max": true,
+                "saved_cadence": true,
+                "integrator": true,
+                "boundary": true
+              },
+              "target_compatible": true,
+              "evidence_fingerprints": [
+                {
+                  "path": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+                  "exists": true,
+                  "bytes": 4167,
+                  "sha256": "a816d5ae86f91d73cb77730042a890c45f8f7b70236f390b4a840047fe94f909"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_medium/generated/R3_F1_twin_obstacle_split_remerge_massmatched_medium.xml",
+                  "exists": true,
+                  "bytes": 5916,
+                  "sha256": "7d7653a3e5db44c43c2a12133879de69a73694e92bf2f4686afa8152b9082b36"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_medium/generated/gencase.stdout.log",
+                  "exists": true,
+                  "bytes": 5543,
+                  "sha256": "2a196c947638f37ae57e724eac50752e6adb12b0c95ab3787e293da08e9fc57b"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_medium/generated/R3_F1_twin_obstacle_split_remerge_massmatched_medium.out",
+                  "exists": true,
+                  "bytes": 5498,
+                  "sha256": "ab5d41127304c531e3093cd48c4b0171897ef0710fccfb98f6338a5bd32825af"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_medium/attempts/20260907T013643.044262Z-83b41b5c.complete/attempt.json",
+                  "exists": true,
+                  "bytes": 4907,
+                  "sha256": "fcbc2d404cd68bbc050c5e074fb12712a4ef436dfda108f4bcd471cbc6da7291"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_medium/attempts/20260907T013643.044262Z-83b41b5c.complete/process.stdout.log",
+                  "exists": true,
+                  "bytes": 31524,
+                  "sha256": "b80263a4c7a55f4e823570ed047130c8b9c4efafa1afd384a7b1e8826bb074a3"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_medium/attempts/20260907T013643.044262Z-83b41b5c.complete/Run.csv",
+                  "exists": true,
+                  "bytes": 1087,
+                  "sha256": "4d95864f1786b71d89b4aa533c40827a757ee2e0b6573b185e516c9ebe584f92"
+                }
+              ]
+            },
+            "evidence_status": "executed",
+            "target_compatible": true,
+            "selection_reason": "the only F1 custom background with an R3 three-resolution run"
+          },
+          {
+            "family": "F1",
+            "background_id": "twin_obstacle_split_remerge",
+            "background_label": "twin obstacle split-remerge",
+            "mechanism": "multi-path-split-remerge",
+            "level": "fine",
+            "target_dp_m": 0.014,
+            "target_time_max_s": 1.5,
+            "observed_case": {
+              "case_id": "R3_F1_twin_obstacle_split_remerge_massmatched_fine",
+              "evidence_status": "executed",
+              "status_reason": "completed solver evidence: status/log, Run.csv and Part_*.bi4",
+              "source_definition": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+              "generated_xml": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_fine/generated/R3_F1_twin_obstacle_split_remerge_massmatched_fine.xml",
+              "attempt_directory": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_fine/attempts/20260907T013643.022259Z-0fb48906.complete",
+              "attempt_id": "20260907T013643.022259Z-0fb48906",
+              "run_evidence": {
+                "attempt_record": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_fine/attempts/20260907T013643.022259Z-0fb48906.complete/attempt.json",
+                "solver_log": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_fine/attempts/20260907T013643.022259Z-0fb48906.complete/process.stdout.log",
+                "run_csv": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_fine/attempts/20260907T013643.022259Z-0fb48906.complete/Run.csv",
+                "particle_file_count": 151,
+                "particle_file_bytes": 228706671
+              },
+              "observed": {
+                "dp_m": 0.014,
+                "time_max_s": 1.5,
+                "time_end_s": 1.500011,
+                "saved_output_cadence_config_s": 0.01,
+                "output_cadence_s": 0.010000073333333333,
+                "frames": 151,
+                "steps": 14506,
+                "integrator": "Verlet",
+                "step_algorithm": 1,
+                "verlet_steps": 40,
+                "boundary_formulation": "DBC",
+                "configuration": "R3_F1_twin_obstacle_split_remerge_massmatched_fine - 3D - SvPosDouble - DBC - Verlet - (40) - Wendland - Visco_Artificial(0.08b1) - DDT2(0.1) - RhopOut(700-1300)"
+              },
+              "target": {
+                "dp_m": 0.014,
+                "time_max_s": 1.5,
+                "saved_output_cadence_s": 0.01,
+                "integrator": "Verlet",
+                "boundary_formulation": "DBC"
+              },
+              "target_matches": {
+                "dp": true,
+                "time_max": true,
+                "saved_cadence": true,
+                "integrator": true,
+                "boundary": true
+              },
+              "target_compatible": true,
+              "evidence_fingerprints": [
+                {
+                  "path": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+                  "exists": true,
+                  "bytes": 4167,
+                  "sha256": "a816d5ae86f91d73cb77730042a890c45f8f7b70236f390b4a840047fe94f909"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_fine/generated/R3_F1_twin_obstacle_split_remerge_massmatched_fine.xml",
+                  "exists": true,
+                  "bytes": 5939,
+                  "sha256": "86a1921c6ef914520b72e9370a607e9de7275b7335177df71d06ba058dafb700"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_fine/generated/gencase.stdout.log",
+                  "exists": true,
+                  "bytes": 5542,
+                  "sha256": "5ed58710edde61dabab0fcbdc3094c2c356bc1d6858a3de23dc351c04df1075e"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_fine/generated/R3_F1_twin_obstacle_split_remerge_massmatched_fine.out",
+                  "exists": true,
+                  "bytes": 5497,
+                  "sha256": "1561f378e9af16431d1561fe5357cbfc9ef18a403f5f355e613f73d57c46af5d"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_fine/attempts/20260907T013643.022259Z-0fb48906.complete/attempt.json",
+                  "exists": true,
+                  "bytes": 4900,
+                  "sha256": "3813b62c2a465c2e78e402b8a08085ea0764de6d176e4d48ce562e79928e8014"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_fine/attempts/20260907T013643.022259Z-0fb48906.complete/process.stdout.log",
+                  "exists": true,
+                  "bytes": 31703,
+                  "sha256": "ca2d3f459439c581ee14e595c7ad0e10ddc071960a2b1dd67974b816b634b6d6"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_fine/attempts/20260907T013643.022259Z-0fb48906.complete/Run.csv",
+                  "exists": true,
+                  "bytes": 1099,
+                  "sha256": "45d8bf68fec625198ecf3782b0c300723186c71343ababe927b87982d6440e83"
+                }
+              ]
+            },
+            "evidence_status": "executed",
+            "target_compatible": true,
+            "selection_reason": "the only F1 custom background with an R3 three-resolution run"
+          }
+        ],
+        "alternate_backgrounds": [
+          {
+            "background_id": "opposing_columns",
+            "case_id": "F1_opposing_columns",
+            "source_definition": "cases/F1/F1_opposing_columns/F1_opposing_columns_Def.xml",
+            "reason_deferred": "two initial fluid sources; separate initial-condition axis"
+          }
+        ]
+      },
+      "F3": {
+        "selected_backgrounds": [
+          "impulse_slosh",
+          "baffled_exchange",
+          "transverse_slosh"
+        ],
+        "cell_count": 9,
+        "executed_evidence_cells": 5,
+        "missing_execution_cells": 4,
+        "prepared_only_cells": 0,
+        "target_compatible_cells": 3,
+        "evidence_coverage": "5/9",
+        "target_compatible_coverage": "3/9",
+        "complete": false,
+        "common_protocol_complete": false,
+        "cells": [
+          {
+            "family": "F3",
+            "background_id": "impulse_slosh",
+            "background_label": "impulse slosh",
+            "mechanism": "free-surface-phase-memory",
+            "level": "coarse",
+            "target_dp_m": 0.035,
+            "target_time_max_s": 0.9,
+            "observed_case": {
+              "case_id": "F3_impulse_slosh",
+              "evidence_status": "executed",
+              "status_reason": "completed solver evidence: status/log, Run.csv and Part_*.bi4",
+              "source_definition": "cases/F3/F3_impulse_slosh/F3_impulse_slosh_Def.xml",
+              "generated_xml": "cases/F3/F3_impulse_slosh/generated/F3_impulse_slosh.xml",
+              "attempt_directory": null,
+              "attempt_id": null,
+              "run_evidence": {
+                "attempt_record": null,
+                "solver_log": "runs/F3_impulse_slosh/solver.stdout.log",
+                "run_csv": "runs/F3_impulse_slosh/Run.csv",
+                "particle_file_count": 19,
+                "particle_file_bytes": 1969958
+              },
+              "observed": {
+                "dp_m": 0.04,
+                "time_max_s": 0.9,
+                "time_end_s": 0.900371,
+                "saved_output_cadence_config_s": 0.05,
+                "output_cadence_s": 0.05002061111111111,
+                "frames": 19,
+                "steps": 2053,
+                "integrator": "Verlet",
+                "step_algorithm": 1,
+                "verlet_steps": 40,
+                "boundary_formulation": "DBC",
+                "configuration": "F3_impulse_slosh - 3D - DBC - Verlet - (40) - Wendland - Visco_Artificial(0.08b1) - DDT2(0.1) - RhopOut(700-1300)"
+              },
+              "target": {
+                "dp_m": 0.035,
+                "time_max_s": 0.9,
+                "saved_output_cadence_s": 0.01,
+                "integrator": "Verlet",
+                "boundary_formulation": "DBC"
+              },
+              "target_matches": {
+                "dp": false,
+                "time_max": true,
+                "saved_cadence": false,
+                "integrator": true,
+                "boundary": true
+              },
+              "target_compatible": false,
+              "evidence_fingerprints": [
+                {
+                  "path": "cases/F3/F3_impulse_slosh/F3_impulse_slosh_Def.xml",
+                  "exists": true,
+                  "bytes": 3153,
+                  "sha256": "c93c3f0a4202459bc401a7c6ce82836303974d49c3d0ce5be7304efac2fc2b99"
+                },
+                {
+                  "path": "cases/F3/F3_impulse_slosh/generated/F3_impulse_slosh.xml",
+                  "exists": true,
+                  "bytes": 4756,
+                  "sha256": "93b5c9b61510a7838fba94b75fdf087f844b84299c6c5c8a72867bc50634fb3c"
+                },
+                {
+                  "path": "cases/F3/F3_impulse_slosh/generated/F3_impulse_slosh.out",
+                  "exists": true,
+                  "bytes": 4698,
+                  "sha256": "8d9e98e2d3609e2d0bf58f14cd475bf8957ffde8552384809ae6b7e5f57bde3a"
+                },
+                {
+                  "path": "runs/F3_impulse_slosh/solver.stdout.log",
+                  "exists": true,
+                  "bytes": 18682,
+                  "sha256": "70caa70b34a941f314ba0c871ff4168f918358640362280522e7d8068da5a566"
+                },
+                {
+                  "path": "runs/F3_impulse_slosh/Run.csv",
+                  "exists": true,
+                  "bytes": 999,
+                  "sha256": "12401ffb89635cd32d3daadf64b3514d0f97c4a683c189edee7dec3d4dd6b32c"
+                }
+              ]
+            },
+            "evidence_status": "executed",
+            "target_compatible": false,
+            "selection_reason": "no-baffle single-source control"
+          },
+          {
+            "family": "F3",
+            "background_id": "impulse_slosh",
+            "background_label": "impulse slosh",
+            "mechanism": "free-surface-phase-memory",
+            "level": "medium",
+            "target_dp_m": 0.028,
+            "target_time_max_s": 0.9,
+            "observed_case": {
+              "case_id": "R4_F3_impulse_slosh_medium",
+              "evidence_status": "missing",
+              "status_reason": "no candidate case id supplied",
+              "source_definition": "cases/F3/F3_impulse_slosh/F3_impulse_slosh_Def.xml",
+              "observed": {
+                "dp_m": null,
+                "time_max_s": null,
+                "time_end_s": null,
+                "output_cadence_s": null,
+                "frames": null,
+                "integrator": null,
+                "boundary_formulation": null
+              },
+              "target_matches": {
+                "dp": false,
+                "time_max": false,
+                "saved_cadence": false,
+                "integrator": false,
+                "boundary": false
+              },
+              "target_compatible": false,
+              "evidence_fingerprints": []
+            },
+            "evidence_status": "missing",
+            "target_compatible": false,
+            "selection_reason": "no-baffle single-source control"
+          },
+          {
+            "family": "F3",
+            "background_id": "impulse_slosh",
+            "background_label": "impulse slosh",
+            "mechanism": "free-surface-phase-memory",
+            "level": "fine",
+            "target_dp_m": 0.022,
+            "target_time_max_s": 0.9,
+            "observed_case": {
+              "case_id": "R4_F3_impulse_slosh_fine",
+              "evidence_status": "missing",
+              "status_reason": "no candidate case id supplied",
+              "source_definition": "cases/F3/F3_impulse_slosh/F3_impulse_slosh_Def.xml",
+              "observed": {
+                "dp_m": null,
+                "time_max_s": null,
+                "time_end_s": null,
+                "output_cadence_s": null,
+                "frames": null,
+                "integrator": null,
+                "boundary_formulation": null
+              },
+              "target_matches": {
+                "dp": false,
+                "time_max": false,
+                "saved_cadence": false,
+                "integrator": false,
+                "boundary": false
+              },
+              "target_compatible": false,
+              "evidence_fingerprints": []
+            },
+            "evidence_status": "missing",
+            "target_compatible": false,
+            "selection_reason": "no-baffle single-source control"
+          },
+          {
+            "family": "F3",
+            "background_id": "baffled_exchange",
+            "background_label": "baffled exchange",
+            "mechanism": "baffle-exchange-repeated-impact",
+            "level": "coarse",
+            "target_dp_m": 0.035,
+            "target_time_max_s": 0.9,
+            "observed_case": {
+              "case_id": "R3_F3_baffled_exchange_massmatched_coarse",
+              "evidence_status": "executed",
+              "status_reason": "completed solver evidence: status/log, Run.csv and Part_*.bi4",
+              "source_definition": "cases/F3/F3_baffled_slosh/F3_baffled_slosh_Def.xml",
+              "generated_xml": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_coarse/generated/R3_F3_baffled_exchange_massmatched_coarse.xml",
+              "attempt_directory": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete",
+              "attempt_id": "20260907T013508.916178Z-1e9f99b5",
+              "run_evidence": {
+                "attempt_record": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/attempt.json",
+                "solver_log": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/process.stdout.log",
+                "run_csv": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/Run.csv",
+                "particle_file_count": 91,
+                "particle_file_bytes": 18518500
+              },
+              "observed": {
+                "dp_m": 0.035,
+                "time_max_s": 0.9,
+                "time_end_s": 0.900115,
+                "saved_output_cadence_config_s": 0.01,
+                "output_cadence_s": 0.010001277777777777,
+                "frames": 91,
+                "steps": 2399,
+                "integrator": "Verlet",
+                "step_algorithm": 1,
+                "verlet_steps": 40,
+                "boundary_formulation": "DBC",
+                "configuration": "R3_F3_baffled_exchange_massmatched_coarse - 3D - SvPosDouble - DBC - Verlet - (40) - Wendland - Visco_Artificial(0.08b1) - DDT2(0.1) - RhopOut(700-1300)"
+              },
+              "target": {
+                "dp_m": 0.035,
+                "time_max_s": 0.9,
+                "saved_output_cadence_s": 0.01,
+                "integrator": "Verlet",
+                "boundary_formulation": "DBC"
+              },
+              "target_matches": {
+                "dp": true,
+                "time_max": true,
+                "saved_cadence": true,
+                "integrator": true,
+                "boundary": true
+              },
+              "target_compatible": true,
+              "evidence_fingerprints": [
+                {
+                  "path": "cases/F3/F3_baffled_slosh/F3_baffled_slosh_Def.xml",
+                  "exists": true,
+                  "bytes": 3713,
+                  "sha256": "e4811e7c3bfdba6ae06ccc073fbf9cec0a9d2d62221a0df69e43fa5278e3c147"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_coarse/generated/R3_F3_baffled_exchange_massmatched_coarse.xml",
+                  "exists": true,
+                  "bytes": 5408,
+                  "sha256": "56f3c9f3dbdfe68228ca210478b9a5dd3f9b951fd0eed18cc52ad3ada3b81d8b"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_coarse/generated/gencase.stdout.log",
+                  "exists": true,
+                  "bytes": 5375,
+                  "sha256": "01324229e83dff0048b04197ba4513fe68e9cd4f34bf4c776b8bd22343f52be0"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_coarse/generated/R3_F3_baffled_exchange_massmatched_coarse.out",
+                  "exists": true,
+                  "bytes": 5330,
+                  "sha256": "47a316047dfa7012a8e05a8e0bb05b3d2f032f2be6435e93948bd2e9a840a926"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/attempt.json",
+                  "exists": true,
+                  "bytes": 3302,
+                  "sha256": "d55b5bba4b78867731b31604aaf5ca83c34fe7398950e90a06f5bf9639b73862"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/process.stdout.log",
+                  "exists": true,
+                  "bytes": 25617,
+                  "sha256": "1abe7dd6e6cd98beff1192acab9757e0ec715863a6d692445a099602f361f475"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/Run.csv",
+                  "exists": true,
+                  "bytes": 1065,
+                  "sha256": "b314cd8b169e0c2b5a72ee16748e225c04bf52bc1fb442e024687fdbd8cc9c17"
+                }
+              ]
+            },
+            "evidence_status": "executed",
+            "target_compatible": true,
+            "selection_reason": "the only F3 custom background with an R3 three-resolution run"
+          },
+          {
+            "family": "F3",
+            "background_id": "baffled_exchange",
+            "background_label": "baffled exchange",
+            "mechanism": "baffle-exchange-repeated-impact",
+            "level": "medium",
+            "target_dp_m": 0.028,
+            "target_time_max_s": 0.9,
+            "observed_case": {
+              "case_id": "R3_F3_baffled_exchange_massmatched_medium",
+              "evidence_status": "executed",
+              "status_reason": "completed solver evidence: status/log, Run.csv and Part_*.bi4",
+              "source_definition": "cases/F3/F3_baffled_slosh/F3_baffled_slosh_Def.xml",
+              "generated_xml": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_medium/generated/R3_F3_baffled_exchange_massmatched_medium.xml",
+              "attempt_directory": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_medium/attempts/20260907T013519.582944Z-26dadb41.complete",
+              "attempt_id": "20260907T013519.582944Z-26dadb41",
+              "run_evidence": {
+                "attempt_record": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_medium/attempts/20260907T013519.582944Z-26dadb41.complete/attempt.json",
+                "solver_log": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_medium/attempts/20260907T013519.582944Z-26dadb41.complete/process.stdout.log",
+                "run_csv": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_medium/attempts/20260907T013519.582944Z-26dadb41.complete/Run.csv",
+                "particle_file_count": 91,
+                "particle_file_bytes": 31091060
+              },
+              "observed": {
+                "dp_m": 0.028,
+                "time_max_s": 0.9,
+                "time_end_s": 0.900148,
+                "saved_output_cadence_config_s": 0.01,
+                "output_cadence_s": 0.010001644444444444,
+                "frames": 91,
+                "steps": 3044,
+                "integrator": "Verlet",
+                "step_algorithm": 1,
+                "verlet_steps": 40,
+                "boundary_formulation": "DBC",
+                "configuration": "R3_F3_baffled_exchange_massmatched_medium - 3D - SvPosDouble - DBC - Verlet - (40) - Wendland - Visco_Artificial(0.08b1) - DDT2(0.1) - RhopOut(700-1300)"
+              },
+              "target": {
+                "dp_m": 0.028,
+                "time_max_s": 0.9,
+                "saved_output_cadence_s": 0.01,
+                "integrator": "Verlet",
+                "boundary_formulation": "DBC"
+              },
+              "target_matches": {
+                "dp": true,
+                "time_max": true,
+                "saved_cadence": true,
+                "integrator": true,
+                "boundary": true
+              },
+              "target_compatible": true,
+              "evidence_fingerprints": [
+                {
+                  "path": "cases/F3/F3_baffled_slosh/F3_baffled_slosh_Def.xml",
+                  "exists": true,
+                  "bytes": 3713,
+                  "sha256": "e4811e7c3bfdba6ae06ccc073fbf9cec0a9d2d62221a0df69e43fa5278e3c147"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_medium/generated/R3_F3_baffled_exchange_massmatched_medium.xml",
+                  "exists": true,
+                  "bytes": 5409,
+                  "sha256": "f7a3c0a6daa59b21483917466092e972d8783fb2b40aa425b887a22b7930bced"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_medium/generated/gencase.stdout.log",
+                  "exists": true,
+                  "bytes": 5371,
+                  "sha256": "172170d3e2ece43125c99d3e5804fa996bd1d491db580dda7e370f16698ac601"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_medium/generated/R3_F3_baffled_exchange_massmatched_medium.out",
+                  "exists": true,
+                  "bytes": 5326,
+                  "sha256": "05083ecdf6560b95de9fd5e05599f55b3dcd1535df50928580ccde933af6b799"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_medium/attempts/20260907T013519.582944Z-26dadb41.complete/attempt.json",
+                  "exists": true,
+                  "bytes": 3303,
+                  "sha256": "6a8c3cd7b6ee5d4dde809a79c9cb37e591a89efaf0aa5d1b3f8cb8d4440aa0b6"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_medium/attempts/20260907T013519.582944Z-26dadb41.complete/process.stdout.log",
+                  "exists": true,
+                  "bytes": 25628,
+                  "sha256": "be392131015af8621c2ec6ba08329864cf1e24562742212bcda7c13536a7fc28"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_medium/attempts/20260907T013519.582944Z-26dadb41.complete/Run.csv",
+                  "exists": true,
+                  "bytes": 1066,
+                  "sha256": "c49b1efca60a932c2613d66ba2c28adbb5b55d3f0f0dcc636cca6012a8c4f563"
+                }
+              ]
+            },
+            "evidence_status": "executed",
+            "target_compatible": true,
+            "selection_reason": "the only F3 custom background with an R3 three-resolution run"
+          },
+          {
+            "family": "F3",
+            "background_id": "baffled_exchange",
+            "background_label": "baffled exchange",
+            "mechanism": "baffle-exchange-repeated-impact",
+            "level": "fine",
+            "target_dp_m": 0.022,
+            "target_time_max_s": 0.9,
+            "observed_case": {
+              "case_id": "R3_F3_baffled_exchange_massmatched_fine",
+              "evidence_status": "executed",
+              "status_reason": "completed solver evidence: status/log, Run.csv and Part_*.bi4",
+              "source_definition": "cases/F3/F3_baffled_slosh/F3_baffled_slosh_Def.xml",
+              "generated_xml": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_fine/generated/R3_F3_baffled_exchange_massmatched_fine.xml",
+              "attempt_directory": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_fine/attempts/20260907T013519.586303Z-a79769c5.complete",
+              "attempt_id": "20260907T013519.586303Z-a79769c5",
+              "run_evidence": {
+                "attempt_record": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_fine/attempts/20260907T013519.586303Z-a79769c5.complete/attempt.json",
+                "solver_log": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_fine/attempts/20260907T013519.586303Z-a79769c5.complete/process.stdout.log",
+                "run_csv": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_fine/attempts/20260907T013519.586303Z-a79769c5.complete/Run.csv",
+                "particle_file_count": 91,
+                "particle_file_bytes": 59255014
+              },
+              "observed": {
+                "dp_m": 0.022,
+                "time_max_s": 0.9,
+                "time_end_s": 0.90002,
+                "saved_output_cadence_config_s": 0.01,
+                "output_cadence_s": 0.010000222222222223,
+                "frames": 91,
+                "steps": 4067,
+                "integrator": "Verlet",
+                "step_algorithm": 1,
+                "verlet_steps": 40,
+                "boundary_formulation": "DBC",
+                "configuration": "R3_F3_baffled_exchange_massmatched_fine - 3D - SvPosDouble - DBC - Verlet - (40) - Wendland - Visco_Artificial(0.08b1) - DDT2(0.1) - RhopOut(700-1300)"
+              },
+              "target": {
+                "dp_m": 0.022,
+                "time_max_s": 0.9,
+                "saved_output_cadence_s": 0.01,
+                "integrator": "Verlet",
+                "boundary_formulation": "DBC"
+              },
+              "target_matches": {
+                "dp": true,
+                "time_max": true,
+                "saved_cadence": true,
+                "integrator": true,
+                "boundary": true
+              },
+              "target_compatible": true,
+              "evidence_fingerprints": [
+                {
+                  "path": "cases/F3/F3_baffled_slosh/F3_baffled_slosh_Def.xml",
+                  "exists": true,
+                  "bytes": 3713,
+                  "sha256": "e4811e7c3bfdba6ae06ccc073fbf9cec0a9d2d62221a0df69e43fa5278e3c147"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_fine/generated/R3_F3_baffled_exchange_massmatched_fine.xml",
+                  "exists": true,
+                  "bytes": 5412,
+                  "sha256": "13218c90e97c76beba204a7bcfa9fac9a955e17c087c17820cd4f1e2fa5dbf96"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_fine/generated/gencase.stdout.log",
+                  "exists": true,
+                  "bytes": 5343,
+                  "sha256": "d42bff60428ae622af05ad23cde3adbc7bee0a285ca2a75f68937e96cac53149"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_fine/generated/R3_F3_baffled_exchange_massmatched_fine.out",
+                  "exists": true,
+                  "bytes": 5298,
+                  "sha256": "26b6adf5e519511cd906ae9f982fee436b1120b7436e2cba3364593a15299403"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_fine/attempts/20260907T013519.586303Z-a79769c5.complete/attempt.json",
+                  "exists": true,
+                  "bytes": 3295,
+                  "sha256": "1f832b48185492fc5e406c6e57d607d21f6235a2a499a8ed1c4cdc0267db3c0c"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_fine/attempts/20260907T013519.586303Z-a79769c5.complete/process.stdout.log",
+                  "exists": true,
+                  "bytes": 25637,
+                  "sha256": "11c2d15b128e94c48d06c633cc50a79879b073651460717c155347477f1330cf"
+                },
+                {
+                  "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_fine/attempts/20260907T013519.586303Z-a79769c5.complete/Run.csv",
+                  "exists": true,
+                  "bytes": 1066,
+                  "sha256": "fb9b7a92ea99121499320f1a5b0dc12e1163015e38d938450458d35d5afb57bd"
+                }
+              ]
+            },
+            "evidence_status": "executed",
+            "target_compatible": true,
+            "selection_reason": "the only F3 custom background with an R3 three-resolution run"
+          },
+          {
+            "family": "F3",
+            "background_id": "transverse_slosh",
+            "background_label": "transverse slosh",
+            "mechanism": "transverse-slosh",
+            "level": "coarse",
+            "target_dp_m": 0.035,
+            "target_time_max_s": 0.9,
+            "observed_case": {
+              "case_id": "F3_transverse_slosh",
+              "evidence_status": "executed",
+              "status_reason": "completed solver evidence: status/log, Run.csv and Part_*.bi4",
+              "source_definition": "cases/F3/F3_transverse_slosh/F3_transverse_slosh_Def.xml",
+              "generated_xml": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh.xml",
+              "attempt_directory": null,
+              "attempt_id": null,
+              "run_evidence": {
+                "attempt_record": null,
+                "solver_log": "runs/F3_transverse_slosh/solver.stdout.log",
+                "run_csv": "runs/F3_transverse_slosh/Run.csv",
+                "particle_file_count": 16,
+                "particle_file_bytes": 1658960
+              },
+              "observed": {
+                "dp_m": 0.04,
+                "time_max_s": 0.75,
+                "time_end_s": 0.750088,
+                "saved_output_cadence_config_s": 0.05,
+                "output_cadence_s": 0.05000586666666666,
+                "frames": 16,
+                "steps": 1710,
+                "integrator": "Verlet",
+                "step_algorithm": 1,
+                "verlet_steps": 40,
+                "boundary_formulation": "DBC",
+                "configuration": "F3_transverse_slosh - 3D - DBC - Verlet - (40) - Wendland - Visco_Artificial(0.08b1) - DDT2(0.1) - RhopOut(700-1300)"
+              },
+              "target": {
+                "dp_m": 0.035,
+                "time_max_s": 0.9,
+                "saved_output_cadence_s": 0.01,
+                "integrator": "Verlet",
+                "boundary_formulation": "DBC"
+              },
+              "target_matches": {
+                "dp": false,
+                "time_max": false,
+                "saved_cadence": false,
+                "integrator": true,
+                "boundary": true
+              },
+              "target_compatible": false,
+              "evidence_fingerprints": [
+                {
+                  "path": "cases/F3/F3_transverse_slosh/F3_transverse_slosh_Def.xml",
+                  "exists": true,
+                  "bytes": 3154,
+                  "sha256": "18ebcaf6b8ffad1ddc45a7ac68ed5ae492cb314aeb6ec54b977256e93cd7344b"
+                },
+                {
+                  "path": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh.xml",
+                  "exists": true,
+                  "bytes": 4757,
+                  "sha256": "72f8c43cfed5c3c69c7fb1968a3050b30670d55012ec1f8c01cffdf89c7e874c"
+                },
+                {
+                  "path": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh.out",
+                  "exists": true,
+                  "bytes": 4737,
+                  "sha256": "576b3030ee6c4f56f3e2484c8d37c6f4f9287f414b229b800ff922a1167142c8"
+                },
+                {
+                  "path": "runs/F3_transverse_slosh/solver.stdout.log",
+                  "exists": true,
+                  "bytes": 18410,
+                  "sha256": "b2691930365862cf110cdfc934068c101c339320f9efeead35eb9976b8e0caf4"
+                },
+                {
+                  "path": "runs/F3_transverse_slosh/Run.csv",
+                  "exists": true,
+                  "bytes": 1002,
+                  "sha256": "2e2ae13b5417d72b160b73b14d3382af1e0b13d4c11dc5cf8df01b73ed5192b9"
+                }
+              ]
+            },
+            "evidence_status": "executed",
+            "target_compatible": false,
+            "selection_reason": "orthogonal forcing/topology control already present in the custom set"
+          },
+          {
+            "family": "F3",
+            "background_id": "transverse_slosh",
+            "background_label": "transverse slosh",
+            "mechanism": "transverse-slosh",
+            "level": "medium",
+            "target_dp_m": 0.028,
+            "target_time_max_s": 0.9,
+            "observed_case": {
+              "case_id": "R4_F3_transverse_slosh_medium",
+              "evidence_status": "missing",
+              "status_reason": "no candidate case id supplied",
+              "source_definition": "cases/F3/F3_transverse_slosh/F3_transverse_slosh_Def.xml",
+              "observed": {
+                "dp_m": null,
+                "time_max_s": null,
+                "time_end_s": null,
+                "output_cadence_s": null,
+                "frames": null,
+                "integrator": null,
+                "boundary_formulation": null
+              },
+              "target_matches": {
+                "dp": false,
+                "time_max": false,
+                "saved_cadence": false,
+                "integrator": false,
+                "boundary": false
+              },
+              "target_compatible": false,
+              "evidence_fingerprints": []
+            },
+            "evidence_status": "missing",
+            "target_compatible": false,
+            "selection_reason": "orthogonal forcing/topology control already present in the custom set"
+          },
+          {
+            "family": "F3",
+            "background_id": "transverse_slosh",
+            "background_label": "transverse slosh",
+            "mechanism": "transverse-slosh",
+            "level": "fine",
+            "target_dp_m": 0.022,
+            "target_time_max_s": 0.9,
+            "observed_case": {
+              "case_id": "R4_F3_transverse_slosh_fine",
+              "evidence_status": "missing",
+              "status_reason": "no candidate case id supplied",
+              "source_definition": "cases/F3/F3_transverse_slosh/F3_transverse_slosh_Def.xml",
+              "observed": {
+                "dp_m": null,
+                "time_max_s": null,
+                "time_end_s": null,
+                "output_cadence_s": null,
+                "frames": null,
+                "integrator": null,
+                "boundary_formulation": null
+              },
+              "target_matches": {
+                "dp": false,
+                "time_max": false,
+                "saved_cadence": false,
+                "integrator": false,
+                "boundary": false
+              },
+              "target_compatible": false,
+              "evidence_fingerprints": []
+            },
+            "evidence_status": "missing",
+            "target_compatible": false,
+            "selection_reason": "orthogonal forcing/topology control already present in the custom set"
+          }
+        ],
+        "alternate_backgrounds": [
+          {
+            "background_id": "perforated_proxy",
+            "case_id": "W08_F3_topology_perforated_proxy_00",
+            "source_definition": "campaigns/v0.1-candidate/cases/w08/topology/F3_perforated_proxy/W08_F3_topology_perforated_proxy_Def.xml",
+            "reason_deferred": "W08 topology holdout; candidate-only and no three-resolution matrix"
+          }
+        ]
+      }
+    },
+    "total_cells": 18,
+    "total_executed_evidence_cells": 10,
+    "total_target_compatible_cells": 6,
+    "r3_rejected_common_dp_preflight_m": [
+      0.04,
+      0.03,
+      0.02
+    ],
+    "r3_preflight_not_counted_as_execution": true,
+    "evidence_paths": [
+      "campaigns/v0.1-candidate/r3-g2-f1-f3-matrix.json",
+      "campaigns/v0.1-candidate/cases/r3-g2-f1-f3/matrix.json",
+      "cases/manifest.json",
+      "reports/runtime/prepare-summary.json",
+      "reports/runtime/run-summary.json",
+      "reports/runtime/quality-gates.json",
+      "reports/runtime/trajectory-audit.json"
+    ]
+  },
+  "A2_control_cadence_window_observable_audit": {
+    "observed_profiles": [
+      {
+        "name": "W05 official F1/F3 anchors",
+        "case_ids": [
+          "W05_F1_coarse",
+          "W05_F1_medium",
+          "W05_F1_fine",
+          "W05_F3_coarse",
+          "W05_F3_medium",
+          "W05_F3_fine"
+        ],
+        "executed_count": 6,
+        "cadence_s": {
+          "median": 0.012500148183632733,
+          "min": 0.005000008383233533,
+          "max": 0.020000553333333334
+        },
+        "time_max_s": {
+          "min": 6.0,
+          "max": 8.35
+        },
+        "time_end_s": {
+          "min": 6.000074,
+          "max": 8.350083
+        },
+        "integrators": [
+          "Symplectic"
+        ],
+        "boundary_formulations": [
+          "mDBC"
+        ],
+        "cases": [
+          {
+            "case_id": "W05_F1_coarse",
+            "evidence_status": "executed",
+            "dp_m": 0.04,
+            "time_max_s": 6.0,
+            "time_end_s": 6.000103,
+            "output_cadence_s": 0.020000343333333333,
+            "frames": 301,
+            "integrator": "Symplectic",
+            "boundary_formulation": "mDBC",
+            "steps": 18636
+          },
+          {
+            "case_id": "W05_F1_medium",
+            "evidence_status": "executed",
+            "dp_m": 0.03,
+            "time_max_s": 6.0,
+            "time_end_s": 6.000166,
+            "output_cadence_s": 0.020000553333333334,
+            "frames": 301,
+            "integrator": "Symplectic",
+            "boundary_formulation": "mDBC",
+            "steps": 24067
+          },
+          {
+            "case_id": "W05_F1_fine",
+            "evidence_status": "executed",
+            "dp_m": 0.02,
+            "time_max_s": 6.0,
+            "time_end_s": 6.000074,
+            "output_cadence_s": 0.020000246666666666,
+            "frames": 301,
+            "integrator": "Symplectic",
+            "boundary_formulation": "mDBC",
+            "steps": 37576
+          },
+          {
+            "case_id": "W05_F3_coarse",
+            "evidence_status": "executed",
+            "dp_m": 0.008,
+            "time_max_s": 8.35,
+            "time_end_s": 8.350083,
+            "output_cadence_s": 0.005000049700598802,
+            "frames": 1671,
+            "integrator": "Symplectic",
+            "boundary_formulation": "mDBC",
+            "steps": 74737
+          },
+          {
+            "case_id": "W05_F3_medium",
+            "evidence_status": "executed",
+            "dp_m": 0.006,
+            "time_max_s": 8.35,
+            "time_end_s": 8.350014,
+            "output_cadence_s": 0.005000008383233533,
+            "frames": 1671,
+            "integrator": "Symplectic",
+            "boundary_formulation": "mDBC",
+            "steps": 97602
+          },
+          {
+            "case_id": "W05_F3_fine",
+            "evidence_status": "executed",
+            "dp_m": 0.004,
+            "time_max_s": 8.35,
+            "time_end_s": 8.350015,
+            "output_cadence_s": 0.0050000089820359285,
+            "frames": 1671,
+            "integrator": "Symplectic",
+            "boundary_formulation": "mDBC",
+            "steps": 152032
+          }
+        ],
+        "evidence_paths": [
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F1_coarse/generated/W05_F1_coarse.out",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F1_coarse/generated/W05_F1_coarse.xml",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F1_coarse/generated/gencase.stdout.log",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F1_fine/generated/W05_F1_fine.out",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F1_fine/generated/W05_F1_fine.xml",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F1_fine/generated/gencase.stdout.log",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F1_medium/generated/W05_F1_medium.out",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F1_medium/generated/W05_F1_medium.xml",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F1_medium/generated/gencase.stdout.log",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F3_coarse/generated/W05_F3_coarse.out",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F3_coarse/generated/W05_F3_coarse.xml",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F3_coarse/generated/gencase.stdout.log",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F3_fine/generated/W05_F3_fine.out",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F3_fine/generated/W05_F3_fine.xml",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F3_fine/generated/gencase.stdout.log",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F3_medium/generated/W05_F3_medium.out",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F3_medium/generated/W05_F3_medium.xml",
+          "campaigns/v0.1-candidate/artifacts/w05/W05_F3_medium/generated/gencase.stdout.log",
+          "campaigns/v0.1-candidate/runs/W05_F1_coarse/attempts/20260906T184832.663311Z-cdff9e9e.complete/Run.csv",
+          "campaigns/v0.1-candidate/runs/W05_F1_coarse/attempts/20260906T184832.663311Z-cdff9e9e.complete/attempt.json",
+          "campaigns/v0.1-candidate/runs/W05_F1_coarse/attempts/20260906T184832.663311Z-cdff9e9e.complete/process.stdout.log",
+          "campaigns/v0.1-candidate/runs/W05_F1_fine/attempts/20260906T184832.696634Z-7d26f4d1.complete/Run.csv",
+          "campaigns/v0.1-candidate/runs/W05_F1_fine/attempts/20260906T184832.696634Z-7d26f4d1.complete/attempt.json",
+          "campaigns/v0.1-candidate/runs/W05_F1_fine/attempts/20260906T184832.696634Z-7d26f4d1.complete/process.stdout.log",
+          "campaigns/v0.1-candidate/runs/W05_F1_medium/attempts/20260906T184832.692698Z-5a58b0f9.complete/Run.csv",
+          "campaigns/v0.1-candidate/runs/W05_F1_medium/attempts/20260906T184832.692698Z-5a58b0f9.complete/attempt.json",
+          "campaigns/v0.1-candidate/runs/W05_F1_medium/attempts/20260906T184832.692698Z-5a58b0f9.complete/process.stdout.log",
+          "campaigns/v0.1-candidate/runs/W05_F3_coarse/attempts/20260906T185131.979160Z-0dfb366d.complete/Run.csv",
+          "campaigns/v0.1-candidate/runs/W05_F3_coarse/attempts/20260906T185131.979160Z-0dfb366d.complete/attempt.json",
+          "campaigns/v0.1-candidate/runs/W05_F3_coarse/attempts/20260906T185131.979160Z-0dfb366d.complete/process.stdout.log",
+          "campaigns/v0.1-candidate/runs/W05_F3_fine/attempts/20260906T184916.979263Z-3ff84862.complete/Run.csv",
+          "campaigns/v0.1-candidate/runs/W05_F3_fine/attempts/20260906T184916.979263Z-3ff84862.complete/attempt.json",
+          "campaigns/v0.1-candidate/runs/W05_F3_fine/attempts/20260906T184916.979263Z-3ff84862.complete/process.stdout.log",
+          "campaigns/v0.1-candidate/runs/W05_F3_medium/attempts/20260906T185131.981347Z-872ed220.complete/Run.csv",
+          "campaigns/v0.1-candidate/runs/W05_F3_medium/attempts/20260906T185131.981347Z-872ed220.complete/attempt.json",
+          "campaigns/v0.1-candidate/runs/W05_F3_medium/attempts/20260906T185131.981347Z-872ed220.complete/process.stdout.log",
+          "vendor/official/DualSPHysics_v5.4/examples/mdbc/03_Sloshing/CaseSloshingLR_Def.xml",
+          "vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml"
+        ]
+      },
+      {
+        "name": "legacy custom one-resolution probes",
+        "case_ids": [
+          "F1_dam_break_plain",
+          "F1_center_obstacle",
+          "F1_twin_obstacle",
+          "F3_impulse_slosh",
+          "F3_baffled_slosh",
+          "F3_transverse_slosh"
+        ],
+        "executed_count": 6,
+        "cadence_s": {
+          "median": 0.05000683080808081,
+          "min": 0.050005,
+          "max": 0.05002061111111111
+        },
+        "time_max_s": {
+          "min": 0.55,
+          "max": 0.9
+        },
+        "time_end_s": {
+          "min": 0.550069,
+          "max": 0.900371
+        },
+        "integrators": [
+          "Verlet"
+        ],
+        "boundary_formulations": [
+          "DBC"
+        ],
+        "cases": [
+          {
+            "case_id": "F1_dam_break_plain",
+            "evidence_status": "executed",
+            "dp_m": 0.04,
+            "time_max_s": 0.55,
+            "time_end_s": 0.550069,
+            "output_cadence_s": 0.05000627272727273,
+            "frames": 12,
+            "integrator": "Verlet",
+            "boundary_formulation": "DBC",
+            "steps": 1825
+          },
+          {
+            "case_id": "F1_center_obstacle",
+            "evidence_status": "executed",
+            "dp_m": 0.04,
+            "time_max_s": 0.6,
+            "time_end_s": 0.60006,
+            "output_cadence_s": 0.050005,
+            "frames": 13,
+            "integrator": "Verlet",
+            "boundary_formulation": "DBC",
+            "steps": 2007
+          },
+          {
+            "case_id": "F1_twin_obstacle",
+            "evidence_status": "executed",
+            "dp_m": 0.04,
+            "time_max_s": 0.65,
+            "time_end_s": 0.650229,
+            "output_cadence_s": 0.05001761538461538,
+            "frames": 14,
+            "integrator": "Verlet",
+            "boundary_formulation": "DBC",
+            "steps": 2164
+          },
+          {
+            "case_id": "F3_impulse_slosh",
+            "evidence_status": "executed",
+            "dp_m": 0.04,
+            "time_max_s": 0.9,
+            "time_end_s": 0.900371,
+            "output_cadence_s": 0.05002061111111111,
+            "frames": 19,
+            "integrator": "Verlet",
+            "boundary_formulation": "DBC",
+            "steps": 2053
+          },
+          {
+            "case_id": "F3_baffled_slosh",
+            "evidence_status": "executed",
+            "dp_m": 0.04,
+            "time_max_s": 0.9,
+            "time_end_s": 0.900133,
+            "output_cadence_s": 0.050007388888888886,
+            "frames": 19,
+            "integrator": "Verlet",
+            "boundary_formulation": "DBC",
+            "steps": 2051
+          },
+          {
+            "case_id": "F3_transverse_slosh",
+            "evidence_status": "executed",
+            "dp_m": 0.04,
+            "time_max_s": 0.75,
+            "time_end_s": 0.750088,
+            "output_cadence_s": 0.05000586666666666,
+            "frames": 16,
+            "integrator": "Verlet",
+            "boundary_formulation": "DBC",
+            "steps": 1710
+          }
+        ],
+        "evidence_paths": [
+          "cases/F1/F1_center_obstacle/F1_center_obstacle_Def.xml",
+          "cases/F1/F1_center_obstacle/generated/F1_center_obstacle.out",
+          "cases/F1/F1_center_obstacle/generated/F1_center_obstacle.xml",
+          "cases/F1/F1_dam_break_plain/F1_dam_break_plain_Def.xml",
+          "cases/F1/F1_dam_break_plain/generated/F1_dam_break_plain.out",
+          "cases/F1/F1_dam_break_plain/generated/F1_dam_break_plain.xml",
+          "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+          "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle.out",
+          "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle.xml",
+          "cases/F3/F3_baffled_slosh/F3_baffled_slosh_Def.xml",
+          "cases/F3/F3_baffled_slosh/generated/F3_baffled_slosh.out",
+          "cases/F3/F3_baffled_slosh/generated/F3_baffled_slosh.xml",
+          "cases/F3/F3_impulse_slosh/F3_impulse_slosh_Def.xml",
+          "cases/F3/F3_impulse_slosh/generated/F3_impulse_slosh.out",
+          "cases/F3/F3_impulse_slosh/generated/F3_impulse_slosh.xml",
+          "cases/F3/F3_transverse_slosh/F3_transverse_slosh_Def.xml",
+          "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh.out",
+          "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh.xml",
+          "runs/F1_center_obstacle/Run.csv",
+          "runs/F1_center_obstacle/solver.stdout.log",
+          "runs/F1_dam_break_plain/Run.csv",
+          "runs/F1_dam_break_plain/solver.stdout.log",
+          "runs/F1_twin_obstacle/Run.csv",
+          "runs/F1_twin_obstacle/solver.stdout.log",
+          "runs/F3_baffled_slosh/Run.csv",
+          "runs/F3_baffled_slosh/solver.stdout.log",
+          "runs/F3_impulse_slosh/Run.csv",
+          "runs/F3_impulse_slosh/solver.stdout.log",
+          "runs/F3_transverse_slosh/Run.csv",
+          "runs/F3_transverse_slosh/solver.stdout.log"
+        ]
+      },
+      {
+        "name": "R3 selected custom three-resolution backgrounds",
+        "case_ids": [
+          "R3_F1_twin_obstacle_split_remerge_massmatched_coarse",
+          "R3_F1_twin_obstacle_split_remerge_massmatched_medium",
+          "R3_F1_twin_obstacle_split_remerge_massmatched_fine",
+          "R3_F3_baffled_exchange_massmatched_coarse",
+          "R3_F3_baffled_exchange_massmatched_medium",
+          "R3_F3_baffled_exchange_massmatched_fine"
+        ],
+        "executed_count": 6,
+        "cadence_s": {
+          "median": 0.010001166666666665,
+          "min": 0.010000073333333333,
+          "max": 0.010001644444444444
+        },
+        "time_max_s": {
+          "min": 0.9,
+          "max": 1.5
+        },
+        "time_end_s": {
+          "min": 0.90002,
+          "max": 1.50019
+        },
+        "integrators": [
+          "Verlet"
+        ],
+        "boundary_formulations": [
+          "DBC"
+        ],
+        "cases": [
+          {
+            "case_id": "R3_F1_twin_obstacle_split_remerge_massmatched_coarse",
+            "evidence_status": "executed",
+            "dp_m": 0.035,
+            "time_max_s": 1.5,
+            "time_end_s": 1.50019,
+            "output_cadence_s": 0.010001266666666666,
+            "frames": 151,
+            "integrator": "Verlet",
+            "boundary_formulation": "DBC",
+            "steps": 5508
+          },
+          {
+            "case_id": "R3_F1_twin_obstacle_split_remerge_massmatched_medium",
+            "evidence_status": "executed",
+            "dp_m": 0.024,
+            "time_max_s": 1.5,
+            "time_end_s": 1.50016,
+            "output_cadence_s": 0.010001066666666666,
+            "frames": 151,
+            "integrator": "Verlet",
+            "boundary_formulation": "DBC",
+            "steps": 8357
+          },
+          {
+            "case_id": "R3_F1_twin_obstacle_split_remerge_massmatched_fine",
+            "evidence_status": "executed",
+            "dp_m": 0.014,
+            "time_max_s": 1.5,
+            "time_end_s": 1.500011,
+            "output_cadence_s": 0.010000073333333333,
+            "frames": 151,
+            "integrator": "Verlet",
+            "boundary_formulation": "DBC",
+            "steps": 14506
+          },
+          {
+            "case_id": "R3_F3_baffled_exchange_massmatched_coarse",
+            "evidence_status": "executed",
+            "dp_m": 0.035,
+            "time_max_s": 0.9,
+            "time_end_s": 0.900115,
+            "output_cadence_s": 0.010001277777777777,
+            "frames": 91,
+            "integrator": "Verlet",
+            "boundary_formulation": "DBC",
+            "steps": 2399
+          },
+          {
+            "case_id": "R3_F3_baffled_exchange_massmatched_medium",
+            "evidence_status": "executed",
+            "dp_m": 0.028,
+            "time_max_s": 0.9,
+            "time_end_s": 0.900148,
+            "output_cadence_s": 0.010001644444444444,
+            "frames": 91,
+            "integrator": "Verlet",
+            "boundary_formulation": "DBC",
+            "steps": 3044
+          },
+          {
+            "case_id": "R3_F3_baffled_exchange_massmatched_fine",
+            "evidence_status": "executed",
+            "dp_m": 0.022,
+            "time_max_s": 0.9,
+            "time_end_s": 0.90002,
+            "output_cadence_s": 0.010000222222222223,
+            "frames": 91,
+            "integrator": "Verlet",
+            "boundary_formulation": "DBC",
+            "steps": 4067
+          }
+        ],
+        "evidence_paths": [
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/generated/R3_F1_twin_obstacle_split_remerge_massmatched_coarse.out",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/generated/R3_F1_twin_obstacle_split_remerge_massmatched_coarse.xml",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/generated/gencase.stdout.log",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_fine/generated/R3_F1_twin_obstacle_split_remerge_massmatched_fine.out",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_fine/generated/R3_F1_twin_obstacle_split_remerge_massmatched_fine.xml",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_fine/generated/gencase.stdout.log",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_medium/generated/R3_F1_twin_obstacle_split_remerge_massmatched_medium.out",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_medium/generated/R3_F1_twin_obstacle_split_remerge_massmatched_medium.xml",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_medium/generated/gencase.stdout.log",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_coarse/generated/R3_F3_baffled_exchange_massmatched_coarse.out",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_coarse/generated/R3_F3_baffled_exchange_massmatched_coarse.xml",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_coarse/generated/gencase.stdout.log",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_fine/generated/R3_F3_baffled_exchange_massmatched_fine.out",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_fine/generated/R3_F3_baffled_exchange_massmatched_fine.xml",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_fine/generated/gencase.stdout.log",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_medium/generated/R3_F3_baffled_exchange_massmatched_medium.out",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_medium/generated/R3_F3_baffled_exchange_massmatched_medium.xml",
+          "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_medium/generated/gencase.stdout.log",
+          "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/attempts/20260907T013643.049422Z-e12a66ce.complete/Run.csv",
+          "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/attempts/20260907T013643.049422Z-e12a66ce.complete/attempt.json",
+          "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/attempts/20260907T013643.049422Z-e12a66ce.complete/process.stdout.log",
+          "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_fine/attempts/20260907T013643.022259Z-0fb48906.complete/Run.csv",
+          "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_fine/attempts/20260907T013643.022259Z-0fb48906.complete/attempt.json",
+          "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_fine/attempts/20260907T013643.022259Z-0fb48906.complete/process.stdout.log",
+          "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_medium/attempts/20260907T013643.044262Z-83b41b5c.complete/Run.csv",
+          "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_medium/attempts/20260907T013643.044262Z-83b41b5c.complete/attempt.json",
+          "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_medium/attempts/20260907T013643.044262Z-83b41b5c.complete/process.stdout.log",
+          "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/Run.csv",
+          "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/attempt.json",
+          "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/process.stdout.log",
+          "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_fine/attempts/20260907T013519.586303Z-a79769c5.complete/Run.csv",
+          "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_fine/attempts/20260907T013519.586303Z-a79769c5.complete/attempt.json",
+          "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_fine/attempts/20260907T013519.586303Z-a79769c5.complete/process.stdout.log",
+          "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_medium/attempts/20260907T013519.582944Z-26dadb41.complete/Run.csv",
+          "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_medium/attempts/20260907T013519.582944Z-26dadb41.complete/attempt.json",
+          "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_medium/attempts/20260907T013519.582944Z-26dadb41.complete/process.stdout.log",
+          "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+          "cases/F3/F3_baffled_slosh/F3_baffled_slosh_Def.xml"
+        ]
+      }
+    ],
+    "recommended_first_core_protocol": {
+      "family": "F1",
+      "case_id": "F1_obstacle_ladder",
+      "spatial_schedule_m": {
+        "coarse": 0.035,
+        "medium": 0.024,
+        "fine": 0.014
+      },
+      "integrator": "Verlet",
+      "step_algorithm": 1,
+      "verlet_steps": 40,
+      "boundary_formulation": "DBC",
+      "base_saved_output_cadence_s": 0.001,
+      "time_window_s": [
+        0.0,
+        1.5
+      ],
+      "event_window_s": [
+        0.35,
+        0.55
+      ],
+      "event_window_basis": "SPHERIC Test 02 P1-P4 experimental first impulse maxima occur at about 0.415-0.459 s",
+      "rationale": "Verlet/DBC is the common formulation of the selected custom ladder and R3; W05 mDBC/Symplectic remains the external A0 anchor, not a silently mixed control."
+    },
+    "gaps": [
+      {
+        "id": "integrator_and_boundary_mismatch",
+        "status": "open",
+        "observed": {
+          "W05_anchor": {
+            "integrator": [
+              "Symplectic"
+            ],
+            "boundary": [
+              "mDBC"
+            ]
+          },
+          "legacy_custom": {
+            "integrator": [
+              "Verlet"
+            ],
+            "boundary": [
+              "DBC"
+            ]
+          },
+          "R3_custom": {
+            "integrator": [
+              "Verlet"
+            ],
+            "boundary": [
+              "DBC"
+            ]
+          }
+        },
+        "required": "one frozen protocol per A1 matrix; do not pool W05 mDBC/Symplectic with custom DBC/Verlet as if identical"
+      },
+      {
+        "id": "event_output_cadence",
+        "status": "open",
+        "observed": {
+          "W05_F1_s": {
+            "median": 0.012500148183632733,
+            "min": 0.005000008383233533,
+            "max": 0.020000553333333334
+          },
+          "legacy_custom_s": {
+            "median": 0.05000683080808081,
+            "min": 0.050005,
+            "max": 0.05002061111111111
+          },
+          "R3_custom_s": {
+            "median": 0.010001166666666665,
+            "min": 0.010000073333333333,
+            "max": 0.010001644444444444
+          }
+        },
+        "required": "0.001 s base output for the first F1 event window; R3 downsampling 0.01 to 0.05 s cannot recreate omitted solver states"
+      },
+      {
+        "id": "time_window_alignment",
+        "status": "open",
+        "observed": {
+          "W05_F1_s": {
+            "min": 6.0,
+            "max": 8.35
+          },
+          "legacy_custom_s": {
+            "min": 0.55,
+            "max": 0.9
+          },
+          "R3_custom_s": {
+            "min": 0.9,
+            "max": 1.5
+          }
+        },
+        "required": "first-core bounded window [0, 1.5] s plus fixed event scoring window [0.35, 0.55] s; 0-6 s is needed only for a full Test 02 trace claim"
+      },
+      {
+        "id": "external_observable_scope",
+        "status": "open",
+        "observed": "W05 F1 has H1-H4 and P1-P8 metrics; R3 custom backgrounds have no compatible external observation",
+        "required": "declare H2/H4 as limited macro anchors, add event peak/time/impulse for F1 pressure, and never transfer A0 truth to custom topologies"
+      },
+      {
+        "id": "f1_resolution_stability",
+        "status": "open",
+        "observed": {
+          "background": "twin_obstacle_split_remerge",
+          "resolution_change": {
+            "coarse_to_medium_mass_fraction_tv": 0.07142857142857142,
+            "medium_to_fine_mass_fraction_tv": 0.1556464124111183
+          },
+          "interpretation": "numerical resolution and mechanism only; no external experiment"
+        },
+        "required": "top-two-resolution primary path/destination observable within the pre-registered 0.05 screening threshold; R3 twin currently reports TV 0.0714 and 0.1556"
+      },
+      {
+        "id": "t2_destination_contract",
+        "status": "open",
+        "observed": {
+          "destination_spec_linked_count": 0,
+          "t2_contract_ready_count": 0,
+          "wall_visibility_true_count": 0
+        },
+        "required": "explicit per-background destination regions, wall/open-face/rim policy, initial-mass denominator and closure evidence; this audit does not modify tracer or transport files"
+      }
+    ],
+    "evidence_paths": [
+      "campaigns/v0.1-candidate/W05-CONCLUSION.md",
+      "campaigns/v0.1-candidate/R3-G2-F1-F3-CONCLUSION.md",
+      "campaigns/v0.1-candidate/r3-g2-f1-f3-matrix.json",
+      "campaigns/v0.1-candidate/R3-G2-TRANSPORT-SPEC-CONCLUSION.md",
+      "campaigns/v0.1-candidate/r3-g2-transport-spec-audit.json"
+    ]
+  },
+  "t2_contract_audit": {
+    "source": "campaigns/v0.1-candidate/r3-g2-transport-spec-audit.json",
+    "formal_ready": false,
+    "destination_spec_linked_count": 0,
+    "destination_spec_valid_count": 0,
+    "wall_visibility_true_count": 0,
+    "t2_contract_ready_count": 0,
+    "open_blockers": [
+      "no development-release case links a destination specification, so T2 has zero executable destination labels",
+      "open-face, rim, implicit-cap, receiver, tray, and out-of-domain semantics must be declared per case",
+      "wall-aware visibility must be proven together with destination geometry; a sidecar alone is insufficient",
+      "destination mass closure and resolution/saved-cadence/tracer-count convergence remain unverified"
+    ]
+  },
+  "acceptance_gate": {
+    "gate_id": "R4_CORE_MOTHER_CASE_GATE_v1",
+    "kind": "single_and_gate_with_tiered_decision",
+    "status": "not_passed",
+    "pass_rule": "All required conditions must pass. GO_T1_T2 additionally requires T2 destination closure; GO_T1_ONLY is allowed only for a numerically passing T1 portion and remains candidate-only for T2.",
+    "screening_thresholds": {
+      "top_two_resolution_primary_distribution_tv_max": 0.05,
+      "event_sampling_cadence_s_max": 0.001,
+      "time_window_s": [
+        0.0,
+        1.5
+      ],
+      "event_window_s": [
+        0.35,
+        0.55
+      ],
+      "numerical_loss_fraction_max": 0.0
+    },
+    "conditions": [
+      {
+        "id": "A0_official_anchor",
+        "required": true,
+        "current_status": "partial_pass",
+        "evidence": "W05 F1 Test 02 anchor exists at three resolutions; full Gold observable equivalence is explicitly false"
+      },
+      {
+        "id": "A1_nine_executed_cells",
+        "required": true,
+        "current_status": "fail",
+        "evidence": "F1 selected ladder has 5/9 executed-evidence cells and 3/9 target-compatible cells"
+      },
+      {
+        "id": "A2_common_control_protocol",
+        "required": true,
+        "current_status": "fail",
+        "evidence": "W05 is mDBC/Symplectic at 0.02 s, legacy custom is DBC/Verlet at 0.05 s, and R3 custom is DBC/Verlet at 0.01 s"
+      },
+      {
+        "id": "A2_event_sampling_and_window",
+        "required": true,
+        "current_status": "fail",
+        "evidence": "no existing F1 matrix has the proposed 0.001 s output and fixed [0.35,0.55] s event window"
+      },
+      {
+        "id": "closed_trajectory_quality_and_resolution",
+        "required": true,
+        "current_status": "fail",
+        "evidence": "R3 F1 twin reports coarse-medium TV=0.07142857142857142 and medium-fine TV=0.1556464124111183; the 0.05 screening threshold is exceeded"
+      },
+      {
+        "id": "T2_destination_closure",
+        "required": true,
+        "current_status": "fail",
+        "evidence": "linked destination specs=0, wall_visibility_true=0, T2-ready=0"
+      }
+    ],
+    "current_blocking_conditions": [
+      "A1_nine_executed_cells",
+      "A2_common_control_protocol",
+      "A2_event_sampling_and_window",
+      "closed_trajectory_quality_and_resolution",
+      "T2_destination_closure"
+    ]
+  },
+  "decision": {
+    "execution_authorization": "NO_GO",
+    "execution_authorization_scope": "formal R4 core-mother-case run; no solver/GPU/CFD was started by this audit",
+    "development_route": "GO_T1_ONLY",
+    "development_route_scope": "existing candidate numerical particle trajectories only; not a formal matrix or T2 benchmark",
+    "formal_t1_t2_route": "NO_GO",
+    "current_gate_pass": false,
+    "rules": {
+      "GO_T1_T2": {
+        "requires": [
+          "A0 official anchor present and its limited/full observable scope explicitly reported",
+          "A1 selected 3x3 custom matrix is 9/9 executed under one frozen control protocol",
+          "closed-domain identity/time/finite-state audit passes with zero unexplained numerical mass loss",
+          "top-two-resolution primary path/destination observable passes the pre-registered 0.05 screening threshold",
+          "A2 fixed 0.001 s event-capable output, fixed [0,1.5] s window and named F1 event observables are present",
+          "T2 destination specification and wall/open-face visibility/closure evidence are complete"
+        ],
+        "current_missing": [
+          "A1 F1 evidence is 5/9 and target-compatible is 3/9",
+          "A2 control/cadence/time-window conflicts are open",
+          "R3 F1 twin resolution TV is 0.0714 and 0.1556 against a 0.05 screen",
+          "T2 linked destination specifications and wall visibility are zero"
+        ]
+      },
+      "GO_T1_ONLY": {
+        "requires": [
+          "same numerical structural/resolution evidence as T1 portion of the gate",
+          "T2 may remain candidate-only, but the report must not label destination truth as accepted"
+        ],
+        "current": "available only as a development route over existing closed trajectories; the formal R4 9-cell gate is not passed"
+      },
+      "NO_GO": {
+        "triggers": [
+          "missing/prepared-only cells in the formal 3x3 matrix",
+          "mixed integrator/boundary/cadence without a declared re-run boundary",
+          "identity/time/finite-state failure or unexplained numerical loss",
+          "resolution instability of the declared primary observable"
+        ],
+        "current": "formal execution is held until the single R4 gate is re-audited"
+      }
+    },
+    "observed_resolution_evidence": {
+      "F1": {
+        "background": "twin_obstacle_split_remerge",
+        "resolution_change": {
+          "coarse_to_medium_mass_fraction_tv": 0.07142857142857142,
+          "medium_to_fine_mass_fraction_tv": 0.1556464124111183
+        },
+        "interpretation": "numerical resolution and mechanism only; no external experiment"
+      },
+      "F3": {
+        "background": "baffled_exchange",
+        "resolution_change": {
+          "coarse_to_medium_mass_fraction_tv": 0.0036547647963727434,
+          "medium_to_fine_mass_fraction_tv": 0.0049975587046372704
+        },
+        "interpretation": "numerical resolution and mechanism only; no external experiment"
+      }
+    },
+    "t2_contract": {
+      "source": "campaigns/v0.1-candidate/r3-g2-transport-spec-audit.json",
+      "formal_ready": false,
+      "destination_spec_linked_count": 0,
+      "destination_spec_valid_count": 0,
+      "wall_visibility_true_count": 0,
+      "t2_contract_ready_count": 0,
+      "open_blockers": [
+        "no development-release case links a destination specification, so T2 has zero executable destination labels",
+        "open-face, rim, implicit-cap, receiver, tray, and out-of-domain semantics must be declared per case",
+        "wall-aware visibility must be proven together with destination geometry; a sidecar alone is insufficient",
+        "destination mass closure and resolution/saved-cadence/tracer-count convergence remain unverified"
+      ]
+    },
+    "acceptance_gate_id": "R4_CORE_MOTHER_CASE_GATE_v1"
+  },
+  "recommended_next_runs": {
+    "count": 9,
+    "maximum_allowed_by_request": 9,
+    "all_execute_false": true,
+    "runs": [
+      {
+        "case_id": "R4_F1_plain_dam_break_coarse",
+        "family": "F1",
+        "background_id": "plain_dam_break",
+        "level": "coarse",
+        "source_definition": "cases/F1/F1_dam_break_plain/F1_dam_break_plain_Def.xml",
+        "dp_m": 0.035,
+        "time_max_s": 1.5,
+        "saved_output_cadence_s": 0.001,
+        "integrator": "Verlet",
+        "step_algorithm": 1,
+        "verlet_steps": 40,
+        "boundary_formulation": "DBC",
+        "time_window_s": [
+          0.0,
+          1.5
+        ],
+        "event_window_s": [
+          0.35,
+          0.55
+        ],
+        "execute": false,
+        "authorization": "blocked_until_R4_CORE_MOTHER_CASE_GATE",
+        "purpose": "canonical common-control rerun; existing W05/R3/legacy evidence is not silently pooled",
+        "required_observables": [
+          "numerical particle position/velocity trajectory",
+          "source-conditioned path occupancy or destination mass vector",
+          "F1 event pressure peak time, peak amplitude and impulse in the fixed event window",
+          "H2/H4 macro elevation when the official Test 02 geometry is selected"
+        ]
+      },
+      {
+        "case_id": "R4_F1_plain_dam_break_medium",
+        "family": "F1",
+        "background_id": "plain_dam_break",
+        "level": "medium",
+        "source_definition": "cases/F1/F1_dam_break_plain/F1_dam_break_plain_Def.xml",
+        "dp_m": 0.024,
+        "time_max_s": 1.5,
+        "saved_output_cadence_s": 0.001,
+        "integrator": "Verlet",
+        "step_algorithm": 1,
+        "verlet_steps": 40,
+        "boundary_formulation": "DBC",
+        "time_window_s": [
+          0.0,
+          1.5
+        ],
+        "event_window_s": [
+          0.35,
+          0.55
+        ],
+        "execute": false,
+        "authorization": "blocked_until_R4_CORE_MOTHER_CASE_GATE",
+        "purpose": "canonical common-control rerun; existing W05/R3/legacy evidence is not silently pooled",
+        "required_observables": [
+          "numerical particle position/velocity trajectory",
+          "source-conditioned path occupancy or destination mass vector",
+          "F1 event pressure peak time, peak amplitude and impulse in the fixed event window",
+          "H2/H4 macro elevation when the official Test 02 geometry is selected"
+        ]
+      },
+      {
+        "case_id": "R4_F1_plain_dam_break_fine",
+        "family": "F1",
+        "background_id": "plain_dam_break",
+        "level": "fine",
+        "source_definition": "cases/F1/F1_dam_break_plain/F1_dam_break_plain_Def.xml",
+        "dp_m": 0.014,
+        "time_max_s": 1.5,
+        "saved_output_cadence_s": 0.001,
+        "integrator": "Verlet",
+        "step_algorithm": 1,
+        "verlet_steps": 40,
+        "boundary_formulation": "DBC",
+        "time_window_s": [
+          0.0,
+          1.5
+        ],
+        "event_window_s": [
+          0.35,
+          0.55
+        ],
+        "execute": false,
+        "authorization": "blocked_until_R4_CORE_MOTHER_CASE_GATE",
+        "purpose": "canonical common-control rerun; existing W05/R3/legacy evidence is not silently pooled",
+        "required_observables": [
+          "numerical particle position/velocity trajectory",
+          "source-conditioned path occupancy or destination mass vector",
+          "F1 event pressure peak time, peak amplitude and impulse in the fixed event window",
+          "H2/H4 macro elevation when the official Test 02 geometry is selected"
+        ]
+      },
+      {
+        "case_id": "R4_F1_center_obstacle_coarse",
+        "family": "F1",
+        "background_id": "center_obstacle",
+        "level": "coarse",
+        "source_definition": "cases/F1/F1_center_obstacle/F1_center_obstacle_Def.xml",
+        "dp_m": 0.035,
+        "time_max_s": 1.5,
+        "saved_output_cadence_s": 0.001,
+        "integrator": "Verlet",
+        "step_algorithm": 1,
+        "verlet_steps": 40,
+        "boundary_formulation": "DBC",
+        "time_window_s": [
+          0.0,
+          1.5
+        ],
+        "event_window_s": [
+          0.35,
+          0.55
+        ],
+        "execute": false,
+        "authorization": "blocked_until_R4_CORE_MOTHER_CASE_GATE",
+        "purpose": "canonical common-control rerun; existing W05/R3/legacy evidence is not silently pooled",
+        "required_observables": [
+          "numerical particle position/velocity trajectory",
+          "source-conditioned path occupancy or destination mass vector",
+          "F1 event pressure peak time, peak amplitude and impulse in the fixed event window",
+          "H2/H4 macro elevation when the official Test 02 geometry is selected"
+        ]
+      },
+      {
+        "case_id": "R4_F1_center_obstacle_medium",
+        "family": "F1",
+        "background_id": "center_obstacle",
+        "level": "medium",
+        "source_definition": "cases/F1/F1_center_obstacle/F1_center_obstacle_Def.xml",
+        "dp_m": 0.024,
+        "time_max_s": 1.5,
+        "saved_output_cadence_s": 0.001,
+        "integrator": "Verlet",
+        "step_algorithm": 1,
+        "verlet_steps": 40,
+        "boundary_formulation": "DBC",
+        "time_window_s": [
+          0.0,
+          1.5
+        ],
+        "event_window_s": [
+          0.35,
+          0.55
+        ],
+        "execute": false,
+        "authorization": "blocked_until_R4_CORE_MOTHER_CASE_GATE",
+        "purpose": "canonical common-control rerun; existing W05/R3/legacy evidence is not silently pooled",
+        "required_observables": [
+          "numerical particle position/velocity trajectory",
+          "source-conditioned path occupancy or destination mass vector",
+          "F1 event pressure peak time, peak amplitude and impulse in the fixed event window",
+          "H2/H4 macro elevation when the official Test 02 geometry is selected"
+        ]
+      },
+      {
+        "case_id": "R4_F1_center_obstacle_fine",
+        "family": "F1",
+        "background_id": "center_obstacle",
+        "level": "fine",
+        "source_definition": "cases/F1/F1_center_obstacle/F1_center_obstacle_Def.xml",
+        "dp_m": 0.014,
+        "time_max_s": 1.5,
+        "saved_output_cadence_s": 0.001,
+        "integrator": "Verlet",
+        "step_algorithm": 1,
+        "verlet_steps": 40,
+        "boundary_formulation": "DBC",
+        "time_window_s": [
+          0.0,
+          1.5
+        ],
+        "event_window_s": [
+          0.35,
+          0.55
+        ],
+        "execute": false,
+        "authorization": "blocked_until_R4_CORE_MOTHER_CASE_GATE",
+        "purpose": "canonical common-control rerun; existing W05/R3/legacy evidence is not silently pooled",
+        "required_observables": [
+          "numerical particle position/velocity trajectory",
+          "source-conditioned path occupancy or destination mass vector",
+          "F1 event pressure peak time, peak amplitude and impulse in the fixed event window",
+          "H2/H4 macro elevation when the official Test 02 geometry is selected"
+        ]
+      },
+      {
+        "case_id": "R4_F1_twin_obstacle_split_remerge_coarse",
+        "family": "F1",
+        "background_id": "twin_obstacle_split_remerge",
+        "level": "coarse",
+        "source_definition": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+        "dp_m": 0.035,
+        "time_max_s": 1.5,
+        "saved_output_cadence_s": 0.001,
+        "integrator": "Verlet",
+        "step_algorithm": 1,
+        "verlet_steps": 40,
+        "boundary_formulation": "DBC",
+        "time_window_s": [
+          0.0,
+          1.5
+        ],
+        "event_window_s": [
+          0.35,
+          0.55
+        ],
+        "execute": false,
+        "authorization": "blocked_until_R4_CORE_MOTHER_CASE_GATE",
+        "purpose": "canonical common-control rerun; existing W05/R3/legacy evidence is not silently pooled",
+        "required_observables": [
+          "numerical particle position/velocity trajectory",
+          "source-conditioned path occupancy or destination mass vector",
+          "F1 event pressure peak time, peak amplitude and impulse in the fixed event window",
+          "H2/H4 macro elevation when the official Test 02 geometry is selected"
+        ]
+      },
+      {
+        "case_id": "R4_F1_twin_obstacle_split_remerge_medium",
+        "family": "F1",
+        "background_id": "twin_obstacle_split_remerge",
+        "level": "medium",
+        "source_definition": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+        "dp_m": 0.024,
+        "time_max_s": 1.5,
+        "saved_output_cadence_s": 0.001,
+        "integrator": "Verlet",
+        "step_algorithm": 1,
+        "verlet_steps": 40,
+        "boundary_formulation": "DBC",
+        "time_window_s": [
+          0.0,
+          1.5
+        ],
+        "event_window_s": [
+          0.35,
+          0.55
+        ],
+        "execute": false,
+        "authorization": "blocked_until_R4_CORE_MOTHER_CASE_GATE",
+        "purpose": "canonical common-control rerun; existing W05/R3/legacy evidence is not silently pooled",
+        "required_observables": [
+          "numerical particle position/velocity trajectory",
+          "source-conditioned path occupancy or destination mass vector",
+          "F1 event pressure peak time, peak amplitude and impulse in the fixed event window",
+          "H2/H4 macro elevation when the official Test 02 geometry is selected"
+        ]
+      },
+      {
+        "case_id": "R4_F1_twin_obstacle_split_remerge_fine",
+        "family": "F1",
+        "background_id": "twin_obstacle_split_remerge",
+        "level": "fine",
+        "source_definition": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+        "dp_m": 0.014,
+        "time_max_s": 1.5,
+        "saved_output_cadence_s": 0.001,
+        "integrator": "Verlet",
+        "step_algorithm": 1,
+        "verlet_steps": 40,
+        "boundary_formulation": "DBC",
+        "time_window_s": [
+          0.0,
+          1.5
+        ],
+        "event_window_s": [
+          0.35,
+          0.55
+        ],
+        "execute": false,
+        "authorization": "blocked_until_R4_CORE_MOTHER_CASE_GATE",
+        "purpose": "canonical common-control rerun; existing W05/R3/legacy evidence is not silently pooled",
+        "required_observables": [
+          "numerical particle position/velocity trajectory",
+          "source-conditioned path occupancy or destination mass vector",
+          "F1 event pressure peak time, peak amplitude and impulse in the fixed event window",
+          "H2/H4 macro elevation when the official Test 02 geometry is selected"
+        ]
+      }
+    ]
+  },
+  "audit_inputs": [
+    {
+      "path": "campaigns/v0.1-candidate/W05-CONCLUSION.md",
+      "exists": true,
+      "bytes": 3747,
+      "sha256": "0360385af228228cc734c5e066a6afd015ddfb8a93fad573a85c790d018bde7f"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/w05-validation-anchors.json",
+      "exists": true,
+      "bytes": 10118,
+      "sha256": "7911ef972e3bb279e4ed8942e3eeabc1369fc8af8a6f1ef53361fc4970f1a25c"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/R3-G2-F1-F3-CONCLUSION.md",
+      "exists": true,
+      "bytes": 3024,
+      "sha256": "4f7d9c566e0c8a16259707dcdbcce711ab9f16c9e90927dcac43b3789a0203f8"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/r3-g2-f1-f3-matrix.json",
+      "exists": true,
+      "bytes": 22883,
+      "sha256": "79a164a40b34e7c16d6e474685af732825bb45ddf2a4f2cc344f339be8f42207"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/cases/r3-g2-f1-f3/matrix.json",
+      "exists": true,
+      "bytes": 4696,
+      "sha256": "e58ab98ba6fa1150c9d55d2c16f138135d05eef067ffc1c4c3f0dccb9031bbdc"
+    },
+    {
+      "path": "cases/manifest.json",
+      "exists": true,
+      "bytes": 6071,
+      "sha256": "2187686bfcf043bf0eff1d80e801e8bea15b16e68656b44a9dbe83106cb1be4d"
+    },
+    {
+      "path": "reports/runtime/prepare-summary.json",
+      "exists": true,
+      "bytes": 9871,
+      "sha256": "31ed917797b72c9313dadcbc75a949f3486e91ab57bcec8f02c54e3334b55074"
+    },
+    {
+      "path": "reports/runtime/run-summary.json",
+      "exists": true,
+      "bytes": 7570,
+      "sha256": "67bcf63f2e7d8b4da6be2bfb9de574f2cddf8702107852500db7da02bdb286a1"
+    },
+    {
+      "path": "reports/runtime/quality-gates.json",
+      "exists": true,
+      "bytes": 16336,
+      "sha256": "4a35bee659c19ceb8fb7244655f4d19808cab46e0368ab19778d49dabcbd5e38"
+    },
+    {
+      "path": "reports/runtime/trajectory-audit.json",
+      "exists": true,
+      "bytes": 31993,
+      "sha256": "a8ae31c6e0e47753a6af590cb695670b3366fea900c31c7dea83a555f43bc778"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/r3-g2-transport-spec-audit.json",
+      "exists": true,
+      "bytes": 5853,
+      "sha256": "fe6ba97f0ef07a751729fbfad89b690be694af8d5d1786546e319131ea65c8c7"
+    },
+    {
+      "path": "cases/F1/F1_dam_break_plain/F1_dam_break_plain_Def.xml",
+      "exists": true,
+      "bytes": 3059,
+      "sha256": "86a6de6d1f2bf9b585c4ca4e36b338418209122f51c18c1242a75990bd5f760b"
+    },
+    {
+      "path": "cases/F1/F1_center_obstacle/F1_center_obstacle_Def.xml",
+      "exists": true,
+      "bytes": 3616,
+      "sha256": "60662c0779da976b2c4c60e7d13c80f0cc52f61fcec9679305ad9259bc3fae0a"
+    },
+    {
+      "path": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+      "exists": true,
+      "bytes": 4167,
+      "sha256": "a816d5ae86f91d73cb77730042a890c45f8f7b70236f390b4a840047fe94f909"
+    },
+    {
+      "path": "cases/F3/F3_impulse_slosh/F3_impulse_slosh_Def.xml",
+      "exists": true,
+      "bytes": 3153,
+      "sha256": "c93c3f0a4202459bc401a7c6ce82836303974d49c3d0ce5be7304efac2fc2b99"
+    },
+    {
+      "path": "cases/F3/F3_baffled_slosh/F3_baffled_slosh_Def.xml",
+      "exists": true,
+      "bytes": 3713,
+      "sha256": "e4811e7c3bfdba6ae06ccc073fbf9cec0a9d2d62221a0df69e43fa5278e3c147"
+    },
+    {
+      "path": "cases/F3/F3_transverse_slosh/F3_transverse_slosh_Def.xml",
+      "exists": true,
+      "bytes": 3154,
+      "sha256": "18ebcaf6b8ffad1ddc45a7ac68ed5ae492cb314aeb6ec54b977256e93cd7344b"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F1_coarse/generated/W05_F1_coarse.out",
+      "exists": true,
+      "bytes": 5598,
+      "sha256": "26d5b66245135ef2c1fc305ae8c9f95602181b9b9c0df4a85ad05970c83ad3a6"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F1_coarse/generated/W05_F1_coarse.xml",
+      "exists": true,
+      "bytes": 15408,
+      "sha256": "d36bfb5c078fdfe9d91cc643894203f61881532097af4a8b6012e1f1d7880149"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F1_coarse/generated/gencase.stdout.log",
+      "exists": true,
+      "bytes": 5664,
+      "sha256": "9a13978ddaa5d130ff317f4ab323e928a3481958a0ae1a28a259e10403e22e40"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F1_fine/generated/W05_F1_fine.out",
+      "exists": true,
+      "bytes": 5583,
+      "sha256": "b0e2848b5dcd887c7ec8a7e19a3a264a2caa422ff8b13e1c60e0a6570bfd3efe"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F1_fine/generated/W05_F1_fine.xml",
+      "exists": true,
+      "bytes": 15407,
+      "sha256": "829f458555e0e9aebaf98f2fae54c57c2c7f50f3ab346e3e3abdd9645444c6b5"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F1_fine/generated/gencase.stdout.log",
+      "exists": true,
+      "bytes": 5649,
+      "sha256": "5c323104358b22ba4e632d0e30390ca9a371fec6873c93902b377391f8eb2f48"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F1_medium/generated/W05_F1_medium.out",
+      "exists": true,
+      "bytes": 5620,
+      "sha256": "ccf8f3d330a085782af3499326f241f9b9e15cf26ebf7654a186720a9c3a1798"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F1_medium/generated/W05_F1_medium.xml",
+      "exists": true,
+      "bytes": 15419,
+      "sha256": "8d808dca3e9d8eae1edfa39b53b60f8731a592dd876e57a04003897ff0dfb513"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F1_medium/generated/gencase.stdout.log",
+      "exists": true,
+      "bytes": 5686,
+      "sha256": "eb2c61504f168246fcef7f076157e812c882d9b75e56f4779a44dbfd3e99eed0"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F3_coarse/generated/W05_F3_coarse.out",
+      "exists": true,
+      "bytes": 6284,
+      "sha256": "1a88a37fe91517f2e242a71abdf062ee7878b713f556f1f1d0d1e3929a30c3fd"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F3_coarse/generated/W05_F3_coarse.xml",
+      "exists": true,
+      "bytes": 10108,
+      "sha256": "391f30d680e8e85f2dcdca5eb3c52c5a3664c9ff147ae26db6f9b544653f3418"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F3_coarse/generated/gencase.stdout.log",
+      "exists": true,
+      "bytes": 6350,
+      "sha256": "8484844361327fc105f29b8df9bb42d72a04ce894a5d58f0d49112edf55c44f3"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F3_fine/generated/W05_F3_fine.out",
+      "exists": true,
+      "bytes": 6239,
+      "sha256": "4b9733a6ba61da3b719c364749619f6432121fc3549b71e1273ec0db8765a5ab"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F3_fine/generated/W05_F3_fine.xml",
+      "exists": true,
+      "bytes": 10191,
+      "sha256": "2bba79f3c20cce7536e5e26aa81f8a641b34645754901d044ad2da7ad66e8301"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F3_fine/generated/gencase.stdout.log",
+      "exists": true,
+      "bytes": 6305,
+      "sha256": "9ed4f0d5d1f06215c5766a8045d384d1e55ee5f41841b5d46e15c604c63e7239"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F3_medium/generated/W05_F3_medium.out",
+      "exists": true,
+      "bytes": 6279,
+      "sha256": "a434c4dafdf39c869a29fac9e52888e5b52309b7bc7ebe3a65cea408eaa4d61c"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F3_medium/generated/W05_F3_medium.xml",
+      "exists": true,
+      "bytes": 10100,
+      "sha256": "38822c74e57f8cb5b07255a3fbaf141a52139cd3795f109d729d92eeaaaf8197"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/w05/W05_F3_medium/generated/gencase.stdout.log",
+      "exists": true,
+      "bytes": 6345,
+      "sha256": "c771dd81c9d40ff738bb8505022206eed0ba9c02a8ffb8b6535fc0f51b3e628e"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F1_coarse/attempts/20260906T184832.663311Z-cdff9e9e.complete/Run.csv",
+      "exists": true,
+      "bytes": 1031,
+      "sha256": "b688d4350ea8886920023471d6b8493827d9bb6251c1f2d783af99ce55e20413"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F1_coarse/attempts/20260906T184832.663311Z-cdff9e9e.complete/attempt.json",
+      "exists": true,
+      "bytes": 8691,
+      "sha256": "713ab9263849976f473f9397af747936ee226e93ca6e64c6d4c89e4018f71c8d"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F1_coarse/attempts/20260906T184832.663311Z-cdff9e9e.complete/process.stdout.log",
+      "exists": true,
+      "bytes": 65550,
+      "sha256": "eec75b327524dfe2d4945c0294d84abe44fd4b8455b4f66fdc661a399dea8746"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F1_fine/attempts/20260906T184832.696634Z-7d26f4d1.complete/Run.csv",
+      "exists": true,
+      "bytes": 1026,
+      "sha256": "41635e5e70284a369f83778bf5232c113966f473dd1ad22b37a5f29ea96c8e97"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F1_fine/attempts/20260906T184832.696634Z-7d26f4d1.complete/attempt.json",
+      "exists": true,
+      "bytes": 8683,
+      "sha256": "233a02fec94109d314f6d67272d42f6f50722979abd61dac7cca36fa0a8ea980"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F1_fine/attempts/20260906T184832.696634Z-7d26f4d1.complete/process.stdout.log",
+      "exists": true,
+      "bytes": 51958,
+      "sha256": "f75a8dcfeea0218961e3c9a85ed4b9a250de3dcef595836c40861ee75f6fb609"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F1_medium/attempts/20260906T184832.692698Z-5a58b0f9.complete/Run.csv",
+      "exists": true,
+      "bytes": 1027,
+      "sha256": "cd9c15d1bd1e7c3005deefa02863f3c7abdcaadc727d60c5d867666c464cad58"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F1_medium/attempts/20260906T184832.692698Z-5a58b0f9.complete/attempt.json",
+      "exists": true,
+      "bytes": 8691,
+      "sha256": "37094b7dc9ab29b616ce1081666d8436455c32621ed8e7bd6a2d1bc9624da7cc"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F1_medium/attempts/20260906T184832.692698Z-5a58b0f9.complete/process.stdout.log",
+      "exists": true,
+      "bytes": 52090,
+      "sha256": "6658bd409331c78d2cd98967fa1414e004ccf0f6dd25b43d2a0c797ca1a585f4"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F3_coarse/attempts/20260906T185131.979160Z-0dfb366d.complete/Run.csv",
+      "exists": true,
+      "bytes": 1009,
+      "sha256": "84a81980d6167746fa1d595ad2ea15cb591bcefdeb26e9691e508387fc9fe15c"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F3_coarse/attempts/20260906T185131.979160Z-0dfb366d.complete/attempt.json",
+      "exists": true,
+      "bytes": 44313,
+      "sha256": "c209d6c279065a8c03f0ade847df1f13e6b24c54a32827bb6b98b7f1a748f145"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F3_coarse/attempts/20260906T185131.979160Z-0dfb366d.complete/process.stdout.log",
+      "exists": true,
+      "bytes": 179631,
+      "sha256": "3f6929b1e370ea15556996bb622b9985db3df8ddd6cb42c9d2aa5d7b25d59d8a"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F3_fine/attempts/20260906T184916.979263Z-3ff84862.complete/Run.csv",
+      "exists": true,
+      "bytes": 1011,
+      "sha256": "cb03bea37bd81d532ad537cb05c1ed3869eea160b84aa1e300a40d031006e527"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F3_fine/attempts/20260906T184916.979263Z-3ff84862.complete/attempt.json",
+      "exists": true,
+      "bytes": 44305,
+      "sha256": "ad2704c5087efd6085353d1ebe738d8be4102e2518c4bac6c4eda24aa61a9ff7"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F3_fine/attempts/20260906T184916.979263Z-3ff84862.complete/process.stdout.log",
+      "exists": true,
+      "bytes": 179631,
+      "sha256": "15a42724231016918e041e01e53e6f0dd4bf881a9a61dae254ec2bda3972ebf3"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F3_medium/attempts/20260906T185131.981347Z-872ed220.complete/Run.csv",
+      "exists": true,
+      "bytes": 1010,
+      "sha256": "c59e15c9a39a64bd13176bda8fc1ebe4907ab9f171744de98c58068adfda3081"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F3_medium/attempts/20260906T185131.981347Z-872ed220.complete/attempt.json",
+      "exists": true,
+      "bytes": 44314,
+      "sha256": "8262e7ec37a6376f486ab50058367c31860d864e58827cf05c5ba2f07a569af9"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/W05_F3_medium/attempts/20260906T185131.981347Z-872ed220.complete/process.stdout.log",
+      "exists": true,
+      "bytes": 179630,
+      "sha256": "5d7cbc4d56150704c0e2422467a2de049fd99d8e731c73de6d7bf46f060d7b83"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/mdbc/03_Sloshing/CaseSloshingLR_Def.xml",
+      "exists": true,
+      "bytes": 8304,
+      "sha256": "d46efc1ad3eaeba541008e296fad37c451c7c09fb4f05de3b28df6ed665dd8cd"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+      "exists": true,
+      "bytes": 12732,
+      "sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7"
+    },
+    {
+      "path": "cases/F1/F1_center_obstacle/generated/F1_center_obstacle.out",
+      "exists": true,
+      "bytes": 4773,
+      "sha256": "95dbd9c735ca76e824814acade87b0776cc85ea96a5595bdda5ec00664cecff5"
+    },
+    {
+      "path": "cases/F1/F1_center_obstacle/generated/F1_center_obstacle.xml",
+      "exists": true,
+      "bytes": 5289,
+      "sha256": "361fd4c4f5363af7e1932cc26ff798a2b96e23df2a96217df0d1ff70c4ba29de"
+    },
+    {
+      "path": "cases/F1/F1_dam_break_plain/generated/F1_dam_break_plain.out",
+      "exists": true,
+      "bytes": 4724,
+      "sha256": "d7d371d928cd67f56659db880c94a33af63fc16e2896311653086a60f4de42c6"
+    },
+    {
+      "path": "cases/F1/F1_dam_break_plain/generated/F1_dam_break_plain.xml",
+      "exists": true,
+      "bytes": 4662,
+      "sha256": "9773edf3a2862b11fc83c2095277c9cd97fb0c6594339386396c23ace913f0fb"
+    },
+    {
+      "path": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle.out",
+      "exists": true,
+      "bytes": 4790,
+      "sha256": "46c6b12458be63006040507474529aa3aa77fd88b4d823cfc1c08a7dc3263d53"
+    },
+    {
+      "path": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle.xml",
+      "exists": true,
+      "bytes": 5905,
+      "sha256": "9e855512587871b5311eb6bf7b3a9fa0db86aee19a97b0188649962321a957e8"
+    },
+    {
+      "path": "cases/F3/F3_baffled_slosh/generated/F3_baffled_slosh.out",
+      "exists": true,
+      "bytes": 4747,
+      "sha256": "483a3205380233e0811aedb3651543fc82095bc036d3cdd79044f8d420b14b59"
+    },
+    {
+      "path": "cases/F3/F3_baffled_slosh/generated/F3_baffled_slosh.xml",
+      "exists": true,
+      "bytes": 5386,
+      "sha256": "7fdd9cf08a294dafe2ca9b4a72b4677d4b8e8675ac0aa966089b9f6f21445dc3"
+    },
+    {
+      "path": "cases/F3/F3_impulse_slosh/generated/F3_impulse_slosh.out",
+      "exists": true,
+      "bytes": 4698,
+      "sha256": "8d9e98e2d3609e2d0bf58f14cd475bf8957ffde8552384809ae6b7e5f57bde3a"
+    },
+    {
+      "path": "cases/F3/F3_impulse_slosh/generated/F3_impulse_slosh.xml",
+      "exists": true,
+      "bytes": 4756,
+      "sha256": "93b5c9b61510a7838fba94b75fdf087f844b84299c6c5c8a72867bc50634fb3c"
+    },
+    {
+      "path": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh.out",
+      "exists": true,
+      "bytes": 4737,
+      "sha256": "576b3030ee6c4f56f3e2484c8d37c6f4f9287f414b229b800ff922a1167142c8"
+    },
+    {
+      "path": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh.xml",
+      "exists": true,
+      "bytes": 4757,
+      "sha256": "72f8c43cfed5c3c69c7fb1968a3050b30670d55012ec1f8c01cffdf89c7e874c"
+    },
+    {
+      "path": "runs/F1_center_obstacle/Run.csv",
+      "exists": true,
+      "bytes": 1004,
+      "sha256": "643ab2e8a89811f2eb735d7ac0153d2070450e2b806b7e905f8d7a442524a18b"
+    },
+    {
+      "path": "runs/F1_center_obstacle/solver.stdout.log",
+      "exists": true,
+      "bytes": 18114,
+      "sha256": "a3382ba2a07a9c0d09f41b6105cb534578a2386ee239e65e9e96137e72f0e904"
+    },
+    {
+      "path": "runs/F1_dam_break_plain/Run.csv",
+      "exists": true,
+      "bytes": 1002,
+      "sha256": "8584b1d7c176d0a9dd7c5b088f93c2067895bfe89d3bc41853dc2285ea178e5d"
+    },
+    {
+      "path": "runs/F1_dam_break_plain/solver.stdout.log",
+      "exists": true,
+      "bytes": 17946,
+      "sha256": "869d3ca9145b6fb80afe2cfe667eb275e0b9e655d9f2815cd26b0ab5c589f126"
+    },
+    {
+      "path": "runs/F1_twin_obstacle/Run.csv",
+      "exists": true,
+      "bytes": 1000,
+      "sha256": "1f4bb5a5634dc8d04e32028ef11f13350113e8de66f74e568fdd625392595917"
+    },
+    {
+      "path": "runs/F1_twin_obstacle/solver.stdout.log",
+      "exists": true,
+      "bytes": 18200,
+      "sha256": "0ad361c46a4dfc9213c9189b1b53506bdba587e2cfd3c05998da260060e7de9b"
+    },
+    {
+      "path": "runs/F3_baffled_slosh/Run.csv",
+      "exists": true,
+      "bytes": 1001,
+      "sha256": "482e983adbfe9fdc1a5d09fc8254721fcca6bd76b6e32db9f16050d1e084ba6c"
+    },
+    {
+      "path": "runs/F3_baffled_slosh/solver.stdout.log",
+      "exists": true,
+      "bytes": 18685,
+      "sha256": "01e7dfe2eef2960c2d1a42dacc95c90c454138d4b8e1b6faa38d261b13396774"
+    },
+    {
+      "path": "runs/F3_impulse_slosh/Run.csv",
+      "exists": true,
+      "bytes": 999,
+      "sha256": "12401ffb89635cd32d3daadf64b3514d0f97c4a683c189edee7dec3d4dd6b32c"
+    },
+    {
+      "path": "runs/F3_impulse_slosh/solver.stdout.log",
+      "exists": true,
+      "bytes": 18682,
+      "sha256": "70caa70b34a941f314ba0c871ff4168f918358640362280522e7d8068da5a566"
+    },
+    {
+      "path": "runs/F3_transverse_slosh/Run.csv",
+      "exists": true,
+      "bytes": 1002,
+      "sha256": "2e2ae13b5417d72b160b73b14d3382af1e0b13d4c11dc5cf8df01b73ed5192b9"
+    },
+    {
+      "path": "runs/F3_transverse_slosh/solver.stdout.log",
+      "exists": true,
+      "bytes": 18410,
+      "sha256": "b2691930365862cf110cdfc934068c101c339320f9efeead35eb9976b8e0caf4"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/generated/R3_F1_twin_obstacle_split_remerge_massmatched_coarse.out",
+      "exists": true,
+      "bytes": 5516,
+      "sha256": "9f5e04dc2c9c2e405a9be475617cd8531d9c9ec99e0ed0a40d4e431aeee7c5a8"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/generated/R3_F1_twin_obstacle_split_remerge_massmatched_coarse.xml",
+      "exists": true,
+      "bytes": 5928,
+      "sha256": "96f72912115e910d3f2391c7e57289da0f4c530d02a36a49a8aad540137a8629"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/generated/gencase.stdout.log",
+      "exists": true,
+      "bytes": 5561,
+      "sha256": "049552b59009419715dd38d562ebb2501ee307ce78862c9084f164a1730c0161"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_fine/generated/R3_F1_twin_obstacle_split_remerge_massmatched_fine.out",
+      "exists": true,
+      "bytes": 5497,
+      "sha256": "1561f378e9af16431d1561fe5357cbfc9ef18a403f5f355e613f73d57c46af5d"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_fine/generated/R3_F1_twin_obstacle_split_remerge_massmatched_fine.xml",
+      "exists": true,
+      "bytes": 5939,
+      "sha256": "86a1921c6ef914520b72e9370a607e9de7275b7335177df71d06ba058dafb700"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_fine/generated/gencase.stdout.log",
+      "exists": true,
+      "bytes": 5542,
+      "sha256": "5ed58710edde61dabab0fcbdc3094c2c356bc1d6858a3de23dc351c04df1075e"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_medium/generated/R3_F1_twin_obstacle_split_remerge_massmatched_medium.out",
+      "exists": true,
+      "bytes": 5498,
+      "sha256": "ab5d41127304c531e3093cd48c4b0171897ef0710fccfb98f6338a5bd32825af"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_medium/generated/R3_F1_twin_obstacle_split_remerge_massmatched_medium.xml",
+      "exists": true,
+      "bytes": 5916,
+      "sha256": "7d7653a3e5db44c43c2a12133879de69a73694e92bf2f4686afa8152b9082b36"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F1_twin_obstacle_split_remerge_massmatched_medium/generated/gencase.stdout.log",
+      "exists": true,
+      "bytes": 5543,
+      "sha256": "2a196c947638f37ae57e724eac50752e6adb12b0c95ab3787e293da08e9fc57b"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_coarse/generated/R3_F3_baffled_exchange_massmatched_coarse.out",
+      "exists": true,
+      "bytes": 5330,
+      "sha256": "47a316047dfa7012a8e05a8e0bb05b3d2f032f2be6435e93948bd2e9a840a926"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_coarse/generated/R3_F3_baffled_exchange_massmatched_coarse.xml",
+      "exists": true,
+      "bytes": 5408,
+      "sha256": "56f3c9f3dbdfe68228ca210478b9a5dd3f9b951fd0eed18cc52ad3ada3b81d8b"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_coarse/generated/gencase.stdout.log",
+      "exists": true,
+      "bytes": 5375,
+      "sha256": "01324229e83dff0048b04197ba4513fe68e9cd4f34bf4c776b8bd22343f52be0"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_fine/generated/R3_F3_baffled_exchange_massmatched_fine.out",
+      "exists": true,
+      "bytes": 5298,
+      "sha256": "26b6adf5e519511cd906ae9f982fee436b1120b7436e2cba3364593a15299403"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_fine/generated/R3_F3_baffled_exchange_massmatched_fine.xml",
+      "exists": true,
+      "bytes": 5412,
+      "sha256": "13218c90e97c76beba204a7bcfa9fac9a955e17c087c17820cd4f1e2fa5dbf96"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_fine/generated/gencase.stdout.log",
+      "exists": true,
+      "bytes": 5343,
+      "sha256": "d42bff60428ae622af05ad23cde3adbc7bee0a285ca2a75f68937e96cac53149"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_medium/generated/R3_F3_baffled_exchange_massmatched_medium.out",
+      "exists": true,
+      "bytes": 5326,
+      "sha256": "05083ecdf6560b95de9fd5e05599f55b3dcd1535df50928580ccde933af6b799"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_medium/generated/R3_F3_baffled_exchange_massmatched_medium.xml",
+      "exists": true,
+      "bytes": 5409,
+      "sha256": "f7a3c0a6daa59b21483917466092e972d8783fb2b40aa425b887a22b7930bced"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/artifacts/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_medium/generated/gencase.stdout.log",
+      "exists": true,
+      "bytes": 5371,
+      "sha256": "172170d3e2ece43125c99d3e5804fa996bd1d491db580dda7e370f16698ac601"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/attempts/20260907T013643.049422Z-e12a66ce.complete/Run.csv",
+      "exists": true,
+      "bytes": 1086,
+      "sha256": "61b7b683568316f9568b6eee5af7047d78a28a042f587758f364a5e3bb2fd93c"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/attempts/20260907T013643.049422Z-e12a66ce.complete/attempt.json",
+      "exists": true,
+      "bytes": 4907,
+      "sha256": "8aa8f0fa63073dd801128292a92273a6934507f53731cf245f6eb187d5f65d9c"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_coarse/attempts/20260907T013643.049422Z-e12a66ce.complete/process.stdout.log",
+      "exists": true,
+      "bytes": 31505,
+      "sha256": "7040d49ad3c19e39da6b0366b9a29bb705d58f3701d7ccd2502a7555b4300dd8"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_fine/attempts/20260907T013643.022259Z-0fb48906.complete/Run.csv",
+      "exists": true,
+      "bytes": 1099,
+      "sha256": "45d8bf68fec625198ecf3782b0c300723186c71343ababe927b87982d6440e83"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_fine/attempts/20260907T013643.022259Z-0fb48906.complete/attempt.json",
+      "exists": true,
+      "bytes": 4900,
+      "sha256": "3813b62c2a465c2e78e402b8a08085ea0764de6d176e4d48ce562e79928e8014"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_fine/attempts/20260907T013643.022259Z-0fb48906.complete/process.stdout.log",
+      "exists": true,
+      "bytes": 31703,
+      "sha256": "ca2d3f459439c581ee14e595c7ad0e10ddc071960a2b1dd67974b816b634b6d6"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_medium/attempts/20260907T013643.044262Z-83b41b5c.complete/Run.csv",
+      "exists": true,
+      "bytes": 1087,
+      "sha256": "4d95864f1786b71d89b4aa533c40827a757ee2e0b6573b185e516c9ebe584f92"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_medium/attempts/20260907T013643.044262Z-83b41b5c.complete/attempt.json",
+      "exists": true,
+      "bytes": 4907,
+      "sha256": "fcbc2d404cd68bbc050c5e074fb12712a4ef436dfda108f4bcd471cbc6da7291"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F1_twin_obstacle_split_remerge_massmatched_medium/attempts/20260907T013643.044262Z-83b41b5c.complete/process.stdout.log",
+      "exists": true,
+      "bytes": 31524,
+      "sha256": "b80263a4c7a55f4e823570ed047130c8b9c4efafa1afd384a7b1e8826bb074a3"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/Run.csv",
+      "exists": true,
+      "bytes": 1065,
+      "sha256": "b314cd8b169e0c2b5a72ee16748e225c04bf52bc1fb442e024687fdbd8cc9c17"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/attempt.json",
+      "exists": true,
+      "bytes": 3302,
+      "sha256": "d55b5bba4b78867731b31604aaf5ca83c34fe7398950e90a06f5bf9639b73862"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/process.stdout.log",
+      "exists": true,
+      "bytes": 25617,
+      "sha256": "1abe7dd6e6cd98beff1192acab9757e0ec715863a6d692445a099602f361f475"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_fine/attempts/20260907T013519.586303Z-a79769c5.complete/Run.csv",
+      "exists": true,
+      "bytes": 1066,
+      "sha256": "fb9b7a92ea99121499320f1a5b0dc12e1163015e38d938450458d35d5afb57bd"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_fine/attempts/20260907T013519.586303Z-a79769c5.complete/attempt.json",
+      "exists": true,
+      "bytes": 3295,
+      "sha256": "1f832b48185492fc5e406c6e57d607d21f6235a2a499a8ed1c4cdc0267db3c0c"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_fine/attempts/20260907T013519.586303Z-a79769c5.complete/process.stdout.log",
+      "exists": true,
+      "bytes": 25637,
+      "sha256": "11c2d15b128e94c48d06c633cc50a79879b073651460717c155347477f1330cf"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_medium/attempts/20260907T013519.582944Z-26dadb41.complete/Run.csv",
+      "exists": true,
+      "bytes": 1066,
+      "sha256": "c49b1efca60a932c2613d66ba2c28adbb5b55d3f0f0dcc636cca6012a8c4f563"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_medium/attempts/20260907T013519.582944Z-26dadb41.complete/attempt.json",
+      "exists": true,
+      "bytes": 3303,
+      "sha256": "6a8c3cd7b6ee5d4dde809a79c9cb37e591a89efaf0aa5d1b3f8cb8d4440aa0b6"
+    },
+    {
+      "path": "campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_medium/attempts/20260907T013519.582944Z-26dadb41.complete/process.stdout.log",
+      "exists": true,
+      "bytes": 25628,
+      "sha256": "be392131015af8621c2ec6ba08329864cf1e24562742212bcda7c13536a7fc28"
+    }
+  ],
+  "evidence_interpretation": {
+    "official_anchor": "W05 exact official physical source and external reference are present, but limited observable scope is authoritative.",
+    "execution": "Only solver attempt/log/Run.csv/Part_*.bi4 evidence counts as executed; generated XML/GenCase output alone is prepared_only.",
+    "resolution": "R3 rejected common dp preflights are reported but never counted as completed cells.",
+    "cross_background": "No external Test 02/Test 10 result is transferred to a custom topology background."
+  }
+}

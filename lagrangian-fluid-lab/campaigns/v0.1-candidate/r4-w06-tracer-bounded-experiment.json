@@ -1,0 +1,730 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-09-07T15:13:48.325470+00:00",
+  "experiment_id": "R4_W06_TRACER_BOUNDED_EXPERIMENT",
+  "scope": "one actual W06 HDF5/sidecar case; mass-weighted source/destination tracer audit",
+  "execution_status": "completed",
+  "acceptance_status": "candidate_only_rejected",
+  "formal_material_target_admitted": false,
+  "validation_scope": [
+    "W06_standard_slow_center actual release HDF5",
+    "release-linked finite triangle boundary sidecar",
+    "32 and 64 mass-weighted seeds",
+    "1 and 4 explicit Heun substeps per saved interval",
+    "source-by-destination mass ledger and first-failure reasons"
+  ],
+  "input": {
+    "case_id": "W06_standard_slow_center",
+    "family": "F2",
+    "lineage_group_id": "F2_standard_slow",
+    "split": "train",
+    "hdf5": "release/v0.1-development/data/W06_standard_slow_center.h5",
+    "hdf5_sha256": "52fe1b51f4998cab639058166612426f3b0e8a7b2b7217a131abfd8f14ac0b91",
+    "sidecar": "release/v0.1-development/sidecars/r3-g2-boundary/W06_standard_slow_center.h5",
+    "sidecar_sha256": "f3cd6f5ea94c7cd8a3b03057c93de53efc24adf688336f62782a330296ca1fe0",
+    "manifest": "release/v0.1-development/manifest.json",
+    "manifest_sha256": "b557b091ece49bb1792266be25e86370f63c83f7283f17884294a153c775d5b2",
+    "source_definition": "campaigns/v0.1-candidate/cases/w06/W06_standard_slow_center_Def.xml",
+    "source_definition_sha256": "761ce5f1eb6d9beb7aa4af8e08e0890b43d4a78be689baf5a843d8d9a87234ae",
+    "frames": 251,
+    "time_start_s": 0.0,
+    "time_end_s": 2.50011,
+    "saved_cadence_median_s": 0.010009999999999852,
+    "particle_spacing_m": 0.025,
+    "initial_fluid_particles": 1764,
+    "initial_fluid_mass_kg": 27.5625,
+    "sidecar_audit": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/sidecars/r3-g2-boundary/W06_standard_slow_center.h5",
+      "case_id": "W06_standard_slow_center",
+      "schema_version": "boundary-sidecar-v1",
+      "coordinate_frame": "world",
+      "frame_count": 251,
+      "triangle_count": 68,
+      "static_triangle_count": 40,
+      "moving_triangle_count": 28,
+      "component_count": 3,
+      "all_frames_finite": true,
+      "all_frames_nondegenerate": true,
+      "time_start_s": 0.0,
+      "time_end_s": 2.50011,
+      "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_slow_center/generated/W06_standard_slow_center_MkCells.vtk",
+      "source_hdf5": "data/W06_standard_slow_center.h5",
+      "source_geometry_sha256": "49c7d5e2252af7adce4b550294308873e98931ee4c2c1630f9be699a3866618f"
+    },
+    "sidecar_components": {
+      "17": {
+        "triangle_count": 28,
+        "types": [
+          1
+        ]
+      },
+      "18": {
+        "triangle_count": 28,
+        "types": [
+          0
+        ]
+      },
+      "19": {
+        "triangle_count": 12,
+        "types": [
+          0
+        ]
+      }
+    },
+    "sidecar_component_label_dataset": "triangle_mk",
+    "sidecar_component_labels_explicit": false,
+    "simulation_domain_m": {
+      "min": [
+        -0.7,
+        -0.65,
+        -0.4
+      ],
+      "max": [
+        2.2,
+        0.8,
+        1.8
+      ]
+    }
+  },
+  "controls": {
+    "seed_counts": [
+      32,
+      64
+    ],
+    "substeps_per_saved_interval": [
+      1,
+      4
+    ],
+    "neighbours": 24,
+    "regularization_over_dp": 0.1,
+    "maximum_support_over_dp": 1.75,
+    "frame_stride": 1,
+    "solver_is_not_rerun": true,
+    "gpu_used": false,
+    "cuda_used": false
+  },
+  "candidate_boundary_policy": {
+    "status": "candidate_only",
+    "coordinate_frame": "world",
+    "component_roles": {
+      "17": {
+        "role": "moving_cup_wall",
+        "declared_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "rim_policy": "finite_generated_triangles_only",
+        "supporting_policy": "not_assumed"
+      },
+      "18": {
+        "role": "fixed_receiver_wall",
+        "declared_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "rim_policy": "finite_generated_triangles_only",
+        "supporting_policy": "not_assumed"
+      },
+      "19": {
+        "role": "fixed_floor",
+        "declared_faces": [
+          "bottom"
+        ],
+        "open_faces": [
+          "top",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "rim_policy": "finite_generated_triangles_only",
+        "supporting_policy": "not_assumed"
+      }
+    },
+    "formal_wall_aware_admission": false,
+    "reason": "release sidecar has finite triangles but no linked accepted open-face/destination contract"
+  },
+  "candidate_destination_spec": {
+    "lifecycle_model": "closed",
+    "sources": {
+      "mode": "mk"
+    },
+    "destination_frame": {
+      "kind": "world"
+    },
+    "destinations": [
+      {
+        "name": "inside_receiver",
+        "type": "aabb",
+        "min": [
+          0.475,
+          -0.275,
+          0.025
+        ],
+        "max": [
+          1.525,
+          0.275,
+          0.425
+        ]
+      }
+    ],
+    "complement_labels": [
+      "in_domain_unclassified",
+      "outside_domain"
+    ],
+    "exit_reason_names": {
+      "wall_crossing": "candidate swept-wall rejection",
+      "support_distance_exceedance": "interpolant support exceeded configured maximum",
+      "support_gate_failure": "ESS/geometry/anisotropy/reconstruction gate failed",
+      "support_nonfinite": "non-finite support or interpolation diagnostic",
+      "numerical_loss": "non-finite or otherwise unclassified tracer failure"
+    }
+  },
+  "results": [
+    {
+      "configuration": {
+        "seed_count": 32,
+        "substeps_per_saved_interval": 1,
+        "neighbours": 24,
+        "regularization_over_dp": 0.1,
+        "maximum_support_over_dp": 1.75,
+        "frame_stride": 1
+      },
+      "execution_status": "completed",
+      "frames": 251,
+      "saved_cadence_median_s": 0.010009999999999852,
+      "actual_substep_dt_s": {
+        "min": 0.009879999999999889,
+        "median": 0.010009999999999852,
+        "max": 0.010129999999999972
+      },
+      "elapsed_seconds": 108.6591519981157,
+      "seed_selection": "source-stratified farthest-point seeds; nearest-seed mass assignment within source",
+      "seed_source_counts": {
+        "1": 9,
+        "2": 12,
+        "3": 11
+      },
+      "represented_initial_mass_kg": 27.5625,
+      "initial_fluid_mass_kg": 27.5625,
+      "mass_weight_closure_error_kg": 0.0,
+      "final_reliable_seed_count": 30,
+      "final_reliable_mass_fraction": 0.937641723356009,
+      "failure_reasons_first_failure": {
+        "support_distance_exceedance": {
+          "seed_count": 1,
+          "mass_kg": 0.859375,
+          "by_source_mk": {
+            "3": 0.859375
+          }
+        },
+        "support_nonfinite": {
+          "seed_count": 1,
+          "mass_kg": 0.859375,
+          "by_source_mk": {
+            "2": 0.859375
+          }
+        }
+      },
+      "first_failure_frame_by_seed": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        140,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        176,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "support_gate_failure_events": 6,
+      "wall_crossing_events": 0,
+      "minimum_visible_neighbours": 0,
+      "support_distance_over_dp": {
+        "median": 0.34153125599716827,
+        "p95": 1.1521043147079644
+      },
+      "source_destination_final": {
+        "frame": 250,
+        "time_s": 2.50011,
+        "mass_kg": {
+          "mass_in_domain_unclassified_kg": 17.390625,
+          "mass_inside_receiver_kg": 8.453125,
+          "mass_outside_domain_kg": 0.0,
+          "mass_support_distance_exceedance_kg": 0.859375,
+          "mass_support_nonfinite_kg": 0.859375
+        },
+        "total_kg": 27.5625,
+        "represented_initial_mass_kg": 27.5625,
+        "closure_error_kg": 0.0
+      },
+      "mass_ledger": {
+        "rows": 753,
+        "source_semantics": "initial Mk proxy; source label is not a post-mixing material identity",
+        "path": "campaigns/v0.1-candidate/artifacts/r4-w06-tracer-bounded-experiment/W06_standard_slow_center_seeds32_substeps1_mass-ledger.csv",
+        "sha256": "177885d5c056b07676fdceb0c5db19d61198783aa6c4393cd1f6ebf9ee99fbec",
+        "bytes": 36778
+      }
+    },
+    {
+      "configuration": {
+        "seed_count": 32,
+        "substeps_per_saved_interval": 4,
+        "neighbours": 24,
+        "regularization_over_dp": 0.1,
+        "maximum_support_over_dp": 1.75,
+        "frame_stride": 1
+      },
+      "execution_status": "completed",
+      "frames": 251,
+      "saved_cadence_median_s": 0.010009999999999852,
+      "actual_substep_dt_s": {
+        "min": 0.0024699999999999722,
+        "median": 0.002502499999999963,
+        "max": 0.002532499999999993
+      },
+      "elapsed_seconds": 402.0694139080588,
+      "seed_selection": "source-stratified farthest-point seeds; nearest-seed mass assignment within source",
+      "seed_source_counts": {
+        "1": 9,
+        "2": 12,
+        "3": 11
+      },
+      "represented_initial_mass_kg": 27.5625,
+      "initial_fluid_mass_kg": 27.5625,
+      "mass_weight_closure_error_kg": 0.0,
+      "final_reliable_seed_count": 30,
+      "final_reliable_mass_fraction": 0.9506802721088435,
+      "failure_reasons_first_failure": {
+        "support_distance_exceedance": {
+          "seed_count": 2,
+          "mass_kg": 1.359375,
+          "by_source_mk": {
+            "2": 0.859375,
+            "3": 0.5
+          }
+        }
+      },
+      "first_failure_frame_by_seed": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        153,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        160,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "support_gate_failure_events": 43,
+      "wall_crossing_events": 1,
+      "minimum_visible_neighbours": 0,
+      "support_distance_over_dp": {
+        "median": 0.30115499591295475,
+        "p95": 1.1588076802197307
+      },
+      "source_destination_final": {
+        "frame": 250,
+        "time_s": 2.50011,
+        "mass_kg": {
+          "mass_in_domain_unclassified_kg": 17.390625,
+          "mass_inside_receiver_kg": 8.8125,
+          "mass_outside_domain_kg": 0.0,
+          "mass_support_distance_exceedance_kg": 1.359375
+        },
+        "total_kg": 27.5625,
+        "represented_initial_mass_kg": 27.5625,
+        "closure_error_kg": 0.0
+      },
+      "mass_ledger": {
+        "rows": 753,
+        "source_semantics": "initial Mk proxy; source label is not a post-mixing material identity",
+        "path": "campaigns/v0.1-candidate/artifacts/r4-w06-tracer-bounded-experiment/W06_standard_slow_center_seeds32_substeps4_mass-ledger.csv",
+        "sha256": "af0729b87d00e71f949478fd722cec900b6e26f1063b0690b7944d53c2411723",
+        "bytes": 33202
+      }
+    },
+    {
+      "configuration": {
+        "seed_count": 64,
+        "substeps_per_saved_interval": 1,
+        "neighbours": 24,
+        "regularization_over_dp": 0.1,
+        "maximum_support_over_dp": 1.75,
+        "frame_stride": 1
+      },
+      "execution_status": "completed",
+      "frames": 251,
+      "saved_cadence_median_s": 0.010009999999999852,
+      "actual_substep_dt_s": {
+        "min": 0.009879999999999889,
+        "median": 0.010009999999999852,
+        "max": 0.010129999999999972
+      },
+      "elapsed_seconds": 211.02918020496145,
+      "seed_selection": "source-stratified farthest-point seeds; nearest-seed mass assignment within source",
+      "seed_source_counts": {
+        "1": 18,
+        "2": 23,
+        "3": 23
+      },
+      "represented_initial_mass_kg": 27.5625,
+      "initial_fluid_mass_kg": 27.5625,
+      "mass_weight_closure_error_kg": 0.0,
+      "final_reliable_seed_count": 60,
+      "final_reliable_mass_fraction": 0.9489795918367347,
+      "failure_reasons_first_failure": {
+        "support_distance_exceedance": {
+          "seed_count": 2,
+          "mass_kg": 0.671875,
+          "by_source_mk": {
+            "3": 0.671875
+          }
+        },
+        "support_nonfinite": {
+          "seed_count": 2,
+          "mass_kg": 0.734375,
+          "by_source_mk": {
+            "2": 0.734375
+          }
+        }
+      },
+      "first_failure_frame_by_seed": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        140,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        135,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        176,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        159
+      ],
+      "support_gate_failure_events": 138,
+      "wall_crossing_events": 1,
+      "minimum_visible_neighbours": 0,
+      "support_distance_over_dp": {
+        "median": 0.2639370914204395,
+        "p95": 1.0659376624207677
+      },
+      "source_destination_final": {
+        "frame": 250,
+        "time_s": 2.50011,
+        "mass_kg": {
+          "mass_in_domain_unclassified_kg": 17.953125,
+          "mass_inside_receiver_kg": 8.203125,
+          "mass_outside_domain_kg": 0.0,
+          "mass_support_distance_exceedance_kg": 0.671875,
+          "mass_support_nonfinite_kg": 0.734375
+        },
+        "total_kg": 27.5625,
+        "represented_initial_mass_kg": 27.5625,
+        "closure_error_kg": 0.0
+      },
+      "mass_ledger": {
+        "rows": 753,
+        "source_semantics": "initial Mk proxy; source label is not a post-mixing material identity",
+        "path": "campaigns/v0.1-candidate/artifacts/r4-w06-tracer-bounded-experiment/W06_standard_slow_center_seeds64_substeps1_mass-ledger.csv",
+        "sha256": "3ceaa534719213127517660af4ae327eed209fae2dd5036a73508cca1c88b337",
+        "bytes": 37531
+      }
+    },
+    {
+      "configuration": {
+        "seed_count": 64,
+        "substeps_per_saved_interval": 4,
+        "neighbours": 24,
+        "regularization_over_dp": 0.1,
+        "maximum_support_over_dp": 1.75,
+        "frame_stride": 1
+      },
+      "execution_status": "completed",
+      "frames": 251,
+      "saved_cadence_median_s": 0.010009999999999852,
+      "actual_substep_dt_s": {
+        "min": 0.0024699999999999722,
+        "median": 0.002502499999999963,
+        "max": 0.002532499999999993
+      },
+      "elapsed_seconds": 833.3831449879799,
+      "seed_selection": "source-stratified farthest-point seeds; nearest-seed mass assignment within source",
+      "seed_source_counts": {
+        "1": 18,
+        "2": 23,
+        "3": 23
+      },
+      "represented_initial_mass_kg": 27.5625,
+      "initial_fluid_mass_kg": 27.5625,
+      "mass_weight_closure_error_kg": 0.0,
+      "final_reliable_seed_count": 59,
+      "final_reliable_mass_fraction": 0.9472789115646258,
+      "failure_reasons_first_failure": {
+        "support_distance_exceedance": {
+          "seed_count": 4,
+          "mass_kg": 1.109375,
+          "by_source_mk": {
+            "1": 0.28125,
+            "2": 0.390625,
+            "3": 0.4375
+          }
+        },
+        "support_nonfinite": {
+          "seed_count": 1,
+          "mass_kg": 0.34375,
+          "by_source_mk": {
+            "2": 0.34375
+          }
+        }
+      },
+      "first_failure_frame_by_seed": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        167,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        153,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        135,
+        -1,
+        -1,
+        -1,
+        -1,
+        160,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        160
+      ],
+      "support_gate_failure_events": 197,
+      "wall_crossing_events": 1,
+      "minimum_visible_neighbours": 0,
+      "support_distance_over_dp": {
+        "median": 0.2411323718415921,
+        "p95": 1.0370457991308266
+      },
+      "source_destination_final": {
+        "frame": 250,
+        "time_s": 2.50011,
+        "mass_kg": {
+          "mass_in_domain_unclassified_kg": 17.671875,
+          "mass_inside_receiver_kg": 8.4375,
+          "mass_outside_domain_kg": 0.0,
+          "mass_support_distance_exceedance_kg": 1.109375,
+          "mass_support_nonfinite_kg": 0.34375
+        },
+        "total_kg": 27.5625,
+        "represented_initial_mass_kg": 27.5625,
+        "closure_error_kg": 0.0
+      },
+      "mass_ledger": {
+        "rows": 753,
+        "source_semantics": "initial Mk proxy; source label is not a post-mixing material identity",
+        "path": "campaigns/v0.1-candidate/artifacts/r4-w06-tracer-bounded-experiment/W06_standard_slow_center_seeds64_substeps4_mass-ledger.csv",
+        "sha256": "91d617fead1fee16636cff21ef752b1d1259a7bafd94d9d645d88a0a92782a2f",
+        "bytes": 37846
+      }
+    }
+  ],
+  "errors": [],
+  "paired_substep_comparisons": [
+    {
+      "seed_count": 32,
+      "comparison": "same physical case and same deterministic seed selection; 1 vs 4 tracer substeps",
+      "final_mass_delta_4_minus_1_kg": {
+        "mass_in_domain_unclassified_kg": 0.0,
+        "mass_inside_receiver_kg": 0.359375,
+        "mass_outside_domain_kg": 0.0,
+        "mass_support_distance_exceedance_kg": 0.5,
+        "mass_support_nonfinite_kg": -0.859375
+      },
+      "max_absolute_final_mass_delta_kg": 0.859375
+    },
+    {
+      "seed_count": 64,
+      "comparison": "same physical case and same deterministic seed selection; 1 vs 4 tracer substeps",
+      "final_mass_delta_4_minus_1_kg": {
+        "mass_in_domain_unclassified_kg": -0.28125,
+        "mass_inside_receiver_kg": 0.234375,
+        "mass_outside_domain_kg": 0.0,
+        "mass_support_distance_exceedance_kg": 0.4375,
+        "mass_support_nonfinite_kg": -0.390625
+      },
+      "max_absolute_final_mass_delta_kg": 0.4375
+    }
+  ],
+  "interpretation": {
+    "source": "source_mk is initial Mk provenance only; it is not a post-mixing material identity",
+    "wall": "sidecar triangles are used at every Heun substep with swept-wall rejection; formal wall-aware admission remains false",
+    "destination": "inside_receiver is a candidate AABB; complement mass is reported rather than forced into a destination",
+    "comparison": "only same-case, same-seed-count substep comparisons are made; no cross-resolution array-index matching",
+    "release_decision": "this bounded result cannot promote a material task or trigger a 20-30 case tranche"
+  },
+  "open_blockers": [
+    "candidate boundary policy is not linked into the production material writer",
+    "the release sidecar uses triangle_mk as a component-label fallback rather than an explicit component registry",
+    "release manifest has no accepted destination specification or source-destination closure",
+    "implicit cap/rim/open-face semantics remain unresolved for the sidecar components",
+    "support failures are reconstructed from current diagnostics; a full persisted per-step reason channel is still required",
+    "no external physical material-transport observation is available"
+  ]
+}

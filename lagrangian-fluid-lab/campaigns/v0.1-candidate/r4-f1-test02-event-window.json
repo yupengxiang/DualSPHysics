@@ -1,0 +1,1613 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-09-07T14:27:58.575698+00:00",
+  "scope": "SPHERIC Test 02 pressure event-window cadence follow-up",
+  "execution_status": "completed",
+  "acceptance_status": "diagnostic_only_not_physical_acceptance",
+  "validation_scope": [
+    "official DualSPHysics 5.4 mDBC Test 02 physical background",
+    "three W05 spatial resolutions",
+    "0--2.2 s event window",
+    "pressure P1--P8 only"
+  ],
+  "source": {
+    "definition": "vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+    "definition_sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7",
+    "experimental_workbook": "campaigns/v0.1-candidate/artifacts/w05/external/test2/test_case_2_exp_data.xls",
+    "experimental_workbook_sha256": "8126f8c8f6effb9e8bfb245a2d098186e9ebee2ef6e75fcb1b3166af17883d8c"
+  },
+  "controls": {
+    "spatial_resolution_m": {
+      "coarse": 0.04,
+      "medium": 0.03,
+      "fine": 0.02
+    },
+    "time_max_s": 2.2,
+    "requested_output_cadence_s": 0.005,
+    "measuretool_kc_limit": 0.5,
+    "measuretool_use_dummy_support": false,
+    "pressure_peak_definition": "signed pressure extremum selected by maximum absolute magnitude; positive-pressure impulse is reported separately",
+    "boundary": "mDBC",
+    "solver_internal_timestep": "adaptive; steps and mean dt are measured per run",
+    "gpu_policy": "only live-idle allow-listed GPUs 4--7; no GPU 0--3 use"
+  },
+  "prepared_cases": [
+    {
+      "case_id": "R4_F1_Test02_event_coarse",
+      "level": "coarse",
+      "family": "F1",
+      "source_definition": "vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+      "dp_m": 0.04,
+      "tmax_s": 2.2,
+      "tout_s": 0.005,
+      "gpu": 4,
+      "definition": "campaigns/v0.1-candidate/cases/r4-f1-test02-event-window/R4_F1_Test02_event_coarse_Def.xml",
+      "definition_sha256": "65e42fbe50910933262e934a3f4653cac9a9be84d2568fcb07535681a1d279b5",
+      "generated_prefix": "campaigns/v0.1-candidate/artifacts/r4-f1-test02-event-window/R4_F1_Test02_event_coarse/generated/R4_F1_Test02_event_coarse",
+      "gencase": {
+        "returncode": 0,
+        "fluid_particles": 9360,
+        "fixed_particles": 20428
+      }
+    },
+    {
+      "case_id": "R4_F1_Test02_event_medium",
+      "level": "medium",
+      "family": "F1",
+      "source_definition": "vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+      "dp_m": 0.03,
+      "tmax_s": 2.2,
+      "tout_s": 0.005,
+      "gpu": 5,
+      "definition": "campaigns/v0.1-candidate/cases/r4-f1-test02-event-window/R4_F1_Test02_event_medium_Def.xml",
+      "definition_sha256": "743ac6fcdca55ea1477b5190aa7c93be9069675889d92165c164f1bd2ae23bca",
+      "generated_prefix": "campaigns/v0.1-candidate/artifacts/r4-f1-test02-event-window/R4_F1_Test02_event_medium/generated/R4_F1_Test02_event_medium",
+      "gencase": {
+        "returncode": 0,
+        "fluid_particles": 21760,
+        "fixed_particles": 41700
+      }
+    },
+    {
+      "case_id": "R4_F1_Test02_event_fine",
+      "level": "fine",
+      "family": "F1",
+      "source_definition": "vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+      "dp_m": 0.02,
+      "tmax_s": 2.2,
+      "tout_s": 0.005,
+      "gpu": 6,
+      "definition": "campaigns/v0.1-candidate/cases/r4-f1-test02-event-window/R4_F1_Test02_event_fine_Def.xml",
+      "definition_sha256": "1d9f7c5b2b189ae482be3394e830678683fa05a935271cf774d039e213b55583",
+      "generated_prefix": "campaigns/v0.1-candidate/artifacts/r4-f1-test02-event-window/R4_F1_Test02_event_fine/generated/R4_F1_Test02_event_fine",
+      "gencase": {
+        "returncode": 0,
+        "fluid_particles": 79380,
+        "fixed_particles": 93042
+      }
+    }
+  ],
+  "run_results": [
+    {
+      "case_id": "R4_F1_Test02_event_coarse",
+      "attempt_id": "20260907T140211.722023Z-64131cbc",
+      "status": "completed",
+      "elapsed_seconds": 13.121913032140583,
+      "frames": 441,
+      "gpu_at_launch": {
+        "index": 4,
+        "recovered_from_latest": true,
+        "uuid_not_persisted_by_legacy_attempt_schema": true
+      }
+    },
+    {
+      "case_id": "R4_F1_Test02_event_medium",
+      "attempt_id": "20260907T140211.677673Z-ac4f18fa",
+      "status": "completed",
+      "elapsed_seconds": 18.82029833085835,
+      "frames": 441,
+      "gpu_at_launch": {
+        "index": 5,
+        "recovered_from_latest": true,
+        "uuid_not_persisted_by_legacy_attempt_schema": true
+      }
+    },
+    {
+      "case_id": "R4_F1_Test02_event_fine",
+      "attempt_id": "20260907T140211.715524Z-00d11f34",
+      "status": "completed",
+      "elapsed_seconds": 34.142393024871126,
+      "frames": 441,
+      "gpu_at_launch": {
+        "index": 6,
+        "recovered_from_latest": true,
+        "uuid_not_persisted_by_legacy_attempt_schema": true
+      }
+    }
+  ],
+  "event_metrics": {
+    "R4_F1_Test02_event_coarse": {
+      "attempt_directory": "campaigns/v0.1-candidate/runs/R4_F1_Test02_event_coarse/attempts/20260907T140211.722023Z-64131cbc.complete",
+      "frames_in_event_window": 440,
+      "observed_time_min_s": 0.0,
+      "observed_time_max_s": 2.19528,
+      "observed_cadence_median_s": 0.004999999999999893,
+      "adaptive_solver_steps": 7003,
+      "mean_internal_dt_s": 0.00031415107810938174,
+      "probes": {
+        "P1": {
+          "rmse_pa": 3327.514749096374,
+          "mae_pa": 2795.449387857855,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": 1434.75,
+            "time_s": 0.470277
+          },
+          "experimental_peak": {
+            "value_pa": 11239.4,
+            "time_s": 0.41502500544346344
+          },
+          "peak_time_error_s": 0.055251994556536566,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 265.43491533998736,
+            "experimental": 6362.292572416088
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.004999999999999893,
+              "peak": {
+                "value_pa": 1434.75,
+                "time_s": 0.470277
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": 1434.75,
+                "time_s": 0.470277
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.02000200000000002,
+              "peak": {
+                "value_pa": -487.096,
+                "time_s": 1.86026
+              },
+              "peak_time_delta_from_5ms_s": 1.389983,
+              "peak_value_delta_from_5ms_pa": -1921.846
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.05001,
+              "peak": {
+                "value_pa": 434.793,
+                "time_s": 1.80005
+              },
+              "peak_time_delta_from_5ms_s": 1.3297729999999999,
+              "peak_value_delta_from_5ms_pa": -999.957
+            }
+          }
+        },
+        "P2": {
+          "rmse_pa": 2700.061614113641,
+          "mae_pa": 2222.053728033968,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": 3617.37,
+            "time_s": 0.470277
+          },
+          "experimental_peak": {
+            "value_pa": 8127.466666666666,
+            "time_s": 0.4260242781466923
+          },
+          "peak_time_error_s": 0.0442527218533077,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 460.3955713572685,
+            "experimental": 5291.068331961754
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.004999999999999893,
+              "peak": {
+                "value_pa": 3617.37,
+                "time_s": 0.470277
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": 3617.37,
+                "time_s": 0.470277
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.02000200000000002,
+              "peak": {
+                "value_pa": -1123.19,
+                "time_s": 0.480186
+              },
+              "peak_time_delta_from_5ms_s": 0.009909000000000001,
+              "peak_value_delta_from_5ms_pa": -4740.5599999999995
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.05001,
+              "peak": {
+                "value_pa": 633.177,
+                "time_s": 1.80005
+              },
+              "peak_time_delta_from_5ms_s": 1.3297729999999999,
+              "peak_value_delta_from_5ms_pa": -2984.1929999999998
+            }
+          }
+        },
+        "P3": {
+          "rmse_pa": 2710.7086317870508,
+          "mae_pa": 2259.9963158605588,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": 3673.11,
+            "time_s": 0.470277
+          },
+          "experimental_peak": {
+            "value_pa": 6563.933333333333,
+            "time_s": 0.4590220962563798
+          },
+          "peak_time_error_s": 0.011254903743620204,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 325.0403752904986,
+            "experimental": 5112.804135703484
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.004999999999999893,
+              "peak": {
+                "value_pa": 3673.11,
+                "time_s": 0.470277
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": 3673.11,
+                "time_s": 0.470277
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.02000200000000002,
+              "peak": {
+                "value_pa": -2374.93,
+                "time_s": 0.480186
+              },
+              "peak_time_delta_from_5ms_s": 0.009909000000000001,
+              "peak_value_delta_from_5ms_pa": -6048.04
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.05001,
+              "peak": {
+                "value_pa": -1992.3,
+                "time_s": 0.500312
+              },
+              "peak_time_delta_from_5ms_s": 0.03003499999999998,
+              "peak_value_delta_from_5ms_pa": -5665.41
+            }
+          }
+        },
+        "P4": {
+          "rmse_pa": 2827.2830079918617,
+          "mae_pa": 2262.4944159881734,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": -4621.23,
+            "time_s": 0.500312
+          },
+          "experimental_peak": {
+            "value_pa": 7202.6,
+            "time_s": 0.4550200134652984
+          },
+          "peak_time_error_s": 0.04529198653470157,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 167.22632370914988,
+            "experimental": 4460.4501592422175
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.004999999999999893,
+              "peak": {
+                "value_pa": -4621.23,
+                "time_s": 0.500312
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": -4621.23,
+                "time_s": 0.500312
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.02000200000000002,
+              "peak": {
+                "value_pa": -4621.23,
+                "time_s": 0.500312
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.05001,
+              "peak": {
+                "value_pa": -4621.23,
+                "time_s": 0.500312
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            }
+          }
+        },
+        "P5": {
+          "rmse_pa": 1212.0528275625795,
+          "mae_pa": 951.159896782515,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": -3360.77,
+            "time_s": 0.515205
+          },
+          "experimental_peak": {
+            "value_pa": 2082.266666666667,
+            "time_s": 1.7420381992989968
+          },
+          "peak_time_error_s": 1.226833199298997,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 134.2405291182038,
+            "experimental": 1330.390586810109
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.004999999999999893,
+              "peak": {
+                "value_pa": -3360.77,
+                "time_s": 0.515205
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": -3023.41,
+                "time_s": 0.750094
+              },
+              "peak_time_delta_from_5ms_s": 0.23488900000000001,
+              "peak_value_delta_from_5ms_pa": 337.3600000000001
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.02000200000000002,
+              "peak": {
+                "value_pa": -3020.69,
+                "time_s": 0.500312
+              },
+              "peak_time_delta_from_5ms_s": 0.014893000000000045,
+              "peak_value_delta_from_5ms_pa": 340.0799999999999
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.05001,
+              "peak": {
+                "value_pa": -3023.41,
+                "time_s": 0.750094
+              },
+              "peak_time_delta_from_5ms_s": 0.23488900000000001,
+              "peak_value_delta_from_5ms_pa": 337.3600000000001
+            }
+          }
+        },
+        "P6": {
+          "rmse_pa": 975.3082249069193,
+          "mae_pa": 741.9233684388784,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": -1691.7,
+            "time_s": 0.875146
+          },
+          "experimental_peak": {
+            "value_pa": 1932.5333333333333,
+            "time_s": 1.7430193550800368
+          },
+          "peak_time_error_s": 0.8678733550800368,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 78.81314109040198,
+            "experimental": 1303.7200220026245
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.004999999999999893,
+              "peak": {
+                "value_pa": -1691.7,
+                "time_s": 0.875146
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": -1583.53,
+                "time_s": 0.870029
+              },
+              "peak_time_delta_from_5ms_s": 0.005116999999999927,
+              "peak_value_delta_from_5ms_pa": 108.17000000000007
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.02000200000000002,
+              "peak": {
+                "value_pa": -1517.42,
+                "time_s": 0.860104
+              },
+              "peak_time_delta_from_5ms_s": 0.015042,
+              "peak_value_delta_from_5ms_pa": 174.27999999999997
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.05001,
+              "peak": {
+                "value_pa": -1451.7,
+                "time_s": 0.850175
+              },
+              "peak_time_delta_from_5ms_s": 0.024970999999999965,
+              "peak_value_delta_from_5ms_pa": 240.0
+            }
+          }
+        },
+        "P7": {
+          "rmse_pa": 1074.0913322099652,
+          "mae_pa": 852.3860918875343,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": -1818.96,
+            "time_s": 0.755036
+          },
+          "experimental_peak": {
+            "value_pa": 2031.2666666666667,
+            "time_s": 1.72003965389254
+          },
+          "peak_time_error_s": 0.96500365389254,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 71.8543143690143,
+            "experimental": 1362.638615139219
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.004999999999999893,
+              "peak": {
+                "value_pa": -1818.96,
+                "time_s": 0.755036
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": -1700.59,
+                "time_s": 0.750094
+              },
+              "peak_time_delta_from_5ms_s": 0.004942000000000002,
+              "peak_value_delta_from_5ms_pa": 118.37000000000012
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.02000200000000002,
+              "peak": {
+                "value_pa": -1645.02,
+                "time_s": 0.760283
+              },
+              "peak_time_delta_from_5ms_s": 0.005247000000000002,
+              "peak_value_delta_from_5ms_pa": 173.94000000000005
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.05001,
+              "peak": {
+                "value_pa": -1700.59,
+                "time_s": 0.750094
+              },
+              "peak_time_delta_from_5ms_s": 0.004942000000000002,
+              "peak_value_delta_from_5ms_pa": 118.37000000000012
+            }
+          }
+        },
+        "P8": {
+          "rmse_pa": 1073.839588543556,
+          "mae_pa": 868.5743796635109,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": -2654.42,
+            "time_s": 0.855116
+          },
+          "experimental_peak": {
+            "value_pa": 2090.133333333333,
+            "time_s": 1.6040308927291402
+          },
+          "peak_time_error_s": 0.7489148927291402,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 269.2777924340703,
+            "experimental": 1326.7560337859863
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.004999999999999893,
+              "peak": {
+                "value_pa": -2654.42,
+                "time_s": 0.855116
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": -2618.97,
+                "time_s": 0.860104
+              },
+              "peak_time_delta_from_5ms_s": 0.0049879999999999924,
+              "peak_value_delta_from_5ms_pa": 35.45000000000027
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.02000200000000002,
+              "peak": {
+                "value_pa": -2618.97,
+                "time_s": 0.860104
+              },
+              "peak_time_delta_from_5ms_s": 0.0049879999999999924,
+              "peak_value_delta_from_5ms_pa": 35.45000000000027
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.05001,
+              "peak": {
+                "value_pa": -2109.26,
+                "time_s": 1.00019
+              },
+              "peak_time_delta_from_5ms_s": 0.14507399999999993,
+              "peak_value_delta_from_5ms_pa": 545.1599999999999
+            }
+          }
+        }
+      }
+    },
+    "R4_F1_Test02_event_medium": {
+      "attempt_directory": "campaigns/v0.1-candidate/runs/R4_F1_Test02_event_medium/attempts/20260907T140211.677673Z-ac4f18fa.complete",
+      "frames_in_event_window": 440,
+      "observed_time_min_s": 0.0,
+      "observed_time_max_s": 2.19518,
+      "observed_cadence_median_s": 0.0049970000000000014,
+      "adaptive_solver_steps": 9185,
+      "mean_internal_dt_s": 0.00023952095808383236,
+      "probes": {
+        "P1": {
+          "rmse_pa": 2899.095276223976,
+          "mae_pa": 2352.9026631145052,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": 6770.68,
+            "time_s": 0.460209
+          },
+          "experimental_peak": {
+            "value_pa": 11239.4,
+            "time_s": 0.41502500544346344
+          },
+          "peak_time_error_s": 0.045183994556536544,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 1214.5617394757844,
+            "experimental": 6362.292572416088
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0049970000000000014,
+              "peak": {
+                "value_pa": 6770.68,
+                "time_s": 0.460209
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010004999999999986,
+              "peak": {
+                "value_pa": 6770.68,
+                "time_s": 0.460209
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.019995999999999958,
+              "peak": {
+                "value_pa": 6770.68,
+                "time_s": 0.460209
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050002999999999936,
+              "peak": {
+                "value_pa": 3369.45,
+                "time_s": 0.500094
+              },
+              "peak_time_delta_from_5ms_s": 0.03988500000000006,
+              "peak_value_delta_from_5ms_pa": -3401.2300000000005
+            }
+          }
+        },
+        "P2": {
+          "rmse_pa": 2103.650758406604,
+          "mae_pa": 1563.7447191666024,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": 15151.2,
+            "time_s": 0.460209
+          },
+          "experimental_peak": {
+            "value_pa": 8127.466666666666,
+            "time_s": 0.4260242781466923
+          },
+          "peak_time_error_s": 0.034184721853307676,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 1960.6751500276127,
+            "experimental": 5291.068331961754
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0049970000000000014,
+              "peak": {
+                "value_pa": 15151.2,
+                "time_s": 0.460209
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010004999999999986,
+              "peak": {
+                "value_pa": 15151.2,
+                "time_s": 0.460209
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.019995999999999958,
+              "peak": {
+                "value_pa": 15151.2,
+                "time_s": 0.460209
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050002999999999936,
+              "peak": {
+                "value_pa": 5775.37,
+                "time_s": 0.500094
+              },
+              "peak_time_delta_from_5ms_s": 0.03988500000000006,
+              "peak_value_delta_from_5ms_pa": -9375.830000000002
+            }
+          }
+        },
+        "P3": {
+          "rmse_pa": 1984.9116599411466,
+          "mae_pa": 1340.8772039306793,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": 7816.91,
+            "time_s": 0.460209
+          },
+          "experimental_peak": {
+            "value_pa": 6563.933333333333,
+            "time_s": 0.4590220962563798
+          },
+          "peak_time_error_s": 0.0011869037436201824,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 2277.0600476389322,
+            "experimental": 5112.804135703484
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0049970000000000014,
+              "peak": {
+                "value_pa": 7816.91,
+                "time_s": 0.460209
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010004999999999986,
+              "peak": {
+                "value_pa": 7816.91,
+                "time_s": 0.460209
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.019995999999999958,
+              "peak": {
+                "value_pa": 7816.91,
+                "time_s": 0.460209
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050002999999999936,
+              "peak": {
+                "value_pa": 3412.32,
+                "time_s": 0.500094
+              },
+              "peak_time_delta_from_5ms_s": 0.03988500000000006,
+              "peak_value_delta_from_5ms_pa": -4404.59
+            }
+          }
+        },
+        "P4": {
+          "rmse_pa": 2452.3351004650326,
+          "mae_pa": 1614.7520356278671,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": -4808.19,
+            "time_s": 0.54515
+          },
+          "experimental_peak": {
+            "value_pa": 7202.6,
+            "time_s": 0.4550200134652984
+          },
+          "peak_time_error_s": 0.09012998653470161,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 1353.4225236282457,
+            "experimental": 4460.4501592422175
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0049970000000000014,
+              "peak": {
+                "value_pa": -4808.19,
+                "time_s": 0.54515
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010004999999999986,
+              "peak": {
+                "value_pa": -3658.65,
+                "time_s": 0.470208
+              },
+              "peak_time_delta_from_5ms_s": 0.07494200000000001,
+              "peak_value_delta_from_5ms_pa": 1149.5399999999995
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.019995999999999958,
+              "peak": {
+                "value_pa": -2971.18,
+                "time_s": 0.540086
+              },
+              "peak_time_delta_from_5ms_s": 0.0050640000000000684,
+              "peak_value_delta_from_5ms_pa": 1837.0099999999998
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050002999999999936,
+              "peak": {
+                "value_pa": -2825.94,
+                "time_s": 0.550122
+              },
+              "peak_time_delta_from_5ms_s": 0.0049719999999999764,
+              "peak_value_delta_from_5ms_pa": 1982.2499999999995
+            }
+          }
+        },
+        "P5": {
+          "rmse_pa": 1104.8393753123,
+          "mae_pa": 824.4477638924805,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": -4479.07,
+            "time_s": 0.50509
+          },
+          "experimental_peak": {
+            "value_pa": 2082.266666666667,
+            "time_s": 1.7420381992989968
+          },
+          "peak_time_error_s": 1.2369481992989968,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 694.6902420098302,
+            "experimental": 1330.390586810109
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0049970000000000014,
+              "peak": {
+                "value_pa": -4479.07,
+                "time_s": 0.50509
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010004999999999986,
+              "peak": {
+                "value_pa": -2972.42,
+                "time_s": 1.02006
+              },
+              "peak_time_delta_from_5ms_s": 0.5149699999999999,
+              "peak_value_delta_from_5ms_pa": 1506.6499999999996
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.019995999999999958,
+              "peak": {
+                "value_pa": -2972.42,
+                "time_s": 1.02006
+              },
+              "peak_time_delta_from_5ms_s": 0.5149699999999999,
+              "peak_value_delta_from_5ms_pa": 1506.6499999999996
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050002999999999936,
+              "peak": {
+                "value_pa": -2860.53,
+                "time_s": 0.550122
+              },
+              "peak_time_delta_from_5ms_s": 0.04503199999999996,
+              "peak_value_delta_from_5ms_pa": 1618.5399999999995
+            }
+          }
+        },
+        "P6": {
+          "rmse_pa": 758.5375400874469,
+          "mae_pa": 596.258957004587,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": -1497.33,
+            "time_s": 0.615219
+          },
+          "experimental_peak": {
+            "value_pa": 1932.5333333333333,
+            "time_s": 1.7430193550800368
+          },
+          "peak_time_error_s": 1.1278003550800368,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 380.7652913829795,
+            "experimental": 1303.7200220026245
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0049970000000000014,
+              "peak": {
+                "value_pa": -1497.33,
+                "time_s": 0.615219
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010004999999999986,
+              "peak": {
+                "value_pa": -1425.79,
+                "time_s": 0.600191
+              },
+              "peak_time_delta_from_5ms_s": 0.01502799999999993,
+              "peak_value_delta_from_5ms_pa": 71.53999999999996
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.019995999999999958,
+              "peak": {
+                "value_pa": -1425.79,
+                "time_s": 0.600191
+              },
+              "peak_time_delta_from_5ms_s": 0.01502799999999993,
+              "peak_value_delta_from_5ms_pa": 71.53999999999996
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050002999999999936,
+              "peak": {
+                "value_pa": -1425.79,
+                "time_s": 0.600191
+              },
+              "peak_time_delta_from_5ms_s": 0.01502799999999993,
+              "peak_value_delta_from_5ms_pa": 71.53999999999996
+            }
+          }
+        },
+        "P7": {
+          "rmse_pa": 689.7152376809426,
+          "mae_pa": 481.4421569331978,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": -1709.57,
+            "time_s": 0.615219
+          },
+          "experimental_peak": {
+            "value_pa": 2031.2666666666667,
+            "time_s": 1.72003965389254
+          },
+          "peak_time_error_s": 1.10482065389254,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 418.7273744063772,
+            "experimental": 1362.638615139219
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0049970000000000014,
+              "peak": {
+                "value_pa": -1709.57,
+                "time_s": 0.615219
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010004999999999986,
+              "peak": {
+                "value_pa": -1307.15,
+                "time_s": 0.610126
+              },
+              "peak_time_delta_from_5ms_s": 0.005093000000000014,
+              "peak_value_delta_from_5ms_pa": 402.41999999999985
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.019995999999999958,
+              "peak": {
+                "value_pa": 748.096,
+                "time_s": 2.06018
+              },
+              "peak_time_delta_from_5ms_s": 1.444961,
+              "peak_value_delta_from_5ms_pa": 2457.666
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050002999999999936,
+              "peak": {
+                "value_pa": 740.457,
+                "time_s": 2.05015
+              },
+              "peak_time_delta_from_5ms_s": 1.434931,
+              "peak_value_delta_from_5ms_pa": 2450.027
+            }
+          }
+        },
+        "P8": {
+          "rmse_pa": 503.79854044617,
+          "mae_pa": 324.4339550082881,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": 1777.65,
+            "time_s": 2.01521
+          },
+          "experimental_peak": {
+            "value_pa": 2090.133333333333,
+            "time_s": 1.6040308927291402
+          },
+          "peak_time_error_s": 0.41117910727085993,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 700.8747632667828,
+            "experimental": 1326.7560337859863
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0049970000000000014,
+              "peak": {
+                "value_pa": 1777.65,
+                "time_s": 2.01521
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010004999999999986,
+              "peak": {
+                "value_pa": 1772.88,
+                "time_s": 2.01019
+              },
+              "peak_time_delta_from_5ms_s": 0.0050200000000000244,
+              "peak_value_delta_from_5ms_pa": -4.769999999999982
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.019995999999999958,
+              "peak": {
+                "value_pa": 1757.5,
+                "time_s": 2.00003
+              },
+              "peak_time_delta_from_5ms_s": 0.015179999999999971,
+              "peak_value_delta_from_5ms_pa": -20.15000000000009
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050002999999999936,
+              "peak": {
+                "value_pa": 1757.5,
+                "time_s": 2.00003
+              },
+              "peak_time_delta_from_5ms_s": 0.015179999999999971,
+              "peak_value_delta_from_5ms_pa": -20.15000000000009
+            }
+          }
+        }
+      }
+    },
+    "R4_F1_Test02_event_fine": {
+      "attempt_directory": "campaigns/v0.1-candidate/runs/R4_F1_Test02_event_fine/attempts/20260907T140211.715524Z-00d11f34.complete",
+      "frames_in_event_window": 440,
+      "observed_time_min_s": 0.0,
+      "observed_time_max_s": 2.19512,
+      "observed_cadence_median_s": 0.0050000000000001155,
+      "adaptive_solver_steps": 14519,
+      "mean_internal_dt_s": 0.00015152558716165026,
+      "probes": {
+        "P1": {
+          "rmse_pa": 2869.9133330263417,
+          "mae_pa": 2332.543782360654,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": 3232.87,
+            "time_s": 0.445129
+          },
+          "experimental_peak": {
+            "value_pa": 11239.4,
+            "time_s": 0.41502500544346344
+          },
+          "peak_time_error_s": 0.030103994556536562,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 1279.1293964311,
+            "experimental": 6362.292572416088
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0050000000000001155,
+              "peak": {
+                "value_pa": 3232.87,
+                "time_s": 0.445129
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": -3179.53,
+                "time_s": 0.450029
+              },
+              "peak_time_delta_from_5ms_s": 0.0049000000000000155,
+              "peak_value_delta_from_5ms_pa": -6412.4
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.020000000000000018,
+              "peak": {
+                "value_pa": 2883.82,
+                "time_s": 0.440026
+              },
+              "peak_time_delta_from_5ms_s": 0.005103000000000024,
+              "peak_value_delta_from_5ms_pa": -349.0499999999997
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050000000000000044,
+              "peak": {
+                "value_pa": -3179.53,
+                "time_s": 0.450029
+              },
+              "peak_time_delta_from_5ms_s": 0.0049000000000000155,
+              "peak_value_delta_from_5ms_pa": -6412.4
+            }
+          }
+        },
+        "P2": {
+          "rmse_pa": 2134.118398058803,
+          "mae_pa": 1647.6077474899566,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": 8494.45,
+            "time_s": 0.445129
+          },
+          "experimental_peak": {
+            "value_pa": 8127.466666666666,
+            "time_s": 0.4260242781466923
+          },
+          "peak_time_error_s": 0.019104721853307693,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 1728.6433247106004,
+            "experimental": 5291.068331961754
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0050000000000001155,
+              "peak": {
+                "value_pa": 8494.45,
+                "time_s": 0.445129
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": -6116.62,
+                "time_s": 0.450029
+              },
+              "peak_time_delta_from_5ms_s": 0.0049000000000000155,
+              "peak_value_delta_from_5ms_pa": -14611.07
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.020000000000000018,
+              "peak": {
+                "value_pa": 2795.07,
+                "time_s": 0.440026
+              },
+              "peak_time_delta_from_5ms_s": 0.005103000000000024,
+              "peak_value_delta_from_5ms_pa": -5699.380000000001
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050000000000000044,
+              "peak": {
+                "value_pa": -6116.62,
+                "time_s": 0.450029
+              },
+              "peak_time_delta_from_5ms_s": 0.0049000000000000155,
+              "peak_value_delta_from_5ms_pa": -14611.07
+            }
+          }
+        },
+        "P3": {
+          "rmse_pa": 2109.5160088430557,
+          "mae_pa": 1688.0588796887764,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": 4096.43,
+            "time_s": 0.460092
+          },
+          "experimental_peak": {
+            "value_pa": 6563.933333333333,
+            "time_s": 0.4590220962563798
+          },
+          "peak_time_error_s": 0.0010699037436202041,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 1481.2065787911502,
+            "experimental": 5112.804135703484
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0050000000000001155,
+              "peak": {
+                "value_pa": 4096.43,
+                "time_s": 0.460092
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": 4096.43,
+                "time_s": 0.460092
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.020000000000000018,
+              "peak": {
+                "value_pa": 4096.43,
+                "time_s": 0.460092
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050000000000000044,
+              "peak": {
+                "value_pa": 1267.74,
+                "time_s": 0.800069
+              },
+              "peak_time_delta_from_5ms_s": 0.33997700000000003,
+              "peak_value_delta_from_5ms_pa": -2828.6900000000005
+            }
+          }
+        },
+        "P4": {
+          "rmse_pa": 2347.374949955033,
+          "mae_pa": 1762.0880224775374,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": -5702.92,
+            "time_s": 0.465113
+          },
+          "experimental_peak": {
+            "value_pa": 7202.6,
+            "time_s": 0.4550200134652984
+          },
+          "peak_time_error_s": 0.010092986534701587,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 800.9461245826001,
+            "experimental": 4460.4501592422175
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0050000000000001155,
+              "peak": {
+                "value_pa": -5702.92,
+                "time_s": 0.465113
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": -3846.44,
+                "time_s": 0.480101
+              },
+              "peak_time_delta_from_5ms_s": 0.014988000000000001,
+              "peak_value_delta_from_5ms_pa": 1856.48
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.020000000000000018,
+              "peak": {
+                "value_pa": -3846.44,
+                "time_s": 0.480101
+              },
+              "peak_time_delta_from_5ms_s": 0.014988000000000001,
+              "peak_value_delta_from_5ms_pa": 1856.48
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050000000000000044,
+              "peak": {
+                "value_pa": -1749.95,
+                "time_s": 0.550073
+              },
+              "peak_time_delta_from_5ms_s": 0.08496000000000004,
+              "peak_value_delta_from_5ms_pa": 3952.9700000000003
+            }
+          }
+        },
+        "P5": {
+          "rmse_pa": 957.7479436335669,
+          "mae_pa": 798.0138001573607,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": -2780.83,
+            "time_s": 0.555036
+          },
+          "experimental_peak": {
+            "value_pa": 2082.266666666667,
+            "time_s": 1.7420381992989968
+          },
+          "peak_time_error_s": 1.187002199298997,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 306.71595069225515,
+            "experimental": 1330.390586810109
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0050000000000001155,
+              "peak": {
+                "value_pa": -2780.83,
+                "time_s": 0.555036
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": -2254.71,
+                "time_s": 0.770112
+              },
+              "peak_time_delta_from_5ms_s": 0.21507600000000004,
+              "peak_value_delta_from_5ms_pa": 526.1199999999999
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.020000000000000018,
+              "peak": {
+                "value_pa": -2248.59,
+                "time_s": 0.480101
+              },
+              "peak_time_delta_from_5ms_s": 0.07493499999999997,
+              "peak_value_delta_from_5ms_pa": 532.2399999999998
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050000000000000044,
+              "peak": {
+                "value_pa": -1797.11,
+                "time_s": 0.850109
+              },
+              "peak_time_delta_from_5ms_s": 0.29507300000000003,
+              "peak_value_delta_from_5ms_pa": 983.72
+            }
+          }
+        },
+        "P6": {
+          "rmse_pa": 691.9524566850522,
+          "mae_pa": 455.2221249515384,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": 695.194,
+            "time_s": 2.115
+          },
+          "experimental_peak": {
+            "value_pa": 1932.5333333333333,
+            "time_s": 1.7430193550800368
+          },
+          "peak_time_error_s": 0.3719806449199634,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 328.6556990361718,
+            "experimental": 1303.7200220026245
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0050000000000001155,
+              "peak": {
+                "value_pa": 695.194,
+                "time_s": 2.115
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": 692.647,
+                "time_s": 2.12001
+              },
+              "peak_time_delta_from_5ms_s": 0.005009999999999959,
+              "peak_value_delta_from_5ms_pa": -2.546999999999912
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.020000000000000018,
+              "peak": {
+                "value_pa": 692.647,
+                "time_s": 2.12001
+              },
+              "peak_time_delta_from_5ms_s": 0.005009999999999959,
+              "peak_value_delta_from_5ms_pa": -2.546999999999912
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050000000000000044,
+              "peak": {
+                "value_pa": 649.196,
+                "time_s": 2.15012
+              },
+              "peak_time_delta_from_5ms_s": 0.035119999999999596,
+              "peak_value_delta_from_5ms_pa": -45.997999999999934
+            }
+          }
+        },
+        "P7": {
+          "rmse_pa": 750.1745254376461,
+          "mae_pa": 486.6077910075378,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": 669.157,
+            "time_s": 2.19512
+          },
+          "experimental_peak": {
+            "value_pa": 2031.2666666666667,
+            "time_s": 1.72003965389254
+          },
+          "peak_time_error_s": 0.4750803461074602,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 302.69851331512666,
+            "experimental": 1362.638615139219
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0050000000000001155,
+              "peak": {
+                "value_pa": 669.157,
+                "time_s": 2.19512
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": 669.157,
+                "time_s": 2.19512
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.020000000000000018,
+              "peak": {
+                "value_pa": 669.157,
+                "time_s": 2.19512
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050000000000000044,
+              "peak": {
+                "value_pa": 669.157,
+                "time_s": 2.19512
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            }
+          }
+        },
+        "P8": {
+          "rmse_pa": 731.2615778846437,
+          "mae_pa": 465.47323466796195,
+          "samples": 439,
+          "simulated_peak": {
+            "value_pa": 781.667,
+            "time_s": 1.82508
+          },
+          "experimental_peak": {
+            "value_pa": 2090.133333333333,
+            "time_s": 1.6040308927291402
+          },
+          "peak_time_error_s": 0.2210491072708598,
+          "positive_pressure_impulse_pa_s": {
+            "simulated": 353.33683513816493,
+            "experimental": 1326.7560337859863
+          },
+          "observation_cadence_sensitivity": {
+            "5ms": {
+              "stride": 1,
+              "median_observed_cadence_s": 0.0050000000000001155,
+              "peak": {
+                "value_pa": 781.667,
+                "time_s": 1.82508
+              },
+              "peak_time_delta_from_5ms_s": 0.0,
+              "peak_value_delta_from_5ms_pa": 0.0
+            },
+            "10ms": {
+              "stride": 2,
+              "median_observed_cadence_s": 0.010000000000000009,
+              "peak": {
+                "value_pa": 686.487,
+                "time_s": 1.82013
+              },
+              "peak_time_delta_from_5ms_s": 0.00495000000000001,
+              "peak_value_delta_from_5ms_pa": -95.18000000000006
+            },
+            "20ms": {
+              "stride": 4,
+              "median_observed_cadence_s": 0.020000000000000018,
+              "peak": {
+                "value_pa": 686.487,
+                "time_s": 1.82013
+              },
+              "peak_time_delta_from_5ms_s": 0.00495000000000001,
+              "peak_value_delta_from_5ms_pa": -95.18000000000006
+            },
+            "50ms": {
+              "stride": 10,
+              "median_observed_cadence_s": 0.050000000000000044,
+              "peak": {
+                "value_pa": 594.142,
+                "time_s": 2.19512
+              },
+              "peak_time_delta_from_5ms_s": 0.37004000000000015,
+              "peak_value_delta_from_5ms_pa": -187.52499999999998
+            }
+          }
+        }
+      }
+    }
+  },
+  "interpretation": {
+    "purpose": "measure whether 5 ms observation cadence resolves documented Test 02 pressure events",
+    "not_a_gold_decision": "event-window pressure agreement cannot qualify the full F1 family or particle-level trajectories",
+    "next_gate": "combine event-window pressure, H1--H4 surface elevation, mass/penetration, and three-resolution behavior"
+  },
+  "open_blockers": [
+    "full six-second pressure and elevation acceptance remains separate",
+    "no claim is made for self-built F1 topology backgrounds",
+    "event-window pressure metrics are not a development tranche admission gate by themselves"
+  ]
+}
