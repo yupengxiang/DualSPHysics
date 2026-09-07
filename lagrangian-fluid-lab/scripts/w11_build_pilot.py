@@ -15,10 +15,10 @@ import h5py
 import numpy as np
 
 try:  # package imports under pytest
-    from scripts.passive_tracers import advect_hdf5, deterministic_seeds
+    from scripts.passive_tracers import advect_hdf5, weighted_stratified_seeds
     from scripts.protocol_metrics import require_finite_when_valid, require_strict_time, validate_affine_transforms, validate_split_lineage
 except ModuleNotFoundError:  # direct ``python scripts/...`` execution
-    from passive_tracers import advect_hdf5, deterministic_seeds
+    from passive_tracers import advect_hdf5, weighted_stratified_seeds
     from protocol_metrics import require_finite_when_valid, require_strict_time, validate_affine_transforms, validate_split_lineage
 
 
@@ -41,29 +41,39 @@ def augment_material(h5_path: Path, dp: float, maximum: int) -> dict[str, Any] |
         fluid_count = int(np.sum(h5["valid"][0] & (h5["type"][0] == 3)))
     if fluid_count == 0:
         return None
-    seeds = deterministic_seeds(h5_path, maximum=maximum)
+    seeds = weighted_stratified_seeds(h5_path, maximum=maximum)
     traced = advect_hdf5(
         h5_path, seeds["position"], neighbours=24, regularization=0.1 * dp,
         maximum_support_distance=1.75 * dp,
     )
     support = traced["nearest_support_distance"]
-    step_valid = support <= 1.75 * dp
-    cumulative = np.vstack((np.ones((1, len(seeds["indices"])), dtype=bool), np.logical_and.accumulate(step_valid, axis=0)))
+    cumulative = traced["reliability_history"]
     with h5py.File(h5_path, "r+") as h5:
         if "material" in h5:
             del h5["material"]
         group = h5.create_group("material")
-        group.attrs["semantics"] = "independent passive tracers; no solver Idp lookup after t0"
+        group.attrs["semantics"] = "independent passive-tracer candidate; no solver Idp lookup after t0; wall visibility not yet supplied for all pilot cases"
+        group.attrs["acceptance_status"] = "candidate"
+        group.attrs["wall_visibility"] = "not supplied in development pilot"
         group.attrs["velocity_interpolation"] = "24-neighbour inverse-distance Shepard"
         group.attrs["integration"] = "Heun"
+        group.attrs["seed_selection"] = seeds["selection"]
         group.create_dataset("tracer_id", data=np.arange(len(seeds["indices"]), dtype=np.int64))
         group.create_dataset("seed_particle_id", data=seeds["particle_id"])
         group.create_dataset("seed_particle_zone", data=seeds["particle_zone"])
         group.create_dataset("source_label", data=seeds["source_mk"].astype(np.int16))
+        group.create_dataset("mass_weight", data=seeds["mass_weight"].astype(np.float64))
         group.create_dataset("valid", data=cumulative, compression="gzip")
         group.create_dataset("position", data=traced["position"].astype(np.float32), compression="gzip")
         group.create_dataset("nearest_support_distance", data=np.vstack((np.zeros((1, len(seeds["indices"]))), support)).astype(np.float32), compression="gzip")
-    return {"tracers": len(seeds["indices"]), "reliable_at_end": int(cumulative[-1].sum())}
+    return {
+        "tracers": len(seeds["indices"]),
+        "reliable_at_end": int(cumulative[-1].sum()),
+        "represented_initial_mass_kg": seeds["represented_initial_mass"],
+        "selection": seeds["selection"],
+        "wall_visibility": False,
+        "acceptance_status": "candidate",
+    }
 
 
 def audit_case(path: Path, expected: dict[str, Any]) -> dict[str, Any]:
@@ -100,6 +110,22 @@ def audit_case(path: Path, expected: dict[str, Any]) -> dict[str, Any]:
             raise ValueError(f"{expected['case_id']}: closed pilot has numerical loss {numerical_loss}")
         if "control/cup_world_from_body" in h5:
             validate_affine_transforms(h5["control/cup_world_from_body"][:])
+        if "material" in h5:
+            material_valid = h5["material/valid"][:]
+            material_position = h5["material/position"][:]
+            material_weight = h5["material/mass_weight"][:]
+            if material_position.shape[:2] != material_valid.shape:
+                raise ValueError(f"{expected['case_id']}: incompatible material trajectory shapes")
+            require_finite_when_valid(material_position, material_valid)
+            if np.any(material_valid[1:] & ~material_valid[:-1]):
+                raise ValueError(f"{expected['case_id']}: material validity recovers after failure")
+            if not np.all(np.isfinite(material_weight)) or np.any(material_weight < 0):
+                raise ValueError(f"{expected['case_id']}: invalid material mass weights")
+            represented = float(material_weight.sum())
+            initial_fluid_mass = float(np.sum(
+                mass[0, initial & (h5["type"][0] == 3)], dtype=np.float64))
+            if not np.isclose(represented, initial_fluid_mass, rtol=1e-9, atol=1e-9):
+                raise ValueError(f"{expected['case_id']}: material weights do not close initial fluid mass")
         return {
             "frames": len(time),
             "identity_slots": valid.shape[1],

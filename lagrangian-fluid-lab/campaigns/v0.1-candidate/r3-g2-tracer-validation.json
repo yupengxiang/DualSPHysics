@@ -1,0 +1,239 @@
+{
+  "schema_version": 1,
+  "acceptance_scope": "R3 G2 material tracing gap closure",
+  "adversarial_visibility": {
+    "wall_side_counterexample": {
+      "legacy_interpolated_x_velocity_m_per_s": 2.0119521912350593,
+      "wall_aware_interpolated_x_velocity_m_per_s": 0.0,
+      "visible_sample_count": 1,
+      "pass": true
+    },
+    "finite_aperture": {
+      "line_of_sight_through_real_gap": true,
+      "wall_crossing_rejected": true,
+      "gap_crossing_retained": true,
+      "pass": true
+    },
+    "new_contact": {
+      "visible_with_separator": false,
+      "visible_after_separator_removed": true,
+      "pass": true
+    }
+  },
+  "moving_wall": {
+    "intermediate_geometry": "linearly interpolated transformed wall vertices at every tracer substep",
+    "midpoint_max_abs_error_m": 0.0,
+    "pass": true
+  },
+  "cadence_vs_integration": {
+    "analytic_velocity": "u(t)=t^2 m/s",
+    "exact_final_position_m": 0.3333333333333333,
+    "result": {
+      "2": {
+        "saved_velocity_interval_s": 0.5,
+        "tracer_substeps_per_saved_interval": [
+          1,
+          2,
+          4
+        ],
+        "position_for_each_substep_count_m": [
+          0.375,
+          0.375,
+          0.375
+        ],
+        "absolute_error_m": 0.041666666666666685
+      },
+      "4": {
+        "saved_velocity_interval_s": 0.25,
+        "tracer_substeps_per_saved_interval": [
+          1,
+          2,
+          4
+        ],
+        "position_for_each_substep_count_m": [
+          0.34375,
+          0.34375,
+          0.34375
+        ],
+        "absolute_error_m": 0.010416666666666685
+      },
+      "10": {
+        "saved_velocity_interval_s": 0.1,
+        "tracer_substeps_per_saved_interval": [
+          1,
+          2,
+          4
+        ],
+        "position_for_each_substep_count_m": [
+          0.33499999999999996,
+          0.33499999999999996,
+          0.33499999999999996
+        ],
+        "absolute_error_m": 0.0016666666666666496
+      }
+    },
+    "conclusion": "saved velocity cadence and tracer integration substeps are independent controls",
+    "pass": true
+  },
+  "actual_rotating_pour": {
+    "case_id": "W06_standard_slow_center",
+    "fluid_spatial_resolution_m": 0.025,
+    "saved_velocity_cadence_s": 0.01,
+    "tracer_integration_substeps_per_saved_interval": 1,
+    "tracer_counts": [
+      16,
+      32,
+      64
+    ],
+    "wall_geometry": "open-top moving cup plus fixed open-top receiver and tray surfaces",
+    "legacy_no_wall_visibility": {
+      "tracer_count": 32,
+      "wall_aware": false,
+      "represented_initial_mass_kg": 27.5625,
+      "reliable_final_count": 30,
+      "reliable_final_fraction_by_count": 0.9375,
+      "maximum_support_distance_m": 0.05525952970128825,
+      "minimum_visible_particle_count": null,
+      "wall_crossing_rejections": 0,
+      "destinations": {
+        "weighted_mass_fraction": {
+          "captured": 0.3066893424036281,
+          "retained": 0.5708616780045351,
+          "spilled_to_tray": 0.0,
+          "inflight_or_unclassified": 0.060090702947845805,
+          "unavailable": 0.06235827664399093
+        },
+        "unweighted_count_fraction": {
+          "captured": 0.40625,
+          "retained": 0.46875,
+          "spilled_to_tray": 0.0,
+          "inflight_or_unclassified": 0.0625,
+          "unavailable": 0.0625
+        },
+        "mass_fraction_closure_error": 0.0
+      },
+      "full_particle_reference_mass_fraction": {
+        "captured": 0.3701814115047455,
+        "retained": 0.5589569211006165,
+        "spilled_to_tray": 0.0,
+        "inflight_or_unclassified": 0.07086167484521866,
+        "unavailable": 0.0
+      },
+      "mass_fraction_total_variation": 0.07426303727319992
+    },
+    "wall_aware_count_sensitivity": [
+      {
+        "tracer_count": 16,
+        "wall_aware": true,
+        "represented_initial_mass_kg": 27.5625,
+        "reliable_final_count": 14,
+        "reliable_final_fraction_by_count": 0.875,
+        "maximum_support_distance_m": 0.05525952970128825,
+        "minimum_visible_particle_count": 653,
+        "wall_crossing_rejections": 0,
+        "destinations": {
+          "weighted_mass_fraction": {
+            "captured": 0.20918367346938777,
+            "retained": 0.70578231292517,
+            "spilled_to_tray": 0.0,
+            "inflight_or_unclassified": 0.0,
+            "unavailable": 0.08503401360544217
+          },
+          "unweighted_count_fraction": {
+            "captured": 0.375,
+            "retained": 0.5,
+            "spilled_to_tray": 0.0,
+            "inflight_or_unclassified": 0.0,
+            "unavailable": 0.125
+          },
+          "mass_fraction_closure_error": 0.0
+        },
+        "full_particle_reference_mass_fraction": {
+          "captured": 0.3701814115047455,
+          "retained": 0.5589569211006165,
+          "spilled_to_tray": 0.0,
+          "inflight_or_unclassified": 0.07086167484521866,
+          "unavailable": 0.0
+        },
+        "mass_fraction_total_variation": 0.23185940915528605
+      },
+      {
+        "tracer_count": 32,
+        "wall_aware": true,
+        "represented_initial_mass_kg": 27.5625,
+        "reliable_final_count": 30,
+        "reliable_final_fraction_by_count": 0.9375,
+        "maximum_support_distance_m": 0.05525952970128825,
+        "minimum_visible_particle_count": 653,
+        "wall_crossing_rejections": 0,
+        "destinations": {
+          "weighted_mass_fraction": {
+            "captured": 0.3066893424036281,
+            "retained": 0.5708616780045351,
+            "spilled_to_tray": 0.0,
+            "inflight_or_unclassified": 0.060090702947845805,
+            "unavailable": 0.06235827664399093
+          },
+          "unweighted_count_fraction": {
+            "captured": 0.40625,
+            "retained": 0.46875,
+            "spilled_to_tray": 0.0,
+            "inflight_or_unclassified": 0.0625,
+            "unavailable": 0.0625
+          },
+          "mass_fraction_closure_error": 0.0
+        },
+        "full_particle_reference_mass_fraction": {
+          "captured": 0.3701814115047455,
+          "retained": 0.5589569211006165,
+          "spilled_to_tray": 0.0,
+          "inflight_or_unclassified": 0.07086167484521866,
+          "unavailable": 0.0
+        },
+        "mass_fraction_total_variation": 0.07426303727319992
+      },
+      {
+        "tracer_count": 64,
+        "wall_aware": true,
+        "represented_initial_mass_kg": 27.5625,
+        "reliable_final_count": 60,
+        "reliable_final_fraction_by_count": 0.9375,
+        "maximum_support_distance_m": 0.07767835069199533,
+        "minimum_visible_particle_count": 653,
+        "wall_crossing_rejections": 0,
+        "destinations": {
+          "weighted_mass_fraction": {
+            "captured": 0.2976190476190476,
+            "retained": 0.5340136054421769,
+            "spilled_to_tray": 0.0,
+            "inflight_or_unclassified": 0.11734693877551021,
+            "unavailable": 0.05102040816326531
+          },
+          "unweighted_count_fraction": {
+            "captured": 0.34375,
+            "retained": 0.484375,
+            "spilled_to_tray": 0.0,
+            "inflight_or_unclassified": 0.109375,
+            "unavailable": 0.0625
+          },
+          "mass_fraction_closure_error": 0.0
+        },
+        "full_particle_reference_mass_fraction": {
+          "captured": 0.3701814115047455,
+          "retained": 0.5589569211006165,
+          "spilled_to_tray": 0.0,
+          "inflight_or_unclassified": 0.07086167484521866,
+          "unavailable": 0.0
+        },
+        "mass_fraction_total_variation": 0.09750567581884714
+      }
+    ],
+    "interpretation": "same-solver consistency only; not external physical validation"
+  },
+  "validation_claim": "numerical material-tracing consistency; no experimental ground-truth claim",
+  "open_blockers": [
+    "all released cases need explicit boundary-triangle sidecars before wall-aware material targets can be accepted",
+    "resolution and saved-cadence convergence must be repeated on the selected physical matrix",
+    "small spill-tail accuracy needs more tracer-count evidence than this 16/32/64 development probe"
+  ]
+}

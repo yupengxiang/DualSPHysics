@@ -71,3 +71,17 @@ def test_failed_build_never_publishes_final_filename(tmp_path: Path):
     with pytest.raises(ValueError):
         build(selection, tmp_path, release)
     assert not (release / "data/bad.h5").exists()
+
+
+def test_pilot_audit_rejects_material_mass_nonclosure(tmp_path: Path):
+    path = tmp_path / "bad-material.h5"
+    make_bad_case(path)
+    with h5py.File(path, "r+") as h5:
+        h5["type"][:] = 3
+        material = h5.create_group("material")
+        material.create_dataset("valid", data=np.ones((3, 1), dtype=bool))
+        material.create_dataset("position", data=np.zeros((3, 1, 3)))
+        material.create_dataset("mass_weight", data=[0.5])
+        material.create_dataset("tracer_id", data=[0])
+    with pytest.raises(ValueError, match="do not close"):
+        audit_case(path, {"case_id": "bad-material"})
