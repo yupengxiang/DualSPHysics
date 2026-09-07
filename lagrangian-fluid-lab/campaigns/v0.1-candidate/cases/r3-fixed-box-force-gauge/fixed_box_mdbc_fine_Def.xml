@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<case>
+  <casedef>
+    <constantsdef>
+      <lattice bound="1" fluid="1" />
+      <gravity x="0" y="0" z="-9.81" />
+      <rhop0 value="1000" />
+      <rhopgradient value="2" />
+      <hswl value="0" auto="true" />
+      <gamma value="7" />
+      <speedsystem value="0" auto="true" />
+      <coefsound value="20" />
+      <speedsound value="0" auto="true" />
+      <coefh value="1.0" />
+      <cflnumber value="0.2" />
+    </constantsdef>
+    <mkconfig boundcount="200" fluidcount="16" />
+    <geometry>
+      <definition dp="0.0125">
+        <pointref x="0" y="0" z="0" />
+        <pointmin x="-0.10" y="-0.10" z="-0.10" />
+        <pointmax x="1.30" y="0.90" z="0.90" />
+      </definition>
+      <commands>
+        <!-- Same physical wall/body coordinates; only dp is refined. -->
+        <list name="GeometryForNormals">
+          <setactive drawpoints="0" drawshapes="1" />
+          <setshapemode>actual | bound</setshapemode>
+          <setnormalinvert invert="true" />
+          <setmkbound mk="0" />
+          <drawbox>
+            <boxfill>bottom | left | right | front | back</boxfill>
+            <point x="0" y="0" z="0" />
+            <size x="1.20" y="0.80" z="0.80" />
+            <layers vdp="-0.5" />
+          </drawbox>
+          <setnormalinvert invert="false" />
+          <setmkbound mk="1" />
+          <drawbox>
+            <boxfill>solid</boxfill>
+            <!-- Base surface is moved inward by Dp/2 so the +0.5 layer
+                 reconstructs the same physical interface [0.50,0.70]^3. -->
+            <point x="0.50625" y="0.30625" z="0.20625" />
+            <size x="0.1875" y="0.1875" z="0.1875" />
+            <layers vdp="0.5" />
+          </drawbox>
+          <shapeout file="hdp" />
+          <resetdraw />
+        </list>
+        <mainlist>
+          <runlist name="GeometryForNormals" />
+          <setshapemode>actual | bound</setshapemode>
+          <setdrawmode mode="full" />
+          <setmkbound mk="0" />
+          <drawbox>
+            <boxfill>bottom | left | right | front | back</boxfill>
+            <point x="0" y="0" z="0" />
+            <size x="1.20" y="0.80" z="0.80" />
+            <layers vdp="0,1,2" />
+          </drawbox>
+          <setmkfluid mk="0" />
+          <drawbox>
+            <boxfill>solid</boxfill>
+            <point x="0.04" y="0.04" z="0.04" />
+            <size x="1.12" y="0.72" z="0.56" />
+          </drawbox>
+          <setmkvoid />
+          <drawbox>
+            <boxfill>solid</boxfill>
+            <point x="0.50" y="0.30" z="0.20" />
+            <size x="0.20" y="0.20" z="0.20" />
+          </drawbox>
+          <setmkbound mk="1" />
+          <drawbox>
+            <boxfill>solid</boxfill>
+            <!-- The fixed shell is one half-dp inside the physical void. -->
+            <point x="0.50625" y="0.30625" z="0.20625" />
+            <size x="0.1875" y="0.1875" z="0.1875" />
+            <layers vdp="0,-1,-2" />
+          </drawbox>
+          <shapeout file="" />
+        </mainlist>
+      </commands>
+    </geometry>
+    <normals active="true">
+      <norgeometry>
+        <geometryfile file="[CaseName]_hdp_Actual.vtk" />
+        <distanceh v="5.0" />
+        <svshapes v="true" />
+      </norgeometry>
+    </normals>
+  </casedef>
+  <execution>
+    <special>
+      <gauges>
+        <default>
+          <savevtkpart value="false" />
+          <computedt value="0.0025" />
+          <computetime start="0" end="0.80" />
+          <output value="true" />
+          <outputdt value="0.0025" />
+          <outputtime start="0" end="0.80" />
+        </default>
+        <force name="BoxForce">
+          <savevtkpart value="false" />
+          <computedt value="0.0025" />
+          <computetime start="0" end="0.80" />
+          <output value="true" />
+          <outputdt value="0.0025" />
+          <outputtime start="0" end="0.80" />
+          <target mkbound="1" />
+        </force>
+      </gauges>
+    </special>
+    <parameters>
+      <parameter key="SavePosDouble" value="0" />
+      <parameter key="Boundary" value="2" />
+      <parameter key="SlipMode" value="1" />
+      <parameter key="StepAlgorithm" value="2" />
+      <parameter key="Kernel" value="2" />
+      <parameter key="ViscoTreatment" value="1" />
+      <parameter key="Visco" value="0.01" />
+      <parameter key="ViscoBoundFactor" value="1" />
+      <parameter key="DensityDT" value="2" />
+      <parameter key="DensityDTvalue" value="0.1" />
+      <parameter key="Shifting" value="0" />
+      <parameter key="RigidAlgorithm" value="1" />
+      <parameter key="FtPause" value="0" />
+      <parameter key="CoefDtMin" value="0.05" />
+      <parameter key="DtIni" value="0" />
+      <parameter key="DtMin" value="0" />
+      <parameter key="DtFixed" value="0" />
+      <parameter key="DtAllParticles" value="0" />
+      <parameter key="TimeMax" value="0.80" />
+      <parameter key="TimeOut" value="0.005" />
+      <parameter key="MinFluidStop" value="0" />
+      <parameter key="RhopOutMin" value="700" />
+      <parameter key="RhopOutMax" value="1300" />
+      <simulationdomain>
+        <posmin x="default - 25%" y="default - 25%" z="default - 25%" />
+        <posmax x="default + 25%" y="default + 25%" z="default + 75%" />
+      </simulationdomain>
+    </parameters>
+  </execution>
+</case>

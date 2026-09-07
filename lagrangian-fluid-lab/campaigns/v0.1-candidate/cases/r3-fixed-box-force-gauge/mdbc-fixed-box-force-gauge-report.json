@@ -1,0 +1,2136 @@
+{
+  "schema_version": 1,
+  "report_id": "R3-fixed-box-force-gauge-mDBC",
+  "started_at_utc": "2026-09-07T12:36:08.768708+00:00",
+  "finished_at_utc": "2026-09-07T12:36:23.008167+00:00",
+  "case_root": "campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge",
+  "bounded_calibration_count": 2,
+  "bounded_calibration_policy": "exactly canonical-2 and fine-3; no radius scan",
+  "owner_authorization": {
+    "authorized_gpu_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "preferred_idle_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "busy_jobs_interrupted": false,
+    "selection_rule": "live nvidia-smi immediately before launch; memory.used < 500 MiB and utilization == 0 on preferred indices"
+  },
+  "resource_policy": {
+    "idle_memory_limit_mib": 500,
+    "idle_utilization_limit_percent": 0,
+    "existing_processes_not_interrupted": true
+  },
+  "source_semantics": {
+    "gauge_xml": "doc/xml_format/_FmtXML_Gauges.xml",
+    "gauge_system_add_gauge_force": "src/source/JDsGaugeSystem.cpp:472-493",
+    "gauge_force_impl": "src/source/JDsGaugeItem.cpp:1710-1988",
+    "gauge_force_kernel": "src/source/JDsGauge_ker.cu:497-603",
+    "force_interpretation": "signed pressure interaction on selected fixed boundary particles only; excludes gravity, support reaction, and viscosity"
+  },
+  "analytical_reference": {
+    "box_dimensions_m": [
+      0.19999999999999996,
+      0.2,
+      0.2
+    ],
+    "box_volume_m3": 0.007999999999999998,
+    "rho_kg_m3": 1000.0,
+    "g_m_s2": 9.81,
+    "fz_n": 78.47999999999999,
+    "status": "pre_registered_reference_only"
+  },
+  "normal_ghost_contract": {
+    "normal_file_arrays": [
+      "Mk",
+      "Normal",
+      "NormalSize"
+    ],
+    "ghost_file_arrays": [
+      "Mk",
+      "Normal",
+      "NormalSize"
+    ],
+    "required_formula": "x_gamma=x_boundary+n_ghost/2",
+    "required_ghost_doubling_tolerance": 2e-05,
+    "required_zero_normal_count": 0,
+    "required_body_interface": "physical cube [0.50,0.70] x [0.30,0.50] x [0.20,0.40] m with outward normal orientation"
+  },
+  "historical_probe_provenance": [
+    {
+      "run_label": "canonical-2",
+      "path": "runs/mdbc-probe-canonical-2",
+      "status": "superseded_historical_probe",
+      "note": "Retained for provenance only; not used for final mDBC result because it predates the final shifted-shell construction.",
+      "solver_log": {
+        "path": "runs/mdbc-probe-canonical-2/solver.stdout.log",
+        "sha256": "1c942ac7bcece8ce00e650a566a044e702424ecb3b84194ede9729cf08fd58e0"
+      },
+      "boundary_mode_mdbc": true,
+      "force_trace": {
+        "path": "runs/mdbc-probe-canonical-2/GaugesForce_BoxForce.csv",
+        "sha256": "cc086d916eb366acb9140c3d80e591b52f4d71af65b4f508482a7766e614fae6"
+      },
+      "force_windows": {
+        "last_0p20s": {
+          "start_s": 0.6000000000000001,
+          "end_s": 0.8,
+          "samples": 40,
+          "force [N]": {
+            "mean": 435.65917499999995,
+            "std": 133.08587441702585,
+            "min": 103.492,
+            "max": 722.759
+          },
+          "forcex [N]": {
+            "mean": -9.414925,
+            "std": 154.1001936372952,
+            "min": -451.419,
+            "max": 373.768
+          },
+          "forcey [N]": {
+            "mean": -1.388507749999998,
+            "std": 166.0506553956493,
+            "min": -294.766,
+            "max": 452.574
+          },
+          "forcez [N]": {
+            "mean": 372.3547924999999,
+            "std": 132.1074758295275,
+            "min": -9.2613,
+            "max": 667.944
+          }
+        },
+        "last_0p40s": {
+          "start_s": 0.4,
+          "end_s": 0.8,
+          "samples": 80,
+          "force [N]": {
+            "mean": 443.55092499999984,
+            "std": 168.62992454601402,
+            "min": 103.492,
+            "max": 960.46
+          },
+          "forcex [N]": {
+            "mean": -14.199259624999996,
+            "std": 214.02941498596226,
+            "min": -871.033,
+            "max": 552.912
+          },
+          "forcey [N]": {
+            "mean": -16.16655512500001,
+            "std": 187.7407292800092,
+            "min": -532.802,
+            "max": 452.574
+          },
+          "forcez [N]": {
+            "mean": 335.884806,
+            "std": 175.60384621668055,
+            "min": -175.688,
+            "max": 765.617
+          }
+        },
+        "last_0p60s": {
+          "start_s": 0.20000000000000007,
+          "end_s": 0.8,
+          "samples": 120,
+          "force [N]": {
+            "mean": 457.0504716666666,
+            "std": 232.3475031478204,
+            "min": 48.6631,
+            "max": 1599.1
+          },
+          "forcex [N]": {
+            "mean": -8.81580875,
+            "std": 204.56982528777576,
+            "min": -871.033,
+            "max": 604.453
+          },
+          "forcey [N]": {
+            "mean": -3.838369333333333,
+            "std": 213.9257480674828,
+            "min": -532.802,
+            "max": 575.86
+          },
+          "forcez [N]": {
+            "mean": 338.0029659166668,
+            "std": 246.83812450897244,
+            "min": -179.864,
+            "max": 1505.13
+          }
+        }
+      }
+    },
+    {
+      "run_label": "fine-3",
+      "path": null,
+      "status": "no_valid_historical_fine_probe",
+      "note": "The old canonical-3/-4 directories were checked and both used Dp=0.025; they are not fine evidence."
+    },
+    {
+      "run_label": "mdbc-probe-canonical-3",
+      "path": "runs/mdbc-probe-canonical-3",
+      "status": "superseded_not_fine",
+      "reported_dp_m": 0.025,
+      "note": "Both legacy directories have the canonical 0.025 m particle count; neither is a fine run.",
+      "solver_log": {
+        "path": "runs/mdbc-probe-canonical-3/solver.stdout.log",
+        "sha256": "b1d0802b1285723e37681e86dbde8617f5627966176dc06a673b091a299eeec6"
+      },
+      "force_trace": {
+        "path": "runs/mdbc-probe-canonical-3/GaugesForce_BoxForce.csv",
+        "sha256": "6fefff7f247539b51ba565f95666ba8ee8be65f193197a755f05625c454fdde6"
+      }
+    },
+    {
+      "run_label": "mdbc-probe-canonical-4",
+      "path": "runs/mdbc-probe-canonical-4",
+      "status": "superseded_not_fine",
+      "reported_dp_m": 0.025,
+      "note": "Both legacy directories have the canonical 0.025 m particle count; neither is a fine run.",
+      "solver_log": {
+        "path": "runs/mdbc-probe-canonical-4/solver.stdout.log",
+        "sha256": "52faab44c3055e42b02e4f17f5a5ee4cea4b1360a0b0060d7bc0d5ee449be20f"
+      },
+      "force_trace": {
+        "path": "runs/mdbc-probe-canonical-4/GaugesForce_BoxForce.csv",
+        "sha256": "11ba85bff9f93a95a80a42de5c40e2b44ba9cc890a79141d1975fe6d0dd95648"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "fixed_box_mdbc_canonical",
+      "run_label": "canonical-2",
+      "label": "mDBC canonical rectangular fixed box",
+      "definition": {
+        "definition": "fixed_box_mdbc_canonical_Def.xml",
+        "definition_sha256": "7fbf0b443d17c9cd3e50636859fea525bda2f88cc9397484e768bbf16c6f068f",
+        "source_dp_m": 0.025,
+        "normal_distanceh": 3.0,
+        "normal_geometryfile": "[CaseName]_hdp_Actual.vtk",
+        "normal_svshapes": "true",
+        "physical_void": {
+          "source_mkvoid": true,
+          "point_m": [
+            0.5,
+            0.3,
+            0.2
+          ],
+          "size_m": [
+            0.19999999999999996,
+            0.2,
+            0.2
+          ],
+          "max_m": [
+            0.7,
+            0.5,
+            0.4
+          ],
+          "volume_m3": 0.007999999999999998
+        },
+        "normal_tank_shape": {
+          "tag": "drawbox",
+          "mkbound": 0,
+          "normal_invert": true,
+          "boxfill": "bottom | left | right | front | back",
+          "point_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size_m": [
+            1.2,
+            0.8,
+            0.8
+          ],
+          "layers_vdp": [
+            -0.5
+          ]
+        },
+        "normal_body_shape": {
+          "tag": "drawbox",
+          "mkbound": 1,
+          "normal_invert": false,
+          "boxfill": "solid",
+          "point_m": [
+            0.5125,
+            0.3125,
+            0.2125
+          ],
+          "size_m": [
+            0.175,
+            0.175,
+            0.175
+          ],
+          "layers_vdp": [
+            0.5
+          ]
+        },
+        "actual_tank_shape": {
+          "tag": "drawbox",
+          "mkbound": 0,
+          "normal_invert": null,
+          "boxfill": "bottom | left | right | front | back",
+          "point_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size_m": [
+            1.2,
+            0.8,
+            0.8
+          ],
+          "layers_vdp": [
+            0.0,
+            1.0,
+            2.0
+          ]
+        },
+        "actual_body_shape": {
+          "tag": "drawbox",
+          "mkbound": 1,
+          "normal_invert": null,
+          "boxfill": "solid",
+          "point_m": [
+            0.5125,
+            0.3125,
+            0.2125
+          ],
+          "size_m": [
+            0.175,
+            0.175,
+            0.175
+          ],
+          "layers_vdp": [
+            0.0,
+            -1.0,
+            -2.0
+          ]
+        },
+        "normal_body_offset_from_physical_min_m": [
+          0.012499999999999956,
+          0.012500000000000011,
+          0.012499999999999983
+        ],
+        "normal_body_offset_from_physical_max_m": [
+          -0.012499999999999956,
+          -0.012500000000000011,
+          -0.012500000000000067
+        ],
+        "actual_body_offset_from_physical_min_m": [
+          0.012499999999999956,
+          0.012500000000000011,
+          0.012499999999999983
+        ],
+        "actual_body_offset_from_physical_max_m": [
+          -0.012499999999999956,
+          -0.012500000000000011,
+          -0.012500000000000067
+        ],
+        "body_normal_layer_displacements_m": [
+          0.0125
+        ],
+        "effective_interface_definition": {
+          "formula": "x_gamma = x_boundary_particle + n_ghost/2",
+          "physical_min_m": [
+            0.5,
+            0.3,
+            0.2
+          ],
+          "physical_max_m": [
+            0.7,
+            0.5,
+            0.4
+          ],
+          "normal_surface_plus_half_dp_reconstructs_physical_interface": true
+        },
+        "parameters": {
+          "SavePosDouble": "0",
+          "Boundary": "2",
+          "SlipMode": "1",
+          "StepAlgorithm": "2",
+          "Kernel": "2",
+          "ViscoTreatment": "1",
+          "Visco": "0.01",
+          "ViscoBoundFactor": "1",
+          "DensityDT": "2",
+          "DensityDTvalue": "0.1",
+          "Shifting": "0",
+          "RigidAlgorithm": "1",
+          "FtPause": "0",
+          "CoefDtMin": "0.05",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "DtAllParticles": "0",
+          "TimeMax": "0.80",
+          "TimeOut": "0.01",
+          "MinFluidStop": "0",
+          "RhopOutMin": "700",
+          "RhopOutMax": "1300"
+        },
+        "gravity": {
+          "x": "0",
+          "y": "0",
+          "z": "-9.81"
+        },
+        "floating_nodes": 0,
+        "contract_checks": {
+          "boundary_parameter_is_mdbc": true,
+          "normals_active": true,
+          "norgeometry_present": true,
+          "normal_tank_invert_true": true,
+          "normal_body_invert_false": true,
+          "normal_tank_single_minus_half_dp": true,
+          "normal_body_single_plus_half_dp": true,
+          "actual_tank_layers_are_0_1_2": true,
+          "actual_body_layers_are_0_minus1_minus2": true,
+          "no_half_dp_on_actual_layers": true,
+          "body_drawn_after_void": true,
+          "physical_void_is_exact_0p2_cube": true,
+          "body_fully_submerged": true,
+          "body_floor_gap_positive": true,
+          "no_floating_section": true,
+          "force_target_mkbound_1": true,
+          "source_dp_matches_spec": true
+        }
+      },
+      "gencase": {
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/fixed_box_mdbc_canonical_Def",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/generated/fixed_box_mdbc_canonical/fixed_box_mdbc_canonical",
+          "-save:all"
+        ],
+        "return_code": 0,
+        "elapsed_seconds": 0.05151,
+        "generated_prefix": "generated/fixed_box_mdbc_canonical/fixed_box_mdbc_canonical",
+        "generated_xml": "generated/fixed_box_mdbc_canonical/fixed_box_mdbc_canonical.xml",
+        "stdout_log": "generated/fixed_box_mdbc_canonical/gencase.stdout.log",
+        "stdout_sha256": "3a54aed0d645a679048a4f71f616942aed8024cf64426a7efbb6199a2404f624",
+        "finished_text_found": true,
+        "generated": {
+          "generated_xml": "generated/fixed_box_mdbc_canonical/fixed_box_mdbc_canonical.xml",
+          "generated_xml_sha256": "4312c2ea8f795624f0b9ff35923627b9900a9cd5022903f6c4492e53d6555b3e",
+          "mapping_source_to_global_mk": [
+            {
+              "particle_type": "fixed",
+              "source_mkbound": 0,
+              "global_mk": 17,
+              "begin": 0,
+              "count": 22011
+            },
+            {
+              "particle_type": "fixed",
+              "source_mkbound": 1,
+              "global_mk": 18,
+              "begin": 22011,
+              "count": 504
+            }
+          ],
+          "fluid_mapping": [
+            {
+              "particle_type": "fluid",
+              "source_mkfluid": 0,
+              "global_mk": 1,
+              "begin": 22515,
+              "count": 29286
+            }
+          ],
+          "np": 51801,
+          "nb": 22515,
+          "nbf": 22515,
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1,
+          "summary": "<_summary>\n                <positions units_comment=\"metres (m)\">\n                    <posmin x=\"-0.05\" y=\"-0.05\" z=\"-0.05\" />\n                    <posmax x=\"1.25\" y=\"0.85\" z=\"0.8\" />\n                </positions>\n                <fixed count=\"22515\" id=\"0-22514\" mkcount=\"2\" mkvalues=\"17-18\" />\n                <fluid count=\"29286\" id=\"22515-51800\" mkcount=\"1\" mkvalues=\"1\" />\n            </_summary>\n            "
+        }
+      },
+      "gencase_log_audit": {
+        "log": "generated/fixed_box_mdbc_canonical/gencase.stdout.log",
+        "log_sha256": "3a54aed0d645a679048a4f71f616942aed8024cf64426a7efbb6199a2404f624",
+        "return_code": 0,
+        "fixed_summary": 22515,
+        "fluid_summary": 29286,
+        "moving_summary": null,
+        "floating_summary": null,
+        "nonzero_normals": {
+          "count": 22515,
+          "total": 22515,
+          "min_size_m": 0.0,
+          "max_size_m": 0.160078
+        },
+        "final_zero_normals": {
+          "count": 0,
+          "total": 22515,
+          "percentage": 0.0
+        },
+        "finished_text_found": true,
+        "normal_completeness_gate": true
+      },
+      "fixed_body_mapping_gate": {
+        "source_mkbound": 1,
+        "mapping_rows": [
+          {
+            "particle_type": "fixed",
+            "source_mkbound": 1,
+            "global_mk": 18,
+            "begin": 22011,
+            "count": 504
+          }
+        ],
+        "source_mkbound_maps_to_one_fixed_row": true,
+        "no_moving_or_floating_rows": true,
+        "body_global_mk": 18,
+        "body_particle_count": 504
+      },
+      "gpu_preflight": {
+        "command": "nvidia-smi --query-gpu=index,uuid,memory.used,memory.total,utilization.gpu --format=csv,noheader,nounits",
+        "return_code": 0,
+        "rows": [
+          {
+            "index": 0,
+            "uuid": "GPU-3dd8e277-f7e1-3893-292a-5928ea229599",
+            "memory_used_mib": 19541,
+            "memory_total_mib": 49140,
+            "utilization_percent": 20
+          },
+          {
+            "index": 1,
+            "uuid": "GPU-ff68d571-7ed7-31b4-a0c0-16fe8745bd7e",
+            "memory_used_mib": 20335,
+            "memory_total_mib": 49140,
+            "utilization_percent": 16
+          },
+          {
+            "index": 2,
+            "uuid": "GPU-2b603061-bc09-9875-acee-e57fbf62f85a",
+            "memory_used_mib": 18223,
+            "memory_total_mib": 49140,
+            "utilization_percent": 58
+          },
+          {
+            "index": 3,
+            "uuid": "GPU-b9624e96-e0f0-920f-ba94-f4db47900f95",
+            "memory_used_mib": 20335,
+            "memory_total_mib": 49140,
+            "utilization_percent": 25
+          },
+          {
+            "index": 4,
+            "uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          },
+          {
+            "index": 5,
+            "uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          },
+          {
+            "index": 6,
+            "uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          },
+          {
+            "index": 7,
+            "uuid": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          }
+        ],
+        "snapshot": "runs/gpu-preflight-mdbc-canonical-final.txt",
+        "selected_gpu": {
+          "index": 4,
+          "uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+          "memory_used_mib": 18,
+          "memory_total_mib": 49140,
+          "utilization_percent": 0
+        },
+        "owner_authorized_gpu_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "preferred_idle_gpu_indices": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "busy_owner_authorized_indices_not_interrupted": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "preflight_reused_from_completed_probe": true
+      },
+      "attempt": {
+        "schema_version": 1,
+        "case_id": "20260907T123424.875319Z-4dfa3f2f.complete",
+        "attempt_id": "20260907T123424.875319Z-4dfa3f2f.complete",
+        "status": "completed",
+        "started_at_utc": null,
+        "finished_at_utc": null,
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+          "-gpu:4",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/generated/fixed_box_mdbc_canonical/fixed_box_mdbc_canonical",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/mdbc-probe-canonical-final/attempts/20260907T123424.875319Z-4dfa3f2f.complete"
+        ],
+        "actual_command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+          "-gpu:4",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/generated/fixed_box_mdbc_canonical/fixed_box_mdbc_canonical",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/mdbc-probe-canonical-final/attempts/20260907T123424.875319Z-4dfa3f2f.complete"
+        ],
+        "gpu_at_launch": {
+          "index": 4,
+          "uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+          "memory_used_mib": 18,
+          "memory_total_mib": 49140,
+          "utilization_percent": 0
+        },
+        "attempt_directory": "runs/mdbc-probe-canonical-final/attempts/20260907T123424.875319Z-4dfa3f2f.complete",
+        "part_files": 81,
+        "provenance": "completed_probe_ingested_without_duplicate_launch"
+      },
+      "attempt_provenance": {
+        "solver_run_directory": "runs/mdbc-probe-canonical-final/attempts/20260907T123424.875319Z-4dfa3f2f.complete",
+        "source_definition_matches_final_definition": true,
+        "duplicate_solver_launch": false
+      },
+      "result_directory": "results/fixed_box_mdbc_canonical/canonical-2-ingested",
+      "generated_evidence": {
+        "particles_xml": "results/fixed_box_mdbc_canonical/canonical-2-ingested/generated_particles.xml",
+        "particles_xml_sha256": "4312c2ea8f795624f0b9ff35923627b9900a9cd5022903f6c4492e53d6555b3e",
+        "gencase_stdout": "results/fixed_box_mdbc_canonical/canonical-2-ingested/gencase.stdout.log",
+        "gencase_stdout_sha256": "3a54aed0d645a679048a4f71f616942aed8024cf64426a7efbb6199a2404f624"
+      },
+      "solver_evidence": {
+        "CfgInit_Normals.vtk": {
+          "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/CfgInit_Normals.vtk",
+          "sha256": "d9240c3e8e49a2a2dc1beb28b8a737696515ca3749749f0ab340bbd3be60f4ec"
+        },
+        "CfgInit_NormalsGhost.vtk": {
+          "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/CfgInit_NormalsGhost.vtk",
+          "sha256": "b88dd97ed874a02d6937d38e8f86e947775b5f364fd5f4918f7616858feee3e5"
+        },
+        "CfgInit_Domain.vtk": {
+          "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/CfgInit_Domain.vtk",
+          "sha256": "d3e0f2be390431d6349078a6feed07f889c5201ffda405b74cecf0309429dcb0"
+        },
+        "CfgInit_MapCells.vtk": {
+          "path": "results/fixed_box_mdbc_canonical/canonical-2-ingested/CfgInit_MapCells.vtk",
+          "sha256": "bcb36733287dafb2a6a7321c9e37b4c553dbc467e5a08a4921a2ab175a628de1"
+        }
+      },
+      "solver_log": {
+        "log": "runs/mdbc-probe-canonical-final/attempts/20260907T123424.875319Z-4dfa3f2f.complete/solver.stdout.log",
+        "log_sha256": "f227e8e5f19d4e5002ae0eccf77ec8b3f0e967328704f1ff9e411ba1c265a503",
+        "fixed_summary": "22,515",
+        "moving_summary": null,
+        "floating_summary": null,
+        "fluid_summary": "29,286",
+        "excluded_particles": "0",
+        "finished_text_found": true,
+        "gauge_config_target_found": true,
+        "chrono_timer": null,
+        "attempt_status": "completed"
+      },
+      "analytical_reference": {
+        "rho_kg_m3": 1000.0,
+        "gravity_m_s2": 9.81,
+        "box_size_m": [
+          0.19999999999999996,
+          0.2,
+          0.2
+        ],
+        "box_volume_m3": 0.007999999999999998,
+        "pressure_resultant_fz_n": 78.47999999999999,
+        "status": "pre_registered_reference_only"
+      },
+      "execution_status": "completed",
+      "acceptance_status": "candidate_not_accepted",
+      "normal_ghost_audit": {
+        "normal_file": {
+          "path": "runs/mdbc-probe-canonical-final/attempts/20260907T123424.875319Z-4dfa3f2f.complete/CfgInit_Normals.vtk",
+          "sha256": "d9240c3e8e49a2a2dc1beb28b8a737696515ca3749749f0ab340bbd3be60f4ec"
+        },
+        "ghost_file": {
+          "path": "runs/mdbc-probe-canonical-final/attempts/20260907T123424.875319Z-4dfa3f2f.complete/CfgInit_NormalsGhost.vtk",
+          "sha256": "b88dd97ed874a02d6937d38e8f86e947775b5f364fd5f4918f7616858feee3e5"
+        },
+        "normal_count": 22515,
+        "ghost_count": 22515,
+        "generated_fixed_count": 22515,
+        "missing_normal_arrays": [],
+        "missing_ghost_arrays": [],
+        "normal_array_stats": {
+          "Mk": {
+            "shape": [
+              22515,
+              1
+            ],
+            "finite": true,
+            "min": 17.0,
+            "max": 18.0,
+            "mean": 17.02238507661559
+          },
+          "Normal": {
+            "shape": [
+              22515,
+              3
+            ],
+            "finite": true,
+            "min": -0.10000000149011612,
+            "max": 0.10000000149011612,
+            "mean": 0.003266528071650186
+          },
+          "NormalSize": {
+            "shape": [
+              22515,
+              1
+            ],
+            "finite": true,
+            "min": 1.1102230246251565e-16,
+            "max": 0.16007810831069946,
+            "mean": 0.039896458681600834
+          }
+        },
+        "ghost_array_stats": {
+          "Mk": {
+            "shape": [
+              22515,
+              1
+            ],
+            "finite": true,
+            "min": 17.0,
+            "max": 18.0,
+            "mean": 17.02238507661559
+          },
+          "Normal": {
+            "shape": [
+              22515,
+              3
+            ],
+            "finite": true,
+            "min": -0.20000000298023224,
+            "max": 0.20000000298023224,
+            "mean": 0.006533056143300372
+          },
+          "NormalSize": {
+            "shape": [
+              22515,
+              1
+            ],
+            "finite": true,
+            "min": 2.220446049250313e-16,
+            "max": 0.3201562166213989,
+            "mean": 0.07979291736320167
+          }
+        },
+        "normal_zero_count": 63,
+        "ghost_zero_count": 63,
+        "body_normal_zero_count": 63,
+        "body_ghost_zero_count": 63,
+        "normal_size_nonpositive_count": 63,
+        "ghost_size_nonpositive_count": 63,
+        "max_ghost_vector_minus_2_normal": 0.0,
+        "max_ghost_size_minus_2_normal_size": 0.0,
+        "source_mkbound": 1,
+        "body_global_mk": 18,
+        "body_expected_count": 504,
+        "body_normal_count": 504,
+        "body_ghost_count": 504,
+        "effective_body_interface_bbox_m": [
+          [
+            0.49999997578561306,
+            0.30000000074505806,
+            0.1999999973922968
+          ],
+          [
+            0.6999999992549419,
+            0.5000000149011612,
+            0.4000000059604645
+          ]
+        ],
+        "effective_body_interface_max_face_residual_m": 3.427267070144069e-08,
+        "effective_body_interface_median_face_residual_m": 2.60770322002557e-09,
+        "effective_body_interface_residual_limit_m": 0.018750000000000003,
+        "effective_body_interface_face_counts": {
+          "x_min": 179,
+          "x_max": 113,
+          "y_min": 139,
+          "y_max": 140,
+          "z_min": 113,
+          "z_max": 113
+        },
+        "effective_body_normal_orientation_min_dot": 0.0001570092458683775,
+        "effective_body_normal_orientation_fraction_dot_ge_0p5": 0.875,
+        "checks": {
+          "files_present": true,
+          "required_arrays_present": true,
+          "normal_count_matches_generated_fixed_count": true,
+          "ghost_count_matches_generated_fixed_count": true,
+          "normal_ghost_points_match": true,
+          "normal_ghost_mk_match": true,
+          "arrays_finite": true,
+          "no_zero_normals": false,
+          "normal_sizes_positive": false,
+          "ghost_vector_is_double_normal": true,
+          "ghost_size_is_double_normal_size": true,
+          "body_global_mk_matches_source_mapping": true,
+          "body_ghost_mk_matches_source_mapping": true,
+          "body_interface_geometry_and_orientation": false
+        },
+        "gate": false
+      },
+      "field_integrity": {
+        "part_file_count": 81,
+        "frames": {
+          "initial": {
+            "part_index": 0,
+            "fluid_time_s": 0.0,
+            "fixed_time_s": 0.0,
+            "fluid_count": 29286,
+            "fixed_count": 22515,
+            "fluid_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fixed_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fluid_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/mdbc-probe-canonical-final/attempts/20260907T123424.875319Z-4dfa3f2f.complete/data",
+                "-first:0",
+                "-last:0",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_mdbc_canonical/canonical-2-ingested/fields/initial/fluid/Particles",
+                "-onlytype:-all,+fluid",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_mdbc_canonical/canonical-2-ingested/fields/initial/fluid/partvtk.stdout.log",
+              "frame": "results/fixed_box_mdbc_canonical/canonical-2-ingested/fields/initial/fluid/Particles_0000.csv",
+              "frame_sha256": "e3ae84148e5f2d7ad5400ad28f9b5cb15209dba18bd13bcb5e6b4757ee9d6294"
+            },
+            "fixed_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/mdbc-probe-canonical-final/attempts/20260907T123424.875319Z-4dfa3f2f.complete/data",
+                "-first:0",
+                "-last:0",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_mdbc_canonical/canonical-2-ingested/fields/initial/fixed/Particles",
+                "-onlytype:-all,+fixed",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_mdbc_canonical/canonical-2-ingested/fields/initial/fixed/partvtk.stdout.log",
+              "frame": "results/fixed_box_mdbc_canonical/canonical-2-ingested/fields/initial/fixed/Particles_0000.csv",
+              "frame_sha256": "c3d6cb138610c73cda0b59fe8c018b477500c8e16c7435935d1dc407037e1767"
+            }
+          },
+          "final": {
+            "part_index": 80,
+            "fluid_time_s": 0.800084,
+            "fixed_time_s": 0.800084,
+            "fluid_count": 29286,
+            "fixed_count": 22515,
+            "fluid_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fixed_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fluid_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/mdbc-probe-canonical-final/attempts/20260907T123424.875319Z-4dfa3f2f.complete/data",
+                "-first:80",
+                "-last:80",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_mdbc_canonical/canonical-2-ingested/fields/final/fluid/Particles",
+                "-onlytype:-all,+fluid",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_mdbc_canonical/canonical-2-ingested/fields/final/fluid/partvtk.stdout.log",
+              "frame": "results/fixed_box_mdbc_canonical/canonical-2-ingested/fields/final/fluid/Particles_0080.csv",
+              "frame_sha256": "77af2f21c1ba27b4290e20c6980883dd2411169fbd8d6d2d39eeb400f00fd9a9"
+            },
+            "fixed_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/mdbc-probe-canonical-final/attempts/20260907T123424.875319Z-4dfa3f2f.complete/data",
+                "-first:80",
+                "-last:80",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_mdbc_canonical/canonical-2-ingested/fields/final/fixed/Particles",
+                "-onlytype:-all,+fixed",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_mdbc_canonical/canonical-2-ingested/fields/final/fixed/partvtk.stdout.log",
+              "frame": "results/fixed_box_mdbc_canonical/canonical-2-ingested/fields/final/fixed/Particles_0080.csv",
+              "frame_sha256": "8a3c0d6d6c7440deb5a13cd19233499dc5f60c6d5e845499bd53056aecb57c73"
+            }
+          }
+        },
+        "required_fields_complete": true,
+        "fluid_count_initial": 29286,
+        "fluid_count_final": 29286,
+        "expected_fluid_count": 29286,
+        "fluid_count_constant": true,
+        "fluid_mass_initial_kg": 457.59375,
+        "fluid_mass_final_kg": 457.59375,
+        "fluid_mass_delta_kg": 0.0,
+        "fluid_mass_conserved": true,
+        "fluid_penetration_into_box": {
+          "initial_particles": 0,
+          "final_particles": 27,
+          "pass": false,
+          "scope": "initial_and_final_field_snapshots; all solver outputs are checked for excluded particles"
+        },
+        "fixed_body_global_mk": 18,
+        "fixed_body_expected_particles": 504,
+        "fixed_body_particle_count_initial": 504,
+        "fixed_body_particle_count_final": 504,
+        "fixed_body_particle_count_constant": true,
+        "fixed_body_particle_motion_max_m": 0.0,
+        "fixed_body_unchanged": true,
+        "pressure_initial_pa": {
+          "min": 0.0,
+          "max": 5395.4883,
+          "mean": 2622.4614468096343
+        },
+        "pressure_final_pa": {
+          "min": -31053.254,
+          "max": 84070.992,
+          "mean": 3181.604724197286
+        }
+      },
+      "force_gauge": {
+        "source": "runs/mdbc-probe-canonical-final/attempts/20260907T123424.875319Z-4dfa3f2f.complete/GaugesForce_BoxForce.csv",
+        "source_sha256": "732bc431c046572003cde48e39970b24ea07a5de8dfcd57600ec82ffe75926f4",
+        "signed_csv": "results/fixed_box_mdbc_canonical/canonical-2-ingested/force_timeseries.csv",
+        "sample_count": 160,
+        "time_min_s": 0.0,
+        "time_max_s": 0.795037,
+        "header": [
+          "time [s]",
+          "force [N]",
+          "forcex [N]",
+          "forcey [N]",
+          "forcez [N]"
+        ],
+        "rows_first": [
+          {
+            "time [s]": 0.0,
+            "force [N]": 41.4435,
+            "forcex [N]": 41.428,
+            "forcey [N]": 4.76837e-07,
+            "forcez [N]": 1.13457
+          },
+          {
+            "time [s]": 0.005016,
+            "force [N]": 27.6689,
+            "forcex [N]": 27.6038,
+            "forcey [N]": -0.000275016,
+            "forcez [N]": -1.89614
+          },
+          {
+            "time [s]": 0.010018,
+            "force [N]": 86.0934,
+            "forcex [N]": -85.7695,
+            "forcey [N]": 0.000459671,
+            "forcez [N]": 7.46111
+          }
+        ],
+        "rows_last": [
+          {
+            "time [s]": 0.785155,
+            "force [N]": 109.008,
+            "forcex [N]": -32.2445,
+            "forcey [N]": -8.36882,
+            "forcez [N]": 103.793
+          },
+          {
+            "time [s]": 0.790082,
+            "force [N]": 145.367,
+            "forcex [N]": 0.720245,
+            "forcey [N]": -12.8465,
+            "forcez [N]": 144.797
+          },
+          {
+            "time [s]": 0.795037,
+            "force [N]": 157.82,
+            "forcex [N]": -1.22365,
+            "forcey [N]": -14.2879,
+            "forcez [N]": 157.167
+          }
+        ],
+        "windows": {
+          "last_0p20s": {
+            "start_s": 0.6000000000000001,
+            "end_s": 0.8,
+            "samples": 40,
+            "force [N]": {
+              "mean": 105.0785075,
+              "std": 43.36095865852938,
+              "min": 37.0611,
+              "max": 206.274
+            },
+            "forcex [N]": {
+              "mean": -1.241275125,
+              "std": 33.044239093755046,
+              "min": -55.2886,
+              "max": 68.2896
+            },
+            "forcey [N]": {
+              "mean": -0.7380125750000001,
+              "std": 19.001951159017732,
+              "min": -38.8673,
+              "max": 32.5388
+            },
+            "forcez [N]": {
+              "mean": 93.39743175000001,
+              "std": 52.37867470537809,
+              "min": -29.8408,
+              "max": 198.377
+            }
+          },
+          "last_0p40s": {
+            "start_s": 0.4,
+            "end_s": 0.8,
+            "samples": 80,
+            "force [N]": {
+              "mean": 103.63259625,
+              "std": 53.34272389825871,
+              "min": 22.9034,
+              "max": 270.365
+            },
+            "forcex [N]": {
+              "mean": -0.3160685,
+              "std": 34.098462671075275,
+              "min": -76.1117,
+              "max": 91.4522
+            },
+            "forcey [N]": {
+              "mean": -0.2676704749999999,
+              "std": 13.86113420518229,
+              "min": -38.8673,
+              "max": 32.5388
+            },
+            "forcez [N]": {
+              "mean": 92.65696899999999,
+              "std": 60.37269119348318,
+              "min": -29.8408,
+              "max": 270.225
+            }
+          },
+          "last_0p60s": {
+            "start_s": 0.20000000000000007,
+            "end_s": 0.8,
+            "samples": 120,
+            "force [N]": {
+              "mean": 105.98259249999994,
+              "std": 67.09324950751396,
+              "min": 13.0149,
+              "max": 364.27
+            },
+            "forcex [N]": {
+              "mean": 0.8314070833333325,
+              "std": 33.46673880144391,
+              "min": -76.1117,
+              "max": 91.4522
+            },
+            "forcey [N]": {
+              "mean": -0.19532343916666667,
+              "std": 11.320135058685661,
+              "min": -38.8673,
+              "max": 32.5388
+            },
+            "forcez [N]": {
+              "mean": 94.666453,
+              "std": 74.31818513724606,
+              "min": -65.5554,
+              "max": 359.499
+            }
+          }
+        }
+      },
+      "solver_configuration_gate": {
+        "finished_text_found": true,
+        "gauge_config_target_found": true,
+        "excluded_particles": 0,
+        "source_mkbound_1_fixed_mapping": true,
+        "moving_summary": null,
+        "floating_summary": null,
+        "pass": true,
+        "note": "generated XML mapping is authoritative; mDBC solver summary omits moving/floating rows"
+      },
+      "screen": {
+        "fixed_body_mapping_gate": true,
+        "normal_ghost_gate": false,
+        "solver_configuration_gate": true,
+        "fields_gate": false,
+        "multiple_window_gate": true,
+        "stable_window_gate": false,
+        "stable_window_std_limit_n": 3.9239999999999995,
+        "forcez_window_means_n": [
+          93.39743175000001,
+          92.65696899999999,
+          94.666453
+        ],
+        "reference_fz_n": 78.47999999999999,
+        "reference_error_last_0p20s_percent": 19.007940558104004,
+        "status": "diagnostic_only_not_physical_acceptance"
+      }
+    },
+    {
+      "case_id": "fixed_box_mdbc_fine",
+      "run_label": "fine-3",
+      "label": "mDBC one-step refined rectangular fixed box",
+      "definition": {
+        "definition": "fixed_box_mdbc_fine_Def.xml",
+        "definition_sha256": "9ecbb65513361899a9d03fa1927f5eff99719fdefbf11259b050379e62ea69ba",
+        "source_dp_m": 0.0125,
+        "normal_distanceh": 5.0,
+        "normal_geometryfile": "[CaseName]_hdp_Actual.vtk",
+        "normal_svshapes": "true",
+        "physical_void": {
+          "source_mkvoid": true,
+          "point_m": [
+            0.5,
+            0.3,
+            0.2
+          ],
+          "size_m": [
+            0.19999999999999996,
+            0.2,
+            0.2
+          ],
+          "max_m": [
+            0.7,
+            0.5,
+            0.4
+          ],
+          "volume_m3": 0.007999999999999998
+        },
+        "normal_tank_shape": {
+          "tag": "drawbox",
+          "mkbound": 0,
+          "normal_invert": true,
+          "boxfill": "bottom | left | right | front | back",
+          "point_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size_m": [
+            1.2,
+            0.8,
+            0.8
+          ],
+          "layers_vdp": [
+            -0.5
+          ]
+        },
+        "normal_body_shape": {
+          "tag": "drawbox",
+          "mkbound": 1,
+          "normal_invert": false,
+          "boxfill": "solid",
+          "point_m": [
+            0.50625,
+            0.30625,
+            0.20625
+          ],
+          "size_m": [
+            0.1875,
+            0.1875,
+            0.1875
+          ],
+          "layers_vdp": [
+            0.5
+          ]
+        },
+        "actual_tank_shape": {
+          "tag": "drawbox",
+          "mkbound": 0,
+          "normal_invert": null,
+          "boxfill": "bottom | left | right | front | back",
+          "point_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size_m": [
+            1.2,
+            0.8,
+            0.8
+          ],
+          "layers_vdp": [
+            0.0,
+            1.0,
+            2.0
+          ]
+        },
+        "actual_body_shape": {
+          "tag": "drawbox",
+          "mkbound": 1,
+          "normal_invert": null,
+          "boxfill": "solid",
+          "point_m": [
+            0.50625,
+            0.30625,
+            0.20625
+          ],
+          "size_m": [
+            0.1875,
+            0.1875,
+            0.1875
+          ],
+          "layers_vdp": [
+            0.0,
+            -1.0,
+            -2.0
+          ]
+        },
+        "normal_body_offset_from_physical_min_m": [
+          0.006249999999999978,
+          0.006250000000000033,
+          0.006249999999999978
+        ],
+        "normal_body_offset_from_physical_max_m": [
+          -0.006249999999999978,
+          -0.006249999999999978,
+          -0.006250000000000033
+        ],
+        "actual_body_offset_from_physical_min_m": [
+          0.006249999999999978,
+          0.006250000000000033,
+          0.006249999999999978
+        ],
+        "actual_body_offset_from_physical_max_m": [
+          -0.006249999999999978,
+          -0.006249999999999978,
+          -0.006250000000000033
+        ],
+        "body_normal_layer_displacements_m": [
+          0.00625
+        ],
+        "effective_interface_definition": {
+          "formula": "x_gamma = x_boundary_particle + n_ghost/2",
+          "physical_min_m": [
+            0.5,
+            0.3,
+            0.2
+          ],
+          "physical_max_m": [
+            0.7,
+            0.5,
+            0.4
+          ],
+          "normal_surface_plus_half_dp_reconstructs_physical_interface": true
+        },
+        "parameters": {
+          "SavePosDouble": "0",
+          "Boundary": "2",
+          "SlipMode": "1",
+          "StepAlgorithm": "2",
+          "Kernel": "2",
+          "ViscoTreatment": "1",
+          "Visco": "0.01",
+          "ViscoBoundFactor": "1",
+          "DensityDT": "2",
+          "DensityDTvalue": "0.1",
+          "Shifting": "0",
+          "RigidAlgorithm": "1",
+          "FtPause": "0",
+          "CoefDtMin": "0.05",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "DtAllParticles": "0",
+          "TimeMax": "0.80",
+          "TimeOut": "0.005",
+          "MinFluidStop": "0",
+          "RhopOutMin": "700",
+          "RhopOutMax": "1300"
+        },
+        "gravity": {
+          "x": "0",
+          "y": "0",
+          "z": "-9.81"
+        },
+        "floating_nodes": 0,
+        "contract_checks": {
+          "boundary_parameter_is_mdbc": true,
+          "normals_active": true,
+          "norgeometry_present": true,
+          "normal_tank_invert_true": true,
+          "normal_body_invert_false": true,
+          "normal_tank_single_minus_half_dp": true,
+          "normal_body_single_plus_half_dp": true,
+          "actual_tank_layers_are_0_1_2": true,
+          "actual_body_layers_are_0_minus1_minus2": true,
+          "no_half_dp_on_actual_layers": true,
+          "body_drawn_after_void": true,
+          "physical_void_is_exact_0p2_cube": true,
+          "body_fully_submerged": true,
+          "body_floor_gap_positive": true,
+          "no_floating_section": true,
+          "force_target_mkbound_1": true,
+          "source_dp_matches_spec": true
+        }
+      },
+      "gencase": {
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/fixed_box_mdbc_fine_Def",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/generated/fixed_box_mdbc_fine/fixed_box_mdbc_fine",
+          "-save:all"
+        ],
+        "return_code": 0,
+        "elapsed_seconds": 0.222452,
+        "generated_prefix": "generated/fixed_box_mdbc_fine/fixed_box_mdbc_fine",
+        "generated_xml": "generated/fixed_box_mdbc_fine/fixed_box_mdbc_fine.xml",
+        "stdout_log": "generated/fixed_box_mdbc_fine/gencase.stdout.log",
+        "stdout_sha256": "3508470fde558b0993cc748f0aee6ffacc52e454191a598ee26d710f9f1e6066",
+        "finished_text_found": true,
+        "generated": {
+          "generated_xml": "generated/fixed_box_mdbc_fine/fixed_box_mdbc_fine.xml",
+          "generated_xml_sha256": "0d1588efb15b330ade0fdb033a3123486767d187ddd2ee9bd974e7b7230e826e",
+          "mapping_source_to_global_mk": [
+            {
+              "particle_type": "fixed",
+              "source_mkbound": 0,
+              "global_mk": 17,
+              "begin": 0,
+              "count": 83883
+            },
+            {
+              "particle_type": "fixed",
+              "source_mkbound": 1,
+              "global_mk": 18,
+              "begin": 83883,
+              "count": 4096
+            }
+          ],
+          "fluid_mapping": [
+            {
+              "particle_type": "fluid",
+              "source_mkfluid": 0,
+              "global_mk": 1,
+              "begin": 87979,
+              "count": 242061
+            }
+          ],
+          "np": 330040,
+          "nb": 87979,
+          "nbf": 87979,
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1,
+          "summary": "<_summary>\n                <positions units_comment=\"metres (m)\">\n                    <posmin x=\"-0.025\" y=\"-0.025\" z=\"-0.025\" />\n                    <posmax x=\"1.225\" y=\"0.825\" z=\"0.8\" />\n                </positions>\n                <fixed count=\"87979\" id=\"0-87978\" mkcount=\"2\" mkvalues=\"17-18\" />\n                <fluid count=\"242061\" id=\"87979-330039\" mkcount=\"1\" mkvalues=\"1\" />\n            </_summary>\n            "
+        }
+      },
+      "gencase_log_audit": {
+        "log": "generated/fixed_box_mdbc_fine/gencase.stdout.log",
+        "log_sha256": "3508470fde558b0993cc748f0aee6ffacc52e454191a598ee26d710f9f1e6066",
+        "return_code": 0,
+        "fixed_summary": 87979,
+        "fluid_summary": 242061,
+        "moving_summary": null,
+        "floating_summary": null,
+        "nonzero_normals": {
+          "count": 87979,
+          "total": 87979,
+          "min_size_m": 0.0,
+          "max_size_m": 0.160078
+        },
+        "final_zero_normals": {
+          "count": 0,
+          "total": 87979,
+          "percentage": 0.0
+        },
+        "finished_text_found": true,
+        "normal_completeness_gate": true
+      },
+      "fixed_body_mapping_gate": {
+        "source_mkbound": 1,
+        "mapping_rows": [
+          {
+            "particle_type": "fixed",
+            "source_mkbound": 1,
+            "global_mk": 18,
+            "begin": 83883,
+            "count": 4096
+          }
+        ],
+        "source_mkbound_maps_to_one_fixed_row": true,
+        "no_moving_or_floating_rows": true,
+        "body_global_mk": 18,
+        "body_particle_count": 4096
+      },
+      "gpu_preflight": {
+        "command": "nvidia-smi --query-gpu=index,uuid,memory.used,memory.total,utilization.gpu --format=csv,noheader,nounits",
+        "return_code": 0,
+        "rows": [
+          {
+            "index": 0,
+            "uuid": "GPU-3dd8e277-f7e1-3893-292a-5928ea229599",
+            "memory_used_mib": 19541,
+            "memory_total_mib": 49140,
+            "utilization_percent": 52
+          },
+          {
+            "index": 1,
+            "uuid": "GPU-ff68d571-7ed7-31b4-a0c0-16fe8745bd7e",
+            "memory_used_mib": 20335,
+            "memory_total_mib": 49140,
+            "utilization_percent": 47
+          },
+          {
+            "index": 2,
+            "uuid": "GPU-2b603061-bc09-9875-acee-e57fbf62f85a",
+            "memory_used_mib": 18223,
+            "memory_total_mib": 49140,
+            "utilization_percent": 47
+          },
+          {
+            "index": 3,
+            "uuid": "GPU-b9624e96-e0f0-920f-ba94-f4db47900f95",
+            "memory_used_mib": 20335,
+            "memory_total_mib": 49140,
+            "utilization_percent": 48
+          },
+          {
+            "index": 4,
+            "uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          },
+          {
+            "index": 5,
+            "uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          },
+          {
+            "index": 6,
+            "uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          },
+          {
+            "index": 7,
+            "uuid": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          }
+        ],
+        "snapshot": "runs/mdbc-probe-fine-root/gpu-preflight.txt",
+        "selected_gpu": {
+          "index": 4,
+          "uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+          "memory_used_mib": 18,
+          "memory_total_mib": 49140,
+          "utilization_percent": 0
+        },
+        "owner_authorized_gpu_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "preferred_idle_gpu_indices": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "busy_owner_authorized_indices_not_interrupted": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "preflight_reused_from_completed_probe": true
+      },
+      "attempt": {
+        "schema_version": 1,
+        "case_id": "mdbc-probe-fine-root",
+        "attempt_id": "mdbc-probe-fine-root",
+        "status": "completed",
+        "started_at_utc": null,
+        "finished_at_utc": null,
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+          "-gpu:4",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/generated/fixed_box_mdbc_fine/fixed_box_mdbc_fine",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/mdbc-probe-fine-root"
+        ],
+        "actual_command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+          "-gpu:4",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/generated/fixed_box_mdbc_fine/fixed_box_mdbc_fine",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/mdbc-probe-fine-root"
+        ],
+        "gpu_at_launch": {
+          "index": 4,
+          "uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+          "memory_used_mib": 18,
+          "memory_total_mib": 49140,
+          "utilization_percent": 0
+        },
+        "attempt_directory": "runs/mdbc-probe-fine-root",
+        "part_files": 161,
+        "provenance": "completed_probe_ingested_without_duplicate_launch"
+      },
+      "attempt_provenance": {
+        "solver_run_directory": "runs/mdbc-probe-fine-root",
+        "source_definition_matches_final_definition": true,
+        "duplicate_solver_launch": false
+      },
+      "result_directory": "results/fixed_box_mdbc_fine/fine-3-ingested",
+      "generated_evidence": {
+        "particles_xml": "results/fixed_box_mdbc_fine/fine-3-ingested/generated_particles.xml",
+        "particles_xml_sha256": "0d1588efb15b330ade0fdb033a3123486767d187ddd2ee9bd974e7b7230e826e",
+        "gencase_stdout": "results/fixed_box_mdbc_fine/fine-3-ingested/gencase.stdout.log",
+        "gencase_stdout_sha256": "3508470fde558b0993cc748f0aee6ffacc52e454191a598ee26d710f9f1e6066"
+      },
+      "solver_evidence": {
+        "CfgInit_Normals.vtk": {
+          "path": "results/fixed_box_mdbc_fine/fine-3-ingested/CfgInit_Normals.vtk",
+          "sha256": "b4f1c86b48d581473907d1afef29dcaf559976b8bb5e912654c45cf2cd809549"
+        },
+        "CfgInit_NormalsGhost.vtk": {
+          "path": "results/fixed_box_mdbc_fine/fine-3-ingested/CfgInit_NormalsGhost.vtk",
+          "sha256": "edbc635956c1dc1f5d6398f212716026979c8dae42e00422c804d4f27d58fa8d"
+        },
+        "CfgInit_Domain.vtk": {
+          "path": "results/fixed_box_mdbc_fine/fine-3-ingested/CfgInit_Domain.vtk",
+          "sha256": "2fd88f9112e858993bde5cfe4e42d16619ab65e19180bd507d5dfcebf26d5ec2"
+        },
+        "CfgInit_MapCells.vtk": {
+          "path": "results/fixed_box_mdbc_fine/fine-3-ingested/CfgInit_MapCells.vtk",
+          "sha256": "012835ea9c008df7571f43d464fd20fef546811ed7545b4d11bc61b9ddcbfeec"
+        }
+      },
+      "solver_log": {
+        "log": "runs/mdbc-probe-fine-root/solver.stdout.log",
+        "log_sha256": "b64314ca94f02642bdc635a9fa4a20f2faf2648129749b87f71167e1d32482ca",
+        "fixed_summary": "87,979",
+        "moving_summary": null,
+        "floating_summary": null,
+        "fluid_summary": "242,061",
+        "excluded_particles": "20",
+        "finished_text_found": true,
+        "gauge_config_target_found": true,
+        "chrono_timer": null,
+        "attempt_status": "completed"
+      },
+      "analytical_reference": {
+        "rho_kg_m3": 1000.0,
+        "gravity_m_s2": 9.81,
+        "box_size_m": [
+          0.19999999999999996,
+          0.2,
+          0.2
+        ],
+        "box_volume_m3": 0.007999999999999998,
+        "pressure_resultant_fz_n": 78.47999999999999,
+        "status": "pre_registered_reference_only"
+      },
+      "execution_status": "completed",
+      "acceptance_status": "candidate_not_accepted",
+      "normal_ghost_audit": {
+        "normal_file": {
+          "path": "runs/mdbc-probe-fine-root/CfgInit_Normals.vtk",
+          "sha256": "b4f1c86b48d581473907d1afef29dcaf559976b8bb5e912654c45cf2cd809549"
+        },
+        "ghost_file": {
+          "path": "runs/mdbc-probe-fine-root/CfgInit_NormalsGhost.vtk",
+          "sha256": "edbc635956c1dc1f5d6398f212716026979c8dae42e00422c804d4f27d58fa8d"
+        },
+        "normal_count": 87979,
+        "ghost_count": 87979,
+        "generated_fixed_count": 87979,
+        "missing_normal_arrays": [],
+        "missing_ghost_arrays": [],
+        "normal_array_stats": {
+          "Mk": {
+            "shape": [
+              87979,
+              1
+            ],
+            "finite": true,
+            "min": 17.0,
+            "max": 18.0,
+            "mean": 17.04655656463474
+          },
+          "Normal": {
+            "shape": [
+              87979,
+              3
+            ],
+            "finite": true,
+            "min": -0.10000000149011612,
+            "max": 0.10000000149011612,
+            "mean": 0.0014854164687393766
+          },
+          "NormalSize": {
+            "shape": [
+              87979,
+              1
+            ],
+            "finite": true,
+            "min": 1.1102230246251565e-16,
+            "max": 0.16007810831069946,
+            "mean": 0.019844250008136763
+          }
+        },
+        "ghost_array_stats": {
+          "Mk": {
+            "shape": [
+              87979,
+              1
+            ],
+            "finite": true,
+            "min": 17.0,
+            "max": 18.0,
+            "mean": 17.04655656463474
+          },
+          "Normal": {
+            "shape": [
+              87979,
+              3
+            ],
+            "finite": true,
+            "min": -0.20000000298023224,
+            "max": 0.20000000298023224,
+            "mean": 0.002970832937478753
+          },
+          "NormalSize": {
+            "shape": [
+              87979,
+              1
+            ],
+            "finite": true,
+            "min": 2.220446049250313e-16,
+            "max": 0.3201562166213989,
+            "mean": 0.039688500016273526
+          }
+        },
+        "normal_zero_count": 240,
+        "ghost_zero_count": 240,
+        "body_normal_zero_count": 240,
+        "body_ghost_zero_count": 240,
+        "normal_size_nonpositive_count": 240,
+        "ghost_size_nonpositive_count": 240,
+        "max_ghost_vector_minus_2_normal": 0.0,
+        "max_ghost_size_minus_2_normal_size": 0.0,
+        "source_mkbound": 1,
+        "body_global_mk": 18,
+        "body_expected_count": 4096,
+        "body_normal_count": 4096,
+        "body_ghost_count": 4096,
+        "effective_body_interface_bbox_m": [
+          [
+            0.49999997578561306,
+            0.29999999701976776,
+            0.19999999180436134
+          ],
+          [
+            0.7000000104308128,
+            0.5000000149011612,
+            0.4000000171363354
+          ]
+        ],
+        "effective_body_interface_max_face_residual_m": 3.427267070144069e-08,
+        "effective_body_interface_median_face_residual_m": 8.195638667718441e-09,
+        "effective_body_interface_residual_limit_m": 0.009375000000000001,
+        "effective_body_interface_face_counts": {
+          "x_min": 1000,
+          "x_max": 742,
+          "y_min": 679,
+          "y_max": 936,
+          "z_min": 742,
+          "z_max": 998
+        },
+        "effective_body_normal_orientation_min_dot": 0.0001570092458683775,
+        "effective_body_normal_orientation_fraction_dot_ge_0p5": 0.94140625,
+        "checks": {
+          "files_present": true,
+          "required_arrays_present": true,
+          "normal_count_matches_generated_fixed_count": true,
+          "ghost_count_matches_generated_fixed_count": true,
+          "normal_ghost_points_match": true,
+          "normal_ghost_mk_match": true,
+          "arrays_finite": true,
+          "no_zero_normals": false,
+          "normal_sizes_positive": false,
+          "ghost_vector_is_double_normal": true,
+          "ghost_size_is_double_normal_size": true,
+          "body_global_mk_matches_source_mapping": true,
+          "body_ghost_mk_matches_source_mapping": true,
+          "body_interface_geometry_and_orientation": false
+        },
+        "gate": false
+      },
+      "field_integrity": {
+        "part_file_count": 161,
+        "frames": {
+          "initial": {
+            "part_index": 0,
+            "fluid_time_s": 0.0,
+            "fixed_time_s": 0.0,
+            "fluid_count": 242061,
+            "fixed_count": 87979,
+            "fluid_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fixed_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fluid_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/mdbc-probe-fine-root/data",
+                "-first:0",
+                "-last:0",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_mdbc_fine/fine-3-ingested/fields/initial/fluid/Particles",
+                "-onlytype:-all,+fluid",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_mdbc_fine/fine-3-ingested/fields/initial/fluid/partvtk.stdout.log",
+              "frame": "results/fixed_box_mdbc_fine/fine-3-ingested/fields/initial/fluid/Particles_0000.csv",
+              "frame_sha256": "f1c9be930d65fee4d995e4ff21f0db3a35dbc08badca9884173424db908b776c"
+            },
+            "fixed_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/mdbc-probe-fine-root/data",
+                "-first:0",
+                "-last:0",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_mdbc_fine/fine-3-ingested/fields/initial/fixed/Particles",
+                "-onlytype:-all,+fixed",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_mdbc_fine/fine-3-ingested/fields/initial/fixed/partvtk.stdout.log",
+              "frame": "results/fixed_box_mdbc_fine/fine-3-ingested/fields/initial/fixed/Particles_0000.csv",
+              "frame_sha256": "6afb743fe2215f147fe4be26ca6da238059644d12db6233ad55f9e464e849726"
+            }
+          },
+          "final": {
+            "part_index": 160,
+            "fluid_time_s": 0.800031,
+            "fixed_time_s": 0.800031,
+            "fluid_count": 242041,
+            "fixed_count": 87979,
+            "fluid_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fixed_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fluid_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/mdbc-probe-fine-root/data",
+                "-first:160",
+                "-last:160",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_mdbc_fine/fine-3-ingested/fields/final/fluid/Particles",
+                "-onlytype:-all,+fluid",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_mdbc_fine/fine-3-ingested/fields/final/fluid/partvtk.stdout.log",
+              "frame": "results/fixed_box_mdbc_fine/fine-3-ingested/fields/final/fluid/Particles_0160.csv",
+              "frame_sha256": "0b66868852cc7127c64faf6eede10a52b6c2b4a7f828616c0e1e603607e0c870"
+            },
+            "fixed_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/mdbc-probe-fine-root/data",
+                "-first:160",
+                "-last:160",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_mdbc_fine/fine-3-ingested/fields/final/fixed/Particles",
+                "-onlytype:-all,+fixed",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_mdbc_fine/fine-3-ingested/fields/final/fixed/partvtk.stdout.log",
+              "frame": "results/fixed_box_mdbc_fine/fine-3-ingested/fields/final/fixed/Particles_0160.csv",
+              "frame_sha256": "9c7fa397ceeca39ca00648acfb80215a91a76e74db2cd2213303d7c64a220d6e"
+            }
+          }
+        },
+        "required_fields_complete": true,
+        "fluid_count_initial": 242061,
+        "fluid_count_final": 242041,
+        "expected_fluid_count": 242061,
+        "fluid_count_constant": false,
+        "fluid_mass_initial_kg": 472.775390625,
+        "fluid_mass_final_kg": 472.736328125,
+        "fluid_mass_delta_kg": -0.0390625,
+        "fluid_mass_conserved": false,
+        "fluid_penetration_into_box": {
+          "initial_particles": 0,
+          "final_particles": 197,
+          "pass": false,
+          "scope": "initial_and_final_field_snapshots; all solver outputs are checked for excluded particles"
+        },
+        "fixed_body_global_mk": 18,
+        "fixed_body_expected_particles": 4096,
+        "fixed_body_particle_count_initial": 4096,
+        "fixed_body_particle_count_final": 4096,
+        "fixed_body_particle_count_constant": true,
+        "fixed_body_particle_motion_max_m": 0.0,
+        "fixed_body_unchanged": true,
+        "pressure_initial_pa": {
+          "min": 0.0,
+          "max": 5518.1133,
+          "mean": 2692.5073963472564
+        },
+        "pressure_final_pa": {
+          "min": -41038.668,
+          "max": 108521.3,
+          "mean": 2700.168365117798
+        }
+      },
+      "force_gauge": {
+        "source": "runs/mdbc-probe-fine-root/GaugesForce_BoxForce.csv",
+        "source_sha256": "821341bf575b2601f13805c4e6db2121f6de425ee99f0d35121c9da39146a377",
+        "signed_csv": "results/fixed_box_mdbc_fine/fine-3-ingested/force_timeseries.csv",
+        "sample_count": 320,
+        "time_min_s": 0.0,
+        "time_max_s": 0.797554,
+        "header": [
+          "time [s]",
+          "force [N]",
+          "forcex [N]",
+          "forcey [N]",
+          "forcez [N]"
+        ],
+        "rows_first": [
+          {
+            "time [s]": 0.0,
+            "force [N]": 68.2781,
+            "forcex [N]": 43.0233,
+            "forcey [N]": -43.0233,
+            "forcez [N]": -30.9821
+          },
+          {
+            "time [s]": 0.002571,
+            "force [N]": 114.818,
+            "forcex [N]": 71.9121,
+            "forcey [N]": -83.1132,
+            "forcez [N]": -33.2266
+          },
+          {
+            "time [s]": 0.005041,
+            "force [N]": 70.0087,
+            "forcex [N]": 22.8493,
+            "forcey [N]": -10.5246,
+            "forcez [N]": -65.3326
+          }
+        ],
+        "rows_last": [
+          {
+            "time [s]": 0.792522,
+            "force [N]": 74.8924,
+            "forcex [N]": -18.2938,
+            "forcey [N]": 15.1734,
+            "forcez [N]": 71.021
+          },
+          {
+            "time [s]": 0.795042,
+            "force [N]": 54.4653,
+            "forcex [N]": -36.8287,
+            "forcey [N]": -17.1771,
+            "forcez [N]": 36.2638
+          },
+          {
+            "time [s]": 0.797554,
+            "force [N]": 82.5789,
+            "forcex [N]": -21.0182,
+            "forcey [N]": -36.8158,
+            "forcez [N]": 70.8668
+          }
+        ],
+        "windows": {
+          "last_0p20s": {
+            "start_s": 0.6000000000000001,
+            "end_s": 0.8,
+            "samples": 80,
+            "force [N]": {
+              "mean": 96.86835375,
+              "std": 26.65715759950761,
+              "min": 42.8827,
+              "max": 162.244
+            },
+            "forcex [N]": {
+              "mean": 0.7439116687499998,
+              "std": 26.186247862139737,
+              "min": -54.2991,
+              "max": 75.7895
+            },
+            "forcey [N]": {
+              "mean": 1.0226473187500016,
+              "std": 45.20581827584064,
+              "min": -82.619,
+              "max": 141.121
+            },
+            "forcez [N]": {
+              "mean": 80.78922624999998,
+              "std": 28.918787409276618,
+              "min": 12.0817,
+              "max": 138.071
+            }
+          },
+          "last_0p40s": {
+            "start_s": 0.4,
+            "end_s": 0.8,
+            "samples": 160,
+            "force [N]": {
+              "mean": 101.99411625000008,
+              "std": 33.37011819202152,
+              "min": 35.7468,
+              "max": 222.148
+            },
+            "forcex [N]": {
+              "mean": 0.5734665468749995,
+              "std": 34.118735513000615,
+              "min": -101.845,
+              "max": 82.9228
+            },
+            "forcey [N]": {
+              "mean": -1.0764047875000018,
+              "std": 44.0924509816735,
+              "min": -115.867,
+              "max": 141.121
+            },
+            "forcez [N]": {
+              "mean": 84.895485,
+              "std": 34.63233028644116,
+              "min": 12.0817,
+              "max": 183.345
+            }
+          },
+          "last_0p60s": {
+            "start_s": 0.20000000000000007,
+            "end_s": 0.8,
+            "samples": 240,
+            "force [N]": {
+              "mean": 114.90684041666665,
+              "std": 56.12556920947947,
+              "min": 11.3738,
+              "max": 438.738
+            },
+            "forcex [N]": {
+              "mean": 0.6667642354166664,
+              "std": 53.04362461884942,
+              "min": -181.207,
+              "max": 213.814
+            },
+            "forcey [N]": {
+              "mean": -0.9936228375000005,
+              "std": 51.34025104536922,
+              "min": -195.298,
+              "max": 183.512
+            },
+            "forcez [N]": {
+              "mean": 84.15577844166674,
+              "std": 61.81093625626254,
+              "min": -135.318,
+              "max": 376.431
+            }
+          }
+        }
+      },
+      "solver_configuration_gate": {
+        "finished_text_found": true,
+        "gauge_config_target_found": true,
+        "excluded_particles": 20,
+        "source_mkbound_1_fixed_mapping": true,
+        "moving_summary": null,
+        "floating_summary": null,
+        "pass": false,
+        "note": "generated XML mapping is authoritative; mDBC solver summary omits moving/floating rows"
+      },
+      "screen": {
+        "fixed_body_mapping_gate": true,
+        "normal_ghost_gate": false,
+        "solver_configuration_gate": false,
+        "fields_gate": false,
+        "multiple_window_gate": true,
+        "stable_window_gate": false,
+        "stable_window_std_limit_n": 3.9239999999999995,
+        "forcez_window_means_n": [
+          80.78922624999998,
+          84.895485,
+          84.15577844166674
+        ],
+        "reference_fz_n": 78.47999999999999,
+        "reference_error_last_0p20s_percent": 2.94243915647298,
+        "status": "diagnostic_only_not_physical_acceptance"
+      }
+    }
+  ],
+  "overall_acceptance_status": "candidate_not_accepted"
+}

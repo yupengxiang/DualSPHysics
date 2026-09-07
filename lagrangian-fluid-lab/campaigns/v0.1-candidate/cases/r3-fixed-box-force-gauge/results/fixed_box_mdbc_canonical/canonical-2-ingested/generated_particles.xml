@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<case app="GenCase v5.4.354.01 (07-04-2025)" date="07-09-2026 20:36:08">
+    <casedef>
+        <constantsdef>
+            <lattice bound="1" fluid="1" />
+            <gravity x="0" y="0" z="-9.81" />
+            <rhop0 value="1000" />
+            <rhopgradient value="2" />
+            <hswl value="0" auto="true" />
+            <gamma value="7" />
+            <speedsystem value="0" auto="true" />
+            <coefsound value="20" />
+            <speedsound value="0" auto="true" />
+            <coefh value="1.0" />
+            <cflnumber value="0.2" />
+        </constantsdef>
+        <mkconfig boundcount="200" fluidcount="16" />
+        <geometry>
+            <definition dp="0.025">
+                <pointref x="0" y="0" z="0" />
+                <pointmin x="-0.10" y="-0.10" z="-0.10" />
+                <pointmax x="1.30" y="0.90" z="0.90" />
+            </definition>
+            <commands>
+                <!--
+          The normal surface is a separate construction.  Tank normals point
+          toward the fluid (invert=true); the immersed cube normals point
+          outward into the fluid (invert=false).  Both use exactly one
+          half-dp shift.  The cube particle shell is on the solid side of its
+          interface, following the official obstacle pattern (0,-1,-2).
+        -->
+                <list name="GeometryForNormals">
+                    <setactive drawpoints="0" drawshapes="1" />
+                    <setshapemode>actual | bound</setshapemode>
+                    <setnormalinvert invert="true" />
+                    <setmkbound mk="0" />
+                    <drawbox>
+                        <boxfill>bottom | left | right | front | back</boxfill>
+                        <point x="0" y="0" z="0" />
+                        <size x="1.20" y="0.80" z="0.80" />
+                        <layers vdp="-0.5" />
+                    </drawbox>
+                    <setnormalinvert invert="false" />
+                    <setmkbound mk="1" />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <!-- Base surface is moved inward by Dp/2 so the +0.5 layer
+                 reconstructs the physical interface [0.50,0.70]^3. -->
+                        <point x="0.5125" y="0.3125" z="0.2125" />
+                        <size x="0.175" y="0.175" z="0.175" />
+                        <layers vdp="0.5" />
+                    </drawbox>
+                    <shapeout file="hdp" />
+                    <resetdraw />
+                </list>
+                <mainlist>
+                    <runlist name="GeometryForNormals" />
+                    <setshapemode>actual | bound</setshapemode>
+                    <setdrawmode mode="full" />
+                    <!-- Rectangular open-top tank, same physical wall as the DBC controls. -->
+                    <setmkbound mk="0" />
+                    <drawbox>
+                        <boxfill>bottom | left | right | front | back</boxfill>
+                        <point x="0" y="0" z="0" />
+                        <size x="1.20" y="0.80" z="0.80" />
+                        <layers vdp="0,1,2" />
+                    </drawbox>
+                    <!-- Water particles with the cube volume removed. -->
+                    <setmkfluid mk="0" />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.04" y="0.04" z="0.04" />
+                        <size x="1.12" y="0.72" z="0.56" />
+                    </drawbox>
+                    <setmkvoid />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.50" y="0.30" z="0.20" />
+                        <size x="0.20" y="0.20" z="0.20" />
+                    </drawbox>
+                    <!-- Fixed immersed cube: z=[0.20,0.40], water top z=0.60. -->
+                    <setmkbound mk="1" />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <!-- The fixed shell is one half-dp inside the physical void. -->
+                        <point x="0.5125" y="0.3125" z="0.2125" />
+                        <size x="0.175" y="0.175" z="0.175" />
+                        <layers vdp="0,-1,-2" />
+                    </drawbox>
+                    <shapeout file="" />
+                </mainlist>
+            </commands>
+        </geometry>
+        <normals active="true">
+            <norgeometry>
+                <geometryfile file="[CaseName]_hdp_Actual.vtk" />
+                <distanceh v="3.0" />
+                <svshapes v="true" />
+            </norgeometry>
+        </normals>
+    </casedef>
+    <execution>
+        <special>
+            <gauges>
+                <default>
+                    <savevtkpart value="false" />
+                    <computedt value="0.005" />
+                    <computetime start="0" end="0.80" />
+                    <output value="true" />
+                    <outputdt value="0.005" />
+                    <outputtime start="0" end="0.80" />
+                </default>
+                <force name="BoxForce">
+                    <savevtkpart value="false" />
+                    <computedt value="0.005" />
+                    <computetime start="0" end="0.80" />
+                    <output value="true" />
+                    <outputdt value="0.005" />
+                    <outputtime start="0" end="0.80" />
+                    <target mkbound="1" />
+                </force>
+            </gauges>
+        </special>
+        <parameters>
+            <parameter key="SavePosDouble" value="0" />
+            <parameter key="Boundary" value="2" />
+            <parameter key="SlipMode" value="1" />
+            <parameter key="StepAlgorithm" value="2" />
+            <parameter key="Kernel" value="2" />
+            <parameter key="ViscoTreatment" value="1" />
+            <parameter key="Visco" value="0.01" />
+            <parameter key="ViscoBoundFactor" value="1" />
+            <parameter key="DensityDT" value="2" />
+            <parameter key="DensityDTvalue" value="0.1" />
+            <parameter key="Shifting" value="0" />
+            <parameter key="RigidAlgorithm" value="1" />
+            <parameter key="FtPause" value="0" />
+            <parameter key="CoefDtMin" value="0.05" />
+            <parameter key="DtIni" value="0" />
+            <parameter key="DtMin" value="0" />
+            <parameter key="DtFixed" value="0" />
+            <parameter key="DtAllParticles" value="0" />
+            <parameter key="TimeMax" value="0.80" />
+            <parameter key="TimeOut" value="0.01" />
+            <parameter key="MinFluidStop" value="0" />
+            <parameter key="RhopOutMin" value="700" />
+            <parameter key="RhopOutMax" value="1300" />
+            <simulationdomain comment="Defines domain of simulation (default=Uses minimum and maximum position of the generated particles)">
+                <posmin x="default - 25%" y="default - 25%" z="default - 25%" comment="e.g.: x=0.5, y=default-1, z=default-10%" />
+                <posmax x="default + 25%" y="default + 25%" z="default + 75%" />
+            </simulationdomain>
+        </parameters>
+        <particles np="51801" nb="22515" nbf="22515" mkboundfirst="17" mkfluidfirst="1">
+            <_summary>
+                <positions units_comment="metres (m)">
+                    <posmin x="-0.05" y="-0.05" z="-0.05" />
+                    <posmax x="1.25" y="0.85" z="0.8" />
+                </positions>
+                <fixed count="22515" id="0-22514" mkcount="2" mkvalues="17-18" />
+                <fluid count="29286" id="22515-51800" mkcount="1" mkvalues="1" />
+            </_summary>
+            <fixed mkbound="0" mk="17" begin="0" count="22011" />
+            <fixed mkbound="1" mk="18" begin="22011" count="504" />
+            <fluid mkfluid="0" mk="1" begin="22515" count="29286" />
+        </particles>
+        <constants>
+            <data2d value="false" />
+            <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
+            <cflnumber value="0.2" />
+            <gamma value="7" />
+            <rhop0 value="1000" units_comment="kg/m^3" />
+            <dp value="0.025" units_comment="metres (m)" />
+            <h value="0.043301270189" units_comment="metres (m)" />
+            <b value="308314.28571" units_comment="Pascal (Pa)" />
+            <massbound value="0.015625" units_comment="kg" />
+            <massfluid value="0.015625" units_comment="kg" />
+        </constants>
+        <uservars>
+            <varnum name="VResId" value="0" />
+        </uservars>
+        <motion />
+        <vtkout mkboundfirst="17" mkfluidfirst="1">
+            <vtkfile name="fixed_box_mdbc_canonical_hdp_Actual.vtk" mk="17-18" mkbound="0-1" />
+            <vtkfile name="fixed_box_mdbc_canonical__Actual.vtk" mk="17-18" mkbound="0-1" />
+        </vtkout>
+    </execution>
+</case>
