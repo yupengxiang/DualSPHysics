@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -20,6 +21,14 @@ DEFAULT_OUTPUT = CAMPAIGN / "sidecars" / "r3-g2-boundary"
 DEFAULT_REPORT = CAMPAIGN / "r3-g2-boundary-sidecars.json"
 
 
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        for block in iter(lambda: stream.read(8 * 1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
 def source_geometry(case: dict, lab: Path = LAB, campaign: Path = CAMPAIGN) -> Path:
     """Locate the exact generated MkCells file for a development case."""
     case_id = case["case_id"]
@@ -27,6 +36,78 @@ def source_geometry(case: dict, lab: Path = LAB, campaign: Path = CAMPAIGN) -> P
     if family == "F2":
         return campaign / "artifacts" / "w06" / case_id / "generated" / f"{case_id}_MkCells.vtk"
     return lab / "cases" / family / case_id / "generated" / f"{case_id}_MkCells.vtk"
+
+
+def audit_manifest_sidecars(manifest_path: Path, output_dir: Path,
+                            records: list[dict], cases: dict[str, dict]) -> dict:
+    """Verify that generated sidecars are the exact release-linked artifacts.
+
+    A candidate sidecar can be valid in isolation while the release points at a
+    stale or unrelated file.  This check keeps the provenance claim honest by
+    checking the declared relative path, containment under the release root,
+    existence, and byte identity with the freshly generated candidate file.
+    """
+    manifest_path = Path(manifest_path).resolve()
+    release_root = manifest_path.parent
+    output_dir = Path(output_dir).resolve()
+    rows = []
+    for record in records:
+        case_id = str(record["case_id"])
+        geometry = record.get("geometry") or {}
+        relative = geometry.get("boundary_sidecar")
+        row = {
+            "case_id": case_id,
+            "declared_relative": relative,
+            "release_path": None,
+            "generated_path": str((output_dir / f"{case_id}.h5").resolve()),
+            "declared": isinstance(relative, str) and bool(relative),
+            "release_exists": False,
+            "generated_exists": False,
+            "byte_identical": False,
+            "status": "not_declared",
+        }
+        if not row["declared"]:
+            rows.append(row)
+            continue
+        release_path = (release_root / relative).resolve()
+        row["release_path"] = str(release_path)
+        try:
+            release_path.relative_to(release_root)
+        except ValueError:
+            row["status"] = "path_escapes_release_root"
+            rows.append(row)
+            continue
+        generated_path = output_dir / f"{case_id}.h5"
+        row["release_exists"] = release_path.is_file()
+        row["generated_exists"] = generated_path.is_file()
+        if row["release_exists"] and row["generated_exists"]:
+            release_hash = _sha256(release_path)
+            generated_hash = _sha256(generated_path)
+            row["release_sha256"] = release_hash
+            row["generated_sha256"] = generated_hash
+            row["byte_identical"] = release_hash == generated_hash
+        if not row["release_exists"]:
+            row["status"] = "release_missing"
+        elif not row["generated_exists"]:
+            row["status"] = "generated_missing"
+        elif not row["byte_identical"]:
+            row["status"] = "bytes_differ"
+        else:
+            row["status"] = "linked_and_identical"
+        rows.append(row)
+    linked = [row for row in rows if row["status"] == "linked_and_identical"]
+    return {
+        "release_root": str(release_root),
+        "generated_root": str(output_dir),
+        "case_count": len(rows),
+        "linked_and_identical_count": len(linked),
+        "all_links_declared": bool(rows) and all(row["declared"] for row in rows),
+        "all_release_files_exist": bool(rows) and all(row["release_exists"] for row in rows),
+        "all_generated_files_exist": bool(rows) and all(row["generated_exists"] for row in rows),
+        "all_bytes_identical": bool(rows) and all(row["byte_identical"] for row in rows),
+        "pass": bool(rows) and len(linked) == len(rows),
+        "cases": rows,
+    }
 
 
 def build_report(manifest_path: Path = DEFAULT_MANIFEST, output_dir: Path = DEFAULT_OUTPUT,
@@ -85,13 +166,14 @@ def build_report(manifest_path: Path = DEFAULT_MANIFEST, output_dir: Path = DEFA
         },
         "case_count": len(cases),
         "cases": cases,
+        "manifest_linkage": audit_manifest_sidecars(manifest_path, output_dir, selected, cases),
         "all_sidecars_valid": bool(cases) and all(
             item["all_frames_finite"] and item["all_frames_nondegenerate"]
             and item["coordinate_frame"] == "world"
             for item in cases.values()
         ),
         "open_blockers": [
-            "sidecars are not yet linked into the W11 release manifest or material destination specifications",
+            "material destination specifications are not yet linked to the release manifest",
             "wall-aware tracer convergence must be rerun using these sidecars before material targets can be accepted",
             "static polygon provenance must be checked against each final production solver definition after resolution changes",
         ],

@@ -12,6 +12,7 @@ from scripts.boundary_sidecars import (
     sidecar_provider,
     write_sidecar,
 )
+from scripts.r3_g2_boundary_sidecars import audit_manifest_sidecars
 
 
 LAB = Path(__file__).resolve().parents[1]
@@ -56,3 +57,26 @@ def test_sidecar_round_trip_validates_frames_and_geometry(tmp_path):
         midpoint = provider(h5, 0, 1, 0.5)
     with h5py.File(sidecar, "r") as h5:
         np.testing.assert_allclose(midpoint, h5["triangles_world"][0])
+
+
+def test_manifest_sidecar_audit_requires_exact_release_bytes(tmp_path):
+    release_root = tmp_path / "release"
+    generated_root = tmp_path / "candidate"
+    release_path = release_root / "sidecars" / "case.h5"
+    generated_path = generated_root / "case.h5"
+    release_path.parent.mkdir(parents=True)
+    generated_root.mkdir()
+    release_path.write_bytes(b"same-sidecar")
+    generated_path.write_bytes(b"same-sidecar")
+    record = {"case_id": "case", "geometry": {"boundary_sidecar": "sidecars/case.h5"}}
+    checked = audit_manifest_sidecars(
+        release_root / "manifest.json", generated_root, [record], {"case": {}},
+    )
+    assert checked["pass"] is True
+    assert checked["all_bytes_identical"] is True
+    generated_path.write_bytes(b"stale-sidecar")
+    checked = audit_manifest_sidecars(
+        release_root / "manifest.json", generated_root, [record], {"case": {}},
+    )
+    assert checked["pass"] is False
+    assert checked["cases"][0]["status"] == "bytes_differ"
