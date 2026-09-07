@@ -50,6 +50,9 @@ def test_trajectory_summary_uses_vector_rmse_and_mass_weights():
              "initial_fluid_mass": 4.0}
     summary = _trajectory_summary(trace, reference, np.ones((3, 2), dtype=bool), seeds, 0.1, 0.0)
     assert summary["mass_weight_closure_error_kg"] == 0.0
+    assert summary["mass_weight_closure_relative_error"] == 0.0
+    assert summary["reliable_final_fraction_by_initial_mass"] == 1.0
+    assert summary["solver_valid_fraction_by_initial_mass"] == 1.0
     # 0.1 m error / 0.1 m dp, weighted over three time frames and two seeds.
     assert summary["position_rmse_over_dp"] == pytest.approx(np.sqrt(3.0 / 4.0))
     assert summary["position_ade_over_dp"] == pytest.approx(3.0 / 4.0)

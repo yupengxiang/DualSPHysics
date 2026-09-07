@@ -107,14 +107,25 @@ def _trajectory_summary(trace: dict, reference_position: np.ndarray,
     weighted_squared_error = _weighted_mean((flat_error / dp) ** 2, flat_weights)
     endpoint_squared_error = _weighted_mean(
         (error[-1, final_valid] / dp) ** 2, final_weights[final_valid])
+    represented_mass = float(np.sum(seeds["mass_weight"]))
+    closure_error = represented_mass - float(seeds["initial_fluid_mass"])
+    mass_weighted_final_reliability = float(
+        np.sum(final_weights * np.asarray(trace["reliable"], dtype=float))
+        / max(represented_mass, 1e-30)
+    )
+    mass_weighted_valid_fraction = float(
+        np.sum(weights * valid.astype(float))
+        / max(represented_mass * error.shape[0], 1e-30)
+    )
     return {
         "seed_count": int(len(seeds["indices"])),
-        "represented_initial_mass_kg": float(np.sum(seeds["mass_weight"])),
-        "mass_weight_closure_error_kg": float(
-            np.sum(seeds["mass_weight"]) - seeds["initial_fluid_mass"]
-        ),
+        "represented_initial_mass_kg": represented_mass,
+        "mass_weight_closure_error_kg": closure_error,
+        "mass_weight_closure_relative_error": abs(closure_error) / max(float(seeds["initial_fluid_mass"]), 1e-30),
         "reliable_final_fraction_by_count": float(np.mean(trace["reliable"])),
+        "reliable_final_fraction_by_initial_mass": mass_weighted_final_reliability,
         "solver_valid_fraction": float(np.mean(valid)),
+        "solver_valid_fraction_by_initial_mass": mass_weighted_valid_fraction,
         "position_rmse_over_dp": float(np.sqrt(weighted_squared_error))
         if weighted_squared_error is not None else None,
         "position_ade_over_dp": _weighted_mean(flat_error / dp, flat_weights),
@@ -283,12 +294,14 @@ def build_report(manifest_path: Path = DEFAULT_MANIFEST, selected_ids: tuple[str
             "neighbours": 24,
             "regularization_over_dp": 0.1,
             "maximum_support_over_dp": 1.75,
+            "mass_closure_relative_tolerance": 1e-6,
             "wall_visibility": False,
         },
         "interpretation": {
             "substeps": "compare 1 vs the largest configured substep count at the same saved cadence; substeps cannot recover omitted solver output times",
             "cadence": "compare frame_stride 1/2/5 against the finest saved cadence at common times; any drift is an observation-cadence sensitivity",
             "mass": "all reported averages use source-stratified initial mass weights; identity comparison uses the selected initial solver particle indices",
+            "reliability": "both count-weighted and initial-mass-weighted reliability are reported so high-mass failed tracers cannot be hidden by a count fraction",
             "release_gate": "no setting is promoted to a material benchmark target until every admitted case has boundary triangles and a declared destination specification",
         },
         "cases": case_reports,
