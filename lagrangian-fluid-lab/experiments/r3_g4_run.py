@@ -24,6 +24,21 @@ SEEDS = (17, 29, 43)
 if str(LAB) not in sys.path:
     sys.path.insert(0, str(LAB))
 
+
+def wait_for_idle(index: int, allowed_uuids: list[str]):
+    """Bounded retry for transient utilization left by a finished process."""
+
+    last_error = None
+    for _ in range(12):
+        try:
+            return require_idle_allowed_gpu(index, allowed_uuids)
+        except RuntimeError as error:
+            last_error = error
+            if "is not idle" not in str(error):
+                raise
+            time.sleep(5)
+    raise RuntimeError(f"GPU {index} did not become idle within 60 seconds: {last_error}")
+
 try:
     from scripts.campaign_runner import require_idle_allowed_gpu
 except ModuleNotFoundError:  # direct invocation from this directory
@@ -42,7 +57,7 @@ def launch(task: dict[str, int | str], args: argparse.Namespace, allowed_uuids: 
     route = str(task["route"])
     seed = int(task["seed"])
     gpu_index = int(task["gpu_index"])
-    gpu = require_idle_allowed_gpu(gpu_index, allowed_uuids)
+    gpu = wait_for_idle(gpu_index, allowed_uuids)
     output = args.results_dir / f"{route}_seed{seed}.json"
     checkpoint = args.checkpoints_dir / f"{route}_seed{seed}.pt"
     log_path = args.logs_dir / f"{route}_seed{seed}.log"
@@ -112,7 +127,7 @@ def main() -> None:
         # intentionally serial between batches so a reused GPU is never
         # launched while a previous child still owns it.
         for task in batch:
-            require_idle_allowed_gpu(int(task["gpu_index"]), allowed)
+            wait_for_idle(int(task["gpu_index"]), allowed)
         with ThreadPoolExecutor(max_workers=len(batch)) as pool:
             futures = [pool.submit(launch, task, args, allowed) for task in batch]
             records.extend(future.result() for future in futures)
