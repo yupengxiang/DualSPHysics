@@ -15,6 +15,10 @@
 
 构建器从被忽略的不可变源 HDF5 复制到 `release/v0.1-development/data/`，再补齐 W10 单位/坐标属性和 `material/` 组；源文件不被就地修改。数据目录继续被 Git 忽略，Git 只记录可复现选择、构建代码、manifest、逐文件 SHA-256 和汇总，因此远端审阅者能检查“选择与语义”，但不能误以为二进制已随仓库发布。
 
+## 坏文件回归与发布顺序
+
+`tests/test_w11_build_pilot.py` 现在覆盖三类中间帧坏文件：身份在中间帧失效后重新出现、有效粒子的质量随时间变化、有效帧密度为 NaN；三者都在 `audit_case` 中按具体门禁原因拒绝。构建器先把源文件复制为 `.h5.partial`，在该候选路径完成属性补写、材料增强和 `audit_case`，最后才用 `os.replace` 原子替换最终 `.h5`。回归测试还验证审计期间最终文件不存在，以及失败重建会保留已有最终文件而只留下未发布的 partial 候选。
+
 ## 门禁结果
 
 所有入选闭域案例复合身份唯一、时间严格递增、valid 下位置/速度有限、首末粒子完整且数值丢失为零；运动杯变换通过 proper rigid transform 检查。数据包规模、帧数、材料示踪可靠数和 split 分布记录在 `w11-pilot-summary.json` 与 `release/v0.1-development/manifest.json`。
