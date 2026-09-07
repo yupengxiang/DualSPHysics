@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "handoff_id": "R3_current_handoff_after_mdbc_fixed_box_force",
+  "date": "2026-09-07",
+  "branch": "codex/lagrangian-fluid-exploration",
+  "head": "b4386559ffc73c2dc898800fc95511529212ea2f",
+  "remote_head": "b4386559ffc73c2dc898800fc95511529212ea2f",
+  "scope": "bounded fixed immersed box DBC controls, final-definition mDBC canonical/fine calibration, and current R3 handoff",
+  "non_goals": [
+    "no six-family expansion",
+    "no radius scan",
+    "no development tranche",
+    "no formal v0.1 physical freeze"
+  ],
+  "owner_resource_override": {
+    "authorized_gpu_indices": [0, 1, 2, 3, 4, 5, 6, 7],
+    "preferred_idle_gpu_indices": [4, 5, 6, 7],
+    "busy_indices_at_run_time": [0, 1, 2, 3],
+    "busy_jobs_interrupted": false,
+    "actual_gpu_uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+    "note": "Owner authorization supersedes the earlier reviewer preference; selection still avoided busy processes."
+  },
+  "commits": {
+    "dbc_controls": "f831fb1",
+    "fixed_body_identity_audit": "d04be60",
+    "canonical_geometry": "a7e3cad",
+    "tracer_g4_contracts": "d160d8b",
+    "mdbc_fixed_box": "b438655"
+  },
+  "directions": [
+    {
+      "id": "E0",
+      "execution_status": "completed_cpu_geometry_audit",
+      "acceptance_status": "candidate_geometry_pass_physical_not_accepted",
+      "validation_scope": ["x_b/n_b/n_g/x_gamma reconstruction", "ghost doubling", "canonical rectangle and Float1 geometry"],
+      "open_blockers": ["runtime mDBC zero normals", "no pressure/force closure"]
+    },
+    {
+      "id": "fixed_box_dbc_gravity",
+      "execution_status": "completed_gpu4",
+      "acceptance_status": "candidate_not_accepted",
+      "validation_scope": ["fixed body identity and immobility", "fluid mass and penetration", "hydrostatic pressure field", "force gauge trace"],
+      "force_last_0p20s_mean_n": 124.7769925,
+      "force_last_0p20s_std_n": 36.6336,
+      "reference_fz_n": 78.48,
+      "open_blockers": ["force stability failed", "58.99 percent late-window reference error", "historical report parser records excluded_particles as null"]
+    },
+    {
+      "id": "fixed_box_dbc_zero_pressure",
+      "execution_status": "completed_gpu4",
+      "acceptance_status": "control_pass_not_physical_acceptance",
+      "validation_scope": ["zero initial and final pressure", "zero force windows", "fixed body immobility", "mass and penetration"],
+      "open_blockers": ["control is not a physical reference case", "historical report parser records excluded_particles as null"]
+    },
+    {
+      "id": "C1_C2",
+      "execution_status": "completed",
+      "acceptance_status": "candidate_only",
+      "validation_scope": ["rigid pose/Slerp", "swept wall", "sidecar component features", "ESS/geometry guards", "G4 failure denominators"],
+      "tests_added": 7,
+      "open_blockers": ["no external physical anchor", "material-tracer physical acceptance pending"]
+    },
+    {
+      "id": "mdbc_canonical_2",
+      "execution_status": "completed_gpu4_final_definition",
+      "acceptance_status": "candidate_not_accepted",
+      "dp_m": 0.025,
+      "fixed_particles": 22515,
+      "fluid_particles": 29286,
+      "runtime_zero_normals": 63,
+      "excluded_particles": 0,
+      "final_fluid_penetration_particles": 27,
+      "force_last_0p20s_mean_n": 93.39743175,
+      "force_last_0p20s_std_n": 52.37867471,
+      "reference_fz_n": 78.48,
+      "open_blockers": ["runtime zero normals", "fluid penetration", "force stability failed"]
+    },
+    {
+      "id": "mdbc_fine_3",
+      "execution_status": "completed_gpu4_final_definition",
+      "acceptance_status": "candidate_not_accepted",
+      "dp_m": 0.0125,
+      "fixed_particles": 87979,
+      "fluid_particles": 242061,
+      "runtime_zero_normals": 240,
+      "excluded_particles": 20,
+      "final_fluid_penetration_particles": 197,
+      "force_last_0p20s_mean_n": 80.78922625,
+      "force_last_0p20s_std_n": 28.91878741,
+      "reference_fz_n": 78.48,
+      "open_blockers": ["runtime zero normals", "excluded particles", "fluid penetration", "force stability failed"]
+    }
+  ],
+  "validation": {
+    "pytest_command": "cd lagrangian-fluid-lab && PYTHONPATH=. .venv/bin/pytest -q",
+    "pytest_passed": 196,
+    "pytest_failed": 0,
+    "upstream_paths_modified": false,
+    "remote_synchronized": true,
+    "raw_high_volume_csv_archived_outside_git": true
+  },
+  "overall": {
+    "execution_status": "bounded_exploration_complete",
+    "acceptance_status": "candidate_only_formal_physics_not_frozen",
+    "development_tranche_allowed": false,
+    "formal_v0_1_physics_frozen": false,
+    "open_blockers": [
+      "mDBC runtime normal completeness and face-level construction",
+      "fluid penetration and excluded-particle closure",
+      "stable multi-window force and pressure convergence",
+      "external physical anchors for selected families",
+      "historical DBC excluded-particle report parser gap"
+    ]
+  },
+  "next_request_to_reviewer": "Choose whether the next bounded experiment should be face/edge/corner diagnosis of the 63/240 runtime zero normals or a revised canonical wall/particle-layer construction; do not authorize a development tranche before both mDBC cases pass the strict closure gates."
+}
