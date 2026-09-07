@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "summary_status": "historical_reference_only_no_new_run_logs",
+  "new_run_logs": [],
+  "historical_logs": [
+    {
+      "label": "existing DBC Test14 neg074 coarse latest attempt",
+      "device": "GPU 4 (historical run; not this task)",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/R3_F6_test14_float1_neg074_coarse/attempts/20260907T015137.638234Z-13c6648b.complete/process.stdout.log",
+      "exists": true,
+      "sha256": "8adc058dfd0fb5643bed9af2f79553886dab5fdb754abaabb36173e2116798e7",
+      "excerpts": [
+        "Available features: Project Chrono coupling, MoorDynPlus coupling, Wave generation, FlexStruc, mDBC no-slip, GPU execution, OpenMP execution.",
+        "Boundary=\"DBC\"",
+        "RigidAlgorithm=\"SPH\"",
+        "CaseNp=67,186",
+        "CaseNbound=24,335",
+        "CaseNfixed=24,195",
+        "CaseNfloat=140",
+        "CaseNfluid=42,851",
+        "[Simulation finished  07-09-2026 09:51:59]",
+        "Excluded particles...............: 0",
+        "Steps of simulation..............: 12,036",
+        "SU-Chrono........................: 0 sec.",
+        "Finished execution (code=0)."
+      ]
+    },
+    {
+      "label": "existing mDBC preflight GenCase",
+      "device": "CPU",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse/generated/gencase.stdout.log",
+      "exists": true,
+      "sha256": "e169dc885952d2e8381513538ed6695bae9082ca7c0851b385d50463dc1a89bd",
+      "excerpts": [
+        "FileShapes> hdp_Actual.vtk  shapes:3,386  points:1,935   (time:0.000s)",
+        "Non-zero particle normals: 23,543/24,335    Normals size range: (0.000470 - 0.801171).",
+        "Final zero normals: 792/24,335 (3.3%)   Maximum normal: 0.801171 (7.71 x h)",
+        "*** There are boundary particles without normal data.",
+        "Finished execution (code=0)."
+      ]
+    },
+    {
+      "label": "existing mDBC preflight CPU solver",
+      "device": "CPU",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse/solver.stdout.log",
+      "exists": true,
+      "sha256": "0d63fcaa259a8188c04d7360cc7874a76782dc8743f675d3d2520fe0ed736dbf",
+      "excerpts": [
+        "Available features: Project Chrono coupling, MoorDynPlus coupling, Wave generation, FlexStruc, mDBC no-slip, OpenMP execution.",
+        "Boundary=\"mDBC\"",
+        "RigidAlgorithm=\"SPH\"",
+        "CaseNp=67,186",
+        "CaseNbound=24,335",
+        "CaseNfixed=24,195",
+        "CaseNfloat=140",
+        "CaseNfluid=42,851",
+        "*** WARNING: There are 792 of 24195 fixed or moving boundary particles without normal data.",
+        "*** WARNING: When mDBC is applied to floating bodies, their collisions should be solved using Chrono (RigidAlgorithm=3).",
+        "2. There are 792 of 24195 fixed or moving boundary particles without normal data.",
+        "3. When mDBC is applied to floating bodies, their collisions should be solved using Chrono (RigidAlgorithm=3).",
+        "[Simulation finished  07-09-2026 15:44:42]",
+        "Excluded particles...............: 0",
+        "Steps of simulation..............: 211",
+        "SU-Chrono........................: 0 sec.",
+        "2. There are 792 of 24195 fixed or moving boundary particles without normal data.",
+        "3. When mDBC is applied to floating bodies, their collisions should be solved using Chrono (RigidAlgorithm=3).",
+        "Finished execution (code=0)."
+      ]
+    },
+    {
+      "label": "existing mDBC zero-normal baseline GenCase",
+      "device": "CPU",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_baseline_combined_mask2_d2_invert/generated/gencase.stdout.log",
+      "exists": true,
+      "sha256": "574b0c73be20495e4674524b971e16135d8a8c9cc78de62f758b0b99a75836b3",
+      "excerpts": [
+        "FileShapes> hdp_Actual.vtk  shapes:3,386  points:1,935   (time:0.001s)",
+        "Non-zero particle normals: 23,543/24,335    Normals size range: (0.000470 - 0.801171).",
+        "Final zero normals: 792/24,335 (3.3%)   Maximum normal: 0.801171 (7.71 x h)",
+        "*** There are boundary particles without normal data.",
+        "Finished execution (code=0)."
+      ]
+    },
+    {
+      "label": "existing candidate tank-radius -0.030 m GenCase",
+      "device": "CPU",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_combined_tank_radius_minus030/generated/gencase.stdout.log",
+      "exists": true,
+      "sha256": "d705e7970ffad755217ee542ec8a4b6499ecad4af5ec92ee81e3bc4ef41b4181",
+      "excerpts": [
+        "FileShapes> hdp_Actual.vtk  shapes:3,386  points:1,935   (time:0.000s)",
+        "Non-zero particle normals: 24,335/24,335    Normals size range: (0.000470 - 0.801171).",
+        "Final zero normals: 0/24,335 (0.0%)   Maximum normal: 0.801171 (7.71 x h)",
+        "Finished execution (code=0)."
+      ]
+    }
+  ],
+  "interpretation": "The historical mDBC baseline initializes and exits code 0 but has 792 fixed/moving zero normals; the radius-offset candidate removes the zeros only after changing tank normal geometry and remains a diagnostic, not a repair."
+}

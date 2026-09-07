@@ -1,0 +1,831 @@
+{
+  "schema_version": 1,
+  "report_id": "R3-F6-E1-fixed-submerged-hydrostatic",
+  "generated_at_utc": "2026-09-07T10:30:58.878751+00:00",
+  "execution_status": "blocked_preflight_no_run",
+  "acceptance_status": "not_run_not_accepted",
+  "scientific_acceptance": "not_accepted",
+  "physical_result": null,
+  "resource_policy": {
+    "command": "nvidia-smi -i 4,5,6,7 --query-gpu=index,uuid,memory.used,memory.total,utilization.gpu --format=csv,noheader,nounits",
+    "return_code": 0,
+    "snapshot": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f6-fixed-hydrostatic/gpu-preflight.txt",
+    "rows": [
+      {
+        "index": 4,
+        "uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+        "memory_used_mib": 18,
+        "memory_total_mib": 49140,
+        "utilization_percent": 0
+      },
+      {
+        "index": 5,
+        "uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+        "memory_used_mib": 18,
+        "memory_total_mib": 49140,
+        "utilization_percent": 0
+      },
+      {
+        "index": 6,
+        "uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+        "memory_used_mib": 18,
+        "memory_total_mib": 49140,
+        "utilization_percent": 0
+      },
+      {
+        "index": 7,
+        "uuid": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+        "memory_used_mib": 18,
+        "memory_total_mib": 49140,
+        "utilization_percent": 0
+      }
+    ],
+    "gpu_indices_used": [],
+    "gpu_uuids_used": [],
+    "allowed_gpu_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "forbidden_gpu_indices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "solver_launched": false,
+    "policy": "no-run preflight; no CUDA solver process was started"
+  },
+  "scope": {
+    "family": "F6",
+    "experiment": "E1 fixed submerged-body hydrostatic closure",
+    "body_mode_requested": "fixed rigid body",
+    "boundary_methods": [
+      "DBC",
+      "mDBC"
+    ],
+    "heights": [
+      "nominal",
+      "deeper",
+      "shallower"
+    ],
+    "primary_case_count": 6,
+    "fine_extension_max_case_count": 3,
+    "matrix_cap_case_count": 9,
+    "chronology": "Chrono disabled; no Chrono/rigid coupling variable may enter the sweep"
+  },
+  "geometry_gate": {
+    "overall_status": "blocked_unproven",
+    "e0_outer_hull": {
+      "status": "provisionally_near_pass_geometry_mass_only",
+      "source_report": "lagrangian-fluid-lab/campaigns/v0.1-candidate/r3-g2-f6-static-buoyancy.json",
+      "nominal_displaced_volume_m3": 0.009662575156373995,
+      "target_displaced_volume_m3": 0.00975,
+      "relative_error_percent": -0.8966650628308206,
+      "predicted_heave_m": -0.0012382149260574682,
+      "caveat": "This is an outer-hull/mass diagnostic, not proof of a fixed-body mDBC geometry gate."
+    },
+    "mdbc_normals": {
+      "status": "fail",
+      "source_report": "lagrangian-fluid-lab/campaigns/v0.1-candidate/r3-g2-f6-mdbc-zero-normal-preflight.json",
+      "baseline_variant": "baseline_combined_mask2_d2_invert",
+      "gencase_zero_count": 792,
+      "gencase_boundary_count": 24335,
+      "boundnor_zero_count": 792,
+      "boundnor_fixed_zero_count": 792,
+      "boundnor_floating_zero_count": 0,
+      "solver_fixed_or_moving_zero_count": 792,
+      "solver_finished_code_0": true,
+      "zero_normal_rule": "must be zero unexplained normals before any physics run",
+      "repair_candidates": {
+        "combined_tank_radius_minus020": {
+          "tank_radius_m": 1.98,
+          "boundnor_zero_count": 0,
+          "normal_geometry_changed": true,
+          "physical_acceptance": false
+        },
+        "combined_tank_radius_minus030": {
+          "tank_radius_m": 1.97,
+          "boundnor_zero_count": 0,
+          "normal_geometry_changed": true,
+          "physical_acceptance": false
+        }
+      }
+    },
+    "fixed_body_setup": {
+      "status": "unproven_blocked",
+      "existing_dbc_fixed_body_definition": false,
+      "existing_mdbc_fixed_body_definition": false,
+      "existing_dbc_floatings_section": true,
+      "existing_mdbc_floatings_section": true,
+      "existing_mdbc_rigid_algorithm": "1",
+      "mdbc_chrono_warning_in_historical_solver": true,
+      "fixed_body_force_gauge_present_in_source": false,
+      "required_action": "materialize a fixed-body XML and explicit force-gauge target before running"
+    }
+  },
+  "xml_audit": {
+    "dbc_neg074_coarse": {
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-test14/R3_F6_test14_float1_neg074_coarse_Def.xml",
+      "exists": true,
+      "sha256": "0fe56a5b2278029dd88228ca0eab4f6702f9a0352c69b0b0bd077f4a2ca9397e",
+      "boundary": {
+        "value": 1,
+        "name": "DBC"
+      },
+      "rigid_algorithm": "1",
+      "time_max_s": 4.5,
+      "time_out_s": 0.01,
+      "damping": {
+        "active": "true",
+        "limitmin_radius_m": "1.4",
+        "limitmax_radius_m": "2.0"
+      },
+      "tank_geometry": {
+        "radius_m": "2.0",
+        "mask": "2",
+        "height_m": "1.10",
+        "fluid_fill_box": {
+          "x": "0.8",
+          "y": "0",
+          "z": "0.4"
+        }
+      },
+      "floating_body": {
+        "section_present": true,
+        "mkbound": "10",
+        "massbody_kg": 9.75,
+        "center_m": {
+          "x": "0",
+          "y": "0",
+          "z": "0.629000"
+        },
+        "translation_dof": {
+          "x": "0",
+          "y": "0",
+          "z": "1"
+        },
+        "rotation_dof": {
+          "x": "0",
+          "y": "0",
+          "z": "0"
+        },
+        "fixed_body": false
+      },
+      "mdbc_normals": {
+        "section_present": false,
+        "active": null,
+        "norgeometry_present": false,
+        "geometryfile": null,
+        "distanceh": null,
+        "geometry_for_normals_list": false,
+        "geometry_for_normals_runlist": false,
+        "geometry_for_normals_shapeout_hdp": false
+      },
+      "force_gauge": {
+        "gauges_section_present": false,
+        "force_gauge_count": 0,
+        "targets": []
+      }
+    },
+    "mdbc_preflight_neg074_coarse": {
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse_Def.xml",
+      "exists": true,
+      "sha256": "4693a1655e71cfdc13a61e86e8b196816352e6a1a4087f5f7585823189e9ce40",
+      "boundary": {
+        "value": 2,
+        "name": "mDBC"
+      },
+      "rigid_algorithm": "1",
+      "time_max_s": 0.08,
+      "time_out_s": 0.04,
+      "damping": {
+        "active": "true",
+        "limitmin_radius_m": "1.4",
+        "limitmax_radius_m": "2.0"
+      },
+      "tank_geometry": {
+        "radius_m": "2.0",
+        "mask": "2",
+        "height_m": "1.10",
+        "fluid_fill_box": {
+          "x": "0.8",
+          "y": "0",
+          "z": "0.4"
+        }
+      },
+      "floating_body": {
+        "section_present": true,
+        "mkbound": "10",
+        "massbody_kg": 9.75,
+        "center_m": {
+          "x": "0",
+          "y": "0",
+          "z": "0.629000"
+        },
+        "translation_dof": {
+          "x": "0",
+          "y": "0",
+          "z": "1"
+        },
+        "rotation_dof": {
+          "x": "0",
+          "y": "0",
+          "z": "0"
+        },
+        "fixed_body": false
+      },
+      "mdbc_normals": {
+        "section_present": true,
+        "active": "true",
+        "norgeometry_present": true,
+        "geometryfile": "[CaseName]_hdp_Actual.vtk",
+        "distanceh": "2.0",
+        "geometry_for_normals_list": true,
+        "geometry_for_normals_runlist": true,
+        "geometry_for_normals_shapeout_hdp": true
+      },
+      "force_gauge": {
+        "gauges_section_present": false,
+        "force_gauge_count": 0,
+        "targets": []
+      }
+    },
+    "mdbc_zero_normal_baseline": {
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_baseline_combined_mask2_d2_invert_Def.xml",
+      "exists": true,
+      "sha256": "ef77c127246dd015d021c92db246a7ae71237746b9a90df3461cb37aad4d5053",
+      "boundary": {
+        "value": 2,
+        "name": "mDBC"
+      },
+      "rigid_algorithm": "1",
+      "time_max_s": 0.005,
+      "time_out_s": 0.005,
+      "damping": {
+        "active": "true",
+        "limitmin_radius_m": "1.4",
+        "limitmax_radius_m": "2.0"
+      },
+      "tank_geometry": {
+        "radius_m": "2.000",
+        "mask": "2",
+        "height_m": "1.10",
+        "fluid_fill_box": {
+          "x": "0.8",
+          "y": "0",
+          "z": "0.4"
+        }
+      },
+      "floating_body": {
+        "section_present": true,
+        "mkbound": "10",
+        "massbody_kg": 9.75,
+        "center_m": {
+          "x": "0",
+          "y": "0",
+          "z": "0.629000"
+        },
+        "translation_dof": {
+          "x": "0",
+          "y": "0",
+          "z": "1"
+        },
+        "rotation_dof": {
+          "x": "0",
+          "y": "0",
+          "z": "0"
+        },
+        "fixed_body": false
+      },
+      "mdbc_normals": {
+        "section_present": true,
+        "active": "true",
+        "norgeometry_present": true,
+        "geometryfile": "[CaseName]_hdp_Actual.vtk",
+        "distanceh": "2.0",
+        "geometry_for_normals_list": true,
+        "geometry_for_normals_runlist": true,
+        "geometry_for_normals_shapeout_hdp": true
+      },
+      "force_gauge": {
+        "gauges_section_present": false,
+        "force_gauge_count": 0,
+        "targets": []
+      }
+    },
+    "mdbc_radius_minus030_diagnostic": {
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_combined_tank_radius_minus030_Def.xml",
+      "exists": true,
+      "sha256": "f38628ae01f568ccf656d5f10df709ed4f82b244cf4d8cfd1b99ca52c0b99ddf",
+      "boundary": {
+        "value": 2,
+        "name": "mDBC"
+      },
+      "rigid_algorithm": "1",
+      "time_max_s": 0.005,
+      "time_out_s": 0.005,
+      "damping": {
+        "active": "true",
+        "limitmin_radius_m": "1.4",
+        "limitmax_radius_m": "2.0"
+      },
+      "tank_geometry": {
+        "radius_m": "1.970",
+        "mask": "2",
+        "height_m": "1.10",
+        "fluid_fill_box": {
+          "x": "0.8",
+          "y": "0",
+          "z": "0.4"
+        }
+      },
+      "floating_body": {
+        "section_present": true,
+        "mkbound": "10",
+        "massbody_kg": 9.75,
+        "center_m": {
+          "x": "0",
+          "y": "0",
+          "z": "0.629000"
+        },
+        "translation_dof": {
+          "x": "0",
+          "y": "0",
+          "z": "1"
+        },
+        "rotation_dof": {
+          "x": "0",
+          "y": "0",
+          "z": "0"
+        },
+        "fixed_body": false
+      },
+      "mdbc_normals": {
+        "section_present": true,
+        "active": "true",
+        "norgeometry_present": true,
+        "geometryfile": "[CaseName]_hdp_Actual.vtk",
+        "distanceh": "2.0",
+        "geometry_for_normals_list": true,
+        "geometry_for_normals_runlist": true,
+        "geometry_for_normals_shapeout_hdp": true
+      },
+      "force_gauge": {
+        "gauges_section_present": false,
+        "force_gauge_count": 0,
+        "targets": []
+      }
+    }
+  },
+  "source_reports": {
+    "test14": {
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/r3-g2-f6-test14.json",
+      "scientific_acceptance": "rejected_current_DBC_proxy",
+      "execution_status": "completed",
+      "boundary": "DBC",
+      "open_blockers": [
+        "eliminate the 70-120 mm positive late-time equilibrium bias before any acceptance claim",
+        "repeat domain-radius/damping sensitivity against a substantially larger basin",
+        "extend to dp <= 0.02 m before claiming body-surface resolution convergence",
+        "compare DBC with a verified mDBC geometry-normal setup",
+        "independently verify the STL vertical transform, outer-hull coupling and equilibrium base placement",
+        "control the 5-10% floating-particle count change caused by release-height lattice phase",
+        "Float2 -0.088 m remains an out-of-sample body-geometry extension"
+      ]
+    },
+    "mdbc_preflight": {
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/r3-g2-f6-mdbc-preflight.json",
+      "acceptance_status": "diagnostic_only_not_physical_acceptance",
+      "scientific_acceptance": "not_accepted_mdbc_preflight",
+      "normal_completeness": {
+        "complete_for_all_boundary_particles": false,
+        "gencase_zero_count": 792,
+        "gencase_boundary_count": 24335,
+        "solver_fixed_or_moving_zero_count": 792,
+        "solver_floating_zero_count": 0,
+        "boundnor_array_count": 24335,
+        "boundnor_direct_zero_count": 792,
+        "boundnor_direct_fixed_zero_count": 792,
+        "boundnor_direct_floating_zero_count": 0,
+        "ghost_vector_artifact_present": true
+      },
+      "open_blockers": [
+        "This is a short coarse CPU preflight, not a Test14 physical acceptance run.",
+        "No DBC-vs-mDBC trajectory or buoyancy comparison was performed.",
+        "The existing F6/Test14 XML remains DBC (Boundary=1) with no normals section.",
+        "GenCase reported 792 zero boundary normals; normal completeness is not established.",
+        "Solver reported 792 fixed/moving particles without normals.",
+        "Solver warns floating mDBC collisions should use Chrono (RigidAlgorithm=3)."
+      ]
+    }
+  },
+  "inputs": [
+    {
+      "role": "existing DBC Test14 XML",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-test14/R3_F6_test14_float1_neg074_coarse_Def.xml",
+      "sha256": "0fe56a5b2278029dd88228ca0eab4f6702f9a0352c69b0b0bd077f4a2ca9397e"
+    },
+    {
+      "role": "existing DBC Test14 XML",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-test14/R3_F6_test14_float1_neg074_fine_Def.xml",
+      "sha256": "738efe9e5035509af534a180b74a8a34e2d6f897cc4ae904fee1d7de643ccd51"
+    },
+    {
+      "role": "existing DBC Test14 XML",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-test14/R3_F6_test14_float1_neg074_medium_Def.xml",
+      "sha256": "c185316949c6114de6f3616f9a05b87812704b4604b941cf516f85cc291f5d58"
+    },
+    {
+      "role": "existing DBC Test14 XML",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-test14/R3_F6_test14_float1_pos076_coarse_Def.xml",
+      "sha256": "91a81fe64d55bac644271515122909f7f86e2edd3d358ab7c9163566bbbe0975"
+    },
+    {
+      "role": "existing DBC Test14 XML",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-test14/R3_F6_test14_float1_pos076_fine_Def.xml",
+      "sha256": "40426ab7289c5490e84322a4a4366e9220a5019c52055d6e12af0dab2ad2b94e"
+    },
+    {
+      "role": "existing DBC Test14 XML",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-test14/R3_F6_test14_float1_pos076_medium_Def.xml",
+      "sha256": "a02231118a86de98e64fdcd16828995783b4a5abf5c15de955c63980fe099df8"
+    },
+    {
+      "role": "existing mDBC preflight XML",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse_Def.xml",
+      "sha256": "4693a1655e71cfdc13a61e86e8b196816352e6a1a4087f5f7585823189e9ce40"
+    },
+    {
+      "role": "mDBC zero-normal baseline XML",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_baseline_combined_mask2_d2_invert_Def.xml",
+      "sha256": "ef77c127246dd015d021c92db246a7ae71237746b9a90df3461cb37aad4d5053"
+    },
+    {
+      "role": "mDBC radius-offset diagnostic XML",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_combined_tank_radius_minus030_Def.xml",
+      "sha256": "f38628ae01f568ccf656d5f10df709ed4f82b244cf4d8cfd1b99ca52c0b99ddf"
+    },
+    {
+      "role": "official Float1 STL",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/w05/external/test14/Float1.STL",
+      "sha256": "f859a2e487d7cafcd119ebd680113830291f784cf736e875dce0acc88ff62cb1"
+    },
+    {
+      "role": "transformed Float1 STL, existing neg074",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse/generated/Float1_world.stl",
+      "sha256": "b586c89a30b864447132e4e7a0c4bb982413d6b5b88cbe7b79bccfabc07c0dd5"
+    },
+    {
+      "role": "static buoyancy report",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/r3-g2-f6-static-buoyancy.json",
+      "sha256": "956eb434bd6dbdf65704fc3c4e394c3f4262059f94924057a074632e07725776"
+    },
+    {
+      "role": "existing DBC Test14 report",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/r3-g2-f6-test14.json",
+      "sha256": "e4555ee0b3cbab3205ca8e737ae883d225c60ab86807a0f4ebb5bcad67371c09"
+    },
+    {
+      "role": "existing mDBC preflight report",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/r3-g2-f6-mdbc-preflight.json",
+      "sha256": "a011924f1a30479fca34d1fb5e986daa3e796054f445094c5248b21ec9ba49b3"
+    },
+    {
+      "role": "existing mDBC zero-normal report",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/r3-g2-f6-mdbc-zero-normal-preflight.json",
+      "sha256": "7bc567f4ad2e57774485f5ec02b2586fdd826cd92956b12b1ae186a82375b4b0"
+    },
+    {
+      "role": "GPU inventory contract",
+      "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/w00-inventory.json",
+      "sha256": "de28efa762450da41e102d7607517f1027439229b181982084004d9c1d513213"
+    }
+  ],
+  "run_manifest": "run-manifest.json",
+  "raw_log_summary": "raw-log-summary.json",
+  "planned_observables": {
+    "pressure_field": {
+      "status": "not_collected",
+      "required": true
+    },
+    "vertical_force_Fz_N": {
+      "status": "not_collected",
+      "required": true
+    },
+    "horizontal_force_Fx_N": {
+      "status": "not_collected",
+      "required": true
+    },
+    "displaced_volume_Vsub_m3": {
+      "status": "not_collected",
+      "required": true
+    },
+    "tail_windows_s": [
+      0.5,
+      1.0,
+      2.0
+    ],
+    "mass_loss": {
+      "status": "not_collected",
+      "required": true
+    },
+    "penetration_or_through_wall": {
+      "status": "not_collected",
+      "required": true
+    },
+    "field_completeness": {
+      "status": "not_collected",
+      "required": true
+    }
+  },
+  "acceptance_gates": [
+    {
+      "id": "normal_completeness",
+      "criterion": "zero unexplained normal vectors in every boundary particle at every executed resolution",
+      "status": "blocked_preflight"
+    },
+    {
+      "id": "hydrostatic_vertical_force",
+      "criterion": "each tail-window mean Fz agrees with rho*g*Vsub within 5%; medium/fine within 3%",
+      "status": "not_evaluable_no_run"
+    },
+    {
+      "id": "horizontal_symmetry",
+      "criterion": "abs(mean Fx) <= 1% of mg",
+      "status": "not_evaluable_no_run"
+    },
+    {
+      "id": "integrity",
+      "criterion": "zero mass loss/penetration and complete pressure/force fields",
+      "status": "not_evaluable_no_run"
+    },
+    {
+      "id": "equilibrium_interpretation",
+      "criterion": "do not require Fz=mg away from nominal equilibrium; compare against geometric Vsub",
+      "status": "protocol_defined"
+    }
+  ],
+  "matrix": {
+    "schema_version": 1,
+    "manifest_id": "R3-F6-E1-fixed-submerged-hydrostatic",
+    "execution_status": "blocked_preflight_no_run",
+    "acceptance_status": "not_run_not_accepted",
+    "planned_primary_case_count": 6,
+    "executed_case_count": 0,
+    "accepted_case_count": 0,
+    "matrix_cap_cases": 9,
+    "fine_extension": {
+      "max_additional_cases": 3,
+      "unlocked": false,
+      "reason": "mDBC E0 normal/ghost geometry gate is not proven"
+    },
+    "heights": [
+      {
+        "height_id": "nominal",
+        "waterline_z_m": 0.8,
+        "nominal_base_z_m": 0.6117617850739425,
+        "delta_from_nominal_m": 0.0,
+        "provisional_only": true
+      },
+      {
+        "height_id": "deeper",
+        "waterline_z_m": 0.8,
+        "nominal_base_z_m": 0.6117617850739425,
+        "delta_from_nominal_m": -0.05,
+        "provisional_only": true
+      },
+      {
+        "height_id": "shallower",
+        "waterline_z_m": 0.8,
+        "nominal_base_z_m": 0.6117617850739425,
+        "delta_from_nominal_m": 0.05,
+        "provisional_only": true
+      }
+    ],
+    "fixed_controls": {
+      "gravity_m_s2": -9.81,
+      "water_density_kg_m3": 1000.0,
+      "water_depth_m": 0.8,
+      "tank_radius_m": 2.0,
+      "damping_start_radius_m": 1.4,
+      "damping_end_radius_m": 2.0,
+      "simulation_domain_zmax_m": 1.4,
+      "chronology": "disabled/not configured; fixed body must not use Chrono",
+      "boundary_method_is_only_sweep_variable": true
+    },
+    "entries": [
+      {
+        "case_id": "R3_F6_E1_fixed_nominal_dbc",
+        "tier": "primary",
+        "height_id": "nominal",
+        "height_delta_from_nominal_m": 0.0,
+        "provisional_body_base_z_m": 0.6117617850739425,
+        "boundary": "DBC",
+        "body_mode": "fixed",
+        "chrono": false,
+        "status": "blocked_preflight",
+        "execute": false,
+        "gpu": null,
+        "result": null,
+        "acceptance": "not_run_not_accepted"
+      },
+      {
+        "case_id": "R3_F6_E1_fixed_nominal_mdbc",
+        "tier": "primary",
+        "height_id": "nominal",
+        "height_delta_from_nominal_m": 0.0,
+        "provisional_body_base_z_m": 0.6117617850739425,
+        "boundary": "mDBC",
+        "body_mode": "fixed",
+        "chrono": false,
+        "status": "blocked_preflight",
+        "execute": false,
+        "gpu": null,
+        "result": null,
+        "acceptance": "not_run_not_accepted"
+      },
+      {
+        "case_id": "R3_F6_E1_fixed_deeper_dbc",
+        "tier": "primary",
+        "height_id": "deeper",
+        "height_delta_from_nominal_m": -0.05,
+        "provisional_body_base_z_m": 0.5617617850739425,
+        "boundary": "DBC",
+        "body_mode": "fixed",
+        "chrono": false,
+        "status": "blocked_preflight",
+        "execute": false,
+        "gpu": null,
+        "result": null,
+        "acceptance": "not_run_not_accepted"
+      },
+      {
+        "case_id": "R3_F6_E1_fixed_deeper_mdbc",
+        "tier": "primary",
+        "height_id": "deeper",
+        "height_delta_from_nominal_m": -0.05,
+        "provisional_body_base_z_m": 0.5617617850739425,
+        "boundary": "mDBC",
+        "body_mode": "fixed",
+        "chrono": false,
+        "status": "blocked_preflight",
+        "execute": false,
+        "gpu": null,
+        "result": null,
+        "acceptance": "not_run_not_accepted"
+      },
+      {
+        "case_id": "R3_F6_E1_fixed_shallower_dbc",
+        "tier": "primary",
+        "height_id": "shallower",
+        "height_delta_from_nominal_m": 0.05,
+        "provisional_body_base_z_m": 0.6617617850739426,
+        "boundary": "DBC",
+        "body_mode": "fixed",
+        "chrono": false,
+        "status": "blocked_preflight",
+        "execute": false,
+        "gpu": null,
+        "result": null,
+        "acceptance": "not_run_not_accepted"
+      },
+      {
+        "case_id": "R3_F6_E1_fixed_shallower_mdbc",
+        "tier": "primary",
+        "height_id": "shallower",
+        "height_delta_from_nominal_m": 0.05,
+        "provisional_body_base_z_m": 0.6617617850739426,
+        "boundary": "mDBC",
+        "body_mode": "fixed",
+        "chrono": false,
+        "status": "blocked_preflight",
+        "execute": false,
+        "gpu": null,
+        "result": null,
+        "acceptance": "not_run_not_accepted"
+      }
+    ]
+  },
+  "raw_logs": {
+    "schema_version": 1,
+    "summary_status": "historical_reference_only_no_new_run_logs",
+    "new_run_logs": [],
+    "historical_logs": [
+      {
+        "label": "existing DBC Test14 neg074 coarse latest attempt",
+        "device": "GPU 4 (historical run; not this task)",
+        "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/R3_F6_test14_float1_neg074_coarse/attempts/20260907T015137.638234Z-13c6648b.complete/process.stdout.log",
+        "exists": true,
+        "sha256": "8adc058dfd0fb5643bed9af2f79553886dab5fdb754abaabb36173e2116798e7",
+        "excerpts": [
+          "Available features: Project Chrono coupling, MoorDynPlus coupling, Wave generation, FlexStruc, mDBC no-slip, GPU execution, OpenMP execution.",
+          "Boundary=\"DBC\"",
+          "RigidAlgorithm=\"SPH\"",
+          "CaseNp=67,186",
+          "CaseNbound=24,335",
+          "CaseNfixed=24,195",
+          "CaseNfloat=140",
+          "CaseNfluid=42,851",
+          "[Simulation finished  07-09-2026 09:51:59]",
+          "Excluded particles...............: 0",
+          "Steps of simulation..............: 12,036",
+          "SU-Chrono........................: 0 sec.",
+          "Finished execution (code=0)."
+        ]
+      },
+      {
+        "label": "existing mDBC preflight GenCase",
+        "device": "CPU",
+        "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse/generated/gencase.stdout.log",
+        "exists": true,
+        "sha256": "e169dc885952d2e8381513538ed6695bae9082ca7c0851b385d50463dc1a89bd",
+        "excerpts": [
+          "FileShapes> hdp_Actual.vtk  shapes:3,386  points:1,935   (time:0.000s)",
+          "Non-zero particle normals: 23,543/24,335    Normals size range: (0.000470 - 0.801171).",
+          "Final zero normals: 792/24,335 (3.3%)   Maximum normal: 0.801171 (7.71 x h)",
+          "*** There are boundary particles without normal data.",
+          "Finished execution (code=0)."
+        ]
+      },
+      {
+        "label": "existing mDBC preflight CPU solver",
+        "device": "CPU",
+        "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse/solver.stdout.log",
+        "exists": true,
+        "sha256": "0d63fcaa259a8188c04d7360cc7874a76782dc8743f675d3d2520fe0ed736dbf",
+        "excerpts": [
+          "Available features: Project Chrono coupling, MoorDynPlus coupling, Wave generation, FlexStruc, mDBC no-slip, OpenMP execution.",
+          "Boundary=\"mDBC\"",
+          "RigidAlgorithm=\"SPH\"",
+          "CaseNp=67,186",
+          "CaseNbound=24,335",
+          "CaseNfixed=24,195",
+          "CaseNfloat=140",
+          "CaseNfluid=42,851",
+          "*** WARNING: There are 792 of 24195 fixed or moving boundary particles without normal data.",
+          "*** WARNING: When mDBC is applied to floating bodies, their collisions should be solved using Chrono (RigidAlgorithm=3).",
+          "2. There are 792 of 24195 fixed or moving boundary particles without normal data.",
+          "3. When mDBC is applied to floating bodies, their collisions should be solved using Chrono (RigidAlgorithm=3).",
+          "[Simulation finished  07-09-2026 15:44:42]",
+          "Excluded particles...............: 0",
+          "Steps of simulation..............: 211",
+          "SU-Chrono........................: 0 sec.",
+          "2. There are 792 of 24195 fixed or moving boundary particles without normal data.",
+          "3. When mDBC is applied to floating bodies, their collisions should be solved using Chrono (RigidAlgorithm=3).",
+          "Finished execution (code=0)."
+        ]
+      },
+      {
+        "label": "existing mDBC zero-normal baseline GenCase",
+        "device": "CPU",
+        "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_baseline_combined_mask2_d2_invert/generated/gencase.stdout.log",
+        "exists": true,
+        "sha256": "574b0c73be20495e4674524b971e16135d8a8c9cc78de62f758b0b99a75836b3",
+        "excerpts": [
+          "FileShapes> hdp_Actual.vtk  shapes:3,386  points:1,935   (time:0.001s)",
+          "Non-zero particle normals: 23,543/24,335    Normals size range: (0.000470 - 0.801171).",
+          "Final zero normals: 792/24,335 (3.3%)   Maximum normal: 0.801171 (7.71 x h)",
+          "*** There are boundary particles without normal data.",
+          "Finished execution (code=0)."
+        ]
+      },
+      {
+        "label": "existing candidate tank-radius -0.030 m GenCase",
+        "device": "CPU",
+        "path": "lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_combined_tank_radius_minus030/generated/gencase.stdout.log",
+        "exists": true,
+        "sha256": "d705e7970ffad755217ee542ec8a4b6499ecad4af5ec92ee81e3bc4ef41b4181",
+        "excerpts": [
+          "FileShapes> hdp_Actual.vtk  shapes:3,386  points:1,935   (time:0.000s)",
+          "Non-zero particle normals: 24,335/24,335    Normals size range: (0.000470 - 0.801171).",
+          "Final zero normals: 0/24,335 (0.0%)   Maximum normal: 0.801171 (7.71 x h)",
+          "Finished execution (code=0)."
+        ]
+      }
+    ],
+    "interpretation": "The historical mDBC baseline initializes and exits code 0 but has 792 fixed/moving zero normals; the radius-offset candidate removes the zeros only after changing tank normal geometry and remains a diagnostic, not a repair."
+  },
+  "blockers": [
+    "mDBC baseline has 792 fixed/moving zero BoundNor vectors; normal completeness is not proven.",
+    "Zero-normal radius-offset candidates change nominal tank geometry and are diagnostic-only.",
+    "No fixed-body DBC or mDBC XML exists in the inspected inputs; both existing XMLs use <floatings>.",
+    "Historical mDBC solver warns floating collisions should use Chrono, which is disallowed for this fixed-body E1.",
+    "No explicit fixed-body force gauge is present in the existing F6 XMLs.",
+    "Therefore no primary or fine solver case was started and no GPU was used."
+  ],
+  "conclusion": {
+    "decision": "no_run_feasibility_report",
+    "reason": "E0 mDBC geometry gate and fixed-body measurement semantics are unproven",
+    "physical_acceptance_claim": false,
+    "accepted_cases": [],
+    "gpu_indices_used": [],
+    "next_unlock_conditions": [
+      "prove complete mDBC normals/ghost geometry without changing nominal tank semantics",
+      "materialize fixed-body XML with Chrono absent",
+      "add and audit fixed-body pressure/force measurement path",
+      "re-audit nominal/deeper/shallower volume and wall-clearance controls"
+    ]
+  }
+}
