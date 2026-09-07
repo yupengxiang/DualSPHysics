@@ -1,0 +1,344 @@
+{
+  "schema_version": 1,
+  "diagnostic_id": "R3_F6_test14_static_buoyancy_preflight",
+  "scope": "CPU-only static outer-hull displacement and existing six-case 3-D DBC tail-force cross-check",
+  "execution_status": "completed_cpu_only_existing_data_crosscheck",
+  "acceptance_status": "diagnostic_only_not_physical_acceptance",
+  "scientific_acceptance": "not_accepted_physical_validation",
+  "acceptance_reason": "The static outer-hull/mass check is near equilibrium at the published waterline, but existing DBC tail forces imply near-weight displaced volume at body states whose geometric submerged volume is much smaller. This localizes a DBC/effective-pressure hypothesis; it does not prove causality or mDBC acceptance.",
+  "resource_policy": {
+    "execution_kind": "CPU-only post-processing; no GenCase, solver, or GPU launch",
+    "gpu_indices_used": [],
+    "gpu_indices_forbidden": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "allowed_physical_gpu_indices_if_future_solver_run": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "inventory_ref": "campaigns/v0.1-candidate/w00-inventory.json"
+  },
+  "hypotheses": [
+    {
+      "id": "H1_geometry_mass_equilibrium",
+      "statement": "A gross outer-hull transform, mass, or equilibrium placement error explains the positive DBC late-time bias.",
+      "prediction": "The closed outer hull should miss m/rho at the nominal waterline or predict a large static heave.",
+      "result": "not_supported_by_static_check",
+      "evidence": {
+        "nominal_displaced_volume_m3": 0.009662575156373995,
+        "target_displaced_volume_m3": 0.00975,
+        "nominal_relative_volume_error": -0.008966650628308205,
+        "predicted_static_heave_m": -0.0012382149260574682
+      }
+    },
+    {
+      "id": "H2_dbc_effective_buoyancy",
+      "statement": "The rejected DBC route has an effective upward pressure/force bias that is not represented by geometric static displacement at its late body state.",
+      "prediction": "Existing tail fluid force remains near body weight while geometric submerged volume at the recorded center is substantially lower.",
+      "result": "consistent_with_existing_data_but_not_causal_proof",
+      "evidence": {
+        "completed_case_count": 6,
+        "case_count": 6,
+        "geometric_gap_volume_range_m3": [
+          0.005043170523702785,
+          0.009468859308575467
+        ],
+        "force_implied_to_geometric_volume_ratio_range": [
+          2.0713228309748866,
+          35.68720671477203
+        ],
+        "all_recorded_tail_forces_within_1N_of_body_weight": true
+      }
+    },
+    {
+      "id": "H3_mdbc_remedy",
+      "statement": "Changing DBC to mDBC will resolve the bias.",
+      "prediction": "A verified mDBC normal/ghost setup would need a matched rerun before this can be assessed.",
+      "result": "untested_blocked",
+      "evidence": {
+        "mdbc_solver_run": false,
+        "mdbc_normals_verified_for_f6": false
+      }
+    }
+  ],
+  "inputs": {
+    "official_stl": {
+      "source_path": "campaigns/v0.1-candidate/artifacts/w05/external/test14/Float1.STL",
+      "source_sha256": "f859a2e487d7cafcd119ebd680113830291f784cf736e875dce0acc88ff62cb1",
+      "source_triangles": 6616,
+      "source_connected_components": 2,
+      "source_component_signed_volumes_m3": [
+        0.016931975362993713,
+        -0.016254801763298517
+      ],
+      "selected_component_index": 0,
+      "selected_outer_triangles": 3338,
+      "selected_outer_volume_m3": 0.01693197536299371,
+      "world_base_z_m": 0.613,
+      "world_bbox_min_m": [
+        -0.15,
+        -0.1499388427734375,
+        0.613
+      ],
+      "world_bbox_max_m": [
+        0.15,
+        0.14993881583213806,
+        0.903
+      ]
+    },
+    "prior_r3_report": {
+      "path": "campaigns/v0.1-candidate/r3-g2-f6-test14.json",
+      "sha256": "e4555ee0b3cbab3205ca8e737ae883d225c60ab86807a0f4ebb5bcad67371c09",
+      "scientific_acceptance": "rejected_current_DBC_proxy",
+      "scope": "true-3D SPHERIC Test 14 Float1, two published offsets by three spatial resolutions"
+    },
+    "existing_dbc_tail_window_s": 1.0
+  },
+  "static_model": {
+    "waterline_z_m": 0.8,
+    "water_depth_m": 0.8,
+    "water_density_kg_m3": 1000.0,
+    "gravity_m_s2": 9.81,
+    "body_mass_kg": 9.75,
+    "body_weight_N": 95.64750000000001,
+    "equilibrium_reference_base_z_m": 0.613,
+    "equilibrium_reference_cog_z_m": 0.703,
+    "nominal_displaced_volume_m3": 0.009662575156373995,
+    "nominal_buoyant_force_z_N": 94.7898622840289,
+    "target_displaced_volume_m3": 0.00975,
+    "nominal_relative_volume_error": -0.008966650628308205,
+    "predicted_equilibrium": {
+      "target_displaced_volume_m3": 0.00975,
+      "equilibrium_local_waterline_m": 0.8012382149260575,
+      "predicted_heave_from_reference_m": -0.0012382149260574682,
+      "predicted_base_z_m": 0.6117617850739425,
+      "predicted_cog_z_m": 0.7017617850739425,
+      "equilibrium_volume_m3": 0.009750000000000005
+    },
+    "static_probes": [
+      {
+        "heave_from_reference_m": -0.12,
+        "center_z_m": 0.583,
+        "local_waterline_m": 0.92,
+        "displaced_volume_m3": 0.016931975362993717,
+        "buoyant_force_z_N": 166.10267831096837,
+        "weight_N": 95.64750000000001,
+        "force_balance_buoyancy_minus_weight_N": 70.45517831096836
+      },
+      {
+        "heave_from_reference_m": -0.074,
+        "center_z_m": 0.629,
+        "local_waterline_m": 0.874,
+        "displaced_volume_m3": 0.01488608759056485,
+        "buoyant_force_z_N": 146.03251926344117,
+        "weight_N": 95.64750000000001,
+        "force_balance_buoyancy_minus_weight_N": 50.385019263441166
+      },
+      {
+        "heave_from_reference_m": 0.0,
+        "center_z_m": 0.703,
+        "local_waterline_m": 0.8,
+        "displaced_volume_m3": 0.009662575156373995,
+        "buoyant_force_z_N": 94.78986228402889,
+        "weight_N": 95.64750000000001,
+        "force_balance_buoyancy_minus_weight_N": -0.8576377159711228
+      },
+      {
+        "heave_from_reference_m": 0.076,
+        "center_z_m": 0.7789999999999999,
+        "local_waterline_m": 0.7240000000000001,
+        "displaced_volume_m3": 0.004361116638784004,
+        "buoyant_force_z_N": 42.78255422647108,
+        "weight_N": 95.64750000000001,
+        "force_balance_buoyancy_minus_weight_N": -52.86494577352893
+      },
+      {
+        "heave_from_reference_m": 0.12,
+        "center_z_m": 0.823,
+        "local_waterline_m": 0.68,
+        "displaced_volume_m3": 0.0017936157198283399,
+        "buoyant_force_z_N": 17.595370211516013,
+        "weight_N": 95.64750000000001,
+        "force_balance_buoyancy_minus_weight_N": -78.052129788484
+      }
+    ]
+  },
+  "existing_dbc_tail_crosscheck": [
+    {
+      "case_id": "R3_F6_test14_float1_neg074_coarse",
+      "offset_name": "neg074",
+      "offset_m": -0.074,
+      "level": "coarse",
+      "source_latest_json": "campaigns/v0.1-candidate/runs/R3_F6_test14_float1_neg074_coarse/latest.json",
+      "input_status": "completed_existing_dbc_output",
+      "attempt_id": "20260907T015137.638234Z-13c6648b",
+      "tail_window_s": 1.0,
+      "tail_samples": 100,
+      "tail_end_time_s": 4.50025022898,
+      "tail_center_z_mean_m": 0.8557744902492659,
+      "tail_center_z_std_m": 0.00416509648147941,
+      "tail_heave_from_reference_mean_m": 0.15277449024926593,
+      "tail_fluid_force_z_mean_N": 95.55924250999999,
+      "tail_fluid_force_z_std_N": 0.9673069987538038,
+      "geometric_displaced_volume_at_tail_mean_m3": 0.0005069339127321141,
+      "geometric_hydrostatic_force_at_tail_mean_N": 4.973021683902039,
+      "force_implied_displaced_volume_m3": 0.00974100331396534,
+      "force_implied_minus_geometric_volume_m3": 0.009234069401233225,
+      "force_implied_to_geometric_volume_ratio": 19.21552902520631,
+      "recorded_force_minus_body_weight_N": -0.08825749000001792,
+      "source_floating_csv": "campaigns/v0.1-candidate/runs/R3_F6_test14_float1_neg074_coarse/attempts/20260907T015137.638234Z-13c6648b.complete/floating/Float1_mk20.csv"
+    },
+    {
+      "case_id": "R3_F6_test14_float1_neg074_medium",
+      "offset_name": "neg074",
+      "offset_m": -0.074,
+      "level": "medium",
+      "source_latest_json": "campaigns/v0.1-candidate/runs/R3_F6_test14_float1_neg074_medium/latest.json",
+      "input_status": "completed_existing_dbc_output",
+      "attempt_id": "20260907T015137.592715Z-d4141d07",
+      "tail_window_s": 1.0,
+      "tail_samples": 101,
+      "tail_end_time_s": 4.500072248991,
+      "tail_center_z_mean_m": 0.8651439520811336,
+      "tail_center_z_std_m": 0.004750078356801306,
+      "tail_heave_from_reference_mean_m": 0.16214395208113364,
+      "tail_fluid_force_z_mean_N": 95.56742823762377,
+      "tail_fluid_force_z_std_N": 1.18787821682052,
+      "geometric_displaced_volume_at_tail_mean_m3": 0.0002729784322628383,
+      "geometric_hydrostatic_force_at_tail_mean_N": 2.677918420498444,
+      "force_implied_displaced_volume_m3": 0.009741837740838305,
+      "force_implied_minus_geometric_volume_m3": 0.009468859308575467,
+      "force_implied_to_geometric_volume_ratio": 35.68720671477203,
+      "recorded_force_minus_body_weight_N": -0.08007176237623526,
+      "source_floating_csv": "campaigns/v0.1-candidate/runs/R3_F6_test14_float1_neg074_medium/attempts/20260907T015137.592715Z-d4141d07.complete/floating/Float1_mk20.csv"
+    },
+    {
+      "case_id": "R3_F6_test14_float1_neg074_fine",
+      "offset_name": "neg074",
+      "offset_m": -0.074,
+      "level": "fine",
+      "source_latest_json": "campaigns/v0.1-candidate/runs/R3_F6_test14_float1_neg074_fine/latest.json",
+      "input_status": "completed_existing_dbc_output",
+      "attempt_id": "20260907T015137.720319Z-79f9ee29",
+      "tail_window_s": 1.0,
+      "tail_samples": 101,
+      "tail_end_time_s": 4.500012249143,
+      "tail_center_z_mean_m": 0.8200239738005981,
+      "tail_center_z_std_m": 0.003274415736355018,
+      "tail_heave_from_reference_mean_m": 0.11702397380059815,
+      "tail_fluid_force_z_mean_N": 95.65633992079206,
+      "tail_fluid_force_z_std_N": 0.7932229082654528,
+      "geometric_displaced_volume_at_tail_mean_m3": 0.0019414196209803644,
+      "geometric_hydrostatic_force_at_tail_mean_N": 19.045326481817373,
+      "force_implied_displaced_volume_m3": 0.009750901113230587,
+      "force_implied_minus_geometric_volume_m3": 0.007809481492250223,
+      "force_implied_to_geometric_volume_ratio": 5.022562359963502,
+      "recorded_force_minus_body_weight_N": 0.008839920792055977,
+      "source_floating_csv": "campaigns/v0.1-candidate/runs/R3_F6_test14_float1_neg074_fine/attempts/20260907T015137.720319Z-79f9ee29.complete/floating/Float1_mk20.csv"
+    },
+    {
+      "case_id": "R3_F6_test14_float1_pos076_coarse",
+      "offset_name": "pos076",
+      "offset_m": 0.076,
+      "level": "coarse",
+      "source_latest_json": "campaigns/v0.1-candidate/runs/R3_F6_test14_float1_pos076_coarse/latest.json",
+      "input_status": "completed_existing_dbc_output",
+      "attempt_id": "20260907T015137.684308Z-e689d395",
+      "tail_window_s": 1.0,
+      "tail_samples": 100,
+      "tail_end_time_s": 4.500262556668,
+      "tail_center_z_mean_m": 0.7903495030012431,
+      "tail_center_z_std_m": 0.00015471251246672194,
+      "tail_heave_from_reference_mean_m": 0.08734950300124311,
+      "tail_fluid_force_z_mean_N": 95.64934386,
+      "tail_fluid_force_z_std_N": 0.07597721930158056,
+      "geometric_displaced_volume_at_tail_mean_m3": 0.003632030697412726,
+      "geometric_hydrostatic_force_at_tail_mean_N": 35.63022114161885,
+      "force_implied_displaced_volume_m3": 0.009750187957186544,
+      "force_implied_minus_geometric_volume_m3": 0.006118157259773818,
+      "force_implied_to_geometric_volume_ratio": 2.6845004267535737,
+      "recorded_force_minus_body_weight_N": 0.0018438599999939242,
+      "source_floating_csv": "campaigns/v0.1-candidate/runs/R3_F6_test14_float1_pos076_coarse/attempts/20260907T015137.684308Z-e689d395.complete/floating/Float1_mk20.csv"
+    },
+    {
+      "case_id": "R3_F6_test14_float1_pos076_medium",
+      "offset_name": "pos076",
+      "offset_m": 0.076,
+      "level": "medium",
+      "source_latest_json": "campaigns/v0.1-candidate/runs/R3_F6_test14_float1_pos076_medium/latest.json",
+      "input_status": "completed_existing_dbc_output",
+      "attempt_id": "20260907T015246.332415Z-07f28bff",
+      "tail_window_s": 1.0,
+      "tail_samples": 100,
+      "tail_end_time_s": 4.500121128181,
+      "tail_center_z_mean_m": 0.809696857415355,
+      "tail_center_z_std_m": 0.0006358177757570551,
+      "tail_heave_from_reference_mean_m": 0.10669685741535506,
+      "tail_fluid_force_z_mean_N": 95.67456729999998,
+      "tail_fluid_force_z_std_N": 0.14315082115471783,
+      "geometric_displaced_volume_at_tail_mean_m3": 0.002487952510253764,
+      "geometric_hydrostatic_force_at_tail_mean_N": 24.406814125589424,
+      "force_implied_displaced_volume_m3": 0.009752759153924564,
+      "force_implied_minus_geometric_volume_m3": 0.007264806643670799,
+      "force_implied_to_geometric_volume_ratio": 3.9199940970456106,
+      "recorded_force_minus_body_weight_N": 0.027067299999970373,
+      "source_floating_csv": "campaigns/v0.1-candidate/runs/R3_F6_test14_float1_pos076_medium/attempts/20260907T015246.332415Z-07f28bff.complete/floating/Float1_mk20.csv"
+    },
+    {
+      "case_id": "R3_F6_test14_float1_pos076_fine",
+      "offset_name": "pos076",
+      "offset_m": 0.076,
+      "level": "fine",
+      "source_latest_json": "campaigns/v0.1-candidate/runs/R3_F6_test14_float1_pos076_fine/latest.json",
+      "input_status": "completed_existing_dbc_output",
+      "attempt_id": "20260907T015246.350594Z-139097a5",
+      "tail_window_s": 1.0,
+      "tail_samples": 100,
+      "tail_end_time_s": 4.500178669025,
+      "tail_center_z_mean_m": 0.7737842404833059,
+      "tail_center_z_std_m": 0.0002220901032218197,
+      "tail_heave_from_reference_mean_m": 0.0707842404833059,
+      "tail_fluid_force_z_mean_N": 95.65332968999999,
+      "tail_fluid_force_z_std_N": 0.09854780181391073,
+      "geometric_displaced_volume_at_tail_mean_m3": 0.004707423736236053,
+      "geometric_hydrostatic_force_at_tail_mean_N": 46.17982685247568,
+      "force_implied_displaced_volume_m3": 0.009750594259938837,
+      "force_implied_minus_geometric_volume_m3": 0.005043170523702785,
+      "force_implied_to_geometric_volume_ratio": 2.0713228309748866,
+      "recorded_force_minus_body_weight_N": 0.005829689999984566,
+      "source_floating_csv": "campaigns/v0.1-candidate/runs/R3_F6_test14_float1_pos076_fine/attempts/20260907T015246.350594Z-139097a5.complete/floating/Float1_mk20.csv"
+    }
+  ],
+  "diagnostic_summary": {
+    "completed_case_count": 6,
+    "case_count": 6,
+    "geometric_gap_volume_range_m3": [
+      0.005043170523702785,
+      0.009468859308575467
+    ],
+    "force_implied_to_geometric_volume_ratio_range": [
+      2.0713228309748866,
+      35.68720671477203
+    ],
+    "all_recorded_tail_forces_within_1N_of_body_weight": true
+  },
+  "conclusion": {
+    "finding": "The static outer-hull/mass model predicts a near-zero reference equilibrium (about 1 mm), while the existing DBC tails sit 70-120 mm above it and still report approximately body-weight upward force.",
+    "interpretation": "A boundary-pressure/effective-buoyancy issue is a prioritized next hypothesis; geometry/mass gross error is not the leading explanation from this preflight.",
+    "physical_acceptance_claim": false,
+    "mdbc_claim": false
+  },
+  "open_blockers": [
+    "Current 3-D Test 14 DBC proxy remains scientifically rejected; this diagnostic cannot promote it.",
+    "Build and verify complete mDBC normals/ghost geometry for the transformed Float1 outer hull before any mDBC attribution.",
+    "Run a matched static or hydrostatic-relaxation DBC-versus-mDBC comparison with force decomposition.",
+    "Repeat a larger-basin/damping sensitivity because the existing 2 m tank is a computational proxy.",
+    "Repeat body-surface resolution and release-height lattice-phase controls at dp <= 0.02 m.",
+    "Confirm the free-surface level and outer-hull/mass convention in the matched solver setup."
+  ]
+}
