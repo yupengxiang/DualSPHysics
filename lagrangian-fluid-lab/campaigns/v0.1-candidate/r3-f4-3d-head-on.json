@@ -1,0 +1,1944 @@
+{
+  "schema_version": 1,
+  "scope": "R3 F4 isolated 3-D head-on liquid-column observation-path probe",
+  "execution_status": "complete",
+  "acceptance_status": "candidate_observations_only",
+  "formal_release_authorized": false,
+  "upstream_source": {
+    "case_definition": "cases/F4/F4_head_on_columns/F4_head_on_columns_Def.xml",
+    "case_definition_sha256": "38edd28b2028946e88cfe06d2f546b114042e032a39a59c86a245f2586e4f4ac",
+    "solver_binary": "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "solver_binary_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+    "gencase_binary": "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+    "gencase_binary_sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226",
+    "measuretool_binary": "vendor/official/DualSPHysics_v5.4/bin/linux/MeasureTool_linux64",
+    "measuretool_binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00",
+    "computeforces_binary": "vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+    "computeforces_binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+  },
+  "observation_contract": {
+    "dimension": "3D",
+    "particle_output_cadence_s": 0.01,
+    "requested_time_end_s": 0.55,
+    "fixed_point_count": 7,
+    "fixed_point_fields": [
+      "pressure",
+      "velocity",
+      "density",
+      "kernel_correction"
+    ],
+    "pressure_units": "Pa",
+    "velocity_units": "m/s",
+    "density_units": "kg/m^3",
+    "kernel_correction_units": "dimensionless kernel sum",
+    "compute_forces_requested_mk": 10,
+    "force_units": "N",
+    "force_mk_semantics": "physical generated Mk passed to ComputeForces; source mkbound is recorded separately"
+  },
+  "resolution_policy": {
+    "candidate_ladder_m": {
+      "coarse": 0.04,
+      "medium": 0.03,
+      "fine": 0.02
+    },
+    "fixed_physics_required": true,
+    "no_admission_threshold_declared": true
+  },
+  "gpu_policy": {
+    "allowed_gpu_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "gpu_uuids": {
+      "4": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+      "5": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+      "6": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+      "7": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51"
+    },
+    "source": "campaigns/v0.1-candidate/w00-inventory.json"
+  },
+  "prepared_cases": [
+    {
+      "label": "coarse",
+      "dp_m": 0.04,
+      "status": "prepared",
+      "returncode": 0,
+      "elapsed_seconds": 0.0385,
+      "fluid_particles": 432,
+      "total_particles": 1973,
+      "case_prefix": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/coarse__dp-0p04__tmax-0p55__tout-0p01/generated/F4_head_on_columns_coarse",
+      "isolated_source": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/coarse__dp-0p04__tmax-0p55__tout-0p01/input/F4_head_on_columns_Def.xml",
+      "generated_xml": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/coarse__dp-0p04__tmax-0p55__tout-0p01/generated/F4_head_on_columns_coarse.xml",
+      "definition": {
+        "source_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/coarse__dp-0p04__tmax-0p55__tout-0p01/input/F4_head_on_columns_Def.xml",
+        "source_sha256": "38edd28b2028946e88cfe06d2f546b114042e032a39a59c86a245f2586e4f4ac",
+        "configured_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/coarse__dp-0p04__tmax-0p55__tout-0p01/configured/F4_head_on_columns_coarse_Def.xml",
+        "configured_sha256": "60ce02cc4d36cd02be381cb2fc95a2fa20443f68ef51c2188e2f44bc7e9e456b",
+        "time_max_s": 0.55,
+        "particle_output_cadence_s": 0.01,
+        "changed_parameters": {
+          "TimeMax": "0.55",
+          "TimeOut": "0.01"
+        },
+        "dimension": "3D",
+        "fluid_initial_velocities_m_per_s": {
+          "mkfluid:0": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "mkfluid:1": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        "requested_compute_forces_mk": 10
+      },
+      "generated_particle_mks": {
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1,
+        "fixed": [
+          {
+            "mkbound": 0,
+            "mk": 17,
+            "count": 1541
+          }
+        ],
+        "fluid": [
+          {
+            "mkfluid": 0,
+            "mk": 1,
+            "count": 216
+          },
+          {
+            "mkfluid": 1,
+            "mk": 2,
+            "count": 216
+          }
+        ],
+        "effective_boundary_mks": [
+          17
+        ],
+        "effective_fluid_mks": [
+          1,
+          2
+        ]
+      },
+      "log": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/coarse__dp-0p04__tmax-0p55__tout-0p01/gencase.stdout.log",
+      "command": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/coarse__dp-0p04__tmax-0p55__tout-0p01/configured/F4_head_on_columns_coarse_Def",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/coarse__dp-0p04__tmax-0p55__tout-0p01/generated/F4_head_on_columns_coarse",
+        "-dp:0.04",
+        "-save:all"
+      ],
+      "issues": [
+        "requested ComputeForces Mk=10 is absent from generated boundary Mks=[17]"
+      ]
+    },
+    {
+      "label": "medium",
+      "dp_m": 0.03,
+      "status": "prepared",
+      "returncode": 0,
+      "elapsed_seconds": 0.0101,
+      "fluid_particles": 896,
+      "total_particles": 3590,
+      "case_prefix": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/medium__dp-0p03__tmax-0p55__tout-0p01/generated/F4_head_on_columns_medium",
+      "isolated_source": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/medium__dp-0p03__tmax-0p55__tout-0p01/input/F4_head_on_columns_Def.xml",
+      "generated_xml": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/medium__dp-0p03__tmax-0p55__tout-0p01/generated/F4_head_on_columns_medium.xml",
+      "definition": {
+        "source_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/medium__dp-0p03__tmax-0p55__tout-0p01/input/F4_head_on_columns_Def.xml",
+        "source_sha256": "38edd28b2028946e88cfe06d2f546b114042e032a39a59c86a245f2586e4f4ac",
+        "configured_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/medium__dp-0p03__tmax-0p55__tout-0p01/configured/F4_head_on_columns_medium_Def.xml",
+        "configured_sha256": "60ce02cc4d36cd02be381cb2fc95a2fa20443f68ef51c2188e2f44bc7e9e456b",
+        "time_max_s": 0.55,
+        "particle_output_cadence_s": 0.01,
+        "changed_parameters": {
+          "TimeMax": "0.55",
+          "TimeOut": "0.01"
+        },
+        "dimension": "3D",
+        "fluid_initial_velocities_m_per_s": {
+          "mkfluid:0": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "mkfluid:1": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        "requested_compute_forces_mk": 10
+      },
+      "generated_particle_mks": {
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1,
+        "fixed": [
+          {
+            "mkbound": 0,
+            "mk": 17,
+            "count": 2694
+          }
+        ],
+        "fluid": [
+          {
+            "mkfluid": 0,
+            "mk": 1,
+            "count": 448
+          },
+          {
+            "mkfluid": 1,
+            "mk": 2,
+            "count": 448
+          }
+        ],
+        "effective_boundary_mks": [
+          17
+        ],
+        "effective_fluid_mks": [
+          1,
+          2
+        ]
+      },
+      "log": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/medium__dp-0p03__tmax-0p55__tout-0p01/gencase.stdout.log",
+      "command": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/medium__dp-0p03__tmax-0p55__tout-0p01/configured/F4_head_on_columns_medium_Def",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/medium__dp-0p03__tmax-0p55__tout-0p01/generated/F4_head_on_columns_medium",
+        "-dp:0.03",
+        "-save:all"
+      ],
+      "issues": [
+        "requested ComputeForces Mk=10 is absent from generated boundary Mks=[17]"
+      ]
+    },
+    {
+      "label": "fine",
+      "dp_m": 0.02,
+      "status": "prepared",
+      "returncode": 0,
+      "elapsed_seconds": 0.0136,
+      "fluid_particles": 2640,
+      "total_particles": 8721,
+      "case_prefix": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/fine__dp-0p02__tmax-0p55__tout-0p01/generated/F4_head_on_columns_fine",
+      "isolated_source": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/fine__dp-0p02__tmax-0p55__tout-0p01/input/F4_head_on_columns_Def.xml",
+      "generated_xml": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/fine__dp-0p02__tmax-0p55__tout-0p01/generated/F4_head_on_columns_fine.xml",
+      "definition": {
+        "source_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/fine__dp-0p02__tmax-0p55__tout-0p01/input/F4_head_on_columns_Def.xml",
+        "source_sha256": "38edd28b2028946e88cfe06d2f546b114042e032a39a59c86a245f2586e4f4ac",
+        "configured_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/fine__dp-0p02__tmax-0p55__tout-0p01/configured/F4_head_on_columns_fine_Def.xml",
+        "configured_sha256": "60ce02cc4d36cd02be381cb2fc95a2fa20443f68ef51c2188e2f44bc7e9e456b",
+        "time_max_s": 0.55,
+        "particle_output_cadence_s": 0.01,
+        "changed_parameters": {
+          "TimeMax": "0.55",
+          "TimeOut": "0.01"
+        },
+        "dimension": "3D",
+        "fluid_initial_velocities_m_per_s": {
+          "mkfluid:0": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "mkfluid:1": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        "requested_compute_forces_mk": 10
+      },
+      "generated_particle_mks": {
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1,
+        "fixed": [
+          {
+            "mkbound": 0,
+            "mk": 17,
+            "count": 6081
+          }
+        ],
+        "fluid": [
+          {
+            "mkfluid": 0,
+            "mk": 1,
+            "count": 1320
+          },
+          {
+            "mkfluid": 1,
+            "mk": 2,
+            "count": 1320
+          }
+        ],
+        "effective_boundary_mks": [
+          17
+        ],
+        "effective_fluid_mks": [
+          1,
+          2
+        ]
+      },
+      "log": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/fine__dp-0p02__tmax-0p55__tout-0p01/gencase.stdout.log",
+      "command": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/fine__dp-0p02__tmax-0p55__tout-0p01/configured/F4_head_on_columns_fine_Def",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/fine__dp-0p02__tmax-0p55__tout-0p01/generated/F4_head_on_columns_fine",
+        "-dp:0.02",
+        "-save:all"
+      ],
+      "issues": [
+        "requested ComputeForces Mk=10 is absent from generated boundary Mks=[17]"
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "label": "coarse",
+      "dp_m": 0.04,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 2.4531,
+      "fluid_particles": 432,
+      "total_particles": 1973,
+      "case_prefix": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/coarse__dp-0p04__tmax-0p55__tout-0p01/generated/F4_head_on_columns_coarse",
+      "isolated_source": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/coarse__dp-0p04__tmax-0p55__tout-0p01/input/F4_head_on_columns_Def.xml",
+      "generated_xml": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/coarse__dp-0p04__tmax-0p55__tout-0p01/generated/F4_head_on_columns_coarse.xml",
+      "definition": {
+        "source_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/coarse__dp-0p04__tmax-0p55__tout-0p01/input/F4_head_on_columns_Def.xml",
+        "source_sha256": "38edd28b2028946e88cfe06d2f546b114042e032a39a59c86a245f2586e4f4ac",
+        "configured_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/coarse__dp-0p04__tmax-0p55__tout-0p01/configured/F4_head_on_columns_coarse_Def.xml",
+        "configured_sha256": "60ce02cc4d36cd02be381cb2fc95a2fa20443f68ef51c2188e2f44bc7e9e456b",
+        "time_max_s": 0.55,
+        "particle_output_cadence_s": 0.01,
+        "changed_parameters": {
+          "TimeMax": "0.55",
+          "TimeOut": "0.01"
+        },
+        "dimension": "3D",
+        "fluid_initial_velocities_m_per_s": {
+          "mkfluid:0": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "mkfluid:1": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        "requested_compute_forces_mk": 10
+      },
+      "generated_particle_mks": {
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1,
+        "fixed": [
+          {
+            "mkbound": 0,
+            "mk": 17,
+            "count": 1541
+          }
+        ],
+        "fluid": [
+          {
+            "mkfluid": 0,
+            "mk": 1,
+            "count": 216
+          },
+          {
+            "mkfluid": 1,
+            "mk": 2,
+            "count": 216
+          }
+        ],
+        "effective_boundary_mks": [
+          17
+        ],
+        "effective_fluid_mks": [
+          1,
+          2
+        ]
+      },
+      "log": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/solver.stdout.log",
+      "command": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+        "-gpu:4",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/coarse__dp-0p04__tmax-0p55__tout-0p01/generated/F4_head_on_columns_coarse",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01",
+        "-tmax:0.55",
+        "-tout:0.01"
+      ],
+      "issues": [
+        "requested ComputeForces Mk=10 is absent from generated boundary Mks=[17]"
+      ],
+      "gpu": 4,
+      "gpu_uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+      "output_dir": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01",
+      "frames": 56,
+      "excluded_particles": 0,
+      "output_bytes": 3753106,
+      "observations": {
+        "status": "completed_with_force_target_mismatch",
+        "data_dir": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/data",
+        "tools": {
+          "measure": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/MeasureTool_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/data",
+              "-filexml",
+              "AUTO",
+              "-pointsdef:pt=0.23:0.2:0.33,pt=0.97:0.2:0.33,pt=0.33:0.2:0.33,pt=0.87:0.2:0.33,pt=0.6:0.2:0.33,pt=0.6:0.2:0.27,pt=0.6:0.2:0.39",
+              "-onlytype:-all,+fluid",
+              "-vars:-all,+vel,+press,+rhop,+kcorr",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/observations/fixed_points"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.0198,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/observations/measure.stdout.log",
+            "status": "completed",
+            "stdout_tail": "39\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0040\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0041\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0042\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0043\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0044\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0045\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0046\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0047\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0048\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0049\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0050\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0051\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0052\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0053\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0054\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0055\nSaveCSV> .../observations/fixed_points_<Var>.csv\n\nTime of operation: 0.015 sec. (16 threads)\n",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          },
+          "compute_forces_requested_mk10": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/data",
+              "-filexml",
+              "AUTO",
+              "-onlymk:10",
+              "-viscoauto",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/observations/wall_force_requested_mk10"
+            ],
+            "returncode": 1,
+            "elapsed_seconds": 0.0049,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/observations/forces_requested_mk10.stdout.log",
+            "status": "failed",
+            "stdout_tail": "BUSINESS INTERRUPTION) HOWEVER CAUSED AND\n ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF\n THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\n\nComputeForces v5.4.266.02 (07-05-2025)\n=======================================\nLoadDsphConfig> .../bin/linux/DsphConfig.xml\nThreads for parallel execution: 16\nExecutes RunPartsVRes code.\nLoadData> /home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/data/Part_Head.ibi4\nLoadData> /home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/data/Part_0000.bi4\nAutomatic last PART selection: 55\nLoadData> PART_0000\n\n*** Exception (JComputeForces::RunPartsVRes) at JMDominguez/codes/DSTools/source/JComputeForces.cpp:833\nText: There are no boundary particles selected according to the filters applied.\n\n\n*** \n*** Exception (JComputeForces::RunPartsVRes) at JMDominguez/codes/DSTools/source/JComputeForces.cpp:833\nText: There are no boundary particles selected according to the filters applied.\n\n",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          },
+          "compute_forces_effective_fallback": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/data",
+              "-filexml",
+              "AUTO",
+              "-onlymk:17",
+              "-viscoauto",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/observations/wall_force_effective_mk17"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.0417,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/observations/forces_effective_mk17.stdout.log",
+            "status": "completed",
+            "stdout_tail": "541 x 1,973\nLoadData> PART_0030\nForces> n:1,541 x 1,973\nLoadData> PART_0031\nForces> n:1,541 x 1,973\nLoadData> PART_0032\nForces> n:1,541 x 1,973\nLoadData> PART_0033\nForces> n:1,541 x 1,973\nLoadData> PART_0034\nForces> n:1,541 x 1,973\nLoadData> PART_0035\nForces> n:1,541 x 1,973\nLoadData> PART_0036\nForces> n:1,541 x 1,973\nLoadData> PART_0037\nForces> n:1,541 x 1,973\nLoadData> PART_0038\nForces> n:1,541 x 1,973\nLoadData> PART_0039\nForces> n:1,541 x 1,973\nLoadData> PART_0040\nForces> n:1,541 x 1,973\nLoadData> PART_0041\nForces> n:1,541 x 1,973\nLoadData> PART_0042\nForces> n:1,541 x 1,973\nLoadData> PART_0043\nForces> n:1,541 x 1,973\nLoadData> PART_0044\nForces> n:1,541 x 1,973\nLoadData> PART_0045\nForces> n:1,541 x 1,973\nLoadData> PART_0046\nForces> n:1,541 x 1,973\nLoadData> PART_0047\nForces> n:1,541 x 1,973\nLoadData> PART_0048\nForces> n:1,541 x 1,973\nLoadData> PART_0049\nForces> n:1,541 x 1,973\nLoadData> PART_0050\nForces> n:1,541 x 1,973\nLoadData> PART_0051\nForces> n:1,541 x 1,973\nLoadData> PART_0052\nForces> n:1,541 x 1,973\nLoadData> PART_0053\nForces> n:1,541 x 1,973\nLoadData> PART_0054\nForces> n:1,541 x 1,973\nLoadData> PART_0055\nForces> n:1,541 x 1,973\n\nTime of operation: 0.039 sec. (16 threads)\n"
+          }
+        },
+        "fixed_points": {
+          "points": [
+            {
+              "name": "left_column_center",
+              "position_m": [
+                0.23,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "right_column_center",
+              "position_m": [
+                0.97,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "left_leading_face",
+              "position_m": [
+                0.33,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "right_leading_face",
+              "position_m": [
+                0.87,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "collision_center",
+              "position_m": [
+                0.6,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "collision_lower",
+              "position_m": [
+                0.6,
+                0.2,
+                0.27
+              ]
+            },
+            {
+              "name": "collision_upper",
+              "position_m": [
+                0.6,
+                0.2,
+                0.39
+              ]
+            }
+          ],
+          "pressure": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/observations/fixed_points_Press.csv",
+            "exists": true,
+            "rows": 56,
+            "columns": [
+              "left_column_center",
+              "right_column_center",
+              "left_leading_face",
+              "right_leading_face",
+              "collision_center",
+              "collision_lower",
+              "collision_upper"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.550439,
+            "dt_median_s": 0.010026000000000007,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "left_column_center",
+                "peak_abs": 1079.16,
+                "peak_signed": 1079.16,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "right_column_center",
+                "peak_abs": 1079.16,
+                "peak_signed": 1079.16,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "left_leading_face",
+                "peak_abs": 1079.24,
+                "peak_signed": 1079.24,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "right_leading_face",
+                "peak_abs": 1079.24,
+                "peak_signed": 1079.24,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "collision_center",
+                "peak_abs": 1762.23,
+                "peak_signed": -1762.23,
+                "peak_time_s": 0.490061
+              },
+              {
+                "name": "collision_lower",
+                "peak_abs": 9122.45,
+                "peak_signed": 9122.45,
+                "peak_time_s": 0.28017
+              },
+              {
+                "name": "collision_upper",
+                "peak_abs": 3895.27,
+                "peak_signed": -3895.27,
+                "peak_time_s": 0.400011
+              }
+            ]
+          },
+          "velocity": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/observations/fixed_points_Vel.csv",
+            "exists": true,
+            "rows": 56,
+            "columns": [
+              "left_column_center",
+              "right_column_center",
+              "left_leading_face",
+              "right_leading_face",
+              "collision_center",
+              "collision_lower",
+              "collision_upper"
+            ],
+            "components_per_point": 3,
+            "time_start_s": 0.0,
+            "time_end_s": 0.550439,
+            "dt_median_s": 0.010026000000000007,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "left_column_center",
+                "peak_speed": 1.5266309325435568,
+                "peak_time_s": 0.120042
+              },
+              {
+                "name": "right_column_center",
+                "peak_speed": 1.5266309346044347,
+                "peak_time_s": 0.120042
+              },
+              {
+                "name": "left_leading_face",
+                "peak_speed": 1.824972021270474,
+                "peak_time_s": 0.160063
+              },
+              {
+                "name": "right_leading_face",
+                "peak_speed": 1.8249720289013636,
+                "peak_time_s": 0.160063
+              },
+              {
+                "name": "collision_center",
+                "peak_speed": 1.3966550739030952,
+                "peak_time_s": 0.550439
+              },
+              {
+                "name": "collision_lower",
+                "peak_speed": 1.2851988449638272,
+                "peak_time_s": 0.550439
+              },
+              {
+                "name": "collision_upper",
+                "peak_speed": 1.2574061922664674,
+                "peak_time_s": 0.530076
+              }
+            ]
+          },
+          "density": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/observations/fixed_points_Rhop.csv",
+            "exists": true,
+            "rows": 56,
+            "columns": [
+              "left_column_center",
+              "right_column_center",
+              "left_leading_face",
+              "right_leading_face",
+              "collision_center",
+              "collision_lower",
+              "collision_upper"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.550439,
+            "dt_median_s": 0.010026000000000007,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "left_column_center",
+                "peak_abs": 1001.37,
+                "peak_signed": 1001.37,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "right_column_center",
+                "peak_abs": 1001.37,
+                "peak_signed": 1001.37,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "left_leading_face",
+                "peak_abs": 1001.37,
+                "peak_signed": 1001.37,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "right_leading_face",
+                "peak_abs": 1001.37,
+                "peak_signed": 1001.37,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "collision_center",
+                "peak_abs": 1001.09,
+                "peak_signed": 1001.09,
+                "peak_time_s": 0.500327
+              },
+              {
+                "name": "collision_lower",
+                "peak_abs": 1010.42,
+                "peak_signed": 1010.42,
+                "peak_time_s": 0.28017
+              },
+              {
+                "name": "collision_upper",
+                "peak_abs": 1004.38,
+                "peak_signed": 1004.38,
+                "peak_time_s": 0.390106
+              }
+            ]
+          },
+          "kernel_correction": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/observations/fixed_points_Kcorr.csv",
+            "exists": true,
+            "rows": 56,
+            "columns": [
+              "left_column_center",
+              "right_column_center",
+              "left_leading_face",
+              "right_leading_face",
+              "collision_center",
+              "collision_lower",
+              "collision_upper"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.550439,
+            "dt_median_s": 0.010026000000000007,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "left_column_center",
+                "peak_abs": 0.999287,
+                "peak_signed": 0.999287,
+                "peak_time_s": 0.0203793
+              },
+              {
+                "name": "right_column_center",
+                "peak_abs": 0.999287,
+                "peak_signed": 0.999287,
+                "peak_time_s": 0.0203793
+              },
+              {
+                "name": "left_leading_face",
+                "peak_abs": 0.998013,
+                "peak_signed": 0.998013,
+                "peak_time_s": 0.090098
+              },
+              {
+                "name": "right_leading_face",
+                "peak_abs": 0.998013,
+                "peak_signed": 0.998013,
+                "peak_time_s": 0.090098
+              },
+              {
+                "name": "collision_center",
+                "peak_abs": 0.643398,
+                "peak_signed": 0.643398,
+                "peak_time_s": 0.540369
+              },
+              {
+                "name": "collision_lower",
+                "peak_abs": 0.554401,
+                "peak_signed": 0.554401,
+                "peak_time_s": 0.550439
+              },
+              {
+                "name": "collision_upper",
+                "peak_abs": 0.669463,
+                "peak_signed": 0.669463,
+                "peak_time_s": 0.5103
+              }
+            ],
+            "minimum": 0.0,
+            "maximum": 0.999287,
+            "zero_fraction": 0.47959183673469385,
+            "support_interpretation": "Kcorr=0 may be an interpolation dummy when support is insufficient; it is not a physical zero."
+          }
+        },
+        "wall_force": {
+          "requested_mk": 10,
+          "requested": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/observations/wall_force_requested_mk10.csv",
+            "exists": false,
+            "rows": 0,
+            "header": [],
+            "finite_fraction": null,
+            "units": "N (3-D force)",
+            "issues": [
+              "force output has fewer than two numeric rows"
+            ]
+          },
+          "effective_fallback_mk": 17,
+          "effective_fallback": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/coarse__tmax-0p55__tout-0p01/observations/wall_force_effective_mk17.csv",
+            "exists": true,
+            "rows": 56,
+            "header": [
+              "Part",
+              "Time [s]",
+              "Np",
+              "ForceFluid.x [N]",
+              "ForceFluid.y [N]",
+              "ForceFluid.z [N]",
+              "ForceFluid [N]"
+            ],
+            "finite_fraction": 1.0,
+            "units": "N (3-D force)",
+            "issues": [],
+            "time_start_s": 0.0,
+            "time_end_s": 0.550439,
+            "dt_median_s": 0.010026000000000007,
+            "peak_force_abs_n": 1699.219027142,
+            "peak_force_signed_n": 1699.219027142,
+            "peak_force_time_s": 0.240001,
+            "peak_force_vector_n": [
+              4.756926311953e-05,
+              62.10103244285,
+              -1698.083850689
+            ]
+          },
+          "contract_status": "requested_target_failed_effective_mk_completed",
+          "interpretation": "The requested Mk=10 target is the explicit contract.  An effective-Mk fallback is diagnostic only and does not rewrite the requested target."
+        },
+        "issues": [
+          "ComputeForces requested Mk=10 is absent from the generated Mk mapping."
+        ]
+      }
+    },
+    {
+      "label": "medium",
+      "dp_m": 0.03,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 2.6019,
+      "fluid_particles": 896,
+      "total_particles": 3590,
+      "case_prefix": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/medium__dp-0p03__tmax-0p55__tout-0p01/generated/F4_head_on_columns_medium",
+      "isolated_source": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/medium__dp-0p03__tmax-0p55__tout-0p01/input/F4_head_on_columns_Def.xml",
+      "generated_xml": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/medium__dp-0p03__tmax-0p55__tout-0p01/generated/F4_head_on_columns_medium.xml",
+      "definition": {
+        "source_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/medium__dp-0p03__tmax-0p55__tout-0p01/input/F4_head_on_columns_Def.xml",
+        "source_sha256": "38edd28b2028946e88cfe06d2f546b114042e032a39a59c86a245f2586e4f4ac",
+        "configured_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/medium__dp-0p03__tmax-0p55__tout-0p01/configured/F4_head_on_columns_medium_Def.xml",
+        "configured_sha256": "60ce02cc4d36cd02be381cb2fc95a2fa20443f68ef51c2188e2f44bc7e9e456b",
+        "time_max_s": 0.55,
+        "particle_output_cadence_s": 0.01,
+        "changed_parameters": {
+          "TimeMax": "0.55",
+          "TimeOut": "0.01"
+        },
+        "dimension": "3D",
+        "fluid_initial_velocities_m_per_s": {
+          "mkfluid:0": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "mkfluid:1": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        "requested_compute_forces_mk": 10
+      },
+      "generated_particle_mks": {
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1,
+        "fixed": [
+          {
+            "mkbound": 0,
+            "mk": 17,
+            "count": 2694
+          }
+        ],
+        "fluid": [
+          {
+            "mkfluid": 0,
+            "mk": 1,
+            "count": 448
+          },
+          {
+            "mkfluid": 1,
+            "mk": 2,
+            "count": 448
+          }
+        ],
+        "effective_boundary_mks": [
+          17
+        ],
+        "effective_fluid_mks": [
+          1,
+          2
+        ]
+      },
+      "log": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/solver.stdout.log",
+      "command": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+        "-gpu:5",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/medium__dp-0p03__tmax-0p55__tout-0p01/generated/F4_head_on_columns_medium",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01",
+        "-tmax:0.55",
+        "-tout:0.01"
+      ],
+      "issues": [
+        "requested ComputeForces Mk=10 is absent from generated boundary Mks=[17]"
+      ],
+      "gpu": 5,
+      "gpu_uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+      "output_dir": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01",
+      "frames": 56,
+      "excluded_particles": 0,
+      "output_bytes": 6651530,
+      "observations": {
+        "status": "completed_with_force_target_mismatch",
+        "data_dir": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/data",
+        "tools": {
+          "measure": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/MeasureTool_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/data",
+              "-filexml",
+              "AUTO",
+              "-pointsdef:pt=0.23:0.2:0.33,pt=0.97:0.2:0.33,pt=0.33:0.2:0.33,pt=0.87:0.2:0.33,pt=0.6:0.2:0.33,pt=0.6:0.2:0.27,pt=0.6:0.2:0.39",
+              "-onlytype:-all,+fluid",
+              "-vars:-all,+vel,+press,+rhop,+kcorr",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/observations/fixed_points"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.0203,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/observations/measure.stdout.log",
+            "status": "completed",
+            "stdout_tail": "39\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0040\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0041\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0042\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0043\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0044\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0045\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0046\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0047\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0048\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0049\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0050\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0051\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0052\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0053\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0054\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0055\nSaveCSV> .../observations/fixed_points_<Var>.csv\n\nTime of operation: 0.016 sec. (16 threads)\n",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          },
+          "compute_forces_requested_mk10": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/data",
+              "-filexml",
+              "AUTO",
+              "-onlymk:10",
+              "-viscoauto",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/observations/wall_force_requested_mk10"
+            ],
+            "returncode": 1,
+            "elapsed_seconds": 0.0037,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/observations/forces_requested_mk10.stdout.log",
+            "status": "failed",
+            "stdout_tail": "BUSINESS INTERRUPTION) HOWEVER CAUSED AND\n ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF\n THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\n\nComputeForces v5.4.266.02 (07-05-2025)\n=======================================\nLoadDsphConfig> .../bin/linux/DsphConfig.xml\nThreads for parallel execution: 16\nExecutes RunPartsVRes code.\nLoadData> /home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/data/Part_Head.ibi4\nLoadData> /home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/data/Part_0000.bi4\nAutomatic last PART selection: 55\nLoadData> PART_0000\n\n*** Exception (JComputeForces::RunPartsVRes) at JMDominguez/codes/DSTools/source/JComputeForces.cpp:833\nText: There are no boundary particles selected according to the filters applied.\n\n\n*** \n*** Exception (JComputeForces::RunPartsVRes) at JMDominguez/codes/DSTools/source/JComputeForces.cpp:833\nText: There are no boundary particles selected according to the filters applied.\n\n",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          },
+          "compute_forces_effective_fallback": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/data",
+              "-filexml",
+              "AUTO",
+              "-onlymk:17",
+              "-viscoauto",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/observations/wall_force_effective_mk17"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.0606,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/observations/forces_effective_mk17.stdout.log",
+            "status": "completed",
+            "stdout_tail": "694 x 3,590\nLoadData> PART_0030\nForces> n:2,694 x 3,590\nLoadData> PART_0031\nForces> n:2,694 x 3,590\nLoadData> PART_0032\nForces> n:2,694 x 3,590\nLoadData> PART_0033\nForces> n:2,694 x 3,590\nLoadData> PART_0034\nForces> n:2,694 x 3,590\nLoadData> PART_0035\nForces> n:2,694 x 3,590\nLoadData> PART_0036\nForces> n:2,694 x 3,590\nLoadData> PART_0037\nForces> n:2,694 x 3,590\nLoadData> PART_0038\nForces> n:2,694 x 3,590\nLoadData> PART_0039\nForces> n:2,694 x 3,590\nLoadData> PART_0040\nForces> n:2,694 x 3,590\nLoadData> PART_0041\nForces> n:2,694 x 3,590\nLoadData> PART_0042\nForces> n:2,694 x 3,590\nLoadData> PART_0043\nForces> n:2,694 x 3,590\nLoadData> PART_0044\nForces> n:2,694 x 3,590\nLoadData> PART_0045\nForces> n:2,694 x 3,590\nLoadData> PART_0046\nForces> n:2,694 x 3,590\nLoadData> PART_0047\nForces> n:2,694 x 3,590\nLoadData> PART_0048\nForces> n:2,694 x 3,590\nLoadData> PART_0049\nForces> n:2,694 x 3,590\nLoadData> PART_0050\nForces> n:2,694 x 3,590\nLoadData> PART_0051\nForces> n:2,694 x 3,590\nLoadData> PART_0052\nForces> n:2,694 x 3,590\nLoadData> PART_0053\nForces> n:2,694 x 3,590\nLoadData> PART_0054\nForces> n:2,694 x 3,590\nLoadData> PART_0055\nForces> n:2,694 x 3,590\n\nTime of operation: 0.058 sec. (16 threads)\n"
+          }
+        },
+        "fixed_points": {
+          "points": [
+            {
+              "name": "left_column_center",
+              "position_m": [
+                0.23,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "right_column_center",
+              "position_m": [
+                0.97,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "left_leading_face",
+              "position_m": [
+                0.33,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "right_leading_face",
+              "position_m": [
+                0.87,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "collision_center",
+              "position_m": [
+                0.6,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "collision_lower",
+              "position_m": [
+                0.6,
+                0.2,
+                0.27
+              ]
+            },
+            {
+              "name": "collision_upper",
+              "position_m": [
+                0.6,
+                0.2,
+                0.39
+              ]
+            }
+          ],
+          "pressure": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/observations/fixed_points_Press.csv",
+            "exists": true,
+            "rows": 56,
+            "columns": [
+              "left_column_center",
+              "right_column_center",
+              "left_leading_face",
+              "right_leading_face",
+              "collision_center",
+              "collision_lower",
+              "collision_upper"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.550028,
+            "dt_median_s": 0.010032999999999986,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "left_column_center",
+                "peak_abs": 882.805,
+                "peak_signed": 882.805,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "right_column_center",
+                "peak_abs": 882.805,
+                "peak_signed": 882.805,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "left_leading_face",
+                "peak_abs": 882.804,
+                "peak_signed": 882.804,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "right_leading_face",
+                "peak_abs": 882.804,
+                "peak_signed": 882.804,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "collision_center",
+                "peak_abs": 277.308,
+                "peak_signed": -277.308,
+                "peak_time_s": 0.470012
+              },
+              {
+                "name": "collision_lower",
+                "peak_abs": 3960.72,
+                "peak_signed": 3960.72,
+                "peak_time_s": 0.300141
+              },
+              {
+                "name": "collision_upper",
+                "peak_abs": 918.264,
+                "peak_signed": 918.264,
+                "peak_time_s": 0.400162
+              }
+            ]
+          },
+          "velocity": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/observations/fixed_points_Vel.csv",
+            "exists": true,
+            "rows": 56,
+            "columns": [
+              "left_column_center",
+              "right_column_center",
+              "left_leading_face",
+              "right_leading_face",
+              "collision_center",
+              "collision_lower",
+              "collision_upper"
+            ],
+            "components_per_point": 3,
+            "time_start_s": 0.0,
+            "time_end_s": 0.550028,
+            "dt_median_s": 0.010032999999999986,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "left_column_center",
+                "peak_speed": 1.5463327747887998,
+                "peak_time_s": 0.12004
+              },
+              {
+                "name": "right_column_center",
+                "peak_speed": 1.5463327747963536,
+                "peak_time_s": 0.12004
+              },
+              {
+                "name": "left_leading_face",
+                "peak_speed": 1.7017536208550774,
+                "peak_time_s": 0.140115
+              },
+              {
+                "name": "right_leading_face",
+                "peak_speed": 1.7017536208661919,
+                "peak_time_s": 0.140115
+              },
+              {
+                "name": "collision_center",
+                "peak_speed": 1.2231218062223814,
+                "peak_time_s": 0.550028
+              },
+              {
+                "name": "collision_lower",
+                "peak_speed": 1.2316477704308977,
+                "peak_time_s": 0.550028
+              },
+              {
+                "name": "collision_upper",
+                "peak_speed": 0.8280621185782646,
+                "peak_time_s": 0.51017
+              }
+            ]
+          },
+          "density": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/observations/fixed_points_Rhop.csv",
+            "exists": true,
+            "rows": 56,
+            "columns": [
+              "left_column_center",
+              "right_column_center",
+              "left_leading_face",
+              "right_leading_face",
+              "collision_center",
+              "collision_lower",
+              "collision_upper"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.550028,
+            "dt_median_s": 0.010032999999999986,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "left_column_center",
+                "peak_abs": 1001.24,
+                "peak_signed": 1001.24,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "right_column_center",
+                "peak_abs": 1001.24,
+                "peak_signed": 1001.24,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "left_leading_face",
+                "peak_abs": 1001.24,
+                "peak_signed": 1001.24,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "right_leading_face",
+                "peak_abs": 1001.24,
+                "peak_signed": 1001.24,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "collision_center",
+                "peak_abs": 1000.26,
+                "peak_signed": 1000.26,
+                "peak_time_s": 0.450162
+              },
+              {
+                "name": "collision_lower",
+                "peak_abs": 1005.44,
+                "peak_signed": 1005.44,
+                "peak_time_s": 0.300141
+              },
+              {
+                "name": "collision_upper",
+                "peak_abs": 1001.28,
+                "peak_signed": 1001.28,
+                "peak_time_s": 0.400162
+              }
+            ]
+          },
+          "kernel_correction": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/observations/fixed_points_Kcorr.csv",
+            "exists": true,
+            "rows": 56,
+            "columns": [
+              "left_column_center",
+              "right_column_center",
+              "left_leading_face",
+              "right_leading_face",
+              "collision_center",
+              "collision_lower",
+              "collision_upper"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.550028,
+            "dt_median_s": 0.010032999999999986,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "left_column_center",
+                "peak_abs": 0.998709,
+                "peak_signed": 0.998709,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "right_column_center",
+                "peak_abs": 0.998709,
+                "peak_signed": 0.998709,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "left_leading_face",
+                "peak_abs": 0.997919,
+                "peak_signed": 0.997919,
+                "peak_time_s": 0.0600893
+              },
+              {
+                "name": "right_leading_face",
+                "peak_abs": 0.997919,
+                "peak_signed": 0.997919,
+                "peak_time_s": 0.0600893
+              },
+              {
+                "name": "collision_center",
+                "peak_abs": 0.635168,
+                "peak_signed": 0.635168,
+                "peak_time_s": 0.550028
+              },
+              {
+                "name": "collision_lower",
+                "peak_abs": 0.788235,
+                "peak_signed": 0.788235,
+                "peak_time_s": 0.340024
+              },
+              {
+                "name": "collision_upper",
+                "peak_abs": 0.612607,
+                "peak_signed": 0.612607,
+                "peak_time_s": 0.440296
+              }
+            ],
+            "minimum": 0.0,
+            "maximum": 0.998709,
+            "zero_fraction": 0.5561224489795918,
+            "support_interpretation": "Kcorr=0 may be an interpolation dummy when support is insufficient; it is not a physical zero."
+          }
+        },
+        "wall_force": {
+          "requested_mk": 10,
+          "requested": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/observations/wall_force_requested_mk10.csv",
+            "exists": false,
+            "rows": 0,
+            "header": [],
+            "finite_fraction": null,
+            "units": "N (3-D force)",
+            "issues": [
+              "force output has fewer than two numeric rows"
+            ]
+          },
+          "effective_fallback_mk": 17,
+          "effective_fallback": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/medium__tmax-0p55__tout-0p01/observations/wall_force_effective_mk17.csv",
+            "exists": true,
+            "rows": 56,
+            "header": [
+              "Part",
+              "Time [s]",
+              "Np",
+              "ForceFluid.x [N]",
+              "ForceFluid.y [N]",
+              "ForceFluid.z [N]",
+              "ForceFluid [N]"
+            ],
+            "finite_fraction": 1.0,
+            "units": "N (3-D force)",
+            "issues": [],
+            "time_start_s": 0.0,
+            "time_end_s": 0.550028,
+            "dt_median_s": 0.010032999999999986,
+            "peak_force_abs_n": 1788.089125058,
+            "peak_force_signed_n": 1788.089125058,
+            "peak_force_time_s": 0.200306,
+            "peak_force_vector_n": [
+              1.952589184899e-05,
+              -9.497035268278e-06,
+              -1788.089125058
+            ]
+          },
+          "contract_status": "requested_target_failed_effective_mk_completed",
+          "interpretation": "The requested Mk=10 target is the explicit contract.  An effective-Mk fallback is diagnostic only and does not rewrite the requested target."
+        },
+        "issues": [
+          "ComputeForces requested Mk=10 is absent from the generated Mk mapping."
+        ]
+      }
+    },
+    {
+      "label": "fine",
+      "dp_m": 0.02,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 3.1291,
+      "fluid_particles": 2640,
+      "total_particles": 8721,
+      "case_prefix": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/fine__dp-0p02__tmax-0p55__tout-0p01/generated/F4_head_on_columns_fine",
+      "isolated_source": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/fine__dp-0p02__tmax-0p55__tout-0p01/input/F4_head_on_columns_Def.xml",
+      "generated_xml": "campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/fine__dp-0p02__tmax-0p55__tout-0p01/generated/F4_head_on_columns_fine.xml",
+      "definition": {
+        "source_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/fine__dp-0p02__tmax-0p55__tout-0p01/input/F4_head_on_columns_Def.xml",
+        "source_sha256": "38edd28b2028946e88cfe06d2f546b114042e032a39a59c86a245f2586e4f4ac",
+        "configured_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/fine__dp-0p02__tmax-0p55__tout-0p01/configured/F4_head_on_columns_fine_Def.xml",
+        "configured_sha256": "60ce02cc4d36cd02be381cb2fc95a2fa20443f68ef51c2188e2f44bc7e9e456b",
+        "time_max_s": 0.55,
+        "particle_output_cadence_s": 0.01,
+        "changed_parameters": {
+          "TimeMax": "0.55",
+          "TimeOut": "0.01"
+        },
+        "dimension": "3D",
+        "fluid_initial_velocities_m_per_s": {
+          "mkfluid:0": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "mkfluid:1": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        "requested_compute_forces_mk": 10
+      },
+      "generated_particle_mks": {
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1,
+        "fixed": [
+          {
+            "mkbound": 0,
+            "mk": 17,
+            "count": 6081
+          }
+        ],
+        "fluid": [
+          {
+            "mkfluid": 0,
+            "mk": 1,
+            "count": 1320
+          },
+          {
+            "mkfluid": 1,
+            "mk": 2,
+            "count": 1320
+          }
+        ],
+        "effective_boundary_mks": [
+          17
+        ],
+        "effective_fluid_mks": [
+          1,
+          2
+        ]
+      },
+      "log": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/solver.stdout.log",
+      "command": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+        "-gpu:6",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-3d-head-on/fine__dp-0p02__tmax-0p55__tout-0p01/generated/F4_head_on_columns_fine",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01",
+        "-tmax:0.55",
+        "-tout:0.01"
+      ],
+      "issues": [
+        "requested ComputeForces Mk=10 is absent from generated boundary Mks=[17]"
+      ],
+      "gpu": 6,
+      "gpu_uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+      "output_dir": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01",
+      "frames": 56,
+      "excluded_particles": 0,
+      "output_bytes": 15848531,
+      "observations": {
+        "status": "completed_with_force_target_mismatch",
+        "data_dir": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/data",
+        "tools": {
+          "measure": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/MeasureTool_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/data",
+              "-filexml",
+              "AUTO",
+              "-pointsdef:pt=0.23:0.2:0.33,pt=0.97:0.2:0.33,pt=0.33:0.2:0.33,pt=0.87:0.2:0.33,pt=0.6:0.2:0.33,pt=0.6:0.2:0.27,pt=0.6:0.2:0.39",
+              "-onlytype:-all,+fluid",
+              "-vars:-all,+vel,+press,+rhop,+kcorr",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/observations/fixed_points"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.0297,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/observations/measure.stdout.log",
+            "status": "completed",
+            "stdout_tail": "39\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0040\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0041\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0042\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0043\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0044\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0045\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0046\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0047\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0048\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0049\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0050\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0051\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0052\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0053\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0054\nSaveCSV> .../observations/fixed_points_<Var>.csv\nLoadData> PART_0055\nSaveCSV> .../observations/fixed_points_<Var>.csv\n\nTime of operation: 0.025 sec. (16 threads)\n",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          },
+          "compute_forces_requested_mk10": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/data",
+              "-filexml",
+              "AUTO",
+              "-onlymk:10",
+              "-viscoauto",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/observations/wall_force_requested_mk10"
+            ],
+            "returncode": 1,
+            "elapsed_seconds": 0.0043,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/observations/forces_requested_mk10.stdout.log",
+            "status": "failed",
+            "stdout_tail": " OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND\n ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF\n THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\n\nComputeForces v5.4.266.02 (07-05-2025)\n=======================================\nLoadDsphConfig> .../bin/linux/DsphConfig.xml\nThreads for parallel execution: 16\nExecutes RunPartsVRes code.\nLoadData> /home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/data/Part_Head.ibi4\nLoadData> /home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/data/Part_0000.bi4\nAutomatic last PART selection: 55\nLoadData> PART_0000\n\n*** Exception (JComputeForces::RunPartsVRes) at JMDominguez/codes/DSTools/source/JComputeForces.cpp:833\nText: There are no boundary particles selected according to the filters applied.\n\n\n*** \n*** Exception (JComputeForces::RunPartsVRes) at JMDominguez/codes/DSTools/source/JComputeForces.cpp:833\nText: There are no boundary particles selected according to the filters applied.\n\n",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          },
+          "compute_forces_effective_fallback": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/data",
+              "-filexml",
+              "AUTO",
+              "-onlymk:17",
+              "-viscoauto",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/observations/wall_force_effective_mk17"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.1141,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/observations/forces_effective_mk17.stdout.log",
+            "status": "completed",
+            "stdout_tail": "081 x 8,721\nLoadData> PART_0030\nForces> n:6,081 x 8,721\nLoadData> PART_0031\nForces> n:6,081 x 8,721\nLoadData> PART_0032\nForces> n:6,081 x 8,721\nLoadData> PART_0033\nForces> n:6,081 x 8,721\nLoadData> PART_0034\nForces> n:6,081 x 8,721\nLoadData> PART_0035\nForces> n:6,081 x 8,721\nLoadData> PART_0036\nForces> n:6,081 x 8,721\nLoadData> PART_0037\nForces> n:6,081 x 8,721\nLoadData> PART_0038\nForces> n:6,081 x 8,721\nLoadData> PART_0039\nForces> n:6,081 x 8,721\nLoadData> PART_0040\nForces> n:6,081 x 8,721\nLoadData> PART_0041\nForces> n:6,081 x 8,721\nLoadData> PART_0042\nForces> n:6,081 x 8,721\nLoadData> PART_0043\nForces> n:6,081 x 8,721\nLoadData> PART_0044\nForces> n:6,081 x 8,721\nLoadData> PART_0045\nForces> n:6,081 x 8,721\nLoadData> PART_0046\nForces> n:6,081 x 8,721\nLoadData> PART_0047\nForces> n:6,081 x 8,721\nLoadData> PART_0048\nForces> n:6,081 x 8,721\nLoadData> PART_0049\nForces> n:6,081 x 8,721\nLoadData> PART_0050\nForces> n:6,081 x 8,721\nLoadData> PART_0051\nForces> n:6,081 x 8,721\nLoadData> PART_0052\nForces> n:6,081 x 8,721\nLoadData> PART_0053\nForces> n:6,081 x 8,721\nLoadData> PART_0054\nForces> n:6,081 x 8,721\nLoadData> PART_0055\nForces> n:6,081 x 8,721\n\nTime of operation: 0.109 sec. (16 threads)\n"
+          }
+        },
+        "fixed_points": {
+          "points": [
+            {
+              "name": "left_column_center",
+              "position_m": [
+                0.23,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "right_column_center",
+              "position_m": [
+                0.97,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "left_leading_face",
+              "position_m": [
+                0.33,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "right_leading_face",
+              "position_m": [
+                0.87,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "collision_center",
+              "position_m": [
+                0.6,
+                0.2,
+                0.33
+              ]
+            },
+            {
+              "name": "collision_lower",
+              "position_m": [
+                0.6,
+                0.2,
+                0.27
+              ]
+            },
+            {
+              "name": "collision_upper",
+              "position_m": [
+                0.6,
+                0.2,
+                0.39
+              ]
+            }
+          ],
+          "pressure": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/observations/fixed_points_Press.csv",
+            "exists": true,
+            "rows": 56,
+            "columns": [
+              "left_column_center",
+              "right_column_center",
+              "left_leading_face",
+              "right_leading_face",
+              "collision_center",
+              "collision_lower",
+              "collision_upper"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.550131,
+            "dt_median_s": 0.009981999999999991,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "left_column_center",
+                "peak_abs": 1952.47,
+                "peak_signed": 1952.47,
+                "peak_time_s": 0.0101427
+              },
+              {
+                "name": "right_column_center",
+                "peak_abs": 1952.47,
+                "peak_signed": 1952.47,
+                "peak_time_s": 0.0101427
+              },
+              {
+                "name": "left_leading_face",
+                "peak_abs": 882.848,
+                "peak_signed": 882.848,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "right_leading_face",
+                "peak_abs": 882.848,
+                "peak_signed": 882.848,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "collision_center",
+                "peak_abs": 0.0,
+                "peak_signed": 0.0,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "collision_lower",
+                "peak_abs": 3967.51,
+                "peak_signed": 3967.51,
+                "peak_time_s": 0.420209
+              },
+              {
+                "name": "collision_upper",
+                "peak_abs": 0.0,
+                "peak_signed": 0.0,
+                "peak_time_s": 0.0
+              }
+            ]
+          },
+          "velocity": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/observations/fixed_points_Vel.csv",
+            "exists": true,
+            "rows": 56,
+            "columns": [
+              "left_column_center",
+              "right_column_center",
+              "left_leading_face",
+              "right_leading_face",
+              "collision_center",
+              "collision_lower",
+              "collision_upper"
+            ],
+            "components_per_point": 3,
+            "time_start_s": 0.0,
+            "time_end_s": 0.550131,
+            "dt_median_s": 0.009981999999999991,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "left_column_center",
+                "peak_speed": 1.4771881841187464,
+                "peak_time_s": 0.110191
+              },
+              {
+                "name": "right_column_center",
+                "peak_speed": 1.4771881841187335,
+                "peak_time_s": 0.110191
+              },
+              {
+                "name": "left_leading_face",
+                "peak_speed": 1.7035670985904934,
+                "peak_time_s": 0.140162
+              },
+              {
+                "name": "right_leading_face",
+                "peak_speed": 1.7035670985905091,
+                "peak_time_s": 0.140162
+              },
+              {
+                "name": "collision_center",
+                "peak_speed": 0.0,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "collision_lower",
+                "peak_speed": 1.1294843264049363,
+                "peak_time_s": 0.550131
+              },
+              {
+                "name": "collision_upper",
+                "peak_speed": 0.0,
+                "peak_time_s": 0.0
+              }
+            ]
+          },
+          "density": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/observations/fixed_points_Rhop.csv",
+            "exists": true,
+            "rows": 56,
+            "columns": [
+              "left_column_center",
+              "right_column_center",
+              "left_leading_face",
+              "right_leading_face",
+              "collision_center",
+              "collision_lower",
+              "collision_upper"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.550131,
+            "dt_median_s": 0.009981999999999991,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "left_column_center",
+                "peak_abs": 1002.74,
+                "peak_signed": 1002.74,
+                "peak_time_s": 0.0101427
+              },
+              {
+                "name": "right_column_center",
+                "peak_abs": 1002.74,
+                "peak_signed": 1002.74,
+                "peak_time_s": 0.0101427
+              },
+              {
+                "name": "left_leading_face",
+                "peak_abs": 1001.25,
+                "peak_signed": 1001.25,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "right_leading_face",
+                "peak_abs": 1001.25,
+                "peak_signed": 1001.25,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "collision_center",
+                "peak_abs": 0.0,
+                "peak_signed": 0.0,
+                "peak_time_s": 0.0
+              },
+              {
+                "name": "collision_lower",
+                "peak_abs": 1005.47,
+                "peak_signed": 1005.47,
+                "peak_time_s": 0.420209
+              },
+              {
+                "name": "collision_upper",
+                "peak_abs": 0.0,
+                "peak_signed": 0.0,
+                "peak_time_s": 0.0
+              }
+            ]
+          },
+          "kernel_correction": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/observations/fixed_points_Kcorr.csv",
+            "exists": true,
+            "rows": 56,
+            "columns": [
+              "left_column_center",
+              "right_column_center",
+              "left_leading_face",
+              "right_leading_face",
+              "collision_center",
+              "collision_lower",
+              "collision_upper"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.550131,
+            "dt_median_s": 0.009981999999999991,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "left_column_center",
+                "peak_abs": 1.00041,
+                "peak_signed": 1.00041,
+                "peak_time_s": 0.0502514
+              },
+              {
+                "name": "right_column_center",
+                "peak_abs": 1.00041,
+                "peak_signed": 1.00041,
+                "peak_time_s": 0.0502514
+              },
+              {
+                "name": "left_leading_face",
+                "peak_abs": 1.00041,
+                "peak_signed": 1.00041,
+                "peak_time_s": 0.0502514
+              },
+              {
+                "name": "right_leading_face",
+                "peak_abs": 1.00041,
+                "peak_signed": 1.00041,
+                "peak_time_s": 0.0502514
+              },
+              {
+                "name": "collision_center",
+                "peak_abs": 0.499233,
+                "peak_signed": 0.499233,
+                "peak_time_s": 0.480157
+              },
+              {
+                "name": "collision_lower",
+                "peak_abs": 0.748469,
+                "peak_signed": 0.748469,
+                "peak_time_s": 0.460095
+              },
+              {
+                "name": "collision_upper",
+                "peak_abs": 0.000542234,
+                "peak_signed": 0.000542234,
+                "peak_time_s": 0.480157
+              }
+            ],
+            "minimum": 0.0,
+            "maximum": 1.00041,
+            "zero_fraction": 0.6862244897959183,
+            "support_interpretation": "Kcorr=0 may be an interpolation dummy when support is insufficient; it is not a physical zero."
+          }
+        },
+        "wall_force": {
+          "requested_mk": 10,
+          "requested": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/observations/wall_force_requested_mk10.csv",
+            "exists": false,
+            "rows": 0,
+            "header": [],
+            "finite_fraction": null,
+            "units": "N (3-D force)",
+            "issues": [
+              "force output has fewer than two numeric rows"
+            ]
+          },
+          "effective_fallback_mk": 17,
+          "effective_fallback": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-3d-head-on/fine__tmax-0p55__tout-0p01/observations/wall_force_effective_mk17.csv",
+            "exists": true,
+            "rows": 56,
+            "header": [
+              "Part",
+              "Time [s]",
+              "Np",
+              "ForceFluid.x [N]",
+              "ForceFluid.y [N]",
+              "ForceFluid.z [N]",
+              "ForceFluid [N]"
+            ],
+            "finite_fraction": 1.0,
+            "units": "N (3-D force)",
+            "issues": [],
+            "time_start_s": 0.0,
+            "time_end_s": 0.550131,
+            "dt_median_s": 0.009981999999999991,
+            "peak_force_abs_n": 2054.540377605,
+            "peak_force_signed_n": 2054.540377605,
+            "peak_force_time_s": 0.210046,
+            "peak_force_vector_n": [
+              -5.436140279631e-05,
+              9.200431053416e-07,
+              -2054.540377605
+            ]
+          },
+          "contract_status": "requested_target_failed_effective_mk_completed",
+          "interpretation": "The requested Mk=10 target is the explicit contract.  An effective-Mk fallback is diagnostic only and does not rewrite the requested target."
+        },
+        "issues": [
+          "ComputeForces requested Mk=10 is absent from the generated Mk mapping."
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "prepared_count": 3,
+    "solver_completed_count": 3,
+    "observation_complete_or_fallback_count": 3,
+    "requested_force_mk10_completed_count": 0,
+    "effective_force_fallback_count": 3
+  },
+  "resolution_comparison": {
+    "status": "diagnostic_only",
+    "acceptance_threshold_declared": false,
+    "pair_count": 3,
+    "pairs": [
+      {
+        "left": {
+          "label": "coarse",
+          "dp_m": 0.04
+        },
+        "right": {
+          "label": "medium",
+          "dp_m": 0.03
+        },
+        "collision_lower_pressure": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.550028,
+          "samples": 56,
+          "rmse": [
+            1615.2368160935466
+          ],
+          "max_rmse": 1615.2368160935466
+        },
+        "effective_mk17_force_magnitude": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.550028,
+          "samples": 56,
+          "rmse": [
+            212.20617089769604
+          ],
+          "max_rmse": 212.20617089769604
+        }
+      },
+      {
+        "left": {
+          "label": "coarse",
+          "dp_m": 0.04
+        },
+        "right": {
+          "label": "fine",
+          "dp_m": 0.02
+        },
+        "collision_lower_pressure": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.550131,
+          "samples": 56,
+          "rmse": [
+            1478.9798396728734
+          ],
+          "max_rmse": 1478.9798396728734
+        },
+        "effective_mk17_force_magnitude": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.550131,
+          "samples": 56,
+          "rmse": [
+            354.31692256122415
+          ],
+          "max_rmse": 354.31692256122415
+        }
+      },
+      {
+        "left": {
+          "label": "medium",
+          "dp_m": 0.03
+        },
+        "right": {
+          "label": "fine",
+          "dp_m": 0.02
+        },
+        "collision_lower_pressure": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.550028,
+          "samples": 56,
+          "rmse": [
+            1075.975971157277
+          ],
+          "max_rmse": 1075.975971157277
+        },
+        "effective_mk17_force_magnitude": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.550028,
+          "samples": 56,
+          "rmse": [
+            337.8595690352976
+          ],
+          "max_rmse": 337.8595690352976
+        }
+      }
+    ]
+  },
+  "open_blockers": [
+    "The source definition generates physical boundary Mk=17, so the requested ComputeForces Mk=10 target is absent; effective-Mk force is diagnostic only.",
+    "No external pressure, velocity, density, or force reference is bundled for this custom F4 case.",
+    "Fixed-point interpolation in initially empty collision locations can produce Kcorr dummies and must not be treated as truth.",
+    "Three resolutions expose numerical sensitivity but do not establish convergence or formal family admission.",
+    "Material particle lineage and collision mixing targets remain outside this observation-path probe."
+  ]
+}
