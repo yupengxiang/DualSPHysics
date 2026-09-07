@@ -118,12 +118,14 @@ def test_declared_topology_holdouts_have_independent_execution_links():
         assert topology[family]["coverage_claim"] is False
         assert topology[family]["actual_coverage_count"] == 1
         assert topology[family]["observed_execution_count"] == 1
+        assert topology[family]["case_links"][0]["identity_contract_pass"]
         assert "materialization" in topology[family]["case_links"][0]["manifest"]
     assert topology["F6"]["w08_controlled_cards"] == 1
     assert topology["F6"]["holdout_gate_pass"] is False
     assert topology["F6"]["coverage_status"] == "executed_structural_without_normalized_data"
     assert topology["F6"]["actual_coverage_count"] == 0
     assert topology["F6"]["observed_execution_count"] == 1
+    assert topology["F6"]["case_links"][0]["identity_contract_pass"]
     assert topology["F6"]["case_links"][0]["manifest"].endswith("topology-probe.json")
     assert topology["F1"]["incidental_matching_registry_cases"] == ["F1_twin_obstacle"]
     assert topology["F2"]["incidental_matching_registry_cases"] == []

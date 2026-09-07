@@ -146,18 +146,22 @@ def topology_holdout_cards() -> list[dict[str, Any]]:
         physics = dict(spec["physics"])
         sig = signature(family, physics)
         holdout = spec["holdout"]
+        # Preserve the exact identity namespace emitted by each independent
+        # materializer.  F3 predates the shared W08 prefix; its manifest is
+        # authoritative and intentionally keeps ``physical_F3_*`` IDs.
+        id_prefix = "F3" if family == "F3" else f"W08_{family}"
         cards.append({
             "card_id": f"W08_{family}_topology_{holdout}_00",
             "family": family,
             "study_id": f"W08_{family}_topology_holdout",
             "paired_background_id": spec["paired_background_id"],
-            "physical_case_id": f"physical_W08_{family}_topology_{holdout}_{sig}",
-            "lineage_group_id": f"lineage_W08_{family}_topology_{holdout}_{sig}",
+            "physical_case_id": f"physical_{id_prefix}_topology_{holdout}_{sig}",
+            "lineage_group_id": f"lineage_{id_prefix}_topology_{holdout}_{sig}",
             "split": "topology_extrapolation",
             "physics": physics,
             "normalized_intervention": dict(spec["intervention"]),
             "simulation_signature": sig,
-            "execution_unit_id": f"sim_{family}_topology_{holdout}_{sig}",
+            "execution_unit_id": f"sim_{id_prefix}_topology_{holdout}_{sig}",
             "execution_status": "planned_not_run",
             "formal_production_authorized": False,
             "materialization_case_id": spec["materialization_case_id"],

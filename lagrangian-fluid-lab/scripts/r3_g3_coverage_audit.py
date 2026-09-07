@@ -544,6 +544,13 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
                 definition = executable.get("definition") or materialization.get("definition")
                 generated_case_xml = executable.get("generated_case_xml")
                 execution_status = materialization.get("execution_status", "unknown")
+                identity_contract_pass = bool(
+                    materialization.get("case_id") == card.get("materialization_case_id")
+                    and materialization.get("physical_case_id") == card.get("physical_case_id")
+                    and materialization.get("lineage_group_id") == card.get("lineage_group_id")
+                    and materialization.get("execution_unit_id") == card.get("execution_unit_id")
+                    and materialization.get("split") == card.get("split")
+                )
                 links.append({
                     "card_id": card.get("card_id"),
                     "case_id": materialization.get("case_id"),
@@ -565,6 +572,7 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
                     "physical_acceptance": materialization.get("physical_acceptance", "unknown"),
                     "reference_acceptance": materialization.get("reference_acceptance", "unknown"),
                     "formal_production_authorized": bool(materialization.get("formal_production_authorized", False)),
+                    "identity_contract_pass": identity_contract_pass,
                     "manifest": str(manifest_path.relative_to(LAB)),
                 })
                 continue
@@ -583,6 +591,7 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
                     "physical_acceptance": "legacy_registry_probe",
                     "reference_acceptance": "legacy_registry_probe",
                     "formal_production_authorized": False,
+                    "identity_contract_pass": False,
                 })
         unique_links = {(link["execution_unit_id"] or link["card_id"]): link for link in links}
         linked_materialized = {link["case_id"] for link in unique_links.values() if link["materialized"]}
@@ -590,7 +599,7 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
         gate_links = list(unique_links.values())
         holdout_gate_pass = bool(w08_holdout) and len(gate_links) == len({card.get("execution_unit_id") or card.get("card_id") for card in w08_holdout}) and all(
             link["execution_status"] == "completed" and link["split"] == "topology_extrapolation"
-            and link["executable"] and link["materialized"] and link["run"] and link["trajectory_structural"] for link in gate_links
+            and link["identity_contract_pass"] and link["executable"] and link["materialized"] and link["run"] and link["trajectory_structural"] for link in gate_links
         )
         scientific_acceptance_pass = bool(gate_links) and all(
             link["physical_acceptance"] == "accepted"
@@ -656,7 +665,7 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
                 "design_only_not_materialized" if not w08_holdout else
                 "completed_and_structurally_linked" if bool(gate_links) and all(
                     link["execution_status"] == "completed" and link["split"] == "topology_extrapolation"
-                    and link["executable"] and link["materialized"] and link["run"] and link["trajectory_structural"] for link in gate_links
+                    and link["identity_contract_pass"] and link["executable"] and link["materialized"] and link["run"] and link["trajectory_structural"] for link in gate_links
                 ) and scientific_acceptance_pass else
                 "completed_structural_candidate_only" if holdout_gate_pass else
                 "executed_structural_probe_not_normalized" if observed_cases else
