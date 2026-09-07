@@ -14,4 +14,6 @@ Each manifest record separates five causal namespaces: `physics`, `geometry`, `c
 
 Evaluation has four tracks defined in `benchmark-tasks.json`. Particle rollout and material transport are not interchangeable. External probe/body metrics are only scored within their declared `validation_scope`; visually plausible unvalidated pressure is not ground truth.
 
+The protocol includes an identity-sensitivity control: a prediction may preserve the complete final point set while permuting particle/material identities. Set-based geometry errors can remain unchanged in that control, but source-conditioned transport, passage-time, and destination-mass metrics must change. A benchmark implementation that cannot detect this permutation is measuring an Eulerian-looking point distribution rather than the intended Lagrangian task.
+
 Every submission must disclose conditioning length, rollout horizon, parameter count, training/inference wall time, peak accelerator memory, hardware and all random seeds. Autonomous rollout means predictions, not reference states, feed subsequent scored steps.

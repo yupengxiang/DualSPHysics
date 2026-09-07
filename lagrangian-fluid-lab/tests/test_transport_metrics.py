@@ -52,3 +52,40 @@ def test_destination_can_be_defined_in_moving_body_frame(tmp_path):
                           "min": [0.0, -0.2, 0.0], "max": [0.4, 0.2, 0.4]}],
     })
     assert report["sources"]["0"]["mass_fraction"]["receiver"] == pytest.approx(2 / 3)
+
+
+def test_material_transport_is_sensitive_to_identity_permutation(tmp_path):
+    """A correct point set with swapped identities must fail the transport task."""
+    path = tmp_path / "identity-sensitive.h5"
+    with h5py.File(path, "w") as h5:
+        h5.attrs["case_id"] = "identity-sensitive"
+        h5.create_dataset("time", data=[0.0, 1.0])
+        h5.create_dataset("valid", data=np.ones((2, 4), dtype=bool))
+        h5.create_dataset("type", data=np.full((2, 4), 3, dtype=np.int8))
+        # Two source groups have the same total mass but different expected
+        # destinations.  The final point set is unchanged in the shuffled case.
+        h5.create_dataset("mk", data=np.asarray([[0, 1, 0, 1], [0, 1, 0, 1]], dtype=np.int8))
+        h5.create_dataset("mass", data=np.ones((2, 4), dtype=float))
+        positions = np.zeros((2, 4, 3), dtype=float)
+        positions[1] = [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0],
+                        [1.0, 0.1, 0.0], [0.0, 0.1, 0.0]]
+        h5.create_dataset("position", data=positions)
+
+    spec = {
+        "lifecycle_model": "closed",
+        "sources": {"mode": "mk"},
+        "destination_frame": {"kind": "world"},
+        "destinations": [{"name": "right", "type": "halfspace",
+                           "normal": [1, 0, 0], "offset": 0.5, "side": "ge"}],
+    }
+    baseline = audit_transport(path, spec)
+    # Rebuild only the final coordinates with the same set of points but swap
+    # the two source identities' destinations.  A point-set metric would see
+    # no change; source-conditioned transport must see the reversal.
+    with h5py.File(path, "a") as h5:
+        h5["position"][1] = h5["position"][1][[1, 0, 3, 2]]
+    shuffled = audit_transport(path, spec)
+    assert baseline["sources"]["0"]["mass_fraction"]["right"] == pytest.approx(1.0)
+    assert baseline["sources"]["1"]["mass_fraction"]["right"] == pytest.approx(0.0)
+    assert shuffled["sources"]["0"]["mass_fraction"]["right"] == pytest.approx(0.0)
+    assert shuffled["sources"]["1"]["mass_fraction"]["right"] == pytest.approx(1.0)
