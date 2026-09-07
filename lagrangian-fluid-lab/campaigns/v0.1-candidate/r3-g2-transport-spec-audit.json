@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "acceptance_scope": "R3 G2 destination-region contract closure",
+  "schema_artifact": "protocol/transport-regions.schema.json",
+  "examples": {
+    "path": "protocol/transport-region-examples.json",
+    "count": 2,
+    "valid_count": 2,
+    "all_valid": true,
+    "cases": [
+      {
+        "name": "future_rotating_receiver",
+        "valid": true,
+        "lifecycle_model": "closed",
+        "destination_frame": {
+          "kind": "moving_affine",
+          "world_from_frame_dataset": "control/receiver_world_from_body"
+        },
+        "destination_count": 1
+      },
+      {
+        "name": "world_fixed_weir",
+        "valid": true,
+        "lifecycle_model": "closed",
+        "destination_frame": {
+          "kind": "world"
+        },
+        "destination_count": 2
+      }
+    ]
+  },
+  "release": {
+    "manifest": "release/v0.1-development/manifest.json",
+    "case_count": 13,
+    "destination_spec_linked_count": 0,
+    "destination_spec_valid_count": 0,
+    "boundary_sidecar_count": 12,
+    "wall_visibility_true_count": 0,
+    "t2_contract_ready_count": 0,
+    "cases": [
+      {
+        "case_id": "F1_dam_break_plain",
+        "family": "F1",
+        "destination_spec_present": false,
+        "destination_spec_valid": false,
+        "destination_spec_error": null,
+        "boundary_sidecar_present": true,
+        "wall_visibility": false,
+        "t2_contract_ready": false
+      },
+      {
+        "case_id": "F1_opposing_columns",
+        "family": "F1",
+        "destination_spec_present": false,
+        "destination_spec_valid": false,
+        "destination_spec_error": null,
+        "boundary_sidecar_present": true,
+        "wall_visibility": false,
+        "t2_contract_ready": false
+      },
+      {
+        "case_id": "F1_center_obstacle",
+        "family": "F1",
+        "destination_spec_present": false,
+        "destination_spec_valid": false,
+        "destination_spec_error": null,
+        "boundary_sidecar_present": true,
+        "wall_visibility": false,
+        "t2_contract_ready": false
+      },
+      {
+        "case_id": "F1_twin_obstacle",
+        "family": "F1",
+        "destination_spec_present": false,
+        "destination_spec_valid": false,
+        "destination_spec_error": null,
+        "boundary_sidecar_present": true,
+        "wall_visibility": false,
+        "t2_contract_ready": false
+      },
+      {
+        "case_id": "W06_narrow_slow_center",
+        "family": "F2",
+        "destination_spec_present": false,
+        "destination_spec_valid": false,
+        "destination_spec_error": null,
+        "boundary_sidecar_present": true,
+        "wall_visibility": false,
+        "t2_contract_ready": false
+      },
+      {
+        "case_id": "W06_standard_slow_center",
+        "family": "F2",
+        "destination_spec_present": false,
+        "destination_spec_valid": false,
+        "destination_spec_error": null,
+        "boundary_sidecar_present": true,
+        "wall_visibility": false,
+        "t2_contract_ready": false
+      },
+      {
+        "case_id": "W06_wide_slow_center",
+        "family": "F2",
+        "destination_spec_present": false,
+        "destination_spec_valid": false,
+        "destination_spec_error": null,
+        "boundary_sidecar_present": true,
+        "wall_visibility": false,
+        "t2_contract_ready": false
+      },
+      {
+        "case_id": "W06_narrow_fast_center",
+        "family": "F2",
+        "destination_spec_present": false,
+        "destination_spec_valid": false,
+        "destination_spec_error": null,
+        "boundary_sidecar_present": true,
+        "wall_visibility": false,
+        "t2_contract_ready": false
+      },
+      {
+        "case_id": "W06_standard_fast_center",
+        "family": "F2",
+        "destination_spec_present": false,
+        "destination_spec_valid": false,
+        "destination_spec_error": null,
+        "boundary_sidecar_present": true,
+        "wall_visibility": false,
+        "t2_contract_ready": false
+      },
+      {
+        "case_id": "F3_impulse_slosh",
+        "family": "F3",
+        "destination_spec_present": false,
+        "destination_spec_valid": false,
+        "destination_spec_error": null,
+        "boundary_sidecar_present": true,
+        "wall_visibility": false,
+        "t2_contract_ready": false
+      },
+      {
+        "case_id": "F3_baffled_slosh",
+        "family": "F3",
+        "destination_spec_present": false,
+        "destination_spec_valid": false,
+        "destination_spec_error": null,
+        "boundary_sidecar_present": true,
+        "wall_visibility": false,
+        "t2_contract_ready": false
+      },
+      {
+        "case_id": "F3_transverse_slosh",
+        "family": "F3",
+        "destination_spec_present": false,
+        "destination_spec_valid": false,
+        "destination_spec_error": null,
+        "boundary_sidecar_present": true,
+        "wall_visibility": false,
+        "t2_contract_ready": false
+      },
+      {
+        "case_id": "W05_F6_fine",
+        "family": "F6",
+        "destination_spec_present": false,
+        "destination_spec_valid": false,
+        "destination_spec_error": null,
+        "boundary_sidecar_present": false,
+        "wall_visibility": null,
+        "t2_contract_ready": false
+      }
+    ]
+  },
+  "formal_ready": false,
+  "validation_claim": "schema/runtime contract audit only; no physical destination truth is claimed",
+  "open_blockers": [
+    "no development-release case links a destination specification, so T2 has zero executable destination labels",
+    "open-face, rim, implicit-cap, receiver, tray, and out-of-domain semantics must be declared per case",
+    "wall-aware visibility must be proven together with destination geometry; a sidecar alone is insufficient",
+    "destination mass closure and resolution/saved-cadence/tracer-count convergence remain unverified"
+  ]
+}

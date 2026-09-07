@@ -1,5 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/lagrangian-fluid-v0.1/transport-regions.schema.json",
   "title": "Lagrangian transport region specification",
   "type": "object",
   "required": ["lifecycle_model", "destination_frame", "destinations"],
@@ -7,28 +8,108 @@
     "lifecycle_model": {"enum": ["closed", "open"]},
     "destination_frame": {
       "oneOf": [
-        {"type": "object", "properties": {"kind": {"const": "world"}}, "required": ["kind"]},
         {
           "type": "object",
+          "required": ["kind"],
+          "properties": {"kind": {"const": "world"}},
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "world_from_frame_dataset"],
           "properties": {
             "kind": {"const": "moving_affine"},
-            "world_from_frame_dataset": {"type": "string"}
+            "world_from_frame_dataset": {"type": "string", "minLength": 1}
           },
-          "required": ["kind", "world_from_frame_dataset"]
+          "additionalProperties": false
         }
       ]
     },
-    "sources": {"type": "object"},
+    "sources": {
+      "type": "object",
+      "properties": {
+        "mode": {"enum": ["mk", "regions"]},
+        "frame": {"$ref": "#/$defs/frame"},
+        "regions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/region"}
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {"properties": {"mode": {"const": "regions"}}, "required": ["mode"]},
+          "then": {"required": ["regions"]}
+        }
+      ]
+    },
     "destinations": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["name", "type"],
-        "properties": {
-          "name": {"type": "string"},
-          "type": {"enum": ["aabb", "halfspace", "sphere"]}
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/region"}
+    },
+    "exit_reason_names": {
+      "type": "object",
+      "additionalProperties": {"type": "string", "minLength": 1}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "vec3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"type": "number"}
+    },
+    "frame": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind"],
+          "properties": {"kind": {"const": "world"}},
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "world_from_frame_dataset"],
+          "properties": {
+            "kind": {"const": "moving_affine"},
+            "world_from_frame_dataset": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false
         }
-      }
+      ]
+    },
+    "region": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "type": {"enum": ["aabb", "halfspace", "sphere"]},
+        "min": {"$ref": "#/$defs/vec3"},
+        "max": {"$ref": "#/$defs/vec3"},
+        "normal": {"$ref": "#/$defs/vec3"},
+        "offset": {"type": "number"},
+        "side": {"enum": ["le", "ge"]},
+        "center": {"$ref": "#/$defs/vec3"},
+        "radius": {"type": "number", "exclusiveMinimum": 0}
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {"properties": {"type": {"const": "aabb"}}, "required": ["type"]},
+          "then": {"required": ["min", "max"]}
+        },
+        {
+          "if": {"properties": {"type": {"const": "halfspace"}}, "required": ["type"]},
+          "then": {"required": ["normal", "offset", "side"]}
+        },
+        {
+          "if": {"properties": {"type": {"const": "sphere"}}, "required": ["type"]},
+          "then": {"required": ["center", "radius"]}
+        }
+      ]
     }
   }
 }

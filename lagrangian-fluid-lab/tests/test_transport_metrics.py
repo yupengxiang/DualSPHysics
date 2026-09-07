@@ -4,7 +4,7 @@ import h5py
 import numpy as np
 import pytest
 
-from scripts.transport_metrics import audit_transport
+from scripts.transport_metrics import audit_transport, validate_transport_spec
 
 
 def make_h5(path, moving=False):
@@ -89,3 +89,46 @@ def test_material_transport_is_sensitive_to_identity_permutation(tmp_path):
     assert baseline["sources"]["1"]["mass_fraction"]["right"] == pytest.approx(0.0)
     assert shuffled["sources"]["0"]["mass_fraction"]["right"] == pytest.approx(0.0)
     assert shuffled["sources"]["1"]["mass_fraction"]["right"] == pytest.approx(1.0)
+
+
+@pytest.mark.parametrize(
+    "mutate, message",
+    [
+        (lambda spec: spec["destinations"][0].pop("side"), "side"),
+        (lambda spec: spec["destinations"][0].update({"normal": [0, 0, 0]}), "non-zero"),
+    ],
+)
+def test_transport_spec_rejects_ambiguous_or_invalid_halfspace_geometry(mutate, message):
+    spec = {
+        "lifecycle_model": "closed",
+        "destination_frame": {"kind": "world"},
+        "destinations": [{"name": "right", "type": "halfspace",
+                           "normal": [1, 0, 0], "offset": 0.5, "side": "ge"}],
+    }
+    mutate(spec)
+    with pytest.raises(ValueError, match=message):
+        validate_transport_spec(spec)
+
+
+def test_transport_spec_rejects_inverted_aabb():
+    with pytest.raises(ValueError, match="max"):
+        validate_transport_spec({
+            "lifecycle_model": "closed",
+            "destination_frame": {"kind": "world"},
+            "destinations": [{"name": "inverted", "type": "aabb",
+                               "min": [1, 0, 0], "max": [0, 0, 0]}],
+        })
+
+
+def test_transport_spec_accepts_all_declared_region_kinds():
+    validate_transport_spec({
+        "lifecycle_model": "open",
+        "destination_frame": {"kind": "moving_affine", "world_from_frame_dataset": "control/frame"},
+        "sources": {"mode": "regions", "frame": {"kind": "world"}, "regions": [
+            {"name": "source", "type": "sphere", "center": [0, 0, 0], "radius": 0.25},
+        ]},
+        "destinations": [
+            {"name": "box", "type": "aabb", "min": [-1, -1, -1], "max": [1, 1, 1]},
+            {"name": "plane", "type": "halfspace", "normal": [1, 0, 0], "offset": 0, "side": "ge"},
+        ],
+    })
