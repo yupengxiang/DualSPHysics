@@ -21,7 +21,7 @@ DualSPHysics force gauge 的含义是选定 `mkbound` 固定边界粒子上的�
 
 - 你已明确授权 GPU `0--7` 可使用；本轮实际选择空闲 GPU 4（UUID `GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9`）。
 - GPU 0--3 在各次 preflight 时有既有负载，全部保持原样，没有中断；空闲优先级仍为 4--7。
-- canonical 与 fine 的 preflight、solver 日志、法向/ghost VTK、力轨迹和统计摘要均在 mDBC 结果目录；大体积逐粒子 CSV 保留在本机可恢复的 `/tmp/r3-mdbc-raw.PZMjF3`，没有推入远程仓库。
+- canonical 与 fine 的 preflight、solver 日志、法向/ghost VTK、力轨迹和统计摘要均在 mDBC 结果目录；大体积逐粒子 CSV 保留在本机的可恢复临时归档中，没有推入远程仓库。
 - 全量回归：`cd lagrangian-fluid-lab && PYTHONPATH=. .venv/bin/pytest -q` → **196 passed**。
 
 ## 方向状态
