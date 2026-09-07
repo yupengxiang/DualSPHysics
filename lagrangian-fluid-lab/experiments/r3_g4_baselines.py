@@ -15,10 +15,11 @@ explicit:
 * clipping is optional and its trigger rate is reported rather than hidden;
 * all errors use the same vector-RMSE convention.
 
-The current W11 pilot has no boundary triangle sidecars.  The model therefore
-receives an explicit all-zero boundary summary plus an availability bit and
-the report keeps this limitation visible instead of silently pretending that
-geometry was supplied.
+When a release record links a validated boundary sidecar, the model receives
+the current frame's finite-triangle world-space AABB summary and an
+availability bit.  Records without a sidecar retain the explicit zero/missing
+fallback (or a legacy static bounds summary); a linked but invalid sidecar is
+an input-contract error rather than a silent fallback.
 """
 
 from __future__ import annotations
@@ -26,6 +27,7 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import string
 import time
 from pathlib import Path
 from typing import Any
@@ -162,8 +164,151 @@ def _control_features(h5: h5py.File, times: np.ndarray) -> tuple[np.ndarray, str
     return result, "known_prescribed_angle_only", True
 
 
-def _boundary_features(record: dict[str, Any], h5: h5py.File, length_scale: float) -> tuple[np.ndarray, str, bool]:
-    """Load a static boundary summary if supplied, otherwise expose missingness."""
+def _attribute_text(value: Any, default: str = "") -> str:
+    """Return an HDF5 attribute as portable text."""
+
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return str(value) if value is not None else default
+
+
+def _pairwise_bounds(triangles: np.ndarray) -> np.ndarray:
+    """Summarize ``[N,3,3]`` triangles as xmin,xmax,ymin,ymax,zmin,zmax."""
+
+    minimum = np.min(triangles, axis=(0, 1))
+    maximum = np.max(triangles, axis=(0, 1))
+    return np.asarray(
+        [minimum[0], maximum[0], minimum[1], maximum[1], minimum[2], maximum[2]],
+        dtype=np.float64,
+    )
+
+
+def _validate_boundary_sidecar(
+    sidecar_path: Path,
+    record: dict[str, Any],
+    solver_times: np.ndarray,
+    length_scale: float,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Read a linked sidecar and return normalized per-frame summaries.
+
+    The release audit proves that a sidecar is structurally sound.  This
+    input-boundary check additionally proves that it belongs to this case and
+    has exactly the same frame/time axis as the HDF5 trajectory consumed by
+    the learner.
+    """
+
+    with h5py.File(sidecar_path, "r") as sidecar:
+        required = ("time", "triangles_world", "triangle_mk", "triangle_type")
+        missing = [name for name in required if name not in sidecar]
+        if missing:
+            raise ValueError(f"{record['case_id']}: boundary sidecar missing {missing}")
+        schema = _attribute_text(sidecar.attrs.get("schema_version"))
+        if schema != "boundary-sidecar-v1":
+            raise ValueError(f"{record['case_id']}: unsupported boundary sidecar schema {schema!r}")
+        coordinate_frame = _attribute_text(sidecar.attrs.get("coordinate_frame"))
+        if coordinate_frame != "world":
+            raise ValueError(f"{record['case_id']}: boundary sidecar is not in world coordinates")
+        sidecar_case_id = _attribute_text(sidecar.attrs.get("case_id"))
+        if sidecar_case_id != record["case_id"]:
+            raise ValueError(
+                f"{record['case_id']}: boundary sidecar case_id is {sidecar_case_id!r}"
+            )
+        source_hash = _attribute_text(sidecar.attrs.get("source_geometry_sha256"))
+        if len(source_hash) != 64 or any(char not in string.hexdigits for char in source_hash):
+            raise ValueError(f"{record['case_id']}: boundary sidecar source geometry hash is invalid")
+        times = np.asarray(sidecar["time"][:], dtype=np.float64)
+        triangles = np.asarray(sidecar["triangles_world"][:], dtype=np.float64)
+        triangle_mk = np.asarray(sidecar["triangle_mk"][:])
+        triangle_type = np.asarray(sidecar["triangle_type"][:])
+        if (
+            times.ndim != 1
+            or len(times) < 2
+            or not np.all(np.isfinite(times))
+            or not np.all(np.diff(times) > 0)
+        ):
+            raise ValueError(f"{record['case_id']}: boundary sidecar time must be finite and strictly increasing")
+        if (
+            solver_times.ndim != 1
+            or len(solver_times) < 2
+            or not np.all(np.isfinite(solver_times))
+            or not np.all(np.diff(solver_times) > 0)
+        ):
+            raise ValueError(f"{record['case_id']}: solver time must be finite and strictly increasing")
+        if len(times) != len(solver_times):
+            raise ValueError(f"{record['case_id']}: boundary sidecar frame count differs from HDF5")
+        if not np.allclose(times, solver_times, rtol=0.0, atol=1e-9):
+            raise ValueError(f"{record['case_id']}: boundary sidecar time axis differs from HDF5")
+        if triangles.ndim != 4 or triangles.shape[0] != len(times) or triangles.shape[2:] != (3, 3):
+            raise ValueError(f"{record['case_id']}: triangles_world must have shape [T,N,3,3]")
+        if triangles.shape[1] < 1:
+            raise ValueError(f"{record['case_id']}: boundary sidecar has no triangles")
+        if len(triangle_mk) != triangles.shape[1] or len(triangle_type) != triangles.shape[1]:
+            raise ValueError(f"{record['case_id']}: boundary triangle labels do not match geometry")
+        if not np.all(np.isin(triangle_type, (0, 1))):
+            raise ValueError(f"{record['case_id']}: boundary sidecar has non-boundary triangle types")
+        if not np.all(np.isfinite(triangles)):
+            raise ValueError(f"{record['case_id']}: boundary sidecar has non-finite triangles")
+        edge1 = triangles[:, :, 1] - triangles[:, :, 0]
+        edge2 = triangles[:, :, 2] - triangles[:, :, 0]
+        area2 = np.linalg.norm(np.cross(edge1, edge2), axis=-1)
+        if not np.all(area2 > 1e-12):
+            raise ValueError(f"{record['case_id']}: boundary sidecar has degenerate triangles")
+        frame_bounds = np.asarray(
+            [_pairwise_bounds(frame_triangles) for frame_triangles in triangles],
+            dtype=np.float32,
+        )
+        normalized = np.zeros((len(times), BOUNDARY_WIDTH), dtype=np.float32)
+        normalized[:, 0] = 1.0
+        normalized[:, 1:] = frame_bounds / max(length_scale, 1e-9)
+        provenance = {
+            "path": sidecar_path.name,
+            "schema_version": schema,
+            "coordinate_frame": coordinate_frame,
+            "case_id": sidecar_case_id,
+            "frame_count": int(len(times)),
+            "triangle_count": int(triangles.shape[1]),
+            "static_triangle_count": int(np.sum(triangle_type == 0)),
+            "moving_triangle_count": int(np.sum(triangle_type == 1)),
+            "source_vtk": _attribute_text(sidecar.attrs.get("source_vtk"), "unknown"),
+            "source_hdf5": _attribute_text(sidecar.attrs.get("source_hdf5"), "unknown"),
+            "source_geometry_sha256": source_hash,
+        }
+    return normalized, provenance
+
+
+def _boundary_features(
+    record: dict[str, Any],
+    h5: h5py.File,
+    length_scale: float,
+    manifest_path: Path | None = None,
+    solver_times: np.ndarray | None = None,
+) -> tuple[np.ndarray, str, bool, dict[str, Any] | None]:
+    """Load sidecar summaries or a legacy static boundary fallback.
+
+    The first return value is a ``[T,7]`` array.  Column zero is the geometry
+    availability bit; the remaining columns use the pairwise
+    ``xmin,xmax,ymin,ymax,zmin,zmax`` order.  A linked sidecar is strict: any
+    missing, mismatched, or malformed file raises instead of being hidden as
+    missing geometry.
+    """
+
+    times = np.asarray(solver_times if solver_times is not None else h5["time"][:], dtype=np.float64)
+    geometry = record.get("geometry", {})
+    sidecar_ref = geometry.get("boundary_sidecar")
+    if sidecar_ref is not None:
+        if manifest_path is None:
+            raise ValueError(f"{record['case_id']}: manifest path is required for boundary sidecar")
+        manifest_root = Path(manifest_path).resolve().parent
+        sidecar_path = (manifest_root / str(sidecar_ref)).resolve()
+        try:
+            sidecar_path.relative_to(manifest_root)
+        except ValueError as error:
+            raise ValueError(f"{record['case_id']}: boundary sidecar escapes release root") from error
+        if not sidecar_path.is_file():
+            raise FileNotFoundError(f"{record['case_id']}: linked boundary sidecar not found: {sidecar_path}")
+        dynamic, provenance = _validate_boundary_sidecar(sidecar_path, record, times, length_scale)
+        provenance["path"] = str(sidecar_path.relative_to(manifest_root))
+        return dynamic, "sidecar_world_triangles", True, provenance
 
     bounds = None
     source = "missing_boundary_sidecar"
@@ -172,7 +317,7 @@ def _boundary_features(record: dict[str, Any], h5: h5py.File, length_scale: floa
         if candidate.size == 6 and np.isfinite(candidate).all():
             bounds = candidate
             source = "hdf5_boundary_bounds"
-    candidate = record.get("geometry", {}).get("boundary_bounds_m")
+    candidate = geometry.get("boundary_bounds_m")
     if bounds is None and candidate is not None:
         array = np.asarray(candidate, dtype=np.float32).reshape(-1)
         if array.size == 6 and np.isfinite(array).all():
@@ -180,10 +325,16 @@ def _boundary_features(record: dict[str, Any], h5: h5py.File, length_scale: floa
             source = "manifest_boundary_bounds"
     result = np.zeros(BOUNDARY_WIDTH, dtype=np.float32)
     if bounds is None:
-        return result, source, False
+        return np.repeat(result[None, :], len(times), axis=0), source, False, None
     result[0] = 1.0
     result[1:] = bounds / max(length_scale, 1e-9)
-    return result, source, True
+    return np.repeat(result[None, :], len(times), axis=0), source, True, {
+        "schema_version": "legacy-static-boundary-summary",
+        "coordinate_frame": "unknown",
+        "frame_count": int(len(times)),
+        "triangle_count": 0,
+        "source_geometry_sha256": None,
+    }
 
 
 def _load_case(manifest_path: Path, record: dict[str, Any]) -> dict[str, Any] | None:
@@ -220,7 +371,9 @@ def _load_case(manifest_path: Path, record: dict[str, Any]) -> dict[str, Any] | 
             [rho_ref / 1000.0, viscosity / 0.001, 1.0 if gravity_explicit is not None else 0.0],
             dtype=np.float32,
         )
-        boundary, boundary_source, boundary_available = _boundary_features(record, h5, length_scale)
+        boundary_by_frame, boundary_source, boundary_available, boundary_provenance = _boundary_features(
+            record, h5, length_scale, manifest_path=manifest_path, solver_times=times
+        )
     if len(times) < 2 or not np.isfinite(times).all() or not np.all(np.diff(times) > 0):
         raise ValueError(f"invalid time axis in {record['case_id']}")
     dp = float(record["numerics"]["particle_spacing_m"])
@@ -244,9 +397,11 @@ def _load_case(manifest_path: Path, record: dict[str, Any]) -> dict[str, Any] | 
         "controls": controls,
         "control_source": control_source,
         "control_available": control_available,
-        "boundary": boundary,
+        "boundary": boundary_by_frame[0].copy(),
+        "boundary_by_frame": boundary_by_frame,
         "boundary_source": boundary_source,
         "boundary_available": boundary_available,
+        "boundary_provenance": boundary_provenance,
         "gravity_source": gravity_source,
         "mass_initial_kg": float(np.sum(mass0)),
     }
@@ -274,7 +429,7 @@ def _tensor(array: np.ndarray, device: torch.device) -> torch.Tensor:
 
 def feature_width() -> int:
     # centered xyz, rollout-consistent velocity, initial density/pressure/mass,
-    # gravity, static physics, prescribed control, boundary summary, family,
+    # gravity, static physics, prescribed control, current boundary summary, family,
     # elapsed time and current dt (both independent of final file endpoint).
     return 3 + 3 + 3 + 3 + 3 + PHYSICS_WIDTH + CONTROL_WIDTH + BOUNDARY_WIDTH + 6 + 2
 
@@ -315,7 +470,14 @@ def build_features(
     controls[3:6] = controls[3:6] / max(case["length_scale"], 1e-9)
     controls[6:9] = controls[6:9] * case["time_scale"] / max(case["length_scale"], 1e-9)
     controls = controls.expand((len(target_position), CONTROL_WIDTH))
-    boundary = _tensor(case["boundary"], device).expand((len(target_position), BOUNDARY_WIDTH))
+    boundary_by_frame = case.get("boundary_by_frame")
+    if boundary_by_frame is None:
+        boundary_values = case["boundary"]
+    else:
+        if not (0 <= int(frame) < len(boundary_by_frame)):
+            raise IndexError(f"boundary summary frame {frame} is outside case frame axis")
+        boundary_values = boundary_by_frame[int(frame)]
+    boundary = _tensor(boundary_values, device).expand((len(target_position), BOUNDARY_WIDTH))
     family = torch.zeros((len(target_position), 6), dtype=target_position.dtype, device=device)
     family[:, FAMILY_INDEX[case["family"]]] = 1.0
     elapsed = torch.full(
@@ -530,7 +692,8 @@ def rollout(model: nn.Module, route: str, case: dict[str, Any], device: torch.de
         "output_saturation_fraction": float(saturated_components / max(total_outputs, 1)),
         "max_raw_model_output": max_raw,
         "control_source": case["control_source"], "boundary_source": case["boundary_source"],
-        "boundary_available": case["boundary_available"], "mass_initial_kg": case["mass_initial_kg"],
+        "boundary_available": case["boundary_available"], "boundary_provenance": case.get("boundary_provenance"),
+        "mass_initial_kg": case["mass_initial_kg"],
         "mass_identity_preserved": status == "completed",
     }
 
@@ -616,14 +779,14 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
             "time": "elapsed physical time divided by sqrt(length_scale/|g|); no division by file endpoint",
             "initial_only_state": ["density", "pressure", "mass"],
             "known_control": "current prescribed control schedule only; no future free-body state",
-            "boundary_geometry": "static summary plus availability bit; missing sidecars remain explicit",
+            "boundary_geometry": "current-frame finite-triangle world-space AABB summary plus availability bit from a linked boundary-sidecar-v1; records without a sidecar use an explicit legacy fallback",
             "prohibited_rollout_inputs": ["future reference position", "future reference velocity", "future reference density", "future free-body trajectory"],
         },
         "metric_definition": "vector RMSE = sqrt(mean(||error_xyz||^2)) / dp; ADE/FDE are mean vector norms; velocity and COM metrics use the same vector convention",
         "output_cap": {"kind": "smooth_tanh", "cap": OUTPUT_CAP, "saturation_rate_reported_per_case": True},
         "clipping": {"configured_clip_dp": args.clip_dp, "trigger_rate_reported_per_case": True, "note": "optional displacement clip is off in the declared run; smooth output cap is applied consistently in train/validation/rollout"},
         "physics_budget_scope": "diagnostic only: identity mass is preserved by construction; density/pressure are not predicted",
-        "limitations": "W11 development pilot; no complete boundary triangle sidecars and no T2/T3/T4 scoring; not a formal ranking",
+        "limitations": "W11 development pilot; sidecar geometry is a current-frame AABB summary rather than a learned wall-interaction state, and T2/T3/T4 scoring is not included; not a formal ranking",
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")

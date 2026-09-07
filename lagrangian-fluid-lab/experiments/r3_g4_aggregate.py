@@ -7,6 +7,7 @@ import argparse
 import json
 from collections import defaultdict
 from pathlib import Path
+import string
 from typing import Any
 
 import numpy as np
@@ -136,6 +137,37 @@ def audit_gpu_manifest(run_manifest: dict[str, Any], config: dict[str, Any],
     }
 
 
+def _valid_sidecar_provenance(entry: dict[str, Any], case_id: str) -> bool:
+    """Check the provenance emitted by a sidecar-aware baseline rollout."""
+
+    if entry.get("boundary_source") != "sidecar_world_triangles":
+        return False
+    if not bool(entry.get("boundary_available")):
+        return False
+    provenance = entry.get("boundary_provenance")
+    if not isinstance(provenance, dict):
+        return False
+    if provenance.get("schema_version") != "boundary-sidecar-v1":
+        return False
+    if provenance.get("coordinate_frame") != "world" or provenance.get("case_id") != case_id:
+        return False
+    if not isinstance(provenance.get("path"), str) or not provenance["path"]:
+        return False
+    try:
+        frame_count = int(provenance.get("frame_count", 0))
+        triangle_count = int(provenance.get("triangle_count", 0))
+    except (TypeError, ValueError):
+        return False
+    if frame_count != int(entry.get("frames_expected", 0)) + 1 or triangle_count < 1:
+        return False
+    source_hash = provenance.get("source_geometry_sha256")
+    return (
+        isinstance(source_hash, str)
+        and len(source_hash) == 64
+        and all(char in string.hexdigits for char in source_hash)
+    )
+
+
 def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
     route_runs = [run for run in runs if run.get("route") == route]
     combinations = [(int(run["seed"]), run.get("route")) for run in route_runs]
@@ -144,6 +176,18 @@ def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
     for case_id in case_ids:
         entries = [run["test_rollout"][case_id] for run in route_runs if case_id in run.get("test_rollout", {})]
         first = entries[0]
+        provenance_by_seed = {
+            str(run["seed"]): run["test_rollout"][case_id].get("boundary_provenance")
+            for run in route_runs if case_id in run.get("test_rollout", {})
+        }
+        provenance_keys = {
+            json.dumps(value, sort_keys=True, separators=(",", ":"))
+            for value in provenance_by_seed.values()
+        }
+        boundary_provenance_consistent = len(provenance_keys) == 1
+        boundary_provenance_valid = all(
+            _valid_sidecar_provenance(entry, case_id) for entry in entries
+        )
         per_case[case_id] = {
             "family": first["family"], "background_id": first["background_id"], "split": first["split"],
             "seeds": sorted(int(run["seed"]) for run in route_runs if case_id in run.get("test_rollout", {})),
@@ -164,6 +208,9 @@ def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
             "control_sources": sorted({entry.get("control_source") for entry in entries}),
             "boundary_sources": sorted({entry.get("boundary_source") for entry in entries}),
             "boundary_available": all(bool(entry.get("boundary_available")) for entry in entries),
+            "boundary_provenance_by_seed": provenance_by_seed,
+            "boundary_provenance_consistent": boundary_provenance_consistent,
+            "boundary_provenance_valid": boundary_provenance_valid,
             "mass_identity_preserved": all(bool(entry.get("mass_identity_preserved")) for entry in entries),
         }
     def macro(metric: str) -> dict[str, Any]:
@@ -203,9 +250,18 @@ def conclusion(report: dict[str, Any]) -> str:
     for route, value in report["routes"].items():
         macro = value["macro_position_rmse_over_dp"]["bootstrap"]
         route_rows.append(f"| {route} | {value['run_count']} | {value['seeds']} | {macro['estimate'] if macro['estimate'] is not None else 'n/a'} | {macro['q025'] if macro['q025'] is not None else 'n/a'}–{macro['q975'] if macro['q975'] is not None else 'n/a'} |")
-    return """# R3 G4 结论：因果输入与多路线学习基线
+    boundary_gate = bool(report.get("boundary_geometry_gate"))
+    if boundary_gate:
+        status = "development-only；已执行 sidecar-aware 边界输入，但这仍不是正式学习排行榜或物理验收。"
+        boundary_note = "所有被评测 test cases 都通过了 sidecar schema、world 坐标、时间轴、三角形 provenance 和 per-seed 一致性检查；模型当前使用每一帧的有限三角形 AABB 摘要。"
+        next_step = "下一步应验证三角形语义/可见性并补齐 T2/T3/T4；之后才考虑三维 F6 的 coupled body-state model。"
+    else:
+        status = "development-only；基线路线和指标闭环已执行，但边界 sidecar 输入契约未通过，因此不能宣布正式学习排行榜或物理验收。"
+        boundary_note = "边界几何 availability/provenance gate 未通过；缺失 sidecar 不会被零向量伪装成已提供几何。"
+        next_step = "下一步应先补齐并审计边界 sidecar，再复跑相同 matrix；之后才考虑三维 F6 的 coupled body-state model。"
+    return f"""# R3 G4 结论：因果输入与多路线学习基线
 
-状态：**development-only；基线路线和指标闭环已执行，但当前 W11 pilot 没有完整边界三角形 sidecar，因此不能宣布正式学习排行榜或物理验收。**
+状态：**{status}**
 
 ## 路线与统一口径
 
@@ -219,13 +275,13 @@ def conclusion(report: dict[str, Any]) -> str:
 
 ## 因果输入与已知限制
 
-当前 pilot 的 F2 提供当前时刻的规定杯体控制曲线，F1/F3 没有 control group；未来流体状态、未来密度/压力和自由刚体未来轨迹没有进入 rollout。密度、压力、质量仅作为初始属性。所有 12 个可训练 fluid cases 的 boundary availability 仍为 false，因为 W11 尚未发布完整 wall triangle sidecar；这是真实阻塞项，不是由零向量伪造的几何输入。
+当前 pilot 的 F2 提供当前时刻的规定杯体控制曲线，F1/F3 没有 control group；未来流体状态、未来密度/压力和自由刚体未来轨迹没有进入 rollout。密度、压力、质量仅作为初始属性。{boundary_note}
 
 本轮只评测 T1 numerical particle rollout。T2 material transport、T3 external observables 和 F6 coupled free-body route 不在该实验中打分。
 
 ## 学习曲线和下一步
 
-每个 route/seed 最多 8 epochs，至少 3 epochs；以 validation autonomous rollout 的 case macro RMSE、patience=2 和 min-delta 作为停止与 checkpoint 选择规则，并在机器可读报告中保存每一 epoch 曲线。下一步应先补齐边界 sidecar，再复跑相同 matrix；之后才考虑三维 F6 的 coupled body-state model。
+每个 route/seed 最多 8 epochs，至少 3 epochs；以 validation autonomous rollout 的 case macro RMSE、patience=2 和 min-delta 作为停止与 checkpoint 选择规则，并在机器可读报告中保存每一 epoch 曲线。{next_step}
 
 机器可读明细见 `r3-g4-baseline-audit.json`；实际运行入口和 GPU 分配见 `r3_g4_run_manifest.json`。
 """
@@ -251,6 +307,21 @@ def main() -> None:
     gpu_audit = audit_gpu_manifest(run_manifest, config, inventory, expected)
     routes = {route: aggregate_route(route, runs) for route in ROUTES}
     all_case_entries = [entry for route in routes.values() for entry in route["per_case"].values()]
+    boundary_geometry_gate = bool(all_case_entries) and all(
+        entry["boundary_available"]
+        and entry["boundary_provenance_valid"]
+        and entry["boundary_provenance_consistent"]
+        for entry in all_case_entries
+    )
+    open_blockers = []
+    if not boundary_geometry_gate:
+        open_blockers.append(
+            "boundary sidecar geometry/provenance gate is false; linked sidecars must be schema-valid, world-frame, time-aligned, and consistent across seeds"
+        )
+    open_blockers.extend([
+        "only T1 particle rollout is scored; material transport and external observable tracks remain separate",
+        "F6 free-body case has no fluid state in the pilot and is excluded until a coupled body-state route exists",
+    ])
     report = {
         "schema_version": 1, "scope": "R3-G4 corrected development baseline audit",
         "execution_status": "complete" if len(runs) == len(expected) else "partial",
@@ -268,7 +339,7 @@ def main() -> None:
         "route_seed_gate": sorted(combinations) == sorted(expected) and len(set(combinations)) == len(combinations),
         "routes": routes,
         "case_count_per_route": {route: len(value["per_case"]) for route, value in routes.items()},
-        "boundary_geometry_gate": all(entry["boundary_available"] for entry in all_case_entries) if all_case_entries else False,
+        "boundary_geometry_gate": boundary_geometry_gate,
         "nonfinite_rollout_gate": all(all(status == "completed" for status in entry["status_by_seed"].values()) for entry in all_case_entries),
         "physics_budget": {
             "status": "diagnostic_only",
@@ -278,11 +349,7 @@ def main() -> None:
         },
         "degradation_policy": "diagnostic_per_case; never a physical-scene admission gate",
         "formal_ready": False,
-        "open_blockers": [
-            "W11 pilot has no complete boundary triangle sidecars; boundary availability gate is false",
-            "only T1 particle rollout is scored; material transport and external observable tracks remain separate",
-            "F6 free-body case has no fluid state in the pilot and is excluded until a coupled body-state route exists",
-        ],
+        "open_blockers": open_blockers,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")

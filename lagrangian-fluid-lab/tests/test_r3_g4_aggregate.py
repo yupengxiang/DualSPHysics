@@ -78,3 +78,34 @@ def test_gpu_manifest_checks_uuid_to_physical_index_mapping():
     failed = module.audit_gpu_manifest(manifest, {"allowed_gpu_indices": [4, 5]}, _inventory(), expected)
     assert not failed["pass"]
     assert any("mismatch" in issue for issue in failed["issues"])
+
+
+def test_aggregate_tracks_and_validates_sidecar_provenance():
+    module = load_module()
+    runs = [_run(seed, float(seed)) for seed in module.SEEDS]
+    for run in runs:
+        entry = run["test_rollout"]["case_a"]
+        entry.update({
+            "frames_expected": 1,
+            "boundary_source": "sidecar_world_triangles",
+            "boundary_available": True,
+            "boundary_provenance": {
+                "path": "sidecars/case_a.h5",
+                "schema_version": "boundary-sidecar-v1",
+                "coordinate_frame": "world",
+                "case_id": "case_a",
+                "frame_count": 2,
+                "triangle_count": 4,
+                "source_geometry_sha256": "a" * 64,
+            },
+        })
+    result = module.aggregate_route("local_interaction", runs)
+    case = result["per_case"]["case_a"]
+    assert case["boundary_provenance_valid"]
+    assert case["boundary_provenance_consistent"]
+    assert sorted(case["boundary_provenance_by_seed"]) == ["17", "29", "43"]
+
+    runs[0]["test_rollout"]["case_a"]["boundary_provenance"]["case_id"] = "wrong"
+    failed = module.aggregate_route("local_interaction", runs)["per_case"]["case_a"]
+    assert not failed["boundary_provenance_valid"]
+    assert not failed["boundary_provenance_consistent"]

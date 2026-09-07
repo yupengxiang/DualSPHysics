@@ -1,7 +1,10 @@
 import importlib.util
+import shutil
 from pathlib import Path
 
+import h5py
 import numpy as np
+import pytest
 import torch
 
 
@@ -97,3 +100,63 @@ def test_pilot_excludes_body_only_f6_case_and_declares_no_future_state():
     assert all("density" not in case and "pressure" not in case for case in cases)
     model = module.model_for("physics_residual", module.feature_width(), 8)
     assert model is not None
+
+
+def test_linked_release_sidecars_supply_dynamic_frame_summaries_and_provenance():
+    module = load_module()
+    cases = {case["case_id"]: case for case in module.load_cases(ROOT / "release/v0.1-development/manifest.json")}
+    assert len(cases) == 12
+    assert all(case["boundary_source"] == "sidecar_world_triangles" for case in cases.values())
+    assert all(case["boundary_available"] for case in cases.values())
+    assert all(case["boundary_by_frame"].shape == (len(case["time"]), module.BOUNDARY_WIDTH) for case in cases.values())
+    assert all(case["boundary_provenance"]["schema_version"] == "boundary-sidecar-v1" for case in cases.values())
+    moving = cases["W06_standard_slow_center"]["boundary_by_frame"]
+    # The prescribed cup motion changes the world-space z extent; using only
+    # the first-frame AABB would silently discard this current-time input.
+    assert not np.allclose(moving[0], moving[-1])
+
+    case = cases["W06_standard_slow_center"]
+    position = torch.from_numpy(case["position"][0, :4])
+    velocity = torch.from_numpy(case["velocity"][0, :4])
+    mass = torch.from_numpy(case["mass0"][:4])
+    first = module.build_features(case, position, velocity, position, velocity, mass, 0, np.arange(4), 0.01, torch.device("cpu"))
+    last = module.build_features(case, position, velocity, position, velocity, mass, len(case["time"]) - 1, np.arange(4), 0.01, torch.device("cpu"))
+    boundary_start = 3 + 3 + 3 + 3 + 3 + module.PHYSICS_WIDTH + module.CONTROL_WIDTH
+    assert not torch.allclose(first[:, boundary_start:boundary_start + module.BOUNDARY_WIDTH], last[:, boundary_start:boundary_start + module.BOUNDARY_WIDTH])
+
+
+@pytest.mark.parametrize("mutation", ["schema", "case_id", "time"])
+def test_linked_sidecar_schema_case_and_time_mismatches_fail(tmp_path, mutation):
+    module = load_module()
+    source = ROOT / "release/v0.1-development/sidecars/r3-g2-boundary/F1_twin_obstacle.h5"
+    copied = tmp_path / "sidecar.h5"
+    shutil.copyfile(source, copied)
+    with h5py.File(copied, "r+") as sidecar:
+        if mutation == "schema":
+            sidecar.attrs["schema_version"] = "boundary-sidecar-v0"
+        elif mutation == "case_id":
+            sidecar.attrs["case_id"] = "not-the-case"
+        else:
+            times = sidecar["time"][:]
+            times[1] += 1e-3
+            sidecar["time"][:] = times
+    with h5py.File(source, "r") as solver:
+        solver_times = np.asarray(solver["time"][:], dtype=np.float64)
+    record = {"case_id": "F1_twin_obstacle"}
+    with pytest.raises(ValueError):
+        module._validate_boundary_sidecar(copied, record, solver_times, 1.0)
+
+
+def test_missing_sidecar_keeps_explicit_zero_fallback(tmp_path):
+    module = load_module()
+    h5_path = tmp_path / "trajectory.h5"
+    with h5py.File(h5_path, "w") as h5:
+        h5.create_dataset("time", data=np.asarray([0.0, 0.1]))
+        boundary, source, available, provenance = module._boundary_features(
+            {"case_id": "tiny", "geometry": {}}, h5, 1.0
+        )
+    assert boundary.shape == (2, module.BOUNDARY_WIDTH)
+    assert np.all(boundary == 0.0)
+    assert source == "missing_boundary_sidecar"
+    assert not available
+    assert provenance is None
