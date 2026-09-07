@@ -1,4 +1,6 @@
-# R3 G4 结论：因果输入与多路线学习基线
+# R3 G4 历史结论：无 sidecar 的因果输入与多路线学习基线
+
+> **历史快照（pre-sidecar）。** 本文件保留用于比较上一轮没有边界三角形 sidecar 的基线，不能作为当前 G4 结果入口。当前权威报告和结论是 [`r3-g4-sidecar-baseline-audit.json`](r3-g4-sidecar-baseline-audit.json) 与 [`R3-G4-SIDECAR-CONCLUSION.md`](R3-G4-SIDECAR-CONCLUSION.md)。
 
 状态：**development-only；基线路线和指标闭环已执行，但当前 W11 pilot 没有完整边界三角形 sidecar，因此不能宣布正式学习排行榜或物理验收。**
 
@@ -25,4 +27,4 @@
 
 每个 route/seed 最多 8 epochs，至少 3 epochs；以 validation autonomous rollout 的 case macro RMSE、patience=2 和 min-delta 作为停止与 checkpoint 选择规则，并在机器可读报告中保存每一 epoch 曲线。下一步应先补齐边界 sidecar，再复跑相同 matrix；之后才考虑三维 F6 的 coupled body-state model。
 
-机器可读明细见 `r3-g4-baseline-audit.json`；实际运行入口和 GPU 分配见 `r3_g4_run_manifest.json`。
+机器可读历史明细见 `r3-g4-baseline-audit.json`；当前 sidecar-aware 明细见 `r3-g4-sidecar-baseline-audit.json`。实际运行入口和 GPU 分配见 `r3_g4_run_manifest.json`。

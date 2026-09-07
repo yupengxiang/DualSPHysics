@@ -137,6 +137,17 @@ def test_sidecar_artifact_audit_binds_result_to_release_file():
     assert any("provenance path" in issue for issue in failed["issues"])
 
 
+def test_legacy_baseline_snapshot_is_explicitly_superseded():
+    legacy = json.loads((ROOT / "campaigns/v0.1-candidate/r3-g4-baseline-audit.json").read_text())
+    current = ROOT / "campaigns/v0.1-candidate/r3-g4-sidecar-baseline-audit.json"
+    conclusion = (ROOT / "campaigns/v0.1-candidate/R3-G4-CONCLUSION.md").read_text()
+    assert legacy["report_role"] == "legacy_pre_sidecar_snapshot"
+    assert legacy["superseded_by"] == current.name
+    assert current.exists()
+    assert "当前权威报告" in conclusion
+    assert current.name in conclusion
+
+
 def _temporary_release_with_sidecar(tmp_path, module):
     source_release = ROOT / "release/v0.1-development"
     release = tmp_path / "release"
