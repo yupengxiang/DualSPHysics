@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/lagrangian-fluid-v0.1/boundary-component-policy.schema.json",
+  "title": "Candidate boundary component policy contract v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "release_id",
+    "acceptance_status",
+    "manifest_ref",
+    "semantics_report_ref",
+    "policy_rules",
+    "cases",
+    "non_claims"
+  ],
+  "properties": {
+    "schema_version": {"const": "boundary-component-policy-v1"},
+    "release_id": {"type": "string", "minLength": 1},
+    "acceptance_status": {"const": "candidate_policy_contract_only"},
+    "manifest_ref": {"type": "string", "minLength": 1},
+    "semantics_report_ref": {"type": "string", "minLength": 1},
+    "policy_rules": {
+      "type": "object",
+      "required": ["open_faces", "rim_policy", "supporting_component"],
+      "properties": {
+        "open_faces": {"type": "string", "minLength": 1},
+        "rim_policy": {
+          "type": "object",
+          "required": ["exclude_open_face_rim", "review_required_implicit_cap"],
+          "properties": {
+            "exclude_open_face_rim": {"type": "string", "minLength": 1},
+            "review_required_implicit_cap": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false
+        },
+        "supporting_component": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["case_id", "case_status", "review_required", "review_reason", "components"],
+        "properties": {
+          "case_id": {"type": "string", "minLength": 1},
+          "case_status": {"enum": ["candidate_documented", "review_required"]},
+          "review_required": {"type": "boolean"},
+          "review_reason": {"type": "string", "minLength": 1},
+          "components": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "component_id",
+                "mkbound",
+                "role",
+                "open_faces",
+                "rim_policy",
+                "supporting_component",
+                "review_status",
+                "review_reason"
+              ],
+              "properties": {
+                "component_id": {"type": "string", "pattern": "^mkbound:[0-9]+$"},
+                "mkbound": {"type": "integer", "minimum": 0},
+                "role": {
+                  "enum": ["container", "solid_obstacle", "baffle", "moving_cup", "receiver", "floor"]
+                },
+                "open_faces": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {"enum": ["bottom", "left", "right", "front", "back", "top"]}
+                },
+                "rim_policy": {
+                  "enum": ["exclude_open_face_rim", "review_required_implicit_cap"]
+                },
+                "supporting_component": {
+                  "oneOf": [
+                    {"type": "null"},
+                    {
+                      "type": "object",
+                      "required": ["component_id", "relationship", "status"],
+                      "properties": {
+                        "component_id": {"type": "string", "pattern": "^mkbound:[0-9]+$"},
+                        "relationship": {"const": "floor_support_candidate"},
+                        "status": {"enum": ["unconfirmed", "confirmed"]}
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "review_status": {
+                  "enum": ["candidate_unresolved", "pending_human_or_rule_confirmation"]
+                },
+                "review_reason": {"type": "string", "minLength": 1}
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "non_claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    }
+  },
+  "additionalProperties": false
+}

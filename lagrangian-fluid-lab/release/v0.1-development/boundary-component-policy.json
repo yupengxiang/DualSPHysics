@@ -1,0 +1,144 @@
+{
+  "schema_version": "boundary-component-policy-v1",
+  "release_id": "v0.1-development-pilot",
+  "acceptance_status": "candidate_policy_contract_only",
+  "manifest_ref": "manifest.json",
+  "semantics_report_ref": "../../campaigns/v0.1-candidate/r3-g2-boundary-semantics.json",
+  "policy_rules": {
+    "open_faces": "must exactly equal logical faces omitted from the source boxfill",
+    "rim_policy": {
+      "exclude_open_face_rim": "exclude rim-only triangles on logical openings from formal wall visibility",
+      "review_required_implicit_cap": "do not classify an undeclared full cap until supporting-component policy is confirmed"
+    },
+    "supporting_component": "null when no supporting relationship is asserted; otherwise an explicit component id and unconfirmed/confirmed status are required"
+  },
+  "cases": [
+    {
+      "case_id": "F1_dam_break_plain",
+      "case_status": "candidate_documented",
+      "review_required": false,
+      "review_reason": "No full undeclared cap was detected by this heuristic; candidate-only, not physical acceptance.",
+      "components": [
+        {"component_id": "mkbound:0", "mkbound": 0, "role": "container", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."}
+      ]
+    },
+    {
+      "case_id": "F1_opposing_columns",
+      "case_status": "candidate_documented",
+      "review_required": false,
+      "review_reason": "No full undeclared cap was detected by this heuristic; candidate-only, not physical acceptance.",
+      "components": [
+        {"component_id": "mkbound:0", "mkbound": 0, "role": "container", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."}
+      ]
+    },
+    {
+      "case_id": "F1_center_obstacle",
+      "case_status": "review_required",
+      "review_required": true,
+      "review_reason": "Implicit undeclared cap(s) require human or explicit rule confirmation before wall-aware use.",
+      "components": [
+        {"component_id": "mkbound:0", "mkbound": 0, "role": "container", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."},
+        {"component_id": "mkbound:1", "mkbound": 1, "role": "solid_obstacle", "open_faces": ["bottom"], "rim_policy": "review_required_implicit_cap", "supporting_component": {"component_id": "mkbound:0", "relationship": "floor_support_candidate", "status": "unconfirmed"}, "review_status": "pending_human_or_rule_confirmation", "review_reason": "undeclared bottom cap coverage=0.733; floor support relationship is not confirmed"}
+      ]
+    },
+    {
+      "case_id": "F1_twin_obstacle",
+      "case_status": "review_required",
+      "review_required": true,
+      "review_reason": "Implicit undeclared cap(s) require human or explicit rule confirmation before wall-aware use.",
+      "components": [
+        {"component_id": "mkbound:0", "mkbound": 0, "role": "container", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."},
+        {"component_id": "mkbound:1", "mkbound": 1, "role": "solid_obstacle", "open_faces": ["bottom"], "rim_policy": "review_required_implicit_cap", "supporting_component": {"component_id": "mkbound:0", "relationship": "floor_support_candidate", "status": "unconfirmed"}, "review_status": "pending_human_or_rule_confirmation", "review_reason": "undeclared bottom cap coverage=0.840; floor support relationship is not confirmed"},
+        {"component_id": "mkbound:2", "mkbound": 2, "role": "solid_obstacle", "open_faces": ["bottom"], "rim_policy": "review_required_implicit_cap", "supporting_component": {"component_id": "mkbound:0", "relationship": "floor_support_candidate", "status": "unconfirmed"}, "review_status": "pending_human_or_rule_confirmation", "review_reason": "undeclared bottom cap coverage=0.840; floor support relationship is not confirmed"}
+      ]
+    },
+    {
+      "case_id": "W06_narrow_slow_center",
+      "case_status": "candidate_documented",
+      "review_required": false,
+      "review_reason": "No full undeclared cap was detected by this heuristic; candidate-only, not physical acceptance.",
+      "components": [
+        {"component_id": "mkbound:0", "mkbound": 0, "role": "moving_cup", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."},
+        {"component_id": "mkbound:1", "mkbound": 1, "role": "receiver", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."},
+        {"component_id": "mkbound:2", "mkbound": 2, "role": "floor", "open_faces": ["left", "right", "front", "back", "top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."}
+      ]
+    },
+    {
+      "case_id": "W06_standard_slow_center",
+      "case_status": "candidate_documented",
+      "review_required": false,
+      "review_reason": "No full undeclared cap was detected by this heuristic; candidate-only, not physical acceptance.",
+      "components": [
+        {"component_id": "mkbound:0", "mkbound": 0, "role": "moving_cup", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."},
+        {"component_id": "mkbound:1", "mkbound": 1, "role": "receiver", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."},
+        {"component_id": "mkbound:2", "mkbound": 2, "role": "floor", "open_faces": ["left", "right", "front", "back", "top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."}
+      ]
+    },
+    {
+      "case_id": "W06_wide_slow_center",
+      "case_status": "candidate_documented",
+      "review_required": false,
+      "review_reason": "No full undeclared cap was detected by this heuristic; candidate-only, not physical acceptance.",
+      "components": [
+        {"component_id": "mkbound:0", "mkbound": 0, "role": "moving_cup", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."},
+        {"component_id": "mkbound:1", "mkbound": 1, "role": "receiver", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."},
+        {"component_id": "mkbound:2", "mkbound": 2, "role": "floor", "open_faces": ["left", "right", "front", "back", "top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."}
+      ]
+    },
+    {
+      "case_id": "W06_narrow_fast_center",
+      "case_status": "candidate_documented",
+      "review_required": false,
+      "review_reason": "No full undeclared cap was detected by this heuristic; candidate-only, not physical acceptance.",
+      "components": [
+        {"component_id": "mkbound:0", "mkbound": 0, "role": "moving_cup", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."},
+        {"component_id": "mkbound:1", "mkbound": 1, "role": "receiver", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."},
+        {"component_id": "mkbound:2", "mkbound": 2, "role": "floor", "open_faces": ["left", "right", "front", "back", "top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."}
+      ]
+    },
+    {
+      "case_id": "W06_standard_fast_center",
+      "case_status": "candidate_documented",
+      "review_required": false,
+      "review_reason": "No full undeclared cap was detected by this heuristic; candidate-only, not physical acceptance.",
+      "components": [
+        {"component_id": "mkbound:0", "mkbound": 0, "role": "moving_cup", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."},
+        {"component_id": "mkbound:1", "mkbound": 1, "role": "receiver", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."},
+        {"component_id": "mkbound:2", "mkbound": 2, "role": "floor", "open_faces": ["left", "right", "front", "back", "top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."}
+      ]
+    },
+    {
+      "case_id": "F3_impulse_slosh",
+      "case_status": "candidate_documented",
+      "review_required": false,
+      "review_reason": "No full undeclared cap was detected by this heuristic; candidate-only, not physical acceptance.",
+      "components": [
+        {"component_id": "mkbound:0", "mkbound": 0, "role": "container", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."}
+      ]
+    },
+    {
+      "case_id": "F3_baffled_slosh",
+      "case_status": "review_required",
+      "review_required": true,
+      "review_reason": "Implicit undeclared cap(s) require human or explicit rule confirmation before wall-aware use.",
+      "components": [
+        {"component_id": "mkbound:0", "mkbound": 0, "role": "container", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."},
+        {"component_id": "mkbound:1", "mkbound": 1, "role": "baffle", "open_faces": ["bottom"], "rim_policy": "review_required_implicit_cap", "supporting_component": {"component_id": "mkbound:0", "relationship": "floor_support_candidate", "status": "unconfirmed"}, "review_status": "pending_human_or_rule_confirmation", "review_reason": "undeclared bottom cap coverage=1.000; floor support relationship is not confirmed"}
+      ]
+    },
+    {
+      "case_id": "F3_transverse_slosh",
+      "case_status": "candidate_documented",
+      "review_required": false,
+      "review_reason": "No full undeclared cap was detected by this heuristic; candidate-only, not physical acceptance.",
+      "components": [
+        {"component_id": "mkbound:0", "mkbound": 0, "role": "container", "open_faces": ["top"], "rim_policy": "exclude_open_face_rim", "supporting_component": null, "review_status": "candidate_unresolved", "review_reason": "Candidate rule only; no physical wall-visibility acceptance is implied."}
+      ]
+    }
+  ],
+  "non_claims": [
+    "This contract records candidate component semantics; it does not validate physical correctness, fluid-wall contact, leakage, or destination labels.",
+    "The 9/12 semantic wall-visibility passes are retained as audit observations and are not upgraded to accepted cases.",
+    "No component in this v1 contract is formally admitted as a wall-aware material target."
+  ]
+}
