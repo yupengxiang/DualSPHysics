@@ -37,6 +37,23 @@ def test_compare_traces_reports_common_time_delta():
     assert result["endpoint_delta_rmse_over_dp"] == pytest.approx(2.0)
 
 
+def test_compare_traces_excludes_solver_invalid_reference_particles():
+    first = _trace()
+    second = _trace()
+    second["position"] = second["position"].copy()
+    second["position"][:, 0, 0] += 0.1
+    second["position"][:, 1, 0] += 0.2
+    solver_valid = np.ones((3, 2), dtype=bool)
+    solver_valid[:, 1] = False
+    result = compare_traces(
+        first, second, 0.05,
+        first_solver_valid=solver_valid,
+        second_solver_valid=solver_valid,
+    )
+    assert result["solver_valid_mask_applied"] is True
+    assert result["trajectory_delta_rmse_over_dp"] == pytest.approx(2.0)
+
+
 def test_trajectory_summary_uses_vector_rmse_and_mass_weights():
     trace = _trace()
     reference = _trace()["position"]

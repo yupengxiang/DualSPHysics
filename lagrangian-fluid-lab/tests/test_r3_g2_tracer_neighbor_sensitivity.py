@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+import shutil
+
 import h5py
 import numpy as np
 import pytest
@@ -7,6 +10,8 @@ import pytest
 from scripts.boundary_sidecars import audit_sidecar
 from scripts.r3_g2_tracer_neighbor_sensitivity import (
     DEFAULT_BASELINE,
+    DEFAULT_MANIFEST,
+    _sidecar_path,
     build_settings,
     render_conclusion_zh,
     run_case,
@@ -95,6 +100,20 @@ def test_sidecar_validation_checks_schema_case_and_time_axis(tmp_path):
         h5["time"][1] = 0.4
     with pytest.raises(ValueError, match="time axes differ"):
         validate_sidecar_against_solver(sidecar, solver, "tiny")
+
+
+def test_staged_sidecar_must_match_release_link(tmp_path):
+    manifest = json.loads(DEFAULT_MANIFEST.read_text())
+    record = next(item for item in manifest["cases"] if item["case_id"] == "F1_twin_obstacle")
+    source = DEFAULT_MANIFEST.parent / record["geometry"]["boundary_sidecar"]
+    staging = tmp_path / "sidecars"
+    staging.mkdir()
+    candidate = staging / "F1_twin_obstacle.h5"
+    shutil.copy2(source, candidate)
+    with h5py.File(candidate, "r+") as h5:
+        h5.attrs["staged_test_mutation"] = "not-release"
+    with pytest.raises(ValueError, match="differs from release-linked artifact"):
+        _sidecar_path(DEFAULT_MANIFEST, record, staging)
 
 
 def test_run_case_records_wall_aware_parameter_sensitivity(tmp_path):

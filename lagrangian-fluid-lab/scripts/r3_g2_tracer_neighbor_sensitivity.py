@@ -25,6 +25,7 @@ outside this probe.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import time as wall_time
@@ -73,6 +74,14 @@ DEFAULT_BASELINE = {
     "substeps_per_interval": 4,
     "varied_parameter": "none",
 }
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        for block in iter(lambda: stream.read(8 * 1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def _positive_ints(values: Iterable[int], name: str) -> tuple[int, ...]:
@@ -213,12 +222,30 @@ def validate_sidecar_against_solver(sidecar_path: Path, solver_path: Path,
 
 
 def _sidecar_path(manifest_path: Path, record: dict[str, Any], sidecar_dir: Path | None) -> Path:
-    if sidecar_dir is not None:
-        return Path(sidecar_dir).resolve() / f"{record['case_id']}.h5"
     relative = (record.get("geometry") or {}).get("boundary_sidecar")
     if not isinstance(relative, str):
         raise ValueError(f"{record['case_id']}: release record has no boundary_sidecar")
-    return Path(manifest_path).resolve().parent / relative
+    release_root = Path(manifest_path).resolve().parent
+    linked = (release_root / relative).resolve()
+    try:
+        linked.relative_to(release_root)
+    except ValueError as error:
+        raise ValueError(f"{record['case_id']}: release boundary_sidecar escapes release root") from error
+    if not linked.is_file():
+        raise FileNotFoundError(linked)
+    if sidecar_dir is None:
+        return linked
+    candidate = Path(sidecar_dir).resolve() / f"{record['case_id']}.h5"
+    if not candidate.is_file():
+        return candidate
+    # A caller may use a staged/campaign copy for I/O, but it must be byte
+    # identical to the release-linked artifact.  This prevents an arbitrary
+    # same-shaped sidecar from bypassing the release contract.
+    if _sha256(candidate) != _sha256(linked):
+        raise ValueError(
+            f"{record['case_id']}: sidecar copy differs from release-linked artifact"
+        )
+    return candidate
 
 
 def run_case(case: dict[str, Any], h5_path: Path, sidecar_path: Path, *,
@@ -252,6 +279,7 @@ def run_case(case: dict[str, Any], h5_path: Path, sidecar_path: Path, *,
     seeds = weighted_stratified_seeds(h5_path, maximum=int(seed_count))
     seeds["initial_fluid_mass"] = initial_fluid_mass
     traces: dict[str, dict[str, Any]] = {}
+    solver_valid_by_label: dict[str, np.ndarray] = {}
     records: list[dict[str, Any]] = []
     for setting in settings:
         started = wall_time.perf_counter()
@@ -272,6 +300,7 @@ def run_case(case: dict[str, Any], h5_path: Path, sidecar_path: Path, *,
         if not np.allclose(reference_time, trace["time"], atol=1e-10, rtol=0):
             raise ValueError(f"{case['case_id']}: tracer time axis differs from solver")
         traces[str(setting["label"])] = trace
+        solver_valid_by_label[str(setting["label"])] = reference_valid
         records.append({
             "configuration": setting,
             "summary": _trajectory_summary(
@@ -282,8 +311,11 @@ def run_case(case: dict[str, Any], h5_path: Path, sidecar_path: Path, *,
 
     baseline = traces[baseline_label]
     for record in records:
+        label = str(record["configuration"]["label"])
         record["relative_to_baseline"] = compare_traces(
-            traces[str(record["configuration"]["label"])], baseline, dp
+            traces[label], baseline, dp,
+            first_solver_valid=solver_valid_by_label[label],
+            second_solver_valid=solver_valid_by_label[baseline_label],
         )
     return {
         "case_id": case["case_id"],
@@ -334,6 +366,10 @@ def build_report(manifest_path: Path = DEFAULT_MANIFEST,
         )
         case_report["hdf5"] = _relative_path(h5_path, manifest_path.parent)
         case_report["boundary_sidecar"] = _relative_path(sidecar_path, LAB)
+        linked_sidecar = (manifest_path.parent / case["geometry"]["boundary_sidecar"]).resolve()
+        case_report["boundary_sidecar_release_ref"] = case["geometry"]["boundary_sidecar"]
+        case_report["boundary_sidecar_sha256"] = _sha256(sidecar_path)
+        case_report["boundary_sidecar_release_sha256"] = _sha256(linked_sidecar)
         cases[case["case_id"]] = case_report
 
     all_records = [record for item in cases.values() for record in item["settings"]]
@@ -367,6 +403,7 @@ def build_report(manifest_path: Path = DEFAULT_MANIFEST,
             "sidecar_directory": _relative_path(
                 sidecar_dir or manifest_path.parent, LAB
             ),
+            "sidecar_release_binding": "staged sidecar must match manifest-linked SHA256",
         },
         "sidecar_contract": {
             "required": True,
@@ -397,7 +434,8 @@ def build_report(manifest_path: Path = DEFAULT_MANIFEST,
             "neighbours": "changes the number of nearest velocity samples in the independent Shepard interpolant",
             "regularization_over_dp": "changes the inverse-distance denominator epsilon relative to spatial resolution",
             "substeps_per_interval": "changes Heun integration subdivision while keeping solver saved frames fixed",
-            "comparison": "each perturbation is compared with the same-case baseline over common reliable tracer states",
+            "comparison": "each perturbation is compared with the same-case baseline over common states where both interpolants are reliable and both solver reference identities remain valid",
+            "sidecar_binding": "a staged sidecar is accepted only when its SHA256 equals the release-manifest-linked artifact",
             "decision": "do not select a global production setting from this small three-case candidate probe",
             "release_gate": "destination regions, explicit open/closed face policy, and external validation are still required",
         },
@@ -442,6 +480,7 @@ def render_conclusion_zh(report: dict[str, Any]) -> str:
         f"有限且非退化：{summary['all_sidecars_finite_and_nondegenerate']}。",
         f"- 扰动配置数：{summary['perturbation_count']}；"
         f"相对基线的最大轨迹 RMSE 差异为 {_fmt(summary['max_trajectory_delta_from_baseline_over_dp'])} dp。",
+        "- sidecar 通过 release manifest 链接的 SHA256 绑定；配置间差异只在双方插值可靠且 solver reference identity 有效的共同状态上计算。",
         "- 具体案例、每个配置的末端可靠率、质量加权误差、支持距离、穿墙拒绝数和运行时间均在机器可读 JSON 中保存。",
         "",
         "## 解释边界",
@@ -449,7 +488,7 @@ def render_conclusion_zh(report: dict[str, Any]) -> str:
         "1. 邻居数、正则化和积分子步会改变独立示踪器的数值轨迹；这种差异是配置敏感性证据，不是物理误差界或收敛证明。",
         "2. sidecar 只提供候选有限三角面。开放面、障碍物/挡板隐式底部 cap 的语义仍需 policy；材料 destination region 也尚未定义。",
         "3. 这轮只有三个代表案例和 16 个示踪点，不能代表家族覆盖，也不能据此选出全局生产默认值。",
-        "4. 当前比较仍是同一求解器导出与初始粒子身份轨迹的数值一致性检查，不是外部实验验证。",
+        "4. 当前比较仍是同一求解器导出与初始粒子身份轨迹的数值一致性检查，不是外部实验验证；solver-valid 掩码用于避免把身份失效后的状态纳入敏感性差异。",
         "",
         "## 下一步",
         "",

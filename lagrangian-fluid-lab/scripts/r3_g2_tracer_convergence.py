@@ -12,6 +12,7 @@ cadence sensitivity before a production material-transport target is frozen.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import time as wall_time
@@ -43,6 +44,14 @@ DEFAULT_CASES = (
 DEFAULT_COUNTS = (16, 32, 64)
 DEFAULT_FRAME_STRIDES = (1, 2, 5)
 DEFAULT_SUBSTEPS = (1, 4)
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        for block in iter(lambda: stream.read(8 * 1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def _weighted_mean(values: np.ndarray, weights: np.ndarray) -> float | None:
@@ -161,14 +170,37 @@ def _common_time_pairs(first_time: np.ndarray, second_time: np.ndarray, toleranc
     return pairs
 
 
-def compare_traces(first: dict, second: dict, dp: float) -> dict:
-    """Compare two settings on their common saved times and reliable seeds."""
+def compare_traces(first: dict, second: dict, dp: float, *,
+                   first_solver_valid: np.ndarray | None = None,
+                   second_solver_valid: np.ndarray | None = None) -> dict:
+    """Compare settings on common times and masks valid solver identities.
+
+    ``reliability_history`` only says that the interpolant had local support.
+    A tracer must also be compared while its reference solver particle is
+    valid; otherwise a setting can appear stable by matching a particle after
+    that identity has already left the numerical state.  The solver masks are
+    optional for compatibility with small synthetic callers, but all campaign
+    comparisons pass them explicitly.
+    """
+    first_reliability = np.asarray(first["reliability_history"], dtype=bool)
+    second_reliability = np.asarray(second["reliability_history"], dtype=bool)
+    if first_solver_valid is not None:
+        first_solver_valid = np.asarray(first_solver_valid, dtype=bool)
+        if first_solver_valid.shape != first_reliability.shape:
+            raise ValueError("first solver-valid mask does not match tracer history")
+    if second_solver_valid is not None:
+        second_solver_valid = np.asarray(second_solver_valid, dtype=bool)
+        if second_solver_valid.shape != second_reliability.shape:
+            raise ValueError("second solver-valid mask does not match tracer history")
     pairs = _common_time_pairs(first["time"], second["time"])
     errors = []
     endpoint = None
     for first_index, second_index in pairs:
-        reliable = (np.asarray(first["reliability_history"], dtype=bool)[first_index]
-                    & np.asarray(second["reliability_history"], dtype=bool)[second_index])
+        reliable = first_reliability[first_index] & second_reliability[second_index]
+        if first_solver_valid is not None:
+            reliable &= first_solver_valid[first_index]
+        if second_solver_valid is not None:
+            reliable &= second_solver_valid[second_index]
         if not reliable.any():
             continue
         delta = np.linalg.norm(first["position"][first_index, reliable]
@@ -180,6 +212,9 @@ def compare_traces(first: dict, second: dict, dp: float) -> dict:
     endpoint_values = np.asarray(endpoint if endpoint is not None else [], dtype=float)
     return {
         "common_time_samples": int(len(pairs)),
+        "solver_valid_mask_applied": bool(
+            first_solver_valid is not None or second_solver_valid is not None
+        ),
         "trajectory_delta_rmse_over_dp": float(np.sqrt(np.mean(values ** 2)) / dp) if values.size else None,
         "trajectory_delta_p95_over_dp": float(np.quantile(values, 0.95) / dp) if values.size else None,
         "endpoint_delta_rmse_over_dp": float(np.sqrt(np.mean(endpoint_values ** 2)) / dp)
@@ -200,6 +235,7 @@ def run_case(case: dict, h5_path: Path, *, counts=DEFAULT_COUNTS,
     initial_mass = _initial_fluid_mass(h5_path)
     barrier = sidecar_provider(sidecar_path) if sidecar_path is not None else None
     traces = {}
+    solver_valid_by_key = {}
     records = []
     for count in counts:
         seeds = weighted_stratified_seeds(h5_path, maximum=int(count))
@@ -224,6 +260,7 @@ def run_case(case: dict, h5_path: Path, *, counts=DEFAULT_COUNTS,
                     raise ValueError("tracer time axis differs from solver reference")
                 key = (int(count), int(stride), int(integration_substeps))
                 traces[key] = trace
+                solver_valid_by_key[key] = reference_valid
                 records.append({
                     "seed_count": int(count),
                     "frame_stride": int(stride),
@@ -242,7 +279,10 @@ def run_case(case: dict, h5_path: Path, *, counts=DEFAULT_COUNTS,
                 continue
             key = (int(count), record["frame_stride"], record["tracer_substeps_per_saved_interval"])
             record["difference_from_stride1_max_substeps"] = compare_traces(
-                traces[key], reference_trace, dp)
+                traces[key], reference_trace, dp,
+                first_solver_valid=solver_valid_by_key[key],
+                second_solver_valid=solver_valid_by_key[reference_key],
+            )
         for stride in frame_strides:
             if (int(count), int(stride), 1) in traces and (int(count), int(stride), max(substeps)) in traces:
                 low = traces[(int(count), int(stride), 1)]
@@ -250,7 +290,13 @@ def run_case(case: dict, h5_path: Path, *, counts=DEFAULT_COUNTS,
                 for record in records:
                     if (record["seed_count"], record["frame_stride"],
                         record["tracer_substeps_per_saved_interval"]) == (int(count), int(stride), 1):
-                        record["substep_refinement_delta"] = compare_traces(low, high, dp)
+                        low_key = (int(count), int(stride), 1)
+                        high_key = (int(count), int(stride), max(substeps))
+                        record["substep_refinement_delta"] = compare_traces(
+                            low, high, dp,
+                            first_solver_valid=solver_valid_by_key[low_key],
+                            second_solver_valid=solver_valid_by_key[high_key],
+                        )
     return records
 
 
@@ -278,10 +324,24 @@ def build_report(manifest_path: Path = DEFAULT_MANIFEST, selected_ids: tuple[str
     case_reports = {}
     for case, path in selected:
         sidecar_path = None
+        linked_sidecar = None
         if sidecar_dir is not None:
+            relative = (case.get("geometry") or {}).get("boundary_sidecar")
+            if not isinstance(relative, str) or not relative:
+                raise ValueError(f"{case['case_id']}: release record has no boundary_sidecar")
+            release_root = Path(manifest_path).resolve().parent
+            linked_sidecar = (release_root / relative).resolve()
+            try:
+                linked_sidecar.relative_to(release_root)
+            except ValueError as error:
+                raise ValueError(f"{case['case_id']}: release boundary_sidecar escapes release root") from error
+            if not linked_sidecar.is_file():
+                raise FileNotFoundError(linked_sidecar)
             sidecar_path = Path(sidecar_dir).resolve() / f"{case['case_id']}.h5"
             if not sidecar_path.is_file():
                 raise FileNotFoundError(sidecar_path)
+            if _sha256(sidecar_path) != _sha256(linked_sidecar):
+                raise ValueError(f"{case['case_id']}: sidecar copy differs from release-linked artifact")
         records = run_case(case, path, counts=counts, frame_strides=frame_strides,
                            substeps=substeps, sidecar_path=sidecar_path)
         case_reports[case["case_id"]] = {
@@ -290,6 +350,9 @@ def build_report(manifest_path: Path = DEFAULT_MANIFEST, selected_ids: tuple[str
             "hdf5": str(path.relative_to(Path(manifest_path).resolve().parent)),
             "particle_spacing_m": float(case["numerics"]["particle_spacing_m"]),
             "boundary_sidecar": str(sidecar_path.relative_to(LAB)) if sidecar_path else "missing; numerical probe runs without wall visibility",
+            "boundary_sidecar_release_ref": (case.get("geometry") or {}).get("boundary_sidecar") if sidecar_path else None,
+            "boundary_sidecar_sha256": _sha256(sidecar_path) if sidecar_path else None,
+            "boundary_sidecar_release_sha256": _sha256(linked_sidecar) if linked_sidecar else None,
             "settings": records,
         }
     return {
