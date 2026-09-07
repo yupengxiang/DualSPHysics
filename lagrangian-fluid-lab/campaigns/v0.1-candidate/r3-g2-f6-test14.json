@@ -1,0 +1,960 @@
+{
+  "schema_version": 1,
+  "scope": "true-3D SPHERIC Test 14 Float1, two published offsets by three spatial resolutions",
+  "execution_status": "completed",
+  "scientific_acceptance": "rejected_current_DBC_proxy",
+  "acceptance_reason": "The physical geometry/data path and six-case comparison are executable, but the response has a large positive equilibrium bias and no resolution stability. The 2 m-radius damped tank is also a computational proxy and the finest dp resolves the 0.3 m body with only about 8.6 spacings.",
+  "experiment": {
+    "source_page": "https://www.spheric-sph.org/tests/test-14",
+    "archive_url": "https://9449af45-2363-44f6-8b03-03b6b7c2aee5.usrfiles.com/archives/9449af_89e9dae6260449eb9cae8af3a3cbcf2f.zip",
+    "archive_sha256": "03d264db42797da73011e20418b5ffc1a2e763aa7a338c68abe4dbd997b0f8cf",
+    "file_sha256": {
+      "Float1.STL": "f859a2e487d7cafcd119ebd680113830291f784cf736e875dce0acc88ff62cb1",
+      "Fl1-0p074.txt": "abdb2f41cce578598400237acd8c0c11463376bfa4210e05cbd1e8b7ee165509",
+      "Fl1+0p76.txt": "2cfe025f26256ffc4c304e73a541166d055164e0e00141346a8a664615c6033e",
+      "SPHERIC_TestCase14_Free_heave.pdf": "9c46438b4b8e0d38c63a98565e7a36eb9be78420dc53596acaffd0b9c3686356"
+    },
+    "water_depth_m": 0.8,
+    "float": "Float1 round-base body",
+    "mass_kg": 9.75,
+    "cog_above_base_m": 0.09,
+    "published_sampling_hz": 200,
+    "published_natural_period_s": 0.87
+  },
+  "numerical_configuration": {
+    "solver": "DualSPHysics 5.4 CPU/GPU binary release",
+    "boundary": "DBC",
+    "tank_radius_m": 2.0,
+    "radial_damping_start_m": 1.4,
+    "water_depth_m": 0.8,
+    "float_motion": "heave translation only; surge, sway and all rotations constrained",
+    "time_max_s": 4.5,
+    "spatial_resolution_m": {
+      "coarse": 0.06,
+      "medium": 0.045,
+      "fine": 0.035
+    },
+    "saved_output_cadence_s": 0.01,
+    "internal_timestep": "adaptive and reported per case"
+  },
+  "geometry_preflight": {
+    "source_stl_interpretation": "official Float1 STL is a watertight physical shell with separate outer and oppositely-wound inner surfaces",
+    "generation_decision": "select the largest-volume connected outer surface, transform mm X/Y(vertical)/Z to m X/Y/Z, then autofill the displaced outer hull before void-filling water",
+    "source_connected_components": 2,
+    "source_component_signed_volumes_m3": [
+      0.016931975362993713,
+      -0.016254801763298517
+    ],
+    "selected_outer_volume_m3": 0.016931975362993713,
+    "floating_particle_count_relative_span_between_offsets": {
+      "coarse": 0.09737827715355805,
+      "medium": 0.09747899159663866,
+      "fine": 0.053959965187119235
+    },
+    "cases": [
+      {
+        "case_id": "R3_F6_test14_float1_neg074_coarse",
+        "dp": 0.06,
+        "offset_m": -0.074,
+        "floating_particles": 140,
+        "fluid_particles": 42851,
+        "transformed_stl_bbox_min_m": [
+          -0.15,
+          -0.1499388427734375,
+          0.539
+        ],
+        "transformed_stl_bbox_max_m": [
+          0.15,
+          0.14993881583213806,
+          0.829
+        ],
+        "floating_bbox_min_m": [
+          -0.18000000715255737,
+          -0.11999999731779099,
+          0.5400000214576721
+        ],
+        "floating_bbox_max_m": [
+          0.18000000715255737,
+          0.11999999731779099,
+          0.8399999737739563
+        ],
+        "transformed_stl_sha256": "b586c89a30b864447132e4e7a0c4bb982413d6b5b88cbe7b79bccfabc07c0dd5"
+      },
+      {
+        "case_id": "R3_F6_test14_float1_neg074_fine",
+        "dp": 0.035,
+        "offset_m": -0.074,
+        "floating_particles": 590,
+        "fluid_particles": 229410,
+        "transformed_stl_bbox_min_m": [
+          -0.15,
+          -0.1499388427734375,
+          0.539
+        ],
+        "transformed_stl_bbox_max_m": [
+          0.15,
+          0.14993881583213806,
+          0.829
+        ],
+        "floating_bbox_min_m": [
+          -0.14000000059604645,
+          -0.14000000059604645,
+          0.5249999761581421
+        ],
+        "floating_bbox_max_m": [
+          0.14000000059604645,
+          0.14000000059604645,
+          0.8399999737739563
+        ],
+        "transformed_stl_sha256": "b586c89a30b864447132e4e7a0c4bb982413d6b5b88cbe7b79bccfabc07c0dd5"
+      },
+      {
+        "case_id": "R3_F6_test14_float1_neg074_medium",
+        "dp": 0.045,
+        "offset_m": -0.074,
+        "floating_particles": 283,
+        "fluid_particles": 106223,
+        "transformed_stl_bbox_min_m": [
+          -0.15,
+          -0.1499388427734375,
+          0.539
+        ],
+        "transformed_stl_bbox_max_m": [
+          0.15,
+          0.14993881583213806,
+          0.829
+        ],
+        "floating_bbox_min_m": [
+          -0.13500000536441803,
+          -0.13500000536441803,
+          0.5400000214576721
+        ],
+        "floating_bbox_max_m": [
+          0.13500000536441803,
+          0.13500000536441803,
+          0.8100000023841858
+        ],
+        "transformed_stl_sha256": "b586c89a30b864447132e4e7a0c4bb982413d6b5b88cbe7b79bccfabc07c0dd5"
+      },
+      {
+        "case_id": "R3_F6_test14_float1_pos076_coarse",
+        "dp": 0.06,
+        "offset_m": 0.076,
+        "floating_particles": 127,
+        "fluid_particles": 42918,
+        "transformed_stl_bbox_min_m": [
+          -0.15,
+          -0.1499388427734375,
+          0.689
+        ],
+        "transformed_stl_bbox_max_m": [
+          0.15,
+          0.14993881583213806,
+          0.9789999999999999
+        ],
+        "floating_bbox_min_m": [
+          -0.18000000715255737,
+          -0.11999999731779099,
+          0.6600000262260437
+        ],
+        "floating_bbox_max_m": [
+          0.18000000715255737,
+          0.11999999731779099,
+          0.9599999785423279
+        ],
+        "transformed_stl_sha256": "3dc1a1c24eded05f6719179e881b8d60776b28e03ccbc0072441530bb1d1a449"
+      },
+      {
+        "case_id": "R3_F6_test14_float1_pos076_fine",
+        "dp": 0.035,
+        "offset_m": 0.076,
+        "floating_particles": 559,
+        "fluid_particles": 229719,
+        "transformed_stl_bbox_min_m": [
+          -0.15,
+          -0.1499388427734375,
+          0.689
+        ],
+        "transformed_stl_bbox_max_m": [
+          0.15,
+          0.14993881583213806,
+          0.9789999999999999
+        ],
+        "floating_bbox_min_m": [
+          -0.14000000059604645,
+          -0.14000000059604645,
+          0.699999988079071
+        ],
+        "floating_bbox_max_m": [
+          0.14000000059604645,
+          0.14000000059604645,
+          0.9800000190734863
+        ],
+        "transformed_stl_sha256": "3dc1a1c24eded05f6719179e881b8d60776b28e03ccbc0072441530bb1d1a449"
+      },
+      {
+        "case_id": "R3_F6_test14_float1_pos076_medium",
+        "dp": 0.045,
+        "offset_m": 0.076,
+        "floating_particles": 312,
+        "fluid_particles": 106374,
+        "transformed_stl_bbox_min_m": [
+          -0.15,
+          -0.1499388427734375,
+          0.689
+        ],
+        "transformed_stl_bbox_max_m": [
+          0.15,
+          0.14993881583213806,
+          0.9789999999999999
+        ],
+        "floating_bbox_min_m": [
+          -0.13500000536441803,
+          -0.13500000536441803,
+          0.675000011920929
+        ],
+        "floating_bbox_max_m": [
+          0.13500000536441803,
+          0.13500000536441803,
+          0.9900000095367432
+        ],
+        "transformed_stl_sha256": "3dc1a1c24eded05f6719179e881b8d60776b28e03ccbc0072441530bb1d1a449"
+      }
+    ]
+  },
+  "offsets": {
+    "neg074": {
+      "published_initial_offset_m": -0.074,
+      "experiment_file": "Fl1-0p074.txt",
+      "resolutions": {
+        "coarse": {
+          "dp_m": 0.06,
+          "simulation_frames": 451,
+          "experimental_samples": 901,
+          "experiment_cadence_s": 0.004999999999999893,
+          "simulation_saved_cadence_s": 0.01008671361429997,
+          "comparison_alignment": "simulation linearly interpolated at experimental timestamps; no time shift or amplitude fit",
+          "initial_offset_error_m": -2.6999999999943736e-06,
+          "initial_center_z_error_m": 0.0,
+          "rmse_m": 0.15015808616477697,
+          "normalized_rmse_by_abs_initial_offset": 2.02916332655104,
+          "mae_m": 0.14671703416042853,
+          "correlation": 0.6599695065000751,
+          "last_1s_simulation_mean_m": 0.15279945448715018,
+          "last_1s_experiment_mean_m": -0.0009429970467661696,
+          "last_1s_mean_bias_m": 0.15374245153391636,
+          "experiment_dominant_period_s": 0.8999999999999999,
+          "simulation_dominant_period_s": 1.12625,
+          "experiment_extrema": [
+            {
+              "time_s": 0.495,
+              "displacement_m": 0.06764548,
+              "absolute_amplitude_m": 0.06764548
+            },
+            {
+              "time_s": 0.9400000000000001,
+              "displacement_m": -0.05333500000000001,
+              "absolute_amplitude_m": 0.05333500000000001
+            },
+            {
+              "time_s": 1.37,
+              "displacement_m": 0.04756322,
+              "absolute_amplitude_m": 0.04756322
+            },
+            {
+              "time_s": 1.81,
+              "displacement_m": -0.037387580000000004,
+              "absolute_amplitude_m": 0.037387580000000004
+            },
+            {
+              "time_s": 2.245,
+              "displacement_m": 0.03541262,
+              "absolute_amplitude_m": 0.03541262
+            },
+            {
+              "time_s": 2.685,
+              "displacement_m": -0.028199140000000004,
+              "absolute_amplitude_m": 0.028199140000000004
+            },
+            {
+              "time_s": 3.115,
+              "displacement_m": 0.02805104,
+              "absolute_amplitude_m": 0.02805104
+            },
+            {
+              "time_s": 3.555,
+              "displacement_m": -0.02100292,
+              "absolute_amplitude_m": 0.02100292
+            }
+          ],
+          "simulation_extrema": [
+            {
+              "time_s": 0.48,
+              "displacement_m": 0.2180885718148303,
+              "absolute_amplitude_m": 0.2180885718148303
+            },
+            {
+              "time_s": 0.975,
+              "displacement_m": 0.13167683203467773,
+              "absolute_amplitude_m": 0.13167683203467773
+            },
+            {
+              "time_s": 1.465,
+              "displacement_m": 0.15826845350599905,
+              "absolute_amplitude_m": 0.15826845350599905
+            },
+            {
+              "time_s": 1.94,
+              "displacement_m": 0.1507523651282161,
+              "absolute_amplitude_m": 0.1507523651282161
+            },
+            {
+              "time_s": 2.41,
+              "displacement_m": 0.15596182818768473,
+              "absolute_amplitude_m": 0.15596182818768473
+            },
+            {
+              "time_s": 3.085,
+              "displacement_m": 0.14700432188872922,
+              "absolute_amplitude_m": 0.14700432188872922
+            },
+            {
+              "time_s": 3.7600000000000002,
+              "displacement_m": 0.1577330467757201,
+              "absolute_amplitude_m": 0.1577330467757201
+            },
+            {
+              "time_s": 4.3950000000000005,
+              "displacement_m": 0.146735787880349,
+              "absolute_amplitude_m": 0.146735787880349
+            }
+          ],
+          "adaptive_solver_steps": 12036,
+          "mean_internal_dt_s": 0.00037387836490528417
+        },
+        "medium": {
+          "dp_m": 0.045,
+          "simulation_frames": 451,
+          "experimental_samples": 901,
+          "experiment_cadence_s": 0.004999999999999893,
+          "simulation_saved_cadence_s": 0.009941565603000191,
+          "comparison_alignment": "simulation linearly interpolated at experimental timestamps; no time shift or amplitude fit",
+          "initial_offset_error_m": -2.6999999999943736e-06,
+          "initial_center_z_error_m": 0.0,
+          "rmse_m": 0.1603758634308639,
+          "normalized_rmse_by_abs_initial_offset": 2.167241397714377,
+          "mae_m": 0.15696342093886329,
+          "correlation": 0.6953005404915616,
+          "last_1s_simulation_mean_m": 0.16215515731291053,
+          "last_1s_experiment_mean_m": -0.0009429970467661696,
+          "last_1s_mean_bias_m": 0.16309815435967667,
+          "experiment_dominant_period_s": 0.8999999999999999,
+          "simulation_dominant_period_s": 1.12625,
+          "experiment_extrema": [
+            {
+              "time_s": 0.495,
+              "displacement_m": 0.06764548,
+              "absolute_amplitude_m": 0.06764548
+            },
+            {
+              "time_s": 0.9400000000000001,
+              "displacement_m": -0.05333500000000001,
+              "absolute_amplitude_m": 0.05333500000000001
+            },
+            {
+              "time_s": 1.37,
+              "displacement_m": 0.04756322,
+              "absolute_amplitude_m": 0.04756322
+            },
+            {
+              "time_s": 1.81,
+              "displacement_m": -0.037387580000000004,
+              "absolute_amplitude_m": 0.037387580000000004
+            },
+            {
+              "time_s": 2.245,
+              "displacement_m": 0.03541262,
+              "absolute_amplitude_m": 0.03541262
+            },
+            {
+              "time_s": 2.685,
+              "displacement_m": -0.028199140000000004,
+              "absolute_amplitude_m": 0.028199140000000004
+            },
+            {
+              "time_s": 3.115,
+              "displacement_m": 0.02805104,
+              "absolute_amplitude_m": 0.02805104
+            },
+            {
+              "time_s": 3.555,
+              "displacement_m": -0.02100292,
+              "absolute_amplitude_m": 0.02100292
+            }
+          ],
+          "simulation_extrema": [
+            {
+              "time_s": 0.455,
+              "displacement_m": 0.24886959143758233,
+              "absolute_amplitude_m": 0.24886959143758233
+            },
+            {
+              "time_s": 0.9500000000000001,
+              "displacement_m": 0.13202227819068268,
+              "absolute_amplitude_m": 0.13202227819068268
+            },
+            {
+              "time_s": 1.48,
+              "displacement_m": 0.17325479081366288,
+              "absolute_amplitude_m": 0.17325479081366288
+            },
+            {
+              "time_s": 1.955,
+              "displacement_m": 0.1566277533123131,
+              "absolute_amplitude_m": 0.1566277533123131
+            },
+            {
+              "time_s": 2.485,
+              "displacement_m": 0.1666098627346765,
+              "absolute_amplitude_m": 0.1666098627346765
+            },
+            {
+              "time_s": 3.105,
+              "displacement_m": 0.15560707554688988,
+              "absolute_amplitude_m": 0.15560707554688988
+            },
+            {
+              "time_s": 3.7600000000000002,
+              "displacement_m": 0.16791951859980542,
+              "absolute_amplitude_m": 0.16791951859980542
+            },
+            {
+              "time_s": 4.37,
+              "displacement_m": 0.15532306709137558,
+              "absolute_amplitude_m": 0.15532306709137558
+            }
+          ],
+          "adaptive_solver_steps": 15889,
+          "mean_internal_dt_s": 0.00028321480269368745
+        },
+        "fine": {
+          "dp_m": 0.035,
+          "simulation_frames": 451,
+          "experimental_samples": 901,
+          "experiment_cadence_s": 0.004999999999999893,
+          "simulation_saved_cadence_s": 0.01002699527106999,
+          "comparison_alignment": "simulation linearly interpolated at experimental timestamps; no time shift or amplitude fit",
+          "initial_offset_error_m": -2.6999999999943736e-06,
+          "initial_center_z_error_m": 0.0,
+          "rmse_m": 0.1156923432467134,
+          "normalized_rmse_by_abs_initial_offset": 1.5634100438745056,
+          "mae_m": 0.11286585069470596,
+          "correlation": 0.7401752579903798,
+          "last_1s_simulation_mean_m": 0.11702806922893685,
+          "last_1s_experiment_mean_m": -0.0009429970467661696,
+          "last_1s_mean_bias_m": 0.11797106627570302,
+          "experiment_dominant_period_s": 0.8999999999999999,
+          "simulation_dominant_period_s": 0.901,
+          "experiment_extrema": [
+            {
+              "time_s": 0.495,
+              "displacement_m": 0.06764548,
+              "absolute_amplitude_m": 0.06764548
+            },
+            {
+              "time_s": 0.9400000000000001,
+              "displacement_m": -0.05333500000000001,
+              "absolute_amplitude_m": 0.05333500000000001
+            },
+            {
+              "time_s": 1.37,
+              "displacement_m": 0.04756322,
+              "absolute_amplitude_m": 0.04756322
+            },
+            {
+              "time_s": 1.81,
+              "displacement_m": -0.037387580000000004,
+              "absolute_amplitude_m": 0.037387580000000004
+            },
+            {
+              "time_s": 2.245,
+              "displacement_m": 0.03541262,
+              "absolute_amplitude_m": 0.03541262
+            },
+            {
+              "time_s": 2.685,
+              "displacement_m": -0.028199140000000004,
+              "absolute_amplitude_m": 0.028199140000000004
+            },
+            {
+              "time_s": 3.115,
+              "displacement_m": 0.02805104,
+              "absolute_amplitude_m": 0.02805104
+            },
+            {
+              "time_s": 3.555,
+              "displacement_m": -0.02100292,
+              "absolute_amplitude_m": 0.02100292
+            }
+          ],
+          "simulation_extrema": [
+            {
+              "time_s": 0.455,
+              "displacement_m": 0.19246347427080818,
+              "absolute_amplitude_m": 0.19246347427080818
+            },
+            {
+              "time_s": 0.925,
+              "displacement_m": 0.0862946784645782,
+              "absolute_amplitude_m": 0.0862946784645782
+            },
+            {
+              "time_s": 1.3900000000000001,
+              "displacement_m": 0.1317620480254679,
+              "absolute_amplitude_m": 0.1317620480254679
+            },
+            {
+              "time_s": 1.855,
+              "displacement_m": 0.1084845310486536,
+              "absolute_amplitude_m": 0.1084845310486536
+            },
+            {
+              "time_s": 2.37,
+              "displacement_m": 0.12287773373567759,
+              "absolute_amplitude_m": 0.12287773373567759
+            },
+            {
+              "time_s": 2.99,
+              "displacement_m": 0.11206983672788846,
+              "absolute_amplitude_m": 0.11206983672788846
+            },
+            {
+              "time_s": 3.73,
+              "displacement_m": 0.12095339270694415,
+              "absolute_amplitude_m": 0.12095339270694415
+            },
+            {
+              "time_s": 4.355,
+              "displacement_m": 0.11243086354353855,
+              "absolute_amplitude_m": 0.11243086354353855
+            }
+          ],
+          "adaptive_solver_steps": 20965,
+          "mean_internal_dt_s": 0.00021464345337467207
+        }
+      },
+      "resolution_change": {
+        "coarse_to_medium": {
+          "curve_rmse_m": 0.011836258040305329,
+          "external_rmse_change_m": 0.010217777266086941,
+          "dominant_period_change_s": 0.0
+        },
+        "medium_to_fine": {
+          "curve_rmse_m": 0.04503204404668576,
+          "external_rmse_change_m": -0.044683520184150505,
+          "dominant_period_change_s": -0.22524999999999995
+        }
+      }
+    },
+    "pos076": {
+      "published_initial_offset_m": 0.076,
+      "experiment_file": "Fl1+0p76.txt",
+      "resolutions": {
+        "coarse": {
+          "dp_m": 0.06,
+          "simulation_frames": 451,
+          "experimental_samples": 901,
+          "experiment_cadence_s": 0.004999999999999893,
+          "simulation_saved_cadence_s": 0.010124823379999925,
+          "comparison_alignment": "simulation linearly interpolated at experimental timestamps; no time shift or amplitude fit",
+          "initial_offset_error_m": -0.0004378000000000021,
+          "initial_center_z_error_m": 1.1102230246251565e-16,
+          "rmse_m": 0.09172877279264448,
+          "normalized_rmse_by_abs_initial_offset": 1.206957536745322,
+          "mae_m": 0.08689072427693743,
+          "correlation": -0.6499533017684044,
+          "last_1s_simulation_mean_m": 0.08735303506253611,
+          "last_1s_experiment_mean_m": 0.0010452433830845768,
+          "last_1s_mean_bias_m": 0.0863077916794515,
+          "experiment_dominant_period_s": 0.8999999999999999,
+          "simulation_dominant_period_s": 0.901,
+          "experiment_extrema": [
+            {
+              "time_s": 0.47500000000000003,
+              "displacement_m": -0.06286161999999999,
+              "absolute_amplitude_m": 0.06286161999999999
+            },
+            {
+              "time_s": 0.905,
+              "displacement_m": 0.05009022,
+              "absolute_amplitude_m": 0.05009022
+            },
+            {
+              "time_s": 1.34,
+              "displacement_m": -0.04275506,
+              "absolute_amplitude_m": 0.04275506
+            },
+            {
+              "time_s": 1.77,
+              "displacement_m": 0.03465018,
+              "absolute_amplitude_m": 0.03465018
+            },
+            {
+              "time_s": 2.195,
+              "displacement_m": -0.03173296,
+              "absolute_amplitude_m": 0.03173296
+            },
+            {
+              "time_s": 2.6350000000000002,
+              "displacement_m": 0.026992020000000002,
+              "absolute_amplitude_m": 0.026992020000000002
+            },
+            {
+              "time_s": 3.06,
+              "displacement_m": -0.025556739999999994,
+              "absolute_amplitude_m": 0.025556739999999994
+            },
+            {
+              "time_s": 3.5,
+              "displacement_m": 0.021120559999999993,
+              "absolute_amplitude_m": 0.021120559999999993
+            }
+          ],
+          "simulation_extrema": [
+            {
+              "time_s": 0.44,
+              "displacement_m": 0.08995588884925157,
+              "absolute_amplitude_m": 0.08995588884925157
+            },
+            {
+              "time_s": 0.855,
+              "displacement_m": 0.08604140676930683,
+              "absolute_amplitude_m": 0.08604140676930683
+            },
+            {
+              "time_s": 1.28,
+              "displacement_m": 0.08780151081020854,
+              "absolute_amplitude_m": 0.08780151081020854
+            },
+            {
+              "time_s": 1.77,
+              "displacement_m": 0.0857909595283245,
+              "absolute_amplitude_m": 0.0857909595283245
+            },
+            {
+              "time_s": 2.35,
+              "displacement_m": 0.0889018914352617,
+              "absolute_amplitude_m": 0.0889018914352617
+            },
+            {
+              "time_s": 2.91,
+              "displacement_m": 0.08607263781466279,
+              "absolute_amplitude_m": 0.08607263781466279
+            },
+            {
+              "time_s": 3.43,
+              "displacement_m": 0.08771869552010979,
+              "absolute_amplitude_m": 0.08771869552010979
+            },
+            {
+              "time_s": 3.81,
+              "displacement_m": 0.08728965182490575,
+              "absolute_amplitude_m": 0.08728965182490575
+            }
+          ],
+          "adaptive_solver_steps": 12882,
+          "mean_internal_dt_s": 0.00034932463903120635
+        },
+        "medium": {
+          "dp_m": 0.045,
+          "simulation_frames": 451,
+          "experimental_samples": 901,
+          "experiment_cadence_s": 0.004999999999999893,
+          "simulation_saved_cadence_s": 0.009971660739499955,
+          "comparison_alignment": "simulation linearly interpolated at experimental timestamps; no time shift or amplitude fit",
+          "initial_offset_error_m": -0.0004378000000000021,
+          "initial_center_z_error_m": 1.1102230246251565e-16,
+          "rmse_m": 0.11110223607720898,
+          "normalized_rmse_by_abs_initial_offset": 1.4618715273316971,
+          "mae_m": 0.10619973390103193,
+          "correlation": -0.7292944381901701,
+          "last_1s_simulation_mean_m": 0.10670375947061751,
+          "last_1s_experiment_mean_m": 0.0010452433830845768,
+          "last_1s_mean_bias_m": 0.10565851608753293,
+          "experiment_dominant_period_s": 0.8999999999999999,
+          "simulation_dominant_period_s": 0.901,
+          "experiment_extrema": [
+            {
+              "time_s": 0.47500000000000003,
+              "displacement_m": -0.06286161999999999,
+              "absolute_amplitude_m": 0.06286161999999999
+            },
+            {
+              "time_s": 0.905,
+              "displacement_m": 0.05009022,
+              "absolute_amplitude_m": 0.05009022
+            },
+            {
+              "time_s": 1.34,
+              "displacement_m": -0.04275506,
+              "absolute_amplitude_m": 0.04275506
+            },
+            {
+              "time_s": 1.77,
+              "displacement_m": 0.03465018,
+              "absolute_amplitude_m": 0.03465018
+            },
+            {
+              "time_s": 2.195,
+              "displacement_m": -0.03173296,
+              "absolute_amplitude_m": 0.03173296
+            },
+            {
+              "time_s": 2.6350000000000002,
+              "displacement_m": 0.026992020000000002,
+              "absolute_amplitude_m": 0.026992020000000002
+            },
+            {
+              "time_s": 3.06,
+              "displacement_m": -0.025556739999999994,
+              "absolute_amplitude_m": 0.025556739999999994
+            },
+            {
+              "time_s": 3.5,
+              "displacement_m": 0.021120559999999993,
+              "absolute_amplitude_m": 0.021120559999999993
+            }
+          ],
+          "simulation_extrema": [
+            {
+              "time_s": 0.425,
+              "displacement_m": 0.12040691459675389,
+              "absolute_amplitude_m": 0.12040691459675389
+            },
+            {
+              "time_s": 0.84,
+              "displacement_m": 0.10111881542143665,
+              "absolute_amplitude_m": 0.10111881542143665
+            },
+            {
+              "time_s": 1.27,
+              "displacement_m": 0.10927144776495934,
+              "absolute_amplitude_m": 0.10927144776495934
+            },
+            {
+              "time_s": 1.735,
+              "displacement_m": 0.10542210184511358,
+              "absolute_amplitude_m": 0.10542210184511358
+            },
+            {
+              "time_s": 2.315,
+              "displacement_m": 0.1080580027675864,
+              "absolute_amplitude_m": 0.1080580027675864
+            },
+            {
+              "time_s": 2.935,
+              "displacement_m": 0.10532717678133294,
+              "absolute_amplitude_m": 0.10532717678133294
+            },
+            {
+              "time_s": 3.6,
+              "displacement_m": 0.10750172324074908,
+              "absolute_amplitude_m": 0.10750172324074908
+            },
+            {
+              "time_s": 4.335,
+              "displacement_m": 0.10583862511575214,
+              "absolute_amplitude_m": 0.10583862511575214
+            }
+          ],
+          "adaptive_solver_steps": 17601,
+          "mean_internal_dt_s": 0.0002556672916311573
+        },
+        "fine": {
+          "dp_m": 0.035,
+          "simulation_frames": 451,
+          "experimental_samples": 901,
+          "experiment_cadence_s": 0.004999999999999893,
+          "simulation_saved_cadence_s": 0.009946629119000017,
+          "comparison_alignment": "simulation linearly interpolated at experimental timestamps; no time shift or amplitude fit",
+          "initial_offset_error_m": -0.0004378000000000021,
+          "initial_center_z_error_m": 1.1102230246251565e-16,
+          "rmse_m": 0.07574511115765072,
+          "normalized_rmse_by_abs_initial_offset": 0.9966461994427726,
+          "mae_m": 0.07074141523383765,
+          "correlation": 0.7651408341742635,
+          "last_1s_simulation_mean_m": 0.07078532573894232,
+          "last_1s_experiment_mean_m": 0.0010452433830845768,
+          "last_1s_mean_bias_m": 0.06974008235585774,
+          "experiment_dominant_period_s": 0.8999999999999999,
+          "simulation_dominant_period_s": 0.901,
+          "experiment_extrema": [
+            {
+              "time_s": 0.47500000000000003,
+              "displacement_m": -0.06286161999999999,
+              "absolute_amplitude_m": 0.06286161999999999
+            },
+            {
+              "time_s": 0.905,
+              "displacement_m": 0.05009022,
+              "absolute_amplitude_m": 0.05009022
+            },
+            {
+              "time_s": 1.34,
+              "displacement_m": -0.04275506,
+              "absolute_amplitude_m": 0.04275506
+            },
+            {
+              "time_s": 1.77,
+              "displacement_m": 0.03465018,
+              "absolute_amplitude_m": 0.03465018
+            },
+            {
+              "time_s": 2.195,
+              "displacement_m": -0.03173296,
+              "absolute_amplitude_m": 0.03173296
+            },
+            {
+              "time_s": 2.6350000000000002,
+              "displacement_m": 0.026992020000000002,
+              "absolute_amplitude_m": 0.026992020000000002
+            },
+            {
+              "time_s": 3.06,
+              "displacement_m": -0.025556739999999994,
+              "absolute_amplitude_m": 0.025556739999999994
+            },
+            {
+              "time_s": 3.5,
+              "displacement_m": 0.021120559999999993,
+              "absolute_amplitude_m": 0.021120559999999993
+            }
+          ],
+          "simulation_extrema": [
+            {
+              "time_s": 0.41000000000000003,
+              "displacement_m": 0.0672704841769041,
+              "absolute_amplitude_m": 0.0672704841769041
+            },
+            {
+              "time_s": 0.8300000000000001,
+              "displacement_m": 0.07231664758684143,
+              "absolute_amplitude_m": 0.07231664758684143
+            },
+            {
+              "time_s": 1.2650000000000001,
+              "displacement_m": 0.07022717923208809,
+              "absolute_amplitude_m": 0.07022717923208809
+            },
+            {
+              "time_s": 1.61,
+              "displacement_m": 0.07089817079908362,
+              "absolute_amplitude_m": 0.07089817079908362
+            },
+            {
+              "time_s": 2.0,
+              "displacement_m": 0.0701733022525816,
+              "absolute_amplitude_m": 0.0701733022525816
+            },
+            {
+              "time_s": 2.465,
+              "displacement_m": 0.07128423211696423,
+              "absolute_amplitude_m": 0.07128423211696423
+            },
+            {
+              "time_s": 2.92,
+              "displacement_m": 0.07021221418154805,
+              "absolute_amplitude_m": 0.07021221418154805
+            },
+            {
+              "time_s": 3.36,
+              "displacement_m": 0.0711026809234824,
+              "absolute_amplitude_m": 0.0711026809234824
+            }
+          ],
+          "adaptive_solver_steps": 22626,
+          "mean_internal_dt_s": 0.0001988862370723946
+        }
+      },
+      "resolution_change": {
+        "coarse_to_medium": {
+          "curve_rmse_m": 0.019738165900687644,
+          "external_rmse_change_m": 0.019373463284564504,
+          "dominant_period_change_s": 0.0
+        },
+        "medium_to_fine": {
+          "curve_rmse_m": 0.03617162136918467,
+          "external_rmse_change_m": -0.035357124919558267,
+          "dominant_period_change_s": 0.0
+        }
+      }
+    }
+  },
+  "run_results": [
+    {
+      "case_id": "R3_F6_test14_float1_neg074_coarse",
+      "attempt_id": "20260907T015137.638234Z-13c6648b",
+      "status": "completed",
+      "elapsed_seconds": 22.515622469130903,
+      "saved_parts": 451
+    },
+    {
+      "case_id": "R3_F6_test14_float1_neg074_medium",
+      "attempt_id": "20260907T015137.592715Z-d4141d07",
+      "status": "completed",
+      "elapsed_seconds": 32.01125530106947,
+      "saved_parts": 451
+    },
+    {
+      "case_id": "R3_F6_test14_float1_neg074_fine",
+      "attempt_id": "20260907T015137.720319Z-79f9ee29",
+      "status": "completed",
+      "elapsed_seconds": 68.47116975393146,
+      "saved_parts": 451
+    },
+    {
+      "case_id": "R3_F6_test14_float1_pos076_coarse",
+      "attempt_id": "20260907T015137.684308Z-e689d395",
+      "status": "completed",
+      "elapsed_seconds": 23.50255509512499,
+      "saved_parts": 451
+    },
+    {
+      "case_id": "R3_F6_test14_float1_pos076_medium",
+      "attempt_id": "20260907T015246.332415Z-07f28bff",
+      "status": "completed",
+      "elapsed_seconds": 31.711788820801303,
+      "saved_parts": 451
+    },
+    {
+      "case_id": "R3_F6_test14_float1_pos076_fine",
+      "attempt_id": "20260907T015246.350594Z-139097a5",
+      "status": "completed",
+      "elapsed_seconds": 69.4600634840317,
+      "saved_parts": 451
+    }
+  ],
+  "resource_summary": {
+    "successful_runs": 6,
+    "solver_gpu_seconds": 247.67245492408983,
+    "successful_attempts_including_short_preflight": 7,
+    "gpu_seconds_including_short_preflight": 251.11717591923662
+  },
+  "diagnostic_summary": {
+    "resolution_curve_change_decreases_for_both_offsets": false,
+    "fine_external_rmse_range_m": [
+      0.07574511115765072,
+      0.1156923432467134
+    ]
+  },
+  "open_blockers": [
+    "eliminate the 70-120 mm positive late-time equilibrium bias before any acceptance claim",
+    "repeat domain-radius/damping sensitivity against a substantially larger basin",
+    "extend to dp <= 0.02 m before claiming body-surface resolution convergence",
+    "compare DBC with a verified mDBC geometry-normal setup",
+    "independently verify the STL vertical transform, outer-hull coupling and equilibrium base placement",
+    "control the 5-10% floating-particle count change caused by release-height lattice phase",
+    "Float2 -0.088 m remains an out-of-sample body-geometry extension"
+  ],
+  "plot": "r3-g2-f6-test14-curves.png"
+}

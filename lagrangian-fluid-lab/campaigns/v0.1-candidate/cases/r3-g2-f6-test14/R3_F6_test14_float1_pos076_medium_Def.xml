@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<case>
+  <casedef>
+    <constantsdef>
+      <lattice bound="1" fluid="1" />
+      <gravity x="0" y="0" z="-9.81" />
+      <rhop0 value="1000" />
+      <rhopgradient value="2" />
+      <hswl value="0" auto="true" />
+      <gamma value="7" />
+      <speedsystem value="0" auto="true" />
+      <coefsound value="20" />
+      <speedsound value="0" auto="true" />
+      <coefh value="1.0" />
+      <cflnumber value="0.2" />
+    </constantsdef>
+    <mkconfig boundcount="241" fluidcount="9" />
+    <geometry>
+      <definition dp="0.045000">
+        <pointref x="0" y="0" z="0" />
+        <pointmin x="-2.2" y="-2.2" z="-0.2" />
+        <pointmax x="2.2" y="2.2" z="1.4" />
+      </definition>
+      <commands>
+        <mainlist>
+          <setshapemode>real | dp | bound</setshapemode>
+          <setdrawmode mode="full" />
+          <setmkbound mk="0" />
+          <drawcylinder radius="2.0" mask="2">
+            <point x="0" y="0" z="0" />
+            <point x="0" y="0" z="1.10" />
+            <layers vdp="0,1,2" />
+          </drawcylinder>
+          <setmkbound mk="10" />
+          <drawfilestl file="../../artifacts/r3-g2-f6-test14/R3_F6_test14_float1_pos076_medium/generated/Float1_world.stl" autofill="true" />
+          <setmkfluid mk="0" />
+          <setboxlimitmode mode="full" />
+          <fillbox x="0.8" y="0" z="0.4">
+            <modefill>void</modefill>
+            <point x="-2.0" y="-2.0" z="0" />
+            <size x="4.0" y="4.0" z="0.8" />
+          </fillbox>
+        </mainlist>
+      </commands>
+    </geometry>
+    <floatings>
+      <floating mkbound="10">
+        <massbody value="9.75" />
+        <center x="0" y="0" z="0.779000" />
+        <translationDOF x="0" y="0" z="1" />
+        <rotationDOF x="0" y="0" z="0" />
+      </floating>
+    </floatings>
+  </casedef>
+  <execution>
+    <special>
+      <damping>
+        <dampingcylinder active="true">
+          <point1 x="0" y="0" z="0" />
+          <point2 x="0" y="0" z="1.2" />
+          <limitmin radius="1.4" />
+          <limitmax radius="2.0" />
+          <overlimit value="0.1" />
+          <redumax value="10" />
+          <factorxyz x="1" y="1" z="1" />
+        </dampingcylinder>
+      </damping>
+    </special>
+    <parameters>
+      <parameter key="SavePosDouble" value="2" />
+      <parameter key="Boundary" value="1" />
+      <parameter key="StepAlgorithm" value="2" />
+      <parameter key="Kernel" value="2" />
+      <parameter key="ViscoTreatment" value="1" />
+      <parameter key="Visco" value="0.01" />
+      <parameter key="DensityDT" value="3" />
+      <parameter key="DensityDTvalue" value="0.1" />
+      <parameter key="Shifting" value="0" />
+      <parameter key="RigidAlgorithm" value="1" />
+      <parameter key="FtPause" value="0" />
+      <parameter key="CoefDtMin" value="0.05" />
+      <parameter key="TimeMax" value="4.5" />
+      <parameter key="TimeOut" value="0.01" />
+      <parameter key="RhopOutMin" value="700" />
+      <parameter key="RhopOutMax" value="1300" />
+      <parameter key="MinFluidStop" value="0" />
+      <parameter key="WrnPartsOut" value="1" />
+      <simulationdomain>
+        <posmin x="default" y="default" z="default" />
+        <posmax x="default" y="default" z="1.4" />
+      </simulationdomain>
+    </parameters>
+  </execution>
+</case>
