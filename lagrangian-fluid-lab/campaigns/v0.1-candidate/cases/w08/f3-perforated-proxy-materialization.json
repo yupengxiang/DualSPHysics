@@ -1,0 +1,261 @@
+{
+  "schema_version": 1,
+  "scope": "W08 F3 perforated_proxy topology-extrapolation materialization; candidate-only evidence",
+  "formal_release": false,
+  "split": "topology_extrapolation",
+  "family": "F3",
+  "holdout_topology": "perforated_proxy",
+  "inventory": "campaigns/v0.1-candidate/w00-inventory.json",
+  "binary_provenance": {
+    "GenCase_linux64": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "bytes": 5809384,
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226"
+    },
+    "DualSPHysics5.4_linux64": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "bytes": 159206984,
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    },
+    "PartVTK_linux64": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+      "bytes": 6222440,
+      "sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+    }
+  },
+  "gpu_policy": {
+    "requested_physical_index": 6,
+    "forbidden_physical_indices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "cuda_visible_devices": "unset (solver -gpu argument uses physical index)"
+  },
+  "materializations": [
+    {
+      "card_id": "W08_F3_topology_perforated_proxy_00",
+      "family": "F3",
+      "study_id": "W08_F3_topology_holdout",
+      "paired_background_id": "background_F3_topology_holdout_perforated_proxy_v1",
+      "physical_case_id": "physical_F3_topology_perforated_proxy_50d4a4ceee7e72d4",
+      "lineage_group_id": "lineage_F3_topology_perforated_proxy_50d4a4ceee7e72d4",
+      "split": "topology_extrapolation",
+      "physics": {
+        "fill_fraction": 0.5,
+        "amplitude_over_length": 0.0425,
+        "forcing_frequency_ratio": 1.05,
+        "baffle_height_over_depth": 0.4,
+        "baffle_topology": "perforated_proxy",
+        "geometry_variant": "center_3rib_2gap_perforated_proxy_v1"
+      },
+      "normalized_intervention": {
+        "baffle_topology": "perforated_proxy"
+      },
+      "simulation_signature": "50d4a4ceee7e72d4",
+      "execution_unit_id": "sim_F3_topology_perforated_proxy_50d4a4ceee7e72d4",
+      "execution_status": "completed",
+      "formal_production_authorized": false,
+      "materialization_case_id": "W08_F3_topology_perforated_proxy_00",
+      "definition": "campaigns/v0.1-candidate/cases/w08/topology/F3_perforated_proxy/W08_F3_topology_perforated_proxy_Def.xml",
+      "provenance_status": "declared_independent_geometry",
+      "case_id": "W08_F3_topology_perforated_proxy_00",
+      "mechanism": "forced-sloshing-perforated-baffle",
+      "source_template_definition": "cases/F3/F3_baffled_slosh/F3_baffled_slosh_Def.xml",
+      "source_template_sha256": "e4811e7c3bfdba6ae06ccc073fbf9cec0a9d2d62221a0df69e43fa5278e3c147",
+      "definition_sha256": "013eece1cf4370ee12020a1186d973a88daeaa434f5822251580ec668bb7bee6",
+      "particle_spacing_m": 0.04,
+      "time_max_s": 0.9,
+      "time_out_s": 0.05,
+      "gpu_requested_physical_index": 6,
+      "release_status": "candidate",
+      "physical_acceptance": "rejected_pending_resolution_and_external_reference",
+      "reference_acceptance": "rejected_no_external_anchor",
+      "provenance": {
+        "definition_is_new_file": true,
+        "reuses_registry_case": false,
+        "registry_case_id_not_reused": "F3_baffled_slosh",
+        "geometry_change": "center baffle replaced by three 0.04 x 0.08 x 0.12 m ribs at y=0.04/0.16/0.28 m, leaving two 0.04 m through-gaps",
+        "drive_realization": "initial x-impulse proxy at 0.65 m/s; no time-dependent forcing added",
+        "upstream_source_modified": false,
+        "binary_source": "W00 allowlisted official DualSPHysics 5.4.355 package"
+      },
+      "materialization_status": "candidate_structural_pass",
+      "stages": {
+        "declared": {
+          "w08_card_id": "W08_F3_topology_perforated_proxy_00",
+          "split": "topology_extrapolation",
+          "physical_case_id": "physical_F3_topology_perforated_proxy_50d4a4ceee7e72d4",
+          "lineage_group_id": "lineage_F3_topology_perforated_proxy_50d4a4ceee7e72d4",
+          "execution_unit_id": "sim_F3_topology_perforated_proxy_50d4a4ceee7e72d4"
+        },
+        "executable": {
+          "definition": "campaigns/v0.1-candidate/cases/w08/topology/F3_perforated_proxy/W08_F3_topology_perforated_proxy_Def.xml",
+          "definition_sha256": "013eece1cf4370ee12020a1186d973a88daeaa434f5822251580ec668bb7bee6",
+          "generated_case_xml": "campaigns/v0.1-candidate/artifacts/w08-f3-perforated-proxy/W08_F3_topology_perforated_proxy_00/generated/W08_F3_topology_perforated_proxy_00.xml",
+          "generated_case_xml_sha256": "b9b38e40a52ff9ced4c05d0cf1e1a9e494c1eb7c45733e924d45f8d4a0ccc6a4",
+          "generated_boundary_vtk": "campaigns/v0.1-candidate/artifacts/w08-f3-perforated-proxy/W08_F3_topology_perforated_proxy_00/generated/W08_F3_topology_perforated_proxy_00_MkCells.vtk",
+          "generated_boundary_vtk_sha256": "21a6acf24a6844d4f898161910f9b1fef838587ad2099ab4016ee7fa6c7cb7d3",
+          "gencase_command": [
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+            "campaigns/v0.1-candidate/cases/w08/topology/F3_perforated_proxy/W08_F3_topology_perforated_proxy_Def",
+            "campaigns/v0.1-candidate/artifacts/w08-f3-perforated-proxy/W08_F3_topology_perforated_proxy_00/generated/W08_F3_topology_perforated_proxy_00",
+            "-save:all"
+          ],
+          "gencase_returncode": 0,
+          "fluid_particles": 1818,
+          "total_particles": 3413,
+          "log": "campaigns/v0.1-candidate/artifacts/w08-f3-perforated-proxy/W08_F3_topology_perforated_proxy_00/generated/gencase.stdout.log",
+          "log_sha256": "de0b75f44291238a7a3ab174bef4a96853f50739c0d54ae7b48782246db43172"
+        },
+        "run": {
+          "status": "completed",
+          "attempt_id": "20260907T075646.755997Z-15a956da",
+          "attempt_directory": "campaigns/v0.1-candidate/runs/W08_F3_topology_perforated_proxy_00/attempts/20260907T075646.755997Z-15a956da.complete",
+          "elapsed_seconds": 2.9259016010910273,
+          "returncode": 0,
+          "evidence_files": [
+            "data/Part_0000.bi4",
+            "data/Part_0001.bi4",
+            "data/Part_0002.bi4",
+            "data/Part_0003.bi4",
+            "data/Part_0004.bi4",
+            "data/Part_0005.bi4",
+            "data/Part_0006.bi4",
+            "data/Part_0007.bi4",
+            "data/Part_0008.bi4",
+            "data/Part_0009.bi4",
+            "data/Part_0010.bi4",
+            "data/Part_0011.bi4",
+            "data/Part_0012.bi4",
+            "data/Part_0013.bi4",
+            "data/Part_0014.bi4",
+            "data/Part_0015.bi4",
+            "data/Part_0016.bi4",
+            "data/Part_0017.bi4",
+            "data/Part_0018.bi4"
+          ],
+          "gpu_at_launch": {
+            "index": 6,
+            "uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+            "memory_used_mib": 18,
+            "utilization_percent": 0
+          },
+          "gpu_binding": {
+            "requested_physical_index": 6,
+            "cuda_visible_devices": "unset"
+          },
+          "solver_command": [
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+            "-gpu:6",
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/w08-f3-perforated-proxy/W08_F3_topology_perforated_proxy_00/generated/W08_F3_topology_perforated_proxy_00",
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/W08_F3_topology_perforated_proxy_00/attempts/20260907T075646.755997Z-15a956da.partial"
+          ],
+          "process_stdout": "campaigns/v0.1-candidate/runs/W08_F3_topology_perforated_proxy_00/attempts/20260907T075646.755997Z-15a956da.complete/process.stdout.log",
+          "process_stdout_sha256": "f4381474e949f5cc711bd69b8a50f6e90403ecfffcfc6662e271b52b71407b15",
+          "run_out": "campaigns/v0.1-candidate/runs/W08_F3_topology_perforated_proxy_00/attempts/20260907T075646.755997Z-15a956da.complete/Run.out",
+          "run_out_sha256": "dcb1725dde90d5c8c560790e13f34af80d0cb6c9aaa3b2b4bcca4d7709924751"
+        },
+        "normalized_hdf5": {
+          "hdf5": "campaigns/v0.1-candidate/data/w08-f3-perforated-proxy/W08_F3_topology_perforated_proxy_00.h5",
+          "hdf5_bytes": 953351,
+          "hdf5_sha256": "1f9fbbc0c2510c11a2c4162a91ea5b68e3eac313564c149d7f8b46245aeea217",
+          "frames": 19,
+          "partvtk_binary": {
+            "path": "vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+            "bytes": 6222440,
+            "sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          },
+          "partvtk_command_log": "campaigns/v0.1-candidate/runs/W08_F3_topology_perforated_proxy_00/attempts/20260907T075646.755997Z-15a956da.complete/csv/partvtk.stdout.log",
+          "partvtk_command_log_sha256": "2c1ba2b5eb6792fd4fb1a1b404155b893010330b5faacaaa680f4f94b75bc239",
+          "csv_frame_count": 19
+        },
+        "structural_audit": {
+          "trajectory_io_audit": {
+            "id": "W08_F3_topology_perforated_proxy_00",
+            "family": "F3",
+            "mechanism": "forced-sloshing-perforated-baffle",
+            "frames": 19,
+            "time_start": 0.0,
+            "time_end": 0.90015,
+            "particle_ids": 1818,
+            "identity_keys": 1818,
+            "identity_key": "idp",
+            "zones": [
+              0
+            ],
+            "ids_common_first_last": 1818,
+            "identity_retention": 1.0,
+            "particles_initial": 1818,
+            "particles_final": 1818,
+            "identities_introduced_after_initial": 0,
+            "initial_identities_missing_at_final": 0,
+            "mean_displacement": 0.06260855495929718,
+            "max_displacement": 0.5111262798309326,
+            "fluid_mean_displacement": 0.06260855495929718,
+            "floating_mean_displacement": null,
+            "floating_max_displacement": null,
+            "max_speed": 2.1586320400238037,
+            "density_min": 986.2286987304688,
+            "density_max": 1013.6416015625,
+            "excluded_particles": 0,
+            "mk_values": [
+              1
+            ],
+            "type_values": [
+              3
+            ],
+            "source_destination_mass_world_x_legacy": {
+              "1": {
+                "initial_count": 1818,
+                "initial_mass_kg": 116.35200500488281,
+                "left_x_lt_0p4_mass_fraction": 0.34763479232788086,
+                "middle_0p4_to_0p8_mass_fraction": 0.3459846079349518,
+                "right_x_ge_0p8_mass_fraction": 0.30638065934181213,
+                "numerically_missing_mass_fraction": 0.0
+              }
+            },
+            "initial_left_particles": 864,
+            "fraction_initial_left_crossing_x_0p6": 0.1550925925925926,
+            "median_first_crossing_time_x_0p6": 0.150194,
+            "hdf5": "campaigns/v0.1-candidate/data/w08-f3-perforated-proxy/W08_F3_topology_perforated_proxy_00.h5",
+            "hdf5_bytes": 953351
+          },
+          "g3_audit": {
+            "path": "campaigns/v0.1-candidate/data/w08-f3-perforated-proxy/W08_F3_topology_perforated_proxy_00.h5",
+            "local_available": true,
+            "structural_pass": true,
+            "release_contract_pass": false,
+            "issues": [],
+            "frames": 19,
+            "identity_slots": 1818,
+            "initial_valid": 1818,
+            "final_valid": 1818,
+            "duration_s": 0.90015,
+            "material_present": false,
+            "material_missing": [
+              "tracer_id",
+              "source_label",
+              "mass_weight",
+              "position",
+              "valid"
+            ],
+            "material_tracers": 0
+          },
+          "structural_pass": true,
+          "physical_acceptance": "rejected_pending_resolution_and_external_reference",
+          "reference_acceptance": "rejected_no_external_anchor",
+          "formal_production_authorized": false
+        }
+      },
+      "acceptance": {
+        "status": "candidate",
+        "physical": "rejected",
+        "reference": "rejected",
+        "reason": "perforated_proxy topology is executable and structurally audited, but one coarse resolution run has no external reference and is not a formal dataset"
+      }
+    }
+  ],
+  "updated_at_utc": "2026-09-07T07:57:02.809645+00:00"
+}
