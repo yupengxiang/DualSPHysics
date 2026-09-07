@@ -19,23 +19,23 @@
 
 | control | status | GPU / UUID | attempt | `Fz` mean last 0.20 s (N) | reference error | stable | fields |
 |---|---|---:|---|---:|---:|---|---|
-| `fixed_box_dbc_gravity` | `completed` | `4` / `GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9` | `20260907T115125.880420Z-7a8059da` | `124.777` | `58.99%` | `False` | `True` |
-| `fixed_box_dbc_zero_pressure` | `completed` | `4` / `GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9` | `20260907T115132.695062Z-e85ed689` | `0.000` | `n/a` | `True` | `True` |
+| `fixed_box_dbc_gravity` | `completed` | `4` / `GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9` | `20260907T115452.522560Z-ff512c2c` | `124.777` | `58.99%` | `False` | `True` |
+| `fixed_box_dbc_zero_pressure` | `completed` | `4` / `GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9` | `20260907T115459.044639Z-6ddfcdaa` | `0.000` | `n/a` | `True` | `True` |
 
 ### `fixed_box_dbc_gravity`
 
-- Force trace: `results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/force_timeseries.csv`; samples `160`, time `0.000000--0.795163 s`.
+- Force trace: `results/fixed_box_dbc_gravity/20260907T115452.522560Z-ff512c2c/force_timeseries.csv`; samples `160`, time `0.000000--0.795163 s`.
 - Three-window signed `Fz` means: `124.777`, `110.697`, `116.350 N`; stability limit `3.924 N`.
 - Source `mkbound=1` maps to generated global `Mk=18` with `729` fixed particles; solver log says `Floating=0`, `Moving=0`.
-- Field snapshots: fixed body max identity-matched motion `0.000e+00 m`; fluid count constant `True`, mass delta `0.000e+00 kg`, penetration `0/0`.
+- Field snapshots: fixed body max identity-matched motion `0.000e+00 m`; Mk-filtered body counts `729/729`; fluid count constant `True`, mass delta `0.000e+00 kg`, penetration `0/0`.
 - Initial pressure range: `0.000--5395.488 Pa`.
 
 ### `fixed_box_dbc_zero_pressure`
 
-- Force trace: `results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/force_timeseries.csv`; samples `160`, time `0.000000--0.795011 s`.
+- Force trace: `results/fixed_box_dbc_zero_pressure/20260907T115459.044639Z-6ddfcdaa/force_timeseries.csv`; samples `160`, time `0.000000--0.795011 s`.
 - Three-window signed `Fz` means: `0.000`, `0.000`, `0.000 N`; stability limit `0.500 N`.
 - Source `mkbound=1` maps to generated global `Mk=18` with `729` fixed particles; solver log says `Floating=0`, `Moving=0`.
-- Field snapshots: fixed body max identity-matched motion `0.000e+00 m`; fluid count constant `True`, mass delta `0.000e+00 kg`, penetration `0/0`.
+- Field snapshots: fixed body max identity-matched motion `0.000e+00 m`; Mk-filtered body counts `729/729`; fluid count constant `True`, mass delta `0.000e+00 kg`, penetration `0/0`.
 - Initial pressure range: `0.000--0.000 Pa`.
 
 ## Interpretation

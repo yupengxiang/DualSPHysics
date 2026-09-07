@@ -403,6 +403,15 @@ def numeric(value: str) -> float:
 
 def field_audit(attempt_dir: Path, generated_xml: Path, result_dir: Path,
                 expected_fluids: int) -> dict[str, object]:
+    generated_mapping = parse_generated_xml(generated_xml)["mapping_source_to_global_mk"]
+    body_mapping = [
+        item for item in generated_mapping
+        if item["source_mkbound"] == 1 and item["particle_type"] == "fixed"
+    ]
+    if len(body_mapping) != 1:
+        raise ValueError(f"generated XML has {len(body_mapping)} fixed rows for source mkbound=1")
+    body_global_mk = int(body_mapping[0]["global_mk"])
+    expected_body_particles = int(body_mapping[0]["count"])
     data_dir = attempt_dir / "data"
     part_files = sorted(data_dir.glob("Part_[0-9][0-9][0-9][0-9].bi4"))
     if not part_files:
@@ -468,14 +477,17 @@ def field_audit(attempt_dir: Path, generated_xml: Path, result_dir: Path,
     # The fixed-body CSVs are regenerated only for the integrity check.  Their
     # coordinates must stay unchanged, which is a direct fixedness check.
     fixed_positions: dict[str, dict[tuple[int, int], tuple[float, float, float]]] = {}
+    fixed_body_counts: dict[str, int] = {}
     for label in ("initial", "final"):
         fixed_path = CASE_ROOT / frame_records[label]["fixed_partvtk"]["frame"]
         _, _, rows = read_table(fixed_path, ",")
+        body_rows = [row for row in rows if int(float(row["Mk"])) == body_global_mk]
+        fixed_body_counts[label] = len(body_rows)
         fixed_positions[label] = {
             (int(row["Zone"]), int(row["Idp"])): tuple(
                 numeric(row[key]) for key in ("Pos.x [m]", "Pos.y [m]", "Pos.z [m]")
             )
-            for row in rows
+            for row in body_rows
         }
     fixed_motion_max = 0.0
     if set(fixed_positions["initial"]) == set(fixed_positions["final"]):
@@ -509,6 +521,13 @@ def field_audit(attempt_dir: Path, generated_xml: Path, result_dir: Path,
             "pass": penetration_initial == 0 and penetration_final == 0,
             "scope": "initial_and_final_field_snapshots; all solver outputs are checked for excluded particles",
         },
+        "fixed_body_global_mk": body_global_mk,
+        "fixed_body_expected_particles": expected_body_particles,
+        "fixed_body_particle_count_initial": fixed_body_counts["initial"],
+        "fixed_body_particle_count_final": fixed_body_counts["final"],
+        "fixed_body_particle_count_constant": all(
+            count == expected_body_particles for count in fixed_body_counts.values()
+        ),
         "fixed_body_particle_motion_max_m": fixed_motion_max,
         "fixed_body_unchanged": math.isfinite(fixed_motion_max) and fixed_motion_max <= 1e-12,
         "pressure_initial_pa": {
@@ -685,7 +704,7 @@ def run_case(case_id: str, config: dict[str, object], index: int) -> dict[str, o
     field_ok = (
         fields["required_fields_complete"] and fields["fluid_count_constant"]
         and fields["fluid_mass_conserved"] and fields["fluid_penetration_into_box"]["pass"]
-        and fields["fixed_body_unchanged"]
+        and fields["fixed_body_particle_count_constant"] and fields["fixed_body_unchanged"]
     )
     force_windows = gauge["windows"]
     stable_window_samples = all(
@@ -790,6 +809,9 @@ def render_markdown(report: dict[str, object]) -> str:
             f"solver log says `Floating=0`, `Moving=0`.",
             f"- Field snapshots: fixed body max identity-matched motion "
             f"`{case['field_integrity']['fixed_body_particle_motion_max_m']:.3e} m`; "
+            f"Mk-filtered body counts "
+            f"`{case['field_integrity']['fixed_body_particle_count_initial']}/"
+            f"{case['field_integrity']['fixed_body_particle_count_final']}`; "
             f"fluid count constant `{case['field_integrity']['fluid_count_constant']}`, "
             f"mass delta `{case['field_integrity']['fluid_mass_delta_kg']:.3e} kg`, "
             f"penetration `{case['field_integrity']['fluid_penetration_into_box']['initial_particles']}/"
