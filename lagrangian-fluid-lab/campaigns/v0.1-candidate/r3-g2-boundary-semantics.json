@@ -1,0 +1,3016 @@
+{
+  "schema_version": 1,
+  "scope": "R3 G2 logical boundary/open-face semantics against MkCells and finite sidecars",
+  "execution_status": "complete",
+  "acceptance_status": "candidate_semantics_only",
+  "source_contract": {
+    "Type": {
+      "0": "fixed boundary",
+      "1": "prescribed moving boundary",
+      "3": "fluid surface excluded"
+    },
+    "Mk": "generated XML particles mapping is authoritative for source mkbound to VTK Mk",
+    "logical_faces": "boxfill names are requested faces; omitted names are logical openings",
+    "coverage_heuristic": "projected union coverage >= 0.5 is treated as a full generated face; lower coverage is edge/rim only"
+  },
+  "case_count": 12,
+  "cases": [
+    {
+      "case_id": "F1_dam_break_plain",
+      "family": "F1",
+      "source_definition": "cases/F1/F1_dam_break_plain/F1_dam_break_plain_Def.xml",
+      "source_generated_xml": "cases/F1/F1_dam_break_plain/generated/F1_dam_break_plain.xml",
+      "source_vtk": "cases/F1/F1_dam_break_plain/generated/F1_dam_break_plain_MkCells.vtk",
+      "particle_spacing_m": 0.04,
+      "boundary_boxes": [
+        {
+          "ordinal": 0,
+          "mkbound": 0,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size_m": [
+            1.2,
+            0.4,
+            0.6
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 17,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 1541,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 0.9999999999999999,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.13000004944701943,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        }
+      ],
+      "generated_mk_mapping": {
+        "0": {
+          "vtk_mk": 17,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 1541,
+          "motion_ref": null
+        }
+      },
+      "vtk_boundary_polygon_count": 14,
+      "vtk_boundary_polygon_counts_by_mk": {
+        "17": 14
+      },
+      "vtk_types_by_mk": {
+        "17": [
+          0
+        ]
+      },
+      "expected_sidecar_triangle_count": 28,
+      "sidecar": {
+        "path": "release/v0.1-development/sidecars/r3-g2-boundary/F1_dam_break_plain.h5",
+        "case_id": "F1_dam_break_plain",
+        "coordinate_frame": "world",
+        "schema_version": "boundary-sidecar-v1",
+        "frame_count": 12,
+        "triangle_count": 28,
+        "static_triangle_count": 28,
+        "moving_triangle_count": 0,
+        "frame0_matches_vtk_local_geometry": true,
+        "static_max_frame_displacement_m": 0.0,
+        "moving_min_frame_displacement_m": null,
+        "moving_max_frame_displacement_m": null
+      },
+      "sidecar_triangle_counts_by_mk": {
+        "17": 28
+      },
+      "sidecar_types_by_mk": {
+        "17": [
+          0
+        ]
+      },
+      "checks": {
+        "source_mk_mapping_pass": true,
+        "sidecar_labels_match_vtk": true,
+        "declared_faces_recovered": true,
+        "static_moving_semantics_pass": true,
+        "open_face_policy_explicit": true
+      },
+      "declared_face_failures": [],
+      "implicit_closures_requiring_policy": [],
+      "open_faces_with_rim_only_geometry": [
+        {
+          "mkbound": 0,
+          "face": "top"
+        }
+      ],
+      "issues": [],
+      "structural_semantics_pass": true,
+      "wall_visibility_semantics_pass": true
+    },
+    {
+      "case_id": "F1_opposing_columns",
+      "family": "F1",
+      "source_definition": "cases/F1/F1_opposing_columns/F1_opposing_columns_Def.xml",
+      "source_generated_xml": "cases/F1/F1_opposing_columns/generated/F1_opposing_columns.xml",
+      "source_vtk": "cases/F1/F1_opposing_columns/generated/F1_opposing_columns_MkCells.vtk",
+      "particle_spacing_m": 0.04,
+      "boundary_boxes": [
+        {
+          "ordinal": 0,
+          "mkbound": 0,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size_m": [
+            1.2,
+            0.4,
+            0.6
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 17,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 1541,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 0.9999999999999999,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.13000004944701943,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        }
+      ],
+      "generated_mk_mapping": {
+        "0": {
+          "vtk_mk": 17,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 1541,
+          "motion_ref": null
+        }
+      },
+      "vtk_boundary_polygon_count": 14,
+      "vtk_boundary_polygon_counts_by_mk": {
+        "17": 14
+      },
+      "vtk_types_by_mk": {
+        "17": [
+          0
+        ]
+      },
+      "expected_sidecar_triangle_count": 28,
+      "sidecar": {
+        "path": "release/v0.1-development/sidecars/r3-g2-boundary/F1_opposing_columns.h5",
+        "case_id": "F1_opposing_columns",
+        "coordinate_frame": "world",
+        "schema_version": "boundary-sidecar-v1",
+        "frame_count": 14,
+        "triangle_count": 28,
+        "static_triangle_count": 28,
+        "moving_triangle_count": 0,
+        "frame0_matches_vtk_local_geometry": true,
+        "static_max_frame_displacement_m": 0.0,
+        "moving_min_frame_displacement_m": null,
+        "moving_max_frame_displacement_m": null
+      },
+      "sidecar_triangle_counts_by_mk": {
+        "17": 28
+      },
+      "sidecar_types_by_mk": {
+        "17": [
+          0
+        ]
+      },
+      "checks": {
+        "source_mk_mapping_pass": true,
+        "sidecar_labels_match_vtk": true,
+        "declared_faces_recovered": true,
+        "static_moving_semantics_pass": true,
+        "open_face_policy_explicit": true
+      },
+      "declared_face_failures": [],
+      "implicit_closures_requiring_policy": [],
+      "open_faces_with_rim_only_geometry": [
+        {
+          "mkbound": 0,
+          "face": "top"
+        }
+      ],
+      "issues": [],
+      "structural_semantics_pass": true,
+      "wall_visibility_semantics_pass": true
+    },
+    {
+      "case_id": "F1_center_obstacle",
+      "family": "F1",
+      "source_definition": "cases/F1/F1_center_obstacle/F1_center_obstacle_Def.xml",
+      "source_generated_xml": "cases/F1/F1_center_obstacle/generated/F1_center_obstacle.xml",
+      "source_vtk": "cases/F1/F1_center_obstacle/generated/F1_center_obstacle_MkCells.vtk",
+      "particle_spacing_m": 0.04,
+      "boundary_boxes": [
+        {
+          "ordinal": 0,
+          "mkbound": 0,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size_m": [
+            1.2,
+            0.4,
+            0.6
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 17,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 1529,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 8,
+              "projected_coverage_ratio": 0.9600000117222461,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.13000004944701943,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        },
+        {
+          "ordinal": 1,
+          "mkbound": 1,
+          "declared_faces": [
+            "top",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "bottom"
+          ],
+          "point_m": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size_m": [
+            0.12,
+            0.1,
+            0.34
+          ],
+          "void_context": true,
+          "vtk_mapping": {
+            "vtk_mk": 18,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 102,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.7333334445953253,
+              "classification": "implicit_cap_or_supporting_surface"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 0.9999999999999999,
+              "classification": "declared_surface_observed"
+            }
+          }
+        }
+      ],
+      "generated_mk_mapping": {
+        "0": {
+          "vtk_mk": 17,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 1529,
+          "motion_ref": null
+        },
+        "1": {
+          "vtk_mk": 18,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 102,
+          "motion_ref": null
+        }
+      },
+      "vtk_boundary_polygon_count": 38,
+      "vtk_boundary_polygon_counts_by_mk": {
+        "17": 24,
+        "18": 14
+      },
+      "vtk_types_by_mk": {
+        "17": [
+          0
+        ],
+        "18": [
+          0
+        ]
+      },
+      "expected_sidecar_triangle_count": 76,
+      "sidecar": {
+        "path": "release/v0.1-development/sidecars/r3-g2-boundary/F1_center_obstacle.h5",
+        "case_id": "F1_center_obstacle",
+        "coordinate_frame": "world",
+        "schema_version": "boundary-sidecar-v1",
+        "frame_count": 13,
+        "triangle_count": 76,
+        "static_triangle_count": 76,
+        "moving_triangle_count": 0,
+        "frame0_matches_vtk_local_geometry": true,
+        "static_max_frame_displacement_m": 0.0,
+        "moving_min_frame_displacement_m": null,
+        "moving_max_frame_displacement_m": null
+      },
+      "sidecar_triangle_counts_by_mk": {
+        "17": 48,
+        "18": 28
+      },
+      "sidecar_types_by_mk": {
+        "17": [
+          0
+        ],
+        "18": [
+          0
+        ]
+      },
+      "checks": {
+        "source_mk_mapping_pass": true,
+        "sidecar_labels_match_vtk": true,
+        "declared_faces_recovered": true,
+        "static_moving_semantics_pass": true,
+        "open_face_policy_explicit": false
+      },
+      "declared_face_failures": [],
+      "implicit_closures_requiring_policy": [
+        {
+          "mkbound": 1,
+          "face": "bottom",
+          "role": "solid_obstacle",
+          "coverage_ratio": 0.7333334445953253
+        }
+      ],
+      "open_faces_with_rim_only_geometry": [
+        {
+          "mkbound": 0,
+          "face": "top"
+        }
+      ],
+      "issues": [],
+      "structural_semantics_pass": true,
+      "wall_visibility_semantics_pass": false
+    },
+    {
+      "case_id": "F1_twin_obstacle",
+      "family": "F1",
+      "source_definition": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+      "source_generated_xml": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle.xml",
+      "source_vtk": "cases/F1/F1_twin_obstacle/generated/F1_twin_obstacle_MkCells.vtk",
+      "particle_spacing_m": 0.04,
+      "boundary_boxes": [
+        {
+          "ordinal": 0,
+          "mkbound": 0,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size_m": [
+            1.2,
+            0.4,
+            0.6
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 17,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 1523,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 14,
+              "projected_coverage_ratio": 0.9399999943003059,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 3,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 3,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.13000004944701943,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        },
+        {
+          "ordinal": 1,
+          "mkbound": 1,
+          "declared_faces": [
+            "top",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "bottom"
+          ],
+          "point_m": [
+            0.62,
+            0.06,
+            0.0
+          ],
+          "size_m": [
+            0.1,
+            0.1,
+            0.3
+          ],
+          "void_context": true,
+          "vtk_mapping": {
+            "vtk_mk": 18,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 73,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.84000010848045,
+              "classification": "implicit_cap_or_supporting_surface"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 0.9999999523162841,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 0.9999999523162841,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 0.9999999523162841,
+              "classification": "declared_surface_observed"
+            }
+          }
+        },
+        {
+          "ordinal": 2,
+          "mkbound": 2,
+          "declared_faces": [
+            "top",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "bottom"
+          ],
+          "point_m": [
+            0.78,
+            0.24,
+            0.0
+          ],
+          "size_m": [
+            0.1,
+            0.1,
+            0.3
+          ],
+          "void_context": true,
+          "vtk_mapping": {
+            "vtk_mk": 19,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 73,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.8399998283385769,
+              "classification": "implicit_cap_or_supporting_surface"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            }
+          }
+        }
+      ],
+      "generated_mk_mapping": {
+        "0": {
+          "vtk_mk": 17,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 1523,
+          "motion_ref": null
+        },
+        "1": {
+          "vtk_mk": 18,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 73,
+          "motion_ref": null
+        },
+        "2": {
+          "vtk_mk": 19,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 73,
+          "motion_ref": null
+        }
+      },
+      "vtk_boundary_polygon_count": 62,
+      "vtk_boundary_polygon_counts_by_mk": {
+        "17": 34,
+        "18": 14,
+        "19": 14
+      },
+      "vtk_types_by_mk": {
+        "17": [
+          0
+        ],
+        "18": [
+          0
+        ],
+        "19": [
+          0
+        ]
+      },
+      "expected_sidecar_triangle_count": 124,
+      "sidecar": {
+        "path": "release/v0.1-development/sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+        "case_id": "F1_twin_obstacle",
+        "coordinate_frame": "world",
+        "schema_version": "boundary-sidecar-v1",
+        "frame_count": 14,
+        "triangle_count": 124,
+        "static_triangle_count": 124,
+        "moving_triangle_count": 0,
+        "frame0_matches_vtk_local_geometry": true,
+        "static_max_frame_displacement_m": 0.0,
+        "moving_min_frame_displacement_m": null,
+        "moving_max_frame_displacement_m": null
+      },
+      "sidecar_triangle_counts_by_mk": {
+        "17": 68,
+        "18": 28,
+        "19": 28
+      },
+      "sidecar_types_by_mk": {
+        "17": [
+          0
+        ],
+        "18": [
+          0
+        ],
+        "19": [
+          0
+        ]
+      },
+      "checks": {
+        "source_mk_mapping_pass": true,
+        "sidecar_labels_match_vtk": true,
+        "declared_faces_recovered": true,
+        "static_moving_semantics_pass": true,
+        "open_face_policy_explicit": false
+      },
+      "declared_face_failures": [],
+      "implicit_closures_requiring_policy": [
+        {
+          "mkbound": 1,
+          "face": "bottom",
+          "role": "solid_obstacle",
+          "coverage_ratio": 0.84000010848045
+        },
+        {
+          "mkbound": 2,
+          "face": "bottom",
+          "role": "solid_obstacle",
+          "coverage_ratio": 0.8399998283385769
+        }
+      ],
+      "open_faces_with_rim_only_geometry": [
+        {
+          "mkbound": 0,
+          "face": "top"
+        }
+      ],
+      "issues": [],
+      "structural_semantics_pass": true,
+      "wall_visibility_semantics_pass": false
+    },
+    {
+      "case_id": "W06_narrow_slow_center",
+      "family": "F2",
+      "source_definition": "campaigns/v0.1-candidate/cases/w06/W06_narrow_slow_center_Def.xml",
+      "source_generated_xml": "campaigns/v0.1-candidate/artifacts/w06/W06_narrow_slow_center/generated/W06_narrow_slow_center.xml",
+      "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_narrow_slow_center/generated/W06_narrow_slow_center_MkCells.vtk",
+      "particle_spacing_m": 0.025,
+      "boundary_boxes": [
+        {
+          "ordinal": 0,
+          "mkbound": 0,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size_m": [
+            0.35,
+            0.3,
+            0.45
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 17,
+            "vtk_type": 1,
+            "particle_role": "moving",
+            "particle_count": 4209,
+            "motion_ref": "0"
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.8511905097624379,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.8912036744532752,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.8912036744532752,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9027777446197369,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9027777446197369,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.14880949023756201,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        },
+        {
+          "ordinal": 1,
+          "mkbound": 1,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.45,
+            -0.3,
+            0.0
+          ],
+          "size_m": [
+            1.1,
+            0.6,
+            0.45
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 18,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 12039,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9365530264648521,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9317129432499683,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9317129432499683,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9501262780260106,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9501262780260106,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.06344697353514789,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        },
+        {
+          "ordinal": 2,
+          "mkbound": 2,
+          "declared_faces": [
+            "bottom"
+          ],
+          "declared_open_faces": [
+            "left",
+            "right",
+            "front",
+            "back",
+            "top"
+          ],
+          "point_m": [
+            -0.6,
+            -0.55,
+            -0.2
+          ],
+          "size_m": [
+            2.6,
+            1.1,
+            0.1
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 19,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 14175,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "right": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "front": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "back": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 0,
+              "projected_coverage_ratio": 0.0,
+              "classification": "not_observed"
+            }
+          }
+        }
+      ],
+      "generated_mk_mapping": {
+        "1": {
+          "vtk_mk": 18,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 12039,
+          "motion_ref": null
+        },
+        "2": {
+          "vtk_mk": 19,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 14175,
+          "motion_ref": null
+        },
+        "0": {
+          "vtk_mk": 17,
+          "vtk_type": 1,
+          "particle_role": "moving",
+          "particle_count": 4209,
+          "motion_ref": "0"
+        }
+      },
+      "vtk_boundary_polygon_count": 34,
+      "vtk_boundary_polygon_counts_by_mk": {
+        "17": 14,
+        "18": 14,
+        "19": 6
+      },
+      "vtk_types_by_mk": {
+        "17": [
+          1
+        ],
+        "18": [
+          0
+        ],
+        "19": [
+          0
+        ]
+      },
+      "expected_sidecar_triangle_count": 68,
+      "sidecar": {
+        "path": "release/v0.1-development/sidecars/r3-g2-boundary/W06_narrow_slow_center.h5",
+        "case_id": "W06_narrow_slow_center",
+        "coordinate_frame": "world",
+        "schema_version": "boundary-sidecar-v1",
+        "frame_count": 251,
+        "triangle_count": 68,
+        "static_triangle_count": 40,
+        "moving_triangle_count": 28,
+        "frame0_matches_vtk_local_geometry": true,
+        "static_max_frame_displacement_m": 0.0,
+        "moving_min_frame_displacement_m": 0.0,
+        "moving_max_frame_displacement_m": 0.02525930524602688
+      },
+      "sidecar_triangle_counts_by_mk": {
+        "17": 28,
+        "18": 28,
+        "19": 12
+      },
+      "sidecar_types_by_mk": {
+        "17": [
+          1
+        ],
+        "18": [
+          0
+        ],
+        "19": [
+          0
+        ]
+      },
+      "checks": {
+        "source_mk_mapping_pass": true,
+        "sidecar_labels_match_vtk": true,
+        "declared_faces_recovered": true,
+        "static_moving_semantics_pass": true,
+        "open_face_policy_explicit": true
+      },
+      "declared_face_failures": [],
+      "implicit_closures_requiring_policy": [],
+      "open_faces_with_rim_only_geometry": [
+        {
+          "mkbound": 0,
+          "face": "top"
+        },
+        {
+          "mkbound": 1,
+          "face": "top"
+        },
+        {
+          "mkbound": 2,
+          "face": "left"
+        },
+        {
+          "mkbound": 2,
+          "face": "right"
+        },
+        {
+          "mkbound": 2,
+          "face": "front"
+        },
+        {
+          "mkbound": 2,
+          "face": "back"
+        }
+      ],
+      "issues": [],
+      "structural_semantics_pass": true,
+      "wall_visibility_semantics_pass": true
+    },
+    {
+      "case_id": "W06_standard_slow_center",
+      "family": "F2",
+      "source_definition": "campaigns/v0.1-candidate/cases/w06/W06_standard_slow_center_Def.xml",
+      "source_generated_xml": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_slow_center/generated/W06_standard_slow_center.xml",
+      "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_slow_center/generated/W06_standard_slow_center_MkCells.vtk",
+      "particle_spacing_m": 0.025,
+      "boundary_boxes": [
+        {
+          "ordinal": 0,
+          "mkbound": 0,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size_m": [
+            0.425,
+            0.3,
+            0.45
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 17,
+            "vtk_type": 1,
+            "particle_role": "moving",
+            "particle_count": 4686,
+            "motion_ref": "0"
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.862745103481061,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.8912036744532752,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.8912036744532752,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9150326158120944,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9150326158120944,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.1372548965189389,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        },
+        {
+          "ordinal": 1,
+          "mkbound": 1,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.45,
+            -0.3,
+            0.0
+          ],
+          "size_m": [
+            1.1,
+            0.6,
+            0.45
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 18,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 12039,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9365530264648521,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9317129432499683,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9317129432499683,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9501262780260106,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9501262780260106,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.06344697353514789,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        },
+        {
+          "ordinal": 2,
+          "mkbound": 2,
+          "declared_faces": [
+            "bottom"
+          ],
+          "declared_open_faces": [
+            "left",
+            "right",
+            "front",
+            "back",
+            "top"
+          ],
+          "point_m": [
+            -0.6,
+            -0.55,
+            -0.2
+          ],
+          "size_m": [
+            2.6,
+            1.1,
+            0.1
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 19,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 14175,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "right": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "front": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "back": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 0,
+              "projected_coverage_ratio": 0.0,
+              "classification": "not_observed"
+            }
+          }
+        }
+      ],
+      "generated_mk_mapping": {
+        "1": {
+          "vtk_mk": 18,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 12039,
+          "motion_ref": null
+        },
+        "2": {
+          "vtk_mk": 19,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 14175,
+          "motion_ref": null
+        },
+        "0": {
+          "vtk_mk": 17,
+          "vtk_type": 1,
+          "particle_role": "moving",
+          "particle_count": 4686,
+          "motion_ref": "0"
+        }
+      },
+      "vtk_boundary_polygon_count": 34,
+      "vtk_boundary_polygon_counts_by_mk": {
+        "17": 14,
+        "18": 14,
+        "19": 6
+      },
+      "vtk_types_by_mk": {
+        "17": [
+          1
+        ],
+        "18": [
+          0
+        ],
+        "19": [
+          0
+        ]
+      },
+      "expected_sidecar_triangle_count": 68,
+      "sidecar": {
+        "path": "release/v0.1-development/sidecars/r3-g2-boundary/W06_standard_slow_center.h5",
+        "case_id": "W06_standard_slow_center",
+        "coordinate_frame": "world",
+        "schema_version": "boundary-sidecar-v1",
+        "frame_count": 251,
+        "triangle_count": 68,
+        "static_triangle_count": 40,
+        "moving_triangle_count": 28,
+        "frame0_matches_vtk_local_geometry": true,
+        "static_max_frame_displacement_m": 0.0,
+        "moving_min_frame_displacement_m": 0.0,
+        "moving_max_frame_displacement_m": 0.027402026115538228
+      },
+      "sidecar_triangle_counts_by_mk": {
+        "17": 28,
+        "18": 28,
+        "19": 12
+      },
+      "sidecar_types_by_mk": {
+        "17": [
+          1
+        ],
+        "18": [
+          0
+        ],
+        "19": [
+          0
+        ]
+      },
+      "checks": {
+        "source_mk_mapping_pass": true,
+        "sidecar_labels_match_vtk": true,
+        "declared_faces_recovered": true,
+        "static_moving_semantics_pass": true,
+        "open_face_policy_explicit": true
+      },
+      "declared_face_failures": [],
+      "implicit_closures_requiring_policy": [],
+      "open_faces_with_rim_only_geometry": [
+        {
+          "mkbound": 0,
+          "face": "top"
+        },
+        {
+          "mkbound": 1,
+          "face": "top"
+        },
+        {
+          "mkbound": 2,
+          "face": "left"
+        },
+        {
+          "mkbound": 2,
+          "face": "right"
+        },
+        {
+          "mkbound": 2,
+          "face": "front"
+        },
+        {
+          "mkbound": 2,
+          "face": "back"
+        }
+      ],
+      "issues": [],
+      "structural_semantics_pass": true,
+      "wall_visibility_semantics_pass": true
+    },
+    {
+      "case_id": "W06_wide_slow_center",
+      "family": "F2",
+      "source_definition": "campaigns/v0.1-candidate/cases/w06/W06_wide_slow_center_Def.xml",
+      "source_generated_xml": "campaigns/v0.1-candidate/artifacts/w06/W06_wide_slow_center/generated/W06_wide_slow_center.xml",
+      "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_wide_slow_center/generated/W06_wide_slow_center_MkCells.vtk",
+      "particle_spacing_m": 0.025,
+      "boundary_boxes": [
+        {
+          "ordinal": 0,
+          "mkbound": 0,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size_m": [
+            0.5,
+            0.3,
+            0.45
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 17,
+            "vtk_type": 1,
+            "particle_role": "moving",
+            "particle_count": 5163,
+            "motion_ref": "0"
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.8708333737216895,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.8912036744532752,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.8912036744532752,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9236110835957018,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9236110835957018,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.12916662627831052,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        },
+        {
+          "ordinal": 1,
+          "mkbound": 1,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.45,
+            -0.3,
+            0.0
+          ],
+          "size_m": [
+            1.1,
+            0.6,
+            0.45
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 18,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 12039,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9365530264648521,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9317129432499683,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9317129432499683,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9501262780260106,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9501262780260106,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.06344697353514789,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        },
+        {
+          "ordinal": 2,
+          "mkbound": 2,
+          "declared_faces": [
+            "bottom"
+          ],
+          "declared_open_faces": [
+            "left",
+            "right",
+            "front",
+            "back",
+            "top"
+          ],
+          "point_m": [
+            -0.6,
+            -0.55,
+            -0.2
+          ],
+          "size_m": [
+            2.6,
+            1.1,
+            0.1
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 19,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 14175,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "right": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "front": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "back": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 0,
+              "projected_coverage_ratio": 0.0,
+              "classification": "not_observed"
+            }
+          }
+        }
+      ],
+      "generated_mk_mapping": {
+        "1": {
+          "vtk_mk": 18,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 12039,
+          "motion_ref": null
+        },
+        "2": {
+          "vtk_mk": 19,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 14175,
+          "motion_ref": null
+        },
+        "0": {
+          "vtk_mk": 17,
+          "vtk_type": 1,
+          "particle_role": "moving",
+          "particle_count": 5163,
+          "motion_ref": "0"
+        }
+      },
+      "vtk_boundary_polygon_count": 34,
+      "vtk_boundary_polygon_counts_by_mk": {
+        "17": 14,
+        "18": 14,
+        "19": 6
+      },
+      "vtk_types_by_mk": {
+        "17": [
+          1
+        ],
+        "18": [
+          0
+        ],
+        "19": [
+          0
+        ]
+      },
+      "expected_sidecar_triangle_count": 68,
+      "sidecar": {
+        "path": "release/v0.1-development/sidecars/r3-g2-boundary/W06_wide_slow_center.h5",
+        "case_id": "W06_wide_slow_center",
+        "coordinate_frame": "world",
+        "schema_version": "boundary-sidecar-v1",
+        "frame_count": 251,
+        "triangle_count": 68,
+        "static_triangle_count": 40,
+        "moving_triangle_count": 28,
+        "frame0_matches_vtk_local_geometry": true,
+        "static_max_frame_displacement_m": 0.0,
+        "moving_min_frame_displacement_m": 0.0,
+        "moving_max_frame_displacement_m": 0.029553376705118057
+      },
+      "sidecar_triangle_counts_by_mk": {
+        "17": 28,
+        "18": 28,
+        "19": 12
+      },
+      "sidecar_types_by_mk": {
+        "17": [
+          1
+        ],
+        "18": [
+          0
+        ],
+        "19": [
+          0
+        ]
+      },
+      "checks": {
+        "source_mk_mapping_pass": true,
+        "sidecar_labels_match_vtk": true,
+        "declared_faces_recovered": true,
+        "static_moving_semantics_pass": true,
+        "open_face_policy_explicit": true
+      },
+      "declared_face_failures": [],
+      "implicit_closures_requiring_policy": [],
+      "open_faces_with_rim_only_geometry": [
+        {
+          "mkbound": 0,
+          "face": "top"
+        },
+        {
+          "mkbound": 1,
+          "face": "top"
+        },
+        {
+          "mkbound": 2,
+          "face": "left"
+        },
+        {
+          "mkbound": 2,
+          "face": "right"
+        },
+        {
+          "mkbound": 2,
+          "face": "front"
+        },
+        {
+          "mkbound": 2,
+          "face": "back"
+        }
+      ],
+      "issues": [],
+      "structural_semantics_pass": true,
+      "wall_visibility_semantics_pass": true
+    },
+    {
+      "case_id": "W06_narrow_fast_center",
+      "family": "F2",
+      "source_definition": "campaigns/v0.1-candidate/cases/w06/W06_narrow_fast_center_Def.xml",
+      "source_generated_xml": "campaigns/v0.1-candidate/artifacts/w06/W06_narrow_fast_center/generated/W06_narrow_fast_center.xml",
+      "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_narrow_fast_center/generated/W06_narrow_fast_center_MkCells.vtk",
+      "particle_spacing_m": 0.025,
+      "boundary_boxes": [
+        {
+          "ordinal": 0,
+          "mkbound": 0,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size_m": [
+            0.35,
+            0.3,
+            0.45
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 17,
+            "vtk_type": 1,
+            "particle_role": "moving",
+            "particle_count": 4209,
+            "motion_ref": "0"
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.8511905097624379,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.8912036744532752,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.8912036744532752,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9027777446197369,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9027777446197369,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.14880949023756201,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        },
+        {
+          "ordinal": 1,
+          "mkbound": 1,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.45,
+            -0.3,
+            0.0
+          ],
+          "size_m": [
+            1.1,
+            0.6,
+            0.45
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 18,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 12039,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9365530264648521,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9317129432499683,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9317129432499683,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9501262780260106,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9501262780260106,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.06344697353514789,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        },
+        {
+          "ordinal": 2,
+          "mkbound": 2,
+          "declared_faces": [
+            "bottom"
+          ],
+          "declared_open_faces": [
+            "left",
+            "right",
+            "front",
+            "back",
+            "top"
+          ],
+          "point_m": [
+            -0.6,
+            -0.55,
+            -0.2
+          ],
+          "size_m": [
+            2.6,
+            1.1,
+            0.1
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 19,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 14175,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "right": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "front": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "back": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 0,
+              "projected_coverage_ratio": 0.0,
+              "classification": "not_observed"
+            }
+          }
+        }
+      ],
+      "generated_mk_mapping": {
+        "1": {
+          "vtk_mk": 18,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 12039,
+          "motion_ref": null
+        },
+        "2": {
+          "vtk_mk": 19,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 14175,
+          "motion_ref": null
+        },
+        "0": {
+          "vtk_mk": 17,
+          "vtk_type": 1,
+          "particle_role": "moving",
+          "particle_count": 4209,
+          "motion_ref": "0"
+        }
+      },
+      "vtk_boundary_polygon_count": 34,
+      "vtk_boundary_polygon_counts_by_mk": {
+        "17": 14,
+        "18": 14,
+        "19": 6
+      },
+      "vtk_types_by_mk": {
+        "17": [
+          1
+        ],
+        "18": [
+          0
+        ],
+        "19": [
+          0
+        ]
+      },
+      "expected_sidecar_triangle_count": 68,
+      "sidecar": {
+        "path": "release/v0.1-development/sidecars/r3-g2-boundary/W06_narrow_fast_center.h5",
+        "case_id": "W06_narrow_fast_center",
+        "coordinate_frame": "world",
+        "schema_version": "boundary-sidecar-v1",
+        "frame_count": 251,
+        "triangle_count": 68,
+        "static_triangle_count": 40,
+        "moving_triangle_count": 28,
+        "frame0_matches_vtk_local_geometry": true,
+        "static_max_frame_displacement_m": 0.0,
+        "moving_min_frame_displacement_m": 0.0,
+        "moving_max_frame_displacement_m": 0.06051492561361296
+      },
+      "sidecar_triangle_counts_by_mk": {
+        "17": 28,
+        "18": 28,
+        "19": 12
+      },
+      "sidecar_types_by_mk": {
+        "17": [
+          1
+        ],
+        "18": [
+          0
+        ],
+        "19": [
+          0
+        ]
+      },
+      "checks": {
+        "source_mk_mapping_pass": true,
+        "sidecar_labels_match_vtk": true,
+        "declared_faces_recovered": true,
+        "static_moving_semantics_pass": true,
+        "open_face_policy_explicit": true
+      },
+      "declared_face_failures": [],
+      "implicit_closures_requiring_policy": [],
+      "open_faces_with_rim_only_geometry": [
+        {
+          "mkbound": 0,
+          "face": "top"
+        },
+        {
+          "mkbound": 1,
+          "face": "top"
+        },
+        {
+          "mkbound": 2,
+          "face": "left"
+        },
+        {
+          "mkbound": 2,
+          "face": "right"
+        },
+        {
+          "mkbound": 2,
+          "face": "front"
+        },
+        {
+          "mkbound": 2,
+          "face": "back"
+        }
+      ],
+      "issues": [],
+      "structural_semantics_pass": true,
+      "wall_visibility_semantics_pass": true
+    },
+    {
+      "case_id": "W06_standard_fast_center",
+      "family": "F2",
+      "source_definition": "campaigns/v0.1-candidate/cases/w06/W06_standard_fast_center_Def.xml",
+      "source_generated_xml": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_fast_center/generated/W06_standard_fast_center.xml",
+      "source_vtk": "campaigns/v0.1-candidate/artifacts/w06/W06_standard_fast_center/generated/W06_standard_fast_center_MkCells.vtk",
+      "particle_spacing_m": 0.025,
+      "boundary_boxes": [
+        {
+          "ordinal": 0,
+          "mkbound": 0,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size_m": [
+            0.425,
+            0.3,
+            0.45
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 17,
+            "vtk_type": 1,
+            "particle_role": "moving",
+            "particle_count": 4686,
+            "motion_ref": "0"
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.862745103481061,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.8912036744532752,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.8912036744532752,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9150326158120944,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9150326158120944,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.1372548965189389,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        },
+        {
+          "ordinal": 1,
+          "mkbound": 1,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.45,
+            -0.3,
+            0.0
+          ],
+          "size_m": [
+            1.1,
+            0.6,
+            0.45
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 18,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 12039,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9365530264648521,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9317129432499683,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9317129432499683,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9501262780260106,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.9501262780260106,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.06344697353514789,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        },
+        {
+          "ordinal": 2,
+          "mkbound": 2,
+          "declared_faces": [
+            "bottom"
+          ],
+          "declared_open_faces": [
+            "left",
+            "right",
+            "front",
+            "back",
+            "top"
+          ],
+          "point_m": [
+            -0.6,
+            -0.55,
+            -0.2
+          ],
+          "size_m": [
+            2.6,
+            1.1,
+            0.1
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 19,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 14175,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "right": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "front": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "back": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 0.1250000000000001,
+              "classification": "edge_or_rim_only"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 0,
+              "projected_coverage_ratio": 0.0,
+              "classification": "not_observed"
+            }
+          }
+        }
+      ],
+      "generated_mk_mapping": {
+        "1": {
+          "vtk_mk": 18,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 12039,
+          "motion_ref": null
+        },
+        "2": {
+          "vtk_mk": 19,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 14175,
+          "motion_ref": null
+        },
+        "0": {
+          "vtk_mk": 17,
+          "vtk_type": 1,
+          "particle_role": "moving",
+          "particle_count": 4686,
+          "motion_ref": "0"
+        }
+      },
+      "vtk_boundary_polygon_count": 34,
+      "vtk_boundary_polygon_counts_by_mk": {
+        "17": 14,
+        "18": 14,
+        "19": 6
+      },
+      "vtk_types_by_mk": {
+        "17": [
+          1
+        ],
+        "18": [
+          0
+        ],
+        "19": [
+          0
+        ]
+      },
+      "expected_sidecar_triangle_count": 68,
+      "sidecar": {
+        "path": "release/v0.1-development/sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+        "case_id": "W06_standard_fast_center",
+        "coordinate_frame": "world",
+        "schema_version": "boundary-sidecar-v1",
+        "frame_count": 251,
+        "triangle_count": 68,
+        "static_triangle_count": 40,
+        "moving_triangle_count": 28,
+        "frame0_matches_vtk_local_geometry": true,
+        "static_max_frame_displacement_m": 0.0,
+        "moving_min_frame_displacement_m": 0.0,
+        "moving_max_frame_displacement_m": 0.06577688128488722
+      },
+      "sidecar_triangle_counts_by_mk": {
+        "17": 28,
+        "18": 28,
+        "19": 12
+      },
+      "sidecar_types_by_mk": {
+        "17": [
+          1
+        ],
+        "18": [
+          0
+        ],
+        "19": [
+          0
+        ]
+      },
+      "checks": {
+        "source_mk_mapping_pass": true,
+        "sidecar_labels_match_vtk": true,
+        "declared_faces_recovered": true,
+        "static_moving_semantics_pass": true,
+        "open_face_policy_explicit": true
+      },
+      "declared_face_failures": [],
+      "implicit_closures_requiring_policy": [],
+      "open_faces_with_rim_only_geometry": [
+        {
+          "mkbound": 0,
+          "face": "top"
+        },
+        {
+          "mkbound": 1,
+          "face": "top"
+        },
+        {
+          "mkbound": 2,
+          "face": "left"
+        },
+        {
+          "mkbound": 2,
+          "face": "right"
+        },
+        {
+          "mkbound": 2,
+          "face": "front"
+        },
+        {
+          "mkbound": 2,
+          "face": "back"
+        }
+      ],
+      "issues": [],
+      "structural_semantics_pass": true,
+      "wall_visibility_semantics_pass": true
+    },
+    {
+      "case_id": "F3_impulse_slosh",
+      "family": "F3",
+      "source_definition": "cases/F3/F3_impulse_slosh/F3_impulse_slosh_Def.xml",
+      "source_generated_xml": "cases/F3/F3_impulse_slosh/generated/F3_impulse_slosh.xml",
+      "source_vtk": "cases/F3/F3_impulse_slosh/generated/F3_impulse_slosh_MkCells.vtk",
+      "particle_spacing_m": 0.04,
+      "boundary_boxes": [
+        {
+          "ordinal": 0,
+          "mkbound": 0,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size_m": [
+            1.2,
+            0.4,
+            0.6
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 17,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 1541,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 0.9999999999999999,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.13000004944701943,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        }
+      ],
+      "generated_mk_mapping": {
+        "0": {
+          "vtk_mk": 17,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 1541,
+          "motion_ref": null
+        }
+      },
+      "vtk_boundary_polygon_count": 14,
+      "vtk_boundary_polygon_counts_by_mk": {
+        "17": 14
+      },
+      "vtk_types_by_mk": {
+        "17": [
+          0
+        ]
+      },
+      "expected_sidecar_triangle_count": 28,
+      "sidecar": {
+        "path": "release/v0.1-development/sidecars/r3-g2-boundary/F3_impulse_slosh.h5",
+        "case_id": "F3_impulse_slosh",
+        "coordinate_frame": "world",
+        "schema_version": "boundary-sidecar-v1",
+        "frame_count": 19,
+        "triangle_count": 28,
+        "static_triangle_count": 28,
+        "moving_triangle_count": 0,
+        "frame0_matches_vtk_local_geometry": true,
+        "static_max_frame_displacement_m": 0.0,
+        "moving_min_frame_displacement_m": null,
+        "moving_max_frame_displacement_m": null
+      },
+      "sidecar_triangle_counts_by_mk": {
+        "17": 28
+      },
+      "sidecar_types_by_mk": {
+        "17": [
+          0
+        ]
+      },
+      "checks": {
+        "source_mk_mapping_pass": true,
+        "sidecar_labels_match_vtk": true,
+        "declared_faces_recovered": true,
+        "static_moving_semantics_pass": true,
+        "open_face_policy_explicit": true
+      },
+      "declared_face_failures": [],
+      "implicit_closures_requiring_policy": [],
+      "open_faces_with_rim_only_geometry": [
+        {
+          "mkbound": 0,
+          "face": "top"
+        }
+      ],
+      "issues": [],
+      "structural_semantics_pass": true,
+      "wall_visibility_semantics_pass": true
+    },
+    {
+      "case_id": "F3_baffled_slosh",
+      "family": "F3",
+      "source_definition": "cases/F3/F3_baffled_slosh/F3_baffled_slosh_Def.xml",
+      "source_generated_xml": "cases/F3/F3_baffled_slosh/generated/F3_baffled_slosh.xml",
+      "source_vtk": "cases/F3/F3_baffled_slosh/generated/F3_baffled_slosh_MkCells.vtk",
+      "particle_spacing_m": 0.04,
+      "boundary_boxes": [
+        {
+          "ordinal": 0,
+          "mkbound": 0,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size_m": [
+            1.2,
+            0.4,
+            0.6
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 17,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 1523,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 6,
+              "projected_coverage_ratio": 0.939999968533715,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 3,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 3,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.13000004944701943,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        },
+        {
+          "ordinal": 1,
+          "mkbound": 1,
+          "declared_faces": [
+            "top",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "bottom"
+          ],
+          "point_m": [
+            0.58,
+            0.04,
+            0.0
+          ],
+          "size_m": [
+            0.04,
+            0.32,
+            0.19
+          ],
+          "void_context": true,
+          "vtk_mapping": {
+            "vtk_mk": 18,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 108,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": false,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 1.0,
+              "classification": "implicit_cap_or_supporting_surface"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": true,
+              "observed_polygon_count": 1,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            }
+          }
+        }
+      ],
+      "generated_mk_mapping": {
+        "0": {
+          "vtk_mk": 17,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 1523,
+          "motion_ref": null
+        },
+        "1": {
+          "vtk_mk": 18,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 108,
+          "motion_ref": null
+        }
+      },
+      "vtk_boundary_polygon_count": 28,
+      "vtk_boundary_polygon_counts_by_mk": {
+        "17": 22,
+        "18": 6
+      },
+      "vtk_types_by_mk": {
+        "17": [
+          0
+        ],
+        "18": [
+          0
+        ]
+      },
+      "expected_sidecar_triangle_count": 56,
+      "sidecar": {
+        "path": "release/v0.1-development/sidecars/r3-g2-boundary/F3_baffled_slosh.h5",
+        "case_id": "F3_baffled_slosh",
+        "coordinate_frame": "world",
+        "schema_version": "boundary-sidecar-v1",
+        "frame_count": 19,
+        "triangle_count": 56,
+        "static_triangle_count": 56,
+        "moving_triangle_count": 0,
+        "frame0_matches_vtk_local_geometry": true,
+        "static_max_frame_displacement_m": 0.0,
+        "moving_min_frame_displacement_m": null,
+        "moving_max_frame_displacement_m": null
+      },
+      "sidecar_triangle_counts_by_mk": {
+        "17": 44,
+        "18": 12
+      },
+      "sidecar_types_by_mk": {
+        "17": [
+          0
+        ],
+        "18": [
+          0
+        ]
+      },
+      "checks": {
+        "source_mk_mapping_pass": true,
+        "sidecar_labels_match_vtk": true,
+        "declared_faces_recovered": true,
+        "static_moving_semantics_pass": true,
+        "open_face_policy_explicit": false
+      },
+      "declared_face_failures": [],
+      "implicit_closures_requiring_policy": [
+        {
+          "mkbound": 1,
+          "face": "bottom",
+          "role": "solid_obstacle",
+          "coverage_ratio": 1.0
+        }
+      ],
+      "open_faces_with_rim_only_geometry": [
+        {
+          "mkbound": 0,
+          "face": "top"
+        }
+      ],
+      "issues": [],
+      "structural_semantics_pass": true,
+      "wall_visibility_semantics_pass": false
+    },
+    {
+      "case_id": "F3_transverse_slosh",
+      "family": "F3",
+      "source_definition": "cases/F3/F3_transverse_slosh/F3_transverse_slosh_Def.xml",
+      "source_generated_xml": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh.xml",
+      "source_vtk": "cases/F3/F3_transverse_slosh/generated/F3_transverse_slosh_MkCells.vtk",
+      "particle_spacing_m": 0.04,
+      "boundary_boxes": [
+        {
+          "ordinal": 0,
+          "mkbound": 0,
+          "declared_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "declared_open_faces": [
+            "top"
+          ],
+          "point_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size_m": [
+            1.2,
+            0.4,
+            0.6
+          ],
+          "void_context": false,
+          "vtk_mapping": {
+            "vtk_mk": 17,
+            "vtk_type": 0,
+            "particle_role": "fixed",
+            "particle_count": 1541,
+            "motion_ref": null
+          },
+          "face_observations": {
+            "bottom": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 0.9999999999999999,
+              "classification": "declared_surface_observed"
+            },
+            "left": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "right": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "front": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "back": {
+              "declared": true,
+              "observed_polygon_count": 2,
+              "projected_coverage_ratio": 1.0,
+              "classification": "declared_surface_observed"
+            },
+            "top": {
+              "declared": false,
+              "observed_polygon_count": 4,
+              "projected_coverage_ratio": 0.13000004944701943,
+              "classification": "edge_or_rim_only"
+            }
+          }
+        }
+      ],
+      "generated_mk_mapping": {
+        "0": {
+          "vtk_mk": 17,
+          "vtk_type": 0,
+          "particle_role": "fixed",
+          "particle_count": 1541,
+          "motion_ref": null
+        }
+      },
+      "vtk_boundary_polygon_count": 14,
+      "vtk_boundary_polygon_counts_by_mk": {
+        "17": 14
+      },
+      "vtk_types_by_mk": {
+        "17": [
+          0
+        ]
+      },
+      "expected_sidecar_triangle_count": 28,
+      "sidecar": {
+        "path": "release/v0.1-development/sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+        "case_id": "F3_transverse_slosh",
+        "coordinate_frame": "world",
+        "schema_version": "boundary-sidecar-v1",
+        "frame_count": 16,
+        "triangle_count": 28,
+        "static_triangle_count": 28,
+        "moving_triangle_count": 0,
+        "frame0_matches_vtk_local_geometry": true,
+        "static_max_frame_displacement_m": 0.0,
+        "moving_min_frame_displacement_m": null,
+        "moving_max_frame_displacement_m": null
+      },
+      "sidecar_triangle_counts_by_mk": {
+        "17": 28
+      },
+      "sidecar_types_by_mk": {
+        "17": [
+          0
+        ]
+      },
+      "checks": {
+        "source_mk_mapping_pass": true,
+        "sidecar_labels_match_vtk": true,
+        "declared_faces_recovered": true,
+        "static_moving_semantics_pass": true,
+        "open_face_policy_explicit": true
+      },
+      "declared_face_failures": [],
+      "implicit_closures_requiring_policy": [],
+      "open_faces_with_rim_only_geometry": [
+        {
+          "mkbound": 0,
+          "face": "top"
+        }
+      ],
+      "issues": [],
+      "structural_semantics_pass": true,
+      "wall_visibility_semantics_pass": true
+    }
+  ],
+  "summary": {
+    "structural_semantics_pass_count": 12,
+    "wall_visibility_semantics_pass_count": 9,
+    "implicit_closure_case_count": 3,
+    "moving_case_count": 5
+  },
+  "conclusion": [
+    "Type/Mk labels and static versus prescribed-moving mapping are auditable against generated XML and VTK.",
+    "Finite sidecars preserve actual boundary-particle shell geometry, but omitted logical faces may retain narrow rim caps.",
+    "Obstacle/baffle bases can show an undeclared generated cap; this is potentially supported by a floor, but requires an explicit component policy.",
+    "No sidecar should be promoted to a formal wall-aware material target until open-face and implicit-support policies are recorded."
+  ]
+}
