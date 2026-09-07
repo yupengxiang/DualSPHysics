@@ -25,10 +25,17 @@ def test_mass_tv_requires_explicit_closure_categories():
     assert mass_fraction_tv({"a": 0.7, "loss": 0.3}, {"a": 0.6, "loss": 0.4}) == pytest.approx(0.1)
     with pytest.raises(ValueError):
         mass_fraction_tv({"a": 0.7, "loss": 0.3}, {"a": 1.2})
+
+
+@pytest.mark.parametrize("side", ["reference", "prediction"])
+@pytest.mark.parametrize("bad_value", [np.nan, -0.1, 1.1])
+def test_mass_tv_rejects_nonfinite_and_out_of_range_fractions(side, bad_value):
+    reference = {"a": 0.7, "loss": 0.3}
+    prediction = {"a": 0.6, "loss": 0.4}
+    target = reference if side == "reference" else prediction
+    target["a"] = bad_value
     with pytest.raises(ValueError):
-        mass_fraction_tv({"a": -0.1, "loss": 1.1}, {"a": -0.1, "loss": 1.1})
-    with pytest.raises(ValueError):
-        mass_fraction_tv({"a": 0.7, "loss": 0.3}, {"a": np.nan, "loss": np.nan})
+        mass_fraction_tv(reference, prediction)
 
 
 def test_first_passage_scores_event_and_time_separately():
@@ -65,8 +72,9 @@ def test_paired_background_may_be_reused_across_controlled_splits():
     ])
 
 
-def test_affine_transform_rejects_nan_translation():
+@pytest.mark.parametrize("bad_value", [np.nan, np.inf, -np.inf])
+def test_affine_transform_rejects_nonfinite_translation(bad_value):
     transforms = np.eye(4)[None]
-    transforms[0, 0, 3] = np.nan
-    with pytest.raises(ValueError):
+    transforms[0, 0, 3] = bad_value
+    with pytest.raises(ValueError, match="translation.*finite"):
         validate_affine_transforms(transforms)

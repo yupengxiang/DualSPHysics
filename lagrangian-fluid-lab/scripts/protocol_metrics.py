@@ -78,8 +78,8 @@ def mass_fraction_tv(reference: dict[str, float], prediction: dict[str, float]) 
         values = np.asarray(list(distribution.values()), dtype=float)
         if not np.all(np.isfinite(values)):
             raise ValueError(f"{name} destination fractions must be finite")
-        if np.any(values < 0):
-            raise ValueError(f"{name} destination fractions must be non-negative")
+        if np.any((values < 0) | (values > 1)):
+            raise ValueError(f"{name} destination fractions must be between zero and one")
     if abs(sum(reference.values()) - 1.0) > 1e-6 or abs(sum(prediction.values()) - 1.0) > 1e-6:
         raise ValueError("destination fractions must close to one, including loss/unclassified categories")
     return 0.5 * sum(abs(reference.get(label, 0.0) - prediction.get(label, 0.0)) for label in labels)
@@ -136,6 +136,9 @@ def validate_affine_transforms(transforms: np.ndarray, tolerance: float = 1e-5) 
     if transforms.ndim != 3 or transforms.shape[1:] != (4, 4):
         raise ValueError("transform dataset must have shape [T,4,4]")
     for transform in transforms:
+        translation = transform[:3, 3]
+        if not np.all(np.isfinite(translation)):
+            raise ValueError("transform translation entries must be finite")
         if not np.all(np.isfinite(transform)):
             raise ValueError("transform entries must be finite")
         if not np.allclose(transform[3], [0, 0, 0, 1], atol=tolerance):
