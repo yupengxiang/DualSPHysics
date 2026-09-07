@@ -1,0 +1,1119 @@
+{
+  "schema_version": 1,
+  "scope": "R3 tracer + G4 model-input geometry contracts",
+  "execution_status": "complete",
+  "acceptance_status": "candidate_only_rejected",
+  "candidate_only": true,
+  "formal_schema_change": false,
+  "compute": {
+    "backend": "NumPy CPU",
+    "gpu_used": false,
+    "cuda_used": false,
+    "cfd_solver_run": false,
+    "production_tracer_imported": false,
+    "production_agent_files_modified": false
+  },
+  "diagnostics": {
+    "dynamic_rigid_triangle": {
+      "case_id": "dynamic_rigid_triangle_pose",
+      "description": "same body triangle at two poses; midpoint is evaluated by quaternion slerp",
+      "alpha": 0.5,
+      "body_triangle": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "endpoint_quaternions_wxyz": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.7071067811865476,
+          0.0,
+          0.0,
+          0.7071067811865475
+        ]
+      ],
+      "midpoint_quaternion_wxyz": [
+        0.9238795325112868,
+        0.0,
+        0.0,
+        0.3826834323650898
+      ],
+      "endpoint_translations_m": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.2,
+          -0.1,
+          0.0
+        ]
+      ],
+      "interpolation_methods": {
+        "incorrect_vertex_lerp": "independent world-space vertex lerp",
+        "candidate_rigid_pose": "linear translation + quaternion SLERP rotation"
+      },
+      "incorrect_vertex_lerp": {
+        "vertices_m": [
+          [
+            0.1,
+            -0.05,
+            0.0
+          ],
+          [
+            0.6000000000000001,
+            0.45,
+            0.0
+          ],
+          [
+            -0.4,
+            0.4500000000000001,
+            0.0
+          ]
+        ],
+        "edge_lengths_m": [
+          0.7071067811865476,
+          1.0,
+          0.7071067811865476
+        ],
+        "max_edge_length_abs_error_m": 0.41421356237309515,
+        "area_m2": 0.25000000000000006,
+        "area_abs_error_m2": 0.24999999999999994,
+        "rigidity_preserved": false
+      },
+      "candidate_rigid_pose": {
+        "vertices_m": [
+          [
+            0.1,
+            -0.05,
+            0.0
+          ],
+          [
+            0.8071067811865474,
+            0.6571067811865475,
+            0.0
+          ],
+          [
+            -0.6071067811865476,
+            0.6571067811865474,
+            0.0
+          ]
+        ],
+        "edge_lengths_m": [
+          1.0,
+          1.414213562373095,
+          1.0
+        ],
+        "max_edge_length_abs_error_m": 2.220446049250313e-16,
+        "area_m2": 0.5,
+        "area_abs_error_m2": 0.0,
+        "rigidity_preserved": true
+      },
+      "endpoint_geometry_invariant": {
+        "reference_edge_lengths_m": [
+          1.0,
+          1.4142135623730951,
+          1.0
+        ],
+        "reference_area_m2": 0.5,
+        "rotation_determinant": 1.0,
+        "rotation_orthogonality_error": 1.0146536357569526e-17
+      },
+      "status": "candidate_only",
+      "formal_schema_change": false
+    },
+    "swept_wall": {
+      "segment_start_m": [
+        -0.2,
+        0.0,
+        0.0
+      ],
+      "segment_end_m": [
+        0.2,
+        0.0,
+        0.0
+      ],
+      "time_samples": 401,
+      "endpoint_hits": {
+        "t0": false,
+        "t1": false
+      },
+      "midpoint_wall_hit": false,
+      "sampled_wall_hit": true,
+      "swept_wall_hit": true,
+      "first_hit_time_normalized": 0.21,
+      "last_hit_time_normalized": 0.79,
+      "hit_sample_count": 66,
+      "wall_swept_aabb_lower_m": [
+        -0.8,
+        -0.3,
+        -0.3
+      ],
+      "wall_swept_aabb_upper_m": [
+        0.8,
+        0.3,
+        0.3
+      ],
+      "segment_aabb_overlap_broad_phase": true,
+      "failure_detected_by_midpoint_only": true,
+      "hit_evidence": "temporal_triangle_hit",
+      "check_kind": "space_time_swept_wall_candidate_check",
+      "status": "candidate_only",
+      "case_id": "moving_wall_swept_between_frames",
+      "wall_motion": "x(t) = 0.80 cos(2 pi t) m; finite y/z patch",
+      "midpoint_wall_x_m": -0.8,
+      "interpretation": "a midpoint snapshot is clear although the wall crosses the segment near t=0.25 and 0.75",
+      "required_consumer_behavior": "evaluate visibility in space-time (or use a conservative swept-wall CCD), not a midpoint snapshot only"
+    },
+    "finite_support": {
+      "scope": "finite-support effective sample size and reconstruction diagnostic",
+      "cases": {
+        "isotropic_24": {
+          "case_id": "isotropic_24",
+          "sample_count": 24,
+          "requested_neighbours": 24,
+          "selected_neighbour_count": 24,
+          "support_distance_min_m": 0.06184658438426491,
+          "support_distance_max_m": 0.12010412149464313,
+          "effective_sample_size": 19.423300022716425,
+          "effective_sample_size_definition": "(sum w)^2 / sum(w^2), with normalized weights equivalent to 1/sum(w^2)",
+          "support_geometry": {
+            "weighted_centroid_m": [
+              0.0,
+              0.0,
+              0.006661793968404498
+            ],
+            "weighted_centroid_offset_from_query_m": [
+              0.0,
+              0.0,
+              -0.018338206031595503
+            ],
+            "weighted_centroid_offset_norm_m": 0.018338206031595503,
+            "covariance_eigenvalues_m2": [
+              0.0013180809574948416,
+              0.002764000736277153,
+              0.0032265764667984004
+            ],
+            "rank": 3,
+            "anisotropy_smallest_to_largest": 0.40850758414001553,
+            "rank_tolerance_m2": 3.2265764667984003e-11
+          },
+          "interpolation_reconstruction": {
+            "analytic_velocity_at_query_mps": [
+              0.8,
+              -0.195,
+              0.4425
+            ],
+            "estimated_velocity_mps": [
+              0.8000000000000003,
+              -0.1986676412063191,
+              0.41132504974628764
+            ],
+            "error_vector_mps": [
+              2.220446049250313e-16,
+              -0.0036676412063191,
+              -0.031174950253712364
+            ],
+            "absolute_error_mps": 0.03138995245838595
+          },
+          "formal_neighbour_threshold": null,
+          "assessment": "candidate_only_informational; neighbour count alone is not an acceptance criterion"
+        },
+        "isotropic_23": {
+          "case_id": "isotropic_23",
+          "sample_count": 23,
+          "requested_neighbours": 24,
+          "selected_neighbour_count": 23,
+          "support_distance_min_m": 0.06184658438426491,
+          "support_distance_max_m": 0.12010412149464313,
+          "effective_sample_size": 18.618713836465485,
+          "effective_sample_size_definition": "(sum w)^2 / sum(w^2), with normalized weights equivalent to 1/sum(w^2)",
+          "support_geometry": {
+            "weighted_centroid_m": [
+              0.0005954342528058753,
+              -0.0029771712640293754,
+              0.006860126984100671
+            ],
+            "weighted_centroid_offset_from_query_m": [
+              0.0005954342528058753,
+              -0.0029771712640293754,
+              -0.01813987301589933
+            ],
+            "weighted_centroid_offset_norm_m": 0.018392201709358492,
+            "covariance_eigenvalues_m2": [
+              0.0013556671904473158,
+              0.0026951766488444986,
+              0.003155201100004575
+            ],
+            "rank": 3,
+            "anisotropy_smallest_to_largest": 0.42966110478515934,
+            "rank_tolerance_m2": 3.1552011000045755e-11
+          },
+          "interpolation_reconstruction": {
+            "analytic_velocity_at_query_mps": [
+              0.8,
+              -0.195,
+              0.4425
+            ],
+            "estimated_velocity_mps": [
+              0.8017267593331371,
+              -0.20154560244192865,
+              0.4106202059305608
+            ],
+            "error_vector_mps": [
+              0.0017267593331370401,
+              -0.006545602441928644,
+              -0.031879794069439193
+            ],
+            "absolute_error_mps": 0.03259061028934881
+          },
+          "formal_neighbour_threshold": null,
+          "assessment": "candidate_only_informational; neighbour count alone is not an acceptance criterion"
+        },
+        "one_sided_24": {
+          "case_id": "one_sided_24",
+          "sample_count": 24,
+          "requested_neighbours": 24,
+          "selected_neighbour_count": 24,
+          "support_distance_min_m": 0.040828911325187206,
+          "support_distance_max_m": 0.06913031173081748,
+          "effective_sample_size": 21.75151420215247,
+          "effective_sample_size_definition": "(sum w)^2 / sum(w^2), with normalized weights equivalent to 1/sum(w^2)",
+          "support_geometry": {
+            "weighted_centroid_m": [
+              0.03389457054313454,
+              -0.0003341071834833489,
+              -0.004084188714014713
+            ],
+            "weighted_centroid_offset_from_query_m": [
+              0.03389457054313454,
+              -0.0003341071834833489,
+              -0.029084188714014712
+            ],
+            "weighted_centroid_offset_norm_m": 0.04466367173739749,
+            "covariance_eigenvalues_m2": [
+              2.0272186739823623e-06,
+              4.248688630120537e-05,
+              0.0007407846131886398
+            ],
+            "rank": 3,
+            "anisotropy_smallest_to_largest": 0.002736583128065234,
+            "rank_tolerance_m2": 7.407846131886398e-12
+          },
+          "interpolation_reconstruction": {
+            "analytic_velocity_at_query_mps": [
+              0.8,
+              -0.195,
+              0.4425
+            ],
+            "estimated_velocity_mps": [
+              0.8475526309154333,
+              -0.18084761331875393,
+              0.3760260671187369
+            ],
+            "error_vector_mps": [
+              0.04755263091543327,
+              0.014152386681246076,
+              -0.06647393288126313
+            ],
+            "absolute_error_mps": 0.0829477335944606
+          },
+          "formal_neighbour_threshold": null,
+          "assessment": "candidate_only_informational; neighbour count alone is not an acceptance criterion"
+        },
+        "planar_24": {
+          "case_id": "planar_24",
+          "sample_count": 24,
+          "requested_neighbours": 24,
+          "selected_neighbour_count": 24,
+          "support_distance_min_m": 0.040607881008493905,
+          "support_distance_max_m": 0.12298373876248843,
+          "effective_sample_size": 17.065153979496912,
+          "effective_sample_size_definition": "(sum w)^2 / sum(w^2), with normalized weights equivalent to 1/sum(w^2)",
+          "support_geometry": {
+            "weighted_centroid_m": [
+              -0.007389294278995732,
+              -0.006808723566291728,
+              0.0
+            ],
+            "weighted_centroid_offset_from_query_m": [
+              -0.007389294278995732,
+              -0.006808723566291728,
+              -0.025
+            ],
+            "weighted_centroid_offset_norm_m": 0.026943652063960735,
+            "covariance_eigenvalues_m2": [
+              0.0,
+              0.001167941720372652,
+              0.002313920692677579
+            ],
+            "rank": 2,
+            "anisotropy_smallest_to_largest": 0.5047457866938193,
+            "rank_tolerance_m2": 2.3139206926775793e-11
+          },
+          "interpolation_reconstruction": {
+            "analytic_velocity_at_query_mps": [
+              0.8,
+              -0.195,
+              0.4425
+            ],
+            "estimated_velocity_mps": [
+              0.7916976050792937,
+              -0.21192317249031836,
+              0.4019924662479251
+            ],
+            "error_vector_mps": [
+              -0.00830239492070639,
+              -0.016923172490318356,
+              -0.04050753375207489
+            ],
+            "absolute_error_mps": 0.0446786729797554
+          },
+          "formal_neighbour_threshold": null,
+          "assessment": "candidate_only_informational; neighbour count alone is not an acceptance criterion"
+        }
+      },
+      "count_is_not_formal_threshold": true,
+      "count_comparison": {
+        "isotropic_23_selected": 23,
+        "isotropic_23_error_mps": 0.03259061028934881,
+        "isotropic_24_selected": 24,
+        "isotropic_24_error_mps": 0.03138995245838595,
+        "one_sided_24_selected": 24,
+        "one_sided_24_error_mps": 0.0829477335944606,
+        "one_sided_24_anisotropy": 0.002736583128065234,
+        "isotropic_23_anisotropy": 0.42966110478515934,
+        "interpretation": "23 isotropic samples can be better supported than 24 one-sided samples; effective sample size, geometry rank/anisotropy, and known-field error must be reported together"
+      },
+      "required_metrics": [
+        "effective_sample_size",
+        "support_geometry",
+        "interpolation_reconstruction.absolute_error_mps"
+      ],
+      "formal_gate": {
+        "neighbour_count_used_as_gate": false,
+        "threshold": null,
+        "status": "candidate_only"
+      }
+    },
+    "mixed_source_labels": {
+      "case_id": "mixed_source_label_geometry_counterexamples",
+      "source_label_contract": {
+        "labels_are": "initial source metadata / lineage annotation",
+        "permanent_post_mixing_filter": false,
+        "filtering_policy": "never use source label as a permanent visibility gate after mixing"
+      },
+      "disconnected_blobs": {
+        "geometry": "no barrier triangles; two blobs separated by a gap",
+        "all_visible_interpolation": {
+          "visible_sample_count": 6,
+          "visible_cross_source_count": 3,
+          "selected_sample_count": 6,
+          "selected_source_labels": [
+            "blob_A",
+            "blob_A",
+            "blob_A",
+            "blob_B",
+            "blob_B",
+            "blob_B"
+          ],
+          "source_label_weight_fraction": {
+            "blob_A": 0.9415096584618088,
+            "blob_B": 0.05849034153819128
+          },
+          "estimated_velocity_mps": [
+            0.0,
+            0.8830193169236175,
+            0.0
+          ],
+          "source_label_filter_applied": false
+        },
+        "same_blob_label_oracle": {
+          "visible_sample_count": 3,
+          "visible_cross_source_count": 0,
+          "selected_sample_count": 3,
+          "selected_source_labels": [
+            "blob_A",
+            "blob_A",
+            "blob_A"
+          ],
+          "source_label_weight_fraction": {
+            "blob_A": 1.0
+          },
+          "estimated_velocity_mps": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "source_label_filter_applied": false
+        },
+        "geometry_only_non_identifiable": true,
+        "counterexample": "geometry-only visibility gives the same result with or without a disconnected-region label; the label oracle is candidate-only and cannot be silently promoted"
+      },
+      "blocked_samples": {
+        "geometry": "finite wall between query and source_B samples",
+        "wall_aware_interpolation": {
+          "visible_sample_count": 2,
+          "visible_cross_source_count": 0,
+          "selected_sample_count": 2,
+          "selected_source_labels": [
+            "source_A",
+            "source_A"
+          ],
+          "source_label_weight_fraction": {
+            "source_A": 1.0,
+            "source_B": 0.0
+          },
+          "estimated_velocity_mps": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "source_label_filter_applied": false
+        },
+        "blocked_cross_source_samples": 2,
+        "counterexample": "source labels are not needed to reject a sample whose segment crosses a supplied wall"
+      },
+      "open_samples": {
+        "geometry": "finite wall panels with y=-0.10..0.10 opening",
+        "wall_aware_interpolation": {
+          "visible_sample_count": 4,
+          "visible_cross_source_count": 2,
+          "selected_sample_count": 4,
+          "selected_source_labels": [
+            "source_A",
+            "source_B",
+            "source_A",
+            "source_B"
+          ],
+          "source_label_weight_fraction": {
+            "source_A": 0.9391886042362093,
+            "source_B": 0.06081139576379074
+          },
+          "estimated_velocity_mps": [
+            0.0,
+            0.9679643658159195,
+            0.0
+          ],
+          "source_label_filter_applied": false
+        },
+        "cross_source_sample_through_opening_retained": true,
+        "counterexample": "an open sample from another source label is valid; permanent label filtering would discard legal transport"
+      },
+      "status": "candidate_only",
+      "formal_schema_change": false
+    },
+    "g4_model_input_geometry": {
+      "scope": "G4 current-geometry model-input contract diagnostic",
+      "same_aabb_cases": [
+        "plain_outer_box",
+        "baffled_with_opening"
+      ],
+      "same_aabb": true,
+      "topology_fingerprints_differ": true,
+      "topology_description": {
+        "plain_outer_box": "outer container only; no internal baffle",
+        "baffled_with_opening": "same outer container plus split internal baffle panels and a central opening"
+      },
+      "aabb_summary": {
+        "plain_outer_box": {
+          "lower_m": [
+            -1.0,
+            -1.0,
+            -1.0
+          ],
+          "upper_m": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "extent_m": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "center_m": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "baffled_with_opening": {
+          "lower_m": [
+            -1.0,
+            -1.0,
+            -1.0
+          ],
+          "upper_m": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "extent_m": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "center_m": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "topology_fingerprint_sha256": {
+        "plain_outer_box": "f72018f33d5a8825ae77a5f6078d7e0a73a102d4d98f6dbfd9b1835941617446",
+        "baffled_with_opening": "2bfe6dcca9383dfb0b6805370d19c65d26689b0e0a64b6ed7d1c7a44ab55172d"
+      },
+      "aabb_only_boundary_summary_non_identifiable": true,
+      "component_feature_difference_detected": true,
+      "required_boundary_component_feature_fields": [
+        "distance_to_boundary_component_m",
+        "boundary_normal",
+        "boundary_type",
+        "wall_velocity_mps"
+      ],
+      "model_inputs": {
+        "plain_outer_box": {
+          "particle_position_m": [
+            0.15,
+            0.0,
+            0.0
+          ],
+          "boundary_component_features": [
+            {
+              "component_id": "outer_xmin",
+              "distance_to_boundary_component_m": 1.15,
+              "distance_m": 1.15,
+              "boundary_normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "boundary_type": "container",
+              "type": "container",
+              "wall_velocity_mps": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "wall_velocity": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "component_id": "outer_xmax",
+              "distance_to_boundary_component_m": 0.85,
+              "distance_m": 0.85,
+              "boundary_normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "boundary_type": "container",
+              "type": "container",
+              "wall_velocity_mps": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "wall_velocity": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "component_id": "outer_ymin",
+              "distance_to_boundary_component_m": 1.0,
+              "distance_m": 1.0,
+              "boundary_normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "boundary_type": "container",
+              "type": "container",
+              "wall_velocity_mps": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "wall_velocity": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "component_id": "outer_ymax",
+              "distance_to_boundary_component_m": 1.0,
+              "distance_m": 1.0,
+              "boundary_normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "boundary_type": "container",
+              "type": "container",
+              "wall_velocity_mps": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "wall_velocity": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "component_id": "outer_zmin",
+              "distance_to_boundary_component_m": 1.0,
+              "distance_m": 1.0,
+              "boundary_normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "boundary_type": "container",
+              "type": "container",
+              "wall_velocity_mps": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "wall_velocity": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "component_id": "outer_zmax",
+              "distance_to_boundary_component_m": 1.0,
+              "distance_m": 1.0,
+              "boundary_normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "boundary_type": "container",
+              "type": "container",
+              "wall_velocity_mps": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "wall_velocity": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "control": {
+            "prescribed_angular_velocity_radps": [
+              0.0,
+              0.0,
+              0.5
+            ]
+          },
+          "input_semantics": "current particle + current boundary component geometry + prescribed control only"
+        },
+        "baffled_with_opening": {
+          "particle_position_m": [
+            0.15,
+            0.0,
+            0.0
+          ],
+          "boundary_component_features": [
+            {
+              "component_id": "outer_xmin",
+              "distance_to_boundary_component_m": 1.15,
+              "distance_m": 1.15,
+              "boundary_normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "boundary_type": "container",
+              "type": "container",
+              "wall_velocity_mps": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "wall_velocity": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "component_id": "outer_xmax",
+              "distance_to_boundary_component_m": 0.85,
+              "distance_m": 0.85,
+              "boundary_normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "boundary_type": "container",
+              "type": "container",
+              "wall_velocity_mps": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "wall_velocity": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "component_id": "outer_ymin",
+              "distance_to_boundary_component_m": 1.0,
+              "distance_m": 1.0,
+              "boundary_normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "boundary_type": "container",
+              "type": "container",
+              "wall_velocity_mps": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "wall_velocity": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "component_id": "outer_ymax",
+              "distance_to_boundary_component_m": 1.0,
+              "distance_m": 1.0,
+              "boundary_normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "boundary_type": "container",
+              "type": "container",
+              "wall_velocity_mps": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "wall_velocity": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "component_id": "outer_zmin",
+              "distance_to_boundary_component_m": 1.0,
+              "distance_m": 1.0,
+              "boundary_normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "boundary_type": "container",
+              "type": "container",
+              "wall_velocity_mps": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "wall_velocity": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "component_id": "outer_zmax",
+              "distance_to_boundary_component_m": 1.0,
+              "distance_m": 1.0,
+              "boundary_normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ],
+              "boundary_type": "container",
+              "type": "container",
+              "wall_velocity_mps": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "wall_velocity": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "component_id": "internal_baffle_opening",
+              "distance_to_boundary_component_m": 0.2598076211353316,
+              "distance_m": 0.2598076211353316,
+              "boundary_normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "boundary_type": "baffle",
+              "type": "baffle",
+              "wall_velocity_mps": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "wall_velocity": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "component_id": "moving_baffle_rim",
+              "distance_to_boundary_component_m": 0.15,
+              "distance_m": 0.15,
+              "boundary_normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "boundary_type": "baffle_rim",
+              "type": "baffle_rim",
+              "wall_velocity_mps": [
+                0.0,
+                0.0,
+                0.25
+              ],
+              "wall_velocity": [
+                0.0,
+                0.0,
+                0.25
+              ]
+            }
+          ],
+          "control": {
+            "prescribed_angular_velocity_radps": [
+              0.0,
+              0.0,
+              0.5
+            ]
+          },
+          "input_semantics": "current particle + current boundary component geometry + prescribed control only"
+        }
+      },
+      "model_input_validation": {
+        "plain_outer_box": {
+          "valid": true,
+          "missing_required_fields": [],
+          "forbidden_future_state_keys": [],
+          "field_errors": [],
+          "allowed_control_fields": [
+            "prescribed_angular_velocity_radps",
+            "prescribed_linear_velocity_mps"
+          ],
+          "future_fluid_or_free_body_state_allowed": false
+        },
+        "baffled_with_opening": {
+          "valid": true,
+          "missing_required_fields": [],
+          "forbidden_future_state_keys": [],
+          "field_errors": [],
+          "allowed_control_fields": [
+            "prescribed_angular_velocity_radps",
+            "prescribed_linear_velocity_mps"
+          ],
+          "future_fluid_or_free_body_state_allowed": false
+        }
+      },
+      "prescribed_control_validation": {
+        "angular_velocity_key": "prescribed_angular_velocity_radps",
+        "accepted": true,
+        "future_fluid_or_free_body_state_allowed": false
+      },
+      "future_state_negative_control": {
+        "valid": false,
+        "missing_required_fields": [],
+        "forbidden_future_state_keys": [
+          "future_fluid_state"
+        ],
+        "field_errors": [],
+        "allowed_control_fields": [
+          "prescribed_angular_velocity_radps",
+          "prescribed_linear_velocity_mps"
+        ],
+        "future_fluid_or_free_body_state_allowed": false
+      },
+      "observed_checks": [
+        {
+          "check_id": "aabb_only_summary_identifies_topology",
+          "passed": false,
+          "expected_failure": true
+        },
+        {
+          "check_id": "component_features_distinguish_topology",
+          "passed": true,
+          "expected_failure": false
+        },
+        {
+          "check_id": "plain_model_input_valid",
+          "passed": true,
+          "expected_failure": false
+        },
+        {
+          "check_id": "baffled_model_input_valid",
+          "passed": true,
+          "expected_failure": false
+        },
+        {
+          "check_id": "future_state_rejected",
+          "passed": true,
+          "expected_failure": false
+        }
+      ],
+      "validation_statistics": {
+        "check_count": 5,
+        "success_count": 4,
+        "failure_count": 1,
+        "failed_check_ids": [
+          "aabb_only_summary_identifies_topology"
+        ],
+        "failure_rate": 0.2,
+        "candidate_representation_failure_count": 1,
+        "input_contract_failure_count": 0,
+        "failure_count_including_candidate_representation": 1,
+        "reported_from_all_checks": true,
+        "success_only_summary_forbidden": true
+      },
+      "aabb_only_failure_statistics": {
+        "ambiguous_scene_pair_count": 1,
+        "aabb_only_success_count": 0,
+        "aabb_only_failure_count": 1
+      },
+      "status": "candidate_only",
+      "formal_schema_change": false
+    }
+  },
+  "headline": {
+    "vertex_lerp_rigidity_preserved": false,
+    "rigid_pose_rigidity_preserved": true,
+    "midpoint_wall_hit": false,
+    "swept_wall_hit": true,
+    "swept_wall_midpoint_failure_detected": true,
+    "support_count_is_formal_threshold": false,
+    "disconnected_blob_geometry_only_non_identifiable": true,
+    "open_cross_source_sample_retained": true,
+    "g4_aabb_only_non_identifiable": true,
+    "g4_validation_failure_count": 1
+  },
+  "limitations": [
+    "All scenes are deterministic synthetic contract probes, not CFD or physical validation.",
+    "The swept-wall check uses a disclosed temporal sampling oracle; a production CCD must provide its own conservative guarantee.",
+    "Disconnected liquid components require an explicit topology/region contract; finite wall visibility alone cannot infer them.",
+    "Support metrics are diagnostics and intentionally do not define a universal neighbour-count threshold.",
+    "G4 boundary features are candidate input fields; no formal release schema is changed."
+  ]
+}
