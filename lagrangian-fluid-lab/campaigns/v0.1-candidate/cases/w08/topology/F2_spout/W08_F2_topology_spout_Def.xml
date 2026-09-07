@@ -1,0 +1,145 @@
+<?xml version='1.0' encoding='utf-8'?>
+<case>
+    <casedef>
+        <constantsdef>
+            <gravity x="0" y="0" z="-9.81" />
+            <rhop0 value="1000" />
+            <rhopgradient value="2" />
+            <hswl value="0" auto="true" />
+            <gamma value="7" />
+            <speedsystem value="0" auto="true" />
+            <coefsound value="20" />
+            <speedsound value="0" auto="true" />
+            <coefh value="1.0" />
+            <cflnumber value="0.2" />
+        </constantsdef>
+        <mkconfig boundcount="200" fluidcount="16" />
+        <geometry>
+            <definition dp="0.04">
+                <pointmin x="-0.12" y="-0.12" z="-0.12" />
+                <pointmax x="1.35" y="0.55" z="0.85" />
+            </definition>
+            <commands>
+                <mainlist>
+                    <setshapemode>dp | bound</setshapemode>
+                    <setdrawmode mode="full" />
+                    <setmkfluid mk="0" />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.1" y="0.12" z="0.35" />
+                        <size x="0.26" y="0.16" z="0.16" />
+                    </drawbox>
+                    <setmkbound mk="0" />
+                    <drawbox>
+                        <boxfill>bottom | left | right | front | back</boxfill>
+                        <point x="0" y="0" z="0" />
+                        <size x="1.2" y="0.4" z="0.6" />
+                    </drawbox>
+
+                    <!--
+                      Independent W08 F2 topology holdout.  The straight-mouth
+                      reference has parallel transverse receiver walls.  This
+                      case replaces the downstream wall with a stepped,
+                      converging pair of side rails, leaving a narrow spout
+                      throat at the outlet.  The source fluid and tank remain
+                      the same as F2_airborne_slug_centered.
+                    -->
+                    <setmkvoid />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.70" y="0.04" z="0" />
+                        <size x="0.06" y="0.32" z="0.2" />
+                    </drawbox>
+                    <setmkbound mk="1" />
+                    <drawbox>
+                        <boxfill>top | left | right | front | back</boxfill>
+                        <point x="0.70" y="0.04" z="0" />
+                        <size x="0.06" y="0.32" z="0.2" />
+                    </drawbox>
+
+                    <!-- Wide entrance section: y=[0.04,0.10] and [0.30,0.36]. -->
+                    <setmkbound mk="2" />
+                    <drawbox>
+                        <boxfill>top | left | right | front | back</boxfill>
+                        <point x="0.76" y="0.04" z="0" />
+                        <size x="0.10" y="0.06" z="0.2" />
+                    </drawbox>
+                    <drawbox>
+                        <boxfill>top | left | right | front | back</boxfill>
+                        <point x="0.76" y="0.30" z="0" />
+                        <size x="0.10" y="0.06" z="0.2" />
+                    </drawbox>
+
+                    <!-- Transition section: y=[0.08,0.14] and [0.26,0.32]. -->
+                    <drawbox>
+                        <boxfill>top | left | right | front | back</boxfill>
+                        <point x="0.86" y="0.08" z="0" />
+                        <size x="0.10" y="0.06" z="0.2" />
+                    </drawbox>
+                    <drawbox>
+                        <boxfill>top | left | right | front | back</boxfill>
+                        <point x="0.86" y="0.26" z="0" />
+                        <size x="0.10" y="0.06" z="0.2" />
+                    </drawbox>
+
+                    <!-- Throat section: y=[0.12,0.18] and [0.22,0.28]. -->
+                    <drawbox>
+                        <boxfill>top | left | right | front | back</boxfill>
+                        <point x="0.96" y="0.12" z="0" />
+                        <size x="0.10" y="0.06" z="0.2" />
+                    </drawbox>
+                    <drawbox>
+                        <boxfill>top | left | right | front | back</boxfill>
+                        <point x="0.96" y="0.22" z="0" />
+                        <size x="0.10" y="0.06" z="0.2" />
+                    </drawbox>
+
+                    <!-- Narrow outlet: y=[0.14,0.20] and [0.20,0.26]. -->
+                    <drawbox>
+                        <boxfill>top | left | right | front | back</boxfill>
+                        <point x="1.06" y="0.14" z="0" />
+                        <size x="0.08" y="0.06" z="0.2" />
+                    </drawbox>
+                    <drawbox>
+                        <boxfill>top | left | right | front | back</boxfill>
+                        <point x="1.06" y="0.20" z="0" />
+                        <size x="0.08" y="0.06" z="0.2" />
+                    </drawbox>
+                </mainlist>
+            </commands>
+        </geometry>
+        <initials>
+            <velocity mkfluid="0" x="1.1" y="0" z="0" />
+        </initials>
+    </casedef>
+    <execution>
+        <parameters>
+            <parameter key="SavePosDouble" value="0" />
+            <parameter key="StepAlgorithm" value="1" />
+            <parameter key="VerletSteps" value="40" />
+            <parameter key="Kernel" value="2" />
+            <parameter key="ViscoTreatment" value="1" />
+            <parameter key="Visco" value="0.08" />
+            <parameter key="ViscoBoundFactor" value="1" />
+            <parameter key="DensityDT" value="2" />
+            <parameter key="DensityDTvalue" value="0.1" />
+            <parameter key="Shifting" value="0" />
+            <parameter key="RigidAlgorithm" value="1" />
+            <parameter key="FtPause" value="0" />
+            <parameter key="CoefDtMin" value="0.05" />
+            <parameter key="DtIni" value="0" />
+            <parameter key="DtMin" value="0" />
+            <parameter key="DtFixed" value="0" />
+            <parameter key="DtAllParticles" value="0" />
+            <parameter key="TimeMax" value="0.65" />
+            <parameter key="TimeOut" value="0.05" />
+            <parameter key="MinFluidStop" value="0" />
+            <parameter key="RhopOutMin" value="700" />
+            <parameter key="RhopOutMax" value="1300" />
+            <simulationdomain>
+                <posmin x="default - 25%" y="default - 25%" z="default - 25%" />
+                <posmax x="default + 25%" y="default + 25%" z="default + 75%" />
+            </simulationdomain>
+        </parameters>
+    </execution>
+</case>
