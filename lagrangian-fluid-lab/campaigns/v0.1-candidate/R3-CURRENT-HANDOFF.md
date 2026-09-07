@@ -2,7 +2,7 @@
 
 日期：2026-09-07  
 分支：`codex/lagrangian-fluid-exploration`  
-当前提交：`195c3c353e8e1984e17ccdf94910fea743876f71`  
+当前提交：`14036245179b6914f3fb295dcb99709cb31bb666`  
 远端分支已核对为同一提交。DualSPHysics 上游目录没有修改。
 
 ## 本轮范围
