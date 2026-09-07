@@ -4,12 +4,14 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from collections import defaultdict
 from pathlib import Path
 import string
 from typing import Any
 
+import h5py
 import numpy as np
 
 
@@ -17,6 +19,7 @@ ROUTES = ("particle_mlp", "deepset_context", "local_interaction", "physics_resid
 SEEDS = (17, 29, 43)
 LAB = Path(__file__).resolve().parents[1]
 DEFAULT_INVENTORY = LAB / "campaigns" / "v0.1-candidate" / "w00-inventory.json"
+DEFAULT_MANIFEST = LAB / "release" / "v0.1-development" / "manifest.json"
 
 
 def mean_std(values: list[float | None]) -> dict[str, Any]:
@@ -168,6 +171,113 @@ def _valid_sidecar_provenance(entry: dict[str, Any], case_id: str) -> bool:
     )
 
 
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        for block in iter(lambda: stream.read(8 * 1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def audit_sidecar_artifacts(
+    entries_by_case: dict[str, list[dict[str, Any]]], manifest_path: Path,
+) -> dict[str, Any]:
+    """Bind rollout provenance to the actual release sidecar artifact.
+
+    Result JSON is an untrusted derived artifact.  Checking only the copied
+    provenance fields would allow a stale or substituted sidecar to satisfy
+    the boundary gate.  This audit resolves the release manifest link,
+    reopens the HDF5 sidecar, validates its schema/geometry counts and checks
+    that every seed reported the exact manifest-relative path and source
+    geometry hash.
+    """
+
+    manifest_path = Path(manifest_path).resolve()
+    release_root = manifest_path.parent
+    try:
+        manifest = json.loads(manifest_path.read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        return {"pass": False, "issues": [f"unreadable release manifest: {error}"], "cases": {}}
+    records = {record.get("case_id"): record for record in manifest.get("cases", [])}
+    issues: list[str] = []
+    case_audits: dict[str, Any] = {}
+    for case_id, entries in sorted(entries_by_case.items()):
+        case_issues: list[str] = []
+        record = records.get(case_id)
+        if record is None:
+            case_issues.append("case is absent from release manifest")
+        geometry = record.get("geometry", {}) if record else {}
+        expected_ref = geometry.get("boundary_sidecar")
+        if not isinstance(expected_ref, str) or not expected_ref:
+            case_issues.append("release manifest has no boundary_sidecar link")
+        expected_path = (release_root / expected_ref).resolve() if isinstance(expected_ref, str) else None
+        if expected_path is not None:
+            try:
+                expected_path.relative_to(release_root)
+            except ValueError:
+                case_issues.append("manifest boundary_sidecar escapes release root")
+        if expected_path is None or not expected_path.is_file():
+            case_issues.append("manifest-linked boundary sidecar is missing")
+
+        provenance_values = [entry.get("boundary_provenance") for entry in entries]
+        path_values = [value.get("path") if isinstance(value, dict) else None for value in provenance_values]
+        if any(value != expected_ref for value in path_values):
+            case_issues.append("result provenance path differs from release manifest link")
+        first_provenance = provenance_values[0] if provenance_values and isinstance(provenance_values[0], dict) else {}
+        actual_summary: dict[str, Any] = {}
+        if expected_path is not None and expected_path.is_file():
+            try:
+                with h5py.File(expected_path, "r") as sidecar:
+                    required = ("time", "triangles_world", "triangle_mk", "triangle_type")
+                    missing = [name for name in required if name not in sidecar]
+                    if missing:
+                        case_issues.append(f"sidecar missing datasets: {missing}")
+                    else:
+                        times = np.asarray(sidecar["time"][:], dtype=np.float64)
+                        triangles = np.asarray(sidecar["triangles_world"][:], dtype=np.float64)
+                        triangle_mk = np.asarray(sidecar["triangle_mk"][:])
+                        triangle_type = np.asarray(sidecar["triangle_type"][:])
+                        actual_summary = {
+                            "file_sha256": _sha256(expected_path),
+                            "schema_version": str(sidecar.attrs.get("schema_version", "")),
+                            "coordinate_frame": str(sidecar.attrs.get("coordinate_frame", "")),
+                            "case_id": str(sidecar.attrs.get("case_id", "")),
+                            "frame_count": int(len(times)),
+                            "triangle_count": int(triangles.shape[1]) if triangles.ndim == 4 else 0,
+                            "static_triangle_count": int(np.sum(triangle_type == 0)),
+                            "moving_triangle_count": int(np.sum(triangle_type == 1)),
+                            "source_geometry_sha256": str(sidecar.attrs.get("source_geometry_sha256", "")),
+                        }
+                        if actual_summary["schema_version"] != "boundary-sidecar-v1":
+                            case_issues.append("sidecar schema is not boundary-sidecar-v1")
+                        if actual_summary["coordinate_frame"] != "world":
+                            case_issues.append("sidecar coordinate frame is not world")
+                        if actual_summary["case_id"] != case_id:
+                            case_issues.append("sidecar case_id differs from result case")
+                        if triangles.ndim != 4 or triangles.shape[2:] != (3, 3) or not np.all(np.isfinite(triangles)):
+                            case_issues.append("sidecar triangles have invalid shape or non-finite values")
+                        if len(triangle_mk) != actual_summary["triangle_count"] or len(triangle_type) != actual_summary["triangle_count"]:
+                            case_issues.append("sidecar triangle labels do not match geometry")
+                        if not np.all(np.isin(triangle_type, (0, 1))):
+                            case_issues.append("sidecar triangle_type contains a non-boundary value")
+                        if first_provenance.get("source_geometry_sha256") != actual_summary["source_geometry_sha256"]:
+                            case_issues.append("result source geometry hash differs from actual sidecar")
+                        for field in ("frame_count", "triangle_count", "static_triangle_count", "moving_triangle_count"):
+                            if first_provenance.get(field) != actual_summary[field]:
+                                case_issues.append(f"result {field} differs from actual sidecar")
+            except (OSError, KeyError, ValueError) as error:
+                case_issues.append(f"sidecar unreadable: {error}")
+        case_audits[case_id] = {
+            "manifest_link": expected_ref,
+            "path": str(expected_path) if expected_path else None,
+            "actual": actual_summary,
+            "pass": not case_issues,
+            "issues": case_issues,
+        }
+        issues.extend(f"{case_id}: {issue}" for issue in case_issues)
+    return {"pass": bool(case_audits) and not issues, "issues": issues, "cases": case_audits}
+
+
 def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
     route_runs = [run for run in runs if run.get("route") == route]
     combinations = [(int(run["seed"]), run.get("route")) for run in route_runs]
@@ -245,7 +355,7 @@ def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def conclusion(report: dict[str, Any]) -> str:
+def conclusion(report: dict[str, Any], report_name: str = "r3-g4-baseline-audit.json") -> str:
     route_rows = []
     for route, value in report["routes"].items():
         macro = value["macro_position_rmse_over_dp"]["bootstrap"]
@@ -284,7 +394,7 @@ def conclusion(report: dict[str, Any]) -> str:
 
 每个 route/seed 最多 8 epochs，至少 3 epochs；以 validation autonomous rollout 的 case macro RMSE、patience=2 和 min-delta 作为停止与 checkpoint 选择规则，并在机器可读报告中保存每一 epoch 曲线。{next_step}
 
-机器可读明细见 `r3-g4-baseline-audit.json`；实际运行入口和 GPU 分配见 `r3_g4_run_manifest.json`。
+机器可读明细见 `{report_name}`；实际运行入口和 GPU 分配见 `r3_g4_run_manifest.json`。
 """
 
 
@@ -293,6 +403,7 @@ def main() -> None:
     parser.add_argument("--results-dir", type=Path, required=True)
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--run-manifest", type=Path, required=True)
+    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--inventory", type=Path, default=DEFAULT_INVENTORY)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--conclusion", type=Path, required=True)
@@ -304,16 +415,32 @@ def main() -> None:
     runs, artifact_issues = load_runs(args.results_dir, run_manifest, lab_root)
     physical_runs = run_manifest.get("runs", [])
     combinations = [(run.get("route"), int(run.get("seed"))) for run in runs]
-    expected = [(route, seed) for route in ROUTES for seed in SEEDS]
+    configured_routes = tuple(config.get("routes", ROUTES))
+    configured_seeds = tuple(int(seed) for seed in config.get("seeds", SEEDS))
+    if not configured_routes or len(set(configured_routes)) != len(configured_routes):
+        raise ValueError("config routes must be a non-empty list of unique route names")
+    if not configured_seeds or len(set(configured_seeds)) != len(configured_seeds):
+        raise ValueError("config seeds must be a non-empty list of unique integers")
+    expected = [(route, seed) for route in configured_routes for seed in configured_seeds]
     gpu_audit = audit_gpu_manifest(run_manifest, config, inventory, expected)
-    routes = {route: aggregate_route(route, runs) for route in ROUTES}
+    routes = {route: aggregate_route(route, runs) for route in configured_routes}
     all_case_entries = [entry for route in routes.values() for entry in route["per_case"].values()]
+    # Build this map directly from raw test rollouts.  The route rows above
+    # remain the report source of truth; this map is solely for artifact
+    # binding against the release manifest.
+    entries_by_case: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for run in runs:
+        for case_id, entry in run.get("test_rollout", {}).items():
+            row = dict(entry)
+            row["case_id"] = case_id
+            entries_by_case[case_id].append(row)
+    sidecar_audit = audit_sidecar_artifacts(entries_by_case, args.manifest)
     boundary_geometry_gate = bool(all_case_entries) and all(
         entry["boundary_available"]
         and entry["boundary_provenance_valid"]
         and entry["boundary_provenance_consistent"]
         for entry in all_case_entries
-    )
+    ) and bool(sidecar_audit["pass"])
     open_blockers = []
     if not boundary_geometry_gate:
         open_blockers.append(
@@ -333,6 +460,8 @@ def main() -> None:
             "physical_gpu_audit": gpu_audit,
             "artifact_provenance_gate": not artifact_issues,
             "artifact_provenance_issues": artifact_issues,
+            "release_manifest": str(args.manifest.resolve()),
+            "sidecar_artifact_audit": sidecar_audit,
             "allowed_gpu_indices": sorted(int(value) for value in config.get("allowed_gpu_indices", [])),
             "runs": physical_runs,
         },
@@ -355,7 +484,7 @@ def main() -> None:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
     args.conclusion.parent.mkdir(parents=True, exist_ok=True)
-    args.conclusion.write_text(conclusion(report))
+    args.conclusion.write_text(conclusion(report, args.output.name))
     print(json.dumps({"run_count": len(runs), "route_seed_gate": report["route_seed_gate"], "physical_gpu_gate": report["run_manifest"]["physical_gpu_gate"], "artifact_provenance_gate": report["run_manifest"]["artifact_provenance_gate"], "boundary_geometry_gate": report["boundary_geometry_gate"], "routes": {k: v["macro_position_rmse_over_dp"]["bootstrap"] for k, v in routes.items()}}, indent=2))
 
 

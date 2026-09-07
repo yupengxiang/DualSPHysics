@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 
 
@@ -109,3 +110,25 @@ def test_aggregate_tracks_and_validates_sidecar_provenance():
     failed = module.aggregate_route("local_interaction", runs)["per_case"]["case_a"]
     assert not failed["boundary_provenance_valid"]
     assert not failed["boundary_provenance_consistent"]
+
+
+def test_sidecar_artifact_audit_binds_result_to_release_file():
+    module = load_module()
+    result_path = ROOT / "experiments/r3_g4_sidecar_results/particle_mlp_seed17.json"
+    result = json.loads(result_path.read_text())
+    entry = result["test_rollout"]["F1_twin_obstacle"]
+    audit = module.audit_sidecar_artifacts(
+        {"F1_twin_obstacle": [entry]},
+        ROOT / "release/v0.1-development/manifest.json",
+    )
+    assert audit["pass"]
+    assert audit["cases"]["F1_twin_obstacle"]["actual"]["triangle_count"] == 124
+
+    tampered = json.loads(json.dumps(entry))
+    tampered["boundary_provenance"]["path"] = "sidecars/not-the-linked-file.h5"
+    failed = module.audit_sidecar_artifacts(
+        {"F1_twin_obstacle": [tampered]},
+        ROOT / "release/v0.1-development/manifest.json",
+    )
+    assert not failed["pass"]
+    assert any("provenance path" in issue for issue in failed["issues"])

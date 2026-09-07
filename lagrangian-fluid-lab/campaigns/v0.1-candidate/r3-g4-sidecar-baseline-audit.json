@@ -55,7 +55,8 @@
     "budget_rule": "at most 8 epochs per route/seed, stop after 3 epochs plus 2 stale autonomous-validation epochs; measured wall time is reported",
     "formal_gate": "development evidence only; constant-velocity degradation is diagnostic, never a physical-scene admission gate",
     "known_pilot_limitations": [
-      "W11 has no complete boundary triangle sidecars, so boundary availability is explicit but false",
+      "W11 links candidate boundary triangle sidecars for 12 F1/F2/F3 cases; sidecar provenance is audited, but wall-interaction semantics and formal physical admission remain open",
+      "the current sidecar-aware baseline supplies a per-frame finite-triangle AABB summary, not full wall-interaction features",
       "density, pressure and mass are initial-only features unless a future model predicts them",
       "T2 material transport and T3 external observables are not scored by this particle rollout experiment"
     ]
@@ -185,6 +186,64 @@
     },
     "artifact_provenance_gate": true,
     "artifact_provenance_issues": [],
+    "release_manifest": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/manifest.json",
+    "sidecar_artifact_audit": {
+      "pass": true,
+      "issues": [],
+      "cases": {
+        "F1_twin_obstacle": {
+          "manifest_link": "sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/sidecars/r3-g2-boundary/F1_twin_obstacle.h5",
+          "actual": {
+            "file_sha256": "912ff595d07fe7a7ff6229f53916a2e3d781b5bd47f4a1d9c11f7aae55f8c866",
+            "schema_version": "boundary-sidecar-v1",
+            "coordinate_frame": "world",
+            "case_id": "F1_twin_obstacle",
+            "frame_count": 14,
+            "triangle_count": 124,
+            "static_triangle_count": 124,
+            "moving_triangle_count": 0,
+            "source_geometry_sha256": "d43f9d74a89ed5727a5db2f796d90dd5b4b6535d4667f265ddbfa488d6c3d7ac"
+          },
+          "pass": true,
+          "issues": []
+        },
+        "F3_transverse_slosh": {
+          "manifest_link": "sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/sidecars/r3-g2-boundary/F3_transverse_slosh.h5",
+          "actual": {
+            "file_sha256": "0fef1ff4b7478b0b1e175b5f2d9755a993fe164d7020b583c87ee6365663f175",
+            "schema_version": "boundary-sidecar-v1",
+            "coordinate_frame": "world",
+            "case_id": "F3_transverse_slosh",
+            "frame_count": 16,
+            "triangle_count": 28,
+            "static_triangle_count": 28,
+            "moving_triangle_count": 0,
+            "source_geometry_sha256": "d8a60a82fbfbe538b97c4ff91b036de91a7da48e003224f47e15af7c204a8640"
+          },
+          "pass": true,
+          "issues": []
+        },
+        "W06_standard_fast_center": {
+          "manifest_link": "sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/release/v0.1-development/sidecars/r3-g2-boundary/W06_standard_fast_center.h5",
+          "actual": {
+            "file_sha256": "0ca4796fd85990fdfb63f429a42a7a0654885c8d7c91fd1b23acff25e0120f96",
+            "schema_version": "boundary-sidecar-v1",
+            "coordinate_frame": "world",
+            "case_id": "W06_standard_fast_center",
+            "frame_count": 251,
+            "triangle_count": 68,
+            "static_triangle_count": 40,
+            "moving_triangle_count": 28,
+            "source_geometry_sha256": "49c7d5e2252af7adce4b550294308873e98931ee4c2c1630f9be699a3866618f"
+          },
+          "pass": true,
+          "issues": []
+        }
+      }
+    },
     "allowed_gpu_indices": [
       4,
       5,

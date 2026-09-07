@@ -25,4 +25,4 @@
 
 每个 route/seed 最多 8 epochs，至少 3 epochs；以 validation autonomous rollout 的 case macro RMSE、patience=2 和 min-delta 作为停止与 checkpoint 选择规则，并在机器可读报告中保存每一 epoch 曲线。下一步应验证三角形语义/可见性并补齐 T2/T3/T4；之后才考虑三维 F6 的 coupled body-state model。
 
-机器可读明细见 `r3-g4-baseline-audit.json`；实际运行入口和 GPU 分配见 `r3_g4_run_manifest.json`。
+机器可读明细见 `r3-g4-sidecar-baseline-audit.json`；实际运行入口和 GPU 分配见 `r3_g4_run_manifest.json`。
