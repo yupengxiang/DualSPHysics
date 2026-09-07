@@ -179,6 +179,69 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _attribute_text(value: Any, default: str = "") -> str:
+    """Normalize HDF5 string attributes for deterministic provenance checks."""
+
+    if value is None:
+        return default
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return str(value)
+
+
+def _load_release_checksums(checksum_path: Path, release_root: Path) -> tuple[dict[str, str], list[str]]:
+    """Load and validate the release checksum index.
+
+    ``checksums.sha256`` is part of the release contract, rather than an
+    informational listing.  Keep the parser deliberately small and strict so
+    that a malformed or ambiguous entry cannot silently turn into a pass.
+    Paths are retained in POSIX, manifest-relative form because that is the
+    representation used by ``manifest.json`` and rollout provenance.
+    """
+
+    checksum_path = Path(checksum_path)
+    release_root = Path(release_root).resolve()
+    if not checksum_path.is_file():
+        return {}, [f"release checksum manifest is missing: {checksum_path}"]
+    checksums: dict[str, str] = {}
+    issues: list[str] = []
+    try:
+        lines = checksum_path.read_text().splitlines()
+    except OSError as error:
+        return {}, [f"release checksum manifest is unreadable: {error}"]
+    for line_number, raw_line in enumerate(lines, start=1):
+        line = raw_line.strip()
+        if not line:
+            continue
+        fields = line.split(maxsplit=1)
+        if len(fields) != 2:
+            issues.append(f"checksum manifest line {line_number} is malformed")
+            continue
+        digest, relative = fields
+        relative = relative.lstrip("*")
+        if len(digest) != 64 or any(char not in string.hexdigits for char in digest):
+            issues.append(f"checksum manifest line {line_number} has an invalid SHA256")
+            continue
+        relative_path = Path(relative)
+        if relative_path.is_absolute():
+            issues.append(f"checksum manifest line {line_number} uses an absolute path")
+            continue
+        try:
+            resolved = (release_root / relative_path).resolve()
+            resolved.relative_to(release_root)
+        except ValueError:
+            issues.append(f"checksum manifest line {line_number} escapes release root")
+            continue
+        key = relative_path.as_posix()
+        digest = digest.lower()
+        previous = checksums.get(key)
+        if previous is not None and previous != digest:
+            issues.append(f"checksum manifest has conflicting entries for {key}")
+            continue
+        checksums[key] = digest
+    return checksums, issues
+
+
 def audit_sidecar_artifacts(
     entries_by_case: dict[str, list[dict[str, Any]]], manifest_path: Path,
 ) -> dict[str, Any]:
@@ -199,7 +262,9 @@ def audit_sidecar_artifacts(
     except (OSError, json.JSONDecodeError) as error:
         return {"pass": False, "issues": [f"unreadable release manifest: {error}"], "cases": {}}
     records = {record.get("case_id"): record for record in manifest.get("cases", [])}
-    issues: list[str] = []
+    checksum_path = release_root / "checksums.sha256"
+    release_checksums, checksum_issues = _load_release_checksums(checksum_path, release_root)
+    issues: list[str] = list(checksum_issues)
     case_audits: dict[str, Any] = {}
     for case_id, entries in sorted(entries_by_case.items()):
         case_issues: list[str] = []
@@ -211,22 +276,36 @@ def audit_sidecar_artifacts(
         if not isinstance(expected_ref, str) or not expected_ref:
             case_issues.append("release manifest has no boundary_sidecar link")
         expected_path = (release_root / expected_ref).resolve() if isinstance(expected_ref, str) else None
+        path_in_release = False
         if expected_path is not None:
             try:
                 expected_path.relative_to(release_root)
             except ValueError:
                 case_issues.append("manifest boundary_sidecar escapes release root")
-        if expected_path is None or not expected_path.is_file():
+            else:
+                path_in_release = True
+        if expected_path is None or not path_in_release or not expected_path.is_file():
             case_issues.append("manifest-linked boundary sidecar is missing")
 
         provenance_values = [entry.get("boundary_provenance") for entry in entries]
         path_values = [value.get("path") if isinstance(value, dict) else None for value in provenance_values]
         if any(value != expected_ref for value in path_values):
             case_issues.append("result provenance path differs from release manifest link")
-        first_provenance = provenance_values[0] if provenance_values and isinstance(provenance_values[0], dict) else {}
         actual_summary: dict[str, Any] = {}
-        if expected_path is not None and expected_path.is_file():
+        if expected_path is not None and path_in_release and expected_path.is_file():
             try:
+                actual_summary["file_sha256"] = _sha256(expected_path)
+                checksum_key = expected_path.relative_to(release_root).as_posix()
+                expected_digest = release_checksums.get(checksum_key)
+                actual_summary["release_checksum_sha256"] = expected_digest
+                if expected_digest is None:
+                    case_issues.append(
+                        f"release checksum manifest has no entry for linked sidecar: {checksum_key}"
+                    )
+                elif expected_digest != actual_summary["file_sha256"]:
+                    case_issues.append(
+                        f"actual sidecar SHA256 differs from release checksum for {checksum_key}"
+                    )
                 with h5py.File(expected_path, "r") as sidecar:
                     required = ("time", "triangles_world", "triangle_mk", "triangle_type")
                     missing = [name for name in required if name not in sidecar]
@@ -238,15 +317,18 @@ def audit_sidecar_artifacts(
                         triangle_mk = np.asarray(sidecar["triangle_mk"][:])
                         triangle_type = np.asarray(sidecar["triangle_type"][:])
                         actual_summary = {
-                            "file_sha256": _sha256(expected_path),
-                            "schema_version": str(sidecar.attrs.get("schema_version", "")),
-                            "coordinate_frame": str(sidecar.attrs.get("coordinate_frame", "")),
-                            "case_id": str(sidecar.attrs.get("case_id", "")),
+                            "file_sha256": actual_summary["file_sha256"],
+                            "release_checksum_sha256": actual_summary["release_checksum_sha256"],
+                            "schema_version": _attribute_text(sidecar.attrs.get("schema_version")),
+                            "coordinate_frame": _attribute_text(sidecar.attrs.get("coordinate_frame")),
+                            "case_id": _attribute_text(sidecar.attrs.get("case_id")),
                             "frame_count": int(len(times)),
                             "triangle_count": int(triangles.shape[1]) if triangles.ndim == 4 else 0,
                             "static_triangle_count": int(np.sum(triangle_type == 0)),
                             "moving_triangle_count": int(np.sum(triangle_type == 1)),
-                            "source_geometry_sha256": str(sidecar.attrs.get("source_geometry_sha256", "")),
+                            "source_vtk": _attribute_text(sidecar.attrs.get("source_vtk"), "unknown"),
+                            "source_hdf5": _attribute_text(sidecar.attrs.get("source_hdf5"), "unknown"),
+                            "source_geometry_sha256": _attribute_text(sidecar.attrs.get("source_geometry_sha256")),
                         }
                         if actual_summary["schema_version"] != "boundary-sidecar-v1":
                             case_issues.append("sidecar schema is not boundary-sidecar-v1")
@@ -260,11 +342,32 @@ def audit_sidecar_artifacts(
                             case_issues.append("sidecar triangle labels do not match geometry")
                         if not np.all(np.isin(triangle_type, (0, 1))):
                             case_issues.append("sidecar triangle_type contains a non-boundary value")
-                        if first_provenance.get("source_geometry_sha256") != actual_summary["source_geometry_sha256"]:
-                            case_issues.append("result source geometry hash differs from actual sidecar")
-                        for field in ("frame_count", "triangle_count", "static_triangle_count", "moving_triangle_count"):
-                            if first_provenance.get(field) != actual_summary[field]:
-                                case_issues.append(f"result {field} differs from actual sidecar")
+                        provenance_fields = (
+                            "schema_version", "coordinate_frame", "case_id", "frame_count",
+                            "triangle_count", "static_triangle_count", "moving_triangle_count",
+                            "source_vtk", "source_hdf5", "source_geometry_sha256",
+                        )
+                        # Every result is an independent, untrusted artifact.
+                        # Comparing only the first seed would let a later seed
+                        # carry stale geometry metadata while the aggregate
+                        # still reports a passing artifact gate.
+                        for index, provenance in enumerate(provenance_values, start=1):
+                            if not isinstance(provenance, dict):
+                                case_issues.append(f"result provenance {index} is not an object")
+                                continue
+                            for field in provenance_fields:
+                                if provenance.get(field) != actual_summary[field]:
+                                    case_issues.append(
+                                        f"result provenance {index} {field} differs from actual sidecar"
+                                    )
+                            # Newer producers may include the artifact hash
+                            # explicitly.  Validate it when present while
+                            # retaining compatibility with already materialized
+                            # reports; the release checksum remains mandatory.
+                            if "file_sha256" in provenance and provenance.get("file_sha256") != actual_summary["file_sha256"]:
+                                case_issues.append(
+                                    f"result provenance {index} file_sha256 differs from actual sidecar"
+                                )
             except (OSError, KeyError, ValueError) as error:
                 case_issues.append(f"sidecar unreadable: {error}")
         case_audits[case_id] = {

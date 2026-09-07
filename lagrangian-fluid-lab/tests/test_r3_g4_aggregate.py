@@ -1,6 +1,9 @@
 import importlib.util
 import json
 from pathlib import Path
+import shutil
+
+import h5py
 
 
 ROOT = Path(__file__).parents[1]
@@ -132,3 +135,46 @@ def test_sidecar_artifact_audit_binds_result_to_release_file():
     )
     assert not failed["pass"]
     assert any("provenance path" in issue for issue in failed["issues"])
+
+
+def _temporary_release_with_sidecar(tmp_path, module):
+    source_release = ROOT / "release/v0.1-development"
+    release = tmp_path / "release"
+    sidecar_relative = Path("sidecars/r3-g2-boundary/F1_twin_obstacle.h5")
+    sidecar_path = release / sidecar_relative
+    sidecar_path.parent.mkdir(parents=True)
+    shutil.copy2(source_release / "manifest.json", release / "manifest.json")
+    shutil.copy2(source_release / sidecar_relative, sidecar_path)
+    digest = module._sha256(sidecar_path)
+    (release / "checksums.sha256").write_text(f"{digest}  {sidecar_relative.as_posix()}\n")
+    return release / "manifest.json", sidecar_path
+
+
+def test_sidecar_artifact_audit_rejects_hash_mismatch_in_temp_release(tmp_path):
+    module = load_module()
+    manifest_path, sidecar_path = _temporary_release_with_sidecar(tmp_path, module)
+    result_path = ROOT / "experiments/r3_g4_sidecar_results/particle_mlp_seed17.json"
+    entry = json.loads(result_path.read_text())["test_rollout"]["F1_twin_obstacle"]
+
+    # Mutate only the temporary copy.  Geometry shape and all semantic
+    # attributes remain valid, but the bytes no longer match the release index.
+    with h5py.File(sidecar_path, "r+") as sidecar:
+        sidecar.attrs["temporary_test_mutation"] = "not-the-release-artifact"
+    audit = module.audit_sidecar_artifacts({"F1_twin_obstacle": [entry]}, manifest_path)
+    assert not audit["pass"]
+    assert any("actual sidecar SHA256 differs from release checksum" in issue for issue in audit["issues"])
+
+
+def test_sidecar_artifact_audit_checks_every_result_provenance(tmp_path):
+    module = load_module()
+    manifest_path, _ = _temporary_release_with_sidecar(tmp_path, module)
+    result_path = ROOT / "experiments/r3_g4_sidecar_results/particle_mlp_seed17.json"
+    entry = json.loads(result_path.read_text())["test_rollout"]["F1_twin_obstacle"]
+    tampered = json.loads(json.dumps(entry))
+    tampered["boundary_provenance"]["source_geometry_sha256"] = "0" * 64
+
+    audit = module.audit_sidecar_artifacts(
+        {"F1_twin_obstacle": [entry, tampered]}, manifest_path,
+    )
+    assert not audit["pass"]
+    assert any("provenance 2 source_geometry_sha256" in issue for issue in audit["issues"])
