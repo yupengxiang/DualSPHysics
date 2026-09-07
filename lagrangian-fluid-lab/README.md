@@ -120,9 +120,12 @@ capacity estimates.
 
 ## Next decision gate
 
-The engineering, identity, material, causal-split and metric contracts are ready
-to freeze, but the formal dataset is not. Close family-specific validation gaps
-first: F1 impact pressure, F2 pouring resolution and external observation, F3
-impact timing/cadence, an external F4 anchor, stable validated F5 run-up, and a
-three-dimensional F6 Test 14 implementation. Only passing families should enter
-a 20--30 case development tranche before formal production scale is chosen.
+The engineering, identity, causal-split and metric contracts are ready to freeze
+as development interfaces, but the material-tracer implementation is still a
+candidate reference (its wall visibility, convergence and destination closure
+are not accepted physical truth) and the formal dataset is not. Close
+family-specific validation gaps first: F1 impact pressure, F2 pouring resolution
+and external observation, F3 impact timing/cadence, an external F4 anchor,
+stable validated F5 run-up, and a three-dimensional F6 Test 14 implementation.
+Only passing families should enter a 20--30 case development tranche before
+formal production scale is chosen.
