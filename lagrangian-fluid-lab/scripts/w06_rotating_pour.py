@@ -15,9 +15,14 @@ import subprocess
 import h5py
 import numpy as np
 
-from campaign_runner import execute_attempt, require_idle_allowed_gpu
-from trajectory_io import convert_streaming
-from w02_semantics import partvtk_csv
+try:
+    from scripts.campaign_runner import execute_attempt, require_idle_allowed_gpu
+    from scripts.trajectory_io import convert_streaming
+    from scripts.w02_semantics import partvtk_csv
+except ModuleNotFoundError:
+    from campaign_runner import execute_attempt, require_idle_allowed_gpu
+    from trajectory_io import convert_streaming
+    from w02_semantics import partvtk_csv
 
 
 LAB = Path(__file__).resolve().parents[1]
@@ -77,6 +82,29 @@ def write_motion(path, record):
 
 def definition_text(record):
     width = record["cup_width"]
+    dp = float(record.get("dp", DP))
+    time_out = float(record.get("tout", 0.01))
+    boundary_method = int(record.get("boundary_method", 1))
+    shape_mode = "actual | bound" if boundary_method == 2 else "dp | bound"
+    normal_geometry = f'''<list name="GeometryForNormals">
+        <setactive drawpoints="0" drawshapes="1"/><setshapemode>actual | bound</setshapemode>
+        <setnormalinvert invert="true"/>
+        <setmkbound mk="0"/><drawbox><boxfill>bottom | left | right | front | back</boxfill>
+          <point x="0" y="-0.15" z="0.65"/><size x="{width}" y="0.30" z="0.45"/><layers vdp="-0.5"/>
+        </drawbox>
+        <setmkbound mk="1"/><drawbox><boxfill>bottom | left | right | front | back</boxfill>
+          <point x="{record['receiver_x']}" y="{record['receiver_y'] - 0.30}" z="0"/><size x="1.10" y="0.60" z="0.45"/><layers vdp="-0.5"/>
+        </drawbox>
+        <setmkbound mk="2"/><drawbox><boxfill>bottom</boxfill>
+          <point x="-0.60" y="-0.55" z="-0.20"/><size x="2.60" y="1.10" z="0.10"/><layers vdp="-0.5"/>
+        </drawbox>
+        <shapeout file="hdp"/><resetdraw/>
+      </list>''' if boundary_method == 2 else ""
+    run_normals = '<runlist name="GeometryForNormals"/>' if boundary_method == 2 else ""
+    normals = '''
+    <normals active="true"><norgeometry>
+      <geometryfile file="[CaseName]_hdp_Actual.vtk"/><distanceh v="2.0"/>
+    </norgeometry></normals>''' if boundary_method == 2 else ""
     fluid_x0, fluid_x1 = 0.05, width - 0.05
     layer_height = 0.11
     receiver_x, receiver_y = record["receiver_x"], record["receiver_y"]
@@ -90,9 +118,10 @@ def definition_text(record):
     </constantsdef>
     <mkconfig boundcount="220" fluidcount="16"/>
     <geometry>
-      <definition dp="{DP}"><pointmin x="-0.80" y="-0.70" z="-0.45"/><pointmax x="2.3" y="0.90" z="1.80"/></definition>
-      <commands><mainlist>
-        <setshapemode>dp | bound</setshapemode><setdrawmode mode="full"/>
+      <definition dp="{dp}"><pointmin x="-0.80" y="-0.70" z="-0.45"/><pointmax x="2.3" y="0.90" z="1.80"/></definition>
+      <commands>{normal_geometry}<mainlist>
+        {run_normals}
+        <setshapemode>{shape_mode}</setshapemode><setdrawmode mode="full"/>
         <setmkbound mk="0"/><drawbox><boxfill>bottom | left | right | front | back</boxfill>
           <point x="0" y="-0.15" z="0.65"/><size x="{width}" y="0.30" z="0.45"/><layers vdp="0,1,2"/>
         </drawbox>
@@ -106,21 +135,21 @@ def definition_text(record):
         <setmkfluid mk="1"/><drawbox><boxfill>solid</boxfill><point x="{fluid_x0}" y="-0.11" z="0.81"/><size x="{fluid_x1-fluid_x0}" y="0.22" z="{layer_height}"/></drawbox>
         <setmkfluid mk="2"/><drawbox><boxfill>solid</boxfill><point x="{fluid_x0}" y="-0.11" z="0.92"/><size x="{fluid_x1-fluid_x0}" y="0.22" z="{layer_height}"/></drawbox>
       </mainlist></commands>
-    </geometry>
+    </geometry>{normals}
     <motion><objreal ref="0"><begin mov="1" start="0" finish="2.5"/>
       <mvrotfile id="1" duration="2.5" anglesunits="degrees"><file name="{record['case_id']}_motion.dat"/>
         <axisp1 x="0" y="-1" z="0.65"/><axisp2 x="0" y="1" z="0.65"/>
       </mvrotfile></objreal></motion>
   </casedef>
   <execution><parameters>
-    <parameter key="SavePosDouble" value="2"/><parameter key="Boundary" value="1"/><parameter key="SlipMode" value="1"/>
+    <parameter key="SavePosDouble" value="2"/><parameter key="Boundary" value="{boundary_method}"/><parameter key="SlipMode" value="1"/>
     <parameter key="StepAlgorithm" value="2"/><parameter key="Kernel" value="2"/>
     <parameter key="ViscoTreatment" value="1"/><parameter key="Visco" value="0.03"/><parameter key="ViscoBoundFactor" value="1"/>
     <parameter key="DensityDT" value="3"/><parameter key="DensityDTvalue" value="0.1"/>
     <parameter key="Shifting" value="0"/><parameter key="RigidAlgorithm" value="1"/><parameter key="FtPause" value="0"/>
     <parameter key="CoefDtMin" value="0.05"/><parameter key="DtIni" value="0"/><parameter key="DtMin" value="0"/>
     <parameter key="DtFixed" value="0"/><parameter key="DtAllParticles" value="0"/>
-    <parameter key="TimeMax" value="2.5"/><parameter key="TimeOut" value="0.01"/><parameter key="PartsOutMax" value="1"/>
+    <parameter key="TimeMax" value="2.5"/><parameter key="TimeOut" value="{time_out}"/><parameter key="PartsOutMax" value="1"/>
     <parameter key="RhopOutMin" value="700"/><parameter key="RhopOutMax" value="1300"/><parameter key="MinFluidStop" value="0"/>
     <simulationdomain><posmin x="-0.70" y="-0.65" z="-0.40"/><posmax x="2.20" y="0.80" z="1.80"/></simulationdomain>
   </parameters></execution>
@@ -232,8 +261,8 @@ def inside_aabb(points, lower, upper):
     return np.all((points >= np.asarray(lower)) & (points <= np.asarray(upper)), axis=1)
 
 
-def audit_case(record):
-    path = DATA / f"{record['case_id']}.h5"
+def audit_case(record, path=None):
+    path = Path(path) if path is not None else DATA / f"{record['case_id']}.h5"
     with h5py.File(path, "r") as h5:
         time = h5["time"][:]
         initial = h5["valid"][0] & (h5["type"][0] == 3)

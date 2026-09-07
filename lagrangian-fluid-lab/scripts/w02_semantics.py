@@ -16,8 +16,12 @@ import h5py
 import numpy as np
 import pandas as pd
 
-from campaign_runner import execute_attempt, require_idle_allowed_gpu
-from trajectory_io import convert_streaming
+try:
+    from scripts.campaign_runner import execute_attempt, require_idle_allowed_gpu
+    from scripts.trajectory_io import convert_streaming
+except ModuleNotFoundError:
+    from campaign_runner import execute_attempt, require_idle_allowed_gpu
+    from trajectory_io import convert_streaming
 
 
 LAB = Path(__file__).resolve().parents[1]

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<case>
+  <casedef>
+    <constantsdef>
+      <gravity x="0" y="0" z="-9.81"/><rhop0 value="1000"/><rhopgradient value="2"/>
+      <hswl value="0" auto="true"/><gamma value="7"/><speedsystem value="0" auto="true"/>
+      <coefsound value="25"/><speedsound value="0" auto="true"/><hdp value="1.3"/><cflnumber value="0.2"/>
+    </constantsdef>
+    <mkconfig boundcount="220" fluidcount="16"/>
+    <geometry>
+      <definition dp="0.018"><pointmin x="-0.80" y="-0.70" z="-0.45"/><pointmax x="2.3" y="0.90" z="1.80"/></definition>
+      <commands><mainlist>
+        
+        <setshapemode>dp | bound</setshapemode><setdrawmode mode="full"/>
+        <setmkbound mk="0"/><drawbox><boxfill>bottom | left | right | front | back</boxfill>
+          <point x="0" y="-0.15" z="0.65"/><size x="0.425" y="0.30" z="0.45"/><layers vdp="0,1,2"/>
+        </drawbox>
+        <setmkbound mk="1"/><drawbox><boxfill>bottom | left | right | front | back</boxfill>
+          <point x="0.45" y="-0.3" z="0"/><size x="1.10" y="0.60" z="0.45"/><layers vdp="0,1,2"/>
+        </drawbox>
+        <setmkbound mk="2"/><drawbox><boxfill>bottom</boxfill>
+          <point x="-0.60" y="-0.55" z="-0.20"/><size x="2.60" y="1.10" z="0.10"/><layers vdp="0,1,2"/>
+        </drawbox>
+        <setmkfluid mk="0"/><drawbox><boxfill>solid</boxfill><point x="0.05" y="-0.11" z="0.70"/><size x="0.325" y="0.22" z="0.11"/></drawbox>
+        <setmkfluid mk="1"/><drawbox><boxfill>solid</boxfill><point x="0.05" y="-0.11" z="0.81"/><size x="0.325" y="0.22" z="0.11"/></drawbox>
+        <setmkfluid mk="2"/><drawbox><boxfill>solid</boxfill><point x="0.05" y="-0.11" z="0.92"/><size x="0.325" y="0.22" z="0.11"/></drawbox>
+      </mainlist></commands>
+    </geometry>
+    <motion><objreal ref="0"><begin mov="1" start="0" finish="2.5"/>
+      <mvrotfile id="1" duration="2.5" anglesunits="degrees"><file name="R3_F2_fast_center_massmatched_mid_motion.dat"/>
+        <axisp1 x="0" y="-1" z="0.65"/><axisp2 x="0" y="1" z="0.65"/>
+      </mvrotfile></objreal></motion>
+  </casedef>
+  <execution><parameters>
+    <parameter key="SavePosDouble" value="2"/><parameter key="Boundary" value="1"/><parameter key="SlipMode" value="1"/>
+    <parameter key="StepAlgorithm" value="2"/><parameter key="Kernel" value="2"/>
+    <parameter key="ViscoTreatment" value="1"/><parameter key="Visco" value="0.03"/><parameter key="ViscoBoundFactor" value="1"/>
+    <parameter key="DensityDT" value="3"/><parameter key="DensityDTvalue" value="0.1"/>
+    <parameter key="Shifting" value="0"/><parameter key="RigidAlgorithm" value="1"/><parameter key="FtPause" value="0"/>
+    <parameter key="CoefDtMin" value="0.05"/><parameter key="DtIni" value="0"/><parameter key="DtMin" value="0"/>
+    <parameter key="DtFixed" value="0"/><parameter key="DtAllParticles" value="0"/>
+    <parameter key="TimeMax" value="2.5"/><parameter key="TimeOut" value="0.01"/><parameter key="PartsOutMax" value="1"/>
+    <parameter key="RhopOutMin" value="700"/><parameter key="RhopOutMax" value="1300"/><parameter key="MinFluidStop" value="0"/>
+    <simulationdomain><posmin x="-0.70" y="-0.65" z="-0.40"/><posmax x="2.20" y="0.80" z="1.80"/></simulationdomain>
+  </parameters></execution>
+</case>
