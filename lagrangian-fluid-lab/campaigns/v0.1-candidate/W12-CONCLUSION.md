@@ -32,7 +32,8 @@ W11 的严格 manifest 被直接用于训练。两条路线分别是 18,691 参�
 - G4：弱基线、局部相互作用和 physics-residual 路线均保留三种子结果；常速度退化只作为学习器诊断，绝不作为物理场景准入门槛。
 - F4：O4 二维官方 impinging-jet 与隔离三维 head-on 液柱观测链路均已执行三档分辨率；F4 仍缺兼容外部锚点、材料碰撞谱系和可接受的 force 目标。
 - F6：三维 Test 14 DBC 代理的静态/动态证据仍被拒绝；新增 CPU-only mDBC 预检确认 `Boundary=2`、`BoundNor` 与 ghost-normal 文件路径可执行，但 792 个 fixed/moving 零法向、Chrono collision warning 和过短时窗阻止物理验收。
-- G1/G2/G3/F4/F6 之后的全量 Python 回归为 `166 passed`。机器报告中的 `execution_status`、`acceptance_status`、`validation_scope` 和 `open_blockers` 才是当前权威状态，旧 `status=complete` 仅为历史兼容字段。
+- G1/G2/G3/F4/F6 之后的全量 Python 回归为 `178 passed`，其中新增谱系、示踪可见性和 G4 sidecar 回归均保持 candidate-only。机器报告中的 `execution_status`、`acceptance_status`、`validation_scope` 和 `open_blockers` 才是当前权威状态，旧 `status=complete` 仅为历史兼容字段。
+- 后续独立诊断进一步确认：旧 family-shared lineage 投影会跨五个 split；有限三角墙可去除示踪器错侧邻居，但无 barrier 的分离液团仍无法由几何可见性识别；LocalInteraction/PhysicsResidual 各三种子的小预算复跑均完成。F6 mDBC 的 20 个 CPU 变体中，法向几何向内偏移 `-0.030/-0.020 m` 清除了序列化零法向，但改变了几何语义，仍不构成物理修复。
 
 ## 冻结决定
 

@@ -72,11 +72,30 @@ the exact solver configuration and executable.
 - The G4 CPU causality audit passes prefix invariance, endpoint independence,
   future-control isolation, and future-free-body isolation. Constant-velocity
   degradation remains a diagnostic, never a scene-admission gate.
+- The R3 lineage diagnostic preserves the historical W08/W10 mismatch as a
+  regression fixture: the old family-shared lineage labels crossed five split
+  classes, while the current exact-physical-case lineage contract passes both
+  audits. This is a contract result, not evidence that historical data were
+  physically revalidated.
+- A CPU-only synthetic tracer-visibility suite confirms that finite triangle
+  barriers remove cross-partition contamination (legacy contaminant weight
+  `0.875` to wall-aware `0`), while a narrow opening leaves only 23 visible
+  neighbours and is conservatively rejected. With no barrier triangles,
+  geometry-only visibility cannot distinguish disconnected liquid blobs
+  (contaminant weight `0.672`, wrong-direction rate `1.0`); both candidate
+  guards remain rejected and production tracer code is unchanged.
+- An independent R3 G4 sidecar re-ran LocalInteraction and PhysicsResidual at
+  seeds `17/29/43` on physical GPUs 4/5 (6/6 completed) and audited all four
+  routes at 43-wide inputs with current boundary sidecars. The tiny-budget
+  results are stability/input-contract diagnostics only, not a ranking.
 - The F6 R3 evidence includes a CPU-only mDBC initialization preflight.
   `Boundary=2` and the official normals path execute, but 792/24,335 boundary
   normals are zero and a floating-body Chrono warning remains; this is not
-  physical mDBC acceptance. A separate static-buoyancy calculation likewise
-  remains diagnostic-only.
+  physical mDBC acceptance. A follow-up CPU-only 20-variant sweep found
+  inward normal-geometry offsets of `-0.030 m` and `-0.020 m` with zero
+  serialized zero normals at `dp=0.060 m`; they alter the geometry contract and
+  remain candidate-only/rejected pending physical revalidation. A separate
+  static-buoyancy calculation likewise remains diagnostic-only.
 - Structural and semantic quality gates passed 29 probes and rejected one
   deliberately retained coarse-resolution failure.
 - W00--W12 then exercised protected provenance, identity/reference-frame
