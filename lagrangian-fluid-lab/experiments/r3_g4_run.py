@@ -25,6 +25,11 @@ TRAINER = LAB / "experiments" / "r3_g4_baselines.py"
 ROUTES = ("particle_mlp", "deepset_context", "local_interaction", "physics_residual")
 SEEDS = (17, 29, 43)
 
+# The repository root is the normal invocation directory; expose the custom
+# lab package explicitly without modifying the upstream DualSPHysics tree.
+if str(LAB) not in sys.path:
+    sys.path.insert(0, str(LAB))
+
 
 def task_list() -> list[dict[str, int | str]]:
     gpu_cycle = (4, 5, 6, 7)
