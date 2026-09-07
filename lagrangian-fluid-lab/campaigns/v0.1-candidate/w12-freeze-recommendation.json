@@ -25,7 +25,17 @@
     "resolution": "top two retained resolutions must agree on declared primary observables within a pre-registered tolerance; use 5% as an initial screening threshold, not universal truth",
     "event_sampling": "at least 10 samples across the shortest scored impact/rise interval",
     "external_observation": "each retained family needs at least one case with uncertainty-aware external comparison",
-    "learning": "three seeds, autonomous family-wise rollout, boundary/control inputs, and no catastrophic degradation relative to constant velocity"
+    "learning": {
+      "status": "diagnostic_only",
+      "requirements": [
+        "three seeds",
+        "autonomous family-wise rollout",
+        "boundary and known-control inputs",
+        "report degradation relative to constant velocity"
+      ],
+      "scene_admission_independent": true,
+      "policy": "learner degradation is a model/input diagnostic, never a physical-scene admission gate"
+    }
   },
   "recommended_sequence": [
     "Close F2 resolution plus simple physical observation first, because its material-history task is the clearest differentiator.",

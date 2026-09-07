@@ -17,6 +17,28 @@ def elapsed_cases(path: Path) -> tuple[int, float]:
     return len(cases), sum(float(case.get("elapsed_seconds", 0)) for case in cases)
 
 
+def learning_gate_policy() -> dict[str, object]:
+    """Keep model stress tests separate from physical-scene admission.
+
+    A constant-velocity comparison is useful for diagnosing a weak learner,
+    but making it a scene gate would preferentially remove difficult yet
+    scientifically valuable cases.  The data, input, and metric gates remain
+    independent of this diagnostic.
+    """
+
+    return {
+        "status": "diagnostic_only",
+        "requirements": [
+            "three seeds",
+            "autonomous family-wise rollout",
+            "boundary and known-control inputs",
+            "report degradation relative to constant velocity",
+        ],
+        "scene_admission_independent": True,
+        "policy": "learner degradation is a model/input diagnostic, never a physical-scene admission gate",
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--lab-root", type=Path, required=True)
@@ -74,7 +96,7 @@ def main() -> None:
             "resolution": "top two retained resolutions must agree on declared primary observables within a pre-registered tolerance; use 5% as an initial screening threshold, not universal truth",
             "event_sampling": "at least 10 samples across the shortest scored impact/rise interval",
             "external_observation": "each retained family needs at least one case with uncertainty-aware external comparison",
-            "learning": "three seeds, autonomous family-wise rollout, boundary/control inputs, and no catastrophic degradation relative to constant velocity",
+            "learning": learning_gate_policy(),
         },
         "recommended_sequence": [
             "Close F2 resolution plus simple physical observation first, because its material-history task is the clearest differentiator.",
