@@ -51,6 +51,20 @@ the exact solver configuration and executable.
   with fixed-point pressure/velocity/Kcorr, two-dimensional wall force, open-
   boundary box flux, and solver lifecycle bookkeeping. These are candidate
   diagnostics, not external physical labels.
+- The R3 F4 isolated 3-D head-on liquid-column path was exercised at
+  `dp=0.04/0.03/0.02 m` through `t=0.55 s`, including fixed-point fields and
+  requested/effective `ComputeForces` targets. The generated `Mk=17` versus
+  requested `Mk=10` mismatch is retained as a blocker; this is candidate-only.
+- R3 contract hardening now rejects non-finite affine translations, invalid
+  mass fractions, and W11 bad files (identity resurrection, mass changes, and
+  NaN density) before atomic publication. The coverage audit separates legacy
+  `status=complete` from execution, acceptance, scope, and blockers; W08's
+  204 cards remain planned-only with zero topology-holdout runs.
+- The 12 released F1/F2/F3 fluid cases have finite world-space boundary
+  sidecars. Release-linkage and byte-identity checks pass, while destination
+  and open-face semantics remain candidate-only. An identity-permutation
+  transport control is part of the protocol so set-based point metrics cannot
+  substitute for material history.
 - Structural and semantic quality gates passed 29 probes and rejected one
   deliberately retained coarse-resolution failure.
 - W00--W12 then exercised protected provenance, identity/reference-frame
@@ -127,9 +141,11 @@ capacity estimates.
 The engineering, identity, causal-split and metric contracts are ready to freeze
 as development interfaces, but the material-tracer implementation is still a
 candidate reference (its wall visibility, convergence and destination closure
-are not accepted physical truth) and the formal dataset is not. Close
-family-specific validation gaps first: F1 impact pressure, F2 pouring resolution
-and external observation, F3 impact timing/cadence, an external F4 anchor,
-stable validated F5 run-up, and a three-dimensional F6 Test 14 implementation.
-Only passing families should enter a 20--30 case development tranche before
-formal production scale is chosen.
+are not accepted physical truth) and the formal dataset is not. R3 has now
+executed the F6 Test 14 three-dimensional route, but its current DBC proxy is
+scientifically rejected; likewise, both F4 observation paths are diagnostic
+only and have no external anchor. Close the remaining family-specific gaps
+first: F1 impact pressure, F2 pouring resolution and external observation, F3
+impact timing/cadence, compatible external F4/F5 anchors, and a validated
+mDBC/larger-domain F6 route. Only passing families should enter a 20--30 case
+development tranche before formal production scale is chosen.
