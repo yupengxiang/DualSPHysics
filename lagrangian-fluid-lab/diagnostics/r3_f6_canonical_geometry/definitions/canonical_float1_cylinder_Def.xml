@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<case>
+  <casedef>
+    <constantsdef>
+      <lattice bound="1" fluid="1" />
+      <gravity x="0" y="0" z="-9.81" />
+      <rhop0 value="1000" />
+      <rhopgradient value="2" />
+      <hswl value="0" auto="true" />
+      <gamma value="7" />
+      <speedsystem value="0" auto="true" />
+      <coefsound value="20" />
+      <speedsound value="0" auto="true" />
+      <coefh value="1.0" />
+      <cflnumber value="0.2" />
+    </constantsdef>
+    <mkconfig boundcount="200" fluidcount="16" />
+    <geometry>
+      <definition dp="0.04">
+        <pointref x="0" y="0" z="0" />
+        <pointmin x="-0.20" y="-0.20" z="-0.20" />
+        <pointmax x="0.60" y="0.50" z="0.60" />
+      </definition>
+      <commands>
+        <list name="GeometryForNormals">
+          <setactive drawpoints="0" drawshapes="1" />
+          <setshapemode>actual | bound</setshapemode>
+          <!-- Tank construction surface: invert container normals toward fluid. -->
+          <setnormalinvert invert="true" />
+          <setmkbound mk="0" />
+          <drawbox>
+            <boxfill>bottom | left | right | front | back</boxfill>
+            <point x="0" y="0" z="0" />
+            <size x="0.4" y="0.3" z="0.35" />
+            <layers vdp="-0.5" />
+          </drawbox>
+          <!-- This is the normal-construction cylinder, not the particle cylinder below. -->
+          <setnormalinvert invert="false" />
+          <setmkbound mk="5" />
+          <!-- Physical Float1 surface: R=.11 m, z=.14.. .30 m. -->
+          <drawcylinder radius="0.11" mask="0">
+            <!-- Cap limits are half-dp outside the first particle caps (z=.16,.28). -->
+            <point x="0.20" y="0.16" z="0.14" />
+            <point x="0.20" y="0.16" z="0.30" />
+          </drawcylinder>
+          <shapeout file="hdp" />
+          <resetdraw />
+        </list>
+        <mainlist>
+          <!-- The hdp list above is the only source for automatic normals. -->
+          <runlist name="GeometryForNormals" />
+          <setshapemode>actual | bound</setshapemode>
+          <setdrawmode mode="full" />
+          <!-- Physical tank shell at the same nominal coordinates. -->
+          <setmkbound mk="0" />
+          <drawbox>
+            <boxfill>bottom | left | right | front | back</boxfill>
+            <point x="0" y="0" z="0" />
+            <size x="0.4" y="0.3" z="0.35" />
+            <layers vdp="0,1,2" />
+          </drawbox>
+          <!-- Float1 actual boundary cylinder: R=.08 raster plus vdp=0,-1,-2. -->
+          <!-- The generated outer ring is R≈.0894; it is checked against the .11 m surface. -->
+          <setmkbound mk="5" />
+          <drawcylinder radius="0.08" mask="0">
+            <point x="0.20" y="0.16" z="0.16" />
+            <point x="0.20" y="0.16" z="0.28" />
+            <layers vdp="0,-1,-2" />
+          </drawcylinder>
+          <setmkfluid mk="0" />
+          <fillbox x="0.04" y="0.04" z="0.04">
+            <modefill>void</modefill>
+            <point x="0" y="0" z="0" />
+            <size x="0.4" y="0.3" z="0.35" />
+          </fillbox>
+          <shapeout file="" />
+        </mainlist>
+      </commands>
+    </geometry>
+    <floatings>
+      <floating mkbound="5" rhopbody="800" />
+    </floatings>
+    <normals active="true">
+      <norgeometry>
+        <geometryfile file="[CaseName]_hdp_Actual.vtk" />
+        <!-- 3h covers the outer triple tank corner and the Float1 cap/side junction. -->
+        <distanceh v="3.0" />
+        <svshapes v="true" />
+      </norgeometry>
+    </normals>
+  </casedef>
+  <execution>
+    <parameters>
+      <parameter key="SavePosDouble" value="0" />
+      <parameter key="Boundary" value="2" />
+      <parameter key="SlipMode" value="1" />
+      <parameter key="StepAlgorithm" value="2" />
+      <parameter key="Kernel" value="2" />
+      <parameter key="ViscoTreatment" value="1" />
+      <parameter key="Visco" value="0.01" />
+      <parameter key="DensityDT" value="3" />
+      <parameter key="DensityDTvalue" value="0.1" />
+      <parameter key="RigidAlgorithm" value="1" />
+      <parameter key="TimeMax" value="0.001" />
+      <parameter key="TimeOut" value="0.001" />
+      <parameter key="RhopOutMin" value="700" />
+      <parameter key="RhopOutMax" value="1300" />
+      <simulationdomain>
+        <posmin x="default" y="default" z="default" />
+        <posmax x="default" y="default" z="default" />
+      </simulationdomain>
+    </parameters>
+  </execution>
+</case>

@@ -1,0 +1,1363 @@
+{
+  "schema_version": 1,
+  "diagnostic_id": "r3_f6_canonical_mdbc_geometry",
+  "status": "candidate",
+  "acceptance_status": "candidate_geometry_pass_physical_gate_blocked",
+  "scientific_acceptance": "not_accepted_physical_mdbc_validation",
+  "execution_status": "completed_cpu_gencase_and_one_step_cpu_solver",
+  "compute": {
+    "gencase": "CPU, 8 OpenMP threads",
+    "solver": "DualSPHysics5.4CPU, one initialization step",
+    "cfd_solver_run": true,
+    "solver_scope": "short initialization smoke test only; no pressure/force closure",
+    "gpu_used": false,
+    "gpu_indices_used": [],
+    "production_tracer_imported": false
+  },
+  "scope": "E0 canonical physical-wall reconstruction.  The normal construction surface, actual boundary layer, and VTK-reconstructed ghost/interface are audited independently for a rectangular wall and a Float1 cylinder.",
+  "source_evidence": {
+    "official_mdbc_guide": "vendor/official/DualSPHysics_v5.4/doc/guides/XML_GUIDE_MDBC.pdf",
+    "official_bound_normal_loader": "vendor/official/DualSPHysics_v5.4/src/source/JPartsLoad4.cpp",
+    "official_bound_normal_interface": "vendor/official/DualSPHysics_v5.4/src/source/JPartsLoad4.h",
+    "official_mdbc_initialization": "vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp",
+    "official_cpu_mdbc_kernel": "vendor/official/DualSPHysics_v5.4/src/source/JSphCpu_mdbc.cpp",
+    "official_examples": [
+      "vendor/official/DualSPHysics_v5.4/examples/mdbc/05_FlowCylinder/CaseFlowFrCylinder_Re200_Def.xml",
+      "vendor/official/DualSPHysics_v5.4/examples/mdbc/08_FloatingWaves/CaseFloatingWaves_Def.xml"
+    ]
+  },
+  "reproduction": {
+    "gencase": "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64 <definition_without_.xml> <evidence>/<case> -save:all -threads:8",
+    "bifileinfo": "vendor/official/DualSPHysics_v5.4/bin/linux/BIFileInfo_linux64 <evidence>/<case>.bi4 -svarrays:1",
+    "solver": "CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=8 LD_LIBRARY_PATH=vendor/official/DualSPHysics_v5.4/bin/linux vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4CPU_linux64 <generated>/<case> <evidence>/<case>/solver",
+    "gpu_policy": "GPU intentionally unused; existing GPU jobs were not disturbed."
+  },
+  "cases": {
+    "canonical_rectangular": {
+      "case_id": "canonical_rectangular",
+      "label": "canonical rectangular tank",
+      "status": "candidate",
+      "definition_contract": {
+        "source": "diagnostics/r3_f6_canonical_geometry/definitions/canonical_rectangular_Def.xml",
+        "dp_m": 0.04,
+        "normal_list_name": "GeometryForNormals",
+        "normal_shapes": [
+          {
+            "tag": "drawbox",
+            "mkbound": 0,
+            "normal_invert": true,
+            "points": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "layers_vdp": [
+              -0.5
+            ],
+            "boxfill": "bottom | left | right | front | back",
+            "size": [
+              0.4,
+              0.3,
+              0.3
+            ]
+          }
+        ],
+        "main_shapes": [
+          {
+            "tag": "drawbox",
+            "mkbound": 0,
+            "normal_invert": null,
+            "points": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "layers_vdp": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "boxfill": "bottom | left | right | front | back",
+            "size": [
+              0.4,
+              0.3,
+              0.3
+            ]
+          }
+        ],
+        "normal_cylinders": [],
+        "actual_cylinders": [],
+        "normal_boxes": [
+          {
+            "tag": "drawbox",
+            "mkbound": 0,
+            "normal_invert": true,
+            "points": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "layers_vdp": [
+              -0.5
+            ],
+            "boxfill": "bottom | left | right | front | back",
+            "size": [
+              0.4,
+              0.3,
+              0.3
+            ]
+          }
+        ],
+        "actual_boxes": [
+          {
+            "tag": "drawbox",
+            "mkbound": 0,
+            "normal_invert": null,
+            "points": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "layers_vdp": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "boxfill": "bottom | left | right | front | back",
+            "size": [
+              0.4,
+              0.3,
+              0.3
+            ]
+          }
+        ],
+        "normal_tank": {
+          "tag": "drawbox",
+          "mkbound": 0,
+          "normal_invert": true,
+          "points": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "layers_vdp": [
+            -0.5
+          ],
+          "boxfill": "bottom | left | right | front | back",
+          "size": [
+            0.4,
+            0.3,
+            0.3
+          ]
+        },
+        "actual_tank": {
+          "tag": "drawbox",
+          "mkbound": 0,
+          "normal_invert": null,
+          "points": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "layers_vdp": [
+            0.0,
+            1.0,
+            2.0
+          ],
+          "boxfill": "bottom | left | right | front | back",
+          "size": [
+            0.4,
+            0.3,
+            0.3
+          ]
+        },
+        "norgeometry": {
+          "geometryfile": "[CaseName]_hdp_Actual.vtk",
+          "distanceh": 3.0,
+          "svshapes": "true"
+        },
+        "parameters": {
+          "SavePosDouble": "0",
+          "Boundary": "2",
+          "SlipMode": "1",
+          "StepAlgorithm": "2",
+          "Kernel": "2",
+          "ViscoTreatment": "1",
+          "Visco": "0.01",
+          "DensityDT": "3",
+          "DensityDTvalue": "0.1",
+          "RigidAlgorithm": "1",
+          "TimeMax": "0.001",
+          "TimeOut": "0.001",
+          "RhopOutMin": "700",
+          "RhopOutMax": "1300"
+        },
+        "floating": [],
+        "layer_audit": {
+          "normal_tank_vdp": [
+            -0.5
+          ],
+          "main_tank_vdp": [
+            0.0,
+            1.0,
+            2.0
+          ],
+          "actual_body_vdp": [],
+          "normal_tank_half_dp_count": 1,
+          "main_tank_half_dp_count": 0,
+          "actual_body_half_dp_count": 0,
+          "normal_tank_has_single_half_dp_shift": true,
+          "no_second_half_dp_on_particle_layer": true
+        }
+      },
+      "physical_contract": {
+        "normal_construction_surface": {
+          "list": "GeometryForNormals",
+          "tank": {
+            "tag": "drawbox",
+            "mkbound": 0,
+            "normal_invert": true,
+            "points": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "layers_vdp": [
+              -0.5
+            ],
+            "boxfill": "bottom | left | right | front | back",
+            "size": [
+              0.4,
+              0.3,
+              0.3
+            ]
+          },
+          "cylinders": [],
+          "geometryfile": "[CaseName]_hdp_Actual.vtk",
+          "distanceh": 3.0
+        },
+        "boundary_particle_layer": {
+          "list": "mainlist",
+          "tank": {
+            "tag": "drawbox",
+            "mkbound": 0,
+            "normal_invert": null,
+            "points": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "layers_vdp": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "boxfill": "bottom | left | right | front | back",
+            "size": [
+              0.4,
+              0.3,
+              0.3
+            ]
+          },
+          "cylinders": []
+        },
+        "ghost_interface_definition": {
+          "normal_file_points": "x_b = CfgInit_Normals.vtk POINTS",
+          "initial_normal": "n_b = CfgInit_Normals.vtk FIELD/Normal",
+          "ghost_normal": "n_g = CfgInit_NormalsGhost.vtk FIELD/Normal = 2*n_b",
+          "inferred_ghost_coordinate": "x_g = x_b + n_g",
+          "effective_interface": "x_gamma = x_b + n_g/2"
+        },
+        "layers": {
+          "normal_tank_vdp": [
+            -0.5
+          ],
+          "main_tank_vdp": [
+            0.0,
+            1.0,
+            2.0
+          ],
+          "actual_body_vdp": [],
+          "normal_tank_half_dp_count": 1,
+          "main_tank_half_dp_count": 0,
+          "actual_body_half_dp_count": 0,
+          "normal_tank_has_single_half_dp_shift": true,
+          "no_second_half_dp_on_particle_layer": true
+        },
+        "physical_wall_preserved": true
+      },
+      "generated_summary": {
+        "path": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/generated/canonical_rectangular.xml",
+        "np": 1917,
+        "nb": 1476,
+        "nbf": 1476,
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1,
+        "fixed": {
+          "count": 1476,
+          "id": "0-1475",
+          "mkvalues": 17,
+          "mkcount": 1
+        },
+        "moving": {},
+        "floating": {},
+        "fluid": {
+          "count": 441,
+          "id": "1476-1916",
+          "mkvalues": 1,
+          "mkcount": 1
+        }
+      },
+      "gencase": {
+        "path": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/gencase.log",
+        "return_code": 0,
+        "points_loaded": 1917,
+        "nonzero_normals": {
+          "count": 1476,
+          "total": 1476,
+          "min_size_m": 0.02,
+          "max_size_m": 0.173205
+        },
+        "final_zero_normals": {
+          "count": 0,
+          "total": 1476,
+          "percentage": 0.0
+        },
+        "shape_outputs": {
+          "hdp_Actual.vtk": {
+            "shape_count": 5,
+            "point_count": 8
+          },
+          "_Actual.vtk": {
+            "shape_count": 15,
+            "point_count": 24
+          }
+        }
+      },
+      "solver": {
+        "path": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/solver.log",
+        "return_code": 0,
+        "steps": 1,
+        "boundary_mode_mdbc": true,
+        "warnings": [
+          "It is advised that selected DDT: 'Fourtakas et al 2019 (full)' is used with several boundary layers of particles when h/dp>1.5 (2h <= layers*Dp)"
+        ],
+        "chrono_warning": false,
+        "initial_normal_files_written": true
+      },
+      "vtk_semantics": {
+        "boundary_coordinate": "x_b = CfgInit_Normals.vtk POINTS",
+        "initial_displacement": "n_b = CfgInit_Normals.vtk FIELD/Normal",
+        "ghost_displacement": "n_g = CfgInit_NormalsGhost.vtk FIELD/Normal",
+        "inferred_ghost_coordinate": "x_g = x_b + n_g",
+        "effective_interface": "x_gamma = (x_b + x_g)/2 = x_b + n_g/2"
+      },
+      "structural": {
+        "boundary_count": 1476,
+        "fixed_count_from_vtk": 1476,
+        "floating_count_from_vtk": 0,
+        "generated_boundary_count": 1476,
+        "generated_fixed_count": 1476,
+        "generated_floating_count": 0,
+        "generated_counts_match_vtk": true,
+        "zero_normal_count": 0,
+        "zero_normal_by_mk": {
+          "17": 0
+        },
+        "near_zero_normal_count_le_1e-8": 0,
+        "normal_size_range_m": [
+          0.019999999552965164,
+          0.17320508333784457
+        ],
+        "normal_size_field_range_m": [
+          0.019999999552965164,
+          0.17320507764816284
+        ],
+        "ghost_doubling_max_abs_residual": 0.0,
+        "normal_size_doubling_max_abs_residual": 0.0,
+        "normal_completeness": true,
+        "finite_arrays": true,
+        "points_equal_between_files": true
+      },
+      "geometry": {
+        "boundary_bbox_m": [
+          [
+            -0.07999999821186066,
+            -0.07999999821186066,
+            -0.07999999821186066
+          ],
+          [
+            0.47999998927116394,
+            0.36000001430511475,
+            0.3199999928474426
+          ]
+        ],
+        "inferred_ghost_bbox_m": [
+          [
+            0.03999999910593033,
+            0.03999999910593033,
+            0.03999999910593033
+          ],
+          [
+            0.36000001430511475,
+            0.28000000357627863,
+            0.2800000160932541
+          ]
+        ],
+        "effective_interface_bbox_m": [
+          [
+            0.019999999552965164,
+            0.019999999552965164,
+            0.019999999552965164
+          ],
+          [
+            0.38000000081956387,
+            0.2800000160932541,
+            0.30000000447034836
+          ]
+        ],
+        "normal_geometry_hdp_bbox_m": [
+          [
+            0.019999999552965164,
+            0.019999999552965164,
+            0.019999999552965164
+          ],
+          [
+            0.3799999952316284,
+            0.2800000011920929,
+            0.30000001192092896
+          ]
+        ],
+        "normal_geometry_hdp_point_count": 8,
+        "tank": {
+          "interface_point_count": 1476,
+          "effective_interface_bbox_m": [
+            [
+              0.019999999552965164,
+              0.019999999552965164,
+              0.019999999552965164
+            ],
+            [
+              0.38000000081956387,
+              0.2800000160932541,
+              0.30000000447034836
+            ]
+          ],
+          "max_face_residual_m": 1.6093254062710116e-08,
+          "median_face_residual_m": 4.470348362317633e-10,
+          "face_coverage_counts": {
+            "x_min": 396,
+            "x_max": 396,
+            "y_min": 495,
+            "y_max": 423,
+            "z_floor": 540
+          },
+          "edge_or_corner_count": 666,
+          "surface_point_count": 1476,
+          "normal_to_expected_surface_dot_min": 0.5000001396984087,
+          "normal_to_expected_surface_dot_median": 1.0,
+          "normal_orientation_fraction_dot_ge_0p5": 1.0,
+          "normal_orientation_pass": true
+        },
+        "float1_cylinder": null,
+        "physical_wall_surface_is_canonical": true
+      },
+      "geometry_gate": {
+        "status": "pass",
+        "checks": {
+          "gencase_return_code_zero": true,
+          "solver_return_code_zero": true,
+          "mdbc_boundary_mode_observed": true,
+          "finite_vtk_arrays": true,
+          "normal_points_equal_ghost_points": true,
+          "zero_normals_absent": true,
+          "ghost_field_is_exactly_doubled": true,
+          "ghost_size_is_exactly_doubled": true,
+          "tank_interface_matches_physical_wall": true,
+          "tank_corner_and_edge_coverage": true,
+          "tank_normal_is_not_inward": true,
+          "layer_contract_has_single_half_dp_shift": true
+        },
+        "all_checks_pass": true,
+        "thresholds": {
+          "zero_normal": 1e-12,
+          "doubling_abs_residual": 2e-05,
+          "tank_interface_residual_m": 1e-05,
+          "cylinder_interface_residual_m": 0.002,
+          "corner_orientation_dot": 0.5
+        }
+      },
+      "physical_mdbc_gate": {
+        "status": "blocked",
+        "mdbc_acceptance": false,
+        "blockers": [
+          "No hydrostatic pressure/force gauge or displaced-volume closure was run in this E0 initialization artifact."
+        ],
+        "pressure_force_hydrostatic_run": false,
+        "one_step_solver_is_only_initialization": true
+      },
+      "evidence": {
+        "definition": "diagnostics/r3_f6_canonical_geometry/definitions/canonical_rectangular_Def.xml",
+        "generated_xml": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/generated/canonical_rectangular.xml",
+        "gencase_log": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/gencase.log",
+        "bifileinfo_log": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/bifileinfo.log",
+        "solver_log": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/solver.log",
+        "normal_geometry_vtk": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/generated/canonical_rectangular_hdp_Actual.vtk",
+        "boundary_vtk": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/generated/canonical_rectangular_Bound.vtk",
+        "normal_vtk": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/solver/CfgInit_Normals.vtk",
+        "ghost_vtk": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/solver/CfgInit_NormalsGhost.vtk",
+        "artifacts": [
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/definitions/canonical_rectangular_Def.xml",
+            "bytes": 3545,
+            "sha256": "59fa6fa272b23a18350bb6760732a809e2b783a731cd4a8f2461be3ef9e32ed2"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/gencase.log",
+            "bytes": 5477,
+            "sha256": "4f025fbbebd155d00d3f444bace4c278cf1db8fa3b048a81be9a7c31269b2ee2"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/bifileinfo.log",
+            "bytes": 2027,
+            "sha256": "4f542bfffa0558c9f2fc484fcb18b9e4d4601b8f88a098985c7a6bc2611d7f7e"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/solver.log",
+            "bytes": 8694,
+            "sha256": "4e5c6af358819e6d18e644e4118e4adc07f6eb282ddc836b562fb3592df176d1"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/generated/canonical_rectangular.xml",
+            "bytes": 6048,
+            "sha256": "e82ac421bc1f1affd7bced2cd3cd915b01d0b0cb7bb75651fd8e3abbf43235f9"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/generated/canonical_rectangular_hdp_Actual.vtk",
+            "bytes": 411,
+            "sha256": "4a56c062d96eb6c1b913601271c6a6eba5fb75b5801f2e3a317f754682712ae1"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/generated/canonical_rectangular_Bound.vtk",
+            "bytes": 63749,
+            "sha256": "043067ad2f11976906a03ef800e4b926fff260d54e9c1dfbd368b2374a405b0e"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/solver/CfgInit_Normals.vtk",
+            "bytes": 62228,
+            "sha256": "37a2f25baea138fc1c9c220769dbe6b095b18906a3885579322cf77718484575"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/rectangular/solver/CfgInit_NormalsGhost.vtk",
+            "bytes": 62228,
+            "sha256": "2ddb3e7c3043c6a6edfe32242c5c4479eb45475f65df4e5d6702e74ee6cfcd0d"
+          }
+        ]
+      }
+    },
+    "canonical_float1_cylinder": {
+      "case_id": "canonical_float1_cylinder",
+      "label": "canonical tank plus Float1 cylinder",
+      "status": "candidate",
+      "definition_contract": {
+        "source": "diagnostics/r3_f6_canonical_geometry/definitions/canonical_float1_cylinder_Def.xml",
+        "dp_m": 0.04,
+        "normal_list_name": "GeometryForNormals",
+        "normal_shapes": [
+          {
+            "tag": "drawbox",
+            "mkbound": 0,
+            "normal_invert": true,
+            "points": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "layers_vdp": [
+              -0.5
+            ],
+            "boxfill": "bottom | left | right | front | back",
+            "size": [
+              0.4,
+              0.3,
+              0.35
+            ]
+          },
+          {
+            "tag": "drawcylinder",
+            "mkbound": 5,
+            "normal_invert": false,
+            "points": [
+              [
+                0.2,
+                0.16,
+                0.14
+              ],
+              [
+                0.2,
+                0.16,
+                0.3
+              ]
+            ],
+            "layers_vdp": [],
+            "radius_m": 0.11,
+            "mask": 0
+          }
+        ],
+        "main_shapes": [
+          {
+            "tag": "drawbox",
+            "mkbound": 0,
+            "normal_invert": null,
+            "points": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "layers_vdp": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "boxfill": "bottom | left | right | front | back",
+            "size": [
+              0.4,
+              0.3,
+              0.35
+            ]
+          },
+          {
+            "tag": "drawcylinder",
+            "mkbound": 5,
+            "normal_invert": null,
+            "points": [
+              [
+                0.2,
+                0.16,
+                0.16
+              ],
+              [
+                0.2,
+                0.16,
+                0.28
+              ]
+            ],
+            "layers_vdp": [
+              0.0,
+              -1.0,
+              -2.0
+            ],
+            "radius_m": 0.08,
+            "mask": 0
+          }
+        ],
+        "normal_cylinders": [
+          {
+            "tag": "drawcylinder",
+            "mkbound": 5,
+            "normal_invert": false,
+            "points": [
+              [
+                0.2,
+                0.16,
+                0.14
+              ],
+              [
+                0.2,
+                0.16,
+                0.3
+              ]
+            ],
+            "layers_vdp": [],
+            "radius_m": 0.11,
+            "mask": 0
+          }
+        ],
+        "actual_cylinders": [
+          {
+            "tag": "drawcylinder",
+            "mkbound": 5,
+            "normal_invert": null,
+            "points": [
+              [
+                0.2,
+                0.16,
+                0.16
+              ],
+              [
+                0.2,
+                0.16,
+                0.28
+              ]
+            ],
+            "layers_vdp": [
+              0.0,
+              -1.0,
+              -2.0
+            ],
+            "radius_m": 0.08,
+            "mask": 0
+          }
+        ],
+        "normal_boxes": [
+          {
+            "tag": "drawbox",
+            "mkbound": 0,
+            "normal_invert": true,
+            "points": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "layers_vdp": [
+              -0.5
+            ],
+            "boxfill": "bottom | left | right | front | back",
+            "size": [
+              0.4,
+              0.3,
+              0.35
+            ]
+          }
+        ],
+        "actual_boxes": [
+          {
+            "tag": "drawbox",
+            "mkbound": 0,
+            "normal_invert": null,
+            "points": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "layers_vdp": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "boxfill": "bottom | left | right | front | back",
+            "size": [
+              0.4,
+              0.3,
+              0.35
+            ]
+          }
+        ],
+        "normal_tank": {
+          "tag": "drawbox",
+          "mkbound": 0,
+          "normal_invert": true,
+          "points": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "layers_vdp": [
+            -0.5
+          ],
+          "boxfill": "bottom | left | right | front | back",
+          "size": [
+            0.4,
+            0.3,
+            0.35
+          ]
+        },
+        "actual_tank": {
+          "tag": "drawbox",
+          "mkbound": 0,
+          "normal_invert": null,
+          "points": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "layers_vdp": [
+            0.0,
+            1.0,
+            2.0
+          ],
+          "boxfill": "bottom | left | right | front | back",
+          "size": [
+            0.4,
+            0.3,
+            0.35
+          ]
+        },
+        "norgeometry": {
+          "geometryfile": "[CaseName]_hdp_Actual.vtk",
+          "distanceh": 3.0,
+          "svshapes": "true"
+        },
+        "parameters": {
+          "SavePosDouble": "0",
+          "Boundary": "2",
+          "SlipMode": "1",
+          "StepAlgorithm": "2",
+          "Kernel": "2",
+          "ViscoTreatment": "1",
+          "Visco": "0.01",
+          "DensityDT": "3",
+          "DensityDTvalue": "0.1",
+          "RigidAlgorithm": "1",
+          "TimeMax": "0.001",
+          "TimeOut": "0.001",
+          "RhopOutMin": "700",
+          "RhopOutMax": "1300"
+        },
+        "floating": [
+          {
+            "mkbound": "5",
+            "rhopbody": "800"
+          }
+        ],
+        "layer_audit": {
+          "normal_tank_vdp": [
+            -0.5
+          ],
+          "main_tank_vdp": [
+            0.0,
+            1.0,
+            2.0
+          ],
+          "actual_body_vdp": [
+            0.0,
+            -1.0,
+            -2.0
+          ],
+          "normal_tank_half_dp_count": 1,
+          "main_tank_half_dp_count": 0,
+          "actual_body_half_dp_count": 0,
+          "normal_tank_has_single_half_dp_shift": true,
+          "no_second_half_dp_on_particle_layer": true
+        }
+      },
+      "physical_contract": {
+        "normal_construction_surface": {
+          "list": "GeometryForNormals",
+          "tank": {
+            "tag": "drawbox",
+            "mkbound": 0,
+            "normal_invert": true,
+            "points": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "layers_vdp": [
+              -0.5
+            ],
+            "boxfill": "bottom | left | right | front | back",
+            "size": [
+              0.4,
+              0.3,
+              0.35
+            ]
+          },
+          "cylinders": [
+            {
+              "tag": "drawcylinder",
+              "mkbound": 5,
+              "normal_invert": false,
+              "points": [
+                [
+                  0.2,
+                  0.16,
+                  0.14
+                ],
+                [
+                  0.2,
+                  0.16,
+                  0.3
+                ]
+              ],
+              "layers_vdp": [],
+              "radius_m": 0.11,
+              "mask": 0
+            }
+          ],
+          "geometryfile": "[CaseName]_hdp_Actual.vtk",
+          "distanceh": 3.0
+        },
+        "boundary_particle_layer": {
+          "list": "mainlist",
+          "tank": {
+            "tag": "drawbox",
+            "mkbound": 0,
+            "normal_invert": null,
+            "points": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "layers_vdp": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "boxfill": "bottom | left | right | front | back",
+            "size": [
+              0.4,
+              0.3,
+              0.35
+            ]
+          },
+          "cylinders": [
+            {
+              "tag": "drawcylinder",
+              "mkbound": 5,
+              "normal_invert": null,
+              "points": [
+                [
+                  0.2,
+                  0.16,
+                  0.16
+                ],
+                [
+                  0.2,
+                  0.16,
+                  0.28
+                ]
+              ],
+              "layers_vdp": [
+                0.0,
+                -1.0,
+                -2.0
+              ],
+              "radius_m": 0.08,
+              "mask": 0
+            }
+          ]
+        },
+        "ghost_interface_definition": {
+          "normal_file_points": "x_b = CfgInit_Normals.vtk POINTS",
+          "initial_normal": "n_b = CfgInit_Normals.vtk FIELD/Normal",
+          "ghost_normal": "n_g = CfgInit_NormalsGhost.vtk FIELD/Normal = 2*n_b",
+          "inferred_ghost_coordinate": "x_g = x_b + n_g",
+          "effective_interface": "x_gamma = x_b + n_g/2"
+        },
+        "layers": {
+          "normal_tank_vdp": [
+            -0.5
+          ],
+          "main_tank_vdp": [
+            0.0,
+            1.0,
+            2.0
+          ],
+          "actual_body_vdp": [
+            0.0,
+            -1.0,
+            -2.0
+          ],
+          "normal_tank_half_dp_count": 1,
+          "main_tank_half_dp_count": 0,
+          "actual_body_half_dp_count": 0,
+          "normal_tank_has_single_half_dp_shift": true,
+          "no_second_half_dp_on_particle_layer": true
+        },
+        "physical_wall_preserved": true,
+        "cylinder_separation": {
+          "normal_construction_radius_m": 0.11,
+          "normal_construction_endpoints_m": [
+            [
+              0.2,
+              0.16,
+              0.14
+            ],
+            [
+              0.2,
+              0.16,
+              0.3
+            ]
+          ],
+          "actual_particle_radius_m": 0.08,
+          "actual_particle_endpoints_m": [
+            [
+              0.2,
+              0.16,
+              0.16
+            ],
+            [
+              0.2,
+              0.16,
+              0.28
+            ]
+          ],
+          "looked_up_by_named_lists": true,
+          "normal_list_name": "GeometryForNormals",
+          "actual_list_name": "mainlist"
+        },
+        "physical_wall_preservation_check": {
+          "target_radius_m": 0.11,
+          "normal_surface_radius_m": 0.11,
+          "target_z_range_m": [
+            0.14,
+            0.3
+          ],
+          "normal_surface_z_range_m": [
+            0.14,
+            0.3
+          ],
+          "target_and_normal_surface_match": true,
+          "particle_cylinder_is_distinct": true
+        }
+      },
+      "generated_summary": {
+        "path": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/generated/canonical_float1_cylinder.xml",
+        "np": 2097,
+        "nb": 1677,
+        "nbf": 1593,
+        "mkboundfirst": 17,
+        "mkfluidfirst": 1,
+        "fixed": {
+          "count": 1593,
+          "id": "0-1592",
+          "mkvalues": 17,
+          "mkcount": 1
+        },
+        "moving": {},
+        "floating": {
+          "count": 84,
+          "id": "1593-1676",
+          "mkvalues": 22,
+          "mkcount": 1
+        },
+        "fluid": {
+          "count": 420,
+          "id": "1677-2096",
+          "mkvalues": 1,
+          "mkcount": 1
+        }
+      },
+      "gencase": {
+        "path": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/gencase.log",
+        "return_code": 0,
+        "points_loaded": 2097,
+        "nonzero_normals": {
+          "count": 1677,
+          "total": 1677,
+          "min_size_m": 0.019841,
+          "max_size_m": 0.173205
+        },
+        "final_zero_normals": {
+          "count": 0,
+          "total": 1677,
+          "percentage": 0.0
+        },
+        "shape_outputs": {
+          "hdp_Actual.vtk": {
+            "shape_count": 77,
+            "point_count": 58
+          },
+          "_Actual.vtk": {
+            "shape_count": 231,
+            "point_count": 124
+          }
+        }
+      },
+      "solver": {
+        "path": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/solver.log",
+        "return_code": 0,
+        "steps": 1,
+        "boundary_mode_mdbc": true,
+        "warnings": [
+          "It is advised that selected DDT: 'Fourtakas et al 2019 (full)' is used with several boundary layers of particles when h/dp>1.5 (2h <= layers*Dp)",
+          "When mDBC is applied to floating bodies, their collisions should be solved using Chrono (RigidAlgorithm=3)."
+        ],
+        "chrono_warning": true,
+        "initial_normal_files_written": true
+      },
+      "vtk_semantics": {
+        "boundary_coordinate": "x_b = CfgInit_Normals.vtk POINTS",
+        "initial_displacement": "n_b = CfgInit_Normals.vtk FIELD/Normal",
+        "ghost_displacement": "n_g = CfgInit_NormalsGhost.vtk FIELD/Normal",
+        "inferred_ghost_coordinate": "x_g = x_b + n_g",
+        "effective_interface": "x_gamma = (x_b + x_g)/2 = x_b + n_g/2"
+      },
+      "structural": {
+        "boundary_count": 1677,
+        "fixed_count_from_vtk": 1593,
+        "floating_count_from_vtk": 84,
+        "generated_boundary_count": 1677,
+        "generated_fixed_count": 1593,
+        "generated_floating_count": 84,
+        "generated_counts_match_vtk": true,
+        "zero_normal_count": 0,
+        "zero_normal_by_mk": {
+          "17": 0,
+          "22": 0
+        },
+        "near_zero_normal_count_le_1e-8": 0,
+        "normal_size_range_m": [
+          0.01984115615486735,
+          0.17320508333784457
+        ],
+        "normal_size_field_range_m": [
+          0.019841156899929047,
+          0.17320507764816284
+        ],
+        "ghost_doubling_max_abs_residual": 0.0,
+        "normal_size_doubling_max_abs_residual": 0.0,
+        "normal_completeness": true,
+        "finite_arrays": true,
+        "points_equal_between_files": true
+      },
+      "geometry": {
+        "boundary_bbox_m": [
+          [
+            -0.07999999821186066,
+            -0.07999999821186066,
+            -0.07999999821186066
+          ],
+          [
+            0.47999998927116394,
+            0.36000001430511475,
+            0.36000001430511475
+          ]
+        ],
+        "inferred_ghost_bbox_m": [
+          [
+            0.03999999910593033,
+            0.020000025629997253,
+            0.03999999910593033
+          ],
+          [
+            0.36000001430511475,
+            0.2999998889863491,
+            0.36000002175569534
+          ]
+        ],
+        "effective_interface_bbox_m": [
+          [
+            0.019999999552965164,
+            0.019999999552965164,
+            0.019999999552965164
+          ],
+          [
+            0.38000000081956387,
+            0.2800000160932541,
+            0.35000000800937414
+          ]
+        ],
+        "normal_geometry_hdp_bbox_m": [
+          [
+            0.019999999552965164,
+            0.019999999552965164,
+            0.019999999552965164
+          ],
+          [
+            0.3799999952316284,
+            0.2800000011920929,
+            0.3499999940395355
+          ]
+        ],
+        "normal_geometry_hdp_point_count": 58,
+        "tank": {
+          "interface_point_count": 1593,
+          "effective_interface_bbox_m": [
+            [
+              0.019999999552965164,
+              0.019999999552965164,
+              0.019999999552965164
+            ],
+            [
+              0.38000000081956387,
+              0.2800000160932541,
+              0.35000000800937414
+            ]
+          ],
+          "max_face_residual_m": 1.6093254062710116e-08,
+          "median_face_residual_m": 4.470348362317633e-10,
+          "face_coverage_counts": {
+            "x_min": 432,
+            "x_max": 432,
+            "y_min": 540,
+            "y_max": 459,
+            "z_floor": 540
+          },
+          "edge_or_corner_count": 702,
+          "surface_point_count": 1593,
+          "normal_to_expected_surface_dot_min": 0.6324554495708472,
+          "normal_to_expected_surface_dot_median": 1.0,
+          "normal_orientation_fraction_dot_ge_0p5": 1.0,
+          "normal_orientation_pass": true
+        },
+        "float1_cylinder": {
+          "interface_point_count": 84,
+          "effective_interface_bbox_m": [
+            [
+              0.09000004641711712,
+              0.050000011920928955,
+              0.13999999687075615
+            ],
+            [
+              0.3100000023841858,
+              0.26999994181096554,
+              0.3000000137835741
+            ]
+          ],
+          "effective_radius_range_m": [
+            4.655271570846475e-09,
+            0.11000001023465178
+          ],
+          "max_surface_residual_m": 0.0007569893374572978,
+          "median_surface_residual_m": 1.3783574115411312e-08,
+          "nearest_surface_counts": {
+            "side": 48,
+            "bottom_cap": 18,
+            "top_cap": 18
+          },
+          "normal_to_expected_surface_dot_min": 0.9983142259642339,
+          "normal_to_expected_surface_dot_median": 0.9999999999999953,
+          "normal_orientation_fraction_dot_ge_0p99": 1.0,
+          "normal_orientation_pass": true
+        },
+        "physical_wall_surface_is_canonical": true
+      },
+      "geometry_gate": {
+        "status": "pass",
+        "checks": {
+          "gencase_return_code_zero": true,
+          "solver_return_code_zero": true,
+          "mdbc_boundary_mode_observed": true,
+          "finite_vtk_arrays": true,
+          "normal_points_equal_ghost_points": true,
+          "zero_normals_absent": true,
+          "ghost_field_is_exactly_doubled": true,
+          "ghost_size_is_exactly_doubled": true,
+          "tank_interface_matches_physical_wall": true,
+          "tank_corner_and_edge_coverage": true,
+          "tank_normal_is_not_inward": true,
+          "layer_contract_has_single_half_dp_shift": true,
+          "float1_interface_matches_physical_cylinder": true,
+          "float1_normal_orientation_pass": true,
+          "normal_and_actual_cylinders_are_separate": true
+        },
+        "all_checks_pass": true,
+        "thresholds": {
+          "zero_normal": 1e-12,
+          "doubling_abs_residual": 2e-05,
+          "tank_interface_residual_m": 1e-05,
+          "cylinder_interface_residual_m": 0.002,
+          "corner_orientation_dot": 0.5
+        }
+      },
+      "physical_mdbc_gate": {
+        "status": "blocked",
+        "mdbc_acceptance": false,
+        "blockers": [
+          "No hydrostatic pressure/force gauge or displaced-volume closure was run in this E0 initialization artifact.",
+          "Float1 one-step smoke test retains RigidAlgorithm=1; the solver explicitly advises Chrono (RigidAlgorithm=3) for floating mDBC collisions."
+        ],
+        "pressure_force_hydrostatic_run": false,
+        "one_step_solver_is_only_initialization": true
+      },
+      "evidence": {
+        "definition": "diagnostics/r3_f6_canonical_geometry/definitions/canonical_float1_cylinder_Def.xml",
+        "generated_xml": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/generated/canonical_float1_cylinder.xml",
+        "gencase_log": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/gencase.log",
+        "bifileinfo_log": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/bifileinfo.log",
+        "solver_log": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/solver.log",
+        "normal_geometry_vtk": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/generated/canonical_float1_cylinder_hdp_Actual.vtk",
+        "boundary_vtk": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/generated/canonical_float1_cylinder_Bound.vtk",
+        "normal_vtk": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/solver/CfgInit_Normals.vtk",
+        "ghost_vtk": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/solver/CfgInit_NormalsGhost.vtk",
+        "artifacts": [
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/definitions/canonical_float1_cylinder_Def.xml",
+            "bytes": 4457,
+            "sha256": "63daae46a6e93d8f0de74331bd640d643114cb939ad5374da257f495276447a7"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/gencase.log",
+            "bytes": 5698,
+            "sha256": "123d97fd15cd2d36caa5fbf39a42bbb722e97e2958b679be4227daee0c203a09"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/bifileinfo.log",
+            "bytes": 2035,
+            "sha256": "1b7336170af66642b81f5a545380d856964be222a689d12ff6196379a4d84f4b"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/solver.log",
+            "bytes": 9369,
+            "sha256": "cbae45168792bb20a717d44f21b3a06968462184310458084d1db779ea15b12a"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/generated/canonical_float1_cylinder.xml",
+            "bytes": 7862,
+            "sha256": "0431a37844b39a168f799c01cfa8516331a3f9f6bdb8dbffd66b52b7c1fc7c89"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/generated/canonical_float1_cylinder_hdp_Actual.vtk",
+            "bytes": 2840,
+            "sha256": "bbadc72c5a1d1aa035a5a42a05e337cc955a7ef771940f13d977cae6ea284b4a"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/generated/canonical_float1_cylinder_Bound.vtk",
+            "bytes": 72392,
+            "sha256": "9f3572a53e9dc76a4484f37f942b56bde71bd360afa761cc43046f51f54702d1"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/solver/CfgInit_Normals.vtk",
+            "bytes": 70670,
+            "sha256": "a6cb9466b9484c15e9483cb8d0c849e918a7af9826a86db24f665456410cca7e"
+          },
+          {
+            "path": "diagnostics/r3_f6_canonical_geometry/evidence/float1_cylinder/solver/CfgInit_NormalsGhost.vtk",
+            "bytes": 70670,
+            "sha256": "688d8eecb7c4a0d654bb8a2cf1efd50b6794f1a0ec56b0bc649b2e1388c30512"
+          }
+        ]
+      }
+    }
+  },
+  "status_legend": {
+    "pass": "E0 geometry/serialization checks pass",
+    "candidate": "geometry pass but downstream physical acceptance remains open",
+    "blocked": "required geometry check or downstream acceptance is not available"
+  },
+  "conclusions": [
+    "The canonical rectangular definition keeps the nominal physical wall at x/y=0..0.4/0.3 and z=0, constructs hdp on its inner face at one Dp/2 offset, and generates the particle shell with vdp=0,1,2.",
+    "The Float1 definition keeps the physical normal-construction cylinder at R=0.11 m and z=0.14..0.30 m, while the separate actual particle cylinder is R=0.08 m with z=0.16..0.28 m and vdp=0,-1,-2.",
+    "The VTK audit observes exact point identity and n_g=2*n_b, then reconstructs x_gamma=x_b+n_g/2.  It does not claim that ghost VTK POINTS are ghost coordinates.",
+    "Both candidates have real GenCase and one-step CPU solver evidence with zero serialized normal vectors; this is a pass for E0 geometry and a candidate for mDBC acceptance."
+  ],
+  "open_blockers": [
+    "Run a matched hydrostatic pressure/force gauge and displaced-volume closure before accepting mDBC physics.",
+    "For floating mDBC, repeat with the official Chrono collision/integration route (RigidAlgorithm=3) rather than treating the RigidAlgorithm=1 smoke test as physical validation.",
+    "Keep E1 tracer/schema changes separate from this canonical geometry package."
+  ]
+}

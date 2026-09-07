@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<case>
+  <casedef>
+    <constantsdef>
+      <lattice bound="1" fluid="1" />
+      <gravity x="0" y="0" z="-9.81" />
+      <rhop0 value="1000" />
+      <rhopgradient value="2" />
+      <hswl value="0" auto="true" />
+      <gamma value="7" />
+      <speedsystem value="0" auto="true" />
+      <coefsound value="20" />
+      <speedsound value="0" auto="true" />
+      <coefh value="1.0" />
+      <cflnumber value="0.2" />
+    </constantsdef>
+    <mkconfig boundcount="200" fluidcount="16" />
+    <geometry>
+      <definition dp="0.04">
+        <pointref x="0" y="0" z="0" />
+        <pointmin x="-0.20" y="-0.20" z="-0.20" />
+        <pointmax x="0.60" y="0.50" z="0.50" />
+      </definition>
+      <commands>
+        <list name="GeometryForNormals">
+          <setactive drawpoints="0" drawshapes="1" />
+          <setshapemode>actual | bound</setshapemode>
+          <setnormalinvert invert="true" />
+          <setmkbound mk="0" />
+          <!-- The nominal physical wall: x/y=0 and z=0, top open. -->
+          <drawbox>
+            <boxfill>bottom | left | right | front | back</boxfill>
+            <!-- Physical wall is the inner face at Dp/2 from this lattice shell. -->
+            <point x="0" y="0" z="0" />
+            <size x="0.4" y="0.3" z="0.3" />
+            <layers vdp="-0.5" />
+          </drawbox>
+          <shapeout file="hdp" />
+          <resetdraw />
+        </list>
+        <mainlist>
+          <!-- Normal construction is isolated from particle generation. -->
+          <runlist name="GeometryForNormals" />
+          <setshapemode>actual | bound</setshapemode>
+          <setdrawmode mode="full" />
+          <setmkbound mk="0" />
+          <!-- Three outside layers; the first layer is one half-dp outside wall. -->
+          <drawbox>
+            <boxfill>bottom | left | right | front | back</boxfill>
+            <point x="0" y="0" z="0" />
+            <size x="0.4" y="0.3" z="0.3" />
+            <layers vdp="0,1,2" />
+          </drawbox>
+          <setmkfluid mk="0" />
+          <fillbox x="0.04" y="0.04" z="0.04">
+            <modefill>void</modefill>
+            <point x="0" y="0" z="0" />
+            <size x="0.4" y="0.3" z="0.3" />
+          </fillbox>
+          <shapeout file="" />
+        </mainlist>
+      </commands>
+    </geometry>
+    <normals active="true">
+      <norgeometry>
+        <geometryfile file="[CaseName]_hdp_Actual.vtk" />
+        <!-- 3h reaches the outer triple-layer corner; this is a single corner-coverage choice. -->
+        <distanceh v="3.0" />
+        <svshapes v="true" />
+      </norgeometry>
+    </normals>
+  </casedef>
+  <execution>
+    <parameters>
+      <parameter key="SavePosDouble" value="0" />
+      <parameter key="Boundary" value="2" />
+      <parameter key="SlipMode" value="1" />
+      <parameter key="StepAlgorithm" value="2" />
+      <parameter key="Kernel" value="2" />
+      <parameter key="ViscoTreatment" value="1" />
+      <parameter key="Visco" value="0.01" />
+      <parameter key="DensityDT" value="3" />
+      <parameter key="DensityDTvalue" value="0.1" />
+      <parameter key="RigidAlgorithm" value="1" />
+      <parameter key="TimeMax" value="0.001" />
+      <parameter key="TimeOut" value="0.001" />
+      <parameter key="RhopOutMin" value="700" />
+      <parameter key="RhopOutMax" value="1300" />
+      <simulationdomain>
+        <posmin x="default" y="default" z="default" />
+        <posmax x="default" y="default" z="default" />
+      </simulationdomain>
+    </parameters>
+  </execution>
+</case>
