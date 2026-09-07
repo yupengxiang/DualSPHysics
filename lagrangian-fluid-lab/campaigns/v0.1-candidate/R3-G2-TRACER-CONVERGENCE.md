@@ -37,6 +37,6 @@
 ## 接受边界
 
 1. 这轮只证明了同一求解器导出上的数值敏感性，**不是外部物理验证**。
-2. 所有案例仍缺少完整静止/运动边界三角形 sidecar 和 wall-aware destination specification，故材料输运目标继续标为 candidate。
+2. 本报告的 54 组对照是无壁面版本；development release 的 12 个 F1/F2/F3 流体案例已有 candidate sidecar，但 wall-aware destination/open-face specification 尚未冻结，故材料输运目标继续标为 candidate。
 3. 正式数据冻结前，应在每个拟纳入的案例上重复空间分辨率、保存 cadence、示踪子步和示踪数量矩阵，并报告 mass closure、可靠率、支持距离、身份轨迹误差和尾部目的地误差。
 4. 对已接受案例，生产 cadence 应由事件窗口和保存 cadence 收敛共同决定；子步只能减少积分离散误差，不能替代更高频的求解器输出。

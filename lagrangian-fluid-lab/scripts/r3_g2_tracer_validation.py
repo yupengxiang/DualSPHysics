@@ -10,17 +10,32 @@ from pathlib import Path
 import h5py
 import numpy as np
 
-from passive_tracers import (
-    advect_hdf5,
-    box_surface_triangles,
-    corresponding_segments_blocked,
-    rigid_barrier_provider,
-    segment_visibility,
-    shepard_velocity,
-    weighted_stratified_seeds,
-)
-from protocol_metrics import mass_fraction_tv
-from w06_rotating_pour import body_positions, inside_aabb
+try:
+    from scripts.passive_tracers import (
+        advect_hdf5,
+        box_surface_triangles,
+        corresponding_segments_blocked,
+        rigid_barrier_provider,
+        segment_visibility,
+        shepard_velocity,
+        weighted_stratified_seeds,
+    )
+except ModuleNotFoundError:  # pragma: no cover - direct script execution
+    from passive_tracers import (
+        advect_hdf5,
+        box_surface_triangles,
+        corresponding_segments_blocked,
+        rigid_barrier_provider,
+        segment_visibility,
+        shepard_velocity,
+        weighted_stratified_seeds,
+    )
+try:
+    from scripts.protocol_metrics import mass_fraction_tv
+    from scripts.w06_rotating_pour import body_positions, inside_aabb
+except ModuleNotFoundError:  # pragma: no cover - direct script execution
+    from protocol_metrics import mass_fraction_tv
+    from w06_rotating_pour import body_positions, inside_aabb
 
 
 LAB = Path(__file__).resolve().parents[1]
@@ -28,6 +43,7 @@ CAMPAIGN = LAB / "campaigns" / "v0.1-candidate"
 REPORT = CAMPAIGN / "r3-g2-tracer-validation.json"
 W06_REPORT = CAMPAIGN / "w06-rotating-pour.json"
 W06_DATA = CAMPAIGN / "data" / "w06"
+RELEASE_MANIFEST = LAB / "release" / "v0.1-development" / "manifest.json"
 DP = 0.025
 
 
@@ -186,6 +202,47 @@ def reference_fractions(record: dict) -> dict:
     }
 
 
+def release_sidecar_coverage(manifest_path: Path = RELEASE_MANIFEST) -> dict:
+    """Report which released fluid cases have an existing linked sidecar.
+
+    F6's body-only pilot is intentionally outside this count.  The result is
+    descriptive: a sidecar supplies candidate finite geometry, not a released
+    material-destination contract.
+    """
+    manifest_path = Path(manifest_path).resolve()
+    release_root = manifest_path.parent
+    payload = json.loads(manifest_path.read_text())
+    fluid_records = [record for record in payload.get("cases", [])
+                     if record.get("family") in {"F1", "F2", "F3"}]
+    rows = []
+    for record in fluid_records:
+        relative = (record.get("geometry") or {}).get("boundary_sidecar")
+        declared = isinstance(relative, str) and bool(relative)
+        path = (release_root / relative).resolve() if declared else None
+        contained = False
+        if path is not None:
+            try:
+                path.relative_to(release_root)
+                contained = True
+            except ValueError:
+                contained = False
+        rows.append({
+            "case_id": record.get("case_id"),
+            "declared": declared,
+            "path_within_release_root": contained,
+            "exists": bool(path is not None and contained and path.is_file()),
+        })
+    existing = [row for row in rows if row["exists"]]
+    return {
+        "scope": "released F1/F2/F3 fluid cases",
+        "case_count": len(rows),
+        "declared_count": sum(row["declared"] for row in rows),
+        "existing_count": len(existing),
+        "all_cases_have_existing_sidecar": bool(rows) and len(existing) == len(rows),
+        "cases": rows,
+    }
+
+
 def trace_actual(count: int, wall_aware: bool, h5_path: Path, record: dict) -> dict:
     seeds = weighted_stratified_seeds(h5_path, maximum=count)
     provider = cup_barrier_provider(
@@ -249,9 +306,11 @@ def main() -> None:
         "moving_wall": moving_wall_audit(),
         "cadence_vs_integration": cadence_integration_audit(),
         "actual_rotating_pour": None if args.skip_actual else actual_pour_audit(args.counts),
+        "boundary_sidecar_coverage": release_sidecar_coverage(),
         "validation_claim": "numerical material-tracing consistency; no experimental ground-truth claim",
         "open_blockers": [
-            "all released cases need explicit boundary-triangle sidecars before wall-aware material targets can be accepted",
+            "the current 12 F1/F2/F3 fluid cases have linked candidate sidecars, but future admitted cases (including F6) need the same geometry contract",
+            "material destination specifications and open-face/rim semantics are not yet linked to the release manifest",
             "resolution and saved-cadence convergence must be repeated on the selected physical matrix",
             "small spill-tail accuracy needs more tracer-count evidence than this 16/32/64 development probe",
         ],
