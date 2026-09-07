@@ -1,0 +1,272 @@
+{
+  "schema_version": 1,
+  "scope": "R3 F5 official WaveRunup external-gauge execution probe",
+  "status": "candidate_only",
+  "formal_release_authorized": false,
+  "upstream_source": {
+    "case_definition": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/CaseWaveRunup_Def.xml",
+    "case_definition_sha256": "5f27b624f31b8f7e1bc8617c8c47af8675cac2f6da3b2f6aedf0b4da45553dac",
+    "reference_table": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/EXP_CaseWaveRunup_CIEMito.txt",
+    "reference_table_sha256": "6195706559c8565e22dfef1afe7e5e72f4de3e5c7b4bb97133b71fe8ef88e7d6",
+    "external_gauge_layout": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/wg1234.txt",
+    "external_gauge_layout_sha256": "dd696418f14bfe26440b55bdefb43a5c12651670dd410ed0588db14053e2e609"
+  },
+  "observation_contract": {
+    "track": "Eulerian external free-surface observables; not particle-corresponded truth",
+    "gauge_cadence_s": 0.02,
+    "particle_output_cadence_s": 0.02,
+    "requested_time_end_s": 0.2,
+    "external_gauges": [
+      {
+        "name": "WG1",
+        "position_m": [
+          3.1,
+          0.18,
+          0.075
+        ],
+        "measurement": "SWL vertical-line estimate"
+      },
+      {
+        "name": "WG2",
+        "position_m": [
+          3.2,
+          0.18,
+          0.075
+        ],
+        "measurement": "SWL vertical-line estimate"
+      },
+      {
+        "name": "WG3",
+        "position_m": [
+          3.34,
+          0.18,
+          0.075
+        ],
+        "measurement": "SWL vertical-line estimate"
+      },
+      {
+        "name": "WG4",
+        "position_m": [
+          3.63,
+          0.18,
+          0.075
+        ],
+        "measurement": "SWL vertical-line estimate"
+      }
+    ],
+    "time_alignment": "not yet established; external reference begins before forcing and contains rounded duplicate timestamps"
+  },
+  "gpu_policy": {
+    "allowed_gpu_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "gpu_uuids": {
+      "4": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+      "5": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+      "6": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+      "7": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51"
+    }
+  },
+  "prepared_cases": [
+    {
+      "label": "medium",
+      "dp_m": 0.025,
+      "status": "prepared",
+      "returncode": 0,
+      "elapsed_seconds": 0.0612,
+      "fluid_particles": 28070,
+      "total_particles": 35458,
+      "case_prefix": "campaigns/v0.1-candidate/cases/r3-f5-wave-runup/medium/generated/F5_wave_runup_medium",
+      "definition": {
+        "source_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f5-wave-runup/medium/generated/CaseWaveRunup_Def.xml",
+        "source_sha256": "5f27b624f31b8f7e1bc8617c8c47af8675cac2f6da3b2f6aedf0b4da45553dac",
+        "configured_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f5-wave-runup/medium/generated/CaseWaveRunup_medium_External_Def.xml",
+        "configured_sha256": "8b3ec97466c4a04c670d7057d56f84138cd7a804617a240749134ebfe130e3d3",
+        "gauge_cadence_s": 0.02,
+        "tmax_s": 0.2,
+        "active_gauge_option_names": [
+          "computedt",
+          "computetime",
+          "outputdt",
+          "outputtime"
+        ],
+        "external_gauges": [
+          {
+            "name": "WG1",
+            "position_m": [
+              3.1,
+              0.18,
+              0.075
+            ],
+            "measurement_axis": "z"
+          },
+          {
+            "name": "WG2",
+            "position_m": [
+              3.2,
+              0.18,
+              0.075
+            ],
+            "measurement_axis": "z"
+          },
+          {
+            "name": "WG3",
+            "position_m": [
+              3.34,
+              0.18,
+              0.075
+            ],
+            "measurement_axis": "z"
+          },
+          {
+            "name": "WG4",
+            "position_m": [
+              3.63,
+              0.18,
+              0.075
+            ],
+            "measurement_axis": "z"
+          }
+        ]
+      },
+      "log": "campaigns/v0.1-candidate/cases/r3-f5-wave-runup/medium/generated/gencase_external.log"
+    }
+  ],
+  "runs": [
+    {
+      "label": "medium",
+      "dp_m": 0.025,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 3.4243,
+      "fluid_particles": 28070,
+      "total_particles": 35458,
+      "case_prefix": "campaigns/v0.1-candidate/cases/r3-f5-wave-runup/medium/generated/F5_wave_runup_medium",
+      "definition": {
+        "source_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f5-wave-runup/medium/generated/CaseWaveRunup_Def.xml",
+        "source_sha256": "5f27b624f31b8f7e1bc8617c8c47af8675cac2f6da3b2f6aedf0b4da45553dac",
+        "configured_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f5-wave-runup/medium/generated/CaseWaveRunup_medium_External_Def.xml",
+        "configured_sha256": "8b3ec97466c4a04c670d7057d56f84138cd7a804617a240749134ebfe130e3d3",
+        "gauge_cadence_s": 0.02,
+        "tmax_s": 0.2,
+        "active_gauge_option_names": [
+          "computedt",
+          "computetime",
+          "outputdt",
+          "outputtime"
+        ],
+        "external_gauges": [
+          {
+            "name": "WG1",
+            "position_m": [
+              3.1,
+              0.18,
+              0.075
+            ],
+            "measurement_axis": "z"
+          },
+          {
+            "name": "WG2",
+            "position_m": [
+              3.2,
+              0.18,
+              0.075
+            ],
+            "measurement_axis": "z"
+          },
+          {
+            "name": "WG3",
+            "position_m": [
+              3.34,
+              0.18,
+              0.075
+            ],
+            "measurement_axis": "z"
+          },
+          {
+            "name": "WG4",
+            "position_m": [
+              3.63,
+              0.18,
+              0.075
+            ],
+            "measurement_axis": "z"
+          }
+        ]
+      },
+      "log": "campaigns/v0.1-candidate/runs/r3-f5-wave-runup/medium/solver.stdout.log",
+      "gpu": 4,
+      "frames": 11,
+      "excluded_particles": null,
+      "output_bytes": 12660156,
+      "command": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+        "-gpu:4",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f5-wave-runup/medium/generated/F5_wave_runup_medium",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f5-wave-runup/medium",
+        "-tmax:0.2",
+        "-tout:0.02"
+      ],
+      "external_gauge_summary": {
+        "directory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f5-wave-runup/medium",
+        "gauge_count": 4,
+        "gauges": {
+          "WG1": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f5-wave-runup/medium/GaugesSWL_WG1.csv",
+            "rows": 10,
+            "time_start_s": 0.0,
+            "time_end_s": 0.180086,
+            "dt_median_s": 0.020020999999999997,
+            "swl_z_min_m": 0.238515,
+            "swl_z_max_m": 0.246156,
+            "swl_dynamic": true,
+            "issues": []
+          },
+          "WG2": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f5-wave-runup/medium/GaugesSWL_WG2.csv",
+            "rows": 10,
+            "time_start_s": 0.0,
+            "time_end_s": 0.180086,
+            "dt_median_s": 0.020020999999999997,
+            "swl_z_min_m": 0.238515,
+            "swl_z_max_m": 0.246156,
+            "swl_dynamic": true,
+            "issues": []
+          },
+          "WG3": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f5-wave-runup/medium/GaugesSWL_WG3.csv",
+            "rows": 10,
+            "time_start_s": 0.0,
+            "time_end_s": 0.180086,
+            "dt_median_s": 0.020020999999999997,
+            "swl_z_min_m": 0.238515,
+            "swl_z_max_m": 0.246155,
+            "swl_dynamic": true,
+            "issues": []
+          },
+          "WG4": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f5-wave-runup/medium/GaugesSWL_WG4.csv",
+            "rows": 10,
+            "time_start_s": 0.0,
+            "time_end_s": 0.180086,
+            "dt_median_s": 0.020020999999999997,
+            "swl_z_min_m": 0.238515,
+            "swl_z_max_m": 0.246155,
+            "swl_dynamic": true,
+            "issues": []
+          }
+        },
+        "all_structural_pass": true
+      }
+    }
+  ],
+  "limitations": [
+    "This probe does not validate any custom F5 weir case.",
+    "A solver return code and dynamic gauge output are not external physical acceptance.",
+    "Three resolutions and an independently declared uncertainty/time-alignment procedure are required before admission.",
+    "The official reference table uses rounded duplicate timestamps; retain rows or aggregate them by a pre-registered rule."
+  ]
+}
