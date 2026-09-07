@@ -1,0 +1,287 @@
+{
+  "record": {
+    "case_id": "R3_F6_mdbc_preflight_neg074_coarse",
+    "offset_name": "neg074",
+    "offset_m": -0.074,
+    "experiment": "Fl1-0p074.txt",
+    "level": "coarse",
+    "dp": 0.06,
+    "gpu": null,
+    "tmax": 0.08,
+    "tout": 0.04
+  },
+  "resource_policy": {
+    "command": "nvidia-smi --query-gpu=index,uuid,memory.used,memory.total,utilization.gpu --format=csv,noheader,nounits",
+    "return_code": 0,
+    "rows": [
+      {
+        "index": 0,
+        "uuid": "GPU-3dd8e277-f7e1-3893-292a-5928ea229599",
+        "memory_used_mib": 19541,
+        "memory_total_mib": 49140,
+        "utilization_percent": 56
+      },
+      {
+        "index": 1,
+        "uuid": "GPU-ff68d571-7ed7-31b4-a0c0-16fe8745bd7e",
+        "memory_used_mib": 20335,
+        "memory_total_mib": 49140,
+        "utilization_percent": 14
+      },
+      {
+        "index": 2,
+        "uuid": "GPU-2b603061-bc09-9875-acee-e57fbf62f85a",
+        "memory_used_mib": 18223,
+        "memory_total_mib": 49140,
+        "utilization_percent": 51
+      },
+      {
+        "index": 3,
+        "uuid": "GPU-b9624e96-e0f0-920f-ba94-f4db47900f95",
+        "memory_used_mib": 20335,
+        "memory_total_mib": 49140,
+        "utilization_percent": 14
+      },
+      {
+        "index": 4,
+        "uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+        "memory_used_mib": 18,
+        "memory_total_mib": 49140,
+        "utilization_percent": 0
+      },
+      {
+        "index": 5,
+        "uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+        "memory_used_mib": 18,
+        "memory_total_mib": 49140,
+        "utilization_percent": 0
+      },
+      {
+        "index": 6,
+        "uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+        "memory_used_mib": 18,
+        "memory_total_mib": 49140,
+        "utilization_percent": 0
+      },
+      {
+        "index": 7,
+        "uuid": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+        "memory_used_mib": 18,
+        "memory_total_mib": 49140,
+        "utilization_percent": 0
+      }
+    ],
+    "gpu_indices_used": [],
+    "gpu_uuids_used": [],
+    "policy": "CPU-only; physical GPU 0-3 prohibited and no GPU was launched"
+  },
+  "requested_boundary": "mDBC",
+  "effective_boundary": "mDBC",
+  "commandline_boundary_override": null,
+  "definition": {
+    "candidate_file": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse_Def.xml",
+    "current_dbc_file": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-test14/R3_F6_test14_float1_neg074_coarse_Def.xml",
+    "stl_file": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse/generated/Float1_world.stl",
+    "xml_switch": {
+      "current_f6": {
+        "requested_boundary": {
+          "value": 1,
+          "name": "DBC"
+        },
+        "geometry_commands": {
+          "normals_list_present": false,
+          "normals_list_run_from_main": false,
+          "normals_shapeout_hdp": false,
+          "normals_shapeout_count": 0,
+          "normal_stl_present": false
+        },
+        "normals": {
+          "section_present": false,
+          "active": null,
+          "norgeometry_present": false,
+          "geometryfile": null,
+          "distanceh": null
+        },
+        "legal_mdbc_switch": false,
+        "blocker": "Boundary=1 (DBC) and no normals geometry/section"
+      },
+      "candidate": {
+        "requested_boundary": {
+          "value": 2,
+          "name": "mDBC"
+        },
+        "geometry_commands": {
+          "normals_list_present": true,
+          "normals_list_run_from_main": true,
+          "normals_shapeout_hdp": true,
+          "normals_shapeout_count": 1,
+          "normal_stl_present": true
+        },
+        "normals": {
+          "section_present": true,
+          "active": "true",
+          "norgeometry_present": true,
+          "geometryfile": "[CaseName]_hdp_Actual.vtk",
+          "distanceh": "2.0"
+        },
+        "legal_mdbc_switch": true,
+        "blocker": null
+      }
+    }
+  },
+  "transform": {
+    "source_triangles": 6616,
+    "source_connected_components": 2,
+    "source_component_signed_volumes_m3": [
+      0.016931975362993713,
+      -0.016254801763298517
+    ],
+    "selected_outer_triangles": 3338,
+    "selected_outer_volume_m3": 0.016931975362993713,
+    "transformed_stl_bbox_min_m": [
+      -0.15,
+      -0.1499388427734375,
+      0.539
+    ],
+    "transformed_stl_bbox_max_m": [
+      0.15,
+      0.14993881583213806,
+      0.829
+    ],
+    "transformed_stl_sha256": "b586c89a30b864447132e4e7a0c4bb982413d6b5b88cbe7b79bccfabc07c0dd5"
+  },
+  "gencase": {
+    "command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse_Def",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse/generated/R3_F6_mdbc_preflight_neg074_coarse",
+      "-save:all"
+    ],
+    "return_code": 0,
+    "log_file": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse/generated/gencase.stdout.log",
+    "normal_data": {
+      "normal_computation_started": true,
+      "normal_geometry_file": "hdp_Actual.vtk",
+      "normal_geometry_shape_count": 3386,
+      "normal_geometry_point_count": 1935,
+      "nonzero_count": 23543,
+      "boundary_count": 24335,
+      "zero_count": 792,
+      "zero_denominator": 24335,
+      "zero_percent": 3.3,
+      "warning_present": true
+    },
+    "generated_counts": {
+      "total_particles": 67186,
+      "boundary_particles": 24335,
+      "fixed_particles": 24195,
+      "floating_particles": 140,
+      "fluid_particles": 42851,
+      "boundnor_array_expected": 24335
+    },
+    "bi_file_info": {
+      "available": true,
+      "return_code": 0,
+      "summary_file": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse/generated/R3_F6_mdbc_preflight_neg074_coarse_.xml",
+      "boundnor_array_count": 24335,
+      "boundnor_array_present": true,
+      "boundnor_nonzero_count": 23543,
+      "boundnor_zero_count": 792,
+      "boundnor_fixed_zero_count": 792,
+      "boundnor_floating_zero_count": 0
+    }
+  },
+  "solver": {
+    "device": "CPU",
+    "command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4CPU_linux64",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse/generated/R3_F6_mdbc_preflight_neg074_coarse",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse"
+    ],
+    "return_code": 0,
+    "timeout": false,
+    "log_file": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse/solver.stdout.log",
+    "normal_data": {
+      "effective_boundary": "mDBC",
+      "fixed_or_moving_zero_count": 792,
+      "fixed_or_moving_count": 24195,
+      "floating_zero_count": 0,
+      "floating_count": 140,
+      "normal_warning_present": true,
+      "ghost_path_reported": true,
+      "chrono_collision_warning": true,
+      "solver_finished_code_0": true
+    },
+    "ghost_artifacts": {
+      "boundary_normals_vtk": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse/CfgInit_Normals.vtk",
+      "ghost_normals_vtk": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-preflight/R3_F6_mdbc_preflight_neg074_coarse/CfgInit_NormalsGhost.vtk",
+      "boundary_normals_vtk_present": true,
+      "ghost_normals_vtk_present": true,
+      "boundary_normals_point_count": 24335,
+      "ghost_normals_point_count": 24335
+    }
+  },
+  "acceptance_status": "diagnostic_only_not_physical_acceptance",
+  "scientific_acceptance": "not_accepted_mdbc_preflight",
+  "mdbc_claim": false,
+  "source_evidence": {
+    "normal_storage": {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JPartsLoad4.cpp",
+      "lines": "213-219, 265-270",
+      "finding": "v5.4 rejects the old _Normals.nbi4 route, allocates BoundNor only when the general BI4 contains BoundNor, and loads/checks its size against the boundary count."
+    },
+    "boundary_switch": {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp",
+      "lines": "700-718",
+      "finding": "Boundary=1 selects DBC; Boundary=2 selects mDBC and enables UseNormals, with SlipMode parsed in the same block."
+    },
+    "normal_and_ghost_initialization": {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp",
+      "lines": "1383-1430",
+      "finding": "initial normals are saved, zero normals are counted separately for fixed/moving and floating particles, each normal is doubled for a new run, and the doubled values are saved as CfgInit_NormalsGhost.vtk; missing normals warn without necessarily changing return code."
+    },
+    "cpu_mdbc_kernel": {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSphCpu_mdbc.cpp",
+      "lines": "41-50, 107-138, 255-286",
+      "finding": "CPU mDBC skips zero BoundNor entries and forms the ghost position as boundary position plus BoundNor before the ghost-fluid interaction."
+    },
+    "official_floating_pattern": {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/mdbc/08_FloatingWaves/CaseFloatingWaves_Def.xml",
+      "lines": "26-49, 93-97, 131",
+      "finding": "official floating mDBC uses GeometryForNormals, shapeout file=hdp, a mainlist runlist, norgeometry [CaseName]_hdp_Actual.vtk, and Boundary=2."
+    },
+    "official_stl_floating_pattern": {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/mdbc/09_FloatingDuck/CaseDuckling_Def.xml",
+      "lines": "26-45, 82-88, 93-95",
+      "finding": "official STL floating mDBC applies actual|bound to a floating STL in GeometryForNormals, writes hdp geometry, and enables Boundary=2 with Norgeometry."
+    }
+  },
+  "schema_version": 1,
+  "generated_at": "2026-09-07T07:44:42.923861+00:00",
+  "normal_completeness": {
+    "complete_for_all_boundary_particles": false,
+    "gencase_zero_count": 792,
+    "gencase_boundary_count": 24335,
+    "solver_fixed_or_moving_zero_count": 792,
+    "solver_floating_zero_count": 0,
+    "boundnor_array_count": 24335,
+    "boundnor_direct_zero_count": 792,
+    "boundnor_direct_fixed_zero_count": 792,
+    "boundnor_direct_floating_zero_count": 0,
+    "ghost_vector_artifact_present": true
+  },
+  "open_blockers": [
+    "This is a short coarse CPU preflight, not a Test14 physical acceptance run.",
+    "No DBC-vs-mDBC trajectory or buoyancy comparison was performed.",
+    "The existing F6/Test14 XML remains DBC (Boundary=1) with no normals section.",
+    "GenCase reported 792 zero boundary normals; normal completeness is not established.",
+    "Solver reported 792 fixed/moving particles without normals.",
+    "Solver warns floating mDBC collisions should use Chrono (RigidAlgorithm=3)."
+  ],
+  "conclusion": {
+    "physical_acceptance_claim": false,
+    "mdbc_claim": false,
+    "preflight_result": "mDBC initialization path reached; inspect normal completeness and blockers",
+    "normal_completeness": "incomplete_or_unverified"
+  }
+}
