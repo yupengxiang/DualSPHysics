@@ -96,6 +96,14 @@ the exact solver configuration and executable.
   serialized zero normals at `dp=0.060 m`; they alter the geometry contract and
   remain candidate-only/rejected pending physical revalidation. A separate
   static-buoyancy calculation likewise remains diagnostic-only.
+- The latest R3 gate directly audits the binary `CfgInit_Normals.vtk` and
+  `CfgInit_NormalsGhost.vtk` fields. It reconstructs the inferred ghost point
+  and effective interface, reports `Mk` components and waterline partitions,
+  and confirms that the two zero-free inward candidates still have an
+  unvalidated interface offset. The fixed submerged-body E1 matrix is therefore
+  recorded as a strict no-run feasibility audit: the existing `<floatings>` /
+  Chrono path has no fixed-body force gauge. See
+  [R3 latest reviewer handoff](campaigns/v0.1-candidate/R3-LATEST-REVIEW-HANDOFF.md).
 - Structural and semantic quality gates passed 29 probes and rejected one
   deliberately retained coarse-resolution failure.
 - W00--W12 then exercised protected provenance, identity/reference-frame

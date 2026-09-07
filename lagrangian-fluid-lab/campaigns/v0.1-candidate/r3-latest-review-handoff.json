@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "handoff_id": "R3_latest_reviewer_handoff",
+  "date": "2026-09-07",
+  "branch": "codex/lagrangian-fluid-exploration",
+  "head_at_authoring": "51bf8c4",
+  "scope": "E0/E1 F6 closure plus tracer and model-input geometry contracts",
+  "non_goals": [
+    "no six-family expansion",
+    "no repeat of small G4 route reruns",
+    "no formal v0.1 physical freeze"
+  ],
+  "e0": {
+    "commit": "51bf8c4",
+    "execution_status": "completed_cpu_only_existing_artifacts",
+    "acceptance_status": "candidate_geometry_only_rejected",
+    "baseline_zero_normals": 792,
+    "baseline_boundary_count": 24335,
+    "inward_candidates": ["-0.030 m", "-0.020 m"],
+    "inward_candidates_zero_free": true,
+    "solver_doubling_consistency_observed": true,
+    "independent_ghost_coordinate_observed": false,
+    "physical_acceptance": false,
+    "report": "campaigns/v0.1-candidate/r3-f6-wall-ghost-geometry.json"
+  },
+  "e1": {
+    "commit": "03c675f",
+    "execution_status": "blocked_preflight_no_run",
+    "acceptance_status": "not_run_not_accepted",
+    "planned_primary_runs": 6,
+    "planned_fine_upper_bound": 3,
+    "executed_runs": 0,
+    "gpu_indices_used": [],
+    "physical_acceptance": false,
+    "report": "campaigns/v0.1-candidate/cases/r3-f6-fixed-hydrostatic/r3-f6-fixed-hydrostatic.json"
+  },
+  "geometry_contracts": {
+    "commit": "c1f47e2",
+    "execution_status": "complete",
+    "acceptance_status": "candidate_only_rejected",
+    "compute": "cpu_only",
+    "tests_added": 7,
+    "report": "diagnostics/r3_geometry_contracts/r3-geometry-contracts.json"
+  },
+  "validation": {
+    "pytest_command": "PYTHONPATH=. .venv/bin/pytest -q",
+    "pytest_passed": 189,
+    "pytest_failed": 0,
+    "gpu_0_3_touched": false,
+    "upstream_paths_modified": false
+  },
+  "open_blockers": [
+    "nominal-geometry mDBC normal/ghost interface validation",
+    "fixed-body XML and auditable force gauge without Chrono",
+    "matched hydrostatic DBC/mDBC matrix after both gates",
+    "separate Chrono/body integration validation"
+  ],
+  "next_request_to_reviewer": "Confirm the fixed-body and nominal-geometry construction before any 6+3 hydrostatic GPU runs."
+}
