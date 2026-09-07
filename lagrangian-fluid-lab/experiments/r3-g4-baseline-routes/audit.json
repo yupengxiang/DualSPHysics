@@ -1,0 +1,332 @@
+{
+  "schema_version": 1,
+  "scope": "R3-G4 candidate-only baseline route and input-contract audit",
+  "status": "complete",
+  "formal_ready": false,
+  "baseline_source": "experiments/r3_g4_baselines.py",
+  "release_manifest": "release/v0.1-development/manifest.json",
+  "routes": [
+    "particle_mlp",
+    "deepset_context",
+    "local_interaction",
+    "physics_residual"
+  ],
+  "route_roles": {
+    "particle_mlp": "direct per-particle predictor",
+    "deepset_context": "global permutation-invariant set context",
+    "local_interaction": "direct predictor plus inverse-distance local neighbour summary",
+    "physics_residual": "normalized acceleration residual integrated with current velocity"
+  },
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "cases": {
+    "loaded_fluid_case_count": 12,
+    "split_counts": {
+      "test": 3,
+      "train": 6,
+      "validation": 3
+    },
+    "excluded_manifest_case_ids": [
+      "W05_F6_fine"
+    ],
+    "field_failures": {}
+  },
+  "feature_contract": {
+    "feature_width": 43,
+    "slices": {
+      "centered_xyz": [
+        0,
+        3
+      ],
+      "target_velocity_scaled": [
+        3,
+        6
+      ],
+      "context_com_velocity_scaled": [
+        6,
+        9
+      ],
+      "initial_density_pressure_mass": [
+        9,
+        12
+      ],
+      "gravity": [
+        12,
+        15
+      ],
+      "static_physics": [
+        15,
+        18
+      ],
+      "current_prescribed_control": [
+        18,
+        28
+      ],
+      "current_boundary_summary": [
+        28,
+        35
+      ],
+      "family_one_hot": [
+        35,
+        41
+      ],
+      "elapsed_time_and_dt": [
+        41,
+        43
+      ]
+    },
+    "state_semantics": {
+      "density_pressure_mass": "initial-only; no future reference fields in rollout",
+      "velocity": "solver velocity under teacher forcing; own predicted next velocity in rollout",
+      "control": "current prescribed schedule; frame-zero transform velocity is zero",
+      "boundary": "current frame finite-triangle world-space AABB plus availability bit",
+      "free_body": "not exposed; body-only F6 fluid-less case excluded"
+    },
+    "route_widths": {
+      "particle_mlp": {
+        "input_width": 43,
+        "local_width": 0,
+        "output_width": 3,
+        "parameter_count": 451
+      },
+      "deepset_context": {
+        "input_width": 43,
+        "local_width": 0,
+        "output_width": 3,
+        "parameter_count": 587
+      },
+      "local_interaction": {
+        "input_width": 43,
+        "local_width": 8,
+        "output_width": 3,
+        "parameter_count": 515
+      },
+      "physics_residual": {
+        "input_width": 43,
+        "local_width": 0,
+        "output_width": 3,
+        "parameter_count": 451
+      }
+    },
+    "control_sources": {
+      "known_prescribed_control_schedule": 5,
+      "missing_control_group": 7
+    },
+    "boundary_sources": {
+      "sidecar_world_triangles": 12
+    },
+    "boundary_sidecar_schemas": [
+      "boundary-sidecar-v1"
+    ],
+    "physics_widths": [
+      3
+    ]
+  },
+  "existing_matrix": {
+    "expected_count": 12,
+    "found_count": 12,
+    "missing": [],
+    "invalid": [],
+    "records": {
+      "particle_mlp_seed17": {
+        "path": "experiments/r3_g4_sidecar_results/particle_mlp_seed17.json",
+        "route": "particle_mlp",
+        "seed": 17,
+        "device": "cuda",
+        "feature_width": 43,
+        "epochs_run": 4,
+        "test_cases": 3,
+        "test_rollout_statuses": {
+          "F1_twin_obstacle": "completed",
+          "W06_standard_fast_center": "completed",
+          "F3_transverse_slosh": "completed"
+        }
+      },
+      "particle_mlp_seed29": {
+        "path": "experiments/r3_g4_sidecar_results/particle_mlp_seed29.json",
+        "route": "particle_mlp",
+        "seed": 29,
+        "device": "cuda",
+        "feature_width": 43,
+        "epochs_run": 4,
+        "test_cases": 3,
+        "test_rollout_statuses": {
+          "F1_twin_obstacle": "completed",
+          "W06_standard_fast_center": "completed",
+          "F3_transverse_slosh": "completed"
+        }
+      },
+      "particle_mlp_seed43": {
+        "path": "experiments/r3_g4_sidecar_results/particle_mlp_seed43.json",
+        "route": "particle_mlp",
+        "seed": 43,
+        "device": "cuda",
+        "feature_width": 43,
+        "epochs_run": 4,
+        "test_cases": 3,
+        "test_rollout_statuses": {
+          "F1_twin_obstacle": "completed",
+          "W06_standard_fast_center": "completed",
+          "F3_transverse_slosh": "completed"
+        }
+      },
+      "deepset_context_seed17": {
+        "path": "experiments/r3_g4_sidecar_results/deepset_context_seed17.json",
+        "route": "deepset_context",
+        "seed": 17,
+        "device": "cuda",
+        "feature_width": 43,
+        "epochs_run": 3,
+        "test_cases": 3,
+        "test_rollout_statuses": {
+          "F1_twin_obstacle": "completed",
+          "W06_standard_fast_center": "completed",
+          "F3_transverse_slosh": "completed"
+        }
+      },
+      "deepset_context_seed29": {
+        "path": "experiments/r3_g4_sidecar_results/deepset_context_seed29.json",
+        "route": "deepset_context",
+        "seed": 29,
+        "device": "cuda",
+        "feature_width": 43,
+        "epochs_run": 4,
+        "test_cases": 3,
+        "test_rollout_statuses": {
+          "F1_twin_obstacle": "completed",
+          "W06_standard_fast_center": "completed",
+          "F3_transverse_slosh": "completed"
+        }
+      },
+      "deepset_context_seed43": {
+        "path": "experiments/r3_g4_sidecar_results/deepset_context_seed43.json",
+        "route": "deepset_context",
+        "seed": 43,
+        "device": "cuda",
+        "feature_width": 43,
+        "epochs_run": 3,
+        "test_cases": 3,
+        "test_rollout_statuses": {
+          "F1_twin_obstacle": "completed",
+          "W06_standard_fast_center": "completed",
+          "F3_transverse_slosh": "completed"
+        }
+      },
+      "local_interaction_seed17": {
+        "path": "experiments/r3_g4_sidecar_results/local_interaction_seed17.json",
+        "route": "local_interaction",
+        "seed": 17,
+        "device": "cuda",
+        "feature_width": 43,
+        "epochs_run": 5,
+        "test_cases": 3,
+        "test_rollout_statuses": {
+          "F1_twin_obstacle": "completed",
+          "W06_standard_fast_center": "completed",
+          "F3_transverse_slosh": "completed"
+        }
+      },
+      "local_interaction_seed29": {
+        "path": "experiments/r3_g4_sidecar_results/local_interaction_seed29.json",
+        "route": "local_interaction",
+        "seed": 29,
+        "device": "cuda",
+        "feature_width": 43,
+        "epochs_run": 4,
+        "test_cases": 3,
+        "test_rollout_statuses": {
+          "F1_twin_obstacle": "completed",
+          "W06_standard_fast_center": "completed",
+          "F3_transverse_slosh": "completed"
+        }
+      },
+      "local_interaction_seed43": {
+        "path": "experiments/r3_g4_sidecar_results/local_interaction_seed43.json",
+        "route": "local_interaction",
+        "seed": 43,
+        "device": "cuda",
+        "feature_width": 43,
+        "epochs_run": 4,
+        "test_cases": 3,
+        "test_rollout_statuses": {
+          "F1_twin_obstacle": "completed",
+          "W06_standard_fast_center": "completed",
+          "F3_transverse_slosh": "completed"
+        }
+      },
+      "physics_residual_seed17": {
+        "path": "experiments/r3_g4_sidecar_results/physics_residual_seed17.json",
+        "route": "physics_residual",
+        "seed": 17,
+        "device": "cuda",
+        "feature_width": 43,
+        "epochs_run": 5,
+        "test_cases": 3,
+        "test_rollout_statuses": {
+          "F1_twin_obstacle": "completed",
+          "W06_standard_fast_center": "completed",
+          "F3_transverse_slosh": "completed"
+        }
+      },
+      "physics_residual_seed29": {
+        "path": "experiments/r3_g4_sidecar_results/physics_residual_seed29.json",
+        "route": "physics_residual",
+        "seed": 29,
+        "device": "cuda",
+        "feature_width": 43,
+        "epochs_run": 4,
+        "test_cases": 3,
+        "test_rollout_statuses": {
+          "F1_twin_obstacle": "completed",
+          "W06_standard_fast_center": "completed",
+          "F3_transverse_slosh": "completed"
+        }
+      },
+      "physics_residual_seed43": {
+        "path": "experiments/r3_g4_sidecar_results/physics_residual_seed43.json",
+        "route": "physics_residual",
+        "seed": 43,
+        "device": "cuda",
+        "feature_width": 43,
+        "epochs_run": 3,
+        "test_cases": 3,
+        "test_rollout_statuses": {
+          "F1_twin_obstacle": "completed",
+          "W06_standard_fast_center": "completed",
+          "F3_transverse_slosh": "completed"
+        }
+      }
+    }
+  },
+  "existing_run_manifest": {
+    "path": "experiments/r3_g4_sidecar_run_manifest.json",
+    "status": "complete",
+    "allowed_gpu_indices": [
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  "checks": {
+    "four_routes_construct_and_emit_xyz": true,
+    "shared_feature_width": true,
+    "canonical_state_fields_present": true,
+    "control_width_and_boundary_width_stable": true,
+    "physics_width_stable": true,
+    "boundary_sidecars_current_frame_aligned": true,
+    "all_loaded_values_finite": true,
+    "three_seed_matrix_complete": true,
+    "body_only_case_explicitly_excluded": true,
+    "candidate_only_not_formal": true
+  },
+  "limitations": [
+    "candidate-only diagnostic; no leaderboard or physical-scene acceptance claim",
+    "material transport, density/pressure prediction, free-body coupling, and T2/T3/T4 scoring are not included",
+    "boundary input is an AABB summary, not a learned wall-contact operator",
+    "existing matrix is indexed for contract coverage; independent small reruns are recorded separately"
+  ]
+}
