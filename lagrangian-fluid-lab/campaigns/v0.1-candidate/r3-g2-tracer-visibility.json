@@ -1,0 +1,1106 @@
+{
+  "schema_version": 1,
+  "scope": "R3 G2 CPU-only synthetic tracer visibility diagnostic",
+  "execution_status": "complete",
+  "acceptance_status": "candidate_only_rejected",
+  "compute": {
+    "backend": "NumPy + existing passive_tracers.py",
+    "gpu_used": false,
+    "cfd_solver_run": false,
+    "neighbours": 24,
+    "regularization_m": 0.004,
+    "regularization_over_dp": 0.1,
+    "synthetic_dp_m": 0.04
+  },
+  "implementation_audit": {
+    "requested_wall_aware_script": "r3_g2_tracer_wall_aware.py",
+    "requested_script_present": false,
+    "actual_wall_aware_implementation": "scripts/passive_tracers.py",
+    "legacy_selection": "24 nearest samples by Euclidean distance, inverse-distance weights; without triangles every sample is eligible",
+    "wall_filter": "segment_visibility masks finite triangle intersections before nearest selection",
+    "path_guard": "corresponding_segments_blocked rejects a Heun candidate crossing a supplied wall",
+    "undersupport_behavior": "fewer than 24 visible samples are allowed to interpolate with zero-weight inf slots",
+    "disconnected_blob_behavior": "no barrier triangles means geometry-only visibility cannot infer disconnected liquid regions"
+  },
+  "sources_read": [
+    "scripts/passive_tracers.py",
+    "campaigns/v0.1-candidate/r3-g2-tracer-wall-aware.json",
+    "campaigns/v0.1-candidate/R3-G2-TRACER-WALL-AWARE.md",
+    "campaigns/v0.1-candidate/r3-g2-tracer-convergence.json",
+    "campaigns/v0.1-candidate/R3-G2-TRACER-CONVERGENCE.md",
+    "campaigns/v0.1-candidate/r3-g2-tracer-neighbour-sensitivity.json",
+    "campaigns/v0.1-candidate/R3-G2-TRACER-NEIGHBOUR-SENSITIVITY.md"
+  ],
+  "cases": {
+    "partition_tangential_flow": {
+      "description": "finite x=0 partition; left/right tangential fields have opposite signs",
+      "geometry": {
+        "type": "finite_partition",
+        "plane_x_m": 0.0,
+        "extent_y_m": [
+          -0.2,
+          0.2
+        ],
+        "extent_z_m": [
+          -0.2,
+          0.2
+        ]
+      },
+      "particle_count": 57,
+      "query_count": 16,
+      "barrier_triangle_count": 2,
+      "legacy_no_barrier": {
+        "neighbours": 24,
+        "regularization_m": 0.004,
+        "query_count": 16,
+        "output_velocity_mean_mps": [
+          0.0,
+          -0.7490946220601175,
+          0.0
+        ],
+        "truth_velocity_mps": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "velocity_rmse_mps": 1.749527415781757,
+        "wrong_tangential_direction_fraction": 1.0,
+        "finite_output_fraction": 1.0,
+        "contaminant_weight_fraction": {
+          "mean": 0.8745473110300588,
+          "median": 0.8678469606292472,
+          "max": 0.9115535018534511,
+          "min": 0.8569722856019805
+        },
+        "contaminant_selected_fraction": {
+          "mean": 0.8125,
+          "median": 0.8125,
+          "max": 0.8333333333333334,
+          "min": 0.7916666666666666
+        },
+        "selected_finite_count": {
+          "mean": 24.0,
+          "median": 24.0,
+          "max": 24.0,
+          "min": 24.0
+        },
+        "eligible_visible_count": {
+          "mean": 57.0,
+          "median": 57.0,
+          "max": 57.0,
+          "min": 57.0
+        },
+        "support_distance_m": {
+          "mean": 0.015486730806030344,
+          "median": 0.015620499351813305,
+          "max": 0.0223606797749979,
+          "min": 0.010770329614269008
+        },
+        "query_rows": [
+          {
+            "contaminant_weight_fraction": 0.8569722856019806,
+            "contaminant_selected_fraction": 0.8333333333333334,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.022360679774997887,
+            "velocity_mps": [
+              0.0,
+              -0.7139445712039613,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.8571404241791053,
+            "contaminant_selected_fraction": 0.7916666666666666,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.01562049935181331,
+            "velocity_mps": [
+              0.0,
+              -0.7142808483582097,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.8890230348727298,
+            "contaminant_selected_fraction": 0.7916666666666666,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.01077032961426901,
+            "velocity_mps": [
+              0.0,
+              -0.7780460697454594,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.8890230348727297,
+            "contaminant_selected_fraction": 0.7916666666666666,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.010770329614269008,
+            "velocity_mps": [
+              0.0,
+              -0.7780460697454594,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.8571404241791052,
+            "contaminant_selected_fraction": 0.7916666666666666,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.015620499351813305,
+            "velocity_mps": [
+              0.0,
+              -0.7142808483582099,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.8569722856019806,
+            "contaminant_selected_fraction": 0.8333333333333334,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.022360679774997894,
+            "velocity_mps": [
+              0.0,
+              -0.7139445712039613,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.878553497079389,
+            "contaminant_selected_fraction": 0.8333333333333334,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.015620499351813305,
+            "velocity_mps": [
+              0.0,
+              -0.7571069941587778,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.9115535018534511,
+            "contaminant_selected_fraction": 0.8333333333333334,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.010770329614269008,
+            "velocity_mps": [
+              0.0,
+              -0.823107003706902,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.911553501853451,
+            "contaminant_selected_fraction": 0.8333333333333334,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.01077032961426901,
+            "velocity_mps": [
+              0.0,
+              -0.8231070037069018,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.878553497079389,
+            "contaminant_selected_fraction": 0.8333333333333334,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.015620499351813316,
+            "velocity_mps": [
+              0.0,
+              -0.7571069941587774,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.8569722856019805,
+            "contaminant_selected_fraction": 0.8333333333333334,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.0223606797749979,
+            "velocity_mps": [
+              0.0,
+              -0.7139445712039613,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.8571404241791053,
+            "contaminant_selected_fraction": 0.7916666666666666,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.015620499351813316,
+            "velocity_mps": [
+              0.0,
+              -0.7142808483582096,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.8890230348727296,
+            "contaminant_selected_fraction": 0.7916666666666666,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.01077032961426901,
+            "velocity_mps": [
+              0.0,
+              -0.7780460697454594,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.8890230348727296,
+            "contaminant_selected_fraction": 0.7916666666666666,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.01077032961426901,
+            "velocity_mps": [
+              0.0,
+              -0.7780460697454595,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.8571404241791052,
+            "contaminant_selected_fraction": 0.7916666666666666,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.015620499351813305,
+            "velocity_mps": [
+              0.0,
+              -0.7142808483582097,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.8569722856019806,
+            "contaminant_selected_fraction": 0.8333333333333334,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 57,
+            "support_distance_m": 0.022360679774997887,
+            "velocity_mps": [
+              0.0,
+              -0.7139445712039613,
+              0.0
+            ]
+          }
+        ]
+      },
+      "existing_wall_aware": {
+        "neighbours": 24,
+        "regularization_m": 0.004,
+        "query_count": 16,
+        "output_velocity_mean_mps": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "truth_velocity_mps": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "velocity_rmse_mps": 1.2719202621569003e-16,
+        "wrong_tangential_direction_fraction": 0.0,
+        "finite_output_fraction": 1.0,
+        "contaminant_weight_fraction": {
+          "mean": 0.0,
+          "median": 0.0,
+          "max": 0.0,
+          "min": 0.0
+        },
+        "contaminant_selected_fraction": {
+          "mean": 0.0,
+          "median": 0.0,
+          "max": 0.0,
+          "min": 0.0
+        },
+        "selected_finite_count": {
+          "mean": 8.0,
+          "median": 8.0,
+          "max": 8.0,
+          "min": 8.0
+        },
+        "eligible_visible_count": {
+          "mean": 8.0,
+          "median": 8.0,
+          "max": 8.0,
+          "min": 8.0
+        },
+        "support_distance_m": {
+          "mean": 0.04522030696308901,
+          "median": 0.0439759250086704,
+          "max": 0.054405882034941774,
+          "min": 0.040987803063838396
+        },
+        "query_rows": [
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.04543126676640219,
+            "velocity_mps": [
+              0.0,
+              1.0,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.0425205832509386,
+            "velocity_mps": [
+              0.0,
+              0.9999999999999999,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.040987803063838396,
+            "velocity_mps": [
+              0.0,
+              0.9999999999999999,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.040987803063838396,
+            "velocity_mps": [
+              0.0,
+              0.9999999999999999,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.0425205832509386,
+            "velocity_mps": [
+              0.0,
+              0.9999999999999999,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.04543126676640219,
+            "velocity_mps": [
+              0.0,
+              1.0000000000000002,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.04947726750741193,
+            "velocity_mps": [
+              0.0,
+              1.0,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.054405882034941774,
+            "velocity_mps": [
+              0.0,
+              0.9999999999999999,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.054405882034941774,
+            "velocity_mps": [
+              0.0,
+              0.9999999999999999,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.04947726750741192,
+            "velocity_mps": [
+              0.0,
+              1.0000000000000002,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.04543126676640219,
+            "velocity_mps": [
+              0.0,
+              1.0,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.0425205832509386,
+            "velocity_mps": [
+              0.0,
+              0.9999999999999999,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.040987803063838396,
+            "velocity_mps": [
+              0.0,
+              0.9999999999999999,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.040987803063838396,
+            "velocity_mps": [
+              0.0,
+              1.0000000000000002,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.0425205832509386,
+            "velocity_mps": [
+              0.0,
+              0.9999999999999999,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 8,
+            "eligible_visible_count": 8,
+            "support_distance_m": 0.04543126676640219,
+            "velocity_mps": [
+              0.0,
+              1.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "minimum_visible_support_guard": {
+        "guard": "minimum_visible_support",
+        "minimum_required_visible_neighbours": 24,
+        "accepted_query_count": 0,
+        "accepted_query_fraction": 0.0,
+        "guarded_velocity_mean_mps": [
+          null,
+          null,
+          null
+        ],
+        "accepted_mask": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "support_distance_m": {
+          "mean": 0.04522030696308901,
+          "median": 0.0439759250086704,
+          "max": 0.054405882034941774,
+          "min": 0.040987803063838396
+        },
+        "status": "candidate_only_rejected",
+        "rejection_reason": "safe undersupport diagnostic only; rejecting a valid narrow opening cannot be promoted without an explicit open-face/support policy"
+      },
+      "comparison": {
+        "velocity_rmse_reduction_mps": 1.7495274157817569,
+        "wrong_direction_fraction_reduction": 1.0
+      }
+    },
+    "narrow_gap_visibility": {
+      "description": "two finite wall panels leave a narrow opening; near samples are blocked but gap rays are valid",
+      "geometry": {
+        "type": "finite_partition_with_gap",
+        "plane_x_m": 0.0,
+        "wall_y_ranges_m": [
+          [
+            -0.2,
+            -0.02
+          ],
+          [
+            0.02,
+            0.2
+          ]
+        ],
+        "open_gap_y_range_m": [
+          -0.02,
+          0.02
+        ]
+      },
+      "particle_count": 43,
+      "query_count": 3,
+      "barrier_triangle_count": 4,
+      "legacy_no_barrier": {
+        "neighbours": 24,
+        "regularization_m": 0.004,
+        "query_count": 3,
+        "output_velocity_mean_mps": [
+          0.0,
+          -1.0442573728783582,
+          0.0
+        ],
+        "truth_velocity_mps": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "velocity_rmse_mps": 2.0495326824927176,
+        "wrong_tangential_direction_fraction": 1.0,
+        "finite_output_fraction": 1.0,
+        "contaminant_weight_fraction": {
+          "mean": 0.6814191242927862,
+          "median": 0.6467813077412288,
+          "max": 0.7506947573959007,
+          "min": 0.6467813077412288
+        },
+        "contaminant_selected_fraction": {
+          "mean": 0.6666666666666666,
+          "median": 0.6666666666666666,
+          "max": 0.6666666666666666,
+          "min": 0.6666666666666666
+        },
+        "selected_finite_count": {
+          "mean": 24.0,
+          "median": 24.0,
+          "max": 24.0,
+          "min": 24.0
+        },
+        "eligible_visible_count": {
+          "mean": 43.0,
+          "median": 43.0,
+          "max": 43.0,
+          "min": 43.0
+        },
+        "support_distance_m": {
+          "mean": 0.02533006504530928,
+          "median": 0.02549509756796392,
+          "max": 0.02549509756796392,
+          "min": 0.025
+        },
+        "query_rows": [
+          {
+            "contaminant_weight_fraction": 0.6467813077412288,
+            "contaminant_selected_fraction": 0.6666666666666666,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 43,
+            "support_distance_m": 0.02549509756796392,
+            "velocity_mps": [
+              0.0,
+              -0.9403439232236859,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.7506947573959007,
+            "contaminant_selected_fraction": 0.6666666666666666,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 43,
+            "support_distance_m": 0.025,
+            "velocity_mps": [
+              0.0,
+              -1.2520842721877028,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.6467813077412288,
+            "contaminant_selected_fraction": 0.6666666666666666,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 43,
+            "support_distance_m": 0.02549509756796392,
+            "velocity_mps": [
+              0.0,
+              -0.9403439232236859,
+              0.0
+            ]
+          }
+        ]
+      },
+      "existing_wall_aware": {
+        "neighbours": 24,
+        "regularization_m": 0.004,
+        "query_count": 3,
+        "output_velocity_mean_mps": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "truth_velocity_mps": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "velocity_rmse_mps": 9.064933036736789e-17,
+        "wrong_tangential_direction_fraction": 0.0,
+        "finite_output_fraction": 1.0,
+        "contaminant_weight_fraction": {
+          "mean": 0.0,
+          "median": 0.0,
+          "max": 0.0,
+          "min": 0.0
+        },
+        "contaminant_selected_fraction": {
+          "mean": 0.0,
+          "median": 0.0,
+          "max": 0.0,
+          "min": 0.0
+        },
+        "selected_finite_count": {
+          "mean": 23.0,
+          "median": 23.0,
+          "max": 23.0,
+          "min": 23.0
+        },
+        "eligible_visible_count": {
+          "mean": 23.0,
+          "median": 23.0,
+          "max": 23.0,
+          "min": 23.0
+        },
+        "support_distance_m": {
+          "mean": 0.03208904027553831,
+          "median": 0.02549509756796392,
+          "max": 0.04527692569068708,
+          "min": 0.02549509756796392
+        },
+        "query_rows": [
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 23,
+            "eligible_visible_count": 23,
+            "support_distance_m": 0.02549509756796392,
+            "velocity_mps": [
+              0.0,
+              0.9999999999999999,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 23,
+            "eligible_visible_count": 23,
+            "support_distance_m": 0.04527692569068708,
+            "velocity_mps": [
+              0.0,
+              1.0,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.0,
+            "contaminant_selected_fraction": 0.0,
+            "selected_finite_count": 23,
+            "eligible_visible_count": 23,
+            "support_distance_m": 0.02549509756796392,
+            "velocity_mps": [
+              0.0,
+              0.9999999999999999,
+              0.0
+            ]
+          }
+        ]
+      },
+      "minimum_visible_support_guard": {
+        "guard": "minimum_visible_support",
+        "minimum_required_visible_neighbours": 24,
+        "accepted_query_count": 0,
+        "accepted_query_fraction": 0.0,
+        "guarded_velocity_mean_mps": [
+          null,
+          null,
+          null
+        ],
+        "accepted_mask": [
+          false,
+          false,
+          false
+        ],
+        "support_distance_m": {
+          "mean": 0.03208904027553831,
+          "median": 0.02549509756796392,
+          "max": 0.04527692569068708,
+          "min": 0.02549509756796392
+        },
+        "status": "candidate_only_rejected",
+        "rejection_reason": "safe undersupport diagnostic only; rejecting a valid narrow opening cannot be promoted without an explicit open-face/support policy"
+      },
+      "comparison": {
+        "velocity_rmse_reduction_mps": 2.0495326824927176,
+        "wrong_direction_fraction_reduction": 1.0
+      },
+      "gap_visibility": {
+        "gap_samples_total": 15,
+        "gap_samples_visible_per_query": [
+          15,
+          15,
+          15
+        ],
+        "gap_samples_retention_fraction": 1.0,
+        "blocked_samples_total": 20,
+        "blocked_samples_visible_per_query": [
+          0,
+          0,
+          0
+        ],
+        "blocked_samples_retention_fraction": 0.0
+      }
+    },
+    "separated_liquid_blob": {
+      "description": "two disconnected liquid blobs separated by a 0.01 m vacuum gap and no triangle barrier",
+      "geometry": {
+        "type": "disconnected_liquid_blobs",
+        "solid_barrier": false,
+        "left_x_range_m": [
+          -0.08,
+          -0.04
+        ],
+        "right_x_range_m": [
+          -0.03,
+          0.07
+        ],
+        "vacuum_gap_m": 0.01
+      },
+      "particle_count": 133,
+      "query_count": 3,
+      "barrier_triangle_count": 0,
+      "legacy_no_barrier": {
+        "neighbours": 24,
+        "regularization_m": 0.004,
+        "query_count": 3,
+        "output_velocity_mean_mps": [
+          0.0,
+          -0.34493709171216835,
+          0.0
+        ],
+        "truth_velocity_mps": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "velocity_rmse_mps": 1.3461509833478578,
+        "wrong_tangential_direction_fraction": 1.0,
+        "finite_output_fraction": 1.0,
+        "contaminant_weight_fraction": {
+          "mean": 0.6724685458560842,
+          "median": 0.6846996435826935,
+          "max": 0.6997117840774245,
+          "min": 0.6329942099081346
+        },
+        "contaminant_selected_fraction": {
+          "mean": 0.7083333333333334,
+          "median": 0.7083333333333334,
+          "max": 0.75,
+          "min": 0.6666666666666666
+        },
+        "selected_finite_count": {
+          "mean": 24.0,
+          "median": 24.0,
+          "max": 24.0,
+          "min": 24.0
+        },
+        "eligible_visible_count": {
+          "mean": 133.0,
+          "median": 133.0,
+          "max": 133.0,
+          "min": 133.0
+        },
+        "support_distance_m": {
+          "mean": 0.016009252125773313,
+          "median": 0.015000000000000001,
+          "max": 0.01802775637731994,
+          "min": 0.014999999999999996
+        },
+        "query_rows": [
+          {
+            "contaminant_weight_fraction": 0.6846996435826935,
+            "contaminant_selected_fraction": 0.6666666666666666,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 133,
+            "support_distance_m": 0.014999999999999996,
+            "velocity_mps": [
+              0.0,
+              -0.36939928716538706,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.6997117840774245,
+            "contaminant_selected_fraction": 0.75,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 133,
+            "support_distance_m": 0.01802775637731994,
+            "velocity_mps": [
+              0.0,
+              -0.3994235681548488,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.6329942099081346,
+            "contaminant_selected_fraction": 0.7083333333333334,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 133,
+            "support_distance_m": 0.015000000000000001,
+            "velocity_mps": [
+              0.0,
+              -0.2659884198162693,
+              0.0
+            ]
+          }
+        ]
+      },
+      "existing_wall_aware": {
+        "neighbours": 24,
+        "regularization_m": 0.004,
+        "query_count": 3,
+        "output_velocity_mean_mps": [
+          0.0,
+          -0.34493709171216835,
+          0.0
+        ],
+        "truth_velocity_mps": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "velocity_rmse_mps": 1.3461509833478578,
+        "wrong_tangential_direction_fraction": 1.0,
+        "finite_output_fraction": 1.0,
+        "contaminant_weight_fraction": {
+          "mean": 0.6724685458560842,
+          "median": 0.6846996435826935,
+          "max": 0.6997117840774245,
+          "min": 0.6329942099081346
+        },
+        "contaminant_selected_fraction": {
+          "mean": 0.7083333333333334,
+          "median": 0.7083333333333334,
+          "max": 0.75,
+          "min": 0.6666666666666666
+        },
+        "selected_finite_count": {
+          "mean": 24.0,
+          "median": 24.0,
+          "max": 24.0,
+          "min": 24.0
+        },
+        "eligible_visible_count": {
+          "mean": 133.0,
+          "median": 133.0,
+          "max": 133.0,
+          "min": 133.0
+        },
+        "support_distance_m": {
+          "mean": 0.016009252125773313,
+          "median": 0.015000000000000001,
+          "max": 0.01802775637731994,
+          "min": 0.014999999999999996
+        },
+        "query_rows": [
+          {
+            "contaminant_weight_fraction": 0.6846996435826935,
+            "contaminant_selected_fraction": 0.6666666666666666,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 133,
+            "support_distance_m": 0.014999999999999996,
+            "velocity_mps": [
+              0.0,
+              -0.36939928716538706,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.6997117840774245,
+            "contaminant_selected_fraction": 0.75,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 133,
+            "support_distance_m": 0.01802775637731994,
+            "velocity_mps": [
+              0.0,
+              -0.3994235681548488,
+              0.0
+            ]
+          },
+          {
+            "contaminant_weight_fraction": 0.6329942099081346,
+            "contaminant_selected_fraction": 0.7083333333333334,
+            "selected_finite_count": 24,
+            "eligible_visible_count": 133,
+            "support_distance_m": 0.015000000000000001,
+            "velocity_mps": [
+              0.0,
+              -0.2659884198162693,
+              0.0
+            ]
+          }
+        ]
+      },
+      "minimum_visible_support_guard": {
+        "guard": "minimum_visible_support",
+        "minimum_required_visible_neighbours": 24,
+        "accepted_query_count": 3,
+        "accepted_query_fraction": 1.0,
+        "guarded_velocity_mean_mps": [
+          0.0,
+          -0.34493709171216835,
+          0.0
+        ],
+        "accepted_mask": [
+          true,
+          true,
+          true
+        ],
+        "support_distance_m": {
+          "mean": 0.016009252125773313,
+          "median": 0.015000000000000001,
+          "max": 0.01802775637731994,
+          "min": 0.014999999999999996
+        },
+        "status": "candidate_only_rejected",
+        "rejection_reason": "safe undersupport diagnostic only; rejecting a valid narrow opening cannot be promoted without an explicit open-face/support policy"
+      },
+      "comparison": {
+        "velocity_rmse_reduction_mps": 0.0,
+        "wrong_direction_fraction_reduction": 0.0
+      },
+      "known_region_label_gate": {
+        "guard": "known_region_label_gate",
+        "output_velocity_mean_mps": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "velocity_rmse_mps": 0.0,
+        "wrong_tangential_direction_fraction": 0.0,
+        "finite_output_fraction": 1.0,
+        "retained_same_region_sample_count": {
+          "mean": 8.0,
+          "median": 8.0,
+          "max": 8.0,
+          "min": 8.0
+        },
+        "support_distance_m": {
+          "mean": 0.022211897235823116,
+          "median": 0.022912878474779203,
+          "max": 0.028722813232690145,
+          "min": 0.015000000000000001
+        },
+        "status": "candidate_only_rejected",
+        "rejection_reason": "synthetic region labels are not a production material-lineage or open-gap topology contract"
+      }
+    }
+  },
+  "headline": {
+    "partition_legacy_wrong_direction_fraction": 1.0,
+    "partition_wall_aware_wrong_direction_fraction": 0.0,
+    "partition_legacy_contaminant_weight_fraction": {
+      "mean": 0.8745473110300588,
+      "median": 0.8678469606292472,
+      "max": 0.9115535018534511,
+      "min": 0.8569722856019805
+    },
+    "partition_wall_aware_contaminant_weight_fraction": {
+      "mean": 0.0,
+      "median": 0.0,
+      "max": 0.0,
+      "min": 0.0
+    },
+    "gap_legacy_blocked_weight_fraction": {
+      "mean": 0.6814191242927862,
+      "median": 0.6467813077412288,
+      "max": 0.7506947573959007,
+      "min": 0.6467813077412288
+    },
+    "gap_wall_aware_blocked_weight_fraction": {
+      "mean": 0.0,
+      "median": 0.0,
+      "max": 0.0,
+      "min": 0.0
+    },
+    "blob_legacy_wrong_direction_fraction": 1.0,
+    "blob_wall_aware_wrong_direction_fraction": 1.0,
+    "blob_region_gate_wrong_direction_fraction": 0.0
+  },
+  "candidate_decision": {
+    "minimum_visible_support_guard": "rejected_candidate_only",
+    "known_region_label_gate": "rejected_candidate_only",
+    "reason": "finite-wall visibility is effective only where wall geometry is supplied; undersupport/open-gap semantics and disconnected-liquid region labels are not frozen"
+  },
+  "limitations": [
+    "Synthetic fields are not CFD validation and do not establish physical truth for any case.",
+    "Finite triangle visibility cannot detect disconnected liquid blobs without a barrier or region contract.",
+    "A minimum-visible-neighbour guard safely rejects the narrow-gap probe but may reject valid open-face transport.",
+    "The region-label gate is an oracle requiring metadata absent from the current production tracer API.",
+    "No production or upstream files were modified by this diagnostic."
+  ]
+}
