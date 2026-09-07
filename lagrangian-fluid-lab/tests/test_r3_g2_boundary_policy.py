@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts.r3_g2_boundary_policy import (
     DEFAULT_MANIFEST,
     DEFAULT_POLICY,
@@ -80,3 +82,41 @@ def test_policy_json_is_explicitly_candidate_only():
         for case in policy["cases"]
         for component in case["components"]
     )
+
+
+@pytest.mark.parametrize(
+    "mutation,expected_path",
+    [
+        (lambda policy: policy.update({"bogus_root_field": True}), "policy"),
+        (lambda policy: policy["cases"][0].update({"bogus_case_field": True}), "policy.cases[0]"),
+        (
+            lambda policy: policy["cases"][0]["components"][0].update({"bogus_component_field": True}),
+            "policy.cases[0].components[0]",
+        ),
+    ],
+)
+def test_policy_rejects_unknown_fields_like_schema_additional_properties_false(
+    tmp_path, mutation, expected_path
+):
+    manifest = json.loads(DEFAULT_MANIFEST.read_text())
+    semantics = json.loads(DEFAULT_SEMANTICS.read_text())
+    policy = json.loads(DEFAULT_POLICY.read_text())
+    mutation(policy)
+
+    release_dir = tmp_path / "release" / "v0.1-development"
+    campaign_dir = tmp_path / "campaigns" / "v0.1-candidate"
+    release_dir.mkdir(parents=True)
+    campaign_dir.mkdir(parents=True)
+    manifest_path = release_dir / "manifest.json"
+    policy_path = release_dir / "boundary-component-policy.json"
+    semantics_path = campaign_dir / "semantics.json"
+    report_path = tmp_path / "audit.json"
+    manifest["boundary_policy"] = policy_path.name
+    policy["semantics_report_ref"] = "../../campaigns/v0.1-candidate/semantics.json"
+    manifest_path.write_text(json.dumps(manifest))
+    policy_path.write_text(json.dumps(policy))
+    semantics_path.write_text(json.dumps(semantics))
+
+    report = build_report(manifest_path, semantics_path, policy_path, report_path)
+    assert not report["checks"]["policy_contract_pass"]
+    assert any(expected_path in error and "unknown field" in error for error in report["global_errors"])

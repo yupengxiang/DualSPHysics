@@ -49,6 +49,17 @@ FACE_AXIS = {
 VTK_TYPE = {"fixed": 0, "moving": 1}
 
 
+def _implicit_closure_role(family: str, *, void_context: bool) -> str:
+    """Label an undeclared generated cap without confusing baffles and obstacles."""
+    if not void_context:
+        return "component"
+    if family == "F1":
+        return "solid_obstacle"
+    if family == "F3":
+        return "baffle"
+    return "component"
+
+
 def _tag(element: ET.Element) -> str:
     return element.tag.rsplit("}", 1)[-1]
 
@@ -377,7 +388,9 @@ def audit_case(record: dict[str, Any], manifest_path: Path) -> dict[str, Any]:
             if not observation["declared"] and observation["classification"] == "implicit_cap_or_supporting_surface":
                 implicit_closures.append({
                     "mkbound": box["mkbound"], "face": face,
-                    "role": "solid_obstacle" if box["void_context"] else "component",
+                    "role": _implicit_closure_role(
+                        record["family"], void_context=bool(box["void_context"])
+                    ),
                     "coverage_ratio": observation["projected_coverage_ratio"],
                 })
             if not observation["declared"] and observation["classification"] == "edge_or_rim_only":

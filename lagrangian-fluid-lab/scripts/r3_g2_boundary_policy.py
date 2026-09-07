@@ -32,12 +32,84 @@ RIM_POLICIES = {"exclude_open_face_rim", "review_required_implicit_cap"}
 REVIEW_STATUSES = {"candidate_unresolved", "pending_human_or_rule_confirmation"}
 ROLES = {"container", "solid_obstacle", "baffle", "moving_cup", "receiver", "floor"}
 
+# Keep the executable audit aligned with the JSON Schema's
+# ``additionalProperties: false`` clauses.  The repository intentionally does
+# not require a JSON-Schema runtime dependency, so unknown-field rejection is
+# implemented explicitly here and covered by negative tests.  Value/required
+# field validation remains in the semantic checks below.
+_POLICY_KEYS = frozenset({
+    "schema_version", "release_id", "acceptance_status", "manifest_ref",
+    "semantics_report_ref", "policy_rules", "cases", "non_claims",
+})
+_POLICY_RULE_KEYS = frozenset({"open_faces", "rim_policy", "supporting_component"})
+_RIM_RULE_KEYS = frozenset({"exclude_open_face_rim", "review_required_implicit_cap"})
+_CASE_KEYS = frozenset({
+    "case_id", "case_status", "review_required", "review_reason", "components",
+})
+_COMPONENT_KEYS = frozenset({
+    "component_id", "mkbound", "role", "open_faces", "rim_policy",
+    "supporting_component", "review_status", "review_reason",
+})
+_SUPPORTING_COMPONENT_KEYS = frozenset({"component_id", "relationship", "status"})
+
 
 def _load(path: Path) -> dict[str, Any]:
     value = json.loads(Path(path).read_text())
     if not isinstance(value, dict):
         raise ValueError(f"expected a JSON object: {path}")
     return value
+
+
+def _unknown_key_errors(value: Any, allowed: frozenset[str], *, path: str) -> list[str]:
+    """Return deterministic errors for keys outside a schema object branch."""
+    if not isinstance(value, dict):
+        return []
+    return [
+        f"{path} contains unknown field {key!r} (additionalProperties=false)"
+        for key in sorted(set(value) - allowed)
+    ]
+
+
+def _strict_policy_shape(policy: dict[str, Any]) -> list[str]:
+    """Mirror every policy-schema ``additionalProperties: false`` branch.
+
+    This is deliberately a shape-only check.  The existing contract checks
+    below provide the domain/value constraints and produce more useful
+    case-level diagnostics for malformed values.
+    """
+    errors = _unknown_key_errors(policy, _POLICY_KEYS, path="policy")
+
+    rules = policy.get("policy_rules")
+    errors.extend(_unknown_key_errors(rules, _POLICY_RULE_KEYS, path="policy.policy_rules"))
+    if isinstance(rules, dict):
+        rim_rules = rules.get("rim_policy")
+        errors.extend(_unknown_key_errors(
+            rim_rules, _RIM_RULE_KEYS, path="policy.policy_rules.rim_policy"
+        ))
+
+    cases = policy.get("cases")
+    if isinstance(cases, list):
+        for case_index, case in enumerate(cases):
+            case_path = f"policy.cases[{case_index}]"
+            errors.extend(_unknown_key_errors(case, _CASE_KEYS, path=case_path))
+            if not isinstance(case, dict):
+                continue
+            components = case.get("components")
+            if not isinstance(components, list):
+                continue
+            for component_index, component in enumerate(components):
+                component_path = f"{case_path}.components[{component_index}]"
+                errors.extend(_unknown_key_errors(
+                    component, _COMPONENT_KEYS, path=component_path
+                ))
+                if not isinstance(component, dict):
+                    continue
+                supporting = component.get("supporting_component")
+                errors.extend(_unknown_key_errors(
+                    supporting, _SUPPORTING_COMPONENT_KEYS,
+                    path=f"{component_path}.supporting_component",
+                ))
+    return errors
 
 
 def _ordered_faces(value: Any, *, field: str) -> tuple[str, ...] | None:
@@ -257,6 +329,8 @@ def build_report(manifest_path: Path = DEFAULT_MANIFEST, semantics_path: Path = 
     except (OSError, ValueError, json.JSONDecodeError) as error:
         policy = {}
         global_errors.append(f"policy unreadable: {error}")
+
+    global_errors.extend(_strict_policy_shape(policy))
 
     manifest_ref = manifest.get("boundary_policy")
     manifest_policy_path = manifest_path.parent / manifest_ref if isinstance(manifest_ref, str) else None

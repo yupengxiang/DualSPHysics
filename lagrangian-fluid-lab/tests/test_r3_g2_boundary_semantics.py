@@ -68,5 +68,12 @@ def test_selected_sidecars_pass_structural_semantics_and_expose_implicit_caps(tm
         for case_id in ("F1_center_obstacle", "F1_twin_obstacle", "F3_baffled_slosh")
         for item in cases[case_id]["implicit_closures_requiring_policy"]
     } == {(1, "bottom"), (2, "bottom")}
+    assert cases["F3_baffled_slosh"]["implicit_closures_requiring_policy"] == [
+        {
+            "mkbound": 1,
+            "face": "bottom",
+            "role": "baffle",
+            "coverage_ratio": 1.0,
+        }
+    ]
     assert cases["F3_baffled_slosh"]["wall_visibility_semantics_pass"] is False
-

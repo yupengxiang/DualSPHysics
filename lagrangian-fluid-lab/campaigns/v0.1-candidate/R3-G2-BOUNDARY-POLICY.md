@@ -9,6 +9,12 @@
 - `protocol/boundary-component-policy.schema.json`：最小结构约束；
 - `scripts/r3_g2_boundary_policy.py`：可重复审计入口。
 
+审计入口会逐层拒绝 policy 对象中未在 schema 声明的字段（等价于各对象分支
+`additionalProperties=false`），因此报告通过不仅表示案例内容一致，也表示当前
+候选 policy 的字段拓扑没有静默扩展。语义报告中的 `F3_baffled_slosh` 隐式
+bottom cap 现在明确标记为 `baffle`，不再误标为 `solid_obstacle`；这只修正
+语义标签，不改变 candidate-only 或 wall-aware 接纳结论。
+
 ## 契约字段
 
 每个 boundary component 必须显式记录：

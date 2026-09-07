@@ -4,6 +4,30 @@
   "title": "Lagrangian fluid benchmark release manifest v0.1",
   "type": "object",
   "required": ["schema_version", "release_id", "cases"],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "cases": {
+            "contains": {
+              "type": "object",
+              "required": ["geometry"],
+              "properties": {
+                "geometry": {
+                  "type": "object",
+                  "required": ["boundary_sidecar"],
+                  "properties": {
+                    "boundary_sidecar": {"type": "string", "minLength": 1}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {"required": ["boundary_policy"]}
+    }
+  ],
   "properties": {
     "schema_version": {"const": "0.1"},
     "release_id": {"type": "string", "minLength": 1},
