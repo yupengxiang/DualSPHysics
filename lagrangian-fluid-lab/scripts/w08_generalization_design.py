@@ -12,8 +12,10 @@ from typing import Any
 
 try:  # package import under pytest
     from scripts.w07_mechanism_screen import FAMILY_SPECS
+    from scripts.protocol_metrics import validate_split_lineage
 except ModuleNotFoundError:  # direct ``python scripts/...`` execution
     from w07_mechanism_screen import FAMILY_SPECS
+    from protocol_metrics import validate_split_lineage
 
 
 STUDIES = {
@@ -69,6 +71,16 @@ def signature(family: str, physics: dict[str, Any]) -> str:
     return hashlib.sha256(payload.encode()).hexdigest()[:16]
 
 
+def paired_background_id(family: str) -> str:
+    """Identify the fixed baseline context used by a family's interventions.
+
+    A background is deliberately shared by the family's studies and can
+    therefore occur in several splits.  It is not a physical case and must
+    not be used as the split key.
+    """
+    return f"background_{family}_{signature(family, baseline(family))}"
+
+
 def make_card(
     family: str,
     study: str,
@@ -79,13 +91,14 @@ def make_card(
 ) -> dict[str, Any]:
     sig = signature(family, physics)
     physical_case_id = f"physical_{family}_{sig}"
+    lineage_group_id = f"lineage_{physical_case_id}"
     return {
         "card_id": f"W08_{family}_{study}_{ordinal:02d}",
         "family": family,
         "study_id": f"W08_{family}_{study}",
-        "paired_background_id": f"W08_{family}_{study}_background",
+        "paired_background_id": paired_background_id(family),
         "physical_case_id": physical_case_id,
-        "lineage_group_id": physical_case_id,
+        "lineage_group_id": lineage_group_id,
         "split": split,
         "physics": physics,
         "normalized_intervention": normalized_intervention,
@@ -146,16 +159,47 @@ def build_cards() -> list[dict[str, Any]]:
 def audit(cards: list[dict[str, Any]]) -> dict[str, Any]:
     assert len(cards) == 204
     assert len({card["card_id"] for card in cards}) == len(cards)
+    # Use the same W10 primitive used by release records.  It checks both the
+    # release lineage and (when present) the exact physical case.  The latter
+    # catches a bad relabelling where two cards retain different lineage IDs
+    # but describe the same physical state in different splits.
+    validate_split_lineage(cards)
+
     split_by_signature: dict[str, set[str]] = {}
     for card in cards:
         split_by_signature.setdefault(card["execution_unit_id"], set()).add(card["split"])
     leakage = {key: sorted(value) for key, value in split_by_signature.items() if len(value) > 1}
     assert not leakage, f"identical physical states cross splits: {leakage}"
+
+    split_by_physical_case: dict[str, set[str]] = {}
+    lineage_by_physical_case: dict[str, set[str]] = {}
+    studies_by_physical_case: dict[str, set[str]] = {}
+    for card in cards:
+        physical_case = card["physical_case_id"]
+        split_by_physical_case.setdefault(physical_case, set()).add(card["split"])
+        lineage_by_physical_case.setdefault(physical_case, set()).add(card["lineage_group_id"])
+        studies_by_physical_case.setdefault(physical_case, set()).add(card["study_id"])
+    physical_case_leakage = {
+        key: sorted(value) for key, value in split_by_physical_case.items() if len(value) > 1
+    }
+    assert not physical_case_leakage, f"physical case crosses splits: {physical_case_leakage}"
+    assert all(len(value) == 1 for value in lineage_by_physical_case.values()), (
+        "one physical case must map to one lineage group"
+    )
     split_by_lineage: dict[str, set[str]] = {}
     for card in cards:
         split_by_lineage.setdefault(card["lineage_group_id"], set()).add(card["split"])
     lineage_leakage = {key: sorted(value) for key, value in split_by_lineage.items() if len(value) > 1}
     assert not lineage_leakage, f"lineage crosses splits: {lineage_leakage}"
+
+    backgrounds_by_family: dict[str, set[str]] = {}
+    studies_by_background: dict[str, set[str]] = {}
+    for card in cards:
+        backgrounds_by_family.setdefault(card["family"], set()).add(card["paired_background_id"])
+        studies_by_background.setdefault(card["paired_background_id"], set()).add(card["study_id"])
+    assert all(len(value) == 1 for value in backgrounds_by_family.values()), (
+        "each family must keep one fixed paired background across its studies"
+    )
 
     for family, study in STUDIES.items():
         for axis in study["single_axes"]:
@@ -174,7 +218,19 @@ def audit(cards: list[dict[str, Any]]) -> dict[str, Any]:
         "unique_execution_units": len(split_by_signature),
         "duplicate_cards_reusable_within_split": len(cards) - len(split_by_signature),
         "cross_split_signature_leakage": leakage,
+        "cross_split_physical_case_leakage": physical_case_leakage,
         "cross_split_lineage_leakage": lineage_leakage,
+        "physical_case_count": len(split_by_physical_case),
+        "physical_cases_reused_across_studies": sum(len(value) > 1 for value in studies_by_physical_case.values()),
+        "paired_background_count": len(studies_by_background),
+        "paired_backgrounds_by_family": {
+            family: {
+                "ids": sorted(ids),
+                "study_count": len({card["study_id"] for card in cards if card["family"] == family}),
+                "split_reuse_is_intentional": True,
+            }
+            for family, ids in sorted(backgrounds_by_family.items())
+        },
         "families": sorted(STUDIES),
     }
 
@@ -189,7 +245,14 @@ def main() -> None:
     design = {
         "schema_version": 1,
         "scope": "controlled W08 design cards, not solver jobs",
-        "split_unit": "physical simulation signature; all temporal windows and material subsets inherit the simulation split",
+        "split_unit": "physical_case_id and its lineage_group_id; all temporal windows and material subsets inherit the simulation split",
+        "identity_semantics": {
+            "study_id": "causal intervention protocol; groups cards that vary one or two named axes",
+            "paired_background_id": "fixed baseline context shared by a family's intervention studies; reuse across splits is intentional",
+            "physical_case_id": "canonical exact physical parameter state; duplicate study cards may reference the same case",
+            "lineage_group_id": "release lineage rooted at one physical case; resolutions, windows, numerics, and derived products stay in its split",
+            "execution_unit_id": "deduplicated solver execution for an exact physical state",
+        },
         "study_count": 12,
         "card_count": len(cards),
         "studies": STUDIES,
@@ -210,6 +273,7 @@ def main() -> None:
             "No random frame split.",
             "All windows, particles, tracers, and derived targets from one simulation inherit one split.",
             "Replicate resolutions and numerical variants stay grouped with the same physical lineage.",
+            "The same physical_case_id and lineage_group_id must never occur in more than one split; paired_background_id may be reused across splits as a fixed intervention background.",
             "Topology holdouts are separate from continuous-axis claims and are not silently pooled.",
         ],
         "execution_decision": "planned_not_run_until_W10_schema_and_family_resolution_gates",

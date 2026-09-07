@@ -29,6 +29,20 @@ def must_reject(name, operation) -> dict:
     return {"attack": name, "detected": False, "reason": "accepted unexpectedly"}
 
 
+def must_accept(name, operation) -> dict:
+    """Record a protocol case that is valid by design.
+
+    A paired background is a controlled nuisance context, not a physical
+    lineage.  Reusing it across intervention splits is therefore expected and
+    should remain a visible positive control in the W10 report.
+    """
+    try:
+        operation()
+    except (ValueError, AssertionError) as exc:
+        return {"attack": name, "detected": False, "reason": f"rejected unexpectedly: {exc}"}
+    return {"attack": name, "detected": True, "reason": "accepted as an intentional paired-background reuse"}
+
+
 def run_attacks() -> list[dict]:
     time = np.asarray([0.0, 0.1, 0.2])
     position = np.zeros((3, 3, 3))
@@ -61,6 +75,22 @@ def run_attacks() -> list[dict]:
             lambda: validate_split_lineage([
                 {"lineage_group_id": "same-physics", "split": "train"},
                 {"lineage_group_id": "same-physics", "split": "test"},
+            ]),
+        ),
+        must_reject(
+            "same_physical_case_with_different_lineage_labels",
+            lambda: validate_split_lineage([
+                {"physical_case_id": "same-physics", "lineage_group_id": "lineage-train", "split": "train"},
+                {"physical_case_id": "same-physics", "lineage_group_id": "lineage-test", "split": "test"},
+            ]),
+        ),
+        must_accept(
+            "paired_background_reuse_across_intervention_splits",
+            lambda: validate_split_lineage([
+                {"paired_background_id": "same-background", "physical_case_id": "train-case",
+                 "lineage_group_id": "train-lineage", "split": "train"},
+                {"paired_background_id": "same-background", "physical_case_id": "test-case",
+                 "lineage_group_id": "test-lineage", "split": "test"},
             ]),
         ),
         must_reject(

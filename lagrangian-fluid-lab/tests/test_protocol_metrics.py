@@ -45,6 +45,26 @@ def test_lineage_cannot_cross_splits():
         ])
 
 
+def test_physical_case_cannot_cross_splits_even_with_different_lineage_labels():
+    with pytest.raises(ValueError, match="physical case crosses splits"):
+        validate_split_lineage([
+            {"physical_case_id": "case-a", "lineage_group_id": "lineage-train", "split": "train"},
+            {"physical_case_id": "case-a", "lineage_group_id": "lineage-test", "split": "test"},
+        ])
+
+
+def test_paired_background_may_be_reused_across_controlled_splits():
+    # A fixed nuisance/background context is deliberately shared by a causal
+    # intervention study.  It is not the split key and must not trigger the
+    # physical-lineage gate by itself.
+    validate_split_lineage([
+        {"paired_background_id": "background-a", "physical_case_id": "case-train",
+         "lineage_group_id": "lineage-train", "split": "train"},
+        {"paired_background_id": "background-a", "physical_case_id": "case-test",
+         "lineage_group_id": "lineage-test", "split": "test"},
+    ])
+
+
 def test_affine_transform_rejects_nan_translation():
     transforms = np.eye(4)[None]
     transforms[0, 0, 3] = np.nan

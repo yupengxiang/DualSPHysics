@@ -102,12 +102,33 @@ def first_passage_metrics(reference: np.ndarray, prediction: np.ndarray) -> dict
 
 
 def validate_split_lineage(records: Iterable[dict]) -> None:
+    """Reject split assignments that separate one physical lineage.
+
+    ``lineage_group_id`` is the release-level grouping key: resolutions,
+    output windows, numerical variants, and derived products belonging to one
+    simulation must stay together.  Design-time cards may also carry a
+    ``physical_case_id``.  That key identifies the exact physical state and
+    is intentionally checked independently because two cards can accidentally
+    be assigned different lineage labels while still describing the same
+    physical case.  ``paired_background_id`` is *not* checked: a controlled
+    intervention study is allowed to reuse the same fixed background across
+    train and extrapolation splits.
+    """
     splits = defaultdict(set)
+    physical_splits = defaultdict(set)
     for record in records:
         splits[record["lineage_group_id"]].add(record["split"])
+        physical_case_id = record.get("physical_case_id")
+        if physical_case_id is not None:
+            physical_splits[physical_case_id].add(record["split"])
     leaking = {key: sorted(value) for key, value in splits.items() if len(value) > 1}
     if leaking:
         raise ValueError(f"lineage crosses splits: {leaking}")
+    physical_leaking = {
+        key: sorted(value) for key, value in physical_splits.items() if len(value) > 1
+    }
+    if physical_leaking:
+        raise ValueError(f"physical case crosses splits: {physical_leaking}")
 
 
 def validate_affine_transforms(transforms: np.ndarray, tolerance: float = 1e-5) -> None:

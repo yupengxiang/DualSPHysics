@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "adversarial_test_count": 8,
-  "detected_count": 8,
+  "adversarial_test_count": 10,
+  "detected_count": 10,
   "strict_pass": true,
   "attacks": [
     {
@@ -23,6 +23,16 @@
       "attack": "split_by_frames_or_resolution",
       "detected": true,
       "reason": "lineage crosses splits: {'same-physics': ['test', 'train']}"
+    },
+    {
+      "attack": "same_physical_case_with_different_lineage_labels",
+      "detected": true,
+      "reason": "physical case crosses splits: {'same-physics': ['test', 'train']}"
+    },
+    {
+      "attack": "paired_background_reuse_across_intervention_splits",
+      "detected": true,
+      "reason": "accepted as an intentional paired-background reuse"
     },
     {
       "attack": "survivor_renormalized_transport",
