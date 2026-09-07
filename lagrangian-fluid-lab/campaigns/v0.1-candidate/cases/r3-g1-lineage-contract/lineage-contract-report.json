@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "status": "candidate-only",
+  "cpu_only": true,
+  "solver_invoked": false,
+  "source_refs": {
+    "w08_design_script": "scripts/w08_generalization_design.py",
+    "w10_validator": "scripts/protocol_metrics.py::validate_split_lineage",
+    "w10_adversarial_script": "scripts/w10_protocol_audit.py",
+    "current_w08_design": "campaigns/v0.1-candidate/cases/w08/controlled-generalization-design.json",
+    "historical_fix_boundary": "91847d6 (W08 lineage audit) / 72c353f (W08-W10 physical-case alignment)"
+  },
+  "current_tree": {
+    "card_count": 204,
+    "w08_audit": {
+      "status": "pass",
+      "result": {
+        "cards": 204,
+        "unique_execution_units": 196,
+        "duplicate_cards_reusable_within_split": 8,
+        "cross_split_signature_leakage": {},
+        "cross_split_physical_case_leakage": {},
+        "cross_split_lineage_leakage": {},
+        "physical_case_count": 196,
+        "physical_cases_reused_across_studies": 4,
+        "paired_background_count": 4,
+        "paired_backgrounds_by_family": {
+          "F1": {
+            "ids": [
+              "background_F1_26b649ee6795645b"
+            ],
+            "study_count": 3,
+            "split_reuse_is_intentional": true
+          },
+          "F2": {
+            "ids": [
+              "background_F2_b84778fda40ec94d"
+            ],
+            "study_count": 3,
+            "split_reuse_is_intentional": true
+          },
+          "F3": {
+            "ids": [
+              "background_F3_ff5fb463d7c71a26"
+            ],
+            "study_count": 3,
+            "split_reuse_is_intentional": true
+          },
+          "F6": {
+            "ids": [
+              "background_F6_d92eece637e44b9a"
+            ],
+            "study_count": 3,
+            "split_reuse_is_intentional": true
+          }
+        },
+        "families": [
+          "F1",
+          "F2",
+          "F3",
+          "F6"
+        ]
+      }
+    },
+    "w10_validate_split_lineage": {
+      "status": "accept"
+    },
+    "candidate_w08_contract": {
+      "status": "pass",
+      "scope": "W08 design cards only",
+      "required_identity_fields": [
+        "card_id",
+        "family",
+        "study_id",
+        "paired_background_id",
+        "physical_case_id",
+        "lineage_group_id",
+        "split",
+        "simulation_signature",
+        "execution_unit_id"
+      ],
+      "physical_case_count": 196,
+      "lineage_count": 196,
+      "execution_unit_count": 196,
+      "paired_background_is_not_a_split_key": true
+    },
+    "persisted_card_count": 204,
+    "persisted_matches_generator": true
+  },
+  "historical_reproduction": {
+    "status": "reproduced",
+    "fixture": "pre-918 W08 identity projection over current 204 physics cards",
+    "card_count": 204,
+    "w08_signature_only_audit": {
+      "cards": 204,
+      "unique_execution_units": 196,
+      "cross_split_signature_leakage": {},
+      "lineage_gate_called": false,
+      "status": "pass"
+    },
+    "w10_validate_split_lineage": {
+      "status": "reject",
+      "exception_type": "ValueError",
+      "reason": "lineage crosses splits: {'W08_F1_controlled': ['extrapolation', 'interpolation', 'joint_extrapolation', 'single_axis_extrapolation', 'train'], 'W08_F2_controlled': ['extrapolation', 'interpolation', 'joint_extrapolation', 'single_axis_extrapolation', 'train'], 'W08_F3_controlled': ['extrapolation', 'interpolation', 'joint_extrapolation', 'single_axis_extrapolation', 'train'], 'W08_F6_controlled': ['extrapolation', 'interpolation', 'joint_extrapolation', 'single_axis_extrapolation', 'train']}"
+    },
+    "cross_split_lineages": {
+      "W08_F1_controlled": [
+        "extrapolation",
+        "interpolation",
+        "joint_extrapolation",
+        "single_axis_extrapolation",
+        "train"
+      ],
+      "W08_F2_controlled": [
+        "extrapolation",
+        "interpolation",
+        "joint_extrapolation",
+        "single_axis_extrapolation",
+        "train"
+      ],
+      "W08_F3_controlled": [
+        "extrapolation",
+        "interpolation",
+        "joint_extrapolation",
+        "single_axis_extrapolation",
+        "train"
+      ],
+      "W08_F6_controlled": [
+        "extrapolation",
+        "interpolation",
+        "joint_extrapolation",
+        "single_axis_extrapolation",
+        "train"
+      ]
+    },
+    "interpretation": "The old W08 audit accepted unique execution signatures, while W10 rejected the family-shared lineage_group_id across train/interpolation/extrapolation splits."
+  },
+  "diagnosis": {
+    "root_cause": "W08 and W10 used different split keys: execution signature versus lineage_group_id.",
+    "current_status": "fixed in the current tree; no current-card rejection was observed",
+    "remaining_contract_risk": "The global W10 validator permits records without physical_case_id for legacy compatibility, so W08-specific identity completeness and one-to-one mapping need an explicit adapter or schema gate."
+  },
+  "candidate_contract_fix": {
+    "status": "candidate-only",
+    "applied_to_existing_sources": false,
+    "proposal": "Run the W10 lineage primitive plus W08 identity-completeness and mapping checks before materialization.",
+    "rules": [
+      "Require physical_case_id, lineage_group_id, execution_unit_id, and split on every W08 card.",
+      "Require one physical_case_id to map to one split, one lineage_group_id, and one execution_unit_id.",
+      "Require one execution_unit_id to map to one physical_case_id and one split.",
+      "Allow paired_background_id to repeat across intervention splits; it is not a split key."
+    ]
+  }
+}
