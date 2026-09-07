@@ -1,0 +1,242 @@
+{
+  "schema_version": 1,
+  "scope": "W08 topology-extrapolation materializations; candidate-only evidence",
+  "formal_release": false,
+  "split": "topology_extrapolation",
+  "inventory": "campaigns/v0.1-candidate/w00-inventory.json",
+  "binary_provenance": {
+    "GenCase_linux64": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "bytes": 5809384,
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226"
+    },
+    "DualSPHysics5.4_linux64": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "bytes": 159206984,
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    },
+    "PartVTK_linux64": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+      "bytes": 6222440,
+      "sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+    }
+  },
+  "materializations": [
+    {
+      "card_id": "W08_F1_topology_twin_00",
+      "family": "F1",
+      "study_id": "W08_F1_topology_holdout",
+      "paired_background_id": "background_F1_topology_holdout_staggered_v1",
+      "physical_case_id": "physical_W08_F1_topology_twin_141632fc10d15922",
+      "lineage_group_id": "lineage_W08_F1_topology_twin_141632fc10d15922",
+      "split": "topology_extrapolation",
+      "physics": {
+        "wet_bed_ratio": 0.0,
+        "blockage_ratio": 0.25,
+        "obstacle_eccentricity": 0.0,
+        "release_aspect_ratio": 0.73913,
+        "obstacle_topology": "twin",
+        "geometry_variant": "staggered_0p09x0p10_obstacles"
+      },
+      "normalized_intervention": {
+        "obstacle_topology": "twin"
+      },
+      "simulation_signature": "141632fc10d15922",
+      "execution_unit_id": "sim_W08_F1_topology_twin_141632fc10d15922",
+      "execution_status": "completed",
+      "formal_production_authorized": false,
+      "materialization_case_id": "W08_F1_topology_twin_obstacle_00",
+      "definition": "campaigns/v0.1-candidate/cases/w08/topology/F1_twin_obstacle/W08_F1_topology_twin_obstacle_Def.xml",
+      "provenance_status": "declared_independent_geometry",
+      "case_id": "W08_F1_topology_twin_obstacle_00",
+      "mechanism": "multi-path-split-remerge",
+      "source_template_definition": "cases/F1/F1_twin_obstacle/F1_twin_obstacle_Def.xml",
+      "source_template_sha256": "a816d5ae86f91d73cb77730042a890c45f8f7b70236f390b4a840047fe94f909",
+      "definition_sha256": "2ff2a1412a258a7b5cc28ffd586abc1e3a8a39fa0888c1a239f51c1ac4e78646",
+      "particle_spacing_m": 0.04,
+      "time_max_s": 0.8,
+      "time_out_s": 0.05,
+      "gpu_requested_physical_index": 4,
+      "release_status": "candidate",
+      "physical_acceptance": "rejected_pending_resolution_and_external_reference",
+      "reference_acceptance": "rejected_no_external_anchor",
+      "provenance": {
+        "definition_is_new_file": true,
+        "reuses_registry_case": false,
+        "registry_case_id_not_reused": "F1_twin_obstacle",
+        "geometry_change": "two obstacle boxes moved to x=0.58/0.84 m, y=0.04/0.26 m and changed to 0.09 x 0.10 x 0.30 m",
+        "upstream_source_modified": false,
+        "binary_source": "W00 allowlisted official DualSPHysics 5.4.355 package"
+      },
+      "materialization_status": "candidate_structural_pass",
+      "stages": {
+        "declared": {
+          "w08_card_id": "W08_F1_topology_twin_00",
+          "split": "topology_extrapolation",
+          "physical_case_id": "physical_W08_F1_topology_twin_141632fc10d15922",
+          "lineage_group_id": "lineage_W08_F1_topology_twin_141632fc10d15922",
+          "execution_unit_id": "sim_W08_F1_topology_twin_141632fc10d15922"
+        },
+        "executable": {
+          "definition": "campaigns/v0.1-candidate/cases/w08/topology/F1_twin_obstacle/W08_F1_topology_twin_obstacle_Def.xml",
+          "definition_sha256": "2ff2a1412a258a7b5cc28ffd586abc1e3a8a39fa0888c1a239f51c1ac4e78646",
+          "generated_case_xml": "campaigns/v0.1-candidate/artifacts/w08-topology/W08_F1_topology_twin_obstacle_00/generated/W08_F1_topology_twin_obstacle_00.xml",
+          "generated_case_xml_sha256": "2f340a356452b48a74af4653111d8775e80c86a4e8e62f06e525a8145cd5e222",
+          "generated_boundary_vtk": "campaigns/v0.1-candidate/artifacts/w08-topology/W08_F1_topology_twin_obstacle_00/generated/W08_F1_topology_twin_obstacle_00_MkCells.vtk",
+          "generated_boundary_vtk_sha256": "e618ed2c41512b95ec7bebcd2160e11b01141969343e1546e501d57d1cba1dee",
+          "gencase_command": [
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+            "campaigns/v0.1-candidate/cases/w08/topology/F1_twin_obstacle/W08_F1_topology_twin_obstacle_Def",
+            "campaigns/v0.1-candidate/artifacts/w08-topology/W08_F1_topology_twin_obstacle_00/generated/W08_F1_topology_twin_obstacle_00",
+            "-save:all"
+          ],
+          "gencase_returncode": 0,
+          "fluid_particles": 1170,
+          "total_particles": 2855,
+          "log": "campaigns/v0.1-candidate/artifacts/w08-topology/W08_F1_topology_twin_obstacle_00/generated/gencase.stdout.log",
+          "log_sha256": "8724b695e6296459f51a66ff723b5d5273d99e72236b1cb03856ec19fba70d2a"
+        },
+        "run": {
+          "status": "completed",
+          "attempt_id": "20260907T073034.720543Z-34aedd16",
+          "attempt_directory": "campaigns/v0.1-candidate/runs/W08_F1_topology_twin_obstacle_00/attempts/20260907T073034.720543Z-34aedd16.complete",
+          "elapsed_seconds": 3.1606296692043543,
+          "returncode": 0,
+          "evidence_files": [
+            "data/Part_0000.bi4",
+            "data/Part_0001.bi4",
+            "data/Part_0002.bi4",
+            "data/Part_0003.bi4",
+            "data/Part_0004.bi4",
+            "data/Part_0005.bi4",
+            "data/Part_0006.bi4",
+            "data/Part_0007.bi4",
+            "data/Part_0008.bi4",
+            "data/Part_0009.bi4",
+            "data/Part_0010.bi4",
+            "data/Part_0011.bi4",
+            "data/Part_0012.bi4",
+            "data/Part_0013.bi4",
+            "data/Part_0014.bi4",
+            "data/Part_0015.bi4",
+            "data/Part_0016.bi4"
+          ],
+          "gpu_at_launch": {
+            "index": 4,
+            "uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+            "memory_used_mib": 18,
+            "utilization_percent": 0
+          },
+          "solver_command": [
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+            "-gpu:4",
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/artifacts/w08-topology/W08_F1_topology_twin_obstacle_00/generated/W08_F1_topology_twin_obstacle_00",
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/W08_F1_topology_twin_obstacle_00/attempts/20260907T073034.720543Z-34aedd16.partial"
+          ],
+          "process_stdout": "campaigns/v0.1-candidate/runs/W08_F1_topology_twin_obstacle_00/attempts/20260907T073034.720543Z-34aedd16.complete/process.stdout.log",
+          "process_stdout_sha256": "c483499321ec1f771b029db27f8b05b93f7f6c296bb124580897680e87341675",
+          "run_out": "campaigns/v0.1-candidate/runs/W08_F1_topology_twin_obstacle_00/attempts/20260907T073034.720543Z-34aedd16.complete/Run.out",
+          "run_out_sha256": "8dc3e0388e8d73be0492a9aff83c434927f0418e9e22392fdf1114c7c01c0b85"
+        },
+        "normalized_hdf5": {
+          "hdf5": "campaigns/v0.1-candidate/data/w08-topology/W08_F1_topology_twin_obstacle_00.h5",
+          "hdf5_bytes": 584412,
+          "hdf5_sha256": "f8164b6581319f95f9df459445aac15429e62497cce2c4f7f70fb3801af01085",
+          "frames": 17,
+          "partvtk_binary": {
+            "path": "vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+            "bytes": 6222440,
+            "sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          },
+          "partvtk_command_log": "campaigns/v0.1-candidate/runs/W08_F1_topology_twin_obstacle_00/attempts/20260907T073034.720543Z-34aedd16.complete/csv/partvtk.stdout.log",
+          "partvtk_command_log_sha256": "87a2b7844ec55f432e72fed7845a8862e68c9f92f239af2b1d422ceb55296d54",
+          "csv_frame_count": 17
+        },
+        "structural_audit": {
+          "trajectory_io_audit": {
+            "id": "W08_F1_topology_twin_obstacle_00",
+            "family": "F1",
+            "mechanism": "multi-path-split-remerge",
+            "frames": 17,
+            "time_start": 0.0,
+            "time_end": 0.800068,
+            "particle_ids": 1170,
+            "identity_keys": 1170,
+            "identity_key": "idp",
+            "zones": [
+              0
+            ],
+            "ids_common_first_last": 1170,
+            "identity_retention": 1.0,
+            "particles_initial": 1170,
+            "particles_final": 1170,
+            "identities_introduced_after_initial": 0,
+            "initial_identities_missing_at_final": 0,
+            "mean_displacement": 0.24135898053646088,
+            "max_displacement": 0.8080111742019653,
+            "fluid_mean_displacement": 0.24135898053646088,
+            "floating_mean_displacement": null,
+            "floating_max_displacement": null,
+            "max_speed": 4.07669734954834,
+            "density_min": 942.0001831054688,
+            "density_max": 1027.6058349609375,
+            "excluded_particles": 0,
+            "mk_values": [
+              1
+            ],
+            "type_values": [
+              3
+            ],
+            "source_destination_mass_world_x_legacy": {
+              "1": {
+                "initial_count": 1170,
+                "initial_mass_kg": 74.8800048828125,
+                "left_x_lt_0p4_mass_fraction": 0.5931624174118042,
+                "middle_0p4_to_0p8_mass_fraction": 0.283760666847229,
+                "right_x_ge_0p8_mass_fraction": 0.1230769231915474,
+                "numerically_missing_mass_fraction": 0.0
+              }
+            },
+            "initial_left_particles": 1170,
+            "fraction_initial_left_crossing_x_0p6": 0.2188034188034188,
+            "median_first_crossing_time_x_0p6": 0.400052,
+            "hdf5": "campaigns/v0.1-candidate/data/w08-topology/W08_F1_topology_twin_obstacle_00.h5",
+            "hdf5_bytes": 584412
+          },
+          "g3_audit": {
+            "path": "campaigns/v0.1-candidate/data/w08-topology/W08_F1_topology_twin_obstacle_00.h5",
+            "local_available": true,
+            "structural_pass": true,
+            "release_contract_pass": false,
+            "issues": [],
+            "frames": 17,
+            "identity_slots": 1170,
+            "initial_valid": 1170,
+            "final_valid": 1170,
+            "duration_s": 0.800068,
+            "material_present": false,
+            "material_missing": [
+              "tracer_id",
+              "source_label",
+              "mass_weight",
+              "position",
+              "valid"
+            ],
+            "material_tracers": 0
+          },
+          "structural_pass": true,
+          "physical_acceptance": "rejected_pending_resolution_and_external_reference",
+          "reference_acceptance": "rejected_no_external_anchor",
+          "formal_production_authorized": false
+        }
+      },
+      "acceptance": {
+        "status": "candidate",
+        "physical": "rejected",
+        "reference": "rejected",
+        "reason": "topology geometry is executable and structurally valid, but one coarse resolution run has no external reference and is not a formal dataset"
+      }
+    }
+  ],
+  "updated_at_utc": "2026-09-07T07:35:20.868995+00:00"
+}

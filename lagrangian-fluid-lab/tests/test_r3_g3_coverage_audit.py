@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import h5py
@@ -86,7 +87,7 @@ def test_work_package_legacy_complete_is_separate_from_authoritative_state():
     assert packages["engineering_accepted_count"] == 3
     assert len(packages["legacy_complete_but_not_engineering_accepted"]) == 10
     assert packages["w08_crosscheck"]["design_only_claim_is_consistent"]
-    assert packages["w08_crosscheck"]["execution_status"] == "design_complete"
+    assert packages["w08_crosscheck"]["execution_status"] == "partial_materialization"
     assert packages["w08_crosscheck"]["acceptance_status"] == "not_experimentally_accepted"
 
 
@@ -105,22 +106,55 @@ def test_work_package_audit_rejects_missing_authoritative_state():
     assert any("missing fields" in issue for issue in result["issues"])
 
 
-def test_declared_topology_holdouts_have_no_w08_execution_link():
+def test_declared_topology_holdouts_have_one_independent_f1_execution_link():
     topology = w08_topology_audit()
     assert set(topology) == set(FAMILIES)
-    assert all(item["w08_controlled_cards"] == 0 for item in topology.values())
-    assert all(not item["holdout_gate_pass"] for item in topology.values())
+    assert topology["F1"]["w08_controlled_cards"] == 1
+    assert topology["F1"]["w08_continuous_controlled_cards"] == 0
+    assert topology["F1"]["holdout_gate_pass"]
+    assert topology["F1"]["scientific_acceptance_pass"] is False
+    assert topology["F1"]["coverage_status"] == "observed_but_not_formal"
+    assert topology["F1"]["coverage_claim"] is False
+    assert all(item["w08_controlled_cards"] == 0 for family, item in topology.items() if family != "F1")
+    assert all(not item["holdout_gate_pass"] for family, item in topology.items() if family != "F1")
     assert topology["F1"]["incidental_matching_registry_cases"] == ["F1_twin_obstacle"]
     assert topology["F2"]["incidental_matching_registry_cases"] == []
     for family in ("F1", "F2", "F3", "F6"):
         item = topology[family]
         assert item["planned_design_card_count"] > 0
-        assert item["actual_coverage_count"] == 0
-        assert item["formal_coverage_count"] == 0
-        assert item["coverage_status"] == "planned_only"
-        assert item["coverage_claim"] is False
+        if family != "F1":
+            assert item["actual_coverage_count"] == 0
+            assert item["formal_coverage_count"] == 0
+            assert item["coverage_status"] == "planned_only"
+            assert item["coverage_claim"] is False
     assert topology["F4"]["coverage_status"] == "not_declared"
     assert topology["F5"]["coverage_status"] == "not_declared"
+
+
+def test_f1_topology_materialization_has_independent_identity_and_candidate_only_acceptance():
+    manifest_path = Path("campaigns/v0.1-candidate/cases/w08/topology-holdout-materializations.json")
+    payload = json.loads(manifest_path.read_text())
+    record = next(item for item in payload["materializations"] if item["family"] == "F1")
+    inventory = json.loads(Path("campaigns/v0.1-candidate/w00-inventory.json").read_text())
+    registry = json.loads(Path("campaigns/v0.1-candidate/case-registry.json").read_text())
+    registry_ids = {item["id"] for item in registry["cases"]}
+    registry_lineages = {item["lineage_group_id"] for item in registry["cases"]}
+    assert record["case_id"] not in registry_ids
+    assert record["physical_case_id"] not in registry_ids
+    assert record["lineage_group_id"] not in registry_lineages
+    assert record["split"] == "topology_extrapolation"
+    assert record["execution_status"] == "completed"
+    assert record["stages"]["executable"]["gencase_returncode"] == 0
+    assert record["stages"]["run"]["status"] == "completed"
+    gpu = record["stages"]["run"]["gpu_at_launch"]
+    assert gpu["index"] == 4
+    assert gpu["index"] not in {0, 1, 2, 3}
+    assert gpu["uuid"] in inventory["execution_policy"]["allowed_gpu_uuids"]
+    assert record["stages"]["structural_audit"]["structural_pass"]
+    assert record["acceptance"]["status"] == "candidate"
+    assert record["acceptance"]["physical"] == "rejected"
+    assert record["acceptance"]["reference"] == "rejected"
+    assert record["formal_production_authorized"] is False
 
 
 def test_pilot_tasks_expose_candidate_material_but_no_complete_t2_t3_t4():

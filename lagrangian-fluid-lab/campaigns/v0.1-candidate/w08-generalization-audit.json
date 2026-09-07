@@ -78,6 +78,41 @@
     "F3": "perforated_proxy",
     "F6": "twin_free"
   },
+  "topology_holdout_cards": [
+    {
+      "card_id": "W08_F1_topology_twin_00",
+      "family": "F1",
+      "study_id": "W08_F1_topology_holdout",
+      "paired_background_id": "background_F1_topology_holdout_staggered_v1",
+      "physical_case_id": "physical_W08_F1_topology_twin_141632fc10d15922",
+      "lineage_group_id": "lineage_W08_F1_topology_twin_141632fc10d15922",
+      "split": "topology_extrapolation",
+      "physics": {
+        "wet_bed_ratio": 0.0,
+        "blockage_ratio": 0.25,
+        "obstacle_eccentricity": 0.0,
+        "release_aspect_ratio": 0.73913,
+        "obstacle_topology": "twin",
+        "geometry_variant": "staggered_0p09x0p10_obstacles"
+      },
+      "normalized_intervention": {
+        "obstacle_topology": "twin"
+      },
+      "simulation_signature": "141632fc10d15922",
+      "execution_unit_id": "sim_W08_F1_topology_twin_141632fc10d15922",
+      "execution_status": "planned_not_run",
+      "formal_production_authorized": false,
+      "materialization_case_id": "W08_F1_topology_twin_obstacle_00",
+      "definition": "campaigns/v0.1-candidate/cases/w08/topology/F1_twin_obstacle/W08_F1_topology_twin_obstacle_Def.xml",
+      "provenance_status": "declared_independent_geometry"
+    }
+  ],
+  "topology_materialization": {
+    "manifest": "campaigns/v0.1-candidate/cases/w08/topology-holdout-materializations.json",
+    "formal_release": false,
+    "status": "candidate_evidence_indexed",
+    "interpretation": "separate from the 204 continuous-axis cards; physical/reference acceptance remains required"
+  },
   "release_constraints": [
     "No random frame split.",
     "All windows, particles, tracers, and derived targets from one simulation inherit one split.",
@@ -85,5 +120,5 @@
     "The same physical_case_id and lineage_group_id must never occur in more than one split; paired_background_id may be reused across splits as a fixed intervention background.",
     "Topology holdouts are separate from continuous-axis claims and are not silently pooled."
   ],
-  "execution_decision": "planned_not_run_until_W10_schema_and_family_resolution_gates"
+  "execution_decision": "continuous_cards_planned_not_run; topology_holdout_candidate_materialization_tracked_separately"
 }

@@ -31,6 +31,7 @@ W07_PATH = CAMPAIGN / "w07-mechanism-screen.json"
 W07_DESIGN_PATH = CAMPAIGN / "cases" / "w07" / "candidate-designs.json"
 W08_PATH = CAMPAIGN / "w08-generalization-audit.json"
 W08_DESIGN_PATH = CAMPAIGN / "cases" / "w08" / "controlled-generalization-design.json"
+W08_TOPOLOGY_MANIFEST_PATH = CAMPAIGN / "cases" / "w08" / "topology-holdout-materializations.json"
 WORK_PACKAGES_PATH = CAMPAIGN / "work-packages.json"
 W11_SELECTION_PATH = CAMPAIGN / "cases" / "w11" / "pilot-selection.json"
 W11_MANIFEST_PATH = RELEASE / "manifest.json"
@@ -89,6 +90,12 @@ ENGINEERING_ACCEPTANCE_STATUSES = {
 
 def load(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text())
+
+
+def lab_path(value: str | Path) -> Path:
+    """Resolve manifest paths without allowing an absolute path to escape semantics."""
+    path = Path(value)
+    return path if path.is_absolute() else LAB / path
 
 
 def audit_work_packages(payload: dict[str, Any]) -> dict[str, Any]:
@@ -448,7 +455,18 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
     design = load(W08_DESIGN_PATH)
     w07_design = load(W07_DESIGN_PATH)
     cards = design["cards"]
+    # Topology cards live outside the 204 continuous-axis cards.  Keeping the
+    # namespaces separate prevents a topology run from being counted as a
+    # continuous intervention while still making the declared W08 holdout
+    # auditable and linkable.
+    topology_cards = design.get("topology_holdout_cards", [])
     w07_cards = w07_design["cards"]
+    topology_manifest = load(W08_TOPOLOGY_MANIFEST_PATH) if W08_TOPOLOGY_MANIFEST_PATH.is_file() else {}
+    materialization_by_card = {
+        item.get("card_id"): item
+        for item in topology_manifest.get("materializations", [])
+        if item.get("card_id")
+    }
     stage_rows, _ = case_stage_rows()
     stage_by_case = {row["case_id"]: row for row in stage_rows}
     result = {}
@@ -481,11 +499,45 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
         key = TOPOLOGY_KEY[family]
         holdout = TOPOLOGY_HOLDOUT[family]
         w08_family = [card for card in cards if card["family"] == family]
+        w08_topology_family = [card for card in topology_cards if card.get("family") == family]
         w07_family = [card for card in w07_cards if card["family"] == family]
-        w08_holdout = [card for card in w08_family if card["physics"].get(key) == holdout]
+        w08_continuous_holdout = [card for card in w08_family if card["physics"].get(key) == holdout]
+        w08_declared_topology = [card for card in w08_topology_family if card["physics"].get(key) == holdout]
+        w08_holdout = w08_continuous_holdout + w08_declared_topology
         w07_holdout = [card for card in w07_family if card["physics"].get(key) == holdout]
         links = []
         for card in w08_holdout:
+            materialization = materialization_by_card.get(card.get("card_id"))
+            if materialization is not None:
+                stages = materialization.get("stages", {})
+                executable = stages.get("executable", {})
+                run_stage = stages.get("run", {})
+                normalized = stages.get("normalized_hdf5", {})
+                structural = stages.get("structural_audit", {})
+                g3_structural = structural.get("g3_audit", {})
+                links.append({
+                    "card_id": card.get("card_id"),
+                    "case_id": materialization.get("case_id"),
+                    "physical_case_id": card.get("physical_case_id"),
+                    "lineage_group_id": card.get("lineage_group_id"),
+                    "execution_unit_id": card.get("execution_unit_id"),
+                    "execution_status": materialization.get("execution_status", "unknown"),
+                    "split": materialization.get("split"),
+                    "executable": bool(
+                        executable.get("gencase_returncode") == 0
+                        and executable.get("definition")
+                        and lab_path(executable["definition"]).is_file()
+                        and executable.get("generated_case_xml")
+                        and lab_path(executable["generated_case_xml"]).is_file()
+                    ),
+                    "run": run_stage.get("status") == "completed",
+                    "materialized": bool(normalized.get("hdf5")) and lab_path(normalized.get("hdf5", "")).is_file(),
+                    "trajectory_structural": bool(structural.get("structural_pass") and g3_structural.get("structural_pass")),
+                    "physical_acceptance": materialization.get("physical_acceptance", "unknown"),
+                    "reference_acceptance": materialization.get("reference_acceptance", "unknown"),
+                    "formal_production_authorized": bool(materialization.get("formal_production_authorized", False)),
+                })
+                continue
             # Only explicit physical case identifiers are eligible for a
             # link.  Card/series IDs are design identities and must not
             # accidentally collide with an observed registry case.
@@ -498,6 +550,9 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
                     "execution_status": card.get("execution_status"), "split": card.get("split"),
                     "materialized": bool(match["local_hdf5_available"]),
                     "run": bool(match["run"]), "trajectory_structural": bool(match["trajectory_structural"]),
+                    "physical_acceptance": "legacy_registry_probe",
+                    "reference_acceptance": "legacy_registry_probe",
+                    "formal_production_authorized": False,
                 })
         unique_links = {(link["execution_unit_id"] or link["card_id"]): link for link in links}
         linked_materialized = {link["case_id"] for link in unique_links.values() if link["materialized"]}
@@ -505,13 +560,26 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
         gate_links = list(unique_links.values())
         holdout_gate_pass = bool(w08_holdout) and len(gate_links) == len({card.get("execution_unit_id") or card.get("card_id") for card in w08_holdout}) and all(
             link["execution_status"] == "completed" and link["split"] == "topology_extrapolation"
-            and link["materialized"] and link["run"] and link["trajectory_structural"] for link in gate_links
+            and link["executable"] and link["materialized"] and link["run"] and link["trajectory_structural"] for link in gate_links
+        )
+        scientific_acceptance_pass = bool(gate_links) and all(
+            link["physical_acceptance"] == "accepted"
+            and link["reference_acceptance"] == "accepted"
+            and not link["formal_production_authorized"]
+            for link in gate_links
         )
         actual_cases = {
             link["case_id"] for link in gate_links
             if link["materialized"] and link["run"] and link["trajectory_structural"]
         }
-        if holdout_gate_pass:
+        formal_cases = {
+            link["case_id"] for link in gate_links
+            if link["materialized"] and link["run"] and link["trajectory_structural"]
+            and link["physical_acceptance"] == "accepted"
+            and link["reference_acceptance"] == "accepted"
+            and not link["formal_production_authorized"]
+        }
+        if holdout_gate_pass and scientific_acceptance_pass:
             coverage_status = "formally_covered"
         elif actual_cases:
             coverage_status = "observed_but_not_formal"
@@ -522,27 +590,36 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
             "topology_field": key,
             "w07_design_cards": len(w07_holdout),
             "w08_controlled_cards": len(w08_holdout),
+            "w08_continuous_controlled_cards": len(w08_continuous_holdout),
+            "w08_declared_topology_cards": len(w08_declared_topology),
             "planned_design_card_count": len(w07_holdout),
             "w08_planned_card_count": len(w08_holdout),
             "w08_holdout_splits": sorted({card["split"] for card in w08_holdout}),
             "w08_execution_statuses": sorted({card["execution_status"] for card in w08_holdout}),
+            "materialization_execution_statuses": sorted({
+                link["execution_status"] for link in unique_links.values()
+            }),
             "incidental_matching_registry_cases": INCIDENTAL_HOLDOUT_CASES[family],
             "linked_materialized_cases": len(linked_materialized),
             "linked_run_cases": len(linked_run),
             "actual_coverage_count": len(actual_cases),
-            "formal_coverage_count": len(gate_links) if holdout_gate_pass else 0,
+            "formal_coverage_count": len(formal_cases),
             "coverage_status": coverage_status,
-            "coverage_claim": holdout_gate_pass,
+            "coverage_claim": bool(formal_cases),
             "case_links": links,
             "unique_execution_links": len(gate_links),
             "holdout_gate_pass": holdout_gate_pass,
+            "scientific_acceptance_pass": scientific_acceptance_pass,
+            "materialization_manifest": str(W08_TOPOLOGY_MANIFEST_PATH.relative_to(LAB)),
             "decision": (
                 "not_declared_for_family" if not w08_holdout and family not in DECLARED_TOPOLOGY_FAMILIES else
                 "design_only_not_materialized" if not w08_holdout else
                 "completed_and_structurally_linked" if bool(gate_links) and all(
                     link["execution_status"] == "completed" and link["split"] == "topology_extrapolation"
-                    and link["materialized"] and link["run"] and link["trajectory_structural"] for link in gate_links
-                ) else "linked_but_not_accepted"
+                    and link["executable"] and link["materialized"] and link["run"] and link["trajectory_structural"] for link in gate_links
+                ) and scientific_acceptance_pass else
+                "completed_structural_candidate_only" if holdout_gate_pass else
+                "linked_but_not_accepted"
             ),
         }
     return result
@@ -841,7 +918,10 @@ def build_report() -> dict[str, Any]:
         disposition = w07["observed_family_map"][family]["disposition"]
         blockers = ["reference-quality gate is not passed"]
         if family in DECLARED_TOPOLOGY_FAMILIES:
-            blockers.insert(0, "topology holdout is not an executed W08 split")
+            if topology[family]["holdout_gate_pass"]:
+                blockers.insert(0, "topology materialization is candidate-only; physical/reference acceptance is not passed")
+            else:
+                blockers.insert(0, "topology holdout is not an executed W08 split")
         family_summary[family] = {
             "declared": len(family_rows),
             "executable": sum(row["executable"] for row in family_rows),
@@ -880,6 +960,9 @@ def build_report() -> dict[str, Any]:
     w08_splits = Counter(card["split"] for card in w08_design["cards"])
     w08_execution = w08_execution_audit()
     w08_decision = (
+        "continuous_design_only_topology_partially_materialized" if w08_execution["run_cases"] == 0 and any(
+            item["holdout_gate_pass"] for item in topology.values()
+        ) else
         "design_only_not_run" if w08_execution["run_cases"] == 0 else
         "partially_executed" if w08_execution["run_cases"] < w08_execution["unique_execution_units"] else
         "executed_requires_scientific_acceptance"
@@ -895,13 +978,23 @@ def build_report() -> dict[str, Any]:
         "coverage_decision": w08_decision,
         "declared_cards": len(w08_design["cards"]),
         "run_cases": w08_execution["run_cases"],
-        "design_only_claim_is_consistent": bool(
+        "continuous_design_only_claim_is_consistent": bool(
             w08_package
-            and w08_package.get("execution_status") == "design_complete"
+            and w08_package.get("execution_status") in {"design_complete", "partial_materialization"}
             and w08_package.get("acceptance_status") == "not_experimentally_accepted"
-            and w08_decision == "design_only_not_run"
             and w08_execution["run_cases"] == 0
         ),
+        # Backward-compatible alias: this now refers specifically to the
+        # 204-card continuous matrix, not the separate topology namespace.
+        "design_only_claim_is_consistent": bool(
+            w08_package
+            and w08_package.get("execution_status") in {"design_complete", "partial_materialization"}
+            and w08_package.get("acceptance_status") == "not_experimentally_accepted"
+            and w08_execution["run_cases"] == 0
+        ),
+        "topology_materialization_is_separate_from_continuous_cards": True,
+        "topology_engineering_links": sum(item["holdout_gate_pass"] for item in topology.values()),
+        "topology_formal_coverage_count": sum(item["formal_coverage_count"] for item in topology.values()),
     }
     return {
         "schema_version": 1,
@@ -923,6 +1016,7 @@ def build_report() -> dict[str, Any]:
         "work_packages": work_packages,
         "w08_design": {
             "declared_cards": len(w08_design["cards"]),
+            "declared_topology_holdout_cards": len(w08_design.get("topology_holdout_cards", [])),
             "unique_execution_units": load(W08_PATH)["audit"]["unique_execution_units"],
             "execution_status_counts": dict(Counter(card["execution_status"] for card in w08_design["cards"])),
             "split_counts": dict(w08_splits),
@@ -935,6 +1029,9 @@ def build_report() -> dict[str, Any]:
             "training_eval_cases": w08_execution["training_eval_cases"],
             "decision": w08_decision,
             "coverage_claim": False,
+            "topology_engineering_link_count": sum(item["holdout_gate_pass"] for item in topology.values()),
+            "topology_actual_coverage_count": sum(item["actual_coverage_count"] for item in topology.values()),
+            "topology_formal_coverage_count": sum(item["formal_coverage_count"] for item in topology.values()),
         },
         "topology_holdouts": topology,
         "w07_topology_design_only": {
@@ -958,6 +1055,12 @@ def build_report() -> dict[str, Any]:
             "all_four_topology_holdouts_materialized_and_linked": all(
                 topology[family]["holdout_gate_pass"] for family in DECLARED_TOPOLOGY_FAMILIES
             ),
+            "any_declared_topology_holdout_materialized_and_structurally_linked": any(
+                topology[family]["holdout_gate_pass"] for family in DECLARED_TOPOLOGY_FAMILIES
+            ),
+            "any_topology_candidate_is_formal_data": any(
+                topology[family]["coverage_claim"] for family in DECLARED_TOPOLOGY_FAMILIES
+            ),
             "retained_families": list(retained_families),
             "all_retained_families_reference_quality_pass": all(
                 references[family]["quality_pass"] for family in retained_families
@@ -967,8 +1070,8 @@ def build_report() -> dict[str, Any]:
         },
         "open_blockers": [
             "W08 contains 204 controlled cards, but all are planned_not_run and no concrete definitions are linked",
-            "the four declared topology holdouts have zero W08 controlled cards; W07 topology cards are design-only",
-            "F2 spout and F3 perforated_proxy have no incidental materialized case; F1/F6 matching cases are not linked to W08 topology_extrapolation",
+            "F1 twin topology now has one independent executable/run/structural candidate link, but it is rejected for physical/reference acceptance and is not formal data",
+            "F2 spout, F3 perforated_proxy, and F6 twin_free remain without an executed W08 topology_extrapolation case; old registry probes are not reused",
             "all six families fail the reference-quality gate (partial anchors or no anchor)",
             "W11 T2 has candidate tracer fields and finite geometry sidecars for 12 fluid cases, but wall_visibility remains unset and no destination specification is declared; T3 and T4 fields are absent",
             "the development pilot has 13 cases but only 3 cases are covered by learned autonomous baseline results",
@@ -981,9 +1084,19 @@ def write_conclusion(report: dict[str, Any]) -> None:
     family = report["family_summary"]
     topology = report["topology_holdouts"]
     work_packages = report["work_packages"]
+    materialized_families = [
+        family_name for family_name in DECLARED_TOPOLOGY_FAMILIES
+        if topology[family_name]["holdout_gate_pass"]
+    ]
+    planned_families = [
+        family_name for family_name in DECLARED_TOPOLOGY_FAMILIES
+        if not topology[family_name]["holdout_gate_pass"]
+    ]
+    materialized_label = ", ".join(materialized_families) if materialized_families else "none"
+    planned_label = ", ".join(planned_families) if planned_families else "none"
     text = f'''# R3 G3 结论：覆盖度与 topology holdout 审计
 
-状态：**审计完成；工程覆盖已经能逐级量化，但 W08 受控泛化设计尚未进入可执行/可评测阶段，四个 topology holdout 仍是 planned-only，尚未形成正式留出。**
+状态：**审计完成；W08 的连续轴矩阵仍是 design-only，但 F1 twin 已完成一个独立 topology_extrapolation 的 declared→executable→run→structural 链接。该案例保持 candidate/rejected，不进入正式数据；其余 topology holdout 仍是 planned-only。**
 
 ## 逐级结果
 
@@ -1000,11 +1113,11 @@ def write_conclusion(report: dict[str, Any]) -> None:
 
 ## 顶层状态语义
 
-`work-packages.json` 中 13 个 package 的旧 `status` 全部为 `complete`，但这是历史兼容字段，不是科学验收或覆盖声明。当前审计将 `execution_status`、`acceptance_status`、`validation_scope` 和 `open_blockers` 单独保留：其中 {work_packages['engineering_accepted_count']} 个 package 只达到有限工程范围的 accepted 状态，{len(work_packages['legacy_complete_but_not_engineering_accepted'])} 个 package 虽有旧的 `status=complete` 但没有工程 accepted 状态。W08 的 authoritative 状态是 `execution_status={work_packages['w08_crosscheck']['execution_status']}`、`acceptance_status={work_packages['w08_crosscheck']['acceptance_status']}`，与下面的 `design_only_not_run` 覆盖判定一致。
+`work-packages.json` 中 13 个 package 的旧 `status` 全部为 `complete`，但这是历史兼容字段，不是科学验收或覆盖声明。当前审计将 `execution_status`、`acceptance_status`、`validation_scope` 和 `open_blockers` 单独保留：其中 {work_packages['engineering_accepted_count']} 个 package 只达到有限工程范围的 accepted 状态，{len(work_packages['legacy_complete_but_not_engineering_accepted'])} 个 package 虽有旧的 `status=complete` 但没有工程 accepted 状态。W08 的 authoritative 状态是 `execution_status={work_packages['w08_crosscheck']['execution_status']}`、`acceptance_status={work_packages['w08_crosscheck']['acceptance_status']}`，与连续轴 `design_only`、拓扑候选部分实体化的覆盖判定一致。
 
-W08 的 204 张卡和 196 个唯一 execution unit 全部仍是 `planned_not_run`；当前没有卡片与 registry、solver attempt、轨迹或训练/评测产物建立链接，因此 `coverage_claim=false`。W07 对 F1/F2/F3/F6 写出了 topology 候选卡（每个 holdout 6 或 8 张），这些也只是 planned design cards，不能算生成数据；F4/F5 尚未声明 topology holdout。
+W08 的 204 张连续轴卡和 196 个唯一 execution unit 全部仍是 `planned_not_run`，没有与 registry、solver attempt、轨迹或训练/评测产物建立链接；连续轴 `coverage_claim=false`。另外显式声明的 W08 topology card 位于独立命名空间，不计入 204 张连续轴卡。
 
-四个已声明 topology holdout 的实际覆盖计数都是 **0**，状态均为 `planned_only`，`holdout_gate_pass=false`：F1 的 twin obstacle 和 F6 的 twin floaters 只有未链接的旧探针，F2 的 spout、F3 的 perforated proxy 连这样的偶然案例都没有。它们的 W07 planned card 数分别为 {topology['F1']['planned_design_card_count']}、{topology['F2']['planned_design_card_count']}、{topology['F3']['planned_design_card_count']}、{topology['F6']['planned_design_card_count']}，不是实际数据覆盖。当前 W08 卡的拓扑字段全部保持 baseline（single/straight/center/single_free），没有 `topology_extrapolation` split。
+四个已声明 topology holdout 中，工程链已完成的家族为 **{materialized_label}**，仍 planned-only 的为 **{planned_label}**。F1 新增 `W08_F1_topology_twin_obstacle_00`，使用独立 `physical_case_id={topology['F1']['case_links'][0]['physical_case_id'] if topology['F1']['case_links'] else 'unlinked'}` 和 `lineage_group_id={topology['F1']['case_links'][0]['lineage_group_id'] if topology['F1']['case_links'] else 'unlinked'}`，definition、GenCase、solver attempt、归一化 HDF5 和结构审计均可由 `topology-holdout-materializations.json` 追溯；`holdout_gate_pass={topology['F1']['holdout_gate_pass']}`，但 `scientific_acceptance_pass={topology['F1']['scientific_acceptance_pass']}`，所以 `coverage_claim={topology['F1']['coverage_claim']}`。旧 registry 的 `F1_twin_obstacle` 仅作为 incidental 对照，未被挂到第二个 split。F1/F2/F3/F6 的 W07 planned card 数分别为 {topology['F1']['planned_design_card_count']}、{topology['F2']['planned_design_card_count']}、{topology['F3']['planned_design_card_count']}、{topology['F6']['planned_design_card_count']}；W07 卡仍不是生成数据。
 
 ## 训练/评测覆盖
 
@@ -1014,7 +1127,7 @@ W11 development pilot 为 13 例（train 6、validation 3、test 4）。T1 粒�
 
 “每族至少三个背景”在现有探针层面满足，但这是 breadth gate，不是 acceptance gate。所有家族的 reference-quality gate 仍未通过，因此当前没有任何 family 可以直接进入正式 v0.1 或 20–30 例生产 tranche。
 
-下一步应先为每个 topology holdout 建立可执行 definition、独立 lineage 和 `topology_extrapolation` split，至少生成并结构审计一个 case；随后把已生成的边界 sidecar 纳入 wall-aware material contract，补齐 destination、T3/T4 任务字段，再按通过 reference/resolution 门的家族运行小规模 development tranche。不要把 W08 204 张卡一次性提交给 GPU。
+下一步应为剩余 topology holdout 建立同样的独立 definition/lineage 链；对 F1 候选补做分辨率与外部参考验收，但在通过前保持 `candidate/rejected`。随后把已生成的边界 sidecar 纳入 wall-aware material contract，补齐 destination、T3/T4 任务字段，再按通过 reference/resolution 门的家族运行小规模 development tranche。不要把 W08 204 张连续轴卡一次性提交给 GPU。
 
 机器可读明细见 `r3-g3-coverage-audit.json`。
 '''

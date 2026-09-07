@@ -52,6 +52,48 @@ SINGLE_LEVELS = {
 }
 
 
+# Topology holdouts are kept in a separate namespace from the 204 continuous
+# intervention cards.  This prevents a materialized topology case from being
+# mistaken for one of the continuous-axis execution units while still giving
+# G3 a declared W08 card to link to concrete solver evidence.
+TOPOLOGY_HOLDOUT_PHYSICS = {
+    "wet_bed_ratio": 0.0,
+    "blockage_ratio": 0.25,
+    "obstacle_eccentricity": 0.0,
+    "release_aspect_ratio": 0.73913,
+    "obstacle_topology": "twin",
+    "geometry_variant": "staggered_0p09x0p10_obstacles",
+}
+
+
+def topology_holdout_cards() -> list[dict[str, Any]]:
+    """Return explicit topology declarations outside the continuous card set."""
+    family = "F1"
+    physics = dict(TOPOLOGY_HOLDOUT_PHYSICS)
+    sig = signature(family, physics)
+    return [{
+        "card_id": "W08_F1_topology_twin_00",
+        "family": family,
+        "study_id": "W08_F1_topology_holdout",
+        "paired_background_id": "background_F1_topology_holdout_staggered_v1",
+        "physical_case_id": f"physical_W08_F1_topology_twin_{sig}",
+        "lineage_group_id": f"lineage_W08_F1_topology_twin_{sig}",
+        "split": "topology_extrapolation",
+        "physics": physics,
+        "normalized_intervention": {"obstacle_topology": "twin"},
+        "simulation_signature": sig,
+        "execution_unit_id": f"sim_W08_F1_topology_twin_{sig}",
+        "execution_status": "planned_not_run",
+        "formal_production_authorized": False,
+        "materialization_case_id": "W08_F1_topology_twin_obstacle_00",
+        "definition": (
+            "campaigns/v0.1-candidate/cases/w08/topology/F1_twin_obstacle/"
+            "W08_F1_topology_twin_obstacle_Def.xml"
+        ),
+        "provenance_status": "declared_independent_geometry",
+    }]
+
+
 def scale(family: str, axis: str, unit_value: float) -> float:
     low, high = FAMILY_SPECS[family]["continuous"][axis]
     return float(f"{low + unit_value * (high - low):.6g}")
@@ -255,6 +297,8 @@ def main() -> None:
         },
         "study_count": 12,
         "card_count": len(cards),
+        "topology_holdout_card_count": len(topology_holdout_cards()),
+        "topology_holdout_cards": topology_holdout_cards(),
         "studies": STUDIES,
         "cards": cards,
     }
@@ -269,6 +313,13 @@ def main() -> None:
             "joint_extrapolation": "four 0.1/0.9 corners",
         },
         "topology_holdouts": {family: spec["topology_holdout"] for family, spec in STUDIES.items()},
+        "topology_holdout_cards": topology_holdout_cards(),
+        "topology_materialization": {
+            "manifest": "campaigns/v0.1-candidate/cases/w08/topology-holdout-materializations.json",
+            "formal_release": False,
+            "status": "candidate_evidence_indexed",
+            "interpretation": "separate from the 204 continuous-axis cards; physical/reference acceptance remains required",
+        },
         "release_constraints": [
             "No random frame split.",
             "All windows, particles, tracers, and derived targets from one simulation inherit one split.",
@@ -276,7 +327,7 @@ def main() -> None:
             "The same physical_case_id and lineage_group_id must never occur in more than one split; paired_background_id may be reused across splits as a fixed intervention background.",
             "Topology holdouts are separate from continuous-axis claims and are not silently pooled.",
         ],
-        "execution_decision": "planned_not_run_until_W10_schema_and_family_resolution_gates",
+        "execution_decision": "continuous_cards_planned_not_run; topology_holdout_candidate_materialization_tracked_separately",
     }
     out = campaign_dir / "cases" / "w08"
     out.mkdir(parents=True, exist_ok=True)

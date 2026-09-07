@@ -1,6 +1,6 @@
 # W08 结论：受控单轴/双轴泛化协议
 
-状态：**已形成 12 个受控研究和无跨划分泄漏的机器可读设计；身份层次已与 W10 统一，暂不执行批量求解。**
+状态：**已形成 12 个受控研究和无跨划分泄漏的机器可读设计；身份层次已与 W10 统一。204 个连续轴 execution unit 仍未批量求解；另行声明的 F1 twin topology holdout 已完成一个独立 candidate-only materialization，未升级为正式数据。**
 
 ## 研究结构
 
@@ -23,8 +23,8 @@
 
 机器可读审计记录了 `cross_split_physical_case_leakage` 和 `cross_split_lineage_leakage` 两类结果，当前均为空；它不会把有意跨 split 复用的 `paired_background_id` 误报为泄漏。
 
-连续参数外推和拓扑外推必须分别报告。每族另记录一个拓扑留出（F1 twin、F2 spout、F3 perforated proxy、F6 twin free），但在几何真正实现并验证前不把它们混进连续轴成绩。
+连续参数外推和拓扑外推必须分别报告。每族另记录一个拓扑留出（F1 twin、F2 spout、F3 perforated proxy、F6 twin free），不把它们混进连续轴成绩。F1 的独立声明卡 `W08_F1_topology_twin_00` 使用独立 `physical_case_id`/`lineage_group_id`，其 definition、GenCase、solver attempt、归一化 HDF5 和结构审计见 `cases/w08/topology-holdout-materializations.json`；该证据标为 candidate，物理与参考验收均 rejected，`formal_production_authorized=false`。
 
 ## 为什么仍不运行
 
-W08 的目的已经达到：把“随机切分看看泛化”替换成了可证伪的因果干预设计。现在执行 204 张卡仍不合理，因为 W10 尚未冻结模式、单位、事件采样、有效掩码和指标语义；F1/F3/F6 的可接受分辨率也只在各自验证量上局部成立。先完成 W09 的扩展边界审计和 W10 协议，才能避免再次转换全部数据。
+W08 的目的已经达到：把“随机切分看看泛化”替换成了可证伪的因果干预设计。现在执行 204 张连续轴卡仍不合理，因为它们应按唯一 execution unit 去重，且 F1 topology 候选尚未通过分辨率/参考验收；W10 的单位、事件采样、有效掩码和指标语义也仍需作为发布约束。先完成 topology candidate 的科学验收与剩余 holdout 的独立 materialization，再决定小规模开发 tranche，避免一次性转换全部数据。

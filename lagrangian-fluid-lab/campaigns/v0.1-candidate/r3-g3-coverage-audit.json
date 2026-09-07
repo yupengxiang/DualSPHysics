@@ -42,7 +42,7 @@
       "w07_screening_disposition": "retain_development_macro_only",
       "development_tranche_ready": false,
       "development_tranche_blockers": [
-        "topology holdout is not an executed W08 split",
+        "topology materialization is candidate-only; physical/reference acceptance is not passed",
         "reference-quality gate is not passed"
       ]
     },
@@ -802,7 +802,8 @@
       "complete": 9,
       "two_background_f1_f3_matrix_complete": 1,
       "resolution_matrix_complete": 1,
-      "design_complete": 2
+      "design_complete": 1,
+      "partial_materialization": 1
     },
     "acceptance_status_counts": {
       "accepted_engineering": 2,
@@ -1035,16 +1036,18 @@
         "id": "W08",
         "name": "controlled generalization studies",
         "legacy_status": "complete",
-        "execution_status": "design_complete",
+        "execution_status": "partial_materialization",
         "acceptance_status": "not_experimentally_accepted",
         "validation_scope": [
-          "causal split design"
+          "causal split design",
+          "one F1 topology_extrapolation candidate materialization"
         ],
         "open_blockers": [
           "204 cards were not executed",
-          "declared topology holdouts need executable cases"
+          "F1 topology candidate is rejected pending resolution and external reference",
+          "F2, F3, and F6 topology holdouts need executable cases"
         ],
-        "open_blocker_count": 2,
+        "open_blocker_count": 3,
         "depends_on": [
           "W07"
         ],
@@ -1136,23 +1139,30 @@
     "w08_crosscheck": {
       "package_present": true,
       "legacy_status": "complete",
-      "execution_status": "design_complete",
+      "execution_status": "partial_materialization",
       "acceptance_status": "not_experimentally_accepted",
       "validation_scope": [
-        "causal split design"
+        "causal split design",
+        "one F1 topology_extrapolation candidate materialization"
       ],
       "open_blockers": [
         "204 cards were not executed",
-        "declared topology holdouts need executable cases"
+        "F1 topology candidate is rejected pending resolution and external reference",
+        "F2, F3, and F6 topology holdouts need executable cases"
       ],
-      "coverage_decision": "design_only_not_run",
+      "coverage_decision": "continuous_design_only_topology_partially_materialized",
       "declared_cards": 204,
       "run_cases": 0,
-      "design_only_claim_is_consistent": true
+      "continuous_design_only_claim_is_consistent": true,
+      "design_only_claim_is_consistent": true,
+      "topology_materialization_is_separate_from_continuous_cards": true,
+      "topology_engineering_links": 1,
+      "topology_formal_coverage_count": 0
     }
   },
   "w08_design": {
     "declared_cards": 204,
+    "declared_topology_holdout_cards": 1,
     "unique_execution_units": 196,
     "execution_status_counts": {
       "planned_not_run": 204
@@ -1171,42 +1181,76 @@
     "trajectory_structural_cases": 0,
     "reference_quality_cases": 0,
     "training_eval_cases": 0,
-    "decision": "design_only_not_run",
-    "coverage_claim": false
+    "decision": "continuous_design_only_topology_partially_materialized",
+    "coverage_claim": false,
+    "topology_engineering_link_count": 1,
+    "topology_actual_coverage_count": 1,
+    "topology_formal_coverage_count": 0
   },
   "topology_holdouts": {
     "F1": {
       "declared_holdout": "twin",
       "topology_field": "obstacle_topology",
       "w07_design_cards": 6,
-      "w08_controlled_cards": 0,
+      "w08_controlled_cards": 1,
+      "w08_continuous_controlled_cards": 0,
+      "w08_declared_topology_cards": 1,
       "planned_design_card_count": 6,
-      "w08_planned_card_count": 0,
-      "w08_holdout_splits": [],
-      "w08_execution_statuses": [],
+      "w08_planned_card_count": 1,
+      "w08_holdout_splits": [
+        "topology_extrapolation"
+      ],
+      "w08_execution_statuses": [
+        "planned_not_run"
+      ],
+      "materialization_execution_statuses": [
+        "completed"
+      ],
       "incidental_matching_registry_cases": [
         "F1_twin_obstacle"
       ],
-      "linked_materialized_cases": 0,
-      "linked_run_cases": 0,
-      "actual_coverage_count": 0,
+      "linked_materialized_cases": 1,
+      "linked_run_cases": 1,
+      "actual_coverage_count": 1,
       "formal_coverage_count": 0,
-      "coverage_status": "planned_only",
+      "coverage_status": "observed_but_not_formal",
       "coverage_claim": false,
-      "case_links": [],
-      "unique_execution_links": 0,
-      "holdout_gate_pass": false,
-      "decision": "design_only_not_materialized"
+      "case_links": [
+        {
+          "card_id": "W08_F1_topology_twin_00",
+          "case_id": "W08_F1_topology_twin_obstacle_00",
+          "physical_case_id": "physical_W08_F1_topology_twin_141632fc10d15922",
+          "lineage_group_id": "lineage_W08_F1_topology_twin_141632fc10d15922",
+          "execution_unit_id": "sim_W08_F1_topology_twin_141632fc10d15922",
+          "execution_status": "completed",
+          "split": "topology_extrapolation",
+          "executable": true,
+          "run": true,
+          "materialized": true,
+          "trajectory_structural": true,
+          "physical_acceptance": "rejected_pending_resolution_and_external_reference",
+          "reference_acceptance": "rejected_no_external_anchor",
+          "formal_production_authorized": false
+        }
+      ],
+      "unique_execution_links": 1,
+      "holdout_gate_pass": true,
+      "scientific_acceptance_pass": false,
+      "materialization_manifest": "campaigns/v0.1-candidate/cases/w08/topology-holdout-materializations.json",
+      "decision": "completed_structural_candidate_only"
     },
     "F2": {
       "declared_holdout": "spout",
       "topology_field": "mouth_topology",
       "w07_design_cards": 8,
       "w08_controlled_cards": 0,
+      "w08_continuous_controlled_cards": 0,
+      "w08_declared_topology_cards": 0,
       "planned_design_card_count": 8,
       "w08_planned_card_count": 0,
       "w08_holdout_splits": [],
       "w08_execution_statuses": [],
+      "materialization_execution_statuses": [],
       "incidental_matching_registry_cases": [],
       "linked_materialized_cases": 0,
       "linked_run_cases": 0,
@@ -1217,6 +1261,8 @@
       "case_links": [],
       "unique_execution_links": 0,
       "holdout_gate_pass": false,
+      "scientific_acceptance_pass": false,
+      "materialization_manifest": "campaigns/v0.1-candidate/cases/w08/topology-holdout-materializations.json",
       "decision": "design_only_not_materialized"
     },
     "F3": {
@@ -1224,10 +1270,13 @@
       "topology_field": "baffle_topology",
       "w07_design_cards": 6,
       "w08_controlled_cards": 0,
+      "w08_continuous_controlled_cards": 0,
+      "w08_declared_topology_cards": 0,
       "planned_design_card_count": 6,
       "w08_planned_card_count": 0,
       "w08_holdout_splits": [],
       "w08_execution_statuses": [],
+      "materialization_execution_statuses": [],
       "incidental_matching_registry_cases": [],
       "linked_materialized_cases": 0,
       "linked_run_cases": 0,
@@ -1238,6 +1287,8 @@
       "case_links": [],
       "unique_execution_links": 0,
       "holdout_gate_pass": false,
+      "scientific_acceptance_pass": false,
+      "materialization_manifest": "campaigns/v0.1-candidate/cases/w08/topology-holdout-materializations.json",
       "decision": "design_only_not_materialized"
     },
     "F4": {
@@ -1285,10 +1336,13 @@
       "topology_field": "body_configuration",
       "w07_design_cards": 8,
       "w08_controlled_cards": 0,
+      "w08_continuous_controlled_cards": 0,
+      "w08_declared_topology_cards": 0,
       "planned_design_card_count": 8,
       "w08_planned_card_count": 0,
       "w08_holdout_splits": [],
       "w08_execution_statuses": [],
+      "materialization_execution_statuses": [],
       "incidental_matching_registry_cases": [
         "F6_twin_floaters"
       ],
@@ -1301,6 +1355,8 @@
       "case_links": [],
       "unique_execution_links": 0,
       "holdout_gate_pass": false,
+      "scientific_acceptance_pass": false,
+      "materialization_manifest": "campaigns/v0.1-candidate/cases/w08/topology-holdout-materializations.json",
       "decision": "design_only_not_materialized"
     }
   },
@@ -1750,6 +1806,8 @@
     ],
     "all_declared_topology_holdouts_materialized_and_linked": false,
     "all_four_topology_holdouts_materialized_and_linked": false,
+    "any_declared_topology_holdout_materialized_and_structurally_linked": true,
+    "any_topology_candidate_is_formal_data": false,
     "retained_families": [
       "F1",
       "F2",
@@ -1762,8 +1820,8 @@
   },
   "open_blockers": [
     "W08 contains 204 controlled cards, but all are planned_not_run and no concrete definitions are linked",
-    "the four declared topology holdouts have zero W08 controlled cards; W07 topology cards are design-only",
-    "F2 spout and F3 perforated_proxy have no incidental materialized case; F1/F6 matching cases are not linked to W08 topology_extrapolation",
+    "F1 twin topology now has one independent executable/run/structural candidate link, but it is rejected for physical/reference acceptance and is not formal data",
+    "F2 spout, F3 perforated_proxy, and F6 twin_free remain without an executed W08 topology_extrapolation case; old registry probes are not reused",
     "all six families fail the reference-quality gate (partial anchors or no anchor)",
     "W11 T2 has candidate tracer fields and finite geometry sidecars for 12 fluid cases, but wall_visibility remains unset and no destination specification is declared; T3 and T4 fields are absent",
     "the development pilot has 13 cases but only 3 cases are covered by learned autonomous baseline results",
