@@ -44,6 +44,16 @@ def endpoint_audit(h5_path, dp, maximum=256, frame_stride=1):
             "median": float(np.median(support / dp)),
             "p95": float(np.quantile(support / dp, 0.95)),
         },
+        "support_quality": {
+            "effective_sample_size_median": float(np.nanmedian(traced["effective_sample_size"])),
+            "geometry_rank_minimum": int(np.nanmin(traced["support_geometry_rank"])),
+            "anisotropy_p05": float(np.nanquantile(traced["support_anisotropy"], 0.05)),
+            "interpolation_reconstruction_error_mps_p95": float(
+                np.nanquantile(traced["interpolation_reconstruction_error_mps"], 0.95)
+            ),
+            "support_gate_failure_count": int(np.size(traced["support_gate_pass"]) - np.count_nonzero(traced["support_gate_pass"])),
+            "support_gate_denominator": int(np.size(traced["support_gate_pass"])),
+        },
     }
 
 
@@ -109,9 +119,10 @@ def main():
         "schema_version": 1,
         "method": {
             "name": "independent passive tracer",
-            "velocity_interpolation": "24-neighbour inverse-distance Shepard; no Idp lookup after t=0",
+            "velocity_interpolation": "inverse-distance Shepard; no Idp lookup after t=0",
             "time_integration": "Heun / explicit trapezoidal",
-            "support_rule": "unreliable if nearest source sample exceeds 1.75 dp at any substep",
+            "support_rule": "unreliable only when ESS/geometry rank/anisotropy/reconstruction or configured support distance fails; neighbour count is not a gate",
+            "source_label_semantics": "initial metadata for stratified sampling/reporting only; never a permanent post-mixing visibility filter",
             "important_non_claim": "This is an independent consistency check, not experimental ground truth.",
         },
         "fixed_resolution_endpoint_audit": endpoints,

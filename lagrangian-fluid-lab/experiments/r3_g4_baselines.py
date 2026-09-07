@@ -42,10 +42,24 @@ FAMILY_INDEX = {"F1": 0, "F2": 1, "F3": 2, "F4": 3, "F5": 4, "F6": 5}
 ROUTES = ("particle_mlp", "deepset_context", "local_interaction", "physics_residual")
 CONTROL_WIDTH = 10
 BOUNDARY_WIDTH = 7
+BOUNDARY_COMPONENT_FEATURE_FIELDS = (
+    "presence", "distance", "normal_x", "normal_y", "normal_z", "type",
+    "wall_velocity_x", "wall_velocity_y", "wall_velocity_z",
+)
+BOUNDARY_COMPONENT_WIDTH = len(BOUNDARY_COMPONENT_FEATURE_FIELDS)
+MAX_BOUNDARY_COMPONENTS = 8
 PHYSICS_WIDTH = 3
 LOCAL_WIDTH = 8
 NEIGHBORS = 8
 OUTPUT_CAP = 8.0
+
+FORBIDDEN_FUTURE_STATE_KEYS = frozenset({
+    "future_fluid_state", "future_free_body_state", "future_state", "next_state",
+    "future_position", "future_velocity", "future_density", "future_pressure",
+    "free_body_future", "fluid_future", "fluid_state_t1", "free_body_state_t1",
+    "particle_velocity_t1", "body_pose_t1", "future_fluid_velocity",
+    "future_free_body_velocity", "future_body_pose",
+})
 
 
 class ParticleMLP(nn.Module):
@@ -135,8 +149,69 @@ def _as_vector(value: Any, default: tuple[float, float, float]) -> np.ndarray:
     return array
 
 
+def _normalise_contract_key(value: Any) -> str:
+    return str(value).strip().lower().replace("-", "_").replace(" ", "_")
+
+
+def _forbidden_future_keys(value: Any, prefix: str = "") -> list[str]:
+    """Recursively find explicit fluid/free-body future-state aliases."""
+    found: list[str] = []
+    if isinstance(value, dict):
+        for key, item in value.items():
+            normalized = _normalise_contract_key(key)
+            path = f"{prefix}.{key}" if prefix else str(key)
+            if normalized in FORBIDDEN_FUTURE_STATE_KEYS:
+                found.append(path)
+            elif (
+                any(marker in normalized for marker in ("future", "next", "_t1", "frame1"))
+                and ("fluid" in normalized or "body" in normalized or "state" in normalized)
+            ):
+                found.append(path)
+            found.extend(_forbidden_future_keys(item, path))
+    elif isinstance(value, (list, tuple)):
+        for index, item in enumerate(value):
+            found.extend(_forbidden_future_keys(item, f"{prefix}[{index}]"))
+    return found
+
+
+def validate_model_input_contract(payload: Any) -> dict[str, Any]:
+    """Reject future fluid/free-body state from a G4 input payload.
+
+    Current prescribed controls (including angular velocity) are allowed.  The
+    validator is intentionally usable by callers constructing dictionaries as
+    well as by the HDF5 loader, and raises before a model sees a forbidden
+    feature rather than merely documenting the issue after a rollout.
+    """
+    forbidden = _forbidden_future_keys(payload)
+    if forbidden:
+        raise ValueError(
+            "future fluid/free-body state is forbidden in G4 model input: "
+            + ", ".join(forbidden)
+        )
+    return {
+        "valid": True,
+        "forbidden_future_state_keys": [],
+        "future_fluid_or_free_body_state_allowed": False,
+        "allowed_control_fields": [
+            "prescribed_linear_velocity_mps", "prescribed_angular_velocity_radps",
+        ],
+    }
+
+
+# Descriptive aliases for custom producers that used the review handoff's
+# terminology.
+validate_g4_model_input = validate_model_input_contract
+validate_model_inputs = validate_model_input_contract
+
+
 def _control_features(h5: h5py.File, times: np.ndarray) -> tuple[np.ndarray, str, bool]:
-    """Encode only known prescribed controls at the current physical time."""
+    """Encode only known prescribed controls at the current physical time.
+
+    A prescribed angular-velocity schedule is a legal control and is encoded
+    directly in slots 6:9.  If no such schedule exists, the same slots retain
+    the historical prescribed translational velocity derived from the current
+    and previous poses (with an explicit zero convention at frame zero).
+    """
 
     result = np.zeros((len(times), CONTROL_WIDTH), dtype=np.float32)
     if "control" not in h5:
@@ -151,10 +226,25 @@ def _control_features(h5: h5py.File, times: np.ndarray) -> tuple[np.ndarray, str
     radians = np.deg2rad(angle)
     result[:, 1] = np.sin(radians)
     result[:, 2] = np.cos(radians)
+    angular = group.get("prescribed_angular_velocity_radps")
+    if angular is not None and "cup_world_from_body" not in group:
+        values = np.asarray(angular[:], dtype=np.float32)
+        if values.shape != (len(times), 3) or not np.isfinite(values).all():
+            return result, "invalid_prescribed_angular_control", False
+        result[:, 6:9] = values
+        result[:, 9] = 1.0
+        return result, "known_prescribed_angular_control_schedule", True
     if "cup_world_from_body" in group:
         transform = np.asarray(group["cup_world_from_body"][:], dtype=np.float32)
         if transform.shape == (len(times), 4, 4) and np.isfinite(transform).all():
             result[:, 3:6] = transform[:, :3, 3]
+            if angular is not None:
+                values = np.asarray(angular[:], dtype=np.float32)
+                if values.shape != (len(times), 3) or not np.isfinite(values).all():
+                    return result, "invalid_prescribed_angular_control", False
+                result[:, 6:9] = values
+                result[:, 9] = 1.0
+                return result, "known_prescribed_angular_control_schedule", True
             if len(times) > 1:
                 dt = np.maximum(np.diff(times), 1e-9).astype(np.float32)
                 result[1:, 6:9] = np.diff(result[:, 3:6], axis=0) / dt[:, None]
@@ -184,6 +274,176 @@ def _pairwise_bounds(triangles: np.ndarray) -> np.ndarray:
         [minimum[0], maximum[0], minimum[1], maximum[1], minimum[2], maximum[2]],
         dtype=np.float64,
     )
+
+
+def _triangle_normal(triangle: np.ndarray) -> np.ndarray:
+    triangle = np.asarray(triangle, dtype=np.float64).reshape(3, 3)
+    normal = np.cross(triangle[1] - triangle[0], triangle[2] - triangle[0])
+    norm = float(np.linalg.norm(normal))
+    return normal / norm if norm > 1e-12 else np.zeros(3, dtype=np.float64)
+
+
+def _closest_point_on_segment(point: np.ndarray, first: np.ndarray, second: np.ndarray) -> np.ndarray:
+    edge = second - first
+    denominator = float(np.dot(edge, edge))
+    alpha = float(np.dot(point - first, edge) / denominator) if denominator > 1e-16 else 0.0
+    return first + np.clip(alpha, 0.0, 1.0) * edge
+
+
+def _closest_point_on_triangle(point: np.ndarray, triangle: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Return closest point and oriented normal on one finite triangle."""
+    tri = np.asarray(triangle, dtype=np.float64).reshape(3, 3)
+    a, b, c = tri
+    ab, ac, ap = b - a, c - a, point - a
+    normal = _triangle_normal(tri)
+    d1, d2 = float(np.dot(ab, ap)), float(np.dot(ac, ap))
+    if d1 <= 0.0 and d2 <= 0.0:
+        return a, normal
+    bp = point - b
+    d3, d4 = float(np.dot(ab, bp)), float(np.dot(ac, bp))
+    if d3 >= 0.0 and d4 <= d3:
+        return b, normal
+    vc = d1 * d4 - d3 * d2
+    if vc <= 0.0 and d1 >= 0.0 and d3 <= 0.0:
+        alpha = d1 / max(d1 - d3, 1e-16)
+        return a + alpha * ab, normal
+    cp = point - c
+    d5, d6 = float(np.dot(ab, cp)), float(np.dot(ac, cp))
+    if d6 >= 0.0 and d5 <= d6:
+        return c, normal
+    vb = d5 * d2 - d1 * d6
+    if vb <= 0.0 and d2 >= 0.0 and d6 <= 0.0:
+        alpha = d2 / max(d2 - d6, 1e-16)
+        return a + alpha * ac, normal
+    va = d3 * d6 - d5 * d4
+    if va <= 0.0 and (d4 - d3) >= 0.0 and (d5 - d6) >= 0.0:
+        alpha = (d4 - d3) / max((d4 - d3) + (d5 - d6), 1e-16)
+        return b + alpha * (c - b), normal
+    denominator = max(va + vb + vc, 1e-16)
+    inverse = 1.0 / denominator
+    beta, gamma = vb * inverse, vc * inverse
+    return a + ab * beta + ac * gamma, normal
+
+
+def _component_groups(triangle_type: np.ndarray, triangle_component: np.ndarray) -> list[tuple[int, int, np.ndarray]]:
+    keys = [(int(kind), int(component)) for kind, component in zip(triangle_type, triangle_component)]
+    groups = []
+    for key in dict.fromkeys(keys):
+        indices = np.asarray([index for index, item in enumerate(keys) if item == key], dtype=np.int64)
+        groups.append((key[0], key[1], indices))
+    return groups
+
+
+def _boundary_component_series(sidecar_path: Path, solver_times: np.ndarray) -> list[dict[str, Any]]:
+    """Read finite sidecar triangles grouped by component for model inputs."""
+    with h5py.File(sidecar_path, "r") as sidecar:
+        times = np.asarray(sidecar["time"][:], dtype=np.float64)
+        triangles = np.asarray(sidecar["triangles_world"][:], dtype=np.float64)
+        kinds = np.asarray(sidecar["triangle_type"][:], dtype=np.int8)
+        components = np.asarray(
+            sidecar["triangle_component"][:] if "triangle_component" in sidecar else sidecar["triangle_mk"][:],
+            dtype=np.int64,
+        )
+    if times.shape != solver_times.shape or not np.allclose(times, solver_times, atol=1e-9, rtol=0.0):
+        raise ValueError("boundary component sidecar time axis differs from solver")
+    if triangles.ndim != 4 or triangles.shape[0] != len(times):
+        raise ValueError("boundary component triangles have invalid shape")
+    components_out = []
+    for kind, component, indices in _component_groups(kinds, components):
+        components_out.append({
+            "component_id": int(component),
+            "type": int(kind),
+            "triangles_world": triangles[:, indices].copy(),
+        })
+    if len(components_out) > MAX_BOUNDARY_COMPONENTS:
+        raise ValueError(
+            f"sidecar contains {len(components_out)} components; max supported is {MAX_BOUNDARY_COMPONENTS}"
+        )
+    return components_out
+
+
+def _boundary_component_features(case: dict[str, Any], frame: int,
+                                 target_position: np.ndarray, dt: float) -> np.ndarray:
+    """Build per-target, per-component distance/normal/type/wall-velocity fields."""
+    targets = np.asarray(target_position, dtype=np.float64).reshape(-1, 3)
+    result = np.zeros((len(targets), MAX_BOUNDARY_COMPONENTS, BOUNDARY_COMPONENT_WIDTH), dtype=np.float32)
+    components = case.get("boundary_components") or []
+    if not components:
+        return result
+    scale = max(float(case.get("length_scale", 1.0)), 1e-9)
+    frame = int(frame)
+    for component_index, component in enumerate(components):
+        triangles = np.asarray(component["triangles_world"][frame], dtype=np.float64)
+        kind = int(component["type"])
+        previous = (
+            np.asarray(component["triangles_world"][frame - 1], dtype=np.float64)
+            if frame > 0 else triangles
+        )
+        wall_velocity = (triangles.mean(axis=(0, 1)) - previous.mean(axis=(0, 1))) / max(float(dt), 1e-9)
+        wall_velocity_scale = float(case.get("time_scale", 1.0)) / scale
+        for target_index, target in enumerate(targets):
+            best_distance = np.inf
+            best_normal = np.zeros(3, dtype=np.float64)
+            best_point = None
+            for triangle in triangles:
+                point, normal = _closest_point_on_triangle(target, triangle)
+                distance = float(np.linalg.norm(target - point))
+                if distance < best_distance:
+                    best_distance = distance
+                    best_normal = normal
+                    best_point = point
+            if best_point is None or not np.isfinite(best_distance):
+                continue
+            result[target_index, component_index] = np.asarray([
+                1.0,
+                best_distance / scale,
+                *best_normal,
+                float(kind),
+                *(wall_velocity * wall_velocity_scale),
+            ], dtype=np.float32)
+    return result
+
+
+def boundary_component_features(case: dict[str, Any], frame: int,
+                                target_position: Any, dt: float | None = None) -> list[list[dict[str, Any]]]:
+    """Return named per-target/per-component geometry inputs.
+
+    This is the auditable representation used to populate the fixed-width
+    model block.  Each row contains presence, finite-component distance,
+    oriented normal, integer boundary type, and current wall velocity.  The
+    packed tensor used by ``build_features`` is just this same data padded to
+    ``MAX_BOUNDARY_COMPONENTS``; no AABB-only replacement is made on the
+    sidecar-aware path.
+    """
+    points = np.asarray(target_position, dtype=np.float64).reshape(-1, 3)
+    if dt is None:
+        times = np.asarray(case["time"], dtype=np.float64)
+        dt = float(times[int(frame) + 1] - times[int(frame)]) if int(frame) + 1 < len(times) else 0.0
+    packed = _boundary_component_features(case, int(frame), points, float(dt))
+    rows: list[list[dict[str, Any]]] = []
+    for target_index in range(len(points)):
+        row: list[dict[str, Any]] = []
+        for component_index, component in enumerate(case.get("boundary_components") or []):
+            values = packed[target_index, component_index]
+            length_scale = max(float(case.get("length_scale", 1.0)), 1e-9)
+            time_scale = max(float(case.get("time_scale", 1.0)), 1e-9)
+            wall_velocity_mps = values[6:9] * length_scale / time_scale
+            row.append({
+                "component_id": int(component["component_id"]),
+                "distance_to_boundary_component": float(values[1] * length_scale),
+                "distance_to_boundary_component_m": float(values[1] * length_scale),
+                "normal": values[2:5].astype(float).tolist(),
+                "boundary_normal": values[2:5].astype(float).tolist(),
+                "type": int(component["type"]),
+                "boundary_type": int(component["type"]),
+                "wall_velocity": wall_velocity_mps.astype(float).tolist(),
+                "wall_velocity_mps": wall_velocity_mps.astype(float).tolist(),
+            })
+        rows.append(row)
+    return rows
+
+
+build_boundary_component_features = boundary_component_features
 
 
 def _validate_boundary_sidecar(
@@ -223,6 +483,10 @@ def _validate_boundary_sidecar(
         triangles = np.asarray(sidecar["triangles_world"][:], dtype=np.float64)
         triangle_mk = np.asarray(sidecar["triangle_mk"][:])
         triangle_type = np.asarray(sidecar["triangle_type"][:])
+        triangle_component = np.asarray(
+            sidecar["triangle_component"][:] if "triangle_component" in sidecar else triangle_mk,
+            dtype=np.int64,
+        )
         if (
             times.ndim != 1
             or len(times) < 2
@@ -247,6 +511,8 @@ def _validate_boundary_sidecar(
             raise ValueError(f"{record['case_id']}: boundary sidecar has no triangles")
         if len(triangle_mk) != triangles.shape[1] or len(triangle_type) != triangles.shape[1]:
             raise ValueError(f"{record['case_id']}: boundary triangle labels do not match geometry")
+        if len(triangle_component) != triangles.shape[1]:
+            raise ValueError(f"{record['case_id']}: boundary component labels do not match geometry")
         if not np.all(np.isin(triangle_type, (0, 1))):
             raise ValueError(f"{record['case_id']}: boundary sidecar has non-boundary triangle types")
         if not np.all(np.isfinite(triangles)):
@@ -272,6 +538,11 @@ def _validate_boundary_sidecar(
             "triangle_count": int(triangles.shape[1]),
             "static_triangle_count": int(np.sum(triangle_type == 0)),
             "moving_triangle_count": int(np.sum(triangle_type == 1)),
+            "component_count": int(len(np.unique(triangle_component))),
+            "component_ids": [int(value) for value in np.unique(triangle_component)],
+            "motion_interpolation": _attribute_text(
+                sidecar.attrs.get("motion_interpolation"), "rigid_pose_or_analytic_only"
+            ),
             "source_vtk": _attribute_text(sidecar.attrs.get("source_vtk"), "unknown"),
             "source_hdf5": _attribute_text(sidecar.attrs.get("source_hdf5"), "unknown"),
             "source_geometry_sha256": source_hash,
@@ -341,6 +612,7 @@ def _boundary_features(
 
 
 def _load_case(manifest_path: Path, record: dict[str, Any]) -> dict[str, Any] | None:
+    validate_model_input_contract(record)
     path = manifest_path.parent / record["hdf5"]
     with h5py.File(path, "r") as h5:
         valid = np.asarray(h5["valid"][:], dtype=bool)
@@ -377,6 +649,11 @@ def _load_case(manifest_path: Path, record: dict[str, Any]) -> dict[str, Any] | 
         boundary_by_frame, boundary_source, boundary_available, boundary_provenance = _boundary_features(
             record, h5, length_scale, manifest_path=manifest_path, solver_times=times
         )
+        boundary_components = []
+        sidecar_ref = (record.get("geometry") or {}).get("boundary_sidecar")
+        if sidecar_ref is not None:
+            sidecar_path = (manifest_path.parent / str(sidecar_ref)).resolve()
+            boundary_components = _boundary_component_series(sidecar_path, times)
     if len(times) < 2 or not np.isfinite(times).all() or not np.all(np.diff(times) > 0):
         raise ValueError(f"invalid time axis in {record['case_id']}")
     dp = float(record["numerics"]["particle_spacing_m"])
@@ -405,6 +682,8 @@ def _load_case(manifest_path: Path, record: dict[str, Any]) -> dict[str, Any] | 
         "boundary_source": boundary_source,
         "boundary_available": boundary_available,
         "boundary_provenance": boundary_provenance,
+        "boundary_components": boundary_components,
+        "boundary_component_feature_fields": list(BOUNDARY_COMPONENT_FEATURE_FIELDS),
         "gravity_source": gravity_source,
         "mass_initial_kg": float(np.sum(mass0)),
     }
@@ -430,11 +709,22 @@ def _tensor(array: np.ndarray, device: torch.device) -> torch.Tensor:
     return torch.from_numpy(np.asarray(array, dtype=np.float32)).to(device)
 
 
-def feature_width() -> int:
+def feature_width(cases: Any | None = None) -> int:
     # centered xyz, rollout-consistent velocity, initial density/pressure/mass,
-    # gravity, static physics, prescribed control, current boundary summary, family,
-    # elapsed time and current dt (both independent of final file endpoint).
-    return 3 + 3 + 3 + 3 + 3 + PHYSICS_WIDTH + CONTROL_WIDTH + BOUNDARY_WIDTH + 6 + 2
+    # gravity, static physics, prescribed control, current boundary summary,
+    # family, elapsed time and current dt (both independent of final file
+    # endpoint).  Keep the no-argument width for old custom checkpoints; the
+    # actual sidecar-aware training path opts into the component block below.
+    base = 3 + 3 + 3 + 3 + 3 + PHYSICS_WIDTH + CONTROL_WIDTH + BOUNDARY_WIDTH + 6 + 2
+    if cases is None:
+        return base
+    if isinstance(cases, dict):
+        cases = [cases]
+    try:
+        rich = any(bool(case.get("boundary_components")) for case in cases)
+    except (TypeError, AttributeError):
+        rich = False
+    return base + MAX_BOUNDARY_COMPONENTS * BOUNDARY_COMPONENT_WIDTH if rich else base
 
 
 def build_features(
@@ -449,6 +739,7 @@ def build_features(
     dt: float,
     device: torch.device,
 ) -> torch.Tensor:
+    validate_model_input_contract(case)
     mass_total = torch.clamp(context_mass.sum(), min=1e-9)
     center = torch.sum(context_position * context_mass[:, None], dim=0, keepdim=True) / mass_total
     centered = (target_position - center) / max(case["length_scale"], 1e-9)
@@ -481,6 +772,14 @@ def build_features(
             raise IndexError(f"boundary summary frame {frame} is outside case frame axis")
         boundary_values = boundary_by_frame[int(frame)]
     boundary = _tensor(boundary_values, device).expand((len(target_position), BOUNDARY_WIDTH))
+    component_values = None
+    if case.get("boundary_components"):
+        component_values = _boundary_component_features(
+            case, frame, target_position.detach().cpu().numpy(), dt
+        )
+        component_tensor = _tensor(component_values.reshape(len(target_position), -1), device)
+    else:
+        component_tensor = None
     family = torch.zeros((len(target_position), 6), dtype=target_position.dtype, device=device)
     family[:, FAMILY_INDEX[case["family"]]] = 1.0
     elapsed = torch.full(
@@ -491,7 +790,11 @@ def build_features(
         (len(target_position), 1), float(dt / max(case["time_scale"], 1e-9)),
         dtype=target_position.dtype, device=device,
     )
-    return torch.cat((centered, velocity_scaled, center_velocity_scaled, state_scalars, gravity, physics, controls, boundary, family, elapsed, dt_feature), dim=-1)
+    values = (centered, velocity_scaled, center_velocity_scaled, state_scalars, gravity,
+              physics, controls, boundary)
+    if component_tensor is not None:
+        values = values + (component_tensor,)
+    return torch.cat(values + (family, elapsed, dt_feature), dim=-1)
 
 
 def local_neighbour_features(
@@ -723,7 +1026,8 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
     test_cases = [case for case in cases if case["split"] == "test"]
     if not train_cases or not validation_cases or not test_cases:
         raise ValueError("manifest must contain train, validation and test fluid cases")
-    model = model_for(args.route, feature_width(), args.hidden).to(device)
+    model_input_width = feature_width(cases)
+    model = model_for(args.route, model_input_width, args.hidden).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate, weight_decay=1e-6)
     rng = np.random.default_rng(args.seed)
     transitions = [(case, frame) for case in train_cases for frame in range(len(case["time"]) - 1)]
@@ -776,7 +1080,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         "device": str(device), "torch_version": torch.__version__,
         "cuda_visible_device_name": torch.cuda.get_device_name(device) if device.type == "cuda" else None,
         "parameter_count": sum(parameter.numel() for parameter in model.parameters()),
-        "feature_width": feature_width(), "epochs_requested": args.epochs, "epochs_run": len(history),
+        "feature_width": model_input_width, "epochs_requested": args.epochs, "epochs_run": len(history),
         "best_epoch": best_epoch, "best_validation_autonomous_rmse_over_dp": best_validation,
         "early_stopping": {"patience": args.patience, "min_epochs": args.min_epochs, "min_delta": args.min_delta},
         "maximum_particles_per_training_frame": args.max_particles,
@@ -789,21 +1093,24 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
             "velocity_state": "solver velocity at every teacher-forced frame; rollout starts from frame-zero solver velocity and then uses predicted next velocity",
             "time": "elapsed physical time divided by sqrt(length_scale/|g|); no division by file endpoint",
             "initial_only_state": ["density", "pressure", "mass"],
-            "known_control": "current prescribed control schedule only; frame-zero control velocity is zero and later velocities use current-minus-previous transforms; no future free-body state",
+            "known_control": "current prescribed control schedule only; frame-zero derived translational velocity is zero, prescribed angular velocity is accepted directly, and no future free-body state is read",
             "prefix_invariance": "shared-prefix rollout inputs use only current predicted state, current control, current boundary summary, and elapsed time; future reference frames are not consumed",
-            "boundary_geometry": "current-frame finite-triangle world-space AABB summary plus availability bit from a linked boundary-sidecar-v1; records without a sidecar use an explicit legacy fallback",
+            "boundary_geometry": "current-frame finite-triangle world-space AABB plus per-component distance, normal, type, and wall velocity from linked boundary-sidecar-v1; records without a sidecar use an explicit legacy fallback",
+            "boundary_component_features": list(BOUNDARY_COMPONENT_FEATURE_FIELDS),
+            "boundary_component_padding": MAX_BOUNDARY_COMPONENTS,
+            "motion_interpolation": "rigid pose or analytic control only; no world-space vertex lerp",
             "prohibited_rollout_inputs": ["future reference position", "future reference velocity", "future reference density", "future free-body trajectory"],
         },
         "metric_definition": "vector RMSE = sqrt(mean(||error_xyz||^2)) / dp; ADE/FDE are mean vector norms; velocity and COM metrics use the same vector convention",
         "output_cap": {"kind": "smooth_tanh", "cap": OUTPUT_CAP, "saturation_rate_reported_per_case": True},
         "clipping": {"configured_clip_dp": args.clip_dp, "trigger_rate_reported_per_case": True, "note": "optional displacement clip is off in the declared run; smooth output cap is applied consistently in train/validation/rollout"},
         "physics_budget_scope": "diagnostic only: identity mass is preserved by construction; density/pressure are not predicted",
-        "limitations": "W11 development pilot; sidecar geometry is a current-frame AABB summary rather than a learned wall-interaction state, and T2/T3/T4 scoring is not included; not a formal ranking",
+        "limitations": "W11 development pilot; sidecar geometry is a finite per-component candidate input and T2/T3/T4 scoring is not included; not a formal ranking or physical acceptance",
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
     args.checkpoint.parent.mkdir(parents=True, exist_ok=True)
-    torch.save({"state_dict": model.state_dict(), "route": args.route, "seed": args.seed, "feature_width": feature_width()}, args.checkpoint)
+    torch.save({"state_dict": model.state_dict(), "route": args.route, "seed": args.seed, "feature_width": model_input_width}, args.checkpoint)
     return result
 
 

@@ -22,13 +22,59 @@ DEFAULT_INVENTORY = LAB / "campaigns" / "v0.1-candidate" / "w00-inventory.json"
 DEFAULT_MANIFEST = LAB / "release" / "v0.1-development" / "manifest.json"
 
 
-def mean_std(values: list[float | None]) -> dict[str, Any]:
-    finite = np.asarray([value for value in values if value is not None and np.isfinite(value)], dtype=float)
+def mean_std(values: list[float | None], statuses: list[str | None] | None = None,
+             expected_count: int | None = None) -> dict[str, Any]:
+    """Summarize a metric while retaining failed/missing denominator rows.
+
+    Historical reports exposed only the finite successful values, which made a
+    route with many failed rollouts look deceptively well behaved.  ``n``
+    remains the finite metric count for compatibility; the explicit sample and
+    failure counters are the evaluation denominator for new reports.
+    """
+    values = list(values)
+    statuses = list(statuses or [])
+    finite_mask = np.asarray(
+        [value is not None and np.isfinite(value) for value in values], dtype=bool
+    )
+    finite = np.asarray([value for value, valid in zip(values, finite_mask) if valid], dtype=float)
+    status_counts: dict[str, int] = defaultdict(int)
+    for status in statuses:
+        status_counts[str(status or "missing")] += 1
+    present_count = max(len(values), len(statuses))
+    sample_count = max(
+        int(expected_count) if expected_count is not None else present_count,
+        present_count,
+    )
+    missing_count = max(sample_count - present_count, 0)
+    present_failures = 0
+    for index in range(present_count):
+        metric_valid = bool(finite_mask[index]) if index < len(finite_mask) else False
+        status = (
+            str(statuses[index] or "missing")
+            if index < len(statuses)
+            else "completed" if metric_valid else "missing"
+        )
+        # A completed row with a missing/non-finite metric is still a failed
+        # metric evaluation; otherwise success-only artifacts could hide a
+        # missing score behind a completed rollout status.
+        if status != "completed" or not metric_valid:
+            present_failures += 1
+    failure_count = missing_count + present_failures
+    successful_count = max(sample_count - failure_count, 0)
     return {
         "mean": float(finite.mean()) if len(finite) else None,
         "sample_std": float(finite.std(ddof=1)) if len(finite) > 1 else 0.0 if len(finite) else None,
         "values": finite.tolist(),
         "n": int(len(finite)),
+        "sample_count": sample_count,
+        "reported_metric_count": int(len(finite)),
+        "present_count": int(present_count),
+        "successful_count": int(successful_count),
+        "failure_count": int(failure_count),
+        "failure_fraction": float(failure_count / sample_count) if sample_count else None,
+        "missing_count": int(missing_count),
+        "status_counts": dict(sorted(status_counts.items())),
+        "includes_failures_in_denominator": True,
     }
 
 
@@ -189,8 +235,12 @@ def load_runs(results_dir: Path, run_manifest: dict[str, Any] | None = None,
             issues.append(f"result provenance mismatch: {path}")
             continue
         if entry.get("status") != "completed":
+            # Keep a failed artifact in the evaluation population.  The
+            # physical-run gate still records the manifest issue, but dropping
+            # the row here would turn success-only aggregation into a false
+            # pass-rate claim.
             issues.append(f"manifest entry is not completed: {entry.get('route')} seed {entry.get('seed')}")
-            continue
+            result["_manifest_status"] = entry.get("status")
         result["_manifest_output"] = str(path)
         runs.append(result)
     return runs, issues
@@ -268,11 +318,22 @@ def _valid_sidecar_provenance(entry: dict[str, Any], case_id: str) -> bool:
     if frame_count != int(entry.get("frames_expected", 0)) + 1 or triangle_count < 1:
         return False
     source_hash = provenance.get("source_geometry_sha256")
-    return (
+    valid = (
         isinstance(source_hash, str)
         and len(source_hash) == 64
         and all(char in string.hexdigits for char in source_hash)
     )
+    if not valid:
+        return False
+    if "component_count" in provenance:
+        try:
+            if int(provenance["component_count"]) < 1:
+                return False
+        except (TypeError, ValueError):
+            return False
+    if "motion_interpolation" in provenance and not str(provenance["motion_interpolation"]):
+        return False
+    return True
 
 
 def _sha256(path: Path) -> str:
@@ -420,6 +481,9 @@ def audit_sidecar_artifacts(
                         triangles = np.asarray(sidecar["triangles_world"][:], dtype=np.float64)
                         triangle_mk = np.asarray(sidecar["triangle_mk"][:])
                         triangle_type = np.asarray(sidecar["triangle_type"][:])
+                        triangle_component = np.asarray(
+                            sidecar["triangle_component"][:] if "triangle_component" in sidecar else triangle_mk
+                        )
                         actual_summary = {
                             "file_sha256": actual_summary["file_sha256"],
                             "release_checksum_sha256": actual_summary["release_checksum_sha256"],
@@ -430,6 +494,11 @@ def audit_sidecar_artifacts(
                             "triangle_count": int(triangles.shape[1]) if triangles.ndim == 4 else 0,
                             "static_triangle_count": int(np.sum(triangle_type == 0)),
                             "moving_triangle_count": int(np.sum(triangle_type == 1)),
+                            "component_count": int(len(np.unique(triangle_component))),
+                            "component_ids": [int(value) for value in np.unique(triangle_component)],
+                            "motion_interpolation": _attribute_text(
+                                sidecar.attrs.get("motion_interpolation"), "rigid_pose_or_analytic_only"
+                            ),
                             "source_vtk": _attribute_text(sidecar.attrs.get("source_vtk"), "unknown"),
                             "source_hdf5": _attribute_text(sidecar.attrs.get("source_hdf5"), "unknown"),
                             "source_geometry_sha256": _attribute_text(sidecar.attrs.get("source_geometry_sha256")),
@@ -472,6 +541,13 @@ def audit_sidecar_artifacts(
                                 case_issues.append(
                                     f"result provenance {index} file_sha256 differs from actual sidecar"
                                 )
+                            for optional_field in (
+                                "component_count", "component_ids", "motion_interpolation",
+                            ):
+                                if optional_field in provenance and provenance.get(optional_field) != actual_summary[optional_field]:
+                                    case_issues.append(
+                                        f"result provenance {index} {optional_field} differs from actual sidecar"
+                                    )
             except (OSError, KeyError, ValueError) as error:
                 case_issues.append(f"sidecar unreadable: {error}")
         case_audits[case_id] = {
@@ -485,6 +561,13 @@ def audit_sidecar_artifacts(
     return {"pass": bool(case_audits) and not issues, "issues": issues, "cases": case_audits}
 
 
+def _metric_from_entries(entries: list[dict[str, Any]], field: str,
+                         expected_count: int | None = None) -> dict[str, Any]:
+    values = [entry.get(field) for entry in entries]
+    statuses = [entry.get("status") for entry in entries]
+    return mean_std(values, statuses, expected_count=expected_count)
+
+
 def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
     route_runs = [run for run in runs if run.get("route") == route]
     combinations = [(int(run["seed"]), run.get("route")) for run in route_runs]
@@ -492,6 +575,17 @@ def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
     per_case = {}
     for case_id in case_ids:
         entries = [run["test_rollout"][case_id] for run in route_runs if case_id in run.get("test_rollout", {})]
+        expected_case_count = len(route_runs)
+        statuses_by_seed = {
+            str(run["seed"]): (
+                run["test_rollout"][case_id].get("status")
+                if case_id in run.get("test_rollout", {}) else "missing"
+            )
+            for run in route_runs
+        }
+        status_counts = defaultdict(int)
+        for status in statuses_by_seed.values():
+            status_counts[str(status)] += 1
         first = entries[0]
         provenance_by_seed = {
             str(run["seed"]): run["test_rollout"][case_id].get("boundary_provenance")
@@ -509,15 +603,21 @@ def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
         per_case[case_id] = {
             "family": first["family"], "background_id": first["background_id"], "split": first["split"],
             "seeds": sorted(int(run["seed"]) for run in route_runs if case_id in run.get("test_rollout", {})),
-            "status_by_seed": {str(run["seed"]): run["test_rollout"][case_id]["status"] for run in route_runs if case_id in run.get("test_rollout", {})},
-            "learned_position_rmse_over_dp": mean_std([entry.get("learned_rmse_over_dp") for entry in entries]),
-            "learned_ade_m": mean_std([entry.get("learned_ade_m") for entry in entries]),
-            "learned_fde_m": mean_std([entry.get("learned_fde_m") for entry in entries]),
-            "learned_velocity_rmse_mps": mean_std([entry.get("learned_velocity_rmse_mps") for entry in entries]),
-            "learned_com_rmse_m": mean_std([entry.get("learned_com_rmse_m") for entry in entries]),
+            "status_by_seed": statuses_by_seed,
+            "status_counts": dict(sorted(status_counts.items())),
+            "failure_count": int(expected_case_count - status_counts.get("completed", 0)),
+            "failure_fraction": float(
+                (expected_case_count - status_counts.get("completed", 0)) / expected_case_count
+            ) if expected_case_count else None,
+            "evaluation_sample_count": expected_case_count,
+            "learned_position_rmse_over_dp": _metric_from_entries(entries, "learned_rmse_over_dp", expected_case_count),
+            "learned_ade_m": _metric_from_entries(entries, "learned_ade_m", expected_case_count),
+            "learned_fde_m": _metric_from_entries(entries, "learned_fde_m", expected_case_count),
+            "learned_velocity_rmse_mps": _metric_from_entries(entries, "learned_velocity_rmse_mps", expected_case_count),
+            "learned_com_rmse_m": _metric_from_entries(entries, "learned_com_rmse_m", expected_case_count),
             "clipped_component_fraction": clipping["clipped_component_fraction"],
             "clipping_trigger_rate": clipping["clipping_trigger_rate"],
-            "output_saturation_fraction": mean_std([entry.get("output_saturation_fraction") for entry in entries]),
+            "output_saturation_fraction": _metric_from_entries(entries, "output_saturation_fraction", expected_case_count),
             "clipping": clipping,
             "constant_velocity_position_rmse_over_dp": entries[0].get("constant_velocity_rmse_over_dp"),
             "constant_velocity_position_fde_m": entries[0].get("constant_velocity_fde_m"),
@@ -532,7 +632,10 @@ def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
             "boundary_provenance_by_seed": provenance_by_seed,
             "boundary_provenance_consistent": boundary_provenance_consistent,
             "boundary_provenance_valid": boundary_provenance_valid,
-            "mass_identity_preserved": all(bool(entry.get("mass_identity_preserved")) for entry in entries),
+            "mass_identity_preserved": bool(
+                len(entries) == expected_case_count
+                and all(bool(entry.get("mass_identity_preserved")) for entry in entries)
+            ),
         }
     def macro(metric: str) -> dict[str, Any]:
         values = [per_case[case][metric]["mean"] for case in case_ids if per_case[case][metric]["mean"] is not None]
@@ -550,6 +653,15 @@ def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
         background: {"case_ids": sorted(ids), "position_rmse_over_dp": bootstrap_cases([per_case[c]["learned_position_rmse_over_dp"]["mean"] for c in ids])}
         for background, ids in sorted(background_cases.items())
     }
+    rollout_status_counts: dict[str, int] = defaultdict(int)
+    rollout_population = 0
+    for run in route_runs:
+        test_rollout = run.get("test_rollout", {})
+        # A missing test-case entry is itself a failed evaluation sample.
+        for case_id in case_ids:
+            status = test_rollout.get(case_id, {}).get("status", "missing")
+            rollout_status_counts[str(status)] += 1
+            rollout_population += 1
     return {
         "route": route, "run_count": len(route_runs), "seeds": sorted(int(run["seed"]) for run in route_runs),
         "route_seed_combinations": [list(item) for item in sorted(combinations)],
@@ -560,6 +672,16 @@ def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
         "inference_seconds": mean_std([run.get("inference_seconds") for run in route_runs]),
         "peak_gpu_memory_bytes": max((run.get("peak_gpu_memory_bytes", 0) for run in route_runs), default=0),
         "per_case": per_case, "per_family": per_family, "per_background": per_background,
+        "evaluation_population": {
+            "sample_count": int(rollout_population),
+            "status_counts": dict(sorted(rollout_status_counts.items())),
+            "successful_count": int(rollout_status_counts.get("completed", 0)),
+            "failure_count": int(rollout_population - rollout_status_counts.get("completed", 0)),
+            "failure_fraction": float(
+                (rollout_population - rollout_status_counts.get("completed", 0)) / rollout_population
+            ) if rollout_population else None,
+            "includes_failed_and_missing_rollouts": True,
+        },
         "macro_position_rmse_over_dp": macro("learned_position_rmse_over_dp"),
         "macro_velocity_rmse_mps": macro("learned_velocity_rmse_mps"),
         "macro_com_rmse_m": macro("learned_com_rmse_m"),

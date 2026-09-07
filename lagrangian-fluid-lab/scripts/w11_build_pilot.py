@@ -55,8 +55,11 @@ def augment_material(h5_path: Path, dp: float, maximum: int) -> dict[str, Any] |
         group.attrs["semantics"] = "independent passive-tracer candidate; no solver Idp lookup after t0; wall visibility not yet supplied for all pilot cases"
         group.attrs["acceptance_status"] = "candidate"
         group.attrs["wall_visibility"] = "not supplied in development pilot"
-        group.attrs["velocity_interpolation"] = "24-neighbour inverse-distance Shepard"
+        group.attrs["velocity_interpolation"] = "inverse-distance Shepard with ESS/geometry/reconstruction support gate"
         group.attrs["integration"] = "Heun"
+        group.attrs["support_gate"] = json.dumps(traced["support_gate"], sort_keys=True)
+        group.attrs["motion_interpolation"] = traced["motion_interpolation"]
+        group.attrs["source_label_semantics"] = "initial metadata only; never a post-mixing visibility filter"
         group.attrs["seed_selection"] = seeds["selection"]
         group.create_dataset("tracer_id", data=np.arange(len(seeds["indices"]), dtype=np.int64))
         group.create_dataset("seed_particle_id", data=seeds["particle_id"])
@@ -66,6 +69,29 @@ def augment_material(h5_path: Path, dp: float, maximum: int) -> dict[str, Any] |
         group.create_dataset("valid", data=cumulative, compression="gzip")
         group.create_dataset("position", data=traced["position"].astype(np.float32), compression="gzip")
         group.create_dataset("nearest_support_distance", data=np.vstack((np.zeros((1, len(seeds["indices"]))), support)).astype(np.float32), compression="gzip")
+        for name, dtype in (
+            ("effective_sample_size", np.float32),
+            ("support_geometry_rank", np.int8),
+            ("support_anisotropy", np.float32),
+            ("interpolation_reconstruction_error_mps", np.float32),
+            ("support_gate_pass", np.bool_),
+            ("wall_crossing", np.bool_),
+        ):
+            values = np.asarray(traced[name])
+            # Quality histories are interval-indexed; prepend a neutral frame
+            # to align them with the material trajectory axis.
+            if values.ndim == 2 and values.shape[0] == len(traced["time"]) - 1:
+                if name == "support_gate_pass":
+                    values = np.vstack((np.ones((1, values.shape[1]), dtype=bool), values))
+                elif name == "wall_crossing":
+                    values = np.vstack((np.zeros((1, values.shape[1]), dtype=bool), values))
+                elif name == "support_geometry_rank":
+                    values = np.vstack((np.zeros((1, values.shape[1]), dtype=np.int8), values))
+                elif name == "effective_sample_size":
+                    values = np.vstack((np.zeros((1, values.shape[1]), dtype=np.float64), values))
+                else:
+                    values = np.vstack((np.zeros((1, values.shape[1]), dtype=np.float64), values))
+            group.create_dataset(name, data=np.asarray(values, dtype=dtype), compression="gzip")
     return {
         "tracers": len(seeds["indices"]),
         "reliable_at_end": int(cumulative[-1].sum()),

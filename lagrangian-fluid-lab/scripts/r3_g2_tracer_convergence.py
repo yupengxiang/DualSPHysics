@@ -113,6 +113,17 @@ def _trajectory_summary(trace: dict, reference_position: np.ndarray,
     support_finite = support[np.isfinite(support)]
     visible = np.asarray(trace["minimum_visible_neighbours"], dtype=float)
     visible_finite = visible[np.isfinite(visible)]
+    effective = np.asarray(trace.get("effective_sample_size", []), dtype=float)
+    effective_finite = effective[np.isfinite(effective)]
+    geometry_rank = np.asarray(trace.get("support_geometry_rank", []), dtype=float)
+    geometry_rank_finite = geometry_rank[np.isfinite(geometry_rank)]
+    anisotropy = np.asarray(trace.get("support_anisotropy", []), dtype=float)
+    anisotropy_finite = anisotropy[np.isfinite(anisotropy)]
+    reconstruction = np.asarray(
+        trace.get("interpolation_reconstruction_error_mps", []), dtype=float
+    )
+    reconstruction_finite = reconstruction[np.isfinite(reconstruction)]
+    support_gate = np.asarray(trace.get("support_gate_pass", []), dtype=bool)
     flat_error = error.ravel()[flat]
     flat_weights = weights.ravel()[flat]
     weighted_squared_error = _weighted_mean((flat_error / dp) ** 2, flat_weights)
@@ -147,8 +158,25 @@ def _trajectory_summary(trace: dict, reference_position: np.ndarray,
         "support_median_over_dp": float(np.median(support_finite) / dp) if support_finite.size else None,
         "support_p95_over_dp": float(np.quantile(support_finite, 0.95) / dp) if support_finite.size else None,
         "minimum_visible_neighbours": int(np.min(visible_finite)) if visible_finite.size else None,
+        "support_quality": {
+            "effective_sample_size_median": float(np.median(effective_finite)) if effective_finite.size else None,
+            "effective_sample_size_p05": float(np.quantile(effective_finite, 0.05)) if effective_finite.size else None,
+            "geometry_rank_minimum": int(np.min(geometry_rank_finite)) if geometry_rank_finite.size else None,
+            "anisotropy_median": float(np.median(anisotropy_finite)) if anisotropy_finite.size else None,
+            "anisotropy_p05": float(np.quantile(anisotropy_finite, 0.05)) if anisotropy_finite.size else None,
+            "interpolation_reconstruction_error_mps_median": float(np.median(reconstruction_finite)) if reconstruction_finite.size else None,
+            "interpolation_reconstruction_error_mps_p95": float(np.quantile(reconstruction_finite, 0.95)) if reconstruction_finite.size else None,
+            "support_gate_pass_fraction": float(np.mean(support_gate)) if support_gate.size else None,
+            "support_gate_failure_count": int(np.size(support_gate) - np.count_nonzero(support_gate)) if support_gate.size else None,
+            "support_gate_denominator": int(np.size(support_gate)) if support_gate.size else 0,
+            "neighbour_count_is_not_a_gate": True,
+            "gate": trace.get("support_gate"),
+        },
         "saved_cadence_median_s": float(np.median(np.diff(trace["time"]))),
         "wall_geometry_available": bool(boundary_available),
+        "motion_interpolation": trace.get("motion_interpolation", "none"),
+        "spacetime_swept_wall_check": bool(trace.get("motion_interpolation", "none") != "none")
+        if boundary_available else False,
         "wall_crossing_rejections": int(np.asarray(trace["wall_crossing"], dtype=bool).sum()),
         "elapsed_seconds": float(elapsed_seconds),
     }
@@ -230,7 +258,7 @@ def _initial_fluid_mass(h5_path: Path) -> float:
 
 def run_case(case: dict, h5_path: Path, *, counts=DEFAULT_COUNTS,
              frame_strides=DEFAULT_FRAME_STRIDES, substeps=DEFAULT_SUBSTEPS,
-             sidecar_path: Path | None = None):
+             sidecar_path: Path | None = None, support_gate: dict | None = None):
     dp = float(case["numerics"]["particle_spacing_m"])
     initial_mass = _initial_fluid_mass(h5_path)
     barrier = sidecar_provider(sidecar_path) if sidecar_path is not None else None
@@ -252,6 +280,7 @@ def run_case(case: dict, h5_path: Path, *, counts=DEFAULT_COUNTS,
                     frame_stride=int(stride),
                     substeps_per_interval=int(integration_substeps),
                     barrier_provider=barrier,
+                    support_gate=support_gate,
                 )
                 elapsed = wall_time.perf_counter() - started
                 reference_time, reference_position, reference_valid = _solver_reference(
@@ -319,7 +348,8 @@ def _load_cases(manifest_path: Path, selected_ids: tuple[str, ...]):
 
 def build_report(manifest_path: Path = DEFAULT_MANIFEST, selected_ids: tuple[str, ...] = DEFAULT_CASES,
                  *, counts=DEFAULT_COUNTS, frame_strides=DEFAULT_FRAME_STRIDES,
-                 substeps=DEFAULT_SUBSTEPS, sidecar_dir: Path | None = None) -> dict:
+                 substeps=DEFAULT_SUBSTEPS, sidecar_dir: Path | None = None,
+                 support_gate: dict | None = None) -> dict:
     selected = _load_cases(manifest_path, selected_ids)
     case_reports = {}
     for case, path in selected:
@@ -343,7 +373,8 @@ def build_report(manifest_path: Path = DEFAULT_MANIFEST, selected_ids: tuple[str
             if _sha256(sidecar_path) != _sha256(linked_sidecar):
                 raise ValueError(f"{case['case_id']}: sidecar copy differs from release-linked artifact")
         records = run_case(case, path, counts=counts, frame_strides=frame_strides,
-                           substeps=substeps, sidecar_path=sidecar_path)
+                           substeps=substeps, sidecar_path=sidecar_path,
+                           support_gate=support_gate)
         case_reports[case["case_id"]] = {
             "family": case["family"],
             "mechanism": case["physics"].get("mechanism"),
@@ -371,6 +402,7 @@ def build_report(manifest_path: Path = DEFAULT_MANIFEST, selected_ids: tuple[str
             "maximum_support_over_dp": 1.75,
             "mass_closure_relative_tolerance": 1e-6,
             "wall_visibility": sidecar_dir is not None,
+            "support_gate": support_gate,
             "sidecar_directory": str(Path(sidecar_dir).resolve().relative_to(LAB)) if sidecar_dir else None,
         },
         "interpretation": {

@@ -18,6 +18,7 @@ try:
         rigid_barrier_provider,
         segment_visibility,
         shepard_velocity,
+        spacetime_swept_wall_blocked,
         weighted_stratified_seeds,
     )
 except ModuleNotFoundError:  # pragma: no cover - direct script execution
@@ -28,6 +29,7 @@ except ModuleNotFoundError:  # pragma: no cover - direct script execution
         rigid_barrier_provider,
         segment_visibility,
         shepard_velocity,
+        spacetime_swept_wall_blocked,
         weighted_stratified_seeds,
     )
 try:
@@ -103,19 +105,47 @@ def moving_wall_audit() -> dict:
     body = box_surface_triangles([0.0, -0.1, 0.0], [0.2, 0.1, 0.3], sides=("xmin",))
     transform0 = np.eye(4)
     transform1 = np.eye(4)
-    transform1[0, 3] = 0.4
-    midpoint = 0.5 * body + 0.5 * (body + np.asarray([0.4, 0.0, 0.0]))
+    transform1[:3, :3] = np.asarray([[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])
+    transform1[:3, 3] = [0.4, 0.0, 0.0]
+    endpoint0 = body
+    endpoint1 = body @ transform1[:3, :3].T + transform1[:3, 3]
+    midpoint_vertex_lerp = 0.5 * endpoint0 + 0.5 * endpoint1
     # Exercise the same provider contract used by the HDF5 advector without
     # relying on any particular DualSPHysics case.
     with h5py.File("/tmp/r3_g2_moving_wall.h5", "w", driver="core", backing_store=False) as h5:
         h5.create_dataset("control/body", data=np.asarray([transform0, transform1]))
         provider = rigid_barrier_provider("control/body", body)
         actual = provider(h5, 0, 1, 0.5)
-    error = float(np.max(np.abs(actual - midpoint)))
+    legacy_edge_lengths = np.linalg.norm(
+        np.diff(np.concatenate((midpoint_vertex_lerp, midpoint_vertex_lerp[:, :1]), axis=1), axis=1), axis=-1
+    )
+    rigid_edge_lengths = np.linalg.norm(
+        np.diff(np.concatenate((actual, actual[:, :1]), axis=1), axis=1), axis=-1
+    )
+    reference_edge_lengths = np.linalg.norm(
+        np.diff(np.concatenate((body, body[:, :1]), axis=1), axis=1), axis=-1
+    )
+    legacy_error = float(np.max(np.abs(legacy_edge_lengths - reference_edge_lengths)))
+    rigid_error = float(np.max(np.abs(rigid_edge_lengths - reference_edge_lengths)))
+    # The panel crosses the stationary tracer segment between endpoints.  A
+    # midpoint-only query is not the space-time collision oracle.
+    wall0 = box_surface_triangles([0.4, -0.2, -0.2], [0.5, 0.2, 0.2], sides=("xmin",))
+    wall1 = box_surface_triangles([-0.5, -0.2, -0.2], [-0.4, 0.2, 0.2], sides=("xmin",))
+    tracer_start = np.asarray([[0.0, 0.0, 0.0]])
+    tracer_end = np.asarray([[0.0, 0.0, 0.0]])
+    midpoint_wall = 0.5 * (wall0 + wall1)
+    midpoint_hit = bool(corresponding_segments_blocked(tracer_start, tracer_end, midpoint_wall)[0])
+    swept_hit = bool(spacetime_swept_wall_blocked(tracer_start, tracer_end, wall0, wall1)[0])
     return {
-        "intermediate_geometry": "linearly interpolated transformed wall vertices at every tracer substep",
-        "midpoint_max_abs_error_m": error,
-        "pass": error < 1e-12,
+        "intermediate_geometry": "rigid pose: linear translation + quaternion SLERP rotation",
+        "legacy_intermediate_geometry": "independent world-space vertex lerp (negative control)",
+        "candidate_intermediate_geometry": "rigid pose: linear translation + quaternion SLERP rotation",
+        "legacy_max_edge_length_abs_error_m": legacy_error,
+        "candidate_max_edge_length_abs_error_m": rigid_error,
+        "midpoint_max_abs_error_m": rigid_error,
+        "midpoint_wall_hit": midpoint_hit,
+        "swept_wall_hit": swept_hit,
+        "pass": bool(legacy_error > 1e-6 and rigid_error < 1e-10 and not midpoint_hit and swept_hit),
     }
 
 

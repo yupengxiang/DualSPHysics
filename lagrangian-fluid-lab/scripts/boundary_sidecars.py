@@ -19,9 +19,13 @@ import h5py
 import numpy as np
 
 try:
-    from scripts.passive_tracers import transform_triangles
+    from scripts.passive_tracers import (
+        interpolate_rigid_transform,
+        transform_triangles,
+        validate_rigid_transform,
+    )
 except ModuleNotFoundError:  # pragma: no cover - direct script execution
-    from passive_tracers import transform_triangles
+    from passive_tracers import interpolate_rigid_transform, transform_triangles, validate_rigid_transform
 
 
 _DTYPES = {
@@ -173,6 +177,39 @@ def _transform_series(triangles: np.ndarray, transforms: np.ndarray) -> np.ndarr
     return np.asarray([transform_triangles(triangles, transform) for transform in transforms])
 
 
+def _fit_rigid_transform(reference: np.ndarray, target: np.ndarray) -> tuple[np.ndarray, float]:
+    """Fit a rigid transform from corresponding world-space vertices.
+
+    Sidecars historically stored only world-space triangles.  For those files
+    we recover the interval pose with a Kabsch fit instead of linearly lerping
+    each vertex.  A non-rigid/deforming group is rejected: callers must supply
+    a new sidecar with an analytic/pose motion contract rather than silently
+    changing the wall shape during tracer integration.
+    """
+    source = np.asarray(reference, dtype=np.float64).reshape(-1, 3)
+    destination = np.asarray(target, dtype=np.float64).reshape(-1, 3)
+    if source.shape != destination.shape or len(source) < 3:
+        raise ValueError("at least three corresponding vertices are required for a rigid fit")
+    source_center = source.mean(axis=0)
+    destination_center = destination.mean(axis=0)
+    source_centered = source - source_center
+    destination_centered = destination - destination_center
+    covariance = source_centered.T @ destination_centered
+    left, _, right_transpose = np.linalg.svd(covariance)
+    rotation = right_transpose.T @ left.T
+    if np.linalg.det(rotation) < 0.0:
+        right_transpose[-1] *= -1.0
+        rotation = right_transpose.T @ left.T
+    translation = destination_center - rotation @ source_center
+    transform = np.eye(4, dtype=np.float64)
+    transform[:3, :3] = rotation
+    transform[:3, 3] = translation
+    transform = validate_rigid_transform(transform)
+    fitted = source @ rotation.T + translation
+    residual = float(np.max(np.linalg.norm(fitted - destination, axis=1)))
+    return transform, residual
+
+
 def build_world_series(h5_path: Path, parsed: dict[str, Any]) -> dict[str, Any]:
     """Build world-space triangle series and provenance from a parsed VTK file."""
     triangles = boundary_triangles(parsed)
@@ -231,6 +268,10 @@ def write_sidecar(path: Path, case_id: str, h5_path: Path, parsed: dict[str, Any
                           chunks=(1, min(128, triangles.shape[1]), 3, 3))
         h5.create_dataset("triangle_mk", data=series["triangle_mk"])
         h5.create_dataset("triangle_type", data=series["triangle_type"])
+        # ``triangle_component`` is intentionally redundant with Mk for the
+        # current DualSPHysics export, but makes the per-component contract
+        # explicit and leaves room for a future component registry.
+        h5.create_dataset("triangle_component", data=series["triangle_mk"].astype(np.int64))
         h5.attrs["schema_version"] = "boundary-sidecar-v1"
         h5.attrs["case_id"] = case_id
         h5.attrs["coordinate_frame"] = "world"
@@ -240,6 +281,7 @@ def write_sidecar(path: Path, case_id: str, h5_path: Path, parsed: dict[str, Any
         h5.attrs["source_vtk"] = source_vtk_label or Path(parsed["source"]).name
         h5.attrs["source_hdf5"] = source_hdf5_label or Path(h5_path).name
         h5.attrs["source_geometry_sha256"] = series["source_geometry_sha256"]
+        h5.attrs["motion_interpolation"] = "rigid_pose_or_analytic_only"
     return audit_sidecar(path)
 
 
@@ -254,12 +296,15 @@ def audit_sidecar(path: Path) -> dict[str, Any]:
         triangles = np.asarray(h5["triangles_world"][:], dtype=np.float64)
         mk = np.asarray(h5["triangle_mk"][:])
         kind = np.asarray(h5["triangle_type"][:])
+        component = np.asarray(h5["triangle_component"][:] if "triangle_component" in h5 else mk)
         if time.ndim != 1 or len(time) < 2 or not np.all(np.diff(time) > 0):
             raise ValueError("sidecar time must be strictly increasing")
         if triangles.ndim != 4 or triangles.shape[0] != len(time) or triangles.shape[2:] != (3, 3):
             raise ValueError("triangles_world must have shape [T,N,3,3]")
         if len(mk) != triangles.shape[1] or len(kind) != triangles.shape[1]:
             raise ValueError("triangle labels do not match triangle axis")
+        if len(component) != triangles.shape[1]:
+            raise ValueError("triangle component labels do not match triangle axis")
         if not np.all(np.isin(kind, (0, 1))):
             raise ValueError("sidecar triangle_type must contain only 0/1")
         edge1 = triangles[:, :, 1] - triangles[:, :, 0]
@@ -276,6 +321,7 @@ def audit_sidecar(path: Path) -> dict[str, Any]:
             "triangle_count": int(triangles.shape[1]),
             "static_triangle_count": int(np.sum(kind == 0)),
             "moving_triangle_count": int(np.sum(kind == 1)),
+            "component_count": int(len(np.unique(component))),
             "all_frames_finite": bool(np.all(finite)),
             "all_frames_nondegenerate": bool(np.all(nondegenerate)),
             "time_start_s": float(time[0]),
@@ -289,21 +335,73 @@ def audit_sidecar(path: Path) -> dict[str, Any]:
 def sidecar_provider(path: Path):
     """Return an ``advect_hdf5`` barrier callback backed by a sidecar.
 
-    The sidecar is loaded once, and each callback linearly interpolates the
-    already-world-space triangles between the two solver frames.  It is kept
-    separate from the solver HDF5 so the same tracer code can compare a legacy
-    no-wall run with a wall-aware run without rewriting the source export.
+    The sidecar is loaded once.  Static components are held fixed; each moving
+    component is interpolated through a Kabsch-recovered rigid pose and
+    quaternion SLERP.  A non-rigid endpoint pair raises an input-contract
+    error instead of silently linearly interpolating world-space vertices.  It
+    is kept separate from the solver HDF5 so the same tracer code can compare a
+    legacy no-wall run with a wall-aware run without rewriting the source
+    export.
     """
     with h5py.File(Path(path), "r") as h5:
         times = np.asarray(h5["time"][:], dtype=np.float64)
         triangles = np.asarray(h5["triangles_world"][:], dtype=np.float64)
+        triangle_type = np.asarray(h5["triangle_type"][:], dtype=np.int8)
+        triangle_component = np.asarray(
+            h5["triangle_component"][:] if "triangle_component" in h5 else h5["triangle_mk"][:],
+            dtype=np.int64,
+        )
     if triangles.shape[0] != len(times):
         raise ValueError("sidecar frame axis does not match its time axis")
+    if triangles.ndim != 4 or triangles.shape[2:] != (3, 3):
+        raise ValueError("sidecar triangles_world must have shape [T,N,3,3]")
+    if len(triangle_type) != triangles.shape[1] or len(triangle_component) != triangles.shape[1]:
+        raise ValueError("sidecar component labels do not match triangle axis")
+    if not np.all(np.isin(triangle_type, (0, 1))):
+        raise ValueError("sidecar triangle_type must contain only 0/1")
+    component_keys = [
+        (int(kind), int(component))
+        for kind, component in zip(triangle_type, triangle_component)
+    ]
+    component_groups: dict[tuple[int, int], np.ndarray] = {}
+    for key in dict.fromkeys(component_keys):
+        component_groups[key] = np.asarray(
+            [index for index, item in enumerate(component_keys) if item == key], dtype=np.int64
+        )
+    motion_cache: dict[tuple[int, int], np.ndarray] = {}
 
     def provider(_solver_h5, frame0: int, frame1: int, alpha: float):
         if not (0 <= int(frame0) < len(times) and 0 <= int(frame1) < len(times)):
             raise IndexError("solver frame is outside sidecar frame axis")
-        return ((1.0 - float(alpha)) * triangles[int(frame0)]
-                + float(alpha) * triangles[int(frame1)])
+        frame0 = int(frame0)
+        frame1 = int(frame1)
+        result = np.empty_like(triangles[frame0])
+        for (kind, _component), indices in component_groups.items():
+            first = triangles[frame0, indices]
+            second = triangles[frame1, indices]
+            if kind == 0:
+                # Type 0 is fixed by the sidecar contract.  Do not average
+                # endpoint vertices even if a malformed sidecar moves them.
+                if not np.allclose(first, second, atol=1e-8, rtol=0.0):
+                    raise ValueError("Type 0 sidecar component changes across frames")
+                result[indices] = first
+                continue
+            key = (frame0, frame1, int(_component))
+            transform = motion_cache.get(key)
+            if transform is None:
+                transform, residual = _fit_rigid_transform(first, second)
+                span = max(float(np.ptp(first.reshape(-1, 3), axis=0).max()), 1.0)
+                if residual > max(1e-7, 1e-6 * span):
+                    raise ValueError(
+                        f"moving sidecar component {_component} is non-rigid (fit residual {residual:g} m)"
+                    )
+                motion_cache[key] = transform
+            identity = np.eye(4, dtype=np.float64)
+            pose = interpolate_rigid_transform(identity, transform, float(alpha))
+            result[indices] = transform_triangles(first, pose)
+        return result
 
+    provider.motion_interpolation = "sidecar_component_rigid_pose_kabsch_slerp"  # type: ignore[attr-defined]
+    provider.supports_spacetime_sweep = True  # type: ignore[attr-defined]
+    provider.component_keys = tuple(component_groups)  # type: ignore[attr-defined]
     return provider
