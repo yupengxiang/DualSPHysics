@@ -55,43 +55,116 @@ SINGLE_LEVELS = {
 # Topology holdouts are kept in a separate namespace from the 204 continuous
 # intervention cards.  This prevents a materialized topology case from being
 # mistaken for one of the continuous-axis execution units while still giving
-# G3 a declared W08 card to link to concrete solver evidence.
-TOPOLOGY_HOLDOUT_PHYSICS = {
-    "wet_bed_ratio": 0.0,
-    "blockage_ratio": 0.25,
-    "obstacle_eccentricity": 0.0,
-    "release_aspect_ratio": 0.73913,
-    "obstacle_topology": "twin",
-    "geometry_variant": "staggered_0p09x0p10_obstacles",
-}
-
-
-def topology_holdout_cards() -> list[dict[str, Any]]:
-    """Return explicit topology declarations outside the continuous card set."""
-    family = "F1"
-    physics = dict(TOPOLOGY_HOLDOUT_PHYSICS)
-    sig = signature(family, physics)
-    return [{
-        "card_id": "W08_F1_topology_twin_00",
-        "family": family,
-        "study_id": "W08_F1_topology_holdout",
+# G3 a declared W08 card to link to concrete solver evidence.  The values are
+# repeated in the per-family materialization manifests so their signatures are
+# stable across independent workers.
+TOPOLOGY_HOLDOUT_SPECS: dict[str, dict[str, Any]] = {
+    "F1": {
+        "holdout": "twin",
+        "physics": {
+            "wet_bed_ratio": 0.0,
+            "blockage_ratio": 0.25,
+            "obstacle_eccentricity": 0.0,
+            "release_aspect_ratio": 0.73913,
+            "obstacle_topology": "twin",
+            "geometry_variant": "staggered_0p09x0p10_obstacles",
+        },
+        "intervention": {"obstacle_topology": "twin"},
         "paired_background_id": "background_F1_topology_holdout_staggered_v1",
-        "physical_case_id": f"physical_W08_F1_topology_twin_{sig}",
-        "lineage_group_id": f"lineage_W08_F1_topology_twin_{sig}",
-        "split": "topology_extrapolation",
-        "physics": physics,
-        "normalized_intervention": {"obstacle_topology": "twin"},
-        "simulation_signature": sig,
-        "execution_unit_id": f"sim_W08_F1_topology_twin_{sig}",
-        "execution_status": "planned_not_run",
-        "formal_production_authorized": False,
         "materialization_case_id": "W08_F1_topology_twin_obstacle_00",
         "definition": (
             "campaigns/v0.1-candidate/cases/w08/topology/F1_twin_obstacle/"
             "W08_F1_topology_twin_obstacle_Def.xml"
         ),
-        "provenance_status": "declared_independent_geometry",
-    }]
+    },
+    "F2": {
+        "holdout": "spout",
+        "physics": {
+            "fill_fraction": 0.525,
+            "rotation_duration_s": 1.0,
+            "final_angle_deg": 115.0,
+            "receiver_offset_over_mouth": 0.0,
+            "receiver_distance_over_mouth": 1.4,
+            "mouth_topology": "spout",
+            "geometry_variant": "stepped_converging_spout_y0p10_to_y0p06",
+        },
+        "intervention": {"mouth_topology": "spout"},
+        "paired_background_id": "background_F2_topology_holdout_spout_v1",
+        "materialization_case_id": "W08_F2_topology_spout_00",
+        "definition": (
+            "campaigns/v0.1-candidate/cases/w08/topology/F2_spout/"
+            "W08_F2_topology_spout_Def.xml"
+        ),
+    },
+    "F3": {
+        "holdout": "perforated_proxy",
+        "physics": {
+            "fill_fraction": 0.5,
+            "amplitude_over_length": 0.0425,
+            "forcing_frequency_ratio": 1.05,
+            "baffle_height_over_depth": 0.4,
+            "baffle_topology": "perforated_proxy",
+            "geometry_variant": "center_3rib_2gap_perforated_proxy_v1",
+        },
+        "intervention": {"baffle_topology": "perforated_proxy"},
+        "paired_background_id": "background_F3_topology_holdout_perforated_proxy_v1",
+        "materialization_case_id": "W08_F3_topology_perforated_proxy_00",
+        "definition": (
+            "campaigns/v0.1-candidate/cases/w08/topology/F3_perforated_proxy/"
+            "W08_F3_topology_perforated_proxy_Def.xml"
+        ),
+    },
+    "F6": {
+        "holdout": "twin_free",
+        "physics": {
+            "body_configuration": "twin_free",
+            "body_density_ratio": [0.7, 0.7],
+            "entry_froude": 0.0,
+            "body_aspect_ratio": 1.125,
+            "initial_pitch_deg": 0.0,
+            "topology_variant": "two_staggered_free_boxes",
+        },
+        "intervention": {"body_configuration": "twin_free"},
+        "paired_background_id": "background_F6_topology_holdout_twin_free_v1",
+        "materialization_case_id": "W08_F6_topology_twin_free_00",
+        "definition": (
+            "campaigns/v0.1-candidate/cases/w08/topology/F6_twin_free/"
+            "W08_F6_topology_twin_free_Def.xml"
+        ),
+    },
+}
+
+# Backward-compatible alias for callers that used the original single-F1
+# constant before all four independent topology cards were materialized.
+TOPOLOGY_HOLDOUT_PHYSICS = TOPOLOGY_HOLDOUT_SPECS["F1"]["physics"]
+
+
+def topology_holdout_cards() -> list[dict[str, Any]]:
+    """Return explicit topology declarations outside the continuous card set."""
+    cards = []
+    for family, spec in TOPOLOGY_HOLDOUT_SPECS.items():
+        physics = dict(spec["physics"])
+        sig = signature(family, physics)
+        holdout = spec["holdout"]
+        cards.append({
+            "card_id": f"W08_{family}_topology_{holdout}_00",
+            "family": family,
+            "study_id": f"W08_{family}_topology_holdout",
+            "paired_background_id": spec["paired_background_id"],
+            "physical_case_id": f"physical_W08_{family}_topology_{holdout}_{sig}",
+            "lineage_group_id": f"lineage_W08_{family}_topology_{holdout}_{sig}",
+            "split": "topology_extrapolation",
+            "physics": physics,
+            "normalized_intervention": dict(spec["intervention"]),
+            "simulation_signature": sig,
+            "execution_unit_id": f"sim_{family}_topology_{holdout}_{sig}",
+            "execution_status": "planned_not_run",
+            "formal_production_authorized": False,
+            "materialization_case_id": spec["materialization_case_id"],
+            "definition": spec["definition"],
+            "provenance_status": "declared_independent_geometry",
+        })
+    return cards
 
 
 def scale(family: str, axis: str, unit_value: float) -> float:

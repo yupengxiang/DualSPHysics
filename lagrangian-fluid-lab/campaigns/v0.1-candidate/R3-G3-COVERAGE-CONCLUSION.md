@@ -1,6 +1,6 @@
 # R3 G3 结论：覆盖度与 topology holdout 审计
 
-状态：**审计完成；W08 的连续轴矩阵仍是 design-only，但 F1 twin 已完成一个独立 topology_extrapolation 的 declared→executable→run→structural 链接。该案例保持 candidate/rejected，不进入正式数据；其余 topology holdout 仍是 planned-only。**
+状态：**审计完成；W08 的连续轴矩阵仍是 design-only。F1/F2/F3 topology holdout 已完成独立的 declared→executable→run→structural 链接但保持 candidate/rejected；F6 仅完成 GenCase 与微时域 solver structural probe，尚无归一化轨迹；正式覆盖仍为零。**
 
 ## 逐级结果
 
@@ -21,7 +21,7 @@
 
 W08 的 204 张连续轴卡和 196 个唯一 execution unit 全部仍是 `planned_not_run`，没有与 registry、solver attempt、轨迹或训练/评测产物建立链接；连续轴 `coverage_claim=false`。另外显式声明的 W08 topology card 位于独立命名空间，不计入 204 张连续轴卡。
 
-四个已声明 topology holdout 中，工程链已完成的家族为 **F1**，仍 planned-only 的为 **F2, F3, F6**。F1 新增 `W08_F1_topology_twin_obstacle_00`，使用独立 `physical_case_id=physical_W08_F1_topology_twin_141632fc10d15922` 和 `lineage_group_id=lineage_W08_F1_topology_twin_141632fc10d15922`，definition、GenCase、solver attempt、归一化 HDF5 和结构审计均可由 `topology-holdout-materializations.json` 追溯；`holdout_gate_pass=True`，但 `scientific_acceptance_pass=False`，所以 `coverage_claim=False`。旧 registry 的 `F1_twin_obstacle` 仅作为 incidental 对照，未被挂到第二个 split。F1/F2/F3/F6 的 W07 planned card 数分别为 6、8、6、8；W07 卡仍不是生成数据。
+四个已声明 topology holdout 中，完整的 GenCase→solver→归一化 HDF5→结构链已完成的家族为 **F1, F2, F3**，仅完成可执行/solver structural probe 的为 **F6**，仍 planned-only 的为 **none**。每个案例都使用独立 `physical_case_id`/`lineage_group_id`，definition、运行证据和 candidate-only 验收状态由各自 materialization manifest 追溯；F6 明确没有归一化 HDF5，因此不计入 trajectory coverage。旧 registry probes 仅作 incidental 对照，未被挂到第二个 split。F1/F2/F3/F6 的 W07 planned card 数分别为 6、8、6、8；W07 卡仍不是生成数据。
 
 ## 训练/评测覆盖
 
@@ -31,6 +31,6 @@ W11 development pilot 为 13 例（train 6、validation 3、test 4）。T1 粒�
 
 “每族至少三个背景”在现有探针层面满足，但这是 breadth gate，不是 acceptance gate。所有家族的 reference-quality gate 仍未通过，因此当前没有任何 family 可以直接进入正式 v0.1 或 20–30 例生产 tranche。
 
-下一步应为剩余 topology holdout 建立同样的独立 definition/lineage 链；对 F1 候选补做分辨率与外部参考验收，但在通过前保持 `candidate/rejected`。随后把已生成的边界 sidecar 纳入 wall-aware material contract，补齐 destination、T3/T4 任务字段，再按通过 reference/resolution 门的家族运行小规模 development tranche。不要把 W08 204 张连续轴卡一次性提交给 GPU。
+下一步应对 F1/F2/F3 topology 候选补做分辨率与外部参考验收，对 F6 补齐归一化轨迹、较长时域和耦合物理验证；在通过前全部保持 `candidate/rejected`。随后把已生成的边界 sidecar 纳入 wall-aware material contract，补齐 destination、T3/T4 任务字段，再按通过 reference/resolution 门的家族运行小规模 development tranche。不要把 W08 204 张连续轴卡一次性提交给 GPU。
 
 机器可读明细见 `r3-g3-coverage-audit.json`。

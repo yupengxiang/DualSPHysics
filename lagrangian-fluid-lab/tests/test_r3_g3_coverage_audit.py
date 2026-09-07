@@ -106,27 +106,32 @@ def test_work_package_audit_rejects_missing_authoritative_state():
     assert any("missing fields" in issue for issue in result["issues"])
 
 
-def test_declared_topology_holdouts_have_one_independent_f1_execution_link():
+def test_declared_topology_holdouts_have_independent_execution_links():
     topology = w08_topology_audit()
     assert set(topology) == set(FAMILIES)
-    assert topology["F1"]["w08_controlled_cards"] == 1
-    assert topology["F1"]["w08_continuous_controlled_cards"] == 0
-    assert topology["F1"]["holdout_gate_pass"]
-    assert topology["F1"]["scientific_acceptance_pass"] is False
-    assert topology["F1"]["coverage_status"] == "observed_but_not_formal"
-    assert topology["F1"]["coverage_claim"] is False
-    assert all(item["w08_controlled_cards"] == 0 for family, item in topology.items() if family != "F1")
-    assert all(not item["holdout_gate_pass"] for family, item in topology.items() if family != "F1")
+    for family in ("F1", "F2", "F3"):
+        assert topology[family]["w08_controlled_cards"] == 1
+        assert topology[family]["w08_continuous_controlled_cards"] == 0
+        assert topology[family]["holdout_gate_pass"]
+        assert topology[family]["scientific_acceptance_pass"] is False
+        assert topology[family]["coverage_status"] == "observed_but_not_formal"
+        assert topology[family]["coverage_claim"] is False
+        assert topology[family]["actual_coverage_count"] == 1
+        assert topology[family]["observed_execution_count"] == 1
+        assert "materialization" in topology[family]["case_links"][0]["manifest"]
+    assert topology["F6"]["w08_controlled_cards"] == 1
+    assert topology["F6"]["holdout_gate_pass"] is False
+    assert topology["F6"]["coverage_status"] == "executed_structural_without_normalized_data"
+    assert topology["F6"]["actual_coverage_count"] == 0
+    assert topology["F6"]["observed_execution_count"] == 1
+    assert topology["F6"]["case_links"][0]["manifest"].endswith("topology-probe.json")
     assert topology["F1"]["incidental_matching_registry_cases"] == ["F1_twin_obstacle"]
     assert topology["F2"]["incidental_matching_registry_cases"] == []
     for family in ("F1", "F2", "F3", "F6"):
         item = topology[family]
         assert item["planned_design_card_count"] > 0
-        if family != "F1":
-            assert item["actual_coverage_count"] == 0
-            assert item["formal_coverage_count"] == 0
-            assert item["coverage_status"] == "planned_only"
-            assert item["coverage_claim"] is False
+        assert item["formal_coverage_count"] == 0
+        assert item["coverage_claim"] is False
     assert topology["F4"]["coverage_status"] == "not_declared"
     assert topology["F5"]["coverage_status"] == "not_declared"
 

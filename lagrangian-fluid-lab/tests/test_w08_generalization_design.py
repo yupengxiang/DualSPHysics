@@ -52,10 +52,18 @@ def test_w08_has_two_single_axis_and_one_joint_study_per_family():
 def test_topology_holdout_card_is_separate_from_continuous_matrix_and_has_unique_lineage():
     continuous = build_cards()
     topology = topology_holdout_cards()
-    assert len(topology) == 1
-    assert topology[0]["split"] == "topology_extrapolation"
-    assert topology[0]["physics"]["obstacle_topology"] == "twin"
-    assert topology[0]["card_id"] not in {card["card_id"] for card in continuous}
-    assert topology[0]["physical_case_id"] not in {card["physical_case_id"] for card in continuous}
-    assert topology[0]["lineage_group_id"] not in {card["lineage_group_id"] for card in continuous}
-    assert topology[0]["execution_unit_id"] not in {card["execution_unit_id"] for card in continuous}
+    assert len(topology) == 4
+    assert {card["family"] for card in topology} == {"F1", "F2", "F3", "F6"}
+    assert all(card["split"] == "topology_extrapolation" for card in topology)
+    assert {card["physics"]["obstacle_topology"] for card in topology if card["family"] == "F1"} == {"twin"}
+    assert {card["physics"]["mouth_topology"] for card in topology if card["family"] == "F2"} == {"spout"}
+    assert {card["physics"]["baffle_topology"] for card in topology if card["family"] == "F3"} == {"perforated_proxy"}
+    assert {card["physics"]["body_configuration"] for card in topology if card["family"] == "F6"} == {"twin_free"}
+    continuous_ids = {card["card_id"] for card in continuous}
+    continuous_physical = {card["physical_case_id"] for card in continuous}
+    continuous_lineage = {card["lineage_group_id"] for card in continuous}
+    continuous_execution = {card["execution_unit_id"] for card in continuous}
+    assert all(card["card_id"] not in continuous_ids for card in topology)
+    assert all(card["physical_case_id"] not in continuous_physical for card in topology)
+    assert all(card["lineage_group_id"] not in continuous_lineage for card in topology)
+    assert all(card["execution_unit_id"] not in continuous_execution for card in topology)

@@ -59,10 +59,11 @@ the exact solver configuration and executable.
   mass fractions, and W11 bad files (identity resurrection, mass changes, and
   NaN density) before atomic publication. The coverage audit separates legacy
   `status=complete` from execution, acceptance, scope, and blockers; W08's
-  204 continuous-axis cards remain planned-only. One explicitly separate F1
-  topology-extrapolation card has completed an independent
-  GenCase–solver–PartVTK–HDF5 structural path, but remains candidate-only;
-  F2/F3/F6 topology holdouts are still planned-only.
+  204 continuous-axis cards remain planned-only. Four explicitly separate
+  topology-extrapolation cards now have independent evidence: F1/F2/F3
+  completed GenCase–solver–PartVTK–HDF5 structural paths, while F6 completed
+  GenCase plus a micro-horizon solver structural probe without normalized HDF5;
+  all remain candidate-only.
 - The 12 released F1/F2/F3 fluid cases have finite world-space boundary
   sidecars. Release-linkage and byte-identity checks pass, while destination
   and open-face semantics remain candidate-only. An identity-permutation
