@@ -45,6 +45,110 @@ def bootstrap_cases(values: list[float], seed: int = 20260907, draws: int = 2000
     }
 
 
+def _entry_counter(entry: dict[str, Any], field: str) -> int | None:
+    """Read a published counter, deriving legacy denominators when safe."""
+
+    value = entry.get(field)
+    if value is not None:
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+    if field not in {
+        "clipping_component_count", "clipped_component_count",
+        "output_component_count", "output_saturation_count",
+    }:
+        return None
+    try:
+        frames = int(entry.get("frames_predicted", entry.get("frames_expected", 0)))
+        particles = int(entry.get("particles", 0))
+    except (TypeError, ValueError):
+        return None
+    denominator = frames * particles * 3
+    if denominator <= 0:
+        return None
+    if field in {"clipping_component_count", "output_component_count"}:
+        return denominator
+    fraction_field = (
+        "clipping_trigger_rate"
+        if field == "clipped_component_count"
+        else "output_saturation_fraction"
+    )
+    fraction = entry.get(fraction_field)
+    if fraction is None and field == "clipped_component_count":
+        fraction = entry.get("clipped_component_fraction")
+    try:
+        fraction = float(fraction)
+    except (TypeError, ValueError):
+        return None
+    if not np.isfinite(fraction) or fraction < 0.0:
+        return None
+    return int(round(fraction * denominator))
+
+
+def _sum_if_complete(entries: list[dict[str, Any]], field: str) -> int | None:
+    """Sum a rollout counter only when every entry publishes/derives it."""
+
+    values = [_entry_counter(entry, field) for entry in entries]
+    if not values or any(value is None for value in values):
+        return None
+    try:
+        return int(sum(int(value) for value in values))
+    except (TypeError, ValueError):
+        return None
+
+
+def _clipping_summary(entries: list[dict[str, Any]]) -> dict[str, Any]:
+    """Retain both trigger rates and denominators for clipping disclosures."""
+
+    def positive(value: Any) -> bool:
+        try:
+            return bool(np.isfinite(float(value)) and float(value) > 0.0)
+        except (TypeError, ValueError):
+            return False
+
+    clip_values = []
+    for entry in entries:
+        value = entry.get("clip_dp")
+        if value is not None:
+            try:
+                value = float(value)
+            except (TypeError, ValueError):
+                continue
+            if np.isfinite(value):
+                clip_values.append(value)
+    triggered_values = [
+        entry.get("clipping_trigger_rate", entry.get("clipped_component_fraction"))
+        for entry in entries
+    ]
+    saturation_values = [entry.get("output_saturation_fraction") for entry in entries]
+    triggered = any(
+        bool(entry.get("clipping_triggered"))
+        or (
+            entry.get("clipping_trigger_rate", entry.get("clipped_component_fraction")) is not None
+            and positive(entry.get("clipping_trigger_rate", entry.get("clipped_component_fraction")))
+        )
+        for entry in entries
+    )
+    saturated = any(
+        bool(entry.get("output_saturation_triggered"))
+        or (entry.get("output_saturation_fraction") is not None and positive(entry["output_saturation_fraction"]))
+        for entry in entries
+    )
+    return {
+        "configured_clip_dp_values": sorted(set(clip_values)),
+        "clipped_component_count": _sum_if_complete(entries, "clipped_component_count"),
+        "clipping_component_count": _sum_if_complete(entries, "clipping_component_count"),
+        "clipped_component_fraction": mean_std(triggered_values),
+        "clipping_trigger_rate": mean_std(triggered_values),
+        "triggered": triggered,
+        "output_saturation_count": _sum_if_complete(entries, "output_saturation_count"),
+        "output_component_count": _sum_if_complete(entries, "output_component_count"),
+        "output_saturation_fraction": mean_std(saturation_values),
+        "output_saturation_triggered": saturated,
+    }
+
+
 def _resolve_artifact(value: str | Path, lab_root: Path) -> Path:
     path = Path(value)
     return path if path.is_absolute() else lab_root / path
@@ -401,6 +505,7 @@ def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
         boundary_provenance_valid = all(
             _valid_sidecar_provenance(entry, case_id) for entry in entries
         )
+        clipping = _clipping_summary(entries)
         per_case[case_id] = {
             "family": first["family"], "background_id": first["background_id"], "split": first["split"],
             "seeds": sorted(int(run["seed"]) for run in route_runs if case_id in run.get("test_rollout", {})),
@@ -410,7 +515,10 @@ def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
             "learned_fde_m": mean_std([entry.get("learned_fde_m") for entry in entries]),
             "learned_velocity_rmse_mps": mean_std([entry.get("learned_velocity_rmse_mps") for entry in entries]),
             "learned_com_rmse_m": mean_std([entry.get("learned_com_rmse_m") for entry in entries]),
+            "clipped_component_fraction": clipping["clipped_component_fraction"],
+            "clipping_trigger_rate": clipping["clipping_trigger_rate"],
             "output_saturation_fraction": mean_std([entry.get("output_saturation_fraction") for entry in entries]),
+            "clipping": clipping,
             "constant_velocity_position_rmse_over_dp": entries[0].get("constant_velocity_rmse_over_dp"),
             "constant_velocity_position_fde_m": entries[0].get("constant_velocity_fde_m"),
             "degradation_ratio_vs_constant": (
@@ -455,6 +563,8 @@ def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
         "macro_position_rmse_over_dp": macro("learned_position_rmse_over_dp"),
         "macro_velocity_rmse_mps": macro("learned_velocity_rmse_mps"),
         "macro_com_rmse_m": macro("learned_com_rmse_m"),
+        "constant_velocity_gate": False,
+        "constant_velocity_policy": "diagnostic_per_case; never a physical-scene admission gate",
     }
 
 
@@ -486,6 +596,10 @@ def conclusion(report: dict[str, Any], report_name: str = "r3-g4-baseline-audit.
 所有学习路线都使用初始质量加权 COM、统一的 solver velocity 状态（训练使用当前帧速度，rollout 从帧 0 速度开始并只消费自己的下一帧速度）、不依赖文件终点的 elapsed time，以及相同的 `8*tanh(raw/8)` 平滑输出上限。位置、速度和 COM 均采用向量范数 RMSE；bootstrap 的重采样单位是物理案例而不是帧。
 
 常速度结果仅作为弱、确定性的参照。学习器相对常速度的退化率逐案例报告，但**不作为场景准入门槛**；困难且可信的案例仍应保留。
+
+输出 clipping 逐案例披露配置的 `clip_dp`、触发分子/分母和触发率；平滑输出上限另报 raw 输出超过上限的比例。当前 sidecar-aware 矩阵的硬 displacement clip 配置为 0，因此 clipping 触发率为 0；这只是配置结果，不是把常速度退化或 clipping 当作场景准入门槛。
+
+合成 CPU 前缀/因果审计见 `r3-g4-prefix-causality-audit.json`：它验证追加或修改未来参考帧、sidecar 摘要和控制值不改变共享前缀，并检查首帧控制速度不读取未来帧、未来自由刚体状态不进入输入。该审计修正了首帧控制速度约定；已有 12-run GPU artifact 未因这一实现修正重跑，因此 CPU 审计结果不应改写为新的 GPU 指标。
 
 ## 因果输入与已知限制
 
@@ -574,6 +688,29 @@ def main() -> None:
         "case_count_per_route": {route: len(value["per_case"]) for route, value in routes.items()},
         "boundary_geometry_gate": boundary_geometry_gate,
         "nonfinite_rollout_gate": all(all(status == "completed" for status in entry["status_by_seed"].values()) for entry in all_case_entries),
+        "constant_velocity_gate": False,
+        "constant_velocity_policy": "diagnostic_per_case; never a physical-scene admission gate",
+        "clipping_disclosure": {
+            "scope": "per-case and per-seed rollout component rates",
+            "fields": [
+                "clip_dp", "clipped_component_count", "clipping_component_count",
+                "clipped_component_fraction", "clipping_trigger_rate", "output_saturation_count",
+                "output_component_count", "output_saturation_fraction",
+            ],
+            "hard_clip_is_not_a_gate": True,
+            "smooth_output_cap_is_not_a_gate": True,
+        },
+        "causal_input_audit": {
+            "report": "r3-g4-prefix-causality-audit.json",
+            "scope": "synthetic_cpu",
+            "status": "reported_separately",
+            "checks": [
+                "shared_prefix_invariance",
+                "time_feature_endpoint_independence",
+                "current_prescribed_control_only",
+                "future_free_body_state_excluded",
+            ],
+        },
         "physics_budget": {
             "status": "diagnostic_only",
             "mass_identity_preservation_reported": True,

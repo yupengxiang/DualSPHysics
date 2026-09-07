@@ -15,6 +15,10 @@
 
 常速度结果仅作为弱、确定性的参照。学习器相对常速度的退化率逐案例报告，但**不作为场景准入门槛**；困难且可信的案例仍应保留。
 
+输出 clipping 逐案例披露配置的 `clip_dp`、触发分子/分母和触发率；平滑输出上限另报 raw 输出超过上限的比例。当前 sidecar-aware 矩阵的硬 displacement clip 配置为 0，因此 clipping 触发率为 0；这只是配置结果，不是把常速度退化或 clipping 当作场景准入门槛。
+
+合成 CPU 前缀/因果审计见 `r3-g4-prefix-causality-audit.json`：它验证追加或修改未来参考帧、sidecar 摘要和控制值不改变共享前缀，并检查首帧控制速度不读取未来帧、未来自由刚体状态不进入输入。该审计修正了首帧控制速度约定；已有 12-run GPU artifact 未因这一实现修正重跑，因此 CPU 审计结果不应改写为新的 GPU 指标。
+
 ## 因果输入与已知限制
 
 当前 pilot 的 F2 提供当前时刻的规定杯体控制曲线，F1/F3 没有 control group；未来流体状态、未来密度/压力和自由刚体未来轨迹没有进入 rollout。密度、压力、质量仅作为初始属性。所有被评测 test cases 都通过了 sidecar schema、world 坐标、时间轴、三角形 provenance 和 per-seed 一致性检查；模型当前使用每一帧的有限三角形 AABB 摘要。

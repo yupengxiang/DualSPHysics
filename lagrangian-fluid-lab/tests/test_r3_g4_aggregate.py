@@ -115,6 +115,32 @@ def test_aggregate_tracks_and_validates_sidecar_provenance():
     assert not failed["boundary_provenance_consistent"]
 
 
+def test_aggregate_discloses_clipping_counts_and_keeps_constant_velocity_diagnostic():
+    module = load_module()
+    runs = [_run(seed, float(seed)) for seed in module.SEEDS]
+    for index, run in enumerate(runs, start=1):
+        run["test_rollout"]["case_a"].update({
+            "clip_dp": 0.25,
+            "clipped_component_count": index,
+            "clipping_component_count": 10,
+            "clipped_component_fraction": index / 10.0,
+            "clipping_triggered": index > 0,
+            "output_saturation_count": index + 1,
+            "output_component_count": 20,
+            "output_saturation_fraction": (index + 1) / 20.0,
+            "output_saturation_triggered": True,
+        })
+    result = module.aggregate_route("local_interaction", runs)
+    case = result["per_case"]["case_a"]
+    assert case["clipping"]["clipped_component_count"] == 6
+    assert case["clipping"]["clipping_component_count"] == 30
+    assert case["clipping"]["triggered"]
+    assert case["clipping"]["output_saturation_count"] == 9
+    assert abs(case["clipped_component_fraction"]["mean"] - 0.2) < 1e-12
+    assert abs(case["clipping_trigger_rate"]["mean"] - 0.2) < 1e-12
+    assert result["constant_velocity_gate"] is False
+
+
 def test_sidecar_artifact_audit_binds_result_to_release_file():
     module = load_module()
     result_path = ROOT / "experiments/r3_g4_sidecar_results/particle_mlp_seed17.json"

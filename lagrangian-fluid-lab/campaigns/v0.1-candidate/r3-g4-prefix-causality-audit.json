@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "scope": "R3-G4 sidecar-aware synthetic CPU prefix and causal audit",
+  "execution_status": "complete",
+  "device": "cpu",
+  "matrix_artifact_note": "The existing 12-run GPU sidecar matrix was not rerun; this report validates the current implementation with deterministic CPU probes after the frame-zero control convention fix.",
+  "checks": {
+    "prefix_invariance": {
+      "pass": true,
+      "common_predicted_frames": 4,
+      "max_feature_abs_diff": 0.0,
+      "max_raw_prediction_abs_diff": 0.0,
+      "short_frames": 4,
+      "long_frames": 6
+    },
+    "time_endpoint_invariance": {
+      "pass": true,
+      "checked_frame": 3,
+      "short_endpoint_s": 0.4,
+      "long_endpoint_s": 0.6000000000000001,
+      "max_feature_abs_diff": 0.0
+    },
+    "prescribed_control_causality": {
+      "pass": true,
+      "common_control_frames_checked": 2,
+      "max_common_prefix_abs_diff": 0.0,
+      "frame_zero_control_velocity": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "future_mutation_start_frame": 2
+    },
+    "future_free_body_state_ignored": {
+      "pass": true,
+      "max_feature_abs_diff": 0.0,
+      "free_body_group_exposed_to_case": false
+    },
+    "clipping_disclosure": {
+      "pass": true,
+      "configured_clip_dp": 0.25,
+      "clipped_component_count": 27,
+      "clipping_component_count": 27,
+      "clipped_component_fraction": 1.0,
+      "clipping_trigger_rate": 1.0,
+      "output_saturation_count": 27,
+      "output_component_count": 27,
+      "output_saturation_fraction": 1.0,
+      "no_clip_trigger_count": 0
+    },
+    "constant_velocity_not_admission_gate": {
+      "pass": true,
+      "constant_velocity_gate": false,
+      "policy": "diagnostic_per_case; never a physical-scene admission gate"
+    }
+  },
+  "findings": [
+    {
+      "id": "frame_zero_control_velocity_future_leak",
+      "status": "fixed",
+      "detail": "Frame-zero prescribed-control velocity is explicitly zero because no past sample exists; frame one onward uses only current-minus-previous transforms."
+    },
+    {
+      "id": "prefix_and_endpoint_contract",
+      "status": "verified_on_synthetic_case",
+      "detail": "Changing/appending future reference, control, and sidecar-summary frames leaves shared-prefix features and deterministic predictions unchanged; elapsed time is absolute elapsed time divided by a case scale, not file endpoint normalization."
+    },
+    {
+      "id": "clipping_disclosure",
+      "status": "verified",
+      "detail": "Rollout reports hard displacement-clip numerator, denominator, fraction, and trigger flag separately from smooth output-cap saturation counts/rate."
+    },
+    {
+      "id": "constant_velocity_policy",
+      "status": "diagnostic_only",
+      "detail": "Constant-velocity comparisons remain per-case diagnostics and do not gate physical-scene admission."
+    }
+  ]
+}

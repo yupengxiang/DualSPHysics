@@ -158,7 +158,10 @@ def _control_features(h5: h5py.File, times: np.ndarray) -> tuple[np.ndarray, str
             if len(times) > 1:
                 dt = np.maximum(np.diff(times), 1e-9).astype(np.float32)
                 result[1:, 6:9] = np.diff(result[:, 3:6], axis=0) / dt[:, None]
-                result[0, 6:9] = result[1, 6:9]
+                # There is no past sample for frame zero.  Do not copy the
+                # frame-one finite difference here: doing so makes the first
+                # rollout input depend on a future prescribed control value.
+                # The zero convention is explicit and remains causal.
             result[:, 9] = 1.0  # transform is present and finite
             return result, "known_prescribed_control_schedule", True
     return result, "known_prescribed_angle_only", True
@@ -688,8 +691,16 @@ def rollout(model: nn.Module, route: str, case: dict[str, Any], device: torch.de
         "learned_com_rmse_m": learned_com_rmse, "learned_com_ade_m": learned_com_ade,
         "learned_com_fde_m": learned_com_fde, "constant_com_rmse_m": constant_com_rmse,
         "constant_com_ade_m": constant_com_ade, "constant_com_fde_m": constant_com_fde,
-        "clip_dp": clip_dp, "clipped_component_fraction": float(clipped_components / max(total_components, 1)),
+        "clip_dp": clip_dp,
+        "clipped_component_count": clipped_components,
+        "clipping_component_count": total_components,
+        "clipped_component_fraction": float(clipped_components / max(total_components, 1)),
+        "clipping_trigger_rate": float(clipped_components / max(total_components, 1)),
+        "clipping_triggered": bool(clipped_components),
+        "output_saturation_count": saturated_components,
+        "output_component_count": total_outputs,
         "output_saturation_fraction": float(saturated_components / max(total_outputs, 1)),
+        "output_saturation_triggered": bool(saturated_components),
         "max_raw_model_output": max_raw,
         "control_source": case["control_source"], "boundary_source": case["boundary_source"],
         "boundary_available": case["boundary_available"], "boundary_provenance": case.get("boundary_provenance"),
@@ -778,7 +789,8 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
             "velocity_state": "solver velocity at every teacher-forced frame; rollout starts from frame-zero solver velocity and then uses predicted next velocity",
             "time": "elapsed physical time divided by sqrt(length_scale/|g|); no division by file endpoint",
             "initial_only_state": ["density", "pressure", "mass"],
-            "known_control": "current prescribed control schedule only; no future free-body state",
+            "known_control": "current prescribed control schedule only; frame-zero control velocity is zero and later velocities use current-minus-previous transforms; no future free-body state",
+            "prefix_invariance": "shared-prefix rollout inputs use only current predicted state, current control, current boundary summary, and elapsed time; future reference frames are not consumed",
             "boundary_geometry": "current-frame finite-triangle world-space AABB summary plus availability bit from a linked boundary-sidecar-v1; records without a sidecar use an explicit legacy fallback",
             "prohibited_rollout_inputs": ["future reference position", "future reference velocity", "future reference density", "future free-body trajectory"],
         },
