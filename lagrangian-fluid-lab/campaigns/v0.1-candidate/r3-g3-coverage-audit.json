@@ -782,6 +782,375 @@
       "reference_quality_pass": false
     }
   ],
+  "work_packages": {
+    "schema_version": 2,
+    "package_count": 13,
+    "contract_pass": true,
+    "issues": [],
+    "legacy_status_is_non_authoritative": true,
+    "status_semantics": "Legacy status is retained for compatibility and records only historical execution bookkeeping; it is never an acceptance, coverage, or readiness claim. The authoritative state is the tuple (execution_status, acceptance_status, validation_scope, open_blockers).",
+    "authoritative_fields": [
+      "execution_status",
+      "acceptance_status",
+      "validation_scope",
+      "open_blockers"
+    ],
+    "legacy_status_counts": {
+      "complete": 13
+    },
+    "execution_status_counts": {
+      "complete": 9,
+      "two_background_f1_f3_matrix_complete": 1,
+      "resolution_matrix_complete": 1,
+      "design_complete": 2
+    },
+    "acceptance_status_counts": {
+      "accepted_engineering": 2,
+      "accepted_limited_scope": 1,
+      "provisional": 1,
+      "partial": 2,
+      "rejected_current_numerics": 1,
+      "not_experimentally_accepted": 2,
+      "extension_only": 1,
+      "development_snapshot": 1,
+      "development_only": 1,
+      "pipeline_only": 1
+    },
+    "legacy_complete_count": 13,
+    "legacy_complete_package_ids": [
+      "W00",
+      "W01",
+      "W02",
+      "W03",
+      "W04",
+      "W05",
+      "W06",
+      "W07",
+      "W08",
+      "W09",
+      "W10",
+      "W11",
+      "W12"
+    ],
+    "engineering_accepted_count": 3,
+    "engineering_accepted_package_ids": [
+      "W00",
+      "W01",
+      "W02"
+    ],
+    "legacy_complete_but_not_engineering_accepted": [
+      "W03",
+      "W04",
+      "W05",
+      "W06",
+      "W07",
+      "W08",
+      "W09",
+      "W10",
+      "W11",
+      "W12"
+    ],
+    "packages_with_open_blockers": [
+      "W02",
+      "W03",
+      "W04",
+      "W05",
+      "W06",
+      "W07",
+      "W08",
+      "W09",
+      "W10",
+      "W11",
+      "W12"
+    ],
+    "package_state_is_separated": true,
+    "packages": [
+      {
+        "id": "W00",
+        "name": "protective inventory",
+        "legacy_status": "complete",
+        "execution_status": "complete",
+        "acceptance_status": "accepted_engineering",
+        "validation_scope": [
+          "inventory",
+          "resource_guards"
+        ],
+        "open_blockers": [],
+        "open_blocker_count": 0,
+        "depends_on": [],
+        "legacy_status_is_non_authoritative": true
+      },
+      {
+        "id": "W01",
+        "name": "engineering and gate repair",
+        "legacy_status": "complete",
+        "execution_status": "complete",
+        "acceptance_status": "accepted_engineering",
+        "validation_scope": [
+          "streaming_conversion",
+          "attempt_provenance",
+          "strict_structural_gates"
+        ],
+        "open_blockers": [],
+        "open_blocker_count": 0,
+        "depends_on": [
+          "W00"
+        ],
+        "legacy_status_is_non_authoritative": true
+      },
+      {
+        "id": "W02",
+        "name": "identity and reference frames",
+        "legacy_status": "complete",
+        "execution_status": "complete",
+        "acceptance_status": "accepted_limited_scope",
+        "validation_scope": [
+          "fixed_resolution_numerical_identity",
+          "declared_reference_frames"
+        ],
+        "open_blockers": [
+          "numerical identity is not material identity"
+        ],
+        "open_blocker_count": 1,
+        "depends_on": [
+          "W01"
+        ],
+        "legacy_status_is_non_authoritative": true
+      },
+      {
+        "id": "W03",
+        "name": "independent material tracing",
+        "legacy_status": "complete",
+        "execution_status": "complete",
+        "acceptance_status": "provisional",
+        "validation_scope": [
+          "fixed-resolution consistency",
+          "adversarial finite-wall visibility",
+          "moving-wall development probe",
+          "mass-weighted tracer sampling"
+        ],
+        "open_blockers": [
+          "boundary sidecars for every admitted case",
+          "resolution and saved-cadence convergence",
+          "small-tail tracer-count convergence"
+        ],
+        "open_blocker_count": 3,
+        "depends_on": [
+          "W01",
+          "W02"
+        ],
+        "legacy_status_is_non_authoritative": true
+      },
+      {
+        "id": "W04",
+        "name": "fundamental calibration",
+        "legacy_status": "complete",
+        "execution_status": "complete",
+        "acceptance_status": "partial",
+        "validation_scope": [
+          "ballistic pre-impact motion",
+          "coarse diagnostic calibrations"
+        ],
+        "open_blockers": [
+          "static hydrostatic error",
+          "coarse buoyancy error"
+        ],
+        "open_blocker_count": 2,
+        "depends_on": [
+          "W01"
+        ],
+        "legacy_status_is_non_authoritative": true
+      },
+      {
+        "id": "W05",
+        "name": "external validation anchors",
+        "legacy_status": "complete",
+        "execution_status": "two_background_f1_f3_matrix_complete",
+        "acceptance_status": "partial",
+        "validation_scope": [
+          "F1 selected Test02 surface gauges",
+          "F3 fine Test10 first impact magnitude",
+          "F3 baffled aggregate numerical transport",
+          "F6 fine 2D displacement"
+        ],
+        "open_blockers": [
+          "F1 pressure and H1",
+          "F1 topology resolution instability",
+          "F3 impact timing",
+          "F3 topology external observation",
+          "F6 3D Test14"
+        ],
+        "open_blocker_count": 5,
+        "depends_on": [
+          "W01",
+          "W04"
+        ],
+        "legacy_status_is_non_authoritative": true
+      },
+      {
+        "id": "W06",
+        "name": "real rotating-cup pouring",
+        "legacy_status": "complete",
+        "execution_status": "resolution_matrix_complete",
+        "acceptance_status": "rejected_current_numerics",
+        "validation_scope": [
+          "mechanism and closed-domain transport bookkeeping",
+          "three-background resolution sensitivity"
+        ],
+        "open_blockers": [
+          "DBC results not resolution stable",
+          "mDBC normals incomplete",
+          "external observation",
+          "lip topology",
+          "saved-cadence convergence"
+        ],
+        "open_blocker_count": 5,
+        "depends_on": [
+          "W01",
+          "W02"
+        ],
+        "legacy_status_is_non_authoritative": true
+      },
+      {
+        "id": "W07",
+        "name": "six-family mechanism screening",
+        "legacy_status": "complete",
+        "execution_status": "design_complete",
+        "acceptance_status": "not_experimentally_accepted",
+        "validation_scope": [
+          "candidate-space generation"
+        ],
+        "open_blockers": [
+          "144 cards were not executed"
+        ],
+        "open_blocker_count": 1,
+        "depends_on": [
+          "W04",
+          "W05",
+          "W06"
+        ],
+        "legacy_status_is_non_authoritative": true
+      },
+      {
+        "id": "W08",
+        "name": "controlled generalization studies",
+        "legacy_status": "complete",
+        "execution_status": "design_complete",
+        "acceptance_status": "not_experimentally_accepted",
+        "validation_scope": [
+          "causal split design"
+        ],
+        "open_blockers": [
+          "204 cards were not executed",
+          "declared topology holdouts need executable cases"
+        ],
+        "open_blocker_count": 2,
+        "depends_on": [
+          "W07"
+        ],
+        "legacy_status_is_non_authoritative": true
+      },
+      {
+        "id": "W09",
+        "name": "bounded open-boundary and adaptive studies",
+        "legacy_status": "complete",
+        "execution_status": "complete",
+        "acceptance_status": "extension_only",
+        "validation_scope": [
+          "lifecycle semantics audit"
+        ],
+        "open_blockers": [
+          "boundary flux schema",
+          "cross-zone material tracing"
+        ],
+        "open_blocker_count": 2,
+        "depends_on": [
+          "W01",
+          "W02"
+        ],
+        "legacy_status_is_non_authoritative": true
+      },
+      {
+        "id": "W10",
+        "name": "data and evaluation protocol",
+        "legacy_status": "complete",
+        "execution_status": "complete",
+        "acceptance_status": "development_snapshot",
+        "validation_scope": [
+          "core schema and metric primitives"
+        ],
+        "open_blockers": [
+          "cross-module acceptance suite continues in R3"
+        ],
+        "open_blocker_count": 1,
+        "depends_on": [
+          "W01",
+          "W02"
+        ],
+        "legacy_status_is_non_authoritative": true
+      },
+      {
+        "id": "W11",
+        "name": "development pilot dataset",
+        "legacy_status": "complete",
+        "execution_status": "complete",
+        "acceptance_status": "development_only",
+        "validation_scope": [
+          "13-case packaging and loader path"
+        ],
+        "open_blockers": [
+          "not production resolution",
+          "material tracer acceptance pending"
+        ],
+        "open_blocker_count": 2,
+        "depends_on": [
+          "W05",
+          "W06",
+          "W07",
+          "W10"
+        ],
+        "legacy_status_is_non_authoritative": true
+      },
+      {
+        "id": "W12",
+        "name": "real baselines and freeze recommendation",
+        "legacy_status": "complete",
+        "execution_status": "complete",
+        "acceptance_status": "pipeline_only",
+        "validation_scope": [
+          "weak learned baseline execution"
+        ],
+        "open_blockers": [
+          "input consistency",
+          "local interaction model",
+          "boundary and control inputs"
+        ],
+        "open_blocker_count": 3,
+        "depends_on": [
+          "W10",
+          "W11"
+        ],
+        "legacy_status_is_non_authoritative": true
+      }
+    ],
+    "w08_crosscheck": {
+      "package_present": true,
+      "legacy_status": "complete",
+      "execution_status": "design_complete",
+      "acceptance_status": "not_experimentally_accepted",
+      "validation_scope": [
+        "causal split design"
+      ],
+      "open_blockers": [
+        "204 cards were not executed",
+        "declared topology holdouts need executable cases"
+      ],
+      "coverage_decision": "design_only_not_run",
+      "declared_cards": 204,
+      "run_cases": 0,
+      "design_only_claim_is_consistent": true
+    }
+  },
   "w08_design": {
     "declared_cards": 204,
     "unique_execution_units": 196,
@@ -795,13 +1164,15 @@
       "single_axis_extrapolation": 48,
       "joint_extrapolation": 16
     },
+    "planned_card_count": 204,
     "linked_card_count": 0,
     "executable_definitions": 0,
     "run_cases": 0,
     "trajectory_structural_cases": 0,
     "reference_quality_cases": 0,
     "training_eval_cases": 0,
-    "decision": "design_only_not_run"
+    "decision": "design_only_not_run",
+    "coverage_claim": false
   },
   "topology_holdouts": {
     "F1": {
@@ -809,6 +1180,8 @@
       "topology_field": "obstacle_topology",
       "w07_design_cards": 6,
       "w08_controlled_cards": 0,
+      "planned_design_card_count": 6,
+      "w08_planned_card_count": 0,
       "w08_holdout_splits": [],
       "w08_execution_statuses": [],
       "incidental_matching_registry_cases": [
@@ -816,6 +1189,10 @@
       ],
       "linked_materialized_cases": 0,
       "linked_run_cases": 0,
+      "actual_coverage_count": 0,
+      "formal_coverage_count": 0,
+      "coverage_status": "planned_only",
+      "coverage_claim": false,
       "case_links": [],
       "unique_execution_links": 0,
       "holdout_gate_pass": false,
@@ -826,11 +1203,17 @@
       "topology_field": "mouth_topology",
       "w07_design_cards": 8,
       "w08_controlled_cards": 0,
+      "planned_design_card_count": 8,
+      "w08_planned_card_count": 0,
       "w08_holdout_splits": [],
       "w08_execution_statuses": [],
       "incidental_matching_registry_cases": [],
       "linked_materialized_cases": 0,
       "linked_run_cases": 0,
+      "actual_coverage_count": 0,
+      "formal_coverage_count": 0,
+      "coverage_status": "planned_only",
+      "coverage_claim": false,
       "case_links": [],
       "unique_execution_links": 0,
       "holdout_gate_pass": false,
@@ -841,11 +1224,17 @@
       "topology_field": "baffle_topology",
       "w07_design_cards": 6,
       "w08_controlled_cards": 0,
+      "planned_design_card_count": 6,
+      "w08_planned_card_count": 0,
       "w08_holdout_splits": [],
       "w08_execution_statuses": [],
       "incidental_matching_registry_cases": [],
       "linked_materialized_cases": 0,
       "linked_run_cases": 0,
+      "actual_coverage_count": 0,
+      "formal_coverage_count": 0,
+      "coverage_status": "planned_only",
+      "coverage_claim": false,
       "case_links": [],
       "unique_execution_links": 0,
       "holdout_gate_pass": false,
@@ -856,12 +1245,19 @@
       "topology_field": null,
       "w07_design_cards": 0,
       "w08_controlled_cards": 0,
+      "planned_design_card_count": 0,
+      "w08_planned_card_count": 0,
       "w08_holdout_splits": [],
       "w08_execution_statuses": [],
       "incidental_matching_registry_cases": [],
       "linked_materialized_cases": 0,
       "linked_run_cases": 0,
+      "actual_coverage_count": 0,
+      "formal_coverage_count": 0,
+      "coverage_status": "not_declared",
+      "coverage_claim": false,
       "holdout_gate_pass": false,
+      "unique_execution_links": 0,
       "decision": "not_declared_for_family"
     },
     "F5": {
@@ -869,12 +1265,19 @@
       "topology_field": null,
       "w07_design_cards": 0,
       "w08_controlled_cards": 0,
+      "planned_design_card_count": 0,
+      "w08_planned_card_count": 0,
       "w08_holdout_splits": [],
       "w08_execution_statuses": [],
       "incidental_matching_registry_cases": [],
       "linked_materialized_cases": 0,
       "linked_run_cases": 0,
+      "actual_coverage_count": 0,
+      "formal_coverage_count": 0,
+      "coverage_status": "not_declared",
+      "coverage_claim": false,
       "holdout_gate_pass": false,
+      "unique_execution_links": 0,
       "decision": "not_declared_for_family"
     },
     "F6": {
@@ -882,6 +1285,8 @@
       "topology_field": "body_configuration",
       "w07_design_cards": 8,
       "w08_controlled_cards": 0,
+      "planned_design_card_count": 8,
+      "w08_planned_card_count": 0,
       "w08_holdout_splits": [],
       "w08_execution_statuses": [],
       "incidental_matching_registry_cases": [
@@ -889,6 +1294,10 @@
       ],
       "linked_materialized_cases": 0,
       "linked_run_cases": 0,
+      "actual_coverage_count": 0,
+      "formal_coverage_count": 0,
+      "coverage_status": "planned_only",
+      "coverage_claim": false,
       "case_links": [],
       "unique_execution_links": 0,
       "holdout_gate_pass": false,

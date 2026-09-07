@@ -5,6 +5,7 @@ import numpy as np
 
 from scripts.r3_g3_coverage_audit import (
     FAMILIES,
+    audit_work_packages,
     build_report,
     pilot_task_audit,
     w08_topology_audit,
@@ -70,6 +71,38 @@ def test_w08_cards_are_not_mistaken_for_executed_cases():
     assert w08["execution_status_counts"] == {"planned_not_run": 204}
     assert w08["executable_definitions"] == 0
     assert w08["run_cases"] == 0
+    assert w08["planned_card_count"] == 204
+    assert w08["coverage_claim"] is False
+
+
+def test_work_package_legacy_complete_is_separate_from_authoritative_state():
+    report = build_report()
+    packages = report["work_packages"]
+    assert packages["contract_pass"]
+    assert packages["legacy_status_is_non_authoritative"]
+    assert packages["package_state_is_separated"]
+    assert packages["legacy_status_counts"] == {"complete": 13}
+    assert packages["legacy_complete_count"] == 13
+    assert packages["engineering_accepted_count"] == 3
+    assert len(packages["legacy_complete_but_not_engineering_accepted"]) == 10
+    assert packages["w08_crosscheck"]["design_only_claim_is_consistent"]
+    assert packages["w08_crosscheck"]["execution_status"] == "design_complete"
+    assert packages["w08_crosscheck"]["acceptance_status"] == "not_experimentally_accepted"
+
+
+def test_work_package_audit_rejects_missing_authoritative_state():
+    result = audit_work_packages({
+        "schema_version": 2,
+        "status_semantics": "Legacy status is compatibility-only",
+        "packages": [{
+            "id": "W08", "name": "controlled generalization", "status": "complete",
+            "execution_status": "design_complete", "validation_scope": [],
+            "open_blockers": [], "depends_on": [],
+        }],
+    })
+    assert not result["contract_pass"]
+    assert not result["package_state_is_separated"]
+    assert any("missing fields" in issue for issue in result["issues"])
 
 
 def test_declared_topology_holdouts_have_no_w08_execution_link():
@@ -79,6 +112,15 @@ def test_declared_topology_holdouts_have_no_w08_execution_link():
     assert all(not item["holdout_gate_pass"] for item in topology.values())
     assert topology["F1"]["incidental_matching_registry_cases"] == ["F1_twin_obstacle"]
     assert topology["F2"]["incidental_matching_registry_cases"] == []
+    for family in ("F1", "F2", "F3", "F6"):
+        item = topology[family]
+        assert item["planned_design_card_count"] > 0
+        assert item["actual_coverage_count"] == 0
+        assert item["formal_coverage_count"] == 0
+        assert item["coverage_status"] == "planned_only"
+        assert item["coverage_claim"] is False
+    assert topology["F4"]["coverage_status"] == "not_declared"
+    assert topology["F5"]["coverage_status"] == "not_declared"
 
 
 def test_pilot_tasks_expose_candidate_material_but_no_complete_t2_t3_t4():

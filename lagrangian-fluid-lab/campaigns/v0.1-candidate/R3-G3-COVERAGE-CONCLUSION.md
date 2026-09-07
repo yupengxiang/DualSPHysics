@@ -1,6 +1,6 @@
 # R3 G3 结论：覆盖度与 topology holdout 审计
 
-状态：**审计完成；工程覆盖已经能逐级量化，但 W08 受控泛化设计尚未进入可执行/可评测阶段，四个 topology holdout 也没有形成正式留出。**
+状态：**审计完成；工程覆盖已经能逐级量化，但 W08 受控泛化设计尚未进入可执行/可评测阶段，四个 topology holdout 仍是 planned-only，尚未形成正式留出。**
 
 ## 逐级结果
 
@@ -15,9 +15,13 @@
 | F5 | 6 | 6 | 6 | 6 | 5 | no_external_anchor | 0 | 0 |
 | F6 | 6 | 6 | 6 | 6 | 6 | partial_2d_anchor_and_rejected_3d_test14 | 1 | 0 |
 
-W08 的 204 张卡和 196 个唯一 execution unit 全部仍是 `planned_not_run`；当前没有卡片与 registry、solver attempt、轨迹或训练/评测产物建立链接。W07 对 F1/F2/F3/F6 写出了 topology 候选卡（每个 holdout 6 或 8 张），这些也只是设计卡，不能算生成数据；F4/F5 尚未声明 topology holdout。
+## 顶层状态语义
 
-四个 topology holdout 的实际审计结果都是 `holdout_gate_pass=false`：F1 的 twin obstacle 和 F6 的 twin floaters 只有未链接的旧探针，F2 的 spout、F3 的 perforated proxy 连这样的偶然案例都没有。当前 W08 卡的拓扑字段全部保持 baseline（single/straight/center/single_free），没有 `topology_extrapolation` split。
+`work-packages.json` 中 13 个 package 的旧 `status` 全部为 `complete`，但这是历史兼容字段，不是科学验收或覆盖声明。当前审计将 `execution_status`、`acceptance_status`、`validation_scope` 和 `open_blockers` 单独保留：其中 3 个 package 只达到有限工程范围的 accepted 状态，10 个 package 虽有旧的 `status=complete` 但没有工程 accepted 状态。W08 的 authoritative 状态是 `execution_status=design_complete`、`acceptance_status=not_experimentally_accepted`，与下面的 `design_only_not_run` 覆盖判定一致。
+
+W08 的 204 张卡和 196 个唯一 execution unit 全部仍是 `planned_not_run`；当前没有卡片与 registry、solver attempt、轨迹或训练/评测产物建立链接，因此 `coverage_claim=false`。W07 对 F1/F2/F3/F6 写出了 topology 候选卡（每个 holdout 6 或 8 张），这些也只是 planned design cards，不能算生成数据；F4/F5 尚未声明 topology holdout。
+
+四个已声明 topology holdout 的实际覆盖计数都是 **0**，状态均为 `planned_only`，`holdout_gate_pass=false`：F1 的 twin obstacle 和 F6 的 twin floaters 只有未链接的旧探针，F2 的 spout、F3 的 perforated proxy 连这样的偶然案例都没有。它们的 W07 planned card 数分别为 6、8、6、8，不是实际数据覆盖。当前 W08 卡的拓扑字段全部保持 baseline（single/straight/center/single_free），没有 `topology_extrapolation` split。
 
 ## 训练/评测覆盖
 

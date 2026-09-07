@@ -9,7 +9,9 @@
     "wall_clock_hours": 168,
     "max_hypothesis_driven_retries_per_blocker": 2
   },
-  "status_semantics": "Legacy status recorded execution completion only. acceptance_status and validation_scope govern scientific use.",
+  "status_semantics": "Legacy status is retained for compatibility and records only historical execution bookkeeping; it is never an acceptance, coverage, or readiness claim. The authoritative state is the tuple (execution_status, acceptance_status, validation_scope, open_blockers).",
+  "authoritative_status_fields": ["execution_status", "acceptance_status", "validation_scope", "open_blockers"],
+  "legacy_status_is_non_authoritative": true,
   "packages": [
     {"id":"W00","name":"protective inventory","status":"complete","execution_status":"complete","acceptance_status":"accepted_engineering","validation_scope":["inventory","resource_guards"],"open_blockers":[],"depends_on":[]},
     {"id":"W01","name":"engineering and gate repair","status":"complete","execution_status":"complete","acceptance_status":"accepted_engineering","validation_scope":["streaming_conversion","attempt_provenance","strict_structural_gates"],"open_blockers":[],"depends_on":["W00"]},

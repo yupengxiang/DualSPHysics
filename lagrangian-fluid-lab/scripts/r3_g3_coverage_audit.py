@@ -31,6 +31,7 @@ W07_PATH = CAMPAIGN / "w07-mechanism-screen.json"
 W07_DESIGN_PATH = CAMPAIGN / "cases" / "w07" / "candidate-designs.json"
 W08_PATH = CAMPAIGN / "w08-generalization-audit.json"
 W08_DESIGN_PATH = CAMPAIGN / "cases" / "w08" / "controlled-generalization-design.json"
+WORK_PACKAGES_PATH = CAMPAIGN / "work-packages.json"
 W11_SELECTION_PATH = CAMPAIGN / "cases" / "w11" / "pilot-selection.json"
 W11_MANIFEST_PATH = RELEASE / "manifest.json"
 W12_RESULTS_DIR = RELEASE / "baselines" / "results"
@@ -74,9 +75,130 @@ INCIDENTAL_HOLDOUT_CASES = {
     "F6": ["F6_twin_floaters"],
 }
 
+WORK_PACKAGE_REQUIRED_FIELDS = (
+    "id", "name", "status", "execution_status", "acceptance_status",
+    "validation_scope", "open_blockers", "depends_on",
+)
+AUTHORITATIVE_WORK_PACKAGE_FIELDS = (
+    "execution_status", "acceptance_status", "validation_scope", "open_blockers",
+)
+ENGINEERING_ACCEPTANCE_STATUSES = {
+    "accepted_engineering", "accepted_limited_scope",
+}
+
 
 def load(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text())
+
+
+def audit_work_packages(payload: dict[str, Any]) -> dict[str, Any]:
+    """Audit package state without treating the legacy ``status`` as truth.
+
+    The original work-package table used one flat ``status`` field.  It is
+    retained for compatibility, but a value such as ``complete`` cannot say
+    whether the work was executed, scientifically accepted, or merely
+    designed.  This audit makes the four authoritative fields visible and
+    reports their cross-product instead of collapsing them back to one label.
+    """
+    packages = payload.get("packages", [])
+    issues: list[str] = []
+    status_semantics = payload.get("status_semantics")
+    legacy_status_is_non_authoritative = (
+        isinstance(status_semantics, str) and status_semantics.startswith("Legacy status")
+    )
+    if payload.get("schema_version") != 2:
+        issues.append("work-packages schema_version is not 2")
+    if not isinstance(packages, list) or not packages:
+        return {
+            "schema_version": payload.get("schema_version"),
+            "package_count": 0,
+            "contract_pass": False,
+            "issues": issues + ["packages must be a non-empty list"],
+            "legacy_status_is_non_authoritative": legacy_status_is_non_authoritative,
+            "authoritative_fields": list(AUTHORITATIVE_WORK_PACKAGE_FIELDS),
+            "packages": [],
+        }
+
+    rows: list[dict[str, Any]] = []
+    ids: list[str] = []
+    for index, package in enumerate(packages):
+        if not isinstance(package, dict):
+            issues.append(f"package[{index}] is not an object")
+            continue
+        missing = [field for field in WORK_PACKAGE_REQUIRED_FIELDS if field not in package]
+        if missing:
+            issues.append(f"package[{index}] missing fields: {missing}")
+        package_id = package.get("id")
+        if not isinstance(package_id, str) or not package_id:
+            issues.append(f"package[{index}] has no non-empty id")
+            package_id = f"<package[{index}]>"
+        ids.append(package_id)
+        for field in ("validation_scope", "open_blockers", "depends_on"):
+            if field in package and not isinstance(package[field], list):
+                issues.append(f"{package_id}.{field} must be a list")
+        rows.append({
+            "id": package_id,
+            "name": package.get("name"),
+            "legacy_status": package.get("status"),
+            "execution_status": package.get("execution_status"),
+            "acceptance_status": package.get("acceptance_status"),
+            "validation_scope": package.get("validation_scope", []),
+            "open_blockers": package.get("open_blockers", []),
+            "open_blocker_count": len(package.get("open_blockers", [])) if isinstance(package.get("open_blockers", []), list) else None,
+            "depends_on": package.get("depends_on", []),
+            "legacy_status_is_non_authoritative": True,
+        })
+
+    duplicate_ids = sorted({package_id for package_id in ids if ids.count(package_id) > 1})
+    if duplicate_ids:
+        issues.append(f"duplicate package ids: {duplicate_ids}")
+    missing_authoritative = [
+        row["id"] for row in rows
+        if any(row[field] is None for field in AUTHORITATIVE_WORK_PACKAGE_FIELDS)
+    ]
+    if missing_authoritative:
+        issues.append(f"packages missing authoritative state: {missing_authoritative}")
+    legacy_status_counts = Counter(str(row["legacy_status"]) for row in rows)
+    execution_status_counts = Counter(str(row["execution_status"]) for row in rows)
+    acceptance_status_counts = Counter(str(row["acceptance_status"]) for row in rows)
+    legacy_complete = [row["id"] for row in rows if row["legacy_status"] == "complete"]
+    engineering_accepted = [
+        row["id"] for row in rows if row["acceptance_status"] in ENGINEERING_ACCEPTANCE_STATUSES
+    ]
+    complete_but_not_engineering_accepted = [
+        row["id"] for row in rows
+        if row["legacy_status"] == "complete"
+        and row["acceptance_status"] not in ENGINEERING_ACCEPTANCE_STATUSES
+    ]
+    with_open_blockers = [row["id"] for row in rows if row["open_blockers"]]
+    return {
+        "schema_version": payload.get("schema_version"),
+        "package_count": len(rows),
+        "contract_pass": not issues and len(ids) == len(set(ids)),
+        "issues": issues,
+        "legacy_status_is_non_authoritative": legacy_status_is_non_authoritative,
+        "status_semantics": status_semantics,
+        "authoritative_fields": list(AUTHORITATIVE_WORK_PACKAGE_FIELDS),
+        "legacy_status_counts": dict(legacy_status_counts),
+        "execution_status_counts": dict(execution_status_counts),
+        "acceptance_status_counts": dict(acceptance_status_counts),
+        "legacy_complete_count": len(legacy_complete),
+        "legacy_complete_package_ids": legacy_complete,
+        "engineering_accepted_count": len(engineering_accepted),
+        "engineering_accepted_package_ids": engineering_accepted,
+        "legacy_complete_but_not_engineering_accepted": complete_but_not_engineering_accepted,
+        "packages_with_open_blockers": with_open_blockers,
+        "package_state_is_separated": bool(
+            not issues
+            and legacy_status_is_non_authoritative
+            and all(all(row[field] is not None for field in AUTHORITATIVE_WORK_PACKAGE_FIELDS) for row in rows)
+        ),
+        "packages": rows,
+    }
+
+
+def work_package_audit() -> dict[str, Any]:
+    return audit_work_packages(load(WORK_PACKAGES_PATH))
 
 
 def official_definition(case: dict[str, Any], official_entries: dict[str, dict[str, Any]]) -> Path:
@@ -340,12 +462,19 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
                 "topology_field": None,
                 "w07_design_cards": 0,
                 "w08_controlled_cards": 0,
+                "planned_design_card_count": 0,
+                "w08_planned_card_count": 0,
                 "w08_holdout_splits": [],
                 "w08_execution_statuses": [],
                 "incidental_matching_registry_cases": [],
                 "linked_materialized_cases": 0,
                 "linked_run_cases": 0,
+                "actual_coverage_count": 0,
+                "formal_coverage_count": 0,
+                "coverage_status": "not_declared",
+                "coverage_claim": False,
                 "holdout_gate_pass": False,
+                "unique_execution_links": 0,
                 "decision": "not_declared_for_family",
             }
             continue
@@ -374,22 +503,39 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
         linked_materialized = {link["case_id"] for link in unique_links.values() if link["materialized"]}
         linked_run = {link["case_id"] for link in unique_links.values() if link["run"]}
         gate_links = list(unique_links.values())
+        holdout_gate_pass = bool(w08_holdout) and len(gate_links) == len({card.get("execution_unit_id") or card.get("card_id") for card in w08_holdout}) and all(
+            link["execution_status"] == "completed" and link["split"] == "topology_extrapolation"
+            and link["materialized"] and link["run"] and link["trajectory_structural"] for link in gate_links
+        )
+        actual_cases = {
+            link["case_id"] for link in gate_links
+            if link["materialized"] and link["run"] and link["trajectory_structural"]
+        }
+        if holdout_gate_pass:
+            coverage_status = "formally_covered"
+        elif actual_cases:
+            coverage_status = "observed_but_not_formal"
+        else:
+            coverage_status = "planned_only"
         result[family] = {
             "declared_holdout": holdout,
             "topology_field": key,
             "w07_design_cards": len(w07_holdout),
             "w08_controlled_cards": len(w08_holdout),
+            "planned_design_card_count": len(w07_holdout),
+            "w08_planned_card_count": len(w08_holdout),
             "w08_holdout_splits": sorted({card["split"] for card in w08_holdout}),
             "w08_execution_statuses": sorted({card["execution_status"] for card in w08_holdout}),
             "incidental_matching_registry_cases": INCIDENTAL_HOLDOUT_CASES[family],
             "linked_materialized_cases": len(linked_materialized),
             "linked_run_cases": len(linked_run),
+            "actual_coverage_count": len(actual_cases),
+            "formal_coverage_count": len(gate_links) if holdout_gate_pass else 0,
+            "coverage_status": coverage_status,
+            "coverage_claim": holdout_gate_pass,
             "case_links": links,
             "unique_execution_links": len(gate_links),
-            "holdout_gate_pass": bool(w08_holdout) and len(gate_links) == len({card.get("execution_unit_id") or card.get("card_id") for card in w08_holdout}) and all(
-                link["execution_status"] == "completed" and link["split"] == "topology_extrapolation"
-                and link["materialized"] and link["run"] and link["trajectory_structural"] for link in gate_links
-            ),
+            "holdout_gate_pass": holdout_gate_pass,
             "decision": (
                 "not_declared_for_family" if not w08_holdout and family not in DECLARED_TOPOLOGY_FAMILIES else
                 "design_only_not_materialized" if not w08_holdout else
@@ -673,6 +819,7 @@ def build_report() -> dict[str, Any]:
     references = reference_status()
     topology = w08_topology_audit()
     pilot = pilot_task_audit()
+    work_packages = work_package_audit()
     registry = load(REGISTRY_PATH)["cases"]
     w07 = load(W07_PATH)
     w06 = load(CAMPAIGN / "w06-rotating-pour.json")
@@ -737,6 +884,25 @@ def build_report() -> dict[str, Any]:
         "partially_executed" if w08_execution["run_cases"] < w08_execution["unique_execution_units"] else
         "executed_requires_scientific_acceptance"
     )
+    w08_package = next((row for row in work_packages["packages"] if row["id"] == "W08"), None)
+    work_packages["w08_crosscheck"] = {
+        "package_present": w08_package is not None,
+        "legacy_status": w08_package.get("legacy_status") if w08_package else None,
+        "execution_status": w08_package.get("execution_status") if w08_package else None,
+        "acceptance_status": w08_package.get("acceptance_status") if w08_package else None,
+        "validation_scope": w08_package.get("validation_scope") if w08_package else None,
+        "open_blockers": w08_package.get("open_blockers") if w08_package else None,
+        "coverage_decision": w08_decision,
+        "declared_cards": len(w08_design["cards"]),
+        "run_cases": w08_execution["run_cases"],
+        "design_only_claim_is_consistent": bool(
+            w08_package
+            and w08_package.get("execution_status") == "design_complete"
+            and w08_package.get("acceptance_status") == "not_experimentally_accepted"
+            and w08_decision == "design_only_not_run"
+            and w08_execution["run_cases"] == 0
+        ),
+    }
     return {
         "schema_version": 1,
         "scope": "R3-G3 declared-to-training/evaluation coverage and topology holdout audit",
@@ -754,11 +920,13 @@ def build_report() -> dict[str, Any]:
         "registry_stage_counts": registry_counts,
         "family_summary": family_summary,
         "registry_case_rows": rows,
+        "work_packages": work_packages,
         "w08_design": {
             "declared_cards": len(w08_design["cards"]),
             "unique_execution_units": load(W08_PATH)["audit"]["unique_execution_units"],
             "execution_status_counts": dict(Counter(card["execution_status"] for card in w08_design["cards"])),
             "split_counts": dict(w08_splits),
+            "planned_card_count": sum(card.get("execution_status") == "planned_not_run" for card in w08_design["cards"]),
             "linked_card_count": w08_execution["linked_card_count"],
             "executable_definitions": w08_execution["executable_definitions"],
             "run_cases": w08_execution["run_cases"],
@@ -766,6 +934,7 @@ def build_report() -> dict[str, Any]:
             "reference_quality_cases": w08_execution["reference_quality_cases"],
             "training_eval_cases": w08_execution["training_eval_cases"],
             "decision": w08_decision,
+            "coverage_claim": False,
         },
         "topology_holdouts": topology,
         "w07_topology_design_only": {
@@ -810,9 +979,11 @@ def build_report() -> dict[str, Any]:
 
 def write_conclusion(report: dict[str, Any]) -> None:
     family = report["family_summary"]
+    topology = report["topology_holdouts"]
+    work_packages = report["work_packages"]
     text = f'''# R3 G3 结论：覆盖度与 topology holdout 审计
 
-状态：**审计完成；工程覆盖已经能逐级量化，但 W08 受控泛化设计尚未进入可执行/可评测阶段，四个 topology holdout 也没有形成正式留出。**
+状态：**审计完成；工程覆盖已经能逐级量化，但 W08 受控泛化设计尚未进入可执行/可评测阶段，四个 topology holdout 仍是 planned-only，尚未形成正式留出。**
 
 ## 逐级结果
 
@@ -827,9 +998,13 @@ def write_conclusion(report: dict[str, Any]) -> None:
 | F5 | {family['F5']['declared']} | {family['F5']['executable']} | {family['F5']['run']} | {family['F5']['trajectory_structural']} | {family['F5']['quality_gate_pass']} | {family['F5']['reference_evidence_status']} | {family['F5']['development_pilot_t1_cases']} | {family['F5']['learned_baseline_evaluated_cases']} |
 | F6 | {family['F6']['declared']} | {family['F6']['executable']} | {family['F6']['run']} | {family['F6']['trajectory_structural']} | {family['F6']['quality_gate_pass']} | {family['F6']['reference_evidence_status']} | {family['F6']['development_pilot_t1_cases']} | {family['F6']['learned_baseline_evaluated_cases']} |
 
-W08 的 204 张卡和 196 个唯一 execution unit 全部仍是 `planned_not_run`；当前没有卡片与 registry、solver attempt、轨迹或训练/评测产物建立链接。W07 对 F1/F2/F3/F6 写出了 topology 候选卡（每个 holdout 6 或 8 张），这些也只是设计卡，不能算生成数据；F4/F5 尚未声明 topology holdout。
+## 顶层状态语义
 
-四个 topology holdout 的实际审计结果都是 `holdout_gate_pass=false`：F1 的 twin obstacle 和 F6 的 twin floaters 只有未链接的旧探针，F2 的 spout、F3 的 perforated proxy 连这样的偶然案例都没有。当前 W08 卡的拓扑字段全部保持 baseline（single/straight/center/single_free），没有 `topology_extrapolation` split。
+`work-packages.json` 中 13 个 package 的旧 `status` 全部为 `complete`，但这是历史兼容字段，不是科学验收或覆盖声明。当前审计将 `execution_status`、`acceptance_status`、`validation_scope` 和 `open_blockers` 单独保留：其中 {work_packages['engineering_accepted_count']} 个 package 只达到有限工程范围的 accepted 状态，{len(work_packages['legacy_complete_but_not_engineering_accepted'])} 个 package 虽有旧的 `status=complete` 但没有工程 accepted 状态。W08 的 authoritative 状态是 `execution_status={work_packages['w08_crosscheck']['execution_status']}`、`acceptance_status={work_packages['w08_crosscheck']['acceptance_status']}`，与下面的 `design_only_not_run` 覆盖判定一致。
+
+W08 的 204 张卡和 196 个唯一 execution unit 全部仍是 `planned_not_run`；当前没有卡片与 registry、solver attempt、轨迹或训练/评测产物建立链接，因此 `coverage_claim=false`。W07 对 F1/F2/F3/F6 写出了 topology 候选卡（每个 holdout 6 或 8 张），这些也只是 planned design cards，不能算生成数据；F4/F5 尚未声明 topology holdout。
+
+四个已声明 topology holdout 的实际覆盖计数都是 **0**，状态均为 `planned_only`，`holdout_gate_pass=false`：F1 的 twin obstacle 和 F6 的 twin floaters 只有未链接的旧探针，F2 的 spout、F3 的 perforated proxy 连这样的偶然案例都没有。它们的 W07 planned card 数分别为 {topology['F1']['planned_design_card_count']}、{topology['F2']['planned_design_card_count']}、{topology['F3']['planned_design_card_count']}、{topology['F6']['planned_design_card_count']}，不是实际数据覆盖。当前 W08 卡的拓扑字段全部保持 baseline（single/straight/center/single_free），没有 `topology_extrapolation` split。
 
 ## 训练/评测覆盖
 
