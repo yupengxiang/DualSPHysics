@@ -259,6 +259,7 @@ def conclusion(report: dict[str, Any]) -> str:
         status = "development-only；基线路线和指标闭环已执行，但边界 sidecar 输入契约未通过，因此不能宣布正式学习排行榜或物理验收。"
         boundary_note = "边界几何 availability/provenance gate 未通过；缺失 sidecar 不会被零向量伪装成已提供几何。"
         next_step = "下一步应先补齐并审计边界 sidecar，再复跑相同 matrix；之后才考虑三维 F6 的 coupled body-state model。"
+    route_table = "\n".join(route_rows)
     return f"""# R3 G4 结论：因果输入与多路线学习基线
 
 状态：**{status}**
@@ -267,7 +268,7 @@ def conclusion(report: dict[str, Any]) -> str:
 
 | 路线 | runs | seeds | case-macro position RMSE/dp | case bootstrap 95% |
 |---|---:|---|---:|---:|
-""" + "\n".join(route_rows) + """
+{route_table}
 
 所有学习路线都使用初始质量加权 COM、统一的 solver velocity 状态（训练使用当前帧速度，rollout 从帧 0 速度开始并只消费自己的下一帧速度）、不依赖文件终点的 elapsed time，以及相同的 `8*tanh(raw/8)` 平滑输出上限。位置、速度和 COM 均采用向量范数 RMSE；bootstrap 的重采样单位是物理案例而不是帧。
 
