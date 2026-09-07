@@ -1,0 +1,373 @@
+{
+  "schema_version": 1,
+  "diagnostic_id": "R3_F6_wall_ghost_geometry",
+  "execution_status": "completed_cpu_only_existing_artifacts",
+  "acceptance_status": "candidate_geometry_only_rejected",
+  "scientific_acceptance": "not_accepted_physical_validation",
+  "candidate_only": true,
+  "compute": {
+    "cfd_solver_run": false,
+    "gpu_used": false,
+    "production_tracer_imported": false,
+    "gpu_indices_used": []
+  },
+  "scope": "Binary VTK POINTS/FIELD audit for canonical F6 mDBC and two inward tank-normal radius candidates; no solver or force claim.",
+  "static_displacement_reused": {
+    "source": "campaigns/v0.1-candidate/r3-g2-f6-static-buoyancy.json",
+    "waterline_m": 0.8,
+    "nominal_displaced_volume_m3": 0.009662575156373995,
+    "target_displaced_volume_m3": 0.00975,
+    "relative_volume_error": -0.008966650628308205,
+    "status": "diagnostic_only_not_physical_acceptance"
+  },
+  "variants": {
+    "baseline": {
+      "label": "baseline",
+      "run_directory": "campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_baseline_combined_mask2_d2_invert",
+      "source_files": {
+        "boundary_normals_vtk": "campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_baseline_combined_mask2_d2_invert/CfgInit_Normals.vtk",
+        "ghost_normals_vtk": "campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_baseline_combined_mask2_d2_invert/CfgInit_NormalsGhost.vtk"
+      },
+      "interpretation": {
+        "boundary_coordinate": "x_b = POINTS in CfgInit_Normals.vtk",
+        "initial_displacement": "n_b = FIELD/Normal in CfgInit_Normals.vtk",
+        "ghost_displacement": "n_g = FIELD/Normal in CfgInit_NormalsGhost.vtk",
+        "inferred_ghost_coordinate": "x_g = x_b + n_g",
+        "effective_interface": "x_gamma = (x_b + x_g)/2 = x_b + n_g/2",
+        "solver_doubling_observed": "n_g is compared against 2*n_b; no blind BoundNor normalization"
+      },
+      "structural": {
+        "normal_file_present": true,
+        "ghost_file_present": true,
+        "points_equal_between_files": true,
+        "finite_arrays": true,
+        "boundary_count": 24335,
+        "fixed_count": 24195,
+        "floating_count": 140,
+        "zero_normal_count": 792,
+        "zero_normal_by_mk": {
+          "10": 792,
+          "20": 0
+        },
+        "boundnor_serialized_zero_count": 792,
+        "solver_fixed_or_moving_zero_count": 792,
+        "normal_geometry_point_count": 1935,
+        "solver_effective_boundary": "mDBC",
+        "ghost_doubling_max_abs_residual": 0.0,
+        "normal_size_doubling_max_abs_residual": 0.0,
+        "ghost_doubling_ratio_min": 2.0,
+        "ghost_doubling_ratio_max": 2.0,
+        "normal_completeness": false
+      },
+      "geometry": {
+        "boundary_bbox_m": [
+          [
+            -2.0999999046325684,
+            -2.0999999046325684,
+            -0.11999999731779099
+          ],
+          [
+            2.0999999046325684,
+            2.0999999046325684,
+            1.0800000429153442
+          ]
+        ],
+        "inferred_ghost_bbox_m": [
+          [
+            -1.9599995985627174,
+            -1.9599995985627174,
+            -0.9405907988548279
+          ],
+          [
+            1.9599995985627174,
+            1.9599995985627174,
+            1.0800000429153442
+          ]
+        ],
+        "effective_interface_bbox_m": [
+          [
+            -1.9699998088181019,
+            -1.9699998088181019,
+            -0.1402953863143921
+          ],
+          [
+            1.9699998088181019,
+            1.9699998088181019,
+            1.0800000429153442
+          ]
+        ],
+        "boundary_radius_range_m": [
+          0.0,
+          2.1306336606096705
+        ],
+        "effective_interface_radius_range_m": [
+          0.0,
+          1.9700000866141385
+        ],
+        "tank_side_count": 15756,
+        "tank_side_inward_normal_fraction_dot_lt_minus_0p9": 0.7939053728949479,
+        "tank_side_inward_dot_range": [
+          -1.0000000000000002,
+          0.0
+        ],
+        "zero_normal_radius_range_m": [
+          1.9469977165232293,
+          1.9589793235949486
+        ],
+        "zero_normal_z_range_m": [
+          0.05999999865889549,
+          1.0800000429153442
+        ],
+        "waterline_partition": {
+          "boundary_below_count": 114,
+          "boundary_at_or_above_count": 26,
+          "interface_below_count": 99,
+          "interface_at_or_above_count": 41,
+          "waterline_m": 0.8
+        }
+      },
+      "gate": {
+        "normal_completeness_pass": false,
+        "solver_doubling_consistency_pass": true,
+        "tank_orientation_pass": false,
+        "effective_interface_nominal_radius_offset_m": -0.04419056643430719,
+        "independent_ghost_coordinate_observed": false,
+        "overall_geometry_gate_pass": false,
+        "status": "candidate_geometry_only_rejected",
+        "reason": "Serialized field geometry is internally auditable, but a zero-free normal field does not establish the physical wall interface. The inward candidates move x_gamma relative to the nominal tank and the VTK artifact does not independently observe ghost coordinates, wetting force, or displaced-volume closure."
+      }
+    },
+    "inward_030": {
+      "label": "inward_030",
+      "run_directory": "campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_combined_tank_radius_minus030",
+      "source_files": {
+        "boundary_normals_vtk": "campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_combined_tank_radius_minus030/CfgInit_Normals.vtk",
+        "ghost_normals_vtk": "campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_combined_tank_radius_minus030/CfgInit_NormalsGhost.vtk"
+      },
+      "interpretation": {
+        "boundary_coordinate": "x_b = POINTS in CfgInit_Normals.vtk",
+        "initial_displacement": "n_b = FIELD/Normal in CfgInit_Normals.vtk",
+        "ghost_displacement": "n_g = FIELD/Normal in CfgInit_NormalsGhost.vtk",
+        "inferred_ghost_coordinate": "x_g = x_b + n_g",
+        "effective_interface": "x_gamma = (x_b + x_g)/2 = x_b + n_g/2",
+        "solver_doubling_observed": "n_g is compared against 2*n_b; no blind BoundNor normalization"
+      },
+      "structural": {
+        "normal_file_present": true,
+        "ghost_file_present": true,
+        "points_equal_between_files": true,
+        "finite_arrays": true,
+        "boundary_count": 24335,
+        "fixed_count": 24195,
+        "floating_count": 140,
+        "zero_normal_count": 0,
+        "zero_normal_by_mk": {
+          "10": 0,
+          "20": 0
+        },
+        "boundnor_serialized_zero_count": 0,
+        "solver_fixed_or_moving_zero_count": null,
+        "normal_geometry_point_count": 1935,
+        "solver_effective_boundary": "mDBC",
+        "ghost_doubling_max_abs_residual": 0.0,
+        "normal_size_doubling_max_abs_residual": 0.0,
+        "ghost_doubling_ratio_min": 2.0,
+        "ghost_doubling_ratio_max": 2.0,
+        "normal_completeness": true
+      },
+      "geometry": {
+        "boundary_bbox_m": [
+          [
+            -2.0999999046325684,
+            -2.0999999046325684,
+            -0.11999999731779099
+          ],
+          [
+            2.0999999046325684,
+            2.0999999046325684,
+            1.0800000429153442
+          ]
+        ],
+        "inferred_ghost_bbox_m": [
+          [
+            -1.9199999570846558,
+            -1.9199999570846558,
+            -0.9405907988548279
+          ],
+          [
+            1.9199999570846558,
+            1.9199999570846558,
+            1.0800000429153442
+          ]
+        ],
+        "effective_interface_bbox_m": [
+          [
+            -1.9399995990097523,
+            -1.9399998374283314,
+            -0.1402953863143921
+          ],
+          [
+            1.9400000758469105,
+            1.9399993605911732,
+            1.0800000429153442
+          ]
+        ],
+        "boundary_radius_range_m": [
+          0.0,
+          2.1306336606096705
+        ],
+        "effective_interface_radius_range_m": [
+          0.0,
+          1.9400001336998343
+        ],
+        "tank_side_count": 15756,
+        "tank_side_inward_normal_fraction_dot_lt_minus_0p9": 0.8144199035288144,
+        "tank_side_inward_dot_range": [
+          -1.0,
+          0.0
+        ],
+        "zero_normal_radius_range_m": null,
+        "zero_normal_z_range_m": null,
+        "waterline_partition": {
+          "boundary_below_count": 114,
+          "boundary_at_or_above_count": 26,
+          "interface_below_count": 99,
+          "interface_at_or_above_count": 41,
+          "waterline_m": 0.8
+        }
+      },
+      "gate": {
+        "normal_completeness_pass": true,
+        "solver_doubling_consistency_pass": true,
+        "tank_orientation_pass": false,
+        "effective_interface_nominal_radius_offset_m": -0.07287627066568247,
+        "independent_ghost_coordinate_observed": false,
+        "overall_geometry_gate_pass": false,
+        "status": "candidate_geometry_only_rejected",
+        "reason": "Serialized field geometry is internally auditable, but a zero-free normal field does not establish the physical wall interface. The inward candidates move x_gamma relative to the nominal tank and the VTK artifact does not independently observe ghost coordinates, wetting force, or displaced-volume closure."
+      }
+    },
+    "inward_020": {
+      "label": "inward_020",
+      "run_directory": "campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_combined_tank_radius_minus020",
+      "source_files": {
+        "boundary_normals_vtk": "campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_combined_tank_radius_minus020/CfgInit_Normals.vtk",
+        "ghost_normals_vtk": "campaigns/v0.1-candidate/runs/r3-g2-f6-mdbc-zero-normal-preflight/R3_F6_mdbc_zero_normal_baseline_combined_tank_radius_minus020/CfgInit_NormalsGhost.vtk"
+      },
+      "interpretation": {
+        "boundary_coordinate": "x_b = POINTS in CfgInit_Normals.vtk",
+        "initial_displacement": "n_b = FIELD/Normal in CfgInit_Normals.vtk",
+        "ghost_displacement": "n_g = FIELD/Normal in CfgInit_NormalsGhost.vtk",
+        "inferred_ghost_coordinate": "x_g = x_b + n_g",
+        "effective_interface": "x_gamma = (x_b + x_g)/2 = x_b + n_g/2",
+        "solver_doubling_observed": "n_g is compared against 2*n_b; no blind BoundNor normalization"
+      },
+      "structural": {
+        "normal_file_present": true,
+        "ghost_file_present": true,
+        "points_equal_between_files": true,
+        "finite_arrays": true,
+        "boundary_count": 24335,
+        "fixed_count": 24195,
+        "floating_count": 140,
+        "zero_normal_count": 0,
+        "zero_normal_by_mk": {
+          "10": 0,
+          "20": 0
+        },
+        "boundnor_serialized_zero_count": 0,
+        "solver_fixed_or_moving_zero_count": null,
+        "normal_geometry_point_count": 1935,
+        "solver_effective_boundary": "mDBC",
+        "ghost_doubling_max_abs_residual": 0.0,
+        "normal_size_doubling_max_abs_residual": 0.0,
+        "ghost_doubling_ratio_min": 2.0,
+        "ghost_doubling_ratio_max": 2.0,
+        "normal_completeness": true
+      },
+      "geometry": {
+        "boundary_bbox_m": [
+          [
+            -2.0999999046325684,
+            -2.0999999046325684,
+            -0.11999999731779099
+          ],
+          [
+            2.0999999046325684,
+            2.0999999046325684,
+            1.0800000429153442
+          ]
+        ],
+        "inferred_ghost_bbox_m": [
+          [
+            -1.9199999570846558,
+            -1.9199999570846558,
+            -0.9405907988548279
+          ],
+          [
+            1.9200001135468483,
+            1.9199999570846558,
+            1.0800000429153442
+          ]
+        ],
+        "effective_interface_bbox_m": [
+          [
+            -1.9499998278915882,
+            -1.9499999471008778,
+            -0.1402953863143921
+          ],
+          [
+            1.9500000663101673,
+            1.949999589473009,
+            1.0800000429153442
+          ]
+        ],
+        "boundary_radius_range_m": [
+          0.0,
+          2.1306336606096705
+        ],
+        "effective_interface_radius_range_m": [
+          0.0,
+          1.9500002268839611
+        ],
+        "tank_side_count": 15756,
+        "tank_side_inward_normal_fraction_dot_lt_minus_0p9": 0.8093424727088093,
+        "tank_side_inward_dot_range": [
+          -1.0000000000000002,
+          0.0
+        ],
+        "zero_normal_radius_range_m": null,
+        "zero_normal_z_range_m": null,
+        "waterline_partition": {
+          "boundary_below_count": 114,
+          "boundary_at_or_above_count": 26,
+          "interface_below_count": 99,
+          "interface_at_or_above_count": 41,
+          "waterline_m": 0.8
+        }
+      },
+      "gate": {
+        "normal_completeness_pass": true,
+        "solver_doubling_consistency_pass": true,
+        "tank_orientation_pass": false,
+        "effective_interface_nominal_radius_offset_m": -0.06298093499490443,
+        "independent_ghost_coordinate_observed": false,
+        "overall_geometry_gate_pass": false,
+        "status": "candidate_geometry_only_rejected",
+        "reason": "Serialized field geometry is internally auditable, but a zero-free normal field does not establish the physical wall interface. The inward candidates move x_gamma relative to the nominal tank and the VTK artifact does not independently observe ghost coordinates, wetting force, or displaced-volume closure."
+      }
+    }
+  },
+  "conclusions": {
+    "baseline": "792 zero fixed normals remain visible in the serialized field and solver warning.",
+    "inward_candidates": "-0.030 m and -0.020 m are zero-free and solver-doubling-consistent in this artifact, but their effective interface is offset and remains rejected.",
+    "boundary_ghost_semantics": "POINTS are unchanged between normal and ghost VTK files; ghost positions are inferred from the doubled FIELD/Normal vector, not directly observed.",
+    "wetting_and_volume": "Waterline partition is countable, but no force or displaced-volume closure is emitted by the normal VTK artifact."
+  },
+  "open_blockers": [
+    "Rebuild a nominal-geometry mDBC normal/ghost construction without unexplained zero vectors.",
+    "Independently validate x_gamma against the intended wall, corners and wetting surface; do not accept a radius offset solely from zero-normal removal.",
+    "Create a fixed-body force gauge and matched DBC/mDBC hydrostatic run after E0 passes.",
+    "Separate Chrono/body integration from the fixed hydrostatic closure."
+  ]
+}
