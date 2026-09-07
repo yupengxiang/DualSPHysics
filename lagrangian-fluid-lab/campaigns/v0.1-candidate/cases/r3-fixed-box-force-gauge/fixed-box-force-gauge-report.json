@@ -1,0 +1,1328 @@
+{
+  "schema_version": 1,
+  "report_id": "R3-fixed-box-force-gauge",
+  "started_at_utc": "2026-09-07T11:51:25.740457+00:00",
+  "finished_at_utc": "2026-09-07T11:51:37.357778+00:00",
+  "case_root": "campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge",
+  "resource_policy": {
+    "allowed_gpu_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "forbidden_gpu_indices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "idle_memory_limit_mib": 500,
+    "idle_utilization_limit_percent": 0,
+    "existing_processes_not_interrupted": true
+  },
+  "source_semantics": {
+    "gauge_xml": "doc/xml_format/_FmtXML_Gauges.xml",
+    "gauge_system_add_gauge_force": "src/source/JDsGaugeSystem.cpp:472-493",
+    "gauge_force_impl": "src/source/JDsGaugeItem.cpp:1710-1988",
+    "gauge_force_kernel": "src/source/JDsGauge_ker.cu:497-603",
+    "interpretation": "pressure interaction on selected fixed boundary particles only; excludes gravity, support reaction, and viscosity"
+  },
+  "analytical_reference": {
+    "box_dimensions_m": [
+      0.19999999999999996,
+      0.2,
+      0.2
+    ],
+    "box_volume_m3": 0.007999999999999998,
+    "rho_kg_m3": 1000.0,
+    "g_m_s2": 9.81,
+    "fz_n": 78.47999999999999,
+    "status": "pre_registered_reference_only"
+  },
+  "cases": [
+    {
+      "case_id": "fixed_box_dbc_gravity",
+      "label": "DBC gravity / hydrostatic initial gradient",
+      "definition": {
+        "definition": "campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/fixed_box_dbc_gravity_Def.xml",
+        "definition_sha256": "03cb4aaa943bc45387d3c438aa2a4f937a1c288b79cd9f1b570b9eb79618257c",
+        "no_floatings_section": true,
+        "floating_nodes": 0,
+        "force_gauge_names": [
+          "BoxForce"
+        ],
+        "force_targets_mkbound": [
+          "1"
+        ],
+        "body_box": {
+          "source_mkbound": 1,
+          "point_m": [
+            0.5,
+            0.3,
+            0.2
+          ],
+          "size_m": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "max_m": [
+            0.7,
+            0.5,
+            0.4
+          ],
+          "volume_m3": 0.008000000000000002,
+          "boxfill": "solid"
+        },
+        "tank_boundary_box_count": 1,
+        "constants": {
+          "gravity": {
+            "x": "0",
+            "y": "0",
+            "z": "-9.81"
+          },
+          "rhop0": {
+            "value": "1000"
+          },
+          "rhopgradient": {
+            "value": "2"
+          },
+          "hswl": {
+            "value": "0",
+            "auto": "true"
+          },
+          "gamma": {
+            "value": "7"
+          },
+          "speedsystem": {
+            "value": "0",
+            "auto": "true"
+          },
+          "coefsound": {
+            "value": "20"
+          },
+          "speedsound": {
+            "value": "0",
+            "auto": "true"
+          },
+          "coefh": {
+            "value": "1.0"
+          },
+          "cflnumber": {
+            "value": "0.2"
+          }
+        },
+        "execution_parameters": {
+          "SavePosDouble": "0",
+          "StepAlgorithm": "1",
+          "VerletSteps": "40",
+          "Kernel": "2",
+          "ViscoTreatment": "1",
+          "Visco": "0.01",
+          "ViscoBoundFactor": "1",
+          "DensityDT": "2",
+          "DensityDTvalue": "0.1",
+          "Shifting": "0",
+          "RigidAlgorithm": "1",
+          "FtPause": "0",
+          "CoefDtMin": "0.05",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "DtAllParticles": "0",
+          "TimeMax": "0.80",
+          "TimeOut": "0.01",
+          "MinFluidStop": "0",
+          "RhopOutMin": "700",
+          "RhopOutMax": "1300"
+        }
+      },
+      "gencase": {
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/fixed_box_dbc_gravity_Def",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/generated/fixed_box_dbc_gravity/fixed_box_dbc_gravity",
+          "-save:all"
+        ],
+        "return_code": 0,
+        "elapsed_seconds": 0.028212,
+        "generated_prefix": "generated/fixed_box_dbc_gravity/fixed_box_dbc_gravity",
+        "generated_xml": "generated/fixed_box_dbc_gravity/fixed_box_dbc_gravity.xml",
+        "stdout_log": "generated/fixed_box_dbc_gravity/gencase.stdout.log",
+        "stdout_sha256": "50f9b0430587386af2201aa41cc8c41bb906ffc3107332c1370ea89a80df1700",
+        "finished_text_found": true,
+        "generated": {
+          "generated_xml": "generated/fixed_box_dbc_gravity/fixed_box_dbc_gravity.xml",
+          "generated_xml_sha256": "c9d91566e997a9f58199b9fa4110e5fbac9562d52d82eaae14a06b2140d911f2",
+          "mapping_source_to_global_mk": [
+            {
+              "particle_type": "fixed",
+              "source_mkbound": 0,
+              "global_mk": 17,
+              "begin": 0,
+              "count": 6737
+            },
+            {
+              "particle_type": "fixed",
+              "source_mkbound": 1,
+              "global_mk": 18,
+              "begin": 6737,
+              "count": 729
+            }
+          ],
+          "fluid_mapping": [
+            {
+              "particle_type": "fluid",
+              "source_mkfluid": 0,
+              "global_mk": 1,
+              "begin": 7466,
+              "count": 29286
+            }
+          ],
+          "np": 36752,
+          "nb": 7466,
+          "nbf": 7466,
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1,
+          "summary": "<_summary>\n                <positions units_comment=\"metres (m)\">\n                    <posmin x=\"0\" y=\"0\" z=\"0\" />\n                    <posmax x=\"1.2\" y=\"0.8\" z=\"0.8\" />\n                </positions>\n                <fixed count=\"7466\" id=\"0-7465\" mkcount=\"2\" mkvalues=\"17-18\" />\n                <fluid count=\"29286\" id=\"7466-36751\" mkcount=\"1\" mkvalues=\"1\" />\n            </_summary>\n            "
+        }
+      },
+      "analytical_reference": {
+        "rho_kg_m3": 1000.0,
+        "gravity_m_s2": 9.81,
+        "box_size_m": [
+          0.19999999999999996,
+          0.2,
+          0.2
+        ],
+        "box_volume_m3": 0.007999999999999998,
+        "pressure_resultant_fz_n": 78.47999999999999,
+        "status": "pre_registered_reference_only"
+      },
+      "execution_status": "completed",
+      "acceptance_status": "candidate_not_accepted",
+      "fixed_body_mapping_gate": {
+        "source_mkbound": 1,
+        "mapping_rows": [
+          {
+            "particle_type": "fixed",
+            "source_mkbound": 1,
+            "global_mk": 18,
+            "begin": 6737,
+            "count": 729
+          }
+        ],
+        "source_mkbound_maps_to_fixed": true,
+        "no_floatings": true
+      },
+      "gpu_preflight": {
+        "command": "nvidia-smi --query-gpu=index,uuid,memory.used,memory.total,utilization.gpu --format=csv,noheader,nounits",
+        "return_code": 0,
+        "rows": [
+          {
+            "index": 0,
+            "uuid": "GPU-3dd8e277-f7e1-3893-292a-5928ea229599",
+            "memory_used_mib": 19541,
+            "memory_total_mib": 49140,
+            "utilization_percent": 30
+          },
+          {
+            "index": 1,
+            "uuid": "GPU-ff68d571-7ed7-31b4-a0c0-16fe8745bd7e",
+            "memory_used_mib": 20335,
+            "memory_total_mib": 49140,
+            "utilization_percent": 64
+          },
+          {
+            "index": 2,
+            "uuid": "GPU-2b603061-bc09-9875-acee-e57fbf62f85a",
+            "memory_used_mib": 18223,
+            "memory_total_mib": 49140,
+            "utilization_percent": 14
+          },
+          {
+            "index": 3,
+            "uuid": "GPU-b9624e96-e0f0-920f-ba94-f4db47900f95",
+            "memory_used_mib": 20335,
+            "memory_total_mib": 49140,
+            "utilization_percent": 15
+          },
+          {
+            "index": 4,
+            "uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          },
+          {
+            "index": 5,
+            "uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          },
+          {
+            "index": 6,
+            "uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          },
+          {
+            "index": 7,
+            "uuid": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          }
+        ],
+        "snapshot": "runs/gpu-preflight/00-fixed_box_dbc_gravity.txt"
+      },
+      "attempt": {
+        "schema_version": 1,
+        "case_id": "fixed_box_dbc_gravity",
+        "attempt_id": "20260907T115125.880420Z-7a8059da",
+        "status": "completed",
+        "started_at_utc": "2026-09-07T11:51:25.880733+00:00",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+          "-gpu:4",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/generated/fixed_box_dbc_gravity/fixed_box_dbc_gravity",
+          "{output}"
+        ],
+        "gpu_at_launch": {
+          "index": 4,
+          "uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+          "memory_used_mib": 18,
+          "memory_total_mib": 49140,
+          "utilization_percent": 0
+        },
+        "finished_at_utc": "2026-09-07T11:51:31.139161+00:00",
+        "elapsed_seconds": 5.255508,
+        "return_code": 0,
+        "actual_command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+          "-gpu:4",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/generated/fixed_box_dbc_gravity/fixed_box_dbc_gravity",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/fixed_box_dbc_gravity/attempts/20260907T115125.880420Z-7a8059da.partial"
+        ],
+        "finished_text_found": true,
+        "part_files": 81,
+        "solver_stdout_sha256": "f3434c1cfeb80e49f4a94645df83fa26c9874ed9e640fc33e1023961442aacb1",
+        "attempt_directory": "runs/fixed_box_dbc_gravity/attempts/20260907T115125.880420Z-7a8059da.complete"
+      },
+      "solver_log": {
+        "log": "runs/fixed_box_dbc_gravity/attempts/20260907T115125.880420Z-7a8059da.complete/solver.stdout.log",
+        "log_sha256": "f3434c1cfeb80e49f4a94645df83fa26c9874ed9e640fc33e1023961442aacb1",
+        "fixed_summary": "7,466",
+        "moving_summary": null,
+        "floating_summary": null,
+        "fluid_summary": "29,286",
+        "excluded_particles": null,
+        "finished_text_found": true,
+        "gauge_config_target_found": true,
+        "chrono_timer": null,
+        "attempt_status": "completed"
+      },
+      "generated_evidence": {
+        "particles_xml": "results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/generated_particles.xml",
+        "particles_xml_sha256": "c9d91566e997a9f58199b9fa4110e5fbac9562d52d82eaae14a06b2140d911f2",
+        "gencase_stdout": "results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/gencase.stdout.log",
+        "gencase_stdout_sha256": "50f9b0430587386af2201aa41cc8c41bb906ffc3107332c1370ea89a80df1700"
+      },
+      "field_integrity": {
+        "part_file_count": 81,
+        "frames": {
+          "initial": {
+            "part_index": 0,
+            "fluid_time_s": 0.0,
+            "fixed_time_s": 0.0,
+            "fluid_count": 29286,
+            "fixed_count": 7466,
+            "fluid_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fixed_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fluid_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/fixed_box_dbc_gravity/attempts/20260907T115125.880420Z-7a8059da.complete/data",
+                "-first:0",
+                "-last:0",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/fields/initial/fluid/Particles",
+                "-onlytype:-all,+fluid",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/fields/initial/fluid/partvtk.stdout.log",
+              "frame": "results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/fields/initial/fluid/Particles_0000.csv",
+              "frame_sha256": "7ec038a500af35293291ee514309cc550cfdce062e7782356201e1b76ed461c8"
+            },
+            "fixed_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/fixed_box_dbc_gravity/attempts/20260907T115125.880420Z-7a8059da.complete/data",
+                "-first:0",
+                "-last:0",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/fields/initial/fixed/Particles",
+                "-onlytype:-all,+fixed",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/fields/initial/fixed/partvtk.stdout.log",
+              "frame": "results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/fields/initial/fixed/Particles_0000.csv",
+              "frame_sha256": "28130619cc7f53ad433a47f5534922fb2c79570eff4239b10a7ec157b211673b"
+            }
+          },
+          "final": {
+            "part_index": 80,
+            "fluid_time_s": 0.800017,
+            "fixed_time_s": 0.800017,
+            "fluid_count": 29286,
+            "fixed_count": 7466,
+            "fluid_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fixed_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fluid_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/fixed_box_dbc_gravity/attempts/20260907T115125.880420Z-7a8059da.complete/data",
+                "-first:80",
+                "-last:80",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/fields/final/fluid/Particles",
+                "-onlytype:-all,+fluid",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/fields/final/fluid/partvtk.stdout.log",
+              "frame": "results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/fields/final/fluid/Particles_0080.csv",
+              "frame_sha256": "7da699fef036414ac4e84cb8ce1022ea35383a2080dcbfc90826064245aa9eac"
+            },
+            "fixed_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/fixed_box_dbc_gravity/attempts/20260907T115125.880420Z-7a8059da.complete/data",
+                "-first:80",
+                "-last:80",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/fields/final/fixed/Particles",
+                "-onlytype:-all,+fixed",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/fields/final/fixed/partvtk.stdout.log",
+              "frame": "results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/fields/final/fixed/Particles_0080.csv",
+              "frame_sha256": "e5e4d4b22fedebcb183abe606e352d486e569a8bf140e96f61545433217767bb"
+            }
+          }
+        },
+        "required_fields_complete": true,
+        "fluid_count_initial": 29286,
+        "fluid_count_final": 29286,
+        "expected_fluid_count": 29286,
+        "fluid_count_constant": true,
+        "fluid_mass_initial_kg": 457.59375,
+        "fluid_mass_final_kg": 457.59375,
+        "fluid_mass_delta_kg": 0.0,
+        "fluid_mass_conserved": true,
+        "fluid_penetration_into_box": {
+          "initial_particles": 0,
+          "final_particles": 0,
+          "pass": true,
+          "scope": "initial_and_final_field_snapshots; all solver outputs are checked for excluded particles"
+        },
+        "fixed_body_particle_motion_max_m": 0.0,
+        "fixed_body_unchanged": true,
+        "pressure_initial_pa": {
+          "min": 0.0,
+          "max": 5395.4883,
+          "mean": 2626.531314295986
+        },
+        "pressure_final_pa": {
+          "min": -11419.655,
+          "max": 34250.359,
+          "mean": 2616.480323367367
+        }
+      },
+      "force_gauge": {
+        "source": "runs/fixed_box_dbc_gravity/attempts/20260907T115125.880420Z-7a8059da.complete/GaugesForce_BoxForce.csv",
+        "source_sha256": "9e4fa063e1aa084ea6fa2e1f6aad1a4394e29f7357a84088514dec2dac60e600",
+        "signed_csv": "results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da/force_timeseries.csv",
+        "sample_count": 160,
+        "time_min_s": 0.0,
+        "time_max_s": 0.795163,
+        "header": [
+          "time [s]",
+          "force [N]",
+          "forcex [N]",
+          "forcey [N]",
+          "forcez [N]"
+        ],
+        "rows_first": [
+          {
+            "time [s]": 0.0,
+            "force [N]": 14.1044,
+            "forcex [N]": 2.98023e-06,
+            "forcey [N]": -9.53674e-07,
+            "forcez [N]": -14.1044
+          },
+          {
+            "time [s]": 0.005014,
+            "force [N]": 84.7731,
+            "forcex [N]": 5.66244e-05,
+            "forcey [N]": 0.000199229,
+            "forcez [N]": -84.7731
+          },
+          {
+            "time [s]": 0.010014,
+            "force [N]": 8.5189,
+            "forcex [N]": 9.82285e-05,
+            "forcey [N]": 0.000503302,
+            "forcez [N]": 8.5189
+          }
+        ],
+        "rows_last": [
+          {
+            "time [s]": 0.785164,
+            "force [N]": 152.179,
+            "forcex [N]": 0.015957,
+            "forcey [N]": -0.326473,
+            "forcez [N]": 152.179
+          },
+          {
+            "time [s]": 0.79016,
+            "force [N]": 135.408,
+            "forcex [N]": -0.347712,
+            "forcey [N]": 0.130333,
+            "forcez [N]": 135.407
+          },
+          {
+            "time [s]": 0.795163,
+            "force [N]": 115.183,
+            "forcex [N]": 0.470659,
+            "forcey [N]": -0.123413,
+            "forcez [N]": 115.181
+          }
+        ],
+        "windows": {
+          "last_0p20s": {
+            "start_s": 0.6000000000000001,
+            "end_s": 0.8,
+            "samples": 40,
+            "force [N]": {
+              "mean": 124.77723,
+              "std": 36.633619743394185,
+              "min": 51.6423,
+              "max": 171.878
+            },
+            "forcex [N]": {
+              "mean": -0.0012821545000000004,
+              "std": 0.12676427901872392,
+              "min": -0.347712,
+              "max": 0.470659
+            },
+            "forcey [N]": {
+              "mean": 0.006657658999999999,
+              "std": 0.1618049672259169,
+              "min": -0.398448,
+              "max": 0.334661
+            },
+            "forcez [N]": {
+              "mean": 124.77699250000003,
+              "std": 36.63370729575692,
+              "min": 51.6419,
+              "max": 171.878
+            }
+          },
+          "last_0p40s": {
+            "start_s": 0.4,
+            "end_s": 0.8,
+            "samples": 80,
+            "force [N]": {
+              "mean": 110.69706125,
+              "std": 50.56787185038661,
+              "min": 10.6511,
+              "max": 192.995
+            },
+            "forcex [N]": {
+              "mean": -0.0005172707625000002,
+              "std": 0.09036567712877858,
+              "min": -0.347712,
+              "max": 0.470659
+            },
+            "forcey [N]": {
+              "mean": 0.0032325819750000013,
+              "std": 0.11612684210495658,
+              "min": -0.398448,
+              "max": 0.334661
+            },
+            "forcez [N]": {
+              "mean": 110.69694124999998,
+              "std": 50.56787237600246,
+              "min": 10.6511,
+              "max": 192.995
+            }
+          },
+          "last_0p60s": {
+            "start_s": 0.20000000000000007,
+            "end_s": 0.8,
+            "samples": 120,
+            "force [N]": {
+              "mean": 116.84796141666668,
+              "std": 61.71008022478506,
+              "min": 3.95075,
+              "max": 241.226
+            },
+            "forcex [N]": {
+              "mean": -0.000403789825,
+              "std": 0.07382277746647803,
+              "min": -0.347712,
+              "max": 0.470659
+            },
+            "forcey [N]": {
+              "mean": 0.0022758080441666662,
+              "std": 0.09486469632979341,
+              "min": -0.398448,
+              "max": 0.334661
+            },
+            "forcez [N]": {
+              "mean": 116.34989366666667,
+              "std": 62.643951468565305,
+              "min": -12.5963,
+              "max": 241.226
+            }
+          }
+        }
+      },
+      "result_directory": "results/fixed_box_dbc_gravity/20260907T115125.880420Z-7a8059da",
+      "screen": {
+        "fixed_body_gate": true,
+        "fields_gate": true,
+        "multiple_window_gate": true,
+        "stable_window_gate": false,
+        "stable_window_std_limit_n": 3.9239999999999995,
+        "initial_pressure_gate": true,
+        "forcez_window_means_n": [
+          124.77699250000003,
+          110.69694124999998,
+          116.34989366666667
+        ],
+        "reference_error_last_0p20s_percent": 58.99209034148834,
+        "status": "diagnostic_only_not_physical_acceptance"
+      }
+    },
+    {
+      "case_id": "fixed_box_dbc_zero_pressure",
+      "label": "DBC zero-pressure / uniform initial density",
+      "definition": {
+        "definition": "campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/fixed_box_dbc_zero_pressure_Def.xml",
+        "definition_sha256": "da27992b0fca3dd9db5fc23bca3ebf183dcce7226348b7fe0994b8e2dc4ae418",
+        "no_floatings_section": true,
+        "floating_nodes": 0,
+        "force_gauge_names": [
+          "BoxForce"
+        ],
+        "force_targets_mkbound": [
+          "1"
+        ],
+        "body_box": {
+          "source_mkbound": 1,
+          "point_m": [
+            0.5,
+            0.3,
+            0.2
+          ],
+          "size_m": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "max_m": [
+            0.7,
+            0.5,
+            0.4
+          ],
+          "volume_m3": 0.008000000000000002,
+          "boxfill": "solid"
+        },
+        "tank_boundary_box_count": 1,
+        "constants": {
+          "gravity": {
+            "x": "0",
+            "y": "0",
+            "z": "0"
+          },
+          "rhop0": {
+            "value": "1000"
+          },
+          "rhopgradient": {
+            "value": "1"
+          },
+          "hswl": {
+            "value": "0.60",
+            "auto": "false"
+          },
+          "gamma": {
+            "value": "7"
+          },
+          "speedsystem": {
+            "value": "1",
+            "auto": "false"
+          },
+          "coefsound": {
+            "value": "20"
+          },
+          "speedsound": {
+            "value": "20",
+            "auto": "false"
+          },
+          "coefh": {
+            "value": "1.0"
+          },
+          "cflnumber": {
+            "value": "0.2"
+          }
+        },
+        "execution_parameters": {
+          "SavePosDouble": "0",
+          "StepAlgorithm": "1",
+          "VerletSteps": "40",
+          "Kernel": "2",
+          "ViscoTreatment": "1",
+          "Visco": "0.01",
+          "ViscoBoundFactor": "1",
+          "DensityDT": "0",
+          "DensityDTvalue": "0.1",
+          "Shifting": "0",
+          "RigidAlgorithm": "1",
+          "FtPause": "0",
+          "CoefDtMin": "0.05",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "DtAllParticles": "0",
+          "TimeMax": "0.80",
+          "TimeOut": "0.01",
+          "MinFluidStop": "0",
+          "RhopOutMin": "700",
+          "RhopOutMax": "1300"
+        }
+      },
+      "gencase": {
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/fixed_box_dbc_zero_pressure_Def",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/generated/fixed_box_dbc_zero_pressure/fixed_box_dbc_zero_pressure",
+          "-save:all"
+        ],
+        "return_code": 0,
+        "elapsed_seconds": 0.021801,
+        "generated_prefix": "generated/fixed_box_dbc_zero_pressure/fixed_box_dbc_zero_pressure",
+        "generated_xml": "generated/fixed_box_dbc_zero_pressure/fixed_box_dbc_zero_pressure.xml",
+        "stdout_log": "generated/fixed_box_dbc_zero_pressure/gencase.stdout.log",
+        "stdout_sha256": "5412cc589eb5a7c54cbd08bcd6520f5fc1cb64f767e2603eb8d9dc015c4fc977",
+        "finished_text_found": true,
+        "generated": {
+          "generated_xml": "generated/fixed_box_dbc_zero_pressure/fixed_box_dbc_zero_pressure.xml",
+          "generated_xml_sha256": "c87db9903f904d15cf0e4e368e5b3478572c8ebc7bed5e2e0ed2d50d99bc9449",
+          "mapping_source_to_global_mk": [
+            {
+              "particle_type": "fixed",
+              "source_mkbound": 0,
+              "global_mk": 17,
+              "begin": 0,
+              "count": 6737
+            },
+            {
+              "particle_type": "fixed",
+              "source_mkbound": 1,
+              "global_mk": 18,
+              "begin": 6737,
+              "count": 729
+            }
+          ],
+          "fluid_mapping": [
+            {
+              "particle_type": "fluid",
+              "source_mkfluid": 0,
+              "global_mk": 1,
+              "begin": 7466,
+              "count": 29286
+            }
+          ],
+          "np": 36752,
+          "nb": 7466,
+          "nbf": 7466,
+          "mkboundfirst": 17,
+          "mkfluidfirst": 1,
+          "summary": "<_summary>\n                <positions units_comment=\"metres (m)\">\n                    <posmin x=\"0\" y=\"0\" z=\"0\" />\n                    <posmax x=\"1.2\" y=\"0.8\" z=\"0.8\" />\n                </positions>\n                <fixed count=\"7466\" id=\"0-7465\" mkcount=\"2\" mkvalues=\"17-18\" />\n                <fluid count=\"29286\" id=\"7466-36751\" mkcount=\"1\" mkvalues=\"1\" />\n            </_summary>\n            "
+        }
+      },
+      "analytical_reference": {
+        "rho_kg_m3": 1000.0,
+        "gravity_m_s2": 9.81,
+        "box_size_m": [
+          0.19999999999999996,
+          0.2,
+          0.2
+        ],
+        "box_volume_m3": 0.007999999999999998,
+        "pressure_resultant_fz_n": 78.47999999999999,
+        "status": "pre_registered_reference_only"
+      },
+      "execution_status": "completed",
+      "acceptance_status": "candidate_not_accepted",
+      "fixed_body_mapping_gate": {
+        "source_mkbound": 1,
+        "mapping_rows": [
+          {
+            "particle_type": "fixed",
+            "source_mkbound": 1,
+            "global_mk": 18,
+            "begin": 6737,
+            "count": 729
+          }
+        ],
+        "source_mkbound_maps_to_fixed": true,
+        "no_floatings": true
+      },
+      "gpu_preflight": {
+        "command": "nvidia-smi --query-gpu=index,uuid,memory.used,memory.total,utilization.gpu --format=csv,noheader,nounits",
+        "return_code": 0,
+        "rows": [
+          {
+            "index": 0,
+            "uuid": "GPU-3dd8e277-f7e1-3893-292a-5928ea229599",
+            "memory_used_mib": 19541,
+            "memory_total_mib": 49140,
+            "utilization_percent": 33
+          },
+          {
+            "index": 1,
+            "uuid": "GPU-ff68d571-7ed7-31b4-a0c0-16fe8745bd7e",
+            "memory_used_mib": 20335,
+            "memory_total_mib": 49140,
+            "utilization_percent": 31
+          },
+          {
+            "index": 2,
+            "uuid": "GPU-2b603061-bc09-9875-acee-e57fbf62f85a",
+            "memory_used_mib": 18223,
+            "memory_total_mib": 49140,
+            "utilization_percent": 51
+          },
+          {
+            "index": 3,
+            "uuid": "GPU-b9624e96-e0f0-920f-ba94-f4db47900f95",
+            "memory_used_mib": 20335,
+            "memory_total_mib": 49140,
+            "utilization_percent": 15
+          },
+          {
+            "index": 4,
+            "uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          },
+          {
+            "index": 5,
+            "uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          },
+          {
+            "index": 6,
+            "uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          },
+          {
+            "index": 7,
+            "uuid": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+            "memory_used_mib": 18,
+            "memory_total_mib": 49140,
+            "utilization_percent": 0
+          }
+        ],
+        "snapshot": "runs/gpu-preflight/01-fixed_box_dbc_zero_pressure.txt"
+      },
+      "attempt": {
+        "schema_version": 1,
+        "case_id": "fixed_box_dbc_zero_pressure",
+        "attempt_id": "20260907T115132.695062Z-e85ed689",
+        "status": "completed",
+        "started_at_utc": "2026-09-07T11:51:32.695297+00:00",
+        "command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+          "-gpu:4",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/generated/fixed_box_dbc_zero_pressure/fixed_box_dbc_zero_pressure",
+          "{output}"
+        ],
+        "gpu_at_launch": {
+          "index": 4,
+          "uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+          "memory_used_mib": 18,
+          "memory_total_mib": 49140,
+          "utilization_percent": 0
+        },
+        "finished_at_utc": "2026-09-07T11:51:35.989775+00:00",
+        "elapsed_seconds": 3.292406,
+        "return_code": 0,
+        "actual_command": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+          "-gpu:4",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/generated/fixed_box_dbc_zero_pressure/fixed_box_dbc_zero_pressure",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/fixed_box_dbc_zero_pressure/attempts/20260907T115132.695062Z-e85ed689.partial"
+        ],
+        "finished_text_found": true,
+        "part_files": 81,
+        "solver_stdout_sha256": "01b7758c3b4845b5a46cf33a40d766dd6dcde2629d726160cb2ec76ac6733b2f",
+        "attempt_directory": "runs/fixed_box_dbc_zero_pressure/attempts/20260907T115132.695062Z-e85ed689.complete"
+      },
+      "solver_log": {
+        "log": "runs/fixed_box_dbc_zero_pressure/attempts/20260907T115132.695062Z-e85ed689.complete/solver.stdout.log",
+        "log_sha256": "01b7758c3b4845b5a46cf33a40d766dd6dcde2629d726160cb2ec76ac6733b2f",
+        "fixed_summary": "7,466",
+        "moving_summary": null,
+        "floating_summary": null,
+        "fluid_summary": "29,286",
+        "excluded_particles": null,
+        "finished_text_found": true,
+        "gauge_config_target_found": true,
+        "chrono_timer": null,
+        "attempt_status": "completed"
+      },
+      "generated_evidence": {
+        "particles_xml": "results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/generated_particles.xml",
+        "particles_xml_sha256": "c87db9903f904d15cf0e4e368e5b3478572c8ebc7bed5e2e0ed2d50d99bc9449",
+        "gencase_stdout": "results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/gencase.stdout.log",
+        "gencase_stdout_sha256": "5412cc589eb5a7c54cbd08bcd6520f5fc1cb64f767e2603eb8d9dc015c4fc977"
+      },
+      "field_integrity": {
+        "part_file_count": 81,
+        "frames": {
+          "initial": {
+            "part_index": 0,
+            "fluid_time_s": 0.0,
+            "fixed_time_s": 0.0,
+            "fluid_count": 29286,
+            "fixed_count": 7466,
+            "fluid_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fixed_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fluid_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/fixed_box_dbc_zero_pressure/attempts/20260907T115132.695062Z-e85ed689.complete/data",
+                "-first:0",
+                "-last:0",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/fields/initial/fluid/Particles",
+                "-onlytype:-all,+fluid",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/fields/initial/fluid/partvtk.stdout.log",
+              "frame": "results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/fields/initial/fluid/Particles_0000.csv",
+              "frame_sha256": "2fe5c19bab15b1d85f1592901c2fb393a134383f9805b7575b62146455d578d2"
+            },
+            "fixed_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/fixed_box_dbc_zero_pressure/attempts/20260907T115132.695062Z-e85ed689.complete/data",
+                "-first:0",
+                "-last:0",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/fields/initial/fixed/Particles",
+                "-onlytype:-all,+fixed",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/fields/initial/fixed/partvtk.stdout.log",
+              "frame": "results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/fields/initial/fixed/Particles_0000.csv",
+              "frame_sha256": "28130619cc7f53ad433a47f5534922fb2c79570eff4239b10a7ec157b211673b"
+            }
+          },
+          "final": {
+            "part_index": 80,
+            "fluid_time_s": 0.800207,
+            "fixed_time_s": 0.800207,
+            "fluid_count": 29286,
+            "fixed_count": 7466,
+            "fluid_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fixed_fields": [
+              "Pos.x [m]",
+              "Pos.y [m]",
+              "Pos.z [m]",
+              "Zone",
+              "Idp",
+              "Vel.x [m/s]",
+              "Vel.y [m/s]",
+              "Vel.z [m/s]",
+              "Rhop [kg/m^3]",
+              "Mass [kg]",
+              "Press [Pa]",
+              "Type",
+              "Mk"
+            ],
+            "fluid_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/fixed_box_dbc_zero_pressure/attempts/20260907T115132.695062Z-e85ed689.complete/data",
+                "-first:80",
+                "-last:80",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/fields/final/fluid/Particles",
+                "-onlytype:-all,+fluid",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/fields/final/fluid/partvtk.stdout.log",
+              "frame": "results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/fields/final/fluid/Particles_0080.csv",
+              "frame_sha256": "473cde0bdb63767bee40e790d002cb589da1bf38e94d31246ef3b569057faa81"
+            },
+            "fixed_partvtk": {
+              "command": [
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+                "-dirdata",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/runs/fixed_box_dbc_zero_pressure/attempts/20260907T115132.695062Z-e85ed689.complete/data",
+                "-first:80",
+                "-last:80",
+                "-savecsv",
+                "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/fields/final/fixed/Particles",
+                "-onlytype:-all,+fixed",
+                "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+                "-csvsep:1"
+              ],
+              "return_code": 0,
+              "stdout_log": "results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/fields/final/fixed/partvtk.stdout.log",
+              "frame": "results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/fields/final/fixed/Particles_0080.csv",
+              "frame_sha256": "65a9f482ec5a883d81b12322deddccb86a30c340e4b02963c601188966152dab"
+            }
+          }
+        },
+        "required_fields_complete": true,
+        "fluid_count_initial": 29286,
+        "fluid_count_final": 29286,
+        "expected_fluid_count": 29286,
+        "fluid_count_constant": true,
+        "fluid_mass_initial_kg": 457.59375,
+        "fluid_mass_final_kg": 457.59375,
+        "fluid_mass_delta_kg": 0.0,
+        "fluid_mass_conserved": true,
+        "fluid_penetration_into_box": {
+          "initial_particles": 0,
+          "final_particles": 0,
+          "pass": true,
+          "scope": "initial_and_final_field_snapshots; all solver outputs are checked for excluded particles"
+        },
+        "fixed_body_particle_motion_max_m": 0.0,
+        "fixed_body_unchanged": true,
+        "pressure_initial_pa": {
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "pressure_final_pa": {
+          "min": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        }
+      },
+      "force_gauge": {
+        "source": "runs/fixed_box_dbc_zero_pressure/attempts/20260907T115132.695062Z-e85ed689.complete/GaugesForce_BoxForce.csv",
+        "source_sha256": "888858ba6da9815e0344f6fcd3c74a192294267e3fdf3ff4600d30eff575811c",
+        "signed_csv": "results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689/force_timeseries.csv",
+        "sample_count": 160,
+        "time_min_s": 0.0,
+        "time_max_s": 0.795011,
+        "header": [
+          "time [s]",
+          "force [N]",
+          "forcex [N]",
+          "forcey [N]",
+          "forcez [N]"
+        ],
+        "rows_first": [
+          {
+            "time [s]": 0.0,
+            "force [N]": 0.0,
+            "forcex [N]": 0.0,
+            "forcey [N]": 0.0,
+            "forcez [N]": 0.0
+          },
+          {
+            "time [s]": 0.005196,
+            "force [N]": 0.0,
+            "forcex [N]": 0.0,
+            "forcey [N]": 0.0,
+            "forcez [N]": 0.0
+          },
+          {
+            "time [s]": 0.010392,
+            "force [N]": 0.0,
+            "forcex [N]": 0.0,
+            "forcey [N]": 0.0,
+            "forcez [N]": 0.0
+          }
+        ],
+        "rows_last": [
+          {
+            "time [s]": 0.785052,
+            "force [N]": 0.0,
+            "forcex [N]": 0.0,
+            "forcey [N]": 0.0,
+            "forcez [N]": 0.0
+          },
+          {
+            "time [s]": 0.790248,
+            "force [N]": 0.0,
+            "forcex [N]": 0.0,
+            "forcey [N]": 0.0,
+            "forcez [N]": 0.0
+          },
+          {
+            "time [s]": 0.795011,
+            "force [N]": 0.0,
+            "forcex [N]": 0.0,
+            "forcey [N]": 0.0,
+            "forcez [N]": 0.0
+          }
+        ],
+        "windows": {
+          "last_0p20s": {
+            "start_s": 0.6000000000000001,
+            "end_s": 0.8,
+            "samples": 40,
+            "force [N]": {
+              "mean": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0
+            },
+            "forcex [N]": {
+              "mean": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0
+            },
+            "forcey [N]": {
+              "mean": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0
+            },
+            "forcez [N]": {
+              "mean": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0
+            }
+          },
+          "last_0p40s": {
+            "start_s": 0.4,
+            "end_s": 0.8,
+            "samples": 80,
+            "force [N]": {
+              "mean": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0
+            },
+            "forcex [N]": {
+              "mean": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0
+            },
+            "forcey [N]": {
+              "mean": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0
+            },
+            "forcez [N]": {
+              "mean": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0
+            }
+          },
+          "last_0p60s": {
+            "start_s": 0.20000000000000007,
+            "end_s": 0.8,
+            "samples": 120,
+            "force [N]": {
+              "mean": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0
+            },
+            "forcex [N]": {
+              "mean": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0
+            },
+            "forcey [N]": {
+              "mean": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0
+            },
+            "forcez [N]": {
+              "mean": 0.0,
+              "std": 0.0,
+              "min": 0.0,
+              "max": 0.0
+            }
+          }
+        }
+      },
+      "result_directory": "results/fixed_box_dbc_zero_pressure/20260907T115132.695062Z-e85ed689",
+      "screen": {
+        "fixed_body_gate": true,
+        "fields_gate": true,
+        "multiple_window_gate": true,
+        "stable_window_gate": true,
+        "stable_window_std_limit_n": 0.5,
+        "initial_pressure_gate": true,
+        "forcez_window_means_n": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "reference_error_last_0p20s_percent": null,
+        "status": "diagnostic_only_not_physical_acceptance"
+      }
+    }
+  ],
+  "blocked_calibrations": [
+    {
+      "case_id": "fixed_box_mdbc_same_geometry",
+      "status": "blocked_not_run",
+      "reason": "No independently safe mDBC normals/ghost geometry path was established; no fake run."
+    },
+    {
+      "case_id": "fixed_box_mdbc_refined",
+      "status": "blocked_not_run",
+      "reason": "No independently safe mDBC normals/ghost geometry path was established; no fake run."
+    }
+  ],
+  "overall_acceptance_status": "candidate_not_accepted"
+}
