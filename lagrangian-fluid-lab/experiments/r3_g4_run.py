@@ -13,12 +13,6 @@ import subprocess
 import sys
 import time
 
-try:
-    from scripts.campaign_runner import require_idle_allowed_gpu
-except ModuleNotFoundError:  # direct invocation from this directory
-    from campaign_runner import require_idle_allowed_gpu
-
-
 LAB = Path(__file__).resolve().parents[1]
 INVENTORY = LAB / "campaigns" / "v0.1-candidate" / "w00-inventory.json"
 TRAINER = LAB / "experiments" / "r3_g4_baselines.py"
@@ -29,6 +23,11 @@ SEEDS = (17, 29, 43)
 # lab package explicitly without modifying the upstream DualSPHysics tree.
 if str(LAB) not in sys.path:
     sys.path.insert(0, str(LAB))
+
+try:
+    from scripts.campaign_runner import require_idle_allowed_gpu
+except ModuleNotFoundError:  # direct invocation from this directory
+    from campaign_runner import require_idle_allowed_gpu
 
 
 def task_list() -> list[dict[str, int | str]]:
