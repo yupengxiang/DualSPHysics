@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -65,6 +66,7 @@ TOPOLOGY_HOLDOUT = {
     "F3": "perforated_proxy",
     "F6": "twin_free",
 }
+DECLARED_TOPOLOGY_FAMILIES = tuple(TOPOLOGY_HOLDOUT)
 INCIDENTAL_HOLDOUT_CASES = {
     "F1": ["F1_twin_obstacle"],
     "F2": [],
@@ -134,6 +136,13 @@ def audit_h5(path: Path, *, release_contract: bool = False) -> dict[str, Any]:
             n = valid.shape[1]
             if h5["particle_id"].shape != (n,) or h5["particle_zone"].shape != (n,):
                 result["issues"].append("identity arrays do not match valid identity axis")
+            # Open-boundary official probes may legitimately introduce a
+            # particle after t0, while the closed W11 release contract must
+            # reject resurrection.  Keep both semantics explicit.
+            if release_contract and len(time) > 1 and np.any(~valid[:-1] & valid[1:]):
+                result["issues"].append("valid lifecycle resurrects an identity after disappearance")
+            if release_contract and not np.all(valid):
+                result["issues"].append("closed release contract contains an invalid identity frame")
             for name in ("position", "velocity"):
                 if h5[name].shape != (len(time), n, 3):
                     result["issues"].append(f"{name} has shape {h5[name].shape}")
@@ -152,8 +161,6 @@ def audit_h5(path: Path, *, release_contract: bool = False) -> dict[str, Any]:
             result["initial_valid"] = int(valid[0].sum()) if len(valid) else 0
             result["final_valid"] = int(valid[-1].sum()) if len(valid) else 0
             result["duration_s"] = float(time[-1] - time[0]) if len(time) else 0.0
-            result["structural_pass"] = not result["issues"]
-
             if "material" in h5:
                 material = h5["material"]
                 missing_material = [name for name in MATERIAL_DATASETS if name not in material]
@@ -162,23 +169,45 @@ def audit_h5(path: Path, *, release_contract: bool = False) -> dict[str, Any]:
                 if not missing_material:
                     material_valid = np.asarray(material["valid"][:], dtype=bool)
                     material_position = material["position"][:]
-                    if material_position.shape[:2] != material_valid.shape:
+                    tracer_count = len(material["mass_weight"])
+                    expected_material_shape = (len(time), tracer_count)
+                    if material_valid.shape != expected_material_shape:
+                        result["issues"].append("material valid shape is incompatible with time/tracer axes")
+                    if material_position.shape != (len(time), tracer_count, 3):
                         result["issues"].append("material position/valid shape mismatch")
-                    elif not finite_under_valid(material_position, material_valid):
+                    elif material_valid.shape == expected_material_shape and not finite_under_valid(material_position, material_valid):
                         result["issues"].append("non-finite material position under valid mask")
+                    if len(material["tracer_id"]) != tracer_count or len(material["source_label"]) != tracer_count:
+                        result["issues"].append("material identity/source arrays do not match mass weights")
+                    if len(np.unique(material["tracer_id"][:])) != tracer_count:
+                        result["issues"].append("duplicate material tracer identities")
+                    if release_contract and material_valid.ndim == 2 and len(time) > 1 and np.any(~material_valid[:-1] & material_valid[1:]):
+                        result["issues"].append("material valid lifecycle resurrects a tracer")
                     weight = material["mass_weight"][:]
                     if not np.isfinite(weight).all() or np.any(weight < 0):
                         result["issues"].append("invalid material mass weights")
+                    if len(h5["mass"].shape) == 2 and h5["mass"].shape == (len(time), n) and len(valid.shape) == 2:
+                        fluid_initial = valid[0] & (np.asarray(h5["type"][0]) == 3)
+                        initial_mass = float(np.sum(h5["mass"][0][fluid_initial]))
+                        closure_error = abs(float(np.sum(weight)) - initial_mass) / max(abs(initial_mass), 1e-12)
+                        result["material_mass_closure_relative_error"] = closure_error
+                        if closure_error > 1e-4:
+                            result["issues"].append(f"material mass weights do not close initial mass (relative error {closure_error:.3g})")
                     result["material_tracers"] = int(len(weight))
                     result["material_reliable_at_end"] = int(material_valid[-1].sum()) if len(material_valid) else 0
                     result["wall_visibility"] = str(material.attrs.get("wall_visibility", "missing"))
                     result["material_acceptance_status"] = str(material.attrs.get("acceptance_status", "missing"))
                 else:
+                    result["issues"].append(f"material group missing datasets: {missing_material}")
                     result["material_tracers"] = 0
             else:
                 result["material_present"] = False
                 result["material_missing"] = list(MATERIAL_DATASETS)
                 result["material_tracers"] = 0
+            # Compute the structural result only after every optional material
+            # check.  A malformed material group must not leave an earlier
+            # optimistic ``structural_pass`` behind.
+            result["structural_pass"] = not result["issues"]
 
             if release_contract:
                 missing_attrs = [name for name in REQUIRED_ROOT_ATTRIBUTES if name not in h5.attrs]
@@ -250,11 +279,17 @@ def case_stage_rows() -> tuple[list[dict[str, Any]], dict[str, Any]]:
 def reference_status() -> dict[str, dict[str, Any]]:
     w05 = load(W05_PATH)
     f6 = load(F6_R3_PATH)
+    external = w05.get("external_validation", {})
+    f1_anchor = external.get("F1", {}).get("coarse")
+    f3_anchor = external.get("F3", {}).get("coarse")
+    f6_anchor = external.get("F6", {}).get("coarse")
+    f6_acceptance = f6.get("scientific_acceptance", "not_reported")
     return {
         "F1": {
-            "status": "partial_external_anchor",
+            "status": "partial_external_anchor" if f1_anchor else "no_external_anchor",
             "quality_pass": False,
-            "evidence": "SPHERIC Test 02 surface gauges/pressure; pressure and H1 are non-monotonic",
+            "anchor_present": bool(f1_anchor),
+            "evidence": "SPHERIC Test 02 surface gauges/pressure; pressure and H1 are non-monotonic" if f1_anchor else "W05 has no F1 external anchor",
         },
         "F2": {
             "status": "no_external_anchor",
@@ -262,9 +297,10 @@ def reference_status() -> dict[str, dict[str, Any]]:
             "evidence": "rotating-pour matrices are numerical only",
         },
         "F3": {
-            "status": "partial_external_anchor",
+            "status": "partial_external_anchor" if f3_anchor else "no_external_anchor",
             "quality_pass": False,
-            "evidence": "SPHERIC Test 10 pressure has unresolved impact timing/full-trace convergence",
+            "anchor_present": bool(f3_anchor),
+            "evidence": "SPHERIC Test 10 pressure has unresolved impact timing/full-trace convergence" if f3_anchor else "W05 has no F3 external anchor",
         },
         "F4": {
             "status": "no_external_anchor",
@@ -277,10 +313,11 @@ def reference_status() -> dict[str, dict[str, Any]]:
             "evidence": "run-up/overtopping anchor and stable envelope absent",
         },
         "F6": {
-            "status": "partial_2d_anchor_and_rejected_3d_test14",
+            "status": "partial_2d_anchor_and_rejected_3d_test14" if f6_anchor else "no_external_anchor_and_rejected_3d_test14",
             "quality_pass": False,
-            "evidence": "Fekken 2-D surrogate is partial; Test 14 report rejects current DBC proxy",
-            "test14_acceptance": f6["scientific_acceptance"],
+            "anchor_present": bool(f6_anchor),
+            "evidence": "Fekken 2-D surrogate is partial; Test 14 report rejects current DBC proxy" if f6_anchor else "no Fekken 2-D anchor; Test 14 report rejects current DBC proxy",
+            "test14_acceptance": f6_acceptance,
         },
     }
 
@@ -290,6 +327,8 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
     w07_design = load(W07_DESIGN_PATH)
     cards = design["cards"]
     w07_cards = w07_design["cards"]
+    stage_rows, _ = case_stage_rows()
+    stage_by_case = {row["case_id"]: row for row in stage_rows}
     result = {}
     for family in FAMILIES:
         # F4/F5 currently have no declared topology holdout vocabulary. Keep
@@ -316,6 +355,25 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
         w07_family = [card for card in w07_cards if card["family"] == family]
         w08_holdout = [card for card in w08_family if card["physics"].get(key) == holdout]
         w07_holdout = [card for card in w07_family if card["physics"].get(key) == holdout]
+        links = []
+        for card in w08_holdout:
+            # Only explicit physical case identifiers are eligible for a
+            # link.  Card/series IDs are design identities and must not
+            # accidentally collide with an observed registry case.
+            identifiers = [card.get("case_id"), card.get("physical_case_id")]
+            match = next((stage_by_case[value] for value in identifiers if value in stage_by_case), None)
+            if match is not None:
+                links.append({
+                    "card_id": card.get("card_id"), "case_id": match["case_id"],
+                    "execution_unit_id": card.get("execution_unit_id"),
+                    "execution_status": card.get("execution_status"), "split": card.get("split"),
+                    "materialized": bool(match["local_hdf5_available"]),
+                    "run": bool(match["run"]), "trajectory_structural": bool(match["trajectory_structural"]),
+                })
+        unique_links = {(link["execution_unit_id"] or link["card_id"]): link for link in links}
+        linked_materialized = {link["case_id"] for link in unique_links.values() if link["materialized"]}
+        linked_run = {link["case_id"] for link in unique_links.values() if link["run"]}
+        gate_links = list(unique_links.values())
         result[family] = {
             "declared_holdout": holdout,
             "topology_field": key,
@@ -324,15 +382,130 @@ def w08_topology_audit() -> dict[str, dict[str, Any]]:
             "w08_holdout_splits": sorted({card["split"] for card in w08_holdout}),
             "w08_execution_statuses": sorted({card["execution_status"] for card in w08_holdout}),
             "incidental_matching_registry_cases": INCIDENTAL_HOLDOUT_CASES[family],
-            "linked_materialized_cases": 0,
-            "linked_run_cases": 0,
-            "holdout_gate_pass": False,
+            "linked_materialized_cases": len(linked_materialized),
+            "linked_run_cases": len(linked_run),
+            "case_links": links,
+            "unique_execution_links": len(gate_links),
+            "holdout_gate_pass": bool(w08_holdout) and len(gate_links) == len({card.get("execution_unit_id") or card.get("card_id") for card in w08_holdout}) and all(
+                link["execution_status"] == "completed" and link["split"] == "topology_extrapolation"
+                and link["materialized"] and link["run"] and link["trajectory_structural"] for link in gate_links
+            ),
             "decision": (
-                "design_only_not_materialized"
-                if not w08_holdout else "not_executed"
+                "not_declared_for_family" if not w08_holdout and family not in DECLARED_TOPOLOGY_FAMILIES else
+                "design_only_not_materialized" if not w08_holdout else
+                "completed_and_structurally_linked" if bool(gate_links) and all(
+                    link["execution_status"] == "completed" and link["split"] == "topology_extrapolation"
+                    and link["materialized"] and link["run"] and link["trajectory_structural"] for link in gate_links
+                ) else "linked_but_not_accepted"
             ),
         }
     return result
+
+
+def w08_execution_audit() -> dict[str, Any]:
+    """Link every W08 card to observed registry evidence when possible."""
+
+    cards = load(W08_DESIGN_PATH)["cards"]
+    rows, _ = case_stage_rows()
+    stage_by_case = {row["case_id"]: row for row in rows}
+    links = []
+    for card in cards:
+        identifiers = [card.get("case_id"), card.get("physical_case_id")]
+        match = next((stage_by_case[value] for value in identifiers if value in stage_by_case), None)
+        links.append({
+            "card_id": card.get("card_id"), "physical_case_id": card.get("physical_case_id"),
+            "execution_unit_id": card.get("execution_unit_id"), "case_id": match["case_id"] if match else None,
+            "execution_status": card.get("execution_status"), "split": card.get("split"),
+            "executable": bool(match and match["executable"]), "run": bool(match and match["run"]),
+            "trajectory_structural": bool(match and match["trajectory_structural"]),
+            "reference_quality": bool(match and match["reference_quality_pass"]),
+            "training_eval": bool(match and match["baseline_evaluated"]),
+        })
+    unique_links = {}
+    for link in links:
+        unique_links.setdefault(link["execution_unit_id"] or link["card_id"], link)
+    return {
+        "card_count": len(cards),
+        "linked_card_count": sum(link["case_id"] is not None for link in links),
+        "unique_execution_units": len(unique_links),
+        "executable_definitions": sum(link["executable"] for link in unique_links.values()),
+        "run_cases": sum(link["run"] and link["execution_status"] == "completed" for link in unique_links.values()),
+        "trajectory_structural_cases": sum(link["trajectory_structural"] for link in unique_links.values()),
+        "reference_quality_cases": sum(link["reference_quality"] for link in unique_links.values()),
+        "training_eval_cases": sum(link["training_eval"] for link in unique_links.values()),
+        "links": links,
+    }
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def release_integrity_audit() -> dict[str, Any]:
+    """Cross-check W11 selection, release manifest and published bytes."""
+
+    selection = load(W11_SELECTION_PATH)
+    manifest = load(W11_MANIFEST_PATH)
+    selection_entries = selection.get("cases", [])
+    manifest_entries = manifest.get("cases", [])
+    selection_ids_raw = [entry.get("case_id") for entry in selection_entries]
+    manifest_ids_raw = [entry.get("case_id") for entry in manifest_entries]
+    duplicate_selection_ids = sorted({case_id for case_id in selection_ids_raw if selection_ids_raw.count(case_id) > 1})
+    duplicate_manifest_ids = sorted({case_id for case_id in manifest_ids_raw if manifest_ids_raw.count(case_id) > 1})
+    selected = {entry["case_id"]: entry for entry in selection_entries}
+    published = {entry["case_id"]: entry for entry in manifest_entries}
+    missing_from_release = sorted(set(selected) - set(published))
+    unexpected_in_release = sorted(set(published) - set(selected))
+    field_mismatches = []
+    checksum_failures = []
+    contract_failures = []
+    for case_id in sorted(set(selected) & set(published)):
+        source = selected[case_id]
+        entry = published[case_id]
+        for field in ("family", "split", "lineage_group_id"):
+            if source.get(field) != entry.get(field):
+                field_mismatches.append({"case_id": case_id, "field": field, "selection": source.get(field), "manifest": entry.get(field)})
+        path = RELEASE / entry["hdf5"]
+        if not path.is_file() or path.stat().st_size != int(entry.get("bytes", -1)) or _sha256(path) != entry.get("sha256"):
+            checksum_failures.append(case_id)
+        audit = audit_h5(path, release_contract=True)
+        if not audit.get("release_contract_pass"):
+            contract_failures.append({"case_id": case_id, "issues": audit.get("issues", [])})
+        if path.is_file():
+            with h5py.File(path, "r") as h5:
+                def attr_text(name: str) -> str | None:
+                    value = h5.attrs.get(name)
+                    if isinstance(value, bytes):
+                        return value.decode()
+                    return str(value) if value is not None else None
+                expected_attrs = {
+                    "case_id": case_id, "family": entry.get("family"),
+                    "schema_version": str(manifest.get("schema_version")),
+                    "time_units": "s", "length_units": "m", "mass_units": "kg",
+                }
+                mismatches = {name: {"expected": expected, "actual": attr_text(name)} for name, expected in expected_attrs.items() if attr_text(name) != str(expected)}
+                if mismatches:
+                    contract_failures.append({"case_id": case_id, "attribute_mismatches": mismatches})
+    return {
+        "selection_release_id_match": selection.get("release_id") == manifest.get("release_id"),
+        "formal_release_is_false": selection.get("formal_release") is False and manifest.get("formal_release") is False,
+        "selection_case_count": len(selected), "manifest_case_count": len(published),
+        "duplicate_selection_ids": duplicate_selection_ids, "duplicate_manifest_ids": duplicate_manifest_ids,
+        "missing_from_release": missing_from_release, "unexpected_in_release": unexpected_in_release,
+        "field_mismatches": field_mismatches, "checksum_failures": checksum_failures,
+        "release_contract_failures": contract_failures,
+        "pass": (
+            selection.get("release_id") == manifest.get("release_id")
+            and selection.get("formal_release") is False and manifest.get("formal_release") is False
+            and not missing_from_release and not unexpected_in_release and not field_mismatches
+            and not duplicate_selection_ids and not duplicate_manifest_ids
+            and not checksum_failures and not contract_failures
+        ),
+    }
 
 
 def pilot_task_audit() -> dict[str, Any]:
@@ -346,11 +519,15 @@ def pilot_task_audit() -> dict[str, Any]:
         material = h5.get("material_present", False) and not h5.get("material_missing")
         t1 = h5.get("release_contract_pass", False)
         t2_candidate = material
-        t2_complete = material and h5.get("wall_visibility") not in ("False", "false", "not supplied in development pilot", "missing")
-        # No current manifest record carries a destination specification or an
-        # event-history group. Keep these checks explicit instead of treating
-        # source labels as destination truth.
-        t2_complete = t2_complete and "destination_spec" in entry and "destination_spec" in h5
+        destination_spec = entry.get("destination_spec") or (entry.get("material") or {}).get("destination_spec")
+        sidecar = entry.get("boundary_sidecar") or (entry.get("geometry") or {}).get("boundary_sidecar")
+        sidecar_path = (RELEASE / sidecar) if isinstance(sidecar, str) else None
+        wall_visible = h5.get("wall_visibility") not in ("False", "false", "not supplied in development pilot", "missing")
+        # A complete material task needs both a destination definition and a
+        # real wall/visibility sidecar. Source labels alone are not destination
+        # truth, and a root-HDF5 key named ``destination_spec`` is not part of
+        # this contract.
+        t2_complete = bool(material and wall_visible and destination_spec and sidecar_path and sidecar_path.is_file())
         t3 = bool(entry.get("observable_reference")) and bool(entry.get("quality", {}).get("validation_scope"))
         t4 = bool(entry.get("terminal_destination")) and bool(entry.get("event_history"))
         if t1:
@@ -366,12 +543,18 @@ def pilot_task_audit() -> dict[str, Any]:
             "release_contract": t1, "material_candidate": t2_candidate,
             "material_task_complete": t2_complete, "interaction_task_complete": t3,
             "outcome_task_complete": t4, "material_wall_visibility": h5.get("wall_visibility"),
+            "destination_spec_present": bool(destination_spec),
+            "boundary_sidecar_present": bool(sidecar_path and sidecar_path.is_file()),
             "material_acceptance_status": h5.get("material_acceptance_status"),
             "hdf5_issues": h5.get("issues", []),
         })
-    baseline_results = [load(path) for path in sorted(W12_RESULTS_DIR.glob("*.json"))]
+    baseline_paths = sorted(W12_RESULTS_DIR.glob("*.json"))
+    baseline_results = [load(path) for path in baseline_paths]
     baseline_routes = sorted({result["route"] for result in baseline_results})
     baseline_seeds = sorted({int(result["seed"]) for result in baseline_results})
+    combinations = [(result.get("route"), int(result.get("seed"))) for result in baseline_results]
+    expected_combinations = [(route, seed) for route in ("deepset_context", "particle_mlp") for seed in (17, 29, 43)]
+    case_sets = [tuple(sorted(result.get("test_rollout", {}))) for result in baseline_results]
     return {
         "pilot_manifest_case_count": len(manifest["cases"]),
         "pilot_split_counts": dict(Counter(entry["split"] for entry in manifest["cases"])),
@@ -379,12 +562,22 @@ def pilot_task_audit() -> dict[str, Any]:
         "task_ready_counts": {task: len(cases) for task, cases in task_cases.items()},
         "material_candidate_case_count": sum(row["material_candidate"] for row in release_case_rows),
         "release_case_rows": release_case_rows,
+        "release_integrity": release_integrity_audit(),
         "learned_baseline": {
             "result_files": len(baseline_results),
             "routes": baseline_routes,
             "seeds": baseline_seeds,
             "case_ids": sorted({case_id for result in baseline_results for case_id in result.get("test_rollout", {})}),
-            "three_seed_gate": baseline_routes == ["deepset_context", "particle_mlp"] and baseline_seeds == [17, 29, 43],
+            "route_seed_combinations": [list(item) for item in sorted(combinations)],
+            "nonempty_test_case_sets": all(case_sets),
+            "consistent_test_case_sets": len(set(case_sets)) <= 1,
+            "three_seed_gate": (
+                len(baseline_results) == len(expected_combinations)
+                and sorted(combinations) == sorted(expected_combinations)
+                and len(set(combinations)) == len(combinations)
+                and all(case_sets)
+                and len(set(case_sets)) == 1
+            ),
         },
     }
 
@@ -427,6 +620,7 @@ def build_report() -> dict[str, Any]:
     registry = load(REGISTRY_PATH)["cases"]
     w07 = load(W07_PATH)
     w06 = load(CAMPAIGN / "w06-rotating-pour.json")
+    retained_families = tuple(w07.get("screening_decision", {}).get("retain", FAMILIES))
     family_summary = {}
     for family in FAMILIES:
         family_rows = [row for row in rows if row["family"] == family]
@@ -442,6 +636,9 @@ def build_report() -> dict[str, Any]:
         baseline_ids = [case_id for case_id in pilot["learned_baseline"]["case_ids"]
                         if case_id.startswith(family) or (family == "F2" and case_id.startswith("W06"))]
         disposition = w07["observed_family_map"][family]["disposition"]
+        blockers = ["reference-quality gate is not passed"]
+        if family in DECLARED_TOPOLOGY_FAMILIES:
+            blockers.insert(0, "topology holdout is not an executed W08 split")
         family_summary[family] = {
             "declared": len(family_rows),
             "executable": sum(row["executable"] for row in family_rows),
@@ -458,10 +655,7 @@ def build_report() -> dict[str, Any]:
             "at_least_three_backgrounds_gate": background_count >= 3,
             "w07_screening_disposition": disposition,
             "development_tranche_ready": False,
-            "development_tranche_blockers": [
-                "topology holdout is not an executed W08 split",
-                "reference-quality gate is not passed",
-            ],
+            "development_tranche_blockers": blockers,
         }
     registry_counts = {
         "declared": len(rows),
@@ -472,11 +666,21 @@ def build_report() -> dict[str, Any]:
         "quality_gate_expected_failure_or_rejected": sum(not row["quality_gate_pass"] for row in rows),
         "reference_quality_pass_families": sum(value["quality_pass"] for value in references.values()),
         "development_pilot_manifest": pilot["pilot_manifest_case_count"],
-        "learned_baseline_evaluated_cases": len(pilot["learned_baseline"]["case_ids"]),
+        # Keep the registry denominator separate from the W11 pilot denominator:
+        # W06_standard_fast_center is a pilot case but is not in the 30-case
+        # candidate registry.
+        "learned_baseline_evaluated_cases": sum(row["baseline_evaluated"] for row in rows),
+        "learned_baseline_evaluated_pilot_cases": len(pilot["learned_baseline"]["case_ids"]),
     }
     w08_design = load(W08_DESIGN_PATH)
     w07_design = load(W07_DESIGN_PATH)
     w08_splits = Counter(card["split"] for card in w08_design["cards"])
+    w08_execution = w08_execution_audit()
+    w08_decision = (
+        "design_only_not_run" if w08_execution["run_cases"] == 0 else
+        "partially_executed" if w08_execution["run_cases"] < w08_execution["unique_execution_units"] else
+        "executed_requires_scientific_acceptance"
+    )
     return {
         "schema_version": 1,
         "scope": "R3-G3 declared-to-training/evaluation coverage and topology holdout audit",
@@ -499,12 +703,13 @@ def build_report() -> dict[str, Any]:
             "unique_execution_units": load(W08_PATH)["audit"]["unique_execution_units"],
             "execution_status_counts": dict(Counter(card["execution_status"] for card in w08_design["cards"])),
             "split_counts": dict(w08_splits),
-            "executable_definitions": 0,
-            "run_cases": 0,
-            "trajectory_structural_cases": 0,
-            "reference_quality_cases": 0,
-            "training_eval_cases": 0,
-            "decision": "design_only_not_run",
+            "linked_card_count": w08_execution["linked_card_count"],
+            "executable_definitions": w08_execution["executable_definitions"],
+            "run_cases": w08_execution["run_cases"],
+            "trajectory_structural_cases": w08_execution["trajectory_structural_cases"],
+            "reference_quality_cases": w08_execution["reference_quality_cases"],
+            "training_eval_cases": w08_execution["training_eval_cases"],
+            "decision": w08_decision,
         },
         "topology_holdouts": topology,
         "w07_topology_design_only": {
@@ -518,11 +723,19 @@ def build_report() -> dict[str, Any]:
             "all_six_families_have_at_least_three_declared_or_executed_probe_backgrounds": all(
                 value["at_least_three_backgrounds_gate"] for value in family_summary.values()
             ),
-            "all_four_topology_holdouts_materialized_and_linked": all(
-                value["holdout_gate_pass"] for value in topology.values()
+            "declared_topology_families": list(DECLARED_TOPOLOGY_FAMILIES),
+            "all_declared_topology_holdouts_materialized_and_linked": all(
+                topology[family]["holdout_gate_pass"] for family in DECLARED_TOPOLOGY_FAMILIES
             ),
+            # Backward-compatible alias retained for consumers of the first
+            # G3 report; its denominator is now explicitly the four declared
+            # holdout families rather than all six families.
+            "all_four_topology_holdouts_materialized_and_linked": all(
+                topology[family]["holdout_gate_pass"] for family in DECLARED_TOPOLOGY_FAMILIES
+            ),
+            "retained_families": list(retained_families),
             "all_retained_families_reference_quality_pass": all(
-                references[family]["quality_pass"] for family in FAMILIES
+                references[family]["quality_pass"] for family in retained_families
             ),
             "three_seed_learned_baseline_gate": pilot["learned_baseline"]["three_seed_gate"],
             "any_family_formal_ready": False,
@@ -558,13 +771,13 @@ def write_conclusion(report: dict[str, Any]) -> None:
 | F5 | {family['F5']['declared']} | {family['F5']['executable']} | {family['F5']['run']} | {family['F5']['trajectory_structural']} | {family['F5']['quality_gate_pass']} | {family['F5']['reference_evidence_status']} | {family['F5']['development_pilot_t1_cases']} | {family['F5']['learned_baseline_evaluated_cases']} |
 | F6 | {family['F6']['declared']} | {family['F6']['executable']} | {family['F6']['run']} | {family['F6']['trajectory_structural']} | {family['F6']['quality_gate_pass']} | {family['F6']['reference_evidence_status']} | {family['F6']['development_pilot_t1_cases']} | {family['F6']['learned_baseline_evaluated_cases']} |
 
-W08 的 204 张卡和 196 个唯一 execution unit 全部仍是 `planned_not_run`；它们没有定义、solver attempt、轨迹或训练/评测产物。W07 虽然为每族写出了 topology 候选卡（每个 holdout 6 或 8 张），这些也只是设计卡，不能算生成数据。
+W08 的 204 张卡和 196 个唯一 execution unit 全部仍是 `planned_not_run`；当前没有卡片与 registry、solver attempt、轨迹或训练/评测产物建立链接。W07 对 F1/F2/F3/F6 写出了 topology 候选卡（每个 holdout 6 或 8 张），这些也只是设计卡，不能算生成数据；F4/F5 尚未声明 topology holdout。
 
 四个 topology holdout 的实际审计结果都是 `holdout_gate_pass=false`：F1 的 twin obstacle 和 F6 的 twin floaters 只有未链接的旧探针，F2 的 spout、F3 的 perforated proxy 连这样的偶然案例都没有。当前 W08 卡的拓扑字段全部保持 baseline（single/straight/center/single_free），没有 `topology_extrapolation` split。
 
 ## 训练/评测覆盖
 
-W11 development pilot 为 13 例（train 6、validation 3、test 4）。T1 粒子 rollout 所需字段在 13 例都有；T2 只有 12 例具备候选 material 组，但仍缺 wall-aware destination specification，不能作为完整材料输运任务；T3 的外部 observable reference 和 T4 的 terminal destination/event history 均为 0 例。W12 真实 autonomous baseline 有两个路线、三种子，但实际测试案例只有 3 个，不能代表 13 例 pilot 或六个家族。
+W11 development pilot 为 13 例（train 6、validation 3、test 4）。T1 粒子 rollout 所需字段在 13 例都有；T2 只有 12 例具备候选 material 组，但仍缺 wall-aware destination specification，不能作为完整材料输运任务；T3 的外部 observable reference 和 T4 的 terminal destination/event history 均为 0 例。selection 与 release 的 ID、split、谱系、校验和及 root-attribute 交叉审计单独记录。W12 真实 autonomous baseline 有两个路线、三种子，但实际测试案例只有 3 个（其中 2 个在 30-case registry 内），不能代表 13 例 pilot 或六个家族。
 
 ## 判定和下一步
 

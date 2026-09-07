@@ -15,13 +15,13 @@
 | F5 | 6 | 6 | 6 | 6 | 5 | no_external_anchor | 0 | 0 |
 | F6 | 6 | 6 | 6 | 6 | 6 | partial_2d_anchor_and_rejected_3d_test14 | 1 | 0 |
 
-W08 的 204 张卡和 196 个唯一 execution unit 全部仍是 `planned_not_run`；它们没有定义、solver attempt、轨迹或训练/评测产物。W07 虽然为每族写出了 topology 候选卡（每个 holdout 6 或 8 张），这些也只是设计卡，不能算生成数据。
+W08 的 204 张卡和 196 个唯一 execution unit 全部仍是 `planned_not_run`；当前没有卡片与 registry、solver attempt、轨迹或训练/评测产物建立链接。W07 对 F1/F2/F3/F6 写出了 topology 候选卡（每个 holdout 6 或 8 张），这些也只是设计卡，不能算生成数据；F4/F5 尚未声明 topology holdout。
 
 四个 topology holdout 的实际审计结果都是 `holdout_gate_pass=false`：F1 的 twin obstacle 和 F6 的 twin floaters 只有未链接的旧探针，F2 的 spout、F3 的 perforated proxy 连这样的偶然案例都没有。当前 W08 卡的拓扑字段全部保持 baseline（single/straight/center/single_free），没有 `topology_extrapolation` split。
 
 ## 训练/评测覆盖
 
-W11 development pilot 为 13 例（train 6、validation 3、test 4）。T1 粒子 rollout 所需字段在 13 例都有；T2 只有 12 例具备候选 material 组，但仍缺 wall-aware destination specification，不能作为完整材料输运任务；T3 的外部 observable reference 和 T4 的 terminal destination/event history 均为 0 例。W12 真实 autonomous baseline 有两个路线、三种子，但实际测试案例只有 3 个，不能代表 13 例 pilot 或六个家族。
+W11 development pilot 为 13 例（train 6、validation 3、test 4）。T1 粒子 rollout 所需字段在 13 例都有；T2 只有 12 例具备候选 material 组，但仍缺 wall-aware destination specification，不能作为完整材料输运任务；T3 的外部 observable reference 和 T4 的 terminal destination/event history 均为 0 例。selection 与 release 的 ID、split、谱系、校验和及 root-attribute 交叉审计单独记录。W12 真实 autonomous baseline 有两个路线、三种子，但实际测试案例只有 3 个（其中 2 个在 30-case registry 内），不能代表 13 例 pilot 或六个家族。
 
 ## 判定和下一步
 
