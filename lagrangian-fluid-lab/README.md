@@ -47,6 +47,10 @@ the exact solver configuration and executable.
 - All 30 probes completed at solver level on GPUs 4--7.
 - BI4 output converted through the official `PartVTK` utility and normalized to
   padded HDF5 trajectories with validity masks.
+- The R3 F4 O4 impinging-jet observation path was exercised at three resolutions
+  with fixed-point pressure/velocity/Kcorr, two-dimensional wall force, open-
+  boundary box flux, and solver lifecycle bookkeeping. These are candidate
+  diagnostics, not external physical labels.
 - Structural and semantic quality gates passed 29 probes and rejected one
   deliberately retained coarse-resolution failure.
 - W00--W12 then exercised protected provenance, identity/reference-frame

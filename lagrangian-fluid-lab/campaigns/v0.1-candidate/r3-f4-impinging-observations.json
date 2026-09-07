@@ -1,0 +1,3410 @@
+{
+  "schema_version": 1,
+  "scope": "R3 F4 official impinging-jet observation-path probe",
+  "execution_status": "complete",
+  "acceptance_status": "candidate_observations_only",
+  "validation_scope": [
+    "fixed-point impact pressure/velocity interpolation",
+    "two-dimensional wall-force postprocessing",
+    "open-boundary inlet/outlet particle-flow bookkeeping",
+    "three-resolution cadence smoke matrix"
+  ],
+  "formal_release_authorized": false,
+  "upstream_source": {
+    "case_definition": "vendor/official/DualSPHysics_v5.4/examples/inletoutlet/08_ImpingingJet/CaseJet2D_Def.xml",
+    "case_definition_sha256": "01976a485a9f2f6374dff476c6984f114576e5deec8bff7841f6be36391430bf",
+    "solver_binary_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+    "gencase_binary_sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226"
+  },
+  "observation_contract": {
+    "dimension": "2D",
+    "entry_velocity_m_per_s": 20.0,
+    "wall_force_units": "N/m",
+    "flow_units": "per-depth particle-volume/flow; FlowTool header may be unspecified for 2D",
+    "pressure_units": "Pa",
+    "particle_output_cadence_s": 0.0005,
+    "requested_time_end_s": 0.03,
+    "fixed_point_count": 11,
+    "open_boundary_lifecycle_required": true
+  },
+  "resolution_policy": {
+    "candidate_ladder_m": {
+      "coarse": 0.0015,
+      "medium": 0.001,
+      "fine": 0.00075
+    },
+    "fixed_physics_required": true,
+    "no_admission_threshold_declared": true
+  },
+  "gpu_policy": {
+    "allowed_gpu_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "gpu_uuids": {
+      "4": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+      "5": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+      "6": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+      "7": "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51"
+    }
+  },
+  "prepared_cases": [
+    {
+      "label": "coarse",
+      "dp_m": 0.0015,
+      "status": "prepared",
+      "returncode": 0,
+      "elapsed_seconds": 0.01,
+      "fluid_particles": 124,
+      "total_particles": 1236,
+      "case_prefix": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/coarse/generated/F4_impinging_jet_coarse",
+      "generated_xml": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/coarse/generated/F4_impinging_jet_coarse.xml",
+      "definition": {
+        "source_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/coarse/generated/CaseJet2D_Def.xml",
+        "source_sha256": "01976a485a9f2f6374dff476c6984f114576e5deec8bff7841f6be36391430bf",
+        "configured_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/coarse/generated/CaseJet2D_coarse_Def.xml",
+        "configured_sha256": "1513d6020a0f519d312d4f3aef8a3f8b27239838cdfaa68f296ffabf79285bc3",
+        "time_max_s": 0.03,
+        "particle_output_cadence_s": 0.0005,
+        "changed_parameters": {
+          "TimeMax": "0.03",
+          "TimeOut": "0.0005"
+        },
+        "dimension": "2D",
+        "entry_velocity_m_per_s": 20.0,
+        "boundary_mk": 10
+      },
+      "log": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/coarse/generated/gencase.log"
+    },
+    {
+      "label": "medium",
+      "dp_m": 0.001,
+      "status": "prepared",
+      "returncode": 0,
+      "elapsed_seconds": 0.0119,
+      "fluid_particles": 246,
+      "total_particles": 1894,
+      "case_prefix": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/medium/generated/F4_impinging_jet_medium",
+      "generated_xml": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/medium/generated/F4_impinging_jet_medium.xml",
+      "definition": {
+        "source_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/medium/generated/CaseJet2D_Def.xml",
+        "source_sha256": "01976a485a9f2f6374dff476c6984f114576e5deec8bff7841f6be36391430bf",
+        "configured_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/medium/generated/CaseJet2D_medium_Def.xml",
+        "configured_sha256": "1513d6020a0f519d312d4f3aef8a3f8b27239838cdfaa68f296ffabf79285bc3",
+        "time_max_s": 0.03,
+        "particle_output_cadence_s": 0.0005,
+        "changed_parameters": {
+          "TimeMax": "0.03",
+          "TimeOut": "0.0005"
+        },
+        "dimension": "2D",
+        "entry_velocity_m_per_s": 20.0,
+        "boundary_mk": 10
+      },
+      "log": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/medium/generated/gencase.log"
+    },
+    {
+      "label": "fine",
+      "dp_m": 0.00075,
+      "status": "prepared",
+      "returncode": 0,
+      "elapsed_seconds": 0.01,
+      "fluid_particles": 408,
+      "total_particles": 2584,
+      "case_prefix": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/fine/generated/F4_impinging_jet_fine",
+      "generated_xml": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/fine/generated/F4_impinging_jet_fine.xml",
+      "definition": {
+        "source_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/fine/generated/CaseJet2D_Def.xml",
+        "source_sha256": "01976a485a9f2f6374dff476c6984f114576e5deec8bff7841f6be36391430bf",
+        "configured_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/fine/generated/CaseJet2D_fine_Def.xml",
+        "configured_sha256": "1513d6020a0f519d312d4f3aef8a3f8b27239838cdfaa68f296ffabf79285bc3",
+        "time_max_s": 0.03,
+        "particle_output_cadence_s": 0.0005,
+        "changed_parameters": {
+          "TimeMax": "0.03",
+          "TimeOut": "0.0005"
+        },
+        "dimension": "2D",
+        "entry_velocity_m_per_s": 20.0,
+        "boundary_mk": 10
+      },
+      "log": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/fine/generated/gencase.log"
+    }
+  ],
+  "runs": [
+    {
+      "label": "coarse",
+      "dp_m": 0.0015,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 22.4162,
+      "fluid_particles": 124,
+      "total_particles": 1236,
+      "case_prefix": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/coarse/generated/F4_impinging_jet_coarse",
+      "generated_xml": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/coarse/generated/F4_impinging_jet_coarse.xml",
+      "definition": {
+        "source_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/coarse/generated/CaseJet2D_Def.xml",
+        "source_sha256": "01976a485a9f2f6374dff476c6984f114576e5deec8bff7841f6be36391430bf",
+        "configured_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/coarse/generated/CaseJet2D_coarse_Def.xml",
+        "configured_sha256": "1513d6020a0f519d312d4f3aef8a3f8b27239838cdfaa68f296ffabf79285bc3",
+        "time_max_s": 0.03,
+        "particle_output_cadence_s": 0.0005,
+        "changed_parameters": {
+          "TimeMax": "0.03",
+          "TimeOut": "0.0005"
+        },
+        "dimension": "2D",
+        "entry_velocity_m_per_s": 20.0,
+        "boundary_mk": 10
+      },
+      "log": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/solver.stdout.log",
+      "gpu": 4,
+      "output_dir": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005",
+      "frames": 61,
+      "excluded_particles": 11,
+      "output_bytes": 9290630,
+      "command": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+        "-gpu:4",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/coarse/generated/F4_impinging_jet_coarse",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005",
+        "-tmax:0.03",
+        "-tout:0.0005"
+      ],
+      "observations": {
+        "status": "completed",
+        "data_dir": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/data",
+        "tools": {
+          "measure": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/MeasureTool_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/data",
+              "-filexml",
+              "AUTO",
+              "-pointsdef:pt=-0.12:0:0.001,pt=-0.08:0:0.001,pt=-0.04:0:0.001,pt=0:0:0.001,pt=0.04:0:0.001,pt=0.08:0:0.001,pt=0.12:0:0.001,pt=0:0:0.03,pt=0:0:0.06,pt=0:0:0.09,pt=0:0:0.11",
+              "-onlytype:-all,+fluid",
+              "-vars:-all,+vel,+press,+rhop,+kcorr",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/observations/fixed_points"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.0333,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/observations/measure.stdout.log",
+            "status": "completed",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          },
+          "compute_forces": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/data",
+              "-filexml",
+              "AUTO",
+              "-onlymk:10",
+              "-viscoauto",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/observations/wall_force"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.0388,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/observations/forces.stdout.log",
+            "status": "completed",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          },
+          "flow": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/FlowTool_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/data",
+              "-fileboxes",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/observations/flow_boxes.xml",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/observations/flow"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.031,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/observations/flow.stdout.log",
+            "status": "completed",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          }
+        },
+        "fixed_points": {
+          "points": [
+            {
+              "name": "impact_00",
+              "position_m": [
+                -0.12,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_01",
+              "position_m": [
+                -0.08,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_02",
+              "position_m": [
+                -0.04,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_03",
+              "position_m": [
+                0.0,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_04",
+              "position_m": [
+                0.04,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_05",
+              "position_m": [
+                0.08,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_06",
+              "position_m": [
+                0.12,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "centerline_00",
+              "position_m": [
+                0.0,
+                0.0,
+                0.03
+              ]
+            },
+            {
+              "name": "centerline_01",
+              "position_m": [
+                0.0,
+                0.0,
+                0.06
+              ]
+            },
+            {
+              "name": "centerline_02",
+              "position_m": [
+                0.0,
+                0.0,
+                0.09
+              ]
+            },
+            {
+              "name": "centerline_03",
+              "position_m": [
+                0.0,
+                0.0,
+                0.11
+              ]
+            }
+          ],
+          "pressure": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/observations/fixed_points_Press.csv",
+            "exists": true,
+            "rows": 61,
+            "columns": [
+              "impact_00",
+              "impact_01",
+              "impact_02",
+              "impact_03",
+              "impact_04",
+              "impact_05",
+              "impact_06",
+              "centerline_00",
+              "centerline_01",
+              "centerline_02",
+              "centerline_03"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.0300003,
+            "dt_median_s": 0.0004999100000000005,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "impact_00",
+                "peak_abs": 28033.2,
+                "peak_signed": -28033.2,
+                "peak_time_s": 0.0155003
+              },
+              {
+                "name": "impact_01",
+                "peak_abs": 34494.4,
+                "peak_signed": -34494.4,
+                "peak_time_s": 0.0110003
+              },
+              {
+                "name": "impact_02",
+                "peak_abs": 103639.0,
+                "peak_signed": 103639.0,
+                "peak_time_s": 0.0205008
+              },
+              {
+                "name": "impact_03",
+                "peak_abs": 281051.0,
+                "peak_signed": 281051.0,
+                "peak_time_s": 0.0175001
+              },
+              {
+                "name": "impact_04",
+                "peak_abs": 119332.0,
+                "peak_signed": 119332.0,
+                "peak_time_s": 0.0295005
+              },
+              {
+                "name": "impact_05",
+                "peak_abs": 23552.9,
+                "peak_signed": -23552.9,
+                "peak_time_s": 0.00900002
+              },
+              {
+                "name": "impact_06",
+                "peak_abs": 13124.3,
+                "peak_signed": 13124.3,
+                "peak_time_s": 0.0135001
+              },
+              {
+                "name": "centerline_00",
+                "peak_abs": 672071.0,
+                "peak_signed": 672071.0,
+                "peak_time_s": 0.0060002
+              },
+              {
+                "name": "centerline_01",
+                "peak_abs": 330302.0,
+                "peak_signed": 330302.0,
+                "peak_time_s": 0.00650012
+              },
+              {
+                "name": "centerline_02",
+                "peak_abs": 721721.0,
+                "peak_signed": -721721.0,
+                "peak_time_s": 0.00650012
+              },
+              {
+                "name": "centerline_03",
+                "peak_abs": 471542.0,
+                "peak_signed": -471542.0,
+                "peak_time_s": 0.00700039
+              }
+            ]
+          },
+          "velocity": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/observations/fixed_points_Vel.csv",
+            "exists": true,
+            "rows": 61,
+            "columns": [
+              "impact_00",
+              "impact_01",
+              "impact_02",
+              "impact_03",
+              "impact_04",
+              "impact_05",
+              "impact_06",
+              "centerline_00",
+              "centerline_01",
+              "centerline_02",
+              "centerline_03"
+            ],
+            "components_per_point": 3,
+            "time_start_s": 0.0,
+            "time_end_s": 0.0300003,
+            "dt_median_s": 0.0004999100000000005,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "impact_00",
+                "peak_speed": 22.098358512433112,
+                "peak_time_s": 0.0125003
+              },
+              {
+                "name": "impact_01",
+                "peak_speed": 26.2523037150891,
+                "peak_time_s": 0.00900002
+              },
+              {
+                "name": "impact_02",
+                "peak_speed": 22.550531569740347,
+                "peak_time_s": 0.00800005
+              },
+              {
+                "name": "impact_03",
+                "peak_speed": 2.9394058111375165,
+                "peak_time_s": 0.00700039
+              },
+              {
+                "name": "impact_04",
+                "peak_speed": 23.374960364334505,
+                "peak_time_s": 0.00800005
+              },
+              {
+                "name": "impact_05",
+                "peak_speed": 26.64740705835716,
+                "peak_time_s": 0.00900002
+              },
+              {
+                "name": "impact_06",
+                "peak_speed": 20.561207792747528,
+                "peak_time_s": 0.0155003
+              },
+              {
+                "name": "centerline_00",
+                "peak_speed": 20.042000000097534,
+                "peak_time_s": 0.00550063
+              },
+              {
+                "name": "centerline_01",
+                "peak_speed": 20.320200085304783,
+                "peak_time_s": 0.00950035
+              },
+              {
+                "name": "centerline_02",
+                "peak_speed": 22.072200000001022,
+                "peak_time_s": 0.00650012
+              },
+              {
+                "name": "centerline_03",
+                "peak_speed": 20.861400000168565,
+                "peak_time_s": 0.00700039
+              }
+            ]
+          },
+          "density": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/observations/fixed_points_Rhop.csv",
+            "exists": true,
+            "rows": 61,
+            "columns": [
+              "impact_00",
+              "impact_01",
+              "impact_02",
+              "impact_03",
+              "impact_04",
+              "impact_05",
+              "impact_06",
+              "centerline_00",
+              "centerline_01",
+              "centerline_02",
+              "centerline_03"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.0300003,
+            "dt_median_s": 0.0004999100000000005,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "impact_00",
+                "peak_abs": 1000.16,
+                "peak_signed": 1000.16,
+                "peak_time_s": 0.0280006
+              },
+              {
+                "name": "impact_01",
+                "peak_abs": 1000.32,
+                "peak_signed": 1000.32,
+                "peak_time_s": 0.0155003
+              },
+              {
+                "name": "impact_02",
+                "peak_abs": 1001.95,
+                "peak_signed": 1001.95,
+                "peak_time_s": 0.0205008
+              },
+              {
+                "name": "impact_03",
+                "peak_abs": 1005.23,
+                "peak_signed": 1005.23,
+                "peak_time_s": 0.0175001
+              },
+              {
+                "name": "impact_04",
+                "peak_abs": 1002.24,
+                "peak_signed": 1002.24,
+                "peak_time_s": 0.0295005
+              },
+              {
+                "name": "impact_05",
+                "peak_abs": 1000.3,
+                "peak_signed": 1000.3,
+                "peak_time_s": 0.0110003
+              },
+              {
+                "name": "impact_06",
+                "peak_abs": 1000.25,
+                "peak_signed": 1000.25,
+                "peak_time_s": 0.0135001
+              },
+              {
+                "name": "centerline_00",
+                "peak_abs": 1012.22,
+                "peak_signed": 1012.22,
+                "peak_time_s": 0.0060002
+              },
+              {
+                "name": "centerline_01",
+                "peak_abs": 1006.13,
+                "peak_signed": 1006.13,
+                "peak_time_s": 0.00650012
+              },
+              {
+                "name": "centerline_02",
+                "peak_abs": 1003.02,
+                "peak_signed": 1003.02,
+                "peak_time_s": 0.00750038
+              },
+              {
+                "name": "centerline_03",
+                "peak_abs": 1007.41,
+                "peak_signed": 1007.41,
+                "peak_time_s": 0.00650012
+              }
+            ]
+          },
+          "kernel_correction": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/observations/fixed_points_Kcorr.csv",
+            "exists": true,
+            "rows": 61,
+            "columns": [
+              "impact_00",
+              "impact_01",
+              "impact_02",
+              "impact_03",
+              "impact_04",
+              "impact_05",
+              "impact_06",
+              "centerline_00",
+              "centerline_01",
+              "centerline_02",
+              "centerline_03"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.0300003,
+            "dt_median_s": 0.0004999100000000005,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "impact_00",
+                "peak_abs": 0.634497,
+                "peak_signed": 0.634497,
+                "peak_time_s": 0.0260007
+              },
+              {
+                "name": "impact_01",
+                "peak_abs": 0.624997,
+                "peak_signed": 0.624997,
+                "peak_time_s": 0.0200005
+              },
+              {
+                "name": "impact_02",
+                "peak_abs": 0.617832,
+                "peak_signed": 0.617832,
+                "peak_time_s": 0.0135001
+              },
+              {
+                "name": "impact_03",
+                "peak_abs": 0.617865,
+                "peak_signed": 0.617865,
+                "peak_time_s": 0.0125003
+              },
+              {
+                "name": "impact_04",
+                "peak_abs": 0.631888,
+                "peak_signed": 0.631888,
+                "peak_time_s": 0.0105004
+              },
+              {
+                "name": "impact_05",
+                "peak_abs": 0.641535,
+                "peak_signed": 0.641535,
+                "peak_time_s": 0.0110003
+              },
+              {
+                "name": "impact_06",
+                "peak_abs": 0.630285,
+                "peak_signed": 0.630285,
+                "peak_time_s": 0.0220004
+              },
+              {
+                "name": "centerline_00",
+                "peak_abs": 1.02169,
+                "peak_signed": 1.02169,
+                "peak_time_s": 0.0120006
+              },
+              {
+                "name": "centerline_01",
+                "peak_abs": 1.00664,
+                "peak_signed": 1.00664,
+                "peak_time_s": 0.0105004
+              },
+              {
+                "name": "centerline_02",
+                "peak_abs": 1.00792,
+                "peak_signed": 1.00792,
+                "peak_time_s": 0.0255001
+              },
+              {
+                "name": "centerline_03",
+                "peak_abs": 1.01063,
+                "peak_signed": 1.01063,
+                "peak_time_s": 0.00700039
+              }
+            ],
+            "minimum": 0.0,
+            "maximum": 1.02169,
+            "zero_fraction": 0.18926974664679583,
+            "support_interpretation": "Kcorr=0 can be an interpolation dummy when kernel support is insufficient; it must not be interpreted as a physical zero."
+          }
+        },
+        "wall_force": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/observations/wall_force.csv",
+          "exists": true,
+          "rows": 61,
+          "header": [
+            "Part",
+            "Time [s]",
+            "Np",
+            "ForceFluid.x [N/m]",
+            "ForceFluid.y [N/m]",
+            "ForceFluid.z [N/m]",
+            "ForceFluid [N/m]"
+          ],
+          "finite_fraction": 1.0,
+          "units": "N/m for this 2-D case",
+          "issues": [],
+          "time_start_s": 0.0,
+          "time_end_s": 0.03,
+          "dt_median_s": 0.0005000000000000004,
+          "peak_force_abs_n_per_m": 17701.00811514,
+          "peak_force_time_s": 0.029501,
+          "peak_force_z_n_per_m": -17700.97489142
+        },
+        "flow_boxes": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/observations/flow_boxes.xml",
+          "sha256": "662e7e38c50842a714aa928ace6d98f275ab85b8eb4e423f5526024a437ced2b",
+          "two_dimensional_per_depth": true,
+          "boxes": {
+            "inlet": {
+              "point": [
+                -0.016,
+                -0.0015,
+                0.117
+              ],
+              "size": [
+                0.032,
+                0.003,
+                0.011
+              ]
+            },
+            "left_outlet": {
+              "point": [
+                -0.205,
+                -0.0015,
+                -0.001
+              ],
+              "size": [
+                0.011,
+                0.003,
+                0.008
+              ]
+            },
+            "right_outlet": {
+              "point": [
+                0.194,
+                -0.0015,
+                -0.001
+              ],
+              "size": [
+                0.011,
+                0.003,
+                0.008
+              ]
+            }
+          }
+        },
+        "flow": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/observations/flow.csv",
+          "exists": true,
+          "rows": 61,
+          "header": [
+            "Time [s]",
+            "Nok_inlet",
+            "Nok_left_outlet",
+            "Nok_right_outlet",
+            "Nok_World",
+            "Nout_inlet",
+            "Nout_left_outlet",
+            "Nout_right_outlet",
+            "Nout_World",
+            "Input_inlet",
+            "Input_left_outlet",
+            "Input_right_outlet",
+            "Input_World",
+            "Output_inlet",
+            "Output_left_outlet",
+            "Output_right_outlet",
+            "Output_World",
+            "InVel_inlet [m/s]",
+            "InVel_left_outlet [m/s]",
+            "InVel_right_outlet [m/s]",
+            "InVel_World [m/s]",
+            "InVolume_inlet [m^3]",
+            "InVolume_left_outlet [m^3]",
+            "InVolume_right_outlet [m^3]",
+            "InVolume_World [m^3]",
+            "InFlow_inlet [m^3/s]",
+            "InFlow_left_outlet [m^3/s]",
+            "InFlow_right_outlet [m^3/s]",
+            "InFlow_World [m^3/s]",
+            "OutVolume_inlet [m^3]",
+            "OutVolume_left_outlet [m^3]",
+            "OutVolume_right_outlet [m^3]",
+            "OutVolume_World [m^3]",
+            "OutFlow_inlet [m^3/s]",
+            "OutFlow_left_outlet [m^3/s]",
+            "OutFlow_right_outlet [m^3/s]",
+            "OutFlow_World [m^3/s]"
+          ],
+          "two_dimensional_per_depth": true,
+          "issues": [],
+          "time_start_s": 0.0,
+          "time_end_s": 0.0300003,
+          "dt_median_s": 0.0004999100000000005,
+          "finite_fraction": 1.0,
+          "columns": {
+            "Nok_inlet": {
+              "max_abs": 168.0,
+              "sum": 9380.0
+            },
+            "Nok_left_outlet": {
+              "max_abs": 28.0,
+              "sum": 1079.0
+            },
+            "Nok_right_outlet": {
+              "max_abs": 29.0,
+              "sum": 1061.0
+            },
+            "Nok_World": {
+              "max_abs": 4546.0,
+              "sum": 199941.0
+            },
+            "Nout_inlet": {
+              "max_abs": 0.0,
+              "sum": 0.0
+            },
+            "Nout_left_outlet": {
+              "max_abs": 23.0,
+              "sum": 639.0
+            },
+            "Nout_right_outlet": {
+              "max_abs": 26.0,
+              "sum": 612.0
+            },
+            "Nout_World": {
+              "max_abs": 136.0,
+              "sum": 2724.0
+            },
+            "Input_inlet": {
+              "max_abs": 147.0,
+              "sum": 8400.0
+            },
+            "Input_left_outlet": {
+              "max_abs": 24.0,
+              "sum": 652.0
+            },
+            "Input_right_outlet": {
+              "max_abs": 26.0,
+              "sum": 624.0
+            },
+            "Input_World": {
+              "max_abs": 169.0,
+              "sum": 9644.0
+            },
+            "Output_inlet": {
+              "max_abs": 147.0,
+              "sum": 8379.0
+            },
+            "Output_left_outlet": {
+              "max_abs": 23.0,
+              "sum": 640.0
+            },
+            "Output_right_outlet": {
+              "max_abs": 27.0,
+              "sum": 616.0
+            },
+            "Output_World": {
+              "max_abs": 197.0,
+              "sum": 5260.0
+            },
+            "InVel_inlet [m/s]": {
+              "max_abs": 20.2501,
+              "sum": 1200.2095000000002
+            },
+            "InVel_left_outlet [m/s]": {
+              "max_abs": 34.6625,
+              "sum": 819.4892000000001
+            },
+            "InVel_right_outlet [m/s]": {
+              "max_abs": 31.7839,
+              "sum": 783.6314
+            },
+            "InVel_World [m/s]": {
+              "max_abs": 20.6066,
+              "sum": 1200.2515999999998
+            },
+            "InVolume_inlet [m^3]": {
+              "max_abs": 0.00033075,
+              "sum": 0.018899999999999997
+            },
+            "InVolume_left_outlet [m^3]": {
+              "max_abs": 5.4e-05,
+              "sum": 0.0014669999999999996
+            },
+            "InVolume_right_outlet [m^3]": {
+              "max_abs": 5.85e-05,
+              "sum": 0.001404
+            },
+            "InVolume_World [m^3]": {
+              "max_abs": 0.00038025,
+              "sum": 0.021698999999999996
+            },
+            "InFlow_inlet [m^3/s]": {
+              "max_abs": 0.66249,
+              "sum": 37.799786999999995
+            },
+            "InFlow_left_outlet [m^3/s]": {
+              "max_abs": 0.107908,
+              "sum": 2.9340267399999997
+            },
+            "InFlow_right_outlet [m^3/s]": {
+              "max_abs": 0.117101,
+              "sum": 2.808065
+            },
+            "InFlow_World [m^3/s]": {
+              "max_abs": 0.760751,
+              "sum": 43.39809599999999
+            },
+            "OutVolume_inlet [m^3]": {
+              "max_abs": 0.00033075,
+              "sum": 0.01885275
+            },
+            "OutVolume_left_outlet [m^3]": {
+              "max_abs": 5.175e-05,
+              "sum": 0.0014400000000000003
+            },
+            "OutVolume_right_outlet [m^3]": {
+              "max_abs": 6.075e-05,
+              "sum": 0.0013859999999999999
+            },
+            "OutVolume_World [m^3]": {
+              "max_abs": 0.00044325,
+              "sum": 0.011835000000000004
+            },
+            "OutFlow_inlet [m^3/s]": {
+              "max_abs": 0.66249,
+              "sum": 37.70565
+            },
+            "OutFlow_left_outlet [m^3/s]": {
+              "max_abs": 0.103553,
+              "sum": 2.8800610000000004
+            },
+            "OutFlow_right_outlet [m^3/s]": {
+              "max_abs": 0.12154,
+              "sum": 2.7719646
+            },
+            "OutFlow_World [m^3/s]": {
+              "max_abs": 0.886254,
+              "sum": 23.6701657
+            }
+          }
+        },
+        "lifecycle": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/coarse__tmax-0p03__tout-0p0005/RunPARTs.csv",
+          "exists": true,
+          "rows": 61,
+          "issues": [],
+          "identity_semantics": "solver numerical-node lifecycle only; not material lineage",
+          "time_start_s": 0.0,
+          "time_end_s": 0.03000025320008522,
+          "dt_median_s": 0.0004999530580220698,
+          "NpSave_initial": 1419,
+          "NpSave_final": 5844,
+          "NpSave_min": 1419,
+          "NpSave_max": 5865,
+          "NpSave_sum": 279293,
+          "NpSim_initial": 1419,
+          "NpSim_final": 5844,
+          "NpSim_min": 1419,
+          "NpSim_max": 5865,
+          "NpSim_sum": 279293,
+          "NpNew_initial": 244,
+          "NpNew_final": 147,
+          "NpNew_min": 126,
+          "NpNew_max": 244,
+          "NpNew_sum": 8644,
+          "NpOut_initial": 0,
+          "NpOut_final": 0,
+          "NpOut_min": 0,
+          "NpOut_max": 10,
+          "NpOut_sum": 11,
+          "NpbSim_initial": 1112,
+          "NpbSim_final": 1112,
+          "NpbSim_min": 1112,
+          "NpbSim_max": 1112,
+          "NpbSim_sum": 67832,
+          "NpfSim_initial": 307,
+          "NpfSim_final": 4732,
+          "NpfSim_min": 307,
+          "NpfSim_max": 4753,
+          "NpfSim_sum": 211461,
+          "numerical_lifecycle_observed": true
+        },
+        "limitations": [
+          "The force CSV is a two-dimensional per-depth wall integral, not a 3-D load.",
+          "FlowTool counts numerical particles crossing boxes; it is not an external flow meter.",
+          "No experimental pressure, force, or flux reference is bundled with O4."
+        ]
+      }
+    },
+    {
+      "label": "medium",
+      "dp_m": 0.001,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 39.9584,
+      "fluid_particles": 246,
+      "total_particles": 1894,
+      "case_prefix": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/medium/generated/F4_impinging_jet_medium",
+      "generated_xml": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/medium/generated/F4_impinging_jet_medium.xml",
+      "definition": {
+        "source_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/medium/generated/CaseJet2D_Def.xml",
+        "source_sha256": "01976a485a9f2f6374dff476c6984f114576e5deec8bff7841f6be36391430bf",
+        "configured_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/medium/generated/CaseJet2D_medium_Def.xml",
+        "configured_sha256": "1513d6020a0f519d312d4f3aef8a3f8b27239838cdfaa68f296ffabf79285bc3",
+        "time_max_s": 0.03,
+        "particle_output_cadence_s": 0.0005,
+        "changed_parameters": {
+          "TimeMax": "0.03",
+          "TimeOut": "0.0005"
+        },
+        "dimension": "2D",
+        "entry_velocity_m_per_s": 20.0,
+        "boundary_mk": 10
+      },
+      "log": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/solver.stdout.log",
+      "gpu": 5,
+      "output_dir": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005",
+      "frames": 61,
+      "excluded_particles": 6,
+      "output_bytes": 18353498,
+      "command": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+        "-gpu:5",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/medium/generated/F4_impinging_jet_medium",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005",
+        "-tmax:0.03",
+        "-tout:0.0005"
+      ],
+      "observations": {
+        "status": "completed",
+        "data_dir": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/data",
+        "tools": {
+          "measure": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/MeasureTool_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/data",
+              "-filexml",
+              "AUTO",
+              "-pointsdef:pt=-0.12:0:0.001,pt=-0.08:0:0.001,pt=-0.04:0:0.001,pt=0:0:0.001,pt=0.04:0:0.001,pt=0.08:0:0.001,pt=0.12:0:0.001,pt=0:0:0.03,pt=0:0:0.06,pt=0:0:0.09,pt=0:0:0.11",
+              "-onlytype:-all,+fluid",
+              "-vars:-all,+vel,+press,+rhop,+kcorr",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/observations/fixed_points"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.0613,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/observations/measure.stdout.log",
+            "status": "completed",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          },
+          "compute_forces": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/data",
+              "-filexml",
+              "AUTO",
+              "-onlymk:10",
+              "-viscoauto",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/observations/wall_force"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.05,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/observations/forces.stdout.log",
+            "status": "completed",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          },
+          "flow": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/FlowTool_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/data",
+              "-fileboxes",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/observations/flow_boxes.xml",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/observations/flow"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.0528,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/observations/flow.stdout.log",
+            "status": "completed",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          }
+        },
+        "fixed_points": {
+          "points": [
+            {
+              "name": "impact_00",
+              "position_m": [
+                -0.12,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_01",
+              "position_m": [
+                -0.08,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_02",
+              "position_m": [
+                -0.04,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_03",
+              "position_m": [
+                0.0,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_04",
+              "position_m": [
+                0.04,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_05",
+              "position_m": [
+                0.08,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_06",
+              "position_m": [
+                0.12,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "centerline_00",
+              "position_m": [
+                0.0,
+                0.0,
+                0.03
+              ]
+            },
+            {
+              "name": "centerline_01",
+              "position_m": [
+                0.0,
+                0.0,
+                0.06
+              ]
+            },
+            {
+              "name": "centerline_02",
+              "position_m": [
+                0.0,
+                0.0,
+                0.09
+              ]
+            },
+            {
+              "name": "centerline_03",
+              "position_m": [
+                0.0,
+                0.0,
+                0.11
+              ]
+            }
+          ],
+          "pressure": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/observations/fixed_points_Press.csv",
+            "exists": true,
+            "rows": 61,
+            "columns": [
+              "impact_00",
+              "impact_01",
+              "impact_02",
+              "impact_03",
+              "impact_04",
+              "impact_05",
+              "impact_06",
+              "centerline_00",
+              "centerline_01",
+              "centerline_02",
+              "centerline_03"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.0300003,
+            "dt_median_s": 0.0004999999999999978,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "impact_00",
+                "peak_abs": 34351.7,
+                "peak_signed": -34351.7,
+                "peak_time_s": 0.00950013
+              },
+              {
+                "name": "impact_01",
+                "peak_abs": 15356.5,
+                "peak_signed": -15356.5,
+                "peak_time_s": 0.0205005
+              },
+              {
+                "name": "impact_02",
+                "peak_abs": 81405.2,
+                "peak_signed": 81405.2,
+                "peak_time_s": 0.0110001
+              },
+              {
+                "name": "impact_03",
+                "peak_abs": 3019070.0,
+                "peak_signed": 3019070.0,
+                "peak_time_s": 0.00600001
+              },
+              {
+                "name": "impact_04",
+                "peak_abs": 71854.1,
+                "peak_signed": 71854.1,
+                "peak_time_s": 0.0170004
+              },
+              {
+                "name": "impact_05",
+                "peak_abs": 13331.1,
+                "peak_signed": 13331.1,
+                "peak_time_s": 0.0180002
+              },
+              {
+                "name": "impact_06",
+                "peak_abs": 10864.8,
+                "peak_signed": 10864.8,
+                "peak_time_s": 0.0270002
+              },
+              {
+                "name": "centerline_00",
+                "peak_abs": 139151.0,
+                "peak_signed": 139151.0,
+                "peak_time_s": 0.0105002
+              },
+              {
+                "name": "centerline_01",
+                "peak_abs": 580270.0,
+                "peak_signed": 580270.0,
+                "peak_time_s": 0.00700006
+              },
+              {
+                "name": "centerline_02",
+                "peak_abs": 317753.0,
+                "peak_signed": -317753.0,
+                "peak_time_s": 0.00650012
+              },
+              {
+                "name": "centerline_03",
+                "peak_abs": 321120.0,
+                "peak_signed": -321120.0,
+                "peak_time_s": 0.00700006
+              }
+            ]
+          },
+          "velocity": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/observations/fixed_points_Vel.csv",
+            "exists": true,
+            "rows": 61,
+            "columns": [
+              "impact_00",
+              "impact_01",
+              "impact_02",
+              "impact_03",
+              "impact_04",
+              "impact_05",
+              "impact_06",
+              "centerline_00",
+              "centerline_01",
+              "centerline_02",
+              "centerline_03"
+            ],
+            "components_per_point": 3,
+            "time_start_s": 0.0,
+            "time_end_s": 0.0300003,
+            "dt_median_s": 0.0004999999999999978,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "impact_00",
+                "peak_speed": 30.177536439672206,
+                "peak_time_s": 0.00950013
+              },
+              {
+                "name": "impact_01",
+                "peak_speed": 27.42677766231113,
+                "peak_time_s": 0.00900016
+              },
+              {
+                "name": "impact_02",
+                "peak_speed": 31.90921422965981,
+                "peak_time_s": 0.00700006
+              },
+              {
+                "name": "impact_03",
+                "peak_speed": 3.8822593344855263,
+                "peak_time_s": 0.00700006
+              },
+              {
+                "name": "impact_04",
+                "peak_speed": 31.82564708501268,
+                "peak_time_s": 0.00700006
+              },
+              {
+                "name": "impact_05",
+                "peak_speed": 34.94813050605175,
+                "peak_time_s": 0.00800021
+              },
+              {
+                "name": "impact_06",
+                "peak_speed": 24.87501721517441,
+                "peak_time_s": 0.0110001
+              },
+              {
+                "name": "centerline_00",
+                "peak_speed": 20.040400000265198,
+                "peak_time_s": 0.00550002
+              },
+              {
+                "name": "centerline_01",
+                "peak_speed": 21.349932352871964,
+                "peak_time_s": 0.00900016
+              },
+              {
+                "name": "centerline_02",
+                "peak_speed": 21.052391619991923,
+                "peak_time_s": 0.00750016
+              },
+              {
+                "name": "centerline_03",
+                "peak_speed": 21.04300000002611,
+                "peak_time_s": 0.00650012
+              }
+            ]
+          },
+          "density": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/observations/fixed_points_Rhop.csv",
+            "exists": true,
+            "rows": 61,
+            "columns": [
+              "impact_00",
+              "impact_01",
+              "impact_02",
+              "impact_03",
+              "impact_04",
+              "impact_05",
+              "impact_06",
+              "centerline_00",
+              "centerline_01",
+              "centerline_02",
+              "centerline_03"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.0300003,
+            "dt_median_s": 0.0004999999999999978,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "impact_00",
+                "peak_abs": 1000.15,
+                "peak_signed": 1000.15,
+                "peak_time_s": 0.0155004
+              },
+              {
+                "name": "impact_01",
+                "peak_abs": 1000.17,
+                "peak_signed": 1000.17,
+                "peak_time_s": 0.0155004
+              },
+              {
+                "name": "impact_02",
+                "peak_abs": 1001.53,
+                "peak_signed": 1001.53,
+                "peak_time_s": 0.0110001
+              },
+              {
+                "name": "impact_03",
+                "peak_abs": 1049.11,
+                "peak_signed": 1049.11,
+                "peak_time_s": 0.00600001
+              },
+              {
+                "name": "impact_04",
+                "peak_abs": 1001.35,
+                "peak_signed": 1001.35,
+                "peak_time_s": 0.0170004
+              },
+              {
+                "name": "impact_05",
+                "peak_abs": 1000.25,
+                "peak_signed": 1000.25,
+                "peak_time_s": 0.0180002
+              },
+              {
+                "name": "impact_06",
+                "peak_abs": 1000.21,
+                "peak_signed": 1000.21,
+                "peak_time_s": 0.0270002
+              },
+              {
+                "name": "centerline_00",
+                "peak_abs": 1002.61,
+                "peak_signed": 1002.61,
+                "peak_time_s": 0.0105002
+              },
+              {
+                "name": "centerline_01",
+                "peak_abs": 1010.61,
+                "peak_signed": 1010.61,
+                "peak_time_s": 0.00700006
+              },
+              {
+                "name": "centerline_02",
+                "peak_abs": 1004.46,
+                "peak_signed": 1004.46,
+                "peak_time_s": 0.00700006
+              },
+              {
+                "name": "centerline_03",
+                "peak_abs": 1000.36,
+                "peak_signed": 1000.36,
+                "peak_time_s": 0.0120001
+              }
+            ]
+          },
+          "kernel_correction": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/observations/fixed_points_Kcorr.csv",
+            "exists": true,
+            "rows": 61,
+            "columns": [
+              "impact_00",
+              "impact_01",
+              "impact_02",
+              "impact_03",
+              "impact_04",
+              "impact_05",
+              "impact_06",
+              "centerline_00",
+              "centerline_01",
+              "centerline_02",
+              "centerline_03"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.0300003,
+            "dt_median_s": 0.0004999999999999978,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "impact_00",
+                "peak_abs": 0.795897,
+                "peak_signed": 0.795897,
+                "peak_time_s": 0.0260001
+              },
+              {
+                "name": "impact_01",
+                "peak_abs": 0.781224,
+                "peak_signed": 0.781224,
+                "peak_time_s": 0.00900016
+              },
+              {
+                "name": "impact_02",
+                "peak_abs": 0.776034,
+                "peak_signed": 0.776034,
+                "peak_time_s": 0.0220003
+              },
+              {
+                "name": "impact_03",
+                "peak_abs": 0.775236,
+                "peak_signed": 0.775236,
+                "peak_time_s": 0.0225001
+              },
+              {
+                "name": "impact_04",
+                "peak_abs": 0.78308,
+                "peak_signed": 0.78308,
+                "peak_time_s": 0.0150001
+              },
+              {
+                "name": "impact_05",
+                "peak_abs": 0.790753,
+                "peak_signed": 0.790753,
+                "peak_time_s": 0.00950013
+              },
+              {
+                "name": "impact_06",
+                "peak_abs": 0.774234,
+                "peak_signed": 0.774234,
+                "peak_time_s": 0.0290004
+              },
+              {
+                "name": "centerline_00",
+                "peak_abs": 1.03148,
+                "peak_signed": 1.03148,
+                "peak_time_s": 0.0110001
+              },
+              {
+                "name": "centerline_01",
+                "peak_abs": 1.01591,
+                "peak_signed": 1.01591,
+                "peak_time_s": 0.0100002
+              },
+              {
+                "name": "centerline_02",
+                "peak_abs": 1.0078,
+                "peak_signed": 1.0078,
+                "peak_time_s": 0.0280004
+              },
+              {
+                "name": "centerline_03",
+                "peak_abs": 1.00886,
+                "peak_signed": 1.00886,
+                "peak_time_s": 0.00750016
+              }
+            ],
+            "minimum": 0.0,
+            "maximum": 1.03148,
+            "zero_fraction": 0.18330849478390462,
+            "support_interpretation": "Kcorr=0 can be an interpolation dummy when kernel support is insufficient; it must not be interpreted as a physical zero."
+          }
+        },
+        "wall_force": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/observations/wall_force.csv",
+          "exists": true,
+          "rows": 61,
+          "header": [
+            "Part",
+            "Time [s]",
+            "Np",
+            "ForceFluid.x [N/m]",
+            "ForceFluid.y [N/m]",
+            "ForceFluid.z [N/m]",
+            "ForceFluid [N/m]"
+          ],
+          "finite_fraction": 1.0,
+          "units": "N/m for this 2-D case",
+          "issues": [],
+          "time_start_s": 0.0,
+          "time_end_s": 0.03,
+          "dt_median_s": 0.0005000000000000004,
+          "peak_force_abs_n_per_m": 43322.97610736,
+          "peak_force_time_s": 0.006,
+          "peak_force_z_n_per_m": -43322.97610713
+        },
+        "flow_boxes": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/observations/flow_boxes.xml",
+          "sha256": "68302b21fb7e3685d5684a67e19ef53e014af8b0a6617197f81be166a2e4035e",
+          "two_dimensional_per_depth": true,
+          "boxes": {
+            "inlet": {
+              "point": [
+                -0.016,
+                -0.001,
+                0.117
+              ],
+              "size": [
+                0.032,
+                0.002,
+                0.011
+              ]
+            },
+            "left_outlet": {
+              "point": [
+                -0.205,
+                -0.001,
+                -0.001
+              ],
+              "size": [
+                0.011,
+                0.002,
+                0.008
+              ]
+            },
+            "right_outlet": {
+              "point": [
+                0.194,
+                -0.001,
+                -0.001
+              ],
+              "size": [
+                0.011,
+                0.002,
+                0.008
+              ]
+            }
+          }
+        },
+        "flow": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/observations/flow.csv",
+          "exists": true,
+          "rows": 61,
+          "header": [
+            "Time [s]",
+            "Nok_inlet",
+            "Nok_left_outlet",
+            "Nok_right_outlet",
+            "Nok_World",
+            "Nout_inlet",
+            "Nout_left_outlet",
+            "Nout_right_outlet",
+            "Nout_World",
+            "Input_inlet",
+            "Input_left_outlet",
+            "Input_right_outlet",
+            "Input_World",
+            "Output_inlet",
+            "Output_left_outlet",
+            "Output_right_outlet",
+            "Output_World",
+            "InVel_inlet [m/s]",
+            "InVel_left_outlet [m/s]",
+            "InVel_right_outlet [m/s]",
+            "InVel_World [m/s]",
+            "InVolume_inlet [m^3]",
+            "InVolume_left_outlet [m^3]",
+            "InVolume_right_outlet [m^3]",
+            "InVolume_World [m^3]",
+            "InFlow_inlet [m^3/s]",
+            "InFlow_left_outlet [m^3/s]",
+            "InFlow_right_outlet [m^3/s]",
+            "InFlow_World [m^3/s]",
+            "OutVolume_inlet [m^3]",
+            "OutVolume_left_outlet [m^3]",
+            "OutVolume_right_outlet [m^3]",
+            "OutVolume_World [m^3]",
+            "OutFlow_inlet [m^3/s]",
+            "OutFlow_left_outlet [m^3/s]",
+            "OutFlow_right_outlet [m^3/s]",
+            "OutFlow_World [m^3/s]"
+          ],
+          "two_dimensional_per_depth": true,
+          "issues": [],
+          "time_start_s": 0.0,
+          "time_end_s": 0.0300003,
+          "dt_median_s": 0.0004999999999999978,
+          "finite_fraction": 1.0,
+          "columns": {
+            "Nok_inlet": {
+              "max_abs": 366.0,
+              "sum": 20780.0
+            },
+            "Nok_left_outlet": {
+              "max_abs": 53.0,
+              "sum": 1958.0
+            },
+            "Nok_right_outlet": {
+              "max_abs": 51.0,
+              "sum": 2027.0
+            },
+            "Nok_World": {
+              "max_abs": 9963.0,
+              "sum": 435711.0
+            },
+            "Nout_inlet": {
+              "max_abs": 0.0,
+              "sum": 0.0
+            },
+            "Nout_left_outlet": {
+              "max_abs": 53.0,
+              "sum": 1450.0
+            },
+            "Nout_right_outlet": {
+              "max_abs": 51.0,
+              "sum": 1510.0
+            },
+            "Nout_World": {
+              "max_abs": 313.0,
+              "sum": 5813.0
+            },
+            "Input_inlet": {
+              "max_abs": 341.0,
+              "sum": 18631.0
+            },
+            "Input_left_outlet": {
+              "max_abs": 53.0,
+              "sum": 1467.0
+            },
+            "Input_right_outlet": {
+              "max_abs": 51.0,
+              "sum": 1532.0
+            },
+            "Input_World": {
+              "max_abs": 325.0,
+              "sum": 18538.0
+            },
+            "Output_inlet": {
+              "max_abs": 325.0,
+              "sum": 18538.0
+            },
+            "Output_left_outlet": {
+              "max_abs": 53.0,
+              "sum": 1450.0
+            },
+            "Output_right_outlet": {
+              "max_abs": 51.0,
+              "sum": 1510.0
+            },
+            "Output_World": {
+              "max_abs": 400.0,
+              "sum": 8843.0
+            },
+            "InVel_inlet [m/s]": {
+              "max_abs": 20.2344,
+              "sum": 1200.3790999999999
+            },
+            "InVel_left_outlet [m/s]": {
+              "max_abs": 41.1697,
+              "sum": 904.4209000000001
+            },
+            "InVel_right_outlet [m/s]": {
+              "max_abs": 38.4333,
+              "sum": 900.8102000000001
+            },
+            "InVel_World [m/s]": {
+              "max_abs": 20.8619,
+              "sum": 1201.2808
+            },
+            "InVolume_inlet [m^3]": {
+              "max_abs": 0.000341,
+              "sum": 0.018631000000000005
+            },
+            "InVolume_left_outlet [m^3]": {
+              "max_abs": 5.3e-05,
+              "sum": 0.0014670000000000002
+            },
+            "InVolume_right_outlet [m^3]": {
+              "max_abs": 5.1e-05,
+              "sum": 0.001532
+            },
+            "InVolume_World [m^3]": {
+              "max_abs": 0.000325,
+              "sum": 0.018538000000000006
+            },
+            "InFlow_inlet [m^3/s]": {
+              "max_abs": 0.681311,
+              "sum": 37.261604
+            },
+            "InFlow_left_outlet [m^3/s]": {
+              "max_abs": 0.106055,
+              "sum": 2.9340046400000004
+            },
+            "InFlow_right_outlet [m^3/s]": {
+              "max_abs": 0.102033,
+              "sum": 3.06400638
+            },
+            "InFlow_World [m^3/s]": {
+              "max_abs": 0.650138,
+              "sum": 37.075791
+            },
+            "OutVolume_inlet [m^3]": {
+              "max_abs": 0.000325,
+              "sum": 0.018538000000000006
+            },
+            "OutVolume_left_outlet [m^3]": {
+              "max_abs": 5.3e-05,
+              "sum": 0.0014500000000000001
+            },
+            "OutVolume_right_outlet [m^3]": {
+              "max_abs": 5.1e-05,
+              "sum": 0.0015099999999999998
+            },
+            "OutVolume_World [m^3]": {
+              "max_abs": 0.0004,
+              "sum": 0.008843000000000002
+            },
+            "OutFlow_inlet [m^3/s]": {
+              "max_abs": 0.650138,
+              "sum": 37.075791
+            },
+            "OutFlow_left_outlet [m^3/s]": {
+              "max_abs": 0.106006,
+              "sum": 2.89999164
+            },
+            "OutFlow_right_outlet [m^3/s]": {
+              "max_abs": 0.101996,
+              "sum": 3.01996125
+            },
+            "OutFlow_World [m^3/s]": {
+              "max_abs": 0.8003,
+              "sum": 17.685929310000002
+            }
+          }
+        },
+        "lifecycle": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/medium__tmax-0p03__tout-0p0005/RunPARTs.csv",
+          "exists": true,
+          "rows": 61,
+          "issues": [],
+          "identity_semantics": "solver numerical-node lifecycle only; not material lineage",
+          "time_start_s": 0.0,
+          "time_end_s": 0.03000027452375233,
+          "dt_median_s": 0.0005000030277498386,
+          "NpSave_initial": 2167,
+          "NpSave_final": 11994,
+          "NpSave_min": 2167,
+          "NpSave_max": 12040,
+          "NpSave_sum": 561004,
+          "NpSim_initial": 2167,
+          "NpSim_final": 11994,
+          "NpSim_min": 2167,
+          "NpSim_max": 12040,
+          "NpSim_sum": 561004,
+          "NpNew_initial": 364,
+          "NpNew_final": 310,
+          "NpNew_min": 310,
+          "NpNew_max": 364,
+          "NpNew_sum": 18964,
+          "NpOut_initial": 0,
+          "NpOut_final": 0,
+          "NpOut_min": 0,
+          "NpOut_max": 4,
+          "NpOut_sum": 6,
+          "NpbSim_initial": 1648,
+          "NpbSim_final": 1648,
+          "NpbSim_min": 1648,
+          "NpbSim_max": 1648,
+          "NpbSim_sum": 100528,
+          "NpfSim_initial": 519,
+          "NpfSim_final": 10346,
+          "NpfSim_min": 519,
+          "NpfSim_max": 10392,
+          "NpfSim_sum": 460476,
+          "numerical_lifecycle_observed": true
+        },
+        "limitations": [
+          "The force CSV is a two-dimensional per-depth wall integral, not a 3-D load.",
+          "FlowTool counts numerical particles crossing boxes; it is not an external flow meter.",
+          "No experimental pressure, force, or flux reference is bundled with O4."
+        ]
+      }
+    },
+    {
+      "label": "fine",
+      "dp_m": 0.00075,
+      "status": "completed",
+      "returncode": 0,
+      "elapsed_seconds": 47.1058,
+      "fluid_particles": 408,
+      "total_particles": 2584,
+      "case_prefix": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/fine/generated/F4_impinging_jet_fine",
+      "generated_xml": "campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/fine/generated/F4_impinging_jet_fine.xml",
+      "definition": {
+        "source_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/fine/generated/CaseJet2D_Def.xml",
+        "source_sha256": "01976a485a9f2f6374dff476c6984f114576e5deec8bff7841f6be36391430bf",
+        "configured_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/fine/generated/CaseJet2D_fine_Def.xml",
+        "configured_sha256": "1513d6020a0f519d312d4f3aef8a3f8b27239838cdfaa68f296ffabf79285bc3",
+        "time_max_s": 0.03,
+        "particle_output_cadence_s": 0.0005,
+        "changed_parameters": {
+          "TimeMax": "0.03",
+          "TimeOut": "0.0005"
+        },
+        "dimension": "2D",
+        "entry_velocity_m_per_s": 20.0,
+        "boundary_mk": 10
+      },
+      "log": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/solver.stdout.log",
+      "gpu": 6,
+      "output_dir": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005",
+      "frames": 61,
+      "excluded_particles": 27,
+      "output_bytes": 30514117,
+      "command": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+        "-gpu:6",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-f4-impinging-jet/fine/generated/F4_impinging_jet_fine",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005",
+        "-tmax:0.03",
+        "-tout:0.0005"
+      ],
+      "observations": {
+        "status": "completed",
+        "data_dir": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/data",
+        "tools": {
+          "measure": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/MeasureTool_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/data",
+              "-filexml",
+              "AUTO",
+              "-pointsdef:pt=-0.12:0:0.001,pt=-0.08:0:0.001,pt=-0.04:0:0.001,pt=0:0:0.001,pt=0.04:0:0.001,pt=0.08:0:0.001,pt=0.12:0:0.001,pt=0:0:0.03,pt=0:0:0.06,pt=0:0:0.09,pt=0:0:0.11",
+              "-onlytype:-all,+fluid",
+              "-vars:-all,+vel,+press,+rhop,+kcorr",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/observations/fixed_points"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.0918,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/observations/measure.stdout.log",
+            "status": "completed",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          },
+          "compute_forces": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/data",
+              "-filexml",
+              "AUTO",
+              "-onlymk:10",
+              "-viscoauto",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/observations/wall_force"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.0663,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/observations/forces.stdout.log",
+            "status": "completed",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          },
+          "flow": {
+            "command": [
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/FlowTool_linux64",
+              "-dirdata",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/data",
+              "-fileboxes",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/observations/flow_boxes.xml",
+              "-savecsv",
+              "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/observations/flow"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.0915,
+            "log": "campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/observations/flow.stdout.log",
+            "status": "completed",
+            "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+          }
+        },
+        "fixed_points": {
+          "points": [
+            {
+              "name": "impact_00",
+              "position_m": [
+                -0.12,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_01",
+              "position_m": [
+                -0.08,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_02",
+              "position_m": [
+                -0.04,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_03",
+              "position_m": [
+                0.0,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_04",
+              "position_m": [
+                0.04,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_05",
+              "position_m": [
+                0.08,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "impact_06",
+              "position_m": [
+                0.12,
+                0.0,
+                0.001
+              ]
+            },
+            {
+              "name": "centerline_00",
+              "position_m": [
+                0.0,
+                0.0,
+                0.03
+              ]
+            },
+            {
+              "name": "centerline_01",
+              "position_m": [
+                0.0,
+                0.0,
+                0.06
+              ]
+            },
+            {
+              "name": "centerline_02",
+              "position_m": [
+                0.0,
+                0.0,
+                0.09
+              ]
+            },
+            {
+              "name": "centerline_03",
+              "position_m": [
+                0.0,
+                0.0,
+                0.11
+              ]
+            }
+          ],
+          "pressure": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/observations/fixed_points_Press.csv",
+            "exists": true,
+            "rows": 61,
+            "columns": [
+              "impact_00",
+              "impact_01",
+              "impact_02",
+              "impact_03",
+              "impact_04",
+              "impact_05",
+              "impact_06",
+              "centerline_00",
+              "centerline_01",
+              "centerline_02",
+              "centerline_03"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.0300003,
+            "dt_median_s": 0.0005000000000000004,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "impact_00",
+                "peak_abs": 8093.49,
+                "peak_signed": 8093.49,
+                "peak_time_s": 0.0275002
+              },
+              {
+                "name": "impact_01",
+                "peak_abs": 13832.5,
+                "peak_signed": -13832.5,
+                "peak_time_s": 0.0145001
+              },
+              {
+                "name": "impact_02",
+                "peak_abs": 73615.6,
+                "peak_signed": 73615.6,
+                "peak_time_s": 0.0180004
+              },
+              {
+                "name": "impact_03",
+                "peak_abs": 4921070.0,
+                "peak_signed": 4921070.0,
+                "peak_time_s": 0.00600005
+              },
+              {
+                "name": "impact_04",
+                "peak_abs": 75104.6,
+                "peak_signed": 75104.6,
+                "peak_time_s": 0.0145001
+              },
+              {
+                "name": "impact_05",
+                "peak_abs": 13132.3,
+                "peak_signed": 13132.3,
+                "peak_time_s": 0.0170003
+              },
+              {
+                "name": "impact_06",
+                "peak_abs": 17028.7,
+                "peak_signed": 17028.7,
+                "peak_time_s": 0.0225004
+              },
+              {
+                "name": "centerline_00",
+                "peak_abs": 183610.0,
+                "peak_signed": 183610.0,
+                "peak_time_s": 0.0120001
+              },
+              {
+                "name": "centerline_01",
+                "peak_abs": 563714.0,
+                "peak_signed": 563714.0,
+                "peak_time_s": 0.0065001
+              },
+              {
+                "name": "centerline_02",
+                "peak_abs": 132308.0,
+                "peak_signed": 132308.0,
+                "peak_time_s": 0.0065001
+              },
+              {
+                "name": "centerline_03",
+                "peak_abs": 623539.0,
+                "peak_signed": -623539.0,
+                "peak_time_s": 0.0065001
+              }
+            ]
+          },
+          "velocity": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/observations/fixed_points_Vel.csv",
+            "exists": true,
+            "rows": 61,
+            "columns": [
+              "impact_00",
+              "impact_01",
+              "impact_02",
+              "impact_03",
+              "impact_04",
+              "impact_05",
+              "impact_06",
+              "centerline_00",
+              "centerline_01",
+              "centerline_02",
+              "centerline_03"
+            ],
+            "components_per_point": 3,
+            "time_start_s": 0.0,
+            "time_end_s": 0.0300003,
+            "dt_median_s": 0.0005000000000000004,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "impact_00",
+                "peak_speed": 31.243429701681997,
+                "peak_time_s": 0.00950007
+              },
+              {
+                "name": "impact_01",
+                "peak_speed": 34.6672004556492,
+                "peak_time_s": 0.008
+              },
+              {
+                "name": "impact_02",
+                "peak_speed": 32.202005918508014,
+                "peak_time_s": 0.00700016
+              },
+              {
+                "name": "impact_03",
+                "peak_speed": 1.7702699204515282,
+                "peak_time_s": 0.00600005
+              },
+              {
+                "name": "impact_04",
+                "peak_speed": 32.28389353653837,
+                "peak_time_s": 0.00700016
+              },
+              {
+                "name": "impact_05",
+                "peak_speed": 34.667892774120325,
+                "peak_time_s": 0.008
+              },
+              {
+                "name": "impact_06",
+                "peak_speed": 41.927368413583984,
+                "peak_time_s": 0.00850011
+              },
+              {
+                "name": "centerline_00",
+                "peak_speed": 20.03950000007175,
+                "peak_time_s": 0.00550017
+              },
+              {
+                "name": "centerline_01",
+                "peak_speed": 21.1002513021396,
+                "peak_time_s": 0.00900006
+              },
+              {
+                "name": "centerline_02",
+                "peak_speed": 21.222300949740205,
+                "peak_time_s": 0.00750015
+              },
+              {
+                "name": "centerline_03",
+                "peak_speed": 22.75680000000712,
+                "peak_time_s": 0.0065001
+              }
+            ]
+          },
+          "density": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/observations/fixed_points_Rhop.csv",
+            "exists": true,
+            "rows": 61,
+            "columns": [
+              "impact_00",
+              "impact_01",
+              "impact_02",
+              "impact_03",
+              "impact_04",
+              "impact_05",
+              "impact_06",
+              "centerline_00",
+              "centerline_01",
+              "centerline_02",
+              "centerline_03"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.0300003,
+            "dt_median_s": 0.0005000000000000004,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "impact_00",
+                "peak_abs": 1000.15,
+                "peak_signed": 1000.15,
+                "peak_time_s": 0.0275002
+              },
+              {
+                "name": "impact_01",
+                "peak_abs": 1000.18,
+                "peak_signed": 1000.18,
+                "peak_time_s": 0.0120001
+              },
+              {
+                "name": "impact_02",
+                "peak_abs": 1001.39,
+                "peak_signed": 1001.39,
+                "peak_time_s": 0.0180004
+              },
+              {
+                "name": "impact_03",
+                "peak_abs": 1074.06,
+                "peak_signed": 1074.06,
+                "peak_time_s": 0.00600005
+              },
+              {
+                "name": "impact_04",
+                "peak_abs": 1001.41,
+                "peak_signed": 1001.41,
+                "peak_time_s": 0.0145001
+              },
+              {
+                "name": "impact_05",
+                "peak_abs": 1000.25,
+                "peak_signed": 1000.25,
+                "peak_time_s": 0.0170003
+              },
+              {
+                "name": "impact_06",
+                "peak_abs": 1000.32,
+                "peak_signed": 1000.32,
+                "peak_time_s": 0.0225004
+              },
+              {
+                "name": "centerline_00",
+                "peak_abs": 1003.44,
+                "peak_signed": 1003.44,
+                "peak_time_s": 0.0120001
+              },
+              {
+                "name": "centerline_01",
+                "peak_abs": 1010.32,
+                "peak_signed": 1010.32,
+                "peak_time_s": 0.0065001
+              },
+              {
+                "name": "centerline_02",
+                "peak_abs": 1002.47,
+                "peak_signed": 1002.47,
+                "peak_time_s": 0.0065001
+              },
+              {
+                "name": "centerline_03",
+                "peak_abs": 1001.33,
+                "peak_signed": 1001.33,
+                "peak_time_s": 0.0120001
+              }
+            ]
+          },
+          "kernel_correction": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/observations/fixed_points_Kcorr.csv",
+            "exists": true,
+            "rows": 61,
+            "columns": [
+              "impact_00",
+              "impact_01",
+              "impact_02",
+              "impact_03",
+              "impact_04",
+              "impact_05",
+              "impact_06",
+              "centerline_00",
+              "centerline_01",
+              "centerline_02",
+              "centerline_03"
+            ],
+            "components_per_point": 1,
+            "time_start_s": 0.0,
+            "time_end_s": 0.0300003,
+            "dt_median_s": 0.0005000000000000004,
+            "finite_fraction": 1.0,
+            "issues": [],
+            "peaks": [
+              {
+                "name": "impact_00",
+                "peak_abs": 0.904356,
+                "peak_signed": 0.904356,
+                "peak_time_s": 0.0160002
+              },
+              {
+                "name": "impact_01",
+                "peak_abs": 0.915482,
+                "peak_signed": 0.915482,
+                "peak_time_s": 0.0275002
+              },
+              {
+                "name": "impact_02",
+                "peak_abs": 0.900182,
+                "peak_signed": 0.900182,
+                "peak_time_s": 0.0180004
+              },
+              {
+                "name": "impact_03",
+                "peak_abs": 0.890008,
+                "peak_signed": 0.890008,
+                "peak_time_s": 0.0300003
+              },
+              {
+                "name": "impact_04",
+                "peak_abs": 0.902377,
+                "peak_signed": 0.902377,
+                "peak_time_s": 0.0185001
+              },
+              {
+                "name": "impact_05",
+                "peak_abs": 0.916422,
+                "peak_signed": 0.916422,
+                "peak_time_s": 0.0210002
+              },
+              {
+                "name": "impact_06",
+                "peak_abs": 0.918219,
+                "peak_signed": 0.918219,
+                "peak_time_s": 0.0220004
+              },
+              {
+                "name": "centerline_00",
+                "peak_abs": 1.06274,
+                "peak_signed": 1.06274,
+                "peak_time_s": 0.0115003
+              },
+              {
+                "name": "centerline_01",
+                "peak_abs": 1.01536,
+                "peak_signed": 1.01536,
+                "peak_time_s": 0.00900006
+              },
+              {
+                "name": "centerline_02",
+                "peak_abs": 1.00825,
+                "peak_signed": 1.00825,
+                "peak_time_s": 0.0165004
+              },
+              {
+                "name": "centerline_03",
+                "peak_abs": 1.009,
+                "peak_signed": 1.009,
+                "peak_time_s": 0.008
+              }
+            ],
+            "minimum": 0.0,
+            "maximum": 1.06274,
+            "zero_fraction": 0.18181818181818182,
+            "support_interpretation": "Kcorr=0 can be an interpolation dummy when kernel support is insufficient; it must not be interpreted as a physical zero."
+          }
+        },
+        "wall_force": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/observations/wall_force.csv",
+          "exists": true,
+          "rows": 61,
+          "header": [
+            "Part",
+            "Time [s]",
+            "Np",
+            "ForceFluid.x [N/m]",
+            "ForceFluid.y [N/m]",
+            "ForceFluid.z [N/m]",
+            "ForceFluid [N/m]"
+          ],
+          "finite_fraction": 1.0,
+          "units": "N/m for this 2-D case",
+          "issues": [],
+          "time_start_s": 0.0,
+          "time_end_s": 0.03,
+          "dt_median_s": 0.0005000000000000004,
+          "peak_force_abs_n_per_m": 66416.03884172,
+          "peak_force_time_s": 0.006,
+          "peak_force_z_n_per_m": -66416.03884095
+        },
+        "flow_boxes": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/observations/flow_boxes.xml",
+          "sha256": "8c617232535ccb55aad97ba7a8ce05fb0fc74ba9462dff7d651a07f2d31cae80",
+          "two_dimensional_per_depth": true,
+          "boxes": {
+            "inlet": {
+              "point": [
+                -0.016,
+                -0.00075,
+                0.117
+              ],
+              "size": [
+                0.032,
+                0.0015,
+                0.011
+              ]
+            },
+            "left_outlet": {
+              "point": [
+                -0.205,
+                -0.00075,
+                -0.001
+              ],
+              "size": [
+                0.011,
+                0.0015,
+                0.008
+              ]
+            },
+            "right_outlet": {
+              "point": [
+                0.194,
+                -0.00075,
+                -0.001
+              ],
+              "size": [
+                0.011,
+                0.0015,
+                0.008
+              ]
+            }
+          }
+        },
+        "flow": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/observations/flow.csv",
+          "exists": true,
+          "rows": 61,
+          "header": [
+            "Time [s]",
+            "Nok_inlet",
+            "Nok_left_outlet",
+            "Nok_right_outlet",
+            "Nok_World",
+            "Nout_inlet",
+            "Nout_left_outlet",
+            "Nout_right_outlet",
+            "Nout_World",
+            "Input_inlet",
+            "Input_left_outlet",
+            "Input_right_outlet",
+            "Input_World",
+            "Output_inlet",
+            "Output_left_outlet",
+            "Output_right_outlet",
+            "Output_World",
+            "InVel_inlet [m/s]",
+            "InVel_left_outlet [m/s]",
+            "InVel_right_outlet [m/s]",
+            "InVel_World [m/s]",
+            "InVolume_inlet [m^3]",
+            "InVolume_left_outlet [m^3]",
+            "InVolume_right_outlet [m^3]",
+            "InVolume_World [m^3]",
+            "InFlow_inlet [m^3/s]",
+            "InFlow_left_outlet [m^3/s]",
+            "InFlow_right_outlet [m^3/s]",
+            "InFlow_World [m^3/s]",
+            "OutVolume_inlet [m^3]",
+            "OutVolume_left_outlet [m^3]",
+            "OutVolume_right_outlet [m^3]",
+            "OutVolume_World [m^3]",
+            "OutFlow_inlet [m^3/s]",
+            "OutFlow_left_outlet [m^3/s]",
+            "OutFlow_right_outlet [m^3/s]",
+            "OutFlow_World [m^3/s]"
+          ],
+          "two_dimensional_per_depth": true,
+          "issues": [],
+          "time_start_s": 0.0,
+          "time_end_s": 0.0300003,
+          "dt_median_s": 0.0005000000000000004,
+          "finite_fraction": 1.0,
+          "columns": {
+            "Nok_inlet": {
+              "max_abs": 615.0,
+              "sum": 35724.0
+            },
+            "Nok_left_outlet": {
+              "max_abs": 89.0,
+              "sum": 3460.0
+            },
+            "Nok_right_outlet": {
+              "max_abs": 91.0,
+              "sum": 3433.0
+            },
+            "Nok_World": {
+              "max_abs": 17626.0,
+              "sum": 764155.0
+            },
+            "Nout_inlet": {
+              "max_abs": 0.0,
+              "sum": 0.0
+            },
+            "Nout_left_outlet": {
+              "max_abs": 89.0,
+              "sum": 2684.0
+            },
+            "Nout_right_outlet": {
+              "max_abs": 91.0,
+              "sum": 2696.0
+            },
+            "Nout_World": {
+              "max_abs": 572.0,
+              "sum": 10059.0
+            },
+            "Input_inlet": {
+              "max_abs": 574.0,
+              "sum": 32800.0
+            },
+            "Input_left_outlet": {
+              "max_abs": 89.0,
+              "sum": 2724.0
+            },
+            "Input_right_outlet": {
+              "max_abs": 91.0,
+              "sum": 2734.0
+            },
+            "Input_World": {
+              "max_abs": 574.0,
+              "sum": 32677.0
+            },
+            "Output_inlet": {
+              "max_abs": 574.0,
+              "sum": 32677.0
+            },
+            "Output_left_outlet": {
+              "max_abs": 89.0,
+              "sum": 2684.0
+            },
+            "Output_right_outlet": {
+              "max_abs": 91.0,
+              "sum": 2696.0
+            },
+            "Output_World": {
+              "max_abs": 739.0,
+              "sum": 15517.0
+            },
+            "InVel_inlet [m/s]": {
+              "max_abs": 20.0348,
+              "sum": 1199.9065999999998
+            },
+            "InVel_left_outlet [m/s]": {
+              "max_abs": 40.7428,
+              "sum": 885.3028999999999
+            },
+            "InVel_right_outlet [m/s]": {
+              "max_abs": 52.6595,
+              "sum": 959.6700999999999
+            },
+            "InVel_World [m/s]": {
+              "max_abs": 21.5308,
+              "sum": 1201.953
+            },
+            "InVolume_inlet [m^3]": {
+              "max_abs": 0.000322875,
+              "sum": 0.018449979999999998
+            },
+            "InVolume_left_outlet [m^3]": {
+              "max_abs": 5.00625e-05,
+              "sum": 0.0015322500000000002
+            },
+            "InVolume_right_outlet [m^3]": {
+              "max_abs": 5.11875e-05,
+              "sum": 0.0015378750000000002
+            },
+            "InVolume_World [m^3]": {
+              "max_abs": 0.000322875,
+              "sum": 0.018380795000000002
+            },
+            "InFlow_inlet [m^3/s]": {
+              "max_abs": 0.645937,
+              "sum": 36.89967300000001
+            },
+            "InFlow_left_outlet [m^3/s]": {
+              "max_abs": 0.100136,
+              "sum": 3.06447337
+            },
+            "InFlow_right_outlet [m^3/s]": {
+              "max_abs": 0.102384,
+              "sum": 3.07571831
+            },
+            "InFlow_World [m^3/s]": {
+              "max_abs": 0.645938,
+              "sum": 36.761387000000006
+            },
+            "OutVolume_inlet [m^3]": {
+              "max_abs": 0.000322875,
+              "sum": 0.018380795000000002
+            },
+            "OutVolume_left_outlet [m^3]": {
+              "max_abs": 5.00625e-05,
+              "sum": 0.0015097500000000002
+            },
+            "OutVolume_right_outlet [m^3]": {
+              "max_abs": 5.11875e-05,
+              "sum": 0.0015164999999999998
+            },
+            "OutVolume_World [m^3]": {
+              "max_abs": 0.000415688,
+              "sum": 0.008728309999999998
+            },
+            "OutFlow_inlet [m^3/s]": {
+              "max_abs": 0.645938,
+              "sum": 36.761387000000006
+            },
+            "OutFlow_left_outlet [m^3/s]": {
+              "max_abs": 0.100076,
+              "sum": 3.0194629799999997
+            },
+            "OutFlow_right_outlet [m^3/s]": {
+              "max_abs": 0.102405,
+              "sum": 3.0329805699999994
+            },
+            "OutFlow_World [m^3/s]": {
+              "max_abs": 0.831444,
+              "sum": 17.456561400000002
+            }
+          }
+        },
+        "lifecycle": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/r3-f4-impinging-jet/fine__tmax-0p03__tout-0p0005/RunPARTs.csv",
+          "exists": true,
+          "rows": 61,
+          "issues": [],
+          "identity_semantics": "solver numerical-node lifecycle only; not material lineage",
+          "time_start_s": 0.0,
+          "time_end_s": 0.03000026421918102,
+          "dt_median_s": 0.0004999839221450707,
+          "NpSave_initial": 2947,
+          "NpSave_final": 20308,
+          "NpSave_min": 2947,
+          "NpSave_max": 20540,
+          "NpSave_sum": 939508,
+          "NpSim_initial": 2947,
+          "NpSim_final": 20308,
+          "NpSim_min": 2947,
+          "NpSim_max": 20540,
+          "NpSim_sum": 939508,
+          "NpNew_initial": 484,
+          "NpNew_final": 533,
+          "NpNew_min": 484,
+          "NpNew_max": 574,
+          "NpNew_sum": 33284,
+          "NpOut_initial": 0,
+          "NpOut_final": 0,
+          "NpOut_min": 0,
+          "NpOut_max": 16,
+          "NpOut_sum": 27,
+          "NpbSim_initial": 2176,
+          "NpbSim_final": 2176,
+          "NpbSim_min": 2176,
+          "NpbSim_max": 2176,
+          "NpbSim_sum": 132736,
+          "NpfSim_initial": 771,
+          "NpfSim_final": 18132,
+          "NpfSim_min": 771,
+          "NpfSim_max": 18364,
+          "NpfSim_sum": 806772,
+          "numerical_lifecycle_observed": true
+        },
+        "limitations": [
+          "The force CSV is a two-dimensional per-depth wall integral, not a 3-D load.",
+          "FlowTool counts numerical particles crossing boxes; it is not an external flow meter.",
+          "No experimental pressure, force, or flux reference is bundled with O4."
+        ]
+      }
+    }
+  ],
+  "open_blockers": [
+    "No external pressure, force, or flux anchor is present for O4.",
+    "A 3-D F4 case is still needed before a 3-D family admission decision.",
+    "Force and flow conventions require an independently declared uncertainty model.",
+    "Particle crossing counts cannot replace material-lineage validation."
+  ],
+  "resolution_comparison": {
+    "status": "diagnostic_only",
+    "acceptance_threshold_declared": false,
+    "pair_count": 3,
+    "computed_pair_count": 3,
+    "pairs": [
+      {
+        "left": {
+          "label": "coarse",
+          "dp_m": 0.0015
+        },
+        "right": {
+          "label": "medium",
+          "dp_m": 0.001
+        },
+        "excluded_particles": {
+          "left": 11,
+          "right": 6
+        },
+        "pressure_impact_points": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.0300003,
+          "samples": 61,
+          "rmse": [
+            7377.294623968255,
+            8053.826860933915,
+            20619.454282859802,
+            390899.4829854682,
+            22307.964269085365,
+            7038.381551845601,
+            4103.168707085954
+          ],
+          "max_abs": [
+            35887.840243380575,
+            32159.526970515413,
+            76067.77568052689,
+            3018768.1594049325,
+            60050.56446173755,
+            21815.82268043978,
+            14875.958505698845
+          ],
+          "relative_rmse": [
+            0.21477280896532203,
+            0.5247037968757426,
+            0.2532986640815452,
+            0.1294897330116677,
+            0.3104861512495789,
+            0.5279910225713,
+            0.37772422267823563
+          ],
+          "max_rmse": 390899.4829854682,
+          "max_relative_rmse": 0.5279910225713
+        },
+        "wall_force_magnitude": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.03,
+          "samples": 61,
+          "rmse": [
+            4635.567229683928
+          ],
+          "max_abs": [
+            29784.843027250005
+          ],
+          "relative_rmse": [
+            0.1070002028068521
+          ],
+          "max_rmse": 4635.567229683928,
+          "max_relative_rmse": 0.1070002028068521
+        },
+        "flow_common_columns": [
+          "Nok_inlet",
+          "Nok_left_outlet",
+          "Nok_right_outlet",
+          "Nok_World",
+          "Nout_inlet",
+          "Nout_left_outlet",
+          "Nout_right_outlet",
+          "Nout_World",
+          "Input_inlet",
+          "Input_left_outlet",
+          "Input_right_outlet",
+          "Input_World",
+          "Output_inlet",
+          "Output_left_outlet",
+          "Output_right_outlet",
+          "Output_World",
+          "InVel_inlet [m/s]",
+          "InVel_left_outlet [m/s]",
+          "InVel_right_outlet [m/s]",
+          "InVel_World [m/s]",
+          "InVolume_inlet [m^3]",
+          "InVolume_left_outlet [m^3]",
+          "InVolume_right_outlet [m^3]",
+          "InVolume_World [m^3]",
+          "InFlow_inlet [m^3/s]",
+          "InFlow_left_outlet [m^3/s]",
+          "InFlow_right_outlet [m^3/s]",
+          "InFlow_World [m^3/s]",
+          "OutVolume_inlet [m^3]",
+          "OutVolume_left_outlet [m^3]",
+          "OutVolume_right_outlet [m^3]",
+          "OutVolume_World [m^3]",
+          "OutFlow_inlet [m^3/s]",
+          "OutFlow_left_outlet [m^3/s]",
+          "OutFlow_right_outlet [m^3/s]",
+          "OutFlow_World [m^3/s]"
+        ],
+        "flow": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.0300003,
+          "samples": 61,
+          "rmse": [
+            187.3900060825955,
+            17.91257924601806,
+            19.436836363009107,
+            4234.623058056212,
+            0.0,
+            18.298508171754577,
+            19.75019031269306,
+            73.45107567149363,
+            169.41974489425868,
+            18.130821801629544,
+            19.724141787075915,
+            147.51244633722655,
+            168.35851556732322,
+            18.27029398344633,
+            19.663657030830084,
+            93.91998129578504,
+            0.012477869735216992,
+            7.3711654210271,
+            8.00302276023074,
+            0.1666914562712951,
+            2.250565444456076e-05,
+            6.913920824269689e-06,
+            8.44916667564451e-06,
+            5.707233465719118e-05,
+            0.04506578933740123,
+            0.013828961053613567,
+            0.01691209246846978,
+            0.1141622732112679,
+            2.3499117339415233e-05,
+            7.782288143783691e-06,
+            9.386623529906572e-06,
+            5.4784935119311205e-05,
+            0.04702591440762309,
+            0.015569651602926107,
+            0.01876905415149333,
+            0.10956337233757771
+          ],
+          "max_abs": [
+            218.99960007998402,
+            32.99995972810876,
+            33.000600251997625,
+            5423.992226981177,
+            0.0,
+            33.99618217408468,
+            34.99523944373038,
+            177.9897579445136,
+            193.89582980009268,
+            32.99995972810876,
+            34.998959923932006,
+            176.98912096190372,
+            197.98912096190372,
+            33.99618217408468,
+            34.99523944373038,
+            209.98925764493322,
+            0.04159312601058218,
+            41.16146721259014,
+            38.42561441598168,
+            1.2026677837144426,
+            2.6499999999999994e-05,
+            2.099795540891821e-05,
+            2.249415668797449e-05,
+            9.299860027994403e-05,
+            0.05359991812713849,
+            0.04205370425814837,
+            0.04496854196742522,
+            0.18552739816275043,
+            4.5748600279943994e-05,
+            2.0995350377924307e-05,
+            2.7717652946819628e-05,
+            0.00012375739217415649,
+            0.09106537513196278,
+            0.04198460593913116,
+            0.05540463227312386,
+            0.24754677532599273
+          ],
+          "relative_rmse": [
+            0.5119951115838489,
+            0.3379777847174161,
+            0.3811160818631826,
+            0.4250349772916491,
+            0.0,
+            0.3452599493024579,
+            0.3872617462403903,
+            0.23468239807891478,
+            0.4973299172465509,
+            0.3420956247260254,
+            0.3867495458422676,
+            0.4538857069313221,
+            0.5180276359968286,
+            0.34472759829692884,
+            0.3855650015857005,
+            0.23480978000294214,
+            0.000616666943321817,
+            0.17907926806779295,
+            0.2082731241091668,
+            0.007990269845542054,
+            0.06606511696425163,
+            0.13045310850014732,
+            0.16567064918851263,
+            0.17560766976151043,
+            0.06621197192877057,
+            0.13039601716086344,
+            0.16575980505995908,
+            0.17559747663999764,
+            0.07230517661865186,
+            0.14683778506749373,
+            0.18405292110813537,
+            0.13696806989694574,
+            0.07233240609518705,
+            0.1468773641777766,
+            0.18402663356675966,
+            0.1369086351238593
+          ],
+          "max_rmse": 4234.623058056212,
+          "max_relative_rmse": 0.5180276359968286
+        }
+      },
+      {
+        "left": {
+          "label": "coarse",
+          "dp_m": 0.0015
+        },
+        "right": {
+          "label": "fine",
+          "dp_m": 0.00075
+        },
+        "excluded_particles": {
+          "left": 11,
+          "right": 27
+        },
+        "pressure_impact_points": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.0300003,
+          "samples": 61,
+          "rmse": [
+            5340.501201877185,
+            9150.054872122928,
+            19620.4050091893,
+            631646.2053523958,
+            23765.240656212387,
+            6915.110648025376,
+            4719.085277648622
+          ],
+          "max_abs": [
+            31933.717584881313,
+            32156.212084785475,
+            73793.17363287353,
+            4920971.588441157,
+            76741.03802194013,
+            26106.879106363172,
+            17020.10638496137
+          ],
+          "relative_rmse": [
+            0.6600143763126197,
+            0.6615649543528941,
+            0.2665731056043955,
+            0.128358027271701,
+            0.3164377025141441,
+            0.52667331402727,
+            0.27719462067574524
+          ],
+          "max_rmse": 631646.2053523958,
+          "max_relative_rmse": 0.6615649543528941
+        },
+        "wall_force_magnitude": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.03,
+          "samples": 61,
+          "rmse": [
+            7153.809647676956
+          ],
+          "max_abs": [
+            52877.90576161
+          ],
+          "relative_rmse": [
+            0.10771207937777837
+          ],
+          "max_rmse": 7153.809647676956,
+          "max_relative_rmse": 0.10771207937777837
+        },
+        "flow_common_columns": [
+          "Nok_inlet",
+          "Nok_left_outlet",
+          "Nok_right_outlet",
+          "Nok_World",
+          "Nout_inlet",
+          "Nout_left_outlet",
+          "Nout_right_outlet",
+          "Nout_World",
+          "Input_inlet",
+          "Input_left_outlet",
+          "Input_right_outlet",
+          "Input_World",
+          "Output_inlet",
+          "Output_left_outlet",
+          "Output_right_outlet",
+          "Output_World",
+          "InVel_inlet [m/s]",
+          "InVel_left_outlet [m/s]",
+          "InVel_right_outlet [m/s]",
+          "InVel_World [m/s]",
+          "InVolume_inlet [m^3]",
+          "InVolume_left_outlet [m^3]",
+          "InVolume_right_outlet [m^3]",
+          "InVolume_World [m^3]",
+          "InFlow_inlet [m^3/s]",
+          "InFlow_left_outlet [m^3/s]",
+          "InFlow_right_outlet [m^3/s]",
+          "InFlow_World [m^3/s]",
+          "OutVolume_inlet [m^3]",
+          "OutVolume_left_outlet [m^3]",
+          "OutVolume_right_outlet [m^3]",
+          "OutVolume_World [m^3]",
+          "OutFlow_inlet [m^3/s]",
+          "OutFlow_left_outlet [m^3/s]",
+          "OutFlow_right_outlet [m^3/s]",
+          "OutFlow_World [m^3/s]"
+        ],
+        "flow": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.0300003,
+          "samples": 61,
+          "rmse": [
+            432.8466955697797,
+            44.974956619357584,
+            45.227618036166085,
+            10142.60753375656,
+            0.0,
+            44.282696135591316,
+            44.637786453298006,
+            178.6212423896207,
+            404.3559508015314,
+            44.56828696270959,
+            44.9164713508849,
+            381.31744222245163,
+            402.1944582645617,
+            44.26031697539254,
+            44.565352956840684,
+            246.07619091622794,
+            0.040376050272413,
+            5.893180283272616,
+            10.799588639892802,
+            0.2458612181278385,
+            3.367756198941363e-05,
+            6.163184199267836e-06,
+            7.186958326196931e-06,
+            5.8149310778299154e-05,
+            0.06737164620847355,
+            0.012329103912885669,
+            0.014378639509056946,
+            0.116308434248232,
+            2.0758148251646514e-05,
+            6.973935570693886e-06,
+            8.06006587147214e-06,
+            5.782971306249939e-05,
+            0.041532913993910056,
+            0.013951790182807252,
+            0.01611528737028078,
+            0.11564265425203346
+          ],
+          "max_abs": [
+            468.0,
+            69.99957983233563,
+            71.99765990790638,
+            13086.969421542264,
+            0.0,
+            70.99974994814222,
+            71.99944000000002,
+            436.9641964014391,
+            448.0,
+            70.99916016806705,
+            72.99765990790638,
+            419.97982752288175,
+            440.97982752288175,
+            70.99974994814222,
+            71.99944000000002,
+            548.9601476009592,
+            0.3036687499881552,
+            40.742602938412354,
+            52.656867709395485,
+            1.8715552966360818,
+            3.937499999999997e-05,
+            1.9121020386750043e-05,
+            2.249842544093699e-05,
+            8.040080040435537e-05,
+            0.07921065163275187,
+            0.03817100671044399,
+            0.04498175322671307,
+            0.16096880575263683,
+            3.0937999999999994e-05,
+            1.68724123873966e-05,
+            2.4717635450318928e-05,
+            0.0001253976839655544,
+            0.06242356264551796,
+            0.03380915518727058,
+            0.049402797354107665,
+            0.25078495505121945
+          ],
+          "relative_rmse": [
+            0.7038157651541133,
+            0.5053437426728309,
+            0.4970144395117944,
+            0.5754352221931421,
+            0.0,
+            0.4975619042051181,
+            0.49052814449515286,
+            0.3122993590924968,
+            0.704452875960856,
+            0.5007743560236948,
+            0.4935951925537229,
+            0.6643161014328426,
+            0.7006872095201424,
+            0.49731045118769296,
+            0.4897321671082885,
+            0.3330060341581789,
+            0.002015297499150437,
+            0.14464417730455048,
+            0.2050936394373843,
+            0.0114191037301814,
+            0.10430526361413435,
+            0.1231115389699459,
+            0.1404067188006148,
+            0.1800985235100245,
+            0.10430116931200102,
+            0.12312534575724862,
+            0.1404405061005633,
+            0.18006181408508087,
+            0.0642915935010345,
+            0.13930556638931954,
+            0.15746257332713526,
+            0.13912670380547892,
+            0.0642987921410933,
+            0.1394129182914728,
+            0.1573691407415188,
+            0.1390951671988571
+          ],
+          "max_rmse": 10142.60753375656,
+          "max_relative_rmse": 0.704452875960856
+        }
+      },
+      {
+        "left": {
+          "label": "medium",
+          "dp_m": 0.001
+        },
+        "right": {
+          "label": "fine",
+          "dp_m": 0.00075
+        },
+        "excluded_particles": {
+          "left": 6,
+          "right": 27
+        },
+        "pressure_impact_points": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.0300003,
+          "samples": 61,
+          "rmse": [
+            5332.02223335934,
+            5868.699922732331,
+            15690.276876512322,
+            246461.79586299308,
+            12020.967525778991,
+            6452.380017567041,
+            4299.225016265211
+          ],
+          "max_abs": [
+            31973.635454857438,
+            18285.275310018882,
+            71603.89115446171,
+            1902203.4290362243,
+            34841.97712911466,
+            19698.572380534944,
+            17024.06592496808
+          ],
+          "relative_rmse": [
+            0.6589664894371121,
+            0.4243172582846438,
+            0.21317632499460548,
+            0.0500839704992213,
+            0.16006096470393952,
+            0.491430512132985,
+            0.2525324247111527
+          ],
+          "max_rmse": 246461.79586299308,
+          "max_relative_rmse": 0.6589664894371121
+        },
+        "wall_force_magnitude": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.03,
+          "samples": 61,
+          "rmse": [
+            3491.6630209371424
+          ],
+          "max_abs": [
+            23093.06273436
+          ],
+          "relative_rmse": [
+            0.052572587613337364
+          ],
+          "max_rmse": 3491.6630209371424,
+          "max_relative_rmse": 0.052572587613337364
+        },
+        "flow_common_columns": [
+          "Nok_inlet",
+          "Nok_left_outlet",
+          "Nok_right_outlet",
+          "Nok_World",
+          "Nout_inlet",
+          "Nout_left_outlet",
+          "Nout_right_outlet",
+          "Nout_World",
+          "Input_inlet",
+          "Input_left_outlet",
+          "Input_right_outlet",
+          "Input_World",
+          "Output_inlet",
+          "Output_left_outlet",
+          "Output_right_outlet",
+          "Output_World",
+          "InVel_inlet [m/s]",
+          "InVel_left_outlet [m/s]",
+          "InVel_right_outlet [m/s]",
+          "InVel_World [m/s]",
+          "InVolume_inlet [m^3]",
+          "InVolume_left_outlet [m^3]",
+          "InVolume_right_outlet [m^3]",
+          "InVolume_World [m^3]",
+          "InFlow_inlet [m^3/s]",
+          "InFlow_left_outlet [m^3/s]",
+          "InFlow_right_outlet [m^3/s]",
+          "InFlow_World [m^3/s]",
+          "OutVolume_inlet [m^3]",
+          "OutVolume_left_outlet [m^3]",
+          "OutVolume_right_outlet [m^3]",
+          "OutVolume_World [m^3]",
+          "OutFlow_inlet [m^3/s]",
+          "OutFlow_left_outlet [m^3/s]",
+          "OutFlow_right_outlet [m^3/s]",
+          "OutFlow_World [m^3/s]"
+        ],
+        "flow": {
+          "status": "computed",
+          "overlap_start_s": 0.0,
+          "overlap_end_s": 0.0300003,
+          "samples": 61,
+          "rmse": [
+            245.88769218275135,
+            28.51390679539297,
+            27.23133302647597,
+            5908.117782602873,
+            0.0,
+            27.37101496543962,
+            26.389698754246844,
+            108.1452276755475,
+            235.05080079412127,
+            27.724832593354936,
+            26.40798547069035,
+            234.83477268778088,
+            234.83477268778088,
+            27.37101496543962,
+            26.389698754246844,
+            155.5084380869178,
+            0.03885190343181333,
+            5.929940682813213,
+            9.707650902709313,
+            0.08707516235457484,
+            1.2175991947480152e-05,
+            5.709549463778626e-06,
+            5.006425646446328e-06,
+            1.3512308166948384e-05,
+            0.024316998746917767,
+            0.011420714681535861,
+            0.010015278964404692,
+            0.027009432146530538,
+            1.3512308166948384e-05,
+            5.736101608424627e-06,
+            5.527530892661949e-06,
+            2.2289229696297267e-05,
+            0.027009432146530538,
+            0.011471130745792016,
+            0.011056047458722271,
+            0.0445798981403051
+          ],
+          "max_abs": [
+            274.0,
+            62.99297395168179,
+            51.99124547267243,
+            7662.977194561088,
+            0.0,
+            62.99580009598084,
+            51.997679984003206,
+            258.9744384569255,
+            264.0,
+            62.99297395168179,
+            51.99124547267243,
+            288.9969606078784,
+            288.9969606078784,
+            62.99580009598084,
+            51.997679984003206,
+            338.970889956026,
+            0.28797047603919523,
+            41.16146721259014,
+            52.656867709395485,
+            0.6688875129216392,
+            4.1054586582708625e-05,
+            2.5805762643943333e-05,
+            1.7866004895787807e-05,
+            3.7872677944411105e-05,
+            0.08184157087700672,
+            0.05162140516364889,
+            0.035746785002053416,
+            0.07576935616876623,
+            3.7872677944411105e-05,
+            2.5808510053989222e-05,
+            1.7872644991001822e-05,
+            8.122957938548923e-05,
+            0.07576935616876623,
+            0.051574122863828085,
+            0.03569989318587886,
+            0.1623452101854297
+          ],
+          "relative_rmse": [
+            0.39981738566301034,
+            0.32038550921039155,
+            0.299250022640818,
+            0.33519379091228263,
+            0.0,
+            0.3075416701036211,
+            0.28999847421310326,
+            0.1890798924033693,
+            0.4094961686308733,
+            0.3115193814700293,
+            0.29020210807598357,
+            0.4091198130449144,
+            0.4091198130449144,
+            0.3075416701036211,
+            0.28999847421310326,
+            0.21044396067999332,
+            0.0019392224671580867,
+            0.1455464367796303,
+            0.18435678620848142,
+            0.004044234055377809,
+            0.03771116360040311,
+            0.11405004273510426,
+            0.09780713426075244,
+            0.04184996722244951,
+            0.03764627326477572,
+            0.11405366147407767,
+            0.09782224845496332,
+            0.04181439962756713,
+            0.04184996722244951,
+            0.11457961940258851,
+            0.1079866160380171,
+            0.05362342114092117,
+            0.04181439962756713,
+            0.11462499022846703,
+            0.10796460830014117,
+            0.05362077189978299
+          ],
+          "max_rmse": 5908.117782602873,
+          "max_relative_rmse": 0.4094961686308733
+        }
+      }
+    ]
+  }
+}

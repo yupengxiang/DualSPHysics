@@ -4,6 +4,7 @@ from pathlib import Path
 
 from scripts.r3_f45_external_feasibility import (
     _minimum_anchor,
+    inspect_f4_observation_probe,
     inspect_piston,
     inspect_wave_reference,
 )
@@ -64,3 +65,21 @@ def test_f45_anchor_contracts_remain_candidate_only():
             "numerical_acceptance"
         ]
         assert anchor["required_common_fields"][-1] == "measurement_uncertainty"
+
+
+def test_f4_observation_probe_is_linked_without_promoting_physics(tmp_path):
+    path = tmp_path / "r3-f4.json"
+    path.write_text(
+        '{"execution_status":"complete",'
+        '"acceptance_status":"candidate_observations_only",'
+        '"formal_release_authorized":false,'
+        '"resolution_comparison":{"pair_count":3},'
+        '"runs":[{"status":"completed",'
+        '"observations":{"status":"completed"}}]}'
+    )
+    report = inspect_f4_observation_probe(path)
+    assert report["structural_pass"] is True
+    assert report["completed_runs"] == 1
+    assert report["postprocessed_runs"] == 1
+    assert report["resolution_pair_count"] == 3
+    assert report["formal_release_authorized"] is False

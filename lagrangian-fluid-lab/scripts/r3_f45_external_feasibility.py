@@ -388,6 +388,57 @@ def _runtime_map(path: Path) -> dict[str, dict[str, Any]]:
     return {str(item.get("id")): item for item in payload.get("cases", []) if item.get("id")}
 
 
+def inspect_f4_observation_probe(path: Path) -> dict[str, Any]:
+    """Link the internal F4 observation-path result into the family audit.
+
+    The linked report is deliberately treated as candidate evidence only.  It
+    proves that pressure, wall-force, and flow postprocessors ran, but it does
+    not manufacture an external physical reference where the official O4
+    example has none.
+    """
+
+    path = Path(path)
+    result: dict[str, Any] = {
+        "path": str(path),
+        "exists": path.is_file(),
+        "status": "missing",
+        "execution_status": None,
+        "acceptance_status": None,
+        "completed_runs": 0,
+        "postprocessed_runs": 0,
+        "resolution_pair_count": 0,
+        "formal_release_authorized": False,
+        "issues": [],
+    }
+    if not path.is_file():
+        result["issues"] = ["F4 observation-path report is missing"]
+        return result
+    try:
+        payload = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        result["issues"] = [f"F4 observation-path report unreadable: {error}"]
+        return result
+    runs = payload.get("runs", [])
+    result.update({
+        "status": "present",
+        "execution_status": payload.get("execution_status"),
+        "acceptance_status": payload.get("acceptance_status"),
+        "completed_runs": sum(run.get("status") == "completed" for run in runs),
+        "postprocessed_runs": sum(
+            run.get("observations", {}).get("status") == "completed" for run in runs
+        ),
+        "resolution_pair_count": payload.get("resolution_comparison", {}).get("pair_count", 0),
+        "formal_release_authorized": bool(payload.get("formal_release_authorized", False)),
+        "source_definition_sha256": payload.get("upstream_source", {}).get("case_definition_sha256"),
+    })
+    if result["acceptance_status"] != "candidate_observations_only":
+        result["issues"].append("observation report does not carry the expected candidate-only status")
+    if result["formal_release_authorized"]:
+        result["issues"].append("observation report unexpectedly authorizes formal release")
+    result["structural_pass"] = not result["issues"]
+    return result
+
+
 def _trajectory_path(lab: Path, case_id: str, official: bool) -> Path:
     root = lab / ("data-official" if official else "data")
     return root / f"{case_id}.h5"
@@ -430,7 +481,7 @@ def _minimum_anchor(family: str) -> dict[str, Any]:
             ],
             "current_blockers": [
                 "bundled O4 example has no experimental/reference measurement file",
-                "current normalized O4 output contains particle pressure but no fixed wall probe or flux series",
+                "the candidate observation probe now records fixed-point pressure, wall force, Kcorr, and box flux, but has no external reference",
                 "O4 is a 2D open-boundary interface probe, not evidence for the custom 3D F4 family",
             ],
             "decision": "retain_custom_F4_as_mechanism_only_until_external_anchor_and_resolution_matrix_pass",
@@ -514,6 +565,9 @@ def build_report(lab_root: Path = LAB) -> dict[str, Any]:
     )
 
     o4_dir = lab_root / "cases" / "official" / "O4_impinging_jet"
+    o4_observation_probe = inspect_f4_observation_probe(
+        lab_root / "campaigns" / "v0.1-candidate" / "r3-f4-impinging-observations.json"
+    )
     o4_external_files = []
     for path in sorted(o4_dir.rglob("*")):
         if not path.is_file() or path.suffix.lower() not in {".txt", ".csv", ".xls", ".xlsx", ".ods", ".pdf"}:
@@ -549,6 +603,7 @@ def build_report(lab_root: Path = LAB) -> dict[str, Any]:
         "configured_inlet_speed_m_s": o4_inlet_speed,
         "external_reference_files": o4_external_files,
         "external_reference_status": "missing" if not o4_external_files else "present_but_requires_mapping",
+        "observation_path_probe": o4_observation_probe,
     }
     families["F5"]["official_reference_inventory"] = {
         "wave_reference": wave_reference,
@@ -592,6 +647,7 @@ def conclusion(report: dict[str, Any]) -> str:
     f4_official = f4["official_probes"][0]
     f5_official = {item["case_id"]: item for item in f5["official_probes"]}
     ref = f5["official_reference_inventory"]["wave_reference"]
+    f4_probe = f4["official_reference_inventory"].get("observation_path_probe", {})
     return f"""# R3 F4/F5 外部验证可行性结论
 
 状态：**candidate-only；没有任何正式数据准入**。
@@ -600,16 +656,16 @@ def conclusion(report: dict[str, Any]) -> str:
 
 | 家族 | 自建机制探针 | 官方/参考探针 | 当前判断 |
 |---|---:|---:|---|
-| F4 | {len(f4_custom)} 个，均为闭域 3D 机制探针 | O4 2D 开放边界，{f4_official['initial_fluid_particles']}→{f4_official['final_fluid_particles']} 个流体粒子 | 无外部观测文件，不能做物理验收 |
+| F4 | {len(f4_custom)} 个，均为闭域 3D 机制探针 | O4 2D 开放边界，{f4_official['initial_fluid_particles']}→{f4_official['final_fluid_particles']} 个流体粒子；内部观测探针完成 {f4_probe.get('completed_runs', 0)} 档 | 观测链路已打通，但无外部文件，不能做物理验收 |
 | F5 | {len(f5_custom)} 个闭域堰/越堤探针 | O5 refined {f5_official['O5_wave_runup_refined']['initial_fluid_particles']} 个初始流体粒子；粗版本已失败 | 有 CIEMito 参考文件，但坐标、时间窗和采样尚未对齐 |
 
 ## 最小可执行锚点
 
 ### F4
 
-必须补一条与粒子不一一对应的外部观测轨道：冲击壁压力或法向合力、入口/出口通量，以及射流中心线/宽度或冲击足迹。每条观测必须带 `time_s`、测点坐标/ID、单位、测量不确定度、时间偏移、`dp_m`、solver/source checksum。当前 O4 只有 2D 开放边界求解；XML 中有 {f4['official_reference_inventory']['inout_zone_count']} 个 in/out zone、入口速度 {f4['official_reference_inventory']['configured_inlet_speed_m_s']} m/s，但仓库没有外部参考文件，也没有固定壁面测压/通量输出。
+必须补一条与粒子不一一对应的外部观测轨道：冲击壁压力或法向合力、入口/出口通量，以及射流中心线/宽度或冲击足迹。每条观测必须带 `time_s`、测点坐标/ID、单位、测量不确定度、时间偏移、`dp_m`、solver/source checksum。当前 O4 只有 2D 开放边界求解；XML 中有 {f4['official_reference_inventory']['inout_zone_count']} 个 in/out zone、入口速度 {f4['official_reference_inventory']['configured_inlet_speed_m_s']} m/s。内部观测探针已新增 {f4_probe.get('completed_runs', 0)} 档运行、{f4_probe.get('postprocessed_runs', 0)} 档三工具后处理和 {f4_probe.get('resolution_pair_count', 0)} 个比较对，但仓库仍没有外部参考文件。
 
-最小执行路径是复制 O4 定义到 lab 自有目录，加入壁面测量与通量导出，做三档分辨率和首撞击高频窗口；开放边界仍必须保留 `valid` 生命周期，不能用初末粒子保留率替代通量验证。
+本轮已经复制 O4 定义到 lab 自有目录，加入壁面测量、Kcorr 支持度与通量导出，并完成三档分辨率和首撞击高频窗口；开放边界的 `RunPARTs.csv` 同时记录注入/离开节点。下一步仍需外部测量锚点、三维 F4 实现和材料谱系验证，不能用初末粒子保留率替代通量验证。
 
 ### F5
 
