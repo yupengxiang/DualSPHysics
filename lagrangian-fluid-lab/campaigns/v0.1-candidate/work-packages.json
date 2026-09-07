@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "campaign_id": "v0.1-candidate",
   "objective": "Freeze an evidence-backed v0.1 benchmark design before formal large-scale production.",
   "resource_ceiling": {
@@ -9,19 +9,20 @@
     "wall_clock_hours": 168,
     "max_hypothesis_driven_retries_per_blocker": 2
   },
+  "status_semantics": "Legacy status recorded execution completion only. acceptance_status and validation_scope govern scientific use.",
   "packages": [
-    {"id": "W00", "name": "protective inventory", "status": "complete", "depends_on": []},
-    {"id": "W01", "name": "engineering and gate repair", "status": "complete", "depends_on": ["W00"]},
-    {"id": "W02", "name": "identity and reference frames", "status": "complete", "depends_on": ["W01"]},
-    {"id": "W03", "name": "independent material tracing", "status": "complete", "depends_on": ["W01", "W02"]},
-    {"id": "W04", "name": "fundamental calibration", "status": "complete", "depends_on": ["W01"]},
-    {"id": "W05", "name": "external validation anchors", "status": "complete", "depends_on": ["W01", "W04"]},
-    {"id": "W06", "name": "real rotating-cup pouring", "status": "complete", "depends_on": ["W01", "W02"]},
-    {"id": "W07", "name": "six-family mechanism screening", "status": "complete", "depends_on": ["W04", "W05", "W06"]},
-    {"id": "W08", "name": "controlled generalization studies", "status": "complete", "depends_on": ["W07"]},
-    {"id": "W09", "name": "bounded open-boundary and adaptive studies", "status": "complete", "depends_on": ["W01", "W02"]},
-    {"id": "W10", "name": "data and evaluation protocol", "status": "complete", "depends_on": ["W01", "W02"]},
-    {"id": "W11", "name": "development pilot dataset", "status": "complete", "depends_on": ["W05", "W06", "W07", "W10"]},
-    {"id": "W12", "name": "real baselines and freeze recommendation", "status": "complete", "depends_on": ["W10", "W11"]}
+    {"id":"W00","name":"protective inventory","status":"complete","execution_status":"complete","acceptance_status":"accepted_engineering","validation_scope":["inventory","resource_guards"],"open_blockers":[],"depends_on":[]},
+    {"id":"W01","name":"engineering and gate repair","status":"complete","execution_status":"complete","acceptance_status":"accepted_engineering","validation_scope":["streaming_conversion","attempt_provenance","strict_structural_gates"],"open_blockers":[],"depends_on":["W00"]},
+    {"id":"W02","name":"identity and reference frames","status":"complete","execution_status":"complete","acceptance_status":"accepted_limited_scope","validation_scope":["fixed_resolution_numerical_identity","declared_reference_frames"],"open_blockers":["numerical identity is not material identity"],"depends_on":["W01"]},
+    {"id":"W03","name":"independent material tracing","status":"complete","execution_status":"complete","acceptance_status":"provisional","validation_scope":["fixed-resolution support-distance consistency"],"open_blockers":["wall visibility","moving boundaries","cadence separation","tracer mass weights"],"depends_on":["W01","W02"]},
+    {"id":"W04","name":"fundamental calibration","status":"complete","execution_status":"complete","acceptance_status":"partial","validation_scope":["ballistic pre-impact motion","coarse diagnostic calibrations"],"open_blockers":["static hydrostatic error","coarse buoyancy error"],"depends_on":["W01"]},
+    {"id":"W05","name":"external validation anchors","status":"complete","execution_status":"complete","acceptance_status":"partial","validation_scope":["F1 selected surface gauges","F3 fine first impact magnitude","F6 fine 2D displacement"],"open_blockers":["F1 pressure and H1","F3 impact timing","F6 3D Test14"],"depends_on":["W01","W04"]},
+    {"id":"W06","name":"real rotating-cup pouring","status":"complete","execution_status":"complete","acceptance_status":"development_only","validation_scope":["mechanism and closed-domain transport bookkeeping"],"open_blockers":["resolution study","external observation","lip topology"],"depends_on":["W01","W02"]},
+    {"id":"W07","name":"six-family mechanism screening","status":"complete","execution_status":"design_complete","acceptance_status":"not_experimentally_accepted","validation_scope":["candidate-space generation"],"open_blockers":["144 cards were not executed"],"depends_on":["W04","W05","W06"]},
+    {"id":"W08","name":"controlled generalization studies","status":"complete","execution_status":"design_complete","acceptance_status":"not_experimentally_accepted","validation_scope":["causal split design"],"open_blockers":["204 cards were not executed","declared topology holdouts need executable cases"],"depends_on":["W07"]},
+    {"id":"W09","name":"bounded open-boundary and adaptive studies","status":"complete","execution_status":"complete","acceptance_status":"extension_only","validation_scope":["lifecycle semantics audit"],"open_blockers":["boundary flux schema","cross-zone material tracing"],"depends_on":["W01","W02"]},
+    {"id":"W10","name":"data and evaluation protocol","status":"complete","execution_status":"complete","acceptance_status":"development_snapshot","validation_scope":["core schema and metric primitives"],"open_blockers":["cross-module acceptance suite continues in R3"],"depends_on":["W01","W02"]},
+    {"id":"W11","name":"development pilot dataset","status":"complete","execution_status":"complete","acceptance_status":"development_only","validation_scope":["13-case packaging and loader path"],"open_blockers":["not production resolution","material tracer acceptance pending"],"depends_on":["W05","W06","W07","W10"]},
+    {"id":"W12","name":"real baselines and freeze recommendation","status":"complete","execution_status":"complete","acceptance_status":"pipeline_only","validation_scope":["weak learned baseline execution"],"open_blockers":["input consistency","local interaction model","boundary and control inputs"],"depends_on":["W10","W11"]}
   ]
 }

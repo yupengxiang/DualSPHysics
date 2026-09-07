@@ -5,6 +5,7 @@ from scripts.protocol_metrics import (
     first_passage_metrics,
     mass_fraction_tv,
     trajectory_metrics,
+    validate_affine_transforms,
     validate_split_lineage,
 )
 
@@ -24,6 +25,10 @@ def test_mass_tv_requires_explicit_closure_categories():
     assert mass_fraction_tv({"a": 0.7, "loss": 0.3}, {"a": 0.6, "loss": 0.4}) == pytest.approx(0.1)
     with pytest.raises(ValueError):
         mass_fraction_tv({"a": 0.7, "loss": 0.3}, {"a": 1.2})
+    with pytest.raises(ValueError):
+        mass_fraction_tv({"a": -0.1, "loss": 1.1}, {"a": -0.1, "loss": 1.1})
+    with pytest.raises(ValueError):
+        mass_fraction_tv({"a": 0.7, "loss": 0.3}, {"a": np.nan, "loss": np.nan})
 
 
 def test_first_passage_scores_event_and_time_separately():
@@ -38,3 +43,10 @@ def test_lineage_cannot_cross_splits():
             {"lineage_group_id": "a", "split": "train"},
             {"lineage_group_id": "a", "split": "test"},
         ])
+
+
+def test_affine_transform_rejects_nan_translation():
+    transforms = np.eye(4)[None]
+    transforms[0, 0, 3] = np.nan
+    with pytest.raises(ValueError):
+        validate_affine_transforms(transforms)

@@ -74,12 +74,27 @@ def audit_case(path: Path, expected: dict[str, Any]) -> dict[str, Any]:
         time = h5["time"][:]
         valid = h5["valid"][:]
         require_strict_time(time)
-        require_finite_when_valid(h5["position"][:], valid)
-        require_finite_when_valid(h5["velocity"][:], valid)
+        for field in ("position", "velocity", "density", "pressure", "mass"):
+            require_finite_when_valid(h5[field][:], valid)
+        if h5["position"].shape != h5["velocity"].shape or h5["position"].shape[:2] != valid.shape:
+            raise ValueError(f"{expected['case_id']}: incompatible vector field shapes")
+        for field in ("density", "pressure", "mass", "type", "mk"):
+            if h5[field].shape != valid.shape:
+                raise ValueError(f"{expected['case_id']}: incompatible {field} shape")
         keys = np.column_stack((h5["particle_zone"][:], h5["particle_id"][:]))
         if len(np.unique(keys, axis=0)) != len(keys):
             raise ValueError(f"{expected['case_id']}: duplicate compound identities")
         initial = valid[0]
+        if np.any(valid[:, ~initial]):
+            raise ValueError(f"{expected['case_id']}: closed pilot contains identities born after the initial frame")
+        if not np.all(valid[:, initial]):
+            raise ValueError(f"{expected['case_id']}: closed pilot contains interrupted or terminated identity lifecycles")
+        mass = h5["mass"][:]
+        initial_mass = mass[0, initial]
+        if np.any(initial_mass < 0):
+            raise ValueError(f"{expected['case_id']}: negative initial particle mass")
+        if not np.allclose(mass[:, initial], initial_mass[None, :], rtol=1e-6, atol=1e-9):
+            raise ValueError(f"{expected['case_id']}: particle mass changes over time in fixed-resolution closed case")
         numerical_loss = float(np.sum(initial & ~valid[-1]) / max(1, np.sum(initial)))
         if numerical_loss > 0:
             raise ValueError(f"{expected['case_id']}: closed pilot has numerical loss {numerical_loss}")
@@ -118,8 +133,10 @@ def build(selection_path: Path, lab_root: Path, release_root: Path) -> dict[str,
                 "development_pilot": True,
             })
         material = augment_material(partial, float(record["dp"]), int(selection["material_tracers_per_fluid_case"]))
+        # Audit the candidate path before publishing it under the final name.
+        # A failed rebuild leaves any prior valid target untouched.
+        evidence = audit_case(partial, record)
         os.replace(partial, target)
-        evidence = audit_case(target, record)
         digest = sha256(target)
         checksums.append(f"{digest}  data/{target.name}")
         manifest_cases.append({

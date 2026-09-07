@@ -78,11 +78,14 @@ def make_card(
     normalized_intervention: dict[str, float],
 ) -> dict[str, Any]:
     sig = signature(family, physics)
+    physical_case_id = f"physical_{family}_{sig}"
     return {
         "card_id": f"W08_{family}_{study}_{ordinal:02d}",
         "family": family,
         "study_id": f"W08_{family}_{study}",
-        "lineage_group_id": f"W08_{family}_controlled",
+        "paired_background_id": f"W08_{family}_{study}_background",
+        "physical_case_id": physical_case_id,
+        "lineage_group_id": physical_case_id,
         "split": split,
         "physics": physics,
         "normalized_intervention": normalized_intervention,
@@ -148,6 +151,11 @@ def audit(cards: list[dict[str, Any]]) -> dict[str, Any]:
         split_by_signature.setdefault(card["execution_unit_id"], set()).add(card["split"])
     leakage = {key: sorted(value) for key, value in split_by_signature.items() if len(value) > 1}
     assert not leakage, f"identical physical states cross splits: {leakage}"
+    split_by_lineage: dict[str, set[str]] = {}
+    for card in cards:
+        split_by_lineage.setdefault(card["lineage_group_id"], set()).add(card["split"])
+    lineage_leakage = {key: sorted(value) for key, value in split_by_lineage.items() if len(value) > 1}
+    assert not lineage_leakage, f"lineage crosses splits: {lineage_leakage}"
 
     for family, study in STUDIES.items():
         for axis in study["single_axes"]:
@@ -166,6 +174,7 @@ def audit(cards: list[dict[str, Any]]) -> dict[str, Any]:
         "unique_execution_units": len(split_by_signature),
         "duplicate_cards_reusable_within_split": len(cards) - len(split_by_signature),
         "cross_split_signature_leakage": leakage,
+        "cross_split_lineage_leakage": lineage_leakage,
         "families": sorted(STUDIES),
     }
 

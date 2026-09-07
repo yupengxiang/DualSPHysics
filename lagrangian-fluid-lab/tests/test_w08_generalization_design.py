@@ -1,3 +1,4 @@
+from scripts.protocol_metrics import validate_split_lineage
 from scripts.w08_generalization_design import STUDIES, audit, build_cards
 
 
@@ -8,6 +9,8 @@ def test_w08_design_is_deterministic_and_leak_free():
     result = audit(first)
     assert result["cards"] == 204
     assert result["cross_split_signature_leakage"] == {}
+    assert result["cross_split_lineage_leakage"] == {}
+    validate_split_lineage(first)
 
 
 def test_w08_has_two_single_axis_and_one_joint_study_per_family():
