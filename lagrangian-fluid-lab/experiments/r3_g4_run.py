@@ -91,6 +91,14 @@ def main() -> None:
     parser.add_argument("--learning-rate", type=float, default=1e-3)
     parser.add_argument("--clip-dp", type=float, default=0.0)
     args = parser.parse_args()
+    # Resolve paths before changing the child working directory to LAB.  This
+    # keeps relative CLI arguments from accidentally producing LAB/LAB/... and
+    # makes manifest links deterministic.
+    args.manifest = args.manifest.resolve()
+    args.results_dir = args.results_dir.resolve()
+    args.checkpoints_dir = args.checkpoints_dir.resolve()
+    args.logs_dir = args.logs_dir.resolve()
+    args.run_manifest = args.run_manifest.resolve()
     inventory = json.loads(INVENTORY.read_text())
     allowed = inventory["execution_policy"]["allowed_gpu_uuids"]
     args.results_dir.mkdir(parents=True, exist_ok=True)
