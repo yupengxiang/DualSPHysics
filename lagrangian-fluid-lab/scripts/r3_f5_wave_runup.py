@@ -41,10 +41,14 @@ RUN_ROOT = LAB / "campaigns" / "v0.1-candidate" / "runs" / "r3-f5-wave-runup"
 DEFAULT_REPORT = LAB / "campaigns" / "v0.1-candidate" / "r3-f5-wave-runup.json"
 DEFAULT_CONCLUSION = LAB / "campaigns" / "v0.1-candidate" / "R3-F5-WAVE-RUNUP-CONCLUSION.md"
 
+# The official 0.040 m case is retained in the earlier probes as a known
+# particle-loss stress test.  It is not a member of the F5 convergence set:
+# its initial fluid topology differs from the refined case.  These three
+# values are the candidate fixed-physics resolution ladder for new runs.
 RESOLUTIONS: dict[str, float] = {
-    "coarse": 0.040,
+    "coarse": 0.030,
     "medium": 0.025,
-    "fine": 0.0125,
+    "fine": 0.020,
 }
 EXTERNAL_GAUGES: tuple[tuple[str, float, float, float], ...] = (
     ("WG1", 3.10, 0.18, 0.075),
@@ -217,12 +221,30 @@ def prepare_case(label: str, dp_m: float, *, gauge_cadence_s: float, tmax_s: flo
     return result
 
 
+def _run_token(value: float) -> str:
+    """Make a short, filesystem-safe token for a run parameter."""
+
+    return f"{value:.9g}".replace("-", "m").replace(".", "p")
+
+
+def _run_tag(label: str, tmax_s: float, tout_s: float) -> str:
+    return f"{label}__tmax-{_run_token(tmax_s)}__tout-{_run_token(tout_s)}"
+
+
+def _excluded_particles(output: str) -> int | None:
+    match = re.search(r"Excluded particles\.+:\s*([0-9,]+)", output)
+    return int(match.group(1).replace(",", "")) if match else None
+
+
 def run_case(prepared: dict[str, Any], gpu: int, *, tmax_s: float, tout_s: float) -> dict[str, Any]:
     if prepared.get("status") != "prepared":
         raise ValueError(f"cannot run unprepared case {prepared.get('label')}")
     label = str(prepared["label"])
     prefix = LAB / prepared["case_prefix"]
-    output = RUN_ROOT / label
+    # Keep each parameterization in its own directory.  Reusing a label after
+    # a longer run would otherwise leave old Part_*.bi4 files in the frame
+    # count and make the report silently mix two simulations.
+    output = RUN_ROOT / _run_tag(label, tmax_s, tout_s)
     output.mkdir(parents=True, exist_ok=True)
     env = os.environ.copy()
     env["LD_LIBRARY_PATH"] = f"{BIN}:{env.get('LD_LIBRARY_PATH', '')}"
@@ -237,15 +259,15 @@ def run_case(prepared: dict[str, Any], gpu: int, *, tmax_s: float, tout_s: float
     parts = sorted(output.glob("data*/Part_*.bi4"))
     finished = "Finished execution (code=0)" in proc.stdout
     status = "completed" if proc.returncode == 0 and finished and parts else "run_failed"
-    excluded = re.search(r"Excluded particles\.\.\.:\s*([0-9,]+)", proc.stdout)
     return {
         **prepared,
         "status": status,
         "returncode": proc.returncode,
         "gpu": gpu,
+        "output_dir": str(output.relative_to(LAB)),
         "elapsed_seconds": round(elapsed, 4),
         "frames": len(parts),
-        "excluded_particles": int(excluded.group(1).replace(",", "")) if excluded else None,
+        "excluded_particles": _excluded_particles(proc.stdout),
         "output_bytes": sum(path.stat().st_size for path in output.rglob("*") if path.is_file()),
         "log": str(log.relative_to(LAB)),
         "command": command,
@@ -288,7 +310,7 @@ def _read_gauge(path: Path) -> dict[str, Any]:
 
 
 def summarize_gauges(run: dict[str, Any]) -> dict[str, Any]:
-    directory = RUN_ROOT / str(run["label"])
+    directory = LAB / str(run["output_dir"])
     gauges = {
         path.stem.removeprefix("GaugesSWL_"): _read_gauge(path)
         for path in sorted(directory.glob("GaugesSWL_WG*.csv"))
@@ -353,6 +375,11 @@ def build_report(
             ],
             "time_alignment": "not yet established; external reference begins before forcing and contains rounded duplicate timestamps",
         },
+        "resolution_policy": {
+            "candidate_ladder_m": {name: value for name, value in RESOLUTIONS.items()},
+            "fixed_physics_required": True,
+            "legacy_0p040_m_status": "stress_test_only; excluded from convergence ladder because its initial fluid topology differs",
+        },
         "gpu_policy": _gpu_inventory(),
         "prepared_cases": prepared,
         "runs": report_runs,
@@ -376,7 +403,7 @@ def render_conclusion(report: dict[str, Any]) -> str:
 
 这条路径验证的是“外部观测能否被同一套 DualSPHysics 输出链读取和记录”，不是验证波高或 run-up 的物理正确性。正式对齐仍需：覆盖参考主要事件的至少 16 s 运行、三分辨率、外部参考与模型时间偏移、重复时间戳处理规则，以及不确定度感知的全时程/首达/峰值/回流指标。
 
-粗分辨率版本保留为失败或压力测试对照；自建 F5 堰案例在获得相容外部观测前仍只能作为机制探针。机器可读详情见 `r3-f5-wave-runup.json`。
+    官方 0.040 m 粗版本保留为已知粒子逸出压力测试对照；本探针的新分辨率梯度固定为 0.030/0.025/0.020 m，仍需逐级完成三分辨率误差与拓扑检查。自建 F5 堰案例在获得相容外部观测前仍只能作为机制探针。机器可读详情见 `r3-f5-wave-runup.json`。
 """
 
 

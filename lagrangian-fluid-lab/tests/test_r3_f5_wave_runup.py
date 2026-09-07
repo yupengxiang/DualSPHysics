@@ -4,8 +4,11 @@ from pathlib import Path
 
 from scripts.r3_f5_wave_runup import (
     EXTERNAL_GAUGES,
+    RESOLUTIONS,
+    _excluded_particles,
     _read_gauge,
     _restore_input_assets,
+    _run_tag,
     configure_definition,
 )
 
@@ -54,6 +57,21 @@ def test_configure_definition_activates_cadence_and_external_gauges(tmp_path):
     assert '<point2 x="3.1" y="0.18" z="0.6"' in text
 
 
+def test_candidate_resolution_ladder_excludes_known_legacy_stress_case():
+    assert RESOLUTIONS == {"coarse": 0.03, "medium": 0.025, "fine": 0.02}
+    assert 0.04 not in RESOLUTIONS.values()
+
+
+def test_run_tag_separates_parameterizations_to_prevent_stale_frame_mixing():
+    assert _run_tag("medium", 4.0, 0.02) == "medium__tmax-4__tout-0p02"
+    assert _run_tag("medium", 16.0, 0.02) != _run_tag("medium", 4.0, 0.02)
+
+
+def test_excluded_particle_parser_handles_solver_dot_leader():
+    assert _excluded_particles("Excluded particles...............: 1") == 1
+    assert _excluded_particles("Excluded particles...............: 21,695") == 21695
+
+
 def test_restore_input_assets_recovers_same_directory_gencase_inputs(tmp_path):
     source = tmp_path / "source"
     destination = tmp_path / "generated"
@@ -82,4 +100,3 @@ def test_read_gauge_requires_two_finite_strictly_increasing_rows(tmp_path):
     assert report["dt_median_s"] == 0.02
     assert report["swl_dynamic"] is True
     assert report["issues"] == []
-
