@@ -14,6 +14,8 @@ import numpy as np
 
 ROUTES = ("particle_mlp", "deepset_context", "local_interaction", "physics_residual")
 SEEDS = (17, 29, 43)
+LAB = Path(__file__).resolve().parents[1]
+DEFAULT_INVENTORY = LAB / "campaigns" / "v0.1-candidate" / "w00-inventory.json"
 
 
 def mean_std(values: list[float | None]) -> dict[str, Any]:
@@ -39,8 +41,99 @@ def bootstrap_cases(values: list[float], seed: int = 20260907, draws: int = 2000
     }
 
 
-def load_runs(results_dir: Path) -> list[dict[str, Any]]:
-    return [json.loads(path.read_text()) for path in sorted(results_dir.glob("*.json"))]
+def _resolve_artifact(value: str | Path, lab_root: Path) -> Path:
+    path = Path(value)
+    return path if path.is_absolute() else lab_root / path
+
+
+def load_runs(results_dir: Path, run_manifest: dict[str, Any] | None = None,
+              lab_root: Path | None = None) -> tuple[list[dict[str, Any]], list[str]]:
+    """Load only artifacts named by the run manifest, never stale directory files."""
+    if run_manifest is None:
+        return [json.loads(path.read_text()) for path in sorted(results_dir.glob("*.json"))], []
+    lab_root = Path(lab_root or LAB).resolve()
+    expected_dir = Path(results_dir).resolve()
+    runs = []
+    issues = []
+    seen_paths = set()
+    for entry in run_manifest.get("runs", []):
+        output = entry.get("output")
+        if not output:
+            issues.append(f"missing output path for {entry.get('route')} seed {entry.get('seed')}")
+            continue
+        path = _resolve_artifact(output, lab_root).resolve()
+        if path.parent != expected_dir:
+            issues.append(f"result artifact is outside results directory: {path}")
+            continue
+        if path in seen_paths:
+            issues.append(f"duplicate output path: {path}")
+            continue
+        seen_paths.add(path)
+        if not path.is_file():
+            issues.append(f"missing result artifact: {path}")
+            continue
+        try:
+            result = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError) as error:
+            issues.append(f"unreadable result artifact {path}: {error}")
+            continue
+        if result.get("route") != entry.get("route") or int(result.get("seed", -1)) != int(entry.get("seed", -2)):
+            issues.append(f"result provenance mismatch: {path}")
+            continue
+        if entry.get("status") != "completed":
+            issues.append(f"manifest entry is not completed: {entry.get('route')} seed {entry.get('seed')}")
+            continue
+        result["_manifest_output"] = str(path)
+        runs.append(result)
+    return runs, issues
+
+
+def audit_gpu_manifest(run_manifest: dict[str, Any], config: dict[str, Any],
+                       inventory: dict[str, Any], expected: list[tuple[str, int]]) -> dict[str, Any]:
+    """Validate physical index, UUID mapping, status, and route/seed uniqueness."""
+    allowed_indices = {int(value) for value in config.get("allowed_gpu_indices", [])}
+    allowed_uuids = set(inventory.get("execution_policy", {}).get("allowed_gpu_uuids", []))
+    inventory_map = {
+        int(gpu["physical_index"]): gpu.get("uuid")
+        for gpu in inventory.get("host", {}).get("gpus", [])
+        if "physical_index" in gpu
+    }
+    entries = run_manifest.get("runs", [])
+    combinations = []
+    issues = []
+    for entry in entries:
+        route = entry.get("route")
+        seed = entry.get("seed")
+        combination = (route, int(seed)) if route is not None and seed is not None else None
+        if combination is not None:
+            combinations.append(combination)
+        index = entry.get("physical_gpu_index")
+        uuid = entry.get("gpu_uuid")
+        if entry.get("status") != "completed":
+            issues.append(f"incomplete run entry: {route} seed {seed}")
+        if index is None or int(index) not in allowed_indices:
+            issues.append(f"GPU index outside allowlist: {index}")
+        else:
+            expected_uuid = inventory_map.get(int(index))
+            if uuid != expected_uuid:
+                issues.append(f"GPU UUID/index mismatch: index={index} uuid={uuid} expected={expected_uuid}")
+        if uuid not in allowed_uuids:
+            issues.append(f"GPU UUID outside allowlist: {uuid}")
+    expected_set = set(expected)
+    return {
+        "pass": run_manifest.get("status") == "complete"
+        and len(entries) == len(expected)
+        and sorted(combinations) == sorted(expected)
+        and len(set(combinations)) == len(combinations)
+        and not issues,
+        "issues": issues,
+        "entry_count": len(entries),
+        "expected_count": len(expected),
+        "combinations": [list(item) for item in sorted(combinations)],
+        "expected_combinations": [list(item) for item in sorted(expected_set)],
+        "allowed_indices": sorted(allowed_indices),
+        "allowed_uuids": sorted(allowed_uuids),
+    }
 
 
 def aggregate_route(route: str, runs: list[dict[str, Any]]) -> dict[str, Any]:
@@ -143,22 +236,19 @@ def main() -> None:
     parser.add_argument("--results-dir", type=Path, required=True)
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--run-manifest", type=Path, required=True)
+    parser.add_argument("--inventory", type=Path, default=DEFAULT_INVENTORY)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--conclusion", type=Path, required=True)
     args = parser.parse_args()
-    runs = load_runs(args.results_dir)
     config = json.loads(args.config.read_text())
     run_manifest = json.loads(args.run_manifest.read_text())
+    inventory = json.loads(args.inventory.read_text())
+    lab_root = args.run_manifest.resolve().parents[1]
+    runs, artifact_issues = load_runs(args.results_dir, run_manifest, lab_root)
     physical_runs = run_manifest.get("runs", [])
-    physical_combinations = [(entry.get("route"), int(entry.get("seed"))) for entry in physical_runs]
-    allowed_gpu_indices = set(config.get("allowed_gpu_indices", []))
-    physical_gpu_gate = (
-        run_manifest.get("status") == "complete"
-        and all(int(entry.get("physical_gpu_index", -1)) in allowed_gpu_indices for entry in physical_runs)
-        and len(set(physical_combinations)) == len(physical_combinations)
-    )
     combinations = [(run.get("route"), int(run.get("seed"))) for run in runs]
     expected = [(route, seed) for route in ROUTES for seed in SEEDS]
+    gpu_audit = audit_gpu_manifest(run_manifest, config, inventory, expected)
     routes = {route: aggregate_route(route, runs) for route in ROUTES}
     all_case_entries = [entry for route in routes.values() for entry in route["per_case"].values()]
     report = {
@@ -167,8 +257,12 @@ def main() -> None:
         "config": config,
         "run_manifest": {
             "path": str(args.run_manifest), "status": run_manifest.get("status"),
-            "run_count": len(physical_runs), "physical_gpu_gate": physical_gpu_gate,
-            "allowed_gpu_indices": sorted(allowed_gpu_indices), "runs": physical_runs,
+            "run_count": len(physical_runs), "physical_gpu_gate": gpu_audit["pass"],
+            "physical_gpu_audit": gpu_audit,
+            "artifact_provenance_gate": not artifact_issues,
+            "artifact_provenance_issues": artifact_issues,
+            "allowed_gpu_indices": sorted(int(value) for value in config.get("allowed_gpu_indices", [])),
+            "runs": physical_runs,
         },
         "run_count": len(runs), "expected_run_count": len(expected),
         "route_seed_gate": sorted(combinations) == sorted(expected) and len(set(combinations)) == len(combinations),
@@ -194,7 +288,7 @@ def main() -> None:
     args.output.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
     args.conclusion.parent.mkdir(parents=True, exist_ok=True)
     args.conclusion.write_text(conclusion(report))
-    print(json.dumps({"run_count": len(runs), "route_seed_gate": report["route_seed_gate"], "physical_gpu_gate": report["run_manifest"]["physical_gpu_gate"], "boundary_geometry_gate": report["boundary_geometry_gate"], "routes": {k: v["macro_position_rmse_over_dp"]["bootstrap"] for k, v in routes.items()}}, indent=2))
+    print(json.dumps({"run_count": len(runs), "route_seed_gate": report["route_seed_gate"], "physical_gpu_gate": report["run_manifest"]["physical_gpu_gate"], "artifact_provenance_gate": report["run_manifest"]["artifact_provenance_gate"], "boundary_geometry_gate": report["boundary_geometry_gate"], "routes": {k: v["macro_position_rmse_over_dp"]["bootstrap"] for k, v in routes.items()}}, indent=2))
 
 
 if __name__ == "__main__":

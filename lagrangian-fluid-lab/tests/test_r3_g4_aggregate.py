@@ -47,3 +47,34 @@ def test_bootstrap_is_case_level_and_deterministic():
     second = module.bootstrap_cases([1.0, 2.0, 5.0], draws=100)
     assert first == second
     assert first["resampling_unit"] == "independent physical case, not frame"
+
+
+def _inventory():
+    return {
+        "execution_policy": {"allowed_gpu_uuids": ["uuid-4", "uuid-5"]},
+        "host": {"gpus": [
+            {"physical_index": 4, "uuid": "uuid-4"},
+            {"physical_index": 5, "uuid": "uuid-5"},
+        ]},
+    }
+
+
+def test_gpu_manifest_checks_uuid_to_physical_index_mapping():
+    module = load_module()
+    manifest = {
+        "status": "complete",
+        "runs": [
+            {"route": route, "seed": seed, "status": "completed",
+             "physical_gpu_index": 5 if seed == 29 else 4,
+             "gpu_uuid": "uuid-5" if seed == 29 else "uuid-4"}
+            for route in module.ROUTES for seed in module.SEEDS
+        ],
+    }
+    expected = [(route, seed) for route in module.ROUTES for seed in module.SEEDS]
+    audit = module.audit_gpu_manifest(manifest, {"allowed_gpu_indices": [4, 5]}, _inventory(), expected)
+    assert audit["pass"]
+
+    manifest["runs"][0]["gpu_uuid"] = "uuid-5"
+    failed = module.audit_gpu_manifest(manifest, {"allowed_gpu_indices": [4, 5]}, _inventory(), expected)
+    assert not failed["pass"]
+    assert any("mismatch" in issue for issue in failed["issues"])
