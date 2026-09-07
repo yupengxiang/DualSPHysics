@@ -59,12 +59,23 @@ the exact solver configuration and executable.
   mass fractions, and W11 bad files (identity resurrection, mass changes, and
   NaN density) before atomic publication. The coverage audit separates legacy
   `status=complete` from execution, acceptance, scope, and blockers; W08's
-  204 cards remain planned-only with zero topology-holdout runs.
+  204 continuous-axis cards remain planned-only. One explicitly separate F1
+  topology-extrapolation card has completed an independent
+  GenCase–solver–PartVTK–HDF5 structural path, but remains candidate-only;
+  F2/F3/F6 topology holdouts are still planned-only.
 - The 12 released F1/F2/F3 fluid cases have finite world-space boundary
   sidecars. Release-linkage and byte-identity checks pass, while destination
   and open-face semantics remain candidate-only. An identity-permutation
   transport control is part of the protocol so set-based point metrics cannot
   substitute for material history.
+- The G4 CPU causality audit passes prefix invariance, endpoint independence,
+  future-control isolation, and future-free-body isolation. Constant-velocity
+  degradation remains a diagnostic, never a scene-admission gate.
+- The F6 R3 evidence includes a CPU-only mDBC initialization preflight.
+  `Boundary=2` and the official normals path execute, but 792/24,335 boundary
+  normals are zero and a floating-body Chrono warning remains; this is not
+  physical mDBC acceptance. A separate static-buoyancy calculation likewise
+  remains diagnostic-only.
 - Structural and semantic quality gates passed 29 probes and rejected one
   deliberately retained coarse-resolution failure.
 - W00--W12 then exercised protected provenance, identity/reference-frame
@@ -143,9 +154,11 @@ as development interfaces, but the material-tracer implementation is still a
 candidate reference (its wall visibility, convergence and destination closure
 are not accepted physical truth) and the formal dataset is not. R3 has now
 executed the F6 Test 14 three-dimensional route, but its current DBC proxy is
-scientifically rejected; likewise, both F4 observation paths are diagnostic
-only and have no external anchor. Close the remaining family-specific gaps
-first: F1 impact pressure, F2 pouring resolution and external observation, F3
-impact timing/cadence, compatible external F4/F5 anchors, and a validated
-mDBC/larger-domain F6 route. Only passing families should enter a 20--30 case
-development tranche before formal production scale is chosen.
+scientifically rejected; the isolated mDBC preflight reaches the intended
+initialization path without establishing complete normals or physical
+acceptance. Likewise, both F4 observation paths are diagnostic only and have
+no external anchor. Close the remaining family-specific gaps first: F1 impact
+pressure, F2 pouring resolution and external observation, F3 impact
+timing/cadence, compatible external F4/F5 anchors, and a validated
+mDBC/Chrono/larger-domain F6 route. Only passing families should enter a
+20--30 case development tranche before formal production scale is chosen.

@@ -12,7 +12,7 @@
     "formal family membership and production parameter counts",
     "family-specific production particle spacing and event output cadence",
     "material-tracer wall visibility, convergence and destination closure",
-    "F1 impact pressure, F2 external observation/resolution, F3 impact timing, F4 validation, F5 stable run-up, F6 three-dimensional Test 14",
+    "F1 impact pressure, F2 external observation/resolution, F3 impact timing, F4 validation, F5 stable run-up, F6 Test14 physical acceptance after DBC rejection, mDBC normal completeness/Chrono configuration, and larger-domain sensitivity",
     "leaderboard learning architecture: both pilot learners lack boundary geometry/local interactions and diverge on long F2 rollout"
   ],
   "minimum_next_gates": {
@@ -39,9 +39,9 @@
   },
   "recommended_sequence": [
     "Close F2 resolution plus simple physical observation first, because its material-history task is the clearest differentiator.",
-    "Repair F1/F3 event cadence and convergence, and implement the SPHERIC Test 14 three-dimensional F6 anchor.",
+    "Repair F1/F3 event cadence and convergence, resolve F6 mDBC zero normals and Chrono configuration, then rerun an accepted SPHERIC Test 14 three-dimensional anchor.",
     "Choose an external F4 collision/impingement anchor and rebuild F5 from a stable run-up validation before admitting either family.",
-    "Run a 20-30 case development tranche only for passing families, then repeat real baselines before fixing formal scale."
+    "Materialize the remaining W08 topology holdouts and revalidate the F1 candidate before running a 20-30 case development tranche only for passing families; then repeat real baselines before fixing formal scale."
   ],
   "baseline_observation": {
     "schema_version": 1,
@@ -330,14 +330,15 @@
     "comparability_warning": "SPH external-observable metrics and learned particle-rollout metrics are separate tracks and must not be ranked in one scalar table."
   },
   "resource_accounting": {
-    "successful_solver_runs_accounted": 54,
-    "successful_solver_gpu_seconds_lower_bound": 1046.7090778158718,
+    "successful_solver_runs_accounted": 55,
+    "successful_solver_gpu_seconds_lower_bound": 1049.869707485076,
     "learned_training_gpu_seconds": 79.63525909092277,
     "learned_inference_gpu_seconds": 0.8570850500836968,
-    "combined_gpu_hours_lower_bound": 0.31311150609913285,
+    "combined_gpu_hours_lower_bound": 0.31398945878502293,
     "excluded_from_lower_bound": [
       "failed solver attempts",
       "W02 runs lacking elapsed fields",
+      "CPU-only F6 mDBC preflight",
       "CPU preprocessing",
       "dependency installation"
     ],
@@ -361,6 +362,12 @@
       "campaigns/v0.1-candidate/w06-rotating-pour.json": {
         "successful_runs": 12,
         "summed_elapsed_seconds": 229.0718703980092
+      },
+      "campaigns/v0.1-candidate/cases/w08/topology-holdout-materializations.json": {
+        "successful_runs": 1,
+        "summed_elapsed_seconds": 3.1606296692043543,
+        "gpu_index": 4,
+        "gpu_uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9"
       }
     }
   }
