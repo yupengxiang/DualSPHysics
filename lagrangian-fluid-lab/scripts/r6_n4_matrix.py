@@ -71,6 +71,7 @@ RESOURCE_REPORT = CAMPAIGN / "N4-RESOURCE-LEDGER.json"
 DECISION_REPORT = CAMPAIGN / "N4-DECISION.json"
 DECISION_MARKDOWN = CAMPAIGN / "N4-DECISION.md"
 APPROVAL_RECORD = CAMPAIGN / "N4-OWNER-APPROVAL.json"
+OWNER_APPROVAL_ORIGINAL = CAMPAIGN / "N4-OWNER-APPROVAL-ORIGINAL.md"
 BATCH_LOCK_FILE = RUN_ROOT / ".n4-batch.lock"
 HANDOFF_MARKDOWN = CAMPAIGN / "N4-LATEST-HANDOFF.md"
 REVIEW_PACKET_MARKDOWN = CAMPAIGN / "N4-REVIEW-PACKET.md"
@@ -92,6 +93,7 @@ PROPOSED_GPU_SECONDS = PROPOSED_GPU_HOURS * 3600.0
 SOLVER_ATTEMPT_TIMEOUT_SECONDS = (PROPOSED_GPU_SECONDS / MAX_NEW_SOLVER_ATTEMPTS) * 0.98
 BASELINE_COMMIT = "d721473f524c71bd85ba88064f66026de8306989"
 SOURCE_RECIPE_ID = "N4_F1_plain_dam_break_cfl010_v1"
+AUTHORIZATION_REFERENCE_COMMIT = "6db8158"
 
 NEW_CASES = (
     ("N4_F1_plain_h09_coarse_cfl010", "h09", "coarse", 4),
@@ -241,6 +243,8 @@ def load_matrix_report() -> dict[str, Any]:
         "authorization": {
             "owner_budget_status": "pending_owner_approval",
             "owner_approval_evidence": None,
+            "authorization_reference_commit": AUTHORIZATION_REFERENCE_COMMIT,
+            "owner_approval_original": relpath(OWNER_APPROVAL_ORIGINAL),
             "new_solver_authorized": False,
             "additional_gpu_hours_cap_proposed": PROPOSED_GPU_HOURS,
             "maximum_new_solver_attempts": MAX_NEW_SOLVER_ATTEMPTS,
@@ -270,6 +274,7 @@ def _approval_record(evidence: str) -> dict[str, Any]:
         "schema_version": "n4-owner-approval-v1",
         "owner": str,
         "decision": "approve",
+        "authorization_reference_commit": AUTHORIZATION_REFERENCE_COMMIT,
         "gpu_hours_max": PROPOSED_GPU_HOURS,
         "solver_attempts_max": MAX_NEW_SOLVER_ATTEMPTS,
         "case_ids": [item[0] for item in NEW_CASES],
@@ -291,13 +296,22 @@ def _approval_record(evidence: str) -> dict[str, Any]:
             raise RuntimeError(f"owner approval field {key!r} is not the exact N4 scope")
     canonical_text = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     digest = hashlib.sha256(canonical_text.encode()).hexdigest()
+    if not OWNER_APPROVAL_ORIGINAL.is_file():
+        raise RuntimeError(
+            f"exact owner authorization original is missing: {relpath(OWNER_APPROVAL_ORIGINAL)}"
+        )
     return {
         "schema_version": "n4-owner-approval-v1",
         "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
         "baseline_commit": BASELINE_COMMIT,
+        "authorization_reference_commit": AUTHORIZATION_REFERENCE_COMMIT,
         "evidence_source": source,
         "evidence_text": canonical_text,
         "evidence_sha256": digest,
+        "original_authorization": {
+            "path": relpath(OWNER_APPROVAL_ORIGINAL),
+            "sha256": sha256(OWNER_APPROVAL_ORIGINAL),
+        },
         "scope": {
             "gpu_hours_max": PROPOSED_GPU_HOURS,
             "gpu_seconds_max": PROPOSED_GPU_SECONDS,
@@ -306,6 +320,7 @@ def _approval_record(evidence: str) -> dict[str, Any]:
             "gpu_indices": list(GPU_IDS),
             "recipe_id": SOURCE_RECIPE_ID,
             "baseline_commit": BASELINE_COMMIT,
+            "authorization_reference_commit": AUTHORIZATION_REFERENCE_COMMIT,
         },
     }
 
@@ -523,6 +538,9 @@ def _approval_guard(evidence: str | None) -> str:
         "owner_budget_status": "approved_for_bounded_n4",
         "owner_approval_evidence": approval["evidence_text"],
         "owner_approval_evidence_sha256": approval["evidence_sha256"],
+        "authorization_reference_commit": AUTHORIZATION_REFERENCE_COMMIT,
+        "owner_approval_original": approval["original_authorization"]["path"],
+        "owner_approval_original_sha256": approval["original_authorization"]["sha256"],
         "owner_approval_record": relpath(APPROVAL_RECORD),
         "new_solver_authorized": True,
         "additional_gpu_hours_cap_proposed": PROPOSED_GPU_HOURS,
@@ -555,11 +573,14 @@ def run_one(record: dict[str, Any], *, gpu_record: dict[str, Any] | None = None,
     attempt_manifest = attempt_directory / "attempt.json"
     generated_xml_sha256 = sha256(prefix.with_suffix(".xml"))
     generated_bi4_sha256 = sha256(prefix.with_suffix(".bi4"))
-    approval_sha256 = load_matrix_report().get("authorization", {}).get("owner_approval_evidence_sha256")
+    authorization = load_matrix_report().get("authorization", {})
+    approval_sha256 = authorization.get("owner_approval_evidence_sha256")
+    approval_original_sha256 = authorization.get("owner_approval_original_sha256")
     manifest = read_json(attempt_manifest, {})
     manifest.update({
         "record_hash": expected_hash,
         "owner_approval_evidence_sha256": approval_sha256,
+        "owner_approval_original_sha256": approval_original_sha256,
         "input_generated_xml_sha256": generated_xml_sha256,
         "input_generated_bi4_sha256": generated_bi4_sha256,
     })
@@ -575,6 +596,7 @@ def run_one(record: dict[str, Any], *, gpu_record: dict[str, Any] | None = None,
         "input_generated_xml_sha256": generated_xml_sha256,
         "input_generated_bi4_sha256": generated_bi4_sha256,
         "owner_approval_evidence_sha256": approval_sha256,
+        "owner_approval_original_sha256": approval_original_sha256,
         "device_seconds_accounting": "solver_wall_elapsed_seconds_proxy",
         "device_seconds": result.get("elapsed_seconds"),
         "attempt_timeout_seconds": SOLVER_ATTEMPT_TIMEOUT_SECONDS,
@@ -607,11 +629,15 @@ def _persist_solver_batch(
     resource_snapshot: Any = None,
 ) -> dict[str, Any]:
     report = load_matrix_report()
-    approval_sha256 = report.get("authorization", {}).get("owner_approval_evidence_sha256")
+    authorization = report.get("authorization", {})
+    approval_sha256 = authorization.get("owner_approval_evidence_sha256")
+    approval_original_sha256 = authorization.get("owner_approval_original_sha256")
     if not approval_sha256:
         raise RuntimeError("N4 approval digest is missing; refusing to launch")
     if batch.get("owner_approval_evidence_sha256") != approval_sha256:
         raise RuntimeError("N4 batch approval digest does not match the authorized record")
+    if batch.get("owner_approval_original_sha256") != approval_original_sha256:
+        raise RuntimeError("N4 batch original-authorization digest does not match the authorized record")
     result_accounting = _solver_result_accounting(results)
     durable = _durable_attempt_summary()
     started = max(
@@ -672,6 +698,7 @@ def run_solver(prepared: Sequence[dict[str, Any]], *, evidence: str, rerun: bool
         raise ValueError("N4 solver phase must contain exactly the four planned cells")
     report = load_matrix_report()
     approval_sha256 = report.get("authorization", {}).get("owner_approval_evidence_sha256")
+    approval_original_sha256 = report.get("authorization", {}).get("owner_approval_original_sha256")
     if not approval_sha256:
         raise RuntimeError("N4 approval digest is missing; refusing to launch")
     resource_ledger = report.get("resource_ledger", {})
@@ -711,6 +738,7 @@ def run_solver(prepared: Sequence[dict[str, Any]], *, evidence: str, rerun: bool
         "gpu_seconds_cap": PROPOSED_GPU_SECONDS,
         "solver_attempt_timeout_seconds": SOLVER_ATTEMPT_TIMEOUT_SECONDS,
         "owner_approval_evidence_sha256": approval_sha256,
+        "owner_approval_original_sha256": approval_original_sha256,
     }
     base_ledger = {
         **resource_ledger,
@@ -1191,7 +1219,11 @@ def update_resource_ledger() -> dict[str, Any]:
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "baseline_commit": BASELINE_COMMIT,
         "authorization": report.get("authorization", {}),
-        "authorization_source": "N4 attachment proposed plan; owner approval is intentionally not inferred",
+        "authorization_source": (
+            "owner authorization recorded in N4-OWNER-APPROVAL.json"
+            if report.get("authorization", {}).get("new_solver_authorized")
+            else "N4 attachment proposed plan; owner approval is intentionally not inferred"
+        ),
         "new_n4": {
             "solver_attempts_started": int(existing.get("solver_attempts_started", sum(1 for item in fallback_runs))),
             "solver_attempts_completed": int(existing.get("solver_attempts_completed", sum(1 for item in fallback_runs if item.get("execution_status") == "completed"))),

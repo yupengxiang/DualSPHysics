@@ -56,6 +56,7 @@ def test_owner_evidence_record_has_bound_digest():
         "schema_version": "n4-owner-approval-v1",
         "owner": "jade",
         "decision": "approve",
+        "authorization_reference_commit": n4.AUTHORIZATION_REFERENCE_COMMIT,
         "gpu_hours_max": 0.5,
         "solver_attempts_max": 4,
         "case_ids": [item[0] for item in n4.NEW_CASES],
