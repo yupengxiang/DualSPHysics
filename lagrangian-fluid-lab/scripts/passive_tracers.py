@@ -18,6 +18,7 @@ except ModuleNotFoundError:  # pragma: no cover - exercised on minimal installs
 
 EPSILON = 1e-10
 _TORCH_NEIGHBOUR_CONFIGURED = False
+_TORCH_NEIGHBOUR_DEVICE = None
 
 
 def _torch_nearest_support(
@@ -25,15 +26,16 @@ def _torch_nearest_support(
     particle_position: np.ndarray,
     k: int,
 ) -> tuple[np.ndarray, np.ndarray] | None:
-    """Return exact CPU top-k distances/indices when optional Torch exists.
+    """Return exact Torch top-k distances/indices for the selected device.
 
-    This path is deliberately limited to the no-finite-barrier case.  It
-    accelerates the large plain-control material audit while leaving the
-    finite-triangle visibility path unchanged.  Tensors are created on CPU
-    from the same float64 arrays used by the NumPy implementation; no CUDA
-    device is touched.
+    The default remains CPU and is byte-for-byte compatible with the previous
+    optional accelerator contract.  A benchmark may set
+    ``LAGRANGIAN_TRACER_TORCH_DEVICE=cuda:<index>`` to test a candidate CUDA
+    implementation.  The candidate includes host/device transfers and an
+    explicit synchronize in its measured call, and is only used for the
+    no-finite-barrier path.  Finite-triangle visibility remains NumPy exact.
     """
-    global _TORCH_NEIGHBOUR_CONFIGURED
+    global _TORCH_NEIGHBOUR_CONFIGURED, _TORCH_NEIGHBOUR_DEVICE
     if torch is None:
         return None
     if not _TORCH_NEIGHBOUR_CONFIGURED:
@@ -44,13 +46,33 @@ def _torch_nearest_support(
             threads = 4
         torch.set_num_threads(threads)
         _TORCH_NEIGHBOUR_CONFIGURED = True
+    requested_device = os.environ.get("LAGRANGIAN_TRACER_TORCH_DEVICE", "cpu").strip() or "cpu"
+    try:
+        device = torch.device(requested_device)
+    except RuntimeError:
+        return None
+    if device.type == "cuda" and not torch.cuda.is_available():
+        return None
+    if _TORCH_NEIGHBOUR_DEVICE is None:
+        _TORCH_NEIGHBOUR_DEVICE = device
+    elif _TORCH_NEIGHBOUR_DEVICE != device:
+        # A process should benchmark one backend at a time.  Refusing a
+        # mid-process device switch avoids silently mixing cached CPU/CUDA
+        # assumptions in a long tracer run.
+        return None
     with torch.no_grad():
-        query_tensor = torch.from_numpy(np.ascontiguousarray(query, dtype=np.float64))
-        particle_tensor = torch.from_numpy(np.ascontiguousarray(particle_position, dtype=np.float64))
+        if device.type == "cuda":
+            torch.cuda.synchronize(device)
+        query_tensor = torch.from_numpy(np.ascontiguousarray(query, dtype=np.float64)).to(device=device)
+        particle_tensor = torch.from_numpy(np.ascontiguousarray(particle_position, dtype=np.float64)).to(device=device)
         distance, selected = torch.topk(
             torch.cdist(query_tensor, particle_tensor),
             k=int(k), dim=1, largest=False, sorted=False,
         )
+        if device.type == "cuda":
+            torch.cuda.synchronize(device)
+        selected = selected.cpu()
+        distance = distance.cpu()
     return (
         np.asarray(selected.numpy(), dtype=np.int64),
         np.asarray(distance.numpy(), dtype=np.float64) ** 2,

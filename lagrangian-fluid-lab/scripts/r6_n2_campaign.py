@@ -14,6 +14,7 @@ DualSPHysics vendor tree and never treats T1 as external physical truth.
 from __future__ import annotations
 
 import argparse
+import csv
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import hashlib
@@ -24,6 +25,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import tempfile
 from typing import Any, Iterable, Sequence
 import xml.etree.ElementTree as ET
 
@@ -51,6 +53,7 @@ CAMPAIGN = LAB / "campaigns" / "v0.1-candidate"
 BIN = LAB / "vendor" / "official" / "DualSPHysics_v5.4" / "bin" / "linux"
 GENCASE = BIN / "GenCase_linux64"
 SOLVER = BIN / "DualSPHysics5.4_linux64"
+PARTVTKOUT = BIN / "PartVTKOut_linux64"
 SOURCE_DEFINITION = LAB / "cases" / "F1" / "F1_dam_break_plain" / "F1_dam_break_plain_Def.xml"
 CASE_ROOT = CAMPAIGN / "cases" / "r6-n2-height"
 ARTIFACT_ROOT = CAMPAIGN / "artifacts" / "r6-n2-height"
@@ -453,7 +456,110 @@ def _closed_distribution(distribution: dict[str, float]) -> dict[str, float]:
     return result
 
 
-def _classify_missing_identities(h5: h5py.File, record: dict[str, Any]) -> dict[str, Any]:
+def _normalise_csv_row(row: dict[str, Any]) -> dict[str, Any]:
+    return {str(key).strip().rstrip(","): value for key, value in row.items() if key is not None}
+
+
+def _runparts_exclusion_reasons(attempt: Path | None) -> dict[int, list[str]]:
+    """Map solver PART numbers to the native exclusion counters.
+
+    ``PartOut`` stores per-particle records, while ``RunPARTs.csv`` stores the
+    native reason counters.  Joining both keeps the identity-level evidence
+    auditable without guessing from a last position alone.
+    """
+    if attempt is None:
+        return {}
+    path = attempt / "RunPARTs.csv"
+    if not path.is_file():
+        return {}
+    lines = path.read_text(errors="replace").splitlines()
+    header_index = next((index for index, line in enumerate(lines) if line.startswith("Part;")), None)
+    if header_index is None:
+        return {}
+    reader = csv.DictReader(lines[header_index:], delimiter=";")
+    result: dict[int, list[str]] = {}
+    for raw in reader:
+        row = _normalise_csv_row(raw)
+        try:
+            part = int(str(row.get("Part", "")).strip())
+        except ValueError:
+            continue
+        reasons = []
+        for column, reason in (("NpOutPos", "position"), ("NpOutRho", "density"), ("NpOutMov", "movement")):
+            try:
+                count = int(str(row.get(column, "0")).replace(",", "").strip())
+            except ValueError:
+                count = 0
+            if count:
+                reasons.append(reason)
+        result[part] = reasons
+    return result
+
+
+def _partout_exclusion_evidence(attempt: Path | None) -> dict[str, Any]:
+    """Decode native ``PartOut`` rows and join their native reason counters."""
+    empty = {"status": "unavailable", "rows": [], "by_particle_id": {}, "reason_counts": {}}
+    if attempt is None or not PARTVTKOUT.is_file():
+        return empty
+    data_dir = attempt / "data"
+    if not data_dir.is_dir() or not any(data_dir.glob("PartOut_*.obi4")):
+        return {**empty, "status": "no_partout_files"}
+    part_reasons = _runparts_exclusion_reasons(attempt)
+    with tempfile.TemporaryDirectory(prefix="r6-partout-") as temporary:
+        output = Path(temporary) / "excluded.csv"
+        resume = Path(temporary) / "resume.csv"
+        process = subprocess.run(
+            [str(PARTVTKOUT), "-dirdata", str(data_dir), "-savecsv", str(output),
+             "-saveresume", str(resume), "-createdirs:1", "-csvsep:1"],
+            cwd=attempt, env=environment(cpu=True), text=True,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
+        )
+        if process.returncode != 0 or not output.is_file():
+            return {**empty, "status": "partvtkout_failed", "returncode": process.returncode}
+        with output.open(newline="", errors="replace") as stream:
+            reader = csv.DictReader(stream, skipinitialspace=True)
+            rows = []
+            by_particle_id: dict[str, dict[str, Any]] = {}
+            reason_counts: dict[str, int] = {}
+            for raw in reader:
+                row = _normalise_csv_row(raw)
+                if not row.get("Idp"):
+                    continue
+                try:
+                    particle_id = int(str(row["Idp"]).strip())
+                    part = int(str(row.get("PartOut", "-1")).strip())
+                except ValueError:
+                    continue
+                native_reasons = part_reasons.get(part, [])
+                reason = native_reasons[0] if len(native_reasons) == 1 else (
+                    "multiple" if native_reasons else "unknown"
+                )
+                evidence = {
+                    "particle_id": particle_id,
+                    "part_out": part,
+                    "motive": int(str(row.get("Motive", "-1")).strip() or -1),
+                    "position_m": [float(row.get(key, "nan")) for key in ("Pos.x [m]", "Pos.y [m]", "Pos.z [m]")],
+                    "velocity_m_s": [float(row.get(key, "nan")) for key in ("Vel.x [m/s]", "Vel.y [m/s]", "Vel.z [m/s]")],
+                    "density_kg_m3": float(row.get("Rhop [kg/m^3]", "nan")),
+                    "native_reason": reason,
+                    "native_reason_counters": native_reasons,
+                }
+                rows.append(evidence)
+                by_particle_id[str(particle_id)] = evidence
+                reason_counts[reason] = reason_counts.get(reason, 0) + 1
+    return {
+        "status": "available",
+        "rows": rows,
+        "by_particle_id": by_particle_id,
+        "reason_counts": reason_counts,
+    }
+
+
+def _classify_missing_identities(
+    h5: h5py.File,
+    record: dict[str, Any],
+    exclusion_evidence: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Classify final identity disappearance without treating the open top as a wall.
 
     A missing final row is not, by itself, solver loss: particles may legally
@@ -467,12 +573,24 @@ def _classify_missing_identities(h5: h5py.File, record: dict[str, Any]) -> dict[
     positions = np.asarray(h5["position"][:], dtype=np.float64)
     velocities = np.asarray(h5["velocity"][:], dtype=np.float64)
     missing = initial_valid & ~final_valid
+    particle_ids = np.asarray(
+        h5["particle_id"][:] if "particle_id" in h5 else np.arange(len(initial_valid)),
+        dtype=np.int64,
+    )
     categories = {
         "legal_open_top_exit_candidate": 0,
+        "top_crossing_without_registered_absorber": 0,
+        "solver_density_exclusion": 0,
+        "solver_position_exclusion": 0,
+        "solver_movement_exclusion": 0,
+        "solver_exclusion_unknown": 0,
+        "conversion_or_export_missing": 0,
         "closed_wall_or_domain_candidate": 0,
         "inside_domain_unknown": 0,
         "no_last_valid_position": 0,
     }
+    by_particle_id = (exclusion_evidence or {}).get("by_particle_id", {})
+    registered_absorber = set(record.get("registered_absorbing_exit_faces", ()))
     examples: list[dict[str, Any]] = []
     tolerance = 0.51 * float(record["dp_m"])
     for particle_index in np.flatnonzero(missing):
@@ -496,12 +614,29 @@ def _classify_missing_identities(h5: h5py.File, record: dict[str, Any]) -> dict[
             or point[1] > 0.4 + tolerance
             or point[2] < -tolerance
         )
-        if open_top:
-            category = "legal_open_top_exit_candidate"
+        evidence = by_particle_id.get(str(int(particle_ids[particle_index])))
+        if evidence is not None:
+            reason = str(evidence.get("native_reason", "unknown"))
+            if reason == "density":
+                category = "solver_density_exclusion"
+            elif reason == "position":
+                if "top" in registered_absorber and float(evidence["position_m"][2]) >= DOMAIN_TOP_M - tolerance:
+                    category = "legal_open_top_exit_candidate"
+                else:
+                    category = "solver_position_exclusion"
+            elif reason == "movement":
+                category = "solver_movement_exclusion"
+            else:
+                category = "solver_exclusion_unknown"
+        elif open_top:
+            # A top opening in the physical-wall specification is not an
+            # absorbing outlet.  Without a registered outlet and a native
+            # per-identity event, this remains unresolved.
+            category = "top_crossing_without_registered_absorber"
         elif closed_domain:
             category = "closed_wall_or_domain_candidate"
         else:
-            category = "inside_domain_unknown"
+            category = "conversion_or_export_missing" if (exclusion_evidence or {}).get("status") == "available" else "inside_domain_unknown"
         categories[category] += 1
         if len(examples) < 8:
             examples.append({
@@ -511,15 +646,23 @@ def _classify_missing_identities(h5: h5py.File, record: dict[str, Any]) -> dict[
                 "last_valid_position_m": point.tolist(),
                 "last_valid_velocity_m_s": velocity.tolist(),
                 "one_step_predicted_z_m": predicted_z,
+                "solver_exclusion": evidence,
                 "category": category,
             })
     missing_count = int(missing.sum())
     if not missing_count:
         status = "no_missing_final_identities"
-    elif categories["inside_domain_unknown"] or categories["no_last_valid_position"]:
+    elif any(categories[key] for key in (
+        "top_crossing_without_registered_absorber", "solver_exclusion_unknown",
+        "conversion_or_export_missing", "inside_domain_unknown", "no_last_valid_position",
+    )):
         status = "unresolved_missing_identities"
     elif categories["legal_open_top_exit_candidate"] == missing_count:
         status = "legal_open_top_exit_only"
+    elif sum(categories[key] for key in (
+        "solver_density_exclusion", "solver_position_exclusion", "solver_movement_exclusion",
+    )) == missing_count:
+        status = "solver_exclusions_only"
     else:
         status = "classified_with_closed_domain_candidates"
     return {
@@ -527,8 +670,11 @@ def _classify_missing_identities(h5: h5py.File, record: dict[str, Any]) -> dict[
         "categories": categories,
         "status": status,
         "examples": examples,
+        "registered_absorbing_exit_faces": sorted(registered_absorber),
+        "exclusion_evidence_status": (exclusion_evidence or {}).get("status", "unavailable"),
+        "exclusion_evidence_reason_counts": (exclusion_evidence or {}).get("reason_counts", {}),
         "domain_top_m": DOMAIN_TOP_M,
-        "open_face_policy": "top_is_open; it is not an infinite wall",
+        "open_face_policy": "top_is_open; it is not an absorbing outlet without registered solver evidence",
     }
 
 
@@ -548,7 +694,8 @@ def full_time_audit(record: dict[str, Any], h5_path: Path, attempt: Path | None)
                 "frame": frame,
                 **_frame_metrics(h5, frame, initial_mass),
             })
-        missing_identity_classification = _classify_missing_identities(h5, record)
+        exclusion_evidence = _partout_exclusion_evidence(attempt)
+        missing_identity_classification = _classify_missing_identities(h5, record, exclusion_evidence)
     hard_failures: list[str] = []
     if not time.size or time[0] > 1e-6 or time[-1] < TIME_MAX_S - 5.0e-4:
         hard_failures.append("saved_time_axis_does_not_cover_0_to_1.5s")
@@ -583,6 +730,7 @@ def full_time_audit(record: dict[str, Any], h5_path: Path, attempt: Path | None)
         "height_label": record["height_label"],
         "resolution": record["resolution"],
         "missing_identity_classification": missing_identity_classification,
+        "solver_exclusion_evidence": exclusion_evidence,
     })
     return base
 

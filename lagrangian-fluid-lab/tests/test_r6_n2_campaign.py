@@ -64,7 +64,7 @@ def test_pair_gate_rejects_mass_distribution_above_initial_mass():
         campaign._closed_distribution({"upstream": 1.001})
 
 
-def test_missing_identity_classifier_respects_open_top_policy(tmp_path):
+def test_missing_identity_classifier_requires_registered_open_exit_evidence(tmp_path):
     import h5py
     import numpy as np
 
@@ -74,8 +74,68 @@ def test_missing_identity_classifier_respects_open_top_policy(tmp_path):
         h5["valid"] = np.asarray([[True], [False]])
         h5["position"] = np.asarray([[[0.2, 0.1, 0.59]], [[0.0, 0.0, 0.0]]])
         h5["velocity"] = np.asarray([[[0.0, 0.0, 0.2]], [[0.0, 0.0, 0.0]]])
-        result = campaign._classify_missing_identities(h5, {"dp_m": 0.014})
+        result = campaign._classify_missing_identities(
+            h5,
+            {"dp_m": 0.014, "registered_absorbing_exit_faces": ["top"]},
+            {
+                "status": "available",
+                "by_particle_id": {
+                    "0": {
+                        "native_reason": "position",
+                        "position_m": [0.2, 0.1, 0.61],
+                    }
+                },
+                "reason_counts": {"position": 1},
+            },
+        )
     assert result["status"] == "legal_open_top_exit_only"
+
+
+def test_missing_identity_classifier_does_not_promote_top_geometry_without_evidence(tmp_path):
+    import h5py
+    import numpy as np
+
+    path = tmp_path / "identity.h5"
+    with h5py.File(path, "w") as h5:
+        h5["time"] = np.asarray([0.0, 0.1])
+        h5["particle_id"] = np.asarray([0], dtype=np.int64)
+        h5["valid"] = np.asarray([[True], [False]])
+        h5["position"] = np.asarray([[[0.2, 0.1, 0.59]], [[0.0, 0.0, 0.0]]])
+        h5["velocity"] = np.asarray([[[0.0, 0.0, 0.2]], [[0.0, 0.0, 0.0]]])
+        result = campaign._classify_missing_identities(
+            h5, {"dp_m": 0.014, "registered_absorbing_exit_faces": ["top"]}
+        )
+    assert result["status"] == "unresolved_missing_identities"
+    assert result["categories"]["top_crossing_without_registered_absorber"] == 1
+
+
+def test_missing_identity_classifier_records_native_density_exclusion(tmp_path):
+    import h5py
+    import numpy as np
+
+    path = tmp_path / "identity.h5"
+    with h5py.File(path, "w") as h5:
+        h5["time"] = np.asarray([0.0, 0.1])
+        h5["particle_id"] = np.asarray([42], dtype=np.int64)
+        h5["valid"] = np.asarray([[True], [False]])
+        h5["position"] = np.asarray([[[0.2, 0.1, 0.2]], [[0.0, 0.0, 0.0]]])
+        h5["velocity"] = np.zeros((2, 1, 3))
+        result = campaign._classify_missing_identities(
+            h5,
+            {"dp_m": 0.014},
+            {
+                "status": "available",
+                "by_particle_id": {
+                    "42": {
+                        "native_reason": "density",
+                        "position_m": [0.2, 0.1, 0.2],
+                    }
+                },
+                "reason_counts": {"density": 1},
+            },
+        )
+    assert result["status"] == "solver_exclusions_only"
+    assert result["categories"]["solver_density_exclusion"] == 1
 
 
 def test_missing_identity_classifier_does_not_hide_inside_domain_loss(tmp_path):

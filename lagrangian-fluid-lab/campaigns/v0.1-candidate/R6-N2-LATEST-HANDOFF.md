@@ -25,8 +25,8 @@ Development tranche: `not_started`
 
 ## T2 material reference
 
-Status: `completed`; acceptance:
-`candidate_t2_numerical_reference_only`; formal
+Status: `pending_plain_control_material_run`; acceptance:
+`not_run`; formal
 material admission: `false`.
 
 The plain-control run uses one continuous source support envelope
@@ -34,7 +34,7 @@ The plain-control run uses one continuous source support envelope
 range `[0.04, 0.50] m` retained separately.  First passage and final category
 are separate fields; failure after an earlier arrival is not relabelled as a
 negative first-passage result.  The material configuration count is
-`6` and all
+`0` and all
 cross-configuration comparisons remain diagnostic, not acceptance gates.
 The plain-control neighbour query used an optional CPU-only exact top-k
 accelerator; no CUDA/GPU was used, and the full finite-wall collision check
@@ -66,4 +66,4 @@ External/reference validation: `not_run`.
 - Material report: `r6-f1-material-task.json`
 - This handoff: `R6-N2-LATEST-HANDOFF.md`
 
-Open blockers: ["T1 remains a numerical-reference candidate at one height only; development authorization is false", "T2 plain-control material reference completed, but external/reference anchors are absent", "material support-gate failures and tracer_unknown mass remain candidate-only findings", "center/twin missing identities remain a separate forensic branch", "formal v0.1 and hidden test release remain unauthorized"]
+Open blockers: ["T1 remains numerical-reference evidence, not external physical validation", "plain-control material T2 requires first-passage/final-destination evaluation", "center/twin missing identities remain a separate forensic branch", "formal v0.1 and hidden test release remain unauthorized"]

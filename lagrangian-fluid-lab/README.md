@@ -114,7 +114,11 @@ the exact solver configuration and executable.
 
 See [campaigns/v0.1-candidate/W12-CONCLUSION.md](campaigns/v0.1-candidate/W12-CONCLUSION.md)
 for the current freeze decision and `campaigns/v0.1-candidate/work-packages.json`
-for package status. The original broad-pass findings remain in
+for package status. The latest bounded R6-N3 execution is summarized in
+[R6-N3-LATEST-HANDOFF.md](campaigns/v0.1-candidate/R6-N3-LATEST-HANDOFF.md),
+with the cloud-review request in
+[R6-N3-REVIEW-PACKET.md](campaigns/v0.1-candidate/R6-N3-REVIEW-PACKET.md).
+The original broad-pass findings remain in
 [reports/findings.md](reports/findings.md).
 
 ## Reproduce the exploration
