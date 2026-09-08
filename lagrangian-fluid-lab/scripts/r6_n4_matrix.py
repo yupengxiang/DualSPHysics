@@ -1336,7 +1336,7 @@ def write_handoff(
 Generated: {datetime.now(timezone.utc).isoformat()}
 Baseline: `{BASELINE_COMMIT}`
 Branch: `{git_value('branch', '--show-current')}`
-Code revision used for this handoff: `{git_value('rev-parse', 'HEAD')}`
+Code revision used for this handoff: `{git_value('log', '-1', '--format=%H', '--', 'lagrangian-fluid-lab/scripts/r6_n4_matrix.py', 'lagrangian-fluid-lab/scripts/campaign_runner.py')}`
 
 ## Current state
 
@@ -1391,6 +1391,7 @@ The h10 coarse→medium result remains `fail_diagnostic`, max TV
 - [N4-REVIEW-PACKET.md](N4-REVIEW-PACKET.md)
 - [N4-REVIEW-ROUND-1.md](N4-REVIEW-ROUND-1.md)
 - [N4-REVIEW-ROUND-2.md](N4-REVIEW-ROUND-2.md)
+- [N4-REVIEW-ROUND-3.md](N4-REVIEW-ROUND-3.md)
 
 ## Next authorized gate
 
@@ -1440,6 +1441,7 @@ been started while owner budget status is pending.
 - `N4-DECISION.json/.md`
 - `N4-REVIEW-ROUND-1.md`
 - `N4-REVIEW-ROUND-2.md`
+- `N4-REVIEW-ROUND-3.md`
 """
     HANDOFF_MARKDOWN.write_text(handoff)
     REVIEW_PACKET_MARKDOWN.write_text(review)
