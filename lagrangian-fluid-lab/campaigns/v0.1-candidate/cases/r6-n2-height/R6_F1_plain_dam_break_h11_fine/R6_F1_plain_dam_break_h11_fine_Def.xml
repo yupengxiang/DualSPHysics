@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='utf-8'?>
+<case>
+    <casedef>
+        <constantsdef>
+            <gravity x="0" y="0" z="-9.81" />
+            <rhop0 value="1000" />
+            <rhopgradient value="2" />
+            <hswl value="0" auto="true" />
+            <gamma value="7" />
+            <speedsystem value="0" auto="true" />
+            <coefsound value="20" />
+            <speedsound value="0" auto="true" />
+            <coefh value="1.0" />
+            <cflnumber value="0.2" />
+        </constantsdef>
+        <mkconfig boundcount="200" fluidcount="16" />
+        <geometry>
+            <definition dp="0.014">
+                <pointmin x="-0.12" y="-0.12" z="-0.12" />
+                <pointmax x="1.35" y="0.55" z="0.85" />
+            </definition>
+            <commands>
+                <mainlist>
+                    <setshapemode>dp | bound</setshapemode>
+                    <setdrawmode mode="full" />
+                    <setmkfluid mk="0" />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.04" y="0.04" z="0.04" />
+                        <size x="0.34" y="0.32" z="0.506" />
+                    </drawbox>
+                    <setmkbound mk="0" />
+                    <drawbox>
+                        <boxfill>bottom | left | right | front | back</boxfill>
+                        <point x="0" y="0" z="0" />
+                        <size x="1.2" y="0.4" z="0.6" />
+                    </drawbox>
+                </mainlist>
+            </commands>
+        </geometry>
+    </casedef>
+    <execution>
+        <parameters>
+            <parameter key="SavePosDouble" value="2" />
+            <parameter key="StepAlgorithm" value="1" />
+            <parameter key="VerletSteps" value="40" />
+            <parameter key="Kernel" value="2" />
+            <parameter key="ViscoTreatment" value="1" />
+            <parameter key="Visco" value="0.08" />
+            <parameter key="ViscoBoundFactor" value="1" />
+            <parameter key="DensityDT" value="2" />
+            <parameter key="DensityDTvalue" value="0.1" />
+            <parameter key="Shifting" value="0" />
+            <parameter key="RigidAlgorithm" value="1" />
+            <parameter key="FtPause" value="0" />
+            <parameter key="CoefDtMin" value="0.05" />
+            <parameter key="DtIni" value="0" />
+            <parameter key="DtMin" value="0" />
+            <parameter key="DtFixed" value="0" />
+            <parameter key="DtAllParticles" value="0" />
+            <parameter key="TimeMax" value="1.5" />
+            <parameter key="TimeOut" value="0.001" />
+            <parameter key="MinFluidStop" value="0" />
+            <parameter key="RhopOutMin" value="700" />
+            <parameter key="RhopOutMax" value="1300" />
+            <simulationdomain>
+                <posmin x="default - 25%" y="default - 25%" z="default - 25%" />
+                <posmax x="default + 25%" y="default + 25%" z="default + 75%" />
+            </simulationdomain>
+            <parameter key="Boundary" value="1" />
+        </parameters>
+    </execution>
+</case>

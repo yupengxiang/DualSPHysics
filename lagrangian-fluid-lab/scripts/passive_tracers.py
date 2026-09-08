@@ -5,12 +5,56 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
+import os
 
 import h5py
 import numpy as np
 
+try:  # Optional CPU acceleration for large no-barrier neighbour queries.
+    import torch
+except ModuleNotFoundError:  # pragma: no cover - exercised on minimal installs
+    torch = None  # type: ignore[assignment]
+
 
 EPSILON = 1e-10
+_TORCH_NEIGHBOUR_CONFIGURED = False
+
+
+def _torch_nearest_support(
+    query: np.ndarray,
+    particle_position: np.ndarray,
+    k: int,
+) -> tuple[np.ndarray, np.ndarray] | None:
+    """Return exact CPU top-k distances/indices when optional Torch exists.
+
+    This path is deliberately limited to the no-finite-barrier case.  It
+    accelerates the large plain-control material audit while leaving the
+    finite-triangle visibility path unchanged.  Tensors are created on CPU
+    from the same float64 arrays used by the NumPy implementation; no CUDA
+    device is touched.
+    """
+    global _TORCH_NEIGHBOUR_CONFIGURED
+    if torch is None:
+        return None
+    if not _TORCH_NEIGHBOUR_CONFIGURED:
+        requested = os.environ.get("LAGRANGIAN_TRACER_TORCH_THREADS", "4")
+        try:
+            threads = max(1, int(requested))
+        except ValueError:
+            threads = 4
+        torch.set_num_threads(threads)
+        _TORCH_NEIGHBOUR_CONFIGURED = True
+    with torch.no_grad():
+        query_tensor = torch.from_numpy(np.ascontiguousarray(query, dtype=np.float64))
+        particle_tensor = torch.from_numpy(np.ascontiguousarray(particle_position, dtype=np.float64))
+        distance, selected = torch.topk(
+            torch.cdist(query_tensor, particle_tensor),
+            k=int(k), dim=1, largest=False, sorted=False,
+        )
+    return (
+        np.asarray(selected.numpy(), dtype=np.int64),
+        np.asarray(distance.numpy(), dtype=np.float64) ** 2,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -594,51 +638,63 @@ def shepard_velocity_with_diagnostics(query, particle_position, particle_velocit
     epsilon2 = float(regularization) ** 2
     for start in range(0, len(query), chunk_size):
         stop = min(start + chunk_size, len(query))
-        delta = query[start:stop, None, :] - particle_position[None, :, :]
-        distance2 = np.einsum("qpi,qpi->qp", delta, delta)
-        if barrier_triangles is not None:
-            triangles = np.asarray(barrier_triangles, dtype=np.float64)
-            if triangles.size and len(particle_position) > max(4 * k, 128):
-                # Find the exact top-k visible support without testing every
-                # query against every finite triangle.  The first candidate
-                # pool contains 4k nearest samples; if fewer than k remain
-                # visible, the pool is expanded.  Once k visible samples are
-                # present, every unsearched sample is no closer than the
-                # pool boundary, so the selected visible top-k is exact.
-                candidate_width = min(max(4 * k, k), len(particle_position))
-                candidate_indices = None
-                candidate_visible = None
-                while True:
-                    candidate_indices = np.argpartition(
-                        distance2, candidate_width - 1, axis=1
-                    )[:, :candidate_width]
-                    candidate_position = particle_position[candidate_indices]
-                    candidate_visible = segment_visibility(
-                        query[start:stop], candidate_position, triangles
-                    )
-                    visible_count = candidate_visible.sum(axis=1)
-                    if candidate_width == len(particle_position) or np.all(visible_count >= k):
-                        break
-                    candidate_width = min(len(particle_position), candidate_width * 2)
-                visible = np.zeros_like(distance2, dtype=bool)
-                rows = np.arange(stop - start)[:, None]
-                visible[rows, candidate_indices] = candidate_visible
-                visible_neighbours[start:stop] = visible_count
-                visibility_mode = "adaptive_exact_visible_top_k"
-                visibility_search_width[start:stop] = candidate_width
-            else:
-                visible = segment_visibility(query[start:stop], particle_position, triangles)
-                visible_neighbours[start:stop] = visible.sum(axis=1)
-                visibility_mode = "full_pairwise_exact"
+        triangles = None if barrier_triangles is None else np.asarray(barrier_triangles, dtype=np.float64)
+        accelerated = triangles is None or triangles.size == 0
+        selected_distance2 = None
+        selected = None
+        if accelerated:
+            nearest = _torch_nearest_support(query[start:stop], particle_position, k)
+            if nearest is not None:
+                selected, selected_distance2 = nearest
+                visible_neighbours[start:stop] = len(particle_position)
                 visibility_search_width[start:stop] = len(particle_position)
-        else:
-            visible = np.ones_like(distance2, dtype=bool)
-            visible_neighbours[start:stop] = len(particle_position)
-            visibility_mode = "no_barrier"
-            visibility_search_width[start:stop] = len(particle_position)
-        distance2[~visible] = np.inf
-        selected = np.argpartition(distance2, k - 1, axis=1)[:, :k]
-        selected_distance2 = np.take_along_axis(distance2, selected, axis=1)
+                visibility_mode = "torch_exact_no_barrier"
+        if selected is None:
+            delta = query[start:stop, None, :] - particle_position[None, :, :]
+            distance2 = np.einsum("qpi,qpi->qp", delta, delta)
+            if triangles is not None:
+                if triangles.size and len(particle_position) > max(4 * k, 128):
+                    # Find the exact top-k visible support without testing
+                    # every query against every finite triangle.  The first
+                    # candidate pool contains 4k nearest samples; if fewer
+                    # than k remain visible, the pool is expanded.  Once k
+                    # visible samples are present, every unsearched sample is
+                    # no closer than the pool boundary, so the selected
+                    # visible top-k is exact.
+                    candidate_width = min(max(4 * k, k), len(particle_position))
+                    candidate_indices = None
+                    candidate_visible = None
+                    while True:
+                        candidate_indices = np.argpartition(
+                            distance2, candidate_width - 1, axis=1
+                        )[:, :candidate_width]
+                        candidate_position = particle_position[candidate_indices]
+                        candidate_visible = segment_visibility(
+                            query[start:stop], candidate_position, triangles
+                        )
+                        visible_count = candidate_visible.sum(axis=1)
+                        if candidate_width == len(particle_position) or np.all(visible_count >= k):
+                            break
+                        candidate_width = min(len(particle_position), candidate_width * 2)
+                    visible = np.zeros_like(distance2, dtype=bool)
+                    rows = np.arange(stop - start)[:, None]
+                    visible[rows, candidate_indices] = candidate_visible
+                    visible_neighbours[start:stop] = visible_count
+                    visibility_mode = "adaptive_exact_visible_top_k"
+                    visibility_search_width[start:stop] = candidate_width
+                else:
+                    visible = segment_visibility(query[start:stop], particle_position, triangles)
+                    visible_neighbours[start:stop] = visible.sum(axis=1)
+                    visibility_mode = "full_pairwise_exact"
+                    visibility_search_width[start:stop] = len(particle_position)
+            else:
+                visible = np.ones_like(distance2, dtype=bool)
+                visible_neighbours[start:stop] = len(particle_position)
+                visibility_mode = "no_barrier"
+                visibility_search_width[start:stop] = len(particle_position)
+            distance2[~visible] = np.inf
+            selected = np.argpartition(distance2, k - 1, axis=1)[:, :k]
+            selected_distance2 = np.take_along_axis(distance2, selected, axis=1)
         weights = np.where(np.isfinite(selected_distance2), 1.0 / (selected_distance2 + epsilon2), 0.0)
         selected_velocity = particle_velocity[selected]
         denominator = weights.sum(axis=1)

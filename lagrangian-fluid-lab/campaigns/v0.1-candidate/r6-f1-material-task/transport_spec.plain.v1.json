@@ -1,0 +1,88 @@
+{
+  "spec_id": "lagrangian-fluid.f1.plain-control.material-transport",
+  "version": "r6.1.0",
+  "case_family": "F1",
+  "case_variant": "plain_control",
+  "lifecycle_model": "closed",
+  "sources": {
+    "mode": "mk",
+    "frame": {"kind": "world"},
+    "source_label": "initial_depth_layer",
+    "measure_only": true,
+    "layer_order": ["lower", "middle", "upper"],
+    "layer_definition": {
+      "axis": "z",
+      "reference": "declared_continuous_initial_fluid_bounds",
+      "default_bounds_m": [0.03, 0.52],
+      "intervals": [
+        {"name": "lower", "z_fraction": [0.0, 0.3333333333333333], "interval": "[0, 1/3)"},
+        {"name": "middle", "z_fraction": [0.3333333333333333, 0.6666666666666666], "interval": "[1/3, 2/3)"},
+        {"name": "upper", "z_fraction": [0.6666666666666666, 1.0], "interval": "[2/3, 1]"}
+      ]
+    },
+    "labels_are_not_material_identity": true
+  },
+  "destination_frame": {"kind": "world"},
+  "destinations": [{
+    "name": "downstream_target",
+    "type": "aabb",
+    "min": [0.84, 0.04, 0.04],
+    "max": [1.16, 0.36, 0.56],
+    "entry_semantics": "first_valid_tracer_frame_inside_region"
+  }],
+  "domain": {
+    "name": "tank_interior",
+    "type": "aabb",
+    "min": [0.0, 0.0, 0.0],
+    "max": [1.2, 0.4, 0.6],
+    "membership": "inclusive_world_coordinates"
+  },
+  "legitimate_exit_regions": [],
+  "terminal_categories": ["target", "domain", "legitimate_exit", "numerical_loss", "tracer_unknown"],
+  "wall": {
+    "coordinate_frame": "world",
+    "component_label_dataset_preference": ["triangle_component", "triangle_mk"],
+    "component_roles": {
+      "17": {
+        "role": "tank_wall",
+        "declared_faces": ["bottom", "left", "right", "front", "back"],
+        "open_faces": ["top"],
+        "rim_policy": "finite_generated_triangles_only",
+        "supporting_policy": "not_assumed"
+      }
+    },
+    "open_face_policy": "only declared finite triangles block a tracer; open faces are not infinite planes",
+    "rim_policy": "finite_generated_triangles_only",
+    "sidecar_motion_policy": "static_or_explicit_rigid_pose",
+    "wall_crossing_is_failure": true
+  },
+  "identity": {
+    "reference_key": ["particle_zone", "particle_id"],
+    "duplicate_policy": "reject_duplicate_reference_or_tracer_id",
+    "source_label_policy": "initial_position_only",
+    "tracer_id_policy": "unique_config_seed_reference_key"
+  },
+  "trace_contract": {
+    "required_fields": ["tracer_id", "time", "position", "valid", "source_label", "mass_weight", "failure_reason", "first_failure", "destination", "first_passage", "censoring"],
+    "failure_reason_semantics": "one reason per saved interval; no event is inferred after first invalid tracer frame",
+    "first_passage_semantics": "first valid frame in destination before tracer failure, solver identity loss, or legitimate exit",
+    "final_destination_semantics": "last valid state; a later failure makes final destination unknown even if first passage was observed",
+    "censoring_semantics": "tracer failure is right-censoring/unknown, never a negative no-event label"
+  },
+  "mass_accounting": {
+    "denominator": "sum of initial valid fluid mass over all source layers",
+    "categories_are_disjoint": true,
+    "required_categories": ["target", "domain", "legitimate_exit", "numerical_loss", "tracer_unknown"],
+    "no_survivor_renormalization": true,
+    "closure_tolerance_kg": 1.0e-8
+  },
+  "exit_reason_names": {
+    "wall_crossing": "finite wall intersection",
+    "support_gate_failure": "support quality gate failure",
+    "support_distance_exceedance": "support distance exceeded",
+    "support_nonfinite": "non-finite interpolation/support diagnostic",
+    "solver_identity_missing": "reference solver identity missing",
+    "tracer_unknown": "tracer failure without a more specific reason",
+    "censored_after_first_failure": "not evaluated after first tracer failure"
+  }
+}

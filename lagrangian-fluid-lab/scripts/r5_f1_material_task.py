@@ -48,7 +48,7 @@ CAMPAIGN = LAB / "campaigns" / "v0.1-candidate"
 CONTRACT_ROOT = CAMPAIGN / "r5-f1-material-task"
 DEFAULT_SPEC = CONTRACT_ROOT / "transport_spec.v1.json"
 DEFAULT_OUTPUT_DIR = CAMPAIGN / "artifacts" / "r5-f1-material-task"
-OUTPUT_SCHEMA_VERSION = "r5-f1-material-task-output.v1"
+OUTPUT_SCHEMA_VERSION = "r6-f1-material-task-output.v2"
 DEFAULT_SEED_COUNTS = (128, 256)
 DEFAULT_SUBSTEPS = (2, 4)
 MAX_CONFIGURATIONS = 8
@@ -182,12 +182,15 @@ def validate_r5_transport_spec(spec: Mapping[str, Any]) -> None:
     """Validate both the shared transport vocabulary and R5-specific fields."""
     if not isinstance(spec, Mapping):
         raise ValueError("R5 transport spec must be an object")
-    if spec.get("spec_id") != "lagrangian-fluid.f1.single-obstacle.material-transport":
-        raise ValueError("unexpected R5 F1 transport spec id")
-    if spec.get("version") != "r5.1.0":
-        raise ValueError("R5 F1 transport spec version must be r5.1.0")
-    if spec.get("case_family") != "F1" or spec.get("case_variant") != "single_obstacle":
-        raise ValueError("R5 material task is frozen for F1 single_obstacle")
+    if spec.get("spec_id") not in {
+        "lagrangian-fluid.f1.single-obstacle.material-transport",
+        "lagrangian-fluid.f1.plain-control.material-transport",
+    }:
+        raise ValueError("unexpected F1 transport spec id")
+    if spec.get("version") not in {"r5.1.0", "r6.1.0"}:
+        raise ValueError("F1 transport spec version must be r5.1.0 or r6.1.0")
+    if spec.get("case_family") != "F1" or spec.get("case_variant") not in {"single_obstacle", "plain_control"}:
+        raise ValueError("F1 material task requires single_obstacle or plain_control")
     # The shared validator is deliberately reused, while the source-label
     # semantics remain separate from its legacy source-mask implementation.
     validate_transport_spec(dict(spec))
@@ -204,8 +207,18 @@ def validate_r5_transport_spec(spec: Mapping[str, Any]) -> None:
     definition = sources.get("layer_definition")
     if not isinstance(definition, Mapping) or definition.get("axis") != "z":
         raise ValueError("source layers must be defined on initial z")
-    if definition.get("reference") != "initial_valid_fluid_min_max":
-        raise ValueError("source layer reference must be initial valid fluid bounds")
+    if definition.get("reference") not in {
+        "initial_valid_fluid_min_max",
+        "declared_continuous_initial_fluid_bounds",
+    }:
+        raise ValueError("source layer reference must be declared continuous or legacy initial bounds")
+    if definition.get("reference") == "declared_continuous_initial_fluid_bounds":
+        default_bounds = definition.get("default_bounds_m")
+        if not isinstance(default_bounds, list) or len(default_bounds) != 2:
+            raise ValueError("declared continuous source layers require default_bounds_m")
+        values = np.asarray(default_bounds, dtype=float)
+        if not np.all(np.isfinite(values)) or values[1] <= values[0]:
+            raise ValueError("default continuous source bounds are invalid")
     intervals = definition.get("intervals")
     if not isinstance(intervals, list) or len(intervals) != 3:
         raise ValueError("exactly three source layer intervals are required")
@@ -241,8 +254,9 @@ def validate_r5_transport_spec(spec: Mapping[str, Any]) -> None:
     if wall.get("coordinate_frame") != "world":
         raise ValueError("F1 wall policy must be in world coordinates")
     roles = wall.get("component_roles")
-    if not isinstance(roles, Mapping) or set(str(key) for key in roles) != {"17", "18"}:
-        raise ValueError("F1 wall policy must freeze components 17 and 18")
+    expected_components = {"17", "18"} if spec.get("case_variant") == "single_obstacle" else {"17"}
+    if not isinstance(roles, Mapping) or set(str(key) for key in roles) != expected_components:
+        raise ValueError(f"F1 wall policy must freeze components {sorted(expected_components)}")
     for component, role in roles.items():
         if not isinstance(role, Mapping):
             raise ValueError(f"wall component {component} policy must be an object")
@@ -426,18 +440,23 @@ def _material_barrier_provider(sidecar_path: Path, spec: Mapping[str, Any]):
         for component_id, role in spec["wall"]["component_roles"].items()
         if role.get("role") == "single_obstacle"
     }
-    if len(obstacle_ids) != 1:
-        raise ValueError("F1 material task requires exactly one single_obstacle component")
+    if len(obstacle_ids) > 1:
+        raise ValueError("F1 material task supports at most one single_obstacle component")
     visibility_indices = np.flatnonzero(np.isin(components, sorted(obstacle_ids))).astype(np.int64)
-    if len(visibility_indices) == 0:
-        raise ValueError("F1 material task sidecar has no single_obstacle triangles")
+    if spec.get("case_variant") == "single_obstacle" and len(visibility_indices) == 0:
+        raise ValueError("single_obstacle material task sidecar has no obstacle triangles")
     provider.visibility_triangle_indices = visibility_indices  # type: ignore[attr-defined]
-    provider.visibility_filter = "only single_obstacle component; tank convexity proof; full collision sidecar retained"  # type: ignore[attr-defined]
+    provider.visibility_filter = (
+        "only single_obstacle component; tank convexity proof; full collision sidecar retained"
+        if len(obstacle_ids)
+        else "no internal obstacle; tank convexity proof; full collision sidecar retained"
+    )  # type: ignore[attr-defined]
     return provider
 
 
 def load_input_snapshot(hdf5_path: Path, sidecar_path: Path, spec: Mapping[str, Any], *, case_id: str | None = None,
-                        particle_spacing_m: float | None = None) -> InputSnapshot:
+                        particle_spacing_m: float | None = None,
+                        source_z_bounds_m: Sequence[float] | None = None) -> InputSnapshot:
     """Validate a real HDF5/sidecar pair and freeze its input metadata."""
     hdf5_path = Path(hdf5_path).resolve()
     sidecar_path = Path(sidecar_path).resolve()
@@ -455,8 +474,28 @@ def load_input_snapshot(hdf5_path: Path, sidecar_path: Path, spec: Mapping[str, 
         raise ValueError(f"--case-id {case_id!r} does not match HDF5 case_id {metadata['case_id']!r}")
     initial_fluid_indices = np.flatnonzero(arrays["initial_fluid"])
     initial_position = arrays["position"][0, initial_fluid_indices]
-    z_lower = float(np.min(initial_position[:, 2]))
-    z_upper = float(np.max(initial_position[:, 2]))
+    discrete_z_lower = float(np.min(initial_position[:, 2]))
+    discrete_z_upper = float(np.max(initial_position[:, 2]))
+    continuous_bounds: Sequence[float] | None = source_z_bounds_m
+    if continuous_bounds is None:
+        with h5py.File(hdf5_path, "r") as h5:
+            if "continuous_initial_fluid_z_bounds_m" in h5.attrs:
+                continuous_bounds = np.asarray(h5.attrs["continuous_initial_fluid_z_bounds_m"], dtype=float).tolist()
+    layer_definition = spec.get("sources", {}).get("layer_definition", {})
+    if continuous_bounds is None and layer_definition.get("reference") == "declared_continuous_initial_fluid_bounds":
+        continuous_bounds = layer_definition.get("default_bounds_m")
+    if continuous_bounds is None:
+        continuous_bounds = (discrete_z_lower, discrete_z_upper)
+    if len(continuous_bounds) != 2:
+        raise ValueError("source_z_bounds_m must contain exactly two values")
+    z_lower, z_upper = (float(continuous_bounds[0]), float(continuous_bounds[1]))
+    if not np.isfinite(z_lower) or not np.isfinite(z_upper) or z_upper <= z_lower:
+        raise ValueError("continuous initial fluid z bounds must be finite and increasing")
+    if discrete_z_lower < z_lower - 1e-8 or discrete_z_upper > z_upper + 1e-8:
+        raise ValueError(
+            "continuous initial fluid bounds do not contain all discrete initial fluid positions: "
+            f"bounds=({z_lower}, {z_upper}) discrete=({discrete_z_lower}, {discrete_z_upper})"
+        )
     initial_labels = _source_labels_from_z(initial_position[:, 2], z_lower, z_upper)
     sidecar_summary = _validate_sidecar(sidecar_path, arrays["time"], spec)
     source_mass = {
@@ -473,7 +512,8 @@ def load_input_snapshot(hdf5_path: Path, sidecar_path: Path, spec: Mapping[str, 
         "time_start_s": float(arrays["time"][0]),
         "time_end_s": float(arrays["time"][-1]),
         "saved_cadence_median_s": float(np.median(np.diff(arrays["time"]))),
-        "initial_z_bounds_m": [z_lower, z_upper],
+        "initial_z_bounds_m": [discrete_z_lower, discrete_z_upper],
+        "continuous_initial_fluid_z_bounds_m": [z_lower, z_upper],
         "source_label_counts": {label: int(np.sum(initial_labels == label)) for label in SOURCE_LABELS},
         "source_label_mass_kg": source_mass,
         "source_label_measure_only": True,
@@ -779,28 +819,38 @@ def _classify_trace(
         first_bad = int(bad[0]) if len(bad) else len(time)
         event_candidates = np.flatnonzero(destination_mask[:first_bad, q])
         exit_candidates = np.flatnonzero(exit_mask[:first_bad, q])
+
+        # First passage is an event-time task.  It is intentionally evaluated
+        # only before the first invalid frame; a stale coordinate after a
+        # tracer/solver failure cannot invent an observed arrival.
         if len(event_candidates):
             event = int(event_candidates[0])
             first_passage_frame[q] = event
             first_passage_time[q] = time[event]
             first_passage_status[q] = "observed"
-            terminal_category[q] = "target"
-            terminal_frame[q] = event
         elif len(exit_candidates):
-            event = int(exit_candidates[0])
             first_passage_status[q] = "legitimate_exit_before_target"
-            terminal_category[q] = "legitimate_exit"
-            terminal_frame[q] = event
         elif first_bad < len(time):
-            terminal_frame[q] = first_bad - 1
             first_reason = str(failure["first_reason"][q])
             if first_reason == "solver_identity_missing":
                 first_passage_status[q] = "censored_by_numerical_loss"
-                terminal_category[q] = "numerical_loss"
             else:
                 first_passage_status[q] = "censored_by_tracer_failure"
-                terminal_category[q] = "tracer_unknown"
             first_passage_censored[q] = True
+        else:
+            first_passage_censored[q] = True
+
+        # Terminal category is a separate final-state task.  In particular,
+        # arrival followed by later return is ``first_passage=observed`` but
+        # terminal_category=domain (or another final region); arrival followed
+        # by failure is observed historically but has unknown final outcome.
+        if first_bad < len(time):
+            terminal_frame[q] = first_bad - 1
+            terminal_category[q] = (
+                "numerical_loss"
+                if str(failure["first_reason"][q]) == "solver_identity_missing"
+                else "tracer_unknown"
+            )
         else:
             terminal_frame[q] = len(time) - 1
             final_position = position[-1, q]
@@ -808,22 +858,13 @@ def _classify_trace(
                 terminal_category[q] = "numerical_loss"
             elif points_in_region(final_position[None, :], destinations[0])[0]:
                 terminal_category[q] = "target"
-                first_passage_frame[q] = len(time) - 1
-                first_passage_time[q] = time[-1]
-                first_passage_status[q] = "observed"
             elif exits and any(points_in_region(final_position[None, :], region)[0] for region in exits):
                 terminal_category[q] = "legitimate_exit"
-                first_passage_status[q] = "legitimate_exit_before_target"
             elif points_in_region(final_position[None, :], domain)[0]:
                 terminal_category[q] = "domain"
             else:
                 outside_domain[q] = True
                 terminal_category[q] = "numerical_loss"
-
-        if first_passage_status[q] in {"censored_by_tracer_failure", "censored_by_numerical_loss"}:
-            first_passage_censored[q] = True
-        elif first_passage_status[q] == "right_censored_end_of_window":
-            first_passage_censored[q] = True
 
     # If an event was observed before a later failure, it remains an observed
     # event; the terminal task outcome is target/exit, not an invented failure.
@@ -895,6 +936,7 @@ def _classify_trace(
         "first_passage_status": first_passage_status,
         "first_passage_censored": first_passage_censored,
         "terminal_category": terminal_category,
+        "final_category": terminal_category.copy(),
         "terminal_frame": terminal_frame,
         "outside_domain": outside_domain,
         **support_fields,
@@ -925,7 +967,18 @@ def _classify_trace(
                 status: int(np.sum(first_passage_status == status)) for status in FIRST_PASSAGE_STATUSES
                 if np.any(first_passage_status == status)
             },
+            "first_passage_status_mass_kg": {
+                status: float(np.sum(weights[first_passage_status == status], dtype=np.float64))
+                for status in FIRST_PASSAGE_STATUSES
+            },
+            "first_passage_status_mass_fractions": {
+                status: float(np.sum(weights[first_passage_status == status], dtype=np.float64) / max(initial_mass, 1e-30))
+                for status in FIRST_PASSAGE_STATUSES
+            },
             "terminal_category_counts": {
+                category: int(np.sum(terminal_category == category)) for category in TERMINAL_CATEGORIES
+            },
+            "final_category_counts": {
                 category: int(np.sum(terminal_category == category)) for category in TERMINAL_CATEGORIES
             },
             "mass_accounting": {
@@ -970,6 +1023,10 @@ def write_trajectory_bundle(path: Path, result: Mapping[str, Any], resolved_spec
         h5.attrs["source_label_measure_only"] = True
         h5.attrs["mass_denominator"] = "initial_valid_fluid_mass"
         h5.attrs["censoring_semantics"] = "tracer failure is unknown/censored, never a negative event"
+        h5.attrs["destination_semantics"] = (
+            "first_passage is first valid arrival; final_category is the last valid state, "
+            "or unknown when failure occurs after any earlier arrival"
+        )
 
         h5.create_dataset("tracer_id", data=np.asarray(result["tracer_id"], dtype=object), dtype=string_dtype)
         h5.create_dataset("time", data=np.asarray(result["time"], dtype=np.float64))
@@ -1009,6 +1066,7 @@ def write_trajectory_bundle(path: Path, result: Mapping[str, Any], resolved_spec
         destination.create_dataset("first_passage_status", data=np.asarray(result["first_passage_status"], dtype=object), dtype=string_dtype)
         destination.create_dataset("first_passage_censored", data=np.asarray(result["first_passage_censored"], dtype=bool))
         destination.create_dataset("terminal_category", data=np.asarray(result["terminal_category"], dtype=object), dtype=string_dtype)
+        destination.create_dataset("final_category", data=np.asarray(result["final_category"], dtype=object), dtype=string_dtype)
         destination.create_dataset("terminal_frame", data=np.asarray(result["terminal_frame"], dtype=np.int64))
         destination.create_dataset("outside_domain", data=np.asarray(result["outside_domain"], dtype=bool))
 
@@ -1023,6 +1081,7 @@ def run_bounded(
     *,
     case_id: str | None = None,
     particle_spacing_m: float | None = None,
+    source_z_bounds_m: Sequence[float] | None = None,
     spec_path: Path = DEFAULT_SPEC,
     output_dir: Path = DEFAULT_OUTPUT_DIR,
     seed_counts: Sequence[int] = DEFAULT_SEED_COUNTS,
@@ -1040,6 +1099,7 @@ def run_bounded(
     snapshot = load_input_snapshot(
         Path(hdf5_path), Path(sidecar_path), spec,
         case_id=case_id, particle_spacing_m=particle_spacing_m,
+        source_z_bounds_m=source_z_bounds_m,
     )
     resolved_spec = _resolved_spec(
         spec,
@@ -1102,7 +1162,7 @@ def run_bounded(
         "execution_status": "completed",
         "acceptance_status": "candidate_only_not_physical_acceptance",
         "formal_material_target_admitted": False,
-        "scope": "bounded CPU source-layer material task on one F1 single-obstacle trajectory",
+        "scope": f"bounded CPU source-layer material task on one F1 {spec.get('case_variant')} trajectory",
         "transport_spec": resolved_spec,
         "input": snapshot.input_summary,
         "hashes": hashes,
@@ -1132,8 +1192,8 @@ def run_bounded(
         },
         "checks": checks,
         "open_blockers": [
-            "new F1 medium/fine HDF5 and release-linked sidecars must be supplied before the preferred production run",
             "source_label is an initial-depth measurement stratum, not a physical material identity",
+            "source layers use declared continuous initial-fluid bounds; discrete particle extrema are recorded separately",
             "formal destination and wall acceptance still require physical/reference validation",
             "solver-exported material identity is still numerical-node identity; the task reports solver identity loss separately",
         ],
@@ -1189,6 +1249,8 @@ def main() -> None:
     parser.add_argument("--case-id")
     parser.add_argument("--particle-spacing", type=float,
                         help="override particle spacing when the HDF5 lacks particle_spacing_m/dp")
+    parser.add_argument("--source-z-bounds", type=float, nargs=2, metavar=("Z_MIN", "Z_MAX"),
+                        help="declared continuous initial-fluid z bounds used for source layers")
     parser.add_argument("--spec", type=Path, default=DEFAULT_SPEC)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--seed-counts", type=int, nargs="+", default=list(DEFAULT_SEED_COUNTS))
@@ -1204,6 +1266,7 @@ def main() -> None:
         args.sidecar,
         case_id=args.case_id,
         particle_spacing_m=args.particle_spacing,
+        source_z_bounds_m=args.source_z_bounds,
         spec_path=args.spec,
         output_dir=args.output_dir,
         seed_counts=args.seed_counts,

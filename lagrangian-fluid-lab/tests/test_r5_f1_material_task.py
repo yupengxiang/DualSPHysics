@@ -247,6 +247,45 @@ def test_tracer_failure_is_not_encoded_as_no_event(tmp_path):
     assert result["summary"]["mass_accounting"]["categories_kg"]["target"] < 18.0
 
 
+def test_first_passage_and_final_destination_are_separate_after_late_failure(tmp_path):
+    _hdf5, _sidecar, snapshot, resolved, seeds = _snapshot_and_seeds(tmp_path)
+    valid = np.ones((3, len(seeds["mass_weight"])), dtype=bool)
+    valid[2, 0] = False
+    positions = np.repeat(seeds["initial_position"][None, :, :], 3, axis=0)
+    positions[1:, 0] = [1.0, 0.2, 0.2]
+    result = MODULE._classify_trace(
+        _trace(snapshot, seeds, valid=valid) | {"position": positions},
+        seeds, snapshot, resolved, "fixture_config", 6, 1,
+    )
+    assert result["first_passage_status"][0] == "observed"
+    assert result["first_passage_frame"][0] == 1
+    assert result["terminal_category"][0] == "tracer_unknown"
+    assert result["final_category"][0] == "tracer_unknown"
+
+
+def test_first_passage_can_be_followed_by_final_domain_state(tmp_path):
+    _hdf5, _sidecar, snapshot, resolved, seeds = _snapshot_and_seeds(tmp_path)
+    positions = np.repeat(seeds["initial_position"][None, :, :], 3, axis=0)
+    positions[1:, 0] = [1.0, 0.2, 0.2]
+    # The target ends at x=1.16; the final point is back in the tank but no
+    # longer in the target, so terminal/final destination must be domain.
+    positions[2, 0] = [0.70, 0.20, 0.20]
+    result = MODULE._classify_trace(
+        _trace(snapshot, seeds) | {"position": positions},
+        seeds, snapshot, resolved, "fixture_config", 6, 1,
+    )
+    assert result["first_passage_status"][0] == "observed"
+    assert result["first_passage_frame"][0] == 1
+    assert result["terminal_category"][0] == "domain"
+    assert result["final_category"][0] == "domain"
+
+
+def test_source_layers_record_declared_continuous_bounds(tmp_path):
+    _hdf5, _sidecar, snapshot, _resolved, _seeds = _snapshot_and_seeds(tmp_path)
+    assert snapshot.input_summary["continuous_initial_fluid_z_bounds_m"] == pytest.approx([0.04, 0.50])
+    assert snapshot.input_summary["initial_z_bounds_m"] == pytest.approx([0.10, 0.50])
+
+
 def test_bounded_configuration_limit_is_enforced(tmp_path):
     hdf5_path, sidecar_path = _write_fixture(tmp_path)
     with pytest.raises(ValueError, match="bounded material run"):
