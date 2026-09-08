@@ -30,8 +30,7 @@ attached N4 planning document.
    each attempt has a 441-second timeout and the aggregate device-seconds
    ledger is capped below 0.5 GPU·h.
 5. No N4 solver attempt has started. N4 new solver device seconds and attempts
-   are both zero. Full local regression is `281 passed` before the current
-   round's final test additions.
+   are both zero. Full local regression is `283 passed`.
 
 ## Primary artifacts to inspect
 

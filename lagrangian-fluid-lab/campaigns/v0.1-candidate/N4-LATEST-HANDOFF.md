@@ -1,9 +1,9 @@
 # N4 latest handoff
 
-Generated: 2026-09-08T17:04:42.639327+00:00
+Generated: 2026-09-08T17:20:36.860138+00:00
 Baseline: `d721473f524c71bd85ba88064f66026de8306989`
 Branch: `codex/lagrangian-fluid-exploration`
-HEAD: `27f72f71e559a3df8e35045037eb2f3c3de35056`
+Code revision used for this handoff: `a14a5a82e6f45b92a5aebbc5472c8bd1a38110ff`
 
 ## Current state
 
@@ -13,7 +13,8 @@ HEAD: `27f72f71e559a3df8e35045037eb2f3c3de35056`
 
 The N4 plan is a bounded evidence-completion task, not production data
 authorization.  The four new solver attempts remain guarded until the owner
-provides explicit approval for at most `0.5 GPU·h` and four attempts.
+provides a structured approval record binding at most `0.5 GPU·h`, four
+attempts, the exact recipe, and GPUs 4–7.
 
 ## Stage summary
 
@@ -69,6 +70,7 @@ The h10 coarse→medium result remains `fail_diagnostic`, max TV
 - [N4-DECISION.md](N4-DECISION.md)
 - [N4-REVIEW-PACKET.md](N4-REVIEW-PACKET.md)
 - [N4-REVIEW-ROUND-1.md](N4-REVIEW-ROUND-1.md)
+- [N4-REVIEW-ROUND-2.md](N4-REVIEW-ROUND-2.md)
 
 ## Next authorized gate
 

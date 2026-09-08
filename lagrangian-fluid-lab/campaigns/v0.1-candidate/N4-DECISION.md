@@ -1,6 +1,6 @@
 # N4 decision
 
-Generated: 2026-09-08T17:04:42.638630+00:00
+Generated: 2026-09-08T17:20:36.859621+00:00
 Baseline: `d721473f524c71bd85ba88064f66026de8306989`
 
 ## Decision
@@ -26,3 +26,4 @@ The N4 plan proposes a maximum of `0.5 GPU·h` and four solver attempts, but the
 - Next action: Obtain explicit owner approval for at most 0.5 GPU-hours and four attempts, then run only h09/h11 coarse/medium.
 
 Product completion alone does not qualify N4: all four new full-time audits, native exclusion reconciliation, and both h09/h11 resolution-pair gates must pass.
+The attached planning document is not authorization; the runner requires an exact-scope structured approval JSON and records its SHA-256 digest in the batch and attempt manifests.
