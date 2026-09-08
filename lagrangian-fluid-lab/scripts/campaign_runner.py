@@ -47,7 +47,8 @@ def require_idle_allowed_gpu(index, allowed_uuids, *, memory_limit_mib=1024, uti
 
 
 def execute_attempt(case_id, command_template, run_root, *, cwd=None, env=None,
-                    evidence_glob="data*/Part_*.bi4", required_text=None):
+                    evidence_glob="data*/Part_*.bi4", required_text=None,
+                    timeout_seconds=None):
     """Execute into a unique partial directory, then atomically publish one attempt."""
     if not SAFE_CASE_ID.fullmatch(case_id):
         raise ValueError(f"unsafe case id: {case_id!r}")
@@ -62,23 +63,36 @@ def execute_attempt(case_id, command_template, run_root, *, cwd=None, env=None,
     atomic_json(partial / "attempt.json", {
         "schema_version": 1, "case_id": case_id, "attempt_id": attempt_id,
         "status": "running", "started_at_utc": started_at, "command": command,
+        "timeout_seconds": timeout_seconds,
     })
     started = time.monotonic()
-    proc = subprocess.run(command, cwd=cwd, env=env, text=True,
-                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    timed_out = False
+    try:
+        proc = subprocess.run(command, cwd=cwd, env=env, text=True,
+                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                              timeout=timeout_seconds)
+        stdout = proc.stdout or ""
+        returncode = proc.returncode
+    except subprocess.TimeoutExpired as error:
+        timed_out = True
+        stdout = error.stdout or ""
+        if isinstance(stdout, bytes):
+            stdout = stdout.decode(errors="replace")
+        returncode = -9
     elapsed = time.monotonic() - started
-    (partial / "process.stdout.log").write_text(proc.stdout)
+    (partial / "process.stdout.log").write_text(stdout)
     evidence = sorted(partial.glob(evidence_glob))
-    text_ok = required_text is None or required_text in proc.stdout
-    succeeded = proc.returncode == 0 and bool(evidence) and text_ok
+    text_ok = required_text is None or required_text in stdout
+    succeeded = returncode == 0 and bool(evidence) and text_ok
     final = attempts / (attempt_id + (".complete" if succeeded else ".failed"))
     payload = {
         "schema_version": 1, "case_id": case_id, "attempt_id": attempt_id,
         "status": "completed" if succeeded else "failed", "started_at_utc": started_at,
         "finished_at_utc": datetime.now(timezone.utc).isoformat(),
-        "elapsed_seconds": elapsed, "returncode": proc.returncode, "command": command,
+        "elapsed_seconds": elapsed, "returncode": returncode, "command": command,
         "evidence_files": [str(path.relative_to(partial)) for path in evidence],
-        "required_text_found": text_ok,
+        "required_text_found": text_ok, "timed_out": timed_out,
+        "timeout_seconds": timeout_seconds,
     }
     atomic_json(partial / "attempt.json", payload)
     os.replace(partial, final)
