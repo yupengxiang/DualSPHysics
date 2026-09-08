@@ -25,12 +25,13 @@ attached N4 planning document.
    TV peak is `0.056904761904761875` at requested `1.05 s` (21-point grid,
    index 14); COM and q90 remain passing, but the TV gate remains blocking.
 4. Added a guarded runner, resource ledger, comparable-matrix report, decision,
-   and this handoff packet. The runner refuses new solver work without an
-   explicit `--owner-approval-evidence` value; after approval, each attempt has
-   a 441-second timeout and the aggregate device-seconds ledger is capped below
-   0.5 GPU·h.
+   and this handoff packet. The runner refuses new solver work without an exact
+   scope JSON supplied through `--owner-approval-evidence`; after approval,
+   each attempt has a 441-second timeout and the aggregate device-seconds
+   ledger is capped below 0.5 GPU·h.
 5. No N4 solver attempt has started. N4 new solver device seconds and attempts
-   are both zero. Full local regression is `271 passed`.
+   are both zero. Full local regression is `281 passed` before the current
+   round's final test additions.
 
 ## Primary artifacts to inspect
 

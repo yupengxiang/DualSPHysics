@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from scripts import r6_n4_matrix as n4
@@ -50,10 +52,21 @@ def test_owner_evidence_must_bind_bounded_scope(tmp_path, monkeypatch):
 
 
 def test_owner_evidence_record_has_bound_digest():
-    record = n4._approval_record(
-        "Owner explicitly authorizes at most 0.5 GPU·h and four solver attempts "
-        "for only h09/h11 coarse/medium."
-    )
+    record = n4._approval_record(json.dumps({
+        "schema_version": "n4-owner-approval-v1",
+        "owner": "jade",
+        "decision": "approve",
+        "gpu_hours_max": 0.5,
+        "solver_attempts_max": 4,
+        "case_ids": [item[0] for item in n4.NEW_CASES],
+        "gpu_indices": list(n4.GPU_IDS),
+        "recipe_id": n4.SOURCE_RECIPE_ID,
+        "baseline_commit": n4.BASELINE_COMMIT,
+        "failed_attempts_consume_budget": True,
+        "formal_release": False,
+        "development_authorized": False,
+        "g4": "not_launched",
+    }))
     assert record["scope"]["gpu_hours_max"] == 0.5
     assert record["scope"]["solver_attempts_max"] == 4
     assert len(record["evidence_sha256"]) == 64
@@ -129,6 +142,32 @@ def test_durable_attempt_summary_counts_completed_and_failed(tmp_path, monkeypat
     assert summary["attempts_completed"] == 1
     assert summary["attempts_failed"] == 1
     assert summary["device_seconds"] == pytest.approx(3.75)
+
+
+def test_batch_lock_rejects_concurrent_owner(tmp_path, monkeypatch):
+    monkeypatch.setattr(n4, "BATCH_LOCK_FILE", tmp_path / "batch.lock")
+    with n4._exclusive_batch_lock():
+        with pytest.raises(RuntimeError, match="already active"):
+            with n4._exclusive_batch_lock():
+                pass
+
+
+def test_newer_failed_attempt_invalidates_older_latest(tmp_path, monkeypatch):
+    monkeypatch.setattr(n4, "RUN_ROOT", tmp_path / "runs")
+    record = n4.records()[0]
+    attempts = n4.RUN_ROOT / record["case_id"] / "attempts"
+    successful = attempts / "20260101T000000.000000Z-good.complete"
+    failed = attempts / "20260101T000001.000000Z-bad.failed"
+    successful.mkdir(parents=True)
+    failed.mkdir(parents=True)
+    n4.atomic_json(successful / "attempt.json", {"status": "completed"})
+    n4.atomic_json(failed / "attempt.json", {"status": "failed"})
+    n4.atomic_json(n4.RUN_ROOT / record["case_id"] / "latest.json", {
+        "status": "completed",
+        "record_hash": n4.record_hash(record),
+        "attempt_directory": str(successful),
+    })
+    assert n4.latest_attempt(record) is None
 
 
 def test_solver_timeout_stays_within_proposed_gpu_cap():

@@ -12,7 +12,10 @@ from __future__ import annotations
 
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import contextmanager
 from datetime import datetime, timezone
+import fcntl
+from functools import wraps
 import hashlib
 import json
 import os
@@ -68,6 +71,7 @@ RESOURCE_REPORT = CAMPAIGN / "N4-RESOURCE-LEDGER.json"
 DECISION_REPORT = CAMPAIGN / "N4-DECISION.json"
 DECISION_MARKDOWN = CAMPAIGN / "N4-DECISION.md"
 APPROVAL_RECORD = CAMPAIGN / "N4-OWNER-APPROVAL.json"
+BATCH_LOCK_FILE = RUN_ROOT / ".n4-batch.lock"
 HANDOFF_MARKDOWN = CAMPAIGN / "N4-LATEST-HANDOFF.md"
 REVIEW_PACKET_MARKDOWN = CAMPAIGN / "N4-REVIEW-PACKET.md"
 
@@ -254,27 +258,45 @@ def _approval_record(evidence: str) -> dict[str, Any]:
             source = relpath(candidate.resolve())
             text = candidate.read_text(errors="replace").strip()
     except OSError:
-        # Long inline approval text is not a valid filesystem path; it remains
-        # inline evidence and is validated below.
         pass
-    normalized = text.lower().replace("·", " ").replace("–", "-").replace("—", "-")
-    has_authority = "owner" in normalized and bool(re.search(r"\b(?:approve|approved|approves|authorize|authorized|authorizes)\b", normalized))
-    has_budget = "0.5" in normalized and "gpu" in normalized and bool(re.search(r"(?:gpu\s*[- ]?hours?|gpu\s*h)", normalized))
-    has_attempt_cap = bool(re.search(r"\b(?:4|four)\s+(?:solver\s+)?attempts?\b", normalized))
-    has_scope = all(token in normalized for token in ("h09", "h11", "coarse", "medium"))
-    bounded = "at most" in normalized or "maximum" in normalized or "max" in normalized
-    if not (text and has_authority and has_budget and has_attempt_cap and has_scope and bounded):
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError as error:
         raise RuntimeError(
-            "owner approval must explicitly bind owner authorization, at most "
-            "0.5 GPU-hours, four solver attempts, and only h09/h11 coarse/medium"
-        )
-    digest = hashlib.sha256(text.encode()).hexdigest()
+            "owner approval must be a JSON object or a path to one; it must "
+            "explicitly bind the exact N4 scope"
+        ) from error
+    expected = {
+        "schema_version": "n4-owner-approval-v1",
+        "owner": str,
+        "decision": "approve",
+        "gpu_hours_max": PROPOSED_GPU_HOURS,
+        "solver_attempts_max": MAX_NEW_SOLVER_ATTEMPTS,
+        "case_ids": [item[0] for item in NEW_CASES],
+        "gpu_indices": list(GPU_IDS),
+        "recipe_id": SOURCE_RECIPE_ID,
+        "baseline_commit": BASELINE_COMMIT,
+        "failed_attempts_consume_budget": True,
+        "formal_release": False,
+        "development_authorized": False,
+        "g4": "not_launched",
+    }
+    if not isinstance(payload, dict) or set(payload) != set(expected):
+        raise RuntimeError("owner approval JSON has extra or missing scope fields")
+    for key, value in expected.items():
+        if value is str:
+            if not isinstance(payload.get(key), str) or not payload[key].strip():
+                raise RuntimeError(f"owner approval field {key!r} must be non-empty text")
+        elif payload.get(key) != value:
+            raise RuntimeError(f"owner approval field {key!r} is not the exact N4 scope")
+    canonical_text = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    digest = hashlib.sha256(canonical_text.encode()).hexdigest()
     return {
         "schema_version": "n4-owner-approval-v1",
         "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
         "baseline_commit": BASELINE_COMMIT,
         "evidence_source": source,
-        "evidence_text": text,
+        "evidence_text": canonical_text,
         "evidence_sha256": digest,
         "scope": {
             "gpu_hours_max": PROPOSED_GPU_HOURS,
@@ -282,8 +304,35 @@ def _approval_record(evidence: str) -> dict[str, Any]:
             "solver_attempts_max": MAX_NEW_SOLVER_ATTEMPTS,
             "case_ids": [item[0] for item in NEW_CASES],
             "gpu_indices": list(GPU_IDS),
+            "recipe_id": SOURCE_RECIPE_ID,
+            "baseline_commit": BASELINE_COMMIT,
         },
     }
+
+
+@contextmanager
+def _exclusive_batch_lock():
+    BATCH_LOCK_FILE.parent.mkdir(parents=True, exist_ok=True)
+    handle = BATCH_LOCK_FILE.open("a+")
+    try:
+        try:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            raise RuntimeError("an N4 solver batch is already active") from error
+        yield
+    finally:
+        try:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        finally:
+            handle.close()
+
+
+def _with_exclusive_batch_lock(function):
+    @wraps(function)
+    def wrapped(*args, **kwargs):
+        with _exclusive_batch_lock():
+            return function(*args, **kwargs)
+    return wrapped
 
 
 def _validate_prepared_for_launch(prepared: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -426,11 +475,39 @@ def latest_attempt(record: dict[str, Any]) -> Path | None:
     latest = RUN_ROOT / record["case_id"] / "latest.json"
     if not latest.is_file():
         return None
+    payload = read_json(latest, {})
     try:
-        attempt = Path(read_json(latest, {})["attempt_directory"])
+        attempt = Path(payload["attempt_directory"])
     except (KeyError, TypeError):
         return None
-    return attempt if attempt.is_dir() else None
+    if not attempt.is_dir() or not attempt.name.endswith(".complete"):
+        return None
+    if payload.get("record_hash") and payload["record_hash"] != record_hash(record):
+        return None
+    attempts_dir = RUN_ROOT / record["case_id"] / "attempts"
+    if attempts_dir.is_dir():
+        newer_failures = [
+            item for item in attempts_dir.iterdir()
+            if item.is_dir() and item.name > attempt.name and item.name.endswith((".failed", ".partial"))
+        ]
+        if newer_failures:
+            return None
+    return attempt
+
+
+def _current_successful_attempt(record: dict[str, Any]) -> Path | None:
+    report = load_matrix_report()
+    run = next((item for item in report.get("solver_runs", []) if item.get("case_id") == record["case_id"]), None)
+    if run is None or run.get("execution_status") not in {"completed", "reused_completed"}:
+        return None
+    if run.get("record_hash") != record_hash(record):
+        return None
+    attempt = latest_attempt(record)
+    if attempt is None:
+        return None
+    if run.get("attempt_directory") and Path(run["attempt_directory"]).resolve() != attempt.resolve():
+        return None
+    return attempt
 
 
 def _approval_guard(evidence: str | None) -> str:
@@ -452,8 +529,8 @@ def _approval_guard(evidence: str | None) -> str:
         "maximum_new_solver_attempts": MAX_NEW_SOLVER_ATTEMPTS,
     })
     report["authorization"] = authorization
-    atomic_json(MATRIX_REPORT, report)
     atomic_json(APPROVAL_RECORD, approval)
+    atomic_json(MATRIX_REPORT, report)
     return approval["evidence_text"]
 
 
@@ -476,6 +553,17 @@ def run_one(record: dict[str, Any], *, gpu_record: dict[str, Any] | None = None,
     )
     attempt_directory = Path(result["attempt_directory"])
     attempt_manifest = attempt_directory / "attempt.json"
+    generated_xml_sha256 = sha256(prefix.with_suffix(".xml"))
+    generated_bi4_sha256 = sha256(prefix.with_suffix(".bi4"))
+    approval_sha256 = load_matrix_report().get("authorization", {}).get("owner_approval_evidence_sha256")
+    manifest = read_json(attempt_manifest, {})
+    manifest.update({
+        "record_hash": expected_hash,
+        "owner_approval_evidence_sha256": approval_sha256,
+        "input_generated_xml_sha256": generated_xml_sha256,
+        "input_generated_bi4_sha256": generated_bi4_sha256,
+    })
+    atomic_json(attempt_manifest, manifest)
     payload = {
         **result,
         "record_hash": expected_hash,
@@ -484,8 +572,9 @@ def run_one(record: dict[str, Any], *, gpu_record: dict[str, Any] | None = None,
         "gpu_at_launch": gpu_record,
         "gpu_index_requested": gpu,
         "protected_gpu_indices": list(PROTECTED_GPU_IDS),
-        "input_generated_xml_sha256": sha256(prefix.with_suffix(".xml")),
-        "input_generated_bi4_sha256": sha256(prefix.with_suffix(".bi4")),
+        "input_generated_xml_sha256": generated_xml_sha256,
+        "input_generated_bi4_sha256": generated_bi4_sha256,
+        "owner_approval_evidence_sha256": approval_sha256,
         "device_seconds_accounting": "solver_wall_elapsed_seconds_proxy",
         "device_seconds": result.get("elapsed_seconds"),
         "attempt_timeout_seconds": SOLVER_ATTEMPT_TIMEOUT_SECONDS,
@@ -518,6 +607,11 @@ def _persist_solver_batch(
     resource_snapshot: Any = None,
 ) -> dict[str, Any]:
     report = load_matrix_report()
+    approval_sha256 = report.get("authorization", {}).get("owner_approval_evidence_sha256")
+    if not approval_sha256:
+        raise RuntimeError("N4 approval digest is missing; refusing to launch")
+    if batch.get("owner_approval_evidence_sha256") != approval_sha256:
+        raise RuntimeError("N4 batch approval digest does not match the authorized record")
     result_accounting = _solver_result_accounting(results)
     durable = _durable_attempt_summary()
     started = max(
@@ -567,12 +661,19 @@ def _persist_solver_batch(
     return report
 
 
+@_with_exclusive_batch_lock
 def run_solver(prepared: Sequence[dict[str, Any]], *, evidence: str, rerun: bool = False) -> list[dict[str, Any]]:
+    active_batch = load_matrix_report().get("solver_batch", {})
+    if active_batch.get("status") in {"reserved", "running"}:
+        raise RuntimeError("an active N4 solver batch is already recorded; reconcile it before relaunch")
     _approval_guard(evidence)
     prepared = _validate_prepared_for_launch(prepared)
     if len(prepared) != MAX_NEW_SOLVER_ATTEMPTS:
         raise ValueError("N4 solver phase must contain exactly the four planned cells")
     report = load_matrix_report()
+    approval_sha256 = report.get("authorization", {}).get("owner_approval_evidence_sha256")
+    if not approval_sha256:
+        raise RuntimeError("N4 approval digest is missing; refusing to launch")
     resource_ledger = report.get("resource_ledger", {})
     previous = int(resource_ledger.get("solver_attempts_started", resource_ledger.get("new_solver_attempts_started", 0)))
     previous_completed = int(resource_ledger.get("solver_attempts_completed", resource_ledger.get("new_solver_attempts_completed", 0)))
@@ -609,6 +710,7 @@ def run_solver(prepared: Sequence[dict[str, Any]], *, evidence: str, rerun: bool
         },
         "gpu_seconds_cap": PROPOSED_GPU_SECONDS,
         "solver_attempt_timeout_seconds": SOLVER_ATTEMPT_TIMEOUT_SECONDS,
+        "owner_approval_evidence_sha256": approval_sha256,
     }
     base_ledger = {
         **resource_ledger,
@@ -669,7 +771,7 @@ def run_solver(prepared: Sequence[dict[str, Any]], *, evidence: str, rerun: bool
 
 
 def normalize_one(record: dict[str, Any]) -> dict[str, Any]:
-    attempt = latest_attempt(record)
+    attempt = _current_successful_attempt(record)
     if attempt is None:
         return {"case_id": record["case_id"], "normalization_status": "blocked_missing_attempt"}
     output = DATA_ROOT / f"{record['case_id']}.h5"
@@ -1169,6 +1271,7 @@ def write_decision(matrix: dict[str, Any] | None = None, difference: dict[str, A
     atomic_json(DECISION_REPORT, decision)
     markdown = f"""# N4 decision\n\nGenerated: {decision['generated_at_utc']}\nBaseline: `{BASELINE_COMMIT}`\n\n## Decision\n\n- Execution status: `{decision['execution_status']}`\n- New N4 cells: `{new_complete}/4`\n- Same-CFL 3×3 matrix complete: `{decision['same_cfl_matrix_complete']}`\n- Formal release: `false`\n- Development tranche: `false`\n- G4: `not_launched`\n\nThe h10 coarse-to-medium blocker is retained: max TV `{decision['h10_coarse_medium_blocker']['max_tv']}` against gate `{decision['h10_coarse_medium_blocker']['gate']}`. Four h09/h11 cells cannot erase or override that failure.\n\n## Authorization\n\nThe N4 plan proposes a maximum of `0.5 GPU·h` and four solver attempts, but the attached plan is not itself owner authorization. New solver execution remains guarded by explicit `--owner-approval-evidence`.\n\n## Evidence\n\n- Comparable matrix: `N4-COMPARABLE-MATRIX.md` / `.json`\n- h10 difference analysis: `N4-H10-DIFFERENCE.md` / `.json`\n- Resource ledger: `N4-RESOURCE-LEDGER.json`\n- Next action: {decision['next_gate']}\n"""
     markdown += "\nProduct completion alone does not qualify N4: all four new full-time audits, native exclusion reconciliation, and both h09/h11 resolution-pair gates must pass.\n"
+    markdown += "The attached planning document is not authorization; the runner requires an exact-scope structured approval JSON and records its SHA-256 digest in the batch and attempt manifests.\n"
     DECISION_MARKDOWN.write_text(markdown)
     return decision
 
@@ -1233,7 +1336,7 @@ def write_handoff(
 Generated: {datetime.now(timezone.utc).isoformat()}
 Baseline: `{BASELINE_COMMIT}`
 Branch: `{git_value('branch', '--show-current')}`
-HEAD: `{git_value('rev-parse', 'HEAD')}`
+Code revision used for this handoff: `{git_value('rev-parse', 'HEAD')}`
 
 ## Current state
 
@@ -1243,7 +1346,8 @@ HEAD: `{git_value('rev-parse', 'HEAD')}`
 
 The N4 plan is a bounded evidence-completion task, not production data
 authorization.  The four new solver attempts remain guarded until the owner
-provides explicit approval for at most `0.5 GPU·h` and four attempts.
+provides a structured approval record binding at most `0.5 GPU·h`, four
+attempts, the exact recipe, and GPUs 4–7.
 
 ## Stage summary
 
@@ -1286,6 +1390,7 @@ The h10 coarse→medium result remains `fail_diagnostic`, max TV
 - [N4-DECISION.md](N4-DECISION.md)
 - [N4-REVIEW-PACKET.md](N4-REVIEW-PACKET.md)
 - [N4-REVIEW-ROUND-1.md](N4-REVIEW-ROUND-1.md)
+- [N4-REVIEW-ROUND-2.md](N4-REVIEW-ROUND-2.md)
 
 ## Next authorized gate
 
@@ -1315,7 +1420,8 @@ been started while owner budget status is pending.
    endpoints override the h10 coarse→medium blocker.
 5. Recheck the round-1 P1 corrections: persisted audit propagation, exact
    launch-set/hash binding, durable attempt accounting, process-group timeout,
-   native exclusion reconciliation, and scoped approval evidence.
+   native exclusion reconciliation, scoped approval evidence, and round-2
+   lock/latest consistency.
 
 ## Current disposition
 
@@ -1333,6 +1439,7 @@ been started while owner budget status is pending.
 - `N4-RESOURCE-LEDGER.json`
 - `N4-DECISION.json/.md`
 - `N4-REVIEW-ROUND-1.md`
+- `N4-REVIEW-ROUND-2.md`
 """
     HANDOFF_MARKDOWN.write_text(handoff)
     REVIEW_PACKET_MARKDOWN.write_text(review)
