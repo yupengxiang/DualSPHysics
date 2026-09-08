@@ -40,5 +40,6 @@ def test_timed_out_attempt_is_published_as_failed(tmp_path):
     result = execute_attempt("case-timeout", template, tmp_path, timeout_seconds=0.05)
     assert result["status"] == "failed"
     assert result["timed_out"] is True
+    assert result["process_group_terminated"] is True
     assert result["returncode"] == -9
     assert list((tmp_path / "case-timeout" / "attempts").glob("*.failed"))

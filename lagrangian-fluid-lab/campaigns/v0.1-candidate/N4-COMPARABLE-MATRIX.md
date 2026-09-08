@@ -30,3 +30,5 @@ Thresholds: TV ≤ `0.05`, COM ≤ `0.06 m`, q90 ≤ `0.06 m`; all use the regis
 | `h11` | `medium_to_fine` | `unknown` | n/a | n/a | n/a |
 
 The h10 coarse→medium failure is preserved and cannot be overridden by endpoint completion.
+
+Product completion alone does not qualify N4: all four new full-time audits, native exclusion reconciliation, and both h09/h11 resolution-pair gates must pass.

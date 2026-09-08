@@ -17,6 +17,9 @@ been started while owner budget status is pending.
 4. After runs exist, require per-case native exclusion evidence, full-time
    identity audit, and both pair gates for h09 and h11.  Do not let successful
    endpoints override the h10 coarse→medium blocker.
+5. Recheck the round-1 P1 corrections: persisted audit propagation, exact
+   launch-set/hash binding, durable attempt accounting, process-group timeout,
+   native exclusion reconciliation, and scoped approval evidence.
 
 ## Current disposition
 
@@ -33,3 +36,4 @@ been started while owner budget status is pending.
 - `N4-H10-DIFFERENCE.json/.md`
 - `N4-RESOURCE-LEDGER.json`
 - `N4-DECISION.json/.md`
+- `N4-REVIEW-ROUND-1.md`

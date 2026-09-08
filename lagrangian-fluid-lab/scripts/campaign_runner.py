@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import re
+import signal
 import subprocess
 import time
 import uuid
@@ -67,18 +68,30 @@ def execute_attempt(case_id, command_template, run_root, *, cwd=None, env=None,
     })
     started = time.monotonic()
     timed_out = False
-    try:
+    process_group_terminated = False
+    if timeout_seconds is None:
         proc = subprocess.run(command, cwd=cwd, env=env, text=True,
-                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                              timeout=timeout_seconds)
+                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         stdout = proc.stdout or ""
         returncode = proc.returncode
-    except subprocess.TimeoutExpired as error:
-        timed_out = True
-        stdout = error.stdout or ""
-        if isinstance(stdout, bytes):
-            stdout = stdout.decode(errors="replace")
-        returncode = -9
+    else:
+        proc = subprocess.Popen(command, cwd=cwd, env=env, text=True,
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                start_new_session=True)
+        try:
+            stdout, _ = proc.communicate(timeout=timeout_seconds)
+            stdout = stdout or ""
+            returncode = proc.returncode
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+                process_group_terminated = True
+            except ProcessLookupError:
+                process_group_terminated = True
+            stdout, _ = proc.communicate()
+            stdout = stdout or ""
+            returncode = -9
     elapsed = time.monotonic() - started
     (partial / "process.stdout.log").write_text(stdout)
     evidence = sorted(partial.glob(evidence_glob))
@@ -92,6 +105,7 @@ def execute_attempt(case_id, command_template, run_root, *, cwd=None, env=None,
         "elapsed_seconds": elapsed, "returncode": returncode, "command": command,
         "evidence_files": [str(path.relative_to(partial)) for path in evidence],
         "required_text_found": text_ok, "timed_out": timed_out,
+        "process_group_terminated": process_group_terminated,
         "timeout_seconds": timeout_seconds,
     }
     atomic_json(partial / "attempt.json", payload)

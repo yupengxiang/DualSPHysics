@@ -1,9 +1,9 @@
 # N4 latest handoff
 
-Generated: 2026-09-08T16:43:10.560814+00:00
+Generated: 2026-09-08T17:04:42.639327+00:00
 Baseline: `d721473f524c71bd85ba88064f66026de8306989`
 Branch: `codex/lagrangian-fluid-exploration`
-HEAD: `d721473f524c71bd85ba88064f66026de8306989`
+HEAD: `27f72f71e559a3df8e35045037eb2f3c3de35056`
 
 ## Current state
 
@@ -68,6 +68,7 @@ The h10 coarse→medium result remains `fail_diagnostic`, max TV
 - [N4-RESOURCE-LEDGER.json](N4-RESOURCE-LEDGER.json)
 - [N4-DECISION.md](N4-DECISION.md)
 - [N4-REVIEW-PACKET.md](N4-REVIEW-PACKET.md)
+- [N4-REVIEW-ROUND-1.md](N4-REVIEW-ROUND-1.md)
 
 ## Next authorized gate
 

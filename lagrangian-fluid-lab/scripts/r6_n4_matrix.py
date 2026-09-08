@@ -11,7 +11,7 @@ the five completed N3 cells without relabelling old-CFL data.
 from __future__ import annotations
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -21,6 +21,7 @@ import re
 import subprocess
 import time
 from typing import Any, Sequence
+import uuid
 import xml.etree.ElementTree as ET
 
 import h5py
@@ -66,6 +67,7 @@ DIFFERENCE_MARKDOWN = CAMPAIGN / "N4-H10-DIFFERENCE.md"
 RESOURCE_REPORT = CAMPAIGN / "N4-RESOURCE-LEDGER.json"
 DECISION_REPORT = CAMPAIGN / "N4-DECISION.json"
 DECISION_MARKDOWN = CAMPAIGN / "N4-DECISION.md"
+APPROVAL_RECORD = CAMPAIGN / "N4-OWNER-APPROVAL.json"
 HANDOFF_MARKDOWN = CAMPAIGN / "N4-LATEST-HANDOFF.md"
 REVIEW_PACKET_MARKDOWN = CAMPAIGN / "N4-REVIEW-PACKET.md"
 
@@ -243,6 +245,113 @@ def load_matrix_report() -> dict[str, Any]:
     })
 
 
+def _approval_record(evidence: str) -> dict[str, Any]:
+    source = "inline"
+    text = evidence.strip()
+    try:
+        candidate = Path(text)
+        if candidate.is_file():
+            source = relpath(candidate.resolve())
+            text = candidate.read_text(errors="replace").strip()
+    except OSError:
+        # Long inline approval text is not a valid filesystem path; it remains
+        # inline evidence and is validated below.
+        pass
+    normalized = text.lower().replace("·", " ").replace("–", "-").replace("—", "-")
+    has_authority = "owner" in normalized and bool(re.search(r"\b(?:approve|approved|approves|authorize|authorized|authorizes)\b", normalized))
+    has_budget = "0.5" in normalized and "gpu" in normalized and bool(re.search(r"(?:gpu\s*[- ]?hours?|gpu\s*h)", normalized))
+    has_attempt_cap = bool(re.search(r"\b(?:4|four)\s+(?:solver\s+)?attempts?\b", normalized))
+    has_scope = all(token in normalized for token in ("h09", "h11", "coarse", "medium"))
+    bounded = "at most" in normalized or "maximum" in normalized or "max" in normalized
+    if not (text and has_authority and has_budget and has_attempt_cap and has_scope and bounded):
+        raise RuntimeError(
+            "owner approval must explicitly bind owner authorization, at most "
+            "0.5 GPU-hours, four solver attempts, and only h09/h11 coarse/medium"
+        )
+    digest = hashlib.sha256(text.encode()).hexdigest()
+    return {
+        "schema_version": "n4-owner-approval-v1",
+        "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
+        "baseline_commit": BASELINE_COMMIT,
+        "evidence_source": source,
+        "evidence_text": text,
+        "evidence_sha256": digest,
+        "scope": {
+            "gpu_hours_max": PROPOSED_GPU_HOURS,
+            "gpu_seconds_max": PROPOSED_GPU_SECONDS,
+            "solver_attempts_max": MAX_NEW_SOLVER_ATTEMPTS,
+            "case_ids": [item[0] for item in NEW_CASES],
+            "gpu_indices": list(GPU_IDS),
+        },
+    }
+
+
+def _validate_prepared_for_launch(prepared: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
+    canonical = {item["case_id"]: item for item in records()}
+    supplied = {item.get("case_id"): item for item in prepared}
+    if set(supplied) != set(canonical) or len(prepared) != len(canonical):
+        raise RuntimeError("N4 launch set must be exactly the four canonical h09/h11 coarse/medium cells")
+    validated: list[dict[str, Any]] = []
+    for case_id in [item[0] for item in NEW_CASES]:
+        expected = canonical[case_id]
+        actual = supplied.get(case_id)
+        expected_hash = record_hash(expected)
+        if actual is None or actual.get("record_hash") != expected_hash or record_hash(actual) != expected_hash:
+            raise RuntimeError(f"N4 launch record hash mismatch for {case_id}")
+        expected_candidate = CASE_ROOT / case_id / f"{case_id}_Def.xml"
+        expected_prefix = ARTIFACT_ROOT / case_id / "generated" / case_id
+        candidate = lab_path(actual.get("candidate_definition", ""))
+        prefix = lab_path(actual.get("generated_prefix", ""))
+        if candidate.resolve() != expected_candidate.resolve() or prefix.resolve() != expected_prefix.resolve():
+            raise RuntimeError(f"N4 launch paths are not canonical for {case_id}")
+        generated_xml = prefix.with_suffix(".xml")
+        generated_bi4 = prefix.with_suffix(".bi4")
+        if not candidate.is_file() or not generated_xml.is_file() or not generated_bi4.is_file():
+            raise RuntimeError(f"N4 launch artifacts are missing for {case_id}")
+        if actual.get("candidate_definition_sha256") != sha256(candidate):
+            raise RuntimeError(f"N4 candidate definition hash mismatch for {case_id}")
+        if actual.get("generated_xml_sha256") != sha256(generated_xml):
+            raise RuntimeError(f"N4 generated XML hash mismatch for {case_id}")
+        if actual.get("generated_bi4_sha256") != sha256(generated_bi4):
+            raise RuntimeError(f"N4 generated BI4 hash mismatch for {case_id}")
+        validated.append(actual)
+    return validated
+
+
+def _durable_attempt_summary() -> dict[str, Any]:
+    entries = []
+    if RUN_ROOT.is_dir():
+        for case_dir in sorted(RUN_ROOT.iterdir()):
+            attempts_dir = case_dir / "attempts"
+            if not attempts_dir.is_dir():
+                continue
+            for attempt_dir in sorted(attempts_dir.iterdir()):
+                if not attempt_dir.is_dir() or not attempt_dir.name.endswith((".complete", ".failed", ".partial")):
+                    continue
+                payload = read_json(attempt_dir / "attempt.json", {})
+                suffix_status = (
+                    "completed" if attempt_dir.name.endswith(".complete") else
+                    "failed" if attempt_dir.name.endswith(".failed") else "running"
+                )
+                entries.append({
+                    "case_id": payload.get("case_id", case_dir.name),
+                    "attempt_id": payload.get("attempt_id", attempt_dir.name.rsplit(".", 1)[0]),
+                    "status": payload.get("status", suffix_status),
+                    "directory": str(attempt_dir),
+                    "elapsed_seconds": payload.get("elapsed_seconds"),
+                })
+    completed = [item for item in entries if item["status"] == "completed"]
+    failed = [item for item in entries if item["status"] == "failed"]
+    return {
+        "attempts_started": len(entries),
+        "attempts_completed": len(completed),
+        "attempts_failed": len(failed),
+        "partial_attempts": sum(item["status"] == "running" for item in entries),
+        "device_seconds": sum(float(item.get("elapsed_seconds") or 0.0) for item in entries),
+        "entries": entries,
+    }
+
+
 def prepare_one(record: dict[str, Any]) -> dict[str, Any]:
     case_id = record["case_id"]
     case_dir = CASE_ROOT / case_id
@@ -330,29 +439,34 @@ def _approval_guard(evidence: str | None) -> str:
             "N4 new solver is blocked: supply --owner-approval-evidence with explicit "
             "owner authorization for at most 0.5 GPU-hours / 4 attempts"
         )
+    approval = _approval_record(evidence)
     report = load_matrix_report()
     authorization = report.setdefault("authorization", {})
     authorization.update({
         "owner_budget_status": "approved_for_bounded_n4",
-        "owner_approval_evidence": evidence.strip(),
+        "owner_approval_evidence": approval["evidence_text"],
+        "owner_approval_evidence_sha256": approval["evidence_sha256"],
+        "owner_approval_record": relpath(APPROVAL_RECORD),
         "new_solver_authorized": True,
         "additional_gpu_hours_cap_proposed": PROPOSED_GPU_HOURS,
         "maximum_new_solver_attempts": MAX_NEW_SOLVER_ATTEMPTS,
     })
     report["authorization"] = authorization
     atomic_json(MATRIX_REPORT, report)
-    return evidence.strip()
+    atomic_json(APPROVAL_RECORD, approval)
+    return approval["evidence_text"]
 
 
-def run_one(record: dict[str, Any], *, rerun: bool = False) -> dict[str, Any]:
+def run_one(record: dict[str, Any], *, gpu_record: dict[str, Any] | None = None, rerun: bool = False) -> dict[str, Any]:
     latest = RUN_ROOT / record["case_id"] / "latest.json"
     expected_hash = record_hash(record)
     if latest.is_file() and not rerun:
         payload = read_json(latest, {})
         if payload.get("status") == "completed" and payload.get("record_hash") == expected_hash:
-            return {**payload, "execution_status": "reused_completed"}
+            return {**payload, "execution_status": "reused_completed", "attempt_started": False}
     gpu = int(record["gpu"])
-    gpu_record = require_idle_allowed_gpu(gpu, allowed_uuids())
+    if gpu_record is None:
+        gpu_record = require_idle_allowed_gpu(gpu, allowed_uuids())
     prefix = lab_path(record["generated_prefix"])
     result = execute_attempt(
         record["case_id"], [str(SOLVER), f"-gpu:{gpu}", str(prefix), "{output}"], RUN_ROOT,
@@ -360,6 +474,8 @@ def run_one(record: dict[str, Any], *, rerun: bool = False) -> dict[str, Any]:
         required_text="Finished execution (code=0)",
         timeout_seconds=SOLVER_ATTEMPT_TIMEOUT_SECONDS,
     )
+    attempt_directory = Path(result["attempt_directory"])
+    attempt_manifest = attempt_directory / "attempt.json"
     payload = {
         **result,
         "record_hash": expected_hash,
@@ -373,14 +489,87 @@ def run_one(record: dict[str, Any], *, rerun: bool = False) -> dict[str, Any]:
         "device_seconds_accounting": "solver_wall_elapsed_seconds_proxy",
         "device_seconds": result.get("elapsed_seconds"),
         "attempt_timeout_seconds": SOLVER_ATTEMPT_TIMEOUT_SECONDS,
+        "attempt_sha256": sha256(attempt_manifest) if attempt_manifest.is_file() else None,
     }
-    atomic_json(RUN_ROOT / record["case_id"] / "latest.json", payload)
+    payload["attempt_started"] = True
+    if result.get("status") == "completed":
+        atomic_json(RUN_ROOT / record["case_id"] / "latest.json", payload)
     return payload
+
+
+def _solver_result_accounting(results: Sequence[dict[str, Any]]) -> dict[str, Any]:
+    started = [item for item in results if item.get("attempt_started", item.get("execution_status") != "reused_completed")]
+    completed = [item for item in started if item.get("execution_status") == "completed"]
+    failed = [item for item in started if item.get("execution_status") == "solver_failed"]
+    return {
+        "attempts_started": len(started),
+        "attempts_completed": len(completed),
+        "attempts_failed": len(failed),
+        "device_seconds": sum(float(item.get("device_seconds") or 0.0) for item in started),
+    }
+
+
+def _persist_solver_batch(
+    base_ledger: dict[str, Any],
+    batch: dict[str, Any],
+    results: Sequence[dict[str, Any]],
+    *,
+    status: str,
+    resource_snapshot: Any = None,
+) -> dict[str, Any]:
+    report = load_matrix_report()
+    result_accounting = _solver_result_accounting(results)
+    durable = _durable_attempt_summary()
+    started = max(
+        int(base_ledger.get("solver_attempts_started", 0)) + result_accounting["attempts_started"],
+        durable["attempts_started"],
+    )
+    completed = max(
+        int(base_ledger.get("solver_attempts_completed", 0)) + result_accounting["attempts_completed"],
+        durable["attempts_completed"],
+    )
+    failed = max(
+        int(base_ledger.get("solver_attempts_failed", 0)) + result_accounting["attempts_failed"],
+        durable["attempts_failed"],
+    )
+    device_seconds = max(
+        float(base_ledger.get("solver_device_seconds", 0.0)) + result_accounting["device_seconds"],
+        durable["device_seconds"],
+    )
+    report.update({
+        "solver_runs": list(results),
+        "solver_batch": {
+            **batch,
+            "status": status,
+            "updated_at_utc": datetime.now(timezone.utc).isoformat(),
+            "results_recorded": len(results),
+            "durable_attempt_summary": durable,
+        },
+        "resource_ledger": {
+            **base_ledger,
+            "solver_attempts_started": started,
+            "solver_attempts_completed": completed,
+            "solver_attempts_failed": failed,
+            "solver_device_seconds": device_seconds,
+            "gpu_seconds_cap": PROPOSED_GPU_SECONDS,
+            "solver_attempt_timeout_seconds": SOLVER_ATTEMPT_TIMEOUT_SECONDS,
+        },
+    })
+    if status == "running":
+        report["execution_status"] = "solver_running"
+    elif status == "completed":
+        report["execution_status"] = "completed"
+    elif status in {"completed_with_findings", "resource_cap_exceeded", "interrupted"}:
+        report["execution_status"] = "completed_with_findings"
+    if resource_snapshot is not None:
+        report["resource_snapshot_after_solver"] = resource_snapshot
+    atomic_json(MATRIX_REPORT, report)
+    return report
 
 
 def run_solver(prepared: Sequence[dict[str, Any]], *, evidence: str, rerun: bool = False) -> list[dict[str, Any]]:
     _approval_guard(evidence)
-    prepared = list(prepared)
+    prepared = _validate_prepared_for_launch(prepared)
     if len(prepared) != MAX_NEW_SOLVER_ATTEMPTS:
         raise ValueError("N4 solver phase must contain exactly the four planned cells")
     report = load_matrix_report()
@@ -389,6 +578,13 @@ def run_solver(prepared: Sequence[dict[str, Any]], *, evidence: str, rerun: bool
     previous_completed = int(resource_ledger.get("solver_attempts_completed", resource_ledger.get("new_solver_attempts_completed", 0)))
     previous_failed = int(resource_ledger.get("solver_attempts_failed", resource_ledger.get("new_solver_attempts_failed", 0)))
     previous_seconds = float(resource_ledger.get("solver_device_seconds", resource_ledger.get("new_solver_device_seconds", 0.0)))
+    durable = _durable_attempt_summary()
+    previous = max(previous, int(durable["attempts_started"]))
+    previous_completed = max(previous_completed, int(durable["attempts_completed"]))
+    previous_failed = max(previous_failed, int(durable["attempts_failed"]))
+    previous_seconds = max(previous_seconds, float(durable["device_seconds"]))
+    if durable["partial_attempts"]:
+        raise RuntimeError("N4 has durable partial attempts; reconcile them before any new batch")
     if previous + len(prepared) > MAX_NEW_SOLVER_ATTEMPTS:
         raise RuntimeError("N4 attempt cap would be exceeded; failed attempts count")
     if previous_seconds >= PROPOSED_GPU_SECONDS:
@@ -398,39 +594,77 @@ def run_solver(prepared: Sequence[dict[str, Any]], *, evidence: str, rerun: bool
     # a partial four-way launch when one candidate GPU becomes busy between
     # the owner's approval and the execution command.
     preflight = [require_idle_allowed_gpu(int(item["gpu"]), allowed) for item in prepared]
-    with ThreadPoolExecutor(max_workers=len(prepared)) as pool:
-        results = list(pool.map(lambda item: run_one(item, rerun=rerun), prepared))
-    report = load_matrix_report()
-    completed = sum(item.get("execution_status") == "completed" for item in results)
-    newly_started = sum(item.get("execution_status") != "reused_completed" for item in results)
-    newly_completed = sum(item.get("execution_status") == "completed" for item in results)
-    newly_failed = sum(item.get("execution_status") == "solver_failed" for item in results)
-    new_device_seconds = sum(
-        float(item.get("device_seconds") or 0.0)
-        for item in results if item.get("execution_status") != "reused_completed"
+    batch = {
+        "batch_id": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ") + "-" + uuid.uuid4().hex[:8],
+        "status": "reserved",
+        "reserved_at_utc": datetime.now(timezone.utc).isoformat(),
+        "case_ids": [item["case_id"] for item in prepared],
+        "gpu_indices": [item["gpu"] for item in prepared],
+        "gpu_preflight": preflight,
+        "starting_ledger": {
+            "solver_attempts_started": previous,
+            "solver_attempts_completed": previous_completed,
+            "solver_attempts_failed": previous_failed,
+            "solver_device_seconds": previous_seconds,
+        },
+        "gpu_seconds_cap": PROPOSED_GPU_SECONDS,
+        "solver_attempt_timeout_seconds": SOLVER_ATTEMPT_TIMEOUT_SECONDS,
+    }
+    base_ledger = {
+        **resource_ledger,
+        "solver_attempts_started": previous,
+        "solver_attempts_completed": previous_completed,
+        "solver_attempts_failed": previous_failed,
+        "solver_device_seconds": previous_seconds,
+    }
+    # Reservation is durable before the first solver process is launched.
+    report.update({"solver_batch": batch, "resource_ledger": base_ledger, "gpu_preflight_before_launch": preflight})
+    atomic_json(MATRIX_REPORT, report)
+    batch["status"] = "running"
+    results: list[dict[str, Any]] = []
+    try:
+        _persist_solver_batch(base_ledger, batch, results, status="running")
+        with ThreadPoolExecutor(max_workers=len(prepared)) as pool:
+            futures = {
+                pool.submit(run_one, item, gpu_record=preflight[index], rerun=rerun): item
+                for index, item in enumerate(prepared)
+            }
+            for future in as_completed(futures):
+                item = futures[future]
+                try:
+                    result = future.result()
+                except Exception as error:
+                    result = {
+                        "case_id": item["case_id"],
+                        "execution_status": "solver_exception",
+                        "attempt_started": False,
+                        "error": repr(error),
+                    }
+                results.append(result)
+                _persist_solver_batch(base_ledger, batch, results, status="running")
+    except BaseException:
+        _persist_solver_batch(base_ledger, batch, results, status="interrupted")
+        raise
+    result_accounting = _solver_result_accounting(results)
+    total_device_seconds = max(
+        previous_seconds + result_accounting["device_seconds"],
+        _durable_attempt_summary()["device_seconds"],
     )
-    total_device_seconds = previous_seconds + new_device_seconds
     if total_device_seconds > PROPOSED_GPU_SECONDS + 1e-6:
+        _persist_solver_batch(base_ledger, batch, results, status="resource_cap_exceeded")
         raise RuntimeError(
             f"N4 GPU-hour cap exceeded: {total_device_seconds:.3f} device seconds "
             f"> {PROPOSED_GPU_SECONDS:.3f}"
         )
-    report.update({
-        "solver_runs": results,
-        "execution_status": "completed" if all(item.get("execution_status") in {"completed", "reused_completed"} for item in results) else "completed_with_findings",
-        "resource_snapshot_after_solver": query_gpus(),
-        "resource_ledger": {
-            **resource_ledger,
-            "solver_attempts_started": previous + newly_started,
-            "solver_attempts_completed": previous_completed + newly_completed,
-            "solver_attempts_failed": previous_failed + newly_failed,
-            "solver_device_seconds": total_device_seconds,
-            "gpu_seconds_cap": PROPOSED_GPU_SECONDS,
-            "solver_attempt_timeout_seconds": SOLVER_ATTEMPT_TIMEOUT_SECONDS,
-        },
-        "gpu_preflight_before_launch": preflight,
-    })
-    atomic_json(MATRIX_REPORT, report)
+    try:
+        snapshot = query_gpus()
+    except Exception as error:
+        snapshot = {"status": "query_failed", "error": repr(error)}
+    _persist_solver_batch(
+        base_ledger, batch, results,
+        status="completed" if all(item.get("execution_status") in {"completed", "reused_completed"} for item in results) else "completed_with_findings",
+        resource_snapshot=snapshot,
+    )
     return results
 
 
@@ -487,6 +721,51 @@ def normalize(prepared: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
     return results
 
 
+def _native_exclusion_reconciliation(audit: dict[str, Any], attempt: Path | None) -> dict[str, Any]:
+    evidence = audit.get("solver_exclusion_evidence") or {}
+    log_count = audit.get("excluded_particles_from_solver_log")
+    rows = evidence.get("rows") or []
+    if evidence.get("status") == "available":
+        if log_count is None:
+            return {
+                "status": "failed",
+                "reason": "solver_log_exclusion_count_missing",
+                "partout_row_count": len(rows),
+                "solver_log_exclusion_count": None,
+            }
+        if int(log_count) != len(rows):
+            return {
+                "status": "failed",
+                "reason": "partout_rows_do_not_match_solver_log_count",
+                "partout_row_count": len(rows),
+                "solver_log_exclusion_count": int(log_count),
+            }
+        return {
+            "status": "pass",
+            "method": "PartOut_rows_reconciled_to_solver_log",
+            "partout_row_count": len(rows),
+            "solver_log_exclusion_count": int(log_count),
+            "reason_counts": evidence.get("reason_counts", {}),
+        }
+    if (
+        int(log_count or 0) == 0
+        and attempt is not None
+        and (attempt / "RunPARTs.csv").is_file()
+    ):
+        return {
+            "status": "pass",
+            "method": "RunPARTs_native_zero_exclusion_record",
+            "partout_row_count": 0,
+            "solver_log_exclusion_count": 0,
+        }
+    return {
+        "status": "failed",
+        "reason": "native_exclusion_or_zero_exclusion_evidence_unavailable",
+        "partout_evidence_status": evidence.get("status", "unavailable"),
+        "solver_log_exclusion_count": log_count,
+    }
+
+
 def _new_audits(prepared: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
     results = []
     for record in prepared:
@@ -498,6 +777,12 @@ def _new_audits(prepared: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
             continue
         try:
             item = r6.full_time_audit(record, path, attempt)
+            reconciliation = _native_exclusion_reconciliation(item, attempt)
+            item["native_exclusion_reconciliation"] = reconciliation
+            if reconciliation.get("status") != "pass":
+                item.setdefault("r6_hard_failures", []).append("native_exclusion_evidence_not_reconciled")
+                item["r6_hard_failures"] = sorted(set(item["r6_hard_failures"]))
+                item["r6_full_time_audit_status"] = "failed_or_unknown"
             item["audit_elapsed_seconds"] = time.perf_counter() - started
             results.append(item)
         except Exception as error:
@@ -568,6 +853,11 @@ def _reused_provenance() -> dict[str, dict[str, Any]]:
 
 
 def matrix_cells(prepared: Sequence[dict[str, Any]] | None = None, audits: Sequence[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
+    persisted = load_matrix_report()
+    if prepared is None:
+        prepared = persisted.get("prepared_cases") or records()
+    if audits is None:
+        audits = persisted.get("audits") or []
     provenance = _reused_provenance()
     audit_map = _reused_audit_map()
     prepared_map = {item["case_id"]: item for item in (prepared or [])}
@@ -829,9 +1119,19 @@ def write_decision(matrix: dict[str, Any] | None = None, difference: dict[str, A
     matrix = matrix or load_matrix_report()
     difference = difference or read_json(DIFFERENCE_REPORT, {})
     ledger = ledger or read_json(RESOURCE_REPORT, {})
-    new_complete = sum(1 for item in matrix.get("cells", []) if item.get("role") == "new_n4" and item.get("matrix_status") == "completed")
+    new_cells = [item for item in matrix.get("cells", []) if item.get("role") == "new_n4"]
+    new_complete = sum(1 for item in new_cells if item.get("matrix_status") == "completed")
+    new_audits_pass = len(new_cells) == MAX_NEW_SOLVER_ATTEMPTS and all(
+        item.get("audit", {}).get("r6_full_time_audit_status") == "pass" for item in new_cells
+    )
     comparisons = matrix.get("height_comparisons", {})
     h10_cm = comparisons.get("h10", {}).get("comparisons", {}).get("coarse_to_medium", {})
+    required_pair_pass = all(
+        comparisons.get(height, {}).get("comparisons", {}).get(pair, {}).get("status") == "pass_diagnostic"
+        for height in ("h09", "h11")
+        for pair in ("coarse_to_medium", "medium_to_fine")
+    )
+    same_cfl_matrix_complete = new_complete == MAX_NEW_SOLVER_ATTEMPTS and new_audits_pass and required_pair_pass
     decision = {
         "schema_version": "n4-decision-v1",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -839,7 +1139,9 @@ def write_decision(matrix: dict[str, Any] | None = None, difference: dict[str, A
         "execution_status": "awaiting_owner_budget_approval" if new_complete == 0 else "completed_with_findings",
         "new_n4_cells_completed": new_complete,
         "new_n4_cells_expected": 4,
-        "same_cfl_matrix_complete": new_complete == 4,
+        "new_n4_full_time_audits_passed": new_audits_pass,
+        "h09_h11_pair_gates_passed": required_pair_pass,
+        "same_cfl_matrix_complete": same_cfl_matrix_complete,
         "formal_release": False,
         "development_authorized": False,
         "g4": "not_launched",
@@ -847,7 +1149,13 @@ def write_decision(matrix: dict[str, Any] | None = None, difference: dict[str, A
             "status": h10_cm.get("status", "fail_diagnostic"),
             "max_tv": h10_cm.get("maxima", {}).get("distribution_tv", 0.056904761904761875),
             "gate": 0.05,
+            "disposition": "blocking",
             "must_remain_blocking": True,
+        },
+        "completion_requirements": {
+            "all_four_new_full_time_audits_pass": True,
+            "native_exclusion_reconciliation_required": True,
+            "h09_and_h11_both_resolution_pairs_pass": True,
         },
         "old_three_resolution_recipe": "not_admitted",
         "next_gate": (
@@ -860,6 +1168,7 @@ def write_decision(matrix: dict[str, Any] | None = None, difference: dict[str, A
     }
     atomic_json(DECISION_REPORT, decision)
     markdown = f"""# N4 decision\n\nGenerated: {decision['generated_at_utc']}\nBaseline: `{BASELINE_COMMIT}`\n\n## Decision\n\n- Execution status: `{decision['execution_status']}`\n- New N4 cells: `{new_complete}/4`\n- Same-CFL 3×3 matrix complete: `{decision['same_cfl_matrix_complete']}`\n- Formal release: `false`\n- Development tranche: `false`\n- G4: `not_launched`\n\nThe h10 coarse-to-medium blocker is retained: max TV `{decision['h10_coarse_medium_blocker']['max_tv']}` against gate `{decision['h10_coarse_medium_blocker']['gate']}`. Four h09/h11 cells cannot erase or override that failure.\n\n## Authorization\n\nThe N4 plan proposes a maximum of `0.5 GPU·h` and four solver attempts, but the attached plan is not itself owner authorization. New solver execution remains guarded by explicit `--owner-approval-evidence`.\n\n## Evidence\n\n- Comparable matrix: `N4-COMPARABLE-MATRIX.md` / `.json`\n- h10 difference analysis: `N4-H10-DIFFERENCE.md` / `.json`\n- Resource ledger: `N4-RESOURCE-LEDGER.json`\n- Next action: {decision['next_gate']}\n"""
+    markdown += "\nProduct completion alone does not qualify N4: all four new full-time audits, native exclusion reconciliation, and both h09/h11 resolution-pair gates must pass.\n"
     DECISION_MARKDOWN.write_text(markdown)
     return decision
 
@@ -883,6 +1192,7 @@ def write_matrix_markdown(report: dict[str, Any]) -> None:
                 f"{maxima.get('distribution_tv', 'n/a')} | {maxima.get('com_l2_m', 'n/a')} | {maxima.get('front_q90_abs_delta_m', 'n/a')} |"
             )
     text = f"""# N4 comparable matrix\n\nBaseline: `{BASELINE_COMMIT}`  Recipe: `{SOURCE_RECIPE_ID}`\n\nThis table keeps the five N3 CFL=0.1 cells as explicit reuse and reserves four new h09/h11 coarse/medium cells for owner-authorized solver attempts. Old CFL=0.2 data are not in the primary matrix.\n\n| height | resolution | case | source | matrix status | full-time audit | final missing identities |\n|---|---|---|---|---|---|---:|\n{chr(10).join(rows)}\n\n## Pair gates\n\nThresholds: TV ≤ `0.05`, COM ≤ `0.06 m`, q90 ≤ `0.06 m`; all use the registered 21-time grid.\n\n| height | pair | status | max TV | max COM (m) | max q90 (m) |\n|---|---|---|---:|---:|---:|\n{chr(10).join(comparison_rows)}\n\nThe h10 coarse→medium failure is preserved and cannot be overridden by endpoint completion.\n"""
+    text += "\nProduct completion alone does not qualify N4: all four new full-time audits, native exclusion reconciliation, and both h09/h11 resolution-pair gates must pass.\n"
     MATRIX_MARKDOWN.write_text(text)
 
 
@@ -975,6 +1285,7 @@ The h10 coarse→medium result remains `fail_diagnostic`, max TV
 - [N4-RESOURCE-LEDGER.json](N4-RESOURCE-LEDGER.json)
 - [N4-DECISION.md](N4-DECISION.md)
 - [N4-REVIEW-PACKET.md](N4-REVIEW-PACKET.md)
+- [N4-REVIEW-ROUND-1.md](N4-REVIEW-ROUND-1.md)
 
 ## Next authorized gate
 
@@ -1002,6 +1313,9 @@ been started while owner budget status is pending.
 4. After runs exist, require per-case native exclusion evidence, full-time
    identity audit, and both pair gates for h09 and h11.  Do not let successful
    endpoints override the h10 coarse→medium blocker.
+5. Recheck the round-1 P1 corrections: persisted audit propagation, exact
+   launch-set/hash binding, durable attempt accounting, process-group timeout,
+   native exclusion reconciliation, and scoped approval evidence.
 
 ## Current disposition
 
@@ -1018,6 +1332,7 @@ been started while owner budget status is pending.
 - `N4-H10-DIFFERENCE.json/.md`
 - `N4-RESOURCE-LEDGER.json`
 - `N4-DECISION.json/.md`
+- `N4-REVIEW-ROUND-1.md`
 """
     HANDOFF_MARKDOWN.write_text(handoff)
     REVIEW_PACKET_MARKDOWN.write_text(review)
