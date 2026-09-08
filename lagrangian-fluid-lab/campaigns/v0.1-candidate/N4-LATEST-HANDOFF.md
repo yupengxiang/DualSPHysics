@@ -1,9 +1,9 @@
 # N4 latest handoff
 
-Generated: 2026-09-08T18:12:15.166850+00:00
+Generated: 2026-09-08T18:17:35.205539+00:00
 Baseline: `d721473f524c71bd85ba88064f66026de8306989`
 Branch: `codex/lagrangian-fluid-exploration`
-Code revision used for this handoff: `eaea89155746cc1effe199791a414e4b3e7f9103`
+Code revision used for this handoff: `f5acb9edbeb80e9526471a3b444b9a376f1913c4`
 
 ## Current state
 
@@ -69,6 +69,7 @@ The h10 coarse→medium result remains `fail_diagnostic`, max TV
 - [N4-DECISION.md](N4-DECISION.md)
 - [N4-OWNER-APPROVAL-ORIGINAL.md](N4-OWNER-APPROVAL-ORIGINAL.md)
 - [N4-OWNER-APPROVAL.json](N4-OWNER-APPROVAL.json)
+- [N4-EXECUTION-HANDOFF.md](N4-EXECUTION-HANDOFF.md)
 - [N4-REVIEW-PACKET.md](N4-REVIEW-PACKET.md)
 - [N4-REVIEW-ROUND-1.md](N4-REVIEW-ROUND-1.md)
 - [N4-REVIEW-ROUND-2.md](N4-REVIEW-ROUND-2.md)
