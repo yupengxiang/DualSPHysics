@@ -1266,11 +1266,32 @@ def write_decision(matrix: dict[str, Any] | None = None, difference: dict[str, A
         for pair in ("coarse_to_medium", "medium_to_fine")
     )
     same_cfl_matrix_complete = new_complete == MAX_NEW_SOLVER_ATTEMPTS and new_audits_pass and required_pair_pass
+    authorization = matrix.get("authorization", {})
+    new_n4_ledger = ledger.get("new_n4", {})
+    attempts_started = int(new_n4_ledger.get("solver_attempts_started", 0))
+    if attempts_started == 0 and not authorization.get("new_solver_authorized"):
+        execution_status = "awaiting_owner_budget_approval"
+    elif attempts_started == 0:
+        execution_status = "approved_pending_execution"
+    else:
+        execution_status = "completed_with_findings"
+    if attempts_started >= MAX_NEW_SOLVER_ATTEMPTS:
+        next_gate = (
+            "No additional N4 solver attempt is permitted; review the four completed cells and audits. "
+            "The h10 coarse-to-medium blocker remains separate."
+        )
+    elif authorization.get("new_solver_authorized"):
+        next_gate = (
+            "Execute only the remaining owner-authorized h09/h11 coarse/medium attempts within the "
+            "recorded cap, then review all audits; h10 coarse-to-medium remains a separate blocker."
+        )
+    else:
+        next_gate = "Obtain explicit owner approval for at most 0.5 GPU-hours and four attempts, then run only h09/h11 coarse/medium."
     decision = {
         "schema_version": "n4-decision-v1",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "baseline_commit": BASELINE_COMMIT,
-        "execution_status": "awaiting_owner_budget_approval" if new_complete == 0 else "completed_with_findings",
+        "execution_status": execution_status,
         "new_n4_cells_completed": new_complete,
         "new_n4_cells_expected": 4,
         "new_n4_full_time_audits_passed": new_audits_pass,
@@ -1292,18 +1313,29 @@ def write_decision(matrix: dict[str, Any] | None = None, difference: dict[str, A
             "h09_and_h11_both_resolution_pairs_pass": True,
         },
         "old_three_resolution_recipe": "not_admitted",
-        "next_gate": (
-            "Obtain explicit owner approval for at most 0.5 GPU-hours and four attempts, then run only h09/h11 coarse/medium."
-            if new_complete == 0 else
-            "Review all four new cells; h10 coarse-to-medium remains a separate blocker."
-        ),
+        "next_gate": next_gate,
         "difference_interpretation": difference.get("peak", {}).get("classification"),
         "resource_ledger": relpath(RESOURCE_REPORT),
     }
     atomic_json(DECISION_REPORT, decision)
-    markdown = f"""# N4 decision\n\nGenerated: {decision['generated_at_utc']}\nBaseline: `{BASELINE_COMMIT}`\n\n## Decision\n\n- Execution status: `{decision['execution_status']}`\n- New N4 cells: `{new_complete}/4`\n- Same-CFL 3×3 matrix complete: `{decision['same_cfl_matrix_complete']}`\n- Formal release: `false`\n- Development tranche: `false`\n- G4: `not_launched`\n\nThe h10 coarse-to-medium blocker is retained: max TV `{decision['h10_coarse_medium_blocker']['max_tv']}` against gate `{decision['h10_coarse_medium_blocker']['gate']}`. Four h09/h11 cells cannot erase or override that failure.\n\n## Authorization\n\nThe N4 plan proposes a maximum of `0.5 GPU·h` and four solver attempts, but the attached plan is not itself owner authorization. New solver execution remains guarded by explicit `--owner-approval-evidence`.\n\n## Evidence\n\n- Comparable matrix: `N4-COMPARABLE-MATRIX.md` / `.json`\n- h10 difference analysis: `N4-H10-DIFFERENCE.md` / `.json`\n- Resource ledger: `N4-RESOURCE-LEDGER.json`\n- Next action: {decision['next_gate']}\n"""
+    if authorization.get("new_solver_authorized"):
+        authorization_text = (
+            f"Owner authorization is recorded against reviewed plan `{AUTHORIZATION_REFERENCE_COMMIT}`. "
+            f"The bounded batch used evidence digest `{authorization.get('owner_approval_evidence_sha256')}` "
+            f"and original-text digest `{authorization.get('owner_approval_original_sha256')}`."
+        )
+    else:
+        authorization_text = (
+            "The N4 plan proposes a maximum of `0.5 GPU·h` and four solver attempts, but the attached "
+            "plan is not itself owner authorization. New solver execution remains guarded by explicit "
+            "`--owner-approval-evidence`."
+        )
+    markdown = f"""# N4 decision\n\nGenerated: {decision['generated_at_utc']}\nBaseline: `{BASELINE_COMMIT}`\n\n## Decision\n\n- Execution status: `{decision['execution_status']}`\n- New N4 cells: `{new_complete}/4`\n- Same-CFL 3×3 matrix complete: `{decision['same_cfl_matrix_complete']}`\n- Formal release: `false`\n- Development tranche: `false`\n- G4: `not_launched`\n\nThe h10 coarse-to-medium blocker is retained: max TV `{decision['h10_coarse_medium_blocker']['max_tv']}` against gate `{decision['h10_coarse_medium_blocker']['gate']}`. Four h09/h11 cells cannot erase or override that failure.\n\n## Authorization\n\n{authorization_text}\n\n## Evidence\n\n- Comparable matrix: `N4-COMPARABLE-MATRIX.md` / `.json`\n- h10 difference analysis: `N4-H10-DIFFERENCE.md` / `.json`\n- Resource ledger: `N4-RESOURCE-LEDGER.json`\n- Owner authorization original: `N4-OWNER-APPROVAL-ORIGINAL.md`\n- Structured owner authorization: `N4-OWNER-APPROVAL.json`\n- Next action: {decision['next_gate']}\n"""
     markdown += "\nProduct completion alone does not qualify N4: all four new full-time audits, native exclusion reconciliation, and both h09/h11 resolution-pair gates must pass.\n"
-    markdown += "The attached planning document is not authorization; the runner requires an exact-scope structured approval JSON and records its SHA-256 digest in the batch and attempt manifests.\n"
+    if authorization.get("new_solver_authorized"):
+        markdown += "The explicit owner authorization is recorded with its SHA-256 digests in the batch and attempt manifests; the four-attempt cap is exhausted and no fifth attempt is permitted.\n"
+    else:
+        markdown += "The attached planning document is not authorization; the runner requires an exact-scope structured approval JSON and records its SHA-256 digest in the batch and attempt manifests.\n"
     DECISION_MARKDOWN.write_text(markdown)
     return decision
 
@@ -1363,6 +1395,40 @@ def write_handoff(
                 f"{comparison.get('maxima', {}).get('distribution_tv', 'n/a')} |"
             )
     peak = difference.get("peak", {})
+    authorization = matrix.get("authorization", {})
+    new_n4 = ledger.get("new_n4", {})
+    attempts_started = int(new_n4.get("solver_attempts_started", 0))
+    attempts_completed = int(new_n4.get("solver_attempts_completed", 0))
+    attempts_failed = int(new_n4.get("solver_attempts_failed", 0))
+    if attempts_started:
+        solver_stage_summary = (
+            f"{attempts_started} new solver attempts were launched under the recorded owner authorization; "
+            f"{attempts_completed} completed and {attempts_failed} failed. No additional attempt is permitted "
+            f"after the four-attempt cap."
+        )
+        authorization_summary = (
+            f"Owner authorization is recorded against reviewed plan `{AUTHORIZATION_REFERENCE_COMMIT}` with "
+            f"evidence digest `{authorization.get('owner_approval_evidence_sha256')}` and original-text digest "
+            f"`{authorization.get('owner_approval_original_sha256')}`."
+        )
+        next_gate_summary = (
+            "No additional N4 solver attempt is permitted. Review the four case products, native exclusion "
+            "reconciliations, full-time audits, and h09/h11 pair gates; retain the h10 blocker."
+        )
+    elif authorization.get("new_solver_authorized"):
+        solver_stage_summary = "Owner authorization is recorded, but no new solver attempt has been launched."
+        authorization_summary = (
+            f"Owner authorization is recorded against reviewed plan `{AUTHORIZATION_REFERENCE_COMMIT}`; the "
+            "bounded launch remains limited to the four exact cells and GPUs 4–7."
+        )
+        next_gate_summary = "Run only the four exact owner-authorized h09/h11 coarse/medium cells under the locked recipe."
+    else:
+        solver_stage_summary = "No new solver attempt was started while owner budget status was pending."
+        authorization_summary = (
+            "The four new solver attempts remain guarded until the owner provides a structured approval record "
+            "binding at most `0.5 GPU·h`, four attempts, the exact recipe, and GPUs 4–7."
+        )
+        next_gate_summary = "After explicit owner budget approval, run only h09/h11 coarse/medium with the locked recipe."
     handoff = f"""# N4 latest handoff
 
 Generated: {datetime.now(timezone.utc).isoformat()}
@@ -1377,14 +1443,13 @@ Code revision used for this handoff: `{git_value('log', '-1', '--format=%H', '--
 `formal_release=false`; `development_authorized=false`; `G4=not_launched`.
 
 The N4 plan is a bounded evidence-completion task, not production data
-authorization.  The four new solver attempts remain guarded until the owner
-provides a structured approval record binding at most `0.5 GPU·h`, four
-attempts, the exact recipe, and GPUs 4–7.
+authorization. {authorization_summary}
 
 ## Stage summary
 
 - Input preparation: four unique h09/h11 coarse/medium CFL=0.1 definitions
-  generated and GenCase-checked; no new solver attempt was started.
+  generated and GenCase-checked.
+- Solver execution: {solver_stage_summary}
 - Reuse: five N3 CFL=0.1 cells are kept as explicit reuse; old CFL=0.2 data
   are excluded from the primary matrix.
 - H10 difference analysis: the registered coarse→medium TV peak is
@@ -1395,8 +1460,8 @@ attempts, the exact recipe, and GPUs 4–7.
 - Resource ledger: new N4 solver device seconds are
   `{ledger.get('new_n4', {}).get('solver_device_seconds')}`; GenCase CPU seconds
   are `{ledger.get('new_n4', {}).get('gencase_cpu_seconds')}`.  The five reused
-  solver wall times are provenance only and are not charged to N4.  If
-  authorized, each new attempt is capped at
+  solver wall times are provenance only and are not charged to N4.  Each new
+  attempt was capped at
   `{ledger.get('new_n4', {}).get('solver_attempt_timeout_seconds')}` seconds,
   with a total ledger cap of `{ledger.get('new_n4', {}).get('gpu_seconds_cap')}`
   seconds.
@@ -1420,6 +1485,9 @@ The h10 coarse→medium result remains `fail_diagnostic`, max TV
 - [N4-H10-DIFFERENCE.md](N4-H10-DIFFERENCE.md)
 - [N4-RESOURCE-LEDGER.json](N4-RESOURCE-LEDGER.json)
 - [N4-DECISION.md](N4-DECISION.md)
+- [N4-OWNER-APPROVAL-ORIGINAL.md](N4-OWNER-APPROVAL-ORIGINAL.md)
+- [N4-OWNER-APPROVAL.json](N4-OWNER-APPROVAL.json)
+- [N4-EXECUTION-HANDOFF.md](N4-EXECUTION-HANDOFF.md)
 - [N4-REVIEW-PACKET.md](N4-REVIEW-PACKET.md)
 - [N4-REVIEW-ROUND-1.md](N4-REVIEW-ROUND-1.md)
 - [N4-REVIEW-ROUND-2.md](N4-REVIEW-ROUND-2.md)
@@ -1427,43 +1495,60 @@ The h10 coarse→medium result remains `fail_diagnostic`, max TV
 
 ## Next authorized gate
 
-After explicit owner budget approval, run only h09/h11 coarse/medium with the
-locked recipe.  Require full-time identity/quality audits and both resolution
-pairs per height to pass TV≤0.05, COM≤0.06 m, and q90≤0.06 m.  Keep the h10
-coarse→medium blocker even if all four new cells pass.
+{next_gate_summary} Require full-time identity/quality audits and both
+resolution pairs per height to pass TV≤0.05, COM≤0.06 m, and q90≤0.06 m.
+Keep the h10 coarse→medium blocker even if all four new cells pass.
 """
-    review = f"""# N4 reviewer packet
-
-This is the stage handoff for the cloud reviewer.  It is based on baseline
-`{BASELINE_COMMIT}` and the locked N4 input plan.  No new N4 solver attempt has
-been started while owner budget status is pending.
-
-## Requested review
-
-1. Confirm the N3 five-cell reuse and the four unique N4 input definitions
+    if attempts_started:
+        review_intro = (
+            f"This is the post-execution handoff for the cloud reviewer. It is based on baseline `{BASELINE_COMMIT}` "
+            f"and reviewed plan `{AUTHORIZATION_REFERENCE_COMMIT}`. The bounded batch launched {attempts_started} "
+            f"attempts ({attempts_completed} completed, {attempts_failed} failed)."
+        )
+        review_requests = f"""1. Confirm the four exact N4 input definitions and their recorded input hashes.
+2. Confirm the four attempt manifests use GPUs 4–7, the two authorization digests, the 441 s timeout, and no
+   protected GPU 0–3 was terminated or used.
+3. Review per-case native exclusion reconciliation, full-time identity/quality audit, and the 21 registered times.
+4. Review the h09 and h11 pair results against TV≤0.05, COM≤0.06 m, and q90≤0.06 m.  The h11 pair failures
+   remain findings and are not to be relabelled as passes.
+5. Confirm that no fifth attempt, F6/G4 run, development tranche, or formal release is authorized.  Do not let
+   successful endpoints override the h10 coarse→medium blocker."""
+        disposition = f"""- `owner_budget_status={authorization.get('owner_budget_status')}`
+- `new_solver_authorized={authorization.get('new_solver_authorized')}`
+- `new_n4_cells={decision.get('new_n4_cells_completed')}/{decision.get('new_n4_cells_expected')}`
+- `solver_attempts={attempts_started}/{MAX_NEW_SOLVER_ATTEMPTS}`
+- `solver_attempts_failed={attempts_failed}`
+- `formal_release=false`
+- `development_authorized=false`
+- `G4=not_launched`"""
+    else:
+        review_intro = (
+            f"This is the stage handoff for the cloud reviewer. It is based on baseline `{BASELINE_COMMIT}` "
+            "and the locked N4 input plan. No new N4 solver attempt has been started while owner budget status is pending."
+        )
+        review_requests = """1. Confirm the N3 five-cell reuse and the four unique N4 input definitions
    (`cflnumber=0.1`, `dp=0.035/0.024`, h09/h11, 1.5 s, 0.001 s output).
-2. Review the h10 TV peak at `{peak.get('requested_time_s')} s`: max TV
-   `{peak.get('bridge_series_row', {}).get('distribution_tv')}`, with the
-   reported region contributions and the same-resolution CFL=0.2 diagnostic.
-3. Confirm that the proposed next action is exactly four bounded new solver
-   attempts, each governed by the recorded timeout/cap, not a scan, F6/G4 run,
-   development tranche, or release.
-4. After runs exist, require per-case native exclusion evidence, full-time
-   identity audit, and both pair gates for h09 and h11.  Do not let successful
-   endpoints override the h10 coarse→medium blocker.
-5. Recheck the round-1 P1 corrections: persisted audit propagation, exact
-   launch-set/hash binding, durable attempt accounting, process-group timeout,
-   native exclusion reconciliation, scoped approval evidence, and round-2
-   lock/latest consistency.
-
-## Current disposition
-
-- `owner_budget_status=pending_owner_approval`
+2. Review the h10 TV peak and the reported diagnostic evidence.
+3. Confirm that the proposed next action is exactly four bounded new solver attempts, each governed by the recorded timeout/cap.
+4. After runs exist, require per-case native exclusion evidence, full-time identity audit, and both pair gates for h09 and h11.
+5. Recheck the recorded launch-set/hash, durable accounting, process-group timeout, and lock/latest consistency."""
+        disposition = """- `owner_budget_status=pending_owner_approval`
 - `new_solver_authorized=false`
 - `new_n4_cells=0/4`
 - `formal_release=false`
 - `development_authorized=false`
-- `G4=not_launched`
+- `G4=not_launched`"""
+    review = f"""# N4 reviewer packet
+
+{review_intro}
+
+## Requested review
+
+{review_requests}
+
+## Current disposition
+
+{disposition}
 
 ## Evidence files
 
@@ -1471,6 +1556,9 @@ been started while owner budget status is pending.
 - `N4-H10-DIFFERENCE.json/.md`
 - `N4-RESOURCE-LEDGER.json`
 - `N4-DECISION.json/.md`
+- `N4-OWNER-APPROVAL-ORIGINAL.md`
+- `N4-OWNER-APPROVAL.json`
+- `N4-EXECUTION-HANDOFF.md`
 - `N4-REVIEW-ROUND-1.md`
 - `N4-REVIEW-ROUND-2.md`
 - `N4-REVIEW-ROUND-3.md`
