@@ -1,6 +1,6 @@
 # N4 decision
 
-Generated: 2026-09-08T17:20:36.859621+00:00
+Generated: 2026-09-08T17:26:13.043826+00:00
 Baseline: `d721473f524c71bd85ba88064f66026de8306989`
 
 ## Decision
