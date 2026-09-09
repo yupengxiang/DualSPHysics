@@ -1,0 +1,64 @@
+{
+  "schema_version": "l1-resource-ledger.v1",
+  "campaign_id": "L1_AUTONOMOUS_FLUID_QUALIFICATION",
+  "date": "2026-09-09",
+  "limits": {
+    "gpu_hours_total": 64.0,
+    "cpu_core_hours_total": 512.0,
+    "qualification_solver_attempts_max": 56,
+    "development_solver_attempts_max": 40,
+    "training_attempts_max": 12,
+    "full_material_configurations_max": 32,
+    "new_storage_gib_max": 512.0
+  },
+  "usage": {
+    "qualification_solver_attempts": 19,
+    "w1_solver_attempts": 18,
+    "w2_a_solver_attempts": 1,
+    "completed_solver_attempts": 12,
+    "failed_or_interrupted_attempts": 7,
+    "gpu_attempts": 14,
+    "cpu_attempts": 5,
+    "solver_wall_seconds_all_attempts": 5782.043679592609,
+    "gpu_solver_wall_seconds": 3868.9791256136778,
+    "gpu_hours_used": 1.0747164237815772,
+    "cpu_solver_wall_seconds": 1913.0645539789311,
+    "cpu_threads_per_attempt": 8,
+    "cpu_core_hours_used": 4.251254564397625,
+    "gencase_cpu_seconds_w1": 0.3347913189791143,
+    "normalization_cpu_seconds_w1": 7731.211323664989,
+    "audit_cpu_seconds_w1": 806.015752078034,
+    "audit_cpu_seconds_w2_a": 129.67194729088806,
+    "audit_cpu_seconds_total_recorded": 935.6876993689221,
+    "normalized_hdf5_bytes": 13976354925,
+    "normalized_hdf5_gib": 13.016494852490723,
+    "development_solver_attempts": 0,
+    "training_attempts": 0,
+    "material_configurations": 0
+  },
+  "attempt_breakdown": {
+    "w1_completed": 11,
+    "w1_return_minus_2_interruptions": 3,
+    "w1_return_minus_15_operator_stops": 2,
+    "w1_return_minus_12_vram_guard_stops": 2,
+    "w2_a_completed_return_0": 1,
+    "w2_a_vram_guard_stops": 0
+  },
+  "gpu_policy": {
+    "allowlisted_indices": [4, 5, 6, 7],
+    "protected_indices": [0, 1, 2, 3],
+    "minimum_free_mib_at_launch": 6144,
+    "abort_below_free_mib": 4096,
+    "max_l1_jobs_per_gpu": 1,
+    "poll_interval_seconds": 1,
+    "w2_a_launch_gpu": 4,
+    "w2_a_launch_free_mib": 6964,
+    "external_training_processes_touched": false
+  },
+  "accounting_notes": [
+    "GPU hours are computed only from attempt manifests whose command contains -gpu:, not from all solver wall time.",
+    "CPU core hours use the declared 8 OpenMP threads for every CPU attempt, including failed/interrupted CPU attempts.",
+    "W2-A normalization elapsed time was not retained by the interrupted predecessor; its HDF5, sidecar, and audit are present and the omission is not estimated.",
+    "Large raw solver outputs, CSV intermediates, and normalized HDF5 remain local and ignored by Git; their sizes and hashes are in DATA-MANIFEST.json."
+  ]
+}

@@ -628,14 +628,7 @@ def run_records(records: Sequence[dict[str, Any]], *, label: str, runtime_cpu: b
     report = load_report()
     report["solver_runs"] = merge_by_id(report.get("solver_runs", []), results)
     report["attempts"] = _attempt_rows()
-    elapsed = sum(float(row.get("elapsed_seconds", 0.0)) for row in report["attempts"] if row.get("status") in {"completed", "failed"})
-    report["resource_budget"]["solver_elapsed_seconds"] = elapsed
-    report["resource_budget"]["gpu_hours_used"] = elapsed / 3600.0
-    report["resource_budget"]["cpu_core_hours_used"] = sum(
-        float(item.get("elapsed_seconds", 0.0)) * CPU_THREADS / 3600.0
-        for item in results if item.get("execution_mode") == "cpu"
-    ) + float(report["resource_budget"].get("cpu_core_hours_used", 0.0))
-    report["resource_budget"]["qualification_solver_attempts_used"] = len(report["attempts"])
+    refresh_solver_resource_budget(report)
     # A later one-case batch must not hide a failed case from an earlier batch.
     # Derive the campaign status from the merged solver inventory, not only
     # from the most recently launched record.
@@ -649,6 +642,43 @@ def run_records(records: Sequence[dict[str, Any]], *, label: str, runtime_cpu: b
     report.setdefault("preflight", []).extend(preflight_snapshots)
     atomic_json(REPORT, report)
     return results
+
+
+def refresh_solver_resource_budget(report: dict[str, Any]) -> None:
+    """Recompute solver resource usage from the immutable attempt manifests.
+
+    Attempt manifests retain the actual command, so GPU and CPU wall time can
+    be separated even when a later batch is executed on a different backend.
+    Recomputing from the full inventory also avoids double-counting CPU time
+    when several batches update the same campaign report.
+    """
+    attempts = [
+        row for row in report.get("attempts", [])
+        if row.get("status") in {"completed", "failed"}
+    ]
+    elapsed = sum(float(row.get("elapsed_seconds", 0.0) or 0.0) for row in attempts)
+    gpu_elapsed = sum(
+        float(row.get("elapsed_seconds", 0.0) or 0.0)
+        for row in attempts
+        if any(str(token).startswith("-gpu:") for token in row.get("command", []))
+    )
+    cpu_elapsed = sum(
+        float(row.get("elapsed_seconds", 0.0) or 0.0)
+        for row in attempts
+        if "-cpu" in {str(token) for token in row.get("command", [])}
+    )
+    report["resource_budget"]["solver_elapsed_seconds"] = elapsed
+    report["resource_budget"]["gpu_hours_used"] = gpu_elapsed / 3600.0
+    report["resource_budget"]["cpu_core_hours_used"] = cpu_elapsed * CPU_THREADS / 3600.0
+    report["resource_budget"]["qualification_solver_attempts_used"] = len(report.get("attempts", []))
+
+
+def recompute_resources() -> dict[str, Any]:
+    report = load_report()
+    report["attempts"] = _attempt_rows()
+    refresh_solver_resource_budget(report)
+    atomic_json(REPORT, report)
+    return report
 
 
 def normalize_one(record: dict[str, Any]) -> dict[str, Any]:
@@ -1058,6 +1088,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "prepare-time", "run-time", "normalize-time", "audit-time", "decide-time",
             "prepare-conditional", "run-conditional", "normalize-conditional", "audit-conditional",
             "prepare-space", "run-space", "normalize-space", "audit-space", "decide-space", "status",
+            "recompute-resources",
         ),
         nargs="?", default="status",
     )
@@ -1103,6 +1134,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         audit_records(selected_prepared(report, "W1_space"), label="space")
     elif args.action == "decide-space":
         space_decision()
+    elif args.action == "recompute-resources":
+        report = recompute_resources()
+        print(json.dumps(report["resource_budget"], indent=2, ensure_ascii=False))
     elif args.action == "status":
         report = load_report()
         print(json.dumps({

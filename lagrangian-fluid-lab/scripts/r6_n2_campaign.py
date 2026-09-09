@@ -568,8 +568,9 @@ def _classify_missing_identities(
     that disappears while still inside the closed part of the domain.
     """
     time = np.asarray(h5["time"][:], dtype=np.float64)
-    initial_valid = np.asarray(h5["valid"][0], dtype=bool)
-    final_valid = np.asarray(h5["valid"][-1], dtype=bool)
+    valid_history = np.asarray(h5["valid"][:], dtype=bool)
+    initial_valid = valid_history[0]
+    final_valid = valid_history[-1]
     positions = np.asarray(h5["position"][:], dtype=np.float64)
     velocities = np.asarray(h5["velocity"][:], dtype=np.float64)
     missing = initial_valid & ~final_valid
@@ -593,12 +594,23 @@ def _classify_missing_identities(
     registered_absorber = set(record.get("registered_absorbing_exit_faces", ()))
     examples: list[dict[str, Any]] = []
     tolerance = 0.51 * float(record["dp_m"])
-    for particle_index in np.flatnonzero(missing):
-        history = np.flatnonzero(np.asarray(h5["valid"][:, particle_index], dtype=bool))
-        if not len(history):
+    missing_indices = np.flatnonzero(missing)
+    # ``valid`` is stored one complete frame per HDF5 chunk.  Reading a
+    # column for every missing particle turns this into O(N_particles) full
+    # dataset scans for a heavily excluded run.  Read the history once and
+    # derive all last-valid frames in memory instead.
+    has_history = valid_history.any(axis=0)
+    last_valid_frame = np.full(valid_history.shape[1], -1, dtype=np.int64)
+    if valid_history.shape[0] and np.any(has_history):
+        reversed_history = valid_history[::-1, has_history]
+        last_valid_frame[has_history] = (
+            valid_history.shape[0] - 1 - np.argmax(reversed_history, axis=0)
+        )
+    for particle_index in missing_indices:
+        last = int(last_valid_frame[particle_index])
+        if last < 0:
             categories["no_last_valid_position"] += 1
             continue
-        last = int(history[-1])
         point = positions[last, particle_index]
         velocity = velocities[last, particle_index]
         next_dt = float(time[last + 1] - time[last]) if last + 1 < len(time) else 0.0

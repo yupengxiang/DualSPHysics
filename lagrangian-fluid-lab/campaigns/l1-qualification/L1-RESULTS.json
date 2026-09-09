@@ -1,0 +1,114 @@
+{
+  "schema_version": "l1-results.v1",
+  "campaign_id": "L1_AUTONOMOUS_FLUID_QUALIFICATION",
+  "date": "2026-09-09",
+  "branch": "codex/lagrangian-fluid-exploration",
+  "baseline_commit": "dc9533eecf7ee608a1db04ea4e26bb80cd2b456a",
+  "provenance": {
+    "attachment": "Lagrangian_Fluid_L1_Autonomous_dc9533e.zip",
+    "attachment_sha256": "2140048e019b2074668799aef145314af90eae242498450c069bbdb910aab5e3",
+    "attachment_role": "user-adopted one-time plan template; not an execution result or reviewer sign-off",
+    "reference_task": "01a077a8-91ef-7682-997e-514714d3faa2"
+  },
+  "status": {
+    "execution_status": "completed_with_findings",
+    "evidence_status": "complete_for_w0_w1_w2a",
+    "acceptance_status": "no_t1_recipe_qualified",
+    "t1_qualified": false,
+    "formal_release": false,
+    "hidden_test": false,
+    "development_authorized": false,
+    "training_attempts": 0,
+    "new_solver_attempts_for_f6": 0
+  },
+  "decisions": {
+    "w0": "complete",
+    "time": {
+      "status": "qualified_for_space",
+      "chosen_cfl": 0.05,
+      "reference_cfl": 0.1,
+      "registered_time_count": 21,
+      "h10_maxima": {
+        "distribution_tv": 0.0018382352941176405,
+        "com_l2_m": 0.0004830944973587065,
+        "front_q90_abs_delta_m": 0.0005003213882446289
+      },
+      "h11_maxima": {
+        "distribution_tv": 0.0040485829959514,
+        "com_l2_m": 0.0009089826270756039,
+        "front_q90_abs_delta_m": 0.0015766620635986328
+      }
+    },
+    "space": {
+      "status": "no_t1_height_qualified",
+      "heights_m": {
+        "h09": 0.414,
+        "h10": 0.46,
+        "h11": 0.506
+      },
+      "qualified_height_labels": [],
+      "conditional_second_ladder_eligible": false,
+      "conditional_007_executed": false,
+      "coarse_to_medium": {
+        "h09_max_distribution_tv": 0.031282943284840825,
+        "h10_max_distribution_tv": 0.04293929110105579,
+        "h11_max_distribution_tv": 0.049230471540843035
+      },
+      "medium_to_fine": {
+        "h09_max_distribution_tv": 0.055649534797000244,
+        "h10_max_distribution_tv": 0.061136331857545856,
+        "h11_max_distribution_tv": 0.06864560877718773
+      }
+    },
+    "w2_a": {
+      "status": "diagnostic_failed_or_unknown",
+      "hypothesis": "mDBC boundary representation with explicit five-face normal geometry",
+      "case_id": "L1_W2_A_BOUNDARY_MDBC_h11_fine_dp0p01_cfl005",
+      "solver_returncode": 0,
+      "frames": 1501,
+      "initial_fluid_particles": 60060,
+      "final_valid_particles": 10291,
+      "native_position_exclusions": 49769,
+      "identity_retention_first_to_last": 0.17134532134532135,
+      "first_closed_wall_penetration_time_s": 0.130014,
+      "penetration_frames": 1371,
+      "max_outside_closed_container_mass_kg": 18.314000869868323,
+      "r6_hard_failures": [
+        "finite_wall_or_obstacle_penetration",
+        "initial_identities_missing_at_final_requires_solver_loss_or_exit_classification",
+        "initial_identities_missing_with_unresolved_cause"
+      ],
+      "expansion_authorized": false
+    },
+    "w4": "not_applicable_without_t1",
+    "w5": "blocked_without_t1",
+    "w6": "blocked_without_t1"
+  },
+  "attempts": {
+    "qualification_solver_attempts": 19,
+    "w1_attempts": 18,
+    "w1_completed": 11,
+    "w1_failed_or_interrupted": 7,
+    "w2_a_attempts": 1,
+    "gpu_attempts": 14,
+    "cpu_attempts": 5,
+    "vram_guard_failures": 2,
+    "operator_or_external_interrupts": 5,
+    "note": "All failures, retries, guard stops, and interruptions remain in immutable attempt manifests."
+  },
+  "evidence": {
+    "final_report": "campaigns/l1-qualification/L1-FINAL-REPORT.zh-CN.md",
+    "w1_report": "campaigns/l1-qualification/l1-f1-qualification.json",
+    "w2_report": "campaigns/l1-qualification/l1-w2-boundary-control.json",
+    "w2_full_audit": "campaigns/l1-qualification/audits/L1_W2_A_BOUNDARY_MDBC_h11_fine_dp0p01_cfl005.json",
+    "review_packet": "campaigns/l1-qualification/L1-REVIEW-PACKET.md",
+    "resource_ledger": "campaigns/l1-qualification/RESOURCE-LEDGER.json",
+    "data_manifest": "campaigns/l1-qualification/DATA-MANIFEST.json",
+    "coverage_map": "campaigns/l1-qualification/ERROR-AND-COVERAGE-MAP.zh-CN.md"
+  },
+  "next_owner_decision": [
+    "Decide whether to authorize one additional W2 controlled hypothesis (for example, an official mDBC/template normal construction) after reviewer feedback.",
+    "Do not start W4, W5, W6, a .007 ladder, or training from the current negative evidence.",
+    "If no further W2 hypothesis is authorized, close L1 as a bounded negative qualification result and carry the boundary/normal-semantics diagnosis forward."
+  ]
+}
