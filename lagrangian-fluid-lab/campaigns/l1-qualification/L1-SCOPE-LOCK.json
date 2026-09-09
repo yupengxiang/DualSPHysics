@@ -1,0 +1,81 @@
+{
+  "schema_version": "l1-scope-lock.v1",
+  "campaign_id": "L1_AUTONOMOUS_FLUID_QUALIFICATION",
+  "created_date": "2026-09-09",
+  "baseline_commit": "dc9533eecf7ee608a1db04ea4e26bb80cd2b456a",
+  "branch": "codex/lagrangian-fluid-exploration",
+  "owner_adoption": {
+    "status": "adopted_from_explicit_user_request",
+    "record": "campaigns/l1-qualification/OWNER-ADOPTION.md",
+    "source_attachment_sha256": "2140048e019b2074668799aef145314af90eae242498450c069bbdb910aab5e3",
+    "plan_source_sha256": "c6d7d597a087e02eb3e85350cd955990862ad7e4bc406a7b71428fb994cb9d9a",
+    "gate_source_sha256": "66adb75a5cf9298b8aba0cefe1c210db61bbb14d38aadffd4229f79fa108c5c6"
+  },
+  "objective": {
+    "positive": "At least one explicitly scoped F1 T1 numerical recipe, followed conditionally by independent development data and real learning.",
+    "negative": "If bounded branches are exhausted, deliver falsifiable root causes, failure/regime map and exact evidence.",
+    "formal_release_allowed": false,
+    "hidden_test_generation_allowed": false
+  },
+  "limits": {
+    "gpu_hours_total": 64,
+    "cpu_core_hours_total": 512,
+    "solver_attempts_total": 96,
+    "qualification_solver_attempts": 56,
+    "development_solver_attempts": 40,
+    "training_attempts": 12,
+    "full_material_configurations": 32,
+    "new_storage_gib": 512,
+    "campaign_validity_hours": 168,
+    "max_concurrent_gpu_heavy_jobs": 4,
+    "max_concurrent_cpu_heavy_jobs": 2,
+    "cpu_threads_default_per_heavy_job": 8,
+    "default_solver_timeout_s": 1800,
+    "max_solver_timeout_s": 7200,
+    "max_training_gpu_hours_each": 8
+  },
+  "gpu_policy": {
+    "allowed_indices": [4, 5, 6, 7],
+    "protected_indices": [0, 1, 2, 3],
+    "recheck_before_each_batch": true,
+    "single_heavy_job_per_gpu": true,
+    "unrelated_jobs_must_not_be_killed": true
+  },
+  "frozen_history": {
+    "n4_authorization_reusable": false,
+    "n4_fifth_solver_attempt_allowed": false,
+    "historical_failures_immutable": true,
+    "f6_new_solver_attempts": 0
+  },
+  "phase_caps": {
+    "W1_time_qualification_solver_max": 5,
+    "W1_space_qualification_solver_max": 12,
+    "W2_controls_fallback_qualification_solver_max": 12,
+    "W4_domain_qualification_solver_max": 12,
+    "W7_second_family_qualification_solver_max": 12,
+    "explicit_diagnostic_reserve_qualification_solver_max": 3,
+    "W5_development_solver_max": 40
+  },
+  "primary_recipe": {
+    "family": "F1",
+    "background": "plain_dam_break",
+    "height_m": [0.414, 0.46, 0.506],
+    "dp_m": [0.02, 0.014, 0.01],
+    "conditional_dp_m": [0.014, 0.01, 0.007],
+    "time_max_s": 1.5,
+    "saved_time_out_s": 0.001,
+    "initial_cfl": 0.1,
+    "conditional_cfl": [0.05, 0.025],
+    "time_gate": {
+      "distribution_tv_max": 0.01,
+      "com_l2_max_m": 0.012,
+      "front_q90_abs_max_m": 0.012
+    },
+    "space_gate": {
+      "distribution_tv_max": 0.05,
+      "com_l2_max_m": 0.06,
+      "front_q90_abs_max_m": 0.06
+    },
+    "registered_times_s": [0.0, 0.075, 0.15, 0.225, 0.3, 0.375, 0.45, 0.525, 0.6, 0.675, 0.75, 0.825, 0.9, 0.975, 1.05, 1.125, 1.2, 1.275, 1.35, 1.425, 1.5]
+  }
+}
