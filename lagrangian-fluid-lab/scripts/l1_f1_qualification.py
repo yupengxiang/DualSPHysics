@@ -81,6 +81,7 @@ TIME_CONDITIONAL_CFL = 0.025
 GPU_IDS = (4, 5, 6, 7)
 PROTECTED_GPU_IDS = (0, 1, 2, 3)
 DEFAULT_TIMEOUT_S = 1800
+CPU_THREADS = 8
 COHOST_MIN_FREE_MIB = 8192
 COHOST_ABORT_FREE_MIB = 6144
 MAX_COHOST_JOBS_PER_GPU = 1
@@ -392,6 +393,7 @@ def load_report() -> dict[str, Any]:
             "material_configurations_used": 0,
             "solver_elapsed_seconds": 0.0,
             "gpu_hours_used": 0.0,
+            "cpu_core_hours_used": 0.0,
             "gencase_cpu_seconds": 0.0,
             "normalization_cpu_seconds": 0.0,
             "audit_cpu_seconds": 0.0,
@@ -520,7 +522,7 @@ def _attempt_rows() -> list[dict[str, Any]]:
 
 
 def run_one(record: dict[str, Any], *, runtime_gpu: int | None = None,
-            rerun: bool = False) -> dict[str, Any]:
+            runtime_cpu: bool = False, rerun: bool = False) -> dict[str, Any]:
     expected_hash = record.get("record_hash") or record_hash(record)
     prior = latest_payload(record)
     if prior and not rerun and prior.get("record_hash") == expected_hash:
@@ -528,16 +530,28 @@ def run_one(record: dict[str, Any], *, runtime_gpu: int | None = None,
             return {**prior, "execution_status": "reused_completed"}
         return {**prior, "execution_status": "existing_failed_not_retried"}
     declared_gpu = int(record["gpu"])
-    gpu = declared_gpu if runtime_gpu is None else int(runtime_gpu)
-    gpu_record = require_headroom_allowed_gpu(gpu, allowed_uuids())
+    gpu = None if runtime_cpu else (declared_gpu if runtime_gpu is None else int(runtime_gpu))
+    gpu_record = None if runtime_cpu else require_headroom_allowed_gpu(gpu, allowed_uuids())
     prefix = lab_path(record["generated_prefix"])
+    if runtime_cpu:
+        command = [str(SOLVER), "-cpu", f"-ompthreads:{CPU_THREADS}", str(prefix), "{output}"]
+        execution_environment = environment(cpu=True)
+    else:
+        command = [str(SOLVER), f"-gpu:{gpu}", str(prefix), "{output}"]
+        execution_environment = environment()
+    attempt_kwargs = {
+        "evidence_glob": "data/Part_*.bi4",
+        "required_text": "Finished execution (code=0)",
+        "timeout_seconds": DEFAULT_TIMEOUT_S,
+    }
+    if not runtime_cpu:
+        attempt_kwargs.update({
+            "resource_guard": lambda: cohost_memory_guard(gpu),
+            "resource_poll_seconds": 1.0,
+        })
     result = execute_attempt(
-        record["case_id"], [str(SOLVER), f"-gpu:{gpu}", str(prefix), "{output}"],
-        RUN_ROOT, cwd=prefix.parent, env=environment(),
-        evidence_glob="data/Part_*.bi4", required_text="Finished execution (code=0)",
-        timeout_seconds=DEFAULT_TIMEOUT_S,
-        resource_guard=lambda: cohost_memory_guard(gpu),
-        resource_poll_seconds=1.0,
+        record["case_id"], command, RUN_ROOT, cwd=prefix.parent,
+        env=execution_environment, **attempt_kwargs,
     )
     payload = {
         **result,
@@ -546,7 +560,9 @@ def run_one(record: dict[str, Any], *, runtime_gpu: int | None = None,
         "gpu_at_launch": gpu_record,
         "gpu_index_declared": declared_gpu,
         "gpu_index_requested": gpu,
-        "gpu_launch_policy": "cohost_headroom",
+        "execution_mode": "cpu" if runtime_cpu else "gpu",
+        "cpu_threads": CPU_THREADS if runtime_cpu else None,
+        "gpu_launch_policy": "cpu_no_gpu" if runtime_cpu else "cohost_headroom",
         "protected_gpu_indices": list(PROTECTED_GPU_IDS),
         "input_generated_xml_sha256": sha256(prefix.with_suffix(".xml")),
         "input_generated_bi4_sha256": sha256(prefix.with_suffix(".bi4")),
@@ -575,14 +591,15 @@ def preflight(label: str, records: Sequence[dict[str, Any]]) -> dict[str, Any]:
     return snapshot
 
 
-def run_records(records: Sequence[dict[str, Any]], *, label: str, rerun: bool = False) -> list[dict[str, Any]]:
+def run_records(records: Sequence[dict[str, Any]], *, label: str, runtime_cpu: bool = False,
+                rerun: bool = False) -> list[dict[str, Any]]:
     records = list(records)
     if not records:
         raise ValueError(f"no records selected for {label}")
     if len(records) > len(GPU_IDS):
         raise ValueError("one batch may not exceed the four allowed GPUs")
     selected = {int(item["gpu"]) for item in records}
-    if any(index not in GPU_IDS for index in selected):
+    if not runtime_cpu and any(index not in GPU_IDS for index in selected):
         raise ValueError(f"records contain a protected or unsupported GPU: {sorted(selected)}")
     # Co-run permission is deliberately conservative: one L1 solver at a time
     # and a fresh memory snapshot before every launch.  The declared GPU is a
@@ -596,15 +613,22 @@ def run_records(records: Sequence[dict[str, Any]], *, label: str, rerun: bool = 
         batch_index += 1
         snapshot = preflight(f"{label}-launch-{batch_index}", pending[:1])
         preflight_snapshots.append(snapshot)
-        runtime_gpu = choose_headroom_gpu(pending[0], snapshot, set())
         record = pending.pop(0)
-        results.append(run_one(record, runtime_gpu=runtime_gpu, rerun=rerun))
+        if runtime_cpu:
+            results.append(run_one(record, runtime_cpu=True, rerun=rerun))
+        else:
+            runtime_gpu = choose_headroom_gpu(record, snapshot, set())
+            results.append(run_one(record, runtime_gpu=runtime_gpu, rerun=rerun))
     report = load_report()
     report["solver_runs"] = merge_by_id(report.get("solver_runs", []), results)
     report["attempts"] = _attempt_rows()
     elapsed = sum(float(row.get("elapsed_seconds", 0.0)) for row in report["attempts"] if row.get("status") in {"completed", "failed"})
     report["resource_budget"]["solver_elapsed_seconds"] = elapsed
     report["resource_budget"]["gpu_hours_used"] = elapsed / 3600.0
+    report["resource_budget"]["cpu_core_hours_used"] = sum(
+        float(item.get("elapsed_seconds", 0.0)) * CPU_THREADS / 3600.0
+        for item in results if item.get("execution_mode") == "cpu"
+    ) + float(report["resource_budget"].get("cpu_core_hours_used", 0.0))
     report["resource_budget"]["qualification_solver_attempts_used"] = len(report["attempts"])
     report["execution_status"] = "solver_completed" if all(
         item.get("execution_status") in {"completed", "reused_completed"} for item in results
@@ -1021,13 +1045,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         nargs="?", default="status",
     )
     parser.add_argument("--rerun", action="store_true", help="make a new attempt after a prior failed attempt")
+    parser.add_argument("--cpu", action="store_true", help="run the selected solver cases on CPU with 8 OpenMP threads")
     args = parser.parse_args(argv)
     report = load_report()
 
     if args.action == "prepare-time":
         prepare_records(time_records(TIME_PRIMARY_CFL), label="primary-cfl005")
     elif args.action == "run-time":
-        run_records(selected_prepared(report, "W1_time", cfl=TIME_PRIMARY_CFL), label="primary-cfl005", rerun=args.rerun)
+        run_records(selected_prepared(report, "W1_time", cfl=TIME_PRIMARY_CFL), label="primary-cfl005", runtime_cpu=args.cpu, rerun=args.rerun)
     elif args.action == "normalize-time":
         normalize_records(selected_prepared(report, "W1_time", cfl=TIME_PRIMARY_CFL), label="primary-cfl005")
     elif args.action == "audit-time":
@@ -1040,7 +1065,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise RuntimeError("conditional CFL=0.025 is only permitted after a failed primary time gate")
         prepare_records(time_records(TIME_CONDITIONAL_CFL), label="conditional-cfl0025")
     elif args.action == "run-conditional":
-        run_records(selected_prepared(report, "W1_time", cfl=TIME_CONDITIONAL_CFL), label="conditional-cfl0025", rerun=args.rerun)
+        run_records(selected_prepared(report, "W1_time", cfl=TIME_CONDITIONAL_CFL), label="conditional-cfl0025", runtime_cpu=args.cpu, rerun=args.rerun)
     elif args.action == "normalize-conditional":
         normalize_records(selected_prepared(report, "W1_time", cfl=TIME_CONDITIONAL_CFL), label="conditional-cfl0025")
     elif args.action == "audit-conditional":
@@ -1054,7 +1079,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     elif args.action == "run-space":
         rows = selected_prepared(report, "W1_space")
         for start in range(0, len(rows), len(GPU_IDS)):
-            run_records(rows[start:start + len(GPU_IDS)], label=f"space-batch-{start // len(GPU_IDS) + 1}", rerun=args.rerun)
+            run_records(rows[start:start + len(GPU_IDS)], label=f"space-batch-{start // len(GPU_IDS) + 1}", runtime_cpu=args.cpu, rerun=args.rerun)
     elif args.action == "normalize-space":
         normalize_records(selected_prepared(report, "W1_space"), label="space")
     elif args.action == "audit-space":
