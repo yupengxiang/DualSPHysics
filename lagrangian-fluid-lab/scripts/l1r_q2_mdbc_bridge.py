@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run one bounded, complete-recipe mDBC bridge case after Q1.
+"""Run one bounded mDBC boundary-configuration bridge case after Q1.
 
 This is the first Q2 development/diagnostic case, not a replacement for the
 old W2-A result.  It keeps the L1 h11/fine geometry and numerical policy,
@@ -143,11 +143,12 @@ def choose_gpu(total_particles: int | None) -> tuple[int | None, dict[str, Any]]
     }
 
 
-def gpu_guard(index: int) -> dict[str, Any]:
+def gpu_guard(index: int, expected_uuid: str | None = None) -> dict[str, Any]:
     row = next((item for item in gpu_snapshot() if item["index"] == index), None)
     if row is None:
         return {"ok": False, "gpu_index": index, "error": "gpu_disappeared"}
-    return {"ok": row["memory_free_mib"] >= ABORT_MIN_FREE_MIB, "gpu_index": index, **row, "abort_below_mib": ABORT_MIN_FREE_MIB}
+    uuid_ok = row["uuid"] in allowed_gpu_uuids() and (expected_uuid is None or row["uuid"] == expected_uuid)
+    return {"ok": uuid_ok and row["memory_free_mib"] >= ABORT_MIN_FREE_MIB, "gpu_index": index, **row, "expected_uuid": expected_uuid, "abort_below_mib": ABORT_MIN_FREE_MIB}
 
 
 def build_record() -> dict[str, Any]:
@@ -169,6 +170,7 @@ def build_record() -> dict[str, Any]:
             "slip_mode": 1,
             "no_penetration": 0,
         },
+        "recipe_scope": "official mDBC boundary configuration on retained L1 numerical settings; not the complete official numerical strategy",
         "development_authorized": False, "formal_release": False,
     }
 
@@ -325,7 +327,7 @@ def run_solver(record: dict[str, Any], *, rerun: bool = False) -> dict[str, Any]
         CASE_ID, [str(SOLVER), f"-gpu:{gpu}", "-mdbc", str(prefix), "{output}"],
         RUN_ROOT, cwd=prefix.parent, env=environment(), evidence_glob="data/Part_*.bi4",
         required_text="Finished execution (code=0)", timeout_seconds=TIMEOUT_S,
-        resource_guard=lambda: gpu_guard(gpu), resource_poll_seconds=1.0,
+        resource_guard=lambda: gpu_guard(gpu, next(row["uuid"] for row in preflight["snapshot"] if row["index"] == gpu)), resource_poll_seconds=1.0,
     )
     payload = {
         **result, "case_id": CASE_ID, "record_hash": record["record_hash"],

@@ -1,0 +1,169 @@
+{
+  "schema": "l1r.continuation.plan.v1",
+  "baseline": "f104e5409cec2c8dd4043f93ffc4f6c7cda96646",
+  "kind": "planning_metadata_not_executable_scheduler",
+  "authorization": "verify_existing_owner_adoption_no_new_grant_no_budget_reset",
+  "parent_limits": {
+    "gpu_hours": 64,
+    "cpu_core_hours": 512,
+    "qualification_attempts": 56,
+    "development_attempts": 40,
+    "training_attempts": 12,
+    "material_configurations": 32,
+    "new_storage_gib": 512,
+    "expiry_hours_from_original_start": 168
+  },
+  "known_qualification_attempt_lower_bound": 21,
+  "remaining_qualification_upper_bound_pending_ledger": 35,
+  "soft_allocation": {
+    "official_static_or_environment": 2,
+    "q2_bounded_diagnostics": 6,
+    "selected_f1_time_space_interior": 15,
+    "f3_fallback_reserved": 6,
+    "evidence_based_retry_reserve": 6
+  },
+  "gpu_policy": {
+    "allowed_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "protected_indices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "max_active_solver": 1,
+    "minimum_launch_free_mib": 6144,
+    "abort_below_free_mib": 4096,
+    "poll_seconds": 1,
+    "kill_only_campaign_process_group": true,
+    "cpu_solver_not_automatic_fallback": true
+  },
+  "nodes": [
+    {
+      "id": "S0",
+      "action": "reconcile parent resources and durable ready-task queue",
+      "depends_on": [],
+      "new_cfd_required": false
+    },
+    {
+      "id": "A1",
+      "action": "audit existing Q1 official raw outputs and matching observations",
+      "depends_on": [
+        "S0"
+      ],
+      "new_cfd_required": false
+    },
+    {
+      "id": "A2",
+      "action": "fix real finite-wall event and missing-domain semantics; re-audit Q2",
+      "depends_on": [
+        "S0"
+      ],
+      "new_cfd_required": false
+    },
+    {
+      "id": "A3",
+      "action": "measure canonical wall/boundary/ghost and initial-state representations",
+      "depends_on": [
+        "S0"
+      ],
+      "new_cfd_required": false
+    },
+    {
+      "id": "B1",
+      "action": "generate full recipe diff from actual official/Q2 configurations",
+      "depends_on": [
+        "S0"
+      ],
+      "new_cfd_required": false
+    },
+    {
+      "id": "B2",
+      "action": "bounded official-numerics-derived Q2 candidate and one evidenced alternative",
+      "depends_on": [
+        "A2",
+        "A3",
+        "B1"
+      ],
+      "new_cfd_required": true,
+      "max_attempts_soft": 6
+    },
+    {
+      "id": "F1_ALT",
+      "action": "derive complete official scene rather than indefinitely repairing local template",
+      "depends_on": [
+        "A1",
+        "B2"
+      ],
+      "condition": "local_legal_q2_routes_exhausted",
+      "new_cfd_required": true
+    },
+    {
+      "id": "C",
+      "action": "select one legal F1 recipe, qualify space/time and independent interior points",
+      "depends_on": [
+        "A1",
+        "A2",
+        "A3",
+        "B1"
+      ],
+      "condition": "a_legal_local_or_official_recipe_is_ready",
+      "new_cfd_required": true,
+      "max_attempts_soft": 15
+    },
+    {
+      "id": "M",
+      "action": "task-specific material numerical validation",
+      "depends_on": [
+        "C"
+      ],
+      "condition": "source_recipe_task_scope_qualified",
+      "new_cfd_required": false
+    },
+    {
+      "id": "DEV",
+      "action": "eight-case pilot then at most32 independent development cases",
+      "depends_on": [
+        "C"
+      ],
+      "condition": "T1_recipe_and_parameter_domain_qualified",
+      "max_attempts_parent": 40
+    },
+    {
+      "id": "TRAIN",
+      "action": "two representative routes three seeds each on independent accepted development cases",
+      "depends_on": [
+        "DEV"
+      ],
+      "condition": "input_and_scoring_contract_valid",
+      "max_attempts_parent": 12
+    },
+    {
+      "id": "F3",
+      "action": "two true3D backgrounds three resolutions each",
+      "depends_on": [
+        "S0",
+        "A2"
+      ],
+      "condition": "meaningful_F1_routes_exhausted_or_F1_has_product_conclusion",
+      "new_cfd_required": true,
+      "max_attempts_soft": 6
+    },
+    {
+      "id": "FINAL",
+      "action": "produce actual product or branch-exhaustion/resource evidence",
+      "depends_on": [
+        "S0"
+      ],
+      "condition": "campaign_stop_rule_satisfied"
+    }
+  ],
+  "forbidden_final_reason": "single_Q2_quality_failure_while_authorized_ready_tasks_exist",
+  "formal_release": false,
+  "cpu_gpu_performance_migration_new_campaign": false,
+  "F6_new_solver": false
+}

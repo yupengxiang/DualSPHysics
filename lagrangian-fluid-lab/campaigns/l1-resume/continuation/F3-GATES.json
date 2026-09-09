@@ -1,0 +1,19 @@
+{
+  "registered_before_solver": true,
+  "recipe": "F3_3D_CELL2",
+  "physical_domain": {"length_m": 0.9, "width_m": 0.18, "height_m": 0.51, "water_depth_m": 0.09},
+  "dp_m": [0.03, 0.015, 0.01],
+  "backgrounds": ["plain", "baffled"],
+  "initial_mass_relative_error_max": 0.02,
+  "saved_frame_hard_gates": ["unique identities", "finite fields", "no excluded or unexplained lost fluid", "finite wall/obstacle tolerance exceedance absent", "known runtime domain"],
+  "observation_times_s": [0,0.075,0.15,0.225,0.3,0.375,0.45,0.525,0.6,0.675,0.75,0.825,0.9,0.975,1.05,1.125,1.2,1.275,1.35,1.425,1.5],
+  "observation_time_policy": "nearest native saved frame inside actual run time domain, report actual timestamps and mismatch; no terminal-state padding",
+  "histogram_cell_width_m": 0.06,
+  "histogram_origin_m": [-0.45,-0.09,0],
+  "distribution_tv_max": 0.05,
+  "com_l2_over_length_max": 0.05,
+  "front_q90_difference_over_length_max": 0.05,
+  "mean_velocity_difference_over_sqrt_gH_max": 0.05,
+  "material_diagnostic": {"initial_seeds":512,"substeps":[2,4],"backgrounds":["plain","baffled"],"source_resolution":"fine","qualification":"diagnostic unless source qualification independently passes"},
+  "formal_release": false
+}

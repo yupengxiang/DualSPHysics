@@ -73,7 +73,7 @@ def _face_masks(points: np.ndarray, spec: dict[str, Any], tolerance: float) -> d
         outward = points[:, axis] < plane - tol if side == 0 else points[:, axis] > plane + tol
         projected = np.ones(len(points), dtype=bool)
         for index in other:
-            projected &= (points[:, index] >= lower[index] - tol) & (points[:, index] <= upper[index] + tol)
+            projected &= (points[:, index] >= lower[index] - 1e-12) & (points[:, index] <= upper[index] + 1e-12)
         result[face] = outward & projected
     return result
 
@@ -113,9 +113,13 @@ def _segment_face_hits(
         plane = lower[axis] if side == 0 else upper[axis]
         direction = delta[:, axis]
         valid_direction = direction < 0 if side == 0 else direction > 0
-        # Both endpoints in the outward tolerance band are not a new crossing.
-        start_near_or_inside = p0[:, axis] >= plane - tol if side == 0 else p0[:, axis] <= plane + tol
-        end_outward = p1[:, axis] < plane - tol if side == 0 else p1[:, axis] > plane + tol
+        # Locate the nominal plane independently of the endpoint tolerance.
+        # Otherwise subdividing a chord inside the tolerance band loses its
+        # crossing. Contact alone is not outward motion; departure from exact
+        # contact is located at fraction zero. Initially outward points are
+        # endpoint states, not newly observed crossings.
+        start_near_or_inside = p0[:, axis] >= plane if side == 0 else p0[:, axis] <= plane
+        end_outward = p1[:, axis] < plane if side == 0 else p1[:, axis] > plane
         valid = valid_direction & start_near_or_inside & end_outward
         fraction = np.full(len(p0), np.nan, dtype=np.float64)
         nonzero = valid_direction
@@ -123,7 +127,7 @@ def _segment_face_hits(
         valid &= np.isfinite(fraction) & (fraction >= 0.0) & (fraction <= 1.0)
         crossing = p0 + fraction[:, None] * delta
         for index in other:
-            valid &= (crossing[:, index] >= lower[index] - tol) & (crossing[:, index] <= upper[index] + tol)
+            valid &= (crossing[:, index] >= lower[index] - 1e-12) & (crossing[:, index] <= upper[index] + 1e-12)
         for index in np.flatnonzero(valid):
             hits.append({
                 "point_index": int(index),
@@ -194,6 +198,8 @@ def segment_crossing_events(
         raise ValueError(f"segment endpoints must have the same shape, got {first.shape} and {second.shape}")
     if not np.isfinite(first).all() or not np.isfinite(second).all():
         raise ValueError("segment endpoints must be finite")
+    if not np.isfinite(tolerance) or tolerance < 0:
+        raise ValueError("tolerance must be finite and non-negative")
     events = _segment_face_hits(first, second, spec, tolerance)
     for obstacle in spec.get("obstacles", ()):  # finite solid inserts
         events.extend(_segment_box_hits(first, second, obstacle, tolerance))
@@ -204,7 +210,7 @@ def outside_runtime_domain_mask(
     points: np.ndarray,
     domain: dict[str, Any] | None,
     tolerance: float,
-) -> np.ndarray:
+) -> np.ndarray | None:
     """Classify points outside an explicitly supplied runtime AABB.
 
     No runtime-domain inference is performed when ``domain`` is absent.  This
@@ -213,10 +219,12 @@ def outside_runtime_domain_mask(
     """
     points = _points(points)
     if domain is None:
-        return np.zeros(len(points), dtype=bool)
+        return None
     lower = np.asarray([domain["xmin"], domain["ymin"], domain["zmin"]], dtype=np.float64)
     upper = np.asarray([domain["xmax"], domain["ymax"], domain["zmax"]], dtype=np.float64)
     tol = float(tolerance)
+    if not np.isfinite(np.r_[lower, upper, tol]).all() or np.any(upper <= lower) or tol < 0:
+        raise ValueError("runtime domain and tolerance must be finite and ordered")
     return np.any((points < lower - tol) | (points > upper + tol), axis=1)
 
 
@@ -264,8 +272,9 @@ def wall_penetration(
         "obstacle_penetration_max_depth_m": obstacle_max_depth,
         "obstacle_counts_by_id": obstacle_counts,
         "obstacle_mass_by_id_kg": obstacle_masses,
-        "runtime_domain_outside_count": int(runtime_outside.sum()),
-        "runtime_domain_outside_mass_kg": float(weights[runtime_outside].sum(dtype=np.float64)),
+        "runtime_domain_status": "checked" if runtime_outside is not None else "not_checked",
+        "runtime_domain_outside_count": int(runtime_outside.sum()) if runtime_outside is not None else None,
+        "runtime_domain_outside_mass_kg": float(weights[runtime_outside].sum(dtype=np.float64)) if runtime_outside is not None else None,
         "closed_faces": list(_closed_faces(spec)),
         "open_faces": list(spec.get("open_faces", ())),
         "geometry_semantics": "finite_closed_faces_and_finite_obstacles",

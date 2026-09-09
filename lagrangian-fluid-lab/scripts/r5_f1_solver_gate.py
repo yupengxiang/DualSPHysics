@@ -469,6 +469,9 @@ def _distribution(points: np.ndarray, mass: np.ndarray, background_id: str, tota
 def audit_hdf5(record: dict[str, Any], h5_path: Path, attempt: Path | None) -> dict[str, Any]:
     issues: list[str] = []
     unknowns: list[str] = []
+    runtime_checked = record["wall_spec"].get("runtime_domain") is not None
+    if not runtime_checked:
+        unknowns.append("runtime_domain_not_checked")
     with h5py.File(h5_path, "r") as h5:
         required = {"time", "particle_id", "particle_zone", "valid", "position", "velocity", "density", "mass", "pressure", "type", "mk"}
         missing = sorted(required - set(h5.keys()))
@@ -639,6 +642,9 @@ def audit_hdf5(record: dict[str, Any], h5_path: Path, attempt: Path | None) -> d
         final_mass = float(np.asarray(h5["mass"][-1], dtype=np.float64)[final_valid].sum(dtype=np.float64))
         sampled_distribution = {}
         for requested in (0.5, 1.0, 1.5):
+            if not len(time) or requested < time[0] or requested > time[-1]:
+                sampled_distribution[f"requested_{requested:.3f}s"] = {"status": "outside_saved_time_domain"}
+                continue
             index = int(np.argmin(np.abs(time - requested)))
             key = f"{float(time[index]):.6f}"
             if key in distributions:
@@ -651,7 +657,8 @@ def audit_hdf5(record: dict[str, Any], h5_path: Path, attempt: Path | None) -> d
             "max_obstacle_penetration_depth_m": max((item.get("obstacle_penetration_max_depth_m", 0.0) for item in penetration_frames), default=0.0),
             "max_outside_closed_container_mass_kg": max((item.get("outside_closed_container_mass_kg", 0.0) for item in penetration_frames), default=0.0),
             "max_obstacle_penetration_mass_kg": max((item.get("obstacle_penetration_mass_kg", 0.0) for item in penetration_frames), default=0.0),
-            "frames_with_runtime_domain_outside": len(runtime_domain_frames),
+            "runtime_domain_status": "checked" if runtime_checked else "not_checked",
+            "frames_with_runtime_domain_outside": len(runtime_domain_frames) if runtime_checked else None,
             "first_runtime_domain_outside": runtime_domain_frames[0] if runtime_domain_frames else None,
             "frames_with_swept_crossing": len(swept_crossing_frames),
             "first_swept_crossing": swept_crossing_frames[0] if swept_crossing_frames else None,

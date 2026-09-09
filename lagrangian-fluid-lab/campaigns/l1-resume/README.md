@@ -1,5 +1,10 @@
 # L1-R continuation
 
+Continuation correction (2026-09-10): the historical Q2 description below
+means an official **boundary-configuration** derivative, not the complete
+official numerical strategy. Current evidence and reviewer handoff are in
+`continuation/`; historical case IDs and failed results are retained.
+
 This directory is an isolated continuation of the L1 evidence at commit
 `404c565c9b43e5470f1830e1e9b81843465c2c38`. The retained
 `campaigns/l1-qualification/` tree is read-only evidence for this round; no
