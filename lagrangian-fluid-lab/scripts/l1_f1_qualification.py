@@ -362,9 +362,11 @@ def prepare_records(records: Sequence[dict[str, Any]], *, label: str) -> list[di
     prepared = [prepare_one(record) for record in records]
     report = load_report()
     report["prepared_cases"] = merge_by_id(report.get("prepared_cases", []), prepared)
-    report["preparation"] = merge_by_id(report.get("preparation", []), [
-        {"label": label, "prepared_at_utc": utc_now(), "case_ids": [item["case_id"] for item in prepared]}
-    ])
+    report.setdefault("preparation", []).append({
+        "label": label,
+        "prepared_at_utc": utc_now(),
+        "case_ids": [item["case_id"] for item in prepared],
+    })
     report["execution_status"] = "prepared_only"
     report["evidence_status"] = "inputs_prepared"
     report["resource_budget"]["gencase_cpu_seconds"] = float(report["resource_budget"].get("gencase_cpu_seconds", 0.0)) + sum(

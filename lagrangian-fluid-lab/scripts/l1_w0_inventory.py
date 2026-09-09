@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+import xml.etree.ElementTree as ET
 
 import h5py
 
@@ -76,8 +77,84 @@ def find_raw_frames(case_id: str) -> list[str]:
     return sorted(set(result))
 
 
+def existing_audit_index() -> dict[str, dict]:
+    """Index committed audit rows without treating a report as a solver run."""
+    index = {}
+    roots = [
+        CAMPAIGN.parent / "v0.1-candidate" / "r6-n2-n2-campaign.json",
+        CAMPAIGN.parent / "v0.1-candidate" / "r6-n3-endpoint-closure.json",
+        CAMPAIGN.parent / "v0.1-candidate" / "r6-n3-bridge-h10.json",
+        CAMPAIGN.parent / "v0.1-candidate" / "N4-COMPARABLE-MATRIX.json",
+    ]
+    for path in roots:
+        if not path.is_file():
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        rows = payload.get("audits", [])
+        if isinstance(rows, list):
+            for row in rows:
+                case_id = row.get("case_id")
+                if case_id and row.get("frames") is not None:
+                    index[str(case_id)] = {
+                        "report": str(path.relative_to(LAB)),
+                        "hard_audited_frame_count": row.get("frames"),
+                        "registered_observation_count": row.get("fixed_time_grid_count"),
+                        "status": row.get("r6_full_time_audit_status", row.get("audit_status")),
+                    }
+    return index
+
+
+def source_geometry_summary() -> dict:
+    tree = ET.parse(LAB / "cases" / "F1" / "F1_dam_break_plain" / "F1_dam_break_plain_Def.xml")
+    root = tree.getroot()
+    definition = root.find(".//geometry/definition")
+    fluid = next(
+        node for node in root.findall(".//geometry/commands/mainlist/drawbox")
+        if (node.findtext("./boxfill") or "").strip() == "solid"
+    )
+    wall = next(
+        node for node in root.findall(".//geometry/commands/mainlist/drawbox")
+        if "bottom" in (node.findtext("./boxfill") or "")
+    )
+    parameters = {
+        node.get("key"): node.get("value")
+        for node in root.findall(".//execution/parameters/parameter")
+    }
+    constants = {
+        node.tag: dict(node.attrib)
+        for node in root.findall(".//constantsdef/*")
+    }
+    return {
+        "source_definition": "cases/F1/F1_dam_break_plain/F1_dam_break_plain_Def.xml",
+        "source_definition_sha256": sha256(LAB / "cases" / "F1" / "F1_dam_break_plain" / "F1_dam_break_plain_Def.xml"),
+        "definition_attributes": dict(definition.attrib) if definition is not None else {},
+        "fluid_drawbox": {
+            "point": dict(fluid.find("./point").attrib),
+            "size": dict(fluid.find("./size").attrib),
+            "fill": fluid.findtext("./boxfill"),
+        },
+        "wall_drawbox": {
+            "point": dict(wall.find("./point").attrib),
+            "size": dict(wall.find("./size").attrib),
+            "fill": wall.findtext("./boxfill"),
+        },
+        "constants_definition": constants,
+        "execution_parameters": parameters,
+        "l1_interpretation": {
+            "fluid_source_bounds_m": "x=0.04..0.38, y=0.04..0.36, z=0.04..height+0.04",
+            "closed_wall_faces": ["bottom", "left", "right", "front", "back"],
+            "top_policy": "geometric open face; not an absorbing outlet without registered solver evidence",
+            "shifting": "disabled in L1 candidate definitions",
+        },
+    }
+
+
 def f1_reference_rows() -> list[dict]:
     rows = []
+    audit_index = existing_audit_index()
     data_root = LAB / "campaigns" / "v0.1-candidate" / "data"
     for path in sorted(data_root.glob("**/*.h5")):
         if not (path.name.startswith("R6_") or path.name.startswith("N4_")):
@@ -85,14 +162,16 @@ def f1_reference_rows() -> list[dict]:
         summary = h5_summary(path)
         case_id = path.stem
         raw = find_raw_frames(case_id)
+        audit = audit_index.get(case_id, {})
         rows.append({
             "case_id": case_id,
             "normalized": summary,
             "raw_saved_frame_count": len(raw),
             "raw_evidence_paths": raw[:3],
-            "hard_audited_frame_count": None,
-            "registered_observation_count": 21 if summary["normalized_frames"] >= 1501 else None,
-            "audit_coverage_status": "inventory_only_pending_l1_report",
+            "hard_audited_frame_count": audit.get("hard_audited_frame_count"),
+            "registered_observation_count": audit.get("registered_observation_count"),
+            "audit_coverage_status": audit.get("status", "not_found_in_committed_audit"),
+            "audit_source": audit.get("report"),
         })
     return rows
 
@@ -146,6 +225,7 @@ def main() -> None:
             }
             for name in ("DualSPHysics5.4_linux64", "GenCase_linux64", "PartVTK_linux64")
         },
+        "source_geometry_and_numerics": source_geometry_summary(),
         "historical_n4": {
             "immutable": True,
             "solver_attempts_reusable": False,
