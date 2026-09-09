@@ -82,6 +82,7 @@ GPU_IDS = (4, 5, 6, 7)
 PROTECTED_GPU_IDS = (0, 1, 2, 3)
 DEFAULT_TIMEOUT_S = 1800
 COHOST_MIN_FREE_MIB = 8192
+COHOST_ABORT_FREE_MIB = 6144
 MAX_COHOST_JOBS_PER_GPU = 1
 REGISTERED_TIMES_S = [
     0.0, 0.075, 0.15, 0.225, 0.3, 0.375, 0.45, 0.525, 0.6,
@@ -209,6 +210,23 @@ def require_headroom_allowed_gpu(index: int, allowed: Sequence[str]) -> dict[str
     }
 
 
+def cohost_memory_guard(index: int) -> dict[str, Any]:
+    """Fail closed if an external job consumes the co-run safety margin."""
+    rows = cohost_gpu_snapshot()
+    record = next((row for row in rows if row["index"] == index), None)
+    if record is None:
+        return {"ok": False, "gpu_index": index, "error": "gpu_disappeared"}
+    return {
+        "ok": record["memory_free_mib"] >= COHOST_ABORT_FREE_MIB,
+        "gpu_index": index,
+        "memory_free_mib": record["memory_free_mib"],
+        "memory_used_mib": record["memory_used_mib"],
+        "memory_total_mib": record["memory_total_mib"],
+        "utilization_percent": record["utilization_percent"],
+        "abort_below_mib": COHOST_ABORT_FREE_MIB,
+    }
+
+
 def choose_headroom_gpu(record: dict[str, Any], snapshot: dict[str, Any], reserved: set[int]) -> int:
     allowed = set(GPU_IDS)
     allowlisted_uuids = set(allowed_uuids())
@@ -330,6 +348,7 @@ def load_report() -> dict[str, Any]:
             payload.setdefault("gpu_launch_policy", {
                 "mode": "cohost_headroom",
                 "minimum_free_mib": COHOST_MIN_FREE_MIB,
+                "abort_below_free_mib": COHOST_ABORT_FREE_MIB,
                 "max_l1_jobs_per_gpu": MAX_COHOST_JOBS_PER_GPU,
                 "external_jobs_may_continue": True,
                 "protected_gpu_indices": list(PROTECTED_GPU_IDS),
@@ -354,6 +373,7 @@ def load_report() -> dict[str, Any]:
         "gpu_launch_policy": {
             "mode": "cohost_headroom",
             "minimum_free_mib": COHOST_MIN_FREE_MIB,
+            "abort_below_free_mib": COHOST_ABORT_FREE_MIB,
             "max_l1_jobs_per_gpu": MAX_COHOST_JOBS_PER_GPU,
             "external_jobs_may_continue": True,
             "protected_gpu_indices": list(PROTECTED_GPU_IDS),
@@ -516,6 +536,8 @@ def run_one(record: dict[str, Any], *, runtime_gpu: int | None = None,
         RUN_ROOT, cwd=prefix.parent, env=environment(),
         evidence_glob="data/Part_*.bi4", required_text="Finished execution (code=0)",
         timeout_seconds=DEFAULT_TIMEOUT_S,
+        resource_guard=lambda: cohost_memory_guard(gpu),
+        resource_poll_seconds=1.0,
     )
     payload = {
         **result,
