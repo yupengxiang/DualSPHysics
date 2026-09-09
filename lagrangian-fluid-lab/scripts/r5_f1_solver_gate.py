@@ -40,6 +40,7 @@ try:
     )
     from scripts.trajectory_io import convert_streaming
     from scripts.w02_semantics import partvtk_csv
+    from scripts.finite_wall_audit import segment_crossing_events, wall_penetration
 except ModuleNotFoundError:
     from campaign_runner import execute_attempt, require_idle_allowed_gpu, query_gpus
     from protocol_metrics import mass_fraction_tv
@@ -51,6 +52,7 @@ except ModuleNotFoundError:
     )
     from trajectory_io import convert_streaming
     from w02_semantics import partvtk_csv
+    from finite_wall_audit import segment_crossing_events, wall_penetration
 
 
 LAB = Path(__file__).resolve().parents[1]
@@ -63,7 +65,7 @@ CSV_ROOT = CAMPAIGN / "artifacts" / "r5-f1-solver-gate" / "csv"
 REPORT = CAMPAIGN / "r5-f1-solver-gate.json"
 GPU_IDS = (4, 5, 6, 7)
 SMOKE_CASE_ID = "R4_F1_plain_dam_break_medium"
-SCHEMA_VERSION = "r5-f1-solver-gate-v1"
+SCHEMA_VERSION = "r5-f1-solver-gate-v2-finite-wall"
 
 PROTOCOL = {
     "time_max_s": float(PREFLIGHT_PROTOCOL["time_max_s"]),
@@ -84,22 +86,28 @@ PROTOCOL = {
 # only for a penetration diagnostic; they are not an external validation.
 WALL_SPECS: dict[str, dict[str, Any]] = {
     "plain_dam_break": {
-        "container_interior": {"xmin": 0.0, "xmax": 1.2, "ymin": 0.0, "ymax": 0.4, "zmin": 0.0},
+        "container_interior": {"xmin": 0.0, "xmax": 1.2, "ymin": 0.0, "ymax": 0.4, "zmin": 0.0, "zmax": 0.6},
         "obstacles": [],
+        "closed_faces": ["bottom", "left", "right", "front", "back"],
         "open_faces": ["top"],
+        "runtime_domain": None,
     },
     "center_obstacle": {
-        "container_interior": {"xmin": 0.0, "xmax": 1.2, "ymin": 0.0, "ymax": 0.4, "zmin": 0.0},
+        "container_interior": {"xmin": 0.0, "xmax": 1.2, "ymin": 0.0, "ymax": 0.4, "zmin": 0.0, "zmax": 0.6},
         "obstacles": [{"id": "center_obstacle", "xmin": 0.68, "xmax": 0.80, "ymin": 0.15, "ymax": 0.25, "zmin": 0.0, "zmax": 0.34}],
+        "closed_faces": ["bottom", "left", "right", "front", "back"],
         "open_faces": ["top"],
+        "runtime_domain": None,
     },
     "twin_obstacle_split_remerge": {
-        "container_interior": {"xmin": 0.0, "xmax": 1.2, "ymin": 0.0, "ymax": 0.4, "zmin": 0.0},
+        "container_interior": {"xmin": 0.0, "xmax": 1.2, "ymin": 0.0, "ymax": 0.4, "zmin": 0.0, "zmax": 0.6},
         "obstacles": [
             {"id": "twin_obstacle_lower", "xmin": 0.62, "xmax": 0.72, "ymin": 0.06, "ymax": 0.16, "zmin": 0.0, "zmax": 0.30},
             {"id": "twin_obstacle_upper", "xmin": 0.78, "xmax": 0.88, "ymin": 0.24, "ymax": 0.34, "zmin": 0.0, "zmax": 0.30},
         ],
+        "closed_faces": ["bottom", "left", "right", "front", "back"],
         "open_faces": ["top"],
+        "runtime_domain": None,
     },
 }
 
@@ -421,33 +429,18 @@ def _box_penetration(points: np.ndarray, box: dict[str, float]) -> tuple[np.ndar
 
 
 def _wall_penetration(points: np.ndarray, mass: np.ndarray, spec: dict[str, Any], tolerance: float) -> dict[str, Any]:
-    bounds = spec["container_interior"]
-    outside = (
-        (points[:, 0] < bounds["xmin"] - tolerance) | (points[:, 0] > bounds["xmax"] + tolerance) |
-        (points[:, 1] < bounds["ymin"] - tolerance) | (points[:, 1] > bounds["ymax"] + tolerance) |
-        (points[:, 2] < bounds["zmin"] - tolerance)
-    )
-    obstacle_counts = {}
-    obstacle_mass = {}
-    max_depth = 0.0
-    inside_any = np.zeros(len(points), dtype=bool)
-    for obstacle in spec["obstacles"]:
-        inside, penetration = _box_penetration(points, obstacle)
-        inside_any |= inside
-        obstacle_counts[obstacle["id"]] = int(inside.sum())
-        obstacle_mass[obstacle["id"]] = float(mass[inside].sum(dtype=np.float64))
-        if len(penetration):
-            max_depth = max(max_depth, float(penetration.max(initial=0.0)))
-    return {
-        "outside_closed_container_count": int(outside.sum()),
-        "outside_closed_container_mass_kg": float(mass[outside].sum(dtype=np.float64)),
-        "obstacle_penetration_count": int(inside_any.sum()),
-        "obstacle_penetration_mass_kg": float(mass[inside_any].sum(dtype=np.float64)),
-        "obstacle_penetration_max_depth_m": max_depth,
-        "obstacle_counts_by_id": obstacle_counts,
-        "obstacle_mass_by_id_kg": obstacle_mass,
-        "open_faces": list(spec["open_faces"]),
-    }
+    """Compatibility wrapper for the finite physical-wall implementation."""
+    return wall_penetration(points, mass, spec, tolerance)
+
+
+def _wall_segment_crossings(
+    p0: np.ndarray,
+    p1: np.ndarray,
+    spec: dict[str, Any],
+    tolerance: float,
+) -> list[dict[str, Any]]:
+    """Return saved-frame chord crossings using the production audit helper."""
+    return segment_crossing_events(p0, p1, spec, tolerance)
 
 
 def _distribution(points: np.ndarray, mass: np.ndarray, background_id: str, total_initial_mass: float) -> dict[str, float]:
@@ -508,8 +501,13 @@ def audit_hdf5(record: dict[str, Any], h5_path: Path, attempt: Path | None) -> d
         mass_series: list[float] = []
         distributions: dict[str, dict[str, float]] = {}
         penetration_frames = []
+        runtime_domain_frames = []
+        swept_crossing_frames = []
         center_series = []
         max_speed = 0.0
+        previous_finite: np.ndarray | None = None
+        previous_positions: np.ndarray | None = None
+        previous_time: float | None = None
 
         for frame_index, time_value in enumerate(time):
             current_valid = np.asarray(h5["valid"][frame_index], dtype=bool)
@@ -522,6 +520,8 @@ def audit_hdf5(record: dict[str, Any], h5_path: Path, attempt: Path | None) -> d
             finite = np.isfinite(positions[current_rows]).all(axis=1)
             finite &= np.isfinite(velocities[current_rows]).all(axis=1)
             finite &= np.isfinite(density[current_rows]) & np.isfinite(masses[current_rows]) & np.isfinite(pressure[current_rows])
+            finite_by_id = np.zeros(len(ids), dtype=bool)
+            finite_by_id[current_rows[finite]] = True
             bad_count = int((~finite).sum())
             if bad_count:
                 finite_bad_rows += bad_count
@@ -545,8 +545,72 @@ def audit_hdf5(record: dict[str, Any], h5_path: Path, attempt: Path | None) -> d
                 penetration = _wall_penetration(positions[current_rows], masses[current_rows], record["wall_spec"], tolerance)
                 if penetration["outside_closed_container_count"] or penetration["obstacle_penetration_count"]:
                     penetration_frames.append({"frame": frame_index, "time_s": float(time_value), **penetration})
+                if penetration.get("runtime_domain_outside_count", 0):
+                    runtime_domain_frames.append({"frame": frame_index, "time_s": float(time_value), **penetration})
             else:
                 mass_series.append(0.0)
+
+            # Endpoint checks cannot locate the first outward crossing inside
+            # an output interval.  Compare only adjacent saved frames for
+            # identities that are valid and finite at both endpoints.  The
+            # event time is a linear-chord locator within the saved-frame
+            # interval; it is intentionally not advertised as the exact
+            # continuous solver trajectory.
+            if previous_finite is not None and previous_positions is not None and previous_time is not None:
+                continuous = previous_finite & finite_by_id
+                continuous_indices = np.flatnonzero(continuous)
+                if continuous_indices.size:
+                    tolerance = 0.51 * record["dp_m"]
+                    events = _wall_segment_crossings(
+                        previous_positions[continuous_indices],
+                        positions[continuous_indices],
+                        record["wall_spec"],
+                        tolerance,
+                    )
+                    if events:
+                        face_counts: dict[str, int] = {}
+                        obstacle_counts: dict[str, int] = {}
+                        event_mass_kg = 0.0
+                        first_event: dict[str, Any] | None = None
+                        event_particles: set[int] = set()
+                        for event in events:
+                            local_index = int(event["point_index"])
+                            global_index = int(continuous_indices[local_index])
+                            event_particle_id = int(ids[global_index])
+                            event_copy = dict(event)
+                            event_copy.update({
+                                "particle_id": event_particle_id,
+                                "particle_zone": int(zones[global_index]),
+                                "time_interval_s": [float(previous_time), float(time_value)],
+                                "event_time_s": float(previous_time + event["fraction"] * (float(time_value) - previous_time)),
+                                "time_semantics": "saved_frame_interval_linear_chord_locator",
+                            })
+                            if first_event is None:
+                                first_event = event_copy
+                            event_particles.add(event_particle_id)
+                            event_mass_kg += float(masses[global_index])
+                            if event["kind"] == "closed_face":
+                                face = str(event["face"])
+                                face_counts[face] = face_counts.get(face, 0) + 1
+                            else:
+                                obstacle_id = str(event["obstacle_id"])
+                                obstacle_counts[obstacle_id] = obstacle_counts.get(obstacle_id, 0) + 1
+                        swept_crossing_frames.append({
+                            "start_frame": frame_index - 1,
+                            "end_frame": frame_index,
+                            "time_interval_s": [float(previous_time), float(time_value)],
+                            "crossing_count": len(events),
+                            "crossing_particle_count": len(event_particles),
+                            "crossing_mass_kg": event_mass_kg,
+                            "closed_face_counts": face_counts,
+                            "obstacle_counts_by_id": obstacle_counts,
+                            "first_crossing": first_event,
+                            "time_semantics": "saved_frame_interval_linear_chord_locator",
+                        })
+
+            previous_finite = finite_by_id
+            previous_positions = positions.copy()
+            previous_time = float(time_value)
 
             reappeared |= current_valid & missing_since_seen
             introduced_after_initial |= current_valid & ~initial_valid
@@ -560,6 +624,10 @@ def audit_hdf5(record: dict[str, Any], h5_path: Path, attempt: Path | None) -> d
             unknowns.append("excluded_particle_evidence_unknown")
         if finite_bad_rows:
             issues.append("nonfinite_values_for_valid_rows")
+        if penetration_frames:
+            issues.append("finite_wall_or_obstacle_penetration")
+        if swept_crossing_frames:
+            issues.append("swept_finite_wall_or_obstacle_crossing")
         if not math.isfinite(density_min) or not math.isfinite(density_max):
             unknowns.append("density_range_unknown")
         elif density_min < 650.0 or density_max > 1350.0:
@@ -583,6 +651,23 @@ def audit_hdf5(record: dict[str, Any], h5_path: Path, attempt: Path | None) -> d
             "max_obstacle_penetration_depth_m": max((item.get("obstacle_penetration_max_depth_m", 0.0) for item in penetration_frames), default=0.0),
             "max_outside_closed_container_mass_kg": max((item.get("outside_closed_container_mass_kg", 0.0) for item in penetration_frames), default=0.0),
             "max_obstacle_penetration_mass_kg": max((item.get("obstacle_penetration_mass_kg", 0.0) for item in penetration_frames), default=0.0),
+            "frames_with_runtime_domain_outside": len(runtime_domain_frames),
+            "first_runtime_domain_outside": runtime_domain_frames[0] if runtime_domain_frames else None,
+            "frames_with_swept_crossing": len(swept_crossing_frames),
+            "first_swept_crossing": swept_crossing_frames[0] if swept_crossing_frames else None,
+            "swept_crossing_count": int(sum(item["crossing_count"] for item in swept_crossing_frames)),
+            "swept_crossing_particle_count": int(sum(item["crossing_particle_count"] for item in swept_crossing_frames)),
+            "swept_crossing_mass_kg": float(sum(item["crossing_mass_kg"] for item in swept_crossing_frames)),
+            "swept_crossings_by_face": {
+                face: int(sum(item["closed_face_counts"].get(face, 0) for item in swept_crossing_frames))
+                for face in record["wall_spec"].get("closed_faces", ())
+            },
+            "swept_crossings_by_obstacle": {
+                obstacle_id: int(sum(item["obstacle_counts_by_id"].get(obstacle_id, 0) for item in swept_crossing_frames))
+                for obstacle_id in (str(item["id"]) for item in record["wall_spec"].get("obstacles", ()))
+            },
+            "event_time_semantics": "saved_frame_interval_linear_chord_locator",
+            "geometry_semantics": "finite_closed_faces_and_finite_obstacles; runtime_domain_separate",
         }
         final_mass_fraction = final_mass / max(initial_fluid_mass, 1e-30)
         quality_status = "pass_diagnostic" if not issues and not unknowns else ("quality_failed" if issues else "unknown")

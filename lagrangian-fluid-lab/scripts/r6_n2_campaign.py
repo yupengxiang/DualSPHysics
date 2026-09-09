@@ -586,6 +586,10 @@ def _classify_missing_identities(
         "solver_movement_exclusion": 0,
         "solver_exclusion_unknown": 0,
         "conversion_or_export_missing": 0,
+        "finite_closed_wall_candidate": 0,
+        "runtime_domain_candidate": 0,
+        # Kept at zero as a compatibility key for earlier compact reports.
+        # New audits never merge physical-wall and runtime-domain causes.
         "closed_wall_or_domain_candidate": 0,
         "inside_domain_unknown": 0,
         "no_last_valid_position": 0,
@@ -594,6 +598,11 @@ def _classify_missing_identities(
     registered_absorber = set(record.get("registered_absorbing_exit_faces", ()))
     examples: list[dict[str, Any]] = []
     tolerance = 0.51 * float(record["dp_m"])
+    wall_spec = record.get("wall_spec") or r5_gate.WALL_SPECS["plain_dam_break"]
+    if record.get("runtime_domain") is not None:
+        wall_spec = dict(wall_spec)
+        wall_spec["runtime_domain"] = record["runtime_domain"]
+    container = wall_spec["container_interior"]
     missing_indices = np.flatnonzero(missing)
     # ``valid`` is stored one complete frame per HDF5 chunk.  Reading a
     # column for every missing particle turns this into O(N_particles) full
@@ -614,18 +623,38 @@ def _classify_missing_identities(
         point = positions[last, particle_index]
         velocity = velocities[last, particle_index]
         next_dt = float(time[last + 1] - time[last]) if last + 1 < len(time) else 0.0
+        predicted = point + velocity * next_dt
         predicted_z = float(point[2] + velocity[2] * next_dt)
+        top_crossing_position: np.ndarray | None = None
+        if point[2] >= DOMAIN_TOP_M - tolerance:
+            top_crossing_position = point
+        elif next_dt > 0.0 and velocity[2] > 0.0 and predicted_z >= DOMAIN_TOP_M - tolerance:
+            fraction = (DOMAIN_TOP_M - float(point[2])) / (predicted_z - float(point[2]))
+            if np.isfinite(fraction) and 0.0 <= fraction <= 1.0:
+                top_crossing_position = point + fraction * (predicted - point)
         open_top = bool(
-            point[2] >= DOMAIN_TOP_M - tolerance
-            or (velocity[2] > 0.0 and predicted_z >= DOMAIN_TOP_M - tolerance)
+            top_crossing_position is not None
+            and container["xmin"] - tolerance <= top_crossing_position[0] <= container["xmax"] + tolerance
+            and container["ymin"] - tolerance <= top_crossing_position[1] <= container["ymax"] + tolerance
         )
-        closed_domain = bool(
-            point[0] < -tolerance
-            or point[0] > 1.2 + tolerance
-            or point[1] < -tolerance
-            or point[1] > 0.4 + tolerance
-            or point[2] < -tolerance
-        )
+        finite_wall_candidate = False
+        runtime_domain_candidate = False
+        finite_geometry_event: dict[str, Any] | None = None
+        predicted_is_finite = np.isfinite(point).all() and np.isfinite(predicted).all()
+        if predicted_is_finite:
+            endpoint = r5_gate._wall_penetration(
+                predicted.reshape(1, 3), np.asarray([1.0], dtype=np.float64), wall_spec, tolerance
+            )
+            finite_events = r5_gate._wall_segment_crossings(
+                point.reshape(1, 3), predicted.reshape(1, 3), wall_spec, tolerance
+            ) if next_dt > 0.0 else []
+            finite_wall_candidate = bool(
+                endpoint["outside_closed_container_count"]
+                or endpoint["obstacle_penetration_count"]
+                or finite_events
+            )
+            finite_geometry_event = finite_events[0] if finite_events else None
+            runtime_domain_candidate = bool(endpoint.get("runtime_domain_outside_count", 0))
         evidence = by_particle_id.get(str(int(particle_ids[particle_index])))
         if evidence is not None:
             reason = str(evidence.get("native_reason", "unknown"))
@@ -645,8 +674,10 @@ def _classify_missing_identities(
             # absorbing outlet.  Without a registered outlet and a native
             # per-identity event, this remains unresolved.
             category = "top_crossing_without_registered_absorber"
-        elif closed_domain:
-            category = "closed_wall_or_domain_candidate"
+        elif finite_wall_candidate:
+            category = "finite_closed_wall_candidate"
+        elif runtime_domain_candidate:
+            category = "runtime_domain_candidate"
         else:
             category = "conversion_or_export_missing" if (exclusion_evidence or {}).get("status") == "available" else "inside_domain_unknown"
         categories[category] += 1
@@ -658,6 +689,9 @@ def _classify_missing_identities(
                 "last_valid_position_m": point.tolist(),
                 "last_valid_velocity_m_s": velocity.tolist(),
                 "one_step_predicted_z_m": predicted_z,
+                "one_step_predicted_position_m": predicted.tolist(),
+                "finite_geometry_event": finite_geometry_event,
+                "runtime_domain_candidate": runtime_domain_candidate,
                 "solver_exclusion": evidence,
                 "category": category,
             })
@@ -675,6 +709,10 @@ def _classify_missing_identities(
         "solver_density_exclusion", "solver_position_exclusion", "solver_movement_exclusion",
     )) == missing_count:
         status = "solver_exclusions_only"
+    elif categories["finite_closed_wall_candidate"] == missing_count:
+        status = "classified_with_finite_closed_wall_candidates"
+    elif categories["runtime_domain_candidate"] == missing_count:
+        status = "classified_with_runtime_domain_candidates"
     else:
         status = "classified_with_closed_domain_candidates"
     return {
@@ -686,6 +724,8 @@ def _classify_missing_identities(
         "exclusion_evidence_status": (exclusion_evidence or {}).get("status", "unavailable"),
         "exclusion_evidence_reason_counts": (exclusion_evidence or {}).get("reason_counts", {}),
         "domain_top_m": DOMAIN_TOP_M,
+        "physical_wall_semantics": "finite_closed_faces_and_finite_obstacles",
+        "runtime_domain": wall_spec.get("runtime_domain"),
         "open_face_policy": "top_is_open; it is not an absorbing outlet without registered solver evidence",
     }
 
@@ -720,6 +760,8 @@ def full_time_audit(record: dict[str, Any], h5_path: Path, attempt: Path | None)
     penetration = base.get("penetration", {})
     if penetration.get("frames_with_penetration", 0):
         hard_failures.append("finite_wall_or_obstacle_penetration")
+    if penetration.get("frames_with_swept_crossing", 0):
+        hard_failures.append("swept_finite_wall_or_obstacle_crossing")
     if base.get("excluded_particles_from_solver_log") is None:
         hard_failures.append("excluded_particle_evidence_unknown")
     missing_unknown = "initial_identities_missing_at_final_requires_solver_loss_or_exit_classification"

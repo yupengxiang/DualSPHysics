@@ -152,6 +152,39 @@ def test_missing_identity_classifier_does_not_hide_inside_domain_loss(tmp_path):
     assert result["status"] == "unresolved_missing_identities"
 
 
+def test_missing_identity_classifier_separates_finite_wall_from_runtime_domain(tmp_path):
+    import copy
+    import h5py
+    import numpy as np
+    from scripts import r5_f1_solver_gate as gate
+
+    path = tmp_path / "identity.h5"
+    with h5py.File(path, "w") as h5:
+        h5["time"] = np.asarray([0.0, 0.1])
+        h5["particle_id"] = np.asarray([7, 8], dtype=np.int64)
+        h5["valid"] = np.asarray([[True, True], [False, False]])
+        h5["position"] = np.asarray([
+            [[1.19, 0.20, 0.20], [0.90, 0.20, 0.20]],
+            [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]],
+        ])
+        h5["velocity"] = np.asarray([
+            [[0.20, 0.0, 0.0], [1.10, 0.0, 0.0]],
+            [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]],
+        ])
+        spec = copy.deepcopy(gate.WALL_SPECS["plain_dam_break"])
+        spec["runtime_domain"] = {
+            "xmin": 0.0, "xmax": 1.0, "ymin": 0.0, "ymax": 0.4,
+            "zmin": 0.0, "zmax": 0.6,
+        }
+        result = campaign._classify_missing_identities(
+            h5, {"dp_m": 0.014, "wall_spec": spec}
+        )
+    assert result["categories"]["finite_closed_wall_candidate"] == 1
+    assert result["categories"]["runtime_domain_candidate"] == 1
+    assert result["categories"]["closed_wall_or_domain_candidate"] == 0
+    assert result["status"] == "classified_with_closed_domain_candidates"
+
+
 def test_plain_material_spec_is_a_single_wall_control():
     import json
 
