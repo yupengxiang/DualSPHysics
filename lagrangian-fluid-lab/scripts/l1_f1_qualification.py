@@ -22,7 +22,6 @@ definitions remain reviewable.
 from __future__ import annotations
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
@@ -41,8 +40,6 @@ try:
     from scripts.boundary_sidecars import read_binary_vtk_polydata, write_sidecar
     from scripts.campaign_runner import (
         execute_attempt,
-        query_gpus,
-        require_idle_allowed_gpu,
     )
     from scripts.trajectory_io import convert_streaming
     from scripts.w02_semantics import partvtk_csv
@@ -50,7 +47,7 @@ except ModuleNotFoundError:  # pragma: no cover - direct script execution
     import r5_f1_solver_gate as r5_gate
     import r6_n2_campaign as r6
     from boundary_sidecars import read_binary_vtk_polydata, write_sidecar
-    from campaign_runner import execute_attempt, query_gpus, require_idle_allowed_gpu
+    from campaign_runner import execute_attempt
     from trajectory_io import convert_streaming
     from w02_semantics import partvtk_csv
 
@@ -84,6 +81,8 @@ TIME_CONDITIONAL_CFL = 0.025
 GPU_IDS = (4, 5, 6, 7)
 PROTECTED_GPU_IDS = (0, 1, 2, 3)
 DEFAULT_TIMEOUT_S = 1800
+COHOST_MIN_FREE_MIB = 8192
+MAX_COHOST_JOBS_PER_GPU = 1
 REGISTERED_TIMES_S = [
     0.0, 0.075, 0.15, 0.225, 0.3, 0.375, 0.45, 0.525, 0.6,
     0.675, 0.75, 0.825, 0.9, 0.975, 1.05, 1.125, 1.2, 1.275,
@@ -145,12 +144,87 @@ def environment(*, cpu: bool = False) -> dict[str, str]:
     return value
 
 
+def cohost_gpu_snapshot() -> list[dict[str, Any]]:
+    """Return memory-aware GPU state for the L1 co-run policy.
+
+    The historical runner's idle guard is intentionally not changed.  L1 has
+    an explicit owner amendment permitting co-running with the long-lived
+    external job, so this namespace uses a stricter free-memory guard instead
+    of requiring zero utilization.
+    """
+    output = subprocess.run(
+        [
+            "nvidia-smi",
+            "--query-gpu=index,uuid,memory.used,memory.total,memory.free,utilization.gpu",
+            "--format=csv,noheader,nounits",
+        ],
+        cwd=LAB,
+        text=True,
+        check=True,
+        stdout=subprocess.PIPE,
+    ).stdout
+    rows = []
+    for line in output.splitlines():
+        index, gpu_uuid, used, total, free, utilization = [value.strip() for value in line.split(",")]
+        rows.append({
+            "index": int(index),
+            "uuid": gpu_uuid,
+            "memory_used_mib": int(used),
+            "memory_total_mib": int(total),
+            "memory_free_mib": int(free),
+            "utilization_percent": int(utilization),
+            "cohost_safe_at_snapshot": int(free) >= COHOST_MIN_FREE_MIB,
+        })
+    return rows
+
+
 def allowed_uuids() -> list[str]:
     inventory = CAMPAIGN / "L1-W00-INVENTORY.json"
     if not inventory.is_file():
         raise RuntimeError("L1-W00-INVENTORY.json is missing; run W0 inventory first")
     payload = json.loads(inventory.read_text(encoding="utf-8"))
     return list(payload["execution_policy"]["allowed_gpu_uuids"])
+
+
+def require_headroom_allowed_gpu(index: int, allowed: Sequence[str]) -> dict[str, Any]:
+    rows = cohost_gpu_snapshot()
+    record = next((row for row in rows if row["index"] == index), None)
+    if record is None:
+        raise RuntimeError(f"physical GPU {index} does not exist")
+    if record["uuid"] not in set(allowed):
+        raise RuntimeError(f"GPU {index} UUID {record['uuid']} is not in the L1 allowlist")
+    if record["memory_free_mib"] < COHOST_MIN_FREE_MIB:
+        raise RuntimeError(
+            f"GPU {index} lacks L1 co-run headroom: {record}; "
+            f"requires at least {COHOST_MIN_FREE_MIB} MiB free"
+        )
+    return {
+        **record,
+        "launch_policy": "cohost_headroom",
+        "minimum_free_mib": COHOST_MIN_FREE_MIB,
+        "max_l1_jobs_per_gpu": MAX_COHOST_JOBS_PER_GPU,
+    }
+
+
+def choose_headroom_gpu(record: dict[str, Any], snapshot: dict[str, Any], reserved: set[int]) -> int:
+    allowed = set(GPU_IDS)
+    allowlisted_uuids = set(allowed_uuids())
+    candidates = [
+        row for row in snapshot["gpu_snapshot"]
+        if row["index"] in allowed
+        and row["uuid"] in allowlisted_uuids
+        and row["index"] not in reserved
+        and int(row.get("memory_free_mib", 0)) >= COHOST_MIN_FREE_MIB
+    ]
+    if not candidates:
+        raise RuntimeError(
+            f"no allowed GPU has {COHOST_MIN_FREE_MIB} MiB free for L1 co-run; "
+            f"snapshot={snapshot['gpu_snapshot']}"
+        )
+    # Prefer the largest live margin.  The record's GPU remains the declared
+    # preference and is retained in the manifest, but maximizing free memory
+    # is the safer choice while the external training job is active.
+    return max(candidates, key=lambda row: int(row["memory_free_mib"]))["index"]
 
 
 def _source_z_bounds(height: float) -> tuple[float, float]:
@@ -249,7 +323,15 @@ def record_hash(record: dict[str, Any]) -> str:
 def load_report() -> dict[str, Any]:
     if REPORT.is_file():
         try:
-            return json.loads(REPORT.read_text(encoding="utf-8"))
+            payload = json.loads(REPORT.read_text(encoding="utf-8"))
+            payload.setdefault("gpu_launch_policy", {
+                "mode": "cohost_headroom",
+                "minimum_free_mib": COHOST_MIN_FREE_MIB,
+                "max_l1_jobs_per_gpu": MAX_COHOST_JOBS_PER_GPU,
+                "external_jobs_may_continue": True,
+                "protected_gpu_indices": list(PROTECTED_GPU_IDS),
+            })
+            return payload
         except json.JSONDecodeError:
             pass
     return {
@@ -266,6 +348,13 @@ def load_report() -> dict[str, Any]:
         "development_authorized": False,
         "protected_gpu_indices": list(PROTECTED_GPU_IDS),
         "allowed_gpu_indices": list(GPU_IDS),
+        "gpu_launch_policy": {
+            "mode": "cohost_headroom",
+            "minimum_free_mib": COHOST_MIN_FREE_MIB,
+            "max_l1_jobs_per_gpu": MAX_COHOST_JOBS_PER_GPU,
+            "external_jobs_may_continue": True,
+            "protected_gpu_indices": list(PROTECTED_GPU_IDS),
+        },
         "resource_budget": {
             "gpu_hours_total": 64.0,
             "cpu_core_hours_total": 512.0,
@@ -407,15 +496,17 @@ def _attempt_rows() -> list[dict[str, Any]]:
     return rows
 
 
-def run_one(record: dict[str, Any], *, rerun: bool = False) -> dict[str, Any]:
+def run_one(record: dict[str, Any], *, runtime_gpu: int | None = None,
+            rerun: bool = False) -> dict[str, Any]:
     expected_hash = record.get("record_hash") or record_hash(record)
     prior = latest_payload(record)
     if prior and not rerun and prior.get("record_hash") == expected_hash:
         if prior.get("status") == "completed":
             return {**prior, "execution_status": "reused_completed"}
         return {**prior, "execution_status": "existing_failed_not_retried"}
-    gpu = int(record["gpu"])
-    gpu_record = require_idle_allowed_gpu(gpu, allowed_uuids())
+    declared_gpu = int(record["gpu"])
+    gpu = declared_gpu if runtime_gpu is None else int(runtime_gpu)
+    gpu_record = require_headroom_allowed_gpu(gpu, allowed_uuids())
     prefix = lab_path(record["generated_prefix"])
     result = execute_attempt(
         record["case_id"], [str(SOLVER), f"-gpu:{gpu}", str(prefix), "{output}"],
@@ -428,7 +519,9 @@ def run_one(record: dict[str, Any], *, rerun: bool = False) -> dict[str, Any]:
         "record_hash": expected_hash,
         "execution_status": "completed" if result.get("status") == "completed" else "solver_failed",
         "gpu_at_launch": gpu_record,
+        "gpu_index_declared": declared_gpu,
         "gpu_index_requested": gpu,
+        "gpu_launch_policy": "cohost_headroom",
         "protected_gpu_indices": list(PROTECTED_GPU_IDS),
         "input_generated_xml_sha256": sha256(prefix.with_suffix(".xml")),
         "input_generated_bi4_sha256": sha256(prefix.with_suffix(".bi4")),
@@ -446,7 +539,7 @@ def preflight(label: str, records: Sequence[dict[str, Any]]) -> dict[str, Any]:
         "captured_at_utc": utc_now(),
         "requested_gpu_indices": sorted({int(item["gpu"]) for item in records}),
         "protected_gpu_indices": list(PROTECTED_GPU_IDS),
-        "gpu_snapshot": query_gpus(),
+        "gpu_snapshot": cohost_gpu_snapshot(),
         "disk_usage": {
             "total_bytes": os.statvfs(LAB).f_frsize * os.statvfs(LAB).f_blocks,
             "free_bytes": os.statvfs(LAB).f_frsize * os.statvfs(LAB).f_bavail,
@@ -463,12 +556,24 @@ def run_records(records: Sequence[dict[str, Any]], *, label: str, rerun: bool = 
         raise ValueError(f"no records selected for {label}")
     if len(records) > len(GPU_IDS):
         raise ValueError("one batch may not exceed the four allowed GPUs")
-    snapshot = preflight(label, records)
     selected = {int(item["gpu"]) for item in records}
     if any(index not in GPU_IDS for index in selected):
         raise ValueError(f"records contain a protected or unsupported GPU: {sorted(selected)}")
-    with ThreadPoolExecutor(max_workers=min(4, len(records))) as pool:
-        results = list(pool.map(lambda item: run_one(item, rerun=rerun), records))
+    # Co-run permission is deliberately conservative: one L1 solver at a time
+    # and a fresh memory snapshot before every launch.  The declared GPU is a
+    # preference; a safe allow-listed GPU may be selected when the external
+    # workload has filled that preferred card.
+    pending = list(records)
+    results = []
+    preflight_snapshots = []
+    batch_index = 0
+    while pending:
+        batch_index += 1
+        snapshot = preflight(f"{label}-launch-{batch_index}", pending[:1])
+        preflight_snapshots.append(snapshot)
+        runtime_gpu = choose_headroom_gpu(pending[0], snapshot, set())
+        record = pending.pop(0)
+        results.append(run_one(record, runtime_gpu=runtime_gpu, rerun=rerun))
     report = load_report()
     report["solver_runs"] = merge_by_id(report.get("solver_runs", []), results)
     report["attempts"] = _attempt_rows()
@@ -482,7 +587,7 @@ def run_records(records: Sequence[dict[str, Any]], *, label: str, rerun: bool = 
     report["evidence_status"] = "solver_outputs_available" if all(
         item.get("status") == "completed" for item in results
     ) else "solver_failure_recorded"
-    report.setdefault("preflight", []).append(snapshot)
+    report.setdefault("preflight", []).extend(preflight_snapshots)
     atomic_json(REPORT, report)
     return results
 
