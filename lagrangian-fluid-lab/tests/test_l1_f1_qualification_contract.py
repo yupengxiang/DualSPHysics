@@ -70,3 +70,12 @@ def test_w0_inventory_records_no_new_solver_attempts():
     assert report["attachment_provenance"]["expected_sha256"] == (
         "2140048e019b2074668799aef145314af90eae242498450c069bbdb910aab5e3"
     )
+
+
+def test_allowlist_reads_w0_gpu_policy():
+    assert set(l1.allowed_uuids()) == {
+        "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+        "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+        "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+        "GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51",
+    }

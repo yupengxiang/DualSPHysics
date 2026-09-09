@@ -183,7 +183,10 @@ def allowed_uuids() -> list[str]:
     if not inventory.is_file():
         raise RuntimeError("L1-W00-INVENTORY.json is missing; run W0 inventory first")
     payload = json.loads(inventory.read_text(encoding="utf-8"))
-    return list(payload["execution_policy"]["allowed_gpu_uuids"])
+    policy = payload.get("execution_policy") or payload.get("gpu_policy")
+    if not policy or "allowed_gpu_uuids" not in policy:
+        raise RuntimeError("L1-W00-INVENTORY.json has no allowlisted GPU UUIDs")
+    return list(policy["allowed_gpu_uuids"])
 
 
 def require_headroom_allowed_gpu(index: int, allowed: Sequence[str]) -> dict[str, Any]:
