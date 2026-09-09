@@ -82,8 +82,11 @@ GPU_IDS = (4, 5, 6, 7)
 PROTECTED_GPU_IDS = (0, 1, 2, 3)
 DEFAULT_TIMEOUT_S = 1800
 CPU_THREADS = 8
-COHOST_MIN_FREE_MIB = 8192
-COHOST_ABORT_FREE_MIB = 6144
+# Keep only a small startup buffer while co-running with an external training
+# job.  During execution the guard protects the last 4 GiB of free VRAM; if
+# the external job reclaims memory, only this L1 solver is terminated.
+COHOST_MIN_FREE_MIB = 6144
+COHOST_ABORT_FREE_MIB = 4096
 MAX_COHOST_JOBS_PER_GPU = 1
 REGISTERED_TIMES_S = [
     0.0, 0.075, 0.15, 0.225, 0.3, 0.375, 0.45, 0.525, 0.6,
@@ -346,14 +349,15 @@ def load_report() -> dict[str, Any]:
     if REPORT.is_file():
         try:
             payload = json.loads(REPORT.read_text(encoding="utf-8"))
-            payload.setdefault("gpu_launch_policy", {
+            payload["gpu_launch_policy"] = {
+                **payload.get("gpu_launch_policy", {}),
                 "mode": "cohost_headroom",
                 "minimum_free_mib": COHOST_MIN_FREE_MIB,
                 "abort_below_free_mib": COHOST_ABORT_FREE_MIB,
                 "max_l1_jobs_per_gpu": MAX_COHOST_JOBS_PER_GPU,
                 "external_jobs_may_continue": True,
                 "protected_gpu_indices": list(PROTECTED_GPU_IDS),
-            })
+            }
             return payload
         except json.JSONDecodeError:
             pass
@@ -529,6 +533,8 @@ def run_one(record: dict[str, Any], *, runtime_gpu: int | None = None,
         if prior.get("status") == "completed":
             return {**prior, "execution_status": "reused_completed"}
         return {**prior, "execution_status": "existing_failed_not_retried"}
+    if prior and rerun and prior.get("record_hash") == expected_hash and prior.get("status") == "completed":
+        return {**prior, "execution_status": "reused_completed"}
     declared_gpu = int(record["gpu"])
     gpu = None if runtime_cpu else (declared_gpu if runtime_gpu is None else int(runtime_gpu))
     gpu_record = None if runtime_cpu else require_headroom_allowed_gpu(gpu, allowed_uuids())
@@ -630,11 +636,15 @@ def run_records(records: Sequence[dict[str, Any]], *, label: str, runtime_cpu: b
         for item in results if item.get("execution_mode") == "cpu"
     ) + float(report["resource_budget"].get("cpu_core_hours_used", 0.0))
     report["resource_budget"]["qualification_solver_attempts_used"] = len(report["attempts"])
+    # A later one-case batch must not hide a failed case from an earlier batch.
+    # Derive the campaign status from the merged solver inventory, not only
+    # from the most recently launched record.
+    all_solver_runs = report["solver_runs"]
     report["execution_status"] = "solver_completed" if all(
-        item.get("execution_status") in {"completed", "reused_completed"} for item in results
+        item.get("status") == "completed" for item in all_solver_runs
     ) else "solver_completed_with_findings"
     report["evidence_status"] = "solver_outputs_available" if all(
-        item.get("status") == "completed" for item in results
+        item.get("status") == "completed" for item in all_solver_runs
     ) else "solver_failure_recorded"
     report.setdefault("preflight", []).extend(preflight_snapshots)
     atomic_json(REPORT, report)
@@ -642,6 +652,13 @@ def run_records(records: Sequence[dict[str, Any]], *, label: str, runtime_cpu: b
 
 
 def normalize_one(record: dict[str, Any]) -> dict[str, Any]:
+    latest = latest_payload(record)
+    if latest is None or latest.get("status") != "completed":
+        return {
+            "case_id": record["case_id"],
+            "normalization_status": "blocked_solver_not_completed",
+            "solver_status": None if latest is None else latest.get("status"),
+        }
     attempt = latest_attempt(record)
     if attempt is None:
         return {"case_id": record["case_id"], "normalization_status": "blocked_missing_attempt"}
