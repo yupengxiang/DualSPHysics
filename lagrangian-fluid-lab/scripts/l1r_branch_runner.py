@@ -42,7 +42,7 @@ def run(record):
             raise RuntimeError("original activity expired")
         if (
             record["family"] == "F3"
-            and len(list(runs.glob("F3*/attempts/*/attempt.json"))) >= 6
+            and len(list(runs.glob("F3*/attempts/*/attempt.json"))) >= 12
         ):
             raise RuntimeError("F3 six-attempt cap")
         disk = shutil.disk_usage(LAB)
@@ -118,7 +118,5 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("kind", choices=["f1", "f3"])
     a = p.parse_args()
-    registry = OUT / (
-        "F1-WHOLE-TEMPLATE.json" if a.kind == "f1" else "F3-REGISTERED-MATRIX.json"
-    )
+    registry = OUT / ("F1-WHOLE-TEMPLATE.json" if a.kind == "f1" else "F3-INPUT-REPAIR-READY.json")
     run_registry(json.loads(registry.read_text())["records"])

@@ -62,8 +62,8 @@ C3/C4 各为 0.6 s；C4 调整半粒距格点相位，属于新初态表示，�
 
 ## 4. 累计资源和验证
 
-- 资格/诊断 attempt：30/56，余 26；六次 F3 初始化失败均已计入。GPU solver 累计约 2.1032/64 GPU·h。
-- 历史 CPU 计时不完整，因此保留已报告值并采用保守全活动时间上界预留，而非填 0；当前上界约 308.06/512 core·h，**不是实测 CPU 用量**。见 `HISTORICAL-CPU-RESERVE.json`。
+- 资格/诊断 attempt：36/56，余 20；六次 F3 初始化失败均已计入。GPU solver 累计约 2.5306/64 GPU·h。
+- 历史 CPU 计时不完整，因此保留已报告值并采用保守全活动时间上界预留，而非填 0；当前上界约 332.03/512 core·h，**不是实测 CPU 用量**。见 `HISTORICAL-CPU-RESERVE.json`。
 - 存储、磁盘余量见 `RESOURCE-PREFLIGHT.json`；原活动期限未重置，保守到期 2026-09-16 00:00 UTC。
 - GPU4–7/UUID allowlist、单 solver、启动 6144 MiB及预估余量、运行 4096 MiB guard 保持；新增 UUID 连续绑定。CPU 后处理有两槽协调。没有宣称共机零性能影响。
 - 最终测试结果见 `pytest-final.txt`；原生读取器检查、附件校验、真实模块探针与真实数据审计分别记录，不相互替代。
