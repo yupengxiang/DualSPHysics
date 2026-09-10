@@ -45,7 +45,7 @@ def observe(record, times):
 
 def main():
     gates = json.loads((OUT / "F3-GATES.json").read_text())
-    records = json.loads((OUT / "F3-REGISTERED-MATRIX.json").read_text())["records"]
+    records = json.loads((OUT / "F3-INPUT-REPAIR-READY.json").read_text())["records"]
     pairs = []
     for background in gates["backgrounds"]:
         group = [r for r in records if r["background_id"] == background]
