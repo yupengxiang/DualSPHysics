@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-09-10T02:07:26.992695+00:00",
+  "captured_at": "2026-09-10T15:36:24.901346+00:00",
   "start_evidence": "L1 W00 capture 2026-09-09T03:09:38.158441Z; adoption earlier on same date",
   "conservative_expiry_utc": "2026-09-16T00:00:00+00:00",
   "attempts": [
@@ -201,11 +201,12 @@
       "status": "failed",
       "started_at_utc": "2026-09-09T03:25:21.203112+00:00",
       "finished_at_utc": "2026-09-09T03:26:59.000000+00:00",
-      "elapsed_seconds": null,
+      "elapsed_seconds": 97.796888,
       "resource_guard_triggered": null,
       "path": "campaigns/l1-qualification/runs/L1_W1_TIME_h11_dp014_cfl005/attempts/20260909T032521.202848Z-f93dec46.failed/attempt.json",
       "sha256": "fac533db5b4db21f429d39bb85873af1f892c311efbd0957ca2513c9a7607b3e",
-      "backend": "gpu"
+      "backend": "gpu",
+      "duration_basis": "recorded_wall_clock_difference"
     },
     {
       "case_id": "L1_W1_TIME_h11_dp014_cfl005",
@@ -434,12 +435,77 @@
       "path": "campaigns/l1-resume/runs/q2-mdbc-bridge/L1R_Q2_MDBC_BRIDGE_h11_fine_dp0p01_cfl005_t0p6/attempts/20260909T131503.846535Z-bbb5577e.complete/attempt.json",
       "sha256": "524857c722150f17abee4c51b3f35e969762f127ba4b1404872445176b4411e0",
       "backend": "gpu"
+    },
+    {
+      "case_id": "direct-0075-out",
+      "attempt_id": "direct-0075-out",
+      "status": "completed",
+      "backend": "gpu",
+      "elapsed_seconds": 574.665894,
+      "resource_guard_triggered": null,
+      "path": "campaigns/l1-resume/artifacts/branches/F3_3D_CELL2_plain_dp0p0075_INPUTFIX/generated/out/Run.out",
+      "sha256": "8742ee1b0ef3bc1310f2f36bc1b43d0c6a3c6f35a4d957480de79dcda2d3c736",
+      "accounting_source": "diagnostics/f3-audit/direct-attempt-reconciliation.json"
+    },
+    {
+      "case_id": "direct-006-out",
+      "attempt_id": "direct-006-out",
+      "status": "operator_terminated",
+      "backend": "gpu",
+      "elapsed_seconds": null,
+      "resource_guard_triggered": null,
+      "path": "campaigns/l1-resume/artifacts/branches/F3_3D_CELL2_plain_dp0p006_INPUTFIX/generated/out/Run.out",
+      "sha256": "5e7fc401fb9b59dc22610033cb1b07ac091fbcfd23c44fe7fd5c4dee24fcb0e1",
+      "accounting_source": "diagnostics/f3-audit/direct-attempt-reconciliation.json",
+      "budget_reserve_seconds": 3600,
+      "reserve_basis": "Conservative one-hour charge, not measured runtime. Direct launches and terminal observations in conversation occurred within 13:19–13:40 local time; stop commit adec9b9 is timestamped 13:40:23."
+    },
+    {
+      "case_id": "direct-006-out_retry",
+      "attempt_id": "direct-006-out_retry",
+      "status": "completed",
+      "backend": "gpu",
+      "elapsed_seconds": 103.765228,
+      "resource_guard_triggered": null,
+      "path": "campaigns/l1-resume/artifacts/branches/F3_3D_CELL2_plain_dp0p006_INPUTFIX/generated/out_retry/Run.out",
+      "sha256": "3b2ce58702f176094035ef94c569dee04631369e89e9c2758d768e2adb0dff6b",
+      "accounting_source": "diagnostics/f3-audit/direct-attempt-reconciliation.json"
+    },
+    {
+      "case_id": "direct-0075-loader-failure",
+      "attempt_id": "direct-0075-loader-failure",
+      "status": "failed_before_solver_initialization",
+      "backend": "gpu",
+      "elapsed_seconds": null,
+      "resource_guard_triggered": null,
+      "path": null,
+      "sha256": null,
+      "accounting_source": "diagnostics/f3-audit/direct-attempt-reconciliation.json",
+      "budget_reserve_seconds": 3600,
+      "reserve_basis": "Conservative one-hour charge, not measured runtime. Direct launches and terminal observations in conversation occurred within 13:19–13:40 local time; stop commit adec9b9 is timestamped 13:40:23."
+    },
+    {
+      "case_id": "direct-0075-missing-drive",
+      "attempt_id": "direct-0075-missing-drive",
+      "status": "failed_input",
+      "backend": "gpu",
+      "elapsed_seconds": null,
+      "resource_guard_triggered": null,
+      "path": null,
+      "sha256": null,
+      "accounting_source": "diagnostics/f3-audit/direct-attempt-reconciliation.json",
+      "budget_reserve_seconds": 3600,
+      "reserve_basis": "Conservative one-hour charge, not measured runtime. Direct launches and terminal observations in conversation occurred within 13:19–13:40 local time; stop commit adec9b9 is timestamped 13:40:23."
     }
   ],
-  "qualification_attempts_used": 36,
-  "qualification_attempts_remaining": 20,
-  "gpu_solver_hours": 2.5305682451831863,
-  "cpu_core_hours_upper_bound": 332.02719567111114,
+  "qualification_attempts_used": 41,
+  "qualification_attempts_remaining": 15,
+  "gpu_unmetered_attempts": 3,
+  "gpu_unbounded_attempts": 0,
+  "gpu_budget_charge_hours": 5.746187136849854,
+  "gpu_accounting_status": "lower_bound_only",
+  "gpu_solver_hours": 2.746187136849853,
+  "cpu_core_hours_upper_bound": 569.3235246991112,
   "historical_cpu_accounting_status": "supplement reported totals with new timings; unmetered work is unknown, never zero",
   "limits": {
     "gpu_hours": 64,

@@ -66,6 +66,28 @@ def ledger():
                     ),
                 }
             )
+    # Direct launches predate the attempt writer. Keep them in the budget on
+    # every regeneration, including failed initialization and interrupted runs.
+    supplement = LAB / "diagnostics/f3-audit/direct-attempt-reconciliation.json"
+    if supplement.exists():
+        for item in json.loads(supplement.read_text())["additional_attempts"]:
+            rows.append({
+                "case_id": item["id"], "attempt_id": item["id"],
+                "status": item["status"], "backend": "gpu",
+                "elapsed_seconds": item["elapsed_seconds"],
+                "resource_guard_triggered": None,
+                "path": item.get("log"), "sha256": item.get("sha256"),
+                "accounting_source": str(supplement.relative_to(LAB)),
+            })
+    for row in rows:
+        if row["elapsed_seconds"] is None and row.get("started_at_utc") and row.get("finished_at_utc"):
+            row["elapsed_seconds"] = (datetime.fromisoformat(row["finished_at_utc"]) - datetime.fromisoformat(row["started_at_utc"])).total_seconds()
+            row["duration_basis"] = "recorded_wall_clock_difference"
+        if row["attempt_id"] in {"direct-006-out", "direct-0075-loader-failure", "direct-0075-missing-drive"}:
+            row["budget_reserve_seconds"] = 3600
+            row["reserve_basis"] = "Conservative one-hour charge, not measured runtime. Direct launches and terminal observations in conversation occurred within 13:19–13:40 local time; stop commit adec9b9 is timestamped 13:40:23."
+    unknown_gpu = sum(r["backend"] == "gpu" and r["elapsed_seconds"] is None for r in rows)
+    unbounded_gpu = sum(r["backend"] == "gpu" and r["elapsed_seconds"] is None and "budget_reserve_seconds" not in r for r in rows)
     reserve = OUT / "HISTORICAL-CPU-RESERVE.json"
     if not reserve.exists():
         now = datetime.now(timezone.utc)
@@ -87,6 +109,10 @@ def ledger():
             "attempts": rows,
             "qualification_attempts_used": len(rows),
             "qualification_attempts_remaining": 56 - len(rows),
+            "gpu_unmetered_attempts": unknown_gpu,
+            "gpu_unbounded_attempts": unbounded_gpu,
+            "gpu_budget_charge_hours": sum((r["elapsed_seconds"] if r["elapsed_seconds"] is not None else r.get("budget_reserve_seconds", 0)) for r in rows if r["backend"] == "gpu") / 3600,
+            "gpu_accounting_status": "lower_bound_only" if unknown_gpu else "recorded_durations",
             "gpu_solver_hours": sum(
                 r["elapsed_seconds"] or 0 for r in rows if r["backend"] == "gpu"
             )
@@ -348,9 +374,11 @@ def trajectories():
 def check_budget():
     ledger()
     budget = json.loads((OUT / "RESOURCE-LEDGER.json").read_text())
+    if budget.get("gpu_unbounded_attempts", 0):
+        raise RuntimeError("reconcile unmetered GPU attempts before budget-dependent launches")
     if (
         budget["qualification_attempts_remaining"] <= 0
-        or budget["gpu_solver_hours"] >= 64
+        or budget["gpu_budget_charge_hours"] >= 64
         or budget["cpu_core_hours_upper_bound"] >= 512
     ):
         raise RuntimeError("parent resource budget exhausted")
