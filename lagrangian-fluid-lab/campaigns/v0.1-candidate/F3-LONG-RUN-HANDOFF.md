@@ -24,3 +24,7 @@ Running `l1r_f3_metrics.py` in the current environment was initially blocked by 
 ## Decision
 
 `formal_v0.1 = NO_GO`; `development tranche = NO_GO`; F3 status remains `candidate-only / qualification pending`. Next executable action is to restore the declared Python environment, run the canary audit on the existing plain repaired case, then generate and execute the 0.0075 and 0.006 plain cases under the reviewer resource guards. Do not claim material or learning closure until those artifacts and gates exist.
+
+## 0.0075 m canary result
+
+The plain `dp=0.0075 m` case was generated and solved on GPU4 with the declared long window (`TimeMax=1.5 s`, `TimePart=0.01 s`). GenCase reported 34,560 fluid and 72,540 fixed particles with zero final wall normals. The solver completed successfully and produced 151 native frames. Conversion to HDF5 completed after fixing the reader's leading-space header handling. The converted trajectory has 34,560 unique particle identities, finite positions, and exact initial/final fluid mass `14.580002 kg` with all particles valid at both endpoints. This is an execution and integrity result only; cross-resolution qualification and material fidelity remain unevaluated.

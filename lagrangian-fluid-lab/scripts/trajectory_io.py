@@ -34,11 +34,14 @@ def frame_time(path: Path):
 
 
 def read_frame(path: Path, identity_only=False):
-    wanted = {"Idp", "Zone"} if identity_only else None
-    frame = pd.read_csv(path, skiprows=3,
-                        usecols=(lambda name: name.strip() in wanted) if wanted else None)
+    # PartVTK emits leading spaces in the particle header.  Applying a
+    # usecols predicate before pandas has normalized those names can silently
+    # drop Idp/Zone and makes otherwise valid solver output unauditable.
+    frame = pd.read_csv(path, skiprows=3)
     frame.columns = [str(column).strip() for column in frame.columns]
     frame = frame.loc[:, ~frame.columns.str.startswith("Unnamed")]
+    if identity_only:
+        frame = frame[["Idp", "Zone"]]
     if "Zone" not in frame:
         frame["Zone"] = 0
     return frame
