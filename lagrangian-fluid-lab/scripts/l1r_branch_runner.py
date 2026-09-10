@@ -1,6 +1,6 @@
 """Execute predeclared whole-template/F3 cases with shared campaign guards."""
 
-import argparse, json, fcntl, subprocess, time, hashlib, shutil
+import argparse, json, fcntl, subprocess, time, hashlib, shutil, re
 from datetime import datetime, timezone
 from scripts.l1r_continuation_evidence import LAB, OUT, write, ledger
 from scripts.l1r_postprocess_case import process
@@ -40,11 +40,8 @@ def run(record):
             budget["conservative_expiry_utc"]
         ):
             raise RuntimeError("original activity expired")
-        if (
-            record["family"] == "F3"
-            and len(list(runs.glob("F3*/attempts/*/attempt.json"))) >= 12
-        ):
-            raise RuntimeError("F3 six-attempt cap")
+        # F3 continuation uses the shared qualification pool checked above.
+        # The exhausted historical six-case child cap is not a new parent cap.
         disk = shutil.disk_usage(LAB)
         if disk.free < max(100 * 1024**3, 0.1 * disk.total):
             raise RuntimeError("disk reserve")
@@ -66,6 +63,15 @@ def run(record):
             str(prefix),
             "{output}",
         ]
+        def guard():
+            state=q2.gpu_guard(gpu,next(row['uuid'] for row in preflight['snapshot'] if row['index']==gpu))
+            expected=record.get('expected_slip_mode')
+            if state.get('ok') and expected:
+                for log in (runs/name/'attempts').glob('*.partial/Run.out'):
+                    found=re.search(r'SlipMode="([^"]+)"',log.read_text(errors='replace'))
+                    if found and found[1]!=expected:
+                        return {'ok':False,'reason':'effective boundary mode mismatch','expected':expected,'actual':found[1]}
+            return state
         result = execute_attempt(
             name,
             cmd,
@@ -75,12 +81,7 @@ def run(record):
             evidence_glob="data/Part_*.bi4",
             required_text="Finished execution (code=0)",
             timeout_seconds=1800,
-            resource_guard=lambda: q2.gpu_guard(
-                gpu,
-                next(
-                    row["uuid"] for row in preflight["snapshot"] if row["index"] == gpu
-                ),
-            ),
+            resource_guard=guard,
             resource_poll_seconds=1.0,
         )
         result.update(

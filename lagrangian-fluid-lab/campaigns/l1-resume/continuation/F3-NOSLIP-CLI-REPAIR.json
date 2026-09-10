@@ -1,0 +1,14 @@
+{
+  "failure_case":"F3_CELL3_LONG_dp0p01_a1p000_noslip",
+  "failure_class":"input semantic override, not a physical boundary result",
+  "observed":"XML SlipMode=2 was overridden by -mdbc; native log remained DBC vel=0 and Corrector=False",
+  "action":"Operator terminated the verified owned solver PID 165620; original failed attempt and all outputs retained and charged",
+  "root_source":"JSphCfgRun.cpp maps -mdbc to SLIP_Vel0; JSph.cpp applies CLI configuration after XML",
+  "corrected_case":"F3_CELL3_LONG_dp0p01_a1p000_noslip_cli_fix",
+  "corrected_cli":"-mdbc_noslip",
+  "expected_native_mode":"No-slip",
+  "NoPenetration":false,
+  "prevention":"Reject CLI/XML mode disagreement before launch and monitor expected effective mode in the live log",
+  "budget":"One ineffective attempt plus one corrected canary, both charged to unchanged parent qualification cap; no repeated sweep",
+  "qualification":"pending corrected canary; old failed contrast cannot support boundary conclusions"
+}

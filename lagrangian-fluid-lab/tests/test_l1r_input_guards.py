@@ -69,6 +69,16 @@ def test_empty_asset_is_rejected_before_any_native_process(monkeypatch, tmp_path
         preflight.check_input({"generated_prefix": "case", "time_max_s": 1.5})
 
 
+def test_cli_cannot_silently_override_xml_boundary_mode(monkeypatch,tmp_path):
+    monkeypatch.setattr(preflight,'LAB',tmp_path)
+    (tmp_path/'case.xml').write_text('<case><parameters><parameter key="Boundary" value="2"/><parameter key="SlipMode" value="2"/></parameters></case>')
+    record={'generated_prefix':'case','solver_mode':'-mdbc'}
+    with pytest.raises(ValueError,match='override'):
+        preflight.check_boundary_mode(record)
+    record['solver_mode']='-mdbc_noslip'
+    preflight.check_boundary_mode(record)
+
+
 def test_preparation_cannot_overwrite_attempted_inputs(monkeypatch, tmp_path):
     monkeypatch.setattr(cases, "LAB", tmp_path)
     attempted = (

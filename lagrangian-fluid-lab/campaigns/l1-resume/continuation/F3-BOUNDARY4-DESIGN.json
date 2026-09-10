@@ -1,0 +1,26 @@
+{
+  "scope": "input preparation only; no CFD launch or qualification",
+  "predecessor": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1",
+  "source_definition_sha256": "5acdb28015a65a82c7a39a7ed8f9c4fe466ab23a7d429ebc8ec386f703d43625",
+  "change": {
+    "boundary_layers_vdp": [
+      "0,1,2",
+      "0,1,2,3"
+    ]
+  },
+  "h_over_dp": 1.5921703843496147,
+  "kernel_diameter_over_dp": 3.1843407686992293,
+  "minimum_layers_for_native_recommendation": 4,
+  "held_fixed": [
+    "nominal physical walls including open top",
+    "fluid initial lattice",
+    "normal-generating physical surfaces",
+    "forcing and full time window",
+    "no-slip viscosity treatment",
+    "time and output steps",
+    "no projection",
+    "hard audit thresholds"
+  ],
+  "native_warning_semantics": "JSph.cpp warning depends only on h/dp and density mode; it does not count layers, so warning disappearance is not a verification criterion",
+  "decision": "Wait for running temporal diagnostic before selecting another CFD attempt."
+}

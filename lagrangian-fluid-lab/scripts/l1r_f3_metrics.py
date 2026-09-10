@@ -7,8 +7,8 @@ from scripts.l1r_continuation_evidence import LAB, OUT, write
 from scripts.l1r_cpu_slots import cpu_slot
 
 
-def observe(record, times):
-    path = LAB / "campaigns/l1-resume/data/continuation" / (record["id"] + ".h5")
+def observe(record, times, *, path=None):
+    path = path or LAB / "campaigns/l1-resume/data/continuation" / (record["id"] + ".h5")
     result = []
     with h5py.File(path, "r") as h:
         native = h["time"][:]

@@ -1,0 +1,14 @@
+{
+  "registered_before_solver":true,
+  "predecessor":"F3_CELL3_LONG_dp0p01_a1p000_noslip_cli_fix",
+  "predecessor_status":"quality_failed; 491 exclusions, true finite-wall tolerance exceedance",
+  "evidence":"Native JSph.cpp warns that ViscoBoundFactor should be 1.0 with no-slip/free-slip. Predecessor log confirms inherited factor 0.0.",
+  "source":"vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp: viscosity configuration warning",
+  "hypothesis":"Apply the native no-slip boundary viscosity treatment instead of disabling it; test hard integrity under the full original forcing.",
+  "single_change":{"ViscoBoundFactor":{"before":0,"after":1}},
+  "held_fixed":["fluid artificial Visco=0.05","SlipMode=2 and CLI -mdbc_noslip","NoPenetration=0","continuous geometry and lattice","original control amplitude 1.0","CFL=0.05","CoefDtMin=0.05","0-8.35 s","TimeOut=0.01","penetration tolerance"],
+  "qualification":"new boundary recipe bridge only; complete temporal/spatial/control-domain evidence still required before production",
+  "attempts_authorized_by_plan":1,
+  "physical_particle_projection":false,
+  "threshold_relaxation":false
+}

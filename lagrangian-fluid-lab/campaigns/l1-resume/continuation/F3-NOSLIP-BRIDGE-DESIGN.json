@@ -1,0 +1,14 @@
+{
+  "registered_before_new_boundary_results":true,
+  "conditional_on":"completed temporal control remaining quality_failed",
+  "question":"Does native mDBC no-slip boundary velocity reconstruction reduce genuine finite-wall penetration seen with DBC vel=0?",
+  "case":"dp=0.010 m, nominal original forcing, 0-8.35 s",
+  "single_changed_parameter":{"SlipMode":{"baseline":1,"bridge":2}},
+  "held_fixed":["continuous geometry","cell-centred mass","native control CSV","CFL=0.05","CoefDtMin=0.05","TimeOut=0.01","NoPenetration=0","particle shifting disabled","runtime domain","original penetration tolerance"],
+  "recipe_id":"F3_CELL3_NS_no_projection",
+  "hard_success":"no lost/excluded particles, finite and unique identities, conserved mass, no finite-wall tolerance exceedance, known runtime domain",
+  "diagnostics":["logged effective boundary mode","first/worst/longest true penetration","native exclusion reason and runtime face","chord crossings separately","fixed-scale distributions and energy"],
+  "interpretation":"A native boundary formulation change is a new recipe and requires new temporal/spatial/reference evidence. One passing bridge alone never permits production.",
+  "projection_clipping_or_threshold_relaxation":false,
+  "maximum_bridge_launches":1
+}

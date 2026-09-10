@@ -1,0 +1,40 @@
+{
+  "registered_before_solver": true,
+  "case": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_time",
+  "predecessor": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1",
+  "predecessor_audit_sha256": "60a3b9940c3aca5cd6fb005af83d06d7e29e18bc4f94576917bf4a6b85f4d005",
+  "crossing_detail_sha256": "dd112d5b08112a43b986dbe3ecee09d3a813b8e76d706a51895465c9f989146b",
+  "hypothesis": "Residual nominal-wall penetration may be sensitive to the integration step; the earlier temporal contrast used different boundary physics and cannot establish NS1 time error.",
+  "changes": {
+    "CFL": [
+      0.05,
+      0.025
+    ],
+    "CoefDtMin": [
+      0.05,
+      0.025
+    ]
+  },
+  "held_fixed": [
+    "dp=0.01m",
+    "full 0-8.35s",
+    "amplitude=1",
+    "no-slip CLI and XML",
+    "ViscoBoundFactor=1",
+    "NoPenetration=0",
+    "fluid viscosity",
+    "geometry and initial particles",
+    "output=0.01s",
+    "all hard audit gates"
+  ],
+  "attempts": 1,
+  "scope": "focused failure diagnosis; not passed-canary expansion or production",
+  "required_evidence": [
+    "effective configuration and actual step halving",
+    "complete native exclusions and full hard audit",
+    "crossing trajectories",
+    "full-window v2 comparison with failed-source semantics if either source fails"
+  ],
+  "threshold_relaxation": false,
+  "physical_projection": false
+}

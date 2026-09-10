@@ -17,6 +17,11 @@ LAB = Path(__file__).resolve().parents[1]
 OUT = LAB / "campaigns/l1-resume/continuation"
 
 
+def resource_limits():
+    """Owner-approved limits; historical charges are never reset."""
+    return json.loads((OUT / "RESOURCE-LIMITS.json").read_text())["limits"]
+
+
 def write(name, data):
     q2.atomic_json(OUT / name, data)
 
@@ -55,6 +60,7 @@ def ledger():
                             "finished_at_utc",
                             "elapsed_seconds",
                             "resource_guard_triggered",
+                            "timeout_seconds",
                         )
                     },
                     "path": str(f.relative_to(LAB)),
@@ -80,6 +86,10 @@ def ledger():
                 "accounting_source": str(supplement.relative_to(LAB)),
             })
     for row in rows:
+        timeout=row.get("timeout_seconds")
+        if row["status"] == "running" and isinstance(timeout,(int,float)) and np.isfinite(timeout) and timeout>0:
+            row["budget_reserve_seconds"]=timeout
+            row["reserve_basis"]="Recorded guarded-executor timeout reserved until terminal duration is available; not measured usage or evidence that a process is live."
         if row["elapsed_seconds"] is None and row.get("started_at_utc") and row.get("finished_at_utc"):
             row["elapsed_seconds"] = (datetime.fromisoformat(row["finished_at_utc"]) - datetime.fromisoformat(row["started_at_utc"])).total_seconds()
             row["duration_basis"] = "recorded_wall_clock_difference"
@@ -108,7 +118,9 @@ def ledger():
             "conservative_expiry_utc": "2026-09-16T00:00:00+00:00",
             "attempts": rows,
             "qualification_attempts_used": len(rows),
-            "qualification_attempts_remaining": 56 - len(rows),
+            "qualification_attempts_remaining": resource_limits()["qualification"] - len(rows),
+            "material_configurations_used": sum(json.loads(p.read_text()).get("configuration_charge",0) for p in OUT.glob("F3-MATERIAL-ENGINEERING-s*.json")),
+            "material_usage_basis": "Original L1 material usage was zero; current F3 engineering configurations are charged including incomplete attempts. Qualified material configurations do not yet exist.",
             "gpu_unmetered_attempts": unknown_gpu,
             "gpu_unbounded_attempts": unbounded_gpu,
             "gpu_budget_charge_hours": sum((r["elapsed_seconds"] if r["elapsed_seconds"] is not None else r.get("budget_reserve_seconds", 0)) for r in rows if r["backend"] == "gpu") / 3600,
@@ -122,15 +134,7 @@ def ledger():
             ]
             + post_reserve_hours() * 16 * 1.1,
             "historical_cpu_accounting_status": "supplement reported totals with new timings; unmetered work is unknown, never zero",
-            "limits": {
-                "gpu_hours": 64,
-                "cpu_core_hours": 512,
-                "qualification": 56,
-                "development": 40,
-                "training": 12,
-                "materials": 32,
-                "storage_gib": 512,
-            },
+            "limits": resource_limits(),
             "formal_release": False,
         },
     )
@@ -378,8 +382,8 @@ def check_budget():
         raise RuntimeError("reconcile unmetered GPU attempts before budget-dependent launches")
     if (
         budget["qualification_attempts_remaining"] <= 0
-        or budget["gpu_budget_charge_hours"] >= 64
-        or budget["cpu_core_hours_upper_bound"] >= 512
+        or budget["gpu_budget_charge_hours"] >= budget["limits"]["gpu_hours"]
+        or budget["cpu_core_hours_upper_bound"] >= budget["limits"]["cpu_core_hours"]
     ):
         raise RuntimeError("parent resource budget exhausted")
     total = sum(
@@ -388,7 +392,7 @@ def check_budget():
         for p in (LAB / "campaigns" / root).rglob("*")
         if p.is_file()
     )
-    if total >= 512 * 1024**3:
+    if total >= budget["limits"]["storage_gib"] * 1024**3:
         raise RuntimeError("parent storage budget exhausted")
     import shutil
 

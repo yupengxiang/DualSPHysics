@@ -1,0 +1,109 @@
+{
+  "schema": "f3.cell3.protocol.v1",
+  "status": "registered_before_CELL3_solver; qualification_pending",
+  "coordinate_frame": "fixed tank computational coordinates, not reconstructed inertial world",
+  "forcing": {
+    "kind": "version-specific prescribed body acceleration; no rigid-pose equivalence claimed",
+    "centre_m": [
+      0.45,
+      0,
+      0
+    ],
+    "globalgravity": false,
+    "columns": [
+      "time_s",
+      "ax",
+      "ay",
+      "az",
+      "alpha_x",
+      "alpha_y",
+      "alpha_z"
+    ],
+    "linear_units": "m/s^2",
+    "angular_units": "rad/s^2",
+    "gravity_handling": "solver subtracts global gravity then adds CSV linear acceleration, which already includes gravity",
+    "velocity_integration": "zero initial velocity; right endpoint sums of acceleration times native CSV dt, then linear interpolation",
+    "angular_branch": "GPU applies angular terms only when instantaneous angular acceleration is nonzero",
+    "caution": "GPU Coriolis implementation is component-specific; do not replace it with an assumed rigid-frame formula",
+    "amplitude_definition": "a_lin = g + amplitude*(a_lin_nominal-g); alpha = amplitude*alpha_nominal; derived velocities use the same native integration",
+    "zero_drive": "linear=(0,0,-9.81), angular=(0,0,0), globalgravity=0",
+    "drive_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+    "rows": 167001,
+    "range_s": [
+      0.0,
+      8.35
+    ],
+    "column_min": [
+      -0.672,
+      0.0,
+      -9.81,
+      0.0,
+      -1.174804106,
+      0.0
+    ],
+    "column_max": [
+      0.692,
+      0.0,
+      -9.79,
+      0.0,
+      1.223430619,
+      0.0
+    ],
+    "source_hashes": {
+      "JDsAccInput.cpp": "eb3c0f4e6208180d3e6a6ae593cc4274a174c34b013d23cf06caa3cecc0c2f5c",
+      "JDsAccInput_ker.cu": "ab873de4415d7bfae403666a4b08b425222856989da8093f7cc3157f201b865a"
+    }
+  },
+  "candidate_production_dp_m": 0.01,
+  "reference_dp_m": [
+    0.01,
+    0.0075,
+    0.006
+  ],
+  "geometry_m": [
+    0.9,
+    0.18,
+    0.51
+  ],
+  "water_depth_m": 0.09,
+  "target_mass_kg": 14.58,
+  "long_window_s": [
+    0,
+    8.35
+  ],
+  "long_window_basis": "entire finite prescribed input; periodicity not assumed",
+  "canary_window_s": [
+    0,
+    1.5
+  ],
+  "canary_scope": "input repair and hard integrity only",
+  "output_interval_s": 0.01,
+  "output_control_interval_s": 0.002,
+  "cfl": [
+    0.05,
+    0.025
+  ],
+  "time_output_error_budget": 0.01,
+  "reference_error_budget": 0.05,
+  "energy_scale": "0.5*M0*9.81*0.09",
+  "old_v1": "preserve registered histograms, outside/missing mass, all 21 historical times and failures",
+  "new_v2": "not designed or accepted; manufactured calibration required before new CFD qualification",
+  "control_amplitudes": [
+    0.9,
+    1.0,
+    1.1
+  ],
+  "independent_internal_amplitude": 0.97,
+  "qualification_attempt_plan": {
+    "repair_canary": 1,
+    "time_and_output": 3,
+    "long_ladder": 3,
+    "endpoints": 6,
+    "internal": 2
+  },
+  "task_scope": {
+    "T1": "numerical particle state in tank coordinates",
+    "T2": "separate macro and path qualification required"
+  },
+  "formal_release": false
+}

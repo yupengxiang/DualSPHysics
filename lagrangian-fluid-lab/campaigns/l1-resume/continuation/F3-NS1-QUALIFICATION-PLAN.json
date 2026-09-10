@@ -1,0 +1,25 @@
+{
+  "status":"conditional plan; source canary must pass before additional launches",
+  "recipe":"F3_CELL3_NS_visco1_no_projection",
+  "fixed_parameters":{"Boundary":2,"SlipMode":2,"CLI":"-mdbc_noslip","NoPenetration":0,"Visco":0.05,"ViscoBoundFactor":1,"Shifting":0},
+  "continuous_volume_m":[0.9,0.18,0.09],
+  "frame":"fixed tank computational coordinates",
+  "time_window_s":[0,8.35],
+  "candidate_production_dp_m":0.01,
+  "nominal_reference_dp_m":[0.01,0.0075,0.006],
+  "observation_protocol":"F3-V2-OBSERVATION-DESIGN.json; old v1 panels remain separate",
+  "gates":{"spatial_observables":0.05,"temporal_output_observables":0.01,"hard_integrity":"all saved frames, explicit native loss and finite-wall tolerance"},
+  "remaining_solver_groups":[
+    {"group":"nominal finer references","dp_m":[0.0075,0.006],"amplitudes":[1.0],"variant":"noslip_visco1","attempts":2},
+    {"group":"zero drive with same boundary recipe","dp_m":[0.01],"amplitudes":[0.0],"variant":"noslip_visco1_zero","attempts":1},
+    {"group":"actual timestep halving","dp_m":[0.01],"amplitudes":[1.0],"variant":"noslip_visco1_time","attempts":1},
+    {"group":"output interval 0.01 to 0.002 s","dp_m":[0.01],"amplitudes":[1.0],"variant":"noslip_visco1_output","attempts":1},
+    {"group":"control endpoints","dp_m":[0.01,0.0075,0.006],"amplitudes":[0.9,1.1],"variant":"noslip_visco1","attempts":6},
+    {"group":"independent internal control","dp_m":[0.01,0.006],"amplitudes":[0.97],"variant":"noslip_visco1","attempts":2}
+  ],
+  "additional_attempts_if_all_dependencies_pass":13,
+  "qualification_attempts_remaining_at_registration":8,
+  "budget_rule":"Existing remaining attempts may execute in dependency order. Additional launches beyond original total 56 require an owner-approved limit change; this plan is not approval.",
+  "cross_recipe_reuse":"Old boundary temporal/spatial controls are not automatically evidence for this recipe; only exactly identical zero/control configurations may be reused after proof.",
+  "production":"Requires reference, time/output and parameter gates; no independent development or learning claim yet"
+}
