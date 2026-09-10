@@ -19,7 +19,7 @@ The attached reviewer package requires the following sequence: calibrate observa
 
 ## Blocking execution issue
 
-Running `l1r_f3_metrics.py` in the current environment fails before metric evaluation because `pandas` is unavailable (`ModuleNotFoundError`). The existing solver artifacts therefore cannot be re-audited in this environment until the repository's declared Python runtime/dependencies are restored. This is an environment blocker, not a physical pass or fail.
+Running `l1r_f3_metrics.py` in the current environment was initially blocked by a system NumPy/h5py ABI mismatch. A clean virtual environment with the declared requirements now runs the audit successfully. The registered spatial comparison still fails the screen: plain 0.030 vs 0.015 has TV 0.1407407451 (>0.05); therefore the existing ladder is not a qualified recipe. This is evidence against qualification, not an environment blocker.
 
 ## Decision
 
