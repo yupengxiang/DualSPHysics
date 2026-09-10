@@ -1,0 +1,37 @@
+{
+  "schema": "f3.t1.candidate-recipe.v1",
+  "status": "candidate_only",
+  "family": "F3",
+  "background": "plain",
+  "resolution_m": [0.01, 0.0075],
+  "production_resolution_m": 0.0075,
+  "control_range": {
+    "gravity_m_s2": [0.0, 0.0, -9.81],
+    "time_max_s": 1.5,
+    "output_interval_s": 0.01,
+    "particle_shifting": false,
+    "solver": "DualSPHysics 5.4.355 GPU",
+    "drive_input": "CaseSloshingAccData.csv",
+    "drive_amplitude_candidates": [0.9, 1.0, 1.1]
+  },
+  "coordinate_frame": {
+    "kind": "world",
+    "histogram_origin_m": [-0.45, -0.09, 0.0],
+    "histogram_cell_width_m": 0.06,
+    "observation_policy": "nearest native frame; report actual timestamp; no terminal padding"
+  },
+  "scoring_tasks": {
+    "T1_numerical_particle": ["identity_uniqueness", "finite_state", "mass_conservation", "valid_time_domain", "distribution_tv", "center_of_mass", "front_q90", "mean_velocity"],
+    "T2_material_transport": "not_qualified; requires dedicated tracer sidecar and source/destination semantics",
+    "learning": "not_qualified; requires independent solver cases and frozen train/test split"
+  },
+  "evidence": {
+    "cross_resolution_tv_max": 0.0416288821355626,
+    "cross_resolution_threshold": 0.05,
+    "time_window_s": [0.0, 1.50001],
+    "native_frames": 151,
+    "mass_closed": true,
+    "independent_physical_cases": 1
+  },
+  "limitations": ["0.006 m run stopped for resource feasibility", "one physical rollout only", "no T2 material qualification", "no learning benchmark result"]
+}
