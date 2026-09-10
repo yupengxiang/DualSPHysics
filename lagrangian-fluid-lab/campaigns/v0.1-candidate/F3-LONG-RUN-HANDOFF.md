@@ -32,3 +32,5 @@ The plain `dp=0.0075 m` case was generated and solved on GPU4 with the declared 
 The first cross-resolution screen is now available: plain `dp=0.010` versus `dp=0.0075` over 151 native frames and the registered histogram frame (`origin=(-0.45,-0.09,0) m`, cell width `0.06 m`) has maximum TV `0.0416288821`, below the diagnostic threshold `0.05`. This supports a candidate numerical T1 interval but does not qualify the full ladder or T2/material tasks.
 
 The `dp=0.006 m` plain run was stopped for resource feasibility after reaching `0.350015 s` in roughly 3.1 observed hours with 174,929 particles. This is recorded as a resource feasibility negative result, not a physical failure. The candidate T1 recipe therefore remains bounded to the executed `0.010/0.0075 m` interval pending an explicitly budgeted finer run.
+
+An eight-row development pilot manifest was generated from the completed 0.0075 m HDF5. It is explicitly marked candidate-only: the rows are deterministic particle partitions of one physical rollout and therefore do not count as independent solver cases. No material qualification or learning benchmark claim is made from this manifest.
