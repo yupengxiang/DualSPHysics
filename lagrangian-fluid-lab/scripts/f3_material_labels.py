@@ -6,17 +6,29 @@ from scripts.l1r_continuation_evidence import LAB,OUT,write
 from scripts.l1r_q2_mdbc_bridge import sha256
 
 
-def labels(path):
-    a=dict(np.load(path));p=a['position'];ok=a['reliable'];dt=np.diff(a['time'])
+def residence_times(time,position,reliable):
+    """Partition every interval, retaining unknown duration in the denominator."""
+    time=np.asarray(time);p=np.asarray(position);ok=np.asarray(reliable,dtype=bool)
+    dt=np.diff(time)
+    if p.shape[:2]!=ok.shape or len(time)!=len(p) or p.shape[-1]!=3 or np.any(dt<=0) or not np.isfinite(time).all():
+        raise ValueError('invalid material trajectory shape or time')
+    if not np.isfinite(p[ok]).all():raise ValueError('reliable positions must be finite')
+    known=ok[:-1]&ok[1:]
     x0,x1=p[:-1,:,0],p[1:,:,0]
+    x0=np.where(known,x0,0.);x1=np.where(known,x1,0.)
     bothleft=(x0<0)&(x1<0);crossed=(x0<0)!=(x1<0)
     alpha=np.divide(-x0,x1-x0,out=np.zeros_like(x0),where=crossed)
     fraction=np.where(bothleft,1.,np.where(crossed,np.where(x0<0,alpha,1-alpha),0.))
-    known=ok[:-1]&ok[1:]
     residence_left=np.sum(dt[:,None]*fraction*known,axis=0)
     residence_right=np.sum(dt[:,None]*(1-fraction)*known,axis=0)
     residence_unknown=np.sum(dt[:,None]*~known,axis=0)
-    assert np.allclose(residence_left+residence_right+residence_unknown,a['time'][-1]-a['time'][0],atol=1e-12)
+    assert np.allclose(residence_left+residence_right+residence_unknown,time[-1]-time[0],atol=1e-12)
+    return residence_left,residence_right,residence_unknown
+
+
+def labels(path):
+    a=dict(np.load(path))
+    residence_left,residence_right,residence_unknown=residence_times(a['time'],a['position'],a['reliable'])
     a.update(residence_left_s=residence_left,residence_right_s=residence_right,residence_unknown_s=residence_unknown)
     output=path.with_name(path.stem+'-labels.npz');np.savez_compressed(output,**a)
     by_source={}

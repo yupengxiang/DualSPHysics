@@ -17,7 +17,12 @@ def check_ns1_expansion(variant,dp,amplitude):
     prior=json.loads(source.read_text())
     if prior['audit_status']=='pass_diagnostic':return
     design=OUT/'F3-NS1-TIME-DIAGNOSTIC-DESIGN.json'
-    if variant=='noslip_visco1_time' and dp==.01 and amplitude==1. and design.exists():
+    if variant=='noslip_visco1_time_quarter':
+        source=OUT/'F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_time-AUDIT.json'
+        if not source.exists():raise ValueError('requires completed half-step diagnostic')
+        prior=json.loads(source.read_text())
+        design=OUT/'F3-NS1-QUARTER-TIME-DIAGNOSTIC-DESIGN.json'
+    if variant in ('noslip_visco1_time','noslip_visco1_time_quarter') and dp==.01 and amplitude==1. and design.exists():
         d=json.loads(design.read_text())
         if (d['registered_before_solver'] and d['attempts']==1
             and d['predecessor_audit_sha256']==sha256(source)
@@ -28,7 +33,7 @@ def check_ns1_expansion(variant,dp,amplitude):
 
 def prepare(dp=.01,amplitude=1.,variant='nominal'):
     allowed=('nominal','zero','time','output','noslip','noslip_cli_fix','noslip_visco1',
-             'noslip_visco1_zero','noslip_visco1_time','noslip_visco1_output')
+             'noslip_visco1_zero','noslip_visco1_time','noslip_visco1_time_quarter','noslip_visco1_output')
     if dp not in (.01,.0075,.006) or variant not in allowed:
         raise ValueError('unregistered numerical variant')
     ns1=variant.startswith('noslip_visco1')
@@ -50,8 +55,8 @@ def prepare(dp=.01,amplitude=1.,variant='nominal'):
         raise ValueError('incomplete preparation exists; inspect before retry')
     shutil.copytree(source,target)
     basename=source.name
-    cfl=.025 if kind=='time' else .05
-    floor=.025 if kind=='time' else .05
+    cfl=.0125 if kind=='time_quarter' else (.025 if kind=='time' else .05)
+    floor=cfl
     cadence=.002 if kind=='output' else .01
     for filename in (basename+'.xml',basename+'_Def.xml'):
         tree=ET.parse(target/filename)

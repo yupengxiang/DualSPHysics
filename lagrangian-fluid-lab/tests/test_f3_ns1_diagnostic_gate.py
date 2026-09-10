@@ -15,3 +15,19 @@ def test_failure_diagnostic_does_not_open_matrix(tmp_path,monkeypatch):
         with pytest.raises(ValueError):campaign.check_ns1_expansion(variant,dp,amplitude)
     source.write_text(source.read_text()+'\n')
     with pytest.raises(ValueError):campaign.check_ns1_expansion('noslip_visco1_time',.01,1.)
+
+
+def test_quarter_step_needs_its_own_completed_predecessor(tmp_path,monkeypatch):
+    monkeypatch.setattr(campaign,'OUT',tmp_path)
+    nominal=tmp_path/'F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1-AUDIT.json'
+    failed={'audit_status':'quality_failed','issues':['swept_finite_wall_or_obstacle_crossing']}
+    nominal.write_text(json.dumps(failed))
+    with pytest.raises(ValueError):campaign.check_ns1_expansion('noslip_visco1_time_quarter',.01,1.)
+    half=tmp_path/'F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_time-AUDIT.json'
+    half.write_text(json.dumps(failed))
+    design=tmp_path/'F3-NS1-QUARTER-TIME-DIAGNOSTIC-DESIGN.json'
+    design.write_text(json.dumps({'registered_before_solver':True,'attempts':1,'predecessor_audit_sha256':sha256(half)}))
+    campaign.check_ns1_expansion('noslip_visco1_time_quarter',.01,1.)
+    with pytest.raises(ValueError):campaign.check_ns1_expansion('noslip_visco1_time_quarter',.0075,1.)
+    half.write_text(half.read_text()+'\n')
+    with pytest.raises(ValueError):campaign.check_ns1_expansion('noslip_visco1_time_quarter',.01,1.)
