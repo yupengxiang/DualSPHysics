@@ -1,3 +1,7 @@
+# Correction notice — prior conclusions below are historical
+
+The 0.006 resource-infeasibility conclusion is withdrawn: ps etime 03:06 was minutes:seconds. The retry completed in 103.765228 seconds. The reported TV screen did not implement the registered metric and is not acceptance evidence. No production resolution is qualified. Independent development cases, materials and learning remain incomplete. Resource ledger must include the direct launches before further budget decisions.
+
 # F3 Long-Run continuation handoff
 
 Baseline: `a8e5038a0600efbd67b1f5578649d225fee97e4f` (reviewer package dated 2026-09-10).
