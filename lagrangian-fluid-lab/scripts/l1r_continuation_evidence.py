@@ -22,6 +22,12 @@ def resource_limits():
     return json.loads((OUT / "RESOURCE-LIMITS.json").read_text())["limits"]
 
 
+def material_usage():
+    """Reserve declared material configurations, including incomplete work."""
+    return sum(json.loads(p.read_text()).get("configuration_charge",0)
+               for p in OUT.glob("F3-MATERIAL-*.json"))
+
+
 def write(name, data):
     q2.atomic_json(OUT / name, data)
 
@@ -119,8 +125,8 @@ def ledger():
             "attempts": rows,
             "qualification_attempts_used": len(rows),
             "qualification_attempts_remaining": resource_limits()["qualification"] - len(rows),
-            "material_configurations_used": sum(json.loads(p.read_text()).get("configuration_charge",0) for p in OUT.glob("F3-MATERIAL-ENGINEERING-s*.json")),
-            "material_usage_basis": "Original L1 material usage was zero; current F3 engineering configurations are charged including incomplete attempts. Qualified material configurations do not yet exist.",
+            "material_configurations_used": material_usage(),
+            "material_usage_basis": "Original L1 material usage was zero; current F3 engineering and manufactured-calibration configurations are charged including incomplete attempts. Qualified CFD material configurations do not yet exist.",
             "gpu_unmetered_attempts": unknown_gpu,
             "gpu_unbounded_attempts": unbounded_gpu,
             "gpu_budget_charge_hours": sum((r["elapsed_seconds"] if r["elapsed_seconds"] is not None else r.get("budget_reserve_seconds", 0)) for r in rows if r["backend"] == "gpu") / 3600,

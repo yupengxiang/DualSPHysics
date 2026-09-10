@@ -20,3 +20,13 @@ def test_inflight_timeout_is_reserved_without_fabricating_elapsed_time(tmp_path,
     del row['timeout_seconds'];attempt.write_text(json.dumps(row));evidence.ledger()
     report=json.loads((out/'RESOURCE-LEDGER.json').read_text())
     assert report['gpu_unbounded_attempts']==1
+
+
+def test_material_calibration_and_incomplete_work_share_budget(tmp_path,monkeypatch):
+    import json
+    from scripts import l1r_continuation_evidence as evidence
+    monkeypatch.setattr(evidence,'OUT',tmp_path)
+    for name,status,charge in [('ENGINEERING-s2','completed',1),('AFFINE-CALIBRATION','failed',4),('AFFINE-CALIBRATION-contact-v2','running',4)]:
+        (tmp_path/f'F3-MATERIAL-{name}.json').write_text(json.dumps({'status':status,'configuration_charge':charge}))
+    (tmp_path/'F3-MATERIAL-COMPARISON.json').write_text(json.dumps({'status':'completed'}))
+    assert evidence.material_usage()==9

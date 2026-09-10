@@ -267,7 +267,12 @@ def segment_visibility(query, particle_position, barrier_triangles, *, epsilon=1
 
 
 def corresponding_segments_blocked(start, end, barrier_triangles, *, epsilon=1e-9):
-    """Check Q corresponding start/end segments against finite triangles."""
+    """Conservatively check closed tracer segments against finite triangles.
+
+    Non-tangential endpoint contact is unsafe for trusted advection: otherwise
+    subdividing a crossing exactly at the wall makes both open segments miss.
+    Neighbour visibility intentionally retains its separate open-segment rule.
+    """
     start = np.asarray(start, dtype=np.float64)
     end = np.asarray(end, dtype=np.float64)
     triangles = np.asarray(barrier_triangles, dtype=np.float64)
@@ -288,7 +293,7 @@ def corresponding_segments_blocked(start, end, barrier_triangles, *, epsilon=1e-
         v = inverse * np.einsum("qi,qi->q", direction, qvec)
         distance = inverse * (qvec @ edge2)
         hit = nonparallel & (u >= -epsilon) & (v >= -epsilon) & (u + v <= 1 + epsilon)
-        hit &= (distance > epsilon) & (distance < 1 - epsilon)
+        hit &= (distance >= -epsilon) & (distance <= 1 + epsilon)
         blocked |= hit
     return blocked
 

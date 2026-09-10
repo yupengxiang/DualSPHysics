@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 import h5py
 import numpy as np
-from scripts.l1r_continuation_evidence import LAB,OUT,write,resource_limits
+from scripts.l1r_continuation_evidence import LAB,OUT,write,resource_limits,material_usage
 from scripts.l1r_q2_mdbc_bridge import sha256
 from scripts.passive_tracers import advect_hdf5,box_surface_triangles
 
@@ -23,7 +23,7 @@ def run(substeps):
         previous=json.loads(manifest.read_text())
         if previous['status']=='completed':return previous
         raise ValueError('existing incomplete material attempt; inspect before retry')
-    count=len(list(OUT.glob('F3-MATERIAL-ENGINEERING-s*.json')))
+    count=material_usage()
     if count>=resource_limits()['materials']:raise ValueError('material configuration cap')
     a=json.loads((OUT/(name+'-AUDIT.json')).read_text())
     if a['audit_status']!='pass_diagnostic' or a['hdf5_sha256']!=sha256(source):
