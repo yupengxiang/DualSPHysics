@@ -1,0 +1,95 @@
+{
+  "status": "adapter_and_untrained_forward_verified",
+  "features": [
+    "position_x_over_L",
+    "position_y_over_L",
+    "position_z_over_L",
+    "velocity_x_over_U",
+    "velocity_y_over_U",
+    "velocity_z_over_U",
+    "linear_acc_x_L_over_U2",
+    "linear_acc_y_L_over_U2",
+    "linear_acc_z_L_over_U2",
+    "angular_acc_x_T2",
+    "angular_acc_y_T2",
+    "angular_acc_z_T2",
+    "integrated_linear_velocity_x_over_U",
+    "integrated_linear_velocity_y_over_U",
+    "integrated_linear_velocity_z_over_U",
+    "integrated_angular_velocity_x_T",
+    "integrated_angular_velocity_y_T",
+    "integrated_angular_velocity_z_T",
+    "native_body_acc_x_L_over_U2",
+    "native_body_acc_y_L_over_U2",
+    "native_body_acc_z_L_over_U2",
+    "left_closest_dx_over_L",
+    "left_closest_dy_over_L",
+    "left_closest_dz_over_L",
+    "left_distance_over_L",
+    "right_closest_dx_over_L",
+    "right_closest_dy_over_L",
+    "right_closest_dz_over_L",
+    "right_distance_over_L",
+    "front_closest_dx_over_L",
+    "front_closest_dy_over_L",
+    "front_closest_dz_over_L",
+    "front_distance_over_L",
+    "back_closest_dx_over_L",
+    "back_closest_dy_over_L",
+    "back_closest_dz_over_L",
+    "back_distance_over_L",
+    "bottom_closest_dx_over_L",
+    "bottom_closest_dy_over_L",
+    "bottom_closest_dz_over_L",
+    "bottom_distance_over_L",
+    "elapsed_time_over_T",
+    "interval_over_T",
+    "dp_over_L",
+    "drive_amplitude",
+    "h_over_dp",
+    "artificial_viscosity",
+    "reference_density_over_1000"
+  ],
+  "width": 48,
+  "normalization": {
+    "length_m": 0.9,
+    "speed_mps": 0.9396275858019495,
+    "time_s": 0.9578262852211514,
+    "basis": "fixed registered geometry/gravity scales; no future frame or split statistics"
+  },
+  "coordinate_frame": "fixed tank; no inferred cup angle or inertial rigid pose",
+  "control_semantics": "current prescribed linear/angular acceleration, integrated control velocities using native right-endpoint convention, current-state native component-specific body force",
+  "geometry": "nearest-point vectors and distances to five finite closed rectangular faces; open top has no face",
+  "fixed_physics": {
+    "h_over_dp": 1.5921703843496147,
+    "artificial_viscosity": 0.05,
+    "reference_density_kg_m3": 1000
+  },
+  "reused_models": [
+    "experiments.r3_g4_baselines.ParticleMLP",
+    "experiments.r3_g4_baselines.LocalInteraction"
+  ],
+  "local_features": "existing actual eight-nearest-neighbour summary from current state",
+  "adapter_sha256": "a4f2b7239e825033e150e4e0f4746ad3e838b1b04aa902b44944edf8a60e03dc",
+  "model_source_sha256": "fe2ea1f9063918217f33841ec4b0ef960564ca2c1dcdc8a3742a76f17a8d1b85",
+  "validation_commands": [
+    {
+      "command": "pytest tests/test_f3_learning_inputs.py tests/test_f3_control.py -q",
+      "passed": 6
+    },
+    {
+      "command": "pytest tests/test_f3_development_candidates.py tests/test_f3_learning_inputs.py -q",
+      "passed": 7
+    }
+  ],
+  "evidence_scope": "CPU unit checks and untrained model forward passes only; no training attempt or GPU performance claim",
+  "remaining": [
+    "wire qualified development loader and recipe/hash gates",
+    "stream current-state training/rollout with same velocity convention",
+    "real GPU training for both routes x three seeds",
+    "full autonomous failure-aware score panel",
+    "checkpoint recovery and end-to-end resource measurement"
+  ],
+  "legacy_trainer_warning": "The historical 115-wide cup-pose trainer still does not consume this 48-wide adapter. Do not launch it unchanged for F3.",
+  "qualified_model": false
+}
