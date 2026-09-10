@@ -1,11 +1,20 @@
 """Execute predeclared whole-template/F3 cases with shared campaign guards."""
 
-import argparse, json, fcntl, subprocess, time, hashlib, shutil, re
+import argparse, json, fcntl, subprocess, time, hashlib, shutil, re, math
 from datetime import datetime, timezone
-from scripts.l1r_continuation_evidence import LAB, OUT, write, ledger
+from scripts.l1r_continuation_evidence import LAB, OUT, write, ledger, resource_limits
 from scripts.l1r_postprocess_case import process
 from scripts import l1r_q2_mdbc_bridge as q2
 from scripts.campaign_runner import execute_attempt
+
+
+def check_gpu_time_reserve(record,budget):
+    timeout=float(record.get('solver_timeout_seconds',1800))
+    if not math.isfinite(timeout) or not 0<timeout<=7200:
+        raise ValueError('solver timeout must be finite, positive and at most 7200 s')
+    if budget['gpu_budget_charge_hours']+timeout/3600>resource_limits()['gpu_hours']:
+        raise RuntimeError('remaining GPU budget cannot cover the guarded attempt timeout')
+    return timeout
 
 
 def run(record):
@@ -31,6 +40,7 @@ def run(record):
         check_budget()
         ledger()
         budget = json.loads((OUT / "RESOURCE-LEDGER.json").read_text())
+        timeout_seconds=check_gpu_time_reserve(record,budget)
         if (
             budget["qualification_attempts_remaining"] <= 0
             or budget["gpu_solver_hours"] >= 64
@@ -80,7 +90,7 @@ def run(record):
             env=q2.environment(),
             evidence_glob="data/Part_*.bi4",
             required_text="Finished execution (code=0)",
-            timeout_seconds=1800,
+            timeout_seconds=timeout_seconds,
             resource_guard=guard,
             resource_poll_seconds=1.0,
         )

@@ -1,0 +1,34 @@
+{
+  "registered_before_solver": true,
+  "attempts": 1,
+  "predecessor": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_time_quarter",
+  "predecessor_audit_sha256": "9454cca712fbcf38537654c27288461a0f3de92efaa33313211c6e402675d291",
+  "coupling_preflight_sha256": "7950b8c2137cc4d7cd173d7c6ca4f2591e894a64aeff6a3b5d8b83c2b7696d59",
+  "case": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_time_quarter",
+  "change": {
+    "dp_m": [
+      0.01,
+      0.0075
+    ]
+  },
+  "held_fixed": [
+    "same continuous plain geometry and water volume",
+    "same dp-dependent CELL3 initialization/automatic constants policy",
+    "no-slip, boundary viscosity1, three layers, no projection",
+    "amplitude1 and full0-8.35s",
+    "CFL and CoefDtMin .0125",
+    "output .01s",
+    "same dimensionless wall tolerance and zero crossing gate"
+  ],
+  "evidence": "Temporal levels retain15/5/7 nominal-wall crossings; saved-state fourth-layer direct coupling bound is outside the kernel. No convergent temporal elimination demonstrated.",
+  "hypothesis": "Determine whether improved spatial resolution changes hard integrity and residual nominal-wall excursions.",
+  "solver_timeout_seconds": 5400,
+  "timeout_basis": "Coarse quarter-step took1326.72s. Fine fluid count scales by2.37 with a smaller native step; reserve90min rather than reusing a30min timeout that may be insufficient. GPU total unchanged.",
+  "scope": "one focused failure diagnosis, not qualified ladder or production",
+  "threshold_relaxation": false,
+  "required_evidence": [
+    "native mass/particle count and actual configuration",
+    "full audit and crossing tracks",
+    "full-window fixed-scale comparison with coarse source, failed-source semantics retained"
+  ]
+}

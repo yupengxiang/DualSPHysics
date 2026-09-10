@@ -22,7 +22,13 @@ def check_ns1_expansion(variant,dp,amplitude):
         if not source.exists():raise ValueError('requires completed half-step diagnostic')
         prior=json.loads(source.read_text())
         design=OUT/'F3-NS1-QUARTER-TIME-DIAGNOSTIC-DESIGN.json'
-    if variant in ('noslip_visco1_time','noslip_visco1_time_quarter') and dp==.01 and amplitude==1. and design.exists():
+    spatial=variant=='noslip_visco1_time_quarter' and dp==.0075
+    if spatial:
+        source=OUT/'F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_time_quarter-AUDIT.json'
+        if not source.exists():raise ValueError('requires completed third temporal level')
+        prior=json.loads(source.read_text())
+        design=OUT/'F3-NS1-SPATIAL-DIAGNOSTIC-DESIGN.json'
+    if variant in ('noslip_visco1_time','noslip_visco1_time_quarter') and (dp==.01 or spatial) and amplitude==1. and design.exists():
         d=json.loads(design.read_text())
         if (d['registered_before_solver'] and d['attempts']==1
             and d['predecessor_audit_sha256']==sha256(source)
@@ -101,6 +107,12 @@ def prepare(dp=.01,amplitude=1.,variant='nominal'):
         r.update(recipe_id='F3_CELL3_NS_visco1_no_projection',visco_bound_factor=1,
                  input_repair='native recommended no-slip boundary viscosity factor; fluid Visco remains 0.05',
                  boundary_bridge_sha256=sha256(OUT/'F3-NOSLIP-VISCO1-DESIGN.json'))
+    if variant=='noslip_visco1_time_quarter' and dp==.0075 and amplitude==1.:
+        design=OUT/'F3-NS1-SPATIAL-DIAGNOSTIC-DESIGN.json'
+        r.update(phase='F3_CELL3_spatial_failure_diagnostic',
+                 comparison_scope='single dp refinement after three unsuccessful temporal levels; not a qualified spatial ladder',
+                 spatial_diagnostic_sha256=sha256(design),
+                 solver_timeout_seconds=json.loads(design.read_text())['solver_timeout_seconds'])
     r.pop('repair_of',None)
     if variant!='noslip_cli_fix' and not ns1:r.pop('input_repair',None)
     check_input(r)

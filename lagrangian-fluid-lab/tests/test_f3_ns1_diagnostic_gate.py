@@ -31,3 +31,16 @@ def test_quarter_step_needs_its_own_completed_predecessor(tmp_path,monkeypatch):
     with pytest.raises(ValueError):campaign.check_ns1_expansion('noslip_visco1_time_quarter',.0075,1.)
     half.write_text(half.read_text()+'\n')
     with pytest.raises(ValueError):campaign.check_ns1_expansion('noslip_visco1_time_quarter',.01,1.)
+
+
+def test_spatial_probe_requires_its_own_hash_bound_design(tmp_path,monkeypatch):
+    monkeypatch.setattr(campaign,'OUT',tmp_path)
+    failed={'audit_status':'quality_failed','issues':['swept_finite_wall_or_obstacle_crossing']}
+    for suffix in ('noslip_visco1','noslip_visco1_time','noslip_visco1_time_quarter'):
+        (tmp_path/f'F3_CELL3_LONG_dp0p01_a1p000_{suffix}-AUDIT.json').write_text(json.dumps(failed))
+    with pytest.raises(ValueError):campaign.check_ns1_expansion('noslip_visco1_time_quarter',.0075,1.)
+    source=tmp_path/'F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_time_quarter-AUDIT.json'
+    (tmp_path/'F3-NS1-SPATIAL-DIAGNOSTIC-DESIGN.json').write_text(json.dumps({'registered_before_solver':True,'attempts':1,'predecessor_audit_sha256':sha256(source)}))
+    campaign.check_ns1_expansion('noslip_visco1_time_quarter',.0075,1.)
+    for dp,amplitude in [(.006,1.),(.0075,.9)]:
+        with pytest.raises(ValueError):campaign.check_ns1_expansion('noslip_visco1_time_quarter',dp,amplitude)

@@ -30,3 +30,13 @@ def test_material_calibration_and_incomplete_work_share_budget(tmp_path,monkeypa
         (tmp_path/f'F3-MATERIAL-{name}.json').write_text(json.dumps({'status':status,'configuration_charge':charge}))
     (tmp_path/'F3-MATERIAL-COMPARISON.json').write_text(json.dumps({'status':'completed'}))
     assert evidence.material_usage()==9
+
+
+def test_new_timeout_must_fit_remaining_gpu_budget(monkeypatch):
+    import pytest
+    from scripts import l1r_branch_runner as runner
+    monkeypatch.setattr(runner,'resource_limits',lambda:{'gpu_hours':64})
+    assert runner.check_gpu_time_reserve({'solver_timeout_seconds':5400},{'gpu_budget_charge_hours':60})==5400
+    with pytest.raises(RuntimeError):runner.check_gpu_time_reserve({'solver_timeout_seconds':5400},{'gpu_budget_charge_hours':63})
+    for timeout in (0,-1,float('nan'),7201):
+        with pytest.raises(ValueError):runner.check_gpu_time_reserve({'solver_timeout_seconds':timeout},{'gpu_budget_charge_hours':0})
