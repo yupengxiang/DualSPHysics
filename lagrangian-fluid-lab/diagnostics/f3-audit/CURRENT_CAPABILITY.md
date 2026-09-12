@@ -1,6 +1,6 @@
 # F3 当前能力 — 2026-09-13
 
-2026-09-13 工程刷新：DualSPHysics 的 GPU 与 CPU 可执行路径均已核对，后续获准的 F3 资格求解优先走 GPU 4–7，并继续保留单 solver、UUID、显存和运行中 guard。GPU 0–3 仍受保护。CPU 训练 checkpoint 已固定 `F3_TORCH_NUM_THREADS`（默认 1），材料校准已切换到显式 hash 绑定的 v2 runner；全套 CPU 回归为 622 passed。没有新增 CFD、材料生产轨迹或训练运行。
+2026-09-13 工程刷新：DualSPHysics 的 GPU 与 CPU 可执行路径均已核对，后续获准的 F3 资格求解优先走 GPU 4–7，并继续保留单 solver、UUID、显存和运行中 guard。GPU 0–3 仍受保护。CPU 训练 checkpoint 已固定 `F3_TORCH_NUM_THREADS`（默认 1），材料校准已切换到显式 hash 绑定的 v2 runner；PyTorch CUDA 识别 8 张 RTX 6000 Ada，全套 CPU 回归为 622 passed。后端快照见 [F3-EXECUTION-BACKEND-AUDIT.json](F3-EXECUTION-BACKEND-AUDIT.json)。没有新增 CFD、材料生产轨迹或训练运行。
 
 **配方资格尚未取得；独立开发数据与学习闭环尚未完成。** CFD 持续使用 GPU4。
 
