@@ -15,11 +15,20 @@
   },
   "candidate": {
     "production_dp_m": 0.0075,
-    "reference_dp_m": [0.01, 0.006],
+    "reference_dp_m": [
+      0.01,
+      0.006
+    ],
     "fixed_recipe": "NoPenetration=True, -mdbc_noslip:1, boundary viscosity 1, CFL/CoefDtMin 0.05",
-    "time_window_s": [0.0, 8.35],
+    "time_window_s": [
+      0.0,
+      8.35
+    ],
     "output_interval_s": 0.01,
-    "control_domain": [0.9, 1.1],
+    "control_domain": [
+      0.9,
+      1.1
+    ],
     "independent_internal_amplitude": 0.97,
     "observables": "frozen v2 full-window macro operator plus unchanged hard particle audit"
   },
@@ -32,10 +41,10 @@
   "cpu_reserve_estimates": {
     "minimum_per_case_at_1800s_timeout_core_hours": 11.733333333333333,
     "minimum_for_11_cases_core_hours": 129.06666666666666,
-    "current_remaining_core_hours": 113.96766867644442,
-    "minimum_shortfall_core_hours": 15.098997990222244,
+    "current_remaining_core_hours": 113.57466802933322,
+    "minimum_shortfall_core_hours": 15.491998637333438,
     "observed_class_reserve_for_075_and_006_core_hours": 234.66666666666669,
-    "observed_class_shortfall_core_hours": 120.69899799022227
+    "observed_class_shortfall_core_hours": 121.09199863733346
   },
   "resource_snapshot": {
     "qualification_used": 61,
@@ -43,11 +52,13 @@
     "qualification_remaining": 11,
     "gpu_hours": 8.80677964546098,
     "gpu_cap_hours": 64,
-    "cpu_core_hours_upper_bound": 654.0323313235556,
+    "cpu_core_hours_upper_bound": 654.4253319706668,
     "cpu_cap_core_hours": 768,
     "material_configurations_used": 10,
     "development_attempts_used": 0,
-    "training_attempts_used": 0
+    "training_attempts_used": 0,
+    "cpu_remaining_core_hours": 113.57466802933322,
+    "resource_ledger_sha256": "8f17475c32521711db8b3c2156a89f596c0f00234a57768a22b6cb6d8d35e5bc"
   },
   "decision_required": [
     "approve a prospective recipe revision",
@@ -59,5 +70,13 @@
     "truncated time window",
     "post-hoc production selection from passing pair",
     "launching development or training before the revised domain gate"
-  ]
+  ],
+  "recommended_owner_decision": {
+    "recipe_revision": "F3_CELL3_NS_visco1_native_nopen_revision075",
+    "qualification_cap": 80,
+    "cpu_core_hours_cap": 896,
+    "gpu_hours_cap": 64,
+    "basis": "11 new revision cells plus seven diagnostic/retry attempts; 896 CPU core-hours covers the observed 0.0075/0.006 conservative class reserve with rounding.",
+    "status": "recommendation_only_not_authorization"
+  }
 }
