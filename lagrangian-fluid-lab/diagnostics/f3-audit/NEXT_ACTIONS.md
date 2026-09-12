@@ -16,6 +16,8 @@ The live ledger is 61/72 qualification attempts, approximately 8.8068/64 GPU hou
 
 The concrete pending revision is recorded in [RECIPE_REVISION_PROPOSAL.md](RECIPE_REVISION_PROPOSAL.md) and its hash-bound JSON companion. The leading candidate is a prospective 0.0075 m production recipe with 0.010/0.006 m references, but it needs new zero/time/output/endpoint/internal cells and additional CPU/qualification budget before any launch.
 
+The 11 candidate input directories are now prepared under `campaigns/l1-resume/artifacts/f3-revision075/` and bound by `F3-075-REVISION-PREPARATION-SUMMARY.json`. Each XML retains `NoPenetration=1`, `Boundary=2`, `SlipMode=2`, full `TimeMax=8.35`, and the manifest-specific CFL/output setting; each forcing file is a gravity-preserving amplitude transform of the vendor input. The preparation summary reports `solver_attempts=0`, `qualification_attempts_charged=0`, `qualified=false`, and `formal_release=false`. Do not invoke these records until a new authorization is recorded.
+
 ### Live refresh at 2026-09-12T09:41Z
 
 The separately registered CFL-half root-cause diagnostic is complete. The first `_cflhalf` launch is preserved as a charged environmental failure: an inherited empty `CUDA_VISIBLE_DEVICES` mask made CUDA return error 100 before computation. The worker was corrected without changing the scientific contrast, and `_cflhalf_retry` completed on GPU4 with 836 frames, 67,500 fluid particles, zero hard-audit issues, and native `dt=8.769713845632211e-6 s` (approximately half of NP06).
