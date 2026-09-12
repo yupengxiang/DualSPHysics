@@ -2,7 +2,15 @@
 
 The full goal remains active: reproducible qualified numerical recipe, independent development trajectories, material tasks and real learning/recovery closure. No production resolution/control domain or full-window CFD material reference is qualified. Do not mark complete or redefine the goal as diagnostics.
 
-## Live continuation at2026-09-12T08:16Z
+## Historical snapshot at2026-09-12T08:16Z
+
+### Live refresh at 2026-09-12T08:55Z
+
+NP04, NP05 and NP06 are now terminal. NP04 used the 0.002 s output schedule and passed its full 4,176-frame hard audit; NP05 (dp=0.0075 m) and NP06 (dp=0.006 m) each passed the 836-frame hard audit with zero exclusions, lifecycle changes, nominal crossings or nonfinite values. NP06 finished on GPU4 at 2026-09-12T08:47:07Z; its audit covers 67,500 initial fluid particles through 8.350012880462266 s.
+
+The CPU-wrapped nominal stage scorer consumed only existing sources and published `F3-NOPEN-NOMINAL-SCORES-526417a59f665d1d25987d473e9c29c581868a1d1367d979a2ddc6e76a4bcf5d.json` plus a failed `F3-NOPEN-NOMINAL-GATE.json`. Zero-drive, half-step, fine-output and NP01↔NP05 spatial panels pass. NP01↔NP06 fails the registered 0.05 full-window spatial budget: maximum energy difference 0.0631686448 and maximum mean-velocity difference 0.0629465234. NP05↔NP06 passes. The failure occurs around 7.35–7.41 s, not only at the final bracket, so it is recorded as a substantive resolution result. Do not change the threshold, truncate the window, or launch NP07–NP14 while this gate is failed. Any follow-up resolution or time-step diagnostic must be a separately registered, resource-charged diagnostic and cannot retroactively overwrite this evidence.
+
+The current ledger is 57/72 qualification attempts, approximately 8.2011/64 GPU hours, and 639.25/768 conservative CPU core-hours; 0/40 development, 0/12 training, and 10/32 material configurations. The user-approved caps remain 72 qualification attempts and 768 CPU core-hours.
 
 NP02 zero drive completed on GPU4: all836 frames pass hard audit, issues=[]/unknowns=[]. Full-window v2 drift maxima all below.01 (largest q90/L=.0052310963; TV=.0019360758). Report F3-NP02-ZERO-DRIFT.json is a preliminary single-control score, not a stage/domain gate.
 
