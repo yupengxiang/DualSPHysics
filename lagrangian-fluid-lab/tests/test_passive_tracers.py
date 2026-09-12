@@ -12,6 +12,7 @@ from scripts.passive_tracers import (
     shepard_velocity,
     weighted_stratified_seeds,
 )
+from scripts.f3_material_neighbors import shepard_velocity_with_diagnostics as material_interpolator
 
 
 def make_uniform_h5(path):
@@ -43,6 +44,16 @@ def test_heun_advects_uniform_field(tmp_path):
     make_uniform_h5(path)
     traced = advect_hdf5(path, [[0.3, 0.4, 0]], neighbours=4, regularization=0.01)
     np.testing.assert_allclose(traced["position"][-1], [[0.5, 0.4, 0]], atol=1e-12)
+
+
+def test_advector_accepts_explicit_material_interpolator(tmp_path):
+    path = tmp_path / "uniform-material.h5"
+    make_uniform_h5(path)
+    traced = advect_hdf5(path, [[0.3, 0.4, 0]], neighbours=4,
+                         regularization=0.01,
+                         velocity_interpolator=material_interpolator)
+    np.testing.assert_allclose(traced["position"][-1], [[0.5, 0.4, 0]], atol=1e-12)
+    assert traced["velocity_interpolator"].endswith("f3_material_neighbors.shepard_velocity_with_diagnostics")
 
 
 def test_visibility_filter_rejects_samples_across_wall():

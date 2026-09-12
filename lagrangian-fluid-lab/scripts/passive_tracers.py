@@ -850,7 +850,8 @@ def _visibility_barriers(barrier_provider: Callable[..., Any] | None, barriers: 
 
 def advect_hdf5(h5_path, initial_positions, *, neighbours=24, regularization=0.004,
                 maximum_support_distance=None, frame_stride=1, substeps_per_interval=1,
-                barrier_provider=None, support_gate: Mapping[str, Any] | None = None):
+                barrier_provider=None, support_gate: Mapping[str, Any] | None = None,
+                velocity_interpolator: Callable[..., Any] | None = None):
     """Heun-integrate passive tracers using positions, velocities and times.
 
     Reliability is determined by finite velocity values, finite support
@@ -860,6 +861,10 @@ def advect_hdf5(h5_path, initial_positions, *, neighbours=24, regularization=0.0
     space-time substep through :func:`spacetime_swept_wall_blocked`.
     """
     initial_positions = np.asarray(initial_positions, dtype=np.float64)
+    interpolator = (shepard_velocity_with_diagnostics
+                    if velocity_interpolator is None else velocity_interpolator)
+    if not callable(interpolator):
+        raise TypeError("velocity_interpolator must be callable")
     gate = _normalise_support_gate(support_gate)
     if int(frame_stride) < 1:
         raise ValueError("frame_stride must be positive")
@@ -927,11 +932,11 @@ def advect_hdf5(h5_path, initial_positions, *, neighbours=24, regularization=0.0
                 barriers1 = barrier_provider(h5, frame0, frame1, alpha1) if barrier_provider else None
                 visibility0 = _visibility_barriers(barrier_provider, barriers0)
                 visibility1 = _visibility_barriers(barrier_provider, barriers1)
-                v0, support0, visible0, metrics0 = shepard_velocity_with_diagnostics(
+                v0, support0, visible0, metrics0 = interpolator(
                     query, samples0, values0, neighbours=neighbours, regularization=regularization,
                     barrier_triangles=visibility0)
                 predicted = query + np.nan_to_num(v0) * subdt
-                v1, support1, visible1, metrics1 = shepard_velocity_with_diagnostics(
+                v1, support1, visible1, metrics1 = interpolator(
                     predicted, samples1, values1, neighbours=neighbours, regularization=regularization,
                     barrier_triangles=visibility1)
                 visibility_mode = str(metrics0.get("visibility_mode", metrics1.get("visibility_mode", "unknown")))
@@ -1000,6 +1005,10 @@ def advect_hdf5(h5_path, initial_positions, *, neighbours=24, regularization=0.0
         "interpolation_reconstruction_error_mps": np.asarray(reconstruction_history),
         "support_gate_pass": np.asarray(support_gate_history),
         "support_gate": gate,
+        "velocity_interpolator": (
+            f"{getattr(interpolator, '__module__', type(interpolator).__module__)}."
+            f"{getattr(interpolator, '__qualname__', type(interpolator).__qualname__)}"
+        ),
         "motion_interpolation": getattr(barrier_provider, "motion_interpolation", "none")
         if barrier_provider is not None else "none",
     }
