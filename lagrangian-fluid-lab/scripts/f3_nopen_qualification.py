@@ -225,7 +225,9 @@ def _xml_metadata(prefix, dp):
     particles = root.find("./execution/particles")
     fluid = root.findall("./execution/particles/fluid")
     fixed = root.findall("./execution/particles/fixed")
-    if definition is None or float(definition.get("dp")) != dp or len(fluid) != 1 or len(fixed) != 1:
+    if (definition is None
+            or not math.isclose(float(definition.get("dp")), dp, rel_tol=0.0, abs_tol=1e-8)
+            or len(fluid) != 1 or len(fixed) != 1):
         raise ValueError("CELL3 source geometry or particle blocks do not match dp")
     n = math.prod(round(length / dp) for length in (.9, .18, .09))
     nb = int(fixed[0].get("count"))
@@ -235,7 +237,8 @@ def _xml_metadata(prefix, dp):
             or int(particles.get("nb")) != nb or int(particles.get("nbf")) != nb):
         raise ValueError("CELL3 generated particle counts or ID blocks are inconsistent")
     constants = root.find("./execution/constants")
-    if float(constants.find("dp").get("value")) != dp:
+    if not math.isclose(float(constants.find("dp").get("value")), dp,
+                        rel_tol=0.0, abs_tol=1e-8):
         raise ValueError("generated constants use another dp")
     return {"total_particles": n + nb, "fluid_particles": n, "boundary_particles": nb}
 
@@ -249,7 +252,8 @@ def _initial_state(prefix, dp):
         temp = Path(folder) / "dump"
         ids, positions, velocities, density, meta, info = read_frame(prefix.with_suffix(".bi4"), temp)
         nb, n = counts["boundary_particles"], counts["fluid_particles"]
-        if (meta.get("CaseName") != prefix.name or float(meta["Dp"]) != dp
+        if (meta.get("CaseName") != prefix.name
+                or not math.isclose(float(meta["Dp"]), dp, rel_tol=0.0, abs_tol=1e-8)
                 or int(meta["CaseNp"]) != counts["total_particles"]
                 or int(meta["CaseNfixed"]) != nb or int(meta["CaseNfluid"]) != n
                 or int(meta["CaseNmoving"]) != 0 or int(meta["CaseNfloat"]) != 0

@@ -1,5 +1,5 @@
 {
-  "schema": "f3.revision075.ref008.proposal.v1",
+  "schema": "f3.revision075.ref0081818.proposal.v2",
   "status": "proposal_only_no_authorization_no_solver_launched",
   "created_at_basis": "2026-09-13",
   "reason": "The approved revision075 matrix passed all hard audits and adjacent checks but failed direct .010↔.006 endpoint energy gates; a prospective tighter reference ladder is needed rather than changing the frozen scorer.",
@@ -28,10 +28,10 @@
     ]
   },
   "prospective_recipe": {
-    "recipe_id": "F3_CELL3_NS_visco1_native_nopen_revision075_ref008",
+    "recipe_id": "F3_CELL3_NS_visco1_native_nopen_revision075_ref0081818",
     "production_resolution_m": 0.0075,
     "reference_resolutions_m": [
-      0.008,
+      0.008181818181818182,
       0.006
     ],
     "retained_historical_resolution_m": 0.01,
@@ -47,29 +47,71 @@
     "independent_internal_amplitude": 0.97,
     "coordinate_frame": "fixed tank computational coordinates",
     "scorer": "same frozen v2 full-window operator, including all pairwise endpoint combinations in the new three-resolution gate",
-    "rationale": "Reduce the largest resolution gap while preserving the production recipe and full control domain; .010 remains immutable historical evidence and is not silently deleted."
+    "rationale": "Reduce the largest resolution gap while preserving the production recipe and full control domain. The new coarse reference is exactly 0.09/11 m so the 0.9 x 0.18 x 0.09 m cell-centred fluid volume tiles exactly; .010 remains immutable historical evidence and is not silently deleted.",
+    "rejected_candidate": {
+      "dp_m": 0.008,
+      "reason": "0.008 m does not divide all three fixed fluid dimensions and would violate the exact cell-centred volume/mass contract."
+    }
   },
   "new_solver_cells_required": [
     {
-      "cell_id": "R008-NOMINAL",
-      "dp_m": 0.008,
+      "cell_id": "R0081818-NOMINAL",
+      "dp_m": 0.008181818181818182,
       "amplitude": 1.0,
       "role": "new_coarse_reference"
     },
     {
-      "cell_id": "R008-ENDPOINT-LOW",
-      "dp_m": 0.008,
+      "cell_id": "R0081818-ENDPOINT-LOW",
+      "dp_m": 0.008181818181818182,
       "amplitude": 0.9,
       "role": "new_low_endpoint_reference"
     },
     {
-      "cell_id": "R008-ENDPOINT-HIGH",
-      "dp_m": 0.008,
+      "cell_id": "R0081818-ENDPOINT-HIGH",
+      "dp_m": 0.008181818181818182,
       "amplitude": 1.1,
       "role": "new_high_endpoint_reference"
     }
   ],
+  "preparation_evidence": {
+    "manifest_path": "diagnostics/f3-audit/F3-075-REF0081818-MANIFEST.json",
+    "manifest_sha256": "0d4cbd7d22daaff864bccb82e57348631e0a057a3465490a6bbc19e67c0aa078",
+    "summary_path": "campaigns/l1-resume/continuation/F3-075-REF0081818-PREPARATION-SUMMARY.json",
+    "summary_sha256": "d23d57e9e7b9d1985256020d666c6edb8b4f32925f7a8be93ba70d5e6cd10c2d",
+    "solver_attempts": 0,
+    "input_preflights": "three passed native acceleration preflights; exact-tiling GenCase structural checks passed",
+    "record_bindings": [
+      {
+        "path": "campaigns/l1-resume/continuation/R0081818-NOMINAL-PREPARED.json",
+        "sha256": "043febcc4e2deb9c515ed32fe99b8ed7241c68fa8dbf72b9ad8d1f7e5ef6684f"
+      },
+      {
+        "path": "campaigns/l1-resume/continuation/R0081818-ENDPOINT-LOW-PREPARED.json",
+        "sha256": "6013d254bcb02d77b3c3043037a5147b506725dec3ffbc1fc986272545a8dd29"
+      },
+      {
+        "path": "campaigns/l1-resume/continuation/R0081818-ENDPOINT-HIGH-PREPARED.json",
+        "sha256": "5914b02ed9bff3123b3f1e077945f647e58ff7efef471df9130d0890048a1c86"
+      }
+    ],
+    "preflight_bindings": [
+      {
+        "path": "campaigns/l1-resume/continuation/R0081818-NOMINAL-INPUT-PREFLIGHT.json",
+        "sha256": "502baea61f125676d8c729f5582bd5dbbb8265b159202e6403c26e7336fb77ca"
+      },
+      {
+        "path": "campaigns/l1-resume/continuation/R0081818-ENDPOINT-LOW-INPUT-PREFLIGHT.json",
+        "sha256": "19bb16d173bcf439d0a697253f632496930c956fd4f3317543dc17c26a460b4d"
+      },
+      {
+        "path": "campaigns/l1-resume/continuation/R0081818-ENDPOINT-HIGH-INPUT-PREFLIGHT.json",
+        "sha256": "82f4f33cd25d3c0ce9bd2101cbd457ee605accb674ab90a3bd2366e1b0ee6002"
+      }
+    ],
+    "preparer_sha256": "38f04a7e2ff03f0a411d76ed487169332557a76cb015a7bfc9bc14e9d7e273e9"
+  },
   "reused_hash_bound_evidence": [
+    "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
     "R075-ZERO",
     "R075-TIME",
     "R075-OUTPUT",
@@ -82,6 +124,13 @@
   ],
   "resource_estimate": {
     "qualification_attempts_new": 3,
+    "solver_timeout_seconds_per_cell": 4200,
+    "cpu_forward_reserve_per_cell_core_hours": 23.4666666667,
+    "cpu_forward_reserve_total_core_hours": 70.4,
+    "gpu_timeout_reserve_per_cell_hours": 1.1666666667,
+    "gpu_timeout_reserve_total_hours": 3.5,
+    "canary_policy": "Run nominal first; if its hard audit fails, stop and preserve the negative result; no blind retry.",
+    "retry_reserve_attempts": 0,
     "qualification_attempts_remaining_before_plan": 8,
     "cpu_core_hours_upper_bound_current": 697.4845240293334,
     "cpu_core_hours_limit": 896,
@@ -92,7 +141,7 @@
   "required_before_launch": [
     "owner approval of this new prospective manifest and recipe binding",
     "new authorization record with the same CPU/GPU/qualification caps",
-    "canary R008-NOMINAL hard audit before endpoint cells"
+    "canary R0081818-NOMINAL hard audit before endpoint cells"
   ],
   "explicitly_not_allowed": [
     "changing the existing .05 threshold",

@@ -1,0 +1,368 @@
+{
+  "schema": "f3.revision075.ref0081818.matrix_manifest.v1",
+  "status": "proposed_preparation_only",
+  "launch_allowed": false,
+  "recipe_id": "F3_CELL3_NS_visco1_native_nopen_revision075_ref0081818",
+  "production_resolution_m": 0.0075,
+  "reference_resolutions_m": [
+    0.00818181818181818,
+    0.006
+  ],
+  "retained_historical_resolution_m": 0.01,
+  "fixed_recipe": {
+    "solver_mode": "-mdbc_noslip:1",
+    "boundary": 2,
+    "slip_mode": 2,
+    "no_penetration": 1,
+    "visco": 0.05,
+    "visco_bound_factor": 1,
+    "shifting": 0,
+    "time_window_s": [
+      0.0,
+      8.35
+    ],
+    "output_interval_s": 0.01,
+    "coordinate_frame": "fixed tank computational coordinates with prescribed acceleration; no inertial-world trajectory claim",
+    "scoring": "frozen v2 full-window macro metrics plus unchanged hard particle audit; all endpoint pair combinations"
+  },
+  "exact_tiling": {
+    "dp_m": 0.00818181818181818,
+    "fluid_shape": [
+      110,
+      22,
+      11
+    ],
+    "fluid_particles": 26620,
+    "target_mass_kg": 14.58,
+    "reason": "dp=0.09/11 exactly tiles all three fixed fluid dimensions"
+  },
+  "old_v1_status": {
+    "status": "failed_immutable",
+    "report": "campaigns/l1-resume/continuation/F3-075-REVISION-SCORES-887035e274d17b56f3c0ab4b749ca6988069b42060ee047b116224a8b8f38af6.json",
+    "report_sha256": "887035e274d17b56f3c0ab4b749ca6988069b42060ee047b116224a8b8f38af6",
+    "direct_endpoint_failures": [
+      ".010↔.006 at amplitude 0.9",
+      ".010↔.006 at amplitude 1.1"
+    ]
+  },
+  "new_v2_status": "not_scored_preparation_only",
+  "cells": [
+    {
+      "cell_id": "R0081818-NOMINAL",
+      "dp_m": 0.00818181818181818,
+      "amplitude": 1.0,
+      "role": "new_coarse_reference",
+      "new_solver_attempt": true
+    },
+    {
+      "cell_id": "R0081818-ENDPOINT-LOW",
+      "dp_m": 0.00818181818181818,
+      "amplitude": 0.9,
+      "role": "new_low_endpoint_reference",
+      "new_solver_attempt": true
+    },
+    {
+      "cell_id": "R0081818-ENDPOINT-HIGH",
+      "dp_m": 0.00818181818181818,
+      "amplitude": 1.1,
+      "role": "new_high_endpoint_reference",
+      "new_solver_attempt": true
+    }
+  ],
+  "reused_hash_bound_evidence": [
+    "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+    "R075-ZERO",
+    "R075-TIME",
+    "R075-OUTPUT",
+    "R075-ENDPOINT-LOW-0075",
+    "R075-ENDPOINT-LOW-006",
+    "R075-ENDPOINT-HIGH-0075",
+    "R075-ENDPOINT-HIGH-006",
+    "R075-INTERNAL-0075",
+    "R075-INTERNAL-006"
+  ],
+  "reused_evidence_bindings": {
+    "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen": {
+      "label": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "record_sha256": "23d151c07c53c83b3048be9b665722161baaef37fc31e6ce6ec42e4b26b36894",
+      "audit_sha256": "00b3ea23d5dee4e77ecd7033ceee4f105ad736ee0de1d7a381838bbf10c79438",
+      "solver_sha256": "c87f2d478c0f294c57e0605b0c007244a23527e2bedd1a335de8db3d5f0e2262",
+      "preflight_sha256": "9f4de89df32e6e0aad52038a3a4e5d4f5c574e748a2d0eae8dcb5ffdb5528494",
+      "hdf5_path": "campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+      "hdf5_sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+      "files": {
+        "campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json": "23d151c07c53c83b3048be9b665722161baaef37fc31e6ce6ec42e4b26b36894",
+        "campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-AUDIT.json": "00b3ea23d5dee4e77ecd7033ceee4f105ad736ee0de1d7a381838bbf10c79438",
+        "campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-SOLVER.json": "c87f2d478c0f294c57e0605b0c007244a23527e2bedd1a335de8db3d5f0e2262",
+        "campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-INPUT-PREFLIGHT.json": "9f4de89df32e6e0aad52038a3a4e5d4f5c574e748a2d0eae8dcb5ffdb5528494",
+        "campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-NORMALIZATION.json": "2940cf3c3436a70e38cd78ba03a5b84a9ab570e361775051eaaf318e45d4885d",
+        "campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/CaseSloshingAccData.csv": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+        "campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075_Def.xml": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5",
+        "campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075_hdp_Actual.vtk": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c",
+        "campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075.bi4": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545",
+        "campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075.xml": "bd6c155b2112f0860293283def01b981c0364a1e67fbb146dd267a1dda8b58df",
+        "campaigns/l1-resume/runs/branches/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/attempts/20260912T082111.942848Z-effdcd7c.complete/Run.out": "855c454943d05e3bbfe2159d2f4a801ebd8bd9b4e364b867cd0f98f7ddb41642",
+        "campaigns/l1-resume/runs/branches/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/attempts/20260912T082111.942848Z-effdcd7c.complete/RunPARTs.csv": "73c2afdd3b176a5227b7c02181141c38d19dca1fc74ce154b1674b6fc9e57fd2",
+        "campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4"
+      }
+    },
+    "R075-ZERO": {
+      "label": "R075-ZERO",
+      "case_id": "F3_REV075_R075-ZERO",
+      "record_sha256": "f065e46ceb131030c125b1b1ee9dc6045db610a8d1e1f38e032883d49e9d8fba",
+      "audit_sha256": "8e514f2115574fb41b84d72e4f255c640a65e83c125d97596dff3fc5e0c3ae15",
+      "solver_sha256": "7fab7c992b21844b8bb98232ddabec0fb5e01b2b2e092858e72d57be7f702e2d",
+      "preflight_sha256": "2017bfa74ce15f79f085317c806e4e38ec7a032d4b0ef77bb2f9e36eaf83a898",
+      "hdf5_path": "campaigns/l1-resume/data/continuation/F3_REV075_R075-ZERO.h5",
+      "hdf5_sha256": "8231d15f3cf69e667e7cf3e798388fb7433ff0a3df69b696a86a27a43b725df3",
+      "files": {
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ZERO-PREPARED.json": "f065e46ceb131030c125b1b1ee9dc6045db610a8d1e1f38e032883d49e9d8fba",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ZERO-AUDIT.json": "8e514f2115574fb41b84d72e4f255c640a65e83c125d97596dff3fc5e0c3ae15",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ZERO-SOLVER.json": "7fab7c992b21844b8bb98232ddabec0fb5e01b2b2e092858e72d57be7f702e2d",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ZERO-INPUT-PREFLIGHT.json": "2017bfa74ce15f79f085317c806e4e38ec7a032d4b0ef77bb2f9e36eaf83a898",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ZERO-NORMALIZATION.json": "a7a77ac1a96b4b091f50676064ca3e1a43a65675c47d708d1fb9d284397d5c7e",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ZERO/CaseSloshingAccData.csv": "be0075e35d50cb39241a0b7d0fbbfad234c2fb619f930660f3aadc34eeedc08b",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ZERO/F3_CELL3_plain_0p0075_Def.xml": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ZERO/F3_CELL3_plain_0p0075_hdp_Actual.vtk": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ZERO/F3_CELL3_plain_0p0075.bi4": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ZERO/F3_CELL3_plain_0p0075.xml": "bd6c155b2112f0860293283def01b981c0364a1e67fbb146dd267a1dda8b58df",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-ZERO/attempts/20260912T181307.553885Z-86c5b2a6.complete/Run.out": "56cd51ec782483930130feac256fb1ee04b9c94140524c4f4574e2de65a4c13e",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-ZERO/attempts/20260912T181307.553885Z-86c5b2a6.complete/RunPARTs.csv": "0a42eb8ed2299722d59e7acfd8f2da52b5580e0f0ca79fc485982f79078f5f2f",
+        "campaigns/l1-resume/data/continuation/F3_REV075_R075-ZERO.h5": "8231d15f3cf69e667e7cf3e798388fb7433ff0a3df69b696a86a27a43b725df3"
+      }
+    },
+    "R075-TIME": {
+      "label": "R075-TIME",
+      "case_id": "F3_REV075_R075-TIME",
+      "record_sha256": "02e64e6251670b9d5a8fbaa9db10796fb56bf89de5687552972bc93bdde1f7ea",
+      "audit_sha256": "28b72317205fff802b9dcdeea872e238b7524e62a07272b6a50fc4aab09eafbf",
+      "solver_sha256": "79163e05a5418d2da77907c3bb0fbb5afd34ec125b9f93c63d1bc36b7c674fc5",
+      "preflight_sha256": "7ca42205d357e2f1bb56930ed2cb532358dbdc6681dafb13985d876da45c2246",
+      "hdf5_path": "campaigns/l1-resume/data/continuation/F3_REV075_R075-TIME.h5",
+      "hdf5_sha256": "2766fd135f378529508d0d97b019def374d9e62da4a6336f41ae7dfa70cb90af",
+      "files": {
+        "campaigns/l1-resume/continuation/F3_REV075_R075-TIME-PREPARED.json": "02e64e6251670b9d5a8fbaa9db10796fb56bf89de5687552972bc93bdde1f7ea",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-TIME-AUDIT.json": "28b72317205fff802b9dcdeea872e238b7524e62a07272b6a50fc4aab09eafbf",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-TIME-SOLVER.json": "79163e05a5418d2da77907c3bb0fbb5afd34ec125b9f93c63d1bc36b7c674fc5",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-TIME-INPUT-PREFLIGHT.json": "7ca42205d357e2f1bb56930ed2cb532358dbdc6681dafb13985d876da45c2246",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-TIME-NORMALIZATION.json": "63c9f5c4ff4f2dcba62a238ee0e464bc765fc5deacc66141d71e7933a22cf2e9",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-TIME/CaseSloshingAccData.csv": "c01596cfc64a90188e2c6a8aa8c0f6ce693ca0befa933b2dac2b494380c576b6",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-TIME/F3_CELL3_plain_0p0075_Def.xml": "cfbec67d91fdc429f1478d8a50b5e14357ad2ec69b665d69cc0ff7a3063bd658",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-TIME/F3_CELL3_plain_0p0075_hdp_Actual.vtk": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-TIME/F3_CELL3_plain_0p0075.bi4": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-TIME/F3_CELL3_plain_0p0075.xml": "151f0130025468fcbc549c65db3b0b4bbc8746dc45ce711350e375f3851ffb1c",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-TIME/attempts/20260912T182355.019059Z-56634a06.complete/Run.out": "428e5ae6c91a7669e16aa978a13e9a5e3733bf280e3b143c3068c0e908deb700",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-TIME/attempts/20260912T182355.019059Z-56634a06.complete/RunPARTs.csv": "134dbb14bb156535f103cb17ce6e12b57454033203e609d8e137c0a09f496b90",
+        "campaigns/l1-resume/data/continuation/F3_REV075_R075-TIME.h5": "2766fd135f378529508d0d97b019def374d9e62da4a6336f41ae7dfa70cb90af"
+      }
+    },
+    "R075-OUTPUT": {
+      "label": "R075-OUTPUT",
+      "case_id": "F3_REV075_R075-OUTPUT",
+      "record_sha256": "e0c847522dcab26548a6dccfc4c5b590ecafa93a3ca153db32db6e954a8d8c3c",
+      "audit_sha256": "b8637e249dfcb4e492f02b4de7997f84fe3fbebe8d1f0788077fa09dde5374b0",
+      "solver_sha256": "69b9550248a9f82922c7c399a84cd43a6d32a116460e2d1f5c27ba97d6d71d50",
+      "preflight_sha256": "71e273cbc89ae4d0d11bc27cc28c3c4b6c143c4893ab84c1673a9430ab2349ad",
+      "hdf5_path": "campaigns/l1-resume/data/continuation/F3_REV075_R075-OUTPUT.h5",
+      "hdf5_sha256": "571ddf4ba1878730ff80d20bca49361a7f3fff841f3ac618dd983894364c7e63",
+      "files": {
+        "campaigns/l1-resume/continuation/F3_REV075_R075-OUTPUT-PREPARED.json": "e0c847522dcab26548a6dccfc4c5b590ecafa93a3ca153db32db6e954a8d8c3c",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-OUTPUT-AUDIT.json": "b8637e249dfcb4e492f02b4de7997f84fe3fbebe8d1f0788077fa09dde5374b0",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-OUTPUT-SOLVER.json": "69b9550248a9f82922c7c399a84cd43a6d32a116460e2d1f5c27ba97d6d71d50",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-OUTPUT-INPUT-PREFLIGHT.json": "71e273cbc89ae4d0d11bc27cc28c3c4b6c143c4893ab84c1673a9430ab2349ad",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-OUTPUT-NORMALIZATION.json": "59552ff5ec7c9a7b5360c22fa2f909a9177d159a73de153a41ac5eea53eefc87",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-OUTPUT/CaseSloshingAccData.csv": "c01596cfc64a90188e2c6a8aa8c0f6ce693ca0befa933b2dac2b494380c576b6",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-OUTPUT/F3_CELL3_plain_0p0075_Def.xml": "77e6d965d2b5f1cfe42113bc69761c21681ee1839964aeec9a5369db0830c16f",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-OUTPUT/F3_CELL3_plain_0p0075_hdp_Actual.vtk": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-OUTPUT/F3_CELL3_plain_0p0075.bi4": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-OUTPUT/F3_CELL3_plain_0p0075.xml": "79c48ff95e0743f5237e37f13a1380f42a48a108c34106d89a288758c03716de",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-OUTPUT/attempts/20260912T184204.585052Z-20e1ebe2.complete/Run.out": "cba714622fef5f153baaff3d69f648e8e3c74f9cb04b2485f9997c2460c6256e",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-OUTPUT/attempts/20260912T184204.585052Z-20e1ebe2.complete/RunPARTs.csv": "d3cc70270df14c73787e7c14d4c09b51123188069cd17a8c339e05f7254dfe59",
+        "campaigns/l1-resume/data/continuation/F3_REV075_R075-OUTPUT.h5": "571ddf4ba1878730ff80d20bca49361a7f3fff841f3ac618dd983894364c7e63"
+      }
+    },
+    "R075-ENDPOINT-LOW-0075": {
+      "label": "R075-ENDPOINT-LOW-0075",
+      "case_id": "F3_REV075_R075-ENDPOINT-LOW-0075",
+      "record_sha256": "129541fe3561050849624e922cbe5c996641d1293df52d3766ad7419895516c6",
+      "audit_sha256": "6fc3bab7d9003ce81a1b6fbadd3934cb0667e3427aab72d7cd2b9e26afac4c87",
+      "solver_sha256": "4b31e95f70dcc463fa60102b6725742c211922df7aff6e900482b381e426d84e",
+      "preflight_sha256": "e9fd8af7e6328ca5ce77bb2e5e4ea91ac8047eab1a14a7140f6c21872c47397b",
+      "hdf5_path": "campaigns/l1-resume/data/continuation/F3_REV075_R075-ENDPOINT-LOW-0075.h5",
+      "hdf5_sha256": "83b065cf15b9ef15fdfa71ac6e6d6239337e22a3794812a173eee1b2de3528c7",
+      "files": {
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-LOW-0075-PREPARED.json": "129541fe3561050849624e922cbe5c996641d1293df52d3766ad7419895516c6",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-LOW-0075-AUDIT.json": "6fc3bab7d9003ce81a1b6fbadd3934cb0667e3427aab72d7cd2b9e26afac4c87",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-LOW-0075-SOLVER.json": "4b31e95f70dcc463fa60102b6725742c211922df7aff6e900482b381e426d84e",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-LOW-0075-INPUT-PREFLIGHT.json": "e9fd8af7e6328ca5ce77bb2e5e4ea91ac8047eab1a14a7140f6c21872c47397b",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-LOW-0075-NORMALIZATION.json": "a2692834d1efaecd67b90d1313082f1b53bf5a1e5fa97886d6350764df5005ed",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-0075/CaseSloshingAccData.csv": "7dccdc38015038cea6a9f8cbd0b80389f0c87f34e25f89d224c36e6bd3ac0c12",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-0075/F3_CELL3_plain_0p0075_Def.xml": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-0075/F3_CELL3_plain_0p0075_hdp_Actual.vtk": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-0075/F3_CELL3_plain_0p0075.bi4": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-0075/F3_CELL3_plain_0p0075.xml": "bd6c155b2112f0860293283def01b981c0364a1e67fbb146dd267a1dda8b58df",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-ENDPOINT-LOW-0075/attempts/20260912T190104.891544Z-ab0feab7.complete/Run.out": "d1c446c5fa5c42cd97a9069e2952ee87e065a02962bfeaa33690b78f70b68d53",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-ENDPOINT-LOW-0075/attempts/20260912T190104.891544Z-ab0feab7.complete/RunPARTs.csv": "8aef6b87ef769ccdee9793241572495fe2311da47ae6373eb99e78079a61855e",
+        "campaigns/l1-resume/data/continuation/F3_REV075_R075-ENDPOINT-LOW-0075.h5": "83b065cf15b9ef15fdfa71ac6e6d6239337e22a3794812a173eee1b2de3528c7"
+      }
+    },
+    "R075-ENDPOINT-LOW-006": {
+      "label": "R075-ENDPOINT-LOW-006",
+      "case_id": "F3_REV075_R075-ENDPOINT-LOW-006",
+      "record_sha256": "1e585fbcefd64bf647d0ec978fb8042061cc4fc8bbcccc3ee0aba514cf230d08",
+      "audit_sha256": "42c6fe9ed406611a82d54f2a487ae699ac41835fdd50a8a08acfd7ae7a6b6e04",
+      "solver_sha256": "1a6c6622fe64414cb5148fdd43ae40d1682b2093acb0bb69db3f386e39d813c3",
+      "preflight_sha256": "7904e7c7ea16c08afdcbc4b993a89c612ced8bbc4236b18e17d261cfdc317471",
+      "hdf5_path": "campaigns/l1-resume/data/continuation/F3_REV075_R075-ENDPOINT-LOW-006.h5",
+      "hdf5_sha256": "1d0a640e1abb30a46cac351c77ea4c7e3dab32de7f422dad917d22f9192aac71",
+      "files": {
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-LOW-006-PREPARED.json": "1e585fbcefd64bf647d0ec978fb8042061cc4fc8bbcccc3ee0aba514cf230d08",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-LOW-006-AUDIT.json": "42c6fe9ed406611a82d54f2a487ae699ac41835fdd50a8a08acfd7ae7a6b6e04",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-LOW-006-SOLVER.json": "1a6c6622fe64414cb5148fdd43ae40d1682b2093acb0bb69db3f386e39d813c3",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-LOW-006-INPUT-PREFLIGHT.json": "7904e7c7ea16c08afdcbc4b993a89c612ced8bbc4236b18e17d261cfdc317471",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-LOW-006-NORMALIZATION.json": "cf9e2e19a2192063ec10ca7db3b2f4cf20783eeed6d5d8c8f2882228785b9b8c",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-006/CaseSloshingAccData.csv": "7dccdc38015038cea6a9f8cbd0b80389f0c87f34e25f89d224c36e6bd3ac0c12",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-006/F3_CELL3_plain_0p006.bi4": "e411c5b13bc0231db5e7dd694540440a397f92f6526f9feabc401b2967bfdc1b",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-006/F3_CELL3_plain_0p006_Def.xml": "417451910735d92de9f27f00a5e04f3d3e002da2eca30bd439470425d53334f5",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-006/F3_CELL3_plain_0p006.xml": "cb2e2fc48c46a856f772b6ad85d05fd6c1d0751646ac07e9c0ea6b4cc1d2e012",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-006/F3_CELL3_plain_0p006_hdp_Actual.vtk": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-ENDPOINT-LOW-006/attempts/20260912T191041.901455Z-eeb1b13a.complete/Run.out": "9a607c28f278f50f98214ee34db5a0bf3648de387eea4a4da351e548aa855543",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-ENDPOINT-LOW-006/attempts/20260912T191041.901455Z-eeb1b13a.complete/RunPARTs.csv": "e05e19e9caf0c2c66e4ab35759d4e832a6d68a96e6ec6af93cabddfdc73ca8d0",
+        "campaigns/l1-resume/data/continuation/F3_REV075_R075-ENDPOINT-LOW-006.h5": "1d0a640e1abb30a46cac351c77ea4c7e3dab32de7f422dad917d22f9192aac71"
+      }
+    },
+    "R075-ENDPOINT-HIGH-0075": {
+      "label": "R075-ENDPOINT-HIGH-0075",
+      "case_id": "F3_REV075_R075-ENDPOINT-HIGH-0075",
+      "record_sha256": "1c2677813d94900bfd294bdc19dc9eb881c06173a11943372b5d7667959a9035",
+      "audit_sha256": "f1cdcbbc78655658f5ae900a87b46bf2df75e6abfe680644d81deb354d6de10b",
+      "solver_sha256": "80d6bea71932355e18ab888a9deb63d10004b8e5ec3af36f1c16748b128cddce",
+      "preflight_sha256": "fb632cfee7f29e43a30a3d3ecdf80181f985a81bb6e291664acd9b9ef4d3fd5c",
+      "hdf5_path": "campaigns/l1-resume/data/continuation/F3_REV075_R075-ENDPOINT-HIGH-0075.h5",
+      "hdf5_sha256": "fdc55cf1f802f3224af2d37032b0ea7b617cd4f1b3884e69edcb0b856e20076d",
+      "files": {
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-HIGH-0075-PREPARED.json": "1c2677813d94900bfd294bdc19dc9eb881c06173a11943372b5d7667959a9035",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-HIGH-0075-AUDIT.json": "f1cdcbbc78655658f5ae900a87b46bf2df75e6abfe680644d81deb354d6de10b",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-HIGH-0075-SOLVER.json": "80d6bea71932355e18ab888a9deb63d10004b8e5ec3af36f1c16748b128cddce",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-HIGH-0075-INPUT-PREFLIGHT.json": "fb632cfee7f29e43a30a3d3ecdf80181f985a81bb6e291664acd9b9ef4d3fd5c",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-HIGH-0075-NORMALIZATION.json": "6dbcd77e696b5e34235abac8bd9a835a7f34017e5b0a5ccbdd2b816e6af47aa2",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-0075/CaseSloshingAccData.csv": "d4633105a7f403f181511171775e17bbae92fbafed0216fedb2de02ad14ee16b",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-0075/F3_CELL3_plain_0p0075_Def.xml": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-0075/F3_CELL3_plain_0p0075_hdp_Actual.vtk": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-0075/F3_CELL3_plain_0p0075.bi4": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-0075/F3_CELL3_plain_0p0075.xml": "bd6c155b2112f0860293283def01b981c0364a1e67fbb146dd267a1dda8b58df",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-ENDPOINT-HIGH-0075/attempts/20260912T193020.400236Z-814fba9c.complete/Run.out": "2e46e3c6510c18d2e8d45b1d201d0696e4702d252e46625e34f0c745cda14977",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-ENDPOINT-HIGH-0075/attempts/20260912T193020.400236Z-814fba9c.complete/RunPARTs.csv": "5db2724c335dd7a5dc633200442c1e0ee4182d53fd836aee63f8d90e21e00086",
+        "campaigns/l1-resume/data/continuation/F3_REV075_R075-ENDPOINT-HIGH-0075.h5": "fdc55cf1f802f3224af2d37032b0ea7b617cd4f1b3884e69edcb0b856e20076d"
+      }
+    },
+    "R075-ENDPOINT-HIGH-006": {
+      "label": "R075-ENDPOINT-HIGH-006",
+      "case_id": "F3_REV075_R075-ENDPOINT-HIGH-006",
+      "record_sha256": "cfbf6c2ff63e8241e7bca52c9c7a00b9a96c534e413f6c105508635e2bd6726c",
+      "audit_sha256": "cb1e0a169fe37740160bb4b6306cfc80db0a76d81c122731b2475e960de60426",
+      "solver_sha256": "d8b19ec488cdd315414a813d63237f71cfd41791843204c12ed57533bc716eec",
+      "preflight_sha256": "cdf047b6f402d3e0f4539581bbcf29b461003235b763e64d372b3e3090523c0f",
+      "hdf5_path": "campaigns/l1-resume/data/continuation/F3_REV075_R075-ENDPOINT-HIGH-006.h5",
+      "hdf5_sha256": "57e6ee9afe6407d07b451f3c7b07b1e12470d36ba52a181bce0716f772cb7815",
+      "files": {
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-HIGH-006-PREPARED.json": "cfbf6c2ff63e8241e7bca52c9c7a00b9a96c534e413f6c105508635e2bd6726c",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-HIGH-006-AUDIT.json": "cb1e0a169fe37740160bb4b6306cfc80db0a76d81c122731b2475e960de60426",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-HIGH-006-SOLVER.json": "d8b19ec488cdd315414a813d63237f71cfd41791843204c12ed57533bc716eec",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-HIGH-006-INPUT-PREFLIGHT.json": "cdf047b6f402d3e0f4539581bbcf29b461003235b763e64d372b3e3090523c0f",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-HIGH-006-NORMALIZATION.json": "8cf61c4b5fa0bbe7ecf35316fac67d570ea68df85b7def682e609e37d394323e",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-006/CaseSloshingAccData.csv": "d4633105a7f403f181511171775e17bbae92fbafed0216fedb2de02ad14ee16b",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-006/F3_CELL3_plain_0p006.bi4": "e411c5b13bc0231db5e7dd694540440a397f92f6526f9feabc401b2967bfdc1b",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-006/F3_CELL3_plain_0p006_Def.xml": "417451910735d92de9f27f00a5e04f3d3e002da2eca30bd439470425d53334f5",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-006/F3_CELL3_plain_0p006.xml": "cb2e2fc48c46a856f772b6ad85d05fd6c1d0751646ac07e9c0ea6b4cc1d2e012",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-006/F3_CELL3_plain_0p006_hdp_Actual.vtk": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-ENDPOINT-HIGH-006/attempts/20260912T193950.541653Z-698025e1.complete/Run.out": "b1b4d5b5676fa04f4bc79334e022b575102758ffbc22981a283cc4a9f55a787e",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-ENDPOINT-HIGH-006/attempts/20260912T193950.541653Z-698025e1.complete/RunPARTs.csv": "e54bb72f0546be7759bcff5f4b5be0f76223472f172352283a8e81330a63f289",
+        "campaigns/l1-resume/data/continuation/F3_REV075_R075-ENDPOINT-HIGH-006.h5": "57e6ee9afe6407d07b451f3c7b07b1e12470d36ba52a181bce0716f772cb7815"
+      }
+    },
+    "R075-INTERNAL-0075": {
+      "label": "R075-INTERNAL-0075",
+      "case_id": "F3_REV075_R075-INTERNAL-0075",
+      "record_sha256": "c178a17de10086ea510221147e9c52fe7b7a1fdecbce3d5c2f81936f8bf60dee",
+      "audit_sha256": "dd22a4a14279486d5575d4e704498b6d493dec35c8ade4c476f5c814dc88d56e",
+      "solver_sha256": "f3a7232d304e74dd4fb61baae9057706d797a0cc1fc7687a895aa1a85744e683",
+      "preflight_sha256": "f655643ef5fbadbfd084ab214db9a8051e5bbbc438ea7b0b17f3a94e21807361",
+      "hdf5_path": "campaigns/l1-resume/data/continuation/F3_REV075_R075-INTERNAL-0075.h5",
+      "hdf5_sha256": "8be6cc1d0d41d9e2c5cd19905303c473820cd51af38efc309f2b28856a8c2662",
+      "files": {
+        "campaigns/l1-resume/continuation/F3_REV075_R075-INTERNAL-0075-PREPARED.json": "c178a17de10086ea510221147e9c52fe7b7a1fdecbce3d5c2f81936f8bf60dee",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-INTERNAL-0075-AUDIT.json": "dd22a4a14279486d5575d4e704498b6d493dec35c8ade4c476f5c814dc88d56e",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-INTERNAL-0075-SOLVER.json": "f3a7232d304e74dd4fb61baae9057706d797a0cc1fc7687a895aa1a85744e683",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-INTERNAL-0075-INPUT-PREFLIGHT.json": "f655643ef5fbadbfd084ab214db9a8051e5bbbc438ea7b0b17f3a94e21807361",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-INTERNAL-0075-NORMALIZATION.json": "980b53d0ab5776932d818b2626a1c3f49bde01d2b80b3a7bb161cebbf981d3c0",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-INTERNAL-0075/CaseSloshingAccData.csv": "0d9c5e3fc8cea3ee7c9023b95b1b89783a9b1992d3ea81537c8bdd12050ac7eb",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-INTERNAL-0075/F3_CELL3_plain_0p0075_Def.xml": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-INTERNAL-0075/F3_CELL3_plain_0p0075_hdp_Actual.vtk": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-INTERNAL-0075/F3_CELL3_plain_0p0075.bi4": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-INTERNAL-0075/F3_CELL3_plain_0p0075.xml": "bd6c155b2112f0860293283def01b981c0364a1e67fbb146dd267a1dda8b58df",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-INTERNAL-0075/attempts/20260912T195258.777199Z-3cf3b3d5.complete/Run.out": "21fe9ff9215960cc3a545004c6769de5d567dc879e2af0aadcb186aa710104de",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-INTERNAL-0075/attempts/20260912T195258.777199Z-3cf3b3d5.complete/RunPARTs.csv": "b39596ea043f722224260e098ca1440901db1ad8ba1f4fc77b5d864b851ab289",
+        "campaigns/l1-resume/data/continuation/F3_REV075_R075-INTERNAL-0075.h5": "8be6cc1d0d41d9e2c5cd19905303c473820cd51af38efc309f2b28856a8c2662"
+      }
+    },
+    "R075-INTERNAL-006": {
+      "label": "R075-INTERNAL-006",
+      "case_id": "F3_REV075_R075-INTERNAL-006",
+      "record_sha256": "44a6c1b7243afce7df74a37cdb759bec29eac812b14b7fcb219b48966646e410",
+      "audit_sha256": "35e811341464ec3e8c6ed1f2508970b1fec9d038f6a64fa3467e60b964f37508",
+      "solver_sha256": "e0e6c345514c0c95d1e36ba029dabb7f9072a65247768b8007e7dc447489145f",
+      "preflight_sha256": "08657cfc0e2ba18060e505315ae1b42fba17b9b17ae33ad412a9ed91c89c90e5",
+      "hdf5_path": "campaigns/l1-resume/data/continuation/F3_REV075_R075-INTERNAL-006.h5",
+      "hdf5_sha256": "828dbba90f8fcb9e471a5cc2616d1687820a87c96ced5df8623a9b9fd1381fd7",
+      "files": {
+        "campaigns/l1-resume/continuation/F3_REV075_R075-INTERNAL-006-PREPARED.json": "44a6c1b7243afce7df74a37cdb759bec29eac812b14b7fcb219b48966646e410",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-INTERNAL-006-AUDIT.json": "35e811341464ec3e8c6ed1f2508970b1fec9d038f6a64fa3467e60b964f37508",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-INTERNAL-006-SOLVER.json": "e0e6c345514c0c95d1e36ba029dabb7f9072a65247768b8007e7dc447489145f",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-INTERNAL-006-INPUT-PREFLIGHT.json": "08657cfc0e2ba18060e505315ae1b42fba17b9b17ae33ad412a9ed91c89c90e5",
+        "campaigns/l1-resume/continuation/F3_REV075_R075-INTERNAL-006-NORMALIZATION.json": "e5738b4323cded96594ea6fd453a8cd1a59a79484b5f422159aed410668aac31",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-INTERNAL-006/CaseSloshingAccData.csv": "0d9c5e3fc8cea3ee7c9023b95b1b89783a9b1992d3ea81537c8bdd12050ac7eb",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-INTERNAL-006/F3_CELL3_plain_0p006.bi4": "e411c5b13bc0231db5e7dd694540440a397f92f6526f9feabc401b2967bfdc1b",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-INTERNAL-006/F3_CELL3_plain_0p006_Def.xml": "417451910735d92de9f27f00a5e04f3d3e002da2eca30bd439470425d53334f5",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-INTERNAL-006/F3_CELL3_plain_0p006.xml": "cb2e2fc48c46a856f772b6ad85d05fd6c1d0751646ac07e9c0ea6b4cc1d2e012",
+        "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-INTERNAL-006/F3_CELL3_plain_0p006_hdp_Actual.vtk": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-INTERNAL-006/attempts/20260912T200224.066053Z-21033f2e.complete/Run.out": "763106046fb6b1363326b1d0c271d8b36814fe0fc5c5ff60935495f356764b34",
+        "campaigns/l1-resume/runs/branches/F3_REV075_R075-INTERNAL-006/attempts/20260912T200224.066053Z-21033f2e.complete/RunPARTs.csv": "5493a2be1ae9bc7ebe34a9e284c282c69b895e23740f095b37a99b7910d083b0",
+        "campaigns/l1-resume/data/continuation/F3_REV075_R075-INTERNAL-006.h5": "828dbba90f8fcb9e471a5cc2616d1687820a87c96ced5df8623a9b9fd1381fd7"
+      }
+    }
+  },
+  "resource_policy": {
+    "qualification_attempts_required": 3,
+    "launch_requires_new_authorization": true,
+    "development_launch_allowed": false,
+    "material_production_allowed": false,
+    "training_launch_allowed": false,
+    "allowed_gpu_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "protected_gpu_indices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "max_concurrent_cfd_solvers": 1,
+    "cpu_analysis_slots": 2,
+    "authorization_path": "campaigns/l1-resume/continuation/F3-075-REF0081818-AUTHORIZATION.json",
+    "approved_resource_caps": {
+      "cpu_core_hours": 896,
+      "gpu_hours": 64,
+      "qualification_attempts": 80
+    }
+  },
+  "required_before_launch": [
+    "owner approval of this prospective branch",
+    "new authorization record bound to this manifest and preparation summary",
+    "R0081818-NOMINAL hard-audit canary before endpoint launches"
+  ]
+}

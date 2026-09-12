@@ -9,6 +9,12 @@ from scripts import l1r_q2_mdbc_bridge as q2
 from scripts.campaign_runner import execute_attempt, validate_resource_category
 
 
+REF008_RECIPE = "F3_CELL3_NS_visco1_native_nopen_revision075_ref0081818"
+REF008_MANIFEST = LAB / "diagnostics/f3-audit/F3-075-REF0081818-MANIFEST.json"
+REF008_SUMMARY = OUT / "F3-075-REF0081818-PREPARATION-SUMMARY.json"
+REF008_AUTHORIZATION = OUT / "F3-075-REF0081818-AUTHORIZATION.json"
+
+
 def check_gpu_time_reserve(record,budget):
     timeout=float(record.get('solver_timeout_seconds',1800))
     if not math.isfinite(timeout) or not 0<timeout<=7200:
@@ -83,8 +89,103 @@ def check_record_resource_category(record):
     return category
 
 
+def _verify_ref008_authorization(record):
+    """Verify the on-disk owner authorization instead of trusting a dict flag."""
+    if record.get("recipe_id") != REF008_RECIPE:
+        return None
+    if not REF008_AUTHORIZATION.is_file():
+        raise PermissionError("ref0081818 has no owner authorization record")
+    if not REF008_MANIFEST.is_file() or not REF008_SUMMARY.is_file():
+        raise PermissionError("ref0081818 authorization bindings are incomplete")
+    authorization = json.loads(REF008_AUTHORIZATION.read_text())
+    manifest = json.loads(REF008_MANIFEST.read_text())
+    summary = json.loads(REF008_SUMMARY.read_text())
+    manifest_sha = q2.sha256(REF008_MANIFEST)
+    summary_sha = q2.sha256(REF008_SUMMARY)
+    if authorization.get("status") != "owner_authorized":
+        raise PermissionError("ref0081818 authorization is not owner-authorized")
+    if authorization.get("recipe_id") != REF008_RECIPE:
+        raise PermissionError("ref0081818 authorization recipe mismatch")
+    if authorization.get("manifest_sha256") != manifest_sha:
+        raise PermissionError("ref0081818 authorization manifest binding mismatch")
+    if authorization.get("summary_sha256") != summary_sha:
+        raise PermissionError("ref0081818 authorization summary binding mismatch")
+    approved_caps = manifest.get("resource_policy", {}).get("approved_resource_caps")
+    if authorization.get("resource_limits") != approved_caps or approved_caps != {
+        "cpu_core_hours": 896,
+        "gpu_hours": 64,
+        "qualification_attempts": 80,
+    }:
+        raise PermissionError("ref0081818 authorization resource caps are not the approved caps")
+    if manifest.get("recipe_id") != REF008_RECIPE or manifest.get("launch_allowed") is not False:
+        raise PermissionError("ref0081818 manifest is not the prepared-only manifest")
+    if summary.get("recipe_id") != REF008_RECIPE or summary.get("launch_allowed") is not False:
+        raise PermissionError("ref0081818 summary is not the prepared-only summary")
+    if (summary.get("manifest_sha256") != manifest_sha
+            or summary.get("solver_attempts") != 0
+            or summary.get("qualification_attempts_charged") != 0
+            or summary.get("qualified") is not False
+            or summary.get("formal_release") is not False
+            or summary.get("new_authorization_required") is not True):
+        raise PermissionError("ref0081818 summary state is not the prepared-only state")
+    cell_ids = set(authorization.get("authorized_cell_ids", []))
+    manifest_cell_ids = {item.get("cell_id") for item in manifest.get("cells", [])}
+    summary_cell_ids = set(summary.get("cell_ids", []))
+    if cell_ids != manifest_cell_ids or summary_cell_ids != manifest_cell_ids:
+        raise PermissionError("ref0081818 authorization cell set differs from manifest")
+    record_bindings = summary.get("record_bindings", [])
+    preflight_bindings = summary.get("preflight_bindings", [])
+    if {item.get("path", "").split("/")[-1].removesuffix("-PREPARED.json")
+        for item in record_bindings} != manifest_cell_ids:
+        raise PermissionError("ref0081818 summary record bindings are incomplete")
+    if {item.get("path", "").split("/")[-1].removesuffix("-INPUT-PREFLIGHT.json")
+        for item in preflight_bindings} != manifest_cell_ids:
+        raise PermissionError("ref0081818 summary preflight bindings are incomplete")
+    for item in [*record_bindings, *preflight_bindings]:
+        bound_path = LAB / item.get("path", "")
+        if not bound_path.is_file() or q2.sha256(bound_path) != item.get("sha256"):
+            raise PermissionError("ref0081818 summary binding hash mismatch")
+    if record.get("id") not in cell_ids:
+        raise PermissionError("ref0081818 record is outside the authorized cell set")
+    expected_record = OUT / f"{record['id']}-PREPARED.json"
+    binding = authorization.get("record_bindings", {}).get(record.get("id"))
+    if not expected_record.is_file() or not isinstance(binding, str):
+        raise PermissionError("ref0081818 record authorization binding is missing")
+    if q2.sha256(expected_record) != binding:
+        raise PermissionError("ref0081818 record authorization hash mismatch")
+    persisted = json.loads(expected_record.read_text())
+    if persisted != record:
+        raise PermissionError("ref0081818 in-memory record differs from prepared record")
+    if (persisted.get("recipe_id") != REF008_RECIPE
+            or persisted.get("revision_manifest_sha256") != manifest_sha
+            or persisted.get("launch_allowed") is not False
+            or persisted.get("qualified") is not False
+            or persisted.get("formal_release") is not False):
+        raise PermissionError("ref0081818 prepared record is not the bound fail-closed record")
+    prefix = LAB / persisted["generated_prefix"]
+    for name, digest in persisted.get("input_assets", {}).items():
+        asset = prefix.parent / name
+        if not asset.is_file() or q2.sha256(asset) != digest:
+            raise PermissionError("ref0081818 prepared input asset changed")
+    if persisted.get("generated_xml_sha256") != q2.sha256(prefix.with_suffix(".xml")):
+        raise PermissionError("ref0081818 prepared XML changed")
+    preflight_path = OUT / f"{persisted['id']}-INPUT-PREFLIGHT.json"
+    preflight = json.loads(preflight_path.read_text()) if preflight_path.is_file() else {}
+    if (preflight.get("status") != "passed"
+            or preflight.get("record_id") != persisted["id"]
+            or preflight.get("record_sha256") != q2.sha256(expected_record)
+            or preflight.get("recipe_id") != REF008_RECIPE
+            or preflight.get("revision_manifest_sha256") != manifest_sha):
+        raise PermissionError("ref0081818 prepared preflight binding changed")
+    return authorization
+
+
 def run(record):
     from scripts.l1r_continuation_evidence import begin_activity_window
+
+    # The exact-tiling ref0081818 branch remains blocked until a real
+    # owner-authorized file is present and bound to the immutable preparation.
+    _verify_ref008_authorization(record)
 
     category=check_record_resource_category(record)
     begin_activity_window()
@@ -93,6 +194,8 @@ def run(record):
         from scripts.l1r_input_preflight import check_input
 
         check_input(record)
+        if record.get("recipe_id") == REF008_RECIPE:
+            _verify_ref008_authorization(record)
     runs = LAB / "campaigns/l1-resume/runs/branches"
     latest = runs / name / "latest.json"
     if latest.exists():

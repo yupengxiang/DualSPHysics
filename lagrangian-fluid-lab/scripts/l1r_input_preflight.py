@@ -59,6 +59,8 @@ def check_input(record):
     parsed = json.loads(p.stdout)
     if parsed["first_time_s"] > 0 or parsed["last_time_s"] < record["time_max_s"]:
         raise ValueError("driving data does not cover run")
+    existing_path = OUT / f"{record['id']}-INPUT-PREFLIGHT.json"
+    existing = json.loads(existing_path.read_text()) if existing_path.is_file() else {}
     result = {
         "asset": q2.fingerprint(file),
         "source": q2.fingerprint(source),
@@ -66,5 +68,10 @@ def check_input(record):
         "solver_attempts": 0,
         "status": "passed",
     }
+    # Preserve immutable preparation bindings when a preflight is repeated
+    # immediately before an authorized launch.
+    for key in ("record_id", "record_sha256", "recipe_id", "revision_manifest_sha256"):
+        if key in existing:
+            result[key] = existing[key]
     write(record["id"] + "-INPUT-PREFLIGHT.json", result)
     return result
