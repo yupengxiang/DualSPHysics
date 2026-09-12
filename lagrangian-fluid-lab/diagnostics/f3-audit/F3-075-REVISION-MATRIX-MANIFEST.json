@@ -1,0 +1,167 @@
+{
+  "schema": "f3.revision075.matrix_manifest.v1",
+  "status": "prepared_manifest_only",
+  "launch_allowed": false,
+  "recipe_id": "F3_CELL3_NS_visco1_native_nopen_revision075",
+  "production_resolution_m": 0.0075,
+  "reference_resolutions_m": [0.01, 0.006],
+  "fixed_recipe": {
+    "solver_mode": "-mdbc_noslip:1",
+    "boundary": 2,
+    "slip_mode": 2,
+    "no_penetration": 1,
+    "visco": 0.05,
+    "visco_bound_factor": 1,
+    "shifting": 0,
+    "time_window_s": [0.0, 8.35],
+    "coordinate_frame": "fixed tank computational coordinates with prescribed acceleration; no inertial-world trajectory claim",
+    "scoring": "frozen v2 full-window macro metrics plus unchanged hard particle audit"
+  },
+  "existing_evidence_requires_rebinding": {
+    "coarse": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen",
+    "production_nominal": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+    "fine": "F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen",
+    "spatial_report": "campaigns/l1-resume/continuation/F3-NOPEN-NOMINAL-SCORES-526417a59f665d1d25987d473e9c29c581868a1d1367d979a2ddc6e76a4bcf5d.json",
+    "current_gate": "campaigns/l1-resume/continuation/F3-NOPEN-NOMINAL-GATE.json"
+  },
+  "cells": [
+    {
+      "cell_id": "R075-ZERO",
+      "role": "production_zero_drive",
+      "dp_m": 0.0075,
+      "amplitude": 0.0,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "source_initial_state": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "new_solver_attempt": true
+    },
+    {
+      "cell_id": "R075-TIME",
+      "role": "production_time_refinement",
+      "dp_m": 0.0075,
+      "amplitude": 1.0,
+      "cfl_number": 0.025,
+      "coef_dt_min": 0.025,
+      "output_interval_s": 0.01,
+      "source_initial_state": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "new_solver_attempt": true
+    },
+    {
+      "cell_id": "R075-OUTPUT",
+      "role": "production_output_refinement",
+      "dp_m": 0.0075,
+      "amplitude": 1.0,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.002,
+      "source_initial_state": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "new_solver_attempt": true
+    },
+    {
+      "cell_id": "R075-ENDPOINT-LOW-010",
+      "role": "endpoint_spatial",
+      "dp_m": 0.01,
+      "amplitude": 0.9,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "source_initial_state": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen",
+      "new_solver_attempt": true
+    },
+    {
+      "cell_id": "R075-ENDPOINT-LOW-0075",
+      "role": "endpoint_spatial",
+      "dp_m": 0.0075,
+      "amplitude": 0.9,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "source_initial_state": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "new_solver_attempt": true
+    },
+    {
+      "cell_id": "R075-ENDPOINT-LOW-006",
+      "role": "endpoint_spatial",
+      "dp_m": 0.006,
+      "amplitude": 0.9,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "source_initial_state": "F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen",
+      "new_solver_attempt": true
+    },
+    {
+      "cell_id": "R075-ENDPOINT-HIGH-010",
+      "role": "endpoint_spatial",
+      "dp_m": 0.01,
+      "amplitude": 1.1,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "source_initial_state": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen",
+      "new_solver_attempt": true
+    },
+    {
+      "cell_id": "R075-ENDPOINT-HIGH-0075",
+      "role": "endpoint_spatial",
+      "dp_m": 0.0075,
+      "amplitude": 1.1,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "source_initial_state": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "new_solver_attempt": true
+    },
+    {
+      "cell_id": "R075-ENDPOINT-HIGH-006",
+      "role": "endpoint_spatial",
+      "dp_m": 0.006,
+      "amplitude": 1.1,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "source_initial_state": "F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen",
+      "new_solver_attempt": true
+    },
+    {
+      "cell_id": "R075-INTERNAL-0075",
+      "role": "independent_internal_control",
+      "dp_m": 0.0075,
+      "amplitude": 0.97,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "source_initial_state": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "new_solver_attempt": true
+    },
+    {
+      "cell_id": "R075-INTERNAL-006",
+      "role": "independent_internal_reference",
+      "dp_m": 0.006,
+      "amplitude": 0.97,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "source_initial_state": "F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen",
+      "new_solver_attempt": true
+    }
+  ],
+  "required_gates_before_development": [
+    "production hard audit",
+    "production zero-drive drift",
+    "production temporal refinement",
+    "production output refinement",
+    "production/reference spatial gate against both references",
+    "endpoint gate at 0.9 and 1.1",
+    "independent internal 0.97 gate"
+  ],
+  "resource_policy": {
+    "qualification_attempts_required": 11,
+    "launch_requires_new_authorization": true,
+    "cpu_budget_requires_new_authorization": true,
+    "development_launch_allowed": false,
+    "training_launch_allowed": false,
+    "material_production_allowed": false
+  }
+}
