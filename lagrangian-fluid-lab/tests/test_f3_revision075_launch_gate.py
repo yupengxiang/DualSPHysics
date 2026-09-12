@@ -22,6 +22,7 @@ def _authorization(tmp_path, manifest, summary, **overrides):
         "status": "approved",
         "owner_reply": "owner approved revision075",
         "recipe_id": gate.RECIPE,
+        "existing_evidence": sorted(gate.REQUIRED_EXISTING_EVIDENCE),
         "manifest_sha256": gate.sha256(manifest),
         "preparation_summary_sha256": gate.sha256(summary),
         "limits": {"qualification": 80, "cpu_core_hours": 896, "gpu_hours": 64},

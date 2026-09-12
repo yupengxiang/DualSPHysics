@@ -21,6 +21,11 @@ LIMITS = LAB / "campaigns/l1-resume/continuation/RESOURCE-LIMITS.json"
 DEFAULT_AUTHORIZATION = LAB / "campaigns/l1-resume/continuation/F3-075-REVISION-AUTHORIZATION.json"
 RECIPE = "F3_CELL3_NS_visco1_native_nopen_revision075"
 SCHEMA = "f3.revision075.owner_authorization.v1"
+REQUIRED_EXISTING_EVIDENCE = {
+    "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen",
+    "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+    "F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen",
+}
 
 
 def sha256(path: Path) -> str:
@@ -73,6 +78,10 @@ def verify_authorization(
         raise PermissionError("explicit approved revision authorization is required")
     if not isinstance(authorization.get("owner_reply"), str) or not authorization["owner_reply"].strip():
         raise PermissionError("authorization must retain the owner's reply")
+    existing = authorization.get("existing_evidence")
+    if (not isinstance(existing, list)
+            or not REQUIRED_EXISTING_EVIDENCE.issubset(set(existing))):
+        raise PermissionError("authorization must explicitly allow the three hash-bound existing reference cases")
     if authorization.get("recipe_id") != RECIPE:
         raise PermissionError("authorization recipe does not match the prepared revision")
     if authorization.get("manifest_sha256") != sha256(MANIFEST):
