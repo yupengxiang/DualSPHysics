@@ -43,6 +43,7 @@ AUTHORIZATION = OUT / "F3-075-REF0081818-AUTHORIZATION.json"
 HORIZON = old_score.HORIZON
 METRICS = old_score.METRICS
 EXISTING_CASES = old_score.EXISTING_CASES
+REUSED_CASES = preparation.REUSED_CASES
 ENDPOINT_LADDER = ("R0081818", "R075-0075", "R075-006")
 
 
@@ -158,7 +159,7 @@ def _panel_from_series(name_a: str, series_a: list[dict[str, Any]], name_b: str,
     return _panel(kind, [name_a, name_b], rows, threshold, grid_step_s=.01)
 
 
-def _panel_pair(first: dict[str, Any], second: CachedSource, kind: str, threshold: float,
+def _panel_pair(first: CachedSource, second: CachedSource, kind: str, threshold: float,
                 *, step_s: float = .01, same_ids: bool = False) -> dict[str, Any]:
     return score_pair(first, second, kind=kind, step_s=step_s,
                       threshold=threshold, same_ids=same_ids)
@@ -176,9 +177,9 @@ def _audit_and_gate(sources: dict[str, dict[str, Any]], bindings: dict[str, str]
         zero = _series(sources["R075-ZERO"], handles["R075-ZERO"])
         panels.append(_panel_from_series("R075-ZERO", zero, "initial", [zero[0]] * len(zero),
                                          "zero_drive_vs_initial", .01))
-        panels.append(_panel_pair(sources["REF-0075"], handles["R075-OUTPUT"],
+        panels.append(_panel_pair(handles["REF-0075"], handles["R075-OUTPUT"],
                                   "output_interpolation", .01, step_s=.002, same_ids=True))
-        panels.append(_panel_pair(sources["REF-0075"], handles["R075-TIME"],
+        panels.append(_panel_pair(handles["REF-0075"], handles["R075-TIME"],
                                   "temporal", .01, same_ids=True))
 
         nominal_keys = ["R0081818-NOMINAL", "REF-0075", "REF-006"]
@@ -208,7 +209,18 @@ def score() -> dict[str, Any]:
     records = _prepared_records(manifest, summary)
     sources: dict[str, dict[str, Any]] = {}
     bindings: dict[str, str] = {}
-    for label, case_id in EXISTING_CASES.items():
+    # The new score reuses the qualified .0075/.006 nominal sources plus the
+    # revision075 zero/time/output, endpoint and internal controls.  Keep the
+    # aliases used by the panel definitions separate from the historical
+    # ``REF-010`` source, which is retained only through the immutable failure
+    # report and is intentionally not a new gate input.
+    source_cases = {
+        "REF-0075": EXISTING_CASES["REF-0075"],
+        "REF-006": EXISTING_CASES["REF-006"],
+        **{label: case_id for label, case_id in REUSED_CASES.items()
+           if label != "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen"},
+    }
+    for label, case_id in source_cases.items():
         source, bound = old_score._existing_source(label, case_id)
         sources[label] = source
         bindings.update(bound)
@@ -262,6 +274,7 @@ def score() -> dict[str, Any]:
         "retained_historical_resolution_m": 0.01,
         "production_source_case_id": EXISTING_CASES["REF-0075"],
         "time_window_s": [0.0, HORIZON],
+        "scoring_interval_s": 0.01,
         "control_domain": [0.9, 1.1],
         "coordinate_frame": "fixed tank computational coordinates",
         "scoring_evidence_path": _relative(report_path),
