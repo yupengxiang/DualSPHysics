@@ -32,7 +32,26 @@ def test_run_requires_owner_authorization_before_shared_runner(monkeypatch):
         called.append(True)
         raise AssertionError("shared solver runner must not be reached")
 
+    monkeypatch.setattr(runner.launch_gate, "verify_authorization",
+                        lambda: (_ for _ in ()).throw(PermissionError("owner authorization required")))
     monkeypatch.setattr("scripts.l1r_branch_runner.run", forbidden, raising=False)
-    with pytest.raises((PermissionError, ValueError)):
+    with pytest.raises(PermissionError):
         runner.run_one("R075-ZERO")
     assert called == []
+
+
+def test_run_accepts_gpu_selected_in_persisted_solver_evidence(monkeypatch, tmp_path):
+    record = runner._records()[0]
+    monkeypatch.setattr(runner, "_records", lambda: [record])
+    monkeypatch.setattr(runner.launch_gate, "verify_authorization",
+                        lambda: {"authorization": {"recipe_id": runner.launch_gate.RECIPE}})
+    monkeypatch.setattr(runner, "check_input", lambda _: None)
+    monkeypatch.setattr(runner, "LAB", tmp_path)
+    attempts = tmp_path / "campaigns/l1-resume/runs/branches" / record["id"] / "attempts"
+    attempts.mkdir(parents=True)
+    solver_path = tmp_path / "campaigns/l1-resume/continuation" / f"{record['id']}-SOLVER.json"
+    solver_path.parent.mkdir(parents=True)
+    solver_path.write_text(json.dumps({"resource_preflight": {"selected_gpu_index": 4}}))
+    monkeypatch.setattr("scripts.l1r_branch_runner.run", lambda _: {"audit_status": "pass_diagnostic"})
+    result = runner.run_one(record["plan_case_id"])
+    assert result["case_id"] == record["id"]

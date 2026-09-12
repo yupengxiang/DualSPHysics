@@ -82,7 +82,17 @@ def run_one(plan_case_id: str) -> dict[str, Any]:
     from scripts.l1r_branch_runner import run as shared_run
 
     result = shared_run(record)
-    selected = (result.get("resource_preflight") or {}).get("selected_gpu_index")
+    # ``l1r_branch_runner.run`` returns the post-processing/audit record after
+    # a fresh launch.  That record intentionally omits the launch metadata,
+    # while the immutable ``*-SOLVER.json`` evidence retains it.  Read both
+    # forms so a completed GPU run is not misreported as a blocked run merely
+    # because post-processing replaced the in-memory result.
+    solver_evidence = OUT / f"{record['id']}-SOLVER.json"
+    persisted = _read(solver_evidence) if solver_evidence.exists() else {}
+    selected = ((result.get("resource_preflight") or {}).get("selected_gpu_index")
+                if isinstance(result, dict) else None)
+    if selected is None:
+        selected = (persisted.get("resource_preflight") or {}).get("selected_gpu_index")
     if selected not in (4, 5, 6, 7):
         raise RuntimeError(f"shared runner did not select an allowed GPU: {selected!r}")
     return {"authorization_recipe": authorization["authorization"]["recipe_id"],

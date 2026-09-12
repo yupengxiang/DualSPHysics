@@ -55,6 +55,9 @@ def test_hash_mismatch_fails_closed(tmp_path):
 
 def test_approved_record_cannot_bypass_unupdated_limits(tmp_path):
     manifest, summary, limits = _copies(tmp_path)
+    current = json.loads(limits.read_text())
+    current["limits"].update({"qualification": 72, "cpu_core_hours": 768})
+    limits.write_text(json.dumps(current))
     path = _authorization(tmp_path, manifest, summary)
     with pytest.raises(PermissionError, match="not been updated"):
         gate.verify_authorization(path, limits)
