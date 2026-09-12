@@ -109,7 +109,7 @@ def cpu_worker(monkeypatch):
 
 
 def test_production_gate_rejects_plausible_but_unverified_contracts(contracts):
-    with pytest.raises(RuntimeError, match="production gate is not implemented"):
+    with pytest.raises(RuntimeError, match="source domain gate|domain gate"):
         training.run_training("model", [sys.executable, "-c", "pass"],
                               timeout_seconds=10, **contracts)
     assert not training.TRAINING_ROOT.exists()

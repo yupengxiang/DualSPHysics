@@ -153,11 +153,61 @@ def _bound_file(reference, field, *, read_json=False):
 
 
 def _require_production_contracts(qualification, development):
-    """Pending actual domain evidence and completed-development-data validation."""
-    raise RuntimeError(
-        "training production gate is not implemented: require full evidence validation "
-        "for f3.nopen.domain_gate.v1 (passed, domain) and an actual completed-development-data contract"
-    )
+    """Revalidate the actual domain gate and every selected development source.
+
+    A digest proves that a contract file was not changed; it does not prove that
+    the contract was substantively produced.  This gate therefore re-runs the
+    domain verifier and the development contract verifier before any attempt is
+    registered or a GPU is probed.
+    """
+    domain = qualification["content"]
+    if (domain.get("schema") != "f3.nopen.domain_gate.v1"
+            or domain.get("stage") != "domain"
+            or domain.get("status") != "passed"
+            or domain.get("recipe_id") != "F3_CELL3_NS_visco1_native_nopen"
+            or domain.get("production_resolution_m") != .01
+            or domain.get("time_window_s") != [0, 8.35]
+            or domain.get("scoring_interval_s") != .01):
+        raise RuntimeError("qualification contract is not a passed F3 NoPen domain gate")
+    evidence = domain.get("evidence_sha256")
+    if not isinstance(evidence, dict) or not evidence:
+        raise RuntimeError("qualification domain gate has no bound evidence")
+    for relative, digest in evidence.items():
+        path = Path(relative)
+        if path.is_absolute() or not relative:
+            raise RuntimeError("qualification evidence path must be LAB-relative")
+        resolved = (LAB / path).resolve()
+        try:
+            resolved.relative_to(LAB.resolve())
+        except ValueError as error:
+            raise RuntimeError("qualification evidence escapes LAB") from error
+        if not resolved.is_file() or _sha256(resolved) != digest:
+            raise RuntimeError("qualification evidence changed: " + relative)
+    from scripts.f3_nopen_development import verify_domain_gate
+    canonical = verify_domain_gate()
+    if canonical != domain:
+        raise RuntimeError("qualification contract differs from the current canonical domain gate")
+
+    development_content = development["content"]
+    if (development_content.get("schema") != "f3.training.development_data.v1"
+            or development_content.get("status") != "passed"
+            or development_content.get("qualified_sources") is not True
+            or development_content.get("recipe_id") != "F3_CELL3_NS_visco1_native_nopen"
+            or development_content.get("scope") not in ("pilot", "full")):
+        raise RuntimeError("development contract is not a passed actual-source contract")
+    source_gate = development_content.get("source_domain_gate")
+    if not isinstance(source_gate, dict):
+        raise RuntimeError("development contract has no source domain gate binding")
+    # The contract stores a LAB-relative path; compare it to the bound
+    # qualification file after normalizing the caller's absolute path.
+    canonical_path = str(Path(qualification["path"]).resolve().relative_to(LAB.resolve()))
+    if source_gate.get("path") != canonical_path or source_gate.get("sha256") != qualification["sha256"]:
+        raise RuntimeError("development contract is bound to another domain gate")
+    from scripts.f3_training_data import validate_development_contract
+    validated = validate_development_contract(development["path"])
+    if validated != development_content:
+        raise RuntimeError("development contract changed during substantive validation")
+    return {"domain": canonical, "development": validated}
 
 
 def _shared_budget():
@@ -166,6 +216,14 @@ def _shared_budget():
     begin_activity_window()
     ledger()
     return json.loads((OUT / "RESOURCE-LEDGER.json").read_text())
+
+
+def _campaign_storage_bytes():
+    """Count persisted campaign and training artifacts against the shared cap."""
+    roots = (LAB / "campaigns" / "l1-qualification",
+             LAB / "campaigns" / "l1-resume")
+    return sum(path.stat().st_size for root in roots if root.exists()
+               for path in root.rglob("*") if path.is_file())
 
 
 def _check_shared_totals(shared, usage):
@@ -186,6 +244,9 @@ def _check_shared_totals(shared, usage):
         raise RuntimeError("shared CPU/GPU budget exhausted")
     if datetime.now(timezone.utc) >= datetime.fromisoformat(shared["conservative_expiry_utc"]):
         raise RuntimeError("campaign expired")
+    storage_limit = limits.get("storage_gib")
+    if storage_limit is not None and _campaign_storage_bytes() >= storage_limit * 1024**3:
+        raise RuntimeError("shared storage budget exhausted")
     return gpu, cpu
 
 
