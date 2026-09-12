@@ -1,0 +1,94 @@
+{
+  "status": "engineering_autonomous_adapter_verified",
+  "created_utc": "2026-09-12T07:18:04.882180+00:00",
+  "training_qualified": false,
+  "reference_recipe_qualified": false,
+  "output_convention": {
+    "normalized_model_output": "direct displacement / (SPEED * caller_interval_s)",
+    "speed_mps": 0.9396275858019495,
+    "position_update": "current predicted position + unmodified model displacement",
+    "velocity_update": "model physical displacement / caller_interval_s",
+    "basis": "new explicit engineering adapter convention; not a historical trained/qualified target contract",
+    "historical_trainer_or_rollout_called": false,
+    "clipping_projection_particle_filtering": false
+  },
+  "real_source_probe": {
+    "case_id": "F3_CELL3_plain_0p01",
+    "source_sha256": "e413de757cb55ed303309115ea6c22dcd24a96f61c86570deac7b5045a7fe2f1",
+    "source_role": "short-window hard-audit-passing engineering initial state only",
+    "source_frames_read": [
+      0,
+      0
+    ],
+    "reader_closed_before_first_prediction": true,
+    "post_initialization_fluid_accessor_calls": 0,
+    "source_future_time_schedule_used": false,
+    "particle_count_initial_and_all_steps": 14580,
+    "ordered_identity_i64le_sha256": "54ecd32f50d0f3c80ce563631431e8b0f8d4d6bf7c19af2ae02a544cda314825",
+    "model": "declared constant normalized prediction [0.15, 0, 0.10]; no learned weights",
+    "steps": 5,
+    "caller_intervals_s": [
+      0.01,
+      0.02,
+      0.005,
+      0.015,
+      0.01
+    ],
+    "final_time_s": 0.06,
+    "input_shapes": [
+      [
+        14580,
+        48
+      ],
+      [
+        14580,
+        48
+      ],
+      [
+        14580,
+        48
+      ],
+      [
+        14580,
+        48
+      ],
+      [
+        14580,
+        48
+      ]
+    ],
+    "all_predicted_states_finite": true,
+    "max_difference_from_declared_autonomous_recurrence_m": 0.0,
+    "predicted_velocity_matches_displacement_over_interval": true,
+    "device": "cpu",
+    "gradients_enabled": false,
+    "elapsed_seconds_including_source_hash_read": 0.30037830700166523
+  },
+  "tests": {
+    "command": "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m pytest tests/test_f3_rollout.py tests/test_f3_learning_inputs.py -q",
+    "result": "11 passed in 1.30s",
+    "coverage": [
+      "variable-interval fake-model autonomous recurrence and current predicted-state features",
+      "only frame zero read; source reader can be closed before all prediction steps",
+      "all particle IDs retained; finite wall crossing retained without projection",
+      "nonfinite state/output, invalid interval, missing output particle and step-bound rejection",
+      "bounded local-neighbour blocks compared to the existing full-context function",
+      "both real untrained ParticleMLP and LocalInteraction routes: CPU two-step finite shape, no gradients"
+    ],
+    "first_test_invocation_note": "An earlier test used fork_rng() without devices=[], which warned about implicit CUDA RNG initialization. No model tensor, model forward, CFD, optimizer or gradient operation ran on GPU. The test was corrected to fork_rng(devices=[]) with CPU default_generator, and the passing invocation explicitly hid CUDA devices."
+  },
+  "source_hashes": {
+    "scripts/f3_rollout.py": "08434a4bd8e3cccd477b45033166c1127bbb5e5209a6fd824f5d95501cee7786",
+    "tests/test_f3_rollout.py": "d3da2a2153d0816799b4732f96bdace2ab87487832112ff8f9aff85a512d5a9e",
+    "scripts/f3_learning_inputs.py": "a4f2b7239e825033e150e4e0f4746ad3e838b1b04aa902b44944edf8a60e03dc",
+    "scripts/f3_frame_reader.py": "23465e5389b0d31eabc1326a766e9a818c7bc7403a795a48b8dd2560f0c828e3",
+    "experiments/r3_g4_baselines.py": "fe2ea1f9063918217f33841ec4b0ef960564ca2c1dcdc8a3742a76f17a8d1b85"
+  },
+  "limitations": [
+    "No numerical reference or control-domain qualification is claimed.",
+    "No training entrypoint, qualified data loader, loss wiring, optimization or model ranking was added or run.",
+    "No full-window autonomous accuracy, hard wall/failure scoring or material task qualification is established.",
+    "Local summary target blocking preserves the full current context; float32 reduction order can introduce rounding differences.",
+    "This report is engineering execution evidence, not a CFD, training or material configuration attempt."
+  ]
+}

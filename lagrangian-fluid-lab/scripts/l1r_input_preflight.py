@@ -9,12 +9,19 @@ from scripts import l1r_q2_mdbc_bridge as q2
 
 def check_boundary_mode(record):
     modes={'-mdbc':1,'-mdbc_noslip':2,'-mdbc_freeslip':3}
-    mode=record.get('solver_mode')
+    mode,_,option=record.get('solver_mode','').partition(':')
     if mode not in modes:return
     root=ET.parse(LAB/(record['generated_prefix']+'.xml')).getroot()
     parameters={n.get('key'):n.get('value') for n in root.findall('.//parameter')}
     if int(parameters.get('Boundary','1'))!=2 or int(parameters.get('SlipMode','1'))!=modes[mode]:
         raise ValueError('CLI boundary mode would override the registered XML mode')
+    if option not in ('','0','1'):
+        raise ValueError('unregistered no-penetration CLI option')
+    cli_nopen=mode!='-mdbc' and option=='1'
+    if bool(int(parameters.get('NoPenetration','0'))) != cli_nopen:
+        raise ValueError('CLI no-penetration mode would override the registered XML mode')
+    if 'expected_no_penetration' in record and record['expected_no_penetration'] != cli_nopen:
+        raise ValueError('declared no-penetration mode differs from command')
 
 
 def check_input(record):

@@ -1,0 +1,52 @@
+{
+  "registered_before_solver": true,
+  "registered_at_utc": "2026-09-12T07:05:17.096725+00:00",
+  "attempts": 1,
+  "case": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen",
+  "comparison_source": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1",
+  "required_failed_audits": {
+    "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1": "60a3b9940c3aca5cd6fb005af83d06d7e29e18bc4f94576917bf4a6b85f4d005",
+    "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_time_quarter": "471345c347a1ba6292fb6758e235422d1c9c0cb04da54cdbc78faf700eb10a44"
+  },
+  "native_source_hashes": {
+    "vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp": "8729eb29db778288b0495855a04fa0984000896546f484dcf96176ec48da5454",
+    "vendor/official/DualSPHysics_v5.4/src/source/JSphCfgRun.cpp": "1917b8c2debad3b4dece4c05c597cb03e44fa77122548e2ffcc172f5ff69b048",
+    "vendor/official/DualSPHysics_v5.4/src/source/JSphGpu_ker.cu": "0d4827071a5d27e13c45d7d4f9864039ec710f5903f3489651979d695b402680",
+    "vendor/official/DualSPHysics_v5.4/src/source/JSphGpuSimple_ker.cu": "a5f1eca0f9a04b0fdc9a7c19efeaca2756d56af745fbe516e70df2bc651c89ea",
+    "vendor/official/DualSPHysics_v5.4/examples/mdbc/03_Sloshing/CaseSloshingLR_NSNP_Def.xml": "1dd72337ec1130239251d11228f83202773fdc3fec9fe3776e9de25b610b3f69"
+  },
+  "evidence": "Official v5.4 sloshing NSNP example enables NoPenetration. Native GPU kernel builds a near-wall velocity correction and symplectic corrector changes velocity and displacement; this is part of the new numerical recipe.",
+  "official_source_url": "https://github.com/DualSPHysics/DualSPHysics/blob/master/src/source/JSphGpuSimple_ker.cu",
+  "hypothesis": "Test whether the native near-wall treatment removes remaining nominal-wall crossings after timestep refinement and one spatial refinement did not.",
+  "changes": {
+    "NoPenetration": [
+      0,
+      1
+    ],
+    "CLI": [
+      "-mdbc_noslip",
+      "-mdbc_noslip:1"
+    ]
+  },
+  "held_fixed": [
+    "dp=.01m",
+    "original CELL3 initial fluid and boundary particles",
+    "same normals",
+    "full amplitude=1 forcing",
+    "fixed tank coordinates",
+    "ViscoBoundFactor=1",
+    "fluid artificial Visco=.05",
+    "CFL=.05 and CoefDtMin=.05",
+    "0–8.35s",
+    "output=.01s",
+    "particle shifting disabled",
+    "unchanged hard gates and observation v2"
+  ],
+  "native_velocity_displacement_correction": true,
+  "posthoc_particle_projection": false,
+  "acceptance": "All original identities and mass retained; zero exclusions, nonfinite states, nominal closed-wall crossings and tolerance exceedance over every saved frame. Full recipe qualification still requires new time/output/spatial and control-domain evidence.",
+  "solver_timeout_seconds": 1800,
+  "expansion_allowed": false,
+  "qualified": false,
+  "invalidates_old_recipe_label": "Do not label these results no_projection or reuse old NS1 convergence as qualification."
+}

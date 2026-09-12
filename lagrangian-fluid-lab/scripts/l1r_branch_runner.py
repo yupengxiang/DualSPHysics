@@ -2,10 +2,11 @@
 
 import argparse, json, fcntl, subprocess, time, hashlib, shutil, re, math
 from datetime import datetime, timezone
+from pathlib import Path
 from scripts.l1r_continuation_evidence import LAB, OUT, write, ledger, resource_limits
 from scripts.l1r_postprocess_case import process
 from scripts import l1r_q2_mdbc_bridge as q2
-from scripts.campaign_runner import execute_attempt
+from scripts.campaign_runner import execute_attempt, validate_resource_category
 
 
 def check_gpu_time_reserve(record,budget):
@@ -17,9 +18,64 @@ def check_gpu_time_reserve(record,budget):
     return timeout
 
 
+def boundary_log_mismatch(record,log):
+    for key,pattern,convert in (
+        ('expected_slip_mode',r'SlipMode="([^"]+)"',str),
+        ('expected_no_penetration',r'No Penetration=(True|False)',lambda x:x=='True'),
+    ):
+        found=re.search(pattern,log)
+        if key in record and found and convert(found[1])!=record[key]:
+            return {'ok':False,'reason':'effective boundary mode mismatch',
+                    'field':key,'expected':record[key],'actual':convert(found[1])}
+    return None
+
+
+def check_completed_boundary(record,result):
+    """Do not publish a source audit without the required native initialization."""
+    fields={'expected_slip_mode':r'SlipMode="([^"]+)"',
+            'expected_no_penetration':r'No Penetration=(True|False)'}
+    if not any(key in record for key in fields):return
+    log=(Path(result['attempt_directory'])/'Run.out').read_text()
+    for key,pattern in fields.items():
+        if key in record and not re.search(pattern,log):
+            raise ValueError('completed solver log lacks required boundary field: '+key)
+    mismatch=boundary_log_mismatch(record,log)
+    if mismatch:raise ValueError('completed solver boundary mismatch: '+json.dumps(mismatch))
+
+
+def check_case_attempt_limit(record,runs):
+    cap=record.get('max_attempts')
+    if cap is None:return
+    if not isinstance(cap,int) or isinstance(cap,bool) or cap<1:
+        raise ValueError('invalid per-case attempt limit')
+    attempts=runs/record['id']/'attempts'
+    count=sum(p.is_dir() for p in attempts.iterdir()) if attempts.exists() else 0
+    if count>=cap:raise RuntimeError('registered per-case attempt limit exhausted; reconcile existing attempt without relaunch')
+
+
+def check_record_resource_category(record):
+    """Bind development accounting to registered physical cases, not reference qualification."""
+    category=validate_resource_category(record.get('resource_category','qualification'))
+    if category=='qualification':return category
+    if record.get('family')!='F3' or not record.get('case_id') or record.get('id')!=record['case_id']:
+        raise ValueError('development resource category requires matching F3 case identities')
+    registry=json.loads((OUT/'F3-DEVELOPMENT-CANDIDATES.json').read_text())
+    candidates=[row for row in registry['cases'] if row['case_id']==record['case_id']]
+    if len(candidates)!=1:
+        raise ValueError('development case is not uniquely registered in the candidate manifest')
+    candidate=candidates[0]
+    for key,source_key in (('drive_amplitude','drive_amplitude'),
+                           ('drive_sha256','control_file_sha256'),
+                           ('physical_lineage_sha256','physical_lineage_sha256')):
+        if key not in record or record[key]!=candidate[source_key]:
+            raise ValueError('development case differs from registered candidate: '+key)
+    return category
+
+
 def run(record):
     from scripts.l1r_continuation_evidence import begin_activity_window
 
+    category=check_record_resource_category(record)
     begin_activity_window()
     name = record["id"]
     if record["family"] == "F3":
@@ -30,19 +86,21 @@ def run(record):
     latest = runs / name / "latest.json"
     if latest.exists():
         result = json.loads(latest.read_text())
+        if validate_resource_category(result.get('resource_category','qualification'))!=category:
+            raise ValueError('existing attempt resource category differs; historical attempts cannot be relabelled')
         if result.get("status") != "completed":
             return result
+        check_completed_boundary(record,result)
         return process(record, result)
     with (OUT / "solver.lock").open("w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        check_case_attempt_limit(record,runs)
         from scripts.l1r_continuation_evidence import check_budget
 
-        check_budget()
-        ledger()
-        budget = json.loads((OUT / "RESOURCE-LEDGER.json").read_text())
+        budget = check_budget(category=category)
         timeout_seconds=check_gpu_time_reserve(record,budget)
         if (
-            budget["qualification_attempts_remaining"] <= 0
+            budget[f"{category}_attempts_remaining"] <= 0
             or budget["gpu_solver_hours"] >= 64
         ):
             raise RuntimeError("original budget exhausted")
@@ -50,8 +108,7 @@ def run(record):
             budget["conservative_expiry_utc"]
         ):
             raise RuntimeError("original activity expired")
-        # F3 continuation uses the shared qualification pool checked above.
-        # The exhausted historical six-case child cap is not a new parent cap.
+        # Both categories share CPU, GPU and storage caps; only attempt pools differ.
         disk = shutil.disk_usage(LAB)
         if disk.free < max(100 * 1024**3, 0.1 * disk.total):
             raise RuntimeError("disk reserve")
@@ -75,12 +132,10 @@ def run(record):
         ]
         def guard():
             state=q2.gpu_guard(gpu,next(row['uuid'] for row in preflight['snapshot'] if row['index']==gpu))
-            expected=record.get('expected_slip_mode')
-            if state.get('ok') and expected:
+            if state.get('ok'):
                 for log in (runs/name/'attempts').glob('*.partial/Run.out'):
-                    found=re.search(r'SlipMode="([^"]+)"',log.read_text(errors='replace'))
-                    if found and found[1]!=expected:
-                        return {'ok':False,'reason':'effective boundary mode mismatch','expected':expected,'actual':found[1]}
+                    mismatch=boundary_log_mismatch(record,log.read_text(errors='replace'))
+                    if mismatch:return mismatch
             return state
         result = execute_attempt(
             name,
@@ -93,6 +148,7 @@ def run(record):
             timeout_seconds=timeout_seconds,
             resource_guard=guard,
             resource_poll_seconds=1.0,
+            resource_category=category,
         )
         result.update(
             resource_preflight=preflight,
@@ -103,6 +159,7 @@ def run(record):
         q2.atomic_json(latest, result)
         ledger()
     if result["status"] == "completed":
+        check_completed_boundary(record,result)
         return process(record, result)
     return result
 

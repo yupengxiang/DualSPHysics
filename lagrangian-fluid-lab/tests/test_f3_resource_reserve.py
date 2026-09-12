@@ -7,7 +7,7 @@ def test_inflight_timeout_is_reserved_without_fabricating_elapsed_time(tmp_path,
     monkeypatch.setattr(evidence,'LAB',tmp_path);monkeypatch.setattr(evidence,'OUT',out)
     (out/'HISTORICAL-CPU-RESERVE.json').write_text(json.dumps({'cpu_core_hours_conservative_reserve':1.}))
     (out/'RESOURCE-ACTIVE-WINDOWS.json').write_text('[]')
-    (out/'RESOURCE-LIMITS.json').write_text(json.dumps({'limits':{'qualification':56,'gpu_hours':64,'cpu_core_hours':768,'materials':32}}))
+    (out/'RESOURCE-LIMITS.json').write_text(json.dumps({'limits':{'qualification':56,'development':40,'gpu_hours':64,'cpu_core_hours':768,'materials':32}}))
     attempt=tmp_path/'campaigns/l1-resume/runs/case/attempt.json';attempt.parent.mkdir(parents=True)
     row={'case_id':'case','attempt_id':'known','status':'running','command':['solver','-gpu:4'],'timeout_seconds':1800}
     attempt.write_text(json.dumps(row));evidence.ledger()

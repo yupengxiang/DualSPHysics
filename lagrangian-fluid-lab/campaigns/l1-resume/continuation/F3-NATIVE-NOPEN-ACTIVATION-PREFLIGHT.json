@@ -1,0 +1,311 @@
+{
+  "schema_version": 1,
+  "captured_at_utc": "2026-09-12T07:25:07.147829+00:00",
+  "status": "passed_activation_geometry_only",
+  "scope": "Analysis of existing dp=0.01 NS1 initialization VTK files and local official native source. This check did not run the candidate and did not use candidate trajectory output.",
+  "baseline_case": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1",
+  "baseline_solver_attempt": "20260910T162141.469237Z-ba96b65c",
+  "candidate_case": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen",
+  "solver_attempts_launched_by_this_check": 0,
+  "candidate_results_used": false,
+  "candidate_attempts_visible_when_report_written": [
+    {
+      "path": "campaigns/l1-resume/runs/branches/F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen/attempts/20260912T072256.206799Z-30e6322a.partial/attempt.json",
+      "sha256": "64b1a991121d40bbe6b8a550262d389c190ddfa8918ebc78cdb6efe033a7652b",
+      "bytes": 797,
+      "attempt_id": "20260912T072256.206799Z-30e6322a",
+      "recorded_status": "running",
+      "started_at_utc": "2026-09-12T07:22:56.207005+00:00"
+    }
+  ],
+  "timing_note": "The activation finding was communicated to the root agent before it launched the candidate. Report writing observed a candidate attempt already present, so this report does not claim the candidate is still unrun.",
+  "qualified": false,
+  "full_window_zero_crossing_proven": false,
+  "candidate_design": {
+    "path": "campaigns/l1-resume/continuation/F3-NATIVE-NOPEN-DESIGN.json",
+    "sha256": "558a4b2cad88c66973f95d1955ab7dfdd8a42e04fbe280f0e47149157e1ce215",
+    "bytes": 2871
+  },
+  "candidate_prepared": {
+    "path": "campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen-PREPARED.json",
+    "sha256": "e7575583b9c4ca5fcdff9a797db19fa4bc04bdbdd4bd31f40c77adedc74b5476",
+    "bytes": 3484
+  },
+  "baseline_initial_bi4": {
+    "path": "campaigns/l1-resume/artifacts/cell3-long/F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1/F3_CELL3_plain_0p01.bi4",
+    "sha256": "07444b30c5c956e88651667b591a6ca0ba08bff3e9b9435c80a2fc8437482d38",
+    "bytes": 3021863
+  },
+  "candidate_initial_bi4": {
+    "path": "campaigns/l1-resume/artifacts/cell3-long/F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p01.bi4",
+    "sha256": "07444b30c5c956e88651667b591a6ca0ba08bff3e9b9435c80a2fc8437482d38",
+    "bytes": 3021863
+  },
+  "candidate_initial_bi4_byte_identical_to_baseline": true,
+  "vtk_evidence": {
+    "wall_normals": {
+      "path": "campaigns/l1-resume/runs/branches/F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1/attempts/20260910T162141.469237Z-ba96b65c.complete/CfgInit_Normals.vtk",
+      "sha256": "b1edceee9a772e23b9b37668d3ede7caf84be67a40ec0e1ee5322a758e409157",
+      "bytes": 1784403
+    },
+    "ghost_normals": {
+      "path": "campaigns/l1-resume/runs/branches/F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1/attempts/20260910T162141.469237Z-ba96b65c.complete/CfgInit_NormalsGhost.vtk",
+      "sha256": "fe07f35f65acb54ba0c1df6d62899c6335463fdfa0db323744befe7eb490b4b5",
+      "bytes": 1784403
+    },
+    "format": "Legacy binary VTK, big-endian float32 POINTS and Normal, big-endian int32 Idp",
+    "boundary_particles": 42480,
+    "all_positions_and_ids_identical": true,
+    "all_ghost_vectors_exactly_twice_wall_vectors": true,
+    "maximum_component_difference_between_ghost_and_twice_wall_m": 0.0
+  },
+  "source_evidence": [
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JPartsLoad4.cpp",
+      "sha256": "ab60efba601c4975cea595b7059e6be11373626d25111874b51156895401ba82",
+      "bytes": 16564,
+      "line_start": 265,
+      "line_end": 269,
+      "meaning": "Load BoundNor from initial BI4 without scaling."
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSphGpuSingle.cpp",
+      "sha256": "7d22adb354da717c6d7cf55c886ec9a3d5dca6a613b2e168d7027ded7f7da5ef",
+      "bytes": 59520,
+      "line_start": 168,
+      "line_end": 213,
+      "meaning": "Copy loaded normals, run initialization, call ConfigBoundNormals, and then upload the resulting vectors."
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp",
+      "sha256": "8729eb29db778288b0495855a04fa0984000896546f484dcf96176ec48da5454",
+      "bytes": 181114,
+      "line_start": 1406,
+      "line_end": 1422,
+      "meaning": "Save wall normals, multiply boundnor by 2 on a fresh run, then save ghost normals."
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp",
+      "sha256": "8729eb29db778288b0495855a04fa0984000896546f484dcf96176ec48da5454",
+      "bytes": 181114,
+      "line_start": 3423,
+      "line_end": 3462,
+      "meaning": "VTK Normal copies boundnor with only the explicit resize argument."
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSphGpu.cpp",
+      "sha256": "376a499523fe10b6d4e62a7aac4c5a8b3dde3f71ec2ae6b46a27985cfcd5b4d0",
+      "bytes": 71667,
+      "line_start": 606,
+      "line_end": 615,
+      "meaning": "Copy configured host normals directly to BoundNor_g."
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSphGpuSingle.cpp",
+      "sha256": "7d22adb354da717c6d7cf55c886ec9a3d5dca6a613b2e168d7027ded7f7da5ef",
+      "bytes": 59520,
+      "line_start": 604,
+      "line_end": 615,
+      "meaning": "Pass BoundNor_g to the force kernel."
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSphGpu_ker.cu",
+      "sha256": "0d4827071a5d27e13c45d7d4f9864039ec710f5903f3489651979d695b402680",
+      "bytes": 183147,
+      "line_start": 687,
+      "line_end": 704,
+      "meaning": "NoPen geometry gates use the uploaded full ghost-vector magnitude and unit direction."
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSphGpu_ker.cu",
+      "sha256": "0d4827071a5d27e13c45d7d4f9864039ec710f5903f3489651979d695b402680",
+      "bytes": 183147,
+      "line_start": 428,
+      "line_end": 437,
+      "meaning": "Velocity correction requires a relative velocity component directed toward the boundary."
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSphGpuSimple_ker.cu",
+      "sha256": "a5f1eca0f9a04b0fdc9a7c19efeaca2756d56af745fbe516e70df2bc651c89ea",
+      "bytes": 41355,
+      "line_start": 447,
+      "line_end": 462,
+      "meaning": "Symplectic corrector changes velocity and displacement when a correction was computed."
+    }
+  ],
+  "runtime_geometry": {
+    "source": {
+      "path": "campaigns/l1-resume/runs/branches/F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1/attempts/20260910T162141.469237Z-ba96b65c.complete/Run.out",
+      "sha256": "f3a76aa34bef14fb5a90440f90ee8e0ad80a5393ce733a464298ccdce63c7d31",
+      "bytes": 100011
+    },
+    "fixed_boundary_particles": 42480,
+    "moving_boundary_particles": 0,
+    "floating_particles": 0,
+    "periodic_active": "None",
+    "step_algorithm": "Symplectic",
+    "dp_m": 0.01
+  },
+  "activation_derivation": {
+    "coordinate": "s is signed distance inside the nominal central planar wall: s=0 at the wall and s>0 in the fluid interior.",
+    "boundary_first_layer_s_m": -0.005,
+    "stored_wall_normal_length_m": 0.005,
+    "uploaded_ghost_normal_length_m": 0.01,
+    "kernel_normal_distance": "normdist = s + dp/2",
+    "geometric_condition": "s + dp/2 < 0.75*dp, hence s < dp/4 = 0.0025 m",
+    "conclusion": "Correction can activate approximately 2.5 mm inside the nominal wall. The proposed 1.25 mm outside-wall activation used the undoubled wall-normal vector and does not describe this runtime path.",
+    "additional_gates": [
+      "NoPen mode active, and the neighbour is a non-floating boundary particle.",
+      "Separation rrmag < 1.25*dp = 0.0125 m.",
+      "Uploaded normal length < 1.75*dp = 0.0175 m.",
+      "A selected nonzero normal component and relative velocity directed toward the boundary."
+    ],
+    "central_grid_radial_coverage": "With dp spacing in both tangent directions, the closest first-layer grid point has tangent offset at most dp/sqrt(2). At normdist=0.75*dp, rrmag <= sqrt(0.75^2+0.5^2+0.5^2)*dp = 0.010307764 m, below 0.0125 m."
+  },
+  "central_plane_samples": [
+    {
+      "face": "left",
+      "representative_boundary_id": 3273,
+      "position_m": [
+        -0.45500001311302185,
+        -0.004999999888241291,
+        0.2549999952316284
+      ],
+      "normal_to_wall_m": [
+        0.005000011995434761,
+        0.0,
+        0.0
+      ],
+      "normal_to_ghost_uploaded_to_gpu_m": [
+        0.010000023990869522,
+        0.0,
+        0.0
+      ],
+      "gpu_normal_length_m": 0.010000023990869522,
+      "nominal_wall_axis": "x",
+      "nominal_wall_axis_coordinate_m": -0.45,
+      "geometric_activation_inequality": "x < -0.4474999951198697",
+      "activation_axis_coordinate_m": -0.4474999951198697,
+      "activation_distance_inside_nominal_wall_m": 0.002500004880130302,
+      "normal_length_gate_passes": true,
+      "radial_distance_at_activation_with_max_nearest_grid_tangential_offset_m": 0.010307777155992745
+    },
+    {
+      "face": "right",
+      "representative_boundary_id": 39153,
+      "position_m": [
+        0.45500001311302185,
+        -0.004999999888241291,
+        0.2549999952316284
+      ],
+      "normal_to_wall_m": [
+        -0.005000011995434761,
+        0.0,
+        0.0
+      ],
+      "normal_to_ghost_uploaded_to_gpu_m": [
+        -0.010000023990869522,
+        0.0,
+        0.0
+      ],
+      "gpu_normal_length_m": 0.010000023990869522,
+      "nominal_wall_axis": "x",
+      "nominal_wall_axis_coordinate_m": 0.45,
+      "geometric_activation_inequality": "x > 0.4474999951198697",
+      "activation_axis_coordinate_m": 0.4474999951198697,
+      "activation_distance_inside_nominal_wall_m": 0.002500004880130302,
+      "normal_length_gate_passes": true,
+      "radial_distance_at_activation_with_max_nearest_grid_tangential_offset_m": 0.010307777155992745
+    },
+    {
+      "face": "front",
+      "representative_boundary_id": 20994,
+      "position_m": [
+        -0.004999999888241291,
+        -0.0949999988079071,
+        0.2549999952316284
+      ],
+      "normal_to_wall_m": [
+        0.0,
+        0.00499999662861228,
+        0.0
+      ],
+      "normal_to_ghost_uploaded_to_gpu_m": [
+        0.0,
+        0.00999999325722456,
+        0.0
+      ],
+      "gpu_normal_length_m": 0.00999999325722456,
+      "nominal_wall_axis": "y",
+      "nominal_wall_axis_coordinate_m": -0.09,
+      "geometric_activation_inequality": "y < -0.08750000386498868",
+      "activation_axis_coordinate_m": -0.08750000386498868,
+      "activation_distance_inside_nominal_wall_m": 0.002499996135011312,
+      "normal_length_gate_passes": true,
+      "radial_distance_at_activation_with_max_nearest_grid_tangential_offset_m": 0.010307760384477409
+    },
+    {
+      "face": "back",
+      "representative_boundary_id": 21103,
+      "position_m": [
+        -0.004999999888241291,
+        0.0949999988079071,
+        0.2549999952316284
+      ],
+      "normal_to_wall_m": [
+        0.0,
+        -0.00499999662861228,
+        0.0
+      ],
+      "normal_to_ghost_uploaded_to_gpu_m": [
+        0.0,
+        -0.00999999325722456,
+        0.0
+      ],
+      "gpu_normal_length_m": 0.00999999325722456,
+      "nominal_wall_axis": "y",
+      "nominal_wall_axis_coordinate_m": 0.09,
+      "geometric_activation_inequality": "y > 0.08750000386498868",
+      "activation_axis_coordinate_m": 0.08750000386498868,
+      "activation_distance_inside_nominal_wall_m": 0.002499996135011312,
+      "normal_length_gate_passes": true,
+      "radial_distance_at_activation_with_max_nearest_grid_tangential_offset_m": 0.010307760384477409
+    },
+    {
+      "face": "bottom",
+      "representative_boundary_id": 21047,
+      "position_m": [
+        -0.004999999888241291,
+        -0.004999999888241291,
+        -0.004999999888241291
+      ],
+      "normal_to_wall_m": [
+        0.0,
+        0.0,
+        0.004999999888241291
+      ],
+      "normal_to_ghost_uploaded_to_gpu_m": [
+        0.0,
+        0.0,
+        0.009999999776482582
+      ],
+      "gpu_normal_length_m": 0.009999999776482582,
+      "nominal_wall_axis": "z",
+      "nominal_wall_axis_coordinate_m": 0.0,
+      "geometric_activation_inequality": "z < 0.002499999944120646",
+      "activation_axis_coordinate_m": 0.0024999999441206455,
+      "activation_distance_inside_nominal_wall_m": 0.0024999999441206455,
+      "normal_length_gate_passes": true,
+      "radial_distance_at_activation_with_max_nearest_grid_tangential_offset_m": 0.010307763942069545
+    }
+  ],
+  "limitations": [
+    "The activation inequality is strict. The threshold is the entry boundary, not an assertion that correction occurs at equality.",
+    "VTK positions are float32; nanometre-scale departures from 2.5 mm reflect exported values and do not establish exact internal double-precision coordinates.",
+    "This verifies geometric eligibility and normal scaling. Actual correction also depends on velocity direction and the integration stage.",
+    "The derivation covers central planar faces. Corners, edges and the open rim require actual trajectory evidence.",
+    "Native velocity/displacement correction is not an exact continuous geometric non-penetration guarantee. This does not prove absence of saved-frame or unsaved intermediate-stage crossings.",
+    "The candidate still requires effective-mode checks and unchanged full-window identity, mass, nonfinite, exclusion and wall-crossing audits. No recipe qualification or control-domain expansion is granted."
+  ],
+  "decision": "The suspected too-late activation is refuted for central planar first-layer walls. This supports the existing single registered diagnostic under its current guards; it does not predict a passing full-window result."
+}

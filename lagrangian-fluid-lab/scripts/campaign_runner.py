@@ -17,6 +17,12 @@ import uuid
 SAFE_CASE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
 
 
+def validate_resource_category(category):
+    if category not in ("qualification", "development"):
+        raise ValueError(f"unsupported solver resource category: {category!r}")
+    return category
+
+
 def atomic_json(path: Path, payload):
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".partial")
@@ -50,8 +56,9 @@ def require_idle_allowed_gpu(index, allowed_uuids, *, memory_limit_mib=1024, uti
 def execute_attempt(case_id, command_template, run_root, *, cwd=None, env=None,
                     evidence_glob="data*/Part_*.bi4", required_text=None,
                     timeout_seconds=None, resource_guard=None,
-                    resource_poll_seconds=1.0):
+                    resource_poll_seconds=1.0, resource_category="qualification"):
     """Execute into a unique partial directory, then atomically publish one attempt."""
+    resource_category = validate_resource_category(resource_category)
     if not SAFE_CASE_ID.fullmatch(case_id):
         raise ValueError(f"unsafe case id: {case_id!r}")
     run_root = Path(run_root).resolve()
@@ -66,6 +73,7 @@ def execute_attempt(case_id, command_template, run_root, *, cwd=None, env=None,
         "schema_version": 1, "case_id": case_id, "attempt_id": attempt_id,
         "status": "running", "started_at_utc": started_at, "command": command,
         "timeout_seconds": timeout_seconds,
+        "resource_category": resource_category,
     })
     started = time.monotonic()
     timed_out = False
@@ -176,6 +184,7 @@ def execute_attempt(case_id, command_template, run_root, *, cwd=None, env=None,
         "resource_guard": resource_guard_triggered,
         "process_group_terminated": process_group_terminated,
         "timeout_seconds": timeout_seconds,
+        "resource_category": resource_category,
     }
     atomic_json(partial / "attempt.json", payload)
     os.replace(partial, final)

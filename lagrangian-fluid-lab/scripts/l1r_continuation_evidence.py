@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 import numpy as np
 import h5py
 from scripts import l1r_q2_mdbc_bridge as q2
+from scripts.campaign_runner import validate_resource_category
 from scripts.finite_wall_audit import (
     FACE_AXIS,
     outside_closed_face_masks,
@@ -54,6 +55,7 @@ def ledger():
     for name in ("l1-qualification", "l1-resume"):
         for f in sorted((LAB / "campaigns" / name / "runs").glob("**/attempt.json")):
             d = json.loads(f.read_text())
+            category = validate_resource_category(d.get("resource_category", "qualification"))
             rows.append(
                 {
                     **{
@@ -71,6 +73,7 @@ def ledger():
                     },
                     "path": str(f.relative_to(LAB)),
                     "sha256": q2.sha256(f),
+                    "resource_category": category,
                     "backend": (
                         "gpu"
                         if any(str(x).startswith("-gpu") for x in d["command"])
@@ -86,6 +89,7 @@ def ledger():
             rows.append({
                 "case_id": item["id"], "attempt_id": item["id"],
                 "status": item["status"], "backend": "gpu",
+                "resource_category": "qualification",
                 "elapsed_seconds": item["elapsed_seconds"],
                 "resource_guard_triggered": None,
                 "path": item.get("log"), "sha256": item.get("sha256"),
@@ -104,6 +108,9 @@ def ledger():
             row["reserve_basis"] = "Conservative one-hour charge, not measured runtime. Direct launches and terminal observations in conversation occurred within 13:19–13:40 local time; stop commit adec9b9 is timestamped 13:40:23."
     unknown_gpu = sum(r["backend"] == "gpu" and r["elapsed_seconds"] is None for r in rows)
     unbounded_gpu = sum(r["backend"] == "gpu" and r["elapsed_seconds"] is None and "budget_reserve_seconds" not in r for r in rows)
+    counts = {category: sum(r["resource_category"] == category for r in rows)
+              for category in ("qualification", "development")}
+    limits = resource_limits()
     reserve = OUT / "HISTORICAL-CPU-RESERVE.json"
     if not reserve.exists():
         now = datetime.now(timezone.utc)
@@ -123,8 +130,10 @@ def ledger():
             "start_evidence": "L1 W00 capture 2026-09-09T03:09:38.158441Z; adoption earlier on same date",
             "conservative_expiry_utc": "2026-09-16T00:00:00+00:00",
             "attempts": rows,
-            "qualification_attempts_used": len(rows),
-            "qualification_attempts_remaining": resource_limits()["qualification"] - len(rows),
+            "qualification_attempts_used": counts["qualification"],
+            "qualification_attempts_remaining": limits["qualification"] - counts["qualification"],
+            "development_attempts_used": counts["development"],
+            "development_attempts_remaining": limits["development"] - counts["development"],
             "material_configurations_used": material_usage(),
             "material_usage_basis": "Original L1 material usage was zero; current F3 engineering and manufactured-calibration configurations are charged including incomplete attempts. Qualified CFD material configurations do not yet exist.",
             "gpu_unmetered_attempts": unknown_gpu,
@@ -140,7 +149,7 @@ def ledger():
             ]
             + post_reserve_hours() * 16 * 1.1,
             "historical_cpu_accounting_status": "supplement reported totals with new timings; unmetered work is unknown, never zero",
-            "limits": resource_limits(),
+            "limits": limits,
             "formal_release": False,
         },
     )
@@ -381,13 +390,14 @@ def trajectories():
     )
 
 
-def check_budget():
+def check_budget(category="qualification"):
+    category = validate_resource_category(category)
     ledger()
     budget = json.loads((OUT / "RESOURCE-LEDGER.json").read_text())
     if budget.get("gpu_unbounded_attempts", 0):
         raise RuntimeError("reconcile unmetered GPU attempts before budget-dependent launches")
     if (
-        budget["qualification_attempts_remaining"] <= 0
+        budget[f"{category}_attempts_remaining"] <= 0
         or budget["gpu_budget_charge_hours"] >= budget["limits"]["gpu_hours"]
         or budget["cpu_core_hours_upper_bound"] >= budget["limits"]["cpu_core_hours"]
     ):
@@ -418,6 +428,9 @@ def check_budget():
             "cpu_core_hours_upper_bound": budget["cpu_core_hours_upper_bound"],
             "gpu_hours": budget["gpu_solver_hours"],
             "qualification_remaining": budget["qualification_attempts_remaining"],
+            "development_remaining": budget["development_attempts_remaining"],
+            "resource_category": category,
+            "category_attempts_remaining": budget[f"{category}_attempts_remaining"],
         },
     )
     return budget

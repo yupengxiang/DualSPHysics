@@ -1,0 +1,329 @@
+{
+  "schema": "f3.native_nopen.conditional_qualification_plan.v1",
+  "scope": "conditional_plan_not_authorization",
+  "recorded_at_utc": "2026-09-12T07:12:13Z",
+  "status": "Conditional minimum matrix; source diagnostic and full recipe qualification remain unproven",
+  "launch_allowed": false,
+  "qualified": false,
+  "modifies_resource_limits": false,
+  "recipe_id": "F3_CELL3_NS_visco1_native_nopen",
+  "single_diagnostic_boundary": {
+    "design_path": "campaigns/l1-resume/continuation/F3-NATIVE-NOPEN-DESIGN.json",
+    "design_sha256": "558a4b2cad88c66973f95d1955ab7dfdd8a42e04fbe280f0e47149157e1ce215",
+    "case_id": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen",
+    "attempts_in_existing_design": 1,
+    "captured_state": "prepared; no NoPen attempt in captured resource ledger",
+    "authorization_via_this_plan": false,
+    "execution_rule": "The prepared single diagnostic is governed separately by its existing one-attempt design and runner guards. This plan does not authorize that run or open any additional matrix cell."
+  },
+  "captured_resource_evidence": {
+    "captured_at_utc": "2026-09-12T07:12:13Z",
+    "ledger_path": "campaigns/l1-resume/continuation/RESOURCE-LEDGER.json",
+    "ledger_sha256": "de1b43909d15fd97825790dab94aa21edea58e855d1b6656c69617edb6c04903",
+    "qualification_attempts_used": 51,
+    "qualification_attempts_remaining": 5,
+    "material_configurations_used": 10,
+    "limits_path": "campaigns/l1-resume/continuation/RESOURCE-LIMITS.json",
+    "limits_sha256": "fc06c05ac446e1f90354a6492ee05e3a704071fbb09b63135055460ab843bb75",
+    "current_qualification_cap": 56,
+    "cpu_core_hours_cap": 768,
+    "cpu_cap_approval": "Explicit owner approval already recorded; this plan makes no new CPU authorization",
+    "other_current_caps": {
+      "gpu_hours": 64,
+      "development_attempts": 40,
+      "training_attempts": 12,
+      "material_configurations": 32,
+      "storage_gib": 512
+    },
+    "old_qualification_cap_proposal": {
+      "proposed_cap": 64,
+      "status": "unanswered; not approved",
+      "authorization_exists": false,
+      "forecast_path": "campaigns/l1-resume/continuation/F3-QUALIFICATION-BUDGET-FORECAST.json",
+      "forecast_sha256": "aad7e22734b701fc9242a9591f9844292179ac3895842a4e7d2ecbad00e3c2bd",
+      "old_charged_base": 49,
+      "old_conditional_minimum_total": 63,
+      "change_since_forecast": "Two further failed-recipe diagnostics raised the charged base from 49 to 51; neither supplies a qualified NoPen matrix cell."
+    },
+    "refresh_rule": "These are captured values, not a live ledger. Refresh actual charges and enforce approved limits before any separately authorized launch. All historical attempts remain charged."
+  },
+  "fixed_recipe_and_scope": {
+    "backend": "GPU",
+    "solver_mode": "-mdbc_noslip:1",
+    "Boundary": 2,
+    "SlipMode": 2,
+    "NoPenetration": 1,
+    "Visco": 0.05,
+    "ViscoBoundFactor": 1,
+    "Shifting": 0,
+    "native_velocity_displacement_correction": true,
+    "posthoc_particle_projection": false,
+    "coordinate_frame": "fixed tank computational coordinates; no reconstructed inertial-world trajectory claim",
+    "container_geometry_m": [0.9, 0.18, 0.51],
+    "continuous_initial_water_volume_m": [0.9, 0.18, 0.09],
+    "initialization": "Same CELL3 continuous geometry and dp-dependent cell-centre initial-state policy; retain mass, boundary, normals and input checks",
+    "nominal_spatial_ladder_dp_m": [0.01, 0.0075, 0.006],
+    "candidate_production_dp_m": 0.01,
+    "production_dp_status": "undetermined until qualification evidence is complete",
+    "control_domain_target": [0.9, 1.1],
+    "independent_internal_amplitude": 0.97,
+    "amplitude_definition": "linear acceleration = gravity + amplitude * (nominal linear acceleration - gravity); angular acceleration = amplitude * nominal angular acceleration",
+    "zero_drive_definition": "linear acceleration (0,0,-9.81), angular acceleration (0,0,0); preserve the same initial water and boundary recipe",
+    "time_window_s": [0, 8.35],
+    "spatial_observable_budget": 0.05,
+    "time_output_observable_budget": 0.01,
+    "observation_scope": "Frozen v2 at fixed physical scale; no pointwise, thin-film or material-path qualification inferred",
+    "hard_gate_rule": "All original identities and mass retained; no native exclusions, unexplained lifecycle changes, nonfinite states, nominal closed-wall crossings or registered tolerance exceedance across all saved frames. No averaging or posthoc particle filtering may waive failures."
+  },
+  "cases": [
+    {
+      "plan_case_id": "NP01",
+      "prepared_case_id": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen",
+      "dp_m": 0.01,
+      "amplitude": 1.0,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [0, 8.35],
+      "roles": ["existing single full-window diagnostic", "nominal coarse spatial cell if all required gates pass", "common baseline for NP02, NP03 and NP04", "matching 1.5 s diagnostic prefix"],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP02",
+      "prepared_case_id": null,
+      "dp_m": 0.01,
+      "amplitude": 0.0,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [0, 8.35],
+      "roles": ["same-recipe gravity-preserving zero-drive drift control"],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP03",
+      "prepared_case_id": null,
+      "dp_m": 0.01,
+      "amplitude": 1.0,
+      "cfl_number": 0.025,
+      "coef_dt_min": 0.025,
+      "output_interval_s": 0.01,
+      "time_window_s": [0, 8.35],
+      "roles": ["actual integration-step refinement against NP01; verify native dt and step counts"],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP04",
+      "prepared_case_id": null,
+      "dp_m": 0.01,
+      "amplitude": 1.0,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.002,
+      "time_window_s": [0, 8.35],
+      "roles": ["finer-output comparison against NP01", "bound interpolation, downsampling and event-time effects separately from integration timestep"],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP05",
+      "prepared_case_id": null,
+      "dp_m": 0.0075,
+      "amplitude": 1.0,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [0, 8.35],
+      "roles": ["nominal middle spatial reference", "matching 1.5 s diagnostic prefix"],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP06",
+      "prepared_case_id": null,
+      "dp_m": 0.006,
+      "amplitude": 1.0,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [0, 8.35],
+      "roles": ["nominal fine spatial reference", "matching 1.5 s diagnostic prefix"],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP07",
+      "prepared_case_id": null,
+      "dp_m": 0.01,
+      "amplitude": 0.9,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [0, 8.35],
+      "roles": ["lower control endpoint coarse spatial cell"],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP08",
+      "prepared_case_id": null,
+      "dp_m": 0.0075,
+      "amplitude": 0.9,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [0, 8.35],
+      "roles": ["lower control endpoint middle spatial reference"],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP09",
+      "prepared_case_id": null,
+      "dp_m": 0.006,
+      "amplitude": 0.9,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [0, 8.35],
+      "roles": ["lower control endpoint fine spatial reference"],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP10",
+      "prepared_case_id": null,
+      "dp_m": 0.01,
+      "amplitude": 1.1,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [0, 8.35],
+      "roles": ["upper control endpoint coarse spatial cell"],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP11",
+      "prepared_case_id": null,
+      "dp_m": 0.0075,
+      "amplitude": 1.1,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [0, 8.35],
+      "roles": ["upper control endpoint middle spatial reference"],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP12",
+      "prepared_case_id": null,
+      "dp_m": 0.006,
+      "amplitude": 1.1,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [0, 8.35],
+      "roles": ["upper control endpoint fine spatial reference"],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP13",
+      "prepared_case_id": null,
+      "dp_m": 0.01,
+      "amplitude": 0.97,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [0, 8.35],
+      "roles": ["preselected independent internal control at candidate production resolution"],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP14",
+      "prepared_case_id": null,
+      "dp_m": 0.006,
+      "amplitude": 0.97,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [0, 8.35],
+      "roles": ["fine reference for the same independent internal control"],
+      "launch_allowed_via_this_plan": false
+    }
+  ],
+  "deduplicated_count": {
+    "nominal_and_endpoint_spatial_cells": 9,
+    "zero_drive_time_output_controls": 3,
+    "independent_internal_cells": 2,
+    "planned_new_attempts_including_prepared_diagnostic": 14,
+    "captured_charged_base": 51,
+    "minimum_total_if_all_dependencies_and_first_attempts_pass": 65,
+    "additional_attempts_after_successful_prepared_diagnostic": 13,
+    "shortfall_against_current_cap_56": 9,
+    "shortfall_even_if_old_cap_64_were_approved": 1,
+    "reserve_at_total_cap_65": 0,
+    "deduplication_rules": [
+      "NP01 is both the full-window diagnostic and nominal coarse cell; do not add a second nominal coarse run.",
+      "The nominal amplitude spatial cells are reused within the three-amplitude control matrix; endpoint expansion adds six cells, not nine.",
+      "Full-window runs provide identical-protocol short-window prefixes, so no additional fine short-window solver attempts are counted.",
+      "NP03 and NP04 remain distinct under the current single-factor control plan. Combining changed integration and output settings requires a prospective equivalence justification that does not currently exist."
+    ],
+    "not_a_completion_guarantee": true
+  },
+  "conditional_dependencies_and_limits": [
+    "A passing NP01 hard audit alone does not establish the numerical recipe, control domain, material reference or production readiness.",
+    "No matrix cell is launchable through this document. Additional preparation, dependency checks, actual budget guards and applicable authorization remain separate.",
+    "The minimum assumes every new run passes on its first attempt and dp=.010 is qualified for production under the complete registered ladder and observation protocol.",
+    "If dp=.0075 becomes the production candidate, use an independent internal comparison at .0075/.006 and establish time/output/zero-drive evidence applicable to that production recipe. Prospective reassignment of unlaunched controls may avoid duplication; already completed diagnostics cannot automatically certify the replacement recipe.",
+    "If dp=.006 is selected for production, it cannot act as its own finer reference. Further finer-resolution evidence and a prospectively revised matrix are required; no exact extra count is claimed here.",
+    "Changing CFL or CoefDtMin without a demonstrated native integration-step reduction does not complete the temporal gate. Failure may require additional evidence-led work beyond the minimum.",
+    "Native NoPen velocity/displacement corrections require their numerical and material-path semantics to be documented, including available trigger, correction and momentum/energy evidence. If existing native outputs are insufficient, additional diagnostics or reruns are not included in this zero-reserve minimum.",
+    "Failed attempts, timeouts, input errors and guarded stops remain charged; qualification work may not be relabelled as development.",
+    "A cap of 65 would cover only this conditional zero-reserve minimum. It is not current authorization, and the pending cap-64 proposal has no approval."
+  ],
+  "evidence_reuse": {
+    "reusable_engineering_and_protocol_evidence": [
+      "Frozen v2 observation design and unchanged manufactured calibration, subject to source/hash checks.",
+      "Verified native control interpretation, gravity-preserving amplitude definition and fixed tank coordinate convention.",
+      "Exactly unchanged CELL3 initial fluid/boundary assets, normals and dp-specific physical-volume checks, subject to new input/hash verification.",
+      "Existing readers, hard audits, finite-wall geometry and timestep/output diagnostic methods after confirming applicability to the new recipe.",
+      "Historical failures remain valid negative evidence and may inform hypotheses; they are never rewritten as passing data."
+    ],
+    "old_cfd_not_qualification_credit": [
+      "NoPen=0 NS1 nominal, half-step, quarter-step and dp=.0075 quarter-step full-window cases failed the nominal-wall crossing hard gate.",
+      "The old passing gravity-only case used a different boundary recipe; no proof establishes complete dynamical equivalence to NoPen=1.",
+      "The old short-window canary does not certify the new NoPen full-window recipe or domain.",
+      "Earlier velocity-zero, no-slip-with-zero-boundary-viscosity and CELL2 results cannot replace any new NoPen spatial, time, output or control-domain cell.",
+      "NoPen changes native velocity and displacement. Old convergence evidence and the old no_projection recipe label must not be inherited as new qualification."
+    ],
+    "existing_cfd_cells_deducted_from_new_matrix": 0
+  },
+  "full_goal_status": {
+    "objective": "取得一份可复现的F3数值参考配方，明确其分辨率、控制范围、时间窗、坐标系和可评分任务；随后实际生成独立开发数据，并完成材料与学习闭环。",
+    "goal_complete": false,
+    "qualified_T1_recipe_and_control_domain": false,
+    "qualified_T2_macro": false,
+    "qualified_T2_path": false,
+    "actual_independent_development_solver_cases": 0,
+    "actual_training_attempts": 0,
+    "candidate_control_files_are_cfd_data": false,
+    "material_rule": "Qualified CFD may supply common physical seeds and cross-dp material comparisons, but macro convergence, manufactured tracer checks and substep convergence do not prove full-window material paths. Material configurations use their own remaining 32-total cap.",
+    "development_rule": "After T1 recipe, domain and input/split gates, execute the actual registered eight-case pilot and then the independent development expansion within the existing 40-attempt cap. T1-only development need not wait for T2-path.",
+    "learning_rule": "Complete real training for two routes and three seeds, autonomous failure/score panels, recovery and measured costs within the existing 12-attempt cap. Engineering-only forwards are not training or qualification.",
+    "formal_release": false,
+    "hidden_test_generation": false
+  },
+  "source_plan_evidence": [
+    {
+      "path": "campaigns/l1-resume/continuation/F3-CELL3-PROTOCOL.json",
+      "sha256": "6e533c03bcbc78ea026aac233b15e5c066dd18f5736e98ce22b0a43588a40c15"
+    },
+    {
+      "path": "campaigns/l1-resume/continuation/F3-TIME-CONTROL-AMENDMENT.json",
+      "sha256": "d827e93fdcf18d792da161bdc99610968e202cb4912980f50e27e708c457c3ea"
+    },
+    {
+      "path": "campaigns/l1-resume/continuation/F3-V2-OBSERVATION-DESIGN.json",
+      "sha256": "ad72b14830e9d1ab902ff3487a85037ecdc5c0e79194a5dcd60a0fb84815c378"
+    },
+    {
+      "path": "campaigns/l1-resume/continuation/F3-NS1-QUALIFICATION-PLAN.json",
+      "sha256": "a89e060737b539078ae6ec31abc00fb3076a00485a3e63388953da72ac9e2613",
+      "use": "Prior same-family matrix structure only; its NoPen=0 recipe is not reused as NoPen=1 qualification"
+    }
+  ]
+}

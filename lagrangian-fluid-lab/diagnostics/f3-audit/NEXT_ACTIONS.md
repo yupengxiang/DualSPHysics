@@ -1,18 +1,21 @@
-# F3 continuation checkpoint — 2026-09-11 Asia/Shanghai
+# F3 continuation checkpoint — 2026-09-12 Asia/Shanghai
 
 The full goal remains active: reproducible qualified numerical recipe, independent development trajectories, material tasks and real learning/recovery closure. No production resolution/control domain or full-window CFD material reference is qualified. Do not mark complete or redefine the goal as diagnostics.
 
-## Live worker — revalidate, never duplicate
+## Completed NP01 worker — never duplicate
 
-- Case: `F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_time_quarter`
-- GPU4; verified PID214157; shell session73691.
-- Attempt: `20260910T171636.775830Z-1ed8f09b`.
-- Command: `OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=1 .venv/bin/python -u -m scripts.f3_long_campaign run --dp .0075 --variant noslip_visco1_time_quarter`
-- Native initialization: No-slip, No Penetration=False, ViscoBoundFactor=1, CFL=.0125, DtMin=5.530674216767470e-6, total108000 particles (34560 fluid).
-- Preregistered timeout5400s. Shared runner now requires the entire timeout to fit remaining GPU budget, default1800s retained for older cases; finite positive limit at most7200s. Fourteen input/diagnostic-gate/resource tests passed.
-- Poll the existing session through normalization and full audit. CPU activity window stays open while real work runs. Files or intent alone never prove liveness.
+- Case: `F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen`
+- GPU4 completed successfully; solver PID1204721, shell session89392, wrapper PID1204658 and runner PID1204680 are terminal. Lifecycle finished2026-09-12T07:29:20Z.
+- Attempt: `20260912T072256.206799Z-30e6322a`; started2026-09-12T07:22:56Z.
+- Native log confirms `SlipMode="No-slip"`, `No Penetration=True`; unchanged .01m CELL3 particles, amplitude1, CFL/floor.05, output.01s, horizon8.35s, boundary viscosity1, artificial fluid viscosity.05, shifting0.
+- One attempt only, timeout1800s. Runtime uses process-local matching NVIDIA libraries (see GPU_RUNTIME.md); ordinary system nvidia-smi still has a driver/library mismatch.
+- F3-NATIVE-NOPEN-WORKER-LIFECYCLE.json records wrapper/runner IDs and final status. The wrapper closes its CPU activity window after the solver and postprocessing return; reopen an activity window for subsequent real work. Never infer liveness from this file alone.
+- F3-NATIVE-NOPEN-DESIGN.json preregisters the single contrast. The new native option changes near-wall velocity and integrated displacement. Do not call it the old no-projection recipe, reuse old convergence qualification, or infer qualification from the option name.
+- Independent review confirmed unchanged BI4/control bytes and the sole XML NoPenetration change. Seventeen input/attempt/budget guard tests passed. Completed native initialization must be present before auditing, including reused latest results; any existing attempt blocks a second launch even if latest.json is missing.
 
-F3-NS1-SPATIAL-DIAGNOSTIC-DESIGN.json binds one spatial failure diagnostic to the completed coarse quarter-step audit. Same geometry/water volume, dp-dependent CELL3 initialization policy, native boundary recipe, amplitude1, full0–8.35s, output.01s and CFL/floor coefficients. This is not matrix expansion or development production.
+The previous .0075m quarter-step worker (session73691/PID214157) is TERMINAL, not live. It finished2026-09-10T17:48:45Z,1928.249s; full836-frame audit failed with2 position exclusions and115 nominal crossings across113 particles. Maximum nominal penetration.018734459m, longest nominal outside streak44 frames; first tolerance exceedance6.280003s,37 offending frames, longest tolerance-exceedance streak15frames. Native dt5.530674216767470e-6s;1,509,684 steps. Both missing IDs are reconciled with native position exclusions (one ymin, one ymax).
+
+Coarse/fine quarter-step v2 diagnostic maxima: TV.016339868, local velocity/U.033993224, mean velocity/U.034459113, energy.031977537, COM/L.009057626, q90/L.006986313. These macro differences are below spatial.05 but cannot waive hard failures. Full archived panels are hash-bound;13 full_report archives verified.
 
 ## Completed numerical evidence
 
@@ -54,12 +57,14 @@ F3-LEARNING-INPUT-CONTRACT.json binds a48-wide current-state/control/finite-wall
 
 ## Next actions and limits
 
-1. Finish current spatial worker and audit all frames. Run crossing/forensic/native-step reports. Compare to coarse quarter source with failed-source semantics when needed.
-2. If integrity passes, register the remaining recipe-specific spatial/time/output/control-domain qualification; one passing run is not production qualification. If it fails, use full evidence to choose remaining bounded work. No threshold relaxation, particle deletion, posthoc projection or shortened horizon to manufacture a pass.
-3. Only after T1/domain/input gates, run actual registered eight-case pilot, then remaining24 if batch integrity holds. Complete qualified material tasks, real learning and recovery/cost work.
+1. NP01 completed: all836 frames,14580 particles, zero exclusions/crossings/nonfinite values, issues=[] and unknowns=[]. This passing source is not production qualification. Register and execute NP02 zero drive, NP03 half-step, NP04 .002s output, NP05/06 spatial controls under the shared single-solver guard.
+2. F3-NATIVE-NOPEN-QUALIFICATION-PLAN.json gives a deduplicated conditional minimum of14 new runs including this single contrast, total65 from the prior51. The historical conditional plan remains launch_allowed=false; a separate execution registration binds the approved limits and passed NP01. User explicitly approved cap72 at2026-09-12T07:31:35Z; old64 proposal is superseded. Production dp changes or extra diagnostics can require more.
+3. Only after full T1/time/output/spatial/domain gates, run the registered eight-case development pilot, then remaining24 if integrity holds. Complete full-window cross-dp material tasks, two learned routes×3seeds, autonomous failures, checkpoint recovery and cost evidence.
 
-Current ledger: qualification51/56, remaining5; materials10/32; CPU conservative597.236/768coreh; GPU budget charge8.335/64h including running timeout reservation and historical unknown reserves. Refresh before new work. Development40, training12, storage512GiB and expiry2026-09-16T00:00Z unchanged. GPUs0–3 protected, only one CFD solver, UUID/memory guards retained.
+Engineering additions: F3FrameReader refuses training mode and failed sources, keeps full IDs/mass and separates current/past inputs from targets. Seven reader/input checks passed and a real14580-particle frame20 read used only[0,20,19]. EngineeringF3Rollout uses the new explicit direct-displacement/(U*dt) convention, not the historical next-velocity/trapezoidal trainer. Eleven rollout/input checks passed; real short-canary initial state completed5 fake-model autonomous CPU steps after reader closure, with no later fluid reads. Reports explicitly retain training/reference qualification=false. Actual independent development CFD and actual training remain0.
 
-CPU768 approval is explicit. Qualification cap64 proposal remains pending: no owner answer yet; do not exceed56. Forecast63 assumed an earlier candidate succeeded and is conditional, not authorization or assurance about the refined recipe. Preserve all historical charges. Close CPU activity window once all real workers stop, not while a GPU solver is live.
+Resources: prior51 plus completed NP01 gives52/72 qualification attempts; materials10/32; CPU cap768 approved; GPU64h, development40, training12, storage512GiB and expiry2026-09-16T00:00Z unchanged. Refresh ledger for current charges. GPUs0–3 protected; only one CFD solver; UUID/memory guards remain.
+
+RESOURCE-PAUSE-RECONCILIATION-20260912.json preserves the previously captured606.118coreh and all historical charges. The prior worker's final audit was written17:49:24Z on Sept10; a further five-minute full-rate cleanup reserve closes the unclosed window, with its inferred-bound semantics explicit. The inactive task gap is not treated as live compute. This continuation opens at2026-09-12T06:58Z. Original ledger/window bytes and full audit are archived by hash. No CPU approval has been requested again or historical charges reset.
 
 Local checkpoints:9e73cfe (observations/long evidence),bada6a4 (temporal diagnostics),f580f90 (material contact repair),aeb030f (development inputs/learning adapter). No push, merge, formal release or hidden test generation.
