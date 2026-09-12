@@ -4,6 +4,16 @@ The full goal remains active: reproducible qualified numerical recipe, independe
 
 ## Historical snapshot at2026-09-12T08:16Z
 
+### Live refresh at 2026-09-12T17:10Z
+
+The prepared four-layer bridge was executed in two explicitly separated forms. The historical bridge `F3_CELL4_LONG_dp0p01_a1p000_noslip_visco1` kept the old `NoPenetration=False` semantics; its 836-frame full-window audit is `quality_failed` with `swept_finite_wall_or_obstacle_crossing`. It is not evidence about the current NP01–NP06 recipe and is retained only to prevent semantic conflation.
+
+The current-recipe bridge `F3_CELL4_LONG_dp0p01_a1p000_noslip_visco1_nopen` kept `-mdbc_noslip:1`, `NoPenetration=True`, the same fluid initial lattice, forcing, CFL, output cadence and 0–8.35 s window, changing only boundary layers `0,1,2` to `0,1,2,3`. It completed 836 frames with `pass_diagnostic`, zero lifecycle exclusions, zero crossings and zero nonfinite values. Because GenCase shifts the fluid identity range from `42480..57059` to `58448..73027`, same-ID path comparison is unavailable; the registered macro operator was used instead.
+
+The current-recipe bridge is macro-close to NP01 (all metrics below `0.0014`), but it does not repair the coarse/fine discrepancy: bridge↔NP06 still fails with maximum energy difference `0.0631941` and mean-velocity difference `0.0629890`, at the same late-window peaks. Therefore the second boundary-layer contrast does not qualify a production recipe and does not change `F3-NOPEN-NOMINAL-GATE.json`.
+
+The live ledger is 61/72 qualification attempts, approximately 8.8068/64 GPU hours and 654.03/768 conservative CPU core-hours; development and training remain 0/40 and 0/12, and material configurations remain 10/32. No endpoint, development, material-production or training launch is allowed under the frozen failed gate. A formal prospective recipe/policy revision is still required before rebuilding a complete qualification matrix.
+
 ### Live refresh at 2026-09-12T09:41Z
 
 The separately registered CFL-half root-cause diagnostic is complete. The first `_cflhalf` launch is preserved as a charged environmental failure: an inherited empty `CUDA_VISIBLE_DEVICES` mask made CUDA return error 100 before computation. The worker was corrected without changing the scientific contrast, and `_cflhalf_retry` completed on GPU4 with 836 frames, 67,500 fluid particles, zero hard-audit issues, and native `dt=8.769713845632211e-6 s` (approximately half of NP06).
