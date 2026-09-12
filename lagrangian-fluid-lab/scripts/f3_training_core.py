@@ -59,7 +59,30 @@ SEMANTICS = {
     'sampling': 'one declared transition per update; state-owned PCG64; no replacement',
     'amp': False, 'gradient_accumulation_steps': 1, 'scheduler': None,
     'gradient_clipping': None, 'output_clipping': None, 'particle_filtering': False,
+    'cpu_thread_policy': 'F3_TORCH_NUM_THREADS environment variable, default 1',
 }
+
+
+def _configure_cpu_threads(device):
+    """Make CPU checkpoint runtime stable across independent interpreters.
+
+    OMP/OpenBLAS settings are often applied before importing torch, so two
+    processes can otherwise report different ``torch.get_num_threads()``
+    values even with the same training config.  The explicit F3 variable is
+    the checkpoint contract; its default is the bounded single-thread policy
+    used by the lab.  Inter-op threads remain part of the runtime fingerprint.
+    """
+    if device.type != 'cpu':
+        return
+    raw = os.environ.get('F3_TORCH_NUM_THREADS', '1')
+    try:
+        threads = int(raw)
+    except (TypeError, ValueError) as error:
+        raise ValueError('F3_TORCH_NUM_THREADS must be a positive integer') from error
+    if threads < 1:
+        raise ValueError('F3_TORCH_NUM_THREADS must be a positive integer')
+    if torch.get_num_threads() != threads:
+        torch.set_num_threads(threads)
 
 
 def _json(value):
@@ -257,6 +280,7 @@ class TrainState:
         if not isinstance(config, TrainConfig):
             raise ValueError('TrainConfig required')
         device, selected = _device(device, cuda_devices)
+        _configure_cpu_threads(device)
         state = cls(config, _catalogue(transitions), _hashes(data_hashes, 'data_hashes'),
                     code_hashes(), device, selected, _runtime(device, selected),
                     np.random.default_rng(config.seed), random.Random(config.seed).getstate(),
