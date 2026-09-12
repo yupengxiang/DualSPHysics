@@ -13,6 +13,7 @@ REF008_RECIPE = "F3_CELL3_NS_visco1_native_nopen_revision075_ref0081818"
 REF008_MANIFEST = LAB / "diagnostics/f3-audit/F3-075-REF0081818-MANIFEST.json"
 REF008_SUMMARY = OUT / "F3-075-REF0081818-PREPARATION-SUMMARY.json"
 REF008_AUTHORIZATION = OUT / "F3-075-REF0081818-AUTHORIZATION.json"
+REF008_GATE = OUT / "F3-075-REF0081818-GATE.json"
 
 
 def check_gpu_time_reserve(record,budget):
@@ -180,12 +181,32 @@ def _verify_ref008_authorization(record):
     return authorization
 
 
+def _verify_ref008_development_gate(record):
+    """Require the passed ref008 gate before any development launch."""
+    if record.get("resource_category") != "development":
+        raise PermissionError("ref0081818 non-qualification records must be development records")
+    if not REF008_GATE.is_file():
+        raise PermissionError("ref0081818 development gate is not passed")
+    gate = json.loads(REF008_GATE.read_text())
+    if (gate.get("schema") != "f3.revision075.ref0081818.gate.v1"
+            or gate.get("status") != "passed"
+            or gate.get("recipe_id") != REF008_RECIPE
+            or gate.get("development_launch_allowed") is not True):
+        raise PermissionError("ref0081818 development gate is not passed")
+    if record.get("source_revision_gate_sha256") != q2.sha256(REF008_GATE):
+        raise PermissionError("ref0081818 development record is bound to another gate")
+
+
 def run(record):
     from scripts.l1r_continuation_evidence import begin_activity_window
 
     # The exact-tiling ref0081818 branch remains blocked until a real
     # owner-authorized file is present and bound to the immutable preparation.
-    _verify_ref008_authorization(record)
+    if record.get("recipe_id") == REF008_RECIPE:
+        if record.get("resource_category", "qualification") == "qualification":
+            _verify_ref008_authorization(record)
+        else:
+            _verify_ref008_development_gate(record)
 
     category=check_record_resource_category(record)
     begin_activity_window()
