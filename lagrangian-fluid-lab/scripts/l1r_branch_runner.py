@@ -216,7 +216,10 @@ def run(record):
 
         check_input(record)
         if record.get("recipe_id") == REF008_RECIPE:
-            _verify_ref008_authorization(record)
+            if category == "qualification":
+                _verify_ref008_authorization(record)
+            else:
+                _verify_ref008_development_gate(record)
     runs = LAB / "campaigns/l1-resume/runs/branches"
     latest = runs / name / "latest.json"
     if latest.exists():
