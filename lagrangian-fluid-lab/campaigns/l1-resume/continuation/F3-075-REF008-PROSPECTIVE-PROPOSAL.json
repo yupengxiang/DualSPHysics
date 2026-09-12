@@ -1,0 +1,103 @@
+{
+  "schema": "f3.revision075.ref008.proposal.v1",
+  "status": "proposal_only_no_authorization_no_solver_launched",
+  "created_at_basis": "2026-09-13",
+  "reason": "The approved revision075 matrix passed all hard audits and adjacent checks but failed direct .010↔.006 endpoint energy gates; a prospective tighter reference ladder is needed rather than changing the frozen scorer.",
+  "failed_revision_report": {
+    "path": "campaigns/l1-resume/continuation/F3-075-REVISION-SCORES-887035e274d17b56f3c0ab4b749ca6988069b42060ee047b116224a8b8f38af6.json",
+    "sha256": "887035e274d17b56f3c0ab4b749ca6988069b42060ee047b116224a8b8f38af6",
+    "failed_panels": [
+      {
+        "kind": "endpoint_low",
+        "pair": [
+          "R075-ENDPOINT-LOW-010",
+          "R075-ENDPOINT-LOW-006"
+        ],
+        "energy_difference": 0.050870004328779334,
+        "threshold": 0.05
+      },
+      {
+        "kind": "endpoint_high",
+        "pair": [
+          "R075-ENDPOINT-HIGH-010",
+          "R075-ENDPOINT-HIGH-006"
+        ],
+        "energy_difference": 0.07424578260008924,
+        "threshold": 0.05
+      }
+    ]
+  },
+  "prospective_recipe": {
+    "recipe_id": "F3_CELL3_NS_visco1_native_nopen_revision075_ref008",
+    "production_resolution_m": 0.0075,
+    "reference_resolutions_m": [
+      0.008,
+      0.006
+    ],
+    "retained_historical_resolution_m": 0.01,
+    "time_window_s": [
+      0.0,
+      8.35
+    ],
+    "output_interval_s": 0.01,
+    "control_domain": [
+      0.9,
+      1.1
+    ],
+    "independent_internal_amplitude": 0.97,
+    "coordinate_frame": "fixed tank computational coordinates",
+    "scorer": "same frozen v2 full-window operator, including all pairwise endpoint combinations in the new three-resolution gate",
+    "rationale": "Reduce the largest resolution gap while preserving the production recipe and full control domain; .010 remains immutable historical evidence and is not silently deleted."
+  },
+  "new_solver_cells_required": [
+    {
+      "cell_id": "R008-NOMINAL",
+      "dp_m": 0.008,
+      "amplitude": 1.0,
+      "role": "new_coarse_reference"
+    },
+    {
+      "cell_id": "R008-ENDPOINT-LOW",
+      "dp_m": 0.008,
+      "amplitude": 0.9,
+      "role": "new_low_endpoint_reference"
+    },
+    {
+      "cell_id": "R008-ENDPOINT-HIGH",
+      "dp_m": 0.008,
+      "amplitude": 1.1,
+      "role": "new_high_endpoint_reference"
+    }
+  ],
+  "reused_hash_bound_evidence": [
+    "R075-ZERO",
+    "R075-TIME",
+    "R075-OUTPUT",
+    "R075-ENDPOINT-LOW-0075",
+    "R075-ENDPOINT-LOW-006",
+    "R075-ENDPOINT-HIGH-0075",
+    "R075-ENDPOINT-HIGH-006",
+    "R075-INTERNAL-0075",
+    "R075-INTERNAL-006"
+  ],
+  "resource_estimate": {
+    "qualification_attempts_new": 3,
+    "qualification_attempts_remaining_before_plan": 8,
+    "cpu_core_hours_upper_bound_current": 697.4845240293334,
+    "cpu_core_hours_limit": 896,
+    "gpu_budget_charge_hours_current": 10.564562639451813,
+    "gpu_hours_limit": 64,
+    "parallelism": "one CFD solver at a time; GPU4-7 allowlist; CPU analysis may use up to two bounded slots"
+  },
+  "required_before_launch": [
+    "owner approval of this new prospective manifest and recipe binding",
+    "new authorization record with the same CPU/GPU/qualification caps",
+    "canary R008-NOMINAL hard audit before endpoint cells"
+  ],
+  "explicitly_not_allowed": [
+    "changing the existing .05 threshold",
+    "dropping the direct .010↔.006 failures from historical evidence",
+    "counting the existing .010 cells as passing new endpoint evidence",
+    "launching development, material production, or training before a passed new gate"
+  ]
+}
