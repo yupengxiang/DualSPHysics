@@ -14,7 +14,7 @@ The 11 prospective `.0075 m` revision inputs remain prepared but
 approximately 8.8068/64 GPU hours and 654.43/768 conservative CPU core-hours;
 development, training and material production remain at zero. CPU checkpoint
 recovery, CUDA environment binding and material v2 backend binding now pass the
-full 630-test suite. `f3_revision075_runner.py` exposes read-only `describe` and
+full 632-test suite. `f3_revision075_runner.py` exposes read-only `describe` and
 `preflight` actions plus a single-cell `run` action that first requires the
 hash-bound owner authorization; the current invocation remains blocked because
 that authorization and the updated limits record do not exist. No new solver or
