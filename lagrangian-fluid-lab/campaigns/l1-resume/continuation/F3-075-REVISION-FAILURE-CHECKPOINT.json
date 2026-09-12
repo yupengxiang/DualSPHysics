@@ -1,0 +1,99 @@
+{
+  "schema": "f3.revision075.failure_checkpoint.v1",
+  "status": "qualification_failed_waiting_new_prospective_plan",
+  "recipe_id": "F3_CELL3_NS_visco1_native_nopen_revision075",
+  "gate_path": "campaigns/l1-resume/continuation/F3-075-REVISION-GATE.json",
+  "report_path": "campaigns/l1-resume/continuation/F3-075-REVISION-SCORES-887035e274d17b56f3c0ab4b749ca6988069b42060ee047b116224a8b8f38af6.json",
+  "report_sha256": "887035e274d17b56f3c0ab4b749ca6988069b42060ee047b116224a8b8f38af6",
+  "time_window_s": [
+    0.0,
+    8.35
+  ],
+  "production_resolution_m": 0.0075,
+  "reference_resolutions_m": [
+    0.01,
+    0.006
+  ],
+  "control_domain": [
+    0.9,
+    1.1
+  ],
+  "failed_panels": [
+    {
+      "kind": "endpoint_low",
+      "case_ids": [
+        "R075-ENDPOINT-LOW-010",
+        "R075-ENDPOINT-LOW-006"
+      ],
+      "threshold": 0.05,
+      "maxima": {
+        "tv": 0.029028749328511565,
+        "com_l2_over_length": 0.01619024971589997,
+        "q90_over_length": 0.012151486033515839,
+        "mean_velocity_over_U": 0.059308302453246926,
+        "energy_difference": 0.050870004328779334,
+        "common_support_velocity_over_U": 0.057787303375195075,
+        "unmatched_support_mass": 0.00019070062275327462
+      },
+      "peak_times_s": {
+        "tv": 7.68,
+        "com_l2_over_length": 7.71,
+        "q90_over_length": 6.84,
+        "mean_velocity_over_U": 7.44,
+        "energy_difference": 7.38,
+        "common_support_velocity_over_U": 7.46,
+        "unmatched_support_mass": 6.71
+      }
+    },
+    {
+      "kind": "endpoint_high",
+      "case_ids": [
+        "R075-ENDPOINT-HIGH-010",
+        "R075-ENDPOINT-HIGH-006"
+      ],
+      "threshold": 0.05,
+      "maxima": {
+        "tv": 0.029770144203022004,
+        "com_l2_over_length": 0.016739503576093374,
+        "q90_over_length": 0.014340591400997835,
+        "mean_velocity_over_U": 0.06586032596961576,
+        "energy_difference": 0.07424578260008924,
+        "common_support_velocity_over_U": 0.06286593235544892,
+        "unmatched_support_mass": 0.0029184709511841187
+      },
+      "peak_times_s": {
+        "tv": 7.61,
+        "com_l2_over_length": 7.61,
+        "q90_over_length": 8.33,
+        "mean_velocity_over_U": 7.38,
+        "energy_difference": 7.34,
+        "common_support_velocity_over_U": 7.390000000000001,
+        "unmatched_support_mass": 7.5600000000000005
+      }
+    }
+  ],
+  "passed_panel_count": 10,
+  "panel_count": 12,
+  "development_launch_allowed": false,
+  "material_production_allowed": false,
+  "training_launch_allowed": false,
+  "resource_snapshot": {
+    "qualification_attempts_used": 72,
+    "qualification_attempts_remaining": 8,
+    "cpu_core_hours_upper_bound": 697.4845240293334,
+    "cpu_core_hours_limit": 896,
+    "gpu_budget_charge_hours": 10.564562639451813,
+    "gpu_hours_limit": 64
+  },
+  "decision_required": [
+    "approve a new prospective reference ladder or an evidence-led repair recipe",
+    "bind its new manifest and authorization before any further solver launch"
+  ],
+  "forbidden_shortcuts": [
+    "adjacent-only endpoint scoring",
+    "threshold relaxation",
+    "truncated time window",
+    "post-hoc production selection",
+    "development/material/training launch before a passed qualification gate"
+  ]
+}
