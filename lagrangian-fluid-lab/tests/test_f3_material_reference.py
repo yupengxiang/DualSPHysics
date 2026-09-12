@@ -146,12 +146,14 @@ def test_cadence_scores_event_cdf_between_coarse_outputs():
 @pytest.fixture
 def calibration(tmp_path, monkeypatch):
     hashes = {name: "a"*64 for name in (
-        "scripts/passive_tracers.py", "scripts/f3_material_neighbors.py", "scripts/f3_material_calibration.py")}
+        "scripts/passive_tracers.py", "scripts/f3_material_neighbors.py",
+        "scripts/f3_material_calibration.py", "scripts/f3_material_calibration_v2.py")}
     monkeypatch.setattr(reference, "code_hashes", lambda: dict(hashes))
     axes = [[-.021, -.007, .007, .021], [-.021, -.007, .007, .021], [.024, .036, .048, .060]]
     points = np.stack(np.meshgrid(*axes, indexing="ij"), axis=-1).reshape(-1, 3)
     value = dict(status="completed", calibrated=True, configuration_charge=4,
-                 tracer_sha256="a"*64, interpolator_sha256="a"*64, program_sha256="a"*64,
+                 tracer_sha256="a"*64, interpolator_sha256="a"*64,
+                 program_path="scripts/f3_material_calibration_v2.py", program_sha256="a"*64,
                  design=dict(seeds=64, substeps=2, time_window_s=[0, .5], output_interval_s=.01,
                              neighbours=24, regularization_m=.004, maximum_support_distance_m=.03,
                              seed_positions_m=points.tolist(), same_physical_seeds_across_resolutions=True,
@@ -190,11 +192,12 @@ def test_registration_freezes_eleven_512_point_configs_and_new_thresholds(calibr
         reference.register(calibration)
 
 
-@pytest.mark.parametrize("change", ["missing_backend", "failed", "missing_row", "threshold", "artifact"])
+@pytest.mark.parametrize("change", ["missing_backend", "legacy_runner", "failed", "missing_row", "threshold", "artifact"])
 def test_missing_or_changed_new_backend_calibration_fails_closed(calibration, change):
     path = Path(calibration["path"])
     value = json.loads(path.read_text())
     if change == "missing_backend": value.pop("interpolator_sha256")
+    elif change == "legacy_runner": value["program_path"] = "scripts/f3_material_calibration.py"
     elif change == "failed": value["results"][0]["passed"] = False
     elif change == "missing_row": value["results"].pop()
     elif change == "threshold": value["design"]["acceptance"]["maximum_path_error_m"] = .5

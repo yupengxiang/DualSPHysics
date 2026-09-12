@@ -101,7 +101,8 @@ def code_hashes():
         "scripts/f3_material_reference.py", "scripts/f3_material_reference_score.py",
         "scripts/f3_material_neighbors.py", "scripts/passive_tracers.py",
         "scripts/f3_material_calibration.py", "scripts/f3_material_labels.py",
-        "scripts/f3_nopen_stage_score.py", "scripts/f3_reference_score.py")}
+        "scripts/f3_material_calibration_v2.py", "scripts/f3_nopen_stage_score.py",
+        "scripts/f3_reference_score.py")}
 
 
 def verify_calibration(reference):
@@ -113,10 +114,18 @@ def verify_calibration(reference):
     value = json.loads(path.read_text())
     hashes = code_hashes()
     for field, filename in (("tracer_sha256", "scripts/passive_tracers.py"),
-                            ("interpolator_sha256", "scripts/f3_material_neighbors.py"),
-                            ("program_sha256", "scripts/f3_material_calibration.py")):
+                            ("interpolator_sha256", "scripts/f3_material_neighbors.py")):
         if value.get(field) != hashes[filename]:
             raise ValueError("new backend calibration code mismatch: "+field)
+    # The old runner remains historical evidence only. New plans must name the
+    # separate v2 runner, which explicitly injects and records this backend;
+    # accepting a legacy record here would make the hash check look stronger
+    # while still calibrating the wrong interpolator.
+    program_path = value.get("program_path")
+    if program_path != "scripts/f3_material_calibration_v2.py":
+        raise ValueError("calibration must use the prospective v2 runner")
+    if value.get("program_sha256") != hashes[program_path]:
+        raise ValueError("new backend calibration code mismatch: program_sha256")
     design = value.get("design", {})
     expected_acceptance = dict(maximum_path_error_m=.001, maximum_residence_error_s=.01,
                                required_reliable_fraction=1., terminal_disagreement_fraction=0.)
