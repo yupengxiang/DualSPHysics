@@ -7,7 +7,7 @@ def test_inflight_timeout_is_reserved_without_fabricating_elapsed_time(tmp_path,
     monkeypatch.setattr(evidence,'LAB',tmp_path);monkeypatch.setattr(evidence,'OUT',out)
     (out/'HISTORICAL-CPU-RESERVE.json').write_text(json.dumps({'cpu_core_hours_conservative_reserve':1.}))
     (out/'RESOURCE-ACTIVE-WINDOWS.json').write_text('[]')
-    (out/'RESOURCE-LIMITS.json').write_text(json.dumps({'limits':{'qualification':56,'development':40,'gpu_hours':64,'cpu_core_hours':768,'materials':32}}))
+    (out/'RESOURCE-LIMITS.json').write_text(json.dumps({'limits':{'qualification':56,'development':40,'training':12,'gpu_hours':64,'cpu_core_hours':768,'materials':32}}))
     attempt=tmp_path/'campaigns/l1-resume/runs/case/attempt.json';attempt.parent.mkdir(parents=True)
     row={'case_id':'case','attempt_id':'known','status':'running','command':['solver','-gpu:4'],'timeout_seconds':1800}
     attempt.write_text(json.dumps(row));evidence.ledger()
@@ -40,3 +40,14 @@ def test_new_timeout_must_fit_remaining_gpu_budget(monkeypatch):
     with pytest.raises(RuntimeError):runner.check_gpu_time_reserve({'solver_timeout_seconds':5400},{'gpu_budget_charge_hours':63})
     for timeout in (0,-1,float('nan'),7201):
         with pytest.raises(ValueError):runner.check_gpu_time_reserve({'solver_timeout_seconds':timeout},{'gpu_budget_charge_hours':0})
+
+
+def test_solver_cpu_forward_reserve_preserves_prior_charges():
+    import pytest
+    from scripts.l1r_branch_runner import check_cpu_time_reserve
+    budget={'cpu_core_hours_upper_bound':700,'limits':{'cpu_core_hours':768}}
+    result=check_cpu_time_reserve(5400,budget)
+    assert result['cpu_core_hours_forward_reserve']==pytest.approx(6000*17.6/3600)
+    assert budget['cpu_core_hours_upper_bound']==700
+    with pytest.raises(RuntimeError,match='CPU budget'):
+        check_cpu_time_reserve(5400,{'cpu_core_hours_upper_bound':750,'limits':{'cpu_core_hours':768}})

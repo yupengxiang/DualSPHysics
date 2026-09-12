@@ -20,6 +20,7 @@ import numpy as np
 import torch
 
 from experiments.r3_g4_baselines import local_neighbour_features
+from scripts.f3_local_neighbors import exact_local_summary
 from scripts.f3_learning_inputs import SPEED, features
 
 
@@ -59,7 +60,9 @@ def _validate_state(position, velocity, particle_id, time_s):
 
 
 def local_summary(position, velocity, *, dp_m, interval_s, max_pairwise_elements):
-    """Reuse actual eight-neighbour features with bounded distance blocks.
+    """Historical v1 comparison helper; float32 self exclusion is unreliable.
+
+    The active F3 rollout uses exact_local_summary with explicit particle IDs.
 
     The legacy last column is the mean neighbour fraction across all targets.
     Restore that global mean after concatenating target blocks so the summary
@@ -164,9 +167,9 @@ class EngineeringF3Rollout:
         )
         local = None
         if self.route == 'local_interaction':
-            local = local_summary(
-                old.position, old.velocity, dp_m=self.dp_m,
-                interval_s=float(interval_s), max_pairwise_elements=self.max_pairwise_elements,
+            local = exact_local_summary(
+                old.position, old.velocity, old.particle_id, dp_m=self.dp_m,
+                interval_s=float(interval_s),
             )
         if not torch.isfinite(base).all() or (local is not None and not torch.isfinite(local).all()):
             raise RolloutFailure('nonfinite derived model input')

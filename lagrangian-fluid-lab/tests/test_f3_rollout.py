@@ -176,3 +176,16 @@ def test_invalid_state_identity_shape_and_interval_are_explicit_failures():
         with pytest.raises(RolloutFailure):
             run.step(dt)
     assert run.steps_completed == 0
+
+
+def test_local_rollout_excludes_self_by_identity_and_uses_current_state():
+    from scripts.f3_local_neighbors import exact_local_summary
+    class Capture(torch.nn.Module):
+        def forward(self, base, local=None):
+            self.local = local.clone()
+            return torch.zeros((len(base), 3), dtype=base.dtype)
+    given=inputs(16); model=Capture().eval()
+    run=EngineeringF3Rollout(model,route='local_interaction',**given)
+    expected=exact_local_summary(given['position'],given['velocity'],given['particle_id'],dp_m=.01,interval_s=.01)
+    run.step(.01)
+    torch.testing.assert_close(model.local,expected)

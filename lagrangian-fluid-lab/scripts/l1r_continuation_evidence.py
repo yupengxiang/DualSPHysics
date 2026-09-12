@@ -123,6 +123,10 @@ def ledger():
                 "basis": "entire activity since start-of-adoption-day at 2 x 8 CPU threads, plus 10 percent control-process allowance; includes failed and unmetered postprocessing, not a claim of measured usage",
             },
         )
+    from scripts.f3_training_runner import training_usage, ACCOUNTING_VERSION
+    training = training_usage(LAB / "campaigns/l1-resume/training-attempts")
+    gpu_base = sum((r["elapsed_seconds"] if r["elapsed_seconds"] is not None else r.get("budget_reserve_seconds", 0)) for r in rows if r["backend"] == "gpu") / 3600
+    cpu_base = json.loads(reserve.read_text())["cpu_core_hours_conservative_reserve"] + post_reserve_hours() * 16 * 1.1
     write(
         "RESOURCE-LEDGER.json",
         {
@@ -138,16 +142,20 @@ def ledger():
             "material_usage_basis": "Original L1 material usage was zero; current F3 engineering and manufactured-calibration configurations are charged including incomplete attempts. Qualified CFD material configurations do not yet exist.",
             "gpu_unmetered_attempts": unknown_gpu,
             "gpu_unbounded_attempts": unbounded_gpu,
-            "gpu_budget_charge_hours": sum((r["elapsed_seconds"] if r["elapsed_seconds"] is not None else r.get("budget_reserve_seconds", 0)) for r in rows if r["backend"] == "gpu") / 3600,
+            "gpu_solver_budget_charge_hours": gpu_base,
+            "gpu_budget_charge_hours": gpu_base + training["gpu_budget_charge_hours"],
+            "shared_training_accounting_version": ACCOUNTING_VERSION,
+            "training_usage": training,
+            "training_attempts_used": training["attempts_used"],
+            "training_attempts_remaining": limits["training"] - training["attempts_used"],
             "gpu_accounting_status": "lower_bound_only" if unknown_gpu else "recorded_durations",
             "gpu_solver_hours": sum(
                 r["elapsed_seconds"] or 0 for r in rows if r["backend"] == "gpu"
             )
             / 3600,
-            "cpu_core_hours_upper_bound": json.loads(reserve.read_text())[
-                "cpu_core_hours_conservative_reserve"
-            ]
-            + post_reserve_hours() * 16 * 1.1,
+            "cpu_base_core_hours_upper_bound": cpu_base,
+            "cpu_core_hours_upper_bound": cpu_base + training["cpu_core_hours_upper_bound"],
+            "training_cpu_accounting_note": training["cpu_accounting_note"],
             "historical_cpu_accounting_status": "supplement reported totals with new timings; unmetered work is unknown, never zero",
             "limits": limits,
             "formal_release": False,

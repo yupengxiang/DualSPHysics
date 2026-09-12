@@ -2,6 +2,16 @@
 
 The full goal remains active: reproducible qualified numerical recipe, independent development trajectories, material tasks and real learning/recovery closure. No production resolution/control domain or full-window CFD material reference is qualified. Do not mark complete or redefine the goal as diagnostics.
 
+## Live continuation at2026-09-12T08:16Z
+
+NP02 zero drive completed on GPU4: all836 frames pass hard audit, issues=[]/unknowns=[]. Full-window v2 drift maxima all below.01 (largest q90/L=.0052310963; TV=.0019360758). Report F3-NP02-ZERO-DRIFT.json is a preliminary single-control score, not a stage/domain gate.
+
+NP03 half-step completed with836-frame hard pass and all temporal v2 differences<=.01 (max local velocity/U=.001601315). Actual dt min/max ratios both.5. Session97324 and its wrapper/worker are terminal. NP04 .002s output is RUNNING, session3833, lifecycle F3-NP04-WORKER-2cfee69670c8.json. Revalidate actual process/log before acting. NP05 .0075m is prepared but has not run. Start the next entry only after current terminal audit; use scripts/f3_gpu_worker.py ENTRY for verified private GPU runtime and lifecycle accounting. Never repeat NP01/NP02/NP03.
+
+Qualification execution is frozen in F3-NATIVE-NOPEN-EXECUTION-STAGE.json, with the approved72 cap and NP01 pass bound. scripts/f3_nopen_qualification.py passed33 CPU tests plus real read-only initial checks at all3 resolutions. scripts/f3_nopen_stage_score.py passed16 CPU tests, including peaks between coarse output times; no actual complete stage gate exists yet. scripts/f3_nopen_development.py is implemented/tested but real development remains0; it requires full domain qualification and all8 original pilots before expansion.
+
+Latest count:55/72 qualification attempts including live NP04. Prior07:08 snapshot before NP04:54/72;0/40 development,0/12 training,10/32 materials; Refresh ledger for live GPU/CPU charges; caps remain64h/768coreh. Shared ledger now includes separate training-attempt fees and conservative CPU addition. Training launcher production contract validation remains pending; no production training has been launched. CFD forward CPU reservation includes the solver timeout plus10min normalization/audit allowance at17.6cores.
+
 ## Completed NP01 worker — never duplicate
 
 - Case: `F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen`
@@ -63,8 +73,10 @@ F3-LEARNING-INPUT-CONTRACT.json binds a48-wide current-state/control/finite-wall
 
 Engineering additions: F3FrameReader refuses training mode and failed sources, keeps full IDs/mass and separates current/past inputs from targets. Seven reader/input checks passed and a real14580-particle frame20 read used only[0,20,19]. EngineeringF3Rollout uses the new explicit direct-displacement/(U*dt) convention, not the historical next-velocity/trapezoidal trainer. Eleven rollout/input checks passed; real short-canary initial state completed5 fake-model autonomous CPU steps after reader closure, with no later fluid reads. Reports explicitly retain training/reference qualification=false. Actual independent development CFD and actual training remain0.
 
-Resources: prior51 plus completed NP01 gives52/72 qualification attempts; materials10/32; CPU cap768 approved; GPU64h, development40, training12, storage512GiB and expiry2026-09-16T00:00Z unchanged. Refresh ledger for current charges. GPUs0–3 protected; only one CFD solver; UUID/memory guards remain.
+Historical snapshot immediately after NP01:52/72 qualification attempts (see current live snapshot above); materials10/32; CPU cap768 approved; GPU64h, development40, training12, storage512GiB and expiry2026-09-16T00:00Z unchanged. Refresh ledger for current charges. GPUs0–3 protected; only one CFD solver; UUID/memory guards remain.
 
 RESOURCE-PAUSE-RECONCILIATION-20260912.json preserves the previously captured606.118coreh and all historical charges. The prior worker's final audit was written17:49:24Z on Sept10; a further five-minute full-rate cleanup reserve closes the unclosed window, with its inferred-bound semantics explicit. The inactive task gap is not treated as live compute. This continuation opens at2026-09-12T06:58Z. Original ledger/window bytes and full audit are archived by hash. No CPU approval has been requested again or historical charges reset.
 
 Local checkpoints:9e73cfe (observations/long evidence),bada6a4 (temporal diagnostics),f580f90 (material contact repair),aeb030f (development inputs/learning adapter). No push, merge, formal release or hidden test generation.
+
+Latest engineering update: scripts/f3_local_neighbors.py replaces unreliable float32 distance-threshold self exclusion with explicit ID exclusion and exact distance/ID ordering in the active F3 rollout. F3-LOCAL-IDENTITY-REPAIR.json binds the new code and measured single-CPU initial-state check; historical rollout/learning reports retain their old hashes. Training must bind this prospective feature revision.

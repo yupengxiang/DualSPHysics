@@ -1,0 +1,33 @@
+{
+  "captured_at_utc": "2026-09-12T07:57:22.394375+00:00",
+  "scope": "CPU engineering only; no model training, no GPU benchmark or numerical reference qualification",
+  "algorithm": "exact float64 cKDTree, full kth-distance shell, distance then integer-ID ordering; exclude only identical particle ID",
+  "feature_semantics": "8 nearest distinct IDs; coincident distinct IDs retained, inverse-distance floor1e-5m; weighted relative position/dp and velocity*dt/dp, mean distance/dp, k/N",
+  "contract_revision": "F3_local_identity_v2",
+  "legacy_equivalent": false,
+  "reason": "float32 torch.cdist self distances can exceed legacy1e-8m exclusion threshold; tie ordering and coincident-ID semantics are now explicit",
+  "legacy_sample": {
+    "targets": 128,
+    "self_exclusion_failures": 10,
+    "max_self_distance_m": 8.63167442730628e-05
+  },
+  "source_hdf5_sha256": "5497dca6790bcaf45496cfd28d94e5a7f45c8f054fb6ad11f46cdf6508de3c22",
+  "source_case": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen",
+  "frame": 0,
+  "particles": 14580,
+  "complete_context": true,
+  "exact_oracle_checked_targets": 128,
+  "self_ids_selected": 0,
+  "search_seconds": 0.2753754628356546,
+  "full_summary_seconds": 0.2851716768927872,
+  "summary_shape": [
+    14580,
+    8
+  ],
+  "code_sha256": {
+    "scripts/f3_local_neighbors.py": "94de31c9fdef750712d25548e800dbf74681ac210c09c4ae2afd6cddc86bb64b",
+    "scripts/f3_rollout.py": "46cab5cdc0b6f683a12e63c1473948fe38c0e906f10e53f494c867f35277306f"
+  },
+  "training_attempts": 0,
+  "qualified": false
+}

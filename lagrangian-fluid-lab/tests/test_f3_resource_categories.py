@@ -13,6 +13,7 @@ from scripts import l1r_input_preflight as input_preflight
 LIMITS = {
     "qualification": 72,
     "development": 40,
+    "training": 12,
     "gpu_hours": 64,
     "cpu_core_hours": 768,
     "materials": 32,

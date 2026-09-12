@@ -1,0 +1,395 @@
+{
+  "schema": "f3.nopen.execution_stage.v1",
+  "registered_at_utc": "2026-09-12T07:51:47.872851+00:00",
+  "scope": "qualification_execution_only_not_production_qualification",
+  "recipe_id": "F3_CELL3_NS_visco1_native_nopen",
+  "conditional_plan": {
+    "path": "campaigns/l1-resume/continuation/F3-NATIVE-NOPEN-QUALIFICATION-PLAN.json",
+    "sha256": "25eb0b6cbf11817a0eae4564f3e5a393801a5172f99503424c6d614f60b6aae7"
+  },
+  "evidence": [
+    {
+      "path": "campaigns/l1-resume/continuation/F3-NATIVE-NOPEN-QUALIFICATION-PLAN.json",
+      "sha256": "25eb0b6cbf11817a0eae4564f3e5a393801a5172f99503424c6d614f60b6aae7"
+    },
+    {
+      "path": "campaigns/l1-resume/continuation/F3-NATIVE-NOPEN-DESIGN.json",
+      "sha256": "558a4b2cad88c66973f95d1955ab7dfdd8a42e04fbe280f0e47149157e1ce215"
+    },
+    {
+      "path": "diagnostics/f3-audit/v2-calibration.json",
+      "sha256": "f662b881e431bd9322006501477d9a7d8e37f2acde2004a7e7b4570990e75b46"
+    },
+    {
+      "path": "scripts/f3_observation_v2.py",
+      "sha256": "8ddcd646a398132aea8c0a8f6d3de4ff87bec61e1cf2ffdf01acebcac8134f04"
+    },
+    {
+      "path": "campaigns/l1-resume/continuation/F3-V2-OBSERVATION-DESIGN.json",
+      "sha256": "ad72b14830e9d1ab902ff3487a85037ecdc5c0e79194a5dcd60a0fb84815c378"
+    },
+    {
+      "path": "campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen-PREPARED.json",
+      "sha256": "e7575583b9c4ca5fcdff9a797db19fa4bc04bdbdd4bd31f40c77adedc74b5476"
+    },
+    {
+      "path": "campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen-AUDIT.json",
+      "sha256": "0549d1c20fb6c0415c229b010055601e6995a5dc42483d3f7fe797d8c06862d6"
+    },
+    {
+      "path": "campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen-SOLVER.json",
+      "sha256": "a96400f35780c8b414fe9003dd0c50a49e6658152829c7bb0a144dee0ebff139"
+    },
+    {
+      "path": "campaigns/l1-resume/runs/branches/F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen/attempts/20260912T072256.206799Z-30e6322a.complete/Run.out",
+      "sha256": "4f57e06274b5b733f06736b92394c90b5a2556bb62b9b7a81c3d5a1435cc6cd1"
+    },
+    {
+      "path": "campaigns/l1-resume/data/f3-evidence/b6e610e0abccb092866a27d093808673e6435f4e5bc8a8590b59cd734ba81d54.json",
+      "sha256": "b6e610e0abccb092866a27d093808673e6435f4e5bc8a8590b59cd734ba81d54"
+    }
+  ],
+  "authorization_snapshot": {
+    "authorization": "Owner reply in this task on 2026-09-10: 批准 CPU 总上限 768 core·h",
+    "change": "CPU512→768 and qualification56→72 explicitly approved; all historical charges and other limits retained",
+    "limits": {
+      "gpu_hours": 64,
+      "cpu_core_hours": 768,
+      "qualification": 72,
+      "development": 40,
+      "training": 12,
+      "materials": 32,
+      "storage_gib": 512
+    },
+    "authorization_history": [
+      {
+        "recorded_at_utc": "2026-09-12T07:31:35.403593+00:00",
+        "owner_reply": "批准资格求解总上限 72 次",
+        "change": {
+          "qualification": {
+            "before": 56,
+            "after": 72
+          }
+        },
+        "unchanged": "CPU768coreh, GPU64h, development40, training12, materials32, storage512GiB; historical charges retained"
+      }
+    ]
+  },
+  "approved_qualification_cap_at_registration": 72,
+  "qualification_cap_72_owner_approval": {
+    "recorded_at_utc": "2026-09-12T07:31:35.403593+00:00",
+    "owner_reply": "批准资格求解总上限 72 次",
+    "change": {
+      "qualification": {
+        "before": 56,
+        "after": 72
+      }
+    },
+    "unchanged": "CPU768coreh, GPU64h, development40, training12, materials32, storage512GiB; historical charges retained"
+  },
+  "max_attempts_per_case": 1,
+  "entries": [
+    {
+      "plan_case_id": "NP02",
+      "prepared_case_id": null,
+      "dp_m": 0.01,
+      "amplitude": 0.0,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [
+        0,
+        8.35
+      ],
+      "roles": [
+        "same-recipe gravity-preserving zero-drive drift control"
+      ],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP03",
+      "prepared_case_id": null,
+      "dp_m": 0.01,
+      "amplitude": 1.0,
+      "cfl_number": 0.025,
+      "coef_dt_min": 0.025,
+      "output_interval_s": 0.01,
+      "time_window_s": [
+        0,
+        8.35
+      ],
+      "roles": [
+        "actual integration-step refinement against NP01; verify native dt and step counts"
+      ],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP04",
+      "prepared_case_id": null,
+      "dp_m": 0.01,
+      "amplitude": 1.0,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.002,
+      "time_window_s": [
+        0,
+        8.35
+      ],
+      "roles": [
+        "finer-output comparison against NP01",
+        "bound interpolation, downsampling and event-time effects separately from integration timestep"
+      ],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP05",
+      "prepared_case_id": null,
+      "dp_m": 0.0075,
+      "amplitude": 1.0,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [
+        0,
+        8.35
+      ],
+      "roles": [
+        "nominal middle spatial reference",
+        "matching 1.5 s diagnostic prefix"
+      ],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP06",
+      "prepared_case_id": null,
+      "dp_m": 0.006,
+      "amplitude": 1.0,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [
+        0,
+        8.35
+      ],
+      "roles": [
+        "nominal fine spatial reference",
+        "matching 1.5 s diagnostic prefix"
+      ],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP07",
+      "prepared_case_id": null,
+      "dp_m": 0.01,
+      "amplitude": 0.9,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [
+        0,
+        8.35
+      ],
+      "roles": [
+        "lower control endpoint coarse spatial cell"
+      ],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP08",
+      "prepared_case_id": null,
+      "dp_m": 0.0075,
+      "amplitude": 0.9,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [
+        0,
+        8.35
+      ],
+      "roles": [
+        "lower control endpoint middle spatial reference"
+      ],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP09",
+      "prepared_case_id": null,
+      "dp_m": 0.006,
+      "amplitude": 0.9,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [
+        0,
+        8.35
+      ],
+      "roles": [
+        "lower control endpoint fine spatial reference"
+      ],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP10",
+      "prepared_case_id": null,
+      "dp_m": 0.01,
+      "amplitude": 1.1,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [
+        0,
+        8.35
+      ],
+      "roles": [
+        "upper control endpoint coarse spatial cell"
+      ],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP11",
+      "prepared_case_id": null,
+      "dp_m": 0.0075,
+      "amplitude": 1.1,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [
+        0,
+        8.35
+      ],
+      "roles": [
+        "upper control endpoint middle spatial reference"
+      ],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP12",
+      "prepared_case_id": null,
+      "dp_m": 0.006,
+      "amplitude": 1.1,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [
+        0,
+        8.35
+      ],
+      "roles": [
+        "upper control endpoint fine spatial reference"
+      ],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP13",
+      "prepared_case_id": null,
+      "dp_m": 0.01,
+      "amplitude": 0.97,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [
+        0,
+        8.35
+      ],
+      "roles": [
+        "preselected independent internal control at candidate production resolution"
+      ],
+      "launch_allowed_via_this_plan": false
+    },
+    {
+      "plan_case_id": "NP14",
+      "prepared_case_id": null,
+      "dp_m": 0.006,
+      "amplitude": 0.97,
+      "cfl_number": 0.05,
+      "coef_dt_min": 0.05,
+      "output_interval_s": 0.01,
+      "time_window_s": [
+        0,
+        8.35
+      ],
+      "roles": [
+        "fine reference for the same independent internal control"
+      ],
+      "launch_allowed_via_this_plan": false
+    }
+  ],
+  "initial_sources": {
+    "0.01": {
+      "prefix": "campaigns/l1-resume/artifacts/cell3/F3_CELL3_plain_0p01/F3_CELL3_plain_0p01",
+      "assets": {
+        "F3_CELL3_plain_0p01.xml": "e58c0af58a43a3174247267a608adf2510817077bd715b11dcc1b53e6db7a3e0",
+        "F3_CELL3_plain_0p01_Def.xml": "2e56ed7550f445aa28d19a221cc55558df9eff4d0410d19af0e178401becca67",
+        "F3_CELL3_plain_0p01.bi4": "07444b30c5c956e88651667b591a6ca0ba08bff3e9b9435c80a2fc8437482d38",
+        "CaseSloshingAccData.csv": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+        "F3_CELL3_plain_0p01_hdp_Actual.vtk": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c"
+      },
+      "total_particles": 57060,
+      "fluid_particles": 14580,
+      "boundary_particles": 42480,
+      "initial_mass_kg": 14.58,
+      "initial_com_m": [
+        -7.873598130743565e-18,
+        2.731773045845507e-18,
+        0.04499999999999759
+      ],
+      "native_dp_m": 0.01,
+      "zero_boundary_normals": 0
+    },
+    "0.0075": {
+      "prefix": "campaigns/l1-resume/artifacts/cell3/F3_CELL3_plain_0p0075/F3_CELL3_plain_0p0075",
+      "assets": {
+        "F3_CELL3_plain_0p0075.xml": "b35fab9589141e8f10932d65206b78ee104c14a4db402464ca421cf350b81f29",
+        "F3_CELL3_plain_0p0075_Def.xml": "4067ebf4fbb3863718d64c2d63490bb70fdce659b734e8b6077ee8024adcbb57",
+        "F3_CELL3_plain_0p0075.bi4": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545",
+        "CaseSloshingAccData.csv": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+        "F3_CELL3_plain_0p0075_hdp_Actual.vtk": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c"
+      },
+      "total_particles": 108000,
+      "fluid_particles": 34560,
+      "boundary_particles": 73440,
+      "initial_mass_kg": 14.58,
+      "initial_com_m": [
+        -7.709882115452476e-19,
+        -1.6062254407192657e-20,
+        0.0449999999999992
+      ],
+      "native_dp_m": 0.0075,
+      "zero_boundary_normals": 0
+    },
+    "0.006": {
+      "prefix": "campaigns/l1-resume/artifacts/cell3/F3_CELL3_plain_0p006/F3_CELL3_plain_0p006",
+      "assets": {
+        "F3_CELL3_plain_0p006.xml": "afaba507ecabccbc8d2f3ffd5799fa8665589a2bca70efe9e5d61b94f8ed061e",
+        "F3_CELL3_plain_0p006_Def.xml": "fb6cdc3f49397f45b107978dd8ec6b9b16566fab4cd8f4756fcd7b8c91d578db",
+        "F3_CELL3_plain_0p006.bi4": "e411c5b13bc0231db5e7dd694540440a397f92f6526f9feabc401b2967bfdc1b",
+        "CaseSloshingAccData.csv": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+        "F3_CELL3_plain_0p006_hdp_Actual.vtk": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c"
+      },
+      "total_particles": 179208,
+      "fluid_particles": 67500,
+      "boundary_particles": 111708,
+      "initial_mass_kg": 14.58,
+      "initial_com_m": [
+        1.0789723024505225e-18,
+        -1.809252336426181e-20,
+        0.045000000000003364
+      ],
+      "native_dp_m": 0.006,
+      "zero_boundary_normals": 0
+    }
+  },
+  "preparer_sha256": "5a3dc4d351377a8a7d92ff681139b05befa59864f0ca539dd399a33343f8f3ee",
+  "auto_run_remaining_entries": false,
+  "initial_ready_entries": [
+    "NP02",
+    "NP03",
+    "NP04",
+    "NP05",
+    "NP06"
+  ],
+  "endpoint_gate": "F3-NOPEN-NOMINAL-GATE.json",
+  "internal_gate": "F3-NOPEN-ENDPOINT-GATE.json",
+  "qualified": false,
+  "formal_release": false
+}

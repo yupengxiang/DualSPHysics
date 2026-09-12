@@ -18,6 +18,17 @@ def check_gpu_time_reserve(record,budget):
     return timeout
 
 
+def check_cpu_time_reserve(timeout_seconds,budget):
+    # Preserve the existing full activity-window accounting rate and reserve
+    # ten additional minutes for normalization/audit. This is a launch bound,
+    # not measured CPU usage and does not reset or deduct previous charges.
+    reserve=(timeout_seconds+600)*17.6/3600
+    if budget['cpu_core_hours_upper_bound']+reserve>budget['limits']['cpu_core_hours']:
+        raise RuntimeError('remaining CPU budget cannot cover solver timeout and postprocessing reserve')
+    return {'cpu_core_hours_forward_reserve':reserve,'accounting_cores':17.6,
+            'solver_timeout_seconds':timeout_seconds,'postprocessing_reserve_seconds':600}
+
+
 def boundary_log_mismatch(record,log):
     for key,pattern,convert in (
         ('expected_slip_mode',r'SlipMode="([^"]+)"',str),
@@ -99,6 +110,7 @@ def run(record):
 
         budget = check_budget(category=category)
         timeout_seconds=check_gpu_time_reserve(record,budget)
+        cpu_reserve=check_cpu_time_reserve(timeout_seconds,budget)
         if (
             budget[f"{category}_attempts_remaining"] <= 0
             or budget["gpu_solver_hours"] >= 64
@@ -152,6 +164,7 @@ def run(record):
         )
         result.update(
             resource_preflight=preflight,
+            cpu_time_reserve=cpu_reserve,
             source_record=record,
             solver_sha256=q2.sha256(q2.SOLVER),
         )
