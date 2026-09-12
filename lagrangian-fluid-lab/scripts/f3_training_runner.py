@@ -420,7 +420,8 @@ def run_training(logical_run_id, command, *, qualification_contract, development
         worker_env = os.environ.copy()
         worker_env.update(env or {})
         worker_env.update({"CUDA_DEVICE_ORDER": "PCI_BUS_ID", "CUDA_VISIBLE_DEVICES": gpu["gpu_uuid"],
-                           "NVIDIA_VISIBLE_DEVICES": gpu["gpu_uuid"], "OMP_NUM_THREADS": str(cpu_cores),
+                           "NVIDIA_VISIBLE_DEVICES": gpu["gpu_uuid"], "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+                           "OMP_NUM_THREADS": str(cpu_cores),
                            "OPENBLAS_NUM_THREADS": str(cpu_cores), "MKL_NUM_THREADS": str(cpu_cores)})
         record = {"schema": ATTEMPT_SCHEMA, "resource_category": "training",
                   "logical_run_id": logical_run_id, "execution_attempt_id": execution_id,

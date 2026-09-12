@@ -313,6 +313,7 @@ def test_cpu_worker_records_reservation_before_spawn_and_terminal_usage(cpu_work
         "r=json.loads((p/'attempt.json').read_text()); "
         "payload={'registration':r, 'affinity':sorted(os.sched_getaffinity(0)), "
         "'device':sys.argv[2], 'cuda':os.environ['CUDA_VISIBLE_DEVICES'], "
+        "'cublas':os.environ['CUBLAS_WORKSPACE_CONFIG'], "
         "'omp':os.environ['OMP_NUM_THREADS'], 'openblas':os.environ['OPENBLAS_NUM_THREADS'], "
         "'lock_inode':os.fstat(r['inherited_solver_lock_fd']).st_ino}; "
         "(p/'worker.json').write_text(json.dumps(payload))"
@@ -327,6 +328,7 @@ def test_cpu_worker_records_reservation_before_spawn_and_terminal_usage(cpu_work
     assert result["elapsed_seconds"] > 0
     assert result["gpu_uuid"] == actual["cuda"] == "GPU-fixture-4"
     assert actual["device"] == "cuda:0" and actual["omp"] == actual["openblas"] == "1"
+    assert actual["cublas"] == ":4096:8"
     assert actual["affinity"] == result["cpu_affinity"] and len(actual["affinity"]) == 1
     assert actual["lock_inode"] == (training.OUT / "solver.lock").stat().st_ino
     assert actual["registration"]["status"] == "running"
