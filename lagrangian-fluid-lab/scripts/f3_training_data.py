@@ -227,6 +227,37 @@ def validate_development_contract(path):
     return _validated(path)[0]
 
 
+def loader_for_contract(path, *, legacy_loader=None):
+    """Dispatch a verified loader by the contract's immutable recipe identity.
+
+    The historical loader remains the default for its own recipe.  The
+    ref0081818 recipe is handed to its revision-bound adapter; an unknown
+    recipe fails closed instead of silently reading data through the old
+    ``f3_nopen_development`` gate.
+    """
+    # Read the recipe before constructing the loader.  The worker's isolated
+    # CPU tests inject a manufactured legacy loader rooted outside LAB; keep
+    # that test seam while the real loaders still enforce their own LAB-bound
+    # contract path checks.
+    contract_path = Path(path)
+    if not contract_path.is_absolute():
+        contract_path = LAB / contract_path
+    contract_path = contract_path.resolve()
+    raw = _read(contract_path)
+    recipe = raw.get("recipe_id")
+    if recipe == development.RECIPE:
+        return (QualifiedF3Loader if legacy_loader is None else legacy_loader)(contract_path)
+    # Only an explicitly injected test double may consume a manufactured
+    # contract without a recipe.  The production worker passes the real class
+    # object, so a missing identity still fails closed there.
+    if recipe is None and legacy_loader is not None and legacy_loader is not QualifiedF3Loader:
+        return legacy_loader(contract_path)
+    from scripts import f3_ref0081818_training_data as revision
+    if recipe == revision.RECIPE:
+        return revision.QualifiedF3Loader(contract_path)
+    raise ValueError("training contract recipe is not registered")
+
+
 def _token(path):
     stat = Path(path).stat()
     return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns

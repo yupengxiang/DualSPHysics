@@ -161,6 +161,43 @@ def _require_production_contracts(qualification, development):
     registered or a GPU is probed.
     """
     domain = qualification["content"]
+    # The exact-tiling ref0081818 recipe has a separate revision gate and a
+    # separate actual-source adapter.  Route it before the historical NoPen
+    # schema checks so an old .010 gate can never qualify the new loader.
+    if domain.get("recipe_id") == "F3_CELL3_NS_visco1_native_nopen_revision075_ref0081818":
+        from scripts import f3_ref0081818_development as revision_development
+        from scripts import f3_ref0081818_training_data as revision_training
+
+        canonical = revision_development.verify_revision_gate()
+        if canonical != domain:
+            raise RuntimeError("qualification contract differs from the current ref0081818 gate")
+        if canonical.get("training_launch_allowed") is not True:
+            raise RuntimeError("ref0081818 gate has not granted training launch")
+        if canonical.get("development_launch_allowed") is not True:
+            raise RuntimeError("ref0081818 gate has not granted development launch")
+        if canonical.get("production_resolution_m") != 0.0075:
+            raise RuntimeError("ref0081818 gate has an invalid production resolution")
+        if canonical.get("time_window_s") != [0.0, 8.35] or canonical.get("scoring_interval_s") != 0.01:
+            raise RuntimeError("ref0081818 gate has an invalid time window or scoring interval")
+        development_content = development["content"]
+        if (development_content.get("schema") != revision_training.SCHEMA
+                or development_content.get("status") != "passed"
+                or development_content.get("qualified_sources") is not True
+                or development_content.get("recipe_id") != canonical["recipe_id"]
+                or development_content.get("production_resolution_m") != canonical["production_resolution_m"]
+                or development_content.get("scope") not in revision_training.CONTRACTS):
+            raise RuntimeError("ref0081818 contract is not a passed actual-source contract")
+        source_gate = development_content.get("source_domain_gate")
+        canonical_path = str(Path(qualification["path"]).resolve().relative_to(LAB.resolve()))
+        if (not isinstance(source_gate, dict)
+                or source_gate.get("path") != canonical_path
+                or source_gate.get("sha256") != qualification["sha256"]):
+            raise RuntimeError("ref0081818 training contract is bound to another revision gate")
+        validated = revision_training.validate_development_contract(development["path"])
+        if validated != development_content:
+            raise RuntimeError("ref0081818 development contract changed during substantive validation")
+        return {"domain": canonical, "development": validated}
+
     # The recipe and production resolution belong to the current, hash-bound
     # domain gate.  Keeping the old .010 recipe here would make a formally
     # accepted prospective recipe (for example .0075 m) impossible to train

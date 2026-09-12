@@ -22,7 +22,7 @@ import torch
 
 from experiments.r3_g4_baselines import LocalInteraction, ParticleMLP
 from scripts import f3_training_core as core
-from scripts.f3_training_data import QualifiedF3Loader, target_grid
+from scripts.f3_training_data import QualifiedF3Loader, loader_for_contract, target_grid
 from scripts.f3_rollout import EngineeringF3Rollout
 from scripts.f3_observation_v2 import observe_arrays, compare
 from scripts.finite_wall_audit import wall_penetration, segment_crossing_events
@@ -425,7 +425,11 @@ def run_worker(argv=None):
     try:
         # QualifiedF3Loader performs the complete real development/domain guard.
         # No contract-bypass parameter or alternate production loader is offered.
-        with QualifiedF3Loader(args.development_contract) as loader:
+        # Dispatch by the immutable recipe in the bound contract.  The legacy
+        # name remains imported for test fixtures and old contracts, while a
+        # ref0081818 contract can only enter through its revision adapter.
+        with loader_for_contract(args.development_contract,
+                                 legacy_loader=QualifiedF3Loader) as loader:
             source = _bound(loader.contract["source_domain_gate"])
             if (source != _bound(attempt["qualification_contract"])
                     or loader.contract_sha256 != attempt["development_contract"]["sha256"]):

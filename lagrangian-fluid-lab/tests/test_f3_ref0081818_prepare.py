@@ -31,7 +31,11 @@ def test_definition_rewrite_preserves_fixed_volume_tiling(tmp_path):
     assert abs(float(bound.find("./size").get("z")) - (0.51 + prepare.DP)) < 1e-15
 
 
-def test_shared_runner_rejects_prepared_only_recipe_without_authorization_file():
+def test_shared_runner_rejects_prepared_only_recipe_without_authorization_file(tmp_path, monkeypatch):
+    # The real workspace may contain the owner authorization after approval;
+    # point this guard test at an absent binding so it continues to exercise
+    # the prepared-only failure path.
+    monkeypatch.setattr(l1r_branch_runner, "REF008_AUTHORIZATION", tmp_path / "missing-auth.json")
     try:
         l1r_branch_runner.run({
             "recipe_id": prepare.RECIPE,

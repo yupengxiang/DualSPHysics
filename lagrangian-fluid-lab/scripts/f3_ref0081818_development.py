@@ -248,6 +248,15 @@ def _context(*, register: bool) -> dict:
                 "schema": REGISTRY_SCHEMA, "recipe_id": REVISION_RECIPE,
                 "resource_category": "development", "cases": manifest["cases"],
                 "production_source_case_id": source["record"]["id"],
+                "initial_source": {
+                    "prefix": _relative(source["prefix"]),
+                    "assets": dict(source["record"]["input_assets"]),
+                    "total_particles": source["record"]["gencase"]["total_particles"],
+                    "fluid_particles": source["record"]["gencase"]["fluid_particles"],
+                    "boundary_particles": source["record"]["gencase"]["boundary_particles"],
+                    "initial_mass_kg": source["record"]["initial_mass_kg"],
+                    "initial_com_m": source["record"]["initial_com_m"],
+                },
                 "evidence": evidence, "program_sha256": q2.sha256(Path(__file__)),
             }
             return {"gate": gate, "manifest": manifest, "registry": registry,
@@ -262,6 +271,15 @@ def _context(*, register: bool) -> dict:
             "production_resolution_m": 0.0075, "time_window_s": [0.0, 8.35],
             "output_interval_s": 0.01, "evidence": evidence,
             "cases": manifest["cases"],
+            "initial_source": {
+                "prefix": _relative(source["prefix"]),
+                "assets": dict(source["record"]["input_assets"]),
+                "total_particles": source["record"]["gencase"]["total_particles"],
+                "fluid_particles": source["record"]["gencase"]["fluid_particles"],
+                "boundary_particles": source["record"]["gencase"]["boundary_particles"],
+                "initial_mass_kg": source["record"]["initial_mass_kg"],
+                "initial_com_m": source["record"]["initial_com_m"],
+            },
             "pilot_case_ids": [row["case_id"] for row in manifest["cases"] if row["pilot"]],
             "max_attempts_per_case": 1, "solver_timeout_seconds": 3600,
             "original_inputs_are_solver_results": False,
@@ -321,6 +339,15 @@ def _prepare(case_id: str, context: dict) -> dict:
             raise ValueError("revision development prepared record differs from registration")
         qualification._verify_assets(_path(record["generated_prefix"]), record["input_assets"])
         check_input(record)
+        preflight_path = OUT / f"{case_id}-INPUT-PREFLIGHT.json"
+        preflight = _read(preflight_path)
+        preflight.update({
+            "record_id": case_id,
+            "record_sha256": q2.sha256(saved),
+            "recipe_id": REVISION_RECIPE,
+            "revision_manifest_sha256": q2.sha256(OUT / DEVELOPMENT_MANIFEST),
+        })
+        q2.atomic_json(preflight_path, preflight)
         return record
     attempts = LAB / "campaigns/l1-resume/runs/branches" / case_id / "attempts"
     if target.exists() or attempts.exists():
@@ -337,7 +364,70 @@ def _prepare(case_id: str, context: dict) -> dict:
     _control(row, context["manifest"], context["nominal"])
     check_input(record)
     _write(saved.name, record)
+    preflight_path = OUT / f"{case_id}-INPUT-PREFLIGHT.json"
+    preflight = _read(preflight_path)
+    preflight.update({
+        "record_id": case_id,
+        "record_sha256": q2.sha256(saved),
+        "recipe_id": REVISION_RECIPE,
+        "revision_manifest_sha256": q2.sha256(OUT / DEVELOPMENT_MANIFEST),
+    })
+    q2.atomic_json(preflight_path, preflight)
     return record
+
+
+def _verified_development(case_id: str, context: dict | None = None):
+    """Read-only verification of one completed ref0081818 development case.
+
+    The training contract must consume an actual development solver result.  A
+    prepared input, a qualification result, or a result whose source record
+    was rewritten under the development label is rejected here.  This mirrors
+    the historical verifier while keeping the revision gate and recipe bound
+    to this entry point.
+    """
+    from scripts.l1r_branch_runner import check_completed_boundary
+
+    candidate(case_id)
+    context = _context(register=False) if context is None else context
+    if context.get("registry", {}).get("resource_category") != "development":
+        raise ValueError("ref0081818 development registry is missing")
+    registry_path = OUT / REGISTRY
+    if not registry_path.is_file():
+        raise ValueError("ref0081818 development registry is not registered")
+    row = next(row for row in context["manifest"]["cases"] if row["case_id"] == case_id)
+    target = LAB / "campaigns/l1-resume/artifacts/f3-ref0081818-development" / case_id
+    expected = _fields(row, context, target)
+    record_path = OUT / f"{case_id}-PREPARED.json"
+    record = _read(record_path)
+    if any(record.get(key) != value for key, value in expected.items()):
+        raise ValueError("ref0081818 development prepared record differs from registration")
+    if record.get("qualified") is not False or record.get("formal_release") is not False:
+        raise ValueError("ref0081818 development source has an invalid qualification state")
+    prefix = _path(record["generated_prefix"])
+    qualification._verify_assets(prefix, record["input_assets"])
+    if record.get("generated_xml_sha256") != record["input_assets"].get(prefix.name + ".xml"):
+        raise ValueError("ref0081818 development XML binding is stale")
+    audit = _read(OUT / f"{case_id}-AUDIT.json")
+    qualification._hard_audit(record, audit)
+    solver = _read(OUT / f"{case_id}-SOLVER.json")
+    if (solver.get("case_id") != case_id or solver.get("status") != "completed"
+            or solver.get("resource_category") != "development"
+            or solver.get("solver_sha256") != q2.sha256(q2.SOLVER)):
+        raise ValueError("ref0081818 development solver is not a completed native run")
+    executed = solver.get("source_record", {})
+    for key in ("id", "generated_prefix", "input_assets", "gencase", "solver_mode",
+                "recipe_id", "resource_category", "drive_amplitude",
+                "effective_control_sha256", "physical_lineage_sha256"):
+        if executed.get(key) != record.get(key):
+            raise ValueError("ref0081818 development solver inputs differ from its prepared record")
+    check_completed_boundary(record, solver)
+    return record, audit, solver
+
+
+def verified_development(case_id: str):
+    """Read-only complete-source verifier used by downstream contracts."""
+    candidate(case_id)
+    return _verified_development(case_id)
 
 
 def plan(case_id: str) -> dict:
