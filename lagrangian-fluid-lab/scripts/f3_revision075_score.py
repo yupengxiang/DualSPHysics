@@ -27,7 +27,7 @@ try:
     from scripts.f3_timestep_evidence import evidence as timestep_evidence
     from scripts.l1r_continuation_evidence import LAB, OUT
     from scripts.l1r_input_preflight import check_input
-    from scripts.l1r_q2_mdbc_bridge import atomic_json, sha256, utc_now
+    from scripts.l1r_q2_mdbc_bridge import SOLVER, atomic_json, sha256, utc_now
 except ModuleNotFoundError:  # pragma: no cover - direct script execution
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from scripts import f3_nopen_stage_score as base_score
@@ -36,7 +36,7 @@ except ModuleNotFoundError:  # pragma: no cover - direct script execution
     from scripts.f3_timestep_evidence import evidence as timestep_evidence
     from scripts.l1r_continuation_evidence import LAB, OUT
     from scripts.l1r_input_preflight import check_input
-    from scripts.l1r_q2_mdbc_bridge import atomic_json, sha256, utc_now
+    from scripts.l1r_q2_mdbc_bridge import SOLVER, atomic_json, sha256, utc_now
 
 
 RECIPE = launch_gate.RECIPE
@@ -64,20 +64,42 @@ def _bind(bindings: dict[str, str], path: Path) -> None:
 
 def _revision_records() -> dict[str, dict[str, Any]]:
     _, summary = launch_gate.verify_preparation()
+    manifest = _read(launch_gate.MANIFEST)
+    manifest_cells = {cell["cell_id"]: cell for cell in manifest["cells"]}
     records = {}
     for relative in summary["prepared_records"]:
         record_path = LAB / relative
         record = _read(record_path)
-        if (record.get("revision_manifest_sha256") != summary["manifest_sha256"]
-                or record.get("launch_allowed") is not False):
+        cell_id = record.get("plan_case_id")
+        cell = manifest_cells.get(cell_id)
+        expected = {
+            "recipe_id": manifest["recipe_id"],
+            "role": cell.get("role") if cell else None,
+            "dp_m": cell.get("dp_m") if cell else None,
+            "drive_amplitude": cell.get("amplitude") if cell else None,
+            "cfl_number": cell.get("cfl_number") if cell else None,
+            "coef_dt_min": cell.get("coef_dt_min") if cell else None,
+            "time_out_s": cell.get("output_interval_s") if cell else None,
+        }
+        if (cell is None
+                or record.get("id") != f"F3_REV075_{cell_id}"
+                or record.get("case_id") != record.get("id")
+                or record.get("resource_category") != "qualification"
+                or record.get("revision_manifest_sha256") != summary["manifest_sha256"]
+                or record.get("launch_allowed") is not False
+                or record.get("qualified") is not False
+                or record.get("formal_release") is not False
+                or any(record.get(key) != value for key, value in expected.items())):
             raise ValueError(f"revision record is not bound to the prepared manifest: {record_path}")
-        records[record["plan_case_id"]] = record
-    if len(records) != 11:
+        if cell_id in records:
+            raise ValueError(f"duplicate revision plan case: {cell_id}")
+        records[cell_id] = record
+    if len(records) != len(manifest_cells) or set(records) != set(manifest_cells):
         raise ValueError("revision preparation must contain all 11 cells")
     return records
 
 
-def _source_from_files(label: str, record_path: Path) -> tuple[dict[str, Any], dict[str, str]]:
+def _source_from_files(label: str, record_path: Path, *, revision: bool = False) -> tuple[dict[str, Any], dict[str, str]]:
     record = _read(record_path)
     check_input(record)
     case_id = record["id"]
@@ -88,6 +110,16 @@ def _source_from_files(label: str, record_path: Path) -> tuple[dict[str, Any], d
         if not path.is_file():
             raise ValueError(f"completed source evidence is missing: {path}")
     audit, solver, preflight = map(_read, (audit_path, solver_path, preflight_path))
+    if solver.get("case_id") != case_id:
+        raise ValueError(f"solver evidence is bound to a different case: {case_id}")
+    if solver.get("solver_sha256") != sha256(SOLVER):
+        raise ValueError(f"solver executable evidence is stale or mismatched: {case_id}")
+    if solver.get("source_record") != record:
+        raise ValueError(f"solver source record changed or is mismatched: {case_id}")
+    if revision and solver.get("resource_category") != "qualification":
+        raise ValueError(f"revision solver evidence has the wrong resource category: {case_id}")
+    if not revision and solver.get("resource_category") not in (None, "qualification"):
+        raise ValueError(f"existing source solver evidence has an invalid resource category: {case_id}")
     if (solver.get("status") != "completed"
             or audit.get("audit_status") != "pass_diagnostic"
             or audit.get("issues") != [] or audit.get("unknowns") != []):
@@ -138,7 +170,7 @@ def _existing_source(label: str, case_id: str) -> tuple[dict[str, Any], dict[str
 
 
 def _revision_source(label: str, record: dict[str, Any]) -> tuple[dict[str, Any], dict[str, str]]:
-    return _source_from_files(label, OUT / f"{record['id']}-PREPARED.json")
+    return _source_from_files(label, OUT / f"{record['id']}-PREPARED.json", revision=True)
 
 
 def _row(first, second, time_s: float) -> dict[str, Any]:
