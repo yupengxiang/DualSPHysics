@@ -4,6 +4,14 @@ The full goal remains active: reproducible qualified numerical recipe, independe
 
 ## Historical snapshot at2026-09-12T08:16Z
 
+### Live refresh at 2026-09-12T09:41Z
+
+The separately registered CFL-half root-cause diagnostic is complete. The first `_cflhalf` launch is preserved as a charged environmental failure: an inherited empty `CUDA_VISIBLE_DEVICES` mask made CUDA return error 100 before computation. The worker was corrected without changing the scientific contrast, and `_cflhalf_retry` completed on GPU4 with 836 frames, 67,500 fluid particles, zero hard-audit issues, and native `dt=8.769713845632211e-6 s` (approximately half of NP06).
+
+The diagnostic score compares the same full 0–8.35 s window with the registered v2 operator. NP06↔CFL-half passes every metric (maximum mean-velocity difference 0.0006274, energy difference 0.0003931, common-support velocity difference 0.0013916). NP01↔CFL-half still fails the spatial budget, with maximum mean-velocity difference 0.0632526 and energy difference 0.0634416; peaks remain around 7.35–7.40 s. The time-step contrast therefore does not explain the NP01↔NP06 failure. This report is diagnostic evidence only and does not alter the frozen nominal gate.
+
+The live ledger is now 59/72 qualification attempts, approximately 8.6030/64 GPU hours, and 647.94/768 conservative CPU core-hours; development and training remain 0/40 and 0/12, and material configurations remain 10/32. No further time-step repair is registered. NP07–NP14, independent development CFD, production material trajectories and training remain blocked until a prospective recipe or policy revision addresses the failed spatial gate.
+
 ### Live refresh at 2026-09-12T08:55Z
 
 NP04, NP05 and NP06 are now terminal. NP04 used the 0.002 s output schedule and passed its full 4,176-frame hard audit; NP05 (dp=0.0075 m) and NP06 (dp=0.006 m) each passed the 836-frame hard audit with zero exclusions, lifecycle changes, nominal crossings or nonfinite values. NP06 finished on GPU4 at 2026-09-12T08:47:07Z; its audit covers 67,500 initial fluid particles through 8.350012880462266 s.
