@@ -1,0 +1,55 @@
+{
+  "schema": "f3.recipe_revision.proposal.v1",
+  "created_at": "2026-09-12T17:20:00Z",
+  "status": "pending_owner_decision",
+  "current_recipe": "F3_CELL3_NS_visco1_native_nopen",
+  "current_gate": "F3-NOPEN-NOMINAL-GATE.json",
+  "current_gate_status": "failed",
+  "root_cause_evidence": {
+    "np01_np06_energy_difference": 0.0631686448,
+    "np01_np06_mean_velocity_difference": 0.0629465234,
+    "np01_cflhalf_energy_difference": 0.06344161253660988,
+    "np06_cflhalf_energy_difference": 0.0003930949590804783,
+    "boundary4_np06_energy_difference": 0.0631941155176339,
+    "boundary4_np06_mean_velocity_difference": 0.06298904685649086
+  },
+  "candidate": {
+    "production_dp_m": 0.0075,
+    "reference_dp_m": [0.01, 0.006],
+    "fixed_recipe": "NoPenetration=True, -mdbc_noslip:1, boundary viscosity 1, CFL/CoefDtMin 0.05",
+    "time_window_s": [0.0, 8.35],
+    "output_interval_s": 0.01,
+    "control_domain": [0.9, 1.1],
+    "independent_internal_amplitude": 0.97,
+    "observables": "frozen v2 full-window macro operator plus unchanged hard particle audit"
+  },
+  "required_new_cells": {
+    "production_zero_time_output": 3,
+    "endpoint_spatial": 6,
+    "independent_internal": 2,
+    "total": 11
+  },
+  "resource_snapshot": {
+    "qualification_used": 61,
+    "qualification_cap": 72,
+    "qualification_remaining": 11,
+    "gpu_hours": 8.80677964546098,
+    "gpu_cap_hours": 64,
+    "cpu_core_hours_upper_bound": 654.0323313235556,
+    "cpu_cap_core_hours": 768,
+    "material_configurations_used": 10,
+    "development_attempts_used": 0,
+    "training_attempts_used": 0
+  },
+  "decision_required": [
+    "approve a prospective recipe revision",
+    "approve additional CPU core-hour and qualification-attempt budget",
+    "confirm whether existing NP01/NP05/NP06 may be hash-bound as evidence in the new plan"
+  ],
+  "forbidden_shortcuts": [
+    "adjacent-only scoring",
+    "truncated time window",
+    "post-hoc production selection from passing pair",
+    "launching development or training before the revised domain gate"
+  ]
+}

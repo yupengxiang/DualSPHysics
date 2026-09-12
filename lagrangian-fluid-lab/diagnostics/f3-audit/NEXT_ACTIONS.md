@@ -14,6 +14,8 @@ The current-recipe bridge is macro-close to NP01 (all metrics below `0.0014`), b
 
 The live ledger is 61/72 qualification attempts, approximately 8.8068/64 GPU hours and 654.03/768 conservative CPU core-hours; development and training remain 0/40 and 0/12, and material configurations remain 10/32. No endpoint, development, material-production or training launch is allowed under the frozen failed gate. A formal prospective recipe/policy revision is still required before rebuilding a complete qualification matrix.
 
+The concrete pending revision is recorded in [RECIPE_REVISION_PROPOSAL.md](RECIPE_REVISION_PROPOSAL.md) and its hash-bound JSON companion. The leading candidate is a prospective 0.0075 m production recipe with 0.010/0.006 m references, but it needs new zero/time/output/endpoint/internal cells and additional CPU/qualification budget before any launch.
+
 ### Live refresh at 2026-09-12T09:41Z
 
 The separately registered CFL-half root-cause diagnostic is complete. The first `_cflhalf` launch is preserved as a charged environmental failure: an inherited empty `CUDA_VISIBLE_DEVICES` mask made CUDA return error 100 before computation. The worker was corrected without changing the scientific contrast, and `_cflhalf_retry` completed on GPU4 with 836 frames, 67,500 fluid particles, zero hard-audit issues, and native `dt=8.769713845632211e-6 s` (approximately half of NP06).
