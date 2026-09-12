@@ -1,5 +1,22 @@
 # F3 continuation checkpoint — 2026-09-12 Asia/Shanghai
 
+## Current refresh — 2026-09-13
+
+The vendor package exposes both `DualSPHysics5.4CPU_linux64` and
+`DualSPHysics5.4_linux64`; the latter is the guarded GPU path selected with
+`-gpu:<physical index>`. GPU 4–7 are currently the allowed pool, while GPU
+0–3 remain protected. The shared branch runner admits only one CFD solver at a
+time and rechecks UUID, free memory and the runtime guard, so independent CPU
+audits can be parallelized but qualification CFD launches remain serialized.
+
+The 11 prospective `.0075 m` revision inputs remain prepared but
+`launch_allowed=false`. The live ledger is 61/72 qualification attempts,
+approximately 8.8068/64 GPU hours and 654.43/768 conservative CPU core-hours;
+development, training and material production remain at zero. CPU checkpoint
+recovery, CUDA environment binding and material v2 backend binding now pass the
+full 622-test suite. No new solver or training attempt was launched in this
+refresh.
+
 The full goal remains active: reproducible qualified numerical recipe, independent development trajectories, material tasks and real learning/recovery closure. No production resolution/control domain or full-window CFD material reference is qualified. Do not mark complete or redefine the goal as diagnostics.
 
 ## Historical snapshot at2026-09-12T08:16Z
