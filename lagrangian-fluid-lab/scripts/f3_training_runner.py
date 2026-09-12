@@ -161,11 +161,21 @@ def _require_production_contracts(qualification, development):
     registered or a GPU is probed.
     """
     domain = qualification["content"]
+    # The recipe and production resolution belong to the current, hash-bound
+    # domain gate.  Keeping the old .010 recipe here would make a formally
+    # accepted prospective recipe (for example .0075 m) impossible to train
+    # on: the launcher would reject it before any attempt was registered.  The
+    # fixed time window and scoring cadence are task contract fields and remain
+    # explicit here.
+    recipe_id = domain.get("recipe_id")
+    production_resolution = domain.get("production_resolution_m")
     if (domain.get("schema") != "f3.nopen.domain_gate.v1"
             or domain.get("stage") != "domain"
             or domain.get("status") != "passed"
-            or domain.get("recipe_id") != "F3_CELL3_NS_visco1_native_nopen"
-            or domain.get("production_resolution_m") != .01
+            or not isinstance(recipe_id, str) or not recipe_id
+            or isinstance(production_resolution, bool)
+            or not isinstance(production_resolution, (int, float))
+            or not math.isfinite(production_resolution) or production_resolution <= 0
             or domain.get("time_window_s") != [0, 8.35]
             or domain.get("scoring_interval_s") != .01):
         raise RuntimeError("qualification contract is not a passed F3 NoPen domain gate")
@@ -192,7 +202,8 @@ def _require_production_contracts(qualification, development):
     if (development_content.get("schema") != "f3.training.development_data.v1"
             or development_content.get("status") != "passed"
             or development_content.get("qualified_sources") is not True
-            or development_content.get("recipe_id") != "F3_CELL3_NS_visco1_native_nopen"
+            or development_content.get("recipe_id") != recipe_id
+            or development_content.get("production_resolution_m") != production_resolution
             or development_content.get("scope") not in ("pilot", "full")):
         raise RuntimeError("development contract is not a passed actual-source contract")
     source_gate = development_content.get("source_domain_gate")

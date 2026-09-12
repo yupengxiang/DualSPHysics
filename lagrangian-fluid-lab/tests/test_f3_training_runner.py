@@ -116,6 +116,44 @@ def test_production_gate_rejects_plausible_but_unverified_contracts(contracts):
     assert not (training.OUT / "solver.lock").exists()
 
 
+def test_production_contracts_follow_current_recipe_resolution(monkeypatch, tmp_path):
+    """A passed prospective recipe must reach the training gate unchanged."""
+    evidence = tmp_path / "evidence.json"
+    evidence.write_text("{}")
+    domain = {
+        "schema": "f3.nopen.domain_gate.v1", "stage": "domain", "status": "passed",
+        "recipe_id": "F3_CELL3_NS_visco1_native_nopen_revision075",
+        "production_resolution_m": 0.0075, "time_window_s": [0, 8.35],
+        "scoring_interval_s": 0.01,
+        "evidence_sha256": {"evidence.json": training._sha256(evidence)},
+    }
+    qualification_path = tmp_path / "domain.json"
+    qualification_path.write_text(json.dumps(domain))
+    qualification = {"path": str(qualification_path), "sha256": training._sha256(qualification_path),
+                     "content": domain}
+    development_content = {
+        "schema": "f3.training.development_data.v1", "status": "passed",
+        "qualified_sources": True, "recipe_id": domain["recipe_id"],
+        "production_resolution_m": domain["production_resolution_m"], "scope": "pilot",
+        "source_domain_gate": {"path": "domain.json", "sha256": qualification["sha256"]},
+    }
+    development_path = tmp_path / "development.json"
+    development_path.write_text(json.dumps(development_content))
+    development = {"path": str(development_path), "sha256": training._sha256(development_path),
+                   "content": development_content}
+
+    from scripts import f3_nopen_development
+    from scripts import f3_training_data
+    monkeypatch.setattr(f3_nopen_development, "verify_domain_gate", lambda: domain)
+    monkeypatch.setattr(f3_training_data, "validate_development_contract",
+                        lambda path: development_content)
+
+    result = training._require_production_contracts(qualification, development)
+    assert result["domain"]["recipe_id"] == domain["recipe_id"]
+    assert result["domain"]["production_resolution_m"] == 0.0075
+    assert result["development"]["recipe_id"] == domain["recipe_id"]
+
+
 @pytest.mark.parametrize("reference", [True, {}, {"path": "missing", "sha256": ""}])
 def test_contracts_require_file_and_digest(reference, contracts):
     contracts["qualification_contract"] = reference
