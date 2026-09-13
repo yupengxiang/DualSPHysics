@@ -18,13 +18,14 @@ from scripts.l1r_continuation_evidence import LAB, OUT
 from scripts.l1r_q2_mdbc_bridge import atomic_json, sha256
 
 
-PLAN_NAME = "F3-REF0081818-TRAINING-PLAN-R1.json"
+PLAN_NAME = "F3-REF0081818-TRAINING-PLAN-R9.json"
 ROUTES = ("particle_mlp", "local_interaction")
 SEEDS = (17, 29, 43)
 MAX_STEPS = 16_384
 CHECKPOINT_STEPS = (4096, 8192, MAX_STEPS)
 FULL_CONTRACT = OUT / training_data.CONTRACTS["full"]
 GATE = OUT / development.REVISION_GATE
+PARALLEL_AUTHORIZATION = OUT / "F3-075-REF0081818-TRAINING-PARALLEL-AUTHORIZATION.json"
 
 
 def _bound(path: Path) -> dict[str, str]:
@@ -44,6 +45,10 @@ def build() -> dict:
     contract = training_data.validate_development_contract(FULL_CONTRACT)
     if contract.get("scope") != "full" or len(contract.get("cases", [])) != 32:
         raise ValueError("full actual-source contract must contain 32 cases")
+    authorization = _read(PARALLEL_AUTHORIZATION)
+    if (authorization.get("status") != "approved"
+            or authorization.get("allowed_gpu_indices") != list(range(8))):
+        raise PermissionError("approved eight-GPU training authorization is required")
     validation_test = [row["case_id"] for row in contract["cases"]
                        if row["split"] in ("validation", "test")]
     train = [row["case_id"] for row in contract["cases"] if row["split"] == "train"]
@@ -85,6 +90,7 @@ def build() -> dict:
         bindings[relative] = sha256(path)
     for path in (GATE, FULL_CONTRACT,
                  OUT / "F3-075-REF0081818-DOWNSTREAM-AUTHORIZATION.json",
+                 PARALLEL_AUTHORIZATION,
                  OUT / "F3-075-REF0081818-DEVELOPMENT-REGISTRY-RECONCILIATION.json",
                  LAB / "scripts/f3_ref0081818_training_plan.py"):
         bindings[str(path.resolve().relative_to(LAB.resolve()))] = sha256(path)
@@ -103,11 +109,21 @@ def build() -> dict:
         "evaluation_case_count": len(validation_test),
         "evaluation_semantics": "all validation and public development test cases; fixed final step; no test-based selection",
         "resource_policy": {
-            "allowed_gpu_indices": [4, 5, 6, 7],
-            "max_concurrent_training_runs": 1,
+            "allowed_gpu_indices": list(range(8)),
+            "max_concurrent_training_runs": 8,
+            "same_gpu_concurrency_limit": 2,
+            "gpu_memory_reservation_mib": 18000,
+            "parallel_authorization": _bound(PARALLEL_AUTHORIZATION),
             "training_attempt_budget": 12,
             "planned_primary_runs": len(entries),
             "reserved_recovery_attempts": 6,
+        },
+        "storage_policy": {
+            "scope": "external_immutable_archive",
+            "archive_root": str(worker.TRAINING_ROOT.resolve()),
+            "campaign_storage_exempt": True,
+            "artifact_manifest": "per-attempt SHA-256 manifest excludes only attempt.json and itself",
+            "unique_outputs_retained": True,
         },
         "evidence_sha256": dict(sorted(bindings.items())),
         "entries": entries,

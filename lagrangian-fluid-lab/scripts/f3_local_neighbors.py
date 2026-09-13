@@ -77,3 +77,67 @@ def exact_local_summary(position, velocity, particle_id, *, dp_m, interval_s):
         result[:, 6] = distance.mean(axis=1) / dp_m
         result[:, 7] = k / n
     return torch.as_tensor(result, dtype=position.dtype, device=position.device)
+
+
+def exact_local_summary_selected(position, velocity, particle_id, rows, *, dp_m, interval_s):
+    """Compute the exact-ID summary only for the rows used by one update.
+
+    The complete position/velocity axis still builds the same deterministic
+    cKDTree and identity tie ordering. Querying the selected rows avoids
+    constructing 34k summaries when the optimizer uses 256 targets.
+    """
+    if (not isinstance(position, torch.Tensor) or not isinstance(velocity, torch.Tensor)
+            or position.shape != velocity.shape or position.dtype != velocity.dtype
+            or position.device != velocity.device or not position.is_floating_point()
+            or not math.isfinite(dp_m) or dp_m <= 0
+            or not math.isfinite(interval_s) or interval_s <= 0):
+        raise ValueError('invalid current state, resolution or interval')
+    selected = np.asarray(rows, dtype=np.int64)
+    if selected.ndim != 1 or len(selected) == 0 or np.any(selected < 0) or np.any(selected >= len(position)):
+        raise ValueError('selected rows are outside the complete particle axis')
+    x = position.detach().cpu().numpy().astype(np.float64)
+    v = velocity.detach().cpu().numpy().astype(np.float64)
+    ids = (particle_id.detach().cpu().numpy() if isinstance(particle_id, torch.Tensor)
+           else np.asarray(particle_id))
+    if (not np.isfinite(x).all() or not np.isfinite(v).all()
+            or ids.shape != (len(x),) or ids.dtype.kind not in 'iu'
+            or len(np.unique(ids)) != len(ids)):
+        raise ValueError('invalid complete current axis')
+    n = len(x); k = min(8, n - 1)
+    result = np.zeros((len(selected), 8), dtype=np.float64)
+    if k:
+        tree = cKDTree(x)
+        _, candidates = tree.query(x[selected], k=min(n, k + 2), workers=1)
+        if candidates.ndim == 1:
+            candidates = candidates[:, None]
+        exact = np.linalg.norm(x[candidates] - x[selected, None], axis=2)
+        exact[ids[candidates] == ids[selected, None]] = np.inf
+        ordering = np.lexsort((ids[candidates], exact), axis=1)
+        sorted_pool = np.take_along_axis(candidates, ordering, axis=1)
+        sorted_distance = np.take_along_axis(exact, ordering, axis=1)
+        indices = sorted_pool[:, :k].copy()
+        chosen_distances = sorted_distance[:, :k].copy()
+        if sorted_distance.shape[1] > k:
+            cutoff = sorted_distance[:, k - 1]
+            tolerance = 8 * np.finfo(float).eps * np.maximum(1., cutoff)
+            ambiguous = np.flatnonzero(sorted_distance[:, k] <= cutoff + tolerance)
+        else:
+            ambiguous = np.empty(0, dtype=int)
+        for j in ambiguous:
+            radius = np.nextafter(chosen_distances[j, -1], np.inf)
+            radius += 8 * np.finfo(float).eps * max(1., radius)
+            pool = np.asarray(tree.query_ball_point(x[selected[j]], radius, workers=1), dtype=np.int64)
+            pool = pool[ids[pool] != ids[selected[j]]]
+            distance = np.linalg.norm(x[pool] - x[selected[j]], axis=1)
+            order = np.lexsort((ids[pool], distance))[:k]
+            if len(order) != k:
+                raise ValueError('spatial index did not return complete neighbour shell')
+            indices[j] = pool[order]
+            chosen_distances[j] = distance[order]
+        weight = 1 / np.maximum(chosen_distances, 1e-5)
+        weight /= weight.sum(axis=1, keepdims=True)
+        result[:, :3] = np.sum(weight[..., None] * (x[indices] - x[selected, None]), axis=1) / dp_m
+        result[:, 3:6] = np.sum(weight[..., None] * (v[indices] - v[selected, None]), axis=1) * interval_s / dp_m
+        result[:, 6] = chosen_distances.mean(axis=1) / dp_m
+        result[:, 7] = k / n
+    return torch.as_tensor(result, dtype=position.dtype, device=position.device)

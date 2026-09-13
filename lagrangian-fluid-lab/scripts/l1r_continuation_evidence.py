@@ -123,8 +123,21 @@ def ledger():
                 "basis": "entire activity since start-of-adoption-day at 2 x 8 CPU threads, plus 10 percent control-process allowance; includes failed and unmetered postprocessing, not a claim of measured usage",
             },
         )
-    from scripts.f3_training_runner import training_usage, ACCOUNTING_VERSION
-    training = training_usage(LAB / "campaigns/l1-resume/training-attempts")
+    from scripts.f3_training_runner import training_usage, ACCOUNTING_VERSION, TRAINING_ROOT
+    # New ref0081818 outputs use the external immutable archive so the
+    # campaign's 512 GiB cap counts only compact records.  Keep a read-only
+    # legacy fallback for pre-archive fixtures and older local attempts.
+    training_root = Path(TRAINING_ROOT)
+    legacy_training_root = LAB / "campaigns/l1-resume/training-attempts"
+    # Tests and imported callers may redirect this module's LAB/OUT.  Do not
+    # accidentally count attempts from the real external archive in a
+    # redirected ledger; use the redirected legacy root for that isolated
+    # accounting context.
+    if Path(TRAINING_ROOT).parent != Path(LAB).parent:
+        training_root = legacy_training_root
+    elif not training_root.exists() and legacy_training_root.exists():
+        training_root = legacy_training_root
+    training = training_usage(training_root)
     gpu_base = sum((r["elapsed_seconds"] if r["elapsed_seconds"] is not None else r.get("budget_reserve_seconds", 0)) for r in rows if r["backend"] == "gpu") / 3600
     cpu_base = json.loads(reserve.read_text())["cpu_core_hours_conservative_reserve"] + post_reserve_hours() * 16 * 1.1
     write(

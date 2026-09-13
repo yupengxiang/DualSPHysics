@@ -12,6 +12,7 @@ from collections import OrderedDict
 import copy
 import json
 import math
+import os
 from pathlib import Path
 
 import numpy as np
@@ -31,6 +32,82 @@ HORIZON = 8.35
 PROGRAMS = ("f3_training_data.py", "f3_nopen_development.py", "f3_nopen_qualification.py",
             "f3_control.py", "f3_nopen_stage_score.py", "f3_reference_score.py",
             "f3_timestep_evidence.py")
+
+# The ref0081818 worker can opt into a bounded in-memory cache for its complete
+# canonical frame axis.  The cache is process-local and keyed by the immutable
+# source path, so it never changes the source contract or crosses attempts.
+# Keeping the switch behind an environment variable leaves contract publishing
+# and the small CPU fixtures on the original two-frame HDF5 cache.
+_PREFETCH_CACHE: dict[str, dict[str, object]] = {}
+_PREFETCH_ACTIVE = False
+_GPU_CACHE_ACTIVE = True
+
+
+def enable_training_prefetch() -> None:
+    """Enable the ref0081818 frame cache after its contract has been checked."""
+    global _PREFETCH_ACTIVE
+    _PREFETCH_ACTIVE = True
+
+
+def disable_training_gpu_cache() -> None:
+    """Disable CUDA batches before the independent NumPy scorer runs.
+
+    The complete frame cache remains available for audit/replay, but evaluation
+    must receive host arrays so that it cannot accidentally use training tensors
+    or pass CUDA tensors into NumPy metrics.
+    """
+    global _GPU_CACHE_ACTIVE
+    _GPU_CACHE_ACTIVE = False
+
+
+def install_training_loader_cache(loader) -> None:
+    """Keep revision-bound source handles alive across shuffled transitions."""
+    if os.environ.get("F3_TRAINING_PREFETCH") != "1" or not hasattr(loader, "_sources"):
+        return
+    from types import MethodType
+    from scripts.f3_control import AccelerationControl
+    from scripts import f3_ref0081818_training_data as revision
+
+    references = {}
+
+    def cached_open(self, case_id):
+        if self._closed:
+            raise ValueError("loader is closed")
+        if case_id not in self._rows:
+            raise ValueError("case is not present in the verified development contract")
+        source = self._sources[case_id]
+        for path in (source["hdf5_path"], source["control_path"]):
+            if legacy_token(path) != self._tokens[path]:
+                raise ValueError("verified source changed after loader was opened")
+        if case_id not in references:
+            reference = revision._Reference(source)
+            try:
+                control = AccelerationControl.from_csv(source["control_path"])
+                control.values.setflags(write=False)
+                control.integrated.setflags(write=False)
+            except BaseException:
+                reference.close()
+                raise
+            references[case_id] = (reference, control)
+        self._reference, self._control = references[case_id]
+        self._reference_case = case_id
+        return self._reference
+
+    def cached_close(self):
+        for reference, _ in references.values():
+            reference.close()
+        references.clear()
+        self._reference = self._reference_case = self._control = None
+        self._closed = True
+
+    # Keep the token helper local to avoid changing the revision contract's
+    # module imports while still checking every immutable source on each use.
+    def legacy_token(path):
+        stat = Path(path).stat()
+        return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
+
+    loader._open = MethodType(cached_open, loader)
+    loader.close = MethodType(cached_close, loader)
 
 
 def _read(path):
@@ -270,6 +347,8 @@ class _Reference(CachedSource):
         super().__init__(source)
         self.canonical = OrderedDict()
         self.grid = target_grid(INTERVAL)
+        self._prefetched = None
+        self._gpu_prefetched = None
         try:
             if not np.issubdtype(self.ids.dtype, np.integer):
                 raise ValueError("native particle IDs must be integral")
@@ -279,11 +358,90 @@ class _Reference(CachedSource):
                     raise ValueError("HDF5 must retain the entire complete native identity axis")
             for values in (self.ids, self.mass, self.times, self.grid):
                 values.setflags(write=False)
+            # Only the revision-bound ref0081818 subclass opts into this path.
+            # It keeps all canonical states for a case in RAM after the first
+            # sequential read, avoiding a full HDF5 frame read on every update.
+            if (_PREFETCH_ACTIVE and os.environ.get("F3_TRAINING_PREFETCH") == "1"
+                    and self.__class__.__module__.endswith("f3_ref0081818_training_data")):
+                key = str(Path(source["hdf5_path"]).resolve())
+                cached = _PREFETCH_CACHE.get(key)
+                if cached is None:
+                    # Read each native dataset once.  The original bounded
+                    # reader is intentionally frame-by-frame; that is useful
+                    # for audit code but turns a 16k-step training pass into
+                    # thousands of random HDF5 reads.  This path performs the
+                    # same validity and linear interpolation checks in chunks.
+                    native_position = self.h5["position"][:].astype(float)
+                    native_velocity = self.h5["velocity"][:].astype(float)
+                    native_valid = self.h5["valid"][:]
+                    native_type = self.h5["type"][:]
+                    native_mass = self.h5["mass"][:].astype(float)
+                    if (not native_valid.all() or not (native_type == 3).all()
+                            or not np.isfinite(native_position).all()
+                            or not np.isfinite(native_velocity).all()
+                            or native_mass.shape != (len(self.times), len(self.ids))
+                            or not np.isfinite(native_mass).all()
+                            or not np.all(native_mass == self.mass[None, :])):
+                        raise ValueError("prefetched source contains an invalid complete-axis state")
+                    left = np.searchsorted(self.times, self.grid, side="right") - 1
+                    left = np.clip(left, 0, len(self.times) - 1)
+                    right = np.minimum(left + 1, len(self.times) - 1)
+                    denominator = self.times[right] - self.times[left]
+                    weight = np.divide(self.grid - self.times[left], denominator,
+                                       out=np.zeros_like(self.grid), where=denominator != 0)
+                    states = {}
+                    for start in range(0, len(self.grid), 64):
+                        stop = min(len(self.grid), start + 64)
+                        w = weight[start:stop, None, None]
+                        p = ((1.0 - w) * native_position[left[start:stop]]
+                             + w * native_position[right[start:stop]])
+                        v = ((1.0 - w) * native_velocity[left[start:stop]]
+                             + w * native_velocity[right[start:stop]])
+                        for offset, index in enumerate(range(start, stop)):
+                            pi, vi = p[offset].copy(), v[offset].copy()
+                            pi.setflags(write=False); vi.setflags(write=False)
+                            states[index] = (pi, vi, self.mass,
+                                             [float(self.times[left[index]]),
+                                              float(self.times[right[index]])])
+                    del native_position, native_velocity, native_valid, native_type, native_mass
+                    cached = {"states": states, "gpu": None}
+                    _PREFETCH_CACHE[key] = cached
+                self._prefetched = cached["states"]
+                if os.environ.get("F3_TRAINING_GPU_CACHE") == "1":
+                    import torch
+                    if torch.cuda.is_available():
+                        gpu = cached.get("gpu")
+                        if gpu is None:
+                            # The worker uses one visible device (cuda:0). A
+                            # GPU batch retains the complete axis while making
+                            # each update independent of host-to-device copies.
+                            gpu = {}
+                            for index in range(len(self.grid) - 1):
+                                p = self._prefetched[index][0]
+                                if index == 0:
+                                    velocity = self._prefetched[index][1]
+                                else:
+                                    velocity = (p - self._prefetched[index - 1][0]) / INTERVAL
+                                target = self._prefetched[index + 1][0] - p
+                                gpu[index] = (
+                                    torch.as_tensor(p, dtype=torch.float32, device="cuda:0"),
+                                    torch.as_tensor(velocity, dtype=torch.float32, device="cuda:0"),
+                                    torch.as_tensor(target, dtype=torch.float32, device="cuda:0"),
+                                )
+                            cached["gpu"] = gpu
+                        self._gpu_prefetched = gpu
         except BaseException:
             self.close()
             raise
 
     def canonical_state(self, index):
+        if self._prefetched is not None:
+            try:
+                p, v, mass, bracket = self._prefetched[index]
+            except KeyError as error:
+                raise ValueError("canonical frame outside the fixed qualified grid") from error
+            return dict(position=p, native_velocity=v, mass=mass,
+                        native_bracket_s=list(bracket))
         if index in self.canonical:
             self.canonical.move_to_end(index)
             return self.canonical[index]
@@ -297,6 +455,12 @@ class _Reference(CachedSource):
         while len(self.canonical) > 2:
             self.canonical.popitem(last=False)
         return state
+
+    def gpu_batch(self, index):
+        if (not _GPU_CACHE_ACTIVE or self._gpu_prefetched is None
+                or index not in self._gpu_prefetched):
+            return None
+        return self._gpu_prefetched[index]
 
 
 class QualifiedF3Loader:
@@ -370,6 +534,13 @@ class QualifiedF3Loader:
         row = self._case(case_id, optimization=optimization)
         frame = self._frame(frame)
         reference = self._open(case_id)
+        gpu_batch = reference.gpu_batch(frame)
+        if gpu_batch is not None:
+            position, velocity, _ = gpu_batch
+            return dict(position=position, velocity=velocity,
+                        particle_id=reference.ids, time_s=float(self.times[frame]),
+                        interval_s=INTERVAL, dp_m=self.contract["production_resolution_m"],
+                        amplitude=row["drive_amplitude"], control=self._control)
         previous = reference.canonical_state(frame - 1) if frame else None
         current = reference.canonical_state(frame)
         velocity = (current["native_velocity"] if previous is None
@@ -388,6 +559,9 @@ class QualifiedF3Loader:
         self._case(case_id, optimization=optimization)
         frame = self._frame(frame)
         reference = self._open(case_id)
+        gpu_batch = reference.gpu_batch(frame)
+        if gpu_batch is not None:
+            return gpu_batch[2]
         current = reference.canonical_state(frame)["position"]
         following = reference.canonical_state(frame + 1)["position"]
         return following - current

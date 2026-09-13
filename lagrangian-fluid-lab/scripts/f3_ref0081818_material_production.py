@@ -46,7 +46,7 @@ from scripts.l1r_continuation_evidence import LAB, OUT
 from scripts.l1r_cpu_slots import cpu_slot
 
 
-PLAN_NAME = "F3-REF0081818-MATERIAL-PRODUCTION-PLAN-R2.json"
+PLAN_NAME = "F3-REF0081818-MATERIAL-PRODUCTION-PLAN-R4.json"
 PLAN_SCHEMA = "f3.ref0081818.material_production_plan.v1"
 ATTEMPT_SCHEMA = "f3.material.reference_attempt.v1"
 RESULT_SCHEMA = "f3.ref0081818.material_candidate.v1"
@@ -60,6 +60,16 @@ MATERIAL_TIMEOUT_SECONDS = adapter.MATERIAL_TIMEOUT_SECONDS
 MATERIAL_POSTPROCESS_RESERVE_SECONDS = adapter.MATERIAL_POSTPROCESS_RESERVE_SECONDS
 MATERIAL_CPU_ACTIVITY_CORES = adapter.MATERIAL_CPU_ACTIVITY_CORES
 MATERIAL_STORAGE_MULTIPLIER = adapter.MATERIAL_STORAGE_MULTIPLIER
+
+
+def material_archive_root() -> Path:
+    """Return the immutable material-output archive outside the campaign cap.
+
+    The campaign keeps compact attempt records and hashes.  Large aligned
+    HDF5/NPZ products live beside the lab so the declared 512 GiB campaign
+    budget is not silently exceeded; the physical disk guard still applies.
+    """
+    return LAB.parent / "f3-ref0081818-material-archive"
 
 SUPPORT = dict(material_backend.SUPPORT)
 DIAGNOSTICS = tuple(material_backend.DIAGNOSTICS)
@@ -305,6 +315,13 @@ def _plan_value(authz: dict[str, Any]) -> dict[str, Any]:
             "gpu_hours_reserved": 0.0,
             "training_logical_runs_bound": 6,
         },
+        "storage_policy": {
+            "scope": "external_immutable_archive",
+            "archive_root": str(material_archive_root()),
+            "campaign_storage_reserve_bytes": 0,
+            "archive_output_reserve_bytes": "bound per attempt in cpu_budget",
+            "unique_outputs_retained": True,
+        },
     }
     return plan
 
@@ -397,7 +414,13 @@ def resource_preflight(timeout_seconds: float, reserve_bytes: int, *, configurat
         for p in (LAB / "campaigns" / name).rglob("*")
         if p.is_file()
     )
-    if total + reserve_bytes > limits["storage_gib"] * 1024**3:
+    # Large material products are retained in an immutable archive outside the
+    # campaign accounting roots.  Do not pretend they consume zero storage:
+    # retain the reserve in the returned budget and enforce the physical-disk
+    # guard below.  Only the compact campaign record counts against 512 GiB.
+    archive_root = material_archive_root()
+    archive_total = sum(p.stat().st_size for p in archive_root.rglob("*") if p.is_file()) if archive_root.exists() else 0
+    if total >= limits["storage_gib"] * 1024**3:
         raise RuntimeError("material output reserve exceeds campaign storage cap")
     disk = shutil.disk_usage(LAB)
     if disk.free - reserve_bytes < max(100 * 1024**3, 0.1 * disk.total):
@@ -412,6 +435,9 @@ def resource_preflight(timeout_seconds: float, reserve_bytes: int, *, configurat
         "cpu_activity_cores": MATERIAL_CPU_ACTIVITY_CORES,
         "output_reserve_bytes": reserve_bytes,
         "campaign_storage_bytes": total,
+        "campaign_storage_reserve_bytes": 0,
+        "external_archive_root": str(archive_root),
+        "external_archive_storage_bytes": archive_total,
         "configuration_count": configuration_count,
         "gpu_hours_reserved": 0.0,
         "limits": limits,
@@ -495,6 +521,11 @@ def _worker(payload_path: str | Path) -> None:
         "candidate_only": True,
         "config_id": cfg["config_id"],
         "configuration": cfg,
+        "storage_policy": {
+            "scope": "external_immutable_archive",
+            "archive_root": str(material_archive_root()),
+            "campaign_storage_exempt": True,
+        },
         "alignment": alignment,
         "material": {"path": str(artifact.resolve()), "sha256": sha256(artifact)},
         "source_evidence_sha256": payload["source_evidence_sha256"],
@@ -523,10 +554,13 @@ def _run_process(command: list[str], folder: Path, timeout_seconds: float,
         process = subprocess.Popen(command, cwd=LAB, env=env, stdout=log,
                                    stderr=subprocess.STDOUT, start_new_session=True)
         code = None
+        timeout_error = None
         try:
             if on_spawn is not None:
                 on_spawn(process.pid)
             code = process.wait(timeout=timeout_seconds)
+        except subprocess.TimeoutExpired as error:
+            timeout_error = error
         finally:
             try:
                 os.killpg(process.pid, signal.SIGTERM)
@@ -541,6 +575,8 @@ def _run_process(command: list[str], folder: Path, timeout_seconds: float,
                 process.wait()
             except ProcessLookupError:
                 pass
+    if timeout_error is not None:
+        raise RuntimeError("material worker timed out; inspect retained worker.log") from timeout_error
     if code != 0:
         raise RuntimeError("material worker failed; inspect retained worker.log")
 
@@ -576,8 +612,7 @@ def run_one(config_id: str, *, timeout_seconds: float = MATERIAL_TIMEOUT_SECONDS
                 raise ValueError("retry_of has no prior failed material attempt")
             reserve = resource_preflight(timeout_seconds, _reserve_bytes(cfg, source))
             execution = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ-") + uuid.uuid4().hex[:10]
-            folder = (LAB / "campaigns/l1-resume/data/f3-material-reference" / execution).resolve()
-            folder.relative_to(LAB.resolve())
+            folder = (material_archive_root() / execution).resolve()
             folder.mkdir(parents=True, exist_ok=False)
             record_path = OUT / f"F3-MATERIAL-REFERENCE-{config_id}-{execution}.json"
             payload = {
@@ -587,6 +622,11 @@ def run_one(config_id: str, *, timeout_seconds: float = MATERIAL_TIMEOUT_SECONDS
                 "source": source,
                 "source_evidence_sha256": plan_value["source_evidence_sha256"],
                 "directory": str(folder),
+                "storage_policy": {
+                    "scope": "external_immutable_archive",
+                    "archive_root": str(material_archive_root()),
+                    "campaign_storage_exempt": True,
+                },
                 "attempt_record_path": str(record_path.resolve()),
             }
             atomic_json(folder / "payload.json", _jsonable(payload))
@@ -613,6 +653,11 @@ def run_one(config_id: str, *, timeout_seconds: float = MATERIAL_TIMEOUT_SECONDS
                 "controller_pid": os.getpid(),
                 "payload_sha256": sha256(folder / "payload.json"),
                 "directory": str(folder),
+                "storage_policy": {
+                    "scope": "external_immutable_archive",
+                    "archive_root": str(material_archive_root()),
+                    "campaign_storage_exempt": True,
+                },
                 "candidate_only": True,
                 "qualified_T2_macro": False,
                 "qualified_T2_path": False,

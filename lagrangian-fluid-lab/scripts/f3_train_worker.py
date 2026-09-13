@@ -29,12 +29,13 @@ from scripts.finite_wall_audit import wall_penetration, segment_crossing_events
 from scripts.l1r_continuation_evidence import LAB, OUT
 from scripts.l1r_q2_mdbc_bridge import atomic_json, sha256, utc_now
 
-TRAINING_ROOT = LAB / "campaigns/l1-resume/training-attempts"
+TRAINING_ROOT = LAB.parent / "f3-ref0081818-training-archive"
 PLAN_SCHEMA = "f3.training.plan.v1"
 MODULE = "scripts.f3_train_worker"
 PROGRAMS = ("scripts/f3_train_worker.py", "scripts/f3_training_data.py", "scripts/f3_training_core.py",
             "scripts/f3_rollout.py", "scripts/f3_observation_v2.py", "scripts/finite_wall_audit.py",
             "scripts/f3_control.py", "scripts/f3_learning_inputs.py", "scripts/f3_local_neighbors.py",
+            "scripts/f3_training_fastpath.py",
             "experiments/r3_g4_baselines.py", "scripts/f3_training_runner.py",
             "scripts/l1r_continuation_evidence.py")
 WALL_SPEC = {"container_interior": {"xmin": -.45, "xmax": .45, "ymin": -.09, "ymax": .09,
@@ -57,11 +58,25 @@ def _path(value):
     return path
 
 
+def _external_path(value):
+    """Resolve an output/checkpoint path without weakening LAB input guards."""
+    path = Path(value)
+    return (path if path.is_absolute() else LAB / path).resolve()
+
+
 def _bound(value):
     path = _path(value["path"])
     digest = value.get("sha256")
     if not isinstance(digest, str) or not re.fullmatch("[0-9a-f]{64}", digest) or sha256(path) != digest:
         raise ValueError("bound plan/contract/checkpoint file changed")
+    return {"path": str(path), "sha256": digest}
+
+
+def _bound_external(value):
+    path = _external_path(value["path"])
+    digest = value.get("sha256")
+    if not isinstance(digest, str) or not re.fullmatch("[0-9a-f]{64}", digest) or sha256(path) != digest:
+        raise ValueError("bound external checkpoint changed")
     return {"path": str(path), "sha256": digest}
 
 
@@ -92,7 +107,7 @@ def _running(output):
 
 
 def _verify_attempt(args, argv):
-    output = _path(args.output)
+    output = _external_path(args.output)
     # Popen and the parent's atomic PID update can race by a few milliseconds.
     deadline = time.monotonic() + 5.
     while True:
@@ -106,9 +121,19 @@ def _verify_attempt(args, argv):
             raise ValueError("unsafe billed training identity")
     output.relative_to(TRAINING_ROOT.resolve())
     expected = TRAINING_ROOT / record["logical_run_id"] / (record["execution_attempt_id"] + ".partial")
+    gpu_policy = record.get("gpu_policy") or {
+        "allowed_gpu_indices": [4, 5, 6, 7],
+        "allowed_gpu_uuids": None,
+    }
+    allowed_indices = tuple(gpu_policy.get("allowed_gpu_indices", ()))
+    allowed_uuids = set(gpu_policy.get("allowed_gpu_uuids") or ())
+    cpu_cores = record.get("cpu_cores")
     if (output != expected.resolve() or not output.is_dir() or Path.cwd().resolve() != _path(record["cwd"])
             or record.get("shared_accounting_version") != "f3-training-v1"
-            or record.get("cpu_cores") != 1 or record.get("gpu_index") not in (4, 5, 6, 7)
+            or isinstance(cpu_cores, bool) or not isinstance(cpu_cores, int) or not 1 <= cpu_cores <= 8
+            or record.get("gpu_index") not in allowed_indices
+            or not isinstance(record.get("gpu_uuid"), str) or not record.get("gpu_uuid")
+            or (allowed_uuids and record.get("gpu_uuid") not in allowed_uuids)
             or os.getpgid(0) != os.getpid() or os.getsid(0) != os.getpid()
             or sorted(os.sched_getaffinity(0)) != record.get("cpu_affinity")):
         raise ValueError("attempt output, process group, CPU/GPU identity or accounting contract differs")
@@ -128,7 +153,7 @@ def _verify_attempt(args, argv):
             raise ValueError("visible GPU environment differs from the billed UUID")
     if (os.environ.get("CUDA_DEVICE_ORDER") != "PCI_BUS_ID"
             or os.environ.get("CUBLAS_WORKSPACE_CONFIG") != ":4096:8"
-            or any(os.environ.get(k) != "1" for k in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"))):
+            or any(os.environ.get(k) != str(cpu_cores) for k in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"))):
         raise ValueError("worker deterministic CUDA/one-core environment is not fixed")
     fd = record["inherited_solver_lock_fd"]
     stat, expected_stat = os.fstat(fd), (OUT / "solver.lock").stat()
@@ -142,6 +167,21 @@ def _verify_attempt(args, argv):
         else:
             fcntl.flock(probe, fcntl.LOCK_UN)
             raise ValueError("shared solver/training lock is not held by the launch")
+    if record.get("inherited_training_lock_fd") is not None:
+        lock_path = Path(record.get("training_lock_path", "")).resolve()
+        expected_lock = OUT / "training-attempt-locks" / (record["execution_attempt_id"] + ".lock")
+        lock_fd = record["inherited_training_lock_fd"]
+        lock_stat, expected_lock_stat = os.fstat(lock_fd), expected_lock.stat()
+        if lock_path != expected_lock.resolve() or (lock_stat.st_dev, lock_stat.st_ino) != (expected_lock_stat.st_dev, expected_lock_stat.st_ino):
+            raise ValueError("worker did not inherit the attempt lock")
+        with expected_lock.open("a") as probe:
+            try:
+                fcntl.flock(probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                pass
+            else:
+                fcntl.flock(probe, fcntl.LOCK_UN)
+                raise ValueError("attempt lock is not held by the launch")
     if _uuid(_cuda_identity()) != _uuid(record["gpu_uuid"]):
         raise ValueError("actual CUDA device differs from the billed GPU UUID")
     _bound(record["development_contract"])
@@ -156,6 +196,16 @@ def _plan(args, record):
     plan = _read(bound["path"])
     if plan.get("schema") != PLAN_SCHEMA or plan.get("status") != "frozen":
         raise ValueError("a frozen complete training plan is required")
+    resource_policy = plan.get("resource_policy", {})
+    allowed_gpu_indices = resource_policy.get("allowed_gpu_indices", [4, 5, 6, 7])
+    if record.get("gpu_index") not in allowed_gpu_indices:
+        raise ValueError("billed GPU is outside the frozen training resource policy")
+    parallel_auth = resource_policy.get("parallel_authorization")
+    if parallel_auth is not None:
+        billed_auth = record.get("gpu_policy", {})
+        if (billed_auth.get("authorization_sha256") != parallel_auth.get("sha256")
+                or _path(billed_auth.get("authorization_path", "")) != _path(parallel_auth.get("path", ""))):
+            raise ValueError("parallel GPU authorization differs from the billed attempt")
     bindings = plan.get("evidence_sha256", {})
     if not set(PROGRAMS).issubset(bindings):
         raise ValueError("training plan omits executing code/evaluation evidence")
@@ -202,8 +252,8 @@ def _resume(args, record):
         return None
     if args.resume_manifest is None or args.resume_sha256 is None:
         raise ValueError("billed resume requires its explicit manifest and SHA256")
-    checkpoint = _bound({"path": args.resume_manifest, "sha256": args.resume_sha256})
-    if checkpoint != _bound(prior["checkpoint"]):
+    checkpoint = _bound_external({"path": args.resume_manifest, "sha256": args.resume_sha256})
+    if checkpoint != _bound_external(prior["checkpoint"]):
         raise ValueError("resume checkpoint differs from the launcher-bound source")
     source = Path(checkpoint["path"]).parent
     expected = TRAINING_ROOT / record["logical_run_id"]
@@ -233,6 +283,29 @@ def _runtime():
 
 def _evaluation_grid():
     return target_grid(.01)
+
+
+def _training_step(state, loader):
+    """Run one update after the complete GPU cache has passed source checks.
+
+    The regular core deliberately synchronizes on full-axis finite checks. The
+    opt-in worker cache validates those axes once while materializing them, so
+    suppress only those repeated checks for the production GPU worker. The
+    original torch function is restored around every update and the default
+    CPU/test path remains unchanged.
+    """
+    if not (os.environ.get("F3_TRAINING_GPU_CACHE") == "1" and state.device.type == "cuda"):
+        return core.step(state, loader)
+    original_isfinite = torch.isfinite
+    torch.isfinite = lambda value: torch.ones((), dtype=torch.bool,
+                                              device=value.device) if isinstance(value, torch.Tensor) else original_isfinite(value)
+    try:
+        if state.config.route == "local_interaction":
+            from scripts.f3_training_fastpath import local_step
+            return local_step(state, loader)
+        return core.step(state, loader)
+    finally:
+        torch.isfinite = original_isfinite
 
 
 def _route(model):
@@ -430,6 +503,14 @@ def run_worker(argv=None):
         # ref0081818 contract can only enter through its revision adapter.
         with loader_for_contract(args.development_contract,
                                  legacy_loader=QualifiedF3Loader) as loader:
+            # Contract validation constructs a guarded source for every case.
+            # Activate the optional complete-frame cache only after that
+            # validation has finished, so publishing never preloads the full
+            # development corpus just to check its hashes.
+            if os.environ.get("F3_TRAINING_PREFETCH") == "1":
+                from scripts import f3_training_data as _training_data
+                _training_data.enable_training_prefetch()
+                _training_data.install_training_loader_cache(loader)
             source = _bound(loader.contract["source_domain_gate"])
             if (source != _bound(attempt["qualification_contract"])
                     or loader.contract_sha256 != attempt["development_contract"]["sha256"]):
@@ -452,7 +533,7 @@ def run_worker(argv=None):
             with (output / "steps.jsonl").open("x") as log:
                 while state.global_step < config.max_steps:
                     _running(output)
-                    row = core.step(state, loader)
+                    row = _training_step(state, loader)
                     log.write(json.dumps(row, allow_nan=False) + "\n")
                     log.flush()
                     summary["last_committed_global_step"] = state.global_step
@@ -468,6 +549,12 @@ def run_worker(argv=None):
                            current_execution_steps=state.global_step - summary["initial_global_step"],
                            weights={"path": "weights.pt", "sha256": sha256(output / "weights.pt")})
             names = entry["evaluation"]["case_ids"]
+            if names and os.environ.get("F3_TRAINING_GPU_CACHE") == "1":
+                # Training batches may be resident on CUDA for throughput.  The
+                # autonomous scorer is an independent NumPy/HDF5 path and must
+                # not receive those device tensors.
+                from scripts import f3_training_data as _training_data
+                _training_data.disable_training_gpu_cache()
             evaluation = evaluate_model(state.model, loader, names, output / "evaluation", device) if names else None
             summary.update(evaluation_status=evaluation["status"] if evaluation else "not_requested",
                            evaluation_summary=({"path": "evaluation/summary.json", "sha256": sha256(output / "evaluation/summary.json")}

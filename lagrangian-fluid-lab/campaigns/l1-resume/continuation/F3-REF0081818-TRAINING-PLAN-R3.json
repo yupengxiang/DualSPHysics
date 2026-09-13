@@ -1,0 +1,523 @@
+{
+  "schema": "f3.training.plan.v1",
+  "status": "frozen",
+  "recipe_id": "F3_CELL3_NS_visco1_native_nopen_revision075_ref0081818",
+  "scope": "ref0081818 actual-source training closure",
+  "qualification_contract": {
+    "path": "campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json",
+    "sha256": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4"
+  },
+  "development_contract": {
+    "path": "campaigns/l1-resume/continuation/F3-REF0081818-TRAINING-DEVELOPMENT-FULL.json",
+    "sha256": "61a1a56f53bebe7edae6955b0469e4ee9cd1750b7388755c9d43d0407a0390db"
+  },
+  "development_contract_sha256": "61a1a56f53bebe7edae6955b0469e4ee9cd1750b7388755c9d43d0407a0390db",
+  "routes": [
+    "particle_mlp",
+    "local_interaction"
+  ],
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "max_steps": 16384,
+  "checkpoint_steps": [
+    4096,
+    8192,
+    16384
+  ],
+  "train_case_count": 16,
+  "evaluation_case_count": 16,
+  "evaluation_semantics": "all validation and public development test cases; fixed final step; no test-based selection",
+  "resource_policy": {
+    "allowed_gpu_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "max_concurrent_training_runs": 1,
+    "training_attempt_budget": 12,
+    "planned_primary_runs": 6,
+    "reserved_recovery_attempts": 6
+  },
+  "storage_policy": {
+    "scope": "external_immutable_archive",
+    "archive_root": "/home/jade/Projects/DualSPHysics/f3-ref0081818-training-archive",
+    "campaign_storage_exempt": true,
+    "artifact_manifest": "per-attempt SHA-256 manifest excludes only attempt.json and itself",
+    "unique_outputs_retained": true
+  },
+  "evidence_sha256": {
+    "campaigns/l1-resume/continuation/F3-075-REF0081818-DEVELOPMENT-REGISTRY-RECONCILIATION.json": "e6a9cc4350ace93eeb040682f6a0b06873458bb9ecf7a0f101c65a1d047a7582",
+    "campaigns/l1-resume/continuation/F3-075-REF0081818-DOWNSTREAM-AUTHORIZATION.json": "b1c83c59d8cbb8afae9940b36bf2e1a03129eca74f50de29d9c6303985e5b70f",
+    "campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4",
+    "campaigns/l1-resume/continuation/F3-REF0081818-TRAINING-DEVELOPMENT-FULL.json": "61a1a56f53bebe7edae6955b0469e4ee9cd1750b7388755c9d43d0407a0390db",
+    "experiments/r3_g4_baselines.py": "fe2ea1f9063918217f33841ec4b0ef960564ca2c1dcdc8a3742a76f17a8d1b85",
+    "scripts/f3_control.py": "36d03cb360a221bc5eea75f15c6a4e5a68fdc5bb7db417d07729e1408a9f2420",
+    "scripts/f3_learning_inputs.py": "a4f2b7239e825033e150e4e0f4746ad3e838b1b04aa902b44944edf8a60e03dc",
+    "scripts/f3_local_neighbors.py": "4e3d3cffe0be276ba9ceec9541375592293b4c64718a7536313544e4ad63f3dd",
+    "scripts/f3_observation_v2.py": "8ddcd646a398132aea8c0a8f6d3de4ff87bec61e1cf2ffdf01acebcac8134f04",
+    "scripts/f3_ref0081818_training_plan.py": "8fe1136d643f6477ed1dd48fbfd1a5cca073fbf6fd58753381d6a5e09b07e252",
+    "scripts/f3_rollout.py": "46cab5cdc0b6f683a12e63c1473948fe38c0e906f10e53f494c867f35277306f",
+    "scripts/f3_train_worker.py": "3f5740c20dc62e004e1e6e7f06e743b5668def56f1e348990f0fb095559c726c",
+    "scripts/f3_training_core.py": "618a38aef1c6f04bdae4679b25fb2ea1439d142263c39b30166eb0cddc2075a6",
+    "scripts/f3_training_data.py": "ca5009d26f1b896c9b9fa362111c16ad2575afe614b911786290291c6c0037d2",
+    "scripts/f3_training_runner.py": "a0a3457ec78127f1f68a54da479705b5e85ec81487124725905b20cdc50950b6",
+    "scripts/finite_wall_audit.py": "18bfdfcfe4c975366a4356797cdbfee0f2645a7b32a61ada0357c4d0fb914e19",
+    "scripts/l1r_continuation_evidence.py": "cb978f4571a04452cac1c1935573bede3a7128c356e84839248d2ac6c75df2d9"
+  },
+  "entries": [
+    {
+      "logical_run_id": "REF0081818-particle_mlp-seed17",
+      "config": {
+        "route": "particle_mlp",
+        "seed": 17,
+        "max_steps": 16384,
+        "hidden": 128,
+        "learning_rate": 0.001,
+        "weight_decay": 0.01,
+        "max_targets": 256,
+        "shuffle": true,
+        "dtype": "float32",
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "validation_patience": null,
+        "validation_min_delta": 0.0
+      },
+      "checkpoint_steps": [
+        4096,
+        8192,
+        16384
+      ],
+      "qualification_contract": {
+        "path": "campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json",
+        "sha256": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4"
+      },
+      "development_contract": {
+        "path": "campaigns/l1-resume/continuation/F3-REF0081818-TRAINING-DEVELOPMENT-FULL.json",
+        "sha256": "61a1a56f53bebe7edae6955b0469e4ee9cd1750b7388755c9d43d0407a0390db"
+      },
+      "evaluation": {
+        "selection": "fixed_final_step_no_selection",
+        "case_ids": [
+          "F3_DEV_00_a0p903125",
+          "F3_DEV_01_a0p909375",
+          "F3_DEV_02_a0p915625",
+          "F3_DEV_03_a0p921875",
+          "F3_DEV_04_a0p928125",
+          "F3_DEV_05_a0p934375",
+          "F3_DEV_08_a0p953125",
+          "F3_DEV_13_a0p984375",
+          "F3_DEV_18_a1p015625",
+          "F3_DEV_23_a1p046875",
+          "F3_DEV_26_a1p065625",
+          "F3_DEV_27_a1p071875",
+          "F3_DEV_28_a1p078125",
+          "F3_DEV_29_a1p084375",
+          "F3_DEV_30_a1p090625",
+          "F3_DEV_31_a1p096875"
+        ],
+        "validation_case_ids": [
+          "F3_DEV_08_a0p953125",
+          "F3_DEV_13_a0p984375",
+          "F3_DEV_18_a1p015625",
+          "F3_DEV_23_a1p046875"
+        ],
+        "public_test_case_ids": [
+          "F3_DEV_00_a0p903125",
+          "F3_DEV_01_a0p909375",
+          "F3_DEV_02_a0p915625",
+          "F3_DEV_03_a0p921875",
+          "F3_DEV_04_a0p928125",
+          "F3_DEV_05_a0p934375",
+          "F3_DEV_26_a1p065625",
+          "F3_DEV_27_a1p071875",
+          "F3_DEV_28_a1p078125",
+          "F3_DEV_29_a1p084375",
+          "F3_DEV_30_a1p090625",
+          "F3_DEV_31_a1p096875"
+        ]
+      }
+    },
+    {
+      "logical_run_id": "REF0081818-particle_mlp-seed29",
+      "config": {
+        "route": "particle_mlp",
+        "seed": 29,
+        "max_steps": 16384,
+        "hidden": 128,
+        "learning_rate": 0.001,
+        "weight_decay": 0.01,
+        "max_targets": 256,
+        "shuffle": true,
+        "dtype": "float32",
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "validation_patience": null,
+        "validation_min_delta": 0.0
+      },
+      "checkpoint_steps": [
+        4096,
+        8192,
+        16384
+      ],
+      "qualification_contract": {
+        "path": "campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json",
+        "sha256": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4"
+      },
+      "development_contract": {
+        "path": "campaigns/l1-resume/continuation/F3-REF0081818-TRAINING-DEVELOPMENT-FULL.json",
+        "sha256": "61a1a56f53bebe7edae6955b0469e4ee9cd1750b7388755c9d43d0407a0390db"
+      },
+      "evaluation": {
+        "selection": "fixed_final_step_no_selection",
+        "case_ids": [
+          "F3_DEV_00_a0p903125",
+          "F3_DEV_01_a0p909375",
+          "F3_DEV_02_a0p915625",
+          "F3_DEV_03_a0p921875",
+          "F3_DEV_04_a0p928125",
+          "F3_DEV_05_a0p934375",
+          "F3_DEV_08_a0p953125",
+          "F3_DEV_13_a0p984375",
+          "F3_DEV_18_a1p015625",
+          "F3_DEV_23_a1p046875",
+          "F3_DEV_26_a1p065625",
+          "F3_DEV_27_a1p071875",
+          "F3_DEV_28_a1p078125",
+          "F3_DEV_29_a1p084375",
+          "F3_DEV_30_a1p090625",
+          "F3_DEV_31_a1p096875"
+        ],
+        "validation_case_ids": [
+          "F3_DEV_08_a0p953125",
+          "F3_DEV_13_a0p984375",
+          "F3_DEV_18_a1p015625",
+          "F3_DEV_23_a1p046875"
+        ],
+        "public_test_case_ids": [
+          "F3_DEV_00_a0p903125",
+          "F3_DEV_01_a0p909375",
+          "F3_DEV_02_a0p915625",
+          "F3_DEV_03_a0p921875",
+          "F3_DEV_04_a0p928125",
+          "F3_DEV_05_a0p934375",
+          "F3_DEV_26_a1p065625",
+          "F3_DEV_27_a1p071875",
+          "F3_DEV_28_a1p078125",
+          "F3_DEV_29_a1p084375",
+          "F3_DEV_30_a1p090625",
+          "F3_DEV_31_a1p096875"
+        ]
+      }
+    },
+    {
+      "logical_run_id": "REF0081818-particle_mlp-seed43",
+      "config": {
+        "route": "particle_mlp",
+        "seed": 43,
+        "max_steps": 16384,
+        "hidden": 128,
+        "learning_rate": 0.001,
+        "weight_decay": 0.01,
+        "max_targets": 256,
+        "shuffle": true,
+        "dtype": "float32",
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "validation_patience": null,
+        "validation_min_delta": 0.0
+      },
+      "checkpoint_steps": [
+        4096,
+        8192,
+        16384
+      ],
+      "qualification_contract": {
+        "path": "campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json",
+        "sha256": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4"
+      },
+      "development_contract": {
+        "path": "campaigns/l1-resume/continuation/F3-REF0081818-TRAINING-DEVELOPMENT-FULL.json",
+        "sha256": "61a1a56f53bebe7edae6955b0469e4ee9cd1750b7388755c9d43d0407a0390db"
+      },
+      "evaluation": {
+        "selection": "fixed_final_step_no_selection",
+        "case_ids": [
+          "F3_DEV_00_a0p903125",
+          "F3_DEV_01_a0p909375",
+          "F3_DEV_02_a0p915625",
+          "F3_DEV_03_a0p921875",
+          "F3_DEV_04_a0p928125",
+          "F3_DEV_05_a0p934375",
+          "F3_DEV_08_a0p953125",
+          "F3_DEV_13_a0p984375",
+          "F3_DEV_18_a1p015625",
+          "F3_DEV_23_a1p046875",
+          "F3_DEV_26_a1p065625",
+          "F3_DEV_27_a1p071875",
+          "F3_DEV_28_a1p078125",
+          "F3_DEV_29_a1p084375",
+          "F3_DEV_30_a1p090625",
+          "F3_DEV_31_a1p096875"
+        ],
+        "validation_case_ids": [
+          "F3_DEV_08_a0p953125",
+          "F3_DEV_13_a0p984375",
+          "F3_DEV_18_a1p015625",
+          "F3_DEV_23_a1p046875"
+        ],
+        "public_test_case_ids": [
+          "F3_DEV_00_a0p903125",
+          "F3_DEV_01_a0p909375",
+          "F3_DEV_02_a0p915625",
+          "F3_DEV_03_a0p921875",
+          "F3_DEV_04_a0p928125",
+          "F3_DEV_05_a0p934375",
+          "F3_DEV_26_a1p065625",
+          "F3_DEV_27_a1p071875",
+          "F3_DEV_28_a1p078125",
+          "F3_DEV_29_a1p084375",
+          "F3_DEV_30_a1p090625",
+          "F3_DEV_31_a1p096875"
+        ]
+      }
+    },
+    {
+      "logical_run_id": "REF0081818-local_interaction-seed17",
+      "config": {
+        "route": "local_interaction",
+        "seed": 17,
+        "max_steps": 16384,
+        "hidden": 128,
+        "learning_rate": 0.001,
+        "weight_decay": 0.01,
+        "max_targets": 256,
+        "shuffle": true,
+        "dtype": "float32",
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "validation_patience": null,
+        "validation_min_delta": 0.0
+      },
+      "checkpoint_steps": [
+        4096,
+        8192,
+        16384
+      ],
+      "qualification_contract": {
+        "path": "campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json",
+        "sha256": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4"
+      },
+      "development_contract": {
+        "path": "campaigns/l1-resume/continuation/F3-REF0081818-TRAINING-DEVELOPMENT-FULL.json",
+        "sha256": "61a1a56f53bebe7edae6955b0469e4ee9cd1750b7388755c9d43d0407a0390db"
+      },
+      "evaluation": {
+        "selection": "fixed_final_step_no_selection",
+        "case_ids": [
+          "F3_DEV_00_a0p903125",
+          "F3_DEV_01_a0p909375",
+          "F3_DEV_02_a0p915625",
+          "F3_DEV_03_a0p921875",
+          "F3_DEV_04_a0p928125",
+          "F3_DEV_05_a0p934375",
+          "F3_DEV_08_a0p953125",
+          "F3_DEV_13_a0p984375",
+          "F3_DEV_18_a1p015625",
+          "F3_DEV_23_a1p046875",
+          "F3_DEV_26_a1p065625",
+          "F3_DEV_27_a1p071875",
+          "F3_DEV_28_a1p078125",
+          "F3_DEV_29_a1p084375",
+          "F3_DEV_30_a1p090625",
+          "F3_DEV_31_a1p096875"
+        ],
+        "validation_case_ids": [
+          "F3_DEV_08_a0p953125",
+          "F3_DEV_13_a0p984375",
+          "F3_DEV_18_a1p015625",
+          "F3_DEV_23_a1p046875"
+        ],
+        "public_test_case_ids": [
+          "F3_DEV_00_a0p903125",
+          "F3_DEV_01_a0p909375",
+          "F3_DEV_02_a0p915625",
+          "F3_DEV_03_a0p921875",
+          "F3_DEV_04_a0p928125",
+          "F3_DEV_05_a0p934375",
+          "F3_DEV_26_a1p065625",
+          "F3_DEV_27_a1p071875",
+          "F3_DEV_28_a1p078125",
+          "F3_DEV_29_a1p084375",
+          "F3_DEV_30_a1p090625",
+          "F3_DEV_31_a1p096875"
+        ]
+      }
+    },
+    {
+      "logical_run_id": "REF0081818-local_interaction-seed29",
+      "config": {
+        "route": "local_interaction",
+        "seed": 29,
+        "max_steps": 16384,
+        "hidden": 128,
+        "learning_rate": 0.001,
+        "weight_decay": 0.01,
+        "max_targets": 256,
+        "shuffle": true,
+        "dtype": "float32",
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "validation_patience": null,
+        "validation_min_delta": 0.0
+      },
+      "checkpoint_steps": [
+        4096,
+        8192,
+        16384
+      ],
+      "qualification_contract": {
+        "path": "campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json",
+        "sha256": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4"
+      },
+      "development_contract": {
+        "path": "campaigns/l1-resume/continuation/F3-REF0081818-TRAINING-DEVELOPMENT-FULL.json",
+        "sha256": "61a1a56f53bebe7edae6955b0469e4ee9cd1750b7388755c9d43d0407a0390db"
+      },
+      "evaluation": {
+        "selection": "fixed_final_step_no_selection",
+        "case_ids": [
+          "F3_DEV_00_a0p903125",
+          "F3_DEV_01_a0p909375",
+          "F3_DEV_02_a0p915625",
+          "F3_DEV_03_a0p921875",
+          "F3_DEV_04_a0p928125",
+          "F3_DEV_05_a0p934375",
+          "F3_DEV_08_a0p953125",
+          "F3_DEV_13_a0p984375",
+          "F3_DEV_18_a1p015625",
+          "F3_DEV_23_a1p046875",
+          "F3_DEV_26_a1p065625",
+          "F3_DEV_27_a1p071875",
+          "F3_DEV_28_a1p078125",
+          "F3_DEV_29_a1p084375",
+          "F3_DEV_30_a1p090625",
+          "F3_DEV_31_a1p096875"
+        ],
+        "validation_case_ids": [
+          "F3_DEV_08_a0p953125",
+          "F3_DEV_13_a0p984375",
+          "F3_DEV_18_a1p015625",
+          "F3_DEV_23_a1p046875"
+        ],
+        "public_test_case_ids": [
+          "F3_DEV_00_a0p903125",
+          "F3_DEV_01_a0p909375",
+          "F3_DEV_02_a0p915625",
+          "F3_DEV_03_a0p921875",
+          "F3_DEV_04_a0p928125",
+          "F3_DEV_05_a0p934375",
+          "F3_DEV_26_a1p065625",
+          "F3_DEV_27_a1p071875",
+          "F3_DEV_28_a1p078125",
+          "F3_DEV_29_a1p084375",
+          "F3_DEV_30_a1p090625",
+          "F3_DEV_31_a1p096875"
+        ]
+      }
+    },
+    {
+      "logical_run_id": "REF0081818-local_interaction-seed43",
+      "config": {
+        "route": "local_interaction",
+        "seed": 43,
+        "max_steps": 16384,
+        "hidden": 128,
+        "learning_rate": 0.001,
+        "weight_decay": 0.01,
+        "max_targets": 256,
+        "shuffle": true,
+        "dtype": "float32",
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "validation_patience": null,
+        "validation_min_delta": 0.0
+      },
+      "checkpoint_steps": [
+        4096,
+        8192,
+        16384
+      ],
+      "qualification_contract": {
+        "path": "campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json",
+        "sha256": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4"
+      },
+      "development_contract": {
+        "path": "campaigns/l1-resume/continuation/F3-REF0081818-TRAINING-DEVELOPMENT-FULL.json",
+        "sha256": "61a1a56f53bebe7edae6955b0469e4ee9cd1750b7388755c9d43d0407a0390db"
+      },
+      "evaluation": {
+        "selection": "fixed_final_step_no_selection",
+        "case_ids": [
+          "F3_DEV_00_a0p903125",
+          "F3_DEV_01_a0p909375",
+          "F3_DEV_02_a0p915625",
+          "F3_DEV_03_a0p921875",
+          "F3_DEV_04_a0p928125",
+          "F3_DEV_05_a0p934375",
+          "F3_DEV_08_a0p953125",
+          "F3_DEV_13_a0p984375",
+          "F3_DEV_18_a1p015625",
+          "F3_DEV_23_a1p046875",
+          "F3_DEV_26_a1p065625",
+          "F3_DEV_27_a1p071875",
+          "F3_DEV_28_a1p078125",
+          "F3_DEV_29_a1p084375",
+          "F3_DEV_30_a1p090625",
+          "F3_DEV_31_a1p096875"
+        ],
+        "validation_case_ids": [
+          "F3_DEV_08_a0p953125",
+          "F3_DEV_13_a0p984375",
+          "F3_DEV_18_a1p015625",
+          "F3_DEV_23_a1p046875"
+        ],
+        "public_test_case_ids": [
+          "F3_DEV_00_a0p903125",
+          "F3_DEV_01_a0p909375",
+          "F3_DEV_02_a0p915625",
+          "F3_DEV_03_a0p921875",
+          "F3_DEV_04_a0p928125",
+          "F3_DEV_05_a0p934375",
+          "F3_DEV_26_a1p065625",
+          "F3_DEV_27_a1p071875",
+          "F3_DEV_28_a1p078125",
+          "F3_DEV_29_a1p084375",
+          "F3_DEV_30_a1p090625",
+          "F3_DEV_31_a1p096875"
+        ]
+      }
+    }
+  ]
+}
