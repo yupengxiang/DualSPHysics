@@ -16,8 +16,11 @@ fails closed before any material-side operation can be attempted.
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import json
+import math
 from pathlib import Path
+import shutil
 import sys
 from typing import Any
 
@@ -40,6 +43,22 @@ HORIZON_S = 8.35
 OUTPUT_INTERVAL_S = 0.01
 CONTROL_DOMAIN = [0.9, 1.1]
 COORDINATE_FRAME = "fixed tank computational coordinates"
+DEVELOPMENT_REGISTRY_NAME = "F3-075-REF0081818-DEVELOPMENT-REGISTRY.json"
+DEVELOPMENT_CASE_COUNT = 32
+MATERIAL_TIMEOUT_SECONDS = 900.0
+MATERIAL_POSTPROCESS_RESERVE_SECONDS = 600.0
+MATERIAL_CPU_ACTIVITY_CORES = 17.6
+MATERIAL_STORAGE_MULTIPLIER = 1.1
+MATERIAL_AUTHORIZATION_FIELDS = (
+    "material_production_allowed",
+    "development_registry_path",
+    "development_registry_sha256",
+    "completed_case_count",
+    "approved_material_configuration_ids",
+    "resource_limits",
+    "owner_reply",
+    "approved_at_utc",
+)
 
 # These values are the prospective material definitions from the material
 # scorer.  Keeping an explicit copy here prevents a later edit to the legacy
@@ -93,7 +112,8 @@ def _verify_material_thresholds() -> dict[str, Any]:
     actual = dict(material_score.THRESHOLDS)
     if actual != NEW_MATERIAL_THRESHOLDS:
         raise ValueError("ref008 material thresholds differ from the registered definitions")
-    if any(not isinstance(value, (int, float)) or value < 0 for value in actual.values()):
+    if any(not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0
+           for value in actual.values()):
         raise ValueError("ref008 material thresholds must be finite nonnegative numbers")
     return actual
 
@@ -105,7 +125,7 @@ def _score_path(gate: dict[str, Any]) -> Path:
     return _path(relative)
 
 
-def verify_revision_gate(gate_path: str | Path | None = None) -> tuple[dict[str, Any], dict[str, Any], Path]:
+def verify_revision_gate(gate_path: str | Path | None = None, *, require_material: bool = True) -> tuple[dict[str, Any], dict[str, Any], Path]:
     """Return a passed material-enabled gate and its bound score report.
 
     ``material_production_allowed`` is checked independently from
@@ -117,7 +137,7 @@ def verify_revision_gate(gate_path: str | Path | None = None) -> tuple[dict[str,
     if (gate.get("schema") != GATE_SCHEMA or gate.get("status") != "passed"
             or gate.get("recipe_id") != RECIPE):
         raise PermissionError("a passed ref0081818 qualification gate is required")
-    if gate.get("material_production_allowed") is not True:
+    if require_material and gate.get("material_production_allowed") is not True:
         raise PermissionError("ref0081818 gate has not opted in to material production")
     if (gate.get("production_resolution_m") != PRODUCTION_DP_M
             or gate.get("reference_resolutions_m") != [preparation.DP, .0075, .006]
@@ -225,6 +245,8 @@ def verify_production_source(gate: dict[str, Any]) -> dict[str, Any]:
         "resolution_m": PRODUCTION_DP_M,
         "time_window_s": [0.0, HORIZON_S],
         "output_interval_s": OUTPUT_INTERVAL_S,
+        "frame_count": round(HORIZON_S / OUTPUT_INTERVAL_S) + 1,
+        "particle_axis_count": audit.get("particle_axis_count"),
         "initial_fluid_mass_kg": audit.get("initial_fluid_mass_kg"),
         "record": _fingerprint(record_path),
         "audit": _fingerprint(audit_path),
@@ -232,6 +254,139 @@ def verify_production_source(gate: dict[str, Any]) -> dict[str, Any]:
         "preflight": _fingerprint(preflight_path),
         "hdf5": _fingerprint(hdf5),
         "evidence": evidence,
+    }
+
+
+def verify_development_handoff() -> dict[str, Any]:
+    """Verify all independent ref008 development sources without launching.
+
+    The revision development verifier is deliberately used only as a
+    read-only source checker.  It checks each prepared/audit/solver record,
+    native asset hash and full-window hard audit; no budget or launch path is
+    entered here.
+    """
+    from scripts import f3_ref0081818_development as development
+
+    context = development._context(register=False)
+    registry = context.get("registry", {})
+    if (registry.get("schema") != "f3.ref0081818.development_registry.v1"
+            or registry.get("recipe_id") != RECIPE
+            or registry.get("resource_category") != "development"
+            or registry.get("production_source_case_id") != PRODUCTION_CASE
+            or registry.get("production_resolution_m") != PRODUCTION_DP_M
+            or registry.get("time_window_s") != [0.0, HORIZON_S]
+            or registry.get("output_interval_s") != OUTPUT_INTERVAL_S):
+        raise ValueError("ref008 development registry is not bound to the material recipe")
+    rows = registry.get("cases")
+    if not isinstance(rows, list) or len(rows) != DEVELOPMENT_CASE_COUNT:
+        raise ValueError("all 32 ref008 development cases are required before material work")
+    ids = [row.get("case_id") for row in rows]
+    if len(set(ids)) != DEVELOPMENT_CASE_COUNT or any(not isinstance(name, str) for name in ids):
+        raise ValueError("ref008 development case identities are incomplete")
+    for item in registry.get("evidence", []):
+        if not isinstance(item, dict) or not isinstance(item.get("path"), str):
+            raise ValueError("ref008 development registry evidence is malformed")
+        _assert_digest(_path(item["path"]), item.get("sha256", ""),
+                       "ref008 development registry evidence changed")
+    for case_id in ids:
+        development._verified_development(case_id, context)
+    registry_path = OUT / DEVELOPMENT_REGISTRY_NAME
+    return {
+        "status": "passed",
+        "case_count": DEVELOPMENT_CASE_COUNT,
+        "registry": _fingerprint(registry_path),
+        "case_ids": ids,
+        "resource_category": "development",
+        "solver_runs": DEVELOPMENT_CASE_COUNT,
+        "hard_audit_required": True,
+    }
+
+
+def required_post_development_opt_in(*, registry: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Describe the owner fields required before material registration.
+
+    This function only describes the future authorization record; it never
+    creates or modifies one.  The top-level gate flag remains the final
+    fail-closed switch.
+    """
+    registry_path = OUT / DEVELOPMENT_REGISTRY_NAME
+    registry_ref = _fingerprint(registry_path) if registry_path.is_file() else {
+        "path": _relative(registry_path), "sha256": None,
+    }
+    limits_path = OUT / "RESOURCE-LIMITS.json"
+    limits = _read(limits_path).get("limits", {}) if limits_path.is_file() else {}
+    return {
+        "required_fields": list(MATERIAL_AUTHORIZATION_FIELDS),
+        "material_production_allowed": True,
+        "development_registry_path": registry_ref["path"],
+        "development_registry_sha256": registry_ref["sha256"],
+        "completed_case_count": DEVELOPMENT_CASE_COUNT,
+        "approved_material_configuration_ids": [row["config_id"] for row in configurations()],
+        "resource_limits": {
+            "materials": limits.get("materials", 32),
+            "cpu_core_hours": limits.get("cpu_core_hours", 896),
+            "gpu_hours": limits.get("gpu_hours", 64),
+            "storage_gib": limits.get("storage_gib", 512),
+        },
+        "owner_reply": "required",
+        "approved_at_utc": "required",
+        "scope": "post-development material reference only; training remains blocked",
+    }
+
+
+def material_resource_preflight(source: dict[str, Any]) -> dict[str, Any]:
+    """Calculate the material reserve from the current ledger, read-only."""
+    ledger = _read(OUT / "RESOURCE-LEDGER.json")
+    limits_record = _read(OUT / "RESOURCE-LIMITS.json")
+    limits = limits_record.get("limits", {})
+    configs = configurations()
+    charged = int(ledger.get("material_configurations_used", 0))
+    requested = len(configs)
+    frames = [round(HORIZON_S / row["output_interval_s"]) + 1 for row in configs]
+    particle_count = int(source.get("particle_axis_count") or 0)
+    if particle_count <= 0:
+        raise ValueError("production source particle axis is unavailable")
+    per_output = [int(frame * (particle_count * 64 + 512 * 256) * MATERIAL_STORAGE_MULTIPLIER)
+                   for frame in frames]
+    cpu_per = ((MATERIAL_TIMEOUT_SECONDS + MATERIAL_POSTPROCESS_RESERVE_SECONDS)
+               * MATERIAL_CPU_ACTIVITY_CORES / 3600.)
+    cpu_total = requested * cpu_per
+    cpu_used = float(ledger.get("cpu_core_hours_upper_bound", 0.))
+    gpu_used = float(ledger.get("gpu_budget_charge_hours", 0.))
+    storage = sum(per_output)
+    remaining = {
+        "materials": int(limits.get("materials", 0)) - charged,
+        "cpu_core_hours": float(limits.get("cpu_core_hours", 0.)) - cpu_used,
+        "gpu_hours": float(limits.get("gpu_hours", 0.)) - gpu_used,
+    }
+    blockers = []
+    if charged + requested > int(limits.get("materials", 0)):
+        blockers.append("material configuration cap")
+    if cpu_used + cpu_total > float(limits.get("cpu_core_hours", 0.)):
+        blockers.append("CPU reserve")
+    if shutil.disk_usage(LAB).free < storage + 100 * 1024**3:
+        blockers.append("disk reserve")
+    expiry = ledger.get("conservative_expiry_utc")
+    if expiry and datetime.now(timezone.utc) >= datetime.fromisoformat(expiry):
+        blockers.append("campaign expiry")
+    return {
+        "status": "passed" if not blockers else "blocked",
+        "blockers": blockers,
+        "configuration_count": requested,
+        "material_configurations_used": charged,
+        "material_configurations_remaining_after_request": remaining["materials"] - requested,
+        "timeout_seconds_per_configuration": MATERIAL_TIMEOUT_SECONDS,
+        "cpu_core_hours_per_configuration": cpu_per,
+        "cpu_core_hours_total_reserve": cpu_total,
+        "cpu_core_hours_used": cpu_used,
+        "cpu_core_hours_remaining_before_request": remaining["cpu_core_hours"],
+        "gpu_hours_total_reserve": 0.0,
+        "gpu_hours_used": gpu_used,
+        "output_reserve_bytes_total": storage,
+        "output_reserve_gib_total": storage / 1024**3,
+        "output_reserve_bytes_by_configuration": dict(zip(
+            (row["config_id"] for row in configs), per_output)),
+        "expiry_utc": expiry,
     }
 
 
@@ -254,6 +409,10 @@ def plan() -> dict[str, Any]:
     """Build a read-only material handoff; no files are written."""
     gate, score, score_path = verify_revision_gate()
     source = verify_production_source(gate)
+    development = verify_development_handoff()
+    resource = material_resource_preflight(source)
+    if resource["status"] != "passed":
+        raise PermissionError("material resource preflight is blocked: " + ", ".join(resource["blockers"]))
     thresholds = _verify_material_thresholds()
     code = {
         "adapter_sha256": sha256(Path(__file__)),
@@ -273,6 +432,9 @@ def plan() -> dict[str, Any]:
         "qualification_gate": _fingerprint(_path(OUT / GATE_NAME)),
         "score_report": _fingerprint(score_path),
         "production_source": source,
+        "development_handoff": development,
+        "resource_preflight": resource,
+        "required_post_development_opt_in": required_post_development_opt_in(),
         "production_resolution_m": PRODUCTION_DP_M,
         "reference_resolutions_m": [preparation.DP, PRODUCTION_DP_M, .006],
         "time_window_s": [0.0, HORIZON_S],
@@ -293,17 +455,67 @@ def plan() -> dict[str, Any]:
     }
 
 
+def preflight() -> dict[str, Any]:
+    """Report material readiness without requiring opt-in or writing files."""
+    blockers = []
+    try:
+        gate, score, score_path = verify_revision_gate(require_material=False)
+    except (PermissionError, ValueError, KeyError, FileNotFoundError) as error:
+        return {"status": "blocked", "launch": False, "solver_runs": 0,
+                "material_configurations_charged": 0, "blockers": [str(error)],
+                "required_post_development_opt_in": required_post_development_opt_in()}
+    try:
+        source = verify_production_source(gate)
+    except (PermissionError, ValueError, KeyError, FileNotFoundError) as error:
+        blockers.append("production source: " + str(error))
+        source = None
+    try:
+        development = verify_development_handoff()
+    except (PermissionError, ValueError, KeyError, FileNotFoundError) as error:
+        blockers.append("development handoff: " + str(error))
+        development = {"status": "blocked"}
+    if gate.get("material_production_allowed") is not True:
+        blockers.append("gate.material_production_allowed is not true")
+    resource = None
+    if source is not None:
+        try:
+            resource = material_resource_preflight(source)
+            blockers.extend(resource["blockers"])
+        except (PermissionError, ValueError, KeyError, FileNotFoundError) as error:
+            blockers.append("resource preflight: " + str(error))
+    thresholds = None
+    try:
+        thresholds = _verify_material_thresholds()
+    except ValueError as error:
+        blockers.append("thresholds: " + str(error))
+    return {
+        "status": "ready" if not blockers else "blocked",
+        "launch": False,
+        "solver_runs": 0,
+        "material_configurations_charged": 0,
+        "recipe_id": RECIPE,
+        "qualification_gate": _fingerprint(_path(OUT / GATE_NAME)),
+        "score_report": _fingerprint(score_path),
+        "production_source": source,
+        "development_handoff": development,
+        "resource_preflight": resource,
+        "thresholds": thresholds,
+        "required_post_development_opt_in": required_post_development_opt_in(),
+        "blockers": blockers,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("plan",))
+    parser.add_argument("action", choices=("plan", "preflight"))
     args = parser.parse_args(argv)
     try:
-        value = plan()
+        value = plan() if args.action == "plan" else preflight()
     except (PermissionError, ValueError, KeyError, FileNotFoundError) as error:
         print(json.dumps({"status": "blocked", "reason": str(error)}, ensure_ascii=False))
         return 2
     print(json.dumps(value, indent=2, ensure_ascii=False))
-    return 0
+    return 0 if value.get("status") in {"ready", "ready_after_ref0081818_material_gate"} else 2
 
 
 if __name__ == "__main__":

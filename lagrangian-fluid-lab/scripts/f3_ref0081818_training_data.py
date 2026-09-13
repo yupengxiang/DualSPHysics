@@ -158,7 +158,10 @@ def _source(row, context, bindings):
     # predates an explicit source path field.  The revision development entry
     # point names the immutable vendor source; never infer it from a prepared
     # candidate directory.
-    source_drive = development.VENDOR_DRIVE
+    # The revision development entry point validates the immutable vendor
+    # forcing directly; keep the same path here without depending on a
+    # private constant that is not part of that adapter's public surface.
+    source_drive = LAB / "vendor/official/DualSPHysics_v5.4/examples/main/05_SloshingTank/CaseSloshingAccData.csv"
     if (preflight.get("source", {}).get("sha256") != context["manifest"]["source_drive_sha256"]
             or preflight.get("native_reader", {}).get("rows") != len(nominal)):
         raise ValueError("ref0081818 development source forcing is not the registered nominal control")

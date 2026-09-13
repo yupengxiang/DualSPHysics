@@ -1,0 +1,63 @@
+{
+  "schema": "f3.revision075.ref0081818.downstream_owner_authorization.v1",
+  "status": "owner_authorized",
+  "approved_at_utc": "2026-09-13T03:55:18.029932+00:00",
+  "owner_reply": "我批准",
+  "recipe_id": "F3_CELL3_NS_visco1_native_nopen_revision075_ref0081818",
+  "scope": "post-development material production and training closure",
+  "preflight": {
+    "path": "campaigns/l1-resume/continuation/F3-REF0081818-DOWNSTREAM-PREFLIGHT.json",
+    "sha256": "fd6cd2e243a3304a0d2e0a2b7e38e730875249b10fb049fbe9cf7e5e1ce19824"
+  },
+  "development_manifest": {
+    "path": "campaigns/l1-resume/continuation/F3-DEVELOPMENT-CANDIDATES.json",
+    "sha256": "67dc346fa16d663ace7ac555be75c780b1961b0a62f33c3e7b0308b4823e18b2"
+  },
+  "development_registry": {
+    "path": "campaigns/l1-resume/continuation/F3-075-REF0081818-DEVELOPMENT-REGISTRY.json",
+    "sha256": "de1ae056e79cfc7eca654d4418c15da4b9de0300035760c93adbcf40f6c99930"
+  },
+  "resource_limits": {
+    "cpu_core_hours": 896,
+    "gpu_hours": 64,
+    "qualification_attempts": 80,
+    "development_attempts": 40,
+    "material_configurations": 32,
+    "training_attempts": 12
+  },
+  "material": {
+    "allowed": true,
+    "configuration_ids": [
+      "REF008-0075-NOMINAL-s2",
+      "REF008-0075-NOMINAL-s4",
+      "REF008-0075-CADENCE-s4"
+    ],
+    "configuration_count": 3
+  },
+  "training": {
+    "allowed": true,
+    "routes": [
+      "particle_mlp",
+      "local_interaction"
+    ],
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "logical_run_count": 6,
+    "max_steps": 16384
+  },
+  "launch_policy": {
+    "allowed_gpu_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "max_concurrent_cfd_solvers": 1,
+    "max_concurrent_training_runs": 1,
+    "analysis_slots": 2
+  },
+  "note": "This record enables the two downstream gate flags only; formal material/model qualification remains false until measured results pass their own gates."
+}

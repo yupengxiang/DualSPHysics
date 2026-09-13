@@ -97,3 +97,64 @@ def test_material_configurations_are_production_bound_and_unqualified():
     assert {row["dp_m"] for row in rows} == {adapter.PRODUCTION_DP_M}
     assert {row["amplitude"] for row in rows} == {1.0}
     assert [row["output_interval_s"] for row in rows] == [.01, .01, .002]
+
+
+def test_post_development_opt_in_describes_owner_fields_without_writing(tmp_path, monkeypatch):
+    out = tmp_path / "continuation"
+    out.mkdir()
+    monkeypatch.setattr(adapter, "LAB", tmp_path)
+    monkeypatch.setattr(adapter, "OUT", out)
+    value = adapter.required_post_development_opt_in()
+    assert value["material_production_allowed"] is True
+    assert value["completed_case_count"] == 32
+    assert set(adapter.MATERIAL_AUTHORIZATION_FIELDS) == set(value["required_fields"])
+    assert not list(out.iterdir())
+
+
+def test_preflight_is_read_only_and_reports_material_gate_block(monkeypatch, tmp_path):
+    out = tmp_path / "continuation"
+    out.mkdir()
+    monkeypatch.setattr(adapter, "LAB", tmp_path)
+    monkeypatch.setattr(adapter, "OUT", out)
+    gate = {
+        "material_production_allowed": False,
+        "production_source_case_id": adapter.PRODUCTION_CASE,
+    }
+    score = {"status": "passed"}
+    score_path = tmp_path / "score.json"
+    score_path.write_text("score")
+    monkeypatch.setattr(adapter, "verify_revision_gate", lambda **_: (gate, score, score_path))
+    monkeypatch.setattr(adapter, "verify_production_source", lambda _: {"particle_axis_count": 2})
+    monkeypatch.setattr(adapter, "verify_development_handoff", lambda: {"status": "passed"})
+    monkeypatch.setattr(adapter, "material_resource_preflight", lambda _: {"status": "passed", "blockers": []})
+    monkeypatch.setattr(adapter, "_verify_material_thresholds", lambda: dict(adapter.NEW_MATERIAL_THRESHOLDS))
+    monkeypatch.setattr(adapter, "_fingerprint", lambda path: {"path": str(path), "sha256": "x" * 64})
+    value = adapter.preflight()
+    assert value["status"] == "blocked"
+    assert "gate.material_production_allowed is not true" in value["blockers"]
+    assert value["launch"] is False and value["solver_runs"] == 0
+    assert list(out.iterdir()) == []
+
+
+def test_material_resource_preflight_reserves_cpu_and_no_gpu(monkeypatch, tmp_path):
+    out = tmp_path / "continuation"
+    out.mkdir()
+    adapter.LAB = tmp_path
+    adapter.OUT = out
+    (out / "RESOURCE-LEDGER.json").write_text(json.dumps({
+        "material_configurations_used": 10,
+        "cpu_core_hours_upper_bound": 800.,
+        "gpu_budget_charge_hours": 15.,
+        "conservative_expiry_utc": "2099-01-01T00:00:00+00:00",
+    }))
+    (out / "RESOURCE-LIMITS.json").write_text(json.dumps({"limits": {
+        "materials": 32, "cpu_core_hours": 896, "gpu_hours": 64,
+    }}))
+    monkeypatch.setattr(adapter.shutil, "disk_usage",
+                        lambda _: type("Usage", (), {"free": 10**15})())
+    value = adapter.material_resource_preflight({"particle_axis_count": 34560})
+    assert value["status"] == "passed"
+    assert value["configuration_count"] == 3
+    assert value["gpu_hours_total_reserve"] == 0.
+    assert value["cpu_core_hours_total_reserve"] > 0
+    assert value["output_reserve_gib_total"] > 14.

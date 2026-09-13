@@ -46,7 +46,7 @@ from scripts.l1r_continuation_evidence import LAB, OUT
 from scripts.l1r_cpu_slots import cpu_slot
 
 
-PLAN_NAME = "F3-REF0081818-MATERIAL-PRODUCTION-PLAN.json"
+PLAN_NAME = "F3-REF0081818-MATERIAL-PRODUCTION-PLAN-R2.json"
 PLAN_SCHEMA = "f3.ref0081818.material_production_plan.v1"
 ATTEMPT_SCHEMA = "f3.material.reference_attempt.v1"
 RESULT_SCHEMA = "f3.ref0081818.material_candidate.v1"
@@ -628,7 +628,7 @@ def run_one(config_id: str, *, timeout_seconds: float = MATERIAL_TIMEOUT_SECONDS
                 LAGRANGIAN_TRACER_TORCH_THREADS="1", LAGRANGIAN_TRACER_TORCH_DEVICE="cpu",
             )
             command = [taskset, "--cpu-list", str(affinity), sys.executable, "-m",
-                       "scripts.f3_ref0081818_material_production", "--worker",
+                       "scripts.f3_ref0081818_material_production", "worker",
                        str(folder / "payload.json")]
             record["command"] = command
             atomic_json(record_path, record)
@@ -697,8 +697,8 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("config_id")
     run.add_argument("--retry-of")
     run.add_argument("--timeout-seconds", type=float, default=MATERIAL_TIMEOUT_SECONDS)
-    worker = sub.add_parser("worker")
-    worker.add_argument("payload", type=Path)
+    worker_parser = sub.add_parser("worker")
+    worker_parser.add_argument("payload", type=Path)
     args = parser.parse_args(argv)
     try:
         if args.action == "plan":
