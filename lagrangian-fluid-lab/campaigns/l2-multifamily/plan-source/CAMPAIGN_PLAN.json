@@ -1,0 +1,228 @@
+{
+  "schema": "sph.long_campaign.plan.v1",
+  "campaign_id": "L2_MULTI_FAMILY_QUALIFICATION",
+  "created_date": "2026-09-13",
+  "baseline_commit": "4b554e69d69245db4a6a6772b296cf256c142a16",
+  "owner_adoption_status": "pending",
+  "old_campaign_reopened": false,
+  "this_is_executable_runner": false,
+  "repo": "yupengxiang/DualSPHysics",
+  "branch": "codex/lagrangian-fluid-exploration",
+  "namespace": "lagrangian-fluid-lab/campaigns/l2-multifamily/",
+  "limits": {
+    "gpu_hours": 96,
+    "cpu_core_hours": 384,
+    "new_storage_gib": 1024,
+    "min_free_gib": 200,
+    "min_free_fraction": 0.2,
+    "lifetime_days_from_adoption": 10,
+    "qualification_solver_attempts": 80,
+    "development_solver_attempts": 160,
+    "training_attempts": 18,
+    "full_material_configurations": 24,
+    "concurrent_heavy_gpu_tasks": 4,
+    "concurrent_tasks_per_gpu": 2
+  },
+  "gpu_indices_proposed": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "soft_allocations": {
+    "qualification_solver": {
+      "known_F3_checks": 10,
+      "T2_source_sensitivity": 12,
+      "F1_F2": 24,
+      "F3_extension": 12,
+      "F4_F5_F6": 12,
+      "reserve": 10
+    },
+    "gpu_hours": {
+      "replay": 2,
+      "qualification": 40,
+      "material": 4,
+      "development": 24,
+      "training": 18,
+      "reserve": 8
+    },
+    "cpu_core_hours": {
+      "conversion_and_audit": 160,
+      "material": 128,
+      "learning_support": 32,
+      "reserve": 64
+    }
+  },
+  "training_success_is_data_gate": false,
+  "t2_success_is_t1_development_gate": false,
+  "public_release_authorized": false,
+  "hidden_test_generation_authorized": false,
+  "preserve_legacy": {
+    "F3_development_cases": 32,
+    "T1_gate": "registered_numerical_pass",
+    "T2_macro": false,
+    "T2_path": false,
+    "learned_evaluation_passed": 0,
+    "learned_case_runs": 96,
+    "independent_evaluation_cases": 16
+  },
+  "stages": [
+    {
+      "id": "A0",
+      "name": "F3 starter与原始回放",
+      "requires": [],
+      "independent_of": [
+        "B1",
+        "B2"
+      ],
+      "exit": "canonical manifest plus independent replay, or concrete input blocker"
+    },
+    {
+      "id": "A1",
+      "name": "模型失败归属与oracle对照",
+      "requires": [
+        "A0"
+      ],
+      "independent_of": [
+        "C0"
+      ],
+      "exit": "failure taxonomy across declared evaluation set"
+    },
+    {
+      "id": "B1",
+      "name": "T2 coverage/cost/reference",
+      "requires": [
+        "A0"
+      ],
+      "independent_of": [
+        "B2",
+        "C1",
+        "C2"
+      ],
+      "exit": "task-scoped T2 qualification or bounded evidence of failure"
+    },
+    {
+      "id": "B2",
+      "name": "代表性学习与混合消融",
+      "requires": [
+        "A0",
+        "A1"
+      ],
+      "independent_of": [
+        "B1",
+        "C1",
+        "C2"
+      ],
+      "exit": "valid seed-complete runs and failure-aware metrics, not model success required"
+    },
+    {
+      "id": "C0",
+      "name": "统一家族候选与前置核验",
+      "requires": [
+        "A0"
+      ],
+      "independent_of": [
+        "B1",
+        "B2"
+      ],
+      "exit": "frozen per-family hypotheses and controls"
+    },
+    {
+      "id": "C1",
+      "name": "F1/F2资格",
+      "requires": [
+        "C0"
+      ],
+      "independent_of": [
+        "B1",
+        "B2",
+        "C2",
+        "C3"
+      ],
+      "exit": "family-scoped recipe/range or bounded no-go"
+    },
+    {
+      "id": "C2",
+      "name": "F3三维几何与控制",
+      "requires": [
+        "C0"
+      ],
+      "independent_of": [
+        "B1",
+        "B2",
+        "C1",
+        "C3"
+      ],
+      "exit": "expanded F3 task/range decision"
+    },
+    {
+      "id": "C3",
+      "name": "F4/F5/F6有限锚点",
+      "requires": [
+        "C0"
+      ],
+      "independent_of": [
+        "B1",
+        "B2",
+        "C1",
+        "C2"
+      ],
+      "exit": "bounded capability map; optional budget priority lower"
+    },
+    {
+      "id": "D0",
+      "name": "逐家族条件式试产",
+      "requires": [
+        "A0"
+      ],
+      "runtime_gate": "at least one newly qualified T1 recipe/subdomain AND split/input gates",
+      "independent_of": [
+        "B1",
+        "B2",
+        "C3"
+      ],
+      "exit": "independent accepted/rejected cases; no compulsory count"
+    },
+    {
+      "id": "E0",
+      "name": "多家族候选与生产预演",
+      "requires": [
+        "A0",
+        "A1",
+        "B1",
+        "B2",
+        "C0",
+        "C1",
+        "C2",
+        "C3",
+        "D0"
+      ],
+      "dependency_policy": "evidence-complete branch outcomes accepted; not every science gate must pass",
+      "exit": "candidate product or all applicable bounded branches terminal or true resource stop"
+    }
+  ],
+  "stop_conditions": [
+    "declared product and terminal review completed",
+    "all applicable bounded branches evidence-complete or externally blocked",
+    "parent budget or lifetime reached",
+    "data/safety/authorization boundary requires owner"
+  ],
+  "not_stop_conditions": [
+    "checkpoint committed",
+    "one physics candidate failed",
+    "T2 not qualified",
+    "learned model failed wall criterion",
+    "one soft subquota exhausted"
+  ],
+  "dispatch_policy": {
+    "one_common_input_error_halts_cohort": true,
+    "recovery_canary_before_batch": true,
+    "soft_quota_reallocation_with_log": true,
+    "artifact_reuse_requires_full_recipe_and_hash_match": true,
+    "no_unscoped_vendor_writes": true
+  }
+}

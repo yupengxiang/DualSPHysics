@@ -1,0 +1,1027 @@
+{
+  "schema": "l2.b2.learning_baseline.v1",
+  "stage": "B2",
+  "created_at_utc": "2026-09-13T17:21:33.581997+00:00",
+  "baseline_commit": "4b554e69d69245db4a6a6772b296cf256c142a16",
+  "status": "complete_with_findings",
+  "decision": "candidate_only_routes_registered; no model_or_data_qualification",
+  "scope": {
+    "data_role": "development",
+    "statistical_unit": "independent physical case; seed is a second-level replicate",
+    "source_policy": "read-only registration of an independent candidate-only three-seed rerun",
+    "new_training_attempts_in_L2": 0,
+    "model_success_required_for_B2_exit": false
+  },
+  "tracks": {
+    "raw_learned_dynamics": {
+      "route": "local_interaction",
+      "description": "direct displacement predictor with current local inverse-distance message summary and current boundary features; no posthoc wall projection",
+      "seeds": [
+        17,
+        29,
+        43
+      ]
+    },
+    "constrained_or_hybrid": {
+      "route": "physics_residual",
+      "description": "normalized acceleration residual integrated with the current velocity state; explicit physical update prior, no hidden wall projection",
+      "seeds": [
+        17,
+        29,
+        43
+      ]
+    }
+  },
+  "source_contract": {
+    "run_manifest": {
+      "path": "experiments/r3-g4-baseline-routes/run_manifest.json",
+      "sha256": "f71cd95117e83aa977bb43fbfb5fba1021bd02edb298523a9504e09d9026e4f4"
+    },
+    "route_audit": {
+      "path": "experiments/r3-g4-baseline-routes/audit.json",
+      "sha256": "2799d6947148715944d1c0ab8b8b3cf9d8c96e9aa4b6cdac18d3b21849cfa25f"
+    },
+    "release_manifest": {
+      "path": "release/v0.1-development/manifest.json",
+      "sha256": "b557b091ece49bb1792266be25e86370f63c83f7283f17884294a153c775d5b2"
+    },
+    "run_budget": {
+      "epochs_requested": 3,
+      "min_epochs": 2,
+      "patience": 1,
+      "max_particles": 64,
+      "validation_particles": 96,
+      "hidden": 32,
+      "clip_dp": 0.0
+    },
+    "candidate_only": true
+  },
+  "runs": [
+    {
+      "route": "local_interaction",
+      "seed": 17,
+      "source_run_status": "completed",
+      "returncode": 0,
+      "physical_gpu_index": 4,
+      "gpu_uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+      "elapsed_seconds": 21.541167977964506,
+      "training_seconds": 15.437037406023592,
+      "inference_seconds": 0.8223475769627839,
+      "epochs_requested": 3,
+      "epochs_run": 3,
+      "parameter_count": 2819,
+      "feature_width": 43,
+      "test_rollout_statuses": {
+        "F1_twin_obstacle": "completed",
+        "W06_standard_fast_center": "completed",
+        "F3_transverse_slosh": "completed"
+      },
+      "test_rollout_completed_count": 3,
+      "test_rollout_expected_count": 3,
+      "finite_metric_counts": {
+        "learned_rmse_over_dp": 3,
+        "learned_ade_m": 3,
+        "learned_fde_m": 3,
+        "learned_velocity_rmse_mps": 3,
+        "learned_com_rmse_m": 3,
+        "constant_velocity_rmse_over_dp": 3
+      },
+      "test_rollouts": {
+        "F1_twin_obstacle": {
+          "learned_rmse_over_dp": 2.968553304672241,
+          "learned_ade_m": 0.09117221087217331,
+          "learned_fde_m": 0.18234139680862427,
+          "learned_velocity_rmse_mps": 0.6591211557388306,
+          "learned_com_rmse_m": 0.062369659543037415,
+          "constant_velocity_rmse_over_dp": 3.7863729000091553
+        },
+        "W06_standard_fast_center": {
+          "learned_rmse_over_dp": 114.18174743652344,
+          "learned_ade_m": 1.901451826095581,
+          "learned_fde_m": 4.922935485839844,
+          "learned_velocity_rmse_mps": 3.884026050567627,
+          "learned_com_rmse_m": 2.285613536834717,
+          "constant_velocity_rmse_over_dp": 28.704187393188477
+        },
+        "F3_transverse_slosh": {
+          "learned_rmse_over_dp": 1.9705857038497925,
+          "learned_ade_m": 0.06930285692214966,
+          "learned_fde_m": 0.12373968958854675,
+          "learned_velocity_rmse_mps": 0.22253835201263428,
+          "learned_com_rmse_m": 0.07255912572145462,
+          "constant_velocity_rmse_over_dp": 5.090209484100342
+        }
+      },
+      "input_contract": {
+        "prefix_invariance": "shared-prefix rollout inputs use only current predicted state, current control, current boundary summary, and elapsed time; future reference frames are not consumed",
+        "prohibited_rollout_inputs": [
+          "future reference position",
+          "future reference velocity",
+          "future reference density",
+          "future free-body trajectory"
+        ],
+        "causal_check_pass": true
+      },
+      "clipping": {
+        "configured_clip_dp": 0.0,
+        "trigger_rate_reported_per_case": true,
+        "note": "optional displacement clip is off in the declared run; smooth output cap is applied consistently in train/validation/rollout"
+      },
+      "limitations": "W11 development pilot; sidecar geometry is a current-frame AABB summary rather than a learned wall-interaction state, and T2/T3/T4 scoring is not included; not a formal ranking",
+      "source_artifacts": {
+        "result": {
+          "path": "experiments/r3-g4-baseline-routes/results/local_interaction_seed17.json",
+          "sha256": "9c8e234745513a6beaea90b1ec9184d5f9861a11dc7dc0ace178541e37cb8a4f",
+          "bytes": 10900
+        },
+        "checkpoint": {
+          "path": "experiments/r3-g4-baseline-routes/checkpoints/local_interaction_seed17.pt",
+          "sha256": "8e6044af59685768c75c58c14f3a15810fea099629194cbbfae26d77f2f1b444",
+          "bytes": 14753
+        },
+        "log": {
+          "path": "experiments/r3-g4-baseline-routes/logs/local_interaction_seed17.log",
+          "sha256": "600a9655d3213fc1fafd468783535ba361035de1a466efcfec33b04cb7304a18",
+          "bytes": 635
+        }
+      }
+    },
+    {
+      "route": "local_interaction",
+      "seed": 29,
+      "source_run_status": "completed",
+      "returncode": 0,
+      "physical_gpu_index": 5,
+      "gpu_uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+      "elapsed_seconds": 16.9424833629746,
+      "training_seconds": 12.481488838093355,
+      "inference_seconds": 0.7311442508362234,
+      "epochs_requested": 3,
+      "epochs_run": 3,
+      "parameter_count": 2819,
+      "feature_width": 43,
+      "test_rollout_statuses": {
+        "F1_twin_obstacle": "completed",
+        "W06_standard_fast_center": "completed",
+        "F3_transverse_slosh": "completed"
+      },
+      "test_rollout_completed_count": 3,
+      "test_rollout_expected_count": 3,
+      "finite_metric_counts": {
+        "learned_rmse_over_dp": 3,
+        "learned_ade_m": 3,
+        "learned_fde_m": 3,
+        "learned_velocity_rmse_mps": 3,
+        "learned_com_rmse_m": 3,
+        "constant_velocity_rmse_over_dp": 3
+      },
+      "test_rollouts": {
+        "F1_twin_obstacle": {
+          "learned_rmse_over_dp": 3.344654083251953,
+          "learned_ade_m": 0.10664134472608566,
+          "learned_fde_m": 0.23687931895256042,
+          "learned_velocity_rmse_mps": 0.7472832798957825,
+          "learned_com_rmse_m": 0.08874021470546722,
+          "constant_velocity_rmse_over_dp": 3.7863729000091553
+        },
+        "W06_standard_fast_center": {
+          "learned_rmse_over_dp": 124.0578384399414,
+          "learned_ade_m": 2.416769504547119,
+          "learned_fde_m": 7.184816837310791,
+          "learned_velocity_rmse_mps": 3.9279026985168457,
+          "learned_com_rmse_m": 3.061993360519409,
+          "constant_velocity_rmse_over_dp": 28.704187393188477
+        },
+        "F3_transverse_slosh": {
+          "learned_rmse_over_dp": 2.0308146476745605,
+          "learned_ade_m": 0.0689762681722641,
+          "learned_fde_m": 0.13800865411758423,
+          "learned_velocity_rmse_mps": 0.24235562980175018,
+          "learned_com_rmse_m": 0.07448754459619522,
+          "constant_velocity_rmse_over_dp": 5.090209484100342
+        }
+      },
+      "input_contract": {
+        "prefix_invariance": "shared-prefix rollout inputs use only current predicted state, current control, current boundary summary, and elapsed time; future reference frames are not consumed",
+        "prohibited_rollout_inputs": [
+          "future reference position",
+          "future reference velocity",
+          "future reference density",
+          "future free-body trajectory"
+        ],
+        "causal_check_pass": true
+      },
+      "clipping": {
+        "configured_clip_dp": 0.0,
+        "trigger_rate_reported_per_case": true,
+        "note": "optional displacement clip is off in the declared run; smooth output cap is applied consistently in train/validation/rollout"
+      },
+      "limitations": "W11 development pilot; sidecar geometry is a current-frame AABB summary rather than a learned wall-interaction state, and T2/T3/T4 scoring is not included; not a formal ranking",
+      "source_artifacts": {
+        "result": {
+          "path": "experiments/r3-g4-baseline-routes/results/local_interaction_seed29.json",
+          "sha256": "1fa12c0716c6de7dfd5143265699868e8e06b468dfae70af78a107bce49733af",
+          "bytes": 10895
+        },
+        "checkpoint": {
+          "path": "experiments/r3-g4-baseline-routes/checkpoints/local_interaction_seed29.pt",
+          "sha256": "4340b897627c7215f27d70dab52d9781fc0a487d53fcc634d4369d30c2112cb6",
+          "bytes": 14753
+        },
+        "log": {
+          "path": "experiments/r3-g4-baseline-routes/logs/local_interaction_seed29.log",
+          "sha256": "126f3b324c94b6c4560d88b6a87584408ea2b1f69338ab993c22fe59f5cf9951",
+          "bytes": 634
+        }
+      }
+    },
+    {
+      "route": "local_interaction",
+      "seed": 43,
+      "source_run_status": "completed",
+      "returncode": 0,
+      "physical_gpu_index": 4,
+      "gpu_uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+      "elapsed_seconds": 16.34810975403525,
+      "training_seconds": 10.901983291143551,
+      "inference_seconds": 0.7160913001280278,
+      "epochs_requested": 3,
+      "epochs_run": 2,
+      "parameter_count": 2819,
+      "feature_width": 43,
+      "test_rollout_statuses": {
+        "F1_twin_obstacle": "completed",
+        "W06_standard_fast_center": "completed",
+        "F3_transverse_slosh": "completed"
+      },
+      "test_rollout_completed_count": 3,
+      "test_rollout_expected_count": 3,
+      "finite_metric_counts": {
+        "learned_rmse_over_dp": 3,
+        "learned_ade_m": 3,
+        "learned_fde_m": 3,
+        "learned_velocity_rmse_mps": 3,
+        "learned_com_rmse_m": 3,
+        "constant_velocity_rmse_over_dp": 3
+      },
+      "test_rollouts": {
+        "F1_twin_obstacle": {
+          "learned_rmse_over_dp": 2.7147819995880127,
+          "learned_ade_m": 0.08362431824207306,
+          "learned_fde_m": 0.1337793916463852,
+          "learned_velocity_rmse_mps": 0.5298779010772705,
+          "learned_com_rmse_m": 0.04102784022688866,
+          "constant_velocity_rmse_over_dp": 3.7863729000091553
+        },
+        "W06_standard_fast_center": {
+          "learned_rmse_over_dp": 136.92918395996094,
+          "learned_ade_m": 2.56896710395813,
+          "learned_fde_m": 7.29070520401001,
+          "learned_velocity_rmse_mps": 3.56022047996521,
+          "learned_com_rmse_m": 3.4016101360321045,
+          "constant_velocity_rmse_over_dp": 28.704187393188477
+        },
+        "F3_transverse_slosh": {
+          "learned_rmse_over_dp": 1.745871663093567,
+          "learned_ade_m": 0.05774455890059471,
+          "learned_fde_m": 0.12415820360183716,
+          "learned_velocity_rmse_mps": 0.22110548615455627,
+          "learned_com_rmse_m": 0.06379935890436172,
+          "constant_velocity_rmse_over_dp": 5.090209484100342
+        }
+      },
+      "input_contract": {
+        "prefix_invariance": "shared-prefix rollout inputs use only current predicted state, current control, current boundary summary, and elapsed time; future reference frames are not consumed",
+        "prohibited_rollout_inputs": [
+          "future reference position",
+          "future reference velocity",
+          "future reference density",
+          "future free-body trajectory"
+        ],
+        "causal_check_pass": true
+      },
+      "clipping": {
+        "configured_clip_dp": 0.0,
+        "trigger_rate_reported_per_case": true,
+        "note": "optional displacement clip is off in the declared run; smooth output cap is applied consistently in train/validation/rollout"
+      },
+      "limitations": "W11 development pilot; sidecar geometry is a current-frame AABB summary rather than a learned wall-interaction state, and T2/T3/T4 scoring is not included; not a formal ranking",
+      "source_artifacts": {
+        "result": {
+          "path": "experiments/r3-g4-baseline-routes/results/local_interaction_seed43.json",
+          "sha256": "c8b32386e02241f7788e705a863eabdd779494403ec106b851bc495aec166ae2",
+          "bytes": 10671
+        },
+        "checkpoint": {
+          "path": "experiments/r3-g4-baseline-routes/checkpoints/local_interaction_seed43.pt",
+          "sha256": "ba1627c21c1b6fb2ce32c56ee02945ff18710da33dbf180a15ae93daad03a858",
+          "bytes": 14753
+        },
+        "log": {
+          "path": "experiments/r3-g4-baseline-routes/logs/local_interaction_seed43.log",
+          "sha256": "13552d33b054966f59f8188f28e33797910c0616f7f7d60127b5c8d4574a2374",
+          "bytes": 422
+        }
+      }
+    },
+    {
+      "route": "physics_residual",
+      "seed": 17,
+      "source_run_status": "completed",
+      "returncode": 0,
+      "physical_gpu_index": 5,
+      "gpu_uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+      "elapsed_seconds": 15.20958033297211,
+      "training_seconds": 10.019417774863541,
+      "inference_seconds": 0.478603124152869,
+      "epochs_requested": 3,
+      "epochs_run": 3,
+      "parameter_count": 2563,
+      "feature_width": 43,
+      "test_rollout_statuses": {
+        "F1_twin_obstacle": "completed",
+        "W06_standard_fast_center": "completed",
+        "F3_transverse_slosh": "completed"
+      },
+      "test_rollout_completed_count": 3,
+      "test_rollout_expected_count": 3,
+      "finite_metric_counts": {
+        "learned_rmse_over_dp": 3,
+        "learned_ade_m": 3,
+        "learned_fde_m": 3,
+        "learned_velocity_rmse_mps": 3,
+        "learned_com_rmse_m": 3,
+        "constant_velocity_rmse_over_dp": 3
+      },
+      "test_rollouts": {
+        "F1_twin_obstacle": {
+          "learned_rmse_over_dp": 2.7967753410339355,
+          "learned_ade_m": 0.08843960613012314,
+          "learned_fde_m": 0.11940629780292511,
+          "learned_velocity_rmse_mps": 0.498635858297348,
+          "learned_com_rmse_m": 0.04771256074309349,
+          "constant_velocity_rmse_over_dp": 3.7863729000091553
+        },
+        "W06_standard_fast_center": {
+          "learned_rmse_over_dp": 30.041027069091797,
+          "learned_ade_m": 0.6198170185089111,
+          "learned_fde_m": 1.1417903900146484,
+          "learned_velocity_rmse_mps": 0.9782578945159912,
+          "learned_com_rmse_m": 0.6589413285255432,
+          "constant_velocity_rmse_over_dp": 28.704187393188477
+        },
+        "F3_transverse_slosh": {
+          "learned_rmse_over_dp": 3.421428918838501,
+          "learned_ade_m": 0.12174367904663086,
+          "learned_fde_m": 0.21443156898021698,
+          "learned_velocity_rmse_mps": 0.3389911949634552,
+          "learned_com_rmse_m": 0.13336564600467682,
+          "constant_velocity_rmse_over_dp": 5.090209484100342
+        }
+      },
+      "input_contract": {
+        "prefix_invariance": "shared-prefix rollout inputs use only current predicted state, current control, current boundary summary, and elapsed time; future reference frames are not consumed",
+        "prohibited_rollout_inputs": [
+          "future reference position",
+          "future reference velocity",
+          "future reference density",
+          "future free-body trajectory"
+        ],
+        "causal_check_pass": true
+      },
+      "clipping": {
+        "configured_clip_dp": 0.0,
+        "trigger_rate_reported_per_case": true,
+        "note": "optional displacement clip is off in the declared run; smooth output cap is applied consistently in train/validation/rollout"
+      },
+      "limitations": "W11 development pilot; sidecar geometry is a current-frame AABB summary rather than a learned wall-interaction state, and T2/T3/T4 scoring is not included; not a formal ranking",
+      "source_artifacts": {
+        "result": {
+          "path": "experiments/r3-g4-baseline-routes/results/physics_residual_seed17.json",
+          "sha256": "93b10dbb76c1e3bd2e3dd674cacd1ccc1d31472e9fc40a1fe9da6bc37d671b33",
+          "bytes": 10891
+        },
+        "checkpoint": {
+          "path": "experiments/r3-g4-baseline-routes/checkpoints/physics_residual_seed17.pt",
+          "sha256": "c63869350ea2eaddedae5d522bc1069f217a8dd039368563a09ab777467c161c",
+          "bytes": 13717
+        },
+        "log": {
+          "path": "experiments/r3-g4-baseline-routes/logs/physics_residual_seed17.log",
+          "sha256": "4bf8487e26147454aa526adb33c50e5224d2102984b1351d5cd4a9d552fd59a1",
+          "bytes": 631
+        }
+      }
+    },
+    {
+      "route": "physics_residual",
+      "seed": 29,
+      "source_run_status": "completed",
+      "returncode": 0,
+      "physical_gpu_index": 4,
+      "gpu_uuid": "GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9",
+      "elapsed_seconds": 15.00524801388383,
+      "training_seconds": 9.818088027182966,
+      "inference_seconds": 0.46802157000638545,
+      "epochs_requested": 3,
+      "epochs_run": 3,
+      "parameter_count": 2563,
+      "feature_width": 43,
+      "test_rollout_statuses": {
+        "F1_twin_obstacle": "completed",
+        "W06_standard_fast_center": "completed",
+        "F3_transverse_slosh": "completed"
+      },
+      "test_rollout_completed_count": 3,
+      "test_rollout_expected_count": 3,
+      "finite_metric_counts": {
+        "learned_rmse_over_dp": 3,
+        "learned_ade_m": 3,
+        "learned_fde_m": 3,
+        "learned_velocity_rmse_mps": 3,
+        "learned_com_rmse_m": 3,
+        "constant_velocity_rmse_over_dp": 3
+      },
+      "test_rollouts": {
+        "F1_twin_obstacle": {
+          "learned_rmse_over_dp": 3.517204523086548,
+          "learned_ade_m": 0.11211887747049332,
+          "learned_fde_m": 0.1526900827884674,
+          "learned_velocity_rmse_mps": 0.4949977993965149,
+          "learned_com_rmse_m": 0.09713337570428848,
+          "constant_velocity_rmse_over_dp": 3.7863729000091553
+        },
+        "W06_standard_fast_center": {
+          "learned_rmse_over_dp": 21.69944190979004,
+          "learned_ade_m": 0.4478284418582916,
+          "learned_fde_m": 0.8821564316749573,
+          "learned_velocity_rmse_mps": 1.0047701597213745,
+          "learned_com_rmse_m": 0.38115033507347107,
+          "constant_velocity_rmse_over_dp": 28.704187393188477
+        },
+        "F3_transverse_slosh": {
+          "learned_rmse_over_dp": 4.995945453643799,
+          "learned_ade_m": 0.17092987895011902,
+          "learned_fde_m": 0.3502497971057892,
+          "learned_velocity_rmse_mps": 0.538789689540863,
+          "learned_com_rmse_m": 0.19761082530021667,
+          "constant_velocity_rmse_over_dp": 5.090209484100342
+        }
+      },
+      "input_contract": {
+        "prefix_invariance": "shared-prefix rollout inputs use only current predicted state, current control, current boundary summary, and elapsed time; future reference frames are not consumed",
+        "prohibited_rollout_inputs": [
+          "future reference position",
+          "future reference velocity",
+          "future reference density",
+          "future free-body trajectory"
+        ],
+        "causal_check_pass": true
+      },
+      "clipping": {
+        "configured_clip_dp": 0.0,
+        "trigger_rate_reported_per_case": true,
+        "note": "optional displacement clip is off in the declared run; smooth output cap is applied consistently in train/validation/rollout"
+      },
+      "limitations": "W11 development pilot; sidecar geometry is a current-frame AABB summary rather than a learned wall-interaction state, and T2/T3/T4 scoring is not included; not a formal ranking",
+      "source_artifacts": {
+        "result": {
+          "path": "experiments/r3-g4-baseline-routes/results/physics_residual_seed29.json",
+          "sha256": "9c86a8a2c6760acb671a73945b0ecd8bd9fa5a6299af79ca411a17b8020fc318",
+          "bytes": 10878
+        },
+        "checkpoint": {
+          "path": "experiments/r3-g4-baseline-routes/checkpoints/physics_residual_seed29.pt",
+          "sha256": "0c1215e2e6b0dd59111cc77c9beb790b31e5eeafaa6a627f2887a42ee2455a87",
+          "bytes": 13717
+        },
+        "log": {
+          "path": "experiments/r3-g4-baseline-routes/logs/physics_residual_seed29.log",
+          "sha256": "8ab7f1a72d4e8b5d52045ba1338663c457a0a47f7695c64d20e637a66f7a6c07",
+          "bytes": 630
+        }
+      }
+    },
+    {
+      "route": "physics_residual",
+      "seed": 43,
+      "source_run_status": "completed",
+      "returncode": 0,
+      "physical_gpu_index": 5,
+      "gpu_uuid": "GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32",
+      "elapsed_seconds": 13.754426792962477,
+      "training_seconds": 8.69516751402989,
+      "inference_seconds": 0.4729964060243219,
+      "epochs_requested": 3,
+      "epochs_run": 3,
+      "parameter_count": 2563,
+      "feature_width": 43,
+      "test_rollout_statuses": {
+        "F1_twin_obstacle": "completed",
+        "W06_standard_fast_center": "completed",
+        "F3_transverse_slosh": "completed"
+      },
+      "test_rollout_completed_count": 3,
+      "test_rollout_expected_count": 3,
+      "finite_metric_counts": {
+        "learned_rmse_over_dp": 3,
+        "learned_ade_m": 3,
+        "learned_fde_m": 3,
+        "learned_velocity_rmse_mps": 3,
+        "learned_com_rmse_m": 3,
+        "constant_velocity_rmse_over_dp": 3
+      },
+      "test_rollouts": {
+        "F1_twin_obstacle": {
+          "learned_rmse_over_dp": 2.831111431121826,
+          "learned_ade_m": 0.08395464718341827,
+          "learned_fde_m": 0.1444084793329239,
+          "learned_velocity_rmse_mps": 0.5661443471908569,
+          "learned_com_rmse_m": 0.05555019900202751,
+          "constant_velocity_rmse_over_dp": 3.7863729000091553
+        },
+        "W06_standard_fast_center": {
+          "learned_rmse_over_dp": 21.036340713500977,
+          "learned_ade_m": 0.3934721052646637,
+          "learned_fde_m": 0.674557089805603,
+          "learned_velocity_rmse_mps": 0.875375509262085,
+          "learned_com_rmse_m": 0.32344043254852295,
+          "constant_velocity_rmse_over_dp": 28.704187393188477
+        },
+        "F3_transverse_slosh": {
+          "learned_rmse_over_dp": 3.4119715690612793,
+          "learned_ade_m": 0.12116999179124832,
+          "learned_fde_m": 0.21173986792564392,
+          "learned_velocity_rmse_mps": 0.33029723167419434,
+          "learned_com_rmse_m": 0.13326241075992584,
+          "constant_velocity_rmse_over_dp": 5.090209484100342
+        }
+      },
+      "input_contract": {
+        "prefix_invariance": "shared-prefix rollout inputs use only current predicted state, current control, current boundary summary, and elapsed time; future reference frames are not consumed",
+        "prohibited_rollout_inputs": [
+          "future reference position",
+          "future reference velocity",
+          "future reference density",
+          "future free-body trajectory"
+        ],
+        "causal_check_pass": true
+      },
+      "clipping": {
+        "configured_clip_dp": 0.0,
+        "trigger_rate_reported_per_case": true,
+        "note": "optional displacement clip is off in the declared run; smooth output cap is applied consistently in train/validation/rollout"
+      },
+      "limitations": "W11 development pilot; sidecar geometry is a current-frame AABB summary rather than a learned wall-interaction state, and T2/T3/T4 scoring is not included; not a formal ranking",
+      "source_artifacts": {
+        "result": {
+          "path": "experiments/r3-g4-baseline-routes/results/physics_residual_seed43.json",
+          "sha256": "c1b995a81f1a1def2de1ad72fd5256611e744792cb486dc1f186d193390b88ea",
+          "bytes": 10880
+        },
+        "checkpoint": {
+          "path": "experiments/r3-g4-baseline-routes/checkpoints/physics_residual_seed43.pt",
+          "sha256": "dec1428001e0dbd1a130d6d2538088c8da7019575505df170ffb5ee983eaeaa3",
+          "bytes": 13717
+        },
+        "log": {
+          "path": "experiments/r3-g4-baseline-routes/logs/physics_residual_seed43.log",
+          "sha256": "b24af5adaa882ce43706c77da174eca8325e3910bef392847648eab210ec1890",
+          "bytes": 628
+        }
+      }
+    }
+  ],
+  "route_summary": {
+    "local_interaction": {
+      "seed_count": 3,
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "seed_complete": true,
+      "test_rollout_completed_count": 9,
+      "test_rollout_expected_count": 9,
+      "per_seed_test_macro_mean_rmse_over_dp": [
+        {
+          "seed": 17,
+          "test_macro_mean_rmse_over_dp": 39.70696214834849
+        },
+        {
+          "seed": 29,
+          "test_macro_mean_rmse_over_dp": 43.14443572362264
+        },
+        {
+          "seed": 43,
+          "test_macro_mean_rmse_over_dp": 47.12994587421417
+        }
+      ],
+      "macro_mean_over_seeds": 43.32711458206177,
+      "macro_sample_std_over_seeds": 3.7148621135389623,
+      "wall_or_physical_pass": "not_assessed_by_this_candidate_pilot"
+    },
+    "physics_residual": {
+      "seed_count": 3,
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "seed_complete": true,
+      "test_rollout_completed_count": 9,
+      "test_rollout_expected_count": 9,
+      "per_seed_test_macro_mean_rmse_over_dp": [
+        {
+          "seed": 17,
+          "test_macro_mean_rmse_over_dp": 12.086410442988077
+        },
+        {
+          "seed": 29,
+          "test_macro_mean_rmse_over_dp": 10.070863962173462
+        },
+        {
+          "seed": 43,
+          "test_macro_mean_rmse_over_dp": 9.093141237894693
+        }
+      ],
+      "macro_mean_over_seeds": 10.416805214352078,
+      "macro_sample_std_over_seeds": 1.5263261925320144,
+      "wall_or_physical_pass": "not_assessed_by_this_candidate_pilot"
+    }
+  },
+  "oracle_and_failure_diagnostics": {
+    "a1_report": "reports/a1-model-failure-diagnostics.json",
+    "oracle_diagnostics": {
+      "real_trajectory_same_evaluator_proxy": "source truth identity/finite/wall oracle; evaluator adapter parity remains a separate implementation check",
+      "reference_next_displacement": "direct next-frame displacement replayed through the declared update equation",
+      "reference_velocity_integrator": "native saved velocity integrated over saved cadence; diagnostic lower bound, not material truth",
+      "constant_velocity_baseline": "initial native velocity autonomous rollout proxy",
+      "low_resolution_sph": "existing low-resolution source references are retained as recipe evidence; no new low-resolution model run was launched",
+      "sentinels": [
+        {
+          "label": "R0081818-ENDPOINT-LOW",
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/R0081818-ENDPOINT-LOW.h5",
+          "exists": true,
+          "truth_identity_axis_unique": true,
+          "truth_closed_wall_sampled_violation_count": 0,
+          "real_trajectory_oracle_pass": true,
+          "reference_next_displacement_update_max_abs_error_m": 0.0,
+          "reference_next_displacement_update_pass": true,
+          "velocity_integrator_error_m": {
+            "mean": 3.480182290787714e-05,
+            "p95": 0.00010301335223066003,
+            "max": 0.001335581507245068,
+            "sample_count": 22227700
+          },
+          "constant_velocity_baseline_error_m": {
+            "mean": 0.05303636443673924,
+            "p95": 0.1419591571737717,
+            "max": 0.31629965226892365,
+            "sample_count": 22227700
+          },
+          "low_resolution_oracle_scope": "source trajectory only; not a model qualification or external validation"
+        },
+        {
+          "label": "R0081818-NOMINAL",
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+          "exists": true,
+          "truth_identity_axis_unique": true,
+          "truth_closed_wall_sampled_violation_count": 0,
+          "real_trajectory_oracle_pass": true,
+          "reference_next_displacement_update_max_abs_error_m": 0.0,
+          "reference_next_displacement_update_pass": true,
+          "velocity_integrator_error_m": {
+            "mean": 4.070258454075928e-05,
+            "p95": 0.00012090194323414574,
+            "max": 0.0014425766840666426,
+            "sample_count": 22227700
+          },
+          "constant_velocity_baseline_error_m": {
+            "mean": 0.060652086200023804,
+            "p95": 0.16156795055375112,
+            "max": 0.36040511139155273,
+            "sample_count": 22227700
+          },
+          "low_resolution_oracle_scope": "source trajectory only; not a model qualification or external validation"
+        },
+        {
+          "label": "R0081818-ENDPOINT-HIGH",
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/R0081818-ENDPOINT-HIGH.h5",
+          "exists": true,
+          "truth_identity_axis_unique": true,
+          "truth_closed_wall_sampled_violation_count": 0,
+          "real_trajectory_oracle_pass": true,
+          "reference_next_displacement_update_max_abs_error_m": 0.0,
+          "reference_next_displacement_update_pass": true,
+          "velocity_integrator_error_m": {
+            "mean": 4.664084876840055e-05,
+            "p95": 0.00013901746974462833,
+            "max": 0.0022232381971802806,
+            "sample_count": 22227700
+          },
+          "constant_velocity_baseline_error_m": {
+            "mean": 0.06799136520285307,
+            "p95": 0.18095433945945413,
+            "max": 0.4430764114018191,
+            "sample_count": 22227700
+          },
+          "low_resolution_oracle_scope": "source trajectory only; not a model qualification or external validation"
+        }
+      ]
+    },
+    "failure_profile": {
+      "case_run_count": 96,
+      "unique_physical_case_count": 16,
+      "first_failure_time_s": {
+        "min": 0.05,
+        "p25": 0.09,
+        "median": 0.1,
+        "p75": 0.12,
+        "max": 0.39
+      },
+      "first_crossing_face_counts": {
+        "left": 48,
+        "back": 32,
+        "bottom": 16
+      },
+      "finite_failure_case_run_count": 64,
+      "wall_failure_case_run_count": 96,
+      "rollout_complete_case_run_count": 32,
+      "survival_curve_case_run": {
+        "0.05": 0.8333333333333334,
+        "0.1": 0.5,
+        "0.2": 0.16666666666666666,
+        "0.5": 0.0,
+        "1.0": 0.0,
+        "2.0": 0.0,
+        "4.0": 0.0,
+        "8.0": 0.0
+      },
+      "survival_curve_physical_case_median_over_seeds": {
+        "0.05": 1.0,
+        "0.1": 0.3125,
+        "0.2": 0.0,
+        "0.5": 0.0,
+        "1.0": 0.0,
+        "2.0": 0.0,
+        "4.0": 0.0,
+        "8.0": 0.0
+      },
+      "physical_case_summaries": [
+        {
+          "case_id": "F3_DEV_00_a0p903125",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.1,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.36,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_01_a0p909375",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.1,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.36,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_02_a0p915625",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.1,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.36,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_03_a0p921875",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.1,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.36,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_04_a0p928125",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.1,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.36,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_05_a0p934375",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.1,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.36,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_08_a0p953125",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.1,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.37,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_13_a0p984375",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.1,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.37,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_18_a1p015625",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.1,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.38,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_23_a1p046875",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.1,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.38,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_26_a1p065625",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.1,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.39,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_27_a1p071875",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.105,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.39,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_28_a1p078125",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.105,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.39,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_29_a1p084375",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.105,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.39,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_30_a1p090625",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.105,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.39,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        },
+        {
+          "case_id": "F3_DEV_31_a1p096875",
+          "run_count": 6,
+          "all_runs_failed": true,
+          "median_first_failure_time_s": 0.105,
+          "min_first_failure_time_s": 0.05,
+          "max_first_failure_time_s": 0.39,
+          "routes": [
+            "local_interaction",
+            "particle_mlp"
+          ]
+        }
+      ]
+    },
+    "legacy_route_summary": {
+      "local_interaction": {
+        "logical_run_count": 3,
+        "seeds": [
+          17,
+          29,
+          43
+        ],
+        "training_completed_count": 3,
+        "worker_exit_clean_count": 0,
+        "evaluation_completed_count": 3,
+        "model_physical_pass_count": 0,
+        "case_run_count": 48,
+        "first_failure_time_s_mean": 0.08437499999999999,
+        "first_failure_time_s_std": 0.02649016276666218,
+        "wall_failure_count": 48,
+        "finite_failure_count": 48
+      },
+      "particle_mlp": {
+        "logical_run_count": 3,
+        "seeds": [
+          17,
+          29,
+          43
+        ],
+        "training_completed_count": 3,
+        "worker_exit_clean_count": 0,
+        "evaluation_completed_count": 3,
+        "model_physical_pass_count": 0,
+        "case_run_count": 48,
+        "first_failure_time_s_mean": 0.193125,
+        "first_failure_time_s_std": 0.13061485122949124,
+        "wall_failure_count": 48,
+        "finite_failure_count": 16
+      }
+    },
+    "failure_aware_metrics_preserved": true
+  },
+  "acceptance": {
+    "two_declared_tracks": true,
+    "three_seeds_per_track": true,
+    "all_six_workers_completed": true,
+    "all_eighteen_candidate_test_rollouts_completed": true,
+    "causal_input_contract_checked": true,
+    "future_fluid_or_body_state_used": false,
+    "failure_aware_metrics_included": true,
+    "wall_contact_physical_pass_claimed": false,
+    "formal_model_qualification_claimed": false,
+    "formal_data_release_claimed": false
+  },
+  "limitations": [
+    "candidate-only development pilot; no formal model ranking or family qualification",
+    "route outputs are finite rollout diagnostics, not a wall-contact pass",
+    "material transport, density/pressure prediction, free-body coupling, and T2/T3/T4 are not assessed",
+    "the source run predates L2 adoption; L2 registers it read-only and does not count its historical GPU time"
+  ],
+  "resource_observation": {
+    "new_training_attempts": 0,
+    "new_storage_bytes": 39787,
+    "historical_source_gpu_hours_not_charged_to_L2": 0.02744472673188688
+  }
+}

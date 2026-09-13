@@ -1,0 +1,66 @@
+{
+  "schema": "l2.d0.production_gate.v1",
+  "stage": "D0",
+  "created_at_utc": "2026-09-13T17:23:24.453791+00:00",
+  "baseline_commit": "4b554e69d69245db4a6a6772b296cf256c142a16",
+  "status": "blocked",
+  "decision": "blocked_runtime_gate_no_new_qualified_t1_recipe",
+  "runtime_gate": {
+    "required": "at least one newly qualified T1 recipe/subdomain and split/input gates",
+    "new_qualified_t1_recipe_count": 0,
+    "new_qualified_t1_recipes": [],
+    "split_input_gate_pass": true,
+    "canary_passes_not_promoted": [
+      {
+        "stage": "C3",
+        "family": "F4",
+        "role": "canary_only"
+      }
+    ],
+    "registered_legacy_f3_case_count": 32,
+    "registered_legacy_f3_is_new_l2_qualification": false
+  },
+  "production_batch": {
+    "launched": false,
+    "accepted_cases": 0,
+    "new_solver_attempts": 0,
+    "reason": "D0 runtime gate is false; no production or pilot batch admitted"
+  },
+  "evidence": {
+    "C0": {
+      "path": "reports/c0-family-hypotheses.json",
+      "exists": true,
+      "sha256": "c1b30857abd8b0413d3a101f816b9be882fa209565aaaad8dd8378bebb7688ab"
+    },
+    "C1": {
+      "path": "reports/c1-canary.json",
+      "exists": true,
+      "sha256": "bc95903a2a36732f55120f7877fdcf5afd4f5b25572cef1d34be100d9e41149c"
+    },
+    "C2": {
+      "path": "reports/c2-f3-canary.json",
+      "exists": true,
+      "sha256": "542b34a587e0c3b4ae62ebb89f4ac05eeaf5cb260435f84aa6f553c89c075ace"
+    },
+    "C3": {
+      "path": "reports/c3-bounded-anchors.json",
+      "exists": true,
+      "sha256": "c9a707f5606f80a87908bdd7a25fa77f4943112c75ce0b9ddafcb9df508568f3"
+    },
+    "B2": {
+      "path": "reports/b2-learning-baseline.json",
+      "exists": true,
+      "sha256": "9e388ffb65455078406b40eeb741d073c5e16399f0eefce6c74857db64bc0e87"
+    },
+    "F3_manifest": {
+      "path": "evidence/f3-canonical-manifest.json",
+      "sha256": "86e27740d764f9769e3255a82a599013a282f1bc4385ad3c29a657a56d9c5bea"
+    }
+  },
+  "authorization": {
+    "public_release_authorized": false,
+    "hidden_test_generation_authorized": false,
+    "legacy_campaign_reopened": false
+  },
+  "conclusion": "The branch is evidence-complete but cannot enter D0 production until a family-scoped L2 T1 qualification exists."
+}

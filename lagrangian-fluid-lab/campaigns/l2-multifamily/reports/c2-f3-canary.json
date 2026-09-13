@@ -1,0 +1,264 @@
+{
+  "schema": "l2.c2.f3_geometry_control_canary.v1",
+  "stage": "C2",
+  "created_at_utc": "2026-09-13T17:01:52.133653+00:00",
+  "baseline_commit": "4b554e69d69245db4a6a6772b296cf256c142a16",
+  "status": "complete_with_findings",
+  "decision": "bounded_canary_finding; F3 extension not qualified",
+  "stop_reason": "canary completed but failed a hard structural/source gate",
+  "design": {
+    "background": "off-axis baffle connected passage",
+    "lagrangian_tasks": [
+      "transverse exchange",
+      "repeated crossing",
+      "residence"
+    ],
+    "connected_passage_semantics": "baffle occupies y=0.04..0.14 while fluid domain continues to y=0.40; upper passage is part of the geometry",
+    "reference_resolution_m": 0.0075,
+    "paired_background_reserved": "multi-axis prescribed drive; not executed by this canary"
+  },
+  "input": {
+    "original_definition": "lagrangian-fluid-lab/cases/F3/F3_baffled_slosh/F3_baffled_slosh_Def.xml",
+    "original_definition_sha256": "e4811e7c3bfdba6ae06ccc073fbf9cec0a9d2d62221a0df69e43fa5278e3c147",
+    "template_definition": "lagrangian-fluid-lab/campaigns/l2-multifamily/c2-canary/cases/L2_C2_F3_offaxis_baffle_nominal_Template.xml",
+    "template_definition_sha256": "86af6fadfc6e5e5e8277b6409534bb78a21ce36ec63c9d820bc1494490564d8a",
+    "generated_xml": "lagrangian-fluid-lab/campaigns/l2-multifamily/c2-canary/artifacts/L2_C2_F3_offaxis_baffle_nominal/generated/L2_C2_F3_offaxis_baffle_nominal.xml",
+    "generated_xml_sha256": "6f1b222df54e1706ebdd4f6c3a4e20d3af0fde9e79ee4ef85c6b018594f3bf17",
+    "recipe_id": "L2_F3_C2_offaxis_connected_passage_dbc_native_v1_dp0p0075",
+    "solver_binary_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+  },
+  "attempt": {
+    "schema_version": 1,
+    "case_id": "L2_C2_F3_offaxis_baffle_nominal",
+    "attempt_id": "20260913T165850.404406Z-14bd45ec",
+    "status": "completed",
+    "started_at_utc": "2026-09-13T16:58:50.404543+00:00",
+    "finished_at_utc": "2026-09-13T16:59:15.699224+00:00",
+    "elapsed_seconds": 25.29319075800595,
+    "returncode": 0,
+    "command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "-gpu:6",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l2-multifamily/c2-canary/artifacts/L2_C2_F3_offaxis_baffle_nominal/generated/L2_C2_F3_offaxis_baffle_nominal",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l2-multifamily/runs/L2_C2_F3_offaxis_baffle_nominal/attempts/20260913T165850.404406Z-14bd45ec.partial"
+    ],
+    "evidence_files": [
+      "data/Part_0000.bi4",
+      "data/Part_0001.bi4",
+      "data/Part_0002.bi4",
+      "data/Part_0003.bi4",
+      "data/Part_0004.bi4",
+      "data/Part_0005.bi4",
+      "data/Part_0006.bi4",
+      "data/Part_0007.bi4",
+      "data/Part_0008.bi4",
+      "data/Part_0009.bi4",
+      "data/Part_0010.bi4",
+      "data/Part_0011.bi4",
+      "data/Part_0012.bi4",
+      "data/Part_0013.bi4",
+      "data/Part_0014.bi4",
+      "data/Part_0015.bi4",
+      "data/Part_0016.bi4",
+      "data/Part_0017.bi4",
+      "data/Part_0018.bi4",
+      "data/Part_0019.bi4",
+      "data/Part_0020.bi4",
+      "data/Part_0021.bi4",
+      "data/Part_0022.bi4",
+      "data/Part_0023.bi4",
+      "data/Part_0024.bi4",
+      "data/Part_0025.bi4",
+      "data/Part_0026.bi4",
+      "data/Part_0027.bi4",
+      "data/Part_0028.bi4",
+      "data/Part_0029.bi4",
+      "data/Part_0030.bi4",
+      "data/Part_0031.bi4",
+      "data/Part_0032.bi4",
+      "data/Part_0033.bi4",
+      "data/Part_0034.bi4",
+      "data/Part_0035.bi4",
+      "data/Part_0036.bi4",
+      "data/Part_0037.bi4",
+      "data/Part_0038.bi4",
+      "data/Part_0039.bi4",
+      "data/Part_0040.bi4",
+      "data/Part_0041.bi4",
+      "data/Part_0042.bi4",
+      "data/Part_0043.bi4",
+      "data/Part_0044.bi4",
+      "data/Part_0045.bi4"
+    ],
+    "required_text_found": true,
+    "timed_out": false,
+    "interrupted": false,
+    "resource_guard_triggered": false,
+    "resource_guard": null,
+    "process_group_terminated": false,
+    "timeout_seconds": 3600,
+    "resource_category": "qualification",
+    "attempt_directory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l2-multifamily/runs/L2_C2_F3_offaxis_baffle_nominal/attempts/20260913T165850.404406Z-14bd45ec.complete",
+    "gpu_at_launch": {
+      "index": 6,
+      "uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+      "memory_used_mib": 15,
+      "utilization_percent": 0
+    },
+    "input_definition_sha256": "b71798d47efa39ccc6a284de4dbc1d138a8415d36d3a368b8eeadefe75ef8b20",
+    "recipe_id": "L2_F3_C2_offaxis_connected_passage_dbc_native_v1_dp0p0075",
+    "solver_binary_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+  },
+  "audit": {
+    "case_id": "L2_C2_F3_offaxis_baffle_nominal",
+    "family": "F3",
+    "recipe_id": "L2_F3_C2_offaxis_connected_passage_dbc_native_v1_dp0p0075",
+    "physical_case_id": "physical_L2_F3_offaxis_baffle_nominal_v1",
+    "lineage_group_id": "lineage_L2_F3_offaxis_baffle_nominal_v1",
+    "paired_background_id": "paired_L2_F3_offaxis_baffle_v1",
+    "attempt_id": "20260913T165850.404406Z-14bd45ec",
+    "attempt_directory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l2-multifamily/runs/L2_C2_F3_offaxis_baffle_nominal/attempts/20260913T165850.404406Z-14bd45ec.complete",
+    "hdf5": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l2-multifamily/c2-canary/data/L2_C2_F3_offaxis_baffle_nominal.h5",
+    "hdf5_sha256": "66f7d9fc79784b8a4f34fbb4100c3182ed8ad3ba343cc92510df9c93e773d2ab",
+    "frame_count": 46,
+    "particle_count": 205695,
+    "time_end_s": 0.900031,
+    "source_counts_initial": {
+      "1": 205695
+    },
+    "initial_mass_kg": 86.77758037592866,
+    "final_mass_kg": 86.73328349977965,
+    "final_mass_fraction": 0.9994895354772844,
+    "missing_initial_identities_at_final": 105,
+    "independent_audit": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l2-multifamily/c2-canary/data/L2_C2_F3_offaxis_baffle_nominal.h5",
+      "exists": true,
+      "datasets": {
+        "density": [
+          46,
+          205695
+        ],
+        "mass": [
+          46,
+          205695
+        ],
+        "mk": [
+          46,
+          205695
+        ],
+        "particle_id": [
+          205695
+        ],
+        "particle_zone": [
+          205695
+        ],
+        "position": [
+          46,
+          205695,
+          3
+        ],
+        "pressure": [
+          46,
+          205695
+        ],
+        "source_label_initial_mk": [
+          205695
+        ],
+        "time": [
+          46
+        ],
+        "type": [
+          46,
+          205695
+        ],
+        "valid": [
+          46,
+          205695
+        ],
+        "velocity": [
+          46,
+          205695,
+          3
+        ]
+      },
+      "attrs": {
+        "T2_macro_status": "not_assessed",
+        "T2_path_status": "not_assessed",
+        "attempt_id": "20260913T165850.404406Z-14bd45ec",
+        "case_id": "L2_C2_F3_offaxis_baffle_nominal",
+        "control_semantics": "known initial x impulse; no future fluid state",
+        "conversion_complete": "True",
+        "conversion_complete_frames": "46",
+        "data_qualification_status": "canary_structural_only",
+        "family": "F3",
+        "identity_key": "particle_id",
+        "l2_recipe_id": "L2_F3_C2_offaxis_connected_passage_dbc_native_v1_dp0p0075",
+        "lineage_group_id": "lineage_L2_F3_offaxis_baffle_nominal_v1",
+        "mechanism": "off-axis-baffle-connected-passage-transverse-exchange",
+        "paired_background_id": "paired_L2_F3_offaxis_baffle_v1",
+        "particle_shifting": "disabled",
+        "physical_case_id": "physical_L2_F3_offaxis_baffle_nominal_v1",
+        "schema_version": "3",
+        "solver": "DualSPHysics 5.4.355",
+        "source_fingerprint": "a2c2928dc6fc2a84b1a5e3968f7907a797426141264afdc31f826c989f37796e",
+        "source_label_semantics": "initial Mk is a numerical source partition; not material truth",
+        "trajectory_semantics": "numerical SPH particle identity; material fidelity requires a separate audit",
+        "view_id": "world_fluid_particle_v1"
+      },
+      "time_start_s": 0.0,
+      "time_end_s": 0.900031,
+      "frame_count": 46,
+      "particle_count": 205695,
+      "finite": {
+        "position": false,
+        "velocity": false,
+        "mass": false
+      },
+      "valid_entries_scanned": 9459693,
+      "mass_min_kg": null,
+      "mass_max_kg": null,
+      "wall_violation_count": 582,
+      "wall_violation_mass_kg": 0.24553125636884943,
+      "full_scan": true,
+      "errors": [
+        "nonfinite:position",
+        "nonfinite:velocity",
+        "nonfinite:mass"
+      ],
+      "structural_pass": false
+    },
+    "semantic_audit": {
+      "source_semantics_present": true,
+      "control_semantics_present": false
+    },
+    "control_audit": {
+      "required": false,
+      "present": true
+    },
+    "canary_hard_integrity_pass": false,
+    "qualification_claim": "none; canary structural evidence only",
+    "T2_macro": "not_assessed",
+    "T2_path": "not_assessed"
+  },
+  "qualification_claim": "none; canary structural evidence only",
+  "T2_macro": "not_assessed",
+  "T2_path": "not_assessed",
+  "resource_observation": {
+    "controller_wall_seconds": 182.24618726999324,
+    "solver_wall_seconds": 25.29319075800595,
+    "child_cpu_seconds": 90.627653,
+    "gpu_hours": 0.007025886321668319,
+    "cpu_core_hours_actual": 0.025174348055555556,
+    "cpu_core_hours_conservative": 0.007025886321668319,
+    "qualification_solver_attempts": 1,
+    "new_storage_bytes": 2256026549
+  },
+  "acceptance": {
+    "offaxis_geometry_template_recorded": true,
+    "nominal_spacing_used": true,
+    "solver_attempt_recorded": true,
+    "hard_canary_pass": false,
+    "no_family_qualification_claim": true,
+    "T2_axes_separate": true
+  }
+}

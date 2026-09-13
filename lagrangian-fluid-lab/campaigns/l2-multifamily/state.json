@@ -1,0 +1,203 @@
+{
+  "schema": "l2.campaign.state.v1",
+  "campaign_id": "L2_MULTI_FAMILY_QUALIFICATION",
+  "namespace": "lagrangian-fluid-lab/campaigns/l2-multifamily",
+  "baseline_commit": "4b554e69d69245db4a6a6772b296cf256c142a16",
+  "current_commit_at_adoption": "4b554e69d69245db4a6a6772b296cf256c142a16",
+  "owner_adoption_status": "accepted",
+  "owner_adopted_at_utc": "2026-09-13T16:29:26.402244+00:00",
+  "owner_request": "这是云端的审阅者给我们下发的任务，我们来按照审阅者给出的规划来继续探索和执行。",
+  "plan_package": {
+    "path": "/home/jade/.codex/attachments/06949eb7-a834-4186-a763-12c168a80ef7/L2_Multifamily_Plan_4b554e69_2026-09-13.zip",
+    "exists": true,
+    "sha256": "0ef5f4573f520cc761fed2ca5bd6046f03c4a997443d964de8421065ed390a13",
+    "files": [
+      "BENCHMARK_SPEC_ZH.md",
+      "CAMPAIGN_PLAN.json",
+      "EVIDENCE_INDEX.json",
+      "PLAN_VALIDATION.json",
+      "PLAN_ZH.md",
+      "README.md",
+      "REVIEW_ZH.md",
+      "SCENARIO_CARDS.json",
+      "SHA256SUMS",
+      "START_HERE_ZH.md",
+      "validate_plan.py"
+    ]
+  },
+  "old_campaign_reopened": false,
+  "legacy_scope": "read_only; no L1 budget reset or artifact reclassification",
+  "public_release_authorized": false,
+  "hidden_test_generation_authorized": false,
+  "limits": {
+    "gpu_hours": 96,
+    "cpu_core_hours": 384,
+    "new_storage_gib": 1024,
+    "min_free_gib": 200,
+    "min_free_fraction": 0.2,
+    "lifetime_days_from_adoption": 10,
+    "qualification_solver_attempts": 80,
+    "development_solver_attempts": 160,
+    "training_attempts": 18,
+    "full_material_configurations": 24,
+    "concurrent_heavy_gpu_tasks": 4,
+    "concurrent_tasks_per_gpu": 2
+  },
+  "stages": {
+    "A0": {
+      "status": "complete",
+      "requires": [],
+      "updated_at_utc": "2026-09-13T16:32:53.301090+00:00",
+      "facts": {
+        "report": "reports/a0-replay.json",
+        "canonical_manifest": "evidence/f3-canonical-manifest.json",
+        "case_count": 32,
+        "sentinel_count": 4
+      }
+    },
+    "A1": {
+      "status": "complete",
+      "requires": [
+        "A0"
+      ],
+      "updated_at_utc": "2026-09-13T16:33:26.225188+00:00",
+      "facts": {
+        "report": "reports/a1-model-failure-diagnostics.json",
+        "logical_runs": 6,
+        "case_runs": 96,
+        "model_pass_count": 0
+      }
+    },
+    "B1": {
+      "status": "complete",
+      "requires": [
+        "A0"
+      ],
+      "updated_at_utc": "2026-09-13T16:56:17.851908+00:00",
+      "facts": {
+        "report": "reports/b1-material-coverage.json",
+        "markdown": "reports/b1-material-coverage.md",
+        "decision": "complete_negative_T2_diagnostic; no material qualification",
+        "new_material_configurations": 0
+      }
+    },
+    "B2": {
+      "status": "complete",
+      "requires": [
+        "A0",
+        "A1"
+      ],
+      "updated_at_utc": "2026-09-13T17:21:33.587858+00:00",
+      "facts": {
+        "report": "reports/b2-learning-baseline.json",
+        "markdown": "reports/b2-learning-baseline.md",
+        "decision": "candidate_only_routes_registered; no model_or_data_qualification",
+        "seed_complete_tracks": 2,
+        "model_physical_pass_count": 0,
+        "new_training_attempts": 0
+      }
+    },
+    "C0": {
+      "status": "complete",
+      "requires": [
+        "A0"
+      ],
+      "updated_at_utc": "2026-09-13T16:41:28.505599+00:00",
+      "facts": {
+        "report": "reports/c0-family-hypotheses.json",
+        "family_count": 6,
+        "solver_attempts": 0,
+        "priority_families": [
+          "F1",
+          "F2"
+        ]
+      }
+    },
+    "C1": {
+      "status": "complete",
+      "requires": [
+        "C0"
+      ],
+      "updated_at_utc": "2026-09-13T16:52:32.503992+00:00",
+      "facts": {
+        "report": "reports/c1-canary.json",
+        "decision": "bounded_canary_finding; no family qualification",
+        "attempt_count": 1,
+        "canary_pass_count": 0
+      }
+    },
+    "C2": {
+      "status": "complete",
+      "requires": [
+        "C0"
+      ],
+      "updated_at_utc": "2026-09-13T17:01:52.339173+00:00",
+      "facts": {
+        "report": "reports/c2-f3-canary.json",
+        "decision": "bounded_canary_finding; F3 extension not qualified",
+        "canary_pass": false
+      }
+    },
+    "C3": {
+      "status": "complete",
+      "requires": [
+        "C0"
+      ],
+      "updated_at_utc": "2026-09-13T17:15:47.094631+00:00",
+      "facts": {
+        "report": "reports/c3-bounded-anchors.json",
+        "decision": "bounded_capability_map_with_no_qualification_claim",
+        "attempt_count": 2,
+        "F6_status": "not_executed_design_only",
+        "audit_repaired": true
+      }
+    },
+    "D0": {
+      "status": "blocked",
+      "requires": [
+        "A0"
+      ],
+      "updated_at_utc": "2026-09-13T17:23:24.456459+00:00",
+      "facts": {
+        "report": "reports/d0-production-gate.json",
+        "markdown": "reports/d0-production-gate.md",
+        "decision": "blocked_runtime_gate_no_new_qualified_t1_recipe",
+        "new_qualified_t1_recipe_count": 0,
+        "production_batch_launched": false
+      }
+    },
+    "E0": {
+      "status": "complete",
+      "requires": [
+        "A0",
+        "A1",
+        "B1",
+        "B2",
+        "C0",
+        "C1",
+        "C2",
+        "C3",
+        "D0"
+      ],
+      "updated_at_utc": "2026-09-13T17:23:33.199086+00:00",
+      "facts": {
+        "report": "reports/e0-campaign-closeout.json",
+        "markdown": "reports/e0-campaign-closeout.md",
+        "decision": "evidence_complete_internal_development_product; no_public_release",
+        "evidence_complete": true,
+        "public_release_ready": false
+      }
+    }
+  },
+  "resource_usage": {
+    "gpu_hours": 0.04323594618473079,
+    "cpu_core_hours_actual": 0.17931320458555555,
+    "cpu_core_hours_conservative": 0.04323594618473079,
+    "qualification_solver_attempts": 5,
+    "development_solver_attempts": 0,
+    "training_attempts": 0,
+    "material_configurations": 0,
+    "new_storage_bytes": 5332073026
+  },
+  "created_at_utc": "2026-09-13T16:29:26.402244+00:00"
+}

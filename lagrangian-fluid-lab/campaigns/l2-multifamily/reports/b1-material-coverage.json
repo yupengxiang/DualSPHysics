@@ -1,0 +1,429 @@
+{
+  "schema": "l2.b1.material_coverage_cost.v1",
+  "stage": "B1",
+  "created_at_utc": "2026-09-13T16:56:17.846881+00:00",
+  "baseline_commit": "4b554e69d69245db4a6a6772b296cf256c142a16",
+  "status": "complete",
+  "decision": "complete_negative_T2_diagnostic; no material qualification",
+  "source_comparison": {
+    "path": "lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-REF0081818-MATERIAL-COMPARISON-NOMINAL-SUBSTEP.json",
+    "sha256": "8246127d5056a2e7c39575715a8fd64616a0d7b7818da3b893d5673722803439",
+    "status": "candidate_diagnostic_complete_quality_failed",
+    "thresholds": {
+      "mass_closure_relative": 1e-12,
+      "unknown_fraction_per_source": 0.01,
+      "terminal_and_passage_bound_difference": 0.02,
+      "mean_residence_bound_difference_s": 0.167,
+      "observed_event_weighted_mae_s": 0.02,
+      "path_rms_m": 0.003,
+      "path_p95_m": 0.006,
+      "path_max_m": 0.012,
+      "temporal_budget_fraction": 0.2
+    },
+    "qualified_T2_macro": false,
+    "qualified_T2_path": false
+  },
+  "raw_data_table": [
+    {
+      "config_id": "REF008-0075-NOMINAL-s2",
+      "substeps": 2,
+      "seed_count": 512,
+      "elapsed_seconds": 297.44822294600453,
+      "aligned_h5_bytes": 1384661144,
+      "material_npz_bytes": 22449033,
+      "aligned_structural_pass": true,
+      "reliable_fraction": 0.939453125,
+      "support_gate_failure_count": 347,
+      "wall_crossing_event_count": 0,
+      "failure_reason_counts": {
+        "support_gate_failure": 27,
+        "support_nonfinite": 4
+      }
+    },
+    {
+      "config_id": "REF008-0075-NOMINAL-s4",
+      "substeps": 4,
+      "seed_count": 512,
+      "elapsed_seconds": 493.79922445700504,
+      "aligned_h5_bytes": 1384661144,
+      "material_npz_bytes": 22448792,
+      "aligned_structural_pass": true,
+      "reliable_fraction": 0.939453125,
+      "support_gate_failure_count": 360,
+      "wall_crossing_event_count": 0,
+      "failure_reason_counts": {
+        "support_gate_failure": 27,
+        "support_nonfinite": 4
+      }
+    }
+  ],
+  "candidate_audits": [
+    {
+      "config_id": "REF008-0075-NOMINAL-s2",
+      "result": {
+        "path": "lagrangian-fluid-lab/campaigns/l1-resume/data/f3-material-reference/20260913T041909.924669Z-d78083d262/result.json",
+        "sha256": "ae1c00a0a56363f7d6dd9048f423def61030d239dbd02361306490c4e331b309"
+      },
+      "attempt": {
+        "path": "lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-MATERIAL-REFERENCE-REF008-0075-NOMINAL-s2-20260913T041909.924669Z-d78083d262.json",
+        "sha256": "769a1906442a1273d3f361c9b85919bd713bef720b3c9899ab35ac5207287298",
+        "status": "completed",
+        "backend": "cpu",
+        "elapsed_seconds": 297.44822294600453,
+        "cpu_cores": 1,
+        "resource_category": "material"
+      },
+      "configuration": {
+        "config_id": "REF008-0075-NOMINAL-s2",
+        "source_case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+        "dp_m": 0.0075,
+        "amplitude": 1.0,
+        "output_interval_s": 0.01,
+        "substeps": 2,
+        "role": "nominal_saved_frame"
+      },
+      "aligned_scan": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/f3-material-reference/20260913T041909.924669Z-d78083d262/aligned.h5",
+        "file": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/f3-material-reference/20260913T041909.924669Z-d78083d262/aligned.h5",
+          "exists": true,
+          "bytes": 1384661144,
+          "mtime_ns": 1789273182765424087,
+          "sha256": "04c50d79f765784ce5cb918d0a2daaeb612a54c0f2785c36e0463e22c1a47cf8"
+        },
+        "exists": true,
+        "schema": "f3.material.aligned_reference.v1",
+        "attrs": {
+          "schema": "f3.material.aligned_reference.v1",
+          "source_case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+          "source_sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+          "time_alignment": "Offline reconstruction of the numerical reference by linear interpolation of unchanged native particle identities and masses onto fixed 0..8.35 s targets; the right native bracket may be later than the target. No control extension or omitted final interval. This is reference reconstruction, not permission for a predictive model to read future fluid state."
+        },
+        "frame_count": 836,
+        "particle_count": 34560,
+        "time_start_s": 0.0,
+        "time_end_s": 8.35,
+        "time_monotonic": true,
+        "identity_unique": true,
+        "finite_active": {
+          "position": true,
+          "velocity": true,
+          "mass": true
+        },
+        "valid_entries": 28892160,
+        "invalid_entries": 0,
+        "invalid_fraction": 0.0,
+        "initial_valid_count": 34560,
+        "final_valid_count": 34560,
+        "initial_mass_kg": 14.580000378191471,
+        "final_mass_kg": 14.580000378191471,
+        "mass_closure_relative": 0.0,
+        "errors": [],
+        "structural_pass": true
+      },
+      "material_scan": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/f3-material-reference/20260913T041909.924669Z-d78083d262/material.npz",
+        "file": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/f3-material-reference/20260913T041909.924669Z-d78083d262/material.npz",
+          "exists": true,
+          "bytes": 22449033,
+          "mtime_ns": 1789273445161035037,
+          "sha256": "c15853a687f010161762df609401d85860d5ad858ed7cff66024849265069889"
+        },
+        "exists": true,
+        "seed_count": 512,
+        "source_labels": [
+          0,
+          1
+        ],
+        "reliable_fraction": 0.939453125,
+        "support_gate_failure_count": 347,
+        "support_gate_failure_fraction_of_frame_seed_pairs": 0.0008116579341317365,
+        "wall_crossing_event_count": 0,
+        "failure_reason_counts": {
+          "support_gate_failure": 27,
+          "support_nonfinite": 4
+        },
+        "by_source": {
+          "0": {
+            "seed_count": 256,
+            "reliable_fraction": 0.9375,
+            "first_failure_fraction": 0.0625,
+            "median_first_failure_time_s": 2.5,
+            "first_failure_time_p95_s": 7.855,
+            "first_passage_status_counts": {
+              "valid_no_event": 136,
+              "censored": 16,
+              "observed": 104
+            },
+            "terminal_label_counts": {
+              "0": 183,
+              "2": 16,
+              "1": 57
+            }
+          },
+          "1": {
+            "seed_count": 256,
+            "reliable_fraction": 0.94140625,
+            "first_failure_fraction": 0.05859375,
+            "median_first_failure_time_s": 3.37,
+            "first_failure_time_p95_s": 8.299000000000001,
+            "first_passage_status_counts": {
+              "observed": 88,
+              "valid_no_event": 153,
+              "censored": 15
+            },
+            "terminal_label_counts": {
+              "1": 241,
+              "2": 15
+            }
+          }
+        },
+        "status_counts": {
+          "valid_no_event": 289,
+          "censored": 31,
+          "observed": 192
+        },
+        "terminal_counts": {
+          "0": 183,
+          "2": 31,
+          "1": 298
+        }
+      }
+    },
+    {
+      "config_id": "REF008-0075-NOMINAL-s4",
+      "result": {
+        "path": "lagrangian-fluid-lab/campaigns/l1-resume/data/f3-material-reference/20260913T042459.344502Z-8b34920167/result.json",
+        "sha256": "acd5efc3e3de9afd215db677bd12c3d433ba3640d2882f209f13a0519d07bb3a"
+      },
+      "attempt": {
+        "path": "lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-MATERIAL-REFERENCE-REF008-0075-NOMINAL-s4-20260913T042459.344502Z-8b34920167.json",
+        "sha256": "895e57d25943773ec10e4db538a650f9df3be6bf6601f1f085e0f82fcef48d59",
+        "status": "completed",
+        "backend": "cpu",
+        "elapsed_seconds": 493.79922445700504,
+        "cpu_cores": 1,
+        "resource_category": "material"
+      },
+      "configuration": {
+        "config_id": "REF008-0075-NOMINAL-s4",
+        "source_case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+        "dp_m": 0.0075,
+        "amplitude": 1.0,
+        "output_interval_s": 0.01,
+        "substeps": 4,
+        "role": "nominal_substep_sensitivity"
+      },
+      "aligned_scan": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/f3-material-reference/20260913T042459.344502Z-8b34920167/aligned.h5",
+        "file": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/f3-material-reference/20260913T042459.344502Z-8b34920167/aligned.h5",
+          "exists": true,
+          "bytes": 1384661144,
+          "mtime_ns": 1789273532900548731,
+          "sha256": "04c50d79f765784ce5cb918d0a2daaeb612a54c0f2785c36e0463e22c1a47cf8"
+        },
+        "exists": true,
+        "schema": "f3.material.aligned_reference.v1",
+        "attrs": {
+          "schema": "f3.material.aligned_reference.v1",
+          "source_case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+          "source_sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+          "time_alignment": "Offline reconstruction of the numerical reference by linear interpolation of unchanged native particle identities and masses onto fixed 0..8.35 s targets; the right native bracket may be later than the target. No control extension or omitted final interval. This is reference reconstruction, not permission for a predictive model to read future fluid state."
+        },
+        "frame_count": 836,
+        "particle_count": 34560,
+        "time_start_s": 0.0,
+        "time_end_s": 8.35,
+        "time_monotonic": true,
+        "identity_unique": true,
+        "finite_active": {
+          "position": true,
+          "velocity": true,
+          "mass": true
+        },
+        "valid_entries": 28892160,
+        "invalid_entries": 0,
+        "invalid_fraction": 0.0,
+        "initial_valid_count": 34560,
+        "final_valid_count": 34560,
+        "initial_mass_kg": 14.580000378191471,
+        "final_mass_kg": 14.580000378191471,
+        "mass_closure_relative": 0.0,
+        "errors": [],
+        "structural_pass": true
+      },
+      "material_scan": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/f3-material-reference/20260913T042459.344502Z-8b34920167/material.npz",
+        "file": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/f3-material-reference/20260913T042459.344502Z-8b34920167/material.npz",
+          "exists": true,
+          "bytes": 22448792,
+          "mtime_ns": 1789273991407479773,
+          "sha256": "eeb4644b13d54fde7e5c61156badcb2971c6d9041eb20ccc91b75552a2c52ba5"
+        },
+        "exists": true,
+        "seed_count": 512,
+        "source_labels": [
+          0,
+          1
+        ],
+        "reliable_fraction": 0.939453125,
+        "support_gate_failure_count": 360,
+        "support_gate_failure_fraction_of_frame_seed_pairs": 0.0008420658682634731,
+        "wall_crossing_event_count": 0,
+        "failure_reason_counts": {
+          "support_gate_failure": 27,
+          "support_nonfinite": 4
+        },
+        "by_source": {
+          "0": {
+            "seed_count": 256,
+            "reliable_fraction": 0.9375,
+            "first_failure_fraction": 0.0625,
+            "median_first_failure_time_s": 2.5,
+            "first_failure_time_p95_s": 7.855,
+            "first_passage_status_counts": {
+              "valid_no_event": 136,
+              "censored": 16,
+              "observed": 104
+            },
+            "terminal_label_counts": {
+              "0": 182,
+              "2": 16,
+              "1": 58
+            }
+          },
+          "1": {
+            "seed_count": 256,
+            "reliable_fraction": 0.94140625,
+            "first_failure_fraction": 0.05859375,
+            "median_first_failure_time_s": 3.37,
+            "first_failure_time_p95_s": 8.299000000000001,
+            "first_passage_status_counts": {
+              "observed": 88,
+              "valid_no_event": 153,
+              "censored": 15
+            },
+            "terminal_label_counts": {
+              "1": 241,
+              "2": 15
+            }
+          }
+        },
+        "status_counts": {
+          "valid_no_event": 289,
+          "censored": 31,
+          "observed": 192
+        },
+        "terminal_counts": {
+          "0": 182,
+          "2": 31,
+          "1": 299
+        }
+      }
+    }
+  ],
+  "coverage_statistics": {
+    "seed_count_per_configuration": 512,
+    "configuration_count": 2,
+    "reliable_fraction_across_configurations": {
+      "n": 2,
+      "mean": 0.939453125,
+      "std_population": 0.0,
+      "std_sample": 0.0
+    },
+    "support_gate_failure_count_across_configurations": {
+      "n": 2,
+      "mean": 353.5,
+      "std_population": 6.5,
+      "std_sample": 9.192388155425117
+    },
+    "unknown_fraction_max_by_source_across_s2_s4": {
+      "0": [
+        0.0625,
+        0.0625
+      ],
+      "1": [
+        0.05859375,
+        0.05859375
+      ]
+    },
+    "unknown_fraction_mean_std_by_source": {
+      "0": {
+        "n": 2,
+        "mean": 0.0625,
+        "std_population": 0.0,
+        "std_sample": 0.0
+      },
+      "1": {
+        "n": 2,
+        "mean": 0.05859375,
+        "std_population": 0.0,
+        "std_sample": 0.0
+      }
+    },
+    "terminal_bound_difference_by_source": {
+      "0": 0.06640625,
+      "1": 0.05859375
+    },
+    "first_passage_cdf_worst_bound_difference_by_source": {
+      "0": 0.0625,
+      "1": 0.05859375
+    },
+    "residence_bound_difference_s_by_source": {
+      "0": 0.2759085498876708,
+      "1": 0.20842411221856771
+    },
+    "observed_event_weighted_mae_s_by_source": {
+      "0": 0.00035997401683349835,
+      "1": 0.00025726307299823244
+    },
+    "path_statistics": null,
+    "path_status": "unknown/not computed; full path reliability gate failed"
+  },
+  "cost_accounting": {
+    "historical_candidate_cpu_seconds": [
+      297.44822294600453,
+      493.79922445700504
+    ],
+    "historical_candidate_cpu_core_hours": 0.2197909576119471,
+    "historical_candidate_is_not_charged_to_L2_usage": true,
+    "new_l2_execution": "read-only audit; no solver/material configuration launched",
+    "physical_units": {
+      "time": "seconds",
+      "path": "metres",
+      "fraction": "dimensionless mass/seed fraction",
+      "storage": "bytes",
+      "cpu": "CPU seconds and CPU core-hours"
+    }
+  },
+  "key_findings": [
+    "Both retained candidates have the same 512-seed reliability fraction: 481/512 = 0.939453125; 31 seeds are censored before the end.",
+    "The s2 and s4 bundles share the same first-failure set at the recorded resolution of this audit; support-gate failure counts differ slightly (347 versus 360 frame-seed pairs), so extra substeps do not repair coverage.",
+    "Per-source unknown mass reaches 0.0625 for source 0 and 0.05859375 for source 1, above the 0.01 candidate budget; terminal and first-passage bound differences also exceed the candidate limits.",
+    "Observed event timing is numerically small in the surviving common subset (source-wise weighted MAE about 0.000258–0.000360 s), but this does not compensate for the approximately 6% censored mass and missing path qualification.",
+    "The aligned HDF5 structural scans and source hashes are retained; neither candidate is reclassified as T2_macro or T2_path qualified."
+  ],
+  "next_experiments": [
+    "Do not spend the remaining material matrix on more s2/s4 repetitions of the same nominal source until the failure window is instrumented.",
+    "Run one bounded diagnostic at the first-failure window with near-wall distance, visible-neighbour/support statistics, source visibility, and mass/identity loss recorded together.",
+    "If that diagnostic identifies a deterministic coverage repair, spend at most one canary configuration on the repair and compare common-observed, coverage-loss, and worst-case uncertainty separately.",
+    "Keep T2_path blocked until a full-coverage or explicitly interval-censored path reference exists; a smaller event-time error alone is not a path pass."
+  ],
+  "acceptance": {
+    "two_candidates_independently_scanned": true,
+    "coverage_failure_is_explicit": true,
+    "path_not_promoted": true,
+    "cost_units_separated": true,
+    "seed_statistics_not_overcounted": true
+  },
+  "resource_observation": {
+    "wall_seconds": 10.605090668002958,
+    "process_cpu_seconds": 10.600011454999999,
+    "new_solver_attempts": 0,
+    "new_material_configurations": 0,
+    "new_storage_bytes": 19475
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "schema": "l2.e0.campaign_closeout.v1",
+  "stage": "E0",
+  "created_at_utc": "2026-09-13T17:23:33.196853+00:00",
+  "baseline_commit": "4b554e69d69245db4a6a6772b296cf256c142a16",
+  "status": "complete_with_findings",
+  "decision": "evidence_complete_internal_development_product; no_public_release",
+  "terminal_predicate": {
+    "all_applicable_branches_terminal": true,
+    "evidence_complete": true,
+    "new_t1_family_qualification_exists": false,
+    "public_release_ready": false
+  },
+  "stage_outcomes": {
+    "A0": {
+      "status": "complete",
+      "facts": {
+        "report": "reports/a0-replay.json",
+        "canonical_manifest": "evidence/f3-canonical-manifest.json",
+        "case_count": 32,
+        "sentinel_count": 4
+      }
+    },
+    "A1": {
+      "status": "complete",
+      "facts": {
+        "report": "reports/a1-model-failure-diagnostics.json",
+        "logical_runs": 6,
+        "case_runs": 96,
+        "model_pass_count": 0
+      }
+    },
+    "B1": {
+      "status": "complete",
+      "facts": {
+        "report": "reports/b1-material-coverage.json",
+        "markdown": "reports/b1-material-coverage.md",
+        "decision": "complete_negative_T2_diagnostic; no material qualification",
+        "new_material_configurations": 0
+      }
+    },
+    "B2": {
+      "status": "complete",
+      "facts": {
+        "report": "reports/b2-learning-baseline.json",
+        "markdown": "reports/b2-learning-baseline.md",
+        "decision": "candidate_only_routes_registered; no model_or_data_qualification",
+        "seed_complete_tracks": 2,
+        "model_physical_pass_count": 0,
+        "new_training_attempts": 0
+      }
+    },
+    "C0": {
+      "status": "complete",
+      "facts": {
+        "report": "reports/c0-family-hypotheses.json",
+        "family_count": 6,
+        "solver_attempts": 0,
+        "priority_families": [
+          "F1",
+          "F2"
+        ]
+      }
+    },
+    "C1": {
+      "status": "complete",
+      "facts": {
+        "report": "reports/c1-canary.json",
+        "decision": "bounded_canary_finding; no family qualification",
+        "attempt_count": 1,
+        "canary_pass_count": 0
+      }
+    },
+    "C2": {
+      "status": "complete",
+      "facts": {
+        "report": "reports/c2-f3-canary.json",
+        "decision": "bounded_canary_finding; F3 extension not qualified",
+        "canary_pass": false
+      }
+    },
+    "C3": {
+      "status": "complete",
+      "facts": {
+        "report": "reports/c3-bounded-anchors.json",
+        "decision": "bounded_capability_map_with_no_qualification_claim",
+        "attempt_count": 2,
+        "F6_status": "not_executed_design_only",
+        "audit_repaired": true
+      }
+    },
+    "D0": {
+      "status": "blocked",
+      "facts": {
+        "report": "reports/d0-production-gate.json",
+        "markdown": "reports/d0-production-gate.md",
+        "decision": "blocked_runtime_gate_no_new_qualified_t1_recipe",
+        "new_qualified_t1_recipe_count": 0,
+        "production_batch_launched": false
+      }
+    },
+    "E0": {
+      "status": "pending",
+      "facts": {}
+    }
+  },
+  "product_boundary": {
+    "existing_f3_registered_numerical_cases": 32,
+    "new_l2_qualified_families": 0,
+    "bounded_families_with_evidence": [
+      "F1",
+      "F2",
+      "F3",
+      "F4",
+      "F5"
+    ],
+    "F6": "design_only_not_executed",
+    "t2_macro_qualified": false,
+    "t2_path_qualified": false,
+    "model_physical_pass_count": 0,
+    "candidate_learning_tracks": 2,
+    "public_release_authorized": false
+  },
+  "resource_usage": {
+    "gpu_hours": 0.04323594618473079,
+    "cpu_core_hours_actual": 0.17931320458555555,
+    "cpu_core_hours_conservative": 0.04323594618473079,
+    "qualification_solver_attempts": 5,
+    "development_solver_attempts": 0,
+    "training_attempts": 0,
+    "material_configurations": 0,
+    "new_storage_bytes": 5332067374,
+    "limits": {
+      "gpu_hours": 96,
+      "cpu_core_hours": 384,
+      "new_storage_gib": 1024,
+      "min_free_gib": 200,
+      "min_free_fraction": 0.2,
+      "lifetime_days_from_adoption": 10,
+      "qualification_solver_attempts": 80,
+      "development_solver_attempts": 160,
+      "training_attempts": 18,
+      "full_material_configurations": 24,
+      "concurrent_heavy_gpu_tasks": 4,
+      "concurrent_tasks_per_gpu": 2
+    },
+    "gpu_budget_fraction": 0.00045037443942427905,
+    "cpu_budget_fraction": 0.00046696147027488425,
+    "storage_budget_fraction": 0.004849487026149291,
+    "free_bytes_at_closeout": 9140370116608,
+    "free_fraction_at_closeout": 0.5758209740803203,
+    "minimum_free_gate_pass": true
+  },
+  "remaining_work": [
+    "qualify at least one new family-scoped T1 recipe before any D0 production batch",
+    "run independent accepted/rejected cases only after split and input gates are frozen",
+    "keep T2 material/path claims separate from T1 numerical evidence",
+    "replace candidate-only learning diagnostics with a new registered GNS/hybrid study if model qualification is desired"
+  ],
+  "authorization_boundary": {
+    "no_public_release": true,
+    "no_hidden_test_generation": true,
+    "no_vendor_writes": true,
+    "legacy_l1_read_only": true
+  }
+}
