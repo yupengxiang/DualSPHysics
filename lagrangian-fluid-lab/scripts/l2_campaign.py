@@ -28,6 +28,11 @@ import zipfile
 import h5py
 import numpy as np
 
+try:
+    from scripts.finite_wall_audit import wall_penetration
+except ModuleNotFoundError:  # pragma: no cover - direct script execution
+    from finite_wall_audit import wall_penetration
+
 
 REPO = Path(__file__).resolve().parents[2]
 LAB = REPO / "lagrangian-fluid-lab"
@@ -44,8 +49,14 @@ DEFAULT_CLOSEOUT = LAB / "campaigns/l1-resume/continuation/F3-REF0081818-CAMPAIG
 DEFAULT_REGISTRY = LAB / "campaigns/l1-resume/continuation/F3-075-REF0081818-DEVELOPMENT-REGISTRY.json"
 DEFAULT_MATERIAL_INDEX = LAB / "campaigns/l1-resume/continuation/F3-REF0081818-MATERIAL-ARCHIVE-INDEX.json"
 CHUNK_SIZE = 64 * 1024 * 1024
-F3_WALL_BOUNDS = {"xmin": -0.45, "xmax": 0.45, "ymin": -0.09, "ymax": 0.09, "zmin": 0.0}
+F3_WALL_BOUNDS = {
+    "xmin": -0.45, "xmax": 0.45, "ymin": -0.09, "ymax": 0.09,
+    "zmin": 0.0, "zmax": 0.6,
+    "closed_faces": ["bottom", "left", "right", "front", "back"],
+    "open_faces": ["top"],
+}
 REQUIRED_TRAJECTORY_DATASETS = ("time", "position", "velocity", "mass", "particle_id", "valid")
+STAGE_DEPENDENCY_STATUSES = frozenset({"complete", "complete_with_findings", "blocked_external"})
 
 
 def utc_now() -> str:
@@ -297,7 +308,14 @@ def update_stage(stage: str, status: str, *, facts: dict | None = None) -> None:
         if task["stage"] == stage:
             task["status"] = status
             task["updated_at_utc"] = state["stages"][stage]["updated_at_utc"]
-    completed = {task["stage"] for task in queue["tasks"] if task["status"] in ("complete", "blocked")}
+    # ``blocked`` and ``blocked_upstream`` are not successful prerequisites.
+    # Only a completed task, a completed-with-findings task, or a specifically
+    # evidenced external block can release a dependent task.  In particular,
+    # the old ``complete -> blocked -> E0`` shortcut must not be recreated.
+    completed = {
+        task["stage"] for task in queue["tasks"]
+        if task["status"] in STAGE_DEPENDENCY_STATUSES
+    }
     for task in queue["tasks"]:
         if task["status"] == "pending" and all(req in completed for req in task["requires"]):
             task["status"] = "ready"
@@ -332,9 +350,61 @@ def _scan_array(dataset: h5py.Dataset, *, finite: bool = True) -> tuple[bool, in
     return True, count
 
 
+def _coerce_wall_spec(wall_bounds: dict | None, wall_spec: dict | None) -> tuple[dict | None, str]:
+    """Convert legacy bounds to the finite-wall contract without making an AABB wall.
+
+    A legacy dictionary is accepted only when it declares the finite ``zmax``
+    rim as well as the five lower/side bounds.
+    Without a finite rim the physical-wall verdict is unknown, rather than an
+    infinite vertical-plane pass/fail result.
+    """
+
+    raw = wall_spec if wall_spec is not None else wall_bounds
+    if raw is None:
+        return None, "not_checked"
+    dynamic_requested = bool(
+        raw.get("moving_geometry_required")
+        or raw.get("dynamic_geometry_required")
+        or str(raw.get("geometry_mode", "")).lower() in {"moving", "dynamic"}
+    )
+    if dynamic_requested:
+        # The endpoint audit below is valid only for a fixed finite geometry.
+        # A moving cup needs a per-frame pose/boundary adapter before its wall
+        # result can be promoted to a production gate.
+        return None, "unknown"
+    if "container_interior" in raw:
+        spec = dict(raw)
+        container = dict(spec.get("container_interior", {}))
+    else:
+        required = ("xmin", "xmax", "ymin", "ymax", "zmin", "zmax")
+        if any(key not in raw for key in required):
+            return None, "unknown"
+        container = {key: raw[key] for key in required}
+        spec = {
+            "container_interior": container,
+            "closed_faces": raw.get("closed_faces", ["bottom", "left", "right", "front", "back"]),
+            "open_faces": raw.get("open_faces", ["top"]),
+        }
+        if "obstacles" in raw:
+            spec["obstacles"] = raw["obstacles"]
+        if "runtime_domain" in raw:
+            spec["runtime_domain"] = raw["runtime_domain"]
+    if any(key not in container for key in ("xmin", "xmax", "ymin", "ymax", "zmin", "zmax")):
+        return None, "unknown"
+    spec["container_interior"] = container
+    return spec, "checked"
+
+
 def inspect_hdf5(path: Path, *, full_scan: bool = True, wall_bounds: dict | None = None,
+                 wall_spec: dict | None = None, runtime_domain: dict | None = None,
                  compare: dict | None = None) -> dict:
-    """Independently validate trajectory structure and finite state."""
+    """Independently validate active trajectory state and finite geometry.
+
+    Inactive padding is allowed to contain NaN.  Active finite state, positive
+    mass, lifecycle semantics, and finite closed-wall crossings are reported as
+    separate gates so a conversion placeholder cannot be confused with solver
+    divergence or physical loss.
+    """
 
     result: dict[str, Any] = {"path": str(path.resolve()), "exists": path.is_file()}
     if not path.is_file():
@@ -360,6 +430,9 @@ def inspect_hdf5(path: Path, *, full_scan: bool = True, wall_bounds: dict | None
         particle_id = np.asarray(handle["particle_id"][:])
         expected_t = len(time_axis)
         expected_n = len(particle_id)
+        valid_dtype_ok = bool(
+            np.issubdtype(valid.dtype, np.bool_) or np.issubdtype(valid.dtype, np.integer)
+        )
         shape_checks = {
             "time": time_axis.ndim == 1 and expected_t >= 2 and np.isfinite(time_axis).all() and np.all(np.diff(time_axis) > 0),
             "particle_id": particle_id.ndim == 1 and expected_n > 0 and len(np.unique(particle_id)) == expected_n,
@@ -369,51 +442,180 @@ def inspect_hdf5(path: Path, *, full_scan: bool = True, wall_bounds: dict | None
             "mass": mass.shape in ((expected_n,), (expected_t, expected_n)),
         }
         errors.extend([f"shape:{key}" for key, okay in shape_checks.items() if not okay])
+        if not valid_dtype_ok:
+            errors.append("valid:dtype")
         finite = {"position": True, "velocity": True, "mass": True}
+        optional_finite: dict[str, bool] = {}
+        for optional in ("density", "pressure"):
+            if optional in handle:
+                optional_finite[optional] = True
         valid_count = 0
         mass_min = math.inf
         mass_max = -math.inf
         wall_violation_count = 0
         wall_violation_mass = 0.0
+        inactive_nonfinite: Counter[str] = Counter()
+        active_mass_positive = True
+        mass_change_max_relative = 0.0
+        initial_mass_total = math.nan
+        final_mass_total = math.nan
+        mass_reference = np.full(expected_n, np.nan, dtype=np.float64)
+        initial_valid = np.zeros(expected_n, dtype=bool)
+        final_valid = np.zeros(expected_n, dtype=bool)
+        ever_valid = np.zeros(expected_n, dtype=bool)
+        dead_after_valid = np.zeros(expected_n, dtype=bool)
+        birth_count = 0
+        death_count = 0
+        resurrection_count = 0
+        previous_valid: np.ndarray | None = None
+        wall_payload, wall_status = _coerce_wall_spec(wall_bounds, wall_spec)
+        if wall_payload is not None and runtime_domain is not None:
+            wall_payload = dict(wall_payload)
+            wall_payload["runtime_domain"] = runtime_domain
+        elif wall_payload is not None and "runtime_domain" not in wall_payload:
+            wall_payload = dict(wall_payload)
         if not errors and full_scan:
             for start in range(0, expected_t, 16):
                 stop = min(start + 16, expected_t)
                 positions = np.asarray(position[start:stop], dtype=np.float64)
                 velocities = np.asarray(velocity[start:stop], dtype=np.float64)
-                masses = np.asarray(mass[start:stop] if mass.ndim == 2 else mass[:], dtype=np.float64)
-                frame_valid = np.asarray(valid[start:stop], dtype=bool)
-                finite["position"] = finite["position"] and bool(np.isfinite(positions).all())
-                finite["velocity"] = finite["velocity"] and bool(np.isfinite(velocities).all())
-                finite["mass"] = finite["mass"] and bool(np.isfinite(masses).all())
-                valid_count += int(frame_valid.sum())
-                mass_min = min(mass_min, float(np.min(masses)))
-                mass_max = max(mass_max, float(np.max(masses)))
-                if wall_bounds:
-                    active = frame_valid & np.isfinite(positions).all(axis=2)
-                    outside = (
-                        (positions[:, :, 0] < wall_bounds["xmin"] - 1e-8)
-                        | (positions[:, :, 0] > wall_bounds["xmax"] + 1e-8)
-                        | (positions[:, :, 1] < wall_bounds["ymin"] - 1e-8)
-                        | (positions[:, :, 1] > wall_bounds["ymax"] + 1e-8)
-                        | (positions[:, :, 2] < wall_bounds["zmin"] - 1e-8)
-                    ) & active
-                    wall_violation_count += int(outside.sum())
-                    if mass.ndim == 2:
-                        wall_violation_mass += float(np.where(outside, masses, 0.0).sum())
+                masses = np.asarray(
+                    mass[start:stop] if mass.ndim == 2 else np.broadcast_to(mass[:], (stop - start, expected_n)),
+                    dtype=np.float64,
+                )
+                raw_valid = np.asarray(valid[start:stop])
+                if valid_dtype_ok and np.issubdtype(raw_valid.dtype, np.integer):
+                    if not np.isin(raw_valid, (0, 1)).all():
+                        errors.append("valid:values")
+                    frame_valid_block = raw_valid.astype(bool)
+                else:
+                    frame_valid_block = raw_valid.astype(bool)
+                for row_index, frame_valid in enumerate(frame_valid_block):
+                    if start == 0 and row_index == 0:
+                        initial_valid = frame_valid.copy()
+                    if previous_valid is not None:
+                        births = (~previous_valid) & frame_valid
+                        deaths = previous_valid & (~frame_valid)
+                        resurrection_count += int((dead_after_valid & (~previous_valid) & frame_valid).sum())
+                        birth_count += int(births.sum())
+                        death_count += int(deaths.sum())
+                        dead_after_valid |= deaths
+                    ever_valid |= frame_valid
+                    previous_valid = frame_valid.copy()
+                    final_valid = frame_valid.copy()
+                    row_mass = masses[row_index]
+                    row_finite_mass = frame_valid & np.isfinite(row_mass)
+                    row_mass_total = float(np.sum(row_mass[row_finite_mass], dtype=np.float64))
+                    if initial_mass_total != initial_mass_total:
+                        initial_mass_total = row_mass_total
+                    final_mass_total = row_mass_total
+                active = frame_valid_block
+                active_position_finite = np.isfinite(positions).all(axis=2)
+                active_velocity_finite = np.isfinite(velocities).all(axis=2)
+                active_mass_finite = np.isfinite(masses)
+                finite["position"] = finite["position"] and bool(active_position_finite[active].all())
+                finite["velocity"] = finite["velocity"] and bool(active_velocity_finite[active].all())
+                finite["mass"] = finite["mass"] and bool(active_mass_finite[active].all())
+                active_mass_positive = active_mass_positive and bool((masses[active] > 0).all())
+                valid_count += int(active.sum())
+                if active.any():
+                    active_values = masses[active]
+                    mass_min = min(mass_min, float(np.min(active_values)))
+                    mass_max = max(mass_max, float(np.max(active_values)))
+                inactive = ~active
+                inactive_nonfinite["position"] += int((~active_position_finite & inactive).sum())
+                inactive_nonfinite["velocity"] += int((~active_velocity_finite & inactive).sum())
+                inactive_nonfinite["mass"] += int((~active_mass_finite & inactive).sum())
+                for optional, flag in optional_finite.items():
+                    values = np.asarray(handle[optional][start:stop], dtype=np.float64)
+                    if values.shape[:2] == active.shape:
+                        finite_values = np.isfinite(values)
+                        selector_shape = active.shape + (1,) * max(0, values.ndim - 2)
+                        flag_active = np.broadcast_to(active.reshape(selector_shape), values.shape)
+                        optional_finite[optional] = flag and bool(finite_values[flag_active].all())
+                        inactive_nonfinite[optional] += int((~finite_values & (~flag_active)).sum())
+                    else:
+                        optional_finite[optional] = False
+                        errors.append(f"shape:{optional}")
+                for row_index, frame_valid in enumerate(frame_valid_block):
+                    row_mass = masses[row_index]
+                    selected = frame_valid & np.isfinite(row_mass)
+                    if selected.any():
+                        reference = mass_reference[selected]
+                        unset = ~np.isfinite(reference)
+                        selected_indices = np.flatnonzero(selected)
+                        if unset.any():
+                            mass_reference[selected_indices[unset]] = row_mass[selected_indices[unset]]
+                        set_indices = selected_indices[~unset]
+                        if len(set_indices):
+                            denominator = np.maximum(np.abs(mass_reference[set_indices]), 1e-30)
+                            relative = np.abs(row_mass[set_indices] - mass_reference[set_indices]) / denominator
+                            mass_change_max_relative = max(mass_change_max_relative, float(np.max(relative)))
+                if wall_payload is not None:
+                    for row_index, frame_valid in enumerate(frame_valid_block):
+                        selected = frame_valid & np.isfinite(positions[row_index]).all(axis=1)
+                        if not selected.any():
+                            continue
+                        wall = wall_penetration(
+                            positions[row_index][selected], masses[row_index][selected], wall_payload, 1e-8
+                        )
+                        wall_violation_count += int(wall["outside_closed_container_count"] + wall["obstacle_penetration_count"])
+                        wall_violation_mass += float(
+                            wall["outside_closed_container_mass_kg"] + wall["obstacle_penetration_mass_kg"]
+                        )
         else:
             finite = {key: False for key in finite}
+            active_mass_positive = False
+            wall_status = "not_scanned"
+        lifecycle_model = str(handle.attrs.get("lifecycle_model", "closed")).lower()
+        if lifecycle_model not in {"closed", "open"}:
+            errors.append("lifecycle:model")
+        if lifecycle_model == "closed" and (birth_count or death_count or resurrection_count):
+            errors.append("lifecycle:closed_transition")
+        if not active_mass_positive:
+            errors.append("mass:active_nonpositive_or_nonfinite")
+        if valid_count == 0:
+            active_mass_positive = False
+            errors.append("valid:no_active_entries")
+        if mass_change_max_relative > 1e-8:
+            errors.append("mass:active_change")
+        if wall_status == "unknown":
+            errors.append("wall:finite_geometry_unknown")
         errors.extend([f"nonfinite:{key}" for key, okay in finite.items() if not okay])
+        errors.extend([f"nonfinite:{key}" for key, okay in optional_finite.items() if not okay])
         result.update({
             "time_start_s": float(time_axis[0]) if expected_t else None,
             "time_end_s": float(time_axis[-1]) if expected_t else None,
             "frame_count": expected_t,
             "particle_count": expected_n,
             "finite": finite,
+            "finite_active": {**finite, **optional_finite},
+            "inactive_nonfinite_counts": dict(inactive_nonfinite),
             "valid_entries_scanned": valid_count,
             "mass_min_kg": None if mass_min == math.inf else mass_min,
             "mass_max_kg": None if mass_max == -math.inf else mass_max,
+            "initial_mass_kg": None if not math.isfinite(initial_mass_total) else initial_mass_total,
+            "final_mass_kg": None if not math.isfinite(final_mass_total) else final_mass_total,
+            "mass_loss_kg": (
+                None if not (math.isfinite(initial_mass_total) and math.isfinite(final_mass_total))
+                else initial_mass_total - final_mass_total
+            ),
+            "final_mass_fraction_of_initial": (
+                None if not (math.isfinite(initial_mass_total) and initial_mass_total > 0 and math.isfinite(final_mass_total))
+                else final_mass_total / initial_mass_total
+            ),
+            "active_mass_positive": active_mass_positive,
+            "mass_change_max_relative": mass_change_max_relative,
+            "initial_valid_count": int(initial_valid.sum()),
+            "final_valid_count": int(final_valid.sum()),
+            "identities_ever_valid": int(ever_valid.sum()),
+            "birth_count": birth_count,
+            "death_count": death_count,
+            "resurrection_count": resurrection_count,
+            "lifecycle_model": lifecycle_model,
             "wall_violation_count": wall_violation_count,
             "wall_violation_mass_kg": wall_violation_mass,
+            "wall_status": wall_status,
             "full_scan": full_scan,
         })
     result["errors"] = errors
@@ -872,21 +1074,28 @@ def oracle_for_hdf5(path: Path) -> dict:
             next_position = np.asarray(positions[frame + 1], dtype=np.float64)
             next_velocity = np.asarray(velocities[frame], dtype=np.float64)
             active = np.asarray(valid[frame], dtype=bool) & np.asarray(valid[frame + 1], dtype=bool)
-            outside = (
-                (next_position[:, 0] < F3_WALL_BOUNDS["xmin"] - 1e-8)
-                | (next_position[:, 0] > F3_WALL_BOUNDS["xmax"] + 1e-8)
-                | (next_position[:, 1] < F3_WALL_BOUNDS["ymin"] - 1e-8)
-                | (next_position[:, 1] > F3_WALL_BOUNDS["ymax"] + 1e-8)
-                | (next_position[:, 2] < F3_WALL_BOUNDS["zmin"] - 1e-8)
-            ) & active
-            truth_outside += int(outside.sum())
+            finite_position = np.isfinite(current).all(axis=1) & np.isfinite(next_position).all(axis=1)
+            wall_active = active & finite_position
+            if wall_active.any():
+                wall = wall_penetration(
+                    next_position[wall_active], np.ones(int(wall_active.sum())), F3_WALL_BOUNDS, 1e-8
+                )
+                truth_outside += int(
+                    wall["outside_closed_container_count"] + wall["obstacle_penetration_count"]
+                )
             delta = next_position - current
-            displacement_error_max = max(displacement_error_max, float(np.max(np.abs(current + delta - next_position))))
+            if finite_position.any():
+                displacement_error_max = max(
+                    displacement_error_max,
+                    float(np.max(np.abs(current[finite_position] + delta[finite_position] - next_position[finite_position]))),
+                )
             dt = float(times[frame + 1] - times[frame])
-            velocity_error = np.linalg.norm(next_position - (current + next_velocity * dt), axis=1)[active]
+            error_active = wall_active & np.isfinite(next_velocity).all(axis=1)
+            velocity_error = np.linalg.norm(next_position - (current + next_velocity * dt), axis=1)[error_active]
             velocity_errors.extend(velocity_error.tolist())
             constant = initial_position + initial_velocity * float(times[frame + 1] - times[0])
-            constant_error = np.linalg.norm(next_position - constant, axis=1)[active]
+            constant_active = error_active & np.isfinite(initial_position).all(axis=1) & np.isfinite(initial_velocity).all(axis=1)
+            constant_error = np.linalg.norm(next_position - constant, axis=1)[constant_active]
             constant_errors.extend(constant_error.tolist())
         result.update({
             "truth_identity_axis_unique": len(np.unique(particle_id)) == n,

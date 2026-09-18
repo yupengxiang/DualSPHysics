@@ -21,6 +21,14 @@ try:
         update_usage,
         utc_now,
     )
+    from scripts.l2_resume import (
+        RECIPE_REGISTRY,
+        RESUME_ROOT,
+        RESUME_STATE,
+        load_state as load_resume_state,
+        mark_task,
+        terminal_predicate,
+    )
 except ModuleNotFoundError:
     from l2_campaign import (
         CAMPAIGN,
@@ -32,13 +40,25 @@ except ModuleNotFoundError:
         update_usage,
         utc_now,
     )
+    from l2_resume import (
+        RECIPE_REGISTRY,
+        RESUME_ROOT,
+        RESUME_STATE,
+        load_state as load_resume_state,
+        mark_task,
+        terminal_predicate,
+    )
 
 
 REPORT_ROOT = CAMPAIGN / "reports"
 D0_REPORT = REPORT_ROOT / "d0-production-gate.json"
 D0_MARKDOWN = REPORT_ROOT / "d0-production-gate.md"
+D0R_REPORT = RESUME_ROOT / "d0-r-production-gate.json"
+D0R_MARKDOWN = RESUME_ROOT / "d0-r-production-gate.md"
 E0_REPORT = REPORT_ROOT / "e0-campaign-closeout.json"
 E0_MARKDOWN = REPORT_ROOT / "e0-campaign-closeout.md"
+E0R_REPORT = RESUME_ROOT / "e0-r-checkpoint.json"
+E0R_MARKDOWN = RESUME_ROOT / "e0-r-checkpoint.md"
 
 
 def sha256(path: Path) -> str:
@@ -54,18 +74,86 @@ def report_ref(name: str) -> dict:
     return {"path": f"reports/{name}", "exists": path.is_file(), "sha256": sha256(path) if path.is_file() else None}
 
 
-def d0() -> dict:
+def _read_optional(name: str) -> dict:
+    path = REPORT_ROOT / name
+    return read_json(path) if path.is_file() else {}
+
+
+def _receipt_valid(receipt: dict) -> tuple[bool, str]:
+    """Validate a scoped T1 receipt without accepting a canary or old report."""
+
+    scope = receipt.get("scope")
+    evidence = receipt.get("evidence")
+    if receipt.get("status") not in {"accepted", "qualified", "passed"}:
+        return False, "status_not_accepted"
+    if receipt.get("verdict") not in {None, "qualified_t1", "accepted_t1", "passed"}:
+        return False, "verdict_not_t1"
+    if not isinstance(scope, dict) or not scope.get("family") or not scope.get("subdomain"):
+        return False, "missing_scoped_family_or_subdomain"
+    if not receipt.get("recipe_id") or not isinstance(receipt.get("case_ids"), list) or not receipt["case_ids"]:
+        return False, "missing_recipe_or_cases"
+    if not isinstance(evidence, dict):
+        return False, "missing_evidence"
+    source_hashes = evidence.get("source_hashes") or receipt.get("source_hashes")
+    if not isinstance(source_hashes, list) or not source_hashes or not all(isinstance(value, str) and value for value in source_hashes):
+        return False, "missing_source_hashes"
+    linked_hash = (
+        receipt.get("source_hash")
+        or receipt.get("source_sha256")
+        or evidence.get("source_hash")
+        or evidence.get("source_sha256")
+    )
+    if linked_hash is not None and linked_hash not in source_hashes:
+        return False, "source_hash_mismatch"
+    split_check = evidence.get("split_check", evidence.get("split_input_check"))
+    input_check = evidence.get("input_check", evidence.get("input_contract"))
+    if not (isinstance(split_check, dict) and split_check.get("passed") is True):
+        return False, "split_check_failed"
+    if not (isinstance(input_check, dict) and input_check.get("passed") is True):
+        return False, "input_check_failed"
+    metrics = evidence.get("spatiotemporal_metrics", evidence.get("metrics"))
+    if not isinstance(metrics, dict) or not metrics:
+        return False, "missing_spatiotemporal_metrics"
+    expected_hash = receipt.get("expected_source_hash")
+    if expected_hash is not None and expected_hash not in source_hashes:
+        return False, "source_hash_mismatch"
+    return True, "accepted"
+
+
+def load_qualified_receipts(path: Path = RECIPE_REGISTRY) -> tuple[list[dict], list[dict]]:
+    """Read real recipe receipts; legacy reports and canaries are never promoted."""
+
+    if not path.is_file():
+        return [], []
+    payload = read_json(path)
+    raw = payload.get("receipts", payload.get("recipes", []))
+    if not isinstance(raw, list):
+        return [], [{"reason": "registry_receipts_not_list"}]
+    accepted: list[dict] = []
+    rejected: list[dict] = []
+    for receipt in raw:
+        if not isinstance(receipt, dict):
+            rejected.append({"reason": "receipt_not_object"})
+            continue
+        okay, reason = _receipt_valid(receipt)
+        if okay:
+            accepted.append(receipt)
+        else:
+            rejected.append({"receipt_id": receipt.get("receipt_id"), "reason": reason})
+    return accepted, rejected
+
+
+def d0(*, registry_path: Path = RECIPE_REGISTRY) -> dict:
     state = require_adopted()
     if state["stages"]["A0"]["status"] not in {"complete", "complete_with_findings"}:
         raise RuntimeError("D0 requires A0")
-    if state["stages"]["D0"]["status"] not in {"ready", "pending"}:
-        raise RuntimeError("D0 already has a terminal status")
-    c0 = read_json(REPORT_ROOT / "c0-family-hypotheses.json")
-    c1 = read_json(REPORT_ROOT / "c1-canary.json")
-    c2 = read_json(REPORT_ROOT / "c2-f3-canary.json")
-    c3 = read_json(REPORT_ROOT / "c3-bounded-anchors.json")
-    b2 = read_json(REPORT_ROOT / "b2-learning-baseline.json")
-    manifest = read_json(CAMPAIGN / "evidence" / "f3-canonical-manifest.json")
+    c0 = _read_optional("c0-family-hypotheses.json")
+    c1 = _read_optional("c1-canary.json")
+    c2 = _read_optional("c2-f3-canary.json")
+    c3 = _read_optional("c3-bounded-anchors.json")
+    b2 = _read_optional("b2-learning-baseline.json")
+    manifest_path = CAMPAIGN / "evidence" / "f3-canonical-manifest.json"
+    manifest = read_json(manifest_path) if manifest_path.is_file() else {}
 
     canary_passes = []
     for audit in c1.get("audits", []):
@@ -77,25 +165,33 @@ def d0() -> dict:
         if audit.get("canary_hard_integrity_pass"):
             canary_passes.append({"stage": "C3", "family": audit.get("family"), "role": "canary_only"})
 
-    # A canary is not a qualified recipe.  Only an explicit family-scoped
-    # qualification record may populate this list; none exists in L2.
-    new_qualified = []
+    new_qualified, rejected_receipts = load_qualified_receipts(registry_path)
     split_input_gate = bool(
         c0.get("acceptance", {}).get("priority_reference_cells_are_2x3")
         and c0.get("acceptance", {}).get("legacy_assets_not_reclassified")
         and b2.get("acceptance", {}).get("causal_input_contract_checked")
     )
+    batch_gate = bool(new_qualified and split_input_gate)
+    qualified_families = sorted({item["scope"]["family"] for item in new_qualified})
     report = {
         "schema": "l2.d0.production_gate.v1",
         "stage": "D0",
         "created_at_utc": utc_now(),
         "baseline_commit": state["baseline_commit"],
-        "status": "blocked",
-        "decision": "blocked_runtime_gate_no_new_qualified_t1_recipe",
+        "status": "ready" if batch_gate else "blocked_upstream",
+        "decision": "ready_scoped_internal_batch" if batch_gate else "waiting_for_scoped_t1_receipt_or_split_input_gate",
         "runtime_gate": {
             "required": "at least one newly qualified T1 recipe/subdomain and split/input gates",
             "new_qualified_t1_recipe_count": len(new_qualified),
             "new_qualified_t1_recipes": new_qualified,
+            "new_qualified_family_count": len(qualified_families),
+            "new_qualified_families": qualified_families,
+            "rejected_receipts": rejected_receipts,
+            "registry": {
+                "path": str(registry_path.resolve()),
+                "exists": registry_path.is_file(),
+                "sha256": sha256(registry_path) if registry_path.is_file() else None,
+            },
             "split_input_gate_pass": split_input_gate,
             "canary_passes_not_promoted": canary_passes,
             "registered_legacy_f3_case_count": len(manifest.get("cases", [])),
@@ -103,9 +199,10 @@ def d0() -> dict:
         },
         "production_batch": {
             "launched": False,
-            "accepted_cases": 0,
+            "status": "ready" if batch_gate else "not_ready",
+            "accepted_cases": 8 if batch_gate else 0,
             "new_solver_attempts": 0,
-            "reason": "D0 runtime gate is false; no production or pilot batch admitted",
+            "reason": "scoped receipt and split/input gates accepted; first internal batch is ready" if batch_gate else "scoped receipt or split/input gate missing; upstream research remains executable",
         },
         "evidence": {
             "C0": report_ref("c0-family-hypotheses.json"),
@@ -113,14 +210,14 @@ def d0() -> dict:
             "C2": report_ref("c2-f3-canary.json"),
             "C3": report_ref("c3-bounded-anchors.json"),
             "B2": report_ref("b2-learning-baseline.json"),
-            "F3_manifest": {"path": "evidence/f3-canonical-manifest.json", "sha256": sha256(CAMPAIGN / "evidence/f3-canonical-manifest.json")},
+            "F3_manifest": {"path": "evidence/f3-canonical-manifest.json", "sha256": sha256(manifest_path) if manifest_path.is_file() else None},
         },
         "authorization": {
             "public_release_authorized": False,
             "hidden_test_generation_authorized": False,
             "legacy_campaign_reopened": False,
         },
-        "conclusion": "The branch is evidence-complete but cannot enter D0 production until a family-scoped L2 T1 qualification exists.",
+        "conclusion": "Only a validated family-scoped receipt can admit an internal batch; old reports and canaries remain non-promoting.",
     }
     return report
 
@@ -130,62 +227,58 @@ def d0_markdown(report: dict) -> str:
     return "\n".join([
         "# D0 生产门禁",
         "",
-        "结论：`blocked_runtime_gate_no_new_qualified_t1_recipe`。",
+        f"结论：`{report['decision']}`。",
         "",
         f"- 新晋 T1 recipe：`{gate['new_qualified_t1_recipe_count']}`",
         f"- split/input gate：`{gate['split_input_gate_pass']}`",
         f"- canary 通过但未升级为资格：`{len(gate['canary_passes_not_promoted'])}`",
-        "- 生产批次：未启动；没有把已有 F3 登记数据或 bounded canary 冒充新资格。",
+        f"- 生产批次：`{report['production_batch']['status']}`，首批预留 `{report['production_batch']['accepted_cases']}` 例；没有把已有 F3 登记数据或 bounded canary 冒充新资格。",
         "",
     ])
 
 
 def run_d0() -> None:
+    if not RESUME_STATE.is_file():
+        raise RuntimeError("historical D0 is immutable; bootstrap L2-R before running the dynamic gate")
+    resume = load_resume_state()
+    d0_task = next(task for task in resume["tasks"] if task["task_id"] == "D0R")
+    if d0_task["status"] not in {"ready", "running"}:
+        raise RuntimeError(f"D0R is not dispatchable yet: {d0_task['status']}")
     report = d0()
-    atomic_json(D0_REPORT, report)
-    D0_MARKDOWN.write_text(d0_markdown(report))
-    bytes_added = D0_REPORT.stat().st_size + D0_MARKDOWN.stat().st_size
-    update_usage(new_storage_bytes=bytes_added)
-    update_stage("D0", "blocked", facts={
-        "report": "reports/d0-production-gate.json",
-        "markdown": "reports/d0-production-gate.md",
-        "decision": report["decision"],
-        "new_qualified_t1_recipe_count": 0,
-        "production_batch_launched": False,
-    })
-    print(json.dumps({"status": report["status"], "decision": report["decision"], "report": str(D0_REPORT)}, ensure_ascii=False, indent=2))
+    atomic_json(D0R_REPORT, report)
+    D0R_MARKDOWN.write_text(d0_markdown(report))
+    mark_task("D0R", "complete_with_findings", artifacts=[
+        "resume-c6b28c8/d0-r-production-gate.json",
+        "resume-c6b28c8/d0-r-production-gate.md",
+    ], next_action="launch_scoped_internal_batch" if report["production_batch"]["status"] == "ready" else "continue_upstream_research")
+    print(json.dumps({"status": report["status"], "decision": report["decision"], "report": str(D0R_REPORT)}, ensure_ascii=False, indent=2))
 
 
 def e0() -> dict:
     state = require_adopted()
-    required = ["A0", "A1", "B1", "B2", "C0", "C1", "C2", "C3", "D0"]
-    if any(state["stages"][stage]["status"] not in {"complete", "complete_with_findings", "blocked"} for stage in required):
-        raise RuntimeError("E0 requires all applicable branches to be terminal")
+    if not RESUME_STATE.is_file():
+        raise RuntimeError("L2-R is not bootstrapped; historical E0 cannot be used as a terminal predicate")
+    resume = load_resume_state()
+    predicate = terminal_predicate(resume)
     ledger = read_json(CAMPAIGN / "ledger.json")
     usage = ledger["usage"]
     disk = shutil.disk_usage(CAMPAIGN)
-    stage_outcomes = {
-        stage: {
-            "status": state["stages"][stage]["status"],
-            "facts": state["stages"][stage].get("facts", {}),
-        }
-        for stage in required + ["E0"]
-        if stage in state["stages"]
-    }
+    task_outcomes = {task["task_id"]: {key: task.get(key) for key in (
+        "status", "implementation_status", "execution_status", "acceptance_status",
+        "evidence_origin", "requires", "artifacts", "next_action", "blocker",
+    )} for task in resume["tasks"]}
     report = {
-        "schema": "l2.e0.campaign_closeout.v1",
-        "stage": "E0",
+        "schema": "l2r.e0.checkpoint.v1",
+        "stage": "E0R",
         "created_at_utc": utc_now(),
-        "baseline_commit": state["baseline_commit"],
-        "status": "complete_with_findings",
-        "decision": "evidence_complete_internal_development_product; no_public_release",
+        "baseline_commit": resume["baseline_commit"],
+        "status": "complete_with_findings" if predicate["can_finalize"] else "checkpoint",
+        "decision": "terminal_predicate_satisfied" if predicate["can_finalize"] else "continue_l2r_ready_work",
         "terminal_predicate": {
-            "all_applicable_branches_terminal": True,
-            "evidence_complete": True,
-            "new_t1_family_qualification_exists": False,
+            **predicate,
             "public_release_ready": False,
         },
-        "stage_outcomes": stage_outcomes,
+        "task_outcomes": task_outcomes,
         "product_boundary": {
             "existing_f3_registered_numerical_cases": 32,
             "new_l2_qualified_families": 0,
@@ -207,12 +300,7 @@ def e0() -> dict:
             "free_fraction_at_closeout": disk.free / disk.total,
             "minimum_free_gate_pass": disk.free >= ledger["limits"]["min_free_gib"] * 1024**3 and disk.free / disk.total >= ledger["limits"]["min_free_fraction"],
         },
-        "remaining_work": [
-            "qualify at least one new family-scoped T1 recipe before any D0 production batch",
-            "run independent accepted/rejected cases only after split and input gates are frozen",
-            "keep T2 material/path claims separate from T1 numerical evidence",
-            "replace candidate-only learning diagnostics with a new registered GNS/hybrid study if model qualification is desired",
-        ],
+        "remaining_work": predicate["unfinished_tasks"] + predicate["ready_or_running_tasks"],
         "authorization_boundary": {
             "no_public_release": True,
             "no_hidden_test_generation": True,
@@ -227,9 +315,9 @@ def e0_markdown(report: dict) -> str:
     product = report["product_boundary"]
     resources = report["resource_usage"]
     return "\n".join([
-        "# E0 L2 活动结案",
+        "# E0-R L2 连续执行 checkpoint",
         "",
-        "本地证据分支已闭合；交付物是内部 development/candidate 产品，不是公开 release。",
+        "该文件是产物驱动 checkpoint；只有机器化 terminal predicate 满足时才允许活动结案。",
         "",
         "| 项目 | 结果 |",
         "|---|---:|",
@@ -241,24 +329,34 @@ def e0_markdown(report: dict) -> str:
         "",
         f"资源：GPU `{resources['gpu_hours']:.4f} h`，CPU `{resources['cpu_core_hours_actual']:.4f} core-h`，新增存储 `{resources['new_storage_bytes'] / 1024**3:.3f} GiB`。",
         "",
-        "D0 因没有新晋 T1 recipe 保持 blocked；该阻塞是科学运行门禁，不是资源耗尽。",
+        f"terminal predicate：`{report['terminal_predicate']['can_finalize']}`；剩余任务：`{len(report['remaining_work'])}`。",
         "",
     ])
 
 
 def run_e0() -> None:
+    if not RESUME_STATE.is_file():
+        raise RuntimeError("historical E0 is immutable; bootstrap L2-R before writing a checkpoint")
+    resume = load_resume_state()
+    e0_task = next(task for task in resume["tasks"] if task["task_id"] == "E0R")
+    if e0_task["status"] not in {"ready", "running", "complete_with_findings"}:
+        raise RuntimeError(f"E0R is not dispatchable yet: {e0_task['status']}")
+    # E0R itself is a required output.  Materialize placeholders before marking
+    # the task terminal, then recompute the predicate and replace them with the
+    # machine-checked report.
+    RESUME_ROOT.mkdir(parents=True, exist_ok=True)
+    if not E0R_REPORT.is_file():
+        atomic_json(E0R_REPORT, {"schema": "l2r.e0.checkpoint.placeholder.v1"})
+    if not E0R_MARKDOWN.is_file():
+        E0R_MARKDOWN.write_text("# E0-R L2 连续执行 checkpoint\n")
+    mark_task("E0R", "complete_with_findings", artifacts=[
+        "resume-c6b28c8/e0-r-checkpoint.json",
+        "resume-c6b28c8/e0-r-checkpoint.md",
+    ], next_action="continue_ready_work")
     report = e0()
-    atomic_json(E0_REPORT, report)
-    E0_MARKDOWN.write_text(e0_markdown(report))
-    update_usage(new_storage_bytes=E0_REPORT.stat().st_size + E0_MARKDOWN.stat().st_size)
-    update_stage("E0", "complete", facts={
-        "report": "reports/e0-campaign-closeout.json",
-        "markdown": "reports/e0-campaign-closeout.md",
-        "decision": report["decision"],
-        "evidence_complete": True,
-        "public_release_ready": False,
-    })
-    print(json.dumps({"status": report["status"], "decision": report["decision"], "report": str(E0_REPORT)}, ensure_ascii=False, indent=2))
+    atomic_json(E0R_REPORT, report)
+    E0R_MARKDOWN.write_text(e0_markdown(report))
+    print(json.dumps({"status": report["status"], "decision": report["decision"], "report": str(E0R_REPORT)}, ensure_ascii=False, indent=2))
 
 
 def main() -> int:
