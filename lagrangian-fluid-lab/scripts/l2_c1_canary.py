@@ -218,15 +218,19 @@ def prepare_case(config: dict) -> dict:
     return config
 
 
-def run_case(config: dict, allowed_uuids: list[str]) -> dict:
+def run_case(config: dict, allowed_uuids: list[str], *, cuda_visible_devices: str | None = None,
+             solver_gpu: int | None = None) -> dict:
     gpu_record = require_idle_allowed_gpu(config["gpu"], allowed_uuids)
     prefix = config["generated_prefix"]
+    env = environment()
+    if cuda_visible_devices is not None:
+        env["CUDA_VISIBLE_DEVICES"] = cuda_visible_devices
+    selected_solver_gpu = config["gpu"] if solver_gpu is None else solver_gpu
     result = execute_attempt(
         config["case_id"],
-        [str(SOLVER), f"-gpu:{config['gpu']}", str(prefix), "{output}"],
+        [str(SOLVER), f"-gpu:{selected_solver_gpu}", str(prefix), "{output}"],
         RUN_ROOT,
-        cwd=LAB,
-        env=environment(),
+        cwd=LAB, env=env,
         evidence_glob="data/Part_*.bi4",
         required_text="Finished execution (code=0)",
         timeout_seconds=3600,
@@ -236,6 +240,8 @@ def run_case(config: dict, allowed_uuids: list[str]) -> dict:
     result["input_definition_sha256"] = config["definition_sha256"]
     result["recipe_id"] = config["recipe_id"]
     result["solver_binary_sha256"] = sha256(SOLVER)
+    result["cuda_visible_devices"] = env.get("CUDA_VISIBLE_DEVICES")
+    result["solver_gpu_argument"] = selected_solver_gpu
     return result
 
 

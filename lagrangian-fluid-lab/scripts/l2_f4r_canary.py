@@ -110,7 +110,10 @@ def run(gpu: int) -> dict:
     item = config(gpu)
     mark_task("F4R", "running", next_action="complete_two_background_three_resolution_matrix")
     prepared = base.prepare_case(item)
-    attempt = base.run_case(prepared, allowed_uuids)
+    attempt = base.run_case(
+        prepared, allowed_uuids,
+        cuda_visible_devices=str(gpu), solver_gpu=0,
+    )
     audit = None
     if attempt["status"] == "completed":
         audit = base.audit_case(prepared, attempt)
@@ -145,6 +148,8 @@ def run(gpu: int) -> dict:
             "live_allowed_indices": [0, 2, 3],
             "live_allowed_uuids": allowed_uuids,
             "historical_a6000_inventory_not_reused": True,
+            "cuda_visible_devices": attempt.get("cuda_visible_devices"),
+            "solver_gpu_argument": attempt.get("solver_gpu_argument"),
         },
         "qualification_claim": "none; first F4R canary only",
         "receipt_emitted": False,
