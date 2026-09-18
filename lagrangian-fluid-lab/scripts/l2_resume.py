@@ -351,12 +351,23 @@ def status() -> dict[str, Any]:
     }
 
 
+def refresh_commit() -> dict[str, Any]:
+    """Update only the resume metadata after a code commit; preserve task state."""
+
+    state = load_state()
+    state["current_commit"] = git_head()
+    state["updated_at_utc"] = utc_now()
+    atomic_json(RESUME_STATE, state)
+    return state
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("bootstrap")
     subparsers.add_parser("status")
     subparsers.add_parser("verify-r0")
+    subparsers.add_parser("refresh-commit")
     mark = subparsers.add_parser("mark")
     mark.add_argument("task")
     mark.add_argument("status", choices=("pending", "ready", "running", "complete", "complete_with_findings", "blocked_upstream", "blocked_external"))
@@ -369,6 +380,8 @@ def main() -> int:
         print(json.dumps(status(), ensure_ascii=False, indent=2))
     elif args.command == "verify-r0":
         print(json.dumps(verify_r0(), ensure_ascii=False, indent=2))
+    elif args.command == "refresh-commit":
+        print(json.dumps(refresh_commit(), ensure_ascii=False, indent=2))
     else:
         print(json.dumps(mark_task(args.task, args.status, artifacts=args.artifact or None, next_action=args.next_action), ensure_ascii=False, indent=2))
     return 0
