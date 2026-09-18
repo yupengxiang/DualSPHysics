@@ -608,6 +608,8 @@ def inspect_hdf5(path: Path, *, full_scan: bool = True, wall_bounds: dict | None
             "mass_change_max_relative": mass_change_max_relative,
             "initial_valid_count": int(initial_valid.sum()),
             "final_valid_count": int(final_valid.sum()),
+            "initial_missing_at_final_count": int((initial_valid & ~final_valid).sum()),
+            "born_after_initial_count": int((~initial_valid & ever_valid).sum()),
             "identities_ever_valid": int(ever_valid.sum()),
             "birth_count": birth_count,
             "death_count": death_count,
