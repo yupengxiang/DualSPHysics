@@ -39,8 +39,10 @@ from torch import nn
 try:
     from scripts.l2_b2r_contract import (
         B2RContractError,
+        CURRENT_F3_CONTRACT_SCHEMA,
         R2Gate,
         StudySpec,
+        validate_current_f3_contract,
         validate_preparation_manifest,
     )
     from scripts.l2_b2r_model import (
@@ -56,7 +58,14 @@ try:
         write_attempt_record,
     )
 except ModuleNotFoundError:  # direct ``python scripts/l2_b2r_train.py``
-    from l2_b2r_contract import B2RContractError, R2Gate, StudySpec, validate_preparation_manifest
+    from l2_b2r_contract import (
+        B2RContractError,
+        CURRENT_F3_CONTRACT_SCHEMA,
+        R2Gate,
+        StudySpec,
+        validate_current_f3_contract,
+        validate_preparation_manifest,
+    )
     from l2_b2r_model import GraphBatch, build_radius_graph, model_for, validate_causal_payload
     from l2_b2r_records import (
         build_failure_denominator,
@@ -334,6 +343,32 @@ def load_study_manifest(path: str | Path) -> tuple[Path, dict[str, Any]]:
     ids = registry.get("physical_case_ids")
     if not isinstance(ids, list) or not ids or len(set(ids)) != len(ids):
         raise WorkerGuardError("study manifest has no unique physical evaluation denominator", category="contract_rejected")
+    current_f3 = manifest.get("data_contract", {}).get("current_f3_contract", {})
+    source = current_f3.get("source") if isinstance(current_f3, Mapping) else None
+    if current_f3.get("schema") != CURRENT_F3_CONTRACT_SCHEMA or not isinstance(source, Mapping):
+        raise WorkerGuardError(
+            "study manifest is not bound to the current F3 contract",
+            category="contract_rejected",
+        )
+    current_f3_path_value = source.get("path")
+    if not isinstance(current_f3_path_value, str):
+        raise WorkerGuardError("current F3 contract source path is missing", category="contract_rejected")
+    current_f3_path = _resolve_lab_path(current_f3_path_value)
+    if not current_f3_path.is_file():
+        raise WorkerGuardError(
+            f"current F3 contract is missing: {current_f3_path}", category="missing_data"
+        )
+    current_f3_payload = _load_json(current_f3_path)
+    try:
+        validate_current_f3_contract(current_f3_payload)
+    except B2RContractError as error:
+        raise WorkerGuardError(str(error), category="contract_rejected") from error
+    expected_f3_sha = source.get("sha256")
+    if not isinstance(expected_f3_sha, str) or expected_f3_sha != sha256_file(current_f3_path):
+        raise WorkerGuardError(
+            "current F3 contract hash does not match the study binding",
+            category="contract_rejected",
+        )
     return study_path, manifest
 
 
@@ -618,6 +653,7 @@ def _case_transitions(
             velocity_tensor = torch.from_numpy(velocity)
             node_tensor = torch.from_numpy(features)
             control_tensor = torch.from_numpy(control)
+            mass_tensor = torch.from_numpy(mass)
             edge_index, edge_features = build_radius_graph(
                 position_tensor,
                 velocity_tensor,
@@ -634,6 +670,7 @@ def _case_transitions(
                 interval_s=float(interval),
                 control_acceleration=control_tensor,
                 particle_id=torch.from_numpy(particle_ids),
+                particle_mass=mass_tensor,
             )
             target = torch.from_numpy(next_position - position)
             transitions.append(
@@ -671,6 +708,12 @@ def _case_transitions(
             "wall_bounds": dict(WALL_BOUNDS),
             "reference_length_m": BOUNDARY_REFERENCE_LENGTH_M,
             "boundary_presence_radius_m": 0.02,
+        },
+        "bounded_particle_sampling": {
+            "selected_particle_count": int(len(particle_ids)) if transitions else 0,
+            "full_source_particle_count": int(len(common)),
+            "uses_full_source_system": bool(transitions and len(particle_ids) == len(common)),
+            "halo_included": False,
         },
     }
 
@@ -728,6 +771,7 @@ class SharedRouteModel(nn.Module):
             "prior_displacement": prior,
             "residual_displacement": correction,
             "residual_displacement_l2": torch.linalg.vector_norm(correction, dim=-1),
+            "residual_acceleration": signal if route == "hybrid" else torch.zeros_like(signal),
             "residual_trigger_count": int((torch.linalg.vector_norm(correction, dim=-1) > 0).sum().item()),
             "correction_l2_mean": torch.linalg.vector_norm(correction, dim=-1).mean(),
             "correction_l2_max": torch.linalg.vector_norm(correction, dim=-1).max(),
@@ -753,6 +797,7 @@ def _move_batch(batch: GraphBatch, device: torch.device) -> GraphBatch:
         interval_s=batch.interval_s,
         control_acceleration=batch.control_acceleration.to(device),
         particle_id=batch.particle_id.to(device) if batch.particle_id is not None else None,
+        particle_mass=batch.particle_mass.to(device) if batch.particle_mass is not None else None,
     )
 
 
@@ -836,6 +881,11 @@ def _evaluate_model(
     losses: list[float] = []
     max_abs_displacement = 0.0
     residual_norms: list[float] = []
+    residual_trigger_count = 0
+    residual_particle_count = 0
+    residual_impulses: list[float] = []
+    residual_energy_budgets: list[float] = []
+    case_accumulators: dict[str, dict[str, Any]] = {}
     with torch.no_grad():
         for transition in transitions:
             _check_elapsed(started, budget, "evaluation")
@@ -847,17 +897,73 @@ def _evaluate_model(
             if not torch.isfinite(prediction).all():
                 raise WorkerGuardError("evaluation prediction became non-finite", category="numerical_failure")
             max_abs_displacement = max(max_abs_displacement, float(prediction.abs().max().detach().cpu()))
-            residual_norms.extend(float(value) for value in diagnostics["residual_displacement_l2"].detach().cpu().tolist())
+            transition_residuals = diagnostics["residual_displacement_l2"].detach().cpu()
+            residual_values = [float(value) for value in transition_residuals.tolist()]
+            residual_norms.extend(residual_values)
+            residual_trigger_count += int((transition_residuals > 1.0e-12).sum())
+            residual_particle_count += len(residual_values)
+            case = case_accumulators.setdefault(
+                transition.case_id,
+                {"losses": [], "residual_norms": [], "prediction_max_abs_displacement": 0.0},
+            )
+            case["losses"].append(losses[-1])
+            case["residual_norms"].extend(residual_values)
+            case["prediction_max_abs_displacement"] = max(
+                case["prediction_max_abs_displacement"],
+                float(prediction.abs().max().detach().cpu()),
+            )
+            if route == "hybrid" and batch.particle_mass is not None:
+                residual_acceleration = diagnostics["residual_acceleration"]
+                interval = torch.as_tensor(batch.interval_s, device=device, dtype=residual_acceleration.dtype)
+                residual_velocity = residual_acceleration * interval
+                impulse = torch.sum(batch.particle_mass[:, None] * residual_acceleration * interval, dim=0)
+                residual_impulses.append(float(torch.linalg.vector_norm(impulse).detach().cpu()))
+                residual_energy_budgets.append(
+                    float(
+                        (
+                            0.5
+                            * batch.particle_mass
+                            * torch.sum(residual_velocity.square(), dim=-1)
+                        )
+                        .sum()
+                        .detach()
+                        .cpu()
+                    )
+                )
     if not losses:
         raise WorkerGuardError("evaluation produced no rows", category="data_rejected")
+    case_reports = []
+    for case_id, case in case_accumulators.items():
+        case_reports.append(
+            {
+                "case_id": case_id,
+                "transition_count": len(case["losses"]),
+                "mse_mean": float(np.mean(case["losses"])),
+                "mse_max": float(np.max(case["losses"])),
+                "prediction_max_abs_displacement": case["prediction_max_abs_displacement"],
+                "residual_displacement_l2_mean": (
+                    float(np.mean(case["residual_norms"])) if case["residual_norms"] else 0.0
+                ),
+            }
+        )
     return {
         "evaluation_completed": True,
         "transition_count": len(losses),
+        "case_count": len(case_reports),
+        "case_reports": case_reports,
         "mse_mean": float(np.mean(losses)),
         "mse_max": float(np.max(losses)),
         "prediction_max_abs_displacement": max_abs_displacement,
         "residual_displacement_l2_mean": float(np.mean(residual_norms)) if residual_norms else 0.0,
         "residual_displacement_l2_max": float(np.max(residual_norms)) if residual_norms else 0.0,
+        "residual_trigger_count": residual_trigger_count,
+        "residual_trigger_frequency": (
+            float(residual_trigger_count / residual_particle_count) if residual_particle_count else 0.0
+        ),
+        "residual_impulse_l2_mean": float(np.mean(residual_impulses)) if residual_impulses else 0.0,
+        "residual_energy_budget_mean": (
+            float(np.mean(residual_energy_budgets)) if residual_energy_budgets else 0.0
+        ),
         "model_physical_pass": "unknown",
         "physical_verdict_reason": "bounded diagnostic evaluator is not a physical qualification gate",
         "posthoc_wall_projection": False,
@@ -869,6 +975,39 @@ def _safe_case_id(value: str, field: str) -> str:
     if not isinstance(value, str) or not value or any(character in value for character in "/\\\n\r\t"):
         raise WorkerGuardError(f"invalid {field}: {value!r}", category="contract_rejected")
     return value
+
+
+def _evaluation_case_selection(
+    args: argparse.Namespace,
+    physical_case_ids: Iterable[str],
+) -> tuple[list[str], str]:
+    """Resolve an explicit subset or the complete registered F3 denominator."""
+
+    denominator = list(physical_case_ids)
+    requested = list(getattr(args, "eval_case_id", None) or [])
+    all_cases = bool(getattr(args, "eval_all_cases", False))
+    if all_cases and requested:
+        raise WorkerGuardError(
+            "--eval-all-cases cannot be combined with --eval-case-id",
+            category="contract_rejected",
+        )
+    if all_cases:
+        return denominator, "full"
+    if not requested:
+        raise WorkerGuardError(
+            "evaluation scope is unspecified; pass --eval-all-cases or one or more --eval-case-id values",
+            category="contract_rejected",
+        )
+    selected = [_safe_case_id(value, "eval_case_id") for value in requested]
+    if len(set(selected)) != len(selected):
+        raise WorkerGuardError("evaluation case IDs must be unique", category="contract_rejected")
+    outside = sorted(set(selected) - set(denominator))
+    if outside:
+        raise WorkerGuardError(
+            "evaluation cases are outside the declared physical denominator: " + ", ".join(outside),
+            category="contract_rejected",
+        )
+    return selected, "subset"
 
 
 def _attempt_id(route: str, seed: int, explicit: str | None) -> str:
@@ -931,6 +1070,8 @@ def run_attempt(args: argparse.Namespace) -> dict[str, Any]:
     evaluation_report: dict[str, Any] = {}
     data_report: dict[str, Any] = {}
     device_report: dict[str, Any] = {}
+    evaluation_case_ids: list[str] = []
+    evaluation_scope = "unspecified"
     failure_reason: str | None = None
     worker_exit_status = "zero"
     attempt_status = "completed"
@@ -949,33 +1090,39 @@ def run_attempt(args: argparse.Namespace) -> dict[str, Any]:
         device = _device_from_argument(args.device, allow_cpu=bool(args.allow_cpu))
         device_report = _device_preflight(device, budget, args.gpu_index)
         train_id = _safe_case_id(args.train_case_id, "train_case_id")
-        eval_id = _safe_case_id(args.eval_case_id, "eval_case_id")
+        evaluation_case_ids, evaluation_scope = _evaluation_case_selection(args, physical_case_ids)
         if train_id not in rows:
             raise WorkerGuardError(f"unknown training case: {train_id}", category="missing_data")
-        if eval_id not in rows:
-            raise WorkerGuardError(f"unknown evaluation case: {eval_id}", category="missing_data")
-        if eval_id not in physical_case_ids:
-            raise WorkerGuardError(
-                f"evaluation case {eval_id} is outside the declared physical denominator",
-                category="contract_rejected",
-            )
+        for eval_id in evaluation_case_ids:
+            if eval_id not in rows:
+                raise WorkerGuardError(f"unknown evaluation case: {eval_id}", category="missing_data")
         train_source = resolve_source_case(rows[train_id], expected_split="train")
-        eval_source = resolve_source_case(rows[eval_id], expected_split=str(rows[eval_id].get("split")))
         train_transitions, train_report = _case_transitions(
             train_source,
             budget=budget,
             device=device,
             verify_hashes=bool(args.verify_source_hashes),
         )
-        eval_transitions, eval_report = _case_transitions(
-            eval_source,
-            budget=budget,
-            device=device,
-            verify_hashes=bool(args.verify_source_hashes),
-        )
+        eval_transitions: list[Transition] = []
+        eval_reports: list[dict[str, Any]] = []
+        for eval_id in evaluation_case_ids:
+            eval_source = resolve_source_case(rows[eval_id], expected_split=str(rows[eval_id].get("split")))
+            case_transitions, eval_report = _case_transitions(
+                eval_source,
+                budget=budget,
+                device=device,
+                verify_hashes=bool(args.verify_source_hashes),
+            )
+            eval_transitions.extend(case_transitions)
+            eval_reports.append(eval_report)
         data_report = {
             "train": train_report,
-            "evaluation": eval_report,
+            "evaluation": {
+                "scope": evaluation_scope,
+                "requested_case_ids": evaluation_case_ids,
+                "case_count": len(eval_reports),
+                "cases": eval_reports,
+            },
             "registry_path": str(registry_path),
             "registry_sha256": sha256_file(registry_path),
             "study_path": str(study_path),
@@ -1021,17 +1168,19 @@ def run_attempt(args: argparse.Namespace) -> dict[str, Any]:
             budget=budget,
         )
         evaluation_completed = True
-        evaluation_rows.append(
-            {
-                "logical_run_id": logical_run["logical_run_id"],
-                "physical_case_id": eval_id,
-                # The records contract reserves the ``unknown`` evaluation
-                # bucket for a completed diagnostic with no physical verdict.
-                "status": "unknown",
-                "model_physical_pass": "unknown",
-                "failure_reason": "bounded diagnostic evaluator is not a physical qualification gate",
-            }
-        )
+        for eval_id in evaluation_case_ids:
+            evaluation_rows.append(
+                {
+                    "logical_run_id": logical_run["logical_run_id"],
+                    "physical_case_id": eval_id,
+                    "execution_attempt_id": attempt_id,
+                    # The records contract reserves the ``unknown`` evaluation
+                    # bucket for a completed diagnostic with no physical verdict.
+                    "status": "unknown",
+                    "model_physical_pass": "unknown",
+                    "failure_reason": "bounded diagnostic evaluator is not a physical qualification gate",
+                }
+            )
         checkpoint_path = output_dir / "model.pt"
         if checkpoint_path.exists() and not overwrite:
             raise FileExistsError(checkpoint_path)
@@ -1087,6 +1236,11 @@ def run_attempt(args: argparse.Namespace) -> dict[str, Any]:
         "worker_exit_status": worker_exit_status,
         "training_completed": training_completed,
         "evaluation_completed": evaluation_completed,
+        "evaluation_scope": evaluation_scope,
+        "evaluation_case_ids": evaluation_case_ids,
+        "full_evaluation_denominator_complete": (
+            evaluation_completed and evaluation_scope == "full" and set(evaluation_case_ids) == set(physical_case_ids)
+        ),
         "model_physical_pass": model_physical_pass,
         "failure_category": failure_category,
         "failure_reason": failure_reason,
@@ -1110,6 +1264,14 @@ def run_attempt(args: argparse.Namespace) -> dict[str, Any]:
             "posthoc_wall_projection": False,
             "output_clipping": False,
             "qualification_claim": False,
+            "required_hybrid_metrics": [
+                "residual_displacement_l2",
+                "residual_trigger_count",
+                "residual_trigger_frequency",
+                "residual_impulse_l2_mean",
+                "residual_energy_budget_mean",
+                "prior_and_residual_cost",
+            ],
         },
         "created_at_utc": utc_now(),
     }
@@ -1138,7 +1300,7 @@ def run_attempt(args: argparse.Namespace) -> dict[str, Any]:
         model_contract_sha256=model_contract_sha,
         r2_evidence_sha256=r2_evidence_sha,
         gpu_index=device_report.get("gpu_index"),
-        gpu_uuid=device_report.get("gpu_name"),
+        gpu_uuid=device_report.get("gpu_uuid"),
         cpu_cores=os.cpu_count(),
         elapsed_seconds=elapsed,
         failure_reason=failure_reason,
@@ -1172,6 +1334,10 @@ def run_attempt(args: argparse.Namespace) -> dict[str, Any]:
         "model_physical_pass": model_physical_pass,
         "training_completed": training_completed,
         "evaluation_completed": evaluation_completed,
+        "evaluation_case_count": len(evaluation_case_ids),
+        "full_evaluation_denominator_complete": (
+            evaluation_completed and evaluation_scope == "full" and set(evaluation_case_ids) == set(physical_case_ids)
+        ),
     }
 
 
@@ -1180,7 +1346,16 @@ def _common_run_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--route", choices=("raw", "hybrid"), required=True)
     parser.add_argument("--seed", type=int, choices=(17, 29, 43), required=True)
     parser.add_argument("--train-case-id", required=True)
-    parser.add_argument("--eval-case-id", required=True)
+    parser.add_argument(
+        "--eval-case-id",
+        action="append",
+        help="evaluate one registered physical case; repeat for an explicit subset",
+    )
+    parser.add_argument(
+        "--eval-all-cases",
+        action="store_true",
+        help="evaluate every validation/test physical case in the current F3 denominator",
+    )
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--device", default="auto")
     parser.add_argument("--gpu-index", type=int)
@@ -1222,10 +1397,16 @@ def preflight(args: argparse.Namespace) -> dict[str, Any]:
     study_path, manifest = load_study_manifest(args.study)
     spec = study_spec_from_manifest(manifest)
     registry_path, rows = load_registry_rows(manifest)
-    if args.train_case_id not in rows or args.eval_case_id not in rows:
-        raise WorkerGuardError("requested train/eval case is missing from canonical registry", category="missing_data")
+    evaluation_case_ids, evaluation_scope = _evaluation_case_selection(args, spec.evaluation_case_ids)
+    if args.train_case_id not in rows:
+        raise WorkerGuardError("requested training case is missing from canonical registry", category="missing_data")
+    if any(case_id not in rows for case_id in evaluation_case_ids):
+        raise WorkerGuardError("requested evaluation case is missing from canonical registry", category="missing_data")
     train_source = resolve_source_case(rows[args.train_case_id], expected_split="train")
-    eval_source = resolve_source_case(rows[args.eval_case_id], expected_split=str(rows[args.eval_case_id].get("split")))
+    eval_sources = [
+        resolve_source_case(rows[case_id], expected_split=str(rows[case_id].get("split")))
+        for case_id in evaluation_case_ids
+    ]
     device = _device_from_argument(args.device, allow_cpu=bool(args.allow_cpu))
     device_report = _device_preflight(device, budget, args.gpu_index)
     return {
@@ -1234,9 +1415,14 @@ def preflight(args: argparse.Namespace) -> dict[str, Any]:
         "study": str(study_path),
         "registry": str(registry_path),
         "logical_run_count": len(spec.logical_runs),
-        "evaluation_case_count": len(spec.evaluation_case_ids),
+        "evaluation_case_count": len(evaluation_case_ids),
+        "evaluation_scope": evaluation_scope,
+        "evaluation_case_ids": evaluation_case_ids,
         "train_case": {"case_id": train_source.case_id, "split": train_source.split, "hdf5": str(train_source.hdf5_path)},
-        "evaluation_case": {"case_id": eval_source.case_id, "split": eval_source.split, "hdf5": str(eval_source.hdf5_path)},
+        "evaluation_cases": [
+            {"case_id": source.case_id, "split": source.split, "hdf5": str(source.hdf5_path)}
+            for source in eval_sources
+        ],
         "budget": budget.__dict__,
         "device": device_report,
         "shared_resume_mutation": False,

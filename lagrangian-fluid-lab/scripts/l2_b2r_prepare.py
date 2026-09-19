@@ -25,6 +25,7 @@ from typing import Any
 try:
     from scripts.l2_b2r_contract import (
         DEFAULT_CASE_REGISTRY,
+        DEFAULT_CURRENT_F3_CONTRACT,
         B2RContractError,
         StudySpec,
         build_study_spec,
@@ -40,6 +41,7 @@ try:
 except ModuleNotFoundError:  # direct ``python scripts/l2_b2r_prepare.py``
     from l2_b2r_contract import (
         DEFAULT_CASE_REGISTRY,
+        DEFAULT_CURRENT_F3_CONTRACT,
         B2RContractError,
         StudySpec,
         build_study_spec,
@@ -85,6 +87,7 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
     r2_evidence = _read_json(args.r2_report) if args.r2_report else None
     _, manifest = build_study_spec(
         registry_path=args.registry,
+        current_f3_contract_path=args.f3_contract,
         r2_evidence=r2_evidence,
         r0_verified=args.r0_verified,
     )
@@ -147,6 +150,7 @@ def parser() -> argparse.ArgumentParser:
 
     prepare_parser = sub.add_parser("prepare", help="write the independent non-terminal B2R study contract")
     prepare_parser.add_argument("--registry", default=str(DEFAULT_CASE_REGISTRY))
+    prepare_parser.add_argument("--f3-contract", default=str(DEFAULT_CURRENT_F3_CONTRACT))
     prepare_parser.add_argument("--r2-report", help="optional explicit R2 evidence; never reads shared resume state")
     prepare_parser.add_argument("--r0-verified", action="store_true")
     prepare_parser.add_argument("--output", required=True)

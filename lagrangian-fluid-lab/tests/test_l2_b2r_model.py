@@ -51,6 +51,21 @@ def test_graph_builder_is_current_state_only_and_deterministic():
     assert batch.edge_index.shape[0] == 2
 
 
+def test_graph_builder_uses_local_spatial_query_contract():
+    contract = graph_model_contract(node_features=8)
+    assert "spatial hash" in contract["architecture"]["neighbor_query"]
+    assert "N-by-N" in contract["architecture"]["neighbor_query"]
+    position = torch.tensor(
+        [[0.0, 0.0, 0.0], [0.05, 0.0, 0.0], [10.0, 10.0, 10.0]], dtype=torch.float32
+    )
+    velocity = torch.zeros_like(position)
+    edge_index, edge_features = build_radius_graph(
+        position, velocity, torch.tensor([3, 1, 2]), radius_m=0.1, max_neighbors=None
+    )
+    assert edge_index.shape[1] == 2
+    assert torch.all(edge_features[:, 6] <= 0.1)
+
+
 @pytest.mark.parametrize("route", ["raw", "hybrid"])
 def test_same_graph_model_supports_both_controlled_routes(route):
     model = model_for(route=route, node_features=8, hidden=16, message_steps=2)

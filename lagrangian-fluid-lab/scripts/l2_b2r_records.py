@@ -279,9 +279,13 @@ def _latest_attempt(records: list[Mapping[str, Any]]) -> Mapping[str, Any]:
 def _validate_eval_rows(
     spec: StudySpec,
     evaluation_results: Iterable[Mapping[str, Any]] | None,
+    attempt_records: Iterable[Mapping[str, Any]],
 ) -> tuple[list[dict[str, Any]], dict[tuple[str, str], dict[str, Any]]]:
     expected_runs = {row["logical_run_id"] for row in spec.logical_runs}
     expected_cases = set(spec.evaluation_case_ids)
+    attempts_by_id = {
+        str(record["execution_attempt_id"]): record for record in attempt_records
+    }
     rows: list[dict[str, Any]] = []
     lookup: dict[tuple[str, str], dict[str, Any]] = {}
     for raw in evaluation_results or ():
@@ -289,10 +293,17 @@ def _validate_eval_rows(
             raise B2RContractError("evaluation result must be a mapping")
         logical_run_id = raw.get("logical_run_id")
         physical_case_id = raw.get("physical_case_id")
+        execution_attempt_id = raw.get("execution_attempt_id")
         _safe_id(logical_run_id, "evaluation.logical_run_id")
         _safe_id(physical_case_id, "evaluation.physical_case_id")
+        _safe_id(execution_attempt_id, "evaluation.execution_attempt_id")
         if logical_run_id not in expected_runs or physical_case_id not in expected_cases:
             raise B2RContractError("evaluation row is outside the declared B2R denominator")
+        attempt = attempts_by_id.get(execution_attempt_id)
+        if attempt is None:
+            raise B2RContractError("evaluation row is not bound to a recorded training attempt")
+        if attempt.get("logical_run_id") != logical_run_id:
+            raise B2RContractError("evaluation row is bound to a different logical run")
         key = (logical_run_id, physical_case_id)
         if key in lookup:
             raise B2RContractError("duplicate logical-run/physical-case evaluation row")
@@ -302,9 +313,18 @@ def _validate_eval_rows(
         physical = raw.get("model_physical_pass", "unknown")
         if physical not in {"pass", "fail", "unknown"}:
             raise B2RContractError("invalid evaluation physical verdict")
+        if status in {"completed", "unknown"} and not (
+            attempt.get("training_completed")
+            and attempt.get("worker_exit_status") == "zero"
+            and attempt.get("evaluation_completed")
+        ):
+            raise B2RContractError(
+                "completed/unknown evaluation row lacks completed training and evaluation facts"
+            )
         row = {
             "logical_run_id": logical_run_id,
             "physical_case_id": physical_case_id,
+            "execution_attempt_id": execution_attempt_id,
             "status": status,
             "model_physical_pass": physical,
             "failure_reason": raw.get("failure_reason"),
@@ -360,7 +380,7 @@ def build_failure_denominator(
         )
     outcome_counts = {outcome: sum(row["outcome"] == outcome for row in logical_rows) for outcome in OUTCOME_STATES}
 
-    eval_rows, lookup = _validate_eval_rows(spec, evaluation_results)
+    eval_rows, lookup = _validate_eval_rows(spec, evaluation_results, record_list)
     expected_eval_rows = []
     for logical_run in spec.logical_runs:
         for physical_case_id in spec.evaluation_case_ids:
@@ -391,12 +411,14 @@ def build_failure_denominator(
             key = "missing"
         evaluation_counts[key] += 1
 
+    logical_complete = all(
+        row["outcome"] not in {"not_started", "worker_incomplete"} for row in logical_rows
+    )
+    denominator_complete = logical_complete and evaluation_counts["missing"] == 0
     denominator = {
         "schema": DENOMINATOR_SCHEMA,
         "study_id": spec.study_id,
-        "status": "complete"
-        if all(row["outcome"] not in {"not_started", "worker_incomplete"} for row in logical_rows)
-        else "incomplete",
+        "status": "complete" if denominator_complete else "incomplete",
         "logical_run_denominator": {
             "unit": "unique logical raw/hybrid seed run",
             "planned": len(spec.logical_runs),
@@ -415,6 +437,7 @@ def build_failure_denominator(
             "observed_case_run_records": len(eval_rows),
             "status_counts": evaluation_counts,
             "all_missing_and_failed_rows_retained": True,
+            "complete_only_when_no_case_run_is_missing": True,
             "rows": expected_eval_rows,
         },
         "no_model_qualification_claim": True,

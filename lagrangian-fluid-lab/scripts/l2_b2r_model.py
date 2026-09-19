@@ -25,6 +25,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+from collections import defaultdict
 from typing import Any, Mapping
 
 import torch
@@ -90,6 +91,7 @@ class GraphBatch:
     interval_s: float | torch.Tensor
     control_acceleration: torch.Tensor
     particle_id: torch.Tensor | None = None
+    particle_mass: torch.Tensor | None = None
 
 
 def _finite_tensor(value: torch.Tensor, name: str) -> None:
@@ -204,6 +206,15 @@ def validate_graph_batch(batch: GraphBatch) -> GraphBatch:
             raise B2RInputContractError("particle_id must be a unique integer [N] tensor")
         if torch.unique(ids).numel() != ids.numel():
             raise B2RInputContractError("particle_id must be unique")
+    if batch.particle_mass is not None:
+        mass = batch.particle_mass
+        if mass.ndim != 1 or mass.shape[0] != position.shape[0]:
+            raise B2RInputContractError("particle_mass must have shape [N]")
+        _finite_tensor(mass, "particle_mass")
+        if torch.any(mass <= 0):
+            raise B2RInputContractError("particle_mass must be positive")
+        if mass.device != position.device:
+            raise B2RInputContractError("particle_mass must be on the same device as position")
     return GraphBatch(
         position=position,
         velocity=velocity,
@@ -213,6 +224,7 @@ def validate_graph_batch(batch: GraphBatch) -> GraphBatch:
         interval_s=interval,
         control_acceleration=control,
         particle_id=batch.particle_id,
+        particle_mass=batch.particle_mass,
     )
 
 
@@ -247,26 +259,56 @@ def build_radius_graph(
 
     n = position.shape[0]
     # The reference builder uses detached CPU values only for graph topology.
+    # A uniform-grid spatial hash limits distance checks to the 27 cells that
+    # can intersect a radius-m neighbourhood.  In particular, it never
+    # constructs the historical N x N displacement matrix.
     p = position.detach().cpu()
     v = velocity.detach().cpu()
     ids = particle_id.detach().cpu()
+    cell_size = float(radius_m)
+    cells = torch.floor(p / cell_size).to(dtype=torch.int64)
+    buckets: dict[tuple[int, int, int], list[int]] = defaultdict(list)
+    for index, cell in enumerate(cells.tolist()):
+        buckets[tuple(int(value) for value in cell)].append(index)
     sources: list[int] = []
     destinations: list[int] = []
     attributes: list[torch.Tensor] = []
     for destination in range(n):
-        delta = p - p[destination]
-        distance = torch.linalg.vector_norm(delta, dim=1)
-        candidates = [
-            source for source in range(n)
-            if source != destination and float(distance[source]) <= radius_m
-        ]
-        candidates.sort(key=lambda source: (float(distance[source]), int(ids[source])))
+        base_cell = cells[destination].tolist()
+        candidate_indices: list[int] = []
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                for dz in (-1, 0, 1):
+                    candidate_indices.extend(
+                        buckets.get(
+                            (int(base_cell[0]) + dx, int(base_cell[1]) + dy, int(base_cell[2]) + dz),
+                            (),
+                        )
+                    )
+        candidates_with_distance: list[tuple[int, float, torch.Tensor]] = []
+        for source in candidate_indices:
+            if source == destination:
+                continue
+            delta = p[source] - p[destination]
+            distance = float(torch.linalg.vector_norm(delta))
+            if distance <= radius_m:
+                candidates_with_distance.append((source, distance, delta))
+        candidates_with_distance.sort(key=lambda row: (row[1], int(ids[row[0]])))
+        candidates = candidates_with_distance
         if max_neighbors is not None:
             candidates = candidates[:max_neighbors]
-        for source in candidates:
+        for source, distance, delta in candidates:
             sources.append(source)
             destinations.append(destination)
-            attributes.append(torch.cat((delta[source], v[source] - v[destination], distance[source].reshape(1))))
+            attributes.append(
+                torch.cat(
+                    (
+                        delta,
+                        v[source] - v[destination],
+                        torch.as_tensor([distance], dtype=delta.dtype),
+                    )
+                )
+            )
     if not attributes:
         edge_index = torch.empty((2, 0), dtype=torch.long, device=position.device)
         edge_features = torch.empty((0, 7), dtype=position.dtype, device=position.device)
@@ -437,6 +479,7 @@ def graph_model_contract(*, node_features: int, edge_features: int = 7, hidden: 
             "node_features": node_features,
             "edge_features": edge_features,
             "edge_semantics": "current relative position, current relative velocity, current distance",
+            "neighbor_query": "uniform-grid spatial hash; 27-cell local query; no N-by-N pair matrix",
         },
         "routes": {
             "raw": {

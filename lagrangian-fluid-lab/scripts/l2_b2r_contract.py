@@ -28,9 +28,11 @@ except ModuleNotFoundError:  # direct ``python scripts/l2_b2r_prepare.py``
 
 LAB = Path(__file__).resolve().parents[1]
 DEFAULT_CASE_REGISTRY = LAB / "campaigns/l2-multifamily/evidence/f3-canonical-manifest.json"
+DEFAULT_CURRENT_F3_CONTRACT = LAB / "campaigns/l2-multifamily/resume-c6b28c8/current-f3-contract.json"
 HISTORICAL_B2_SCRIPT = "scripts/l2_b2_learning.py"
 HISTORICAL_B2_REPORT = "campaigns/l2-multifamily/reports/b2-learning-baseline.json"
 CONTRACT_SCHEMA = "l2r.b2r.preparation_contract.v1"
+CURRENT_F3_CONTRACT_SCHEMA = "l2r.r2.current_f3_contract.v1"
 ATTEMPT_SCHEMA = "l2r.b2r.training_attempt.v1"
 DENOMINATOR_SCHEMA = "l2r.b2r.failure_denominator.v1"
 R2_REQUIRED_OUTPUTS = (
@@ -174,6 +176,59 @@ def _source_ref(path: str | Path) -> dict[str, Any]:
     }
 
 
+def validate_current_f3_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
+    """Validate the current F3 data/target contract bound to B2R.
+
+    B2R is a new graph architecture, so it does not claim to use the legacy
+    43-feature checkpoint.  It must nevertheless be attached to the current
+    F3 contract that defines the registered data, causal boundary and target
+    update.  The current model checkpoint may still be absent; that is an R2
+    finding, not permission to silently fall back to the historical model.
+    """
+
+    if not isinstance(contract, Mapping) or contract.get("schema") != CURRENT_F3_CONTRACT_SCHEMA:
+        raise B2RContractError("B2R requires the current F3 contract schema")
+    data_contract = contract.get("data_contract")
+    if not isinstance(data_contract, Mapping):
+        raise B2RContractError("current F3 contract has no data_contract block")
+    if data_contract.get("feature_width") != 48 or data_contract.get("recorded_feature_width") != 48:
+        raise B2RContractError("current F3 contract must bind the 48-feature input width")
+    if data_contract.get("future_fluid_state_allowed") is not False:
+        raise B2RContractError("current F3 contract permits future fluid state")
+    if data_contract.get("future_free_body_state_allowed") is not False:
+        raise B2RContractError("current F3 contract permits future free-body state")
+    target = str(data_contract.get("target_convention", ""))
+    if "next" not in target.lower() or "current" not in target.lower():
+        raise B2RContractError("current F3 target convention is not current-to-next displacement")
+    identity = str(data_contract.get("identity_convention", ""))
+    if "native" not in identity.lower() or "id" not in identity.lower():
+        raise B2RContractError("current F3 identity convention is not native-ID based")
+    recipe = contract.get("recipe")
+    if not isinstance(recipe, Mapping) or not recipe.get("recipe_id"):
+        raise B2RContractError("current F3 recipe binding is missing")
+    return {
+        "valid": True,
+        "schema": CURRENT_F3_CONTRACT_SCHEMA,
+        "feature_width": 48,
+        "recipe_id": recipe["recipe_id"],
+        "qualification_claim": bool(contract.get("qualification", {}).get("current_model_qualified", False)),
+    }
+
+
+def load_current_f3_contract(path: str | Path = DEFAULT_CURRENT_F3_CONTRACT) -> tuple[Path, dict[str, Any]]:
+    """Load and validate the current F3 contract without touching shared state."""
+
+    resolved = _resolve_lab_path(path)
+    if not resolved.is_file():
+        raise FileNotFoundError(resolved)
+    try:
+        payload = json.loads(resolved.read_text())
+    except json.JSONDecodeError as error:
+        raise B2RContractError(f"invalid current F3 contract JSON: {resolved}") from error
+    validate_current_f3_contract(payload)
+    return resolved, payload
+
+
 def load_evaluation_case_registry(
     path: str | Path = DEFAULT_CASE_REGISTRY,
     *,
@@ -287,12 +342,14 @@ def _r2_acceptance_key(output: str) -> str:
 def build_study_spec(
     *,
     registry_path: str | Path = DEFAULT_CASE_REGISTRY,
+    current_f3_contract_path: str | Path = DEFAULT_CURRENT_F3_CONTRACT,
     r2_evidence: Mapping[str, Any] | None = None,
     r0_verified: bool = False,
 ) -> tuple[StudySpec, dict[str, Any]]:
     """Prepare the controlled study and its independent denominator manifest."""
 
     registry = load_evaluation_case_registry(registry_path)
+    current_f3_path, current_f3_contract = load_current_f3_contract(current_f3_contract_path)
     gate = evaluate_r2_dependency(r2_evidence)
     spec = StudySpec(
         evaluation_case_ids=tuple(registry["physical_case_ids"]),
@@ -332,12 +389,22 @@ def build_study_spec(
             "new_training_attempts": 0,
             "can_satisfy_B2R": False,
         },
-        "model_contract": graph_model_contract(
+        "model_contract": {
+            **graph_model_contract(
             node_features=len(spec.node_feature_names),
             edge_features=len(spec.edge_feature_names),
             hidden=spec.hidden,
             message_steps=spec.message_steps,
-        ),
+            ),
+            "current_f3_contract_binding": {
+                "schema": CURRENT_F3_CONTRACT_SCHEMA,
+                "source": _source_ref(current_f3_path),
+                "feature_width": current_f3_contract["data_contract"]["feature_width"],
+                "target_convention": current_f3_contract["data_contract"]["target_convention"],
+                "identity_convention": current_f3_contract["data_contract"]["identity_convention"],
+                "legacy_checkpoint_reuse": False,
+            },
+        },
         "study_design": {
             "routes": [
                 {
@@ -370,6 +437,12 @@ def build_study_spec(
         },
         "data_contract": {
             "source_role": "registered F3 development data; no hidden test",
+            "current_f3_contract": {
+                "source": _source_ref(current_f3_path),
+                "schema": CURRENT_F3_CONTRACT_SCHEMA,
+                "feature_width": current_f3_contract["data_contract"]["feature_width"],
+                "recipe_id": current_f3_contract["recipe"]["recipe_id"],
+            },
             "evaluation_case_registry": registry,
             "evaluation_denominator_unit": "unique physical_case_id",
             "lineage_rule": "resolution/restart/window views stay within lineage and do not create new physical cases",
@@ -430,6 +503,11 @@ def validate_preparation_manifest(manifest: Mapping[str, Any]) -> dict[str, Any]
         raise B2RContractError("B2R preparation must explicitly remain non-terminal")
     if manifest.get("historical_baseline_boundary", {}).get("can_satisfy_B2R") is not False:
         raise B2RContractError("historical B2 report cannot satisfy B2R")
+    current_f3 = manifest.get("data_contract", {}).get("current_f3_contract", {})
+    if current_f3.get("schema") != CURRENT_F3_CONTRACT_SCHEMA:
+        raise B2RContractError("B2R preparation is not bound to the current F3 contract")
+    if current_f3.get("feature_width") != 48 or not isinstance(current_f3.get("source"), Mapping):
+        raise B2RContractError("B2R current F3 contract binding is incomplete")
     dependency = manifest.get("dependencies", {}).get("R2", {})
     if manifest.get("status") == "waiting_for_R2" and dependency.get("status") != "waiting_for_R2":
         raise B2RContractError("waiting_for_R2 status must be backed by the R2 dependency")

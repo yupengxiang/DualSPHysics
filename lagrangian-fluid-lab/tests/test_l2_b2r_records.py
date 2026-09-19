@@ -114,3 +114,74 @@ def test_attempt_record_write_is_atomic_and_non_overwriting(tmp_path):
     assert json.loads(target.read_text())["schema"] == "l2r.b2r.training_attempt.v1"
     with pytest.raises(FileExistsError):
         write_attempt_record(target, record)
+
+
+def test_evaluation_rows_are_bound_to_completed_attempts():
+    spec = _spec()
+    record = _record(
+        spec,
+        0,
+        status="completed",
+        worker_exit_status="zero",
+        training_completed=True,
+        evaluation_completed=True,
+        model_physical_pass="unknown",
+    )
+    rows = [
+        {
+            "logical_run_id": record["logical_run_id"],
+            "physical_case_id": spec.evaluation_case_ids[0],
+            "execution_attempt_id": record["execution_attempt_id"],
+            "status": "unknown",
+            "model_physical_pass": "unknown",
+        }
+    ]
+    report = build_failure_denominator(spec, [record], evaluation_results=rows)
+    evaluation = report["evaluation_case_denominator"]
+    assert evaluation["observed_case_run_records"] == 1
+    assert evaluation["status_counts"]["unknown"] == 1
+    assert evaluation["rows"][0]["execution_attempt_id"] == record["execution_attempt_id"]
+
+
+def test_unbound_evaluation_row_cannot_inflate_the_denominator():
+    spec = _spec()
+    record = _record(spec, 0)
+    row = {
+        "logical_run_id": record["logical_run_id"],
+        "physical_case_id": spec.evaluation_case_ids[0],
+        "execution_attempt_id": "not-the-recorded-attempt",
+        "status": "unknown",
+        "model_physical_pass": "unknown",
+    }
+    with pytest.raises(B2RContractError, match="not bound"):
+        build_failure_denominator(spec, [record], evaluation_results=[row])
+
+
+def test_logically_complete_runs_stay_incomplete_until_all_case_runs_exist():
+    spec = _spec()
+    records = [
+        _record(
+            spec,
+            index,
+            execution_attempt_id=f"complete{index}",
+            status="completed",
+            worker_exit_status="zero",
+            training_completed=True,
+            evaluation_completed=True,
+            model_physical_pass="unknown",
+        )
+        for index in range(6)
+    ]
+    evaluation = [
+        {
+            "logical_run_id": records[0]["logical_run_id"],
+            "physical_case_id": spec.evaluation_case_ids[0],
+            "execution_attempt_id": records[0]["execution_attempt_id"],
+            "status": "unknown",
+            "model_physical_pass": "unknown",
+        }
+    ]
+    report = build_failure_denominator(spec, records, evaluation_results=evaluation)
+    assert report["logical_run_denominator"]["outcome_counts"]["physical_unknown"] == 6
+    assert report["status"] == "incomplete"
+    assert report["evaluation_case_denominator"]["status_counts"]["missing"] == 95

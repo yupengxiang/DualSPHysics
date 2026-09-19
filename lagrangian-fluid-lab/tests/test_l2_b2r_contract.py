@@ -9,6 +9,8 @@ from scripts.l2_b2r_contract import (
     assert_execution_allowed,
     build_study_spec,
     evaluate_r2_dependency,
+    load_current_f3_contract,
+    validate_current_f3_contract,
     validate_preparation_manifest,
 )
 
@@ -24,7 +26,22 @@ def test_preparation_defaults_to_waiting_for_r2_and_declares_six_logical_runs():
     assert manifest["acceptance"]["B2R_terminal"] is False
     assert manifest["historical_baseline_boundary"]["can_satisfy_B2R"] is False
     assert manifest["dependencies"]["R2"]["status"] == "waiting_for_R2"
+    assert manifest["data_contract"]["current_f3_contract"]["feature_width"] == 48
+    assert manifest["model_contract"]["current_f3_contract_binding"]["legacy_checkpoint_reuse"] is False
     assert validate_preparation_manifest(manifest)["valid"] is True
+
+
+def test_current_f3_contract_is_machine_checked_and_not_legacy_checkpoint_reuse():
+    path, contract = load_current_f3_contract()
+    assert path.is_file()
+    result = validate_current_f3_contract(contract)
+    assert result["valid"] is True
+    assert result["feature_width"] == 48
+    broken = dict(contract)
+    broken["data_contract"] = dict(contract["data_contract"])
+    broken["data_contract"]["future_fluid_state_allowed"] = True
+    with pytest.raises(B2RContractError, match="future fluid"):
+        validate_current_f3_contract(broken)
 
 
 def test_r2_gate_does_not_accept_old_b2_report_or_partial_evidence():

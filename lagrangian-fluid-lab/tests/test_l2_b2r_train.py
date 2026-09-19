@@ -1,4 +1,5 @@
 import json
+import hashlib
 from pathlib import Path
 
 import h5py
@@ -29,7 +30,7 @@ def _toy_bundle(tmp_path: Path, monkeypatch):
     velocity[..., 0] = 0.01
     position = np.stack([base + velocity[0] * (0.1 * frame) for frame in range(t_count)])
     scalar = np.ones((t_count, particle_count), dtype=np.float32)
-    for stem, offset in (("train", 0.0), ("eval", 0.002)):
+    for stem, offset in (("train", 0.0), ("eval", 0.002), ("eval2", 0.003)):
         hdf5 = tmp_path / f"{stem}.h5"
         with h5py.File(hdf5, "w") as handle:
             handle.create_dataset("time", data=np.arange(t_count, dtype=np.float64) * 0.1)
@@ -64,10 +65,33 @@ def _toy_bundle(tmp_path: Path, monkeypatch):
                 "hdf5": "eval.h5",
                 "source_evidence": {"control": {"path": "eval.csv"}},
             },
+            {
+                "case_id": "EVAL_1",
+                "physical_case_id": "EVAL_1",
+                "split": "test",
+                "hdf5": "eval2.h5",
+                "source_evidence": {"control": {"path": "eval2.csv"}},
+            },
         ],
     }
     registry_path = tmp_path / "registry.json"
     registry_path.write_text(json.dumps(registry))
+    current_f3 = {
+        "schema": "l2r.r2.current_f3_contract.v1",
+        "data_contract": {
+            "feature_width": 48,
+            "recorded_feature_width": 48,
+            "future_fluid_state_allowed": False,
+            "future_free_body_state_allowed": False,
+            "target_convention": "Next canonical position minus current canonical position",
+            "identity_convention": "Full immutable native particle IDs",
+        },
+        "recipe": {"recipe_id": "TOY_F3_RECIPE"},
+        "qualification": {"current_model_qualified": False},
+    }
+    current_f3_path = tmp_path / "current-f3.json"
+    current_f3_path.write_text(json.dumps(current_f3))
+    current_f3_sha = hashlib.sha256(current_f3_path.read_bytes()).hexdigest()
     contract = graph_model_contract(node_features=8, edge_features=7, hidden=8, message_steps=1)
     study = {
         "schema": "l2r.b2r.preparation_contract.v1",
@@ -90,7 +114,12 @@ def _toy_bundle(tmp_path: Path, monkeypatch):
         "data_contract": {
             "evaluation_case_registry": {
                 "source": {"path": "registry.json"},
-                "physical_case_ids": ["EVAL_0"],
+                "physical_case_ids": ["EVAL_0", "EVAL_1"],
+            },
+            "current_f3_contract": {
+                "schema": "l2r.r2.current_f3_contract.v1",
+                "source": {"path": "current-f3.json", "sha256": current_f3_sha},
+                "feature_width": 48,
             },
             "future_reference_state_allowed": False,
         },
@@ -177,7 +206,27 @@ def test_bounded_run_records_unknown_physical_verdict_and_complete_denominator(t
     assert attempt["model_physical_pass"] == "unknown"
     assert denominator["logical_run_denominator"]["outcome_counts"]["physical_unknown"] == 1
     assert denominator["evaluation_case_denominator"]["status_counts"]["unknown"] == 1
-    assert denominator["evaluation_case_denominator"]["status_counts"]["missing"] == 5
+    assert denominator["evaluation_case_denominator"]["status_counts"]["missing"] == 11
+
+
+def test_full_evaluation_scope_emits_one_row_per_registered_case(tmp_path, monkeypatch):
+    study_path = _toy_bundle(tmp_path, monkeypatch)
+    output = tmp_path / "full-attempt"
+    args = _run_args(study_path, output, route="hybrid")
+    args.eval_case_id = None
+    args.eval_all_cases = True
+    result = worker.run_attempt(args)
+    assert result["status"] == "completed"
+    assert result["evaluation_case_count"] == 2
+    assert result["full_evaluation_denominator_complete"] is True
+    report = json.loads((output / "attempt-report.json").read_text())
+    denominator = json.loads((output / "failure-denominator.json").read_text())
+    assert report["evaluation_scope"] == "full"
+    assert report["full_evaluation_denominator_complete"] is True
+    assert report["evaluation"]["case_count"] == 2
+    assert denominator["evaluation_case_denominator"]["status_counts"]["unknown"] == 2
+    assert denominator["evaluation_case_denominator"]["status_counts"]["missing"] == 10
+    assert all(row["execution_attempt_id"] == report["execution_attempt_id"] for row in denominator["evaluation_case_denominator"]["rows"] if row["status"] == "unknown")
 
 
 def test_missing_case_is_a_guarded_failed_attempt_not_a_physical_pass(tmp_path, monkeypatch):
