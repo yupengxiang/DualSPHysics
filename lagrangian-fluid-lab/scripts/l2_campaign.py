@@ -1058,6 +1058,8 @@ def oracle_for_hdf5(path: Path) -> dict:
     result: dict[str, Any] = {"path": str(path.resolve()), "exists": path.is_file()}
     if not path.is_file():
         return result
+    wall_spec, wall_status = _coerce_wall_spec(F3_WALL_BOUNDS, None)
+    result["wall_status"] = wall_status
     with h5py.File(path, "r") as handle:
         times = np.asarray(handle["time"][:], dtype=np.float64)
         positions = handle["position"]
@@ -1078,9 +1080,9 @@ def oracle_for_hdf5(path: Path) -> dict:
             active = np.asarray(valid[frame], dtype=bool) & np.asarray(valid[frame + 1], dtype=bool)
             finite_position = np.isfinite(current).all(axis=1) & np.isfinite(next_position).all(axis=1)
             wall_active = active & finite_position
-            if wall_active.any():
+            if wall_active.any() and wall_spec is not None:
                 wall = wall_penetration(
-                    next_position[wall_active], np.ones(int(wall_active.sum())), F3_WALL_BOUNDS, 1e-8
+                    next_position[wall_active], np.ones(int(wall_active.sum())), wall_spec, 1e-8
                 )
                 truth_outside += int(
                     wall["outside_closed_container_count"] + wall["obstacle_penetration_count"]
