@@ -57,6 +57,31 @@ F3_WALL_BOUNDS = {
 }
 REQUIRED_TRAJECTORY_DATASETS = ("time", "position", "velocity", "mass", "particle_id", "valid")
 STAGE_DEPENDENCY_STATUSES = frozenset({"complete", "complete_with_findings", "blocked_external"})
+STAGE_STATUSES = frozenset({
+    "pending", "ready", "running", "complete", "complete_with_findings",
+    "blocked", "blocked_upstream", "blocked_external",
+})
+
+
+def external_blocker_error(blocker: Any) -> str | None:
+    """Return a reason when an external-blocker record is not auditable.
+
+    ``blocked_external`` is a terminal *evidence* state, not a free-form
+    escape hatch.  Keep the schema small enough for both the legacy stage
+    controller and the L2-R task controller to share it.
+    """
+
+    if not isinstance(blocker, dict):
+        return "blocker_not_object"
+    for key in ("id", "requirement", "evidence", "release_conditions"):
+        value = blocker.get(key)
+        if key in {"id", "requirement"} and (not isinstance(value, str) or not value.strip()):
+            return f"blocker_missing_{key}"
+        if key in {"evidence", "release_conditions"} and (
+            value is None or value is False or value == "" or value == [] or value == {}
+        ):
+            return f"blocker_missing_{key}"
+    return None
 
 
 def utc_now() -> str:
@@ -296,12 +321,88 @@ def require_adopted() -> dict:
     return state
 
 
+def _stage_report_path(facts: dict) -> Path | None:
+    report = facts.get("report")
+    if not isinstance(report, str) or not report:
+        return None
+    path = Path(report)
+    return path if path.is_absolute() else CAMPAIGN / path
+
+
+def _facts_show_canary_failure(facts: dict) -> bool:
+    """Detect an explicit hard-canary failure without guessing from absence."""
+
+    for key in ("canary_pass", "hard_canary_pass", "canary_hard_integrity_pass"):
+        if facts.get(key) is False:
+            return True
+    pass_count = facts.get("canary_pass_count")
+    attempt_count = facts.get("attempt_count")
+    if isinstance(pass_count, (int, float)) and isinstance(attempt_count, (int, float)):
+        return attempt_count > 0 and pass_count < attempt_count
+    decision = str(facts.get("decision", "")).lower()
+    return "canary" in decision and any(token in decision for token in ("fail", "finding", "stop", "blocked"))
+
+
+def _facts_show_no_new_training(facts: dict) -> bool:
+    for key in ("new_training_attempts", "training_attempts", "new_training_count"):
+        value = facts.get(key)
+        if isinstance(value, (int, float)) and value == 0:
+            return True
+    for key in ("new_training_attempts_executed", "new_training_executed"):
+        if facts.get(key) is False:
+            return True
+    return False
+
+
+def _facts_show_no_new_recipe(facts: dict) -> bool:
+    for key in ("new_qualified_t1_recipe_count", "new_recipe_count", "new_qualified_recipe_count"):
+        value = facts.get(key)
+        if isinstance(value, (int, float)) and value == 0:
+            return True
+    for key in ("new_recipe", "new_recipe_available", "new_qualified_recipe"):
+        if facts.get(key) is False:
+            return True
+    return False
+
+
 def update_stage(stage: str, status: str, *, facts: dict | None = None) -> None:
+    if status not in STAGE_STATUSES:
+        raise ValueError(f"invalid L2 stage status: {status}")
     state = require_adopted()
+    if stage not in state.get("stages", {}):
+        raise KeyError(stage)
+    stored_facts = dict(facts or {})
+    if status in {"complete", "complete_with_findings"}:
+        report_path = _stage_report_path(stored_facts)
+        if report_path is None:
+            raise ValueError(f"{status} requires a report in facts")
+        if not report_path.is_file():
+            raise ValueError(f"{status} requires an existing report: {report_path}")
+    if status == "blocked_external":
+        blocker = stored_facts.get("external_blocker", stored_facts.get("blocker"))
+        error = external_blocker_error(blocker)
+        if error:
+            raise ValueError(f"blocked_external requires auditable blocker evidence: {error}")
+        stored_facts["external_blocker"] = blocker
+
+    requested_status = status
+    if status == "complete" and (
+        _facts_show_canary_failure(stored_facts)
+        or _facts_show_no_new_training(stored_facts)
+        or _facts_show_no_new_recipe(stored_facts)
+    ):
+        # A report may be terminal evidence for a bounded negative result, but
+        # it must not be represented as an unqualified successful stage.
+        status = "complete_with_findings"
+        stored_facts["controller_downgrade"] = {
+            "requested_status": requested_status,
+            "reason": "explicit canary, training, or recipe gate was not satisfied",
+        }
+
     state["stages"][stage]["status"] = status
     state["stages"][stage]["updated_at_utc"] = utc_now()
-    if facts:
-        state["stages"][stage]["facts"] = facts
+    if stored_facts:
+        state["stages"][stage]["facts"] = stored_facts
     atomic_json(CAMPAIGN / "state.json", state)
     queue = read_json(CAMPAIGN / "queue.json")
     for task in queue["tasks"]:

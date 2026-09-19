@@ -207,5 +207,52 @@ def test_blocked_stage_does_not_release_dependents(monkeypatch: pytest.MonkeyPat
     l2_campaign.update_stage("A0", "blocked")
     assert json.loads((campaign / "queue.json").read_text())["tasks"][1]["status"] == "pending"
 
-    l2_campaign.update_stage("A0", "blocked_external")
+    with pytest.raises(ValueError, match="auditable blocker evidence"):
+        l2_campaign.update_stage("A0", "blocked_external")
+    assert json.loads((campaign / "queue.json").read_text())["tasks"][1]["status"] == "pending"
+
+    l2_campaign.atomic_json(campaign / "reports" / "a0-blocker.json", {"evidence": "fixture"})
+    l2_campaign.update_stage(
+        "A0",
+        "blocked_external",
+        facts={
+            "report": "reports/a0-blocker.json",
+            "external_blocker": {
+                "id": "fixture-external",
+                "requirement": "owner supplied anchor",
+                "evidence": {"report": "reports/a0-blocker.json"},
+                "release_conditions": ["owner supplies the anchor"],
+            },
+        },
+    )
     assert json.loads((campaign / "queue.json").read_text())["tasks"][1]["status"] == "ready"
+
+
+@pytest.mark.parametrize(
+    "gate_facts",
+    [
+        {"canary_pass": False},
+        {"new_training_attempts": 0},
+        {"new_qualified_t1_recipe_count": 0},
+    ],
+)
+def test_explicit_failed_gate_cannot_be_recorded_as_complete(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, gate_facts: dict,
+):
+    campaign = tmp_path / "campaign"
+    monkeypatch.setattr(l2_campaign, "CAMPAIGN", campaign)
+    state = {
+        "owner_adoption_status": "accepted",
+        "stages": {"A0": {"status": "ready"}},
+        "resource_usage": {},
+    }
+    queue = {"tasks": [{"task_id": "A0", "stage": "A0", "status": "ready", "requires": []}]}
+    l2_campaign.atomic_json(campaign / "state.json", state)
+    l2_campaign.atomic_json(campaign / "queue.json", queue)
+    l2_campaign.atomic_json(campaign / "reports" / "gate.json", {"fixture": True})
+
+    l2_campaign.update_stage("A0", "complete", facts={"report": "reports/gate.json", **gate_facts})
+
+    stored = json.loads((campaign / "state.json").read_text())
+    assert stored["stages"]["A0"]["status"] == "complete_with_findings"
+    assert stored["stages"]["A0"]["facts"]["controller_downgrade"]["requested_status"] == "complete"

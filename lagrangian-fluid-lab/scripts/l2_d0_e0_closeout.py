@@ -82,6 +82,12 @@ def _read_optional(name: str) -> dict:
 def _receipt_valid(receipt: dict) -> tuple[bool, str]:
     """Validate a scoped T1 receipt without accepting a canary or old report."""
 
+    if (
+        receipt.get("canary") is True
+        or receipt.get("role") in {"canary", "canary_only"}
+        or receipt.get("qualification_claim") == "canary_only"
+    ):
+        return False, "canary_not_qualification"
     scope = receipt.get("scope")
     evidence = receipt.get("evidence")
     if receipt.get("status") not in {"accepted", "qualified", "passed"}:
@@ -120,12 +126,21 @@ def _receipt_valid(receipt: dict) -> tuple[bool, str]:
     return True, "accepted"
 
 
-def load_qualified_receipts(path: Path = RECIPE_REGISTRY) -> tuple[list[dict], list[dict]]:
+def load_qualified_receipts(path: Path | None = None) -> tuple[list[dict], list[dict]]:
     """Read real recipe receipts; legacy reports and canaries are never promoted."""
 
-    if not path.is_file():
-        return [], []
-    payload = read_json(path)
+    # Resolve the registry at call time.  A default argument bound to
+    # ``RECIPE_REGISTRY`` at import would make a resumed/moved namespace read
+    # a stale path and could silently ignore a newly written receipt.
+    registry_path = Path(RECIPE_REGISTRY if path is None else path)
+    if not registry_path.is_file():
+        return [], [{"reason": "registry_missing", "path": str(registry_path.resolve())}]
+    try:
+        payload = read_json(registry_path)
+    except (OSError, json.JSONDecodeError):
+        return [], [{"reason": "registry_unreadable", "path": str(registry_path.resolve())}]
+    if not isinstance(payload, dict):
+        return [], [{"reason": "registry_not_object"}]
     raw = payload.get("receipts", payload.get("recipes", []))
     if not isinstance(raw, list):
         return [], [{"reason": "registry_receipts_not_list"}]
@@ -143,7 +158,51 @@ def load_qualified_receipts(path: Path = RECIPE_REGISTRY) -> tuple[list[dict], l
     return accepted, rejected
 
 
-def d0(*, registry_path: Path = RECIPE_REGISTRY) -> dict:
+def _canary_failures(*reports: dict) -> list[dict]:
+    failures: list[dict] = []
+    for report_index, report in enumerate(reports):
+        if not isinstance(report, dict) or not report:
+            continue
+        label = report.get("stage") or report.get("family") or f"canary_{report_index}"
+        for key in ("canary_pass", "hard_canary_pass", "canary_hard_integrity_pass"):
+            if report.get(key) is False:
+                failures.append({"source": label, "reason": f"{key}=false"})
+        for key, value in report.items():
+            if key.endswith("_canary_pass") and value is False:
+                failures.append({"source": label, "reason": f"{key}=false"})
+        for audit_index, audit in enumerate(report.get("audits", [])):
+            if isinstance(audit, dict) and audit.get("canary_hard_integrity_pass") is False:
+                failures.append({
+                    "source": label,
+                    "audit_index": audit_index,
+                    "family": audit.get("family"),
+                    "reason": "canary_hard_integrity_pass=false",
+                })
+    return failures
+
+
+def _new_receipts(receipts: list[dict], manifest: dict) -> tuple[list[dict], list[dict]]:
+    """Exclude re-registered legacy recipe IDs from the D0 new-recipe gate."""
+
+    legacy_recipe_ids = {
+        case.get("recipe_id") for case in manifest.get("cases", [])
+        if isinstance(case, dict) and case.get("recipe_id")
+    }
+    fresh: list[dict] = []
+    rejected: list[dict] = []
+    for receipt in receipts:
+        explicitly_new = any(receipt.get(key) is True for key in ("new_recipe", "is_new", "new_subdomain"))
+        if receipt.get("recipe_id") in legacy_recipe_ids and not explicitly_new:
+            rejected.append({
+                "receipt_id": receipt.get("receipt_id"),
+                "reason": "legacy_recipe_not_new",
+            })
+            continue
+        fresh.append(receipt)
+    return fresh, rejected
+
+
+def d0(*, registry_path: Path | None = None) -> dict:
     state = require_adopted()
     if state["stages"]["A0"]["status"] not in {"complete", "complete_with_findings"}:
         raise RuntimeError("D0 requires A0")
@@ -165,21 +224,34 @@ def d0(*, registry_path: Path = RECIPE_REGISTRY) -> dict:
         if audit.get("canary_hard_integrity_pass"):
             canary_passes.append({"stage": "C3", "family": audit.get("family"), "role": "canary_only"})
 
-    new_qualified, rejected_receipts = load_qualified_receipts(registry_path)
+    active_registry = Path(RECIPE_REGISTRY if registry_path is None else registry_path)
+    qualified_receipts, rejected_receipts = load_qualified_receipts(active_registry)
+    new_qualified, legacy_rejections = _new_receipts(qualified_receipts, manifest)
+    rejected_receipts.extend(legacy_rejections)
+    canary_failures = _canary_failures(c1, c2, c3)
+    canary_gate = not canary_failures
     split_input_gate = bool(
         c0.get("acceptance", {}).get("priority_reference_cells_are_2x3")
         and c0.get("acceptance", {}).get("legacy_assets_not_reclassified")
         and b2.get("acceptance", {}).get("causal_input_contract_checked")
     )
-    batch_gate = bool(new_qualified and split_input_gate)
+    batch_gate = bool(new_qualified and split_input_gate and canary_gate)
     qualified_families = sorted({item["scope"]["family"] for item in new_qualified})
+    if not new_qualified:
+        decision = "waiting_for_scoped_t1_receipt_or_split_input_gate"
+    elif not split_input_gate:
+        decision = "waiting_for_split_or_input_gate"
+    elif not canary_gate:
+        decision = "blocked_canary_failure"
+    else:
+        decision = "ready_scoped_internal_batch"
     report = {
         "schema": "l2.d0.production_gate.v1",
         "stage": "D0",
         "created_at_utc": utc_now(),
         "baseline_commit": state["baseline_commit"],
         "status": "ready" if batch_gate else "blocked_upstream",
-        "decision": "ready_scoped_internal_batch" if batch_gate else "waiting_for_scoped_t1_receipt_or_split_input_gate",
+        "decision": decision,
         "runtime_gate": {
             "required": "at least one newly qualified T1 recipe/subdomain and split/input gates",
             "new_qualified_t1_recipe_count": len(new_qualified),
@@ -188,11 +260,13 @@ def d0(*, registry_path: Path = RECIPE_REGISTRY) -> dict:
             "new_qualified_families": qualified_families,
             "rejected_receipts": rejected_receipts,
             "registry": {
-                "path": str(registry_path.resolve()),
-                "exists": registry_path.is_file(),
-                "sha256": sha256(registry_path) if registry_path.is_file() else None,
+                "path": str(active_registry.resolve()),
+                "exists": active_registry.is_file(),
+                "sha256": sha256(active_registry) if active_registry.is_file() else None,
             },
             "split_input_gate_pass": split_input_gate,
+            "canary_gate_pass": canary_gate,
+            "canary_failures": canary_failures,
             "canary_passes_not_promoted": canary_passes,
             "registered_legacy_f3_case_count": len(manifest.get("cases", [])),
             "registered_legacy_f3_is_new_l2_qualification": False,
@@ -202,7 +276,7 @@ def d0(*, registry_path: Path = RECIPE_REGISTRY) -> dict:
             "status": "ready" if batch_gate else "not_ready",
             "accepted_cases": 8 if batch_gate else 0,
             "new_solver_attempts": 0,
-            "reason": "scoped receipt and split/input gates accepted; first internal batch is ready" if batch_gate else "scoped receipt or split/input gate missing; upstream research remains executable",
+            "reason": "scoped receipt, canary, and split/input gates accepted; first internal batch is ready" if batch_gate else "runtime gate is false; upstream research remains executable",
         },
         "evidence": {
             "C0": report_ref("c0-family-hypotheses.json"),
@@ -217,7 +291,7 @@ def d0(*, registry_path: Path = RECIPE_REGISTRY) -> dict:
             "hidden_test_generation_authorized": False,
             "legacy_campaign_reopened": False,
         },
-        "conclusion": "Only a validated family-scoped receipt can admit an internal batch; old reports and canaries remain non-promoting.",
+        "conclusion": "Only a validated family-scoped receipt with passing split/input and canary gates can admit an internal batch; old reports and canaries remain non-promoting.",
     }
     return report
 
@@ -341,18 +415,19 @@ def run_e0() -> None:
     e0_task = next(task for task in resume["tasks"] if task["task_id"] == "E0R")
     if e0_task["status"] not in {"ready", "running", "complete_with_findings"}:
         raise RuntimeError(f"E0R is not dispatchable yet: {e0_task['status']}")
-    # E0R itself is a required output.  Materialize placeholders before marking
-    # the task terminal, then recompute the predicate and replace them with the
-    # machine-checked report.
+    # E0R itself is a required output.  Write a machine-checked checkpoint
+    # before changing the task to terminal.  This keeps a report-generation
+    # exception from leaving a terminal task backed only by a placeholder.
     RESUME_ROOT.mkdir(parents=True, exist_ok=True)
-    if not E0R_REPORT.is_file():
-        atomic_json(E0R_REPORT, {"schema": "l2r.e0.checkpoint.placeholder.v1"})
-    if not E0R_MARKDOWN.is_file():
-        E0R_MARKDOWN.write_text("# E0-R L2 连续执行 checkpoint\n")
+    report = e0()
+    atomic_json(E0R_REPORT, report)
+    E0R_MARKDOWN.write_text(e0_markdown(report))
     mark_task("E0R", "complete_with_findings", artifacts=[
         "resume-c6b28c8/e0-r-checkpoint.json",
         "resume-c6b28c8/e0-r-checkpoint.md",
     ], next_action="continue_ready_work")
+    # Recompute after E0R is terminal so the persisted report describes the
+    # actual final predicate rather than the pre-E0 checkpoint state.
     report = e0()
     atomic_json(E0R_REPORT, report)
     E0R_MARKDOWN.write_text(e0_markdown(report))

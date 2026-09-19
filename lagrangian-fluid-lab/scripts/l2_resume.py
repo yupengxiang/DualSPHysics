@@ -26,6 +26,7 @@ try:
         read_json,
         require_adopted,
         sha256_file,
+        external_blocker_error,
         utc_now,
     )
 except ModuleNotFoundError:  # pragma: no cover - direct script execution
@@ -38,6 +39,7 @@ except ModuleNotFoundError:  # pragma: no cover - direct script execution
         read_json,
         require_adopted,
         sha256_file,
+        external_blocker_error,
         utc_now,
     )
 
@@ -49,6 +51,7 @@ RESUME_EVENTS = RESUME_ROOT / "events.json"
 RECIPE_REGISTRY = RESUME_ROOT / "recipe-registry.json"
 R0_VERIFICATION = RESUME_ROOT / "r0-controller-verification.json"
 TERMINAL_STATUSES = frozenset({"complete", "complete_with_findings", "blocked_external"})
+EVIDENCE_TERMINAL_STATUSES = frozenset({"complete", "complete_with_findings"})
 
 TASK_DEFINITIONS = (
     ("R0", [], ["controller_negative_closeout_tests", "artifact_registry_reader", "resume_event", "reconciled_ledger"]),
@@ -96,13 +99,83 @@ def _task_records() -> list[dict[str, Any]]:
     return records
 
 
+def _terminal_evidence_error(task: dict[str, Any]) -> str | None:
+    """Validate the evidence contract for a terminal L2-R task.
+
+    A bounded finding is terminal only with concrete artifact references.  An
+    external block is a different contract: it needs a structured blocker
+    statement with evidence and release conditions, and cannot be represented
+    by an arbitrary non-empty value.
+    """
+
+    status = task.get("status")
+    if status in EVIDENCE_TERMINAL_STATUSES:
+        if task.get("blocker") is not None:
+            return "complete_status_cannot_carry_external_blocker"
+        artifacts = task.get("artifacts")
+        if not isinstance(artifacts, list) or not artifacts:
+            return "complete_status_requires_artifacts"
+        if not all(isinstance(path, str) and path for path in artifacts):
+            return "complete_status_has_invalid_artifact_reference"
+    elif status == "blocked_external":
+        error = external_blocker_error(task.get("blocker"))
+        if error:
+            return f"blocked_external:{error}"
+    return None
+
+
+def _artifact_payloads(task: dict[str, Any]) -> list[dict[str, Any]]:
+    payloads: list[dict[str, Any]] = []
+    for reference in task.get("artifacts", []):
+        path = _artifact_path(reference)
+        if path.suffix != ".json" or not path.is_file():
+            continue
+        try:
+            payload = read_json(path)
+        except (OSError, json.JSONDecodeError):
+            continue
+        if isinstance(payload, dict):
+            payloads.append(payload)
+    return payloads
+
+
+def _task_specific_terminal_error(task: dict[str, Any]) -> str | None:
+    """Keep known false-terminal shortcuts out of the generic predicate."""
+
+    if task.get("status") not in EVIDENCE_TERMINAL_STATUSES:
+        return None
+    if task.get("task_id") != "B2R":
+        return None
+    # B2R's preparation contract explicitly records zero launches.  It is not
+    # enough to make that preparation file terminal; at least one persisted
+    # training-attempt record must exist, including a failed attempt.
+    for payload in _artifact_payloads(task):
+        schema = payload.get("schema")
+        if schema == "l2r.b2r.training_attempt.v1" and payload.get("execution_attempt_id"):
+            return None
+        if schema == "l2r.b2r.bounded_attempt_report.v1" and payload.get("execution_attempt_id"):
+            return None
+    return "B2R_requires_a_new_training_attempt_record"
+
+
+def _task_is_terminal(task: dict[str, Any], *, require_artifacts: bool = False) -> bool:
+    if task.get("status") not in TERMINAL_STATUSES:
+        return False
+    if _terminal_evidence_error(task) or _task_specific_terminal_error(task):
+        return False
+    if require_artifacts and task.get("status") in EVIDENCE_TERMINAL_STATUSES:
+        return all(_artifact_exists(path) for path in task.get("artifacts", []))
+    return True
+
+
 def _refresh_ready(state: dict[str, Any]) -> dict[str, Any]:
     by_id = {task["task_id"]: task for task in state["tasks"]}
     for task in state["tasks"]:
         if task["status"] in TERMINAL_STATUSES or task["status"] == "running":
             continue
         dependencies_terminal = all(
-            by_id[requirement]["status"] in TERMINAL_STATUSES for requirement in task["requires"]
+            _task_is_terminal(by_id[requirement], require_artifacts=True)
+            for requirement in task["requires"]
         )
         if dependencies_terminal and task["status"] in {"pending", "blocked_upstream"}:
             task["status"] = "ready"
@@ -229,23 +302,50 @@ def mark_task(task_id: str, status: str, *, artifacts: list[str] | None = None,
         by_id = {item["task_id"]: item for item in state["tasks"]}
         unmet = [
             requirement for requirement in task.get("requires", [])
-            if by_id[requirement]["status"] not in TERMINAL_STATUSES
+            if not _task_is_terminal(by_id[requirement], require_artifacts=True)
         ]
         if unmet:
             raise RuntimeError(f"cannot mark {task_id} terminal before dependencies: {unmet}")
-    task["status"] = status
-    task["execution_status"] = status
-    task["acceptance_status"] = "accepted" if status in TERMINAL_STATUSES else "pending"
+
+    candidate = dict(task)
+    candidate["status"] = status
     if artifacts is not None:
-        task["artifacts"] = list(artifacts)
+        candidate["artifacts"] = list(artifacts)
+    if status == "blocked_external":
+        if blocker is not None:
+            candidate["blocker"] = blocker
+    else:
+        # Do not let a stale blocker survive a transition back to a normal
+        # evidence state; the two terminal contracts are mutually exclusive.
+        candidate["blocker"] = None
+    if status in TERMINAL_STATUSES:
+        error = _terminal_evidence_error(candidate)
+        if error:
+            raise ValueError(f"invalid terminal evidence for {task_id}: {error}")
+        if status in EVIDENCE_TERMINAL_STATUSES and not all(
+            _artifact_exists(path) for path in candidate.get("artifacts", [])
+        ):
+            raise ValueError(f"terminal task {task_id} requires all artifacts to exist")
+        specific_error = _task_specific_terminal_error(candidate)
+        if specific_error:
+            raise ValueError(f"invalid terminal evidence for {task_id}: {specific_error}")
+
+    task.update(candidate)
+    task["execution_status"] = status
+    task["acceptance_status"] = (
+        "blocked_external" if status == "blocked_external"
+        else "accepted" if status in TERMINAL_STATUSES
+        else "pending"
+    )
     if next_action is not None:
         task["next_action"] = next_action
-    if blocker is not None:
-        task["blocker"] = blocker
     if evidence_origin is not None:
         task["evidence_origin"] = evidence_origin
+    elif status == "blocked_external":
+        task["evidence_origin"] = "external_blocker_evidence"
     task["updated_at_utc"] = utc_now()
     _refresh_ready(state)
+    state["terminal_predicate"] = terminal_predicate(state)
     atomic_json(RESUME_STATE, state)
     return state
 
@@ -298,11 +398,15 @@ def verify_r0() -> dict[str, Any]:
     return verification
 
 
-def _artifact_exists(reference: str) -> bool:
+def _artifact_path(reference: str) -> Path:
     path = Path(reference)
     if not path.is_absolute():
         path = RESUME_ROOT / path if not reference.startswith("resume-c6b28c8/") else CAMPAIGN / reference
-    return path.is_file()
+    return path
+
+
+def _artifact_exists(reference: str) -> bool:
+    return _artifact_path(reference).is_file()
 
 
 def terminal_predicate(state: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -310,31 +414,39 @@ def terminal_predicate(state: dict[str, Any] | None = None) -> dict[str, Any]:
     mandatory = list(state["tasks"])
     unfinished = [task["task_id"] for task in mandatory if task["status"] not in TERMINAL_STATUSES]
     ready = [task["task_id"] for task in mandatory if task["status"] in {"ready", "running"}]
+    invalid_terminal_evidence = {
+        task["task_id"]: error
+        for task in mandatory
+        if task["status"] in TERMINAL_STATUSES
+        for error in [_terminal_evidence_error(task) or _task_specific_terminal_error(task)]
+        if error
+    }
     missing_artifacts = [
         task["task_id"] for task in mandatory
-        if task["status"] in {"complete", "complete_with_findings"}
+        if task["status"] in EVIDENCE_TERMINAL_STATUSES
         and (
             not task.get("artifacts")
             or not all(_artifact_exists(path) for path in task["artifacts"])
         )
     ]
-    invalid_external_blocks = [
-        task["task_id"] for task in mandatory
-        if task["status"] == "blocked_external" and not task.get("blocker")
-    ]
+    invalid_external_blocks = [task_id for task_id, error in invalid_terminal_evidence.items()
+                               if error.startswith("blocked_external:")]
     result = {
         "all_mandatory_tasks_terminal": not unfinished,
         "no_ready_or_running_work": not ready,
         "all_terminal_artifacts_present": not missing_artifacts,
         "external_blockers_evidenced": not invalid_external_blocks,
+        "terminal_evidence_contract_valid": not invalid_terminal_evidence,
         "unfinished_tasks": unfinished,
         "ready_or_running_tasks": ready,
         "missing_artifacts": missing_artifacts,
         "invalid_external_blocks": invalid_external_blocks,
+        "invalid_terminal_evidence": invalid_terminal_evidence,
     }
     result["can_finalize"] = all(result[key] for key in (
         "all_mandatory_tasks_terminal", "no_ready_or_running_work",
         "all_terminal_artifacts_present", "external_blockers_evidenced",
+        "terminal_evidence_contract_valid",
     ))
     return result
 
@@ -357,6 +469,7 @@ def refresh_commit() -> dict[str, Any]:
     state = load_state()
     state["current_commit"] = git_head()
     state["updated_at_utc"] = utc_now()
+    state["terminal_predicate"] = terminal_predicate(state)
     atomic_json(RESUME_STATE, state)
     return state
 
