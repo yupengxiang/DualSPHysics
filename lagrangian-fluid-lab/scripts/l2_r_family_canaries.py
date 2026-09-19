@@ -17,10 +17,12 @@ import xml.etree.ElementTree as ET
 
 try:
     from scripts import l2_c1_canary as base
+    from scripts.campaign_runner import query_gpus
     from scripts.l2_campaign import CAMPAIGN, LAB, atomic_json, repo_relative, sha256_file, utc_now
     from scripts.l2_resume import RESUME_ROOT, load_state
 except ModuleNotFoundError:  # pragma: no cover - direct script execution
     import l2_c1_canary as base
+    from campaign_runner import query_gpus
     from l2_campaign import CAMPAIGN, LAB, atomic_json, repo_relative, sha256_file, utc_now
     from l2_resume import RESUME_ROOT, load_state
 
@@ -203,7 +205,13 @@ def run(task: str, gpu: int) -> dict:
     base.ARTIFACT_ROOT = root / "artifacts"
     base.DATA_ROOT = root / "data"
     base.RUN_ROOT = CAMPAIGN / "runs"
-    allowed = base.inventory_allowlist()
+    live_records = query_gpus()
+    selected_record = next((record for record in live_records if record["index"] == gpu), None)
+    if selected_record is None:
+        raise RuntimeError(f"GPU {gpu} is not visible in the live inventory")
+    # The historical four-GPU inventory is immutable evidence for the prior
+    # activity.  L2-R uses the owner's current local 0..7 allowlist instead.
+    allowed = [record["uuid"] for record in live_records if 0 <= record["index"] <= 7]
     prepared = [base.prepare_case(item) for item in configs(task, gpu)]
     attempts = []
     audits = []
@@ -269,6 +277,9 @@ def run(task: str, gpu: int) -> dict:
             "physical_gpu": gpu,
             "cuda_visible_devices": str(gpu),
             "solver_gpu_argument": 0,
+            "live_uuid": selected_record["uuid"],
+            "live_allowlist_indices": [record["index"] for record in live_records if 0 <= record["index"] <= 7],
+            "historical_inventory_not_reused": True,
             "isolation": "single visible GPU with solver-local index 0",
         },
         "acceptance": {
