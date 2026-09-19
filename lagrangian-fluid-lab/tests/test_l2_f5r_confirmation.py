@@ -145,6 +145,17 @@ def test_runparts_partout_hdf5_identity_ledger_passes_exact_join(tmp_path: Path)
     assert ledger["checks"]["runparts_total_matches_partout_rows"] is True
 
 
+def test_runparts_trailing_comments_are_ignored(tmp_path: Path):
+    path = tmp_path / "RunPARTs.csv"
+    _write_runparts(path)
+    path.write_text(path.read_text() + "\n# NpOutRho: trailing summary\n# NpOutMov: trailing summary\n")
+
+    parsed = f5r.parse_runparts(path)
+
+    assert parsed["errors"] == []
+    assert parsed["totals"]["np_out"] == 1
+
+
 def test_identity_mismatch_is_blocked_instead_of_inferred(tmp_path: Path):
     runparts_path = tmp_path / "RunPARTs.csv"
     partout_path = tmp_path / "PartOut.csv"

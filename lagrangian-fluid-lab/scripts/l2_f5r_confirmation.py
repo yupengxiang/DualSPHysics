@@ -538,6 +538,12 @@ def parse_runparts(path: Path) -> dict[str, Any]:
     errors: list[str] = []
     for raw in reader:
         row = _normalise_csv_row(raw)
+        # RunPARTs appends comment/summary lines after the tabular section.
+        # They are not malformed data rows and must not poison an otherwise
+        # exact native-counter/PartOut/HDF5 identity join.
+        raw_part = _csv_key(row, "Part")
+        if raw_part is None or str(raw_part).strip().startswith("#"):
+            continue
         part = _integer(_csv_key(row, "Part"))
         time_s = _number(_csv_key(row, "TimeStep [s]"))
         values = {
