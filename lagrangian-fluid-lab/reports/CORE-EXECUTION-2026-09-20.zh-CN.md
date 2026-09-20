@@ -725,3 +725,9 @@ F4 formal 注册器回归：**2 passed**（成功注册可重复执行；formal 
 - 报告抽查帧 `0,100,200,…,800` 共9帧，保存帧之间按 stride `32` 检查共同流体粒子；因此状态严格是 `scientific_review_sampled_pending_zero_credit`，不能解释成完整时域通过。抽样已经观察到 `3,354` 个实体穿透粒子帧（Slope `891`、Blocks `2,463`）、`1,435` 个保存帧 chord crossings，以及 `103,552` 个超出生成包络的粒子帧；这足以阻止该候选直接进入15行资格矩阵，后续必须先建立新的可证伪几何假设或完整审计，不能把抽样失败删掉。
 - 抽样 native identity、native 时间轴和有限值均通过，9 个样本的流体质量保持在约 `539.9388421305049 kg`；这些只是输入／执行诊断。事件阈值和外部参考接受包络没有在当前 F5 contract 中预登记，WG1–WG4 对外部表的 RMSE `0.0056603–0.0078241 m`、最大绝对差 `0.0182533–0.0231902 m` 仅作诊断，不能变成 T1 或 external validation credit。
 - 结合 worker 的 cadence/path 基础设施失败，F5 目前同时有“raw solver 完整”“执行器 receipt 失败”“抽样科学几何门观察到负证据”三类独立事实；三者均保留，资格状态仍为 `none`，Core gate 仍只有 T1 F3/F4、T2 `0/2`、formal training `0/9`。
+
+## 本轮追加：F5 runtime v2 修复已准备但尚未授权
+
+- 独立 runtime v2 [f5_wave_runup_solver_anchor_runtime_v2.py](../scripts/f5_wave_runup_solver_anchor_runtime_v2.py) SHA-256 为 `84a9fe5620df956bcbff8e9979a21a318b4004837ca3b30cb505cc3186b79b2b`，测试 SHA-256 为 `ec64751aa739dcb60edc8442910a4d1d0fce0652bd53a9d8d1f40695e4054cf5`。它把真实 `Output..... dt:` 作为 cadence gate，保留 `TimeOut=` 仅作诊断，并对 snapshot 外部 attempt 路径安全回退；exact-one、固定15行分母、zero credit、solver/GPU 各一次以及 queue/ledger/registry/matrix mutation 全部保持关闭。
+- v2 隔离回归 **6 passed**，F5 anchor 相关回归合计 **20 passed**，真实完成 Run.out 仅读检查得到 `TimeMax=16`、`output_dt=[0.02]`、`Excluded=0`、`Steps=138258`；没有启动新的 solver/GPU/queue，也没有修改当前 v1 attempt。v2 明确拒绝当前 v1 job，下一次必须使用全新输入／输出身份和独立 root review 重新绑定 v2 runtime、job、queue 及 hash closure。
+- 这只是基础设施修复准备，不是授权或科学结果；在几何抽样负证据解决之前，不提交新的 F5 资格矩阵，不对当前 anchor 做同输入重试。Core gate 保持 T1 F3/F4、宏观 T2 `0/2`、正式训练 `0/9`。
