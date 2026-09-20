@@ -1,0 +1,127 @@
+{
+  "schema": "core.f5.third_t1.root_review_receipt.v1",
+  "created_at_utc": "2026-09-20T21:27:16.043775+00:00",
+  "record_id": "f5-wave-runup-third-t1-root-review-v1",
+  "status": "definition_preparation_authorized_solver_closed",
+  "review_decision": {
+    "candidate_scope_id": "F5_prescribed_wave_runup_x_v1",
+    "candidate_family": "F5",
+    "authorized_now": true,
+    "authorized_action": "write_one_fresh_definition_and_scaled_motion_file",
+    "authorized_solver": false,
+    "authorized_cpu_native_preflight": false,
+    "authorized_matrix": false,
+    "reason": "the proposal binds a distinct prescribed-piston wave/run-up mechanism and pinned source provenance, while all existing R3 products remain candidate-only",
+    "next_review_required": "root review after fresh Definition/motion hash closure before any CPU/native preflight"
+  },
+  "source_review": {
+    "official_inputs_verified": true,
+    "official_input_count": 6,
+    "official_inputs": [
+      {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/CaseWaveRunup_Def.xml",
+        "sha256": "5f27b624f31b8f7e1bc8617c8c47af8675cac2f6da3b2f6aedf0b4da45553dac",
+        "bytes": 10910,
+        "role": "official WaveRunup case definition"
+      },
+      {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/Mov_piston.dat",
+        "sha256": "c8319af36ca85dd33e56b722d888d1646912b0f602577d73814fac267df26a2e",
+        "bytes": 11268,
+        "role": "official piston time/displacement source"
+      },
+      {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/Slope.stl",
+        "sha256": "bb6ed4811e1d24a05d72f2212b887fdc46ab354d93df13481618557333f95c90",
+        "bytes": 484,
+        "role": "official run-up slope geometry"
+      },
+      {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/Blocks_3D_scaled.stl",
+        "sha256": "528052692d4802601a7dbd92bfa9bcc00605559e1920628eadae3b76a39cf118",
+        "bytes": 58884,
+        "role": "official slope/block geometry"
+      },
+      {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/wg1234.txt",
+        "sha256": "dd696418f14bfe26440b55bdefb43a5c12651670dd410ed0588db14053e2e609",
+        "bytes": 258,
+        "role": "official external gauge locations"
+      },
+      {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/EXP_CaseWaveRunup_CIEMito.txt",
+        "sha256": "6195706559c8565e22dfef1afe7e5e72f4de3e5c7b4bb97133b71fe8ef88e7d6",
+        "bytes": 124413,
+        "role": "official CIEMito reference table"
+      }
+    ],
+    "r3_candidate_only_verified": true,
+    "old_generated_products_qualification_reuse": false,
+    "external_reference_training_use": false
+  },
+  "scientific_contract": {
+    "mechanism_class": "prescribed_piston_wave_runup_return",
+    "family_difference": [
+      "The source is a time-dependent moving piston and a sloped run-up surface, not a gravity-release dam break.",
+      "The response is wave propagation, slope run-up and return flow, not pouring into a receiver or underflow through an aperture.",
+      "The registered control is piston displacement amplitude at fixed time history and fixed slope/block geometry.",
+      "The external contract has four fixed Eulerian wave gauges plus run-up-line observations and an independent CIEMito table."
+    ],
+    "cell_count": 15,
+    "parameter": "piston_displacement_scale",
+    "mapping": "s(q)=0.80+0.40*q",
+    "resolutions_m": [
+      0.01,
+      0.0075,
+      0.005
+    ],
+    "time_max_s": 16.0,
+    "output_interval_s": 0.02,
+    "event_completion_required": true,
+    "fixed_denominator": true,
+    "partial_credit": false
+  },
+  "forbidden_actions": [
+    "reuse R3 generated XML, BI4, HDF5, or trajectory as Core qualification input",
+    "run GenCase/native decoder before a second review of fresh input hashes",
+    "run solver or GPU work",
+    "submit or mutate queue, ledger, registry, or qualification matrix",
+    "change event, mass, identity, geometry, cadence, or denominator thresholds after observing results",
+    "fit a time shift or use the external reference as particle labels or training targets"
+  ],
+  "execution_constraints": {
+    "read_only_review": true,
+    "definition_written_by_review": false,
+    "motion_written_by_review": false,
+    "gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_mutation": 0,
+    "qualification_credit": 0,
+    "core_gate_changed": false
+  },
+  "hash_bindings": {
+    "proposal": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1-proposal-audit-v1.json",
+      "sha256": "2a72700b40c08c4a11ac38b55cccb40a85b7fecf940f612bc974dd88fc3a3760",
+      "bytes": 13036,
+      "role": "F5 proposal-only audit"
+    },
+    "implementation": {
+      "path": "scripts/f5_wave_runup_root_review_v1.py",
+      "sha256": "f9bbc3b4f3b85cd4f6258018691d4f830961d7ae6b37d3bc84b96420287ff85f",
+      "bytes": 8825,
+      "role": "F5 root-review implementation"
+    },
+    "test": {
+      "path": "tests/test_f5_wave_runup_root_review_v1.py",
+      "sha256": "4b7dd8c2cda42bcde0c28b078894a9cf394be88c9795cf9cf4933fff64037152",
+      "bytes": 2771,
+      "role": "F5 root-review regression test"
+    }
+  }
+}
