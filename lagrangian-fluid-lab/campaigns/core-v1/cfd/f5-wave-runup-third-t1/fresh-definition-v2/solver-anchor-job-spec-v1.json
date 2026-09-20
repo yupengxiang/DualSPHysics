@@ -1,0 +1,360 @@
+{
+  "schema": "core.f5.third_t1.solver_anchor_job_spec.v1",
+  "job_id": "f5-wave-runup-third-t1-q05-dp0075-v2-protected-gpu-anchor",
+  "logical_id": "F5_wave_runup_q0p50_dp0p0075_v2_protected_gpu_anchor",
+  "scope_id": "F5_prescribed_wave_runup_x_v1",
+  "revision_id": "F5_piston_amplitude_runup_v2",
+  "family": "F5",
+  "job_spec_status": "root_review_only_not_submitted",
+  "root_review_only": true,
+  "attempt_role": "protected_single_gpu_solver_anchor",
+  "exactly_one_anchor": true,
+  "qualification_claim": "none",
+  "qualified": false,
+  "matrix_credit": 0,
+  "prepared_case_id": "F5_wave_runup_q0p50_dp0p0075_v2",
+  "matrix_row": {
+    "index": 4,
+    "row_kind": "spatial_anchor",
+    "q": 0.5,
+    "dp_m": 0.0075,
+    "case_id": "F5_wave_runup_q0p50_dp0p0075_v2",
+    "denominator_rows": 15
+  },
+  "root_review": {
+    "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/solver-anchor-root-review-v1.json",
+    "sha256": "fa4074cac0b5f4808ec5a5e6bc6046205440180cda847810760067f4883d1a8d",
+    "role": "exact-one protected GPU anchor authorization"
+  },
+  "anchor_input": {
+    "generated_prefix": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/generated/F5_wave_runup_q0p50_dp0p0075_v2",
+    "generated_xml": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/generated/F5_wave_runup_q0p50_dp0p0075_v2.xml",
+    "native_bi4": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/generated/F5_wave_runup_q0p50_dp0p0075_v2.bi4",
+    "output_directory": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/solver-anchor-v1/generated",
+    "output_stem": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/solver-anchor-v1/generated/F5_wave_runup_q0p50_dp0p0075_v2_anchor",
+    "output_stem_is_new": true,
+    "preflight_stem_reused": false
+  },
+  "anchor_output": {
+    "stem": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/solver-anchor-v1/generated/F5_wave_runup_q0p50_dp0p0075_v2_anchor",
+    "execution_path_template": "{attempt_dir}/product/solver",
+    "logical_stem_only": true
+  },
+  "registered_window_s": 16.0,
+  "output_interval_s": 0.02,
+  "gauge_interval_s": 0.02,
+  "event_completion_required": true,
+  "hard_integrity_gates": {
+    "requested_horizon": {
+      "required": true,
+      "status": "pending_until_solver",
+      "condition": "saved/native trajectory reaches exactly the registered 16.0 s horizon"
+    },
+    "native_identity": {
+      "required": true,
+      "status": "pending_until_solver",
+      "condition": "native fluid IDs remain unique and no active fluid ID is missing"
+    },
+    "finite_active_values": {
+      "required": true,
+      "status": "pending_until_solver",
+      "condition": "all active position, velocity, density, mass and gauge values are finite"
+    },
+    "closed_face_endpoint": {
+      "required": true,
+      "status": "pending_until_solver",
+      "condition": "zero piston, slope and block closed-face endpoint violations"
+    },
+    "saved_frame_chords": {
+      "required": true,
+      "status": "pending_until_solver",
+      "condition": "zero saved-frame chord crossings through piston, slope or block geometry"
+    },
+    "domain_containment": {
+      "required": true,
+      "status": "pending_until_solver",
+      "condition": "zero unintended active particles outside the explicit simulation domain"
+    },
+    "full_window_mass": {
+      "required": true,
+      "status": "pending_until_solver",
+      "condition": "native source mass and full-window mass change remain within fixed root gates"
+    }
+  },
+  "event_gates": {
+    "incident_order": {
+      "required": true,
+      "status": "pending_until_solver",
+      "condition": "incident-wave signal reaches WG1, then WG2 and WG3 in chronological order"
+    },
+    "runup_threshold": {
+      "required": true,
+      "status": "pending_until_solver",
+      "condition": "run-up-line signal exceeds the preregistered q-independent threshold with finite first/peak time"
+    },
+    "return_threshold": {
+      "required": true,
+      "status": "pending_until_solver",
+      "condition": "run-up returns below its event threshold before the 16.0 s horizon"
+    },
+    "external_gauges": {
+      "required": true,
+      "status": "pending_until_solver",
+      "condition": "q=0.5 scale=1.0 compares WG1..WG4 with the pinned CIEMito table at fixed time origin"
+    },
+    "completion": {
+      "required": true,
+      "status": "pending_until_solver",
+      "condition": "full window, all hard-integrity gates, incident/run-up/return events and external review complete"
+    }
+  },
+  "failure_policy": {
+    "same_input_retry": false,
+    "failure_zero_credit": true,
+    "threshold_relaxation": false,
+    "horizon_extension_before_anchor": false,
+    "event_censor_is_failure": true,
+    "hard_integrity_failure_is_failure": true,
+    "failed_anchor_stays_in_denominator": true
+  },
+  "worker": {
+    "path": "scripts/f5_wave_runup_solver_anchor_worker_v1.py",
+    "sha256": "4f1a654fab05b2cebff58777041e119414d6ad1717dad3a9b3e342da5c612bb3",
+    "runtime_enabled": false,
+    "contract_only": true,
+    "solver_calls": 0,
+    "gpu_calls": 0,
+    "queue_mutations": 0,
+    "ledger_mutations": 0,
+    "registry_mutations": 0
+  },
+  "planned_solver": {
+    "binary": "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "binary_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+    "decoder": "campaigns/l1-resume/artifacts/bi4_dump",
+    "decoder_sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+    "host": "ada",
+    "cuda_device_contract": "scheduler supplies exactly one CUDA UUID; worker maps it to solver -gpu:0",
+    "argv_after_explicit_runtime_approval": [
+      "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "-gpu:0",
+      "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/generated/F5_wave_runup_q0p50_dp0p0075_v2",
+      "{attempt_dir}/product/solver"
+    ],
+    "solver_invoked": false,
+    "gpu_started": false
+  },
+  "required_outputs": [
+    "product/audit.json",
+    "product/observations.json",
+    "product/solver/Run.out"
+  ],
+  "resources": {
+    "cpu_cores": 4,
+    "ram_mib": 65536,
+    "gpu_peak_mib": 24576,
+    "io_weight": 2,
+    "timeout_seconds": 86400,
+    "estimate_status": "planning_only_no_reservation",
+    "basis": "fresh 1,279,855-fluid-particle input; no prior Core F5 solver anchor; 1.2x GPU reservation rule"
+  },
+  "execution_policy": {
+    "submit_allowed": false,
+    "solver_launch": true,
+    "gpu_launch": true,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_submission": false,
+    "matrix_expansion": false,
+    "one_anchor_only": true,
+    "same_input_retry": false,
+    "failure_credit": 0,
+    "qualification_claim_none": true,
+    "runtime_worker_enabled": false
+  },
+  "runtime_worker": {
+    "path": "scripts/f5_wave_runup_solver_anchor_runtime_v1.py",
+    "sha256": "63c4699e943eebb88c37268b8cf2217f6cea709da9b33e46a5de9529a9030558",
+    "runtime_enabled": true,
+    "solver_calls": 1,
+    "gpu_calls": 1,
+    "queue_mutations": 0,
+    "ledger_mutations": 0,
+    "registry_mutations": 0,
+    "matrix_mutations": 0,
+    "single_use": true
+  },
+  "input_files": [
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/solver-anchor-root-review-v1.json",
+      "sha256": "fa4074cac0b5f4808ec5a5e6bc6046205440180cda847810760067f4883d1a8d",
+      "bytes": 9898,
+      "role": "exact F5 protected-anchor root review"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-root-review-v2.json",
+      "sha256": "7b398d071742b39b27043a7619b84e4ed5562daf2997e56f9efd4c2b4f0368e9",
+      "bytes": 4198,
+      "role": "F5 v2 CPU/native root review"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/preflight.json",
+      "sha256": "12895e9364f6be3fda4c1c5629ac0d6f58cbf710fb0443e8c9b51976851a8225",
+      "bytes": 5412,
+      "role": "F5 v2 CPU/native static preflight"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-boundary-semantics-audit-v1.json",
+      "sha256": "c922f98949dec2848ecf615a765e5bdf642d48cde91605f2d9b8a4555a7813fa",
+      "bytes": 1644,
+      "role": "F5 boundary semantics audit"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/fresh-definition-contract-v2.json",
+      "sha256": "5fd1b6561bc495db53ac6e60a1e07e3abf79a1ff286a2e882e13a93a53893206",
+      "bytes": 5395,
+      "role": "fresh v2 Definition contract"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1-proposal-audit-v1.json",
+      "sha256": "2a72700b40c08c4a11ac38b55cccb40a85b7fecf940f612bc974dd88fc3a3760",
+      "bytes": 13036,
+      "role": "F5 third-T1 proposal audit"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/F5_wave_runup_q0p50_dp0p0075_Def.xml",
+      "sha256": "76c38600c791200b9aacaab6b379952ba2a27ef3ce11b1d7fa560515e5942b80",
+      "bytes": 11316,
+      "role": "fresh v2 Definition"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/Mov_piston_q0p50_scaled.dat",
+      "sha256": "ffabedc2331533d7950554368f20d33db0ab08c0002b1c053cf996f800756204",
+      "bytes": 16708,
+      "role": "fresh v2 piston motion"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/generated/F5_wave_runup_q0p50_dp0p0075_v2.xml",
+      "sha256": "22f789b9569e946263280ecb72fecf14406a222506648d0d7546b7a2397184dd",
+      "bytes": 15151,
+      "role": "fresh generated XML"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/generated/F5_wave_runup_q0p50_dp0p0075_v2.bi4",
+      "sha256": "c2aa468ef044db783d17bcd7a83cfa68c4234d5a7e3c55bffac193add55a34aa",
+      "bytes": 60478421,
+      "role": "fresh native BI4"
+    },
+    {
+      "path": "scripts/f5_wave_runup_solver_anchor_worker_v1.py",
+      "sha256": "4f1a654fab05b2cebff58777041e119414d6ad1717dad3a9b3e342da5c612bb3",
+      "bytes": 4701,
+      "role": "contract-only F5 anchor worker"
+    },
+    {
+      "path": "scripts/f5_wave_runup_solver_anchor_runtime_v1.py",
+      "sha256": "63c4699e943eebb88c37268b8cf2217f6cea709da9b33e46a5de9529a9030558",
+      "bytes": 15078,
+      "role": "protected F5 anchor runtime worker; planned only"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+      "bytes": 159206984,
+      "role": "pinned DualSPHysics solver; planned only"
+    },
+    {
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+      "bytes": 324368,
+      "role": "pinned native BI4 decoder; planned only"
+    }
+  ],
+  "hash_bindings": {
+    "root_review": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/solver-anchor-root-review-v1.json",
+      "sha256": "fa4074cac0b5f4808ec5a5e6bc6046205440180cda847810760067f4883d1a8d",
+      "bytes": 9898,
+      "role": "exact F5 protected-anchor root review"
+    },
+    "v2_root_review": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-root-review-v2.json",
+      "sha256": "7b398d071742b39b27043a7619b84e4ed5562daf2997e56f9efd4c2b4f0368e9",
+      "bytes": 4198,
+      "role": "F5 v2 CPU/native root review"
+    },
+    "v2_preflight": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/preflight.json",
+      "sha256": "12895e9364f6be3fda4c1c5629ac0d6f58cbf710fb0443e8c9b51976851a8225",
+      "bytes": 5412,
+      "role": "F5 v2 CPU/native static preflight"
+    },
+    "boundary_audit": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-boundary-semantics-audit-v1.json",
+      "sha256": "c922f98949dec2848ecf615a765e5bdf642d48cde91605f2d9b8a4555a7813fa",
+      "bytes": 1644,
+      "role": "F5 boundary semantics audit"
+    },
+    "definition_contract": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/fresh-definition-contract-v2.json",
+      "sha256": "5fd1b6561bc495db53ac6e60a1e07e3abf79a1ff286a2e882e13a93a53893206",
+      "bytes": 5395,
+      "role": "fresh v2 Definition contract"
+    },
+    "proposal": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1-proposal-audit-v1.json",
+      "sha256": "2a72700b40c08c4a11ac38b55cccb40a85b7fecf940f612bc974dd88fc3a3760",
+      "bytes": 13036,
+      "role": "F5 third-T1 proposal audit"
+    },
+    "definition": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/F5_wave_runup_q0p50_dp0p0075_Def.xml",
+      "sha256": "76c38600c791200b9aacaab6b379952ba2a27ef3ce11b1d7fa560515e5942b80",
+      "bytes": 11316,
+      "role": "fresh v2 Definition"
+    },
+    "motion": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/Mov_piston_q0p50_scaled.dat",
+      "sha256": "ffabedc2331533d7950554368f20d33db0ab08c0002b1c053cf996f800756204",
+      "bytes": 16708,
+      "role": "fresh v2 piston motion"
+    },
+    "generated_xml": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/generated/F5_wave_runup_q0p50_dp0p0075_v2.xml",
+      "sha256": "22f789b9569e946263280ecb72fecf14406a222506648d0d7546b7a2397184dd",
+      "bytes": 15151,
+      "role": "fresh generated XML"
+    },
+    "native_bi4": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/generated/F5_wave_runup_q0p50_dp0p0075_v2.bi4",
+      "sha256": "c2aa468ef044db783d17bcd7a83cfa68c4234d5a7e3c55bffac193add55a34aa",
+      "bytes": 60478421,
+      "role": "fresh native BI4"
+    },
+    "worker": {
+      "path": "scripts/f5_wave_runup_solver_anchor_worker_v1.py",
+      "sha256": "4f1a654fab05b2cebff58777041e119414d6ad1717dad3a9b3e342da5c612bb3",
+      "bytes": 4701,
+      "role": "contract-only F5 anchor worker"
+    },
+    "runtime_worker": {
+      "path": "scripts/f5_wave_runup_solver_anchor_runtime_v1.py",
+      "sha256": "63c4699e943eebb88c37268b8cf2217f6cea709da9b33e46a5de9529a9030558",
+      "bytes": 15078,
+      "role": "protected F5 anchor runtime worker; planned only"
+    },
+    "solver": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+      "bytes": 159206984,
+      "role": "pinned DualSPHysics solver; planned only"
+    },
+    "decoder": {
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+      "bytes": 324368,
+      "role": "pinned native BI4 decoder; planned only"
+    }
+  }
+}
