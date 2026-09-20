@@ -1,0 +1,160 @@
+{
+  "schema": "core.f5.third_t1.preflight.v1",
+  "created_at_utc": "2026-09-20T21:45:20.881403+00:00",
+  "status": "cpu_native_preflight_passed_static_only",
+  "qualification_claim": "none",
+  "case_id": "F5_wave_runup_q0p50_dp0p0075_v2",
+  "authorization": {
+    "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-root-review-v2.json",
+    "sha256": "7b398d071742b39b27043a7619b84e4ed5562daf2997e56f9efd4c2b4f0368e9",
+    "bytes": 4198,
+    "role": "F5 preflight root review"
+  },
+  "input": {
+    "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/F5_wave_runup_q0p50_dp0p0075_Def.xml",
+    "sha256": "76c38600c791200b9aacaab6b379952ba2a27ef3ce11b1d7fa560515e5942b80",
+    "bytes": 11316,
+    "role": "fresh F5 Definition"
+  },
+  "motion": {
+    "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/Mov_piston_q0p50_scaled.dat",
+    "sha256": "ffabedc2331533d7950554368f20d33db0ab08c0002b1c053cf996f800756204",
+    "bytes": 16708,
+    "role": "fresh F5 motion"
+  },
+  "gencase": {
+    "command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/F5_wave_runup_q0p50_dp0p0075_Def",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/generated/F5_wave_runup_q0p50_dp0p0075_v2",
+      "-save:all"
+    ],
+    "started_at_utc": "2026-09-20T21:45:20.389100+00:00",
+    "return_code": 0,
+    "stdout_log": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/gencase.stdout.log",
+      "sha256": "bf3768c2904f974040c06e5af8cca2562e9aa181c5190d55b3374f67f2ced5e6",
+      "bytes": 6437,
+      "role": "CPU GenCase stdout"
+    },
+    "environment": {
+      "CUDA_VISIBLE_DEVICES": "",
+      "NVIDIA_VISIBLE_DEVICES": "void"
+    }
+  },
+  "binaries": {
+    "gencase": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226",
+      "bytes": 5809384,
+      "role": "pinned CPU GenCase"
+    },
+    "native_decoder": {
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+      "bytes": 324368,
+      "role": "pinned native BI4 decoder"
+    }
+  },
+  "execution_controls": {
+    "gencase_invoked": true,
+    "native_decode_invoked": true,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_mutation": 0,
+    "qualification_credit": 0
+  },
+  "hard_gates": {
+    "gencase_return_code_zero": true,
+    "generated_xml_present": true,
+    "native_bi4_present": true,
+    "id_unique_and_xml_aligned": true,
+    "finite_native_arrays": true,
+    "mass_metadata_match": true,
+    "geometry_static_integrity": true,
+    "trajectory_endpoint_gate": "not_applicable_until_solver",
+    "full_window_reached": "not_applicable_until_solver",
+    "event_completion": "not_applicable_until_solver"
+  },
+  "native": {
+    "total_particles": 1374477,
+    "boundary_particles": 86270,
+    "fluid_particles": 1279855,
+    "unique_ids": true,
+    "finite_arrays": true,
+    "metadata_massfluid_kg": 0.000421875,
+    "xml_massfluid_kg": 0.000421875,
+    "mass_metadata_match": true,
+    "initial_total_fluid_mass_kg": 539.938828125,
+    "arrays_directory": "/tmp/f5-native-5r8ktenh/native/PART_0000"
+  },
+  "generated": {
+    "total_particles": 1374477,
+    "boundary_particles": 94622,
+    "fixed_particles": 86270,
+    "fluid_particles": 1279855,
+    "dp_m": 0.0075,
+    "massfluid_kg": 0.000421875
+  },
+  "geometry": {
+    "vtk": {
+      "all": {
+        "present": true,
+        "declared_points": 1374477,
+        "encoding": "binary_big_endian"
+      },
+      "bound": {
+        "present": true,
+        "declared_points": 94622,
+        "encoding": "binary_big_endian"
+      },
+      "fluid": {
+        "present": true,
+        "declared_points": 1279855,
+        "encoding": "binary_big_endian"
+      }
+    },
+    "declared_bounds_m": {
+      "min": [
+        -1.0,
+        0.0,
+        -0.2
+      ],
+      "max": [
+        12.0,
+        0.37,
+        0.7
+      ]
+    },
+    "out_of_bounds": {
+      "all": 0,
+      "bound": 0,
+      "fluid": 0
+    },
+    "anomalies": [],
+    "pass": true
+  },
+  "preflight_pass": true,
+  "qualified": false,
+  "matrix_credit": 0,
+  "artifacts": {
+    "generated_xml": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/generated/F5_wave_runup_q0p50_dp0p0075_v2.xml",
+      "sha256": "22f789b9569e946263280ecb72fecf14406a222506648d0d7546b7a2397184dd",
+      "bytes": 15151,
+      "role": "fresh generated XML"
+    },
+    "native_bi4": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/generated/F5_wave_runup_q0p50_dp0p0075_v2.bi4",
+      "sha256": "c2aa468ef044db783d17bcd7a83cfa68c4234d5a7e3c55bffac193add55a34aa",
+      "bytes": 60478421,
+      "role": "fresh native BI4"
+    },
+    "preflight": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/preflight.json"
+    }
+  }
+}
