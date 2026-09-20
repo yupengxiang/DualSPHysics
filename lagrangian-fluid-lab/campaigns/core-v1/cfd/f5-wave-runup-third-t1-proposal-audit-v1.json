@@ -1,0 +1,298 @@
+{
+  "schema": "core.f5.third_t1.proposal_audit.v1",
+  "created_at_utc": "2026-09-20T21:14:51.980619+00:00",
+  "status": "proposal_only_root_review_required",
+  "qualification_claim": "none",
+  "candidate": {
+    "family": "F5",
+    "scope_id": "F5_prescribed_wave_runup_x_v1",
+    "revision_id": "F5_piston_amplitude_runup_v1",
+    "candidate_id": "F5_wave_runup_piston_scale_anchor",
+    "mechanism_class": "prescribed_piston_wave_runup_return",
+    "hypothesis": "A prescribed piston wave crossing a fixed slope and block field creates a reproducible incident-wave, run-up, and return-flow response whose amplitude dependence can be evaluated with SWL gauges and run-up lines.",
+    "scientific_difference": [
+      "The source is a time-dependent moving piston and a sloped run-up surface, not a gravity-release dam break.",
+      "The response is wave propagation, slope run-up and return flow, not pouring into a receiver or underflow through an aperture.",
+      "The registered control is piston displacement amplitude at fixed time history and fixed slope/block geometry.",
+      "The external contract has four fixed Eulerian wave gauges plus run-up-line observations and an independent CIEMito table."
+    ],
+    "disallowed_shortcuts": [
+      "no F1 obstacle, dam-break, or suspended-gap geometry/input reuse",
+      "no F2 cup, reservoir, receiver, weir, or submerged-orifice input reuse",
+      "no reuse of R3 generated XML, BI4, HDF5, or trajectory as Core qualification data",
+      "no fitted time shift, external-reference label leakage, threshold relaxation, or survivor renormalization",
+      "no solver, GPU, queue, ledger, registry, or matrix submission from this proposal"
+    ]
+  },
+  "core_gate": {
+    "current_registered_t1_families": [
+      "F3",
+      "F4"
+    ],
+    "required_t1_family_count": 3,
+    "candidate_family": "F5",
+    "candidate_can_satisfy_third_family_conditionally": true,
+    "qualification_credit_added": 0,
+    "core_gate_changed": false
+  },
+  "evidence": {
+    "official_inputs": [
+      {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/CaseWaveRunup_Def.xml",
+        "sha256": "5f27b624f31b8f7e1bc8617c8c47af8675cac2f6da3b2f6aedf0b4da45553dac",
+        "bytes": 10910,
+        "role": "official WaveRunup case definition"
+      },
+      {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/Mov_piston.dat",
+        "sha256": "c8319af36ca85dd33e56b722d888d1646912b0f602577d73814fac267df26a2e",
+        "bytes": 11268,
+        "role": "official piston time/displacement source"
+      },
+      {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/Slope.stl",
+        "sha256": "bb6ed4811e1d24a05d72f2212b887fdc46ab354d93df13481618557333f95c90",
+        "bytes": 484,
+        "role": "official run-up slope geometry"
+      },
+      {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/Blocks_3D_scaled.stl",
+        "sha256": "528052692d4802601a7dbd92bfa9bcc00605559e1920628eadae3b76a39cf118",
+        "bytes": 58884,
+        "role": "official slope/block geometry"
+      },
+      {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/wg1234.txt",
+        "sha256": "dd696418f14bfe26440b55bdefb43a5c12651670dd410ed0588db14053e2e609",
+        "bytes": 258,
+        "role": "official external gauge locations"
+      },
+      {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/EXP_CaseWaveRunup_CIEMito.txt",
+        "sha256": "6195706559c8565e22dfef1afe7e5e72f4de3e5c7b4bb97133b71fe8ef88e7d6",
+        "bytes": 124413,
+        "role": "official CIEMito reference table"
+      }
+    ],
+    "existing_candidate_only": [
+      {
+        "path": "campaigns/v0.1-candidate/r3-f5-wave-runup.json",
+        "sha256": "9ffcbbc5cff60fbb5ae0ef251e2102f2a99db07221d5e8f0daf8b681ffbc331c",
+        "bytes": 30683,
+        "role": "R3 WaveRunup candidate-only execution report"
+      },
+      {
+        "path": "campaigns/v0.1-candidate/r3-f5-reference-alignment.json",
+        "sha256": "1df48562b101d27c0da7835aa28b99f42887a47a46c75331e9d7a1d572d1dfdc",
+        "bytes": 12977,
+        "role": "R3 WaveRunup candidate-only gauge alignment report"
+      },
+      {
+        "path": "reports/findings.md",
+        "sha256": "048217518fe22d91f0626a35b6756d946ecdbc0d006924cbf386aa279e896f69",
+        "bytes": 1797,
+        "role": "exploration resolution failure/repair finding"
+      },
+      {
+        "path": "scripts/r3_f5_wave_runup.py",
+        "sha256": "ecb235891bee1e8594ca645f0551c756ff076c7a0c53ab09dcbbb6a8042cd71b",
+        "bytes": 25674,
+        "role": "existing observation-path implementation"
+      },
+      {
+        "path": "scripts/r3_f5_reference_alignment.py",
+        "sha256": "5f78c4aa9f2c7249c4d6ac4a613dce415d94eb71f51abad189d8aefc39afebfc",
+        "bytes": 12736,
+        "role": "existing external-alignment implementation"
+      }
+    ],
+    "r3_summary": {
+      "source_scope": "R3 F5 official WaveRunup external-gauge execution probe",
+      "execution_status": "candidate_only",
+      "formal_release_authorized": false,
+      "runs": [
+        {
+          "label": "coarse",
+          "dp_m": 0.03,
+          "status": "completed",
+          "frames": 801,
+          "excluded_particles": 1,
+          "time_end_s": 15.980268,
+          "external_gauge_count": 4
+        },
+        {
+          "label": "medium",
+          "dp_m": 0.025,
+          "status": "completed",
+          "frames": 801,
+          "excluded_particles": 1,
+          "time_end_s": 15.980318,
+          "external_gauge_count": 4
+        },
+        {
+          "label": "fine",
+          "dp_m": 0.02,
+          "status": "completed",
+          "frames": 801,
+          "excluded_particles": 0,
+          "time_end_s": 15.980108,
+          "external_gauge_count": 4
+        }
+      ],
+      "alignment_status": "candidate_only",
+      "alignment_rows": [
+        {
+          "label": "coarse",
+          "dp_m": 0.03,
+          "fixed_zero_offset_mean_rmse_m": 0.015523169495566844,
+          "local_shift_best_mean_rmse_m": 0.015498504174673498,
+          "local_shift_best_offset_s": -0.007999999999999563
+        },
+        {
+          "label": "medium",
+          "dp_m": 0.025,
+          "fixed_zero_offset_mean_rmse_m": 0.010899951500973332,
+          "local_shift_best_mean_rmse_m": 0.010890553844125598,
+          "local_shift_best_offset_s": -0.0039999999999995595
+        },
+        {
+          "label": "fine",
+          "dp_m": 0.02,
+          "fixed_zero_offset_mean_rmse_m": 0.008871353138730389,
+          "local_shift_best_mean_rmse_m": 0.007256313443740979,
+          "local_shift_best_offset_s": 0.05400000000000049
+        }
+      ],
+      "interpretation": "Engineering and external-observation evidence only.  These runs are not imported into the Core T1 denominator."
+    },
+    "observed_support": [
+      "Three fresh R3 resolution probes at dp=0.030/0.025/0.020 m completed about 16 s with 801 frames.",
+      "R3 excluded-particle counts were 1, 1, and 0 respectively; the old 0.040 m stress case is excluded from the ladder.",
+      "R3 emitted four external SWL gauge series at 0.02 s cadence and aligned them to the official CIEMito table as a diagnostic.",
+      "The refined external-gauge diagnostic decreased fixed-zero-offset mean RMSE from 15.52 mm at 0.030 m to 8.87 mm at 0.020 m."
+    ],
+    "limitations": [
+      "The R3 reports are candidate-only and carry no Core T1 credit.",
+      "The official table is Eulerian gauge/reference data, not particle-corresponded truth.",
+      "A fresh Core matrix at dp=0.010/0.0075/0.005 m and a preregistered event observer are still required.",
+      "Reference time origin, uncertainty envelope, and run-up event thresholds require root review."
+    ]
+  },
+  "fresh_input_contract": {
+    "source_identity_changed": true,
+    "qualification_inheritance": false,
+    "old_generated_input_reused": false,
+    "old_trajectory_reused": false,
+    "new_definition_required": true,
+    "new_motion_file_required": true,
+    "construction": "Copy the pinned official source assets into a new Core case directory; emit a literal Definition and a literal motion file for every q/dp cell. For piston scale s, preserve the time column and write x_new(t)=x_initial+s*(x_old(t)-x_initial).",
+    "forbidden_sources": [
+      "campaigns/v0.1-candidate/cases/r3-f5-wave-runup/*/generated",
+      "campaigns/v0.1-candidate/runs/r3-f5-wave-runup",
+      "data-official/O5_wave_runup.h5",
+      "data-official/O5_wave_runup_refined.h5"
+    ],
+    "allowed_reference_role": "Pinned official XML/STL/motion/reference files may be read as source provenance and copied into a fresh output identity; prior generated products remain diagnostics only."
+  },
+  "fixed_scope_design": {
+    "cell_count": 15,
+    "spatial_cell_count": 13,
+    "temporal_cell_count": 2,
+    "parameter": "piston_displacement_scale",
+    "mapping": "s(q)=0.80+0.40*q",
+    "qualification_q": [
+      0.0,
+      0.5,
+      1.0
+    ],
+    "qualification_scale": [
+      0.8,
+      1.0,
+      1.2
+    ],
+    "held_out_q": [
+      0.25,
+      0.75
+    ],
+    "held_out_scale": [
+      0.9,
+      1.1
+    ],
+    "resolutions_m": [
+      0.01,
+      0.0075,
+      0.005
+    ],
+    "temporal_controls": [
+      "internal_time",
+      "native_output"
+    ],
+    "registered_window": {
+      "time_max_s": 16.0,
+      "output_interval_s": 0.02,
+      "gauge_interval_s": 0.02,
+      "extension_before_anchor": false,
+      "event_completion_required": true
+    },
+    "fixed_physics": [
+      "gravity=(0,0,-9.81) m/s^2",
+      "official slope and block geometry copied by hash",
+      "official piston time samples retained; only displacement scale varies",
+      "particle shifting disabled unless a separately reviewed contract changes it"
+    ],
+    "denominator_policy": [
+      "all 15 rows remain in the denominator",
+      "solver failure, hard-integrity failure, and event censoring receive zero credit",
+      "CPU/native preflight and anchor canary receive zero T1 credit"
+    ]
+  },
+  "observer_contract_draft": {
+    "hard_integrity": [
+      "requested 16 s horizon reached",
+      "native fluid IDs are unique and no active ID is missing",
+      "all active position, velocity, density, mass, and gauge values are finite",
+      "zero piston/slope/block closed-face endpoint violations",
+      "zero saved-frame chord crossings through piston, slope, or block geometry",
+      "zero unintended particles outside the explicit simulation domain",
+      "native source mass and full-window mass change remain within root-approved fixed gates"
+    ],
+    "event": {
+      "incident": "wave signal reaches WG1 and then WG2/WG3 in chronological order",
+      "runup": "run-up-line signal exceeds a preregistered q-independent threshold and has a finite first/peak time",
+      "return": "run-up returns below its event threshold before the 16 s horizon",
+      "external": "q=0.5 scale=1.0 compares four model SWL gauges with the pinned CIEMito table using fixed time origin",
+      "completion": "hard integrity, incident/run-up/return events, and complete horizon are all required"
+    },
+    "external_reference_policy": [
+      "retain duplicate reference timestamps in provenance",
+      "aggregate duplicates only for interpolation, never as extra observations",
+      "do not optimize a local time shift as a physical calibration",
+      "do not use the reference table as particle labels or training targets before independent review"
+    ]
+  },
+  "root_review_only_contract": {
+    "step_0": "Review this candidate, F5 family distinction, source hashes, and no-reuse boundary.",
+    "step_1": "If accepted, write a fresh q=0.5, dp=0.0075 literal Definition and scaled motion file; do not run solver.",
+    "step_2": "Run only CPU GenCase/native decode under a new output stem and audit normals, IDs, finite arrays, mass, domain and geometry endpoints; credit remains zero.",
+    "step_3": "Root may then authorize exactly one protected solver anchor; this proposal itself submits nothing.",
+    "step_4": "Only after a complete hard-pass anchor may the 15-row matrix be materialized; all rows and failures stay fixed in the denominator.",
+    "step_5": "T1 promotion requires the complete fixed matrix, the separate 32-case production denominator, external/event review, and Core evaluator acceptance."
+  },
+  "execution_controls": {
+    "read_only_audit": true,
+    "gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_launched": false,
+    "queue_mutation": 0,
+    "central_ledger_mutation": 0,
+    "central_registry_mutation": 0,
+    "matrix_materialized": false,
+    "matrix_submitted": false
+  },
+  "implementation": {
+    "path": "scripts/f5_third_t1_proposal_audit_v1.py",
+    "sha256": "3f88280641b447412e8b56673b0884569d396e86eadfc9087ec7a49792d2512f",
+    "role": "read-only proposal audit; no scientific execution"
+  }
+}
