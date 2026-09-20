@@ -1,0 +1,147 @@
+{
+  "schema": "core.f5.third_t1.definition_materialization.v2",
+  "created_at_utc": "2026-09-20T21:42:54.330541+00:00",
+  "status": "definition_written_preflight_pending",
+  "qualification_claim": "none",
+  "candidate": {
+    "family": "F5",
+    "scope_id": "F5_prescribed_wave_runup_x_v1",
+    "revision_id": "F5_piston_amplitude_runup_v2",
+    "q": 0.5,
+    "piston_scale": 1.0,
+    "dp_m": 0.0075,
+    "case_id": "F5_wave_runup_q0p50_dp0p0075_v2"
+  },
+  "repair_lineage": {
+    "prior_v1_failure": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v1/preflight-v1/preflight.json",
+      "sha256": "45ba509b21cfa1f228386e8fcd2669e329cc69827fca6f8d55a8ef069b9f22fe",
+      "bytes": 2883,
+      "role": "v1 GenCase asset-closure failure"
+    },
+    "failure_class": "definition_relative_asset_not_adjacent",
+    "repair_hypothesis": "place Slope.stl, Blocks_3D_scaled.stl and motion beside the fresh Definition",
+    "prior_output_reused": false,
+    "prior_generated_xml_reused": false,
+    "prior_bi4_reused": false,
+    "prior_trajectory_reused": false
+  },
+  "authorization": {
+    "root_review": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-root-review-v1.json",
+      "sha256": "c47481f9700543a238a44f13c9aa64b21862ced4a813d78d720eaa1cec741d16",
+      "bytes": 5413,
+      "role": "F5 initial root review"
+    },
+    "authorized_action": "write_one_fresh_definition_and_scaled_motion_file",
+    "gencase_authorized": false,
+    "native_decode_authorized": false,
+    "solver_authorized": false,
+    "gpu_authorized": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0
+  },
+  "fresh_identity": {
+    "definition": {
+      "source": {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/CaseWaveRunup_Def.xml",
+        "sha256": "5f27b624f31b8f7e1bc8617c8c47af8675cac2f6da3b2f6aedf0b4da45553dac",
+        "bytes": 10910,
+        "role": "official WaveRunup Definition"
+      },
+      "output": {
+        "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/F5_wave_runup_q0p50_dp0p0075_Def.xml",
+        "sha256": "76c38600c791200b9aacaab6b379952ba2a27ef3ce11b1d7fa560515e5942b80",
+        "bytes": 11316,
+        "role": "fresh Core F5 Definition"
+      },
+      "dp_m": 0.0075,
+      "time_max_s": 16.0,
+      "output_interval_s": 0.02,
+      "gauge_interval_s": 0.02,
+      "external_gauges": [
+        "WG1",
+        "WG2",
+        "WG3",
+        "WG4"
+      ],
+      "motion_file": "Mov_piston_q0p50_scaled.dat"
+    },
+    "motion": {
+      "source": {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/Mov_piston.dat",
+        "sha256": "c8319af36ca85dd33e56b722d888d1646912b0f602577d73814fac267df26a2e",
+        "bytes": 11268,
+        "role": "official piston source"
+      },
+      "output": {
+        "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/Mov_piston_q0p50_scaled.dat",
+        "sha256": "ffabedc2331533d7950554368f20d33db0ab08c0002b1c053cf996f800756204",
+        "bytes": 16708,
+        "role": "fresh scaled piston motion"
+      },
+      "row_count": 626,
+      "time_start_s": 0.0,
+      "time_end_s": 15.6,
+      "scale": 1.0
+    },
+    "definition_adjacent_assets": [
+      {
+        "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/Slope.stl",
+        "sha256": "bb6ed4811e1d24a05d72f2212b887fdc46ab354d93df13481618557333f95c90",
+        "bytes": 484,
+        "role": "Definition-adjacent F5 source asset"
+      },
+      {
+        "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/Blocks_3D_scaled.stl",
+        "sha256": "528052692d4802601a7dbd92bfa9bcc00605559e1920628eadae3b76a39cf118",
+        "bytes": 58884,
+        "role": "Definition-adjacent F5 source asset"
+      },
+      {
+        "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/wg1234.txt",
+        "sha256": "dd696418f14bfe26440b55bdefb43a5c12651670dd410ed0588db14053e2e609",
+        "bytes": 258,
+        "role": "Definition-adjacent F5 source asset"
+      },
+      {
+        "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/EXP_CaseWaveRunup_CIEMito.txt",
+        "sha256": "6195706559c8565e22dfef1afe7e5e72f4de3e5c7b4bb97133b71fe8ef88e7d6",
+        "bytes": 124413,
+        "role": "Definition-adjacent F5 source asset"
+      }
+    ],
+    "required_relative_assets": [
+      "Blocks_3D_scaled.stl",
+      "Mov_piston_q0p50_scaled.dat",
+      "Slope.stl"
+    ],
+    "output_directory": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2"
+  },
+  "fixed_contract": {
+    "denominator_rows": 15,
+    "time_max_s": 16.0,
+    "output_interval_s": 0.02,
+    "gauge_interval_s": 0.02,
+    "event_window_required": true,
+    "zero_credit_until_cpu_native_and_solver_reviews": true
+  },
+  "implementation": {
+    "path": "scripts/f5_wave_runup_definition_writer_v2.py",
+    "sha256": "c634da2aa47fd972dfeb3a5888dfa235e744ef9579cfe0c3e43ee488f403e9bb",
+    "bytes": 5795,
+    "role": "F5 v2 Definition writer"
+  },
+  "execution_controls": {
+    "definition_written": true,
+    "motion_written": true,
+    "gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "matrix_materialized": false,
+    "matrix_submitted": false,
+    "qualification_credit": 0
+  }
+}
