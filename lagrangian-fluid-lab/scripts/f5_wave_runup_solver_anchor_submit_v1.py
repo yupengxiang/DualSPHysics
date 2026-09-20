@@ -67,8 +67,6 @@ def verify_inputs() -> tuple[dict[str, Any], dict[str, Any]]:
             raise ValueError(f"stale job binding: {path}")
     if not RUNTIME.is_file() or sha256(RUNTIME) != job.get("runtime_worker", {}).get("sha256"):
         raise ValueError("runtime worker hash is stale")
-    if QUEUE_SPEC.exists():
-        raise FileExistsError("queue spec already exists; refuse duplicate submission")
     return job, review
 
 
@@ -118,7 +116,13 @@ def main() -> int:
     args = parser.parse_args()
     job, _review = verify_inputs()
     spec = build_queue_spec(job)
-    QUEUE_SPEC.write_text(json.dumps(spec, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
+    encoded = json.dumps(spec, indent=2, ensure_ascii=False, allow_nan=False) + "\n"
+    if QUEUE_SPEC.exists():
+        existing = load(QUEUE_SPEC)
+        if existing != spec:
+            raise ValueError("existing queue spec differs; refuse to overwrite a protected submission")
+    else:
+        QUEUE_SPEC.write_text(encoded, encoding="utf-8")
     if args.command == "dry-run":
         print(json.dumps({"status": "queue_spec_written_not_submitted", "job_id": spec["job_id"],
                           "queue_spec": str(QUEUE_SPEC), "queue_mutation": 0}, indent=2))
@@ -130,6 +134,9 @@ def main() -> int:
         print(completed.stdout, end="")
         print(completed.stderr, end="")
         return completed.returncode
+    response = json.loads(completed.stdout)
+    if response.get("inserted") is not True:
+        raise SystemExit("queue already contains this job id; no second submission was performed")
     print(json.dumps({"status": "queue_submitted_once", "job_id": spec["job_id"],
                       "queue_spec": str(QUEUE_SPEC), "queue_mutation": 1,
                       "runtime_output": "attempt_dir/product"}, indent=2))
