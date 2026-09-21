@@ -7,7 +7,12 @@ import pytest
 
 from scripts.core_material import F4_SCHEMA, SCHEMA, trace, trace_f4_resting_pool
 from scripts.core_material_acceptance import (
+    F4_TALLWALL120_CHECKPOINT_SCHEMA,
+    F4_TALLWALL120_DIAGNOSTIC_SCHEMA,
+    F4_TALLWALL120_ENDPOINT_TOLERANCE_M,
+    F4_TALLWALL120_GENERATION_SCHEMA,
     audit_material_h5,
+    evaluate_f4_tallwall120_diagnostic_json,
     evaluate_material_summary,
     evaluate_material_output_json,
     validate_checkpoint_manifest,
@@ -433,3 +438,247 @@ def test_json_output_source_denominator_mismatch_is_structural_error():
     payload['source_coverage']['rows'][0]['initial_mass_kg'] = 49.
     with pytest.raises(ValueError, match='denominator'):
         evaluate_material_output_json(payload, required_source_ids=JSON_SOURCE_IDS)
+
+
+def _f4_tallwall120_diagnostic_payload():
+    identity = {
+        'family': 'F4',
+        'case_id': 'F4_mdbc_laminar_nu1e6_tallwall120_v1',
+        'scope_id': 'F4_resting_pool_laminar_tallwall120_x_v1',
+        'revision_id': 'F4_tallwall120_material_baseline24_v1',
+        'recipe_id': 'F4_tallwall120_material_overlay_baseline24_v1',
+    }
+
+    def event(name, *, residence=False):
+        value = {
+            'definition': f'F4 tallwall120 {name} event',
+            'denominator_policy': 'all_initial_mass',
+            'event_fraction': .8,
+            'cdf': {
+                'time_s': [0., 1.],
+                'lower': [0., .25],
+                'upper': [0., .3],
+                'denominator_policy': 'all_initial_mass',
+            },
+            'censor': {
+                'type': 'none',
+                'fraction': 0.,
+                'policy': 'no_censoring',
+                'counts_as_acceptance': False,
+            },
+        }
+        if residence:
+            value['residence_mean_s'] = .15
+            value['residence_censored_fraction'] = 0.
+        return value
+
+    return {
+        'schema': F4_TALLWALL120_DIAGNOSTIC_SCHEMA,
+        'family': 'F4',
+        **{name: identity[name] for name in ('case_id', 'scope_id', 'revision_id', 'recipe_id')},
+        'identity': identity,
+        'status': 'diagnostic_only',
+        'diagnostic_only': True,
+        'qualification_claim': 'none',
+        'credit': 0,
+        'qualification_credit': 0,
+        'T2_macro': False,
+        'T2_path': False,
+        'qualified_T2_macro': False,
+        'qualified_T2_path': False,
+        'hash_bindings': {
+            'generation': {
+                'schema': F4_TALLWALL120_GENERATION_SCHEMA,
+                'sha256': 'a' * 64,
+                'bound_sha256': 'a' * 64,
+                'identity': dict(identity),
+            },
+            'checkpoint': {
+                'schema': F4_TALLWALL120_CHECKPOINT_SCHEMA,
+                'sha256': 'b' * 64,
+                'bound_sha256': 'b' * 64,
+                'identity': dict(identity),
+            },
+        },
+        'source_denominator': {
+            'denominator_policy': 'all_initial_mass',
+            'total_initial_mass_kg': 1.,
+            'source_rows': [
+                {'source_id': 'source-1', 'initial_mass_kg': 1., 'unknown_fraction_max': 0.},
+            ],
+            'unknown_bound': {
+                'denominator_policy': 'all_initial_mass',
+                'observed_fraction': 0.,
+                'worst_case_fraction': 0.,
+                'limit': .01,
+                'includes_right_censored_mass': True,
+            },
+        },
+        'events': {
+            'contact': event('contact'),
+            'upward': event('upward'),
+            'return': event('return'),
+            'residence': event('residence', residence=True),
+        },
+        'event_window': {
+            'complete': True,
+            'status': 'complete',
+            'right_censored': False,
+        },
+        'f4_tolerances': {
+            'cdf': {
+                'family': 'F4', 'registered': True,
+                'scope_id': identity['scope_id'], 'revision_id': identity['revision_id'],
+                'observed': .01, 'tolerance': .02,
+            },
+            'residence': {
+                'family': 'F4', 'registered': True,
+                'scope_id': identity['scope_id'], 'revision_id': identity['revision_id'],
+                'observed_s': .001, 'tolerance_s': .01,
+            },
+            'endpoint': {
+                'family': 'F4', 'registered': True,
+                'scope_id': identity['scope_id'], 'revision_id': identity['revision_id'],
+                'observed_max_error_m': 0., 'tolerance_m': F4_TALLWALL120_ENDPOINT_TOLERANCE_M,
+            },
+            'saved_chord': {
+                'family': 'F4', 'registered': True,
+                'scope_id': identity['scope_id'], 'revision_id': identity['revision_id'],
+                'observed_crossings': 0, 'allowed_crossings': 0,
+            },
+        },
+    }
+
+
+def test_f4_tallwall120_json_diagnostic_passes_without_mutation():
+    payload = _f4_tallwall120_diagnostic_payload()
+    before = deepcopy(payload)
+    result = evaluate_f4_tallwall120_diagnostic_json(payload)
+    assert result['passed'] is True
+    assert result['status'] == 'diagnostic_only'
+    assert result['qualification_claim'] == 'none'
+    assert result['credit'] == 0 and result['qualification_credit'] == 0
+    assert result['T2_macro'] is False and result['T2_path'] is False
+    assert payload == before
+    assert result['execution_constraints']['hdf5_opened'] is False
+    assert result['execution_constraints']['bridge_read'] is False
+
+
+def test_f4_tallwall120_json_diagnostic_requires_explicit_schema_identity():
+    payload = _f4_tallwall120_diagnostic_payload()
+    del payload['identity']['revision_id']
+    result = evaluate_f4_tallwall120_diagnostic_json(payload)
+    assert result['passed'] is False
+    assert result['diagnostic_state'] == 'blocked_diagnostic'
+    assert 'structural_validation' in result['failure_reasons']
+
+
+def test_f4_tallwall120_json_diagnostic_rejects_wrong_generation_hash():
+    payload = _f4_tallwall120_diagnostic_payload()
+    payload['hash_bindings']['generation']['bound_sha256'] = 'c' * 64
+    result = evaluate_f4_tallwall120_diagnostic_json(payload)
+    assert result['passed'] is False
+    assert 'structural_validation' in result['failure_reasons']
+    assert result['T2_macro'] is False and result['credit'] == 0
+
+
+def test_f4_tallwall120_json_diagnostic_checks_external_hash_binding():
+    payload = _f4_tallwall120_diagnostic_payload()
+    result = evaluate_f4_tallwall120_diagnostic_json(
+        payload, expected_generation_sha256='c' * 64, expected_checkpoint_sha256='b' * 64,
+    )
+    assert result['passed'] is False
+    assert 'structural_validation' in result['failure_reasons']
+
+
+def test_f4_tallwall120_json_diagnostic_rejects_denominator_mismatch():
+    payload = _f4_tallwall120_diagnostic_payload()
+    payload['source_denominator']['source_rows'][0]['initial_mass_kg'] = .9
+    result = evaluate_f4_tallwall120_diagnostic_json(payload)
+    assert result['passed'] is False
+    assert 'structural_validation' in result['failure_reasons']
+
+
+def test_f4_tallwall120_json_diagnostic_uses_mass_closure_tolerance():
+    payload = _f4_tallwall120_diagnostic_payload()
+    payload['source_denominator']['total_initial_mass_kg'] = .3
+    payload['source_denominator']['source_rows'] = [
+        {'source_id': 'source-1', 'initial_mass_kg': .1, 'unknown_fraction_max': 0.},
+        {'source_id': 'source-2', 'initial_mass_kg': .2, 'unknown_fraction_max': 0.},
+    ]
+    payload['source_denominator']['unknown_bound']['observed_fraction'] = 0.
+    payload['source_denominator']['unknown_bound']['worst_case_fraction'] = 0.
+    result = evaluate_f4_tallwall120_diagnostic_json(payload)
+    assert result['passed'] is True
+
+
+def test_f4_tallwall120_json_diagnostic_preserves_over_unknown_as_blocked():
+    payload = _f4_tallwall120_diagnostic_payload()
+    payload['source_denominator']['source_rows'][0]['unknown_fraction_max'] = .02
+    payload['source_denominator']['unknown_bound']['observed_fraction'] = .02
+    payload['source_denominator']['unknown_bound']['worst_case_fraction'] = .02
+    result = evaluate_f4_tallwall120_diagnostic_json(payload)
+    assert result['passed'] is False
+    assert result['gates']['unknown_bound'] is False
+    assert result['qualification_claim'] == 'none' and result['T2_path'] is False
+
+
+def test_f4_tallwall120_json_diagnostic_right_censor_is_not_acceptance():
+    payload = _f4_tallwall120_diagnostic_payload()
+    censor = payload['events']['return']['censor']
+    censor.update(type='right', fraction=.1, policy='right_censored_mass_remains_in_denominator')
+    result = evaluate_f4_tallwall120_diagnostic_json(payload)
+    assert result['passed'] is False
+    assert result['gates']['right_censor_free'] is False
+    assert result['gates']['return'] is False
+
+
+def test_f4_tallwall120_json_diagnostic_incomplete_window_is_blocked():
+    payload = _f4_tallwall120_diagnostic_payload()
+    payload['event_window'] = {'complete': False, 'status': 'right_censored_or_unresolved', 'right_censored': True}
+    result = evaluate_f4_tallwall120_diagnostic_json(payload)
+    assert result['passed'] is False
+    assert result['gates']['complete_event_window'] is False
+    assert result['gates']['right_censor_free'] is False
+
+
+def test_f4_tallwall120_json_diagnostic_requires_residence_fields():
+    payload = _f4_tallwall120_diagnostic_payload()
+    del payload['events']['residence']['residence_mean_s']
+    result = evaluate_f4_tallwall120_diagnostic_json(payload)
+    assert result['passed'] is False
+    assert 'structural_validation' in result['failure_reasons']
+
+
+def test_f4_tallwall120_json_diagnostic_enforces_f4_cdf_tolerance():
+    payload = _f4_tallwall120_diagnostic_payload()
+    payload['f4_tolerances']['cdf']['observed'] = .03
+    result = evaluate_f4_tallwall120_diagnostic_json(payload)
+    assert result['passed'] is False
+    assert result['gates']['f4_cdf_tolerance'] is False
+
+
+def test_f4_tallwall120_json_diagnostic_enforces_residence_tolerance():
+    payload = _f4_tallwall120_diagnostic_payload()
+    payload['f4_tolerances']['residence']['observed_s'] = .02
+    result = evaluate_f4_tallwall120_diagnostic_json(payload)
+    assert result['passed'] is False
+    assert result['gates']['f4_residence_tolerance'] is False
+
+
+def test_f4_tallwall120_json_diagnostic_enforces_endpoint_and_saved_chord_tolerances():
+    payload = _f4_tallwall120_diagnostic_payload()
+    payload['f4_tolerances']['endpoint']['observed_max_error_m'] = 2.e-8
+    payload['f4_tolerances']['saved_chord']['observed_crossings'] = 1
+    result = evaluate_f4_tallwall120_diagnostic_json(payload)
+    assert result['passed'] is False
+    assert result['gates']['f4_endpoint_tolerance'] is False
+    assert result['gates']['f4_saved_chord_tolerance'] is False
+
+
+def test_f4_tallwall120_json_diagnostic_rejects_non_json_values():
+    payload = _f4_tallwall120_diagnostic_payload()
+    payload['events']['contact']['cdf']['time_s'] = (0., 1.)
+    result = evaluate_f4_tallwall120_diagnostic_json(payload)
+    assert result['passed'] is False
+    assert result['diagnostic_state'] == 'blocked_diagnostic'

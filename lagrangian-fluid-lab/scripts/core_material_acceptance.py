@@ -22,6 +22,12 @@ import numpy as np
 
 UNKNOWN_FRACTION_LIMIT = 0.01
 ACCEPTANCE_SCHEMA = "core.material.acceptance.v1"
+F4_TALLWALL120_DIAGNOSTIC_SCHEMA = "core.material.f4.tallwall120.diagnostic.v1"
+F4_TALLWALL120_GENERATION_SCHEMA = "core.material.f4.tallwall120.generation.v1"
+F4_TALLWALL120_CHECKPOINT_SCHEMA = "core.material.f4.tallwall120.checkpoint.v2"
+F4_TALLWALL120_UNKNOWN_FRACTION_LIMIT = 0.01
+F4_TALLWALL120_ENDPOINT_TOLERANCE_M = 1.0e-8
+F4_TALLWALL120_SAVED_CHORD_CROSSINGS_ALLOWED = 0
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _CHECKPOINT_FIELDS_F3 = (
     "position", "reliable", "first_passage", "return_time", "residence",
@@ -552,6 +558,419 @@ def evaluate_material_output_json(
             "qualification_credit_registered": 0,
         },
     }
+
+
+_F4_TALLWALL120_IDENTITY_FIELDS = ("case_id", "scope_id", "revision_id", "recipe_id")
+_F4_TALLWALL120_EVENT_NAMES = ("contact", "upward", "return", "residence")
+_F4_TALLWALL120_GATE_NAMES = (
+    "schema", "identity", "generation_hash_binding", "checkpoint_hash_binding",
+    "source_denominator", "unknown_bound", "contact", "upward", "return",
+    "residence", "complete_event_window", "right_censor_free",
+    "f4_cdf_tolerance", "f4_residence_tolerance", "f4_endpoint_tolerance",
+    "f4_saved_chord_tolerance",
+)
+
+
+def _f4_tallwall120_json_like(value, path="payload", active=None):
+    """Reject non-JSON values before the F4-only validator inspects a value."""
+    if active is None:
+        active = set()
+    if value is None or isinstance(value, (str, bool, int)):
+        return
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError(f"{path} contains a non-finite number")
+        return
+    if isinstance(value, dict):
+        identity = id(value)
+        if identity in active:
+            raise ValueError(f"{path} contains a cyclic object")
+        active.add(identity)
+        try:
+            for key, item in value.items():
+                if not isinstance(key, str):
+                    raise ValueError(f"{path} has a non-string object key")
+                _f4_tallwall120_json_like(item, f"{path}.{key}", active)
+        finally:
+            active.remove(identity)
+        return
+    if isinstance(value, list):
+        identity = id(value)
+        if identity in active:
+            raise ValueError(f"{path} contains a cyclic list")
+        active.add(identity)
+        try:
+            for index, item in enumerate(value):
+                _f4_tallwall120_json_like(item, f"{path}[{index}]", active)
+        finally:
+            active.remove(identity)
+        return
+    raise ValueError(f"{path} is not JSON-like")
+
+
+def _f4_tallwall120_object(value, name):
+    if not isinstance(value, dict):
+        raise ValueError(f"{name} must be an object")
+    return value
+
+
+def _f4_tallwall120_list(value, name):
+    if not isinstance(value, list):
+        raise ValueError(f"{name} must be a list")
+    return value
+
+
+def _f4_tallwall120_string(value, name):
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{name} must be a non-empty string")
+    return value
+
+
+def _f4_tallwall120_number(value, name, *, minimum=None, maximum=None):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{name} must be a finite number")
+    value = float(value)
+    if not math.isfinite(value):
+        raise ValueError(f"{name} must be a finite number")
+    if minimum is not None and value < minimum:
+        raise ValueError(f"{name} must be >= {minimum}")
+    if maximum is not None and value > maximum:
+        raise ValueError(f"{name} must be <= {maximum}")
+    return value
+
+
+def _f4_tallwall120_identity(payload):
+    if payload.get("family") != "F4":
+        raise ValueError("F4 tallwall120 diagnostic family must be F4")
+    identity = _f4_tallwall120_object(payload.get("identity"), "identity")
+    if identity.get("family") != "F4":
+        raise ValueError("F4 tallwall120 identity family must be F4")
+    normalized = {"family": "F4"}
+    for name in _F4_TALLWALL120_IDENTITY_FIELDS:
+        root_value = _f4_tallwall120_string(payload.get(name), name)
+        identity_value = _f4_tallwall120_string(identity.get(name), "identity." + name)
+        if root_value != identity_value:
+            raise ValueError("F4 tallwall120 identity binding mismatch: " + name)
+        if "tallwall120" not in root_value.lower():
+            raise ValueError(name + " must identify tallwall120")
+        normalized[name] = root_value
+    return normalized
+
+
+def _f4_tallwall120_hash_bindings(payload, identity, expected_generation, expected_checkpoint):
+    bindings = _f4_tallwall120_object(payload.get("hash_bindings"), "hash_bindings")
+    normalized = {}
+    for kind, schema, expected in (
+        ("generation", F4_TALLWALL120_GENERATION_SCHEMA, expected_generation),
+        ("checkpoint", F4_TALLWALL120_CHECKPOINT_SCHEMA, expected_checkpoint),
+    ):
+        entry = _f4_tallwall120_object(bindings.get(kind), "hash_bindings." + kind)
+        if entry.get("schema") != schema:
+            raise ValueError("hash_bindings." + kind + ".schema mismatch")
+        digest = _sha256(entry.get("sha256"), "hash_bindings." + kind + ".sha256")
+        bound = _sha256(entry.get("bound_sha256"), "hash_bindings." + kind + ".bound_sha256")
+        if digest != bound:
+            raise ValueError("hash_bindings." + kind + " hash mismatch")
+        if expected is not None:
+            expected = _sha256(expected, "expected_" + kind + "_sha256")
+            if digest != expected:
+                raise ValueError("hash_bindings." + kind + " does not match expected hash")
+        if _f4_tallwall120_object(entry.get("identity"), "hash_bindings." + kind + ".identity") != identity:
+            raise ValueError("hash_bindings." + kind + " identity mismatch")
+        normalized[kind] = {
+            "schema": schema,
+            "sha256": digest,
+            "bound_sha256": bound,
+        }
+    return normalized
+
+
+def _f4_tallwall120_source_denominator(payload):
+    source = _f4_tallwall120_object(payload.get("source_denominator"), "source_denominator")
+    if source.get("denominator_policy") != "all_initial_mass":
+        raise ValueError("source_denominator.denominator_policy must be all_initial_mass")
+    total = _f4_tallwall120_number(
+        source.get("total_initial_mass_kg"), "source_denominator.total_initial_mass_kg", minimum=0.0
+    )
+    if total <= 0.0:
+        raise ValueError("source_denominator.total_initial_mass_kg must be positive")
+    rows = _f4_tallwall120_list(source.get("source_rows"), "source_denominator.source_rows")
+    if not rows:
+        raise ValueError("source_denominator.source_rows must not be empty")
+    seen = set()
+    normalized_rows = []
+    for index, row in enumerate(rows):
+        row = _f4_tallwall120_object(row, f"source_denominator.source_rows[{index}]")
+        source_id = _f4_tallwall120_string(row.get("source_id"), "source_id")
+        if source_id in seen:
+            raise ValueError("duplicate source_id in source denominator")
+        seen.add(source_id)
+        mass = _f4_tallwall120_number(row.get("initial_mass_kg"), "initial_mass_kg", minimum=0.0)
+        if mass <= 0.0:
+            raise ValueError("source denominator mass must be positive")
+        unknown = _f4_tallwall120_number(
+            row.get("unknown_fraction_max"), "unknown_fraction_max", minimum=0.0, maximum=1.0
+        )
+        normalized_rows.append({
+            "source_id": source_id,
+            "initial_mass_kg": mass,
+            "unknown_fraction_max": unknown,
+        })
+    mass_sum = sum(row["initial_mass_kg"] for row in normalized_rows)
+    mass_tolerance = max(1.0e-12, total * 1.0e-12)
+    if abs(mass_sum - total) > mass_tolerance:
+        raise ValueError("source denominator rows do not close total_initial_mass_kg")
+
+    bound = _f4_tallwall120_object(source.get("unknown_bound"), "source_denominator.unknown_bound")
+    if bound.get("denominator_policy") != "all_initial_mass":
+        raise ValueError("unknown_bound.denominator_policy must be all_initial_mass")
+    observed = _f4_tallwall120_number(bound.get("observed_fraction"), "unknown_bound.observed_fraction", minimum=0.0, maximum=1.0)
+    worst = _f4_tallwall120_number(bound.get("worst_case_fraction"), "unknown_bound.worst_case_fraction", minimum=0.0, maximum=1.0)
+    limit = _f4_tallwall120_number(bound.get("limit"), "unknown_bound.limit", minimum=0.0, maximum=1.0)
+    if limit != F4_TALLWALL120_UNKNOWN_FRACTION_LIMIT:
+        raise ValueError("unknown_bound.limit is not the fixed F4 1% limit")
+    if worst < observed:
+        raise ValueError("unknown_bound.worst_case_fraction cannot be below observed_fraction")
+    if bound.get("includes_right_censored_mass") is not True:
+        raise ValueError("unknown_bound.includes_right_censored_mass must be true")
+    expected_observed = sum(row["initial_mass_kg"] * row["unknown_fraction_max"] for row in normalized_rows) / total
+    if abs(observed - expected_observed) > 1.0e-12:
+        raise ValueError("unknown_bound.observed_fraction is not bound to source denominator")
+    unknown_pass = all(row["unknown_fraction_max"] <= limit for row in normalized_rows) and worst <= limit
+    return {
+        "denominator_policy": "all_initial_mass",
+        "total_initial_mass_kg": total,
+        "source_rows": normalized_rows,
+        "unknown_bound": {
+            "denominator_policy": "all_initial_mass",
+            "observed_fraction": observed,
+            "worst_case_fraction": worst,
+            "limit": limit,
+            "includes_right_censored_mass": True,
+            "gate_pass": bool(unknown_pass),
+        },
+        "gate_pass": bool(abs(mass_sum - total) <= mass_tolerance and unknown_pass),
+    }, bool(unknown_pass)
+
+
+def _f4_tallwall120_event(name, event):
+    event = _f4_tallwall120_object(event, "events." + name)
+    definition = _f4_tallwall120_string(event.get("definition"), "events." + name + ".definition")
+    if event.get("denominator_policy") != "all_initial_mass":
+        raise ValueError("events." + name + ".denominator_policy must be all_initial_mass")
+    fraction = _f4_tallwall120_number(event.get("event_fraction"), "events." + name + ".event_fraction", minimum=0.0, maximum=1.0)
+    cdf = _f4_tallwall120_object(event.get("cdf"), "events." + name + ".cdf")
+    times = _f4_tallwall120_list(cdf.get("time_s"), "events." + name + ".cdf.time_s")
+    lower = _f4_tallwall120_list(cdf.get("lower"), "events." + name + ".cdf.lower")
+    upper = _f4_tallwall120_list(cdf.get("upper"), "events." + name + ".cdf.upper")
+    if not times or len(times) != len(lower) or len(lower) != len(upper):
+        raise ValueError("events." + name + ".cdf arrays must be non-empty and aligned")
+    times = [_f4_tallwall120_number(value, "CDF time", minimum=0.0) for value in times]
+    lower = [_f4_tallwall120_number(value, "CDF lower", minimum=0.0, maximum=1.0) for value in lower]
+    upper = [_f4_tallwall120_number(value, "CDF upper", minimum=0.0, maximum=1.0) for value in upper]
+    if any(later <= earlier for earlier, later in zip(times, times[1:])):
+        raise ValueError("events." + name + ".cdf.time_s must be strictly increasing")
+    if any(lo > hi for lo, hi in zip(lower, upper)):
+        raise ValueError("events." + name + ".cdf lower exceeds upper")
+    if any(later < earlier for earlier, later in zip(lower, lower[1:])) or any(later < earlier for earlier, later in zip(upper, upper[1:])):
+        raise ValueError("events." + name + ".cdf bounds must be non-decreasing")
+    if cdf.get("denominator_policy") != "all_initial_mass":
+        raise ValueError("events." + name + ".cdf.denominator_policy must be all_initial_mass")
+    censor = _f4_tallwall120_object(event.get("censor"), "events." + name + ".censor")
+    censor_type = censor.get("type")
+    if censor_type not in ("none", "right"):
+        raise ValueError("events." + name + ".censor.type must be none or right")
+    censor_fraction = _f4_tallwall120_number(censor.get("fraction"), "censor.fraction", minimum=0.0, maximum=1.0)
+    if censor.get("counts_as_acceptance") is not False:
+        raise ValueError("events." + name + ".censor.counts_as_acceptance must be false")
+    expected_policy = "no_censoring" if censor_type == "none" else "right_censored_mass_remains_in_denominator"
+    if censor.get("policy") != expected_policy:
+        raise ValueError("events." + name + ".censor.policy mismatch")
+    if (censor_type == "none" and censor_fraction != 0.0) or (censor_type == "right" and censor_fraction <= 0.0):
+        raise ValueError("events." + name + ".censor.fraction is inconsistent with type")
+    normalized = {
+        "definition": definition,
+        "denominator_policy": "all_initial_mass",
+        "event_fraction": fraction,
+        "cdf": {"time_s": times, "lower": lower, "upper": upper, "denominator_policy": "all_initial_mass"},
+        "censor": {"type": censor_type, "fraction": censor_fraction, "policy": expected_policy, "counts_as_acceptance": False},
+    }
+    if name == "residence":
+        mean = _f4_tallwall120_number(event.get("residence_mean_s"), "events.residence.residence_mean_s", minimum=0.0)
+        residence_censored = _f4_tallwall120_number(event.get("residence_censored_fraction"), "events.residence.residence_censored_fraction", minimum=0.0, maximum=1.0)
+        if abs(residence_censored - censor_fraction) > 1.0e-12:
+            raise ValueError("residence_censored_fraction is not bound to residence censor")
+        normalized.update({"residence_mean_s": mean, "residence_censored_fraction": residence_censored})
+    return normalized, censor_type == "right"
+
+
+def _f4_tallwall120_tolerances(payload, identity):
+    values = _f4_tallwall120_object(payload.get("f4_tolerances"), "f4_tolerances")
+    normalized = {}
+    for name in ("cdf", "residence", "endpoint", "saved_chord"):
+        entry = _f4_tallwall120_object(values.get(name), "f4_tolerances." + name)
+        if entry.get("family") != "F4" or entry.get("registered") is not True:
+            raise ValueError("f4_tolerances." + name + " is not registered for F4")
+        if entry.get("scope_id") != identity["scope_id"] or entry.get("revision_id") != identity["revision_id"]:
+            raise ValueError("f4_tolerances." + name + " identity mismatch")
+        normalized[name] = dict(entry)
+    cdf_observed = _f4_tallwall120_number(normalized["cdf"].get("observed"), "f4_tolerances.cdf.observed", minimum=0.0)
+    cdf_limit = _f4_tallwall120_number(normalized["cdf"].get("tolerance"), "f4_tolerances.cdf.tolerance", minimum=0.0)
+    residence_observed = _f4_tallwall120_number(normalized["residence"].get("observed_s"), "f4_tolerances.residence.observed_s", minimum=0.0)
+    residence_limit = _f4_tallwall120_number(normalized["residence"].get("tolerance_s"), "f4_tolerances.residence.tolerance_s", minimum=0.0)
+    endpoint_observed = _f4_tallwall120_number(normalized["endpoint"].get("observed_max_error_m"), "f4_tolerances.endpoint.observed_max_error_m", minimum=0.0)
+    endpoint_limit = _f4_tallwall120_number(normalized["endpoint"].get("tolerance_m"), "f4_tolerances.endpoint.tolerance_m", minimum=0.0)
+    if endpoint_limit != F4_TALLWALL120_ENDPOINT_TOLERANCE_M:
+        raise ValueError("F4 endpoint tolerance changed")
+    saved_observed = normalized["saved_chord"].get("observed_crossings")
+    saved_allowed = normalized["saved_chord"].get("allowed_crossings")
+    if isinstance(saved_observed, bool) or not isinstance(saved_observed, int) or saved_observed < 0:
+        raise ValueError("saved-chord observed_crossings must be a non-negative integer")
+    if isinstance(saved_allowed, bool) or not isinstance(saved_allowed, int) or saved_allowed < 0:
+        raise ValueError("saved-chord allowed_crossings must be a non-negative integer")
+    if saved_allowed != F4_TALLWALL120_SAVED_CHORD_CROSSINGS_ALLOWED:
+        raise ValueError("F4 saved-chord allowance changed")
+    normalized["cdf"] = {"family": "F4", "registered": True, "observed": cdf_observed, "tolerance": cdf_limit}
+    normalized["residence"] = {"family": "F4", "registered": True, "observed_s": residence_observed, "tolerance_s": residence_limit}
+    normalized["endpoint"] = {"family": "F4", "registered": True, "observed_max_error_m": endpoint_observed, "tolerance_m": endpoint_limit}
+    normalized["saved_chord"] = {"family": "F4", "registered": True, "observed_crossings": saved_observed, "allowed_crossings": saved_allowed}
+    return normalized, {
+        "f4_cdf_tolerance": cdf_observed <= cdf_limit,
+        "f4_residence_tolerance": residence_observed <= residence_limit,
+        "f4_endpoint_tolerance": endpoint_observed <= endpoint_limit,
+        "f4_saved_chord_tolerance": saved_observed <= saved_allowed,
+    }
+
+
+def _f4_tallwall120_validate(payload, expected_generation, expected_checkpoint):
+    if payload.get("schema") != F4_TALLWALL120_DIAGNOSTIC_SCHEMA:
+        raise ValueError("unsupported F4 tallwall120 diagnostic schema")
+    if payload.get("diagnostic_only", True) is not True:
+        raise ValueError("F4 tallwall120 diagnostic must be diagnostic_only")
+    if payload.get("status", "diagnostic_only") != "diagnostic_only":
+        raise ValueError("F4 tallwall120 diagnostic status must be diagnostic_only")
+    if payload.get("qualification_claim", "none") != "none":
+        raise ValueError("F4 tallwall120 diagnostic carries a qualification claim")
+    for name in ("credit", "qualification_credit"):
+        value = payload.get(name, 0)
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or float(value) != 0.0:
+            raise ValueError("F4 tallwall120 diagnostic credit must be zero")
+    for name in ("T2_macro", "T2_path", "qualified_T2_macro", "qualified_T2_path"):
+        if payload.get(name, False) is not False:
+            raise ValueError("F4 tallwall120 diagnostic cannot claim " + name)
+    identity = _f4_tallwall120_identity(payload)
+    hashes = _f4_tallwall120_hash_bindings(payload, identity, expected_generation, expected_checkpoint)
+    source, unknown_pass = _f4_tallwall120_source_denominator(payload)
+    events_payload = _f4_tallwall120_object(payload.get("events"), "events")
+    events = {}
+    censored = False
+    event_gates = {}
+    for name in _F4_TALLWALL120_EVENT_NAMES:
+        events[name], event_censored = _f4_tallwall120_event(name, events_payload.get(name))
+        censored = censored or event_censored
+        event_gates[name] = not event_censored
+    event_window = _f4_tallwall120_object(payload.get("event_window"), "event_window")
+    if not isinstance(event_window.get("complete"), bool):
+        raise ValueError("event_window.complete must be boolean")
+    if not isinstance(event_window.get("right_censored"), bool):
+        raise ValueError("event_window.right_censored must be boolean")
+    if not isinstance(event_window.get("status"), str):
+        raise ValueError("event_window.status is required")
+    complete_window = event_window["complete"] is True and event_window["status"] == "complete" and event_window["right_censored"] is False
+    censored = censored or event_window["right_censored"] is True or event_window["status"] != "complete"
+    tolerances, tolerance_gates = _f4_tallwall120_tolerances(payload, identity)
+    gates = {name: True for name in _F4_TALLWALL120_GATE_NAMES}
+    gates.update({"complete_event_window": complete_window, "right_censor_free": not censored, "unknown_bound": unknown_pass})
+    gates.update(event_gates)
+    gates.update(tolerance_gates)
+    reasons = []
+    if not unknown_pass:
+        reasons.append("source unknown bound exceeds the fixed F4 1% limit")
+    if censored:
+        reasons.append("right-censored or incomplete F4 event window is not acceptance")
+    for name, passed in tolerance_gates.items():
+        if not passed:
+            reasons.append(name + " failed")
+    return {
+        "identity": identity,
+        "hash_bindings": hashes,
+        "source_denominator": source,
+        "events": events,
+        "event_window": {
+            "complete": bool(event_window["complete"]),
+            "status": event_window["status"],
+            "right_censored": bool(event_window["right_censored"]),
+        },
+        "f4_tolerances": tolerances,
+        "gates": gates,
+        "blocking_reasons": reasons,
+    }
+
+
+def evaluate_f4_tallwall120_diagnostic_json(
+    payload,
+    *,
+    expected_generation_sha256=None,
+    expected_checkpoint_sha256=None,
+):
+    """Evaluate an F4/tallwall120 JSON diagnostic without touching artifacts.
+
+    The input is JSON-like only.  Generation/checkpoint hashes are compared to
+    their explicit ``bound_sha256`` fields and, when supplied, to the caller's
+    expected hashes.  Missing or malformed fields, right censoring, an unknown
+    bound above 1%, or any F4 tolerance failure return a blocked diagnostic.
+    This function never opens HDF5/bridge inputs and never writes state.
+    """
+    result = {
+        "schema": F4_TALLWALL120_DIAGNOSTIC_SCHEMA,
+        "status": "diagnostic_only",
+        "diagnostic_only": True,
+        "passed": False,
+        "diagnostic_state": "blocked_diagnostic",
+        "qualification_claim": "none",
+        "credit": 0,
+        "qualification_credit": 0,
+        "T2_macro": False,
+        "T2_path": False,
+        "qualified_T2_macro": False,
+        "qualified_T2_path": False,
+        "failure_reasons": [],
+        "blocking_reasons": [],
+        "gates": {name: False for name in _F4_TALLWALL120_GATE_NAMES},
+        "execution_constraints": {
+            "read_only": True,
+            "json_source_only": True,
+            "hdf5_opened": False,
+            "bridge_read": False,
+            "solver_started": False,
+            "gpu_started": False,
+            "registry_written": False,
+            "ledger_written": False,
+            "evidence_written": False,
+            "completion_written": False,
+            "qualification_credit_registered": 0,
+        },
+    }
+    try:
+        _f4_tallwall120_json_like(payload)
+        if not isinstance(payload, dict):
+            raise ValueError("F4 tallwall120 diagnostic payload must be an object")
+        checked = _f4_tallwall120_validate(payload, expected_generation_sha256, expected_checkpoint_sha256)
+    except (TypeError, ValueError) as error:
+        result["failure_reasons"] = ["structural_validation"]
+        result["blocking_reasons"] = [str(error)]
+        return result
+    result.update({key: value for key, value in checked.items() if key != "gates"})
+    result["gates"] = checked["gates"]
+    result["failure_reasons"] = [name for name, passed in checked["gates"].items() if not passed]
+    result["passed"] = not result["failure_reasons"]
+    result["diagnostic_state"] = "diagnostic_pass" if result["passed"] else "blocked_diagnostic"
+    return result
+
+
+def validate_f4_tallwall120_diagnostic_json(*args, **kwargs):
+    """Named validator alias for the additive F4 JSON diagnostic consumer."""
+    return evaluate_f4_tallwall120_diagnostic_json(*args, **kwargs)
 
 
 def validate_material_summary(*args, **kwargs):
