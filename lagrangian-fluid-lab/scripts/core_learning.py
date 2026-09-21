@@ -55,6 +55,13 @@ MILESTONE_UPDATES = (8000, 16000, 24000, 32000)
 SCIENTIFIC_STATUS_NOT_ASSESSED = "not_assessed"
 
 
+def _strict_integer(value, name):
+    """Accept integer counters without truncating malformed receipt values."""
+    if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, np.integer)):
+        raise ValueError(f"{name} must be an integer")
+    return int(value)
+
+
 def _finite_scalar_sequence(values, expected):
     """Return whether an error sequence covers the requested horizon finitely."""
     if not isinstance(values, (list, tuple)) or len(values) != int(expected):
@@ -64,8 +71,8 @@ def _finite_scalar_sequence(values, expected):
 
 
 def rollout_completion_semantics(*, expected_frames, frames_executed,
-                                 failure_category, position_rmse,
-                                 velocity_rmse):
+                                failure_category, position_rmse,
+                                velocity_rmse):
     """Separate execution/finite completion from scientific validity.
 
     ``failure_category`` belongs to the execution/reader path.  A physical
@@ -74,8 +81,8 @@ def rollout_completion_semantics(*, expected_frames, frames_executed,
     ``scientific_status=not_assessed``.  A released scientific protocol may
     add a separate status and category without changing the numerical score.
     """
-    expected = int(expected_frames)
-    completed = int(frames_executed)
+    expected = _strict_integer(expected_frames, "expected_frames")
+    completed = _strict_integer(frames_executed, "frames_executed")
     if expected < 0 or completed < 0 or completed > expected:
         raise ValueError("invalid rollout completion counts")
     execution_complete = bool(expected > 0 and completed == expected and failure_category is None)

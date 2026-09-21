@@ -24,9 +24,17 @@ PROTOCOL = {
 }
 
 
+def _strict_integer(value, name):
+    """Accept integer counters without truncating malformed numeric values."""
+    if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, np.integer)):
+        raise ValueError(f"{name} must be an integer")
+    return int(value)
+
+
 def score_case(position_rmse, velocity_rmse, *, expected_frames, length_m,
                speed_mps, executed=True, failure_category=None):
-    if isinstance(expected_frames, bool) or int(expected_frames) != expected_frames or expected_frames < 1:
+    expected_frames = _strict_integer(expected_frames, "expected_frames")
+    if expected_frames < 1:
         raise ValueError("expected_frames must be a positive integer")
     if not all(math.isfinite(v) and v > 0 for v in (length_m, speed_mps)):
         raise ValueError("normalization scales must be finite and positive")

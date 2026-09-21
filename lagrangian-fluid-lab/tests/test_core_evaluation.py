@@ -32,6 +32,13 @@ def test_unexecuted_setup_failure_keeps_explicit_frame_denominator():
         score([0.0] * 4, [0.0] * 4, executed=False)
 
 
+def test_fixed_denominator_rejects_non_integer_frame_counts():
+    for invalid in (4.0, np.float64(4.0), True):
+        with pytest.raises(ValueError, match="expected_frames"):
+            score_case([0.0] * 4, [0.0] * 4, expected_frames=invalid,
+                       length_m=1.0, speed_mps=1.0)
+
+
 def test_family_macro_and_missing_execution():
     result = aggregate_cases({"a": "F1", "b": "F1", "c": "F3"},
                              {"a": score([0]*4), "b": score([0]*4)})

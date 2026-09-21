@@ -350,6 +350,19 @@ def test_completion_semantics_separate_finite_execution_from_science():
     assert summary["scientific_status_counts"] == {"failed": 1, "not_assessed": 1}
 
 
+def test_completion_semantics_rejects_fractional_or_boolean_counts():
+    for invalid in (3.0, np.float64(3.0), 3.5, True):
+        with pytest.raises(ValueError, match="expected_frames"):
+            rollout_completion_semantics(
+                expected_frames=invalid, frames_executed=3, failure_category=None,
+                position_rmse=[0.0, 0.0, 0.0], velocity_rmse=[0.0, 0.0, 0.0])
+    for invalid in (3.0, np.float64(3.0), 3.5, True):
+        with pytest.raises(ValueError, match="frames_executed"):
+            rollout_completion_semantics(
+                expected_frames=3, frames_executed=invalid, failure_category=None,
+                position_rmse=[0.0, 0.0, 0.0], velocity_rmse=[0.0, 0.0, 0.0])
+
+
 def test_legacy_known_inputs_geometry_contract_remains_scoreable(tmp_path):
     """The v3 bundle exposes ``geometry`` without ``geometry_at``."""
     manifest = tiny_manifest(tmp_path)
