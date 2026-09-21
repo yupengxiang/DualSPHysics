@@ -50,10 +50,14 @@ def test_design_is_proposal_only_and_has_exact_13_plus_2_cells() -> None:
     assert value["qualification_claim"] == "none"
     assert value["qualification_credit"] == 0
     assert value["T1"] is False
+    assert value["scope_id"] == "F6_fluid_rigid_body_physical_anchor_aligned_sampling_v3"
+    assert value["revision_id"] == "F6_observation_axis_13plus2_v4"
     assert value["parameter"]["name"] == "body_release_com_z_m"
     assert value["parameter"]["range_m"] == [0.49, 0.61]
     assert value["parameter"]["anchor_q"] == [0.0, 0.5, 1.0]
     assert value["parameter"]["held_out_q"] == [0.25, 0.75]
+    assert value["cells"][0]["geometry"]["fluid_low_m"] == [0.175, 0.05, 0.04]
+    assert value["cells"][0]["geometry"]["fluid_size_m"] == [1.14, 0.465, 0.24]
 
 
 def test_cells_have_unique_identity_and_fixed_qualification_signature() -> None:
@@ -111,6 +115,9 @@ def test_event_prediction_is_independent_and_monotone_in_release_height() -> Non
         assert event["observation_window_s"] == [1.0, 1.5]
         assert cell["time_contract"]["native_time_axis"] == "solver_reported_actual_TimeStep"
         assert cell["time_contract"]["equilibrium_status"] == "not_claimed"
+        expected = 601 if cell["design_cell"] == "native_output" else 301
+        assert cell["time_contract"]["expected_frame_count"] == expected
+        assert event["expected_frame_count"] == expected
 
 
 def test_design_binds_current_nonqualifying_v10_context_by_hash() -> None:

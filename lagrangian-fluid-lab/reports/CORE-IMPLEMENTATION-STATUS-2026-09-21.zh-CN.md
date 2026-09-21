@@ -55,12 +55,22 @@
   body sidecar 全部通过；`[1.0,1.5] s` 只登记为 observation hold，明确没有
   equilibrium claim。该 canary 状态为 `solver_completed_sidecar_pass_pending_scientific_review`，
   仍然不计入 T1 或生产分母。
-- v10 observation-axis 的 13+2 候选资格矩阵已冻结为 root-review-only 设计：
-  `body_release_com_z_m∈[0.49,0.61]` 的三个空间锚点、两个独立内部点、三档
-  分辨率，以及内部时间推进和原生输出 cadence 对照，共 15 个唯一单元。每格要求
-  fresh Definition/XML/BI4、独立 native preflight 和实际 `TimeStep` 审查；旧 canary
-  只作哈希绑定上下文，不能提供资格 credit。设计产物仍是
-  `qualification_only`、`T1=false`、credit 为零，尚未启动矩阵执行。
+- v10 observation-axis 的 13+2 候选资格矩阵经历了三轮输入相位修正。v1--v3 的
+  失败 preflight 证据保留：先后发现 `dp=0.015/0.025` 的粒子越过连续盒边界，
+  以及修正后 `dp=0.025` 的连续质量闭合失败；没有放宽硬门或覆盖失败分母。最终
+  v4 以新 scope `F6_fluid_rigid_body_physical_anchor_aligned_sampling_v3` 和
+  revision `F6_observation_axis_13plus2_v4` 冻结连续盒 `[0.175,0.050,0.040]--
+  [1.315,0.515,0.280] m`。
+- v4 的 3 个空间锚点、2 个独立内点、三档分辨率、内部时间推进和原生输出 cadence
+  对照共 15 个单元，均完成 fresh Definition/XML/BI4 的 exact-one CPU/native
+  preflight；聚合审计通过。每格仍是 `qualification_only`、`T1=false`、credit 为零，
+  尚未启动 solver，不能由初态 preflight 推导 F6 T1。
+- v4 已为 8 个代表格生成独立 CPU solver canary root review/job：选择了三个空间锚点、
+  中心细档、两个独立内点和内部时间／原生 cadence 对照。中心生产格已完成一次
+  solver attempt，301 帧、实际 `TimeStep`、接触窗口、闭合面和 observation hold
+  硬门通过；首次 worker 的回执字段缺失被记录为基础设施失败，并从同一已完成输出
+  只读恢复，未再次启动 solver。其它 7 格正在各自 attempt-001 中执行，尚未写入
+  Core 分母或 T1 credit。
 - 材料修复后的实现哈希已重新绑定到只读预检证据；同时把评测和 rollout 的
   frame denominator 收紧为真实整数语义，拒绝 fractional/bool 计数。新鲜 v5
   源闭包、root-admission 回执和 full-field halo oracle 已重新生成并通过哈希
@@ -86,10 +96,9 @@
 ## 下一步准入顺序
 
 1. F6 v9 canary 的 solver 产物已经完整保留，但严格 cadence 合同未通过。v10
-   已通过 fresh Definition/native preflight 和一次 actual-TimeStep solver canary，
-   现在已冻结 13+2 候选矩阵；下一步为每格 fresh native preflight，再授权预登记
-   的 8 个 canary 单元，最后才决定是否进入 8→32 生产。不得对同一科学输入重跑，
-   也不能把 v9 canary 改判为通过。
+   v4 已完成 15 格 fresh native preflight，8 格 solver canary 已授权并在执行；完成后
+   逐格审查实际时间轴、事件窗和 sidecar，再授权剩余 7 格，最后才决定是否进入
+   8→32 生产。不得对同一科学输入重跑，也不能把 v9 或 v1--v3 失败证据改判为通过。
 2. F6 取得 T1 后，按固定 8→32 生产规则注册案例，再开启正式 9 个模型/种子
    训练。材料侧先在已取得 T1 的两个家族分别完成完整宏观矩阵，不能用旧
    diagnostic trace 代替 T2。

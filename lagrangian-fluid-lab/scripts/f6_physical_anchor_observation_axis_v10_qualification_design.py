@@ -37,8 +37,8 @@ OUTPUT_DIR = LAB / (
     "f6-fluid-rigid-body-physical-anchor-observation-axis-v10-qualification-design-20260921"
 )
 
-SCOPE_ID = "F6_fluid_rigid_body_physical_anchor_v2"
-REVISION_ID = "F6_observation_axis_13plus2_v1"
+SCOPE_ID = "F6_fluid_rigid_body_physical_anchor_aligned_sampling_v3"
+REVISION_ID = "F6_observation_axis_13plus2_v4"
 FAMILY = "F6"
 PARAMETER_NAME = "body_release_com_z_m"
 PARAMETER_RANGE = (0.49, 0.61)
@@ -56,8 +56,8 @@ MAX_GAP_S = 0.0055
 NATIVE_MAX_GAP_S = 0.00275
 BODY_SIZE = (0.20, 0.16, 0.12)
 BODY_COM_XY = (0.75, 0.30)
-FLUID_LOW = (0.18, 0.08, 0.04)
-FLUID_SIZE = (1.14, 0.44, 0.24)
+FLUID_LOW = (0.175, 0.05, 0.04)
+FLUID_SIZE = (1.14, 0.465, 0.24)
 FLUID_SURFACE_Z = FLUID_LOW[2] + FLUID_SIZE[2]
 GRAVITY_Z = -9.81
 
@@ -128,6 +128,10 @@ def event_prediction(q: float) -> dict[str, Any]:
     }
 
 
+def expected_frame_count(output_interval_s: float) -> int:
+    return int(round((TIME_END_S / output_interval_s))) + 1
+
+
 def design_signature() -> list[tuple[float, float, str]]:
     cells: list[tuple[float, float, str]] = []
     for q in (0.0, 0.5, 1.0):
@@ -176,6 +180,8 @@ def cell(q: float, dp: float, kind: str) -> dict[str, Any]:
             "output_interval_s": OUTPUT_INTERVAL_S,
             "max_native_gap_s": MAX_GAP_S,
         }
+    frame_count = expected_frame_count(float(time["output_interval_s"]))
+    time["expected_frame_count"] = frame_count
     return {
         "schema": "core.cfd.v1",
         "family": FAMILY,
@@ -227,6 +233,7 @@ def cell(q: float, dp: float, kind: str) -> dict[str, Any]:
         },
         "event_contract": {
             **event,
+            "expected_frame_count": frame_count,
             "observation_window_s": [1.0, 1.5],
             "event_window_complete_required": True,
             "one_whole_scope_extension_allowed": True,
@@ -245,7 +252,7 @@ def cell(q: float, dp: float, kind: str) -> dict[str, Any]:
             "native particle IDs unique and fixed; arrays finite",
             "fluid/body counts and continuous-mass error pass per-cell gate",
             "body mass/COM/inertia metadata match this cell contract",
-            "301 native frames with actual TimeStep gaps within cell bound",
+            f"{frame_count} native frames with actual TimeStep gaps within cell bound",
             "terminal actual time brackets target without overshoot violation",
             "contact time lies in the independently recomputed window",
             "closed-face contact and penetration remain zero",
@@ -280,7 +287,7 @@ def build_design() -> dict[str, Any]:
     assert len(spatial) == 13 and len(comparisons) == 2
     return {
         "schema": "core.f6.observation_axis.qualification_design.v1",
-        "record_id": "F6_observation_axis_v10_qualification_design_20260921",
+        "record_id": "F6_observation_axis_v10_qualification_design_v4_20260921",
         "created_at_utc": stamp(),
         "status": "root_review_only_not_submitted",
         "family": FAMILY,
@@ -300,6 +307,7 @@ def build_design() -> dict[str, Any]:
             "anchor_q": list(ANCHOR_Q),
             "held_out_q": list(HELD_OUT_Q),
             "axis_interpretation": "initial body center-of-mass release height",
+            "geometry_revision": "aligned_sampling_box_v3",
         },
         "resolutions_m": list(RESOLUTIONS),
         "registered_window": {
@@ -308,6 +316,8 @@ def build_design() -> dict[str, Any]:
             "output_interval_s": OUTPUT_INTERVAL_S,
             "native_time_axis": "solver_reported_actual_TimeStep",
             "observation_hold_s": [1.0, 1.5],
+            "baseline_expected_frame_count": expected_frame_count(OUTPUT_INTERVAL_S),
+            "native_output_expected_frame_count": expected_frame_count(NATIVE_OUTPUT_INTERVAL_S),
             "event_complete_required": True,
             "one_whole_scope_extension_allowed": True,
         },

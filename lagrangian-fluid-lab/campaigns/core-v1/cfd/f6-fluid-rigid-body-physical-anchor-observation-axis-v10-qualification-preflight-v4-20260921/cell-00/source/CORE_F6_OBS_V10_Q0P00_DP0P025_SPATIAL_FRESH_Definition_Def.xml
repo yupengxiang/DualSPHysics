@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='utf-8'?>
+<case>
+
+    <casedef>
+        <constantsdef>
+            <gravity x="0.0" y="0.0" z="-9.81" />
+            <rhop0 value="1000.0" />
+            <rhopgradient value="2" />
+            <hswl value="0" auto="true" />
+            <gamma value="7" />
+            <speedsystem value="0" auto="true" />
+            <coefsound value="20" />
+            <speedsound value="0" auto="true" />
+            <coefh value="1.0" />
+            <cflnumber value="0.2" />
+        </constantsdef>
+        <mkconfig boundcount="200" fluidcount="16" />
+        <geometry>
+            <definition dp="0.025">
+                <pointmin x="-0.2" y="-0.2" z="-0.2" />
+                <pointmax x="1.7" y="0.8" z="1.05" />
+            </definition>
+            <commands>
+                <mainlist>
+                    <setshapemode>dp | bound</setshapemode>
+                    <setdrawmode mode="full" />
+                    <setmkfluid mk="0" />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.175" y="0.05" z="0.04" />
+                        <size x="1.115" y="0.44" z="0.215" />
+                    </drawbox>
+                    <setmkbound mk="0" />
+                    <drawbox>
+                        <boxfill>bottom | left | right | front | back</boxfill>
+                        <point x="0.0" y="0.0" z="0.0" />
+                        <size x="1.5" y="0.6" z="0.9" />
+                    </drawbox>
+                    <setmkvoid />
+                    <setmkbound mk="8" />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.65" y="0.21999999999999997" z="0.43" />
+                        <size x="0.2" y="0.16" z="0.12" />
+                    </drawbox>
+                </mainlist>
+            </commands>
+        </geometry>
+        <floatings>
+            <floating mkbound="8">
+                <linearvelini x="0.0" y="0.0" z="0.0" />
+                <massbody value="2.9952" />
+                <center x="0.75" y="0.3" z="0.49" />
+                <inertia x="0.009984000000000002" y="0.01357824" z="0.01637376" />
+            </floating>
+        </floatings>
+    </casedef>
+    <execution>
+        <parameters>
+            <parameter key="SavePosDouble" value="0" />
+            <parameter key="StepAlgorithm" value="1" />
+            <parameter key="VerletSteps" value="40" />
+            <parameter key="Kernel" value="2" />
+            <parameter key="ViscoTreatment" value="1" />
+            <parameter key="Visco" value="0.08" />
+            <parameter key="ViscoBoundFactor" value="1" />
+            <parameter key="DensityDT" value="2" />
+            <parameter key="DensityDTvalue" value="0.1" />
+            <parameter key="Shifting" value="0" />
+            <parameter key="RigidAlgorithm" value="1" />
+            <parameter key="FtPause" value="0" />
+            <parameter key="CoefDtMin" value="0.05" />
+            <parameter key="DtIni" value="0" />
+            <parameter key="DtMin" value="0" />
+            <parameter key="DtFixed" value="0" />
+            <parameter key="DtAllParticles" value="0" />
+            <parameter key="TimeMax" value="1.5" />
+            <parameter key="TimeOut" value="0.005" />
+            <parameter key="MinFluidStop" value="0" />
+            <parameter key="RhopOutMin" value="650" />
+            <parameter key="RhopOutMax" value="1350" />
+            <simulationdomain>
+                <posmin x="default - 25%" y="default - 25%" z="default - 25%" />
+                <posmax x="default + 25%" y="default + 25%" z="default + 25%" />
+            </simulationdomain>
+        </parameters>
+    </execution>
+</case>
