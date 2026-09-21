@@ -108,4 +108,8 @@ def test_isolated_contracts_are_bound_but_not_core_admitted():
     assert isolated["material_observer"]["finite_torque_independence_contract_gate"] is True
     assert isolated["material_observer"]["physical_independence_claim"] is False
     assert isolated["material_observer"]["trajectory_evidence_present"] is False
-    assert len(isolated["bindings"]) == 5
+    assert len(isolated["bindings"]) == 7
+    assert {item["path"] for item in isolated["bindings"]} >= {
+        "scripts/f7_pump_root_review_contract_v2.py",
+        "tests/test_f7_pump_root_review_contract_v2.py",
+    }
