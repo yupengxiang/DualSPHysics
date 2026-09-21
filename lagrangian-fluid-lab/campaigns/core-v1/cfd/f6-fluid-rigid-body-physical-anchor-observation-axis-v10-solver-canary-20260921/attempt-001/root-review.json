@@ -1,0 +1,98 @@
+{
+  "schema": "core.f6.physical_anchor.protected_solver_canary_root_review.v1",
+  "review_id": "F6_physical_anchor_observation_axis_v10_solver_canary_root_review_20260921",
+  "created_at_utc": "2026-09-21T10:47:02.810132+00:00",
+  "status": "root_review_authorized_one_cpu_solver_canary",
+  "family": "F6",
+  "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+  "case_id": "CORE_F6_physical_anchor_single_body_gravity_explicit_body_v10_observation_axis_20260921",
+  "body_id": "F6_physical_anchor_body_lambda_v10_20260921",
+  "decision": {
+    "authorized_solver": true,
+    "authorized_gpu": false,
+    "authorized_cpu_solver": true,
+    "authorized_queue": false,
+    "authorized_registry": false,
+    "authorized_ledger": false,
+    "authorized_matrix": false,
+    "exactly_one_solver_attempt": true,
+    "same_input_retry": false,
+    "resume": false
+  },
+  "basis": {
+    "proposal": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/proposal.json",
+      "sha256": "f026ecc47f229a732e3a5a3a3b78f18a6705018de35928a6314147a5ecaf70f3",
+      "bytes": 5263,
+      "role": "v10 conditional canary proposal"
+    },
+    "root_preflight": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/preflight-static.json",
+      "sha256": "9a0ec1dd5b2a700ad375b88c01a70c21e34b7d80d5a9fe143c08973b7c6415f5",
+      "bytes": 9093,
+      "role": "v10 root CPU preflight"
+    },
+    "native_preflight": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-cpu-native-preflight-20260921/preflight.json",
+      "sha256": "8a47aa9c57981b9739f5c4253d498c7bc1fbfbf4dbc7717668ef06da33800e40",
+      "bytes": 23125,
+      "role": "v10 exact-one CPU/native preflight"
+    },
+    "definition_contract": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/definition-contract.json",
+      "sha256": "53f959956d504572f9b396cbca5dd5580718f11a57981ce8cffe7ab60dc91e9c",
+      "bytes": 8501,
+      "role": "v10 Definition contract"
+    },
+    "event_window": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/event-window-contract.json",
+      "sha256": "e8e9218d5375afc9e3a0999fefa09cb34d3f76016a12b7266e6a6220a6c3322c",
+      "bytes": 3164,
+      "role": "v10 event-window contract"
+    },
+    "body_sidecar_schema": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/body-state-force-torque-sidecar-schema.json",
+      "sha256": "9daa949502e8797ecce73fececa008c230e8765a4ca9d09b11857b96fe7ccc0d",
+      "bytes": 3572,
+      "role": "v10 body-state/force/torque schema"
+    },
+    "runtime_worker": {
+      "path": "scripts/f6_physical_anchor_observation_axis_v10_solver_canary.py",
+      "sha256": "73a515f1264fb9fbbb5bde94d88fce24679e89be3f77568cbecbe23714737e42",
+      "bytes": 27775,
+      "role": "single-use CPU solver worker"
+    }
+  },
+  "window": {
+    "start_s": 0.0,
+    "end_s": 1.5,
+    "cadence_s": 0.005,
+    "expected_frames": 301,
+    "settle_hold_s": [
+      1.0,
+      1.5
+    ],
+    "contact_window_s": [
+      0.18691412628791773,
+      0.2269141262879177
+    ]
+  },
+  "hard_failure_policy": [
+    "input hash mismatch, duplicate invocation, retry or resume",
+    "solver failure, missing or censored frame, non-increasing time or cadence mismatch",
+    "non-finite body sidecar, body identity change, contact-window miss",
+    "closed-tank-face contact or penetration, unexplained top-open mass flux",
+    "any registry/ledger/matrix/queue mutation"
+  ],
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "T1": false,
+  "execution_controls": {
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "matrix_submission": false
+  }
+}

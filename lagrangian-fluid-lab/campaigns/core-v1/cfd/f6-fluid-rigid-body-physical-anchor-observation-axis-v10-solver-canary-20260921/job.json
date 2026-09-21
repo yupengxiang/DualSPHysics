@@ -1,0 +1,136 @@
+{
+  "schema": "core.f6.physical_anchor.protected_solver_canary_job.v1",
+  "job_id": "F6_physical_anchor_observation_axis_v10_solver_canary_20260921",
+  "job_status": "root_authorized_not_started",
+  "attempt": 1,
+  "input_count": 1,
+  "case_id": "CORE_F6_physical_anchor_single_body_gravity_explicit_body_v10_observation_axis_20260921",
+  "body_id": "F6_physical_anchor_body_lambda_v10_20260921",
+  "family": "F6",
+  "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+  "root_review": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-solver-canary-20260921/root-review.json",
+    "sha256": "0fe327f1583f5457d0655cab5448aaa73733984b3c4076af212288d766ce01e0",
+    "bytes": 4001,
+    "role": "independent root authorization"
+  },
+  "window": {
+    "start_s": 0.0,
+    "end_s": 1.5,
+    "cadence_s": 0.005,
+    "expected_frames": 301,
+    "settle_hold_s": [
+      1.0,
+      1.5
+    ],
+    "contact_window_s": [
+      0.18691412628791773,
+      0.2269141262879177
+    ]
+  },
+  "solver": {
+    "binary": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4CPU_linux64",
+      "sha256": "8ca0cd10db3045dada4292c7bd3a23e4b1d58feb0d0cedb43315df5a9614d72a",
+      "bytes": 25420992,
+      "role": "pinned CPU DualSPHysics solver"
+    },
+    "argv": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4CPU_linux64",
+      "-tmax:1.5",
+      "-tout:0.005",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-cpu-native-preflight-20260921/generated/F6_physical_anchor_observation_axis_v10_cpu_native_preflight_20260921",
+      "<attempt>/solver"
+    ],
+    "cuda_visible_devices": "",
+    "threads": 32,
+    "timeout_seconds": 3600
+  },
+  "floating_info": {
+    "path": "vendor/official/DualSPHysics_v5.4/bin/linux/FloatingInfo_linux64",
+    "sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00",
+    "bytes": 6222440,
+    "role": "pinned floating-body sidecar converter"
+  },
+  "decoder": {
+    "path": "campaigns/l1-resume/artifacts/bi4_dump",
+    "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+    "bytes": 324368,
+    "role": "pinned native BI4 decoder"
+  },
+  "runtime_worker": {
+    "path": "scripts/f6_physical_anchor_observation_axis_v10_solver_canary.py",
+    "sha256": "73a515f1264fb9fbbb5bde94d88fce24679e89be3f77568cbecbe23714737e42",
+    "bytes": 27775,
+    "role": "single-use CPU solver worker"
+  },
+  "inputs": {
+    "definition": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/CORE_F6_physical_anchor_single_body_gravity_explicit_body_v10_observation_axis_20260921_Def.xml",
+      "sha256": "b78aaed2048ba416f629773194cbfb998af1f3bc49dce9039cd305fa53e25ef0",
+      "bytes": 3826,
+      "role": "fresh v10 Definition"
+    },
+    "definition_contract": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/definition-contract.json",
+      "sha256": "53f959956d504572f9b396cbca5dd5580718f11a57981ce8cffe7ab60dc91e9c",
+      "bytes": 8501,
+      "role": "v10 Definition contract"
+    },
+    "sidecar_schema": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/body-state-force-torque-sidecar-schema.json",
+      "sha256": "9daa949502e8797ecce73fececa008c230e8765a4ca9d09b11857b96fe7ccc0d",
+      "bytes": 3572,
+      "role": "body-state/force/torque sidecar schema"
+    },
+    "event_window": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/event-window-contract.json",
+      "sha256": "e8e9218d5375afc9e3a0999fefa09cb34d3f76016a12b7266e6a6220a6c3322c",
+      "bytes": 3164,
+      "role": "event-window contract"
+    },
+    "root_preflight": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/preflight-static.json",
+      "sha256": "9a0ec1dd5b2a700ad375b88c01a70c21e34b7d80d5a9fe143c08973b7c6415f5",
+      "bytes": 9093,
+      "role": "v10 root preflight"
+    },
+    "proposal": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/proposal.json",
+      "sha256": "f026ecc47f229a732e3a5a3a3b78f18a6705018de35928a6314147a5ecaf70f3",
+      "bytes": 5263,
+      "role": "v10 conditional proposal"
+    },
+    "native_preflight": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-cpu-native-preflight-20260921/preflight.json",
+      "sha256": "8a47aa9c57981b9739f5c4253d498c7bc1fbfbf4dbc7717668ef06da33800e40",
+      "bytes": 23125,
+      "role": "v10 native preflight"
+    },
+    "generated_xml": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-cpu-native-preflight-20260921/generated/F6_physical_anchor_observation_axis_v10_cpu_native_preflight_20260921.xml",
+      "sha256": "f3c869f1a905c283f5e5c83a916c60dd91d2925919c3c4874f2422d6c5b9b3ba",
+      "bytes": 5914,
+      "role": "GenCase generated XML"
+    },
+    "generated_bi4": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-cpu-native-preflight-20260921/generated/F6_physical_anchor_observation_axis_v10_cpu_native_preflight_20260921.bi4",
+      "sha256": "459ded811dd47f4ee22cb49284de35c1309fa35015d8a84b8921a4807c4158cb",
+      "bytes": 1213539,
+      "role": "GenCase native initial state"
+    }
+  },
+  "execution_policy": {
+    "exactly_one_solver_attempt": true,
+    "same_input_retry": false,
+    "resume": false,
+    "queue_submission": false,
+    "registry_mutation": false,
+    "ledger_mutation": false,
+    "matrix_submission": false,
+    "failure_credit": 0
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "T1": false
+}
