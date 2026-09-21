@@ -23,10 +23,29 @@ LAB = Path(__file__).resolve().parents[1]
 ROOT = LAB / "campaigns/core-v1"
 SEEDS = [17, 29, 43]
 MODELS = ["mlp", "graph_raw", "graph_residual"]
+FORMAL_UPDATES = 32000
+MINIMUM_T1_CASE_RUNS = 432
+MINIMUM_MATERIAL_CASE_RUNS = 288
 
 
 def expected_runs():
     return [f"{model}-seed{seed}" for model in MODELS for seed in SEEDS]
+
+
+def _rooted_path(value, data_root, label):
+    """Resolve a portable reference without allowing symlink/path escapes."""
+    if not isinstance(value, (str, Path)):
+        raise ValueError(f"{label} path must be a relative path within data_root")
+    relative = Path(value)
+    if relative.is_absolute() or ".." in relative.parts:
+        raise ValueError(f"{label} path must be portable and within data_root")
+    root = Path(data_root).resolve()
+    path = (root / relative).resolve()
+    try:
+        path.relative_to(root)
+    except ValueError as exc:
+        raise ValueError(f"{label} path must be within data_root") from exc
+    return path
 
 
 def adopt(lab=LAB, root=ROOT):
@@ -56,8 +75,9 @@ def adopt(lab=LAB, root=ROOT):
                             "no_interruption_of_unrelated_processes": True},
         "targets": {"t1_distinct_families": 3, "cases_per_t1_family": 32,
                     "macro_t2_distinct_families": 2, "material_cases_per_family": 32,
-                    "training_runs": expected_runs(), "updates_per_run": 32000,
-                    "minimum_t1_case_runs": 432, "minimum_material_case_runs": 288,
+                    "training_runs": expected_runs(), "updates_per_run": FORMAL_UPDATES,
+                    "minimum_t1_case_runs": MINIMUM_T1_CASE_RUNS,
+                    "minimum_material_case_runs": MINIMUM_MATERIAL_CASE_RUNS,
                     "evaluation_missing": 0, "different_host_reproduction_required": True},
         "qualification_axes": ["T1_numerical", "T2_macro", "T2_path", "external_physical_validation"],
         "family_priority": ["F3", "F4", "F1", "F2"],
@@ -65,7 +85,7 @@ def adopt(lab=LAB, root=ROOT):
         "retry_policy": {"hypotheses_per_failure_mechanism": 2,
                          "canaries_per_hypothesis": 1, "repaired_infrastructure_retries": 1,
                          "no_threshold_relaxation_after_results": True},
-        "training": {"model_configs": MODELS, "seeds": SEEDS, "updates": 32000,
+        "training": {"model_configs": MODELS, "seeds": SEEDS, "updates": FORMAL_UPDATES,
                      "centers_per_update": 256, "history_states": 1, "hidden": 64,
                      "message_passing_layers": 2, "radius_over_h": 2, "max_neighbors": 64,
                      "optimizer": "Adam", "learning_rate": .001,
@@ -80,14 +100,12 @@ def adopt(lab=LAB, root=ROOT):
 
 def load_evidence(reference, data_root):
     """Verify receipt identity and content; failure is explicit, never a pass."""
-    if not isinstance(reference, dict) or not {"path", "sha256"} <= set(reference):
+    if (not isinstance(reference, dict) or not {"path", "sha256"} <= set(reference)
+            or not isinstance(reference["sha256"], str)):
         raise ValueError("a hashed evidence reference is required")
-    relative = Path(reference["path"])
-    if relative.is_absolute() or ".." in relative.parts:
-        raise ValueError("evidence path must be portable and within data_root")
-    path = Path(data_root) / relative
+    path = _rooted_path(reference["path"], data_root, "evidence")
     if digest(path) != reference["sha256"]:
-        raise ValueError("evidence hash mismatch: " + str(relative))
+        raise ValueError("evidence hash mismatch: " + str(Path(reference["path"])))
     return json.loads(path.read_text())
 
 
@@ -102,7 +120,11 @@ def _contract_evidence_reference(name, registry, data_root):
     reference = registry.get(name)
     if reference is not None:
         return reference
-    catalog_path = Path(data_root) / "campaigns/core-v1/contract-evidence.json"
+    try:
+        catalog_path = _rooted_path(
+            "campaigns/core-v1/contract-evidence.json", data_root, "contract catalog")
+    except ValueError:
+        return None
     if not catalog_path.is_file():
         return None
     try:
@@ -118,6 +140,37 @@ def _contract_evidence_reference(name, registry, data_root):
         return reference
     except (OSError, TypeError, ValueError, json.JSONDecodeError):
         return None
+
+
+def _reject_nonformal_or_nonroot(payload, label):
+    """Reject explicit diagnostic/blocked evidence instead of inferring credit."""
+    if not isinstance(payload, dict):
+        raise ValueError(f"{label} is not a JSON object")
+    if payload.get("qualification_only") is True or payload.get("diagnostic_only") is True:
+        raise ValueError(f"{label} is qualification-only/diagnostic evidence")
+    if (payload.get("formal_eligible") is False
+            or payload.get("formal_release") is False
+            or payload.get("formal") is False):
+        raise ValueError(f"{label} is not formal evidence")
+    if payload.get("root_review_only") is True or payload.get("root_admitted") is False:
+        raise ValueError(f"{label} is not root-admitted evidence")
+    root_admission = payload.get("root_admission")
+    if isinstance(root_admission, dict) and root_admission.get("granted") is False:
+        raise ValueError(f"{label} lacks root admission")
+    root_review = payload.get("root_review")
+    if root_review is False or (isinstance(root_review, dict) and root_review.get("granted") is False):
+        raise ValueError(f"{label} lacks root review")
+
+
+def _require_passed_root_review(reference, data_root, label):
+    """Require a hash-bound root receipt before granting formal material credit."""
+    if not isinstance(reference, dict):
+        raise ValueError(f"{label} root review is missing")
+    receipt = load_evidence(reference, data_root)
+    if not isinstance(receipt, dict) or (
+            receipt.get("status") not in ("pass", "passed", "approved", "accepted")
+            and receipt.get("passed") is not True):
+        raise ValueError(f"{label} root review is not passed")
 
 
 def import_registered_f3(lab=LAB, root=ROOT):
@@ -177,9 +230,35 @@ def import_registered_f3(lab=LAB, root=ROOT):
 def completion(registry, data_root):
     issues = []
     studies = []
-    for study in registry.get('scope_studies', []):
+    if not isinstance(registry, dict):
+        registry = {}
+        issues.append({"registry": "root", "reason": "registry must be a JSON object"})
+
+    def entries(name):
+        value = registry.get(name, [])
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            issues.append({"registry": name, "reason": f"{name} must be a list"})
+            return []
+        return value
+
+    expected_run_ids = tuple(expected_runs())
+    expected_run_set = set(expected_run_ids)
+    expected_run_ids_are_complete = (
+        len(expected_run_ids) == len(expected_run_set)
+        and all(isinstance(run_id, str) and run_id for run_id in expected_run_ids)
+    )
+    if not expected_run_ids_are_complete:
+        issues.append({"registry": "training_runs", "reason": "expected training run denominator is invalid"})
+
+    for study in entries('scope_studies'):
+        if not isinstance(study, dict):
+            issues.append({'scope_study': None, 'reason': 'scope study entry is not an object'})
+            continue
         try:
             receipt = load_evidence(study['qualification'], data_root)
+            _reject_nonformal_or_nonroot(receipt, "scope study")
             if (receipt.get('schema') != 'core.qualification.v1'
                     or receipt.get('scope_id') != study['scope_id']
                     or receipt.get('family') != study['family']):
@@ -187,34 +266,62 @@ def completion(registry, data_root):
             studies.append({'scope_id': study['scope_id'], 'family': study['family'],
                             'matrix_complete': receipt.get('matrix_complete') is True,
                             'T1_numerical': receipt.get('T1_numerical') is True,
-                            'status': 'incomplete' if not receipt.get('matrix_complete') else
-                                      'qualified' if receipt.get('T1_numerical') else 'completed_negative_result'})
+                            'status': 'incomplete' if receipt.get('matrix_complete') is not True else
+                                      'qualified' if receipt.get('T1_numerical') is True else 'completed_negative_result'})
         except (KeyError, ValueError, OSError, TypeError) as exc:
             issues.append({'scope_study': study.get('scope_id'), 'reason': str(exc)})
     families = {}
     material = {}
     eval_ids = set()
     material_eval_ids = set()
-    for scope in registry.get("scopes", []):
+    for scope in entries("scopes"):
+        if not isinstance(scope, dict):
+            issues.append({"scope_id": None, "reason": "scope entry is not an object"})
+            continue
         sid = scope.get("scope_id", "unknown")
         try:
             receipt = load_evidence(scope["qualification"], data_root)
+            _reject_nonformal_or_nonroot(receipt, "qualification")
             if receipt.get("schema") != "core.qualification.v1" or receipt.get("scope_id") != sid:
                 raise ValueError("qualification schema/scope mismatch")
-            if not receipt.get("T1_numerical") or receipt.get("extent") != "parameter_range":
+            if receipt.get("T1_numerical") is not True or receipt.get("extent") != "parameter_range":
                 raise ValueError("T1 range not qualified")
-            if not receipt.get("matrix_complete") or not receipt.get("independent_checks_passed"):
+            if (receipt.get("matrix_complete") is not True
+                    or receipt.get("independent_checks_passed") is not True):
                 raise ValueError("qualification matrix/independent checks incomplete")
             cases = scope.get("cases", [])
-            accepted = [c for c in cases if c.get("hard_integrity_pass") and c.get("T1_numerical")]
-            if len({c["physical_case_id"] for c in accepted}) < 32:
+            if not isinstance(cases, list):
+                raise ValueError("scope cases must be a list")
+            accepted = [c for c in cases
+                        if isinstance(c, dict)
+                        and c.get("hard_integrity_pass") is True
+                        and c.get("T1_numerical") is True]
+            physical_ids = {
+                c.get("physical_case_id") for c in accepted
+                if isinstance(c.get("physical_case_id"), str) and c.get("physical_case_id")
+            }
+            ids = {
+                c.get("case_id") for c in accepted
+                if isinstance(c.get("case_id"), str) and c.get("case_id")
+            }
+            if len(physical_ids) < 32 or len(ids) < 32 or len(ids) != len(accepted):
                 raise ValueError("fewer than 32 distinct accepted physical cases")
-            ids = {c["case_id"] for c in accepted}
             for c in accepted:
+                if (not isinstance(c.get("physical_case_id"), str)
+                        or not c.get("physical_case_id")
+                        or not isinstance(c.get("case_id"), str)
+                        or not c.get("case_id")
+                        or not isinstance(c.get("split"), str)):
+                    raise ValueError("accepted case identity/split is incomplete")
                 audit = load_evidence(c["audit"], data_root)
-                if not audit.get("hard_integrity_pass") or audit.get("case_id") != c["case_id"]:
+                _reject_nonformal_or_nonroot(audit, "case audit")
+                if (audit.get("schema") != "core.case_audit.v1"
+                        or audit.get("hard_integrity_pass") is not True
+                        or audit.get("case_id") != c["case_id"]):
                     raise ValueError("case hard audit mismatch")
             family = scope["family"]
+            if not isinstance(family, str) or not family:
+                raise ValueError("scope family is missing")
             families.setdefault(family, set()).update(ids)
             evaluation = {c["case_id"] for c in accepted if c["split"] in ("validation", "test", "id_test", "ood_test")}
             if len(evaluation) < 16:
@@ -222,13 +329,29 @@ def completion(registry, data_root):
             eval_ids.update(evaluation)
             if scope.get("material_qualification"):
                 m = load_evidence(scope["material_qualification"], data_root)
-                if m.get("schema") != "core.material_qualification.v1" or not m.get("T2_macro") or m.get("scope_id") != sid:
+                _reject_nonformal_or_nonroot(m, "material qualification")
+                if (m.get("schema") != "core.material_qualification.v1"
+                        or m.get("T2_macro") is not True or m.get("scope_id") != sid):
                     raise ValueError("material range unqualified")
-                if not m.get("matrix_complete") or m.get("extent") != "parameter_range":
+                if (m.get("matrix_complete") is not True
+                        or m.get("extent") != "parameter_range"):
                     raise ValueError("material matrix/range incomplete")
+                formal_receipt = m.get("formal_acceptance_receipt")
+                if not isinstance(formal_receipt, dict):
+                    raise ValueError("material formal acceptance receipt is missing")
+                if (formal_receipt.get("status") not in ("accepted", "complete", "passed", "qualified")
+                        or formal_receipt.get("T2_macro") is not True):
+                    raise ValueError("material formal acceptance receipt is not accepted")
+                _reject_nonformal_or_nonroot(formal_receipt, "material formal acceptance receipt")
+                _require_passed_root_review(
+                    formal_receipt.get("root_review") or m.get("root_review"),
+                    data_root, "material formal acceptance receipt")
                 for c in accepted:
                     sidecar = load_evidence(c["material_audit"], data_root)
-                    if sidecar.get("case_id") != c["case_id"] or not sidecar.get("macro_qualified"):
+                    _reject_nonformal_or_nonroot(sidecar, "material case audit")
+                    if (sidecar.get("schema") not in ("core.material.case_audit.v1", "core.material.sidecar.v1")
+                            or sidecar.get("case_id") != c["case_id"]
+                            or sidecar.get("macro_qualified") is not True):
                         raise ValueError("material sidecar not qualified")
                     if sidecar.get("window_complete") is not True:
                         raise ValueError("material sidecar window incomplete")
@@ -240,14 +363,29 @@ def completion(registry, data_root):
         except (KeyError, ValueError, OSError, TypeError) as exc:
             issues.append({"scope_id": sid, "reason": str(exc)})
     runs = {}
-    for run in registry.get("training_runs", []):
+    seen_training_run_ids = set()
+    for run in entries("training_runs"):
+        if not isinstance(run, dict):
+            issues.append({"run_id": None, "reason": "training run entry is not an object"})
+            continue
         try:
+            run_id = run["run_id"]
+            if not isinstance(run_id, str) or run_id not in expected_run_set:
+                raise ValueError("training run is not in expected formal run denominator")
+            if run_id in seen_training_run_ids:
+                raise ValueError("duplicate formal training run entry")
+            seen_training_run_ids.add(run_id)
             receipt = load_evidence(run["receipt"], data_root)
-            if receipt.get("schema") != "core.training.v1" or receipt.get("run_id") != run["run_id"]:
+            if not isinstance(receipt, dict):
+                raise ValueError("training receipt is not a JSON object")
+            if receipt.get("schema") != "core.training.v1" or receipt.get("run_id") != run_id:
                 raise ValueError("training receipt identity/schema mismatch")
-            if receipt.get("completed_updates") != 32000 or not receipt.get("checkpoint_verified"):
+            if (receipt.get("completed_updates") != FORMAL_UPDATES
+                    or receipt.get("checkpoint_verified") is not True):
                 raise ValueError("formal training/checkpoint incomplete")
             config = receipt.get("config", {})
+            if not isinstance(config, dict):
+                raise ValueError("formal training config is missing")
             if (config.get("manifest_formal_release") is not True
                     or config.get("validation_formal_eligible") is not True
                     or config.get("evaluate_milestones") is not True):
@@ -258,34 +396,83 @@ def completion(registry, data_root):
                            for n in counts.values())):
                 raise ValueError("formal training lacks three families with four validation cases each")
             checkpoint = receipt.get("checkpoint", {})
-            if checkpoint.get("schema") != "core.checkpoint.v1" or checkpoint.get("update") != 32000:
+            if (not isinstance(checkpoint, dict)
+                    or checkpoint.get("schema") != "core.checkpoint.v1"
+                    or checkpoint.get("update") != FORMAL_UPDATES):
                 raise ValueError("formal terminal checkpoint identity/update mismatch")
-            checkpoint_path = Path(data_root) / checkpoint["path"]
+            checkpoint_path = _rooted_path(checkpoint["path"], data_root, "checkpoint")
             if digest(checkpoint_path) != checkpoint.get("sha256"):
                 raise ValueError("formal terminal checkpoint hash mismatch")
-            runs[run["run_id"]] = receipt
+            if receipt.get("evidence_status") != "complete":
+                raise ValueError("formal training evidence receipt is missing or incomplete")
+            evidence = receipt.get("evidence")
+            if (not isinstance(evidence, dict)
+                    or evidence.get("schema") != "core.training.evidence.v1"
+                    or evidence.get("status") != "complete"):
+                raise ValueError("formal training evidence receipt is missing or incomplete")
+            _reject_nonformal_or_nonroot(receipt, "training receipt")
+            runs[run_id] = receipt
         except (KeyError, ValueError, OSError, TypeError) as exc:
             issues.append({"run_id": run.get("run_id"), "reason": str(exc)})
     received = {"T1": set(), "T2_macro": set()}
-    for entry in registry.get("evaluations", []):
+    seen_evaluations = {"T1": set(), "T2_macro": set()}
+    for entry in entries("evaluations"):
+        if not isinstance(entry, dict):
+            issues.append({"evaluation": entry, "reason": "evaluation entry is not an object"})
+            continue
         try:
             receipt = load_evidence(entry["receipt"], data_root)
-            if receipt.get("schema") != "core.evaluation.v1":
+            if not isinstance(receipt, dict) or receipt.get("schema") != "core.evaluation.v1":
                 raise ValueError("evaluation receipt schema mismatch")
             if receipt.get("execution_status") not in ("complete", "model_failed"):
                 raise ValueError("evaluation missing or infrastructure failure")
-            key = (receipt["run_id"], receipt["case_id"])
-            received[receipt["axis"]].add(key)
+            _reject_nonformal_or_nonroot(receipt, "evaluation receipt")
+            axis = receipt["axis"]
+            if axis not in received:
+                raise ValueError("evaluation axis is not registered")
+            run_id, case_id = receipt["run_id"], receipt["case_id"]
+            if (not isinstance(run_id, str) or not isinstance(case_id, str)
+                    or not run_id or not case_id):
+                raise ValueError("evaluation identity is incomplete")
+            key = (run_id, case_id)
+            if key in seen_evaluations[axis]:
+                raise ValueError("duplicate evaluation receipt")
+            seen_evaluations[axis].add(key)
+            received[axis].add(key)
         except (KeyError, ValueError, OSError, TypeError) as exc:
             issues.append({"evaluation": entry, "reason": str(exc)})
-    required_t1 = {(run, case) for run in expected_runs() for case in eval_ids}
-    required_t2 = {(run, case) for run in expected_runs() for case in material_eval_ids}
+    required_t1 = {(run, case) for run in expected_run_set for case in eval_ids}
+    required_t2 = {(run, case) for run in expected_run_set for case in material_eval_ids}
+    registered_received = {
+        "T1": received["T1"] & required_t1,
+        "T2_macro": received["T2_macro"] & required_t2,
+    }
+    unregistered_received = {
+        "T1": received["T1"] - required_t1,
+        "T2_macro": received["T2_macro"] - required_t2,
+    }
+    for axis, keys in unregistered_received.items():
+        for run_id, case_id in sorted(keys):
+            issues.append({
+                "evaluation": {"axis": axis, "run_id": run_id, "case_id": case_id},
+                "reason": "evaluation is outside the registered completion denominator",
+            })
     checks = {
         "three_t1_families": len(families) >= 3,
         "two_macro_t2_families": len(material) >= 2,
-        "nine_formal_training_runs": set(expected_runs()) <= set(runs),
-        "t1_denominator_complete": len(required_t1) >= 432 and required_t1 <= received["T1"],
-        "material_denominator_complete": len(required_t2) >= 288 and required_t2 <= received["T2_macro"],
+        "nine_formal_training_runs": (
+            expected_run_ids_are_complete
+            and len(runs) == len(expected_run_set)
+            and set(runs) == expected_run_set
+        ),
+        "t1_denominator_complete": (
+            len(required_t1) >= MINIMUM_T1_CASE_RUNS
+            and required_t1 <= registered_received["T1"]
+        ),
+        "material_denominator_complete": (
+            len(required_t2) >= MINIMUM_MATERIAL_CASE_RUNS
+            and required_t2 <= registered_received["T2_macro"]
+        ),
         "independent_reproduction": False,
         "causal_lineage_contracts": False,
         "evidence_valid": not issues,
@@ -299,24 +486,50 @@ def completion(registry, data_root):
             receipt = load_evidence(reference, data_root)
             checks[name] = receipt.get("schema") == schema and receipt.get("passed") is True
             if name == "independent_reproduction":
-                checks[name] = checks[name] and receipt.get("source_host") != receipt.get("reproduction_host") and bool(receipt.get("source_host"))
+                root_review = receipt.get("root_review")
+                root_passed = False
+                if isinstance(root_review, dict):
+                    root_receipt = load_evidence(root_review, data_root)
+                    root_passed = (
+                        isinstance(root_receipt, dict)
+                        and root_receipt.get("status") in ("pass", "passed")
+                    )
+                checks[name] = (
+                    checks[name]
+                    and receipt.get("source_host") != receipt.get("reproduction_host")
+                    and bool(receipt.get("source_host"))
+                    and root_passed
+                )
         except (KeyError, ValueError, OSError, TypeError):
             pass
     # Keep two distinct counts: the registered-material denominator (which is
     # empty until two T2 families are accepted) and the Core target denominator.
-    # Reporting only the former as ``missing_material_case_runs`` made an
-    # unstarted 288-run material evaluation look complete.
-    registered_material_missing = len(required_t2 - received["T2_macro"])
-    target_material_missing = max(0, 288 - len(received["T2_macro"]))
+    # Only the intersection with ``required_t2`` is observed product evidence;
+    # arbitrary receipts must never shrink the target denominator.
+    registered_t1_missing = len(required_t1 - registered_received["T1"])
+    registered_material_missing = len(required_t2 - registered_received["T2_macro"])
+    target_t1_missing = max(0, MINIMUM_T1_CASE_RUNS - len(registered_received["T1"]))
+    target_material_missing = max(0, MINIMUM_MATERIAL_CASE_RUNS - len(registered_received["T2_macro"]))
     return {"schema": "core.completion.v1", "can_finalize": all(checks.values()), "checks": checks,
             "scope_studies": studies,
             "t1_families": sorted(families), "macro_t2_families": sorted(material),
-            "training_runs": sorted(runs), "missing_t1_case_runs": len(required_t1 - received["T1"]),
+            "training_runs": sorted(runs), "missing_t1_case_runs": registered_t1_missing,
             "missing_material_case_runs": target_material_missing,
             "missing_registered_material_case_runs": registered_material_missing,
-            "unregistered_t1_case_runs": max(0, 432 - len(required_t1)),
-            "unregistered_material_case_runs": max(0, 288 - len(required_t2)),
-            "minimum_t1_case_runs": 432, "minimum_material_case_runs": 288,
+            "missing_registered_t1_case_runs": registered_t1_missing,
+            "missing_target_t1_case_runs": target_t1_missing,
+            "unregistered_t1_case_runs": max(0, MINIMUM_T1_CASE_RUNS - len(required_t1)),
+            "unregistered_material_case_runs": max(0, MINIMUM_MATERIAL_CASE_RUNS - len(required_t2)),
+            "unregistered_t1_evidence_case_runs": len(unregistered_received["T1"]),
+            "unregistered_material_evidence_case_runs": len(unregistered_received["T2_macro"]),
+            "required_t1_case_runs": len(required_t1),
+            "required_material_case_runs": len(required_t2),
+            "observed_t1_case_runs": len(registered_received["T1"]),
+            "observed_material_case_runs": len(registered_received["T2_macro"]),
+            "expected_training_runs": sorted(expected_run_set),
+            "missing_training_runs": sorted(expected_run_set - set(runs)),
+            "minimum_t1_case_runs": MINIMUM_T1_CASE_RUNS,
+            "minimum_material_case_runs": MINIMUM_MATERIAL_CASE_RUNS,
             "issues": issues}
 
 

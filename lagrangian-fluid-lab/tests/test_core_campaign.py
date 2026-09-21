@@ -14,6 +14,194 @@ def test_empty_queue_never_completes_product(tmp_path):
     assert result["unregistered_material_case_runs"] == 288
 
 
+def _write_evaluation(tmp_path, *, axis, run_id, case_id, **extra):
+    payload = {"schema": "core.evaluation.v1", "execution_status": "complete",
+               "axis": axis, "run_id": run_id, "case_id": case_id}
+    payload.update(extra)
+    path = tmp_path / f"{axis}-{run_id}-{case_id}.json"
+    atomic_json(path, payload)
+    return {"path": path.name, "sha256": digest(path)}
+
+
+def test_unregistered_evaluations_do_not_shrink_any_target_denominator(tmp_path):
+    registry = {"evaluations": [
+        {"receipt": _write_evaluation(tmp_path, axis="T1", run_id="pilot-seed17",
+                                       case_id="unregistered-t1")},
+        {"receipt": _write_evaluation(tmp_path, axis="T2_macro", run_id="pilot-seed17",
+                                       case_id="unregistered-material")},
+    ]}
+
+    result = completion(registry, tmp_path)
+
+    assert not result["can_finalize"]
+    assert result["missing_material_case_runs"] == 288
+    assert result["missing_target_t1_case_runs"] == 432
+    assert result["unregistered_t1_case_runs"] == 432
+    assert result["unregistered_material_case_runs"] == 288
+    assert result["unregistered_t1_evidence_case_runs"] == 1
+    assert result["unregistered_material_evidence_case_runs"] == 1
+    assert not result["checks"]["evidence_valid"]
+    assert all("outside the registered completion denominator" in issue["reason"]
+               for issue in result["issues"])
+
+
+def _qualified_scope_fixture(tmp_path, *, material=False, formal_material_receipt=None):
+    scope_id = "scope-with-material" if material else "scope-t1-only"
+    qualification_path = tmp_path / f"{scope_id}-qualification.json"
+    atomic_json(qualification_path, {
+        "schema": "core.qualification.v1", "scope_id": scope_id, "family": "F3",
+        "T1_numerical": True, "extent": "parameter_range", "matrix_complete": True,
+        "independent_checks_passed": True,
+    })
+    cases = []
+    for index in range(32):
+        case_id = f"{scope_id}-case-{index:02d}"
+        audit_path = tmp_path / f"{case_id}-audit.json"
+        atomic_json(audit_path, {
+            "schema": "core.case_audit.v1", "case_id": case_id,
+            "hard_integrity_pass": True,
+        })
+        row = {
+            "case_id": case_id, "physical_case_id": case_id,
+            "lineage_group_id": case_id,
+            "split": "validation" if index < 16 else "train",
+            "hard_integrity_pass": True, "T1_numerical": True,
+            "audit": {"path": audit_path.name, "sha256": digest(audit_path)},
+        }
+        if material:
+            sidecar_path = tmp_path / f"{case_id}-material.json"
+            atomic_json(sidecar_path, {
+                "schema": "core.material.sidecar.v1", "case_id": case_id,
+                "macro_qualified": True, "window_complete": True,
+                "source_coverage": [{"source_id": "source-0", "initial_mass_kg": 1.0,
+                                      "unknown_fraction_max": 0.0}],
+            })
+            row["material_audit"] = {
+                "path": sidecar_path.name, "sha256": digest(sidecar_path),
+            }
+        cases.append(row)
+    scope = {
+        "scope_id": scope_id, "family": "F3",
+        "qualification": {"path": qualification_path.name, "sha256": digest(qualification_path)},
+        "cases": cases,
+    }
+    if material:
+        material_path = tmp_path / f"{scope_id}-material-qualification.json"
+        material_payload = {
+            "schema": "core.material_qualification.v1", "scope_id": scope_id,
+            "T2_macro": True, "extent": "parameter_range", "matrix_complete": True,
+            "required_source_ids": ["source-0"],
+            "maximum_source_unknown_fraction": 0.01,
+        }
+        if formal_material_receipt is not None:
+            material_payload["formal_acceptance_receipt"] = formal_material_receipt
+        atomic_json(material_path, material_payload)
+        scope["material_qualification"] = {
+            "path": material_path.name, "sha256": digest(material_path),
+        }
+    return scope
+
+
+def test_material_scope_without_formal_acceptance_receipt_is_not_qualified(tmp_path):
+    registry = {"scopes": [_qualified_scope_fixture(tmp_path, material=True)]}
+
+    result = completion(registry, tmp_path)
+
+    assert not result["macro_t2_families"]
+    assert result["required_material_case_runs"] == 0
+    assert result["unregistered_material_case_runs"] == 288
+    assert any("formal acceptance receipt is missing" in issue["reason"]
+               for issue in result["issues"])
+
+
+def test_material_formal_receipt_without_passed_root_review_is_not_qualified(tmp_path):
+    registry = {"scopes": [_qualified_scope_fixture(
+        tmp_path, material=True,
+        formal_material_receipt={"status": "accepted", "T2_macro": True},
+    )]}
+
+    result = completion(registry, tmp_path)
+
+    assert not result["macro_t2_families"]
+    assert result["required_material_case_runs"] == 0
+    assert any("root review is missing" in issue["reason"]
+               for issue in result["issues"])
+
+
+def _formal_training_receipt(tmp_path, run_id, *, include_evidence=True, checkpoint_path=None):
+    checkpoint_path = checkpoint_path or (tmp_path / f"{run_id}.pt")
+    checkpoint_path.write_bytes(b"temporary checkpoint fixture")
+    checkpoint_reference = (
+        checkpoint_path.name
+        if checkpoint_path.resolve().parent == tmp_path.resolve()
+        else str(checkpoint_path)
+    )
+    receipt = {
+        "schema": "core.training.v1", "run_id": run_id,
+        "completed_updates": 32000, "checkpoint_verified": True,
+        "config": {
+            "manifest_formal_release": True, "validation_formal_eligible": True,
+            "evaluate_milestones": True,
+            "validation_family_counts": {"F1": 4, "F3": 4, "F4": 4},
+        },
+        "checkpoint": {
+            "schema": "core.checkpoint.v1", "update": 32000,
+            "path": checkpoint_reference, "sha256": digest(checkpoint_path),
+        },
+    }
+    if include_evidence:
+        receipt["evidence_status"] = "complete"
+        receipt["evidence"] = {"schema": "core.training.evidence.v1", "status": "complete"}
+    receipt_path = tmp_path / f"{run_id}-training.json"
+    atomic_json(receipt_path, receipt)
+    return {"path": receipt_path.name, "sha256": digest(receipt_path)}
+
+
+def test_unknown_training_run_cannot_count_as_formal_run(tmp_path):
+    registry = {"training_runs": [{
+        "run_id": "mlp-seed17-diagnostic",
+        "receipt": _formal_training_receipt(tmp_path, "mlp-seed17-diagnostic"),
+    }]}
+
+    result = completion(registry, tmp_path)
+
+    assert result["training_runs"] == []
+    assert result["missing_training_runs"] == sorted(
+        {"mlp-seed17", "mlp-seed29", "mlp-seed43",
+         "graph_raw-seed17", "graph_raw-seed29", "graph_raw-seed43",
+         "graph_residual-seed17", "graph_residual-seed29", "graph_residual-seed43"})
+    assert not result["checks"]["nine_formal_training_runs"]
+    assert any("not in expected formal run denominator" in issue["reason"]
+               for issue in result["issues"])
+
+
+def test_missing_formal_training_evidence_receipt_cannot_count(tmp_path):
+    registry = {"training_runs": [{
+        "run_id": "mlp-seed17",
+        "receipt": _formal_training_receipt(tmp_path, "mlp-seed17", include_evidence=False),
+    }]}
+
+    result = completion(registry, tmp_path)
+
+    assert result["training_runs"] == []
+    assert not result["checks"]["nine_formal_training_runs"]
+    assert any("evidence receipt is missing or incomplete" in issue["reason"]
+               for issue in result["issues"])
+
+
+def test_checkpoint_outside_data_root_cannot_be_formal_evidence(tmp_path):
+    outside = tmp_path.parent / "outside-checkpoint.pt"
+    outside.write_bytes(b"outside temporary checkpoint fixture")
+    receipt_ref = _formal_training_receipt(tmp_path, "mlp-seed17", checkpoint_path=outside)
+    registry = {"training_runs": [{"run_id": "mlp-seed17", "receipt": receipt_ref}]}
+
+    result = completion(registry, tmp_path)
+
+    assert result["training_runs"] == []
+    assert any("checkpoint path must be portable" in issue["reason"]
+               for issue in result["issues"])
+
+
 def test_report_existence_or_job_success_is_not_qualification(tmp_path):
     path = tmp_path / "report.json"
     atomic_json(path, {"execution_status": "succeeded", "T1_numerical": True})
