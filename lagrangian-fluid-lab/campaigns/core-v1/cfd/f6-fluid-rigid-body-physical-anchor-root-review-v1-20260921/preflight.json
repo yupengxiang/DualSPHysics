@@ -1,0 +1,269 @@
+{
+  "schema": "core.f6.physical_anchor.cpu_preflight_receipt.v1",
+  "status": "cpu_physical_anchor_preflight_pass",
+  "gate_passed": true,
+  "event_window_auditable": true,
+  "event_window_complete": false,
+  "event_window_status": "auditable_prediction_pending_runtime_event_window",
+  "checks": {
+    "fresh_xml_parse": {
+      "passed": true,
+      "detail": {
+        "root_tag": "case"
+      }
+    },
+    "fresh_xml_no_legacy_input": {
+      "passed": true,
+      "detail": {
+        "forbidden_tokens": [
+          "F6_floating_box",
+          "F6_heavy_box_entry",
+          "F6_twin_floaters",
+          ".bi4",
+          ".h5"
+        ]
+      }
+    },
+    "gravity_binding": {
+      "passed": true,
+      "detail": {
+        "observed": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "expected": [
+          0.0,
+          0.0,
+          -9.81
+        ]
+      }
+    },
+    "fresh_resolution": {
+      "passed": true,
+      "detail": {
+        "observed": 0.02,
+        "expected": 0.02
+      }
+    },
+    "body_density_binding": {
+      "passed": true,
+      "detail": {
+        "mkbound": "8",
+        "rhopbody": "780.0"
+      }
+    },
+    "runtime_cadence_binding": {
+      "passed": true,
+      "detail": {
+        "TimeMax": "1.5",
+        "TimeOut": "0.005"
+      }
+    },
+    "mass_from_density_volume": {
+      "passed": true,
+      "detail": {
+        "mass_kg": 2.9952,
+        "expected": 2.9952
+      }
+    },
+    "inertia_tensor": {
+      "passed": true,
+      "detail": {
+        "expected": [
+          [
+            0.009984000000000002,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.01357824,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.01637376
+          ]
+        ],
+        "observed": [
+          [
+            0.009984000000000002,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.01357824,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.01637376
+          ]
+        ],
+        "positive_diagonal": true
+      }
+    },
+    "initial_body_inside_tank": {
+      "passed": true,
+      "detail": {
+        "body_low": [
+          0.65,
+          0.21999999999999997,
+          0.49000000000000005
+        ],
+        "body_high": [
+          0.8500000000000001,
+          0.38,
+          0.6100000000000001
+        ],
+        "tank_low": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tank_high": [
+          1.5,
+          0.6,
+          0.9
+        ]
+      }
+    },
+    "initial_no_contact": {
+      "passed": true,
+      "detail": {
+        "clearance_m": {
+          "bottom": 0.49000000000000005,
+          "left": 0.65,
+          "right": 0.6499999999999999,
+          "front": 0.21999999999999997,
+          "back": 0.21999999999999997,
+          "top": 0.2899999999999999,
+          "fluid_surface_gap": 0.21000000000000002
+        },
+        "required_m": 0.06
+      }
+    },
+    "analytic_contact_and_equilibrium": {
+      "passed": true,
+      "detail": {
+        "predicted_events": {
+          "initial_fluid_surface_gap_m": 0.21000000000000002,
+          "predicted_contact_com_z_m": 0.34,
+          "predicted_contact_time_s": 0.20691412628791772,
+          "predicted_impact_speed_m_s": 2.029827578884473,
+          "contact_prediction_window_s": [
+            0.18691412628791773,
+            0.2269141262879177
+          ],
+          "equilibrium_submerged_fraction": 0.78,
+          "equilibrium_submerged_depth_m": 0.0936,
+          "equilibrium_bottom_z_m": 0.1864,
+          "equilibrium_com_z_m": 0.2464,
+          "equilibrium_top_z_m": 0.3064,
+          "free_fall_equivalent_time_to_equilibrium_s": 0.24878911645172866,
+          "tank_bottom_clearance_at_equilibrium_m": 0.1864,
+          "tank_top_clearance_at_equilibrium_m": 0.5936,
+          "hydrodynamic_response_is_runtime_unknown": true
+        }
+      }
+    },
+    "event_window_auditable": {
+      "passed": true,
+      "detail": {
+        "predicted_contact_window_s": [
+          0.18691412628791773,
+          0.2269141262879177
+        ],
+        "settle_hold_s": [
+          1.0,
+          1.5
+        ],
+        "runtime_response_unknown": true
+      }
+    },
+    "body_state_force_torque_sidecar": {
+      "passed": true,
+      "detail": {
+        "schema": "core.f6.physical_anchor.body_state_force_sidecar.v1",
+        "body_id": "F6_physical_anchor_body_beta_20260921",
+        "missing": [],
+        "extra": []
+      }
+    },
+    "event_window_contract": {
+      "passed": true,
+      "detail": {
+        "window": {
+          "start_s": 0.0,
+          "end_s": 1.5,
+          "output_interval_s": 0.005,
+          "expected_frame_count": 301,
+          "settle_hold_start_s": 1.0,
+          "settle_hold_end_s": 1.5
+        },
+        "predicted_contact_window_s": [
+          0.18691412628791773,
+          0.2269141262879177
+        ],
+        "status_without_runtime": "auditable_prediction_pending_runtime_event_window"
+      }
+    }
+  },
+  "recommendation": "worth_one_protected_solver_canary_conditionally",
+  "solver_canary_authorized_in_this_receipt": false,
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "execution_controls": {
+    "xml_parsed": true,
+    "gencase_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "matrix_submission": false
+  },
+  "failure_policy": "If any CPU preflight gate fails, retain this receipt and do not authorize or launch a solver canary.",
+  "contract": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-root-review-v1-20260921/definition-contract.json",
+    "sha256": "c5b3ba6262e34ddccef200bfa714c474e67ebfa34dd552aa89041e8dc71eb88f",
+    "bytes": 7399,
+    "role": "fresh physical-anchor contract"
+  },
+  "definition": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-root-review-v1-20260921/CORE_F6_physical_anchor_single_body_gravity_20260921_Def.xml",
+    "sha256": "abdefd8906b178757f1eab7ec7c8b34a50828c8e32687858424005e0fd328ab1",
+    "bytes": 3576,
+    "role": "fresh gravity=-9.81 Definition"
+  },
+  "sidecar_schema": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-root-review-v1-20260921/body-state-force-torque-sidecar-schema.json",
+    "sha256": "fd33ef5c2ad2ba0562b356e69c6febc4c05c33a272c1a174ef0b3cdf4c755cfd",
+    "bytes": 3075,
+    "role": "fresh body-state/force/torque sidecar schema"
+  },
+  "event_window": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-root-review-v1-20260921/event-window-contract.json",
+    "sha256": "c63782a6c870d865ee5c7a959680bda050f6410ed855a8e7137fcac5badf3436",
+    "bytes": 2214,
+    "role": "fresh predicted event-window contract"
+  },
+  "legacy_provenance_hash_only": true,
+  "proposal": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-root-review-v1-20260921/proposal.json",
+    "sha256": "2da8ba5540ee740947c51990e678ea0039901ab88ff133a5a93088fc222faa21",
+    "bytes": 6506,
+    "role": "fresh physical-anchor root-review proposal"
+  },
+  "implementation": {
+    "path": "scripts/f6_physical_anchor_root_review.py",
+    "sha256": "6b1e3189d2cf46b09dd9af0ab5ac2896283a973cf34e373eb5fa66755ce1a681",
+    "bytes": 31316,
+    "role": "F6 physical-anchor root-review implementation"
+  },
+  "created_at_utc": "2026-09-21T07:29:36.622276+00:00"
+}
