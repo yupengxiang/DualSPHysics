@@ -79,7 +79,7 @@ def test_f3_scope_and_f4_coverage_remain_open() -> None:
 def test_versioned_evidence_binds_inputs_and_implementation() -> None:
     lab_root = Path(__file__).resolve().parents[1]
     evidence = lab_root / "campaigns/core-v1/material/evidence/" \
-        "f3-f4-t2-minimal-repair-audit-20260920.json"
+        "f3-f4-t2-minimal-repair-audit-20260922.json"
     value = json.loads(evidence.read_text(encoding="utf-8"))
     assert value["schema"] == "core.material.t2.minimal_repair_audit.v1"
     assert value["qualification_claim"] == "none"
@@ -94,14 +94,14 @@ def test_versioned_evidence_binds_inputs_and_implementation() -> None:
 
 def test_chinese_report_binds_receipt_and_preserves_core_gate() -> None:
     lab_root = Path(__file__).resolve().parents[1]
-    report = lab_root / "reports/F3-F4-T2-MINIMAL-REPAIR-AUDIT-2026-09-20.zh-CN.md"
+    report = lab_root / "reports/F3-F4-T2-MINIMAL-REPAIR-AUDIT-2026-09-22.zh-CN.md"
     receipt = lab_root / (
         "campaigns/core-v1/material/evidence/"
-        "f3-f4-t2-minimal-repair-audit-20260920.json"
+        "f3-f4-t2-minimal-repair-audit-20260922.json"
     )
     text = report.read_text(encoding="utf-8")
     assert report.is_file()
-    assert "9a9799abd9e8f8f46b34496b61e60bf5cbab873336fb6d5c469748b72dcf4c20" in text
+    assert "2e147623aa0ac78e03bc5f07d4857a284a084e492b670af0ddabfa4e557ccb81" in text
     assert hashlib.sha256(receipt.read_bytes()).hexdigest() in text
     assert "T2_macro=false" in text
     assert "T2_path=false" in text
