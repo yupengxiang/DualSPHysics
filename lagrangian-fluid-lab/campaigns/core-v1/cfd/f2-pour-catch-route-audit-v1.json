@@ -1,0 +1,143 @@
+{
+  "schema": "core.f2.pour_catch.route_decision.v1",
+  "status": "root_review_only_conditional_route",
+  "trigger": "F6 v4 canary aggregate is 7/8; cell-08 is retained as a scientific hard failure",
+  "core_gate": {
+    "registered_t1_families": [
+      "F3",
+      "F4"
+    ],
+    "required_t1_family_count": 3,
+    "three_t1_families": false,
+    "missing_t1_case_runs": 288,
+    "registry_contains_f2_scope": false,
+    "qualification_credit_added": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "T1_denominator_mutation": 0,
+    "T2_denominator_mutation": 0
+  },
+  "route_comparison": {
+    "closed_submerged_slot": {
+      "status": "closed_negative",
+      "zero_boundnor": 76095,
+      "zero_normalsize": 76095,
+      "same_input_retry": false,
+      "credit": 0
+    },
+    "closed_dynamic_dbc": {
+      "status": "closed_event_censored",
+      "hard_integrity_pass": true,
+      "event_window_complete": false,
+      "same_input_retry": false,
+      "credit": 0
+    },
+    "closed_receiver_weir": {
+      "status": "closed_terminal_anchor_negative",
+      "planned": 15,
+      "executed": 1,
+      "failed": 1,
+      "event_censored": 1,
+      "unattempted": 14,
+      "credit": 0,
+      "same_input_retry": false
+    },
+    "selected_receiver_ballistic_v2": {
+      "status": "root_review_only_new_definition_required",
+      "candidate_id": "F2_receiver_ballistic_catch_release_speed010_v2",
+      "scope_id": "F2_receiver_ballistic_catch_release_speed_v2_x_v1",
+      "mechanism_class": "stationary_receiver_ballistic_slug_capture",
+      "distinct_from_closed_submerged_slot": true,
+      "worth_new_definition": true,
+      "worth_preflight_now": false
+    }
+  },
+  "selected_route": {
+    "decision": "retain_conditional_f2_stationary_receiver_ballistic_catch_v2",
+    "reason": [
+      "The fixed receiver plus falling slug has no submerged aperture, crest, or moving cup.",
+      "Legacy airborne-slug evidence supports only plumbing/ballistic feasibility and is not imported as qualification evidence.",
+      "The v1 anchor failures are retained and make same-input retry forbidden.",
+      "A lower release-speed v2 is a falsifiable fresh hypothesis with a new identity, not a relabelled v1 retry."
+    ],
+    "next_action": "root-review-only gap closure; do not write Definition or run preflight in this audit",
+    "qualification_claim": "none",
+    "matrix_credit": 0,
+    "old_failed_input_reused": false,
+    "old_failed_trajectory_reused": false,
+    "same_input_retry": false
+  },
+  "root_review_gap_audit": {
+    "path": "campaigns/core-v1/cfd/f2-pour-catch-root-review-gap-audit-v1.json",
+    "sha256": "36763b98654eed1e2af6cfc543eec2ce4d10c28326366765b40037f87bb69f39",
+    "bytes": 4484
+  },
+  "candidate_card": {
+    "path": "campaigns/core-v1/cfd/f2-pour-catch-candidate-card-v2.json",
+    "sha256": "13295204939d6b26fb717c2a0ee76cd095f7014379df244142fb17dca29079c8",
+    "bytes": 8939
+  },
+  "evidence": {
+    "completion": {
+      "path": "campaigns/core-v1/completion.json",
+      "sha256": "eb25d9878ce8b005a1e6fe6c481671ad4c223beafb3f1104601a8a3dc67311e0",
+      "bytes": 1516,
+      "role": "current Core gate"
+    },
+    "registry": {
+      "path": "campaigns/core-v1/registry.json",
+      "sha256": "1ddfeda5b2d3eb142f94be4bb2cbc6f1b65271d6b77efc8b65c829b94e66b38d",
+      "bytes": 41714,
+      "role": "unchanged Core registry"
+    },
+    "closed_submerged_slot": {
+      "path": "campaigns/core-v1/evidence/f2-distributed-slot-normal-repair-v2-negative-evidence.json",
+      "sha256": "b7534bedb27c7536c3c7b99870f2dd0b027196eaca82f3686382a9a4e104c2f5",
+      "bytes": 5481,
+      "role": "closed submerged-slot negative evidence"
+    },
+    "closed_dynamic_dbc": {
+      "path": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-anchor-canary-negative-evidence-v1.json",
+      "sha256": "0bba913c75b2a716b0756154239e11595feb753b428e2b4745563c5da3ff841d",
+      "bytes": 7087,
+      "role": "closed DBC event-censored evidence"
+    },
+    "closed_receiver_weir_denominator": {
+      "path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/terminal-failure-denominator-v1.json",
+      "sha256": "c10bf4b0e4eca59931384ddf30e2ebac5b231d7455ec8cd4e55db48e24e2f591",
+      "bytes": 2022,
+      "role": "receiver/weir failure denominator"
+    },
+    "f6_context": {
+      "path": "reports/F6-PHYSICAL-ANCHOR-OBSERVATION-AXIS-V10-SOLVER-CANARY-V4-2026-09-21.zh-CN.md",
+      "sha256": "ee96c528f9fe615b736e9d1174f5e2c50257a6241b52fa1dd3d338bdc59a574e",
+      "bytes": 3913,
+      "role": "F6 v4 canary context: 7/8 with cell-08 scientific hard failure"
+    },
+    "implementation": {
+      "path": "scripts/f2_pour_catch_route_audit_v1.py",
+      "sha256": "dd1c79adf7316c5f38bb94f4620923c2c58499a58a5a86e118b9fd8ee85eb8fc",
+      "bytes": 29876,
+      "role": "read-only route audit implementation"
+    },
+    "test": {
+      "path": "tests/test_f2_pour_catch_route_audit_v1.py",
+      "sha256": "8d968ce66b21a7f57adf5196444e43f47c4ed47ec08d92732bad0854cf3c19d6",
+      "bytes": 6558,
+      "role": "targeted route audit regression test"
+    }
+  },
+  "execution_controls": {
+    "read_only_audit": true,
+    "definition_writer": false,
+    "cpu_gencase": false,
+    "native_decode": false,
+    "solver": false,
+    "gpu": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "T1_denominator_mutation": 0,
+    "T2_denominator_mutation": 0
+  }
+}
