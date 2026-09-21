@@ -17,11 +17,12 @@
 - F2 分布式 submerged-slot 新机制完成了一次全新 Definition/native CPU
   preflight 和一次允许的 normal-layer repair。两次均为固定零法向门的硬负例，
   route 已关闭，credit 为零，禁止 v3 和同输入重跑。
-- 在 F6 v4 失败后，F2 又完成了一次只读第三家族路线审计。固定接收盆+自由落体
-  液块的 `F2_receiver_ballistic_catch_release_speed010_v2` 仅为条件性候选：
-  15 行仍是 proposal-only、`executed=0`、`credit=0`。新 Definition/hash、
-  receiver contact 与 retained/spill observer 及第二次 root review 尚未完成，
-  因此当前不启动 preflight，也不改变 F2 失败分母。
+- 在 F6 v4 失败后，F2 先完成了固定接收盆+自由落体液块路线的只读审计，随后
+  为新 release-speed 假设完成一次新的 Definition/hash、receiver contact 与
+  retained/spill observer root review 和一次 CPU/native preflight。身份、有限值、
+  质量、receiver overlap 与 runtime domain 通过，但外壁端点零容差门出现 `3840`
+  个越界流体粒子；候选已在 solver 前关闭，15 行仍为 `credit=0`，没有改变 F2
+  失败分母。详见 F2 v2 negative evidence。
 - 旧 F6 浮箱、入水和双浮体探针经只读审计确认是与 F1--F5 不同的自由刚体
   流固反馈机制，但只达到 structural probe。新的 F6 proposal 保持
   root-review-only，未进入 registry、ledger、matrix 或 T1 分母。
@@ -123,9 +124,10 @@
    cell-08 保留科学硬失败）。新的 root review 必须先决定该 scope 是否关闭并转向 F2
    或其它替补家族；不得授权剩余 7 格、对 cell-08 同输入重跑，或把 v9/v1--v3 失败证据
    改判为通过。
-2. F2 第三家族候选和 F3 宏观 T2 资格正在做独立只读审计；在第三个 T1 家族
-   通过并完成32例注册前，formal planner 不得生成9个训练作业。F4 的 T2 工作须先
-   解决未知质量、完整事件窗、F4 专用容差和 acceptance 接口，再执行剩余矩阵。
+2. F2 release-speed v2 已因 CPU/native 外壁端点硬失败关闭；任何后续 F2/F1/F5
+   路线必须提出全新的物理假设和 Definition。F3 宏观 T2 审计仍在阻塞；在第三个
+   T1 家族通过并完成32例注册前，formal planner 不得生成9个训练作业。F4 的 T2
+   工作须先解决未知质量、完整事件窗、F4 专用容差和 acceptance 接口，再执行剩余矩阵。
 3. 任一家族取得 T1 后，按固定 8→32 生产规则注册案例；材料侧在已取得 T1 的
    两个家族分别完成完整宏观矩阵，不能用旧 diagnostic trace 代替 T2。F3 还需
    先完成 native MLS acceptance bridge，并重新满足 unknown/CDF 门。
