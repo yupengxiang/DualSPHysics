@@ -1,0 +1,56 @@
+# Core 全流程实施状态（2026-09-21）
+
+本记录是当前实现状态的集成快照；科学状态仍以
+`campaigns/core-v1/completion.json` 和不可变 attempt 回执为准。
+
+## 已落地
+
+- 公共数据、状态更新、谱系、分割、材料和评测接口已经有版本化实现及
+  regression tests。模型接口把位移和原生保存速度增量分开，参考 oracle
+  复用同一 adapter、更新器和 evaluator。
+- 单写者 runtime coordinator、GPU/CPU 资源预留、幂等回执、恢复和跨机
+  reader reproduction 已接入；H200 与 Ada 的并发准入仍由实测显存、RAM、
+  I/O 和外部占用决定。当前长期归档进程保持运行，不能覆盖或重复启动其
+  attempt。
+- F3 和 F4 各有一个通过 T1 数值资格的 scope；材料接口的 F4 membership
+  resume/acceptance 完整性漏洞已修复，但 F3/F4 都尚未通过宏观 T2。
+- F2 分布式 submerged-slot 新机制完成了一次全新 Definition/native CPU
+  preflight 和一次允许的 normal-layer repair。两次均为固定零法向门的硬负例，
+  route 已关闭，credit 为零，禁止 v3 和同输入重跑。
+- 旧 F6 浮箱、入水和双浮体探针经只读审计确认是与 F1--F5 不同的自由刚体
+  流固反馈机制，但只达到 structural probe。新的 F6 proposal 保持
+  root-review-only，未进入 registry、ledger、matrix 或 T1 分母。
+
+## 当前门状态
+
+最近的 `core_campaign.py status` 为：
+
+| 门 | 当前 |
+|---|---:|
+| T1 家族 | F3、F4（需要 3） |
+| 宏观 T2 家族 | 0（需要 2） |
+| 正式训练 | 0/9 |
+| 缺失 T1 case-run | 288/432 |
+| 缺失材料 case-run | 288/288 |
+| 独立 reproduction | 通过 |
+| 因果／谱系契约 | 通过 |
+
+因此 `can_finalize=false` 是预期结果。失败的 solver、材料或模型运行可以
+作为负结果进入分母，但未注册、未执行和缺少参考证据不能被算作完成。
+
+## 下一步准入顺序
+
+1. 完成 F6 新 Definition 的 body mass/inertia、body-state、force/torque、
+   boundary/contact 和事件窗的 CPU-only static gate；旧 XML、BI4、HDF5
+   只能作为 hash provenance。
+2. 只有静态 gate 通过，才由 root review 决定一个单刚体 anchor canary；
+   canary 仍需独立的完整事件窗和硬审计，不能直接注册为 T1。
+3. F6 取得 T1 后，按固定 8→32 生产规则注册案例，再开启正式 9 个模型/种子
+   训练。材料侧先在已取得 T1 的两个家族分别完成完整宏观矩阵，不能用旧
+   diagnostic trace 代替 T2。
+4. 每个阶段都继续使用 `verify → inspect → train → rollout → evaluate →
+   reproduce` 入口和固定失败分母；正式 Core 完成判据保持不变。
+
+代理配置记录在 `campaigns/core-v1/agent-policy.json`：subagent 使用
+`gpt-5.6-luna` / Max，主 agent 请求 `gpt-6-astra` / Low。该配置只约束
+执行角色，不把任何代理名称或一次运行自动解释为科学资格。
