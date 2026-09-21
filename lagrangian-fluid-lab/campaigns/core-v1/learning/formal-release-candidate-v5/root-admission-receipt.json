@@ -1,0 +1,324 @@
+{
+  "active_blockers": [
+    {
+      "code": "THIRD_T1_FAMILY",
+      "message": "formal admission needs three distinct T1 families",
+      "observed": 2,
+      "passed": false,
+      "required": 3
+    },
+    {
+      "code": "VALIDATION_DENOMINATOR",
+      "message": "formal evaluator needs twelve validation cases",
+      "observed": 8,
+      "passed": false,
+      "required": 12
+    },
+    {
+      "code": "FORMAL_RUN_DENOMINATOR",
+      "message": "formal training requires nine completed model/seed runs",
+      "observed": 0,
+      "passed": false,
+      "required": 9
+    },
+    {
+      "code": "MATERIAL_CASE_RUN_DENOMINATOR",
+      "message": "Core retains a 288 case-run material target",
+      "observed": 0,
+      "passed": false,
+      "required": 288
+    },
+    {
+      "code": "RESOURCE_FRONTIER_UNPROVEN",
+      "message": "fresh full-field 32000-update resource evidence is required",
+      "observed": false,
+      "passed": false,
+      "required": true
+    },
+    {
+      "code": "FORMAL_RELEASE_REQUIRED",
+      "message": "every formal source manifest must explicitly declare formal_release=true",
+      "observed": false,
+      "passed": false,
+      "required": true
+    },
+    {
+      "code": "SOURCE_CLOSURE_ROOT_ADMISSION_REQUIRED",
+      "message": "the v5 closure is materialized for root review but is not self-admitted",
+      "observed": false,
+      "passed": false,
+      "required": true
+    },
+    {
+      "code": "STALE_SOURCE_CLOSURE",
+      "message": "the v4 historical snapshot remains stale; v5 is the fresh current-workspace proposal",
+      "observed": false,
+      "passed": false,
+      "required": true,
+      "resolved_by": "core-formal-release-candidate-v5/source-closure.json"
+    }
+  ],
+  "candidate_version": "core-formal-release-candidate-v5",
+  "execution_constraints": {
+    "formal_job_specs_written": false,
+    "formal_jobs_submitted": false,
+    "formal_runs_started": 0,
+    "future_state_inputs": false,
+    "gpu_started": false,
+    "ledger_written": false,
+    "optimizer_started": false,
+    "read_only": true,
+    "registry_written": false,
+    "solver_started": false,
+    "source_snapshot_admitted": false,
+    "source_snapshot_written": true
+  },
+  "formal_job_count": 0,
+  "formal_release": false,
+  "formal_training_allowed": false,
+  "formal_training_ready": false,
+  "gate_evaluation": {
+    "evaluator_failure_penalty": {
+      "code": "EVALUATOR_DENOMINATOR_CONTRACT",
+      "message": "failed rollout frames must retain a unit penalty",
+      "observed": true,
+      "passed": true,
+      "required": true
+    },
+    "formal_release": {
+      "code": "FORMAL_RELEASE_REQUIRED",
+      "message": "every formal source manifest must explicitly declare formal_release=true",
+      "observed": false,
+      "passed": false,
+      "required": true
+    },
+    "formal_run_denominator": {
+      "code": "FORMAL_RUN_DENOMINATOR",
+      "message": "formal training requires nine completed model/seed runs",
+      "observed": 0,
+      "passed": false,
+      "required": 9
+    },
+    "fresh_closure_root_admission": {
+      "code": "SOURCE_CLOSURE_ROOT_ADMISSION_REQUIRED",
+      "message": "the v5 closure is materialized for root review but is not self-admitted",
+      "observed": false,
+      "passed": false,
+      "required": true
+    },
+    "historical_v4_staleness": {
+      "code": "STALE_SOURCE_CLOSURE",
+      "message": "the v4 historical snapshot remains stale; v5 is the fresh current-workspace proposal",
+      "observed": false,
+      "passed": false,
+      "required": true,
+      "resolved_by": "core-formal-release-candidate-v5/source-closure.json"
+    },
+    "material_case_run_denominator": {
+      "code": "MATERIAL_CASE_RUN_DENOMINATOR",
+      "message": "Core retains a 288 case-run material target",
+      "observed": 0,
+      "passed": false,
+      "required": 288
+    },
+    "phase_plan_denominator": {
+      "code": "PHASE_PLAN_CONTRACT",
+      "message": "phase plan must retain the registered denominator",
+      "observed": true,
+      "passed": true,
+      "required": true
+    },
+    "resource_frontier": {
+      "code": "RESOURCE_FRONTIER_UNPROVEN",
+      "message": "fresh full-field 32000-update resource evidence is required",
+      "observed": false,
+      "passed": false,
+      "required": true
+    },
+    "third_t1_family": {
+      "code": "THIRD_T1_FAMILY",
+      "message": "formal admission needs three distinct T1 families",
+      "observed": 2,
+      "passed": false,
+      "required": 3
+    },
+    "validation_denominator": {
+      "code": "VALIDATION_DENOMINATOR",
+      "message": "formal evaluator needs twelve validation cases",
+      "observed": 8,
+      "passed": false,
+      "required": 12
+    }
+  },
+  "generator": {
+    "bytes": 20947,
+    "path": "scripts/core_formal_source_closure_admission.py",
+    "sha256": "bf8a59b13009230e605f401ea1a746303db49d76e66b8a16de8a26bd11ae44c4"
+  },
+  "historical_audit": {
+    "historical_comparison": {
+      "current_closure_sha256": "d50ab1fac799507dfde6866bbce76b1d88bbf29986d11464cbf4ca5e96ed7b6b",
+      "fresh_snapshot_required": true,
+      "matches_current": false,
+      "mismatch_files": [
+        "scripts/core_contract.py",
+        "scripts/core_evaluation.py",
+        "scripts/core_learning.py"
+      ],
+      "snapshot": {
+        "bytes": 2090,
+        "path": "campaigns/core-v1/learning/formal-release-candidate-v4/source-closure.json",
+        "sha256": "1125b30a2ea750f9be4a7ace016ea23032a0a752c55e42b1562bfacf04e3937b"
+      },
+      "snapshot_closure_sha256": "76c93c4d4effa6bf7ffa1bb124b5a43efc3c5f31bbb107f570a750fb6e5b9b22"
+    },
+    "inherited_blockers": [
+      {
+        "code": "STALE_SOURCE_CLOSURE",
+        "message": "historical formal source snapshot does not match current required files",
+        "observed": {
+          "current_closure_sha256": "d50ab1fac799507dfde6866bbce76b1d88bbf29986d11464cbf4ca5e96ed7b6b",
+          "historical_closure_sha256": "76c93c4d4effa6bf7ffa1bb124b5a43efc3c5f31bbb107f570a750fb6e5b9b22",
+          "mismatch_files": [
+            "scripts/core_contract.py",
+            "scripts/core_evaluation.py",
+            "scripts/core_learning.py"
+          ]
+        },
+        "required": "fresh source closure proposal admitted by root"
+      },
+      {
+        "code": "FORMAL_READINESS_BLOCKED",
+        "message": "formal readiness remains blocked",
+        "observed": [
+          "FORMAL_RELEASE_REQUIRED",
+          "FORMAL_RUN_DENOMINATOR",
+          "MATERIAL_CASE_RUN_DENOMINATOR",
+          "RESOURCE_FRONTIER_UNPROVEN",
+          "STALE_SOURCE_CLOSURE",
+          "THIRD_FAMILY_REQUIRED",
+          "THIRD_T1_FAMILY",
+          "VALIDATION_DENOMINATOR"
+        ],
+        "required": "all formal readiness gates pass"
+      },
+      {
+        "code": "FRESH_CLOSURE_NOT_ADMITTED",
+        "message": "this artifact proposes hashes but does not admit a training source snapshot",
+        "observed": false,
+        "required": true
+      }
+    ],
+    "path": "campaigns/core-v1/learning/core-formal-source-closure-audit-20260921.json",
+    "sha256": "fed5ab0e0be4de80f43e89a9f5264f9bca130614894e0a8e29d87cc100a20a57",
+    "status": "proposal_only_blocked"
+  },
+  "inputs": {
+    "formal_launch_contract": {
+      "bytes": 41517,
+      "path": "campaigns/core-v1/learning/core-formal-launch-contract-20260921.json",
+      "sha256": "eb1451fe6bde2ba9a80bf7742b6e2aa7df3ee76806e20edfc05a8f99b806bc5a"
+    },
+    "formal_readiness": {
+      "bytes": 7757,
+      "path": "campaigns/core-v1/learning/core-formal-readiness-audit-20260921.json",
+      "sha256": "250d04643546c0f750301821d5df593f617094f0fd0e874285b08a73e0c8ad9b"
+    },
+    "source_closure_audit": {
+      "bytes": 10355,
+      "path": "campaigns/core-v1/learning/core-formal-source-closure-audit-20260921.json",
+      "sha256": "fed5ab0e0be4de80f43e89a9f5264f9bca130614894e0a8e29d87cc100a20a57"
+    }
+  },
+  "launch_allowed": false,
+  "next_admission_checks": [
+    "root reviews and admits the hash-bound v5 closure only as a planning input",
+    "qualify a third independent T1 family with four validation cases",
+    "complete the 12-case validation denominator and preserve all 288 material case-runs",
+    "obtain fresh full-field 32000-update resource evidence and same-card admission observations",
+    "rebind formal readiness and re-run the planner; emit nine jobs only after every gate passes"
+  ],
+  "planning_allowed": true,
+  "planning_only": true,
+  "proposal_only": true,
+  "record_id": "core-formal-source-closure-root-admission-v5-20260921",
+  "required_formal_job_count": 9,
+  "root_admission": {
+    "authority": "root",
+    "decision": "hold",
+    "granted": false,
+    "reason": "v5 is a current-workspace closure for planning review; remaining formal gates prevent release",
+    "requested": true,
+    "status": "required_not_granted"
+  },
+  "schema": "core.formal_source_closure_admission.v1",
+  "source_closure": {
+    "bytes": 2362,
+    "closure_sha256": "d50ab1fac799507dfde6866bbce76b1d88bbf29986d11464cbf4ca5e96ed7b6b",
+    "complete": true,
+    "path": "campaigns/core-v1/learning/formal-release-candidate-v5/source-closure.json",
+    "sha256": "36a5371b4451b4c06de3776c23db457f118a2b37b6b74017c6b7a1876d108a28",
+    "verification": {
+      "checks": {
+        "all_workspace_hashes_match": true,
+        "closure_hash_matches": true,
+        "closure_version": true,
+        "complete": true,
+        "declared_order_and_set": true,
+        "formal_release_is_closed": true,
+        "formal_training_is_closed": true,
+        "no_formal_jobs": true,
+        "planning_only": true,
+        "required_file_set": true,
+        "schema": true
+      },
+      "current_closure_sha256": "d50ab1fac799507dfde6866bbce76b1d88bbf29986d11464cbf4ca5e96ed7b6b",
+      "current_files": [
+        {
+          "bytes": 112793,
+          "relative_path": "scripts/core_learning.py",
+          "sha256": "bed04ad46600a7f80847072e7ef850d42c1efa0b6504521dc38419bf02930682"
+        },
+        {
+          "bytes": 28464,
+          "relative_path": "scripts/core_contract.py",
+          "sha256": "57ffb15cea1e9a8510a5c66b2ef11fec9214c8416ab574f286cee16ebded3523"
+        },
+        {
+          "bytes": 30550,
+          "relative_path": "scripts/core_dataset.py",
+          "sha256": "41b9b65ed196cc39e9d0d3fc4028119c5cd111f4cf97d2f950da57148892d25d"
+        },
+        {
+          "bytes": 22521,
+          "relative_path": "scripts/core_models.py",
+          "sha256": "27a323244554aa564676e957e072197248cc3fb3a923e5816443fd589bbae66f"
+        },
+        {
+          "bytes": 38880,
+          "relative_path": "scripts/core_cfd_dataset.py",
+          "sha256": "9a8b5ed364735804cc66521060ed04a18845a80bd95870d2727eda5392997523"
+        },
+        {
+          "bytes": 8434,
+          "relative_path": "scripts/core_evaluation.py",
+          "sha256": "0adf9fba3ae60276f861cb85da02730d7caf419c4acdbee07bb87607a6dfae52"
+        },
+        {
+          "bytes": 30607,
+          "relative_path": "scripts/core_physics.py",
+          "sha256": "af5469f88791cdd16bf2ee6234c73e76e0dc453fe2030ccb33c03cf6fd84f892"
+        },
+        {
+          "bytes": 52402,
+          "relative_path": "scripts/core_formal_planner.py",
+          "sha256": "f958023abc92147209d976a52978bd5d50c3a4ef1c792aa105f8187cbf6fbc6b"
+        }
+      ],
+      "declared_closure_sha256": "d50ab1fac799507dfde6866bbce76b1d88bbf29986d11464cbf4ca5e96ed7b6b",
+      "mismatch_files": [],
+      "ok": true
+    }
+  },
+  "status": "planning_only_blocked"
+}
