@@ -66,11 +66,13 @@
   preflight；聚合审计通过。每格仍是 `qualification_only`、`T1=false`、credit 为零，
   尚未启动 solver，不能由初态 preflight 推导 F6 T1。
 - v4 已为 8 个代表格生成独立 CPU solver canary root review/job：选择了三个空间锚点、
-  中心细档、两个独立内点和内部时间／原生 cadence 对照。中心生产格已完成一次
-  solver attempt，301 帧、实际 `TimeStep`、接触窗口、闭合面和 observation hold
-  硬门通过；首次 worker 的回执字段缺失被记录为基础设施失败，并从同一已完成输出
-  只读恢复，未再次启动 solver。其它 7 格正在各自 attempt-001 中执行，尚未写入
-  Core 分母或 T1 credit。
+  中心细档、两个独立内点和内部时间／原生 cadence 对照。8 格已全部完成并审计：
+  7 格通过全部硬门；cell-08（`q=1`、细档）产生 301 帧但末端少 1 个流体粒子，
+  `excluded_particles_zero`、`native_identity_fixed`、`fluid_group_count_fixed` 失败，
+  保留为科学硬失败。cell-04 首次 worker 的回执字段缺失被记录为基础设施失败，并从
+  同一已完成输出只读恢复，未再次启动 solver；cell-14 的原生 cadence 对照为 601 帧。
+  aggregate audit 为 `all_selected_canaries_audited`、`scientific_pass_count=7/8`，
+  所有结果仍是 qualification-only，没有写入 Core 分母或 T1 credit。
 - 材料修复后的实现哈希已重新绑定到只读预检证据；同时把评测和 rollout 的
   frame denominator 收紧为真实整数语义，拒绝 fractional/bool 计数。新鲜 v5
   源闭包、root-admission 回执和 full-field halo oracle 已重新生成并通过哈希
@@ -96,9 +98,10 @@
 ## 下一步准入顺序
 
 1. F6 v9 canary 的 solver 产物已经完整保留，但严格 cadence 合同未通过。v10
-   v4 已完成 15 格 fresh native preflight，8 格 solver canary 已授权并在执行；完成后
-   逐格审查实际时间轴、事件窗和 sidecar，再授权剩余 7 格，最后才决定是否进入
-   8→32 生产。不得对同一科学输入重跑，也不能把 v9 或 v1--v3 失败证据改判为通过。
+   v4 已完成 15 格 fresh native preflight，8 格 solver canary 已完整审计（7/8 通过，
+   cell-08 保留科学硬失败）。新的 root review 必须先决定该 scope 是否关闭并转向 F2
+   或其它替补家族；不得授权剩余 7 格、对 cell-08 同输入重跑，或把 v9/v1--v3 失败证据
+   改判为通过。
 2. F6 取得 T1 后，按固定 8→32 生产规则注册案例，再开启正式 9 个模型/种子
    训练。材料侧先在已取得 T1 的两个家族分别完成完整宏观矩阵，不能用旧
    diagnostic trace 代替 T2。
