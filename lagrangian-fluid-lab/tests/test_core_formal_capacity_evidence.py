@@ -235,3 +235,43 @@ def test_32000_synthetic_profile_stays_diagnostic(tmp_path: Path) -> None:
     assert observation["observed_update_frontier"] == 32000
     assert observation["diagnostic_only"] is True
     assert observation["formal_capacity_evidence"] is False
+
+
+def test_capacity_binding_requires_explicit_manifest_hashes(tmp_path: Path) -> None:
+    receipt, execution, manifest, closure, _ = _fixture(tmp_path)
+    del receipt["config"]["manifest_sha256"]
+    execution.pop("manifest_sha256")
+    report = inspect_capacity_evidence(
+        receipt, execution=execution, manifest=manifest,
+        source_closure=closure, data_root=tmp_path, code_root=ROOT,
+    )
+    assert report["formal_capacity_evidence"] is False
+    assert "CAPACITY_MANIFEST_BINDING" in report["blocker_codes"]
+
+
+def test_capacity_binding_requires_checkpoint_and_closure_byte_receipts(
+    tmp_path: Path,
+) -> None:
+    receipt, execution, manifest, closure, _ = _fixture(tmp_path)
+    del receipt["milestone_checkpoints"][0]["bytes"]
+    closure_payload = json.loads(closure.read_text(encoding="utf-8"))
+    del closure_payload["files"][0]["bytes"]
+    closure.write_text(json.dumps(closure_payload), encoding="utf-8")
+    report = inspect_capacity_evidence(
+        receipt, execution=execution, manifest=manifest,
+        source_closure=closure, data_root=tmp_path, code_root=ROOT,
+    )
+    assert report["formal_capacity_evidence"] is False
+    assert "CAPACITY_CHECKPOINT_SEMANTICS" in report["blocker_codes"]
+    assert "CAPACITY_SOURCE_CLOSURE" in report["blocker_codes"]
+
+
+def test_capacity_binding_requires_execution_source_closure_hash(tmp_path: Path) -> None:
+    receipt, execution, manifest, closure, _ = _fixture(tmp_path)
+    execution.pop("source_closure_sha256")
+    report = inspect_capacity_evidence(
+        receipt, execution=execution, manifest=manifest,
+        source_closure=closure, data_root=tmp_path, code_root=ROOT,
+    )
+    assert report["formal_capacity_evidence"] is False
+    assert "CAPACITY_SOURCE_CLOSURE" in report["blocker_codes"]

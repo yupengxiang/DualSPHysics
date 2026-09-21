@@ -143,6 +143,7 @@ def _record_failure(failures: list[dict[str, Any]], code: str, message: str) -> 
 def _file_ref(
     reference: Mapping[str, Any], *, root: Path, base: Path | None,
     failures: list[dict[str, Any]], role: str, require_portable: bool = False,
+    require_bytes: bool = False,
 ) -> tuple[Path | None, dict[str, Any] | None]:
     path_value = reference.get("path")
     declared_sha = reference.get("sha256")
@@ -164,6 +165,13 @@ def _file_ref(
         _record_failure(failures, "CAPACITY_HASH_BINDING", f"{role} SHA-256 mismatch or declaration missing: {path}")
         return path, result
     expected_bytes = reference.get("bytes")
+    if require_bytes and (
+            isinstance(expected_bytes, bool)
+            or not isinstance(expected_bytes, int)
+            or expected_bytes < 0):
+        _record_failure(
+            failures, "CAPACITY_CHECKPOINT_SEMANTICS",
+            f"{role} requires a nonnegative integer byte declaration: {path}")
     if expected_bytes is not None and expected_bytes != result["bytes"]:
         _record_failure(failures, "CAPACITY_CHECKPOINT_SEMANTICS", f"{role} byte count differs from declaration: {path}")
     return path, result
@@ -242,6 +250,11 @@ def _verify_source_closure(source: Any, *, root: Path, code_root: Path,
         observed = sha256_file(candidate)
         if observed != item.get("sha256"):
             _record_failure(failures, "CAPACITY_SOURCE_CLOSURE", f"source closure hash mismatch: {relative}")
+        declared_bytes = item.get("bytes")
+        if (isinstance(declared_bytes, bool) or not isinstance(declared_bytes, int)
+                or declared_bytes < 0 or declared_bytes != candidate.stat().st_size):
+            _record_failure(failures, "CAPACITY_SOURCE_CLOSURE",
+                            f"source closure byte count mismatch: {relative}")
         normalized.append({"relative_path": str(relative), "sha256": observed,
                            "bytes": candidate.stat().st_size})
     names = {item["relative_path"] for item in normalized}
@@ -255,8 +268,9 @@ def _verify_source_closure(source: Any, *, root: Path, code_root: Path,
     if payload.get("closure_sha256") != closure_hash:
         _record_failure(failures, "CAPACITY_SOURCE_CLOSURE", "source closure digest does not match its file rows")
     declared_execution = execution.get("source_closure_sha256")
-    if declared_execution is not None and declared_execution != closure_hash:
-        _record_failure(failures, "CAPACITY_SOURCE_CLOSURE", "execution sidecar source closure differs from closure record")
+    if not _valid_sha(declared_execution) or declared_execution != closure_hash:
+        _record_failure(failures, "CAPACITY_SOURCE_CLOSURE",
+                        "execution sidecar source closure is missing or differs from closure record")
     result = {
         "bound": True, "valid": not any(item["code"] == "CAPACITY_SOURCE_CLOSURE" for item in failures),
         "path": _relative(path, root) if path is not None else "<in-memory>",
@@ -290,8 +304,12 @@ def _verify_manifest(source: Any, *, root: Path, receipt: Mapping[str, Any],
     sidecar_declared = execution.get("manifest_sha256")
     acceptable = {raw_sha, canonical_sha}
     for value, role in ((declared, "receipt"), (sidecar_declared, "execution")):
-        if value is not None and value not in acceptable:
-            _record_failure(failures, "CAPACITY_MANIFEST_BINDING", f"{role} manifest hash differs from reader manifest")
+        if not _valid_sha(value):
+            _record_failure(failures, "CAPACITY_MANIFEST_BINDING",
+                            f"{role} manifest hash declaration is missing or malformed")
+        elif value not in acceptable:
+            _record_failure(failures, "CAPACITY_MANIFEST_BINDING",
+                            f"{role} manifest hash differs from reader manifest")
     return {
         "bound": True, "valid": not any(item["code"] == "CAPACITY_MANIFEST_BINDING" for item in failures),
         "path": _relative(path, root) if path is not None else "<in-memory>",
@@ -410,7 +428,7 @@ def inspect_capacity_evidence(
     for update, reference, role in checkpoint_refs:
         path, observed = _file_ref(
             reference, root=root, base=receipt_path.parent if receipt_path else None,
-            failures=failures, role=role
+            failures=failures, role=role, require_bytes=True
         )
         if path is None or observed is None:
             continue
