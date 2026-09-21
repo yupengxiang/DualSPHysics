@@ -1,0 +1,157 @@
+{
+  "schema": "core.t1_family3.route_review.route_closed_negative.v1",
+  "review_id": "T1_FAMILY3_ROUTE_REVIEW_LUNA_MAX_20260922",
+  "created_at_utc": "2026-09-22T00:00:00+00:00",
+  "execution_host": "Luna Max",
+  "status": "route_closed_negative_no_new_hypothesis",
+  "decision": "close_bounded_f1_f2_f5_f6_search_without_new_candidate",
+  "qualification_claim": "none",
+  "third_t1_family_established": false,
+  "qualification_credit_added": 0,
+  "protected_state_mutation": {
+    "registry": 0,
+    "ledger": 0,
+    "matrix": 0,
+    "denominator": 0,
+    "queue": 0,
+    "solver_invoked": false,
+    "gpu_started": false
+  },
+  "core_gate_snapshot": {
+    "path": "campaigns/core-v1/completion.json",
+    "sha256": "eb25d9878ce8b005a1e6fe6c481671ad4c223beafb3f1104601a8a3dc67311e0",
+    "t1_families": ["F3", "F4"],
+    "three_t1_families": false,
+    "missing_t1_case_runs": 288
+  },
+  "historical_dedup_audit": [
+    {
+      "family": "F1",
+      "routes": ["H1/H2/H3/H4 repair lineage", "suspended-obstacle gap G1"],
+      "historical_assumption_class": "fixed-obstacle/dam-break boundary, ghost, normal, and obstacle-placement repairs",
+      "status": "closed_hard_negative",
+      "dedup_reason": "All variants retain the F1 obstacle/dam-break problem and already have hard-integrity failure; changing normal construction or gap placement is not a new T1 family mechanism.",
+      "evidence": "campaigns/core-v1/cfd/f1-f2-third-t1-route-closed-v2.json"
+    },
+    {
+      "family": "F2",
+      "routes": ["DBC duration", "receiver/weir", "ballistic catch", "distributed slot", "submerged-orifice v2/v3/v4", "H2 static hold"],
+      "historical_assumption_class": "prescribed cup/receiver or stationary aperture plus duration, catchment, source, normal-layer, and CFL/static-hold variants",
+      "status": "closed_negative_or_event_censored",
+      "dedup_reason": "The existing changes are duration, topology already closed by its own anchor, release/endpoint, normal-layer/source-lattice repair, or static-only diagnostics; none is a new unbound physical/numerical formulation for the next case.",
+      "latest_binding": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v4/preflight-v4/preflight.json"
+    },
+    {
+      "family": "F5",
+      "routes": ["geometry repair v3", "official-autofill geometry repair v4", "strict contact-band diagnostic"],
+      "historical_assumption_class": "same prescribed WaveRunup piston/slope/block physics with alternative STL/materialization and classification diagnostics",
+      "status": "closed_hard_negative",
+      "dedup_reason": "v3 and v4 leave the same frame-0 block endpoint (fluid_first_id=94622); contact classification cannot waive exact endpoint/chord gates, so a third materialization is not independent.",
+      "evidence": "campaigns/core-v1/evidence/f5-wave-runup-third-t1-route-closed-no-new-hypothesis-v1.json"
+    },
+    {
+      "family": "F6",
+      "routes": ["observation-axis v4", "explicit-body v9/v10 physical-anchor lineage"],
+      "historical_assumption_class": "free rigid-body coupling with observation-axis, cadence, mass/inertia, and body-sidecar revisions",
+      "status": "closed_or_pending_existing_lineage",
+      "dedup_reason": "The v4 route is explicitly closed after cell-08 excluded-particle failure; v9/v10 mass/inertia/cadence proposals are already existing lineage, not new hypotheses for this audit, and remain qualification-only.",
+      "evidence": "campaigns/core-v1/cfd/f6-observation-axis-v4-third-t1-route-closed-v1.json"
+    }
+  ],
+  "latest_f2_v4_fact": {
+    "preflight_path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v4/preflight-v4/preflight.json",
+    "preflight_sha256": "db18863a97cb0a6d17a2cbb877e7b3df94368c96be4176728bd7b15b8a698685",
+    "case_id": "F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v4",
+    "preflight_pass": false,
+    "zero_boundnor": 29484,
+    "zero_normal_size": 29484,
+    "mk18_gate_particles": 29484,
+    "mk17_outer_zero_normals": 0,
+    "finite_pass": true,
+    "ids_pass": true,
+    "endpoint_pass": true,
+    "mass_relative_error": 0.007812500000000222,
+    "mass_pass": true,
+    "solver_product_present": false,
+    "same_input_retry": false,
+    "qualification_claim": "none",
+    "matrix_credit": 0,
+    "interpretation": "hard CPU/native failure; no solver/event inference"
+  },
+  "candidate_screen": {
+    "candidate_id": "F2_submerged_orifice_native_dbc_boundary_v1",
+    "family": "F2",
+    "status": "screened_not_admitted_insufficient_evidence",
+    "root_review_ready": false,
+    "runtime_authorized": false,
+    "why_not_admitted": "Changing the global boundary formulation from mDBC to DBC is a plausible diagnostic question, but the current evidence only localizes the mDBC zero-normal failure. The existing DBC receipt is a different full-cup topology and does not establish per-component or orifice-specific semantic equivalence. Materializing it now would expand the search without enough evidence for a genuinely independent bounded route.",
+    "not_written": [
+      "no candidate card",
+      "no new Definition",
+      "no static preflight contract"
+    ],
+    "required_new_information": [
+      "an authoritative solver/source contract showing that native DBC can represent this stationary aperture without changing its underflow semantics",
+      "an independently reviewed physical boundary specification, not only a switch from Boundary=2 to Boundary=1",
+      "a new root-approved scope and fresh hard-gate contract before any materialization"
+    ]
+  },
+  "required_new_information_before_reopening": [
+    "A genuinely independent physical or numerical mechanism with evidence beyond the closed F1/F2/F5/F6 lineages.",
+    "A new scope/case/output identity and a literal Definition or equivalent authoritative input contract, separately root-reviewed.",
+    "A fixed hard-gate and failure-denominator contract; no threshold relaxation, survivor renormalization, or same-input retry."
+  ],
+  "execution_controls": {
+    "read_only_route_audit": true,
+    "new_candidate_written": false,
+    "new_static_definition_written": false,
+    "static_preflight_executed": false,
+    "cpu_gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "matrix_mutation": 0,
+    "denominator_mutation": 0,
+    "qualification_credit": 0
+  },
+  "source_receipts": [
+    {
+      "path": "campaigns/core-v1/cfd/f1-f2-third-t1-route-closed-v2.json",
+      "sha256": "ba789b300d7e977e8c845c2215721fc081637d5c0a382d4d9f6d640c8db58b67",
+      "role": "F1/F2 route closure"
+    },
+    {
+      "path": "campaigns/core-v1/evidence/f5-wave-runup-third-t1-route-closed-no-new-hypothesis-v1.json",
+      "sha256": "b192dadb44706ec8af5246a4fcb09855aeed49b4b49ada5db348eef8a7574e92",
+      "role": "F5 route closure"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f6-observation-axis-v4-third-t1-route-closed-v1.json",
+      "sha256": "55d40fa5ae78ea23c43c52a4451e8c9ff20d9d64e80908e30c9db670b6f759cb",
+      "role": "F6 route closure"
+    },
+    {
+      "path": "campaigns/core-v1/evidence/f1-f2-third-t1-route-decision-receipt-v2.json",
+      "sha256": "6f8e84a0d31d27db4f3ba38907a8a8e8020be41adc5c8a159b3ab6d1a4b1b8cf",
+      "role": "F1/F2 closure decision receipt"
+    },
+    {
+      "path": "campaigns/core-v1/evidence/f6-observation-axis-v4-third-t1-route-decision-receipt-v1.json",
+      "sha256": "8b6c9aba1a37031e84f23e055676e33dffb410b5165f913a6c1cbbda5e668ce8",
+      "role": "F6 closure decision receipt"
+    },
+    {
+      "path": "campaigns/core-v1/completion.json",
+      "sha256": "eb25d9878ce8b005a1e6fe6c481671ad4c223beafb3f1104601a8a3dc67311e0",
+      "role": "unchanged Core gate"
+    },
+    {
+      "path": "scripts/f2_full_cup_closed_catchment_dbc.py",
+      "sha256": "ae98d525653992df41f304aad90957e56c4f481ebfe86631d71704034e0226b1",
+      "role": "prior DBC formulation evidence"
+    }
+  ]
+}
