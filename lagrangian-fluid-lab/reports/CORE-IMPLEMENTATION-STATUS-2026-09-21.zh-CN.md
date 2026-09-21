@@ -17,6 +17,11 @@
 - F2 分布式 submerged-slot 新机制完成了一次全新 Definition/native CPU
   preflight 和一次允许的 normal-layer repair。两次均为固定零法向门的硬负例，
   route 已关闭，credit 为零，禁止 v3 和同输入重跑。
+- 在 F6 v4 失败后，F2 又完成了一次只读第三家族路线审计。固定接收盆+自由落体
+  液块的 `F2_receiver_ballistic_catch_release_speed010_v2` 仅为条件性候选：
+  15 行仍是 proposal-only、`executed=0`、`credit=0`。新 Definition/hash、
+  receiver contact 与 retained/spill observer 及第二次 root review 尚未完成，
+  因此当前不启动 preflight，也不改变 F2 失败分母。
 - 旧 F6 浮箱、入水和双浮体探针经只读审计确认是与 F1--F5 不同的自由刚体
   流固反馈机制，但只达到 structural probe。新的 F6 proposal 保持
   root-review-only，未进入 registry、ledger、matrix 或 T1 分母。
