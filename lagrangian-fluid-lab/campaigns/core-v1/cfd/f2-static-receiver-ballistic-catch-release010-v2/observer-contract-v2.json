@@ -1,0 +1,406 @@
+{
+  "schema": "core.f2.receiver_ballistic_catch.observer_contract.v2",
+  "status": "observer_contract_static_root_review_pending",
+  "family": "F2",
+  "scope_id": "F2_receiver_ballistic_catch_release_speed_v2_x_v1",
+  "revision_id": "F2_receiver_ballistic_catch_release_speed_v2",
+  "anchor_case_id": "CORE_F2_RECEIVER_BALLISTIC_CATCH_RELEASE010_q0p50000000_dp0p007500000000_anchor",
+  "qualification_claim": "none",
+  "matrix_credit": 0,
+  "geometry_contract": {
+    "outer_tank": {
+      "low_m": [
+        0.0,
+        -0.45,
+        0.0
+      ],
+      "high_m": [
+        1.25,
+        0.45,
+        0.8
+      ],
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "endpoint_tolerance_m": 1e-08
+    },
+    "receiver_basin": {
+      "x_low_m": 0.35,
+      "x_high_m": 0.85,
+      "z_low_m": 0.08,
+      "z_high_m": 0.58,
+      "y_mapping": "center_y_m = -0.12 + 0.24*q; size_y_m = 0.36",
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "endpoint_tolerance_m": 1e-08,
+      "interior_clearance_m": 0.0075
+    },
+    "runtime_domain": {
+      "low_m": [
+        -0.15,
+        -0.55,
+        -0.15
+      ],
+      "high_m": [
+        1.4,
+        0.55,
+        1.05
+      ]
+    }
+  },
+  "receiver_contact": {
+    "mass_basis": "initial native fluid mass",
+    "initial_mass_kg": 7.776,
+    "interior_definition": "active fluid position inside the q-specific one-dp-clear receiver interior AABB",
+    "minimum_mass_fraction": 0.01,
+    "minimum_mass_kg": 0.07776,
+    "first_contact": "first saved frame at or above the threshold after the source descends from its initial height",
+    "sustained_contact_required": true,
+    "sustained_duration_s": 0.2,
+    "open_top_is_not_closed_wall_violation": true,
+    "closed_face_endpoint_or_chord_violation": "hard integrity failure, independent of contact event"
+  },
+  "retained_vs_spill": {
+    "frame_scope": "only after first receiver contact; final allocation requires the full registered horizon",
+    "retained": "active fluid mass inside the q-specific one-dp-clear receiver interior",
+    "spill_or_residual": "active fluid mass outside that receiver interior but still inside the outer tank/runtime domain after contact",
+    "escaped": "active fluid mass outside the runtime domain or outside a closed outer-tank face; never relabel as spill",
+    "transit": "mass before first contact or before terminal allocation; diagnostic only and never a pass",
+    "missing_identity": "a fluid ID present in the initial native set but absent from a frame; hard integrity failure, never spill",
+    "mass_partition": [
+      "retained",
+      "spill_or_residual",
+      "escaped",
+      "transit",
+      "missing_identity"
+    ],
+    "terminal_reporting": {
+      "retained_fraction": "retained_mass / initial_mass",
+      "spill_or_residual_fraction": "spill_or_residual_mass / initial_mass",
+      "escaped_fraction": "escaped_mass / initial_mass",
+      "partition_sum_tolerance": 1e-08,
+      "allocation_complete": "retained + spill_or_residual + escaped equals initial active mass within tolerance and no missing IDs",
+      "event_window_complete": "full 1.5 s horizon reached after contact and allocation is reported"
+    },
+    "spill_diagnostic_threshold": 0.01,
+    "spill_threshold_is_not_a_credit_rule": true
+  },
+  "q_endpoint_contract": {
+    "parameter": "receiver_center_y_m",
+    "mapping": "receiver_center_y_m = -0.12 + 0.24*q",
+    "endpoints": [
+      {
+        "q": 0.0,
+        "label": "qualification_low_endpoint",
+        "receiver_center_y_m": -0.12,
+        "receiver_closed_box_m": {
+          "low": [
+            0.35,
+            -0.3,
+            0.08
+          ],
+          "high": [
+            0.85,
+            0.06,
+            0.58
+          ],
+          "closed_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "open_faces": [
+            "top"
+          ]
+        },
+        "observer_interior_m": {
+          "low": [
+            0.3575,
+            -0.2925,
+            0.0875
+          ],
+          "high": [
+            0.8425,
+            0.0525,
+            0.5725
+          ],
+          "clearance_m": 0.0075
+        },
+        "source_centerline_y_m": 0.0,
+        "placement_semantics": "receiver centerline only; source geometry and release velocity remain fixed"
+      },
+      {
+        "q": 0.25,
+        "label": "held_out_low_midpoint",
+        "receiver_center_y_m": -0.06,
+        "receiver_closed_box_m": {
+          "low": [
+            0.35,
+            -0.24,
+            0.08
+          ],
+          "high": [
+            0.85,
+            0.12,
+            0.58
+          ],
+          "closed_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "open_faces": [
+            "top"
+          ]
+        },
+        "observer_interior_m": {
+          "low": [
+            0.3575,
+            -0.23249999999999998,
+            0.0875
+          ],
+          "high": [
+            0.8425,
+            0.11249999999999999,
+            0.5725
+          ],
+          "clearance_m": 0.0075
+        },
+        "source_centerline_y_m": 0.0,
+        "placement_semantics": "receiver centerline only; source geometry and release velocity remain fixed"
+      },
+      {
+        "q": 0.5,
+        "label": "anchor_center_endpoint",
+        "receiver_center_y_m": 0.0,
+        "receiver_closed_box_m": {
+          "low": [
+            0.35,
+            -0.18,
+            0.08
+          ],
+          "high": [
+            0.85,
+            0.18,
+            0.58
+          ],
+          "closed_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "open_faces": [
+            "top"
+          ]
+        },
+        "observer_interior_m": {
+          "low": [
+            0.3575,
+            -0.1725,
+            0.0875
+          ],
+          "high": [
+            0.8425,
+            0.1725,
+            0.5725
+          ],
+          "clearance_m": 0.0075
+        },
+        "source_centerline_y_m": 0.0,
+        "placement_semantics": "receiver centerline only; source geometry and release velocity remain fixed"
+      },
+      {
+        "q": 0.75,
+        "label": "held_out_high_midpoint",
+        "receiver_center_y_m": 0.06,
+        "receiver_closed_box_m": {
+          "low": [
+            0.35,
+            -0.12,
+            0.08
+          ],
+          "high": [
+            0.85,
+            0.24,
+            0.58
+          ],
+          "closed_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "open_faces": [
+            "top"
+          ]
+        },
+        "observer_interior_m": {
+          "low": [
+            0.3575,
+            -0.11249999999999999,
+            0.0875
+          ],
+          "high": [
+            0.8425,
+            0.23249999999999998,
+            0.5725
+          ],
+          "clearance_m": 0.0075
+        },
+        "source_centerline_y_m": 0.0,
+        "placement_semantics": "receiver centerline only; source geometry and release velocity remain fixed"
+      },
+      {
+        "q": 1.0,
+        "label": "qualification_high_endpoint",
+        "receiver_center_y_m": 0.12,
+        "receiver_closed_box_m": {
+          "low": [
+            0.35,
+            -0.06,
+            0.08
+          ],
+          "high": [
+            0.85,
+            0.3,
+            0.58
+          ],
+          "closed_faces": [
+            "bottom",
+            "left",
+            "right",
+            "front",
+            "back"
+          ],
+          "open_faces": [
+            "top"
+          ]
+        },
+        "observer_interior_m": {
+          "low": [
+            0.3575,
+            -0.0525,
+            0.0875
+          ],
+          "high": [
+            0.8425,
+            0.2925,
+            0.5725
+          ],
+          "clearance_m": 0.0075
+        },
+        "source_centerline_y_m": 0.0,
+        "placement_semantics": "receiver centerline only; source geometry and release velocity remain fixed"
+      }
+    ],
+    "required_spatial_q": [
+      0.0,
+      0.5,
+      1.0
+    ],
+    "held_out_q": [
+      0.25,
+      0.75
+    ],
+    "required_case_ids": [
+      "CORE_F2_RECEIVER_BALLISTIC_CATCH_RELEASE010_q0p00_dp0p0100",
+      "CORE_F2_RECEIVER_BALLISTIC_CATCH_RELEASE010_q0p00_dp0p0075",
+      "CORE_F2_RECEIVER_BALLISTIC_CATCH_RELEASE010_q0p00_dp0p0050",
+      "CORE_F2_RECEIVER_BALLISTIC_CATCH_RELEASE010_q0p50_dp0p0100",
+      "CORE_F2_RECEIVER_BALLISTIC_CATCH_RELEASE010_q0p50_dp0p0075",
+      "CORE_F2_RECEIVER_BALLISTIC_CATCH_RELEASE010_q0p50_dp0p0050",
+      "CORE_F2_RECEIVER_BALLISTIC_CATCH_RELEASE010_q1p00_dp0p0100",
+      "CORE_F2_RECEIVER_BALLISTIC_CATCH_RELEASE010_q1p00_dp0p0075",
+      "CORE_F2_RECEIVER_BALLISTIC_CATCH_RELEASE010_q1p00_dp0p0050",
+      "CORE_F2_RECEIVER_BALLISTIC_CATCH_RELEASE010_q0p25_dp0p0075_heldout",
+      "CORE_F2_RECEIVER_BALLISTIC_CATCH_RELEASE010_q0p25_dp0p0050_heldout",
+      "CORE_F2_RECEIVER_BALLISTIC_CATCH_RELEASE010_q0p75_dp0p0075_heldout",
+      "CORE_F2_RECEIVER_BALLISTIC_CATCH_RELEASE010_q0p75_dp0p0050_heldout"
+    ],
+    "source_centerline_fixed": true,
+    "endpoint_comparison": "report contact, retained, spill_or_residual, escaped, transit, and missing-ID fractions separately for every q",
+    "partial_capture_semantics": "q changes only receiver lateral placement; partial capture is an observed destination allocation, never an inferred pass"
+  },
+  "hard_integrity_before_event": [
+    "native IDs unique and aligned with generated XML",
+    "all active position, velocity, density, and mass arrays finite",
+    "zero active fluid IDs missing from any required frame",
+    "zero closed outer-tank endpoint violations and saved chord crossings",
+    "zero closed receiver-basin endpoint violations and saved chord crossings",
+    "zero valid fluid positions outside the declared runtime domain",
+    "native source mass relative error <= 0.025 with no mass rescaling",
+    "full 1.5 s registered horizon reached"
+  ],
+  "denominator_policy": {
+    "planned_rows": 15,
+    "executed_rows": 0,
+    "qualification_credit": 0,
+    "event_censoring_is_zero_credit": true,
+    "same_input_retry": false,
+    "survivor_renormalization": false,
+    "failure_rows_retained": true
+  },
+  "fresh_input_boundary": {
+    "old_v1_definition_reused": false,
+    "old_v1_generated_xml_reused": false,
+    "old_v1_native_bi4_reused": false,
+    "old_v1_trajectory_reused": false,
+    "old_v1_output_stem_reused": false,
+    "submerged_slot_assets_reused": false,
+    "observer_only": true,
+    "forbidden_sources": [
+      "campaigns/core-v1/cfd/f2-static-receiver-ballistic-catch-v1/**",
+      "campaigns/core-v1/runtime/attempts/f2-static-receiver-ballistic-catch-q05-anchor-*/*",
+      "campaigns/core-v1/cfd/f2-distributed-slot-transfer-v1/**",
+      "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/**"
+    ]
+  },
+  "execution_controls": {
+    "trajectory_opened": false,
+    "native_decoder_invoked": false,
+    "solver_invoked": false,
+    "gpu_launched": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "T1_denominator_mutation": 0,
+    "T2_denominator_mutation": 0,
+    "qualification_credit": 0
+  },
+  "hash_bindings": {
+    "candidate_card": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-pour-catch-candidate-card-v2.json",
+      "sha256": "13295204939d6b26fb717c2a0ee76cd095f7014379df244142fb17dca29079c8",
+      "bytes": 8939,
+      "role": "v2 conditional candidate card"
+    },
+    "implementation": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_receiver_ballistic_catch_release010_v2_observer.py",
+      "sha256": "cff74dea14314cfdb1bdaf9e6a97032237af94993a86385cf735e430436a02cb",
+      "bytes": 13549,
+      "role": "observer contract implementation"
+    }
+  }
+}
