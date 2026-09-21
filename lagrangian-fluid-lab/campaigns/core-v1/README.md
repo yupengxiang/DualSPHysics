@@ -93,6 +93,12 @@ reproduction is explicitly separate from final GPU-model product reproduction.
   therefore root-review-only and remains unqualified; its old HDF5 files cannot
   enter a T1 denominator. See
   `reports/F6-CORE-THIRD-T1-CANDIDATE-ROOT-REVIEW-2026-09-21.zh-CN.md`.
+- A fresh F6 gravity/entry physical anchor now passes a CPU/root-review
+  preflight with a new Definition, analytic contact window, mass/inertia
+  binding, and body-state/force/torque sidecar contract. It only recommends one
+  protected solver canary conditionally; no GenCase, solver, GPU, queue,
+  registry, or T1 credit has been used. See
+  `reports/F6-PHYSICAL-ANCHOR-ROOT-REVIEW-2026-09-21.zh-CN.md`.
 - F1 and the F2 receiver, full-cup, and submerged-orifice repair lines retain
   their failed canaries and hard preflight failures. The F2 v2/v3/v4 orifice
   attempts are one family route with three failed definitions, not three
@@ -135,7 +141,7 @@ The authoritative `completion.json` currently reports `can_finalize=false`:
 - independent reader reproduction and causal-lineage checks: passed.
 
 These counts are completion denominators, not a request to pad the dataset with
-unqualified or duplicate cases. The next admissible step is a fresh F6
-body-state/force/boundary contract and CPU-only gate, followed by a new
-Definition and independently reviewed canary; no failed route may be relabeled
-to satisfy the gate.
+unqualified or duplicate cases. The next admissible step is a root-authorized
+single protected F6 physical canary using the new Definition and sidecar
+contract; it must preserve a fixed failure denominator and cannot promote
+itself to T1. No failed route may be relabeled to satisfy the gate.

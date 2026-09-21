@@ -1,0 +1,379 @@
+{
+  "schema": "core.material.t2.cpu_only_remediation_preflight.v1",
+  "record_id": "f3-f4-t2-cpu-only-remediation-preflight-20260920",
+  "created_at_utc": "2026-09-20T05:30:00Z",
+  "status": "blocked_for_qualification",
+  "mode": "read_only_json_evidence_audit",
+  "purpose": "Bind the retained F3/F4 negative evidence to a CPU-only remediation checklist without changing a threshold, submitting a job, or granting T2.",
+  "qualification_claim": "none",
+  "qualification_credit": "none",
+  "t2_status": "not_established",
+  "t2_qualified": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "execution_constraints": {
+    "read_only": true,
+    "new_material_computation_by_audit": false,
+    "new_job_submitted": false,
+    "gpu_started": false,
+    "cfd_solver_started": false,
+    "solver_started": false,
+    "central_ledger_mutation": 0,
+    "registry_mutation": 0,
+    "active_h5_opened": false,
+    "thresholds_changed": false
+  },
+  "registered_gates": {
+    "unknown_fraction_per_source_max": 0.01,
+    "unknown_denominator": "All geometric seeds in each source remain in the denominator; permanent unknown seeds are not dropped.",
+    "f3_cdf_sup_abs_difference_max": 0.02,
+    "f3_native_dense_saved_interval_s": 0.002,
+    "f3_matched_decimation_saved_interval_s": 0.01,
+    "f4_baseline_native_saved_interval_s": 0.02,
+    "f4_native_dense_saved_interval_s": 0.002,
+    "f4_matched_decimation_saved_interval_s": 0.02,
+    "f4_full_registered_event_window_s": 4.34,
+    "full_registered_event_window_required": true,
+    "right_censored_is_not_acceptance": true,
+    "required_distinct_t2_families": 2,
+    "f3_matrix_rows": {
+      "resolution_substep": 24,
+      "cadence": 4,
+      "seed_density": 5,
+      "total": 33
+    },
+    "f4_overlay_template_rows": {
+      "resolution_substep": 24,
+      "cadence": 4,
+      "seed_density": 5,
+      "total": 33
+    },
+    "f4_cfd_source_cells": 15
+  },
+  "observed_negative_state": {
+    "f3": {
+      "terminal_rows": {
+        "seed_count": 4096,
+        "committed_frames": 836,
+        "time_end_s": 8.350012828223477,
+        "native_source_interval_s": {
+          "nominal": 0.01,
+          "min": 0.00999945898381771,
+          "max": 0.010021581680887515
+        },
+        "frame_selection": "identity_all_native_frames",
+        "interpolation": false,
+        "mass_closed": {
+          "row29": true,
+          "row31": true
+        }
+      },
+      "unknown_quality": {
+        "gate_max": 0.01,
+        "aggregate_unknown_fraction_max": {
+          "row29": 0.0107421875,
+          "row31": 0.014892578125
+        },
+        "per_source_final_unknown_fraction": {
+          "row29": {
+            "source0": 0.01220703125,
+            "source1": 0.00927734375
+          },
+          "row31": {
+            "source0": 0.015625,
+            "source1": 0.01416015625
+          }
+        },
+        "gate_pass": false,
+        "interpretation": "Mass closure does not repair a failing per-source unknown gate. Row 29 source 0 and both row 31 sources exceed 0.01."
+      },
+      "cdf_quality": {
+        "first_passage_sup_abs_difference_max": 0.06005859375,
+        "return_sup_abs_difference_max": 0.06005859375,
+        "residence_sup_abs_difference_max": 0.06103515625,
+        "registered_max": 0.02,
+        "gate_pass": false,
+        "qualification_effect": "none"
+      },
+      "native_cadence_diagnostic": {
+        "native_dense_saved_interval_s": 0.002,
+        "native_dense_frame_count": 4176,
+        "matched_decimation_saved_interval_s": 0.01,
+        "matched_decimation_frame_count": 836,
+        "direct_native_frame_selection": true,
+        "interpolation": false,
+        "common_horizon_s": 8.350012828223477,
+        "common_full_path_fraction": 0.998046875,
+        "source1_first_passage_sup_abs_difference": 0.03125,
+        "status": "diagnostic_only",
+        "qualification_effect": "none"
+      },
+      "scope_coverage": {
+        "registered_rows": 33,
+        "terminal_v1_512_diagnostic_rows": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "terminal_matched_decimation_diagnostic_rows": [
+          25
+        ],
+        "active_or_unresolved_rows": [
+          24,
+          30
+        ],
+        "blocked_source_rows": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          26,
+          27,
+          29,
+          31
+        ],
+        "source_available_not_submitted_rows": [
+          28,
+          32
+        ],
+        "formal_row_complete": false,
+        "qualification_credit": "none"
+      }
+    },
+    "f4": {
+      "unknown_quality": {
+        "gate_max": 0.01,
+        "retained_canaries": {
+          "real_material_baseline_s2": {
+            "unknown_fraction_max": 0.84765625,
+            "common_reliable_path_coverage": 0.15234375,
+            "committed_frames": 16
+          },
+          "native_dense_pair_s2_s4": {
+            "unknown_fraction_max": 0.896484375,
+            "common_reliable_path_coverage": 0.103515625,
+            "committed_frames": 151
+          },
+          "repair_ess32_v2": {
+            "unknown_fraction_max": 0.923828125,
+            "common_reliable_path_coverage": 0.076171875
+          },
+          "repair_affine_bound_v2": {
+            "unknown_fraction_max": 0.955078125,
+            "common_reliable_path_coverage": 0.044921875
+          },
+          "tallwall120_short_canary": {
+            "unknown_fraction_max": 1.0,
+            "common_reliable_path_coverage": 0.0,
+            "saved_intervals": 20,
+            "last_saved_time_s": 0.4000145164329399
+          }
+        },
+        "all_retained_canaries_pass": false,
+        "gate_pass": false
+      },
+      "native_cadence": {
+        "baseline_saved_interval_s": 0.02,
+        "baseline_observed_frames": 16,
+        "baseline_observed_window_s": 0.3000032376922204,
+        "required_dense_saved_interval_s": 0.002,
+        "required_dense_frame_count": 151,
+        "required_matched_decimation_saved_interval_s": 0.02,
+        "exact_dense_source_available": false,
+        "exact_matched_decimation_pair_available": false,
+        "prepared_dense_execution_status": "prepared_only; dense CFD and paired material overlays not yet executed",
+        "substitution_forbidden": [
+          "The existing .004 s center source cannot substitute for the required .002 s dense source.",
+          "An independent .02 s solve cannot substitute for matched decimation from a .002 s parent.",
+          "The q=1 endpoint has no dense parent source."
+        ],
+        "qualification_effect": "none"
+      },
+      "event_window": {
+        "registered_full_window_s": 4.34,
+        "observed_canary_window_s": 0.3000032376922204,
+        "complete": false,
+        "status": "right_censored_or_unresolved",
+        "acceptance": false
+      },
+      "scope_coverage": {
+        "registered_overlay_rows": 33,
+        "source_cfd_cells": 15,
+        "resolution_substep_rows": 24,
+        "resolution_source_mapping": "all 24 rows map to existing F4 spatial source cells; material overlays remain pending",
+        "cadence_rows": 4,
+        "cadence_exact_pairs_complete": false,
+        "seed_density_rows": 5,
+        "seed_density_source_cells_exist": true,
+        "seed_density_4096_overlays_complete": false,
+        "formal_matrix_acceptance": false,
+        "qualification_credit": "none"
+      }
+    }
+  },
+  "remediation_requirements": [
+    {
+      "id": "R1",
+      "name": "per_source_unknown_quality_closure",
+      "mode": "cpu_only_read_only",
+      "current_status": "blocked",
+      "pass_requires": [
+        "Every registered source reports a finite per-source unknown fraction at or below 0.01.",
+        "The denominator retains every geometric seed and does not use an aggregate-only pass.",
+        "Material summaries, checkpoint manifests, source bindings, and terminal receipts hash-check against the versioned implementation.",
+        "A repair or diagnostic variant is not counted without an independent fixed-gate acceptance record."
+      ]
+    },
+    {
+      "id": "R2",
+      "name": "native_cadence_provenance_closure",
+      "mode": "cpu_only_read_only",
+      "current_status": "blocked",
+      "pass_requires": [
+        "F3 retains a native .002 s dense source and direct native-frame .01 s matched decimation with frame-map and source hashes.",
+        "F4 retains a native .002 s dense source and .02 s matched decimation from that same parent, with the registered physics fields unchanged.",
+        "No interpolation, independent .02 s solve, or .004 s source is substituted for a required native cadence product.",
+        "Cadence comparisons remain diagnostic until their source scope and independent acceptance records are complete."
+      ]
+    },
+    {
+      "id": "R3",
+      "name": "registered_scope_and_event_closure",
+      "mode": "cpu_only_read_only",
+      "current_status": "blocked",
+      "pass_requires": [
+        "All 33 registered F3 rows have terminal, hash-bound evidence and an independent acceptance decision.",
+        "All 33 F4 overlay rows are represented by the registered 15-cell source mapping, with the five 4096-seed density overlays and four cadence rows closed.",
+        "Residence and event metrics use the full registered event window; right-censored or unresolved canaries remain diagnostic."
+      ]
+    },
+    {
+      "id": "R4",
+      "name": "second_family_independent_acceptance",
+      "mode": "cpu_only_read_only",
+      "current_status": "blocked",
+      "pass_requires": [
+        "Two distinct material families each have an independently accepted macro T2 record under the same fixed gates.",
+        "A passing F3 or F4 diagnostic, mass closure, substep agreement, or repair proposal cannot satisfy the second-family gate.",
+        "The central registry remains unchanged until the independent acceptance records exist."
+      ]
+    }
+  ],
+  "qualification_preflight": {
+    "overall_pass": false,
+    "f3": {
+      "eligible_for_t2": false,
+      "unknown_gate_pass": false,
+      "cdf_gate_pass": false,
+      "native_cadence_scope_complete": false,
+      "registered_scope_complete": false,
+      "blocking_reasons": [
+        "Per-source unknown gate fails on retained rows 29 and 31.",
+        "Terminal CDF bounds exceed the fixed 0.02 gate.",
+        "The 33-row matrix still contains active, blocked, and unsubmitted rows; observed cadence output is diagnostic only."
+      ]
+    },
+    "f4": {
+      "eligible_for_t2": false,
+      "unknown_gate_pass": false,
+      "native_cadence_pair_complete": false,
+      "full_event_window_pass": false,
+      "registered_scope_complete": false,
+      "blocking_reasons": [
+        "Every retained canary fails the 0.01 unknown gate.",
+        "The exact .002 s dense plus .02 s matched-decimation pair is incomplete.",
+        "The observed canaries are right-censored before the 4.34 s registered event window.",
+        "The 33-row overlay template has pending density, cadence, and independent acceptance records."
+      ]
+    },
+    "second_family_gate": {
+      "required": true,
+      "required_distinct_t2_families": 2,
+      "observed_independently_accepted_t2_families": 0,
+      "pass": false,
+      "registry_mutation": 0
+    }
+  },
+  "implementation_binding": {
+    "hash_algorithm": "sha256",
+    "scripts": {
+      "scripts/core_material.py": "75564f6fba20f8f3298dd6882e211ad4ad8278676c67083fb24e4ab140bb614c",
+      "scripts/core_material_acceptance.py": "4489ba4904a0c0e81dff844ef045a9749fd4fa5eed7af3f3070d9fead7f5f879",
+      "scripts/f3_native_volume_mls_compare.py": "d4fc40b0b0057b4b0fc2487560d709f01c95068109a028e2664bc9f6fdf44acb",
+      "scripts/f3_material_neighbors.py": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752",
+      "scripts/passive_tracers.py": "3c12744133176a20ca955e1b76e0a9b7c0f5e2ddda4fef75d77574fc201f9024"
+    },
+    "binding_rule": "A changed implementation hash invalidates this preflight until the JSON evidence and acceptance tests are regenerated; no stale code hash is treated as current."
+  },
+  "input_evidence": [
+    {
+      "path": "campaigns/core-v1/material/evidence/f3-f4-t2-cpu-only-next-step-decision-20260920.json",
+      "sha256": "5236dc57e600af014cf4a4cb5dde321fc1693173765c37e2a072e821b2d021bf",
+      "role": "current fixed-gate decision and terminal F3/F4 negative summary"
+    },
+    {
+      "path": "campaigns/core-v1/material/evidence/f3-adapter-rows29-31-terminal-negative-evidence-20260920.json",
+      "sha256": "fbf4d1c728896ea88ae04ad12b225570c1459502fedc42503e7c27090ecc5e95",
+      "role": "F3 terminal row receipts and source-window provenance"
+    },
+    {
+      "path": "campaigns/core-v1/material/evidence/f3-adapter-rows29-31-terminal-comparison-20260920.json",
+      "sha256": "2db007419d5a00e91ec6dfa4ae7454dabed4e150472afc8e8835868a5c3b0e33",
+      "role": "F3 paired terminal comparison and denominator policy"
+    },
+    {
+      "path": "campaigns/core-v1/material/evidence/f3-cadence-comparisons/f3-native002-production-s4-vs-matched010-production-s4-v2-summary-v2.json",
+      "sha256": "bc48f655a8e1fd9574dacb7011fc4b04d380f5b3d2912957a7a719b77dae2e30",
+      "role": "F3 native dense versus direct native-frame matched cadence diagnostic"
+    },
+    {
+      "path": "campaigns/core-v1/material/evidence/f3-cadence-comparisons/root-verification-v1.json",
+      "sha256": "1cead3e110818437868ca8d6bcc30744e5dc6bac01c160ea0c62d029c5a6c786",
+      "role": "F3 cadence root verification and no-qualification decision"
+    },
+    {
+      "path": "campaigns/core-v1/material/evidence/f3-native-mls-33-matrix-gap-audit-v1.json",
+      "sha256": "b1cf2d4943d07e095343c664d8b704d4217ac920cd3672600da5a3e28af288a3",
+      "role": "F3 33-row scope and source-availability audit"
+    },
+    {
+      "path": "campaigns/core-v1/material/evidence/f4-material-negative-evidence-audit-20260920.json",
+      "sha256": "6aa41b16acdf6562a7b40c4e79f1e3ee18b59db080c2fd8ce642d04749bf33dd",
+      "role": "F4 retained canary negative evidence and right-censoring audit"
+    },
+    {
+      "path": "campaigns/core-v1/material/evidence/f4-native-cadence-comparison-2026-09-19.json",
+      "sha256": "bf44683190fc3f90023e2c08a5b4e78952721fb644e71d220b8391aa39ed0eb5",
+      "role": "F4 native cadence control design and prepared-only status"
+    },
+    {
+      "path": "campaigns/core-v1/material/evidence/f4-resting-pool-33-to-15-matrix-review-2026-09-19.json",
+      "sha256": "7fd6c5f5c8f42a28a424a3a30e528eef549b6787895c3c9216b0c246d88710ff",
+      "role": "F4 33-row overlay mapping, 15-cell source coverage, and cadence gaps"
+    }
+  ],
+  "prohibited_shortcuts": [
+    "Do not relax the 0.01 unknown threshold or replace per-source denominators with aggregate mass.",
+    "Do not use a .004 s source, an independent .02 s solve, interpolation, or a right-censored canary as a native cadence or event acceptance substitute.",
+    "Do not convert diagnostic comparisons, mass closure, substep agreement, or repair proposals into T2 credit.",
+    "Do not submit GPU/CFD/solver work or mutate the central registry or ledger as part of this preflight."
+  ],
+  "interpretation_boundary": "This artifact is a CPU-only evidence-closure and qualification-preflight record. It records why F3 and F4 remain blocked and lists fixed-gate prerequisites for a later review; it cannot grant T2 and does not change registry state."
+}
