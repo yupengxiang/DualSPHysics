@@ -1,0 +1,2283 @@
+{
+  "schema": "core.f6.observation_axis.qualification_matrix.v1",
+  "design_ref": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-qualification-design-20260921/design.json",
+    "sha256": "ef676a9a8a25f9ff5353a1d8c3e792cc087cc2ff0f1fdf8934820870d7167a89",
+    "bytes": 71552,
+    "role": "matrix design",
+    "hash_only": false
+  },
+  "cells": [
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q0P00_DP0P025_SPATIAL",
+      "case_id": "F6_OBS_V10_Q0P00_DP0P025_SPATIAL_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q0P00_DP0P025_SPATIAL_Definition",
+      "design_cell": "spatial",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 0.0,
+        "value_m": 0.49,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.025,
+        "role": "fine_reference",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.49,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "baseline",
+        "cfl": 0.2,
+        "output_interval_s": 0.005,
+        "max_native_gap_s": 0.0055,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.0005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.49,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.15000000000000002,
+        "predicted_contact_time_s": 0.17487435419566724,
+        "contact_prediction_window_s": [
+          0.15487435419566725,
+          0.19487435419566723
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q0P00_DP0P020_SPATIAL",
+      "case_id": "F6_OBS_V10_Q0P00_DP0P020_SPATIAL_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q0P00_DP0P020_SPATIAL_Definition",
+      "design_cell": "spatial",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 0.0,
+        "value_m": 0.49,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.02,
+        "role": "production",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.49,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "baseline",
+        "cfl": 0.2,
+        "output_interval_s": 0.005,
+        "max_native_gap_s": 0.0055,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.0005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.49,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.15000000000000002,
+        "predicted_contact_time_s": 0.17487435419566724,
+        "contact_prediction_window_s": [
+          0.15487435419566725,
+          0.19487435419566723
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q0P00_DP0P015_SPATIAL",
+      "case_id": "F6_OBS_V10_Q0P00_DP0P015_SPATIAL_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q0P00_DP0P015_SPATIAL_Definition",
+      "design_cell": "spatial",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 0.0,
+        "value_m": 0.49,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.015,
+        "role": "fine_reference",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.49,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "baseline",
+        "cfl": 0.2,
+        "output_interval_s": 0.005,
+        "max_native_gap_s": 0.0055,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.0005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.49,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.15000000000000002,
+        "predicted_contact_time_s": 0.17487435419566724,
+        "contact_prediction_window_s": [
+          0.15487435419566725,
+          0.19487435419566723
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q0P50_DP0P025_SPATIAL",
+      "case_id": "F6_OBS_V10_Q0P50_DP0P025_SPATIAL_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q0P50_DP0P025_SPATIAL_Definition",
+      "design_cell": "spatial",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 0.5,
+        "value_m": 0.55,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.025,
+        "role": "fine_reference",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.55,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "baseline",
+        "cfl": 0.2,
+        "output_interval_s": 0.005,
+        "max_native_gap_s": 0.0055,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.0005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.55,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.21000000000000008,
+        "predicted_contact_time_s": 0.20691412628791772,
+        "contact_prediction_window_s": [
+          0.18691412628791773,
+          0.2269141262879177
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q0P50_DP0P020_SPATIAL",
+      "case_id": "F6_OBS_V10_Q0P50_DP0P020_SPATIAL_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q0P50_DP0P020_SPATIAL_Definition",
+      "design_cell": "spatial",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 0.5,
+        "value_m": 0.55,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.02,
+        "role": "production",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.55,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "baseline",
+        "cfl": 0.2,
+        "output_interval_s": 0.005,
+        "max_native_gap_s": 0.0055,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.0005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.55,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.21000000000000008,
+        "predicted_contact_time_s": 0.20691412628791772,
+        "contact_prediction_window_s": [
+          0.18691412628791773,
+          0.2269141262879177
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q0P50_DP0P015_SPATIAL",
+      "case_id": "F6_OBS_V10_Q0P50_DP0P015_SPATIAL_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q0P50_DP0P015_SPATIAL_Definition",
+      "design_cell": "spatial",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 0.5,
+        "value_m": 0.55,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.015,
+        "role": "fine_reference",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.55,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "baseline",
+        "cfl": 0.2,
+        "output_interval_s": 0.005,
+        "max_native_gap_s": 0.0055,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.0005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.55,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.21000000000000008,
+        "predicted_contact_time_s": 0.20691412628791772,
+        "contact_prediction_window_s": [
+          0.18691412628791773,
+          0.2269141262879177
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q1P00_DP0P025_SPATIAL",
+      "case_id": "F6_OBS_V10_Q1P00_DP0P025_SPATIAL_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q1P00_DP0P025_SPATIAL_Definition",
+      "design_cell": "spatial",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 1.0,
+        "value_m": 0.61,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.025,
+        "role": "fine_reference",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.61,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "baseline",
+        "cfl": 0.2,
+        "output_interval_s": 0.005,
+        "max_native_gap_s": 0.0055,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.0005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.61,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.27,
+        "predicted_contact_time_s": 0.2346185661017325,
+        "contact_prediction_window_s": [
+          0.21461856610173252,
+          0.2546185661017325
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q1P00_DP0P020_SPATIAL",
+      "case_id": "F6_OBS_V10_Q1P00_DP0P020_SPATIAL_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q1P00_DP0P020_SPATIAL_Definition",
+      "design_cell": "spatial",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 1.0,
+        "value_m": 0.61,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.02,
+        "role": "production",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.61,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "baseline",
+        "cfl": 0.2,
+        "output_interval_s": 0.005,
+        "max_native_gap_s": 0.0055,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.0005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.61,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.27,
+        "predicted_contact_time_s": 0.2346185661017325,
+        "contact_prediction_window_s": [
+          0.21461856610173252,
+          0.2546185661017325
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q1P00_DP0P015_SPATIAL",
+      "case_id": "F6_OBS_V10_Q1P00_DP0P015_SPATIAL_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q1P00_DP0P015_SPATIAL_Definition",
+      "design_cell": "spatial",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 1.0,
+        "value_m": 0.61,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.015,
+        "role": "fine_reference",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.61,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "baseline",
+        "cfl": 0.2,
+        "output_interval_s": 0.005,
+        "max_native_gap_s": 0.0055,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.0005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.61,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.27,
+        "predicted_contact_time_s": 0.2346185661017325,
+        "contact_prediction_window_s": [
+          0.21461856610173252,
+          0.2546185661017325
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q0P25_DP0P020_SPATIAL_HELD_OUT",
+      "case_id": "F6_OBS_V10_Q0P25_DP0P020_SPATIAL_HELD_OUT_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q0P25_DP0P020_SPATIAL_HELD_OUT_Definition",
+      "design_cell": "spatial_held_out",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 0.25,
+        "value_m": 0.52,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.02,
+        "role": "production",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.52,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "baseline",
+        "cfl": 0.2,
+        "output_interval_s": 0.005,
+        "max_native_gap_s": 0.0055,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.0005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.52,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.18000000000000005,
+        "predicted_contact_time_s": 0.1915652570442303,
+        "contact_prediction_window_s": [
+          0.1715652570442303,
+          0.2115652570442303
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q0P25_DP0P015_SPATIAL_HELD_OUT",
+      "case_id": "F6_OBS_V10_Q0P25_DP0P015_SPATIAL_HELD_OUT_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q0P25_DP0P015_SPATIAL_HELD_OUT_Definition",
+      "design_cell": "spatial_held_out",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 0.25,
+        "value_m": 0.52,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.015,
+        "role": "fine_reference",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.52,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "baseline",
+        "cfl": 0.2,
+        "output_interval_s": 0.005,
+        "max_native_gap_s": 0.0055,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.0005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.52,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.18000000000000005,
+        "predicted_contact_time_s": 0.1915652570442303,
+        "contact_prediction_window_s": [
+          0.1715652570442303,
+          0.2115652570442303
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q0P75_DP0P020_SPATIAL_HELD_OUT",
+      "case_id": "F6_OBS_V10_Q0P75_DP0P020_SPATIAL_HELD_OUT_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q0P75_DP0P020_SPATIAL_HELD_OUT_Definition",
+      "design_cell": "spatial_held_out",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 0.75,
+        "value_m": 0.58,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.02,
+        "role": "production",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.58,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "baseline",
+        "cfl": 0.2,
+        "output_interval_s": 0.005,
+        "max_native_gap_s": 0.0055,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.0005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.58,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.24,
+        "predicted_contact_time_s": 0.2212005054437324,
+        "contact_prediction_window_s": [
+          0.2012005054437324,
+          0.2412005054437324
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q0P75_DP0P015_SPATIAL_HELD_OUT",
+      "case_id": "F6_OBS_V10_Q0P75_DP0P015_SPATIAL_HELD_OUT_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q0P75_DP0P015_SPATIAL_HELD_OUT_Definition",
+      "design_cell": "spatial_held_out",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 0.75,
+        "value_m": 0.58,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.015,
+        "role": "fine_reference",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.58,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "baseline",
+        "cfl": 0.2,
+        "output_interval_s": 0.005,
+        "max_native_gap_s": 0.0055,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.0005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.58,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.24,
+        "predicted_contact_time_s": 0.2212005054437324,
+        "contact_prediction_window_s": [
+          0.2012005054437324,
+          0.2412005054437324
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q0P50_DP0P020_INTERNAL_TIME",
+      "case_id": "F6_OBS_V10_Q0P50_DP0P020_INTERNAL_TIME_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q0P50_DP0P020_INTERNAL_TIME_Definition",
+      "design_cell": "internal_time",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 0.5,
+        "value_m": 0.55,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.02,
+        "role": "production",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.55,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "internal_time_step",
+        "cfl": 0.1,
+        "output_interval_s": 0.005,
+        "max_native_gap_s": 0.0055,
+        "comparison_to": "F6_OBS_V10_Q0P50_DP0P020_spatial",
+        "actual_step_count_required": true,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.0005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.55,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.21000000000000008,
+        "predicted_contact_time_s": 0.20691412628791772,
+        "contact_prediction_window_s": [
+          0.18691412628791773,
+          0.2269141262879177
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F6",
+      "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+      "revision_id": "F6_observation_axis_13plus2_v1",
+      "cell_id": "F6_OBS_V10_Q0P50_DP0P020_NATIVE_OUTPUT",
+      "case_id": "F6_OBS_V10_Q0P50_DP0P020_NATIVE_OUTPUT_fresh_case",
+      "definition_id": "CORE_F6_OBS_V10_Q0P50_DP0P020_NATIVE_OUTPUT_Definition",
+      "design_cell": "native_output",
+      "stage": "qualification",
+      "qualification_only": true,
+      "qualification_claim": "none",
+      "qualification_credit": 0,
+      "T1": false,
+      "split": "qualification_only",
+      "parameter": {
+        "name": "body_release_com_z_m",
+        "q": 0.5,
+        "value_m": 0.55,
+        "candidate_range_m": [
+          0.49,
+          0.61
+        ],
+        "interpretation": "initial floating-body center-of-mass release height"
+      },
+      "resolution": {
+        "dp_m": 0.02,
+        "role": "production",
+        "registered_resolutions_m": [
+          0.025,
+          0.02,
+          0.015
+        ]
+      },
+      "geometry": {
+        "fluid_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "fluid_size_m": [
+          1.14,
+          0.44,
+          0.24
+        ],
+        "body_size_m": [
+          0.2,
+          0.16,
+          0.12
+        ],
+        "body_com_xy_m": [
+          0.75,
+          0.3
+        ],
+        "body_com_z_m": 0.55,
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      },
+      "physics": {
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "fluid_density_kg_m3": 1000.0,
+        "body_density_kg_m3": 780.0,
+        "initial_fluid_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "initial_body_velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "time_contract": {
+        "variant": "native_output_cadence",
+        "cfl": 0.2,
+        "output_interval_s": 0.0025,
+        "max_native_gap_s": 0.00275,
+        "comparison_to": "F6_OBS_V10_Q0P50_DP0P020_spatial",
+        "actual_step_count_unchanged_by_design": true,
+        "time_start_s": 0.0,
+        "time_end_target_s": 1.5,
+        "maximum_extended_time_s": 3.0,
+        "terminal_overshoot_max_s": 0.00025,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "observation_hold_s": [
+          1.0,
+          1.5
+        ],
+        "equilibrium_status": "not_claimed"
+      },
+      "event_contract": {
+        "initial_body_com_z_m": 0.55,
+        "fluid_surface_z_m": 0.27999999999999997,
+        "predicted_contact_com_z_m": 0.33999999999999997,
+        "predicted_drop_distance_m": 0.21000000000000008,
+        "predicted_contact_time_s": 0.20691412628791772,
+        "contact_prediction_window_s": [
+          0.18691412628791773,
+          0.2269141262879177
+        ],
+        "analytic_only": true,
+        "observation_window_s": [
+          1.0,
+          1.5
+        ],
+        "event_window_complete_required": true,
+        "one_whole_scope_extension_allowed": true,
+        "extension_policy": "if_hard_complete_but_event_censored_extend_all_cells_to_2T_once"
+      },
+      "fresh_input_contract": {
+        "fresh_definition_required": true,
+        "fresh_generated_xml_required": true,
+        "fresh_generated_bi4_required": true,
+        "old_v10_canary_used_as_input": false,
+        "old_v10_canary_context_hash_only": true,
+        "prior_scope_qualification_inherited": false
+      },
+      "hard_gates": [
+        "fresh Definition/XML/BI4 hashes match this cell identity",
+        "native particle IDs unique and fixed; arrays finite",
+        "fluid/body counts and continuous-mass error pass per-cell gate",
+        "body mass/COM/inertia metadata match this cell contract",
+        "301 native frames with actual TimeStep gaps within cell bound",
+        "terminal actual time brackets target without overshoot violation",
+        "contact time lies in the independently recomputed window",
+        "closed-face contact and penetration remain zero",
+        "open-top mass flux is zero",
+        "observation hold is bracketed without equilibrium claim"
+      ],
+      "execution_policy": {
+        "exactly_one_initial_attempt_per_cell": true,
+        "same_input_retry": false,
+        "infrastructure_retry_requires_new_attempt_record": true,
+        "science_failure_retry": false,
+        "queue_submission": false,
+        "registry_mutation": false,
+        "ledger_mutation": false,
+        "matrix_credit": 0
+      }
+    }
+  ],
+  "submitted": false,
+  "qualification_credit": 0
+}

@@ -55,6 +55,12 @@
   body sidecar 全部通过；`[1.0,1.5] s` 只登记为 observation hold，明确没有
   equilibrium claim。该 canary 状态为 `solver_completed_sidecar_pass_pending_scientific_review`，
   仍然不计入 T1 或生产分母。
+- v10 observation-axis 的 13+2 候选资格矩阵已冻结为 root-review-only 设计：
+  `body_release_com_z_m∈[0.49,0.61]` 的三个空间锚点、两个独立内部点、三档
+  分辨率，以及内部时间推进和原生输出 cadence 对照，共 15 个唯一单元。每格要求
+  fresh Definition/XML/BI4、独立 native preflight 和实际 `TimeStep` 审查；旧 canary
+  只作哈希绑定上下文，不能提供资格 credit。设计产物仍是
+  `qualification_only`、`T1=false`、credit 为零，尚未启动矩阵执行。
 - 材料修复后的实现哈希已重新绑定到只读预检证据；同时把评测和 rollout 的
   frame denominator 收紧为真实整数语义，拒绝 fractional/bool 计数。新鲜 v5
   源闭包、root-admission 回执和 full-field halo oracle 已重新生成并通过哈希
@@ -80,9 +86,10 @@
 ## 下一步准入顺序
 
 1. F6 v9 canary 的 solver 产物已经完整保留，但严格 cadence 合同未通过。v10
-   已通过 fresh Definition/native preflight 和一次 actual-TimeStep solver canary；
-   下一步是独立完成预登记的空间／时间／原生 cadence 资格矩阵，再决定是否进入
-   8→32 生产。不得对同一科学输入重跑，也不能把 v9 canary 改判为通过。
+   已通过 fresh Definition/native preflight 和一次 actual-TimeStep solver canary，
+   现在已冻结 13+2 候选矩阵；下一步为每格 fresh native preflight，再授权预登记
+   的 8 个 canary 单元，最后才决定是否进入 8→32 生产。不得对同一科学输入重跑，
+   也不能把 v9 canary 改判为通过。
 2. F6 取得 T1 后，按固定 8→32 生产规则注册案例，再开启正式 9 个模型/种子
    训练。材料侧先在已取得 T1 的两个家族分别完成完整宏观矩阵，不能用旧
    diagnostic trace 代替 T2。
