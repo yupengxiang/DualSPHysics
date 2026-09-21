@@ -115,6 +115,23 @@
   H2 static-hold 均已有硬失败或事件删失，没有发现可审计的新物理 Definition。
   新 receipt 只冻结 `route_closed_no_new_hypothesis`，保留各自 zero-credit 与失败
   分母；没有运行 GenCase/native/solver，也没有变更 registry、ledger、T1/T2。
+- F6 observation-axis v4 已形成独立 route-closure receipt：15 格 native preflight 全部
+  通过，但 8 格 root-authorized solver canary 只有 7/8 scientific pass；`q=1,
+  dp=0.015 m` 的 cell-08 有 1 个被排除流体粒子，导致
+  `excluded_particles_zero`、`native_identity_fixed` 和 `fluid_group_count_fixed` 三个
+  硬门失败。7 个 metadata-only repair 没有重启 solver、没有改变 scientific fields；
+  当前不授权剩余 7 格或同输入重跑，F6 仍不计入 T1。
+- F4 native weighted MLS 候选已完成只读 admission audit。现有短 RK4 canary 的
+  unknown 为 0，但没有 reference CDF comparison，trace 不是完整事件窗，residence
+  全部 right-censored；因此 receipt 保持 `blocked`、`credit=0`、`T2_macro=false`，
+  没有重跑 ESS32/affine-bound，也没有启动长 H5 或修改分母。
+
+- F6 observation-axis v4 已形成独立 route-closure receipt：15 格 native preflight 全部
+  通过，但 8 格 root-authorized solver canary 只有 7/8 scientific pass；`q=1,
+  dp=0.015 m` 的 cell-08 有 1 个被排除流体粒子，导致
+  `excluded_particles_zero`、`native_identity_fixed` 和 `fluid_group_count_fixed` 三个
+  硬门失败。7 个 metadata-only repair 没有重启 solver、没有改变 scientific fields；
+  当前不授权剩余 7 格或同输入重跑，F6 仍不计入 T1。
 
 ## 当前门状态
 
@@ -135,11 +152,10 @@
 
 ## 下一步准入顺序
 
-1. F6 v9 canary 的 solver 产物已经完整保留，但严格 cadence 合同未通过。v10
-   v4 已完成 15 格 fresh native preflight，8 格 solver canary 已完整审计（7/8 通过，
-   cell-08 保留科学硬失败）。新的 root review 必须先决定该 scope 是否关闭并转向 F2
-   或其它替补家族；不得授权剩余 7 格、对 cell-08 同输入重跑，或把 v9/v1--v3 失败证据
-   改判为通过。
+1. F6 v9 canary 的 solver 产物已经完整保留，但严格 cadence 合同未通过；v10 v4
+   也已由 7/8 通过、cell-08 科学硬失败的证据正式关闭。不得授权剩余 7 格、对
+   cell-08 同输入重跑，或把 v9/v1--v3 失败证据改判为通过。若要恢复 F6，必须先
+   提出新的、独立且可证伪的物理/数值假设并重新走 Definition 与 root review。
 2. F2 release-speed v2 已因 CPU/native 外壁端点硬失败关闭；任何后续 F2/F1/F5
    路线必须提出全新的物理假设和 Definition。F3 宏观 T2 审计仍在阻塞；在第三个
    T1 家族通过并完成32例注册前，formal planner 不得生成9个训练作业。F4 的 T2
