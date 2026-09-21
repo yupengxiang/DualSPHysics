@@ -142,6 +142,107 @@ def _execution_summary(case_rows):
     }
 
 
+def formal_evaluation_gate(*, registered_case_ids, selected_case_ids=None,
+                           split="test", maximum_steps=None):
+    """Validate the immutable scope of a direct formal evaluation.
+
+    This is deliberately pure: the caller supplies the case registry observed
+    from the released manifest.  In particular, an explicit case list is not
+    allowed to redefine the denominator, and a rollout horizon is not allowed
+    to redefine the registered future-frame count.
+    """
+    registered = tuple(registered_case_ids)
+    try:
+        registered_set = set(registered)
+    except TypeError as error:
+        raise ValueError("formal evaluation case IDs must be hashable") from error
+    if not registered:
+        raise ValueError("formal evaluation requires registered test cases")
+    if len(registered_set) != len(registered):
+        raise ValueError("formal evaluation registry contains duplicate cases")
+    if split != "test":
+        raise ValueError("formal evaluation requires split='test'")
+    if maximum_steps is not None:
+        raise ValueError("formal evaluation forbids maximum_steps")
+
+    if selected_case_ids is None:
+        selected = registered
+    elif isinstance(selected_case_ids, str):
+        selected = (selected_case_ids,)
+    else:
+        selected = tuple(selected_case_ids)
+    try:
+        selected_set = set(selected)
+    except TypeError as error:
+        raise ValueError("formal evaluation case IDs must be hashable") from error
+    if len(selected_set) != len(selected):
+        raise ValueError("formal evaluation case selection contains duplicate cases")
+    unknown = [case_id for case_id in selected if case_id not in registered_set]
+    if unknown:
+        raise ValueError(f"formal evaluation contains unknown case(s): {unknown}")
+    if selected_set != registered_set or len(selected) != len(registered):
+        raise ValueError("formal evaluation requires every registered test case")
+    return {
+        "split": "test",
+        "registered_case_ids": registered,
+        "case_ids": selected,
+        "registered_case_count": len(registered),
+        "maximum_steps": None,
+    }
+
+
+def _validate_fixed_denominator(case_ids, fixed_denominator):
+    """Reject a missing, partial, or malformed registered frame denominator."""
+    case_ids = tuple(case_ids)
+    if not isinstance(fixed_denominator, dict):
+        raise ValueError("fixed evaluation denominator is required")
+    try:
+        if set(fixed_denominator) != set(case_ids):
+            raise ValueError("fixed evaluation denominator must cover every registered case")
+    except TypeError as error:
+        raise ValueError("fixed evaluation denominator case IDs must be hashable") from error
+    for case_id in case_ids:
+        row = fixed_denominator.get(case_id)
+        if not isinstance(row, dict):
+            raise ValueError(f"fixed evaluation denominator is missing case {case_id}")
+        expected_frames = _strict_integer(row.get("expected_frames"),
+                                          f"expected_frames for case {case_id}")
+        if expected_frames < 1:
+            raise ValueError(f"expected_frames for case {case_id} must be positive")
+        for name in ("length_m", "speed_mps"):
+            value = row.get(name)
+            if not isinstance(value, (int, float, np.integer, np.floating)) \
+                    or not np.isfinite(float(value)) or float(value) <= 0:
+                raise ValueError(f"fixed evaluation denominator has invalid {name} for case {case_id}")
+    return fixed_denominator
+
+
+def _fixed_denominator_for_cases(dataset, case_ids):
+    fixed_denominator = {}
+    for case_id in case_ids:
+        expected_frames = len(dataset.times(case_id)) - 1
+        length_m, speed_mps = _characteristic_scales(dataset.known_inputs(case_id))
+        fixed_denominator[case_id] = {
+            "expected_frames": expected_frames,
+            "length_m": length_m,
+            "speed_mps": speed_mps,
+        }
+    return _validate_fixed_denominator(case_ids, fixed_denominator)
+
+
+def _finite_summary(case_rows):
+    """Expose finite completion separately from execution and score status."""
+    rows = list(case_rows.values()) if isinstance(case_rows, dict) else list(case_rows)
+    finite = sum(row.get("rollout", {}).get("finite_rollout_complete") is True
+                 for row in rows if isinstance(row, dict))
+    return {
+        "registered_case_count": len(rows),
+        "finite_rollout_complete_case_count": int(finite),
+        "finite_rollout_incomplete_case_count": int(len(rows) - finite),
+        "all_registered_rollouts_finite": bool(rows) and finite == len(rows),
+    }
+
+
 def canonical(value):
     return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
@@ -1968,6 +2069,210 @@ def evaluate_checkpoints(dataset, checkpoints, *, device="cpu", chunk_size=DEFAU
     }
 
 
+def _diagnostic_case_selection(dataset, split, case_ids):
+    """Select a known diagnostic scope without changing manifest split labels."""
+    available = tuple(dataset.case_ids())
+    available_set = set(available)
+    if case_ids is None:
+        selected = tuple(dataset.case_ids(split))
+    elif isinstance(case_ids, str):
+        selected = (case_ids,)
+    else:
+        selected = tuple(case_ids)
+    if not selected:
+        raise ValueError("no diagnostic evaluation cases selected")
+    if len(set(selected)) != len(selected):
+        raise ValueError("diagnostic evaluation case selection contains duplicate cases")
+    unknown = [case_id for case_id in selected if case_id not in available_set]
+    if unknown:
+        raise ValueError(f"diagnostic evaluation contains unknown case(s): {unknown}")
+    return selected
+
+
+def _pad_rollout_to_expected_frames(rollout, expected_frames, *, horizon_limited=False):
+    """Retain a fixed frame denominator when a diagnostic horizon is bounded."""
+    if not isinstance(rollout, dict):
+        raise ValueError("rollout result must be a mapping")
+    expected_frames = _strict_integer(expected_frames, "expected_frames")
+    if expected_frames < 1:
+        raise ValueError("expected_frames must be positive")
+    result = dict(rollout)
+    observed_expected = result.get("expected_frames", expected_frames)
+    observed_expected = _strict_integer(observed_expected, "rollout expected_frames")
+    if observed_expected < 0 or observed_expected > expected_frames:
+        raise ValueError("rollout expected_frames exceeds the fixed denominator")
+
+    for name in ("position_rmse", "velocity_rmse", "position_ade", "velocity_ade"):
+        values = result.get(name, [])
+        if not isinstance(values, (list, tuple)) or len(values) > expected_frames:
+            raise ValueError(f"rollout {name} exceeds the fixed denominator")
+        result[name] = list(values) + [None] * (expected_frames - len(values))
+
+    physics = result.get("physics", {})
+    if not isinstance(physics, dict):
+        raise ValueError("rollout physics must be a mapping")
+    physics = dict(physics)
+    physics_frames = physics.get("frames", [])
+    if not isinstance(physics_frames, (list, tuple)) or len(physics_frames) > expected_frames:
+        raise ValueError("rollout physics frame coverage exceeds the fixed denominator")
+    physics_frames = list(physics_frames) + [None] * (expected_frames - len(physics_frames))
+    physics_summary = physics.get("summary", {})
+    if not isinstance(physics_summary, dict):
+        raise ValueError("rollout physics summary must be a mapping")
+    physics_summary = dict(physics_summary)
+    physics_summary["expected_frames"] = expected_frames
+    physics_summary["completed_frames"] = sum(frame is not None for frame in physics_frames)
+    physics["frames"] = physics_frames
+    physics["summary"] = physics_summary
+    result["physics"] = physics
+
+    frames_executed = result.get("frames_executed", result.get("frames_predicted", 0))
+    frames_executed = _strict_integer(frames_executed, "frames_executed")
+    if frames_executed < 0 or frames_executed > expected_frames:
+        raise ValueError("invalid rollout frame count")
+    result["frames_executed"] = frames_executed
+    result["frames_predicted"] = frames_executed
+    result["frames_expected"] = expected_frames
+    result["expected_frames"] = expected_frames
+
+    failure_category = result.get("failure_category")
+    if observed_expected < expected_frames and failure_category is None:
+        failure_category = "maximum_steps_limit" if horizon_limited else "missing_frames"
+        result["failure_category"] = failure_category
+        result["first_failure_frame"] = frames_executed + 1
+    elif failure_category is not None and result.get("first_failure_frame") is None:
+        result["first_failure_frame"] = frames_executed + 1
+
+    completion = rollout_completion_semantics(
+        expected_frames=expected_frames,
+        frames_executed=frames_executed,
+        failure_category=failure_category,
+        position_rmse=result["position_rmse"],
+        velocity_rmse=result["velocity_rmse"],
+    )
+    result["execution_complete"] = completion["execution_complete"]
+    result["finite_rollout_complete"] = completion["finite_rollout_complete"]
+    result.setdefault("scientific_status", SCIENTIFIC_STATUS_NOT_ASSESSED)
+    result.setdefault("scientific_failure_category", None)
+    result.setdefault("scientific_first_failure_frame", None)
+    return result
+
+
+def evaluate(dataset, predictor, *, split="test", case_ids=None, maximum_steps=None,
+             diagnostic=False, model_kind=None, checkpoint=None, baseline=None,
+             training=True, trajectory_output_for_case=None,
+             progress_output_for_case=None, progress_every=25):
+    """Evaluate a predictor with a fixed registered denominator.
+
+    A manifest released for formal work can only be evaluated over its entire
+    registered ``test`` split.  Non-released manifests retain a deliberately
+    diagnostic mode for small fixtures and bounded investigations; those
+    results carry no formal eligibility and retain the actual manifest split
+    labels in the receipt.
+    """
+    from scripts.core_evaluation import aggregate_cases, score_case
+
+    formal_release = _manifest_formal_release(dataset)
+    if formal_release:
+        if diagnostic:
+            raise ValueError("formal manifests cannot use diagnostic evaluate")
+        registered_case_ids = tuple(dataset.case_ids("test"))
+        scope = formal_evaluation_gate(
+            registered_case_ids=registered_case_ids,
+            selected_case_ids=case_ids,
+            split=split,
+            maximum_steps=maximum_steps,
+        )
+        selected_case_ids = tuple(scope["case_ids"])
+        evaluation_mode = "formal"
+    else:
+        if maximum_steps is not None:
+            maximum_steps = _strict_integer(maximum_steps, "maximum_steps")
+            if maximum_steps < 1:
+                raise ValueError("maximum_steps must be positive")
+        selected_case_ids = _diagnostic_case_selection(dataset, split, case_ids)
+        registered_case_ids = selected_case_ids
+        evaluation_mode = "diagnostic"
+
+    case_splits = {case_id: dataset.record(case_id)["split"] for case_id in selected_case_ids}
+    fixed_denominator = _fixed_denominator_for_cases(dataset, registered_case_ids)
+    registry = {case_id: dataset.record(case_id)["family"] for case_id in registered_case_ids}
+    case_rows, scores = {}, {}
+    for case_id in selected_case_ids:
+        try:
+            rollout = rollout_case(
+                dataset, case_id, predictor,
+                maximum_steps=(None if evaluation_mode == "formal" else maximum_steps),
+                trajectory_output=(trajectory_output_for_case(case_id)
+                                   if trajectory_output_for_case is not None else None),
+                progress_output=(progress_output_for_case(case_id)
+                                 if progress_output_for_case is not None else None),
+                progress_every=progress_every,
+            )
+        except Exception as error:
+            rollout = _failed_rollout_receipt(dataset, case_id, error)
+        rollout = _pad_rollout_to_expected_frames(
+            rollout, fixed_denominator[case_id]["expected_frames"],
+            horizon_limited=(evaluation_mode == "diagnostic" and maximum_steps is not None),
+        )
+        score_failure_category = rollout.get("failure_category")
+        if rollout.get("scientific_status") == "failed" and score_failure_category is None:
+            score_failure_category = rollout.get("scientific_failure_category") or "scientific_failure"
+        if (rollout.get("execution_complete") is not True
+                or rollout.get("finite_rollout_complete") is not True) \
+                and score_failure_category is None:
+            score_failure_category = "incomplete_rollout"
+        denominator = fixed_denominator[case_id]
+        score = score_case(
+            rollout["position_rmse"], rollout["velocity_rmse"],
+            expected_frames=denominator["expected_frames"],
+            length_m=denominator["length_m"], speed_mps=denominator["speed_mps"],
+            executed=rollout.get("executed", False),
+            failure_category=score_failure_category,
+        )
+        scores[case_id] = score
+        # Keep the historical direct-evaluate shape (rollout fields at the
+        # case-row top level) while adding protocol-bound score/rollout views.
+        case_rows[case_id] = {**rollout, "score": score, "rollout": rollout}
+
+    aggregate = aggregate_cases(registry, scores)
+    execution_summary = _execution_summary(case_rows)
+    finite_summary = _finite_summary(case_rows)
+    observed_splits = set(case_splits.values())
+    receipt_split = (next(iter(observed_splits)) if len(observed_splits) == 1 else "mixed")
+    return {
+        "schema": "core.evaluation.v1",
+        "evaluation_mode": evaluation_mode,
+        "diagnostic": evaluation_mode == "diagnostic",
+        "formal_eligible": evaluation_mode == "formal",
+        "model_kind": model_kind,
+        "checkpoint": str(checkpoint) if checkpoint is not None else None,
+        "baseline": baseline,
+        "training": bool(training),
+        "split": receipt_split,
+        "requested_split": split,
+        "test_included": "test" in observed_splits,
+        "case_splits": case_splits,
+        "registered_case_ids": list(registered_case_ids),
+        "selected_case_ids": list(selected_case_ids),
+        "registered_case_count": len(registered_case_ids),
+        "case_count": len(case_rows),
+        "expected_frames": {
+            case_id: denominator["expected_frames"]
+            for case_id, denominator in fixed_denominator.items()
+        },
+        "fixed_denominator": fixed_denominator,
+        "cases": case_rows,
+        "aggregate": aggregate,
+        "metrics": aggregate,
+        "execution_summary": execution_summary,
+        "finite_summary": finite_summary,
+        "maximum_steps": maximum_steps,
+        "autonomous": True,
+        "future_state_inputs": False,
+    }
+
+
 def _manifest_path(manifest, data_root):
     """Resolve a learning manifest relative to the explicit data root.
 
@@ -2063,6 +2368,9 @@ def main(argv=None):
         command.add_argument("--progress-every", type=int, default=25,
                              help="publish rollout progress every N completed frames")
         command.add_argument("--output", type=Path, required=True)
+        if name == "evaluate":
+            command.add_argument("--diagnostic", action="store_true",
+                                 help="run a non-formal diagnostic on a non-released manifest")
 
     checkpoint_eval = sub.add_parser("evaluate-checkpoints")
     checkpoint_eval.add_argument("--manifest", type=Path, required=True)
@@ -2116,12 +2424,12 @@ def main(argv=None):
             else:
                 predictor, payload = _build_predictor_from_baseline(args.baseline)
                 source_checkpoint = None
-            case_ids = args.case_id or dataset.case_ids(args.split)
-            if not case_ids:
+            path_case_ids = tuple(args.case_id or dataset.case_ids(args.split))
+            if not path_case_ids:
                 raise ValueError("no rollout cases selected")
             if args.trajectory_output is not None and args.trajectory_output_dir is not None:
                 raise ValueError("--trajectory-output and --trajectory-output-dir are mutually exclusive")
-            if args.trajectory_output is not None and len(case_ids) != 1:
+            if args.trajectory_output is not None and len(path_case_ids) != 1:
                 raise ValueError("--trajectory-output requires exactly one case; use --trajectory-output-dir for many")
 
             def case_trajectory_path(case_id):
@@ -2137,25 +2445,36 @@ def main(argv=None):
                     return None
                 safe_case_id = "".join(char if (char.isalnum() or char in "-_.") else "_"
                                         for char in str(case_id))
-                if len(case_ids) == 1:
+                if len(path_case_ids) == 1:
                     return args.progress_output
                 # Multiple case rollouts need independent sidecars so a
                 # scheduler never mistakes one case's heartbeat for another.
                 args.progress_output.mkdir(parents=True, exist_ok=True)
                 return args.progress_output / f"{safe_case_id}-progress.json"
 
-            results = {case_id: rollout_case(dataset, case_id, predictor,
-                                              maximum_steps=args.maximum_steps,
-                                              trajectory_output=case_trajectory_path(case_id),
-                                              progress_output=case_progress_path(case_id),
-                                              progress_every=args.progress_every)
-                       for case_id in case_ids}
-            result = {"schema": "core.evaluation.v1" if args.command == "evaluate" else ROLLOUT_SCHEMA,
-                      "model_kind": payload["model_kind"], "checkpoint": source_checkpoint,
-                      "baseline": payload.get("baseline"), "training": payload.get("training", True),
-                      "case_count": len(results), "cases": results,
-                      "execution_summary": _execution_summary(results),
-                      "autonomous": True, "future_state_inputs": False}
+            if args.command == "evaluate":
+                result = evaluate(
+                    dataset, predictor, split=args.split, case_ids=args.case_id,
+                    maximum_steps=args.maximum_steps, diagnostic=args.diagnostic,
+                    model_kind=payload["model_kind"], checkpoint=source_checkpoint,
+                    baseline=payload.get("baseline"), training=payload.get("training", True),
+                    trajectory_output_for_case=case_trajectory_path,
+                    progress_output_for_case=case_progress_path,
+                    progress_every=args.progress_every,
+                )
+            else:
+                results = {case_id: rollout_case(dataset, case_id, predictor,
+                                                  maximum_steps=args.maximum_steps,
+                                                  trajectory_output=case_trajectory_path(case_id),
+                                                  progress_output=case_progress_path(case_id),
+                                                  progress_every=args.progress_every)
+                           for case_id in path_case_ids}
+                result = {"schema": ROLLOUT_SCHEMA,
+                          "model_kind": payload["model_kind"], "checkpoint": source_checkpoint,
+                          "baseline": payload.get("baseline"), "training": payload.get("training", True),
+                          "case_count": len(results), "cases": results,
+                          "execution_summary": _execution_summary(results),
+                          "autonomous": True, "future_state_inputs": False}
         atomic_json(args.output, result)
     print(json.dumps({key: value for key, value in result.items()
                       if key not in ("cases", "history", "checkpoints")}, indent=2))

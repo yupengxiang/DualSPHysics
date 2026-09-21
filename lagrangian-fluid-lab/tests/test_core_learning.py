@@ -17,17 +17,38 @@ import torch
 import scripts.core_learning as learning
 from scripts.core_dataset import CoreDataset
 from scripts.core_learning import (TransitionSampler, compute_normalization,
-                                   checkpoint_refs_from_receipt, evaluate_checkpoints,
+                                   checkpoint_refs_from_receipt, evaluate, evaluate_checkpoints,
+                                   formal_evaluation_gate,
                                    load_training_checkpoint, main, MILESTONE_UPDATES,
                                    model_parameter_digest, profile_case, rollout_case,
                                    save_training_checkpoint, sha256_file, train_model,
                                    restore_rng_state,
                                    _characteristic_scales,
                                    _execution_summary, rollout_completion_semantics,
+                                   _validate_fixed_denominator,
                                    _validate_milestone_evaluation)
 from scripts.core_models import DualIncrementModel, Normalization
 
 from test_core_contract import tiny_manifest
+
+
+def _formal_test_manifest(tmp_path, case_count=2):
+    manifest = tiny_manifest(tmp_path)
+    template = manifest["cases"][0]
+    cases = []
+    for index in range(case_count):
+        row = copy.deepcopy(template)
+        row.update(
+            case_id=f"formal-test-{index}",
+            physical_case_id=f"formal-test-{index}",
+            lineage_group_id=f"formal-test-{index}",
+            split="test",
+            evaluation_role="development_extrapolation",
+        )
+        cases.append(row)
+    manifest["cases"] = cases
+    manifest["formal_release"] = True
+    return manifest
 
 
 def test_normalization_and_sampler_are_train_only_and_resumable(tmp_path):
@@ -514,6 +535,162 @@ def test_cli_relative_manifest_is_resolved_under_data_root_from_other_cwd(tmp_pa
     receipt = json.loads(output.read_text())
     assert receipt["cases"]["tiny"]["expected_frames"] == 1
     assert receipt["future_state_inputs"] is False
+
+
+def test_formal_evaluate_rejects_short_horizon_subset_and_non_test_split(tmp_path):
+    manifest = _formal_test_manifest(tmp_path, case_count=2)
+    with CoreDataset(manifest, tmp_path) as data:
+        predictor, _ = learning._build_predictor_from_baseline("constant_velocity")
+        with pytest.raises(ValueError, match="maximum_steps"):
+            evaluate(data, predictor, maximum_steps=1)
+        with pytest.raises(ValueError, match="every registered test case"):
+            evaluate(data, predictor, case_ids=["formal-test-0"])
+        with pytest.raises(ValueError, match="split='test'"):
+            evaluate(data, predictor, split="validation")
+
+
+def test_formal_evaluate_cli_binds_full_registered_test_registry(tmp_path):
+    manifest = _formal_test_manifest(tmp_path, case_count=2)
+    manifest_path = tmp_path / "formal-manifest.json"
+    manifest_path.write_text(json.dumps(manifest))
+    output = tmp_path / "formal-evaluate.json"
+    assert main([
+        "evaluate", "--manifest", str(manifest_path), "--data-root", str(tmp_path),
+        "--baseline", "constant_velocity", "--output", str(output),
+    ]) == 0
+    receipt = json.loads(output.read_text())
+    assert receipt["evaluation_mode"] == "formal"
+    assert receipt["registered_case_count"] == 2
+    assert receipt["aggregate"]["registered_cases"] == 2
+    assert set(receipt["cases"]) == {"formal-test-0", "formal-test-1"}
+    assert all(row["expected_frames"] == 1 for row in receipt["cases"].values())
+    with pytest.raises(ValueError, match="every registered test case"):
+        main([
+            "evaluate", "--manifest", str(manifest_path), "--data-root", str(tmp_path),
+            "--baseline", "constant_velocity", "--case-id", "formal-test-0",
+            "--output", str(tmp_path / "subset.json"),
+        ])
+
+
+def test_formal_evaluate_rejects_unknown_and_duplicate_cases(tmp_path):
+    manifest = _formal_test_manifest(tmp_path, case_count=2)
+    with CoreDataset(manifest, tmp_path) as data:
+        predictor, _ = learning._build_predictor_from_baseline("constant_velocity")
+        with pytest.raises(ValueError, match="unknown case"):
+            evaluate(data, predictor, case_ids=["formal-test-0", "missing"])
+        with pytest.raises(ValueError, match="duplicate cases"):
+            evaluate(data, predictor, case_ids=["formal-test-0", "formal-test-0"])
+    with pytest.raises(ValueError, match="every registered test case"):
+        formal_evaluation_gate(
+            registered_case_ids=("formal-test-0", "formal-test-1"),
+            selected_case_ids=("formal-test-0",),
+        )
+
+
+def test_formal_evaluation_rejects_missing_fixed_denominator():
+    with pytest.raises(ValueError, match="fixed evaluation denominator"):
+        _validate_fixed_denominator(("formal-test-0",), {})
+
+
+def test_formal_evaluate_retains_finite_failed_rollout_as_incomplete(tmp_path, monkeypatch):
+    manifest = _formal_test_manifest(tmp_path, case_count=1)
+
+    def finite_but_failed_rollout(dataset, case_id, predictor, **kwargs):
+        return {
+            "schema": learning.ROLLOUT_SCHEMA,
+            "case_id": case_id,
+            "frames_predicted": 1,
+            "frames_expected": 1,
+            "frames_executed": 1,
+            "expected_frames": 1,
+            "executed": True,
+            "position_rmse": [0.0],
+            "velocity_rmse": [0.0],
+            "position_ade": [0.0],
+            "velocity_ade": [0.0],
+            "failure_category": "catastrophic_rollout",
+            "first_failure_frame": 1,
+            "execution_complete": False,
+            "finite_rollout_complete": False,
+            "scientific_status": "not_assessed",
+            "physics": {"frames": [{}], "summary": {"expected_frames": 1,
+                                                        "completed_frames": 1}},
+        }
+
+    monkeypatch.setattr(learning, "rollout_case", finite_but_failed_rollout)
+    with CoreDataset(manifest, tmp_path) as data:
+        predictor, _ = learning._build_predictor_from_baseline("constant_velocity")
+        result = evaluate(data, predictor)
+    row = result["cases"]["formal-test-0"]
+    assert result["registered_case_count"] == 1
+    assert result["aggregate"]["registered_cases"] == 1
+    assert result["aggregate"]["complete_fraction"] == 0.0
+    assert result["execution_summary"]["execution_complete_case_count"] == 0
+    assert result["finite_summary"]["finite_rollout_complete_case_count"] == 0
+    assert row["score"]["complete"] is False
+    assert row["rollout"]["position_rmse"] == [0.0]
+
+
+def test_diagnostic_short_horizon_keeps_null_tail_and_incomplete_score(tmp_path, monkeypatch):
+    manifest = tiny_manifest(tmp_path)
+
+    def short_rollout(dataset, case_id, predictor, **kwargs):
+        return {
+            "schema": learning.ROLLOUT_SCHEMA,
+            "case_id": case_id,
+            "frames_predicted": 1,
+            "frames_expected": 1,
+            "frames_executed": 1,
+            "expected_frames": 1,
+            "executed": True,
+            "position_rmse": [0.0],
+            "velocity_rmse": [0.0],
+            "position_ade": [0.0],
+            "velocity_ade": [0.0],
+            "failure_category": None,
+            "first_failure_frame": None,
+            "execution_complete": True,
+            "finite_rollout_complete": True,
+            "scientific_status": "not_assessed",
+            "physics": {"frames": [{}], "summary": {"expected_frames": 1,
+                                                        "completed_frames": 1}},
+        }
+
+    monkeypatch.setattr(learning, "rollout_case", short_rollout)
+    monkeypatch.setattr(
+        learning,
+        "_fixed_denominator_for_cases",
+        lambda dataset, case_ids: {
+            case_id: {"expected_frames": 2, "length_m": 1.0, "speed_mps": 1.0}
+            for case_id in case_ids
+        },
+    )
+    with CoreDataset(manifest, tmp_path) as data:
+        predictor, _ = learning._build_predictor_from_baseline("constant_velocity")
+        result = evaluate(data, predictor, case_ids=["tiny"], maximum_steps=1,
+                          diagnostic=True)
+    row = result["cases"]["tiny"]
+    assert row["expected_frames"] == 2
+    assert row["position_rmse"] == [0.0, None]
+    assert row["velocity_rmse"] == [0.0, None]
+    assert row["execution_complete"] is False
+    assert row["finite_rollout_complete"] is False
+    assert row["score"]["complete"] is False
+    assert result["aggregate"]["complete_fraction"] == 0.0
+
+
+def test_diagnostic_evaluate_is_explicit_and_keeps_protocol_fields(tmp_path):
+    manifest = tiny_manifest(tmp_path)
+    with CoreDataset(manifest, tmp_path) as data:
+        predictor, _ = learning._build_predictor_from_baseline("constant_velocity")
+        result = evaluate(data, predictor, split="test", case_ids=["tiny"],
+                          maximum_steps=1, diagnostic=True)
+    assert result["evaluation_mode"] == "diagnostic"
+    assert result["formal_eligible"] is False
+    assert result["registered_case_count"] == 1
+    assert result["fixed_denominator"]["tiny"]["expected_frames"] == 1
+    assert result["aggregate"]["registered_cases"] == 1
+    assert result["cases"]["tiny"]["expected_frames"] == 1
 
 
 def test_normalization_torch_values_stay_on_input_device_and_dtype():
