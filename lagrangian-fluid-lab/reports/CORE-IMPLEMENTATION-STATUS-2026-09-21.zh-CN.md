@@ -81,6 +81,11 @@
   frame denominator 收紧为真实整数语义，拒绝 fractional/bool 计数。新鲜 v5
   源闭包、root-admission 回执和 full-field halo oracle 已重新生成并通过哈希
   验证；完整 Core 回归为 `444 passed`，不改变任何 T2 分母或资格状态。
+- F4 tallwall120 的只读 T2 admission/acceptance gap audit 已登记为独立证据：6/6
+  保留案例未知质量门失败（最大 `1.0 > 0.01`），6/6 事件窗 right-censored，
+  没有 F4 CDF 容差、residence/event acceptance 或正式逐例 acceptance receipt；
+  33 行材料矩阵中仍有 24 个 resolution/substep 和 5 个 seed-density overlay
+  待执行。该审计没有修改 T2 分母，也没有授权 ESS32 或启动材料作业。
 
 ## 当前门状态
 
@@ -106,10 +111,12 @@
    cell-08 保留科学硬失败）。新的 root review 必须先决定该 scope 是否关闭并转向 F2
    或其它替补家族；不得授权剩余 7 格、对 cell-08 同输入重跑，或把 v9/v1--v3 失败证据
    改判为通过。
-2. F6 取得 T1 后，按固定 8→32 生产规则注册案例，再开启正式 9 个模型/种子
-   训练。材料侧先在已取得 T1 的两个家族分别完成完整宏观矩阵，不能用旧
-   diagnostic trace 代替 T2。
-3. 每个阶段都继续使用 `verify → inspect → train → rollout → evaluate →
+2. F2 第三家族候选和 F3 宏观 T2 资格正在做独立只读审计；在第三个 T1 家族
+   通过并完成32例注册前，formal planner 不得生成9个训练作业。F4 的 T2 工作须先
+   解决未知质量、完整事件窗、F4 专用容差和 acceptance 接口，再执行剩余矩阵。
+3. 任一家族取得 T1 后，按固定 8→32 生产规则注册案例；材料侧在已取得 T1 的
+   两个家族分别完成完整宏观矩阵，不能用旧 diagnostic trace 代替 T2。
+4. 每个阶段都继续使用 `verify → inspect → train → rollout → evaluate →
    reproduce` 入口和固定失败分母；正式 Core 完成判据保持不变。
 
 代理配置记录在 `campaigns/core-v1/agent-policy.json`：subagent 使用
