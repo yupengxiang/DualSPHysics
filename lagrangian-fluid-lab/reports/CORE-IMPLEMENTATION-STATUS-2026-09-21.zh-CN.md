@@ -20,6 +20,10 @@
 - 旧 F6 浮箱、入水和双浮体探针经只读审计确认是与 F1--F5 不同的自由刚体
   流固反馈机制，但只达到 structural probe。新的 F6 proposal 保持
   root-review-only，未进入 registry、ledger、matrix 或 T1 分母。
+- F6 的新 zero-force/units/inertia static anchor 已通过 CPU static gate：
+  新 Definition、body mass/inertia、body identity、sidecar 字段、边界间距和
+  151-frame 事件窗合同均通过；这是接口准入证据，不是流体物理或 T1 资格，
+  因为 `gravity=(0,0,0)` 且没有 runtime sidecar。
 
 ## 当前门状态
 
@@ -40,11 +44,10 @@
 
 ## 下一步准入顺序
 
-1. 完成 F6 新 Definition 的 body mass/inertia、body-state、force/torque、
-   boundary/contact 和事件窗的 CPU-only static gate；旧 XML、BI4、HDF5
-   只能作为 hash provenance。
-2. 只有静态 gate 通过，才由 root review 决定一个单刚体 anchor canary；
-   canary 仍需独立的完整事件窗和硬审计，不能直接注册为 T1。
+1. 在 static gate 之后，为重力/入水物理另写一个全新 Definition 和可审计
+   事件窗，先做 CPU/几何/边界 preflight；zero-force anchor 不能替代它。
+2. 只有该 physical preflight 通过，才由 root review 决定一个单刚体 anchor
+   canary；canary 仍需独立的完整事件窗和硬审计，不能直接注册为 T1。
 3. F6 取得 T1 后，按固定 8→32 生产规则注册案例，再开启正式 9 个模型/种子
    训练。材料侧先在已取得 T1 的两个家族分别完成完整宏观矩阵，不能用旧
    diagnostic trace 代替 T2。
