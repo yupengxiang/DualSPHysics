@@ -1,6 +1,6 @@
 {
   "schema": "core.f7.pump_recirculation.interface_review.v1",
-  "status": "blocked_before_adapter_or_definition",
+  "status": "blocked_after_isolated_contract_before_core_admission",
   "candidate_id": "F7_pump_prescribed_internal_rotor_recirculation_v1",
   "implementation_bindings": [
     {
@@ -20,6 +20,30 @@
       "sha256": "af5469f88791cdd16bf2ee6234c73e76e0dc453fe2030ccb33c03cf6fd84f892",
       "bytes": 30607,
       "role": "current finite moving-wall physics observer"
+    },
+    {
+      "path": "scripts/f7_pump_geometry_adapter_v1.py",
+      "sha256": "d7434546a617fe563137eb27e9fceda760888baa722ed424d80bfdf3153d38d9",
+      "bytes": 22080,
+      "role": "isolated read-only F7 Pump geometry adapter"
+    },
+    {
+      "path": "tests/test_f7_pump_geometry_adapter_v1.py",
+      "sha256": "d3c2c085203adde4a1e1b600600405486571bef335c108aa4b662a74cb102ffc",
+      "bytes": 6117,
+      "role": "geometry adapter synthetic regression tests"
+    },
+    {
+      "path": "scripts/f7_pump_transport_observer_v1.py",
+      "sha256": "abf98eadbdce3252f3688f0d4e0a0bcd1ef5b76e60d4a91e152958fcd2202e50",
+      "bytes": 29802,
+      "role": "isolated closed-lifecycle F7 Pump material observer"
+    },
+    {
+      "path": "tests/test_f7_pump_transport_observer_v1.py",
+      "sha256": "e5d71a5ab036fca790298e087dd0c2b300d3e1017b72a93cf2922ff9db45d02a",
+      "bytes": 14175,
+      "role": "material observer synthetic regression tests"
     }
   ],
   "static_findings": {
@@ -34,18 +58,22 @@
     "moving_wall_saved_chord_operator_present": true,
     "moving_affine_material_frame_present": true,
     "f7_transform_dataset_producer_present": false,
-    "f7_return_observer_present": false
+    "f7_return_observer_present": false,
+    "isolated_f7_geometry_adapter_present": true,
+    "isolated_f7_material_observer_present": true,
+    "isolated_f7_return_observer_present": true
   },
   "what_can_be_reused_after_root_admission": [
-    "finite moving-wall saved-chord operator, after F7 geometry snapshots and public motion schedule are adapted",
-    "explicit closed-lifecycle source-mass denominator and no-survivor-renormalization policy",
-    "moving-affine destination frame contract only after a causal transform dataset is emitted"
+    "the isolated Pump POLYDATA parser and XML motion contract, after Core adapter review and generated-input binding",
+    "the isolated closed-lifecycle source-mass denominator, no-survivor-renormalization policy, and conservative unknown-exit handling, after trajectory review",
+    "finite moving-wall saved-chord operators only after F7 geometry snapshots and public motion schedule are adapted"
   ],
   "blocking_gaps": [
-    "Add and review an F7 adapter for official VTK geometry, mk labels, rigid pose, and motion schedule.",
-    "Emit a causal body-pose/frame dataset that is hash-bound to every trajectory.",
-    "Define source, discharge/return, residence, and unknown-exit regions before material data.",
-    "Implement an F7 pump-specific observer and synthetic regression tests before any Definition.",
+    "Wire the isolated F7 adapter into the Core dataset contract only after root review authorizes that mutation and accepts its bounded sampled-motion contract.",
+    "Resolve or explicitly certify the Core sampled pose/gradient-velocity behavior at start and finish knots before runtime use.",
+    "Emit a causal body-pose/frame and angular-control dataset hash-bound to every trajectory.",
+    "Freeze source, discharge/return, residence, and unknown-exit regions before material data.",
+    "Produce real trajectory evidence and a hash/semantic/time-bound nonzero torque dataset, then verify its producer/geometry provenance and energy consistency; the isolated observer intentionally cannot claim independence without root provenance review.",
     "Have root review decide whether pump torque/recirculation is physically independent enough from F6."
   ],
   "authorization": {

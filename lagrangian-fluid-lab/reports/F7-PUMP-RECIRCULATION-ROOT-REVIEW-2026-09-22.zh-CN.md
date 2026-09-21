@@ -1,6 +1,6 @@
 # F7 预设旋转内泵循环路线根审查材料（2026-09-22）
 
-本文件只记录官方 DualSPHysics `main/13_Pump` 的只读源绑定和候选判断；没有生成 Definition、BI4、trajectory，没有运行 GenCase/native solver/GPU/queue，也没有修改 Core registry、ledger、matrix 或 denominator。
+本文件记录官方 DualSPHysics `main/13_Pump` 的只读源绑定、隔离适配器/观测器合约和候选判断；没有生成 Definition、BI4、trajectory，没有运行 GenCase/native solver/GPU/queue，也没有修改 Core registry、ledger、matrix 或 denominator。
 
 ## 候选结论
 
@@ -12,18 +12,19 @@
 - 新候选拟把唯一研究轴冻结为预设角加速度 `250--750 deg/s²`，15 行仍是 13 个空间格 + 2 个时间/输出对照；15/15 未物化、0 执行、0 credit。
 - 两个对照已明确为真实控制变化：`internal_time` 的 CFL `0.20→0.10`（须检查实际 dt/步数分离），`native_output` 的 `TimeOut 0.02→0.01 s`（须检查实际帧数/间隔分离）。
 
-## 必须保持的阻塞
+## 隔离合约与必须保持的阻塞
 
-1. 当前 Core CFD adapter 只接受 F1/F2/F4，未支持 F7 的 Pump VTK、mk 标签和运动调度；不能把官方 XML 直接当成 Core dataset。
-2. 当前没有 F7 的 source/discharge/return/residence observer，也没有与 trajectory 绑定的因果 `control/frame` 产物；因此不能开始材料 T2。
-3. 官方 CPU/GPU wrapper 含清理和求解命令，只能作为哈希绑定的参考，绝不是执行授权。
-4. 对抗性 root review 必须确认“泵驱动循环”不是把普通 moving-wall 或 F6 运动换名；若不能观测扭矩输入和回流，候选应关闭。
+1. 已实现隔离的只读 F7 geometry adapter：解析 allowlisted 官方 binary fixed / ASCII moving POLYDATA、XML mk 标签和两段旋转，并在内存中返回 Core `PrescribedGeometry`；源三角形退化项被显式计数并过滤，不能把这个清理结果当成物理证据。XML 解析器还校验 degree 单位、1→2 链和 finish 截止；Core pose/gradient velocity 仍是有误差界的采样近似，不能称为 exact runtime motion。
+2. 已实现隔离的只读 F7 material observer：固定 all-initial-fluid 分母、不做 survivor renormalization、校验 body-frame/angular-control/region hash、报告 unknown exit，并把 residence 作为事件指标而非终态质量桶；显式 torque contract 仍只形成待根审查的合约，不宣称物理独立性。
+3. 隔离合约尚未接入 Core CFD adapter、Definition writer 或 trajectory producer；没有与 trajectory 绑定的真实 `control/frame` 和 torque 产物，因此不能开始材料 T2。
+4. 官方 CPU/GPU wrapper 含清理和求解命令，只能作为哈希绑定的参考，绝不是执行授权。
+5. 对抗性 root review 必须确认“泵驱动循环”不是把普通 moving-wall 或 F6 运动换名；若不能观测扭矩输入和回流，候选应关闭。
 
 ## 状态与授权
 
 当前 Core 仍为 `t1_families=['F3', 'F4']`、`missing_t1_case_runs=288`、`missing_material_case_runs=288`。
 
-本包只授权后续人工/root review 讨论：不授权 Definition writer、不授权 CPU/native preflight、不授权 solver/GPU/queue，不产生 T1/T2 分母或资格变化。接口审查状态为 `blocked_before_adapter_or_definition`。
+本包只授权后续人工/root review 讨论：不授权 Definition writer、不授权 CPU/native preflight、不授权 solver/GPU/queue，不产生 T1/T2 分母或资格变化。接口审查状态为 `blocked_after_isolated_contract_before_core_admission`。
 
 机器可读文件：
 - `campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/candidate-card-v1.json`
@@ -31,4 +32,4 @@
 - `campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/interface-review-v1.json`
 - `campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/root-review-receipt-v1.json`
 
-定向回归：`pytest -q tests/test_f7_pump_recirculation_root_review_v1.py`。
+定向回归：`pytest -q tests/test_f7_pump_recirculation_root_review_v1.py tests/test_f7_pump_geometry_adapter_v1.py tests/test_f7_pump_transport_observer_v1.py`。

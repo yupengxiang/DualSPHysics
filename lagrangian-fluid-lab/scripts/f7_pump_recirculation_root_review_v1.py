@@ -29,6 +29,11 @@ ROOT_RECEIPT = NAMESPACE / "root-review-receipt-v1.json"
 REPORT = LAB / "reports/F7-PUMP-RECIRCULATION-ROOT-REVIEW-2026-09-22.zh-CN.md"
 TEST = LAB / "tests/test_f7_pump_recirculation_root_review_v1.py"
 
+ADAPTER_SCRIPT = "scripts/f7_pump_geometry_adapter_v1.py"
+ADAPTER_TEST = "tests/test_f7_pump_geometry_adapter_v1.py"
+OBSERVER_SCRIPT = "scripts/f7_pump_transport_observer_v1.py"
+OBSERVER_TEST = "tests/test_f7_pump_transport_observer_v1.py"
+
 PUMP_DIR = "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump"
 PUMP_XML = f"{PUMP_DIR}/CasePump_Def.xml"
 PUMP_FIXED = f"{PUMP_DIR}/pump_fixed.vtk"
@@ -193,6 +198,15 @@ def pump_sources() -> list[dict[str, Any]]:
     ]
 
 
+def isolated_implementation_bindings() -> list[dict[str, Any]]:
+    return [
+        binding(ADAPTER_SCRIPT, "isolated read-only F7 Pump geometry adapter"),
+        binding(ADAPTER_TEST, "geometry adapter synthetic regression tests"),
+        binding(OBSERVER_SCRIPT, "isolated closed-lifecycle F7 Pump material observer"),
+        binding(OBSERVER_TEST, "material observer synthetic regression tests"),
+    ]
+
+
 def matrix_rows() -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     index = 0
@@ -264,6 +278,7 @@ def build_candidate() -> dict[str, Any]:
     assert not any(item.get("family") == "F7" for item in registry.get("scope_studies", []))
     parsed = parse_pump_definition()
     sources = pump_sources()
+    isolated = isolated_implementation_bindings()
     return {
         "schema": "core.f7.pump_recirculation.candidate_card.v1",
         "status": "root_review_only_not_admitted",
@@ -355,17 +370,54 @@ def build_candidate() -> dict[str, Any]:
             "destination_region_or_return_section": "not yet frozen",
             "body_frame_transform_dataset": "required control/frame or equivalent causal dataset",
             "source_mass_denominator": "all initial fluid particles; no survivor renormalization",
-            "return_and_residence_observer": "required; no implementation yet",
+            "return_and_residence_observer": "isolated read-only observer implemented and tested; no trajectory evidence or Core admission",
             "unknown_exit_bound": "required for closed lifecycle; no evidence yet",
         },
         "root_review_blockers": [
-            "No F7 Core CFD adapter maps drawfilevtk pump geometry into the dataset contract.",
-            "No F7 source/destination/return observer is implemented or validated.",
+            "The isolated F7 geometry adapter is not wired into the Core CFD adapter or Definition pipeline; its Core pose/gradient velocity is a bounded sample approximation, not runtime evidence.",
+            "The adapter's analytic finish clamp is source-faithful, but Core sampled gradient velocity is not certified exact at the finish boundary.",
+            "The isolated F7 source/discharge/return/residence observer has no trajectory, body-pose, angular-control, or provenance-verified torque runtime evidence.",
             "No generated Definition, XML, BI4, trajectory, or solver evidence exists.",
             "The official CPU/GPU wrappers contain destructive cleanup and execution commands and are reference-only.",
-            "The physical distinction must survive adversarial review against generic moving-boundary and F6 overlap.",
+            "The physical distinction must survive adversarial review with a finite torque/control gate against generic moving-boundary and F6 overlap.",
         ],
         "source_bindings": sources,
+        "isolated_implementation": {
+            "status": "implemented_read_only_not_admitted",
+            "bindings": isolated,
+            "geometry_adapter": {
+                "official_fixed_encoding": "BINARY POLYDATA",
+                "official_moving_encoding": "ASCII POLYDATA",
+                "returns_core_prescribed_geometry_in_memory": True,
+                "xml_motion_schedule_hash_bound": True,
+                "analytic_xml_finish_boundary_enforced": True,
+                "core_finish_velocity_exact": False,
+                "source_directory_binding_strict": True,
+                "official_source_allowlist_hash_bound": True,
+                "analytic_motion_evaluators_present": True,
+                "core_pose_and_gradient_velocity_are_sampled_approximations": True,
+                "default_linear_angle_interpolation_error_bound_deg": 0.00625,
+                "degenerate_source_triangles_explicitly_counted_and_dropped": True,
+                "core_adapter_wired": False,
+            },
+                "material_observer": {
+                    "all_initial_fluid_denominator": True,
+                    "survivor_renormalization": False,
+                    "body_frame_and_angular_control_hash_bound": True,
+                    "frame_control_semantics_and_trajectory_time_bound": True,
+                    "cross_frame_identity_history_required": True,
+                    "region_contract_hash_bound": True,
+                    "event_window_applied_to_events": True,
+                    "linear_segment_crossing_detection": True,
+                    "unknown_exit_accounted": True,
+                "return_and_residence_classification": True,
+                "residence_is_terminal_mass_category": False,
+                "finite_torque_independence_contract_gate": True,
+                "physical_independence_claim": False,
+                "trajectory_evidence_present": False,
+                "core_observer_wired": False,
+            },
+        },
         "current_core_snapshot": {
             "completion": binding("campaigns/core-v1/completion.json", "read-only current Core gate"),
             "registry": binding("campaigns/core-v1/registry.json", "read-only current Core registry"),
@@ -397,10 +449,11 @@ def build_source_audit(candidate: dict[str, Any]) -> dict[str, Any]:
     gpu = local(PUMP_GPU).read_text(encoding="utf-8")
     return {
         "schema": "core.f7.pump_recirculation.source_audit.v1",
-        "status": "official_source_bound_read_only",
+        "status": "official_source_and_isolated_contract_bound_read_only",
         "candidate_id": candidate["candidate_id"],
         "candidate_card": binding(str(CANDIDATE.relative_to(LAB)), "F7 candidate card"),
         "official_source_bindings": candidate["source_bindings"],
+        "isolated_implementation_bindings": candidate["isolated_implementation"]["bindings"],
         "vtk_headers": {
             "pump_fixed": parse_vtk_header(PUMP_FIXED),
             "pump_moving": parse_vtk_header(PUMP_MOVING),
@@ -441,12 +494,13 @@ def build_interface_review(candidate: dict[str, Any]) -> dict[str, Any]:
     )
     return {
         "schema": "core.f7.pump_recirculation.interface_review.v1",
-        "status": "blocked_before_adapter_or_definition",
+        "status": "blocked_after_isolated_contract_before_core_admission",
         "candidate_id": candidate["candidate_id"],
         "implementation_bindings": [
             binding("scripts/core_cfd_dataset.py", "current CFD-to-Core adapter"),
             binding("scripts/transport_metrics.py", "current mass transport observer"),
             binding("scripts/core_physics.py", "current finite moving-wall physics observer"),
+            *candidate["isolated_implementation"]["bindings"],
         ],
         "static_findings": {
             "current_cfd_adapter_supported_families": supported_families,
@@ -457,17 +511,21 @@ def build_interface_review(candidate: dict[str, Any]) -> dict[str, Any]:
             "moving_affine_material_frame_present": "moving_affine" in transport_source,
             "f7_transform_dataset_producer_present": "control/frame" in dataset_source,
             "f7_return_observer_present": "recirculation" in transport_source.lower(),
+            "isolated_f7_geometry_adapter_present": True,
+            "isolated_f7_material_observer_present": True,
+            "isolated_f7_return_observer_present": True,
         },
         "what_can_be_reused_after_root_admission": [
-            "finite moving-wall saved-chord operator, after F7 geometry snapshots and public motion schedule are adapted",
-            "explicit closed-lifecycle source-mass denominator and no-survivor-renormalization policy",
-            "moving-affine destination frame contract only after a causal transform dataset is emitted",
+            "the isolated Pump POLYDATA parser and XML motion contract, after Core adapter review and generated-input binding",
+            "the isolated closed-lifecycle source-mass denominator, no-survivor-renormalization policy, and conservative unknown-exit handling, after trajectory review",
+            "finite moving-wall saved-chord operators only after F7 geometry snapshots and public motion schedule are adapted",
         ],
         "blocking_gaps": [
-            "Add and review an F7 adapter for official VTK geometry, mk labels, rigid pose, and motion schedule.",
-            "Emit a causal body-pose/frame dataset that is hash-bound to every trajectory.",
-            "Define source, discharge/return, residence, and unknown-exit regions before material data.",
-            "Implement an F7 pump-specific observer and synthetic regression tests before any Definition.",
+            "Wire the isolated F7 adapter into the Core dataset contract only after root review authorizes that mutation and accepts its bounded sampled-motion contract.",
+            "Resolve or explicitly certify the Core sampled pose/gradient-velocity behavior at start and finish knots before runtime use.",
+            "Emit a causal body-pose/frame and angular-control dataset hash-bound to every trajectory.",
+            "Freeze source, discharge/return, residence, and unknown-exit regions before material data.",
+            "Produce real trajectory evidence and a hash/semantic/time-bound nonzero torque dataset, then verify its producer/geometry provenance and energy consistency; the isolated observer intentionally cannot claim independence without root provenance review.",
             "Have root review decide whether pump torque/recirculation is physically independent enough from F6.",
         ],
         "authorization": {
@@ -490,7 +548,7 @@ def render_report(candidate: dict[str, Any], source: dict[str, Any], interface: 
     return "\n".join([
         "# F7 预设旋转内泵循环路线根审查材料（2026-09-22）",
         "",
-        "本文件只记录官方 DualSPHysics `main/13_Pump` 的只读源绑定和候选判断；没有生成 Definition、BI4、trajectory，没有运行 GenCase/native solver/GPU/queue，也没有修改 Core registry、ledger、matrix 或 denominator。",
+        "本文件记录官方 DualSPHysics `main/13_Pump` 的只读源绑定、隔离适配器/观测器合约和候选判断；没有生成 Definition、BI4、trajectory，没有运行 GenCase/native solver/GPU/queue，也没有修改 Core registry、ledger、matrix 或 denominator。",
         "",
         "## 候选结论",
         "",
@@ -502,18 +560,19 @@ def render_report(candidate: dict[str, Any], source: dict[str, Any], interface: 
         "- 新候选拟把唯一研究轴冻结为预设角加速度 `250--750 deg/s²`，15 行仍是 13 个空间格 + 2 个时间/输出对照；15/15 未物化、0 执行、0 credit。",
         "- 两个对照已明确为真实控制变化：`internal_time` 的 CFL `0.20→0.10`（须检查实际 dt/步数分离），`native_output` 的 `TimeOut 0.02→0.01 s`（须检查实际帧数/间隔分离）。",
         "",
-        "## 必须保持的阻塞",
+        "## 隔离合约与必须保持的阻塞",
         "",
-        "1. 当前 Core CFD adapter 只接受 F1/F2/F4，未支持 F7 的 Pump VTK、mk 标签和运动调度；不能把官方 XML 直接当成 Core dataset。",
-        "2. 当前没有 F7 的 source/discharge/return/residence observer，也没有与 trajectory 绑定的因果 `control/frame` 产物；因此不能开始材料 T2。",
-        "3. 官方 CPU/GPU wrapper 含清理和求解命令，只能作为哈希绑定的参考，绝不是执行授权。",
-        "4. 对抗性 root review 必须确认“泵驱动循环”不是把普通 moving-wall 或 F6 运动换名；若不能观测扭矩输入和回流，候选应关闭。",
+        "1. 已实现隔离的只读 F7 geometry adapter：解析 allowlisted 官方 binary fixed / ASCII moving POLYDATA、XML mk 标签和两段旋转，并在内存中返回 Core `PrescribedGeometry`；源三角形退化项被显式计数并过滤，不能把这个清理结果当成物理证据。XML 解析器还校验 degree 单位、1→2 链和 finish 截止；Core pose/gradient velocity 仍是有误差界的采样近似，不能称为 exact runtime motion。",
+        "2. 已实现隔离的只读 F7 material observer：固定 all-initial-fluid 分母、不做 survivor renormalization、校验 body-frame/angular-control/region hash、报告 unknown exit，并把 residence 作为事件指标而非终态质量桶；显式 torque contract 仍只形成待根审查的合约，不宣称物理独立性。",
+        "3. 隔离合约尚未接入 Core CFD adapter、Definition writer 或 trajectory producer；没有与 trajectory 绑定的真实 `control/frame` 和 torque 产物，因此不能开始材料 T2。",
+        "4. 官方 CPU/GPU wrapper 含清理和求解命令，只能作为哈希绑定的参考，绝不是执行授权。",
+        "5. 对抗性 root review 必须确认“泵驱动循环”不是把普通 moving-wall 或 F6 运动换名；若不能观测扭矩输入和回流，候选应关闭。",
         "",
         "## 状态与授权",
         "",
         f"当前 Core 仍为 `t1_families={candidate['current_core_snapshot']['t1_families']}`、`missing_t1_case_runs={candidate['current_core_snapshot']['missing_t1_case_runs']}`、`missing_material_case_runs={candidate['current_core_snapshot']['missing_material_case_runs']}`。",
         "",
-        "本包只授权后续人工/root review 讨论：不授权 Definition writer、不授权 CPU/native preflight、不授权 solver/GPU/queue，不产生 T1/T2 分母或资格变化。接口审查状态为 `blocked_before_adapter_or_definition`。",
+        "本包只授权后续人工/root review 讨论：不授权 Definition writer、不授权 CPU/native preflight、不授权 solver/GPU/queue，不产生 T1/T2 分母或资格变化。接口审查状态为 `blocked_after_isolated_contract_before_core_admission`。",
         "",
         "机器可读文件：",
         "- `campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/candidate-card-v1.json`",
@@ -521,7 +580,7 @@ def render_report(candidate: dict[str, Any], source: dict[str, Any], interface: 
         "- `campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/interface-review-v1.json`",
         "- `campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/root-review-receipt-v1.json`",
         "",
-        "定向回归：`pytest -q tests/test_f7_pump_recirculation_root_review_v1.py`。",
+        "定向回归：`pytest -q tests/test_f7_pump_recirculation_root_review_v1.py tests/test_f7_pump_geometry_adapter_v1.py tests/test_f7_pump_transport_observer_v1.py`。",
         "",
     ])
 
@@ -549,6 +608,7 @@ def build_root_receipt(candidate: dict[str, Any], source: dict[str, Any], interf
             binding(str(REPORT.relative_to(LAB)), "human-readable report"),
             binding("scripts/f7_pump_recirculation_root_review_v1.py", "read-only implementation"),
             binding(str(TEST.relative_to(LAB)), "targeted regression test"),
+            *candidate["isolated_implementation"]["bindings"],
         ],
         "forbidden_materialization": [
             "no Definition XML in the F7 namespace",
@@ -609,19 +669,28 @@ def verify() -> dict[str, Any]:
     assert candidate["current_core_snapshot"]["t1_families"] == ["F3", "F4"]
 
     assert source["schema"] == "core.f7.pump_recirculation.source_audit.v1"
-    assert source["status"] == "official_source_bound_read_only"
+    assert source["status"] == "official_source_and_isolated_contract_bound_read_only"
     _verify_binding(source["candidate_card"])
     for item in source["official_source_bindings"]:
         _verify_binding(item)
+    for item in source["isolated_implementation_bindings"]:
+        _verify_binding(item)
+    assert candidate["isolated_implementation"]["status"] == "implemented_read_only_not_admitted"
+    assert candidate["isolated_implementation"]["geometry_adapter"]["core_adapter_wired"] is False
+    assert candidate["isolated_implementation"]["material_observer"]["core_observer_wired"] is False
+    assert candidate["isolated_implementation"]["material_observer"]["trajectory_evidence_present"] is False
     assert source["wrapper_static_audit"]["wrapper_invoked"] is False
     assert source["protected_state_mutation"]["registry"] == 0
     assert source["protected_state_mutation"]["solver_invoked"] is False
     assert source["vtk_headers"]["pump_fixed"]["points"] > source["vtk_headers"]["pump_moving"]["points"]
 
     assert interface["schema"] == "core.f7.pump_recirculation.interface_review.v1"
-    assert interface["status"] == "blocked_before_adapter_or_definition"
+    assert interface["status"] == "blocked_after_isolated_contract_before_core_admission"
     assert interface["static_findings"]["f7_family_is_currently_supported"] is False
     assert interface["static_findings"]["drawfilevtk_pump_reader_present"] is False
+    assert interface["static_findings"]["isolated_f7_geometry_adapter_present"] is True
+    assert interface["static_findings"]["isolated_f7_material_observer_present"] is True
+    assert interface["static_findings"]["isolated_f7_return_observer_present"] is True
     assert interface["authorization"]["definition_writer"] is False
     assert interface["authorization"]["solver"] is False
     for item in interface["implementation_bindings"]:

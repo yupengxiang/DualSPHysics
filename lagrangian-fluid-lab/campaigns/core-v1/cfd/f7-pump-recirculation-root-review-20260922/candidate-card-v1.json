@@ -239,15 +239,16 @@
     "destination_region_or_return_section": "not yet frozen",
     "body_frame_transform_dataset": "required control/frame or equivalent causal dataset",
     "source_mass_denominator": "all initial fluid particles; no survivor renormalization",
-    "return_and_residence_observer": "required; no implementation yet",
+    "return_and_residence_observer": "isolated read-only observer implemented and tested; no trajectory evidence or Core admission",
     "unknown_exit_bound": "required for closed lifecycle; no evidence yet"
   },
   "root_review_blockers": [
-    "No F7 Core CFD adapter maps drawfilevtk pump geometry into the dataset contract.",
-    "No F7 source/destination/return observer is implemented or validated.",
+    "The isolated F7 geometry adapter is not wired into the Core CFD adapter or Definition pipeline; its Core pose/gradient velocity is a bounded sample approximation, not runtime evidence.",
+    "The adapter's analytic finish clamp is source-faithful, but Core sampled gradient velocity is not certified exact at the finish boundary.",
+    "The isolated F7 source/discharge/return/residence observer has no trajectory, body-pose, angular-control, or provenance-verified torque runtime evidence.",
     "No generated Definition, XML, BI4, trajectory, or solver evidence exists.",
     "The official CPU/GPU wrappers contain destructive cleanup and execution commands and are reference-only.",
-    "The physical distinction must survive adversarial review against generic moving-boundary and F6 overlap."
+    "The physical distinction must survive adversarial review with a finite torque/control gate against generic moving-boundary and F6 overlap."
   ],
   "source_bindings": [
     {
@@ -305,6 +306,67 @@
       "role": "official fixed/moving/floating particle loading reference"
     }
   ],
+  "isolated_implementation": {
+    "status": "implemented_read_only_not_admitted",
+    "bindings": [
+      {
+        "path": "scripts/f7_pump_geometry_adapter_v1.py",
+        "sha256": "d7434546a617fe563137eb27e9fceda760888baa722ed424d80bfdf3153d38d9",
+        "bytes": 22080,
+        "role": "isolated read-only F7 Pump geometry adapter"
+      },
+      {
+        "path": "tests/test_f7_pump_geometry_adapter_v1.py",
+        "sha256": "d3c2c085203adde4a1e1b600600405486571bef335c108aa4b662a74cb102ffc",
+        "bytes": 6117,
+        "role": "geometry adapter synthetic regression tests"
+      },
+      {
+        "path": "scripts/f7_pump_transport_observer_v1.py",
+        "sha256": "abf98eadbdce3252f3688f0d4e0a0bcd1ef5b76e60d4a91e152958fcd2202e50",
+        "bytes": 29802,
+        "role": "isolated closed-lifecycle F7 Pump material observer"
+      },
+      {
+        "path": "tests/test_f7_pump_transport_observer_v1.py",
+        "sha256": "e5d71a5ab036fca790298e087dd0c2b300d3e1017b72a93cf2922ff9db45d02a",
+        "bytes": 14175,
+        "role": "material observer synthetic regression tests"
+      }
+    ],
+    "geometry_adapter": {
+      "official_fixed_encoding": "BINARY POLYDATA",
+      "official_moving_encoding": "ASCII POLYDATA",
+      "returns_core_prescribed_geometry_in_memory": true,
+      "xml_motion_schedule_hash_bound": true,
+      "analytic_xml_finish_boundary_enforced": true,
+      "core_finish_velocity_exact": false,
+      "source_directory_binding_strict": true,
+      "official_source_allowlist_hash_bound": true,
+      "analytic_motion_evaluators_present": true,
+      "core_pose_and_gradient_velocity_are_sampled_approximations": true,
+      "default_linear_angle_interpolation_error_bound_deg": 0.00625,
+      "degenerate_source_triangles_explicitly_counted_and_dropped": true,
+      "core_adapter_wired": false
+    },
+    "material_observer": {
+      "all_initial_fluid_denominator": true,
+      "survivor_renormalization": false,
+      "body_frame_and_angular_control_hash_bound": true,
+      "frame_control_semantics_and_trajectory_time_bound": true,
+      "cross_frame_identity_history_required": true,
+      "region_contract_hash_bound": true,
+      "event_window_applied_to_events": true,
+      "linear_segment_crossing_detection": true,
+      "unknown_exit_accounted": true,
+      "return_and_residence_classification": true,
+      "residence_is_terminal_mass_category": false,
+      "finite_torque_independence_contract_gate": true,
+      "physical_independence_claim": false,
+      "trajectory_evidence_present": false,
+      "core_observer_wired": false
+    }
+  },
   "current_core_snapshot": {
     "completion": {
       "path": "campaigns/core-v1/completion.json",

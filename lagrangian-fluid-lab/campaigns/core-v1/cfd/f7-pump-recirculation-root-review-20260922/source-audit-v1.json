@@ -1,11 +1,11 @@
 {
   "schema": "core.f7.pump_recirculation.source_audit.v1",
-  "status": "official_source_bound_read_only",
+  "status": "official_source_and_isolated_contract_bound_read_only",
   "candidate_id": "F7_pump_prescribed_internal_rotor_recirculation_v1",
   "candidate_card": {
     "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/candidate-card-v1.json",
-    "sha256": "316e8c9818a36de452cede6d981b8dfee83eb6faa5ca7694c7fb6add2871b855",
-    "bytes": 13784,
+    "sha256": "069e214dce2aa47cbc8602a0c1616fc2921d8efad903fab7c4836fef097aa058",
+    "bytes": 16818,
     "role": "F7 candidate card"
   },
   "official_source_bindings": [
@@ -62,6 +62,32 @@
       "sha256": "ab60efba601c4975cea595b7059e6be11373626d25111874b51156895401ba82",
       "bytes": 16564,
       "role": "official fixed/moving/floating particle loading reference"
+    }
+  ],
+  "isolated_implementation_bindings": [
+    {
+      "path": "scripts/f7_pump_geometry_adapter_v1.py",
+      "sha256": "d7434546a617fe563137eb27e9fceda760888baa722ed424d80bfdf3153d38d9",
+      "bytes": 22080,
+      "role": "isolated read-only F7 Pump geometry adapter"
+    },
+    {
+      "path": "tests/test_f7_pump_geometry_adapter_v1.py",
+      "sha256": "d3c2c085203adde4a1e1b600600405486571bef335c108aa4b662a74cb102ffc",
+      "bytes": 6117,
+      "role": "geometry adapter synthetic regression tests"
+    },
+    {
+      "path": "scripts/f7_pump_transport_observer_v1.py",
+      "sha256": "abf98eadbdce3252f3688f0d4e0a0bcd1ef5b76e60d4a91e152958fcd2202e50",
+      "bytes": 29802,
+      "role": "isolated closed-lifecycle F7 Pump material observer"
+    },
+    {
+      "path": "tests/test_f7_pump_transport_observer_v1.py",
+      "sha256": "e5d71a5ab036fca790298e087dd0c2b300d3e1017b72a93cf2922ff9db45d02a",
+      "bytes": 14175,
+      "role": "material observer synthetic regression tests"
     }
   ],
   "vtk_headers": {
