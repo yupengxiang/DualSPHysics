@@ -1,6 +1,8 @@
 import copy
 import json
 
+import pytest
+import scripts.core_dataset as core_dataset_module
 from scripts.core_dataset import (COMPACT_SCHEMA, CoreDataset, _write_npz_asset,
                                   compactify_manifest, sha256_file, validate_manifest)
 
@@ -36,6 +38,60 @@ def test_compact_manifest_resolves_hashed_shared_inputs(tmp_path):
         assert data.verify_sources()["tiny"] == row["sha256"]
         assert loaded.control.samples.shape == known.control.samples.shape
         assert loaded.geometry.triangles.shape == known.geometry.triangles.shape
+
+
+def test_compact_reader_rejects_same_size_asset_tamper_before_hdf5_open(tmp_path):
+    source = tmp_path / "source"
+    source.mkdir()
+    manifest_path = source / "manifest.json"
+    manifest_path.write_text(json.dumps(tiny_manifest(source)))
+    compact = compactify_manifest(manifest_path, source)
+    geometry = source / compact["cases"][0]["known_inputs_ref"]["geometry"]["path"]
+    original_size = geometry.stat().st_size
+    payload = bytearray(geometry.read_bytes())
+    payload[len(payload) // 2] ^= 1
+    geometry.write_bytes(payload)
+    assert geometry.stat().st_size == original_size
+
+    with CoreDataset(compact, source) as data:
+        with pytest.raises(ValueError, match="input asset hash mismatch"):
+            data.times("tiny")
+
+
+def test_compact_reader_reuses_shared_asset_binding_after_lru_reopen(tmp_path, monkeypatch):
+    source = tmp_path / "source"
+    source.mkdir()
+    manifest_path = source / "manifest.json"
+    manifest_path.write_text(json.dumps(tiny_manifest(source)))
+    compact = compactify_manifest(manifest_path, source)
+    first_path = source / "data.h5"
+    second_path = source / "data-second.h5"
+    second_path.write_bytes(first_path.read_bytes())
+    second = copy.deepcopy(compact["cases"][0])
+    second.update(case_id="second", physical_case_id="second", lineage_group_id="second",
+                  hdf5="data-second.h5")
+    compact["cases"].append(second)
+    validate_manifest(compact)
+
+    observed_paths = []
+    original_hash = core_dataset_module.sha256_file
+
+    def counted_hash(path):
+        observed_paths.append(path.resolve())
+        return original_hash(path)
+
+    monkeypatch.setattr(core_dataset_module, "sha256_file", counted_hash)
+    with CoreDataset(compact, source, max_open_files=1) as data:
+        data.known_inputs("tiny")
+        assert len(data.times("second")) == 2
+        assert len(data.times("tiny")) == 2
+
+    geometry = source / compact["cases"][0]["known_inputs_ref"]["geometry"]["path"]
+    control = source / compact["cases"][0]["known_inputs_ref"]["control"]["path"]
+    assert observed_paths.count(first_path.resolve()) == 1
+    assert observed_paths.count(second_path.resolve()) == 1
+    assert observed_paths.count(geometry.resolve()) == 1
+    assert observed_paths.count(control.resolve()) == 1
 
 
 def test_compactify_v1_materializes_hash_bound_assets_without_opening_hdf5(tmp_path):

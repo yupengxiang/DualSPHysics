@@ -9,6 +9,7 @@ import h5py
 import pytest
 
 from test_core_contract import tiny_manifest
+from scripts import core_learning
 from scripts.core_benchmark import (_checkpoint_registration,
                                      _compare_paired_reproduction,
                                      inspect_dataset, phase_plan, reproduce,
@@ -130,9 +131,24 @@ def test_relocated_checkpoint_reproduction_writes_full_trajectory_and_score(tmp_
     assert report["schema"] == "core.model_reproduction.v1"
     assert report["passed"] and report["full_horizon_reproduction"]
     assert not report["full_product_reproduction"]
+    assert json.loads((bundle / "bundle.json").read_text())["full_core_release"] is False
+    assert report["registered_case_ids"] == ["tiny"]
+    assert report["selected_case_ids"] == ["tiny"]
+    assert report["denominator"]["registered_case_count"] == 1
+    assert report["denominator"]["selected_case_count"] == 1
+    assert report["denominator"]["registered_expected_frames_by_case"] == {"tiny": 1}
+    assert report["denominator"]["selected_expected_frames_by_case"] == {"tiny": 1}
     assert report["full_horizon"]["requested_maximum_steps"] is None
     assert report["comparison"]["status"] == "not_requested"
+    assert report["score_artifact"]["path"] == "scores.json"
+    assert not Path(report["score_artifact"]["path"]).is_absolute()
+    assert report["score_artifact"]["expected_frames"] == {"tiny": 1}
     trajectory = output / report["cases"]["tiny"]["trajectory"]["path"]
+    trajectory_ref = report["cases"]["tiny"]["trajectory"]
+    assert not Path(trajectory_ref["path"]).is_absolute()
+    assert trajectory_ref["expected_frames"] == 1
+    assert trajectory_ref["trajectory_frames"] == 2
+    assert trajectory_ref["bytes"] == trajectory.stat().st_size
     with h5py.File(trajectory, "r") as handle:
         assert handle["time"].shape == (2,)
         assert handle["position"].shape == (2, 2, 3)
@@ -142,6 +158,103 @@ def test_relocated_checkpoint_reproduction_writes_full_trajectory_and_score(tmp_
     assert score["cases"]["tiny"]["expected_frames"] == 1
     assert report["resource"]["wall_seconds"] >= 0
     assert report["code"]["closure_sha256"]
+
+
+def test_checkpoint_reproduction_rejects_duplicate_and_unknown_cases(tmp_path):
+    bundle = _model_bundle(tmp_path)
+    with pytest.raises(ValueError, match="duplicates"):
+        reproduce(bundle / "dataset.json", bundle, ["tiny", "tiny"],
+                  checkpoint="models/checkpoint-000.pt", output_dir=tmp_path / "duplicate")
+    with pytest.raises(ValueError, match="not registered"):
+        reproduce(bundle / "dataset.json", bundle, ["unknown"],
+                  checkpoint="models/checkpoint-000.pt", output_dir=tmp_path / "unknown")
+
+
+def _make_distinct_host_pair(output, tmp_path):
+    paired_dir = tmp_path / "paired"
+    shutil.copytree(output, paired_dir)
+    paired_report_path = paired_dir / "reproduction.json"
+    paired_report = json.loads(paired_report_path.read_text())
+    paired_report["artifact_root"] = str(paired_dir)
+    paired_report["reproduction_host"] = "paired-test-host"
+    paired_report["verification"]["host"] = "paired-test-host"
+    paired_report_path.write_text(json.dumps(paired_report))
+    return paired_report_path
+
+
+def test_paired_comparison_requires_portable_bound_artifacts_and_fixed_denominators(tmp_path):
+    bundle = _model_bundle(tmp_path)
+    output = tmp_path / "reproduction"
+    report = reproduce(
+        bundle / "dataset.json", bundle, ["tiny"],
+        checkpoint="models/checkpoint-000.pt", output_dir=output,
+    )
+    paired_report_path = _make_distinct_host_pair(output, tmp_path)
+
+    valid = _compare_paired_reproduction(report, output / "reproduction.json", paired_report_path)
+    assert valid["passed"] is True
+
+    paired = json.loads(paired_report_path.read_text())
+    paired["score_artifact"]["bytes"] += 1
+    paired_report_path.write_text(json.dumps(paired))
+    bad_bytes = _compare_paired_reproduction(
+        report, output / "reproduction.json", paired_report_path)
+    assert bad_bytes["passed"] is False
+    assert any("byte count mismatch" in error for error in bad_bytes["errors"])
+
+    paired["score_artifact"]["bytes"] -= 1
+    paired["cases"]["tiny"]["trajectory"]["sha256"] = "0" * 64
+    paired_report_path.write_text(json.dumps(paired))
+    bad_hash = _compare_paired_reproduction(
+        report, output / "reproduction.json", paired_report_path)
+    assert bad_hash["passed"] is False
+    assert any("hash mismatch" in error
+               for error in bad_hash["trajectory"]["tiny"]["errors"])
+
+    paired["cases"]["tiny"]["trajectory"]["sha256"] = report["cases"]["tiny"]["trajectory"]["sha256"]
+    paired["score_artifact"]["path"] = str(tmp_path / "paired" / "scores.json")
+    paired_report_path.write_text(json.dumps(paired))
+    absolute_path = _compare_paired_reproduction(
+        report, output / "reproduction.json", paired_report_path)
+    assert absolute_path["passed"] is False
+    assert any("portable relative path" in error for error in absolute_path["errors"])
+
+    paired["score_artifact"]["path"] = "scores.json"
+    paired["cases"]["tiny"]["trajectory"].pop("expected_frames")
+    paired_report_path.write_text(json.dumps(paired))
+    missing_frames = _compare_paired_reproduction(
+        report, output / "reproduction.json", paired_report_path)
+    assert missing_frames["passed"] is False
+    assert any("expected_frames" in error for error in missing_frames["errors"])
+
+
+def test_checkpoint_reproduction_rejects_short_horizon_and_marks_partial(tmp_path, monkeypatch):
+    bundle = _model_bundle(tmp_path)
+    original_rollout = core_learning.rollout_case
+
+    def short_rollout(*args, **kwargs):
+        result = original_rollout(*args, **kwargs)
+        result["expected_frames"] -= 1
+        return result
+
+    monkeypatch.setattr(core_learning, "rollout_case", short_rollout)
+    with pytest.raises(ValueError, match="full horizon"):
+        reproduce(bundle / "dataset.json", bundle, ["tiny"],
+                  checkpoint="models/checkpoint-000.pt", output_dir=tmp_path / "short")
+
+    def partial_rollout(*args, **kwargs):
+        result = original_rollout(*args, **kwargs)
+        result["finite_rollout_complete"] = False
+        result["failure_category"] = "synthetic_partial"
+        return result
+
+    monkeypatch.setattr(core_learning, "rollout_case", partial_rollout)
+    report = reproduce(
+        bundle / "dataset.json", bundle, ["tiny"],
+        checkpoint="models/checkpoint-000.pt", output_dir=tmp_path / "partial",
+    )
+    assert report["passed"] is False
+    assert report["full_horizon_reproduction"] is False
 
 
 def test_checkpoint_registry_version_hash_and_same_host_pair_are_rejected(tmp_path):

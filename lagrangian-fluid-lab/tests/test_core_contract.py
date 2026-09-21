@@ -6,6 +6,7 @@ import h5py
 import numpy as np
 import pytest
 
+import scripts.core_dataset as core_dataset_module
 from scripts.core_contract import (FiniteGeometry, KnownInputs, PrescribedControl,
                                    PrescribedGeometry, State,
                                    StepPrediction, apply_prediction, commit, contract_hash,
@@ -192,6 +193,66 @@ def test_portable_reader_and_train_only_boundary(tmp_path):
     manifest["cases"][0]["hdf5"] = "../outside.h5"
     with pytest.raises(ValueError, match="nonportable"):
         CoreDataset(manifest, tmp_path)
+
+
+def test_reader_rejects_same_size_hdf5_tamper_on_first_open(tmp_path):
+    manifest = tiny_manifest(tmp_path)
+    path = tmp_path / "data.h5"
+    original_size = path.stat().st_size
+    with h5py.File(path, "r+") as handle:
+        handle["velocity"][0, 0, 0] += 1.0
+    assert path.stat().st_size == original_size == manifest["cases"][0]["bytes"]
+
+    with CoreDataset(manifest, tmp_path) as data:
+        with pytest.raises(ValueError, match="HDF5 hash mismatch"):
+            data.times("tiny")
+        assert not data._handles
+
+
+def test_reader_reuses_verified_binding_across_frames_and_lru_reopen(tmp_path, monkeypatch):
+    manifest = tiny_manifest(tmp_path)
+    first_path = tmp_path / "data.h5"
+    second_path = tmp_path / "data-second.h5"
+    second_path.write_bytes(first_path.read_bytes())
+    second = copy.deepcopy(manifest["cases"][0])
+    second.update(case_id="second", physical_case_id="second", lineage_group_id="second",
+                  hdf5="data-second.h5")
+    manifest["cases"].append(second)
+
+    observed_paths = []
+    original_hash = core_dataset_module.sha256_file
+
+    def counted_hash(path):
+        observed_paths.append(Path(path).resolve())
+        return original_hash(path)
+
+    monkeypatch.setattr(core_dataset_module, "sha256_file", counted_hash)
+    with CoreDataset(manifest, tmp_path, max_open_files=1) as data:
+        assert len(data.times("tiny")) == 2
+        assert len(data.times("second")) == 2
+        # The first handle was evicted, but its already-bound source hash is
+        # retained; reopening it must not scan the HDF5 once per frame.
+        assert len(data.times("tiny")) == 2
+        assert data.read_state("tiny", 0).count == 2
+
+    assert observed_paths.count(first_path.resolve()) == 1
+    assert observed_paths.count(second_path.resolve()) == 1
+
+
+def test_unverified_legacy_provider_hash_is_diagnostic_and_never_formal(tmp_path):
+    manifest = tiny_manifest(tmp_path)
+    manifest["diagnostic_only"] = True
+    manifest["cases"][0]["sha256"] = "provider-supplied"
+    with CoreDataset(manifest, tmp_path, strict=False) as data:
+        assert data.integrity_mode == "diagnostic_only"
+        assert data.formal_eligible is False
+        assert len(data.times("tiny")) == 2
+
+    formal = copy.deepcopy(manifest)
+    formal["diagnostic_only"] = False
+    formal["formal_release"] = True
+    with pytest.raises(ValueError, match="strict source verification"):
+        CoreDataset(formal, tmp_path, strict=False)
 
 
 def test_reader_binds_initial_mass_and_ignores_inactive_payload_nan(tmp_path):

@@ -39,6 +39,11 @@ def _canonical_hash(value):
                                     allow_nan=False).encode()).hexdigest()
 
 
+def _is_sha256(value):
+    return (isinstance(value, str) and len(value) == 64
+            and all(character in "0123456789abcdef" for character in value.lower()))
+
+
 def _validate_binary_valid_dataset(dataset):
     """Validate the raw lifecycle mask without materializing the full axis.
 
@@ -81,7 +86,7 @@ def _portable_asset_ref(value, *, name="asset"):
     if path.is_absolute() or ".." in path.parts:
         raise ValueError(f"{name} path is not portable")
     digest = value.get("sha256")
-    if not isinstance(digest, str) or len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest.lower()):
+    if not _is_sha256(digest):
         raise ValueError(f"{name} requires a SHA-256 reference")
     return value
 
@@ -89,6 +94,14 @@ def _portable_asset_ref(value, *, name="asset"):
 def validate_manifest(manifest):
     if manifest.get("schema") not in SUPPORTED_SCHEMAS or not isinstance(manifest.get("cases"), list):
         raise ValueError("unsupported core dataset manifest")
+    if ("formal_release" in manifest
+            and not isinstance(manifest["formal_release"], bool)):
+        raise ValueError("formal_release must be boolean")
+    if ("diagnostic_only" in manifest
+            and not isinstance(manifest["diagnostic_only"], bool)):
+        raise ValueError("diagnostic_only must be boolean")
+    if manifest.get("formal_release") is True and manifest.get("diagnostic_only") is True:
+        raise ValueError("diagnostic-only manifest cannot be formal")
     identities, physical, lineages = set(), {}, {}
     for row in manifest["cases"]:
         for key in ("case_id", "physical_case_id", "lineage_group_id", "family", "split",
@@ -187,11 +200,12 @@ def _write_npz_asset(path, *, arrays, metadata):
     return sha256_file(path)
 
 
-def _load_npz_asset(root, reference, *, kind):
+def _load_npz_asset(root, reference, *, kind, observed_hash=None, verify_hash=True):
     path = _asset(root, reference["path"])
-    observed = sha256_file(path)
-    if observed != reference["sha256"]:
-        raise ValueError(f"{kind} asset hash mismatch: {reference['path']}")
+    if verify_hash:
+        observed = observed_hash if observed_hash is not None else sha256_file(path)
+        if observed != reference["sha256"]:
+            raise ValueError(f"{kind} asset hash mismatch: {reference['path']}")
     try:
         with np.load(path, allow_pickle=False) as archive:
             metadata = json.loads(str(np.asarray(archive["metadata"]).item()))
@@ -220,13 +234,24 @@ def _load_npz_asset(root, reference, *, kind):
     raise ValueError(f"unknown compact input asset kind {kind}")
 
 
-def known_inputs_from_record(row, data_root):
+def known_inputs_from_record(row, data_root, *, verified_assets=None, verify_hash=True):
     """Resolve either inline v1 inputs or hashed compact v2 inputs."""
     if row.get("known_inputs") is not None:
         return known_inputs_from_dict(row["known_inputs"])
+    root = Path(data_root).expanduser().resolve()
     references = row["known_inputs_ref"]
-    geometry = _load_npz_asset(data_root, references["geometry"], kind="geometry")
-    control = _load_npz_asset(data_root, references["control"], kind="control")
+    geometry_reference = references["geometry"]
+    control_reference = references["control"]
+    geometry_path = _asset(root, geometry_reference["path"])
+    control_path = _asset(root, control_reference["path"])
+    geometry = _load_npz_asset(
+        root, geometry_reference, kind="geometry",
+        observed_hash=(verified_assets.get(geometry_path) if verified_assets is not None else None),
+        verify_hash=verify_hash)
+    control = _load_npz_asset(
+        root, control_reference, kind="control",
+        observed_hash=(verified_assets.get(control_path) if verified_assets is not None else None),
+        verify_hash=verify_hash)
     return KnownInputs(geometry, control, references["physics"], references["numerics"],
                        references["coordinate_frame"], references.get("contract_version", "core.inputs.v1"))
 
@@ -454,7 +479,7 @@ def new_scope_split(parameter_min, parameter_max):
 
 
 class CoreDataset:
-    def __init__(self, manifest, data_root=None, *, max_open_files=4):
+    def __init__(self, manifest, data_root=None, *, max_open_files=4, strict=True):
         if isinstance(manifest, (str, Path)):
             path = Path(manifest).expanduser().resolve()
             payload = json.loads(path.read_text())
@@ -472,13 +497,27 @@ class CoreDataset:
                 raise ValueError("an in-memory manifest requires explicit data_root")
             root = Path(data_root).expanduser().resolve()
         self.manifest = validate_manifest(payload)
+        if not isinstance(strict, bool):
+            raise ValueError("strict source verification must be boolean")
+        formal_release = payload.get("formal_release", False)
+        if not strict and formal_release is True:
+            raise ValueError("formal manifests require strict source verification")
         self.manifest_sha256 = _canonical_hash(payload)
         self.data_root = root
+        self.strict = strict
+        self.integrity_mode = "strict" if strict else "diagnostic_only"
+        self.formal_eligible = bool(strict and formal_release is True)
         self._records = {row["case_id"]: row for row in payload["cases"]}
         if not isinstance(max_open_files, int) or max_open_files < 1:
             raise ValueError("positive open-file bound required")
         self.max_open_files = max_open_files
         self._handles = OrderedDict(); self._known = {}; self._mass_reference = {}; self.read_log = []
+        # Hashes are bound once per resolved asset for this reader lifetime.
+        # LRU handle eviction therefore does not turn a frame loop into a
+        # repeated full-file scan, while an explicit verify_sources() call can
+        # still force a fresh check.
+        self._hash_cache = {}
+        self._source_hashes = {}
 
     def case_ids(self, split=None):
         return tuple(key for key, row in self._records.items() if split is None or row["split"] == split)
@@ -486,14 +525,43 @@ class CoreDataset:
     def record(self, case_id):
         return json.loads(json.dumps(self._records[case_id]))
 
-    def _handle(self, case_id):
-        if case_id in self._handles:
-            self._handles.move_to_end(case_id)
-            return self._handles[case_id]
+    def _observed_hash(self, path, *, force=False):
+        path = Path(path)
+        if force or path not in self._hash_cache:
+            self._hash_cache[path] = sha256_file(path)
+        return self._hash_cache[path]
+
+    def _bind_sources(self, case_id, *, force=False):
         row = self._records[case_id]
         path = _asset(self.data_root, row["hdf5"])
         if row.get("bytes") and path.stat().st_size != row["bytes"]:
             raise ValueError("source HDF5 size mismatch")
+
+        verify = self.strict or force
+        if verify:
+            expected = row["sha256"]
+            if not _is_sha256(expected):
+                raise ValueError(f"HDF5 SHA-256 registration is invalid: {case_id}")
+            observed = self._observed_hash(path, force=force)
+            if observed != expected:
+                raise ValueError(f"source integrity failure: HDF5 hash mismatch: {case_id}")
+            self._source_hashes[case_id] = observed
+
+            references = row.get("known_inputs_ref")
+            if references:
+                for key in ("geometry", "control"):
+                    reference = references[key]
+                    input_path = _asset(self.data_root, reference["path"])
+                    observed = self._observed_hash(input_path, force=force)
+                    if observed != reference["sha256"]:
+                        raise ValueError(f"input asset hash mismatch: {case_id}/{key}")
+        return path
+
+    def _handle(self, case_id):
+        if case_id in self._handles:
+            self._handles.move_to_end(case_id)
+            return self._handles[case_id]
+        path = self._bind_sources(case_id)
         handle = h5py.File(path, "r")
         required = {"time", "position", "velocity", "particle_id", "particle_zone", "mass", "valid"}
         try:
@@ -520,19 +588,8 @@ class CoreDataset:
     def verify_sources(self, case_ids=None):
         result = {}
         for case_id in self.case_ids() if case_ids is None else case_ids:
-            row = self._records[case_id]
-            observed = sha256_file(_asset(self.data_root, row["hdf5"]))
-            if observed != row["sha256"]:
-                raise ValueError(f"HDF5 hash mismatch: {case_id}")
-            result[case_id] = observed
-            if row.get("known_inputs_ref"):
-                for key, reference in row["known_inputs_ref"].items():
-                    if key not in ("geometry", "control"):
-                        continue
-                    input_path = _asset(self.data_root, reference["path"])
-                    input_hash = sha256_file(input_path)
-                    if input_hash != reference["sha256"]:
-                        raise ValueError(f"input asset hash mismatch: {case_id}/{key}")
+            self._bind_sources(case_id, force=True)
+            result[case_id] = self._source_hashes[case_id]
         return result
 
     def times(self, case_id):
@@ -541,8 +598,12 @@ class CoreDataset:
         return result
 
     def known_inputs(self, case_id):
+        self._bind_sources(case_id)
         if case_id not in self._known:
-            self._known[case_id] = known_inputs_from_record(self._records[case_id], self.data_root)
+            self._known[case_id] = known_inputs_from_record(
+                self._records[case_id], self.data_root,
+                verified_assets=self._hash_cache if self.strict else None,
+                verify_hash=self.strict)
             if contract_hash(self._known[case_id]) != self._records[case_id]["known_inputs_sha256"]:
                 raise ValueError("known input contract hash mismatch")
         return self._known[case_id]
@@ -596,6 +657,8 @@ class CoreDataset:
             handle.close()
         self._handles.clear()
         self._mass_reference.clear()
+        self._hash_cache.clear()
+        self._source_hashes.clear()
 
     def __enter__(self):
         return self
