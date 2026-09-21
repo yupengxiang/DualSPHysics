@@ -99,6 +99,17 @@
   仍 right-censored；33 行 overlay 只有诊断终态，正式 acceptance receipt 为 0，
   native MLS 尚未接入共享 acceptance bridge。建议的下一步是只读 adapter/receipt
   bridge，不能借此把 diagnostic row 升级成 T2。
+- 上述 F3 bridge 已完成并绑定到固定 acceptance contract：它只读取 gap-audit
+  JSON 与源码 hash，不打开 HDF5、不启动 solver/GPU、不改变 registry、ledger、
+  matrix 或分母。bridge 的 formal receipt 明确为 `blocked`、`credit=0`、
+  `T2_macro=false`；unknown/CDF、right-censor/full-window、逐 source 分母和
+  33-row diagnostic-only 规则均已重新核对。它解决了接口缺失，但没有掩盖目前
+  的科学 acceptance 失败。
+- F5 第三个 T1 路线的 v3/v4 geometry repair 已冻结为只读 route-closure receipt：
+  两种独立的 STL materialization 都在 frame 0 留下同一个 block 内 fluid endpoint
+  （`fluid_first_id=94622`），因此当前 F5 identity 不再授权 solver anchor、同输入
+  重跑或 T1 资格。15 行失败分母保留，后续只有出现新的独立物理假设并通过 root
+  review 才能重新开 F5。
 
 ## 当前门状态
 
