@@ -731,3 +731,16 @@ F4 formal 注册器回归：**2 passed**（成功注册可重复执行；formal 
 - 独立 runtime v2 [f5_wave_runup_solver_anchor_runtime_v2.py](../scripts/f5_wave_runup_solver_anchor_runtime_v2.py) SHA-256 为 `84a9fe5620df956bcbff8e9979a21a318b4004837ca3b30cb505cc3186b79b2b`，测试 SHA-256 为 `ec64751aa739dcb60edc8442910a4d1d0fce0652bd53a9d8d1f40695e4054cf5`。它把真实 `Output..... dt:` 作为 cadence gate，保留 `TimeOut=` 仅作诊断，并对 snapshot 外部 attempt 路径安全回退；exact-one、固定15行分母、zero credit、solver/GPU 各一次以及 queue/ledger/registry/matrix mutation 全部保持关闭。
 - v2 隔离回归 **6 passed**，F5 anchor 相关回归合计 **20 passed**，真实完成 Run.out 仅读检查得到 `TimeMax=16`、`output_dt=[0.02]`、`Excluded=0`、`Steps=138258`；没有启动新的 solver/GPU/queue，也没有修改当前 v1 attempt。v2 明确拒绝当前 v1 job，下一次必须使用全新输入／输出身份和独立 root review 重新绑定 v2 runtime、job、queue 及 hash closure。
 - 这只是基础设施修复准备，不是授权或科学结果；在几何抽样负证据解决之前，不提交新的 F5 资格矩阵，不对当前 anchor 做同输入重试。Core gate 保持 T1 F3/F4、宏观 T2 `0/2`、正式训练 `0/9`。
+
+## 本轮追加：第三 T1 候选路线审计 v2
+
+- 独立路线报告 [CORE-THIRD-T1-CANDIDATE-AUDIT-2026-09-21-v2.zh-CN.md](CORE-THIRD-T1-CANDIDATE-AUDIT-2026-09-21-v2.zh-CN.md) 重新核对 F1、F2 和 F5 的现有谱系，没有启动 GenCase、solver、GPU、queue，也没有写 registry、ledger 或 matrix。报告 SHA-256 为 `68047248a4830be798ee8db6a40520eb1c6db80a736500c330d3f904d62c6bff`，对应 commit `1ce3d4a9e5d4472eda245ae23a8e22ef157dff92`。
+- F2 submerged-orifice 的 v2/v3/v4 依次保留 `64,899`、`83,443` 和 `29,484` 个 zero `BoundNor/NormalSize`；v4 的零法向全部位于 `Mk=18` gate，虽然质量误差已回到门槛内，hard gate 仍失败。三条输入均 `credit=0`，禁止同输入重试或直接进入 solver。
+- F1 G1、F2 receiver/weir 和当前修复谱系已关闭。F5 仍是最可执行的第三家族候选，但当前 anchor 的抽样几何负证据必须先转成新的、可证伪的 Definition/output 身份和独立 root review；在此之前不授权新的 F5 runtime、solver 或资格矩阵。
+
+## 本轮追加：F5 几何修复 proposal-only 审计
+
+- 只读审计 [geometry-repair-proposal-audit-v1.json](../campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/geometry-repair-proposal-audit-v1.json) SHA-256 为 `3163d6e1d75b3ffacbda61afeb18e9e35a98e5e575ded254c6b7b86733ebee42`，commit `52acd00e7146e836f0584ecfa378db457cca2f45`。它重算并复现了九帧、fluid-only、stride-32 的 `891` 个 slope endpoint、`2463` 个 block endpoint 和 `1435` 个 saved-chord crossings；没有启动 GenCase、solver、GPU、queue，也没有修改现有 attempt/root/job、registry、ledger 或 matrix。
+- 当前只保留两个有证据的假设：H1 为 fillbox 前缺少显式 closed-solid/void 排除，导致块体初态和后续接触穿透；H2 为严格连续 STL 判定与离散 `MkCells` 接触带的差异使浅层计数偏高。H2 不能解释约 `2.3–2.8 dp` 的 block 深部尾部，也不能作为放宽几何硬门的依据。
+- 最小候选是全新 `F5_wave_runup_q0p50_dp0p0075_geomrepair_v3` 输入／输出身份：只改变几何排除的物化顺序或新 hash 的一层壳资产，保留 q、粒距、运动、时域、cadence、观察量和15行分母。proposal 明确 `qualification_claim=none`、`matrix_credit=0`、禁止 same-input retry；必须先由 root review 选择合法 GenCase 排除语法，再授权一次全新 CPU/native preflight，之后还需独立 solver review。
+- JSON 校验及 F5 相关回归共 **42 passed**。在 root review 之前不写 v3 Definition/资产，不执行 GenCase/native decode，不提交 solver/GPU 作业；Core gate 仍只有 T1 F3/F4、宏观 T2 `0/2`、正式训练 `0/9`。
