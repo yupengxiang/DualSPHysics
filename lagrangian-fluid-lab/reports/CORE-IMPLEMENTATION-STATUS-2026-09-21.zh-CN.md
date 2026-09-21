@@ -80,7 +80,8 @@
 - 材料修复后的实现哈希已重新绑定到只读预检证据；同时把评测和 rollout 的
   frame denominator 收紧为真实整数语义，拒绝 fractional/bool 计数。新鲜 v5
   源闭包、root-admission 回执和 full-field halo oracle 已重新生成并通过哈希
-  验证；完整 Core 回归为 `444 passed`，不改变任何 T2 分母或资格状态。
+  验证；此前完整 Core 回归为 `444 passed`，本次 F6/F4 定向回归另有 `16 passed`，
+  不改变任何 T2 分母或资格状态。
 - F4 tallwall120 的只读 T2 admission/acceptance gap audit 已登记为独立证据：6/6
   保留案例未知质量门失败（最大 `1.0 > 0.01`），6/6 事件窗 right-censored，
   没有 F4 CDF 容差、residence/event acceptance 或正式逐例 acceptance receipt；
