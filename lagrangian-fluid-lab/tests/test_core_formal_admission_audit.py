@@ -6,7 +6,12 @@ import json
 import hashlib
 from pathlib import Path
 
-from scripts.core_formal_admission_audit import _is_qualification, audit_admission, main
+from scripts.core_formal_admission_audit import (
+    _is_qualification,
+    audit_admission,
+    main,
+    sha256_file,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -152,6 +157,116 @@ def test_unbound_external_adapter_cannot_mask_audit_failure(tmp_path: Path) -> N
     assert report["production_denominator"]["failure_denominator_preserved"] is True
     assert "HARD_AUDIT_GAP" in {item["code"] for item in report["blockers"]}
     assert "STRUCTURAL_AUDIT_GAP" in {item["code"] for item in report["blockers"]}
+
+
+def test_cross_manifest_duplicate_case_id_cannot_pass_a_complete_denominator(
+    tmp_path: Path,
+) -> None:
+    """A duplicate split row used to make the 3-family gate pass fail-open.
+
+    The two F3 manifest fragments below contain 32 rows in total and retain
+    the exact 16/4/12 split shape, but the first train row is repeated and a
+    different train row disappears.  Before the blocker was added,
+    ``duplicate_case_ids`` was only reported and the synthetic admission
+    reached ``ready`` with 96 rows and 96 bound audits.
+    """
+
+    def manifest_rows(family: str) -> list[dict]:
+        rows: list[dict] = []
+        scope = f"scope-{family}"
+        for split, count in (("train", 16), ("validation", 4), ("test", 12)):
+            for index in range(count):
+                case_id = f"{family}-{split}-{index:02d}"
+                rows.append({
+                    "case_id": case_id,
+                    "physical_case_id": f"physical-{case_id}",
+                    "lineage_group_id": f"lineage-{case_id}",
+                    "family": family,
+                    "scope_id": scope,
+                    "split": split,
+                    "hdf5": f"assets/{case_id}.h5",
+                    "known_inputs_ref": {
+                        "geometry": {"path": f"assets/{case_id}-geometry.npz"},
+                        "control": {"path": f"assets/{case_id}-control.npz"},
+                    },
+                })
+        return rows
+
+    def materialize_manifest(path: Path, family: str, rows: list[dict]) -> Path:
+        for row in rows:
+            audit_path = tmp_path / "audits" / f"{row['case_id']}.json"
+            audit_path.parent.mkdir(parents=True, exist_ok=True)
+            if not audit_path.exists():
+                audit_path.write_text(json.dumps({
+                    "case_id": row["case_id"],
+                    "family": family,
+                    "scope_id": row["scope_id"],
+                    "physical_case_id": row["physical_case_id"],
+                    "lineage_group_id": row["lineage_group_id"],
+                    "hard_integrity_pass": True,
+                    "structural_pass": True,
+                }))
+            row["audit"] = {
+                "path": f"audits/{row['case_id']}.json",
+                "sha256": sha256_file(audit_path),
+            }
+        path.write_text(json.dumps({
+            "schema": "core.dataset.v2",
+            "dataset_id": f"dataset-{family}-{path.stem}",
+            "formal_release": True,
+            "cases": rows,
+        }))
+        return path
+
+    def split_f3() -> tuple[list[dict], list[dict]]:
+        rows = manifest_rows("F3")
+        # Keep the aggregate split shape unchanged: each fragment has a
+        # train row, so the replacement remains train rather than turning a
+        # validation row into a second train row.
+        first = rows[:15] + rows[16:17]
+        second = rows[15:16] + rows[17:]
+        duplicate = dict(first[0])
+        second[0] = duplicate
+        return first, second
+
+    f3_a, f3_b = split_f3()
+    manifest_specs = [
+        ("F3", "f3-a.json", f3_a),
+        ("F3", "f3-b.json", f3_b),
+        ("F4", "f4.json", manifest_rows("F4")),
+        ("F5", "f5.json", manifest_rows("F5")),
+    ]
+    manifests = [
+        materialize_manifest(tmp_path / filename, family, rows)
+        for family, filename, rows in manifest_specs
+    ]
+    evidence = [
+        {
+            "schema": "core.qualification.v1",
+            "family": family,
+            "scope_id": f"scope-{family}",
+            "T1_numerical": True,
+        }
+        for family in ("F3", "F3", "F4", "F5")
+    ]
+
+    report = audit_admission(
+        manifests,
+        data_root=tmp_path,
+        code_root=ROOT,
+        evidence=evidence,
+    )
+
+    assert report["duplicate_case_ids"] == ["F3-train-00"]
+    assert report["family_summary"]["split_shape_mismatches"] == {}
+    assert report["family_summary"]["t1_family_count"] == 3
+    denominator = report["production_denominator"]
+    assert denominator["included_case_count"] == 96
+    assert denominator["formal_audit_pass_count"] == 96
+    assert report["formal_admission"] is False
+    assert "MANIFEST_DUPLICATE_CASE_ID" in {
+        item["code"] for item in report["blockers"]
+    }
 
 
 def test_explanatory_none_claim_remains_in_the_production_denominator() -> None:

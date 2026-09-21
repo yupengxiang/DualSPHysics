@@ -958,6 +958,13 @@ def audit_admission(
             "FORMAL_RELEASE_REQUIRED",
             "every source reader manifest must declare formal_release=true; this audit never upgrades it",
             observed=formal_release_sources, required="all source manifests formal_release=true"))
+    if duplicate_case_ids:
+        blockers.append(_blocker(
+            "MANIFEST_DUPLICATE_CASE_ID",
+            "the formal production denominator requires each case_id exactly once across all source manifests",
+            observed=duplicate_case_ids,
+            required="unique case_id across the complete manifest set",
+            scope="manifest"))
     t1_family_count = sum(value is True for value in t1_families.values())
     if t1_family_count < REQUIRED_FAMILIES:
         blockers.append(_blocker(
