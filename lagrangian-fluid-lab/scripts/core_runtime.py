@@ -31,6 +31,9 @@ DEFAULT_ROOT = LAB / "campaigns/core-v1/runtime"
 ACTIVE = ("reserved", "launching", "running", "attention")
 TERMINAL = ("succeeded", "failed", "cancelled")
 SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,159}$")
+_UNSET = object()
+EXECUTION_RECEIPT_SCHEMA = "core.execution_receipt.v1"
+RECOVERY_ATTENTION_SCHEMA = "core.reconciliation_attention.v1"
 
 
 def queue_priority(job):
@@ -358,6 +361,287 @@ class Store:
             if status != "running" or "result" in fields:
                 self.event(job_id, status, fields)
 
+    @staticmethod
+    def _json_value(raw):
+        if not raw:
+            return {}
+        try:
+            value = json.loads(raw)
+        except (TypeError, ValueError):
+            return {}
+        return value if isinstance(value, dict) else {}
+
+    @staticmethod
+    def _where_attempt(where, values, attempt_id):
+        if attempt_id is _UNSET:
+            return
+        if attempt_id is None:
+            where.append("attempt_id IS NULL")
+        else:
+            where.append("attempt_id=?")
+            values.append(attempt_id)
+
+    def cas_update(self, job_id, status, *, expected_status, expected_attempt_id=_UNSET,
+                   expected_job_id=None, event_name=None, **fields):
+        """Atomically update one job only if its observed identity is unchanged.
+
+        ``update`` predates the coordinator recovery path and intentionally keeps
+        its unconditional behavior.  New lifecycle code uses this helper so a
+        stale coordinator snapshot cannot overwrite a newer attempt.  A false
+        return means the compare-and-set predicate did not match; no event or
+        field is written.
+        """
+        if expected_job_id is not None and expected_job_id != job_id:
+            return False
+        assignments = ["status=?", "updated=?"]
+        values = [status, time.time()]
+        event_fields = {}
+        for key, value in fields.items():
+            if key not in ("attempt_id", "allocation", "attempt_dir", "heartbeat", "result"):
+                raise ValueError(key)
+            assignments.append(key + "=?")
+            values.append(canonical(value) if key in ("allocation", "heartbeat", "result") else value)
+            event_fields[key] = value
+        where = ["job_id=?", "status=?"]
+        where_values = [job_id, expected_status]
+        self._where_attempt(where, where_values, expected_attempt_id)
+        with self.db:
+            self.db.execute("BEGIN IMMEDIATE")
+            cursor = self.db.execute(
+                "UPDATE jobs SET " + ",".join(assignments) + " WHERE " + " AND ".join(where),
+                values + where_values,
+            )
+            if cursor.rowcount != 1:
+                return False
+            if status != "running" or "result" in fields:
+                self.event(job_id, event_name or status, event_fields)
+        return True
+
+    def transition(self, job_id, status, *, expected_status, expected_attempt_id=_UNSET,
+                   expected_job_id=None, event_name=None, **fields):
+        """Named alias for the public lifecycle CAS operation."""
+        return self.cas_update(
+            job_id,
+            status,
+            expected_status=expected_status,
+            expected_attempt_id=expected_attempt_id,
+            expected_job_id=expected_job_id,
+            event_name=event_name,
+            **fields,
+        )
+
+    @staticmethod
+    def _receipt_hash(receipt):
+        try:
+            return hashlib.sha256(canonical(receipt).encode()).hexdigest()
+        except (TypeError, ValueError):
+            return None
+
+    @staticmethod
+    def _receipt_errors(receipt, job_id, attempt_id):
+        errors = []
+        if not isinstance(receipt, dict):
+            return ["receipt_not_object"]
+        if receipt.get("schema") != EXECUTION_RECEIPT_SCHEMA:
+            errors.append("invalid_schema")
+        if receipt.get("job_id") != job_id:
+            errors.append("job_id_mismatch")
+        if attempt_id is None or receipt.get("attempt_id") != attempt_id:
+            errors.append("attempt_id_mismatch")
+        if receipt.get("execution_status") not in ("succeeded", "failed"):
+            errors.append("invalid_execution_status")
+        return errors
+
+    @staticmethod
+    def _safe_observed(observed):
+        try:
+            canonical(observed)
+            return observed
+        except (TypeError, ValueError):
+            return {"type": type(observed).__name__}
+
+    @staticmethod
+    def _receipt_is_valid(receipt, job_id, attempt_id):
+        return isinstance(receipt, dict) and not Store._receipt_errors(receipt, job_id, attempt_id)
+
+    @staticmethod
+    def _locked_where(row):
+        where = ["job_id=?", "status=?"]
+        values = [row["job_id"], row["status"]]
+        Store._where_attempt(where, values, row["attempt_id"])
+        return where, values
+
+    def register_recovery(self, job_id, *, expected_status, expected_attempt_id,
+                          reason, observed=None, heartbeat=None, expected_job_id=None):
+        """Record an uncertain observation without relaunching or overwriting a receipt."""
+        if expected_job_id is not None and expected_job_id != job_id:
+            return {"action": "rejected", "reason": "expected_job_id_mismatch"}
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            row = self.db.execute(
+                "SELECT job_id,status,attempt_id,heartbeat,result FROM jobs WHERE job_id=?",
+                (job_id,),
+            ).fetchone()
+            if row is None:
+                raise KeyError(job_id)
+            if row["status"] != expected_status or row["attempt_id"] != expected_attempt_id:
+                self.db.rollback()
+                return {"action": "cas_lost", "reason": "job_identity_changed"}
+            current = self._json_value(row["result"])
+            if self._receipt_is_valid(current, job_id, row["attempt_id"]):
+                self.db.rollback()
+                return {"action": "noop", "reason": "receipt_already_finalized"}
+            if (row["status"] == "attention" and current.get("schema") == RECOVERY_ATTENTION_SCHEMA
+                    and current.get("reason") == reason):
+                self.db.rollback()
+                return {"action": "noop", "reason": "recovery_already_registered"}
+            diagnostic = {
+                "schema": RECOVERY_ATTENTION_SCHEMA,
+                "reason": reason,
+                "job_id": job_id,
+                "attempt_id": row["attempt_id"],
+                "observed": self._safe_observed(observed),
+            }
+            fields = {"result": diagnostic}
+            if heartbeat is not None:
+                fields["heartbeat"] = heartbeat
+            assignments = ["status=?", "updated=?"]
+            values = ["attention", time.time()]
+            for key, value in fields.items():
+                assignments.append(key + "=?")
+                values.append(canonical(value))
+            where, where_values = self._locked_where(row)
+            cursor = self.db.execute(
+                "UPDATE jobs SET " + ",".join(assignments) + " WHERE " + " AND ".join(where),
+                values + where_values,
+            )
+            if cursor.rowcount != 1:
+                self.db.rollback()
+                return {"action": "cas_lost", "reason": "job_identity_changed"}
+            self.event(job_id, "recovery_registered", diagnostic)
+            self.db.commit()
+            return {"action": "attention", "reason": reason}
+        except Exception:
+            self.db.rollback()
+            raise
+
+    def finalize_receipt(self, job_id, receipt, *, expected_attempt_id=_UNSET,
+                         heartbeat=None, expected_job_id=None):
+        """Validate and atomically accept one execution receipt.
+
+        The stored execution receipt is the billing identity for a job.  A
+        duplicate byte-for-byte receipt is a no-op.  A different receipt for
+        the same job/attempt never replaces the stored receipt; it moves the
+        job to ``attention`` and retains the original result so accounting can
+        count at most one completion.
+        """
+        if expected_job_id is not None and expected_job_id != job_id:
+            return {"action": "rejected", "reason": "expected_job_id_mismatch"}
+        incoming_hash = self._receipt_hash(receipt)
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            row = self.db.execute(
+                "SELECT job_id,status,attempt_id,heartbeat,result FROM jobs WHERE job_id=?",
+                (job_id,),
+            ).fetchone()
+            if row is None:
+                raise KeyError(job_id)
+            if expected_attempt_id is not _UNSET and row["attempt_id"] != expected_attempt_id:
+                self.db.rollback()
+                return {"action": "cas_lost", "reason": "attempt_identity_changed"}
+            current = self._json_value(row["result"])
+            current_valid = self._receipt_is_valid(current, job_id, row["attempt_id"])
+            if current_valid:
+                current_hash = self._receipt_hash(current)
+                if current_hash == incoming_hash and canonical(current) == canonical(receipt):
+                    self.db.rollback()
+                    return {"action": "noop", "reason": "duplicate_receipt", "receipt_sha256": incoming_hash}
+                metadata = self._json_value(row["heartbeat"])
+                reconciliation = metadata.get("reconciliation", {})
+                if reconciliation.get("conflicting_receipt_sha256") == incoming_hash:
+                    self.db.rollback()
+                    return {"action": "noop", "reason": "duplicate_conflicting_receipt"}
+                metadata["reconciliation"] = {
+                    "reason": "conflicting_receipt",
+                    "conflicting_receipt_sha256": incoming_hash,
+                    "original_receipt_sha256": current_hash,
+                }
+                assignments = ["status=?", "updated=?", "heartbeat=?"]
+                values = ["attention", time.time(), canonical(metadata)]
+                where, where_values = self._locked_where(row)
+                cursor = self.db.execute(
+                    "UPDATE jobs SET " + ",".join(assignments) + " WHERE " + " AND ".join(where),
+                    values + where_values,
+                )
+                if cursor.rowcount != 1:
+                    self.db.rollback()
+                    return {"action": "cas_lost", "reason": "job_identity_changed"}
+                self.event(job_id, "receipt_conflict", {
+                    "original_receipt_sha256": current_hash,
+                    "conflicting_receipt_sha256": incoming_hash,
+                })
+                self.db.commit()
+                return {"action": "attention", "reason": "conflicting_receipt"}
+
+            errors = self._receipt_errors(receipt, job_id, row["attempt_id"])
+            if errors:
+                if (row["status"] == "attention" and current.get("schema") == RECOVERY_ATTENTION_SCHEMA
+                        and current.get("reason") == "invalid_execution_receipt"
+                        and current.get("receipt_sha256") == incoming_hash
+                        and current.get("errors") == errors):
+                    self.db.rollback()
+                    return {"action": "noop", "reason": "duplicate_invalid_receipt"}
+                if row["status"] not in ACTIVE:
+                    self.db.rollback()
+                    return {"action": "rejected", "reason": "job_not_active"}
+                diagnostic = {
+                    "schema": RECOVERY_ATTENTION_SCHEMA,
+                    "reason": "invalid_execution_receipt",
+                    "job_id": job_id,
+                    "attempt_id": row["attempt_id"],
+                    "receipt_sha256": incoming_hash,
+                    "errors": errors,
+                }
+                assignments = ["status=?", "updated=?", "result=?"]
+                values = ["attention", time.time(), canonical(diagnostic)]
+                if heartbeat is not None:
+                    assignments.append("heartbeat=?")
+                    values.append(canonical(heartbeat))
+                where, where_values = self._locked_where(row)
+                cursor = self.db.execute(
+                    "UPDATE jobs SET " + ",".join(assignments) + " WHERE " + " AND ".join(where),
+                    values + where_values,
+                )
+                if cursor.rowcount != 1:
+                    self.db.rollback()
+                    return {"action": "cas_lost", "reason": "job_identity_changed"}
+                self.event(job_id, "recovery_registered", diagnostic)
+                self.db.commit()
+                return {"action": "attention", "reason": "invalid_execution_receipt"}
+
+            if row["status"] not in ACTIVE:
+                self.db.rollback()
+                return {"action": "rejected", "reason": "job_not_active"}
+            assignments = ["status=?", "updated=?", "result=?"]
+            values = [receipt["execution_status"], time.time(), canonical(receipt)]
+            if heartbeat is not None:
+                assignments.append("heartbeat=?")
+                values.append(canonical(heartbeat))
+            where, where_values = self._locked_where(row)
+            cursor = self.db.execute(
+                "UPDATE jobs SET " + ",".join(assignments) + " WHERE " + " AND ".join(where),
+                values + where_values,
+            )
+            if cursor.rowcount != 1:
+                self.db.rollback()
+                return {"action": "cas_lost", "reason": "job_identity_changed"}
+            self.event(job_id, receipt["execution_status"], {"result": receipt})
+            self.db.commit()
+            return {"action": "accepted", "receipt_sha256": incoming_hash}
+        except Exception:
+            self.db.rollback()
+            raise
+
 
 def default_hosts(lab):
     lab = str(Path(lab).resolve())
@@ -392,14 +676,25 @@ def deploy_runtime(host):
 def collect_attempt(path):
     path = Path(path)
     result = {}
+    receipt_errors = []
     for name in ("launch", "heartbeat", "result"):
         try:
-            result[name] = json.loads((path / (name + ".json")).read_text())
+            value = json.loads((path / (name + ".json")).read_text())
+            if not isinstance(value, dict):
+                receipt_errors.append({"file": name + ".json", "error": "JSONShapeError"})
+            else:
+                result[name] = value
         except FileNotFoundError:
             pass
-    identity = result.get("launch", {}).get("worker_identity")
+        except (OSError, TypeError, ValueError) as exc:
+            receipt_errors.append({"file": name + ".json", "error": type(exc).__name__})
+    if receipt_errors:
+        result["receipt_errors"] = receipt_errors
+    launch = result.get("launch", {})
+    heartbeat = result.get("heartbeat", {})
+    identity = launch.get("worker_identity")
     result["worker_alive"] = is_alive(identity)
-    result["child_alive"] = is_alive(result.get("heartbeat", {}).get("child_identity"))
+    result["child_alive"] = is_alive(heartbeat.get("child_identity"))
     return result
 
 
@@ -526,9 +821,11 @@ def worker(spec_file, attempt_dir):
     if (attempt / "launch.json").exists():
         return 2
     spec = json.loads(Path(spec_file).read_text())
+    attempt_id = spec.get("attempt_id") or attempt.name
     start = time.time()
     identity = proc_identity(os.getpid())
-    atomic_json(attempt / "launch.json", {"time": start, "worker_identity": identity, "job_id": spec["job_id"]})
+    atomic_json(attempt / "launch.json", {"time": start, "worker_identity": identity,
+                "job_id": spec["job_id"], "attempt_id": attempt_id})
     env = os.environ.copy()
     env.update({k: str(v) for k, v in spec.get("env", {}).items()})
     threads = str(max(1, int(spec["resources"]["cpu_cores"])))
@@ -601,7 +898,8 @@ def worker(spec_file, attempt_dir):
                 indexed[relative] = {"path": relative, "sha256": digest(path), "bytes": path.stat().st_size}
     usage = resource.getrusage(resource.RUSAGE_CHILDREN)
     end = time.time()
-    result = {"schema": "core.execution_receipt.v1", "job_id": spec["job_id"],
+    result = {"schema": EXECUTION_RECEIPT_SCHEMA, "job_id": spec["job_id"],
+              "attempt_id": attempt_id,
               "execution_status": "succeeded" if returncode == 0 and not error and not missing and not timeout else "failed",
               "scientific_status": "not_inferred_from_execution", "started": start, "finished": end,
               "returncode": returncode, "timeout": timeout, "error": error, "missing_outputs": missing,
@@ -656,26 +954,56 @@ class Coordinator:
                 continue
             host_name = self.job_host(job)
             if host_name not in self.hosts:
-                self.store.update(job["job_id"], "attention", result={
-                    "reason": "unknown_effective_host", "host": host_name})
+                self.store.register_recovery(
+                    job["job_id"], expected_status=job["status"],
+                    expected_attempt_id=job["attempt_id"], reason="unknown_effective_host",
+                    observed={"host": host_name}, expected_job_id=job["job_id"],
+                )
                 continue
             try:
                 receipt = self.call(host_name, "collect", "--attempt-dir", job["attempt_dir"])
             except Exception as exc:
                 # Unreachable is not dead; retain reservation, do not relaunch.
-                self.store.update(job["job_id"], "attention", result={"reason": "host_unreachable", "error": repr(exc)})
+                self.store.register_recovery(
+                    job["job_id"], expected_status=job["status"],
+                    expected_attempt_id=job["attempt_id"], reason="host_unreachable",
+                    observed={"error": repr(exc)}, expected_job_id=job["job_id"],
+                )
+                continue
+            if not isinstance(receipt, dict):
+                self.store.register_recovery(
+                    job["job_id"], expected_status=job["status"],
+                    expected_attempt_id=job["attempt_id"], reason="invalid_collect_response",
+                    observed={"type": type(receipt).__name__}, expected_job_id=job["job_id"],
+                )
+                continue
+            if receipt.get("receipt_errors"):
+                self.store.register_recovery(
+                    job["job_id"], expected_status=job["status"],
+                    expected_attempt_id=job["attempt_id"], reason="corrupt_receipt",
+                    observed={"receipt_errors": receipt["receipt_errors"]},
+                    heartbeat=receipt.get("heartbeat", {}), expected_job_id=job["job_id"],
+                )
                 continue
             result = receipt.get("result")
-            if result:
-                if result["job_id"] != job["job_id"]:
-                    raise RuntimeError("receipt job identity mismatch")
-                self.store.update(job["job_id"], result["execution_status"], result=result,
-                                  heartbeat=receipt.get("heartbeat", {}))
+            if result is not None:
+                self.store.finalize_receipt(
+                    job["job_id"], result, expected_attempt_id=job["attempt_id"],
+                    heartbeat=receipt.get("heartbeat", {}), expected_job_id=job["job_id"],
+                )
             elif receipt.get("worker_alive") or receipt.get("child_alive"):
-                self.store.update(job["job_id"], "running", heartbeat=receipt.get("heartbeat", {}), result={})
+                self.store.cas_update(
+                    job["job_id"], "running", expected_status=job["status"],
+                    expected_attempt_id=job["attempt_id"], expected_job_id=job["job_id"],
+                    heartbeat=receipt.get("heartbeat", {}), result={},
+                )
             elif time.time() - job["updated"] > 60 or job["status"] == "attention":
-                self.store.update(job["job_id"], "attention", result={"reason": "missing_receipt_requires_reconciliation",
-                                  "observed": receipt}, heartbeat=receipt.get("heartbeat", {}))
+                self.store.register_recovery(
+                    job["job_id"], expected_status=job["status"],
+                    expected_attempt_id=job["attempt_id"],
+                    reason="missing_receipt_requires_reconciliation", observed=receipt,
+                    heartbeat=receipt.get("heartbeat", {}), expected_job_id=job["job_id"],
+                )
 
     def launch(self, job, allocation, host_name=None):
         name = host_name or job["spec"]["host"]
@@ -690,10 +1018,18 @@ class Coordinator:
         # concrete host into the worker request and receipt.
         spec = freeze_job(dict(job["spec"], host=name, allocation=allocation), self.lab, self.store.root)
         spec["source_lab"] = host["lab"]
-        self.store.update(job["job_id"], "reserved", attempt_id=attempt_id, allocation=allocation, attempt_dir=str(attempt))
+        if not self.store.cas_update(
+                job["job_id"], "reserved", expected_status=job["status"],
+                expected_attempt_id=None, expected_job_id=job["job_id"],
+                attempt_id=attempt_id, allocation=allocation, attempt_dir=str(attempt)):
+            raise RuntimeError("job changed before reservation")
+        spec["attempt_id"] = attempt_id
         local_spec = self.store.root / "specs" / (attempt_id + ".json")
         atomic_json(local_spec, spec)
-        self.store.update(job["job_id"], "launching")
+        if not self.store.cas_update(
+                job["job_id"], "launching", expected_status="reserved",
+                expected_attempt_id=attempt_id, expected_job_id=job["job_id"]):
+            raise RuntimeError("job changed before launch")
         try:
             if host.get("ssh"):
                 source_parent = Path(spec["source_snapshot"]["path"]).parent
@@ -722,7 +1058,11 @@ class Coordinator:
                 shutil.copyfile(local_spec, attempt / "request.json")
             self.call(name, "prepare-launch", "--spec", attempt / "request.json", "--attempt-dir", attempt)
         except Exception as exc:
-            self.store.update(job["job_id"], "attention", result={"reason": "launch_uncertain", "error": repr(exc)})
+            self.store.register_recovery(
+                job["job_id"], expected_status="launching", expected_attempt_id=attempt_id,
+                reason="launch_uncertain", observed={"error": repr(exc)},
+                expected_job_id=job["job_id"],
+            )
 
     def tick(self):
         self.reconcile()
