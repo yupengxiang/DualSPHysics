@@ -153,6 +153,25 @@ def test_reader_binds_initial_mass_and_ignores_inactive_payload_nan(tmp_path):
             data.read_state("tiny", 1)
 
 
+@pytest.mark.parametrize("invalid_values", [
+    np.asarray([[2, 1], [1, 1]], dtype=np.int64),
+    np.asarray([[0.5, 1.0], [1.0, 1.0]], dtype=np.float64),
+    np.asarray([[np.nan, 1.0], [1.0, 1.0]], dtype=np.float64),
+])
+def test_reader_rejects_nonbinary_valid_mask(tmp_path, invalid_values):
+    manifest = tiny_manifest(tmp_path)
+    path = tmp_path / "data.h5"
+    with h5py.File(path, "r+") as handle:
+        del handle["valid"]
+        handle.create_dataset("valid", data=invalid_values)
+    manifest["cases"][0]["sha256"] = sha256_file(path)
+    manifest["cases"][0]["bytes"] = path.stat().st_size
+
+    with CoreDataset(manifest, tmp_path) as data:
+        with pytest.raises(ValueError, match="valid"):
+            data.times("tiny")
+
+
 def test_lineage_and_qualification_cannot_cross_splits(tmp_path):
     manifest = tiny_manifest(tmp_path)
     extra = copy.deepcopy(manifest["cases"][0]); extra.update(case_id="other", physical_case_id="other", split="validation")

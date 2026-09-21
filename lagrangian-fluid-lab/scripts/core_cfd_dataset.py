@@ -9,7 +9,7 @@ known inputs and it maps qualification records to the separate
 
 The adapter accepts either the compact ``core.cfd.dataset.v1`` form below, an
 F4 production collection report with an explicit materialized reader view, or
-the existing F1/F2/F4 design/production records when each case has a trajectory
+the existing F1/F2/F4/F7 design/production records when each case has a trajectory
 and a prepared record attached (inline or through ``prepared``).  Static
 qualification designs without HDF5 products are rejected with an actionable
 error; they are design registrations, not trainable data.
@@ -130,8 +130,17 @@ def geometry_from_cfd_config(config, *, coordinate_frame=COORDINATE_FRAME,
     F2 is represented by its actual finite cup, receiver and tray faces.  A
     dynamic F2 row additionally carries a declared rigid motion schedule and
     returns :class:`PrescribedGeometry`; it is never reduced to the static
-    ``wall_bounds`` envelope.
+    ``wall_bounds`` envelope.  F7 uses the isolated, allowlisted official Pump
+    adapter and remains a read-only geometry boundary: no Definition writer,
+    GenCase, native decoder, solver, or trajectory is invoked here.
     """
+    coordinate_frame = config.get("coordinate_frame", coordinate_frame)
+    if not isinstance(coordinate_frame, str) or not coordinate_frame:
+        raise ValueError("CFD coordinate_frame must be a nonempty string")
+    if str(config.get("family", "")).upper() == "F7" or config.get("pump") is not None:
+        return _f7_pump_geometry_from_config(
+            config, coordinate_frame=coordinate_frame,
+            data_root=data_root, source_parent=source_parent)
     if str(config.get("family", "")).upper() == "F2" or any(
             key in config for key in ("cup", "receiver", "tray")):
         return _f2_geometry_from_config(config, coordinate_frame=coordinate_frame,
@@ -162,6 +171,51 @@ def geometry_from_cfd_config(config, *, coordinate_frame=COORDINATE_FRAME,
     return FiniteGeometry(array, np.asarray(components, dtype=np.int64),
                           np.asarray(bodies, dtype=np.int64),
                           np.zeros((len(array), 3), dtype=float), coordinate_frame)
+
+
+def _f7_pump_geometry_from_config(config, *, coordinate_frame=COORDINATE_FRAME,
+                                   data_root=None, source_parent=None):
+    """Resolve the official F7 Pump assets through the public Core boundary."""
+    if str(config.get("family", "")).upper() != "F7":
+        raise ValueError("F7 Pump geometry requires family=F7")
+    pump = config.get("pump")
+    if not isinstance(pump, dict):
+        raise ValueError("F7 config requires an explicit pump asset mapping")
+    if data_root is None:
+        raise ValueError("F7 Pump geometry requires an explicit data_root")
+    required = ("definition", "fixed_geometry", "moving_geometry")
+    if any(not isinstance(pump.get(key), (str, Path)) for key in required):
+        raise ValueError("F7 Pump config requires definition/fixed_geometry/moving_geometry paths")
+    resolved = {}
+    for key in required:
+        _, path = _resolve_path(pump[key], data_root, source_parent=source_parent, must_exist=True)
+        resolved[key] = path
+    sample_interval = pump.get("motion_sample_interval_s", 0.01)
+    end_time = pump.get("end_time_s", config.get("time_max_s"))
+    if end_time is not None:
+        try:
+            end_time = float(end_time)
+        except (TypeError, ValueError) as error:
+            raise ValueError("F7 end_time_s must be finite and positive") from error
+        if not np.isfinite(end_time) or end_time <= 0:
+            raise ValueError("F7 end_time_s must be finite and positive")
+    try:
+        sample_interval = float(sample_interval)
+    except (TypeError, ValueError) as error:
+        raise ValueError("F7 motion_sample_interval_s must be finite and positive") from error
+    if not np.isfinite(sample_interval) or sample_interval <= 0:
+        raise ValueError("F7 motion_sample_interval_s must be finite and positive")
+    from scripts.f7_pump_geometry_adapter_v1 import load_pump_geometry
+    geometry, _metadata = load_pump_geometry(
+        resolved["definition"], resolved["fixed_geometry"], resolved["moving_geometry"],
+        end_time_s=end_time, sample_interval_s=sample_interval)
+    if geometry.coordinate_frame != coordinate_frame:
+        # The official Pump source has a fixed declared frame.  A caller may
+        # only rename it explicitly in the config, never silently coerce it.
+        declared = pump.get("coordinate_frame", coordinate_frame)
+        if declared != geometry.coordinate_frame:
+            raise ValueError("F7 Pump coordinate_frame conflicts with the official source frame")
+    return geometry
 
 
 def _f2_box_bounds(box, *, name):
@@ -534,7 +588,11 @@ def known_inputs_from_cfd_config(config, *, family, scope_id=None,
             "viscosity_source": "declared_physical_kinematic_viscosity_m2_s",
         })
     if isinstance(geometry, PrescribedGeometry):
-        physics["geometry_motion_semantics"] = "declared_f2_rotation_pose_and_wall_velocity"
+        physics["geometry_motion_semantics"] = (
+            "declared_f7_pump_rotation_pose_and_wall_velocity"
+            if str(family).upper() == "F7"
+            else "declared_f2_rotation_pose_and_wall_velocity"
+        )
         physics["geometry_motion_sha256"] = geometry.motion_sha256
     return KnownInputs(geometry, control, physics, numerics, coordinate_frame)
 
@@ -632,8 +690,8 @@ def adapt_manifest(manifest, data_root, *, require_existing=True):
         prepared = _load_prepared(row, root, source_parent=source_parent)
         config = _config_from_prepared(prepared) if prepared is not None else row
         family = str(row.get("family", config.get("family", family_default or "")))
-        if family not in {"F1", "F2", "F4"}:
-            raise ValueError(f"CFD case {case_id} requires family F1, F2 or F4")
+        if family not in {"F1", "F2", "F4", "F7"}:
+            raise ValueError(f"CFD case {case_id} requires family F1, F2, F4 or F7")
         split = _split(row, config, source_schema=schema, family=family)
         source_hdf5 = _source_path(row)
         if source_hdf5 is None:
@@ -699,7 +757,7 @@ def adapt_manifest(manifest, data_root, *, require_existing=True):
 
 
 class CoreCFDDataset:
-    """CoreDataset-compatible lazy reader for F1/F2/F4 trajectories."""
+    """CoreDataset-compatible lazy reader for F1/F2/F4/F7 trajectories."""
 
     def __init__(self, manifest, data_root=None, *, max_open_files=4, require_existing=True):
         if data_root is None and isinstance(manifest, (str, Path)):
@@ -731,7 +789,7 @@ CFDDataset = CoreCFDDataset
 
 
 def open_dataset(manifest, data_root=None, **kwargs):
-    """Open a native CoreDataset or a validated F1/F2/F4 source collection."""
+    """Open a native CoreDataset or a validated F1/F2/F4/F7 source collection."""
     payload, _ = _read_manifest(manifest)
     if payload.get("schema") in SOURCE_SCHEMAS and payload.get("schema") not in {DATASET_SCHEMA, COMPACT_SCHEMA}:
         return CoreCFDDataset(manifest, data_root, **kwargs)

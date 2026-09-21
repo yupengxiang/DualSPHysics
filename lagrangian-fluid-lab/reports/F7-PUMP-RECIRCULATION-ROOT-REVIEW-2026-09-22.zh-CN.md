@@ -16,7 +16,7 @@
 
 1. 已实现隔离的只读 F7 geometry adapter：解析 allowlisted 官方 binary fixed / ASCII moving POLYDATA、XML mk 标签和两段旋转，并在内存中返回 Core `PrescribedGeometry`；源三角形退化项被显式计数并过滤，不能把这个清理结果当成物理证据。XML 解析器还校验 degree 单位、1→2 链和 finish 截止；Core pose/gradient velocity 仍是有误差界的采样近似，不能称为 exact runtime motion。
 2. 已实现隔离的只读 F7 material observer：固定 all-initial-fluid 分母、不做 survivor renormalization、校验 body-frame/angular-control/region hash、报告 unknown exit，并把 residence 作为事件指标而非终态质量桶；显式 torque contract 仍只形成待根审查的合约，不宣称物理独立性。
-3. 隔离合约尚未接入 Core CFD adapter、Definition writer 或 trajectory producer；没有与 trajectory 绑定的真实 `control/frame` 和 torque 产物，因此不能开始材料 T2。
+3. F7 geometry 已通过只读 public Core CFD adapter 接入，但尚未接入 Definition writer 或 trajectory producer；没有与 trajectory 绑定的真实 `control/frame` 和 torque 产物，因此不能开始材料 T2。
 4. 官方 CPU/GPU wrapper 含清理和求解命令，只能作为哈希绑定的参考，绝不是执行授权。
 5. 对抗性 root review 必须确认“泵驱动循环”不是把普通 moving-wall 或 F6 运动换名；若不能观测扭矩输入和回流，候选应关闭。
 
@@ -24,7 +24,7 @@
 
 当前 Core 仍为 `t1_families=['F3', 'F4']`、`missing_t1_case_runs=288`、`missing_material_case_runs=288`。
 
-本包只授权后续人工/root review 讨论：不授权 Definition writer、不授权 CPU/native preflight、不授权 solver/GPU/queue，不产生 T1/T2 分母或资格变化。接口审查状态为 `blocked_after_isolated_contract_before_core_admission`。
+本包只授权后续人工/root review 讨论：不授权 Definition writer、不授权 CPU/native preflight、不授权 solver/GPU/queue，不产生 T1/T2 分母或资格变化。接口审查状态为 `blocked_after_core_adapter_before_runtime_admission`。
 
 机器可读文件：
 - `campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/candidate-card-v1.json`

@@ -243,7 +243,7 @@
     "unknown_exit_bound": "required for closed lifecycle; no evidence yet"
   },
   "root_review_blockers": [
-    "The isolated F7 geometry adapter is not wired into the Core CFD adapter or Definition pipeline; its Core pose/gradient velocity is a bounded sample approximation, not runtime evidence.",
+    "The F7 geometry adapter is now wired through a read-only Core CFD adapter boundary, but its Core pose/gradient velocity is a bounded sample approximation, not runtime evidence or a Definition/trajectory producer.",
     "The adapter's analytic finish clamp is source-faithful, but Core sampled gradient velocity is not certified exact at the finish boundary.",
     "The isolated F7 source/discharge/return/residence observer has no trajectory, body-pose, angular-control, or provenance-verified torque runtime evidence.",
     "No generated Definition, XML, BI4, trajectory, or solver evidence exists.",
@@ -322,6 +322,12 @@
         "role": "geometry adapter synthetic regression tests"
       },
       {
+        "path": "tests/test_f7_core_cfd_adapter_v1.py",
+        "sha256": "bae07a8a893f3879cdd584783ab0ff13b355dab84d6fbf2f36a8e6dd63f3e796",
+        "bytes": 4074,
+        "role": "read-only Core F7 adapter contract regression tests"
+      },
+      {
         "path": "scripts/f7_pump_transport_observer_v1.py",
         "sha256": "abf98eadbdce3252f3688f0d4e0a0bcd1ef5b76e60d4a91e152958fcd2202e50",
         "bytes": 29802,
@@ -347,7 +353,7 @@
       "core_pose_and_gradient_velocity_are_sampled_approximations": true,
       "default_linear_angle_interpolation_error_bound_deg": 0.00625,
       "degenerate_source_triangles_explicitly_counted_and_dropped": true,
-      "core_adapter_wired": false
+      "core_adapter_wired": true
     },
     "material_observer": {
       "all_initial_fluid_denominator": true,

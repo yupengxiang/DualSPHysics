@@ -65,8 +65,9 @@ def test_f7_matrix_is_15_row_proposal_only():
 def test_interface_review_fails_closed_before_any_runtime():
     interface = load(review.INTERFACE_REVIEW)
     findings = interface["static_findings"]
-    assert interface["status"] == "blocked_after_isolated_contract_before_core_admission"
-    assert findings["f7_family_is_currently_supported"] is False
+    assert interface["status"] == "blocked_after_core_adapter_before_runtime_admission"
+    assert findings["f7_family_is_currently_supported"] is True
+    assert findings["f7_core_adapter_wired"] is True
     assert findings["drawfilevtk_pump_reader_present"] is False
     assert findings["isolated_f7_geometry_adapter_present"] is True
     assert findings["isolated_f7_material_observer_present"] is True
@@ -101,10 +102,10 @@ def test_isolated_contracts_are_bound_but_not_core_admitted():
     isolated = candidate["isolated_implementation"]
     assert isolated["status"] == "implemented_read_only_not_admitted"
     assert isolated["geometry_adapter"]["returns_core_prescribed_geometry_in_memory"] is True
-    assert isolated["geometry_adapter"]["core_adapter_wired"] is False
+    assert isolated["geometry_adapter"]["core_adapter_wired"] is True
     assert isolated["material_observer"]["all_initial_fluid_denominator"] is True
     assert isolated["material_observer"]["survivor_renormalization"] is False
     assert isolated["material_observer"]["finite_torque_independence_contract_gate"] is True
     assert isolated["material_observer"]["physical_independence_claim"] is False
     assert isolated["material_observer"]["trajectory_evidence_present"] is False
-    assert len(isolated["bindings"]) == 4
+    assert len(isolated["bindings"]) == 5

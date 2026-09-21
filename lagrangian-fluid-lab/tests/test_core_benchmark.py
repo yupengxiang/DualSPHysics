@@ -62,6 +62,23 @@ def test_phase_plan_connects_all_entrypoints_and_freezes_denominator(tmp_path, m
     assert cli_plan["denominator"]["expected_frames_by_case"] == {"tiny": 1}
 
 
+def test_verify_dataset_rejects_nonbinary_valid_mask(tmp_path):
+    source = tmp_path / "source"
+    source.mkdir()
+    manifest = source / "manifest.json"
+    payload = tiny_manifest(source)
+    path = source / "data.h5"
+    with h5py.File(path, "r+") as handle:
+        del handle["valid"]
+        handle.create_dataset("valid", data=[[2, 1], [1, 1]])
+    payload["cases"][0]["sha256"] = sha256_file(path)
+    payload["cases"][0]["bytes"] = path.stat().st_size
+    manifest.write_text(json.dumps(payload))
+
+    with pytest.raises(ValueError, match="valid"):
+        verify_dataset(manifest, source, case_ids=["tiny"])
+
+
 def _model_bundle(tmp_path):
     source = tmp_path / "source"
     source.mkdir()

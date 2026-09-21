@@ -39,6 +39,26 @@ def _canonical_hash(value):
                                     allow_nan=False).encode()).hexdigest()
 
 
+def _validate_binary_valid_dataset(dataset):
+    """Validate the raw lifecycle mask without materializing the full axis.
+
+    ``read_state`` converts the source values to bool for the public State
+    object.  That conversion must happen only after the source contract has
+    established that the values really are binary; otherwise values such as
+    ``2`` or ``0.5`` silently become active particles.
+    """
+    if dataset.dtype.kind not in "biu":
+        raise ValueError("invalid valid dtype")
+    if len(dataset.shape) != 2:
+        raise ValueError("invalid validity axis")
+    chunk = dataset.chunks[0] if dataset.chunks else 1024
+    chunk = max(1, int(chunk))
+    for start in range(0, dataset.shape[0], chunk):
+        values = np.asarray(dataset[start:start + chunk])
+        if not np.isin(values, (0, 1)).all():
+            raise ValueError("invalid binary valid mask")
+
+
 def _asset(root, value):
     path = Path(value)
     if path.is_absolute():
@@ -487,6 +507,7 @@ class CoreDataset:
                 raise ValueError("invalid full particle axis")
             if handle["valid"].shape != (len(time), n) or handle["particle_zone"].shape != (n,):
                 raise ValueError("invalid validity or zone axis")
+            _validate_binary_valid_dataset(handle["valid"])
             if handle["mass"].shape not in ((n,), (len(time), n)):
                 raise ValueError("invalid mass shape")
         except BaseException:

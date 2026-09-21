@@ -1,12 +1,12 @@
 {
   "schema": "core.f7.pump_recirculation.interface_review.v1",
-  "status": "blocked_after_isolated_contract_before_core_admission",
+  "status": "blocked_after_core_adapter_before_runtime_admission",
   "candidate_id": "F7_pump_prescribed_internal_rotor_recirculation_v1",
   "implementation_bindings": [
     {
       "path": "scripts/core_cfd_dataset.py",
-      "sha256": "9a8b5ed364735804cc66521060ed04a18845a80bd95870d2727eda5392997523",
-      "bytes": 38880,
+      "sha256": "0e9f693df7e8ffcae54a9e446295275ed19605ba2309001eb8e0293b82e2f065",
+      "bytes": 42240,
       "role": "current CFD-to-Core adapter"
     },
     {
@@ -34,6 +34,12 @@
       "role": "geometry adapter synthetic regression tests"
     },
     {
+      "path": "tests/test_f7_core_cfd_adapter_v1.py",
+      "sha256": "bae07a8a893f3879cdd584783ab0ff13b355dab84d6fbf2f36a8e6dd63f3e796",
+      "bytes": 4074,
+      "role": "read-only Core F7 adapter contract regression tests"
+    },
+    {
       "path": "scripts/f7_pump_transport_observer_v1.py",
       "sha256": "abf98eadbdce3252f3688f0d4e0a0bcd1ef5b76e60d4a91e152958fcd2202e50",
       "bytes": 29802,
@@ -50,9 +56,11 @@
     "current_cfd_adapter_supported_families": [
       "F1",
       "F2",
-      "F4"
+      "F4",
+      "F7"
     ],
-    "f7_family_is_currently_supported": false,
+    "f7_family_is_currently_supported": true,
+    "f7_core_adapter_wired": true,
     "f2_specific_geometry_branch_present": true,
     "drawfilevtk_pump_reader_present": false,
     "moving_wall_saved_chord_operator_present": true,
@@ -64,13 +72,13 @@
     "isolated_f7_return_observer_present": true
   },
   "what_can_be_reused_after_root_admission": [
-    "the isolated Pump POLYDATA parser and XML motion contract, after Core adapter review and generated-input binding",
+    "the Pump POLYDATA parser and XML motion contract already exposed through the read-only Core adapter, after generated-input and runtime binding",
     "the isolated closed-lifecycle source-mass denominator, no-survivor-renormalization policy, and conservative unknown-exit handling, after trajectory review",
     "finite moving-wall saved-chord operators only after F7 geometry snapshots and public motion schedule are adapted"
   ],
   "blocking_gaps": [
-    "Wire the isolated F7 adapter into the Core dataset contract only after root review authorizes that mutation and accepts its bounded sampled-motion contract.",
     "Resolve or explicitly certify the Core sampled pose/gradient-velocity behavior at start and finish knots before runtime use.",
+    "No F7 trajectory producer currently emits the Core pose/frame and angular-control contract; the adapter remains source-only and read-only.",
     "Emit a causal body-pose/frame and angular-control dataset hash-bound to every trajectory.",
     "Freeze source, discharge/return, residence, and unknown-exit regions before material data.",
     "Produce real trajectory evidence and a hash/semantic/time-bound nonzero torque dataset, then verify its producer/geometry provenance and energy consistency; the isolated observer intentionally cannot claim independence without root provenance review.",
