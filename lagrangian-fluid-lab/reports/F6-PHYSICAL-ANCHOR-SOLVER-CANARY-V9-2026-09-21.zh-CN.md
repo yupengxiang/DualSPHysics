@@ -39,6 +39,12 @@ DualSPHysics 实际按照 `TimePart` 保存“达到下一个输出目标后的�
 `settle_hold_uncensored` 因而未通过。这个回执不能被解释为“物理资格通过”，也
 不能通过放宽本次回执的门槛来补发 credit。
 
+此外，sidecar 中从 `t>=1.0 s` 开始使用的 `settle_hold` 只是当前实现的时间段
+标签，并没有证明刚体已经达到物理平衡。该段的线速度范数约为
+`0.025--0.252 m/s`、角速度约为 `0.109--0.731 rad/s`；因此 v9 没有通过、也
+没有尝试声明 equilibrium gate。下一版必须把这段改称 observation hold，或者
+另行预登记位置、速度、角速度及力／力矩的稳定阈值和持续时间。
+
 ## 结论和后续边界
 
 本次唯一 solver attempt 已执行并保留全部失败分母；不进行同输入重试、resume 或
@@ -48,6 +54,13 @@ DualSPHysics 实际按照 `TimePart` 保存“达到下一个输出目标后的�
 若继续 F6，必须另立新的 Definition／事件合同，明确采用 DualSPHysics 的实际
 自适应 `TimePart` 时间轴并重新做独立 root 评审；当前 v9 输入不能因为这次运行
 产生完整帧而重跑或改判。
+
+已准备一个不执行计算的 v10 root-review-only 合同草案：
+`campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-cadence-revision-v10-20260921/proposal.json`。
+它只把 v9 回执作为 hash-only 负证据，要求全新的 Definition/XML/BI4 和新的
+case identity；它把 `settle_hold` 改为不声称平衡的 `observation_hold`，并预先
+规定实际 `TimeStep` 的最大间隔、末帧 overshoot 和 bracket 覆盖门。该草案尚未
+获得 root solver 授权，也没有启动 GenCase、solver、GPU 或队列。
 
 原始回执和侧车：
 
