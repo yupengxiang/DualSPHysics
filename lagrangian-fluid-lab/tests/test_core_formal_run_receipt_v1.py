@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import hashlib
+import json
 from pathlib import Path
 
 import pytest
@@ -20,12 +21,19 @@ from scripts.core_formal_run_receipt_v1 import (
 )
 
 
-def _write_fixture_files(root: Path) -> dict[str, object]:
+def _write_fixture_files(root: Path, *, variant: str = "") -> dict[str, object]:
     files: dict[str, Path] = {}
+    suffix = f',"fixture":"{variant}"' if variant else ""
     for name, content in {
-        "dataset-manifest.json": b'{"dataset":"synthetic","split":"train"}\n',
-        "source-closure.json": b'{"closure":"synthetic-source-v1"}\n',
-        "training-config.json": b'{"updates":32000,"centers":16,"test_included":false}\n',
+        "dataset-manifest.json": (
+            f'{{"dataset":"synthetic","split":"train"{suffix}}}\n'.encode()
+        ),
+        "source-closure.json": (
+            f'{{"closure":"synthetic-source-v1"{suffix}}}\n'.encode()
+        ),
+        "training-config.json": (
+            f'{{"updates":32000,"centers":16,"test_included":false{suffix}}}\n'.encode()
+        ),
     }.items():
         path = root / name
         path.write_bytes(content)
@@ -35,8 +43,10 @@ def _write_fixture_files(root: Path) -> dict[str, object]:
     for milestone in MILESTONES:
         checkpoint = root / f"checkpoint-{milestone}.bin"
         validation_report = root / f"validation-{milestone}.json"
-        checkpoint.write_bytes(f"checkpoint:{milestone}\n".encode())
-        validation_report.write_bytes(f'{{"milestone":{milestone},"ok":true}}\n'.encode())
+        checkpoint.write_bytes(f"checkpoint:{milestone}:{variant}\n".encode())
+        validation_report.write_bytes(
+            f'{{"milestone":{milestone},"ok":true{suffix}}}\n'.encode()
+        )
         checkpoints[milestone] = checkpoint
         validation[milestone] = validation_report
     return {
@@ -50,8 +60,25 @@ def _write_fixture_files(root: Path) -> dict[str, object]:
 
 def _receipt(tmp_path: Path, *, model: str = "mlp", seed: int = 17) -> dict:
     paths = _write_fixture_files(tmp_path)
-    return build_synthetic_receipt(
+    return _build_receipt(
+        paths,
+        artifact_root=tmp_path,
         run_id=f"{model}-seed{seed}",
+        model=model,
+        seed=seed,
+    )
+
+
+def _build_receipt(
+    paths: dict[str, object],
+    *,
+    artifact_root: Path,
+    run_id: str,
+    model: str,
+    seed: int,
+) -> dict:
+    return build_synthetic_receipt(
+        run_id=run_id,
         model=model,
         seed=seed,
         dataset_manifest=paths["dataset_manifest"],
@@ -59,8 +86,27 @@ def _receipt(tmp_path: Path, *, model: str = "mlp", seed: int = 17) -> dict:
         training_config=paths["training_config"],
         checkpoints=paths["checkpoints"],
         validation=paths["validation"],
-        artifact_root=tmp_path,
+        artifact_root=artifact_root,
     )
+
+
+def _rewrite_artifact_json(
+    receipt: dict,
+    root: Path,
+    *,
+    category: str,
+    milestone: int,
+    payload: dict[str, object],
+) -> None:
+    row = next(
+        item
+        for item in receipt["artifacts"][category]
+        if item["milestone"] == milestone
+    )
+    path = root / row["path"]
+    path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+    row["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+    row["bytes"] = path.stat().st_size
 
 
 def test_protocol_defines_three_models_three_seeds_and_fixed_milestones() -> None:
@@ -97,6 +143,7 @@ def test_valid_synthetic_receipt_is_read_only_and_nonqualifying(tmp_path: Path) 
     assert report["qualification_claim"] == "none"
     assert report["qualification_credit"] == 0
     assert report["launch_allowed"] is False
+    assert report["no_qualification"] is True
     assert report["run_id"] == "mlp-seed17"
     assert [row["milestone"] for row in report["artifacts"]["checkpoints"]] == list(MILESTONES)
     assert [row["milestone"] for row in report["artifacts"]["validation"]] == list(MILESTONES)
@@ -179,6 +226,28 @@ def test_duplicate_run_id_is_rejected_in_single_and_collection_validation(tmp_pa
         verify_receipt_set([receipt, deepcopy(receipt)], artifact_root=tmp_path)
 
 
+def test_distinct_run_ids_cannot_reuse_file_bindings_as_independent_runs(
+    tmp_path: Path,
+) -> None:
+    first = _receipt(tmp_path)
+    second = deepcopy(first)
+    second["run_id"] = "mlp-seed29"
+    second["seed"] = 29
+    with pytest.raises(ReceiptContractError, match="cross-run independence"):
+        verify_receipt_set([first, second], artifact_root=tmp_path)
+
+
+def test_same_checkpoint_cannot_be_reused_for_two_milestones(tmp_path: Path) -> None:
+    receipt = _receipt(tmp_path)
+    first_checkpoint = deepcopy(receipt["artifacts"]["checkpoints"][0])
+    receipt["artifacts"]["checkpoints"][1] = {
+        **first_checkpoint,
+        "milestone": MILESTONES[1],
+    }
+    with pytest.raises(ReceiptContractError, match="identity reuse within run"):
+        verify_receipt_set([receipt], artifact_root=tmp_path)
+
+
 def test_missing_or_duplicate_milestones_are_rejected(tmp_path: Path) -> None:
     receipt = _receipt(tmp_path)
     receipt["update_milestones"] = [8000, 16000, 24000]
@@ -235,6 +304,33 @@ def test_external_expected_hash_binding_is_enforced(tmp_path: Path) -> None:
         )
 
 
+def test_collection_and_matrix_forward_external_input_anchors_to_each_receipt(
+    tmp_path: Path,
+) -> None:
+    first = _receipt(tmp_path)
+    second_root = tmp_path / "second"
+    second_root.mkdir()
+    second = _build_receipt(
+        _write_fixture_files(second_root, variant="second"),
+        artifact_root=tmp_path,
+        run_id="mlp-seed29",
+        model="mlp",
+        seed=29,
+    )
+    with pytest.raises(ReceiptContractError, match="expected binding"):
+        verify_receipt_set(
+            [first, second],
+            artifact_root=tmp_path,
+            expected_dataset_manifest_sha256=first["bindings"]["dataset_manifest"]["sha256"],
+        )
+    with pytest.raises(ReceiptContractError, match="expected binding"):
+        verify_formal_run_matrix(
+            [first, second],
+            artifact_root=tmp_path,
+            expected_source_closure_sha256=first["bindings"]["source_closure"]["sha256"],
+        )
+
+
 def test_preprofile_or_diagnostic_provenance_cannot_be_relabelled_formal(
     tmp_path: Path,
 ) -> None:
@@ -251,6 +347,52 @@ def test_preprofile_or_diagnostic_provenance_cannot_be_relabelled_formal(
     receipt = _receipt(tmp_path)
     receipt["provenance"]["formal_execution"] = True
     with pytest.raises(ReceiptContractError):
+        verify_receipt(receipt, artifact_root=tmp_path)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("stage", "formal"),
+        ("training_stage", "qualification"),
+        ("run_type", "formal_run_proposal"),
+        ("phase", "qualified"),
+    ],
+)
+def test_optional_stage_aliases_only_allow_safe_markers(
+    tmp_path: Path, field: str, value: str
+) -> None:
+    receipt = _receipt(tmp_path)
+    receipt[field] = value
+    with pytest.raises(ReceiptContractError, match=field):
+        verify_receipt(receipt, artifact_root=tmp_path)
+
+
+def test_json_milestone_metadata_mismatch_is_rejected(tmp_path: Path) -> None:
+    receipt = _receipt(tmp_path)
+    _rewrite_artifact_json(
+        receipt,
+        tmp_path,
+        category="validation",
+        milestone=8000,
+        payload={"milestone": 16000, "ok": True},
+    )
+    with pytest.raises(ReceiptContractError, match="does not match milestone"):
+        verify_receipt(receipt, artifact_root=tmp_path)
+
+
+def test_json_false_status_is_rejected_without_inventing_binary_metadata(
+    tmp_path: Path,
+) -> None:
+    receipt = _receipt(tmp_path)
+    _rewrite_artifact_json(
+        receipt,
+        tmp_path,
+        category="validation",
+        milestone=8000,
+        payload={"milestone": 8000, "ok": False},
+    )
+    with pytest.raises(ReceiptContractError, match="false artifact status"):
         verify_receipt(receipt, artifact_root=tmp_path)
 
 
@@ -274,7 +416,7 @@ def test_complete_three_by_three_matrix_passes_and_incomplete_matrix_fails(
     ):
         run_root = tmp_path / f"run-{index}"
         run_root.mkdir()
-        paths = _write_fixture_files(run_root)
+        paths = _write_fixture_files(run_root, variant=f"run-{index}")
         receipts.append(
             build_synthetic_receipt(
                 run_id=f"{model}-seed{seed}",
@@ -292,8 +434,14 @@ def test_complete_three_by_three_matrix_passes_and_incomplete_matrix_fails(
     assert result["valid"] is True
     assert result["matrix_complete"] is True
     assert result["receipt_count"] == 9
+    assert result["status"] == "proposal_only"
+    assert result["mode"] == "diagnostic_only"
+    assert result["proposal_only"] is True
+    assert result["diagnostic_only"] is True
     assert result["formal_credit"] == 0
     assert result["launch_allowed"] is False
+    assert result["qualification_claim"] == "none"
+    assert result["no_qualification"] is True
 
     with pytest.raises(ReceiptContractError, match="incomplete"):
         verify_formal_run_matrix(receipts[:-1], artifact_root=tmp_path)
@@ -301,13 +449,22 @@ def test_complete_three_by_three_matrix_passes_and_incomplete_matrix_fails(
 
 def test_set_validation_can_check_a_partial_nonduplicated_proposal_set(tmp_path: Path) -> None:
     first = _receipt(tmp_path)
-    second = deepcopy(first)
-    second["run_id"] = "mlp-seed29"
-    second["seed"] = 29
+    second_root = tmp_path / "second"
+    second_root.mkdir()
+    second_paths = _write_fixture_files(second_root, variant="second")
+    second = _build_receipt(
+        second_paths,
+        artifact_root=tmp_path,
+        run_id="mlp-seed29",
+        model="mlp",
+        seed=29,
+    )
     result = verify_receipt_set([first, second], artifact_root=tmp_path)
     assert result["valid"] is True
     assert result["matrix_complete"] is False
     assert result["run_ids"] == ["mlp-seed17", "mlp-seed29"]
+    assert result["qualification_claim"] == "none"
+    assert result["no_qualification"] is True
 
 
 def test_file_hashes_in_the_fixture_are_actual_sha256_values(tmp_path: Path) -> None:

@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping, Sequence
 import hashlib
+import json
 import math
 from pathlib import Path
 import re
@@ -41,6 +42,18 @@ _FORBIDDEN_PROVENANCE_MARKERS = {
     "diagnostic_preprofile",
     "pre_profile",
 }
+_PROVENANCE_ALIAS_FIELDS = (
+    "run_type",
+    "stage",
+    "training_stage",
+    "phase",
+    "execution_stage",
+    "training_phase",
+)
+_SAFE_PROVENANCE_ALIAS_VALUES = frozenset({STATUS, MODE})
+_NEGATIVE_JSON_STATUS_VALUES = frozenset(
+    {"false", "fail", "failed", "invalid", "error", "rejected", "unsuccessful"}
+)
 
 
 class ReceiptContractError(ValueError):
@@ -175,18 +188,18 @@ def _validate_provenance(receipt: Mapping[str, Any]) -> None:
     _boolean(provenance.get("diagnostic"), "provenance.diagnostic", True)
     _boolean(provenance.get("formal_execution"), "provenance.formal_execution", False)
 
-    # Optional aliases are checked when present so that a caller cannot add a
-    # contradictory stage marker around an otherwise valid proposal.
-    for field in ("run_type", "stage", "training_stage"):
-        marker = receipt.get(field)
-        if marker is None:
+    # Optional aliases are intentionally allow-listed.  Free-form values such
+    # as "formal", "qualification", or "formal_run_proposal" can be
+    # misread by downstream consumers even when the envelope is proposal-only.
+    for field in _PROVENANCE_ALIAS_FIELDS:
+        if field not in receipt:
             continue
-        if not isinstance(marker, str):
-            raise _error(f"{field} must be a string when present")
-        if marker.lower() in _FORBIDDEN_PROVENANCE_MARKERS:
-            raise _error(f"{field} cannot identify a preprofile/diagnostic run as formal")
-        if field == "run_type" and marker != "formal_run_proposal":
-            raise _error("run_type must be 'formal_run_proposal' when present")
+        marker = receipt[field]
+        if not isinstance(marker, str) or marker not in _SAFE_PROVENANCE_ALIAS_VALUES:
+            raise _error(
+                f"{field} must be one of {sorted(_SAFE_PROVENANCE_ALIAS_VALUES)} "
+                "when present"
+            )
 
 
 def _validate_envelope(receipt: Mapping[str, Any]) -> dict[str, Any]:
@@ -232,8 +245,13 @@ def _validate_envelope(receipt: Mapping[str, Any]) -> dict[str, Any]:
         "mode": MODE,
         "diagnostic_only": True,
         "proposal_only": True,
+        "formal_training": False,
         "formal_credit": 0,
         "launch_allowed": False,
+        "qualification_claim": "none",
+        "qualification_credit": 0,
+        "no_future_state": True,
+        "no_qualification": True,
     }
 
 
@@ -285,8 +303,83 @@ def _validate_milestones(receipt: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _validate_json_artifact_metadata(
+    path: Path,
+    *,
+    name: str,
+    milestone: int,
+    run_id: str,
+    model: str,
+    seed: int,
+) -> None:
+    """Check only explicit, auditable metadata in a declared JSON artifact.
+
+    Binary checkpoints are deliberately not inspected.  JSON is inspected
+    only when the declaration names a ``.json`` file; metadata is optional so
+    generic fixtures remain diagnostic fixtures rather than being promoted to
+    training evidence.
+    """
+
+    if path.suffix.lower() != ".json":
+        return
+    try:
+        with path.open("r", encoding="utf-8") as stream:
+            payload = json.load(stream)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise _error(f"{name} declares a JSON artifact with invalid JSON") from exc
+    if not isinstance(payload, Mapping):
+        return
+
+    mappings: list[tuple[str, Mapping[str, Any]]] = [("", payload)]
+    nested_metadata = payload.get("metadata")
+    if isinstance(nested_metadata, Mapping):
+        mappings.append((".metadata", nested_metadata))
+
+    for suffix, metadata in mappings:
+        field_name = lambda field: f"{name}{suffix}.{field}"
+        for field in ("milestone", "update", "step"):
+            if field in metadata:
+                declared = _integer(metadata[field], field_name(field), positive=True)
+                if declared != milestone:
+                    raise _error(
+                        f"{field_name(field)}={declared} does not match milestone {milestone}"
+                    )
+        if "run_id" in metadata:
+            declared_run_id = _non_empty_string(metadata["run_id"], field_name("run_id"))
+            if declared_run_id != run_id:
+                raise _error(f"{field_name('run_id')} does not match receipt run_id")
+        if "model" in metadata:
+            declared_model = _non_empty_string(metadata["model"], field_name("model"))
+            if declared_model != model:
+                raise _error(f"{field_name('model')} does not match receipt model")
+        if "seed" in metadata:
+            declared_seed = _integer(metadata["seed"], field_name("seed"), positive=True)
+            if declared_seed != seed:
+                raise _error(f"{field_name('seed')} does not match receipt seed")
+
+        for field in ("ok", "valid", "success", "passed", "is_valid"):
+            if field not in metadata:
+                continue
+            value = metadata[field]
+            if not isinstance(value, bool):
+                raise _error(f"{field_name(field)} must be boolean when declared")
+            if not value:
+                raise _error(f"{field_name(field)} declares a false artifact status")
+        for field in ("status", "state"):
+            if field not in metadata:
+                continue
+            value = metadata[field]
+            if isinstance(value, bool) and not value:
+                raise _error(f"{field_name(field)} declares a false artifact status")
+            if isinstance(value, str) and value.strip().lower() in _NEGATIVE_JSON_STATUS_VALUES:
+                raise _error(f"{field_name(field)} declares a failed artifact status")
+
+
 def _validate_artifacts(
-    receipt: Mapping[str, Any], *, artifact_root: str | Path | None
+    receipt: Mapping[str, Any],
+    *,
+    artifact_root: str | Path | None,
+    identity: Mapping[str, Any],
 ) -> dict[str, list[dict[str, Any]]]:
     artifacts = _object(receipt.get("artifacts"), "artifacts")
     normalized: dict[str, list[dict[str, Any]]] = {}
@@ -304,6 +397,19 @@ def _validate_artifacts(
                 raise _error(f"artifacts.{category} contains duplicate milestone {milestone}")
             if milestone not in MILESTONES:
                 raise _error(f"artifacts.{category} contains unsupported milestone {milestone}")
+            path = _resolve_file(
+                item.get("path"),
+                artifact_root=artifact_root,
+                name=f"artifacts.{category}[{index}]",
+            )
+            _validate_json_artifact_metadata(
+                path,
+                name=f"artifacts.{category}[{index}]",
+                milestone=milestone,
+                run_id=identity["run_id"],
+                model=identity["model"],
+                seed=identity["seed"],
+            )
             by_milestone[milestone] = _file_binding(
                 item,
                 name=f"artifacts.{category}[{index}]",
@@ -366,7 +472,11 @@ def verify_receipt(
         artifact_root=artifact_root,
         expected_sha256=expected_training_config_sha256,
     )
-    artifacts = _validate_artifacts(receipt, artifact_root=artifact_root)
+    artifacts = _validate_artifacts(
+        receipt,
+        artifact_root=artifact_root,
+        identity=identity,
+    )
     return {
         **envelope,
         **identity,
@@ -385,13 +495,94 @@ def verify_receipt(
     }
 
 
+def _check_cross_run_independence(
+    reports: Sequence[Mapping[str, Any]],
+    *,
+    expected_dataset_manifest_sha256: str | None,
+    expected_source_closure_sha256: str | None,
+    expected_training_config_sha256: str | None,
+) -> None:
+    """Reject reused file identities or hashes between distinct run IDs.
+
+    Checkpoint and validation artifacts are always run-specific.  The three
+    input bindings may be shared only when the caller supplies the matching
+    external SHA-256 anchor; that makes shared inputs explicit and keeps an
+    unanchored copied receipt fail-closed.
+    """
+
+    shared_binding_anchors = {
+        "dataset_manifest": expected_dataset_manifest_sha256,
+        "source_closure": expected_source_closure_sha256,
+        "training_config": expected_training_config_sha256,
+    }
+    seen: dict[tuple[str, str, str], tuple[str, str, str, int | None]] = {}
+
+    def claim(
+        scope: str,
+        binding: Mapping[str, Any],
+        run_id: str,
+        *,
+        category: str,
+        milestone: int | None,
+    ) -> None:
+        location = (run_id, category, milestone)
+        for identity_kind in ("path", "sha256"):
+            key = (scope, identity_kind, str(binding[identity_kind]))
+            previous = seen.get(key)
+            if previous is not None and previous != location:
+                previous_run_id, previous_category, previous_milestone = previous
+                if previous_run_id == run_id:
+                    raise _error(
+                        "artifact identity reuse within run: "
+                        f"{scope} {identity_kind}={binding[identity_kind]!r} "
+                        f"is declared at {previous_category}[{previous_milestone}] "
+                        f"and {category}[{milestone}] for {run_id}"
+                    )
+                raise _error(
+                    "cross-run independence violation: "
+                    f"{scope} {identity_kind}={binding[identity_kind]!r} "
+                    f"is reused by {previous_run_id} and {run_id}"
+                )
+            seen[key] = location
+
+    for report in reports:
+        run_id = report["run_id"]
+        for category in ("checkpoints", "validation"):
+            for row in report["artifacts"][category]:
+                claim(
+                    "artifacts",
+                    row,
+                    run_id,
+                    category=category,
+                    milestone=row["milestone"],
+                )
+        for category, expected in shared_binding_anchors.items():
+            if expected is not None:
+                continue
+            claim(
+                "bindings." + category,
+                report["bindings"][category],
+                run_id,
+                category=category,
+                milestone=None,
+            )
+
+
 def verify_receipt_set(
     receipts: Sequence[Mapping[str, Any]],
     *,
     artifact_root: str | Path | None = None,
     require_complete: bool = False,
+    expected_dataset_manifest_sha256: str | None = None,
+    expected_source_closure_sha256: str | None = None,
+    expected_training_config_sha256: str | None = None,
 ) -> dict[str, Any]:
-    """Verify a collection, rejecting duplicate IDs and optionally requiring 3x3."""
+    """Verify a collection, rejecting duplicate IDs and reused file bindings.
+
+    Optional external input hashes are forwarded to every receipt.  When
+    supplied, they explicitly authorize the corresponding input binding to be
+    shared by otherwise independent runs.
+    """
 
     if isinstance(receipts, (str, bytes)) or not isinstance(receipts, Sequence):
         raise _error("receipts must be a sequence of receipt objects")
@@ -401,7 +592,14 @@ def verify_receipt_set(
     seen: list[str] = []
     for index, receipt in enumerate(receipts):
         try:
-            report = verify_receipt(receipt, artifact_root=artifact_root, seen_run_ids=seen)
+            report = verify_receipt(
+                receipt,
+                artifact_root=artifact_root,
+                seen_run_ids=seen,
+                expected_dataset_manifest_sha256=expected_dataset_manifest_sha256,
+                expected_source_closure_sha256=expected_source_closure_sha256,
+                expected_training_config_sha256=expected_training_config_sha256,
+            )
         except ReceiptContractError as exc:
             raise _error(f"receipt[{index}] is invalid: {exc}") from exc
         reports.append(report)
@@ -412,24 +610,51 @@ def verify_receipt_set(
         missing = sorted(expected - actual)
         extra = sorted(actual - expected)
         raise _error(f"3x3 run matrix is incomplete; missing={missing}, extra={extra}")
+    _check_cross_run_independence(
+        reports,
+        expected_dataset_manifest_sha256=expected_dataset_manifest_sha256,
+        expected_source_closure_sha256=expected_source_closure_sha256,
+        expected_training_config_sha256=expected_training_config_sha256,
+    )
     return {
         "schema": SCHEMA,
+        "status": STATUS,
+        "mode": MODE,
+        "diagnostic_only": True,
+        "proposal_only": True,
         "valid": True,
         "receipt_count": len(reports),
         "run_ids": seen,
         "matrix_complete": actual == expected,
+        "formal_training": False,
         "formal_credit": 0,
         "launch_allowed": False,
+        "qualification_claim": "none",
+        "qualification_credit": 0,
+        "no_future_state": True,
+        "no_qualification": True,
         "receipts": reports,
     }
 
 
 def verify_formal_run_matrix(
-    receipts: Sequence[Mapping[str, Any]], *, artifact_root: str | Path | None = None
+    receipts: Sequence[Mapping[str, Any]],
+    *,
+    artifact_root: str | Path | None = None,
+    expected_dataset_manifest_sha256: str | None = None,
+    expected_source_closure_sha256: str | None = None,
+    expected_training_config_sha256: str | None = None,
 ) -> dict[str, Any]:
     """Strict alias for validating all future 3-model by 3-seed receipts."""
 
-    return verify_receipt_set(receipts, artifact_root=artifact_root, require_complete=True)
+    return verify_receipt_set(
+        receipts,
+        artifact_root=artifact_root,
+        require_complete=True,
+        expected_dataset_manifest_sha256=expected_dataset_manifest_sha256,
+        expected_source_closure_sha256=expected_source_closure_sha256,
+        expected_training_config_sha256=expected_training_config_sha256,
+    )
 
 
 def _display_path(path: Path, *, artifact_root: str | Path | None) -> str:
