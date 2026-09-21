@@ -417,6 +417,143 @@ def evaluate_material_summary(
     }
 
 
+def evaluate_material_output_json(
+    payload,
+    *,
+    required_source_ids,
+    expected_family=None,
+    expected_case_id=None,
+    require_complete_window=False,
+    cdf_sup_abs_difference=None,
+    cdf_limit=None,
+):
+    """Evaluate the v1 JSON material contract without granting qualification.
+
+    This is the acceptance-layer consumer for
+    :mod:`core_material_output_contract_v1`.  It accepts an already
+    materialized JSON-like object only; it does not read HDF5, bridge receipts,
+    paths, registries or ledgers.  ``passed`` means that the supplied JSON
+    satisfies the requested diagnostic gates.  It is never a T1/T2 credit.
+
+    ``required_source_ids`` is deliberately mandatory and external.  The
+    output cannot infer a complete registered source set from its own rows.
+    When ``require_complete_window`` is true, any right-censored event keeps
+    the diagnostic acceptance gate closed.
+    """
+    from scripts.core_material_output_contract_v1 import (
+        EVENTS,
+        MASS_CLOSURE_TOLERANCE_KG,
+        OUTPUT_SCHEMA,
+        evaluate_material_output,
+    )
+
+    if isinstance(required_source_ids, (str, bytes)) or not isinstance(required_source_ids, list):
+        raise ValueError("required_source_ids must be a non-empty list")
+    if not required_source_ids:
+        raise ValueError("required_source_ids must not be empty")
+    if any(not isinstance(item, str) or not item.strip() for item in required_source_ids):
+        raise ValueError("required_source_ids must contain unique non-empty ids")
+    normalized_source_ids = list(required_source_ids)
+    if len(set(normalized_source_ids)) != len(normalized_source_ids):
+        raise ValueError("required_source_ids must contain unique non-empty ids")
+
+    contract = evaluate_material_output(payload)
+    if contract["schema"] != OUTPUT_SCHEMA:
+        raise ValueError("material JSON contract schema mismatch")
+    if expected_family is not None and contract["family"] != expected_family:
+        raise ValueError("material JSON family does not match expected_family")
+    if expected_case_id is not None and contract["case_id"] != expected_case_id:
+        raise ValueError("material JSON case_id does not match expected_case_id")
+
+    source_coverage = payload.get("source_coverage")
+    if not isinstance(source_coverage, dict):
+        raise ValueError("material JSON must include source_coverage for acceptance")
+    declared_ids = source_coverage.get("required_source_ids")
+    if declared_ids != sorted(normalized_source_ids):
+        raise ValueError("material JSON source_coverage does not match required_source_ids")
+    if source_coverage.get("family") != contract["family"] or source_coverage.get("case_id") != contract["case_id"]:
+        raise ValueError("material JSON source_coverage identity does not match output")
+    rows = source_coverage.get("rows")
+    coverage, coverage_reason = _coverage_audit(
+        rows,
+        normalized_source_ids,
+        UNKNOWN_FRACTION_LIMIT,
+    )
+    initial_mass = contract["mass"]["initial_mass_kg"]
+    if abs(coverage["total_initial_mass_kg"] - initial_mass) > MASS_CLOSURE_TOLERANCE_KG:
+        raise ValueError("material JSON source coverage does not close the output mass denominator")
+
+    event_pass = True
+    event_reason = None
+    if require_complete_window:
+        censored = [
+            name for name in EVENTS
+            if contract["events"][name]["censor"]["type"] == "right"
+        ]
+        event_pass = not censored
+        if not event_pass:
+            event_reason = "material JSON contains right-censored event(s): " + ", ".join(censored)
+
+    cdf_pass = True
+    cdf_reason = None
+    if cdf_sup_abs_difference is not None or cdf_limit is not None:
+        if cdf_sup_abs_difference is None or cdf_limit is None:
+            raise ValueError("CDF difference and limit must be supplied together")
+        difference = _finite_number(cdf_sup_abs_difference, "CDF difference")
+        limit = _finite_number(cdf_limit, "CDF limit")
+        if difference < 0 or limit < 0:
+            raise ValueError("CDF difference and limit must be nonnegative")
+        cdf_pass = difference <= limit
+        if not cdf_pass:
+            cdf_reason = f"CDF difference {difference} exceeds registered limit {limit}"
+
+    source_pass = bool(coverage["all_sources_pass"])
+    unknown_pass = bool(contract["unknown_bound"]["gate_pass"] and source_pass)
+    gates = {
+        "output_contract": bool(contract["passed"]),
+        "source_coverage": source_pass,
+        "unknown_bound": unknown_pass,
+        "complete_event_window": bool(event_pass),
+        "cdf_comparison": bool(cdf_pass),
+    }
+    failures = [name for name, passed in gates.items() if not passed]
+    return {
+        "schema": ACCEPTANCE_SCHEMA,
+        "status": "diagnostic_only",
+        "diagnostic_only": True,
+        "input_schema": OUTPUT_SCHEMA,
+        "passed": not failures,
+        "failure_reasons": failures,
+        "qualification_claim": "none",
+        "qualification_credit": 0,
+        "T2_macro": False,
+        "T2_path": False,
+        "qualified_T2_macro": False,
+        "qualified_T2_path": False,
+        "family": contract["family"],
+        "case_id": contract["case_id"],
+        "source_coverage": coverage,
+        "source_coverage_reason": coverage_reason,
+        "event_window_pass": bool(event_pass),
+        "event_window_reason": event_reason,
+        "cdf_gate_pass": bool(cdf_pass),
+        "cdf_gate_reason": cdf_reason,
+        "gates": gates,
+        "contract": contract,
+        "execution_constraints": {
+            "read_only": True,
+            "json_source_only": True,
+            "hdf5_opened": False,
+            "solver_started": False,
+            "gpu_started": False,
+            "registry_written": False,
+            "ledger_written": False,
+            "evidence_written": False,
+            "qualification_credit_registered": 0,
+        },
+    }
+
+
 def validate_material_summary(*args, **kwargs):
     """Strict summary gate used by a future qualification collector.
 
