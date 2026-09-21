@@ -1,0 +1,269 @@
+{
+  "schema": "core.f2.distributed_slot_transfer.proposal.v1",
+  "created_at_utc": "2026-09-21T00:00:00+00:00",
+  "status": "root_review_only_new_physical_hypothesis_not_run",
+  "family": "F2",
+  "scope_id": "F2_distributed_submerged_slot_transfer_x_v1",
+  "revision_id": "F2_distributed_slot_gate_v1",
+  "proposal_id": "F2_distributed_slot_transfer_q05_dp0075_anchor",
+  "qualification_claim": "none",
+  "qualified": false,
+  "matrix_credit": 0,
+  "root_review_only": true,
+  "novelty_and_lineage": {
+    "mechanism_class": "stationary_reservoir_distributed_submerged_slot_transfer",
+    "hypothesis": "A stationary upstream reservoir drives two separated underflow jets through a transverse gate with an explicit solid web; changing slot width controls the split-jet transfer and downstream receiver contact.",
+    "physical_difference": [
+      "The gate has two separated finite-width slots and a solid central web, rather than the prior single full-span rectangular aperture.",
+      "q changes the width of both slots at fixed sill and top, rather than changing the single-orifice top height.",
+      "The outer tank, source volume, gate dimensions, case identity and output stem are all new and require a new literal Definition and generated input.",
+      "The proposal is a new physical scope; it is not a normal-remediation revision of the existing submerged-orifice scope."
+    ],
+    "distinct_from_failed_scopes": true,
+    "reuses_failed_scope": false,
+    "excluded_scope_ids": [
+      "F2_dynamic_third_family_dbc_duration_x_v1",
+      "F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_x_v1",
+      "F2_static_full_cup_volume_hold_x_v1",
+      "F2_submerged_orifice_transfer_v1",
+      "F5_prescribed_wave_runup_x_v1"
+    ],
+    "forbidden_reuse": [
+      "all v2/v3/v4 submerged-orifice Definition, generated XML, BI4, BoundNor, NormalSize and trajectory products",
+      "all dynamic-DBC, moving-cup and static-full-cup generated inputs and trajectories",
+      "any F5 failed anchor product or output stem",
+      "same-input retry under a new label"
+    ]
+  },
+  "minimum_parameter_contract": {
+    "q_values": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "parameter": "slot_width_m",
+    "mapping": "slot_width_m = 0.06 + 0.06*q",
+    "slot_width_values_m": [0.06, 0.075, 0.09, 0.105, 0.12],
+    "anchor": {
+      "q": 0.5,
+      "slot_width_m": 0.09,
+      "dp_m": 0.0075,
+      "case_id": "F2_SLOT_TRANSFER_q0p50000000_dp0p007500000000_anchor",
+      "output_stem": "F2_SLOT_TRANSFER_q0p50000000_dp0p007500000000_anchor"
+    },
+    "resolution_values_m": [0.01, 0.0075, 0.005],
+    "temporal_controls": ["internal_time", "native_output"],
+    "fixed_matrix": {
+      "planned_rows": 15,
+      "spatial_rows": 13,
+      "temporal_rows": 2,
+      "qualification_q_values": [0.0, 0.5, 1.0],
+      "held_out_q_values": [0.25, 0.75],
+      "denominator_policy": "all 15 rows remain in the denominator; no survivor renormalization"
+    }
+  },
+  "fresh_geometry_contract": {
+    "new_definition_required": true,
+    "new_generated_xml_required": true,
+    "new_native_bi4_required": true,
+    "old_generated_input_reused": false,
+    "old_trajectory_reused": false,
+    "outer_tank": {
+      "low_m": [0.0, 0.0, 0.0],
+      "size_m": [1.8, 0.6, 0.9],
+      "closed_faces": ["bottom", "left", "right", "front", "back"],
+      "open_faces": ["top"]
+    },
+    "upstream_source": {
+      "low_m": [0.05, 0.05, 0.05],
+      "size_m": [0.75, 0.5, 0.36],
+      "continuous_volume_m3": 0.135,
+      "continuous_mass_kg": 135.0,
+      "initial_velocity_m_s": [0.0, 0.0, 0.0],
+      "free_surface_m": 0.41
+    },
+    "transverse_gate": {
+      "x_span_m": [0.8, 0.86],
+      "y_span_m": [0.05, 0.55],
+      "z_span_m": [0.04, 0.86],
+      "solid_web": true,
+      "slots": [
+        {"center_y_m": 0.2, "width_parameter": "slot_width_m", "z_span_m": [0.04, 0.20]},
+        {"center_y_m": 0.4, "width_parameter": "slot_width_m", "z_span_m": [0.04, 0.20]}
+      ],
+      "normal_construction": "fresh explicit four-sided gate frame plus outer shell GeometryForNormals; no parent BoundNor or NormalSize asset reuse"
+    },
+    "receiver_region_m": {
+      "xmin": 0.86,
+      "xmax": 1.72,
+      "ymin": 0.05,
+      "ymax": 0.55,
+      "zmin": 0.0,
+      "zmax": 0.9
+    },
+    "runtime_domain_m": {
+      "xmin": -0.3,
+      "xmax": 2.0,
+      "ymin": -0.2,
+      "ymax": 0.8,
+      "zmin": -0.2,
+      "zmax": 1.3
+    },
+    "gravity_m_s2": [0.0, 0.0, -9.81],
+    "boundary_method": "native mDBC Boundary=2 with the new gate-frame normal construction"
+  },
+  "registered_window": {
+    "time_max_s": 1.5,
+    "output_interval_s": 0.01,
+    "event_window_required": true,
+    "maximum_extension_s": 3.0,
+    "extension_allowed_only_after_complete_hard_pass": true,
+    "event_censoring_stays_in_denominator": true
+  },
+  "cpu_native_preflight_gate": {
+    "authorized_by_this_proposal": false,
+    "must_follow_separate_root_review": true,
+    "fresh_output_stem_required": true,
+    "zero_boundnor_count_max": 0,
+    "zero_normal_size_count_max": 0,
+    "zero_normal_norm_threshold_m": 1e-12,
+    "ids_unique_and_xml_aligned": true,
+    "fluid_ids_match_xml": true,
+    "arrays_finite": true,
+    "fluid_boundary_overlap_count_max": 0,
+    "outer_endpoint_count_max": 0,
+    "gate_endpoint_penetration_count_max": 0,
+    "saved_initial_chord_crossing_count_max": 0,
+    "source_mass_policy": "native rho*dp^3; no mass rescaling",
+    "source_mass_relative_error_max": 0.025,
+    "total_mass_relative_error_max": 0.03,
+    "expected_continuous_source_mass_kg": 135.0,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "job_created": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_submission": false,
+    "qualification_credit": 0
+  },
+  "future_anchor_gate": {
+    "requires_second_root_review_after_fresh_preflight": true,
+    "exactly_one_protected_anchor": true,
+    "time_max_s": 1.5,
+    "requested_horizon_reached": true,
+    "hard_integrity": [
+      "native fluid IDs unique with no active ID missing",
+      "all active position, velocity, density, mass and observer values finite",
+      "zero closed-wall and gate-frame endpoint violations",
+      "zero saved-frame chord crossings through outer walls, gate frame or solid web",
+      "zero unintended particles outside the explicit domain",
+      "native source mass and full-window mass change remain within fixed gates"
+    ],
+    "events": [
+      "at least 1% of initial fluid mass crosses either slot plane below the slot top plus 2dp",
+      "at least 1% of initial fluid mass enters the downstream receiver",
+      "receiver contact is sustained for 0.20 s",
+      "complete 1.5 s event window is observed"
+    ],
+    "failure_policy": {
+      "hard_failure_is_failure": true,
+      "event_censor_is_failure": true,
+      "failure_zero_credit": true,
+      "same_input_retry": false,
+      "threshold_relaxation": false,
+      "horizon_extension_before_hard_pass": false
+    }
+  },
+  "authorization_boundary": {
+    "status": "proposal_only_no_runtime_authority",
+    "solver": false,
+    "gpu": false,
+    "queue": false,
+    "ledger": false,
+    "registry": false,
+    "matrix_materialization": false,
+    "matrix_submission": false,
+    "core_gate_changed": false,
+    "qualification_credit_added": 0,
+    "next_allowed_action": "root review of this new scope and its construction contract only"
+  },
+  "current_core_status": {
+    "status_command": ".venv/bin/python scripts/core_campaign.py status",
+    "can_finalize": false,
+    "t1_families": ["F3", "F4"],
+    "three_t1_families": false,
+    "missing_t1_case_runs": 288,
+    "missing_material_case_runs": 288,
+    "independent_reproduction": true,
+    "causal_lineage_contracts": true,
+    "evidence_valid": true,
+    "issues": []
+  },
+  "evidence_bindings": {
+    "third_t1_audit": {
+      "path": "reports/CORE-THIRD-T1-CANDIDATE-AUDIT-2026-09-21-v2.zh-CN.md",
+      "sha256": "68047248a4830be798ee8db6a40520eb1c6db80a736500c330d3f904d62c6bff",
+      "bytes": 14626,
+      "role": "current third-family audit and minimum proposal gate"
+    },
+    "completion": {
+      "path": "campaigns/core-v1/completion.json",
+      "sha256": "eb25d9878ce8b005a1e6fe6c481671ad4c223beafb3f1104601a8a3dc67311e0",
+      "bytes": 1516,
+      "role": "authoritative Core completion status"
+    },
+    "dynamic_dbc_negative": {
+      "path": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-anchor-canary-negative-evidence-v1.json",
+      "sha256": "0bba913c75b2a716b0756154239e11595feb753b428e2b4745563c5da3ff841d",
+      "bytes": 7087,
+      "role": "closed duration-scope event-censored canary"
+    },
+    "static_full_cup_negative": {
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-negative-evidence-v1.json",
+      "sha256": "bbb97817955782e787a844300e3756af248d9cc49e7ecbb43b6275f7dd6de166",
+      "bytes": 51786,
+      "role": "closed static full-cup hard-integrity negative canary"
+    },
+    "orifice_v2_preflight_failure": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/preflight-v4/preflight.json",
+      "sha256": "90123f1c0ab3b776a306729c92d1d5dbb6281190e19511245a724f83036e1113",
+      "bytes": 10171,
+      "role": "parent orifice remediation hard preflight failure"
+    },
+    "orifice_v3_preflight_failure": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v3/preflight-v3/preflight.json",
+      "sha256": "90b8c460262ad1424aab42dbc0046f1bf3b511478ddc0b5e240fd83b87485dd7",
+      "bytes": 13017,
+      "role": "parent orifice remediation hard preflight failure"
+    },
+    "orifice_v4_preflight_failure": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v4/preflight-v4/preflight.json",
+      "sha256": "db18863a97cb0a6d17a2cbb877e7b3df94368c96be4176728bd7b15b8a698685",
+      "bytes": 13361,
+      "role": "parent orifice remediation hard zero-normal failure"
+    },
+    "orifice_v4_partition_audit": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v4/v4-current-failure-partition-audit-v1.json",
+      "sha256": "74d7395e697db199d05e70b2795540812fae8170c2e69247f26258c1e2141bdd",
+      "bytes": 19833,
+      "role": "read-only gate-normal failure partition"
+    },
+    "f5_negative_anchor": {
+      "path": "campaigns/core-v1/evidence/f5-wave-runup-third-t1-anchor-negative-evidence-v1.json",
+      "sha256": "d09cf0ca1388bb752909af61e520fb64b195766d3f8884968d587ff9a510b3d2",
+      "bytes": 4675,
+      "role": "closed F5 third-family hard-geometry negative anchor"
+    }
+  },
+  "planning_estimate": {
+    "cpu_native": {
+      "cpu_cores": 2,
+      "ram_mib": 16384,
+      "gpu_required": false,
+      "timeout_seconds": 1800,
+      "status": "estimate_only_no_reservation"
+    },
+    "protected_anchor": {
+      "gpu_hours_estimate": [0.1, 0.2],
+      "wall_minutes_estimate": [5, 10],
+      "status": "not_authorized; estimate must be revised after fresh preflight"
+    }
+  }
+}
