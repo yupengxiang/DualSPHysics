@@ -29,12 +29,85 @@ _PRESCRIBED_ROTATION_SIGNS = {
     DUALSPHYSICS_MVROTFILE_ROTATION_VERSION: -1.0,
 }
 
-# KnownInputs is the only information boundary visible to a predictor.  Keep
-# physical metadata such as ``reference_density_kgm3`` legal, but reject
-# common aliases that could smuggle a future/reference particle state into the
-# serialized contract.  The previous substring list caught
-# ``future_fluid_velocity`` while allowing the equally dangerous generic
-# ``future_state`` and ``future_velocity`` keys.
+# KnownInputs is the only information boundary visible to a predictor.  These
+# are the complete v1 metadata fields currently emitted by the Core adapters.
+# Values are deliberately scalar finite numbers, finite 3-vectors, strings, or
+# the one registered boolean flag; arbitrary nested JSON is not part of this
+# contract.  Adding a field requires an explicit schema change.
+_KNOWN_INPUT_FIELD_TYPES = {
+    "physics": {
+        "drive_amplitude": "finite_number",
+        "family": "string",
+        "gravity_mps2": "finite_vector3",
+        "physical_kinematic_viscosity_m2_s": "finite_number",
+        "reference_density_kgm3": "finite_number",
+        "scope_id": "string",
+        "viscosity_formulation": "string",
+        "viscosity_source": "string",
+        "geometry_motion_semantics": "string",
+        "geometry_motion_sha256": "string",
+    },
+    "numerics": {
+        "dp_m": "finite_number",
+        "h_m": "finite_number",
+        "native_velocity_correction": "boolean",
+        "recipe_id": "string",
+        "viscosity_coefficient": "finite_number",
+    },
+}
+
+
+def _finite_metadata_number(value, path):
+    if isinstance(value, (bool, np.bool_)) or not isinstance(
+            value, (int, float, np.integer, np.floating)):
+        raise ValueError(f"{path} must be a finite number")
+    if isinstance(value, np.integer):
+        value = int(value)
+    elif isinstance(value, np.floating):
+        value = float(value)
+    try:
+        finite = math.isfinite(float(value))
+    except (OverflowError, TypeError, ValueError):
+        finite = False
+    if not finite:
+        raise ValueError(f"{path} must be a finite number")
+    return value
+
+
+def _known_input_metadata(section, value):
+    if not isinstance(value, Mapping):
+        raise ValueError(f"known input {section} must be a mapping")
+    result = {}
+    schema = _KNOWN_INPUT_FIELD_TYPES[section]
+    for key, item in value.items():
+        if not isinstance(key, str):
+            raise ValueError(f"known input {section} field names must be strings")
+        field_type = schema.get(key)
+        if field_type is None:
+            raise ValueError(
+                f"unknown {section} field {key!r}; future/reference/predicted/next_state "
+                "fields are forbidden")
+        path = f"{section}.{key}"
+        if field_type == "finite_number":
+            result[key] = _finite_metadata_number(item, path)
+        elif field_type == "finite_vector3":
+            if not isinstance(item, (list, tuple)) or len(item) != 3:
+                raise ValueError(f"{path} must be a finite numeric 3-vector")
+            result[key] = [_finite_metadata_number(entry, f"{path}[{index}]")
+                           for index, entry in enumerate(item)]
+        elif field_type == "string":
+            if not isinstance(item, str):
+                raise ValueError(f"{path} must be a string")
+            result[key] = item
+        elif field_type == "boolean":
+            if not isinstance(item, (bool, np.bool_)):
+                raise ValueError(f"{path} must be a boolean")
+            result[key] = bool(item)
+        else:  # pragma: no cover - protects future schema typos
+            raise ValueError(f"unsupported {section} schema type for {key!r}")
+    return result
+
+
 _FORBIDDEN_CAUSAL_KEY_EXACT = frozenset({
     "future", "state", "reference", "target",
     "future_state", "future_position", "future_velocity", "future_acceleration",
@@ -482,8 +555,8 @@ class KnownInputs:
             raise ValueError("known inputs require finite or prescribed geometry and prescribed arrays; providers are forbidden")
         if self.contract_version != INPUT_VERSION or self.geometry.coordinate_frame != self.coordinate_frame:
             raise ValueError("input version/coordinate frame mismatch")
-        object.__setattr__(self, "physics", _freeze(_json_value(self.physics)))
-        object.__setattr__(self, "numerics", _freeze(_json_value(self.numerics)))
+        object.__setattr__(self, "physics", _freeze(_known_input_metadata("physics", self.physics)))
+        object.__setattr__(self, "numerics", _freeze(_known_input_metadata("numerics", self.numerics)))
         for key in ("dp_m", "h_m"):
             if key not in self.numerics or not math.isfinite(self.numerics[key]) or self.numerics[key] <= 0:
                 raise ValueError("positive dp_m/h_m required")

@@ -659,6 +659,105 @@ def test_milestone_rollouts_are_consumed_and_resume_deduplicates(tmp_path, monke
     assert all(row["validation_case_count"] == 12 for row in resumed["milestone_evaluations"])
 
 
+def _minimal_milestone_evaluation_fixture(tmp_path):
+    manifest = tiny_manifest(tmp_path)
+    manifest["cases"][0]["split"] = "validation"
+    checkpoint_path = tmp_path / "model.step-00000002.pt"
+    checkpoint_path.write_bytes(b"hash-bound checkpoint")
+    checkpoint = {
+        "path": str(checkpoint_path), "sha256": sha256_file(checkpoint_path),
+        "bytes": checkpoint_path.stat().st_size, "update": 2,
+    }
+    return manifest, checkpoint
+
+
+def _minimal_milestone_evaluation(data, checkpoint):
+    from scripts.core_evaluation import aggregate_cases, score_case
+
+    validation_cases = tuple(data.case_ids("validation"))
+    validation_registry = {
+        case_id: data.record(case_id)["family"] for case_id in validation_cases
+    }
+    case_rows, scores, denominators = {}, {}, {}
+    for case_id in validation_cases:
+        expected_frames = len(data.times(case_id)) - 1
+        length_m, speed_mps = _characteristic_scales(data.known_inputs(case_id))
+        denominators[case_id] = {
+            "expected_frames": expected_frames,
+            "length_m": length_m,
+            "speed_mps": speed_mps,
+        }
+        rollout = {
+            "expected_frames": expected_frames,
+            "position_rmse": [0.0] * expected_frames,
+            "velocity_rmse": [0.0] * expected_frames,
+            "executed": True,
+            "failure_category": None,
+        }
+        score = score_case(
+            rollout["position_rmse"], rollout["velocity_rmse"],
+            expected_frames=expected_frames, length_m=length_m,
+            speed_mps=speed_mps, executed=True, failure_category=None,
+        )
+        scores[case_id] = score
+        case_rows[case_id] = {"score": score, "rollout": rollout}
+    return {
+        "schema": "core.milestone_evaluation.v1", "update": 2,
+        "split": "validation", "test_included": False,
+        "checkpoint": copy.deepcopy(checkpoint),
+        "validation_case_count": len(validation_cases),
+        "family_registry": validation_registry,
+        "fixed_denominator": denominators,
+        "cases": case_rows,
+        "metrics": aggregate_cases(validation_registry, scores),
+        "execution_summary": {"registered_case_count": len(validation_cases)},
+    }
+
+
+def test_milestone_evaluation_rejects_original_checkpoint_hash_mismatch(tmp_path):
+    manifest, checkpoint = _minimal_milestone_evaluation_fixture(tmp_path)
+    with CoreDataset(manifest, tmp_path) as data:
+        report = _minimal_milestone_evaluation(data, checkpoint)
+        report["checkpoint"]["sha256"] = "0" * 64
+        with pytest.raises(ValueError, match="checkpoint hash mismatch"):
+            _validate_milestone_evaluation(
+                report, dataset=data, checkpoint=checkpoint,
+                validation_cases=data.case_ids("validation"),
+                validation_registry={"tiny": "F3"},
+            )
+
+
+def test_milestone_evaluation_rejects_tampered_self_reported_hash(tmp_path):
+    manifest, checkpoint = _minimal_milestone_evaluation_fixture(tmp_path)
+    attacker_checkpoint = tmp_path / "attacker.pt"
+    attacker_checkpoint.write_bytes(b"tampered evaluation binding")
+    with CoreDataset(manifest, tmp_path) as data:
+        report = _minimal_milestone_evaluation(data, checkpoint)
+        report["checkpoint"] = {
+            "path": str(attacker_checkpoint),
+            "sha256": sha256_file(attacker_checkpoint),
+            "bytes": attacker_checkpoint.stat().st_size,
+            "update": 2,
+        }
+        with pytest.raises(ValueError, match="checkpoint hash mismatch"):
+            _validate_milestone_evaluation(
+                report, dataset=data, checkpoint=checkpoint,
+                validation_cases=data.case_ids("validation"),
+                validation_registry={"tiny": "F3"},
+            )
+
+
+def test_milestone_evaluation_accepts_hash_bound_ledger_reference(tmp_path):
+    manifest, checkpoint = _minimal_milestone_evaluation_fixture(tmp_path)
+    with CoreDataset(manifest, tmp_path) as data:
+        report = _minimal_milestone_evaluation(data, checkpoint)
+        assert _validate_milestone_evaluation(
+            report, dataset=data, checkpoint=checkpoint,
+            validation_cases=data.case_ids("validation"),
+            validation_registry={"tiny": "F3"},
+        ) == report
+
+
 def test_milestone_selection_rejects_incomplete_case_sidecar(tmp_path, monkeypatch):
     manifest = tiny_manifest(tmp_path)
     template = manifest["cases"][0]

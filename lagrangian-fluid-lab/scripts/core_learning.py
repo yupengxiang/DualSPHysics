@@ -859,10 +859,12 @@ def train_model(dataset, *, model_kind="graph_raw", seed=17, updates=DEFAULT_UPD
         milestone_evaluations = []
         for saved_evaluation in payload.get("milestone_evaluations", []):
             try:
+                update = int(saved_evaluation.get("update", -1))
+                checkpoint_reference = _milestone_checkpoint_for_update(
+                    milestone_checkpoints, update)
                 milestone_evaluations.append(_validate_milestone_evaluation(
                     saved_evaluation, dataset=dataset,
-                    checkpoint={"update": saved_evaluation.get("update", -1),
-                                "sha256": saved_evaluation.get("checkpoint", {}).get("sha256")},
+                    checkpoint=checkpoint_reference,
                     validation_cases=validation_cases,
                     validation_registry=validation_registry,
                 ))
@@ -983,9 +985,11 @@ def train_model(dataset, *, model_kind="graph_raw", seed=17, updates=DEFAULT_UPD
     def record_milestone_evaluation(report):
         """Append one update exactly once and close its persistent queue row."""
         update = int(report["update"])
+        checkpoint_reference = _milestone_checkpoint_for_update(
+            milestone_checkpoints, update)
         _validate_milestone_evaluation(
             report, dataset=dataset,
-            checkpoint=report["checkpoint"],
+            checkpoint=checkpoint_reference,
             validation_cases=validation_cases,
             validation_registry=validation_registry,
         )
@@ -1024,10 +1028,11 @@ def train_model(dataset, *, model_kind="graph_raw", seed=17, updates=DEFAULT_UPD
             if sidecar.is_file():
                 try:
                     cached = json.loads(sidecar.read_text())
-                    if (int(cached.get("update", -1)) == update
-                            and cached.get("checkpoint", {}).get("sha256") == milestone.get("sha256")):
+                    if int(cached.get("update", -1)) == update:
+                        checkpoint_reference = _milestone_checkpoint_for_update(
+                            milestone_checkpoints, update)
                         _validate_milestone_evaluation(
-                            cached, dataset=dataset, checkpoint=milestone,
+                            cached, dataset=dataset, checkpoint=checkpoint_reference,
                             validation_cases=validation_cases,
                             validation_registry=validation_registry,
                         )
@@ -1508,6 +1513,41 @@ def _checkpoint_reference(item):
     raise ValueError("checkpoint references require a path")
 
 
+def _verified_checkpoint_reference(item, *, expected_update=None):
+    """Bind a checkpoint reference to the bytes currently on disk."""
+    reference = _checkpoint_reference(item)
+    path = Path(reference["path"])
+    try:
+        observed_bytes = path.stat().st_size
+        observed_hash = sha256_file(path)
+    except OSError as error:
+        raise ValueError(f"milestone checkpoint is unavailable: {path}") from error
+    if expected_update is not None and int(reference.get("update", -1)) != int(expected_update):
+        raise ValueError("milestone checkpoint update mismatch")
+    if reference.get("sha256") != observed_hash:
+        raise ValueError("milestone checkpoint ledger hash mismatch")
+    if reference.get("bytes") is not None:
+        try:
+            reference_bytes = int(reference["bytes"])
+        except (TypeError, ValueError):
+            reference_bytes = -1
+        if reference_bytes != observed_bytes:
+            raise ValueError("milestone checkpoint ledger byte count mismatch")
+    verified = dict(reference)
+    verified["sha256"] = observed_hash
+    verified["bytes"] = observed_bytes
+    return verified
+
+
+def _milestone_checkpoint_for_update(milestone_checkpoints, update):
+    """Resolve and verify the single ledger checkpoint for one update."""
+    matches = [item for item in milestone_checkpoints
+               if int(item.get("update", -1)) == int(update)]
+    if len(matches) != 1:
+        raise ValueError(f"milestone ledger must contain one checkpoint at update {update}")
+    return _verified_checkpoint_reference(matches[0], expected_update=update)
+
+
 def _validate_milestone_evaluation(report, *, dataset, checkpoint,
                                     validation_cases, validation_registry):
     """Fail closed on persisted milestone reports before checkpoint selection.
@@ -1519,13 +1559,16 @@ def _validate_milestone_evaluation(report, *, dataset, checkpoint,
     """
     if not isinstance(report, dict) or report.get("schema") != "core.milestone_evaluation.v1":
         raise ValueError("milestone evaluation schema mismatch")
+    checkpoint = _verified_checkpoint_reference(checkpoint)
     expected_update = int(checkpoint.get("update", -1))
     if int(report.get("update", -1)) != expected_update:
         raise ValueError("milestone evaluation update mismatch")
     if report.get("split") != "validation" or report.get("test_included") is not False:
         raise ValueError("milestone evaluation must be validation-only")
     checkpoint_report = report.get("checkpoint")
-    if not isinstance(checkpoint_report, dict) or checkpoint_report.get("sha256") != checkpoint.get("sha256"):
+    if (not isinstance(checkpoint_report, dict)
+            or checkpoint_report.get("sha256") != checkpoint.get("sha256")
+            or checkpoint_report.get("bytes") != checkpoint.get("bytes")):
         raise ValueError("milestone evaluation checkpoint hash mismatch")
     expected_cases = tuple(validation_cases)
     expected_set = set(expected_cases)

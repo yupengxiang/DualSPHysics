@@ -6,7 +6,8 @@ import h5py
 import numpy as np
 import pytest
 
-from scripts.core_contract import (FiniteGeometry, KnownInputs, PrescribedControl, State,
+from scripts.core_contract import (FiniteGeometry, KnownInputs, PrescribedControl,
+                                   PrescribedGeometry, State,
                                    StepPrediction, apply_prediction, commit, contract_hash,
                                    updater_oracle)
 from scripts.core_dataset import (CoreDataset, import_f3_manifest, new_scope_split,
@@ -109,6 +110,69 @@ def test_known_input_rejects_generic_future_state_aliases_recursively():
     KnownInputs(known.geometry, known.control,
                 {"reference_density_kgm3": 1000.0},
                 known.numerics, known.coordinate_frame)
+
+
+@pytest.mark.parametrize("section, forbidden", [
+    ("physics", "next_state"),
+    ("physics", "predicted_position"),
+    ("numerics", "future_reference_velocity"),
+    ("numerics", "next_state_position"),
+])
+def test_known_input_schema_rejects_unregistered_future_aliases(section, forbidden):
+    known = example_known()
+    physics = dict(known.physics)
+    numerics = dict(known.numerics)
+    (physics if section == "physics" else numerics)[forbidden] = 1.0
+    with pytest.raises(ValueError, match="unknown .* field"):
+        KnownInputs(known.geometry, known.control, physics, numerics,
+                    known.coordinate_frame)
+
+
+@pytest.mark.parametrize("section, payload", [
+    ("physics", {"scope_id": {"nested": "value"}}),
+    ("physics", {"gravity_mps2": [0.0, {"next_state": 1.0}, -9.81]}),
+    ("numerics", {"recipe_id": {"predicted_position": [0.0, 0.0, 0.0]}}),
+])
+def test_known_input_schema_rejects_nested_metadata_fields(section, payload):
+    known = example_known()
+    physics = dict(known.physics) if section == "numerics" else payload
+    numerics = dict(known.numerics) if section == "physics" else payload
+    with pytest.raises(ValueError):
+        KnownInputs(known.geometry, known.control, physics, numerics,
+                    known.coordinate_frame)
+
+
+def test_known_input_schema_preserves_registered_metadata_and_prescribed_contract():
+    base = example_known()
+    prescribed = PrescribedGeometry(
+        base.geometry.triangles, base.geometry.component_id, base.geometry.body_id,
+        base.geometry.wall_velocity, base.geometry.coordinate_frame,
+        [0.0, 1.0], [0.0, 15.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0])
+    physics = {
+        "drive_amplitude": 0.5,
+        "family": "F3",
+        "gravity_mps2": [0.0, 0.0, -9.81],
+        "physical_kinematic_viscosity_m2_s": 1.0e-6,
+        "reference_density_kgm3": 1000.0,
+        "scope_id": "registered-scope",
+        "viscosity_formulation": "laminar",
+        "viscosity_source": "declared",
+        "geometry_motion_semantics": "declared rigid pose",
+        "geometry_motion_sha256": "a" * 64,
+    }
+    numerics = {
+        "dp_m": 0.01,
+        "h_m": 0.016,
+        "native_velocity_correction": True,
+        "recipe_id": "registered-recipe",
+        "viscosity_coefficient": 0.05,
+    }
+    known = KnownInputs(prescribed, base.control, physics, numerics, "test")
+    assert known.geometry is prescribed
+    assert known.control is base.control
+    assert known.physics["gravity_mps2"] == (0.0, 0.0, -9.81)
+    assert known.numerics["native_velocity_correction"] is True
+    assert known.geometry_at(0.5).triangles.shape == prescribed.triangles.shape
 
 
 def test_portable_reader_and_train_only_boundary(tmp_path):
