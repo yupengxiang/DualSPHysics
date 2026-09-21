@@ -1,0 +1,162 @@
+{
+  "schema": "core.f6.root_review_only_proposal.v1",
+  "proposal_id": "F6_fluid_rigid_body_root_review_only_20260921",
+  "created_at_utc": "2026-09-21T00:00:00+08:00",
+  "status": "proposal_only_root_review_required",
+  "scientific_status": "candidate_distinct_mechanism_blocked",
+  "qualification_claim": "none",
+  "family_admission": false,
+  "candidate": {
+    "family": "F6",
+    "scope_id": "F6_fluid_rigid_body_interaction_v1",
+    "revision_id": "F6_root_review_only_20260921",
+    "candidate_id": "F6_free_rigid_body_coupling",
+    "mechanism_class": "free_rigid_body_fluid_momentum_and_buoyancy_coupling",
+    "mechanism_difference": "F6 exposes body position, velocity, mass/inertia and contact state as dynamic variables that feed back into the fluid. F1 uses fixed obstacle topology, F2 uses prescribed cup/receiver motion, F3 uses prescribed sloshing forcing, F4 uses fluid-stream collision, and F5 uses prescribed wave/run-up geometry; none has an independently moving rigid body with coupled response.",
+    "submechanisms": [
+      "buoyancy-heave-drift",
+      "water-entry-momentum-exchange",
+      "multi-body-fluid-mediated-interaction"
+    ],
+    "proposal_decision": "Mechanism is suitable for a new proposal and is genuinely distinct at the state-space level, but the existing assets support only a bounded structural probe. They do not support Core T1 admission."
+  },
+  "execution_policy": {
+    "read_only": true,
+    "solver_launch": false,
+    "gpu_launch": false,
+    "queue_mutation": false,
+    "registry_mutation": false,
+    "ledger_mutation": false,
+    "matrix_mutation": false,
+    "same_input_retry": false,
+    "old_asset_reuse_as_qualification": false,
+    "qualification_claim_none": true
+  },
+  "evidence": {
+    "runtime_summary": [
+      {
+        "case_id": "F6_floating_box",
+        "mechanism": "buoyancy-heave-drift",
+        "definition": "cases/F6/F6_floating_box/F6_floating_box_Def.xml",
+        "definition_sha256": "0446ee36bba9266dd45c3662710fc52efccd9f2ec593d564bfbf4613a46d335e",
+        "trajectory": "data/F6_floating_box.h5",
+        "trajectory_sha256": "6c288b5861ddf58af6177ff0209cb7fd00f33f0c072af90ac8747095477e1e9e",
+        "dp_m": 0.04,
+        "target_time_s": 0.8,
+        "frames": 17,
+        "time_end_s": 0.800281,
+        "particles": 2121,
+        "identity_retention": 1.0,
+        "excluded_particles": 0,
+        "role": "read-only structural probe"
+      },
+      {
+        "case_id": "F6_heavy_box_entry",
+        "mechanism": "water-entry-momentum-exchange",
+        "definition": "cases/F6/F6_heavy_box_entry/F6_heavy_box_entry_Def.xml",
+        "definition_sha256": "e77cc90ca080c1d94ae040c2268f1d74c7c25fb7578eec72ed2f6e599cca1e36",
+        "trajectory": "data/F6_heavy_box_entry.h5",
+        "trajectory_sha256": "bda8e91b1eb48edea18ca86b9242f58833f0b9c3c14a6564c442f7f419930383",
+        "dp_m": 0.04,
+        "target_time_s": 0.6,
+        "frames": 13,
+        "time_end_s": 0.600442,
+        "particles": 1914,
+        "identity_retention": 1.0,
+        "excluded_particles": 0,
+        "role": "read-only structural probe"
+      },
+      {
+        "case_id": "F6_twin_floaters",
+        "mechanism": "multi-body-fluid-mediated-interaction",
+        "definition": "cases/F6/F6_twin_floaters/F6_twin_floaters_Def.xml",
+        "definition_sha256": "bd73de914fdbebbc77c3b64f60e7d6f4f553fecce0b8de8fdf97ad8a295ab882",
+        "trajectory": "data/F6_twin_floaters.h5",
+        "trajectory_sha256": "d68d7d8db30ecb475525ade4fc8c51ef53ffdbd41c419855b8f4811c5debe19c",
+        "dp_m": 0.04,
+        "target_time_s": 0.8,
+        "frames": 17,
+        "time_end_s": 0.800301,
+        "particles": 2196,
+        "identity_retention": 1.0,
+        "excluded_particles": 0,
+        "role": "read-only structural probe"
+      }
+    ],
+    "runtime_reports": [
+      {
+        "path": "reports/runtime/prepare-summary.json",
+        "sha256": "31ed917797b72c9313dadcbc75a949f3486e91ab57bcec8f02c54e3334b55074",
+        "role": "historical prepare receipt"
+      },
+      {
+        "path": "reports/runtime/run-summary.json",
+        "sha256": "67bcf63f2e7d8b4da6be2bfb9de574f2cddf8702107852500db7da02bdb286a1",
+        "role": "historical solver completion receipt"
+      },
+      {
+        "path": "reports/runtime/trajectory-audit.json",
+        "sha256": "a8ae31c6e0e47753a6af590cb695670b3366fea900c31c7dea83a555f43bc778",
+        "role": "historical normalized trajectory audit"
+      },
+      {
+        "path": "reports/runtime/quality-gates.json",
+        "sha256": "4a35bee659c19ceb8fb7244655f4d19808cab46e0368ab19778d49dabcbd5e38",
+        "role": "historical exploratory quality gate"
+      }
+    ],
+    "blocker_contract": {
+      "path": "campaigns/l2-multifamily/resume-c6b28c8/f6r-blocker-audit.json",
+      "sha256": "6c9423829737962d9f988c2d11e7ffaa30b2f300ee8160dbc285edb8a7411519",
+      "role": "read-only blocker evidence",
+      "decision": "blocked_external",
+      "blockers": [
+        "nominal floating mDBC boundary normals are incomplete",
+        "no matched transformed-Float1 force-gauge closure exists",
+        "floating Chrono/contact semantics remain unresolved"
+      ]
+    }
+  },
+  "observed_integrity": {
+    "definition_and_solver_truth": "The three custom definitions were prepared and their historical solver receipts report code 0, with no excluded particles. This proves execution authenticity for those old probes, not physical acceptance.",
+    "trajectory_schema": "Each HDF5 is schema_version 2 with position, velocity, density, pressure, mass, type, mk, valid, particle_id, particle_zone and strictly increasing time.",
+    "identity": "All three custom probes retain every initial numerical particle ID through the final frame; mk 22 identifies the single body and mk 22/23 identify the two twin bodies. This is numerical-node identity only; it is not a material-lineage or body-state contract.",
+    "time_axis": "Saved cadence is approximately 0.05 s and reaches 99.99% or more of each declared target. The windows are short probes: 0.6 s for entry and 0.8 s for float/twin response.",
+    "density": "Historical audits report density ranges 998.61--1009.86 kg/m^3 for the twin, 998.74--1005.17 kg/m^3 for the single floater, and 982.27--1066.30 kg/m^3 for entry; these pass only the broad exploratory sanity range.",
+    "mass": "The HDF5 mass array is a particle field and does not bind rigid-body mass or inertia. For example, the floating-box body mass field sums to 11.2 kg while rho_body times declared box volume is 3.072 kg; the heavy body sums to 9.6 kg while the declared value is 7.168 kg. The twin bodies each sum to 9.6 kg while their declared rho_body volumes are 3.072 kg and 4.096 kg. This is a missing closure contract, not evidence that the historical solver run was false.",
+    "boundary": "The XML declares a finite tank with bottom/left/right/front/back faces and an open top, but the normalized HDF5 contains no boundary normals, wall-contact/penetration flags, or open-face flux ledger. Excluded_particles=0 does not close those gates.",
+    "event_window": "No event definitions or body-level force/torque traces are present. The heavy body is still moving at its 0.600442 s endpoint, and the float/twin body responses have no declared settling or post-impact completion criterion. Therefore the historical windows are not complete event windows."
+  },
+  "minimal_static_cpu_gate": {
+    "gate_kind": "root_review_only_static_cpu",
+    "must_pass_before_any_future_runtime_authorization": [
+      "Parse a fresh F6 Definition and bind hashes for geometry, fluid density, body density, dimensions, center of mass, inertia, initial velocity and tank open/closed faces.",
+      "Derive body volume and mass from the declared geometry and rho_body; require an explicit inertia tensor and a body-level identity that is separate from particle IDs.",
+      "Validate HDF5 or equivalent output axes: finite arrays, strictly increasing time, declared cadence, complete target window, stable numerical IDs, mk/body mapping, and zero unexplained exclusions.",
+      "Require a body-state sidecar with per-body position, linear/angular velocity, force, torque, contact/penetration status, and mass/inertia provenance.",
+      "Require boundary-normal completeness and a wall/open-face accounting contract before any mDBC or Chrono interpretation.",
+      "Keep event completion separate from trajectory structural integrity; a complete file with an uncensored body event is required for any T1 review."
+    ],
+    "future_canary_shape": {
+      "authorization": "not granted by this proposal",
+      "one_case": "single free body, no contact, static/units/inertia control",
+      "one_resolution": "one explicitly bound resolution after root review",
+      "window": "long enough to include static balance and a declared no-contact response window",
+      "required_outputs": ["body state", "force/torque", "mass/inertia", "boundary audit", "event completion"],
+      "qualification_claim": "none"
+    }
+  },
+  "forbidden_reuse_and_actions": [
+    "Do not count any F6_floating_box, F6_heavy_box_entry, F6_twin_floaters, O6_floating_box, or Test14 artifact toward a Core T1 denominator.",
+    "Do not reuse old generated XML, BI4/OBI4, CSV, HDF5, or trajectory as a fresh qualification input; their hashes may be retained only as read-only evidence references.",
+    "Do not promote radius-offset zero-normal diagnostics or fixed-box DBC/mDBC force controls to transformed-Float1 F6 evidence.",
+    "Do not mix a dynamic Chrono/contact experiment into a fixed-body hydrostatic gate.",
+    "Do not launch solver/GPU/queue work, mutate registry/ledger/matrix, or label this proposal T1."
+  ],
+  "decision": {
+    "root_review_only_proposal_accepted": true,
+    "candidate_is_mechanistically_distinct": true,
+    "candidate_has_sufficient_evidence_for_t1": false,
+    "next_state": "blocked_pending_body_mass_inertia_force_boundary_and_event_contracts"
+  }
+}
