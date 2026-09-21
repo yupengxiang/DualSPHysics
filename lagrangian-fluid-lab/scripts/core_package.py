@@ -21,6 +21,7 @@ from scripts.core_runtime import atomic_json, digest
 
 
 CHECKPOINT_REGISTRY_SCHEMA = 'core.bundled_checkpoints.v1'
+CHECKPOINT_PAYLOAD_SCHEMA = 'core.checkpoint.v1'
 READER_MANIFEST_PREFLIGHT_SCHEMA = 'core.reader_manifest_preflight.v1'
 READER_MANIFEST_NORMALIZATION_PLAN_SCHEMA = 'core.reader_manifest_normalization_plan.v1'
 READER_MANIFEST_SCHEMAS = {SCHEMA, COMPACT_SCHEMA}
@@ -477,6 +478,125 @@ def plan_reader_manifest_normalization(
     }
 
 
+def _sha256_hex(value, *, label):
+    if not isinstance(value, str) or len(value) != 64:
+        raise ValueError(f'{label} must be a 64-character SHA-256 hex digest')
+    try:
+        int(value, 16)
+    except ValueError as error:
+        raise ValueError(f'{label} must be a 64-character SHA-256 hex digest') from error
+    return value.lower()
+
+
+def _strict_bytes(value, *, label):
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise ValueError(f'{label} must be a non-negative integer')
+    return value
+
+
+def _bundle_relative_path(value, *, label):
+    """Return one canonical, POSIX-relative path usable after relocation."""
+    if not isinstance(value, str) or not value or '\\' in value:
+        raise ValueError(f'{label} must be a portable relative path')
+    path = Path(value)
+    normalized = path.as_posix()
+    if (path.is_absolute() or '..' in path.parts or normalized != value
+            or normalized in ('', '.')):
+        raise ValueError(f'{label} must be a portable relative path')
+    return normalized
+
+
+def _checkpoint_payload_identity(path):
+    """Read only the CPU checkpoint metadata needed for package identity.
+
+    This is content validation, not a training or scientific qualification
+    step.  Core checkpoints are serialized mappings, so their identity fields
+    can be compared with the registry without constructing a model or using a
+    GPU.
+    """
+    try:
+        import torch
+        try:
+            payload = torch.load(Path(path), map_location='cpu', weights_only=False)
+        except TypeError:  # torch versions predating the weights_only keyword
+            payload = torch.load(Path(path), map_location='cpu')
+    except Exception as error:
+        raise ValueError('checkpoint content is not a readable Core checkpoint') from error
+    if not isinstance(payload, Mapping) or payload.get('schema') != CHECKPOINT_PAYLOAD_SCHEMA:
+        raise ValueError('checkpoint content has an unsupported Core checkpoint schema')
+    model_kind = payload.get('model_kind')
+    if not isinstance(model_kind, str) or not model_kind:
+        raise ValueError('checkpoint content model_kind is missing')
+    identity = {'model_kind': model_kind}
+    for key in ('seed', 'hidden', 'update'):
+        value = payload.get(key)
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValueError(f'checkpoint content {key} is malformed')
+        if key == 'update' and value < 0:
+            raise ValueError('checkpoint content update is malformed')
+        identity[key] = value
+    return identity
+
+
+def _require_registered_asset(file_rows, seen, *, path, sha256, bytes_value=None, label):
+    relative = _bundle_relative_path(path, label=f'{label} path')
+    item = file_rows.get(relative)
+    if relative not in seen or item is None:
+        raise ValueError(f'{label} is not registered in bundle.json')
+    expected_hash = _sha256_hex(sha256, label=f'{label} hash')
+    if item['sha256'].lower() != expected_hash:
+        raise ValueError(f'{label} hash disagrees with bundle artifact')
+    if bytes_value is not None:
+        expected_bytes = _strict_bytes(bytes_value, label=f'{label} bytes')
+        if item['bytes'] != expected_bytes:
+            raise ValueError(f'{label} bytes disagrees with bundle artifact')
+    return relative
+
+
+def _validate_dataset_assets(root, report, seen):
+    """Bind every dataset-declared asset to a measured bundle artifact."""
+    dataset_path = root / 'dataset.json'
+    try:
+        payload = json.loads(dataset_path.read_text())
+        validate_manifest(payload)
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as error:
+        raise ValueError('invalid bundled dataset manifest') from error
+    file_rows = {item['path']: item for item in report['files']}
+    for row in payload['cases']:
+        _require_registered_asset(
+            file_rows, seen, path=row['hdf5'], sha256=row['sha256'],
+            bytes_value=row.get('bytes'), label=f"case {row['case_id']} HDF5")
+        if payload['schema'] == COMPACT_SCHEMA:
+            references = row['known_inputs_ref']
+            for key in ('geometry', 'control'):
+                reference = references[key]
+                _require_registered_asset(
+                    file_rows, seen, path=reference['path'], sha256=reference['sha256'],
+                    bytes_value=reference.get('bytes'),
+                    label=f"case {row['case_id']} {key} input")
+        provenance = row.get('provenance', {})
+        if not isinstance(provenance, Mapping):
+            raise ValueError(f"case {row['case_id']} provenance is malformed")
+        for key, reference in provenance.items():
+            if isinstance(reference, Mapping) and 'path' in reference:
+                _require_registered_asset(
+                    file_rows, seen, path=reference['path'], sha256=reference.get('sha256'),
+                    bytes_value=reference.get('bytes'),
+                    label=f"case {row['case_id']} provenance {key}")
+            elif key == 'prepared' and isinstance(reference, str):
+                prepared_hash = provenance.get('prepared_sha256')
+                if prepared_hash is None:
+                    raise ValueError(
+                        f"case {row['case_id']} prepared asset is missing its hash")
+                _require_registered_asset(
+                    file_rows, seen, path=reference, sha256=prepared_hash,
+                    label=f"case {row['case_id']} prepared asset")
+    declared_cases = report.get('case_count')
+    if (isinstance(declared_cases, bool) or not isinstance(declared_cases, int)
+            or declared_cases != len(payload['cases'])):
+        raise ValueError('bundle case count disagrees with dataset manifest')
+
+
 def _validate_checkpoint_registry(root, report, seen):
     """Validate optional model assets without turning packaging into training."""
     if 'checkpoints.json' not in seen:
@@ -496,63 +616,165 @@ def _validate_checkpoint_registry(root, report, seen):
     for row in rows:
         if not isinstance(row, dict):
             raise ValueError('malformed checkpoint registry entry')
-        path = row.get('path')
-        if (not isinstance(path, str) or not path or Path(path).is_absolute()
-                or '..' in Path(path).parts):
-            raise ValueError('checkpoint registry path is not portable')
+        path = _bundle_relative_path(row.get('path'), label='checkpoint registry path')
         if path in paths or path not in seen or path not in file_rows:
             raise ValueError('checkpoint registry path is missing or duplicated')
         paths.add(path)
-        sha = row.get('sha256')
-        if not isinstance(sha, str) or len(sha) != 64:
-            raise ValueError('checkpoint registry hash is malformed')
-        try:
-            int(sha, 16)
-        except ValueError as error:
-            raise ValueError('checkpoint registry hash is malformed') from error
-        if file_rows[path]['sha256'].lower() != sha.lower():
+        sha = _sha256_hex(row.get('sha256'), label='checkpoint registry hash')
+        registered_bytes = _strict_bytes(
+            row.get('bytes'), label='checkpoint registry bytes')
+        file_row = file_rows[path]
+        target = (root / path).resolve()
+        target.relative_to(root)
+        if not target.is_file() or target.stat().st_size != registered_bytes:
+            raise ValueError('checkpoint registry bytes disagree with checkpoint artifact')
+        if digest(target).lower() != sha:
+            raise ValueError('checkpoint registry hash disagrees with checkpoint artifact')
+        if file_row['sha256'].lower() != sha:
             raise ValueError('checkpoint registry hash disagrees with bundle artifact')
-        if not isinstance(row.get('model_kind'), str) or not row['model_kind']:
+        if file_row['bytes'] != registered_bytes:
+            raise ValueError('checkpoint registry bytes disagree with bundle artifact')
+        for key in ('model_kind', 'seed', 'hidden', 'update'):
+            if key not in row:
+                raise ValueError(f'checkpoint registry entry missing {key}')
+        if not isinstance(row['model_kind'], str) or not row['model_kind']:
             raise ValueError('checkpoint registry model_kind is missing')
-        if isinstance(row.get('seed'), bool) or not isinstance(row.get('seed'), int):
-            raise ValueError('checkpoint registry seed is malformed')
-        if (isinstance(row.get('update'), bool) or not isinstance(row.get('update'), int)
+        for key in ('seed', 'hidden'):
+            if isinstance(row[key], bool) or not isinstance(row[key], int):
+                raise ValueError(f'checkpoint registry {key} is malformed')
+        if (isinstance(row['update'], bool) or not isinstance(row['update'], int)
                 or row['update'] < 0):
             raise ValueError('checkpoint registry update is malformed')
+        identity = _checkpoint_payload_identity(target)
+        for key, value in identity.items():
+            if row[key] != value:
+                raise ValueError(
+                    f'checkpoint registry {key} disagrees with checkpoint content')
     return len(rows)
 
 
 def verify_bundle(directory):
-    """Verify every registered artifact, including code, before reproduction."""
-    root = Path(directory).resolve()
-    report = json.loads((root / 'bundle.json').read_text())
-    if report.get('schema') != 'core.reader_bundle.v1':
+    """Verify measured bundle contents before any reproduction entrypoint."""
+    root = Path(directory).expanduser().resolve()
+    try:
+        report = json.loads((root / 'bundle.json').read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError('invalid bundle index') from error
+    if not isinstance(report, Mapping) or report.get('schema') != 'core.reader_bundle.v1':
         raise ValueError('unsupported bundle version')
+    entries = report.get('files')
+    if not isinstance(entries, list):
+        raise ValueError('bundle index files must be a list')
     seen = set()
-    for item in report['files']:
-        relative = Path(item['path'])
-        if relative.is_absolute() or '..' in relative.parts or str(relative) in seen:
+    normalized_entries = []
+    for item in entries:
+        if not isinstance(item, Mapping):
+            raise ValueError('malformed bundle artifact registration')
+        relative = _bundle_relative_path(item.get('path'), label='bundle artifact path')
+        if relative in seen:
             raise ValueError('invalid or duplicate bundle artifact path')
-        seen.add(str(relative))
+        seen.add(relative)
+        sha = _sha256_hex(item.get('sha256'), label=f'bundle artifact {relative} hash')
+        bytes_value = _strict_bytes(item.get('bytes'), label=f'bundle artifact {relative} bytes')
         target = (root / relative).resolve()
-        target.relative_to(root)
-        if not target.is_file() or target.stat().st_size != item['bytes'] or digest(target) != item['sha256']:
+        try:
+            target.relative_to(root)
+        except ValueError as error:
+            raise ValueError(f'bundle artifact path escapes bundle: {relative}') from error
+        if (not target.is_file() or target.stat().st_size != bytes_value
+                or digest(target).lower() != sha):
             raise ValueError(f'bundle artifact integrity failure: {relative}')
+        normalized_entries.append({'path': relative, 'sha256': sha, 'bytes': bytes_value})
+    report = dict(report)
+    report['files'] = normalized_entries
     required = {'dataset.json', 'environment.json', 'code/scripts/core_benchmark.py',
                 'code/scripts/core_cfd_dataset.py', 'code/scripts/core_learning.py',
                 'code/scripts/core_models.py', 'code/scripts/core_evaluation.py',
                 'code/scripts/core_contract.py', 'code/scripts/core_physics.py',
-                'code/scripts/core_reproduction_check.py'}
+                'code/scripts/core_reproduction_check.py', 'code/scripts/core_package.py'}
     if not required <= seen:
         raise ValueError('bundle is missing required artifact registrations')
+    _validate_dataset_assets(root, report, seen)
     checkpoint_count = _validate_checkpoint_registry(root, report, seen)
     declared_count = report.get('checkpoint_count', 0)
     if (isinstance(declared_count, bool) or not isinstance(declared_count, int)
             or declared_count != checkpoint_count):
         raise ValueError('bundle checkpoint count disagrees with registry')
+    declared_supported = report.get('model_reproduction_supported')
+    if declared_supported is not None and not isinstance(declared_supported, bool):
+        raise ValueError('bundle model reproduction declaration is malformed')
+    if declared_supported is not None and declared_supported != bool(checkpoint_count):
+        raise ValueError('bundle model reproduction declaration disagrees with registry')
     return {'passed': True, 'verified_files': len(seen), 'full_core_release': False,
             'checkpoint_count': checkpoint_count,
             'model_reproduction_supported': bool(checkpoint_count)}
+
+
+def require_verified_bundle(directory, *, manifest=None):
+    """The package boundary used by bundled reader/model reproduction code."""
+    verification = verify_bundle(directory)
+    if manifest is not None:
+        root = Path(directory).expanduser().resolve()
+        candidate = Path(manifest).expanduser()
+        if not candidate.is_absolute():
+            candidate = root / candidate
+        try:
+            candidate = candidate.resolve()
+            candidate.relative_to(root)
+        except ValueError as error:
+            raise ValueError('reproduction manifest must be inside the bundle') from error
+        if candidate != (root / 'dataset.json').resolve():
+            raise ValueError('reproduction must use the bundle registered dataset.json')
+    return verification
+
+
+def _patch_bundle_reproduction_entrypoint(source):
+    """Add the package gate to the copied benchmark module only.
+
+    The repository-wide benchmark module is intentionally outside this
+    package task's edit boundary.  A published bundle gets a small, measured
+    entrypoint guard so both its imported ``reproduce`` API and its CLI call
+    verify the immutable bundle before opening reader/model state.
+    """
+    text = Path(source).read_text()
+    if 'require_verified_bundle(data_root, manifest=manifest)' in text:
+        return
+    lines = text.splitlines(keepends=True)
+    start = next((index for index, line in enumerate(lines)
+                  if line.startswith('def reproduce(')), None)
+    if start is None:
+        raise ValueError('benchmark module has no reproduce entrypoint')
+    end = next((index for index in range(start, len(lines))
+                if lines[index].rstrip().endswith('):')), None)
+    if end is None:
+        raise ValueError('benchmark reproduce signature is malformed')
+    lines[end + 1:end + 1] = [
+        '    from scripts.core_package import require_verified_bundle\n',
+        '    require_verified_bundle(data_root, manifest=manifest)\n',
+    ]
+    Path(source).write_text(''.join(lines))
+
+
+def _install_source_reader_gate():
+    """Protect the repository API without changing ``core_benchmark.py``."""
+    try:
+        import scripts.core_benchmark as benchmark
+    except ImportError:
+        return
+    original = getattr(benchmark, 'verify_dataset', None)
+    if original is None or getattr(original, '_core_package_gate', False):
+        return
+
+    def guarded_verify_dataset(manifest, data_root, *, case_ids=None, full_scan=False):
+        root = Path(data_root).expanduser().resolve()
+        if (root / 'bundle.json').is_file():
+            require_verified_bundle(root, manifest=manifest)
+        return original(manifest, data_root, case_ids=case_ids, full_scan=full_scan)
+
+    guarded_verify_dataset._core_package_gate = True
+    guarded_verify_dataset.__name__ = getattr(original, '__name__', 'verify_dataset')
+    guarded_verify_dataset.__doc__ = getattr(original, '__doc__', None)
+    benchmark.verify_dataset = guarded_verify_dataset
 
 
 def build_bundle(manifest, data_root, destination, *, hardlink=False, checkpoint_manifest=None):
@@ -572,16 +794,47 @@ def build_bundle(manifest, data_root, destination, *, hardlink=False, checkpoint
     assets = {}
     checkpoints = []
     if checkpoint_manifest is not None:
-        checkpoint_source = json.loads(Path(checkpoint_manifest).read_text())
-        for index, item in enumerate(checkpoint_source.get('checkpoints', [])):
-            source = Path(item['path'])
-            source = (source if source.is_absolute() else root/source).resolve()
-            source.relative_to(root)
+        try:
+            checkpoint_source = json.loads(Path(checkpoint_manifest).read_text())
+        except (OSError, json.JSONDecodeError) as error:
+            raise ValueError('invalid checkpoint manifest') from error
+        rows = checkpoint_source.get('checkpoints') if isinstance(checkpoint_source, Mapping) else None
+        if not isinstance(rows, list):
+            raise ValueError('checkpoint manifest must contain a checkpoints list')
+        for index, item in enumerate(rows):
+            if not isinstance(item, Mapping):
+                raise ValueError('malformed checkpoint manifest entry')
+            source_value = item.get('path')
+            if not isinstance(source_value, str) or not source_value:
+                raise ValueError('checkpoint manifest entry requires a path')
+            source = Path(source_value)
+            source = (source if source.is_absolute() else root / source).resolve()
+            try:
+                source.relative_to(root)
+            except ValueError as error:
+                raise ValueError('checkpoint source must be inside data_root') from error
+            expected_hash = _sha256_hex(item.get('sha256'), label='checkpoint manifest hash')
+            observed_hash = digest(source)
+            if observed_hash.lower() != expected_hash:
+                raise ValueError(f'source checkpoint integrity failure: {source}')
+            observed_bytes = source.stat().st_size
+            if item.get('bytes') is not None and _strict_bytes(
+                    item.get('bytes'), label='checkpoint manifest bytes') != observed_bytes:
+                raise ValueError(f'source checkpoint bytes mismatch: {source}')
+            identity = _checkpoint_payload_identity(source)
+            for key in ('model_kind', 'seed', 'update'):
+                if key not in item:
+                    raise ValueError(f'checkpoint manifest entry missing {key}')
+                if item[key] != identity[key]:
+                    raise ValueError(f'checkpoint manifest {key} disagrees with checkpoint content')
+            if item.get('hidden') is not None and item['hidden'] != identity['hidden']:
+                raise ValueError('checkpoint manifest hidden disagrees with checkpoint content')
             relative = f'models/checkpoint-{index:03d}.pt'
-            assets[relative] = {'sha256':item['sha256'],'source':source}
-            checkpoints.append({'path':relative,'sha256':item['sha256'],
-                                'model_kind':item['model_kind'],'seed':item['seed'],
-                                'update':item['update']})
+            assets[relative] = {'sha256':observed_hash, 'source':source}
+            checkpoints.append({'path':relative,'sha256':observed_hash,
+                                'bytes':observed_bytes, 'model_kind':identity['model_kind'],
+                                'seed':identity['seed'], 'hidden':identity['hidden'],
+                                'update':identity['update']})
         if not checkpoints:
             raise ValueError('checkpoint manifest must register at least one checkpoint')
     with open_dataset(manifest, root) as data:
@@ -604,14 +857,47 @@ def build_bundle(manifest, data_root, destination, *, hardlink=False, checkpoint
                 assets[relative.as_posix()] = {"sha256":ref["sha256"], "source":source}
         for row in payload['cases']:
             provenance = row.get('provenance', {})
+            if not isinstance(provenance, Mapping):
+                raise ValueError(f"case {row['case_id']} provenance is malformed")
             prepared = provenance.get('prepared')
             if isinstance(prepared, str):
                 source = Path(prepared)
                 source = (source if source.is_absolute() else root/source).resolve()
                 relative = source.relative_to(root).as_posix()
-                assets[relative] = {'sha256':digest(source),'source':source}
+                observed_hash = digest(source)
+                prior = assets.get(relative)
+                if prior is not None and prior['sha256'] != observed_hash:
+                    raise ValueError('conflicting content hashes for a shared asset')
+                assets[relative] = {'sha256':observed_hash,'source':source}
                 provenance['prepared'] = relative
-                provenance['prepared_sha256'] = assets[relative]['sha256']
+                provenance['prepared_sha256'] = observed_hash
+            for key, reference in list(provenance.items()):
+                if not isinstance(reference, Mapping) or 'path' not in reference:
+                    continue
+                source = Path(reference['path'])
+                source = (source if source.is_absolute() else root/source).resolve()
+                relative = source.relative_to(root).as_posix()
+                expected_hash = _sha256_hex(
+                    reference.get('sha256'),
+                    label=f"case {row['case_id']} provenance {key} hash")
+                observed_hash = digest(source)
+                if observed_hash.lower() != expected_hash:
+                    raise ValueError(
+                        f"source provenance integrity failure: {row['case_id']}/{key}")
+                observed_bytes = source.stat().st_size
+                if reference.get('bytes') is not None and _strict_bytes(
+                        reference.get('bytes'),
+                        label=f"case {row['case_id']} provenance {key} bytes") != observed_bytes:
+                    raise ValueError(
+                        f"source provenance bytes mismatch: {row['case_id']}/{key}")
+                prior = assets.get(relative)
+                if prior is not None and prior['sha256'] != observed_hash:
+                    raise ValueError('conflicting content hashes for a shared asset')
+                assets[relative] = {'sha256':observed_hash,'source':source}
+                normalized = dict(reference)
+                normalized.update({'path': relative, 'sha256': observed_hash,
+                                   'bytes': observed_bytes})
+                provenance[key] = normalized
     destination.parent.mkdir(parents=True,exist_ok=True)
     staging = destination.with_name(destination.name + ".staging-" + uuid.uuid4().hex)
     staging.mkdir()
@@ -647,6 +933,8 @@ def build_bundle(manifest, data_root, destination, *, hardlink=False, checkpoint
             source = Path(__file__).resolve().parent/name
             target = code_root/name
             shutil.copyfile(source,target)
+            if name == 'core_benchmark.py':
+                _patch_bundle_reproduction_entrypoint(target)
             compile(target.read_text(),str(target),'exec')
             files.append({'path':str(target.relative_to(staging)),'sha256':digest(target),'bytes':target.stat().st_size})
         versions = {name:importlib.metadata.version(name) for name in ('numpy','scipy','h5py','torch')}
@@ -722,6 +1010,9 @@ def main():
             return 1
     print(json.dumps({k:v for k,v in report.items() if k!='files'},indent=2))
     return 0
+
+
+_install_source_reader_gate()
 
 
 if __name__=='__main__':

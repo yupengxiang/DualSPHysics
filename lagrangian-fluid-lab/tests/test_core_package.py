@@ -1,5 +1,9 @@
+import hashlib
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
 import pytest
 from test_core_contract import tiny_manifest
 from scripts.core_package import (build_bundle, inspect_reader_manifests,
@@ -13,9 +17,10 @@ def test_moved_bundle_reads_and_corruption_is_rejected(tmp_path):
     bundle=tmp_path/'bundle'
     build_bundle(manifest,source,bundle)
     relocated=tmp_path/'different-root';bundle.rename(relocated)
+    assert verify_bundle(relocated)['passed']
     assert verify_dataset(relocated/'dataset.json',relocated)['passed']
     with (relocated/'data.h5').open('ab') as stream:stream.write(b'corruption')
-    with pytest.raises(ValueError,match='hash mismatch'):
+    with pytest.raises(ValueError,match='artifact integrity'):
         verify_dataset(relocated/'dataset.json',relocated)
 
 
@@ -114,21 +119,136 @@ def test_cfd_source_bundle_is_normalized_and_relocatable(tmp_path):
 
 def test_bundle_carries_hashed_checkpoint_without_source_path(tmp_path):
     from scripts.core_dataset import sha256_file
+    import torch
     source=tmp_path/'source';source.mkdir()
     manifest=source/'manifest.json';manifest.write_text(json.dumps(tiny_manifest(source)))
-    weights=source/'weights.pt';weights.write_bytes(b'checkpoint artifact fixture')
+    weights=source/'weights.pt'
+    torch.save({'schema':'core.checkpoint.v1','model_kind':'mlp','hidden':8,
+                'seed':17,'update':500},weights)
     registered=source/'checkpoints.json'
     registered.write_text(json.dumps({'checkpoints':[{'path':str(weights),
         'sha256':sha256_file(weights),'model_kind':'mlp','seed':17,'update':500}]}))
     bundle=tmp_path/'bundle'
     report=build_bundle(manifest,source,bundle,checkpoint_manifest=registered)
     assert report['checkpoint_count']==1 and report['full_core_release'] is False
-    record=json.loads((bundle/'checkpoints.json').read_text())['checkpoints'][0]
+    relocated = tmp_path / 'relocated'
+    bundle.rename(relocated)
+    record=json.loads((relocated/'checkpoints.json').read_text())['checkpoints'][0]
     assert record['path']=='models/checkpoint-000.pt'
-    assert verify_bundle(bundle)['passed']
-    (bundle/record['path']).write_bytes(b'corrupt weights')
+    assert verify_bundle(relocated)['passed']
+    (relocated/record['path']).write_bytes(b'corrupt weights')
     with pytest.raises(ValueError,match='artifact integrity'):
+        verify_bundle(relocated)
+
+
+def _refresh_bundle_artifact_index(bundle, relative):
+    index_path = bundle / 'bundle.json'
+    index = json.loads(index_path.read_text())
+    target = bundle / relative
+    for item in index['files']:
+        if item['path'] == relative:
+            item['sha256'] = hashlib.sha256(target.read_bytes()).hexdigest()
+            item['bytes'] = target.stat().st_size
+            break
+    else:
+        raise AssertionError(relative)
+    index_path.write_text(json.dumps(index))
+
+
+def _checkpoint_fixture_bundle(tmp_path):
+    import torch
+    from scripts.core_dataset import sha256_file
+    source = tmp_path / 'source'
+    source.mkdir(parents=True)
+    manifest = source / 'manifest.json'
+    manifest.write_text(json.dumps(tiny_manifest(source)))
+    checkpoint = source / 'weights.pt'
+    torch.save({'schema': 'core.checkpoint.v1', 'model_kind': 'mlp', 'hidden': 8,
+                'seed': 17, 'update': 500}, checkpoint)
+    registration = source / 'checkpoints.json'
+    registration.write_text(json.dumps({'checkpoints': [{
+        'path': str(checkpoint), 'sha256': sha256_file(checkpoint),
+        'model_kind': 'mlp', 'seed': 17, 'update': 500,
+    }]}))
+    bundle = tmp_path / 'bundle'
+    build_bundle(manifest, source, bundle, checkpoint_manifest=registration)
+    return bundle
+
+
+def test_checkpoint_registry_requires_hash_and_content_bound_bytes(tmp_path):
+    bundle = _checkpoint_fixture_bundle(tmp_path)
+    registry_path = bundle / 'checkpoints.json'
+    registry = json.loads(registry_path.read_text())
+    registry['checkpoints'][0].pop('sha256')
+    registry_path.write_text(json.dumps(registry))
+    _refresh_bundle_artifact_index(bundle, 'checkpoints.json')
+    with pytest.raises(ValueError, match='checkpoint registry hash'):
         verify_bundle(bundle)
+
+    bundle = _checkpoint_fixture_bundle(tmp_path / 'bytes')
+    registry_path = bundle / 'checkpoints.json'
+    registry = json.loads(registry_path.read_text())
+    registry['checkpoints'][0]['bytes'] += 1
+    registry_path.write_text(json.dumps(registry))
+    _refresh_bundle_artifact_index(bundle, 'checkpoints.json')
+    with pytest.raises(ValueError, match='checkpoint registry bytes'):
+        verify_bundle(bundle)
+
+
+def test_checkpoint_registry_rejects_content_identity_drift(tmp_path):
+    bundle = _checkpoint_fixture_bundle(tmp_path)
+    registry_path = bundle / 'checkpoints.json'
+    registry = json.loads(registry_path.read_text())
+    registry['checkpoints'][0]['update'] += 1
+    registry_path.write_text(json.dumps(registry))
+    _refresh_bundle_artifact_index(bundle, 'checkpoints.json')
+    with pytest.raises(ValueError, match='update disagrees with checkpoint content'):
+        verify_bundle(bundle)
+
+
+def test_verify_rejects_manifest_asset_not_registered_in_bundle_index(tmp_path):
+    source = tmp_path / 'source'
+    source.mkdir()
+    manifest = source / 'manifest.json'
+    manifest.write_text(json.dumps(tiny_manifest(source)))
+    bundle = tmp_path / 'bundle'
+    build_bundle(manifest, source, bundle)
+    index_path = bundle / 'bundle.json'
+    index = json.loads(index_path.read_text())
+    index['files'] = [item for item in index['files'] if item['path'] != 'data.h5']
+    index_path.write_text(json.dumps(index))
+    with pytest.raises(ValueError, match='not registered in bundle.json'):
+        verify_bundle(bundle)
+
+
+def test_bundle_reproduction_gate_checks_bundle_before_reader_entrypoint(tmp_path):
+    source = tmp_path / 'source'
+    source.mkdir()
+    manifest = source / 'manifest.json'
+    manifest.write_text(json.dumps(tiny_manifest(source)))
+    bundle = tmp_path / 'bundle'
+    build_bundle(manifest, source, bundle)
+    output = tmp_path / 'reader-reproduction.json'
+    environment = dict(os.environ)
+    environment.pop('PYTHONPATH', None)
+    command = [sys.executable, str(bundle / 'code/scripts/core_benchmark.py'),
+               'reproduce', '--manifest', str(bundle / 'dataset.json'),
+               '--data-root', str(bundle), '--output', str(output)]
+    valid = subprocess.run(command, cwd=tmp_path, env=environment,
+                           capture_output=True, text=True)
+    assert valid.returncode == 0, valid.stderr
+    assert json.loads(output.read_text())['passed'] is True
+
+    with (bundle / 'data.h5').open('ab') as stream:
+        stream.write(b'unregistered mutation')
+    rejected = subprocess.run(command, cwd=tmp_path, env=environment,
+                              capture_output=True, text=True)
+    assert rejected.returncode != 0
+    assert 'bundle artifact integrity failure' in rejected.stderr
+
+    from scripts.core_benchmark import reproduce
+    with pytest.raises(ValueError, match='bundle artifact integrity'):
+        reproduce(bundle / 'dataset.json', bundle)
 
 
 def test_moving_geometry_survives_source_removal_and_isolated_reader(tmp_path):
