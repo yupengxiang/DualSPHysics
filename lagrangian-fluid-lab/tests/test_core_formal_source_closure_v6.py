@@ -25,11 +25,17 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def test_v6_rehashes_current_code_and_remains_planning_only() -> None:
+def test_v6_rehash_mismatch_remains_fail_closed_and_planning_only() -> None:
     closure = json.loads(CLOSURE.read_text(encoding="utf-8"))
     result = verify_source_closure(closure, data_root=ROOT)
 
-    assert result["ok"] is True
+    # The immutable v6 artifact predates the current public-reader/F7
+    # contracts.  Live verification must therefore reject it rather than
+    # silently treating a stale closure as a formal source snapshot.
+    assert result["ok"] is False
+    assert result["mismatch_files"] == [
+        "scripts/core_cfd_dataset.py", "scripts/core_dataset.py"
+    ]
     assert closure["schema"] == "core.formal_source_closure.v2"
     assert closure["namespace"] == "core-formal-release-candidate-v6"
     assert closure["required_files"] == list(REQUIRED_CODE_FILES)
@@ -40,8 +46,11 @@ def test_v6_rehashes_current_code_and_remains_planning_only() -> None:
     assert closure["closure_sha256"] == "d692701964bfd4d0ddaa2db437b8870a2ea71e4ffbb428282398573aa89a05ba"
     for row in closure["files"]:
         path = ROOT / row["relative_path"]
-        assert row["sha256"] == _sha256(path)
-        assert row["bytes"] == path.stat().st_size
+        if row["relative_path"] in result["mismatch_files"]:
+            assert row["sha256"] != _sha256(path) or row["bytes"] != path.stat().st_size
+        else:
+            assert row["sha256"] == _sha256(path)
+            assert row["bytes"] == path.stat().st_size
 
 
 def test_v6_audit_labels_v5_differences_as_historical_only() -> None:
@@ -65,7 +74,8 @@ def test_v6_receipt_is_hash_bound_and_has_no_execution_side_effects() -> None:
     result = verify_admission(data_root=ROOT, source_closure=CLOSURE, receipt=RECEIPT)
     receipt = json.loads(RECEIPT.read_text(encoding="utf-8"))
 
-    assert result["ok"] is True
+    assert result["ok"] is False
+    assert result["checks"]["closure_verification"] is False
     assert receipt["schema"] == "core.formal_source_closure_admission.v2"
     assert receipt["namespace"] == "core-formal-release-candidate-v6"
     assert receipt["formal_release"] is False

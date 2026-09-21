@@ -110,19 +110,36 @@ def test_evidence_and_current_source_closure_hashes_are_bound() -> None:
             historical_mismatches.append(item["relative_path"])
 
     assert historical_mismatches == [
-        "scripts/core_learning.py", "scripts/core_contract.py", "scripts/core_models.py"
+        "scripts/core_learning.py", "scripts/core_contract.py",
+        "scripts/core_dataset.py", "scripts/core_models.py",
+        "scripts/core_cfd_dataset.py"
     ]
 
     v6 = json.loads(V6_CLOSURE.read_text(encoding="utf-8"))
     v6_result = verify_source_closure(v6, data_root=ROOT)
-    assert v6_result["ok"] is True
+    # The immutable v6 proposal predates the current public-reader/F7 adapter
+    # contracts.  It must fail closed against those changed source hashes;
+    # this does not authorize a new formal release.
+    assert v6_result["ok"] is False
+    assert v6_result["mismatch_files"] == [
+        "scripts/core_cfd_dataset.py", "scripts/core_dataset.py"
+    ]
     assert v6["namespace"] == "core-formal-release-candidate-v6"
     assert v6["formal_training_allowed"] is False
     assert v6["formal_job_count"] == 0
     for item in v6["files"]:
         path = ROOT / item["relative_path"]
-        assert _sha256(path) == item["sha256"]
-        assert path.stat().st_size == item["bytes"]
+        if item["relative_path"] in v6_result["mismatch_files"]:
+            # Either digest or byte count is sufficient to establish that the
+            # immutable historical snapshot is stale; do not over-constrain
+            # future source edits to change both independently.
+            assert (
+                _sha256(path) != item["sha256"]
+                or path.stat().st_size != item["bytes"]
+            )
+        else:
+            assert _sha256(path) == item["sha256"]
+            assert path.stat().st_size == item["bytes"]
 
     assert data["source_binding"]["preprofile_source_closure_match"] is False
     assert data["source_binding"]["preprofile_mismatch_count"] == 7
