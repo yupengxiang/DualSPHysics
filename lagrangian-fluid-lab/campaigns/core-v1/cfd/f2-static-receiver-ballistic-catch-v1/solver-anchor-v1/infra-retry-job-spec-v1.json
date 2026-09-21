@@ -1,0 +1,121 @@
+{
+  "schema": "core.runtime.job_spec.v1",
+  "job_id": "f2-static-receiver-ballistic-catch-q05-anchor-infra-retry-v1",
+  "logical_id": "f2-static-receiver-ballistic-catch-q05-anchor-infra-retry-v1",
+  "attempt_role": "repaired_infrastructure_retry",
+  "category": "solver_f2_static_receiver_anchor_infrastructure_retry",
+  "family": "F2",
+  "scope_id": "F2_static_receiver_ballistic_catch_x_v1",
+  "revision_id": "F2_static_receiver_ballistic_catch_v1",
+  "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p50000000_dp0p007500000000_anchor",
+  "host": "ada",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_static_receiver_ballistic_catch_solver_worker_v1.py",
+    "--output",
+    "{attempt_dir}/product",
+    "--generated-prefix",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-receiver-ballistic-catch-v1/preflight/generated/CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p50000000_dp0p007500000000_anchor",
+    "--time-max",
+    "1.5",
+    "--output-interval",
+    "0.005"
+  ],
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-receiver-ballistic-catch-v1/input/CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p50000000_dp0p007500000000_anchor_Def.xml",
+      "sha256": "a84975730d456edc99ce5f6e6fe23703959b8e383fdefe5f1baeca579aec8ac8",
+      "bytes": 3343,
+      "role": "unchanged fresh literal Definition"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-receiver-ballistic-catch-v1/input/definition-contract-v1.json",
+      "sha256": "94aadfe73168be67ff882f36b0bc2a8c5a78acf7e651dca041285e8cb08c14d4",
+      "bytes": 2086,
+      "role": "unchanged Definition contract"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-receiver-ballistic-catch-v1/preflight/preflight.json",
+      "sha256": "2ad193aaadcd60a325dd18bea1f79635f3592671816afd673fde813ded2694cf",
+      "bytes": 6186,
+      "role": "unchanged CPU/native preflight receipt"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-receiver-ballistic-catch-v1/preflight/generated/CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p50000000_dp0p007500000000_anchor.xml",
+      "sha256": "b6d8ebe646dde4c4df7b7f1ea6eb0b568183551e29c85e4c9cf9324e30af46b5",
+      "bytes": 5649,
+      "role": "unchanged GenCase generated XML"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-receiver-ballistic-catch-v1/preflight/generated/CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p50000000_dp0p007500000000_anchor.bi4",
+      "sha256": "10bd0a352ccffe4544f64b017a81dee3566b9b556c0982483d130f614cbe8eda",
+      "bytes": 5215873,
+      "role": "unchanged GenCase initial native frame"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+      "bytes": 159206984,
+      "role": "pinned DualSPHysics solver"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_static_receiver_ballistic_catch_solver_worker_v1.py",
+      "sha256": "95e855b85c2ded9a41b432dd1d38cf2d3e70bc34b6bdcfb12c07a944c6e6b437",
+      "bytes": 6479,
+      "role": "repaired solver worker"
+    }
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/solver.stdout.log",
+    "product/worker-status.json"
+  ],
+  "resources": {
+    "cpu_cores": 4,
+    "ram_mib": 16384,
+    "gpu_peak_mib": 8192,
+    "io_weight": 0.5
+  },
+  "timeout_seconds": 7200,
+  "depends_on": [],
+  "qualification_claim": "none; one repaired-infrastructure retry only",
+  "matrix_credit": 0,
+  "registry_mutation": 0,
+  "ledger_mutation": 1,
+  "queue_mutation": 1,
+  "solver_launch": true,
+  "gpu_launch": true,
+  "retry_policy": {
+    "retry_kind": "infrastructure_only",
+    "scientific_input_changed": false,
+    "same_input_scientific_retry": false,
+    "max_repaired_infrastructure_retries": 1,
+    "retry_index": 1,
+    "first_failure": {
+      "runtime": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f2-static-receiver-ballistic-catch-q05-anchor-v1/20260921T111451-a4575f1d2a18/result.json",
+        "sha256": "4c234add59763a94959fe7b8240fb047c6ad1b0156185bf4b56102b53eb895b9",
+        "bytes": 3481,
+        "role": "first runtime execution receipt"
+      },
+      "worker_result": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f2-static-receiver-ballistic-catch-q05-anchor-v1/20260921T111451-a4575f1d2a18/product/result.json",
+        "sha256": "fbb6ffdef89f1e17df0c9a5f1466d8a5117b5eb03e2d82aeb4a4af96a5128682",
+        "bytes": 1387,
+        "role": "first worker failure result"
+      },
+      "solver_stdout": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f2-static-receiver-ballistic-catch-q05-anchor-v1/20260921T111451-a4575f1d2a18/product/solver.stdout.log",
+        "sha256": "f87b94a21763ee8824c7e23ba00d520ff5d67b5dd69ae6de8b70114f9105685b",
+        "bytes": 359,
+        "role": "first loader failure log"
+      },
+      "returncode": 127,
+      "frame_count": 0,
+      "defect": "missing_official_shared_library_path"
+    }
+  },
+  "worker_contract": "official LD_LIBRARY_PATH repair; one solver invocation with scheduler CUDA UUID"
+}
