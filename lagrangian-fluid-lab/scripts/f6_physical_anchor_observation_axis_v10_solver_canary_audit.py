@@ -50,14 +50,38 @@ def audit() -> dict[str, Any]:
             local.append("qualification guard failed")
         if controls.get("gpu_started") is not False or controls.get("queue_mutation") != 0 or controls.get("registry_mutation") != 0 or controls.get("ledger_mutation") != 0 or controls.get("matrix_submission") is not False:
             local.append("forbidden execution or mutation control")
-        hard = all(receipt.get("hard_gates", {}).values())
+        hard_gate_failures = [
+            str(key) for key, value in receipt.get("hard_gates", {}).items()
+            if value is not True
+        ]
+        hard = not hard_gate_failures and bool(receipt.get("hard_gates"))
         scientific = receipt.get("status") == "solver_completed_sidecar_pass_pending_scientific_review" and hard and not local
-        row.update({"status": receipt.get("status"), "scientific_pass": scientific, "hard_gate_pass": hard, "issues": local, "recovered": receipt.get("recovery", {}).get("solver_not_reinvoked") is True})
+        if local:
+            failure_category = "execution_control_contract_failure"
+        elif hard_gate_failures:
+            failure_category = "scientific_hard_gate_failure"
+        elif scientific:
+            failure_category = None
+        else:
+            failure_category = "receipt_status_or_contract_failure"
+        row.update({
+            "status": receipt.get("status"),
+            "scientific_pass": scientific,
+            "hard_gate_pass": hard,
+            "hard_gate_failures": hard_gate_failures,
+            "failure_category": failure_category,
+            "issues": local,
+            "recovered": receipt.get("recovery", {}).get("solver_not_reinvoked") is True,
+        })
         if local:
             issues.extend([f"cell {item['index']:02d}: {x}" for x in local])
         rows.append(row)
     complete = len(rows) == int(plan.get("selected_count", 0)) and all(row["status"] != "pending" for row in rows)
     pass_count = sum(row["scientific_pass"] for row in rows)
+    hard_gate_failure_counts: dict[str, int] = {}
+    for row in rows:
+        for failure in row.get("hard_gate_failures", []):
+            hard_gate_failure_counts[failure] = hard_gate_failure_counts.get(failure, 0) + 1
     return {
         "schema": "core.f6.observation_axis.solver_canary_audit.v1",
         "record_id": "F6_observation_axis_v10_solver_canary_audit_v4_20260921",
@@ -67,6 +91,7 @@ def audit() -> dict[str, Any]:
         "selected_count": plan.get("selected_count"),
         "audited_count": sum(row["status"] != "pending" for row in rows),
         "scientific_pass_count": pass_count,
+        "hard_gate_failure_counts": dict(sorted(hard_gate_failure_counts.items())),
         "complete": complete,
         "qualification_claim": "none",
         "qualification_credit": 0,

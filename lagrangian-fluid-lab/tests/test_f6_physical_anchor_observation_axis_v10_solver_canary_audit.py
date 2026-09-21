@@ -27,3 +27,17 @@ def test_audit_keeps_eight_cell_denominator_and_zero_credit_while_attempts_run()
     assert center["scientific_pass"] is True
     assert center["hard_gate_pass"] is True
     assert center["recovered"] is True
+
+
+def test_audit_retains_scientific_hard_failure_and_gate_names() -> None:
+    value = load()
+    failed = next(row for row in value["rows"] if row["index"] == 8)
+    assert failed["status"] == "solver_completed_hard_failure"
+    assert failed["scientific_pass"] is False
+    assert failed["failure_category"] == "scientific_hard_gate_failure"
+    assert failed["hard_gate_failures"] == [
+        "excluded_particles_zero",
+        "native_identity_fixed",
+        "fluid_group_count_fixed",
+    ]
+    assert value["hard_gate_failure_counts"]["excluded_particles_zero"] == 1
