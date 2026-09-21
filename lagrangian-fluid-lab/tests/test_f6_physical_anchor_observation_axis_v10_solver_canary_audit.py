@@ -41,3 +41,4 @@ def test_audit_retains_scientific_hard_failure_and_gate_names() -> None:
         "fluid_group_count_fixed",
     ]
     assert value["hard_gate_failure_counts"]["excluded_particles_zero"] == 1
+    assert value["next_gate"] == "close_scope_or_open_new_scientific_scope_before_remaining_cells"

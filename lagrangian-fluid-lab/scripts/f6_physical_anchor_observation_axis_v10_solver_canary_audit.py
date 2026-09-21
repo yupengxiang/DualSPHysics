@@ -98,7 +98,12 @@ def audit() -> dict[str, Any]:
         "T1": False,
         "issues": issues,
         "rows": rows,
-        "next_gate": "audit_remaining_selected_attempts" if not complete else "root_review_canary_results_before_remaining_7_cells",
+        "next_gate": (
+            "audit_remaining_selected_attempts" if not complete else
+            "close_scope_or_open_new_scientific_scope_before_remaining_cells"
+            if pass_count < int(plan.get("selected_count", 0)) else
+            "root_review_canary_results_before_remaining_7_cells"
+        ),
     }
 
 
