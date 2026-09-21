@@ -28,6 +28,27 @@ def load(path: Path) -> dict[str, Any]:
     return value
 
 
+def check_binding(binding: Any) -> list[str]:
+    """Validate a receipt's path/hash/byte binding without opening solver data."""
+    if not isinstance(binding, dict):
+        return ["native_frame_audit_binding_missing"]
+    raw_path = binding.get("path")
+    if not isinstance(raw_path, str) or not raw_path:
+        return ["native_frame_audit_binding_path_missing"]
+    path = Path(raw_path)
+    if not path.is_absolute():
+        path = LAB / path
+    path = path.resolve()
+    if not path.is_file():
+        return ["native_frame_audit_binding_file_missing"]
+    failures: list[str] = []
+    if binding.get("sha256") != sha256(path):
+        failures.append("native_frame_audit_binding_sha256")
+    if binding.get("bytes") != path.stat().st_size:
+        failures.append("native_frame_audit_binding_bytes")
+    return failures
+
+
 def audit() -> dict[str, Any]:
     plan = load(PLAN)
     rows: list[dict[str, Any]] = []
@@ -55,6 +76,9 @@ def audit() -> dict[str, Any]:
             if value is not True
         ]
         hard = not hard_gate_failures and bool(receipt.get("hard_gates"))
+        binding_issues = check_binding(receipt.get("native_frame_audit"))
+        if binding_issues:
+            local.extend(binding_issues)
         scientific = receipt.get("status") == "solver_completed_sidecar_pass_pending_scientific_review" and hard and not local
         if local:
             failure_category = "execution_control_contract_failure"
@@ -69,6 +93,9 @@ def audit() -> dict[str, Any]:
             "scientific_pass": scientific,
             "hard_gate_pass": hard,
             "hard_gate_failures": hard_gate_failures,
+            "receipt_binding_pass": not binding_issues,
+            "receipt_binding_issues": binding_issues,
+            "metadata_integrity_repaired": "metadata_integrity_repair" in receipt,
             "failure_category": failure_category,
             "issues": local,
             "recovered": receipt.get("recovery", {}).get("solver_not_reinvoked") is True,
@@ -82,6 +109,10 @@ def audit() -> dict[str, Any]:
     for row in rows:
         for failure in row.get("hard_gate_failures", []):
             hard_gate_failure_counts[failure] = hard_gate_failure_counts.get(failure, 0) + 1
+    binding_failure_counts: dict[str, int] = {}
+    for row in rows:
+        for failure in row.get("receipt_binding_issues", []):
+            binding_failure_counts[failure] = binding_failure_counts.get(failure, 0) + 1
     return {
         "schema": "core.f6.observation_axis.solver_canary_audit.v1",
         "record_id": "F6_observation_axis_v10_solver_canary_audit_v4_20260921",
@@ -92,6 +123,8 @@ def audit() -> dict[str, Any]:
         "audited_count": sum(row["status"] != "pending" for row in rows),
         "scientific_pass_count": pass_count,
         "hard_gate_failure_counts": dict(sorted(hard_gate_failure_counts.items())),
+        "receipt_binding_failure_counts": dict(sorted(binding_failure_counts.items())),
+        "metadata_integrity_repair_count": sum(bool(row.get("metadata_integrity_repaired")) for row in rows),
         "complete": complete,
         "qualification_claim": "none",
         "qualification_credit": 0,

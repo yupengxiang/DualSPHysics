@@ -73,6 +73,10 @@
   同一已完成输出只读恢复，未再次启动 solver；cell-14 的原生 cadence 对照为 601 帧。
   aggregate audit 为 `all_selected_canaries_audited`、`scientific_pass_count=7/8`，
   所有结果仍是 qualification-only，没有写入 Core 分母或 T1 credit。
+- v4 回执审计又发现 7 个正常 worker 的 `native-frame-audit` hash 因写入顺序暂时为
+  `null`。worker 已修正；对既有完成 attempt 只做一次 metadata-only repair，保留
+  原回执 SHA-256，并将新 hash 与 `solver_reinvoked=false` 写入 repair manifest。
+  最终 `receipt_binding_failure_counts={}`，不改变任何科学字段、hard gate 或资格分母。
 - 材料修复后的实现哈希已重新绑定到只读预检证据；同时把评测和 rollout 的
   frame denominator 收紧为真实整数语义，拒绝 fractional/bool 计数。新鲜 v5
   源闭包、root-admission 回执和 full-field halo oracle 已重新生成并通过哈希

@@ -503,7 +503,18 @@ def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
         "execution_controls": {"solver_invoked": solver_invoked, "gpu_started": False, "queue_mutation": 0, "registry_mutation": 0, "ledger_mutation": 0, "matrix_submission": False, "qualification_credit": 0},
         "failure_policy": "retain this exact-one receipt; no same-input retry, resume, matrix expansion or scientific credit",
     }
-    write_json(output / "native-frame-audit.json", {"schema": "core.f6.physical_anchor.native_frame_audit.v1", "groups": groups, "frames": frame_audits, "native_times_s": native_times, "checks": native_checks})
+    native_audit = {
+        "schema": "core.f6.physical_anchor.native_frame_audit.v1",
+        "groups": groups,
+        "frames": frame_audits,
+        "native_times_s": native_times,
+        "checks": native_checks,
+    }
+    # Materialize the audit before binding it into the receipt.  The previous
+    # ordering left a syntactically valid receipt with a null audit hash even
+    # though the solver and all scientific gates had completed.
+    write_json(output / "native-frame-audit.json", native_audit)
+    receipt["native_frame_audit"] = ref(output / "native-frame-audit.json", "per-frame native audit")
     write_json(output / "execution-receipt.json", receipt)
     write_json(output / "worker-status.json", {"status": status, "finished_at_utc": stamp(), "hard_gate_pass": all(hard_gates.values())})
     return receipt

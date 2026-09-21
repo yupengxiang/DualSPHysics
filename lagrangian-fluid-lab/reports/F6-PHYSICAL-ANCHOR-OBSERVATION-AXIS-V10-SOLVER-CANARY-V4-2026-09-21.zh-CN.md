@@ -26,6 +26,13 @@ cell-14 的原生输出对照产生 601 帧并通过对应 cadence 门；cell-04
 `all_selected_canaries_audited`、`scientific_pass_count=7/8`，且仍为
 `qualification_claim=none`、`qualification_credit=0`、`T1=false`。
 
+另外发现 7 个正常 worker 回执在写入顺序上没有绑定 native-frame-audit 的 hash。
+已先修正 worker，再对这 7 个已经结束的 attempt 做一次 metadata-only repair：保留
+原回执副本及其 SHA-256，只补 `native_frame_audit.sha256/bytes`，并明确
+`solver_reinvoked=false`、registry/ledger/matrix 均为零。最终 aggregate 的
+`receipt_binding_failure_counts={}`、`metadata_integrity_repair_count=7`；这项修复
+不改变任何 hard gate、status、科学字段或分母。
+
 这组结果只完成了 canary 证据闭包，不足以授权剩余 7 个矩阵格，也不能把 v4 scope
 升级为 F6 T1。下一步必须由新的 root review 决定：保留该 scope 的负结果并转向替补
 家族，或者提出一个改变科学输入的新 scope；不得对 cell-08 做同输入重跑。
