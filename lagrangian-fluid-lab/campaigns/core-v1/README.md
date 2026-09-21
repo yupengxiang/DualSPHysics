@@ -72,15 +72,21 @@ reproduction is explicitly separate from final GPU-model product reproduction.
 
 - F3 remains the previously registered numerical recipe; importing it does not
   confer material qualification or external physical validation.
-- F4 H1 short-window canary passed native identity and finite-wall integrity at
-  0.006 m. Its original borrowed coarse resolution failed the initial mass gate.
-  The revised 0.01/0.0075/0.005 m design has a separate registration and must pass
-  the full spatial, temporal, cadence and event-window study.
-- F1's domain-only continuation preserves physical inputs and extends the
-  runtime ceiling to 1.8 m. Its 0.6 s canary includes finite obstacle checks;
-  passing it does not qualify a longer event window or parameter range.
-- Material outputs and model smoke/profile runs remain engineering evidence
-  until their complete scientific matrices and evaluation contracts pass.
+- The current completion receipt recognizes one qualified F4 scope,
+  `F4_resting_pool_laminar_tallwall120_x_v1`, in addition to F3. Earlier F4
+  scopes remain retained negative results; their reports are not silently
+  promoted by the later scope.
+- The F5 prescribed-piston wave/run-up anchor reached the requested raw solver
+  window but failed its zero-tolerance wall-integrity audit. It contributes no
+  T1 family or matrix credit; see
+  `reports/F5-WAVE-RUNUP-THIRD-T1-ANCHOR-NEGATIVE-2026-09-21.zh-CN.md`.
+- F1 and the F2 receiver, full-cup, and submerged-orifice repair lines retain
+  their failed canaries and hard preflight failures. The F2 v2/v3/v4 orifice
+  attempts are one family route with three failed definitions, not three
+  families or three credits.
+- No family currently has a macro-T2 material qualification. Existing material
+  readers, tracers, profiles, and smoke runs remain engineering evidence until
+  their registered matrices and complete case-run denominators pass.
 
 `core_campaign.py status` verifies hashed typed evidence, not task-label strings.
 It reports unregistered denominators as well as missing registered evaluations.
@@ -103,3 +109,19 @@ This is reader/input/oracle portability only, not full model/scoring reproductio
 The full-field graph inference profiles used all 34,560 particles: one cold step
 was 3.08 s on Ada and 2.75 s on H200. These are bounded inference measurements,
 not training-memory or steady-state throughput measurements.
+
+### Completion snapshot
+
+The authoritative `completion.json` currently reports `can_finalize=false`:
+
+- T1 families: F3 and F4 (2 of the required 3);
+- macro-T2 families: 0 of 2;
+- formal training runs: 0 of 9;
+- missing registered T1 case-runs: 288 of 432;
+- missing registered material case-runs: 288 of 288;
+- independent reader reproduction and causal-lineage checks: passed.
+
+These counts are completion denominators, not a request to pad the dataset with
+unqualified or duplicate cases. The next admissible step is a new, separately
+reviewed third-family proposal followed by its CPU/native preflight; no failed
+route may be relabeled to satisfy the gate.
