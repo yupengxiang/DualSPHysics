@@ -1757,6 +1757,24 @@ def _f4_validate_resume_output(out, initial, weight, labels, tracer_ids, binding
     stored_ids = np.asarray(out["tracer_id"].asstr()[:])
     if _hash_array(stored_ids) != _hash_array(tracer_ids):
         raise ValueError("F4 restart tracer identity mismatch")
+    try:
+        binding_object = json.loads(binding)
+    except (TypeError, json.JSONDecodeError) as error:
+        raise ValueError("F4 restart binding is not valid JSON") from error
+    if not isinstance(binding_object, dict):
+        raise ValueError("F4 restart binding must be an object")
+    definition = binding_object.get("f4_definition")
+    if not isinstance(definition, dict) or "q" not in definition:
+        raise ValueError("F4 restart binding has no source definition")
+    expected_source = f4_source_membership(initial, definition["q"])
+    expected_destination = f4_destination_membership(initial)
+    for name, expected in (("source_membership", expected_source),
+                           ("destination_membership", expected_destination)):
+        stored = np.asarray(out[name][:])
+        if stored.shape != expected.shape or stored.dtype.kind != "b":
+            raise ValueError("F4 restart membership metadata has an invalid shape or dtype")
+        if not np.array_equal(stored, expected):
+            raise ValueError("F4 restart membership metadata disagrees with bound geometry")
     return int(out.attrs.get("committed", -1))
 
 

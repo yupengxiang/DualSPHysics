@@ -306,3 +306,32 @@ def test_f4_trace_emits_events_and_resumes_from_sidecar(tmp_path):
         assert np.isfinite(actual["upward_time"][-1, 0])
         assert np.isfinite(actual["return_time"][-1, 0])
         assert actual.attrs["schema"] == "core.material.f4.resting_pool.v2"
+
+
+def test_f4_resume_rejects_tampered_bound_membership_metadata(tmp_path):
+    source_path = tmp_path / "f4-reference.h5"
+    points = np.stack(np.meshgrid(
+        np.array([0.40, 0.45, 0.50]),
+        np.array([0.15, 0.20, 0.25]),
+        np.array([0.42, 0.47, 0.52]),
+        indexing="ij",
+    ), axis=-1).reshape(-1, 3)
+    with h5py.File(source_path, "w") as handle:
+        handle["time"] = [0.0, 0.1]
+        handle["position"] = np.tile(points, (2, 1, 1))
+        handle["velocity"] = np.zeros((2, len(points), 3))
+        handle["valid"] = np.ones((2, len(points)), dtype=bool)
+        handle["type"] = np.full(len(points), 3, dtype=np.int32)
+    output = tmp_path / "tampered-resume.h5"
+    seed = np.array([[0.4, 0.2, 0.5]])
+    trace_f4_resting_pool(
+        source_path, output, seed, q=0.5, dp_m=0.0075,
+        walls=np.empty((0, 3, 3)), stop_after=0,
+    )
+    with h5py.File(output, "r+") as handle:
+        handle["destination_membership"][0] = True
+    with pytest.raises(ValueError, match="membership metadata disagrees"):
+        trace_f4_resting_pool(
+            source_path, output, seed, q=0.5, dp_m=0.0075,
+            walls=np.empty((0, 3, 3)), resume=True,
+        )

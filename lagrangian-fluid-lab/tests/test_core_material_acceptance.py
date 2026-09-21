@@ -161,6 +161,20 @@ def test_f4_h5_audit_uses_f4_binding_and_checkpoint_schema(tmp_path):
     assert receipt['qualified_T2_macro'] is False
 
 
+def test_f4_h5_audit_rejects_tampered_bound_membership_metadata(tmp_path):
+    source = tmp_path / 'f4-reference.h5'
+    output = tmp_path / 'f4-trace.h5'
+    _f4_reference(source)
+    trace_f4_resting_pool(
+        source, output, np.array([[.4, .2, .5]]), q=.5, dp_m=.0075,
+        walls=np.empty((0, 3, 3)), stop_after=1,
+    )
+    with h5py.File(output, 'r+') as handle:
+        handle['source_membership'][0] = False
+    with pytest.raises(ValueError, match='source_membership.*bound geometry'):
+        audit_material_h5(output, required_source_ids=['1'], source=source)
+
+
 def test_summary_evaluation_preserves_negative_source_and_t2_state():
     summary = {
         'qualification_claim': 'none',

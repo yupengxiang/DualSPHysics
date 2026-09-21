@@ -524,6 +524,22 @@ def audit_material_h5(
         count = len(initial)
         if weight.shape != (count,) or not np.isfinite(weight).all() or np.any(weight < 0) or not weight.sum() > 0:
             raise ValueError("material H5 weight denominator is invalid")
+        if schema == material.F4_SCHEMA:
+            definition = binding.get("f4_definition")
+            if not isinstance(definition, dict) or "q" not in definition:
+                raise ValueError("F4 material binding has no source definition")
+            expected_memberships = {
+                "source_membership": material.f4_source_membership(initial, definition["q"]),
+                "destination_membership": material.f4_destination_membership(initial),
+            }
+            for name, expected in expected_memberships.items():
+                if name not in handle:
+                    raise ValueError("F4 material H5 is missing " + name)
+                actual = np.asarray(handle[name][:])
+                if actual.shape != (count,) or actual.dtype.kind != "b":
+                    raise ValueError("F4 material H5 " + name + " has an invalid shape or dtype")
+                if not np.array_equal(actual, expected):
+                    raise ValueError("F4 material H5 " + name + " disagrees with bound geometry")
         labels = handle["source_label"].asstr()[:] if handle["source_label"].dtype.kind in "OSU" else np.asarray(handle["source_label"][:])
         labels = np.asarray([str(item) for item in labels])
         if labels.shape != (count,):
