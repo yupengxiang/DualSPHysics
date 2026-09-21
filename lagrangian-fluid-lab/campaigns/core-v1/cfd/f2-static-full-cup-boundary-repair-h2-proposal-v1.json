@@ -1,0 +1,298 @@
+{
+  "schema": "core.f2.static_full_cup.boundary_repair_h2_proposal.v1",
+  "record_id": "f2-static-full-cup-boundary-repair-h2-proposal-v1",
+  "created_at_utc": "2026-09-21T03:55:50.431538+00:00",
+  "family": "F2",
+  "scope_id": "F2_static_full_cup_volume_hold_x_v1",
+  "repair_id": "F2_static_full_cup_initial_support_clearance_h2_v1",
+  "status": "proposal_only_root_review_required",
+  "qualification_claim": "none; independent H2 hypothesis only",
+  "qualified": false,
+  "T1_numerical": false,
+  "matrix_credit": 0,
+  "fixed_failure_denominator": {
+    "planned": 15,
+    "executed": 0,
+    "passed": 0,
+    "failed": 0,
+    "unattempted": 15,
+    "survivor_renormalization": false,
+    "anchor_trajectory_reuse": false
+  },
+  "evidence": {
+    "smoke": {
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-runtime-smoke-negative-evidence-v1.json",
+      "sha256": "299487272bd2a84cb5c517e59a2662240f8447f3b6b30543079d1e4626a37e19",
+      "bytes": 155331,
+      "role": "native DBC cell-0 negative runtime evidence"
+    },
+    "h1": {
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-negative-evidence-v1.json",
+      "sha256": "bbb97817955782e787a844300e3756af248d9cc49e7ecbb43b6275f7dd6de166",
+      "bytes": 51786,
+      "role": "mDBC H1 cell-0 negative runtime evidence"
+    },
+    "matrix_audit": {
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-matrix-prepared-v4/matrix-preparation-audit.json",
+      "sha256": "bc44fbf64aff429eb9ddb5e71117548413e7db047ceabbee627a6fe0312ecc25",
+      "bytes": 15198,
+      "role": "15-cell CPU/native closure audit"
+    },
+    "candidate": {
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-volume-hold-candidate-v1.json",
+      "sha256": "fcbaa77fe28c2ec43a4fd7eb28023555d15a520439f31b01151600cc0342c26f",
+      "bytes": 16996,
+      "role": "static full-cup candidate card"
+    },
+    "h1_root_review": {
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-runtime-root-review-v1.json",
+      "sha256": "6a782ba2d8682a720d91ea39c71544695ff4d8cc7785dc8a1e976003d0011ef3",
+      "bytes": 4343,
+      "role": "H1 root review"
+    }
+  },
+  "prior_negative_results": {
+    "native_dbc_smoke": {
+      "first_failure_time_s": 0.02001944020583839,
+      "endpoint_violation_particle_frames": 28786,
+      "unique_wall_violation_id_count": 1304,
+      "saved_chord_crossing_count": 1274
+    },
+    "h1_mdbc": {
+      "first_failure_time_s": 0.02001456907554933,
+      "endpoint_violation_particle_frames": 10433,
+      "unique_wall_violation_id_count": 1094,
+      "saved_chord_crossing_count": 1263
+    },
+    "interpretation": "both runtime canaries are retained hard-integrity negatives; no same-input retry and no matrix expansion are allowed"
+  },
+  "hypothesis": {
+    "class": "H2_initial_fluid_support_clearance",
+    "independent_change": "construct a fresh fluid lattice with an explicit 3*hdp*dp clearance from the fixed cup side/bottom faces, while retaining the H1 mDBC boundary formulation",
+    "continuous_cup_geometry_unchanged": true,
+    "boundary_formulation": "Boundary=2, explicit geometry normals, -mdbc_noslip:1",
+    "mass_policy": "native rho*dp^3; no mass rescaling",
+    "window_s": 0.6,
+    "hdp": 1.3,
+    "clearance_rule": "c(dp)=3*hdp*dp",
+    "source_box_rule": {
+      "cup_low_m": [
+        0.0,
+        -0.15,
+        0.65
+      ],
+      "cup_size_m": [
+        0.425,
+        0.3,
+        0.45
+      ],
+      "fluid_low_xy_m": [
+        "c(dp)",
+        "-0.15+c(dp)"
+      ],
+      "fluid_size_xy_m": [
+        "0.425-2*c(dp)",
+        "0.30-2*c(dp)"
+      ],
+      "volume_axis": "V(q)=0.022950+0.001290*q m3",
+      "fluid_height_rule": "H(q,dp)=V(q)/((0.425-2*c(dp))*(0.30-2*c(dp)))",
+      "fluid_bottom_m": 0.65
+    },
+    "fresh_identity": {
+      "case_id_prefix": "CORE_F2_static_full_cup_volume_supportclearance_h2",
+      "revision_id": "F2_static_full_cup_support_clearance_h2_v1",
+      "old_definition_reused": false,
+      "old_trajectory_reused": false
+    },
+    "falsifiers": [
+      "any generated fluid point is within c(dp) of a closed cup face",
+      "native IDs or fluid count do not match the fresh XML",
+      "native mass relative error exceeds the registered 0.03 preparation gate",
+      "any BoundNor is zero/nonfinite or any endpoint/chord violation remains",
+      "the changed footprint cannot fit the declared cup volume without crossing the open top"
+    ]
+  },
+  "static_fit_screen": {
+    "rows": [
+      {
+        "q": 0.0,
+        "dp_m": 0.01,
+        "clearance_m": 0.03900000000000001,
+        "source_area_m2": 0.07703399999999999,
+        "height_m": 0.29792039878495213,
+        "top_m": 0.9479203987849522,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      },
+      {
+        "q": 0.25,
+        "dp_m": 0.01,
+        "clearance_m": 0.03900000000000001,
+        "source_area_m2": 0.07703399999999999,
+        "height_m": 0.30210686190513286,
+        "top_m": 0.9521068619051329,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      },
+      {
+        "q": 0.5,
+        "dp_m": 0.01,
+        "clearance_m": 0.03900000000000001,
+        "source_area_m2": 0.07703399999999999,
+        "height_m": 0.30629332502531353,
+        "top_m": 0.9562933250253136,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      },
+      {
+        "q": 0.75,
+        "dp_m": 0.01,
+        "clearance_m": 0.03900000000000001,
+        "source_area_m2": 0.07703399999999999,
+        "height_m": 0.31047978814549426,
+        "top_m": 0.9604797881454943,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      },
+      {
+        "q": 1.0,
+        "dp_m": 0.01,
+        "clearance_m": 0.03900000000000001,
+        "source_area_m2": 0.07703399999999999,
+        "height_m": 0.31466625126567493,
+        "top_m": 0.964666251265675,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      },
+      {
+        "q": 0.0,
+        "dp_m": 0.0075,
+        "clearance_m": 0.02925,
+        "source_area_m2": 0.08850975,
+        "height_m": 0.25929346766881617,
+        "top_m": 0.9092934676688162,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      },
+      {
+        "q": 0.25,
+        "dp_m": 0.0075,
+        "clearance_m": 0.02925,
+        "source_area_m2": 0.08850975,
+        "height_m": 0.26293713404455443,
+        "top_m": 0.9129371340445545,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      },
+      {
+        "q": 0.5,
+        "dp_m": 0.0075,
+        "clearance_m": 0.02925,
+        "source_area_m2": 0.08850975,
+        "height_m": 0.2665808004202927,
+        "top_m": 0.9165808004202927,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      },
+      {
+        "q": 0.75,
+        "dp_m": 0.0075,
+        "clearance_m": 0.02925,
+        "source_area_m2": 0.08850975,
+        "height_m": 0.27022446679603096,
+        "top_m": 0.920224466796031,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      },
+      {
+        "q": 1.0,
+        "dp_m": 0.0075,
+        "clearance_m": 0.02925,
+        "source_area_m2": 0.08850975,
+        "height_m": 0.2738681331717692,
+        "top_m": 0.9238681331717693,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      },
+      {
+        "q": 0.0,
+        "dp_m": 0.005,
+        "clearance_m": 0.019500000000000003,
+        "source_area_m2": 0.100746,
+        "height_m": 0.2278006074682866,
+        "top_m": 0.8778006074682866,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      },
+      {
+        "q": 0.25,
+        "dp_m": 0.005,
+        "clearance_m": 0.019500000000000003,
+        "source_area_m2": 0.100746,
+        "height_m": 0.23100172711571676,
+        "top_m": 0.8810017271157168,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      },
+      {
+        "q": 0.5,
+        "dp_m": 0.005,
+        "clearance_m": 0.019500000000000003,
+        "source_area_m2": 0.100746,
+        "height_m": 0.23420284676314693,
+        "top_m": 0.884202846763147,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      },
+      {
+        "q": 0.75,
+        "dp_m": 0.005,
+        "clearance_m": 0.019500000000000003,
+        "source_area_m2": 0.100746,
+        "height_m": 0.2374039664105771,
+        "top_m": 0.8874039664105771,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      },
+      {
+        "q": 1.0,
+        "dp_m": 0.005,
+        "clearance_m": 0.019500000000000003,
+        "source_area_m2": 0.100746,
+        "height_m": 0.24060508605800726,
+        "top_m": 0.8906050860580073,
+        "clearance_ge_3h": true,
+        "fits_below_cup_top": true
+      }
+    ],
+    "all_continuous_fit": true,
+    "all_clearance_rules_hold": true,
+    "mass_and_native_sampling_pending": true
+  },
+  "authorization": {
+    "definition_writer": false,
+    "cpu_gencase": false,
+    "native_decode": false,
+    "solver": false,
+    "gpu": false,
+    "job_spec_creation": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "qualification_credit": 0,
+    "next_review": "separate root review may authorize exactly one fresh CPU/native canary after static fit and mass checks"
+  },
+  "required_execution_order": [
+    "review the literal H2 source-box construction and verify the clearance/volume fit for all 15 rows",
+    "write a new Definition and motion file under a new H2 identity",
+    "run exactly one CPU GenCase/native decode canary",
+    "record a zero-credit pass or retained failure; stop before solver/GPU/matrix queue"
+  ],
+  "implementation": {
+    "path": "scripts/f2_static_full_cup_boundary_repair_h2_proposal_v1.py",
+    "sha256": "bd71a8834b738c5bcd4706e4d323e0ca8f4e3a720e14a324961791da49e1385c",
+    "bytes": 12403,
+    "role": "H2 proposal audit implementation"
+  },
+  "interpretation_boundary": "proposal-only route audit; no runtime output, T1 qualification, material qualification, registry entry, or Core gate change"
+}
