@@ -1,0 +1,145 @@
+{
+  "schema": "core.f6.w0_w1.static_anchor_proposal.v1",
+  "proposal_id": "F6_W0_W1_static_anchor_root_review_only_20260921",
+  "parent_proposal": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-root-review-only-proposal-v1-20260921.json",
+    "sha256": "e456c017ec92c121e0ca581a77dce2580f930d922407d3c80134342b27fcf762",
+    "bytes": 9995,
+    "role": "parent F6 root-review-only proposal lineage"
+  },
+  "status": "proposal_only_cpu_static_gate",
+  "family": "F6",
+  "scope_id": "F6_fluid_rigid_body_w0_w1_static_anchor_v1",
+  "revision_id": "F6_W0_W1_single_body_no_contact_anchor_v1",
+  "case_id": "CORE_F6_W0_W1_single_body_no_contact_anchor_20260921",
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "candidate": {
+    "mechanism": "single free rigid body zero-force no-contact units/inertia anchor",
+    "body_id": "F6_W0_W1_body_alpha_20260921",
+    "purpose": "close fresh Definition, body mass/inertia, identity and complete event-window semantics before any fluid-body runtime; gravity is zero by design",
+    "physical_f6_qualification": false,
+    "new_identity": true,
+    "old_assets_as_inputs": false
+  },
+  "fresh_contract": {
+    "contract": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-w0-w1-static-anchor-v1/definition-contract.json",
+      "sha256": "1058b249e780f1965991de5da0a96f0c8ee0cc1fc2221d812021fa5a8745c032",
+      "bytes": 7025,
+      "role": "fresh contract"
+    },
+    "definition": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-w0-w1-static-anchor-v1/CORE_F6_W0_W1_single_body_no_contact_anchor_20260921_Def.xml",
+      "sha256": "34d90e40b28cdf1a930664a7f0dd3cc8d0690c594818ef5a8799d79288425f72",
+      "bytes": 3556,
+      "role": "fresh XML Definition"
+    },
+    "body_state_sidecar_schema": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-w0-w1-static-anchor-v1/body-state-sidecar-schema.json",
+      "sha256": "1297af4f4706f82964810e12dff9f1746c540b67b227f27d7c4f2eb65b04da08",
+      "bytes": 2647,
+      "role": "fresh sidecar schema"
+    },
+    "event_window_contract": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-w0-w1-static-anchor-v1/event-window-contract.json",
+      "sha256": "695711c8ff2f70253b0e2a9aac45bcc4ec87ddd9e509e4bd2270ec03e2a18010",
+      "bytes": 1374,
+      "role": "fresh event-window contract"
+    },
+    "implementation": {
+      "path": "scripts/f6_w0_w1_static_contract.py",
+      "sha256": "98e45928ebce1d94b5775f21e04f4c720b860eb4ac599bb204f8439f9f576138",
+      "bytes": 28992,
+      "role": "F6 W0/W1 static contract implementation"
+    }
+  },
+  "static_gate": {
+    "authorized_action": "write and parse the fresh Definition and validate geometry, mass, inertia, body identity, sidecar schema and event-window contract on CPU",
+    "gen_case": false,
+    "solver": false,
+    "gpu": false,
+    "queue": false,
+    "required_clearance_over_dp": 3.0,
+    "event_window_complete_required_before_runtime": true
+  },
+  "provenance_policy": {
+    "legacy_assets": "hash_only",
+    "legacy_assets_as_inputs": false,
+    "legacy_assets_as_qualification": false,
+    "old_definition_reused": false,
+    "old_bi4_reused": false,
+    "old_hdf5_reused": false,
+    "legacy_hashes": [
+      {
+        "path": "cases/F6/F6_floating_box/F6_floating_box_Def.xml",
+        "sha256": "0446ee36bba9266dd45c3662710fc52efccd9f2ec593d564bfbf4613a46d335e",
+        "bytes": 3688,
+        "role": "historical XML hash only",
+        "hash_only": true,
+        "reused_as_input": false
+      },
+      {
+        "path": "data/F6_floating_box.h5",
+        "sha256": "6c288b5861ddf58af6177ff0209cb7fd00f33f0c072af90ac8747095477e1e9e",
+        "bytes": 926868,
+        "role": "historical HDF5 hash only",
+        "hash_only": true,
+        "reused_as_input": false
+      },
+      {
+        "path": "cases/F6/F6_heavy_box_entry/F6_heavy_box_entry_Def.xml",
+        "sha256": "e77cc90ca080c1d94ae040c2268f1d74c7c25fb7578eec72ed2f6e599cca1e36",
+        "bytes": 3762,
+        "role": "historical XML hash only",
+        "hash_only": true,
+        "reused_as_input": false
+      },
+      {
+        "path": "data/F6_heavy_box_entry.h5",
+        "sha256": "bda8e91b1eb48edea18ca86b9242f58833f0b9c3c14a6564c442f7f419930383",
+        "bytes": 674916,
+        "role": "historical HDF5 hash only",
+        "hash_only": true,
+        "reused_as_input": false
+      },
+      {
+        "path": "cases/F6/F6_twin_floaters/F6_twin_floaters_Def.xml",
+        "sha256": "bd73de914fdbebbc77c3b64f60e7d6f4f553fecce0b8de8fdf97ad8a295ab882",
+        "bytes": 4274,
+        "role": "historical XML hash only",
+        "hash_only": true,
+        "reused_as_input": false
+      },
+      {
+        "path": "data/F6_twin_floaters.h5",
+        "sha256": "d68d7d8db30ecb475525ade4fc8c51ef53ffdbd41c419855b8f4811c5debe19c",
+        "bytes": 940085,
+        "role": "historical HDF5 hash only",
+        "hash_only": true,
+        "reused_as_input": false
+      },
+      {
+        "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-root-review-only-proposal-v1-20260921.json",
+        "sha256": "e456c017ec92c121e0ca581a77dce2580f930d922407d3c80134342b27fcf762",
+        "bytes": 9995,
+        "role": "parent proposal lineage hash only",
+        "hash_only": true,
+        "reused_as_input": false
+      }
+    ]
+  },
+  "execution_controls": {
+    "read_only_review": true,
+    "definition_writer_only": true,
+    "gencase_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "matrix_submission": false,
+    "qualification_credit": 0
+  },
+  "failure_policy": "Static failure is terminal evidence for this review; do not run GenCase, solver, GPU or queue and do not repair by reusing a legacy input."
+}

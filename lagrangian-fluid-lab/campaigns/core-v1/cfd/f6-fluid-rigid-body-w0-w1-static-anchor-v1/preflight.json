@@ -1,0 +1,258 @@
+{
+  "schema": "core.f6.w0_w1.static_preflight_receipt.v1",
+  "status": "cpu_static_gate_pass",
+  "gate_passed": true,
+  "checks": {
+    "xml_parse": {
+      "passed": true,
+      "detail": {
+        "root_tag": "case"
+      }
+    },
+    "fresh_xml_has_no_legacy_reference": {
+      "passed": true,
+      "detail": {
+        "forbidden_tokens": [
+          "F6_floating_box",
+          "F6_heavy_box_entry",
+          "F6_twin_floaters",
+          ".bi4",
+          ".h5"
+        ]
+      }
+    },
+    "definition_dp": {
+      "passed": true,
+      "detail": {
+        "observed": 0.02,
+        "expected": 0.02
+      }
+    },
+    "floating_binding": {
+      "passed": true,
+      "detail": {
+        "mkbound": "7",
+        "rhopbody": "780.0"
+      }
+    },
+    "initial_velocity_binding": {
+      "passed": true,
+      "detail": {
+        "expected": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "runtime_window_binding": {
+      "passed": true,
+      "detail": {
+        "TimeMax": "1.5",
+        "TimeOut": "0.01"
+      }
+    },
+    "body_mass_from_density_volume": {
+      "passed": true,
+      "detail": {
+        "mass_kg": 2.35872,
+        "rho_times_volume": 2.35872
+      }
+    },
+    "inertia_tensor": {
+      "passed": true,
+      "detail": {
+        "expected": [
+          [
+            0.00668304,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.009199007999999998,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.01022112
+          ]
+        ],
+        "observed": [
+          [
+            0.00668304,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.009199007999999998,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.01022112
+          ]
+        ],
+        "positive_diagonal": true
+      }
+    },
+    "body_inside_tank": {
+      "passed": true,
+      "detail": {
+        "body_low": [
+          0.61,
+          0.18,
+          0.5900000000000001
+        ],
+        "body_high": [
+          0.79,
+          0.32,
+          0.7100000000000001
+        ],
+        "tank_low": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tank_high": [
+          1.4,
+          0.5,
+          0.8
+        ]
+      }
+    },
+    "no_initial_fluid_contact": {
+      "passed": true,
+      "detail": {
+        "clearance_m": {
+          "bottom": 0.5900000000000001,
+          "left": 0.61,
+          "right": 0.6099999999999999,
+          "front": 0.18,
+          "back": 0.18,
+          "open_top": 0.08999999999999997,
+          "fluid_free_surface": 0.31000000000000005
+        },
+        "minimum_closed_face_clearance_m": 0.18,
+        "minimum_all_declared_clearance_m": 0.08999999999999997,
+        "required_clearance_m": 0.06,
+        "body_fully_above_fluid": true,
+        "initial_contact_expected": false
+      }
+    },
+    "clearance_margin": {
+      "passed": true,
+      "detail": {
+        "clearance_m": {
+          "bottom": 0.5900000000000001,
+          "left": 0.61,
+          "right": 0.6099999999999999,
+          "front": 0.18,
+          "back": 0.18,
+          "open_top": 0.08999999999999997,
+          "fluid_free_surface": 0.31000000000000005
+        },
+        "minimum_closed_face_clearance_m": 0.18,
+        "minimum_all_declared_clearance_m": 0.08999999999999997,
+        "required_clearance_m": 0.06,
+        "body_fully_above_fluid": true,
+        "initial_contact_expected": false
+      }
+    },
+    "density_and_zero_force_mode": {
+      "passed": true,
+      "detail": {
+        "fluid_density": 1000.0,
+        "body_density": 780.0,
+        "gravity": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "physical_f6_claim": false
+      }
+    },
+    "sidecar_schema": {
+      "passed": true,
+      "detail": {
+        "schema": "core.f6.body_state_sidecar.v1",
+        "body_id": "F6_W0_W1_body_alpha_20260921",
+        "missing": [],
+        "extra": []
+      }
+    },
+    "event_window_contract": {
+      "passed": true,
+      "detail": {
+        "window": {
+          "start_s": 0.0,
+          "end_s": 1.5,
+          "output_interval_s": 0.01,
+          "expected_frame_count": 151,
+          "settle_hold_start_s": 1.0,
+          "settle_hold_end_s": 1.5
+        },
+        "expected_frame_count": 151,
+        "forcing_mode": "zero_gravity_zero_force_units_inertia_anchor",
+        "status_without_runtime": "pending_runtime_event_window"
+      }
+    }
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "event_window_complete": false,
+  "event_window_status": "pending_runtime_event_window",
+  "execution_controls": {
+    "xml_parsed": true,
+    "gencase_invoked": false,
+    "native_decoder_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "matrix_submission": false
+  },
+  "failure_policy": "If any static check fails, retain this receipt as failure evidence and do not continue to GenCase, solver or matrix preparation.",
+  "contract": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-w0-w1-static-anchor-v1/definition-contract.json",
+    "sha256": "1058b249e780f1965991de5da0a96f0c8ee0cc1fc2221d812021fa5a8745c032",
+    "bytes": 7025,
+    "role": "fresh F6 definition contract"
+  },
+  "definition": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-w0-w1-static-anchor-v1/CORE_F6_W0_W1_single_body_no_contact_anchor_20260921_Def.xml",
+    "sha256": "34d90e40b28cdf1a930664a7f0dd3cc8d0690c594818ef5a8799d79288425f72",
+    "bytes": 3556,
+    "role": "fresh F6 Definition"
+  },
+  "sidecar_schema": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-w0-w1-static-anchor-v1/body-state-sidecar-schema.json",
+    "sha256": "1297af4f4706f82964810e12dff9f1746c540b67b227f27d7c4f2eb65b04da08",
+    "bytes": 2647,
+    "role": "fresh body-state sidecar schema"
+  },
+  "event_window": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-w0-w1-static-anchor-v1/event-window-contract.json",
+    "sha256": "695711c8ff2f70253b0e2a9aac45bcc4ec87ddd9e509e4bd2270ec03e2a18010",
+    "bytes": 1374,
+    "role": "fresh event-window contract"
+  },
+  "implementation": {
+    "path": "scripts/f6_w0_w1_static_contract.py",
+    "sha256": "98e45928ebce1d94b5775f21e04f4c720b860eb4ac599bb204f8439f9f576138",
+    "bytes": 28992,
+    "role": "F6 W0/W1 static contract implementation"
+  },
+  "legacy_provenance_hash_only": true,
+  "proposal": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-w0-w1-static-anchor-v1/proposal.json",
+    "sha256": "64a5c29284a617cac32d856c44e010eca5a1b087925274b35d51e0242372f204",
+    "bytes": 5794,
+    "role": "fresh root-review-only proposal"
+  },
+  "created_at_utc": "2026-09-21T07:20:01.596201+00:00"
+}

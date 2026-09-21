@@ -1,0 +1,46 @@
+{
+  "schema": "core.f6.event_window_contract.v1",
+  "event_id": "F6_W0_W1_static_no_contact_balance_v1",
+  "forcing_mode": "zero_gravity_zero_force_units_inertia_anchor",
+  "physical_f6_qualification": false,
+  "body_id": "F6_W0_W1_body_alpha_20260921",
+  "window": {
+    "start_s": 0.0,
+    "end_s": 1.5,
+    "output_interval_s": 0.01,
+    "expected_frame_count": 151,
+    "settle_hold_start_s": 1.0,
+    "settle_hold_end_s": 1.5
+  },
+  "initial_state": {
+    "com_m": [
+      0.7,
+      0.25,
+      0.65
+    ],
+    "linear_velocity_m_s": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "angular_velocity_rad_s": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "contact_expected": false
+  },
+  "completion_required": true,
+  "completion_rule": [
+    "all expected frames exist and time_s is strictly increasing at the declared cadence",
+    "body_id is present on every body-state row",
+    "all state, force and torque values are finite",
+    "contact_count equals zero and penetration_depth_m is no greater than 1e-12 throughout",
+    "the body remains inside the declared tank and above the fluid free surface under the zero-force contract",
+    "the final settle-hold interval [1.0,1.5] s is present and uncensored"
+  ],
+  "uncensored_required": true,
+  "status_without_runtime": "pending_runtime_event_window",
+  "qualification_claim": "none",
+  "qualification_credit": 0
+}

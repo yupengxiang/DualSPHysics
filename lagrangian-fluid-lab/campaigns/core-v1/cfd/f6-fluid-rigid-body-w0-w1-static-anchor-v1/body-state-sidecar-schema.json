@@ -1,0 +1,121 @@
+{
+  "schema": "core.f6.body_state_sidecar.v1",
+  "status": "contract_only_no_runtime_sidecar",
+  "forcing_mode": "zero_gravity_zero_force_units_inertia_anchor",
+  "physical_f6_qualification": false,
+  "body_id": "F6_W0_W1_body_alpha_20260921",
+  "mkbound": 7,
+  "identity_rule": "body_id is immutable and is never inferred from a particle_id",
+  "required_fields": [
+    {
+      "name": "time_s",
+      "dtype": "float64",
+      "shape": "[n_frames]"
+    },
+    {
+      "name": "body_position_m",
+      "dtype": "float64",
+      "shape": "[n_frames,3]"
+    },
+    {
+      "name": "body_quaternion_xyzw",
+      "dtype": "float64",
+      "shape": "[n_frames,4]"
+    },
+    {
+      "name": "linear_velocity_m_s",
+      "dtype": "float64",
+      "shape": "[n_frames,3]"
+    },
+    {
+      "name": "angular_velocity_rad_s",
+      "dtype": "float64",
+      "shape": "[n_frames,3]"
+    },
+    {
+      "name": "fluid_force_N",
+      "dtype": "float64",
+      "shape": "[n_frames,3]"
+    },
+    {
+      "name": "fluid_torque_Nm",
+      "dtype": "float64",
+      "shape": "[n_frames,3]"
+    },
+    {
+      "name": "contact_count",
+      "dtype": "int32",
+      "shape": "[n_frames]"
+    },
+    {
+      "name": "penetration_depth_m",
+      "dtype": "float64",
+      "shape": "[n_frames]"
+    },
+    {
+      "name": "valid",
+      "dtype": "bool",
+      "shape": "[n_frames]"
+    }
+  ],
+  "body_geometry_binding": {
+    "body_id": "F6_W0_W1_body_alpha_20260921",
+    "mkbound": 7,
+    "shape": "axis_aligned_box",
+    "size_m": [
+      0.18,
+      0.14,
+      0.12
+    ],
+    "bbox_low_m": [
+      0.61,
+      0.18,
+      0.5900000000000001
+    ],
+    "bbox_high_m": [
+      0.79,
+      0.32,
+      0.7100000000000001
+    ],
+    "com_m": [
+      0.7,
+      0.25,
+      0.65
+    ],
+    "density_kg_m3": 780.0,
+    "volume_m3": 0.0030239999999999998,
+    "mass_kg": 2.35872,
+    "inertia_about_com_kg_m2": [
+      [
+        0.00668304,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.009199007999999998,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.01022112
+      ]
+    ],
+    "inertia_convention": "world-aligned body axes at initial COM; tensor about COM",
+    "initial_linear_velocity_m_s": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "initial_angular_velocity_rad_s": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "event_window_contract": "campaigns/core-v1/cfd/f6-fluid-rigid-body-w0-w1-static-anchor-v1/event-window-contract.json",
+  "mass_policy": "body mass and inertia are authoritative from this sidecar binding; particle mass is not a substitute",
+  "qualification_claim": "none",
+  "qualification_credit": 0
+}
