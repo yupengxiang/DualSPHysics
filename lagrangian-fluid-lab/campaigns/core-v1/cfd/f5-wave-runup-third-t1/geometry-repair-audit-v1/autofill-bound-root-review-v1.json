@@ -1,0 +1,180 @@
+{
+  "schema": "core.f5.third_t1.geometry_autofill_bound_root_review_receipt.v1",
+  "created_at_utc": "2026-09-21T00:57:55.317703+00:00",
+  "record_id": "f5-wave-runup-third-t1-geometry-autofill-bound-root-review-v1",
+  "status": "authorized_one_fresh_v4_cpu_native_preflight_only",
+  "root_review_only": true,
+  "family": "F5",
+  "scope_id": "F5_prescribed_wave_runup_x_v1",
+  "revision_id": "F5_piston_amplitude_runup_geomrepair_v4",
+  "candidate_case_id": "F5_wave_runup_q0p50_dp0p0075_geomrepair_v4",
+  "qualification_claim": "none",
+  "matrix_credit": 0,
+  "denominator_rows": 15,
+  "review_decision": {
+    "authorized_now": true,
+    "decision": "authorize_exactly_one_fresh_v4_cpu_native_preflight_after_autofill_bound_materialization",
+    "authorized_action": "write_v4_inputs_then_run_exactly_one_fresh_cpu_gencase_native_decode",
+    "authorized_definition_materialization": true,
+    "authorized_cpu_native_preflight": true,
+    "authorized_solver": false,
+    "authorized_gpu": false,
+    "authorized_queue": false,
+    "authorized_registry": false,
+    "authorized_ledger": false,
+    "authorized_matrix": false,
+    "exactly_one_preflight": true,
+    "reason": "v3 failed one exact fluid-only block endpoint gate; the official GenCase example directly binds setmkbound followed by drawfilestl autofill=true, giving a distinct materialization hypothesis",
+    "failure_policy": "v4 failure remains zero credit and cannot be retried with the same input; a solver anchor requires a separate root review"
+  },
+  "review_inputs": {
+    "proposal": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/geometry-repair-proposal-audit-v1.json",
+      "sha256": "3163d6e1d75b3ffacbda61afeb18e9e35a98e5e575ded254c6b7b86733ebee42",
+      "bytes": 24970,
+      "role": "F5 geometry proposal-only audit"
+    },
+    "v3_preflight": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/preflight-v3/preflight.json",
+      "sha256": "eb91770a8a52b1495438d2ff9fe13d265d05053cb15109f3251a9da6ace25441",
+      "bytes": 8126,
+      "role": "v3 exact CPU/native geometry-gate failure"
+    },
+    "official_chrono_example": {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/chrono/11_CurrentWheelPulley/CaseCurrentWheel_Def.xml",
+      "sha256": "76b829423dbb7e58c5471003e99582502df07f383d3146ac122b09f75eb806d9",
+      "bytes": 11825,
+      "role": "official setmkbound/autofill example"
+    },
+    "official_template": {
+      "path": "vendor/official/DualSPHysics_v5.4/doc/xml_format/GenCase_CaseTemplate.xml",
+      "sha256": "b0c7be2eac1f2bbf9702519cc0c94aa5ca9ef3df94c5e1cda28a005d8a27a38e",
+      "bytes": 67624,
+      "role": "official GenCase syntax template"
+    }
+  },
+  "fresh_identity": {
+    "case_id": "F5_wave_runup_q0p50_dp0p0075_geomrepair_v4",
+    "definition": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/v4-input/F5_wave_runup_q0p50_dp0p0075_geomrepair_v4_Def.xml",
+    "motion": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/v4-input/Mov_piston_q0p50_scaled_geomrepair_v4.dat",
+    "slope_asset": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/v4-input/Slope_geomrepair_v4.stl",
+    "blocks_asset": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/v4-input/Blocks_3D_scaled_geomrepair_v4.stl",
+    "preflight_output_prefix": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/preflight-v4/generated/F5_wave_runup_q0p50_dp0p0075_geomrepair_v4",
+    "solver_anchor_attempt_root": "campaigns/core-v1/runtime/attempts/f5-wave-runup-third-t1-q05-dp0075-geomrepair-v4-protected-anchor/<root-approved-attempt-id>",
+    "solver_output_stem": "F5_wave_runup_q0p50_dp0p0075_geomrepair_v4_anchor",
+    "old_v3_input_reused": false,
+    "old_v3_generated_reused": false,
+    "qualification_inheritance": false
+  },
+  "recipe": {
+    "identity": "F5_geomrepair_v4_autofill_bound",
+    "commands_in_order": [
+      "setmkbound mk=40",
+      "drawfilestl Slope_geomrepair_v4.stl autofill=true with unchanged transform",
+      "setmkbound mk=50",
+      "drawfilestl Blocks_3D_scaled_geomrepair_v4.stl autofill=true with unchanged transform",
+      "setmkfluid mk=0; fillbox mode=void using unchanged v2 fluid box"
+    ],
+    "physical_boundary_policy": "one official autofill draw per watertight STL; no separate non-autofill redraw and no threshold relaxation",
+    "preserved_parameters": {
+      "q": 0.5,
+      "piston_scale": 1.0,
+      "dp_m": 0.0075,
+      "time_max_s": 16.0,
+      "output_dt_s": 0.02,
+      "slope_transform": {
+        "move_m": [
+          5.95,
+          0.37,
+          0.0
+        ],
+        "rotate_z_deg": -90.0
+      },
+      "blocks_transform": {
+        "move_m": [
+          5.95,
+          0.37,
+          0.0
+        ],
+        "rotate_z_deg": -90.0
+      }
+    }
+  },
+  "hard_preflight_gates": {
+    "gencase_return_code_zero": true,
+    "generated_xml_and_native_bi4_present": true,
+    "unique_ids_and_generated_native_counts_aligned": true,
+    "finite_native_arrays": true,
+    "mass_metadata_match": true,
+    "geometry_static_integrity": true,
+    "frame0_fluid_endpoint_inside_slope": {
+      "required_value": 0,
+      "scope": "fluid-only",
+      "tolerance_m": 1e-08
+    },
+    "frame0_fluid_endpoint_inside_blocks": {
+      "required_value": 0,
+      "scope": "fluid-only",
+      "tolerance_m": 1e-08
+    },
+    "full_window_and_events": "not applicable until separately reviewed solver anchor"
+  },
+  "fixed_denominator": {
+    "planned_rows": 15,
+    "all_rows_retained": true,
+    "partial_credit": false,
+    "same_input_retry": false,
+    "qualification_credit": 0
+  },
+  "execution_controls": {
+    "review_only": true,
+    "definition_written_by_review": false,
+    "gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_mutation": 0,
+    "qualification_credit": 0
+  },
+  "hash_bindings": {
+    "implementation": {
+      "path": "scripts/f5_wave_runup_geometry_autofill_bound_root_review_v1.py",
+      "sha256": "be881fe987ccf3f71fb40e7460853f2c9ee518cb739556cb274db7a9641fc856",
+      "bytes": 12386,
+      "role": "v4 autofill-bound root-review implementation"
+    },
+    "test": {
+      "path": "tests/test_f5_wave_runup_geometry_autofill_bound_root_review_v1.py",
+      "sha256": "6dcf055021b0a905bbdfcac1de2f3785ffdde112ddc57111ee18ac4515f778c3",
+      "bytes": 1569,
+      "role": "v4 autofill-bound root-review regression test"
+    },
+    "proposal": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/geometry-repair-proposal-audit-v1.json",
+      "sha256": "3163d6e1d75b3ffacbda61afeb18e9e35a98e5e575ded254c6b7b86733ebee42",
+      "bytes": 24970,
+      "role": "F5 geometry proposal"
+    },
+    "v3_preflight": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/preflight-v3/preflight.json",
+      "sha256": "eb91770a8a52b1495438d2ff9fe13d265d05053cb15109f3251a9da6ace25441",
+      "bytes": 8126,
+      "role": "v3 failure evidence"
+    },
+    "official_chrono_example": {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/chrono/11_CurrentWheelPulley/CaseCurrentWheel_Def.xml",
+      "sha256": "76b829423dbb7e58c5471003e99582502df07f383d3146ac122b09f75eb806d9",
+      "bytes": 11825,
+      "role": "official setmkbound/autofill example"
+    },
+    "official_template": {
+      "path": "vendor/official/DualSPHysics_v5.4/doc/xml_format/GenCase_CaseTemplate.xml",
+      "sha256": "b0c7be2eac1f2bbf9702519cc0c94aa5ca9ef3df94c5e1cda28a005d8a27a38e",
+      "bytes": 67624,
+      "role": "official GenCase syntax template"
+    }
+  }
+}

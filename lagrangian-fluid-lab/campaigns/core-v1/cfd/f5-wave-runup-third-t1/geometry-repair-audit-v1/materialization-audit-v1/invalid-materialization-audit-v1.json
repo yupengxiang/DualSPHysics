@@ -1,0 +1,29 @@
+{
+  "schema": "core.f5.third_t1.geometry_repair_materialization_audit.v1",
+  "status": "invalid_materialization_repaired_before_any_preflight",
+  "qualification_claim": "none",
+  "matrix_credit": 0,
+  "reason": "The first writer version left the existing setmkbound marker before setmkvoid, so the subsequent physical STL redraw did not explicitly restore its boundary marker. No GenCase, native decoder, solver, GPU, queue, ledger, registry, or matrix action used this input.",
+  "old_files": [
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/materialization-audit-v1/invalid-preflight-F5_wave_runup_q0p50_dp0p0075_geomrepair_v3_Def.xml",
+      "sha256": "ae3b45ff6f58cac4c8f707edaa37b8a6d96bb786ad0c619dd11f9219f55863a8"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/materialization-audit-v1/invalid-preflight-geometry-repair-contract-v1.json",
+      "sha256": "fe7a9c486a3b5c3794e3827e913622a086e37d9f3f893bec7f72da66a7bd8339"
+    }
+  ],
+  "repair": "Insert setmkbound mk=40/50 after each autofill void precursor and before the physical boundary redraw; preserve all other parameters and the same root-reviewed path.",
+  "execution_controls": {
+    "gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_mutation": 0,
+    "qualification_credit": 0
+  }
+}

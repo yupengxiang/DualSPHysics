@@ -1,0 +1,77 @@
+{
+  "schema": "core.f5.third_t1.geometry_repair_failure_summary.v1",
+  "status": "f5_candidate_closed_after_two_independent_geometry_repairs",
+  "created_at_utc": "2026-09-21T01:20:00Z",
+  "family": "F5",
+  "scope_id": "F5_prescribed_wave_runup_x_v1",
+  "qualification_claim": "none",
+  "qualified": false,
+  "matrix_credit": 0,
+  "fixed_denominator": {
+    "rows": 15,
+    "failed_rows_retained": true,
+    "same_input_retry": false,
+    "survivor_renormalization": false
+  },
+  "v3": {
+    "case_id": "F5_wave_runup_q0p50_dp0p0075_geomrepair_v3",
+    "hypothesis": "explicit setmkvoid plus autofill precursor followed by unchanged physical STL redraw",
+    "preflight": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/preflight-v3/preflight.json",
+      "sha256": "eb91770a8a52b1495438d2ff9fe13d265d05053cb15109f3251a9da6ace25441",
+      "bytes": 8126,
+      "role": "v3 exact CPU/native geometry-gate failure"
+    },
+    "status": "cpu_native_preflight_failed_geometry_repair_gate",
+    "gencase_return_code": 0,
+    "native_decode": true,
+    "fluid_particles": 1279855,
+    "fluid_first_id": 94622,
+    "slope_endpoint_inside_count": 0,
+    "blocks_endpoint_inside_count": 1,
+    "hard_gate": "frame0_fluid_endpoint_inside_blocks=false",
+    "generated_total_particles": 1374477,
+    "generated_boundary_particles": 94622,
+    "generated_fluid_particles": 1279855,
+    "mass_metadata_match": true,
+    "finite_native_arrays": true,
+    "id_unique_and_xml_aligned": true
+  },
+  "v4": {
+    "case_id": "F5_wave_runup_q0p50_dp0p0075_geomrepair_v4",
+    "hypothesis": "official setmkbound followed by one drawfilestl autofill=true per watertight STL",
+    "preflight": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/preflight-v4/preflight.json",
+      "sha256": "75f55fd80d01a067acb72e22888797b14e30ce22fc22d98ac90838c9ef519c2d",
+      "bytes": 8189,
+      "role": "v4 exact CPU/native geometry-gate failure"
+    },
+    "status": "cpu_native_preflight_failed_geometry_repair_gate",
+    "gencase_return_code": 0,
+    "native_decode": true,
+    "fluid_particles": 1279855,
+    "fluid_first_id": 94622,
+    "slope_endpoint_inside_count": 0,
+    "blocks_endpoint_inside_count": 1,
+    "hard_gate": "frame0_fluid_endpoint_inside_blocks=false",
+    "generated_total_particles": 1374477,
+    "generated_boundary_particles": 94622,
+    "generated_fluid_particles": 1279855,
+    "mass_metadata_match": true,
+    "finite_native_arrays": true,
+    "id_unique_and_xml_aligned": true
+  },
+  "conclusion": "Both evidence-backed F5 geometry materializations leave the same single fluid particle at [5.94000006,0.105,0.09] inside the transformed block STL. This closes the two permitted repair hypotheses for the current F5 geometry identity; no solver anchor or T1 qualification is authorized.",
+  "execution_controls": {
+    "gencase_invoked": true,
+    "native_decode_invoked": true,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_mutation": 0,
+    "qualification_credit": 0
+  },
+  "next_step": "Do not retry v3/v4. Promote a separately reviewed F2 candidate or define a new F5 geometry contract only after an independent root-level scientific hypothesis; existing F5 outputs remain development failure evidence."
+}

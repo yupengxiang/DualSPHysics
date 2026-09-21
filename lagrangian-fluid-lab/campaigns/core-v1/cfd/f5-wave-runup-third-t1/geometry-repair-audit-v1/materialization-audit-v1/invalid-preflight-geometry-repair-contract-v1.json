@@ -1,0 +1,154 @@
+{
+  "schema": "core.f5.third_t1.geometry_repair_materialization.v1",
+  "created_at_utc": "2026-09-21T00:43:22.643481+00:00",
+  "status": "v3_definition_written_preflight_pending",
+  "qualification_claim": "none",
+  "candidate": {
+    "family": "F5",
+    "scope_id": "F5_prescribed_wave_runup_x_v1",
+    "revision_id": "F5_piston_amplitude_runup_geomrepair_v3",
+    "q": 0.5,
+    "piston_scale": 1.0,
+    "dp_m": 0.0075,
+    "case_id": "F5_wave_runup_q0p50_dp0p0075_geomrepair_v3"
+  },
+  "repair_lineage": {
+    "root_review": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/root-review-receipt-v1.json",
+      "sha256": "d94d683f56b41d045190f7ddc23463d7a871f762095ae6cbc7867d8df4f5bff1",
+      "bytes": 9254,
+      "role": "geometry repair root review"
+    },
+    "proposal": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/geometry-repair-proposal-audit-v1.json",
+      "sha256": "3163d6e1d75b3ffacbda61afeb18e9e35a98e5e575ded254c6b7b86733ebee42",
+      "bytes": 24970,
+      "role": "geometry repair proposal"
+    },
+    "prior_output_reused": false,
+    "prior_generated_input_reused": false,
+    "prior_trajectory_reused": false,
+    "hypothesis": "explicit setmkvoid plus autofill precursor before unchanged physical STL boundary redraw"
+  },
+  "fresh_identity": {
+    "definition": {
+      "source": {
+        "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/F5_wave_runup_q0p50_dp0p0075_Def.xml",
+        "sha256": "76c38600c791200b9aacaab6b379952ba2a27ef3ce11b1d7fa560515e5942b80",
+        "bytes": 11316,
+        "role": "prior v2 Definition template"
+      },
+      "output": {
+        "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/F5_wave_runup_q0p50_dp0p0075_geomrepair_v3_Def.xml",
+        "sha256": "ae3b45ff6f58cac4c8f707edaa37b8a6d96bb786ad0c619dd11f9219f55863a8",
+        "bytes": 11705,
+        "role": "fresh v3 geometry-repair Definition"
+      },
+      "dp_m": 0.0075,
+      "time_max_s": 16.0,
+      "output_interval_s": 0.02,
+      "motion_file": "Mov_piston_q0p50_scaled_geomrepair_v3.dat",
+      "slope_file": "Slope_geomrepair_v3.stl",
+      "blocks_file": "Blocks_3D_scaled_geomrepair_v3.stl",
+      "autofill_draws": 2,
+      "physical_boundary_draws": 2,
+      "void_precursors": 2
+    },
+    "motion": {
+      "source": {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/17_WaveRunup/Mov_piston.dat",
+        "sha256": "c8319af36ca85dd33e56b722d888d1646912b0f602577d73814fac267df26a2e",
+        "bytes": 11268,
+        "role": "official piston source"
+      },
+      "output": {
+        "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/Mov_piston_q0p50_scaled_geomrepair_v3.dat",
+        "sha256": "ffabedc2331533d7950554368f20d33db0ab08c0002b1c053cf996f800756204",
+        "bytes": 16708,
+        "role": "fresh v3 piston motion"
+      },
+      "row_count": 626,
+      "time_start_s": 0.0,
+      "time_end_s": 15.6,
+      "scale": 1.0
+    },
+    "definition_adjacent_assets": [
+      {
+        "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/Slope_geomrepair_v3.stl",
+        "sha256": "bb6ed4811e1d24a05d72f2212b887fdc46ab354d93df13481618557333f95c90",
+        "bytes": 484,
+        "role": "byte-identical renamed v3 slope source"
+      },
+      {
+        "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/Blocks_3D_scaled_geomrepair_v3.stl",
+        "sha256": "528052692d4802601a7dbd92bfa9bcc00605559e1920628eadae3b76a39cf118",
+        "bytes": 58884,
+        "role": "byte-identical renamed v3 blocks source"
+      }
+    ],
+    "input_directory": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input",
+    "preflight_output_prefix": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/preflight-v3/generated/F5_wave_runup_q0p50_dp0p0075_geomrepair_v3"
+  },
+  "fixed_contract": {
+    "denominator_rows": 15,
+    "time_max_s": 16.0,
+    "output_interval_s": 0.02,
+    "gauge_interval_s": 0.02,
+    "event_window_required": true,
+    "zero_credit_until_cpu_native_and_solver_reviews": true,
+    "same_input_retry": false
+  },
+  "geometry_recipe": {
+    "void_precursor_commands": [
+      "setmkvoid",
+      "drawfilestl Slope_geomrepair_v3.stl autofill=true",
+      "setmkbound mk=40",
+      "drawfilestl Slope_geomrepair_v3.stl",
+      "setmkvoid",
+      "drawfilestl Blocks_3D_scaled_geomrepair_v3.stl autofill=true",
+      "setmkbound mk=50",
+      "drawfilestl Blocks_3D_scaled_geomrepair_v3.stl"
+    ],
+    "transforms_preserved": true,
+    "source_assets_byte_identical": true,
+    "thresholds_changed": false
+  },
+  "authorization": {
+    "root_review": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/root-review-receipt-v1.json",
+      "sha256": "d94d683f56b41d045190f7ddc23463d7a871f762095ae6cbc7867d8df4f5bff1",
+      "bytes": 9254,
+      "role": "exact root review authorization"
+    },
+    "definition_written": true,
+    "motion_written": true,
+    "gencase_authorized_by_this_step": false,
+    "native_decode_authorized_by_this_step": false,
+    "solver_authorized": false,
+    "gpu_authorized": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_mutation": 0
+  },
+  "implementation": {
+    "path": "scripts/f5_wave_runup_geometry_repair_writer_v1.py",
+    "sha256": "f41485e39f5d30944d6829ef7bebb83e569117242ab8c06307b795b499099c21",
+    "bytes": 15935,
+    "role": "v3 geometry repair writer"
+  },
+  "execution_controls": {
+    "definition_written": true,
+    "motion_written": true,
+    "assets_copied": true,
+    "gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_mutation": 0,
+    "qualification_credit": 0
+  }
+}

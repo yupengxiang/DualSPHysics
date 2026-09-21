@@ -1,0 +1,220 @@
+{
+  "schema": "core.f5.third_t1.preflight.v1",
+  "created_at_utc": "2026-09-21T00:50:25.902492+00:00",
+  "status": "cpu_native_preflight_failed_geometry_repair_gate",
+  "qualification_claim": "none",
+  "case_id": "F5_wave_runup_q0p50_dp0p0075_geomrepair_v3",
+  "authorization": {
+    "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/root-review-receipt-v1.json",
+    "sha256": "24b1bf0780dc905a7e17e31aeac7be1a2e98b5b0f9bd49eccefcff6e4e6b9dc1",
+    "bytes": 9254,
+    "role": "F5 preflight root review"
+  },
+  "input": {
+    "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/F5_wave_runup_q0p50_dp0p0075_geomrepair_v3_Def.xml",
+    "sha256": "afdfeb51f6c704842377effa577dd3a5345fd0241188f369cb36734d2905dc1a",
+    "bytes": 11683,
+    "role": "fresh F5 Definition"
+  },
+  "motion": {
+    "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/Mov_piston_q0p50_scaled_geomrepair_v3.dat",
+    "sha256": "ffabedc2331533d7950554368f20d33db0ab08c0002b1c053cf996f800756204",
+    "bytes": 16708,
+    "role": "fresh F5 motion"
+  },
+  "gencase": {
+    "command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/F5_wave_runup_q0p50_dp0p0075_geomrepair_v3_Def",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/preflight-v3/generated/F5_wave_runup_q0p50_dp0p0075_geomrepair_v3",
+      "-save:all"
+    ],
+    "started_at_utc": "2026-09-21T00:50:24.042869+00:00",
+    "return_code": 0,
+    "stdout_log": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/preflight-v3/gencase.stdout.log",
+      "sha256": "f122a634657e9a8987aab60f1b2460fe8b448731d56e8f4ae67f418ae2e0ad63",
+      "bytes": 7211,
+      "role": "CPU GenCase stdout"
+    },
+    "environment": {
+      "CUDA_VISIBLE_DEVICES": "",
+      "NVIDIA_VISIBLE_DEVICES": "void"
+    }
+  },
+  "binaries": {
+    "gencase": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226",
+      "bytes": 5809384,
+      "role": "pinned CPU GenCase"
+    },
+    "native_decoder": {
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+      "bytes": 324368,
+      "role": "pinned native BI4 decoder"
+    }
+  },
+  "execution_controls": {
+    "gencase_invoked": true,
+    "native_decode_invoked": true,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_mutation": 0,
+    "qualification_credit": 0
+  },
+  "hard_gates": {
+    "gencase_return_code_zero": true,
+    "generated_xml_present": true,
+    "native_bi4_present": true,
+    "id_unique_and_xml_aligned": true,
+    "finite_native_arrays": true,
+    "mass_metadata_match": true,
+    "geometry_static_integrity": true,
+    "trajectory_endpoint_gate": "not_applicable_until_solver",
+    "full_window_reached": "not_applicable_until_solver",
+    "event_completion": "not_applicable_until_solver",
+    "frame0_fluid_endpoint_inside_slope": true,
+    "frame0_fluid_endpoint_inside_blocks": false
+  },
+  "native": {
+    "total_particles": 1374477,
+    "boundary_particles": 86270,
+    "fluid_particles": 1279855,
+    "unique_ids": true,
+    "finite_arrays": true,
+    "metadata_massfluid_kg": 0.000421875,
+    "xml_massfluid_kg": 0.000421875,
+    "mass_metadata_match": true,
+    "initial_total_fluid_mass_kg": 539.938828125,
+    "arrays_directory": "/tmp/f5-native-xvsir2n1/native/PART_0000"
+  },
+  "generated": {
+    "total_particles": 1374477,
+    "boundary_particles": 94622,
+    "fixed_particles": 86270,
+    "fluid_particles": 1279855,
+    "dp_m": 0.0075,
+    "massfluid_kg": 0.000421875
+  },
+  "geometry": {
+    "vtk": {
+      "all": {
+        "present": true,
+        "declared_points": 1374477,
+        "encoding": "binary_big_endian"
+      },
+      "bound": {
+        "present": true,
+        "declared_points": 94622,
+        "encoding": "binary_big_endian"
+      },
+      "fluid": {
+        "present": true,
+        "declared_points": 1279855,
+        "encoding": "binary_big_endian"
+      }
+    },
+    "declared_bounds_m": {
+      "min": [
+        -1.0,
+        0.0,
+        -0.2
+      ],
+      "max": [
+        12.0,
+        0.37,
+        0.7
+      ]
+    },
+    "out_of_bounds": {
+      "all": 0,
+      "bound": 0,
+      "fluid": 0
+    },
+    "anomalies": [],
+    "pass": true
+  },
+  "preflight_pass": false,
+  "qualified": false,
+  "matrix_credit": 0,
+  "artifacts": {
+    "generated_xml": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/preflight-v3/generated/F5_wave_runup_q0p50_dp0p0075_geomrepair_v3.xml",
+      "sha256": "305d56bc5b2d28188d1349d8ebf3f8f97007893b3b7f4585bfb163b7162884fb",
+      "bytes": 15868,
+      "role": "fresh generated XML"
+    },
+    "native_bi4": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/preflight-v3/generated/F5_wave_runup_q0p50_dp0p0075_geomrepair_v3.bi4",
+      "sha256": "bdf35589f1d6b17ba78c1b58fdda85e24f3bcb345e19ff91e4eb16fa34661eac",
+      "bytes": 60478432,
+      "role": "fresh native BI4"
+    },
+    "preflight": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/preflight-v3/preflight.json",
+      "sha256": "a24efe4d1de79065747489ff028315c2de72df579e00e9f758f1b2472ef7d6c4"
+    }
+  },
+  "geometry_repair": {
+    "scope": "frame0_fluid_only",
+    "fluid_first_id": 94622,
+    "fluid_particles": 1279855,
+    "slope_endpoint_inside_count": 0,
+    "blocks_endpoint_inside_count": 1,
+    "endpoint_tolerance_m": 1e-08,
+    "slope_gate_pass": true,
+    "blocks_gate_pass": false,
+    "pass": false,
+    "source_meshes": {
+      "slope": {
+        "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/Slope_geomrepair_v3.stl",
+        "sha256": "bb6ed4811e1d24a05d72f2212b887fdc46ab354d93df13481618557333f95c90",
+        "bytes": 484,
+        "role": "v3 slope source used for exact fluid endpoint gate"
+      },
+      "blocks": {
+        "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/Blocks_3D_scaled_geomrepair_v3.stl",
+        "sha256": "528052692d4802601a7dbd92bfa9bcc00605559e1920628eadae3b76a39cf118",
+        "bytes": 58884,
+        "role": "v3 blocks source used for exact fluid endpoint gate"
+      }
+    }
+  },
+  "repair_bindings": {
+    "root_review": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/root-review-receipt-v1.json",
+      "sha256": "24b1bf0780dc905a7e17e31aeac7be1a2e98b5b0f9bd49eccefcff6e4e6b9dc1",
+      "bytes": 9254,
+      "role": "v3 geometry repair root review"
+    },
+    "contract": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/geometry-repair-contract-v1.json",
+      "sha256": "479df60b5bd610f6275e0343c0b5302a0fb5743da6074823bd29808c2c7e584b",
+      "bytes": 6395,
+      "role": "v3 geometry repair materialization contract"
+    },
+    "runner": {
+      "path": "scripts/f5_wave_runup_geometry_repair_preflight_v1.py",
+      "sha256": "f13fd3cdf10f7caae0bde96776ef8cd7b06ab4a40fc1aaf086aeb206a70bb729",
+      "bytes": 12027,
+      "role": "v3 CPU/native preflight runner"
+    },
+    "root_review_runner": {
+      "path": "scripts/f5_wave_runup_geometry_repair_root_review_v1.py",
+      "sha256": "1c72c5f15420a7ced3e68f8ab350d3acfd5684e36e05d1709d258a84ec37014e",
+      "bytes": 19858,
+      "role": "v3 root-review implementation"
+    },
+    "writer": {
+      "path": "scripts/f5_wave_runup_geometry_repair_writer_v1.py",
+      "sha256": "2f020bfdb00bfd9a38a8b5761e2ef45d145c2eec20e3da9d411d84c512458398",
+      "bytes": 17015,
+      "role": "v3 input writer"
+    }
+  }
+}
