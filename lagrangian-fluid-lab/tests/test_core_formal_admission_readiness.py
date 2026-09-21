@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from scripts.core_formal_planner import build_plan
+from scripts.core_formal_source_closure_admission_v6 import verify_source_closure
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,8 +15,7 @@ ARTIFACT = ROOT / (
     "campaigns/core-v1/learning/"
     "formal-training-admission-readiness-luna-max-20260920.json"
 )
-CAUSAL_REPAIR = ROOT / "campaigns/core-v1/learning/core-interface-causal-contract-repair-20260920.json"
-HALO_ORACLE = ROOT / "campaigns/core-v1/learning/core-fullfield-halo-oracle-diagnostic-20260921.json"
+V6_CLOSURE = ROOT / "campaigns/core-v1/learning/formal-release-candidate-v6/source-closure.json"
 
 
 def _load() -> dict:
@@ -94,8 +94,6 @@ def test_current_planner_reproduces_the_blocked_admission_without_writing_specs(
 
 def test_evidence_and_current_source_closure_hashes_are_bound() -> None:
     data = _load()
-    repair = json.loads(CAUSAL_REPAIR.read_text(encoding="utf-8"))
-    halo_oracle = json.loads(HALO_ORACLE.read_text(encoding="utf-8"))
 
     for item in data["input_evidence"]:
         path = ROOT / item["path"]
@@ -104,33 +102,27 @@ def test_evidence_and_current_source_closure_hashes_are_bound() -> None:
 
     current = data["source_binding"]["current_code_files"]
     assert len(current) == 8
+    historical_mismatches = []
     for item in current:
         path = ROOT / item["relative_path"]
         assert path.is_file(), item["relative_path"]
-        if item["relative_path"] == "scripts/core_contract.py":
-            # The preserved v1 readiness receipt intentionally pins the
-            # pre-repair source.  The causal repair receipt is the current
-            # binding and must be checked separately before a fresh formal
-            # admission can be considered.
-            assert item["sha256"] != _sha256(path)
-            repair_binding = next(
-                x for x in repair["source_bindings"] if x["path"] == item["relative_path"]
-            )
-            assert repair_binding["sha256"] == _sha256(path)
-        elif item["relative_path"] == "scripts/core_learning.py":
-            # The preserved v1 readiness receipt predates the full-field/halo
-            # oracle.  Keep that historical receipt immutable, and bind the
-            # current learning source through the diagnostic that actually
-            # exercised the updated predictor interface.
-            assert item["sha256"] != _sha256(path)
-            oracle_binding = next(
-                x
-                for x in halo_oracle["interface_audit"]["source_bindings"]
-                if x["path"] == item["relative_path"]
-            )
-            assert oracle_binding["sha256"] == _sha256(path)
-        else:
-            assert _sha256(path) == item["sha256"], item["relative_path"]
+        if _sha256(path) != item["sha256"]:
+            historical_mismatches.append(item["relative_path"])
+
+    assert historical_mismatches == [
+        "scripts/core_learning.py", "scripts/core_contract.py", "scripts/core_models.py"
+    ]
+
+    v6 = json.loads(V6_CLOSURE.read_text(encoding="utf-8"))
+    v6_result = verify_source_closure(v6, data_root=ROOT)
+    assert v6_result["ok"] is True
+    assert v6["namespace"] == "core-formal-release-candidate-v6"
+    assert v6["formal_training_allowed"] is False
+    assert v6["formal_job_count"] == 0
+    for item in v6["files"]:
+        path = ROOT / item["relative_path"]
+        assert _sha256(path) == item["sha256"]
+        assert path.stat().st_size == item["bytes"]
 
     assert data["source_binding"]["preprofile_source_closure_match"] is False
     assert data["source_binding"]["preprofile_mismatch_count"] == 7

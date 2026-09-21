@@ -33,10 +33,11 @@ def test_real_audit_lists_exact_stale_files_and_keeps_proposal_unadmitted() -> N
     assert report["launch_allowed"] is False
     assert report["current_source_closure"]["complete"] is True
     assert report["historical_comparison"]["mismatch_files"] == [
-        "scripts/core_contract.py", "scripts/core_evaluation.py", "scripts/core_learning.py"
+        "scripts/core_contract.py", "scripts/core_evaluation.py",
+        "scripts/core_learning.py", "scripts/core_models.py"
     ]
     assert report["current_source_closure"]["closure_sha256"] == (
-        "d50ab1fac799507dfde6866bbce76b1d88bbf29986d11464cbf4ca5e96ed7b6b"
+        "d692701964bfd4d0ddaa2db437b8870a2ea71e4ffbb428282398573aa89a05ba"
     )
     assert report["fresh_source_closure_proposal"]["admitted"] is False
     assert report["fresh_source_closure_proposal"]["formal_release"] is False

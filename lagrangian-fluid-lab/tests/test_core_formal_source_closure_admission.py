@@ -1,4 +1,4 @@
-"""Regression tests for the hash-bound proposal-only v5 source closure."""
+"""Regression tests for the preserved, historical v5 source closure."""
 
 from __future__ import annotations
 
@@ -24,12 +24,14 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def test_v5_closure_rehashes_every_required_file() -> None:
+def test_v5_closure_is_preserved_and_fails_closed_against_current_sources() -> None:
     closure = json.loads(CLOSURE.read_text(encoding="utf-8"))
     result = verify_source_closure(closure, data_root=ROOT)
 
-    assert result["ok"] is True
-    assert result["mismatch_files"] == []
+    assert result["ok"] is False
+    assert result["mismatch_files"] == [
+        "scripts/core_contract.py", "scripts/core_learning.py", "scripts/core_models.py"
+    ]
     assert closure["closure_version"] == "core-formal-release-candidate-v5"
     assert closure["formal_release"] is False
     assert closure["planning_only"] is True
@@ -38,10 +40,8 @@ def test_v5_closure_rehashes_every_required_file() -> None:
     assert closure["formal_job_count"] == 0
     assert [row["relative_path"] for row in closure["files"]] == list(REQUIRED_CODE_FILES)
 
-    for row in closure["files"]:
-        path = ROOT / row["relative_path"]
-        assert row["sha256"] == _sha256(path)
-        assert row["bytes"] == path.stat().st_size
+    assert closure["source_snapshot_policy"] == "fresh_code_closure_at_formal_admission"
+    assert closure["generator"]["path"] == "scripts/core_formal_source_closure_admission.py"
 
 
 def test_root_receipt_binds_v5_hash_and_preserves_formal_holds() -> None:
@@ -53,7 +53,8 @@ def test_root_receipt_binds_v5_hash_and_preserves_formal_holds() -> None:
     receipt = json.loads(RECEIPT.read_text(encoding="utf-8"))
     closure = json.loads(CLOSURE.read_text(encoding="utf-8"))
 
-    assert result["ok"] is True
+    assert result["ok"] is False
+    assert result["checks"]["closure_verification"] is False
     assert receipt["source_closure"]["sha256"] == _sha256(CLOSURE)
     assert receipt["source_closure"]["closure_sha256"] == closure["closure_sha256"]
     assert receipt["formal_release"] is False
@@ -86,7 +87,7 @@ def test_verify_cli_is_read_only_and_detects_tampered_closure(tmp_path: Path) ->
         "--data-root", str(ROOT),
         "--source-closure", str(CLOSURE),
         "--receipt", str(RECEIPT),
-    ]) == 0
+    ]) == 1
     assert _sha256(REGISTRY) == before
 
     tampered = json.loads(CLOSURE.read_text(encoding="utf-8"))

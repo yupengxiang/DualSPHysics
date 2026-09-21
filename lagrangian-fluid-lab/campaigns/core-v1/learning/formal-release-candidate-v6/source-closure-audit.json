@@ -1,0 +1,300 @@
+{
+  "admission_next_step": "root may review the v6 hash-bound planning input; formal readiness, launch, and root admission must remain closed until all Core gates are independently satisfied",
+  "audit_version": "core-formal-release-candidate-v6",
+  "blockers": [
+    {
+      "code": "FORMAL_READINESS_BLOCKED",
+      "message": "current formal readiness remains blocked",
+      "observed": [
+        "FORMAL_RELEASE_REQUIRED",
+        "FORMAL_RUN_DENOMINATOR",
+        "MATERIAL_CASE_RUN_DENOMINATOR",
+        "RESOURCE_FRONTIER_UNPROVEN",
+        "STALE_SOURCE_CLOSURE",
+        "THIRD_FAMILY_REQUIRED",
+        "THIRD_T1_FAMILY",
+        "VALIDATION_DENOMINATOR"
+      ],
+      "required": "ready"
+    },
+    {
+      "code": "LAUNCH_CONTRACT_BLOCKED",
+      "message": "current launch contract does not authorize formal jobs",
+      "observed": {
+        "formal_job_count": 0,
+        "launch_allowed": false
+      },
+      "required": {
+        "formal_job_count": 9,
+        "launch_allowed": true
+      }
+    },
+    {
+      "code": "FRESH_CLOSURE_NOT_ADMITTED",
+      "message": "v6 records a fresh closure but does not grant root admission",
+      "observed": false,
+      "required": true
+    }
+  ],
+  "checks": {
+    "formal_readiness_unblocked": false,
+    "historical_comparison_recorded": true,
+    "historical_mismatch_is_labeled": true,
+    "launch_contract_emits_zero_jobs": true,
+    "launch_contract_unblocked": false,
+    "root_admission_granted": false,
+    "v6_source_closure_complete": true,
+    "v6_source_closure_hash_matches": true,
+    "v6_source_closure_rehashed": true
+  },
+  "current_source_closure": {
+    "closure_sha256": "d692701964bfd4d0ddaa2db437b8870a2ea71e4ffbb428282398573aa89a05ba",
+    "closure_version": "core-formal-release-candidate-v6",
+    "complete": true,
+    "files": [
+      {
+        "bytes": 112763,
+        "relative_path": "scripts/core_learning.py",
+        "sha256": "ce2eb83bc636cc32aea5706debfee7a7aa5509821ec3d629a564fdac13cc6e36"
+      },
+      {
+        "bytes": 31175,
+        "relative_path": "scripts/core_contract.py",
+        "sha256": "ba759a9d13568fa88e9577a1a9fbd6abf9b2c075a8c0123086bb8495c2c641d6"
+      },
+      {
+        "bytes": 30550,
+        "relative_path": "scripts/core_dataset.py",
+        "sha256": "41b9b65ed196cc39e9d0d3fc4028119c5cd111f4cf97d2f950da57148892d25d"
+      },
+      {
+        "bytes": 23597,
+        "relative_path": "scripts/core_models.py",
+        "sha256": "4b59519bfda612412bd7de45df9ab99424def3a57f19aa2c5581264919c8e32e"
+      },
+      {
+        "bytes": 38880,
+        "relative_path": "scripts/core_cfd_dataset.py",
+        "sha256": "9a8b5ed364735804cc66521060ed04a18845a80bd95870d2727eda5392997523"
+      },
+      {
+        "bytes": 8434,
+        "relative_path": "scripts/core_evaluation.py",
+        "sha256": "0adf9fba3ae60276f861cb85da02730d7caf419c4acdbee07bb87607a6dfae52"
+      },
+      {
+        "bytes": 30607,
+        "relative_path": "scripts/core_physics.py",
+        "sha256": "af5469f88791cdd16bf2ee6234c73e76e0dc453fe2030ccb33c03cf6fd84f892"
+      },
+      {
+        "bytes": 52402,
+        "relative_path": "scripts/core_formal_planner.py",
+        "sha256": "f958023abc92147209d976a52978bd5d50c3a4ef1c792aa105f8187cbf6fbc6b"
+      }
+    ],
+    "formal_job_count": 0,
+    "formal_release": false,
+    "formal_training_allowed": false,
+    "formal_training_ready": false,
+    "generator": {
+      "bytes": 34884,
+      "path": "scripts/core_formal_source_closure_admission_v6.py",
+      "sha256": "1670cc17c4e787cbc5b9cf0965d3f79c656add24817e5323568c6f94b5ca8036"
+    },
+    "hash_algorithm": "sha256",
+    "missing_files": [],
+    "namespace": "core-formal-release-candidate-v6",
+    "planning_allowed": true,
+    "planning_only": true,
+    "read_only_verification_supported": true,
+    "required_files": [
+      "scripts/core_learning.py",
+      "scripts/core_contract.py",
+      "scripts/core_dataset.py",
+      "scripts/core_models.py",
+      "scripts/core_cfd_dataset.py",
+      "scripts/core_evaluation.py",
+      "scripts/core_physics.py",
+      "scripts/core_formal_planner.py"
+    ],
+    "root_admission_granted": false,
+    "schema": "core.formal_source_closure.v2",
+    "source_snapshot_policy": "fresh_code_closure_at_formal_admission"
+  },
+  "execution_constraints": {
+    "formal_job_specs_written": false,
+    "formal_jobs_submitted": false,
+    "formal_runs_started": 0,
+    "future_state_inputs": false,
+    "gpu_started": false,
+    "ledger_written": false,
+    "optimizer_started": false,
+    "read_only": true,
+    "registry_written": false,
+    "solver_started": false,
+    "source_snapshot_admitted": false,
+    "source_snapshot_written": false
+  },
+  "formal_job_count": 0,
+  "formal_release": false,
+  "formal_training_allowed": false,
+  "generator": {
+    "bytes": 34884,
+    "path": "scripts/core_formal_source_closure_admission_v6.py",
+    "sha256": "1670cc17c4e787cbc5b9cf0965d3f79c656add24817e5323568c6f94b5ca8036"
+  },
+  "historical_audit_semantics": {
+    "baseline": {
+      "bytes": 2362,
+      "path": "campaigns/core-v1/learning/formal-release-candidate-v5/source-closure.json",
+      "sha256": "36a5371b4451b4c06de3776c23db457f118a2b37b6b74017c6b7a1876d108a28"
+    },
+    "baseline_version": "core-formal-release-candidate-v5",
+    "current_v6_hash_source": "live REQUIRED_CODE_FILES re-hash",
+    "mismatch_files_are_historical_only": true,
+    "mismatch_files_do_not_replace_v6_hashes": true
+  },
+  "historical_comparison": {
+    "comparison_type": "historical_baseline_only",
+    "current_closure_sha256": "d692701964bfd4d0ddaa2db437b8870a2ea71e4ffbb428282398573aa89a05ba",
+    "fresh_snapshot_required": true,
+    "matches_current": false,
+    "mismatch_files": [
+      "scripts/core_contract.py",
+      "scripts/core_learning.py",
+      "scripts/core_models.py"
+    ],
+    "mismatch_semantics": "mismatch_files compare the named historical baseline with the live workspace; they are not a failure of the freshly rehashed v6 file set",
+    "snapshot": {
+      "bytes": 2362,
+      "path": "campaigns/core-v1/learning/formal-release-candidate-v5/source-closure.json",
+      "sha256": "36a5371b4451b4c06de3776c23db457f118a2b37b6b74017c6b7a1876d108a28"
+    },
+    "snapshot_closure_sha256": "d50ab1fac799507dfde6866bbce76b1d88bbf29986d11464cbf4ca5e96ed7b6b",
+    "snapshot_version": "core-formal-release-candidate-v5",
+    "v6_current_closure_is_not_historical_baseline": true
+  },
+  "inputs": {
+    "formal_launch_contract": {
+      "bytes": 41517,
+      "path": "campaigns/core-v1/learning/core-formal-launch-contract-20260921.json",
+      "sha256": "eb1451fe6bde2ba9a80bf7742b6e2aa7df3ee76806e20edfc05a8f99b806bc5a"
+    },
+    "formal_readiness": {
+      "bytes": 7757,
+      "path": "campaigns/core-v1/learning/core-formal-readiness-audit-20260921.json",
+      "sha256": "250d04643546c0f750301821d5df593f617094f0fd0e874285b08a73e0c8ad9b"
+    },
+    "historical_snapshot": {
+      "bytes": 2362,
+      "path": "campaigns/core-v1/learning/formal-release-candidate-v5/source-closure.json",
+      "sha256": "36a5371b4451b4c06de3776c23db457f118a2b37b6b74017c6b7a1876d108a28"
+    },
+    "v6_source_closure": {
+      "bytes": 2495,
+      "path": "campaigns/core-v1/learning/formal-release-candidate-v6/source-closure.json",
+      "sha256": "03c157681e2b6195752604ed642b7e68e8756cc39212b074a0b69288f9956549"
+    }
+  },
+  "launch_allowed": false,
+  "namespace": "core-formal-release-candidate-v6",
+  "nine_run_launch_contract": {
+    "launch_allowed": false,
+    "observed_formal_job_count": 0,
+    "required_formal_job_count": 9,
+    "run_ids": [
+      "mlp-seed17",
+      "mlp-seed29",
+      "mlp-seed43",
+      "graph_raw-seed17",
+      "graph_raw-seed29",
+      "graph_raw-seed43",
+      "graph_residual-seed17",
+      "graph_residual-seed29",
+      "graph_residual-seed43"
+    ]
+  },
+  "proposal_only": true,
+  "readiness_blockers": [
+    "FORMAL_RELEASE_REQUIRED",
+    "FORMAL_RUN_DENOMINATOR",
+    "MATERIAL_CASE_RUN_DENOMINATOR",
+    "RESOURCE_FRONTIER_UNPROVEN",
+    "STALE_SOURCE_CLOSURE",
+    "THIRD_FAMILY_REQUIRED",
+    "THIRD_T1_FAMILY",
+    "VALIDATION_DENOMINATOR"
+  ],
+  "record_id": "core-formal-source-closure-audit-v6-20260922",
+  "schema": "core.formal_source_closure_audit.v2",
+  "status": "proposal_only_blocked",
+  "v6_source_closure": {
+    "closure_sha256": "d692701964bfd4d0ddaa2db437b8870a2ea71e4ffbb428282398573aa89a05ba",
+    "path": "campaigns/core-v1/learning/formal-release-candidate-v6/source-closure.json",
+    "sha256": "03c157681e2b6195752604ed642b7e68e8756cc39212b074a0b69288f9956549",
+    "verification": {
+      "checks": {
+        "all_workspace_hashes_match": true,
+        "closure_hash_matches": true,
+        "closure_version": true,
+        "complete": true,
+        "declared_order_and_set": true,
+        "formal_release_is_closed": true,
+        "formal_training_is_closed": true,
+        "namespace": true,
+        "no_formal_jobs": true,
+        "planning_only": true,
+        "required_file_set": true,
+        "root_admission_is_closed": true,
+        "schema": true
+      },
+      "current_closure_sha256": "d692701964bfd4d0ddaa2db437b8870a2ea71e4ffbb428282398573aa89a05ba",
+      "current_files": [
+        {
+          "bytes": 112763,
+          "relative_path": "scripts/core_learning.py",
+          "sha256": "ce2eb83bc636cc32aea5706debfee7a7aa5509821ec3d629a564fdac13cc6e36"
+        },
+        {
+          "bytes": 31175,
+          "relative_path": "scripts/core_contract.py",
+          "sha256": "ba759a9d13568fa88e9577a1a9fbd6abf9b2c075a8c0123086bb8495c2c641d6"
+        },
+        {
+          "bytes": 30550,
+          "relative_path": "scripts/core_dataset.py",
+          "sha256": "41b9b65ed196cc39e9d0d3fc4028119c5cd111f4cf97d2f950da57148892d25d"
+        },
+        {
+          "bytes": 23597,
+          "relative_path": "scripts/core_models.py",
+          "sha256": "4b59519bfda612412bd7de45df9ab99424def3a57f19aa2c5581264919c8e32e"
+        },
+        {
+          "bytes": 38880,
+          "relative_path": "scripts/core_cfd_dataset.py",
+          "sha256": "9a8b5ed364735804cc66521060ed04a18845a80bd95870d2727eda5392997523"
+        },
+        {
+          "bytes": 8434,
+          "relative_path": "scripts/core_evaluation.py",
+          "sha256": "0adf9fba3ae60276f861cb85da02730d7caf419c4acdbee07bb87607a6dfae52"
+        },
+        {
+          "bytes": 30607,
+          "relative_path": "scripts/core_physics.py",
+          "sha256": "af5469f88791cdd16bf2ee6234c73e76e0dc453fe2030ccb33c03cf6fd84f892"
+        },
+        {
+          "bytes": 52402,
+          "relative_path": "scripts/core_formal_planner.py",
+          "sha256": "f958023abc92147209d976a52978bd5d50c3a4ef1c792aa105f8187cbf6fbc6b"
+        }
+      ],
+      "declared_closure_sha256": "d692701964bfd4d0ddaa2db437b8870a2ea71e4ffbb428282398573aa89a05ba",
+      "mismatch_files": [],
+      "ok": true
+    }
+  }
+}

@@ -1,0 +1,330 @@
+{
+  "active_blockers": [
+    {
+      "code": "THIRD_T1_FAMILY",
+      "message": "formal admission needs three distinct T1 families",
+      "observed": 2,
+      "passed": false,
+      "required": 3
+    },
+    {
+      "code": "VALIDATION_DENOMINATOR",
+      "message": "formal evaluator needs twelve validation cases",
+      "observed": 8,
+      "passed": false,
+      "required": 12
+    },
+    {
+      "code": "FORMAL_RUN_DENOMINATOR",
+      "message": "formal training requires nine completed model/seed runs",
+      "observed": 0,
+      "passed": false,
+      "required": 9
+    },
+    {
+      "code": "MATERIAL_CASE_RUN_DENOMINATOR",
+      "message": "Core retains a 288 case-run material target",
+      "observed": 0,
+      "passed": false,
+      "required": 288
+    },
+    {
+      "code": "RESOURCE_FRONTIER_UNPROVEN",
+      "message": "fresh full-field 32000-update resource evidence is required",
+      "observed": false,
+      "passed": false,
+      "required": true
+    },
+    {
+      "code": "FORMAL_RELEASE_REQUIRED",
+      "message": "v6 remains planning-only and does not promote formal release",
+      "observed": false,
+      "passed": false,
+      "required": true
+    },
+    {
+      "code": "FORMAL_READINESS_BLOCKED",
+      "message": "formal readiness must be ready before formal admission",
+      "observed": "blocked",
+      "passed": false,
+      "required": "ready"
+    },
+    {
+      "code": "LAUNCH_CONTRACT_BLOCKED",
+      "message": "launch contract must authorize formal jobs before admission",
+      "observed": false,
+      "passed": false,
+      "required": true
+    },
+    {
+      "code": "ROOT_ADMISSION_REQUIRED",
+      "message": "root admission is intentionally not granted by v6",
+      "observed": false,
+      "passed": false,
+      "required": true
+    }
+  ],
+  "bound_current_state": {
+    "formal_launch_contract": {
+      "formal_job_count": 0,
+      "launch_allowed": false,
+      "status": "proposal_only_blocked"
+    },
+    "formal_readiness": {
+      "formal_job_count": 0,
+      "status": "blocked",
+      "upstream_admission_blockers": [
+        "STALE_SOURCE_CLOSURE",
+        "FORMAL_RELEASE_REQUIRED",
+        "THIRD_FAMILY_REQUIRED",
+        "VALIDATION_DENOMINATOR",
+        "RESOURCE_FRONTIER_UNPROVEN"
+      ]
+    },
+    "source_closure_audit": {
+      "current_closure_sha256": "d692701964bfd4d0ddaa2db437b8870a2ea71e4ffbb428282398573aa89a05ba",
+      "formal_job_count": 0,
+      "historical_mismatch_files": [
+        "scripts/core_contract.py",
+        "scripts/core_learning.py",
+        "scripts/core_models.py"
+      ],
+      "historical_mismatch_semantics": "mismatch_files compare the named historical baseline with the live workspace; they are not a failure of the freshly rehashed v6 file set",
+      "launch_allowed": false,
+      "status": "proposal_only_blocked"
+    }
+  },
+  "execution_constraints": {
+    "formal_job_specs_written": false,
+    "formal_jobs_submitted": false,
+    "formal_runs_started": 0,
+    "future_state_inputs": false,
+    "gpu_started": false,
+    "ledger_written": false,
+    "optimizer_started": false,
+    "read_only": true,
+    "registry_written": false,
+    "solver_started": false,
+    "source_snapshot_admitted": false,
+    "source_snapshot_written": true
+  },
+  "formal_job_count": 0,
+  "formal_release": false,
+  "formal_training_allowed": false,
+  "formal_training_ready": false,
+  "gate_evaluation": {
+    "evaluator_failure_penalty": {
+      "code": "EVALUATOR_DENOMINATOR_CONTRACT",
+      "message": "failed rollout frames must retain a unit penalty",
+      "observed": true,
+      "passed": true,
+      "required": true
+    },
+    "formal_readiness": {
+      "code": "FORMAL_READINESS_BLOCKED",
+      "message": "formal readiness must be ready before formal admission",
+      "observed": "blocked",
+      "passed": false,
+      "required": "ready"
+    },
+    "formal_release": {
+      "code": "FORMAL_RELEASE_REQUIRED",
+      "message": "v6 remains planning-only and does not promote formal release",
+      "observed": false,
+      "passed": false,
+      "required": true
+    },
+    "formal_run_denominator": {
+      "code": "FORMAL_RUN_DENOMINATOR",
+      "message": "formal training requires nine completed model/seed runs",
+      "observed": 0,
+      "passed": false,
+      "required": 9
+    },
+    "launch_contract": {
+      "code": "LAUNCH_CONTRACT_BLOCKED",
+      "message": "launch contract must authorize formal jobs before admission",
+      "observed": false,
+      "passed": false,
+      "required": true
+    },
+    "material_case_run_denominator": {
+      "code": "MATERIAL_CASE_RUN_DENOMINATOR",
+      "message": "Core retains a 288 case-run material target",
+      "observed": 0,
+      "passed": false,
+      "required": 288
+    },
+    "phase_plan_denominator": {
+      "code": "PHASE_PLAN_CONTRACT",
+      "message": "phase plan must retain the registered denominator",
+      "observed": true,
+      "passed": true,
+      "required": true
+    },
+    "resource_frontier": {
+      "code": "RESOURCE_FRONTIER_UNPROVEN",
+      "message": "fresh full-field 32000-update resource evidence is required",
+      "observed": false,
+      "passed": false,
+      "required": true
+    },
+    "root_admission": {
+      "code": "ROOT_ADMISSION_REQUIRED",
+      "message": "root admission is intentionally not granted by v6",
+      "observed": false,
+      "passed": false,
+      "required": true
+    },
+    "third_t1_family": {
+      "code": "THIRD_T1_FAMILY",
+      "message": "formal admission needs three distinct T1 families",
+      "observed": 2,
+      "passed": false,
+      "required": 3
+    },
+    "v6_source_audit_rebound": {
+      "code": "V6_SOURCE_AUDIT_REBOUND",
+      "message": "v6 audit must bind the freshly rehashed v6 closure",
+      "observed": true,
+      "passed": true,
+      "required": true
+    },
+    "validation_denominator": {
+      "code": "VALIDATION_DENOMINATOR",
+      "message": "formal evaluator needs twelve validation cases",
+      "observed": 8,
+      "passed": false,
+      "required": 12
+    }
+  },
+  "generator": {
+    "bytes": 34884,
+    "path": "scripts/core_formal_source_closure_admission_v6.py",
+    "sha256": "1670cc17c4e787cbc5b9cf0965d3f79c656add24817e5323568c6f94b5ca8036"
+  },
+  "historical_audit": {
+    "closure_version": "core-formal-release-candidate-v5",
+    "comparison_type": "historical_baseline_only",
+    "mismatch_files": [
+      "scripts/core_contract.py",
+      "scripts/core_learning.py",
+      "scripts/core_models.py"
+    ],
+    "mismatch_files_are_historical_only": true,
+    "path": "campaigns/core-v1/learning/formal-release-candidate-v5/source-closure.json",
+    "sha256": "36a5371b4451b4c06de3776c23db457f118a2b37b6b74017c6b7a1876d108a28"
+  },
+  "inputs": {
+    "formal_launch_contract": {
+      "bytes": 41517,
+      "path": "campaigns/core-v1/learning/core-formal-launch-contract-20260921.json",
+      "sha256": "eb1451fe6bde2ba9a80bf7742b6e2aa7df3ee76806e20edfc05a8f99b806bc5a"
+    },
+    "formal_readiness": {
+      "bytes": 7757,
+      "path": "campaigns/core-v1/learning/core-formal-readiness-audit-20260921.json",
+      "sha256": "250d04643546c0f750301821d5df593f617094f0fd0e874285b08a73e0c8ad9b"
+    },
+    "source_closure_audit": {
+      "bytes": 10892,
+      "path": "campaigns/core-v1/learning/formal-release-candidate-v6/source-closure-audit.json",
+      "sha256": "ebd20df9d15b5207883cfd73fe7838b16034a2fc1108e2ec7fa1155460b1f7e5"
+    }
+  },
+  "launch_allowed": false,
+  "namespace": "core-formal-release-candidate-v6",
+  "next_admission_checks": [
+    "rebind the current readiness and launch contracts after all upstream gates change",
+    "retain the v5/v4 mismatch reports as historical comparisons only",
+    "obtain the missing third T1 family, validation denominator, material denominator, and resource evidence",
+    "request a separate root decision before any formal job specification or execution"
+  ],
+  "planning_allowed": true,
+  "planning_only": true,
+  "proposal_only": true,
+  "receipt_version": "core-formal-release-candidate-v6",
+  "record_id": "core-formal-source-closure-root-admission-v6-20260922",
+  "required_formal_job_count": 9,
+  "root_admission": {
+    "authority": "root",
+    "decision": "hold",
+    "granted": false,
+    "reason": "v6 is a hash-bound planning input; readiness and launch gates remain blocked",
+    "requested": true,
+    "status": "required_not_granted"
+  },
+  "schema": "core.formal_source_closure_admission.v2",
+  "source_closure": {
+    "bytes": 2495,
+    "closure_sha256": "d692701964bfd4d0ddaa2db437b8870a2ea71e4ffbb428282398573aa89a05ba",
+    "closure_version": "core-formal-release-candidate-v6",
+    "complete": true,
+    "path": "campaigns/core-v1/learning/formal-release-candidate-v6/source-closure.json",
+    "sha256": "03c157681e2b6195752604ed642b7e68e8756cc39212b074a0b69288f9956549",
+    "verification": {
+      "checks": {
+        "all_workspace_hashes_match": true,
+        "closure_hash_matches": true,
+        "closure_version": true,
+        "complete": true,
+        "declared_order_and_set": true,
+        "formal_release_is_closed": true,
+        "formal_training_is_closed": true,
+        "namespace": true,
+        "no_formal_jobs": true,
+        "planning_only": true,
+        "required_file_set": true,
+        "root_admission_is_closed": true,
+        "schema": true
+      },
+      "current_closure_sha256": "d692701964bfd4d0ddaa2db437b8870a2ea71e4ffbb428282398573aa89a05ba",
+      "current_files": [
+        {
+          "bytes": 112763,
+          "relative_path": "scripts/core_learning.py",
+          "sha256": "ce2eb83bc636cc32aea5706debfee7a7aa5509821ec3d629a564fdac13cc6e36"
+        },
+        {
+          "bytes": 31175,
+          "relative_path": "scripts/core_contract.py",
+          "sha256": "ba759a9d13568fa88e9577a1a9fbd6abf9b2c075a8c0123086bb8495c2c641d6"
+        },
+        {
+          "bytes": 30550,
+          "relative_path": "scripts/core_dataset.py",
+          "sha256": "41b9b65ed196cc39e9d0d3fc4028119c5cd111f4cf97d2f950da57148892d25d"
+        },
+        {
+          "bytes": 23597,
+          "relative_path": "scripts/core_models.py",
+          "sha256": "4b59519bfda612412bd7de45df9ab99424def3a57f19aa2c5581264919c8e32e"
+        },
+        {
+          "bytes": 38880,
+          "relative_path": "scripts/core_cfd_dataset.py",
+          "sha256": "9a8b5ed364735804cc66521060ed04a18845a80bd95870d2727eda5392997523"
+        },
+        {
+          "bytes": 8434,
+          "relative_path": "scripts/core_evaluation.py",
+          "sha256": "0adf9fba3ae60276f861cb85da02730d7caf419c4acdbee07bb87607a6dfae52"
+        },
+        {
+          "bytes": 30607,
+          "relative_path": "scripts/core_physics.py",
+          "sha256": "af5469f88791cdd16bf2ee6234c73e76e0dc453fe2030ccb33c03cf6fd84f892"
+        },
+        {
+          "bytes": 52402,
+          "relative_path": "scripts/core_formal_planner.py",
+          "sha256": "f958023abc92147209d976a52978bd5d50c3a4ef1c792aa105f8187cbf6fbc6b"
+        }
+      ],
+      "declared_closure_sha256": "d692701964bfd4d0ddaa2db437b8870a2ea71e4ffbb428282398573aa89a05ba",
+      "mismatch_files": [],
+      "ok": true
+    }
+  },
+  "status": "planning_only_blocked"
+}
