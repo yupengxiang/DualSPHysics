@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
+from collections.abc import Mapping
 import hashlib
 import json
 import math
@@ -53,6 +54,14 @@ DEFAULT_MAX_NEIGHBORS = 64
 ANALYTIC_BASELINES = ("constant_velocity", "known_force")
 MILESTONE_UPDATES = (8000, 16000, 24000, 32000)
 SCIENTIFIC_STATUS_NOT_ASSESSED = "not_assessed"
+
+# Keep the direct learning/evaluation boundary aligned with the formal
+# capacity contract in core_formal_planner.py.  These are deliberately local
+# constants so a caller cannot omit the planner's denominator requirements by
+# invoking this module without the planner CLI.
+FORMAL_MIN_FAMILIES = 3
+FORMAL_MIN_VALIDATION_PER_FAMILY = 4
+FORMAL_MIN_TEST_PER_FAMILY = 12
 
 
 def _strict_integer(value, name):
@@ -143,13 +152,17 @@ def _execution_summary(case_rows):
 
 
 def formal_evaluation_gate(*, registered_case_ids, selected_case_ids=None,
-                           split="test", maximum_steps=None):
+                           split="test", maximum_steps=None,
+                           test_family_counts=None, validation_family_counts=None):
     """Validate the immutable scope of a direct formal evaluation.
 
     This is deliberately pure: the caller supplies the case registry observed
     from the released manifest.  In particular, an explicit case list is not
     allowed to redefine the denominator, and a rollout horizon is not allowed
-    to redefine the registered future-frame count.
+    to redefine the registered future-frame count.  The family denominators
+    are required inputs rather than inferred from a selected case list, so a
+    small ``formal_release`` fixture cannot bypass the planner capacity
+    contract.
     """
     registered = tuple(registered_case_ids)
     try:
@@ -164,6 +177,40 @@ def formal_evaluation_gate(*, registered_case_ids, selected_case_ids=None,
         raise ValueError("formal evaluation requires split='test'")
     if maximum_steps is not None:
         raise ValueError("formal evaluation forbids maximum_steps")
+
+    test_counts = _strict_formal_family_counts(
+        test_family_counts, "test family denominator")
+    validation_counts = _strict_formal_family_counts(
+        validation_family_counts, "validation family denominator")
+    if not test_counts or not validation_counts:
+        raise ValueError("formal evaluation requires non-empty family denominators")
+    if sum(test_counts.values()) != len(registered):
+        raise ValueError(
+            "test family denominator must sum to every registered test case")
+    if set(test_counts) != set(validation_counts):
+        raise ValueError(
+            "validation and test family denominators must contain the same families")
+    if len(test_counts) < FORMAL_MIN_FAMILIES:
+        raise ValueError(
+            f"formal evaluation requires at least {FORMAL_MIN_FAMILIES} T1 families")
+    undersized_validation = {
+        family: count for family, count in validation_counts.items()
+        if count < FORMAL_MIN_VALIDATION_PER_FAMILY
+    }
+    if undersized_validation:
+        raise ValueError(
+            "formal evaluation requires at least "
+            f"{FORMAL_MIN_VALIDATION_PER_FAMILY} validation cases per family; "
+            f"found {undersized_validation}")
+    undersized_test = {
+        family: count for family, count in test_counts.items()
+        if count < FORMAL_MIN_TEST_PER_FAMILY
+    }
+    if undersized_test:
+        raise ValueError(
+            "formal evaluation requires at least "
+            f"{FORMAL_MIN_TEST_PER_FAMILY} test cases per family; "
+            f"found {undersized_test}")
 
     if selected_case_ids is None:
         selected = registered
@@ -188,7 +235,29 @@ def formal_evaluation_gate(*, registered_case_ids, selected_case_ids=None,
         "case_ids": selected,
         "registered_case_count": len(registered),
         "maximum_steps": None,
+        "test_family_counts": dict(sorted(test_counts.items())),
+        "validation_family_counts": dict(sorted(validation_counts.items())),
+        "minimum_families": FORMAL_MIN_FAMILIES,
+        "minimum_validation_cases_per_family": FORMAL_MIN_VALIDATION_PER_FAMILY,
+        "minimum_test_cases_per_family": FORMAL_MIN_TEST_PER_FAMILY,
     }
+
+
+def _strict_formal_family_counts(value, name):
+    """Validate a planner-bound family denominator without coercion."""
+    if not isinstance(value, Mapping):
+        raise ValueError(f"{name} must be a mapping of string families to integer counts")
+    counts = {}
+    for family, count in value.items():
+        if not isinstance(family, str) or not family.strip():
+            raise ValueError(f"{name} family IDs must be non-empty strings")
+        if isinstance(count, (bool, np.bool_)) or not isinstance(count, (int, np.integer)):
+            raise ValueError(f"{name} counts must be integers")
+        count = int(count)
+        if count < 0:
+            raise ValueError(f"{name} counts must be nonnegative")
+        counts[family] = count
+    return counts
 
 
 def _validate_fixed_denominator(case_ids, fixed_denominator):
@@ -283,9 +352,9 @@ def _manifest_formal_release(dataset):
 def _formal_validation_eligible(dataset, validation_cases, family_counts):
     return bool(
         _manifest_formal_release(dataset)
-        and len(validation_cases) >= 12
-        and len(family_counts) >= 3
-        and min(family_counts.values(), default=0) >= 4
+        and len(validation_cases) >= FORMAL_MIN_FAMILIES * FORMAL_MIN_VALIDATION_PER_FAMILY
+        and len(family_counts) >= FORMAL_MIN_FAMILIES
+        and min(family_counts.values(), default=0) >= FORMAL_MIN_VALIDATION_PER_FAMILY
     )
 
 
@@ -1910,6 +1979,54 @@ def select_completed_milestones(evaluations):
     }, None
 
 
+def _validation_bootstrap_receipt(registry, scores, physical_case_ids):
+    """Build CI metadata only from the complete registered case registry.
+
+    ``bootstrap_case_interval`` intentionally treats an absent result as an
+    all-penalty unexecuted case for its general scoring API.  A checkpoint
+    receipt must be stricter: a missing bootstrap row is an incomplete
+    validation product, not an observed penalty row.  Keep this guard here so
+    the four candidates cannot silently bootstrap different denominators.
+    """
+    from scripts.core_evaluation import bootstrap_case_interval
+
+    try:
+        registry_keys = set(registry)
+        score_keys = set(scores)
+        physical_keys = set(physical_case_ids)
+    except (TypeError, ValueError) as error:
+        raise ValueError("checkpoint bootstrap registry keys must be hashable") from error
+    if score_keys != registry_keys:
+        raise ValueError(
+            "checkpoint bootstrap requires complete registered validation results")
+    if physical_keys != registry_keys:
+        raise ValueError(
+            "checkpoint bootstrap requires physical IDs for every registered validation case")
+
+    bootstrap = bootstrap_case_interval(
+        registry, scores, physical_case_ids=physical_case_ids)
+    independent_cases_by_family = bootstrap.get("independent_cases_by_family")
+    if not isinstance(independent_cases_by_family, dict) or not independent_cases_by_family:
+        raise ValueError("checkpoint bootstrap did not retain independent case counts")
+    if any(not isinstance(count, int) or count < 1
+           for count in independent_cases_by_family.values()):
+        raise ValueError("checkpoint bootstrap has invalid independent case counts")
+    independent_case_count = sum(independent_cases_by_family.values())
+    return {
+        **bootstrap,
+        "registered_case_count": len(registry_keys),
+        "independent_case_count": int(independent_case_count),
+        "sample_unit": "independent physical case cluster, never frame or particle",
+        "cluster_key": "physical_case_id",
+        "stratified_by": "family",
+        "confidence_interval": {
+            "confidence": bootstrap["confidence"],
+            "lower": bootstrap["lower"],
+            "upper": bootstrap["upper"],
+        },
+    }
+
+
 def evaluate_checkpoints(dataset, checkpoints, *, device="cpu", chunk_size=DEFAULT_CENTERS,
                          run_id=None, qualification_only=False):
     """Roll every formal checkpoint over every validation case and select one.
@@ -1935,7 +2052,16 @@ def evaluate_checkpoints(dataset, checkpoints, *, device="cpu", chunk_size=DEFAU
                 "use qualification_only=True for a diagnostic fixture")
         if not _manifest_formal_release(dataset):
             raise ValueError("formal Core evaluation requires manifest formal_release=true")
-    physical_case_ids = {case_id: dataset.record(case_id)["physical_case_id"] for case_id in validation_cases}
+    lineage_group_ids = {case_id: dataset.record(case_id)["lineage_group_id"]
+                         for case_id in validation_cases}
+    physical_case_ids = {case_id: dataset.record(case_id)["physical_case_id"]
+                         for case_id in validation_cases}
+    formal_eligible = bool(not qualification_only and _manifest_formal_release(dataset))
+    eligibility = {
+        "mode": "diagnostic" if qualification_only else "formal",
+        "diagnostic_eligible": bool(qualification_only),
+        "formal_eligible": formal_eligible,
+    }
     fixed_denominator = {}
     for case_id in validation_cases:
         known = dataset.known_inputs(case_id)
@@ -2025,6 +2151,8 @@ def evaluate_checkpoints(dataset, checkpoints, *, device="cpu", chunk_size=DEFAU
             scores[case_id] = score
             case_rows[case_id] = {"score": score, "rollout": rollout}
         metrics = aggregate_cases(registry, scores)
+        bootstrap = _validation_bootstrap_receipt(
+            registry, scores, physical_case_ids)
         checkpoint_info = {
             "path": str(path), "sha256": observed_hash, "bytes": path.stat().st_size,
             "update": int(payload["update"]), "schema": CHECKPOINT_SCHEMA,
@@ -2033,6 +2161,20 @@ def evaluate_checkpoints(dataset, checkpoints, *, device="cpu", chunk_size=DEFAU
         candidates.append({
             "update": int(payload["update"]), "split": "validation", "metrics": metrics,
             "checkpoint": checkpoint_info, "case_count": len(case_rows), "cases": case_rows,
+            "registered_case_count": len(validation_cases),
+            "fixed_denominator": fixed_denominator,
+            "physical_case_ids": physical_case_ids,
+            "lineage_group_ids": lineage_group_ids,
+            "qualification_only": bool(qualification_only),
+            "formal_eligible": formal_eligible,
+            "eligibility": eligibility,
+            # Descriptive validation diagnostics only.  The selector below
+            # continues to consume ``metrics`` and never uses CI eligibility.
+            "point_estimate": bootstrap["point_estimate"],
+            "confidence_interval": bootstrap["confidence_interval"],
+            "independent_case_count": bootstrap["independent_case_count"],
+            "independent_cases_by_family": bootstrap["independent_cases_by_family"],
+            "bootstrap": bootstrap,
             "execution_summary": _execution_summary(case_rows),
         })
 
@@ -2054,11 +2196,13 @@ def evaluate_checkpoints(dataset, checkpoints, *, device="cpu", chunk_size=DEFAU
         "hidden": model_identity[2] if model_identity else None,
         "split": "validation", "test_included": False,
         "qualification_only": bool(qualification_only),
-        "formal_eligible": bool(not qualification_only and _manifest_formal_release(dataset)),
+        "formal_eligible": formal_eligible,
+        "eligibility": eligibility,
         "validation_case_count": len(validation_cases),
         "validation_family_counts": dict(sorted(family_counts.items())),
         "protocol": PROTOCOL, "fixed_denominator": fixed_denominator,
-        "physical_case_ids": physical_case_ids, "family_registry": registry,
+        "physical_case_ids": physical_case_ids, "lineage_group_ids": lineage_group_ids,
+        "family_registry": registry,
         "checkpoints": candidates, "checkpoint_count": len(candidates),
         "execution_summaries": {
             str(candidate["update"]): candidate["execution_summary"]
@@ -2173,17 +2317,33 @@ def evaluate(dataset, predictor, *, split="test", case_ids=None, maximum_steps=N
     from scripts.core_evaluation import aggregate_cases, score_case
 
     formal_release = _manifest_formal_release(dataset)
+    formal_capacity = None
     if formal_release:
         if diagnostic:
             raise ValueError("formal manifests cannot use diagnostic evaluate")
         registered_case_ids = tuple(dataset.case_ids("test"))
+        validation_case_ids = tuple(dataset.case_ids("validation"))
+        test_family_counts = Counter(
+            dataset.record(case_id)["family"] for case_id in registered_case_ids)
+        validation_family_counts = Counter(
+            dataset.record(case_id)["family"] for case_id in validation_case_ids)
         scope = formal_evaluation_gate(
             registered_case_ids=registered_case_ids,
             selected_case_ids=case_ids,
             split=split,
             maximum_steps=maximum_steps,
+            test_family_counts=test_family_counts,
+            validation_family_counts=validation_family_counts,
         )
         selected_case_ids = tuple(scope["case_ids"])
+        formal_capacity = {
+            "test_family_counts": scope["test_family_counts"],
+            "validation_family_counts": scope["validation_family_counts"],
+            "minimum_families": scope["minimum_families"],
+            "minimum_validation_cases_per_family": scope[
+                "minimum_validation_cases_per_family"],
+            "minimum_test_cases_per_family": scope["minimum_test_cases_per_family"],
+        }
         evaluation_mode = "formal"
     else:
         if maximum_steps is not None:
@@ -2257,6 +2417,7 @@ def evaluate(dataset, predictor, *, split="test", case_ids=None, maximum_steps=N
         "selected_case_ids": list(selected_case_ids),
         "registered_case_count": len(registered_case_ids),
         "case_count": len(case_rows),
+        "formal_capacity": formal_capacity,
         "expected_frames": {
             case_id: denominator["expected_frames"]
             for case_id, denominator in fixed_denominator.items()

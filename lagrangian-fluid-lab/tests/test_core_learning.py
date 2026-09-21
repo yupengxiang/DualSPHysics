@@ -51,6 +51,33 @@ def _formal_test_manifest(tmp_path, case_count=2):
     return manifest
 
 
+def _formal_capacity_manifest(tmp_path, *, family_count=3,
+                             validation_per_family=4, test_per_family=12):
+    """Build a tiny-source manifest with the planner's formal capacities."""
+    manifest = tiny_manifest(tmp_path)
+    template = manifest["cases"][0]
+    cases = []
+    serial = 0
+    for family_index in range(family_count):
+        for split, count in (("test", test_per_family),
+                             ("validation", validation_per_family)):
+            for _ in range(count):
+                row = copy.deepcopy(template)
+                row.update(
+                    case_id=f"formal-test-{serial}",
+                    physical_case_id=f"formal-physical-{serial}",
+                    lineage_group_id=f"formal-lineage-{serial}",
+                    family=f"F{family_index + 1}", split=split,
+                    evaluation_role=("development_extrapolation"
+                                     if split == "test" else "validation"),
+                )
+                cases.append(row)
+                serial += 1
+    manifest["cases"] = cases
+    manifest["formal_release"] = True
+    return manifest
+
+
 def test_normalization_and_sampler_are_train_only_and_resumable(tmp_path):
     manifest = tiny_manifest(tmp_path)
     with CoreDataset(manifest, tmp_path) as data:
@@ -538,7 +565,7 @@ def test_cli_relative_manifest_is_resolved_under_data_root_from_other_cwd(tmp_pa
 
 
 def test_formal_evaluate_rejects_short_horizon_subset_and_non_test_split(tmp_path):
-    manifest = _formal_test_manifest(tmp_path, case_count=2)
+    manifest = _formal_capacity_manifest(tmp_path)
     with CoreDataset(manifest, tmp_path) as data:
         predictor, _ = learning._build_predictor_from_baseline("constant_velocity")
         with pytest.raises(ValueError, match="maximum_steps"):
@@ -550,7 +577,7 @@ def test_formal_evaluate_rejects_short_horizon_subset_and_non_test_split(tmp_pat
 
 
 def test_formal_evaluate_cli_binds_full_registered_test_registry(tmp_path):
-    manifest = _formal_test_manifest(tmp_path, case_count=2)
+    manifest = _formal_capacity_manifest(tmp_path)
     manifest_path = tmp_path / "formal-manifest.json"
     manifest_path.write_text(json.dumps(manifest))
     output = tmp_path / "formal-evaluate.json"
@@ -560,9 +587,12 @@ def test_formal_evaluate_cli_binds_full_registered_test_registry(tmp_path):
     ]) == 0
     receipt = json.loads(output.read_text())
     assert receipt["evaluation_mode"] == "formal"
-    assert receipt["registered_case_count"] == 2
-    assert receipt["aggregate"]["registered_cases"] == 2
-    assert set(receipt["cases"]) == {"formal-test-0", "formal-test-1"}
+    test_case_ids = {row["case_id"] for row in manifest["cases"] if row["split"] == "test"}
+    assert receipt["registered_case_count"] == len(test_case_ids) == 36
+    assert receipt["aggregate"]["registered_cases"] == len(test_case_ids)
+    assert set(receipt["cases"]) == test_case_ids
+    assert receipt["formal_capacity"]["test_family_counts"] == {"F1": 12, "F2": 12, "F3": 12}
+    assert receipt["formal_capacity"]["validation_family_counts"] == {"F1": 4, "F2": 4, "F3": 4}
     assert all(row["expected_frames"] == 1 for row in receipt["cases"].values())
     with pytest.raises(ValueError, match="every registered test case"):
         main([
@@ -573,7 +603,7 @@ def test_formal_evaluate_cli_binds_full_registered_test_registry(tmp_path):
 
 
 def test_formal_evaluate_rejects_unknown_and_duplicate_cases(tmp_path):
-    manifest = _formal_test_manifest(tmp_path, case_count=2)
+    manifest = _formal_capacity_manifest(tmp_path)
     with CoreDataset(manifest, tmp_path) as data:
         predictor, _ = learning._build_predictor_from_baseline("constant_velocity")
         with pytest.raises(ValueError, match="unknown case"):
@@ -582,9 +612,30 @@ def test_formal_evaluate_rejects_unknown_and_duplicate_cases(tmp_path):
             evaluate(data, predictor, case_ids=["formal-test-0", "formal-test-0"])
     with pytest.raises(ValueError, match="every registered test case"):
         formal_evaluation_gate(
-            registered_case_ids=("formal-test-0", "formal-test-1"),
+            registered_case_ids=tuple(f"formal-test-{index}" for index in range(36)),
             selected_case_ids=("formal-test-0",),
+            test_family_counts={"F1": 12, "F2": 12, "F3": 12},
+            validation_family_counts={"F1": 4, "F2": 4, "F3": 4},
         )
+
+
+@pytest.mark.parametrize(("family_count", "test_per_family", "message"), [
+    (2, 12, "at least 3 T1 families"),
+    (3, 11, "at least 12 test cases per family"),
+])
+def test_formal_evaluate_rejects_manifest_below_planner_capacity(
+        tmp_path, family_count, test_per_family, message):
+    manifest = _formal_capacity_manifest(
+        tmp_path, family_count=family_count, test_per_family=test_per_family)
+    with CoreDataset(manifest, tmp_path) as data:
+        predictor, _ = learning._build_predictor_from_baseline("constant_velocity")
+        with pytest.raises(ValueError, match=message):
+            evaluate(data, predictor)
+
+
+def test_formal_evaluation_gate_requires_family_denominator_metadata():
+    with pytest.raises(ValueError, match="family denominator"):
+        formal_evaluation_gate(registered_case_ids=("case",))
 
 
 def test_formal_evaluation_rejects_missing_fixed_denominator():
@@ -593,7 +644,7 @@ def test_formal_evaluation_rejects_missing_fixed_denominator():
 
 
 def test_formal_evaluate_retains_finite_failed_rollout_as_incomplete(tmp_path, monkeypatch):
-    manifest = _formal_test_manifest(tmp_path, case_count=1)
+    manifest = _formal_capacity_manifest(tmp_path)
 
     def finite_but_failed_rollout(dataset, case_id, predictor, **kwargs):
         return {
@@ -622,8 +673,8 @@ def test_formal_evaluate_retains_finite_failed_rollout_as_incomplete(tmp_path, m
         predictor, _ = learning._build_predictor_from_baseline("constant_velocity")
         result = evaluate(data, predictor)
     row = result["cases"]["formal-test-0"]
-    assert result["registered_case_count"] == 1
-    assert result["aggregate"]["registered_cases"] == 1
+    assert result["registered_case_count"] == 36
+    assert result["aggregate"]["registered_cases"] == 36
     assert result["aggregate"]["complete_fraction"] == 0.0
     assert result["execution_summary"]["execution_complete_case_count"] == 0
     assert result["finite_summary"]["finite_rollout_complete_case_count"] == 0
@@ -1074,6 +1125,26 @@ def test_completed_formal_milestones_use_registered_selector():
     assert error is None and selected["update"] == MILESTONE_UPDATES[3]
 
 
+def test_checkpoint_bootstrap_receipt_fails_closed_on_incomplete_or_invalid_clusters():
+    from scripts.core_evaluation import score_case
+
+    registry = {"a": "F1", "b": "F2"}
+    scores = {
+        case_id: score_case([0.0], [0.0], expected_frames=1,
+                            length_m=1.0, speed_mps=1.0)
+        for case_id in registry
+    }
+    with pytest.raises(ValueError, match="complete registered validation results"):
+        learning._validation_bootstrap_receipt(
+            registry, {"a": scores["a"]}, {"a": "p1", "b": "p2"})
+    with pytest.raises(ValueError, match="multiple mechanism families"):
+        learning._validation_bootstrap_receipt(
+            registry, scores, {"a": "shared", "b": "shared"})
+    with pytest.raises(ValueError, match="finite"):
+        learning._validation_bootstrap_receipt(
+            registry, scores, {"a": np.nan, "b": "p2"})
+
+
 def test_four_milestone_rollouts_are_validation_only_and_select_with_hashes(tmp_path):
     manifest = tiny_manifest(tmp_path)
     template = manifest["cases"][0]
@@ -1113,9 +1184,30 @@ def test_four_milestone_rollouts_are_validation_only_and_select_with_hashes(tmp_
     assert report["qualification_only"] is True and report["formal_eligible"] is False
     assert report["checkpoint_count"] == 4
     assert set(report["family_registry"]) == {f"validation-{index}" for index in range(4)}
+    assert report["eligibility"] == {
+        "mode": "diagnostic", "diagnostic_eligible": True, "formal_eligible": False,
+    }
+    assert set(report["lineage_group_ids"]) == set(report["family_registry"])
+    assert report["fixed_denominator"] == report["checkpoints"][0]["fixed_denominator"]
     assert report["selection"]["update"] == 8000
     assert all(candidate["metrics"]["complete_fraction"] == 1.0 for candidate in report["checkpoints"])
     assert all(len(candidate["cases"]) == 4 for candidate in report["checkpoints"])
+    assert all(candidate["point_estimate"] == candidate["metrics"]["selection_score"]
+               for candidate in report["checkpoints"])
+    assert all(candidate["confidence_interval"]["confidence"] == .95
+               for candidate in report["checkpoints"])
+    assert all(candidate["confidence_interval"]["lower"]
+               <= candidate["point_estimate"]
+               <= candidate["confidence_interval"]["upper"]
+               for candidate in report["checkpoints"])
+    assert all(candidate["independent_case_count"] == 4
+               and candidate["independent_cases_by_family"] == {"F3": 4}
+               and candidate["bootstrap"]["sample_unit"]
+               == "independent physical case cluster, never frame or particle"
+               for candidate in report["checkpoints"])
+    assert all(candidate["fixed_denominator"] == report["fixed_denominator"]
+               and candidate["eligibility"] == report["eligibility"]
+               for candidate in report["checkpoints"])
     assert all(row["score"]["expected_frames"] == 1
                for candidate in report["checkpoints"] for row in candidate["cases"].values())
     assert all(row["checkpoint"]["sha256"] for row in report["checkpoints"])
