@@ -1,0 +1,313 @@
+{
+  "schema": "core.formal_training_admission_readiness.v1",
+  "record_id": "formal-training-admission-readiness-luna-max-20260920",
+  "created_at_utc": "2026-09-20T06:10:00Z",
+  "status": "blocked",
+  "mode": "read_only_admission_audit",
+  "purpose": "Independently bind the formal nine-run admission gates to the current planner, learning source closure, preprofile evidence, and preserved Luna Max resource configuration.",
+  "formal_admission": false,
+  "formal_training": false,
+  "formal_job_count": 0,
+  "required_formal_job_count": 9,
+  "diagnostic_job_count": 3,
+  "diagnostic_runs_counted_as_formal": false,
+  "qualification_claim": "none",
+  "execution_constraints": {
+    "read_only": true,
+    "planner_only": true,
+    "new_optimizer_canary_started": false,
+    "new_job_submitted": false,
+    "gpu_started": false,
+    "solver_started": false,
+    "submitted": false,
+    "writes_ledger": false,
+    "central_registry_mutation": 0,
+    "central_ledger_mutation": 0,
+    "formal_runs_started": 0
+  },
+  "requested_compute_configuration": {
+    "label": "Luna Max",
+    "policy": "preserve_existing_configuration; metadata binding only",
+    "observed_host_label": "h200-deepdebris",
+    "observed_hostname": "h200",
+    "resource_profile": {
+      "path": "campaigns/core-v1/learning/backward-resource-measurements.json",
+      "sha256": "fedc3e65080381dd1a6c22caa9394a1eacbb8b7a1f60f53b1c68a44cfbc7d315"
+    },
+    "environment_record": {
+      "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/records/h200-import-remote.json",
+      "sha256": "59f929cf0cf9f4dae802c4175a9b43c15ef17ebd5e0081ddae72ed389c82fc0c"
+    },
+    "launch_requested": false,
+    "interpretation": "The Luna Max/H200 configuration is retained as a future admission binding. This record did not run an optimizer or touch a GPU."
+  },
+  "formal_protocol": {
+    "models": [
+      "mlp",
+      "graph_raw",
+      "graph_residual"
+    ],
+    "seeds": [17, 29, 43],
+    "model_seed_product_count": 9,
+    "updates": 32000,
+    "checkpoint_milestones": [8000, 16000, 24000, 32000],
+    "centers_per_update": 256,
+    "hidden": 64,
+    "learning_rate": 0.001,
+    "normalization_transitions": 256,
+    "validation_transitions": 4,
+    "validation_centers": 256,
+    "validation_cases_required": 12,
+    "validation_cases_per_family_required": 4,
+    "training_split": "train",
+    "validation_split": "validation",
+    "test_included": false,
+    "optimizer": "Adam",
+    "formal_spec_device": "cuda",
+    "formal_spec_device_is_execution": false
+  },
+  "planner_observation": {
+    "planner_schema": "core.formal_training_plan.v1",
+    "planner_script": {
+      "path": "scripts/core_formal_planner.py",
+      "sha256": "f958023abc92147209d976a52978bd5d50c3a4ef1c792aa105f8187cbf6fbc6b"
+    },
+    "manifest": {
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+    },
+    "qualification_evidence": {
+      "path": "campaigns/core-v1/evidence/f3-inherited-qualification.json",
+      "sha256": "a28bf89e231fdb1bd7399c4ed8e2a6cbb297194c5cfee7cc93a1eb9d1d40d8a2"
+    },
+    "profile": {
+      "path": "campaigns/core-v1/learning/backward-resource-measurements.json",
+      "sha256": "fedc3e65080381dd1a6c22caa9394a1eacbb8b7a1f60f53b1c68a44cfbc7d315"
+    },
+    "status": "hold",
+    "launch_allowed": false,
+    "formal_job_count": 0,
+    "required_job_count": 9,
+    "submitted": false,
+    "writes_ledger": false,
+    "gpu_started": false,
+    "audit": {
+      "case_count": 32,
+      "production_case_count": 32,
+      "families": [
+        "F3"
+      ],
+      "family_counts": {
+        "F3": 32
+      },
+      "validation_family_counts": {
+        "F3": 4
+      },
+      "manifest_formal_release": false,
+      "formal_eligible": false,
+      "hard_audit_passing_case_count": 0,
+      "hard_audit_failure_case_count": 32
+    },
+    "hold_reason_categories": [
+      "manifest does not declare formal_release=true",
+      "requires at least 3 distinct T1 families; found ['F3']",
+      "hard/structural audit is not passed for all 32 production cases"
+    ]
+  },
+  "preprofile_observation": {
+    "index": {
+      "path": "campaigns/core-v1/learning/formal-preprofile-v3/index.json",
+      "sha256": "5fc470a23c044b182e970d08a5acdea1ea407869607c118e26935b0370bde67e"
+    },
+    "schema": "core.formal_preprofile_job_set.v3",
+    "status": "ready_diagnostic_only",
+    "formal_admission": false,
+    "formal_training": false,
+    "formal_job_count": 0,
+    "diagnostic_job_count": 3,
+    "launch_allowed_for_diagnostic_preprofile": true,
+    "submitted": false,
+    "gpu_started": false,
+    "writes_ledger": false,
+    "resume_canary_status": "awaiting_v3_checkpoint_bindings",
+    "hold_reason": "F3 remains one-family diagnostic data and formal release is disabled; these three evidence preprofiles are not formal nine-run jobs."
+  },
+  "gate_evaluation": {
+    "formal_manifest_release": {
+      "required": true,
+      "observed": false,
+      "pass": false
+    },
+    "distinct_t1_families": {
+      "required": 3,
+      "observed": 1,
+      "pass": false
+    },
+    "production_case_shape": {
+      "required_cases_per_family": 32,
+      "required_train_per_family": 16,
+      "required_test_per_family": 12,
+      "required_validation_per_family": 4,
+      "observed_f3_cases": 32,
+      "observed_f3_validation": 4,
+      "pass_for_observed_family": true,
+      "overall_formal_pass": false,
+      "reason": "The single F3 family satisfies its local count shape but cannot satisfy the three-family admission gate."
+    },
+    "per_case_hard_audit": {
+      "required_passing_cases": 32,
+      "observed_passing_cases": 0,
+      "observed_failure_cases": 32,
+      "pass": false,
+      "reason": "The inherited qualification evidence carries T1 metadata but does not provide the explicit per-case hard/structural audit required by the current planner."
+    },
+    "current_source_closure": {
+      "required_files": 8,
+      "observed_files": 8,
+      "missing_files": [],
+      "current_closure_sha256": "76c93c4d4effa6bf7ffa1bb124b5a43efc3c5f31bbb107f570a750fb6e5b9b22",
+      "pass_for_fresh_admission": true,
+      "preprofile_source_closure_match": false,
+      "preprofile_mismatch_count": 7,
+      "pass_for_existing_preprofile_evidence": false
+    },
+    "resource_profile": {
+      "host": "h200",
+      "measured_update_frontier": 16,
+      "formal_update_target": 32000,
+      "profile_limit": "16-update engineering canaries; not formal training or multi-family memory upper bounds",
+      "bound": true,
+      "formal_capacity_evidence": false,
+      "pass": false
+    },
+    "diagnostic_exclusion": {
+      "diagnostic_jobs": 3,
+      "formal_jobs": 0,
+      "diagnostic_runs_counted_as_formal": false,
+      "pass": true
+    }
+  },
+  "source_binding": {
+    "hash_algorithm": "sha256",
+    "current_code_files": [
+      {
+        "relative_path": "scripts/core_learning.py",
+        "sha256": "20fee75b02fa9ce5cee6fdc7645bc4970ccbdd5d3a62aed7b9fedeb512c6392f"
+      },
+      {
+        "relative_path": "scripts/core_contract.py",
+        "sha256": "99ff892dfe2c1ae1c7d97af00241f736cf3ebcc3c5e018ab74581fbcb079b261"
+      },
+      {
+        "relative_path": "scripts/core_dataset.py",
+        "sha256": "41b9b65ed196cc39e9d0d3fc4028119c5cd111f4cf97d2f950da57148892d25d"
+      },
+      {
+        "relative_path": "scripts/core_models.py",
+        "sha256": "27a323244554aa564676e957e072197248cc3fb3a923e5816443fd589bbae66f"
+      },
+      {
+        "relative_path": "scripts/core_cfd_dataset.py",
+        "sha256": "9a8b5ed364735804cc66521060ed04a18845a80bd95870d2727eda5392997523"
+      },
+      {
+        "relative_path": "scripts/core_evaluation.py",
+        "sha256": "8256905a9ee5961acfc815ef860b39f918af8fb31714eadfeb33269e608952ec"
+      },
+      {
+        "relative_path": "scripts/core_physics.py",
+        "sha256": "af5469f88791cdd16bf2ee6234c73e76e0dc453fe2030ccb33c03cf6fd84f892"
+      },
+      {
+        "relative_path": "scripts/core_formal_planner.py",
+        "sha256": "f958023abc92147209d976a52978bd5d50c3a4ef1c792aa105f8187cbf6fbc6b"
+      }
+    ],
+    "saved_preprofile_v3_closure_sha256": "9b1266de9642403357470420119ef04e7b44d3d8b21557db50813ee401b93916",
+    "saved_preprofile_v3_mismatch_files": [
+      "scripts/core_learning.py",
+      "scripts/core_contract.py",
+      "scripts/core_dataset.py",
+      "scripts/core_models.py",
+      "scripts/core_cfd_dataset.py",
+      "scripts/core_evaluation.py"
+    ],
+    "preprofile_source_closure_match": false,
+    "preprofile_mismatch_count": 7,
+    "pass_for_existing_preprofile_evidence": false,
+    "binding_decision": "Existing preprofile outputs cannot be admitted as formal evidence under the current source closure; regenerate a fresh planner/spec/evidence bundle after formal inputs pass."
+  },
+  "admission_decision": {
+    "pass": false,
+    "formal_training_run_count": 0,
+    "diagnostic_training_run_count_excluded": 3,
+    "blocking_reasons": [
+      "The portable manifest is F3-only and formal_release=false.",
+      "The current planner sees one T1 family where three are required.",
+      "The current planner sees no explicit hard/structural audit pass for any of the 32 production cases.",
+      "The prior diagnostic preprofile source closure differs from the current eight-file closure.",
+      "The measured resource profile stops at 16-update engineering canaries and does not establish the 32000-update formal capacity."
+    ],
+    "next_safe_action": "Read-only regeneration of the formal manifest/evidence/source closure and a fresh nine-spec planner report after the gates are independently satisfied; do not launch from this record."
+  },
+  "required_before_formal_admission": [
+    "Release a manifest with formal_release=true, three distinct T1 families, 32 production cases per family, and four validation cases per family.",
+    "Attach a matching explicit hard/structural audit to every production case with exact scope, recipe, physical identity, and lineage binding.",
+    "Regenerate the source closure and planner report against the current code hashes; stale v2/v3 preprofile closures cannot be reused as formal evidence.",
+    "Bind the unchanged Luna Max environment/resource profile and produce nine immutable specs (three models by three seeds) without counting the three diagnostic preprofiles.",
+    "Keep formal training and checkpoint selection separate from qualification/canary/diagnostic rows; no registry mutation is part of readiness."
+  ],
+  "input_evidence": [
+    {
+      "path": "campaigns/core-v1/learning/formal-readiness-f3-v3.json",
+      "sha256": "163178dc8aff0803dec45d2957cab91e4a965d2954b2963440d14acb04255603",
+      "role": "prior planner hold report"
+    },
+    {
+      "path": "campaigns/core-v1/learning/formal-preprofile-v3/index.json",
+      "sha256": "5fc470a23c044b182e970d08a5acdea1ea407869607c118e26935b0370bde67e",
+      "role": "diagnostic-only three-job preprofile and exclusion state"
+    },
+    {
+      "path": "campaigns/core-v1/learning/formal-preprofile-proposal-v1.json",
+      "sha256": "9da4cf03338118d13cde4e03fa3353961dba085aaeadd06e38c83c5d0282eabe",
+      "role": "proposal-only formal protocol boundary"
+    },
+    {
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "role": "current one-family portable manifest"
+    },
+    {
+      "path": "campaigns/core-v1/evidence/f3-inherited-qualification.json",
+      "sha256": "a28bf89e231fdb1bd7399c4ed8e2a6cbb297194c5cfee7cc93a1eb9d1d40d8a2",
+      "role": "historical F3 T1 metadata; no formal learning release"
+    },
+    {
+      "path": "campaigns/core-v1/learning/backward-resource-measurements.json",
+      "sha256": "fedc3e65080381dd1a6c22caa9394a1eacbb8b7a1f60f53b1c68a44cfbc7d315",
+      "role": "16-update engineering resource profile"
+    },
+    {
+      "path": "campaigns/core-v1/learning/integration-pilot-resource-plan.json",
+      "sha256": "8f04803a30ee10502dcd45d18e6ba209eece162bad07d1a49b2a86742fd35afe",
+      "role": "resource plan with formal_core_training_runs=0"
+    },
+    {
+      "path": "campaigns/core-v1/learning/validation-selection-root-review-v1.json",
+      "sha256": "c5312b53f33c662cf1c5a56295ea3f5d72897803b0f38182f0c1fe272160a6c0",
+      "role": "validation-selection review boundary"
+    },
+    {
+      "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/records/h200-import-remote.json",
+      "sha256": "59f929cf0cf9f4dae802c4175a9b43c15ef17ebd5e0081ddae72ed389c82fc0c",
+      "role": "preserved H200/Luna Max environment probe"
+    },
+    {
+      "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/environment-record-v1.json",
+      "sha256": "03169cdeb8549bf24ad0233db00db9286fe3f0f211303fd56e4ccc78b9d37c02",
+      "role": "environment package and handoff record"
+    }
+  ],
+  "interpretation_boundary": "This is an independent formal-training admission/readiness record. It preserves the formal nine-run denominator, excludes all three diagnostic preprofiles, and records a blocked gate state. It grants no formal training credit, starts no optimizer, and does not alter the central registry or ledger."
+}

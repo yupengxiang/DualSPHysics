@@ -1,0 +1,88 @@
+{
+  "schema": "core.phase_plan_denominator_receipt.v1",
+  "record_id": "core-phase-plan-denominator-receipt-20260921",
+  "created_at_utc": "2026-09-21T00:00:00Z",
+  "status": "read_only_contract_passed_formal_blocked",
+  "scope": "verify_inspect_train_rollout_evaluate_reproduce",
+  "phase_order": [
+    "verify",
+    "inspect",
+    "train",
+    "rollout",
+    "evaluate",
+    "reproduce"
+  ],
+  "repair": {
+    "relative_manifest_resolution": "core_benchmark and delegated core_learning resolve a relative manifest under explicit data_root for inspect, verify, train, rollout, evaluate, and reproduce.",
+    "phase_plan_cli": "core_benchmark.py phase-plan emits one ordered, read-only phase contract.",
+    "denominator_contract": "expected_frames is frozen as len(registered time axis)-1 per case; missing execution retains the registered denominator and cannot remove a case.",
+    "future_state_contract": "phase plan and all delegated model phases declare predictor_future_state_inputs=false."
+  },
+  "observed_phase_plan": {
+    "path": "campaigns/core-v1/learning/core-phase-plan-denominator-audit-20260921.json",
+    "sha256": "cd6e1a432d1f8b626d7df41a2a27c3ce02356faa2242236550fa52971f37311c",
+    "schema": "core.phase_plan.v1",
+    "passed": true,
+    "manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "registered_case_count": 32,
+    "expected_frames_by_case": "all 32 cases have 835 registered future frames",
+    "missing_denominator_case_count": 0,
+    "trajectory_state_frames_read": 0
+  },
+  "formal_readiness": {
+    "status": "blocked",
+    "formal_admission": false,
+    "formal_training": false,
+    "formal_job_count": 0,
+    "required_formal_job_count": 9,
+    "diagnostic_runs_counted_as_formal": false
+  },
+  "requested_compute_configuration": {
+    "label": "Luna Max",
+    "launch_requested": false,
+    "interpretation": "Only CPU metadata/time-axis auditing ran; no optimizer, GPU, or solver was started."
+  },
+  "execution_constraints": {
+    "formal_updates_started": 0,
+    "optimizer_started": false,
+    "gpu_started": false,
+    "solver_started": false,
+    "registry_written": false,
+    "ledger_written": false,
+    "old_evidence_modified": false
+  },
+  "source_bindings": [
+    {
+      "path": "scripts/core_benchmark.py",
+      "sha256": "c9867ec3fa0293ffd769a2e9e77ca09f301b009660262e6eecb854ef10db394e"
+    },
+    {
+      "path": "tests/test_core_benchmark.py",
+      "sha256": "5e45117007446fad1a3b43175d9aec0a81fe8cc523b6e41edc6786752d2bb33e"
+    },
+    {
+      "path": "scripts/core_learning.py",
+      "sha256": "50e50edc003bdc8b7723163e32cb2b6d56fcd0285ac97db96bac30c7751fc6d0"
+    },
+    {
+      "path": "tests/test_core_learning.py",
+      "sha256": "a8c357964c838c6319baa065dbde758e9d46179afecfe1a70f45321fee042844"
+    }
+  ],
+  "validation": {
+    "targeted_command": ".venv/bin/python -m pytest -q tests/test_core_benchmark.py::test_phase_plan_connects_all_entrypoints_and_freezes_denominator",
+    "targeted_result": "1 passed in 9.47s",
+    "benchmark_suite_command": ".venv/bin/python -m pytest -q tests/test_core_benchmark.py",
+    "benchmark_suite_result": "4 passed in 48.24s",
+    "evaluator_campaign_result": "13 passed in 0.44s",
+    "package_relative_root_result": "1 passed in 1.44s",
+    "rollout_denominator_result": "3 passed in 2.42s",
+    "learning_relative_root_result": "1 passed in 9.01s",
+    "learning_suite_result": "30 passed in 10.55s"
+  },
+  "preserved_formal_readiness_receipt": {
+    "path": "campaigns/core-v1/learning/formal-training-admission-readiness-luna-max-20260920.json",
+    "sha256": "a40345cdd3550a2b15e19a3175ab58835db64be0453a39933b924625ebf86495",
+    "status": "blocked"
+  }
+}
