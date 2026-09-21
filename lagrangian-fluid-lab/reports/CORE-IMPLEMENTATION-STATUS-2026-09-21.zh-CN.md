@@ -110,6 +110,11 @@
   （`fluid_first_id=94622`），因此当前 F5 identity 不再授权 solver anchor、同输入
   重跑或 T1 资格。15 行失败分母保留，后续只有出现新的独立物理假设并通过 root
   review 才能重新开 F5。
+- F1/F2 第三个 T1 路线搜索也已完成只读收束。F1 G1/H1--H4、F2 DBC duration、
+  receiver/weir、release-speed、distributed-slot、submerged-orifice v2/v3/v4 和
+  H2 static-hold 均已有硬失败或事件删失，没有发现可审计的新物理 Definition。
+  新 receipt 只冻结 `route_closed_no_new_hypothesis`，保留各自 zero-credit 与失败
+  分母；没有运行 GenCase/native/solver，也没有变更 registry、ledger、T1/T2。
 
 ## 当前门状态
 
