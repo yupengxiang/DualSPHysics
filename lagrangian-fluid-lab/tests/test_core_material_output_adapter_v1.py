@@ -14,11 +14,16 @@ from scripts.core_material_output_adapter_v1 import (
     adapt_material_output,
     normalize_material_output,
 )
-from scripts.core_material_output_contract_v1 import OUTPUT_SCHEMA, evaluate_material_output
+from scripts.core_material_output_contract_v1 import (
+    MASS_CLOSURE_TOLERANCE_KG,
+    OUTPUT_SCHEMA,
+    evaluate_material_output,
+)
 
 
 FAMILY = "F3"
 CASE_ID = "synthetic-material-adapter-f3"
+REQUIRED_SOURCE_IDS = ["source-a", "source-b"]
 
 
 def _source_summary(family: str = FAMILY, case_id: str = CASE_ID) -> dict:
@@ -28,7 +33,7 @@ def _source_summary(family: str = FAMILY, case_id: str = CASE_ID) -> dict:
         "case_id": case_id,
         "denominator_policy": "all_initial_mass",
         "initial_mass_kg": 100.0,
-        "closure_tolerance_kg": 1.0e-9,
+        "closure_tolerance_kg": MASS_CLOSURE_TOLERANCE_KG,
         "terminal_buckets": {
             "source": {"mass_kg": 40.0, "fraction": 0.40},
             "destination": {"mass_kg": 59.5, "fraction": 0.595},
@@ -155,7 +160,7 @@ def _components(family: str = FAMILY, case_id: str = CASE_ID) -> tuple[dict, ...
 
 
 def test_f3_pass_normalizes_to_contract_and_keeps_full_source_denominator() -> None:
-    result = adapt_material_output(*_components())
+    result = adapt_material_output(*_components(), required_source_ids=REQUIRED_SOURCE_IDS)
 
     assert result["schema"] == OUTPUT_SCHEMA
     assert result["passed"] is True
@@ -166,6 +171,7 @@ def test_f3_pass_normalizes_to_contract_and_keeps_full_source_denominator() -> N
     assert result["events"]["return"]["censor"]["counts_as_acceptance"] is False
     assert result["source_coverage"]["source_count"] == 2
     assert result["source_coverage"]["source_unknown_gate_pass"] is True
+    assert result["source_coverage"]["aggregate_unknown_gate_pass"] is True
     assert result["execution_constraints"]["hdf5_opened"] is False
     assert result["execution_constraints"]["registry_mutation"] == 0
     json.dumps(result, allow_nan=False)
@@ -173,7 +179,10 @@ def test_f3_pass_normalizes_to_contract_and_keeps_full_source_denominator() -> N
 
 
 def test_f4_pass_uses_its_own_family_fields_without_importing_f3_fields() -> None:
-    result = adapt_material_output(*_components("F4", "synthetic-material-adapter-f4"))
+    result = adapt_material_output(
+        *_components("F4", "synthetic-material-adapter-f4"),
+        required_source_ids=REQUIRED_SOURCE_IDS,
+    )
 
     assert result["family"] == "F4"
     assert result["passed"] is True
@@ -200,7 +209,7 @@ def test_missing_new_fields_fail_closed(component_index, field_path) -> None:
     del target[field_path[-1]]
 
     with pytest.raises(ValueError, match="missing required field"):
-        adapt_material_output(*components)
+        adapt_material_output(*components, required_source_ids=REQUIRED_SOURCE_IDS)
 
 
 def test_old_bridge_summary_shape_is_not_guessed_or_adapted() -> None:
@@ -214,7 +223,7 @@ def test_old_bridge_summary_shape_is_not_guessed_or_adapted() -> None:
     }
 
     with pytest.raises(ValueError, match="source_summary.*schema"):
-        adapt_material_output(*components)
+        adapt_material_output(*components, required_source_ids=REQUIRED_SOURCE_IDS)
 
 
 def test_component_identity_mismatch_is_rejected() -> None:
@@ -222,14 +231,14 @@ def test_component_identity_mismatch_is_rejected() -> None:
     components[2]["case_id"] = "different-case"
 
     with pytest.raises(ValueError, match="identity"):
-        adapt_material_output(*components)
+        adapt_material_output(*components, required_source_ids=REQUIRED_SOURCE_IDS)
 
 
 def test_scientific_failure_is_diagnostic_zero_credit_not_silently_repaired() -> None:
     components = list(_components())
     components[0]["unknown_bound"]["worst_case_fraction"] = 0.011
 
-    result = normalize_material_output(*components)
+    result = normalize_material_output(*components, required_source_ids=REQUIRED_SOURCE_IDS)
 
     assert result["passed"] is False
     assert "unknown_worst_case_bound" in result["failure_reasons"]
@@ -243,7 +252,7 @@ def test_censor_acceptance_claim_is_rejected_instead_of_defaulted() -> None:
     components[2]["first_passage"]["censor"]["counts_as_acceptance"] = True
 
     with pytest.raises(ValueError, match="counts_as_acceptance"):
-        adapt_material_output(*components)
+        adapt_material_output(*components, required_source_ids=REQUIRED_SOURCE_IDS)
 
 
 def test_component_schemas_are_required() -> None:
@@ -251,4 +260,89 @@ def test_component_schemas_are_required() -> None:
     del components[1]["schema"]
 
     with pytest.raises(ValueError, match="transfer_matrix.*schema"):
-        adapt_material_output(*components)
+        adapt_material_output(*components, required_source_ids=REQUIRED_SOURCE_IDS)
+
+
+def test_required_source_ids_are_mandatory_and_external() -> None:
+    with pytest.raises(TypeError, match="required_source_ids"):
+        adapt_material_output(*_components())
+
+
+@pytest.mark.parametrize("shape", ["merged", "missing", "extra"])
+def test_source_rows_must_match_registered_source_set_exactly(shape: str) -> None:
+    components = list(_components())
+    rows = components[0]["source_rows"]
+    if shape == "merged":
+        components[0]["source_rows"] = [
+            {
+                "source_id": "source-a+source-b",
+                "denominator_policy": "all_initial_mass",
+                "initial_mass_kg": 100.0,
+                "unknown_fraction_max": 0.005,
+            }
+        ]
+    elif shape == "missing":
+        components[0]["source_rows"] = rows[:1]
+    else:
+        components[0]["source_rows"] = [
+            *rows,
+            {
+                "source_id": "source-c",
+                "denominator_policy": "all_initial_mass",
+                "initial_mass_kg": 1.0,
+                "unknown_fraction_max": 0.0,
+            },
+        ]
+
+    with pytest.raises(ValueError, match="required_source_ids"):
+        adapt_material_output(*components, required_source_ids=REQUIRED_SOURCE_IDS)
+
+
+def test_registered_mass_tolerance_cannot_hide_missing_mass() -> None:
+    components = list(_components())
+    components[0]["closure_tolerance_kg"] = 1.0
+    components[0]["terminal_buckets"]["unknown"] = {"mass_kg": 0.0, "fraction": 0.0}
+    components[0]["unknown_bound"]["observed_fraction"] = 0.0
+
+    with pytest.raises(ValueError, match="closure_tolerance_kg.*registered"):
+        adapt_material_output(*components, required_source_ids=REQUIRED_SOURCE_IDS)
+
+
+def test_per_source_and_weighted_aggregate_unknown_gates_are_separate() -> None:
+    components = list(_components())
+    components[0]["source_rows"][0]["initial_mass_kg"] = 10.0
+    components[0]["source_rows"][0]["unknown_fraction_max"] = 0.02
+    components[0]["source_rows"][1]["initial_mass_kg"] = 90.0
+    components[0]["source_rows"][1]["unknown_fraction_max"] = 0.0
+
+    result = normalize_material_output(*components, required_source_ids=REQUIRED_SOURCE_IDS)
+
+    coverage = result["source_coverage"]
+    assert coverage["maximum_source_unknown_fraction"] == pytest.approx(0.02)
+    assert coverage["aggregate_worst_case_unknown_fraction"] == pytest.approx(0.002)
+    assert coverage["source_unknown_gate_pass"] is False
+    assert coverage["aggregate_unknown_gate_pass"] is True
+    assert result["passed"] is False
+    assert "source_unknown_gate" in result["failure_reasons"]
+    assert result["diagnostic_only"] is True
+    assert result["qualification_claim"] == "none"
+    assert result["qualification_credit"] == 0
+    assert result["T2_macro"] is False
+    assert result["T2_path"] is False
+
+
+def test_weighted_aggregate_unknown_failure_is_diagnostic() -> None:
+    components = list(_components())
+    for row in components[0]["source_rows"]:
+        row["unknown_fraction_max"] = 0.011
+
+    result = normalize_material_output(*components, required_source_ids=REQUIRED_SOURCE_IDS)
+
+    coverage = result["source_coverage"]
+    assert coverage["aggregate_worst_case_unknown_fraction"] == pytest.approx(0.011)
+    assert coverage["aggregate_bound_covers_source_rows"] is False
+    assert coverage["aggregate_unknown_gate_pass"] is False
+    assert result["passed"] is False
+    assert "source_unknown_gate" in result["failure_reasons"]
+    assert "aggregate_unknown_gate" in result["failure_reasons"]
+    assert result["qualification_credit"] == 0

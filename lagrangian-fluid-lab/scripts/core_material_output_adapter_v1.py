@@ -37,6 +37,7 @@ try:
     from scripts.core_material_output_contract_v1 import (
         DENOMINATOR_POLICY,
         EVENTS,
+        MASS_CLOSURE_TOLERANCE_KG,
         OUTPUT_SCHEMA,
         PATH_COVERAGE_POLICY,
         UNKNOWN_FRACTION_LIMIT,
@@ -46,6 +47,7 @@ except ModuleNotFoundError:  # pragma: no cover - direct script import
     from core_material_output_contract_v1 import (  # type: ignore
         DENOMINATOR_POLICY,
         EVENTS,
+        MASS_CLOSURE_TOLERANCE_KG,
         OUTPUT_SCHEMA,
         PATH_COVERAGE_POLICY,
         UNKNOWN_FRACTION_LIMIT,
@@ -161,6 +163,20 @@ def _policy(value: Any, name: str) -> str:
     return DENOMINATOR_POLICY
 
 
+def _required_source_ids(value: Any) -> frozenset[str]:
+    if isinstance(value, (str, bytes)) or not isinstance(value, (list, tuple, set, frozenset)):
+        raise ValueError("required_source_ids must be a non-empty collection of source ids")
+    if not value:
+        raise ValueError("required_source_ids must not be empty")
+    normalized = [
+        _string(item, f"required_source_ids[{index}]")
+        for index, item in enumerate(value)
+    ]
+    if len(set(normalized)) != len(normalized):
+        raise ValueError("required_source_ids must not contain duplicates")
+    return frozenset(normalized)
+
+
 def _close(actual: float, expected: float, tolerance: float) -> bool:
     return abs(actual - expected) <= max(tolerance, 1.0e-12)
 
@@ -189,6 +205,7 @@ def _validate_component_identity(
 
 def _source_summary(
     value: Any,
+    required_source_ids: frozenset[str],
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], str, str]:
     summary = _object(value, "source_summary")
     _schema(summary, SOURCE_SUMMARY_SCHEMA, "source_summary")
@@ -207,8 +224,11 @@ def _source_summary(
         _required(summary, "closure_tolerance_kg", "source_summary"),
         "source_summary.closure_tolerance_kg",
     )
-    if tolerance < 0:
-        raise ValueError("source_summary.closure_tolerance_kg cannot be negative")
+    if tolerance != MASS_CLOSURE_TOLERANCE_KG:
+        raise ValueError(
+            "source_summary.closure_tolerance_kg must equal the registered "
+            f"value {MASS_CLOSURE_TOLERANCE_KG!r}"
+        )
 
     terminal = _object(
         _required(summary, "terminal_buckets", "source_summary"),
@@ -237,6 +257,7 @@ def _source_summary(
     normalized_rows: list[dict[str, Any]] = []
     seen: set[str] = set()
     source_mass_total = 0.0
+    weighted_source_unknown_mass = 0.0
     maximum_source_unknown = 0.0
     for index, raw in enumerate(rows):
         row = _object(raw, f"source_summary.source_rows[{index}]")
@@ -262,6 +283,7 @@ def _source_summary(
             f"source_summary.source_rows[{index}].unknown_fraction_max",
         )
         source_mass_total += source_mass
+        weighted_source_unknown_mass += source_mass * unknown
         maximum_source_unknown = max(maximum_source_unknown, unknown)
         normalized_rows.append(
             {
@@ -271,7 +293,14 @@ def _source_summary(
                 "denominator_policy": DENOMINATOR_POLICY,
             }
         )
-    if not _close(source_mass_total, initial, tolerance):
+    if seen != required_source_ids:
+        missing = sorted(required_source_ids - seen)
+        extra = sorted(seen - required_source_ids)
+        raise ValueError(
+            "source_summary.source_rows source ids do not match required_source_ids; "
+            f"missing={missing!r}, extra={extra!r}"
+        )
+    if not _close(source_mass_total, initial, MASS_CLOSURE_TOLERANCE_KG):
         raise ValueError("source_summary.source_rows do not close the initial-mass denominator")
 
     unknown_input = _object(
@@ -305,12 +334,22 @@ def _source_summary(
     expected_observed = buckets["unknown"]["mass_kg"] / initial
     if not _close(observed, expected_observed, tolerance / initial):
         raise ValueError("source_summary.unknown_bound.observed_fraction is not bound to unknown mass")
-    if worst < observed or worst < maximum_source_unknown:
-        raise ValueError("source_summary.unknown_bound.worst_case_fraction understates source unknown bounds")
+    aggregate_worst = weighted_source_unknown_mass / initial
+    if worst < observed:
+        raise ValueError("source_summary.unknown_bound.worst_case_fraction cannot be below observed_fraction")
+    aggregate_bound_covers_source_rows = worst >= aggregate_worst
+
+    source_unknown_gate_pass = maximum_source_unknown <= UNKNOWN_FRACTION_LIMIT
+    aggregate_unknown_gate_pass = (
+        observed <= UNKNOWN_FRACTION_LIMIT
+        and worst <= UNKNOWN_FRACTION_LIMIT
+        and aggregate_worst <= UNKNOWN_FRACTION_LIMIT
+        and aggregate_bound_covers_source_rows
+    )
 
     mass = {
         "initial_mass_kg": initial,
-        "closure_tolerance_kg": tolerance,
+        "closure_tolerance_kg": MASS_CLOSURE_TOLERANCE_KG,
         "denominator_policy": DENOMINATOR_POLICY,
         **buckets,
     }
@@ -327,10 +366,16 @@ def _source_summary(
         "case_id": case_id,
         "denominator_policy": DENOMINATOR_POLICY,
         "source_count": len(normalized_rows),
+        "required_source_ids": sorted(required_source_ids),
         "initial_mass_kg": initial,
         "source_mass_sum_kg": source_mass_total,
         "maximum_source_unknown_fraction": maximum_source_unknown,
-        "source_unknown_gate_pass": maximum_source_unknown <= UNKNOWN_FRACTION_LIMIT,
+        "source_unknown_gate_pass": source_unknown_gate_pass,
+        "aggregate_observed_unknown_fraction": observed,
+        "aggregate_worst_case_unknown_fraction": aggregate_worst,
+        "declared_aggregate_worst_case_fraction": worst,
+        "aggregate_bound_covers_source_rows": aggregate_bound_covers_source_rows,
+        "aggregate_unknown_gate_pass": aggregate_unknown_gate_pass,
         "rows": normalized_rows,
     }
     return mass, unknown_bound, source_coverage, family, case_id
@@ -535,6 +580,8 @@ def adapt_material_output(
     events: dict[str, Any],
     path_error: dict[str, Any],
     family_fields: dict[str, Any],
+    *,
+    required_source_ids: Any,
 ) -> dict[str, Any]:
     """Normalize five complete JSON components into the v1 output contract.
 
@@ -553,8 +600,12 @@ def adapt_material_output(
     for name, component in components.items():
         _assert_json_like(component, name)
 
+    registered_source_ids = _required_source_ids(required_source_ids)
     family, case_id, family_specific = _family_fields(family_fields)
-    source_mass, unknown_bound, source_coverage, source_family, source_case = _source_summary(source_summary)
+    source_mass, unknown_bound, source_coverage, source_family, source_case = _source_summary(
+        source_summary,
+        registered_source_ids,
+    )
     if source_family != family or source_case != case_id:
         raise ValueError("source_summary family/case identity does not match family_fields")
     normalized_matrix = _transfer_matrix(transfer_matrix, family, case_id)
@@ -578,6 +629,22 @@ def adapt_material_output(
         "family_specific": family_specific,
     }
     result = evaluate_material_output(payload)
+
+    source_gate_failures = []
+    if not source_coverage["source_unknown_gate_pass"]:
+        source_gate_failures.append("source_unknown_gate")
+    if not source_coverage["aggregate_unknown_gate_pass"]:
+        source_gate_failures.append("aggregate_unknown_gate")
+    if source_gate_failures:
+        result["passed"] = False
+        result["failure_reasons"] = [
+            *result["failure_reasons"],
+            *[reason for reason in source_gate_failures if reason not in result["failure_reasons"]],
+        ]
+    result["gates"]["source_unknown_coverage"] = bool(source_coverage["source_unknown_gate_pass"])
+    result["gates"]["aggregate_unknown_coverage"] = bool(
+        source_coverage["aggregate_unknown_gate_pass"]
+    )
 
     # These are non-qualifying, source-coverage extensions.  They preserve the
     # complete denominator audit without asking the target contract to infer
@@ -605,6 +672,7 @@ def adapt_material_output(
         result.get("diagnostic_only") is not True
         or result.get("qualification_claim") != "none"
         or result.get("qualification_credit") != 0
+        or any(result.get(name) is not False for name in ("T2_macro", "T2_path"))
     ):
         raise AssertionError("adapter emitted a non-diagnostic or nonzero qualification result")
     return result
@@ -616,9 +684,18 @@ def normalize_material_output(
     events: dict[str, Any],
     path_error: dict[str, Any],
     family_fields: dict[str, Any],
+    *,
+    required_source_ids: Any,
 ) -> dict[str, Any]:
     """Explicit-name alias for :func:`adapt_material_output`."""
-    return adapt_material_output(source_summary, transfer_matrix, events, path_error, family_fields)
+    return adapt_material_output(
+        source_summary,
+        transfer_matrix,
+        events,
+        path_error,
+        family_fields,
+        required_source_ids=required_source_ids,
+    )
 
 
 __all__ = [
