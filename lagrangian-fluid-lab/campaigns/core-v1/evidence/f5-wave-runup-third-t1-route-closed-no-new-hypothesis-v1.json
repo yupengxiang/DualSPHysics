@@ -1,0 +1,213 @@
+{
+  "schema": "core.f5.third_t1.route_closed_no_new_hypothesis.v1",
+  "created_at_utc": "2026-09-21T02:00:00Z",
+  "record_id": "f5-wave-runup-third-t1-route-closed-no-new-hypothesis-v1",
+  "status": "f5_route_closed_no_new_hypothesis",
+  "family": "F5",
+  "scope_id": "F5_prescribed_wave_runup_x_v1",
+  "qualification_only": true,
+  "qualification_claim": "none",
+  "qualified": false,
+  "T1_numerical": false,
+  "T2_numerical": false,
+  "matrix_credit": 0,
+  "candidate_status": "closed",
+  "decision": "stop_f5_until_independent_physical_hypothesis",
+  "independent_hypothesis_audit": {
+    "status": "none_found_in_audited_f5_lineage",
+    "new_physical_hypothesis_count": 0,
+    "audited_hypotheses": [
+      {
+        "id": "H1_missing_solid_exclusion_or_fill_ordering",
+        "status": "tested_and_failed_by_v3",
+        "mechanism_class": "geometry_materialization",
+        "result": {
+          "case_id": "F5_wave_runup_q0p50_dp0p0075_geomrepair_v3",
+          "hypothesis": "explicit setmkvoid plus autofill precursor followed by unchanged physical STL redraw",
+          "status": "cpu_native_preflight_failed_geometry_repair_gate",
+          "blocks_endpoint_inside_count": 1,
+          "fluid_first_id": 94622,
+          "fluid_particles": 1279855,
+          "failure_class": "frame0_fluid_endpoint_inside_transformed_blocks"
+        }
+      },
+      {
+        "id": "H2_strict_stl_contact_band_classification",
+        "status": "diagnostic_only_no_release_credit",
+        "mechanism_class": "classification_diagnostic",
+        "result": "Cannot waive exact fluid endpoint or saved-chord gates."
+      },
+      {
+        "id": "H2b_official_autofill_boundary_materialization",
+        "status": "tested_and_failed_by_v4",
+        "mechanism_class": "geometry_materialization",
+        "result": {
+          "case_id": "F5_wave_runup_q0p50_dp0p0075_geomrepair_v4",
+          "hypothesis": "official setmkbound followed by one drawfilestl autofill=true per watertight STL",
+          "status": "cpu_native_preflight_failed_geometry_repair_gate",
+          "blocks_endpoint_inside_count": 1,
+          "fluid_first_id": 94622,
+          "fluid_particles": 1279855,
+          "failure_class": "frame0_fluid_endpoint_inside_transformed_blocks"
+        }
+      }
+    ],
+    "closure_reason": [
+      "v3 and v4 preserve the same transformed physical STL, motion, q, dp, domain, and cadence; they only change discrete materialization.",
+      "Both exact frame-0 fluid-only gates leave one block endpoint inside the transformed block STL.",
+      "No audited F5 artifact proposes a distinct wave/contact/topology mechanism with a falsifiable prediction beyond those two repairs."
+    ]
+  },
+  "scientific_failure_preserved": {
+    "v3": {
+      "case_id": "F5_wave_runup_q0p50_dp0p0075_geomrepair_v3",
+      "hypothesis": "explicit setmkvoid plus autofill precursor followed by unchanged physical STL redraw",
+      "status": "cpu_native_preflight_failed_geometry_repair_gate",
+      "blocks_endpoint_inside_count": 1,
+      "fluid_first_id": 94622,
+      "fluid_particles": 1279855,
+      "failure_class": "frame0_fluid_endpoint_inside_transformed_blocks"
+    },
+    "v4": {
+      "case_id": "F5_wave_runup_q0p50_dp0p0075_geomrepair_v4",
+      "hypothesis": "official setmkbound followed by one drawfilestl autofill=true per watertight STL",
+      "status": "cpu_native_preflight_failed_geometry_repair_gate",
+      "blocks_endpoint_inside_count": 1,
+      "fluid_first_id": 94622,
+      "fluid_particles": 1279855,
+      "failure_class": "frame0_fluid_endpoint_inside_transformed_blocks"
+    },
+    "prior_anchor": {
+      "scientific_failure_class": "sampled_zero_tolerance_geometry_failure",
+      "sampled_entity_penetration_particle_frames": 3354,
+      "sampled_saved_chord_crossing_count": 1435
+    },
+    "same_input_retry": false,
+    "failure_summary_is_authoritative": true
+  },
+  "fixed_denominator": {
+    "planned_rows": 15,
+    "failed_rows_retained": true,
+    "survivor_renormalization": false,
+    "denominator_mutation": 0,
+    "matrix_mutation": 0,
+    "T1_T2_denominator_mutation": 0
+  },
+  "reuse_policy": {
+    "new_definition_written": false,
+    "new_input_identity_materialized": false,
+    "old_v2_definition_reused": false,
+    "old_v2_generated_xml_reused": false,
+    "old_v2_bi4_reused": false,
+    "old_v2_trajectory_reused": false,
+    "old_v2_output_stem_reused": false,
+    "v3_v4_retry": false,
+    "forbidden_reuse": [
+      "fresh-definition-v2/F5_wave_runup_q0p50_dp0p0075_Def.xml",
+      "fresh-definition-v2/preflight-v2/generated/F5_wave_runup_q0p50_dp0p0075_v2.bi4",
+      "f5-wave-runup-third-t1-q05-dp0075-v2-protected-gpu-anchor/*",
+      "data-official/O5_wave_runup.h5",
+      "data-official/O5_wave_runup_refined.h5"
+    ]
+  },
+  "execution_controls": {
+    "read_only_audit": true,
+    "definition_written": false,
+    "gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "job_mutation": 0,
+    "attempt_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "matrix_mutation": 0,
+    "qualification_credit": 0
+  },
+  "next_step": {
+    "decision": "route_closed",
+    "required_before_reopening": [
+      "A new root-level scientific hypothesis independent of v3/v4 geometry materialization must be written and falsifiable.",
+      "A new candidate identity and root review must be approved before any file materialization or preflight."
+    ],
+    "forbidden_now": [
+      "Do not rerun v2, v3, or v4.",
+      "Do not start solver, GPU, queue, registry, ledger, T1, T2, or matrix actions."
+    ]
+  },
+  "hash_bindings": {
+    "proposal": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/geometry-repair-proposal-audit-v1.json",
+      "sha256": "3163d6e1d75b3ffacbda61afeb18e9e35a98e5e575ded254c6b7b86733ebee42",
+      "bytes": 24970,
+      "role": "proposal-only F5 geometry hypothesis audit"
+    },
+    "failure_summary": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/failure-summary-v1.json",
+      "sha256": "d18299fd1335b9c65a33839256adbf26f165dfb61fe8636aaf9712ccc9282336",
+      "bytes": 3382,
+      "role": "authoritative F5 v3/v4 scientific failure and candidate closure"
+    },
+    "v3_root_review": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/root-review-receipt-v1.json",
+      "sha256": "24b1bf0780dc905a7e17e31aeac7be1a2e98b5b0f9bd49eccefcff6e4e6b9dc1",
+      "bytes": 9254,
+      "role": "v3 explicit-void geometry root review"
+    },
+    "v3_contract": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/geometry-repair-contract-v1.json",
+      "sha256": "479df60b5bd610f6275e0343c0b5302a0fb5743da6074823bd29808c2c7e584b",
+      "bytes": 6395,
+      "role": "v3 explicit-void input/output contract"
+    },
+    "v3_preflight": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/preflight-v3/preflight.json",
+      "sha256": "eb91770a8a52b1495438d2ff9fe13d265d05053cb15109f3251a9da6ace25441",
+      "bytes": 8126,
+      "role": "v3 CPU/native frame-0 geometry result"
+    },
+    "v4_root_review": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/autofill-bound-root-review-v1.json",
+      "sha256": "c9f0a76ecee5876d42c0d49eda50f9cc4e55d371e9f44ffa1dd70b75d33ffb87",
+      "bytes": 7825,
+      "role": "v4 official-autofill geometry root review"
+    },
+    "v4_contract": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/v4-input/geometry-autofill-bound-contract-v1.json",
+      "sha256": "2910fac741812bc255b371da1592bca88fa0c6561a7cc3c337b73443ff6e06ce",
+      "bytes": 6015,
+      "role": "v4 official-autofill input/output contract"
+    },
+    "v4_preflight": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/preflight-v4/preflight.json",
+      "sha256": "75f55fd80d01a067acb72e22888797b14e30ce22fc22d98ac90838c9ef519c2d",
+      "bytes": 8189,
+      "role": "v4 CPU/native frame-0 geometry result"
+    },
+    "anchor_negative": {
+      "path": "campaigns/core-v1/evidence/f5-wave-runup-third-t1-anchor-negative-evidence-v1.json",
+      "sha256": "d09cf0ca1388bb752909af61e520fb64b195766d3f8884968d587ff9a510b3d2",
+      "bytes": 4675,
+      "role": "prior sampled solver-anchor scientific negative evidence"
+    },
+    "implementation": {
+      "path": "scripts/f5_wave_runup_route_closed_audit_v1.py",
+      "sha256": "558e00eae798789b56073386e2519412859aaf643eb9fb33369057cd45e15887",
+      "bytes": 18926,
+      "role": "read-only F5 route-closure implementation"
+    },
+    "test": {
+      "path": "tests/test_f5_wave_runup_route_closed_audit_v1.py",
+      "sha256": "f7032db524c68e95fa11134e769de90b1e27bbc7445b6af6a39701a05a559613",
+      "bytes": 2553,
+      "role": "route-closure regression test"
+    },
+    "report": {
+      "path": "reports/F5-WAVE-RUNUP-THIRD-T1-ROUTE-CLOSED-2026-09-21.zh-CN.md",
+      "sha256": "0c0df1178ae03dbc3048899211104bf400bb9d141c765296bcd5fb3f97d6ff3d",
+      "bytes": 4369,
+      "role": "Chinese route-closure report"
+    }
+  }
+}
