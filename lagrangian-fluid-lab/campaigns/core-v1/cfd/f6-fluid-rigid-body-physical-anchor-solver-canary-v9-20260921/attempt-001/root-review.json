@@ -1,0 +1,98 @@
+{
+  "schema": "core.f6.physical_anchor.protected_solver_canary_root_review.v1",
+  "review_id": "F6_explicit_body_v9_solver_canary_root_review_20260921",
+  "created_at_utc": "2026-09-21T09:12:51.040903+00:00",
+  "status": "root_review_authorized_one_cpu_solver_canary",
+  "family": "F6",
+  "scope_id": "F6_fluid_rigid_body_physical_anchor_v1",
+  "case_id": "CORE_F6_physical_anchor_single_body_gravity_explicit_body_v9_20260921",
+  "body_id": "F6_physical_anchor_body_kappa_20260921",
+  "decision": {
+    "authorized_solver": true,
+    "authorized_gpu": false,
+    "authorized_cpu_solver": true,
+    "authorized_queue": false,
+    "authorized_registry": false,
+    "authorized_ledger": false,
+    "authorized_matrix": false,
+    "exactly_one_solver_attempt": true,
+    "same_input_retry": false,
+    "resume": false
+  },
+  "basis": {
+    "proposal": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-root-review-v9-20260921/proposal.json",
+      "sha256": "9553e000e0650a6f80e7cf49c76ffd025e45db33ad5752435cab0b6c67710070",
+      "bytes": 7230,
+      "role": "v9 conditional canary proposal"
+    },
+    "root_preflight": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-root-review-v9-20260921/preflight.json",
+      "sha256": "3fa493328bf3d26bacb9f1403d4046e323a4fbc52aba766df156f73d0bd6462b",
+      "bytes": 8756,
+      "role": "v9 root CPU preflight"
+    },
+    "native_preflight": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-cpu-native-preflight-v9-20260921/preflight.json",
+      "sha256": "bcf01e9969894ed5af4dc7cd8e1c820910eb58d916f2b75b78204164608f3c70",
+      "bytes": 14300,
+      "role": "v9 exact-one CPU/native preflight"
+    },
+    "definition_contract": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-root-review-v9-20260921/definition-contract.json",
+      "sha256": "c186c02760376ef38b0182add08f3bc50e2a60258e736028a7abff65fe36a94f",
+      "bytes": 8706,
+      "role": "v9 Definition contract"
+    },
+    "event_window": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-root-review-v9-20260921/event-window-contract.json",
+      "sha256": "bb8173d70b2c9ff4727543ae4d0f051b6605e6e5d64066b218ed0e5d493ddc9f",
+      "bytes": 2293,
+      "role": "v9 event-window contract"
+    },
+    "body_sidecar_schema": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-root-review-v9-20260921/body-state-force-torque-sidecar-schema.json",
+      "sha256": "618315902d44cf91dff20c7199877f13bfd9bf2fb9ab76f223117aa743a7d927",
+      "bytes": 3091,
+      "role": "v9 body-state/force/torque schema"
+    },
+    "runtime_worker": {
+      "path": "scripts/f6_physical_anchor_solver_canary_v9.py",
+      "sha256": "971be2d81e3689e66f272a1801815c65c7bc6b71b9a7706edfd11db5cd76a946",
+      "bytes": 25921,
+      "role": "single-use CPU solver worker"
+    }
+  },
+  "window": {
+    "start_s": 0.0,
+    "end_s": 1.5,
+    "cadence_s": 0.005,
+    "expected_frames": 301,
+    "settle_hold_s": [
+      1.0,
+      1.5
+    ],
+    "contact_window_s": [
+      0.18691412628791773,
+      0.2269141262879177
+    ]
+  },
+  "hard_failure_policy": [
+    "input hash mismatch, duplicate invocation, retry or resume",
+    "solver failure, missing or censored frame, non-increasing time or cadence mismatch",
+    "non-finite body sidecar, body identity change, contact-window miss",
+    "closed-tank-face contact or penetration, unexplained top-open mass flux",
+    "any registry/ledger/matrix/queue mutation"
+  ],
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "T1": false,
+  "execution_controls": {
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "matrix_submission": false
+  }
+}

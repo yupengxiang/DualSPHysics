@@ -34,6 +34,15 @@
   该结果只使 v9 具备下一次独立 root 授权评审的条件，仍是
   `qualification_claim=none`、`T1=false`、credit 为零；没有启动 solver/GPU/queue，
   也未写 registry/ledger/matrix。
+- 在独立 root 授权后，v9 protected CPU solver canary 已按 exact-one 合同执行一次。
+  求解器返回 0，产生完整 301 帧；原生粒子身份、有限值、fixed/floating/fluid
+  数量、接触时间、闭合面接触／穿透和开顶质量流均通过。但 DualSPHysics 的
+  实际 `TimePart` 帧时间围绕 `0.005 s` 有自适应步进偏差（相邻帧约
+  `0.0048089--0.0051873 s`），严格 cadence 门和按闭区间计数的
+  `[1.0,1.5] s` 101 帧门未通过（实际区间内 100 帧，末帧为 `1.500144 s`）。
+  因此该 canary 保留为 `solver_completed_hard_failure`，详见
+  `reports/F6-PHYSICAL-ANCHOR-SOLVER-CANARY-V9-2026-09-21.zh-CN.md`；不重试、
+  不恢复、不登记 F6 T1，科学 credit 仍为零。
 - 材料修复后的实现哈希已重新绑定到只读预检证据；完整 Core 回归为
   `442 passed`，不改变任何 T2 分母或资格状态。
 
@@ -56,16 +65,13 @@
 
 ## 下一步准入顺序
 
-1. 由 root 单独审查 hash-bound v9 Definition 和 CPU/native receipt，若批准，
-   只执行一次 protected solver canary；canary 必须保留 body-state/force/torque
-   sidecar、完整事件窗和闭合边界硬门，不能把这次 native pass 直接登记为 T1。
-2. 若 v9 canary 通过，再按固定范围资格矩阵与 8→32 生产规则登记 F6；任何
-   事件窗、body identity、边界穿透或 sidecar 失败都保留 zero credit，禁止同一
-   科学输入重跑。
-3. F6 取得 T1 后，按固定 8→32 生产规则注册案例，再开启正式 9 个模型/种子
+1. F6 v9 canary 的 solver 产物已经完整保留，但严格 cadence 合同未通过。后续若
+   继续 F6，必须基于新的、明确规定 `TimePart` 自适应输出语义的 Definition 和
+   独立资格复审；不得对同一科学输入重跑，也不能把当前 canary 改判为通过。
+2. F6 取得 T1 后，按固定 8→32 生产规则注册案例，再开启正式 9 个模型/种子
    训练。材料侧先在已取得 T1 的两个家族分别完成完整宏观矩阵，不能用旧
    diagnostic trace 代替 T2。
-4. 每个阶段都继续使用 `verify → inspect → train → rollout → evaluate →
+3. 每个阶段都继续使用 `verify → inspect → train → rollout → evaluate →
    reproduce` 入口和固定失败分母；正式 Core 完成判据保持不变。
 
 代理配置记录在 `campaigns/core-v1/agent-policy.json`：subagent 使用

@@ -1,0 +1,136 @@
+{
+  "schema": "core.f6.physical_anchor.protected_solver_canary_job.v1",
+  "job_id": "F6_explicit_body_v9_protected_solver_canary_20260921",
+  "job_status": "root_authorized_not_started",
+  "attempt": 1,
+  "input_count": 1,
+  "case_id": "CORE_F6_physical_anchor_single_body_gravity_explicit_body_v9_20260921",
+  "body_id": "F6_physical_anchor_body_kappa_20260921",
+  "family": "F6",
+  "scope_id": "F6_fluid_rigid_body_physical_anchor_v1",
+  "root_review": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-solver-canary-v9-20260921/root-review.json",
+    "sha256": "16a13c1ccc94a1d1d5f0d56db7997eec726abb67cb2af3a83cb8841797efb463",
+    "bytes": 3903,
+    "role": "independent root authorization"
+  },
+  "window": {
+    "start_s": 0.0,
+    "end_s": 1.5,
+    "cadence_s": 0.005,
+    "expected_frames": 301,
+    "settle_hold_s": [
+      1.0,
+      1.5
+    ],
+    "contact_window_s": [
+      0.18691412628791773,
+      0.2269141262879177
+    ]
+  },
+  "solver": {
+    "binary": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4CPU_linux64",
+      "sha256": "8ca0cd10db3045dada4292c7bd3a23e4b1d58feb0d0cedb43315df5a9614d72a",
+      "bytes": 25420992,
+      "role": "pinned CPU DualSPHysics solver"
+    },
+    "argv": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4CPU_linux64",
+      "-tmax:1.5",
+      "-tout:0.005",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-cpu-native-preflight-v9-20260921/generated/F6_physical_anchor_explicit_body_v9_cpu_native_preflight_20260921",
+      "<attempt>/solver"
+    ],
+    "cuda_visible_devices": "",
+    "threads": 32,
+    "timeout_seconds": 3600
+  },
+  "floating_info": {
+    "path": "vendor/official/DualSPHysics_v5.4/bin/linux/FloatingInfo_linux64",
+    "sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00",
+    "bytes": 6222440,
+    "role": "pinned floating-body sidecar converter"
+  },
+  "decoder": {
+    "path": "campaigns/l1-resume/artifacts/bi4_dump",
+    "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+    "bytes": 324368,
+    "role": "pinned native BI4 decoder"
+  },
+  "runtime_worker": {
+    "path": "scripts/f6_physical_anchor_solver_canary_v9.py",
+    "sha256": "971be2d81e3689e66f272a1801815c65c7bc6b71b9a7706edfd11db5cd76a946",
+    "bytes": 25921,
+    "role": "single-use CPU solver worker"
+  },
+  "inputs": {
+    "definition": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-root-review-v9-20260921/CORE_F6_physical_anchor_single_body_gravity_explicit_body_v9_20260921_Def.xml",
+      "sha256": "5c98caea2ad17def4353d0a23c0e04fb3b0b0bb00b6ee4e28e0b7c81d6dcdf92",
+      "bytes": 3822,
+      "role": "fresh v9 Definition"
+    },
+    "definition_contract": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-root-review-v9-20260921/definition-contract.json",
+      "sha256": "c186c02760376ef38b0182add08f3bc50e2a60258e736028a7abff65fe36a94f",
+      "bytes": 8706,
+      "role": "v9 Definition contract"
+    },
+    "sidecar_schema": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-root-review-v9-20260921/body-state-force-torque-sidecar-schema.json",
+      "sha256": "618315902d44cf91dff20c7199877f13bfd9bf2fb9ab76f223117aa743a7d927",
+      "bytes": 3091,
+      "role": "body-state/force/torque sidecar schema"
+    },
+    "event_window": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-root-review-v9-20260921/event-window-contract.json",
+      "sha256": "bb8173d70b2c9ff4727543ae4d0f051b6605e6e5d64066b218ed0e5d493ddc9f",
+      "bytes": 2293,
+      "role": "event-window contract"
+    },
+    "root_preflight": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-root-review-v9-20260921/preflight.json",
+      "sha256": "3fa493328bf3d26bacb9f1403d4046e323a4fbc52aba766df156f73d0bd6462b",
+      "bytes": 8756,
+      "role": "v9 root preflight"
+    },
+    "proposal": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-root-review-v9-20260921/proposal.json",
+      "sha256": "9553e000e0650a6f80e7cf49c76ffd025e45db33ad5752435cab0b6c67710070",
+      "bytes": 7230,
+      "role": "v9 conditional proposal"
+    },
+    "native_preflight": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-cpu-native-preflight-v9-20260921/preflight.json",
+      "sha256": "bcf01e9969894ed5af4dc7cd8e1c820910eb58d916f2b75b78204164608f3c70",
+      "bytes": 14300,
+      "role": "v9 native preflight"
+    },
+    "generated_xml": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-cpu-native-preflight-v9-20260921/generated/F6_physical_anchor_explicit_body_v9_cpu_native_preflight_20260921.xml",
+      "sha256": "f19680ef0316717e9eacb4e16ac2b75fedae7211479a976bfdeb58738af7b993",
+      "bytes": 5910,
+      "role": "GenCase generated XML"
+    },
+    "generated_bi4": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-cpu-native-preflight-v9-20260921/generated/F6_physical_anchor_explicit_body_v9_cpu_native_preflight_20260921.bi4",
+      "sha256": "9cb299e800fab989951b9f203c6e436aa524146f2202515a609fbaf2ce4a3d71",
+      "bytes": 1213535,
+      "role": "GenCase native initial state"
+    }
+  },
+  "execution_policy": {
+    "exactly_one_solver_attempt": true,
+    "same_input_retry": false,
+    "resume": false,
+    "queue_submission": false,
+    "registry_mutation": false,
+    "ledger_mutation": false,
+    "matrix_submission": false,
+    "failure_credit": 0
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "T1": false
+}
