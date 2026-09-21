@@ -6,6 +6,8 @@ import hashlib
 import json
 from pathlib import Path
 
+import scripts.core_formal_release_candidate as release_candidate
+
 
 ROOT = Path(__file__).resolve().parents[1]
 CANDIDATE = ROOT / "campaigns/core-v1/learning/formal-release-candidate-v4/f3-f4-candidate.json"
@@ -41,3 +43,131 @@ def test_candidate_binds_current_closure_and_keeps_formal_gate_closed() -> None:
     assert candidate["source_closure"]["sha256"] == _sha256(CLOSURE)
     assert candidate["source_closure"]["closure_sha256"] == closure["closure_sha256"]
 
+
+def _ready_audit(closure_sha256: str) -> dict:
+    return {
+        "status": "ready",
+        "formal_admission": True,
+        "required_formal_job_count": 9,
+        "blockers": [],
+        "manifests": [],
+        "evidence": [],
+        "family_summary": {"families": ["F1", "F2", "F3"]},
+        "production_denominator": {"failure_denominator_preserved": True},
+        "source_closure": {
+            "fresh_admission_closure_complete": True,
+            "missing_files": [],
+            "current_closure_sha256": closure_sha256,
+        },
+        "resource_profile": {},
+        "resource_dryrun": {},
+        "graph_probe": {},
+        "execution_constraints": {},
+        "admission_next_dependency": None,
+    }
+
+
+def _candidate_inputs(tmp_path: Path, closure_sha256: str = "closure") -> dict:
+    return {
+        "manifests": [],
+        "evidence": [],
+        "root": ROOT,
+        "code_root": ROOT,
+        "preprofile_index": None,
+        "resource_profile": None,
+        "resource_dryrun": None,
+        "graph_probe": None,
+        "source_closure": {
+            "complete": True,
+            "missing_files": [],
+            "closure_sha256": closure_sha256,
+        },
+        "registry": {},
+    }
+
+
+def test_ready_admission_cannot_promote_an_incomplete_closure(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        release_candidate,
+        "audit_admission",
+        lambda *args, **kwargs: _ready_audit("closure"),
+    )
+    monkeypatch.setattr(
+        release_candidate,
+        "campaign_completion",
+        lambda payload, root: {
+            "schema": "core.completion.v1",
+            "can_finalize": True,
+            "checks": {"all": True},
+        },
+    )
+    inputs = _candidate_inputs(tmp_path)
+    inputs["source_closure"] = {
+        "complete": False,
+        "missing_files": ["scripts/core_learning.py"],
+        "closure_sha256": "closure",
+    }
+
+    candidate = release_candidate.build_candidate(**inputs)
+
+    assert candidate["status"] == "blocked"
+    assert candidate["formal_training_ready"] is False
+    assert candidate["formal_release"] is False
+    assert "SOURCE_CLOSURE_BINDING_GAP" in candidate["blocker_codes"]
+    assert candidate["source_closure_contract"]["passed"] is False
+
+
+def test_candidate_observes_but_does_not_require_final_campaign_completion(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        release_candidate,
+        "audit_admission",
+        lambda *args, **kwargs: _ready_audit("closure"),
+    )
+    registry = tmp_path / "registry.json"
+    registry.write_text("{}\n", encoding="utf-8")
+    before = _sha256(registry)
+    inputs = _candidate_inputs(tmp_path)
+    inputs["registry"] = registry
+
+    candidate = release_candidate.build_candidate(**inputs)
+
+    assert candidate["status"] == "released"
+    assert candidate["formal_training_ready"] is True
+    assert candidate["formal_release"] is True
+    assert "CAMPAIGN_COMPLETION_REQUIRED" not in candidate["blocker_codes"]
+    assert candidate["campaign_completion"]["valid"] is True
+    assert candidate["campaign_completion"]["can_finalize"] is False
+    assert candidate["campaign_completion"]["checks"]
+    assert candidate["campaign_completion_required_for_full_finalize"] is True
+    assert _sha256(registry) == before
+
+
+def test_candidate_promotes_only_when_closure_and_completion_both_pass(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        release_candidate,
+        "audit_admission",
+        lambda *args, **kwargs: _ready_audit("closure"),
+    )
+    monkeypatch.setattr(
+        release_candidate,
+        "campaign_completion",
+        lambda payload, root: {
+            "schema": "core.completion.v1",
+            "can_finalize": True,
+            "checks": {"all": True},
+        },
+    )
+
+    candidate = release_candidate.build_candidate(**_candidate_inputs(tmp_path))
+
+    assert candidate["status"] == "released"
+    assert candidate["formal_training_ready"] is True
+    assert candidate["formal_release"] is True
+    assert candidate["blocker_codes"] == []
