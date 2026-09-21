@@ -22,7 +22,7 @@
   retained/spill observer root review 和一次 CPU/native preflight。身份、有限值、
   质量、receiver overlap 与 runtime domain 通过，但外壁端点零容差门出现 `3840`
   个越界流体粒子；候选已在 solver 前关闭，15 行仍为 `credit=0`，没有改变 F2
-  失败分母。详见 F2 v2 negative evidence。
+  失败分母。详见 [F2 v2 negative evidence](/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F2-RELEASE010-V2-CPU-NATIVE-NEGATIVE-2026-09-21.zh-CN.md)。
 - 旧 F6 浮箱、入水和双浮体探针经只读审计确认是与 F1--F5 不同的自由刚体
   流固反馈机制，但只达到 structural probe。新的 F6 proposal 保持
   root-review-only，未进入 registry、ledger、matrix 或 T1 分母。
