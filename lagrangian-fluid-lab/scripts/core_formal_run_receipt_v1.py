@@ -115,6 +115,32 @@ def _zero_credit(value: Any, name: str) -> None:
         raise _error(f"{name} must be numeric zero")
 
 
+def _validate_finite_values(value: Any, name: str, *, _seen: set[int] | None = None) -> None:
+    """Reject non-finite numeric values anywhere in JSON-like metadata."""
+
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise _error(f"{name} contains a non-finite numeric value")
+        return
+    if not isinstance(value, (Mapping, list, tuple)):
+        return
+    seen = _seen if _seen is not None else set()
+    identity = id(value)
+    if identity in seen:
+        return
+    seen.add(identity)
+    if isinstance(value, Mapping):
+        for key, item in value.items():
+            _validate_finite_values(item, f"{name}.{key}", _seen=seen)
+    else:
+        for index, item in enumerate(value):
+            _validate_finite_values(item, f"{name}[{index}]", _seen=seen)
+
+
+def _reject_nonfinite_json_constant(value: str, *, name: str) -> Any:
+    raise _error(f"{name} contains non-finite JSON constant {value!r}")
+
+
 def _sha256(value: Any, name: str) -> str:
     if not isinstance(value, str) or _SHA256.fullmatch(value) is None:
         raise _error(f"{name} must be a lowercase SHA-256 digest")
@@ -124,11 +150,16 @@ def _sha256(value: Any, name: str) -> str:
 def _resolve_file(path_value: Any, *, artifact_root: str | Path | None, name: str) -> Path:
     path_text = _non_empty_string(path_value, f"{name}.path")
     path = Path(path_text).expanduser()
-    if not path.is_absolute():
-        if artifact_root is None:
-            raise _error(f"{name}.path is relative but artifact_root was not supplied")
-        path = Path(artifact_root).expanduser() / path
-    resolved = path.resolve()
+    if path.is_absolute():
+        raise _error(f"{name}.path must be relative to artifact_root")
+    if artifact_root is None:
+        raise _error(f"{name}.path is relative but artifact_root was not supplied")
+    root = Path(artifact_root).expanduser().resolve()
+    resolved = (root / path).resolve()
+    try:
+        resolved.relative_to(root)
+    except ValueError as exc:
+        raise _error(f"{name}.path escapes artifact_root") from exc
     if not resolved.is_file():
         raise _error(f"{name}.path does not name a readable file: {resolved}")
     return resolved
@@ -162,13 +193,12 @@ def _file_binding(
         raise _error(f"{name}.sha256 does not match file contents")
     if expected_sha256 is not None and declared != _sha256(expected_sha256, f"expected {name}.sha256"):
         raise _error(f"{name}.sha256 does not match the expected binding")
-    if "bytes" in binding:
-        declared_bytes = _integer(binding.get("bytes"), f"{name}.bytes", positive=True)
-        actual_bytes = path.stat().st_size
-        if declared_bytes != actual_bytes:
-            raise _error(f"{name}.bytes does not match the file")
-    else:
-        actual_bytes = path.stat().st_size
+    if "bytes" not in binding:
+        raise _error(f"{name}.bytes is required")
+    declared_bytes = _integer(binding.get("bytes"), f"{name}.bytes", positive=True)
+    actual_bytes = path.stat().st_size
+    if declared_bytes != actual_bytes:
+        raise _error(f"{name}.bytes does not match the file")
     return {
         "path": _reference_path(path, artifact_root=artifact_root),
         "sha256": actual,
@@ -324,9 +354,15 @@ def _validate_json_artifact_metadata(
         return
     try:
         with path.open("r", encoding="utf-8") as stream:
-            payload = json.load(stream)
+            payload = json.load(
+                stream,
+                parse_constant=lambda value: _reject_nonfinite_json_constant(
+                    value, name=name
+                ),
+            )
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise _error(f"{name} declares a JSON artifact with invalid JSON") from exc
+    _validate_finite_values(payload, name)
     if not isinstance(payload, Mapping):
         return
 
@@ -383,6 +419,7 @@ def _validate_artifacts(
 ) -> dict[str, list[dict[str, Any]]]:
     artifacts = _object(receipt.get("artifacts"), "artifacts")
     normalized: dict[str, list[dict[str, Any]]] = {}
+    artifact_identities: dict[tuple[str, str], tuple[str, int]] = {}
     for category in ("checkpoints", "validation"):
         rows = artifacts.get(category)
         if not isinstance(rows, list):
@@ -410,11 +447,28 @@ def _validate_artifacts(
                 model=identity["model"],
                 seed=identity["seed"],
             )
-            by_milestone[milestone] = _file_binding(
+            normalized_row = _file_binding(
                 item,
                 name=f"artifacts.{category}[{index}]",
                 artifact_root=artifact_root,
             ) | {"milestone": milestone}
+            for identity_kind in ("path", "sha256"):
+                previous = artifact_identities.get(
+                    (identity_kind, normalized_row[identity_kind])
+                )
+                if previous is not None:
+                    previous_category, previous_milestone = previous
+                    raise _error(
+                        "artifact identity reuse within run: "
+                        f"artifacts {identity_kind}={normalized_row[identity_kind]!r} "
+                        f"is declared at {previous_category}[{previous_milestone}] "
+                        f"and {category}[{milestone}] for {identity['run_id']}"
+                    )
+                artifact_identities[(identity_kind, normalized_row[identity_kind])] = (
+                    category,
+                    milestone,
+                )
+            by_milestone[milestone] = normalized_row
         if set(by_milestone) != set(MILESTONES):
             missing = sorted(set(MILESTONES) - set(by_milestone))
             raise _error(f"artifacts.{category} is missing milestone(s): {missing}")
@@ -444,6 +498,7 @@ def verify_receipt(
 
     if not isinstance(receipt, Mapping):
         raise _error("receipt must be an object")
+    _validate_finite_values(receipt, "receipt")
     envelope = _validate_envelope(receipt)
     identity = _validate_identity(
         receipt,
@@ -664,6 +719,15 @@ def _display_path(path: Path, *, artifact_root: str | Path | None) -> str:
 def _synthetic_binding(path_value: str | Path, *, artifact_root: str | Path | None, name: str) -> dict[str, Any]:
     # Receipt paths are strings, while the Python factory intentionally also
     # accepts ``Path`` objects for callers constructing synthetic fixtures.
+    candidate = Path(path_value).expanduser()
+    if candidate.is_absolute():
+        if artifact_root is None:
+            raise _error(f"{name}.path is absolute but artifact_root was not supplied")
+        root = Path(artifact_root).expanduser().resolve()
+        try:
+            path_value = candidate.resolve().relative_to(root).as_posix()
+        except ValueError as exc:
+            raise _error(f"{name}.path is outside artifact_root") from exc
     path = _resolve_file(str(path_value), artifact_root=artifact_root, name=name)
     return {
         "path": _display_path(path, artifact_root=artifact_root),

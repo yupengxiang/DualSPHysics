@@ -12,6 +12,7 @@ from scripts.core_formal_run_receipt_v1 import (
     MILESTONES,
     MODELS,
     SEEDS,
+    TOTAL_UPDATES,
     ReceiptContractError,
     build_synthetic_receipt,
     expected_run_ids,
@@ -147,6 +148,11 @@ def test_valid_synthetic_receipt_is_read_only_and_nonqualifying(tmp_path: Path) 
     assert report["run_id"] == "mlp-seed17"
     assert [row["milestone"] for row in report["artifacts"]["checkpoints"]] == list(MILESTONES)
     assert [row["milestone"] for row in report["artifacts"]["validation"]] == list(MILESTONES)
+    terminal = report["artifacts"]["checkpoints"][-1]
+    assert terminal["milestone"] == TOTAL_UPDATES
+    assert terminal["path"] == receipt["artifacts"]["checkpoints"][-1]["path"]
+    assert terminal["sha256"] == receipt["artifacts"]["checkpoints"][-1]["sha256"]
+    assert terminal["bytes"] == receipt["artifacts"]["checkpoints"][-1]["bytes"]
     after = {
         path: (path.read_bytes(), path.stat().st_mtime_ns)
         for path in tmp_path.iterdir()
@@ -174,6 +180,22 @@ def test_permission_or_provenance_mutations_fail_closed(
     receipt[field] = value
     with pytest.raises(ReceiptContractError):
         verify_receipt(receipt, artifact_root=tmp_path)
+
+
+def test_qualification_or_formal_status_markers_are_not_accepted(
+    tmp_path: Path,
+) -> None:
+    for field, value in (
+        ("status", "qualification_only"),
+        ("status", "formal"),
+        ("mode", "qualification"),
+        ("formal_training", True),
+        ("qualification_claim", "qualification_only"),
+    ):
+        receipt = _receipt(tmp_path)
+        receipt[field] = value
+        with pytest.raises(ReceiptContractError):
+            verify_receipt(receipt, artifact_root=tmp_path)
 
 
 def test_future_state_and_qualification_guard_mutations_fail(tmp_path: Path) -> None:
@@ -294,6 +316,13 @@ def test_checkpoint_and_validation_hash_mismatch_is_rejected(tmp_path: Path) -> 
         verify_receipt(receipt, artifact_root=tmp_path)
 
 
+def test_terminal_checkpoint_requires_declared_bytes(tmp_path: Path) -> None:
+    receipt = _receipt(tmp_path)
+    del receipt["artifacts"]["checkpoints"][-1]["bytes"]
+    with pytest.raises(ReceiptContractError, match="bytes is required"):
+        verify_receipt(receipt, artifact_root=tmp_path)
+
+
 def test_external_expected_hash_binding_is_enforced(tmp_path: Path) -> None:
     receipt = _receipt(tmp_path)
     with pytest.raises(ReceiptContractError, match="expected binding"):
@@ -302,6 +331,20 @@ def test_external_expected_hash_binding_is_enforced(tmp_path: Path) -> None:
             artifact_root=tmp_path,
             expected_dataset_manifest_sha256="1" * 64,
         )
+
+
+def test_paths_must_be_relative_and_must_stay_inside_artifact_root(tmp_path: Path) -> None:
+    receipt = _receipt(tmp_path)
+    receipt["bindings"]["dataset_manifest"]["path"] = str(
+        tmp_path / "dataset-manifest.json"
+    )
+    with pytest.raises(ReceiptContractError, match="must be relative"):
+        verify_receipt(receipt, artifact_root=tmp_path)
+
+    receipt = _receipt(tmp_path)
+    receipt["bindings"]["dataset_manifest"]["path"] = "../dataset-manifest.json"
+    with pytest.raises(ReceiptContractError, match="escapes artifact_root"):
+        verify_receipt(receipt, artifact_root=tmp_path)
 
 
 def test_collection_and_matrix_forward_external_input_anchors_to_each_receipt(
@@ -347,6 +390,34 @@ def test_preprofile_or_diagnostic_provenance_cannot_be_relabelled_formal(
     receipt = _receipt(tmp_path)
     receipt["provenance"]["formal_execution"] = True
     with pytest.raises(ReceiptContractError):
+        verify_receipt(receipt, artifact_root=tmp_path)
+
+
+def test_nonfinite_receipt_metadata_is_rejected(tmp_path: Path) -> None:
+    receipt = _receipt(tmp_path)
+    receipt["metadata"] = {"validation_loss": float("nan")}
+    with pytest.raises(ReceiptContractError, match="non-finite"):
+        verify_receipt(receipt, artifact_root=tmp_path)
+
+
+def test_nonfinite_json_validation_metadata_is_rejected(tmp_path: Path) -> None:
+    receipt = _receipt(tmp_path)
+    _rewrite_artifact_json(
+        receipt,
+        tmp_path,
+        category="validation",
+        milestone=8000,
+        payload={"milestone": 8000, "ok": True, "validation_loss": float("nan")},
+    )
+    with pytest.raises(ReceiptContractError, match="non-finite"):
+        verify_receipt(receipt, artifact_root=tmp_path)
+
+
+def test_single_receipt_rejects_reused_checkpoint_identity(tmp_path: Path) -> None:
+    receipt = _receipt(tmp_path)
+    first = deepcopy(receipt["artifacts"]["checkpoints"][0])
+    receipt["artifacts"]["checkpoints"][1] = {**first, "milestone": MILESTONES[1]}
+    with pytest.raises(ReceiptContractError, match="identity reuse within run"):
         verify_receipt(receipt, artifact_root=tmp_path)
 
 
