@@ -30,7 +30,7 @@ import torch
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.core_contract import apply_prediction
+from scripts.core_contract import commit
 from scripts.core_dataset import CoreDataset
 from scripts.core_physics import frame_physics
 from scripts.core_models import (MODEL_KINDS, AnalyticPredictor, Normalization,
@@ -1254,7 +1254,7 @@ def profile_case(dataset, case_id, *, model_kind="graph_raw", steps=10, hidden=D
     for step in range(min(int(steps), len(times) - 1)):
         started = time.perf_counter()
         prediction = predictor.predict_step(current, known, float(times[step + 1] - times[step]))
-        current = apply_prediction(current, prediction, float(times[step + 1] - times[step]))
+        current = commit(current, prediction, float(times[step + 1] - times[step]))
         measurements.append(time.perf_counter() - started)
     memory = _memory_snapshot()
     return {
@@ -1363,7 +1363,7 @@ def rollout_case(dataset, case_id, predictor, *, maximum_steps=None, trajectory_
                 if (not np.isfinite(prediction.displacement).all()
                         or not np.isfinite(prediction.delta_velocity).all()):
                     raise FloatingPointError("nonfinite model prediction")
-                current = apply_prediction(previous, prediction, dt)
+                current = commit(previous, prediction, dt)
             except FloatingPointError:
                 failure_category, first_failure_frame = "nonfinite_prediction", step + 1
                 publish_progress("failed")

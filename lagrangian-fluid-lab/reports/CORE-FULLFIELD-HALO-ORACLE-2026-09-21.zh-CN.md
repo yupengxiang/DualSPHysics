@@ -10,7 +10,7 @@
 诊断 receipt 是
 `campaigns/core-v1/learning/core-fullfield-halo-oracle-diagnostic-20260921.json`，
 SHA-256 为
-`a8a41fcff61ab0cb1dda99a338dcb6c36f8e8826a850b4dd9fdf35db3f1801c1`；其 closure
+`031166cd3a2d11b6ded2933e6c0f6909f940b2ea40ce3186afc5b1fd38d4621f`；其 closure
 sidecar 同时保存在同目录。完整粒子轴为 `8`，中心分为四个两粒子 chunk，每个 chunk
 保留完整 field neighbor table 和 exact two-hop halo；全场与分块预测的最大绝对误差为
 `2.9802322387695312e-08`，commit 后位置误差相同量级、速度误差为 `0`，符合 CPU

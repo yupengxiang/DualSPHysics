@@ -11,7 +11,7 @@ import hashlib
 import json
 import math
 from types import MappingProxyType
-from typing import Mapping
+from typing import Mapping, Protocol, runtime_checkable
 
 import numpy as np
 
@@ -539,38 +539,107 @@ class StepPrediction:
         return self.delta_velocity
 
 
-def apply_prediction(state: State, prediction: StepPrediction, dt: float):
-    """Commit both estimates without projection or a velocity finite difference."""
-    validate_state(state)
-    if not math.isfinite(dt) or dt <= 0 or state.time_s + dt <= state.time_s:
+@runtime_checkable
+class Predictor(Protocol):
+    """Minimal causal inference interface used by an autonomous rollout.
+
+    A predictor sees one committed current ``State``, immutable ``KnownInputs``
+    and the requested interval.  It returns independent displacement and
+    native velocity increments.  The protocol intentionally has no reference
+    state, trajectory reader or target argument.
+    """
+
+    def predict_step(self, state: State, known: KnownInputs, dt: float) -> StepPrediction:
+        ...
+
+
+def _validate_dt(state: State, dt: float) -> float:
+    """Validate a positive interval that advances the public state clock."""
+    if isinstance(dt, (bool, np.bool_)):
         raise ValueError("positive advancing dt required")
+    try:
+        value = float(dt)
+    except (TypeError, ValueError) as error:
+        raise ValueError("positive advancing dt required") from error
+    if not math.isfinite(value) or value <= 0 or state.time_s + value <= state.time_s:
+        raise ValueError("positive advancing dt required")
+    return value
+
+
+def validate_prediction(state: State, prediction: StepPrediction, dt: float | None = None):
+    """Validate one complete-axis prediction before it reaches ``commit``.
+
+    Inactive rows are outside the current lifecycle and may carry NaNs in a
+    native source.  Active rows must always be finite; the complete array
+    shape is retained so a predictor cannot silently drop or reorder IDs.
+    """
+    validate_state(state)
+    if dt is not None:
+        _validate_dt(state, dt)
     if not isinstance(prediction, StepPrediction):
         raise ValueError("StepPrediction required")
-    if prediction.displacement.shape != state.position.shape or prediction.delta_velocity.shape != state.velocity.shape:
+    if (prediction.displacement.shape != state.position.shape
+            or prediction.delta_velocity.shape != state.velocity.shape):
         raise ValueError("prediction must preserve the complete particle axis")
     if not all(np.isfinite(value[state.valid]).all() for value in
                (prediction.displacement, prediction.delta_velocity)):
         raise ValueError("nonfinite active model prediction")
+    return prediction
+
+
+def commit(state: State, prediction: StepPrediction, dt: float):
+    """Commit independent displacement and native velocity increments.
+
+    The velocity field is updated from ``delta_velocity`` directly.  It is
+    never reconstructed as ``displacement / dt``; saved native numerical
+    velocity therefore remains a separate prediction target.
+    """
+    validate_state(state)
+    dt = _validate_dt(state, dt)
+    validate_prediction(state, prediction)
     return State(state.time_s + dt, state.position + prediction.displacement,
                  state.velocity + prediction.delta_velocity, state.particle_id,
                  state.particle_zone, state.mass, state.valid)
 
 
-def commit(state: State, prediction: StepPrediction, dt: float):
-    """Commit a public dual-increment prediction using the fixed update rule."""
-    return apply_prediction(state, prediction, dt)
+def apply_prediction(state: State, prediction: StepPrediction, dt: float):
+    """Backward-compatible alias for :func:`commit`.
+
+    Older diagnostics import ``apply_prediction``.  Keeping it as a thin alias
+    prevents two subtly different state update paths from emerging.
+    """
+    return commit(state, prediction, dt)
+
+
+def reference_displacement_oracle(state: State, following: State) -> StepPrediction:
+    """Build privileged reference increments from two consecutive states.
+
+    This helper is for scoring and contract diagnostics only.  It is kept
+    separate from a predictor so future state can be used to form the target
+    without ever crossing the predictor input boundary.  The displacement and
+    native velocity increment are copied independently from the two saved
+    states, preserving the distinction between ``dx`` and ``dv``.
+    """
+    validate_state(state)
+    validate_state(following)
+    dt = following.time_s - state.time_s
+    _validate_dt(state, dt)
+    if not all(np.array_equal(getattr(state, key), getattr(following, key)) for key in
+               ("particle_id", "particle_zone", "mass", "valid")):
+        raise ValueError("oracle identity/lifecycle/mass change requires a different task contract")
+    return StepPrediction(following.position - state.position,
+                          following.velocity - state.velocity,
+                          {"oracle": "reference_displacement", "privileged_reference": True})
 
 
 def updater_oracle(state: State, following: State):
     """Privileged reference increments pass through the actual public updater."""
-    if not all(np.array_equal(getattr(state, key), getattr(following, key)) for key in
-               ("particle_id", "particle_zone", "mass", "valid")):
-        raise ValueError("oracle identity/lifecycle/mass change requires a different task contract")
-    prediction = StepPrediction(following.position - state.position,
-                                following.velocity - state.velocity)
-    updated = apply_prediction(state, prediction, following.time_s - state.time_s)
+    prediction = reference_displacement_oracle(state, following)
+    dt = following.time_s - state.time_s
+    updated = commit(state, prediction, dt)
     mask = state.valid
     return {"schema": "core.updater_oracle.v1", "particle_count": state.count,
+            "dt_s": float(dt),
             "position_max_abs_error": float(np.max(np.abs(updated.position[mask] - following.position[mask]))),
             "native_velocity_max_abs_error": float(np.max(np.abs(updated.velocity[mask] - following.velocity[mask]))),
             "privileged_reference_increments": True, "learned_model_qualified": False,

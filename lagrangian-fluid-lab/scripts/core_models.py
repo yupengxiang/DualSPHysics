@@ -16,7 +16,7 @@ import torch
 from scipy.spatial import cKDTree
 from torch import nn
 
-from scripts.core_contract import StepPrediction
+from scripts.core_contract import Predictor, StepPrediction, validate_prediction
 
 MODEL_VERSION = "core.dual_increment.v1"
 FEATURE_VERSION = "core.finite_triangle_features.v1"
@@ -404,6 +404,27 @@ def tensors(state, known, dt, device):
     return args, torch.as_tensor(prior, dtype=torch.float32, device=device), diagnostics
 
 
+class CausalPredictorAdapter:
+    """Validate and expose the shared current-state ``predict_step`` API.
+
+    The wrapped object may be a learned predictor, an analytic baseline, or a
+    test double.  The adapter forwards exactly ``(state, known, dt)`` and
+    rejects legacy outputs that do not carry independent displacement and
+    native velocity increments.  In particular, it has no reference-state or
+    trajectory-reader argument that could make a rollout non-causal.
+    """
+
+    def __init__(self, predictor: Predictor):
+        method = getattr(predictor, "predict_step", None)
+        if not callable(method):
+            raise TypeError("predictor must expose predict_step(state, known, dt)")
+        self.predictor = predictor
+
+    def predict_step(self, state, known, dt):
+        prediction = self.predictor.predict_step(state, known, dt)
+        return validate_prediction(state, prediction, dt)
+
+
 class ModelPredictor:
     """Causal inference adapter that commits both displacement and velocity."""
 
@@ -434,7 +455,8 @@ class ModelPredictor:
                 if self.model.kind == "graph_residual":
                     result = result + prior[centers]
                 output[start:start + len(centers)] = result.detach().cpu().numpy()
-        return StepPrediction(output[:, :3], output[:, 3:], diagnostics)
+        prediction = StepPrediction(output[:, :3], output[:, 3:], diagnostics)
+        return validate_prediction(state, prediction, dt)
 
 
 class AnalyticPredictor:
@@ -447,8 +469,9 @@ class AnalyticPredictor:
 
     def predict_step(self, state, known, dt):
         acceleration = known.control.acceleration(state) if self.kind == "known_force" else np.zeros_like(state.velocity)
-        return StepPrediction(
+        prediction = StepPrediction(
             state.velocity * dt + 0.5 * acceleration * dt * dt,
             acceleration * dt,
             {"baseline": self.kind, "known_force_prior": self.kind == "known_force"},
         )
+        return validate_prediction(state, prediction, dt)
