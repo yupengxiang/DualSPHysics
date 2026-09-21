@@ -1,0 +1,403 @@
+{
+  "schema": "core.f7.pump_recirculation.candidate_card.v1",
+  "status": "root_review_only_not_admitted",
+  "family": "F7",
+  "scope_id": "F7_pump_recirculation_x_v1",
+  "revision_id": "F7_pump_recirculation_root_review_20260922",
+  "candidate_id": "F7_pump_prescribed_internal_rotor_recirculation_v1",
+  "mechanism_class": "closed_single_phase_prescribed_internal_pump_recirculation",
+  "qualification_claim": "none",
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "matrix_credit": 0,
+  "hypothesis": {
+    "statement": "A prescribed rotating internal pump body injects angular momentum into a closed fluid volume, producing a measurable recirculation/return path distinct from transfer, impact, sloshing, runup, or fluid-rigid-body coupling families.",
+    "changed_control": "prescribed_angular_acceleration_deg_s2",
+    "axis_range": [
+      250.0,
+      750.0
+    ],
+    "baseline_value": 500.0,
+    "all_geometry_and_initial_fluid_controls_frozen": true,
+    "falsifiable": true
+  },
+  "topology": {
+    "lifecycle_model": "closed",
+    "fluid": "single phase mk=1",
+    "fixed_boundary": "pump_fixed.vtk, mk=0",
+    "moving_boundary": "pump_moving.vtk, mk=2, prescribed rotation",
+    "open_boundary": false,
+    "source_destination_transfer": false,
+    "internal_driver": "prescribed rotating pump body"
+  },
+  "independence_screen": {
+    "F1_dam_break_fixed_obstacle": "distinct: no dam-break release or fixed-obstacle primary event",
+    "F2_transfer_catch_orifice": "distinct: no source-to-receiver transfer, aperture, crest, or moving cup",
+    "F3_impulse_baffle_slosh": "distinct: no initial impulse or baffle exchange as primary driver",
+    "F4_drop_impact_pool": "distinct: no falling source slug or impact event as primary driver",
+    "F5_piston_wave_runup": "distinct: no piston/runup shoreline event",
+    "F6_fluid_rigid_body": "distinct_if_prescribed_torque_is_observed: pump is not freely coupled",
+    "adversarial_condition": "Root review must reject the family if the proposed observer only detects generic moving-wall motion and cannot demonstrate pump-driven recirculation/return."
+  },
+  "fresh_input_contract": {
+    "new_scope_id": true,
+    "new_revision_id": true,
+    "new_case_ids": true,
+    "new_literal_definition_required": true,
+    "new_generated_xml_required": true,
+    "new_native_bi4_required": true,
+    "official_pump_assets_reused_as_immutable_sources": true,
+    "existing_f1_f6_trajectory_reused": false,
+    "existing_qualification_inherited": false,
+    "same_input_retry": false,
+    "central_registry_mutation": 0,
+    "central_ledger_mutation": 0
+  },
+  "planned_matrix": {
+    "design": "13 spatial rows + 2 temporal/output comparator rows",
+    "proposed_rows": 15,
+    "rows": [
+      {
+        "index": 0,
+        "kind": "spatial_anchor",
+        "q": 0.0,
+        "dp_m": 0.01,
+        "acceleration_deg_s2": 250.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q0p00_dp0p0100",
+        "status": "proposal_only_unmaterialized"
+      },
+      {
+        "index": 1,
+        "kind": "spatial_anchor",
+        "q": 0.0,
+        "dp_m": 0.0075,
+        "acceleration_deg_s2": 250.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q0p00_dp0p0075",
+        "status": "proposal_only_unmaterialized"
+      },
+      {
+        "index": 2,
+        "kind": "spatial_anchor",
+        "q": 0.0,
+        "dp_m": 0.005,
+        "acceleration_deg_s2": 250.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q0p00_dp0p0050",
+        "status": "proposal_only_unmaterialized"
+      },
+      {
+        "index": 3,
+        "kind": "spatial_anchor",
+        "q": 0.5,
+        "dp_m": 0.01,
+        "acceleration_deg_s2": 500.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q0p50_dp0p0100",
+        "status": "proposal_only_unmaterialized"
+      },
+      {
+        "index": 4,
+        "kind": "spatial_anchor",
+        "q": 0.5,
+        "dp_m": 0.0075,
+        "acceleration_deg_s2": 500.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q0p50_dp0p0075",
+        "status": "proposal_only_unmaterialized"
+      },
+      {
+        "index": 5,
+        "kind": "spatial_anchor",
+        "q": 0.5,
+        "dp_m": 0.005,
+        "acceleration_deg_s2": 500.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q0p50_dp0p0050",
+        "status": "proposal_only_unmaterialized"
+      },
+      {
+        "index": 6,
+        "kind": "spatial_anchor",
+        "q": 1.0,
+        "dp_m": 0.01,
+        "acceleration_deg_s2": 750.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q1p00_dp0p0100",
+        "status": "proposal_only_unmaterialized"
+      },
+      {
+        "index": 7,
+        "kind": "spatial_anchor",
+        "q": 1.0,
+        "dp_m": 0.0075,
+        "acceleration_deg_s2": 750.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q1p00_dp0p0075",
+        "status": "proposal_only_unmaterialized"
+      },
+      {
+        "index": 8,
+        "kind": "spatial_anchor",
+        "q": 1.0,
+        "dp_m": 0.005,
+        "acceleration_deg_s2": 750.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q1p00_dp0p0050",
+        "status": "proposal_only_unmaterialized"
+      },
+      {
+        "index": 9,
+        "kind": "held_out",
+        "q": 0.25,
+        "dp_m": 0.0075,
+        "acceleration_deg_s2": 375.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q0p25_dp0p0075_heldout",
+        "status": "proposal_only_unmaterialized"
+      },
+      {
+        "index": 10,
+        "kind": "held_out",
+        "q": 0.25,
+        "dp_m": 0.005,
+        "acceleration_deg_s2": 375.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q0p25_dp0p0050_heldout",
+        "status": "proposal_only_unmaterialized"
+      },
+      {
+        "index": 11,
+        "kind": "held_out",
+        "q": 0.75,
+        "dp_m": 0.0075,
+        "acceleration_deg_s2": 625.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q0p75_dp0p0075_heldout",
+        "status": "proposal_only_unmaterialized"
+      },
+      {
+        "index": 12,
+        "kind": "held_out",
+        "q": 0.75,
+        "dp_m": 0.005,
+        "acceleration_deg_s2": 625.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q0p75_dp0p0050_heldout",
+        "status": "proposal_only_unmaterialized"
+      },
+      {
+        "index": 13,
+        "kind": "internal_time",
+        "q": 0.5,
+        "dp_m": 0.0075,
+        "acceleration_deg_s2": 500.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q0p50_dp0p0075_internal_time",
+        "status": "proposal_only_unmaterialized",
+        "control_change": {
+          "parameter": "cflnumber",
+          "baseline": 0.2,
+          "variant": 0.1,
+          "actual_gate": {
+            "max_actual_dt_ratio_to_baseline": 0.8,
+            "min_actual_step_count_ratio_to_baseline": 1.25
+          }
+        }
+      },
+      {
+        "index": 14,
+        "kind": "native_output",
+        "q": 0.5,
+        "dp_m": 0.0075,
+        "acceleration_deg_s2": 500.0,
+        "case_id": "F7_PUMP_RECIRCULATION_q0p50_dp0p0075_native_output",
+        "status": "proposal_only_unmaterialized",
+        "control_change": {
+          "parameter": "TimeOut",
+          "baseline_s": 0.02,
+          "variant_s": 0.01,
+          "actual_gate": {
+            "min_saved_frame_ratio_to_baseline": 1.5,
+            "max_actual_cadence_s": 0.011
+          }
+        }
+      }
+    ],
+    "temporal_comparator_contract": {
+      "internal_time": "CFL 0.20 -> 0.10; require actual dt and step-count separation",
+      "native_output": "TimeOut 0.02 s -> 0.01 s; require independent saved-frame/cadence separation"
+    },
+    "executed": 0,
+    "passed": 0,
+    "failed": 0,
+    "unattempted": 15,
+    "credit": 0,
+    "survivor_renormalization": false,
+    "formal_t1_denominator_mutation": 0
+  },
+  "preflight_gates_to_freeze_before_any_runtime": {
+    "native_particle_identity_unique_and_xml_aligned": true,
+    "all_decoded_arrays_finite": true,
+    "fluid_mass_relative_error_max": 0.025,
+    "excluded_fluid_particles": 0,
+    "fixed_and_moving_wall_chord_crossings": 0,
+    "prescribed_motion_axis_and_schedule_hash_match": true,
+    "actual_time_axis_covers_declared_window": true,
+    "moving_internal_body_pose_is_finite_and_rigid": true
+  },
+  "t2_interface_gates_to_freeze_before_material_data": {
+    "initial_source_region_in_world_coordinates": "not yet frozen",
+    "destination_region_or_return_section": "not yet frozen",
+    "body_frame_transform_dataset": "required control/frame or equivalent causal dataset",
+    "source_mass_denominator": "all initial fluid particles; no survivor renormalization",
+    "return_and_residence_observer": "required; no implementation yet",
+    "unknown_exit_bound": "required for closed lifecycle; no evidence yet"
+  },
+  "root_review_blockers": [
+    "No F7 Core CFD adapter maps drawfilevtk pump geometry into the dataset contract.",
+    "No F7 source/destination/return observer is implemented or validated.",
+    "No generated Definition, XML, BI4, trajectory, or solver evidence exists.",
+    "The official CPU/GPU wrappers contain destructive cleanup and execution commands and are reference-only.",
+    "The physical distinction must survive adversarial review against generic moving-boundary and F6 overlap."
+  ],
+  "source_bindings": [
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/CasePump_Def.xml",
+      "sha256": "746ae80f4c21bca62a01d59ee04d0eaaf3d1af830c36dafef4b684ca8f3c9453",
+      "bytes": 6983,
+      "role": "official Pump Definition source; immutable reference only"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/pump_fixed.vtk",
+      "sha256": "6148ea8f05a2cf497eb14dd6d7ae03693cafa1c8bd271f74ff1316ba2fbaf616",
+      "bytes": 2143950,
+      "role": "official fixed geometry source; immutable reference only"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/pump_moving.vtk",
+      "sha256": "376a6d84164ec1e154486196b4d6e7f647f857ad6cd2cf12fdd268f435753c72",
+      "bytes": 537792,
+      "role": "official moving pump geometry source; immutable reference only"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/xCasePump_linux64_CPU.sh",
+      "sha256": "67d1c6c58d76ce4c765f347bf5db2398904a1fcd7edec546e3eea646600971ba",
+      "bytes": 2568,
+      "role": "official CPU wrapper; inspected but never invoked"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/xCasePump_linux64_GPU.sh",
+      "sha256": "50f35f4801b17a157606131e88d12192f7c0fa668adc0a7f7d650cff806eb9fc",
+      "bytes": 2573,
+      "role": "official GPU wrapper; inspected but never invoked"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JMotionObj.cpp",
+      "sha256": "bfbfd8765cbf9f850fabaea7ec6ec3aa90a95d0b43f66575e226055fff3fa005",
+      "bytes": 40796,
+      "role": "official prescribed motion implementation reference"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JDsMotion.cpp",
+      "sha256": "5f35f3405c5af680d6fd6e089947e28222c9aab203b59f85c14f667055a1ed8d",
+      "bytes": 8691,
+      "role": "official moving-body dispatch reference"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSphCpuSingle.cpp",
+      "sha256": "2af63868305d2b38b3876f26563c82e979da7f8c4cb86743b339d2c25572b5fd",
+      "bytes": 64678,
+      "role": "official moving-particle runtime reference"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JPartsLoad4.cpp",
+      "sha256": "ab60efba601c4975cea595b7059e6be11373626d25111874b51156895401ba82",
+      "bytes": 16564,
+      "role": "official fixed/moving/floating particle loading reference"
+    }
+  ],
+  "current_core_snapshot": {
+    "completion": {
+      "path": "campaigns/core-v1/completion.json",
+      "sha256": "eb25d9878ce8b005a1e6fe6c481671ad4c223beafb3f1104601a8a3dc67311e0",
+      "bytes": 1516,
+      "role": "read-only current Core gate"
+    },
+    "registry": {
+      "path": "campaigns/core-v1/registry.json",
+      "sha256": "1ddfeda5b2d3eb142f94be4bb2cbc6f1b65271d6b77efc8b65c829b94e66b38d",
+      "bytes": 41714,
+      "role": "read-only current Core registry"
+    },
+    "can_finalize": false,
+    "t1_families": [
+      "F3",
+      "F4"
+    ],
+    "missing_t1_case_runs": 288,
+    "missing_material_case_runs": 288
+  },
+  "official_source_observation": {
+    "fluid_mk": 1,
+    "fixed_boundary_mk": 0,
+    "moving_boundary_mk": 2,
+    "moving_object_ref": 2,
+    "drawfilevtk": [
+      "pump_fixed.vtk",
+      "pump_moving.vtk"
+    ],
+    "fluid_fillbox": {
+      "origin": [
+        0.14,
+        -0.1,
+        -0.39
+      ],
+      "size": [
+        0.9,
+        0.68,
+        0.82
+      ],
+      "point": [
+        -0.6,
+        -0.39,
+        -1.1
+      ]
+    },
+    "rotation_axis": {
+      "p1": [
+        -0.0176,
+        -0.29,
+        -0.7275
+      ],
+      "p2": [
+        -0.0176,
+        -0.49,
+        -0.7275
+      ]
+    },
+    "rotation_axis_length_m": 0.2,
+    "rotation_schedule": [
+      {
+        "id": "1",
+        "duration_s": 2.0,
+        "acceleration_deg_s2": 500.0,
+        "initial_velocity_deg_s": 90.0
+      },
+      {
+        "id": "2",
+        "duration_s": 1000.0,
+        "acceleration_deg_s2": 0.0,
+        "initial_velocity_deg_s": null
+      }
+    ],
+    "time_max_s": 6.0,
+    "time_out_s": 0.02,
+    "parts_out_max": 0.9,
+    "gravity_z_m_s2": -9.81,
+    "viscosity_treatment": "1",
+    "viscosity_value": 0.1
+  },
+  "execution_controls": {
+    "read_only_source_audit": true,
+    "definition_writer_invoked": false,
+    "gencase_invoked": false,
+    "native_decoder_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "t1_denominator_mutation": 0,
+    "t2_denominator_mutation": 0,
+    "qualification_credit": 0
+  }
+}

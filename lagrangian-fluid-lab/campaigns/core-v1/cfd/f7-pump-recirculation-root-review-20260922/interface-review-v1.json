@@ -1,0 +1,63 @@
+{
+  "schema": "core.f7.pump_recirculation.interface_review.v1",
+  "status": "blocked_before_adapter_or_definition",
+  "candidate_id": "F7_pump_prescribed_internal_rotor_recirculation_v1",
+  "implementation_bindings": [
+    {
+      "path": "scripts/core_cfd_dataset.py",
+      "sha256": "9a8b5ed364735804cc66521060ed04a18845a80bd95870d2727eda5392997523",
+      "bytes": 38880,
+      "role": "current CFD-to-Core adapter"
+    },
+    {
+      "path": "scripts/transport_metrics.py",
+      "sha256": "19025c7749277b18865693799413bae05487d715451c13917135ef042c7b61c4",
+      "bytes": 10030,
+      "role": "current mass transport observer"
+    },
+    {
+      "path": "scripts/core_physics.py",
+      "sha256": "af5469f88791cdd16bf2ee6234c73e76e0dc453fe2030ccb33c03cf6fd84f892",
+      "bytes": 30607,
+      "role": "current finite moving-wall physics observer"
+    }
+  ],
+  "static_findings": {
+    "current_cfd_adapter_supported_families": [
+      "F1",
+      "F2",
+      "F4"
+    ],
+    "f7_family_is_currently_supported": false,
+    "f2_specific_geometry_branch_present": true,
+    "drawfilevtk_pump_reader_present": false,
+    "moving_wall_saved_chord_operator_present": true,
+    "moving_affine_material_frame_present": true,
+    "f7_transform_dataset_producer_present": false,
+    "f7_return_observer_present": false
+  },
+  "what_can_be_reused_after_root_admission": [
+    "finite moving-wall saved-chord operator, after F7 geometry snapshots and public motion schedule are adapted",
+    "explicit closed-lifecycle source-mass denominator and no-survivor-renormalization policy",
+    "moving-affine destination frame contract only after a causal transform dataset is emitted"
+  ],
+  "blocking_gaps": [
+    "Add and review an F7 adapter for official VTK geometry, mk labels, rigid pose, and motion schedule.",
+    "Emit a causal body-pose/frame dataset that is hash-bound to every trajectory.",
+    "Define source, discharge/return, residence, and unknown-exit regions before material data.",
+    "Implement an F7 pump-specific observer and synthetic regression tests before any Definition.",
+    "Have root review decide whether pump torque/recirculation is physically independent enough from F6."
+  ],
+  "authorization": {
+    "adapter_write": false,
+    "definition_writer": false,
+    "cpu_gencase": false,
+    "native_decode": false,
+    "solver": false,
+    "gpu": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "qualification_credit": 0
+  }
+}

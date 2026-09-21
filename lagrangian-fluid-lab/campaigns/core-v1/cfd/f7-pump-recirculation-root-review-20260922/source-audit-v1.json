@@ -1,0 +1,108 @@
+{
+  "schema": "core.f7.pump_recirculation.source_audit.v1",
+  "status": "official_source_bound_read_only",
+  "candidate_id": "F7_pump_prescribed_internal_rotor_recirculation_v1",
+  "candidate_card": {
+    "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/candidate-card-v1.json",
+    "sha256": "316e8c9818a36de452cede6d981b8dfee83eb6faa5ca7694c7fb6add2871b855",
+    "bytes": 13784,
+    "role": "F7 candidate card"
+  },
+  "official_source_bindings": [
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/CasePump_Def.xml",
+      "sha256": "746ae80f4c21bca62a01d59ee04d0eaaf3d1af830c36dafef4b684ca8f3c9453",
+      "bytes": 6983,
+      "role": "official Pump Definition source; immutable reference only"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/pump_fixed.vtk",
+      "sha256": "6148ea8f05a2cf497eb14dd6d7ae03693cafa1c8bd271f74ff1316ba2fbaf616",
+      "bytes": 2143950,
+      "role": "official fixed geometry source; immutable reference only"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/pump_moving.vtk",
+      "sha256": "376a6d84164ec1e154486196b4d6e7f647f857ad6cd2cf12fdd268f435753c72",
+      "bytes": 537792,
+      "role": "official moving pump geometry source; immutable reference only"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/xCasePump_linux64_CPU.sh",
+      "sha256": "67d1c6c58d76ce4c765f347bf5db2398904a1fcd7edec546e3eea646600971ba",
+      "bytes": 2568,
+      "role": "official CPU wrapper; inspected but never invoked"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/xCasePump_linux64_GPU.sh",
+      "sha256": "50f35f4801b17a157606131e88d12192f7c0fa668adc0a7f7d650cff806eb9fc",
+      "bytes": 2573,
+      "role": "official GPU wrapper; inspected but never invoked"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JMotionObj.cpp",
+      "sha256": "bfbfd8765cbf9f850fabaea7ec6ec3aa90a95d0b43f66575e226055fff3fa005",
+      "bytes": 40796,
+      "role": "official prescribed motion implementation reference"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JDsMotion.cpp",
+      "sha256": "5f35f3405c5af680d6fd6e089947e28222c9aab203b59f85c14f667055a1ed8d",
+      "bytes": 8691,
+      "role": "official moving-body dispatch reference"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSphCpuSingle.cpp",
+      "sha256": "2af63868305d2b38b3876f26563c82e979da7f8c4cb86743b339d2c25572b5fd",
+      "bytes": 64678,
+      "role": "official moving-particle runtime reference"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JPartsLoad4.cpp",
+      "sha256": "ab60efba601c4975cea595b7059e6be11373626d25111874b51156895401ba82",
+      "bytes": 16564,
+      "role": "official fixed/moving/floating particle loading reference"
+    }
+  ],
+  "vtk_headers": {
+    "pump_fixed": {
+      "format": "BINARY",
+      "dataset": "POLYDATA",
+      "points": 118075,
+      "point_type": "float",
+      "polygons": 45111,
+      "polygon_integer_count": 181736
+    },
+    "pump_moving": {
+      "format": "ASCII",
+      "dataset": "POLYDATA",
+      "points": 6383,
+      "point_type": "float",
+      "polygons": 12768,
+      "polygon_integer_count": 51072
+    }
+  },
+  "wrapper_static_audit": {
+    "cpu_contains_recursive_cleanup": true,
+    "cpu_contains_gencase": true,
+    "cpu_contains_cpu_solver": true,
+    "gpu_contains_gpu_solver": true,
+    "wrapper_invoked": false,
+    "interpretation": "reference wrappers are not an execution authorization"
+  },
+  "lineage": {
+    "official_example_is_source_reference_only": true,
+    "f1_f6_trajectory_reused": false,
+    "qualification_inherited": false,
+    "same_input_retry": false
+  },
+  "protected_state_mutation": {
+    "registry": 0,
+    "ledger": 0,
+    "matrix": 0,
+    "denominator": 0,
+    "queue": 0,
+    "solver_invoked": false,
+    "gpu_started": false
+  }
+}
