@@ -5,11 +5,21 @@ import numpy as np
 import pytest
 
 from scripts.passive_tracers import (
+    _fit_rigid_transform_for_sweep,
+    _point_triangle_distance,
+    _point_triangle_distance_batch,
+    _rigid_sweep_bounds,
+    _signed_triangle_plane_distance,
+    _signed_triangle_plane_distance_batch,
     advect_hdf5,
     box_surface_triangles,
+    corresponding_segments_blocked,
+    interpolate_rigid_transform,
     rigid_barrier_provider,
     segment_visibility,
     shepard_velocity,
+    spacetime_swept_wall_blocked,
+    transform_triangles,
     weighted_stratified_seeds,
 )
 from scripts.f3_material_neighbors import shepard_velocity_with_diagnostics as material_interpolator
@@ -140,3 +150,61 @@ def test_advector_invalidates_intermediate_wall_crossing(tmp_path):
     assert traced["wall_crossing"][0, 0]
     assert not traced["reliable"][0]
     np.testing.assert_allclose(traced["position"][-1], [[-0.15, 0.0, 0.0]])
+
+
+def test_swept_point_batch_matches_scalar_distance_and_plane_semantics():
+    """Vectorized moving-wall broad phase preserves scalar oracle values."""
+    triangle = np.asarray([[[-0.3, -0.2, 0.1], [0.8, -0.1, 0.2], [0.1, 0.9, -0.4]]])[0]
+    points = np.asarray([
+        [-0.1, 0.1, 0.0],       # projection inside
+        [1.3, 0.4, 0.2],        # nearest edge/vertex
+        [-0.9, -0.8, 1.1],      # distant point
+        [0.2, 0.2, -0.7],       # opposite side of plane
+    ])
+    scalar_distance = np.asarray([_point_triangle_distance(point, triangle) for point in points])
+    batch_distance = _point_triangle_distance_batch(points, triangle)
+    np.testing.assert_allclose(batch_distance, scalar_distance, rtol=0.0, atol=1e-14)
+    scalar_plane = np.asarray([_signed_triangle_plane_distance(point, triangle) for point in points])
+    batch_plane = _signed_triangle_plane_distance_batch(points, triangle)
+    np.testing.assert_allclose(batch_plane, scalar_plane, rtol=0.0, atol=1e-14)
+
+
+def test_swept_operator_matches_scalar_sample_reference_on_small_batch():
+    """The vectorized broad phase keeps the former 17-pose hit semantics."""
+    body = box_surface_triangles([0.0, -0.3, -0.3], [0.0, 0.3, 0.3], sides=("xmin",))
+    first_pose = np.eye(4)
+    first_pose[:3, 3] = [0.45, 0.0, 0.0]
+    second_pose = np.eye(4)
+    second_pose[:3, 3] = [-0.45, 0.0, 0.0]
+    wall0 = transform_triangles(body, first_pose)
+    wall1 = transform_triangles(body, second_pose)
+    start = np.asarray([
+        [-0.05, 0.0, 0.0], [0.2, 0.1, 0.0], [0.8, 0.0, 0.0],
+        [-0.1, 0.29, 0.0], [0.1, -0.29, 0.0],
+    ])
+    end = start.copy()
+    accelerated = spacetime_swept_wall_blocked(start, end, wall0, wall1)
+
+    # Small scalar reference corresponding to the pre-vectorization sample
+    # loop.  It deliberately uses the same conservative broad-phase bounds
+    # and exact closed segment test as the production operator.
+    expected = np.zeros(len(start), dtype=bool)
+    for first_triangle, wall_triangle in zip(wall0, wall1):
+        transform, residual = _fit_rigid_transform_for_sweep(first_triangle, wall_triangle)
+        lower, upper = _rigid_sweep_bounds(first_triangle, transform)
+        overlap = np.all(np.maximum(start, end) >= lower - 1e-9, axis=1)
+        overlap &= np.all(np.minimum(start, end) <= upper + 1e-9, axis=1)
+        previous_plane = None
+        for alpha in np.linspace(0.0, 1.0, 17):
+            pose = interpolate_rigid_transform(np.eye(4), transform, float(alpha))
+            triangle = transform_triangles(first_triangle[None, ...], pose)[0]
+            expected |= overlap & corresponding_segments_blocked(start, end, triangle[None, ...])
+            points = start + float(alpha) * (end - start)
+            distance = np.asarray([_point_triangle_distance(point, triangle) for point in points])
+            signed = np.asarray([_signed_triangle_plane_distance(point, triangle) for point in points])
+            expected |= overlap & (distance <= 1e-8)
+            if previous_plane is not None:
+                expected |= overlap & (previous_plane * signed <= 0.0)
+            previous_plane = signed
+        assert residual < 1e-12
+    np.testing.assert_array_equal(accelerated, expected)

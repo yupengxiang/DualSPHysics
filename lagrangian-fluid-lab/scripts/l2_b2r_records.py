@@ -271,9 +271,37 @@ def _record_outcome(record: Mapping[str, Any] | None) -> str:
 
 
 def _latest_attempt(records: list[Mapping[str, Any]]) -> Mapping[str, Any]:
-    # Input order is not trusted; timestamps are used when available, with the
-    # stable execution ID as a deterministic tie breaker.
-    return max(records, key=lambda row: (str(row.get("finished_at_utc") or row.get("created_at_utc") or ""), row["execution_attempt_id"]))
+    """Return the terminal leaf of the explicit retry chain.
+
+    Wall-clock fields are useful for independent attempts, but a retry may be
+    recorded with a worker's completion time that predates the coordinator's
+    creation time for the failed attempt (for example after a resumed queue or
+    a copied receipt).  In that case timestamp sorting can select the failed
+    predecessor and hide a successful retry.  ``retry_of`` is therefore the
+    primary ordering signal; timestamps only break ties between unrelated
+    leaves.
+    """
+    if not records:
+        raise ValueError("at least one attempt is required")
+
+    by_id = {row["execution_attempt_id"]: row for row in records}
+    referenced = {
+        row.get("retry_of")
+        for row in records
+        if row.get("retry_of") in by_id
+    }
+    leaves = [row for row in records if row["execution_attempt_id"] not in referenced]
+    candidates = leaves or records
+
+    # Input order is not trusted; timestamps are used only after the explicit
+    # retry relation has reduced the set to independent terminal candidates.
+    return max(
+        candidates,
+        key=lambda row: (
+            str(row.get("finished_at_utc") or row.get("created_at_utc") or ""),
+            row["execution_attempt_id"],
+        ),
+    )
 
 
 def _validate_eval_rows(

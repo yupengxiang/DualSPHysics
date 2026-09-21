@@ -350,11 +350,72 @@ def _point_triangle_distance(point: np.ndarray, triangle: np.ndarray) -> float:
     return min(edge_distances)
 
 
+def _point_triangle_distance_batch(points: np.ndarray, triangle: np.ndarray) -> np.ndarray:
+    """Vectorized counterpart of :func:`_point_triangle_distance`.
+
+    The moving-wall oracle calls the point-to-triangle check at every sampled
+    pose.  Keeping the exact scalar barycentric/edge semantics while doing the
+    arithmetic over a candidate batch avoids a Python call for every particle
+    and pose.  This is a performance implementation detail: callers should use
+    ``spacetime_swept_wall_blocked`` so the conservative broad phase and
+    endpoint tests remain in one place.
+    """
+    points = np.asarray(points, dtype=np.float64)
+    if points.ndim != 2 or points.shape[1:] != (3,):
+        raise ValueError("points must have shape [Q,3]")
+    tri = np.asarray(triangle, dtype=np.float64).reshape(3, 3)
+    a, b, c = tri
+    ab, ac = b - a, c - a
+    normal = np.cross(ab, ac)
+    norm = float(np.linalg.norm(normal))
+    if norm <= EPSILON:
+        return np.min(np.linalg.norm(points[:, None, :] - tri[None, :, :], axis=2), axis=1)
+
+    unit_normal = normal / norm
+    signed = (points - a) @ unit_normal
+    projection = points - signed[:, None] * unit_normal[None, :]
+    v0, v1, v2 = b - a, c - a, projection - a
+    d00, d01, d11 = np.dot(v0, v0), np.dot(v0, v1), np.dot(v1, v1)
+    d20, d21 = v2 @ v0, v2 @ v1
+    denominator = d00 * d11 - d01 * d01
+    inside = np.zeros(len(points), dtype=bool)
+    if abs(float(denominator)) > EPSILON:
+        u = (d11 * d20 - d01 * d21) / denominator
+        v = (d00 * d21 - d01 * d20) / denominator
+        inside = (u >= -EPSILON) & (v >= -EPSILON) & (u + v <= 1.0 + EPSILON)
+
+    # Edge distances are needed for points whose orthogonal projection lies
+    # outside the finite triangle.  Initialize with +inf so the same path
+    # also handles a degenerate triangle (although production geometry rejects
+    # one during contract validation).
+    result = np.full(len(points), np.inf, dtype=np.float64)
+    result[inside] = np.abs(signed[inside])
+    outside = ~inside
+    for first, second in ((a, b), (b, c), (c, a)):
+        edge = second - first
+        edge_length2 = float(np.dot(edge, edge))
+        fraction = (points - first) @ edge / max(edge_length2, EPSILON)
+        closest = first[None, :] + np.clip(fraction, 0.0, 1.0)[:, None] * edge[None, :]
+        result[outside] = np.minimum(result[outside], np.linalg.norm(points[outside] - closest[outside], axis=1))
+    return result
+
+
 def _signed_triangle_plane_distance(point: np.ndarray, triangle: np.ndarray) -> float:
     tri = np.asarray(triangle, dtype=np.float64).reshape(3, 3)
     normal = np.cross(tri[1] - tri[0], tri[2] - tri[0])
     norm = float(np.linalg.norm(normal))
     return float(np.dot(np.asarray(point, dtype=np.float64) - tri[0], normal) / norm) if norm > EPSILON else np.nan
+
+
+def _signed_triangle_plane_distance_batch(points: np.ndarray, triangle: np.ndarray) -> np.ndarray:
+    """Vectorized signed plane distance with scalar helper semantics."""
+    points = np.asarray(points, dtype=np.float64)
+    tri = np.asarray(triangle, dtype=np.float64).reshape(3, 3)
+    normal = np.cross(tri[1] - tri[0], tri[2] - tri[0])
+    norm = float(np.linalg.norm(normal))
+    if norm <= EPSILON:
+        return np.full(len(points), np.nan, dtype=np.float64)
+    return (points - tri[0]) @ normal / norm
 
 
 def _rigid_sweep_bounds(points: np.ndarray, transform: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -467,6 +528,11 @@ def spacetime_swept_wall_blocked(start, end, barrier_start, barrier_end=None, *,
             blocked |= overlap
             continue
         sampled_hit = np.zeros(len(start), dtype=bool)
+        # ``overlap`` is pose-independent for this endpoint pair.  Keep a
+        # compact candidate view for the sampled point/plane checks; the
+        # segment/triangle test above intentionally still receives the full
+        # arrays so its registered endpoint semantics remain unchanged.
+        candidate_indices = np.flatnonzero(overlap)
         previous_distance = None
         for sample_alpha in np.linspace(0.0, 1.0, 17):
             pose = interpolate_rigid_transform(np.eye(4), transform, float(sample_alpha))
@@ -476,19 +542,24 @@ def spacetime_swept_wall_blocked(start, end, barrier_start, barrier_end=None, *,
             # Also test the instantaneous tracer position.  This catches a
             # stationary tracer crossed by a zero-thickness moving panel,
             # where a segment/triangle test has no direction to intersect.
-            point = start + float(sample_alpha) * (end - start)
-            distance = np.asarray([_point_triangle_distance(item, triangle) for item in point])
-            signed_distance = np.asarray([_signed_triangle_plane_distance(item, triangle) for item in point])
-            sampled_hit |= overlap & (distance <= max(epsilon, 1e-8))
+            if len(candidate_indices):
+                point = start[candidate_indices] + float(sample_alpha) * (
+                    end[candidate_indices] - start[candidate_indices])
+                distance = _point_triangle_distance_batch(point, triangle)
+                signed_distance = _signed_triangle_plane_distance_batch(point, triangle)
+                sampled_hit[candidate_indices] |= distance <= max(epsilon, 1e-8)
+            else:
+                signed_distance = np.empty(0, dtype=np.float64)
             if previous_distance is not None:
-                crossing = (previous_distance * signed_distance <= 0.0) & (
-                    np.isfinite(previous_distance) & np.isfinite(signed_distance)
-                )
+                if len(candidate_indices):
+                    crossing = (previous_distance * signed_distance <= 0.0) & (
+                        np.isfinite(previous_distance) & np.isfinite(signed_distance)
+                    )
+                    sampled_hit[candidate_indices] |= crossing
                 # A sign change between samples is a conservative swept-plane
                 # hit.  Do not require either sampled distance to be near zero:
                 # a fast wall can cross between samples while both snapshots
                 # remain visibly separated from the tracer.
-                sampled_hit |= overlap & crossing
             previous_distance = signed_distance
         blocked |= sampled_hit
     return blocked

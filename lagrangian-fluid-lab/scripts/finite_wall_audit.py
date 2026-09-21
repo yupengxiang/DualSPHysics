@@ -206,6 +206,35 @@ def segment_crossing_events(
     return sorted(events, key=lambda item: (item["point_index"], item["fraction"], item["kind"], item.get("face", item.get("obstacle_id", ""))))
 
 
+def bidirectional_face_crossing_events(
+    p0: np.ndarray,
+    p1: np.ndarray,
+    spec: dict[str, Any],
+    tolerance: float,
+) -> list[dict[str, Any]]:
+    """Locate inward and outward saved-chord crossings of container faces.
+
+    This additive diagnostic excludes obstacle boxes and does not replace the
+    historical outward-only audit. Faces have zero thickness: events are not
+    proof of intersection with a finite wall volume or an exact solver path.
+    Exact contact is included on the interior side, consistently with the
+    historical operator; reversing a chord reverses its event direction.
+    """
+    first, second = _points(p0), _points(p1)
+    if first.shape != second.shape:
+        raise ValueError("segment endpoints must have the same shape")
+    if not np.isfinite(first).all() or not np.isfinite(second).all():
+        raise ValueError("segment endpoints must be finite")
+    if not np.isfinite(tolerance) or tolerance < 0:
+        raise ValueError("tolerance must be finite and non-negative")
+    events = [dict(event, direction="outward")
+              for event in _segment_face_hits(first, second, spec, tolerance)]
+    events.extend(dict(event, direction="inward", fraction=1.0 - event["fraction"])
+                  for event in _segment_face_hits(second, first, spec, tolerance))
+    return sorted(events, key=lambda event: (
+        event["point_index"], event["fraction"], event["face"], event["direction"]))
+
+
 def outside_runtime_domain_mask(
     points: np.ndarray,
     domain: dict[str, Any] | None,
