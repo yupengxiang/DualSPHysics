@@ -1,0 +1,309 @@
+{
+  "schema": "core.f6.physical_anchor.cpu_preflight_receipt.v1",
+  "status": "cpu_physical_anchor_preflight_pass",
+  "gate_passed": true,
+  "event_window_auditable": true,
+  "event_window_complete": false,
+  "event_window_status": "auditable_prediction_pending_runtime_event_window",
+  "checks": {
+    "fresh_xml_parse": {
+      "passed": true,
+      "detail": {
+        "root_tag": "case"
+      }
+    },
+    "fresh_xml_no_legacy_input": {
+      "passed": true,
+      "detail": {
+        "forbidden_tokens": [
+          "F6_floating_box",
+          "F6_heavy_box_entry",
+          "F6_twin_floaters",
+          ".bi4",
+          ".h5"
+        ]
+      }
+    },
+    "gravity_binding": {
+      "passed": true,
+      "detail": {
+        "observed": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "expected": [
+          0.0,
+          0.0,
+          -9.81
+        ]
+      }
+    },
+    "fresh_resolution": {
+      "passed": true,
+      "detail": {
+        "observed": 0.02,
+        "expected": 0.02
+      }
+    },
+    "fluid_drawbox_binding": {
+      "passed": true,
+      "detail": {
+        "observed": {
+          "fill": "solid",
+          "point": [
+            0.18,
+            0.08,
+            0.04
+          ],
+          "size": [
+            1.1199999999999999,
+            0.42,
+            0.22
+          ]
+        },
+        "expected_low_m": [
+          0.18,
+          0.08,
+          0.04
+        ],
+        "expected_drawbox_size_m": [
+          1.1199999999999999,
+          0.42,
+          0.22
+        ]
+      }
+    },
+    "geometry_opening_entity_boundary": {
+      "passed": true,
+      "detail": {
+        "drawboxes": [
+          {
+            "fill": "solid",
+            "point": [
+              0.18,
+              0.08,
+              0.04
+            ],
+            "size": [
+              1.1199999999999999,
+              0.42,
+              0.22
+            ]
+          },
+          {
+            "fill": "bottom | left | right | front | back",
+            "point": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "size": [
+              1.5,
+              0.6,
+              0.9
+            ]
+          },
+          {
+            "fill": "solid",
+            "point": [
+              0.65,
+              0.21999999999999997,
+              0.49000000000000005
+            ],
+            "size": [
+              0.2,
+              0.16,
+              0.12
+            ]
+          }
+        ],
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ]
+      }
+    },
+    "body_mass_com_inertia_binding": {
+      "passed": true,
+      "detail": {
+        "mkbound": "8",
+        "massbody_kg": 2.9952,
+        "center_m": [
+          0.75,
+          0.3,
+          0.55
+        ],
+        "inertia_diag_kg_m2": [
+          0.009984000000000002,
+          0.01357824,
+          0.01637376
+        ],
+        "expected_mass_kg": 2.9952,
+        "expected_center_m": [
+          0.75,
+          0.3,
+          0.55
+        ],
+        "expected_inertia_diag_kg_m2": [
+          0.009984000000000002,
+          0.01357824,
+          0.01637376
+        ]
+      }
+    },
+    "event_window_recomputed": {
+      "passed": true,
+      "detail": {
+        "predicted_events": {
+          "initial_fluid_surface_gap_m": 0.21000000000000008,
+          "predicted_contact_com_z_m": 0.33999999999999997,
+          "predicted_contact_time_s": 0.20691412628791772,
+          "predicted_impact_speed_m_s": 2.029827578884473,
+          "contact_prediction_window_s": [
+            0.18691412628791773,
+            0.2269141262879177
+          ],
+          "equilibrium_submerged_fraction": 0.78,
+          "equilibrium_submerged_depth_m": 0.0936,
+          "equilibrium_bottom_z_m": 0.18639999999999995,
+          "equilibrium_com_z_m": 0.24639999999999995,
+          "equilibrium_top_z_m": 0.30639999999999995,
+          "tank_bottom_clearance_at_equilibrium_m": 0.18639999999999995,
+          "tank_top_clearance_at_equilibrium_m": 0.5936000000000001,
+          "hydrodynamic_response_is_runtime_unknown": true
+        },
+        "window": {
+          "start_s": 0.0,
+          "end_s": 1.5,
+          "output_interval_s": 0.005,
+          "expected_frame_count": 301,
+          "settle_hold_start_s": 1.0,
+          "settle_hold_end_s": 1.5
+        }
+      }
+    },
+    "observation_window_no_equilibrium_claim": {
+      "passed": true,
+      "detail": {
+        "name": "observation_hold",
+        "start_s": 1.0,
+        "end_s": 1.5,
+        "coverage": "native_time_bracket_with_max_gap_s",
+        "requires_equilibrium_claim": false,
+        "equilibrium_status": "not_claimed",
+        "equilibrium_thresholds": null
+      }
+    },
+    "actual_timestep_bracket_contract": {
+      "passed": true,
+      "detail": {
+        "requested_output_interval_s": 0.005,
+        "native_time_axis": "solver_reported_actual_TimeStep",
+        "frame_count": 301,
+        "start_time_s": 0.0,
+        "end_time_target_s": 1.5,
+        "strictly_increasing": true,
+        "max_gap_s": 0.0055,
+        "max_gap_basis": "pre_registered_10_percent_envelope_over_requested_interval",
+        "terminal_coverage": {
+          "mode": "bracket_target",
+          "target_end_s": 1.5,
+          "last_native_time_must_be_at_least_target": true,
+          "terminal_overshoot_max_s": 0.0005
+        },
+        "interpolation_for_common_grid": "linear_in_solver_reported_actual_time_only; no future CFD values"
+      }
+    },
+    "fluid_continuum_mass_contract": {
+      "passed": true,
+      "detail": {
+        "continuum_fluid_mass_kg": 120.38399999999997,
+        "density_kg_m3": 1000.0,
+        "continuous_volume_m3": 0.12038399999999998
+      }
+    },
+    "sidecar_identity_binding": {
+      "passed": true,
+      "detail": {
+        "schema": "core.f6.physical_anchor.body_state_force_sidecar.v1",
+        "body_id": "F6_physical_anchor_body_lambda_v10_20260921",
+        "required_field_count": 13
+      }
+    },
+    "event_identity_binding": {
+      "passed": true,
+      "detail": {
+        "schema": "core.f6.physical_anchor.event_window_contract.v1",
+        "body_id": "F6_physical_anchor_body_lambda_v10_20260921",
+        "physical_f6_qualification": false
+      }
+    }
+  },
+  "recommendation": "run_exactly_one_cpu_native_preflight",
+  "solver_canary_authorized_in_this_receipt": false,
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "T1": false,
+  "execution_controls": {
+    "definition_written": true,
+    "xml_parsed": true,
+    "gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "matrix_submission": false
+  },
+  "failure_policy": "Every failed gate is retained as negative evidence; qualification_claim remains none and qualification_credit remains zero.",
+  "contract": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/definition-contract.json",
+    "sha256": "53f959956d504572f9b396cbca5dd5580718f11a57981ce8cffe7ab60dc91e9c",
+    "bytes": 8501,
+    "role": "fresh v10 Definition contract",
+    "hash_only": false
+  },
+  "definition": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/CORE_F6_physical_anchor_single_body_gravity_explicit_body_v10_observation_axis_20260921_Def.xml",
+    "sha256": "b78aaed2048ba416f629773194cbfb998af1f3bc49dce9039cd305fa53e25ef0",
+    "bytes": 3826,
+    "role": "fresh v10 gravity=-9.81 Definition",
+    "hash_only": false
+  },
+  "sidecar_schema": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/body-state-force-torque-sidecar-schema.json",
+    "sha256": "9daa949502e8797ecce73fececa008c230e8765a4ca9d09b11857b96fe7ccc0d",
+    "bytes": 3572,
+    "role": "fresh v10 sidecar schema",
+    "hash_only": false
+  },
+  "event_window": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/event-window-contract.json",
+    "sha256": "e8e9218d5375afc9e3a0999fefa09cb34d3f76016a12b7266e6a6220a6c3322c",
+    "bytes": 3164,
+    "role": "fresh v10 event-window contract",
+    "hash_only": false
+  },
+  "proposal": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/proposal.json",
+    "sha256": "f026ecc47f229a732e3a5a3a3b78f18a6705018de35928a6314147a5ecaf70f3",
+    "bytes": 5263,
+    "role": "hash-bound derived v10 proposal",
+    "hash_only": false
+  },
+  "proposal_context": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-cadence-revision-v10-20260921/proposal.json",
+    "sha256": "0a50a413890805af9acc92296a3caeba7df3e7df63c332743ac3308c681ca604",
+    "bytes": 4637,
+    "role": "existing v10 proposal identity context",
+    "hash_only": false
+  }
+}

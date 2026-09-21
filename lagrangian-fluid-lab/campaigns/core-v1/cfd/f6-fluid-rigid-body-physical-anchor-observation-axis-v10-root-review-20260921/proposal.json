@@ -1,0 +1,126 @@
+{
+  "schema": "core.f6.physical_anchor.cadence_revision_proposal.v1",
+  "proposal_id": "F6_physical_anchor_observation_axis_v10_20260921",
+  "created_at_utc": "2026-09-21T09:39:58.895757+00:00",
+  "status": "root_review_only_fresh_definition_cpu_native_preflight_pending",
+  "family": "F6",
+  "scope_id": "F6_fluid_rigid_body_physical_anchor_v2",
+  "prior_v9": {
+    "status": "completed_negative_evidence_immutable",
+    "receipt": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-solver-canary-v9-20260921/attempt-001/execution-receipt.json",
+      "sha256": "105071e1882b3c7d879d7525b06ab089f6c1eea523f25b020b6c89bf4289edb9",
+      "bytes": 5479,
+      "role": "v9 solver canary negative receipt",
+      "hash_only": true
+    },
+    "runparts": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-solver-canary-v9-20260921/attempt-001/solver/RunPARTs.csv",
+      "sha256": "1aba0cb03835b508afde999e21bc1c729503715a730816f1706b5061f098a953",
+      "bytes": 62163,
+      "role": "v9 native output-time diagnostic",
+      "hash_only": true
+    },
+    "event_contract": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-explicit-body-root-review-v9-20260921/event-window-contract.json",
+      "sha256": "bb8173d70b2c9ff4727543ae4d0f051b6605e6e5d64066b218ed0e5d493ddc9f",
+      "bytes": 2293,
+      "role": "v9 analytical event context",
+      "hash_only": true
+    },
+    "same_input_retry": false,
+    "resume": false
+  },
+  "fresh_identity": {
+    "definition_id": "CORE_F6_physical_anchor_single_body_gravity_explicit_body_v10_observation_axis_20260921",
+    "case_id": "F6_explicit_body_v10_observation_axis_root_review_20260921",
+    "revision_id": "F6_gravity_single_body_observation_axis_actual_time_v10",
+    "fresh_definition_required": true,
+    "fresh_generated_xml_required": true,
+    "fresh_generated_bi4_required": true,
+    "old_xml_bi4_hdf5_reused_as_input": false,
+    "old_trajectory_reused_as_input": false,
+    "body_id": "F6_physical_anchor_body_lambda_v10_20260921"
+  },
+  "time_axis_contract": {
+    "requested_output_interval_s": 0.005,
+    "native_time_axis": "solver_reported_actual_TimeStep",
+    "frame_count": 301,
+    "start_time_s": 0.0,
+    "end_time_target_s": 1.5,
+    "strictly_increasing": true,
+    "max_gap_s": 0.0055,
+    "max_gap_basis": "pre_registered_10_percent_envelope_over_requested_interval",
+    "terminal_coverage": {
+      "mode": "bracket_target",
+      "target_end_s": 1.5,
+      "last_native_time_must_be_at_least_target": true,
+      "terminal_overshoot_max_s": 0.0005
+    },
+    "interpolation_for_common_grid": "linear_in_solver_reported_actual_time_only; no future CFD values"
+  },
+  "observation_window_contract": {
+    "name": "observation_hold",
+    "start_s": 1.0,
+    "end_s": 1.5,
+    "coverage": "native_time_bracket_with_max_gap_s",
+    "requires_equilibrium_claim": false,
+    "equilibrium_status": "not_claimed",
+    "equilibrium_thresholds": null
+  },
+  "runtime_hard_gates": [
+    "fresh Definition/XML/BI4 hashes match the new identity",
+    "301 native frames, first time 0, strictly increasing actual TimeStep",
+    "all native gaps <= 0.0055 s and final time in [1.5,1.5005] s",
+    "body sidecar finite and identity fixed on every native row",
+    "contact time remains inside the independently recomputed analytical window",
+    "closed-face contact and penetration remain zero",
+    "open-top mass flux remains zero",
+    "observation window is bracketed without an equilibrium claim"
+  ],
+  "root_review_requirements": [
+    "recompute the analytical event window from the fresh Definition",
+    "run the v10 GenCase/native CPU preflight exactly once before solver authorization",
+    "bind the new worker, solver, decoder, contracts, XML and BI4 by hash",
+    "authorize at most one CPU solver attempt with no retry/resume/queue/registry/ledger/matrix mutation"
+  ],
+  "execution_controls": {
+    "definition_written": false,
+    "gencase_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "matrix_submission": false
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "T1": false,
+  "proposal_script": {
+    "path": "scripts/f6_physical_anchor_cadence_revision_proposal_v10.py",
+    "sha256": "997e8ba8e4945a3d8b18117be25ecd067b86a5e5e7c7a73128e6f8de90bfc0bc",
+    "bytes": 6854,
+    "role": "proposal generator",
+    "hash_only": false
+  },
+  "root_review_decision": {
+    "cpu_native_preflight_authorized": true,
+    "solver_canary_authorized_now": false,
+    "solver_canary_authorized_in_this_receipt": false,
+    "qualification_claim": "none",
+    "qualification_credit": 0
+  },
+  "derived_artifact": {
+    "role": "fresh v10 preflight binding only",
+    "source_proposal": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-cadence-revision-v10-20260921/proposal.json",
+      "sha256": "0a50a413890805af9acc92296a3caeba7df3e7df63c332743ac3308c681ca604",
+      "bytes": 4637,
+      "role": "existing v10 proposal identity context",
+      "hash_only": false
+    },
+    "old_xml_bi4_hdf5_reused_as_input": false,
+    "old_trajectory_reused_as_input": false
+  }
+}

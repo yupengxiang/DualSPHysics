@@ -45,8 +45,15 @@
   不恢复、不登记 F6 T1，科学 credit 仍为零。
   其中 sidecar 的 `settle_hold` 只是时间段标签；v9 没有证明物理平衡，后续
   revision 必须区分 observation hold 与预登记的 equilibrium threshold。
-- 材料修复后的实现哈希已重新绑定到只读预检证据；完整 Core 回归为
-  `442 passed`，不改变任何 T2 分母或资格状态。
+- v10 observation-axis 已完成全新 Definition/XML/BI4 的一次 CPU GenCase/native
+  preflight。11,806 fixed、693 floating、15,048 fluid 粒子，连续体质量相对误差
+  `4.44e-16`，刚体质量／COM／惯量门通过；实际时间轴和 `[1.0,1.5] s`
+  observation hold 尚未有 solver 输出。该 receipt 仍是 `T1=false`、credit 为零，
+  没有启动 solver/GPU/queue，也没有写 registry/ledger/matrix。
+- 材料修复后的实现哈希已重新绑定到只读预检证据；同时把评测和 rollout 的
+  frame denominator 收紧为真实整数语义，拒绝 fractional/bool 计数。新鲜 v5
+  源闭包、root-admission 回执和 full-field halo oracle 已重新生成并通过哈希
+  验证；完整 Core 回归为 `444 passed`，不改变任何 T2 分母或资格状态。
 
 ## 当前门状态
 
@@ -67,11 +74,11 @@
 
 ## 下一步准入顺序
 
-1. F6 v9 canary 的 solver 产物已经完整保留，但严格 cadence 合同未通过。后续若
-   继续 F6，必须基于新的、明确规定 `TimePart` 自适应输出语义的 Definition 和
-   独立资格复审；不得对同一科学输入重跑，也不能把当前 canary 改判为通过。
-   已写入 root-review-only 的 v10 cadence/observation contract proposal；它尚未
-   materialize Definition、GenCase/native preflight 或 solver attempt。
+1. F6 v9 canary 的 solver 产物已经完整保留，但严格 cadence 合同未通过。v10
+   已 materialize fresh Definition 并通过一次 CPU GenCase/native preflight；后续
+   必须基于独立 root review 最多授权一次 solver canary，明确检查 solver 实际时间轴、
+   末端覆盖、接触／穿透、开口质量流和 observation hold。不得对同一科学输入重跑，
+   也不能把 v9 canary 改判为通过。
 2. F6 取得 T1 后，按固定 8→32 生产规则注册案例，再开启正式 9 个模型/种子
    训练。材料侧先在已取得 T1 的两个家族分别完成完整宏观矩阵，不能用旧
    diagnostic trace 代替 T2。
