@@ -92,6 +92,12 @@
   没有 F4 CDF 容差、residence/event acceptance 或正式逐例 acceptance receipt；
   33 行材料矩阵中仍有 24 个 resolution/substep 和 5 个 seed-density overlay
   待执行。该审计没有修改 T2 分母，也没有授权 ESS32 或启动材料作业。
+- F3 的独立 T2 admission audit 也保持 `T2_macro=false`、`T2_path=false`：两条
+  4096-seed source-window 的结构、质量闭合和 native cadence 证据通过，但
+  unknown 最大 `0.015625 > 0.01`、CDF 最大 `0.06103515625 > 0.02`，短 canary
+  仍 right-censored；33 行 overlay 只有诊断终态，正式 acceptance receipt 为 0，
+  native MLS 尚未接入共享 acceptance bridge。建议的下一步是只读 adapter/receipt
+  bridge，不能借此把 diagnostic row 升级成 T2。
 
 ## 当前门状态
 
@@ -121,7 +127,8 @@
    通过并完成32例注册前，formal planner 不得生成9个训练作业。F4 的 T2 工作须先
    解决未知质量、完整事件窗、F4 专用容差和 acceptance 接口，再执行剩余矩阵。
 3. 任一家族取得 T1 后，按固定 8→32 生产规则注册案例；材料侧在已取得 T1 的
-   两个家族分别完成完整宏观矩阵，不能用旧 diagnostic trace 代替 T2。
+   两个家族分别完成完整宏观矩阵，不能用旧 diagnostic trace 代替 T2。F3 还需
+   先完成 native MLS acceptance bridge，并重新满足 unknown/CDF 门。
 4. 每个阶段都继续使用 `verify → inspect → train → rollout → evaluate →
    reproduce` 入口和固定失败分母；正式 Core 完成判据保持不变。
 
