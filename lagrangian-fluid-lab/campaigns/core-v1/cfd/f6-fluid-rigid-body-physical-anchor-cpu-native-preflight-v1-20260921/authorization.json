@@ -1,0 +1,103 @@
+{
+  "schema": "core.f6.physical_anchor.cpu_native_preflight_authorization.v1",
+  "authorization_id": "F6_physical_anchor_cpu_native_preflight_authorization_20260921",
+  "created_at_utc": "2026-09-21T07:45:31.906779+00:00",
+  "status": "authorized_for_exactly_one_cpu_native_preflight",
+  "family": "F6",
+  "scope_id": "F6_fluid_rigid_body_physical_anchor_v1",
+  "case_id": "F6_physical_anchor_cpu_native_preflight_20260921",
+  "definition_id": "CORE_F6_physical_anchor_single_body_gravity_20260921",
+  "body_id": "F6_physical_anchor_body_beta_20260921",
+  "root_authorized_for_cpu_native_preflight": true,
+  "authorization_basis": "F6 physical-anchor root review plus passed static CPU preflight; CPU GenCase/native entry only",
+  "single_input": {
+    "simulation_input_count": 1,
+    "definition": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-root-review-v1-20260921/CORE_F6_physical_anchor_single_body_gravity_20260921_Def.xml",
+      "sha256": "abdefd8906b178757f1eab7ec7c8b34a50828c8e32687858424005e0fd328ab1",
+      "bytes": 3576,
+      "role": "single fresh physical-anchor Definition input"
+    },
+    "old_xml_bi4_hdf5_reused_as_input": false,
+    "trajectory_input": null
+  },
+  "read_only_contract_inputs": {
+    "definition_contract": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-root-review-v1-20260921/definition-contract.json",
+      "sha256": "c5b3ba6262e34ddccef200bfa714c474e67ebfa34dd552aa89041e8dc71eb88f",
+      "bytes": 7399,
+      "role": "physical-anchor Definition contract"
+    },
+    "sidecar_schema": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-root-review-v1-20260921/body-state-force-torque-sidecar-schema.json",
+      "sha256": "fd33ef5c2ad2ba0562b356e69c6febc4c05c33a272c1a174ef0b3cdf4c755cfd",
+      "bytes": 3075,
+      "role": "body-state/force/torque sidecar schema"
+    },
+    "event_window_contract": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-root-review-v1-20260921/event-window-contract.json",
+      "sha256": "c63782a6c870d865ee5c7a959680bda050f6410ed855a8e7137fcac5badf3436",
+      "bytes": 2214,
+      "role": "physical-anchor event-window contract"
+    },
+    "static_preflight": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-root-review-v1-20260921/preflight.json",
+      "sha256": "d0b0bedbfe53a1321c7afc80748c41240ccc953b4361383e7eb6d6681f251070",
+      "bytes": 7515,
+      "role": "passed static physical-anchor preflight"
+    },
+    "proposal": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-root-review-v1-20260921/proposal.json",
+      "sha256": "2da8ba5540ee740947c51990e678ea0039901ab88ff133a5a93088fc222faa21",
+      "bytes": 6506,
+      "role": "physical-anchor root-review proposal"
+    }
+  },
+  "cpu_native_entry": {
+    "gencase_binary": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226",
+      "bytes": 5809384,
+      "role": "pinned CPU GenCase entry"
+    },
+    "native_decoder": {
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+      "bytes": 324368,
+      "role": "pinned native BI4 decoder entry"
+    },
+    "gencase_invocation_limit": 1,
+    "native_decode_invocation_limit": 1,
+    "output_interval_s": 0.005,
+    "event_window_s": [
+      0.0,
+      1.5
+    ]
+  },
+  "permissions": {
+    "definition_read": true,
+    "cpu_gencase": true,
+    "native_decode": true,
+    "solver_launch": false,
+    "gpu_launch": false,
+    "job_spec_creation": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "matrix_submission": false,
+    "qualification_credit": 0
+  },
+  "execution_policy": {
+    "exactly_one_definition_input": true,
+    "exactly_one_cpu_gencase_invocation": true,
+    "exactly_one_native_decode_invocation": true,
+    "same_input_retry": false,
+    "retry_after_gencase_failure": false,
+    "retry_after_native_decode_failure": false,
+    "solver_or_gpu_product_not_allowed": true,
+    "runtime_sidecar_is_contract_only_until_solver": true,
+    "event_window_complete_in_this_preflight": false
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0
+}

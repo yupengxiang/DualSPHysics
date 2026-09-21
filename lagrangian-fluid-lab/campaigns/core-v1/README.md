@@ -93,12 +93,14 @@ reproduction is explicitly separate from final GPU-model product reproduction.
   therefore root-review-only and remains unqualified; its old HDF5 files cannot
   enter a T1 denominator. See
   `reports/F6-CORE-THIRD-T1-CANDIDATE-ROOT-REVIEW-2026-09-21.zh-CN.md`.
-- A fresh F6 gravity/entry physical anchor now passes a CPU/root-review
-  preflight with a new Definition, analytic contact window, mass/inertia
-  binding, and body-state/force/torque sidecar contract. It only recommends one
-  protected solver canary conditionally; no GenCase, solver, GPU, queue,
-  registry, or T1 credit has been used. See
-  `reports/F6-PHYSICAL-ANCHOR-ROOT-REVIEW-2026-09-21.zh-CN.md`.
+- A fresh F6 gravity/entry physical anchor reached a protected CPU/GenCase/native
+  preflight but failed the body mass/COM/inertia contract. GenCase produced a
+  valid `floating mkbound=8` group; the first verifier receipt retained a
+  parser infrastructure failure, and a bounded native-decode amendment then
+  measured generated mass `4.32432 kg` versus the declared `2.9952 kg` and
+  inertia relative error about `84.8%`. No solver, GPU, queue, registry, or T1
+  credit was used. See
+  `reports/F6-PHYSICAL-ANCHOR-CPU-NATIVE-PREFLIGHT-NEGATIVE-2026-09-21.zh-CN.md`.
 - F1 and the F2 receiver, full-cup, and submerged-orifice repair lines retain
   their failed canaries and hard preflight failures. The F2 v2/v3/v4 orifice
   attempts are one family route with three failed definitions, not three
@@ -141,7 +143,7 @@ The authoritative `completion.json` currently reports `can_finalize=false`:
 - independent reader reproduction and causal-lineage checks: passed.
 
 These counts are completion denominators, not a request to pad the dataset with
-unqualified or duplicate cases. The next admissible step is a root-authorized
-single protected F6 physical canary using the new Definition and sidecar
-contract; it must preserve a fixed failure denominator and cannot promote
-itself to T1. No failed route may be relabeled to satisfy the gate.
+unqualified or duplicate cases. The next admissible step is a new F6 Definition
+revision with explicit `massbody`, `center`, and `inertia`, followed by an
+independent root review and CPU/native gate. The failed Definition cannot be
+retried or relabeled to satisfy the gate.

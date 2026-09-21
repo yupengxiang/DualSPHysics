@@ -24,11 +24,13 @@
   新 Definition、body mass/inertia、body identity、sidecar 字段、边界间距和
   151-frame 事件窗合同均通过；这是接口准入证据，不是流体物理或 T1 资格，
   因为 `gravity=(0,0,0)` 且没有 runtime sidecar。
-- F6 的全新 gravity/entry physical anchor 已完成独立 CPU/root-review preflight：
-  新 Definition 绑定 `gravity=(0,0,-9.81)`、body mass/inertia、接触事件窗和
-  body-state/force/torque sidecar。解析接触窗可审计，建议最多一次受保护
-  solver canary，但当前仍是 `qualification_claim=none`、credit 为零，尚未
-  启动 GenCase、solver、GPU 或 queue。
+- F6 的全新 gravity/entry physical anchor 已完成一次受保护的 CPU/GenCase/native
+  preflight，但在 body mass/COM/inertia 硬门失败。GenCase 确实生成了
+  `floating mkbound=8` 组；首份 verifier 因漏识别 `floating` 产生基础设施负例，
+  随后保留原 receipt 并完成有界 native-decode amendment。最终生成 body 为
+  `4.32432 kg`、COM 最大偏差 `0.01 m`、惯量最大相对偏差约 `84.8%`，因此
+  当前 Definition 不得进入 solver canary。整个路线仍为 `qualification_claim=none`、
+  credit 为零，未启动 solver/GPU/queue，也未写 registry/ledger/matrix。
 - 材料修复后的实现哈希已重新绑定到只读预检证据；完整 Core 回归为
   `442 passed`，不改变任何 T2 分母或资格状态。
 
@@ -51,11 +53,13 @@
 
 ## 下一步准入顺序
 
-1. 对已通过 physical preflight 的 F6 Definition 进行一次 root-authorized、
-   单输入、受保护的 solver canary；必须独立保存 body-state/force/torque、
-   接触和开放面通量证据，失败时 credit 仍为零，禁止 same-input retry。
-2. 只有 canary 完成硬审计且后续完整资格矩阵通过，F6 才能成为第三个 T1
-   家族；physical preflight 或单次 canary 都不能直接注册为 T1。
+1. 为 F6 建立全新的 Definition revision，在输入中显式绑定 `massbody`、
+   `center` 和 `inertia`，先经过独立 root review 与 CPU/native preflight；当前
+   Definition 禁止 same-input GenCase retry，不能通过改 receipt 消除 body contract
+   负例。
+2. 只有新 revision 通过 body-state、边界、事件窗和 native 硬门，才可由 root
+   决定一次 protected solver canary；canary 仍需完整 sidecar 和失败分母，不能
+   直接登记为 T1。
 3. F6 取得 T1 后，按固定 8→32 生产规则注册案例，再开启正式 9 个模型/种子
    训练。材料侧先在已取得 T1 的两个家族分别完成完整宏观矩阵，不能用旧
    diagnostic trace 代替 T2。
