@@ -1,0 +1,434 @@
+{
+  "schema": "core.f2.static_receiver_ballistic_catch.proposal_audit.v1",
+  "created_at_utc": "2026-09-21T09:30:00+08:00",
+  "status": "proposal_only_root_review_required",
+  "family": "F2",
+  "qualification_claim": "none",
+  "qualified": false,
+  "T1_numerical": false,
+  "matrix_credit": 0,
+  "candidate": {
+    "family": "F2",
+    "scope_id": "F2_static_receiver_ballistic_catch_x_v1",
+    "revision_id": "F2_static_receiver_ballistic_catch_v1",
+    "candidate_id": "F2_static_receiver_ballistic_catch_anchor",
+    "mechanism_class": "stationary_receiver_ballistic_slug_capture",
+    "status": "proposal_only_no_definition_materialized",
+    "hypothesis": "A fresh finite liquid slug released above a fixed, deep receiving basin will produce a reproducible gravity-drop, receiver-contact, retention/spill allocation, and terminal destination event without a moving cup, an internal crest, or an underflow aperture.",
+    "physical_question": "Does receiver lateral placement control capture versus spill of a falling liquid slug while the fixed outer tank and receiver remain geometrically intact?",
+    "scientific_difference": [
+      "The liquid source is a free-falling slug with prescribed initial downward velocity; no prescribed wall motion or rotating cup is used.",
+      "The receiving object is a raised, finite, open-top basin with a closed floor and side walls; it has no crest crossing and no submerged aperture.",
+      "The q axis moves only the stationary receiver centerline in y, exposing centered capture and controlled partial capture at one fixed source state.",
+      "The event is source-to-receiver contact followed by retained-versus-spilled destination allocation, rather than moving-cup settling or reservoir underflow."
+    ],
+    "selection_reason": [
+      "The existing F2 airborne-slug probes completed solver windows with 0.9885714286, 0.9942857143, and 1.0 identity retention, demonstrating that the transfer/catch observation path is executable at low cost.",
+      "The W04 calibration measured pre-impact ballistic center-of-mass error of 0.0186 dp for the existing F2 airborne liquid slug, supporting the gravity/trajectory portion of the mechanism within a stated limited range.",
+      "The new basin adds a physical receiver and a finite destination contract, directly addressing the old probe warning that fewer than 500 particles was plumbing evidence only.",
+      "The route avoids the known moving-cup ID-loss line, static-hold plume line, receiver/weir hard failure, H2 mDBC static failure, and all submerged-orifice remediation inputs."
+    ],
+    "disallowed_shortcuts": [
+      "no submerged-orifice v2/v3/v4 Definition, generated XML, BI4, BoundNor, trajectory, or output-stem reuse",
+      "no receiver-overflow-weir geometry, generated asset, or terminal matrix reuse",
+      "no moving-cup DBC/mDBC input, side-wet canary, or static full-cup input reuse",
+      "no same-input retry under a new label, threshold relaxation, early horizon extension, or survivor renormalization",
+      "no CPU/native preflight, solver, GPU, queue, ledger, registry, or matrix action from this proposal"
+    ]
+  },
+  "core_gate": {
+    "current_registered_t1_families": ["F3", "F4"],
+    "required_t1_family_count": 3,
+    "candidate_family": "F2",
+    "third_t1_family_established": false,
+    "qualification_credit_added": 0,
+    "core_gate_changed": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0
+  },
+  "existing_f2_audit": {
+    "submerged_orifice_v2_v3_v4": {
+      "status": "closed_hard_input_failure_line",
+      "same_input_retry": false,
+      "matrix_credit": 0,
+      "v2": {
+        "zero_boundnor": 64899,
+        "zero_normalsize": 64899,
+        "native_mass_relative_error": 0.04718017578125,
+        "preflight_pass": false
+      },
+      "v3": {
+        "zero_boundnor": 83443,
+        "zero_normalsize": 83443,
+        "native_mass_relative_error": -0.04207502092633919,
+        "preflight_pass": false
+      },
+      "v4": {
+        "zero_boundnor": 29484,
+        "zero_normalsize": 29484,
+        "zero_partition": "Mk=18 gate boundary",
+        "native_mass_relative_error": 0.0078125,
+        "preflight_pass": false
+      },
+      "route_decision": "excluded; the new proposal contains no orifice geometry or remediation input"
+    },
+    "moving_cup_side_wet": {
+      "status": "terminal_dynamic_canary_negative",
+      "missing_native_ids": 13527,
+      "hard_integrity_pass": false,
+      "event_window_complete": false,
+      "same_input_retry": false,
+      "matrix_credit": 0
+    },
+    "receiver_overflow_weir": {
+      "status": "terminal_anchor_negative",
+      "planned": 15,
+      "executed": 1,
+      "passed": 0,
+      "failed": 1,
+      "event_censored": 1,
+      "unattempted": 14,
+      "hard_integrity_pass": false,
+      "event_window_complete": false,
+      "same_input_retry": false,
+      "matrix_credit": 0
+    },
+    "h2_static_hold": {
+      "status": "closed_scientific_negative",
+      "executed_rows": 8,
+      "failed_rows": 8,
+      "speed_gate_failed": true,
+      "kinetic_gate_failed": true,
+      "open_cup_escape_gate_failed": true,
+      "same_input_retry": false,
+      "matrix_credit": 0
+    },
+    "static_full_cup": {
+      "status": "input_closure_only",
+      "cpu_native_rows_passed": 15,
+      "solver_rows_executed": 0,
+      "qualification_claim": "none",
+      "matrix_credit": 0,
+      "moving_pour_inheritance": false
+    },
+    "legacy_airborne_slug_probes": {
+      "status": "usable_low_cost_plumbing_evidence_only",
+      "centered": {
+        "initial_particles": 175,
+        "final_particles": 173,
+        "identity_retention": 0.9885714285714285,
+        "frames": 14,
+        "time_end_s": 0.650156
+      },
+      "offset": {
+        "initial_particles": 175,
+        "final_particles": 174,
+        "identity_retention": 0.9942857142857143,
+        "frames": 14,
+        "time_end_s": 0.650266
+      },
+      "two_source_layers": {
+        "initial_particles": 200,
+        "final_particles": 200,
+        "identity_retention": 1.0,
+        "frames": 14,
+        "time_end_s": 0.650295
+      },
+      "warning": "all three probes are below 500 initial dynamic particles and cannot supply Core qualification credit"
+    }
+  },
+  "evidence": {
+    "bindings": [
+      {
+        "path": "campaigns/core-v1/completion.json",
+        "sha256": "eb25d9878ce8b005a1e6fe6c481671ad4c223beafb3f1104601a8a3dc67311e0",
+        "bytes": 1516,
+        "role": "current Core gate and denominator status"
+      },
+      {
+        "path": "reports/runtime/quality-gates.json",
+        "sha256": "4a35bee659c19ceb8fb7244655f4d19808cab46e0368ab19778d49dabcbd5e38",
+        "bytes": 16336,
+        "role": "legacy F2 airborne-slug identity and probe status"
+      },
+      {
+        "path": "reports/runtime/trajectory-audit.json",
+        "sha256": "a8ae31c6e0e47753a6af590cb695670b3366fea900c31c7dea83a555f43bc778",
+        "bytes": 31993,
+        "role": "legacy F2 transfer trajectory and crossing evidence"
+      },
+      {
+        "path": "campaigns/v0.1-candidate/W04-CONCLUSION.md",
+        "sha256": "d453705177afed22045b758475996e55842f959c2b5afe0eabd9123fbdf8523d",
+        "bytes": 2827,
+        "role": "limited ballistic calibration result"
+      },
+      {
+        "path": "cases/F2/F2_airborne_slug_centered/F2_airborne_slug_centered_Def.xml",
+        "sha256": "a5e10b292d7ba46fc9e2ce782a10ba3d76867cf1f293e6b6464054a4f52c8655",
+        "bytes": 4268,
+        "role": "legacy source-definition provenance only"
+      },
+      {
+        "path": "cases/F2/F2_airborne_slug_offset/F2_airborne_slug_offset_Def.xml",
+        "sha256": "0618772d089984a132b44ea4435a33001fa71e4da9d0ac1035b0a5a4a7f0d94c",
+        "bytes": 4271,
+        "role": "legacy offset source-definition provenance only"
+      },
+      {
+        "path": "cases/F2/F2_two_source_layers/F2_two_source_layers_Def.xml",
+        "sha256": "815d0d1bd0c81f6f6b299cd9189fae6dbb566e4e18404e274f5b7f8877db480c",
+        "bytes": 4600,
+        "role": "legacy source-layer provenance only"
+      },
+      {
+        "path": "data/F2_airborne_slug_centered.h5",
+        "sha256": "2ebcd38ccfe9b6002db79bd527de1e48318bb530edf9fb3dab78b139575bd7b6",
+        "bytes": 95644,
+        "role": "legacy trajectory read-only evidence"
+      },
+      {
+        "path": "data/F2_airborne_slug_offset.h5",
+        "sha256": "c3fedbf81dfdc30308f84707a8a3bdda5af6107ba981c7eb681385e06f9dd65d",
+        "bytes": 99476,
+        "role": "legacy trajectory read-only evidence"
+      },
+      {
+        "path": "data/F2_two_source_layers.h5",
+        "sha256": "e6ae95d759ebb4a40990bd83a63608be7ed7a23c67d1c1dc0520ec371683b0f6",
+        "bytes": 107080,
+        "role": "legacy trajectory read-only evidence"
+      },
+      {
+        "path": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-anchor-canary-negative-evidence-v1.json",
+        "sha256": "0bba913c75b2a716b0756154239e11595feb753b428e2b4745563c5da3ff841d",
+        "bytes": 7087,
+        "role": "moving-cup event-censored negative evidence"
+      },
+      {
+        "path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/terminal-matrix-v1.json",
+        "sha256": "8089ceb988ee8ed0e51bfb135939affe237741478f368cf7d6acc4f1367e12e4",
+        "bytes": 7069,
+        "role": "receiver/weir terminal denominator"
+      },
+      {
+        "path": "campaigns/core-v1/evidence/f2-receiver-overflow-weir-anchor-negative-evidence-v1.json",
+        "sha256": "844bb4c6e41b1000205b875d8efd540dd8c0438131c74f1b2324168cdb53d608",
+        "bytes": 4850,
+        "role": "receiver/weir hard-integrity negative anchor"
+      },
+      {
+        "path": "campaigns/core-v1/cfd/f2-side-wet-dynamic-v1-root-integration.json",
+        "sha256": "636c109b3cdda901829996e35a44cc05003b0f4d66c6465a88831dcca92abfb9",
+        "bytes": 4766,
+        "role": "moving side-wet dynamic hard negative"
+      },
+      {
+        "path": "reports/F2-H2-MDBC-STATIC-HOLD-NEGATIVE-AUDIT-2026-09-21.zh-CN.md",
+        "sha256": "83334ef3fdb041a24be5982d7e59fea33b9c94bf60891f798bc2285124733cbb",
+        "bytes": 3731,
+        "role": "H2 static-hold negative audit"
+      },
+      {
+        "path": "reports/F2-STATIC-FULL-CUP-CPU-PREFLIGHT-2026-09-20.md",
+        "sha256": "bac7094ba4c8dab84507164a20bb9f94e80c9dc56d6c272c05a1437a886464f7",
+        "bytes": 3302,
+        "role": "static full-cup input-closure-only audit"
+      },
+      {
+        "path": "reports/CORE-THIRD-T1-CANDIDATE-AUDIT-2026-09-21-v2.zh-CN.md",
+        "sha256": "68047248a4830be798ee8db6a40520eb1c6db80a736500c330d3f904d62c6bff",
+        "bytes": 14626,
+        "role": "current third-family route comparison and hard blockers"
+      }
+    ],
+    "interpretation": "Legacy airborne-slug records establish only executable transfer plumbing and a limited ballistic check. They are diagnostic references; no legacy Definition, generated asset, trajectory, or qualification result is imported into this candidate."
+  },
+  "fresh_input_contract": {
+    "source_identity_changed": true,
+    "source_reuse": false,
+    "qualification_inheritance": false,
+    "old_generated_input_reused": false,
+    "old_trajectory_reused": false,
+    "new_definition_required": true,
+    "new_native_output_required": true,
+    "same_input_retry": false,
+    "construction": {
+      "definition_policy": "After root approval, author a literal new Definition from this geometry contract; do not copy any old F2 XML and then relabel it.",
+      "boundary_method": "native DBC Boundary=1 with fixed outer tank and fixed receiver; no mDBC normal file, moving boundary, crest, or aperture",
+      "outer_tank": {
+        "low_m": [0.0, -0.45, 0.0],
+        "size_m": [1.25, 0.90, 0.80],
+        "closed_faces": ["bottom", "left", "right", "front", "back"],
+        "open_faces": ["top"],
+        "mkbound": 0
+      },
+      "receiver_basin": {
+        "x_low_m": 0.35,
+        "x_size_m": 0.50,
+        "y_center_mapping": "y_center_m = -0.12 + 0.24*q",
+        "y_size_m": 0.36,
+        "z_low_m": 0.08,
+        "z_size_m": 0.50,
+        "closed_faces": ["bottom", "left", "right", "front", "back"],
+        "open_faces": ["top"],
+        "mkbound": 1,
+        "separation_from_outer_floor_m": 0.08
+      },
+      "falling_source": {
+        "fluid_box_low_m": [0.48, -0.09, 0.65],
+        "fluid_box_size_m": [0.24, 0.18, 0.18],
+        "initial_velocity_m_s": [0.0, 0.0, -0.20],
+        "source_mkfluid": 0,
+        "source_centerline_fixed_across_q": true,
+        "initial_overlap_with_basin": false,
+        "mass_policy": "native rho*dp^3; no mass rescaling"
+      },
+      "runtime_domain_m": {
+        "posmin": [-0.15, -0.55, -0.15],
+        "posmax": [1.40, 0.55, 1.05]
+      }
+    },
+    "forbidden_sources": [
+      "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/**",
+      "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/**",
+      "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet*",
+      "campaigns/core-v1/runtime/attempts/f2-*",
+      "cases/F2/*/generated/**",
+      "data/F2_*.h5"
+    ],
+    "allowed_reference_role": "Read-only evidence for mechanism selection and failure comparison. No old generated input, native binary, solver trajectory, or output identity may enter the new scope."
+  },
+  "fixed_scope_design": {
+    "cell_count": 15,
+    "spatial_cell_count": 13,
+    "temporal_cell_count": 2,
+    "parameter": "receiver_center_y_m",
+    "mapping": "receiver_center_y_m = -0.12 + 0.24*q",
+    "q_values": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "qualification_q_values": [0.0, 0.5, 1.0],
+    "held_out_q_values": [0.25, 0.75],
+    "dp_values_m": [0.01, 0.0075, 0.005],
+    "temporal_controls": ["internal_time", "native_output"],
+    "registered_window": {
+      "time_max_s": 1.5,
+      "maximum_extended_time_s": 3.0,
+      "output_interval_s": 0.005,
+      "extension_before_anchor": false,
+      "event_completion_required": true
+    },
+    "planned_rows": [
+      {"index": 0, "q": 0.0, "dp_m": 0.01, "design_cell": "spatial", "row_id": "SRBC-q0-dp010-spatial", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p00000000_dp0p010000000000_spatial", "status": "not_started"},
+      {"index": 1, "q": 0.0, "dp_m": 0.0075, "design_cell": "spatial", "row_id": "SRBC-q0-dp0075-spatial", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p00000000_dp0p007500000000_spatial", "status": "not_started"},
+      {"index": 2, "q": 0.0, "dp_m": 0.005, "design_cell": "spatial", "row_id": "SRBC-q0-dp005-spatial", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p00000000_dp0p005000000000_spatial", "status": "not_started"},
+      {"index": 3, "q": 0.5, "dp_m": 0.01, "design_cell": "spatial", "row_id": "SRBC-q05-dp010-spatial", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p50000000_dp0p010000000000_spatial", "status": "not_started"},
+      {"index": 4, "q": 0.5, "dp_m": 0.0075, "design_cell": "spatial", "row_id": "SRBC-q05-dp0075-spatial", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p50000000_dp0p007500000000_spatial", "status": "not_started"},
+      {"index": 5, "q": 0.5, "dp_m": 0.005, "design_cell": "spatial", "row_id": "SRBC-q05-dp005-spatial", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p50000000_dp0p005000000000_spatial", "status": "not_started"},
+      {"index": 6, "q": 1.0, "dp_m": 0.01, "design_cell": "spatial", "row_id": "SRBC-q1-dp010-spatial", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q1p00000000_dp0p010000000000_spatial", "status": "not_started"},
+      {"index": 7, "q": 1.0, "dp_m": 0.0075, "design_cell": "spatial", "row_id": "SRBC-q1-dp0075-spatial", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q1p00000000_dp0p007500000000_spatial", "status": "not_started"},
+      {"index": 8, "q": 1.0, "dp_m": 0.005, "design_cell": "spatial", "row_id": "SRBC-q1-dp005-spatial", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q1p00000000_dp0p005000000000_spatial", "status": "not_started"},
+      {"index": 9, "q": 0.25, "dp_m": 0.0075, "design_cell": "held_out", "row_id": "SRBC-q025-dp0075-heldout", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p25000000_dp0p007500000000_heldout", "status": "not_started"},
+      {"index": 10, "q": 0.25, "dp_m": 0.005, "design_cell": "held_out", "row_id": "SRBC-q025-dp005-heldout", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p25000000_dp0p005000000000_heldout", "status": "not_started"},
+      {"index": 11, "q": 0.75, "dp_m": 0.0075, "design_cell": "held_out", "row_id": "SRBC-q075-dp0075-heldout", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p75000000_dp0p007500000000_heldout", "status": "not_started"},
+      {"index": 12, "q": 0.75, "dp_m": 0.005, "design_cell": "held_out", "row_id": "SRBC-q075-dp005-heldout", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p75000000_dp0p005000000000_heldout", "status": "not_started"},
+      {"index": 13, "q": 0.5, "dp_m": 0.0075, "design_cell": "internal_time", "row_id": "SRBC-q05-dp0075-internal-time", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p50000000_dp0p007500000000_internal_time", "temporal_variant": "internal_time", "status": "not_started"},
+      {"index": 14, "q": 0.5, "dp_m": 0.0075, "design_cell": "native_output", "row_id": "SRBC-q05-dp0075-native-output", "case_id": "CORE_F2_STATIC_RECEIVER_BALLISTIC_CATCH_q0p50000000_dp0p007500000000_native_output", "temporal_variant": "native_output", "status": "not_started"}
+    ],
+    "denominator_policy": [
+      "The 15 rows are fixed at proposal creation and all rows remain in the denominator.",
+      "CPU/native preflight, root-review anchor, and structural artifacts receive zero T1 credit.",
+      "Solver failure, hard-integrity failure, event censoring, or missing output stays as a zero-credit row.",
+      "No same-input retry, threshold relaxation, early extension, or survivor renormalization is allowed."
+    ]
+  },
+  "observer_contract_draft": {
+    "mass_policy": {
+      "native_particle_mass": "rho*dp^3",
+      "source_relative_error_max": 0.025,
+      "total_relative_error_max": 0.03,
+      "mass_change_relative_max": 1e-08,
+      "mass_rescaling": false
+    },
+    "hard_integrity": [
+      "registered 1.5 s horizon reached",
+      "native fluid IDs are unique and no active fluid identity is missing",
+      "all active position, velocity, density, and mass values are finite",
+      "zero closed outer-tank endpoint violations and zero saved chord crossings",
+      "zero closed receiver-basin endpoint violations and zero saved chord crossings",
+      "zero valid fluid particles outside the explicit runtime domain",
+      "native initial mass and full-window mass change satisfy the fixed mass gates"
+    ],
+    "event": {
+      "drop": "the source fluid COM descends into the receiver-height band under gravity before terminal classification",
+      "receiver_contact": "at least 1% of initial native fluid mass enters the one-dp-clear receiver interior",
+      "destination_allocation": "after contact, receiver/interior and outer-tank residual fractions sum to at least 95% of initial mass for 0.20 s; allocation is reported as retained, residual, or spill",
+      "completion": "hard integrity, receiver contact, destination allocation, and full registered window are all observed",
+      "right_censor_policy": "event censoring remains a failed denominator row; one whole-scope extension is allowed only after a complete hard pass and never before root approval"
+    },
+    "observer_ownership": "fixed receiver and outer-tank faces use world coordinates; open top ownership is separate from closed-face endpoint/chord checks; missing IDs never become spill mass"
+  },
+  "root_review_only_contract": {
+    "current_action": "review proposal and dependency hashes only",
+    "step_1": "Root reviews that the falling-slug plus fixed-basin topology is a new F2 mechanism and is not a relabelled submerged-orifice, weir, side-wet moving-cup, or static-full-cup input.",
+    "step_2": "If accepted, root authorizes one fresh literal Definition and one new output namespace for CPU/native preflight; this proposal itself does not authorize either action.",
+    "step_3": "A separate root receipt must inspect the new Definition hash and authorize exactly one CPU/native preflight; any hard input failure stops the scope and preserves all 15 rows.",
+    "step_4": "Only a fresh CPU/native pass plus a second root review may authorize one protected solver canary at q=0.5, dp=0.0075; that canary is zero credit and outside the numerator until independently registered.",
+    "step_5": "Only after protected evidence can root decide whether to materialize the same frozen 15-row plan; full 15-row hard/event completion and Core evaluation remain required for any T1 claim.",
+    "hard_blockers": [
+      "No fresh Definition, native preflight, solver trajectory, or event audit exists for this new geometry.",
+      "Legacy airborne-slug evidence is below 500 particles and only supports executable plumbing and limited ballistic behavior.",
+      "Receiver side-wall/outer-floor separation and q-endpoint partial-capture semantics still require root review of the literal Definition.",
+      "The Core completion gate still reports only F3/F4 and 288 missing T1 case runs."
+    ],
+    "authorization": {
+      "definition_writer": false,
+      "cpu_gencase": false,
+      "native_decode": false,
+      "solver": false,
+      "gpu": false,
+      "queue_mutation": 0,
+      "ledger_mutation": 0,
+      "registry_mutation": 0,
+      "matrix_materialization": false,
+      "qualification_credit": 0
+    }
+  },
+  "denominator": {
+    "planned": 15,
+    "executed": 0,
+    "passed": 0,
+    "failed": 0,
+    "event_censored": 0,
+    "unattempted": 15,
+    "credit": 0,
+    "same_input_retry": false,
+    "survivor_renormalization": false
+  },
+  "execution_controls": {
+    "read_only_audit": true,
+    "gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_launched": false,
+    "queue_mutation": 0,
+    "central_ledger_mutation": 0,
+    "central_registry_mutation": 0,
+    "matrix_materialized": false,
+    "matrix_submitted": false,
+    "authorized_host": "Luna Max",
+    "control_note": "This artifact is a root-review proposal only; no execution path was called."
+  },
+  "proposal_only_artifacts": {
+    "definition_present": false,
+    "generated_native_present": false,
+    "solver_product_present": false,
+    "trajectory_present": false,
+    "job_submitted": false
+  },
+  "implementation": {
+    "path": "scripts/f2_static_receiver_ballistic_catch_proposal_v1.py",
+    "sha256": "3cd20870daa5a01ffa2a37e99985b538ab93747f70ac291d7206bbe2d3e919f6",
+    "bytes": 5990,
+    "role": "read-only proposal validator; no runtime entry point"
+  }
+}
