@@ -80,6 +80,19 @@ reproduction is explicitly separate from final GPU-model product reproduction.
   window but failed its zero-tolerance wall-integrity audit. It contributes no
   T1 family or matrix credit; see
   `reports/F5-WAVE-RUNUP-THIRD-T1-ANCHOR-NEGATIVE-2026-09-21.zh-CN.md`.
+- The fresh F2 distributed-submerged-slot route also remains zero-credit: its
+  native CPU preflight left 124,608 boundary normals unresolved; the permitted
+  layer-mirroring repair reduced this to 76,095 but still failed the fixed zero
+  gate, so that route is closed with no same-input retry or v3 authorization.
+  See `reports/F2-DISTRIBUTED-SLOT-PREFLIGHT-NEGATIVE-2026-09-21.zh-CN.md` and
+  `reports/F2-DISTRIBUTED-SLOT-NORMAL-REPAIR-V2-NEGATIVE-2026-09-21.zh-CN.md`.
+- A read-only audit found that old F6 floating-box, water-entry, and twin-body
+  probes represent a genuinely distinct free-rigid-body/flow-feedback
+  mechanism, but they lack body mass/inertia binding, force/torque and
+  boundary/contact sidecars, and complete event windows. The new F6 proposal is
+  therefore root-review-only and remains unqualified; its old HDF5 files cannot
+  enter a T1 denominator. See
+  `reports/F6-CORE-THIRD-T1-CANDIDATE-ROOT-REVIEW-2026-09-21.zh-CN.md`.
 - F1 and the F2 receiver, full-cup, and submerged-orifice repair lines retain
   their failed canaries and hard preflight failures. The F2 v2/v3/v4 orifice
   attempts are one family route with three failed definitions, not three
@@ -122,6 +135,7 @@ The authoritative `completion.json` currently reports `can_finalize=false`:
 - independent reader reproduction and causal-lineage checks: passed.
 
 These counts are completion denominators, not a request to pad the dataset with
-unqualified or duplicate cases. The next admissible step is a new, separately
-reviewed third-family proposal followed by its CPU/native preflight; no failed
-route may be relabeled to satisfy the gate.
+unqualified or duplicate cases. The next admissible step is a fresh F6
+body-state/force/boundary contract and CPU-only gate, followed by a new
+Definition and independently reviewed canary; no failed route may be relabeled
+to satisfy the gate.
