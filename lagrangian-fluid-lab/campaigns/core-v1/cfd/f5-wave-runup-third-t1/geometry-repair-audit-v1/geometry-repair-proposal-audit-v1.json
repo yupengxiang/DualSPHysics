@@ -1,0 +1,405 @@
+{
+  "schema": "core.f5.third_t1.geometry_repair_proposal_audit.v1",
+  "created_at_utc": "2026-09-21T00:13:42Z",
+  "record_id": "f5-wave-runup-third-t1-geometry-repair-proposal-audit-v1",
+  "status": "proposal_only_root_review_required",
+  "proposal_only": true,
+  "qualification_claim": "none",
+  "qualified": false,
+  "matrix_credit": 0,
+  "t1_credit": 0,
+  "scope": {
+    "family": "F5",
+    "scope_id": "F5_prescribed_wave_runup_x_v1",
+    "prior_revision_id": "F5_piston_amplitude_runup_v2",
+    "proposed_revision_id": "F5_piston_amplitude_runup_geomrepair_v3",
+    "prior_anchor_case_id": "F5_wave_runup_q0p50_dp0p0075_v2",
+    "audit_question": "Determine whether sampled fluid endpoint penetration at the slope and blocks is most consistent with a fill/materialization defect, a strict-STL contact-band diagnostic, or both, and specify the smallest root-reviewable geometry repair.",
+    "read_only_boundary": "This record audits existing inputs and products. It does not authorize GenCase, native preflight, solver, GPU, queue, job, attempt, ledger, registry, or matrix mutation."
+  },
+  "fixed_matrix_contract": {
+    "denominator_rows": 15,
+    "denominator_is_fixed": true,
+    "failed_rows_remain_in_denominator": true,
+    "survivor_renormalization": false,
+    "same_input_retry": false,
+    "same_input_retry_forbidden": true,
+    "matrix_submission_authorized": false,
+    "qualification_credit": 0,
+    "core_gate_changed": false
+  },
+  "input_output_identity": {
+    "identity_status": "proposed_not_materialized",
+    "new_input_identity": {
+      "case_id": "F5_wave_runup_q0p50_dp0p0075_geomrepair_v3",
+      "definition": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/F5_wave_runup_q0p50_dp0p0075_geomrepair_v3_Def.xml",
+      "motion": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/Mov_piston_q0p50_scaled_geomrepair_v3.dat",
+      "slope_asset": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/Slope_geomrepair_v3.stl",
+      "blocks_asset": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/input/Blocks_3D_scaled_geomrepair_v3.stl",
+      "source_assets": "The official slope, block, motion, gauge, and CIEMito files remain provenance. A byte-identical copy may retain its source hash; a derived exclusion shell must receive a new filename and hash.",
+      "parameter_invariants": {
+        "piston_scale_q": 0.5,
+        "dp_m": 0.0075,
+        "timemax_s": 16.0,
+        "output_dt_s": 0.02,
+        "official_motion_time_column": "preserve",
+        "slope_transform": {
+          "move_m": [5.95, 0.37, 0.0],
+          "rotate_z_deg": -90.0
+        },
+        "blocks_transform": {
+          "move_m": [5.95, 0.37, 0.0],
+          "rotate_z_deg": -90.0
+        }
+      },
+      "materialized": false,
+      "old_generated_input_reused": false,
+      "qualification_inheritance": false
+    },
+    "new_output_identity": {
+      "preflight_output_prefix": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/preflight-v3/generated/F5_wave_runup_q0p50_dp0p0075_geomrepair_v3",
+      "solver_anchor_attempt_root": "campaigns/core-v1/runtime/attempts/f5-wave-runup-third-t1-q05-dp0075-geomrepair-v3-protected-anchor/<root-approved-attempt-id>",
+      "solver_output_stem": "F5_wave_runup_q0p50_dp0p0075_geomrepair_v3_anchor",
+      "materialized": false,
+      "old_output_reuse_forbidden": true
+    },
+    "forbidden_reuse": [
+      "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/generated/*",
+      "campaigns/core-v1/runtime/attempts/f5-wave-runup-third-t1-q05-dp0075-v2-protected-gpu-anchor/20260921T061057-efc149b14810/*",
+      "campaigns/v0.1-candidate/cases/r3-f5-wave-runup/*/generated/*",
+      "data-official/O5_wave_runup.h5",
+      "data-official/O5_wave_runup_refined.h5"
+    ]
+  },
+  "reviewed_artifacts": [
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/F5_wave_runup_q0p50_dp0p0075_Def.xml",
+      "sha256": "76c38600c791200b9aacaab6b379952ba2a27ef3ce11b1d7fa560515e5942b80",
+      "role": "solver input Definition; source of fill order, STL transforms, domain envelope, and output cadence"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/fresh-definition-contract-v2.json",
+      "sha256": "5fd1b6561bc495db53ac6e60a1e07e3abf79a1ff286a2e882e13a93a53893206",
+      "role": "fixed v2 input and zero-credit contract"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-root-review-v2.json",
+      "sha256": "7b398d071742b39b27043a7619b84e4ed5562daf2997e56f9efd4c2b4f0368e9",
+      "role": "prior authorization; one fresh v2 CPU/native preflight only"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-boundary-semantics-audit-v1.json",
+      "sha256": "c922f98949dec2848ecf615a765e5bdf642d48cde91605f2d9b8a4555a7813fa",
+      "role": "generated/native fixed-boundary semantics audit"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v2/preflight-v2/generated/F5_wave_runup_q0p50_dp0p0075_v2_MkCells.vtk",
+      "sha256": "7a8e29aa89659daeb012cd305c1854758e954449399bee7b4b24fccc44d618ea",
+      "role": "generated static boundary lattice used for geometry comparison"
+    },
+    {
+      "path": "campaigns/core-v1/runtime/attempts/f5-wave-runup-third-t1-q05-dp0075-v2-protected-gpu-anchor/20260921T061057-efc149b14810/product/postrun-audit.json",
+      "sha256": "badf1432199e5e0d92f580c090feb8c5f14f5a86ddd4cb944304b7341168d123",
+      "role": "read-only raw solver completion and zero-credit postrun audit"
+    },
+    {
+      "path": "campaigns/core-v1/runtime/attempts/f5-wave-runup-third-t1-q05-dp0075-v2-protected-gpu-anchor/20260921T061057-efc149b14810/product/scientific-review-sampled-v1.json",
+      "sha256": "2b93d7f826e1cdd2a8502a7fe7e49270a7cdcd627ece70afcd704bee9033685f",
+      "role": "sampled scientific review; nine frames and stride-32 surface intervals"
+    },
+    {
+      "path": "scripts/f5_wave_runup_definition_writer_v2.py",
+      "sha256": "c634da2aa47fd972dfeb3a5888dfa235e744ef9579cfe0c3e43ee488f403e9bb",
+      "role": "Definition generation implementation reviewed read-only"
+    },
+    {
+      "path": "scripts/f5_wave_runup_preflight_v2.py",
+      "sha256": "dec1fdec75cc0e09770e78fdc651cc83f416619c4c7b21bf628ccb607c747bbb",
+      "role": "CPU/native preflight implementation reviewed read-only"
+    },
+    {
+      "path": "scripts/f5_wave_runup_preflight_boundary_audit_v1.py",
+      "sha256": "fb21fc69d4b2c86bfbcdc1571b79013fc1d777bfc2a0cd290e237da1cd4785e3",
+      "role": "boundary and generated geometry audit implementation reviewed read-only"
+    },
+    {
+      "path": "scripts/f5_wave_runup_solver_anchor_runtime_v2.py",
+      "sha256": "84a9fe5620df956bcbff8e9979a21a318b4004837ca3b30cb505cc3186b79b2b",
+      "role": "protected anchor input/output and execution-control implementation reviewed read-only"
+    },
+    {
+      "path": "scripts/f5_wave_runup_solver_anchor_postrun_audit_v1.py",
+      "sha256": "dd8bce8105196de8990bf3ae81bb24fa6289f9f197d47b6a302f94350fc24db1",
+      "role": "postrun cadence and native identity audit implementation reviewed read-only"
+    },
+    {
+      "path": "scripts/f5_wave_runup_solver_anchor_scientific_review_v1.py",
+      "sha256": "1600fb1b6b5dca6b11fec2b95fbc83c83bceaa07a34be2533149904807d1b4d1",
+      "role": "sampled endpoint and saved-chord geometry implementation reviewed read-only"
+    },
+    {
+      "path": "reports/CORE-EXECUTION-2026-09-20.zh-CN.md",
+      "sha256": "5b9c4dc6407deeccd09572b157a9f95e6eddf23fd65e9b43f877251d89a93fcc",
+      "role": "F5 execution and zero-credit narrative report"
+    }
+  ],
+  "read_only_observations": {
+    "anchor": {
+      "run_out_sha256": "c5b5e3964f05449cabc3772beabe13e51979116e6bc490d081cffb5437f43d8a",
+      "finished_code_zero": true,
+      "timemax_s": 16.0,
+      "output_dt_s": 0.02,
+      "frames_available": 801,
+      "particles_per_frame": 1374477,
+      "fluid_particles_per_frame": 1279855,
+      "excluded_particles": 0,
+      "anchor_was_not_retried": true
+    },
+    "scientific_review_scope": {
+      "decoded_frame_indices": [0, 100, 200, 300, 400, 500, 600, 700, 800],
+      "frames_decoded": 9,
+      "surface_particle_stride": 32,
+      "full_frame_coverage": false,
+      "full_particle_coverage": false,
+      "endpoint_predicate": "strict transformed source-STL point-in-closed-mesh with 1e-8 m endpoint tolerance",
+      "endpoint_particle_scope": "fluid-only in the existing scientific-review implementation",
+      "saved_chord_scope": "fluid IDs sampled at stride 32; linear chords between saved endpoints, not an exact substep path",
+      "qualification_effect": "diagnostic only; sampled geometry cannot qualify the run"
+    },
+    "reported_sampled_geometry": {
+      "generation_envelope_outside_particle_frames": 103552,
+      "fluid_endpoint_penetration_particle_frames": 3354,
+      "fluid_endpoint_penetration_by_component": {
+        "slope": 891,
+        "blocks": 2463,
+        "piston": 0,
+        "bottom": 0
+      },
+      "saved_chord_crossing_count": 1435,
+      "saved_chord_crossing_component_breakdown_from_read_only_recount": {
+        "slope": 7,
+        "blocks": 1389,
+        "piston": 39,
+        "total": 1435
+      }
+    },
+    "fluid_only_endpoint_recount_by_frame": [
+      {"frame": 0, "time_s": 0.0, "slope": 0, "blocks": 1, "union": 1},
+      {"frame": 100, "time_s": 2.0, "slope": 75, "blocks": 242, "union": 317},
+      {"frame": 200, "time_s": 4.0, "slope": 81, "blocks": 270, "union": 351},
+      {"frame": 300, "time_s": 6.0, "slope": 86, "blocks": 278, "union": 364},
+      {"frame": 400, "time_s": 8.0, "slope": 109, "blocks": 344, "union": 453},
+      {"frame": 500, "time_s": 10.0, "slope": 114, "blocks": 335, "union": 449},
+      {"frame": 600, "time_s": 12.0, "slope": 131, "blocks": 345, "union": 476},
+      {"frame": 700, "time_s": 14.0, "slope": 141, "blocks": 337, "union": 478},
+      {"frame": 800, "time_s": 16.0, "slope": 154, "blocks": 311, "union": 465}
+    ],
+    "fluid_boundary_scope_split": {
+      "frame0_fluid_endpoint_inside_block": 1,
+      "frame0_fluid_endpoint_inside_slope": 0,
+      "frame0_fluid_block_endpoint_nearest_surface_m": 0.000144085,
+      "parent_read_only_all_particle_diagnostic_frame0_entity_inside_count": 25883,
+      "parent_diagnostic_interpretation": "The all-particle frame-0 count is dominated by boundary particles and must not be compared with the fluid-only penetration metric. It is retained as a scope warning, not as a qualification result.",
+      "frame100_fluid_counts_from_full_fluid_axis": {
+        "slope": 75,
+        "blocks": 242
+      }
+    },
+    "nearest_source_surface_distance_m": {
+      "method": "read-only nearest transformed source-STL triangle distance for points already classified inside",
+      "dp_m": 0.0075,
+      "slope_frames_100_to_800": {
+        "p50_range": [0.00128, 0.003292],
+        "p90_range": [0.004449, 0.005681],
+        "max_range": [0.006787, 0.008031]
+      },
+      "blocks_frames_100_to_800": {
+        "p50_range": [0.003484, 0.004616],
+        "p90_range": [0.012675, 0.016824],
+        "max_range": [0.017066, 0.020864]
+      },
+      "interpretation": "Slope points are mostly within about one dp of the source surface; block points include a recurring deeper tail of roughly 2.3 to 2.8 dp. Distance is evidence for triage, not a relaxed acceptance threshold."
+    },
+    "sampled_id_persistence": {
+      "slope_unique_fluid_ids": 225,
+      "slope_ids_in_at_least_5_of_9_frames": 83,
+      "slope_ids_in_at_least_8_of_9_frames": 55,
+      "blocks_unique_fluid_ids": 1001,
+      "blocks_ids_in_at_least_5_of_9_frames": 143,
+      "blocks_ids_in_at_least_8_of_9_frames": 62,
+      "interpretation": "The counts include a repeated wall-adjacent cohort, so they are not explained by one isolated sampled endpoint."
+    },
+    "static_geometry_and_input": {
+      "definition_dp_m": 0.0075,
+      "definition_fill_mode": "fillbox mode=void after STL boundary draws",
+      "explicit_setmkvoid_before_fluid_fill": false,
+      "definition_declared_bounds_m": {
+        "min": [-1.0, 0.0, -0.2],
+        "max": [12.0, 0.37, 0.7]
+      },
+      "source_stl": {
+        "slope_triangles": 8,
+        "slope_watertight": true,
+        "blocks_triangles": 1176,
+        "blocks_watertight": true,
+        "blocks_closed_components": 98,
+        "block_vertices_inside_slope": 0,
+        "block_triangle_centroids_inside_slope": 0,
+        "interpretation": "The source block field does not overlap the source slope under the exact Definition transform; source STL overlap is not a leading explanation."
+      },
+      "generated_mkcells": {
+        "boundary_triangle_count": 49612,
+        "mk_counts": {"10": 24, "20": 28, "50": 968, "60": 48592},
+        "mk50_unique_points": 1936,
+        "mk60_unique_points": 97184,
+        "interpretation": "The generated boundary is a dp-lattice materialization around the transformed source meshes, not the continuous source triangle set used by the strict endpoint predicate."
+      }
+    },
+    "mass_and_events": {
+      "sampled_initial_fluid_mass_kg": 539.9388421305049,
+      "sampled_mass_relative_change": 0.0,
+      "mass_contract_bound": false,
+      "event_thresholds_and_reference_acceptance": "pending root-bound thresholds; not used to waive geometry failure"
+    }
+  },
+  "hypotheses": [
+    {
+      "id": "H1_missing_solid_exclusion_or_fill_ordering",
+      "rank": 1,
+      "statement": "The v2 materialization leaves a small amount of fluid available inside the closed block field at fill time and permits later block contact loss because STL boundary surfaces are drawn before a void fill but no explicit solid/void precursor is present in the Definition. This is the leading repair hypothesis for the block result.",
+      "evidence": [
+        "The Definition uses fillbox mode=void after slope and block drawfilestl calls, with no explicit setmkvoid precursor.",
+        "A fluid endpoint is already inside a block at frame 0; its nearest transformed source surface distance is 0.000144085 m.",
+        "Fluid block endpoint counts persist and grow from 1 at frame 0 to 242 at frame 100 and remain 311 at frame 800.",
+        "Blocks contribute 1389 of 1435 sampled saved-chord crossings, and block inside-point tails reach 0.020864 m, about 2.8 dp.",
+        "The source block field is watertight and does not overlap the source slope, reducing source overlap and transform mistakes as explanations."
+      ],
+      "discriminating_test": "Materialize a fresh v3 case with an explicit closed-solid void/exclusion precursor for the transformed slope and blocks before fluid fill, then redraw the unchanged physical boundary faces. Compare frame-0 fluid endpoint occupancy and the full fluid block endpoint/chord gates with v2 under the same q, dp, motion, and transforms.",
+      "falsifier": "If a root-reviewed explicit exclusion materialization still produces any frame-0 fluid endpoint inside slope/blocks or any full-window fluid block endpoint/chord crossing, H1 is falsified as a sufficient repair; do not reinterpret that failure as a threshold issue."
+    },
+    {
+      "id": "H2_strict_stl_contact_band_classification",
+      "rank": 2,
+      "statement": "A substantial portion of the slope count, and the shallow part of the block count, is a strict continuous-STL point-in-solid diagnostic sampling an effective finite-dp contact band around a discrete MkCells boundary. This can inflate endpoint counts near a wall even when the native boundary lattice is behaving as intended, but it cannot by itself waive the deeper block tail or saved-chord crossings.",
+      "evidence": [
+        "The existing endpoint predicate uses exact transformed source-STL point-in-closed-mesh classification with a 1e-8 m tolerance, while the generated boundary is a dp-lattice MkCells materialization.",
+        "The generated static boundary has 968 slope triangles and 48,592 block triangles, whereas the source meshes have 8 and 1176 triangles respectively.",
+        "For frame 100 through 800, slope inside-point p90 distances are 0.004449 to 0.005681 m and maxima are 0.006787 to 0.008031 m, mostly about one dp.",
+        "The frame-0 fluid block point is only 0.000144085 m from the source surface, and a separate all-particle frame-0 count is dominated by boundary particles rather than fluid particles.",
+        "The fluid-only endpoint recount and the parent all-particle diagnostic differ in scope; mixing them would overstate fluid penetration."
+      ],
+      "discriminating_test": "For the same decoded frames, report fluid-only and boundary-only scopes separately; bind a diagnostic signed-distance/contact-band comparison to generated MkCells; then require the repaired anchor to pass the exact fluid endpoint and saved-chord gates rather than accepting a distance-based waiver.",
+      "falsifier": "If block endpoints remain at depths above one dp with independent full-window chord crossings after a successful void/exclusion materialization, H2 cannot explain the failure; the remaining failure is a native geometry/contact defect. If generated and source surfaces agree within a root-bound contact-band rule but exact fluid gates still fail, H2 is only a classification aid and provides no release credit."
+    }
+  ],
+  "minimal_repair_candidate": {
+    "candidate_id": "F5_geomrepair_v3_explicit_void_precursor",
+    "status": "proposed_not_executed",
+    "change_class": "geometry_materialization_only",
+    "recipe": [
+      "Create the new v3 Definition and fresh adjacent assets under the proposed input identity.",
+      "Before fluid fill, materialize the transformed closed slope and block meshes as an explicit solid/void exclusion volume using the repository-supported GenCase STL void/autofill mechanism selected by root review.",
+      "Redraw the same physical slope and block faces with their existing boundary markers and transforms after the exclusion precursor; preserve source geometry, q=0.5 motion, dp, domain, gauges, and output cadence.",
+      "If the native mechanism cannot represent the closed exclusion robustly, root review may select a separately named one-dp outward shell asset. That shell must have a new hash and its physical deviation must be recorded; it must not alter the v2 assets in place.",
+      "Do not change endpoint tolerances, event thresholds, the matrix denominator, or the qualification contract to make the observed v2 counts pass."
+    ],
+    "why_minimal": "It changes only the order/materialization of the closed geometry exclusion while preserving the F5 physical input and observation contract. It directly tests H1 and leaves H2 measurable.",
+    "implementation_authority": "The literal XML syntax and any shell construction require root review before any file is written or any preflight is run.",
+    "not_authorized": [
+      "writing the proposed v3 Definition or assets",
+      "running GenCase or native decode",
+      "starting a solver, GPU, queue, job, or attempt",
+      "retrying the v2 input or using its output as v3 evidence"
+    ]
+  },
+  "verification_gates": [
+    {
+      "id": "G0_root_review",
+      "gate": "Root approves the v3 literal XML recipe, source/shell identities, and one fresh preflight scope.",
+      "failure_action": "Remain proposal-only with zero credit."
+    },
+    {
+      "id": "G1_identity_closure",
+      "gate": "Fresh Definition, motion, STL/shell assets, generated prefix, and eventual attempt identity have distinct names and hashes; v2 generated products and trajectory are not reused.",
+      "failure_action": "Stop before GenCase; no same-input retry."
+    },
+    {
+      "id": "G2_static_native_preflight",
+      "gate": "After root authorization only: CPU/native preflight passes XML alignment, unique IDs, finite arrays, fixed/moving boundary counts, fluid count/mass diagnostics, and static geometry closure.",
+      "failure_action": "Keep v3 zero credit and do not schedule a solver."
+    },
+    {
+      "id": "G3_initial_fluid_geometry",
+      "gate": "Fresh v3 frame 0 has zero fluid endpoints inside transformed slope and blocks under the exact source-STL predicate; fluid and boundary scopes are reported separately.",
+      "failure_action": "Hard fail; do not use a contact-band tolerance to waive it."
+    },
+    {
+      "id": "G4_one_anchor_full_window",
+      "gate": "Only after a new root review: one fresh protected anchor reaches all 801 frames at 16 s and 0.02 s output cadence with excluded particles zero and full fluid identity/finite checks.",
+      "failure_action": "Retain the failed row in the fixed 15-row denominator; no same-input retry."
+    },
+    {
+      "id": "G5_full_fluid_geometry",
+      "gate": "Review all 801 frames and all fluid particles: zero exact slope/block endpoint penetrations and zero exact saved-endpoint chord crossings; report piston/bottom separately.",
+      "failure_action": "Hard geometry failure, qualification_claim remains none, matrix_credit remains 0."
+    },
+    {
+      "id": "G6_events_and_reference",
+      "gate": "Only after geometry gates pass, apply root-bound incident/run-up/return thresholds, full-window mass policy, and preregistered external reference acceptance.",
+      "failure_action": "No geometry or matrix credit is inferred from event/reference results."
+    }
+  ],
+  "execution_controls": {
+    "audit_read_only": true,
+    "solver_started_by_audit": false,
+    "gpu_started_by_audit": false,
+    "queue_mutation": 0,
+    "job_mutation": 0,
+    "attempt_mutation": 0,
+    "root_review_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_mutation": 0,
+    "existing_v2_anchor_modified": false,
+    "existing_v2_anchor_retried": false,
+    "existing_reports_modified": false
+  },
+  "targeted_checks": {
+    "read_only_recount": {
+      "status": "passed_reproduced_existing_sampled_totals",
+      "coverage": "nine decoded frames; fluid-only endpoints; stride-32 saved chords",
+      "result": "891 slope endpoint frames, 2463 block endpoint frames, 1435 saved chord crossings",
+      "solver_gpu_queue_started": false,
+      "output_written": "/tmp only; no repository artifact"
+    },
+    "json_validation": {
+      "status": "passed",
+      "command": "./.venv/bin/python -m json.tool campaigns/core-v1/cfd/f5-wave-runup-third-t1/geometry-repair-audit-v1/geometry-repair-proposal-audit-v1.json"
+    },
+    "focused_tests": {
+      "status": "passed_42_tests",
+      "duration_s": 7.10,
+      "scope": "F5 proposal, Definition writer, preflight, boundary audit, postrun, and scientific-review regression tests",
+      "command": "./.venv/bin/python -m pytest -q tests/test_f5_third_t1_proposal_audit_v1.py tests/test_f5_wave_runup_definition_writer_v1.py tests/test_f5_wave_runup_definition_writer_v2.py tests/test_f5_wave_runup_preflight_boundary_audit_v1.py tests/test_f5_wave_runup_preflight_root_review_v1.py tests/test_f5_wave_runup_preflight_root_review_v2.py tests/test_f5_wave_runup_preflight_v2.py tests/test_f5_wave_runup_root_review_v1.py tests/test_f5_wave_runup_solver_anchor_cadence_parser_v1.py tests/test_f5_wave_runup_solver_anchor_postrun_audit_v1.py tests/test_f5_wave_runup_solver_anchor_root_review_v1.py tests/test_f5_wave_runup_solver_anchor_runtime_v2.py tests/test_f5_wave_runup_solver_anchor_scientific_review_v1.py",
+      "result": "42 passed",
+      "solver_gpu_queue_started": false
+    }
+  },
+  "next_step": {
+    "decision": "root_review_required",
+    "required_review": [
+      "Choose and bind the literal GenCase void/exclusion materialization syntax or reject H1.",
+      "Approve the new input/output identity and hash-closure procedure.",
+      "Authorize at most one fresh CPU/native preflight; a later solver anchor requires a separate root review.",
+      "Keep the denominator at 15 rows, qualification_claim none, matrix_credit 0, and same-input retry forbidden until every full-window geometry gate passes."
+    ],
+    "no_action_until_review": true
+  },
+  "limitations": [
+    "The current scientific report samples 9 of 801 frames and stride-32 surface particles; it cannot establish a full-window zero-crossing result.",
+    "The source-STL predicate is a diagnostic geometry oracle and does not by itself encode DualSPHysics finite-particle contact semantics.",
+    "The generated runtime-domain numeric envelope is not explicit in the v2 Definition; the 103552 sampled envelope-outside count remains a separate pending contract issue.",
+    "Mass change is zero in sampled frames, but the F5 contract does not bind a numeric full-window mass threshold.",
+    "No hypothesis here authorizes threshold relaxation, event reinterpretation, or qualification credit."
+  ]
+}
