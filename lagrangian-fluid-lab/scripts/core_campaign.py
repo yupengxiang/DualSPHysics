@@ -518,6 +518,7 @@ def completion(registry, data_root):
             "missing_registered_material_case_runs": registered_material_missing,
             "missing_registered_t1_case_runs": registered_t1_missing,
             "missing_target_t1_case_runs": target_t1_missing,
+            "missing_target_material_case_runs": target_material_missing,
             "unregistered_t1_case_runs": max(0, MINIMUM_T1_CASE_RUNS - len(required_t1)),
             "unregistered_material_case_runs": max(0, MINIMUM_MATERIAL_CASE_RUNS - len(required_t2)),
             "unregistered_t1_evidence_case_runs": len(unregistered_received["T1"]),

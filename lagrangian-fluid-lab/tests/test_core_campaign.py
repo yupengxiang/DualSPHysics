@@ -10,6 +10,8 @@ def test_empty_queue_never_completes_product(tmp_path):
     assert not result["can_finalize"]
     assert result["unregistered_t1_case_runs"] == 432
     assert result["missing_material_case_runs"] == 288
+    assert result["missing_target_material_case_runs"] == 288
+    assert result["missing_target_material_case_runs"] == result["missing_material_case_runs"]
     assert result["missing_registered_material_case_runs"] == 0
     assert result["unregistered_material_case_runs"] == 288
 
@@ -35,6 +37,8 @@ def test_unregistered_evaluations_do_not_shrink_any_target_denominator(tmp_path)
 
     assert not result["can_finalize"]
     assert result["missing_material_case_runs"] == 288
+    assert result["missing_target_material_case_runs"] == 288
+    assert result["missing_target_material_case_runs"] == result["missing_material_case_runs"]
     assert result["missing_target_t1_case_runs"] == 432
     assert result["unregistered_t1_case_runs"] == 432
     assert result["unregistered_material_case_runs"] == 288
