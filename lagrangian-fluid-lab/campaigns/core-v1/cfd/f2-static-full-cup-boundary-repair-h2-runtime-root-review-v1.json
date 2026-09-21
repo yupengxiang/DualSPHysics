@@ -1,0 +1,115 @@
+{
+  "schema": "core.f2.static_full_cup.boundary_repair_h2.runtime_root_review.v1",
+  "review_id": "f2-static-full-cup-boundary-repair-h2-runtime-root-review-v1",
+  "created_at_utc": "2026-09-21T04:34:50.373770+00:00",
+  "family": "F2",
+  "scope_id": "F2_static_full_cup_volume_hold_x_v1",
+  "repair_id": "F2_static_full_cup_initial_support_clearance_h2_v1",
+  "status": "approved_for_one_solver_canary",
+  "decision": "approved_for_one_solver_canary",
+  "authorized_cell_indices": [
+    0
+  ],
+  "hypothesis_class": "H2_initial_fluid_support_clearance",
+  "hypothesis": "retain Boundary=2 mDBC/explicit normals and the fixed cup, but use the fresh source lattice whose minimum distance to the cup bottom and four closed sides is c(dp)=3*hdp*dp",
+  "case_id": "CORE_F2_static_full_cup_volume_supportclearance_h2_q0p00000000_dp0p010000000000_canary",
+  "revision_id": "F2_static_full_cup_support_clearance_h2_v1",
+  "preflight": {
+    "path": "campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h2-cell0-v1/preflight.json",
+    "sha256": "ff768436bcc225aa2b49ed9a8ab50cbc9778ae1768dcbf32875340a4d0d95fec",
+    "bytes": 10088,
+    "role": "passed H2 CPU/native input preflight"
+  },
+  "writer_receipt": {
+    "path": "campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h2-cell0-v1/input/writer-receipt.json",
+    "sha256": "3c73610681fc1d9b59a578ae60c353d5ac7a187696c92964aec12eaaeca49535",
+    "bytes": 4688,
+    "role": "fresh H2 Definition writer receipt"
+  },
+  "definition": {
+    "path": "campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h2-cell0-v1/input/CORE_F2_static_full_cup_volume_supportclearance_h2_q0p00000000_dp0p010000000000_canary_Def.xml",
+    "sha256": "18e475ea951d7611a035d54bc2df42e420c4a231b012694566298d8ba0eebbaf",
+    "bytes": 5665,
+    "role": "fresh H2 Definition"
+  },
+  "preflight_root_review": {
+    "path": "campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h2-root-review-v1.json",
+    "sha256": "a6a2d9f96c1d4153e71620b28a2436ea8408d7ba3d9a402fff7fbdac6aa6b70e",
+    "bytes": 3437,
+    "role": "input-only H2 root review"
+  },
+  "proposal": {
+    "path": "campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h2-proposal-v1.json",
+    "sha256": "e065ef46f754c25ad211ab142221c9d9c09c786a82b834cf7b8d35c7990ab790",
+    "bytes": 10631,
+    "role": "H2 proposal-only contract"
+  },
+  "prior_negative": {
+    "path": "campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-negative-evidence-v1.json",
+    "sha256": "bbb97817955782e787a844300e3756af248d9cc49e7ecbb43b6275f7dd6de166",
+    "bytes": 51786,
+    "role": "immutable H1 runtime negative"
+  },
+  "authorization": {
+    "solver_launch": true,
+    "gpu_launch": true,
+    "job_spec_creation": true,
+    "queue_mutation": true,
+    "ledger_mutation": true,
+    "registry_mutation": false,
+    "material_training": false,
+    "model_training": false,
+    "qualification_credit": 0
+  },
+  "execution_controls": {
+    "read_only_review": true,
+    "solver_now": false,
+    "gpu_launch_now": false,
+    "job_spec_creation_now": false,
+    "queue_mutation_now": 0,
+    "ledger_mutation_now": 0,
+    "registry_mutation_now": 0
+  },
+  "execution_policy": {
+    "exactly_one_solver_canary": true,
+    "selected_cell_is_fixed": true,
+    "host_preference": "ada; use a card with measured headroom and avoid H200 disk pressure",
+    "registered_window_s": 0.6,
+    "output_interval_s": 0.02,
+    "same_input_retry": false,
+    "infrastructure_retry": "at most one explicitly logged infrastructure recovery; no scientific retry",
+    "matrix_expansion": false,
+    "scope_registration": false,
+    "failure_denominator": {
+      "planned": 15,
+      "executed": 1,
+      "future_unattempted": 14,
+      "survivor_renormalization": false
+    }
+  },
+  "hard_gates": {
+    "cpu_native_preflight_pass": true,
+    "fresh_definition_and_generated_bi4": true,
+    "support_clearance_m": 0.039,
+    "mass_relative_error_max": 0.03,
+    "no_initial_endpoint": true,
+    "no_zero_boundnor": true,
+    "static_hold_event_window_and_wall_audit_required": true
+  },
+  "postconditions": [
+    "one solver execution receipt and complete native conversion",
+    "full 0.60 s window or an explicit infrastructure/scientific failure receipt",
+    "wall endpoint, saved-chord, missing-frame, finite-state and mass audits",
+    "preserve the fixed 15-cell denominator and the H2 input preflight",
+    "do not mutate registry, do not claim T1/T2, do not launch matrix rows"
+  ],
+  "qualification_claim": "none; one H2 solver canary only",
+  "scientific_status": "solver_execution_authorized_but_not_started",
+  "registry_mutation": 0,
+  "implementation": {
+    "path": "scripts/f2_static_full_cup_boundary_repair_h2_runtime_root_review_v1.py",
+    "sha256": "8ef59e3a5cc45cddd06bd006eed163d79e3c177898ff95f95bfd6d9b30a641b2",
+    "bytes": 10961,
+    "role": "runtime root-review implementation"
+  }
+}
