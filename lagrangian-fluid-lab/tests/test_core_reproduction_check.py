@@ -1,3 +1,5 @@
+import copy
+import json
 import shutil
 import h5py
 from test_core_cfd_dataset import _trajectory
@@ -117,6 +119,90 @@ def test_score_comparison_keeps_unexecuted_setup_failure_in_full_denominator(tmp
     result=compare_scores(a,b,expected_frames=2)
     assert result['passed']
     assert result['cases']['case']['left']['selection_score']==1.
+
+
+def test_score_failure_metadata_and_registered_scores_fail_closed(tmp_path):
+    from scripts.core_reproduction_check import compare_scores
+
+    summary = {'expected_frames': 3, 'completed_frames': 3,
+               'mass_error_abs_max_kg': 0., 'kinetic_energy_error_abs_max_j': 0.,
+               'validity_mismatch_frames': 0, 'changed_particle_mass_frames': 0,
+               'wall_chord_statuses': ['checked_static_saved_chords'],
+               'wall_chord_particle_count': 0, 'wall_chord_mass_kg': 0.}
+    row = {'expected_frames': 3, 'length_m': 1., 'speed_mps': 1.,
+           'failure_category': None, 'first_failure_frame': None,
+           'frames_predicted': 3, 'frames_executed': 3, 'frames_expected': 3,
+           'executed': True, 'position_rmse': [.1, .2, .3],
+           'velocity_rmse': [.1, .2, .3], 'selection_score': .2,
+           'physics': {'summary': summary}}
+
+    def write_pair(left_row, right_row):
+        left = tmp_path / 'left.json'
+        right = tmp_path / 'right.json'
+        report = {'model_kind': 'mlp', 'cases': {'case': left_row}}
+        left.write_text(json.dumps(report))
+        report = {'model_kind': 'mlp', 'cases': {'case': right_row}}
+        right.write_text(json.dumps(report))
+        return compare_scores(left, right, expected_frames=3)
+
+    assert write_pair(row, copy.deepcopy(row))['passed']
+
+    missing_frame = copy.deepcopy(row)
+    missing_frame.update(failure_category='nonfinite_prediction', frames_predicted=1,
+                         frames_executed=1, first_failure_frame=None,
+                         position_rmse=[.1, None, None], velocity_rmse=[.1, None, None])
+    missing_frame['physics']['summary']['completed_frames'] = 1
+    result = write_pair(missing_frame, copy.deepcopy(missing_frame))
+    assert not result['passed'] and any('missing_first_failure_frame' in e for e in result['errors'])
+
+    complete_with_failure = copy.deepcopy(row)
+    complete_with_failure.update(failure_category='spurious_failure', first_failure_frame=1)
+    result = write_pair(complete_with_failure, copy.deepcopy(complete_with_failure))
+    assert not result['passed'] and any('completed_failure_category' in e for e in result['errors'])
+
+    inconsistent_counts = copy.deepcopy(row)
+    inconsistent_counts['frames_executed'] = 2
+    result = write_pair(inconsistent_counts, copy.deepcopy(inconsistent_counts))
+    assert not result['passed'] and any('frames_executed' in e for e in result['errors'])
+
+    inconsistent_prefix = copy.deepcopy(missing_frame)
+    inconsistent_prefix['frames_predicted'] = inconsistent_prefix['frames_executed'] = 2
+    result = write_pair(inconsistent_prefix, copy.deepcopy(inconsistent_prefix))
+    assert not result['passed'] and any('frames_predicted' in e for e in result['errors'])
+
+    out_of_range_score = copy.deepcopy(row)
+    out_of_range_score['selection_score'] = 1.1
+    result = write_pair(out_of_range_score, copy.deepcopy(out_of_range_score))
+    assert not result['passed'] and any('invalid_selection_score' in e for e in result['errors'])
+
+    nonfinite_score = copy.deepcopy(row)
+    nonfinite_score['selection_score'] = float('nan')
+    result = write_pair(nonfinite_score, copy.deepcopy(nonfinite_score))
+    assert not result['passed'] and any('invalid_json' in e for e in result['errors'])
+
+
+def test_hdf5_failure_metadata_is_diagnostic_and_fail_closed(tmp_path):
+    left, right = tmp_path / 'left.h5', tmp_path / 'right.h5'
+    _trajectory(left)
+    shutil.copyfile(left, right)
+    with h5py.File(right, 'r+') as handle:
+        handle.attrs['failure_category'] = 'nonfinite_prediction'
+    result = compare(left, right, expected_frames=2)
+    assert not result['passed']
+    assert any('missing_first_failure_frame:right' in error for error in result['errors'])
+
+    shutil.copyfile(left, right)
+    with h5py.File(right, 'r+') as handle:
+        handle.attrs['finite_prefix_frames'] = 2
+        handle.attrs['failure_category'] = 'spurious_failure'
+        handle.attrs['first_failure_frame'] = 1
+        handle.attrs['frames_predicted'] = 2
+        handle.attrs['frames_executed'] = 2
+        handle.attrs['selection_score'] = float('inf')
+    result = compare(left, right, expected_frames=2)
+    assert not result['passed']
+    assert any('completed_failure_category:right' in error for error in result['errors'])
+    assert any('invalid_selection_score:right' in error for error in result['errors'])
 
 
 def test_trajectory_comparison_rejects_shared_invalid_identity_and_one_sided_nonfinite(tmp_path):

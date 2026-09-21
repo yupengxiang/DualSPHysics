@@ -91,6 +91,70 @@ def _identity_keys(zone, particle_id):
     return {(int(z), int(i)) for z, i in zip(zone.tolist(), particle_id.tolist())}
 
 
+def _trajectory_failure_metadata(handle, label, expected_frames):
+    """Validate optional failure metadata without making legacy HDF5 invalid."""
+    errors = []
+    names = ("failure_category", "first_failure_frame", "frames_predicted",
+             "frames_executed", "finite_prefix_frames")
+    present = {name: name in handle.attrs for name in names}
+    if not any(present.values()):
+        return errors
+
+    def attr(name):
+        value = handle.attrs.get(name)
+        if isinstance(value, bytes):
+            return value.decode(errors="replace")
+        if isinstance(value, np.ndarray) and value.shape == ():
+            value = value.item()
+        return value
+
+    category = attr("failure_category") if present["failure_category"] else None
+    if category is not None and (not isinstance(category, str) or not category):
+        errors.append(f"invalid_failure_category:{label}")
+    first = attr("first_failure_frame") if present["first_failure_frame"] else None
+    first_value = int(first) if _is_integral(first) else None
+    first_valid = first is None or (first_value is not None and 1 <= first_value <= expected_frames)
+    if not first_valid:
+        errors.append(f"invalid_first_failure_frame:{label}")
+    counts = {}
+    for name in ("frames_predicted", "frames_executed", "finite_prefix_frames"):
+        if not present[name]:
+            continue
+        value = attr(name)
+        if not _is_integral(value) or not 0 <= int(value) <= expected_frames:
+            errors.append(f"invalid_{name}:{label}")
+        else:
+            counts[name] = int(value)
+    if len(counts) > 1 and len(set(counts.values())) != 1:
+        errors.append(f"inconsistent_failure_counts:{label}")
+    if category is not None and isinstance(category, str) and category:
+        if first is None:
+            errors.append(f"missing_first_failure_frame:{label}")
+    elif first is not None:
+        errors.append(f"orphan_first_failure_frame:{label}")
+    state_complete = False
+    if all(name in handle for name in ("valid", "position", "velocity")):
+        try:
+            state_complete = all(
+                np.asarray(handle["valid"][frame]).astype(bool).all()
+                and np.isfinite(np.asarray(handle["position"][frame])).all()
+                and np.isfinite(np.asarray(handle["velocity"][frame])).all()
+                for frame in range(expected_frames)
+            )
+        except (IndexError, OSError, TypeError, ValueError):
+            state_complete = False
+    if category is not None and (counts.get("finite_prefix_frames") == expected_frames or state_complete):
+        errors.append(f"completed_failure_category:{label}")
+    if counts.get("finite_prefix_frames", expected_frames) < expected_frames and category is None:
+        errors.append(f"missing_failure_category:{label}")
+    for name in ("selection_score", "score"):
+        if name in handle.attrs:
+            value = attr(name)
+            if not (_is_real(value) and math.isfinite(float(value)) and 0 <= float(value) <= 1):
+                errors.append(f"invalid_selection_score:{label}:{name}")
+    return errors
+
+
 def _trajectory_layout(handle, label, expected_frames):
     """Validate HDF5 layout and static public-State axes.
 
@@ -151,6 +215,7 @@ def _trajectory_layout(handle, label, expected_frames):
             errors.append(f"duplicate_identity:{label}")
         if not np.isfinite(mass).all() or np.any(mass <= 0):
             errors.append(f"invalid_mass_axis:{label}")
+    errors.extend(_trajectory_failure_metadata(handle, label, expected_frames))
     return count, errors
 
 
@@ -177,12 +242,48 @@ def _read_score_array(row, key, expected_frames, errors):
     for index, item in enumerate(value):
         if item is None:
             converted.append(np.nan)
-        elif _is_real(item):
+        elif _is_real(item) and math.isfinite(float(item)):
             converted.append(float(item))
         else:
             errors.append(f"invalid_score_value:{key}:{index}")
             converted.append(np.nan)
     return np.asarray(converted, dtype=float)
+
+
+def _validate_declared_selection_score(row, score, *, prefix, errors):
+    """Reject optional serialized scores that are not registered scores."""
+    declared = []
+    if "selection_score" in row:
+        declared.append(("selection_score", row["selection_score"]))
+    nested = row.get("score")
+    if nested is not None:
+        if not isinstance(nested, dict):
+            errors.append(prefix + ":invalid_score_field")
+        elif "selection_score" in nested:
+            declared.append(("score.selection_score", nested["selection_score"]))
+    for name, value in declared:
+        if not (_is_real(value) and math.isfinite(float(value)) and 0 <= float(value) <= 1):
+            errors.append(prefix + ":invalid_selection_score:" + name)
+        elif score is not None and abs(float(value) - float(score["selection_score"])) > PROTOCOL["score_absolute_tolerance"]:
+            errors.append(prefix + ":selection_score_mismatch:" + name)
+
+
+def _validate_computed_score(score, *, expected_frames, prefix, errors):
+    if score is None:
+        return
+    selection = score.get("selection_score")
+    if not (_is_real(selection) and math.isfinite(float(selection)) and 0 <= float(selection) <= 1):
+        errors.append(prefix + ":invalid_selection_score")
+    coverage = score.get("raw_error_coverage")
+    if not (_is_real(coverage) and math.isfinite(float(coverage)) and 0 <= float(coverage) <= 1):
+        errors.append(prefix + ":invalid_score_coverage")
+    finite_prefix = score.get("finite_prefix_frames")
+    if not _is_integral(finite_prefix) or not 0 <= int(finite_prefix) <= expected_frames:
+        errors.append(prefix + ":invalid_finite_prefix")
+    for key in ("raw_position_rmse_frame_mean_m", "raw_velocity_rmse_frame_mean_mps"):
+        value = score.get(key)
+        if value is not None and not (_is_real(value) and math.isfinite(float(value)) and float(value) >= 0):
+            errors.append(prefix + ":invalid_score_value:" + key)
 
 
 def _validate_physics_summary(row, *, expected_frames, case, side):
@@ -211,6 +312,9 @@ def _validate_physics_summary(row, *, expected_frames, case, side):
     frames_predicted = row.get("frames_predicted")
     if _is_integral(frames_predicted) and completed >= 0 and int(frames_predicted) != completed:
         errors.append(f"{prefix}:completed_frame_mismatch")
+    frames_executed = row.get("frames_executed")
+    if _is_integral(frames_executed) and completed >= 0 and int(frames_executed) != completed:
+        errors.append(f"{prefix}:executed_frame_mismatch")
     for key in PHYSICS_FLOAT_FIELDS:
         value = summary[key]
         if value is None:
@@ -256,16 +360,21 @@ def _validate_score_row(row, *, expected_frames, case, side):
             errors.append(prefix + ":" + key)
     if _is_integral(row.get("frames_expected")) and int(row["frames_expected"]) != expected_frames:
         errors.append(prefix + ":frames_expected")
-    if _is_integral(row.get("frames_executed")) and _is_integral(row.get("frames_predicted")):
-        if int(row["frames_executed"]) != int(row["frames_predicted"]):
-            errors.append(prefix + ":frames_executed")
+    predicted = row.get("frames_predicted")
+    executed_frames = row.get("frames_executed")
+    predicted_value = int(predicted) if _is_integral(predicted) else None
+    executed_value = int(executed_frames) if _is_integral(executed_frames) else None
+    if predicted_value is not None and executed_value is not None and predicted_value != executed_value:
+        errors.append(prefix + ":frames_executed")
     category = row.get("failure_category")
     if category is not None and (not isinstance(category, str) or not category):
         errors.append(prefix + ":failure_category")
     first_failure = row.get("first_failure_frame")
-    if first_failure is not None and (
-        not _is_integral(first_failure) or int(first_failure) < 1 or int(first_failure) > expected_frames
-    ):
+    first_failure_value = int(first_failure) if _is_integral(first_failure) else None
+    first_failure_valid = first_failure is None or (
+        first_failure_value is not None and 1 <= first_failure_value <= expected_frames
+    )
+    if not first_failure_valid:
         errors.append(prefix + ":first_failure_frame")
 
     position = _read_score_array(row, "position_rmse", expected_frames, errors)
@@ -274,6 +383,10 @@ def _validate_score_row(row, *, expected_frames, case, side):
     first_bad = int(np.flatnonzero(~finite)[0]) if np.any(~finite) else expected_frames
     if np.any(finite[first_bad:]):
         errors.append(prefix + ":finite_prefix")
+    if predicted_value is not None and predicted_value != first_bad:
+        errors.append(prefix + ":frames_predicted")
+    if executed_value is not None and executed_value != first_bad:
+        errors.append(prefix + ":frames_executed")
 
     attempted = bool(row.get("executed")) if isinstance(row.get("executed"), (bool, np.bool_)) else None
     # score_case intentionally owns the registered clipping and denominator
@@ -297,10 +410,9 @@ def _validate_score_row(row, *, expected_frames, case, side):
     except (KeyError, TypeError, ValueError, OverflowError) as error:
         errors.append(prefix + ":invalid_score:" + type(error).__name__)
         score = None
+    _validate_computed_score(score, expected_frames=expected_frames, prefix=prefix, errors=errors)
+    _validate_declared_selection_score(row, score, prefix=prefix, errors=errors)
 
-    predicted = row.get("frames_predicted")
-    if _is_integral(predicted) and int(predicted) != first_bad:
-        errors.append(prefix + ":frames_predicted")
     if attempted is False and first_bad != 0:
         errors.append(prefix + ":unexecuted_predictions")
     if first_bad == expected_frames:
@@ -308,10 +420,16 @@ def _validate_score_row(row, *, expected_frames, case, side):
             errors.append(prefix + ":completed_failure_category")
         if first_failure is not None:
             errors.append(prefix + ":completed_first_failure_frame")
+        if attempted is not True:
+            errors.append(prefix + ":completed_execution")
     else:
         if category is None:
             errors.append(prefix + ":missing_failure_category")
-        if first_failure is not None and int(first_failure) != first_bad + 1:
+        elif not isinstance(category, str) or not category:
+            errors.append(prefix + ":missing_failure_category")
+        if category is not None and first_failure is None:
+            errors.append(prefix + ":missing_first_failure_frame")
+        if first_failure_valid and first_failure_value is not None and first_failure_value != first_bad + 1:
             errors.append(prefix + ":first_failure_frame")
     physics, physics_errors = _validate_physics_summary(
         row, expected_frames=expected_frames, case=case, side=side
@@ -359,6 +477,26 @@ def _report_metadata_mismatches(a, b):
     return errors
 
 
+def _load_score_report(path, label):
+    try:
+        report = json.loads(Path(path).read_text(), parse_constant=lambda value: (_ for _ in ()).throw(
+            ValueError(f"non-finite JSON constant:{value}")
+        ))
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as error:
+        return {}, [f"invalid_json:{label}:{type(error).__name__}"]
+    if not isinstance(report, dict):
+        return {}, [f"invalid_json:{label}:root"]
+
+    def nonfinite(value):
+        if isinstance(value, dict):
+            return any(nonfinite(child) for child in value.values())
+        if isinstance(value, list):
+            return any(nonfinite(child) for child in value)
+        return isinstance(value, float) and not math.isfinite(value)
+
+    return (report, []) if not nonfinite(report) else ({}, [f"invalid_json:{label}:nonfinite"])
+
+
 def compare_scores(left, right, *, expected_frames):
     """Compare fixed-denominator score reports from two hosts.
 
@@ -367,8 +505,9 @@ def compare_scores(left, right, *, expected_frames):
     being silently promoted to a shorter denominator by score_case().
     """
     expected_frames = _validate_expected_frames(expected_frames, minimum=1)
-    a, b = [json.loads(Path(path).read_text()) for path in (left, right)]
-    errors = _report_metadata_mismatches(a, b)
+    a, left_errors = _load_score_report(left, "left")
+    b, right_errors = _load_score_report(right, "right")
+    errors = left_errors + right_errors + _report_metadata_mismatches(a, b)
     cases = {}
     a_cases, b_cases = a.get("cases"), b.get("cases")
     if not isinstance(a_cases, dict) or not isinstance(b_cases, dict) or not a_cases:
