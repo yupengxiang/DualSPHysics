@@ -1,0 +1,144 @@
+{
+  "schema": "core.f2.submerged_orifice_transfer.v3_failure_evidence.v1",
+  "created_at_utc": "2026-09-21T00:00:00+00:00",
+  "scope_id": "F2_submerged_orifice_transfer_v1",
+  "revision_id": "F2_submerged_orifice_normal_remediation_v4",
+  "status": "read_only_v3_failure_evidence_closed",
+  "case_id": "F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v3",
+  "qualification_claim": "none",
+  "matrix_credit": 0,
+  "input_scope": {
+    "preflight_json_read": true,
+    "bound_vtk_read": true,
+    "hdp_actual_vtk_read": true,
+    "gencase_log_read": true,
+    "definition_read": true,
+    "bi4_read": false,
+    "native_decoder_invoked": false,
+    "gencase_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "job_created": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_submission": false
+  },
+  "observed_failure": {
+    "zero_boundnor_count": 83443,
+    "zero_normal_size_count": 83443,
+    "mk17_outer_zero_count": 64899,
+    "mk18_gate_zero_count": 18544,
+    "boundary_particles": 255906,
+    "fluid_particles": 219725,
+    "mass_relative_error": -0.04207502092633919,
+    "mass_gate_max": 0.025,
+    "outer_endpoint_count": 0,
+    "gate_endpoint_penetration_count": 0,
+    "ids_finite_gates_passed": true
+  },
+  "geometry_observation": {
+    "v3_normal_layers_vdp": [
+      "0,1,2",
+      "0,-1,-2"
+    ],
+    "hdp_actual_shape_count": 33,
+    "hdp_actual_points": 48,
+    "hdp_actual_shapes_by_mk": {
+      "17": 15,
+      "18": 18
+    },
+    "zero_normals_are_exact_vectors": true,
+    "zero_normals_mk_partition": {
+      "17": 64899,
+      "18": 18544
+    }
+  },
+  "source_count_observation": {
+    "v3_source_low_m": [
+      0.04125,
+      0.04125,
+      0.04125
+    ],
+    "v3_source_size_m": [
+      0.63,
+      0.405,
+      0.345
+    ],
+    "observed_fluid_count_factorization": [
+      85,
+      55,
+      47
+    ],
+    "observed_fluid_count": 219725,
+    "v4_proposed_source_size_m": [
+      0.6375,
+      0.4125,
+      0.3525
+    ],
+    "v4_predicted_count_xyz": [
+      86,
+      56,
+      48
+    ],
+    "v4_predicted_particles": 231168,
+    "v4_predicted_mass_relative_error": 0.0078125
+  },
+  "single_falsifiable_hypothesis": {
+    "statement": "The v3 normal geometry is layer-directionally misregistered: outer layers 0,1,2 are emitted on the opposite side of the active shell and gate layers 0,-1,-2 are emitted on the solid-side rows that still carry zero vectors. A sign-mirrored GeometryForNormals recipe, coupled with the one-dp endpoint correction required by the observed 85x55x47 source lattice, should remove the zero-normal rows and bring native source mass inside the unchanged 2.5% gate.",
+    "v4_outer_normal_layers_vdp": "0,-1,-2",
+    "v4_gate_normal_layers_vdp": "0,1,2",
+    "falsifier": "Any future exact-one fresh CPU/native audit with a nonzero zero-normal count, nonfinite/ID failure, endpoint violation, or absolute source mass error above 0.025 falsifies this candidate and pauses this F2 remediation route."
+  },
+  "source": {
+    "v3_preflight": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v3/preflight-v3/preflight.json",
+      "sha256": "90b8c460262ad1424aab42dbc0046f1bf3b511478ddc0b5e240fd83b87485dd7",
+      "bytes": 13017,
+      "role": "closed v3 failed preflight"
+    },
+    "v3_bound_vtk": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v3/preflight-v3/F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v3_Bound.vtk",
+      "sha256": "cac3d1efb795869e5f296c962b9719800b7b281a7eb43114569f0cb6c1f25eae",
+      "bytes": 11004255,
+      "role": "closed v3 Bound.vtk normal sidecar"
+    },
+    "v3_hdp_actual_vtk": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v3/preflight-v3/F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v3_hdp_Actual.vtk",
+      "sha256": "8cc76e435083e50229728a06b332fb2308afabd4c3f510edfed52436bba3c246",
+      "bytes": 1680,
+      "role": "closed v3 GeometryForNormals sidecar"
+    },
+    "v3_gencase_log": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v3/preflight-v3/gencase.log",
+      "sha256": "900212cf5b3793f2215d86b2492eb74d04a1b05601a50ca6d1d68d2ad598fba0",
+      "bytes": 6090,
+      "role": "closed v3 GenCase log"
+    },
+    "v3_definition": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v3/fresh-definition-v3/F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v3_Def.xml",
+      "sha256": "a8db3f6f3d5d47851e30e005daa4d0b3434630c78f70446428fe56710234c6da",
+      "bytes": 4798,
+      "role": "historical v3 Definition evidence"
+    },
+    "v4_evidence_adapter": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_submerged_orifice_normal_remediation_v4.py",
+      "sha256": "22ca462a83f11d9f92db46650553156630b1a907110cc9c74f77dc9d9024eae4",
+      "bytes": 37804,
+      "role": "v4 read-only evidence adapter"
+    }
+  },
+  "execution_controls": {
+    "definition_writer_invoked": false,
+    "gencase_invoked": false,
+    "native_decoder_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "job_created": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_submission": false,
+    "qualification_numerator_credit": 0
+  }
+}

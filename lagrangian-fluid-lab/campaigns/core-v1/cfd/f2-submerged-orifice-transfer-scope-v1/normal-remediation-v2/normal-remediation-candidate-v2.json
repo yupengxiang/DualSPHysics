@@ -1,0 +1,209 @@
+{
+  "schema": "core.f2.submerged_orifice_transfer.normal_remediation_candidate.v2",
+  "created_at_utc": "2026-09-21T00:00:00+00:00",
+  "family": "F2",
+  "scope_id": "F2_submerged_orifice_transfer_v1",
+  "parent_revision_id": "F2_submerged_orifice_mdbc_orifice_v1",
+  "revision_id": "F2_submerged_orifice_normal_remediation_v2",
+  "candidate_id": "F2_submerged_orifice_normal_remediation_q0p5_anchor_v2",
+  "candidate_status": "root_review_only_no_cpu_preflight",
+  "qualification_claim": "none",
+  "qualified": false,
+  "T1_numerical": false,
+  "matrix_credit": 0,
+  "repair_class": "mdbc_generated_normal_coverage",
+  "new_input_identity": {
+    "case_id": "F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v2",
+    "fresh_definition_required": true,
+    "fresh_generated_prefix_required": true,
+    "old_anchor_definition_reused": false,
+    "old_anchor_bi4_reused": false,
+    "old_anchor_trajectory_reused": false
+  },
+  "observed_failure": {
+    "source_audit_schema": "core.f2.submerged_orifice_transfer.boundnor_partition_audit.v1",
+    "global_zero_normal_count": 63161,
+    "global_zero_fraction": 0.23903976868462085,
+    "outer_mk17_zero_normal_count": 43526,
+    "gate_mk18_zero_normal_count": 19635,
+    "hard_gate": "zero Boundary normal vectors remain an unconditional failure at norm <= 1e-12 m"
+  },
+  "boundary_hypothesis": {
+    "statement": "The inner boundary particle layers need an explicit center-layer normal source and the internal gate shell must be built on its solid side with a void precursor.",
+    "new_relative_to_failed_anchor": [
+      "GeometryForNormals changes from vdp=-0.5 to vdp=0 for both registered Mk roles.",
+      "Outer normal coverage uses all^top to make the five closed tank faces explicit as one normal source.",
+      "The gate mainlist adds an expanded setmkvoid precursor and changes the gate shell to vdp=0,-1,-2.",
+      "A fresh literal Definition and fresh generated/native prefix are required; no failed anchor asset is an input."
+    ]
+  },
+  "geometry_and_normal_contract": {
+    "physical_geometry_identity": {
+      "outer_tank_low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "outer_tank_size_m": [
+        1.6,
+        0.5,
+        0.8
+      ],
+      "upper_gate_physical_low_m": [
+        0.72,
+        0.04,
+        0.18
+      ],
+      "upper_gate_physical_size_m": [
+        0.06,
+        0.42,
+        0.62
+      ],
+      "source_low_m": [
+        0.04,
+        0.04,
+        0.04
+      ],
+      "source_size_m": [
+        0.64,
+        0.42,
+        0.36
+      ],
+      "physical_scene_changed": false
+    },
+    "normal_geometry_list": {
+      "outer_boxfill": "all^top",
+      "outer_mkbound": 0,
+      "outer_setnormalinvert": true,
+      "outer_layers_vdp": "0",
+      "gate_boxfill": "bottom | top | left | right | front | back",
+      "gate_mkbound": 1,
+      "gate_setnormalinvert": false,
+      "gate_layers_vdp": "0",
+      "shapeout": "hdp",
+      "distanceh": 3.0,
+      "svshapes": true,
+      "change_reason": "cover the boundary center layer directly; the failed -0.5 source left inner layers with zero generated vectors"
+    },
+    "mainlist_boundary_contract": {
+      "outer_layers_vdp": "0,1,2",
+      "gate_void_precursor": {
+        "setmkvoid": true,
+        "low_m": [
+          0.71625,
+          0.03625,
+          0.17625
+        ],
+        "size_m": [
+          0.0675,
+          0.4275,
+          0.6275
+        ],
+        "formula": "physical gate low - dp/2; physical gate size + dp"
+      },
+      "gate_boundary_shell": {
+        "low_m": [
+          0.72375,
+          0.04375,
+          0.18375
+        ],
+        "size_m": [
+          0.0525,
+          0.4125,
+          0.6125
+        ],
+        "layers_vdp": "0,-1,-2",
+        "formula": "physical gate low + dp/2; physical gate size - dp"
+      },
+      "gate_shell_side": "solid_side_with_void_precursor",
+      "old_gate_layers_reused": false
+    }
+  },
+  "hard_preflight_gates": {
+    "generated_boundnor_count_equals_boundary_count": true,
+    "zero_normal_count_max": 0,
+    "zero_normal_threshold_m": 1e-12,
+    "normal_size_zero_count_max": 0,
+    "arrays_finite": true,
+    "ids_unique_and_native_xml_aligned": true,
+    "outer_wall_endpoint_count_max": 0,
+    "gate_endpoint_penetration_count_max": 0,
+    "native_mass_relative_error_max": 0.025,
+    "solver_product_present": false,
+    "threshold_relaxation": false
+  },
+  "denominator_preservation": {
+    "planned_rows": 15,
+    "executed_rows": 0,
+    "passed_rows": 0,
+    "failed_rows": 0,
+    "unattempted_rows": 15,
+    "qualification_numerator": 0,
+    "all_rows_retained": true,
+    "same_input_retry": false,
+    "survivor_renormalization": false,
+    "old_anchor_preflight_credit": 0
+  },
+  "hash_bindings": {
+    "parent_candidate_card": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/candidate-card-v1.json",
+      "sha256": "0726648a24db7b0889870b7c35f852503dca42288cf88cd780408eb1167fac1d",
+      "bytes": 7527,
+      "role": "parent submerged-orifice candidate"
+    },
+    "parent_fixed_matrix": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/fixed-matrix-v1.json",
+      "sha256": "d3a275b6e6dc130bdf249f6d01a69d54c7f651831dd6a6ea289f70fd18c916eb",
+      "bytes": 5910,
+      "role": "parent 15-row fixed matrix"
+    },
+    "parent_failure_denominator": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/failure-denominator-v1.json",
+      "sha256": "cc34093a811db4a23edab3cf6e8dfc7ec5c01bb391eabe38b539ac55fb2edbc3",
+      "bytes": 691,
+      "role": "parent full zero-credit denominator"
+    },
+    "parent_lineage": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/lineage-clarification-v1.json",
+      "sha256": "42dbbe2181096855175110f74de6a997f37d3c5e23c7dcbb75be8d3406dd0e69",
+      "bytes": 2735,
+      "role": "parent lineage clarification"
+    },
+    "parent_root_contract": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/root-review-contract-v1.json",
+      "sha256": "285f3bd5eef0e71ffe277afc73954627bc64694cf78879c9bb0df39694cc34f6",
+      "bytes": 4978,
+      "role": "parent root-review-only contract"
+    },
+    "failed_anchor_preflight_evidence": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/anchor-q0p5-dp0p0075/preflight.json",
+      "sha256": "a29673207eba9cf2d3e62ad3693a0224b749e3cdfc95a9c50eb5733d375837dc",
+      "bytes": 7292,
+      "role": "failed anchor noncredit evidence"
+    },
+    "boundnor_partition_audit": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/generated-boundnor-partition-audit-v1.json",
+      "sha256": "f2ea5a2db069298041d560e893ff907ae5e63eef2c86c3326ac3d23d30e7f22a",
+      "bytes": 9377,
+      "role": "read-only generated Bound.vtk partition audit"
+    },
+    "remediation_adapter": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_submerged_orifice_normal_remediation_v2.py",
+      "sha256": "677ab6f1c8e7345cb90a8fb6a233dc5802f39b8b28d00ecca6dc871dd6829af0",
+      "bytes": 23880,
+      "role": "normal remediation contract adapter"
+    }
+  },
+  "prohibited_actions": [
+    "do not modify or rerun the failed anchor",
+    "do not read or reuse the failed anchor Definition or BI4 for v2",
+    "do not launch solver or GPU",
+    "do not create a job or mutate queue, ledger, or registry",
+    "do not relax zero-normal threshold or remove failed rows"
+  ],
+  "core_gate_effect": {
+    "new_t1_family": false,
+    "qualification_credit": 0,
+    "core_can_finalize_changed": false
+  }
+}

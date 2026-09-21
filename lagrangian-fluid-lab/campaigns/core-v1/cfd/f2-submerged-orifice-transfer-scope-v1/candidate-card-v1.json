@@ -1,0 +1,262 @@
+{
+  "schema": "core.f2.submerged_orifice_transfer.candidate_card.v1",
+  "created_at_utc": "2026-09-21T00:00:00+00:00",
+  "family": "F2",
+  "scope_id": "F2_submerged_orifice_transfer_v1",
+  "revision_id": "F2_submerged_orifice_mdbc_orifice_v1",
+  "candidate_id": "F2_submerged_orifice_transfer_q0p5_anchor",
+  "candidate_status": "root_review_only_contract_no_cpu_preflight",
+  "qualification_claim": "none",
+  "qualified": false,
+  "T1_numerical": false,
+  "matrix_credit": 0,
+  "mechanism": {
+    "class": "stationary_reservoir_submerged_orifice_transfer",
+    "hypothesis": "A stationary upstream reservoir drives a reproducible gravity jet through a fixed submerged aperture under an upper gate slab into a downstream receiver.",
+    "physical_question": "Does aperture height control a gravity-driven underflow transfer event while preserving finite-wall and gate-shell integrity?",
+    "scientific_difference": [
+      "Transfer is underflow through a low aperture; no particle must cross an internal crest.",
+      "The fixed gate is an upper solid slab with a real bottom opening, not the prior full-height weir box.",
+      "The source is stationary and there is no rotating cup, prescribed wall motion, or source impulse.",
+      "q changes only the aperture top height; the outer tank, source, receiver, horizon, and observer stay fixed."
+    ],
+    "disallowed_shortcuts_not_used": [
+      "no receiver-overflow-weir input, generated asset, or trajectory reuse",
+      "no F1 suspended-obstacle input or boundary repair reuse",
+      "no rotating-cup DBC duration reuse",
+      "no F3 impulse-baffle source reuse",
+      "no same-input retry, threshold relaxation, horizon extension before hard pass, or survivor renormalization"
+    ]
+  },
+  "fixed_geometry": {
+    "outer_tank": {
+      "low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size_m": [
+        1.6,
+        0.5,
+        0.8
+      ],
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "mkbound": 0
+    },
+    "upper_gate_slab": {
+      "anchor_low_m": [
+        0.72,
+        0.04,
+        0.18
+      ],
+      "size_xy_m": [
+        0.06,
+        0.42
+      ],
+      "zmax_m": 0.8,
+      "low_z_mapping": "z_low_m = orifice_height_m(q)",
+      "closed_faces": [
+        "top",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "bottom_opening_below_z_m": 0.18,
+      "mkbound": 1
+    },
+    "submerged_aperture": {
+      "x_span_m": [
+        0.72,
+        0.78
+      ],
+      "y_span_m": [
+        0.04,
+        0.46
+      ],
+      "z_low_m": 0.04,
+      "top_mapping": "orifice_height_m = 0.10 + 0.16*q",
+      "anchor_top_m": 0.18,
+      "q_values": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "top_values_m": [
+        0.1,
+        0.14,
+        0.18,
+        0.22,
+        0.26
+      ]
+    },
+    "upstream_source": {
+      "low_m": [
+        0.04,
+        0.04,
+        0.04
+      ],
+      "size_m": [
+        0.64,
+        0.42,
+        0.36
+      ],
+      "free_surface_m": 0.4,
+      "continuous_volume_m3": 0.096768,
+      "density_kg_m3": 1000.0,
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "downstream_receiver": {
+      "region_m": {
+        "xmin": 0.78,
+        "xmax": 1.56,
+        "ymin": 0.04,
+        "ymax": 0.46,
+        "zmin": 0.0,
+        "zmax": 0.8
+      },
+      "initial_fluid": false,
+      "containment": "outer tank floor and side walls; top open"
+    },
+    "runtime_domain_m": {
+      "xmin": -0.3,
+      "xmax": 1.9,
+      "ymin": -0.15,
+      "ymax": 0.65,
+      "zmin": -0.15,
+      "zmax": 1.2
+    },
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ]
+  },
+  "boundary_and_numerics": {
+    "boundary": "native mDBC Boundary=2",
+    "slip_mode": 1,
+    "normal_generation": "outer tank and upper gate slab GeometryForNormals; explicit gate shell orientation",
+    "dp_matrix_m": [
+      0.01,
+      0.0075,
+      0.005
+    ],
+    "cfl": 0.2,
+    "visco_treatment": 1,
+    "visco": 0.03,
+    "mass_policy": "native rho*dp^3; no rescaling",
+    "output_interval_s": 0.01,
+    "time_max_s": 1.5
+  },
+  "one_dimensional_parameter": {
+    "name": "submerged_orifice_top_height_m",
+    "coordinate": "q in [0,1]",
+    "mapping": "orifice_height_m = 0.10 + 0.16*q",
+    "q_values": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "orifice_height_values_m": [
+      0.1,
+      0.14,
+      0.18,
+      0.22,
+      0.26
+    ],
+    "free_surface_minus_orifice_range_m": [
+      0.14,
+      0.3
+    ]
+  },
+  "registered_window": {
+    "initial_time_max_s": 1.5,
+    "maximum_extended_time_max_s": 3.0,
+    "extension_policy": "one whole-scope extension only after a complete hard pass; event censoring stays in denominator",
+    "event_completion_required": true
+  },
+  "observer": {
+    "hard_integrity": [
+      "requested horizon reached",
+      "native fluid IDs unique and no active fluid ID missing",
+      "all active arrays finite",
+      "zero closed outer-wall endpoint violations",
+      "zero upper-gate-shell endpoint penetrations",
+      "zero outer-wall or gate-shell saved chord crossings",
+      "zero fluid particles outside the closed outer tank",
+      "relative mass change <= 1e-8"
+    ],
+    "event": {
+      "underflow_crossing": "at least 1% of initial fluid mass crosses x=0.78 m while z is at or below the registered aperture top plus 2dp",
+      "receiver_contact": "at least 1% of initial fluid mass enters the downstream receiver region",
+      "completion": "receiver contact is sustained for 0.20 s and the complete 1.5 s window is observed",
+      "credit_policy": "hard pass and complete event are both required; contract and CPU/native evidence have zero T1 credit"
+    },
+    "mass": {
+      "native_policy": "rho*dp^3",
+      "source_relative_error_max": 0.025,
+      "total_relative_error_max": 0.03,
+      "mass_change_relative_max": 1e-08,
+      "mass_rescaling": false
+    },
+    "event_censoring_policy": "hard pass without underflow/receiver completion remains event_censored in the fixed denominator"
+  },
+  "fixed_matrix": {
+    "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/fixed-matrix-v1.json",
+    "cell_count": 15,
+    "spatial_cells": 13,
+    "temporal_cells": 2,
+    "denominator_policy": "all 15 rows remain in the denominator regardless of outcome"
+  },
+  "lineage": {
+    "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/lineage-clarification-v1.json",
+    "source_reuse": false,
+    "input_identity_changed": true,
+    "qualification_inheritance": false
+  },
+  "preflight": {
+    "status": "not_run_root_review_required",
+    "solver_run": false,
+    "gpu_launched": false,
+    "matrix_prepared": false,
+    "matrix_credit": 0,
+    "generated_input_present": false
+  },
+  "execution_controls": {
+    "cpu_gencase_invoked": false,
+    "cpu_native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "central_ledger_mutation": 0,
+    "central_registry_mutation": 0,
+    "controls_executed": false
+  },
+  "launch_policy": {
+    "root_review_only": true,
+    "cpu_native_preflight_allowed_after_root_review": true,
+    "solver_submit": false,
+    "gpu_submit": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "qualification_claim_allowed_now": false
+  }
+}

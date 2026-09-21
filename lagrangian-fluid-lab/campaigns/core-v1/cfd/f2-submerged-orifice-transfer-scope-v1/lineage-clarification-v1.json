@@ -1,0 +1,55 @@
+{
+  "schema": "core.f2.submerged_orifice_transfer.lineage_clarification.v1",
+  "created_at_utc": "2026-09-21T00:00:00+00:00",
+  "scope_id": "F2_submerged_orifice_transfer_v1",
+  "revision_id": "F2_submerged_orifice_mdbc_orifice_v1",
+  "qualification_claim": "none",
+  "new_scope": {
+    "family": "F2",
+    "mechanism_class": "stationary_reservoir_submerged_orifice_underflow",
+    "physical_geometry_changed": true,
+    "input_identity_changed": true,
+    "boundary_semantics": "native mDBC Boundary=2 with upper gate slab and real bottom aperture",
+    "prescribed_motion": false,
+    "source_exchange": false,
+    "static_hold": false
+  },
+  "comparison_and_noninheritance": [
+    {
+      "scope": "F2_receiver_overflow_weir_v1",
+      "reference": "campaigns/core-v1/evidence/f2-receiver-overflow-weir-anchor-negative-evidence-v1.json",
+      "difference": "The failed route used a full-height internal weir and crest-overflow observer; this route uses an upper slab with a low submerged underflow aperture.",
+      "historical_execution_reused": false,
+      "same_input_retry": false
+    },
+    {
+      "scope": "F1_suspended_obstacle_gap_v1",
+      "reference": "campaigns/core-v1/evidence/f1-suspended-obstacle-gap-g1-anchor-negative-evidence-v1.json",
+      "difference": "F1 is a suspended obstacle approach/split/rejoin scene; this route has a stationary reservoir, a gate aperture and downstream receiver transfer.",
+      "historical_execution_reused": false,
+      "same_input_retry": false
+    },
+    {
+      "scope": "F2_dynamic_third_family_dbc_duration_x_v1",
+      "reference": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-anchor-canary-negative-evidence-v1.json",
+      "difference": "The dynamic scope rotates a full cup and varies duration; this route has no moving wall, cup or duration axis.",
+      "historical_execution_reused": false,
+      "same_input_retry": false
+    },
+    {
+      "scope": "F3_baffle_exchange_native_mdbc_x_v1",
+      "reference": "campaigns/core-v1/cfd/f3-baffle-exchange-source-scope-v1/candidate-card-v1.json",
+      "difference": "F3 is a source-scope impulse/baffle exchange; this route is an F2 stationary gravity underflow with an aperture-height axis and no source impulse.",
+      "historical_execution_reused": false,
+      "qualification_inheritance": false
+    }
+  ],
+  "source_asset_policy": {
+    "new_definition_required": true,
+    "new_generated_native_required": true,
+    "old_failed_trajectory_reused": false,
+    "old_failed_definition_reused": false,
+    "cpu_native_preflight_status": "not_run"
+  },
+  "lineage_decision": "A fresh F2 physical/topology hypothesis is proposed for root review; no prior runtime result or input contributes credit."
+}

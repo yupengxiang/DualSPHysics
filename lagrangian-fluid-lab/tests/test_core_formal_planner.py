@@ -1,0 +1,216 @@
+import copy
+import json
+from pathlib import Path
+import sys
+
+import pytest
+
+from scripts.core_formal_planner import (CASES_PER_FAMILY, MILESTONES, MODELS, SEEDS,
+                                         _qualification_marker, build_plan, inspect_inputs, main)
+
+
+def _manifest(tmp_path, *, family_count=3):
+    families = ("F1", "F2", "F4")[:family_count]
+    cases = []
+    for family in families:
+        for index in range(CASES_PER_FAMILY):
+            split = "train" if index < 16 else "validation" if index < 20 else "test"
+            cases.append({
+                "case_id": f"{family}_PROD_{index:02d}",
+                "physical_case_id": f"{family}_PHYSICAL_{index:02d}",
+                "lineage_group_id": f"{family}_LINEAGE_{index:02d}",
+                "family": family, "split": split, "stage": "production",
+                "scope_id": f"{family}_scope_v1", "recipe_id": f"{family}_recipe_v1",
+                "qualification_case": False, "qualification_only": False,
+                "T1_numerical": True,
+                "audit": {"hard_integrity_pass": True, "structural_pass": True},
+            })
+    payload = {"schema": "core.dataset.v2", "dataset_id": "fixture-formal",
+               "formal_release": True, "cases": cases}
+    path = tmp_path / "manifest.json"
+    path.write_text(json.dumps(payload))
+    return path, payload
+
+
+def _profile():
+    return {"schema": "core.measured_resource_profile.v1", "host": "h200",
+            "resources": {"cpu_cores": 4, "ram_mib": 8192, "gpu_peak_mib": 10240,
+                          "io_weight": 0.1}}
+
+
+def _environment():
+    return {"id": "fixture-python", "python_executable": sys.executable}
+
+
+def _ready_plan(tmp_path):
+    manifest_path, _ = _manifest(tmp_path)
+    return build_plan(manifest_path, profile=_profile(), environment=_environment(),
+                      data_root=tmp_path, code_root=Path(__file__).parents[1],
+                      output_dir=tmp_path / "specs")
+
+
+def test_complete_manifest_emits_exact_nine_specs_and_frozen_protocol(tmp_path):
+    plan = _ready_plan(tmp_path)
+    assert plan["status"] == "ready"
+    assert plan["formal_job_count"] == len(MODELS) * len(SEEDS) == 9
+    assert len(plan["spec_paths"]) == 9
+    job = json.loads(Path(plan["spec_paths"][0]).read_text())
+    assert job["training_protocol"]["updates"] == 32000
+    assert job["training_protocol"]["checkpoint_milestones"] == list(MILESTONES)
+    assert job["training_protocol"]["full_validation_rollout_at_each_milestone"] is True
+    assert job["training_protocol"]["test_included"] is False
+    assert job["resume"]["supported"] is True
+    assert "--resume" in job["resume_argv"]
+    assert job["source_snapshot_policy"]["inherited_profile_argv"] is False
+    assert job["resources"]["profile_sha256"]
+    assert job["bindings"]["code_files"]
+
+
+@pytest.mark.parametrize('replacement, reason', [('train', 'requires 12'), ('unassigned', 'unrecognized production splits')])
+def test_missing_test_denominator_is_not_a_formal_plan(tmp_path, replacement, reason):
+    path, payload = _manifest(tmp_path)
+    for row in payload['cases']:
+        if row['family'] == 'F4' and row['split'] == 'test':
+            row['split'] = replacement
+    path.write_text(json.dumps(payload))
+    plan = build_plan(path, profile=_profile(), environment=_environment(),
+                      data_root=tmp_path, code_root=Path(__file__).parents[1],
+                      output_dir=tmp_path / 'specs')
+    assert plan['status'] == 'hold'
+    assert plan['formal_job_count'] == 0
+    assert any(reason in item for item in plan['hold_reasons'])
+
+
+def test_structural_success_alone_does_not_prove_hard_integrity(tmp_path):
+    path, payload = _manifest(tmp_path)
+    payload['cases'][0]['audit'] = {'structural_pass': True, 'passed': True,
+                                    'audit_status': 'pass_diagnostic'}
+    path.write_text(json.dumps(payload))
+    plan = build_plan(path, profile=_profile(), environment=_environment(),
+                      data_root=tmp_path, code_root=Path(__file__).parents[1],
+                      output_dir=tmp_path / 'specs')
+    assert plan['status'] == 'hold'
+    assert plan['formal_job_count'] == 0
+    assert any('explicit hard audit required' in item for item in plan['hold_reasons'])
+
+
+@pytest.mark.parametrize("mutation, expected", [
+    ("missing_family", "distinct T1 families"),
+    ("qualification_only", "qualification_only case"),
+    ("duplicate_case", "duplicate case_id"),
+    ("duplicate_physical", "duplicate physical_case_id"),
+])
+def test_invalid_manifest_is_a_hold_and_writes_no_specs(tmp_path, mutation, expected):
+    manifest_path, payload = _manifest(tmp_path)
+    payload = copy.deepcopy(payload)
+    if mutation == "missing_family":
+        payload["cases"] = [row for row in payload["cases"] if row["family"] != "F4"]
+    elif mutation == "qualification_only":
+        payload["cases"][0]["qualification_only"] = True
+    elif mutation == "duplicate_case":
+        payload["cases"].append(copy.deepcopy(payload["cases"][1]))
+    elif mutation == "duplicate_physical":
+        payload["cases"][1]["physical_case_id"] = payload["cases"][0]["physical_case_id"]
+    manifest_path.write_text(json.dumps(payload))
+    spec_dir = tmp_path / "specs"
+    plan = build_plan(manifest_path, profile=_profile(), environment=_environment(),
+                      data_root=tmp_path, code_root=Path(__file__).parents[1],
+                      output_dir=spec_dir)
+    assert plan["status"] == "hold"
+    assert plan["formal_job_count"] == 0
+    assert any(expected in reason for reason in plan["hold_reasons"])
+    assert not spec_dir.exists()
+
+
+def test_lineage_cross_split_isolation_is_required(tmp_path):
+    manifest_path, payload = _manifest(tmp_path)
+    payload = copy.deepcopy(payload)
+    payload["cases"][28]["lineage_group_id"] = payload["cases"][0]["lineage_group_id"]
+    manifest_path.write_text(json.dumps(payload))
+    report = inspect_inputs(manifest_path, data_root=tmp_path)
+    assert report["formal_eligible"] is False
+    assert any("lineage crosses splits" in reason for reason in report["hold_reasons"])
+
+
+def test_explicit_hard_false_cannot_be_masked_by_positive_metadata(tmp_path):
+    manifest_path, payload = _manifest(tmp_path)
+    payload = copy.deepcopy(payload)
+    payload["cases"][0]["audit"]["hard_integrity_pass"] = False
+    payload["cases"][0]["audit"]["structural_pass"] = True
+    manifest_path.write_text(json.dumps(payload))
+    report = inspect_inputs(manifest_path, data_root=tmp_path)
+    assert any("hard/structural audit" in reason for reason in report["hold_reasons"])
+    assert report["formal_eligible"] is False
+
+
+def test_explanatory_none_qualification_claim_does_not_remove_production_case():
+    """A prose ``none; ...`` marker is an explicit absence of a claim."""
+    assert _qualification_marker([{
+        "case_id": "F4_PROD_00",
+        "qualification_claim": "none; one case cannot establish range qualification",
+    }]) is False
+    assert _qualification_marker([{
+        "case_id": "F4_PROD_00",
+        "qualification_claim": "formal range qualification",
+    }]) is True
+
+
+def test_t1_evidence_must_match_case_scope_and_recipe(tmp_path):
+    manifest_path, payload = _manifest(tmp_path)
+    payload = copy.deepcopy(payload)
+    # Remove the inline T1 marker for one case so only the supplied family
+    # record can qualify it.  That record deliberately belongs to another
+    # registered recipe.
+    payload["cases"][0].pop("T1_numerical")
+    payload["cases"][0]["audit"].pop("structural_pass")
+    manifest_path.write_text(json.dumps(payload))
+    evidence = [{"case_id": payload["cases"][0]["case_id"], "family": "F1",
+                 "scope_id": "F1_other_scope", "recipe_id": "F1_other_recipe",
+                 "T1_numerical": True}]
+    report = inspect_inputs(manifest_path, evidence=evidence, data_root=tmp_path)
+    assert any("T1 qualification" in reason for reason in report["hold_reasons"])
+    assert any("scope/recipe mismatch" in reason for reason in report["hold_reasons"])
+
+
+def test_audit_reference_requires_matching_declared_hash(tmp_path):
+    manifest_path, payload = _manifest(tmp_path)
+    payload = copy.deepcopy(payload)
+    audit_path = tmp_path / "case-audit.json"
+    audit_path.write_text(json.dumps({"case_id": payload["cases"][0]["case_id"],
+                                      "hard_integrity_pass": True,
+                                      "T1_numerical": True}))
+    payload["cases"][0].pop("audit")
+    payload["cases"][0]["audit"] = {"path": audit_path.name, "sha256": "0" * 64}
+    manifest_path.write_text(json.dumps(payload))
+    report = inspect_inputs(manifest_path, data_root=tmp_path)
+    assert any("hash/format failure" in reason for reason in report["hold_reasons"])
+    assert report["formal_eligible"] is False
+
+
+def test_missing_physical_or_lineage_identity_is_not_inferred_from_case_id(tmp_path):
+    manifest_path, payload = _manifest(tmp_path)
+    payload = copy.deepcopy(payload)
+    payload["cases"][0].pop("physical_case_id")
+    payload["cases"][1].pop("lineage_group_id")
+    manifest_path.write_text(json.dumps(payload))
+    report = inspect_inputs(manifest_path, data_root=tmp_path)
+    assert any("no physical_case_id" in reason for reason in report["hold_reasons"])
+    assert any("no lineage_group_id" in reason for reason in report["hold_reasons"])
+
+
+def test_real_f3_compact_manifest_is_hold_and_never_creates_formal_jobs(tmp_path):
+    lab = Path(__file__).parents[1]
+    manifest = lab / "campaigns/core-v1/f3-dataset-v2.json"
+    evidence = lab / "campaigns/core-v1/evidence/f3-inherited-qualification.json"
+    profile = lab / "campaigns/core-v1/learning/backward-resource-measurements.json"
+    report_path = tmp_path / "f3-plan.json"
+    exit_code = main([
+        "plan", "--manifest", str(manifest), "--data-root", str(lab),
+        "--evidence", str(evidence), "--profile-resource", str(profile),
+        "--python-executable", sys.executable, "--output", str(report_path),
+    ])
+    assert exit_code == 2
+    report = json.loads(report_path.read_text())
+    assert report["status"] == "hold"
+    assert report["formal_job_count"] == 0
+    assert any("distinct T1 families" in reason for reason in report["hold_reasons"])

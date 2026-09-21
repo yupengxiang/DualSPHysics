@@ -1,0 +1,95 @@
+"""Regression tests for the hash-bound proposal-only v5 source closure."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+
+from scripts.core_formal_source_closure_admission import (
+    REQUIRED_CODE_FILES,
+    main,
+    verify_admission,
+    verify_source_closure,
+)
+
+
+ROOT = Path(__file__).resolve().parents[1]
+CLOSURE = ROOT / "campaigns/core-v1/learning/formal-release-candidate-v5/source-closure.json"
+RECEIPT = ROOT / "campaigns/core-v1/learning/formal-release-candidate-v5/root-admission-receipt.json"
+REGISTRY = ROOT / "campaigns/core-v1/registry.json"
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def test_v5_closure_rehashes_every_required_file() -> None:
+    closure = json.loads(CLOSURE.read_text(encoding="utf-8"))
+    result = verify_source_closure(closure, data_root=ROOT)
+
+    assert result["ok"] is True
+    assert result["mismatch_files"] == []
+    assert closure["closure_version"] == "core-formal-release-candidate-v5"
+    assert closure["formal_release"] is False
+    assert closure["planning_only"] is True
+    assert closure["planning_allowed"] is True
+    assert closure["formal_training_allowed"] is False
+    assert closure["formal_job_count"] == 0
+    assert [row["relative_path"] for row in closure["files"]] == list(REQUIRED_CODE_FILES)
+
+    for row in closure["files"]:
+        path = ROOT / row["relative_path"]
+        assert row["sha256"] == _sha256(path)
+        assert row["bytes"] == path.stat().st_size
+
+
+def test_root_receipt_binds_v5_hash_and_preserves_formal_holds() -> None:
+    result = verify_admission(
+        data_root=ROOT,
+        source_closure=CLOSURE,
+        receipt=RECEIPT,
+    )
+    receipt = json.loads(RECEIPT.read_text(encoding="utf-8"))
+    closure = json.loads(CLOSURE.read_text(encoding="utf-8"))
+
+    assert result["ok"] is True
+    assert receipt["source_closure"]["sha256"] == _sha256(CLOSURE)
+    assert receipt["source_closure"]["closure_sha256"] == closure["closure_sha256"]
+    assert receipt["formal_release"] is False
+    assert receipt["planning_only"] is True
+    assert receipt["planning_allowed"] is True
+    assert receipt["formal_training_allowed"] is False
+    assert receipt["formal_job_count"] == 0
+    assert receipt["required_formal_job_count"] == 9
+    assert receipt["launch_allowed"] is False
+    assert receipt["root_admission"]["granted"] is False
+
+    gates = receipt["gate_evaluation"]
+    assert gates["third_t1_family"]["observed"] == 2
+    assert gates["third_t1_family"]["required"] == 3
+    assert gates["validation_denominator"]["observed"] == 8
+    assert gates["validation_denominator"]["required"] == 12
+    assert gates["material_case_run_denominator"]["observed"] == 0
+    assert gates["material_case_run_denominator"]["required"] == 288
+    assert gates["resource_frontier"]["passed"] is False
+    assert gates["formal_run_denominator"]["observed"] == 0
+    assert gates["formal_run_denominator"]["required"] == 9
+    assert gates["phase_plan_denominator"]["passed"] is True
+    assert gates["evaluator_failure_penalty"]["passed"] is True
+
+
+def test_verify_cli_is_read_only_and_detects_tampered_closure(tmp_path: Path) -> None:
+    before = _sha256(REGISTRY)
+    assert main([
+        "--verify",
+        "--data-root", str(ROOT),
+        "--source-closure", str(CLOSURE),
+        "--receipt", str(RECEIPT),
+    ]) == 0
+    assert _sha256(REGISTRY) == before
+
+    tampered = json.loads(CLOSURE.read_text(encoding="utf-8"))
+    tampered["files"][0]["sha256"] = "0" * 64
+    assert verify_source_closure(tampered, data_root=ROOT)["ok"] is False
+    assert _sha256(REGISTRY) == before

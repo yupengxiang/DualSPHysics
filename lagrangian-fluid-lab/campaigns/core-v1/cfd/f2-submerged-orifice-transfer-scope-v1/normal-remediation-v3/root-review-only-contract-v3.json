@@ -1,0 +1,166 @@
+{
+  "schema": "core.f2.submerged_orifice_transfer.normal_remediation.root_review_only.v3",
+  "created_at_utc": "2026-09-21T00:00:00+00:00",
+  "scope_id": "F2_submerged_orifice_transfer_v1",
+  "revision_id": "F2_submerged_orifice_normal_remediation_v3",
+  "candidate_id": "F2_submerged_orifice_normalremediation_q0p5_closed_lattice_v3",
+  "case_id": "F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v3",
+  "parent_failed_case_id": "F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v2",
+  "status": "root_review_only_static_contract_runtime_closed",
+  "decision": "candidate_requires_independent_root_review_before_any_runtime",
+  "authorized_now": false,
+  "qualification_claim": "none",
+  "matrix_credit": 0,
+  "authorization": {
+    "cpu_gencase": false,
+    "native_decode": false,
+    "solver_launch": false,
+    "gpu_launch": false,
+    "job_spec_creation": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_submission": false
+  },
+  "fresh_input": {
+    "definition": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v3/fresh-definition-v3/F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v3_Def.xml",
+      "sha256": "a8db3f6f3d5d47851e30e005daa4d0b3434630c78f70446428fe56710234c6da",
+      "bytes": 4798,
+      "role": "fresh v3 literal Definition"
+    },
+    "generated_prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v3/preflight-v3/F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v3",
+    "generated_products_present": false,
+    "native_input_present": false,
+    "old_anchor_definition_reused": false,
+    "old_anchor_native_input_reused": false,
+    "v4_failed_definition_reused": false,
+    "v4_failed_native_input_reused": false
+  },
+  "one_hypothesis_review": {
+    "statement": "The v4 hard failure is a single geometry/normal closure defect: the outer normal source does not explicitly mirror all active outer shell layers, while the inclusive source extent emits one extra y and z lattice row. Mirror the active shell in GeometryForNormals and use a count-closed 86x56x48 source lattice.",
+    "evidence": [
+      "v4 Bound.vtk: 64,899/64,899 zero entries are Mk=17; Mk=18 has 0.",
+      "v4 preflight: generated source count is 86x57x49=240,198 and mass error is +4.718017578125%.",
+      "A count-closed 86x56x48 lattice predicts 231,168 particles and +0.78125% mass error."
+    ],
+    "scope_limit": "one geometry/normal hypothesis; no alternate candidate is authorized"
+  },
+  "hard_preflight_gates": {
+    "zero_boundnor_count_max": 0,
+    "zero_normal_size_count_max": 0,
+    "zero_normal_norm_threshold_m": 1e-12,
+    "arrays_finite": true,
+    "ids_unique_and_xml_aligned": true,
+    "outer_endpoint_count_max": 0,
+    "gate_endpoint_penetration_count_max": 0,
+    "native_mass_relative_error_max": 0.025,
+    "threshold_relaxation": false,
+    "survivor_renormalization": false
+  },
+  "preflight": {
+    "status": "not_run",
+    "generated_xml_present": false,
+    "native_arrays_present": false,
+    "solver_product_present": false,
+    "qualification_credit": 0
+  },
+  "failure_denominator": {
+    "planned_rows": 15,
+    "executed_rows": 0,
+    "passed_rows": 0,
+    "failed_rows": 0,
+    "unattempted_rows": 15,
+    "qualification_numerator": 0,
+    "all_rows_retained": true,
+    "same_input_retry": false
+  },
+  "hash_bindings": {
+    "v3_candidate": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v3/normal-remediation-candidate-v3.json",
+      "sha256": "0368f5fdc11b089cad3664f9c8c1d2f88a645165c5233774e7f90b4704de8852",
+      "bytes": 7842,
+      "role": "v3 root-review candidate"
+    },
+    "v3_fresh_definition": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v3/fresh-definition-v3/F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v3_Def.xml",
+      "sha256": "a8db3f6f3d5d47851e30e005daa4d0b3434630c78f70446428fe56710234c6da",
+      "bytes": 4798,
+      "role": "v3 fresh literal Definition"
+    },
+    "v4_preflight_evidence": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/preflight-v4/preflight.json",
+      "sha256": "90123f1c0ab3b776a306729c92d1d5dbb6281190e19511245a724f83036e1113",
+      "bytes": 10171,
+      "role": "v4 failed preflight evidence"
+    },
+    "v4_boundnor_failure_audit": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v3/v4-boundnor-failure-audit-v1.json",
+      "sha256": "56960219cc28687d5e7233f48485f242b014082c3b965f7f9eee1f2f6742ca47",
+      "bytes": 7839,
+      "role": "v4 read-only Bound.vtk audit"
+    },
+    "v4_failure_audit_adapter": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_submerged_orifice_v4_failure_audit_v1.py",
+      "sha256": "b189aa69dd8b8fd9cfb0bbecae0d5f0bd81ca75b94a711ea7afe53ac0939e74c",
+      "bytes": 12156,
+      "role": "v4 read-only audit adapter"
+    },
+    "normal_remediation_v3_adapter": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_submerged_orifice_normal_remediation_v3.py",
+      "sha256": "c2c03bf543a03d181769661ed34d07a6d8d643684222a0ddf465ed460df0d2db",
+      "bytes": 39709,
+      "role": "v3 static contract adapter"
+    },
+    "parent_root_contract": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/root-review-contract-v1.json",
+      "sha256": "285f3bd5eef0e71ffe277afc73954627bc64694cf78879c9bb0df39694cc34f6",
+      "bytes": 4978,
+      "role": "parent scope root contract"
+    },
+    "parent_fixed_matrix": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/fixed-matrix-v1.json",
+      "sha256": "d3a275b6e6dc130bdf249f6d01a69d54c7f651831dd6a6ea289f70fd18c916eb",
+      "bytes": 5910,
+      "role": "parent 15-row matrix"
+    },
+    "parent_failure_denominator": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/failure-denominator-v1.json",
+      "sha256": "cc34093a811db4a23edab3cf6e8dfc7ec5c01bb391eabe38b539ac55fb2edbc3",
+      "bytes": 691,
+      "role": "parent full denominator"
+    },
+    "parent_lineage": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/lineage-clarification-v1.json",
+      "sha256": "42dbbe2181096855175110f74de6a997f37d3c5e23c7dcbb75be8d3406dd0e69",
+      "bytes": 2735,
+      "role": "parent lineage closure"
+    },
+    "v3_contract_test": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f2_submerged_orifice_normal_remediation_v3.py",
+      "sha256": "4ac63eee47f5ee48475a5a16ece62f8ea64667a58a31562c456b65fe264001df",
+      "bytes": 5449,
+      "role": "v3 static contract test"
+    }
+  },
+  "execution_controls": {
+    "definition_writer_invoked": true,
+    "gencase_invoked": false,
+    "native_decoder_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "job_created": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_submission": false,
+    "qualification_numerator_credit": 0
+  },
+  "blockers": [
+    "v4 failed with 64,899 zero outer-wall BoundNor/NormalSize entries",
+    "v4 failed mass gate at +4.718017578125%; the new source lattice is only a static prediction",
+    "no v3 GenCase/native preflight has been run",
+    "zero-normal and mass gates remain exact; no threshold relaxation is allowed"
+  ],
+  "required_root_review": "review the one hash-bound geometry/normal closure hypothesis; keep runtime closed until separately authorized"
+}

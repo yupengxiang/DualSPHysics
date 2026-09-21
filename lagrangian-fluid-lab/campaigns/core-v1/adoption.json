@@ -1,0 +1,120 @@
+{
+  "adopted_at_utc": "2026-09-19T08:22:23.497318+00:00",
+  "authorization": "User explicitly requested implementation of the complete Core plan, both hosts, GPU colocation, and milestone-measured resource policy.",
+  "baseline_commit": "49df6847404b9c2d3d20c465e8f9cf2e00cde712",
+  "completion_policy": "typed evidence and complete denominators; not file existence, job exit, or report count",
+  "family_priority": [
+    "F3",
+    "F4",
+    "F1",
+    "F2"
+  ],
+  "historical_evidence": [
+    {
+      "path": "campaigns/l2-multifamily/ledger.json",
+      "sha256": "d34dafd0772d5a6b596bf1fbdc02bf3bb394c60ed86e7384f0ddee9a696747f1"
+    },
+    {
+      "path": "campaigns/l2-multifamily/resume-c6b28c8/resource-reconciliation.json",
+      "sha256": "5660f0324571feb9148dc5ea525cad225bf587951b90a4ec3c00362efe25d2a7"
+    },
+    {
+      "path": "campaigns/l2-multifamily/evidence/f3-canonical-manifest.json",
+      "sha256": "86e27740d764f9769e3255a82a599013a282f1bc4385ad3c29a657a56d9c5bea"
+    }
+  ],
+  "historical_usage_reset": false,
+  "material_family_priority": [
+    "F3",
+    "F4",
+    "F1",
+    "F2"
+  ],
+  "qualification_axes": [
+    "T1_numerical",
+    "T2_macro",
+    "T2_path",
+    "external_physical_validation"
+  ],
+  "release_role": "internal_development",
+  "resource_policy": {
+    "cpu_reservation_fraction": 0.8,
+    "failed_attempts_counted": true,
+    "fixed_jobs_per_gpu_cap": null,
+    "global_hours_cap": null,
+    "gpu_reservation_peak_factor": 1.2,
+    "gpu_safety_fraction": 0.1,
+    "gpu_safety_min_mib": 4096,
+    "host_ram_safety_fraction": 0.15,
+    "hosts": [
+      "ada",
+      "h200"
+    ],
+    "initial_heavy_io_tokens": 2,
+    "milestone_estimates_required": true,
+    "no_interruption_of_unrelated_processes": true
+  },
+  "retry_policy": {
+    "canaries_per_hypothesis": 1,
+    "hypotheses_per_failure_mechanism": 2,
+    "no_threshold_relaxation_after_results": true,
+    "repaired_infrastructure_retries": 1
+  },
+  "schema": "core.adoption.v1",
+  "scientific_matrices": {
+    "macro_t2_per_scope": 33,
+    "new_t1_range": {
+      "space_cells": 13,
+      "time_cadence_cells": 2
+    }
+  },
+  "targets": {
+    "cases_per_t1_family": 32,
+    "different_host_reproduction_required": true,
+    "evaluation_missing": 0,
+    "macro_t2_distinct_families": 2,
+    "material_cases_per_family": 32,
+    "minimum_material_case_runs": 288,
+    "minimum_t1_case_runs": 432,
+    "t1_distinct_families": 3,
+    "training_runs": [
+      "mlp-seed17",
+      "mlp-seed29",
+      "mlp-seed43",
+      "graph_raw-seed17",
+      "graph_raw-seed29",
+      "graph_raw-seed43",
+      "graph_residual-seed17",
+      "graph_residual-seed29",
+      "graph_residual-seed43"
+    ],
+    "updates_per_run": 32000
+  },
+  "training": {
+    "centers_per_update": 256,
+    "full_validation_steps": [
+      8000,
+      16000,
+      24000,
+      32000
+    ],
+    "hidden": 64,
+    "history_states": 1,
+    "learning_rate": 0.001,
+    "max_neighbors": 64,
+    "message_passing_layers": 2,
+    "model_configs": [
+      "mlp",
+      "graph_raw",
+      "graph_residual"
+    ],
+    "optimizer": "Adam",
+    "radius_over_h": 2,
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "updates": 32000
+  }
+}

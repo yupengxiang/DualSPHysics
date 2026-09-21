@@ -1,0 +1,120 @@
+{
+  "schema": "core.f2.submerged_orifice_transfer.cpu_preflight_proposal.v2",
+  "created_at_utc": "2026-09-21T00:00:00+00:00",
+  "scope_id": "F2_submerged_orifice_transfer_v1",
+  "parent_revision_id": "F2_submerged_orifice_mdbc_orifice_v1",
+  "revision_id": "F2_submerged_orifice_normal_remediation_v2",
+  "status": "root_review_only_cpu_preflight_proposal_not_run",
+  "authorized_now": false,
+  "case_id": "F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v2",
+  "q": 0.5,
+  "dp_m": 0.0075,
+  "orifice_height_m": 0.18,
+  "fresh_definition": {
+    "required": true,
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v2_Def.xml",
+    "literal_recipe_required": true,
+    "reuse_failed_anchor_definition": false,
+    "reuse_failed_anchor_bi4": false
+  },
+  "fresh_generated_prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/generated/F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v2",
+  "proposed_execution": {
+    "cpu_gencase": true,
+    "native_decode": true,
+    "solver_launch": false,
+    "gpu_launch": false,
+    "job_spec_creation": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_submission": false
+  },
+  "preflight_order": [
+    "root review this v2 candidate, audit, proposal, and all hash bindings",
+    "if separately authorized, write a fresh literal Definition at the new path",
+    "run CPU GenCase once for the new identity only",
+    "decode only the new native BI4 and audit IDs, finite arrays, BoundNor count, zero normals, mass, and geometry",
+    "stop with zero credit on any hard-gate failure; no solver decision follows automatically"
+  ],
+  "required_hard_results": {
+    "zero_normal_count": 0,
+    "zero_normal_norm_threshold_m": 1e-12,
+    "normal_size_zero_count": 0,
+    "native_mass_relative_error_max": 0.025,
+    "outer_wall_endpoint_count": 0,
+    "gate_endpoint_penetration_count": 0,
+    "qualification_credit": 0
+  },
+  "denominator": {
+    "planned": 15,
+    "executed": 0,
+    "failed": 0,
+    "unattempted": 15,
+    "credit": 0,
+    "threshold_relaxation": false,
+    "same_input_retry": false
+  },
+  "source_partition_audit": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/generated-boundnor-partition-audit-v1.json",
+    "sha256": "f2ea5a2db069298041d560e893ff907ae5e63eef2c86c3326ac3d23d30e7f22a",
+    "global_zero_normal_count": 63161
+  },
+  "hash_bindings": {
+    "parent_candidate_card": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/candidate-card-v1.json",
+      "sha256": "0726648a24db7b0889870b7c35f852503dca42288cf88cd780408eb1167fac1d",
+      "bytes": 7527,
+      "role": "parent submerged-orifice candidate"
+    },
+    "parent_fixed_matrix": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/fixed-matrix-v1.json",
+      "sha256": "d3a275b6e6dc130bdf249f6d01a69d54c7f651831dd6a6ea289f70fd18c916eb",
+      "bytes": 5910,
+      "role": "parent 15-row fixed matrix"
+    },
+    "parent_failure_denominator": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/failure-denominator-v1.json",
+      "sha256": "cc34093a811db4a23edab3cf6e8dfc7ec5c01bb391eabe38b539ac55fb2edbc3",
+      "bytes": 691,
+      "role": "parent full zero-credit denominator"
+    },
+    "parent_lineage": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/lineage-clarification-v1.json",
+      "sha256": "42dbbe2181096855175110f74de6a997f37d3c5e23c7dcbb75be8d3406dd0e69",
+      "bytes": 2735,
+      "role": "parent lineage clarification"
+    },
+    "parent_root_contract": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/root-review-contract-v1.json",
+      "sha256": "285f3bd5eef0e71ffe277afc73954627bc64694cf78879c9bb0df39694cc34f6",
+      "bytes": 4978,
+      "role": "parent root-review-only contract"
+    },
+    "failed_anchor_preflight_evidence": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/anchor-q0p5-dp0p0075/preflight.json",
+      "sha256": "a29673207eba9cf2d3e62ad3693a0224b749e3cdfc95a9c50eb5733d375837dc",
+      "bytes": 7292,
+      "role": "failed anchor noncredit evidence"
+    },
+    "boundnor_partition_audit": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/generated-boundnor-partition-audit-v1.json",
+      "sha256": "f2ea5a2db069298041d560e893ff907ae5e63eef2c86c3326ac3d23d30e7f22a",
+      "bytes": 9377,
+      "role": "read-only generated Bound.vtk partition audit"
+    },
+    "remediation_adapter": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_submerged_orifice_normal_remediation_v2.py",
+      "sha256": "677ab6f1c8e7345cb90a8fb6a233dc5802f39b8b28d00ecca6dc871dd6829af0",
+      "bytes": 23880,
+      "role": "normal remediation contract adapter"
+    }
+  },
+  "execution_controls": {
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "qualification_numerator_credit": 0
+  }
+}

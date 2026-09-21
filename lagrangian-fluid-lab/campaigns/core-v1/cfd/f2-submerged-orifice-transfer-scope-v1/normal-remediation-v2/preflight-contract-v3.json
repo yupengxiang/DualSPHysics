@@ -1,0 +1,165 @@
+{
+  "schema": "core.f2.submerged_orifice_transfer.cpu_native_preflight_contract.v3",
+  "contract_id": "F2_SUBMERGED_ORIFICE_CPU_NATIVE_PREFLIGHT_CONTRACT_V3",
+  "created_at_utc": "2026-09-21T00:00:00+00:00",
+  "scope_id": "F2_submerged_orifice_transfer_v1",
+  "revision_id": "F2_submerged_orifice_normal_remediation_v2",
+  "case_id": "F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v2",
+  "matrix_index": 4,
+  "q": 0.5,
+  "dp_m": 0.0075,
+  "status": "proposal_only_cpu_native_closed",
+  "decision": "static_contract_only_no_preflight_authority",
+  "proposal_only": true,
+  "authorized_now": false,
+  "execution_closed": true,
+  "qualification_claim": "none",
+  "matrix_credit": 0,
+  "input_bindings": {
+    "v3_root_review_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/root-review-receipt-v3.json",
+      "sha256": "789ba8e926e266f324f57f4ce2d066a6493c9ce218ba53d6c9dabf7f1252eebb",
+      "bytes": 9881,
+      "role": "existing v3 root-review receipt"
+    },
+    "fresh_definition": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/fresh-definition-v2/F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v2_Def.xml",
+      "sha256": "1ff8cd118f31fc3a05c4e538c72c43f0b036cd0b640d597d9e2ca534d10d6e81",
+      "bytes": 4774,
+      "role": "fresh literal v2 Definition"
+    },
+    "fresh_definition_contract": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/fresh-definition-contract-v2.json",
+      "sha256": "0ad110108f76394af9778af08d8b5ddbc33eabbe0bd1ec04d45bb8f724aa0f94",
+      "bytes": 7589,
+      "role": "fresh Definition static contract"
+    },
+    "fresh_definition_proposal": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/fresh-definition-proposal-v2.json",
+      "sha256": "5d740d09add150d213c6ed034cf6f433880039688231271b3258edaaded7fd65",
+      "bytes": 7487,
+      "role": "fresh Definition proposal"
+    },
+    "verifier": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_submerged_orifice_preflight_contract_v3.py",
+      "sha256": "32087a5b12d80136d084484cc87f65bf013d1fe181518f3763e4d78c22544396",
+      "bytes": 22421,
+      "role": "v3 proposal-only contract verifier"
+    }
+  },
+  "fresh_output": {
+    "generated_prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/fresh-definition-v2/generated/F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v2",
+    "expected_generated_xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/fresh-definition-v2/generated/F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v2.xml",
+    "expected_native_bi4": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/fresh-definition-v2/generated/F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v2.bi4",
+    "currently_present": {
+      "generated_xml": false,
+      "native_bi4": false
+    },
+    "fresh_definition_only": true,
+    "old_anchor_definition_reused": false,
+    "old_anchor_bi4_reused": false,
+    "output_materialized": false
+  },
+  "hard_gates": {
+    "zero_boundnor": {
+      "required": true,
+      "metric": "BoundNor vectors with norm <= threshold",
+      "threshold_m": 1e-12,
+      "operator": "==",
+      "required_value": 0,
+      "observed": null,
+      "status": "pending_fresh_cpu_native_preflight"
+    },
+    "normal_size": {
+      "required": true,
+      "metric": "NormalSize entries <= threshold",
+      "threshold_m": 1e-12,
+      "operator": "==",
+      "required_value": 0,
+      "observed": null,
+      "status": "pending_fresh_cpu_native_preflight"
+    },
+    "ids": {
+      "required": true,
+      "checks": [
+        "native particle IDs are unique",
+        "native IDs align exactly with generated XML IDs"
+      ],
+      "required_value": true,
+      "observed": null,
+      "status": "pending_fresh_cpu_native_preflight"
+    },
+    "finite": {
+      "required": true,
+      "checks": [
+        "positions",
+        "BoundNor",
+        "NormalSize",
+        "mass/density arrays"
+      ],
+      "required_value": true,
+      "observed": null,
+      "status": "pending_fresh_cpu_native_preflight"
+    },
+    "mass": {
+      "required": true,
+      "metric": "native mass relative error",
+      "operator": "<=",
+      "max_relative_error": 0.025,
+      "observed": null,
+      "status": "pending_fresh_cpu_native_preflight"
+    },
+    "endpoints": {
+      "required": true,
+      "checks": {
+        "outer_wall_endpoint_count": {
+          "operator": "==",
+          "required_value": 0,
+          "observed": null
+        },
+        "gate_endpoint_penetration_count": {
+          "operator": "==",
+          "required_value": 0,
+          "observed": null
+        }
+      },
+      "status": "pending_fresh_cpu_native_preflight"
+    }
+  },
+  "gate_evaluation": {
+    "status": "not_run",
+    "all_hard_gates_pass": false,
+    "qualification_credit": 0,
+    "threshold_relaxation": false,
+    "same_input_retry": false,
+    "survivor_renormalization": false
+  },
+  "permissions": {
+    "cpu_gencase": false,
+    "native_decode": false,
+    "solver_launch": false,
+    "gpu_launch": false,
+    "job_spec_creation": false,
+    "matrix_submission": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "qualification_numerator_credit": 0
+  },
+  "denominator": {
+    "planned_rows": 15,
+    "executed_rows": 0,
+    "passed_rows": 0,
+    "failed_rows": 0,
+    "unattempted_rows": 15,
+    "qualification_numerator": 0
+  },
+  "prohibited_actions": [
+    "do not invoke GenCase or a native decoder",
+    "do not launch a solver or GPU",
+    "do not create a job",
+    "do not mutate queue, ledger, registry, or matrix",
+    "do not relax any hard gate or assign qualification credit"
+  ],
+  "review_note_zh": "这是 proposal-only 静态合约；v3 root receipt 未授权 CPU/native preflight，所有 hard gate 仍待未来独立授权后的 fresh 输出验证。"
+}
