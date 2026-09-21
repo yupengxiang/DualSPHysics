@@ -104,9 +104,11 @@ def _continuous_fit_screen() -> dict[str, Any]:
         for q in (0.0, 0.25, 0.5, 0.75, 1.0):
             volume = 0.022950 + 0.001290 * q
             height = volume / area
-            top = 0.65 + height
+            bottom = 0.65 + clearance
+            top = bottom + height
             rows.append({"q": q, "dp_m": dp, "clearance_m": clearance,
-                         "source_area_m2": area, "height_m": height, "top_m": top,
+                         "source_area_m2": area, "height_m": height,
+                         "bottom_m": bottom, "top_m": top,
                          "clearance_ge_3h": clearance >= 3.0 * 1.3 * dp,
                          "fits_below_cup_top": top <= 1.10})
     return {"rows": rows, "all_continuous_fit": all(r["fits_below_cup_top"] for r in rows),
@@ -170,7 +172,7 @@ def build_contract() -> dict[str, Any]:
                 "fluid_size_xy_m": ["0.425-2*c(dp)", "0.30-2*c(dp)"],
                 "volume_axis": "V(q)=0.022950+0.001290*q m3",
                 "fluid_height_rule": "H(q,dp)=V(q)/((0.425-2*c(dp))*(0.30-2*c(dp)))",
-                "fluid_bottom_m": 0.65,
+                "fluid_bottom_rule": "0.65+c(dp); the fresh lattice is clear of the cup bottom as well as the side faces",
             },
             "fresh_identity": {
                 "case_id_prefix": "CORE_F2_static_full_cup_volume_supportclearance_h2",

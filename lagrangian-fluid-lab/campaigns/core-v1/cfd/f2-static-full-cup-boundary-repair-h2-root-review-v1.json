@@ -1,0 +1,76 @@
+{
+  "schema": "core.f2.static_full_cup.boundary_repair_h2.root_review.v1",
+  "review_id": "f2-static-full-cup-boundary-repair-h2-root-review-v1",
+  "created_at_utc": "2026-09-21T04:00:14.890244+00:00",
+  "family": "F2",
+  "scope_id": "F2_static_full_cup_volume_hold_x_v1",
+  "repair_id": "F2_static_full_cup_initial_support_clearance_h2_v1",
+  "status": "approved_for_one_fresh_cpu_native_preflight",
+  "qualification_claim": "none; root review authorizes one input preflight only",
+  "proposal": {
+    "path": "campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h2-proposal-v1.json",
+    "sha256": "e065ef46f754c25ad211ab142221c9d9c09c786a82b834cf7b8d35c7990ab790",
+    "bytes": 10631,
+    "role": "H2 proposal-only contract"
+  },
+  "source_definition": {
+    "path": "campaigns/core-v1/cfd/f2-static-full-cup-matrix-prepared-v4/cells/00-CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_Def.xml",
+    "sha256": "28e3a3906f453c4d3fa6ad7b6bfc9a93647afc4e6dffa5933cbb3cdb2e556324",
+    "bytes": 4499,
+    "role": "original v4 cell-0 Definition template; rewritten to fresh H2 identity"
+  },
+  "prior_negative": {
+    "path": "campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-negative-evidence-v1.json",
+    "sha256": "bbb97817955782e787a844300e3756af248d9cc49e7ecbb43b6275f7dd6de166",
+    "bytes": 51786,
+    "role": "immutable H1 negative evidence"
+  },
+  "decision": {
+    "proposal_hash_reviewed": true,
+    "continuous_fit_screen_passed": true,
+    "mass_sampling_screen_pending": true,
+    "fresh_definition_write_allowed": true,
+    "cpu_gencase_allowed": true,
+    "native_decode_allowed": true,
+    "solver_allowed": false,
+    "gpu_allowed": false,
+    "job_spec_creation_allowed": false,
+    "queue_mutation_allowed": 0,
+    "ledger_mutation_allowed": 0,
+    "registry_mutation_allowed": 0,
+    "qualification_credit": 0,
+    "matrix_submission": false,
+    "scope": "exactly one q=0.0, dp=0.010 H2 canary; no matrix expansion"
+  },
+  "input_identity": {
+    "case_id": "CORE_F2_static_full_cup_volume_supportclearance_h2_q0p00000000_dp0p010000000000_canary",
+    "revision_id": "F2_static_full_cup_support_clearance_h2_v1",
+    "old_definition_reused": false,
+    "old_trajectory_reused": false,
+    "boundary": "H1 mDBC Boundary=2 with explicit normals; no boundary parameter change in H2",
+    "initial_condition_change": "fresh fluid source box with c(dp)=3*hdp*dp clearance from the cup bottom and all four closed side faces"
+  },
+  "execution_controls": {
+    "read_only_review": true,
+    "definition_writer_now": false,
+    "gencase_now": false,
+    "native_decode_now": false,
+    "solver_now": false,
+    "gpu_launch_now": false,
+    "queue_mutation_now": 0,
+    "ledger_mutation_now": 0,
+    "registry_mutation_now": 0
+  },
+  "hard_gates": {
+    "fresh_xml_and_bi4_required": true,
+    "ids_match_and_unique": true,
+    "arrays_finite": true,
+    "zero_boundnor": 0,
+    "mass_relative_error_max": 0.03,
+    "fluid_support_clearance": true,
+    "outer_wall_endpoint_count": 0,
+    "cup_endpoint_and_chord_count": 0,
+    "fluid_support_clearance_rule": "minimum distance to cup bottom and four closed side faces >= c(dp)=3*hdp*dp"
+  },
+  "next_action": "materialize fresh H2 Definition with bottom-and-side support clearance and run exactly one CPU GenCase/native decode; stop with zero credit before solver/GPU"
+}
