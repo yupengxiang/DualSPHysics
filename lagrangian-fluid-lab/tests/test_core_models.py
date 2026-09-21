@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import numpy as np
 import pytest
 import torch
@@ -34,15 +36,78 @@ def test_neighbors_use_complete_field_distance_then_identity_order():
 
 def test_two_hop_halo_and_edge_contract_are_explicit():
     state = _grid_state()
-    table, _ = neighbor_table(state, .01, limit=64)
+    table, _, provenance = neighbor_table(state, .01, limit=64, return_provenance=True)
     centers = np.array([0])
-    one, two = two_hop_halo(centers, table)
+    one, two = two_hop_halo(centers, table, provenance=provenance, position=state.position)
     assert 0 in one and set(one) <= set(two)
+    assert tuple(two.tolist()) == provenance.required_two_hop_sources(centers)[0]
     model = DualIncrementModel("graph_raw", hidden=64)
     assert model.messages[0][0].in_features == 2 * 64 + 7
     args, _, _ = tensors(state, example_known(), .01, "cpu")
-    output = model(*args, centers=torch.tensor([0]))
-    assert output.shape == (1, 6)
+    formal = model(*args, centers=torch.tensor([0]))
+    diagnostic = model(*args[:4], centers=torch.tensor([0]))
+    assert formal.shape == (1, 6)
+    assert torch.equal(formal, diagnostic)
+
+
+def test_formal_halo_path_is_fixed_seed_equivalent_to_diagnostic_path():
+    state, known, dt = example_state(), example_known(), .01
+    args, _, _ = tensors(state, known, dt, "cpu")
+    torch.manual_seed(41)
+    formal_model = DualIncrementModel("graph_raw", hidden=8)
+    formal = formal_model(*args, centers=torch.tensor([0, 1]))
+    torch.manual_seed(41)
+    diagnostic_model = DualIncrementModel("graph_raw", hidden=8)
+    diagnostic = diagnostic_model(*args[:4], centers=torch.tensor([0, 1]))
+    assert torch.equal(formal, diagnostic)
+
+
+def test_two_hop_halo_requires_provenance_for_formal_use():
+    state = _grid_state()
+    table, _ = neighbor_table(state, .01, limit=64)
+    with pytest.raises(ValueError, match="requires NeighborProvenance"):
+        two_hop_halo(np.array([0]), table, require_provenance=True)
+
+
+def test_two_hop_halo_rejects_required_rows_with_max_neighbor_truncation():
+    state = _grid_state()
+    table, diagnostics, provenance = neighbor_table(
+        state, .01, limit=3, return_provenance=True)
+    assert diagnostics["neighbor_truncated_rows"] > 0
+    with pytest.raises(ValueError, match="truncated"):
+        two_hop_halo(np.array([0]), table, provenance=provenance, position=state.position)
+
+
+def test_two_hop_halo_rejects_duplicate_and_out_of_bounds_identity_provenance():
+    state = _grid_state()
+    table, _, provenance = neighbor_table(state, .01, limit=64, return_provenance=True)
+
+    duplicate_table = table.copy()
+    duplicate_table[0, 1] = duplicate_table[0, 0]
+    duplicate_identity = provenance.neighbor_identity.copy()
+    duplicate_identity[0, 1] = duplicate_identity[0, 0]
+    duplicate_provenance = replace(
+        provenance, neighbor_indices=duplicate_table,
+        neighbor_identity=duplicate_identity)
+    with pytest.raises(ValueError, match="duplicate"):
+        two_hop_halo(np.array([0]), duplicate_table,
+                     provenance=duplicate_provenance, position=state.position)
+
+    out_of_bounds = table.copy()
+    out_of_bounds[0, 0] = state.count
+    out_of_bounds_provenance = replace(provenance, neighbor_indices=out_of_bounds)
+    with pytest.raises(ValueError, match="outside particle field"):
+        two_hop_halo(np.array([0]), out_of_bounds,
+                     provenance=out_of_bounds_provenance, position=state.position)
+
+    mismatched_identity = provenance.neighbor_identity.copy()
+    mismatched_identity[0, 0] = np.array([999, 999])
+    with pytest.raises(ValueError, match="identity"):
+        two_hop_halo(
+            np.array([0]), table,
+            provenance=replace(provenance, neighbor_identity=mismatched_identity),
+            position=state.position,
+        )
 
 
 def test_halo_rejects_truncated_or_out_of_axis_neighbor_tables():
@@ -165,7 +230,7 @@ def test_known_force_residual_units_prior_and_shared_denormalization_are_equival
             super().__init__()
             self.register_buffer("encoded", encoded)
 
-        def forward(self, features, position, neighbors, h, centers=None):
+        def forward(self, features, position, neighbors, h, provenance=None, centers=None):
             return self.encoded[centers]
 
     predictor = ModelPredictor(ResidualStub(residual_encoded), normalization=normalization,

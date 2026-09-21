@@ -22,6 +22,8 @@ MODEL_VERSION = "core.dual_increment.v1"
 FEATURE_VERSION = "core.finite_triangle_features.v1"
 NORMALIZATION_VERSION = "core.train_normalization.v1"
 INITIALIZATION_VERSION = "core.paired_initialization.common_encoder_head.v1"
+NEIGHBOR_PROVENANCE_VERSION = "core.neighbor_provenance.v1"
+TWO_HOP_SOURCE_RULE = "center-plus-neighbors-of-center-and-one-hop.v1"
 FEATURE_DIM = 23
 OUTPUT_DIM = 6
 MODEL_KINDS = ("mlp", "graph_raw", "graph_residual")
@@ -37,6 +39,288 @@ def _readonly_array(value: Any, *, dtype=np.float32, shape=None) -> np.ndarray:
         raise ValueError("normalization values must be finite")
     result.setflags(write=False)
     return result
+
+
+def _readonly_integer_array(value: Any, *, shape=None, name="array") -> np.ndarray:
+    """Copy an integer provenance field and make it immutable."""
+    original = np.asarray(value)
+    if original.dtype.kind not in "iu":
+        raise ValueError(f"{name} must be an integer array")
+    result = np.array(original, dtype=np.int64, copy=True)
+    if shape is not None and result.shape != shape:
+        raise ValueError(f"{name} must have shape {shape}")
+    result.setflags(write=False)
+    return result
+
+
+def _readonly_boolean_array(value: Any, *, shape=None, name="array") -> np.ndarray:
+    """Copy a strict boolean/0-1 provenance field and make it immutable."""
+    original = np.asarray(value)
+    if original.dtype.kind not in "biu":
+        raise ValueError(f"{name} must be a boolean array")
+    if original.dtype.kind in "iu" and not np.isin(original, (0, 1)).all():
+        raise ValueError(f"{name} must contain only false/true values")
+    result = np.array(original, dtype=bool, copy=True)
+    if shape is not None and result.shape != shape:
+        raise ValueError(f"{name} must have shape {shape}")
+    result.setflags(write=False)
+    return result
+
+
+@dataclass(frozen=True)
+class NeighborProvenance:
+    """Auditable binding for one complete-field neighbor table.
+
+    The table is indexed by the current particle axis.  ``center_identity``
+    and ``neighbor_identity`` use the public composite key
+    ``(particle_zone, particle_id)`` rather than treating a row number as a
+    durable particle identity.  The required two-hop source set is derived
+    from the bound table for the requested centers by
+    :func:`validate_neighbor_provenance`; it is never accepted from an
+    unbound/truncated table.
+
+    This object is intentionally runtime-only.  It is immutable so that the
+    graph input tuple used by formal/training paths cannot silently lose its
+    source binding between construction and a forward pass.
+    """
+
+    center_indices: np.ndarray
+    center_identity: np.ndarray
+    neighbor_indices: np.ndarray
+    neighbor_identity: np.ndarray
+    neighbor_distance2: np.ndarray
+    max_neighbors: int
+    truncated_rows: np.ndarray
+    radius: float
+    version: str = NEIGHBOR_PROVENANCE_VERSION
+    required_two_hop_source_rule: str = TWO_HOP_SOURCE_RULE
+
+    def __post_init__(self):
+        center_indices = _readonly_integer_array(
+            self.center_indices, name="provenance center_indices")
+        center_identity = _readonly_integer_array(
+            self.center_identity, name="provenance center_identity")
+        neighbor_indices = _readonly_integer_array(
+            self.neighbor_indices, name="provenance neighbor_indices")
+        neighbor_identity = _readonly_integer_array(
+            self.neighbor_identity, name="provenance neighbor_identity")
+        neighbor_distance2 = np.array(self.neighbor_distance2, dtype=np.float64, copy=True)
+        truncated_rows = _readonly_boolean_array(
+            self.truncated_rows, name="provenance truncated_rows")
+
+        if center_indices.ndim != 1:
+            raise ValueError("provenance center_indices must be one-dimensional")
+        n = int(center_indices.shape[0])
+        if center_identity.shape != (n, 2):
+            raise ValueError("provenance center_identity must have shape [N,2]")
+        if neighbor_indices.ndim != 2 or neighbor_indices.shape[0] != n:
+            raise ValueError("provenance neighbor_indices must have shape [N,K]")
+        k = int(neighbor_indices.shape[1])
+        if neighbor_identity.shape != (n, k, 2):
+            raise ValueError("provenance neighbor_identity must have shape [N,K,2]")
+        if neighbor_distance2.shape != (n, k):
+            raise ValueError("provenance neighbor_distance2 must have shape [N,K]")
+        if truncated_rows.shape != (n,):
+            raise ValueError("provenance truncated_rows must have shape [N]")
+        if np.isnan(neighbor_distance2).any():
+            raise ValueError("provenance neighbor distances must not be NaN")
+        if isinstance(self.max_neighbors, (bool, np.bool_)) or not isinstance(
+                self.max_neighbors, (int, np.integer)):
+            raise ValueError("provenance max_neighbors must be an integer")
+        if int(self.max_neighbors) < 1 or int(self.max_neighbors) != k:
+            raise ValueError("provenance max_neighbors must match neighbor table width")
+        if self.version != NEIGHBOR_PROVENANCE_VERSION:
+            raise ValueError("unknown neighbor provenance version")
+        if self.required_two_hop_source_rule != TWO_HOP_SOURCE_RULE:
+            raise ValueError("unknown two-hop source rule")
+        try:
+            radius = float(self.radius)
+        except (TypeError, ValueError) as error:
+            raise ValueError("provenance radius must be finite and positive") from error
+        if not np.isfinite(radius) or radius <= 0:
+            raise ValueError("provenance radius must be finite and positive")
+        neighbor_distance2.setflags(write=False)
+
+        object.__setattr__(self, "center_indices", center_indices)
+        object.__setattr__(self, "center_identity", center_identity)
+        object.__setattr__(self, "neighbor_indices", neighbor_indices)
+        object.__setattr__(self, "neighbor_identity", neighbor_identity)
+        object.__setattr__(self, "neighbor_distance2", neighbor_distance2)
+        object.__setattr__(self, "max_neighbors", int(self.max_neighbors))
+        object.__setattr__(self, "truncated_rows", truncated_rows)
+        object.__setattr__(self, "radius", radius)
+
+    def required_two_hop_sources(self, centers=None):
+        """Return the canonical source rows bound to the requested centers."""
+        if centers is None:
+            requested = self.center_indices
+        else:
+            requested = _as_numpy_integer_table(centers, name="centers").reshape(-1)
+        if np.any((requested < 0) | (requested >= len(self.neighbor_indices))):
+            raise ValueError("center index outside particle field")
+        return tuple(
+            _canonical_two_hop_sources_for_center(self.neighbor_indices, int(center))
+            for center in requested
+        )
+
+
+def _as_numpy_integer_table(value, *, name):
+    """Normalize a CPU/GPU integer table for provenance validation."""
+    if torch.is_tensor(value):
+        if value.dtype not in (torch.int8, torch.int16, torch.int32,
+                               torch.int64, torch.uint8):
+            raise ValueError(f"{name} must be an integer array")
+        return value.detach().cpu().numpy().astype(np.int64, copy=False)
+    result = np.asarray(value)
+    if result.dtype.kind not in "iu":
+        raise ValueError(f"{name} must be an integer array")
+    return result.astype(np.int64, copy=False)
+
+
+def _canonical_two_hop_sources_for_center(neighbors: np.ndarray, center: int) -> tuple[int, ...]:
+    """Derive one exact source union after the caller has passed bounds checks."""
+    one_hop = np.unique(np.concatenate((
+        np.array([center], dtype=np.int64),
+        neighbors[center][neighbors[center] >= 0],
+    )))
+    two_hop = np.unique(np.concatenate((
+        one_hop,
+        neighbors[one_hop].reshape(-1),
+    )))
+    return tuple(int(index) for index in two_hop[two_hop >= 0])
+
+
+def validate_neighbor_provenance(neighbors, provenance, *, centers=None, n=None,
+                                 position=None):
+    """Validate a formal two-hop source binding and return the provenance.
+
+    ``neighbors`` must be the exact table used to create ``provenance``.  The
+    validator checks the particle-axis binding, composite identities,
+    distance/order metadata, padding, and the canonical two-hop source set.
+    Truncation is rejected only when it touches a requested center or its
+    one-hop rows; unrelated rows cannot affect that center's exact halo.
+    ``position`` is optional for callers that only need structural validation.
+    When supplied, it additionally checks the recorded distances against the
+    current field.  Missing provenance is always an error in this formal
+    validator.
+    """
+    if not isinstance(provenance, NeighborProvenance):
+        raise ValueError("formal two-hop halo requires NeighborProvenance")
+    table = _as_numpy_integer_table(neighbors, name="neighbors")
+    if table.ndim != 2:
+        raise ValueError("neighbors must be an integer [N,K] table")
+    rows, width = table.shape
+    if n is not None:
+        if isinstance(n, (bool, np.bool_)) or not isinstance(n, (int, np.integer)):
+            raise ValueError("halo particle axis must be an integer")
+        if int(n) != rows:
+            raise ValueError("halo particle axis must match neighbor table")
+    if provenance.version != NEIGHBOR_PROVENANCE_VERSION:
+        raise ValueError("unknown neighbor provenance version")
+    if provenance.required_two_hop_source_rule != TWO_HOP_SOURCE_RULE:
+        raise ValueError("unknown two-hop source rule")
+    if provenance.center_indices.shape != (rows,) or not np.array_equal(
+            provenance.center_indices, np.arange(rows, dtype=np.int64)):
+        raise ValueError("neighbor provenance center binding is unknown or out of bounds")
+    if provenance.neighbor_indices.shape != (rows, width):
+        raise ValueError("neighbor provenance table shape does not match neighbors")
+    if provenance.max_neighbors != width:
+        raise ValueError("neighbor provenance max_neighbors does not match table width")
+    if np.any(table < -1) or np.any(table >= rows):
+        raise ValueError("neighbor identity index outside particle field")
+    if not np.array_equal(table, provenance.neighbor_indices):
+        raise ValueError("neighbor provenance is not bound to this neighbor table")
+
+    center_identity = provenance.center_identity
+    if center_identity.shape != (rows, 2):
+        raise ValueError("neighbor provenance center identity shape mismatch")
+    if len(np.unique(center_identity, axis=0)) != rows:
+        raise ValueError("duplicate center identity in neighbor provenance")
+    neighbor_identity = provenance.neighbor_identity
+    neighbor_distance2 = provenance.neighbor_distance2
+    if neighbor_identity.shape != (rows, width, 2):
+        raise ValueError("neighbor provenance identity shape mismatch")
+    if neighbor_distance2.shape != (rows, width):
+        raise ValueError("neighbor provenance distance shape mismatch")
+    if provenance.truncated_rows.shape != (rows,):
+        raise ValueError("neighbor provenance truncation shape mismatch")
+    if provenance.truncated_rows.dtype != bool:
+        raise ValueError("neighbor provenance truncation state is unknown")
+    if np.isnan(neighbor_distance2).any():
+        raise ValueError("neighbor provenance contains unknown distance")
+    radius2 = float(provenance.radius) ** 2
+    for row in range(rows):
+        valid_count = int(np.count_nonzero(table[row] >= 0))
+        if np.any(table[row, valid_count:] != -1):
+            raise ValueError("neighbor padding is not canonical")
+        row_indices = table[row, :valid_count]
+        if len(np.unique(row_indices)) != len(row_indices):
+            raise ValueError("duplicate neighbor identity in provenance")
+        if np.any(row_indices == row):
+            raise ValueError("neighbor provenance contains a self identity")
+        expected_identity = center_identity[row_indices]
+        if not np.array_equal(neighbor_identity[row, :valid_count], expected_identity):
+            raise ValueError("neighbor identity provenance mismatch")
+        if valid_count < width and np.any(neighbor_identity[row, valid_count:] != 0):
+            raise ValueError("padded neighbor identity is unknown")
+        valid_distance = neighbor_distance2[row, :valid_count]
+        if not np.isfinite(valid_distance).all() or np.any(valid_distance < 0):
+            raise ValueError("neighbor provenance contains invalid distance")
+        if np.any(valid_distance > radius2 * (1.0 + 1e-12)):
+            raise ValueError("neighbor provenance distance is outside search radius")
+        if valid_count < width and not np.isposinf(neighbor_distance2[row, valid_count:]).all():
+            raise ValueError("padded neighbor distance is unknown")
+        if valid_count:
+            expected_order = np.lexsort((
+                center_identity[row_indices, 0],
+                center_identity[row_indices, 1],
+                valid_distance,
+            ))
+            if not np.array_equal(expected_order, np.arange(valid_count)):
+                raise ValueError("neighbor identity/distance order is not deterministic")
+
+    requested = np.arange(rows, dtype=np.int64) if centers is None else _as_numpy_integer_table(
+        centers, name="centers").reshape(-1)
+    if np.any((requested < 0) | (requested >= rows)):
+        raise ValueError("center index outside particle field")
+    if len(np.unique(requested)) != len(requested):
+        raise ValueError("duplicate center identity in halo request")
+    if not np.isin(requested, provenance.center_indices).all():
+        raise ValueError("requested center is not bound by neighbor provenance")
+
+    bound_sources = provenance.required_two_hop_sources(requested)
+    observed_sources = tuple(
+        _canonical_two_hop_sources_for_center(table, int(center))
+        for center in requested
+    )
+    if bound_sources != observed_sources:
+        raise ValueError("required two-hop source provenance mismatch")
+    for center, required_sources in zip(requested, observed_sources):
+        one_hop_rows = np.unique(np.concatenate((
+            np.array([center], dtype=np.int64),
+            table[center][table[center] >= 0],
+        )))
+        if not required_sources or int(center) not in required_sources:
+            raise ValueError("required two-hop source provenance is incomplete")
+        if np.any(provenance.truncated_rows[one_hop_rows]):
+            raise ValueError("neighbor provenance is truncated for a required two-hop row")
+
+    if position is not None:
+        coordinates = (position.detach().cpu().numpy()
+                       if torch.is_tensor(position) else np.asarray(position))
+        if coordinates.shape != (rows, 3) or not np.isfinite(coordinates).all():
+            raise ValueError("position must be finite [N,3] for provenance validation")
+        for row in range(rows):
+            valid_count = int(np.count_nonzero(table[row] >= 0))
+            if not valid_count:
+                continue
+            row_indices = table[row, :valid_count]
+            actual_distance2 = np.sum((coordinates[row_indices] - coordinates[row]) ** 2, axis=1)
+            if not np.allclose(actual_distance2, neighbor_distance2[row, :valid_count],
+                               rtol=2e-5, atol=1e-10):
+                raise ValueError("neighbor provenance distance does not match position")
+
+    return provenance
 
 
 @dataclass(frozen=True)
@@ -103,13 +387,17 @@ class Normalization:
                    payload.get("target_reference", "raw_dual_increment_train_shared"))
 
 
-def neighbor_table(state, h, limit=MAX_NEIGHBORS):
+def neighbor_table(state, h, limit=MAX_NEIGHBORS, *, return_provenance=False):
     """Return deterministic complete-field neighbors within ``2h``.
 
     Rows contain source indices sorted by squared distance, then the public
     composite particle identity. The cKDTree query is expanded at the cutoff
     so equal-distance contenders are included before the fixed ``limit`` is
     applied. ``-1`` is padding only; invalid/survivor filtering is rejected.
+
+    The legacy two-return-value form remains available for diagnostics. A
+    formal/training caller must request ``return_provenance=True`` and carry
+    the returned :class:`NeighborProvenance` alongside the table.
     """
     if not np.isfinite(h) or h <= 0:
         raise ValueError("positive finite smoothing length is required")
@@ -129,6 +417,9 @@ def neighbor_table(state, h, limit=MAX_NEIGHBORS):
     distance = np.asarray(distance).reshape(n, k)
     index = np.asarray(index).reshape(n, k)
     neighbors = np.full((n, int(limit)), -1, dtype=np.int64)
+    neighbor_distance2 = (np.full((n, int(limit)), np.inf, dtype=np.float64)
+                          if return_provenance else None)
+    truncated_rows = np.zeros(n, dtype=bool) if return_provenance else None
     truncated = 0
     for i in range(n):
         ids = index[i][(index[i] < n) & (index[i] != i)]
@@ -146,24 +437,57 @@ def neighbor_table(state, h, limit=MAX_NEIGHBORS):
         order = np.lexsort((state.particle_zone[ids], state.particle_id[ids], d2))
         ids = ids[order]
         if len(ids) > int(limit):
-            truncated += 1
+            if return_provenance:
+                truncated_rows[i] = True
+            else:
+                truncated += 1
             ids = ids[: int(limit)]
         neighbors[i, : len(ids)] = ids
-    return neighbors, {
-        "neighbor_truncation_fraction": float(truncated / n),
+        if return_provenance:
+            neighbor_distance2[i, : len(ids)] = d2[order][: len(ids)]
+    diagnostics = {
+        "neighbor_truncation_fraction": float(
+            (np.count_nonzero(truncated_rows) if return_provenance else truncated) / n),
         "field_particle_count": int(n),
         "neighbor_radius_over_h": NEIGHBOR_RADIUS_OVER_H,
         "max_neighbors": int(limit),
     }
+    if not return_provenance:
+        return neighbors, diagnostics
+    diagnostics.update({
+        "neighbor_truncated_rows": int(np.count_nonzero(truncated_rows)),
+        "neighbor_provenance_version": NEIGHBOR_PROVENANCE_VERSION,
+        "neighbor_two_hop_source_rule": TWO_HOP_SOURCE_RULE,
+        "neighbor_provenance_bound": True,
+    })
+    center_identity = np.column_stack((state.particle_zone, state.particle_id))
+    valid = neighbors >= 0
+    neighbor_identity = np.zeros((n, int(limit), 2), dtype=np.int64)
+    neighbor_identity[valid] = center_identity[neighbors[valid]]
+    provenance = NeighborProvenance(
+        center_indices=np.arange(n, dtype=np.int64),
+        center_identity=center_identity,
+        neighbor_indices=neighbors,
+        neighbor_identity=neighbor_identity,
+        neighbor_distance2=neighbor_distance2,
+        max_neighbors=int(limit),
+        truncated_rows=truncated_rows,
+        radius=radius,
+    )
+    return neighbors, diagnostics, provenance
 
 
-def two_hop_halo(centers, neighbors, n=None):
-    """Return the exact center, one-hop, and two-hop source index union.
+def two_hop_halo(centers, neighbors, n=None, provenance=None, *,
+                 require_provenance=False, position=None):
+    """Return the center, one-hop, and exact two-hop source index union.
 
-    ``neighbors`` describes the complete particle axis.  A caller may select
-    a center chunk, but it cannot pass a truncated neighbor table or silently
-    introduce an out-of-axis source: doing so would make a graph chunk depend
-    on which chunk happened to be evaluated first.
+    A formal call supplies ``provenance`` from
+    ``neighbor_table(..., return_provenance=True)``.  That path validates the
+    table, identities, distances, truncation state, and all source rows needed
+    by ``centers`` before returning a halo.  The historical unbound call is
+    retained as a diagnostic-only compatibility path; it deliberately does
+    not certify completeness.  Set ``require_provenance=True`` to make that
+    distinction fail closed.
     """
     if torch.is_tensor(neighbors):
         if neighbors.ndim != 2 or not neighbors.dtype in (
@@ -183,10 +507,17 @@ def two_hop_halo(centers, neighbors, n=None):
             raise ValueError("center index outside particle field")
         if torch.any((neighbors < -1) | (neighbors >= total)):
             raise ValueError("neighbor index outside particle field")
+        if provenance is None:
+            if require_provenance:
+                raise ValueError("formal two-hop halo requires NeighborProvenance")
+        else:
+            validate_neighbor_provenance(
+                neighbors, provenance, centers=centers, n=total, position=position)
         s1 = torch.unique(torch.cat((centers, neighbors[centers].reshape(-1))))
         s1 = s1[s1 >= 0]
         s2 = torch.unique(torch.cat((s1, neighbors[s1].reshape(-1))))
         return s1, s2[s2 >= 0]
+
     neighbors = np.asarray(neighbors)
     if neighbors.ndim != 2 or neighbors.dtype.kind not in "iu":
         raise ValueError("neighbors must be an integer [N,K] table")
@@ -202,6 +533,12 @@ def two_hop_halo(centers, neighbors, n=None):
         raise ValueError("center index outside particle field")
     if np.any((neighbors < -1) | (neighbors >= total)):
         raise ValueError("neighbor index outside particle field")
+    if provenance is None:
+        if require_provenance:
+            raise ValueError("formal two-hop halo requires NeighborProvenance")
+    else:
+        validate_neighbor_provenance(
+            neighbors, provenance, centers=centers, n=total, position=position)
     s1 = np.unique(np.concatenate((centers, neighbors[centers].reshape(-1))))
     s1 = s1[s1 >= 0]
     s2 = np.unique(np.concatenate((s1, neighbors[s1].reshape(-1))))
@@ -322,8 +659,20 @@ class DualIncrementModel(nn.Module):
             self.updates = nn.ModuleList([_mlp(2 * self.hidden, self.hidden, self.hidden) for _ in range(2)])
         self.register_buffer("target_scale", torch.ones(OUTPUT_DIM))
 
-    def forward(self, features, position, neighbors, h, centers=None):
-        """Predict normalized ``(dx,dv)`` rows with complete two-hop halos."""
+    def forward(self, features, position, neighbors, h, provenance=None, centers=None):
+        """Predict normalized ``(dx,dv)`` rows from a bound graph input.
+
+        Formal/training inputs carry ``NeighborProvenance`` as the fifth
+        positional value produced by :func:`tensors`.  Calls without it keep
+        the historical graph behavior for diagnostic compatibility only; they
+        do not establish a formal completeness claim.  A legacy fifth
+        positional center tensor is also accepted and remains unbound.
+        """
+        if centers is None and provenance is not None and not isinstance(
+                provenance, NeighborProvenance):
+            # Preserve the old ``forward(..., centers)`` positional form while
+            # reserving the fifth slot for the explicit provenance contract.
+            centers, provenance = provenance, None
         features = torch.as_tensor(features)
         position = torch.as_tensor(position, dtype=features.dtype, device=features.device)
         raw_neighbors = torch.as_tensor(neighbors, device=features.device)
@@ -360,7 +709,8 @@ class DualIncrementModel(nn.Module):
         if self.kind == "mlp":
             return self.head(encoded[centers]) * self.target_scale
 
-        s1, s2 = two_hop_halo(centers, neighbors, n=n)
+        s1, s2 = two_hop_halo(
+            centers, neighbors, n=n, provenance=provenance, position=position)
         values = encoded[s2]
         sources = s2
         for layer, destinations in enumerate((s1, centers)):
@@ -388,14 +738,21 @@ class DualIncrementModel(nn.Module):
 
 
 def tensors(state, known, dt, device):
-    """Build inputs and the SI-unit known-force prior ``(dx_m, dv_mps)``."""
+    """Build formal graph inputs and the SI-unit known-force prior.
+
+    The provenance is part of ``args`` so the existing training/inference
+    call pattern cannot accidentally drop the source contract while
+    normalizing features or changing center chunks.
+    """
     features, acceleration = node_features(state, known, dt)
-    neighbors, diagnostics = neighbor_table(state, float(known.numerics["h_m"]))
+    neighbors, diagnostics, provenance = neighbor_table(
+        state, float(known.numerics["h_m"]), return_provenance=True)
     args = (
         torch.as_tensor(features, dtype=torch.float32, device=device),
         torch.tensor(np.asarray(state.position), dtype=torch.float32, device=device),
         torch.as_tensor(neighbors, dtype=torch.long, device=device),
         float(known.numerics["h_m"]),
+        provenance,
     )
     prior = np.column_stack((
         state.velocity * dt + 0.5 * acceleration * dt * dt,
