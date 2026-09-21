@@ -1,0 +1,54 @@
+{
+  "schema": "core.f6.physical_anchor.event_window_contract.v1",
+  "event_id": "F6_physical_anchor_gravity_entry_buoyancy_v1",
+  "body_id": "F6_physical_anchor_body_kappa_20260921",
+  "forcing_mode": "gravity_minus_9p81_fluid_body_coupling_expected",
+  "physical_f6_qualification": false,
+  "window": {
+    "start_s": 0.0,
+    "end_s": 1.5,
+    "output_interval_s": 0.005,
+    "expected_frame_count": 301,
+    "settle_hold_start_s": 1.0,
+    "settle_hold_end_s": 1.5
+  },
+  "predicted_events": {
+    "initial_fluid_surface_gap_m": 0.21000000000000008,
+    "predicted_contact_com_z_m": 0.33999999999999997,
+    "predicted_contact_time_s": 0.20691412628791772,
+    "predicted_impact_speed_m_s": 2.029827578884473,
+    "contact_prediction_window_s": [
+      0.18691412628791773,
+      0.2269141262879177
+    ],
+    "equilibrium_submerged_fraction": 0.78,
+    "equilibrium_submerged_depth_m": 0.0936,
+    "equilibrium_bottom_z_m": 0.18639999999999995,
+    "equilibrium_com_z_m": 0.24639999999999995,
+    "equilibrium_top_z_m": 0.30639999999999995,
+    "free_fall_equivalent_time_to_equilibrium_s": 0.2487891164517287,
+    "tank_bottom_clearance_at_equilibrium_m": 0.18639999999999995,
+    "tank_top_clearance_at_equilibrium_m": 0.5936000000000001,
+    "hydrodynamic_response_is_runtime_unknown": true
+  },
+  "required_runtime_events": [
+    "body_free_fall_started",
+    "fluid_contact_observed_once_or_more",
+    "buoyant_response_observed",
+    "no_closed_tank_face_contact_or_penetration",
+    "no_unaccounted_open_top_mass_flux",
+    "settle_hold_present_and_uncensored"
+  ],
+  "completion_rule": [
+    "all 301 frames exist at strictly increasing 0.005 s cadence",
+    "body_id is present on every row and all body/force/torque values are finite",
+    "fluid-contact time lies within the predicted contact window [t_contact-0.02,t_contact+0.02] s",
+    "closed-face contact count and penetration depth are zero throughout",
+    "the body remains inside the tank; later equilibrium has at least 3*dp bottom and top margins",
+    "the final [1.0,1.5] s interval is present, uncensored, and carries status fields"
+  ],
+  "uncensored_required": true,
+  "status_without_runtime": "auditable_prediction_pending_runtime_event_window",
+  "qualification_claim": "none",
+  "qualification_credit": 0
+}

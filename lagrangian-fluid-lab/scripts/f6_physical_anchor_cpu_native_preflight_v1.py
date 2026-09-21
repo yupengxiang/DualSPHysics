@@ -235,11 +235,14 @@ def validate_definition(contract: dict[str, Any], sidecar: dict[str, Any], event
     dp = _float_attr(geometry_definition, "dp") if geometry_definition is not None else float("nan")
     checks["dp_exact"] = math.isclose(dp, physical.DP_M, rel_tol=0.0, abs_tol=1.0e-12)
     floating = root.find("./casedef/floatings/floating")
-    checks["single_floating_binding"] = bool(
-        floating is not None
-        and floating.get("mkbound") == str(physical.MKBOUND)
-        and math.isclose(float(floating.get("rhopbody", "nan")), physical.RHO_BODY, rel_tol=0.0, abs_tol=1.0e-12)
-    )
+    massbody_node = floating.find("massbody") if floating is not None else None
+    density_binding = floating is not None and math.isclose(float(floating.get("rhopbody", "nan")), physical.RHO_BODY, rel_tol=0.0, abs_tol=1.0e-12)
+    # The explicit-body revision intentionally omits rhopbody.  Its mass is
+    # checked against the immutable contract below; the density-only route
+    # remains valid for the earlier form.
+    expected_body_mass = float(json.loads(CONTRACT.read_text(encoding="utf-8"))["body"]["mass_kg"])
+    mass_binding = massbody_node is not None and math.isclose(float(massbody_node.get("value", "nan")), expected_body_mass, rel_tol=0.0, abs_tol=1.0e-12)
+    checks["single_floating_binding"] = bool(floating is not None and floating.get("mkbound") == str(physical.MKBOUND) and (density_binding or mass_binding))
     params = {node.get("key"): node.get("value") for node in root.findall("./execution/parameters/parameter")}
     checks["runtime_cadence"] = params.get("TimeMax") == str(physical.TIME_END_S) and params.get("TimeOut") == str(physical.OUTPUT_INTERVAL_S)
 
@@ -267,7 +270,14 @@ def validate_definition(contract: dict[str, Any], sidecar: dict[str, Any], event
         if parent_index == 2:
             body_boxes.append(value)
     expected_body_low = body["bbox_low_m"]
-    checks["fresh_fluid_drawbox"] = bool(fluid_boxes and _close_vector(fluid_boxes[0]["point"], fluid["low_m"]) and _close_vector(fluid_boxes[0]["size"], fluid["size_m"]))
+    sampling = fluid.get("sampling_contract", {})
+    registered_drawbox_size = sampling.get("drawbox_size_m") if isinstance(sampling, dict) else None
+    expected_drawbox_size = registered_drawbox_size if registered_drawbox_size is not None else fluid["size_m"]
+    checks["fresh_fluid_drawbox"] = bool(
+        fluid_boxes
+        and _close_vector(fluid_boxes[0]["point"], fluid["low_m"])
+        and _close_vector(fluid_boxes[0]["size"], expected_drawbox_size)
+    )
     checks["fresh_tank_faces"] = any("bottom" in item["fill"] and "left" in item["fill"] and "right" in item["fill"] for item in ({"fill": (node.findtext("boxfill") or "")} for node in drawboxes))
     checks["fresh_body_drawbox"] = bool(body_boxes and _close_vector(body_boxes[0]["point"], expected_body_low) and _close_vector(body_boxes[0]["size"], body["size_m"]))
     checks["contract_static_pass"] = static.get("gate_passed") is True
@@ -293,7 +303,12 @@ def validate_definition(contract: dict[str, Any], sidecar: dict[str, Any], event
         "dp_m": dp,
         "runtime_parameters": params,
         "drawbox_count": len(drawboxes),
-        "fluid_contract": {"low_m": fluid["low_m"], "size_m": fluid["size_m"]},
+        "fluid_contract": {
+            "low_m": fluid["low_m"],
+            "size_m": fluid["size_m"],
+            "drawbox_size_m": expected_drawbox_size,
+            "sampling_contract": sampling,
+        },
         "body_contract": {"body_id": BODY_ID, "low_m": expected_body_low, "size_m": body["size_m"]},
         "tank_contract": tank,
         "runtime_sidecar_present": False,
@@ -306,7 +321,7 @@ def _group_items(generated_xml: Path) -> tuple[list[dict[str, Any]], list[dict[s
     fixed: list[dict[str, Any]] = []
     fluids: list[dict[str, Any]] = []
     for node in root.findall(".//particles/*"):
-        if node.tag not in {"fixed", "moving", "fluid"}:
+        if node.tag not in {"fixed", "moving", "floating", "fluid"}:
             continue
         value: dict[str, Any] = {"kind": node.tag}
         for key, raw in node.attrib.items():
@@ -314,6 +329,18 @@ def _group_items(generated_xml: Path) -> tuple[list[dict[str, Any]], list[dict[s
                 value[key] = int(raw) if key in {"begin", "count", "mk", "mkbound", "mkfluid"} else raw
             except (TypeError, ValueError):
                 value[key] = raw
+        for child in node:
+            if child.tag == "massbody":
+                value["massbody_kg"] = float(child.get("value"))
+            elif child.tag == "masspart":
+                value["masspart_kg"] = float(child.get("value"))
+            elif child.tag == "center":
+                value["center_m"] = [float(child.get(axis)) for axis in "xyz"]
+            elif child.tag == "inertia" and all(child.get(axis) is not None for axis in "xyz"):
+                value["inertia_diag_kg_m2"] = [float(child.get(axis)) for axis in "xyz"]
+            elif child.tag == "inertiafull":
+                rows = child.findall("values")
+                value["inertia_matrix_kg_m2"] = [[float(row.get(f"v{i}{j}")) for j in (1, 2, 3)] for i, row in enumerate(rows, 1)]
         (fluids if node.tag == "fluid" else fixed).append(value)
     return fixed, fluids
 
@@ -410,6 +437,21 @@ def _decode_and_check(generated_xml: Path, bi4: Path, output: Path, contract: di
     boundary_normals_path = Path(arrays) / "BoundNor.bin"
     boundary_normals = np.fromfile(boundary_normals_path, np.float32).reshape(-1, 3) if boundary_normals_path.is_file() else np.empty((0, 3), dtype=np.float32)
     expected_boundary = int(sum(int(item.get("count", 0)) for item in fixed if item not in body_groups))
+    body_contract = contract["body"]
+    generated_body = body_groups[0] if body_groups else {}
+    generated_mass = float(generated_body.get("massbody_kg", "nan"))
+    expected_mass = float(body_contract["mass_kg"])
+    mass_relative_error = generated_mass / expected_mass - 1.0 if expected_mass else float("inf")
+    generated_center = generated_body.get("center_m", [])
+    center_error = max((abs(float(a) - float(b)) for a, b in zip(generated_center, body_contract["com_m"])), default=float("inf"))
+    expected_inertia = np.asarray(body_contract["inertia_about_com_kg_m2"], dtype=float)
+    if "inertia_matrix_kg_m2" in generated_body:
+        generated_inertia = np.asarray(generated_body["inertia_matrix_kg_m2"], dtype=float)
+    elif "inertia_diag_kg_m2" in generated_body:
+        generated_inertia = np.diag(np.asarray(generated_body["inertia_diag_kg_m2"], dtype=float))
+    else:
+        generated_inertia = np.full((3, 3), float("nan"))
+    inertia_relative_error = float(np.max(np.abs(generated_inertia - expected_inertia) / np.maximum(np.abs(expected_inertia), 1.0e-12)))
     checks = {
         **generated_checks,
         "native_ids_unique": len(np.unique(ids)) == len(ids),
@@ -426,6 +468,9 @@ def _decode_and_check(generated_xml: Path, bi4: Path, output: Path, contract: di
         "no_solver_product": not any(path.name in {"trajectory.h5", "result.json", "audit.json"} for path in output.rglob("*")),
         "boundnor_finite_if_present": bool(len(boundary_normals) == 0 or np.isfinite(boundary_normals).all()),
         "boundnor_count_if_present": bool(len(boundary_normals) == 0 or len(boundary_normals) == expected_boundary),
+        "generated_body_mass_matches_contract": math.isfinite(mass_relative_error) and abs(mass_relative_error) <= 0.01,
+        "generated_body_center_matches_contract": math.isfinite(center_error) and center_error <= 0.5 * physical.DP_M,
+        "generated_body_inertia_matches_contract": math.isfinite(inertia_relative_error) and inertia_relative_error <= 0.01,
     }
     return {
         "checks": checks,
@@ -452,6 +497,14 @@ def _decode_and_check(generated_xml: Path, bi4: Path, output: Path, contract: di
             "sha256": sha256(boundary_normals_path) if boundary_normals_path.is_file() else None,
             "count": int(len(boundary_normals)),
             "expected_if_present": expected_boundary,
+        },
+        "generated_body": {
+            "massbody_kg": generated_mass,
+            "massbody_relative_error": mass_relative_error,
+            "center_m": generated_center,
+            "center_max_abs_error_m": center_error,
+            "inertia_matrix_kg_m2": generated_inertia.tolist(),
+            "inertia_max_relative_error": inertia_relative_error,
         },
         "decoded_xml": ref(Path(str(decoded_root) + ".xml"), "native decoder XML") if Path(str(decoded_root) + ".xml").is_file() else None,
         "trajectory_or_solver_checked": False,

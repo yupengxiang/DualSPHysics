@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<case app="GenCase v5.4.354.01 (07-04-2025)" date="21-09-2026 16:28:05">
+    <casedef>
+        <constantsdef>
+            <gravity x="0.0" y="0.0" z="-9.81" />
+            <rhop0 value="1000.0" />
+            <rhopgradient value="2" />
+            <hswl value="0" auto="true" />
+            <gamma value="7" />
+            <speedsystem value="0" auto="true" />
+            <coefsound value="20" />
+            <speedsound value="0" auto="true" />
+            <coefh value="1.0" />
+            <cflnumber value="0.2" />
+        </constantsdef>
+        <mkconfig boundcount="200" fluidcount="16" />
+        <geometry>
+            <definition dp="0.02">
+                <pointmin x="-0.2" y="-0.2" z="-0.2" />
+                <pointmax x="1.7" y="0.8" z="1.05" />
+            </definition>
+            <commands>
+                <mainlist>
+                    <setshapemode>dp | bound</setshapemode>
+                    <setdrawmode mode="full" />
+                    <setmkfluid mk="0" />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.18" y="0.08" z="0.05" />
+                        <size x="1.14" y="0.44" z="0.24" />
+                    </drawbox>
+                    <setmkbound mk="0" />
+                    <drawbox>
+                        <boxfill>bottom | left | right | front | back</boxfill>
+                        <point x="0.0" y="0.0" z="0.0" />
+                        <size x="1.5" y="0.6" z="0.9" />
+                    </drawbox>
+                    <setmkvoid />
+                    <setmkbound mk="8" />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.65" y="0.21999999999999997" z="0.49000000000000005" />
+                        <size x="0.2" y="0.16" z="0.12" />
+                    </drawbox>
+                </mainlist>
+            </commands>
+        </geometry>
+        <floatings>
+            <floating mkbound="8">
+                <linearvelini x="0.0" y="0.0" z="0.0" />
+                <massbody value="2.9952000000000001" />
+                <center x="0.75" y="0.29999999999999999" z="0.55000000000000004" />
+                <inertia x="0.0099840000000000016" y="0.01357824" z="0.016373760000000001" />
+            </floating>
+        </floatings>
+    </casedef>
+    <execution>
+        <parameters>
+            <parameter key="SavePosDouble" value="0" />
+            <parameter key="StepAlgorithm" value="1" />
+            <parameter key="VerletSteps" value="40" />
+            <parameter key="Kernel" value="2" />
+            <parameter key="ViscoTreatment" value="1" />
+            <parameter key="Visco" value="0.08" />
+            <parameter key="ViscoBoundFactor" value="1" />
+            <parameter key="DensityDT" value="2" />
+            <parameter key="DensityDTvalue" value="0.1" />
+            <parameter key="Shifting" value="0" />
+            <parameter key="RigidAlgorithm" value="1" />
+            <parameter key="FtPause" value="0" />
+            <parameter key="CoefDtMin" value="0.05" />
+            <parameter key="DtIni" value="0" />
+            <parameter key="DtMin" value="0" />
+            <parameter key="DtFixed" value="0" />
+            <parameter key="DtAllParticles" value="0" />
+            <parameter key="TimeMax" value="1.5" />
+            <parameter key="TimeOut" value="0.005" />
+            <parameter key="MinFluidStop" value="0" />
+            <parameter key="RhopOutMin" value="650" />
+            <parameter key="RhopOutMax" value="1350" />
+            <simulationdomain comment="Defines domain of simulation (default=Uses minimum and maximum position of the generated particles)">
+                <posmin x="default - 25%" y="default - 25%" z="default - 25%" comment="e.g.: x=0.5, y=default-1, z=default-10%" />
+                <posmax x="default + 25%" y="default + 25%" z="default + 25%" />
+            </simulationdomain>
+        </parameters>
+        <particles np="29841" nb="12499" nbf="11806" mkboundfirst="17" mkfluidfirst="1">
+            <_summary>
+                <positions units_comment="metres (m)">
+                    <posmin x="0" y="0" z="0" />
+                    <posmax x="1.5" y="0.6" z="0.9" />
+                </positions>
+                <fixed count="11806" id="0-11805" mkcount="1" mkvalues="17" />
+                <floating count="693" id="11806-12498" mkcount="1" mkvalues="25" />
+                <fluid count="17342" id="12499-29840" mkcount="1" mkvalues="1" />
+            </_summary>
+            <fixed mkbound="0" mk="17" begin="0" count="11806" />
+            <floating mkbound="8" mk="25" begin="11806" count="693">
+                <massbody value="2.9952" units_comment="kg" />
+                <masspart value="0.008" units_comment="kg" />
+                <center x="0.75" y="0.3" z="0.55" units_comment="metres (m)" />
+                <inertia x="0.009984" y="0.0135782" z="0.0163738" units_comment="kg*m^2" />
+            </floating>
+            <fluid mkfluid="0" mk="1" begin="12499" count="17342" />
+        </particles>
+        <constants>
+            <data2d value="false" />
+            <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
+            <cflnumber value="0.2" />
+            <gamma value="7" />
+            <rhop0 value="1000" units_comment="kg/m^3" />
+            <dp value="0.02" units_comment="metres (m)" />
+            <h value="0.034641016151" units_comment="metres (m)" />
+            <b value="134537.14286" units_comment="Pascal (Pa)" />
+            <massbound value="0.008" units_comment="kg" />
+            <massfluid value="0.008" units_comment="kg" />
+        </constants>
+        <uservars>
+            <varnum name="VResId" value="0" />
+        </uservars>
+        <motion />
+        <vtkout mkboundfirst="17" mkfluidfirst="1" />
+    </execution>
+</case>

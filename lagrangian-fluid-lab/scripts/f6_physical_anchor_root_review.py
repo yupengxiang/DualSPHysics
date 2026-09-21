@@ -149,6 +149,22 @@ def fluid_model() -> dict[str, Any]:
     }
 
 
+def expected_fluid_drawbox_size(fluid: dict[str, Any]) -> list[float]:
+    """Return the Definition drawbox size for the declared fluid contract.
+
+    Most Definitions use the continuous box size directly.  A GenCase
+    endpoint-safe support-centre revision may explicitly register a smaller
+    drawbox while retaining the continuous volume in ``fluid.size_m`` for the
+    mass gate.  Keeping this lookup in the shared contract code prevents the
+    native preflight from silently inferring a different convention.
+    """
+    sampling = fluid.get("sampling_contract", {})
+    drawbox = sampling.get("drawbox_size_m") if isinstance(sampling, dict) else None
+    if drawbox is None:
+        drawbox = fluid["size_m"]
+    return [float(value) for value in drawbox]
+
+
 def tank_model() -> dict[str, Any]:
     return {
         "low_m": list(TANK_LOW),
@@ -402,9 +418,25 @@ def static_preflight(root: Path, contract: dict[str, Any], definition: Path, sid
         dp = float(xml_root.find("./casedef/geometry/definition").get("dp"))
         check("fresh_resolution", abs(dp - DP_M) <= 1.0e-15, {"observed": dp, "expected": DP_M})
         floating = xml_root.find("./casedef/floatings/floating")
-        check("body_density_binding", floating is not None and floating.get("mkbound") == str(MKBOUND) and abs(float(floating.get("rhopbody")) - RHO_BODY) <= 1.0e-12, {"mkbound": None if floating is None else floating.get("mkbound"), "rhopbody": None if floating is None else floating.get("rhopbody")})
+        massbody = floating.find("massbody") if floating is not None else None
+        density_binding = floating is not None and floating.get("rhopbody") is not None and abs(float(floating.get("rhopbody")) - RHO_BODY) <= 1.0e-12
+        mass_binding = massbody is not None and abs(float(massbody.get("value")) - body_model()["mass_kg"]) <= 1.0e-12
+        check("body_density_binding", floating is not None and floating.get("mkbound") == str(MKBOUND) and (density_binding or mass_binding), {"mkbound": None if floating is None else floating.get("mkbound"), "rhopbody": None if floating is None else floating.get("rhopbody"), "massbody": None if massbody is None else massbody.get("value")})
         params = {node.get("key"): node.get("value") for node in xml_root.findall("./execution/parameters/parameter")}
         check("runtime_cadence_binding", params.get("TimeMax") == str(TIME_END_S) and params.get("TimeOut") == str(OUTPUT_INTERVAL_S), {"TimeMax": params.get("TimeMax"), "TimeOut": params.get("TimeOut")})
+        fluid_node = xml_root.find("./casedef/geometry/commands/mainlist/drawbox")
+        fluid_point = fluid_node.find("point") if fluid_node is not None else None
+        fluid_size = fluid_node.find("size") if fluid_node is not None else None
+        observed_fluid_low = [float(fluid_point.get(axis)) for axis in "xyz"] if fluid_point is not None else None
+        observed_fluid_size = [float(fluid_size.get(axis)) for axis in "xyz"] if fluid_size is not None else None
+        expected_fluid_size = expected_fluid_drawbox_size(contract["fluid"])
+        low_matches = observed_fluid_low is not None and all(abs(actual - expected) <= 1.0e-12 for actual, expected in zip(observed_fluid_low, contract["fluid"]["low_m"]))
+        size_matches = observed_fluid_size is not None and all(abs(actual - expected) <= 1.0e-12 for actual, expected in zip(observed_fluid_size, expected_fluid_size))
+        check(
+            "fluid_drawbox_binding",
+            low_matches and size_matches,
+            {"observed_low_m": observed_fluid_low, "expected_low_m": contract["fluid"]["low_m"], "observed_size_m": observed_fluid_size, "expected_size_m": expected_fluid_size},
+        )
     except (ET.ParseError, AttributeError, TypeError, ValueError) as error:
         check("fresh_xml_parse", False, str(error))
 
