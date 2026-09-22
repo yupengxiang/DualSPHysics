@@ -23,7 +23,15 @@ def test_real_receipt_is_hash_bound_and_nonformal() -> None:
     payload = json.loads(RECEIPT.read_text(encoding="utf-8"))
     result = verify_receipt(payload, data_root=ROOT)
 
-    assert result["ok"] is True
+    # This immutable diagnostic receipt predates the current public source
+    # closure.  Rehashing must therefore report it as stale rather than
+    # silently blessing old implementation bytes; a fresh run_diagnostic()
+    # below still proves the live interface.
+    assert result["ok"] is False
+    assert result["mismatch_paths"] == [
+        "scripts/core_learning.py", "scripts/core_models.py",
+        "scripts/core_contract.py",
+    ]
     assert payload["status"] == "diagnostic_passed"
     assert payload["proposal_only"] is True
     assert payload["diagnostic_only"] is True

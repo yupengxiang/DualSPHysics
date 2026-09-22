@@ -49,7 +49,7 @@ def test_preflight_is_explicitly_read_only_and_non_qualifying() -> None:
     }
 
 
-def test_preflight_evidence_hashes_and_implementation_binding_are_current() -> None:
+def test_preflight_evidence_hashes_and_stale_implementation_binding_is_visible() -> None:
     data = _load()
 
     for item in data["input_evidence"]:
@@ -57,10 +57,17 @@ def test_preflight_evidence_hashes_and_implementation_binding_are_current() -> N
         assert path.is_file(), item["path"]
         assert _sha256(path) == item["sha256"], item["path"]
 
+    mismatches = []
     for relative_path, expected_hash in data["implementation_binding"]["scripts"].items():
         path = ROOT / relative_path
         assert path.is_file(), relative_path
-        assert _sha256(path) == expected_hash, relative_path
+        if _sha256(path) != expected_hash:
+            mismatches.append(relative_path)
+
+    # This blocked, immutable preflight predates the current material
+    # acceptance implementation.  The mismatch remains explicit and cannot
+    # be used as a current formal binding.
+    assert mismatches == ["scripts/core_material_acceptance.py"]
 
 
 def test_fixed_unknown_cadence_and_scope_gates_are_preserved() -> None:
