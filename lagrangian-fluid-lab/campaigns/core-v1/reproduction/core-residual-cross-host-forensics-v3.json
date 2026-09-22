@@ -1,0 +1,299 @@
+{
+  "canary": {
+    "ada_job_spec": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/ada-f3-cross-host-canary20-v1.json",
+      "sha256": "ed718eb0d61d3506a6fb66595de6f87edbbcbb874a043b3f2449a9f420a2c277"
+    },
+    "archive_spec": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/core-residual-cross-host-canary-v1.json",
+    "archive_spec_sha256": "d3453671f2f48301c24eb08004c2ea22abc28b2f1f7dd20b81605f55f46d73f0",
+    "deterministic_flag_requested": true,
+    "entrypoint": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_cross_host_canary.py",
+    "entrypoint_sha256": "befc9a72eae671072b02e5bd89425a76e8327d3615636df925617f0786541c9d",
+    "expected_frames": 21,
+    "gpu_started": false,
+    "h200_job_spec": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/h200-f3-cross-host-canary20-v1.json",
+      "sha256": "2249ba0a3e163fcb14ba393727b8dee581c2727bf1c171010f91b7d66731080a"
+    },
+    "model_kind": "graph_residual",
+    "source_tmp_sha256": "172aabc3a9611801c184890e0f7adcbcc7fe8d3ceeb152854aa20715ea61b6e3",
+    "source_tmp_spec": "/tmp/core-residual-cross-host-canary-v1.json",
+    "steps": 20
+  },
+  "conclusion": {
+    "leading_cause": "device/runtime floating-point behavior in the graph message path, amplified by state feedback",
+    "not_a_prior_unit_failure": "frame-1 acceleration difference was 1.01737765e-08 m/s2 and dt was 0.0100215817 s, implying about 1.02e-10 m/s prior velocity difference versus 1.42626464e-04 m/s observed residual velocity difference at frame 2",
+    "qualification": "bounded inference; original execution receipts do not contain actual torch.version.cuda, driver, or deterministic flags, so the exact kernel/driver contribution remains to be measured by the canary",
+    "ruled_out": "checkpoint, dataset, bundle code, identity/mass/time/valid mismatch",
+    "secondary_mechanism": "small frame-1 state differences reorder near-equal CPU neighbor rows; order changes then alter message.sum reduction order"
+  },
+  "early_trajectory_differences": {
+    "graph_raw": {
+      "frame_0": {
+        "position_max_m": 0.0,
+        "velocity_max_mps": 0.0
+      },
+      "frame_1": {
+        "position_max_m": 2.9802322387695312e-08,
+        "velocity_max_mps": 3.725290298461914e-09
+      },
+      "frame_2": {
+        "position_max_m": 2.682209014892578e-07,
+        "velocity_max_mps": 7.37607479095459e-07
+      }
+    },
+    "graph_residual": {
+      "frame_0": {
+        "position_max_m": 0.0,
+        "velocity_max_mps": 0.0
+      },
+      "frame_1": {
+        "position_max_m": 2.9802322387695312e-08,
+        "velocity_max_mps": 5.21540641784668e-08
+      },
+      "frame_14": {
+        "position_max_m": 1.7274171113967896e-05,
+        "position_particles_over_tolerance": 8,
+        "velocity_max_mps": 0.0004124194383621216,
+        "velocity_particles_over_tolerance": 182
+      },
+      "frame_2": {
+        "position_max_m": 5.252659320831299e-07,
+        "velocity_max_mps": 0.00014262646436691284,
+        "velocity_particles_over_tolerance": 4
+      }
+    },
+    "mlp": {
+      "frame_0": {
+        "position_max_m": 0.0,
+        "velocity_max_mps": 0.0
+      },
+      "frame_20": {
+        "position_max_m": 2.9802322387695312e-08,
+        "velocity_max_mps": 1.4901161193847656e-08
+      },
+      "global_max": {
+        "position_m": 1.385807991027832e-06,
+        "velocity_mps": 2.3543834686279297e-06
+      }
+    }
+  },
+  "environment_evidence": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/ada-identical-h200-bundle-v3/environment.json",
+      "python": "3.12.13",
+      "recorded_packages": {
+        "h5py": "3.16.0",
+        "numpy": "2.2.6",
+        "scipy": "1.15.3",
+        "torch": "2.12.1+cu132"
+      },
+      "sha256": "fd6ea095ba44e5c10e815eb9a8a55a4c293c528672ec7c21dc1da06e347fed5a"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/h200-model-bundle-metadata/environment.json",
+      "python": "3.12.13",
+      "recorded_packages": {
+        "h5py": "3.16.0",
+        "numpy": "2.2.6",
+        "scipy": "1.15.3",
+        "torch": "2.12.1+cu132"
+      },
+      "sha256": "fd6ea095ba44e5c10e815eb9a8a55a4c293c528672ec7c21dc1da06e347fed5a"
+    },
+    {
+      "gpu_uuid": "GPU-ff68d571-7ed7-31b4-a0c0-16fe8745bd7e",
+      "host_gpu": "ada: NVIDIA RTX 6000 Ada Generation"
+    },
+    {
+      "gpu_uuid": "GPU-0d263fb2-4782-e7d6-7947-f4c53650c6f9",
+      "host_gpu": "h200: NVIDIA H200 NVL"
+    },
+    {
+      "gap": "original paired stdout records rollout metadata only; runtime torch/CUDA/driver/determinism were not captured"
+    }
+  ],
+  "frozen_protocol": {
+    "position_absolute_tolerance_m": 1e-05,
+    "relative_tolerance": 0.0001,
+    "schema": "core.cross_host_comparison.v1",
+    "tolerances_changed": false,
+    "velocity_absolute_tolerance_mps": 0.0001
+  },
+  "identity_evidence": [
+    {
+      "passed": true,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/residual-pair-input-identity.json",
+      "sha256": "d7eb77cbbe1030d4ea8afb39f84669e86815ae6f5b10e41fed70ce509a612b74"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/identical-bundle-paired-run-registration.json",
+      "sha256": "5b3102bcc83a363dd067cf3e64858068078c4f049822dc98c9ba5d8ba5d59403"
+    },
+    {
+      "checkpoint_sha256": "9af1dc3cb68991c38fd31b59d92895326e3abe89d5d29d33dd086d7fa462b8a8",
+      "chunk_size": 256,
+      "core_models_sha256": "73a98b262500c30e46f14aafd2a89f2bea34116c77",
+      "dataset_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "registered_frames": 836
+    }
+  ],
+  "input_assets": [
+    {
+      "kind": "control",
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/ada-identical-h200-bundle-v3/campaigns/core-v1/inputs/control-db8874e6315f38a54d729d15ae11edbf0f38e17296ed049f9e5f91dd10088b04.npz",
+      "sha256": "b18c67a6c0b7eeccf78dafc886d504aa6cb4fe7170fe5fa8264a22f2e3696ec6"
+    },
+    {
+      "kind": "geometry",
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/ada-identical-h200-bundle-v3/campaigns/core-v1/inputs/geometry-d5901a774256848081383d2288d452c48fe398aada9a3708e605c97c2c751a7e.npz",
+      "sha256": "d7ccdc43108fde81c71f1ef6483258e6b0fa2a3bc9561df063b87a580bc55d70"
+    }
+  ],
+  "model_code_evidence": {
+    "halo_lines": "159-167; torch.unique on CUDA indices",
+    "message_reduction_line": "317; aggregate = message.sum(1) / valid.sum(1).clamp_min(1)[:,None]",
+    "model_structure": "encoder + two graph message/update layers + head; MLP bypasses graph aggregation",
+    "neighbor_sort_lines": "105-150; squared distance is primary, then public ID and zone",
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/ada-identical-h200-bundle-v3/code/scripts/core_models.py",
+    "sha256": "73a98b262500c30e46f14aafd2a89f2bea34116c77b6e34ce5e33e7412c38c77"
+  },
+  "neighbor_probe_from_serialized_float32_states": {
+    "frame_0": {
+      "graph_raw": {
+        "different_rows": 0,
+        "different_slots": 0,
+        "truncation_fraction": 0.39189814814814816
+      },
+      "graph_residual": {
+        "different_rows": 0,
+        "different_slots": 0,
+        "truncation_fraction": 0.39189814814814816
+      }
+    },
+    "frame_1": {
+      "graph_raw": {
+        "different_rows": 128,
+        "different_slots": 263,
+        "membership_difference_rows": 1,
+        "order_only_rows": 127,
+        "truncation_fraction_left": 0.0,
+        "truncation_fraction_right": 0.0
+      },
+      "graph_residual": {
+        "different_rows": 5722,
+        "different_slots": 15771,
+        "membership_difference_rows": 147,
+        "order_only_rows": 5575,
+        "truncation_fraction_left": 0.0,
+        "truncation_fraction_right": 0.0
+      },
+      "mlp_reference_only": {
+        "different_rows": 81,
+        "different_slots": 168
+      }
+    },
+    "limitation": "HDF5 public trajectories store position/velocity as float32; counts are a sensitivity probe, not a claim about hidden float64 in-memory neighbors",
+    "smoothing_length_m": 0.01194127788262211
+  },
+  "paired_reports": [
+    {
+      "first_mismatch_frame": {},
+      "passed": true,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/mlp-paired-comparison-v3.json",
+      "sha256": "5bba1a679525dcf2e1797089958961aec2dbfbc3d5ce067b62b01cff57da2f55"
+    },
+    {
+      "first_mismatch_frame": {
+        "position": 459,
+        "velocity": 459
+      },
+      "max_abs": {
+        "position_m": 0.008463859558105469,
+        "velocity_mps": 0.025003492832183838
+      },
+      "passed": false,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/graph_raw-paired-comparison-v3.json",
+      "sha256": "6d797addcaf8cd251064145e4bd36bcaafc041998fad47b7287636c30b4c9dec"
+    },
+    {
+      "first_mismatch_frame": {
+        "position": 14,
+        "velocity": 2
+      },
+      "max_abs": {
+        "position_m": 61680976.0,
+        "velocity_mps": 151880480.0
+      },
+      "passed": false,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/graph_residual-paired-comparison-v3.json",
+      "sha256": "42796914853d800d19a0d5a39e892f98163f2929bb2f5bfcb0800cb546f7435f"
+    },
+    {
+      "all_models_reproduced": false,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/paired-run-final-v3.json",
+      "sha256": "6c2b15bf30f778cf299c4252b1f5099bed4a768e77c38027ca867ede1d535e6d"
+    }
+  ],
+  "schema": "core.cross_host_forensics.v3",
+  "scope": "F3_DEV_08_a0p953125, step500 graph_residual paired Ada/H200 reproduction; original 835-frame reports remain immutable",
+  "status": "diagnostic_only",
+  "trajectory_artifacts": [
+    {
+      "dtype": "float32 position/velocity",
+      "frames": 836,
+      "host": "ada",
+      "model": "graph_residual",
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/runtime/attempts/ada-f3-bundled-rollout-graph_residual-step500-v3/20260919T182233-55e77dad34d8/trajectory.h5",
+      "sha256": "9eb32b24afd3da32612f6ea70ba65c67df0567e19c4b6a94f6c0071a61877f30"
+    },
+    {
+      "dtype": "float32 position/velocity",
+      "frames": 836,
+      "host": "h200",
+      "model": "graph_residual",
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/collected-h200-residual-v3/trajectory.h5",
+      "sha256": "04669f052d67df856eb5bf72845396c6441f75f2cbe895b849f8a7f79362dce5"
+    },
+    {
+      "dtype": "float32 position/velocity",
+      "frames": 836,
+      "host": "ada",
+      "model": "graph_raw",
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/runtime/attempts/ada-f3-bundled-rollout-graph_raw-step500-v3/20260919T181936-77badf536514/trajectory.h5",
+      "sha256": "514685307ab4f213f58e1c67813303b7524d9de52653a25b675f304e3a468dbb"
+    },
+    {
+      "dtype": "float32 position/velocity",
+      "frames": 836,
+      "host": "h200",
+      "model": "graph_raw",
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/collected-h200-graph_raw-v3/trajectory.h5",
+      "sha256": "3ac24b8705239aff1b0be7a58a6b8a4f8474e16bfe929e5c73edb420bb1dfbbc"
+    },
+    {
+      "dtype": "float32 position/velocity",
+      "frames": 836,
+      "host": "ada",
+      "model": "mlp",
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/runtime/attempts/ada-f3-bundled-rollout-mlp-step500-v3/20260919T182248-3eb9731f6ee9/trajectory.h5",
+      "sha256": "1a64ac4fdddcc4110d60f46892a66c161087853d0e70422673780d9f74c05a58"
+    },
+    {
+      "dtype": "float32 position/velocity",
+      "frames": 836,
+      "host": "h200",
+      "model": "mlp",
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/collected-h200-mlp-v3/trajectory.h5",
+      "sha256": "12b92dd1413e5aceabce579d05059d84e239c0a0e9af400155d8616bacabd31a"
+    }
+  ],
+  "verification": {
+    "cpu_fullfield_smoke": "one step completed using Ada bundle on CPU; read_log contained only frame 0",
+    "cpu_unit_tests": "14 passed (test_core_cross_host_canary.py, test_core_reproduction_check.py, and test_core_models.py)",
+    "gpu_started": false,
+    "ledger_written": false,
+    "model_trace_equivalence": "_trace_forward CPU output torch.equal to registered bundle model.forward on a 12-particle graph fixture",
+    "original_reports_modified": false
+  }
+}

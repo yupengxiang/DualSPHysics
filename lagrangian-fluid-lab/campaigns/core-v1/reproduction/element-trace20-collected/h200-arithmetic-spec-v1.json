@@ -1,0 +1,51 @@
+{
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/bin/python3.12",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c68e049e97ab491e04453f765cfdfaeed98d2ce7276f32435cb008d1ba6a46a4/lagrangian-fluid-lab/scripts/core_update_arithmetic_probe.py",
+    "--input",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/element-trace20-collected/layer0-update-replay-inputs-v1.npz",
+    "--expected-sha256",
+    "60d7ec1eeb8c17a78731ad239d316a739e2abe740fa7589c76cb70d0afd6fc41",
+    "--device",
+    "cuda",
+    "--output",
+    "{attempt_dir}/arithmetic.json"
+  ],
+  "category": "matched_stack_canary",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "env": {
+    "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+    "PYTHONPATH": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c68e049e97ab491e04453f765cfdfaeed98d2ce7276f32435cb008d1ba6a46a4/lagrangian-fluid-lab:/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c68e049e97ab491e04453f765cfdfaeed98d2ce7276f32435cb008d1ba6a46a4/lagrangian-fluid-lab/scripts"
+  },
+  "estimated_gpu_process_hours_upper_bound": 0.08333333333333333,
+  "host": "h200",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/element-trace20-collected/layer0-update-replay-inputs-v1.npz",
+      "sha256": "60d7ec1eeb8c17a78731ad239d316a739e2abe740fa7589c76cb70d0afd6fc41"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c68e049e97ab491e04453f765cfdfaeed98d2ce7276f32435cb008d1ba6a46a4/lagrangian-fluid-lab/scripts/core_update_arithmetic_probe.py",
+      "sha256": "70bb2be867e38f54ae113e60ce545788fac412ca4d423f4feb34449c200867dc"
+    }
+  ],
+  "job_id": "h200-layer0-update-arithmetic-v1",
+  "qualification_claim": "none",
+  "required_outputs": [
+    "arithmetic.json",
+    "arithmetic.npz"
+  ],
+  "resource_basis": "Same torch environment; prior captured full graph peak <=1066MiB, isolated 1105x128 update MLP uses smaller tensors; reserve 2048MiB peak. Bounded 300s canary.",
+  "resources": {
+    "cpu_cores": 1,
+    "gpu_peak_mib": 2048,
+    "io_weight": 0.05,
+    "ram_mib": 4096
+  },
+  "scientific_scope": "arithmetic replay only; no predictor replacement",
+  "source_snapshot": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c68e049e97ab491e04453f765cfdfaeed98d2ce7276f32435cb008d1ba6a46a4/lagrangian-fluid-lab",
+    "sha256": "c68e049e97ab491e04453f765cfdfaeed98d2ce7276f32435cb008d1ba6a46a4"
+  },
+  "timeout_seconds": 300
+}

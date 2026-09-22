@@ -1,0 +1,73 @@
+{
+  "schema": "core.cross_host_canary.float64.variant.v1",
+  "status": "proposal_only",
+  "variant": "float64_inference",
+  "protocol": "core.cross_host_canary.float64.v1",
+  "diagnostic_scope": {
+    "maximum_steps": 20,
+    "formal_training": false,
+    "formal_evaluation": false,
+    "full_835_frame_reproduction": false,
+    "scientific_claim": "none; bounded arithmetic isolation only"
+  },
+  "runner": {
+    "path": "scripts/core_cross_host_canary_float64.py",
+    "sha256": "82fc043196afa61a901e6ec14ab94d81fca8faadd9cbaa7bf003326a352a2703"
+  },
+  "frozen_default_runner": {
+    "path": "scripts/core_cross_host_canary.py",
+    "sha256": "befc9a72eae671072b02e5bd89425a76e8327d3615636df925617f0786541c9d",
+    "role": "reference_only; unchanged float32 default"
+  },
+  "immutable_base_bundle": {
+    "path": "campaigns/core-v1/reproduction/ada-identical-h200-bundle-v3",
+    "manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "checkpoint": "models/checkpoint-001.pt",
+    "checkpoint_sha256": "9af1dc3cb68991c38fd31b59d92895326e3abe89d5d29d33dd086d7fa462b8a8",
+    "core_models_sha256": "73a98b262500c30e46f14aafd2a89f2bea34116c77b6e34ce5e33e7412c38c77",
+    "checkpoint_policy": "load original bytes and promote in memory; never rewrite"
+  },
+  "dtype_contract": {
+    "feature_construction": "float32 from core_models.node_features",
+    "feature_promotion": "exact value-preserving promotion to float64 before normalization/model",
+    "model_inputs": "torch.float64",
+    "model_parameters": "torch.float64 after loading original checkpoint values",
+    "normalization": "torch.float64 constants on the input device",
+    "positions": "torch.float64",
+    "known_force_prior": "torch.float64 from dx=v*dt+0.5*a*dt^2 and dv=a*dt",
+    "neighbor_indices": "int64; complete field, radius 2h, max64, distance then public identity order",
+    "output": "float64 NumPy SI displacement and native-velocity increments"
+  },
+  "semantic_invariants": [
+    "full particle field remains the graph input",
+    "two-hop halo is unchanged",
+    "graph_raw/graph_residual target normalization remains shared and train-only",
+    "graph_residual prior is added after target denormalization",
+    "native velocity is committed independently of displacement",
+    "registered comparison tolerances remain position 1e-5 m, velocity 1e-4 m/s, relative 1e-4"
+  ],
+  "environment": {
+    "environment_id": "cross-host-py312-torch212-cu132-v1",
+    "environment_spec": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/environment-spec.json",
+    "environment_spec_sha256": "02a36d671c48e09ec55041b8df8f224c42fa3e1dcb8853e27ccf144c6700072a",
+    "ada_record": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/records/ada-import.json",
+    "ada_record_sha256": "3e289e7ab34a2b0db9b3efe7aa34b88cf02da9a73f72c1f25093baf27beed7bd",
+    "h200_record": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/records/h200-import-remote.json",
+    "h200_record_sha256": "59f929cf0cf9f4dae802c4175a9b43c15ef17ebd5e0081ddae72ed389c82fc0c"
+  },
+  "resource_basis": {
+    "reference_profile": "campaigns/core-v1/learning/ada-f3-fullfield-graph-profile-v1.json",
+    "reference_backward_measurement": "campaigns/core-v1/learning/backward-resource-measurements.json",
+    "reference_float32_inference_peak_mib": 858,
+    "float64_estimate_method": "2x tensor storage upper bound plus scheduler margin; no float64 GPU run has been claimed",
+    "proposed_gpu_peak_mib": 8192,
+    "proposed_ram_mib": 12288,
+    "proposed_cpu_cores": 2,
+    "proposed_io_weight": 0.25,
+    "measurement_required": true
+  },
+  "proposals": [
+    "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/specs/ada-f3-cross-host-float64-canary20-v1-proposal.json",
+    "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/specs/h200-f3-cross-host-float64-canary20-v1-proposal.json"
+  ]
+}

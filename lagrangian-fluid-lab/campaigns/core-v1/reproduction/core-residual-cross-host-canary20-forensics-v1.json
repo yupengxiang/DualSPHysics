@@ -1,0 +1,892 @@
+{
+  "actual_environment": {
+    "ada": {
+      "capability": [
+        8,
+        9
+      ],
+      "device": "NVIDIA RTX 6000 Ada Generation",
+      "hostname": "user-SYS-421GE-TNRT",
+      "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+      "torch": "2.11.0+cu128",
+      "torch_cuda": "12.8",
+      "uuid": "GPU-ff68d571-7ed7-31b4-a0c0-16fe8745bd7e"
+    },
+    "common": {
+      "cublas_workspace_config": ":4096:8",
+      "cudnn_benchmark": false,
+      "cudnn_deterministic": true,
+      "deterministic_algorithms_enabled": true,
+      "driver_ada": "595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-ff68d571-7ed7-31b4-a0c0-16fe8745bd7e",
+      "driver_h200": "595.91.07, NVIDIA H200 NVL, GPU-0d263fb2-4782-e7d6-7947-f4c53650c6f9",
+      "kernel_ada": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+      "kernel_h200": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+      "tf32_cudnn": true,
+      "tf32_matmul": false
+    },
+    "common_import_hashes": [
+      {
+        "module": "scripts.core_contract",
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/ada-identical-h200-bundle-v3/code/scripts/core_contract.py",
+        "sha256": "ff041e5d6b098167ab6e07231ba3c65de5cc4f5110c6d64bcea99024f04b109a"
+      },
+      {
+        "module": "scripts.core_dataset",
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/ada-identical-h200-bundle-v3/code/scripts/core_dataset.py",
+        "sha256": "0c69bebac6d63db28aa4ead579308d846889943acb97b286b886e3f8c04172b2"
+      },
+      {
+        "module": "scripts.core_models",
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/ada-identical-h200-bundle-v3/code/scripts/core_models.py",
+        "sha256": "73a98b262500c30e46f14aafd2a89f2bea34116c77b6e34ce5e33e7412c38c77"
+      }
+    ],
+    "h200": {
+      "capability": [
+        9,
+        0
+      ],
+      "device": "NVIDIA H200 NVL",
+      "hostname": "h200",
+      "python": "3.12.13 | packaged by Anaconda, Inc. | (main, Mar 19 2026, 20:20:58) [GCC 14.3.0]",
+      "torch": "2.12.1+cu132",
+      "torch_cuda": "13.2",
+      "uuid": "GPU-0d263fb2-4782-e7d6-7947-f4c53650c6f9"
+    },
+    "software_stack_mismatch": [
+      "Python 3.10.12 on Ada versus Python 3.12.13 on H200",
+      "torch 2.11.0+cu128 / CUDA 12.8 on Ada versus torch 2.12.1+cu132 / CUDA 13.2 on H200"
+    ]
+  },
+  "amplification_trajectory": {
+    "frames_compared": 20,
+    "interpretation": "Digest inequality persists from frame 1; the 20-step canary remains ULP-scale in saved finite summaries and does not reproduce the later 835-frame residual runaway.",
+    "max_summary_stat_abs_delta": {
+      "cpu_neighbors": {
+        "frame": 14,
+        "stat": "mean",
+        "value": 0.016805013019620674
+      },
+      "layer1_chunk0_aggregate": {
+        "frame": 14,
+        "stat": "max",
+        "value": 3.5762786865234375e-07
+      },
+      "state_after_position": {
+        "frame": 16,
+        "stat": "min",
+        "value": 6.606569513678551e-09
+      },
+      "state_after_velocity": {
+        "frame": 3,
+        "stat": "max",
+        "value": 3.725290298461914e-08
+      }
+    },
+    "state_after_position_digest_mismatch_frames": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "state_after_velocity_digest_mismatch_frames": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "trace_digest_mismatch_counts": {
+      "cpu_neighbor_frames": 19,
+      "layer0_aggregate_frames": 19,
+      "layer1_aggregate_frames": 20,
+      "normalized_output_frames": 20
+    }
+  },
+  "first_observed_divergence": {
+    "first_mismatch_by_trace_stage": {
+      "encoder": {
+        "chunk": 0,
+        "frame": 2,
+        "start": 0,
+        "step": 1,
+        "stop": 256,
+        "summary_stat_absolute_differences": {
+          "max": 5.960464477539063e-08,
+          "max_abs": 5.960464477539063e-08,
+          "mean": 1.3193040410142132e-11,
+          "min": 0.0,
+          "rms": 1.576455632701368e-11
+        }
+      },
+      "layer0.aggregate": {
+        "chunk": 0,
+        "frame": 2,
+        "start": 0,
+        "step": 1,
+        "stop": 256,
+        "summary_stat_absolute_differences": {
+          "max": 0.0,
+          "max_abs": 0.0,
+          "mean": 1.5734407513012805e-07,
+          "min": 0.0,
+          "rms": 1.093417376585304e-06
+        }
+      },
+      "layer1.aggregate": {
+        "chunk": 0,
+        "frame": 1,
+        "start": 0,
+        "step": 0,
+        "stop": 256,
+        "summary_stat_absolute_differences": {
+          "max": 1.1920928955078125e-07,
+          "max_abs": 0.0,
+          "mean": 7.295852810784709e-11,
+          "min": 0.0,
+          "rms": 2.7087709852935404e-10
+        }
+      },
+      "normalized_output": {
+        "chunk": 0,
+        "frame": 1,
+        "start": 0,
+        "step": 0,
+        "stop": 256,
+        "summary_stat_absolute_differences": {
+          "max": 1.9073486328125e-06,
+          "max_abs": 1.9073486328125e-06,
+          "mean": 2.55919681002581e-08,
+          "min": 3.725290298461914e-07,
+          "rms": 5.8088419407908987e-08
+        }
+      },
+      "output": {
+        "chunk": 0,
+        "frame": 1,
+        "start": 0,
+        "step": 0,
+        "stop": 256,
+        "summary_stat_absolute_differences": {
+          "max": 7.148628355935216e-10,
+          "max_abs": 1.4901161193847656e-08,
+          "mean": 1.9011603402674382e-10,
+          "min": 1.4901161193847656e-08,
+          "rms": 2.0458300418330078e-10
+        }
+      }
+    },
+    "frame_1": {
+      "cpu_features_equal": true,
+      "cpu_neighbors_equal": true,
+      "encoder_equal": true,
+      "initial_state_position_equal": true,
+      "initial_state_velocity_equal": true,
+      "layer0_aggregate_equal_all_chunks": true,
+      "layer1_aggregate_equal_all_chunks": false,
+      "layer1_chunk0_shape": [
+        256,
+        64
+      ],
+      "layer1_chunk0_summary_stat_absolute_differences": {
+        "max": 1.1920928955078125e-07,
+        "max_abs": 0.0,
+        "mean": 7.295852810784709e-11,
+        "min": 0.0,
+        "rms": 2.7087709852935404e-10
+      },
+      "layer1_is_after_message_mlp_and_aggregate": true,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": true,
+      "normalized_output_mismatching_chunks": 135,
+      "output_mismatching_chunks": 135
+    },
+    "frame_2_new_upstream_differences": {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 2,
+      "interpretation": "After frame-1 state differs, frame-2 feature/neighbor/encoder/layer0 differences are downstream feedback, not evidence that neighbor ordering caused the initial mismatch.",
+      "layer0_aggregate_equal": false
+    }
+  },
+  "fixed_identity": {
+    "case_id": "F3_DEV_08_a0p953125",
+    "checkpoint_sha256": "9af1dc3cb68991c38fd31b59d92895326e3abe89d5d29d33dd086d7fa462b8a8",
+    "chunk_size": 256,
+    "core_models_sha256": "73a98b262500c30e46f14aafd2a89f2bea34116c77b6e34ce5e33e7412c38c77",
+    "expected_frames": 21,
+    "future_state_inputs_ada": false,
+    "future_state_inputs_h200": false,
+    "manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "read_log_ada": [
+      [
+        "F3_DEV_08_a0p953125",
+        0
+      ]
+    ],
+    "read_log_h200": [
+      [
+        "F3_DEV_08_a0p953125",
+        0
+      ]
+    ],
+    "source_snapshot_sha256": "f424b138a352299117ebae71c00549a6045d4835e6d2e45ef3f845b3a5fbeb21",
+    "split": "validation"
+  },
+  "next_minimal_evidence": {
+    "constraints": [
+      "Use new per-host environment directories; do not alter the existing .venv or frozen paired jobs.",
+      "Use the same bundle, checkpoint, manifest, source snapshot, CUDA_VISIBLE_DEVICES policy, CUBLAS_WORKSPACE_CONFIG, deterministic flags, chunk size, and 20-step argv.",
+      "Record python executable, pip/conda lock or wheel hashes, torch/CUDA/driver, import module hashes, and CPU features before model construction.",
+      "Do not change neighbor sorting, tolerances, model weights, normalization, or checkpoint."
+    ],
+    "decision_rule": {
+      "mismatch_disappears": "software-stack/runtime implementation is sufficient explanation for this pair; retain original failure as immutable evidence.",
+      "mismatch_persists": "add one diagnostic canary version that records layer-1 message tensor digest plus reduction numerator/count before aggregate; this separates MLP arithmetic from reduction without changing inference."
+    },
+    "priority": "run the same 20-step canary on both hosts from a newly isolated identical software stack",
+    "target_stack_from_recorded_h200_environment": {
+      "cuda": "13.2",
+      "h5py": "3.16.0",
+      "numpy": "2.2.6",
+      "python": "3.12.13",
+      "scipy": "1.15.3",
+      "source": "recorded H200 environment metadata; exact wheel/source hashes must be captured before execution",
+      "torch": "2.12.1+cu132"
+    }
+  },
+  "not_proven_by_digest_trace": [
+    "The canary does not record layer-1 pre-reduction message tensors, valid-count numerators, or pairwise elementwise differences.",
+    "A layer-1 aggregate digest mismatch therefore cannot distinguish second message-MLP arithmetic from the subsequent sum/divide reduction.",
+    "Finite-summary deltas are not an elementwise max error; no claim is made that 1.19e-7 bounds every aggregate element.",
+    "The 20-step trace does not establish the cause of the later 835-frame residual failure."
+  ],
+  "per_frame_trace_summary": [
+    {
+      "cpu_features_equal": true,
+      "cpu_neighbors_equal": true,
+      "encoder_equal": true,
+      "frame": 1,
+      "layer0_aggregate_equal": true,
+      "layer0_mismatching_chunks": 0,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": true,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 0,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.0,
+        "layer1_chunk0_aggregate": 1.1920928955078125e-07,
+        "state_after_position": 5.820766091346741e-10,
+        "state_after_velocity": 2.9802322387695312e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 2,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 1,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.0026864510982704815,
+        "layer1_chunk0_aggregate": 2.384185791015625e-07,
+        "state_after_position": 8.87666828930378e-10,
+        "state_after_velocity": 1.4901161193847656e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 3,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 2,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.003293080153525807,
+        "layer1_chunk0_aggregate": 1.1920928955078125e-07,
+        "state_after_position": 1.076841726899147e-09,
+        "state_after_velocity": 3.725290298461914e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 4,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 3,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.0022868718842801172,
+        "layer1_chunk0_aggregate": 1.1920928955078125e-07,
+        "state_after_position": 1.0477378964424133e-09,
+        "state_after_velocity": 3.725290298461914e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 5,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 4,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.0007708514167461544,
+        "layer1_chunk0_aggregate": 2.384185791015625e-07,
+        "state_after_position": 7.130438461899757e-10,
+        "state_after_velocity": 2.2351741790771484e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 6,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 5,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.0005533854200621136,
+        "layer1_chunk0_aggregate": 1.704202512442521e-08,
+        "state_after_position": 1.1059455573558807e-09,
+        "state_after_velocity": 3.725290298461914e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 7,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 6,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.004309986255975673,
+        "layer1_chunk0_aggregate": 1.1920928955078125e-07,
+        "state_after_position": 1.0186340659856796e-09,
+        "state_after_velocity": 2.2351741790771484e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 8,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 7,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.004633698641555384,
+        "layer1_chunk0_aggregate": 2.4482680327508888e-08,
+        "state_after_position": 1.57160684466362e-09,
+        "state_after_velocity": 2.9802322387695312e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 9,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 8,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.003716362847626442,
+        "layer1_chunk0_aggregate": 1.1920928955078125e-07,
+        "state_after_position": 3.2887328416109085e-09,
+        "state_after_velocity": 2.9802322387695312e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 10,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 9,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.0013260452833492309,
+        "layer1_chunk0_aggregate": 3.471440312985408e-08,
+        "state_after_position": 3.7834979593753815e-09,
+        "state_after_velocity": 2.2351741790771484e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 11,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 10,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.007929142364446307,
+        "layer1_chunk0_aggregate": 1.1920928955078125e-07,
+        "state_after_position": 3.841705620288849e-09,
+        "state_after_velocity": 2.2351741790771484e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 12,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 11,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.0005105303462187294,
+        "layer1_chunk0_aggregate": 1.1920928955078125e-07,
+        "state_after_position": 4.685716703534126e-09,
+        "state_after_velocity": 1.6992348784994338e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 13,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 12,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.0017796747597458307,
+        "layer1_chunk0_aggregate": 5.246810586001516e-08,
+        "state_after_position": 4.190951585769653e-09,
+        "state_after_velocity": 1.4901161193847656e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 14,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 13,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.016805013019620674,
+        "layer1_chunk0_aggregate": 3.5762786865234375e-07,
+        "state_after_position": 5.966285243630409e-09,
+        "state_after_velocity": 2.9802322387695312e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 15,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 14,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.0064771381112223025,
+        "layer1_chunk0_aggregate": 5.986667295232451e-08,
+        "state_after_position": 5.0640664994716644e-09,
+        "state_after_velocity": 1.440179166548039e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 16,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 15,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.0031489157227042597,
+        "layer1_chunk0_aggregate": 2.384185791015625e-07,
+        "state_after_position": 6.606569513678551e-09,
+        "state_after_velocity": 2.9622864322967346e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 17,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 16,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.004085738572030095,
+        "layer1_chunk0_aggregate": 1.1920928955078125e-07,
+        "state_after_position": 4.889443516731262e-09,
+        "state_after_velocity": 3.725290298461914e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 18,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 17,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.005619303385174135,
+        "layer1_chunk0_aggregate": 6.684116060640122e-08,
+        "state_after_position": 4.773028194904327e-09,
+        "state_after_velocity": 1.4901161193847656e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 19,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 18,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.0022049515318940394,
+        "layer1_chunk0_aggregate": 6.485205117368054e-08,
+        "state_after_position": 5.180481821298599e-09,
+        "state_after_velocity": 2.2351741790771484e-08
+      }
+    },
+    {
+      "cpu_features_equal": false,
+      "cpu_neighbors_equal": false,
+      "encoder_equal": false,
+      "frame": 20,
+      "layer0_aggregate_equal": false,
+      "layer0_mismatching_chunks": 135,
+      "layer1_aggregate_equal": false,
+      "layer1_mismatching_chunks": 135,
+      "normalized_features_equal": false,
+      "normalized_output_equal": false,
+      "normalized_output_mismatching_chunks": 135,
+      "output_equal": false,
+      "output_mismatching_chunks": 135,
+      "state_after_position_digest_equal": false,
+      "state_after_velocity_digest_equal": false,
+      "step": 19,
+      "summary_stat_max_abs_delta": {
+        "cpu_neighbors": 0.005230486833170289,
+        "layer1_chunk0_aggregate": 6.540515440356387e-08,
+        "state_after_position": 4.0745362639427185e-09,
+        "state_after_velocity": 7.450580596923828e-09
+      }
+    }
+  ],
+  "physical_viscosity_adapter": {
+    "behavior": [
+      "An explicit physical_kinematic_viscosity_m2_s is copied to KnownInputs.physics as a finite positive value.",
+      "The value requires viscosity_formulation=laminar and records viscosity_source=declared_physical_kinematic_viscosity_m2_s.",
+      "Artificial/numerical Visco is never promoted to physical metadata.",
+      "A formulation without a physical value, a nonpositive/nonfinite value, or a non-laminar formulation is rejected."
+    ],
+    "code": {
+      "bytes": 32680,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_cfd_dataset.py",
+      "sha256": "3d8951ca6a131318c93a97c5ef1e905a61ae9e2bb76a6324765c01695bead96e"
+    },
+    "old_training_bundle_changed": false,
+    "status": "implemented_and_tested",
+    "test": {
+      "bytes": 12335,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_core_cfd_dataset.py",
+      "sha256": "704d6ed27c05593bd56bfbb51f09bcb1512dc24afc78731ef062a7f36bec88ca"
+    }
+  },
+  "schema": "core.cross_host_canary_forensics.v1",
+  "scope": "F3_DEV_08_a0p953125 graph_residual checkpoint update500, deterministic CUDA, 20 autonomous steps",
+  "source_artifacts": {
+    "ada_canary": {
+      "bytes": 7393528,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/canary20-collected/ada-canary.json",
+      "sha256": "0f948c807418aabce56251df6f25f63a1781c69e9211a9d45708561d54f6a622"
+    },
+    "ada_execution": {
+      "bytes": 3791,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/canary20-collected/ada-execution.json",
+      "sha256": "bb3596f9cd95c3a988f4a35d45fc6dd50d9958acb9fc0c47adf4dde0113c335d"
+    },
+    "h200_canary": {
+      "bytes": 7393800,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/canary20-collected/h200-canary.json",
+      "sha256": "cb972fd4a5ce0cce3f57722ab5bf71b5b76fee78542af240c3ceff936e49366c"
+    },
+    "h200_execution": {
+      "bytes": 3891,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/canary20-collected/h200-execution.json",
+      "sha256": "2fc05cfc1354acf91da48bf1d6218ea6e3f61d20fdd5e8d4bf6cbac76e90903a"
+    },
+    "prior_forensics_report": {
+      "bytes": 12718,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/core-residual-cross-host-forensics-v3.json",
+      "sha256": "280f90fbc413e0dbae6e6a6bb01c2a2976c38a281eaed747f4ef413a82fc76d8"
+    },
+    "prior_paired_reports": [
+      {
+        "first_mismatch_frame": {},
+        "passed": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/mlp-paired-comparison-v3.json",
+        "sha256": "5bba1a679525dcf2e1797089958961aec2dbfbc3d5ce067b62b01cff57da2f55"
+      },
+      {
+        "first_mismatch_frame": {
+          "position": 459,
+          "velocity": 459
+        },
+        "max_abs": {
+          "position_m": 0.008463859558105469,
+          "velocity_mps": 0.025003492832183838
+        },
+        "passed": false,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/graph_raw-paired-comparison-v3.json",
+        "sha256": "6d797addcaf8cd251064145e4bd36bcaafc041998fad47b7287636c30b4c9dec"
+      },
+      {
+        "first_mismatch_frame": {
+          "position": 14,
+          "velocity": 2
+        },
+        "max_abs": {
+          "position_m": 61680976.0,
+          "velocity_mps": 151880480.0
+        },
+        "passed": false,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/graph_residual-paired-comparison-v3.json",
+        "sha256": "42796914853d800d19a0d5a39e892f98163f2929bb2f5bfcb0800cb546f7435f"
+      },
+      {
+        "all_models_reproduced": false,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/paired-run-final-v3.json",
+        "sha256": "6c2b15bf30f778cf299c4252b1f5099bed4a768e77c38027ca867ede1d535e6d"
+      }
+    ]
+  },
+  "status": "diagnostic_complete; matched_stack_followup_required",
+  "supported_interpretation": [
+    "The two executions used the same declared manifest, checkpoint, core_models hash, source snapshot, deterministic flags, CUBLAS setting, and case; both completed 20 steps and read only frame 0.",
+    "At frame 1, CPU features, CPU neighbors, normalized features, encoder output, and layer-0 aggregate hashes match exactly across all 135 chunks.",
+    "The first observed mismatch is layer-1 aggregate output in every chunk. This is the boundary after the second message MLP and its neighbor reduction.",
+    "The later neighbor and encoder mismatches begin after the divergent frame-1 state and are therefore compatible with state-feedback amplification.",
+    "The actual runtime software stacks differ; architecture or reduction-order attribution is premature until a common isolated stack is run on both hosts."
+  ],
+  "verification": {
+    "canary_completed_steps": [
+      20,
+      20
+    ],
+    "canary_execution_ada": "succeeded",
+    "canary_execution_h200": "succeeded",
+    "canary_returncodes": [
+      0,
+      0
+    ],
+    "cpu_adapter_tests": "15 passed (tests/test_core_cfd_dataset.py and tests/test_core_cfd.py)",
+    "cpu_regression_tests": "28 passed (core_cfd_dataset, core_cfd, core_contract, and core_models)",
+    "frozen_tolerances_changed": false,
+    "gpu_started_by_this_task": false,
+    "ledger_written_by_this_task": false,
+    "neighbor_rules_changed": false
+  }
+}

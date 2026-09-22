@@ -1,0 +1,21 @@
+{
+  "aggregation": "case mean within family, then equal-weight family mean",
+  "case_denominator": "all registered future frames, excluding initial state",
+  "confidence_interval_unit": "independent physical case, never frame or particle",
+  "eligible_checkpoint_updates": [
+    8000,
+    16000,
+    24000,
+    32000
+  ],
+  "frame_penalty": 1.0,
+  "frame_score": "mean(min(position_rmse/length,1), min(velocity_rmse/speed,1))",
+  "implementation_sha256": "83279b11fa1ae981b863ee89e88c9107f8e2fb60c0aaad56e5984f65adf0b708",
+  "missing_failed_nonfinite_frame_score": 1.0,
+  "position_scale": "registered characteristic geometry length in metres",
+  "registered_before_formal_training": true,
+  "schema": "core.scoring_protocol.v1",
+  "selection": "complete case fraction descending, score ascending, update ascending",
+  "selection_split": "validation",
+  "velocity_scale": "sqrt(gravity magnitude * registered characteristic length)"
+}

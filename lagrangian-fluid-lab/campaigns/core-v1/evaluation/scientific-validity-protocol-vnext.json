@@ -1,0 +1,68 @@
+{
+  "schema": "core.scientific_validity_protocol.vNext",
+  "release_state": "candidate_only",
+  "formal_training_eligible": false,
+  "retroactive_old_reproduction_gate": false,
+  "purpose": "Separate execution completion and finite rollout completion from scientific validity.",
+  "status_values": [
+    "not_assessed",
+    "failed",
+    "passed"
+  ],
+  "execution_fields": {
+    "execution_complete": "All registered future transitions completed without an execution/reader failure.",
+    "finite_rollout_complete": "execution_complete plus every registered prediction/error frame is finite.",
+    "scientific_status": "Independent scientific gate result; raw rollout completion never implies passed.",
+    "failure_category": "Execution/reader failure category retained from the raw rollout.",
+    "first_failure_frame": "First execution/reader failure frame retained from the raw rollout.",
+    "scientific_failure_category": "Optional vNext physical-gate category, kept separate from failure_category.",
+    "scientific_first_failure_frame": "First vNext physical-gate frame, kept separate from first_failure_frame."
+  },
+  "fixed_denominator": {
+    "source": "core.scoring_protocol.v1",
+    "rule": "All registered future frames remain in the denominator.",
+    "executed_negative_case": "Counts as executed when an autonomous attempt produced a score row, even when scientific_status=failed.",
+    "missing_case": "Does not count as executed; its registered frame denominator receives the existing missing penalty."
+  },
+  "candidate_gates": {
+    "finite_wall_penetration": {
+      "scientific_failure_category": "finite_wall_penetration",
+      "source_script": "scripts/core_physics.py",
+      "source_sha256": "7649283265ba859aa0c88c875ad9f8e688a8b72ef65f95f0c492d494e0a17bd5",
+      "operator": "static_wall_crossings",
+      "diagnostic_tolerance_m": 1e-9,
+      "threshold_status": "implementation default only; requires explicit release before being a scientific gate",
+      "semantics": "Finite triangle intersection of a saved previous-to-predicted chord.",
+      "limitations": [
+        "Does not reconstruct solver substeps or the exact continuous particle path.",
+        "Static geometry only; moving geometry is unsupported.",
+        "A near-degenerate triangle/determinant is classified by the numerical diagnostic tolerance."
+      ]
+    },
+    "closed_face_domain_exit": {
+      "scientific_failure_category": "closed_face_domain_exit",
+      "source_script": "scripts/finite_wall_audit.py",
+      "source_sha256": "41a4bae8e21d4e1d78205199389bb60d1cc265e2574065e5ee08f6763172a70c",
+      "operator": "outside_closed_face_masks",
+      "diagnostic_tolerance_m": 1e-9,
+      "threshold_status": "caller diagnostic value; no F3 formal declaration",
+      "semantics": "Finite closed-face endpoint outside test with projected point on the registered face.",
+      "limitations": [
+        "Does not infer a runtime solver-domain AABB.",
+        "Open faces remain excluded.",
+        "Endpoint classification does not prove a continuous-path crossing."
+      ]
+    }
+  },
+  "diagnostics_only": {
+    "state_magnitude": {
+      "status": "diagnostic_only",
+      "threshold": null,
+      "reason": "No preregistered explosion threshold is available; report finite magnitudes without classifying a scientific failure."
+    }
+  },
+  "source_audit": {
+    "audit_script": "scripts/core_scientific_failure_audit.py",
+    "audit_script_sha256": "4337e0fe0bb0ad5c39c9de9a53b01e342f241ba76f0c893ea2e11232f0394839"
+  }
+}

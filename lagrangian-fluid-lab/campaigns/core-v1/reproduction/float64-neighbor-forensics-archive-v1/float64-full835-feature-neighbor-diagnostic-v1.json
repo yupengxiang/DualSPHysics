@@ -1,0 +1,254 @@
+{
+  "dense_neighbor_window_result": {
+    "first_order_frame_in_scanned_window": "255 (and no fast-screen hit in 0..249)",
+    "first_set_frame_in_scanned_window": "257 (and no fast-screen hit in 0..249)",
+    "frames_scanned_inclusive": "250..286 and 300",
+    "note": "All frames 0..249 passed the fast k=65 screen; exact core_models neighbor_table was run for every frame 250..286 and frame 300. Exact first order change is frame 255; exact first set change is frame 257.",
+    "prewindow_fast_screen": {
+      "caveat": "k=65 screen; exact core_models was used for the first dense-window hits",
+      "frames": "0..249 inclusive",
+      "result": "no changed rows"
+    }
+  },
+  "evidence_artifacts": [
+    "campaigns/core-v1/reproduction/float64-full835-feature-neighbor-diagnostic-v1.json",
+    "/tmp/neighbor-window-250-300.json",
+    "/tmp/neighbor_key.py output",
+    "campaigns/core-v1/reproduction/float64-full835-collected/paired-comparison-v2.json",
+    "campaigns/core-v1/reproduction/float64-fixed-state-replay-v1.json",
+    "campaigns/core-v1/reproduction/float64-neighbor-fast-scan-v1.py"
+  ],
+  "findings": {
+    "feature_columns": "0:2 position/length; 3:5 velocity/speed; 6:8 relative wall point/h; 9:11 wall normal; 12:14 wall velocity/speed; 15:17 acceleration/9.81; 18:22 scalars",
+    "feature_progression": [
+      {
+        "columns": [
+          15
+        ],
+        "frame": 10,
+        "interpretation": "one float32 ULP in acceleration_x/9.81",
+        "max_abs": 5.551115123125783e-17,
+        "rows": 1
+      },
+      {
+        "columns": [
+          7
+        ],
+        "frame": 20,
+        "interpretation": "relative wall-point y feature begins to differ",
+        "max_abs": 5.810847188489473e-16,
+        "rows": 4
+      },
+      {
+        "columns": [
+          5
+        ],
+        "frame": 100,
+        "max_abs": 1.4551915228366852e-11,
+        "rows": 1
+      },
+      {
+        "columns": [
+          2,
+          3,
+          5,
+          6,
+          7,
+          8,
+          15
+        ],
+        "frame": 200,
+        "max_abs": 1.1920928955078125e-07,
+        "rows": 6902
+      },
+      {
+        "columns": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          8,
+          15
+        ],
+        "frame": 250,
+        "max_abs": 3.814697265625e-06,
+        "rows": 10008
+      }
+    ],
+    "first_neighbor_order_difference": {
+      "ada_order": "9858 before 11309",
+      "changed_rows": 1,
+      "d2_delta_ada_m2": -1.462681869612674e-10,
+      "d2_delta_h200_m2": 6.767396082808883e-10,
+      "frame": 255,
+      "h200_order": "11309 before 9858",
+      "kind": "order_only",
+      "position_max_abs_m": 6.606450342339087e-08,
+      "row": 11603,
+      "velocity_max_abs_mps": 3.110595352406875e-07
+    },
+    "first_neighbor_set_difference": {
+      "ada_only_id": 7029,
+      "changed_rows": 1,
+      "d2_delta_ada_m2": -9.208118208897664e-14,
+      "d2_delta_h200_m2": 1.8243116435903706e-13,
+      "frame": 257,
+      "h200_only_id": 7069,
+      "kind": "64th_cutoff_swap",
+      "position_max_abs_m": 7.256303236058415e-08,
+      "row": 8771,
+      "velocity_max_abs_mps": 3.405157749103438e-07
+    },
+    "first_public_feature_difference": {
+      "ada": -3.6537890768517656e-11,
+      "column": 4,
+      "column_name": "velocity_y/speed",
+      "difference": 3.469446951953614e-18,
+      "frame": 1,
+      "h200": -3.653789423796461e-11,
+      "one_float32_ulp": true,
+      "row": 2429
+    },
+    "first_registered_position_tolerance_failure": {
+      "frame": 359,
+      "max_abs_m": 0.0002188850905389117,
+      "threshold_m": 1e-05
+    },
+    "first_registered_velocity_tolerance_failure": {
+      "frame": 284,
+      "max_abs_mps": 0.0001404961395258253,
+      "neighbor_event_same_frame": {
+        "ada_only_id": 6737,
+        "d2_delta_ada_m2": -1.5938232547987874e-10,
+        "d2_delta_h200_m2": 3.5730447788852315e-10,
+        "h200_only_id": 6741,
+        "row": 7329
+      },
+      "threshold_mps": 0.0001
+    },
+    "first_state_difference": {
+      "frame": 1,
+      "position_max_abs_m": 5.551115123125783e-17,
+      "velocity_max_abs_mps": 1.249000902703301e-16
+    }
+  },
+  "fixed_state_replay": {
+    "artifact": "campaigns/core-v1/reproduction/float64-fixed-state-replay-v1.json",
+    "artifact_sha256": "f2abf72e56f209a31e1dc045b07952e625c1fc4054e7715b0e051d6b74fb1e96",
+    "case_id": "F3_DEV_08_a0p953125",
+    "cross_state_cpu": {
+      "feature_equal": false,
+      "feature_max_abs": 7.62939453125e-06,
+      "neighbor_changed_rows": 1,
+      "neighbors_equal": false,
+      "position_equal": false,
+      "position_max_abs": 7.256303236058415e-08,
+      "prediction_max_abs": 0.00014061542179447106,
+      "prediction_nonzero": 207279
+    },
+    "device": "cpu",
+    "dtype": "float64",
+    "frame": 257,
+    "interpretation": "Repeated exact state and model calls are bitwise identical on CPU. Ada/H200 saved states are not byte-identical at frame 257; running them through the same CPU path preserves one neighbor-row cutoff difference and yields a 1.406e-4 maximum output difference. This isolates sensitivity to state/input divergence but is not a GPU attribution.",
+    "same_state_repeat": {
+      "ada": {
+        "repeat_feature_equal": true,
+        "repeat_input_metadata_equal": true,
+        "repeat_neighbors_equal": true,
+        "repeat_position_equal": true,
+        "repeat_prediction_equal": true,
+        "repeat_prior_equal": true
+      },
+      "h200": {
+        "repeat_feature_equal": true,
+        "repeat_input_metadata_equal": true,
+        "repeat_neighbors_equal": true,
+        "repeat_position_equal": true,
+        "repeat_prediction_equal": true,
+        "repeat_prior_equal": true
+      }
+    },
+    "schema": "core.float64_fixed_state_replay.v1"
+  },
+  "inputs": {
+    "ada_h5_sha256": "12059939b45d9e28c122bc21a248a1cd99187d69ff1b83ffe93f03423fc47840",
+    "bundle_root": "campaigns/core-v1/reproduction/ada-identical-h200-bundle-v3",
+    "checkpoint_sha256": "9af1dc3cb68991c38fd31b59d92895326e3abe89d5d29d33dd086d7fa462b8a8",
+    "core_models_sha256": "73a98b262500c30e46f14aafd2a89f2bea34116c77b6e34ce5e33e7412c38c77",
+    "feature_rule": "frozen core_models.node_features: float64 source arithmetic then public float32 cast, 23 columns",
+    "h200_h5_sha256": "ecd19bd0f2139d4ca4d47922ede3b2d4859397896fc1aefcfc54d0578e25e4d1",
+    "manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "neighbor_rule": "frozen core_models.neighbor_table: radius 2h, limit 64, squared distance then particle_id then zone"
+  },
+  "interpretation": {
+    "not_proven": "The posthoc H5 reconstruction cannot identify the first GPU kernel/operator or distinguish which prior layer produced the initial state difference. It cannot attribute the original difference solely to cKDTree or to feature casting.",
+    "protocol_preserved": "No model source, neighbor threshold/order, checkpoint, tolerance, formal ledger, or GPU job was changed.",
+    "supported": "A common 1e-16-scale state difference appears before any neighbor-table difference. Public float32 features differ at frame 1. A distance/ID cutoff ordering swap appears at frame 255 and a 64th-neighbor membership swap at frame 257; the first velocity tolerance failure is frame 284. The observed sequence is consistent with small cross-architecture arithmetic differences amplified until a near-tied distance crosses the fixed 64-neighbor cutoff."
+  },
+  "method": {
+    "dtype": "State float64; feature output float32; neighbor indices int64",
+    "known_inputs": "bundle known inputs only; no future CFD/reference states supplied to node_features or neighbor_table",
+    "prewindow_neighbor_screen": "fast cKDTree k=65 stable distance+ID screen on every frame 0..249; exact core_models table rechecked densely on 250..286",
+    "prewindow_screen_script": "campaigns/core-v1/reproduction/float64-neighbor-fast-scan-v1.py",
+    "prewindow_screen_script_sha256": "1e7d234f9f946d83f176c0fce21003ae304aeeca6470cf8fe64e04d45fc72817",
+    "reconstruction_script": "campaigns/core-v1/reproduction/float64-feature-neighbor-diagnostic-v1.py",
+    "reconstruction_script_sha256": "1e00936cc301a4ad103d91a5c01e9b86f0b11f5723e5cfa5e6d5aeccfe7d85f3",
+    "state_identity": "particle_id/zone/mass/valid read from immutable rollout axes; predicted position/velocity read one frame at a time"
+  },
+  "next_diagnostic": {
+    "diagnostic_outputs": "At each state capture normalized feature hash, encoder output, layer0/1 aggregate, head output, and pre/post prior arrays; record dtype and max elementwise abs/relative error. Do not run a trajectory or alter the production neighbor rule.",
+    "goal": "separate upstream model arithmetic from causal input construction without another 835-step run",
+    "inputs": "Use exact saved Ada state arrays at frames 250,255,257,284 (and exact H200 copies as a second fixture); run both hosts with the same state bytes, same checkpoint/bundle, and capture feature array hash, neighbor array hash, 64th/65th candidate IDs and squared distances.",
+    "name": "fixed_state_input_and_cutoff_replay.v1",
+    "pass_conditions": "With identical state bytes, node_features and neighbor_table must be byte-identical; candidate cutoff ordering must match ID tie rule. Any GPU model mismatch then belongs to model arithmetic, not state/neighbor construction.",
+    "replay_script": "campaigns/core-v1/reproduction/float64-fixed-state-replay-v1.py",
+    "replay_script_sha256": "68b5aafddc8b980c349cd3c1189d6aecfc01493164e7e20eec8220924d2a8787",
+    "stability_option": "If production cross-architecture reproducibility is required after the replay, evaluate a separately versioned fixed-arithmetic execution path (for example CPU or explicitly controlled matmul) on this short fixture first. Do not quantize distances, widen tolerances, or replace distance+ID ordering in the registered model."
+  },
+  "schema": "core.float64_full835_feature_neighbor_diagnostic.v1",
+  "scope": {
+    "case_id": "F3_DEV_08_a0p953125",
+    "dense_neighbor_window": [
+      250,
+      286
+    ],
+    "formal_evaluation": false,
+    "formal_training": false,
+    "gpu_started_by_diagnostic": false,
+    "particle_count": 34560,
+    "purpose": "posthoc CPU reconstruction of causal features and full-field neighbor table from completed paired float64 trajectories",
+    "sampled_frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      10,
+      15,
+      20,
+      25,
+      50,
+      75,
+      100,
+      150,
+      200,
+      250,
+      270,
+      275,
+      280,
+      281,
+      282,
+      283,
+      284,
+      285,
+      286,
+      300,
+      350,
+      358,
+      359
+    ],
+    "transitions": 835
+  }
+}

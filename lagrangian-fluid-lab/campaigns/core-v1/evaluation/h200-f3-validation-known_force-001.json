@@ -1,0 +1,41 @@
+{
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_learning.py",
+    "evaluate",
+    "--manifest",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "--data-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "--baseline",
+    "known_force",
+    "--split",
+    "validation",
+    "--output",
+    "{attempt_dir}/evaluation.json"
+  ],
+  "category": "baseline_validation",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "depends_on": [
+    "h200-transfer-f3-compact-v2"
+  ],
+  "host": "h200",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+    }
+  ],
+  "job_id": "h200-f3-validation-known_force-001",
+  "logical_id": "h200-f3-validation-known_force-001",
+  "required_outputs": [
+    "evaluation.json"
+  ],
+  "resources": {
+    "cpu_cores": 4,
+    "gpu_peak_mib": 0,
+    "io_weight": 0.5,
+    "ram_mib": 8192
+  },
+  "timeout_seconds": 7200
+}

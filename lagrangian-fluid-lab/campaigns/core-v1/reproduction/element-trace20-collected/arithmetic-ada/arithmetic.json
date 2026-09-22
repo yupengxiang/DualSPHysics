@@ -1,0 +1,36 @@
+{
+  "schema": "core.update_arithmetic_probe.v1",
+  "input_sha256": "60d7ec1eeb8c17a78731ad239d316a739e2abe740fa7589c76cb70d0afd6fc41",
+  "code_sha256": "70bb2be867e38f54ae113e60ce545788fac412ca4d423f4feb34449c200867dc",
+  "device": "cuda",
+  "torch": "2.12.1+cu132",
+  "cuda": "13.2",
+  "gpu_name": "NVIDIA RTX 6000 Ada Generation",
+  "arrays": {
+    "path": "arithmetic.npz",
+    "sha256": "e108ea23a97f518b36d00bbeef3931c2bb39f48f4d8fc902683470484a6a7569"
+  },
+  "captured_comparison": {
+    "float32": {
+      "ada": {
+        "exact_equal": true,
+        "max_abs_error": 0.0
+      },
+      "h200": {
+        "exact_equal": false,
+        "max_abs_error": 4.76837158203125e-07
+      }
+    },
+    "float64": {
+      "ada": {
+        "exact_equal": false,
+        "max_abs_error": 2.7286066384135665e-07
+      },
+      "h200": {
+        "exact_equal": false,
+        "max_abs_error": 5.197477137564022e-07
+      }
+    }
+  },
+  "scope": "isolated update MLP, original float32 weights promoted for float64 diagnostic; no rollout or qualification claim"
+}

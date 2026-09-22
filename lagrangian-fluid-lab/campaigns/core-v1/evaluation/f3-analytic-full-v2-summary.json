@@ -1,0 +1,1204 @@
+{
+  "schema": "core.analytic_full_evaluation_summary.v1",
+  "generated_unix": 1789821886.9938762,
+  "registered_case_runs": 32,
+  "executed_case_runs": 32,
+  "missing": 0,
+  "formal_training_runs": 0,
+  "learned_model_case_runs": 0,
+  "qualification_claim": "none",
+  "scope": "F3 historical 4 validation and 12 development extrapolation cases; all 835 future frames and 34560 particles",
+  "completion_semantics": "Finite full-horizon completion is distinct from physical validity. Physics violations retained separately.",
+  "protocol": {
+    "schema": "core.scoring_protocol.v1",
+    "frame_penalty": 1.0,
+    "position_scale": "registered characteristic geometry length in metres",
+    "velocity_scale": "sqrt(gravity magnitude * registered characteristic length)",
+    "frame_score": "mean(min(position_rmse/length,1), min(velocity_rmse/speed,1))",
+    "missing_failed_nonfinite_frame_score": 1.0,
+    "case_denominator": "all registered future frames, excluding initial state",
+    "aggregation": "case mean within family, then equal-weight family mean",
+    "selection": "complete case fraction descending, score ascending, update ascending",
+    "eligible_checkpoint_updates": [
+      8000,
+      16000,
+      24000,
+      32000
+    ],
+    "selection_split": "validation",
+    "confidence_interval_unit": "independent physical case, never frame or particle"
+  },
+  "models": {
+    "constant_velocity": {
+      "groups": {
+        "validation": {
+          "aggregate": {
+            "families": {
+              "F3": {
+                "case_count": 4,
+                "complete_fraction": 1.0,
+                "selection_score": 0.04613896191843436,
+                "missing_execution": 0
+              }
+            },
+            "registered_cases": 4,
+            "complete_fraction": 1.0,
+            "selection_score": 0.04613896191843436,
+            "missing_execution": 0
+          },
+          "confidence_interval": {
+            "method": "physical_case_cluster_bootstrap_stratified_by_family",
+            "confidence": 0.95,
+            "lower": 0.04446714096995032,
+            "upper": 0.047810782866918394,
+            "point_estimate": 0.04613896191843436,
+            "registered_view_point_estimate": 0.04613896191843436,
+            "draws": 2000,
+            "seed": 17,
+            "independent_cases_by_family": {
+              "F3": 4
+            },
+            "insufficient_within_family_variation": false
+          }
+        },
+        "test": {
+          "aggregate": {
+            "families": {
+              "F3": {
+                "case_count": 12,
+                "complete_fraction": 1.0,
+                "selection_score": 0.04605536771119467,
+                "missing_execution": 0
+              }
+            },
+            "registered_cases": 12,
+            "complete_fraction": 1.0,
+            "selection_score": 0.04605536771119467,
+            "missing_execution": 0
+          },
+          "confidence_interval": {
+            "method": "physical_case_cluster_bootstrap_stratified_by_family",
+            "confidence": 0.95,
+            "lower": 0.043681860874665725,
+            "upper": 0.04834782189086905,
+            "point_estimate": 0.04605536771119467,
+            "registered_view_point_estimate": 0.04605536771119467,
+            "draws": 2000,
+            "seed": 17,
+            "independent_cases_by_family": {
+              "F3": 12
+            },
+            "insufficient_within_family_variation": false
+          }
+        }
+      },
+      "case_scores": {
+        "F3_DEV_00_a0p903125": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.040914340073876475,
+          "raw_position_rmse_frame_mean_m": 0.03830606395140532,
+          "raw_velocity_rmse_frame_mean_mps": 0.11667470178557435,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_01_a0p909375": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.04126892094194591,
+          "raw_position_rmse_frame_mean_m": 0.03865542999077963,
+          "raw_velocity_rmse_frame_mean_mps": 0.11762844180778367,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_02_a0p915625": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.04158175417887375,
+          "raw_position_rmse_frame_mean_m": 0.03894741169162403,
+          "raw_velocity_rmse_frame_mean_mps": 0.11852354231312731,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_03_a0p921875": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.04193799227859165,
+          "raw_position_rmse_frame_mean_m": 0.03931691971199123,
+          "raw_velocity_rmse_frame_mean_mps": 0.11942063176158728,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_04_a0p928125": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.04227079018857377,
+          "raw_position_rmse_frame_mean_m": 0.03964139636431204,
+          "raw_velocity_rmse_frame_mean_mps": 0.1203270942981381,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_05_a0p934375": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.04259836980814625,
+          "raw_position_rmse_frame_mean_m": 0.03996086467396065,
+          "raw_velocity_rmse_frame_mean_mps": 0.12121908107869522,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_08_a0p953125": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.04364747322412638,
+          "raw_position_rmse_frame_mean_m": 0.041007030517913885,
+          "raw_velocity_rmse_frame_mean_mps": 0.12399968388312661,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_13_a0p984375": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.04528680871577425,
+          "raw_position_rmse_frame_mean_m": 0.04261719522912448,
+          "raw_velocity_rmse_frame_mean_mps": 0.1284258239618936,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_18_a1p015625": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.046999357824292924,
+          "raw_position_rmse_frame_mean_m": 0.04431176958412917,
+          "raw_velocity_rmse_frame_mean_mps": 0.13300837286398262,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_23_a1p046875": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.04862220790954387,
+          "raw_position_rmse_frame_mean_m": 0.04593676354272416,
+          "raw_velocity_rmse_frame_mean_mps": 0.13728758569909985,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_26_a1p065625": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.04954527206431019,
+          "raw_position_rmse_frame_mean_m": 0.04684117163652112,
+          "raw_velocity_rmse_frame_mean_mps": 0.13978718693805847,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_27_a1p071875": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.04990645016163398,
+          "raw_position_rmse_frame_mean_m": 0.04722162737376549,
+          "raw_velocity_rmse_frame_mean_mps": 0.14067748939258845,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_28_a1p078125": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.05018485991565283,
+          "raw_position_rmse_frame_mean_m": 0.04748318108112664,
+          "raw_velocity_rmse_frame_mean_mps": 0.1414684790197053,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_29_a1p084375": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.050508255251651576,
+          "raw_position_rmse_frame_mean_m": 0.047817188472470386,
+          "raw_velocity_rmse_frame_mean_mps": 0.1422875987533197,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_30_a1p090625": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.05080422767105911,
+          "raw_position_rmse_frame_mean_m": 0.04809990702084897,
+          "raw_velocity_rmse_frame_mean_mps": 0.1431130824640928,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_31_a1p096875": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.05114318000002065,
+          "raw_position_rmse_frame_mean_m": 0.04844772224429024,
+          "raw_velocity_rmse_frame_mean_mps": 0.14397906639225413,
+          "raw_error_coverage": 1.0
+        }
+      },
+      "physics": {
+        "F3_DEV_00_a0p903125": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 0.7791682353755925,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_01_a0p909375": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 0.7923012780580219,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_02_a0p915625": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 0.8052954601369535,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_03_a0p921875": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 0.8170559706659495,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_04_a0p928125": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 0.8297464126693456,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_05_a0p934375": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 0.8418562905129177,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_08_a0p953125": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 0.883238142659151,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_13_a0p984375": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 0.9533606216075556,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_18_a1p015625": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 1.0294475023406968,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_23_a1p046875": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 1.1009340809250383,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_26_a1p065625": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 1.1466527870275238,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_27_a1p071875": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 1.1630750412613522,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_28_a1p078125": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 1.1761105083107737,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_29_a1p084375": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 1.192628847115248,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_30_a1p090625": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 1.2066272904753823,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_31_a1p096875": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 1.2225187833860243,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 0.0,
+          "wall_chord_particle_count": 0,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        }
+      },
+      "cases_with_wall_chord_crossings": 0,
+      "evidence": [
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_00_a0p903125",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_00_a0p903125.json",
+          "sha256": "4a87018bdb9bf4083ca387d1cb226bd59513ee54a69ed41b36da874c32852c11",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_00_a0p903125/20260919T203224-f18a064771b0/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_01_a0p909375",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_01_a0p909375.json",
+          "sha256": "bedea496bf47906134053d4fe036ba8e50d915f88b48e797610f31824b34ebad",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_01_a0p909375/20260919T203225-7b92c72d9b0f/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_02_a0p915625",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_02_a0p915625.json",
+          "sha256": "af91a2168205a89502aa04f210cd45ac836ff223dd625d007a594ddb9ef19758",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_02_a0p915625/20260919T203227-5d07eb502689/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_03_a0p921875",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_03_a0p921875.json",
+          "sha256": "b02b2c00edd44d13a7f034d5b4f0ab7dc60b32304132a43eb14958c700729231",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_03_a0p921875/20260919T203229-67d088657315/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_04_a0p928125",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_04_a0p928125.json",
+          "sha256": "a79e26aa8b552560138d847786da8581ec3876d6b77e6f0996d0b5ed4e4a9e42",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_04_a0p928125/20260919T203230-d89cf0db9801/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_05_a0p934375",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_05_a0p934375.json",
+          "sha256": "fa579d5a4e40d71ce35a78de1f01c1a9328dde990966735e0c8502d750aceef5",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_05_a0p934375/20260919T203232-b7fcea836ff9/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_08_a0p953125",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_08_a0p953125.json",
+          "sha256": "2df6ff937dfee0d6f1e6e0072cef57e6f8fa358e3828fb70717f5913df771cf8",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_08_a0p953125/20260919T203233-97ad4d052b39/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_13_a0p984375",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_13_a0p984375.json",
+          "sha256": "fa11a82af18a5ed94b5ebf445cc298fef62f3fb8632db6943384e32e4db43018",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_13_a0p984375/20260919T203235-908b38b51f6c/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_18_a1p015625",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_18_a1p015625.json",
+          "sha256": "cd8b435291025310e23397faf85352cf7301d0affa921eb8864960343a4a241b",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_18_a1p015625/20260919T203351-8433297a1dd1/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_23_a1p046875",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_23_a1p046875.json",
+          "sha256": "f1fc6b58acc8f6b4236c831c518ccc02bd17becd7e427401af90f541fae15dc2",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_23_a1p046875/20260919T203353-a36cf528ae37/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_26_a1p065625",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_26_a1p065625.json",
+          "sha256": "53118827d24abfa832020b436fd999f06a6f6b22732284a5f41dd906be6beec0",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_26_a1p065625/20260919T203355-4c6ac17e88ea/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_27_a1p071875",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_27_a1p071875.json",
+          "sha256": "1df07428fc9b9478ffa3e7b1cb663e76b73763f0bad67efe33283f0685c32ccf",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_27_a1p071875/20260919T203356-bf590eee25d1/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_28_a1p078125",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_28_a1p078125.json",
+          "sha256": "218cb728a51494a926a07c1d24217cfa4b27bb108896c686f9cb175082ab3256",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_28_a1p078125/20260919T203358-46d1586d98b1/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_29_a1p084375",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_29_a1p084375.json",
+          "sha256": "9083f923fde8b7fceda3d40bf3c00fe3f26f737200d314d36397d1504be3c348",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_29_a1p084375/20260919T203359-dbbf91afee2b/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_30_a1p090625",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_30_a1p090625.json",
+          "sha256": "2db4326d4de49c1aaa5694b0decfb0ca3d0606e280ffc46adaae021b6288754c",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_30_a1p090625/20260919T203401-0aeef4b93b3b/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-constant_velocity-f3_dev_31_a1p096875",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-constant_velocity-f3_dev_31_a1p096875.json",
+          "sha256": "7a04a01ced2541493e821a7f3cbcdb423fbb2c39a34bdf114b23b59a8b81b39b",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-constant_velocity-f3_dev_31_a1p096875/20260919T203421-3e8f2c3852af/trajectory.h5",
+          "trajectory_sha256": "9e2c7199e3afd7e151760095c8f27c645c57e0929463117cafa4f5afdb532f39"
+        }
+      ]
+    },
+    "known_force": {
+      "groups": {
+        "validation": {
+          "aggregate": {
+            "families": {
+              "F3": {
+                "case_count": 4,
+                "complete_fraction": 1.0,
+                "selection_score": 0.9617107143460084,
+                "missing_execution": 0
+              }
+            },
+            "registered_cases": 4,
+            "complete_fraction": 1.0,
+            "selection_score": 0.9617107143460084,
+            "missing_execution": 0
+          },
+          "confidence_interval": {
+            "method": "physical_case_cluster_bootstrap_stratified_by_family",
+            "confidence": 0.95,
+            "lower": 0.9616891870995167,
+            "upper": 0.9617322357684714,
+            "point_estimate": 0.9617107143460084,
+            "registered_view_point_estimate": 0.9617107143460084,
+            "draws": 2000,
+            "seed": 17,
+            "independent_cases_by_family": {
+              "F3": 4
+            },
+            "insufficient_within_family_variation": false
+          }
+        },
+        "test": {
+          "aggregate": {
+            "families": {
+              "F3": {
+                "case_count": 12,
+                "complete_fraction": 1.0,
+                "selection_score": 0.9617104739584152,
+                "missing_execution": 0
+              }
+            },
+            "registered_cases": 12,
+            "complete_fraction": 1.0,
+            "selection_score": 0.9617104739584152,
+            "missing_execution": 0
+          },
+          "confidence_interval": {
+            "method": "physical_case_cluster_bootstrap_stratified_by_family",
+            "confidence": 0.95,
+            "lower": 0.9616805523254813,
+            "upper": 0.9617414590196898,
+            "point_estimate": 0.9617104739584154,
+            "registered_view_point_estimate": 0.9617104739584152,
+            "draws": 2000,
+            "seed": 17,
+            "independent_cases_by_family": {
+              "F3": 12
+            },
+            "insufficient_within_family_variation": false
+          }
+        }
+      },
+      "case_scores": {
+        "F3_DEV_00_a0p903125": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.9617773363860611,
+          "raw_position_rmse_frame_mean_m": 53.679249429677256,
+          "raw_velocity_rmse_frame_mean_mps": 19.331092168770283,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_01_a0p909375": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.9617730456511447,
+          "raw_position_rmse_frame_mean_m": 53.525742800256474,
+          "raw_velocity_rmse_frame_mean_mps": 19.279208288059323,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_02_a0p915625": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.9617687538693294,
+          "raw_position_rmse_frame_mean_m": 53.371603677039225,
+          "raw_velocity_rmse_frame_mean_mps": 19.227190771120036,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_03_a0p921875": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.9617644609957744,
+          "raw_position_rmse_frame_mean_m": 53.216839965379194,
+          "raw_velocity_rmse_frame_mean_mps": 19.17504745029021,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_04_a0p928125": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.9617601677177648,
+          "raw_position_rmse_frame_mean_m": 53.06145965359756,
+          "raw_velocity_rmse_frame_mean_mps": 19.12275215645063,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_05_a0p934375": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.961755872682085,
+          "raw_position_rmse_frame_mean_m": 52.905470639462685,
+          "raw_velocity_rmse_frame_mean_mps": 19.070336624471445,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_08_a0p953125": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.9617429849255582,
+          "raw_position_rmse_frame_mean_m": 52.43392924295379,
+          "raw_velocity_rmse_frame_mean_mps": 18.91232689993595,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_13_a0p984375": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.9617214866113848,
+          "raw_position_rmse_frame_mean_m": 51.63657640160785,
+          "raw_velocity_rmse_frame_mean_mps": 18.64675487527155,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_18_a1p015625": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.9616999652515302,
+          "raw_position_rmse_frame_mean_m": 50.82576911439399,
+          "raw_velocity_rmse_frame_mean_mps": 18.37879621146504,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_23_a1p046875": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.9616784205955605,
+          "raw_position_rmse_frame_mean_m": 50.002490144765005,
+          "raw_velocity_rmse_frame_mean_mps": 18.109039517271764,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_26_a1p065625": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.9616653399296256,
+          "raw_position_rmse_frame_mean_m": 49.50295145475408,
+          "raw_velocity_rmse_frame_mean_mps": 17.946512151208086,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_27_a1p071875": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.9616609427095764,
+          "raw_position_rmse_frame_mean_m": 49.33555963373544,
+          "raw_velocity_rmse_frame_mean_mps": 17.89225241577168,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_28_a1p078125": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.961656541868777,
+          "raw_position_rmse_frame_mean_m": 49.167739679099675,
+          "raw_velocity_rmse_frame_mean_mps": 17.837968168959964,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_29_a1p084375": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.9616521432080591,
+          "raw_position_rmse_frame_mean_m": 48.99950075923466,
+          "raw_velocity_rmse_frame_mean_mps": 17.783630978722833,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_30_a1p090625": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.9616477417630418,
+          "raw_position_rmse_frame_mean_m": 48.83085200583092,
+          "raw_velocity_rmse_frame_mean_mps": 17.729281816279315,
+          "raw_error_coverage": 1.0
+        },
+        "F3_DEV_31_a1p096875": {
+          "expected_frames": 835,
+          "finite_prefix_frames": 835,
+          "executed": true,
+          "complete": true,
+          "failure_category": null,
+          "first_failure_frame": null,
+          "selection_score": 0.961643340719744,
+          "raw_position_rmse_frame_mean_m": 48.66180210905345,
+          "raw_velocity_rmse_frame_mean_mps": 17.674901633487007,
+          "raw_error_coverage": 1.0
+        }
+      },
+      "physics": {
+        "F3_DEV_00_a0p903125": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 33131.71779662108,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_01_a0p909375": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 32955.31561757409,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_02_a0p915625": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 32778.54982367261,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_03_a0p921875": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 32601.43133271442,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_04_a0p928125": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 32423.974637712767,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_05_a0p934375": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 32246.192816359482,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_08_a0p953125": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 31711.020910523748,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_13_a0p984375": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 30813.760097665967,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_18_a1p015625": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 29911.23786474107,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_23_a1p046875": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 29005.0152781125,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_26_a1p065625": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 28460.145097209945,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_27_a1p071875": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 28278.403097066486,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_28_a1p078125": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 28096.625512690873,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_29_a1p084375": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 27914.818442843418,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_30_a1p090625": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 27732.996892453277,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        },
+        "F3_DEV_31_a1p096875": {
+          "changed_particle_mass_frames": 0,
+          "completed_frames": 835,
+          "expected_frames": 835,
+          "kinetic_energy_error_abs_max_j": 27551.173684729532,
+          "mass_error_abs_max_kg": 0.0,
+          "validity_mismatch_frames": 0,
+          "wall_chord_mass_kg": 14.580000378191471,
+          "wall_chord_particle_count": 34560,
+          "wall_chord_statuses": [
+            "checked_static_saved_chords"
+          ]
+        }
+      },
+      "cases_with_wall_chord_crossings": 16,
+      "evidence": [
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_00_a0p903125",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_00_a0p903125.json",
+          "sha256": "181c27a417c78463e9ddd445e99804b59261bcbe12e69264b44ae904270b0cfb",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_00_a0p903125/20260919T203518-fab13ab33357/trajectory.h5",
+          "trajectory_sha256": "7ada6aadb868c6e1e60ecd046a0cdd0482fbe7d1e5f8239c84594e231cae4dad"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_01_a0p909375",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_01_a0p909375.json",
+          "sha256": "514d6531ff3a7a97572453a6dc67a4c0d68e929706fa2a63749da2bc057ddc74",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_01_a0p909375/20260919T203520-e5bb35cb6ac1/trajectory.h5",
+          "trajectory_sha256": "063177940aacc3e3dd81a7179a4a47322de4120ed7b2cb02ca1ebd6f1b366a48"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_02_a0p915625",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_02_a0p915625.json",
+          "sha256": "e26c94a98c09f99d33d647f2d82eaa5cc0db4bc541c47fc2c8c1d640b1c92ce3",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_02_a0p915625/20260919T203521-67585c3d9fd3/trajectory.h5",
+          "trajectory_sha256": "ddc1035f04554ad0bd317fc0edfc6d1dd8e1a40f62cf4fddcdad4ed9bfedaa2e"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_03_a0p921875",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_03_a0p921875.json",
+          "sha256": "d4ae5dd05f37e4fa663f97b5005f2f73da82aba319904f93b4f70bdf4eaa8ff8",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_03_a0p921875/20260919T203523-db2974d8a572/trajectory.h5",
+          "trajectory_sha256": "e301873bde3933fc79b4a572da7f9b018eb2cc68177ba00195ceefce0187989a"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_04_a0p928125",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_04_a0p928125.json",
+          "sha256": "95f106f5ce70dea88f87948638a5677441eb595751c8adc5b468358b848eadf3",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_04_a0p928125/20260919T203525-6312e79b8c83/trajectory.h5",
+          "trajectory_sha256": "620c97e63d14aaac21d810d5c95d5f2effb7901dae9655d8b8d80556246b1ffe"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_05_a0p934375",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_05_a0p934375.json",
+          "sha256": "daa2d7cbf5837bc590b9acf07b176ea787e927f285aa82e5613a24120c6003a8",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_05_a0p934375/20260919T203526-b8a99ecebf45/trajectory.h5",
+          "trajectory_sha256": "759a63e3e655475f4d230b7a13e0d2eb9a862298ed5f74bdcfde0fc52aaf101c"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_08_a0p953125",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_08_a0p953125.json",
+          "sha256": "399e2ab355eb61e50d96efcbdeb3e995f34a065d49ad33f7a2315ebde28894db",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_08_a0p953125/20260919T203528-5d2dacfd90e9/trajectory.h5",
+          "trajectory_sha256": "2f7ef7de139476163b0436a185a7792a01a8ca63339b634ca16c77e241c2698c"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_13_a0p984375",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_13_a0p984375.json",
+          "sha256": "0cd042437a11321fb8016807f84721497980ac530df92efdb66725856f4d6a4d",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_13_a0p984375/20260919T203546-c63cfa48d287/trajectory.h5",
+          "trajectory_sha256": "921c0f83bbbf3a9e46e4bdcbe596d8562ea9c6a01978bca3176823babcb80938"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_18_a1p015625",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_18_a1p015625.json",
+          "sha256": "3caeb159a8719b0bb5a341652aa7180824673246ce47fc2da132841fa523552b",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_18_a1p015625/20260919T203702-d53ce2ae624d/trajectory.h5",
+          "trajectory_sha256": "7ae2bff12190740ad42b629cb495ff2fa6806d1fedc388e9442e675baddca92e"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_23_a1p046875",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_23_a1p046875.json",
+          "sha256": "ef7a8595dfc11843e7a9c11564048a51e395b6ec6262d20b96265102b32f53f4",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_23_a1p046875/20260919T203704-19666fcbbb58/trajectory.h5",
+          "trajectory_sha256": "570026789145ed82b67f8196efe6bf1af1d6bf0c15670ee99c8a0cf5df3c75d9"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_26_a1p065625",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_26_a1p065625.json",
+          "sha256": "2f47792a8eb5cf2213d3ba0f0c083fc7d8c95a57446122a134f27befc3cfbb4e",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_26_a1p065625/20260919T203705-fe54d1df6053/trajectory.h5",
+          "trajectory_sha256": "0ecf12048181a87a06c873909aa69cf8fec7e5e6fd22c8c4099dbac2beb3b932"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_27_a1p071875",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_27_a1p071875.json",
+          "sha256": "818389b6ca61703ab5f57a05b27dcf36e9afbf26e5d727e88dff73d7ec736518",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_27_a1p071875/20260919T203707-0f9718d72834/trajectory.h5",
+          "trajectory_sha256": "b715348db8d934a71d523e27c2a583baa2dbe5cf02e16f6a42b337c0845e289c"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_28_a1p078125",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_28_a1p078125.json",
+          "sha256": "77488c80463e4bf0d68e5150d8ffe85c732fa6da8d7a675048e22535b57a6be5",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_28_a1p078125/20260919T203708-cc7d3effb092/trajectory.h5",
+          "trajectory_sha256": "128afc6c0d0f47c126fa6f616fddac86e1d9430d7bfcb7986981f2f730cb7a1e"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_29_a1p084375",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_29_a1p084375.json",
+          "sha256": "3e22b6f726c8aa2bdaf4f4af22a69e6951fb48ab3df418d81f7c66e3fb9cdc25",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_29_a1p084375/20260919T203710-5555626c3473/trajectory.h5",
+          "trajectory_sha256": "9b632de72ac07eb7bb53a63948d40c06aa01ed544d903a28287b85f5aad58430"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_30_a1p090625",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_30_a1p090625.json",
+          "sha256": "4f05ef1fb95313d24f5d0216de4518014817c0bb11a1375edbab0ddd4b71e57d",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_30_a1p090625/20260919T203711-0f864180d547/trajectory.h5",
+          "trajectory_sha256": "21419f4ab873e4518bae530bacea88688b464388e9597c01ad87967d11e71065"
+        },
+        {
+          "job_id": "h200-f3-analytic-full-v2-known_force-f3_dev_31_a1p096875",
+          "evaluation": "campaigns/core-v1/evaluation/analytic-full-v2-collected/h200-f3-analytic-full-v2-known_force-f3_dev_31_a1p096875.json",
+          "sha256": "b16abe2efcf569f49bc5d8a2cb654185aa74514f73ef2e805089f43c60c38f47",
+          "remote_trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-analytic-full-v2-known_force-f3_dev_31_a1p096875/20260919T203729-703ee0212c95/trajectory.h5",
+          "trajectory_sha256": "4067b05485e549457dfc0eafdfd8428aca0b02d954df475709e225356470936e"
+        }
+      ]
+    }
+  },
+  "usage": {
+    "cpu_seconds_children": 2381.616928,
+    "sum_process_wall_seconds": 2469.3464393615723,
+    "gpu_hours": 0
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "basis_receipts": [
+    {
+      "host": "ada",
+      "path": "campaigns/core-v1/runtime/attempts/ada-f3-bundled-rollout-mlp-step500-v3/20260919T182248-3eb9731f6ee9/result.json",
+      "sha256": "352cd8802f1d3fcd55558b44cadc82100c3766fb5bdd16952b0e0109565b9f8d"
+    },
+    {
+      "host": "h200",
+      "path": "campaigns/core-v1/reproduction/collected-h200-mlp-v3/execution.json",
+      "sha256": "28531d373abb900fbe1c2ac385f1b2692cb20b5209f8ec23449ad4d10dd79ba4"
+    }
+  ],
+  "bundle_input_bytes": 28883085927,
+  "bundle_input_gib": 26.899469948373735,
+  "case_id": "F3_DEV_08_a0p953125",
+  "diagnostic_only": true,
+  "formal_training_count": 0,
+  "hosts": {
+    "ada": {
+      "planning_wall_seconds": 3600,
+      "prior_peak_gpu_mib_sampled": 568,
+      "prior_peak_rss_mib": 962.81640625,
+      "prior_same_architecture_step500_wall_seconds": 1795.6162359714508,
+      "requested_gpu_peak_mib": 4096,
+      "timeout_seconds": 7200
+    },
+    "h200": {
+      "planning_wall_seconds": 3600,
+      "prior_peak_gpu_mib_sampled": 770,
+      "prior_peak_rss_mib": 1037.55859375,
+      "prior_same_architecture_step500_wall_seconds": 1767.3749918937683,
+      "requested_gpu_peak_mib": 4096,
+      "timeout_seconds": 7200
+    }
+  },
+  "limitations": [
+    "Prior receipts use update500 checkpoint and core_learning rollout; current A8 run is update16 and core_benchmark checkpoint-backed, so wall time and outcome are estimates only.",
+    "Bundle content is approximately 26.9 GiB, but all 65 H5/NPZ assets are exact hardlinks/reusable hashes from the existing F3 transfer.",
+    "This pair is diagnostic; no formal training count, qualification, selection, or ledger evidence is produced."
+  ],
+  "logical_job_count": 2,
+  "model_kind": "mlp",
+  "particles": 34560,
+  "planned_output_reserve_bytes_per_job": 2147483648,
+  "resources_each": {
+    "cpu_cores": 2,
+    "gpu_peak_mib": 4096,
+    "io_weight": 0.25,
+    "min_free_disk_bytes": 4294967296,
+    "ram_mib": 8192
+  },
+  "schema": "core.a8_model_reproduction.resource_estimate.v1",
+  "scope_note": "One complete registered validation case; all32 F3 assets are hash-bound in the bundle for later explicit selection.",
+  "seed": 17,
+  "selected_case_count_per_job": 1,
+  "trajectory_bytes_per_job_observed": 723148320,
+  "trajectory_frames": 836,
+  "transitions": 835,
+  "update": 16
+}

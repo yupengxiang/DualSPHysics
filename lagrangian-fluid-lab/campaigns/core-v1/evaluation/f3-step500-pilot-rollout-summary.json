@@ -1,0 +1,153 @@
+{
+  "completed_case_runs": 3,
+  "formal_core_case_runs": 0,
+  "interpretation": "single F3 validation engineering diagnostic; finite completion does not imply physically valid dynamics",
+  "missing": 0,
+  "protocol": {
+    "aggregation": "case mean within family, then equal-weight family mean",
+    "case_denominator": "all registered future frames, excluding initial state",
+    "confidence_interval_unit": "independent physical case, never frame or particle",
+    "eligible_checkpoint_updates": [
+      8000,
+      16000,
+      24000,
+      32000
+    ],
+    "frame_penalty": 1.0,
+    "frame_score": "mean(min(position_rmse/length,1), min(velocity_rmse/speed,1))",
+    "missing_failed_nonfinite_frame_score": 1.0,
+    "position_scale": "registered characteristic geometry length in metres",
+    "schema": "core.scoring_protocol.v1",
+    "selection": "complete case fraction descending, score ascending, update ascending",
+    "selection_split": "validation",
+    "velocity_scale": "sqrt(gravity magnitude * registered characteristic length)"
+  },
+  "registered_case_runs": 3,
+  "rows": [
+    {
+      "case_id": "F3_DEV_08_a0p953125",
+      "checkpoint_update": 500,
+      "executed": true,
+      "formal_core_case_run": false,
+      "frames_predicted": 835,
+      "model": "mlp",
+      "physics": {
+        "changed_particle_mass_frames": 0,
+        "completed_frames": 835,
+        "expected_frames": 835,
+        "kinetic_energy_error_abs_max_j": 0.9127773305323075,
+        "mass_error_abs_max_kg": 0.0,
+        "validity_mismatch_frames": 0,
+        "wall_chord_mass_kg": 7.7300158255093265,
+        "wall_chord_particle_count": 18323,
+        "wall_chord_statuses": [
+          "checked_static_saved_chords"
+        ]
+      },
+      "position_rmse_m": 0.1678743408757147,
+      "score": {
+        "complete": true,
+        "executed": true,
+        "expected_frames": 835,
+        "failure_category": null,
+        "finite_prefix_frames": 835,
+        "first_failure_frame": null,
+        "raw_error_coverage": 1.0,
+        "raw_position_rmse_frame_mean_m": 0.15924350874284746,
+        "raw_velocity_rmse_frame_mean_mps": 0.1296855045456466,
+        "selection_score": 0.11029117524966597
+      },
+      "source": {
+        "path": "campaigns/core-v1/evidence/h200-f3-pilot-rollout-mlp-step500-001-rollout.json",
+        "sha256": "6a09aebc2133b049299443dfa2d94e9daf076c419b890d837782ea7086f93c5f"
+      },
+      "velocity_rmse_mps": 0.13282461736881004,
+      "wall_count_semantics": "sum of crossing occurrences over saved-frame chords, not unique particles or unique material mass",
+      "wall_diagnostic_failed": true
+    },
+    {
+      "case_id": "F3_DEV_08_a0p953125",
+      "checkpoint_update": 500,
+      "executed": true,
+      "formal_core_case_run": false,
+      "frames_predicted": 835,
+      "model": "graph_raw",
+      "physics": {
+        "changed_particle_mass_frames": 0,
+        "completed_frames": 835,
+        "expected_frames": 835,
+        "kinetic_energy_error_abs_max_j": 24.258968293748097,
+        "mass_error_abs_max_kg": 0.0,
+        "validity_mismatch_frames": 0,
+        "wall_chord_mass_kg": 15.33473477276857,
+        "wall_chord_particle_count": 36349,
+        "wall_chord_statuses": [
+          "checked_static_saved_chords"
+        ]
+      },
+      "position_rmse_m": 0.8738145647438115,
+      "score": {
+        "complete": true,
+        "executed": true,
+        "expected_frames": 835,
+        "failure_category": null,
+        "finite_prefix_frames": 835,
+        "first_failure_frame": null,
+        "raw_error_coverage": 1.0,
+        "raw_position_rmse_frame_mean_m": 0.5873365098327332,
+        "raw_velocity_rmse_frame_mean_mps": 0.3996573729868221,
+        "selection_score": 0.3010075054873621
+      },
+      "source": {
+        "path": "campaigns/core-v1/evidence/h200-f3-pilot-rollout-graph_raw-step500-001-rollout.json",
+        "sha256": "f09940963b807ffad6bb1ef2dec2cc55fd7a1b8f860f136d948962ba6e26fde9"
+      },
+      "velocity_rmse_mps": 0.5185129509401526,
+      "wall_count_semantics": "sum of crossing occurrences over saved-frame chords, not unique particles or unique material mass",
+      "wall_diagnostic_failed": true
+    },
+    {
+      "case_id": "F3_DEV_08_a0p953125",
+      "checkpoint_update": 500,
+      "executed": true,
+      "formal_core_case_run": false,
+      "frames_predicted": 835,
+      "model": "graph_residual",
+      "physics": {
+        "changed_particle_mass_frames": 0,
+        "completed_frames": 835,
+        "expected_frames": 835,
+        "kinetic_energy_error_abs_max_j": 1747915523598664.2,
+        "mass_error_abs_max_kg": 0.0,
+        "validity_mismatch_frames": 0,
+        "wall_chord_mass_kg": 16.47000042721629,
+        "wall_chord_particle_count": 39040,
+        "wall_chord_statuses": [
+          "checked_static_saved_chords"
+        ]
+      },
+      "position_rmse_m": 565408.1901781372,
+      "score": {
+        "complete": true,
+        "executed": true,
+        "expected_frames": 835,
+        "failure_category": null,
+        "finite_prefix_frames": 835,
+        "first_failure_frame": null,
+        "raw_error_coverage": 1.0,
+        "raw_position_rmse_frame_mean_m": 175103.92214151853,
+        "raw_velocity_rmse_frame_mean_mps": 438924.513119122,
+        "selection_score": 0.7667059193996033
+      },
+      "source": {
+        "path": "campaigns/core-v1/evidence/h200-f3-pilot-rollout-graph_residual-step500-001-rollout.json",
+        "sha256": "09280d4c98dcf56e83b2cbc9e57d04a1492293ba6268a55e14e884aa6b9f3255"
+      },
+      "velocity_rmse_mps": 1414076.727501901,
+      "wall_count_semantics": "sum of crossing occurrences over saved-frame chords, not unique particles or unique material mass",
+      "wall_diagnostic_failed": true
+    }
+  ],
+  "schema": "core.pilot_rollout_summary.v1",
+  "time": 1789813887.2687347
+}

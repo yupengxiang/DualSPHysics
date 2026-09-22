@@ -1,0 +1,324 @@
+{
+  "comparison": {
+    "failure_aware_score_differences": {
+      "raw_position_rmse_frame_mean_m": 4.336808689942018e-19,
+      "raw_velocity_rmse_frame_mean_mps": 0.0,
+      "selection_score": 0.0
+    },
+    "failure_event_identity_equal": true,
+    "full_trajectory_reproduction": false,
+    "full_trajectory_reproduction_reason": "original full H5 comparator remains the authoritative reproduction result and remains failed",
+    "left_event": {
+      "category": "finite_wall_penetration",
+      "first_failure_frame": 15,
+      "wall_chord_last_frame": 694,
+      "wall_chord_particle_count": 124,
+      "wall_chord_particle_count_total": 39038,
+      "wall_event_frame_count": 251
+    },
+    "left_failure_event_identity": {
+      "category": "finite_wall_penetration",
+      "endpoint_count": null,
+      "first_failure_frame": 15,
+      "wall_chord_particle_count": 124
+    },
+    "left_scientific_status": "failed",
+    "right_event": {
+      "category": "finite_wall_penetration",
+      "first_failure_frame": 15,
+      "wall_chord_last_frame": 694,
+      "wall_chord_particle_count": 124,
+      "wall_chord_particle_count_total": 39040,
+      "wall_event_frame_count": 252
+    },
+    "right_failure_event_identity": {
+      "category": "finite_wall_penetration",
+      "endpoint_count": null,
+      "first_failure_frame": 15,
+      "wall_chord_particle_count": 124
+    },
+    "right_scientific_status": "failed",
+    "schema": "core.scientific_failure_aware_comparison.v2",
+    "scientific_status_equal": true,
+    "scientific_success": false,
+    "scientific_success_reason": "finite full-horizon execution has a finite saved-chord wall penetration; this overlay censors after its first frame",
+    "score_atol": 0.0001,
+    "score_within_registered_comparison_atol": true
+  },
+  "formal_protocol_modified": false,
+  "geometry": {
+    "bounds_m": {
+      "xmax": 0.45,
+      "xmin": -0.45,
+      "ymax": 0.09,
+      "ymin": -0.09,
+      "zmax": 0.51,
+      "zmin": 0.0
+    },
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "open_faces": [
+      "top"
+    ],
+    "source": "registered F3 finite geometry triangles; no runtime AABB inferred"
+  },
+  "gpu_started": false,
+  "hosts": [
+    {
+      "events": {
+        "first_endpoint_frame": 15,
+        "first_nonfinite_frame": null,
+        "first_wall_frame": 15,
+        "max_position_metric_m": 67680039.66655722,
+        "max_speed_metric_mps": 168421586.6146008,
+        "selected": {
+          "category": "finite_wall_penetration",
+          "first_failure_frame": 15,
+          "wall_chord_last_frame": 694,
+          "wall_chord_particle_count": 124,
+          "wall_chord_particle_count_total": 39038,
+          "wall_event_frame_count": 251
+        },
+        "state_magnitude_threshold_applied": false
+      },
+      "execution_complete": true,
+      "expected_frames": 835,
+      "failure_aware_score": {
+        "censored_after_first_failure_frames": 821,
+        "complete": false,
+        "executed": true,
+        "expected_frames": 835,
+        "failure_category": "finite_wall_penetration",
+        "finite_prefix_frames": 14,
+        "first_failure_frame": 15,
+        "raw_error_coverage": 0.016766467065868262,
+        "raw_position_rmse_frame_mean_m": 0.0010573898786950902,
+        "raw_velocity_rmse_frame_mean_mps": 0.008734870166376247,
+        "selection_score": 0.9832680262679402
+      },
+      "failure_category": null,
+      "finite_rollout_complete": true,
+      "first_failure_frame": null,
+      "formal_receipt_semantics": {
+        "failure_category": null,
+        "first_failure_frame": null,
+        "score_complete": true,
+        "score_selection": 0.7667062566449424,
+        "status": "complete"
+      },
+      "host": "ada",
+      "policy": {
+        "closed_face_endpoint": {
+          "category": "closed_face_domain_exit",
+          "diagnostic_tolerance_m": 1e-09,
+          "limitations": [
+            "registered finite face projection only",
+            "runtime solver-domain AABB is not inferred"
+          ],
+          "open_top": true,
+          "source": "finite_wall_audit.outside_closed_face_masks",
+          "threshold_status": "caller diagnostic value; no F3 formal declaration"
+        },
+        "denominator": "all registered future frames; first failure frame and all later frames receive frame_penalty=1",
+        "nonfinite": {
+          "category": "nonfinite_state",
+          "scope": "active saved position or native velocity"
+        },
+        "precedence": [
+          "nonfinite_state",
+          "finite_wall_penetration",
+          "closed_face_domain_exit"
+        ],
+        "release_state": "candidate_only; no formal training or old reproduction gate",
+        "schema": "core.scientific_failure_policy.v2",
+        "state_magnitude": {
+          "basis": "no preregistered explosion threshold exists; report magnitudes only",
+          "category": null,
+          "status": "diagnostic_only",
+          "threshold": null
+        },
+        "version": "vNext-candidate-only",
+        "wall_chord": {
+          "category": "finite_wall_penetration",
+          "diagnostic_tolerance_m": 1e-09,
+          "limitations": [
+            "finite static triangles only",
+            "saved-state chord, not the exact solver substep path",
+            "moving surfaces return unsupported rather than pass"
+          ],
+          "source": "core_physics.static_wall_crossings saved-state chord",
+          "threshold_status": "implementation diagnostic; not a registered scientific gate"
+        }
+      },
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/float64-full835-collected/ada/float64-rollout.json",
+        "sha256": "77bb5419abf272e36fd15721b032d40313e114122eac4fd83b8f9306a7d5ce10"
+      },
+      "registered_scales": {
+        "length_m": 0.9,
+        "speed_mps": 2.9713633234594523
+      },
+      "schema": "core.scientific_failure_audit.v2",
+      "scientific_failure_category": "finite_wall_penetration",
+      "scientific_first_failure_frame": 15,
+      "scientific_status": "failed",
+      "trajectory": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/float64-full835-collected/ada/float64-rollout.h5",
+        "sha256": "12059939b45d9e28c122bc21a248a1cd99187d69ff1b83ffe93f03423fc47840"
+      }
+    },
+    {
+      "events": {
+        "first_endpoint_frame": 15,
+        "first_nonfinite_frame": null,
+        "first_wall_frame": 15,
+        "max_position_metric_m": 67680039.66655722,
+        "max_speed_metric_mps": 168421586.6146008,
+        "selected": {
+          "category": "finite_wall_penetration",
+          "first_failure_frame": 15,
+          "wall_chord_last_frame": 694,
+          "wall_chord_particle_count": 124,
+          "wall_chord_particle_count_total": 39040,
+          "wall_event_frame_count": 252
+        },
+        "state_magnitude_threshold_applied": false
+      },
+      "execution_complete": true,
+      "expected_frames": 835,
+      "failure_aware_score": {
+        "censored_after_first_failure_frames": 821,
+        "complete": false,
+        "executed": true,
+        "expected_frames": 835,
+        "failure_category": "finite_wall_penetration",
+        "finite_prefix_frames": 14,
+        "first_failure_frame": 15,
+        "raw_error_coverage": 0.016766467065868262,
+        "raw_position_rmse_frame_mean_m": 0.0010573898786950906,
+        "raw_velocity_rmse_frame_mean_mps": 0.008734870166376247,
+        "selection_score": 0.9832680262679402
+      },
+      "failure_category": null,
+      "finite_rollout_complete": true,
+      "first_failure_frame": null,
+      "formal_receipt_semantics": {
+        "failure_category": null,
+        "first_failure_frame": null,
+        "score_complete": true,
+        "score_selection": 0.7667062566449971,
+        "status": "complete"
+      },
+      "host": "h200",
+      "policy": {
+        "closed_face_endpoint": {
+          "category": "closed_face_domain_exit",
+          "diagnostic_tolerance_m": 1e-09,
+          "limitations": [
+            "registered finite face projection only",
+            "runtime solver-domain AABB is not inferred"
+          ],
+          "open_top": true,
+          "source": "finite_wall_audit.outside_closed_face_masks",
+          "threshold_status": "caller diagnostic value; no F3 formal declaration"
+        },
+        "denominator": "all registered future frames; first failure frame and all later frames receive frame_penalty=1",
+        "nonfinite": {
+          "category": "nonfinite_state",
+          "scope": "active saved position or native velocity"
+        },
+        "precedence": [
+          "nonfinite_state",
+          "finite_wall_penetration",
+          "closed_face_domain_exit"
+        ],
+        "release_state": "candidate_only; no formal training or old reproduction gate",
+        "schema": "core.scientific_failure_policy.v2",
+        "state_magnitude": {
+          "basis": "no preregistered explosion threshold exists; report magnitudes only",
+          "category": null,
+          "status": "diagnostic_only",
+          "threshold": null
+        },
+        "version": "vNext-candidate-only",
+        "wall_chord": {
+          "category": "finite_wall_penetration",
+          "diagnostic_tolerance_m": 1e-09,
+          "limitations": [
+            "finite static triangles only",
+            "saved-state chord, not the exact solver substep path",
+            "moving surfaces return unsupported rather than pass"
+          ],
+          "source": "core_physics.static_wall_crossings saved-state chord",
+          "threshold_status": "implementation diagnostic; not a registered scientific gate"
+        }
+      },
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/float64-full835-collected/h200/float64-rollout.json",
+        "sha256": "a3f9963c8d2734ae5f1f6f219e6ece31d06727cc1ec3b8d76f726d8c3210fb01"
+      },
+      "registered_scales": {
+        "length_m": 0.9,
+        "speed_mps": 2.9713633234594523
+      },
+      "schema": "core.scientific_failure_audit.v2",
+      "scientific_failure_category": "finite_wall_penetration",
+      "scientific_first_failure_frame": 15,
+      "scientific_status": "failed",
+      "trajectory": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/float64-full835-collected/h200/float64-rollout.h5",
+        "sha256": "ecd19bd0f2139d4ca4d47922ede3b2d4859397896fc1aefcfc54d0578e25e4d1"
+      }
+    }
+  ],
+  "original_full_result": "campaigns/core-v1/reproduction/float64-full835-collected/paired-comparison-v2.json",
+  "policy": {
+    "closed_face_endpoint": {
+      "category": "closed_face_domain_exit",
+      "diagnostic_tolerance_m": 1e-09,
+      "limitations": [
+        "registered finite face projection only",
+        "runtime solver-domain AABB is not inferred"
+      ],
+      "open_top": true,
+      "source": "finite_wall_audit.outside_closed_face_masks",
+      "threshold_status": "caller diagnostic value; no F3 formal declaration"
+    },
+    "denominator": "all registered future frames; first failure frame and all later frames receive frame_penalty=1",
+    "nonfinite": {
+      "category": "nonfinite_state",
+      "scope": "active saved position or native velocity"
+    },
+    "precedence": [
+      "nonfinite_state",
+      "finite_wall_penetration",
+      "closed_face_domain_exit"
+    ],
+    "release_state": "candidate_only; no formal training or old reproduction gate",
+    "schema": "core.scientific_failure_policy.v2",
+    "state_magnitude": {
+      "basis": "no preregistered explosion threshold exists; report magnitudes only",
+      "category": null,
+      "status": "diagnostic_only",
+      "threshold": null
+    },
+    "version": "vNext-candidate-only",
+    "wall_chord": {
+      "category": "finite_wall_penetration",
+      "diagnostic_tolerance_m": 1e-09,
+      "limitations": [
+        "finite static triangles only",
+        "saved-state chord, not the exact solver substep path",
+        "moving surfaces return unsupported rather than pass"
+      ],
+      "source": "core_physics.static_wall_crossings saved-state chord",
+      "threshold_status": "implementation diagnostic; not a registered scientific gate"
+    }
+  },
+  "schema": "core.scientific_failure_aware_comparison.v2"
+}

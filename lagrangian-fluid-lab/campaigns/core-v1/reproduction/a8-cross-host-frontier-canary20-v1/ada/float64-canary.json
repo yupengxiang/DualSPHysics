@@ -1,0 +1,114 @@
+{
+  "case_id": "F3_DEV_08_a0p953125",
+  "chunk_size": 256,
+  "comparison_protocol": {
+    "identity_time_mass_valid": "exact",
+    "position_absolute_tolerance_m": 1e-05,
+    "relative_tolerance": 0.0001,
+    "schema": "core.cross_host_comparison.v1",
+    "tolerances_frozen": true,
+    "velocity_absolute_tolerance_mps": 0.0001
+  },
+  "completed_steps": 0,
+  "diagnostic_scope": {
+    "description": "bounded 20-step arithmetic isolation only",
+    "formal_evaluation": false,
+    "formal_training": false,
+    "full_835_frame_reproduction": false
+  },
+  "dtype_contract": {
+    "checkpoint_values": "loaded from immutable checkpoint then promoted; checkpoint bytes unchanged",
+    "default_float32_path": "core_cross_host_canary.py remains frozen float32",
+    "feature_construction_dtype": "float32 (core_models.node_features public contract)",
+    "feature_promotion": true,
+    "model_input_dtype": "float64",
+    "neighbor_index_dtype": "int64",
+    "normalization_dtype": "float64",
+    "output_dtype": "float64 numpy SI arrays",
+    "parameter_compute_dtype": "float64",
+    "position_tensor_dtype": "float64",
+    "prior_tensor_dtype": "float64",
+    "variant": "float64_inference"
+  },
+  "environment": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda": {
+      "arch_list": [
+        "sm_75",
+        "sm_80",
+        "sm_86",
+        "sm_90",
+        "sm_100",
+        "sm_120"
+      ],
+      "current_device": 0,
+      "device_capability": [
+        8,
+        9
+      ],
+      "device_index": 0,
+      "device_name": "NVIDIA RTX 6000 Ada Generation",
+      "major": 8,
+      "minor": 9,
+      "multi_processor_count": 142,
+      "total_memory_bytes": 50867404800
+    },
+    "cuda_available": true,
+    "cuda_device_count": 1,
+    "cuda_visible_devices": "GPU-ff68d571-7ed7-31b4-a0c0-16fe8745bd7e",
+    "cudnn_benchmark": false,
+    "cudnn_deterministic": true,
+    "deterministic_algorithms_enabled": true,
+    "deterministic_requested": true,
+    "deterministic_warn_only": false,
+    "driver_query": {
+      "available": true,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-ff68d571-7ed7-31b4-a0c0-16fe8745bd7e"
+    },
+    "hostname": "user-SYS-421GE-TNRT",
+    "modules_before_model": [
+      {
+        "module": "scripts.core_contract",
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/ada-identical-h200-bundle-v3/code/scripts/core_contract.py",
+        "sha256": "ff041e5d6b098167ab6e07231ba3c65de5cc4f5110c6d64bcea99024f04b109a"
+      },
+      {
+        "module": "scripts.core_dataset",
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/ada-identical-h200-bundle-v3/code/scripts/core_dataset.py",
+        "sha256": "0c69bebac6d63db28aa4ead579308d846889943acb97b286b886e3f8c04172b2"
+      },
+      {
+        "module": "scripts.core_models",
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/ada-identical-h200-bundle-v3/code/scripts/core_models.py",
+        "sha256": "73a98b262500c30e46f14aafd2a89f2bea34116c77b6e34ce5e33e7412c38c77"
+      }
+    ],
+    "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+    "python": "3.12.13 | packaged by conda-forge | (main, Aug 11 2026, 10:27:28) [GCC 14.4.0]",
+    "python_executable": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/bin/python3.12",
+    "requested_device": "cuda",
+    "torch_cuda_version": "13.2",
+    "torch_tf32_cudnn": true,
+    "torch_tf32_matmul": false,
+    "torch_version": "2.12.1+cu132"
+  },
+  "error": {
+    "message": "fixed reproduction identity mismatch: core_models: expected 73a98b262500c30e46f14aafd2a89f2bea34116c77, observed 73a98b262500c30e46f14aafd2a89f2bea34116c77b6e34ce5e33e7412c38c77",
+    "traceback": "Traceback (most recent call last):\n  File \"/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/b12f50e6daf67b82a12dd7fab5ff5dd2eef893e169f8fa54e389b0767eb58e72/lagrangian-fluid-lab/scripts/core_cross_host_canary_float64.py\", line 471, in run\n    identity = _fixed_identity(\n               ^^^^^^^^^^^^^^^^\n  File \"/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/b12f50e6daf67b82a12dd7fab5ff5dd2eef893e169f8fa54e389b0767eb58e72/lagrangian-fluid-lab/scripts/core_cross_host_canary_float64.py\", line 254, in _fixed_identity\n    raise ValueError(\"fixed reproduction identity mismatch: \" + \"; \".join(mismatches))\nValueError: fixed reproduction identity mismatch: core_models: expected 73a98b262500c30e46f14aafd2a89f2bea34116c77, observed 73a98b262500c30e46f14aafd2a89f2bea34116c77b6e34ce5e33e7412c38c77\n",
+    "type": "ValueError"
+  },
+  "events": [
+    "environment_captured_before_model_construction"
+  ],
+  "expected_frames": 21,
+  "inference_dtype": "float64",
+  "maximum_steps": 20,
+  "model_kind": "graph_residual",
+  "schema": "core.cross_host_canary.float64.v1",
+  "status": "failed",
+  "steps": [],
+  "trajectory_arrays_output": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/reproduction/a8-cross-host-frontier-canary20-v1/ada/float64-trajectory.npz",
+  "variant": "float64_inference"
+}
