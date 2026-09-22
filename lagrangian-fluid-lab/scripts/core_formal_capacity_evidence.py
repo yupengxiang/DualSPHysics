@@ -230,16 +230,22 @@ def _verify_source_closure(source: Any, *, root: Path, code_root: Path,
         return {"bound": True, "valid": False}
     if payload.get("schema") != SOURCE_CLOSURE_SCHEMA or payload.get("complete") is not True:
         _record_failure(failures, "CAPACITY_SOURCE_CLOSURE", "source closure schema or complete flag is invalid")
+    if payload.get("required_files") != list(REQUIRED_CODE_FILES):
+        _record_failure(failures, "CAPACITY_SOURCE_CLOSURE", "source closure required_files do not match the formal planner closure")
+    if payload.get("missing_files") not in (None, []):
+        _record_failure(failures, "CAPACITY_SOURCE_CLOSURE", "source closure declares missing files")
     files = payload.get("files")
     if not isinstance(files, list) or not files:
         _record_failure(failures, "CAPACITY_SOURCE_CLOSURE", "source closure has no files")
         files = []
     normalized: list[dict[str, Any]] = []
+    declared_names: list[Any] = []
     for item in files:
         if not isinstance(item, Mapping):
             _record_failure(failures, "CAPACITY_SOURCE_CLOSURE", "source closure contains a non-object file row")
             continue
         relative = item.get("relative_path")
+        declared_names.append(relative)
         if relative not in REQUIRED_CODE_FILES:
             _record_failure(failures, "CAPACITY_SOURCE_CLOSURE", f"unexpected source closure path: {relative}")
             continue
@@ -258,6 +264,8 @@ def _verify_source_closure(source: Any, *, root: Path, code_root: Path,
         normalized.append({"relative_path": str(relative), "sha256": observed,
                            "bytes": candidate.stat().st_size})
     names = {item["relative_path"] for item in normalized}
+    if declared_names != list(REQUIRED_CODE_FILES):
+        _record_failure(failures, "CAPACITY_SOURCE_CLOSURE", "source closure files must match the formal planner closure exactly once and in order")
     for required in REQUIRED_CODE_FILES:
         if required not in names:
             _record_failure(failures, "CAPACITY_SOURCE_CLOSURE", f"source closure is missing {required}")

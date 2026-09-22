@@ -275,3 +275,16 @@ def test_capacity_binding_requires_execution_source_closure_hash(tmp_path: Path)
     )
     assert report["formal_capacity_evidence"] is False
     assert "CAPACITY_SOURCE_CLOSURE" in report["blocker_codes"]
+
+
+def test_capacity_binding_rejects_noncanonical_source_closure_rows(tmp_path: Path) -> None:
+    receipt, execution, manifest, closure, _ = _fixture(tmp_path)
+    payload = json.loads(closure.read_text(encoding="utf-8"))
+    payload["files"] = payload["files"][1:] + payload["files"][:1]
+    closure.write_text(json.dumps(payload), encoding="utf-8")
+    report = inspect_capacity_evidence(
+        receipt, execution=execution, manifest=manifest,
+        source_closure=closure, data_root=tmp_path, code_root=ROOT,
+    )
+    assert report["formal_capacity_evidence"] is False
+    assert "CAPACITY_SOURCE_CLOSURE" in report["blocker_codes"]
