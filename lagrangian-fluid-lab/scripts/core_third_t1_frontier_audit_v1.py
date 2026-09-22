@@ -38,6 +38,7 @@ def build_audit() -> dict[str, Any]:
     f6 = load("campaigns/core-v1/cfd/f6-observation-axis-v4-third-t1-route-closed-v1.json")
     f7 = load("campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/root-review-receipt-v2-20260922.json")
     f8 = load("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/candidate-card-v1.json")
+    f8_review = load("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/root-review/terra-high-root-review-v1.json")
     readiness = load("campaigns/core-v1/learning/core-formal-readiness-audit-20260922.json")
 
     assert completion["t1_families"] == ["F3", "F4"]
@@ -49,6 +50,8 @@ def build_audit() -> dict[str, Any]:
     assert f7["admission_granted"] is False
     assert f8["status"] == "proposal_only_root_review_required"
     assert f8["admission_granted"] is False
+    assert f8_review["decision"] == "conditional_go_static_preparation_no_admission"
+    assert f8_review["admission_granted"] is False
     assert readiness["status"] == "blocked"
 
     return {
@@ -87,6 +90,7 @@ def build_audit() -> dict[str, Any]:
                 "scope_id": f8["scope_id"],
                 "admission_granted": f8["admission_granted"],
                 "qualification_credit": f8["qualification_credit"],
+                "terra_high_review": f8_review["decision"],
                 "fresh_definition_present": f8["execution_controls"]["definition_written"],
                 "next_allowed_action": "root interpretation and independent admission review only; no GenCase or solver execution",
             },
@@ -116,6 +120,7 @@ def build_audit() -> dict[str, Any]:
             bind("campaigns/core-v1/evidence/f6-observation-axis-v4-third-t1-route-decision-receipt-v1.json", "F6 closure receipt"),
             bind("campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/root-review-receipt-v2-20260922.json", "F7 no-go root receipt"),
             bind("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/candidate-card-v1.json", "F8 proposal-only candidate card"),
+            bind("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/root-review/terra-high-root-review-v1.json", "F8 Terra High root-style review"),
             bind("campaigns/core-v1/learning/core-formal-readiness-audit-20260922.json", "current formal readiness"),
         ],
     }

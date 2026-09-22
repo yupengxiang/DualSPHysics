@@ -1,0 +1,50 @@
+{
+  "schema": "core.cfd.f8.root_review.terra_high.v1",
+  "reviewer": {
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "agent_id": "01a0c85a-2f31-7b60-b97e-bd5839fda4d4"
+  },
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001",
+  "decision": "conditional_go_static_preparation_no_admission",
+  "admission_granted": false,
+  "qualification_credit": 0,
+  "independence": {
+    "status": "principally_independent_candidate",
+    "basis": "fully filled periodic channel with time-varying uniform acceleration and viscous momentum diffusion; no free-surface release, transfer, rigid-body feedback, pump motion, torque, droplet, or impact event"
+  },
+  "plan_boundary": {
+    "free_surface_is_explicit_absolute_t1_gate": false,
+    "free_surface_is_scope_interpretation_gate": true,
+    "root_must_decide_before_admission": true
+  },
+  "blocking_findings": [
+    "proposal calls the mechanism pressure-driven while the planned input is accinput linear acceleration; sign, units, frame, and pressure-gradient equivalence must be frozen or the name must change to body-force-driven",
+    "official sources separately demonstrate syntax and do not validate the combined target Definition",
+    "no fresh Definition, BI4, native preflight, solver, decoder, or qualification receipt exists"
+  ],
+  "minimum_admission_gates": [
+    "root scope ruling on non-free-surface F8",
+    "fresh hashed Definition, control file, and output namespace",
+    "combined semantic validation for one fluid, zero gravity, accinput, XY periodicity, z no-slip/mDBC, and no moving or rigid bodies",
+    "frozen H, nu, omega, A, Mach/density limits, dt, cadence, transient window, amplitude/phase/flux gates",
+    "native static preflight for particles, periodic copies, wall clearance, overlaps, lifecycle, and excluded particles",
+    "bounded CPU anchor with decoded trajectory, full time axis, profile, parser, and integrity receipts",
+    "only then freeze and run 13+2 qualification before any production or T1 credit"
+  ],
+  "execution_controls": {
+    "definition_written": false,
+    "gencase_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "training_started": false
+  },
+  "bound_candidate_card": {
+    "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/candidate-card-v1.json",
+    "sha256": "7663c9244decd142321835182f2d61043785023aea5f745870b06870c87322d4"
+  }
+}
