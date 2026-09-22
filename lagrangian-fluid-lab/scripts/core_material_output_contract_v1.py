@@ -37,7 +37,11 @@ preserves negative evidence without granting any qualification credit.
 from __future__ import annotations
 
 from copy import deepcopy
+import hashlib
+import json
 import math
+from pathlib import Path
+import re
 from typing import Any
 
 
@@ -49,6 +53,13 @@ DENOMINATOR_POLICY = "all_initial_mass"
 PATH_COVERAGE_POLICY = "common_reliable_mass_over_all_initial_mass"
 BUCKETS = ("source", "destination", "unknown")
 EVENTS = ("first_passage", "return", "residence")
+ADMISSION_SCHEMA = "core.material.output_admission.v1"
+MATERIAL_ADMISSION_SCHEMA = ADMISSION_SCHEMA
+ROOT_ADMISSION_SCHEMA = "core.material.root_admission.v1"
+ROOT_PHYSICAL_CASE_ID = "__root__"
+WINDOW_TOLERANCE_S = 1.0e-9
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+_CASE_ARTIFACT_ROLES = frozenset({"source_window", "material_output", "checkpoint"})
 
 
 def _finite_number(value: Any, name: str) -> float:
@@ -416,6 +427,612 @@ def _validate_family_specific(family: str, fields: dict[str, Any]) -> dict[str, 
     return normalized
 
 
+def _normalized_ids(value: Any, name: str) -> tuple[str, ...]:
+    """Normalize an externally supplied denominator without trusting its order."""
+    if isinstance(value, (str, bytes)) or not isinstance(value, (list, tuple, set, frozenset)):
+        raise ValueError(f"{name} must be a non-empty collection of ids")
+    if not value:
+        raise ValueError(f"{name} must not be empty")
+    values = [_require_string(item, f"{name}[{index}]") for index, item in enumerate(value)]
+    if len(set(values)) != len(values):
+        raise ValueError(f"{name} must not contain duplicates")
+    return tuple(sorted(values))
+
+
+def _positive_integer(value: Any, name: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise ValueError(f"{name} must be a positive integer")
+    return value
+
+
+def _sha256(value: Any, name: str) -> str:
+    if not isinstance(value, str) or _SHA256_RE.fullmatch(value) is None:
+        raise ValueError(f"{name} must be a lowercase SHA-256 digest")
+    return value
+
+
+def _canonical_digest(value: Any) -> str:
+    try:
+        encoded = json.dumps(
+            value,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode("utf-8")
+    except (TypeError, ValueError) as exc:
+        raise ValueError("admission binding is not canonical JSON") from exc
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(8 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _artifact_root(value: Any) -> Path:
+    if not isinstance(value, (str, Path)):
+        raise ValueError("artifact_root must be a path")
+    root = Path(value).expanduser().resolve()
+    if not root.is_dir():
+        raise ValueError("artifact_root must be an existing directory")
+    return root
+
+
+def _verify_artifact(
+    value: Any,
+    *,
+    root: Path,
+    name: str,
+    expected_role: str | None = None,
+    expected_physical_case_id: str | None = None,
+) -> dict[str, Any]:
+    """Verify one relative, content-addressed artifact without following root escapes."""
+    binding = _require_object(value, name)
+    artifact_id = _require_string(binding.get("artifact_id"), f"{name}.artifact_id")
+    role = _require_string(binding.get("role"), f"{name}.role")
+    if expected_role is not None and role != expected_role:
+        raise ValueError(f"{name}.role must be {expected_role!r}")
+    if role not in _CASE_ARTIFACT_ROLES and role != "root_admission":
+        raise ValueError(f"{name}.role is not a registered artifact role")
+    physical_case_id = _require_string(
+        binding.get("physical_case_id"), f"{name}.physical_case_id"
+    )
+    if expected_physical_case_id is not None and physical_case_id != expected_physical_case_id:
+        raise ValueError(
+            f"{name}.physical_case_id does not match {expected_physical_case_id!r}"
+        )
+    path_text = _require_string(binding.get("path"), f"{name}.path")
+    path = Path(path_text).expanduser()
+    if path.is_absolute():
+        raise ValueError(f"{name}.path must be relative to artifact_root")
+    resolved = (root / path).resolve()
+    try:
+        relative = resolved.relative_to(root)
+    except ValueError as exc:
+        raise ValueError(f"{name}.path escapes artifact_root") from exc
+    if not resolved.is_file():
+        raise ValueError(f"{name}.path does not name a regular file")
+    declared_bytes = _positive_integer(binding.get("bytes"), f"{name}.bytes")
+    declared_sha256 = _sha256(binding.get("sha256"), f"{name}.sha256")
+    actual_bytes = resolved.stat().st_size
+    if declared_bytes != actual_bytes:
+        raise ValueError(f"{name}.bytes does not match the artifact")
+    actual_sha256 = _file_sha256(resolved)
+    if declared_sha256 != actual_sha256:
+        raise ValueError(f"{name}.sha256 does not match the artifact")
+    return {
+        "artifact_id": artifact_id,
+        "role": role,
+        "physical_case_id": physical_case_id,
+        "path": relative.as_posix(),
+        "sha256": actual_sha256,
+        "bytes": actual_bytes,
+    }
+
+
+def _source_coverage_gate(
+    payload: dict[str, Any],
+    base: dict[str, Any],
+    required_source_ids: tuple[str, ...],
+) -> tuple[bool, list[str], dict[str, Any]]:
+    coverage = payload.get("source_coverage")
+    failures: list[str] = []
+    if not isinstance(coverage, dict):
+        return False, ["source_coverage_missing"], {"source_count": 0, "rows": []}
+
+    try:
+        if coverage.get("denominator_policy") != DENOMINATOR_POLICY:
+            failures.append("source_denominator_policy")
+        if coverage.get("family") != base["family"]:
+            failures.append("source_coverage_family")
+        if coverage.get("case_id") != base["case_id"]:
+            failures.append("source_coverage_case_id")
+        declared = coverage.get("required_source_ids")
+        if declared != list(required_source_ids):
+            failures.append("source_denominator_ids")
+        rows = coverage.get("rows")
+        if not isinstance(rows, list) or not rows:
+            failures.append("source_rows_missing")
+            rows = []
+        seen: set[str] = set()
+        total_mass = 0.0
+        maximum_unknown = 0.0
+        normalized_rows: list[dict[str, Any]] = []
+        for index, raw in enumerate(rows):
+            row = _require_object(raw, f"source_coverage.rows[{index}]")
+            source_id = _require_string(
+                row.get("source_id"), f"source_coverage.rows[{index}].source_id"
+            )
+            if source_id in seen:
+                failures.append("source_row_duplicate")
+            seen.add(source_id)
+            if row.get("denominator_policy") != DENOMINATOR_POLICY:
+                failures.append("source_row_denominator_policy")
+            source_mass = _finite_number(
+                row.get("initial_mass_kg"),
+                f"source_coverage.rows[{index}].initial_mass_kg",
+            )
+            if source_mass <= 0:
+                failures.append("source_row_mass")
+            unknown = _bounded(
+                row.get("unknown_fraction_max"),
+                f"source_coverage.rows[{index}].unknown_fraction_max",
+            )
+            total_mass += source_mass
+            maximum_unknown = max(maximum_unknown, unknown)
+            normalized_rows.append(
+                {
+                    "source_id": source_id,
+                    "initial_mass_kg": source_mass,
+                    "unknown_fraction_max": unknown,
+                    "denominator_policy": DENOMINATOR_POLICY,
+                }
+            )
+        if seen != set(required_source_ids):
+            failures.append("source_row_coverage")
+        initial_mass = base["mass"]["initial_mass_kg"]
+        if not _close(total_mass, initial_mass, MASS_CLOSURE_TOLERANCE_KG):
+            failures.append("source_denominator_mass_closure")
+        if maximum_unknown > UNKNOWN_FRACTION_LIMIT:
+            failures.append("source_unknown_gate")
+        for field, expected in (
+            ("source_count", len(required_source_ids)),
+            ("initial_mass_kg", initial_mass),
+            ("source_mass_sum_kg", total_mass),
+        ):
+            if field in coverage:
+                actual = coverage[field]
+                if field == "source_count":
+                    if isinstance(actual, bool) or not isinstance(actual, int) or actual != expected:
+                        failures.append(f"source_coverage_{field}")
+                elif not _close(_finite_number(actual, f"source_coverage.{field}"), expected, MASS_CLOSURE_TOLERANCE_KG):
+                    failures.append(f"source_coverage_{field}")
+    except ValueError as exc:
+        failures.append(str(exc))
+        normalized_rows = []
+        total_mass = 0.0
+        maximum_unknown = 1.0
+
+    normalized = {
+        "schema": coverage.get("schema"),
+        "denominator_policy": coverage.get("denominator_policy"),
+        "required_source_ids": list(required_source_ids),
+        "source_count": len(normalized_rows),
+        "source_mass_sum_kg": total_mass,
+        "maximum_source_unknown_fraction": maximum_unknown,
+        "rows": normalized_rows,
+    }
+    return not failures, sorted(set(failures)), normalized
+
+
+def _full_window_gate(
+    payload: dict[str, Any],
+    base: dict[str, Any],
+    artifacts: dict[str, dict[str, Any]],
+    expected_full_window_s: float,
+) -> tuple[bool, list[str], dict[str, Any] | None]:
+    failures: list[str] = []
+    window = payload.get("full_window")
+    if not isinstance(window, dict):
+        return False, ["full_window_missing"], None
+    start = end = observed_start = observed_end = None
+    frame_start = frame_end = frame_count = None
+    source_id = material_id = None
+    try:
+        if window.get("required") is not True:
+            failures.append("full_window_not_required")
+        if window.get("complete") is not True:
+            failures.append("full_window_incomplete")
+        start = _finite_number(window.get("start_s"), "full_window.start_s")
+        end = _finite_number(window.get("end_s"), "full_window.end_s")
+        observed_start = _finite_number(
+            window.get("observed_start_s"), "full_window.observed_start_s"
+        )
+        observed_end = _finite_number(
+            window.get("observed_end_s"), "full_window.observed_end_s"
+        )
+        if not _close(start, 0.0, WINDOW_TOLERANCE_S):
+            failures.append("full_window_start")
+        if not _close(observed_start, start, WINDOW_TOLERANCE_S):
+            failures.append("full_window_observed_start")
+        if not _close(end, expected_full_window_s, WINDOW_TOLERANCE_S):
+            failures.append("full_window_registered_end")
+        if not _close(observed_end, end, WINDOW_TOLERANCE_S):
+            failures.append("full_window_observed_end")
+        family_window_key = "full_window_s" if base["family"] == "F3" else "event_window_s"
+        family_window = _finite_number(
+            base["family_specific"].get(family_window_key),
+            f"family_specific.{family_window_key}",
+        )
+        if not _close(family_window, expected_full_window_s, WINDOW_TOLERANCE_S):
+            failures.append("full_window_family_binding")
+        frame_start = window.get("frame_start")
+        frame_end = window.get("frame_end")
+        frame_count = window.get("frame_count")
+        if isinstance(frame_start, bool) or not isinstance(frame_start, int) or frame_start != 0:
+            failures.append("full_window_frame_start")
+        if isinstance(frame_end, bool) or not isinstance(frame_end, int) or frame_end < 1:
+            failures.append("full_window_frame_end")
+        if isinstance(frame_count, bool) or not isinstance(frame_count, int) or frame_count < 2:
+            failures.append("full_window_frame_count")
+        elif (
+            isinstance(frame_start, int)
+            and isinstance(frame_end, int)
+            and frame_end >= 1
+            and frame_count != frame_end - frame_start + 1
+        ):
+            failures.append("full_window_frame_count_binding")
+        if window.get("native_rows_exact") is not True:
+            failures.append("full_window_native_rows")
+        if window.get("no_stride_or_synthetic_cadence") is not True:
+            failures.append("full_window_cadence")
+        source_id = _require_string(window.get("source_artifact_id"), "full_window.source_artifact_id")
+        material_id = _require_string(
+            window.get("material_artifact_id"), "full_window.material_artifact_id"
+        )
+        source = artifacts.get(source_id)
+        material = artifacts.get(material_id)
+        if source is None or source.get("role") != "source_window":
+            failures.append("full_window_source_artifact_binding")
+        if material is None or material.get("role") != "material_output":
+            failures.append("full_window_material_artifact_binding")
+        if source is not None and window.get("source_artifact_sha256") != source["sha256"]:
+            failures.append("full_window_source_hash_binding")
+        if material is not None and window.get("material_artifact_sha256") != material["sha256"]:
+            failures.append("full_window_material_hash_binding")
+        for event_name in EVENTS:
+            event = base["events"][event_name]
+            if event["censor"]["type"] != "none":
+                failures.append(f"full_window_{event_name}_right_censored")
+    except ValueError as exc:
+        failures.append(str(exc))
+        start = end = observed_start = observed_end = None
+        frame_start = frame_end = frame_count = None
+        source_id = material_id = None
+    normalized = {
+        "required": window.get("required"),
+        "complete": window.get("complete"),
+        "start_s": start,
+        "end_s": end,
+        "observed_start_s": observed_start,
+        "observed_end_s": observed_end,
+        "frame_start": frame_start,
+        "frame_end": frame_end,
+        "frame_count": frame_count,
+        "source_artifact_id": source_id,
+        "material_artifact_id": material_id,
+        "native_rows_exact": window.get("native_rows_exact"),
+        "no_stride_or_synthetic_cadence": window.get("no_stride_or_synthetic_cadence"),
+    }
+    return not failures, sorted(set(failures)), normalized
+
+
+def _root_admission_gate(
+    root_admission: Any,
+    *,
+    root: Path,
+    registered_physical_case_ids: tuple[str, ...],
+    required_source_ids: tuple[str, ...],
+    expected_full_window_s: float,
+    binding_digest: str | None,
+    used_artifact_ids: set[str],
+    used_artifact_paths: set[str],
+    used_artifact_hashes: set[str],
+) -> tuple[bool, list[str], dict[str, Any]]:
+    failures: list[str] = []
+    if not isinstance(root_admission, dict):
+        return False, ["root_admission_missing"], {}
+    try:
+        if root_admission.get("schema") != ROOT_ADMISSION_SCHEMA:
+            failures.append("root_admission_schema")
+        if root_admission.get("granted") is not True:
+            failures.append("root_admission_not_granted")
+        if root_admission.get("status") not in ("approved", "accepted"):
+            failures.append("root_admission_status")
+        if root_admission.get("T2_macro") is True or root_admission.get("qualified_T2_macro") is True:
+            failures.append("root_admission_cannot_claim_t2")
+        if root_admission.get("physical_case_ids") != list(registered_physical_case_ids):
+            failures.append("root_admission_case_denominator")
+        if root_admission.get("required_source_ids") != list(required_source_ids):
+            failures.append("root_admission_source_denominator")
+        declared_window = _finite_number(
+            root_admission.get("full_window_s"), "root_admission.full_window_s"
+        )
+        if not _close(declared_window, expected_full_window_s, WINDOW_TOLERANCE_S):
+            failures.append("root_admission_full_window")
+        if binding_digest is None or root_admission.get("output_binding_sha256") != binding_digest:
+            failures.append("root_admission_output_binding")
+        artifact = _verify_artifact(
+            root_admission.get("artifact"),
+            root=root,
+            name="root_admission.artifact",
+            expected_role="root_admission",
+            expected_physical_case_id=ROOT_PHYSICAL_CASE_ID,
+        )
+        if artifact["artifact_id"] in used_artifact_ids:
+            failures.append("root_admission_artifact_reused")
+        if artifact.get("path") in used_artifact_paths:
+            failures.append("root_admission_artifact_path_reused")
+        if artifact.get("sha256") in used_artifact_hashes:
+            failures.append("root_admission_artifact_hash_reused")
+        used_artifact_ids.add(artifact["artifact_id"])
+        used_artifact_paths.add(artifact["path"])
+        used_artifact_hashes.add(artifact["sha256"])
+    except (ValueError, OSError) as exc:
+        failures.append(str(exc))
+        artifact = {}
+    normalized = {
+        "schema": root_admission.get("schema"),
+        "granted": root_admission.get("granted"),
+        "status": root_admission.get("status"),
+        "physical_case_ids": root_admission.get("physical_case_ids"),
+        "required_source_ids": root_admission.get("required_source_ids"),
+        "full_window_s": root_admission.get("full_window_s"),
+        "output_binding_sha256": root_admission.get("output_binding_sha256"),
+        "artifact": artifact,
+    }
+    return not failures, sorted(set(failures)), normalized
+
+
+def audit_material_output_contract(
+    outputs: Any,
+    *,
+    registered_physical_case_ids: Any,
+    required_source_ids: Any,
+    artifact_root: str | Path,
+    expected_full_window_s: Any,
+    root_admission: Any,
+) -> dict[str, Any]:
+    """Audit a complete material-output collection without granting macro T2.
+
+    ``evaluate_material_output`` is intentionally a single-case diagnostic
+    contract.  This firewall is the only helper in this module that may inspect
+    a collection.  Its denominators are supplied externally: a sidecar cannot
+    shrink them by declaring a smaller list.  Every physical case must appear
+    exactly once, every registered source must appear exactly once per case,
+    every artifact is re-hashed under ``artifact_root``, and a separately
+    supplied root-admission receipt must bind the resulting case/artifact/window
+    digest.  A passing audit is an admission/readiness observation only;
+    ``T2_macro`` remains false and no registry or ledger is touched.
+    """
+    registered_ids = _normalized_ids(registered_physical_case_ids, "registered_physical_case_ids")
+    source_ids = _normalized_ids(required_source_ids, "required_source_ids")
+    root = _artifact_root(artifact_root)
+    expected_window = _finite_number(expected_full_window_s, "expected_full_window_s")
+    if expected_window <= 0:
+        raise ValueError("expected_full_window_s must be positive")
+    if not isinstance(outputs, list):
+        raise ValueError("outputs must be a list; one sidecar is not a collection admission")
+
+    physical_ids = [
+        item.get("physical_case_id") if isinstance(item, dict) else None for item in outputs
+    ]
+    valid_physical_ids = [item for item in physical_ids if isinstance(item, str) and item.strip()]
+    physical_unique = len(valid_physical_ids) == len(set(valid_physical_ids)) == len(outputs)
+    case_ids = [item.get("case_id") if isinstance(item, dict) else None for item in outputs]
+    case_unique = (
+        len(case_ids) == len(set(case_ids))
+        and all(isinstance(item, str) and item.strip() for item in case_ids)
+    )
+    registered_coverage = set(valid_physical_ids) == set(registered_ids) and len(outputs) == len(registered_ids)
+
+    case_reports: list[dict[str, Any]] = []
+    bindings: list[dict[str, Any]] = []
+    used_artifact_ids: set[str] = set()
+    used_artifact_paths: set[str] = set()
+    used_artifact_hashes: set[str] = set()
+    for index, raw in enumerate(outputs):
+        failures: list[str] = []
+        if not isinstance(raw, dict):
+            case_reports.append(
+                {"index": index, "physical_case_id": None, "case_id": None, "passed": False,
+                 "failure_reasons": ["output_not_object"], "gates": {}}
+            )
+            continue
+        physical_case_id = raw.get("physical_case_id")
+        case_id = raw.get("case_id")
+        try:
+            physical_case_id = _require_string(physical_case_id, f"outputs[{index}].physical_case_id")
+            case_id = _require_string(case_id, f"outputs[{index}].case_id")
+            base = evaluate_material_output(raw)
+            base_pass = bool(base["passed"])
+            if not base_pass:
+                failures.extend(f"base_{reason}" for reason in base["failure_reasons"])
+            if raw.get("diagnostic_only") is not True or raw.get("qualification_claim") != "none":
+                failures.append("diagnostic_or_claimed_output")
+            source_pass, source_failures, source_summary = _source_coverage_gate(
+                raw, base, source_ids
+            )
+            failures.extend(source_failures)
+            artifact_rows = raw.get("artifact_bindings")
+            artifacts: dict[str, dict[str, Any]] = {}
+            artifact_gate_pass = True
+            if not isinstance(artifact_rows, list) or not artifact_rows:
+                failures.append("artifact_bindings_missing")
+                artifact_gate_pass = False
+            else:
+                for artifact_index, artifact_row in enumerate(artifact_rows):
+                    try:
+                        normalized = _verify_artifact(
+                            artifact_row,
+                            root=root,
+                            name=f"outputs[{index}].artifact_bindings[{artifact_index}]",
+                            expected_physical_case_id=physical_case_id,
+                        )
+                        if normalized["artifact_id"] in used_artifact_ids:
+                            raise ValueError("artifact_id is reused across material cases")
+                        if normalized["path"] in used_artifact_paths:
+                            raise ValueError("artifact path is reused across material cases")
+                        if normalized["sha256"] in used_artifact_hashes:
+                            raise ValueError("artifact hash is reused across material cases")
+                        used_artifact_ids.add(normalized["artifact_id"])
+                        used_artifact_paths.add(normalized["path"])
+                        used_artifact_hashes.add(normalized["sha256"])
+                        artifacts[normalized["artifact_id"]] = normalized
+                    except (ValueError, OSError) as exc:
+                        failures.append(str(exc))
+                        artifact_gate_pass = False
+            roles = {item["role"] for item in artifacts.values()}
+            if not {"source_window", "material_output"} <= roles:
+                failures.append("required_artifact_roles_missing")
+                artifact_gate_pass = False
+            window_pass, window_failures, window_summary = _full_window_gate(
+                raw, base, artifacts, expected_window
+            )
+            failures.extend(window_failures)
+            if source_pass is False:
+                failures.extend(f"source_{reason}" for reason in source_failures)
+            case_pass = not failures
+            if case_pass and window_summary is not None:
+                source_artifact = artifacts[window_summary["source_artifact_id"]]
+                material_artifact = artifacts[window_summary["material_artifact_id"]]
+                bindings.append(
+                    {
+                        "physical_case_id": physical_case_id,
+                        "case_id": case_id,
+                        "family": base["family"],
+                        "source_artifact_sha256": source_artifact["sha256"],
+                        "material_artifact_sha256": material_artifact["sha256"],
+                        "full_window": window_summary,
+                    }
+                )
+            case_reports.append(
+                {
+                    "index": index,
+                    "physical_case_id": physical_case_id,
+                    "case_id": case_id,
+                    "family": base.get("family"),
+                    "passed": case_pass,
+                    "failure_reasons": sorted(set(failures)),
+                    "gates": {
+                        "base_output_contract": base_pass,
+                        "source_coverage": source_pass,
+                        "artifact_hash_bytes": artifact_gate_pass,
+                        "full_window_binding": window_pass,
+                    },
+                    "source_coverage": source_summary,
+                    "full_window": window_summary,
+                    "artifacts": sorted(artifacts.values(), key=lambda item: item["artifact_id"]),
+                }
+            )
+        except (ValueError, OSError) as exc:
+            failures.append(str(exc))
+            case_reports.append(
+                {
+                    "index": index,
+                    "physical_case_id": physical_case_id,
+                    "case_id": case_id,
+                    "passed": False,
+                    "failure_reasons": sorted(set(failures)),
+                    "gates": {},
+                }
+            )
+
+    output_binding_digest = None
+    if len(bindings) == len(outputs) and all(item["passed"] for item in case_reports):
+        output_binding_digest = _canonical_digest(sorted(bindings, key=lambda item: item["physical_case_id"]))
+    root_pass, root_failures, root_summary = _root_admission_gate(
+        root_admission,
+        root=root,
+        registered_physical_case_ids=registered_ids,
+        required_source_ids=source_ids,
+        expected_full_window_s=expected_window,
+        binding_digest=output_binding_digest,
+        used_artifact_ids=used_artifact_ids,
+        used_artifact_paths=used_artifact_paths,
+        used_artifact_hashes=used_artifact_hashes,
+    )
+    all_source_pass = bool(case_reports) and all(
+        report.get("gates", {}).get("source_coverage") is True for report in case_reports
+    )
+    all_artifact_pass = bool(case_reports) and all(
+        report.get("gates", {}).get("artifact_hash_bytes") is True for report in case_reports
+    )
+    all_window_pass = bool(case_reports) and all(
+        report.get("gates", {}).get("full_window_binding") is True for report in case_reports
+    )
+    base_pass = bool(case_reports) and all(
+        report.get("gates", {}).get("base_output_contract") is True for report in case_reports
+    )
+    gates = {
+        "diagnostic_sidecar_block": True,
+        "physical_case_uniqueness": physical_unique and case_unique,
+        "registered_physical_case_coverage": registered_coverage,
+        "source_coverage": all_source_pass,
+        "artifact_hash_bytes": all_artifact_pass,
+        "root_admission": root_pass,
+        "full_window_binding": all_window_pass,
+        "base_output_contract": base_pass,
+    }
+    failures = [name for name, passed in gates.items() if not passed]
+    if not physical_unique:
+        failures.append("duplicate_or_missing_physical_case_id")
+    if not case_unique:
+        failures.append("duplicate_or_missing_case_id")
+    if not registered_coverage:
+        failures.append("registered_physical_case_denominator")
+    failures.extend(f"root_{reason}" for reason in root_failures)
+    return {
+        "schema": ADMISSION_SCHEMA,
+        "status": "admission_ready_but_non_qualifying" if not failures else "blocked_for_macro_t2",
+        "diagnostic_only": True,
+        "qualification_claim": "none",
+        "qualification_credit": 0,
+        "T2_macro": False,
+        "T2_path": False,
+        "admission_pass": not failures,
+        "macro_t2_upgrade_blocked": True,
+        "failure_reasons": sorted(set(failures)),
+        "gates": gates,
+        "registered_physical_case_ids": list(registered_ids),
+        "required_source_ids": list(source_ids),
+        "expected_full_window_s": expected_window,
+        "physical_case_ids": sorted(item for item in valid_physical_ids),
+        "case_count": len(outputs),
+        "case_reports": case_reports,
+        "output_binding_sha256": output_binding_digest,
+        "root_admission": root_summary,
+        "execution_constraints": {
+            "json_source_only": True,
+            "solver_started": False,
+            "gpu_started": False,
+            "training_started": False,
+            "registry_mutation": 0,
+            "ledger_mutation": 0,
+            "qualification_credit_registered": 0,
+        },
+    }
+
+
+def audit_material_output_admission(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    """Explicit-name alias for :func:`audit_material_output_contract`."""
+    return audit_material_output_contract(*args, **kwargs)
+
+
 def evaluate_material_output(payload: dict[str, Any]) -> dict[str, Any]:
     """Return a diagnostic receipt for one JSON-only material output.
 
@@ -495,13 +1112,20 @@ def validate_material_output_diagnostic(payload: dict[str, Any]) -> dict[str, An
 
 __all__ = [
     "BUCKETS",
+    "ADMISSION_SCHEMA",
     "DENOMINATOR_POLICY",
     "EVENTS",
+    "MATERIAL_ADMISSION_SCHEMA",
     "MASS_CLOSURE_TOLERANCE_KG",
     "OUTPUT_SCHEMA",
     "PATH_COVERAGE_POLICY",
+    "ROOT_ADMISSION_SCHEMA",
+    "ROOT_PHYSICAL_CASE_ID",
     "SCHEMA",
     "UNKNOWN_FRACTION_LIMIT",
+    "WINDOW_TOLERANCE_S",
+    "audit_material_output_admission",
+    "audit_material_output_contract",
     "evaluate_material_output",
     "validate_material_output",
     "validate_material_output_diagnostic",

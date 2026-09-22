@@ -1,14 +1,22 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import hashlib
+import json
 import math
+from pathlib import Path
 
 import pytest
 
 from scripts.core_material_output_contract_v1 import (
+    ADMISSION_SCHEMA,
     PATH_COVERAGE_POLICY,
+    ROOT_ADMISSION_SCHEMA,
+    ROOT_PHYSICAL_CASE_ID,
     SCHEMA,
     UNKNOWN_FRACTION_LIMIT,
+    audit_material_output_admission,
+    audit_material_output_contract,
     evaluate_material_output,
     validate_material_output,
 )
@@ -247,3 +255,233 @@ def test_qualification_fields_are_fail_closed_and_numeric_zero_is_required() -> 
     value["T2_path"] = True
     with pytest.raises(ValueError, match="T2_path"):
         evaluate_material_output(value)
+
+
+def _canonical_digest(value: object) -> str:
+    encoded = json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _file_binding(path: Path, artifact_id: str, role: str, physical_case_id: str) -> dict:
+    raw = path.read_bytes()
+    return {
+        "artifact_id": artifact_id,
+        "role": role,
+        "physical_case_id": physical_case_id,
+        "path": path.name,
+        "sha256": hashlib.sha256(raw).hexdigest(),
+        "bytes": len(raw),
+    }
+
+
+def _complete_collection(tmp_path: Path, physical_case_ids: tuple[str, ...] = ("physical-a",)) -> tuple[list[dict], dict]:
+    outputs: list[dict] = []
+    for index, physical_case_id in enumerate(physical_case_ids):
+        value = _f3_output()
+        value["case_id"] = f"material-case-{index}"
+        value["physical_case_id"] = physical_case_id
+        for event in value["events"].values():
+            event["censor"] = {
+                "type": "none",
+                "fraction": 0.0,
+                "policy": "no_censoring",
+                "counts_as_acceptance": False,
+            }
+        value["source_coverage"] = {
+            "schema": "core.material.source_summary.v1",
+            "family": value["family"],
+            "case_id": value["case_id"],
+            "denominator_policy": "all_initial_mass",
+            "required_source_ids": ["source-a", "source-b"],
+            "source_count": 2,
+            "initial_mass_kg": 100.0,
+            "source_mass_sum_kg": 100.0,
+            "rows": [
+                {
+                    "source_id": "source-a",
+                    "initial_mass_kg": 50.0,
+                    "unknown_fraction_max": 0.005,
+                    "denominator_policy": "all_initial_mass",
+                },
+                {
+                    "source_id": "source-b",
+                    "initial_mass_kg": 50.0,
+                    "unknown_fraction_max": 0.005,
+                    "denominator_policy": "all_initial_mass",
+                },
+            ],
+        }
+        source_path = tmp_path / f"{physical_case_id}-source.bin"
+        material_path = tmp_path / f"{physical_case_id}-material.json"
+        source_path.write_bytes(f"source-{physical_case_id}".encode("utf-8"))
+        material_path.write_text(
+            json.dumps(value, sort_keys=True, allow_nan=False), encoding="utf-8"
+        )
+        source = _file_binding(source_path, f"{physical_case_id}-source", "source_window", physical_case_id)
+        material = _file_binding(material_path, f"{physical_case_id}-material", "material_output", physical_case_id)
+        value["artifact_bindings"] = [source, material]
+        value["full_window"] = {
+            "required": True,
+            "complete": True,
+            "start_s": 0.0,
+            "end_s": 2.0,
+            "observed_start_s": 0.0,
+            "observed_end_s": 2.0,
+            "frame_start": 0,
+            "frame_end": 2,
+            "frame_count": 3,
+            "native_rows_exact": True,
+            "no_stride_or_synthetic_cadence": True,
+            "source_artifact_id": source["artifact_id"],
+            "source_artifact_sha256": source["sha256"],
+            "material_artifact_id": material["artifact_id"],
+            "material_artifact_sha256": material["sha256"],
+        }
+        outputs.append(value)
+
+    bindings = []
+    for value in outputs:
+        source = next(item for item in value["artifact_bindings"] if item["role"] == "source_window")
+        material = next(item for item in value["artifact_bindings"] if item["role"] == "material_output")
+        bindings.append(
+            {
+                "physical_case_id": value["physical_case_id"],
+                "case_id": value["case_id"],
+                "family": value["family"],
+                "source_artifact_sha256": source["sha256"],
+                "material_artifact_sha256": material["sha256"],
+                "full_window": {
+                    "required": value["full_window"]["required"],
+                    "complete": value["full_window"]["complete"],
+                    "start_s": value["full_window"]["start_s"],
+                    "end_s": value["full_window"]["end_s"],
+                    "observed_start_s": value["full_window"]["observed_start_s"],
+                    "observed_end_s": value["full_window"]["observed_end_s"],
+                    "frame_start": value["full_window"]["frame_start"],
+                    "frame_end": value["full_window"]["frame_end"],
+                    "frame_count": value["full_window"]["frame_count"],
+                    "source_artifact_id": value["full_window"]["source_artifact_id"],
+                    "material_artifact_id": value["full_window"]["material_artifact_id"],
+                    "native_rows_exact": value["full_window"]["native_rows_exact"],
+                    "no_stride_or_synthetic_cadence": value["full_window"]["no_stride_or_synthetic_cadence"],
+                },
+            }
+        )
+    root_path = tmp_path / "root-admission.json"
+    root_path.write_text("root admission", encoding="utf-8")
+    root_artifact = _file_binding(root_path, "root-admission", "root_admission", ROOT_PHYSICAL_CASE_ID)
+    root_admission = {
+        "schema": ROOT_ADMISSION_SCHEMA,
+        "granted": True,
+        "status": "approved",
+        "physical_case_ids": sorted(physical_case_ids),
+        "required_source_ids": ["source-a", "source-b"],
+        "full_window_s": 2.0,
+        "output_binding_sha256": _canonical_digest(sorted(bindings, key=lambda item: item["physical_case_id"])),
+        "artifact": root_artifact,
+    }
+    return outputs, root_admission
+
+
+def _audit(outputs: list[dict], root_admission: dict, tmp_path: Path) -> dict:
+    return audit_material_output_contract(
+        outputs,
+        registered_physical_case_ids=sorted(item["physical_case_id"] for item in outputs),
+        required_source_ids=["source-a", "source-b"],
+        artifact_root=tmp_path,
+        expected_full_window_s=2.0,
+        root_admission=root_admission,
+    )
+
+
+def test_complete_external_collection_is_admission_ready_but_t2_stays_false(tmp_path: Path) -> None:
+    outputs, root_admission = _complete_collection(tmp_path)
+    result = _audit(outputs, root_admission, tmp_path)
+
+    assert result["schema"] == ADMISSION_SCHEMA
+    assert result["admission_pass"] is True
+    assert result["status"] == "admission_ready_but_non_qualifying"
+    assert result["T2_macro"] is False
+    assert result["T2_path"] is False
+    assert result["qualification_credit"] == 0
+    assert result["macro_t2_upgrade_blocked"] is True
+    assert all(result["gates"].values())
+    assert result["execution_constraints"]["registry_mutation"] == 0
+
+
+def test_missing_source_denominator_and_single_sidecar_fail_closed(tmp_path: Path) -> None:
+    outputs, root_admission = _complete_collection(tmp_path)
+    del outputs[0]["source_coverage"]
+    result = _audit(outputs, root_admission, tmp_path)
+
+    assert result["admission_pass"] is False
+    assert result["gates"]["source_coverage"] is False
+    assert result["gates"]["root_admission"] is False
+    assert result["T2_macro"] is False
+    with pytest.raises(ValueError, match="outputs must be a list"):
+        audit_material_output_admission(
+            outputs[0],
+            registered_physical_case_ids=["physical-a"],
+            required_source_ids=["source-a", "source-b"],
+            artifact_root=tmp_path,
+            expected_full_window_s=2.0,
+            root_admission=root_admission,
+        )
+
+
+def test_duplicate_physical_case_and_incomplete_registered_denominator_are_blocked(tmp_path: Path) -> None:
+    outputs, root_admission = _complete_collection(tmp_path, ("physical-a", "physical-b"))
+    outputs[1]["physical_case_id"] = outputs[0]["physical_case_id"]
+    result = audit_material_output_contract(
+        outputs,
+        registered_physical_case_ids=["physical-a", "physical-b"],
+        required_source_ids=["source-a", "source-b"],
+        artifact_root=tmp_path,
+        expected_full_window_s=2.0,
+        root_admission=root_admission,
+    )
+
+    assert result["admission_pass"] is False
+    assert result["gates"]["physical_case_uniqueness"] is False
+    assert result["gates"]["registered_physical_case_coverage"] is False
+    assert result["T2_macro"] is False
+
+
+def test_artifact_hash_bytes_root_and_full_window_bindings_fail_closed(tmp_path: Path) -> None:
+    outputs, root_admission = _complete_collection(tmp_path)
+    source = tmp_path / "physical-a-source.bin"
+    source.write_bytes(b"tampered!")
+    result = _audit(outputs, root_admission, tmp_path)
+    assert result["admission_pass"] is False
+    assert result["gates"]["artifact_hash_bytes"] is False
+    assert result["gates"]["root_admission"] is False
+
+    window_root = tmp_path / "window"
+    window_root.mkdir()
+    outputs, root_admission = _complete_collection(window_root)
+    outputs[0]["full_window"]["material_artifact_sha256"] = "0" * 64
+    result = _audit(outputs, root_admission, window_root)
+    assert result["admission_pass"] is False
+    assert result["gates"]["full_window_binding"] is False
+    assert result["gates"]["root_admission"] is False
+
+
+def test_root_denial_and_short_window_cannot_be_relabelled(tmp_path: Path) -> None:
+    outputs, root_admission = _complete_collection(tmp_path)
+    root_admission["granted"] = False
+    result = _audit(outputs, root_admission, tmp_path)
+    assert result["gates"]["root_admission"] is False
+    assert result["T2_macro"] is False
+
+    outputs, root_admission = _complete_collection(tmp_path)
+    outputs[0]["full_window"]["complete"] = False
+    result = _audit(outputs, root_admission, tmp_path)
+    assert result["gates"]["full_window_binding"] is False
+    assert result["gates"]["root_admission"] is False
+    assert result["T2_macro"] is False
