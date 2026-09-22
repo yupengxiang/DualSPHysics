@@ -224,6 +224,8 @@ def _admission_observation(payload: Mapping[str, Any], reference: Mapping[str, A
     }
     protocol = payload.get("formal_protocol")
     protocol = protocol if isinstance(protocol, Mapping) else {}
+    capacity_evidence = payload.get("capacity_evidence")
+    capacity_evidence = dict(capacity_evidence) if isinstance(capacity_evidence, Mapping) else {}
     return {
         "artifact": dict(reference),
         "schema": payload.get("schema"),
@@ -243,6 +245,10 @@ def _admission_observation(payload: Mapping[str, Any], reference: Mapping[str, A
             "updates": protocol.get("updates"),
             "test_included": protocol.get("test_included"),
         },
+        # Preserve the admission auditor's already hash-bound capacity
+        # observation so the source-closure/root-admission layers can require
+        # evidence rather than infer readiness from a missing blocker code.
+        "capacity_evidence": capacity_evidence,
         "upstream_blockers": [
             item.get("code") for item in payload.get("blockers", ())
             if isinstance(item, Mapping) and item.get("code")

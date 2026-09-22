@@ -34,6 +34,7 @@ REQUIRED_FORMAL_RUNS = 9
 REQUIRED_T1_FAMILIES = 3
 REQUIRED_VALIDATION_CASES = 12
 REQUIRED_MATERIAL_CASE_RUNS = 288
+FORMAL_UPDATES = 32000
 
 
 def canonical(value: Any) -> str:
@@ -225,6 +226,21 @@ def _gate(code: str, *, observed: Any, required: Any, message: str) -> dict[str,
     }
 
 
+def _resource_frontier_proven(readiness: Mapping[str, Any], upstream: set[str]) -> bool:
+    admission = readiness.get("admission_audit")
+    admission = admission if isinstance(admission, Mapping) else {}
+    evidence = admission.get("capacity_evidence")
+    return (
+        "RESOURCE_FRONTIER_UNPROVEN" not in upstream
+        and isinstance(evidence, Mapping)
+        and evidence.get("schema") == "core.formal_capacity_evidence.v1"
+        and evidence.get("valid") is True
+        and evidence.get("formal_capacity_evidence") is True
+        and evidence.get("formal_runs_counted") == 0
+        and evidence.get("observed_update_frontier") == FORMAL_UPDATES
+    )
+
+
 def build_audit(*, data_root: str | Path, source_closure: str | Path,
                 historical_snapshot: str | Path, readiness: str | Path,
                 launch_contract: str | Path) -> dict[str, Any]:
@@ -395,7 +411,7 @@ def _readiness_gates(readiness: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
         ),
         "resource_frontier": _gate(
             "RESOURCE_FRONTIER_UNPROVEN",
-            observed="RESOURCE_FRONTIER_UNPROVEN" not in upstream,
+            observed=_resource_frontier_proven(readiness, upstream),
             required=True,
             message="fresh full-field 32000-update resource evidence is required",
         ),

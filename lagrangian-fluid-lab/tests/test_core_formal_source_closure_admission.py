@@ -8,6 +8,7 @@ from pathlib import Path
 
 from scripts.core_formal_source_closure_admission import (
     REQUIRED_CODE_FILES,
+    _gate_snapshot,
     main,
     verify_admission,
     verify_source_closure,
@@ -96,3 +97,24 @@ def test_verify_cli_is_read_only_and_detects_tampered_closure(tmp_path: Path) ->
     tampered["files"][0]["sha256"] = "0" * 64
     assert verify_source_closure(tampered, data_root=ROOT)["ok"] is False
     assert _sha256(REGISTRY) == before
+
+
+def test_resource_frontier_requires_explicit_capacity_evidence_not_blocker_absence() -> None:
+    readiness = json.loads(
+        (ROOT / "campaigns/core-v1/learning/core-formal-readiness-audit-20260921.json")
+        .read_text(encoding="utf-8")
+    )
+    readiness["upstream_admission_blockers"] = []
+    readiness["admission_audit"]["upstream_blockers"] = []
+    gates = _gate_snapshot(readiness, {})
+    assert gates["resource_frontier"]["passed"] is False
+
+    readiness["admission_audit"]["capacity_evidence"] = {
+        "schema": "core.formal_capacity_evidence.v1",
+        "valid": True,
+        "formal_capacity_evidence": True,
+        "formal_runs_counted": 0,
+        "observed_update_frontier": 32000,
+    }
+    gates = _gate_snapshot(readiness, {})
+    assert gates["resource_frontier"]["passed"] is True

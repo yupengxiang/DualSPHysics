@@ -8,6 +8,7 @@ from pathlib import Path
 
 from scripts.core_formal_source_closure_admission_v6 import (
     REQUIRED_CODE_FILES,
+    _readiness_gates,
     verify_admission,
     verify_source_closure,
 )
@@ -103,3 +104,24 @@ def test_v6_sidecars_bind_the_three_immutable_json_products() -> None:
         sidecar = payload.with_name(payload.name + ".sha256")
         assert sidecar.is_file()
         assert sidecar.read_text(encoding="utf-8").split()[0] == _sha256(payload)
+
+
+def test_v6_resource_frontier_requires_explicit_capacity_evidence() -> None:
+    readiness = json.loads(
+        (ROOT / "campaigns/core-v1/learning/core-formal-readiness-audit-20260921.json")
+        .read_text(encoding="utf-8")
+    )
+    readiness["upstream_admission_blockers"] = []
+    readiness["admission_audit"]["upstream_blockers"] = []
+    gates = _readiness_gates(readiness)
+    assert gates["resource_frontier"]["passed"] is False
+
+    readiness["admission_audit"]["capacity_evidence"] = {
+        "schema": "core.formal_capacity_evidence.v1",
+        "valid": True,
+        "formal_capacity_evidence": True,
+        "formal_runs_counted": 0,
+        "observed_update_frontier": 32000,
+    }
+    gates = _readiness_gates(readiness)
+    assert gates["resource_frontier"]["passed"] is True
