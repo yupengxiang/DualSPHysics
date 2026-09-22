@@ -24,8 +24,8 @@ from scripts.f8_definition_control_static_review_v1 import (
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_static_review_binds_all_required_inputs_and_authorizes_only_one_write_pair() -> None:
-    review = build_review()
+def test_historical_static_review_binds_its_prewrite_inputs_and_authorizes_only_one_write_pair() -> None:
+    review = json.loads(OUTPUT.read_text(encoding="utf-8"))
     assert review["status"] == (
         "static_constraints_satisfied_one_time_definition_control_materialization_authorized")
     assert review["static_constraint_gaps"] == []
@@ -45,8 +45,8 @@ def test_static_review_binds_all_required_inputs_and_authorizes_only_one_write_p
     assert {str(path) for path in OFFICIAL_PRECEDENTS.values()}.issubset(bound_paths)
 
 
-def test_static_review_never_grants_runtime_or_credit() -> None:
-    review = build_review()
+def test_historical_static_review_never_grants_runtime_or_credit() -> None:
+    review = json.loads(OUTPUT.read_text(encoding="utf-8"))
     controls = review["execution_controls"]
     assert all(value is False for value in controls.values() if isinstance(value, bool))
     assert all(value == 0 for key, value in controls.items() if key.endswith("_mutation"))
@@ -55,13 +55,22 @@ def test_static_review_never_grants_runtime_or_credit() -> None:
                for gate in review["cpu_preflight_hard_gates"])
 
 
-def test_constraint_failure_precisely_closes_write_authorization(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_current_builder_closes_write_authorization_after_one_time_targets_exist(monkeypatch: pytest.MonkeyPatch) -> None:
+    documents, gaps = load_documents()
+    assert gaps == []
+    assert {gap["code"] for gap in evaluate_static_constraints(documents)} == {"FRESH_INPUT_TARGETS"}
+    current = build_review()
+    assert current["status"] == "static_constraints_unsatisfied_write_not_authorized"
+    assert current["static_materialization_authorization"]["granted"] is False
+
+
+def test_contract_failure_precisely_closes_write_authorization(monkeypatch: pytest.MonkeyPatch) -> None:
     documents, gaps = load_documents()
     assert gaps == []
     broken = copy.deepcopy(documents)
     broken["parameter_contract"]["parameterization"]["zero_mean_control"] = False
     observed = evaluate_static_constraints(broken)
-    assert {gap["code"] for gap in observed} == {"FORCING_SEMANTICS"}
+    assert {gap["code"] for gap in observed} == {"FORCING_SEMANTICS", "FRESH_INPUT_TARGETS"}
     monkeypatch.setattr(review_module, "load_documents", lambda: (broken, []))
     review = review_module.build_review()
     assert review["status"] == "static_constraints_unsatisfied_write_not_authorized"
@@ -73,6 +82,12 @@ def test_committed_review_is_hash_closed_and_historical_inputs_unchanged(tmp_pat
     review = json.loads(OUTPUT.read_text(encoding="utf-8"))
     assert review["static_constraint_gaps"] == []
     for item in review["bindings"]:
+        # v1 is an immutable pre-write artifact.  Its own test source was
+        # subsequently and deliberately switched to the post-write lifecycle.
+        # The historical test binding must therefore remain recorded, but
+        # cannot be a current-source closure requirement.
+        if item["path"] == "tests/test_f8_definition_control_static_review_v1.py":
+            continue
         path = ROOT / item["path"]
         assert path.is_file()
         assert path.stat().st_size == item["bytes"]

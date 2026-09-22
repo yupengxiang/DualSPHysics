@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Static F8 r001 input.  This is not a solver admission or qualification. -->
+<case>
+  <casedef>
+    <constantsdef>
+      <gravity x="0" y="0" z="0" comment="Global gravity disabled; forcing is accinput linear X acceleration." units_comment="m/s^2" />
+      <rhop0 value="1000" comment="Reference density" units_comment="kg/m^3" />
+      <rhopgradient value="1" comment="Uniform fully-filled fluid reference density." />
+      <hswl value="0" auto="true" comment="No free surface is present." units_comment="metres (m)" />
+      <gamma value="7" comment="Polytropic constant." />
+      <speedsystem value="0" auto="true" comment="Static input value." />
+      <coefsound value="1" comment="Static input value." />
+      <speedsound value="10" auto="false" comment="Contract sound speed." units_comment="m/s" />
+      <coefh value="1.0" comment="Smoothing-length coefficient." />
+      <cflnumber value="0.2" comment="Static preflight value only." />
+    </constantsdef>
+    <mkconfig boundcount="1" fluidcount="1" />
+    <geometry>
+      <definition dp="0.0074999999999999997" units_comment="metres (m)">
+        <pointref x="0" y="0" z="0" />
+        <pointmin x="0" y="0" z="-0.044999999999999998" />
+        <pointmax x="0.23999999999999999" y="0.12" z="0.044999999999999998" />
+      </definition>
+      <commands>
+        <mainlist>
+          <setshapemode>actual | bound</setshapemode>
+          <setdrawmode mode="full" />
+          <setmkbound mk="0" name="FixedNoSlipZWalls" />
+          <drawbox>
+            <boxfill>top|bottom</boxfill>
+            <point x="0" y="0" z="-0.044999999999999998" />
+            <size x="0.23999999999999999" y="0.12" z="0.089999999999999997" />
+          </drawbox>
+          <setmkfluid mk="0" name="FullyFilledChannelFluid" />
+          <drawbox>
+            <boxfill>solid</boxfill>
+            <point x="0" y="0" z="-0.044999999999999998" />
+            <size x="0.23999999999999999" y="0.12" z="0.089999999999999997" />
+          </drawbox>
+        </mainlist>
+      </commands>
+    </geometry>
+  </casedef>
+  <execution>
+    <special>
+      <accinputs>
+        <accinput mkfluid="0">
+          <acccentre x="0" y="0" z="0" comment="Fixed acceleration reference centre." units_comment="metres (m)" />
+          <globalgravity value="0" comment="Gravity remains disabled for this body-force input." />
+          <acctimesfile value="acceleration/F8_OPC_q0p500_acceleration.csv" comment="Zero-mean linear X acceleration table." />
+        </accinput>
+      </accinputs>
+    </special>
+    <parameters>
+      <parameter key="Boundary" value="2" comment="mDBC fixed boundary method." />
+      <parameter key="StepAlgorithm" value="2" comment="Static preflight value only." />
+      <parameter key="Kernel" value="2" comment="Wendland kernel." />
+      <parameter key="ViscoTreatment" value="3" comment="Laminar viscosity." />
+      <parameter key="Visco" value="0.00050000000000000001" comment="Contract kinematic viscosity." units_comment="m^2/s" />
+      <parameter key="ViscoBoundFactor" value="1" comment="Fixed wall viscosity factor." />
+      <parameter key="DensityDT" value="0" comment="No density diffusion in this static input." />
+      <parameter key="Shifting" value="0" comment="No shifting." />
+      <parameter key="RigidAlgorithm" value="1" comment="No floating or rigid-body component is defined." />
+      <parameter key="TimeMax" value="11.196636217394023" comment="Control coverage end time." units_comment="seconds" />
+      <parameter key="TimeOut" value="0.015904312808798327" comment="One control-table interval." units_comment="seconds" />
+      <parameter key="PartsOutMax" value="0" comment="No excluded fluid particles permitted." />
+      <parameter key="RhopOutMin" value="950" comment="Contract density lower bound." units_comment="kg/m^3" />
+      <parameter key="RhopOutMax" value="1050" comment="Contract density upper bound." units_comment="kg/m^3" />
+      <parameter key="XYPeriodic" value="0" comment="Periodic BC in X and Y; value is ignored by native presence semantics." />
+      <simulationdomain comment="Use generated channel extent.">
+        <posmin x="default" y="default" z="default" />
+        <posmax x="default" y="default" z="default" />
+      </simulationdomain>
+    </parameters>
+  </execution>
+</case>
