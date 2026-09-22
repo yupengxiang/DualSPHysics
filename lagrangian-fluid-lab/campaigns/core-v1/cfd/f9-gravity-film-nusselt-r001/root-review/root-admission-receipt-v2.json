@@ -1,0 +1,223 @@
+{
+  "schema": "core.cfd.f9.root_review.terra_high.v4",
+  "review_type": "second_independent_static_root_admission_review",
+  "reviewer": {
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "review_mode": "static_read_only",
+    "independence_basis": "Fresh read of the current checkout, the r001 Definition, both F9 contracts, JSph.cpp and JPartsLoad4.cpp; no runtime receipt was reused as proof of the current target."
+  },
+  "scope_id": "F9_GRAVITY_FILM_NUSSELT_R001",
+  "case_definition_revision": "r001",
+  "review_base_commit": "c0f79b359a04f0eb56020c6c6bf7a2e3ea132d2a",
+  "decision": "CONDITIONAL_GO_ONE_SHOT_CPU_GENCASE_AND_NATIVE_BI4_SEMANTIC_PREFLIGHT",
+  "root_preflight_admission_granted": true,
+  "formal_scientific_admission": false,
+  "qualification_credit": 0,
+  "scientific_status": "preflight_authorized_only_not_qualified",
+  "review_scope": {
+    "static_only_during_review": true,
+    "gencase_invoked_during_review": false,
+    "bi4_native_preflight_invoked_during_review": false,
+    "solver_invoked_during_review": false,
+    "gpu_started_during_review": false,
+    "queue_mutation_during_review": 0,
+    "registry_mutation_during_review": 0,
+    "ledger_mutation_during_review": 0,
+    "denominator_mutation_during_review": 0,
+    "training_started_during_review": false
+  },
+  "static_findings": {
+    "definition_contract_v2": {
+      "status": "accepted_as_the_static_hold_for_formal_qualification",
+      "admission_granted_remains_false": true,
+      "qualification_credit_remains_zero": true,
+      "map_width_is_not_assumed": true,
+      "metric_runtime_is_not_authorized": true
+    },
+    "metric_parser_contract_v1": {
+      "status": "static_semantics_bound_for_future_runtime_parser",
+      "admission_granted_remains_false": true,
+      "qualification_credit_remains_zero": true,
+      "fixed_denominators": true,
+      "pressure_convention": "gauge_pressure_required; pressure_is_gauge=true must be present in a future runtime receipt",
+      "implementation_or_runtime_receipt_present": false,
+      "used_by_this_preflight": false
+    },
+    "definition_xml": {
+      "well_formed": true,
+      "one_fluid_block": true,
+      "bottom_only_fixed_boundary": true,
+      "real_free_surface_declared": true,
+      "global_gravity": [0.0, 0.0, -9.81],
+      "xy_periodic_parameter_absent": true,
+      "x_periodic_z_offset_m": 0.025225016464,
+      "y_periodic_z_offset_m": 0.0,
+      "dt_fixed_s": 0.00001,
+      "time_out_s": 0.01,
+      "time_max_s": 5.0,
+      "expected_output_rows_including_t0": 501,
+      "geometry_static_check": {
+        "bottom_slope_matches_minus_tan_6_deg": true,
+        "fluid_bottom_coincides_with_bottom_top_in_local_normal": true,
+        "fluid_top_normal_thickness_m": 0.03,
+        "fluid_top_thickness_check": "passed_with_absolute_error_below_1e-10_m"
+      }
+    },
+    "runtime_source": {
+      "periodic_parameter_precedence": "XPeriodicIncZ and YPeriodicIncZ enable individual X and Y periodic axes; XYPeriodic is a separate override and is absent from the Definition.",
+      "map_width_rule": "JSph loads BI4 MapPosMin/MapPosMax when present, otherwise calculates limits from particle positions; MapRealSize=MapRealPosMax-MapRealPosMin.",
+      "periodic_x_rule": "JSph sets PeriXinc.x=-MapRealSize.x after loading the map.",
+      "upper_x_mapping_rule": "UpdatePeriodicPos adds the configured XPeriodicIncZ together with PeriXinc.x for dx>=MapRealSize.x.",
+      "static_consequence": "The requested 0.24 m x-width is a preflight acceptance condition, not a static assumption."
+    }
+  },
+  "remaining_gates_explicitly_deferred_to_the_one_shot_preflight": [
+    {
+      "gate": "target BI4 map width",
+      "required_result": "MapPosMax.x-MapPosMin.x=0.24 m within the declared receipt tolerance",
+      "failure_action": "hard hold; no solver or retry"
+    },
+    {
+      "gate": "native particle identity and counts",
+      "required_result": "one fluid block, one fixed-bottom block, no unintended top-wall or extra material block, and counts bound to the generated BI4 header",
+      "failure_action": "hard hold; no qualification credit"
+    },
+    {
+      "gate": "periodic semantic vector",
+      "required_result": "native header/configuration preserves X translation equal to negative map width, positive X z-offset 0.025225016464 m, and zero Y z-offset",
+      "failure_action": "hard hold; do not reinterpret the XML or create r002 in this receipt"
+    },
+    {
+      "gate": "particle geometry and boundary normals",
+      "required_result": "decoded particle positions preserve the bottom/interface/top geometry and valid mDBC normal metadata without overlap or missing normal data",
+      "failure_action": "hard hold; no solver"
+    },
+    {
+      "gate": "metric implementation",
+      "required_result": "none in this preflight; the metric parser is not invoked and no profile, flux, pressure, surface, or convergence claim may be emitted",
+      "failure_action": "any metric result is out of scope and invalidates the receipt"
+    }
+  ],
+  "authorized_scope": {
+    "definition_input": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml",
+    "definition_input_must_remain_byte_identical": true,
+    "cpu_only": true,
+    "cpu_gencase_invocations": 1,
+    "native_bi4_semantic_preflight_invocations": 1,
+    "native_bi4_decoder_invocations": 1,
+    "isolated_output_root": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/preflight-r002",
+    "allowed_outputs": [
+      "one generated XML materialization",
+      "one generated BI4 case",
+      "one native decoded semantic snapshot",
+      "one preflight receipt containing hashes, counts, map limits and pass/fail gates"
+    ],
+    "qualification_credit": 0,
+    "formal_admission": false,
+    "t1_registration": false,
+    "t2_registration": false,
+    "production_case_generation": false
+  },
+  "execution_controls_before_authorized_run": {
+    "definition_written": false,
+    "gencase_invoked": false,
+    "bi4_invoked": false,
+    "native_preflight_invoked": false,
+    "metric_parser_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "training_started": false
+  },
+  "prohibited_scope": {
+    "definition_edit": true,
+    "r002_definition_creation": true,
+    "solver": true,
+    "gpu": true,
+    "queue": true,
+    "registry": true,
+    "ledger": true,
+    "denominator": true,
+    "metric_parser_runtime": true,
+    "t1_registration": true,
+    "t2_registration": true,
+    "qualification_matrix": true,
+    "production_32_case_batch": true,
+    "formal_training_admission": true
+  },
+  "hash_bindings": {
+    "plan": {
+      "path": "PLAN.md",
+      "sha256": "17491b1f5ea5b7c8464c7afb6f2dc21bdff7cf396cb47aebd625ca22d38c3263"
+    },
+    "candidate_card": {
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json",
+      "sha256": "ecb6afa637e47f1afd539db9d941b7411119bac8e20ae0c6beced4df36b2f8b9"
+    },
+    "definition_contract_v2": {
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/definition-contract-v2.json",
+      "sha256": "cd02b43c45c2cd2a5e30ad3383d270876594b983edfb9ceb1bf337396817e851"
+    },
+    "metric_parser_contract_v1": {
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/metric-parser-contract-v1.json",
+      "sha256": "af359469526131e67ed91a29f23b9289f663a5abbb3f2b9102dd43093da1d192"
+    },
+    "definition_xml": {
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml",
+      "sha256": "940417e139fb42add49de3f2d7720a13e982ebc76826ecbe51b30b55b2278433"
+    },
+    "JSph_cpp": {
+      "path": "src/source/JSph.cpp",
+      "sha256": "206e4486a3a0d304e02da1a73d2e7c7ed96354d559ce481275d09f5245b8c9e7"
+    },
+    "JPartsLoad4_cpp": {
+      "path": "src/source/JPartsLoad4.cpp",
+      "sha256": "50926bd6c47bfb9a3807bc98b85f6784f8d4d92c318ad7dd5722d4592935735b"
+    },
+    "JSph_h": {
+      "path": "src/source/JSph.h",
+      "sha256": "abb087c020641d94c3968507f0ce067da4f45cac246ff6bc586d4e8665e39eda"
+    },
+    "metric_contract_builder": {
+      "path": "lagrangian-fluid-lab/scripts/f9_metric_parser_contract_v1.py",
+      "sha256": "60bee4bbfbb8e0c2f18f1d05c4deb6d7515c5bb1c5aa1a8c3f6cd32c42d8a303"
+    },
+    "metric_contract_tests": {
+      "path": "lagrangian-fluid-lab/tests/test_f9_metric_parser_contract_v1.py",
+      "sha256": "d2ff5340f836e64e604df7729153e9e438703747c72ec18316df2e07cb074655"
+    },
+    "cpu_gencase": {
+      "path": "bin/linux/GenCase_linux64",
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226"
+    },
+    "native_bi4_decoder": {
+      "path": "lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    },
+    "native_decoder_source": {
+      "path": "lagrangian-fluid-lab/scripts/native/bi4_dump.cpp",
+      "sha256": "5d63457cf7427128aa564639cfb77af70edacb5237371113697c478067bb7fe6"
+    }
+  },
+  "static_validation_commands": [
+    "python3 lagrangian-fluid-lab/scripts/f9_metric_parser_contract_v1.py verify",
+    "lagrangian-fluid-lab/.venv/bin/python -m pytest -q lagrangian-fluid-lab/tests/test_f9_metric_parser_contract_v1.py",
+    "python3 ET-based XML geometry and parameter self-check for the immutable r001 Definition",
+    "git diff --check",
+    "git status --short --branch"
+  ],
+  "static_validation_results": {
+    "metric_contract_verify": "passed; static_parser_contract_bound_no_runtime_authorization",
+    "metric_contract_tests": "passed; 2 tests",
+    "xml_geometry_self_check": "passed; bottom slope, coincident interface, 0.03 m normal thickness, and no XYPeriodic",
+    "gencase_invoked": false,
+    "native_decoder_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "qualification_credit": 0
+  }
+}
