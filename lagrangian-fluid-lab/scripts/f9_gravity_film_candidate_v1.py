@@ -23,6 +23,7 @@ SOURCE_ROLES = {
     "vendor/official/DualSPHysics_v5.4/examples/mdbc/02_Poiseuille/CasePoiseuille_FS_LR_Def.xml": "official mDBC, free-surface threshold, laminar-viscosity syntax precedent; solid upper wall not reused",
     "vendor/official/DualSPHysics_v5.4/examples/main/02_Periodicity/CasePeriodicity_Def.xml": "official periodic-boundary example",
     "vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML__Parameters.xml": "official periodic-offset, mDBC and free-surface parameter syntax",
+    "vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp": "official runtime parameter precedence for individual periodic offsets versus XYPeriodic",
     "campaigns/core-v1/cfd/f1-f2-third-t1-route-closed-v3.json": "closed F1/F2 lineages used for independence review",
     "campaigns/core-v1/evidence/f5-wave-runup-third-t1-route-closed-no-new-hypothesis-v1.json": "closed F5 lineage used for independence review",
     "campaigns/core-v1/cfd/f6-observation-axis-v4-third-t1-route-closed-v1.json": "closed F6 lineage used for independence review",
@@ -62,10 +63,12 @@ def build_card() -> dict[str, Any]:
     poiseuille_fs = path_for("vendor/official/DualSPHysics_v5.4/examples/mdbc/02_Poiseuille/CasePoiseuille_FS_LR_Def.xml")
     periodic = path_for("vendor/official/DualSPHysics_v5.4/examples/main/02_Periodicity/CasePeriodicity_Def.xml")
     parameter_doc = path_for("vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML__Parameters.xml")
+    periodic_source = path_for("vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp")
     openchannel_text = parse_xml(openchannel)
     poiseuille_text = parse_xml(poiseuille_fs)
     periodic_text = parse_xml(periodic)
     parameter_text = parameter_doc.read_text(encoding="utf-8")
+    periodic_source_text = periodic_source.read_text(encoding="utf-8")
     plan_text = PLAN.read_text(encoding="utf-8")
 
     static_checks = {
@@ -75,6 +78,7 @@ def build_card() -> dict[str, Any]:
         "mdbc_example_has_mdbc_and_viscosity": 'key="Boundary" value="2"' in poiseuille_text and 'key="ViscoTreatment" value="2"' in poiseuille_text,
         "periodic_example_present": "XPeriodicIncZ" in periodic_text,
         "periodic_offset_documented": "XPeriodicIncZ" in parameter_text,
+        "periodic_offset_runtime_precedence_visible": 'if(eparms.Exists("XPeriodicIncZ"))' in periodic_source_text and 'if(eparms.Exists("XYPeriodic"))' in periodic_source_text,
         "no_slip_mdbc_documented": "SlipMode" in parameter_text and "No-slip" in parameter_text,
         "plan_default_boundary_mentions_free_surface": "自由表面机制" in plan_text,
         "plan_three_family_gate": "至少三个真正不同家族" in plan_text,
@@ -154,7 +158,7 @@ def build_card() -> dict[str, Any]:
                 "one fluid block and no top-wall particles",
                 "fixed mDBC bottom with no-slip and a real free surface at n=h",
                 "gravity decomposed into tangential and normal components",
-                "periodic streamwise/spanwise boundaries and explicitly verified streamwise normal offset sign",
+            "periodic streamwise/spanwise boundaries using individual XPeriodicIncZ and YPeriodicIncZ parameters, never XYPeriodic, plus explicitly verified offset sign",
                 "no inlet/outlet, pump, moving boundary, floating, Chrono, obstacle, material body, or surface tension",
                 "particle identity, mass, finite-value, overlap, initial exclusion, and lifecycle checks",
                 "parser for full velocity profile, free-surface height, pressure, flux, and exclusion statistics",

@@ -61,6 +61,7 @@ def build_audit() -> dict[str, Any]:
     assert f9["admission_granted"] is False
     assert f9_review["decision"] == "conditional_go_static_preparation_no_admission"
     assert f9_review["admission_granted"] is False
+    assert f9_review["bound_candidate_card"]["sha256"] == sha256(LAB / "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json")
     assert readiness["status"] == "blocked"
 
     return {

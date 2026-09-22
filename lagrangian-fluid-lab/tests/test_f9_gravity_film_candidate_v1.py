@@ -35,5 +35,5 @@ def test_committed_f9_card_is_hash_bound_and_unqualified() -> None:
     assert OUTPUT.is_file()
     card = json.loads(OUTPUT.read_text(encoding="utf-8"))
     assert card["status"] == "proposal_only_root_review_required"
-    assert len(card["evidence"]) == 9
+    assert len(card["evidence"]) == 10
     assert all(item["sha256"] for item in card["evidence"])
