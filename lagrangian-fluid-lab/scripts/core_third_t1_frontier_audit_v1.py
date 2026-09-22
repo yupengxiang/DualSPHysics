@@ -43,6 +43,7 @@ def build_audit() -> dict[str, Any]:
     f9 = load("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json")
     f9_review = load("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-definition-review-v3.json")
     f9_contract = load("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/definition-contract-v1.json")
+    f9_proposal = load("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/root-admission-proposal-v1.json")
     readiness = load("campaigns/core-v1/learning/core-formal-readiness-audit-20260922.json")
 
     assert completion["t1_families"] == ["F3", "F4"]
@@ -68,6 +69,11 @@ def build_audit() -> dict[str, Any]:
     assert f9_contract["status"] == "static_definition_materialized_no_runtime_authorization"
     assert f9_contract["admission_granted"] is False
     assert f9_contract["runtime_authorization"]["solver"] is False
+    assert f9_proposal["status"] == "proposal_only_waiting_for_root_decision"
+    assert f9_proposal["third_t1_family_candidate"] is True
+    assert f9_proposal["admission_granted"] is False
+    assert f9_proposal["qualification_credit"] == 0
+    assert all(value is False for key, value in f9_proposal["execution_controls"].items() if key not in {"definition_candidate_materialized"})
     assert readiness["status"] == "blocked"
 
     return {
@@ -119,6 +125,7 @@ def build_audit() -> dict[str, Any]:
                 "terra_high_review": f9_review["decision"],
                 "definition_contract": f9_contract["status"],
                 "fresh_definition_present": f9["execution_controls"]["definition_written"],
+                "root_admission_proposal": f9_proposal["status"],
                 "next_allowed_action": "formal root admission review only; after admission, target-specific native semantic preparation may be considered; no GenCase or solver execution",
             },
         },
@@ -153,6 +160,7 @@ def build_audit() -> dict[str, Any]:
             bind("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-definition-review-v3.json", "F9 Terra High corrected Definition review v3"),
             bind("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/definition-contract-v1.json", "F9 static Definition contract"),
             bind("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml", "F9 static Definition XML"),
+            bind("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/root-admission-proposal-v1.json", "F9 non-authorizing root-admission proposal"),
             bind("campaigns/core-v1/learning/core-formal-readiness-audit-20260922.json", "current formal readiness"),
         ],
     }

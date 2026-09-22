@@ -14,4 +14,4 @@ F9 是固定倾斜平面上的单相牛顿薄膜：切向重力驱动黏性剪�
 
 Terra High 的独立 Definition review 在修正几何后给出 `CONDITIONAL-GO`：确认底部/流体接触与膜厚，但指出尚无正式 root admission、BI4、MapRealSize.x 运行时证据或 native/solver 资格证据。v1/v2 审查保留为历史记录；当前收据位于 `campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-definition-review-v3.json`。
 
-本轮新增 Definition contract，冻结 anchor 的倾斜底面、自由表面高度、重力分解、`XPeriodicIncZ`／`YPeriodicIncZ` 以及禁止 `XYPeriodic` 的规则。该合同明确候选已物化，但 `definition_write_authorization=false`、`native_preflight=false`、`solver=false`；下一步只能进行正式 root admission 审查。
+本轮新增 Definition contract，冻结 anchor 的倾斜底面、自由表面高度、重力分解、`XPeriodicIncZ`／`YPeriodicIncZ` 以及禁止 `XYPeriodic` 的规则。另生成了不授权执行的 hash-bound root-admission proposal：`campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/root-admission-proposal-v1.json`。候选仍明确 `admission_granted=false`、`qualification_credit=0`；下一步只能等待正式 root admission 决策。

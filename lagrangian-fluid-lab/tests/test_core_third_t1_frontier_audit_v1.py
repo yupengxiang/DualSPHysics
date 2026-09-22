@@ -19,7 +19,7 @@ def test_frontier_audit_preserves_closed_routes_and_f7_no_go() -> None:
 def test_committed_frontier_audit_is_hash_bound_and_non_mutating() -> None:
     assert OUTPUT.is_file()
     result = json.loads(OUTPUT.read_text(encoding="utf-8"))
-    assert len(result["evidence"]) == 14
+    assert len(result["evidence"]) == 15
     assert all(row["sha256"] for row in result["evidence"])
     assert result["execution_controls"]["solver_invoked"] is False
     assert result["execution_controls"]["registry_mutation"] == 0
@@ -29,3 +29,4 @@ def test_committed_frontier_audit_is_hash_bound_and_non_mutating() -> None:
     assert result["route_decisions"]["F9"]["admission_granted"] is False
     assert result["route_decisions"]["F9"]["terra_high_review"] == "CONDITIONAL-GO"
     assert result["route_decisions"]["F9"]["definition_contract"] == "static_definition_materialized_no_runtime_authorization"
+    assert result["route_decisions"]["F9"]["root_admission_proposal"] == "proposal_only_waiting_for_root_decision"
