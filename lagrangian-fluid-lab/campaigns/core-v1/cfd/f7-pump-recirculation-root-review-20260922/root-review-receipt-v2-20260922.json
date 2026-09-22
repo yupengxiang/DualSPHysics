@@ -1,0 +1,228 @@
+{
+  "admission_granted": false,
+  "artifact_bindings": [
+    {
+      "bytes": 11373,
+      "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/direct-torque-admission-proposal-v2-20260922.json",
+      "role": "v2 direct-torque proposal under review",
+      "sha256": "33029cdbaa2d094f2c4e6c3e4433272b99e2d4623cf3f676c3eb890ab02791fe"
+    },
+    {
+      "bytes": 7314,
+      "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/root-review-receipt-v1.json",
+      "role": "superseded root receipt; historical execution state retained",
+      "sha256": "5559f70aac902b5ff4cb169f57e341c9cc8349205d0cd79c097941cc74fa0e1e"
+    },
+    {
+      "bytes": 3957,
+      "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/force-gauge-capability-audit-v1.json",
+      "role": "official force-gauge capability audit",
+      "sha256": "48406a6e1a5add93e7078e76cd4b13cee00de34f8e1dbe36eaae3e022bbd8984"
+    },
+    {
+      "bytes": 3475,
+      "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/compute-forces-contract-v1.json",
+      "role": "official ComputeForces command contract",
+      "sha256": "17a8f2b296b7349ff709c63d2508dfdafbe5fa9ef17f2194e23b5ab473f8bb7b"
+    },
+    {
+      "bytes": 5809384,
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "role": "official GenCase binary; not invoked",
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226"
+    },
+    {
+      "bytes": 159206984,
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "role": "official CPU solver binary; not invoked",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    },
+    {
+      "bytes": 6222440,
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+      "role": "official ComputeForces binary; not invoked",
+      "sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+    },
+    {
+      "bytes": 324368,
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "role": "native BI4 decoder executable; not invoked",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    },
+    {
+      "bytes": 6137,
+      "path": "vendor/official/DualSPHysics_v5.4/doc/help/ComputeForces_Help.out",
+      "role": "official ComputeForces help",
+      "sha256": "ff01ceeaddf800ea992db16d7655cfee9de8eec31fc8ef69dc650f878946396a"
+    },
+    {
+      "bytes": 2568,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/xCasePump_linux64_CPU.sh",
+      "role": "official Pump CPU wrapper; not invoked",
+      "sha256": "67d1c6c58d76ce4c765f347bf5db2398904a1fcd7edec546e3eea646600971ba"
+    },
+    {
+      "bytes": 6983,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/CasePump_Def.xml",
+      "role": "official Pump source Definition",
+      "sha256": "746ae80f4c21bca62a01d59ee04d0eaaf3d1af830c36dafef4b684ca8f3c9453"
+    },
+    {
+      "bytes": 4132,
+      "path": "scripts/f7_pump_compute_forces_result_contract_v1.py",
+      "role": "frozen ComputeForces result parser contract",
+      "sha256": "b2a346fbf9aadf10be66a1efbcf2810fccee53eadfb8937c2be7cba1d751e440"
+    },
+    {
+      "bytes": 2817,
+      "path": "scripts/f7_pump_energy_consistency_contract_v1.py",
+      "role": "frozen energy evaluator contract",
+      "sha256": "4deffd86112218f7cced3bba4973a7898ea429336a4161479c74c1af47d13b54"
+    },
+    {
+      "bytes": 12386,
+      "path": "scripts/f7_pump_direct_torque_admission_proposal_v2.py",
+      "role": "proposal generator",
+      "sha256": "aab0bb1c1c7808933e6dcc90f4dcaeb28de465f6ba2e5788d73cb7f747729d19"
+    }
+  ],
+  "candidate_id": "F7_pump_prescribed_internal_rotor_recirculation_v1",
+  "decision": "do_not_authorize_f7_anchor; retain candidate for a later independently reviewed admission",
+  "definition_authorized": false,
+  "diagnostic_only": true,
+  "energy_contract": {
+    "absolute_floor_J": 1e-12,
+    "evaluator_path": "scripts/f7_pump_energy_consistency_contract_v1.py",
+    "evaluator_schema": "core.f7.pump.energy_consistency.evaluator.v1",
+    "receipt_present": false,
+    "relative_tolerance": 0.1,
+    "required_fields": [
+      "time_s",
+      "tau_axis_Nm",
+      "omega_rad_s",
+      "delta_energy_fluid_J",
+      "dissipation_J",
+      "gravity_work_J"
+    ]
+  },
+  "exact_future_anchor_counts_if_separately_authorized": {
+    "T1_denominator_mutation": 0,
+    "T2_denominator_mutation": 0,
+    "compute_forces": 1,
+    "definition_materialization": 1,
+    "gencase": 1,
+    "gpu": 0,
+    "job_submission": 0,
+    "ledger_mutation": 0,
+    "matrix_mutation": 0,
+    "native_cpu_solver": 1,
+    "native_decode": 1,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "training_mutation": 0
+  },
+  "forbidden_actions_until_new_admission": [
+    "GenCase",
+    "native CPU solver",
+    "native decoder",
+    "ComputeForces",
+    "GPU",
+    "queue/job submission",
+    "registry/ledger/matrix/denominator/training mutation"
+  ],
+  "fresh_artifact_integrity": {
+    "definition": {
+      "bytes": null,
+      "exists": false,
+      "path": "campaigns/core-v1/cfd/f7-pump-direct-torque-anchor-v1/input/F7_pump_torque_anchor_Def.xml",
+      "role": "required materialized fresh Definition; absent at review time",
+      "sha256": null
+    },
+    "native_bi4_directory": {
+      "bytes": null,
+      "exists": false,
+      "path": "campaigns/core-v1/cfd/f7-pump-direct-torque-anchor-v1/native/data",
+      "role": "required native BI4 directory; absent at review time",
+      "sha256": null
+    },
+    "native_integrity_receipt": {
+      "bytes": null,
+      "exists": false,
+      "path": "campaigns/core-v1/cfd/f7-pump-direct-torque-anchor-v1/native/native-integrity-receipt.json",
+      "role": "required frame/mk2/mass/decoder integrity receipt; absent at review time",
+      "sha256": null
+    },
+    "required_integrity_fields": [
+      "definition_sha256",
+      "frame_first_last_count",
+      "all_frame_sha256",
+      "mk2_particle_count",
+      "mk2_particle_id_hash",
+      "mass_metadata_sha256",
+      "decoder_path_and_sha256",
+      "time_axis_sha256"
+    ]
+  },
+  "future_result_contract": {
+    "empty_missing_duplicate_nan": "hard failure",
+    "moment_units": "N*m only through explicit mapping from official [Nn] header",
+    "normalized_fields": [
+      "time_s",
+      "force_fluid_x_N",
+      "force_fluid_y_N",
+      "force_fluid_z_N",
+      "moment_pump_axis_in_Nm",
+      "moment_pump_axis_ex_Nm"
+    ],
+    "parser_path": "scripts/f7_pump_compute_forces_result_contract_v1.py",
+    "parser_schema": "core.f7.pump.compute_forces.result_parser.v1",
+    "time_alignment_tolerance_s": 1e-09
+  },
+  "hard_blockers": [
+    "fresh Definition materialization and immutable hash receipt are absent",
+    "native BI4 archive and integrity receipt are absent",
+    "ComputeForces output and parser result receipt are absent",
+    "energy sidecar and consistency receipt are absent",
+    "the superseded v1 receipt records historical solver_invoked=true and cannot authorize this v2 anchor"
+  ],
+  "historical_canary_separation": {
+    "current_v2_execution": false,
+    "current_v2_gpu_started": false,
+    "current_v2_queue_mutation": 0,
+    "current_v2_solver_invoked": false,
+    "interpretation": "historical isolated canary state only; not an execution by this v2 review",
+    "superseded_receipt": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/root-review-receipt-v1.json",
+    "superseded_receipt_solver_invoked": true
+  },
+  "preflight_authorized": false,
+  "proposal_revision": "F7_pump_direct_torque_anchor_revision_20260922_v2",
+  "protected_state_mutation": {
+    "compute_forces": 0,
+    "definition": 0,
+    "denominator": 0,
+    "gencase": 0,
+    "gpu": 0,
+    "job_submission": 0,
+    "ledger": 0,
+    "matrix": 0,
+    "native_decode": 0,
+    "queue": 0,
+    "registry": 0,
+    "solver": 0,
+    "training": 0
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "root_decision_basis": {
+    "compute_forces_result_present": false,
+    "energy_evaluator_bound": true,
+    "energy_receipt_present": false,
+    "fresh_definition_materialized": false,
+    "native_bi4_materialized": false,
+    "native_integrity_receipt_present": false,
+    "result_parser_bound": true
+  },
+  "schema": "core.f7.pump_recirculation.root_review_receipt.v2",
+  "solver_authorized": false,
+  "status": "root_review_only_no_go_missing_fresh_materialization"
+}
