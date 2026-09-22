@@ -10,6 +10,6 @@ PLAN 强调 Core 的研究重点是三维自由表面流动；同时其明确 Co
 
 当前状态：`proposal_only_root_review_required`，资格 credit 为 0。没有写 Definition，没有运行 GenCase、CPU/GPU solver、decoder 或队列，也没有改变 registry、ledger、denominator 或 training。
 
-Terra High 的独立 root-style review 给出 `CONDITIONAL-GO` 仅限静态 admission preparation；正式 root-admit 为 `NO-GO`。除范围裁决外，还必须冻结 `H, nu, omega, A`、Mach／密度门、时间步、cadence、瞬态窗口和幅值／相位／通量误差门，并明确 `accinput` 线性加速度与“pressure-driven”表述的符号、单位和参考系等价性。审查收据位于 `campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/root-review/terra-high-root-review-v1.json`。
+Terra High 的独立 root-style review 给出 `CONDITIONAL-GO` 仅限静态 admission preparation；正式 root-admit 为 `NO-GO`。本轮已将机制语义冻结为 body-force-driven / Womersley-equivalent，明确 `accinput` 的线性加速度、体力密度和只有在连续介质等价性验证后才能使用的压力梯度解释；同时冻结 `H, nu, omega, A`、Mach／密度门、时间步、cadence、瞬态窗口和幅值／相位／通量误差门。合同位于 `campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/parameter-contract-v1.json`，审查收据位于 `campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/root-review/terra-high-root-review-v1.json`。
 
 机器可读收据：`campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/candidate-card-v1.json`。
