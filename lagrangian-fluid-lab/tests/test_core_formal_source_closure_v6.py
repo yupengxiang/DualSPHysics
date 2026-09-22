@@ -37,7 +37,8 @@ def test_v6_rehash_mismatch_remains_fail_closed_and_planning_only() -> None:
     assert result["mismatch_files"] == [
         "scripts/core_cfd_dataset.py", "scripts/core_contract.py",
         "scripts/core_dataset.py", "scripts/core_evaluation.py",
-        "scripts/core_learning.py", "scripts/core_models.py"
+        "scripts/core_formal_planner.py", "scripts/core_learning.py",
+        "scripts/core_models.py"
     ]
     assert closure["schema"] == "core.formal_source_closure.v2"
     assert closure["namespace"] == "core-formal-release-candidate-v6"

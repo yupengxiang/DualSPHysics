@@ -112,7 +112,8 @@ def test_evidence_and_current_source_closure_hashes_are_bound() -> None:
     assert historical_mismatches == [
         "scripts/core_learning.py", "scripts/core_contract.py",
         "scripts/core_dataset.py", "scripts/core_models.py",
-        "scripts/core_cfd_dataset.py", "scripts/core_evaluation.py"
+        "scripts/core_cfd_dataset.py", "scripts/core_evaluation.py",
+        "scripts/core_formal_planner.py"
     ]
 
     v6 = json.loads(V6_CLOSURE.read_text(encoding="utf-8"))
@@ -124,7 +125,8 @@ def test_evidence_and_current_source_closure_hashes_are_bound() -> None:
     assert v6_result["mismatch_files"] == [
         "scripts/core_cfd_dataset.py", "scripts/core_contract.py",
         "scripts/core_dataset.py", "scripts/core_evaluation.py",
-        "scripts/core_learning.py", "scripts/core_models.py"
+        "scripts/core_formal_planner.py", "scripts/core_learning.py",
+        "scripts/core_models.py"
     ]
     assert v6["namespace"] == "core-formal-release-candidate-v6"
     assert v6["formal_training_allowed"] is False

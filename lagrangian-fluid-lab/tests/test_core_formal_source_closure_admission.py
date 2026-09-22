@@ -33,7 +33,8 @@ def test_v5_closure_is_preserved_and_fails_closed_against_current_sources() -> N
     assert result["mismatch_files"] == [
         "scripts/core_cfd_dataset.py", "scripts/core_contract.py",
         "scripts/core_dataset.py", "scripts/core_evaluation.py",
-        "scripts/core_learning.py", "scripts/core_models.py"
+        "scripts/core_formal_planner.py", "scripts/core_learning.py",
+        "scripts/core_models.py"
     ]
     assert closure["closure_version"] == "core-formal-release-candidate-v5"
     assert closure["formal_release"] is False
