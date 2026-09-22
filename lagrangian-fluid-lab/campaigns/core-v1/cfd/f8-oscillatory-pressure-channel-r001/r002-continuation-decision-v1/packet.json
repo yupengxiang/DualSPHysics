@@ -1,0 +1,76 @@
+{
+  "closed_scope": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001",
+  "evidence": [
+    {
+      "bytes": 30379,
+      "path": "/home/jade/.codex/attachments/ece07836-13f3-4e3a-9dd4-55120224dcee/PLAN.md",
+      "role": "adopted Core plan",
+      "sha256": "17491b1f5ea5b7c8464c7afb6f2dc21bdff7cf396cb47aebd625ca22d38c3263"
+    },
+    {
+      "bytes": 2253,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/root-scope-ruling-v1/receipt.json",
+      "role": "user-accepted F8 mechanism-family ruling for r001",
+      "sha256": "a0b337fa88cbba59bfcd1217cab6dd374b98f231311139e18d520065f9897a52"
+    },
+    {
+      "bytes": 5830,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/cpu-native-preflight-v1/receipt.json",
+      "role": "one-shot r001 CPU/native preflight receipt",
+      "sha256": "851bcf9234dcde326b484db150f31d866000a768c621df8d23515db82c8294f3"
+    },
+    {
+      "bytes": 4499,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/cpu-native-preflight-postrun-audit-v1/receipt.json",
+      "role": "read-only r001 hard-failure closure",
+      "sha256": "d67f5055bd74769694dd43187fcb4447c84d8294454da8cc5f4e55c343d5b638"
+    }
+  ],
+  "execution_controls": {
+    "denominator_mutation": 0,
+    "gencase_invoked": false,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "native_decode_invoked": false,
+    "queue_mutation": 0,
+    "r002_control_written": false,
+    "r002_definition_written": false,
+    "registry_mutation": 0,
+    "solver_invoked": false,
+    "training_started": false
+  },
+  "no_implicit_selection": true,
+  "options": {
+    "close_f8_after_r001": {
+      "effect": "F8 supplies no third T1 family and Core must choose another family",
+      "label": "Do not open r002; retain F8 as closed after r001",
+      "qualification_credit": 0
+    },
+    "open_new_r002_scope": {
+      "effect": "permits only a new root/static design review; it does not permit input writing or runtime execution",
+      "label": "Authorize a fresh F8 r002 scope",
+      "mandatory_invariants": [
+        "r001 files and raw evidence remain immutable and are never rerun",
+        "r002 uses a separate directory, scope ID, Definition hash, control hash, and output namespace",
+        "static review must prove GenCase-realizable fixed z-wall particles and a resolvable control-file path before any CPU authorization",
+        "the next CPU/native preflight requires its own immutable one-shot authorization",
+        "solver, GPU, queue, registry, ledger, qualification, and training remain unauthorized"
+      ],
+      "qualification_credit": 0
+    }
+  },
+  "proposed_new_scope": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002",
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "question": "May Core open a new F8 r002 scope after the closed r001 hard failure, with fresh inputs and a fresh static review?",
+  "r001_retained_failure": {
+    "boundary_normal_file": "absent: BoundNor.bin",
+    "control_copy_warning": "WARNING: File 'acceleration/F8_OPC_q0p500_acceleration.csv' could not be copied.",
+    "fixed_boundary_particle_count": 0,
+    "qualification_credit": 0,
+    "same_input_retry_forbidden": true,
+    "status": "retained_hard_failure_no_retry_zero_credit"
+  },
+  "schema": "core.cfd.f8.r002_continuation_decision_packet.v1",
+  "status": "awaiting_user_r002_continuation_ruling"
+}
