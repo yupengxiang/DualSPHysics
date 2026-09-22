@@ -1,0 +1,105 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "candidate_id": "F7_pump_prescribed_internal_rotor_recirculation_v1",
+  "fluid_angular_momentum": {
+    "axis_projection": [
+      0.0,
+      0.0016027829873098427,
+      -0.0033806981632782253,
+      0.0005977152791882066,
+      0.0006336783280397633,
+      -0.0006602496125064404,
+      6.646870681901547e-05,
+      0.0003583093403910646,
+      -0.0003583471091744832,
+      1.1109190784823457e-05,
+      0.00010423959456015788,
+      0.0009609749798097968
+    ],
+    "finite_difference_axis_torque_proxy": [
+      null,
+      0.0320353574402763,
+      -0.09958739762665075,
+      0.0793383118775247,
+      0.0007208079857569737,
+      -0.025912642966195644,
+      0.01454191422602387,
+      0.0058358603431456655,
+      -0.014324927147285248,
+      0.007381716745025673,
+      0.0018602829273908217,
+      0.017162655825612834
+    ],
+    "fluid_mass_max_kg": 40.560001926496625,
+    "fluid_mass_min_kg": 40.560001926496625,
+    "max_abs_proxy_after_motion_start": 0.017162655825612834,
+    "max_abs_proxy_during_motion": 0.017162655825612834
+  },
+  "gates": {
+    "direct_torque_dataset_present": false,
+    "finite_arrays": true,
+    "finite_difference_response_observed": true,
+    "nonzero_motion_observed": true,
+    "particle_identity_unique": true,
+    "pump_independence_gate": false,
+    "time_axis_identical": true,
+    "torque_provenance_verified": false,
+    "trajectory_control_hash_bound": true
+  },
+  "independence_established": false,
+  "inputs": {
+    "control_sidecar": {
+      "bytes": 11040,
+      "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/control-sidecar.h5",
+      "role": "prescribed pump motion control sidecar",
+      "sha256": "d0dcda264642136b686d086b139583b7184e5d446efc005b4969ce8bdaeb2016"
+    },
+    "trajectory": {
+      "bytes": 2280710,
+      "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/trajectory.h5",
+      "role": "isolated F7 canary fluid trajectory",
+      "sha256": "aff59b9d0648ef35e9878d6293e189150ec95591d7465d4aab86f98105648d0e"
+    }
+  },
+  "interpretation": [
+    "The canary contains nonzero prescribed motion and a measurable fluid angular-momentum response proxy.",
+    "The proxy is derived from saved fluid states and is not a wall-reaction torque dataset.",
+    "The result cannot establish independence from F6 or authorize F7 Definition/preflight/solver work."
+  ],
+  "physical_torque_claim": false,
+  "protected_state_mutation": {
+    "denominator": 0,
+    "ledger": 0,
+    "matrix": 0,
+    "qualification_credit": 0,
+    "queue": 0,
+    "registry": 0
+  },
+  "pump_motion": {
+    "axis_unit": [
+      -0.0,
+      1.0,
+      -0.0
+    ],
+    "max_angular_acceleration_rad_s2": 8.726646259971648,
+    "max_angular_speed_rad_s": 2.007887062139725,
+    "motion_start_frame": 10,
+    "nonzero_motion_observed": true
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "schema": "core.f7.pump.angular_momentum_diagnostic.v1",
+  "shape": {
+    "fluid_particles": 5070,
+    "frames": 12
+  },
+  "status": "diagnostic_only_torque_unresolved",
+  "time": {
+    "complete_axis": true,
+    "end_s": 0.5500869087990566,
+    "native_frame_count": 12,
+    "start_s": 0.0
+  }
+}
