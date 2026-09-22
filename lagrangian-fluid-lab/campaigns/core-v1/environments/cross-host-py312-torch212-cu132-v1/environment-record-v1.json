@@ -1,0 +1,399 @@
+{
+  "artifact_manifest": {
+    "environment_spec": {
+      "bytes": 2772,
+      "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/environment-spec.json",
+      "sha256": "02a36d671c48e09ec55041b8df8f224c42fa3e1dcb8853e27ccf144c6700072a"
+    },
+    "prepare_script": {
+      "bytes": 1681,
+      "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/prepare_host.sh",
+      "sha256": "2b1c9f1c535d3dbaf62bbe74d59552b794b2dc4c847b1096ad932ba3af7c03eb"
+    },
+    "probe_script": {
+      "bytes": 4992,
+      "path": "scripts/core_cross_host_environment_probe.py",
+      "sha256": "87ba267acd3f16acc49970e43e604edef24fc1a6df7231e87f79cdf8a3234ef2"
+    },
+    "readme": {
+      "bytes": 2120,
+      "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/README.md",
+      "sha256": "d7a9df411db28df11be1d33d6a7d98ea3ddf7e65eb7a478572f631d608f3a0f9"
+    },
+    "specs": {
+      "ada": {
+        "bytes": 5854,
+        "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/specs/ada-f3-cross-host-canary20-matched-stack-v1.json",
+        "sha256": "25575022eae33bffe9644b70a3af5a06e158c02391f1bba995fc88ae1368344c"
+      },
+      "h200": {
+        "bytes": 6294,
+        "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/specs/h200-f3-cross-host-canary20-matched-stack-v1.json",
+        "sha256": "9fdecd0892f930a74f0c9bee26aac4fa78d4245b3490bd3968a2cb1b7e70476e"
+      }
+    }
+  },
+  "environment_id": "cross-host-py312-torch212-cu132-v1",
+  "generated_utc": "2026-09-19T12:32:21.381913+00:00",
+  "handoff": {
+    "ada_spec": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/specs/ada-f3-cross-host-canary20-matched-stack-v1.json",
+    "canary": "F3_DEV_08_a0p953125 graph_residual, chunk 256, maximum_steps 20, deterministic, diagnostic only",
+    "fixed_tolerances": {
+      "position_absolute_tolerance_m": 1e-05,
+      "velocity_absolute_tolerance_mps": 0.0001
+    },
+    "h200_required_action": "Run the probe with the h200 prefix on the actual H200 host, replace the local h200 import record, verify driver/CPU/GPU UUID and then submit the unchanged spec.",
+    "h200_spec": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/specs/h200-f3-cross-host-canary20-matched-stack-v1.json"
+  },
+  "installation": {
+    "clone_source": "/home/jade/.conda/envs/neural_lagrangian_solver_torch212",
+    "commands": [
+      "conda create --prefix <HOST_PREFIX> --clone /home/jade/.conda/envs/neural_lagrangian_solver_torch212 --copy --yes",
+      "<HOST_PREFIX>/bin/python -m pip install --no-deps --only-binary=:all: numpy==2.2.6 scipy==1.15.3",
+      "CUDA_VISIBLE_DEVICES= <HOST_PREFIX>/bin/python scripts/core_cross_host_environment_probe.py --output <HOST_RECORD>"
+    ],
+    "reuse_strategy": "read-only Python 3.12/Torch 2.12.1 source clone; only NumPy/SciPy exact pins installed",
+    "target_prefixes_created": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200"
+    ]
+  },
+  "required_versions": {
+    "cuda_runtime": "13.2",
+    "h5py": "3.16.0",
+    "numpy": "2.2.6",
+    "python": "3.12.13",
+    "scipy": "1.15.3",
+    "torch": "2.12.1+cu132"
+  },
+  "schema": "core.cross_host_environment_record.v1",
+  "source": {
+    "observed_import": {
+      "cuda": "13.2",
+      "executable": "/home/jade/.conda/envs/neural_lagrangian_solver_torch212/bin/python",
+      "h5py": "3.16.0",
+      "numpy": "2.5.1",
+      "python": "3.12.13 | packaged by conda-forge | (main, Aug 11 2026, 10:27:28) [GCC 14.4.0]",
+      "scipy": "ModuleNotFoundError: No module named 'scipy'",
+      "torch": "2.12.1+cu132"
+    },
+    "observed_limitation": "source has NumPy 2.5.1 and no SciPy; exact target NumPy/SciPy are installed only in copied prefixes",
+    "prefix": "/home/jade/.conda/envs/neural_lagrangian_solver_torch212",
+    "read_only": true
+  },
+  "targets": {
+    "ada": {
+      "distribution_metadata": {
+        "h5py": {
+          "directory": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/h5py-3.16.0.dist-info",
+          "metadata": {
+            "bytes": 3007,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/h5py-3.16.0.dist-info/METADATA",
+            "sha256": "e461fcf7eb9fee6242205f9225cc178455a0212d1c0cb8f997f7eebf8cd9695e"
+          },
+          "record": {
+            "bytes": 12793,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/h5py-3.16.0.dist-info/RECORD",
+            "sha256": "31bb230d050e54f8bafe38ce6cfb20e6f697e1d6c68af2fd26f4f83603ac7500"
+          },
+          "wheel": {
+            "bytes": 113,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/h5py-3.16.0.dist-info/WHEEL",
+            "sha256": "0635a71fda73bafbe27da888a2157eddbb0183b0f1b16cf8fcdbd4bd5af2d0e0"
+          }
+        },
+        "numpy": {
+          "directory": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/numpy-2.2.6.dist-info",
+          "metadata": {
+            "bytes": 62026,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/numpy-2.2.6.dist-info/METADATA",
+            "sha256": "22d648f53848429464ca643b40d73b49a920d47876fc77c395d4dca4e834904a"
+          },
+          "record": {
+            "bytes": 106863,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/numpy-2.2.6.dist-info/RECORD",
+            "sha256": "e7dc8c68ab4d550fb22139f26253c31667371b0f18dfaa1653befbfb8c900f50"
+          },
+          "wheel": {
+            "bytes": 137,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/numpy-2.2.6.dist-info/WHEEL",
+            "sha256": "dea2037170a4e7bec05e22b7a4389f3be804f54fcc61660682d0fbf202dadbf5"
+          }
+        },
+        "scipy": {
+          "directory": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/scipy-1.15.3.dist-info",
+          "metadata": {
+            "bytes": 61956,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/scipy-1.15.3.dist-info/METADATA",
+            "sha256": "c75caf32b67a13a9fc16aacf993a8bb883b7a69744ffe77cbbd4f3bfbad28f3d"
+          },
+          "record": {
+            "bytes": 193673,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/scipy-1.15.3.dist-info/RECORD",
+            "sha256": "2d4c8351ff1d9fd52cdf969298221c3ef75c30575a4467ddabc5c84ee9dc0529"
+          },
+          "wheel": {
+            "bytes": 137,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/scipy-1.15.3.dist-info/WHEEL",
+            "sha256": "dea2037170a4e7bec05e22b7a4389f3be804f54fcc61660682d0fbf202dadbf5"
+          }
+        },
+        "torch": {
+          "directory": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/torch-2.12.1+cu132.dist-info",
+          "metadata": {
+            "bytes": 31909,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/torch-2.12.1+cu132.dist-info/METADATA",
+            "sha256": "48b8815a7dc1c9ea7786e63c3075331c1afb098f5592bb2478ed032d6bcb0e64"
+          },
+          "record": {
+            "bytes": 1429798,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/torch-2.12.1+cu132.dist-info/RECORD",
+            "sha256": "b62d6d3e106e81959cb52167616c918c128422cf1ebea7e1094b313f604f919a"
+          },
+          "wheel": {
+            "bytes": 113,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/torch-2.12.1+cu132.dist-info/WHEEL",
+            "sha256": "28df027203dbaf17f48f8ca7584122e6eb48242d20ca4859d17067936b769c6a"
+          }
+        }
+      },
+      "import_evidence": {
+        "cpu_sha256": "30c5c0575abaf6c9ec56b16f2b049ef89b23e005bd5ffa22dde342caddf34973",
+        "driver_query": {
+          "argv": [
+            "nvidia-smi",
+            "--query-gpu=driver_version,name,uuid",
+            "--format=csv,noheader,nounits"
+          ],
+          "available": true,
+          "executable": "nvidia-smi",
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-3dd8e277-f7e1-3893-292a-5928ea229599\n595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-ff68d571-7ed7-31b4-a0c0-16fe8745bd7e\n595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-2b603061-bc09-9875-acee-e57fbf62f85a\n595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-b9624e96-e0f0-920f-ba94-f4db47900f95\n595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9\n595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32\n595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec\n595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51"
+        },
+        "host_label": "ada",
+        "hostname": "user-SYS-421GE-TNRT",
+        "packages": {
+          "h5py": {
+            "module_sha256": "d4a46803087247cef67ee34a4d98d797be2f55b1f9230bc5f8a1fa358f8d1b87",
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/h5py/__init__.py",
+            "version": "3.16.0"
+          },
+          "numpy": {
+            "module_sha256": "6ae17b070c0f70a8e3cad89a510a256942e5a1f37ea5feb120cec167ed2a6236",
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/numpy/__init__.py",
+            "version": "2.2.6"
+          },
+          "scipy": {
+            "module_sha256": "185913aa107512fafd5cf89dfd452a8719b45a6eba833e2dcee2cbfd18b4bbe5",
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/scipy/__init__.py",
+            "version": "1.15.3"
+          },
+          "torch": {
+            "module_sha256": "d9dfff4b75d46e4c75572200a3466b70231d05b0318e38ac1bd121789165fb49",
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/lib/python3.12/site-packages/torch/__init__.py",
+            "version": "2.12.1+cu132"
+          }
+        },
+        "torch_runtime": {
+          "cuda_available_with_visibility_empty": false,
+          "cuda_version": "13.2",
+          "cudnn_benchmark": false,
+          "cudnn_deterministic": false,
+          "deterministic_algorithms_enabled": false,
+          "version": "2.12.1+cu132"
+        }
+      },
+      "prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada",
+      "python": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada/bin/python",
+      "record_files": {
+        "conda_explicit": {
+          "bytes": 20050,
+          "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/records/ada.conda-explicit.txt",
+          "sha256": "41cf6d5c7376f3041ae2197a8f3e96a8b521c1c70ec81340ce938b18621ac5b4"
+        },
+        "import": {
+          "bytes": 11875,
+          "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/records/ada-import.json",
+          "sha256": "3e289e7ab34a2b0db9b3efe7aa34b88cf02da9a73f72c1f25093baf27beed7bd"
+        },
+        "pip_freeze": {
+          "bytes": 4044,
+          "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/records/ada.freeze.txt",
+          "sha256": "67649449203cb064415b1454079f059e9674414e9957e7ce4fccc491ebacf112"
+        }
+      },
+      "status": "package_stack_ready_ada_probe_recorded"
+    },
+    "h200": {
+      "distribution_metadata": {
+        "h5py": {
+          "directory": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/h5py-3.16.0.dist-info",
+          "metadata": {
+            "bytes": 3007,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/h5py-3.16.0.dist-info/METADATA",
+            "sha256": "e461fcf7eb9fee6242205f9225cc178455a0212d1c0cb8f997f7eebf8cd9695e"
+          },
+          "record": {
+            "bytes": 12793,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/h5py-3.16.0.dist-info/RECORD",
+            "sha256": "31bb230d050e54f8bafe38ce6cfb20e6f697e1d6c68af2fd26f4f83603ac7500"
+          },
+          "wheel": {
+            "bytes": 113,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/h5py-3.16.0.dist-info/WHEEL",
+            "sha256": "0635a71fda73bafbe27da888a2157eddbb0183b0f1b16cf8fcdbd4bd5af2d0e0"
+          }
+        },
+        "numpy": {
+          "directory": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/numpy-2.2.6.dist-info",
+          "metadata": {
+            "bytes": 62026,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/numpy-2.2.6.dist-info/METADATA",
+            "sha256": "22d648f53848429464ca643b40d73b49a920d47876fc77c395d4dca4e834904a"
+          },
+          "record": {
+            "bytes": 106863,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/numpy-2.2.6.dist-info/RECORD",
+            "sha256": "813201ff8edad3033d2d2e847466a04b2eba42b46d6eb495e444c321a54db505"
+          },
+          "wheel": {
+            "bytes": 137,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/numpy-2.2.6.dist-info/WHEEL",
+            "sha256": "dea2037170a4e7bec05e22b7a4389f3be804f54fcc61660682d0fbf202dadbf5"
+          }
+        },
+        "scipy": {
+          "directory": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/scipy-1.15.3.dist-info",
+          "metadata": {
+            "bytes": 61956,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/scipy-1.15.3.dist-info/METADATA",
+            "sha256": "c75caf32b67a13a9fc16aacf993a8bb883b7a69744ffe77cbbd4f3bfbad28f3d"
+          },
+          "record": {
+            "bytes": 193673,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/scipy-1.15.3.dist-info/RECORD",
+            "sha256": "2d4c8351ff1d9fd52cdf969298221c3ef75c30575a4467ddabc5c84ee9dc0529"
+          },
+          "wheel": {
+            "bytes": 137,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/scipy-1.15.3.dist-info/WHEEL",
+            "sha256": "dea2037170a4e7bec05e22b7a4389f3be804f54fcc61660682d0fbf202dadbf5"
+          }
+        },
+        "torch": {
+          "directory": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/torch-2.12.1+cu132.dist-info",
+          "metadata": {
+            "bytes": 31909,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/torch-2.12.1+cu132.dist-info/METADATA",
+            "sha256": "48b8815a7dc1c9ea7786e63c3075331c1afb098f5592bb2478ed032d6bcb0e64"
+          },
+          "record": {
+            "bytes": 1429798,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/torch-2.12.1+cu132.dist-info/RECORD",
+            "sha256": "b62d6d3e106e81959cb52167616c918c128422cf1ebea7e1094b313f604f919a"
+          },
+          "wheel": {
+            "bytes": 113,
+            "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/torch-2.12.1+cu132.dist-info/WHEEL",
+            "sha256": "28df027203dbaf17f48f8ca7584122e6eb48242d20ca4859d17067936b769c6a"
+          }
+        }
+      },
+      "import_evidence": {
+        "cpu_sha256": "ba12544c3b2cf8cf43ef4b2acc87cee586220cb555aa23550b641b2123d3a602",
+        "driver_query": {
+          "argv": [
+            "nvidia-smi",
+            "--query-gpu=driver_version,name,uuid",
+            "--format=csv,noheader,nounits"
+          ],
+          "available": true,
+          "executable": "nvidia-smi",
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-3dd8e277-f7e1-3893-292a-5928ea229599\n595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-ff68d571-7ed7-31b4-a0c0-16fe8745bd7e\n595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-2b603061-bc09-9875-acee-e57fbf62f85a\n595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-b9624e96-e0f0-920f-ba94-f4db47900f95\n595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-74ce8a29-c3cd-1e50-a9b4-a2293f2335c9\n595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-b5e3f067-fe26-4c00-5805-00a4f5acde32\n595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec\n595.91.07, NVIDIA RTX 6000 Ada Generation, GPU-88bfe7db-87fb-d458-719b-eb9a098f8f51"
+        },
+        "host_label": "h200",
+        "hostname": "user-SYS-421GE-TNRT",
+        "packages": {
+          "h5py": {
+            "module_sha256": "d4a46803087247cef67ee34a4d98d797be2f55b1f9230bc5f8a1fa358f8d1b87",
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/h5py/__init__.py",
+            "version": "3.16.0"
+          },
+          "numpy": {
+            "module_sha256": "6ae17b070c0f70a8e3cad89a510a256942e5a1f37ea5feb120cec167ed2a6236",
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/numpy/__init__.py",
+            "version": "2.2.6"
+          },
+          "scipy": {
+            "module_sha256": "185913aa107512fafd5cf89dfd452a8719b45a6eba833e2dcee2cbfd18b4bbe5",
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/scipy/__init__.py",
+            "version": "1.15.3"
+          },
+          "torch": {
+            "module_sha256": "d9dfff4b75d46e4c75572200a3466b70231d05b0318e38ac1bd121789165fb49",
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/lib/python3.12/site-packages/torch/__init__.py",
+            "version": "2.12.1+cu132"
+          }
+        },
+        "torch_runtime": {
+          "cuda_available_with_visibility_empty": false,
+          "cuda_version": "13.2",
+          "cudnn_benchmark": false,
+          "cudnn_deterministic": false,
+          "deterministic_algorithms_enabled": false,
+          "version": "2.12.1+cu132"
+        }
+      },
+      "prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200",
+      "python": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200/bin/python",
+      "record_files": {
+        "conda_explicit": {
+          "bytes": 20050,
+          "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/records/h200.conda-explicit.txt",
+          "sha256": "41cf6d5c7376f3041ae2197a8f3e96a8b521c1c70ec81340ce938b18621ac5b4"
+        },
+        "import": {
+          "bytes": 11881,
+          "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/records/h200-import.json",
+          "sha256": "3223637a31f956c16932e90ed8af000d966a157238397006c9e249f13b292d2f"
+        },
+        "pip_freeze": {
+          "bytes": 4044,
+          "path": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/records/h200.freeze.txt",
+          "sha256": "67649449203cb064415b1454079f059e9674414e9957e7ce4fccc491ebacf112"
+        }
+      },
+      "status": "package_stack_ready_local_hardware_probe_pending"
+    }
+  },
+  "validation": {
+    "cuda_model_construction_during_preparation": false,
+    "distribution_record_comparison": {
+      "h5py": "identical",
+      "numpy": "differs only in pip-generated f2py/numpy-config entrypoint rows because each prefix has a different absolute shebang path; package metadata and imported module hashes match",
+      "scipy": "identical",
+      "torch": "identical"
+    },
+    "existing_lab_venv_mutated": false,
+    "existing_lab_venv_observation": {
+      "cuda": "12.8",
+      "executable": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "h5py": "3.16.0",
+      "numpy": "2.2.6",
+      "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+      "scipy": "1.15.3",
+      "torch": "2.11.0+cu128"
+    },
+    "formal_gpu_canary_started_by_preparation": false,
+    "ledger_written_by_preparation": false,
+    "pip_check": {
+      "ada": "passed: No broken requirements found",
+      "h200": "passed: No broken requirements found"
+    },
+    "spec_validation": "passed for ada and h200 with scripts.core_runtime.validate_spec",
+    "target_import_assertions": "passed for ada and h200 with CUDA_VISIBLE_DEVICES empty"
+  }
+}

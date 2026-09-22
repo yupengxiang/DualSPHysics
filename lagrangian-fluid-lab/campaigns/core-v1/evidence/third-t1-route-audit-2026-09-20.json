@@ -1,0 +1,83 @@
+{
+  "schema": "core.third_t1.route_audit.v1",
+  "created_at": "2026-09-20T00:00:00+08:00",
+  "decision": {
+    "selected_route": "F1_suspended_obstacle_gap_v1",
+    "selected_route_status": "root_review_admissible_cpu_native_preflight_pass_protected_job_not_submitted",
+    "why_this_route": "It is the shortest evidence-backed new physical scope that can supply the missing F1 family: one changed continuum geometry plus a dedicated native/mDBC preflight and adapter. F1 H1-H4 boundary repairs are terminal; F2 dynamic duration is event-censored and static F2 is excluded; F3 baffle is scientifically distinct but cannot increase the unique family count.",
+    "runtime_decision": "Do not run solver/GPU until root reviews the protected anchor spec.",
+    "central_state_mutation": {"registry": false, "ledger": false, "queue": false}
+  },
+  "completion_context": {
+    "completion_path": "campaigns/core-v1/completion.json",
+    "completion_sha256": "eb25d9878ce8b005a1e6fe6c481671ad4c223beafb3f1104601a8a3dc67311e0",
+    "can_finalize": false,
+    "current_unique_families": ["F3", "F4"],
+    "third_family_gate": "F1 or F2 must be qualified; a second F3 scope is insufficient",
+    "registry_path": "campaigns/core-v1/registry.json",
+    "registry_sha256_read_only": "1ddfeda5b2d3eb142f94be4bb2cbc6f1b65271d6b77efc8b65c829b94e66b38d"
+  },
+  "family_audit": {
+    "F1": {
+      "parent_scope": "F1_single_obstacle_height_range_v1",
+      "parent_denominator": {"planned": 15, "qualified": false, "qualification_credit": 0},
+      "repairability": "no same-class repair candidate remains",
+      "reason": "H1 native/mDBC full window, H2 mDBC repair, H3 bottom-face topology repair, and H4 obstacle normal orientation were retained as separate negative forensic attempts. H4 reached the requested 2.2 s but terminally failed hard integrity.",
+      "failures": {
+        "H1": {"native_ids_lost": 1426, "wall_endpoint_frames": 166, "first_wall_violation_s": 1.04001137035, "hard_integrity": false},
+        "H2": {"native_ids_lost": 6689, "wall_violation_frames": 53742, "final_mass_fraction": 0.94456, "hard_integrity": false},
+        "H3": {"obstacle_penetration_particle_frames": 302558, "saved_chord_crossings": 302559, "wall_endpoint_frames": 246, "native_ids_lost": 774, "hard_integrity": false},
+        "H4": {"initial_valid_count": 120658, "final_valid_count": 89956, "wall_endpoint_frames": 265270, "obstacle_penetration_particle_frames": 1358, "mass_loss_kg": 12.952406585973222, "hard_integrity": false}
+      },
+      "selected_new_scope": "F1_suspended_obstacle_gap_v1",
+      "selected_scope_is_repair": false,
+      "selected_scope_is_new_physical_geometry": true
+    },
+    "F2": {
+      "dynamic_duration_scope": "F2_dynamic_third_family_dbc_duration_x_v1",
+      "dynamic_denominator": {"planned": 15, "executed": 0, "unattempted": 15, "credit": 0},
+      "q075_anchor": {"horizon_s": 5.000003231, "hard_integrity": true, "motion_complete_s": 1.525, "receiver_contact_s": 1.1000196945, "settled": false, "event_complete": false, "p95_terminal_speed_m_s": 0.3996844588, "kinetic_fraction_max": 1.156, "wall_s": 364.697, "gpu_hours": 0.1013048, "peak_gpu_mib": 606},
+      "q1_extensions": {"windows_s":[5.0,10.0],"hard_integrity":"pass","event":"censored/no settle","further_horizon_extension":false},
+      "repairability": "no legal dynamic repair within the registered duration/input lineage",
+      "static_status": "CPU/static full-cup closures are retained but excluded by the current instruction and earn zero third-family credit",
+      "next_dependency": "A future F2 attempt would need a new preregistered physical motion law, new input identity, and new root review; no such solver job is written here."
+    },
+    "F3": {
+      "scope": "F3_baffle_exchange_native_mdbc_x_v1",
+      "denominator": {"planned": 15, "executed": 0, "unattempted": 15, "credit": 0},
+      "v2_canary": {"horizon_s": 8.35001594, "solver_return": 0, "first_baffle_penetration_s": 0.0100356, "fixed_particles_without_normal": 26732, "fixed_particles_total": 131403, "saved_chord_crossings": 20990, "forward_exchange": 0, "reverse_exchange": 5, "hard_integrity": false, "event_complete": false, "wall_s": 281.448, "gpu_hours": 0.078179949, "peak_gpu_mib": 735.7},
+      "v1_failure": "No normal data for mDBC before integration",
+      "route_status": "scientifically distinct but not a third unique family and not retryable without new geometry/normal evidence plus new root review"
+    }
+  },
+  "new_scope": {
+    "scope_id": "F1_suspended_obstacle_gap_v1",
+    "revision_id": "F1_suspended_obstacle_gap_mdbc_v1",
+    "physical_change": {"obstacle_low_m":[0.68,0.15,0.06],"obstacle_high_m":[0.8,0.25,0.4],"bottom_fluid_gap_m":0.06,"source_fill_unchanged":true,"gravity_unchanged":true,"mdbc_observer_unchanged":true},
+    "cpu_native_anchor": {"fluid_particles":120658,"boundary_particles":142446,"zero_normals":0,"exact_fluid_boundary_overlap":0,"all_face_signs_pass":true,"gap_geometry_pass":true,"mass_relative_error":0.017075482536764497,"solver_run":false,"gpu_launched":false},
+    "fixed_matrix": {"planned":15,"executed":0,"unattempted":15,"credit":0},
+    "event_window": {"initial_s":2.2,"maximum_extension_s":4.4,"extension_before_anchor":false,"event_required":true},
+    "lineage": "new physical geometry, not a H1-H4 boundary retry; F3/F4 are separate mechanisms"
+  },
+  "resource_estimates": {
+    "F1_H4_basis": {"solver_s":305.30091592192184,"total_s":378.111042935983,"peak_gpu_mib":588,"peak_rss_mib":514.00390625},
+    "F2_q075_basis": {"total_s":364.697,"gpu_hours":0.1013048,"peak_gpu_mib":606},
+    "F3_v2_basis": {"total_s":281.448,"gpu_hours":0.078179949,"peak_gpu_mib":735.7},
+    "protected_G1_anchor_estimate": {"gpu_hours":0.12,"gpu_peak_mib":4096,"ram_mib":16384,"timeout_s":3600},
+    "G1_full_matrix_upper_bound": {"gpu_hours":3.0,"serial_wall_hours":2.0,"status":"estimate only; no matrix submission"}
+  },
+  "artifact_hashes": {
+    "selected_candidate_card": {"path":"campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/candidate-card-v1.json","sha256":"e419ab8acc78861e17e8ea8f672358c1819f918bb997813ce7edf4b23f098978"},
+    "fixed_matrix": {"path":"campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/fixed-matrix-v1.json","sha256":"136151eafbec649f4361e5a8416efa70adbced9cf58221e2d025c2f8673d9f4d"},
+    "failure_denominator": {"path":"campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/failure-denominator-v1.json","sha256":"7aa6afe3659133a2478172873159266f9cb69b2d51b0df6fddfd6a793eeb0d8e"},
+    "lineage": {"path":"campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/lineage-clarification-v1.json","sha256":"680f97c22a31a662461995a30f99148a0b05530298f3656d176eb9beccfd069b"},
+    "cpu_native_preflight": {"path":"campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/cpu-native-preflight.json","sha256":"7b1076a38c1d2121d0527079c493efe8474e555ea6e6cc1b8631c1846c248007"},
+    "protected_job_spec": {"path":"campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/protected-anchor-job-spec-v1.json","sha256":"7cf6d8028aba1862adef3201847484d09f663c69b57536262a3feb98e0aee469"},
+    "runtime_adapter": {"path":"scripts/f1_suspended_obstacle_gap_runtime_v1.py","sha256":"86af6c5e3089e8c0a3712e9c34205a488264db989b138bb78851d28a40aff796"},
+    "preflight_adapter": {"path":"scripts/f1_suspended_obstacle_gap_preflight_v1.py","sha256":"e09d3cd4e8b5ca4118ed6340a7536ee7b1a5d89e803ef98b3367ee195c5387fa"},
+    "F1_H4_terminal_gate": {"path":"campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/terminal-forensics-v1/root-terminal-gate-v1.json","sha256":"1926289f008c5c8a5e1c95155fa501cbf3f69939a2345a3207191afa8b9a8ff1"},
+    "F2_q075_negative": {"path":"campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-anchor-canary-negative-evidence-v1.json","sha256":"0bba913c75b2a716b0756154239e11595feb753b428e2b4745563c5da3ff841d"},
+    "F2_extension_review": {"path":"campaigns/core-v1/cfd/f2-dbc-extension5s-scientific-review-v1.json","sha256":"6ee8340428cb7fd8d5c1b796ba3c2c42a5eda0d0793d9b609feed530eae4573b"},
+    "F3_v2_report": {"path":"reports/F3-BAFFLE-RUNTIME-CANARY-NORMALS-V2-2026-09-20.md","sha256":"8655113872e921c23acf9d5a6fc8b3a216074206173b9c3280af293688d5de1d"}
+  }
+}

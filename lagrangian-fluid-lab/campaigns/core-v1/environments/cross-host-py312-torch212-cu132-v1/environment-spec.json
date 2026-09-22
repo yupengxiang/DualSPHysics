@@ -1,0 +1,63 @@
+{
+  "schema": "core.cross_host_environment.v1",
+  "environment_id": "cross-host-py312-torch212-cu132-v1",
+  "purpose": "minimal matched-stack follow-up for the F3 graph_residual 20-step canary",
+  "source_environment": {
+    "prefix": "/home/jade/.conda/envs/neural_lagrangian_solver_torch212",
+    "read_only": true,
+    "observed_python": "3.12.13",
+    "observed_torch": "2.12.1+cu132",
+    "observed_h5py": "3.16.0"
+  },
+  "required_packages": {
+    "python": "3.12.13",
+    "torch": "2.12.1+cu132",
+    "cuda_runtime": "13.2",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "h5py": "3.16.0"
+  },
+  "host_installation": {
+    "ada_prefix": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/ada",
+    "h200_prefix": "campaigns/core-v1/environments/cross-host-py312-torch212-cu132-v1/runtime/h200",
+    "method": "conda clone --copy from source_environment, then pip install exact numpy/scipy with --no-deps",
+    "old_venv_mutated": false,
+    "gpu_started_during_preparation": false
+  },
+  "installation_commands": [
+    "conda create --prefix <HOST_PREFIX> --clone /home/jade/.conda/envs/neural_lagrangian_solver_torch212 --copy --yes",
+    "<HOST_PREFIX>/bin/python -m pip install --no-deps --only-binary=:all: numpy==2.2.6 scipy==1.15.3",
+    "CUDA_VISIBLE_DEVICES= <HOST_PREFIX>/bin/python scripts/core_cross_host_environment_probe.py --output <HOST_RECORD>"
+  ],
+  "runtime_policy": {
+    "CUDA_VISIBLE_DEVICES": "assigned host UUID only during root GPU run",
+    "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+    "PYTHONHASHSEED": "0",
+    "torch_use_deterministic_algorithms": true,
+    "cudnn_deterministic": true,
+    "cudnn_benchmark": false,
+    "no_neighbor_change": true,
+    "no_tolerance_change": true,
+    "no_model_change": true
+  },
+  "follow_up_canary": {
+    "case_id": "F3_DEV_08_a0p953125",
+    "model_kind": "graph_residual",
+    "chunk_size": 256,
+    "maximum_steps": 20,
+    "expected_frames": 21,
+    "manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "checkpoint_sha256": "9af1dc3cb68991c38fd31b59d92895326e3abe89d5d29d33dd086d7fa462b8a8",
+    "core_models_sha256": "73a98b262500c30e46f14aafd2a89f2bea34116c77b6e34ce5e33e7412c38c77",
+    "position_absolute_tolerance_m": 1e-05,
+    "velocity_absolute_tolerance_mps": 0.0001
+  },
+  "evidence_required_before_submission": [
+    "python --version and executable path",
+    "pip freeze and conda explicit package lock with package source URLs",
+    "torch.__version__, torch.version.cuda, NumPy/SciPy/h5py versions",
+    "import paths and SHA-256 for bundle modules",
+    "driver, visible GPU UUID, deterministic flags, and CPU feature summary",
+    "environment prefix hash/manifest and no CUDA model construction during probe"
+  ]
+}
