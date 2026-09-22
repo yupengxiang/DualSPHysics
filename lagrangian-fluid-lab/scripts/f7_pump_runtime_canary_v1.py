@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +32,7 @@ GENCASE = BIN_DIR / "GenCase_linux64"
 SOLVER_CPU = BIN_DIR / "DualSPHysics5.4CPU_linux64"
 DECODER = LAB / "campaigns/l1-resume/artifacts/bi4_dump"
 SCHEMA = "core.f7.pump.runtime_canary_plan.v1"
+OFFICIAL_DP_M = 0.004
 
 
 def sha256_file(path: Path) -> str:
@@ -58,12 +60,15 @@ def _safe_output_root(path: Path) -> Path:
 
 
 def prepare_plan(output_root: str | Path, *, time_max_s: float | None = None,
-                 time_out_s: float | None = None) -> dict[str, Any]:
+                 time_out_s: float | None = None, dp_m: float = OFFICIAL_DP_M) -> dict[str, Any]:
     """Return a hash-bound direct-command plan without executing anything."""
     output_root = _safe_output_root(Path(output_root))
     contract = parse_pump_definition(DEFAULT_DEFINITION)
     requested_time_max = contract["time_max_s"] if time_max_s is None else float(time_max_s)
     requested_time_out = contract["time_out_s"] if time_out_s is None else float(time_out_s)
+    dp_m = float(dp_m)
+    if not math.isfinite(dp_m) or dp_m <= 0:
+        raise ValueError("canary dp_m must be positive and finite")
     if requested_time_max <= 0 or requested_time_max > contract["time_max_s"]:
         raise ValueError("canary time_max_s must be positive and no greater than the official TimeMax")
     if requested_time_out <= 0 or requested_time_out > requested_time_max:
@@ -101,6 +106,7 @@ def prepare_plan(output_root: str | Path, *, time_max_s: float | None = None,
             "motion_sha256": contract["motion_sha256"],
             "time_max_s": requested_time_max,
             "time_out_s": requested_time_out,
+            "dp_m": dp_m,
         },
         "source_bindings": source_bindings,
         "binary_bindings": binaries,
@@ -139,12 +145,13 @@ def prepare_plan(output_root: str | Path, *, time_max_s: float | None = None,
 
 
 def write_plan(path: str | Path, *, output_root: str | Path,
-               time_max_s: float | None = None, time_out_s: float | None = None) -> dict[str, Any]:
+               time_max_s: float | None = None, time_out_s: float | None = None,
+               dp_m: float = OFFICIAL_DP_M) -> dict[str, Any]:
     target = Path(path).expanduser().resolve()
     if target.exists():
         raise FileExistsError(f"refusing to overwrite runtime plan: {target}")
     target.parent.mkdir(parents=True, exist_ok=True)
-    payload = prepare_plan(output_root, time_max_s=time_max_s, time_out_s=time_out_s)
+    payload = prepare_plan(output_root, time_max_s=time_max_s, time_out_s=time_out_s, dp_m=dp_m)
     target.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return payload
 
@@ -155,9 +162,10 @@ def main() -> int:
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument("--time-max", type=float)
     parser.add_argument("--time-out", type=float)
+    parser.add_argument("--dp", type=float, default=OFFICIAL_DP_M)
     args = parser.parse_args()
     payload = write_plan(args.output_plan, output_root=args.output_root,
-                         time_max_s=args.time_max, time_out_s=args.time_out)
+                         time_max_s=args.time_max, time_out_s=args.time_out, dp_m=args.dp)
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0
 

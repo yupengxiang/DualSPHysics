@@ -1,11 +1,11 @@
 {
   "schema": "core.f7.pump_recirculation.source_audit.v1",
-  "status": "official_source_and_isolated_contract_bound_read_only",
+  "status": "official_source_and_unqualified_runtime_evidence_bound",
   "candidate_id": "F7_pump_prescribed_internal_rotor_recirculation_v1",
   "candidate_card": {
     "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/candidate-card-v1.json",
-    "sha256": "2cc4635970a3a1aa1ecc4ec69a681483d3ea2e239fbb0724c42639c4b5b78e26",
-    "bytes": 18623,
+    "sha256": "a896dbe62d49a434c07bfe1eb4aae1cba76d252abe395dd70d9498ffee63ffc2",
+    "bytes": 22468,
     "role": "F7 candidate card"
   },
   "official_source_bindings": [
@@ -91,8 +91,8 @@
     },
     {
       "path": "scripts/f7_pump_runtime_canary_v1.py",
-      "sha256": "413bc4d3c7fa9c3e711a1014d8ca921c97032cf1b304a5910f0de359b48ae763",
-      "bytes": 7079,
+      "sha256": "1344511a5d1229123de1889a54e892f3561b73c957f3fcd9bc8d32d94f69b272",
+      "bytes": 7440,
       "role": "non-executing official Pump runtime canary planner"
     },
     {
@@ -100,6 +100,18 @@
       "sha256": "74329fa3ead640aa45a3d59a54212b6e58a0c720aee5ca22cc2ae1ebc6984618",
       "bytes": 2444,
       "role": "runtime canary planner regression tests"
+    },
+    {
+      "path": "scripts/f7_pump_runtime_canary_executor_v1.py",
+      "sha256": "759ec40760804bc595fec3c1287233d28717f497f06366b78182ce776ee81dba",
+      "bytes": 12607,
+      "role": "isolated direct CPU Pump runtime canary executor"
+    },
+    {
+      "path": "tests/test_f7_pump_runtime_canary_executor_v1.py",
+      "sha256": "8eaa55cc77d30b94baf617cf17fecf0ecf27aeda83c072b616c149401c4182bf",
+      "bytes": 1388,
+      "role": "runtime canary executor regression tests"
     },
     {
       "path": "scripts/f7_pump_geometry_adapter_v1.py",
@@ -132,6 +144,88 @@
       "role": "material observer synthetic regression tests"
     }
   ],
+  "runtime_canary_evidence": {
+    "status": "runtime_canary_observed_unqualified",
+    "manifest": {
+      "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/evidence-manifest-v1.json",
+      "sha256": "668de21d0cd132b9bc22552c1091596aed9d744f35bc72b55aee38207b1ab5b9",
+      "bytes": 2374,
+      "role": "unqualified F7 runtime canary evidence manifest"
+    },
+    "artifact_bindings": [
+      {
+        "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/CasePump_Def.xml",
+        "sha256": "43db19c36cd45f11b55a3e9119126382c11491a58b920a2f877241cfaf659299",
+        "bytes": 6924,
+        "role": "derived Pump canary Definition; isolated evidence only"
+      },
+      {
+        "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/trajectory.h5",
+        "sha256": "aff59b9d0648ef35e9878d6293e189150ec95591d7465d4aab86f98105648d0e",
+        "bytes": 2280710,
+        "role": "decoded Pump canary trajectory; isolated evidence only"
+      },
+      {
+        "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/control-sidecar.h5",
+        "sha256": "d0dcda264642136b686d086b139583b7184e5d446efc005b4969ce8bdaeb2016",
+        "bytes": 11040,
+        "role": "hash-bound causal sidecar; no torque claim"
+      },
+      {
+        "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/runtime-canary-receipt.json",
+        "sha256": "b3a95f9a40c1810b489e98c978e74286235bb6bb848897a181af8a632addc005",
+        "bytes": 6051,
+        "role": "direct canary execution receipt; isolated evidence only"
+      }
+    ],
+    "derived_case": {
+      "definition": {
+        "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/CasePump_Def.xml",
+        "sha256": "43db19c36cd45f11b55a3e9119126382c11491a58b920a2f877241cfaf659299"
+      },
+      "dp_m": 0.02,
+      "time_max_s": 0.55,
+      "time_out_s": 0.05,
+      "official_motion_sha256": "1682de96b0d0e097c80dca25c1e2de6f946938abc2f698a73b460154f9f945a0",
+      "official_source_hashes_verified": true
+    },
+    "trajectory": {
+      "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/trajectory.h5",
+      "sha256": "aff59b9d0648ef35e9878d6293e189150ec95591d7465d4aab86f98105648d0e",
+      "frames": 12,
+      "fluid_particles": 5070,
+      "time_start_s": 0.0,
+      "time_end_s": 0.5500869087990566,
+      "finite_arrays": true,
+      "unique_fluid_id_axis": true
+    },
+    "control_sidecar": {
+      "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/control-sidecar.h5",
+      "sha256": "d0dcda264642136b686d086b139583b7184e5d446efc005b4969ce8bdaeb2016",
+      "schema": "core.f7.pump.causal_sidecar.v1",
+      "runtime_evidence_claim": false,
+      "torque_dataset_present": false,
+      "angular_speed_norm_rad_s": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.57226528,
+        2.00788706
+      ]
+    },
+    "trajectory_evidence_present": true,
+    "nonzero_prescribed_motion_observed": true,
+    "torque_evidence_present": false,
+    "admitted_to_core": false,
+    "qualification_credit": 0
+  },
   "vtk_headers": {
     "pump_fixed": {
       "format": "BINARY",
@@ -156,7 +250,7 @@
     "cpu_contains_cpu_solver": true,
     "gpu_contains_gpu_solver": true,
     "wrapper_invoked": false,
-    "interpretation": "reference wrappers are not an execution authorization"
+    "interpretation": "reference wrappers are not an execution authorization; the isolated canary invoked direct binaries"
   },
   "lineage": {
     "official_example_is_source_reference_only": true,
@@ -170,7 +264,7 @@
     "matrix": 0,
     "denominator": 0,
     "queue": 0,
-    "solver_invoked": false,
+    "solver_invoked": true,
     "gpu_started": false
   }
 }

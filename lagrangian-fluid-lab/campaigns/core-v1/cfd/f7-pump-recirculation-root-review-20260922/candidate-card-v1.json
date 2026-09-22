@@ -245,8 +245,8 @@
   "root_review_blockers": [
     "The F7 geometry adapter is now wired through a read-only Core CFD adapter boundary, but its Core pose/gradient velocity is a bounded sample approximation, not runtime evidence or a Definition/trajectory producer.",
     "The adapter's analytic finish clamp is source-faithful, but Core sampled gradient velocity is not certified exact at the finish boundary.",
-    "The isolated F7 observer has no solver trajectory or provenance-verified torque runtime evidence; the new causal sidecar is interface-only and cannot certify runtime motion.",
-    "No generated Definition, XML, BI4, trajectory, or solver evidence exists.",
+    "A coarse isolated CPU canary now has generated Definition, decoded trajectory, and causal-sidecar evidence, but it is not a registered 15-row range and remains outside Core admission.",
+    "The canary sidecar is hash-bound and observes nonzero prescribed motion, but it contains no provenance-verified torque dataset; source/discharge/return/residence regions remain unfrozen.",
     "The official CPU/GPU wrappers contain destructive cleanup and execution commands and are reference-only.",
     "The physical distinction must survive adversarial review with a finite torque/control gate against generic moving-boundary and F6 overlap."
   ],
@@ -306,6 +306,88 @@
       "role": "official fixed/moving/floating particle loading reference"
     }
   ],
+  "runtime_canary_observation": {
+    "status": "runtime_canary_observed_unqualified",
+    "manifest": {
+      "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/evidence-manifest-v1.json",
+      "sha256": "668de21d0cd132b9bc22552c1091596aed9d744f35bc72b55aee38207b1ab5b9",
+      "bytes": 2374,
+      "role": "unqualified F7 runtime canary evidence manifest"
+    },
+    "artifact_bindings": [
+      {
+        "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/CasePump_Def.xml",
+        "sha256": "43db19c36cd45f11b55a3e9119126382c11491a58b920a2f877241cfaf659299",
+        "bytes": 6924,
+        "role": "derived Pump canary Definition; isolated evidence only"
+      },
+      {
+        "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/trajectory.h5",
+        "sha256": "aff59b9d0648ef35e9878d6293e189150ec95591d7465d4aab86f98105648d0e",
+        "bytes": 2280710,
+        "role": "decoded Pump canary trajectory; isolated evidence only"
+      },
+      {
+        "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/control-sidecar.h5",
+        "sha256": "d0dcda264642136b686d086b139583b7184e5d446efc005b4969ce8bdaeb2016",
+        "bytes": 11040,
+        "role": "hash-bound causal sidecar; no torque claim"
+      },
+      {
+        "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/runtime-canary-receipt.json",
+        "sha256": "b3a95f9a40c1810b489e98c978e74286235bb6bb848897a181af8a632addc005",
+        "bytes": 6051,
+        "role": "direct canary execution receipt; isolated evidence only"
+      }
+    ],
+    "derived_case": {
+      "definition": {
+        "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/CasePump_Def.xml",
+        "sha256": "43db19c36cd45f11b55a3e9119126382c11491a58b920a2f877241cfaf659299"
+      },
+      "dp_m": 0.02,
+      "time_max_s": 0.55,
+      "time_out_s": 0.05,
+      "official_motion_sha256": "1682de96b0d0e097c80dca25c1e2de6f946938abc2f698a73b460154f9f945a0",
+      "official_source_hashes_verified": true
+    },
+    "trajectory": {
+      "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/trajectory.h5",
+      "sha256": "aff59b9d0648ef35e9878d6293e189150ec95591d7465d4aab86f98105648d0e",
+      "frames": 12,
+      "fluid_particles": 5070,
+      "time_start_s": 0.0,
+      "time_end_s": 0.5500869087990566,
+      "finite_arrays": true,
+      "unique_fluid_id_axis": true
+    },
+    "control_sidecar": {
+      "path": "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/control-sidecar.h5",
+      "sha256": "d0dcda264642136b686d086b139583b7184e5d446efc005b4969ce8bdaeb2016",
+      "schema": "core.f7.pump.causal_sidecar.v1",
+      "runtime_evidence_claim": false,
+      "torque_dataset_present": false,
+      "angular_speed_norm_rad_s": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.57226528,
+        2.00788706
+      ]
+    },
+    "trajectory_evidence_present": true,
+    "nonzero_prescribed_motion_observed": true,
+    "torque_evidence_present": false,
+    "admitted_to_core": false,
+    "qualification_credit": 0
+  },
   "isolated_implementation": {
     "status": "implemented_read_only_not_admitted",
     "bindings": [
@@ -335,8 +417,8 @@
       },
       {
         "path": "scripts/f7_pump_runtime_canary_v1.py",
-        "sha256": "413bc4d3c7fa9c3e711a1014d8ca921c97032cf1b304a5910f0de359b48ae763",
-        "bytes": 7079,
+        "sha256": "1344511a5d1229123de1889a54e892f3561b73c957f3fcd9bc8d32d94f69b272",
+        "bytes": 7440,
         "role": "non-executing official Pump runtime canary planner"
       },
       {
@@ -344,6 +426,18 @@
         "sha256": "74329fa3ead640aa45a3d59a54212b6e58a0c720aee5ca22cc2ae1ebc6984618",
         "bytes": 2444,
         "role": "runtime canary planner regression tests"
+      },
+      {
+        "path": "scripts/f7_pump_runtime_canary_executor_v1.py",
+        "sha256": "759ec40760804bc595fec3c1287233d28717f497f06366b78182ce776ee81dba",
+        "bytes": 12607,
+        "role": "isolated direct CPU Pump runtime canary executor"
+      },
+      {
+        "path": "tests/test_f7_pump_runtime_canary_executor_v1.py",
+        "sha256": "8eaa55cc77d30b94baf617cf17fecf0ecf27aeda83c072b616c149401c4182bf",
+        "bytes": 1388,
+        "role": "runtime canary executor regression tests"
       },
       {
         "path": "scripts/f7_pump_geometry_adapter_v1.py",
@@ -493,9 +587,9 @@
   "execution_controls": {
     "read_only_source_audit": true,
     "definition_writer_invoked": false,
-    "gencase_invoked": false,
-    "native_decoder_invoked": false,
-    "solver_invoked": false,
+    "gencase_invoked": true,
+    "native_decoder_invoked": true,
+    "solver_invoked": true,
     "gpu_started": false,
     "queue_mutation": 0,
     "ledger_mutation": 0,

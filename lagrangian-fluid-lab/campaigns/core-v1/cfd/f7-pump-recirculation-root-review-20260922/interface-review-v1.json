@@ -47,8 +47,8 @@
     },
     {
       "path": "scripts/f7_pump_runtime_canary_v1.py",
-      "sha256": "413bc4d3c7fa9c3e711a1014d8ca921c97032cf1b304a5910f0de359b48ae763",
-      "bytes": 7079,
+      "sha256": "1344511a5d1229123de1889a54e892f3561b73c957f3fcd9bc8d32d94f69b272",
+      "bytes": 7440,
       "role": "non-executing official Pump runtime canary planner"
     },
     {
@@ -56,6 +56,18 @@
       "sha256": "74329fa3ead640aa45a3d59a54212b6e58a0c720aee5ca22cc2ae1ebc6984618",
       "bytes": 2444,
       "role": "runtime canary planner regression tests"
+    },
+    {
+      "path": "scripts/f7_pump_runtime_canary_executor_v1.py",
+      "sha256": "759ec40760804bc595fec3c1287233d28717f497f06366b78182ce776ee81dba",
+      "bytes": 12607,
+      "role": "isolated direct CPU Pump runtime canary executor"
+    },
+    {
+      "path": "tests/test_f7_pump_runtime_canary_executor_v1.py",
+      "sha256": "8eaa55cc77d30b94baf617cf17fecf0ecf27aeda83c072b616c149401c4182bf",
+      "bytes": 1388,
+      "role": "runtime canary executor regression tests"
     },
     {
       "path": "scripts/f7_pump_geometry_adapter_v1.py",
@@ -104,6 +116,8 @@
     "f7_transform_dataset_producer_present": false,
     "f7_causal_sidecar_producer_present": true,
     "f7_runtime_canary_planner_present": true,
+    "f7_runtime_canary_executor_present": true,
+    "f7_runtime_canary_evidence_present": true,
     "f7_return_observer_present": false,
     "isolated_f7_geometry_adapter_present": true,
     "isolated_f7_material_observer_present": true,
@@ -116,10 +130,10 @@
   ],
   "blocking_gaps": [
     "Resolve or explicitly certify the Core sampled pose/gradient-velocity behavior at start and finish knots before runtime use.",
-    "The F7 causal sidecar producer is interface-only: no solver trajectory producer currently certifies that runtime motion followed the schedule.",
-    "Emit a causal body-pose/frame and angular-control dataset hash-bound to every trajectory.",
+    "The isolated canary is one coarse runtime observation only; it must not be promoted to the planned 15-row range or Core denominator.",
+    "The causal sidecar is hash-bound to the canary trajectory and observes prescribed motion, but it has no torque dataset and cannot establish physical independence.",
     "Freeze source, discharge/return, residence, and unknown-exit regions before material data.",
-    "Produce real trajectory evidence and a hash/semantic/time-bound nonzero torque dataset, then verify its producer/geometry provenance and energy consistency; the isolated observer intentionally cannot claim independence without root provenance review.",
+    "Produce a provenance-verified, hash/semantic/time-bound nonzero torque dataset, then verify its producer/geometry provenance and energy consistency; the isolated observer intentionally cannot claim independence without root provenance review.",
     "Have root review decide whether pump torque/recirculation is physically independent enough from F6."
   ],
   "authorization": {

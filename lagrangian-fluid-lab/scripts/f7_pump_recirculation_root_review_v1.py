@@ -3,10 +3,10 @@
 
 The official DualSPHysics Pump example is a plausible new physical family:
 closed single-phase recirculation driven by a prescribed rotating internal
-pump body.  This module records that hypothesis and its source hashes only.
-It deliberately does not create a Definition, materialize a matrix, invoke
-GenCase/native tools/solver/GPU/queue, or mutate the Core registry, ledger,
-completion record, or denominator.
+pump body.  This module records that hypothesis, its source hashes, and a
+separately bound unqualified runtime canary.  It does not admit that canary
+to Core, materialize a qualification matrix, invoke a queue/GPU, or mutate
+the Core registry, ledger, completion record, or denominator.
 """
 
 from __future__ import annotations
@@ -40,6 +40,11 @@ CAUSAL_SIDECAR_SCRIPT = "scripts/f7_pump_causal_sidecar_v1.py"
 CAUSAL_SIDECAR_TEST = "tests/test_f7_pump_causal_sidecar_v1.py"
 RUNTIME_CANARY_SCRIPT = "scripts/f7_pump_runtime_canary_v1.py"
 RUNTIME_CANARY_TEST = "tests/test_f7_pump_runtime_canary_v1.py"
+RUNTIME_EXECUTOR_SCRIPT = "scripts/f7_pump_runtime_canary_executor_v1.py"
+RUNTIME_EXECUTOR_TEST = "tests/test_f7_pump_runtime_canary_executor_v1.py"
+RUNTIME_EVIDENCE_MANIFEST = (
+    "campaigns/core-v1/evidence/f7-pump-runtime-canary-dp0020-t0p55/evidence-manifest-v1.json"
+)
 
 PUMP_DIR = "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump"
 PUMP_XML = f"{PUMP_DIR}/CasePump_Def.xml"
@@ -78,6 +83,27 @@ def binding(relative: str, role: str) -> dict[str, Any]:
         "sha256": sha256(path),
         "bytes": path.stat().st_size,
         "role": role,
+    }
+
+
+def runtime_canary_evidence() -> dict[str, Any]:
+    manifest = load(local(RUNTIME_EVIDENCE_MANIFEST))
+    if manifest.get("status") != "runtime_canary_observed_unqualified":
+        raise AssertionError("runtime canary evidence must remain explicitly unqualified")
+    definition = manifest["derived_case"]["definition"]
+    trajectory = manifest["trajectory"]
+    sidecar = manifest["control_sidecar"]
+    receipt = manifest["receipt"]
+    artifact_specs = [
+        (definition["path"], "derived Pump canary Definition; isolated evidence only"),
+        (trajectory["path"], "decoded Pump canary trajectory; isolated evidence only"),
+        (sidecar["path"], "hash-bound causal sidecar; no torque claim"),
+        (receipt["path"], "direct canary execution receipt; isolated evidence only"),
+    ]
+    return {
+        "manifest": binding(RUNTIME_EVIDENCE_MANIFEST, "unqualified F7 runtime canary evidence manifest"),
+        "artifacts": [binding(path, role) for path, role in artifact_specs],
+        "payload": manifest,
     }
 
 
@@ -213,6 +239,8 @@ def isolated_implementation_bindings() -> list[dict[str, Any]]:
         binding(CAUSAL_SIDECAR_TEST, "causal control sidecar producer regression tests"),
         binding(RUNTIME_CANARY_SCRIPT, "non-executing official Pump runtime canary planner"),
         binding(RUNTIME_CANARY_TEST, "runtime canary planner regression tests"),
+        binding(RUNTIME_EXECUTOR_SCRIPT, "isolated direct CPU Pump runtime canary executor"),
+        binding(RUNTIME_EXECUTOR_TEST, "runtime canary executor regression tests"),
         binding(ADAPTER_SCRIPT, "isolated read-only F7 Pump geometry adapter"),
         binding(ADAPTER_TEST, "geometry adapter synthetic regression tests"),
         binding(CORE_ADAPTER_TEST, "read-only Core F7 adapter contract regression tests"),
@@ -293,6 +321,8 @@ def build_candidate() -> dict[str, Any]:
     parsed = parse_pump_definition()
     sources = pump_sources()
     isolated = isolated_implementation_bindings()
+    runtime = runtime_canary_evidence()
+    runtime_payload = runtime["payload"]
     return {
         "schema": "core.f7.pump_recirculation.candidate_card.v1",
         "status": "root_review_only_not_admitted",
@@ -390,12 +420,27 @@ def build_candidate() -> dict[str, Any]:
         "root_review_blockers": [
             "The F7 geometry adapter is now wired through a read-only Core CFD adapter boundary, but its Core pose/gradient velocity is a bounded sample approximation, not runtime evidence or a Definition/trajectory producer.",
             "The adapter's analytic finish clamp is source-faithful, but Core sampled gradient velocity is not certified exact at the finish boundary.",
-            "The isolated F7 observer has no solver trajectory or provenance-verified torque runtime evidence; the new causal sidecar is interface-only and cannot certify runtime motion.",
-            "No generated Definition, XML, BI4, trajectory, or solver evidence exists.",
+            "A coarse isolated CPU canary now has generated Definition, decoded trajectory, and causal-sidecar evidence, but it is not a registered 15-row range and remains outside Core admission.",
+            "The canary sidecar is hash-bound and observes nonzero prescribed motion, but it contains no provenance-verified torque dataset; source/discharge/return/residence regions remain unfrozen.",
             "The official CPU/GPU wrappers contain destructive cleanup and execution commands and are reference-only.",
             "The physical distinction must survive adversarial review with a finite torque/control gate against generic moving-boundary and F6 overlap.",
         ],
         "source_bindings": sources,
+        "runtime_canary_observation": {
+            "status": runtime_payload["status"],
+            "manifest": runtime["manifest"],
+            "artifact_bindings": runtime["artifacts"],
+            "derived_case": runtime_payload["derived_case"],
+            "trajectory": runtime_payload["trajectory"],
+            "control_sidecar": runtime_payload["control_sidecar"],
+            "trajectory_evidence_present": True,
+            "nonzero_prescribed_motion_observed": any(
+                value > 0 for value in runtime_payload["control_sidecar"]["angular_speed_norm_rad_s"]
+            ),
+            "torque_evidence_present": runtime_payload["control_sidecar"]["torque_dataset_present"],
+            "admitted_to_core": runtime_payload["qualification"]["root_admission"],
+            "qualification_credit": runtime_payload["execution"]["qualification_credit"],
+        },
         "isolated_implementation": {
             "status": "implemented_read_only_not_admitted",
             "bindings": isolated,
@@ -444,9 +489,9 @@ def build_candidate() -> dict[str, Any]:
         "execution_controls": {
             "read_only_source_audit": True,
             "definition_writer_invoked": False,
-            "gencase_invoked": False,
-            "native_decoder_invoked": False,
-            "solver_invoked": False,
+            "gencase_invoked": True,
+            "native_decoder_invoked": True,
+            "solver_invoked": True,
             "gpu_started": False,
             "queue_mutation": 0,
             "ledger_mutation": 0,
@@ -463,11 +508,12 @@ def build_source_audit(candidate: dict[str, Any]) -> dict[str, Any]:
     gpu = local(PUMP_GPU).read_text(encoding="utf-8")
     return {
         "schema": "core.f7.pump_recirculation.source_audit.v1",
-        "status": "official_source_and_isolated_contract_bound_read_only",
+        "status": "official_source_and_unqualified_runtime_evidence_bound",
         "candidate_id": candidate["candidate_id"],
         "candidate_card": binding(str(CANDIDATE.relative_to(LAB)), "F7 candidate card"),
         "official_source_bindings": candidate["source_bindings"],
         "isolated_implementation_bindings": candidate["isolated_implementation"]["bindings"],
+        "runtime_canary_evidence": candidate["runtime_canary_observation"],
         "vtk_headers": {
             "pump_fixed": parse_vtk_header(PUMP_FIXED),
             "pump_moving": parse_vtk_header(PUMP_MOVING),
@@ -478,7 +524,7 @@ def build_source_audit(candidate: dict[str, Any]) -> dict[str, Any]:
             "cpu_contains_cpu_solver": "dualsphysicscpu" in cpu,
             "gpu_contains_gpu_solver": "dualsphysicsgpu" in gpu,
             "wrapper_invoked": False,
-            "interpretation": "reference wrappers are not an execution authorization",
+            "interpretation": "reference wrappers are not an execution authorization; the isolated canary invoked direct binaries",
         },
         "lineage": {
             "official_example_is_source_reference_only": True,
@@ -492,7 +538,7 @@ def build_source_audit(candidate: dict[str, Any]) -> dict[str, Any]:
             "matrix": 0,
             "denominator": 0,
             "queue": 0,
-            "solver_invoked": False,
+            "solver_invoked": True,
             "gpu_started": False,
         },
     }
@@ -527,6 +573,8 @@ def build_interface_review(candidate: dict[str, Any]) -> dict[str, Any]:
             "f7_transform_dataset_producer_present": "control/frame" in dataset_source,
             "f7_causal_sidecar_producer_present": local(CAUSAL_SIDECAR_SCRIPT).is_file(),
             "f7_runtime_canary_planner_present": local(RUNTIME_CANARY_SCRIPT).is_file(),
+            "f7_runtime_canary_executor_present": local(RUNTIME_EXECUTOR_SCRIPT).is_file(),
+            "f7_runtime_canary_evidence_present": candidate["runtime_canary_observation"]["trajectory_evidence_present"],
             "f7_return_observer_present": "recirculation" in transport_source.lower(),
             "isolated_f7_geometry_adapter_present": True,
             "isolated_f7_material_observer_present": True,
@@ -539,10 +587,10 @@ def build_interface_review(candidate: dict[str, Any]) -> dict[str, Any]:
         ],
         "blocking_gaps": [
             "Resolve or explicitly certify the Core sampled pose/gradient-velocity behavior at start and finish knots before runtime use.",
-            "The F7 causal sidecar producer is interface-only: no solver trajectory producer currently certifies that runtime motion followed the schedule.",
-            "Emit a causal body-pose/frame and angular-control dataset hash-bound to every trajectory.",
+            "The isolated canary is one coarse runtime observation only; it must not be promoted to the planned 15-row range or Core denominator.",
+            "The causal sidecar is hash-bound to the canary trajectory and observes prescribed motion, but it has no torque dataset and cannot establish physical independence.",
             "Freeze source, discharge/return, residence, and unknown-exit regions before material data.",
-            "Produce real trajectory evidence and a hash/semantic/time-bound nonzero torque dataset, then verify its producer/geometry provenance and energy consistency; the isolated observer intentionally cannot claim independence without root provenance review.",
+            "Produce a provenance-verified, hash/semantic/time-bound nonzero torque dataset, then verify its producer/geometry provenance and energy consistency; the isolated observer intentionally cannot claim independence without root provenance review.",
             "Have root review decide whether pump torque/recirculation is physically independent enough from F6.",
         ],
         "authorization": {
@@ -565,7 +613,7 @@ def render_report(candidate: dict[str, Any], source: dict[str, Any], interface: 
     return "\n".join([
         "# F7 预设旋转内泵循环路线根审查材料（2026-09-22）",
         "",
-        "本文件记录官方 DualSPHysics `main/13_Pump` 的只读源绑定、隔离适配器/观测器合约和候选判断；没有生成 Definition、BI4、trajectory，没有运行 GenCase/native solver/GPU/queue，也没有修改 Core registry、ledger、matrix 或 denominator。",
+        "本文件记录官方 DualSPHysics `main/13_Pump` 的只读源绑定、隔离适配器/观测器合约，以及一条明确未准入的 CPU runtime canary；canary 之外没有运行 Core queue/GPU，也没有修改 Core registry、ledger、matrix 或 denominator。",
         "",
         "## 候选结论",
         "",
@@ -581,7 +629,7 @@ def render_report(candidate: dict[str, Any], source: dict[str, Any], interface: 
         "",
         "1. 已实现隔离的只读 F7 geometry adapter：解析 allowlisted 官方 binary fixed / ASCII moving POLYDATA、XML mk 标签和两段旋转，并在内存中返回 Core `PrescribedGeometry`；源三角形退化项被显式计数并过滤，不能把这个清理结果当成物理证据。XML 解析器还校验 degree 单位、1→2 链和 finish 截止；Core pose/gradient velocity 仍是有误差界的采样近似，不能称为 exact runtime motion。",
         "2. 已实现隔离的只读 F7 material observer：固定 all-initial-fluid 分母、不做 survivor renormalization、校验 body-frame/angular-control/region hash、报告 unknown exit，并把 residence 作为事件指标而非终态质量桶；显式 torque contract 仍只形成待根审查的合约，不宣称物理独立性。",
-        "3. F7 geometry 已通过只读 public Core CFD adapter 接入，但尚未接入 Definition writer 或 trajectory producer；没有与 trajectory 绑定的真实 `control/frame` 和 torque 产物，因此不能开始材料 T2。",
+        "3. F7 geometry 已通过只读 public Core CFD adapter 接入；另有一条 `dp=0.02 m, TimeMax=0.55 s` 的隔离 CPU canary 产出 Definition、12 帧 trajectory 和 hash-bound causal sidecar。它只证明可复现的粗粒度运行观察，不能开始材料 T2，也不能替代 15 行矩阵。",
         "4. root-review contract v2 已绑定 F1/F2、F5、F6 的路线关闭收据和官方 Pump 源哈希；它只增加静态完整性证据，不改变阻塞或授权。",
         "5. 官方 CPU/GPU wrapper 含清理和求解命令，只能作为哈希绑定的参考，绝不是执行授权。",
         "6. 对抗性 root review 必须确认“泵驱动循环”不是把普通 moving-wall 或 F6 运动换名；若不能观测扭矩输入和回流，候选应关闭。",
@@ -590,7 +638,7 @@ def render_report(candidate: dict[str, Any], source: dict[str, Any], interface: 
         "",
         f"当前 Core 仍为 `t1_families={candidate['current_core_snapshot']['t1_families']}`、`missing_t1_case_runs={candidate['current_core_snapshot']['missing_t1_case_runs']}`、`missing_material_case_runs={candidate['current_core_snapshot']['missing_material_case_runs']}`。",
         "",
-        "本包只授权后续人工/root review 讨论：不授权 Definition writer、不授权 CPU/native preflight、不授权 solver/GPU/queue，不产生 T1/T2 分母或资格变化。接口审查状态为 `blocked_after_core_adapter_before_runtime_admission`。",
+        "本包只授权后续人工/root review 讨论：canary 的直接 CPU 运行证据保持 unqualified；不授权 Core Definition writer、Core preflight、solver/GPU/queue，不产生 T1/T2 分母或资格变化。接口审查状态为 `blocked_after_core_adapter_before_runtime_admission`。",
         "",
         "机器可读文件：",
         "- `campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/candidate-card-v1.json`",
@@ -627,12 +675,14 @@ def build_root_receipt(candidate: dict[str, Any], source: dict[str, Any], interf
             binding("scripts/f7_pump_recirculation_root_review_v1.py", "read-only implementation"),
             binding(str(TEST.relative_to(LAB)), "targeted regression test"),
             *candidate["isolated_implementation"]["bindings"],
+            candidate["runtime_canary_observation"]["manifest"],
+            *candidate["runtime_canary_observation"]["artifact_bindings"],
         ],
         "forbidden_materialization": [
             "no Definition XML in the F7 namespace",
             "no generated XML/BI4/trajectory/HDF5 in the F7 namespace",
             "no registry/ledger/matrix/completion edit",
-            "no GenCase/native solver/GPU/queue action",
+            "no Core GenCase/native solver/GPU/queue action; isolated direct CPU canary is evidence only",
         ],
     }
 
@@ -675,8 +725,10 @@ def verify() -> dict[str, Any]:
     assert candidate["planned_matrix"]["executed"] == 0
     assert candidate["planned_matrix"]["unattempted"] == 15
     assert candidate["execution_controls"]["qualification_credit"] == 0
-    for key in ("definition_writer_invoked", "gencase_invoked", "native_decoder_invoked", "solver_invoked", "gpu_started"):
-        assert candidate["execution_controls"][key] is False
+    assert candidate["execution_controls"]["definition_writer_invoked"] is False
+    for key in ("gencase_invoked", "native_decoder_invoked", "solver_invoked"):
+        assert candidate["execution_controls"][key] is True
+    assert candidate["execution_controls"]["gpu_started"] is False
     for key in ("queue_mutation", "ledger_mutation", "registry_mutation", "t1_denominator_mutation", "t2_denominator_mutation"):
         assert candidate["execution_controls"][key] == 0
     for item in candidate["source_bindings"]:
@@ -687,19 +739,30 @@ def verify() -> dict[str, Any]:
     assert candidate["current_core_snapshot"]["t1_families"] == ["F3", "F4"]
 
     assert source["schema"] == "core.f7.pump_recirculation.source_audit.v1"
-    assert source["status"] == "official_source_and_isolated_contract_bound_read_only"
+    assert source["status"] == "official_source_and_unqualified_runtime_evidence_bound"
     _verify_binding(source["candidate_card"])
     for item in source["official_source_bindings"]:
         _verify_binding(item)
     for item in source["isolated_implementation_bindings"]:
         _verify_binding(item)
+    runtime = candidate["runtime_canary_observation"]
+    assert runtime["status"] == "runtime_canary_observed_unqualified"
+    assert runtime["trajectory_evidence_present"] is True
+    assert runtime["nonzero_prescribed_motion_observed"] is True
+    assert runtime["torque_evidence_present"] is False
+    assert runtime["admitted_to_core"] is False
+    assert runtime["qualification_credit"] == 0
+    _verify_binding(runtime["manifest"])
+    for item in runtime["artifact_bindings"]:
+        _verify_binding(item)
+    assert source["runtime_canary_evidence"]["manifest"] == runtime["manifest"]
     assert candidate["isolated_implementation"]["status"] == "implemented_read_only_not_admitted"
     assert candidate["isolated_implementation"]["geometry_adapter"]["core_adapter_wired"] is True
     assert candidate["isolated_implementation"]["material_observer"]["core_observer_wired"] is False
     assert candidate["isolated_implementation"]["material_observer"]["trajectory_evidence_present"] is False
     assert source["wrapper_static_audit"]["wrapper_invoked"] is False
     assert source["protected_state_mutation"]["registry"] == 0
-    assert source["protected_state_mutation"]["solver_invoked"] is False
+    assert source["protected_state_mutation"]["solver_invoked"] is True
     assert source["vtk_headers"]["pump_fixed"]["points"] > source["vtk_headers"]["pump_moving"]["points"]
 
     assert interface["schema"] == "core.f7.pump_recirculation.interface_review.v1"
@@ -710,6 +773,8 @@ def verify() -> dict[str, Any]:
     assert interface["static_findings"]["isolated_f7_geometry_adapter_present"] is True
     assert interface["static_findings"]["isolated_f7_material_observer_present"] is True
     assert interface["static_findings"]["isolated_f7_return_observer_present"] is True
+    assert interface["static_findings"]["f7_runtime_canary_executor_present"] is True
+    assert interface["static_findings"]["f7_runtime_canary_evidence_present"] is True
     assert interface["authorization"]["definition_writer"] is False
     assert interface["authorization"]["solver"] is False
     for item in interface["implementation_bindings"]:

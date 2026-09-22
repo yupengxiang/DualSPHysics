@@ -1,0 +1,130 @@
+{
+  "derived_definition": {
+    "path": "/tmp/f7-pump-canary-20260922-3AnPUL/input/CasePump_Def.xml",
+    "sha256": "43db19c36cd45f11b55a3e9119126382c11491a58b920a2f877241cfaf659299"
+  },
+  "execution": {
+    "gencase_invoked": true,
+    "gencase_returncode": 0,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "native_decoder_invoked": true,
+    "qualification_credit": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_invoked": true,
+    "solver_returncode": 0
+  },
+  "official_motion_sha256": "1682de96b0d0e097c80dca25c1e2de6f946938abc2f698a73b460154f9f945a0",
+  "plan": {
+    "binary_bindings": [
+      {
+        "bytes": 5809384,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+        "role": "direct GenCase executable; not invoked by this plan",
+        "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226"
+      },
+      {
+        "bytes": 25420992,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4CPU_linux64",
+        "role": "direct CPU solver executable; not invoked by this plan",
+        "sha256": "8ca0cd10db3045dada4292c7bd3a23e4b1d58feb0d0cedb43315df5a9614d72a"
+      },
+      {
+        "bytes": 324368,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+        "role": "native BI4 decoder; not invoked by this plan",
+        "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+      }
+    ],
+    "execution_boundary": {
+      "gencase_invoked": false,
+      "gpu_started": false,
+      "ledger_mutation": 0,
+      "native_decoder_invoked": false,
+      "prepare_invoked": true,
+      "qualification_credit": 0,
+      "queue_mutation": 0,
+      "registry_mutation": 0,
+      "runtime_evidence": false,
+      "solver_invoked": false
+    },
+    "execution_plan": {
+      "destructive_wrapper_used": false,
+      "gencase_argv": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/CasePump_Def",
+        "/tmp/f7-pump-canary-20260922-3AnPUL/generated/CasePump",
+        "-save:all"
+      ],
+      "generated_prefix": "/tmp/f7-pump-canary-20260922-3AnPUL/generated/CasePump",
+      "interactive_wrapper_used": false,
+      "native_decode_executable": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "native_decode_input": "/tmp/f7-pump-canary-20260922-3AnPUL/solver/data",
+      "recursive_cleanup_requested": false,
+      "solver_cpu_argv": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4CPU_linux64",
+        "/tmp/f7-pump-canary-20260922-3AnPUL/generated/CasePump",
+        "/tmp/f7-pump-canary-20260922-3AnPUL/solver"
+      ],
+      "solver_output": "/tmp/f7-pump-canary-20260922-3AnPUL/solver",
+      "working_directory": "/tmp/f7-pump-canary-20260922-3AnPUL"
+    },
+    "required_future_evidence": [
+      "fresh generated XML and BI4 output hash-bound to this plan",
+      "decoded fluid identity and finite-array audit",
+      "trajectory time axis covering the declared canary window",
+      "explicit control sidecar and observer result bound to the trajectory",
+      "root review of any solver result before Core admission"
+    ],
+    "schema": "core.f7.pump.runtime_canary_plan.v1",
+    "source_bindings": [
+      {
+        "bytes": 6983,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/CasePump_Def.xml",
+        "role": "immutable official Pump definition source",
+        "sha256": "746ae80f4c21bca62a01d59ee04d0eaaf3d1af830c36dafef4b684ca8f3c9453"
+      },
+      {
+        "bytes": 2143950,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/pump_fixed.vtk",
+        "role": "immutable official Pump fixed_geometry source",
+        "sha256": "6148ea8f05a2cf497eb14dd6d7ae03693cafa1c8bd271f74ff1316ba2fbaf616"
+      },
+      {
+        "bytes": 537792,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/pump_moving.vtk",
+        "role": "immutable official Pump moving_geometry source",
+        "sha256": "376a6d84164ec1e154486196b4d6e7f647f857ad6cd2cf12fdd268f435753c72"
+      }
+    ],
+    "source_contract": {
+      "definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/CasePump_Def.xml",
+      "dp_m": 0.02,
+      "fixed_geometry": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/pump_fixed.vtk",
+      "fluid_mk": 1,
+      "motion_sha256": "1682de96b0d0e097c80dca25c1e2de6f946938abc2f698a73b460154f9f945a0",
+      "moving_boundary_mk": 2,
+      "moving_geometry": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/pump_moving.vtk",
+      "official_source_hashes_verified": true,
+      "time_max_s": 0.55,
+      "time_out_s": 0.05
+    },
+    "status": "prepared_only_not_executed"
+  },
+  "plan_schema": "core.f7.pump.runtime_canary_plan.v1",
+  "qualification": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "reason": "one bounded runtime canary cannot establish a qualified 15-row range",
+    "root_review_required": true
+  },
+  "schema": "core.f7.pump.runtime_canary_execution.v1",
+  "status": "runtime_canary_completed_unqualified",
+  "trajectory": {
+    "fluid_particles": 5070,
+    "frames": 12,
+    "path": "/tmp/f7-pump-canary-20260922-3AnPUL/trajectory.h5",
+    "sha256": "aff59b9d0648ef35e9878d6293e189150ec95591d7465d4aab86f98105648d0e"
+  }
+}
