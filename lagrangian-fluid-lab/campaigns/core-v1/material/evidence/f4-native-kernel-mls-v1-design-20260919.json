@@ -1,0 +1,190 @@
+{
+  "code": "scripts/f4_native_kernel_mls.py",
+  "code_sha256": "bb3db37dbbef74ddc6b7baa158f513f3da250b67a49eb60836475060ad561181",
+  "connectivity_diagnostic": {
+    "backend": "f4_native_support_connectivity_diagnostic_v1",
+    "edge_radius": "1.5*dp_m",
+    "gate_effect": "none",
+    "purpose": "current-support connectivity and velocity-branch evidence; diagnostic only",
+    "source_labels": "not read; no initial Mk/particle-id partition"
+  },
+  "created_at": "2026-09-19T12:32:35.413926+00:00",
+  "dense_canary_spec": "campaigns/core-v1/material/evidence/f4-native-kernel-mls-v1-dense-short-canary-spec-20260919.json",
+  "dense_canary_spec_sha256": "02a839bbe048d4e57340c5a7f0f01ae38c5258a0797975c8fe2a2de31a20e2e3",
+  "execution_policy": {
+    "device": "CPU",
+    "gpu": false,
+    "ledger": false,
+    "old_results_immutable": true,
+    "slot": false
+  },
+  "fit_definition": {
+    "basis": "[1, dx/h, dy/h, dz/h]",
+    "solver": "weighted least squares via float64 SVD/lstsq; rank and condition recorded",
+    "support": "all current valid fluid particles within 2h; optional finite triangle visibility",
+    "weights": "(mass/density)*Wendland_quintic_c2_3d(distance,h)"
+  },
+  "formula": {
+    "argument": "q=r/h",
+    "dimension": 3,
+    "doi": "10.1007/BF02123482",
+    "expression": "W(r,h)=21/(16*pi*h^3)*(1-q/2)^4*(1+2*q)",
+    "family": "quintic_wendland_c2",
+    "normalisation": "21/(16*pi*h^3)",
+    "official_run_3d_awen": 245355.2,
+    "official_run_binding": "DualSPHysics Run.out: Kernel=\"Wendland\"; Kernel: Quintic Wendland",
+    "official_run_h_rounded_m": 0.011941,
+    "official_run_path": "campaigns/core-v1/runtime/attempts/f4-resting-pool-qualification-cell-14/20260919T184548-9bb5d3e36d4b/product/solver/Run.out",
+    "outside_support": 0.0,
+    "source": "Wendland 1995, Piecewise polynomial, positive definite and compactly supported radial functions of minimal degree",
+    "support": "0 <= q <= 2"
+  },
+  "formula_sources": {
+    "official_binding": "Kernel=\"Wendland\", Kernel: Quintic Wendland, 3-D awen=245355.2 at rounded h=.011941 m",
+    "official_dualsphysics_run": "campaigns/core-v1/runtime/attempts/f4-resting-pool-qualification-cell-14/20260919T184548-9bb5d3e36d4b/product/solver/Run.out",
+    "primary_paper_doi": "https://doi.org/10.1007/BF02123482"
+  },
+  "input_policy": {
+    "density_mode": "native_current_only",
+    "density_source": "same selected H5 frame; no predicted or future density",
+    "future_state": "forbidden",
+    "mass_source": "same selected H5 frame",
+    "model_density_estimation": "not implemented; a future estimator requires a new backend version",
+    "native_particle_id": "not used for query identity or termination",
+    "public_current_inputs": [
+      "position",
+      "velocity",
+      "mass",
+      "density",
+      "valid",
+      "fluid_mask"
+    ]
+  },
+  "manufactured_cases": [
+    {
+      "diagnostics": {
+        "branch_separation_max_mps": null,
+        "component_count_max": 1,
+        "failure_reasons": {
+          "reliable": 27
+        }
+      },
+      "id": "constant_interior",
+      "mass_closure_abs_error": 0.0,
+      "passed": true,
+      "truth_status": "analytic_velocity_defined",
+      "unknown_fraction": 0.0
+    },
+    {
+      "diagnostics": {
+        "branch_separation_max_mps": 0.03473606720443159,
+        "component_count_max": 1,
+        "failure_reasons": {
+          "reliable": 27
+        }
+      },
+      "id": "affine_interior",
+      "mass_closure_abs_error": 0.0,
+      "passed": true,
+      "truth_status": "analytic_velocity_defined",
+      "unknown_fraction": 0.0
+    },
+    {
+      "diagnostics": {
+        "branch_separation_max_mps": null,
+        "component_count_max": 1,
+        "failure_reasons": {
+          "reliable": 2
+        }
+      },
+      "id": "wall_two_sides",
+      "mass_closure_abs_error": 0.0,
+      "passed": true,
+      "truth_status": "analytic_velocity_defined",
+      "unknown_fraction": 0.0
+    },
+    {
+      "diagnostics": {
+        "branch_separation_max_mps": null,
+        "component_count_max": 1,
+        "failure_reasons": {
+          "reliable": 2
+        }
+      },
+      "id": "wall_opening",
+      "mass_closure_abs_error": 0.0,
+      "passed": true,
+      "truth_status": "analytic_velocity_defined",
+      "unknown_fraction": 0.0
+    },
+    {
+      "diagnostics": {
+        "branch_separation_max_mps": null,
+        "component_count_max": 1,
+        "failure_reasons": {
+          "no_support": 1,
+          "reliable": 2
+        }
+      },
+      "id": "separated_liquid_clouds",
+      "mass_closure_abs_error": 0.0,
+      "passed": true,
+      "truth_status": "analytic_velocity_defined",
+      "unknown_fraction": 0.3333333333333333
+    },
+    {
+      "diagnostics": {
+        "branch_separation_max_mps": 0.6000000000000006,
+        "component_count_max": 2,
+        "failure_reasons": {
+          "reliable": 1
+        }
+      },
+      "id": "near_separated_velocity_branches",
+      "mass_closure_abs_error": 0.0,
+      "passed": true,
+      "truth_status": "discontinuous_interface_has_no_single_analytic_velocity",
+      "unknown_fraction": 0.0
+    },
+    {
+      "diagnostics": {
+        "branch_separation_max_mps": null,
+        "component_count_max": 1,
+        "failure_reasons": {
+          "rank_deficient": 1
+        }
+      },
+      "id": "support_rank_deficient",
+      "mass_closure_abs_error": 0.0,
+      "passed": true,
+      "truth_status": "analytic_velocity_defined",
+      "unknown_fraction": 1.0
+    },
+    {
+      "diagnostics": {
+        "branch_separation_max_mps": null,
+        "component_count_max": 0,
+        "failure_reasons": {
+          "no_support": 1
+        }
+      },
+      "id": "support_empty",
+      "mass_closure_abs_error": 0.0,
+      "passed": true,
+      "truth_status": "analytic_velocity_defined",
+      "unknown_fraction": 1.0
+    }
+  ],
+  "numerical_gate": {
+    "maximum_condition_number": 10000000000.0,
+    "minimum_effective_sample_size": 4.0,
+    "minimum_geometry_rank": 4,
+    "minimum_support_count": 4,
+    "svd_relative_cutoff": 1e-12
+  },
+  "purpose": "independent F4 native mass/density Wendland weighted affine MLS research backend",
+  "qualification_claim": "none; never inherited from old T2 and no old result/gate modified",
+  "revision_id": "f4_native_kernel_mls_v1_20260919",
+  "schema": "core.material.f4.native_kernel_mls.design.v1",
+  "status": "research backend ready for independently queued canary; no T2 claim"
+}

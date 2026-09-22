@@ -1,0 +1,265 @@
+{
+  "schema": "core.material.qualification_runtime_spec.v1",
+  "created_at_utc": "2026-09-19T00:00:00+08:00",
+  "owner": "luna_material",
+  "status": "ready_for_root_queue",
+  "qualification_claim": "none_until_all_six_rows_are_evaluated",
+  "purpose": "Run the planned F3 material qualification diagnostic on the existing coarse, production, and fine native reference HDF5 files.",
+  "scope_decision": {
+    "backend": "original_registered Shepard backend only",
+    "third_repair": false,
+    "gate_relaxation": false,
+    "dev00_allowed": false,
+    "old_material_ledger_or_slots_used": false,
+    "solver_launch": false,
+    "gpu_launch": false,
+    "note": "This is a read-only tracer analysis of already completed native CFD references. The substeps are tracer integration substeps between saved reference frames; they do not turn a .01 s source into a fabricated .002 s source."
+  },
+  "lab_root": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "runtime": {
+    "python": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "module": "scripts.core_material",
+    "command_template": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "-m",
+      "scripts.core_material",
+      "--source",
+      "<source_h5>",
+      "--output",
+      "<attempt_dir>/material.h5",
+      "--seeds",
+      "512",
+      "--substeps",
+      "<2-or-4>",
+      "--neighbour-variant",
+      "baseline24"
+    ],
+    "working_directory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "cpu_only": true,
+    "gpu_forbidden": true,
+    "scheduler_owned_resources": true,
+    "full_native_window": true,
+    "stop_after": null,
+    "resume_policy": "If a worker is killed, resume the same attempt with --resume from its atomic checkpoint sidecar; do not restart under a new scientific configuration.",
+    "required_receipt": [
+      "exact argv",
+      "input HDF5 sha256",
+      "scripts/core_material.py sha256",
+      "scripts/f3_material_neighbors.py sha256",
+      "scripts/passive_tracers.py sha256",
+      "output and checkpoint hashes",
+      "wall_seconds",
+      "cpu_seconds",
+      "max_rss",
+      "committed_frame",
+      "native_frame_count",
+      "status"
+    ]
+  },
+  "implementation_binding": {
+    "schema": "core.material.v2",
+    "core_material_sha256": "1880c02a50168ae3325c39993a55103a1ebba06adcc48a486b7f6f4825d94b7e",
+    "neighbor_code_sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752",
+    "passive_tracer_code_sha256": "0301b797ddf472d8e37a835cb97036ba13b4cde8c1832838edfed06da20860cc",
+    "neighbour_variant": "baseline24",
+    "backend": "f3_ckdtree_visible_shepard_distance_v1",
+    "neighbours": 24,
+    "weight": "1/(distance_squared+regularization_squared)",
+    "regularization_m": 0.004,
+    "maximum_support_distance_m": 0.03,
+    "support_gate": {
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3,
+      "minimum_anisotropy": 0.005,
+      "maximum_reconstruction_error_mps": 0.04698137929009748
+    },
+    "reference_provider": "reference_native_saved_frames",
+    "predicted_provider_access": "not used by this runtime spec",
+    "source_definition": {
+      "kind": "continuous_halfspace",
+      "axis": 0,
+      "boundary_m": 0.0,
+      "source_0": "x < 0",
+      "source_1": "x >= 0",
+      "identity": "independent seed-XXXXXX tracer id; never native particle_id"
+    },
+    "seed_definition": {
+      "count": 512,
+      "grid_shape": [16, 8, 4],
+      "domain_low_m": [-0.45, -0.09, 0.0],
+      "domain_size_m": [0.9, 0.18, 0.09],
+      "weights": "equal volume; normalized by core_material",
+      "seed_ids": "seed-000000 through seed-000511"
+    },
+    "wall_definition": "F3 finite closed bottom, left, right, front, and back faces; top is open; use registered f3_walls()"
+  },
+  "source_contracts": [
+    {
+      "source_role": "coarse",
+      "case_id": "R0081818-NOMINAL",
+      "dp_m": 0.00818181818181818,
+      "path": "campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+      "sha256": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575",
+      "frames": 836,
+      "time_start_s": 0.0,
+      "time_end_s": 8.350015121408111,
+      "fluid_particles": 26620,
+      "mass_kg": 14.58,
+      "prepared": {
+        "path": "campaigns/l1-resume/continuation/R0081818-NOMINAL-PREPARED.json",
+        "sha256": "043febcc4e2deb9c515ed32fe99b8ed7241c68fa8dbf72b9ad8d1f7e5ef6684f",
+        "role": "new_coarse_reference",
+        "qualified": false,
+        "formal_release": false,
+        "launch_allowed": false
+      },
+      "audit_sha256": "eff6e351eaeb6ec270a2ec9883a15d0fbea1c04bd57c213e94db4cd0c90d6c11",
+      "solver_sha256": "fde7b4c593b00daaffa93d991be0498282eb9985474e86903f1340088bb01cbe",
+      "use": "read-only coarse comparison; no new CFD solve"
+    },
+    {
+      "source_role": "production",
+      "case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "dp_m": 0.0075,
+      "path": "campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+      "sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+      "frames": 836,
+      "time_start_s": 0.0,
+      "time_end_s": 8.350012828223477,
+      "fluid_particles": 34560,
+      "mass_kg": 14.58,
+      "prepared": {
+        "path": "campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json",
+        "sha256": "23d151c07c53c83b3048be9b665722161baaef37fc31e6ce6ec42e4b26b36894",
+        "phase": "F3_native_nopen_qualification",
+        "qualified": false,
+        "formal_release": false
+      },
+      "audit_sha256": "00b3ea23d5dee4e77ecd7033ceee4f105ad736ee0de1d7a381838bbf10c79438",
+      "solver_sha256": "c87f2d478c0f294c57e0605b0c007244a23527e2bedd1a335de8db3d5f0e2262",
+      "use": "read-only production qualification source"
+    },
+    {
+      "source_role": "fine",
+      "case_id": "F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen",
+      "dp_m": 0.006,
+      "path": "campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen.h5",
+      "sha256": "42f527b645017058de18cbdeb54687b728c9082bdd9513b2e4c577c3475f49f0",
+      "frames": 836,
+      "time_start_s": 0.0,
+      "time_end_s": 8.350012880462266,
+      "fluid_particles": 67500,
+      "mass_kg": 14.58,
+      "prepared": {
+        "path": "campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen-PREPARED.json",
+        "sha256": "c2e632c41e0decacb2ef81342ab4fe120556930ac1aced898871d72b6ac0951c",
+        "phase": "F3_native_nopen_qualification",
+        "qualified": false,
+        "formal_release": false
+      },
+      "audit_sha256": "f90bfcd542190965e4af88ea7220025b540187a58da6b3ec60308d775b6dcc8f",
+      "solver_sha256": "651727ff914f0d6f5a1d20642e7fa8968c412399e4999ae3ca71d1386cbdfb9a",
+      "use": "read-only fine qualification source"
+    }
+  ],
+  "qualification_bindings": {
+    "gate_path": "campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json",
+    "gate_sha256": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4",
+    "authorization_path": "campaigns/l1-resume/continuation/F3-075-REF0081818-AUTHORIZATION.json",
+    "authorization_sha256": "f8d5dae425c954a82d400b0a5b58ffdb59d9caafe0853b055ca0058f5396c4dd",
+    "recipe_id": "F3_CELL3_NS_visco1_native_nopen_revision075_ref0081818",
+    "time_window_s": [0.0, 8.35],
+    "source_control": "amplitude=1.0, noslip, visco=0.05, native velocity correction, no posthoc projection",
+    "release_status": "candidate qualification evidence only; no T2 claim"
+  },
+  "rows": [
+    {
+      "job_id": "core-f3-material-coarse-s2",
+      "source_role": "coarse",
+      "source_case_id": "R0081818-NOMINAL",
+      "substeps": 2,
+      "configuration_id": "CORE-F3-MATERIAL-COARSE-s2",
+      "output_template": "<attempt_dir>/material.h5",
+      "argv": "<python> -m scripts.core_material --source campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5 --output <attempt_dir>/material.h5 --seeds 512 --substeps 2 --neighbour-variant baseline24"
+    },
+    {
+      "job_id": "core-f3-material-coarse-s4",
+      "source_role": "coarse",
+      "source_case_id": "R0081818-NOMINAL",
+      "substeps": 4,
+      "configuration_id": "CORE-F3-MATERIAL-COARSE-s4",
+      "output_template": "<attempt_dir>/material.h5",
+      "argv": "<python> -m scripts.core_material --source campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5 --output <attempt_dir>/material.h5 --seeds 512 --substeps 4 --neighbour-variant baseline24"
+    },
+    {
+      "job_id": "core-f3-material-production-s2",
+      "source_role": "production",
+      "source_case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "substeps": 2,
+      "configuration_id": "CORE-F3-MATERIAL-PRODUCTION-s2",
+      "output_template": "<attempt_dir>/material.h5",
+      "argv": "<python> -m scripts.core_material --source campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5 --output <attempt_dir>/material.h5 --seeds 512 --substeps 2 --neighbour-variant baseline24"
+    },
+    {
+      "job_id": "core-f3-material-production-s4",
+      "source_role": "production",
+      "source_case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "substeps": 4,
+      "configuration_id": "CORE-F3-MATERIAL-PRODUCTION-s4",
+      "output_template": "<attempt_dir>/material.h5",
+      "argv": "<python> -m scripts.core_material --source campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5 --output <attempt_dir>/material.h5 --seeds 512 --substeps 4 --neighbour-variant baseline24"
+    },
+    {
+      "job_id": "core-f3-material-fine-s2",
+      "source_role": "fine",
+      "source_case_id": "F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen",
+      "substeps": 2,
+      "configuration_id": "CORE-F3-MATERIAL-FINE-s2",
+      "output_template": "<attempt_dir>/material.h5",
+      "argv": "<python> -m scripts.core_material --source campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen.h5 --output <attempt_dir>/material.h5 --seeds 512 --substeps 2 --neighbour-variant baseline24"
+    },
+    {
+      "job_id": "core-f3-material-fine-s4",
+      "source_role": "fine",
+      "source_case_id": "F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen",
+      "substeps": 4,
+      "configuration_id": "CORE-F3-MATERIAL-FINE-s4",
+      "output_template": "<attempt_dir>/material.h5",
+      "argv": "<python> -m scripts.core_material --source campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen.h5 --output <attempt_dir>/material.h5 --seeds 512 --substeps 4 --neighbour-variant baseline24"
+    }
+  ],
+  "required_outputs": [
+    "material.h5",
+    "material.json",
+    "material.h5.checkpoint.npz",
+    "material.h5.checkpoint.json"
+  ],
+  "acceptance": {
+    "initial_support_validation": "frame 0 must be sampled and support-gated before any integration; initial reliable must not be hardcoded true",
+    "unknown_gate": "every source row in every completed output has unknown_fraction_max <= 0.01",
+    "reconstruction_gate": "use the bound in implementation_binding without changing it",
+    "mass_closure": "mass_closed=true and each source mass_closure_error <= 1e-12",
+    "macro_outputs": [
+      "first-passage weighted CDF with right-censored mass retained",
+      "return weighted CDF",
+      "opposite-half and left/right residence",
+      "source-group closure",
+      "common reliable path coverage",
+      "per-source unknown mass and first-failure frame/time"
+    ],
+    "qualification_rule": "Any failed row leaves this F3 material scope T2-unqualified. Do not select another neighbour count, change epsilon/support/error thresholds, or infer qualification from a partial run."
+  },
+  "prior_evidence_not_substituted": [
+    "campaigns/core-v1/material/evidence/material-diagnosis-2026-09-19.json",
+    "campaigns/core-v1/material/evidence/material-h2-h1-study-2026-09-19.json",
+    "campaigns/l1-resume/continuation/F3-MATERIAL-REFERENCE-REF008-0075-NOMINAL-s2-20260913T041909.924669Z-d78083d262.json",
+    "campaigns/l1-resume/continuation/F3-MATERIAL-REFERENCE-REF008-0075-NOMINAL-s4-20260913T042459.344502Z-8b34920167.json"
+  ],
+  "created_by_execution": {
+    "cpu_attempts_started_by_this_spec": 0,
+    "ledger_mutations": 0,
+    "gpu_jobs_started": 0,
+    "source_hashes_recomputed": true,
+    "hdf5_structure_checked": true
+  }
+}

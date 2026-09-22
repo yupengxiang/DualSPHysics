@@ -1,0 +1,242 @@
+{
+  "constraints": [
+    "same frozen c92db95 temporal-v3 runner",
+    "same nominal amp=1/q=.5 physics family per scope",
+    "native saved .01s output selection; no interpolation-created CFD frames",
+    "CPU only; no GPU or ledger write by this proposal",
+    "do not launch coarse or a 4096 cross-scope matrix in this batch"
+  ],
+  "created_at_utc": "2026-09-19T18:14:55.951658+00:00",
+  "input_integrity": {
+    "fine_source_sha256": "42f527b645017058de18cbdeb54687b728c9082bdd9513b2e4c577c3475f49f0",
+    "production_source_sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+    "runner_sha256": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395"
+  },
+  "jobs": [
+    {
+      "argv": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c92db95dc6e108563d38205b4e67ac6794344b717ad1cb61df5cfeb9a98702e0/lagrangian-fluid-lab/scripts/f3_native_volume_mls_temporal_v3.py",
+        "--source",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+        "--prepared",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json",
+        "--output",
+        "{attempt_dir}/trace.h5",
+        "--audit-output",
+        "{attempt_dir}/source-preflight.json",
+        "--seeds",
+        "4096",
+        "--substeps",
+        "2",
+        "--stop-after",
+        "835"
+      ],
+      "attempt_role": "initial",
+      "category": "material_diagnostic",
+      "comparison_plan": {
+        "against_512": "independent_seed_axes mode against the completed same-scope 512-seed v3 trace; report source-level macro/CDF/unknown bounds only, path pairing N/A",
+        "cross_scope_4096": "not requested in this minimal batch; current comparator cross_scope path policy is registered for 512 axes, so no 4096 cross-scope pairing is implied",
+        "fixed_denominator": "all 4096 geometric seeds per source; unknown and right-censoring retained",
+        "qualification_effect": "none"
+      },
+      "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+      "depends_on": [],
+      "env": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PYTHONPATH": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c92db95dc6e108563d38205b4e67ac6794344b717ad1cb61df5cfeb9a98702e0/lagrangian-fluid-lab:/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c92db95dc6e108563d38205b4e67ac6794344b717ad1cb61df5cfeb9a98702e0/lagrangian-fluid-lab/scripts"
+      },
+      "frozen_backend": "f3_native_volume_mls_temporal_linear_current_interval_rk4_v3",
+      "host": "ada",
+      "input_files": [
+        {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+          "sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4"
+        },
+        {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json",
+          "sha256": "23d151c07c53c83b3048be9b665722161baaef37fc31e6ce6ec42e4b26b36894"
+        },
+        {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075_Def.xml",
+          "sha256": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5"
+        },
+        {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c92db95dc6e108563d38205b4e67ac6794344b717ad1cb61df5cfeb9a98702e0/lagrangian-fluid-lab/scripts/f3_native_volume_mls_temporal_v3.py",
+          "sha256": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395"
+        }
+      ],
+      "job_id": "ada-f3-native-mls-temporal-v3-nominal-production-seeds4096-full835-s2-v1",
+      "logical_id": "f3-native-mls-temporal-v3-nominal-production-seeds4096-full835-s2-v1",
+      "parameter_binding": {
+        "cadence": "native saved .01s selection, no interpolation",
+        "dp_m": 0.0075,
+        "drive_amplitude": 1.0,
+        "family": "F3",
+        "purpose": "separate seed-quadrature effect from registered production/fine spatial-scope differences",
+        "q": 0.5,
+        "scope": "production",
+        "seed_count": 4096,
+        "substeps": 2
+      },
+      "profile_basis": {
+        "estimated_cpu_seconds": 14981.072,
+        "estimated_trace_h5_mib": 499.147,
+        "estimated_wall_seconds": 17424.392,
+        "fine512_wall_seconds": 1773.9248595237732,
+        "limit": "measured 512-seed full window scaled by seed cardinality; near-wall cost and checkpoint IO may differ",
+        "measured_reference": "same frozen temporal-v3 runner, full 835-step s2, 512 seeds",
+        "production512_wall_seconds": 1675.422354221344,
+        "provisional_margin": 1.3,
+        "seed_scaling": 8.0
+      },
+      "qualification_claim": "none; quadrature-density engineering diagnostic only",
+      "required_outputs": [
+        "trace.h5",
+        "trace.summary.json",
+        "source-preflight.json",
+        "trace.h5.checkpoint.json"
+      ],
+      "resources": {
+        "cpu_cores": 2,
+        "gpu_peak_mib": 0,
+        "io_weight": 0.25,
+        "ram_mib": 8192
+      },
+      "schema": "core.runtime.job_spec.proposal.v1",
+      "seeds": 4096,
+      "source_snapshot": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c92db95dc6e108563d38205b4e67ac6794344b717ad1cb61df5cfeb9a98702e0/lagrangian-fluid-lab",
+        "sha256": "c92db95dc6e108563d38205b4e67ac6794344b717ad1cb61df5cfeb9a98702e0"
+      },
+      "stop_after": 835,
+      "substeps": 2,
+      "timeout_seconds": 21600
+    },
+    {
+      "argv": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c92db95dc6e108563d38205b4e67ac6794344b717ad1cb61df5cfeb9a98702e0/lagrangian-fluid-lab/scripts/f3_native_volume_mls_temporal_v3.py",
+        "--source",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen.h5",
+        "--prepared",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen-PREPARED.json",
+        "--output",
+        "{attempt_dir}/trace.h5",
+        "--audit-output",
+        "{attempt_dir}/source-preflight.json",
+        "--seeds",
+        "4096",
+        "--substeps",
+        "2",
+        "--stop-after",
+        "835"
+      ],
+      "attempt_role": "initial",
+      "category": "material_diagnostic",
+      "comparison_plan": {
+        "against_512": "independent_seed_axes mode against the completed same-scope 512-seed v3 trace; report source-level macro/CDF/unknown bounds only, path pairing N/A",
+        "cross_scope_4096": "not requested in this minimal batch; current comparator cross_scope path policy is registered for 512 axes, so no 4096 cross-scope pairing is implied",
+        "fixed_denominator": "all 4096 geometric seeds per source; unknown and right-censoring retained",
+        "qualification_effect": "none"
+      },
+      "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+      "depends_on": [],
+      "env": {
+        "MKL_NUM_THREADS": "1",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PYTHONPATH": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c92db95dc6e108563d38205b4e67ac6794344b717ad1cb61df5cfeb9a98702e0/lagrangian-fluid-lab:/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c92db95dc6e108563d38205b4e67ac6794344b717ad1cb61df5cfeb9a98702e0/lagrangian-fluid-lab/scripts"
+      },
+      "frozen_backend": "f3_native_volume_mls_temporal_linear_current_interval_rk4_v3",
+      "host": "ada",
+      "input_files": [
+        {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen.h5",
+          "sha256": "42f527b645017058de18cbdeb54687b728c9082bdd9513b2e4c577c3475f49f0"
+        },
+        {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen-PREPARED.json",
+          "sha256": "c2e632c41e0decacb2ef81342ab4fe120556930ac1aced898871d72b6ac0951c"
+        },
+        {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p006_Def.xml",
+          "sha256": "417451910735d92de9f27f00a5e04f3d3e002da2eca30bd439470425d53334f5"
+        },
+        {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c92db95dc6e108563d38205b4e67ac6794344b717ad1cb61df5cfeb9a98702e0/lagrangian-fluid-lab/scripts/f3_native_volume_mls_temporal_v3.py",
+          "sha256": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395"
+        }
+      ],
+      "job_id": "ada-f3-native-mls-temporal-v3-nominal-fine-seeds4096-full835-s2-v1",
+      "logical_id": "f3-native-mls-temporal-v3-nominal-fine-seeds4096-full835-s2-v1",
+      "parameter_binding": {
+        "cadence": "native saved .01s selection, no interpolation",
+        "dp_m": 0.006,
+        "drive_amplitude": 1.0,
+        "family": "F3",
+        "purpose": "separate seed-quadrature effect from registered production/fine spatial-scope differences",
+        "q": 0.5,
+        "scope": "fine",
+        "seed_count": 4096,
+        "substeps": 2
+      },
+      "profile_basis": {
+        "estimated_cpu_seconds": 15566.038,
+        "estimated_trace_h5_mib": 499.105,
+        "estimated_wall_seconds": 18448.819,
+        "fine512_wall_seconds": 1773.9248595237732,
+        "limit": "measured 512-seed full window scaled by seed cardinality; near-wall cost and checkpoint IO may differ",
+        "measured_reference": "same frozen temporal-v3 runner, full 835-step s2, 512 seeds",
+        "production512_wall_seconds": 1675.422354221344,
+        "provisional_margin": 1.3,
+        "seed_scaling": 8.0
+      },
+      "qualification_claim": "none; quadrature-density engineering diagnostic only",
+      "required_outputs": [
+        "trace.h5",
+        "trace.summary.json",
+        "source-preflight.json",
+        "trace.h5.checkpoint.json"
+      ],
+      "resources": {
+        "cpu_cores": 2,
+        "gpu_peak_mib": 0,
+        "io_weight": 0.25,
+        "ram_mib": 8192
+      },
+      "schema": "core.runtime.job_spec.proposal.v1",
+      "seeds": 4096,
+      "source_snapshot": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/c92db95dc6e108563d38205b4e67ac6794344b717ad1cb61df5cfeb9a98702e0/lagrangian-fluid-lab",
+        "sha256": "c92db95dc6e108563d38205b4e67ac6794344b717ad1cb61df5cfeb9a98702e0"
+      },
+      "stop_after": 835,
+      "substeps": 2,
+      "timeout_seconds": 25200
+    }
+  ],
+  "next_comparison_receipts": [
+    {
+      "mode": "independent_seed_axes",
+      "pair": "production4096-vs-existing-production512",
+      "path_metrics": "N/A; different seed axes",
+      "purpose": "whether source-level CDF/unknown bounds move under seed quadrature"
+    },
+    {
+      "mode": "independent_seed_axes",
+      "pair": "fine4096-vs-existing-fine512",
+      "path_metrics": "N/A; different seed axes",
+      "purpose": "same seed-quadrature check for fine source"
+    }
+  ],
+  "proposal_id": "f3-temporal-v3-production-fine-seeds4096-s2-v1",
+  "purpose": "minimal two-run 4096-seed diagnostic to separate seed quadrature from the observed 512-seed production/fine spatial differences",
+  "qualification_claim": "none",
+  "schema": "core.material.f3.temporal_v3.quadrature_proposals.v1",
+  "status": "proposal_only_not_submitted"
+}

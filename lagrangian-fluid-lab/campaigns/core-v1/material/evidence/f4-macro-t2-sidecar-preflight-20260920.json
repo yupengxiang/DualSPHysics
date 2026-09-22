@@ -1,0 +1,281 @@
+{
+  "schema": "core.material.f4.macro_t2_sidecar_preflight.v1",
+  "created_at_utc": "2026-09-20T10:47:38.924550+00:00",
+  "status": "blocked_for_qualification",
+  "qualification_claim": "none",
+  "t2_status": "not_qualified",
+  "T2_macro": false,
+  "T2_path": false,
+  "audit_scope": "Read-only F4 material/sidecar preflight. Existing JSON receipts and the static qualification manifest were hashed; no active H5 was opened and no solver, worker, registry, ledger, threshold, or historical score was changed.",
+  "execution_constraints": {
+    "read_only": true,
+    "cpu_only": true,
+    "active_h5_opened": false,
+    "new_job_submitted": false,
+    "solver_started": false,
+    "gpu_started": false,
+    "registry_mutation": 0,
+    "central_ledger_mutation": 0,
+    "thresholds_changed": false,
+    "historical_scores_modified": false
+  },
+  "resource_accounting": {
+    "runtime_seconds": 10.166638487949967,
+    "max_rss_kib": 463152,
+    "active_h5_opened": false,
+    "long_task_started": false
+  },
+  "registered_gates": {
+    "unknown_fraction_per_source_max": 0.01,
+    "f3_cdf_sup_abs_difference_max": 0.02,
+    "full_event_window_s": 4.34,
+    "maximum_right_censored_extension_s": 8.68,
+    "gate_semantics": "all geometric seeds remain in the source denominator; right-censored events remain unresolved"
+  },
+  "canaries": [
+    {
+      "id": "f4_real_material_baseline_s2",
+      "unknown_fraction_max": 0.84765625,
+      "common_reliable_path_coverage": 0.15234375,
+      "mass_closed": true,
+      "event_window_complete": false,
+      "event_window_status": "right_censored_or_unresolved",
+      "unknown_gate_pass": false,
+      "qualified_T2_macro": false,
+      "qualified_T2_path": false,
+      "negative_finding": "First losses are recorded as reconstruction-error gate failures; no wall, distance, ESS, rank, anisotropy, or nonfinite-velocity failure is needed to explain the retained negative result.",
+      "result_path": "campaigns/core-v1/evidence/f4-real-material-canary-result.json"
+    },
+    {
+      "id": "f4_native_dense_pair_s2_s4",
+      "unknown_fraction_max": 0.896484375,
+      "common_reliable_path_coverage": 0.103515625,
+      "mass_closed": true,
+      "event_window_complete": false,
+      "event_window_status": "right_censored_or_unresolved",
+      "unknown_gate_pass": false,
+      "qualified_T2_macro": false,
+      "qualified_T2_path": false,
+      "negative_finding": "Native .002 s output densification did not resolve the fixed reconstruction reliability gate.",
+      "result_path": [
+        "campaigns/core-v1/evidence/f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5-material.json",
+        "campaigns/core-v1/evidence/f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5-material.json"
+      ]
+    },
+    {
+      "id": "f4_repair_canaries_ess32_and_affine_bound:f4_ess32_v2",
+      "unknown_fraction_max": 0.923828125,
+      "common_reliable_path_coverage": 0.076171875,
+      "mass_closed": true,
+      "event_window_complete": false,
+      "event_window_status": "right_censored_or_unresolved",
+      "unknown_gate_pass": false,
+      "qualified_T2_macro": false,
+      "qualified_T2_path": false,
+      "negative_finding": "Both repair candidates first fail at frame 81 in the near-contact approach interval; the fixed reconstruction cap is exceeded while ESS, rank, anisotropy, and support distance still pass at first loss.",
+      "result_path": "campaigns/core-v1/material/evidence/f4-material-repair-ess32-v2-canary-s0p3-center-q0p5-result.json"
+    },
+    {
+      "id": "f4_repair_canaries_ess32_and_affine_bound:f4_affine_bound_v2",
+      "unknown_fraction_max": 0.955078125,
+      "common_reliable_path_coverage": 0.044921875,
+      "mass_closed": true,
+      "event_window_complete": false,
+      "event_window_status": "right_censored_or_unresolved",
+      "unknown_gate_pass": false,
+      "qualified_T2_macro": false,
+      "qualified_T2_path": false,
+      "negative_finding": "Both repair candidates first fail at frame 81 in the near-contact approach interval; the fixed reconstruction cap is exceeded while ESS, rank, anisotropy, and support distance still pass at first loss.",
+      "result_path": "campaigns/core-v1/material/evidence/f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5-result.json"
+    },
+    {
+      "id": "f4_tallwall120_short_canary",
+      "unknown_fraction_max": 1.0,
+      "common_reliable_path_coverage": 0.0,
+      "mass_closed": true,
+      "event_window_complete": false,
+      "event_window_status": "right_censored_or_unresolved",
+      "unknown_gate_pass": false,
+      "qualified_T2_macro": false,
+      "qualified_T2_path": false,
+      "negative_finding": "All 512 seeds are unknown by the short-window end; the retained replay identifies reconstruction-error failures and records no wall, distance, ESS, rank, anisotropy, or nonfinite failure.",
+      "result_path": "campaigns/core-v1/material/evidence/f4-tallwall120-canary-root-v1.json"
+    }
+  ],
+  "sidecar_status": {
+    "native_source": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-14/product/trajectory.h5",
+      "sha256": "91846866c177e4c3036b7ef92c33a4e0bde7d9e8993efb01dde300811b7c096e",
+      "frame_count": 1086,
+      "window_s": 4.340002980805959,
+      "max_material_step_s": 0.0020042033830776074,
+      "role": "native_dense_reference_source"
+    },
+    "exact_stride_view": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/derived/f4-tallwall120-native004-stride5/trajectory.h5",
+      "sha256": "d80756f031d700d7aa91d68a8d9234142267d657376feecbb26ae2a67dc11bf1",
+      "manifest_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/derived/f4-tallwall120-native004-stride5/trajectory.h5.manifest.json",
+      "manifest_sha256": "73dea6a7bcb4e46fa21ed3efffc0d79dc6eb600d62235add5f8966c4c97d30ea",
+      "frame_count": 218,
+      "max_material_step_s": 0.0020011435305842262,
+      "role": "exact_every_fifth_saved_row; no interpolation",
+      "exact_rows_no_interpolation": true,
+      "selection_rule": "source_frame_index % stride == 0",
+      "same_terminal_lineage": true
+    },
+    "physical_control_equal_after_cadence_normalisation": true,
+    "sidecar_provenance_pass": true,
+    "source_view_is_not_independent_cfd": true,
+    "material_reliability_status": "uncalibrated",
+    "qualification_claim": "none",
+    "t2_status": "not_assessed",
+    "sidecar_can_qualify_t2": false,
+    "interpretation": "The exact stride view is a provenance/cadence control over one terminal source lineage. It is not an independent CFD solve and carries no material qualification credit."
+  },
+  "matrix_status": {
+    "template_total_rows": 33,
+    "cadence_rows": 4,
+    "exact_cadence_rows_available": 0,
+    "exact_cadence_rows_missing": 4,
+    "exact_cadence_missing_reasons": [
+      "F4 cell-14 is a real native-output solve at .004 s, not the .002 s dense control required by the 33-row template",
+      "no complete dense source is available yet; cell-13 .02 s is an independent solve, not a decimation of cell-14",
+      "cell-07 is only the .02 s spatial solve; no q=1 native dense CFD cell",
+      "no q=1 dense parent exists to decimate"
+    ],
+    "resolution_substep_rows": 24,
+    "resolution_material_overlays_pending": 24,
+    "seed_density_rows": 5,
+    "seed_density_material_overlays_pending": 5,
+    "existing_cfd_cell_count": 15,
+    "existing_cfd_matrix_sha256": "f6bab3eb0df6bef6a59452b9786458d535352ae9d69621806460b9b8b0e8f6b9",
+    "coverage_notes": {
+      "cadence": "No exact full-template cadence pair is complete. Center F4 cell-14 is .004 s native output and cell-13 is an independent .02 s solve; neither is an exact .002 s dense plus decimation pair. Endpoint q=1 has no dense parent.",
+      "resolution_substep": "All 24 rows map to existing F4 spatial source cells: center q=.5 cells 3-5, hard endpoint q=1 cells 6-8, q=0 production/fine cells 1-2, and q=.25/.75 production/fine cells 9-12. F4 q=0 dp=.01 cell 0 is present in CFD but outside this 24-row template.",
+      "seed_density": "All five q values have a dp=.0075 spatial H5 source cell (1, 9, 4, 11, 7), but the 4096-seed material overlays have not been run."
+    },
+    "material_matrix_ready": false,
+    "qualification_claim": "none",
+    "interpretation": "The template maps source cells and records pending material overlays; source-cell availability is not material qualification."
+  },
+  "static_cfd_qualification_status": {
+    "evaluator_path": "scripts/f4_tallwall_qualification_evaluator_v2.py",
+    "evaluator_sha256": "ee2673cda352558884177c2bb10c7c57d92589de5645c5ffebe215007c5b6eb8",
+    "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-qualification-evaluator-v2.json",
+    "manifest_sha256": "dc6ebde73388ab69d2eb2ba5df8cd52f511f378dc2655e68c17a356547a8bbfe",
+    "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+    "revision_id": "F4_tallwall120_13plus2_v2",
+    "static_contract_pass": true,
+    "matrix_complete": false,
+    "T1_numerical": false,
+    "cell_count": 15,
+    "scheduled_solver_cells": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      13,
+      14
+    ],
+    "reused_canary_cells": [
+      12
+    ],
+    "promotion_status": "blocked_until_14_scheduled_products_and_all_gates",
+    "qualification_claim": "none"
+  },
+  "gate_evaluation": {
+    "all_mass_closed": true,
+    "unknown_mass_pass": false,
+    "event_window_pass": false,
+    "cdf_gate_pass": false,
+    "sidecar_provenance_pass": true,
+    "sidecar_independent_cfd_pass": false,
+    "f4_calibration_pass": false,
+    "material_matrix_ready": false,
+    "static_cfd_matrix_complete": false,
+    "T2_macro": false,
+    "T2_path": false
+  },
+  "blocking_reasons": [
+    "all retained F4 material canaries fail the fixed per-source unknown-mass gate (1 maximum observed vs 0.01)",
+    "all retained F4 material event windows are right-censored or unresolved; no terminal CDF qualification result exists",
+    "native .002 cadence densification did not resolve the fixed reconstruction gate in the retained dense pair",
+    "native004/stride5 sidecar is exact and hash-bound but is not independent CFD and remains uncalibrated with qualification claim none",
+    "the 33-row F4 overlay template has four missing exact cadence rows and all 24 resolution plus five seed-density material overlays pending",
+    "the static 15-cell F4 CFD evaluator is structurally valid but matrix_complete=false; this is a source-product state, not material T2 evidence"
+  ],
+  "minimal_repair_hypothesis": {
+    "hypothesis": "The first-loss interval is dominated by the local reconstruction path near contact; cadence alone is insufficient. Reproduce the fixed reconstruction error with the existing geometry/wall binding and repair that implementation without changing its cap or unknown semantics.",
+    "diagnostic_anchor": {
+      "native_first_failure_time_interval_s": [
+        0.1600149861278153,
+        0.1640080936314531
+      ],
+      "stride_first_failure_time_interval_s": [
+        0.1600149861278153,
+        0.1800111221709365
+      ],
+      "reconstruction_error_gate_dominates": true,
+      "support_distance_or_wall_dominates": false
+    },
+    "bounded_test_sequence": [
+      "Run one fixed-seed, one-source-cell canary only across the native first-loss interval (~0.1600–0.1640 s), with the existing fixed reconstruction cap and unknown denominator.",
+      "Require the corrected implementation to pass the fixed reconstruction gate at that interval while preserving source/destination mass closure and failure-event semantics.",
+      "Only after that canary passes, resume one full 4.34 s F4 event window (extend to 8.68 s only under the registered right-censor policy) and require terminal unknown, CDF, residence, return, and coverage outputs.",
+      "Then produce the missing exact cadence sources and the registered 33-row material overlays; a sidecar alone cannot substitute for these products."
+    ],
+    "forbidden_shortcuts": [
+      "do not raise or reinterpret the reconstruction cap",
+      "do not relabel permanent unknown seeds as reliable",
+      "do not treat the exact-stride view as an independent CFD solve",
+      "do not call a .3/.4 s right-censored canary a full event result"
+    ]
+  },
+  "input_evidence": [
+    {
+      "path": "campaigns/core-v1/material/evidence/f4-material-negative-evidence-audit-20260920.json",
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-material-negative-evidence-audit-20260920.json",
+      "exists": true,
+      "sha256": "6aa41b16acdf6562a7b40c4e79f1e3ee18b59db080c2fd8ce642d04749bf33dd"
+    },
+    {
+      "path": "campaigns/core-v1/material/evidence/f4-native004-cadence-terminal-diagnosis-v1/cadence-terminal-diagnosis-v2.json",
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-native004-cadence-terminal-diagnosis-v1/cadence-terminal-diagnosis-v2.json",
+      "exists": true,
+      "sha256": "f139ce0f6d88702db3d0ef910608f79ea6eab6eb41912bd91af144316e65f967"
+    },
+    {
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native004-cadence-source-audit-v1.json",
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-tallwall120-native004-cadence-source-audit-v1.json",
+      "exists": true,
+      "sha256": "9cbad0aea665c886e8e9b51d4c540bf42ca7f1e521ade291e6482cda2b4c5298"
+    },
+    {
+      "path": "campaigns/core-v1/material/evidence/f4-resting-pool-33-to-15-matrix-review-2026-09-19.json",
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-resting-pool-33-to-15-matrix-review-2026-09-19.json",
+      "exists": true,
+      "sha256": "7fd6c5f5c8f42a28a424a3a30e528eef549b6787895c3c9216b0c246d88710ff"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-qualification-evaluator-v2.json",
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-qualification-evaluator-v2.json",
+      "exists": true,
+      "sha256": "dc6ebde73388ab69d2eb2ba5df8cd52f511f378dc2655e68c17a356547a8bbfe"
+    },
+    {
+      "path": "scripts/f4_tallwall_qualification_evaluator_v2.py",
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_tallwall_qualification_evaluator_v2.py",
+      "exists": true,
+      "sha256": "ee2673cda352558884177c2bb10c7c57d92589de5645c5ffebe215007c5b6eb8"
+    }
+  ],
+  "interpretation_boundary": "This record is a negative preflight and does not grant F4 T2 credit. A sidecar can establish source/view identity and cadence provenance, while material qualification still requires fixed-gate calibration, a complete event window, terminal unknown/CDF evidence, and the registered matrix."
+}

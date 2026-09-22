@@ -1,0 +1,278 @@
+{
+  "backend_policy": {
+    "accepted": "cross_scope_same_seed_axis accepts v3 only when expected_trace_backend, expected_backend_family, seed, finite-wall, source hashes, and event definition are explicit",
+    "backend": "f3_native_volume_mls_temporal_linear_current_interval_rk4_v3",
+    "backend_family": "temporal_linear_v3",
+    "method_comparison": "not a v3-v1/v2 temporal method comparison; all three traces must use the same v3 backend",
+    "runner_script_sha256": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395",
+    "runner_snapshot_sha256": "c92db95dc6e108563d38205b4e67ac6794344b717ad1cb61df5cfeb9a98702e0"
+  },
+  "collection_checks": [
+    "all trace files have committed=835 and 836 states before comparison",
+    "all trace binding source_definition and event_definition equal the registered definitions",
+    "all trace backends equal the registered temporal v3 backend and family",
+    "all trace bindings carry the exact finite-wall hash; missing or mismatched walls reject",
+    "all trace seed_hash values equal the registered v3 seed representation; initial_position and source_label arrays remain exact pairwise checks",
+    "source H5 hashes may differ only because this is an explicit cross-resolution scope comparison",
+    "unknown seeds remain in each source denominator; residence includes zero-residence seeds and right-censored bounds",
+    "output is diagnostic-only; no material-reliability or T2 qualification is inferred"
+  ],
+  "comparison_mode": "cross_scope_same_seed_axis",
+  "created_at_utc": "2026-09-19T17:41:21.664054+00:00",
+  "diagnostic_scope": "same temporal-v3 MLS backend across production/coarse/fine source scopes",
+  "implementation": {
+    "comparator_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_compare.py",
+    "comparator_sha256": "729b72c860043a54af3e43d1ba347d8ba931944fee4b3f2db2319a9300186893",
+    "test_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f3_native_volume_mls_compare.py",
+    "test_result": "15 passed",
+    "test_sha256": "d13144c8947d3834fc297e9a9116e49233731eb764a00c0fc337ed38fa7b23ca",
+    "tests": "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 .venv/bin/python -m pytest -q tests/test_f3_native_volume_mls_compare.py"
+  },
+  "no_side_effects": {
+    "collection_writes": "new comparison JSONs only after root supplies completed trace paths",
+    "gpu_launch": false,
+    "ledger_write": false,
+    "source_write": false,
+    "trace_launch": false
+  },
+  "pairwise_collection": [
+    {
+      "argv_template": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+        "-m",
+        "scripts.f3_native_volume_mls_compare",
+        "--left",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-full835-s2-512-v1/20260920T011358-9e5aa00ce480/trace.h5",
+        "--right",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-coarse-full835-s2-v1/20260920T012939-4db224616d6e/trace.h5",
+        "--comparison-mode",
+        "cross_scope_same_seed_axis",
+        "--provenance",
+        "{collection_attempt_dir}/production-vs-coarse-provenance.json",
+        "--output",
+        "{collection_attempt_dir}/production-vs-coarse-comparison.json"
+      ],
+      "left_scope": "production",
+      "output_template": "{collection_attempt_dir}/production-vs-coarse-comparison.json",
+      "pair_id": "f3-temporal-v3-production-vs-coarse-spatial-v1",
+      "provenance": {
+        "allow_source_sha_mismatch": true,
+        "comparison_id": "f3-temporal-v3-production-vs-coarse-spatial-v1",
+        "comparison_mode": "cross_scope_same_seed_axis",
+        "endpoint_time_tolerance_s": 3e-05,
+        "expected_backend_family": "temporal_linear_v3",
+        "expected_event_definition": {
+          "first_passage": "continuous crossing of x=0 into opposite source half on accepted linear RK segment",
+          "residence": "accepted segment time in the opposite source half",
+          "return": "first later crossing back to the seed's origin half"
+        },
+        "expected_source_definition": {
+          "axis": 0,
+          "boundary_m": 0.0,
+          "identity": "independent geometric seeds; native particle_id never partitions or terminates a seed",
+          "kind": "continuous_halfspace",
+          "source_0": "seed x < 0",
+          "source_1": "seed x >= 0"
+        },
+        "expected_trace_backend": "f3_native_volume_mls_temporal_linear_current_interval_rk4_v3",
+        "expected_trace_seed_hash": "d6c5fa1879ccf5e0c5dcf25ef52139c7d20ebd99a50c6aedaa88c9ee565c0741",
+        "expected_trace_source_sha256": {
+          "left": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+          "right": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575"
+        },
+        "expected_walls_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217",
+        "require_finite_wall_match": true
+      },
+      "right_scope": "coarse",
+      "status": "waiting_for_both_v3_traces_committed_835",
+      "write_policy": "comparison output only; source traces and ledger are read-only"
+    },
+    {
+      "argv_template": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+        "-m",
+        "scripts.f3_native_volume_mls_compare",
+        "--left",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-full835-s2-512-v1/20260920T011358-9e5aa00ce480/trace.h5",
+        "--right",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-fine-full835-s2-v1/20260920T012951-cae4c9abd9b5/trace.h5",
+        "--comparison-mode",
+        "cross_scope_same_seed_axis",
+        "--provenance",
+        "{collection_attempt_dir}/production-vs-fine-provenance.json",
+        "--output",
+        "{collection_attempt_dir}/production-vs-fine-comparison.json"
+      ],
+      "left_scope": "production",
+      "output_template": "{collection_attempt_dir}/production-vs-fine-comparison.json",
+      "pair_id": "f3-temporal-v3-production-vs-fine-spatial-v1",
+      "provenance": {
+        "allow_source_sha_mismatch": true,
+        "comparison_id": "f3-temporal-v3-production-vs-fine-spatial-v1",
+        "comparison_mode": "cross_scope_same_seed_axis",
+        "endpoint_time_tolerance_s": 3e-05,
+        "expected_backend_family": "temporal_linear_v3",
+        "expected_event_definition": {
+          "first_passage": "continuous crossing of x=0 into opposite source half on accepted linear RK segment",
+          "residence": "accepted segment time in the opposite source half",
+          "return": "first later crossing back to the seed's origin half"
+        },
+        "expected_source_definition": {
+          "axis": 0,
+          "boundary_m": 0.0,
+          "identity": "independent geometric seeds; native particle_id never partitions or terminates a seed",
+          "kind": "continuous_halfspace",
+          "source_0": "seed x < 0",
+          "source_1": "seed x >= 0"
+        },
+        "expected_trace_backend": "f3_native_volume_mls_temporal_linear_current_interval_rk4_v3",
+        "expected_trace_seed_hash": "d6c5fa1879ccf5e0c5dcf25ef52139c7d20ebd99a50c6aedaa88c9ee565c0741",
+        "expected_trace_source_sha256": {
+          "left": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+          "right": "42f527b645017058de18cbdeb54687b728c9082bdd9513b2e4c577c3475f49f0"
+        },
+        "expected_walls_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217",
+        "require_finite_wall_match": true
+      },
+      "right_scope": "fine",
+      "status": "waiting_for_both_v3_traces_committed_835",
+      "write_policy": "comparison output only; source traces and ledger are read-only"
+    },
+    {
+      "argv_template": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+        "-m",
+        "scripts.f3_native_volume_mls_compare",
+        "--left",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-coarse-full835-s2-v1/20260920T012939-4db224616d6e/trace.h5",
+        "--right",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-fine-full835-s2-v1/20260920T012951-cae4c9abd9b5/trace.h5",
+        "--comparison-mode",
+        "cross_scope_same_seed_axis",
+        "--provenance",
+        "{collection_attempt_dir}/coarse-vs-fine-provenance.json",
+        "--output",
+        "{collection_attempt_dir}/coarse-vs-fine-comparison.json"
+      ],
+      "left_scope": "coarse",
+      "output_template": "{collection_attempt_dir}/coarse-vs-fine-comparison.json",
+      "pair_id": "f3-temporal-v3-coarse-vs-fine-spatial-v1",
+      "provenance": {
+        "allow_source_sha_mismatch": true,
+        "comparison_id": "f3-temporal-v3-coarse-vs-fine-spatial-v1",
+        "comparison_mode": "cross_scope_same_seed_axis",
+        "endpoint_time_tolerance_s": 3e-05,
+        "expected_backend_family": "temporal_linear_v3",
+        "expected_event_definition": {
+          "first_passage": "continuous crossing of x=0 into opposite source half on accepted linear RK segment",
+          "residence": "accepted segment time in the opposite source half",
+          "return": "first later crossing back to the seed's origin half"
+        },
+        "expected_source_definition": {
+          "axis": 0,
+          "boundary_m": 0.0,
+          "identity": "independent geometric seeds; native particle_id never partitions or terminates a seed",
+          "kind": "continuous_halfspace",
+          "source_0": "seed x < 0",
+          "source_1": "seed x >= 0"
+        },
+        "expected_trace_backend": "f3_native_volume_mls_temporal_linear_current_interval_rk4_v3",
+        "expected_trace_seed_hash": "d6c5fa1879ccf5e0c5dcf25ef52139c7d20ebd99a50c6aedaa88c9ee565c0741",
+        "expected_trace_source_sha256": {
+          "left": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575",
+          "right": "42f527b645017058de18cbdeb54687b728c9082bdd9513b2e4c577c3475f49f0"
+        },
+        "expected_walls_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217",
+        "require_finite_wall_match": true
+      },
+      "right_scope": "fine",
+      "status": "waiting_for_both_v3_traces_committed_835",
+      "write_policy": "comparison output only; source traces and ledger are read-only"
+    }
+  ],
+  "qualification_claim": "none",
+  "registered_axis": {
+    "endpoint_time_tolerance_s": 3e-05,
+    "endpoint_tolerance_basis": "pre-registered source end-time jitter budget; larger mismatch rejects collection",
+    "event_definition": {
+      "first_passage": "continuous crossing of x=0 into opposite source half on accepted linear RK segment",
+      "residence": "accepted segment time in the opposite source half",
+      "return": "first later crossing back to the seed's origin half"
+    },
+    "finite_wall": {
+      "geometry": "F3 finite closed bottom,left,right,front,back; top open",
+      "walls_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217"
+    },
+    "seed_count": 512,
+    "seed_hash": "d6c5fa1879ccf5e0c5dcf25ef52139c7d20ebd99a50c6aedaa88c9ee565c0741",
+    "source_definition": {
+      "axis": 0,
+      "boundary_m": 0.0,
+      "identity": "independent geometric seeds; native particle_id never partitions or terminates a seed",
+      "kind": "continuous_halfspace",
+      "source_0": "seed x < 0",
+      "source_1": "seed x >= 0"
+    }
+  },
+  "schema": "core.material.f3.native_volume_mls.temporal_v3.spatial_comparison_collection.v1",
+  "scopes": {
+    "coarse": {
+      "attempt_dir": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-coarse-full835-s2-v1/20260920T012939-4db224616d6e",
+      "case_id": "R0081818-NOMINAL",
+      "dp_m": 0.00818181818181818,
+      "expected_committed_frame": 835,
+      "expected_frame_count": 836,
+      "job_id": "ada-f3-native-mls-temporal-v3-nominal-coarse-full835-s2-v1",
+      "prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/R0081818-NOMINAL-PREPARED.json",
+      "prepared_sha256": "043febcc4e2deb9c515ed32fe99b8ed7241c68fa8dbf72b9ad8d1f7e5ef6684f",
+      "seed_count": 512,
+      "seed_hash": "d6c5fa1879ccf5e0c5dcf25ef52139c7d20ebd99a50c6aedaa88c9ee565c0741",
+      "source_h5": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+      "source_sha256": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575",
+      "trace_backend": "f3_native_volume_mls_temporal_linear_current_interval_rk4_v3",
+      "trace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-coarse-full835-s2-v1/20260920T012939-4db224616d6e/trace.h5",
+      "walls_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217",
+      "xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/f3-ref0081818/R0081818-NOMINAL/F3_CELL3_plain_0p008181818181818_Def.xml",
+      "xml_sha256": "dd4c8c00c21c08a55be47fbf13684ad49830ef8546d8731b60e6e2beb2eac83d"
+    },
+    "fine": {
+      "attempt_dir": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-fine-full835-s2-v1/20260920T012951-cae4c9abd9b5",
+      "case_id": "F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen",
+      "dp_m": 0.006,
+      "expected_committed_frame": 835,
+      "expected_frame_count": 836,
+      "job_id": "ada-f3-native-mls-temporal-v3-nominal-fine-full835-s2-v1",
+      "prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen-PREPARED.json",
+      "prepared_sha256": "c2e632c41e0decacb2ef81342ab4fe120556930ac1aced898871d72b6ac0951c",
+      "seed_count": 512,
+      "seed_hash": "d6c5fa1879ccf5e0c5dcf25ef52139c7d20ebd99a50c6aedaa88c9ee565c0741",
+      "source_h5": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen.h5",
+      "source_sha256": "42f527b645017058de18cbdeb54687b728c9082bdd9513b2e4c577c3475f49f0",
+      "trace_backend": "f3_native_volume_mls_temporal_linear_current_interval_rk4_v3",
+      "trace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-fine-full835-s2-v1/20260920T012951-cae4c9abd9b5/trace.h5",
+      "walls_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217",
+      "xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p006_Def.xml",
+      "xml_sha256": "417451910735d92de9f27f00a5e04f3d3e002da2eca30bd439470425d53334f5"
+    },
+    "production": {
+      "attempt_dir": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-full835-s2-512-v1/20260920T011358-9e5aa00ce480",
+      "case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "dp_m": 0.0075,
+      "expected_committed_frame": 835,
+      "expected_frame_count": 836,
+      "job_id": "ada-f3-native-mls-temporal-v3-full835-s2-512-v1",
+      "prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json",
+      "prepared_sha256": "23d151c07c53c83b3048be9b665722161baaef37fc31e6ce6ec42e4b26b36894",
+      "seed_count": 512,
+      "seed_hash": "d6c5fa1879ccf5e0c5dcf25ef52139c7d20ebd99a50c6aedaa88c9ee565c0741",
+      "source_h5": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+      "source_sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+      "trace_backend": "f3_native_volume_mls_temporal_linear_current_interval_rk4_v3",
+      "trace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-full835-s2-512-v1/20260920T011358-9e5aa00ce480/trace.h5",
+      "walls_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217",
+      "xml": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075_Def.xml",
+      "xml_sha256": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5"
+    }
+  },
+  "status": "collection_entry_waiting_for_three_v3_full_traces"
+}

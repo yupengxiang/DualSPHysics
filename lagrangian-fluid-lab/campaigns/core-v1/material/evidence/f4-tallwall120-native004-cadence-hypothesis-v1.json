@@ -1,0 +1,56 @@
+{
+  "alternative": "Using native 0.004 s support frames may change first-failure timing and unknown mass because the provider has shorter current-frame brackets.",
+  "audit_bindings": {
+    "cell14_source_sha256": "91846866c177e4c3036b7ef92c33a4e0bde7d9e8993efb01dde300811b7c096e",
+    "source_audit_schema": "core.material.f4.tallwall120.cadence_source_audit.v1",
+    "stride_view_sha256": "d80756f031d700d7aa91d68a8d9234142267d657376feecbb26ae2a67dc11bf1"
+  },
+  "controlled": {
+    "dense_max_material_step_s": 0.0020042033830776074,
+    "dense_substeps": 2,
+    "dp_m": 0.0075,
+    "maximum_step_difference_s": 3.0598524933811433e-06,
+    "maximum_step_match_tolerance_s": 5e-06,
+    "neighbour_variant": "baseline24",
+    "neighbours": 24,
+    "q": 0.5,
+    "regularization_m": 0.004,
+    "seed_generator": "scripts.core_material.seeds_f4",
+    "seeds": 512,
+    "stride_view_max_material_step_s": 0.0020011435305842262,
+    "stride_view_substeps": 10,
+    "support_gate": {
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "minimum_anisotropy": 0.005,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3
+    },
+    "unknown_gate_fraction_max": 0.01,
+    "walls": "same tallwall120 finite wall definition",
+    "weighting": "1/(distance_squared+regularization_squared)"
+  },
+  "created_at_utc": "2026-09-19T22:10:03.936265+00:00",
+  "excluded_comparisons": [
+    "The old cell-04 .02 s s2 canary remains historical context and is not used to attribute this paired effect.",
+    "No threshold relaxation, neighbour sweep, wall change, seed change, or q change is allowed.",
+    "The derived stride view is not a new CFD run and cannot receive T1/T2 qualification."
+  ],
+  "fixed_metrics": [
+    "first failure saved-frame bracket and physical time",
+    "unknown fraction per source at every common physical time",
+    "common reliable path coverage and cumulative reliability",
+    "reconstruction, distance, wall, ESS, rank, anisotropy and nonfinite gate contributions",
+    "mass closure",
+    "contact/upward/return CDFs, residence with right-censoring, and event-window status"
+  ],
+  "hypothesis_id": "F4_HC1_native004_vs_exact_stride5_v1",
+  "null": "The native 0.004 s source and exact every-fifth-frame 0.02 s view produce the same first-failure interval, unknown curve, and support-gate component accounting within numerical equality at common saved times.",
+  "question": "Does the saved reference-frame cadence alter the first frozen reconstruction-error failure when the maximum tracer integration step is held at the same approximately 0.002 s scale?",
+  "schema": "core.material.f4.tallwall120.cadence_hypothesis.v1",
+  "single_variable": "reference saved-frame cadence; the exact stride view is copied from the same cell-14 H5 rows without interpolation, while both runs use fixed substep counts chosen for the recorded approximately 0.002 s maximum step",
+  "source_audit": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-tallwall120-native004-cadence-source-audit-v1.json",
+    "sha256": "9cbad0aea665c886e8e9b51d4c540bf42ca7f1e521ade291e6482cda2b4c5298"
+  },
+  "status": "preregistered_proposal_only"
+}

@@ -1,0 +1,201 @@
+{
+  "acceptance": {
+    "all_rows_mass_closure_abs_error_max": 1e-12,
+    "candidate_gate_is_unchanged": true,
+    "constant_source_candidate_unknown_max": 0.01,
+    "qualification": "none; manufactured calibration only",
+    "report_required": [
+      "true_error",
+      "estimated_error",
+      "ESS/rank/anisotropy/support failures",
+      "false_safe_mass",
+      "false_alarm_mass"
+    ]
+  },
+  "backend_candidates": {
+    "baseline24": {
+      "backend": "f3_ckdtree_visible_shepard_distance_v1",
+      "error_estimator": "local_residual",
+      "gate": {
+        "maximum_reconstruction_error_mps": 0.04698137929009748,
+        "minimum_anisotropy": 0.005,
+        "minimum_effective_sample_size": 4.0,
+        "minimum_geometry_rank": 3
+      },
+      "neighbours": 24,
+      "weights": "1/(d^2+eps^2)"
+    },
+    "f4_affine_bound_v2": {
+      "backend": "f4_ckdtree_visible_shepard_affine_bound_v2",
+      "error_estimator": "residual_plus_local_affine_query_bias",
+      "gate": {
+        "maximum_reconstruction_error_mps": 0.04698137929009748,
+        "minimum_anisotropy": 0.005,
+        "minimum_effective_sample_size": 4.0,
+        "minimum_geometry_rank": 3
+      },
+      "neighbours": 24,
+      "weights": "1/(d^2+eps^2)"
+    },
+    "f4_ess32_v2": {
+      "backend": "f4_ckdtree_visible_shepard_ess32_v2",
+      "error_estimator": "local_residual",
+      "gate": {
+        "maximum_reconstruction_error_mps": 0.04698137929009748,
+        "minimum_anisotropy": 0.005,
+        "minimum_effective_sample_size": 4.0,
+        "minimum_geometry_rank": 3
+      },
+      "neighbours": 32,
+      "weights": "1/(d^2+eps^2)"
+    }
+  },
+  "code_provenance": {
+    "calibration_script": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_material_calibration_v2.py",
+    "calibration_script_sha256": "5a19310dfe770f25fa583a1b62e35d1cdb10c1a7cae68de31026832ab607274b"
+  },
+  "created_at": "2026-09-19T11:20:29.046107+00:00",
+  "execution": {
+    "bounded_rows": 12,
+    "commands": {
+      "run": ".venv/bin/python -m scripts.f4_material_calibration_v2 run --design <design.json> --output <result.json>",
+      "write_design": ".venv/bin/python -m scripts.f4_material_calibration_v2 design --output <design.json>"
+    },
+    "device": "CPU",
+    "gpu": false,
+    "ledger": false,
+    "not_the_33_cell_scientific_matrix": true,
+    "slot": false
+  },
+  "geometry": {
+    "destination_region": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "box_low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "box_size_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "destination_role": "resting basin liquid and post-contact destination volume",
+      "kind": "continuous_resting_pool_box",
+      "pool_free_surface_z_m": 0.18
+    },
+    "dp_metadata_m": 0.0075,
+    "event_definition": {
+      "contact": {
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "path_interpolation": "continuous_linear_segment_per_tracer_substep",
+      "post_return_window": {
+        "completion_required": true,
+        "extension_policy": "double whole scope once if any required event is right-censored; never shorten",
+        "gravity_time_s": 0.3497487083913345,
+        "initial_horizon_s": 4.34,
+        "maximum_extended_horizon_s": 8.68
+      },
+      "residence": {
+        "definition": "time inside destination box after contact, right-censored if unresolved"
+      },
+      "return": {
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "upward_propagation": {
+        "direction": "upward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_gt": 0.0
+      }
+    },
+    "q_cases": [
+      0.25,
+      0.75
+    ],
+    "query_regions": {
+      "interface": "13x5x3 cell-centre grid in z=[.1525,.2075] m",
+      "source": "seeds_f4(512,q)"
+    },
+    "source_region": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        0.565,
+        0.28,
+        0.54
+      ],
+      "box_low_m": [
+        0.305,
+        0.12,
+        0.4
+      ],
+      "box_size_m": [
+        0.26,
+        0.16,
+        0.14
+      ],
+      "drop_left_x_m": 0.305,
+      "initial_velocity_mps": [
+        0.0,
+        0.0,
+        -0.5
+      ],
+      "kind": "continuous_drop_box",
+      "q": 0.25,
+      "source_role": "falling liquid drop, initial fluid box"
+    },
+    "support_spacing_m": 0.015,
+    "wall_definition": "f4_walls(): bottom and four closed side faces; top open"
+  },
+  "hypotheses": [
+    {
+      "candidate": "f4_ess32_v2",
+      "evidence": "v1 constant source rows had 16/512 ESS-only failures with true error <=1.1e-16, rank=3, anisotropy>=.46, visible=96; fixed k=32 clears those ESS values in the same geometry check",
+      "id": "F4-H1-ess32-support-cap",
+      "repair": "retain visible cKDTree and Shepard weights; use fixed k=32; retain ESS>=4, rank>=3, anisotropy>=.005, reconstruction cap and unknown<=.01"
+    },
+    {
+      "candidate": "f4_affine_bound_v2",
+      "evidence": "v1 affine/quadratic/interface fields had true p95 errors .0075-.0146 m/s while local residual p95 was ~1e-16-.00082; affine query-bias estimate tracks .0075-.0143 p95 without a gate change",
+      "id": "F4-H2-affine-query-bound",
+      "repair": "retain visible cKDTree, k=24, Shepard weights and fixed gate; use residual_plus_local_affine_query_bias as the reconstruction estimate"
+    }
+  ],
+  "macro_unknown_budget": {
+    "closure_tolerance": 1e-12,
+    "failure_policy": "candidate fails if source unknown exceeds .01; no threshold relaxation",
+    "maximum_unknown_mass_fraction": 0.01,
+    "source_denominator": "all 512 equal-weight source seeds for each held-out q and field"
+  },
+  "manufactured_fields": [
+    {
+      "expression": "U*[.07,.03,-.04]",
+      "id": "constant_offset",
+      "purpose": "ESS geometry sanity with zero true residual"
+    },
+    {
+      "expression": "base + U*[.13*x^3+.06*x*z, -.09*y^3+.04*y*z, .11*z^3-.05*x*y]",
+      "id": "cubic_shear",
+      "purpose": "nonlinear query error"
+    },
+    {
+      "expression": "base + trigonometric interface-scale swirl",
+      "id": "vortex_interface",
+      "purpose": "smooth interface query bias"
+    }
+  ],
+  "purpose": "independent F4 manufactured backend validation after v1 ESS false-positive diagnosis",
+  "qualification_claim": "none",
+  "revision_id": "F4_reconstruction_manufactured_v2",
+  "schema": "core.material.f4.reconstruction_calibration.v2",
+  "source_policy": "analytic/manufactured fields only; held-out q=.25/.75; no F4 failure positions or dev00 data"
+}

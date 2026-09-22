@@ -1,0 +1,446 @@
+{
+  "schema": "core.material.f4.reconstruction_gate_interval_canary.v1",
+  "created_at_utc": "2026-09-20T11:07:18.873151+00:00",
+  "status": "completed_bounded_diagnostic",
+  "qualification_claim": "none",
+  "t2_status": "not_qualified",
+  "T2_macro": false,
+  "T2_path": false,
+  "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+  "revision_id": "F4_tallwall120_material_baseline24_v1",
+  "audit_scope": "Single-source, fixed-seed replay through the retained F4 first-loss interval. This is an implementation diagnostic only; it is not a full event-window or matrix qualification run.",
+  "canary_contract": {
+    "source_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-14/product/trajectory.h5",
+    "source_sha256": "91846866c177e4c3036b7ef92c33a4e0bde7d9e8993efb01dde300811b7c096e",
+    "source_audit_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-tallwall120-native004-cadence-source-audit-v1.json",
+    "source_audit_sha256": "9cbad0aea665c886e8e9b51d4c540bf42ca7f1e521ade291e6482cda2b4c5298",
+    "q": 0.5,
+    "dp_m": 0.0075,
+    "seeds": 512,
+    "substeps": 2,
+    "stop_after_frame_inclusive": 41,
+    "first_loss_bracket": {
+      "frame_count": 1086,
+      "particle_count": 217485,
+      "from_frame": 40,
+      "to_frame": 41,
+      "from_time_s": 0.1600149861278153,
+      "to_time_s": 0.1640080936314531,
+      "interval_s": 0.003993107503637794
+    },
+    "source_geometry": "native_dense_reference_source",
+    "source_view": "native cell14; no interpolation or stride view"
+  },
+  "fixed_gate_semantics": {
+    "support_gate": {
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3,
+      "minimum_anisotropy": 0.005,
+      "maximum_reconstruction_error_mps": 0.04698137929009748
+    },
+    "unknown_fraction_per_source_max": 0.01,
+    "unknown_denominator": "full 512-seed source mass; permanent unknown remains in denominator",
+    "event_definition": {
+      "path_interpolation": "native support particle x/v are linearly interpolated only between the two registered reference frames; the independent tracer path is integrated by RK2 substeps",
+      "contact": {
+        "definition": "first downward crossing from z>0.18 to z<=0.18 after t=0",
+        "interface_plane_z_m": 0.18,
+        "direction": "downward",
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "upward_propagation": {
+        "definition": "first upward crossing after contact from z<=0.18 to z>0.18",
+        "interface_plane_z_m": 0.18,
+        "direction": "upward",
+        "requires_vertical_velocity_mps_gt": 0.0
+      },
+      "return": {
+        "definition": "first later downward crossing after upward from z>0.18 to z<=0.18",
+        "interface_plane_z_m": 0.18,
+        "direction": "downward",
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "residence": {
+        "definition": "time in the continuous destination box after contact",
+        "right_censored_if_unresolved": true,
+        "box": "destination_definition"
+      },
+      "post_return_window": {
+        "gravity_time_s": 0.3497487083913345,
+        "initial_horizon_s": 4.34,
+        "maximum_extended_horizon_s": 8.68,
+        "extension_policy": "one whole-scope doubling only when an event is right-censored; a source ending at 4.34 s cannot claim the 8.68 s extension",
+        "completion_required": true
+      },
+      "unobserved_event_policy": "NaN/right-censored; no saved-chord imputation"
+    },
+    "thresholds_changed": false,
+    "source_destination_mass_semantics_changed": false,
+    "event_window_semantics_changed": false
+  },
+  "trace": {
+    "status": "partial",
+    "qualification_claim": "none",
+    "qualified_T2_macro": false,
+    "qualified_T2_path": false,
+    "committed_frame": 41,
+    "committed_time_s": 0.1640080936314531,
+    "native_frame_count": 1086,
+    "mass_closed": true,
+    "event_window_complete": false,
+    "event_window_status": "right_censored_or_unresolved",
+    "unknown_gate_pass": false,
+    "unknown_fraction_max": 0.25,
+    "common_reliable_path_coverage": 0.75,
+    "elapsed_seconds": 16.81542460701894,
+    "max_rss_kib": 654072,
+    "trace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-reconstruction-gate-interval-canary-v1/baseline-frame40-41.h5",
+    "trace_sha256": "3900b04123667712d8806b567034535c93925d831c5c7999f599617833dba3ad",
+    "result_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-reconstruction-gate-interval-canary-v1/baseline-frame40-41.json",
+    "result_sha256": "624dcf83c48a08c597594bbfdd76ecc08424992cdc2a3b8b6eae7933a580cd69"
+  },
+  "diagnosis": {
+    "diagnosis_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-reconstruction-gate-interval-canary-v1/baseline-frame40-41-diagnosis.json",
+    "diagnosis_sha256": "a84f791abf18bbd1886f8ceb2c07ab70a5d2bf25f11303ae87b6f98bf0f523e7",
+    "failed_seed_count": 128,
+    "surviving_seed_count": 384,
+    "frame_histogram": {
+      "41": 128
+    },
+    "time_histogram_s": {
+      "41": 0.1640080936314531
+    },
+    "location": {
+      "count": 128,
+      "x_m": {
+        "count": 128,
+        "min": 0.3761948715445981,
+        "p50": 0.4900014154638035,
+        "p95": 0.6037473574112124,
+        "p99": 0.6037525816625838,
+        "max": 0.603797062395595
+      },
+      "y_m": {
+        "count": 128,
+        "min": 0.12989142155129008,
+        "p50": 0.20000058762147088,
+        "p95": 0.2700106002909554,
+        "p99": 0.27009291591166823,
+        "max": 0.27013640193241945
+      },
+      "z_m": {
+        "count": 128,
+        "min": 0.20314915199758676,
+        "p50": 0.2098992076298746,
+        "p95": 0.2206862330144967,
+        "p99": 0.22069392389644713,
+        "max": 0.22069408160367543
+      },
+      "minimum_distance_to_interface_m": 0.02314915199758677
+    },
+    "replay_mismatches": [],
+    "interval_transition": [
+      {
+        "frame": 40,
+        "substep": 0,
+        "segment_time_s": 0.1600149861278153,
+        "active_count": 512,
+        "usable_count": 387,
+        "new_failure_count": 125,
+        "failure_reason_counts": {
+          "g0_support_gate_fail": 0,
+          "g1_support_gate_fail": 125,
+          "distance_gate_fail": 0,
+          "wall_blocked": 0,
+          "nonfinite_velocity": 0,
+          "other": 0
+        },
+        "g0": {
+          "active_count": 512,
+          "support_gate_pass_count": 512,
+          "support_gate_fail_count": 0,
+          "component_fail_counts": {
+            "ess_fail": 0,
+            "rank_fail": 0,
+            "anisotropy_fail": 0,
+            "reconstruction_error_fail": 0
+          },
+          "support_distance_m": {
+            "count": 512,
+            "min": 0.0011772701806116212,
+            "p50": 0.0037347659833289904,
+            "p95": 0.005143843456172965,
+            "p99": 0.005179999651712171,
+            "max": 0.005236001709959238
+          },
+          "effective_sample_size": {
+            "count": 512,
+            "min": 12.824670541119232,
+            "p50": 16.989112215626186,
+            "p95": 18.16702819771813,
+            "p99": 18.246098047958682,
+            "max": 18.279816697661293
+          },
+          "geometry_rank": {
+            "count": 512,
+            "min": 3.0,
+            "p50": 3.0,
+            "p95": 3.0,
+            "p99": 3.0,
+            "max": 3.0
+          },
+          "anisotropy": {
+            "count": 512,
+            "min": 0.6116264248402136,
+            "p50": 0.7724012292705502,
+            "p95": 0.9013525912517124,
+            "p99": 0.9020275515017938,
+            "max": 0.9022866894426292
+          },
+          "reconstruction_error_mps": {
+            "count": 512,
+            "min": 4.905302105126532e-05,
+            "p50": 0.00021936732254050487,
+            "p95": 0.011776593976710242,
+            "p99": 0.0120199077839569,
+            "max": 0.01208598451689699
+          }
+        },
+        "g1": {
+          "active_count": 512,
+          "support_gate_pass_count": 387,
+          "support_gate_fail_count": 125,
+          "component_fail_counts": {
+            "ess_fail": 0,
+            "rank_fail": 0,
+            "anisotropy_fail": 0,
+            "reconstruction_error_fail": 125
+          },
+          "support_distance_m": {
+            "count": 512,
+            "min": 0.001160261803445119,
+            "p50": 0.003721527237805505,
+            "p95": 0.005131181152408578,
+            "p99": 0.005180982473283913,
+            "max": 0.005242456379035081
+          },
+          "effective_sample_size": {
+            "count": 512,
+            "min": 12.796338043144942,
+            "p50": 16.923064722498815,
+            "p95": 18.172394051128016,
+            "p99": 18.248988978791928,
+            "max": 18.28882193697738
+          },
+          "geometry_rank": {
+            "count": 512,
+            "min": 3.0,
+            "p50": 3.0,
+            "p95": 3.0,
+            "p99": 3.0,
+            "max": 3.0
+          },
+          "anisotropy": {
+            "count": 512,
+            "min": 0.6115806662726861,
+            "p50": 0.7721391095808958,
+            "p95": 0.9051469523946748,
+            "p99": 0.9106246733639143,
+            "max": 0.9114940332104589
+          },
+          "reconstruction_error_mps": {
+            "count": 512,
+            "min": 0.00011457125689023604,
+            "p50": 0.001242361669760004,
+            "p95": 0.2836709363444843,
+            "p99": 0.3015516080455589,
+            "max": 0.30626618562304475
+          }
+        }
+      },
+      {
+        "frame": 40,
+        "substep": 1,
+        "segment_time_s": 0.1620115398796342,
+        "active_count": 387,
+        "usable_count": 384,
+        "new_failure_count": 3,
+        "failure_reason_counts": {
+          "g0_support_gate_fail": 0,
+          "g1_support_gate_fail": 3,
+          "distance_gate_fail": 0,
+          "wall_blocked": 0,
+          "nonfinite_velocity": 0,
+          "other": 0
+        },
+        "g0": {
+          "active_count": 387,
+          "support_gate_pass_count": 387,
+          "support_gate_fail_count": 0,
+          "component_fail_counts": {
+            "ess_fail": 0,
+            "rank_fail": 0,
+            "anisotropy_fail": 0,
+            "reconstruction_error_fail": 0
+          },
+          "support_distance_m": {
+            "count": 387,
+            "min": 0.0011791179584484648,
+            "p50": 0.0037269573891896154,
+            "p95": 0.005140382226628905,
+            "p99": 0.005185300559452517,
+            "max": 0.005251000074465649
+          },
+          "effective_sample_size": {
+            "count": 387,
+            "min": 12.827380990128225,
+            "p50": 16.964409740363376,
+            "p95": 18.18476985192249,
+            "p99": 18.262133592975466,
+            "max": 18.294905942675424
+          },
+          "geometry_rank": {
+            "count": 387,
+            "min": 3.0,
+            "p50": 3.0,
+            "p95": 3.0,
+            "p99": 3.0,
+            "max": 3.0
+          },
+          "anisotropy": {
+            "count": 387,
+            "min": 0.6115400081808986,
+            "p50": 0.776520425250052,
+            "p95": 0.897693378994579,
+            "p99": 0.9052736259794308,
+            "max": 0.9062524950040058
+          },
+          "reconstruction_error_mps": {
+            "count": 387,
+            "min": 0.0001145757065290533,
+            "p50": 0.000924314691957215,
+            "p95": 0.00554348118671837,
+            "p99": 0.006692182090379958,
+            "max": 0.045618634819484534
+          }
+        },
+        "g1": {
+          "active_count": 387,
+          "support_gate_pass_count": 384,
+          "support_gate_fail_count": 3,
+          "component_fail_counts": {
+            "ess_fail": 0,
+            "rank_fail": 0,
+            "anisotropy_fail": 0,
+            "reconstruction_error_fail": 3
+          },
+          "support_distance_m": {
+            "count": 387,
+            "min": 0.0011854655502502936,
+            "p50": 0.003727877991844122,
+            "p95": 0.005145422871750298,
+            "p99": 0.005205616216162613,
+            "max": 0.005274747034913964
+          },
+          "effective_sample_size": {
+            "count": 387,
+            "min": 12.836113395960794,
+            "p50": 16.947260695398583,
+            "p95": 18.192420855245842,
+            "p99": 18.265969871461394,
+            "max": 18.316223153864495
+          },
+          "geometry_rank": {
+            "count": 387,
+            "min": 3.0,
+            "p50": 3.0,
+            "p95": 3.0,
+            "p99": 3.0,
+            "max": 3.0
+          },
+          "anisotropy": {
+            "count": 387,
+            "min": 0.6114132629769449,
+            "p50": 0.8135116615803687,
+            "p95": 0.897472227354528,
+            "p99": 0.9090422068762061,
+            "max": 0.9108493253588335
+          },
+          "reconstruction_error_mps": {
+            "count": 387,
+            "min": 0.0001407187713067313,
+            "p50": 0.0016453779652633367,
+            "p95": 0.01114603721450679,
+            "p99": 0.013317689415327287,
+            "max": 0.09024027874629925
+          }
+        }
+      }
+    ],
+    "interpretation": {
+      "thresholds_changed": false,
+      "initial_support_passes": true,
+      "first_failure_time_is_saved_frame_upper_bound": true,
+      "material_reliability_claim": "uncalibrated",
+      "event_claim": "none; this is support diagnosis only"
+    }
+  },
+  "diagnostic_conclusion": {
+    "baseline_failure_reproduced": true,
+    "first_failure_is_reconstruction_gate": true,
+    "repair_applied": false,
+    "repair_pass_proven": false,
+    "bounded_interval_only": true,
+    "qualification_eligible": false,
+    "reason": "The replay is intentionally baseline-only. It establishes whether the saved native source and current implementation reproduce the fixed reconstruction failure; it does not change the implementation or claim that a repair has passed."
+  },
+  "execution_constraints": {
+    "read_only_source_h5": true,
+    "terminal_source_h5_opened": true,
+    "new_solver_started": false,
+    "new_job_submitted": false,
+    "gpu_started": false,
+    "registry_mutation": 0,
+    "central_ledger_mutation": 0,
+    "thresholds_changed": false,
+    "historical_scores_modified": false,
+    "full_horizon_started": false,
+    "matrix_started": false
+  },
+  "resource_accounting": {
+    "wrapper_wall_seconds": 57.16050719493069,
+    "trace_elapsed_seconds": 16.81542460701894,
+    "trace_max_rss_kib": 654072,
+    "diagnosis_process_max_rss_kib": 670204,
+    "trace_output_bytes": 1417552,
+    "diagnosis_output_bytes": 412540
+  },
+  "next_minimal_repair_test": {
+    "required_before_any_full_window": "Implement a separately versioned reconstruction change with the same fixed cap and denominator, rerun this exact 512-seed frame-40→41 interval, and require zero new g0/g1 reconstruction failures plus trace replay equality.",
+    "must_preserve": [
+      "maximum reconstruction error cap",
+      "ESS/rank/anisotropy/support gates",
+      "full source-mass unknown denominator",
+      "native source geometry and event semantics"
+    ],
+    "success_is_not_t2": true
+  },
+  "input_provenance": {
+    "source_audit": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-tallwall120-native004-cadence-source-audit-v1.json",
+      "sha256": "9cbad0aea665c886e8e9b51d4c540bf42ca7f1e521ade291e6482cda2b4c5298"
+    },
+    "runner": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_tallwall120_material.py",
+      "sha256": "fdda7d03602b7bed20213f4e66d662a8c1e980318845c6b5c3b63454da75b4d2"
+    },
+    "core_material": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_material.py",
+      "sha256": "bc68a3d37073b7941f0ba64d657cc63daad2ce6ea2becc966c4661a25afe1e24"
+    },
+    "diagnosis": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_tallwall120_material_diagnosis.py",
+      "sha256": "704596a2794ca4d6727962e564e73d40369a39720e091d723049e70af8c1ffa6"
+    }
+  }
+}

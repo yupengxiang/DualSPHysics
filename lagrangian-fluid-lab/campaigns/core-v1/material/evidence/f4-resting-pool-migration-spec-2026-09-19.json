@@ -1,0 +1,190 @@
+{
+  "schema": "core.material.family_migration_spec.v1",
+  "created_at_utc": "2026-09-19T00:00:00+08:00",
+  "owner": "luna_material",
+  "status": "design_ready_pending_f4_t1",
+  "qualification_claim": "none",
+  "trigger": {
+    "condition": "The standard F3 coarse/production/fine baseline24 matrix has any production or fine row outside the fixed gates.",
+    "action": "Record F3 material scope T2 as unqualified and migrate the diagnostic definition to this new F4 family.",
+    "third_repair_allowed": false,
+    "gate_relaxation_allowed": false,
+    "current_state": "pending_standard_f3_matrix; this file does not infer a result before those rows finish"
+  },
+  "family": {
+    "family_id": "F4",
+    "scope_id": "F4_drop_resting_pool_x_v2",
+    "revision_id": "F4_resting_pool_13plus2_v2",
+    "recipe_id": "F4_resting_pool_mdbc_native_v2",
+    "recipe": "mdbc_native",
+    "stage": "qualification_only",
+    "physical_change": "Fill the finite basin to z=0.18 m so the pool starts at rest on the basin; do not inherit the prior floating-pool T1 or production status.",
+    "design_path": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/design.json",
+    "design_sha256": "150ab91acc962355f59128974dfcce6f581e9c75ef49496b2d211320bfa29db6",
+    "prepared_matrix_path": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/prepared-matrix.json",
+    "prepared_matrix_sha256": "f6bab3eb0df6bef6a59452b9786458d535352ae9d69621806460b9b8b0e8f6b9",
+    "job_bundle_path": "campaigns/core-v1/cfd/f4-resting-pool-jobs.partial",
+    "job_bundle_sha256": "219bdedafafce17d85d2c102f63b89d8281405b49e2aa3c3b40cd1af9ad3746c",
+    "prior_scope_inherited": false
+  },
+  "material_overlay_binding": {
+    "implementation_status": "design_only_until_f4_t1_completes",
+    "core_material_sha256": "1880c02a50168ae3325c39993a55103a1ebba06adcc48a486b7f6f4825d94b7e",
+    "neighbor_code_sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752",
+    "backend": "f3_ckdtree_visible_shepard_distance_v1",
+    "neighbour_variant": "baseline24",
+    "neighbours": 24,
+    "regularization_m": 0.004,
+    "maximum_support_distance_m": 0.03,
+    "unknown_gate_fraction": 0.01
+  },
+  "source_definition": {
+    "kind": "continuous_drop_box",
+    "formula": "drop_left_x_m = 0.25 + 0.22*q",
+    "box_low_m": ["drop_left_x_m", 0.12, 0.4],
+    "box_size_m": [0.26, 0.16, 0.14],
+    "source_role": "falling liquid drop, initial fluid box",
+    "initial_velocity_mps": [0.0, 0.0, -0.5],
+    "source_labels": "Independent tracer source labels come from continuous box membership; native Mk and particle_id are not material truth.",
+    "source_mk_reference": 1,
+    "seed_identity": "independent seed-XXXXXX ids, never native particle_id",
+    "q_values": [0.0, 0.25, 0.5, 0.75, 1.0]
+  },
+  "destination_definition": {
+    "kind": "continuous_resting_pool_box",
+    "box_low_m": [0.0, 0.0, 0.0],
+    "box_size_m": [1.2, 0.4, 0.18],
+    "destination_role": "resting basin liquid and post-contact destination volume",
+    "destination_mk_reference": 0,
+    "pool_free_surface_z_m": 0.18,
+    "wall_bounds_m": {
+      "xmin": 0.0,
+      "xmax": 1.2,
+      "ymin": 0.0,
+      "ymax": 0.4,
+      "zmin": 0.0,
+      "zmax": 0.6
+    },
+    "closed_faces": ["bottom", "left", "right", "front", "back"],
+    "open_faces": ["top"]
+  },
+  "event_definition": {
+    "path_interpolation": "continuous linear segment between native saved frames and tracer substeps; a saved-frame chord alone is not an exact event path",
+    "contact": {
+      "definition": "First crossing from z > 0.18 m to z <= 0.18 m after t=0.",
+      "interface_plane_z_m": 0.18,
+      "direction": "downward",
+      "requires_vertical_velocity_mps_lt": 0.0
+    },
+    "upward_propagation": {
+      "definition": "First crossing after contact from z <= 0.18 m to z > 0.18 m with vertical velocity > 0.",
+      "interface_plane_z_m": 0.18,
+      "direction": "upward",
+      "requires_vertical_velocity_mps_gt": 0.0
+    },
+    "return": {
+      "definition": "First crossing after upward propagation from z > 0.18 m to z <= 0.18 m with vertical velocity < 0.",
+      "interface_plane_z_m": 0.18,
+      "direction": "downward",
+      "requires_vertical_velocity_mps_lt": 0.0
+    },
+    "residence": {
+      "definition": "Time spent inside the continuous destination box after contact, including right-censored duration when return is unresolved.",
+      "box": "destination_definition"
+    },
+    "post_return_window": {
+      "definition": "A completed return must be followed by one gravity-time window.",
+      "gravity_time_s": 0.3497487083913345,
+      "initial_horizon_s": 4.34,
+      "maximum_extended_horizon_s": 8.68,
+      "extension_policy": "If any required event is right-censored, double the whole scope once; never shorten a failed window.",
+      "completion_required": true
+    },
+    "reported_distributions": [
+      "contact weighted CDF",
+      "upward propagation weighted CDF",
+      "return weighted CDF",
+      "destination residence weighted CDF",
+      "source-to-destination mass closure",
+      "common reliable path coverage",
+      "per-source unknown mass"
+    ]
+  },
+  "t1_dependency": {
+    "state": "wait_for_current_f4_resting_pool_t1",
+    "canary_job": "f4-resting-pool-canary-001",
+    "canary_spec_path": "campaigns/core-v1/cfd/f4-resting-pool-canary-job.json",
+    "canary_spec_sha256": "269052201acdd6197a9d79e03598cd94dd62049d88f99588ee913273ae3faa7f",
+    "canary_prepared_path": "campaigns/core-v1/cfd/prepared/F4_resting_pool_center_medium_canary/prepared.json",
+    "canary_prepared_sha256": "170aa5facc7f1d08688a3f7ef01af45cbc4226cc660aa91a4e89f74c03893abd",
+    "canary_result_path": "campaigns/core-v1/runtime/attempts/f4-resting-pool-canary-001/20260919T172542-d49b17d63c4f/product/result.json",
+    "canary_result_sha256": "ed8d65ac19ef54928c90ba9d0437689b98d201e73d0f4ef25f27eb1b1b5a6878",
+    "canary_status": {
+      "structural_pass": true,
+      "mass_gate_pass": true,
+      "event_window_complete": false,
+      "event_window_status": "right_censored_or_unresolved",
+      "qualification_claim": "none"
+    },
+    "do_not_start_material_overlay_until": [
+      "all registered F4 T1 products are available",
+      "full-window event completion or the preregistered one-time extension is recorded",
+      "hard integrity, mass, wall, and macro gates are evaluated"
+    ]
+  },
+  "scope_matrix": {
+    "cell_count": 15,
+    "spatial_cells": 13,
+    "temporal_cells": 2,
+    "registered_resolutions_m": [0.01, 0.0075, 0.005],
+    "registered_output_interval_s": 0.02,
+    "material_overlay": {
+      "backend": "f3_ckdtree_visible_shepard_distance_v1",
+      "neighbour_variant": "baseline24",
+      "neighbours": 24,
+      "regularization_m": 0.004,
+      "maximum_support_distance_m": 0.03,
+      "unknown_gate_fraction": 0.01,
+      "seed_counts": [512, 4096],
+      "note": "Overlay is a later read-only diagnostic on each completed native H5. It does not replace the F4 T1 solver or use native Mk as material labels."
+    },
+    "rows": [
+      {"index": 0, "q": 0.0, "dp_m": 0.01, "design_cell": "spatial", "case_id": "RESTING_CORE_F4_mdbc_native_q0p00000000_dp0p010000000000_qualification", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-00/prepared.json", "job_id": "f4-h1-qualification-cell-00"},
+      {"index": 1, "q": 0.0, "dp_m": 0.0075, "design_cell": "spatial", "case_id": "RESTING_CORE_F4_mdbc_native_q0p00000000_dp0p007500000000_qualification", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-01/prepared.json", "job_id": "f4-h1-qualification-cell-01"},
+      {"index": 2, "q": 0.0, "dp_m": 0.005, "design_cell": "spatial", "case_id": "RESTING_CORE_F4_mdbc_native_q0p00000000_dp0p005000000000_qualification", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-02/prepared.json", "job_id": "f4-h1-qualification-cell-02"},
+      {"index": 3, "q": 0.5, "dp_m": 0.01, "design_cell": "spatial", "case_id": "RESTING_CORE_F4_mdbc_native_q0p50000000_dp0p010000000000_qualification", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-03/prepared.json", "job_id": "f4-h1-qualification-cell-03"},
+      {"index": 4, "q": 0.5, "dp_m": 0.0075, "design_cell": "spatial", "case_id": "RESTING_CORE_F4_mdbc_native_q0p50000000_dp0p007500000000_qualification", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-04/prepared.json", "job_id": "f4-h1-qualification-cell-04"},
+      {"index": 5, "q": 0.5, "dp_m": 0.005, "design_cell": "spatial", "case_id": "RESTING_CORE_F4_mdbc_native_q0p50000000_dp0p005000000000_qualification", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-05/prepared.json", "job_id": "f4-h1-qualification-cell-05"},
+      {"index": 6, "q": 1.0, "dp_m": 0.01, "design_cell": "spatial", "case_id": "RESTING_CORE_F4_mdbc_native_q1p00000000_dp0p010000000000_qualification", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-06/prepared.json", "job_id": "f4-h1-qualification-cell-06"},
+      {"index": 7, "q": 1.0, "dp_m": 0.0075, "design_cell": "spatial", "case_id": "RESTING_CORE_F4_mdbc_native_q1p00000000_dp0p007500000000_qualification", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-07/prepared.json", "job_id": "f4-h1-qualification-cell-07"},
+      {"index": 8, "q": 1.0, "dp_m": 0.005, "design_cell": "spatial", "case_id": "RESTING_CORE_F4_mdbc_native_q1p00000000_dp0p005000000000_qualification", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-08/prepared.json", "job_id": "f4-h1-qualification-cell-08"},
+      {"index": 9, "q": 0.25, "dp_m": 0.0075, "design_cell": "spatial", "case_id": "RESTING_CORE_F4_mdbc_native_q0p25000000_dp0p007500000000_qualification", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-09/prepared.json", "job_id": "f4-h1-qualification-cell-09"},
+      {"index": 10, "q": 0.25, "dp_m": 0.005, "design_cell": "spatial", "case_id": "RESTING_CORE_F4_mdbc_native_q0p25000000_dp0p005000000000_qualification", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-10/prepared.json", "job_id": "f4-h1-qualification-cell-10"},
+      {"index": 11, "q": 0.75, "dp_m": 0.0075, "design_cell": "spatial", "case_id": "RESTING_CORE_F4_mdbc_native_q0p75000000_dp0p007500000000_qualification", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-11/prepared.json", "job_id": "f4-h1-qualification-cell-11"},
+      {"index": 12, "q": 0.75, "dp_m": 0.005, "design_cell": "spatial", "case_id": "RESTING_CORE_F4_mdbc_native_q0p75000000_dp0p005000000000_qualification", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-12/prepared.json", "job_id": "f4-h1-qualification-cell-12"},
+      {"index": 13, "q": 0.5, "dp_m": 0.0075, "design_cell": "internal_time", "case_id": "RESTING_CORE_F4_mdbc_native_q0p50000000_dp0p007500000000_qualification_internal_time", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-13/prepared.json", "job_id": "f4-h1-qualification-cell-13"},
+      {"index": 14, "q": 0.5, "dp_m": 0.0075, "design_cell": "native_output", "case_id": "RESTING_CORE_F4_mdbc_native_q0p50000000_dp0p007500000000_qualification_native_output", "prepared": "campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-14/prepared.json", "job_id": "f4-h1-qualification-cell-14"}
+    ]
+  },
+  "f4_gates": {
+    "no_missing_native_fluid_ids": true,
+    "no_nonfinite_active_values": true,
+    "closed_wall_endpoint_tolerance_m": 1e-08,
+    "saved_chord_crossings_allowed": 0,
+    "source_initial_mass_relative_error_max": 0.025,
+    "initial_mass_spread_over_continuous_mass_max": 0.03,
+    "mass_change_relative_max": 1e-08,
+    "spatial_max_absolute_normalized_difference": 0.05,
+    "temporal_fraction_of_spatial_budget": 0.2,
+    "monotone_refinement_required": true,
+    "full_window_event_completion_required": true,
+    "material_unknown_fraction_max": 0.01
+  },
+  "queue_policy": {
+    "this_file_starts_no_job": true,
+    "central_ledger_mutation": 0,
+    "gpu_launch_by_owner": false,
+    "existing_f4_jobs": "Use the root-owned F4 scheduler/ledger entries only after the current T1 run is reconciled; do not duplicate them from this material evidence file.",
+    "material_overlay_queue": "Queue only after complete T1 products and gate receipt; use the immutable source H5 and record independent tracer output/checkpoint receipts."
+  }
+}

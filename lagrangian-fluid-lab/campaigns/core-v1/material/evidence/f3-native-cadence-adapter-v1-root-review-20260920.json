@@ -1,0 +1,75 @@
+{
+  "authorization": {
+    "gpu_launch": false,
+    "job_spec_creation": false,
+    "ledger_mutation": false,
+    "material_canary": true,
+    "model_training": false,
+    "queue_mutation": false,
+    "registry_mutation": false,
+    "solver_launch": false
+  },
+  "authorized_operation": "512 seeds, 4 substeps, exactly 4 native intervals, with one kill/resume recovery check",
+  "bindings": {
+    "adapter": {
+      "bytes": 25252,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_cadence_adapter_v1.py",
+      "role": "cadence adapter",
+      "sha256": "746477383578df5edcef927e72aaff706d8a2621ff01f435cb9d65fd425dd42e"
+    },
+    "backend": {
+      "bytes": 67812,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_v2.py",
+      "role": "native MLS backend",
+      "sha256": "cd1c050757df7b0d5832181464d446cf6e8c678e2b150aa07bae0ddb0ee3b5f9"
+    },
+    "frame_selection": {
+      "bytes": 9006,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-cadence-adapter-v1-every-fifth-selection-20260920.json",
+      "role": "direct every-fifth diagnostic selection",
+      "sha256": "6c2c4a1059f7b43dd7235294395e574368f8d7c3649451d45a08a22cf2da3bac"
+    },
+    "preflight": {
+      "bytes": 28467,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-cadence-adapter-v1-preflight-20260920.json",
+      "role": "cadence preflight",
+      "sha256": "9f2bef012459cba60a6d5c62723b567a5d56496f8436bb40d7fb4bc2fc6db651"
+    },
+    "prepared": {
+      "bytes": 4365,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_REV075_R075-OUTPUT-PREPARED.json",
+      "role": "prepared F3 source",
+      "sha256": "e0c847522dcab26548a6dccfc4c5b590ecafa93a3ca153db32db6e954a8d8c3c"
+    },
+    "source": {
+      "bytes": 4498243234,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_REV075_R075-OUTPUT.h5",
+      "role": "solver-saved native .002 s source",
+      "sha256": "571ddf4ba1878730ff80d20bca49361a7f3fff841f3ac618dd983894364c7e63"
+    }
+  },
+  "created_at_utc": "2026-09-20T22:25:00+08:00",
+  "decision": "approved_for_material_bounded_canary",
+  "execution_policy": {
+    "cdf_gate_unchanged": true,
+    "full_event_window_required_for_acceptance": true,
+    "intervals": 4,
+    "recovery_required": true,
+    "right_censored_canary_credit": 0,
+    "same_input_retry": false,
+    "seed_count": 512,
+    "substeps": 4,
+    "unknown_gate_unchanged": true
+  },
+  "family": "F3",
+  "postconditions": [
+    "resume output must be immutable and internally consistent",
+    "no registry/ledger/queue mutation",
+    "no T2 or full-window claim"
+  ],
+  "qualification_claim": "none",
+  "review_id": "f3-native-cadence-adapter-v1-bounded-root-review-20260920",
+  "revision_id": "F3_REV075_native_cadence_adapter_v1",
+  "schema": "core.root_review.v1",
+  "scope_id": "F3_REV075_native_material_cadence_diagnostic_v1"
+}

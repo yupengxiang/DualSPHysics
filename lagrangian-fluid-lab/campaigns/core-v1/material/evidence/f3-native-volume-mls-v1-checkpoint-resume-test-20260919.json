@@ -1,0 +1,63 @@
+{
+  "schema": "core.material.f3.native_volume_mls.checkpoint_resume_test.v1",
+  "created_at_utc": "2026-09-19T14:54:00Z",
+  "status": "passed",
+  "qualification_claim": "none",
+  "program": "scripts/f3_native_volume_mls.py",
+  "program_sha256": "e1c5fc39e73781d386c7da2874c1749b5223c8209eaf8f25bb4453346df51ff9",
+  "test_program": "tests/test_f3_native_volume_mls.py",
+  "test_program_sha256": "7a59beaca9ee0586053f25760bce78b03c00e5088f38744fe33c64bf9392bb16",
+  "pytest": {
+    "command": ".venv/bin/pytest -q tests/test_f3_native_volume_mls.py",
+    "result": "5 passed",
+    "coverage": [
+      "compact Wendland support",
+      "affine native-volume MLS exactness",
+      "geometric source balance",
+      "current-frame provider isolation",
+      "SIGKILL checkpoint/resume equivalence"
+    ]
+  },
+  "fixture": {
+    "source_h5": "campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-checkpoint-fixture/source.h5",
+    "source_h5_sha256": "ba16ea4b4731f30581dad4413ee3345b2418825cea19384dc8e5fd01152251b7",
+    "prepared_json": "campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-checkpoint-fixture/prepared.json",
+    "prepared_json_sha256": "9ae87637d498a8d2e9cf94a1ec42df3e63a3db5321281a735966382aac3ce515",
+    "frames": 3,
+    "seeds": 512,
+    "substeps": 2,
+    "stop_after": 2
+  },
+  "fault_windows": [
+    {
+      "injection": "--kill-after-h5-append 1",
+      "process_exit": -9,
+      "manifest_committed_frame_before_resume": 0,
+      "h5_committed_frame_before_resume": 1,
+      "interpretation": "extra HDF5 row is discarded to the last manifest generation"
+    },
+    {
+      "injection": "--kill-after-generation 1",
+      "process_exit": -9,
+      "manifest_committed_frame_before_resume": 0,
+      "h5_committed_frame_before_resume": 1,
+      "interpretation": "immutable generation exists but old manifest remains authoritative"
+    }
+  ],
+  "resume_assertions": {
+    "resume_command": "same argv plus --resume",
+    "final_committed_frame": 2,
+    "uninterrupted_trace": "same fixture and stop_after without fault injection",
+    "dataset_comparison": "time, position, reliability, unknown state, events, support diagnostics, mass closure, and failure reasons all matched",
+    "unknown_denominator": "all 512 geometric seeds, including permanently unknown seeds",
+    "generation_policy": "content-addressed NPZ names; no previously published generation is overwritten",
+    "manifest_policy": "atomic replacement after generation fsync"
+  },
+  "scope_limits": {
+    "fixture_is_not_f3_qualification": true,
+    "full_nominal_not_started": true,
+    "gpu_started": false,
+    "ledger_mutation": false,
+    "old_f3_gate_inherited": false
+  }
+}

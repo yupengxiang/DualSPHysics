@@ -1,0 +1,133 @@
+{
+  "active_attempt_guard": {
+    "required_committed_frame": 835,
+    "required_frame_count": 836,
+    "required_terminal_state": "succeeded_or_completed_with_required_outputs_verified",
+    "required_time_end_s": 8.350012828223477,
+    "rule": "do not open trace.h5 while either registered attempt is running, heartbeat-active, or lacking a terminal runtime receipt",
+    "status_inputs": [
+      {
+        "attempt_dir": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-production-seeds4096-full835-s2-v1/20260920T021701-9a54b89981d6",
+        "job_id": "ada-f3-native-mls-temporal-v3-nominal-production-seeds4096-full835-s2-v1",
+        "status_files": [
+          "heartbeat.json",
+          "trace.h5.checkpoint.json",
+          "result.json"
+        ]
+      },
+      {
+        "attempt_dir": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-fine-seeds4096-full835-s2-v1/20260920T021701-6f0402566b3b",
+        "job_id": "ada-f3-native-mls-temporal-v3-nominal-fine-seeds4096-full835-s2-v1",
+        "status_files": [
+          "heartbeat.json",
+          "trace.h5.checkpoint.json",
+          "result.json"
+        ]
+      }
+    ],
+    "when_not_terminal": "emit waiting status and do not hash/open either trace.h5"
+  },
+  "central_ledger_mutation": false,
+  "comparison_policy": {
+    "cdf": "report lower/upper bounds and sup differences",
+    "fixed_denominator": "all seeds per trace, 2048 per source for 4096; unknown retained",
+    "path_pairing": "only production4096-vs-fine4096 same seed axis; 512-vs-4096 path metrics N/A",
+    "qualification_effect": "none",
+    "residence": "include reliable no-contact zero and right-censored unknown interval"
+  },
+  "created_at_utc": "2026-09-19T18:40:13.996005+00:00",
+  "gpu_started": false,
+  "implementation": {
+    "comparator_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_compare.py",
+    "comparator_sha256": "d4fc40b0b0057b4b0fc2487560d709f01c95068109a028e2664bc9f6fdf44acb",
+    "comparator_test_result": "17 passed",
+    "comparator_tests_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f3_native_volume_mls_compare.py",
+    "comparator_tests_sha256": "7eee7bdd59120f2d9ada58f8aa11ad9799192d2fb516362657c59dcbaac3d0cb"
+  },
+  "material_reliability": "uncalibrated; numerical support_unknown is not material reliability",
+  "outputs": {
+    "directory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-mls-full835-seeds4096-postcompletion-collector-v1",
+    "no_output_until_terminal": true,
+    "required": [
+      "three comparator JSON outputs",
+      "terminal input receipt/hash manifest",
+      "collector execution receipt"
+    ]
+  },
+  "postcompletion_argv_templates": [
+    {
+      "comparison_id": "f3-native-mls-full835-production4096-vs-fine4096-v1",
+      "left": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-production-seeds4096-full835-s2-v1/20260920T021701-9a54b89981d6/trace.h5",
+      "mode": "cross_scope_same_seed_axis",
+      "output": "{collector_dir}/production4096-vs-fine4096.json",
+      "provenance": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-mls-full835-production4096-vs-fine4096-provenance-v1.json",
+      "right": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-fine-seeds4096-full835-s2-v1/20260920T021701-6f0402566b3b/trace.h5"
+    },
+    {
+      "comparison_id": "f3-native-mls-full835-production512-vs-production4096-v1",
+      "left": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-full835-s2-512-v1/20260920T011358-9e5aa00ce480/trace.h5",
+      "mode": "independent_seed_axes",
+      "output": "{collector_dir}/production512-vs-production4096.json",
+      "provenance": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-mls-full835-production512-vs-production4096-provenance-v1.json",
+      "right": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-production-seeds4096-full835-s2-v1/20260920T021701-9a54b89981d6/trace.h5"
+    },
+    {
+      "comparison_id": "f3-native-mls-full835-fine512-vs-fine4096-v1",
+      "left": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-fine-full835-s2-v1/20260920T012951-cae4c9abd9b5/trace.h5",
+      "mode": "independent_seed_axes",
+      "output": "{collector_dir}/fine512-vs-fine4096.json",
+      "provenance": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-mls-full835-fine512-vs-fine4096-provenance-v1.json",
+      "right": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-fine-seeds4096-full835-s2-v1/20260920T021701-6f0402566b3b/trace.h5"
+    }
+  ],
+  "proposal_id": "f3-native-mls-full835-seeds4096-postcompletion-collector-v1",
+  "provenance_files": {
+    "fine512_vs_fine4096": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-mls-full835-fine512-vs-fine4096-provenance-v1.json",
+      "sha256": "8fe3beb6eedd1325bd91304762fe0c448c2bb0fd33d1da60312376e9d8fc05bc"
+    },
+    "production4096_vs_fine4096": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-mls-full835-production4096-vs-fine4096-provenance-v1.json",
+      "sha256": "b0a72ae81bbe3e529efdb698a34baf7d21b784342a571187024eee47e131ce51"
+    },
+    "production512_vs_production4096": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-mls-full835-production512-vs-production4096-provenance-v1.json",
+      "sha256": "3cb9aa45f929af9d17a78f5aeda0124f0e0a73812317bf6aeba6635a8cf1c2c5"
+    }
+  },
+  "qualification_claim": "none",
+  "registered_inputs": {
+    "fine4096": {
+      "job_id": "ada-f3-native-mls-temporal-v3-nominal-fine-seeds4096-full835-s2-v1",
+      "seed_count": 4096,
+      "source_count_per_side": 2048,
+      "source_sha256": "42f527b645017058de18cbdeb54687b728c9082bdd9513b2e4c577c3475f49f0",
+      "trace": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-fine-seeds4096-full835-s2-v1/20260920T021701-6f0402566b3b/trace.h5"
+    },
+    "fine512_control": {
+      "seed_count": 512,
+      "seed_hash": "d6c5fa1879ccf5e0c5dcf25ef52139c7d20ebd99a50c6aedaa88c9ee565c0741",
+      "source_sha256": "42f527b645017058de18cbdeb54687b728c9082bdd9513b2e4c577c3475f49f0",
+      "trace": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-fine-full835-s2-v1/20260920T012951-cae4c9abd9b5/trace.h5",
+      "trace_sha256": "16cd1dd8279240be590422cef319247821f92ec03147f59d62b015bef133f014"
+    },
+    "production4096": {
+      "job_id": "ada-f3-native-mls-temporal-v3-nominal-production-seeds4096-full835-s2-v1",
+      "seed_count": 4096,
+      "source_count_per_side": 2048,
+      "source_sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+      "trace": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-nominal-production-seeds4096-full835-s2-v1/20260920T021701-9a54b89981d6/trace.h5"
+    },
+    "production512_control": {
+      "seed_count": 512,
+      "seed_hash": "d6c5fa1879ccf5e0c5dcf25ef52139c7d20ebd99a50c6aedaa88c9ee565c0741",
+      "source_sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+      "trace": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-temporal-v3-full835-s2-512-v1/20260920T011358-9e5aa00ce480/trace.h5",
+      "trace_sha256": "2a191ccd7bb946f64ee622dbe35204579cbda3296729dc9276a24ba665c1cad8"
+    }
+  },
+  "schema": "core.material.f3.native_volume_mls.postcompletion_collector.v1",
+  "solver_launch": false,
+  "source_write": false,
+  "status": "proposal_only_waiting_for_terminal_attempts"
+}

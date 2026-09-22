@@ -1,0 +1,75 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    ".venv/bin/python",
+    "-m",
+    "scripts.f4_native_kernel_mls",
+    "--dense-output",
+    "<evidence>/f4-native-kernel-mls-v1-dense-short-canary-result-20260919.json",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+    "--h",
+    "0.011941277883",
+    "--fluid-type",
+    "3",
+    "--frame-indices",
+    "0",
+    "80",
+    "81",
+    "82",
+    "150"
+  ],
+  "code": "scripts/f4_native_kernel_mls.py",
+  "code_sha256": "bb3db37dbbef74ddc6b7baa158f513f3da250b67a49eb60836475060ad561181",
+  "finished_at": "2026-09-19T12:31:37.071134+00:00",
+  "frames_processed_sequentially": "0..150",
+  "frames_selected": [
+    0,
+    80,
+    81,
+    82,
+    150
+  ],
+  "input_permissions": {
+    "current_frame_only": true,
+    "fields": [
+      "position",
+      "velocity",
+      "mass",
+      "density",
+      "valid",
+      "type==3",
+      "time"
+    ],
+    "future_density": false,
+    "future_velocity": false,
+    "source_labels_or_particle_ids": false
+  },
+  "job_id": "f4-native-kernel-mls-v1-dense-short-canary-s0p3-center-q0p5",
+  "notes": [
+    "Current numerical support gate reports all 512 queries reliable in each selected frame; this is not the old F3 reconstruction-error gate and does not qualify T2.",
+    "Weighted reconstruction p95 rises from 0.0111 m/s at frame 80 to 0.1639 at frame 81 and 0.4743 at frame 82 while current geometric rank/condition remain sound.",
+    "The versioned connectivity diagnostic sees no multi-component support at frame 81 but reports two velocity branches (separation 0.2558 m/s); multi-component support appears later at frame 150 for 4.88% of queries."
+  ],
+  "prepared_xml": "campaigns/core-v1/cfd/prepared/F4_resting_pool_center_native_dense_002_canary/generated/F4_RESTING_POOL_CENTER_NATIVE_DENSE_002_CANARY.xml",
+  "qualification_claim": "none; diagnostic canary only",
+  "resource": {
+    "cpu_percent_reported": 118,
+    "device": "CPU",
+    "gpu": false,
+    "ledger": false,
+    "max_rss_mib": 136.86328125,
+    "slot": false,
+    "system_cpu_seconds": 0.92,
+    "user_cpu_seconds": 103.16,
+    "wall_seconds": 87.91
+  },
+  "result_json": "campaigns/core-v1/material/evidence/f4-native-kernel-mls-v1-dense-short-canary-result-20260919.json",
+  "result_sha256": "2e77f66007cf74de8959020b0efbf3c93ab80709c4ea4a77406e7f94bb90565e",
+  "schema": "core.material.f4.native_kernel_mls.execution.v1",
+  "source_h5": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+  "source_sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9",
+  "started_at": "2026-09-19T12:30:09.161134+00:00",
+  "status": "completed"
+}

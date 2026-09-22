@@ -1,0 +1,98 @@
+{
+  "argv": [
+    ".venv/bin/python",
+    "-m",
+    "scripts.f4_native_kernel_mls",
+    "--trace-output",
+    "<attempt_dir>/native_mls_rk4_material.h5",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+    "--h",
+    "0.011941277883",
+    "--fluid-type",
+    "3",
+    "--query-count",
+    "512",
+    "--q",
+    "0.5",
+    "--substeps",
+    "4",
+    "--stop-after",
+    "90"
+  ],
+  "backend": "f4_native_kernel_mls_causal_current_volume_rk4_v1",
+  "checkpoint": {
+    "crash_window": "old manifest/generation remain valid if SIGKILL occurs before manifest replace",
+    "generation": "content-addressed NPZ named by frame and state hash",
+    "h5_resume": "truncate dynamic datasets to checkpoint frame and rewrite that frame",
+    "publish_order": "fsynced generation rename, then atomic manifest replace",
+    "schema": "core.material.f4.native_kernel_mls.checkpoint.v2"
+  },
+  "code_sha256": "8da879e466105efa53a620115b8a204031e400b60bb535d2efdc1f697d76e30c",
+  "constraints": [
+    "CPU-only postprocess",
+    "no solver/GPU/ledger/slot",
+    "old results immutable",
+    "qualification claim remains none"
+  ],
+  "created_at": "2026-09-19T13:26:22.309867+00:00",
+  "error_budget": {
+    "path": "RK4-vs-Euler per-step and cumulative estimates; no certified material bound",
+    "real_source_hessian": "not supplied; analytic upper bound unavailable",
+    "residual": "weighted MLS residual estimate only"
+  },
+  "events": {
+    "crossing": "continuous linear segment crossings on usable RK segments",
+    "destination_box_m": {
+      "high": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "low": [
+        0,
+        0,
+        0
+      ]
+    },
+    "plane_z_m": 0.18,
+    "window_end": "unreturned seeds right_censored_or_unresolved"
+  },
+  "integration": {
+    "field_access": "all stages use current frame i only; no frame i+1 velocity/density",
+    "field_hold_order": "piecewise-constant O(dt) hold across native output intervals",
+    "method": "classical RK4 over each native interval",
+    "rk4_scope": "fourth-order integration of frozen current-frame field only; overall cross-frame temporal interpolation is not fourth-order",
+    "substeps": 4,
+    "window_frames": [
+      0,
+      90
+    ]
+  },
+  "qualification_claim": "none",
+  "query_definition": {
+    "count": 512,
+    "identity": "independent geometric seeds; no native particle_id or initial Mk termination",
+    "mass": "equal positive 1/512; all seeds remain denominator",
+    "q": 0.5
+  },
+  "resource_estimate": {
+    "device": "CPU",
+    "estimated_peak_rss_mib": 1024,
+    "gpu": false,
+    "ledger": false,
+    "measured_full_canary": "724.82 wall s, 157536 KiB RSS for frames 0-90, 4 substeps",
+    "measured_short_profile": "168.73 wall s, 158816 KiB RSS for frames 0-20, 4 substeps",
+    "slot": false,
+    "source_particle_rows": 217485
+  },
+  "schema": "core.material.f4.native_kernel_mls.trace_spec.v2",
+  "source_h5": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+  "source_sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9",
+  "spec_id": "f4-native-kernel-mls-v1-rk4-budget-canary-s0p3-center-q0p5-v2",
+  "static_backend": "f4_native_kernel_mls_wendland_mass_density_v1",
+  "unknown_policy": {
+    "gate": "no material reliability claim; numerical support mask reported separately",
+    "rule": "first failed numerical support stage makes seed permanent_unknown; later events/path updates stop"
+  }
+}

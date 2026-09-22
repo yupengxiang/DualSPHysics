@@ -1,0 +1,86 @@
+{
+  "argv": [
+    ".venv/bin/python",
+    "-m",
+    "scripts.f4_native_kernel_mls",
+    "--trace-output",
+    "<attempt_dir>/native_mls_rk4_material.h5",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+    "--h",
+    "0.011941277883",
+    "--fluid-type",
+    "3",
+    "--query-count",
+    "512",
+    "--q",
+    "0.5",
+    "--substeps",
+    "4",
+    "--stop-after",
+    "90"
+  ],
+  "backend": "f4_native_kernel_mls_causal_current_volume_rk4_v1",
+  "code_sha256": "69229cf7126afea3ff148a91e8aaa79174f63ad03a0f1160a2323e0d1f2761b2",
+  "created_at": "2026-09-19T13:00:14.112456+00:00",
+  "error_budget": {
+    "analytic_upper_bound": "not available for real CFD without independent native field Hessian bound",
+    "material_reliability": "not assessed by numerical support pass",
+    "path_error_estimate": "RK4 step versus current-frame Euler step; diagnostic, not certified bound",
+    "reconstruction_residual": "reported estimate only"
+  },
+  "events": {
+    "definition": "continuous downward/upward/return crossings at z=.18; residence in [0,0,0]-[1.2,.4,.18] box",
+    "right_censoring": "seeds without return at window end remain right_censored_or_unresolved"
+  },
+  "execution_constraints": [
+    "CPU-only postprocess; do not start GPU CFD",
+    "do not write campaign ledger or acquire slot",
+    "do not modify old core_material results or gates",
+    "qualification claim remains none even if numerical support is complete"
+  ],
+  "integration": {
+    "future_density": false,
+    "future_velocity": false,
+    "interval_policy": "each [i,i+1] interval uses only current frame i for all stages",
+    "method": "classical explicit RK4",
+    "native_frame_window": [
+      0,
+      90
+    ],
+    "predicted_density": false,
+    "stop_after": 90,
+    "substeps": 4
+  },
+  "qualification_claim": "none",
+  "query_definition": {
+    "construction": "independent 8x8x8 cell-centre grid in F4 drop box",
+    "count": 512,
+    "q": 0.5,
+    "query_identity": "independent geometric seed; native particle_id and initial Mk forbidden",
+    "query_mass": "equal positive 1/512; denominator retains permanent unknown"
+  },
+  "recovery": {
+    "checkpoint": "atomic NPZ+manifest before every HDF5 frame append",
+    "checkpoint_schema": "core.material.f4.native_kernel_mls.checkpoint.v1",
+    "kill_resume": "resume truncates HDF5 to checkpoint frame and rewrites it"
+  },
+  "resource_estimate": {
+    "device": "CPU",
+    "estimated_cpu_seconds": "roughly 4x 151-frame static canary at substeps=4; measure before any full window",
+    "estimated_output_bytes": "about 5-10 MiB HDF5 plus checkpoint and summary",
+    "estimated_peak_rss_mib": 1024,
+    "frame_count": 91,
+    "gpu": false,
+    "ledger": false,
+    "query_count": 512,
+    "slot": false,
+    "source_particle_rows": 217485
+  },
+  "schema": "core.material.f4.native_kernel_mls.trace_spec.v1",
+  "source_h5": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+  "source_role": "qualification_only real F4 dense .002 s CFD source; causal native-current RK research canary",
+  "source_sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9",
+  "spec_id": "f4-native-kernel-mls-v1-rk4-budget-canary-s0p3-center-q0p5",
+  "static_backend": "f4_native_kernel_mls_wendland_mass_density_v1"
+}

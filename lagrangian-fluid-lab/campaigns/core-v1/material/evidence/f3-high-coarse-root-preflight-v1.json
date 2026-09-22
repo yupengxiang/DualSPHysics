@@ -1,0 +1,145 @@
+{
+  "schema": "core.material.f3.native_volume_mls.source_preflight.v1",
+  "created_at_utc": "2026-09-19T15:49:44.023112+00:00",
+  "status": "preflight_passed",
+  "qualification_claim": "none",
+  "source": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/R0081818-ENDPOINT-HIGH.h5",
+    "sha256": "6c623e651598d082951c8023cc8168da1ec0a4f58ef99b4747deb1836eb0ca41",
+    "frames": 836,
+    "particles_axis": 26620,
+    "fluid_rows_frame0": 26620,
+    "time_start_s": 0.0,
+    "time_end_s": 8.350015121408111,
+    "native_output_interval_nominal_s": 0.01,
+    "time_step_min_s": 0.009984490806765223,
+    "time_step_max_s": 0.010008725008120223,
+    "datasets": [
+      "time",
+      "position",
+      "velocity",
+      "mass",
+      "density",
+      "valid",
+      "type"
+    ],
+    "mass_dtype": "float32",
+    "density_dtype": "float32",
+    "current_frame_mass_density": true,
+    "sampled_native_mass_sums_kg": [
+      14.57999967969954,
+      14.57999967969954,
+      14.57999967969954
+    ],
+    "initial_mass_kg": 14.57999967969954,
+    "initial_position_bounds_m": {
+      "low": [
+        -0.4459090828895569,
+        -0.08590909093618393,
+        0.004090908914804459
+      ],
+      "high": [
+        0.4459090828895569,
+        0.08590909093618393,
+        0.08590909093618393
+      ]
+    }
+  },
+  "prepared_case": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/R0081818-ENDPOINT-HIGH-PREPARED.json",
+    "sha256": "5914b02ed9bff3123b3f1e077945f647e58ff7efef471df9130d0890048a1c86",
+    "case_id": "R0081818-ENDPOINT-HIGH",
+    "dp_m": 0.00818181818181818,
+    "h_m": 0.013026848599224119,
+    "recipe_id": "F3_CELL3_NS_visco1_native_nopen_revision075_ref0081818",
+    "qualified": false,
+    "formal_release": false,
+    "wall_spec": {
+      "container_interior": {
+        "xmin": -0.45,
+        "xmax": 0.45,
+        "ymin": -0.09,
+        "ymax": 0.09,
+        "zmin": 0,
+        "zmax": 0.51
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "obstacles": []
+    }
+  },
+  "kernel_binding": {
+    "xml_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/f3-ref0081818/R0081818-ENDPOINT-HIGH/F3_CELL3_plain_0p008181818181818_Def.xml",
+    "xml_sha256": "dd4c8c00c21c08a55be47fbf13684ad49830ef8546d8731b60e6e2beb2eac83d",
+    "kernel_id": 2,
+    "kernel_name": "Wendland",
+    "coefh": 0.91924,
+    "h_formula": "coefh*sqrt(3*dp^2)",
+    "h_m": 0.013026848599224119,
+    "formula": {
+      "family": "quintic_wendland_c2",
+      "dimension": 3,
+      "argument": "q=r/h",
+      "support": "0 <= q <= 2",
+      "expression": "W(r,h)=21/(16*pi*h^3)*(1-q/2)^4*(1+2*q)",
+      "normalisation": "21/(16*pi*h^3)",
+      "official_f3_binding": "generated F3 XML parameter Kernel=2 (Wendland)"
+    }
+  },
+  "wall_binding": {
+    "geometry": "F3 finite closed bottom,left,right,front,back; top open",
+    "low_m": [
+      -0.45,
+      -0.09,
+      0.0
+    ],
+    "high_m": [
+      0.45,
+      0.09,
+      0.51
+    ],
+    "triangle_count": 10,
+    "triangles_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217"
+  },
+  "source_definition": {
+    "kind": "continuous_halfspace",
+    "axis": 0,
+    "boundary_m": 0.0,
+    "source_0": "seed x < 0",
+    "source_1": "seed x >= 0",
+    "seed_count": 512,
+    "source0_seed_count": 256,
+    "source1_seed_count": 256,
+    "identity": "independent geometric seeds; native particle_id never partitions or terminates a seed"
+  },
+  "original_f3_material_gate": {
+    "minimum_effective_sample_size": 4.0,
+    "minimum_geometry_rank": 3,
+    "minimum_anisotropy": 0.005,
+    "maximum_reconstruction_error_mps": 0.04698137929009748,
+    "maximum_support_distance_m": 0.03
+  },
+  "candidate_binding": {
+    "schema": "core.material.f3.native_volume_mls.v1",
+    "backend": "f3_native_volume_mls_wendland_mass_density_v1",
+    "future_state": "forbidden",
+    "native_volume": "mass/density from same current native H5 frame",
+    "support": "all current valid fluid rows within 2h after finite-wall visibility",
+    "fit": "weighted affine MLS SVD",
+    "candidate_gate": {
+      "minimum_support_count": 4,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 4,
+      "maximum_condition_number": 10000000000.0,
+      "svd_relative_cutoff": 1e-12
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "schema": "core.material.f3.native_volume_mls.temporal_semantics.v1",
+  "created_at_utc": "2026-09-20T01:09:22+08:00",
+  "status": "analytical_tests_passed_proposal_only",
+  "qualification_claim": "none",
+  "material_reliability": "not established",
+  "implementation": {
+    "runner": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_temporal_v3.py",
+      "sha256": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395"
+    },
+    "tests": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f3_native_volume_mls_temporal_v3.py",
+      "sha256": "fdecea571341b3a6cb77152262cc35dfcb10e4f65ad61a002414036d373db7bb",
+      "command": ".venv/bin/python -m pytest -q tests/test_f3_native_volume_mls_temporal_v3.py",
+      "result": "6 passed"
+    },
+    "proposal": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-mls-temporal-v3-short-s2-job-proposal-v1.json",
+      "sha256": "0c5397b2151e3b5f45ae37039f171e6192dd0da0f06ca8977d22279c2b18c07f"
+    }
+  },
+  "old_v2_semantics_audit": {
+    "backend": "f3_native_volume_mls_current_frame_rk4_v2",
+    "interval_policy": "all RK stages over [t_i,t_(i+1)] reconstruct against saved field F_i",
+    "field_model": "piecewise constant in time over each saved interval",
+    "substep_effect": "substeps reduce RK quadrature error for the frozen F_i field but do not remove the O(delta_t_saved) temporal hold consistency bias when the reference field changes in time",
+    "time_error_statement": "for a smooth time-dependent reference field, piecewise-constant hold has first-order global temporal consistency in the saved-frame interval; this is a semantic audit, not a measured bound",
+    "future_access": "none beyond current saved frame, but no endpoint temporal evolution is represented"
+  },
+  "new_v3_semantics": {
+    "backend": "f3_native_volume_mls_temporal_linear_current_interval_rk4_v3",
+    "interval_policy": "stage at time tau in [t_i,t_(i+1)] reads exactly registered endpoint arrays F_i and F_(i+1)",
+    "field_model": "U_v3(tau,x)=MLS(x; (1-alpha)F_i + alpha F_(i+1)), alpha=(tau-t_i)/(t_(i+1)-t_i)",
+    "interpolated_arrays": ["position", "velocity", "mass", "density"],
+    "endpoint_policy": "exact endpoint fields at alpha=0 or 1; no extrapolation",
+    "future_policy": "a right endpoint is permitted only because it is the registered endpoint of the current integration interval; no following interval or model CFD state is exposed",
+    "trajectory_policy": "native particle positions are linearly interpolated as support geometry; the tracer path is the independent RK4 state; row correspondence is checked by identical valid fluid native indices",
+    "model_source_policy": "provider opens only the registered reference source H5; model/future CFD fields are forbidden",
+    "time_error_statement": "RK4 quadrature sees a time-dependent linearly interpolated field; with a smooth spatial reconstruction its quadrature error is higher order inside an interval, while the piecewise-linear saved-field representation remains a separate O(delta_t_saved^2) global modeling error under smoothness assumptions; no material error bound is claimed",
+    "substep_interpretation": "substeps test RK quadrature of the same v3 time field; they do not make the piecewise-linear reference field or whole trace fourth-order in time"
+  },
+  "analytic_checks": [
+    {
+      "name": "moving_support_midpoint_field",
+      "result": "pass",
+      "detail": "27 moving native support rows; componentwise midpoint positions and time-linear velocity exactly recovered"
+    },
+    {
+      "name": "analytic_affine_mls",
+      "result": "pass",
+      "detail": "moving support with constant-in-space time-linear velocity reconstructs [2.0,-0.375,0.3] at t=0.5 with 27-row support"
+    },
+    {
+      "name": "rk4_time_stage",
+      "result": "pass",
+      "detail": "analytic u_x(t)=1+2t integrates from x=1 to x=3 over one interval; y/z integrals also match"
+    },
+    {
+      "name": "interval_boundary_guard",
+      "result": "pass",
+      "detail": "a request outside the current registered endpoint pair is rejected"
+    },
+    {
+      "name": "support_mask_guard",
+      "result": "pass",
+      "detail": "changing valid native rows between endpoints is rejected instead of silently pairing different particles"
+    },
+    {
+      "name": "sigkill_generation_resume",
+      "result": "pass",
+      "detail": "SIGKILL after immutable NPZ generation publication and before manifest replacement resumes from the prior manifest; resumed and continuous H5 histories match"
+    }
+  ],
+  "limitations": [
+    "The analytic tests validate interpolation and checkpoint semantics, not real F3 material reliability.",
+    "Interpolating native field arrays can still mix free-surface or near-wall branches; MLS support and reconstruction diagnostics remain uncalibrated.",
+    "The v3 canary has not been run on the 0.2 s real F3 source; the job proposal is not an execution receipt.",
+    "No original unknown gate, reconstruction gate, or qualification threshold was changed."
+  ],
+  "existing_provenance_used_for_design_only": {
+    "dense_matched_s4_root_verification": "root-owned completed diagnostic; not used as v3 output and not re-run",
+    "old_v1_v2_traces": "immutable paired baseline; no files overwritten"
+  },
+  "central_runtime_submission": false,
+  "central_ledger_mutation": false,
+  "gpu_started": false,
+  "solver_started": false
+}

@@ -1,0 +1,352 @@
+{
+  "binding": {
+    "backend": "f3_ckdtree_visible_shepard_distance_v1",
+    "code_sha256": "448ede1784f7ff624ee749d7bd085c0c0c50eacf72c79c7bf18233895f19b900",
+    "core_material_sha256": "bc68a3d37073b7941f0ba64d657cc63daad2ce6ea2becc966c4661a25afe1e24",
+    "error_estimator": "local_residual",
+    "f4_definition": {
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "destination_definition": {
+        "boundary_policy": "closed_box_membership",
+        "box_high_m": [
+          1.2,
+          0.4,
+          0.18
+        ],
+        "box_low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "box_size_m": [
+          1.2,
+          0.4,
+          0.18
+        ],
+        "destination_role": "resting basin liquid and post-contact destination volume",
+        "kind": "continuous_resting_pool_box",
+        "pool_free_surface_z_m": 0.18
+      },
+      "dp_m": 0.0075,
+      "event_definition": {
+        "contact": {
+          "definition": "first downward crossing from z>0.18 to z<=0.18 after t=0",
+          "direction": "downward",
+          "interface_plane_z_m": 0.18,
+          "requires_vertical_velocity_mps_lt": 0.0
+        },
+        "path_interpolation": "native support particle x/v are linearly interpolated only between the two registered reference frames; the independent tracer path is integrated by RK2 substeps",
+        "post_return_window": {
+          "completion_required": true,
+          "extension_policy": "one whole-scope doubling only when an event is right-censored; a source ending at 4.34 s cannot claim the 8.68 s extension",
+          "gravity_time_s": 0.3497487083913345,
+          "initial_horizon_s": 4.34,
+          "maximum_extended_horizon_s": 8.68
+        },
+        "residence": {
+          "box": "destination_definition",
+          "definition": "time in the continuous destination box after contact",
+          "right_censored_if_unresolved": true
+        },
+        "return": {
+          "definition": "first later downward crossing after upward from z>0.18 to z<=0.18",
+          "direction": "downward",
+          "interface_plane_z_m": 0.18,
+          "requires_vertical_velocity_mps_lt": 0.0
+        },
+        "unobserved_event_policy": "NaN/right-censored; no saved-chord imputation",
+        "upward_propagation": {
+          "definition": "first upward crossing after contact from z<=0.18 to z>0.18",
+          "direction": "upward",
+          "interface_plane_z_m": 0.18,
+          "requires_vertical_velocity_mps_gt": 0.0
+        }
+      },
+      "family_id": "F4",
+      "material_recipe_id": "F4_tallwall120_material_overlay_baseline24_v1",
+      "open_faces": [
+        "top"
+      ],
+      "provider_contract": {
+        "model": "must provide only current predicted x/v state and public parameters; no future CFD density/state",
+        "native_density_mls": false,
+        "reference": "may read only the two native support frames bracketing the current interval"
+      },
+      "q": 0.5,
+      "qualification_claim": "none",
+      "revision_id": "F4_tallwall120_material_baseline24_v1",
+      "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+      "seed_identity": "independent geometric seed-XXXXXX ids; never native particle_id",
+      "source_definition": {
+        "boundary_policy": "closed_box_membership",
+        "box_high_m": [
+          0.62,
+          0.28,
+          0.54
+        ],
+        "box_low_m": [
+          0.36,
+          0.12,
+          0.4
+        ],
+        "box_size_m": [
+          0.26,
+          0.16,
+          0.14
+        ],
+        "drop_left_x_m": 0.36,
+        "initial_velocity_mps": [
+          0.0,
+          0.0,
+          -0.5
+        ],
+        "kind": "continuous_drop_box",
+        "q": 0.5,
+        "source_role": "falling liquid drop, initial fluid box"
+      },
+      "source_labels": "continuous initial source-box membership; native Mk and particle_id are provenance only",
+      "source_recipe_id": "F4_mdbc_laminar_nu1e6_tallwall120_v1",
+      "stage": "qualification_only",
+      "wall_bounds_m": {
+        "xmax": 1.2,
+        "xmin": 0.0,
+        "ymax": 0.4,
+        "ymin": 0.0,
+        "zmax": 1.2,
+        "zmin": 0.0
+      }
+    },
+    "initial_sha256": "997f114d80829e05150f411c60184b8dc37642df78d622300097103e5fab973f",
+    "material_recipe_id": "F4_tallwall120_material_overlay_velocity_zoh_query_v1",
+    "maximum_support_distance_m": 0.03,
+    "neighbor_code_sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752",
+    "neighbour_variant": "baseline24",
+    "neighbours": 24,
+    "passive_code_sha256": "3c12744133176a20ca955e1b76e0a9b7c0f5e2ddda4fef75d77574fc201f9024",
+    "provider_role": "reference",
+    "regularization_m": 0.004,
+    "repair_candidate_id": "f4_native_velocity_zoh_query_v1",
+    "repair_implementation_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_reconstruction_gate_repair_v1.py",
+    "repair_implementation_sha256": "64ba80fd6979d3544e94c65d0e8724568541614d48c9506c161054fe53355031",
+    "revision_id": "F4_tallwall120_material_velocity_zoh_query_v1",
+    "schema": "core.material.f4.tallwall120.v1",
+    "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+    "source_case_scope": "F4_mdbc_laminar_nu1e6_tallwall120_v1",
+    "source_label_sha256": "1d83736463e8726afb974609e4aa415eb68577d8962e36307e22064fb13ed73c",
+    "source_semantics": "reference_native_saved_frames",
+    "source_sha256": "91846866c177e4c3036b7ef92c33a4e0bde7d9e8993efb01dde300811b7c096e",
+    "substeps": 2,
+    "support_gate": {
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "minimum_anisotropy": 0.005,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3
+    },
+    "temporal_interpolation": "linear_native_position_interval_start_velocity_zoh",
+    "tracer_id_sha256": "f8eab7bc5bf5f3421c3c23b4598d7ecace610c41f635c281e2b4e3a0d58f7e2e",
+    "walls_sha256": "3731e9d080508e875b766c9dacf6c458f7ef40833bb3554890c6e29bfa8280ce",
+    "weight_sha256": "c315fce8d802f7d0e401560972404f6fe9f6e659d9410110bf239e4ecdc852cc"
+  },
+  "by_source": [
+    {
+      "contact_cdf": {
+        "event_mass_fraction": 0.0,
+        "lower": [],
+        "mass_fraction": [],
+        "time_s": [],
+        "upper": []
+      },
+      "contact_fraction": 0.0,
+      "destination_mass_fraction": 0.0,
+      "final_unknown_fraction": 0.0,
+      "initial_mass_fraction": 1.0,
+      "mass_closure_error": 0.0,
+      "mass_closure_fraction": 1.0,
+      "outside_destination_mass_fraction": 1.0,
+      "reliable_path_coverage": 1.0,
+      "residence_cdf": {
+        "event_mass_fraction": 0.0,
+        "lower": [],
+        "mass_fraction": [],
+        "time_s": [],
+        "upper": []
+      },
+      "residence_mean_s": 0.0,
+      "return_cdf": {
+        "event_mass_fraction": 0.0,
+        "lower": [],
+        "mass_fraction": [],
+        "time_s": [],
+        "upper": []
+      },
+      "return_fraction": 0.0,
+      "right_censored_fraction": 1.0,
+      "source": 1,
+      "unknown_fraction": 0.0,
+      "unknown_fraction_max": 0.0,
+      "unknown_fraction_monotone": true,
+      "upward_cdf": {
+        "event_mass_fraction": 0.0,
+        "lower": [],
+        "mass_fraction": [],
+        "time_s": [],
+        "upper": []
+      },
+      "upward_fraction": 0.0
+    }
+  ],
+  "checkpoint_generation_dir": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-reconstruction-gate-interval-repair-canary-v1/candidate-replay-frame40-41.h5.checkpoints",
+  "checkpoint_manifest": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-reconstruction-gate-interval-repair-canary-v1/candidate-replay-frame40-41.h5.checkpoint.json",
+  "checkpoint_schema": "core.material.f4.tallwall120.checkpoint.v2",
+  "committed_frame": 41,
+  "committed_time_s": 0.1640080936314531,
+  "common_reliable_path_coverage": 1.0,
+  "elapsed_seconds": 16.085193359991536,
+  "event_window_complete": false,
+  "event_window_status": "right_censored_or_unresolved",
+  "mass_closed": true,
+  "material_recipe_id": "F4_tallwall120_material_overlay_baseline24_v1",
+  "material_reliability_status": "uncalibrated",
+  "max_rss_kib": 649476,
+  "native_frame_count": 1086,
+  "qualification_claim": "none",
+  "revision_id": "F4_tallwall120_material_baseline24_v1",
+  "schema": "core.material.f4.tallwall120.v1",
+  "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+  "source_definition": {
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "destination_definition": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "box_low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "box_size_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "destination_role": "resting basin liquid and post-contact destination volume",
+      "kind": "continuous_resting_pool_box",
+      "pool_free_surface_z_m": 0.18
+    },
+    "dp_m": 0.0075,
+    "event_definition": {
+      "contact": {
+        "definition": "first downward crossing from z>0.18 to z<=0.18 after t=0",
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "path_interpolation": "native support particle x/v are linearly interpolated only between the two registered reference frames; the independent tracer path is integrated by RK2 substeps",
+      "post_return_window": {
+        "completion_required": true,
+        "extension_policy": "one whole-scope doubling only when an event is right-censored; a source ending at 4.34 s cannot claim the 8.68 s extension",
+        "gravity_time_s": 0.3497487083913345,
+        "initial_horizon_s": 4.34,
+        "maximum_extended_horizon_s": 8.68
+      },
+      "residence": {
+        "box": "destination_definition",
+        "definition": "time in the continuous destination box after contact",
+        "right_censored_if_unresolved": true
+      },
+      "return": {
+        "definition": "first later downward crossing after upward from z>0.18 to z<=0.18",
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "unobserved_event_policy": "NaN/right-censored; no saved-chord imputation",
+      "upward_propagation": {
+        "definition": "first upward crossing after contact from z<=0.18 to z>0.18",
+        "direction": "upward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_gt": 0.0
+      }
+    },
+    "family_id": "F4",
+    "material_recipe_id": "F4_tallwall120_material_overlay_baseline24_v1",
+    "open_faces": [
+      "top"
+    ],
+    "provider_contract": {
+      "model": "must provide only current predicted x/v state and public parameters; no future CFD density/state",
+      "native_density_mls": false,
+      "reference": "may read only the two native support frames bracketing the current interval"
+    },
+    "q": 0.5,
+    "qualification_claim": "none",
+    "revision_id": "F4_tallwall120_material_baseline24_v1",
+    "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+    "seed_identity": "independent geometric seed-XXXXXX ids; never native particle_id",
+    "source_definition": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        0.62,
+        0.28,
+        0.54
+      ],
+      "box_low_m": [
+        0.36,
+        0.12,
+        0.4
+      ],
+      "box_size_m": [
+        0.26,
+        0.16,
+        0.14
+      ],
+      "drop_left_x_m": 0.36,
+      "initial_velocity_mps": [
+        0.0,
+        0.0,
+        -0.5
+      ],
+      "kind": "continuous_drop_box",
+      "q": 0.5,
+      "source_role": "falling liquid drop, initial fluid box"
+    },
+    "source_labels": "continuous initial source-box membership; native Mk and particle_id are provenance only",
+    "source_recipe_id": "F4_mdbc_laminar_nu1e6_tallwall120_v1",
+    "stage": "qualification_only",
+    "wall_bounds_m": {
+      "xmax": 1.2,
+      "xmin": 0.0,
+      "ymax": 0.4,
+      "ymin": 0.0,
+      "zmax": 1.2,
+      "zmin": 0.0
+    }
+  },
+  "status": "partial",
+  "task": "F4 tallwall120 continuous drop source to resting-pool events",
+  "unknown_fraction_monotone": true,
+  "unknown_gate_pass": true,
+  "wall_bounds_m": {
+    "xmax": 1.2,
+    "xmin": 0.0,
+    "ymax": 0.4,
+    "ymin": 0.0,
+    "zmax": 1.2,
+    "zmin": 0.0
+  }
+}

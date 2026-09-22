@@ -1,0 +1,193 @@
+{
+  "acceptance": {
+    "must_not_report_T2_qualification": true,
+    "must_preserve_mass_closure": true,
+    "must_preserve_source_hash_binding": true,
+    "must_report_event_window_status_right_censored": true,
+    "must_report_unknown_fraction_per_source": true
+  },
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_material.py",
+    "--family",
+    "f4",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-canary-001/20260919T172542-d49b17d63c4f/product/trajectory.h5",
+    "--output",
+    "{attempt_dir}/material.h5",
+    "--q",
+    "0.5",
+    "--seeds",
+    "512",
+    "--substeps",
+    "4",
+    "--neighbour-variant",
+    "baseline24",
+    "--dp-m",
+    "0.0075"
+  ],
+  "canary_control": {
+    "acceptance": "report unknown fraction, first-failure frame/time, support gate component counts, and mass closure; do not infer T2",
+    "control_id": "F4_material_integration_substeps4",
+    "observed_cpu_reference": {
+      "substeps1_unknown_fraction": 0.869140625,
+      "substeps2_unknown_fraction": 0.84765625,
+      "substeps4_unknown_fraction": 0.83984375
+    },
+    "parent_job_id": "core-f4-material-resting-pool-canary-s2",
+    "purpose": "test saved-frame integration cadence after observed reconstruction failures; no gate/threshold change"
+  },
+  "category": "material_f4_integration_control_canary",
+  "central_ledger_mutation": 0,
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "depends_on": [],
+  "event_policy": {
+    "canary_horizon_source": "prepared.json horizon (3.84/7.68), retained exactly for this interface canary",
+    "contact": "first downward crossing z=0.18 after t=0",
+    "initial_horizon_s": 3.84,
+    "maximum_extended_horizon_s": 7.68,
+    "post_return_gravity_time_s": 0.3497487083913345,
+    "qualification_claim": "forbidden for this .3 s source",
+    "registered_scope_initial_horizon_s": 4.34,
+    "registered_scope_maximum_extended_horizon_s": 8.68,
+    "residence": "continuous destination-box time after contact",
+    "return": "first later downward crossing z=0.18 after upward",
+    "unobserved_event_policy": "NaN/right-censored; never impute from a saved-frame chord or synthetic output",
+    "upward": "first later upward crossing z=0.18"
+  },
+  "family": "F4",
+  "gpu_started": false,
+  "host": "ada",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-canary-001/20260919T172542-d49b17d63c4f/product/trajectory.h5",
+      "role": "real_native_f4_canary_trajectory",
+      "sha256": "892583601f507a2f66977a337718e29e108196aa3d6e83c8a9c3d59d634b6be6"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_medium_canary/prepared.json",
+      "role": "prepared_source_definition",
+      "sha256": "170aa5facc7f1d08688a3f7ef01af45cbc4226cc660aa91a4e89f74c03893abd"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_material.py",
+      "role": "material_tracer_corrected_dp_binding",
+      "sha256": "1a15cf8ad0927f00ba44f72f9e85f167852d1dc8eb49807b057509ed516337dd"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_material_neighbors.py",
+      "role": "support_backend",
+      "sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/passive_tracers.py",
+      "role": "wall_and_gate_helpers",
+      "sha256": "0301b797ddf472d8e37a835cb97036ba13b4cde8c1832838edfed06da20860cc"
+    }
+  ],
+  "job_id": "core-f4-material-resting-pool-canary-s2-integration4",
+  "logical_id": "CORE-F4-MATERIAL-RESTING-POOL-CANARY-s2-INTEGRATION4",
+  "material_backend": {
+    "backend": "f3_ckdtree_visible_shepard_distance_v1",
+    "integration_control": "fixed baseline24/shepard/gate; only saved-frame RK2 substep count changes from 2 to 4",
+    "maximum_support_distance_m": 0.03,
+    "neighbour_variant": "baseline24",
+    "neighbours": 24,
+    "regularization_m": 0.004,
+    "seed_identity": "independent geometric seed ids; never native particle_id",
+    "substeps": 4,
+    "unknown_gate_fraction_max": 0.01,
+    "weighting": "1/(distance_squared+regularization_squared)"
+  },
+  "qualification_claim": "none; CPU integration control only; event window right-censored",
+  "required_outputs": [
+    "material.h5",
+    "material.json",
+    "material.h5.checkpoint.npz",
+    "material.h5.checkpoint.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "gpu_peak_mib": 0,
+    "io_weight": 0.1,
+    "ram_mib": 8192
+  },
+  "revision_id": "F4_resting_pool_13plus2_v2",
+  "schema": "core.material.job.v1",
+  "scope_id": "F4_drop_resting_pool_x_v2",
+  "source_definition": {
+    "canary_window_s": 0.3,
+    "case_id": "F4_RESTING_POOL_CENTER_MEDIUM_CANARY",
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "destination_region": {
+      "high_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "interface_z_m": 0.18,
+      "kind": "continuous_resting_pool_box",
+      "low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size_m": [
+        1.2,
+        0.4,
+        0.18
+      ]
+    },
+    "dp_m": 0.0075,
+    "lineage_group_id": "F4_resting_pool_q0.5",
+    "material_recipe_id": "F4_resting_pool_mdbc_native_v2",
+    "native_output_interval_s": 0.02,
+    "open_faces": [
+      "top"
+    ],
+    "physical_case_id": "F4_resting_pool_q0.5",
+    "q": 0.5,
+    "source_recipe_id": "CORE_F4_mdbc_native_cell_center_v1",
+    "source_region": {
+      "high_m": [
+        0.62,
+        0.28,
+        0.54
+      ],
+      "initial_velocity_mps": [
+        0.0,
+        0.0,
+        -0.5
+      ],
+      "kind": "continuous_drop_box",
+      "label_policy": "continuous membership; native Mk and particle_id are provenance only",
+      "low_m": [
+        0.36,
+        0.12,
+        0.4
+      ],
+      "q": 0.5,
+      "size_m": [
+        0.26,
+        0.16,
+        0.14
+      ]
+    },
+    "wall_bounds_m": {
+      "xmax": 1.2,
+      "xmin": 0.0,
+      "ymax": 0.4,
+      "ymin": 0.0,
+      "zmax": 0.6,
+      "zmin": 0.0
+    }
+  },
+  "stage": "qualification_only",
+  "timeout_seconds": 3600
+}

@@ -1,0 +1,289 @@
+{
+  "backend": {
+    "evaluator": "f3_native_volume_mls_shared_current_model_rho0_v1",
+    "mls_runner_sha256": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395",
+    "model_material_module_sha256": "d3b98a5bd1110b1d1ffe7377e36251ce372f6151468bdd254646f5d4c6d71f1b",
+    "shared_adapter_sha256": "2e46b82d20542d39156014cdc16167838b5cd1b3fbe0f5e9f566e59d7a2359fb",
+    "shared_field_backend": "f3_native_volume_mls_wendland_mass_density_shared_current_v1"
+  },
+  "created_at_utc": "2026-09-19T18:31:04.590044+00:00",
+  "density_policy": {
+    "model_state_density": "broadcast from public rho0 over each current predicted State",
+    "native_density_qualification": false,
+    "reference_density": "native reference density replaced by the same rho0 control",
+    "rho0_kgm3": 1000.0,
+    "strategy": "rho0_constant_public_current_state_v1"
+  },
+  "execution": {
+    "central_ledger_written": false,
+    "gpu_started": false,
+    "limitations": [
+      "4 independent seeds near x=0, 20 saved intervals (0.2 s), one RK substep per interval",
+      "rho0 constant is a model density estimate, not native CFD density",
+      "support reliability is numerical MLS support only; no material error budget or T2 qualification"
+    ],
+    "model_resource": {
+      "cpu_seconds": 10.912128,
+      "elapsed_seconds": 9.352106097037904,
+      "loaded_frame_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "peak_rss_kib": 951328,
+      "stage_failure_counts": {
+        "reliable": 320
+      }
+    },
+    "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+    "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+    "reference_resource": {
+      "cpu_seconds": 3.673568,
+      "elapsed_seconds": 2.2717160750180483,
+      "loaded_frame_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "peak_rss_kib": 642348,
+      "stage_failure_counts": {
+        "reliable": 320
+      }
+    },
+    "thread_environment": {
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "inputs": {
+    "model": {
+      "future_state_inputs": false,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-bundled-rollout-graph_raw-step500-v3/20260919T181936-77badf536514/trajectory.h5",
+      "role": "predicted_model_rollout",
+      "sha256": "514685307ab4f213f58e1c67813303b7524d9de52653a25b675f304e3a468dbb",
+      "state_schema": "core.state.native_velocity.v1"
+    },
+    "reference": {
+      "future_state_inputs": false,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+      "role": "reference_control_rho0",
+      "sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4"
+    },
+    "same_seed_hash": "f59c568af93ff60b0d5f02d67f771313117a9c1373b5a7e8d119766df79cd295",
+    "same_time_window": {
+      "frames": 21,
+      "intervals": 20,
+      "substeps_per_saved_interval": 1,
+      "time_end_s": 0.2,
+      "time_start_s": 0.0
+    },
+    "seed_count": 4
+  },
+  "material_reliability": "not_established",
+  "metrics": {
+    "endpoint_model_minus_reference": {
+      "max_m": 0.00584464337855977,
+      "per_seed_m": [
+        0.004332435690002887,
+        0.00497457497588482,
+        0.005131248132463429,
+        0.00584464337855977
+      ],
+      "rms_m": 0.005099165589048914
+    },
+    "model_common_reliable_path_fraction": 1.0,
+    "model_source_rows": [
+      {
+        "common_reliable_path_fraction": 1.0,
+        "first_failure_frame": null,
+        "first_failure_time_s": null,
+        "first_passage_time_quantiles_s": {
+          "count": 2,
+          "p50": 0.089669352972869,
+          "p90": 0.1052203930299466,
+          "p95": 0.10716427303708129,
+          "p99": 0.10871937704278906
+        },
+        "initial_mass_fraction": 0.5,
+        "observed_first_passage_fraction": 1.0,
+        "observed_return_fraction": 0.0,
+        "residence_censored_fraction": 0.0,
+        "residence_opposite_quantiles_s_lower_bound": {
+          "count": 2,
+          "p50": 0.1103419493957252,
+          "p90": 0.12589298945280278,
+          "p95": 0.1278368694599375,
+          "p99": 0.12939197346564524
+        },
+        "return_time_quantiles_s": {
+          "count": 0,
+          "p50": null,
+          "p90": null,
+          "p95": null,
+          "p99": null
+        },
+        "seed_count": 2,
+        "source": 0,
+        "unknown_fraction_final": 0.0
+      },
+      {
+        "common_reliable_path_fraction": 1.0,
+        "first_failure_frame": null,
+        "first_failure_time_s": null,
+        "first_passage_time_quantiles_s": {
+          "count": 0,
+          "p50": null,
+          "p90": null,
+          "p95": null,
+          "p99": null
+        },
+        "initial_mass_fraction": 0.5,
+        "observed_first_passage_fraction": 0.0,
+        "observed_return_fraction": 0.0,
+        "residence_censored_fraction": 0.0,
+        "residence_opposite_quantiles_s_lower_bound": {
+          "count": 2,
+          "p50": 0.0,
+          "p90": 0.0,
+          "p95": 0.0,
+          "p99": 0.0
+        },
+        "return_time_quantiles_s": {
+          "count": 0,
+          "p50": null,
+          "p90": null,
+          "p95": null,
+          "p99": null
+        },
+        "seed_count": 2,
+        "source": 1,
+        "unknown_fraction_final": 0.0
+      }
+    ],
+    "model_unknown_fraction_final": 0.0,
+    "reference_common_reliable_path_fraction": 1.0,
+    "reference_source_rows": [
+      {
+        "common_reliable_path_fraction": 1.0,
+        "first_failure_frame": null,
+        "first_failure_time_s": null,
+        "first_passage_time_quantiles_s": {
+          "count": 0,
+          "p50": null,
+          "p90": null,
+          "p95": null,
+          "p99": null
+        },
+        "initial_mass_fraction": 0.5,
+        "observed_first_passage_fraction": 0.0,
+        "observed_return_fraction": 0.0,
+        "residence_censored_fraction": 0.0,
+        "residence_opposite_quantiles_s_lower_bound": {
+          "count": 2,
+          "p50": 0.0,
+          "p90": 0.0,
+          "p95": 0.0,
+          "p99": 0.0
+        },
+        "return_time_quantiles_s": {
+          "count": 0,
+          "p50": null,
+          "p90": null,
+          "p95": null,
+          "p99": null
+        },
+        "seed_count": 2,
+        "source": 0,
+        "unknown_fraction_final": 0.0
+      },
+      {
+        "common_reliable_path_fraction": 1.0,
+        "first_failure_frame": null,
+        "first_failure_time_s": null,
+        "first_passage_time_quantiles_s": {
+          "count": 0,
+          "p50": null,
+          "p90": null,
+          "p95": null,
+          "p99": null
+        },
+        "initial_mass_fraction": 0.5,
+        "observed_first_passage_fraction": 0.0,
+        "observed_return_fraction": 0.0,
+        "residence_censored_fraction": 0.0,
+        "residence_opposite_quantiles_s_lower_bound": {
+          "count": 2,
+          "p50": 0.0,
+          "p90": 0.0,
+          "p95": 0.0,
+          "p99": 0.0
+        },
+        "return_time_quantiles_s": {
+          "count": 0,
+          "p50": null,
+          "p90": null,
+          "p95": null,
+          "p99": null
+        },
+        "seed_count": 2,
+        "source": 1,
+        "unknown_fraction_final": 0.0
+      }
+    ],
+    "reference_unknown_fraction_final": 0.0
+  },
+  "outputs": {
+    "model": {
+      "report": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/model-result.json",
+      "report_sha256": "6bb2dd83af6ed34a1231225d33c5e41c2f336328180ae283cebac4f22c48984e",
+      "sha256": "0ac72a8b5c238e7f0737ffcad28c859cb618bd1488e9f349857e0820ff49b5d9",
+      "trace_h5": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/model-trace.h5"
+    },
+    "reference_control": {
+      "report": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/reference-control-result.json",
+      "report_sha256": "606d992281ee7b61ce4ba2aa801cf1f1e733a8c112212ac0b1bf8bc923923a58",
+      "sha256": "0086557e5a7395c5f556c11494c49058aa0a89e3b68cfefabfa2181b0a33b389",
+      "trace_h5": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/reference-control-trace.h5"
+    }
+  },
+  "purpose": "small causal model rollout versus same-backend same-rho0 reference control; diagnostic only",
+  "qualification_claim": "none",
+  "schema": "core.material.f3.native_volume_mls.model_material_comparison.v1",
+  "status": "completed"
+}

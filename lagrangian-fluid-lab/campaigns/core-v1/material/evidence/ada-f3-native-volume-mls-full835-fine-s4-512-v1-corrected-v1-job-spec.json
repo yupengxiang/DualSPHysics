@@ -1,0 +1,104 @@
+{
+  "argv": [
+    "/usr/bin/python3.10",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/81ba36735f05ddf7b5a1f1568ed91ec3c861e84b1617b35f26da74648f99efe1/lagrangian-fluid-lab/scripts/f3_native_volume_mls.py",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen.h5",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen-PREPARED.json",
+    "--output",
+    "{attempt_dir}/trace.h5",
+    "--audit-output",
+    "{attempt_dir}/source-preflight.json",
+    "--seeds",
+    "512",
+    "--substeps",
+    "4",
+    "--stop-after",
+    "835"
+  ],
+  "attempt_role": "initial",
+  "category": "material_diagnostic",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "deduplication": "production nominal rows 02/03 are already running; this spec covers coarse/fine rows only",
+  "depends_on": [],
+  "env": {
+    "PYTHONPATH": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/81ba36735f05ddf7b5a1f1568ed91ec3c861e84b1617b35f26da74648f99efe1/lagrangian-fluid-lab:/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/81ba36735f05ddf7b5a1f1568ed91ec3c861e84b1617b35f26da74648f99efe1/lagrangian-fluid-lab/scripts"
+  },
+  "host": "ada",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen.h5",
+      "sha256": "42f527b645017058de18cbdeb54687b728c9082bdd9513b2e4c577c3475f49f0"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen-PREPARED.json",
+      "sha256": "c2e632c41e0decacb2ef81342ab4fe120556930ac1aced898871d72b6ac0951c"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p006_Def.xml",
+      "sha256": "417451910735d92de9f27f00a5e04f3d3e002da2eca30bd439470425d53334f5",
+      "superseded_sha256": "cb2e2fc48c46a856f772b6ad85d05fd6c1d0751646ac07e9c0ea6b4cc1d2e012"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-q-control-binding-root-v1.json",
+      "sha256": "bf146309ed5df5a4806a44e6a7a9c2a217e82f13a97f6bac15780fcec3fed3da"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/81ba36735f05ddf7b5a1f1568ed91ec3c861e84b1617b35f26da74648f99efe1/lagrangian-fluid-lab/scripts/f3_native_volume_mls.py",
+      "sha256": "e1c5fc39e73781d386c7da2874c1749b5223c8209eaf8f25bb4453346df51ff9"
+    }
+  ],
+  "job_id": "ada-f3-native-volume-mls-full835-fine-s4-512-v1",
+  "logical_id": "f3-native-volume-mls-full835-fine-s4-512-v1",
+  "matrix_binding": {
+    "cadence": "native",
+    "configuration_id": "F3-material-05",
+    "control_binding_path": "campaigns/core-v1/material/evidence/f3-q-control-binding-root-v1.json",
+    "dp_role": "fine",
+    "drive_amplitude": 1.0,
+    "matrix_index": 5,
+    "q": 0.5,
+    "q_definition": "(drive_amplitude-0.9)/0.2",
+    "scope": "F3",
+    "seeds": 512,
+    "source_asset_id": "f3_fine_amp1p0_native010",
+    "source_policy": "fixed seeds_f3 and continuous x<0/x>=0 source labels",
+    "substeps": 4
+  },
+  "no_side_effects": {
+    "gpu_launch": false,
+    "ledger_write": false,
+    "solver_launch": false
+  },
+  "proposal": {
+    "path": "campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-full-nominal-coarse-fine-s2-s4-job-specs-corrected-v1-20260919.json"
+  },
+  "qualification_claim": "none; engineering native MLS diagnostic only",
+  "required_outputs": [
+    "trace.h5",
+    "trace.summary.json",
+    "source-preflight.json",
+    "trace.h5.checkpoint.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "gpu_peak_mib": 0,
+    "io_weight": 0.25,
+    "ram_mib": 4096
+  },
+  "resume_policy": "resume the same attempt from immutable checkpoint generations; do not restart under a new scientific configuration",
+  "schema": "core.runtime.job_spec.v1",
+  "source_snapshot": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/81ba36735f05ddf7b5a1f1568ed91ec3c861e84b1617b35f26da74648f99efe1/lagrangian-fluid-lab",
+    "sha256": "81ba36735f05ddf7b5a1f1568ed91ec3c861e84b1617b35f26da74648f99efe1"
+  },
+  "status": "ready_for_root_queue",
+  "timeout_seconds": 5400,
+  "amendment_only": {
+    "amends": "campaigns/core-v1/material/evidence/ada-f3-native-volume-mls-full835-fine-s4-512-v1-job-spec.json",
+    "previous_sha256": "4a0fcfbc9880aadd0e6d3f4f6e4ec46cd016def97e7eab03e9169f72e6d72476",
+    "reason": "Correct candidate_definition _Def.xml input hash; no scientific or runner change.",
+    "do_not_submit_duplicate": true
+  }
+}

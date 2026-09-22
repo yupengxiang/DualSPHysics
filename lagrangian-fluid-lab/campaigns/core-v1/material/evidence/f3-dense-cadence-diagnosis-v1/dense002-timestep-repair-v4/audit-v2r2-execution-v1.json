@@ -1,0 +1,63 @@
+{
+  "active_h5_read": false,
+  "artifacts": [
+    {
+      "bytes": 41691,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f3_cfd_source_dtmin_repair_v1.py",
+      "sha256": "0a826d91382416121e7d287baed55d5467f00fc142b91bccd12bb5104a53c956"
+    },
+    {
+      "bytes": 30986,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f3_cfd_source_audit_v2.py",
+      "sha256": "bf84f3db8b2233d6bccd127a85cec45098fb941a0fa1b54f2213f28216650ffe"
+    },
+    {
+      "bytes": 13977,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/finite_wall_audit.py",
+      "sha256": "41a4bae8e21d4e1d78205199389bb60d1cc265e2574065e5ee08f6763172a70c"
+    },
+    {
+      "bytes": 2592,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f3_dense002_source_audit_v2_binding_v1.py",
+      "sha256": "2de265b3ab1edb11eb167fb03ec5dbd59be9d0b25471d7a48f401295ca37134d"
+    },
+    {
+      "bytes": 9595,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/prepared-v3/f3_production_amp1p1_native002_dtminrepair_auditv2r2/prepared.json",
+      "sha256": "e6c034342a93d6db3634f8c4f8128ff745b1a0370cda9f3a046b647ffe165e28"
+    },
+    {
+      "bytes": 8338,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/jobs-v3/f3_production_amp1p1_native002_dtminrepair_auditv2r2_full835_v1.json",
+      "sha256": "ccc688cc9ece0a3c767dbcd7893af9344e494bbe70bc297f7665c8235d086af3"
+    },
+    {
+      "bytes": 9411,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-dense-cadence-diagnosis-v1/dense002-timestep-repair-v4/audit-v2r2-freeze-package-v1.json",
+      "sha256": "5dbd6c6303584ddd902322f28c62f7abe6a1eb8365156d0a29311eec91912509"
+    }
+  ],
+  "central_ledger_mutation": 0,
+  "commands": [
+    ".venv/bin/python scripts/core_f3_cfd_source_dtmin_repair_v1.py --lab-root . prepare --case f3_production_amp1p1_native002_dtminrepair_auditv2r2 --output campaigns/core-v1/cfd/f3-native-mls-sources/prepared-v3/f3_production_amp1p1_native002_dtminrepair_auditv2r2",
+    ".venv/bin/python scripts/core_f3_cfd_source_dtmin_repair_v1.py --lab-root . make-job --prepared .../prepared.json --output .../auditv2r2_full835_v1.json --job-id cfd-f3-production-amp1p1-native002-dtminrepair-auditv2r2-full835-v1 --host h200",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 .venv/bin/pytest -q tests/test_f3_dense002_source_audit_v2_binding_v1.py tests/test_f3_dense002_source_audit_v2_binding.py tests/test_f3_dense002_timestep_repair_static.py tests/test_core_runtime.py",
+    ".venv/bin/python -c validate_prepared_and_core_runtime_validate_spec"
+  ],
+  "created_at_utc": "2026-09-19T22:59:16.837752+00:00",
+  "execution_kind": "cpu_prepare_make_job_validate_and_targeted_tests",
+  "gpu_started": false,
+  "resources": {
+    "cpu_cores": 2,
+    "gpu_peak_mib": 8192,
+    "host": "h200",
+    "ram_mib": 8192,
+    "timeout_seconds": 21600
+  },
+  "schema": "core.material.f3.dense002_timestep_repair.audit_v2_execution.v1",
+  "solver_started": false,
+  "static_only_note": "No GenCase or solver invocation occurred; this receipt covers metadata preparation and tests only.",
+  "status": "completed_no_launch",
+  "test_result": "31 passed in 2.78s",
+  "validation_result": "prepared_validation=pass; spec_validation=pass; all 14 input hashes match; py_compile=pass"
+}

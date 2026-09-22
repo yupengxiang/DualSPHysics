@@ -1,0 +1,1818 @@
+{
+  "blocking_reasons": [
+    "per-source unknown mass exceeds the fixed 1% gate in retained F3/F4 cases",
+    "F3 cross-scope first-passage/return/residence CDF bounds exceed 0.02",
+    "retained F4 material cases end in a right-censored or unresolved event window",
+    "independent material calibration and acceptance record remain absent; this audit cannot create T2 credit"
+  ],
+  "created_at_utc": "2026-09-20T08:35:31.071772+00:00",
+  "denominators": {
+    "f3_rows": 2,
+    "f3_seed_count_per_row": {
+      "29": 4096,
+      "31": 4096
+    },
+    "f4_case_seed_denominators": {
+      "f4_native_dense_pair_s2_s4::f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5-material": 512,
+      "f4_native_dense_pair_s2_s4::f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5-material": 512,
+      "f4_real_material_baseline_s2::f4-real-material-canary-result": 512,
+      "f4_repair_canaries_ess32_and_affine_bound::f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5-result": 512,
+      "f4_repair_canaries_ess32_and_affine_bound::f4-material-repair-ess32-v2-canary-s0p3-center-q0p5-result": 512,
+      "f4_tallwall120_short_canary": 512
+    },
+    "f4_cases": 6,
+    "f4_source_denominator_policy": "each retained result is one case; every declared source keeps all geometric seeds in its denominator"
+  },
+  "execution_constraints": {
+    "central_ledger_mutation": 0,
+    "cpu_only": true,
+    "existing_scores_modified": false,
+    "gpu_started_by_audit": false,
+    "new_job_submitted": false,
+    "registry_mutation": 0,
+    "solver_started_by_audit": false,
+    "terminal_h5_read_only": true
+  },
+  "f3": {
+    "cdf_gate": {
+      "by_source": {
+        "0": {
+          "bounds": {
+            "first_passage": 0.0537109375,
+            "residence": 0.06103515625,
+            "return": 0.05029296875
+          },
+          "denominator_policy": "all geometric seeds remain in every source CDF denominator",
+          "maximum": 0.06103515625,
+          "pass": false
+        },
+        "1": {
+          "bounds": {
+            "first_passage": 0.06005859375,
+            "residence": 0.06005859375,
+            "return": 0.06005859375
+          },
+          "denominator_policy": "all geometric seeds remain in every source CDF denominator",
+          "maximum": 0.06005859375,
+          "pass": false
+        }
+      },
+      "diagnostic_only": true,
+      "limit": 0.02,
+      "pass": false
+    },
+    "comparison_evidence": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-adapter-rows29-31-terminal-comparison-20260920.json",
+    "negative_evidence": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-adapter-rows29-31-terminal-negative-result-20260920.json",
+    "qualification_claim": "none",
+    "rows": [
+      {
+        "case_id": "F3_REV075_MATERIAL-AMP0P95-0075",
+        "cdf_comparison": {
+          "0": {
+            "bounds": {
+              "first_passage": 0.0537109375,
+              "residence": 0.06103515625,
+              "return": 0.05029296875
+            },
+            "denominator_policy": "all geometric seeds remain in every source CDF denominator",
+            "maximum": 0.06103515625,
+            "pass": false
+          },
+          "1": {
+            "bounds": {
+              "first_passage": 0.06005859375,
+              "residence": 0.06005859375,
+              "return": 0.06005859375
+            },
+            "denominator_policy": "all geometric seeds remain in every source CDF denominator",
+            "maximum": 0.06005859375,
+            "pass": false
+          }
+        },
+        "failure_classification": [
+          "unknown_mass_over_1_percent",
+          "cdf_sup_difference_over_0.02"
+        ],
+        "qualification_credit": "none",
+        "row": 29,
+        "source_audit": {
+          "cadence": {
+            "cadence_pass": true,
+            "cadence_tolerance_s": 0.0001,
+            "exact_error_alert_2e-5_s": true,
+            "frame_count": 836,
+            "interpretation": "The one-percent saved-output bound is the structural cadence check; the exact timestamp error is retained as a diagnostic and is not a new qualification threshold.",
+            "interval_max_s": 0.010021581680887515,
+            "interval_median_s": 0.009999458984018439,
+            "interval_min_s": 0.00999945898381771,
+            "max_abs_timestamp_error_s": 2.2084453489945588e-05,
+            "nominal_interval_s": 0.01,
+            "time_end_s": 8.350012828223477,
+            "time_finite": true,
+            "time_monotone": true,
+            "time_start_s": 0.0
+          },
+          "datasets": {
+            "density": [
+              836,
+              34560
+            ],
+            "mass": [
+              836,
+              34560
+            ],
+            "mk": [
+              836,
+              34560
+            ],
+            "particle_id": [
+              34560
+            ],
+            "particle_zone": [
+              34560
+            ],
+            "position": [
+              836,
+              34560,
+              3
+            ],
+            "pressure": [
+              836,
+              34560
+            ],
+            "source_label_initial_mk": [
+              34560
+            ],
+            "time": [
+              836
+            ],
+            "type": [
+              836,
+              34560
+            ],
+            "valid": [
+              836,
+              34560
+            ],
+            "velocity": [
+              836,
+              34560,
+              3
+            ]
+          },
+          "errors": [],
+          "finite_active_counts": {
+            "density": 0,
+            "mass": 0,
+            "position": 0,
+            "pressure": 0,
+            "velocity": 0
+          },
+          "frames_scanned": 836,
+          "hash": {
+            "exists": true,
+            "expected_sha256": "841cfb103ff3c27d827a000f99814fe6593fc6ca3f6dc5e97854359db957d620",
+            "pass": true,
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/cfd-f3_production_amp0p95_native010-v1/20260920T035702-dc9c237466a0/product/trajectory.h5",
+            "sha256": "841cfb103ff3c27d827a000f99814fe6593fc6ca3f6dc5e97854359db957d620"
+          },
+          "integrity_pass": true,
+          "mass": {
+            "bad_frame_count": 0,
+            "mass_closure_pass": true,
+            "max_abs_frame_error_kg": 0.0,
+            "max_error_frame": null,
+            "max_relative_frame_error": 0.0,
+            "nonfinite_active_mass_count": 0,
+            "nonpositive_active_mass_count": 0,
+            "reference_mass_kg": 14.580000378191471,
+            "relative_tolerance": 1e-08
+          },
+          "particle_count": 34560,
+          "particle_ids_unique": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/cfd-f3_production_amp0p95_native010-v1/20260920T035702-dc9c237466a0/product/trajectory.h5",
+          "qualification_claim": "none",
+          "role": "F3_native_source"
+        },
+        "source_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/cfd-f3_production_amp0p95_native010-v1/20260920T035702-dc9c237466a0/product/trajectory.h5",
+        "trace_audit": {
+          "attrs": {
+            "committed": 835,
+            "schema": "core.material.f3.native_volume_mls.trace.v2",
+            "trace_backend": "f3_native_volume_mls_current_frame_rk4_v2"
+          },
+          "binding_schema": "core.material.f3.native_volume_mls.trace.v2",
+          "cadence": {
+            "cadence_pass": true,
+            "cadence_tolerance_s": 0.0001,
+            "exact_error_alert_2e-5_s": true,
+            "frame_count": 836,
+            "interpretation": "The one-percent saved-output bound is the structural cadence check; the exact timestamp error is retained as a diagnostic and is not a new qualification threshold.",
+            "interval_max_s": 0.010021581680887515,
+            "interval_median_s": 0.009999458984018439,
+            "interval_min_s": 0.00999945898381771,
+            "max_abs_timestamp_error_s": 2.2084453489945588e-05,
+            "nominal_interval_s": 0.01,
+            "time_end_s": 8.350012828223477,
+            "time_finite": true,
+            "time_monotone": true,
+            "time_start_s": 0.0
+          },
+          "checkpoint": {
+            "committed_frame": 835,
+            "errors": [],
+            "file_hash": {
+              "exists": true,
+              "expected_sha256": "fe6b96e55fa4cd3a934bcd3acb3d0b48c0cee8a3c09e3faf18c3f5f170a1baaa",
+              "pass": true,
+              "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row29-v1/20260920T050202-38d126b5519a/product/f3_material_adapter_row29_trace.h5.checkpoint.00000835.a6f8fc0fe65c792bf2068b8e.npz",
+              "sha256": "fe6b96e55fa4cd3a934bcd3acb3d0b48c0cee8a3c09e3faf18c3f5f170a1baaa"
+            },
+            "file_hash_pass": true,
+            "file_sha256": "fe6b96e55fa4cd3a934bcd3acb3d0b48c0cee8a3c09e3faf18c3f5f170a1baaa",
+            "generation_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row29-v1/20260920T050202-38d126b5519a/product/f3_material_adapter_row29_trace.h5.checkpoint.00000835.a6f8fc0fe65c792bf2068b8e.npz",
+            "manifest_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row29-v1/20260920T050202-38d126b5519a/product/f3_material_adapter_row29_trace.h5.checkpoint.json",
+            "pass": true,
+            "schema": "core.material.f3.native_volume_mls.checkpoint.v2",
+            "semantic_state_sha256": "a6f8fc0fe65c792bf2068b8eb4255bf3c2131d77c21861e0bcd89b23bc18afe8",
+            "state_hash": {
+              "exists": true,
+              "expected_sha256": "a6f8fc0fe65c792bf2068b8eb4255bf3c2131d77c21861e0bcd89b23bc18afe8",
+              "kind": "semantic_fields_hash",
+              "pass": true,
+              "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row29-v1/20260920T050202-38d126b5519a/product/f3_material_adapter_row29_trace.h5.checkpoint.00000835.a6f8fc0fe65c792bf2068b8e.npz",
+              "sha256": "a6f8fc0fe65c792bf2068b8eb4255bf3c2131d77c21861e0bcd89b23bc18afe8"
+            },
+            "state_hash_pass": true,
+            "state_sha256": "a6f8fc0fe65c792bf2068b8eb4255bf3c2131d77c21861e0bcd89b23bc18afe8"
+          },
+          "datasets": {
+            "anisotropy": [
+              836,
+              4096
+            ],
+            "candidate_count": [
+              836,
+              4096
+            ],
+            "candidate_support_pass": [
+              836,
+              4096
+            ],
+            "condition_number": [
+              836,
+              4096
+            ],
+            "effective_sample_size": [
+              836,
+              4096
+            ],
+            "failure_reason": [
+              836,
+              4096
+            ],
+            "first_passage": [
+              836,
+              4096
+            ],
+            "geometry_rank": [
+              836,
+              4096
+            ],
+            "initial_position": [
+              4096,
+              3
+            ],
+            "native_mass_kg": [
+              836
+            ],
+            "old_gate_pass": [
+              836,
+              4096
+            ],
+            "permanent_unknown": [
+              836,
+              4096
+            ],
+            "position": [
+              836,
+              4096,
+              3
+            ],
+            "reconstruction_error_mps": [
+              836,
+              4096
+            ],
+            "reliable": [
+              836,
+              4096
+            ],
+            "residence_opposite": [
+              836,
+              4096
+            ],
+            "return_time": [
+              836,
+              4096
+            ],
+            "returned": [
+              836,
+              4096
+            ],
+            "seed_mass_closure_error": [
+              836
+            ],
+            "source_label": [
+              4096
+            ],
+            "support_count": [
+              836,
+              4096
+            ],
+            "time": [
+              836
+            ],
+            "tracer_id": [
+              4096
+            ],
+            "wall_rejected_count": [
+              836,
+              4096
+            ]
+          },
+          "errors": [],
+          "frames": 836,
+          "hash": {
+            "exists": true,
+            "expected_sha256": "c1de25a835ac5150b8a51529e4ac11ce34b74a4b79dc487943414563c7edc3df",
+            "pass": true,
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row29-v1/20260920T050202-38d126b5519a/product/f3_material_adapter_row29_trace.h5",
+            "sha256": "c1de25a835ac5150b8a51529e4ac11ce34b74a4b79dc487943414563c7edc3df"
+          },
+          "integrity_pass": true,
+          "native_mass_match": {
+            "max_abs_error_kg": 0.0,
+            "pass": true
+          },
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row29-v1/20260920T050202-38d126b5519a/product/f3_material_adapter_row29_trace.h5",
+          "qualification_claim": "none",
+          "reader_contract": {
+            "backend_present": true,
+            "current_frame_only": true,
+            "future_state_forbidden": true,
+            "native_frame_identity": true,
+            "qualification_claim_none": true
+          },
+          "reader_reconstruction_pass": true,
+          "role": "F3_material_trace",
+          "seed_count": 4096,
+          "seed_mass_closure": {
+            "max_abs_error": 0.0,
+            "pass": true
+          },
+          "source_hash_expected": "841cfb103ff3c27d827a000f99814fe6593fc6ca3f6dc5e97854359db957d620",
+          "source_hash_pass": true,
+          "source_ids": [
+            "0",
+            "1"
+          ],
+          "source_rows": [
+            {
+              "denominator_policy": "all geometric seeds carrying this source label",
+              "first_failure_frame": 456,
+              "first_failure_reason_counts": {
+                "low_effective_sample_size": 1,
+                "wall_occluded": 24
+              },
+              "first_failure_time_s": 4.560018769008347,
+              "initial_mass_fraction": 0.5,
+              "seed_denominator": 2048,
+              "source_id": "0",
+              "terminal_reliable_fraction": 0.98779296875,
+              "terminal_unknown_count": 25,
+              "terminal_unknown_fraction": 0.01220703125,
+              "unknown_gate_pass": false
+            },
+            {
+              "denominator_policy": "all geometric seeds carrying this source label",
+              "first_failure_frame": 394,
+              "first_failure_reason_counts": {
+                "wall_occluded": 19
+              },
+              "first_failure_time_s": 3.940008066606618,
+              "initial_mass_fraction": 0.5,
+              "seed_denominator": 2048,
+              "source_id": "1",
+              "terminal_reliable_fraction": 0.99072265625,
+              "terminal_unknown_count": 19,
+              "terminal_unknown_fraction": 0.00927734375,
+              "unknown_gate_pass": true
+            }
+          ],
+          "source_seed_counts": {
+            "0": 2048,
+            "1": 2048
+          },
+          "source_time_match_max_abs_s": 0.0,
+          "unknown_gate": {
+            "limit": 0.01,
+            "maximum_source_unknown_fraction": 0.01220703125,
+            "pass": false
+          }
+        },
+        "trace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row29-v1/20260920T050202-38d126b5519a/product/f3_material_adapter_row29_trace.h5"
+      },
+      {
+        "case_id": "F3_REV075_MATERIAL-AMP1P05-0075",
+        "cdf_comparison": {
+          "0": {
+            "bounds": {
+              "first_passage": 0.0537109375,
+              "residence": 0.06103515625,
+              "return": 0.05029296875
+            },
+            "denominator_policy": "all geometric seeds remain in every source CDF denominator",
+            "maximum": 0.06103515625,
+            "pass": false
+          },
+          "1": {
+            "bounds": {
+              "first_passage": 0.06005859375,
+              "residence": 0.06005859375,
+              "return": 0.06005859375
+            },
+            "denominator_policy": "all geometric seeds remain in every source CDF denominator",
+            "maximum": 0.06005859375,
+            "pass": false
+          }
+        },
+        "failure_classification": [
+          "unknown_mass_over_1_percent",
+          "cdf_sup_difference_over_0.02"
+        ],
+        "qualification_credit": "none",
+        "row": 31,
+        "source_audit": {
+          "cadence": {
+            "cadence_pass": true,
+            "cadence_tolerance_s": 0.0001,
+            "exact_error_alert_2e-5_s": true,
+            "frame_count": 836,
+            "interpretation": "The one-percent saved-output bound is the structural cadence check; the exact timestamp error is retained as a diagnostic and is not a new qualification threshold.",
+            "interval_max_s": 0.010021581680887515,
+            "interval_median_s": 0.009999458984018439,
+            "interval_min_s": 0.00999945898381771,
+            "max_abs_timestamp_error_s": 2.2084453489945588e-05,
+            "nominal_interval_s": 0.01,
+            "time_end_s": 8.350012828223477,
+            "time_finite": true,
+            "time_monotone": true,
+            "time_start_s": 0.0
+          },
+          "datasets": {
+            "density": [
+              836,
+              34560
+            ],
+            "mass": [
+              836,
+              34560
+            ],
+            "mk": [
+              836,
+              34560
+            ],
+            "particle_id": [
+              34560
+            ],
+            "particle_zone": [
+              34560
+            ],
+            "position": [
+              836,
+              34560,
+              3
+            ],
+            "pressure": [
+              836,
+              34560
+            ],
+            "source_label_initial_mk": [
+              34560
+            ],
+            "time": [
+              836
+            ],
+            "type": [
+              836,
+              34560
+            ],
+            "valid": [
+              836,
+              34560
+            ],
+            "velocity": [
+              836,
+              34560,
+              3
+            ]
+          },
+          "errors": [],
+          "finite_active_counts": {
+            "density": 0,
+            "mass": 0,
+            "position": 0,
+            "pressure": 0,
+            "velocity": 0
+          },
+          "frames_scanned": 836,
+          "hash": {
+            "exists": true,
+            "expected_sha256": "d7f473242e6ddb361b188d1281652a7c9c77a96030b3771b7385b89a32a5de7c",
+            "pass": true,
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/cfd-f3_production_amp1p05_native010-v1/20260920T041246-ea0b619b15af/product/trajectory.h5",
+            "sha256": "d7f473242e6ddb361b188d1281652a7c9c77a96030b3771b7385b89a32a5de7c"
+          },
+          "integrity_pass": true,
+          "mass": {
+            "bad_frame_count": 0,
+            "mass_closure_pass": true,
+            "max_abs_frame_error_kg": 0.0,
+            "max_error_frame": null,
+            "max_relative_frame_error": 0.0,
+            "nonfinite_active_mass_count": 0,
+            "nonpositive_active_mass_count": 0,
+            "reference_mass_kg": 14.580000378191471,
+            "relative_tolerance": 1e-08
+          },
+          "particle_count": 34560,
+          "particle_ids_unique": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/cfd-f3_production_amp1p05_native010-v1/20260920T041246-ea0b619b15af/product/trajectory.h5",
+          "qualification_claim": "none",
+          "role": "F3_native_source"
+        },
+        "source_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/cfd-f3_production_amp1p05_native010-v1/20260920T041246-ea0b619b15af/product/trajectory.h5",
+        "trace_audit": {
+          "attrs": {
+            "committed": 835,
+            "schema": "core.material.f3.native_volume_mls.trace.v2",
+            "trace_backend": "f3_native_volume_mls_current_frame_rk4_v2"
+          },
+          "binding_schema": "core.material.f3.native_volume_mls.trace.v2",
+          "cadence": {
+            "cadence_pass": true,
+            "cadence_tolerance_s": 0.0001,
+            "exact_error_alert_2e-5_s": true,
+            "frame_count": 836,
+            "interpretation": "The one-percent saved-output bound is the structural cadence check; the exact timestamp error is retained as a diagnostic and is not a new qualification threshold.",
+            "interval_max_s": 0.010021581680887515,
+            "interval_median_s": 0.009999458984018439,
+            "interval_min_s": 0.00999945898381771,
+            "max_abs_timestamp_error_s": 2.2084453489945588e-05,
+            "nominal_interval_s": 0.01,
+            "time_end_s": 8.350012828223477,
+            "time_finite": true,
+            "time_monotone": true,
+            "time_start_s": 0.0
+          },
+          "checkpoint": {
+            "committed_frame": 835,
+            "errors": [],
+            "file_hash": {
+              "exists": true,
+              "expected_sha256": "de0cbbfba25a8e3845996e75398159fc5aa66779aa516f251666312d5b668a9c",
+              "pass": true,
+              "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row31-v1/20260920T050202-b16aef660dc8/product/f3_material_adapter_row31_trace.h5.checkpoint.00000835.02286aed842da6d33c70c614.npz",
+              "sha256": "de0cbbfba25a8e3845996e75398159fc5aa66779aa516f251666312d5b668a9c"
+            },
+            "file_hash_pass": true,
+            "file_sha256": "de0cbbfba25a8e3845996e75398159fc5aa66779aa516f251666312d5b668a9c",
+            "generation_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row31-v1/20260920T050202-b16aef660dc8/product/f3_material_adapter_row31_trace.h5.checkpoint.00000835.02286aed842da6d33c70c614.npz",
+            "manifest_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row31-v1/20260920T050202-b16aef660dc8/product/f3_material_adapter_row31_trace.h5.checkpoint.json",
+            "pass": true,
+            "schema": "core.material.f3.native_volume_mls.checkpoint.v2",
+            "semantic_state_sha256": "02286aed842da6d33c70c614677bf951ce6c31c0a121011974195f730b9c2b11",
+            "state_hash": {
+              "exists": true,
+              "expected_sha256": "02286aed842da6d33c70c614677bf951ce6c31c0a121011974195f730b9c2b11",
+              "kind": "semantic_fields_hash",
+              "pass": true,
+              "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row31-v1/20260920T050202-b16aef660dc8/product/f3_material_adapter_row31_trace.h5.checkpoint.00000835.02286aed842da6d33c70c614.npz",
+              "sha256": "02286aed842da6d33c70c614677bf951ce6c31c0a121011974195f730b9c2b11"
+            },
+            "state_hash_pass": true,
+            "state_sha256": "02286aed842da6d33c70c614677bf951ce6c31c0a121011974195f730b9c2b11"
+          },
+          "datasets": {
+            "anisotropy": [
+              836,
+              4096
+            ],
+            "candidate_count": [
+              836,
+              4096
+            ],
+            "candidate_support_pass": [
+              836,
+              4096
+            ],
+            "condition_number": [
+              836,
+              4096
+            ],
+            "effective_sample_size": [
+              836,
+              4096
+            ],
+            "failure_reason": [
+              836,
+              4096
+            ],
+            "first_passage": [
+              836,
+              4096
+            ],
+            "geometry_rank": [
+              836,
+              4096
+            ],
+            "initial_position": [
+              4096,
+              3
+            ],
+            "native_mass_kg": [
+              836
+            ],
+            "old_gate_pass": [
+              836,
+              4096
+            ],
+            "permanent_unknown": [
+              836,
+              4096
+            ],
+            "position": [
+              836,
+              4096,
+              3
+            ],
+            "reconstruction_error_mps": [
+              836,
+              4096
+            ],
+            "reliable": [
+              836,
+              4096
+            ],
+            "residence_opposite": [
+              836,
+              4096
+            ],
+            "return_time": [
+              836,
+              4096
+            ],
+            "returned": [
+              836,
+              4096
+            ],
+            "seed_mass_closure_error": [
+              836
+            ],
+            "source_label": [
+              4096
+            ],
+            "support_count": [
+              836,
+              4096
+            ],
+            "time": [
+              836
+            ],
+            "tracer_id": [
+              4096
+            ],
+            "wall_rejected_count": [
+              836,
+              4096
+            ]
+          },
+          "errors": [],
+          "frames": 836,
+          "hash": {
+            "exists": true,
+            "expected_sha256": "f27b770a3051f1ae9d35f64edb76700578476e1c32d5f7f4bfbe50474d6f3da5",
+            "pass": true,
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row31-v1/20260920T050202-b16aef660dc8/product/f3_material_adapter_row31_trace.h5",
+            "sha256": "f27b770a3051f1ae9d35f64edb76700578476e1c32d5f7f4bfbe50474d6f3da5"
+          },
+          "integrity_pass": true,
+          "native_mass_match": {
+            "max_abs_error_kg": 0.0,
+            "pass": true
+          },
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row31-v1/20260920T050202-b16aef660dc8/product/f3_material_adapter_row31_trace.h5",
+          "qualification_claim": "none",
+          "reader_contract": {
+            "backend_present": true,
+            "current_frame_only": true,
+            "future_state_forbidden": true,
+            "native_frame_identity": true,
+            "qualification_claim_none": true
+          },
+          "reader_reconstruction_pass": true,
+          "role": "F3_material_trace",
+          "seed_count": 4096,
+          "seed_mass_closure": {
+            "max_abs_error": 0.0,
+            "pass": true
+          },
+          "source_hash_expected": "d7f473242e6ddb361b188d1281652a7c9c77a96030b3771b7385b89a32a5de7c",
+          "source_hash_pass": true,
+          "source_ids": [
+            "0",
+            "1"
+          ],
+          "source_rows": [
+            {
+              "denominator_policy": "all geometric seeds carrying this source label",
+              "first_failure_frame": 281,
+              "first_failure_reason_counts": {
+                "low_effective_sample_size": 4,
+                "no_support": 1,
+                "wall_occluded": 27
+              },
+              "first_failure_time_s": 2.810002833344516,
+              "initial_mass_fraction": 0.5,
+              "seed_denominator": 2048,
+              "source_id": "0",
+              "terminal_reliable_fraction": 0.984375,
+              "terminal_unknown_count": 32,
+              "terminal_unknown_fraction": 0.015625,
+              "unknown_gate_pass": false
+            },
+            {
+              "denominator_policy": "all geometric seeds carrying this source label",
+              "first_failure_frame": 237,
+              "first_failure_reason_counts": {
+                "low_effective_sample_size": 3,
+                "wall_occluded": 26
+              },
+              "first_failure_time_s": 2.370004515359631,
+              "initial_mass_fraction": 0.5,
+              "seed_denominator": 2048,
+              "source_id": "1",
+              "terminal_reliable_fraction": 0.98583984375,
+              "terminal_unknown_count": 29,
+              "terminal_unknown_fraction": 0.01416015625,
+              "unknown_gate_pass": false
+            }
+          ],
+          "source_seed_counts": {
+            "0": 2048,
+            "1": 2048
+          },
+          "source_time_match_max_abs_s": 0.0,
+          "unknown_gate": {
+            "limit": 0.01,
+            "maximum_source_unknown_fraction": 0.015625,
+            "pass": false
+          }
+        },
+        "trace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row31-v1/20260920T050202-b16aef660dc8/product/f3_material_adapter_row31_trace.h5"
+      }
+    ],
+    "source_denominator": "row-specific source_label seed counts; no source-contact subset"
+  },
+  "f4": {
+    "case_count": 6,
+    "cases": [
+      {
+        "canary_id": "f4_real_material_baseline_s2",
+        "case_id": "f4_real_material_baseline_s2::f4-real-material-canary-result",
+        "event_window_complete": false,
+        "failure_classification": [
+          "unknown_mass_over_1_percent",
+          "reconstruction_error_gate",
+          "wall_or_visibility_failure"
+        ],
+        "mass_closed": true,
+        "qualification_credit": "none",
+        "result_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/evidence/f4-real-material-canary-result.json",
+        "seed_denominator": 512,
+        "trace_audit": {
+          "cadence": {
+            "cadence_pass": true,
+            "cadence_tolerance_s": 0.00020000215846148028,
+            "exact_error_alert_2e-5_s": false,
+            "frame_count": 16,
+            "interpretation": "The one-percent saved-output bound is the structural cadence check; the exact timestamp error is retained as a diagnostic and is not a new qualification threshold.",
+            "interval_max_s": 0.0200114353055873,
+            "interval_median_s": 0.01999613604312375,
+            "interval_min_s": 0.01999613604312117,
+            "max_abs_timestamp_error_s": 1.4279308272316382e-05,
+            "nominal_interval_s": 0.02000021584614803,
+            "time_end_s": 0.3000032376922204,
+            "time_finite": true,
+            "time_monotone": true,
+            "time_start_s": 0.0
+          },
+          "checkpoint": {
+            "committed_frame": 15,
+            "errors": [],
+            "file_hash_pass": null,
+            "file_sha256": null,
+            "generation_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-material-resting-pool-canary-s2/20260919T182233-c7ddf4fda108/material.h5.checkpoint.npz",
+            "manifest_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-material-resting-pool-canary-s2/20260919T182233-c7ddf4fda108/material.h5.checkpoint.json",
+            "pass": true,
+            "schema": "core.material.f4.checkpoint.v1",
+            "semantic_state_sha256": null,
+            "state_hash": {
+              "exists": true,
+              "expected_sha256": "20aa6ed6fb0c014474e026f6bed8b016d9f8d8c12036b31899aa35eb4aa4c8e5",
+              "pass": true,
+              "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-material-resting-pool-canary-s2/20260919T182233-c7ddf4fda108/material.h5.checkpoint.npz",
+              "sha256": "20aa6ed6fb0c014474e026f6bed8b016d9f8d8c12036b31899aa35eb4aa4c8e5"
+            },
+            "state_hash_pass": true,
+            "state_sha256": "20aa6ed6fb0c014474e026f6bed8b016d9f8d8c12036b31899aa35eb4aa4c8e5"
+          },
+          "committed_frame": 15,
+          "datasets": {
+            "contact_time": [
+              16,
+              512
+            ],
+            "contacted": [
+              16,
+              512
+            ],
+            "destination_membership": [
+              512
+            ],
+            "event_status": [
+              16,
+              512
+            ],
+            "initial_position": [
+              512,
+              3
+            ],
+            "position": [
+              16,
+              512,
+              3
+            ],
+            "reliable": [
+              16,
+              512
+            ],
+            "residence": [
+              16,
+              512
+            ],
+            "return_time": [
+              16,
+              512
+            ],
+            "returned": [
+              16,
+              512
+            ],
+            "source_label": [
+              512
+            ],
+            "source_membership": [
+              512
+            ],
+            "time": [
+              16
+            ],
+            "tracer_id": [
+              512
+            ],
+            "upward": [
+              16,
+              512
+            ],
+            "upward_time": [
+              16,
+              512
+            ],
+            "weight": [
+              512
+            ]
+          },
+          "errors": [],
+          "event_window": {
+            "committed_time_s": 0.3000032376922204,
+            "complete": false,
+            "required_for_t2": true,
+            "status": "right_censored_or_unresolved"
+          },
+          "frames": 16,
+          "gate_pass": false,
+          "hash": {
+            "exists": true,
+            "expected_sha256": null,
+            "pass": true,
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-material-resting-pool-canary-s2/20260919T182233-c7ddf4fda108/material.h5",
+            "sha256": "22fed640cb6d6657d8fe9370327543b2535afc27d89a4c302788a18e2f7cde02"
+          },
+          "integrity_pass": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-material-resting-pool-canary-s2/20260919T182233-c7ddf4fda108/material.h5",
+          "qualification_claim": "none",
+          "reader_contract": {
+            "backend_present": true,
+            "future_state_forbidden": true,
+            "qualification_claim_none": true,
+            "qualification_only_stage": true,
+            "reference_provider": true
+          },
+          "role": "F4_material_trace",
+          "schema": "core.material.f4.resting_pool.v2",
+          "seed_count": 512,
+          "source_rows": [
+            {
+              "denominator_policy": "all geometric seeds carrying this source label",
+              "initial_mass_fraction": 1.0,
+              "seed_denominator": 512,
+              "source_id": "1",
+              "terminal_reliable_fraction": 0.15234375,
+              "terminal_unknown_count": 434,
+              "terminal_unknown_fraction": 0.84765625,
+              "unknown_gate_pass": false
+            }
+          ],
+          "unknown_gate": {
+            "limit": 0.01,
+            "maximum_source_unknown_fraction": 0.84765625,
+            "pass": false
+          }
+        },
+        "trace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-material-resting-pool-canary-s2/20260919T182233-c7ddf4fda108/material.h5",
+        "unknown_fraction_max": 0.84765625
+      },
+      {
+        "canary_id": "f4_native_dense_pair_s2_s4",
+        "case_id": "f4_native_dense_pair_s2_s4::f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5-material",
+        "event_window_complete": false,
+        "failure_classification": [
+          "unknown_mass_over_1_percent",
+          "reconstruction_error_gate"
+        ],
+        "mass_closed": true,
+        "qualification_credit": "none",
+        "result_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/evidence/f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5-material.json",
+        "seed_denominator": 512,
+        "trace_audit": {
+          "cadence": {
+            "cadence_pass": true,
+            "cadence_tolerance_s": 2.000021584614803e-05,
+            "exact_error_alert_2e-5_s": false,
+            "frame_count": 151,
+            "interpretation": "The one-percent saved-output bound is the structural cadence check; the exact timestamp error is retained as a diagnostic and is not a new qualification threshold.",
+            "interval_max_s": 0.002004203383055625,
+            "interval_median_s": 0.0020042033830519057,
+            "interval_min_s": 0.001988904120585791,
+            "max_abs_timestamp_error_s": 1.4279308272316382e-05,
+            "nominal_interval_s": 0.002000021584614803,
+            "time_end_s": 0.3000032376922204,
+            "time_finite": true,
+            "time_monotone": true,
+            "time_start_s": 0.0
+          },
+          "checkpoint": {
+            "committed_frame": 150,
+            "errors": [],
+            "file_hash_pass": null,
+            "file_sha256": null,
+            "generation_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5/20260919T190454-2aac05fec061/product/material.h5.checkpoint.npz",
+            "manifest_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5/20260919T190454-2aac05fec061/product/material.h5.checkpoint.json",
+            "pass": true,
+            "schema": "core.material.f4.checkpoint.v1",
+            "semantic_state_sha256": null,
+            "state_hash": {
+              "exists": true,
+              "expected_sha256": "1e0ad3cc8a7d1252ad5fa15442009b5c6b0ed8e5e64a8ae501e6dfe02892f995",
+              "pass": true,
+              "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5/20260919T190454-2aac05fec061/product/material.h5.checkpoint.npz",
+              "sha256": "1e0ad3cc8a7d1252ad5fa15442009b5c6b0ed8e5e64a8ae501e6dfe02892f995"
+            },
+            "state_hash_pass": true,
+            "state_sha256": "1e0ad3cc8a7d1252ad5fa15442009b5c6b0ed8e5e64a8ae501e6dfe02892f995"
+          },
+          "committed_frame": 150,
+          "datasets": {
+            "contact_time": [
+              151,
+              512
+            ],
+            "contacted": [
+              151,
+              512
+            ],
+            "destination_membership": [
+              512
+            ],
+            "event_status": [
+              151,
+              512
+            ],
+            "initial_position": [
+              512,
+              3
+            ],
+            "position": [
+              151,
+              512,
+              3
+            ],
+            "reliable": [
+              151,
+              512
+            ],
+            "residence": [
+              151,
+              512
+            ],
+            "return_time": [
+              151,
+              512
+            ],
+            "returned": [
+              151,
+              512
+            ],
+            "source_label": [
+              512
+            ],
+            "source_membership": [
+              512
+            ],
+            "time": [
+              151
+            ],
+            "tracer_id": [
+              512
+            ],
+            "upward": [
+              151,
+              512
+            ],
+            "upward_time": [
+              151,
+              512
+            ],
+            "weight": [
+              512
+            ]
+          },
+          "errors": [],
+          "event_window": {
+            "committed_time_s": 0.3000032376922204,
+            "complete": false,
+            "required_for_t2": true,
+            "status": "right_censored_or_unresolved"
+          },
+          "frames": 151,
+          "gate_pass": false,
+          "hash": {
+            "exists": true,
+            "expected_sha256": null,
+            "pass": true,
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5/20260919T190454-2aac05fec061/product/material.h5",
+            "sha256": "40823e34e7eeeb772772a804803829ac7bda10e99ddf83f1511d1413ed4ab8a4"
+          },
+          "integrity_pass": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5/20260919T190454-2aac05fec061/product/material.h5",
+          "qualification_claim": "none",
+          "reader_contract": {
+            "backend_present": true,
+            "future_state_forbidden": true,
+            "qualification_claim_none": true,
+            "qualification_only_stage": true,
+            "reference_provider": true
+          },
+          "role": "F4_material_trace",
+          "schema": "core.material.f4.resting_pool.v2",
+          "seed_count": 512,
+          "source_rows": [
+            {
+              "denominator_policy": "all geometric seeds carrying this source label",
+              "initial_mass_fraction": 1.0,
+              "seed_denominator": 512,
+              "source_id": "1",
+              "terminal_reliable_fraction": 0.103515625,
+              "terminal_unknown_count": 459,
+              "terminal_unknown_fraction": 0.896484375,
+              "unknown_gate_pass": false
+            }
+          ],
+          "unknown_gate": {
+            "limit": 0.01,
+            "maximum_source_unknown_fraction": 0.896484375,
+            "pass": false
+          }
+        },
+        "trace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5/20260919T190454-2aac05fec061/product/material.h5",
+        "unknown_fraction_max": 0.896484375
+      },
+      {
+        "canary_id": "f4_native_dense_pair_s2_s4",
+        "case_id": "f4_native_dense_pair_s2_s4::f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5-material",
+        "event_window_complete": false,
+        "failure_classification": [
+          "unknown_mass_over_1_percent",
+          "reconstruction_error_gate"
+        ],
+        "mass_closed": true,
+        "qualification_credit": "none",
+        "result_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/evidence/f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5-material.json",
+        "seed_denominator": 512,
+        "trace_audit": {
+          "cadence": {
+            "cadence_pass": true,
+            "cadence_tolerance_s": 2.000021584614803e-05,
+            "exact_error_alert_2e-5_s": false,
+            "frame_count": 151,
+            "interpretation": "The one-percent saved-output bound is the structural cadence check; the exact timestamp error is retained as a diagnostic and is not a new qualification threshold.",
+            "interval_max_s": 0.002004203383055625,
+            "interval_median_s": 0.0020042033830519057,
+            "interval_min_s": 0.001988904120585791,
+            "max_abs_timestamp_error_s": 1.4279308272316382e-05,
+            "nominal_interval_s": 0.002000021584614803,
+            "time_end_s": 0.3000032376922204,
+            "time_finite": true,
+            "time_monotone": true,
+            "time_start_s": 0.0
+          },
+          "checkpoint": {
+            "committed_frame": 150,
+            "errors": [],
+            "file_hash_pass": null,
+            "file_sha256": null,
+            "generation_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5/20260919T190454-3005556b3515/product/material.h5.checkpoint.npz",
+            "manifest_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5/20260919T190454-3005556b3515/product/material.h5.checkpoint.json",
+            "pass": true,
+            "schema": "core.material.f4.checkpoint.v1",
+            "semantic_state_sha256": null,
+            "state_hash": {
+              "exists": true,
+              "expected_sha256": "7cd930f9593f2772c9821d607ff005cb99613a748c476262d754beb0927c4214",
+              "pass": true,
+              "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5/20260919T190454-3005556b3515/product/material.h5.checkpoint.npz",
+              "sha256": "7cd930f9593f2772c9821d607ff005cb99613a748c476262d754beb0927c4214"
+            },
+            "state_hash_pass": true,
+            "state_sha256": "7cd930f9593f2772c9821d607ff005cb99613a748c476262d754beb0927c4214"
+          },
+          "committed_frame": 150,
+          "datasets": {
+            "contact_time": [
+              151,
+              512
+            ],
+            "contacted": [
+              151,
+              512
+            ],
+            "destination_membership": [
+              512
+            ],
+            "event_status": [
+              151,
+              512
+            ],
+            "initial_position": [
+              512,
+              3
+            ],
+            "position": [
+              151,
+              512,
+              3
+            ],
+            "reliable": [
+              151,
+              512
+            ],
+            "residence": [
+              151,
+              512
+            ],
+            "return_time": [
+              151,
+              512
+            ],
+            "returned": [
+              151,
+              512
+            ],
+            "source_label": [
+              512
+            ],
+            "source_membership": [
+              512
+            ],
+            "time": [
+              151
+            ],
+            "tracer_id": [
+              512
+            ],
+            "upward": [
+              151,
+              512
+            ],
+            "upward_time": [
+              151,
+              512
+            ],
+            "weight": [
+              512
+            ]
+          },
+          "errors": [],
+          "event_window": {
+            "committed_time_s": 0.3000032376922204,
+            "complete": false,
+            "required_for_t2": true,
+            "status": "right_censored_or_unresolved"
+          },
+          "frames": 151,
+          "gate_pass": false,
+          "hash": {
+            "exists": true,
+            "expected_sha256": null,
+            "pass": true,
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5/20260919T190454-3005556b3515/product/material.h5",
+            "sha256": "b7b9cad225340095da14e08ce70731fb0ef8c70a54d37359448c6fc721244f8b"
+          },
+          "integrity_pass": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5/20260919T190454-3005556b3515/product/material.h5",
+          "qualification_claim": "none",
+          "reader_contract": {
+            "backend_present": true,
+            "future_state_forbidden": true,
+            "qualification_claim_none": true,
+            "qualification_only_stage": true,
+            "reference_provider": true
+          },
+          "role": "F4_material_trace",
+          "schema": "core.material.f4.resting_pool.v2",
+          "seed_count": 512,
+          "source_rows": [
+            {
+              "denominator_policy": "all geometric seeds carrying this source label",
+              "initial_mass_fraction": 1.0,
+              "seed_denominator": 512,
+              "source_id": "1",
+              "terminal_reliable_fraction": 0.103515625,
+              "terminal_unknown_count": 459,
+              "terminal_unknown_fraction": 0.896484375,
+              "unknown_gate_pass": false
+            }
+          ],
+          "unknown_gate": {
+            "limit": 0.01,
+            "maximum_source_unknown_fraction": 0.896484375,
+            "pass": false
+          }
+        },
+        "trace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5/20260919T190454-3005556b3515/product/material.h5",
+        "unknown_fraction_max": 0.896484375
+      },
+      {
+        "canary_id": "f4_repair_canaries_ess32_and_affine_bound",
+        "case_id": "f4_repair_canaries_ess32_and_affine_bound::f4-material-repair-ess32-v2-canary-s0p3-center-q0p5-result",
+        "event_window_complete": false,
+        "failure_classification": [
+          "unknown_mass_over_1_percent",
+          "reconstruction_error_gate"
+        ],
+        "mass_closed": true,
+        "qualification_credit": "none",
+        "result_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-material-repair-ess32-v2-canary-s0p3-center-q0p5-result.json",
+        "seed_denominator": 512,
+        "trace_audit": {
+          "cadence": {
+            "cadence_pass": true,
+            "cadence_tolerance_s": 2.000021584614803e-05,
+            "exact_error_alert_2e-5_s": false,
+            "frame_count": 151,
+            "interpretation": "The one-percent saved-output bound is the structural cadence check; the exact timestamp error is retained as a diagnostic and is not a new qualification threshold.",
+            "interval_max_s": 0.002004203383055625,
+            "interval_median_s": 0.0020042033830519057,
+            "interval_min_s": 0.001988904120585791,
+            "max_abs_timestamp_error_s": 1.4279308272316382e-05,
+            "nominal_interval_s": 0.002000021584614803,
+            "time_end_s": 0.3000032376922204,
+            "time_finite": true,
+            "time_monotone": true,
+            "time_start_s": 0.0
+          },
+          "checkpoint": {
+            "committed_frame": 150,
+            "errors": [],
+            "file_hash_pass": null,
+            "file_sha256": null,
+            "generation_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-material-repair-ess32-v2-canary-s0p3-center-q0p5/20260919T193535-adc113f4faa2/material.h5.checkpoint.npz",
+            "manifest_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-material-repair-ess32-v2-canary-s0p3-center-q0p5/20260919T193535-adc113f4faa2/material.h5.checkpoint.json",
+            "pass": true,
+            "schema": "core.material.f4.checkpoint.v1",
+            "semantic_state_sha256": null,
+            "state_hash": {
+              "exists": true,
+              "expected_sha256": "6d65d558682a47f4aec428569ec8c5c58bb59746c0f045b6e474413d0b02e597",
+              "pass": true,
+              "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-material-repair-ess32-v2-canary-s0p3-center-q0p5/20260919T193535-adc113f4faa2/material.h5.checkpoint.npz",
+              "sha256": "6d65d558682a47f4aec428569ec8c5c58bb59746c0f045b6e474413d0b02e597"
+            },
+            "state_hash_pass": true,
+            "state_sha256": "6d65d558682a47f4aec428569ec8c5c58bb59746c0f045b6e474413d0b02e597"
+          },
+          "committed_frame": 150,
+          "datasets": {
+            "contact_time": [
+              151,
+              512
+            ],
+            "contacted": [
+              151,
+              512
+            ],
+            "destination_membership": [
+              512
+            ],
+            "event_status": [
+              151,
+              512
+            ],
+            "initial_position": [
+              512,
+              3
+            ],
+            "position": [
+              151,
+              512,
+              3
+            ],
+            "reliable": [
+              151,
+              512
+            ],
+            "residence": [
+              151,
+              512
+            ],
+            "return_time": [
+              151,
+              512
+            ],
+            "returned": [
+              151,
+              512
+            ],
+            "source_label": [
+              512
+            ],
+            "source_membership": [
+              512
+            ],
+            "time": [
+              151
+            ],
+            "tracer_id": [
+              512
+            ],
+            "upward": [
+              151,
+              512
+            ],
+            "upward_time": [
+              151,
+              512
+            ],
+            "weight": [
+              512
+            ]
+          },
+          "errors": [],
+          "event_window": {
+            "committed_time_s": 0.3000032376922204,
+            "complete": false,
+            "required_for_t2": true,
+            "status": "right_censored_or_unresolved"
+          },
+          "frames": 151,
+          "gate_pass": false,
+          "hash": {
+            "exists": true,
+            "expected_sha256": null,
+            "pass": true,
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-material-repair-ess32-v2-canary-s0p3-center-q0p5/20260919T193535-adc113f4faa2/material.h5",
+            "sha256": "f0c1b0802fabc4eec3ecb4b72fbb57d96b9c8aaacac2978c86539d17d64fc5db"
+          },
+          "integrity_pass": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-material-repair-ess32-v2-canary-s0p3-center-q0p5/20260919T193535-adc113f4faa2/material.h5",
+          "qualification_claim": "none",
+          "reader_contract": {
+            "backend_present": true,
+            "future_state_forbidden": true,
+            "qualification_claim_none": true,
+            "qualification_only_stage": true,
+            "reference_provider": true
+          },
+          "role": "F4_material_trace",
+          "schema": "core.material.f4.resting_pool.v2",
+          "seed_count": 512,
+          "source_rows": [
+            {
+              "denominator_policy": "all geometric seeds carrying this source label",
+              "initial_mass_fraction": 1.0,
+              "seed_denominator": 512,
+              "source_id": "1",
+              "terminal_reliable_fraction": 0.076171875,
+              "terminal_unknown_count": 473,
+              "terminal_unknown_fraction": 0.923828125,
+              "unknown_gate_pass": false
+            }
+          ],
+          "unknown_gate": {
+            "limit": 0.01,
+            "maximum_source_unknown_fraction": 0.923828125,
+            "pass": false
+          }
+        },
+        "trace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-material-repair-ess32-v2-canary-s0p3-center-q0p5/20260919T193535-adc113f4faa2/material.h5",
+        "unknown_fraction_max": 0.923828125
+      },
+      {
+        "canary_id": "f4_repair_canaries_ess32_and_affine_bound",
+        "case_id": "f4_repair_canaries_ess32_and_affine_bound::f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5-result",
+        "event_window_complete": false,
+        "failure_classification": [
+          "unknown_mass_over_1_percent",
+          "reconstruction_error_gate"
+        ],
+        "mass_closed": true,
+        "qualification_credit": "none",
+        "result_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5-result.json",
+        "seed_denominator": 512,
+        "trace_audit": {
+          "cadence": {
+            "cadence_pass": true,
+            "cadence_tolerance_s": 2.000021584614803e-05,
+            "exact_error_alert_2e-5_s": false,
+            "frame_count": 151,
+            "interpretation": "The one-percent saved-output bound is the structural cadence check; the exact timestamp error is retained as a diagnostic and is not a new qualification threshold.",
+            "interval_max_s": 0.002004203383055625,
+            "interval_median_s": 0.0020042033830519057,
+            "interval_min_s": 0.001988904120585791,
+            "max_abs_timestamp_error_s": 1.4279308272316382e-05,
+            "nominal_interval_s": 0.002000021584614803,
+            "time_end_s": 0.3000032376922204,
+            "time_finite": true,
+            "time_monotone": true,
+            "time_start_s": 0.0
+          },
+          "checkpoint": {
+            "committed_frame": 150,
+            "errors": [],
+            "file_hash_pass": null,
+            "file_sha256": null,
+            "generation_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5/20260919T193535-e8bc4e52ab93/material.h5.checkpoint.npz",
+            "manifest_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5/20260919T193535-e8bc4e52ab93/material.h5.checkpoint.json",
+            "pass": true,
+            "schema": "core.material.f4.checkpoint.v1",
+            "semantic_state_sha256": null,
+            "state_hash": {
+              "exists": true,
+              "expected_sha256": "4a3936c0184d1d17c96be9457202625135566931aaa1440089a84e0c52b57632",
+              "pass": true,
+              "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5/20260919T193535-e8bc4e52ab93/material.h5.checkpoint.npz",
+              "sha256": "4a3936c0184d1d17c96be9457202625135566931aaa1440089a84e0c52b57632"
+            },
+            "state_hash_pass": true,
+            "state_sha256": "4a3936c0184d1d17c96be9457202625135566931aaa1440089a84e0c52b57632"
+          },
+          "committed_frame": 150,
+          "datasets": {
+            "contact_time": [
+              151,
+              512
+            ],
+            "contacted": [
+              151,
+              512
+            ],
+            "destination_membership": [
+              512
+            ],
+            "event_status": [
+              151,
+              512
+            ],
+            "initial_position": [
+              512,
+              3
+            ],
+            "position": [
+              151,
+              512,
+              3
+            ],
+            "reliable": [
+              151,
+              512
+            ],
+            "residence": [
+              151,
+              512
+            ],
+            "return_time": [
+              151,
+              512
+            ],
+            "returned": [
+              151,
+              512
+            ],
+            "source_label": [
+              512
+            ],
+            "source_membership": [
+              512
+            ],
+            "time": [
+              151
+            ],
+            "tracer_id": [
+              512
+            ],
+            "upward": [
+              151,
+              512
+            ],
+            "upward_time": [
+              151,
+              512
+            ],
+            "weight": [
+              512
+            ]
+          },
+          "errors": [],
+          "event_window": {
+            "committed_time_s": 0.3000032376922204,
+            "complete": false,
+            "required_for_t2": true,
+            "status": "right_censored_or_unresolved"
+          },
+          "frames": 151,
+          "gate_pass": false,
+          "hash": {
+            "exists": true,
+            "expected_sha256": null,
+            "pass": true,
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5/20260919T193535-e8bc4e52ab93/material.h5",
+            "sha256": "b82c4f69aec15f01578fe630dd51286b30aa8adf6b9087e815f1f695d1e7bad8"
+          },
+          "integrity_pass": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5/20260919T193535-e8bc4e52ab93/material.h5",
+          "qualification_claim": "none",
+          "reader_contract": {
+            "backend_present": true,
+            "future_state_forbidden": true,
+            "qualification_claim_none": true,
+            "qualification_only_stage": true,
+            "reference_provider": true
+          },
+          "role": "F4_material_trace",
+          "schema": "core.material.f4.resting_pool.v2",
+          "seed_count": 512,
+          "source_rows": [
+            {
+              "denominator_policy": "all geometric seeds carrying this source label",
+              "initial_mass_fraction": 1.0,
+              "seed_denominator": 512,
+              "source_id": "1",
+              "terminal_reliable_fraction": 0.044921875,
+              "terminal_unknown_count": 489,
+              "terminal_unknown_fraction": 0.955078125,
+              "unknown_gate_pass": false
+            }
+          ],
+          "unknown_gate": {
+            "limit": 0.01,
+            "maximum_source_unknown_fraction": 0.955078125,
+            "pass": false
+          }
+        },
+        "trace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5/20260919T193535-e8bc4e52ab93/material.h5",
+        "unknown_fraction_max": 0.955078125
+      },
+      {
+        "canary_id": "f4_tallwall120_short_canary",
+        "case_id": "f4_tallwall120_short_canary",
+        "event_window_complete": false,
+        "failure_classification": [
+          "unknown_mass_over_1_percent",
+          "event_window_right_censored_or_unresolved",
+          "wall_or_visibility_failure"
+        ],
+        "mass_closed": true,
+        "qualification_credit": "none",
+        "result_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-tallwall120-canary-support-diagnosis-summary-v1.json",
+        "seed_denominator": 512,
+        "trace_audit": {
+          "cadence": {
+            "cadence_pass": true,
+            "cadence_tolerance_s": 0.0002,
+            "exact_error_alert_2e-5_s": false,
+            "frame_count": 21,
+            "interpretation": "The one-percent saved-output bound is the structural cadence check; the exact timestamp error is retained as a diagnostic and is not a new qualification threshold.",
+            "interval_max_s": 0.02001143530562355,
+            "interval_median_s": 0.01999613604315742,
+            "interval_min_s": 0.01999613604312117,
+            "max_abs_timestamp_error_s": 1.5142692864428264e-05,
+            "nominal_interval_s": 0.02,
+            "time_end_s": 0.4000145164329399,
+            "time_finite": true,
+            "time_monotone": true,
+            "time_start_s": 0.0
+          },
+          "checkpoint": {
+            "committed_frame": 20,
+            "errors": [],
+            "file_hash_pass": null,
+            "file_sha256": null,
+            "generation_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-tallwall120-material-canary-s2-v1/20260920T053432-7ccabc4f7247/product/tallwall120_material.h5.checkpoints/state-00000020-521a67358933e4f236f6.npz",
+            "manifest_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-tallwall120-material-canary-s2-v1/20260920T053432-7ccabc4f7247/product/tallwall120_material.h5.checkpoint.json",
+            "pass": true,
+            "schema": "core.material.f4.tallwall120.checkpoint.v2",
+            "semantic_state_sha256": null,
+            "state_hash": {
+              "exists": true,
+              "expected_sha256": "521a67358933e4f236f6790fe18b5eb74a09496491cedd3c446468990fd524e7",
+              "pass": true,
+              "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-tallwall120-material-canary-s2-v1/20260920T053432-7ccabc4f7247/product/tallwall120_material.h5.checkpoints/state-00000020-521a67358933e4f236f6.npz",
+              "sha256": "521a67358933e4f236f6790fe18b5eb74a09496491cedd3c446468990fd524e7"
+            },
+            "state_hash_pass": true,
+            "state_sha256": "521a67358933e4f236f6790fe18b5eb74a09496491cedd3c446468990fd524e7"
+          },
+          "committed_frame": 20,
+          "datasets": {
+            "contact_time": [
+              21,
+              512
+            ],
+            "contacted": [
+              21,
+              512
+            ],
+            "destination_membership": [
+              512
+            ],
+            "event_status": [
+              21,
+              512
+            ],
+            "initial_position": [
+              512,
+              3
+            ],
+            "position": [
+              21,
+              512,
+              3
+            ],
+            "reliable": [
+              21,
+              512
+            ],
+            "residence": [
+              21,
+              512
+            ],
+            "return_time": [
+              21,
+              512
+            ],
+            "returned": [
+              21,
+              512
+            ],
+            "source_label": [
+              512
+            ],
+            "source_membership": [
+              512
+            ],
+            "time": [
+              21
+            ],
+            "tracer_id": [
+              512
+            ],
+            "upward": [
+              21,
+              512
+            ],
+            "upward_time": [
+              21,
+              512
+            ],
+            "weight": [
+              512
+            ]
+          },
+          "errors": [],
+          "event_window": {
+            "committed_time_s": 0.4000145164329399,
+            "complete": false,
+            "required_for_t2": true,
+            "status": "right_censored_or_unresolved"
+          },
+          "frames": 21,
+          "gate_pass": false,
+          "hash": {
+            "exists": true,
+            "expected_sha256": "8d37c9f2f49731f293ffe7f13f265b2f2981f891b5b91e0b465478711866a819",
+            "pass": true,
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-tallwall120-material-canary-s2-v1/20260920T053432-7ccabc4f7247/product/tallwall120_material.h5",
+            "sha256": "8d37c9f2f49731f293ffe7f13f265b2f2981f891b5b91e0b465478711866a819"
+          },
+          "integrity_pass": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-tallwall120-material-canary-s2-v1/20260920T053432-7ccabc4f7247/product/tallwall120_material.h5",
+          "qualification_claim": "none",
+          "reader_contract": {
+            "backend_present": true,
+            "future_state_forbidden": true,
+            "qualification_claim_none": true,
+            "qualification_only_stage": true,
+            "reference_provider": true
+          },
+          "role": "F4_material_trace",
+          "schema": "core.material.f4.tallwall120.v1",
+          "seed_count": 512,
+          "source_rows": [
+            {
+              "denominator_policy": "all geometric seeds carrying this source label",
+              "initial_mass_fraction": 1.0,
+              "seed_denominator": 512,
+              "source_id": "1",
+              "terminal_reliable_fraction": 0.0,
+              "terminal_unknown_count": 512,
+              "terminal_unknown_fraction": 1.0,
+              "unknown_gate_pass": false
+            }
+          ],
+          "unknown_gate": {
+            "limit": 0.01,
+            "maximum_source_unknown_fraction": 1.0,
+            "pass": false
+          }
+        },
+        "trace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-tallwall120-material-canary-s2-v1/20260920T053432-7ccabc4f7247/product/tallwall120_material.h5",
+        "unknown_fraction_max": 1.0
+      }
+    ],
+    "denominator_policy": "each retained result is one case; every declared source keeps all geometric seeds in its denominator",
+    "negative_evidence": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-material-negative-evidence-audit-20260920.json",
+    "qualification_claim": "none"
+  },
+  "failure_classification_summary": {
+    "f3": [
+      "cdf_sup_difference_over_0.02",
+      "unknown_mass_over_1_percent"
+    ],
+    "f4": [
+      "event_window_right_censored_or_unresolved",
+      "reconstruction_error_gate",
+      "unknown_mass_over_1_percent",
+      "wall_or_visibility_failure"
+    ]
+  },
+  "gate_evaluation": {
+    "T2_macro": false,
+    "T2_path": false,
+    "f3_cdf_pass": false,
+    "f4_event_window_pass": false,
+    "qualification_claim": "none",
+    "qualification_credit": "none",
+    "source_reader_reconstruction_integrity_pass": true,
+    "unknown_mass_pass": false
+  },
+  "interpretation_boundary": "A complete read-only audit binds source bytes, full saved time axes, reconstruction provenance, denominators and failure categories. It is diagnostic evidence and does not grant T2.",
+  "registered_gates": {
+    "f3_cdf_sup_abs_difference_max": 0.02,
+    "f4_event_window_required": true,
+    "source_cadence_relative_tolerance": 0.01,
+    "unknown_fraction_per_source_max": 0.01
+  },
+  "schema": "core.material.t2.cpu_source_window_audit.v1",
+  "status": "completed_negative_cpu_audit"
+}

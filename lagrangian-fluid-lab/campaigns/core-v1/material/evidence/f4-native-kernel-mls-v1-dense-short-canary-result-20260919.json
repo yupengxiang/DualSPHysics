@@ -1,0 +1,290 @@
+{
+  "backend": "f4_native_kernel_mls_wendland_mass_density_v1",
+  "binding": {
+    "backend": "f4_native_kernel_mls_wendland_mass_density_v1",
+    "connectivity_diagnostic": {
+      "backend": "f4_native_support_connectivity_diagnostic_v1",
+      "edge_radius": "1.5*dp_m",
+      "gate_effect": "none",
+      "purpose": "current-support connectivity and velocity-branch evidence; diagnostic only",
+      "source_labels": "not read; no initial Mk/particle-id partition"
+    },
+    "fit": "weighted_affine_MLS_in_scaled_offsets_[1,dx/h,dy/h,dz/h]",
+    "gate": {
+      "maximum_condition_number": 10000000000.0,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 4,
+      "minimum_support_count": 4,
+      "svd_relative_cutoff": 1e-12
+    },
+    "h_m": 0.011941277883,
+    "input_policy": {
+      "density_mode": "native_current_only",
+      "density_source": "same selected H5 frame; no predicted or future density",
+      "future_state": "forbidden",
+      "mass_source": "same selected H5 frame",
+      "model_density_estimation": "not implemented; a future estimator requires a new backend version",
+      "native_particle_id": "not used for query identity or termination",
+      "public_current_inputs": [
+        "position",
+        "velocity",
+        "mass",
+        "density",
+        "valid",
+        "fluid_mask"
+      ]
+    },
+    "kernel": {
+      "argument": "q=r/h",
+      "dimension": 3,
+      "doi": "10.1007/BF02123482",
+      "expression": "W(r,h)=21/(16*pi*h^3)*(1-q/2)^4*(1+2*q)",
+      "family": "quintic_wendland_c2",
+      "normalisation": "21/(16*pi*h^3)",
+      "official_run_3d_awen": 245355.2,
+      "official_run_binding": "DualSPHysics Run.out: Kernel=\"Wendland\"; Kernel: Quintic Wendland",
+      "official_run_h_rounded_m": 0.011941,
+      "official_run_path": "campaigns/core-v1/runtime/attempts/f4-resting-pool-qualification-cell-14/20260919T184548-9bb5d3e36d4b/product/solver/Run.out",
+      "outside_support": 0.0,
+      "source": "Wendland 1995, Piecewise polynomial, positive definite and compactly supported radial functions of minimal degree",
+      "support": "0 <= q <= 2"
+    },
+    "qualification_claim": "none",
+    "schema": "core.material.f4.native_kernel_mls.v1",
+    "support_radius_m": 0.023882555766,
+    "support_selection": "all_valid_fluid_rows_within_2h_after_optional_finite_wall_visibility",
+    "weights": "(mass/density)*Wendland_quintic_c2_3d(distance,h)"
+  },
+  "code_sha256": "bb3db37dbbef74ddc6b7baa158f513f3da250b67a49eb60836475060ad561181",
+  "created_at": "2026-09-19T12:30:58.896664+00:00",
+  "frame_indices": [
+    0,
+    80,
+    81,
+    82,
+    150
+  ],
+  "qualification_claim": "none",
+  "query_definition": {
+    "construction": "independent F4 8x8x8 drop-box grid",
+    "count": 512,
+    "position_policy": "explicit Euler from each current-frame reconstructed velocity; unknown stays in place",
+    "q": 0.5
+  },
+  "rows": [
+    {
+      "condition_number_max": 2.3950086207371255,
+      "condition_number_p95": 2.3885399941038044,
+      "connectivity_diagnostic": {
+        "backend": "f4_native_support_connectivity_diagnostic_v1",
+        "component_count_max": 1,
+        "component_count_p95": 1.0,
+        "distance_gap_p95_m": 0.00500000000000006,
+        "edge_radius_m": 0.01125,
+        "multi_component_fraction": 0.0,
+        "velocity_branch_count_max": 0,
+        "velocity_branch_separation_p95_mps": null,
+        "velocity_branch_within_rms_p95_mps": null
+      },
+      "effective_sample_size_p05": 22.384016602837175,
+      "failure_reason_counts": {
+        "reliable": 512
+      },
+      "frame_index": 0,
+      "mass_closed": true,
+      "query_count": 512,
+      "query_position_max_m": [
+        0.60375,
+        0.27,
+        0.53125
+      ],
+      "query_position_min_m": [
+        0.37625,
+        0.13,
+        0.40875
+      ],
+      "reliable_count": 512,
+      "source_rows_fluid_valid": 217485,
+      "source_rows_total": 217485,
+      "source_sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9",
+      "support_distance_p95_m": 0.0238812164681786,
+      "time_s": 0.0,
+      "unknown_count": 0,
+      "unknown_fraction": 0.0,
+      "wall_rejected_total": 0,
+      "weighted_reconstruction_error_p95_mps": 3.33066907387547e-16
+    },
+    {
+      "condition_number_max": 2.4711464217757415,
+      "condition_number_p95": 2.4440194556102433,
+      "connectivity_diagnostic": {
+        "backend": "f4_native_support_connectivity_diagnostic_v1",
+        "component_count_max": 1,
+        "component_count_p95": 1.0,
+        "distance_gap_p95_m": 0.0047077099076980045,
+        "edge_radius_m": 0.01125,
+        "multi_component_fraction": 0.0,
+        "velocity_branch_count_max": 2,
+        "velocity_branch_separation_p95_mps": 0.023212333582199585,
+        "velocity_branch_within_rms_p95_mps": 0.006215793677814797
+      },
+      "effective_sample_size_p05": 22.042195060837013,
+      "failure_reason_counts": {
+        "reliable": 512
+      },
+      "frame_index": 80,
+      "mass_closed": true,
+      "query_count": 512,
+      "query_position_max_m": [
+        0.603770950155187,
+        0.27007353715867566,
+        0.32732713846869377
+      ],
+      "query_position_min_m": [
+        0.3762277163761757,
+        0.12993965608253588,
+        0.20467488872680742
+      ],
+      "reliable_count": 512,
+      "source_rows_fluid_valid": 217485,
+      "source_rows_total": 217485,
+      "source_sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9",
+      "support_distance_p95_m": 0.023875314502422165,
+      "time_s": 0.1600149861278153,
+      "unknown_count": 0,
+      "unknown_fraction": 0.0,
+      "wall_rejected_total": 0,
+      "weighted_reconstruction_error_p95_mps": 0.011083715365714349
+    },
+    {
+      "condition_number_max": 2.4732837529591096,
+      "condition_number_p95": 2.4468329646113784,
+      "connectivity_diagnostic": {
+        "backend": "f4_native_support_connectivity_diagnostic_v1",
+        "component_count_max": 1,
+        "component_count_p95": 1.0,
+        "distance_gap_p95_m": 0.004710218779634564,
+        "edge_radius_m": 0.01125,
+        "multi_component_fraction": 0.0,
+        "velocity_branch_count_max": 2,
+        "velocity_branch_separation_p95_mps": 0.2557556357335216,
+        "velocity_branch_within_rms_p95_mps": 0.0995277179358275
+      },
+      "effective_sample_size_p05": 22.018496197517354,
+      "failure_reason_counts": {
+        "reliable": 512
+      },
+      "frame_index": 81,
+      "mass_closed": true,
+      "query_count": 512,
+      "query_position_max_m": [
+        0.6037719601565709,
+        0.2700756425983828,
+        0.32321282524322215
+      ],
+      "query_position_min_m": [
+        0.37622664967364294,
+        0.12993764672857702,
+        0.20056417416600264
+      ],
+      "reliable_count": 512,
+      "source_rows_fluid_valid": 217485,
+      "source_rows_total": 217485,
+      "source_sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9",
+      "support_distance_p95_m": 0.023878887151889062,
+      "time_s": 0.1620038902484012,
+      "unknown_count": 0,
+      "unknown_fraction": 0.0,
+      "wall_rejected_total": 0,
+      "weighted_reconstruction_error_p95_mps": 0.16386853132571946
+    },
+    {
+      "condition_number_max": 2.47523561257656,
+      "condition_number_p95": 2.4487580539480986,
+      "connectivity_diagnostic": {
+        "backend": "f4_native_support_connectivity_diagnostic_v1",
+        "component_count_max": 1,
+        "component_count_p95": 1.0,
+        "distance_gap_p95_m": 0.004688442192653382,
+        "edge_radius_m": 0.01125,
+        "multi_component_fraction": 0.0,
+        "velocity_branch_count_max": 2,
+        "velocity_branch_separation_p95_mps": 1.1132704061208931,
+        "velocity_branch_within_rms_p95_mps": 0.4794961145005763
+      },
+      "effective_sample_size_p05": 22.00587532734911,
+      "failure_reason_counts": {
+        "reliable": 512
+      },
+      "frame_index": 82,
+      "mass_closed": true,
+      "query_count": 512,
+      "query_position_max_m": [
+        0.6037804705994174,
+        0.2701185582262303,
+        0.3190265179662517
+      ],
+      "query_position_min_m": [
+        0.37621763263313585,
+        0.12992633918989258,
+        0.19651577477085783
+      ],
+      "reliable_count": 512,
+      "source_rows_fluid_valid": 217485,
+      "source_rows_total": 217485,
+      "source_sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9",
+      "support_distance_p95_m": 0.023878376511027085,
+      "time_s": 0.1640080936314531,
+      "unknown_count": 0,
+      "unknown_fraction": 0.0,
+      "wall_rejected_total": 0,
+      "weighted_reconstruction_error_p95_mps": 0.4742847791653183
+    },
+    {
+      "condition_number_max": 4.313909944571925,
+      "condition_number_p95": 3.522773595021731,
+      "connectivity_diagnostic": {
+        "backend": "f4_native_support_connectivity_diagnostic_v1",
+        "component_count_max": 3,
+        "component_count_p95": 1.0,
+        "distance_gap_p95_m": 0.0034806612536418357,
+        "edge_radius_m": 0.01125,
+        "multi_component_fraction": 0.048828125,
+        "velocity_branch_count_max": 2,
+        "velocity_branch_separation_p95_mps": 0.19868035943094758,
+        "velocity_branch_within_rms_p95_mps": 0.09341670896079741
+      },
+      "effective_sample_size_p05": 18.952528078469324,
+      "failure_reason_counts": {
+        "reliable": 512
+      },
+      "frame_index": 150,
+      "mass_closed": true,
+      "query_count": 512,
+      "query_position_max_m": [
+        0.7307602706512946,
+        0.376933093200857,
+        0.2964697860475699
+      ],
+      "query_position_min_m": [
+        0.24731088244218022,
+        0.023172194638854504,
+        0.08650852321856836
+      ],
+      "reliable_count": 512,
+      "source_rows_fluid_valid": 217485,
+      "source_rows_total": 217485,
+      "source_sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9",
+      "support_distance_p95_m": 0.023879391546344653,
+      "time_s": 0.3000032376922204,
+      "unknown_count": 0,
+      "unknown_fraction": 0.0,
+      "wall_rejected_total": 0,
+      "weighted_reconstruction_error_p95_mps": 0.05839996770364848
+    }
+  ],
+  "schema": "core.material.f4.native_kernel_mls.v1",
+  "source": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+  "source_sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9",
+  "t2_status": "not_evaluated"
+}

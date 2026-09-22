@@ -1,0 +1,247 @@
+{
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/2af639756b08095883006ce4867b1f8674e832f660ca365b41ec8def50d37ed7/lagrangian-fluid-lab/scripts/core_material.py",
+    "--family",
+    "f4",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+    "--output",
+    "{attempt_dir}/product/material.h5",
+    "--q",
+    "0.5",
+    "--dp-m",
+    "0.0075",
+    "--seeds",
+    "512",
+    "--substeps",
+    "2",
+    "--neighbour-variant",
+    "baseline24"
+  ],
+  "backend": "f3_ckdtree_visible_shepard_distance_v1",
+  "category": "material_qualification_diagnostic",
+  "central_ledger_mutation": 0,
+  "code_provenance": {
+    "core_material": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_material.py",
+    "core_material_sha256": "1a15cf8ad0927f00ba44f72f9e85f167852d1dc8eb49807b057509ed516337dd",
+    "neighbor_backend": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_material_neighbors.py",
+    "neighbor_backend_sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752",
+    "passive_geometry": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/passive_tracers.py",
+    "passive_geometry_sha256": "0301b797ddf472d8e37a835cb97036ba13b4cde8c1832838edfed06da20860cc"
+  },
+  "comparison_contract": {
+    "baseline_output_interval_s": 0.02,
+    "compare": [
+      "unknown_fraction_by_source",
+      "first_failure_time_and_position",
+      "support_gate_components",
+      "reconstruction_error",
+      "mass_closed",
+      "common_reliable_path_coverage",
+      "event_cdf_residence_and_return"
+    ],
+    "dense_output_interval_s": 0.002,
+    "material_controls_held": "baseline24 Shepard/visible support, q=.5, dp metadata=.0075, 512 geometric seeds, and gate unchanged",
+    "only_cfd_change": "native solver saved-output TimeOut 0.02 -> 0.002; same source geometry, recipe, cfl, TimeMax, and numerical controls",
+    "paired_baseline_prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_medium_canary/prepared.json",
+    "paired_baseline_prepared_sha256": "170aa5facc7f1d08688a3f7ef01af45cbc4226cc660aa91a4e89f74c03893abd",
+    "paired_baseline_source": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-canary-001/20260919T172542-d49b17d63c4f/product/trajectory.h5",
+    "paired_baseline_source_sha256": "892583601f507a2f66977a337718e29e108196aa3d6e83c8a9c3d59d634b6be6",
+    "qualification_decision": "not inferred from either short canary; unknown gate remains fixed at 1%"
+  },
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "depends_on": [
+    "f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5"
+  ],
+  "dp_m": 0.0075,
+  "env": {
+    "PYTHONPATH": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/2af639756b08095883006ce4867b1f8674e832f660ca365b41ec8def50d37ed7/lagrangian-fluid-lab:/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/2af639756b08095883006ce4867b1f8674e832f660ca365b41ec8def50d37ed7/lagrangian-fluid-lab/scripts"
+  },
+  "error_estimator": "local_residual",
+  "execution_status": "registered",
+  "family": "F4",
+  "gate": {
+    "maximum_reconstruction_error_mps": 0.04698137929009748,
+    "maximum_support_distance_m": 0.03,
+    "minimum_anisotropy": 0.005,
+    "minimum_effective_sample_size": 4.0,
+    "minimum_geometry_rank": 3,
+    "regularization_m": 0.004,
+    "unknown_fraction_max": 0.01
+  },
+  "gpu_started": false,
+  "host": "ada",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+      "sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/2af639756b08095883006ce4867b1f8674e832f660ca365b41ec8def50d37ed7/lagrangian-fluid-lab/scripts/core_material.py",
+      "sha256": "1a15cf8ad0927f00ba44f72f9e85f167852d1dc8eb49807b057509ed516337dd"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/2af639756b08095883006ce4867b1f8674e832f660ca365b41ec8def50d37ed7/lagrangian-fluid-lab/scripts/f3_material_neighbors.py",
+      "sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/2af639756b08095883006ce4867b1f8674e832f660ca365b41ec8def50d37ed7/lagrangian-fluid-lab/scripts/passive_tracers.py",
+      "sha256": "0301b797ddf472d8e37a835cb97036ba13b4cde8c1832838edfed06da20860cc"
+    }
+  ],
+  "job_id": "f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5",
+  "logical_id": "f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5",
+  "material_definition": {
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "destination_definition": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "box_low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "box_size_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "destination_role": "resting basin liquid and post-contact destination volume",
+      "kind": "continuous_resting_pool_box",
+      "pool_free_surface_z_m": 0.18
+    },
+    "dp_m": 0.0075,
+    "event_definition": {
+      "contact": {
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "path_interpolation": "continuous_linear_segment_per_tracer_substep",
+      "post_return_window": {
+        "completion_required": true,
+        "extension_policy": "double whole scope once if any required event is right-censored; never shorten",
+        "gravity_time_s": 0.3497487083913345,
+        "initial_horizon_s": 4.34,
+        "maximum_extended_horizon_s": 8.68
+      },
+      "residence": {
+        "definition": "time inside destination box after contact, right-censored if unresolved"
+      },
+      "return": {
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "upward_propagation": {
+        "direction": "upward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_gt": 0.0
+      }
+    },
+    "family_id": "F4",
+    "open_faces": [
+      "top"
+    ],
+    "q": 0.5,
+    "recipe": "mdbc_native",
+    "recipe_id": "F4_resting_pool_mdbc_native_v2",
+    "revision_id": "F4_resting_pool_13plus2_v2",
+    "scope_id": "F4_drop_resting_pool_x_v2",
+    "seed_identity": "independent seed-XXXXXX ids, never native particle_id",
+    "source_definition": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        0.62,
+        0.28,
+        0.54
+      ],
+      "box_low_m": [
+        0.36,
+        0.12,
+        0.4
+      ],
+      "box_size_m": [
+        0.26,
+        0.16,
+        0.14
+      ],
+      "drop_left_x_m": 0.36,
+      "initial_velocity_mps": [
+        0.0,
+        0.0,
+        -0.5
+      ],
+      "kind": "continuous_drop_box",
+      "q": 0.5,
+      "source_role": "falling liquid drop, initial fluid box"
+    },
+    "source_labels": "continuous source-box membership; native Mk and particle_id are not material truth",
+    "stage": "qualification_only",
+    "wall_bounds_m": {
+      "xmax": 1.2,
+      "xmin": 0.0,
+      "ymax": 0.4,
+      "ymin": 0.0,
+      "zmax": 0.6,
+      "zmin": 0.0
+    }
+  },
+  "neighbour_variant": "baseline24",
+  "neighbours": 24,
+  "output_contract": {
+    "checkpoint_json": "product/material.h5.checkpoint.json",
+    "checkpoint_npz": "product/material.h5.checkpoint.npz",
+    "material_h5": "product/material.h5",
+    "resume_required": "kill/resume may only be accepted after comparing independent process receipt and binding hashes",
+    "summary_json": "product/material.json"
+  },
+  "q": 0.5,
+  "qualification_claim": "none; native cadence comparator material overlay only",
+  "required_outputs": [
+    "product/material.h5",
+    "product/material.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "gpu_peak_mib": 0,
+    "io_weight": 0.25,
+    "ram_mib": 8192
+  },
+  "schema": "core.material.job.v1",
+  "scope_id": "F4_drop_resting_pool_x_v2",
+  "seeds": 512,
+  "source_dependency": {
+    "cfd_job_id": "f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5",
+    "expected_native_frame_count": 151,
+    "expected_output_interval_s": 0.002,
+    "expected_time_max_s": 0.3,
+    "interpolation_or_decimation_forbidden": true,
+    "native_source_required": true,
+    "prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_native_dense_002_canary/prepared.json",
+    "prepared_sha256": "438bc45e7587d559bf5a8e938b9834284b08c1b058e1b516f63ac35801778f6d",
+    "source_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+    "source_path_template": "<cfd_attempt_dir>/product/trajectory.h5",
+    "source_semantics": "reference_native_saved_frames",
+    "source_sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9"
+  },
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "source_snapshot": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/2af639756b08095883006ce4867b1f8674e832f660ca365b41ec8def50d37ed7/lagrangian-fluid-lab",
+    "sha256": "2af639756b08095883006ce4867b1f8674e832f660ca365b41ec8def50d37ed7"
+  },
+  "stage": "canary",
+  "substeps": 2,
+  "timeout_seconds": 3600
+}

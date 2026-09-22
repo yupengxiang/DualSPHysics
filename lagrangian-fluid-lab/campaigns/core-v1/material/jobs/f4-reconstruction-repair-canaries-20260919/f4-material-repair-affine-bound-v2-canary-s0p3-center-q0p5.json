@@ -1,0 +1,268 @@
+{
+  "acceptance": {
+    "comparison": "compare against baseline24 on the same dense source; candidate is an independent overlay",
+    "must_not_report_T2_qualification": true,
+    "must_preserve_mass_closure": true,
+    "must_preserve_source_hash_binding": true,
+    "must_report_first_failure_frame_time": true,
+    "must_report_gate_failure_components": true,
+    "must_report_unknown_fraction_per_source": true,
+    "must_support_atomic_checkpoint_resume": true,
+    "unknown_gate_remains_1_percent": true
+  },
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_material.py",
+    "--family",
+    "f4",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+    "--output",
+    "{attempt_dir}/material.h5",
+    "--q",
+    "0.5",
+    "--dp-m",
+    "0.0075",
+    "--seeds",
+    "512",
+    "--substeps",
+    "4",
+    "--neighbour-variant",
+    "f4_affine_bound_v2"
+  ],
+  "attempt_role": "initial",
+  "category": "repair_canary",
+  "central_ledger_mutation": 0,
+  "comparison_control": {
+    "baseline_gate_unchanged": true,
+    "baseline_unknown_fraction_s2_s4": 0.896484375,
+    "baseline_variant": "baseline24",
+    "dense_short_diagnostic_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-dense-short-diagnostic-results.json",
+    "dense_short_diagnostic_sha256": "edee80d8685de7cdfcf7c3b86f5ee8a44b694fefbd94771c21071d91b0d78ce6"
+  },
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "depends_on": [],
+  "event_policy": {
+    "canary_window_s": 0.3000032376922204,
+    "contact": "first downward crossing z=0.18 after t=0",
+    "event_window_status": "right_censored_or_unresolved",
+    "registered_scope_initial_horizon_s": 4.34,
+    "registered_scope_maximum_extended_horizon_s": 8.68,
+    "residence": "continuous destination-box time after contact",
+    "return": "first later downward crossing z=0.18 after upward",
+    "unobserved_event_policy": "NaN/right-censored; never impute from saved-frame chord or synthetic output",
+    "upward": "first later upward crossing z=0.18"
+  },
+  "execution_status": "prepared_only",
+  "family": "F4",
+  "gpu_started": false,
+  "host": "ada",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+      "role": "real_native_f4_dense_002s_trajectory",
+      "sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_native_dense_002_canary/prepared.json",
+      "role": "prepared_native_dense_source_definition",
+      "sha256": "438bc45e7587d559bf5a8e938b9834284b08c1b058e1b516f63ac35801778f6d"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/result.json",
+      "role": "native_dense_integrity_receipt",
+      "sha256": "fb5ae0961380cae1014bcd5f1919686335b3a04983279c8021dfff0f4ea84bde"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-reconstruction-calibration-diagnosis-20260919.json",
+      "role": "candidate_diagnosis",
+      "sha256": "31545500c65f497ac29116b19ad045e6c6641e5dcb1d60cc44e0f049dccf3476"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-reconstruction-calibration-v2-20260919-design.json",
+      "role": "held_out_manufactured_validation_design",
+      "sha256": "3e25960520ad620c1786460f37002e7925aa53db16f6c971c5edf253dc2f02fc"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-reconstruction-calibration-v2-20260919-result.json",
+      "role": "held_out_manufactured_validation_receipt",
+      "sha256": "81ad35f4154cc43a11716755d449b79ca6d59422bc25140c693fa3e4d13d1333"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_material.py",
+      "role": "material_tracer_candidate_backend",
+      "sha256": "3dc9e6e6fd67aa3994c1876a0661f04a6c4b17cfb73ade52fa36fe0b63344137"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_material_neighbors.py",
+      "role": "visible_support_backend",
+      "sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/passive_tracers.py",
+      "role": "wall_and_gate_helpers",
+      "sha256": "0301b797ddf472d8e37a835cb97036ba13b4cde8c1832838edfed06da20860cc"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-resting-pool-migration-spec-2026-09-19.json",
+      "role": "F4_event_definition",
+      "sha256": "76dfc5fe035ddcfa374fa09fec5b3f2472199ee58e9e13496f88f4c04d25b562"
+    }
+  ],
+  "job_id": "f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5",
+  "logical_id": "F4-MATERIAL-REPAIR-AFFINE-BOUND-V2-CANARY-S0P3-CENTER-Q0P5",
+  "material_backend": {
+    "backend": "f4_ckdtree_visible_shepard_affine_bound_v2",
+    "error_estimator": "residual_plus_local_affine_query_bias",
+    "maximum_support_distance_m": 0.03,
+    "neighbour_variant": "f4_affine_bound_v2",
+    "neighbours": 24,
+    "regularization_m": 0.004,
+    "seed_identity": "independent seed-XXXXXX ids; never native particle_id",
+    "support_gate": {
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "minimum_anisotropy": 0.005,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3
+    },
+    "unknown_gate_fraction_max": 0.01,
+    "weighting": "1/(d^2+eps^2)"
+  },
+  "material_definition": {
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "destination_definition": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "box_low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "box_size_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "destination_role": "resting basin liquid and post-contact destination volume",
+      "kind": "continuous_resting_pool_box",
+      "pool_free_surface_z_m": 0.18
+    },
+    "dp_m": 0.0075,
+    "event_definition": {
+      "contact": {
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "path_interpolation": "continuous_linear_segment_per_tracer_substep",
+      "post_return_window": {
+        "completion_required": true,
+        "extension_policy": "double whole scope once if any required event is right-censored; never shorten",
+        "gravity_time_s": 0.3497487083913345,
+        "initial_horizon_s": 4.34,
+        "maximum_extended_horizon_s": 8.68
+      },
+      "residence": {
+        "definition": "time inside destination box after contact, right-censored if unresolved"
+      },
+      "return": {
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "upward_propagation": {
+        "direction": "upward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_gt": 0.0
+      }
+    },
+    "family_id": "F4",
+    "open_faces": [
+      "top"
+    ],
+    "q": 0.5,
+    "recipe": "mdbc_native",
+    "recipe_id": "F4_resting_pool_mdbc_native_v2",
+    "revision_id": "F4_resting_pool_13plus2_v2",
+    "scope_id": "F4_drop_resting_pool_x_v2",
+    "seed_identity": "independent seed-XXXXXX ids, never native particle_id",
+    "source_definition": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        0.62,
+        0.28,
+        0.54
+      ],
+      "box_low_m": [
+        0.36,
+        0.12,
+        0.4
+      ],
+      "box_size_m": [
+        0.26,
+        0.16,
+        0.14
+      ],
+      "drop_left_x_m": 0.36,
+      "initial_velocity_mps": [
+        0.0,
+        0.0,
+        -0.5
+      ],
+      "kind": "continuous_drop_box",
+      "q": 0.5,
+      "source_role": "falling liquid drop, initial fluid box"
+    },
+    "source_labels": "continuous source-box membership; native Mk and particle_id are not material truth",
+    "stage": "qualification_only",
+    "wall_bounds_m": {
+      "xmax": 1.2,
+      "xmin": 0.0,
+      "ymax": 0.4,
+      "ymin": 0.0,
+      "zmax": 0.6,
+      "zmin": 0.0
+    }
+  },
+  "qualification_claim": "none; real native dense .3 s overlay only; event window is right-censored",
+  "required_outputs": [
+    "material.h5",
+    "material.json",
+    "material.h5.checkpoint.npz",
+    "material.h5.checkpoint.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "gpu_peak_mib": 0,
+    "io_weight": 0.25,
+    "ram_mib": 8192
+  },
+  "revision_id": "F4_resting_pool_13plus2_v2",
+  "schema": "core.material.job.v1",
+  "scope_id": "F4_drop_resting_pool_x_v2",
+  "source_dependency": {
+    "cfd_job_id": "f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5",
+    "dp_m": 0.0075,
+    "native_frame_count": 151,
+    "native_output_interval_s": 0.002,
+    "q": 0.5,
+    "source_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+    "source_qualification": "none; one short case cannot establish F4 T2",
+    "source_role": "completed native output at .002 s; direct reference rows; no interpolation",
+    "source_sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9",
+    "time_end_s": 0.3000032376922204,
+    "time_start_s": 0.0
+  },
+  "stage": "canary",
+  "timeout_seconds": 3600
+}

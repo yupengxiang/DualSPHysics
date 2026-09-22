@@ -1,0 +1,54 @@
+{
+  "code": "scripts/f4_native_kernel_mls.py",
+  "code_sha256": "69229cf7126afea3ff148a91e8aaa79174f63ad03a0f1160a2323e0d1f2761b2",
+  "contact_semantics": {
+    "ballistic_band_s": [
+      0.16744591174319812,
+      0.22330837152764313
+    ],
+    "correction": "core_cfd physical_observations contact is 5% initial-drop mass below pool proxy, not first geometric contact",
+    "failure_frame81_s": 0.1620038902,
+    "native_saved_first_any_s": 0.1700054045181429,
+    "source": "f4-material-repair-failure-diagnosis-20260919.json contact_provenance_correction"
+  },
+  "created_at": "2026-09-19T13:00:14.112456+00:00",
+  "error_budget": {
+    "near_collision_validation": "current geometric components plus deterministic two-velocity branch separation lower bound; discontinuity has no single truth",
+    "non_affine_validation": "quadratic manufactured field with H=4.0 m/s/m^2; bound covers true error",
+    "real_source": "residual and RK-vs-Euler path estimates only; no unsupported material upper-bound claim",
+    "smooth_field": "conditional Taylor upper 0.5*H*weighted_second_moment*condition_amplification when independent Hessian bound is supplied"
+  },
+  "execution_policy": {
+    "device": "CPU",
+    "gpu": false,
+    "ledger": false,
+    "old_results_immutable": true,
+    "t2_status": "not_evaluated"
+  },
+  "formula": {
+    "expression": "W=21/(16*pi*h^3)*(1-q/2)^4*(1+2*q), q=r/h, support q<=2",
+    "official_binding": "DualSPHysics Run.out Kernel=\"Wendland\"; Quintic Wendland",
+    "source": "Wendland 1995 DOI 10.1007/BF02123482"
+  },
+  "input_policy": {
+    "density": "native current frame only",
+    "future_state": "forbidden",
+    "model_density": "no estimator in this version",
+    "predicted_density": "forbidden",
+    "query_identity": "independent geometric seeds, no native particle ID or initial Mk termination"
+  },
+  "manufactured_result": "campaigns/core-v1/material/evidence/f4-native-kernel-mls-v1-manufactured-result-v2-20260919.json",
+  "qualification_claim": "none",
+  "revision_id": "f4_native_kernel_mls_v1_design_20260919_v2",
+  "rk_canary_spec": "campaigns/core-v1/material/evidence/f4-native-kernel-mls-v1-rk4-budget-canary-spec-20260919.json",
+  "schema": "core.material.f4.native_kernel_mls.design.v2",
+  "static_backend": "f4_native_kernel_mls_wendland_mass_density_v1",
+  "temporal_trace": {
+    "checkpoint": "atomic checkpoint NPZ and manifest before append; resume rewrites checkpoint frame",
+    "events": "continuous z=.18 contact/upward/return and destination residence",
+    "mass": "equal positive seed mass, per-source closure and CDFs, right censoring",
+    "method": "causal current-frame RK4 with configurable fixed substeps",
+    "permanent_unknown": "first failed stage freezes seed and removes it from later event integration"
+  },
+  "trace_backend": "f4_native_kernel_mls_causal_current_volume_rk4_v1"
+}

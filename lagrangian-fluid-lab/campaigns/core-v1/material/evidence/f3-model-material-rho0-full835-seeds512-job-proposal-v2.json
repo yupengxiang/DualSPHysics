@@ -1,0 +1,448 @@
+{
+  "central_ledger_mutation": false,
+  "created_at_utc": "2026-09-19T18:45:47.254867+00:00",
+  "gpu_started": false,
+  "implementation": {
+    "comparator": {
+      "last_result": "17 passed",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_compare.py",
+      "sha256": "d4fc40b0b0057b4b0fc2487560d709f01c95068109a028e2664bc9f6fdf44acb"
+    },
+    "comparator_tests": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f3_native_volume_mls_compare.py",
+      "sha256": "7eee7bdd59120f2d9ada58f8aa11ad9799192d2fb516362657c59dcbaac3d0cb"
+    },
+    "model_material_module": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_model_material.py",
+      "sha256": "d3b98a5bd1110b1d1ffe7377e36251ce372f6151468bdd254646f5d4c6d71f1b"
+    },
+    "model_material_tests": {
+      "last_result": "4 passed",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f3_native_volume_mls_model_material.py",
+      "sha256": "7be3cbcb35b9e0b4fdc19f37c9c531eaa244b608787cdbd190e771426fa72c5c"
+    },
+    "shared_adapter": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_shared.py",
+      "sha256": "2e46b82d20542d39156014cdc16167838b5cd1b3fbe0f5e9f566e59d7a2359fb"
+    },
+    "temporal_mls_runner": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_temporal_v3.py",
+      "sha256": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395"
+    }
+  },
+  "inputs": {
+    "model_rollout": {
+      "attributes": {
+        "autonomous_prediction": true,
+        "future_state_inputs": false,
+        "identity_semantics": "particle_zone,particle_id",
+        "schema_version": 1,
+        "state_schema": "core.state.native_velocity.v1",
+        "velocity_semantics": "native saved numerical velocity"
+      },
+      "bytes": 723148320,
+      "dt_max_s": 0.010021581680887515,
+      "dt_min_s": 0.00999945898381771,
+      "frames": 836,
+      "particles": 34560,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-bundled-rollout-graph_raw-step500-v3/20260919T181936-77badf536514/trajectory.h5",
+      "sha256": "514685307ab4f213f58e1c67813303b7524d9de52653a25b675f304e3a468dbb",
+      "time_end_s": 8.350012828223477,
+      "time_start_s": 0.0,
+      "valid_all": true
+    },
+    "reference_native_source": {
+      "attributes": {
+        "case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+        "conversion_complete": true,
+        "mass_semantics": "native MassFluid header",
+        "particle_shifting": "disabled",
+        "pressure_semantics": "native EOS",
+        "source": "native JBinaryData arrays; no posthoc particle corrections"
+      },
+      "bytes": 900096638,
+      "dt_max_s": 0.010021581680887515,
+      "dt_min_s": 0.00999945898381771,
+      "frames": 836,
+      "particles": 34560,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+      "sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+      "time_end_s": 8.350012828223477,
+      "time_start_s": 0.0,
+      "valid_all": true
+    },
+    "seed_axis": {
+      "construction": "scripts.f3_native_volume_mls_temporal_v3.seeds_f3(512)",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/seeds-f3-512.npy",
+      "qualification_claim": "none",
+      "schema": "core.material.f3.native_volume_mls.model_seed_axis.v1",
+      "seed_count": 512,
+      "seed_hash_array_with_labels": "952d0fbd75ce680cd80b753caae195e96d28bed4ce73025f31a14e26155300c5",
+      "sha256": "1a433490e5ed38f315a6165e2098fe83f4e7a7599fd7f05ce0376e090661599b",
+      "source_counts": {
+        "source_0": 256,
+        "source_1": 256
+      },
+      "source_definition": "continuous initial x<0 vs x>=0"
+    }
+  },
+  "jobs": [
+    {
+      "argv_template": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+        "-m",
+        "scripts.f3_native_volume_mls_model_material",
+        "--source",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-bundled-rollout-graph_raw-step500-v3/20260919T181936-77badf536514/trajectory.h5",
+        "--output",
+        "{attempt_dir}/trace.h5",
+        "--report",
+        "{attempt_dir}/result.json",
+        "--role",
+        "predicted_model_rollout",
+        "--rho0-kgm3",
+        "1000",
+        "--dp-m",
+        "0.0075",
+        "--intervals",
+        "835",
+        "--substeps",
+        "1",
+        "--seeds",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/seeds-f3-512.npy"
+      ],
+      "job_id": "cpu-f3-model-material-rho0-full835-seeds512-v2",
+      "outputs": {
+        "execution_receipt": "runtime-generated core.material_cpu_profile_receipt.v1",
+        "result_json": "{attempt_dir}/result.json",
+        "trace_h5": "{attempt_dir}/trace.h5"
+      },
+      "qualification_only": true,
+      "reference_pair_policy": "run model and rho0 reference independently; compare only after both completed, fixed seed axis/event definitions, no native-density qualification",
+      "resource_estimate": {
+        "basis_limit": "measured 512-seed interval phase timing; only interval factor extrapolated, with margin for full source and checkpoint/output IO",
+        "estimated_cpu_seconds_no_margin": 1167.304449,
+        "estimated_trace_h5_mib": 70.0,
+        "estimated_wall_seconds_no_margin": 855.0654985477449,
+        "input_bytes": 723148320,
+        "measured_basis": "512 seeds x 20 intervals same rho0 model/reference profile",
+        "peak_rss_mib_measured": 927.3046875,
+        "provisional_margin": 1.3,
+        "recommended_cpu_budget_seconds": 1518,
+        "recommended_wall_budget_seconds": 1112,
+        "scale_intervals": 41.75,
+        "timeout_seconds": 3600
+      },
+      "resources": {
+        "cpu_cores": 2,
+        "gpu_peak_mib": 0,
+        "io_weight": 0.25,
+        "ram_mib": 4096
+      },
+      "role": "predicted_model_rollout",
+      "source": {
+        "attributes": {
+          "autonomous_prediction": true,
+          "future_state_inputs": false,
+          "identity_semantics": "particle_zone,particle_id",
+          "schema_version": 1,
+          "state_schema": "core.state.native_velocity.v1",
+          "velocity_semantics": "native saved numerical velocity"
+        },
+        "bytes": 723148320,
+        "dt_max_s": 0.010021581680887515,
+        "dt_min_s": 0.00999945898381771,
+        "frames": 836,
+        "particles": 34560,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-bundled-rollout-graph_raw-step500-v3/20260919T181936-77badf536514/trajectory.h5",
+        "sha256": "514685307ab4f213f58e1c67813303b7524d9de52653a25b675f304e3a468dbb",
+        "time_end_s": 8.350012828223477,
+        "time_start_s": 0.0,
+        "valid_all": true
+      },
+      "source_read_policy": "read-only complete autonomous/reference input; no source mutation",
+      "status": "proposal_only_do_not_submit",
+      "timeout_seconds": 3600
+    },
+    {
+      "argv_template": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+        "-m",
+        "scripts.f3_native_volume_mls_model_material",
+        "--source",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+        "--output",
+        "{attempt_dir}/trace.h5",
+        "--report",
+        "{attempt_dir}/result.json",
+        "--role",
+        "reference_control_rho0",
+        "--rho0-kgm3",
+        "1000",
+        "--dp-m",
+        "0.0075",
+        "--intervals",
+        "835",
+        "--substeps",
+        "1",
+        "--seeds",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/seeds-f3-512.npy"
+      ],
+      "job_id": "cpu-f3-reference-rho0-full835-seeds512-v2",
+      "outputs": {
+        "execution_receipt": "runtime-generated core.material_cpu_profile_receipt.v1",
+        "result_json": "{attempt_dir}/result.json",
+        "trace_h5": "{attempt_dir}/trace.h5"
+      },
+      "qualification_only": true,
+      "reference_pair_policy": "run model and rho0 reference independently; compare only after both completed, fixed seed axis/event definitions, no native-density qualification",
+      "resource_estimate": {
+        "basis_limit": "measured 512-seed interval phase timing; only interval factor extrapolated, with margin for full source and checkpoint/output IO",
+        "estimated_cpu_seconds_no_margin": 778.4470365000001,
+        "estimated_trace_h5_mib": 70.0,
+        "estimated_wall_seconds_no_margin": 660.2715484501095,
+        "input_bytes": 900096638,
+        "measured_basis": "512 seeds x 20 intervals same rho0 model/reference profile",
+        "peak_rss_mib_measured": 632.34375,
+        "provisional_margin": 1.3,
+        "recommended_cpu_budget_seconds": 1012,
+        "recommended_wall_budget_seconds": 859,
+        "scale_intervals": 41.75,
+        "timeout_seconds": 2700
+      },
+      "resources": {
+        "cpu_cores": 2,
+        "gpu_peak_mib": 0,
+        "io_weight": 0.25,
+        "ram_mib": 4096
+      },
+      "role": "reference_control_rho0",
+      "source": {
+        "attributes": {
+          "case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+          "conversion_complete": true,
+          "mass_semantics": "native MassFluid header",
+          "particle_shifting": "disabled",
+          "pressure_semantics": "native EOS",
+          "source": "native JBinaryData arrays; no posthoc particle corrections"
+        },
+        "bytes": 900096638,
+        "dt_max_s": 0.010021581680887515,
+        "dt_min_s": 0.00999945898381771,
+        "frames": 836,
+        "particles": 34560,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+        "sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+        "time_end_s": 8.350012828223477,
+        "time_start_s": 0.0,
+        "valid_all": true
+      },
+      "source_read_policy": "read-only complete autonomous/reference input; no source mutation",
+      "status": "proposal_only_do_not_submit",
+      "timeout_seconds": 2700
+    }
+  ],
+  "limitations": [
+    "model source is graph_raw autonomous rollout, not a native CFD density source",
+    "rho0 is a public constant estimate and material error is uncalibrated",
+    "full run is proposed only; short 4-seed run is the only measured performance basis"
+  ],
+  "material_reliability": "not_established",
+  "post_run_comparison": {
+    "all_seeds_denominator": true,
+    "comparison_output": "separate diagnostic report; no T2 or native-density claim",
+    "same_density_policy": "rho0_constant_public_current_state_v1",
+    "same_seed_axis": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/seeds-f3-512.npy",
+    "unknown_right_censoring": true
+  },
+  "profile512_measurement": {
+    "extrapolation": {
+      "model": {
+        "basis": "measured 512 seeds x 20 intervals with per-interval advance/field/MLS instrumentation; full-window extrapolation uses 835/20 interval factor only",
+        "estimated_full_cpu_seconds_no_margin": 1167.304449,
+        "estimated_full_wall_seconds_no_margin": 855.0654985477449,
+        "full_advance_wall_seconds": 848.7578969700262,
+        "provisional_margin": 1.3,
+        "recommended_cpu_budget_seconds": 1518,
+        "recommended_wall_budget_seconds": 1112,
+        "short_cpu_seconds": 27.959387999999997,
+        "short_wall_seconds": 26.637132044066675,
+        "startup_overhead_seconds": 6.307601577718742,
+        "timeout_seconds": 3600
+      },
+      "reference": {
+        "basis": "measured 512 seeds x 20 intervals with per-interval advance/field/MLS instrumentation; full-window extrapolation uses 835/20 interval factor only",
+        "estimated_full_cpu_seconds_no_margin": 778.4470365000001,
+        "estimated_full_wall_seconds_no_margin": 660.2715484501095,
+        "full_advance_wall_seconds": 658.640576145146,
+        "provisional_margin": 1.3,
+        "recommended_cpu_budget_seconds": 1012,
+        "recommended_wall_budget_seconds": 859,
+        "short_cpu_seconds": 18.645438000000002,
+        "short_wall_seconds": 17.406794488080777,
+        "startup_overhead_seconds": 1.6309723049635068,
+        "timeout_seconds": 2700
+      }
+    },
+    "model": {
+      "cpu_seconds": 27.959387999999997,
+      "interval_timing": {
+        "field_seconds": {
+          "first": 0.4229529539588839,
+          "last": 0.2045811319258064,
+          "mean": 0.22118742506718264,
+          "p50": 0.20546615053899586,
+          "p95": 0.2777063862537035
+        },
+        "reconstruct_seconds": {
+          "first": 1.2375545188551769,
+          "last": 0.7768131111515686,
+          "mean": 0.7992161367088556,
+          "p50": 0.7660122409579344,
+          "p95": 0.9707818013033832
+        },
+        "wall_seconds": {
+          "first": 1.5703814860899001,
+          "last": 0.9819920699810609,
+          "mean": 1.0164765233173967,
+          "p50": 0.9707763069891371,
+          "p95": 1.244639554229798
+        }
+      },
+      "peak_rss_mib": 927.3046875,
+      "phase_totals": {
+        "advance_calls": 20,
+        "advance_wall_seconds": 20.329530466347933,
+        "field_calls": 81,
+        "field_seconds": 4.423748501343653,
+        "initial_reconstruct_seconds": 0.30364217702299356,
+        "reconstruct_calls": 81,
+        "reconstruct_seconds": 16.287964911200106
+      },
+      "report_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/profile512/model-profile.json",
+      "report_sha256": "c72e5b66ee1d1b718808738dbf429d9bd4d2f1383b2a9fd22c6746c44a0667a7",
+      "trace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/profile512/model-trace.h5",
+      "trace_sha256": "81e238756d6b67b720303a5d4f2cddb10a733471eca644a9fa87d3f489592af9",
+      "wall_seconds": 26.637132044066675
+    },
+    "numerical_code_sha256": "d3b98a5bd1110b1d1ffe7377e36251ce372f6151468bdd254646f5d4c6d71f1b",
+    "profile_wrapper_sha256": "51a7788d0a3ba0680b787a14aba0dbb9f686167b5d41c8e7787235830083be07",
+    "receipt_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/profile512/execution-receipt-v1.json",
+    "receipt_sha256": "933bdf8c8a2a9d622024e13c13e3e67451b4f06d881fe13568f6a7dd53da4b52",
+    "reference": {
+      "cpu_seconds": 18.645438000000002,
+      "interval_timing": {
+        "field_seconds": {
+          "first": 0.010026915115304291,
+          "last": 0.010017901076935232,
+          "mean": 0.009335593116702512,
+          "p50": 0.009149498422630131,
+          "p95": 0.010174781957175583
+        },
+        "reconstruct_seconds": {
+          "first": 0.7775681408820674,
+          "last": 0.7747218278236687,
+          "mean": 0.7793108725978527,
+          "p50": 0.7753807810368016,
+          "p95": 0.7902527265367099
+        },
+        "wall_seconds": {
+          "first": 0.7791681069647893,
+          "last": 0.7852927730418742,
+          "mean": 0.7887911091558635,
+          "p50": 0.7850157704669982,
+          "p95": 0.8002702429366764
+        }
+      },
+      "peak_rss_mib": 632.34375,
+      "phase_totals": {
+        "advance_calls": 20,
+        "advance_wall_seconds": 15.77582218311727,
+        "field_calls": 81,
+        "field_seconds": 0.18671186233405024,
+        "initial_reconstruct_seconds": 0.19902188004925847,
+        "reconstruct_calls": 81,
+        "reconstruct_seconds": 15.785239332006313
+      },
+      "report_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/profile512/reference-control-profile.json",
+      "report_sha256": "4d24601974d66431f62c2427c8c95c36a4b80d15af2ccc94a4dcc37a350f9e19",
+      "trace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/profile512/reference-control-trace.h5",
+      "trace_sha256": "83629284130465b2fa265ac425e07806d455afb91b65635f7af2888f84d7ba5a",
+      "wall_seconds": 17.406794488080777
+    }
+  },
+  "proposal_id": "f3-model-material-rho0-full835-seeds512-v2",
+  "purpose": "full-time complete-source diagnostic for real autonomous model rollout with explicit rho0 density estimate and matching reference rho0 control",
+  "qualification_claim": "none",
+  "resources_basis": "RAM remains 4096 MiB despite measured RSS; full source reads and HDF5 output are bounded by the complete 836-frame assets.",
+  "schema": "core.runtime.job_spec.proposal.v2",
+  "shared_contract": {
+    "density_estimator": "core.material.f3.native_volume_mls.model_density_rho0_constant.v1",
+    "density_strategy": "rho0_constant_public_current_state_v1",
+    "model_future_state_inputs": false,
+    "model_input": "core.state.native_velocity.v1 has no density dataset",
+    "reference_native_density_used": false,
+    "shared_backend": "f3_native_volume_mls_wendland_mass_density_shared_current_v1"
+  },
+  "short_window_measurements": {
+    "extrapolation": "linear in intervals and seed cardinality; near-contact cost, HDF5 cache and support-loss behavior may increase runtime",
+    "model": {
+      "cpu_seconds": 10.912128,
+      "peak_rss_mib": 929.03125,
+      "report": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/model-result.json",
+      "report_sha256": "6bb2dd83af6ed34a1231225d33c5e41c2f336328180ae283cebac4f22c48984e",
+      "trace_sha256": "0ac72a8b5c238e7f0737ffcad28c859cb618bd1488e9f349857e0820ff49b5d9",
+      "wall_seconds": 9.352106097037904
+    },
+    "reference": {
+      "cpu_seconds": 3.673568,
+      "peak_rss_mib": 627.29296875,
+      "report": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/reference-control-result.json",
+      "report_sha256": "606d992281ee7b61ce4ba2aa801cf1f1e733a8c112212ac0b1bf8bc923923a58",
+      "trace_sha256": "0086557e5a7395c5f556c11494c49058aa0a89e3b68cfefabfa2181b0a33b389",
+      "wall_seconds": 2.2717160750180483
+    }
+  },
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "status": "proposal_only_do_not_submit",
+  "study_axis": {
+    "central_ledger_mutation": false,
+    "density_strategy": "rho0_constant_public_current_state_v1",
+    "dp_m": 0.0075,
+    "event_definition": {
+      "event_plane": "x=0",
+      "first_passage": "continuous crossing of x=0 into opposite source half on accepted linear RK segment",
+      "residence": "accepted segment time in opposite source half",
+      "return": "first later crossing back to origin side",
+      "source_label": "initial_x_ge_0"
+    },
+    "frames": 836,
+    "h_m": 0.01194127788262211,
+    "intervals": 835,
+    "material_reliability": "not_established",
+    "no_gpu": true,
+    "qualification_claim": "none",
+    "rho0_kgm3": 1000.0,
+    "seed_axis_manifest_sha256": "303bf9f076622dacfea0150428c931b0474a05fc39aa3c995b6f17f25f147f30",
+    "seed_axis_npy": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/seeds-f3-512.npy",
+    "seed_axis_npy_sha256": "1a433490e5ed38f315a6165e2098fe83f4e7a7599fd7f05ce0376e090661599b",
+    "seed_count": 512,
+    "seed_hash_representation": "952d0fbd75ce680cd80b753caae195e96d28bed4ce73025f31a14e26155300c5",
+    "source_0_seed_count": 256,
+    "source_1_seed_count": 256,
+    "substeps_per_saved_interval": 1,
+    "thread_environment": {
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "time_end_s": 8.350012828223477,
+    "time_start_s": 0.0
+  },
+  "supersedes": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-full835-seeds512-job-proposal-v1.json",
+    "reason": "replace 4-seed linear seed scaling with measured 512-seed x20 interval phase profile",
+    "sha256": "912dd0cf00867723492663d7903c6647090ced4d10e57c4d68148116ea5572e8"
+  }
+}

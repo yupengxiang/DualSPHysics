@@ -1,0 +1,56 @@
+{
+  "acceptance": {
+    "failure_action": "retain qualification_only and do not place repaired source in the 33-scope qualification set",
+    "required": [
+      "audit v2 hard_integrity_pass=true",
+      "all 4176 saved times satisfy abs(t_i - i*.002) <= 2e-5 s",
+      "source wall, finite-state, validity and per-particle mass gates remain unchanged and pass",
+      "new source prepared/input/solver hashes are independently bound"
+    ]
+  },
+  "created_at_utc": "2026-09-19T21:13:17.271302+00:00",
+  "evidence_report_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-dense-cadence-diagnosis-v1/dense1p0-vs-dense1p1-cadence-diagnosis-v2.json",
+  "evidence_report_sha256": "65ffea7c1ad5c29073332dddb944f73afb55695fc0947b88822f7a0574d993f9",
+  "problem": {
+    "cause": "completed-step quantization at the shared DtMin/output schedule; both nominal dense1.0 and candidate dense1.1 share it",
+    "frozen_audit_v2_tolerance_s": 2e-05,
+    "observed_bad_frames": 397,
+    "observed_max_abs_error_s": 2.2084453489945588e-05,
+    "registered_output_interval_s": 0.002
+  },
+  "qualification_claim": "none; do not launch or substitute into T1/T2",
+  "schema": "core.material.f3.dense_cadence_repair_proposal.v1",
+  "scope_implication": {
+    "dense1p0": "nominal dense1.0 remains an engineering/legacy source; its diagnostic audit does not grant qualification",
+    "repaired_lineage": "a repaired source is a new qualification_only lineage; it cannot silently replace existing T1 rows or inherit T1/T2 status",
+    "rows26_27": "current dense1.1 source remains blocked by audit v2 and cannot be used for material qualification",
+    "threshold_policy": "no tolerance or material gate is relaxed"
+  },
+  "single_repair": {
+    "current_coef_dt_min": 0.05,
+    "current_dt_min_s": 2.212269686706988e-05,
+    "name": "align internal minimum timestep to the .002 s save grid",
+    "parameter": "DtMin via the registered coef_dt_min source parameter",
+    "preserve": {
+      "audit_v2_thresholds": {
+        "cadence_floor_s": 1e-07,
+        "cadence_relative": 0.01,
+        "mass_relative": 1e-08,
+        "wall_endpoint_m": 1e-08
+      },
+      "cfl_number": 0.05,
+      "expected_frames": 4176,
+      "interpolation": false,
+      "output_interval_s": 0.002,
+      "posthoc_timestamp_rewrite": false,
+      "solver_binary_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+      "time_max_s": 8.35
+    },
+    "proposed_coef_dt_min_from_DtIni": 0.049673017800634406,
+    "selection_reason": "the smaller 91-step target reduces DtMin by about 0.654 percent and avoids increasing the current stability-limiting step",
+    "target_dt_min_s": 2.1978021978021977e-05,
+    "target_steps_per_saved_interval": 91,
+    "verification": "one bounded source-generation canary must prove the saved timestamps, then the full source must pass audit v2; no timestamp rewriting may be used"
+  },
+  "status": "preregistered_proposal_only"
+}

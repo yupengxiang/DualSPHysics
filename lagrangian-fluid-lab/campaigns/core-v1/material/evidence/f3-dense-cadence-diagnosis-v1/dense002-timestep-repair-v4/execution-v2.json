@@ -1,0 +1,60 @@
+{
+  "active_h5_read": false,
+  "audit_binding": {
+    "module": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f3_cfd_source_audit_v2.py",
+    "runner_delegates_without_copy": true,
+    "schema": "core.f3.cfd.native_volume_mls.source_audit.v2",
+    "sha256": "bf84f3db8b2233d6bccd127a85cec45098fb941a0fa1b54f2213f28216650ffe"
+  },
+  "central_ledger_mutation": 0,
+  "command_records": [
+    ".venv/bin/python scripts/core_f3_cfd_source_dtmin_repair_v2.py --lab-root . prepare --case f3_production_amp1p1_native002_dtminrepair_v1 --output campaigns/core-v1/cfd/f3-native-mls-sources/prepared-v4/f3_production_amp1p1_native002_dtminrepair_v2",
+    ".venv/bin/python scripts/core_f3_cfd_source_dtmin_repair_v2.py --lab-root . make-job --prepared .../prepared.json --output .../full835_v2.json --job-id cfd-f3_production_amp1p1_native002-dtminrepair-full835-v2 --host h200",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 .venv/bin/pytest -q tests/test_f3_dense002_source_audit_v2_binding.py tests/test_f3_dense002_timestep_repair_static.py ..."
+  ],
+  "created_at_utc": "2026-09-19T22:50:54.136769+00:00",
+  "execution_kind": "cpu_prepare_validate_test_only",
+  "gpu_started": false,
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f3_cfd_source_dtmin_repair_v2.py",
+      "sha256": "4d8dfd6fdf8f12b3bb036d37336690081f0595d6f97b24bf10e1036f0db3f9eb"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f3_cfd_source_audit_v2.py",
+      "sha256": "bf84f3db8b2233d6bccd127a85cec45098fb941a0fa1b54f2213f28216650ffe"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f3_dense002_source_audit_v2_binding.py",
+      "sha256": "6d79c7c06a6fdac62de460081c785074b0f0a8c01fcc10fb762df5bd1d7c8162"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f3_dense002_timestep_repair_static.py",
+      "sha256": "5022ad93a792a657e197a8bb0918e33cf9e4b9f03a36193fa9a4e3642dcde204"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/prepared-v4/f3_production_amp1p1_native002_dtminrepair_v2/prepared.json",
+      "sha256": "91c5ad71f76b98dd74aa55727954b4a9037aed4219cfdc5325b79df9da5a012e"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/jobs-v4/f3_production_amp1p1_native002_dtminrepair_full835_v2.json",
+      "sha256": "dbf5272e3a39c23f7d13a25e8c35dbf4b1a1bec72a4e230dbfc7a65fb65c6bf5"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-dense-cadence-diagnosis-v1/dense002-timestep-repair-v4/full835-canary-handoff-v2.json",
+      "sha256": "9333153383ea026c5cc3d9cc0807cbb745952829e9fef83f2ace835ed3fe4c3b"
+    }
+  ],
+  "outputs": {
+    "handoff": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-dense-cadence-diagnosis-v1/dense002-timestep-repair-v4/full835-canary-handoff-v2.json",
+    "handoff_sha256": "9333153383ea026c5cc3d9cc0807cbb745952829e9fef83f2ace835ed3fe4c3b",
+    "job": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/jobs-v4/f3_production_amp1p1_native002_dtminrepair_full835_v2.json",
+    "job_sha256": "dbf5272e3a39c23f7d13a25e8c35dbf4b1a1bec72a4e230dbfc7a65fb65c6bf5",
+    "prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/prepared-v4/f3_production_amp1p1_native002_dtminrepair_v2/prepared.json",
+    "prepared_sha256": "91c5ad71f76b98dd74aa55727954b4a9037aed4219cfdc5325b79df9da5a012e"
+  },
+  "resource_note": "CPU preparation and tests only; no solver resource usage or runtime H5 was produced.",
+  "schema": "core.material.f3.dense002_timestep_repair_execution.v2",
+  "status": "completed_no_launch",
+  "test_result": "30 passed in 3.00s"
+}

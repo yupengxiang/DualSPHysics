@@ -1,0 +1,144 @@
+{
+  "schema": "core.runtime.job_spec.v1",
+  "created_at_utc": "2026-09-20T01:09:22+08:00",
+  "status": "proposal_only_pending_root_queue",
+  "job_id": "ada-f3-native-mls-temporal-v3-short-s2-512-v1",
+  "logical_id": "f3-native-mls-temporal-v3-short-s2-512-v1",
+  "host": "ada",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "attempt_role": "initial",
+  "category": "material_diagnostic",
+  "depends_on": [],
+  "qualification_claim": "none; temporal field interpolation feasibility canary only",
+  "material_reliability": "not established by numerical support diagnostics",
+  "central_runtime_submission": false,
+  "central_ledger_mutation": false,
+  "gpu_started": false,
+  "solver_started": false,
+  "required_outputs": [
+    "trace.h5",
+    "trace.summary.json",
+    "source-preflight.json",
+    "trace.h5.checkpoint.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "gpu_peak_mib": 0,
+    "io_weight": 0.25,
+    "ram_mib": 4096
+  },
+  "timeout_seconds": 180,
+  "resume_policy": "resume the same attempt from immutable v3 checkpoint generations; never restart under a different temporal policy",
+  "no_side_effects": {
+    "gpu_launch": false,
+    "ledger_write": false,
+    "solver_launch": false,
+    "source_write": false
+  },
+  "env": {
+    "PYTHONPATH": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab"
+  },
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "-m",
+    "scripts.f3_native_volume_mls_temporal_v3",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json",
+    "--output",
+    "{attempt_dir}/trace.h5",
+    "--audit-output",
+    "{attempt_dir}/source-preflight.json",
+    "--seeds",
+    "512",
+    "--substeps",
+    "2",
+    "--stop-after",
+    "20"
+  ],
+  "parameter_binding": {
+    "scope": "F3 nominal production engineering diagnosis",
+    "drive_amplitude": 1.0,
+    "q": 0.5,
+    "dp_m": 0.0075,
+    "seed_count": 512,
+    "substeps": 2,
+    "logical_frames": 21,
+    "time_end_basis": "registered source frame 20, approximately 0.2 s",
+    "backend": "f3_native_volume_mls_temporal_linear_current_interval_rk4_v3",
+    "trace_schema": "core.material.f3.native_volume_mls.trace.temporal.v3",
+    "checkpoint_schema": "core.material.f3.native_volume_mls.checkpoint.temporal.v3",
+    "source_policy": "independent geometric seeds_f3(512), continuous x<0/x>=0 labels; native particle identity never defines a seed",
+    "reference_field_policy": "componentwise linear interpolation of native position/velocity/mass/density arrays at the two selected saved frames bracketing the current interval",
+    "interval_boundary_policy": "stage times outside the current registered interval are rejected; no extrapolation and no following-frame access",
+    "model_source_policy": "model CFD state and future model fields are forbidden; only the registered reference source H5 is opened",
+    "trajectory_policy": "native particle positions are linearly interpolated as support geometry; the tracer path is the independent RK4 state and is not read from native particle labels",
+    "support_mask_policy": "the valid fluid native row mask must match at both interval endpoints",
+    "original_material_gate": "retained as comparison metadata only; no gate or 1% threshold change"
+  },
+  "input_provenance": {
+    "source_h5": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+      "sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+      "role": "registered qualification_only reference source; read-only"
+    },
+    "prepared": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json",
+      "sha256": "23d151c07c53c83b3048be9b665722161baaef37fc31e6ce6ec42e4b26b36894"
+    },
+    "candidate_definition": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075_Def.xml",
+      "sha256": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5"
+    },
+    "runner": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_temporal_v3.py",
+      "sha256": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395",
+      "snapshot_policy": "root must create and bind an immutable runtime snapshot before queueing"
+    },
+    "tests": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f3_native_volume_mls_temporal_v3.py",
+      "sha256": "fdecea571341b3a6cb77152262cc35dfcb10e4f65ad61a002414036d373db7bb",
+      "result": "6 passed"
+    }
+  },
+  "recovery_design": {
+    "hdf5_commit_order": "append frame, flush/fsync, publish immutable content-addressed NPZ generation, atomically replace manifest, then record manifest attribute",
+    "fault_window_covered": "SIGKILL after generation publication and before manifest replacement",
+    "resume_source_of_truth": "last manifest generation; any extra HDF5 row is truncated to that committed frame",
+    "generation_gc": "none in this canary; retain all generations for audit"
+  },
+  "measured_profile_basis": {
+    "status": "estimate_only_no_v3_job_started",
+    "development_test_profile": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-mls-temporal-v3-test-profile-receipt-v1.json",
+      "sha256": "8d1408a9ae5aa94afb0c13f6ade5cde16f3fe09a7b04fe62da47e0a2cbabf191",
+      "scope": "analytic and checkpoint unit tests only; not a real-source scaling measurement"
+    },
+    "prior_reference": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-short-canary-s2-s0p2-v2.summary.json",
+      "sha256": "b4629957c0555b0d94f3fa36190d0311e969323bc1df73a458668a511505b454",
+      "window_intervals": 20,
+      "wall_seconds": 34.64,
+      "user_seconds": 49.84,
+      "peak_rss_kib": 716576
+    },
+    "v3_estimate": {
+      "wall_seconds_budget": 180,
+      "cpu_seconds_expected_upper": 120,
+      "peak_rss_mib_budget": 4096,
+      "basis": "v2 0.2 s/512/s2 measured profile plus endpoint-pair field-array interpolation and extra temporal provenance checks; no v3 measurement is claimed"
+    }
+  },
+  "comparison_role": {
+    "primary": "isolate current-frame-held RK4 versus interval-bounded linear reference-field time dependence",
+    "paired_baseline": "existing F3 v1/v2 current-frame traces remain immutable and are not overwritten",
+    "interpretation": "any CDF, residence, return, or unknown change is diagnostic only; it cannot be assigned to temporal interpolation alone without a common spatial/reference comparison",
+    "qualification": false
+  },
+  "status_notes": [
+    "Proposal has not been submitted to the central runtime and does not mutate the ledger.",
+    "This .2 s canary is not a full-window F3 qualification run.",
+    "Existing dense/.01 and dense/.002 jobs are independent and are not restarted or reused as v3 outputs."
+  ]
+}

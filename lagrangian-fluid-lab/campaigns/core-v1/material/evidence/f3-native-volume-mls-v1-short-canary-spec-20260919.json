@@ -1,0 +1,163 @@
+{
+  "schema": "core.material.f3.native_volume_mls.cpu_canary_job.v1",
+  "created_at_utc": "2026-09-19T14:43:00Z",
+  "status": "completed_cpu_canary",
+  "qualification_claim": "none",
+  "material_reliability": "not established by numerical support diagnostics",
+  "central_runtime_submission": false,
+  "central_ledger_mutation": false,
+  "gpu_started": false,
+  "solver_started": false,
+  "scope": {
+    "family": "F3",
+    "purpose": "native-volume MLS feasibility preflight",
+    "source_window": "native frames 0..20 inclusive; current frame i drives interval i to i+1",
+    "time_start_s": 0.0,
+    "time_end_s": 0.2000113023685942,
+    "frames_committed": 21,
+    "seed_count": 512,
+    "substeps": 2,
+    "native_output_interval_s": 0.01,
+    "native_particle_id_as_seed_identity": false,
+    "full_f3_window_requested": false
+  },
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "-m",
+    "scripts.f3_native_volume_mls",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json",
+    "--output",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-short-canary-s2-s0p2-v2.h5",
+    "--audit-output",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-source-preflight-20260919.json",
+    "--seeds",
+    "512",
+    "--substeps",
+    "2",
+    "--stop-after",
+    "20"
+  ],
+  "code_binding": {
+    "program": "scripts/f3_native_volume_mls.py",
+    "program_sha256": "110f7a49e5fe02ecbc631806fb14e64b0e801a027adc847fa39764cd36d04b9b",
+    "test_program": "tests/test_f3_native_volume_mls.py",
+    "test_program_sha256": "d1c9f67393f48735b8505b75a4ed79a7abd30c1ef6cb436d9d53336a9fb4590c",
+    "schema": "core.material.f3.native_volume_mls.v1",
+    "backend": "f3_native_volume_mls_wendland_mass_density_v1",
+    "trace_schema": "core.material.f3.native_volume_mls.trace.v1",
+    "trace_backend": "f3_native_volume_mls_current_frame_rk4_v1"
+  },
+  "input_lineage": {
+    "source_h5": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+      "sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+      "bytes": 900096638,
+      "frames": 836,
+      "particles_axis": 34560,
+      "native_datasets": ["position", "velocity", "mass", "density", "valid", "type", "time"]
+    },
+    "prepared_case": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json",
+      "sha256": "23d151c07c53c83b3048be9b665722161baaef37fc31e6ce6ec42e4b26b36894",
+      "case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "dp_m": 0.0075,
+      "qualified": false,
+      "formal_release": false
+    },
+    "definition_xml": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075_Def.xml",
+      "sha256": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5",
+      "kernel_id": 2,
+      "kernel_name": "Wendland",
+      "coefh": 0.91924,
+      "h_m": 0.01194127788262211,
+      "support_radius_m": 0.02388255576524422
+    },
+    "source_preflight": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-source-preflight-20260919.json",
+      "sha256": "c1c2c90e8b2867273a66f9a4b5c66f8a270c8823f95e1a61130b8f2268897dff"
+    }
+  },
+  "geometry_and_sources": {
+    "walls": "finite closed bottom,left,right,front,back; top open",
+    "wall_box_m": {"low": [-0.45, -0.09, 0.0], "high": [0.45, 0.09, 0.51]},
+    "source_definition": "continuous geometric x halfspace: source 0 x<0, source 1 x>=0",
+    "source_seed_counts": {"source_0": 256, "source_1": 256},
+    "seed_identity": "independent geometric seeds; native particle_id never partitions or terminates a seed",
+    "visibility": "current query-to-current-particle finite-wall line-of-sight test, recomputed per reconstruction",
+    "event_definitions": {
+      "first_passage": "accepted continuous x=0 crossing into opposite halfspace",
+      "return": "first later accepted crossing back to origin halfspace",
+      "residence": "accepted RK segment time in opposite halfspace"
+    }
+  },
+  "reconstruction": {
+    "volume_weight": "mass/density from the same current native H5 frame",
+    "kernel": "Wendland quintic C2 3D, 21/(16*pi*h^3)*(1-q/2)^4*(1+2*q), q=r/h, q<=2",
+    "fit": "weighted affine MLS by SVD on [1,dx/h,dy/h,dz/h]",
+    "candidate_support_gate": {
+      "minimum_support_count": 4,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 4,
+      "maximum_condition_number": 10000000000.0,
+      "svd_relative_cutoff": 1e-12
+    },
+    "old_f3_shepard_gate": "stored as comparison only; not used as native MLS qualification gate",
+    "future_velocity": "forbidden",
+    "future_density": "forbidden",
+    "material_reliability": "support diagnostics are not a calibrated material error bound"
+  },
+  "actual_execution": {
+    "receipt_schema": "core.material.f3.native_volume_mls.cpu_profile_receipt.v1",
+    "wall_seconds_from_time_v": 34.64,
+    "user_seconds": 49.84,
+    "system_seconds": 0.96,
+    "cpu_percent_reported": 146,
+    "peak_rss_kib": 716576,
+    "threads_requested": 1,
+    "h5_output_bytes": 1731656,
+    "h5_file_system_outputs_blocks": 3752,
+    "pytest": "4 passed",
+    "runtime_environment": ".venv/bin/python; numpy/scipy/h5py environment",
+    "stdout_log": "/tmp/f3_native_mls_canary_v2.stdout",
+    "stdout_log_persisted": false
+  },
+  "outputs": {
+    "trace_h5": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-short-canary-s2-s0p2-v2.h5",
+      "sha256": "c11ae4d814a5f91168de621dfede096ea19e5096ec529c18bfec6fe4b136b92e",
+      "bytes": 1731656
+    },
+    "summary": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-short-canary-s2-s0p2-v2.summary.json",
+      "sha256": "b4629957c0555b0d94f3fa36190d0311e969323bc1df73a458668a511505b454"
+    }
+  },
+  "observed_result": {
+    "unknown_fraction_max": 0.0,
+    "common_reliable_path_coverage": 1.0,
+    "mass_closed": true,
+    "source_0_unknown_fraction": 0.0,
+    "source_1_unknown_fraction": 0.0,
+    "source_0_final_candidate_support_pass_fraction": 1.0,
+    "source_1_final_candidate_support_pass_fraction": 1.0,
+    "first_passage_fraction_by_source": {"source_0": 0.0, "source_1": 0.0},
+    "return_fraction_by_source": {"source_0": 0.0, "source_1": 0.0},
+    "native_initial_mass_kg": 14.580000378191471,
+    "stage_failure_counts": {"reliable": 81920}
+  },
+  "interpretation": {
+    "claim": "CPU short-window feasibility only; no F3 T1/T2 qualification",
+    "f4_reuse": "only generic current-frame isolation, geometric seed accounting, visibility, event, and mass-closure ideas are reusable",
+    "f3_new_binding": "F3 source H5, F3 dp/h/kernel, F3 finite-wall/open-top geometry, F3 x-halfspace source definition, and F3 native cadence are independently bound",
+    "f4_reference_only": [
+      "campaigns/core-v1/material/evidence/full003-collected/comparison-v2.json",
+      "campaigns/core-v1/material/evidence/full003-collected/integration-v1.json"
+    ],
+    "f4_outputs_not_reused_as_f3_input": true,
+    "next_scope": "If root schedules a longer F3 candidate, create a new immutable output and preserve this short canary; do not infer qualification from 0.2 s support success."
+  }
+}

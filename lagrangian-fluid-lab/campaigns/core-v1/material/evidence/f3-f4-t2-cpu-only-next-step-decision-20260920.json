@@ -1,0 +1,148 @@
+{
+  "schema": "core.material.t2.cpu_only_next_step_decision.v1",
+  "record_id": "f3-f4-t2-cpu-only-next-step-decision-20260920",
+  "created_at_utc": "2026-09-20T03:40:00Z",
+  "status": "blocked_for_qualification",
+  "decision": "No safe T2-qualification step is available from the retained F3/F4 evidence without resolving the registered material gates. A CPU-only evidence-closure step is safe and may update negative evidence, but it cannot grant T2.",
+  "qualification_claim": "none",
+  "qualification_credit": "none",
+  "t2_status": "not_established",
+  "t2_qualified": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "audit_scope": {
+    "f3": "terminal native-MLS adapter rows 29 and 31, 4096 seeds, 836 frames, through 8.350012828223477 s",
+    "f4": "retained real-material, dense-pair, repair-canary, and tallwall120 negative evidence",
+    "mode": "read_only_json_evidence_audit",
+    "new_cfd_required_for_this_audit": false
+  },
+  "execution_constraints": {
+    "new_job_submitted": false,
+    "gpu_started_by_audit": false,
+    "solver_started_by_audit": false,
+    "central_ledger_mutation": 0,
+    "active_h5_opened": false,
+    "thresholds_changed": false
+  },
+  "registered_gates": {
+    "unknown_fraction_per_source_max": 0.01,
+    "f3_cdf_sup_abs_difference_max": 0.02,
+    "residence_acceptance": {
+      "full_registered_event_window_required": true,
+      "right_censored_is_not_acceptance": true,
+      "numeric_residence_limit_re_evaluated": false
+    }
+  },
+  "observed_evidence": {
+    "f3_rows_29_31": {
+      "row29": {
+        "aggregate_unknown_fraction_max": 0.0107421875,
+        "per_source_final_unknown_fraction": {
+          "0": 0.01220703125,
+          "1": 0.00927734375
+        },
+        "mass_closed": true
+      },
+      "row31": {
+        "aggregate_unknown_fraction_max": 0.014892578125,
+        "per_source_final_unknown_fraction": {
+          "0": 0.015625,
+          "1": 0.01416015625
+        },
+        "mass_closed": true
+      },
+      "comparison_cdf_sup_abs_difference_max": {
+        "first_passage": 0.06005859375,
+        "return": 0.06005859375,
+        "residence": 0.06103515625
+      },
+      "comparison_residence_mean_delta_upper_max_s": 0.07167273314695355,
+      "qualification_effect": "none"
+    },
+    "f4_canaries": {
+      "unknown_fraction_max_by_record": {
+        "real_material_baseline_s2": 0.84765625,
+        "native_dense_pair_s2_s4": 0.896484375,
+        "repair_ess32_v2": 0.923828125,
+        "repair_affine_bound_v2": 0.955078125,
+        "tallwall120_short_canary": 1.0
+      },
+      "all_retained_canaries_fail_unknown_gate": true,
+      "full_event_window_available": false,
+      "event_window_status": "right_censored_or_unresolved",
+      "full003_substep_consistency_is_qualification": false,
+      "full003_residence_mean_s4_minus_s2_s": 0.000002349142314117536
+    }
+  },
+  "qualification_decision": {
+    "unknown_gate": {
+      "pass": false,
+      "reason": "F3 row 29 source 0 and both row 31 sources exceed 0.01; every retained F4 canary fails the unknown gate."
+    },
+    "cdf_gate": {
+      "pass": false,
+      "reason": "F3 first-passage, return, and residence comparison bounds reach 0.06005859375, 0.06005859375, and 0.06103515625, above 0.02."
+    },
+    "residence_gate": {
+      "pass": false,
+      "reason": "F4 residence observations remain right-censored or unresolved because the full registered event window is absent."
+    },
+    "overall_t2_eligibility": false
+  },
+  "safe_next_step": {
+    "name": "cpu_only_evidence_closure",
+    "safe": true,
+    "eligible_for_t2": false,
+    "requires_new_cfd": false,
+    "will_grant_t2": false,
+    "actions": [
+      "Validate the versioned JSON evidence, input hashes, terminal receipts, and explicit negative T2 fields.",
+      "Recheck per-source unknown fractions and the registered F3 CDF bound without aggregating away failing sources.",
+      "Keep right-censored residence records diagnostic until a full registered event window and acceptance record exist.",
+      "Preserve this decision as the current hold state and do not submit a CFD or solver job."
+    ]
+  },
+  "blocked_gaps": [
+    "A material reference path that passes the fixed unknown/reconstruction gate.",
+    "F3 CDF agreement within the registered 0.02 bound.",
+    "A full registered event window with uncensored residence acceptance.",
+    "Independent material calibration and the registered F4 matrix acceptance record."
+  ],
+  "prohibited_shortcuts": [
+    "Do not relax the 0.01 unknown threshold.",
+    "Do not substitute aggregate unknown mass for the per-source gate.",
+    "Do not treat mass closure, substep agreement, or a repair proposal as material reliability.",
+    "Do not convert diagnostic comparison output into T2 qualification."
+  ],
+  "input_evidence": [
+    {
+      "path": "campaigns/core-v1/material/evidence/f3-adapter-rows29-31-terminal-negative-result-20260920.json",
+      "sha256": "74c63836782bd3ff4308dc33e47366c48150e212a020ecac00807e2a4801b8b8",
+      "role": "F3 terminal row summaries, receipts, and explicit negative qualification"
+    },
+    {
+      "path": "campaigns/core-v1/material/evidence/f3-adapter-rows29-31-terminal-comparison-20260920.json",
+      "sha256": "2db007419d5a00e91ec6dfa4ae7454dabed4e150472afc8e8835868a5c3b0e33",
+      "role": "F3 cross-scope diagnostic CDF and residence comparison"
+    },
+    {
+      "path": "campaigns/core-v1/material/evidence/f4-material-negative-evidence-audit-20260920.json",
+      "sha256": "6aa41b16acdf6562a7b40c4e79f1e3ee18b59db080c2fd8ce642d04749bf33dd",
+      "role": "F4 canary completeness and negative-evidence chain"
+    },
+    {
+      "path": "campaigns/core-v1/material/evidence/full003-collected/comparison-v2.json",
+      "sha256": "ccd0622d91d27d769fa2253de72227b32aac3f24171a6cd79418878777d918c3",
+      "role": "F4 short-window substep diagnostic, explicitly not qualification"
+    }
+  ],
+  "targeted_tests": {
+    "test_file": "tests/test_f3_f4_t2_cpu_only_decision.py",
+    "scope": "JSON-only integrity, threshold, censoring, and explicit no-T2 assertions",
+    "commands": [
+      ".venv/bin/python -m pytest -q tests/test_f3_f4_t2_cpu_only_decision.py",
+      ".venv/bin/python -m pytest -q tests/test_f3_f4_t2_cpu_only_decision.py tests/test_f3_audited_source_job_specs_v4.py tests/test_core_f3_native_volume_mls_prepared_adapter_v1.py tests/test_f4_material_calibration.py tests/test_f4_tallwall120_material.py"
+    ],
+    "touches_h5_or_starts_computation": false
+  }
+}

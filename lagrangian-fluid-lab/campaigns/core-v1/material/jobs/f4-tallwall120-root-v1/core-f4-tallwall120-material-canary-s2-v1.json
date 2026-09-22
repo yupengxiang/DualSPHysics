@@ -1,0 +1,380 @@
+{
+  "acceptance": {
+    "must_not_report_T2_qualification": true,
+    "must_preserve_mass_closure": true,
+    "must_report_common_reliable_path_coverage": true,
+    "must_report_contact_upward_return_cdf": true,
+    "must_report_residence_with_right_censoring": true,
+    "must_report_unknown_fraction_per_source": true,
+    "source_hash_must_match_archive": true,
+    "tallwall_zmax_must_be_1p2_m": true,
+    "unknown_gate_remains_0p01": true
+  },
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/e297ce47daed9f58ab671336f7738fbf33de73ba8bbe4d50158ad95b7b8afce8/lagrangian-fluid-lab/scripts/f4_tallwall120_material.py",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-04/product/trajectory.h5",
+    "--output",
+    "{attempt_dir}/product/tallwall120_material.h5",
+    "--q",
+    "0.5",
+    "--dp-m",
+    "0.0075",
+    "--seeds",
+    "512",
+    "--substeps",
+    "2",
+    "--stop-after",
+    "20"
+  ],
+  "attempt_role": "initial",
+  "backend": {
+    "material_reliability_calibrated": false,
+    "maximum_support_distance_m": 0.03,
+    "name": "f3_ckdtree_visible_shepard_distance_v1",
+    "neighbours": 24,
+    "regularization_m": 0.004,
+    "support_gate": {
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "minimum_anisotropy": 0.005,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3
+    },
+    "unknown_gate_fraction_max": 0.01,
+    "version": "F4_tallwall120_material_baseline24_v1",
+    "weighting": "1/(distance_squared+regularization_squared)"
+  },
+  "category": "material_f4_tallwall120_canary",
+  "central_ledger_mutation": 0,
+  "checkpoint_contract": {
+    "generation_directory": "product/tallwall120_material.h5.checkpoints/",
+    "policy": "content-addressed generation files; manifest pointer atomic; no generation overwrite",
+    "resume_equivalence_required": true,
+    "schema": "core.material.f4.tallwall120.checkpoint.v2"
+  },
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "depends_on": [],
+  "env": {
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONPATH": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/e297ce47daed9f58ab671336f7738fbf33de73ba8bbe4d50158ad95b7b8afce8/lagrangian-fluid-lab:/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/e297ce47daed9f58ab671336f7738fbf33de73ba8bbe4d50158ad95b7b8afce8/lagrangian-fluid-lab/scripts"
+  },
+  "event_window": {
+    "extension_requires_new_native_source": true,
+    "full_canary_extension_available": false,
+    "requested_native_intervals": 20,
+    "requested_window_s": 0.4,
+    "short_canary_is_event_right_censored": true,
+    "source_native_window_s": 4.34,
+    "unobserved_event_policy": "NaN/right-censored; retain full source mass denominator"
+  },
+  "family": "F4",
+  "gpu_started": false,
+  "host": "ada",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-04/product/trajectory.h5",
+      "role": "terminal_root_verified_native_trajectory",
+      "sha256": "78631cec15acdd5abcd5c43f326c2dd7c215b3248fd99ec544718bca72a74cad"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-04/archive.json",
+      "role": "terminal_verified_archive",
+      "sha256": "c08aa95984d3e0f4cf153935c2cc7a710fbaeb8e66a371b72079c25bb9a3d3eb"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-04/product/result.json",
+      "role": "native_source_result",
+      "sha256": "83a6e5a6dd76da3666321f9524cbe37da46a7aa3d6622c749082f5596162762e"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-04/product/audit.json",
+      "role": "native_source_audit",
+      "sha256": "f8a0adb44f0be5ce5e33819c7be37b6c76346885908bd9e0099a1db7919e45b1"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-04/product/observations.json",
+      "role": "native_source_observations",
+      "sha256": "3f265d2359ce4786c5fbd141d3d4788d067fa4b71d0f8896fa8a1542556b5f08"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_tallwall120_qualification_v2/cell-04/prepared.json",
+      "role": "prepared_source_definition",
+      "sha256": "08418202ce897da5fbc9f7a7e4ac33867337d54ed46a2632060bbf336c14748c"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_tallwall120_qualification_v2/cell-04/F4_TALLWALL120_MDBC_NATIVE_NU1E6_Q0P50000000_DP0P007500000000_SPATIAL_Def.xml",
+      "role": "prepared_finite_wall_definition",
+      "sha256": "9618bdb071ca406e7d562a4e7391f3508e511e83e7901a42b543e600facea05a"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_tallwall120_qualification_v2/cell-04/generated/F4_TALLWALL120_MDBC_NATIVE_NU1E6_Q0P50000000_DP0P007500000000_SPATIAL.xml",
+      "role": "prepared_generated_solver_definition",
+      "sha256": "69361cb7ebd0ff6a945e09d55f99b9c89548b53d78a3ec2817d5398218610e73"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-cell04-root-verification-v1.json",
+      "role": "root_cell04_output_verification",
+      "sha256": "78968399ee09fab366a57c96c96013293a72e6dffcbfa523460bca3cce50aec0"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-qualification-independent-root-complete-v1.json",
+      "role": "root_t1_complete_tallwall_matrix",
+      "sha256": "11552d98f85225e9748a0aca8012d8080d90aa23862fe7582eb4306ac924846c"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/e297ce47daed9f58ab671336f7738fbf33de73ba8bbe4d50158ad95b7b8afce8/lagrangian-fluid-lab/scripts/f4_tallwall120_material.py",
+      "role": "versioned_tallwall120_material_tracer",
+      "sha256": "fdda7d03602b7bed20213f4e66d662a8c1e980318845c6b5c3b63454da75b4d2"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/e297ce47daed9f58ab671336f7738fbf33de73ba8bbe4d50158ad95b7b8afce8/lagrangian-fluid-lab/scripts/core_material.py",
+      "role": "shared_provider_and_event_primitives",
+      "sha256": "3dc9e6e6fd67aa3994c1876a0661f04a6c4b17cfb73ade52fa36fe0b63344137"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/e297ce47daed9f58ab671336f7738fbf33de73ba8bbe4d50158ad95b7b8afce8/lagrangian-fluid-lab/scripts/f3_material_neighbors.py",
+      "role": "visible_support_shepard_backend",
+      "sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/e297ce47daed9f58ab671336f7738fbf33de73ba8bbe4d50158ad95b7b8afce8/lagrangian-fluid-lab/scripts/passive_tracers.py",
+      "role": "finite_wall_and_support_helpers",
+      "sha256": "3c12744133176a20ca955e1b76e0a9b7c0f5e2ddda4fef75d77574fc201f9024"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-resting-pool-migration-spec-2026-09-19.json",
+      "role": "f4_family_event_precedent",
+      "sha256": "76dfc5fe035ddcfa374fa09fec5b3f2472199ee58e9e13496f88f4c04d25b562"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/e297ce47daed9f58ab671336f7738fbf33de73ba8bbe4d50158ad95b7b8afce8/lagrangian-fluid-lab/scripts/f4_tallwall120_material_proposal.py",
+      "role": "proposal_builder",
+      "sha256": "3ce708b564c6c44d647f4f6e00d0eb901e96b1a811d4165654e221be7bfab814"
+    }
+  ],
+  "job_id": "core-f4-tallwall120-material-canary-s2-v1",
+  "launch_status": "proposal_only_root_review_required",
+  "logical_id": "CORE_F4_TALLWALL120_MATERIAL_CANARY_S2_V1",
+  "material_reliability_status": "uncalibrated",
+  "qualification_claim": "none",
+  "qualification_only": true,
+  "required_outputs": [
+    "product/tallwall120_material.h5",
+    "product/tallwall120_material.json",
+    "product/tallwall120_material.h5.checkpoint.json"
+  ],
+  "resource_estimate": {
+    "basis": "completed H200 F4 native-MLS 151-frame s2 profile: 900 wall s / 1050 CPU s / 1,320,960,691 input bytes; scaled by terminal cell-04 H5 bytes and interval count with 30% margin",
+    "cpu_user_seconds_budget": 360,
+    "estimate_status": "planning estimate; no run started",
+    "intervals": 20,
+    "io_read_bytes_budget": 219148356,
+    "io_write_bytes_budget": 33554432,
+    "peak_rss_mib_budget": 8192,
+    "source_bytes": 2068153309,
+    "wall_seconds_budget": 300
+  },
+  "resources": {
+    "cpu_cores": 2,
+    "gpu_peak_mib": 0,
+    "io_weight": 0.25,
+    "ram_mib": 8192
+  },
+  "revision_id": "F4_tallwall120_material_baseline24_v1",
+  "root_review": {
+    "full_integration_resume_equivalence": "pending",
+    "input_hashes_verified": true,
+    "proposal_sha256": "f79f0576986302d0a531e877bde673768a2c81a986ff13b87d944909d448ecad",
+    "qualification_claim": "none",
+    "test_passes": 5
+  },
+  "schema": "core.material.job.v2",
+  "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+  "source": {
+    "archive": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-04/archive.json",
+      "role": "terminal_verified_archive",
+      "sha256": "c08aa95984d3e0f4cf153935c2cc7a710fbaeb8e66a371b72079c25bb9a3d3eb"
+    },
+    "audit": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-04/product/audit.json",
+      "role": "native_source_audit",
+      "sha256": "f8a0adb44f0be5ce5e33819c7be37b6c76346885908bd9e0099a1db7919e45b1"
+    },
+    "cadence_max_error_s": 1.143530584226185e-05,
+    "cadence_tolerance_s": 2e-05,
+    "case_id": "F4_TALLWALL120_MDBC_NATIVE_NU1E6_Q0P50000000_DP0P007500000000_SPATIAL",
+    "cell04_verification": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-cell04-root-verification-v1.json",
+      "role": "root_cell04_output_verification",
+      "sha256": "78968399ee09fab366a57c96c96013293a72e6dffcbfa523460bca3cce50aec0"
+    },
+    "def_xml": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_tallwall120_qualification_v2/cell-04/F4_TALLWALL120_MDBC_NATIVE_NU1E6_Q0P50000000_DP0P007500000000_SPATIAL_Def.xml",
+      "role": "prepared_finite_wall_definition",
+      "sha256": "9618bdb071ca406e7d562a4e7391f3508e511e83e7901a42b543e600facea05a"
+    },
+    "frame_count": 218,
+    "generated_xml": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_tallwall120_qualification_v2/cell-04/generated/F4_TALLWALL120_MDBC_NATIVE_NU1E6_Q0P50000000_DP0P007500000000_SPATIAL.xml",
+      "role": "prepared_generated_solver_definition",
+      "sha256": "69361cb7ebd0ff6a945e09d55f99b9c89548b53d78a3ec2817d5398218610e73"
+    },
+    "native_output_interval_s": 0.02,
+    "observations": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-04/product/observations.json",
+      "role": "native_source_observations",
+      "sha256": "3f265d2359ce4786c5fbd141d3d4788d067fa4b71d0f8896fa8a1542556b5f08"
+    },
+    "particle_count": 217485,
+    "prepared": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_tallwall120_qualification_v2/cell-04/prepared.json",
+      "role": "prepared_source_definition",
+      "sha256": "08418202ce897da5fbc9f7a7e4ac33867337d54ed46a2632060bbf336c14748c"
+    },
+    "result": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-04/product/result.json",
+      "role": "native_source_result",
+      "sha256": "83a6e5a6dd76da3666321f9524cbe37da46a7aa3d6622c749082f5596162762e"
+    },
+    "source_h5": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-04/product/trajectory.h5",
+      "role": "terminal_root_verified_native_trajectory",
+      "sha256": "78631cec15acdd5abcd5c43f326c2dd7c215b3248fd99ec544718bca72a74cad"
+    },
+    "t1_complete": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-qualification-independent-root-complete-v1.json",
+      "role": "root_t1_complete_tallwall_matrix",
+      "sha256": "11552d98f85225e9748a0aca8012d8080d90aa23862fe7582eb4306ac924846c"
+    },
+    "window_s": 4.34
+  },
+  "source_definition": {
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "destination_region": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "box_low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "box_size_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "destination_role": "resting basin liquid and post-contact destination volume",
+      "kind": "continuous_resting_pool_box",
+      "pool_free_surface_z_m": 0.18
+    },
+    "event_definition": {
+      "contact": {
+        "definition": "first downward crossing from z>0.18 to z<=0.18 after t=0",
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "path_interpolation": "native support particle x/v are linearly interpolated only between the two registered reference frames; the independent tracer path is integrated by RK2 substeps",
+      "post_return_window": {
+        "completion_required": true,
+        "extension_policy": "one whole-scope doubling only when an event is right-censored; a source ending at 4.34 s cannot claim the 8.68 s extension",
+        "gravity_time_s": 0.3497487083913345,
+        "initial_horizon_s": 4.34,
+        "maximum_extended_horizon_s": 8.68
+      },
+      "residence": {
+        "box": "destination_definition",
+        "definition": "time in the continuous destination box after contact",
+        "right_censored_if_unresolved": true
+      },
+      "return": {
+        "definition": "first later downward crossing after upward from z>0.18 to z<=0.18",
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "unobserved_event_policy": "NaN/right-censored; no saved-chord imputation",
+      "upward_propagation": {
+        "definition": "first upward crossing after contact from z<=0.18 to z>0.18",
+        "direction": "upward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_gt": 0.0
+      }
+    },
+    "open_faces": [
+      "top"
+    ],
+    "provider_contract": {
+      "model": "must provide only current predicted x/v state and public parameters; no future CFD density/state",
+      "native_density_mls": false,
+      "reference": "may read only the two native support frames bracketing the current interval"
+    },
+    "source_region": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        0.62,
+        0.28,
+        0.54
+      ],
+      "box_low_m": [
+        0.36,
+        0.12,
+        0.4
+      ],
+      "box_size_m": [
+        0.26,
+        0.16,
+        0.14
+      ],
+      "drop_left_x_m": 0.36,
+      "initial_velocity_mps": [
+        0.0,
+        0.0,
+        -0.5
+      ],
+      "kind": "continuous_drop_box",
+      "q": 0.5,
+      "source_role": "falling liquid drop, initial fluid box"
+    },
+    "source_seed_contract": {
+      "count": 512,
+      "generator": "scripts.core_material.seeds_f4",
+      "identity": "seed-000000..seed-000511; no native particle_id identity",
+      "labels": "all source label 1 from initial continuous membership",
+      "q": 0.5,
+      "source_membership": "all seeds must be inside the continuous source box",
+      "weight": "equal volume quadrature weight; full source mass denominator"
+    },
+    "wall_bounds_m": {
+      "xmax": 1.2,
+      "xmin": 0.0,
+      "ymax": 0.4,
+      "ymin": 0.0,
+      "zmax": 1.2,
+      "zmin": 0.0
+    }
+  },
+  "source_lineage": "terminal archived cell-04 q=0.5 dp=0.0075; no synthetic or F3 source substitution",
+  "source_snapshot": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/e297ce47daed9f58ab671336f7738fbf33de73ba8bbe4d50158ad95b7b8afce8/lagrangian-fluid-lab",
+    "sha256": "e297ce47daed9f58ab671336f7738fbf33de73ba8bbe4d50158ad95b7b8afce8"
+  },
+  "source_t1_status": "root_complete_15_cell_tallwall120; independent material T2 not assessed",
+  "stage": "qualification_only",
+  "timeout_seconds": 900
+}

@@ -1,0 +1,209 @@
+{
+  "baseline_02s": {
+    "case_id": "F4_RESTING_POOL_CENTER_MEDIUM_CANARY",
+    "diagnosis": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-real-material-canary-diagnosis-20260919/diagnosis.json",
+      "sha256": "a80eae9da60cfaac2d99798b657d3286ee7d80258a3db0f49868992d4c9457b8"
+    },
+    "material": {
+      "common_reliable_path_coverage": 0.15234375,
+      "h5": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-material-resting-pool-canary-s2/20260919T182233-c7ddf4fda108/material.h5",
+        "sha256": "22fed640cb6d6657d8fe9370327543b2535afc27d89a4c302788a18e2f7cde02"
+      },
+      "mass_closed": true,
+      "summary": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-material-resting-pool-canary-s2/20260919T182233-c7ddf4fda108/material.json",
+        "sha256": "af3a0dadc5eb691318d83b63918cd6d82f1ab3b6f721e0a30df00f112752f366"
+      },
+      "unknown_fraction_max": 0.84765625
+    },
+    "observed_frame_count": 16,
+    "prepared": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_medium_canary/prepared.json",
+      "sha256": "170aa5facc7f1d08688a3f7ef01af45cbc4226cc660aa91a4e89f74c03893abd"
+    },
+    "trajectory": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-canary-001/20260919T172542-d49b17d63c4f/product/trajectory.h5",
+      "sha256": "892583601f507a2f66977a337718e29e108196aa3d6e83c8a9c3d59d634b6be6"
+    }
+  },
+  "central_ledger_mutation": 0,
+  "code_provenance": {
+    "core_cfd": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_cfd.py",
+      "sha256": "76b01c93554ff5e13046f580a3d224c5db2f200ebacd0f062afdf4aaf74396b1"
+    },
+    "core_material": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_material.py",
+      "sha256": "1a15cf8ad0927f00ba44f72f9e85f167852d1dc8eb49807b057509ed516337dd"
+    },
+    "neighbor_backend": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_material_neighbors.py",
+      "sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752"
+    },
+    "passive_geometry": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/passive_tracers.py",
+      "sha256": "0301b797ddf472d8e37a835cb97036ba13b4cde8c1832838edfed06da20860cc"
+    }
+  },
+  "comparison": {
+    "baseline_output_interval_s": 0.02,
+    "changed_fields": [
+      "case_id",
+      "output_interval_s"
+    ],
+    "dense_source_policy": "must be the native .002 CFD trajectory; no interpolation from .02 and no .02 decimation",
+    "dp_m": 0.0075,
+    "expected_native_dense_frame_count": 151,
+    "family": "F4",
+    "material_controls": [
+      "baseline24",
+      "f3_ckdtree_visible_shepard_distance_v1",
+      "Shepard 1/(d^2+eps^2)",
+      "regularization_m=.004",
+      "maximum_support_distance_m=.03",
+      "seeds=512",
+      "substeps=2 and 4",
+      "unknown gate=.01"
+    ],
+    "native_dense_output_interval_s": 0.002,
+    "q": 0.5,
+    "recipe": "mdbc_native",
+    "same_physics_fields": [
+      "scope_id",
+      "recipe_id",
+      "recipe",
+      "stage",
+      "parameter",
+      "dp_m",
+      "pool",
+      "drop",
+      "gravity_m_s2",
+      "initial_drop_velocity_m_s",
+      "wall_bounds",
+      "closed_faces",
+      "open_faces",
+      "time_max_s",
+      "horizon",
+      "cfl",
+      "boundary_layers",
+      "source_label_semantics",
+      "physical_case_id",
+      "lineage_group_id"
+    ],
+    "time_max_s": 0.3
+  },
+  "created_at": "2026-09-19T10:55:02.534041+00:00",
+  "execution_status": "prepared_only; dense CFD and paired material overlays not yet executed",
+  "expected_analysis": {
+    "compare": [
+      "first failure time and position",
+      "support gate component counts",
+      "reconstruction error distribution",
+      "unknown fraction by source",
+      "mass closure",
+      "common reliable path",
+      "first passage/return CDF and residence with right-censoring"
+    ],
+    "event_policy": "unobserved event windows remain right_censored_or_unresolved/NA; .3 s canary is not a full F4 event qualification window.",
+    "hypothesis_separation": "If dense native output materially delays/removes reconstruction failures while solver physics is unchanged, saved cadence is implicated; if failures persist at the same state/locations with reconstructed velocity error above the fixed cap, local spatial reconstruction remains implicated. No threshold change is allowed."
+  },
+  "gpu_started": false,
+  "limitations": [
+    "No native .002 trajectory exists in this workspace yet; only prepared CFD and pending material plans are delivered.",
+    "No GPU or CFD solver was started by this task.",
+    "No central ledger, slot, or queue state was written.",
+    "The existing .02 result was produced under an earlier frozen core_material snapshot; its raw hash and diagnostic lineage are preserved above, while new material plans bind current code hash explicitly."
+  ],
+  "material_plans": {
+    "manifest": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/jobs/f4-native-cadence-control-20260919/manifest.json",
+      "sha256": "5c035ab32f6bc431d7f1082aac05230805cc569238d429b3540845a5ccd1cd1c"
+    },
+    "s2": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/jobs/f4-native-cadence-control-20260919/s2.json",
+      "sha256": "7697273e65e5633774c3e8ccba8bb396c1ec41269e2e0090b546dcccab6bb75a"
+    },
+    "s4": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/jobs/f4-native-cadence-control-20260919/s4.json",
+      "sha256": "6ada0730d70dede3f86fd5bdd52f2d4afca5d9c90125c96b62a37e47e2291e73"
+    },
+    "status": "pending_native_cfd_artifact; bind actual attempt path and source SHA before queueing"
+  },
+  "native_dense_002s": {
+    "expected_frame_count": 151,
+    "generated_definition_xml": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_native_dense_002_canary/F4_RESTING_POOL_CENTER_NATIVE_DENSE_002_CANARY_Def.xml",
+      "sha256": "8abaae2485c115b81c989051971dd6c9c8cd040c725f174766257fb31597ba8a"
+    },
+    "generated_native_initial_bi4": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_native_dense_002_canary/generated/F4_RESTING_POOL_CENTER_NATIVE_DENSE_002_CANARY.bi4",
+      "sha256": "ca22f36ac027f2157ed51d9a89d526cab01a09f0790a457fa2ec4052147bd341"
+    },
+    "generated_solver_xml": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_native_dense_002_canary/generated/F4_RESTING_POOL_CENTER_NATIVE_DENSE_002_CANARY.xml",
+      "sha256": "b702d0e84437276a0f305aa7e596b3b23204b6379cad1ba52f697a01da145eb1"
+    },
+    "job": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-resting-pool-native-dense-002-canary-job.json",
+      "sha256": "39de9cf1655dfb3a30134b29e72570dcf7d5ce8d086bd8ef505b05cda82000d4"
+    },
+    "job_id": "f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5",
+    "preflight_pass": true,
+    "prepared": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_native_dense_002_canary/prepared.json",
+      "sha256": "438bc45e7587d559bf5a8e938b9834284b08c1b058e1b516f63ac35801778f6d"
+    },
+    "prepared_case_id": "F4_RESTING_POOL_CENTER_NATIVE_DENSE_002_CANARY",
+    "solver_started": false,
+    "trajectory": "pending_native_cfd_attempt/product/trajectory.h5",
+    "trajectory_sha256": "pending_after_native_cfd"
+  },
+  "purpose": "F4 short-window native output cadence control to separate saved-cadence effects from local reconstruction reliability",
+  "qualification_claim": "none",
+  "schema": "core.material.f4.cadence_comparison.v1",
+  "threshold_review": {
+    "applicability_finding": "The .04698137929009748 m/s reconstruction cap and associated ESS/rank/anisotropy/support settings are registered from the F3 qualification diagnostic. The F4 source/destination/event definition is independent, but no F4 calibration record establishes transfer of this F3 cap. Current F4 use is therefore an inherited fixed diagnostic gate, not an F4-qualified threshold.",
+    "decision": "retain the exact fixed gate for this cadence comparison so cadence and reconstruction contributions remain comparable; do not relax, retune, or use either canary as F4/T2 qualification.",
+    "f3_threshold_reuse_detected": true,
+    "f4_specific_calibration_evidence": false,
+    "interpretation_guard": "A dense .002 run passing or failing this inherited gate cannot by itself prove F4 gate validity; it only supplies the pre-registered control comparison.",
+    "origin": {
+      "code_constant": "scripts/core_material.py:GATE",
+      "f3_authorization": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-075-REF0081818-AUTHORIZATION.json",
+        "sha256": "f8d5dae425c954a82d400b0a5b58ffdb59d9caafe0853b055ca0058f5396c4dd"
+      },
+      "f3_backend": "f3_ckdtree_visible_shepard_distance_v1",
+      "f3_dev00_policy": "development/engineering sidecar excluded from recipe, threshold, training, and qualification tuning",
+      "f3_diagnosis_record": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/material-diagnosis-2026-09-19.json",
+        "sha256": "aaec43fdbc017436414c8a7bd42e5bae430fc4f5002a6cb09602dbaaef139933"
+      },
+      "f3_gate_registration": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json",
+        "sha256": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4"
+      },
+      "f3_h2_h1_study": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/material-h2-h1-study-2026-09-19.json",
+        "sha256": "967ca4d34240b6a4ac72fcf5e6c5806c0e38a6a9bfad578fd62a129be28c284a"
+      },
+      "f3_reference_roles": [
+        "reference_nominal",
+        "reference_low_amplitude",
+        "reference_high_amplitude"
+      ],
+      "formula": "0.05 * sqrt(9.81 * 0.09)"
+    },
+    "shared_gate_in_use": {
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "maximum_support_distance_m": 0.03,
+      "minimum_anisotropy": 0.005,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3,
+      "regularization_m": 0.004,
+      "unknown_fraction_max": 0.01
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "central_ledger_mutation": 0,
+  "cfd_job": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-resting-pool-native-dense-002-canary-job.json",
+  "cfd_job_sha256": "39de9cf1655dfb3a30134b29e72570dcf7d5ce8d086bd8ef505b05cda82000d4",
+  "created_at": "2026-09-19",
+  "execution_status": "prepared_only_pending_native_cfd_artifact",
+  "fixed_gate": {
+    "maximum_reconstruction_error_mps": 0.04698137929009748,
+    "maximum_support_distance_m": 0.03,
+    "minimum_anisotropy": 0.005,
+    "minimum_effective_sample_size": 4.0,
+    "minimum_geometry_rank": 3,
+    "regularization_m": 0.004,
+    "unknown_fraction_max": 0.01
+  },
+  "gpu_started": false,
+  "native_dense": {
+    "expected_native_frame_count": 151,
+    "expected_trajectory": "<cfd_attempt_dir>/product/trajectory.h5",
+    "output_interval_s": 0.002,
+    "time_max_s": 0.3
+  },
+  "paired_baseline": {
+    "output_interval_s": 0.02,
+    "trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-canary-001/20260919T172542-d49b17d63c4f/product/trajectory.h5",
+    "trajectory_sha256": "892583601f507a2f66977a337718e29e108196aa3d6e83c8a9c3d59d634b6be6"
+  },
+  "plans": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/jobs/f4-native-cadence-control-20260919/s2.json",
+      "sha256": "7697273e65e5633774c3e8ccba8bb396c1ec41269e2e0090b546dcccab6bb75a",
+      "substeps": 2
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/jobs/f4-native-cadence-control-20260919/s4.json",
+      "sha256": "6ada0730d70dede3f86fd5bdd52f2d4afca5d9c90125c96b62a37e47e2291e73",
+      "substeps": 4
+    }
+  ],
+  "prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_native_dense_002_canary/prepared.json",
+  "prepared_sha256": "438bc45e7587d559bf5a8e938b9834284b08c1b058e1b516f63ac35801778f6d",
+  "purpose": "F4 native .002 s short-cadence material comparison plans; pending actual native CFD trajectory",
+  "qualification_claim": "none",
+  "schema": "core.material.jobs.v1",
+  "source_policy": "Do not queue or run until root binds <cfd_attempt_dir> to the completed native .002 CFD attempt and records its trajectory hash; no interpolation or .02 decimation may satisfy this dependency."
+}

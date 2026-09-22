@@ -1,0 +1,202 @@
+{
+  "acceptance": {
+    "all_rows_mass_closure_abs_error_max": 1e-12,
+    "constant_true_error_max_mps": 1e-12,
+    "qualification": "none; this calibrates diagnostic observability and error budget only",
+    "report_required": [
+      "true_error",
+      "diagnostic_error",
+      "false_safe_mass",
+      "false_alarm_mass",
+      "gate_failure_components"
+    ],
+    "source_rows_unknown_mass_fraction_max": 0.01
+  },
+  "backend_binding": {
+    "backend": "f3_ckdtree_visible_shepard_distance_v1",
+    "gate": {
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "minimum_anisotropy": 0.005,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3
+    },
+    "gate_policy": "fixed inherited diagnostic gate; calibration cannot modify it",
+    "maximum_support_distance_m": 0.03,
+    "neighbours": 24,
+    "regularization_m": 0.004,
+    "weighting": "1/(d^2+eps^2)"
+  },
+  "code_provenance": {
+    "calibration_script": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_material_calibration.py",
+    "calibration_script_sha256": "b4f122fddfb581941aab7cad122b121ca693b249a9cbbb9447e978d185d2a9ec"
+  },
+  "created_at": "2026-09-19T11:11:09.182272+00:00",
+  "execution": {
+    "commands": {
+      "run": ".venv/bin/python -m scripts.f4_material_calibration run --design <design.json> --output <receipt.json>",
+      "write_design": ".venv/bin/python -m scripts.f4_material_calibration design --output <design.json>"
+    },
+    "device": "CPU",
+    "gpu": false,
+    "ledger": false,
+    "matrix_scope": "8 bounded q/field combinations (2 q values x 4 analytic fields, with 4 diagnostic regions each), not the 33-cell scientific matrix",
+    "slot": false
+  },
+  "geometry": {
+    "destination_region": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "box_low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "box_size_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "destination_role": "resting basin liquid and post-contact destination volume",
+      "kind": "continuous_resting_pool_box",
+      "pool_free_surface_z_m": 0.18
+    },
+    "dp_metadata_m": [
+      0.0075
+    ],
+    "event_definition": {
+      "contact": {
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "path_interpolation": "continuous_linear_segment_per_tracer_substep",
+      "post_return_window": {
+        "completion_required": true,
+        "extension_policy": "double whole scope once if any required event is right-censored; never shorten",
+        "gravity_time_s": 0.3497487083913345,
+        "initial_horizon_s": 4.34,
+        "maximum_extended_horizon_s": 8.68
+      },
+      "residence": {
+        "definition": "time inside destination box after contact, right-censored if unresolved"
+      },
+      "return": {
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "upward_propagation": {
+        "direction": "upward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_gt": 0.0
+      }
+    },
+    "q_cases": [
+      0.5,
+      1.0
+    ],
+    "source_region": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        0.62,
+        0.28,
+        0.54
+      ],
+      "box_low_m": [
+        0.36,
+        0.12,
+        0.4
+      ],
+      "box_size_m": [
+        0.26,
+        0.16,
+        0.14
+      ],
+      "drop_left_x_m": 0.36,
+      "initial_velocity_mps": [
+        0.0,
+        0.0,
+        -0.5
+      ],
+      "kind": "continuous_drop_box",
+      "q": 0.5,
+      "source_role": "falling liquid drop, initial fluid box"
+    },
+    "support_spacing_m": 0.015,
+    "wall_definition": "f4_walls(): bottom and four closed side faces; top open"
+  },
+  "macro_unknown_budget": {
+    "closure_tolerance": 1e-12,
+    "failure_policy": "budget failure is reported as calibration failure; never repair by changing the F3 gate",
+    "maximum_unknown_mass_fraction": 0.01,
+    "source_denominator": "all 512 equal-weight source seeds per q and field",
+    "unknown_policy": "every failed support query remains unknown and is included in the denominator"
+  },
+  "manufactured_fields": [
+    {
+      "expression": "U*[0.10,-0.05,0.02]",
+      "id": "constant",
+      "truth": "exact constant velocity"
+    },
+    {
+      "expression": "U*[0.10,-0.05,0.02] + U*A@[x/1.2,y/0.4,z/0.6]",
+      "id": "affine_div_free",
+      "matrix_A": [
+        [
+          0.0,
+          0.3,
+          0.1
+        ],
+        [
+          -0.2,
+          0.0,
+          0.05
+        ],
+        [
+          0.15,
+          -0.1,
+          0.0
+        ]
+      ],
+      "truth": "analytic affine field with trace(A)=0"
+    },
+    {
+      "expression": "affine + U*[0.12*z^2+0.08*x*z, 0.05*(y-0.5)*z, 0.18*(z-z_interface)^2]",
+      "id": "quadratic_wall_normal",
+      "truth": "analytic wall-normal/interface curvature field"
+    },
+    {
+      "expression": "affine + U*[0.10*sin(2*pi*z), 0.08*cos(pi*x), 0.06*sin(2*pi*z)*cos(pi*y)]",
+      "id": "smooth_interface",
+      "truth": "analytic smooth interface-scale field"
+    }
+  ],
+  "purpose": "F4-specific independent reconstruction calibration; diagnostic only",
+  "qualification_claim": "none",
+  "query_regions": {
+    "closed_wall": {
+      "construction": "3x8x4 cell-centre slab x=[0,.06] m",
+      "mass_policy": "diagnostic region budget"
+    },
+    "destination": {
+      "construction": "16x8x4 cell-centre grid in the continuous pool box",
+      "mass_policy": "diagnostic region budget"
+    },
+    "interface": {
+      "construction": "16x8x3 cell-centre grid over z=[.15,.21] m",
+      "mass_policy": "diagnostic region budget"
+    },
+    "source": {
+      "construction": "seeds_f4(512,q)",
+      "mass_policy": "equal source seed mass; production macro budget"
+    }
+  },
+  "revision_id": "F4_reconstruction_manufactured_v1",
+  "schema": "core.material.f4.reconstruction_calibration.v1",
+  "source_policy": "analytic/manufactured samples only; no F3 or F4 CFD failure locations are used for fitting",
+  "velocity_scale_mps": 1.1719214990774767
+}

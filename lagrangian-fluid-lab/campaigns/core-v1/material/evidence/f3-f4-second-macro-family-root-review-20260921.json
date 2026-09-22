@@ -1,0 +1,247 @@
+{
+  "schema": "core.material.t2.f3_f4.second_macro_family.root_review_only.v1",
+  "record_id": "f3-f4-second-macro-family-root-review-20260921",
+  "created_at_utc": "2026-09-21T00:00:00+00:00",
+  "status": "blocked_no_t2_safe_route",
+  "review_decision": {
+    "T2_macro": false,
+    "T2_path": false,
+    "qualification_credit": 0,
+    "decision": "defer_f4_ess32_new_output_contract_after_candidate_review",
+    "selected_family": "F4",
+    "selected_candidate_id": "f4_ess32_v2",
+    "selected_candidate_status": "proposal_only_zero_credit",
+    "reason": [
+      "F3 remains negative on the fixed per-source unknown and CDF bounds.",
+      "F4 has a complete T1-bound native source window, but every retained material canary is unknown/right-censored and fails the fixed unknown gate.",
+      "The F4 ESS32 candidate is the smallest complete-window candidate with unchanged scientific gates, but its frame-40-to-41 counterfactual has zero cohort survivors.",
+      "No alternate qualified F4 cell or backend provides independent positive material evidence under the same gates."
+    ]
+  },
+  "fixed_rules": {
+    "unknown_fraction_per_source_max": 0.01,
+    "f3_cdf_sup_abs_difference_max": 0.02,
+    "f4_full_event_window_s": 4.340002980805959,
+    "right_censor_is_unknown": true,
+    "no_partial_credit": true,
+    "denominator_policy": "all geometric seeds remain in each source denominator; failed or right-censored seeds are retained",
+    "reconstruction_gate": {
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "minimum_anisotropy": 0.005,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3.0,
+      "maximum_support_distance_m": 0.03
+    },
+    "gate_changes": {
+      "unknown": false,
+      "cdf": false,
+      "reconstruction": false,
+      "event_window": false,
+      "denominator": false
+    }
+  },
+  "admission_state": {
+    "F3": {
+      "T1_numerical": true,
+      "matrix_complete": true,
+      "T2_macro": false,
+      "T2_path": false,
+      "retained_rows": 2,
+      "maximum_unknown_fraction": 0.015625,
+      "cdf_pass": false,
+      "cdf_maximum": 0.06103515625,
+      "qualification_credit": 0
+    },
+    "F4": {
+      "T1_numerical": true,
+      "matrix_complete": true,
+      "T2_macro": false,
+      "T2_path": false,
+      "retained_material_cases": 6,
+      "all_event_windows_complete": false,
+      "unknown_gate_pass": false,
+      "qualification_credit": 0
+    },
+    "overall_T2_credit": 0
+  },
+  "candidate_contract": {
+    "candidate_id": "f4_ess32_v2",
+    "family": "F4",
+    "backend": "f4_ckdtree_visible_shepard_ess32_v2",
+    "neighbours": 32,
+    "error_estimator": "local_residual",
+    "source_cell": "cell-14",
+    "source_window": {
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-14/product/trajectory.h5",
+      "sha256": "91846866c177e4c3036b7ef92c33a4e0bde7d9e8993efb01dde300811b7c096e",
+      "bytes": 10326356548,
+      "frames": 1086,
+      "particles": 217485,
+      "time_start_s": 0.0,
+      "time_end_s": 4.340002980805959,
+      "native_rows_exact": true,
+      "no_stride_or_synthetic_cadence": true
+    },
+    "one_transition_audit": {
+      "frame_transition": "40->41",
+      "cohort_size": 128,
+      "counterfactual_cohort_survivors": 0,
+      "counterfactual_reliable_after_frame": 384,
+      "qualification_credit": 0,
+      "interpretation": "diagnostic proposal only; zero survivors blocks automatic full-source authorization"
+    },
+    "new_output_required": true,
+    "old_negative_trace_reuse": "binding_only",
+    "old_negative_trace_state_copy": false
+  },
+  "alternate_f4_screen": {
+    "cell-04": {
+      "case_id": "F4_TALLWALL120_MDBC_NATIVE_NU1E6_Q0P50000000_DP0P007500000000_SPATIAL",
+      "source_path": "campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-04/product/trajectory.h5",
+      "source_sha256": "78631cec15acdd5abcd5c43f326c2dd7c215b3248fd99ec544718bca72a74cad",
+      "source_bytes": 2068153309,
+      "frames": 218,
+      "time_end_s": 4.340002980805959,
+      "hard_integrity_pass": true,
+      "source_mass_gate_pass": true,
+      "independent_route": false,
+      "decision": "reject_as_second_route",
+      "reason": "cadence audit proves exact every-fifth equality with Cell14; it is a coarser derived lineage, not independent CFD"
+    },
+    "cell-13": {
+      "case_id": "F4_TALLWALL120_MDBC_NATIVE_NU1E6_Q0P50000000_DP0P007500000000_INTERNAL_TIME",
+      "source_path": "campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-13/product/trajectory.h5",
+      "source_sha256": "dda836234da1c40f7505db36b33d1b7522631a2c3622751e718de19bd24abf16",
+      "frames": 218,
+      "time_end_s": 4.340008094101708,
+      "hard_integrity_pass": true,
+      "source_mass_gate_pass": true,
+      "independent_route": false,
+      "decision": "reject_as_second_route",
+      "reason": "internal-time comparator cell; it does not provide the registered native-output source semantics"
+    },
+    "other_qualified_cells": {
+      "status": "screened_out",
+      "reason": "cells 00,01,02,03,05,06,07,08,09,10,11 vary q/dp or resolution and are not an alternate source for the selected q=0.5, dp=0.0075 native-output material contract"
+    }
+  },
+  "alternate_backend_screen": {
+    "baseline24": {
+      "backend": "f3_ckdtree_visible_shepard_distance_v1",
+      "status": "negative_existing_canary",
+      "counterfactual_cohort_survivors": 0,
+      "qualification_credit": 0,
+      "reuse_policy": "negative trace binding only"
+    },
+    "f4_affine_bound_v2": {
+      "backend": "f4_ckdtree_visible_shepard_affine_bound_v2",
+      "status": "negative_existing_canary",
+      "counterfactual_cohort_survivors": 0,
+      "short_canary_unknown_fraction": 0.955078125,
+      "qualification_credit": 0,
+      "decision": "reject; no evidence improvement over ESS32"
+    },
+    "f4_native_kernel_mls_v1": {
+      "backend": "f4_native_kernel_mls_wendland_mass_density_v1",
+      "status": "diagnostic_only",
+      "source_window": "151 frames through 0.300003 s on a dense canary, not the registered 4.34 s terminal window",
+      "fixed_reconstruction_gate_used": false,
+      "t2_status": "not_evaluated",
+      "decision": "reject; source and gate contract are insufficient for T2 admission"
+    },
+    "f4_ess32_v2": {
+      "backend": "f4_ckdtree_visible_shepard_ess32_v2",
+      "status": "smallest_complete_window_proposal",
+      "counterfactual_cohort_survivors": 0,
+      "decision": "defer; candidate review required"
+    }
+  },
+  "execution_constraints": {
+    "read_only_json_review": true,
+    "source_h5_reopened": false,
+    "source_h5_rehashed": false,
+    "sidecar_started": false,
+    "solver_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "matrix_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "qualification_credit": 0
+  },
+  "forbidden_actions": [
+    "change unknown, CDF, reconstruction, event-window, cadence, or denominator gates",
+    "drop unknown or right-censored seeds",
+    "reuse a negative trace as candidate state",
+    "rerun CFD or start a solver/GPU",
+    "start a material sidecar without a separate explicit authorization",
+    "write matrix, registry, or ledger"
+  ],
+  "hash_bindings": {
+    "prior_admission_contract": {
+      "path": "campaigns/core-v1/material/evidence/f3-f4-t2-admission-root-review-contract-20260921.json",
+      "sha256": "04e02868af86d65758fb739ff4630fec658e384b7325bbdf66abd55d60edafac",
+      "role": "existing F3/F4 T2 admission review"
+    },
+    "source_window_audit": {
+      "path": "campaigns/core-v1/material/evidence/f3-f4-t2-cpu-source-window-audit-v1-20260920.json",
+      "sha256": "983e15aae8e1ce4df705590c7b1cc89e27a0445c8152f4a003123392e3aaa279",
+      "role": "negative source-window and fixed-gate audit"
+    },
+    "f3_t1_receipt": {
+      "path": "campaigns/core-v1/evidence/f3-inherited-qualification.json",
+      "sha256": "a28bf89e231fdb1bd7399c4ed8e2a6cbb297194c5cfee7cc93a1eb9d1d40d8a2",
+      "role": "F3 T1 receipt"
+    },
+    "f4_t1_receipt": {
+      "path": "campaigns/core-v1/evidence/f4-tallwall120-formal-qualification-20260920.json",
+      "sha256": "865f2481a28b4935635264c58d72bff166f267e943ba509a602d9f67f3c38307",
+      "role": "F4 T1 receipt"
+    },
+    "f4_cell_matrix_review": {
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-qualification-independent-root-fourteen-cells-v1.json",
+      "sha256": "57cea257bf1ac3fea59490fc5732b73938898bd615c7a853f834fb6e0d10df3c",
+      "role": "qualified-cell and alternate-cell screen"
+    },
+    "f4_cadence_source_audit": {
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native004-cadence-source-audit-v1.json",
+      "sha256": "9cbad0aea665c886e8e9b51d4c540bf42ca7f1e521ade291e6482cda2b4c5298",
+      "role": "Cell04 exact-every-fifth / Cell14 lineage audit"
+    },
+    "f4_candidate_contract": {
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-candidate-contract-20260921.json",
+      "sha256": "566d39c8c32f42859d7f2b1b93ef087dbf6e01d1666bead10d740d9ca2709d6d",
+      "role": "ESS32 candidate and one-transition audit"
+    },
+    "f4_full_source_contract": {
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-f4-ess32-full-source-canary-contract-20260921.json",
+      "sha256": "cfb7f20c8e5276d1148f21b32980ae2ef55afdf656924dc72aeddc06631a8f91",
+      "role": "deferred full-source candidate contract"
+    },
+    "f4_root_cause_audit": {
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-root-cause-audit-20260921.json",
+      "sha256": "a4fa8e9283b4588f8ff25ace474ef57705191ba27c84a5ec9fbceefca935d0e6",
+      "role": "zero-survivor first-failure decomposition"
+    },
+    "f4_sidecar_negative_preflight": {
+      "path": "campaigns/core-v1/material/evidence/f4-macro-t2-sidecar-preflight-20260920.json",
+      "sha256": "636b212081852921c209fe4b4124a99f64eac975c67b054b2fa2f48ab1172cb8",
+      "role": "negative sidecar preflight"
+    },
+    "f4_ess32_canary_result": {
+      "path": "campaigns/core-v1/material/evidence/f4-material-repair-ess32-v2-canary-s0p3-center-q0p5-result.json",
+      "sha256": "4c30232fbcbf2489921257ec7c244182c7b9a70680e0408ecef5d007f1eed115",
+      "role": "negative ESS32 short canary"
+    },
+    "f4_affine_canary_result": {
+      "path": "campaigns/core-v1/material/evidence/f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5-result.json",
+      "sha256": "867b35003c4e8a6f5bbe6641614302cabd65fa20e44e59f90ae03cec78ccafa1",
+      "role": "negative affine-bound short canary"
+    },
+    "f4_native_kernel_mls_result": {
+      "path": "campaigns/core-v1/material/evidence/f4-native-kernel-mls-v1-dense-short-canary-result-20260919.json",
+      "sha256": "2e77f66007cf74de8959020b0efbf3c93ab80709c4ea4a77406e7f94bb90565e",
+      "role": "diagnostic-only native-kernel MLS canary"
+    }
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "amends": {
+    "prior_report": "campaigns/core-v1/material/evidence/f3-native-volume-mls-model-adapter-contract-v1.json",
+    "reason": "v2 adds explicit density_time_s equality to State.time_s; prior v1 report remains immutable"
+  },
+  "causal_tests": [
+    {
+      "meaning": "same arrays produce identical native-volume MLS velocity and reliability through both adapters",
+      "name": "reference_model_same_field",
+      "result": "passed"
+    },
+    {
+      "meaning": "changing one current model density changes m/rho and the reconstructed velocity on a nonlinear field",
+      "name": "density_is_causal_weight_input",
+      "result": "passed"
+    },
+    {
+      "meaning": "x/v/mass-only State cannot enter native-volume MLS",
+      "name": "missing_density_fails_closed",
+      "result": "passed"
+    },
+    {
+      "meaning": "current predicted H5 has no density dataset and is rejected without an explicit estimate",
+      "name": "existing_predicted_h5_gap",
+      "result": "passed"
+    },
+    {
+      "meaning": "model adapter rejects reference/CFD source semantics and non-model density labels",
+      "name": "reference_density_provenance_rejected_for_model",
+      "result": "passed"
+    },
+    {
+      "meaning": "a density estimate tagged at a different time than State.time_s is rejected",
+      "name": "same_current_time_required",
+      "result": "passed"
+    },
+    {
+      "meaning": "arrays are copied/read-only and the adapter exposes no future reader",
+      "name": "immutable_current_field",
+      "result": "passed"
+    }
+  ],
+  "created_at_utc": "2026-09-19T18:12:24.939822+00:00",
+  "evidence_id": "f3-native-volume-mls-model-adapter-contract-v2",
+  "execution_receipt": "campaigns/core-v1/material/evidence/f3-native-volume-mls-model-adapter-contract-execution-v2.json",
+  "input_code_sha256": {
+    "scripts/core_contract.py": "9dd0dd6eae979d3764250c2a620a1e5417affeed3332010ec026e8db8782f767",
+    "scripts/core_material.py": "3dc9e6e6fd67aa3994c1876a0661f04a6c4b17cfb73ade52fa36fe0b63344137",
+    "scripts/f3_native_volume_mls_shared.py": "2e46b82d20542d39156014cdc16167838b5cd1b3fbe0f5e9f566e59d7a2359fb",
+    "scripts/f3_native_volume_mls_temporal_v3.py": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395",
+    "tests/test_f3_native_volume_mls_shared.py": "6d8bdef3f3abfa8d6f13c7be9270020b88c5fcac2194a839d2fe00edb5eab92b"
+  },
+  "interface_audit": {
+    "conclusion": "the existing predicted model source cannot be sent to native-volume MLS without an explicit same-frame model density estimate; silently using reference density or falling back to Shepard would change the backend semantics",
+    "existing_model_material_path": {
+      "current_frame": "x/v/valid only",
+      "future_permission": "future() raises PermissionError; field() uses only an explicitly requested local bracket",
+      "provider": "scripts.core_material.StateH5Provider",
+      "sampler": "CurrentField with 1/(distance_squared+regularization_squared) Shepard weights"
+    },
+    "model_source_current_datasets": [
+      "time",
+      "position",
+      "velocity",
+      "particle_id",
+      "particle_zone",
+      "mass",
+      "valid"
+    ],
+    "model_source_missing_for_native_volume_mls": [
+      "density"
+    ],
+    "model_source_schema": "core.state.native_velocity.v1",
+    "model_state_missing_field": "core_contract.State has position/velocity/mass/valid but no density or volume field",
+    "reference_path": {
+      "backend_weight": "(mass/density)*Wendland_quintic_c2_3d(distance,h)",
+      "current_fields": [
+        "position",
+        "velocity",
+        "mass",
+        "density",
+        "valid"
+      ],
+      "model_source_access": "forbidden by existing v3 provider binding",
+      "provider": "scripts.f3_native_volume_mls_temporal_v3.F3TemporalReferenceProvider"
+    }
+  },
+  "limitations_and_next_input": [
+    "No model density estimator is supplied by this change; a future model implementation must publish and hash a versioned model_* density estimator or density dataset before any native-volume model canary.",
+    "The adapter is an interface/causality candidate only. It does not modify frozen v1/v2/v3 runners, old results, support gates, or qualification status.",
+    "The seven adapter tests use a small analytic cloud; they do not establish real CFD material reliability or T2."
+  ],
+  "qualification_claim": "none",
+  "schema": "core.material.f3.native_volume_mls.shared_current_field.evidence.v2",
+  "scope": "material-side backend interface only; no GPU, CFD launch, ledger, or T2 decision",
+  "shared_contract": {
+    "backend": "f3_native_volume_mls_wendland_mass_density_shared_current_v1",
+    "causality": {
+      "density_time_binding": "density_time_s must equal State.time_s",
+      "future_state_inputs": false,
+      "implicit_density_or_volume": false,
+      "model_input": "one current State plus explicit density_estimate and density_time_s for that same State",
+      "native_particle_id_as_tracer_identity": false,
+      "reference_source_lookup_from_model_adapter": false
+    },
+    "compatibility": "F3NativeVolumeMLS.reconstruct consumes the shared object structurally; legacy core_material.CurrentField remains Shepard and is not relabelled as native-volume MLS",
+    "model_adapter": "from_predicted_state(core_contract.State, density_estimate, density_time_s, density_semantics=model_*)",
+    "module": "scripts/f3_native_volume_mls_shared.py",
+    "reference_adapter": "from_reference_frame(frame, source_semantics, density_semantics)",
+    "required_arrays": [
+      "position[N,3]",
+      "velocity[N,3]",
+      "mass[N]",
+      "density[N]",
+      "valid[N]"
+    ],
+    "roles": [
+      "reference_native",
+      "predicted_model"
+    ],
+    "schema": "core.material.f3.native_volume_mls.shared_current_field.v1"
+  },
+  "status": "interface_gap_confirmed_and_fail_closed_adapter_tested"
+}

@@ -1,0 +1,217 @@
+{
+  "central_ledger_mutation": false,
+  "central_runtime_submission": false,
+  "comparison_mode": {
+    "allowed_pair": [
+      "f3_native_volume_mls_temporal_linear_current_interval_rk4_v3",
+      "f3_native_volume_mls_current_frame_rk4_v1_or_v2"
+    ],
+    "event_semantics_required": [
+      "first_passage",
+      "return",
+      "residence"
+    ],
+    "finite_wall_required": true,
+    "name": "temporal_method_comparison",
+    "qualification_effect": "none; result remains diagnostic_only and qualification_claim=none",
+    "same_seed_axis_required": true,
+    "same_source_required": true,
+    "seed_hash_representation": "v3 and v1/v2 hashes may differ only with explicit expected_trace_seed_hash; initial_position and source_label arrays must still match exactly"
+  },
+  "completed_short_validation": {
+    "common_reliable_path_fraction": 1.0,
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-temporal-v3-v1-short-s2-method-comparison-v1.json",
+    "qualification_claim": "none",
+    "v3_short_root_verification": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-temporal-v3-short-s2-root-verification-v1.json",
+      "sha256": "889933a662c82dfdade199acf74860026e2a8d14acf970d62cb8d47d2048773c"
+    }
+  },
+  "created_at_utc": "2026-09-19T17:41:21.692706+00:00",
+  "first_near_wall_window_postprocess": {
+    "argv_template": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "-m",
+      "scripts.f3_native_volume_mls_spatial_diagnosis",
+      "--pair",
+      "nominal-v3-v1={v3_attempt_dir}/trace.h5=/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-volume-mls-full835-s2-512-v1/20260919T230331-8a2f1ed31265/trace.h5",
+      "--output",
+      "{attempt_dir}/near-wall-spatial-diagnosis.json"
+    ],
+    "depends_on": [
+      "ada-f3-native-mls-temporal-v3-full835-s2-512-v1",
+      "ada-f3-native-volume-mls-full835-s2-512-v1"
+    ],
+    "input_policy": "consume completed trace.h5 files read-only; do not rerun v3/v1 and do not use this job to estimate trace runtime",
+    "interpretation": {
+      "event": "first passage, return, residence and unknown remain fixed event definitions; no source/contact subset is introduced",
+      "qualification_claim": "none; support_unknown remains separate from material reliability and the 1% gate is unchanged",
+      "reference_vs_reconstruction": "compare native reference macro fields and MLS diagnostics in the same window; do not assign causality from one metric",
+      "support": "report wall_rejected_count, support distance, candidate count, ESS, rank, condition and reconstruction error in the selected window"
+    },
+    "job_id": "post-f3-temporal-v3-v1-full835-s2-near-wall-postprocess-v2",
+    "no_side_effects": {
+      "gpu_launch": false,
+      "ledger_write": false,
+      "solver_launch": false,
+      "source_write": false
+    },
+    "output_policy": "diagnostic JSON only: first-failure window, support/reconstruction metrics, macro comparison; no resource receipt and no qualification decision",
+    "performance_profiling": false,
+    "proposal_kind": "read_only_postprocess_diagnosis",
+    "required_outputs": [
+      "near-wall-spatial-diagnosis.json"
+    ],
+    "resources": {
+      "cpu_cores": 2,
+      "gpu_peak_mib": 0,
+      "io_weight": 0.25,
+      "purpose": "postprocess admission limit, not a performance profile",
+      "ram_mib": 4096
+    },
+    "solver_launch": false,
+    "status": "postprocess_proposal_waiting_for_v3_full_trace",
+    "timeout_seconds": 900,
+    "trace_runner_launch": false,
+    "window_definition": {
+      "algorithm_change": false,
+      "frame_end": 835,
+      "frame_start": 800,
+      "selection_basis": "existing v1 nominal production first wall_occluded observation near frame 828; v3 result must report its own first failure and may differ",
+      "time_basis": "approximately 8.00..8.35 s on the registered nominal source axis"
+    }
+  },
+  "full_nominal_835_s2": {
+    "argv_template": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "-m",
+      "scripts.f3_native_volume_mls_compare",
+      "--left",
+      "{v3_attempt_dir}/trace.h5",
+      "--right",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-volume-mls-full835-s2-512-v1/20260919T230331-8a2f1ed31265/trace.h5",
+      "--comparison-mode",
+      "temporal_method_comparison",
+      "--provenance",
+      "{attempt_dir}/temporal-method-provenance.json",
+      "--output",
+      "{attempt_dir}/temporal-method-comparison.json"
+    ],
+    "depends_on": [
+      "ada-f3-native-mls-temporal-v3-full835-s2-512-v1",
+      "ada-f3-native-volume-mls-full835-s2-512-v1"
+    ],
+    "existing_v3_trace_job_spec": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-temporal-v3-full835-s2-root-job-v1.json",
+      "sha256": "5a1957d1a94f3cb101fd0fd5b989f263cc0ffc420cb3d58b93035c4d5adab68c"
+    },
+    "job_id": "post-f3-temporal-v3-v1-full835-s2-method-comparison-v1",
+    "left_trace": "{v3_attempt_dir}/trace.h5",
+    "no_side_effects": {
+      "gpu_launch": false,
+      "ledger_write": false,
+      "solver_launch": false,
+      "source_write": false
+    },
+    "provenance_template": {
+      "allow_seed_hash_representation_difference": true,
+      "allow_temporal_method_difference": true,
+      "comparison_id": "f3-temporal-v3-v1-full835-s2-method-v1",
+      "comparison_mode": "temporal_method_comparison",
+      "endpoint_time_tolerance_s": 1e-08,
+      "expected_backend_families": [
+        "temporal_linear_v3",
+        "current_frame_hold"
+      ],
+      "expected_event_definition": {
+        "first_passage": "continuous crossing of x=0 into opposite source half on accepted linear RK segment",
+        "residence": "accepted segment time in the opposite source half",
+        "return": "first later crossing back to the seed's origin half"
+      },
+      "expected_trace_backends": [
+        "f3_native_volume_mls_temporal_linear_current_interval_rk4_v3",
+        "f3_native_volume_mls_current_frame_rk4_v1"
+      ],
+      "expected_trace_seed_hash": {
+        "left": "d6c5fa1879ccf5e0c5dcf25ef52139c7d20ebd99a50c6aedaa88c9ee565c0741",
+        "right": "21431fb61295d91a12c63de103eab15fb4fe88bc527e08ef7a5f994ef3d6ee37"
+      },
+      "expected_trace_source_sha256": {
+        "left": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+        "right": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4"
+      },
+      "expected_walls_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217"
+    },
+    "required_outputs": [
+      "temporal-method-comparison.json"
+    ],
+    "resources": {
+      "cpu_cores": 2,
+      "gpu_peak_mib": 0,
+      "io_weight": 0.25,
+      "ram_mib": 4096
+    },
+    "right_trace": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-volume-mls-full835-s2-512-v1/20260919T230331-8a2f1ed31265/trace.h5",
+    "status": "postprocess_proposal_waiting_for_v3_full_trace",
+    "timeout_seconds": 900
+  },
+  "gpu_started": false,
+  "implementation": {
+    "comparator": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_compare.py",
+      "sha256": "729b72c860043a54af3e43d1ba347d8ba931944fee4b3f2db2319a9300186893"
+    },
+    "comparator_tests": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f3_native_volume_mls_compare.py",
+      "result": "15 passed",
+      "sha256": "d13144c8947d3834fc297e9a9116e49233731eb764a00c0fc337ed38fa7b23ca"
+    },
+    "near_wall_diagnosis": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_spatial_diagnosis.py",
+      "sha256": "efc38394f3398f89dad371303940ec75b60f7ca8794efd736df77de7cebd4b73"
+    }
+  },
+  "near_wall_role": {
+    "performance_profiling": false,
+    "proposal_kind": "read_only_postprocess_diagnosis",
+    "resource_fields_are_admission_limits_only": "cpu_cores/ram_mib/timeout bound the postprocess job; no trace-cost estimate or runner benchmark is claimed",
+    "solver_launch": false,
+    "trace_runner_launch": false
+  },
+  "qualification_claim": "none; temporal method comparison and near-wall diagnosis only",
+  "registered_inputs": {
+    "event_definition": {
+      "first_passage": "continuous crossing of x=0 into opposite source half on accepted linear RK segment",
+      "residence": "accepted segment time in the opposite source half",
+      "return": "first later crossing back to the seed's origin half"
+    },
+    "finite_wall_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217",
+    "prepared": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json",
+      "sha256": "23d151c07c53c83b3048be9b665722161baaef37fc31e6ce6ec42e4b26b36894"
+    },
+    "reference_source_h5": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+      "sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4"
+    },
+    "seed_hashes": {
+      "v1_current_frame": "21431fb61295d91a12c63de103eab15fb4fe88bc527e08ef7a5f994ef3d6ee37",
+      "v3_temporal": "d6c5fa1879ccf5e0c5dcf25ef52139c7d20ebd99a50c6aedaa88c9ee565c0741"
+    },
+    "source_definition": {
+      "axis": 0,
+      "boundary_m": 0.0,
+      "kind": "continuous_halfspace",
+      "source_0": "seed x < 0",
+      "source_1": "seed x >= 0"
+    }
+  },
+  "schema": "core.runtime.comparison_job_proposals.v2",
+  "solver_started": false,
+  "status": "proposal_only_do_not_submit",
+  "supersedes": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-temporal-method-comparison-job-proposals-v1.json",
+    "reason": "v2 explicitly separates read-only near-wall postprocess from CPU performance profiling",
+    "sha256": "23bdacd3d74a54d30e213e8819e07e6fa9950b5e5196b4221c8a0c5d40eb6092"
+  }
+}

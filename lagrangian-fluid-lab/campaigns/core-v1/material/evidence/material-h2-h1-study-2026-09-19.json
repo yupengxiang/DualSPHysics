@@ -1,0 +1,179 @@
+{
+  "schema": "core.material.h2_h1.study.v1",
+  "created_date": "2026-09-19",
+  "decision": "h2_invalid_h1_conservative_but_gate_failed",
+  "central_state": {
+    "ledger_modified": false,
+    "gpu_started": false,
+    "slot_acquired": false,
+    "qualification_claim": false,
+    "unknown_gate_fraction": 0.01
+  },
+  "code": {
+    "current_sha256": "1880c02a50168ae3325c39993a55103a1ebba06adcc48a486b7f6f4825d94b7e",
+    "neighbor_code_sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752",
+    "passive_code_sha256": "0301b797ddf472d8e37a835cb97036ba13b4cde8c1832838edfed06da20860cc",
+    "fixed_gate": {
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3,
+      "minimum_anisotropy": 0.005,
+      "maximum_support_distance_m": 0.03,
+      "regularization_m": 0.004
+    }
+  },
+  "manufactured_validation": {
+    "receipt": "campaigns/core-v1/material/evidence/h1-affine-bound-study-2026-09-19/core-material-h2-manufactured.json",
+    "receipt_sha256": "e85b7a39d997c3e271f5b262e7b22efc04e8d84a286a704f16f51c8de143c0c6",
+    "script": "campaigns/core-v1/material/evidence/h1-affine-bound-study-2026-09-19/core_material_h2_manufactured.py",
+    "script_sha256": "bccdd0ad4b0ec75f0f99d69db3ae0075b3cde970b43b8a71f95aef789a8662ba",
+    "input": {
+      "cloud_shape": [6555, 3],
+      "query_shape": [60, 3],
+      "cloud_sha256": "0b87c8c2e6e82f470f4181115757c3c31a72a4ead69ea2152db2feb79ffbe0cf",
+      "query_sha256": "a60183587b6f5a895b6bd09ed81c676c2dff7effc1f86f243debdfdf27f2e83e",
+      "velocity_sha256": "8afb133157fba5d8cf6fbadf3a42735162c09dfb0bd1565e9f8ba9e347f9ae40",
+      "truth_sha256": "a52d774aa952c0a871cd766ccfcb34bd628f5e799241d0be9ab49caf97ef9025",
+      "walls_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217",
+      "field": "quadratic wall-normal x/z curvature plus y/z cross terms"
+    },
+    "execution": {
+      "device": "CPU",
+      "elapsed_seconds": 0.03134763799607754,
+      "max_rss_kib": 560128,
+      "gpu_started": false,
+      "ledger_touched": false,
+      "slot_acquired": false
+    },
+    "results": {
+      "baseline24": {
+        "backend": "f3_ckdtree_visible_shepard_distance_v1",
+        "actual_error_over_gate_fraction": 0.4,
+        "diagnostic_gate_fail_fraction": 0.0,
+        "actual_bad_but_diagnostic_pass_fraction": 0.4,
+        "actual_good_but_diagnostic_fail_fraction": 0.0,
+        "actual_error_p95_mps": 0.07903192657019444,
+        "estimated_error_p95_mps": 0.027025317464431493
+      },
+      "h2_k48": {
+        "backend": "f3_ckdtree_visible_shepard_distance_k48_v1",
+        "actual_error_over_gate_fraction": 0.4166666666666667,
+        "diagnostic_gate_fail_fraction": 0.3333333333333333,
+        "actual_bad_but_diagnostic_pass_fraction": 0.35,
+        "actual_good_but_diagnostic_fail_fraction": 0.26666666666666666,
+        "actual_error_p95_mps": 0.11854752251472682,
+        "estimated_error_p95_mps": 0.05081117995830467
+      },
+      "h1_affine_bound": {
+        "backend": "f3_ckdtree_visible_shepard_query_error_bound_v1",
+        "error_estimator": "residual_plus_local_affine_query_bias",
+        "actual_error_over_gate_fraction": 0.4,
+        "diagnostic_gate_fail_fraction": 0.8,
+        "actual_bad_but_diagnostic_pass_fraction": 0.0,
+        "actual_good_but_diagnostic_fail_fraction": 0.4,
+        "actual_error_p95_mps": 0.07903192657019444,
+        "estimated_error_p95_mps": 0.08181561880260076
+      }
+    }
+  },
+  "h2_k48_nominal_canary": {
+    "lineage": "R0081818-NOMINAL reference_nominal",
+    "input": "campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+    "input_sha256": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575",
+    "command": ".venv/bin/python -m scripts.core_material --source campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5 --output /tmp/core-material-h2-nominal-260.h5 --seeds 512 --substeps 2 --stop-after 260 --neighbour-variant h2_k48",
+    "output": "campaigns/core-v1/material/evidence/h2-k48-study-2026-09-19/core-material-h2-nominal-260.h5",
+    "output_sha256": "969ba5502ca877512a018419dcb6848bb57e53f3ab023b454aee22a740e3c7e3",
+    "summary_sha256": "eeee54611baa4d70737ff161e5b74c52ad52add1e9d2f460b1014cee01910acb",
+    "checkpoint_sha256": {
+      "json": "c970e22dd78789c4b73a36e33aa476fc82ddd0c5dbf7e77a2e63871b6f416e24",
+      "npz": "821a4c27912769dbf30df880b7ca9eb28513724001f70c26abb8c540b99e5dbe"
+    },
+    "run_binding": {
+      "code_sha256": "d9b8efd1d4d6eb10ceac768605f5c6ef474362224356d01d37c01b32ebd6255e",
+      "backend": "f3_ckdtree_visible_shepard_distance_k48_v1",
+      "neighbour_variant": "h2_k48",
+      "neighbours": 48,
+      "error_estimator": "local_residual"
+    },
+    "execution": {
+      "status": "partial",
+      "committed_frame": 260,
+      "committed_time_s": 2.60001472138253,
+      "summary_elapsed_seconds": 82.98215947602876,
+      "summary_max_rss_kib": 589692,
+      "time_v_user_s": 100.20,
+      "time_v_system_s": 1.33,
+      "time_v_wall_s": 85.44,
+      "time_v_max_rss_kib": 709644,
+      "device": "CPU",
+      "gpu_started": false,
+      "ledger_touched": false,
+      "slot_acquired": false
+    },
+    "result": {
+      "mass_closed": true,
+      "unknown_fraction_by_source": {"0": 0.046875, "1": 0.0},
+      "unknown_fraction_max": 0.046875,
+      "unknown_gate_pass": false,
+      "common_reliable_path_coverage": 0.9765625,
+      "first_failure_seed_count": 12,
+      "first_failure_source_counts": {"0": 12, "1": 0},
+      "first_failure_frames": [{"frame": 245, "count": 2}, {"frame": 247, "count": 2}, {"frame": 248, "count": 2}, {"frame": 249, "count": 2}, {"frame": 250, "count": 4}, {"frame": 250, "time_s": 2.500000173906133}]
+    },
+    "diagnosis": "k48 increased ESS and visible/selected support (visible 192, selected 48) but did not reduce first failures or the unknown bound; H2 is invalid as a repair."
+  },
+  "h1_affine_bound_nominal_canary": {
+    "lineage": "R0081818-NOMINAL reference_nominal",
+    "input": "campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+    "input_sha256": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575",
+    "command": ".venv/bin/python -m scripts.core_material --source campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5 --output /tmp/core-material-h1-nominal-260.h5 --seeds 512 --substeps 2 --stop-after 260 --neighbour-variant h1_affine_bound",
+    "output": "campaigns/core-v1/material/evidence/h1-affine-bound-study-2026-09-19/core-material-h1-nominal-260.h5",
+    "output_sha256": "3de7023e1dd8e5f5d825fd77f5bc935230b3d1dfca12f44716d8ae843e19773c",
+    "summary_sha256": "cd3c095a513eae4674402e5e959c5fb68e7530525d7e467471d7ff8e005c238e",
+    "checkpoint_sha256": {
+      "json": "aa35a2aac8871cb325bd2228c5e1b28fb73ebf6713c4a8cc634fb49ef0be2c38",
+      "npz": "46a35eb7b2e25f4e8a565bd21043f0aa9d7804411e57ecc93da14f7ebc136dba"
+    },
+    "run_binding": {
+      "code_sha256": "8d45ee7b1be55b8e01f8b4b978091f527fdb824ab53bec36656ae6bf4977ce68",
+      "backend": "f3_ckdtree_visible_shepard_query_error_bound_v1",
+      "neighbour_variant": "h1_affine_bound",
+      "neighbours": 24,
+      "error_estimator": "residual_plus_local_affine_query_bias"
+    },
+    "execution": {
+      "status": "partial",
+      "committed_frame": 260,
+      "committed_time_s": 2.60001472138253,
+      "summary_elapsed_seconds": 51.386307891923934,
+      "summary_max_rss_kib": 581428,
+      "time_v_user_s": 69.04,
+      "time_v_system_s": 0.73,
+      "time_v_wall_s": 53.69,
+      "time_v_max_rss_kib": 716612,
+      "device": "CPU",
+      "gpu_started": false,
+      "ledger_touched": false,
+      "slot_acquired": false
+    },
+    "result": {
+      "mass_closed": true,
+      "unknown_fraction_by_source": {"0": 0.06640625, "1": 0.0078125},
+      "unknown_fraction_max": 0.06640625,
+      "unknown_gate_pass": false,
+      "common_reliable_path_coverage": 0.962890625,
+      "first_failure_seed_count": 19,
+      "first_failure_source_counts": {"0": 17, "1": 2},
+      "first_failure_frames": [{"frame": 218, "count": 2}, {"frame": 229, "count": 1}, {"frame": 236, "count": 2}, {"frame": 239, "count": 2}, {"frame": 245, "count": 2}, {"frame": 247, "count": 2}, {"frame": 248, "count": 2}, {"frame": 249, "count": 2}, {"frame": 250, "count": 4}]
+    },
+    "diagnosis": "H1 removes manufactured false passes but is conservative on the nominal canary and fails the fixed 1% unknown gate; it is not a qualification repair."
+  },
+  "job_spec": {
+    "working_directory": "lagrangian-fluid-lab",
+    "executable": ".venv/bin/python",
+    "resource": {"device": "CPU", "gpu": false, "ledger": false, "slot": false, "seeds": 512, "substeps": 2, "stop_after": 260},
+    "h2_argv": ["-m", "scripts.core_material", "--source", "campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5", "--output", "campaigns/core-v1/material/evidence/h2-k48-study-2026-09-19/<run>.h5", "--seeds", "512", "--substeps", "2", "--stop-after", "260", "--neighbour-variant", "h2_k48"],
+    "h1_argv": ["-m", "scripts.core_material", "--source", "campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5", "--output", "campaigns/core-v1/material/evidence/h1-affine-bound-study-2026-09-19/<run>.h5", "--seeds", "512", "--substeps", "2", "--stop-after", "260", "--neighbour-variant", "h1_affine_bound"],
+    "hard_checks": ["initial_reliable == 512/512", "mass_closed == true", "unknown_fraction_max <= 0.01", "preserve fixed reconstruction gate", "record code/input hashes", "do not use dev00 for selection"]
+  }
+}

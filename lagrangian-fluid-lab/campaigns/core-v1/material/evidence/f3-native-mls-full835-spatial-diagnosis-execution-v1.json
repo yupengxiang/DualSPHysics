@@ -1,0 +1,69 @@
+{
+  "created_at_utc": "2026-09-19T16:43:01.681308+00:00",
+  "implementation": {
+    "script": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_spatial_diagnosis.py",
+    "sha256": "efc38394f3398f89dad371303940ec75b60f7ca8794efd736df77de7cebd4b73"
+  },
+  "input_traces": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-volume-mls-full835-s2-512-v1/20260919T230331-8a2f1ed31265/trace.h5",
+      "sha256": "37365de6a6d5091d9af6cb6302d44152bb61e55e89e61482aa8ffed90514caf0"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-nominal-coarse-s2-full835-v1/20260919T233252-213c3eec0f06/trace.h5",
+      "sha256": "c7f48717f9018b3389fa5abe7442be9d0807c5a7196292b3e18bc28292b7ae6c"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-native-mls-nominal-fine-s2-full835-v1/20260919T233316-d1da746887f4/trace.h5",
+      "sha256": "60c22832aec3452a3d3d909619b92978757dff718796bda2b1d6a148ee461ba6"
+    }
+  ],
+  "interpreter": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "version": "Python 3.10.12"
+  },
+  "outputs": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-mls-full835-spatial-diagnosis-v1.json",
+      "sha256": "6447314a42db716fd1f2b46685564c22470adeaf1db2ed5e99f93e8cd1598e37"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-mls-full835-spatial-diagnosis-summary-v1.json",
+      "sha256": "321905c9b00ee82580eb0906ec9788a531c6d727bef5f6afaf57c7f3d93ab1f4"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-mls-full835-nominal-coarse-s2-vs-s4-comparison-v1.json",
+      "sha256": "fa14a6aee3d13ae580170b895c15152834e7e25c28720e19e9680407fb0c2003"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-mls-full835-nominal-fine-s2-vs-s4-comparison-v1.json",
+      "sha256": "1feb020ac0e54ca167af142b282ee7bc1358e3bd2bfddb1448bd4954cd9c456d"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-mls-full835-production-s2-vs-s4-comparison-v1.json",
+      "sha256": "7f9b32d0d41ec85fc53a4b0067781bb3d6ed635c1690974d09166733f3438a00"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-endpoint-spatial-root-comparisons-v1.json",
+      "sha256": "f19938cf88a945ec255771b9c63ecf903740c723a7d555cb8c30a889396fc4cd"
+    }
+  ],
+  "policy": {
+    "cdf_exceedance_threshold": 0.02,
+    "qualification_claim": "none",
+    "source_field_future_access": "forbidden; native current frame only",
+    "unknown_gate_per_source": 0.01
+  },
+  "reference_semantics_audit": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-generated-numerical-semantics-root-v1.json",
+    "sha256": "5c577d043ad4c09a3153b27385553f94a93e00e34fed963b66667a30bd684784"
+  },
+  "resource_observation": "wall_s=3.23 cpu_user_s=11.00 cpu_sys_s=0.32 max_rss_kib=148600",
+  "schema": "core.material.f3.native_volume_mls.spatial_diagnosis_execution.v1",
+  "status": "succeeded_diagnostic_only",
+  "tests": {
+    "command": ".venv/bin/python -m pytest -q tests/test_f3_native_volume_mls_compare.py tests/test_f3_native_volume_mls_v2.py tests/test_f3_native_volume_mls_spatial_diagnosis.py",
+    "result": "13 passed in 1.56s",
+    "test_sha256": "59e3b3403af6d90f16eb1fbc2cdc73c661ff978892fb79d72658750150936f4a"
+  }
+}

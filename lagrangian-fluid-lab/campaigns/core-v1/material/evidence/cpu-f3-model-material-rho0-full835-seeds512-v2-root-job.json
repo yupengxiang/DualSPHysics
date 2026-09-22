@@ -1,0 +1,83 @@
+{
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "-m",
+    "scripts.f3_native_volume_mls_model_material",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-bundled-rollout-graph_raw-step500-v3/20260919T181936-77badf536514/trajectory.h5",
+    "--output",
+    "{attempt_dir}/trace.h5",
+    "--report",
+    "{attempt_dir}/result.json",
+    "--role",
+    "predicted_model_rollout",
+    "--rho0-kgm3",
+    "1000",
+    "--dp-m",
+    "0.0075",
+    "--intervals",
+    "835",
+    "--substeps",
+    "1",
+    "--seeds",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/seeds-f3-512.npy"
+  ],
+  "category": "model_material_fulltime_diagnostic",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/8f52f26cccdc31256abf22397b49478d18a1968383d7399888a131bb07c756be/lagrangian-fluid-lab",
+  "env": {
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONPATH": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/8f52f26cccdc31256abf22397b49478d18a1968383d7399888a131bb07c756be/lagrangian-fluid-lab:/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/8f52f26cccdc31256abf22397b49478d18a1968383d7399888a131bb07c756be/lagrangian-fluid-lab/scripts"
+  },
+  "formal_eligible": false,
+  "host": "ada",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-bundled-rollout-graph_raw-step500-v3/20260919T181936-77badf536514/trajectory.h5",
+      "sha256": "514685307ab4f213f58e1c67813303b7524d9de52653a25b675f304e3a468dbb"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/seeds-f3-512.npy",
+      "sha256": "1a433490e5ed38f315a6165e2098fe83f4e7a7599fd7f05ce0376e090661599b"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/8f52f26cccdc31256abf22397b49478d18a1968383d7399888a131bb07c756be/lagrangian-fluid-lab/scripts/f3_native_volume_mls_model_material.py",
+      "sha256": "d3b98a5bd1110b1d1ffe7377e36251ce372f6151468bdd254646f5d4c6d71f1b"
+    }
+  ],
+  "job_id": "cpu-f3-model-material-rho0-full835-seeds512-v2",
+  "profile_basis": {
+    "basis_limit": "measured 512-seed interval phase timing; only interval factor extrapolated, with margin for full source and checkpoint/output IO",
+    "estimated_cpu_seconds_no_margin": 1167.304449,
+    "estimated_trace_h5_mib": 70.0,
+    "estimated_wall_seconds_no_margin": 855.0654985477449,
+    "input_bytes": 723148320,
+    "measured_basis": "512 seeds x 20 intervals same rho0 model/reference profile",
+    "peak_rss_mib_measured": 927.3046875,
+    "provisional_margin": 1.3,
+    "recommended_cpu_budget_seconds": 1518,
+    "recommended_wall_budget_seconds": 1112,
+    "scale_intervals": 41.75,
+    "timeout_seconds": 3600
+  },
+  "proposal_sha256": "1bc1cc99707c4cebd1d65bf17131446782d1faeec628b1bf13e664aa6d19fda0",
+  "qualification_claim": "none",
+  "qualification_only": true,
+  "required_outputs": [
+    "trace.h5",
+    "result.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "gpu_peak_mib": 0,
+    "io_weight": 0.25,
+    "ram_mib": 4096
+  },
+  "source_snapshot": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/8f52f26cccdc31256abf22397b49478d18a1968383d7399888a131bb07c756be/lagrangian-fluid-lab",
+    "sha256": "8f52f26cccdc31256abf22397b49478d18a1968383d7399888a131bb07c756be"
+  },
+  "timeout_seconds": 3600
+}

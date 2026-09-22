@@ -1,0 +1,273 @@
+{
+  "acceptance": {
+    "must_label_support_unknown_separately_from_material_reliability": true,
+    "must_not_relax_unknown_gate": true,
+    "must_not_report_T2_qualification": true,
+    "must_not_use_initial_source_label_to_partition_support": true,
+    "must_process_all_151_native_frames": true,
+    "must_report_common_reliable_path_coverage": true,
+    "must_report_event_window_status": true,
+    "must_report_first_passage_cdf": true,
+    "must_report_mass_closure": true,
+    "must_report_residence_cdf": true,
+    "must_report_return_cdf": true,
+    "must_report_unknown_fraction_per_source": true
+  },
+  "argv": [
+    "/usr/bin/python3.10",
+    "-m",
+    "scripts.f4_native_kernel_mls",
+    "--trace-output",
+    "{attempt_dir}/native_mls_material.h5",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+    "--h",
+    "0.011941277883",
+    "--fluid-type",
+    "3",
+    "--query-count",
+    "512",
+    "--q",
+    "0.5",
+    "--substeps",
+    "2",
+    "--stop-after",
+    "150"
+  ],
+  "backend": "f4_native_kernel_mls_causal_current_volume_rk4_v1",
+  "central_ledger_mutation": 0,
+  "checkpoint_and_resume": {
+    "cross_window_resume": "forbidden; output path is independent of previous 0.18 s canary",
+    "fault_safety": "SIGKILL after generation rename before manifest leaves prior manifest/generation valid; SIGKILL after manifest before HDF5 append resumes by truncating/replacing checkpoint frame",
+    "generation_pattern": "{output}.checkpoint.{frame:08d}.{state_sha_prefix}.npz",
+    "generation_retention": "retain every committed content-addressed generation for this evidence; no garbage collection is performed",
+    "manifest": "{output}.checkpoint.json",
+    "publish_order": "fsync generation, atomic rename, then atomic manifest replace, then HDF5 append",
+    "resume_command_suffix": [
+      "--resume"
+    ],
+    "schema": "core.material.f4.native_kernel_mls.checkpoint.v2"
+  },
+  "code_snapshot": {
+    "checkpoint_schema": "core.material.f4.native_kernel_mls.checkpoint.v2",
+    "contact_amendment": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-material-repair-failure-diagnosis-20260919-amendment.json",
+      "sha256": "7f15a40a9ae3be384d32e4f77d30eaea55e2a6190f0fb76c73909860e1650a9d"
+    },
+    "old_report": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-material-repair-failure-diagnosis-20260919.json",
+      "sha256": "e9b753a7c663d8b843aea8087f549452f4fb30f27aec09e002a84596cae5319a"
+    },
+    "old_report_immutable": true,
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_native_kernel_mls.py",
+    "sha256": "8da879e466105efa53a620115b8a204031e400b60bb535d2efdc1f697d76e30c",
+    "snapshot_role": "frozen executable reference for this job; scheduler must record copied snapshot hash before launch"
+  },
+  "created_at_utc": "2026-09-19T13:43:03.322104+00:00",
+  "denominator_and_gates": {
+    "mass_closure_tolerance": 1e-12,
+    "material_reliability": "not calibrated by this backend; do not infer from support mask",
+    "seed_denominator": 512,
+    "source_groups": [
+      "drop_q0.5"
+    ],
+    "support_unknown_definition": "permanent_unknown after any failed RK stage; numerical support mask is separate from material reliability",
+    "unknown_gate_fraction_max": 0.01,
+    "unknown_gate_status": "reported only; no T2 qualification"
+  },
+  "event_definition": {
+    "contact": "continuous downward crossing z>0.18 to z<=0.18 on usable segment",
+    "destination_box_high_m": [
+      1.2,
+      0.4,
+      0.18
+    ],
+    "destination_box_low_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "interface_plane_z_m": 0.18,
+    "residence": "continuous segment time inside destination box after contact",
+    "return": "first later downward crossing after upward",
+    "unobserved_event": "NaN/right_censored_or_unresolved; no saved-chord imputation",
+    "upward": "first later upward crossing after contact"
+  },
+  "gpu_required": false,
+  "host_preference": "h200_cpu_first",
+  "input_policy": {
+    "density": "same selected current native H5 frame only",
+    "fluid_selector": {
+      "dataset": "type",
+      "value": 3
+    },
+    "future_density": "forbidden",
+    "future_velocity": "forbidden",
+    "model_density_estimator": "not implemented",
+    "predicted_density": "forbidden",
+    "q": 0.5,
+    "query_count": 512,
+    "query_identity": "independent geometric seed-000000..000511; native particle_id/initial Mk never terminates or partitions a query",
+    "query_mass": "equal positive 1/512; every seed remains in all unknown/event denominators"
+  },
+  "job_id": "f4-native-kernel-mls-v1-full-003s-s2-512-causal-v2",
+  "kernel_binding": {
+    "fit": "weighted affine MLS SVD",
+    "h_m": 0.011941277883,
+    "numerical_support_gate": "backend MLS gate only; does not establish material reliability",
+    "support_radius_m": 0.023882555766,
+    "wall_policy": "finite triangle visibility, F4 bottom + four sides, top open",
+    "weights": "native mass/density volume * normalized quintic Wendland C2"
+  },
+  "logical_id": "F4-NATIVE-KERNEL-MLS-FULL-003S-S2-512",
+  "output_hash_registration": {
+    "algorithm": "sha256",
+    "generation_hash_rule": "manifest records each committed generation NPZ file_sha256 and state_sha256; preserve all generations",
+    "required_outputs": {
+      "native_mls_material.h5": {
+        "path": "{attempt_dir}/native_mls_material.h5",
+        "sha256": null
+      },
+      "native_mls_material.h5.checkpoint.json": {
+        "path": "{attempt_dir}/native_mls_material.h5.checkpoint.json",
+        "sha256": null
+      },
+      "native_mls_material.h5.summary.json": {
+        "path": "{attempt_dir}/native_mls_material.h5.summary.json",
+        "sha256": null
+      }
+    },
+    "status": "pre_registered_paths; exact hashes filled by worker after successful close"
+  },
+  "qualification_claim": "none",
+  "required_outputs": [
+    "native_mls_material.h5",
+    "native_mls_material.h5.summary.json",
+    "native_mls_material.h5.checkpoint.json",
+    "checkpoint generation NPZ files",
+    "execution.json"
+  ],
+  "resource_measurements": {
+    "budget_method": "full151 stage calls = 1 + 150*substeps*4; s2 uses short measured ratio and s4 full measured baseline plus 30% scheduler/IO margin; values are resource budgets, not qualification results",
+    "full_scope_budget": {
+      "basis": "Measured s2 frames 0..20 (20 native intervals, approximately 0.04 s): 102.16 user CPU s and 89.00 wall s. Linear 150-interval estimate is 766.20 user CPU s and 667.50 wall s; a 30% scheduler/IO margin gives 995.06 user CPU s and 867.75 wall s. Budget is rounded up to 1050 user CPU s and 900 wall s. Source read and checkpoint/HDF5 writes are included; this is a resource budget, not a qualification result.",
+      "cpu_user_seconds_budget": 1050,
+      "interval_count": 150,
+      "io_read_bytes_budget": 1320960691,
+      "io_write_bytes_budget": 16777216,
+      "native_frame_count": 151,
+      "peak_rss_mib_budget": 512,
+      "stage_calls": 1201,
+      "wall_seconds_budget": 900
+    },
+    "s2_profile_frames_0_20": {
+      "max_rss_kib": 155172,
+      "path": "campaigns/core-v1/material/evidence/f4-native-kernel-mls-v1-rk4-budget-profile-s2-s0p041-execution.json",
+      "stage_calls": 161,
+      "system_cpu_seconds": 1.01,
+      "user_cpu_seconds": 102.16,
+      "wall_seconds": 89.0
+    },
+    "s4_full_frames_0_90": {
+      "max_rss_kib": 157536,
+      "path": "campaigns/core-v1/material/evidence/f4-native-kernel-mls-v1-rk4-budget-canary-s0p3-execution.json",
+      "stage_calls": 1441,
+      "system_cpu_seconds": 1.16,
+      "user_cpu_seconds": 731.43,
+      "wall_seconds": 724.82
+    },
+    "s4_profile_frames_0_20": {
+      "max_rss_kib": 158816,
+      "path": "campaigns/core-v1/material/evidence/f4-native-kernel-mls-v1-rk4-budget-canary-s0p041-execution.json",
+      "stage_calls": 321,
+      "system_cpu_seconds": 0.92,
+      "user_cpu_seconds": 182.06,
+      "wall_seconds": 168.73
+    },
+    "extrapolation": {
+      "measured_intervals": 20,
+      "measured_user_cpu_seconds": 102.16,
+      "measured_wall_seconds": 89.0,
+      "target_intervals": 150,
+      "linear_target_user_cpu_seconds": 766.2,
+      "linear_target_wall_seconds": 667.5,
+      "margin_fraction": 0.3,
+      "margin_target_user_cpu_seconds": 995.06,
+      "margin_target_wall_seconds": 867.75,
+      "rounded_budget_user_cpu_seconds": 1050,
+      "rounded_budget_wall_seconds": 900,
+      "profile_scope": "s2 frames 0..20; 20 native intervals, approximately 0.04 s"
+    }
+  },
+  "resources": {
+    "checkpoint_generation_write_bytes_estimate_mib": 4.2,
+    "cpu_cores": 2,
+    "gpu_peak_mib": 0,
+    "io_weight": 0.25,
+    "material_h5_write_bytes_estimate_mib": 8.0,
+    "output_write_bytes_estimate_mib": 16.0,
+    "ram_mib": 8192,
+    "source_read_bytes_measured": 1320960691,
+    "timeout_seconds": 1500
+  },
+  "resume_argv": [
+    "/usr/bin/python3.10",
+    "-m",
+    "scripts.f4_native_kernel_mls",
+    "--trace-output",
+    "{attempt_dir}/native_mls_material.h5",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+    "--h",
+    "0.011941277883",
+    "--fluid-type",
+    "3",
+    "--query-count",
+    "512",
+    "--q",
+    "0.5",
+    "--substeps",
+    "2",
+    "--stop-after",
+    "150",
+    "--resume"
+  ],
+  "revision_id": "F4_native_kernel_mls_full_003s_v2",
+  "schema": "core.material.job.v2",
+  "solver_started": false,
+  "source_window": {
+    "prepared_case": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_native_dense_002_canary/prepared.json",
+    "prepared_case_sha256": "438bc45e7587d559bf5a8e938b9834284b08c1b058e1b516f63ac35801778f6d",
+    "source_bytes": 1320960691,
+    "source_h5": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+    "source_role": "real native F4 dense .002 s trajectory; 0.3 s short canary only, not 4.34 s qualification",
+    "source_sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9",
+    "source_time_axis": {
+      "all_native_frames": true,
+      "first_frame": 0,
+      "frame_count": 151,
+      "frame_policy": "read every saved frame 0..150 sequentially",
+      "last_frame": 150,
+      "time_end_s": 0.300003243,
+      "time_start_s": 0.0
+    },
+    "transfer_receipt": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/h200-native-dense-source-transfer-v1.json",
+    "transfer_receipt_sha256": "c1322a3626cedd47b80b9ac1c939333bebbefe7efc6993156527b9512286443b"
+  },
+  "stage": "qualification_only_research_postprocess",
+  "static_backend": "f4_native_kernel_mls_wendland_mass_density_v1",
+  "temporal_binding": {
+    "field_hold": "piecewise-constant cross-frame hold, first-order in native dt",
+    "method": "classical RK4",
+    "native_interval_policy": "all RK stages for [frame i,frame i+1] use current frame i",
+    "rk4_scope": "RK4 accuracy applies only to integration of frozen current-frame field; no fourth-order cross-frame interpolation claim",
+    "substeps": 2
+  },
+  "temporal_storage_budget": {
+    "checkpoint_generations": "151 content-addressed NPZ generations plus one manifest; retain all generations",
+    "estimated_total_write_mib": 16.0,
+    "h5_history": "all frame-level position/reliability/event/error/mass datasets 0..150",
+    "native_frames_stored": 151,
+    "seed_count": 512
+  }
+}

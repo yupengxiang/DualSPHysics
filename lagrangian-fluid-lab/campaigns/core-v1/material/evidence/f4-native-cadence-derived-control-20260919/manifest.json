@@ -1,0 +1,201 @@
+{
+  "calibration_design": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-reconstruction-calibration-2026-09-19/design.json",
+    "sha256": "b8e58c8d525694da2be6f4b80d6679b22ba47ede38f5fe15860f1d09dd98a8af"
+  },
+  "calibration_script": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_material_calibration.py",
+    "sha256": "b4f122fddfb581941aab7cad122b121ca693b249a9cbbb9447e978d185d2a9ec"
+  },
+  "central_ledger_mutation": 0,
+  "created_at": "2026-09-19T11:10:27.342565+00:00",
+  "dense_native_source": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5/20260919T185855-d91665790347/product/trajectory.h5",
+    "sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9"
+  },
+  "derivation_receipt": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-native-cadence-derived-control-20260919/dense-derived-02s.json",
+    "sha256": "c0b22572d18bc6e748075b814bb8f6859ef2aff2695a504c8c04e570f467b214"
+  },
+  "derived_source": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-native-cadence-derived-control-20260919/dense-derived-02s.h5",
+    "sha256": "fec2cf1837a6eda977c0eeddfc00c69a65381b62f34ea68758386ee110e1110a"
+  },
+  "direct_row_copy_contract": {
+    "field_interpolation": false,
+    "solver_started": false,
+    "tool": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_dense_cadence.py",
+      "sha256": "b594735e01bd570ed7bcc94a11b89fa7e38151a316b141d03c257469895eb52d"
+    },
+    "tool_schema": "core.material.f4.native_cadence_downsample.v1"
+  },
+  "gpu_started": false,
+  "independent_native_02_source": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-canary-001/20260919T172542-d49b17d63c4f/product/trajectory.h5",
+    "role": "independent_native_02s_comparison_only",
+    "sha256": "892583601f507a2f66977a337718e29e108196aa3d6e83c8a9c3d59d634b6be6",
+    "used_as_downsample_input": false
+  },
+  "interpretation": "The dense native source has 0.896484375 unknown for both s2/s4; the direct dense-to-.02 rows recover .84765625/.83984375. This isolates saved-cadence exposure from the native .002 material integration result. It is diagnostic only and does not validate or change the inherited F3 gate.",
+  "limitations": [
+    "The .02 derived H5 is a row subset of the native dense H5, not an independent CFD solve.",
+    "The independent native .02 H5 remains a separate lineage and is recorded only for comparison.",
+    "Both cadence controls are .3 s right-censored canaries; no T2 qualification claim is made."
+  ],
+  "purpose": "Matched .02 s material overlay derived directly from the completed native .002 s F4 source",
+  "qualification_claim": "none",
+  "results": {
+    "dense_native_002_s": {
+      "s2": {
+        "mass_closed": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/evidence/f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5-material.json",
+        "sha256": "c25962cd22a48eaeb12d68ab4405d48142634797fa98c892603c079a8f114245",
+        "unknown_fraction_max": 0.896484375
+      },
+      "s4": {
+        "mass_closed": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/evidence/f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5-material.json",
+        "sha256": "1bbaa01257966c962deef207806a925a2ae693e7e2f6b71f3328bc3aefb5d6a8",
+        "unknown_fraction_max": 0.896484375
+      }
+    },
+    "derived_dense_to_02_s": {
+      "s2": {
+        "common_reliable_path_coverage": 0.15234375,
+        "mass_closed": true,
+        "material_h5": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-native-cadence-derived-control-20260919/material-s2.h5",
+          "sha256": "7b0317aa284b40c8d522def4f815de8908ebec44596942cf4de339ccdfd6e62c"
+        },
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-native-cadence-derived-control-20260919/material-s2.json",
+        "sha256": "9e0380a24e78b529959bfd2fef8ff05c8d426a65a8d62674ff336c6575b926c3",
+        "unknown_fraction_max": 0.84765625
+      },
+      "s4": {
+        "common_reliable_path_coverage": 0.16015625,
+        "mass_closed": true,
+        "material_h5": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-native-cadence-derived-control-20260919/material-s4.h5",
+          "sha256": "728214abb50b04e746198646a6c1e1d2d8bb98f634391f6fe6ea305afabd5d28"
+        },
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-native-cadence-derived-control-20260919/material-s4.json",
+        "sha256": "a27a10702a9314a0510c35522f2c80fa0935eff7dc82b28b2a156faaab34b23f",
+        "unknown_fraction_max": 0.83984375
+      }
+    },
+    "independent_native_02_s_reference": {
+      "s2": {
+        "mass_closed": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f4-material-resting-pool-canary-s2/20260919T182233-c7ddf4fda108/material.json",
+        "sha256": "af3a0dadc5eb691318d83b63918cd6d82f1ab3b6f721e0a30df00f112752f366",
+        "unknown_fraction_max": 0.84765625
+      },
+      "s4": {
+        "mass_closed": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-real-material-canary-diagnosis-20260919/integration-control-s4-material.json",
+        "sha256": "f17082cc8960a4b1b8d09844ac803c373faefa7c231786cd01f2a72ba7d7b838",
+        "unknown_fraction_max": 0.83984375
+      }
+    }
+  },
+  "schema": "core.material.f4.native_cadence_derived_control.v1",
+  "selection": {
+    "requested_target_times_s": [
+      0.0,
+      0.02,
+      0.04,
+      0.06,
+      0.08,
+      0.1,
+      0.12,
+      0.14,
+      0.16,
+      0.18,
+      0.2,
+      0.22,
+      0.24,
+      0.26,
+      0.28,
+      0.3
+    ],
+    "selected_source_times_s": [
+      0.0,
+      0.02001143530103224,
+      0.04000757134415599,
+      0.06000370738727719,
+      0.08001514269286443,
+      0.1000112787359856,
+      0.1200074147791068,
+      0.140003550822228,
+      0.1600149861278153,
+      0.1800111221709365,
+      0.2000072582140577,
+      0.2200033942571789,
+      0.2400148295627661,
+      0.2600109656059055,
+      0.280007101649063,
+      0.3000032376922204
+    ],
+    "selection_error_s": [
+      0.0,
+      1.1435301032237943e-05,
+      7.571344155986315e-06,
+      3.707387277195051e-06,
+      1.5142692864428264e-05,
+      1.1278735985595367e-05,
+      7.4147791068041036e-06,
+      3.550822227998962e-06,
+      1.4986127815308503e-05,
+      1.112217093651724e-05,
+      7.25821405769822e-06,
+      3.3942571789069564e-06,
+      1.4829562766105475e-05,
+      1.0965605905466358e-05,
+      7.101649062979387e-06,
+      3.237692220436905e-06
+    ],
+    "source_frame_indices": [
+      0,
+      10,
+      20,
+      30,
+      40,
+      50,
+      60,
+      70,
+      80,
+      90,
+      100,
+      110,
+      120,
+      130,
+      140,
+      150
+    ],
+    "source_median_interval_s": 0.0020042033830519057,
+    "source_to_target_interval_ratio": 9.979027163173905,
+    "target_interval_s": 0.02,
+    "target_time_max_s": 0.3
+  },
+  "shared_material_controls": {
+    "backend": "f3_ckdtree_visible_shepard_distance_v1",
+    "code_sha256": "1a15cf8ad0927f00ba44f72f9e85f167852d1dc8eb49807b057509ed516337dd",
+    "dp_m": 0.0075,
+    "family": "F4",
+    "maximum_support_distance_m": 0.03,
+    "neighbour_variant": "baseline24",
+    "neighbours": 24,
+    "q": 0.5,
+    "regularization_m": 0.004,
+    "scope_id": "F4_drop_resting_pool_x_v2",
+    "seeds": 512,
+    "support_gate": {
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "minimum_anisotropy": 0.005,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3
+    },
+    "unknown_fraction_max": 0.01
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "central_ledger_mutation": false,
+  "command_template": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "-m",
+    "scripts.f3_model_material_compare",
+    "--model-report",
+    "{model_attempt_dir}/result.json",
+    "--reference-report",
+    "{reference_attempt_dir}/result.json",
+    "--provenance",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-full835-terminal-comparison-provenance-v1.json",
+    "--output",
+    "{comparison_attempt_dir}/model-vs-reference-rho0-comparison.json"
+  ],
+  "created_at_utc": "2026-09-19T18:57:51.821376+00:00",
+  "denominator_and_limits": {
+    "rho0": "public current-state rho0 estimate is shared by model/reference control and is not native CFD density",
+    "source_denominator": "all 256 independent seeds per source, uniform 1/N; no source_contact subset",
+    "support_vs_material": "support pass/fail is numerical support only and cannot be called material reliability",
+    "t2": "not assessed and cannot be inferred from this comparison",
+    "unknown": "permanent unknown remains in denominator; event CDF upper bound uses first possible failure; residence upper bound is right-censored"
+  },
+  "gpu_started": false,
+  "implementation": {
+    "comparison_script": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_model_material_compare.py",
+      "sha256": "040ce277db8a4241d21ceaddcb07fb197f27fec3e243ad8e6813a7baec8a2029"
+    },
+    "comparison_tests": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f3_model_material_compare.py",
+      "result": "3 passed",
+      "sha256": "de209836e998a2b26ee24d61e08a272e8b45970dbe328c593aa1b2cb4876ce1d"
+    },
+    "job_proposal_v2": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-full835-seeds512-job-proposal-v2.json",
+      "sha256": "1bc1cc99707c4cebd1d65bf17131446782d1faeec628b1bf13e664aa6d19fda0"
+    },
+    "numerical_module": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_model_material.py",
+      "sha256": "d3b98a5bd1110b1d1ffe7377e36251ce372f6151468bdd254646f5d4c6d71f1b"
+    },
+    "shared_adapter": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_shared.py",
+      "sha256": "2e46b82d20542d39156014cdc16167838b5cd1b3fbe0f5e9f566e59d7a2359fb"
+    },
+    "temporal_runner": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_temporal_v3.py",
+      "sha256": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395"
+    }
+  },
+  "inputs": {
+    "model_source": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-bundled-rollout-graph_raw-step500-v3/20260919T181936-77badf536514/trajectory.h5",
+      "sha256": "514685307ab4f213f58e1c67813303b7524d9de52653a25b675f304e3a468dbb"
+    },
+    "reference_source": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+      "sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4"
+    },
+    "seed_axis": {
+      "manifest_sha256": "303bf9f076622dacfea0150428c931b0474a05fc39aa3c995b6f17f25f147f30",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/seeds-f3-512.npy",
+      "seed_hash": "21431fb61295d91a12c63de103eab15fb4fe88bc527e08ef7a5f994ef3d6ee37",
+      "sha256": "1a433490e5ed38f315a6165e2098fe83f4e7a7599fd7f05ce0376e090661599b",
+      "source_counts": {
+        "source_0": 256,
+        "source_1": 256
+      }
+    }
+  },
+  "outputs": {
+    "comparison_json": "{comparison_attempt_dir}/model-vs-reference-rho0-comparison.json",
+    "source_outputs_immutable": true,
+    "summary_fields": [
+      "unknown_fraction_by_source",
+      "first_passage_cdf_bounds",
+      "residence_cdf_bounds",
+      "return_cdf_bounds",
+      "common_reliable_path",
+      "mass_closure"
+    ]
+  },
+  "proposal_id": "f3-model-material-rho0-full835-terminal-comparison-v1",
+  "provenance": {
+    "allow_source_sha_mismatch": true,
+    "comparison_mode": "model_vs_reference_same_rho0",
+    "expected_source_sha256": {
+      "predicted_model_rollout": "514685307ab4f213f58e1c67813303b7524d9de52653a25b675f304e3a468dbb",
+      "reference_control_rho0": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4"
+    },
+    "seed_axis": "same registered 512-seed positions and source labels; pair endpoints only diagnostically"
+  },
+  "provenance_file": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-full835-terminal-comparison-provenance-v1.json",
+    "sha256": "281ac196e70efdcabb732e0fc645bb32ea2a973221b1cf49cc15df2783e91e15"
+  },
+  "schema": "core.material.f3.native_volume_mls.model_material_comparison_proposal.v1",
+  "scope": {
+    "comparison_mode": "model_vs_reference_same_rho0",
+    "jobs": [
+      {
+        "job_id": "cpu-f3-model-material-rho0-full835-seeds512-v2",
+        "role": "predicted_model_rollout"
+      },
+      {
+        "job_id": "cpu-f3-reference-rho0-full835-seeds512-v2",
+        "role": "reference_control_rho0"
+      }
+    ],
+    "material_reliability": "not_established",
+    "native_density_qualification": "not_applicable",
+    "purpose": "Compare the two root-submitted full-window rho0 material jobs after both terminal receipts are complete.",
+    "qualification_claim": "none"
+  },
+  "status": "terminal_reports_recovered_comparison_complete",
+  "terminal_gate": {
+    "active_h5_policy": "do not open active/resumable H5; a nonterminal report aborts before trace open",
+    "expected_backend": "f3_native_volume_mls_shared_current_model_rho0_v1",
+    "expected_density_strategy": "rho0_constant_public_current_state_v1",
+    "expected_dp_m": 0.0075,
+    "expected_event_definition": {
+      "event_plane": "x=0",
+      "first_passage": "first usable crossing to opposite x side",
+      "residence": "integrated opposite-side time over usable segments",
+      "return": "first later usable crossing back to origin side",
+      "source_label": "initial_x_ge_0"
+    },
+    "expected_frame_count": 836,
+    "expected_intervals": 835,
+    "expected_rho0_kgm3": 1000.0,
+    "expected_seed_count": 512,
+    "expected_substeps_per_saved_interval": 1,
+    "expected_time_end_s": 8.350012828223477,
+    "expected_time_start_s": 0.0,
+    "expected_trace_schema": "core.material.f3.native_volume_mls.model_material_trace.v1",
+    "read_order": [
+      "read each result.json and verify status=completed",
+      "verify role/source/hash/trace_h5_sha256 and full intervals",
+      "only then open the two trace.h5 files"
+    ],
+    "required_result_status": "completed"
+  }
+}

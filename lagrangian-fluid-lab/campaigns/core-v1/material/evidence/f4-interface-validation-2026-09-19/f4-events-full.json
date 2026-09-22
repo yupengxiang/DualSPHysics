@@ -1,0 +1,338 @@
+{
+  "binding": {
+    "backend": "f3_ckdtree_visible_shepard_distance_v1",
+    "code_sha256": "ecd4ff9728af6b6ef92b2adfc085e3a4329ec312b903c7dae06c724e765e1ce5",
+    "error_estimator": "local_residual",
+    "f4_definition": {
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "destination_definition": {
+        "boundary_policy": "closed_box_membership",
+        "box_high_m": [
+          1.2,
+          0.4,
+          0.18
+        ],
+        "box_low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "box_size_m": [
+          1.2,
+          0.4,
+          0.18
+        ],
+        "destination_role": "resting basin liquid and post-contact destination volume",
+        "kind": "continuous_resting_pool_box",
+        "pool_free_surface_z_m": 0.18
+      },
+      "dp_m": null,
+      "event_definition": {
+        "contact": {
+          "direction": "downward",
+          "interface_plane_z_m": 0.18,
+          "requires_vertical_velocity_mps_lt": 0.0
+        },
+        "path_interpolation": "continuous_linear_segment_per_tracer_substep",
+        "post_return_window": {
+          "completion_required": true,
+          "extension_policy": "double whole scope once if any required event is right-censored; never shorten",
+          "gravity_time_s": 0.3497487083913345,
+          "initial_horizon_s": 4.34,
+          "maximum_extended_horizon_s": 8.68
+        },
+        "residence": {
+          "definition": "time inside destination box after contact, right-censored if unresolved"
+        },
+        "return": {
+          "direction": "downward",
+          "interface_plane_z_m": 0.18,
+          "requires_vertical_velocity_mps_lt": 0.0
+        },
+        "upward_propagation": {
+          "direction": "upward",
+          "interface_plane_z_m": 0.18,
+          "requires_vertical_velocity_mps_gt": 0.0
+        }
+      },
+      "family_id": "F4",
+      "open_faces": [
+        "top"
+      ],
+      "q": 0.5,
+      "recipe": "mdbc_native",
+      "recipe_id": "F4_resting_pool_mdbc_native_v2",
+      "revision_id": "F4_resting_pool_13plus2_v2",
+      "scope_id": "F4_drop_resting_pool_x_v2",
+      "seed_identity": "independent seed-XXXXXX ids, never native particle_id",
+      "source_definition": {
+        "boundary_policy": "closed_box_membership",
+        "box_high_m": [
+          0.62,
+          0.28,
+          0.54
+        ],
+        "box_low_m": [
+          0.36,
+          0.12,
+          0.4
+        ],
+        "box_size_m": [
+          0.26,
+          0.16,
+          0.14
+        ],
+        "drop_left_x_m": 0.36,
+        "initial_velocity_mps": [
+          0.0,
+          0.0,
+          -0.5
+        ],
+        "kind": "continuous_drop_box",
+        "q": 0.5,
+        "source_role": "falling liquid drop, initial fluid box"
+      },
+      "source_labels": "continuous source-box membership; native Mk and particle_id are not material truth",
+      "stage": "qualification_only",
+      "wall_bounds_m": {
+        "xmax": 1.2,
+        "xmin": 0.0,
+        "ymax": 0.4,
+        "ymin": 0.0,
+        "zmax": 0.6,
+        "zmin": 0.0
+      }
+    },
+    "initial_sha256": "68ee3982f8706e39959cd8b50d76bd9d5dcc827abdc309a14040cb39edcc00f2",
+    "maximum_support_distance_m": 0.03,
+    "neighbor_code_sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752",
+    "neighbour_variant": "baseline24",
+    "neighbours": 24,
+    "passive_code_sha256": "0301b797ddf472d8e37a835cb97036ba13b4cde8c1832838edfed06da20860cc",
+    "provider_role": "reference",
+    "recipe_id": "F4_resting_pool_mdbc_native_v2",
+    "regularization_m": 0.004,
+    "revision_id": "F4_resting_pool_13plus2_v2",
+    "schema": "core.material.f4.resting_pool.v2",
+    "scope_id": "F4_drop_resting_pool_x_v2",
+    "source_label_sha256": "a094a408e6edc4d9bd4a7ecf4bfe633604cc981409a9597f5b967295b88fd2fb",
+    "source_semantics": "reference_native_saved_frames",
+    "source_sha256": "709808f49d7c0cc2471ce89eff093b475f5e500a7e610a770a0d6e61e226e86e",
+    "substeps": 4,
+    "support_gate": {
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "minimum_anisotropy": 0.005,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3
+    },
+    "tracer_id_sha256": "0f4d11312be59205f4de7f1587fd557d126533efe9d907de21290b9b5743321c",
+    "walls_sha256": "8390622433750f93c19b5e9e7df5ffb7b5793bea9af0e5459b58c155d548f273",
+    "weight_sha256": "c2bfa2da17439cd2389776bfafb32c015446164a335988de6cbbbec758f56fc2"
+  },
+  "by_source": [
+    {
+      "contact_cdf": {
+        "event_mass_fraction": 1.0,
+        "lower": [
+          1.0
+        ],
+        "mass_fraction": [
+          1.0
+        ],
+        "time_s": [
+          0.32000000000000006
+        ],
+        "upper": [
+          1.0
+        ]
+      },
+      "contact_fraction": 1.0,
+      "destination_mass_fraction": 1.0,
+      "initial_mass_fraction": 1.0,
+      "mass_closure_error": 0.0,
+      "mass_closure_fraction": 1.0,
+      "outside_destination_mass_fraction": 0.0,
+      "reliable_path_coverage": 1.0,
+      "residence_cdf": {
+        "event_mass_fraction": 1.0,
+        "lower": [
+          1.0
+        ],
+        "mass_fraction": [
+          1.0
+        ],
+        "time_s": [
+          0.7199999999999999
+        ],
+        "upper": [
+          1.0
+        ]
+      },
+      "residence_mean_s": 0.7199999999999999,
+      "return_cdf": {
+        "event_mass_fraction": 1.0,
+        "lower": [
+          1.0
+        ],
+        "mass_fraction": [
+          1.0
+        ],
+        "time_s": [
+          1.0799999999999998
+        ],
+        "upper": [
+          1.0
+        ]
+      },
+      "return_fraction": 1.0,
+      "right_censored_fraction": 1.0,
+      "source": 1,
+      "unknown_fraction": 0.0,
+      "unknown_fraction_max": 0.0,
+      "upward_cdf": {
+        "event_mass_fraction": 1.0,
+        "lower": [
+          1.0
+        ],
+        "mass_fraction": [
+          1.0
+        ],
+        "time_s": [
+          0.9200000000000002
+        ],
+        "upper": [
+          1.0
+        ]
+      },
+      "upward_fraction": 1.0
+    }
+  ],
+  "checkpoint_manifest": "/tmp/f4-material-provider-validation-20260919/f4-events-full.h5.checkpoint.json",
+  "committed_frame": 3,
+  "committed_time_s": 1.2,
+  "common_reliable_path_coverage": 1.0,
+  "elapsed_seconds": 0.03544032701756805,
+  "event_window_complete": false,
+  "event_window_status": "right_censored_or_unresolved",
+  "mass_closed": true,
+  "max_rss_kib": 560128,
+  "native_frame_count": 4,
+  "qualified_T2_macro": false,
+  "qualified_T2_path": false,
+  "scope_id": "F4_drop_resting_pool_x_v2",
+  "source_definition": {
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "destination_definition": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "box_low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "box_size_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "destination_role": "resting basin liquid and post-contact destination volume",
+      "kind": "continuous_resting_pool_box",
+      "pool_free_surface_z_m": 0.18
+    },
+    "dp_m": null,
+    "event_definition": {
+      "contact": {
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "path_interpolation": "continuous_linear_segment_per_tracer_substep",
+      "post_return_window": {
+        "completion_required": true,
+        "extension_policy": "double whole scope once if any required event is right-censored; never shorten",
+        "gravity_time_s": 0.3497487083913345,
+        "initial_horizon_s": 4.34,
+        "maximum_extended_horizon_s": 8.68
+      },
+      "residence": {
+        "definition": "time inside destination box after contact, right-censored if unresolved"
+      },
+      "return": {
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "upward_propagation": {
+        "direction": "upward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_gt": 0.0
+      }
+    },
+    "family_id": "F4",
+    "open_faces": [
+      "top"
+    ],
+    "q": 0.5,
+    "recipe": "mdbc_native",
+    "recipe_id": "F4_resting_pool_mdbc_native_v2",
+    "revision_id": "F4_resting_pool_13plus2_v2",
+    "scope_id": "F4_drop_resting_pool_x_v2",
+    "seed_identity": "independent seed-XXXXXX ids, never native particle_id",
+    "source_definition": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        0.62,
+        0.28,
+        0.54
+      ],
+      "box_low_m": [
+        0.36,
+        0.12,
+        0.4
+      ],
+      "box_size_m": [
+        0.26,
+        0.16,
+        0.14
+      ],
+      "drop_left_x_m": 0.36,
+      "initial_velocity_mps": [
+        0.0,
+        0.0,
+        -0.5
+      ],
+      "kind": "continuous_drop_box",
+      "q": 0.5,
+      "source_role": "falling liquid drop, initial fluid box"
+    },
+    "source_labels": "continuous source-box membership; native Mk and particle_id are not material truth",
+    "stage": "qualification_only",
+    "wall_bounds_m": {
+      "xmax": 1.2,
+      "xmin": 0.0,
+      "ymax": 0.4,
+      "ymin": 0.0,
+      "zmax": 0.6,
+      "zmin": 0.0
+    }
+  },
+  "status": "completed",
+  "task": "F4 continuous drop source to resting-pool contact/upward/return/residence",
+  "unknown_gate_pass": true
+}

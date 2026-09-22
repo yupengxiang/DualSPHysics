@@ -1,0 +1,194 @@
+{
+  "schema": "core.material.f3.native_volume_mls.full_cpu_job.v1",
+  "created_at_utc": "2026-09-19T14:52:00Z",
+  "status": "ready_for_central_submission",
+  "qualification_claim": "none",
+  "material_reliability": "not established by numerical support diagnostics",
+  "central_runtime_submission": false,
+  "central_ledger_mutation": false,
+  "gpu_started": false,
+  "solver_started": false,
+  "scope": {
+    "family": "F3",
+    "purpose": "full nominal native-volume MLS feasibility diagnosis through first near-wall failure and possible return window",
+    "case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+    "source_window": {
+      "first_native_frame": 0,
+      "last_native_frame": 835,
+      "frame_count": 836,
+      "time_start_s": 0.0,
+      "time_end_s": 8.350012828223477,
+      "interval_policy": "native interval i uses only current frame i for all RK stages; output frame i+1 is a diagnostic timestamp"
+    },
+    "seed_count": 512,
+    "substeps": 2,
+    "native_output_interval_s": 0.01,
+    "native_particle_id_as_seed_identity": false,
+    "full_window_is_qualification": false
+  },
+  "argv_initial": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "-m",
+    "scripts.f3_native_volume_mls",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json",
+    "--output",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-full-nominal-s2-512.h5",
+    "--audit-output",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-full-nominal-s2-512.source-preflight.json",
+    "--seeds",
+    "512",
+    "--substeps",
+    "2",
+    "--stop-after",
+    "835"
+  ],
+  "argv_resume": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "-m",
+    "scripts.f3_native_volume_mls",
+    "--source",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json",
+    "--output",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-full-nominal-s2-512.h5",
+    "--seeds",
+    "512",
+    "--substeps",
+    "2",
+    "--stop-after",
+    "835",
+    "--resume"
+  ],
+  "code_binding": {
+    "program": "scripts/f3_native_volume_mls.py",
+    "program_sha256": "e1c5fc39e73781d386c7da2874c1749b5223c8209eaf8f25bb4453346df51ff9",
+    "tests": "tests/test_f3_native_volume_mls.py",
+    "tests_sha256": "7a59beaca9ee0586053f25760bce78b03c00e5088f38744fe33c64bf9392bb16",
+    "backend_schema": "core.material.f3.native_volume_mls.v1",
+    "backend": "f3_native_volume_mls_wendland_mass_density_v1",
+    "trace_schema": "core.material.f3.native_volume_mls.trace.v1",
+    "trace_backend": "f3_native_volume_mls_current_frame_rk4_v1",
+    "checkpoint_schema": "core.material.f3.native_volume_mls.checkpoint.v1"
+  },
+  "input_lineage": {
+    "source_h5": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+      "sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+      "bytes": 900096638,
+      "frames": 836,
+      "particles_axis": 34560,
+      "datasets_read": ["time", "position", "velocity", "mass", "density", "valid", "type"],
+      "native_mass_density": true,
+      "future_frame_fields": "forbidden"
+    },
+    "prepared_case": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json",
+      "sha256": "23d151c07c53c83b3048be9b665722161baaef37fc31e6ce6ec42e4b26b36894",
+      "case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "dp_m": 0.0075,
+      "qualified": false,
+      "formal_release": false
+    },
+    "definition_xml": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075_Def.xml",
+      "sha256": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5",
+      "kernel_id": 2,
+      "kernel_name": "Wendland",
+      "coefh": 0.91924,
+      "h_m": 0.01194127788262211,
+      "support_radius_m": 0.02388255576524422
+    }
+  },
+  "geometry_and_sources": {
+    "walls": "finite closed bottom,left,right,front,back; top open",
+    "wall_box_m": {"low": [-0.45, -0.09, 0.0], "high": [0.45, 0.09, 0.51]},
+    "source_definition": "continuous geometric x halfspace: source 0 x<0, source 1 x>=0",
+    "source_seed_counts": {"source_0": 256, "source_1": 256},
+    "seed_identity": "independent geometric seeds; native particle_id never partitions or terminates a seed",
+    "visibility": "current query-to-current-particle finite-wall line-of-sight test, recomputed per reconstruction",
+    "events": {
+      "first_passage": "accepted continuous x=0 crossing into opposite source halfspace",
+      "return": "first later accepted crossing back to origin halfspace",
+      "residence": "accepted RK segment time in opposite halfspace",
+      "unknown": "first failed support stage permanently removes seed from later event updates; it remains in all source denominators"
+    }
+  },
+  "reconstruction": {
+    "volume_weight": "mass/density from the same current native H5 frame",
+    "kernel": "Wendland quintic C2 3D, 21/(16*pi*h^3)*(1-q/2)^4*(1+2*q), q=r/h, q<=2",
+    "fit": "weighted affine MLS by SVD on [1,dx/h,dy/h,dz/h]",
+    "candidate_support_gate": {
+      "minimum_support_count": 4,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 4,
+      "maximum_condition_number": 10000000000.0,
+      "svd_relative_cutoff": 1e-12
+    },
+    "original_f3_gate": "reported for comparison only; no Shepard residual threshold is inherited as a native MLS qualification gate",
+    "material_reliability": "numerical support and MLS residual are diagnostic estimates, not a calibrated material error bound",
+    "cross_family_reuse": {
+      "reusable": ["current-frame-only provider isolation", "geometric seed accounting", "finite-wall visibility", "continuous events", "mass closure", "permanent unknown accounting"],
+      "must_remain_f3_specific": ["F3 native source H5", "F3 dp/h/kernel binding", "F3 finite/open wall geometry", "F3 x-halfspace sources", "F3 native cadence and window"],
+      "f4_inputs_reused": false
+    }
+  },
+  "checkpoint_resume": {
+    "manifest": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-full-nominal-s2-512.h5.checkpoint.json",
+    "generation_directory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence",
+    "ordering": "append and fsync HDF5 frame, publish immutable content-addressed NPZ generation, atomically replace manifest",
+    "resume_source_of_truth": "last valid manifest generation; HDF5 rows after its committed frame are truncated",
+    "generation_gc": "none during run; retain all generations for evidence",
+    "fault_windows_tested": [
+      "SIGKILL after HDF5 append before generation publication",
+      "SIGKILL after generation publication before manifest replacement"
+    ],
+    "continuous_equivalence_test": "synthetic 3-frame trace resumed after each fault matched uninterrupted trace for all HDF5 history datasets",
+    "test_evidence": "campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-checkpoint-resume-test-20260919.json"
+  },
+  "resources": {
+    "observed_short_canary": {
+      "frames": 21,
+      "intervals": 20,
+      "seeds": 512,
+      "substeps": 2,
+      "wall_seconds": 34.64,
+      "user_seconds": 49.84,
+      "system_seconds": 0.96,
+      "peak_rss_kib": 716576
+    },
+    "full_intervals": 835,
+    "linear_wall_estimate_seconds": 1446.2,
+    "requested_wall_timeout_seconds": 2700,
+    "requested_cpu_cores": 2,
+    "requested_ram_mib": 2048,
+    "requested_io_parallelism": 1,
+    "estimate_basis": "measured native F3 .2 s canary, 835/20 interval scaling, plus checkpoint and startup margin",
+    "bounded_timeout_reason": "full run is diagnostic and resumable; timeout bounds CPU use without changing gates"
+  },
+  "required_outputs": {
+    "trace_h5": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-full-nominal-s2-512.h5",
+    "summary_json": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-full-nominal-s2-512.summary.json",
+    "source_preflight_json": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-native-volume-mls-v1-full-nominal-s2-512.source-preflight.json",
+    "expected_history_frames": 836,
+    "required_diagnostics": [
+      "first failure frame/time by source and cumulative failure CDF",
+      "final failure reason and support/wall rejection counts by source",
+      "per-frame permanent unknown fraction with all-seed denominator",
+      "first passage and return time CDF/quantiles with no-event censoring",
+      "residence values with unknown paths explicitly lower-bound/censored",
+      "mass closure and common reliable path coverage"
+    ],
+    "output_hashes": "to be filled by central runtime receipt after execution"
+  },
+  "constraints": {
+    "do_not_start_here": "This is a proposal for root's scheduler; Luna has not started the full window",
+    "do_not_reopen_f3_shepard_tuning": true,
+    "do_not_call_t2_qualification": true,
+    "do_not_use_dev00_for_selection": true,
+    "do_not_use_f4_comparison_as_f3_input": true
+  }
+}

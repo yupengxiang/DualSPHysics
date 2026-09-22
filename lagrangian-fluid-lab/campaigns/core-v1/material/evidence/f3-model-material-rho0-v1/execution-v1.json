@@ -1,0 +1,144 @@
+{
+  "code": {
+    "model_material_module": "d3b98a5bd1110b1d1ffe7377e36251ce372f6151468bdd254646f5d4c6d71f1b",
+    "shared_adapter": "2e46b82d20542d39156014cdc16167838b5cd1b3fbe0f5e9f566e59d7a2359fb",
+    "temporal_mls_runner": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395",
+    "test_command": "./.venv/bin/python -m pytest -q tests/test_f3_native_volume_mls_shared.py tests/test_f3_native_volume_mls_temporal_v3.py tests/test_f3_native_volume_mls_model_material.py",
+    "tests": "7be3cbcb35b9e0b4fdc19f37c9c531eaa244b608787cdbd190e771426fa72c5c"
+  },
+  "commands": [
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 ./.venv/bin/python -m scripts.f3_native_volume_mls_model_material --role predicted_model_rollout --intervals 20 --substeps 1",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 ./.venv/bin/python -m scripts.f3_native_volume_mls_model_material --role reference_control_rho0 --intervals 20 --substeps 1"
+  ],
+  "created_at_utc": "2026-09-19T18:31:04.591115+00:00",
+  "inputs": {
+    "dp_m": 0.0075,
+    "frames": 21,
+    "intervals": 20,
+    "model_future_state_inputs": false,
+    "model_source": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f3-bundled-rollout-graph_raw-step500-v3/20260919T181936-77badf536514/trajectory.h5",
+      "role": "predicted_model_rollout",
+      "sha256": "514685307ab4f213f58e1c67813303b7524d9de52653a25b675f304e3a468dbb"
+    },
+    "reference_future_state_inputs": false,
+    "reference_source": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+      "role": "reference_control_rho0",
+      "sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4"
+    },
+    "rho0_kgm3": 1000.0,
+    "seed_count": 4,
+    "seed_hash": "f59c568af93ff60b0d5f02d67f771313117a9c1373b5a7e8d119766df79cd295",
+    "substeps_per_saved_interval": 1,
+    "time_end_s": 0.2
+  },
+  "limitations": [
+    "4 independent seeds near x=0, 0.2 s window only",
+    "rho0 constant is an explicit model density estimate and does not establish native-density MLS qualification",
+    "numerical support masks are not material reliability or T2 evidence"
+  ],
+  "outputs": {
+    "comparison": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/comparison-v1.json",
+      "sha256": "cd5b8b1b56d2067c61cf7aacadc66b258ef4afa04b1f2411d28b67b8a1330328"
+    },
+    "model_result": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/model-result.json",
+      "sha256": "6bb2dd83af6ed34a1231225d33c5e41c2f336328180ae283cebac4f22c48984e"
+    },
+    "model_trace_h5": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/model-trace.h5",
+      "sha256": "0ac72a8b5c238e7f0737ffcad28c859cb618bd1488e9f349857e0820ff49b5d9"
+    },
+    "reference_result": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/reference-control-result.json",
+      "sha256": "606d992281ee7b61ce4ba2aa801cf1f1e733a8c112212ac0b1bf8bc923923a58"
+    },
+    "reference_trace_h5": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/reference-control-trace.h5",
+      "sha256": "0086557e5a7395c5f556c11494c49058aa0a89e3b68cfefabfa2181b0a33b389"
+    }
+  },
+  "purpose": "causal model rollout material adapter short-window execution and matching rho0 reference control",
+  "restrictions": {
+    "central_ledger_written": false,
+    "gpu_started": false,
+    "material_reliability": "not_established",
+    "native_density_qualification": "not_applicable",
+    "qualification_claim": "none",
+    "scheduler_used": false
+  },
+  "schema": "core.material_cpu_profile_receipt.v1",
+  "status": "completed",
+  "usage": {
+    "model": {
+      "cpu_seconds": 10.912128,
+      "elapsed_seconds": 9.352106097037904,
+      "loaded_frame_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "peak_rss_kib": 951328,
+      "stage_failure_counts": {
+        "reliable": 320
+      }
+    },
+    "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+    "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+    "reference": {
+      "cpu_seconds": 3.673568,
+      "elapsed_seconds": 2.2717160750180483,
+      "loaded_frame_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "peak_rss_kib": 642348,
+      "stage_failure_counts": {
+        "reliable": 320
+      }
+    },
+    "thread_environment": {
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  }
+}

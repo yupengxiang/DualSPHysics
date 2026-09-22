@@ -1,0 +1,90 @@
+{
+  "created_at_utc": "2026-09-19T23:04:21.297216+00:00",
+  "decision": "Adopt this additive summary repair before interpreting future F4 residence/contact outputs. It fixes denominator semantics; it does not repair the observed reconstruction-gate failure or establish material reliability.",
+  "evidence": {
+    "finding": "The existing summary applies final reliability to contact/CDF masks but not to residence_mean_s, while right_censored_fraction also excludes final unknown paths. This makes contact_fraction=0 with positive residence_mean_s mathematically possible but easy to misread, and makes unresolved unknown mass appear as right_censored_fraction=0.",
+    "native004": {
+      "final_contact_history_count": 166,
+      "final_reliable_contact_count": 0,
+      "final_residence_positive_count": 166,
+      "reported_contact_fraction": 0.0,
+      "reported_residence_mean_s": 0.006722778714407523,
+      "reported_right_censored_fraction": 0.0
+    },
+    "stride5_s10": {
+      "final_contact_history_count": 212,
+      "final_reliable_contact_count": 0,
+      "final_residence_positive_count": 212,
+      "reported_contact_fraction": 0.0,
+      "reported_residence_mean_s": 0.008354765380047674,
+      "reported_right_censored_fraction": 0.0
+    }
+  },
+  "frozen_semantics_to_preserve": {
+    "contact": "first downward crossing from z>0.18 to z<=0.18 after t=0 with vertical velocity <0",
+    "gate_unchanged": true,
+    "residence": "destination-box time after contact",
+    "return": "first later downward crossing after upward with vertical velocity <0",
+    "unknown_policy": "NaN/right-censored; no saved-chord imputation",
+    "upward": "first upward crossing after contact with vertical velocity >0"
+  },
+  "implementation_boundary": {
+    "backend_change": false,
+    "candidate_target": "versioned summary schema/function only; do not alter frozen runner or terminal traces",
+    "event_definition_change": false,
+    "gpu_or_ledger_action": false,
+    "new_cfd": false,
+    "seed_change": false,
+    "threshold_change": false
+  },
+  "inputs": {
+    "diagnosis": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-native004-cadence-terminal-diagnosis-v1/f4-cadence-scientific-diagnosis-v1.json",
+      "sha256": "bc5e82c413b90804ed360ca335d6b08466b06e4c4a654ae72efd2c4ef6d38ee8"
+    },
+    "summary_code": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_material.py",
+      "sha256": "3dc9e6e6fd67aa3994c1876a0661f04a6c4b17cfb73ade52fa36fe0b63344137",
+      "target": "f4_event_summary"
+    },
+    "tracer_code": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_tallwall120_material.py",
+      "sha256": "fdda7d03602b7bed20213f4e66d662a8c1e980318845c6b5c3b63454da75b4d2"
+    }
+  },
+  "legacy_compatibility": {
+    "legacy_contact_fraction_note": "document as final_reliable_contact_fraction",
+    "legacy_residence_mean_note": "document as residence_partial_mean_lower_bound_s when unknown_fraction > 0",
+    "legacy_right_censored_fraction_note": "do not interpret as unresolved mass until replaced by event_unresolved_fraction",
+    "no_rewrite_of_terminal_outputs": true,
+    "preserve_existing_fields": true
+  },
+  "minimal_validation": [
+    {
+      "assert": "history fraction=final reliable contact fraction=1; observed mean is finite; unresolved fraction=0",
+      "case": "all reliable, one contacted"
+    },
+    {
+      "assert": "history fraction=.5; final reliable contact fraction=0; partial residence lower bound >0; unresolved fraction=1; observed mean=null",
+      "case": "one contacted then unknown, one never contacted and unknown"
+    },
+    {
+      "assert": "history fraction=0; partial residence lower bound=0; unresolved fraction=1; all event CDFs unresolved/NA",
+      "case": "all unknown with no event history"
+    }
+  ],
+  "proposed_additive_fields": {
+    "contact_history_fraction": "weighted(contacted) / source_mass; known historical contact even if the path later becomes unknown",
+    "event_cdf_status": "complete only when the required reliable event mask is complete; otherwise unresolved/NA",
+    "event_unresolved_fraction": "weighted(~reliable or unresolved required event) / source_mass; unknown paths are included",
+    "final_reliable_contact_fraction": "weighted(reliable & contacted) / source_mass; the current contact_fraction under an explicit name",
+    "residence_observed_mass_fraction": "weighted(reliable & contacted) / source_mass",
+    "residence_observed_mean_s": "weighted(residence where reliable & contacted) / weighted(reliable & contacted), or null when observed mass is zero",
+    "residence_partial_mean_lower_bound_s": "weighted(residence over all seeds) / source_mass; current residence_mean_s renamed/documented as a lower bound while any path is unknown",
+    "unknown_fraction": "weighted(~reliable) / source_mass; retain current field"
+  },
+  "purpose": "Make terminal reliability and event-history denominators explicit without changing the numerical backend, support gate, unknown gate, event definitions, or existing terminal evidence.",
+  "qualification_claim": "none; proposal only; no T2 implication",
+  "schema": "core.material.f4.tallwall120.event_summary_semantic_repair_proposal.v1",
+  "status": "proposed_additive_unimplemented"
+}

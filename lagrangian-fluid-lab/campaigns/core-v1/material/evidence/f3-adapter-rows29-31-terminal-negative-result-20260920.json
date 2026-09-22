@@ -1,0 +1,349 @@
+{
+  "schema": "core.material.f3.adapter_matrix.terminal_negative_result.v1",
+  "record_id": "f3-adapter-rows29-31-terminal-negative-result-20260920",
+  "created_at_utc": "2026-09-20T03:23:00Z",
+  "status": "terminal_diagnostic_negative",
+  "scope": "F3 material adapter matrix rows 29 and 31",
+  "rows": [29, 31],
+  "execution_result": "both terminal receipts succeeded; material qualification remains negative",
+  "qualification_claim": "none",
+  "qualification_credit": "none",
+  "t2_status": "not_established",
+  "t2_qualified": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "decision": "Rows 29 and 31 are complete terminal diagnostic traces. T2 has not been established and must not be granted from these outputs.",
+  "evidence_boundary": {
+    "diagnostic_only": true,
+    "material_reliability": "not established by numerical support diagnostics",
+    "qualification_only": true,
+    "source_and_trace_comparison_does_not_grant_T2": true,
+    "existing_negative_qualification_remains_unchanged": true
+  },
+  "side_effects": {
+    "new_computation_jobs_submitted": 0,
+    "gpu_started_by_audit": false,
+    "central_ledger_mutation": 0,
+    "active_h5_opened": false,
+    "terminal_h5_read_for_audit": true
+  },
+  "comparison_audit": {
+    "provenance": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-adapter-rows29-31-cross-scope-provenance-20260920.json",
+      "sha256": "421bd650606b6b6564a8c288929d0f58ceae46afbea89778b3140e0b6f2ec1e9"
+    },
+    "comparison": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-adapter-rows29-31-terminal-comparison-20260920.json",
+      "sha256": "2db007419d5a00e91ec6dfa4ae7454dabed4e150472afc8e8835868a5c3b0e33",
+      "schema": "core.material.f3.native_volume_mls.comparison.v2",
+      "status": "diagnostic_only",
+      "comparison_mode": "cross_scope_same_seed_axis",
+      "script": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_compare.py",
+      "script_sha256": "d4fc40b0b0057b4b0fc2487560d709f01c95068109a028e2664bc9f6fdf44acb",
+      "common_horizon_s": 8.350012828223477,
+      "common_full_path_fraction": 0.982177734375,
+      "common_final_reliable_seed_count": 4023,
+      "union_full_path_seed_count": 4064,
+      "mass_closure": {
+        "row29_max_abs_error": 0.0,
+        "row31_max_abs_error": 0.0
+      },
+      "source_comparison": {
+        "0": {
+          "row29_final_unknown_fraction": 0.01220703125,
+          "row31_final_unknown_fraction": 0.015625,
+          "first_passage_cdf_sup_abs_difference_bound": 0.0537109375,
+          "return_cdf_sup_abs_difference_bound": 0.05029296875,
+          "residence_cdf_sup_abs_difference_bound": 0.06103515625,
+          "residence_lower_mean_s_right_minus_left": 0.052596550550970456,
+          "residence_upper_mean_s_right_minus_left": 0.06249399452070137
+        },
+        "1": {
+          "row29_final_unknown_fraction": 0.00927734375,
+          "row31_final_unknown_fraction": 0.01416015625,
+          "first_passage_cdf_sup_abs_difference_bound": 0.06005859375,
+          "return_cdf_sup_abs_difference_bound": 0.06005859375,
+          "residence_cdf_sup_abs_difference_bound": 0.06005859375,
+          "residence_lower_mean_s_right_minus_left": 0.05350864875667949,
+          "residence_upper_mean_s_right_minus_left": 0.07167273314695355
+        }
+      },
+      "qualification_effect": "none"
+    },
+    "spatial_diagnosis_attempt": {
+      "script": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_spatial_diagnosis.py",
+      "script_sha256": "efc38394f3398f89dad371303940ec75b60f7ca8794efd736df77de7cebd4b73",
+      "status": "not_applicable_to_rows29_31",
+      "reason": "The existing spatial entry point requires the registered 512-seed axis and rejects these 4096-seed traces before opening the output file; no spatial result was produced.",
+      "qualification_effect": "none"
+    }
+  },
+  "rows_evidence": {
+    "29": {
+      "matrix_row": 29,
+      "job_id": "core-f3-native-mls-audited-adapter-row29-v1",
+      "logical_id": "core-f3-native-mls-audited-row29-v2-adapter-v1",
+      "attempt_dir": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row29-v1/20260920T050202-38d126b5519a",
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row29-v1/20260920T050202-38d126b5519a/result.json",
+        "sha256": "c60af4021f8dbece2de9c54f94f1d8522922fc10c2eba999321f21d2ea03bc0a",
+        "schema": "core.execution_receipt.v1",
+        "execution_status": "succeeded",
+        "returncode": 0,
+        "error": null,
+        "missing_outputs": [],
+        "scientific_status": "not_inferred_from_execution",
+        "timeout": false,
+        "terminal": true
+      },
+      "parameter_binding": {
+        "q": 0.25,
+        "drive_amplitude": 0.95,
+        "dp_m": 0.0075,
+        "seeds": 4096,
+        "substeps": 4,
+        "stop_after": 835,
+        "expected_frames": 836,
+        "time_window_s": [0.0, 8.35],
+        "source_asset_id": "f3_production_amp0p95_native010",
+        "source_sha256": "841cfb103ff3c27d827a000f99814fe6593fc6ca3f6dc5e97854359db957d620",
+        "prepared_sha256": "ba6a4a1f19c65c982836126aa7ac8fdc627879a329c0a3b2b9ce6cca5c2686de",
+        "candidate_definition_sha256": "bd6c155b2112f0860293283def01b981c0364a1e67fbb146dd267a1dda8b58df",
+        "adapter_sha256": "b6334dab708efff2ee8d8a903aa2ca33ca753f007cdec8bfb422ff590f503284",
+        "backend_sha256": "cd1c050757df7b0d5832181464d446cf6e8c678e2b150aa07bae0ddb0ee3b5f9",
+        "seed_hash": "e8205ca52501d473609014d494d497062dbc84cf4379e779704c4d5fdab2c96c",
+        "walls_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217"
+      },
+      "summary": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row29-v1/20260920T050202-38d126b5519a/product/f3_material_adapter_row29_trace.summary.json",
+        "sha256": "31660048bc2c802219b0858d41a2ba9c23931db60f37b7a939badf408e0fdc4c",
+        "schema": "core.material.f3.native_volume_mls.full_cadence_result.v2",
+        "status": "completed",
+        "material_reliability": "not established by numerical support diagnostics",
+        "qualification_claim": "none",
+        "mass_closed": true,
+        "native_initial_mass_kg": 14.580000378191471,
+        "common_reliable_path_coverage": 0.9892578125,
+        "unknown_fraction_max": 0.0107421875,
+        "committed_frames": 836,
+        "committed_last_frame": 835,
+        "time_end_s": 8.350012828223477,
+        "stage_failure_counts": {
+          "low_effective_sample_size": 1,
+          "reliable": 54562852,
+          "wall_occluded": 63
+        },
+        "source_rows": {
+          "0": {
+            "final_unknown_count": 25,
+            "final_unknown_fraction": 0.01220703125,
+            "candidate_support_pass_fraction_final": 0.99169921875,
+            "reliable_path_coverage": 0.98779296875,
+            "first_failure_frame": 456,
+            "first_failure_time_s": 4.560018769008347,
+            "failure_reason_counts": {
+              "low_effective_sample_size": 1,
+              "wall_occluded": 24
+            },
+            "observed_first_passage_fraction": 0.3193359375,
+            "observed_return_fraction": 0.30810546875,
+            "residence_censored_fraction": 0.01220703125
+          },
+          "1": {
+            "final_unknown_count": 19,
+            "final_unknown_fraction": 0.00927734375,
+            "candidate_support_pass_fraction_final": 0.9990234375,
+            "reliable_path_coverage": 0.99072265625,
+            "first_failure_frame": 394,
+            "first_failure_time_s": 3.940008066606618,
+            "failure_reason_counts": {
+              "wall_occluded": 19
+            },
+            "observed_first_passage_fraction": 0.2958984375,
+            "observed_return_fraction": 0.2958984375,
+            "residence_censored_fraction": 0.00927734375
+          }
+        }
+      },
+      "source_preflight": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row29-v1/20260920T050202-38d126b5519a/product/f3_material_adapter_row29_source-preflight.json",
+        "sha256": "f905c7d0993e7fa3fb64c3e52d318c9b21047bd2fe95fa3b4bdbd90accd4c11a",
+        "status": "preflight_passed",
+        "qualification_claim": "none",
+        "prepared_case": "F3_REV075_MATERIAL-AMP0P95-0075",
+        "prepared_case_qualified": false,
+        "formal_release": false,
+        "source_frames": 836,
+        "interpolation": false,
+        "current_frame_mass_density": true,
+        "candidate_gate": {
+          "minimum_effective_sample_size": 4.0,
+          "minimum_geometry_rank": 4,
+          "minimum_support_count": 4,
+          "maximum_condition_number": 10000000000.0
+        }
+      },
+      "checkpoint": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row29-v1/20260920T050202-38d126b5519a/product/f3_material_adapter_row29_trace.h5.checkpoint.json",
+        "sha256": "7385b54c010302474b9883dc2922694a4774311c35dcf3fe57f13227eb9df3bc",
+        "schema": "core.material.f3.native_volume_mls.checkpoint.v2",
+        "committed_frame": 835,
+        "checkpoint_npz_sha256": "fe6b96e55fa4cd3a934bcd3acb3d0b48c0cee8a3c09e3faf18c3f5f170a1baaa",
+        "state_sha256": "a6f8fc0fe65c792bf2068b8eb4255bf3c2131d77c21861e0bcd89b23bc18afe8"
+      },
+      "output_hashes": {
+        "trace_h5": {"bytes": 515237728, "sha256": "c1de25a835ac5150b8a51529e4ac11ce34b74a4b79dc487943414563c7edc3df"},
+        "prepared_adapter": {"bytes": 2035, "sha256": "5a1040b667b323da68d320e1980090812fd3ed8d00848900ce38d80440443e8b"},
+        "normalized_prepared": {"bytes": 9376, "sha256": "e775f710421370894b382368e690654a0ab7e90e5825417419a0b576c52619c2"},
+        "spec": {"bytes": 15796, "sha256": "9ecb85414fe4e94595404175fb58d4d897a9a5dab3b9467a00fd6f3ed2ce59fd"}
+      },
+      "artifact_index_audit": {"artifact_count": 846, "all_entries_match": true}
+    },
+    "31": {
+      "matrix_row": 31,
+      "job_id": "core-f3-native-mls-audited-adapter-row31-v1",
+      "logical_id": "core-f3-native-mls-audited-row31-v2-adapter-v1",
+      "attempt_dir": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row31-v1/20260920T050202-b16aef660dc8",
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row31-v1/20260920T050202-b16aef660dc8/result.json",
+        "sha256": "c7c7ab1a6c8108213e278465dce2cdc6fc2c49b70c6d775f892362970ea4e732",
+        "schema": "core.execution_receipt.v1",
+        "execution_status": "succeeded",
+        "returncode": 0,
+        "error": null,
+        "missing_outputs": [],
+        "scientific_status": "not_inferred_from_execution",
+        "timeout": false,
+        "terminal": true
+      },
+      "parameter_binding": {
+        "q": 0.75,
+        "drive_amplitude": 1.05,
+        "dp_m": 0.0075,
+        "seeds": 4096,
+        "substeps": 4,
+        "stop_after": 835,
+        "expected_frames": 836,
+        "time_window_s": [0.0, 8.35],
+        "source_asset_id": "f3_production_amp1p05_native010",
+        "source_sha256": "d7f473242e6ddb361b188d1281652a7c9c77a96030b3771b7385b89a32a5de7c",
+        "prepared_sha256": "88de9c2d2521216da9f3be48b2f037409f3e3370b0dddf51f3ceec744efd70ad",
+        "candidate_definition_sha256": "bd6c155b2112f0860293283def01b981c0364a1e67fbb146dd267a1dda8b58df",
+        "adapter_sha256": "b6334dab708efff2ee8d8a903aa2ca33ca753f007cdec8bfb422ff590f503284",
+        "backend_sha256": "cd1c050757df7b0d5832181464d446cf6e8c678e2b150aa07bae0ddb0ee3b5f9",
+        "seed_hash": "e8205ca52501d473609014d494d497062dbc84cf4379e779704c4d5fdab2c96c",
+        "walls_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217"
+      },
+      "summary": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row31-v1/20260920T050202-b16aef660dc8/product/f3_material_adapter_row31_trace.summary.json",
+        "sha256": "8275dba47d81229f9d424437e52477bac1d6e4cf2fb45fd55aafe0d822b9e762",
+        "schema": "core.material.f3.native_volume_mls.full_cadence_result.v2",
+        "status": "completed",
+        "material_reliability": "not established by numerical support diagnostics",
+        "qualification_claim": "none",
+        "mass_closed": true,
+        "native_initial_mass_kg": 14.580000378191471,
+        "common_reliable_path_coverage": 0.985107421875,
+        "unknown_fraction_max": 0.014892578125,
+        "committed_frames": 836,
+        "committed_last_frame": 835,
+        "time_end_s": 8.350012828223477,
+        "stage_failure_counts": {
+          "low_effective_sample_size": 16,
+          "no_support": 1,
+          "reliable": 54471051,
+          "wall_occluded": 76
+        },
+        "source_rows": {
+          "0": {
+            "final_unknown_count": 32,
+            "final_unknown_fraction": 0.015625,
+            "candidate_support_pass_fraction_final": 0.98974609375,
+            "reliable_path_coverage": 0.984375,
+            "first_failure_frame": 281,
+            "first_failure_time_s": 2.810002833344516,
+            "failure_reason_counts": {
+              "low_effective_sample_size": 4,
+              "no_support": 1,
+              "wall_occluded": 27
+            },
+            "observed_first_passage_fraction": 0.35693359375,
+            "observed_return_fraction": 0.34375,
+            "residence_censored_fraction": 0.015625
+          },
+          "1": {
+            "final_unknown_count": 29,
+            "final_unknown_fraction": 0.01416015625,
+            "candidate_support_pass_fraction_final": 0.99755859375,
+            "reliable_path_coverage": 0.98583984375,
+            "first_failure_frame": 237,
+            "first_failure_time_s": 2.370004515359631,
+            "failure_reason_counts": {
+              "low_effective_sample_size": 3,
+              "wall_occluded": 26
+            },
+            "observed_first_passage_fraction": 0.34326171875,
+            "observed_return_fraction": 0.34326171875,
+            "residence_censored_fraction": 0.01416015625
+          }
+        }
+      },
+      "source_preflight": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row31-v1/20260920T050202-b16aef660dc8/product/f3_material_adapter_row31_source-preflight.json",
+        "sha256": "e017fa5e03f888ac9487abab497da2e7d45621a0c0eedb3a8eafeba0ab050a27",
+        "status": "preflight_passed",
+        "qualification_claim": "none",
+        "prepared_case": "F3_REV075_MATERIAL-AMP1P05-0075",
+        "prepared_case_qualified": false,
+        "formal_release": false,
+        "source_frames": 836,
+        "interpolation": false,
+        "current_frame_mass_density": true,
+        "candidate_gate": {
+          "minimum_effective_sample_size": 4.0,
+          "minimum_geometry_rank": 4,
+          "minimum_support_count": 4,
+          "maximum_condition_number": 10000000000.0
+        }
+      },
+      "checkpoint": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/core-f3-native-mls-audited-adapter-row31-v1/20260920T050202-b16aef660dc8/product/f3_material_adapter_row31_trace.h5.checkpoint.json",
+        "sha256": "ffcb61419bf15ab153516587eff257de9bcef1969010c46a84b532563c3a3f6e",
+        "schema": "core.material.f3.native_volume_mls.checkpoint.v2",
+        "committed_frame": 835,
+        "checkpoint_npz_sha256": "de0cbbfba25a8e3845996e75398159fc5aa66779aa516f251666312d5b668a9c",
+        "state_sha256": "02286aed842da6d33c70c614677bf951ce6c31c0a121011974195f730b9c2b11"
+      },
+      "output_hashes": {
+        "trace_h5": {"bytes": 515293672, "sha256": "f27b770a3051f1ae9d35f64edb76700578476e1c32d5f7f4bfbe50474d6f3da5"},
+        "prepared_adapter": {"bytes": 2035, "sha256": "13274675c0c099c28aedc7a8390ae41b055f614f79107a28540cac7bfda27801"},
+        "normalized_prepared": {"bytes": 9377, "sha256": "f56ccb9b40ceace6437bf6e570ac42fb48d6996c5190cc3f9c33be3b7b5cba46"},
+        "spec": {"bytes": 15796, "sha256": "7023d1ddd40663d1121723168a26bb2f4dc721ba7289857bc470e233b68c3d91"}
+      },
+      "artifact_index_audit": {"artifact_count": 846, "all_entries_match": true}
+    }
+  },
+  "unknown_gate": {
+    "threshold": 0.01,
+    "policy": "per source denominator; all geometric seeds remain in denominator",
+    "rows": {
+      "29": {
+        "source_0": {"unknown_fraction": 0.01220703125, "passes_1percent": false},
+        "source_1": {"unknown_fraction": 0.00927734375, "passes_1percent": true},
+        "macro_pass": false
+      },
+      "31": {
+        "source_0": {"unknown_fraction": 0.015625, "passes_1percent": false},
+        "source_1": {"unknown_fraction": 0.01416015625, "passes_1percent": false},
+        "macro_pass": false
+      }
+    },
+    "interpretation": "The numerical traces complete, but their support-loss diagnostics exceed the fixed 1% per-source unknown gate for row29 source 0 and both row31 sources. No gate relaxation is applied."
+  },
+  "required_followup_for_any_future_qualification": [
+    "retain the exact terminal receipts, source-preflight records, prepared adapter records, trace summaries, trace H5 hashes, and comparison provenance",
+    "resolve and independently validate material reliability/support coverage under the registered acceptance gate",
+    "obtain an independent T2 acceptance record before any qualification claim"
+  ],
+  "no_new_job_statement": "This record was produced from already terminal row29/row31 attempts and read-only postprocessing; no duplicate or new computation job was submitted."
+}

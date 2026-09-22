@@ -1,0 +1,241 @@
+{
+  "backend": "f3_native_volume_mls_shared_current_model_rho0_v1",
+  "binding": {
+    "backend": "f3_native_volume_mls_shared_current_model_rho0_v1",
+    "density_estimator": {
+      "density_semantics": "reference_rho0_constant_public_v1",
+      "future_state_inputs": false,
+      "input": "public rho0 and one current core_contract.State",
+      "reference_density_input": false,
+      "rho0_kgm3": 1000.0,
+      "role": "reference_control",
+      "schema": "core.material.f3.native_volume_mls.model_density_rho0_constant.v1",
+      "spatial_density_model": "constant_over_current_support_rows",
+      "strategy": "rho0_constant_public_current_state_v1",
+      "time_binding": "estimate time equals State.time_s"
+    },
+    "dp_m": 0.0075,
+    "event_definition": {
+      "event_plane": "x=0",
+      "first_passage": "first usable crossing to opposite x side",
+      "residence": "integrated opposite-side time over usable segments",
+      "return": "first later usable crossing back to origin side",
+      "source_label": "initial_x_ge_0"
+    },
+    "field_time_policy": "current_frame_hold_within_registered_interval",
+    "future_state_inputs": false,
+    "h_m": 0.01194127788262211,
+    "intervals_requested": 20,
+    "native_density_read_for_weight": false,
+    "native_particle_id_is_tracer_identity": false,
+    "native_reference_density_used": false,
+    "provider_role": "reference_control_rho0",
+    "qualification_claim": "none",
+    "schema": "core.material.f3.native_volume_mls.model_material.v1",
+    "seed_hash": "f59c568af93ff60b0d5f02d67f771313117a9c1373b5a7e8d119766df79cd295",
+    "shared_field_backend": "f3_native_volume_mls_wendland_mass_density_shared_current_v1",
+    "source_h5": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+    "source_semantics": "registered_reference_support_frame_native_position_velocity_mass",
+    "source_sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+    "substeps_per_saved_interval": 1,
+    "support_reliability": "native-volume MLS numerical support only; material error uncalibrated",
+    "time_end_s": 0.2000113023685942,
+    "time_start_s": 0.0,
+    "trace_schema": "core.material.f3.native_volume_mls.model_material_trace.v1"
+  },
+  "common_reliable_path_fraction": 1.0,
+  "created_at_utc": "2026-09-19T18:30:20.051302+00:00",
+  "density_policy": {
+    "future_state_inputs": false,
+    "input": "public rho0 and one current core_contract.State",
+    "reference_density_input": false,
+    "rho0_kgm3": 1000.0,
+    "schema": "core.material.f3.native_volume_mls.model_density_rho0_constant.v1",
+    "spatial_density_model": "constant_over_current_support_rows",
+    "strategy": "rho0_constant_public_current_state_v1",
+    "time_binding": "estimate time equals State.time_s"
+  },
+  "diagnostics": {
+    "cpu_seconds": 3.673568,
+    "elapsed_seconds": 2.2717160750180483,
+    "loaded_frame_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "peak_rss_kib": 642348,
+    "stage_failure_counts": {
+      "reliable": 320
+    }
+  },
+  "implementation": {
+    "h5py": "3.16.0",
+    "mls_runner": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_temporal_v3.py",
+    "mls_runner_sha256": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395",
+    "module": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_model_material.py",
+    "module_sha256": "d3b98a5bd1110b1d1ffe7377e36251ce372f6151468bdd254646f5d4c6d71f1b",
+    "numpy": "2.2.6",
+    "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+    "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+    "shared_adapter": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_native_volume_mls_shared.py",
+    "shared_adapter_sha256": "2e46b82d20542d39156014cdc16167838b5cd1b3fbe0f5e9f566e59d7a2359fb"
+  },
+  "mass_closure": {
+    "closed": true,
+    "closure_error": 0.0,
+    "native_support_mass_used_for_weight": true,
+    "seed_weight_definition": "uniform 1/N independent tracer weights"
+  },
+  "material_reliability": "not_established",
+  "native_density_qualification": "not_applicable",
+  "output_trace_h5": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-model-material-rho0-v1/reference-control-trace.h5",
+  "qualification_claim": "none",
+  "schema": "core.material.f3.native_volume_mls.model_material.v1",
+  "seed_count": 4,
+  "seed_hash": "f59c568af93ff60b0d5f02d67f771313117a9c1373b5a7e8d119766df79cd295",
+  "source": {
+    "frames_registered": 836,
+    "future_state_inputs": false,
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+    "role": "reference_control_rho0",
+    "sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4"
+  },
+  "source_rows": [
+    {
+      "common_reliable_path_fraction": 1.0,
+      "first_failure_frame": null,
+      "first_failure_time_s": null,
+      "first_passage_time_quantiles_s": {
+        "count": 0,
+        "p50": null,
+        "p90": null,
+        "p95": null,
+        "p99": null
+      },
+      "initial_mass_fraction": 0.5,
+      "observed_first_passage_fraction": 0.0,
+      "observed_return_fraction": 0.0,
+      "residence_censored_fraction": 0.0,
+      "residence_opposite_quantiles_s_lower_bound": {
+        "count": 2,
+        "p50": 0.0,
+        "p90": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      },
+      "return_time_quantiles_s": {
+        "count": 0,
+        "p50": null,
+        "p90": null,
+        "p95": null,
+        "p99": null
+      },
+      "seed_count": 2,
+      "source": 0,
+      "unknown_fraction_final": 0.0
+    },
+    {
+      "common_reliable_path_fraction": 1.0,
+      "first_failure_frame": null,
+      "first_failure_time_s": null,
+      "first_passage_time_quantiles_s": {
+        "count": 0,
+        "p50": null,
+        "p90": null,
+        "p95": null,
+        "p99": null
+      },
+      "initial_mass_fraction": 0.5,
+      "observed_first_passage_fraction": 0.0,
+      "observed_return_fraction": 0.0,
+      "residence_censored_fraction": 0.0,
+      "residence_opposite_quantiles_s_lower_bound": {
+        "count": 2,
+        "p50": 0.0,
+        "p90": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      },
+      "return_time_quantiles_s": {
+        "count": 0,
+        "p50": null,
+        "p90": null,
+        "p95": null,
+        "p99": null
+      },
+      "seed_count": 2,
+      "source": 1,
+      "unknown_fraction_final": 0.0
+    }
+  ],
+  "status": "completed",
+  "trace_h5_sha256": "0086557e5a7395c5f556c11494c49058aa0a89e3b68cfefabfa2181b0a33b389",
+  "trace_schema": "core.material.f3.native_volume_mls.model_material_trace.v1",
+  "unknown_fraction_by_frame": {
+    "fraction": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "time_s": [
+      0.0,
+      0.01002158167418958,
+      0.02002104065810541,
+      0.03002049964202124,
+      0.04001995862593706,
+      0.05001941760985289,
+      0.06001887659376871,
+      0.07001833557768218,
+      0.08001779456159487,
+      0.09001725354550756,
+      0.1000167125294203,
+      0.1100161715133329,
+      0.1200156304972456,
+      0.1300150894811615,
+      0.1400145484650804,
+      0.1500140074489994,
+      0.1600134664329184,
+      0.1700129254168373,
+      0.1800123844007563,
+      0.1900118433846752,
+      0.2000113023685942
+    ]
+  },
+  "unknown_fraction_final": 0.0,
+  "unknown_fraction_max": 0.0
+}

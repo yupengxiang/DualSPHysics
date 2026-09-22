@@ -1,0 +1,135 @@
+{
+  "schema": "core.material.f4.negative_evidence_audit.v1",
+  "observed_at_utc": "2026-09-20T02:15:27Z",
+  "status": "complete_negative_evidence_only",
+  "qualification_claim": "none",
+  "t2_status": "not_qualified",
+  "audit_scope": "Retained F4 material canaries and their read-only failure diagnoses; no new worker or solver was launched.",
+  "execution_constraints": {
+    "new_job_submitted": false,
+    "gpu_started_by_audit": false,
+    "solver_started_by_audit": false,
+    "central_ledger_mutation": 0,
+    "active_h5_opened": false,
+    "thresholds_changed": false
+  },
+  "completeness_criteria": {
+    "terminal_execution_receipt": true,
+    "artifact_bytes_and_sha256_verified": true,
+    "material_result_is_terminal": true,
+    "mass_closure_is_recorded": true,
+    "unknown_gate_failure_is_recorded": true,
+    "event_right_censoring_is_recorded": true,
+    "t2_booleans_explicitly_false": true,
+    "first_failure_or_support_diagnosis_linked": true,
+    "qualification_claim_explicitly_none": true
+  },
+  "canaries": [
+    {
+      "id": "f4_real_material_baseline_s2",
+      "execution": "campaigns/core-v1/evidence/f4-real-material-canary-execution.json",
+      "result": "campaigns/core-v1/evidence/f4-real-material-canary-result.json",
+      "summary": "campaigns/core-v1/evidence/f4-real-material-canary-summary.json",
+      "diagnosis_manifest": "campaigns/core-v1/material/evidence/f4-real-material-canary-diagnosis-20260919/manifest.json",
+      "binding_correction": "campaigns/core-v1/material/evidence/f4-real-material-canary-binding-correction-2026-09-19.json",
+      "execution_status": "succeeded",
+      "committed_frames": 16,
+      "unknown_fraction_max": 0.84765625,
+      "common_reliable_path_coverage": 0.15234375,
+      "mass_closed": true,
+      "event_window_complete": false,
+      "event_window_status": "right_censored_or_unresolved",
+      "unknown_gate_pass": false,
+      "qualified_T2_macro": false,
+      "qualified_T2_path": false,
+      "negative_finding": "First losses are recorded as reconstruction-error gate failures; no wall, distance, ESS, rank, anisotropy, or nonfinite-velocity failure is needed to explain the retained negative result."
+    },
+    {
+      "id": "f4_native_dense_pair_s2_s4",
+      "execution": [
+        "campaigns/core-v1/evidence/f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5-execution.json",
+        "campaigns/core-v1/evidence/f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5-execution.json"
+      ],
+      "result": [
+        "campaigns/core-v1/evidence/f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5-material.json",
+        "campaigns/core-v1/evidence/f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5-material.json"
+      ],
+      "pair_summary": "campaigns/core-v1/material/evidence/f4-dense-short-diagnostic-results.json",
+      "execution_status": "both_succeeded",
+      "committed_frames": 151,
+      "unknown_fraction_max": 0.896484375,
+      "common_reliable_path_coverage": 0.103515625,
+      "mass_closed": true,
+      "event_window_complete": false,
+      "event_window_status": "right_censored_or_unresolved",
+      "unknown_gate_pass": false,
+      "qualified_T2_macro": false,
+      "qualified_T2_path": false,
+      "negative_finding": "Native .002 s output densification did not resolve the fixed reconstruction reliability gate."
+    },
+    {
+      "id": "f4_repair_canaries_ess32_and_affine_bound",
+      "execution": [
+        "campaigns/core-v1/material/evidence/f4-material-repair-ess32-v2-canary-s0p3-center-q0p5-execution.json",
+        "campaigns/core-v1/material/evidence/f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5-execution.json"
+      ],
+      "result": [
+        "campaigns/core-v1/material/evidence/f4-material-repair-ess32-v2-canary-s0p3-center-q0p5-result.json",
+        "campaigns/core-v1/material/evidence/f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5-result.json"
+      ],
+      "diagnosis": "campaigns/core-v1/material/evidence/f4-material-repair-failure-diagnosis-20260919-amendment.json",
+      "execution_status": "both_succeeded",
+      "unknown_fraction_max_by_variant": {
+        "f4_ess32_v2": 0.923828125,
+        "f4_affine_bound_v2": 0.955078125
+      },
+      "common_reliable_path_coverage_by_variant": {
+        "f4_ess32_v2": 0.076171875,
+        "f4_affine_bound_v2": 0.044921875
+      },
+      "mass_closed": true,
+      "event_window_complete": false,
+      "unknown_gate_pass": false,
+      "qualified_T2_macro": false,
+      "qualified_T2_path": false,
+      "negative_finding": "Both repair candidates first fail at frame 81 in the near-contact approach interval; the fixed reconstruction cap is exceeded while ESS, rank, anisotropy, and support distance still pass at first loss."
+    },
+    {
+      "id": "f4_tallwall120_short_canary",
+      "execution": "campaigns/core-v1/material/evidence/f4-tallwall120-canary-root-v1.json",
+      "diagnosis": "campaigns/core-v1/material/evidence/f4-tallwall120-canary-support-diagnosis-v1.json",
+      "diagnosis_summary": "campaigns/core-v1/material/evidence/f4-tallwall120-canary-support-diagnosis-summary-v1.json",
+      "execution_status": "succeeded",
+      "saved_intervals": 20,
+      "last_saved_time_s": 0.4000145164329399,
+      "seed_count": 512,
+      "unknown_fraction_max": 1.0,
+      "common_reliable_path_coverage": 0.0,
+      "mass_closed": true,
+      "event_window_status": "right_censored_or_unresolved",
+      "scientific_gate_pass": false,
+      "first_failure_interval_s": [0.1600149861278153, 0.1800111221709365],
+      "support_gate_failure_totals": {
+        "g0_reconstruction_error_fail": 15,
+        "g1_reconstruction_error_fail": 510,
+        "distance_ess_rank_anisotropy_wall_nonfinite_failures": 0
+      },
+      "negative_finding": "All 512 seeds are unknown by the short-window end; the retained replay identifies reconstruction-error failures and records no wall, distance, ESS, rank, anisotropy, or nonfinite failure."
+    }
+  ],
+  "hash_check": {
+    "execution_receipts_checked": 5,
+    "artifact_index_bytes_and_sha256": "pass",
+    "baseline_corrected_artifact_manifest": "pass",
+    "binding_correction_sidecar": "pass",
+    "tallwall_output_hashes": "pass",
+    "material_result_gate_fields": "pass",
+    "diagnosis_replay_mismatches": 0
+  },
+  "remaining_before_any_t2_claim": [
+    "independent material/reference calibration and a fixed-gate passing reference path",
+    "full-window event completion under the registered right-censoring rule",
+    "the registered F4 material matrix and independent acceptance record"
+  ],
+  "interpretation_boundary": "This file closes the negative-evidence chain and records why the retained canaries remain diagnostic failures. It does not convert solver execution, mass closure, or a repair proposal into T2 eligibility."
+}

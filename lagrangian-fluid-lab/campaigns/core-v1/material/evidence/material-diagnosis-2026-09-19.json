@@ -1,0 +1,197 @@
+{
+  "schema": "core.material.diagnosis.v1",
+  "created_date": "2026-09-19",
+  "decision": "diagnosis_only_no_science_change",
+  "unknown_gate": {
+    "max_fraction": 0.01,
+    "policy": "fixed; no relaxation",
+    "full_window_pass": false
+  },
+  "implementation_binding": {
+    "backend": "f3_ckdtree_visible_shepard_distance_v1",
+    "weighting": "Shepard distance 1/(d^2 + eps^2)",
+    "neighbours": 24,
+    "regularization_m": 0.004,
+    "maximum_support_distance_m": 0.03,
+    "support_gate": {
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3,
+      "minimum_anisotropy": 0.005
+    },
+    "neighbor_code_sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752",
+    "passive_code_sha256": "0301b797ddf472d8e37a835cb97036ba13b4cde8c1832838edfed06da20860cc",
+    "walls_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217"
+  },
+  "lineage": {
+    "development_sidecar": {
+      "case_id": "F3_DEV_00_a0p903125",
+      "evaluation_role": "development_extrapolation",
+      "qualification_case": false,
+      "source_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+      "use": "production-side performance/engineering sidecar",
+      "excluded_from": ["recipe tuning", "threshold tuning", "training data", "qualification claim"]
+    },
+    "qualification_reference_basis": {
+      "manifest": "campaigns/l2-multifamily/reports/a0-replay.json",
+      "manifest_sha256": "1f04f8c9ba2ffef5220045b9b2e2d1112cb34df42e1f452fa3f782bd6c6824e7",
+      "gate": "campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json",
+      "gate_sha256": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4",
+      "authorization": "campaigns/l1-resume/continuation/F3-075-REF0081818-AUTHORIZATION.json",
+      "authorization_sha256": "f8d5dae425c954a82d400b0a5b58ffdb59d9caafe0853b055ca0058f5396c4dd",
+      "cell_status": "registered qualification cells; prepared references remain qualified=false and formal_release=false",
+      "roles": ["reference_nominal", "reference_low_amplitude", "reference_high_amplitude"]
+    }
+  },
+  "full_window_development_sidecar": {
+    "input": "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5",
+    "output_directory": "campaigns/core-v1/material/evidence/core-material-final.LZjV4E",
+    "output": "campaigns/core-v1/material/evidence/core-material-final.LZjV4E/f3dev00-512.h5",
+    "output_sha256": "5eed59adc1d22a6a652abed078f09290b7e978b08c8c7e9547100fd442c6b895",
+    "summary": "campaigns/core-v1/material/evidence/core-material-final.LZjV4E/f3dev00-512.json",
+    "summary_sha256": "5d21f086f7b0f7f6f2f6b41b75670159fd7ffa2757d66c571140665b6a61336f",
+    "checkpoint_sidecars": {
+      "json_sha256": "8420e8967c7f0a5467860289efb9d5997aebb609d33602867b77b0c543ae416b",
+      "npz_sha256": "38a69c78a9dcaa461563e81292be025ba62fb2532ef98b34454a89298b83235d"
+    },
+    "run_binding_code_sha256": "d619ba26fc624775e1bd587e40f1dcf96d8e89ce0e38545f5d18827356e2f5ec",
+    "command": ".venv/bin/python -m scripts.core_material --source campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5 --output /tmp/core-material-final.LZjV4E/f3dev00-512.h5 --seeds 512 --substeps 2",
+    "execution": {
+      "saved_frames": 836,
+      "last_frame_index": 835,
+      "end_time_s": 8.350012828223477,
+      "elapsed_s": 168.3537334050052,
+      "max_rss_kib": 588108,
+      "device": "CPU",
+      "gpu_started": false,
+      "ledger_touched": false,
+      "slot_acquired": false
+    },
+    "result": {
+      "status": "completed",
+      "mass_closed": true,
+      "common_reliable_path_coverage": 0.96484375,
+      "unknown_fraction_weighted": 0.03515625,
+      "unknown_fraction_by_source": {"0": 0.0390625, "1": 0.03125},
+      "unknown_gate_pass": false,
+      "qualification_claim": false
+    },
+    "first_failure_by_source": {
+      "source_0": {
+        "seed_count": 10,
+        "frames": [{"frame": 248, "count": 2, "time_s": 2.48002}, {"frame": 251, "count": 2, "time_s": 2.51002}, {"frame": 252, "count": 4, "time_s": 2.52002}, {"frame": 253, "count": 2, "time_s": 2.53002}],
+        "location": "left x wall; x approximately -0.430 to -0.385 m, |y| approximately 0.01 to 0.079 m, z approximately 0.092 to 0.112 m"
+      },
+      "source_1": {
+        "seed_count": 8,
+        "frames": [{"frame": 339, "count": 3, "time_s": 3.39002}, {"frame": 340, "count": 3, "time_s": 3.40002}, {"frame": 341, "count": 2, "time_s": 3.41001}],
+        "location": "right x wall mirror; x approximately 0.426 to 0.432 m, |y| approximately 0.01 to 0.079 m, z approximately 0.103 to 0.112 m"
+      }
+    },
+    "failure_reason": {
+      "all_observed_first_failures": "support-gate reconstruction error at the second RK2 field sample",
+      "g1": false,
+      "blocked": false,
+      "finite_velocity": true,
+      "visible_neighbours": 96,
+      "selected_visible_neighbours": 24,
+      "ess_range": [12.0, 19.4],
+      "rank": 3,
+      "anisotropy_range": [0.46, 0.82],
+      "reconstruction_error_mps": "approximately 0.047 to 0.059, above 0.04698137929009748",
+      "interpretation": "not a missing-visible-support or wall-segment collision event in the inspected first-failure rows"
+    }
+  },
+  "qualification_reference_canaries": [
+    {
+      "case_id": "R0081818-NOMINAL",
+      "role": "reference_nominal",
+      "input": "campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+      "input_sha256": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575",
+      "output": "campaigns/core-v1/material/evidence/qualification-canary-260/core-material-canary-qualification-nominal-260.h5",
+      "output_sha256": "aeb707af6546c3a09fbc57f2c9552d7ffe78815e9da3b85636345bfe21ecd665",
+      "summary_sha256": "a2db3a4e1b301e696da42dcc5f9de1a78a9a514b8ffc0af59f2124cd3729f7fd",
+      "command": ".venv/bin/python -m scripts.core_material --source campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5 --output /tmp/core-material-canary-qualification-nominal-260.h5 --seeds 512 --substeps 2 --stop-after 260",
+      "initial_reliable": "512/512",
+      "first_bad_frames": [{"frame": 245, "count": 2}, {"frame": 247, "count": 2}, {"frame": 248, "count": 2}, {"frame": 250, "count": 6}],
+      "first_bad_source": 0,
+      "unknown_fraction_max": 0.046875,
+      "common_reliable_path_coverage": 0.9765625,
+      "mass_closed": true,
+      "status": "partial"
+    },
+    {
+      "case_id": "R0081818-ENDPOINT-LOW",
+      "role": "reference_low_amplitude",
+      "input": "campaigns/l1-resume/data/continuation/R0081818-ENDPOINT-LOW.h5",
+      "input_sha256": "d69f831a4e88fc9f1762a45082a65a1c26916577506dbc8b91e09084828a160f",
+      "output": "campaigns/core-v1/material/evidence/qualification-canary-260/core-material-canary-qualification-low-260.h5",
+      "output_sha256": "d3c1ba6e406334e531513dba0129cbbb15467e4686ab2de4844f32a6f83593ec",
+      "summary_sha256": "701284fd4c16ae592f3c9142baf0953a6f2496082f8b76dad09817099472cc03",
+      "command": ".venv/bin/python -m scripts.core_material --source campaigns/l1-resume/data/continuation/R0081818-ENDPOINT-LOW.h5 --output /tmp/core-material-canary-qualification-low-260.h5 --seeds 512 --substeps 2 --stop-after 260",
+      "initial_reliable": "512/512",
+      "first_bad_frames": [{"frame": 248, "count": 2}, {"frame": 250, "count": 2}, {"frame": 253, "count": 6}],
+      "first_bad_source": 0,
+      "unknown_fraction_max": 0.0390625,
+      "common_reliable_path_coverage": 0.98046875,
+      "mass_closed": true,
+      "status": "partial"
+    },
+    {
+      "case_id": "R0081818-ENDPOINT-HIGH",
+      "role": "reference_high_amplitude",
+      "input": "campaigns/l1-resume/data/continuation/R0081818-ENDPOINT-HIGH.h5",
+      "input_sha256": "6c623e651598d082951c8023cc8168da1ec0a4f58ef99b4747deb1836eb0ca41",
+      "output": "campaigns/core-v1/material/evidence/qualification-canary-260/core-material-canary-qualification-high-260.h5",
+      "output_sha256": "5b4267adb4d829a99474bec941bf4d3d84c85a13dc3f6255a4b2c02afc7ee848",
+      "summary_sha256": "3704e43988a5db53463fd1fa4cfdf0361a6be14ed0e1669fa26be367f608c073",
+      "command": ".venv/bin/python -m scripts.core_material --source campaigns/l1-resume/data/continuation/R0081818-ENDPOINT-HIGH.h5 --output /tmp/core-material-canary-qualification-high-260.h5 --seeds 512 --substeps 2 --stop-after 260",
+      "initial_reliable": "512/512",
+      "first_bad_frames": [{"frame": 242, "count": 2}, {"frame": 245, "count": 2}, {"frame": 247, "count": 5}, {"frame": 248, "count": 3}],
+      "first_bad_source": 0,
+      "unknown_fraction_max": 0.046875,
+      "common_reliable_path_coverage": 0.9765625,
+      "mass_closed": true,
+      "status": "partial"
+    }
+  ],
+  "repair_hypotheses": [
+    {
+      "id": "H1",
+      "name": "support_gate_reconstruction_false_positive",
+      "evidence": "Across dev00 and all three qualification roles, first failures have g1=false while finite velocity, visible-neighbour count, ESS, rank, anisotropy, support distance and swept-wall collision checks pass.",
+      "candidate_experiment": "Evaluate a wall-aware local reconstruction diagnostic using the same visible cKDTree candidates and Shepard distance weights; retain the 1% unknown gate and compare first-failure count, mass closure and common-path coverage.",
+      "status": "hypothesis_only; no science implementation changed"
+    },
+    {
+      "id": "H2",
+      "name": "valid_visibility_but_one_sided_near_wall_support",
+      "evidence": "Failures cluster at the left/right wall-adjacent band (z about 0.09-0.11 m) across amplitudes. The search sees 96 visible candidates but selects 24, so a geometrically valid yet one-sided/truncated neighborhood can raise reconstruction error without a visibility or collision false positive.",
+      "candidate_experiment": "Run an independently bound support-cap/boundary-completion canary on the qualification references, with the current backend recorded as control; do not change the production recipe or gate until the canary preserves mass closure and improves the unknown bound.",
+      "status": "hypothesis_only; no science implementation changed"
+    }
+  ],
+  "next_job_spec": {
+    "purpose": "qualification-reference control canary and later hypothesis variants",
+    "resource": {"device": "CPU", "python": ".venv/bin/python", "max_rss_observed_kib": 581060, "gpu": false, "ledger": false, "slot": false},
+    "argv_template": ["-m", "scripts.core_material", "--source", "<REFERENCE_H5>", "--output", "<OUTPUT_H5>", "--seeds", "512", "--substeps", "2", "--stop-after", "260"],
+    "reference_inputs": [
+      "campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+      "campaigns/l1-resume/data/continuation/R0081818-ENDPOINT-LOW.h5",
+      "campaigns/l1-resume/data/continuation/R0081818-ENDPOINT-HIGH.h5"
+    ],
+    "hard_checks": ["initial_reliable == 512/512", "mass_closed == true", "unknown_fraction_max <= 0.01 for a candidate to advance", "no use of dev00 as tuning data"],
+    "output_root": "campaigns/core-v1/material/evidence",
+    "lineage_policy": "qualification_only references for repair canaries; dev00 remains sidecar only"
+  },
+  "tests": {
+    "command": ".venv/bin/python -m pytest -q tests/test_core_material.py",
+    "result": "7 passed in 2.86s",
+    "coverage": ["explicit 15-row matrix subset", "provider future-frame refusal", "source/CDF semantics", "explicit H2/H1 backend bindings", "independent-process SIGKILL checkpoint/resume equivalence"]
+  },
+  "central_state": {
+    "ledger_modified": false,
+    "gpu_job_started": false,
+    "qualification_claim": false
+  }
+}

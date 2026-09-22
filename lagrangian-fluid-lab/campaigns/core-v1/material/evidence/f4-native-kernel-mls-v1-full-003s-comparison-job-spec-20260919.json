@@ -1,0 +1,83 @@
+{
+  "argv": [
+    "/usr/bin/python3.10",
+    "-m",
+    "scripts.f4_native_kernel_mls_compare",
+    "--s2",
+    "{s2_attempt_dir}/native_mls_material.h5",
+    "--s4",
+    "{s4_attempt_dir}/native_mls_material.h5",
+    "--output",
+    "{attempt_dir}/s2-s4-comparison.json"
+  ],
+  "central_ledger_mutation": 0,
+  "code_snapshot": {
+    "checkpoint_schema": "core.material.f4.native_kernel_mls.checkpoint.v2",
+    "comparison_code": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_native_kernel_mls_compare.py",
+      "sha256": "a6623f462ddd0f9527fb4bb28a43760f79c86cdbb9df9ffb2733b6a731d22f53"
+    },
+    "trace_code": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_native_kernel_mls.py",
+      "sha256": "8da879e466105efa53a620115b8a204031e400b60bb535d2efdc1f697d76e30c"
+    },
+    "comparison_schema": "core.material.f4.native_kernel_mls.comparison.v2"
+  },
+  "comparisons": [
+    "endpoint reliable/unknown/destination mass fractions with unknown lower/upper bounds",
+    "framewise permanent_unknown mass",
+    "first contact/upward/return CDF lower and upper bounds with right-censoring",
+    "all-source residence CDF lower/upper bounds and zero-residence mass",
+    "residence lower/upper mean with support-loss censoring",
+    "common reliable path and endpoint disagreement",
+    "mass closure"
+  ],
+  "constraints": [
+    "read-only inputs",
+    "no GPU/solver/ledger",
+    "do not modify trace outputs or old reports",
+    "comparison is invalid if bindings/source hashes/time axes differ"
+  ],
+  "created_at_utc": "2026-09-19T13:46:39.529180+00:00",
+  "gpu_required": false,
+  "host_preference": "h200_cpu_first",
+  "inputs": {
+    "frame_count": 151,
+    "s2_h5": "{s2_attempt_dir}/native_mls_material.h5",
+    "s4_h5": "{s4_attempt_dir}/native_mls_material.h5",
+    "same_source_required": true,
+    "same_source_sha256": "eaa423cd1e6cdb2e0bd89fcd9b0332fd0e9524e10be0c907926d4155b3ce46b9",
+    "seed_denominator": 512,
+    "window_s": 0.3
+  },
+  "interpretation_policy": {
+    "material_reliability": "uncalibrated; CDF agreement or support success does not establish material truth",
+    "support_unknown": "numerical support failure retained in denominator; report separately",
+    "t2": "not evaluated; .3 s source is a short canary, not 4.34 s qualification",
+    "unobserved_events": "NaN/right-censored; never impute",
+    "residence": "cumulative destination-box time within the observed 0.3 s window; all source mass is retained, reliable no-contact seeds contribute exact zero, and support-loss seeds contribute a conservative [lower, upper] interval; eventual residence after the window remains right-censored",
+    "event_cdf_bounds": "finite event times are observed; unresolved permanent-unknown seeds widen only the upper CDF from the preceding committed frame, while reliable no-event seeds remain right-censored"
+  },
+  "job_id": "f4-native-kernel-mls-v1-full-003s-s2-s4-comparison-v2",
+  "logical_id": "F4-NATIVE-KERNEL-MLS-FULL-003S-S2-S4-COMPARISON",
+  "outputs": {
+    "comparison_json": {
+      "path": "{attempt_dir}/s2-s4-comparison.json",
+      "sha256": null
+    },
+    "execution_json": {
+      "path": "{attempt_dir}/execution.json",
+      "sha256": null
+    }
+  },
+  "qualification_claim": "none",
+  "resources": {
+    "cpu_cores": 1,
+    "gpu_peak_mib": 0,
+    "io_weight": 0.1,
+    "ram_mib": 1024,
+    "timeout_seconds": 300
+  },
+  "schema": "core.material.comparison.job.v2",
+  "stage": "qualification_only_diagnostic_postprocess"
+}
