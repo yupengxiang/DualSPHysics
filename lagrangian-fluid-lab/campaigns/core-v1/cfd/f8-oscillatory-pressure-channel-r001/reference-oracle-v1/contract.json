@@ -1,0 +1,54 @@
+{
+  "schema": "core.cfd.f8.reference_oracle_contract.v1",
+  "status": "static_reference_only_no_admission",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001",
+  "qualification_credit": 0,
+  "execution_controls": {
+    "definition_written": false,
+    "gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0
+  },
+  "continuum_problem": {
+    "equation": "du/dt = a(t) + nu*d2u/dz2",
+    "forcing": "a(t)=A*sin(omega*t)",
+    "domain": "-H <= z <= H",
+    "boundary": "u(-H,t)=u(H,t)=0",
+    "complex_solution": "U(z)=ahat/(i*omega)*(1-cosh(k*z)/cosh(k*H)), k=sqrt(i*omega/nu)",
+    "sine_forcing_complex_amplitude": "ahat=-i*A",
+    "reference_semantics": "steady harmonic continuum oracle; no CFD future-state access"
+  },
+  "required_gates": [
+    "wall no-slip",
+    "centerline symmetry",
+    "low-frequency Poiseuille limit",
+    "zero-mean cycle flux",
+    "finite positive parameter validation",
+    "strict in-domain ordered integration grid"
+  ],
+  "bindings": {
+    "implementation": {
+      "path": "scripts/f8_womersley_oracle.py",
+      "sha256": "bf9a3f975d4a25ba72d65ff2f9edafa29fd565d366d2c940fc85043bd84b469f",
+      "bytes": 7285
+    },
+    "test": {
+      "path": "tests/test_f8_womersley_oracle.py",
+      "sha256": "963e73ab42709c1828f94aea0267f386373a74562dd03014ff6122e0160d6110",
+      "bytes": 5365
+    },
+    "upstream_candidate": {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/candidate-card-v1.json",
+      "role": "historical proposal context only; not rewritten by this contract"
+    },
+    "upstream_root_review": {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/root-review/terra-high-root-review-v1.json",
+      "role": "historical conditional review; does not authorize execution"
+    }
+  }
+}
