@@ -38,6 +38,8 @@ ROOT_CONTRACT_V2_SCRIPT = "scripts/f7_pump_root_review_contract_v2.py"
 ROOT_CONTRACT_V2_TEST = "tests/test_f7_pump_root_review_contract_v2.py"
 CAUSAL_SIDECAR_SCRIPT = "scripts/f7_pump_causal_sidecar_v1.py"
 CAUSAL_SIDECAR_TEST = "tests/test_f7_pump_causal_sidecar_v1.py"
+RUNTIME_CANARY_SCRIPT = "scripts/f7_pump_runtime_canary_v1.py"
+RUNTIME_CANARY_TEST = "tests/test_f7_pump_runtime_canary_v1.py"
 
 PUMP_DIR = "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump"
 PUMP_XML = f"{PUMP_DIR}/CasePump_Def.xml"
@@ -209,6 +211,8 @@ def isolated_implementation_bindings() -> list[dict[str, Any]]:
         binding(ROOT_CONTRACT_V2_TEST, "root-review contract v2 synthetic regression tests"),
         binding(CAUSAL_SIDECAR_SCRIPT, "read-only hash-bound causal control sidecar producer"),
         binding(CAUSAL_SIDECAR_TEST, "causal control sidecar producer regression tests"),
+        binding(RUNTIME_CANARY_SCRIPT, "non-executing official Pump runtime canary planner"),
+        binding(RUNTIME_CANARY_TEST, "runtime canary planner regression tests"),
         binding(ADAPTER_SCRIPT, "isolated read-only F7 Pump geometry adapter"),
         binding(ADAPTER_TEST, "geometry adapter synthetic regression tests"),
         binding(CORE_ADAPTER_TEST, "read-only Core F7 adapter contract regression tests"),
@@ -522,6 +526,7 @@ def build_interface_review(candidate: dict[str, Any]) -> dict[str, Any]:
             "moving_affine_material_frame_present": "moving_affine" in transport_source,
             "f7_transform_dataset_producer_present": "control/frame" in dataset_source,
             "f7_causal_sidecar_producer_present": local(CAUSAL_SIDECAR_SCRIPT).is_file(),
+            "f7_runtime_canary_planner_present": local(RUNTIME_CANARY_SCRIPT).is_file(),
             "f7_return_observer_present": "recirculation" in transport_source.lower(),
             "isolated_f7_geometry_adapter_present": True,
             "isolated_f7_material_observer_present": True,
