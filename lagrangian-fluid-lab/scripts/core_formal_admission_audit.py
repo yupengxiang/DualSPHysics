@@ -1027,11 +1027,25 @@ def audit_admission(
             "existing diagnostic preprofile evidence was produced under a different source closure",
             observed=closure.get("preprofile_mismatch_count"), required=0,
             scope="evidence"))
-    if resource.get("bound") and not resource.get("formal_capacity_evidence"):
+    if not (
+        resource.get("formal_capacity_evidence") is True
+        and capacity.get("valid") is True
+    ):
         blockers.append(_blocker(
             "RESOURCE_FRONTIER_UNPROVEN",
-            "the preserved profile reaches only the diagnostic update frontier and cannot prove 32000-update capacity",
-            observed=resource.get("observed_update_frontier"), required=FORMAL_UPDATES,
+            "formal admission requires explicit valid full-field 32000-update capacity evidence",
+            observed={
+                "resource_profile_bound": resource.get("bound") is True,
+                "resource_formal_capacity_evidence": resource.get("formal_capacity_evidence"),
+                "capacity_evidence_bound": capacity.get("bound") is True,
+                "capacity_evidence_valid": capacity.get("valid") is True,
+                "observed_update_frontier": capacity.get("observed_update_frontier"),
+            },
+            required={
+                "resource_formal_capacity_evidence": True,
+                "capacity_evidence_valid": True,
+                "observed_update_frontier": FORMAL_UPDATES,
+            },
             scope="resource"))
     if capacity.get("bound") and not capacity.get("valid"):
         blockers.append(_blocker(

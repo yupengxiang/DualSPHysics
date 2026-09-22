@@ -306,3 +306,20 @@ def test_cli_writes_a_digest_and_never_emits_formal_jobs(tmp_path: Path) -> None
     digest_text = digest.read_text().strip()
     assert digest_text.endswith("  admission.json")
     assert digest_text.split()[0]
+
+
+def test_missing_resource_profile_cannot_satisfy_capacity_gate() -> None:
+    report = audit_admission(
+        [F3_MANIFEST, F4_MANIFEST],
+        evidence=[F3_QUALIFICATION, F3_ADAPTER, F3_STRUCTURAL_ADAPTER, F4_QUALIFICATION],
+        data_root=ROOT,
+        code_root=ROOT,
+        preprofile_index=PREPROFILE,
+        resource_profile=None,
+        resource_dryrun=RESOURCE_DRYRUN,
+        graph_probe=GRAPH_PROBE,
+    )
+    assert "RESOURCE_FRONTIER_UNPROVEN" in {
+        item["code"] for item in report["blockers"]
+    }
+    assert report["resource_profile"]["formal_capacity_evidence"] is False
