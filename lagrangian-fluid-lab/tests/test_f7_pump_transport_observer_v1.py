@@ -14,6 +14,8 @@ from scripts.f7_pump_transport_observer_v1 import (
     sha256_array,
     sha256_file,
 )
+from scripts.f7_pump_causal_sidecar_v1 import make_sidecar
+from scripts.f7_pump_geometry_adapter_v1 import DEFAULT_DEFINITION
 
 
 def _write_case(path):
@@ -115,6 +117,24 @@ def test_missing_control_is_blocked_without_inference(tmp_path):
     spec["trajectory_sha256"] = sha256_file(path)
     failed = audit_pump_transport(path, spec)
     assert failed["status"] == "blocked_missing_causal_control"
+
+
+def test_companion_control_sidecar_is_explicitly_bound_and_consumed(tmp_path):
+    path = tmp_path / "case.h5"
+    _, _, _ = _write_case(path)
+    with h5py.File(path, "a") as h5:
+        del h5["control"]
+    sidecar = tmp_path / "case.controls.h5"
+    make_sidecar(path, sidecar, DEFAULT_DEFINITION)
+    with h5py.File(sidecar, "r") as h5:
+        transforms = np.asarray(h5["control/pump_world_from_body"][:])
+        angular = np.asarray(h5["control/pump_angular_velocity_rad_s"][:])
+    spec = _spec(path, transforms, angular)
+    result = audit_pump_transport(path, spec, control_sidecar_path=sidecar)
+    assert result["status"] == "observer_complete_but_root_gate_blocked"
+    assert result["control_sidecar_binding"]["schema"] == "core.f7.pump.causal_sidecar.v1"
+    assert result["control_sidecar_binding"]["runtime_evidence"] is False
+    assert result["qualification_credit"] == 0
 
 
 def test_unknown_exit_is_not_renormalized(tmp_path):

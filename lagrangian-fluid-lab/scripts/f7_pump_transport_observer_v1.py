@@ -14,6 +14,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+from contextlib import ExitStack
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +25,7 @@ from scripts.passive_tracers import validate_rigid_transform
 
 
 SCHEMA = "core.f7.pump.transport_observer.v1"
+CONTROL_SIDECAR_SCHEMA = "core.f7.pump.causal_sidecar.v1"
 IDENTITY = "particle_zone,particle_id"
 BODY_FRAME_SEMANTICS = "world_from_body"
 ANGULAR_CONTROL_SEMANTICS = "pump_body_angular_velocity_rad_s_world_frame"
@@ -246,8 +248,18 @@ def _correlation(left: np.ndarray, right: np.ndarray) -> float | None:
     return float(np.corrcoef(left, right)[0, 1])
 
 
-def audit_pump_transport(h5_path: Path, spec: dict[str, Any]) -> dict[str, Any]:
-    """Audit all initial fluid mass against causal pump-frame events."""
+def audit_pump_transport(
+    h5_path: Path,
+    spec: dict[str, Any],
+    *,
+    control_sidecar_path: Path | None = None,
+) -> dict[str, Any]:
+    """Audit all initial fluid mass against causal pump-frame events.
+
+    A companion control sidecar is accepted only when it binds byte-for-byte
+    to this trajectory and its exact time axis.  It contributes prescribed
+    kinematic controls only; it cannot contribute torque or runtime provenance.
+    """
     try:
         _validate_spec(spec)
     except (TypeError, ValueError) as error:
@@ -265,8 +277,9 @@ def audit_pump_transport(h5_path: Path, spec: dict[str, Any]) -> dict[str, Any]:
             bindings={"observed_trajectory_sha256": observed_trajectory_hash},
         )
 
+    control_sidecar_binding: dict[str, Any] | None = None
     try:
-        with h5py.File(h5_path, "r") as h5:
+        with h5py.File(h5_path, "r") as h5, ExitStack() as resources:
             required = {"time", "position", "valid", "type", "mass", "particle_id", "particle_zone"}
             missing = sorted(required - set(h5.keys()))
             if missing:
@@ -289,13 +302,44 @@ def audit_pump_transport(h5_path: Path, spec: dict[str, Any]) -> dict[str, Any]:
             particle_zone_by_frame = np.asarray(h5[particle_zone_frame_dataset][:])
             frame_dataset = spec["body_frame_dataset"]
             control_dataset = spec["angular_control_dataset"]
-            if frame_dataset not in h5 or control_dataset not in h5:
+            control_h5 = h5
+            if control_sidecar_path is not None:
+                try:
+                    sidecar_path = Path(control_sidecar_path)
+                    control_h5 = resources.enter_context(h5py.File(sidecar_path, "r"))
+                except OSError as error:
+                    return _blocked("blocked_unreadable_control_sidecar", str(error))
+                try:
+                    if control_h5.attrs.get("f7_causal_sidecar_schema") != CONTROL_SIDECAR_SCHEMA:
+                        return _blocked("blocked_invalid_control_sidecar", "control sidecar schema is unsupported")
+                    if control_h5.attrs.get("f7_source_trajectory_sha256", "").lower() != observed_trajectory_hash.lower():
+                        return _blocked("blocked_control_sidecar_trajectory_mismatch", "control sidecar is bound to a different trajectory")
+                    if "time" not in control_h5:
+                        return _blocked("blocked_control_sidecar_missing_time", "control sidecar has no /time dataset")
+                    sidecar_times = np.asarray(control_h5["time"][:], dtype=np.float64)
+                    if not np.array_equal(sidecar_times, times):
+                        return _blocked("blocked_control_sidecar_time_mismatch", "control sidecar time differs from trajectory time")
+                    if control_h5.attrs.get("f7_control_time_sha256", "").lower() != sha256_array(times).lower():
+                        return _blocked("blocked_control_sidecar_time_hash_mismatch", "control sidecar time hash is invalid")
+                    if bool(control_h5.attrs.get("f7_torque_dataset_present", True)):
+                        return _blocked("blocked_control_sidecar_torque_claim", "control sidecar must not claim a torque dataset")
+                    control_sidecar_binding = {
+                        "path": str(sidecar_path),
+                        "sha256": sha256_file(sidecar_path),
+                        "trajectory_sha256": observed_trajectory_hash,
+                        "time_sha256": sha256_array(times),
+                        "schema": CONTROL_SIDECAR_SCHEMA,
+                        "runtime_evidence": False,
+                    }
+                except (KeyError, TypeError, ValueError) as error:
+                    return _blocked("blocked_invalid_control_sidecar", str(error))
+            if frame_dataset not in control_h5 or control_dataset not in control_h5:
                 return _blocked(
                     "blocked_missing_causal_control",
                     "body pose and angular control datasets are required; future motion cannot be inferred",
                 )
-            transforms = np.asarray(h5[frame_dataset][:], dtype=np.float64)
-            angular = np.asarray(h5[control_dataset][:], dtype=np.float64)
+            transforms = np.asarray(control_h5[frame_dataset][:], dtype=np.float64)
+            angular = np.asarray(control_h5[control_dataset][:], dtype=np.float64)
             torque_dataset = spec.get("torque_dataset")
             torque = None if not torque_dataset or torque_dataset not in h5 else np.asarray(h5[torque_dataset][:], dtype=np.float64)
             if torque_dataset and torque_dataset not in h5:
@@ -545,6 +589,7 @@ def audit_pump_transport(h5_path: Path, spec: dict[str, Any]) -> dict[str, Any]:
             "sha256": observed_trajectory_hash,
             "time_sha256": sha256_array(times),
         },
+        "control_sidecar_binding": control_sidecar_binding,
         "qualification_claim": "none",
         "qualification_credit": 0,
         "execution_controls": {
