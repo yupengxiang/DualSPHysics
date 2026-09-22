@@ -45,3 +45,27 @@ def test_resource_probe_refuses_a_candidate_with_data_gate_closed(tmp_path: Path
     with pytest.raises(ValueError, match="schema/data gate"):
         _load_candidate(path)
 
+
+def test_resource_probe_refuses_missing_production_denominator(tmp_path: Path) -> None:
+    candidate = json.loads(CANDIDATE.read_text(encoding="utf-8"))
+    candidate["admission_observation"].pop("production_denominator")
+    path = tmp_path / "missing-denominator.json"
+    path.write_text(json.dumps(candidate), encoding="utf-8")
+    with pytest.raises(ValueError, match="explicit production denominator"):
+        _load_candidate(path)
+
+
+def test_resource_probe_refuses_zero_or_boolean_denominator_counts(tmp_path: Path) -> None:
+    candidate = json.loads(CANDIDATE.read_text(encoding="utf-8"))
+    denominator = candidate["admission_observation"]["production_denominator"]
+    denominator["included_case_count"] = 0
+    path = tmp_path / "zero-denominator.json"
+    path.write_text(json.dumps(candidate), encoding="utf-8")
+    with pytest.raises(ValueError, match="positive integer"):
+        _load_candidate(path)
+
+    denominator["included_case_count"] = True
+    path = tmp_path / "boolean-denominator.json"
+    path.write_text(json.dumps(candidate), encoding="utf-8")
+    with pytest.raises(ValueError, match="positive integer"):
+        _load_candidate(path)

@@ -55,10 +55,27 @@ def _load_candidate(path: str | Path) -> Mapping[str, Any]:
     blockers = set(payload.get("data_blocker_codes", ()))
     if blockers & DATA_BLOCKERS:
         raise ValueError(f"resource probe data blockers remain: {sorted(blockers & DATA_BLOCKERS)}")
-    denominator = payload.get("admission_observation", {}).get("production_denominator", {})
-    if denominator.get("hard_integrity_pass_bound_count") != denominator.get("included_case_count"):
+
+    admission = payload.get("admission_observation")
+    if not isinstance(admission, Mapping):
+        raise ValueError("resource probe requires an explicit admission observation")
+    denominator = admission.get("production_denominator")
+    if not isinstance(denominator, Mapping):
+        raise ValueError("resource probe requires an explicit production denominator")
+    counts = {
+        name: denominator.get(name)
+        for name in (
+            "included_case_count",
+            "hard_integrity_pass_bound_count",
+            "structural_pass_bound_count",
+        )
+    }
+    if any(isinstance(value, bool) or not isinstance(value, int) or value < 1
+           for value in counts.values()):
+        raise ValueError("resource probe requires positive integer production denominator counts")
+    if counts["hard_integrity_pass_bound_count"] != counts["included_case_count"]:
         raise ValueError("resource probe requires complete hard-audit denominator")
-    if denominator.get("structural_pass_bound_count") != denominator.get("included_case_count"):
+    if counts["structural_pass_bound_count"] != counts["included_case_count"]:
         raise ValueError("resource probe requires complete structural-audit denominator")
     return payload
 

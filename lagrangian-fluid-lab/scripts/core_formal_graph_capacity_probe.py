@@ -41,10 +41,26 @@ def _load_candidate(path: str | Path) -> Mapping[str, Any]:
         raise ValueError("schema/data gate is not ready; graph probe was not started")
     if payload.get("formal_release") is not False or payload.get("formal_job_count") != 0:
         raise ValueError("graph probe cannot run as formal training")
-    denominator = payload.get("admission_observation", {}).get("production_denominator", {})
-    if denominator.get("hard_integrity_pass_bound_count") != denominator.get("included_case_count"):
+    admission = payload.get("admission_observation")
+    if not isinstance(admission, Mapping):
+        raise ValueError("graph probe requires an explicit admission observation")
+    denominator = admission.get("production_denominator")
+    if not isinstance(denominator, Mapping):
+        raise ValueError("graph probe requires an explicit production denominator")
+    counts = {
+        name: denominator.get(name)
+        for name in (
+            "included_case_count",
+            "hard_integrity_pass_bound_count",
+            "structural_pass_bound_count",
+        )
+    }
+    if any(isinstance(value, bool) or not isinstance(value, int) or value < 1
+           for value in counts.values()):
+        raise ValueError("graph probe requires positive integer production denominator counts")
+    if counts["hard_integrity_pass_bound_count"] != counts["included_case_count"]:
         raise ValueError("graph probe requires complete hard-audit denominator")
-    if denominator.get("structural_pass_bound_count") != denominator.get("included_case_count"):
+    if counts["structural_pass_bound_count"] != counts["included_case_count"]:
         raise ValueError("graph probe requires complete structural-audit denominator")
     return payload
 
@@ -64,6 +80,8 @@ def run_probe(candidate: Mapping[str, Any], *, manifest: str | Path,
               centers: int = 256, seed: int = 17, device: str = "cuda") -> dict[str, Any]:
     if not 1 <= int(updates) <= MAX_PROBE_UPDATES:
         raise ValueError(f"bounded graph probe accepts 1..{MAX_PROBE_UPDATES} updates")
+    if int(hidden) < 1 or int(centers) < 1:
+        raise ValueError("hidden and centers must be positive")
     root = Path(data_root).expanduser().resolve()
     manifest_path = Path(manifest).expanduser().resolve()
     binding = _manifest_binding(candidate, manifest_path, root)

@@ -5,7 +5,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts.core_formal_admission_audit import _graph_probe_observation
+from scripts.core_formal_graph_capacity_probe import _load_candidate
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,3 +42,22 @@ def test_probe_without_explicit_extrapolation_semantics_fails_closed(tmp_path: P
     observation = _graph_probe_observation(path, root=tmp_path)
     assert observation["valid"] is False
 
+
+def test_graph_probe_refuses_missing_production_denominator(tmp_path: Path) -> None:
+    candidate_path = ROOT / "campaigns/core-v1/learning/formal-release-candidate-v4/f3-f4-candidate.json"
+    candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+    candidate["admission_observation"].pop("production_denominator")
+    path = tmp_path / "missing-denominator.json"
+    path.write_text(json.dumps(candidate), encoding="utf-8")
+    with pytest.raises(ValueError, match="explicit production denominator"):
+        _load_candidate(path)
+
+
+def test_graph_probe_rejects_empty_probe_shape() -> None:
+    candidate_path = ROOT / "campaigns/core-v1/learning/formal-release-candidate-v4/f3-f4-candidate.json"
+    candidate = _load_candidate(candidate_path)
+    with pytest.raises(ValueError, match="hidden and centers"):
+        # Manifest/data-root are not reached because shape validation is first.
+        from scripts.core_formal_graph_capacity_probe import run_probe
+        run_probe(candidate, manifest=ROOT / "missing.h5", data_root=ROOT,
+                  hidden=0, centers=0, device="cpu")
