@@ -1,0 +1,40 @@
+{
+  "schema": "core.reference.f8_womersley_oracle.v2_contract.v1",
+  "status": "static_reference_only_no_admission",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001",
+  "qualification_credit": 0,
+  "extension": "zero_initial_velocity_startup_transient_even_cosine_series",
+  "startup_semantics": {
+    "initial_velocity": "zero",
+    "boundary": "no_slip_at_z_plus_minus_H",
+    "diffusion_scale": "H^2/nu",
+    "steady_limit": "must_converge_to_reference_oracle_v1_after_transient_decay",
+    "cfd_future_state_access": false
+  },
+  "execution_controls": {
+    "definition_written": false,
+    "gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0
+  },
+  "bindings": {
+    "implementation": {
+      "path": "scripts/f8_womersley_oracle_v2.py",
+      "sha256": "8f5ab2c3b61c947cd2bbc97ecc0e16928c52a804df03d3154c4e4ce12ebf2d66",
+      "bytes": 3351
+    },
+    "test": {
+      "path": "tests/test_f8_womersley_oracle_v2.py",
+      "sha256": "3e076ec4049ff9322a5b6522ae1da1b9c4268b5b074eb42d9af3cc0962a342a5",
+      "bytes": 1573
+    },
+    "steady_contract": {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/reference-oracle-v1/contract.json",
+      "role": "immutable steady reference contract"
+    }
+  }
+}

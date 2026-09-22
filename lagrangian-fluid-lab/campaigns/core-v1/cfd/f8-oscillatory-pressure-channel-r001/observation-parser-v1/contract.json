@@ -1,0 +1,41 @@
+{
+  "schema": "core.cfd.f8.observation_parser_contract.v2",
+  "status": "static_parser_only_no_source_present",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001",
+  "qualification_credit": 0,
+  "observables": [
+    "time_s",
+    "center_velocity_mps",
+    "profile_z_m",
+    "profile_velocity_mps",
+    "mean_flux_m3_s_per_m"
+  ],
+  "fit_semantics": {
+    "model": "mean + amplitude*sin(omega*t + phase)",
+    "time_shift_fitting": false,
+    "future_reference_access": false,
+    "minimum_samples": 4
+  },
+  "execution_controls": {
+    "definition_written": false,
+    "gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0
+  },
+  "bindings": {
+    "implementation": {
+      "path": "scripts/f8_observation_parser_v1.py",
+      "sha256": "7bc357f091b6c360522ab6386591d6ab07af64626b89219ab43e4e83553ba079",
+      "bytes": 3870
+    },
+    "test": {
+      "path": "tests/test_f8_observation_parser_v1.py",
+      "sha256": "54582f0c2acd78b96ac3dbe7bc13243179d95c653b14eceebdce86429ee3ed1a",
+      "bytes": 1904
+    }
+  }
+}
