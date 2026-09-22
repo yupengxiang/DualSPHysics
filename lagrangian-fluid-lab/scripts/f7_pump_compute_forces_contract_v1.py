@@ -17,6 +17,7 @@ from typing import Any
 
 LAB = Path(__file__).resolve().parents[1]
 HELP = LAB / "vendor/official/DualSPHysics_v5.4/doc/help/ComputeForces_Help.out"
+BINARY = LAB / "vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64"
 WRAPPER = LAB / "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/xCasePump_linux64_CPU.sh"
 PUMP_XML = LAB / "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/CasePump_Def.xml"
 OUTPUT = LAB / "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/compute-forces-contract-v1.json"
@@ -54,6 +55,8 @@ def build_contract() -> dict[str, Any]:
         raise AssertionError(f"ComputeForces help contract changed: {missing}")
     if "computeforces=" not in wrapper_text:
         raise AssertionError("Pump wrapper no longer binds ComputeForces")
+    if not BINARY.is_file() or not BINARY.stat().st_mode & 0o111:
+        raise AssertionError("official Linux ComputeForces binary is unavailable or not executable")
 
     return {
         "schema": "core.f7.pump.compute_forces_contract.v1",
@@ -105,6 +108,7 @@ def build_contract() -> dict[str, Any]:
         },
         "bindings": {
             "compute_forces_help": bind(HELP, "official ComputeForces command contract"),
+            "compute_forces_binary": bind(BINARY, "official Linux ComputeForces executable; not invoked"),
             "pump_cpu_wrapper": bind(WRAPPER, "official Pump wrapper reference"),
             "pump_definition": bind(PUMP_XML, "official Pump Definition source"),
         },

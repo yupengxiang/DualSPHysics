@@ -23,4 +23,5 @@ def test_committed_contract_binds_official_inputs() -> None:
     result = json.loads(OUTPUT.read_text(encoding="utf-8"))
     assert result["schema"] == "core.f7.pump.compute_forces_contract.v1"
     assert result["bindings"]["compute_forces_help"]["sha256"]
+    assert result["bindings"]["compute_forces_binary"]["sha256"]
     assert result["bindings"]["pump_cpu_wrapper"]["sha256"]
