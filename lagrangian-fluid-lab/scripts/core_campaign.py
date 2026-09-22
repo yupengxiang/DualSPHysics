@@ -606,6 +606,61 @@ def completion(registry, data_root):
     registered_material_missing = len(required_t2 - registered_received["T2_macro"])
     target_t1_missing = max(0, MINIMUM_T1_CASE_RUNS - len(registered_received["T1"]))
     target_material_missing = max(0, MINIMUM_MATERIAL_CASE_RUNS - len(registered_received["T2_macro"]))
+    completion_gaps = []
+    if not checks["three_t1_families"]:
+        completion_gaps.append({
+            "gate": "three_t1_families",
+            "observed": sorted(families),
+            "required_minimum": 3,
+            "reason": "Core requires three distinct qualified T1 mechanism families",
+        })
+    if not checks["two_macro_t2_families"]:
+        completion_gaps.append({
+            "gate": "two_macro_t2_families",
+            "observed": sorted(material),
+            "required_minimum": 2,
+            "reason": "Core requires two distinct families with accepted macro T2 material paths",
+        })
+    if not checks["nine_formal_training_runs"]:
+        completion_gaps.append({
+            "gate": "nine_formal_training_runs",
+            "observed_count": len(runs),
+            "required_count": len(expected_run_set),
+            "missing_run_ids": sorted(expected_run_set - set(runs)),
+            "reason": "all registered model/seed runs must have formal terminal evidence",
+        })
+    if not checks["t1_denominator_complete"]:
+        completion_gaps.append({
+            "gate": "t1_denominator_complete",
+            "observed_case_runs": len(registered_received["T1"]),
+            "required_case_runs": MINIMUM_T1_CASE_RUNS,
+            "missing_case_runs": target_t1_missing,
+            "reason": "the fixed T1 evaluation denominator is incomplete",
+        })
+    if not checks["material_denominator_complete"]:
+        completion_gaps.append({
+            "gate": "material_denominator_complete",
+            "observed_case_runs": len(registered_received["T2_macro"]),
+            "required_case_runs": MINIMUM_MATERIAL_CASE_RUNS,
+            "missing_case_runs": target_material_missing,
+            "reason": "the fixed model-material evaluation denominator is incomplete",
+        })
+    if not checks["independent_reproduction"]:
+        completion_gaps.append({
+            "gate": "independent_reproduction",
+            "reason": "no valid cross-host reproduction receipt with passed root review is registered",
+        })
+    if not checks["causal_lineage_contracts"]:
+        completion_gaps.append({
+            "gate": "causal_lineage_contracts",
+            "reason": "the required causal/data-lineage contract audit is not registered as passed",
+        })
+    if not checks["evidence_valid"]:
+        completion_gaps.append({
+            "gate": "evidence_valid",
+            "invalid_evidence_issue_count": len(issues),
+            "reason": "one or more registered evidence records fail structural or hash validation",
+        })
     return {"schema": "core.completion.v1", "can_finalize": all(checks.values()), "checks": checks,
             "scope_studies": studies,
             "t1_families": sorted(families), "macro_t2_families": sorted(material),
@@ -627,7 +682,8 @@ def completion(registry, data_root):
             "missing_training_runs": sorted(expected_run_set - set(runs)),
             "minimum_t1_case_runs": MINIMUM_T1_CASE_RUNS,
             "minimum_material_case_runs": MINIMUM_MATERIAL_CASE_RUNS,
-            "issues": issues}
+            "issues": issues,
+            "completion_gaps": completion_gaps}
 
 
 def main():

@@ -14,6 +14,13 @@ def test_empty_queue_never_completes_product(tmp_path):
     assert result["missing_target_material_case_runs"] == result["missing_material_case_runs"]
     assert result["missing_registered_material_case_runs"] == 0
     assert result["unregistered_material_case_runs"] == 288
+    gaps = {item["gate"] for item in result["completion_gaps"]}
+    assert {
+        "three_t1_families", "two_macro_t2_families", "nine_formal_training_runs",
+        "t1_denominator_complete", "material_denominator_complete",
+        "independent_reproduction", "causal_lineage_contracts",
+    } <= gaps
+    assert result["issues"] == []
 
 
 def _write_evaluation(tmp_path, *, axis, run_id, case_id, **extra):
