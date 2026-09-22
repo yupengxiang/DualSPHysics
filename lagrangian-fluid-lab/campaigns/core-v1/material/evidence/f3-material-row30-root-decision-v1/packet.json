@@ -1,0 +1,74 @@
+{
+  "candidate": {
+    "configuration_id": "F3-material-30",
+    "existing_s2_result": "noncanonical related diagnostic that failed the unknown gate; it cannot be reused as row 30",
+    "matrix_row": 30,
+    "q": 0.5,
+    "resolution": "production",
+    "seeds": 4096,
+    "substeps": 4,
+    "window": "full 8.35 s native source"
+  },
+  "evidence": [
+    {
+      "bytes": 42626,
+      "path": "campaigns/core-v1/material/evidence/f3-material-t2-launch-readiness-v1/receipt.json",
+      "role": "F3 material T2 launch-readiness audit",
+      "sha256": "954b9e261422cf4c515c108e0d72c0a67aa800bc9af78f340584e30decd09c5b"
+    },
+    {
+      "bytes": 2055,
+      "path": "campaigns/core-v1/evidence/f3-inherited-qualification.json",
+      "role": "F3 T1 qualification",
+      "sha256": "a28bf89e231fdb1bd7399c4ed8e2a6cbb297194c5cfee7cc93a1eb9d1d40d8a2"
+    }
+  ],
+  "execution_controls": {
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "material_worker_started": false,
+    "matrix_mutation": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_started": false
+  },
+  "invariants": {
+    "T2_macro": false,
+    "T2_path": false,
+    "existing_s2_output_reuse_forbidden": true,
+    "qualification_credit": 0,
+    "threshold_relaxation_forbidden": true,
+    "unknown_and_right_censor_retained": true
+  },
+  "no_implicit_selection": true,
+  "options": {
+    "authorize_new_row30_attempt": {
+      "does_not_grant": [
+        "immediate worker launch",
+        "solver",
+        "GPU",
+        "queue mutation",
+        "registry mutation",
+        "ledger mutation",
+        "T2 credit",
+        "matrix expansion"
+      ],
+      "effect": "permits only an immutable exact-input resource/scheduler authorization for one new CPU material attempt",
+      "qualification_credit": 0,
+      "required_next_gates": [
+        "source hash and availability check",
+        "fresh resource allocation",
+        "new output namespace",
+        "same-argv checkpoint/resume contract",
+        "immutable positive-or-negative result receipt"
+      ]
+    },
+    "defer_or_close_row30": {
+      "effect": "preserves all old F3 material evidence and leaves row 30 absent from the accepted T2 matrix",
+      "qualification_credit": 0
+    }
+  },
+  "question": "May Core create a fresh, one-attempt CPU material diagnostic for F3-material-30 after a new resource/scheduler preflight?",
+  "schema": "core.material.f3.row30.root_decision_packet.v1",
+  "status": "awaiting_user_root_decision_for_new_row30_attempt"
+}
