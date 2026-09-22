@@ -1,0 +1,101 @@
+{
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2_qualification.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-q0p75-preflight-v1/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "attempt_role": "first_scientific_matrix_row",
+  "category": "f2_dynamic_third_family_scientific_canary",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "depends_on": [],
+  "family": "F2",
+  "gpu_launch_authorized": true,
+  "host": "ada",
+  "input_files": [
+    {
+      "bytes": 31931,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-q0p75-preflight-v1/prepared.json",
+      "role": "q=.75 CPU/native anchor preflight",
+      "sha256": "0e20f0a1931f069b0b049a7f33b9b9e27bbc6293cd706708c9619d83e723ff9d"
+    },
+    {
+      "bytes": 9175,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-candidate-card-v1.json",
+      "role": "independent third-family candidate card",
+      "sha256": "bf7ee6e0fe4c45f597e65ba66d4b5ebbdea0772c5d73ecf532cad45a3199814c"
+    },
+    {
+      "bytes": 8559,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-matrix-v1.json",
+      "role": "fixed fifteen-row qualification matrix",
+      "sha256": "cf356f1cf7d0b02474ce7e6d215a9ff07eea0d6293aca5c87799014367c5dcf1"
+    },
+    {
+      "bytes": 4604,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-lineage-clarification-v1.json",
+      "role": "static-source/dynamic-baseline lineage clarification",
+      "sha256": "abed3b35ea5459f725814cad574e636d2f6dd31ec51775f1c4cb6daeb70ab6b3"
+    },
+    {
+      "bytes": 4584,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-root-review-first-row-v1.json",
+      "role": "root approval for one first scientific row",
+      "sha256": "d263a479173401cd67952a5f5a6a4ef2043da33f73111cb442528fdf5a871f7b"
+    },
+    {
+      "bytes": 159206984,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "role": "pinned DualSPHysics solver",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    },
+    {
+      "bytes": 324368,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "role": "pinned native decoder",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    }
+  ],
+  "job_id": "f2-dynamic-third-family-dbc-duration-q0p75-dp0075-canary-001",
+  "job_spec_creation_authorized": true,
+  "ledger_mutation_authorized": true,
+  "logical_id": "f2-dynamic-third-family-dbc-duration-q0p75-dp0075-canary-001",
+  "matrix_case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p75000000_dp0p007500000000_held_out",
+  "matrix_index": 11,
+  "output_interval_s": 0.01,
+  "parameter_axis": "rotation_duration_s",
+  "parameter_dp_m": 0.0075,
+  "parameter_q": 0.75,
+  "postcondition": "hard_integrity_pass=true and requested_horizon_reached=true and event_window_complete=true are required for any future scope review",
+  "prepared_case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p75000000_dp0p007500000000_anchor",
+  "qualification_claim": "none",
+  "qualification_status": "first-row scientific canary; fifteen-row F2 scope remains unqualified",
+  "queue_mutation_authorized": true,
+  "registered_window_s": 5.0,
+  "registry_mutation_authorized": false,
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 4,
+    "gpu_peak_mib": 12288,
+    "io_weight": 2,
+    "ram_mib": 32768
+  },
+  "revision_id": "F2_dynamic_third_family_dbc_duration_v1",
+  "root_review_decision": "approved_for_first_scientific_row",
+  "schema": "core.cfd.job.v1",
+  "scope_id": "F2_dynamic_third_family_dbc_duration_x_v1",
+  "solver_launch_authorized": true,
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "timeout_seconds": 14400,
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0"
+}

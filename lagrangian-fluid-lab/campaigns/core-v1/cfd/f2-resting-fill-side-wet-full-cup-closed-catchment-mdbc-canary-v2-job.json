@@ -1,0 +1,176 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f2-resting-fill-side-wet-full-cup-closed-catchment-mdbc-canary-v1-001",
+  "logical_id": "f2-resting-fill-side-wet-full-cup-closed-catchment-mdbc-canary-v1-001",
+  "attempt_role": "full_cup_closed_catchment_mdbc_event_canary",
+  "category": "f2_dynamic_full_cup_closed_catchment_mdbc_canary",
+  "host": "h200",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2_qualification.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_canary_v2/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 32768,
+    "gpu_peak_mib": 12288,
+    "io_weight": 2
+  },
+  "timeout_seconds": 14400,
+  "depends_on": [],
+  "qualification_claim": "none",
+  "qualification_only": true,
+  "split": "qualification_only",
+  "qualification_status": "candidate-only; independent full-cup catchment mDBC scope remains unqualified",
+  "launch_recommendation": "root review/queue only; do not infer 13+2 or T1 qualification from this canary",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_canary_v2/prepared.json",
+      "sha256": "37cc7b7522d996111a35b5644769b845be79ff6c2063bc675d3f92a9c62b9446"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2_qualification.py",
+      "sha256": "d3a063dd951e03887ee2d6454ecb79c9a3b190865fe6e122a4cdc22ed2c0ddad"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_full_cup_closed_catchment_mdbc.py",
+      "sha256": "4858d722fa0b457476e34c68d2d6a7db93353996e55295f88d0dc31773673731"
+    }
+  ],
+  "prepared_case_id": "CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v1",
+  "registered_window_s": 2.5,
+  "maximum_extended_window_s": 5.0,
+  "motion_start_s": 0.5,
+  "rotation_duration_s": 0.85,
+  "angle_degrees": -105.0,
+  "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_x_v1",
+  "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_v1",
+  "family": "F2",
+  "repair_candidate_id": "closed_external_catchment_full_cup_mdbc",
+  "physical_geometry_changed": true,
+  "initial_condition_changed": false,
+  "mass_rescaling": false,
+  "boundary_method": "mDBC Boundary=2 with -mdbc_noslip:1",
+  "normal_preflight": {
+    "geometry_groups": [
+      "cup",
+      "receiver",
+      "tray_floor",
+      "catchment_side_walls"
+    ],
+    "normal_construction_layers_vdp": -0.5,
+    "normal_search_distance_h": 3.0,
+    "svshapes": true,
+    "required_zero_boundary_normals": 0
+  },
+  "geometry_contract": {
+    "catchment_continuous_low_m": [
+      -0.6,
+      -0.55,
+      -0.2
+    ],
+    "catchment_continuous_size_m": [
+      2.6,
+      1.1,
+      0.8
+    ],
+    "catchment_closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "catchment_open_faces": [
+      "top"
+    ],
+    "catchment_wall_mkbound": 3,
+    "retained_tray_floor_mkbound": 2,
+    "floor_fluid_facing_surface_z_m": -0.2,
+    "floor_outer_low_z_m": -0.2,
+    "surface_convention": "continuous source planes; no inward layer-center shrink"
+  },
+  "observer_contract": {
+    "cup": {
+      "frame": "moving cup body frame",
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "saved_chord_and_endpoint_hard": true
+    },
+    "receiver": {
+      "frame": "world",
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "saved_chord_and_endpoint_hard": true
+    },
+    "tray": {
+      "frame": "world",
+      "closed_faces": [
+        "bottom"
+      ],
+      "open_faces": [
+        "top",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "saved_chord_and_endpoint_hard": true
+    },
+    "catchment": {
+      "frame": "world",
+      "closed_faces": [
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "floor_source_plane_z_m": -0.2,
+      "saved_chord_and_endpoint_hard": true
+    },
+    "ownership": "open-top ownership is separate; side entry and recontact cannot be hidden by ownership",
+    "geometry_audit_owner": "core_f2_qualification.audit_dynamic"
+  },
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0; output is attempt_dir/product"
+}

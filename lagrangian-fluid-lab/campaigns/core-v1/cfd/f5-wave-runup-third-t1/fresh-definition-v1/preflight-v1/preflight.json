@@ -1,0 +1,72 @@
+{
+  "schema": "core.f5.third_t1.preflight.v1",
+  "created_at_utc": "2026-09-20T21:40:55.287045+00:00",
+  "status": "cpu_native_preflight_failed_hard_audit",
+  "qualification_claim": "none",
+  "case_id": "F5_wave_runup_q0p50_dp0p0075",
+  "authorization": {
+    "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v1/preflight-root-review-v1.json",
+    "sha256": "092c3778fd2247a0c121df2b86474ee617f4d56b85fd4d92ade8c39601c07916",
+    "bytes": 3505,
+    "role": "F5 preflight root review"
+  },
+  "input": {
+    "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v1/F5_wave_runup_q0p50_dp0p0075_Def.xml",
+    "sha256": "76c38600c791200b9aacaab6b379952ba2a27ef3ce11b1d7fa560515e5942b80",
+    "bytes": 11316,
+    "role": "fresh F5 Definition"
+  },
+  "motion": {
+    "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v1/Mov_piston_q0p50_scaled.dat",
+    "sha256": "ffabedc2331533d7950554368f20d33db0ab08c0002b1c053cf996f800756204",
+    "bytes": 16708,
+    "role": "fresh F5 motion"
+  },
+  "gencase": {
+    "command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v1/F5_wave_runup_q0p50_dp0p0075_Def",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v1/preflight-v1/generated/F5_wave_runup_q0p50_dp0p0075",
+      "-save:all"
+    ],
+    "started_at_utc": "2026-09-20T21:40:55.271790+00:00",
+    "return_code": 1,
+    "stdout_log": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v1/preflight-v1/gencase.stdout.log",
+      "sha256": "1b81676f4888ec5cab355e2c6793066971fd2a74a3ec1c477169a6da5cc4269a",
+      "bytes": 3015,
+      "role": "CPU GenCase stdout"
+    },
+    "environment": {
+      "CUDA_VISIBLE_DEVICES": "",
+      "NVIDIA_VISIBLE_DEVICES": "void"
+    }
+  },
+  "binaries": {
+    "gencase": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226",
+      "bytes": 5809384,
+      "role": "pinned CPU GenCase"
+    },
+    "native_decoder": {
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+      "bytes": 324368,
+      "role": "pinned native BI4 decoder"
+    }
+  },
+  "execution_controls": {
+    "gencase_invoked": true,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_mutation": 0,
+    "qualification_credit": 0
+  },
+  "hard_gates": {},
+  "failure_reason": "GenCase returned nonzero"
+}

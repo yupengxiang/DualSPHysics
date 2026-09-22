@@ -1,0 +1,122 @@
+{
+  "budget": {
+    "allocated_cells": 172589008,
+    "baseline_cells": 2605052,
+    "cell_counts": [
+      227,
+      164,
+      4636
+    ],
+    "cell_factor": 66.25165562913908,
+    "projected_gpu_peak_mib": 2876.9363504701987,
+    "requested_resources": {
+      "cpu_cores": 2,
+      "gpu_peak_mib": 4096,
+      "io_weight": 0.5,
+      "ram_mib": 32768
+    },
+    "timeout_seconds": 21600
+  },
+  "candidate_id": "F4_laminar_domain_extension_q075_dp005_repair_canary_v1",
+  "geometry_identity": {
+    "candidate_casedef_sha256": "3d96da93f91bc7b6ce16b957a77bf7a6ac898f7d6c8534904cd091dd28cd5c9f",
+    "source_casedef_sha256": "3d96da93f91bc7b6ce16b957a77bf7a6ac898f7d6c8534904cd091dd28cd5c9f",
+    "unchanged": true
+  },
+  "job": {
+    "job_id": "f4-laminar-domain-extension-q075-dp005-canary-001",
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-domain-extension-q075-dp005-canary-job.json",
+    "sha256": "438737e986c7e07d3268797dbcf467961db361eb77dc385b24a714dc977e50a6"
+  },
+  "known_limits": [
+    "q=.25 fine has no native loss; its top-edge endpoint and inward saved chord remain a separate hard failure and are not repaired by this extension.",
+    "q=.75 spill has already crossed the registered finite vessel wall; native-loss removal does not imply hard_integrity_pass.",
+    "Ballistic envelope is only a domain-size bound after the last native PartOut record, not a forecast of post-exit SPH dynamics."
+  ],
+  "physical_geometry_policy": {
+    "continuum_pool_drop_unchanged": true,
+    "domain_high_m": [
+      2.4,
+      0.8,
+      1.8
+    ],
+    "domain_low_m": [
+      -1.2,
+      -1.8,
+      -72.0
+    ],
+    "native_mass_rescaling": false,
+    "unchanged": true,
+    "wall_bounds_unchanged": true
+  },
+  "qualification_claim": "none",
+  "readout_gates": {
+    "event_window_required": true,
+    "native_exclusion_count_expected": 0,
+    "nonfinite_active_values": false,
+    "qualification": false,
+    "unchanged_finite_wall_endpoint_gate": true
+  },
+  "schema": "core.f4.domain_extension_candidate.v1",
+  "scientific_hypothesis": "The q=.75 fine native losses are position exclusions at the registered computational floor after open-rim spill; preserving all physical bodies and extending only the computational domain should remove native domain loss while retaining the finite-vessel wall audit.",
+  "scope_id": "F4_drop_resting_pool_laminar_nu1e6_x_v1",
+  "source_evidence": {
+    "budget_report": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-domain-extension-budget-v1.json",
+      "sha256": "9139ef9ea7dc2b84bc3c600eb6a84af0f07b356eea9bb8034642ba9162b2e147"
+    },
+    "native_exclusion": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-laminar-q075-native-exclusions-v1/evidence.json",
+      "sha256": "a5b9b604b98ba4d07aca221dd966daf060736455a5cb7a9d97549626849cf746"
+    },
+    "prepared_source_q075": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_laminar_qualification_v1/cell-12/prepared.json",
+      "sha256": "57c3709f8c0890a6788aac2ca99a1be6ffa00fee0ef5662f27cfef1472c6a377"
+    },
+    "q025_control": {
+      "audit": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-laminar-qualification-cell-10/20260919T195624-08f5d07ea433/product/audit.json",
+      "audit_sha256": "817c93f61050ede43ebe9e04275dc3521ce41afc846a02d17dce233545299d1b",
+      "control_policy": "retain q=.25 fine failure; domain extension is not a repair for this case",
+      "endpoint_violation_particle_frames": 1,
+      "extension_effect": "none_expected_for_q025_top_edge_event",
+      "f4-laminar-q025-fine-endpoint-forensics-v1": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-laminar-q025-fine-endpoint-forensics-v1.json",
+        "sha256": "bbdd6fa4994e794e31bc1bbd4a18b49aeda956135ab1feccb934a7f5e197a1ae"
+      },
+      "f4-laminar-q025-inward-chord-probe-v1": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-laminar-q025-inward-chord-probe-v1.json",
+        "sha256": "9283c0fa50c43aaa2ff98d592803df430bc0ea62dbe5d4648d4ab40c91e2321f"
+      },
+      "first_wall_violation": {
+        "ids": [
+          568775
+        ],
+        "positions_m": [
+          [
+            0.5046872080660241,
+            -0.0011434867638184434,
+            0.5965854779750991
+          ]
+        ],
+        "time_s": 0.4400019152314342
+      },
+      "hard_integrity_pass": false,
+      "native_loss_count": 0,
+      "prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_laminar_qualification_v1/cell-10/prepared.json",
+      "prepared_sha256": "14aefbea8f8d5de9706b317c99eed9d2b6071c0158eb183af1a2b1ee0ffc1d01"
+    }
+  },
+  "static_preflight": {
+    "boundary_particles": 300144,
+    "continuum_geometry_unchanged": true,
+    "fluid_particles": 737792,
+    "mass_gate_pass": true,
+    "preflight_pass": true,
+    "prepared": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_laminar_domain_extension_q075_dp005_canary_v1/prepared.json",
+      "sha256": "0d05dc8e641031740c6ad512a17ff4ed24e5fed4c055a0d32c8c1f367ecf223c"
+    },
+    "zero_boundary_normals": 0
+  },
+  "status": "prepared_only_not_submitted"
+}

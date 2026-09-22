@@ -1,0 +1,560 @@
+{
+  "schema": "core.f1.h2.bottom_contact_forensics.v1",
+  "created_at": "2026-09-19T19:50:45.721521+00:00",
+  "case_id": "CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary",
+  "scope": "read-only forensic of completed F1 H2 mDBC failure plus static candidate",
+  "solver_rerun": false,
+  "gpu_launched": false,
+  "ledger_written": false,
+  "forensic_code": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f1_h2_bottom_contact_forensics.py",
+    "sha256": "2ea4095b4d8c932a05b7ea914f11e52ffae1c1bd5b0184cf26e2219dedccd9cc",
+    "vtk_parser_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/r4_f6_mdbc_runtime_zero_normal_audit.py",
+    "vtk_parser_sha256": "7be5cb6eceee2d6581cace2d48c53e18aaa4efded0f8ac57fd20f36a6b608c82"
+  },
+  "source_inputs": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/prepared.json": "36b60d5860debb77811b61fcecf450a7c792a82da59e6fe2260999296823258e",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_Def.xml": "889f35707e531257fe1eee78ab49a76681d4c580876e8660d374ecacf457cb42",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_Bound.vtk": "9d9c293c39b286954eb3a692c6d3528c5451cf35eb9168e031101d2e72536bc7",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h2-mdbc-repair-canary-001/20260919T175354-3ce99dbbd4b7/product/solver/CfgInit_Normals.vtk": "7a7b77184a3f4873a028be75c6b2eba9eefb8945c57412850aaa473071b53146",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h2-mdbc-repair-canary-001/20260919T175354-3ce99dbbd4b7/product/solver/CfgInit_NormalsGhost.vtk": "843d6483da4cb3c5015be57c7ba5aff26b25ebdaed364a77dd3bd41f27ca8282",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/evidence/f1-h2-mdbc-result.json": "929764f6808aa60b8a0c773ad520572c6e0197a34a14b14b5ccc78c5c84302a4",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h2-mdbc-repair-canary-001/20260919T175354-3ce99dbbd4b7/product/audit.json": "929764f6808aa60b8a0c773ad520572c6e0197a34a14b14b5ccc78c5c84302a4"
+  },
+  "trajectory": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h2-mdbc-repair-canary-001/20260919T175354-3ce99dbbd4b7/product/trajectory.h5",
+    "sha256_from_original_receipt": "1481ff0bb0734dc2114249870f5917a177124bc9991d91ed79e8e33379dff961",
+    "frames": 111,
+    "particle_count": 120658
+  },
+  "h2_run_parameters": {
+    "boundary": "mDBC",
+    "slip_mode": "No-slip",
+    "mdbc_corrector": true,
+    "no_penetration": 1,
+    "solver_argument": "-mdbc_noslip:1",
+    "dp_m": 0.0075,
+    "kernel_h_m": 0.0129904,
+    "h_over_dp": 1.7320533333333332,
+    "cfl": 0.2,
+    "dt_ini_s": 0.0003091370956550911,
+    "dt_min_s": 1.545685501307964e-05,
+    "time_max_s": 2.2,
+    "output_interval_s": 0.02,
+    "visco": 0.08
+  },
+  "normal_and_ghost_forensics": {
+    "normal_point_count": 145476,
+    "bound_point_count": 145476,
+    "mk_counts": {
+      "17": 134562,
+      "18": 10914
+    },
+    "normal_points_equal_bound_points": true,
+    "ghost_points_equal_normal_points": true,
+    "ghost_normal_is_two_times_normal_max_abs_error": 0.0,
+    "ghost_size_is_two_times_normal_size_max_abs_error": 0.0,
+    "normal_norm_matches_normal_size_max_abs_error": 1.914924739609969e-09,
+    "zero_normal_count": 0,
+    "normal_size_range_m": [
+      0.0012499940348789096,
+      0.03266783058643341
+    ],
+    "obstacle_mk": 18,
+    "obstacle_boundary_count": 10914,
+    "obstacle_bottom_edge_z_m": -0.00375,
+    "obstacle_bottom_edge_particle_count": 210,
+    "obstacle_bottom_edge_normal_direction_counts": {
+      "(0.0, 0.0, 0.00375)": 210
+    },
+    "obstacle_bottom_edge_effective_interface_z_range_m": [
+      0.0,
+      0.0
+    ],
+    "boundary_shell_contract": {
+      "obstacle_boundary_layers_vdp": "0,1,2",
+      "obstacle_normal_geometry_layers_vdp": "0",
+      "support_face_offset_m": 0.00375,
+      "continuous_obstacle_bottom_z_m": 0.0,
+      "edge_boundary_centres_z_m": -0.00375,
+      "bottom_edge_normal_vector_m": [
+        0.0,
+        0.0,
+        0.00375
+      ],
+      "ghost_file_semantics": "same boundary POINTS/IDs with doubled normal displacement; effective interface = boundary point + ghost displacement/2",
+      "effective_interface_matches_continuous_bottom_max_abs_error_m": 0.0
+    },
+    "obstacle_bottom_interior_particle_count": 0,
+    "obstacle_bottom_interior_or_tank_floor_count_in_bottom_band": 0,
+    "boundary_points_strictly_inside_obstacle_xy_bottom_band": 0,
+    "interpretation": "The edge shell has +z normals at z=-dp/2, but setmkvoid removes the tank floor below the obstacle and no boundary center remains in the strict obstacle footprint. The complete normal/ghost arrays therefore do not close this geometric hole."
+  },
+  "first_failure_forensics": {
+    "first_wall_violation_time_s": 0.4000131299003276,
+    "first_wall_violation_ids": [
+      262233,
+      264858
+    ],
+    "first_wall_violation_positions_m": [
+      [
+        0.6911559022690884,
+        0.2210224715206416,
+        -0.0012819319262154436
+      ],
+      [
+        0.6958036850726602,
+        0.21629162440213617,
+        -6.675171157997767e-05
+      ]
+    ],
+    "trajectory_window": [
+      {
+        "frame_index": 18,
+        "time_s": 0.3600285997855969,
+        "particle_id": 262233,
+        "valid": true,
+        "position_m": [
+          0.6806416082535128,
+          0.2176777029708959,
+          0.005094241976609264
+        ],
+        "velocity_m_s": [
+          0.3658214211463928,
+          -0.009915973991155624,
+          -0.031533803790807724
+        ],
+        "density_kg_m3": 999.81689453125,
+        "pressure_native": -323.15008544921875,
+        "nearest_boundary_distance_m": 0.004259875433786093,
+        "nearest_boundary_mk": 18,
+        "nearest_boundary_position_m": [
+          0.6787499785423279,
+          0.2212499976158142,
+          0.0037499999161809683
+        ]
+      },
+      {
+        "frame_index": 18,
+        "time_s": 0.3600285997855969,
+        "particle_id": 264858,
+        "valid": true,
+        "position_m": [
+          0.6912434205340259,
+          0.21383736879263313,
+          0.005289806099107587
+        ],
+        "velocity_m_s": [
+          0.12480580061674118,
+          0.13512854278087616,
+          -0.11097364872694016
+        ],
+        "density_kg_m3": 1000.4208984375,
+        "pressure_native": 744.1615600585938,
+        "nearest_boundary_distance_m": 0.01258827741804402,
+        "nearest_boundary_mk": 18,
+        "nearest_boundary_position_m": [
+          0.6787499785423279,
+          0.21375000476837158,
+          0.0037499999161809683
+        ]
+      },
+      {
+        "frame_index": 19,
+        "time_s": 0.3800326783017132,
+        "particle_id": 262233,
+        "valid": true,
+        "position_m": [
+          0.6868487244542769,
+          0.2189960401026343,
+          0.002704694253482308
+        ],
+        "velocity_m_s": [
+          0.21507897973060608,
+          0.10490135848522186,
+          -0.17337705194950104
+        ],
+        "density_kg_m3": 999.78369140625,
+        "pressure_native": -381.7099304199219,
+        "nearest_boundary_distance_m": 0.008471285247587952,
+        "nearest_boundary_mk": 18,
+        "nearest_boundary_position_m": [
+          0.6787499785423279,
+          0.2212499976158142,
+          0.0037499999161809683
+        ]
+      },
+      {
+        "frame_index": 19,
+        "time_s": 0.3800326783017132,
+        "particle_id": 264858,
+        "valid": true,
+        "position_m": [
+          0.6941610511983066,
+          0.2159318645767044,
+          0.0031877782394909957
+        ],
+        "velocity_m_s": [
+          0.12172958254814148,
+          0.0573841854929924,
+          -0.1210966408252716
+        ],
+        "density_kg_m3": 999.925537109375,
+        "pressure_native": -131.4571990966797,
+        "nearest_boundary_distance_m": 0.015574908213046197,
+        "nearest_boundary_mk": 18,
+        "nearest_boundary_position_m": [
+          0.6787499785423279,
+          0.21375000476837158,
+          0.0037499999161809683
+        ]
+      },
+      {
+        "frame_index": 20,
+        "time_s": 0.4000131299003276,
+        "particle_id": 262233,
+        "valid": true,
+        "position_m": [
+          0.6911559022690884,
+          0.2210224715206416,
+          -0.0012819319262154436
+        ],
+        "velocity_m_s": [
+          0.16849152743816376,
+          0.07577169686555862,
+          -0.21678514778614044
+        ],
+        "density_kg_m3": 999.82958984375,
+        "pressure_native": -300.7564697265625,
+        "nearest_boundary_distance_m": 0.01265108972544566,
+        "nearest_boundary_mk": 18,
+        "nearest_boundary_position_m": [
+          0.6787499785423279,
+          0.2212499976158142,
+          -0.0037499999161809683
+        ]
+      },
+      {
+        "frame_index": 20,
+        "time_s": 0.4000131299003276,
+        "particle_id": 264858,
+        "valid": true,
+        "position_m": [
+          0.6958036850726602,
+          0.21629162440213617,
+          -6.675171157997767e-05
+        ],
+        "velocity_m_s": [
+          0.03169307857751846,
+          -0.01363974716514349,
+          -0.19766102731227875
+        ],
+        "density_kg_m3": 999.8945922851562,
+        "pressure_native": -186.07009887695312,
+        "nearest_boundary_distance_m": 0.017631082046265165,
+        "nearest_boundary_mk": 18,
+        "nearest_boundary_position_m": [
+          0.6787499785423279,
+          0.21375000476837158,
+          -0.0037499999161809683
+        ]
+      },
+      {
+        "frame_index": 21,
+        "time_s": 0.4200128635379777,
+        "particle_id": 262233,
+        "valid": true,
+        "position_m": [
+          0.6932403821519023,
+          0.22168517549117572,
+          -0.006172094485500739
+        ],
+        "velocity_m_s": [
+          0.009056536480784416,
+          -0.021014953032135963,
+          -0.29594776034355164
+        ],
+        "density_kg_m3": 999.9542846679688,
+        "pressure_native": -80.71306610107422,
+        "nearest_boundary_distance_m": 0.014697881434216981,
+        "nearest_boundary_mk": 18,
+        "nearest_boundary_position_m": [
+          0.6787499785423279,
+          0.2212499976158142,
+          -0.0037499999161809683
+        ]
+      },
+      {
+        "frame_index": 21,
+        "time_s": 0.4200128635379777,
+        "particle_id": 264858,
+        "valid": true,
+        "position_m": [
+          0.6956276145769397,
+          0.2158670266057348,
+          -0.004820887231865417
+        ],
+        "velocity_m_s": [
+          -0.05435488000512123,
+          -0.030436402186751366,
+          -0.28246915340423584
+        ],
+        "density_kg_m3": 1000.0426025390625,
+        "pressure_native": 75.23717498779297,
+        "nearest_boundary_distance_m": 0.017043567092002568,
+        "nearest_boundary_mk": 18,
+        "nearest_boundary_position_m": [
+          0.6787499785423279,
+          0.21375000476837158,
+          -0.0037499999161809683
+        ]
+      },
+      {
+        "frame_index": 22,
+        "time_s": 0.4400042234463952,
+        "particle_id": 262233,
+        "valid": true,
+        "position_m": [
+          0.6918067786242057,
+          0.22096905044643747,
+          -0.012348979300424045
+        ],
+        "velocity_m_s": [
+          -0.15510797500610352,
+          -0.012342944741249084,
+          -0.26283758878707886
+        ],
+        "density_kg_m3": 999.732421875,
+        "pressure_native": -472.1103210449219,
+        "nearest_boundary_distance_m": 0.015636540734470104,
+        "nearest_boundary_mk": 18,
+        "nearest_boundary_position_m": [
+          0.6787499785423279,
+          0.2212499976158142,
+          -0.0037499999161809683
+        ]
+      },
+      {
+        "frame_index": 22,
+        "time_s": 0.4400042234463952,
+        "particle_id": 264858,
+        "valid": true,
+        "position_m": [
+          0.6935105946122488,
+          0.21516181593667666,
+          -0.010698834443150675
+        ],
+        "velocity_m_s": [
+          -0.1636286973953247,
+          -0.008195445872843266,
+          -0.2852184772491455
+        ],
+        "density_kg_m3": 999.9263305664062,
+        "pressure_native": -130.05673217773438,
+        "nearest_boundary_distance_m": 0.01637544804949673,
+        "nearest_boundary_mk": 18,
+        "nearest_boundary_position_m": [
+          0.6787499785423279,
+          0.21375000476837158,
+          -0.0037499999161809683
+        ]
+      }
+    ],
+    "first_frame_records": [
+      {
+        "frame_index": 20,
+        "time_s": 0.4000131299003276,
+        "particle_id": 262233,
+        "valid": true,
+        "position_m": [
+          0.6911559022690884,
+          0.2210224715206416,
+          -0.0012819319262154436
+        ],
+        "velocity_m_s": [
+          0.16849152743816376,
+          0.07577169686555862,
+          -0.21678514778614044
+        ],
+        "density_kg_m3": 999.82958984375,
+        "pressure_native": -300.7564697265625,
+        "nearest_boundary_distance_m": 0.01265108972544566,
+        "nearest_boundary_mk": 18,
+        "nearest_boundary_position_m": [
+          0.6787499785423279,
+          0.2212499976158142,
+          -0.0037499999161809683
+        ]
+      },
+      {
+        "frame_index": 20,
+        "time_s": 0.4000131299003276,
+        "particle_id": 264858,
+        "valid": true,
+        "position_m": [
+          0.6958036850726602,
+          0.21629162440213617,
+          -6.675171157997767e-05
+        ],
+        "velocity_m_s": [
+          0.03169307857751846,
+          -0.01363974716514349,
+          -0.19766102731227875
+        ],
+        "density_kg_m3": 999.8945922851562,
+        "pressure_native": -186.07009887695312,
+        "nearest_boundary_distance_m": 0.017631082046265165,
+        "nearest_boundary_mk": 18,
+        "nearest_boundary_position_m": [
+          0.6787499785423279,
+          0.21375000476837158,
+          -0.0037499999161809683
+        ]
+      }
+    ],
+    "failure_is_inside_obstacle_projection": true,
+    "failure_crosses_continuous_bottom_plane": true,
+    "interpretation": "At the first reported violation the two fluid centers are inside the obstacle x/y footprint and have crossed z=0. This is consistent with the unfilled floor hole; it is not evidence of a zero-normal or ghost serialization failure."
+  },
+  "f3_comparison": {
+    "case_id": "L2_C2_F3_offaxis_baffle_nominal",
+    "boundary_semantics": "DBC (Run.out), no explicit runtime mDBC normals/ghost arrays",
+    "generated_bound_point_count": 43774,
+    "generated_bound_mk_counts": {
+      "17": 42669,
+      "18": 1105
+    },
+    "baffle_bottom_edge_particle_count": 40,
+    "baffle_bottom_interior_particle_count": 0,
+    "fluid_min_z_in_baffle_xy_over_saved_frames_m": 0.19479656219482422,
+    "baffle_top_z_m": 0.19,
+    "fluid_entered_bottom_hole_in_saved_frames": false,
+    "comparison_limit": "F3 uses the same open-bottom baffle draw and setmkvoid topology, but its saved fluid remains above the baffle top (minimum z\u22480.195 m). It therefore does not exercise the hole. Its DBC run cannot validate the explicit F1 mDBC bottom-face contract, and no direct ghost comparison is available."
+  },
+  "root_cause_assessment": {
+    "status": "evidence_supported_new_mechanism",
+    "claim": "F1 H2 first failure is compatible with an unclosed obstacle-floor hole: setmkvoid removes tank bottom under obstacle, while obstacle bottom is omitted from the boundary and normal geometry.",
+    "what_is_excluded": [
+      "zero normals: excluded by 145476/145476 nonzero normals and GenCase final zero=0",
+      "ghost serialization: excluded by exact point identity, GhostNormal=2*Normal, GhostNormalSize=2*NormalSize",
+      "CFL/Dt as the proposed cause: not tested here and deliberately not retried",
+      "outer tank wall leakage: first positions are inside obstacle x/y projection at z\u22480"
+    ],
+    "remaining_limit": "Saved trajectory establishes entry through the missing continuous floor support; it does not prove substep contact forces or guarantee the bottom-face candidate will pass."
+  },
+  "candidate_proposal": {
+    "proposal_id": "F1_H3_obstacle_bottom_face_mdbc_canary_v1",
+    "status": "prepared_cpu_only_not_submitted",
+    "mechanism_class": "boundary topology: restore obstacle bottom contact face",
+    "evidence_root": "missing obstacle-bottom interior boundary after setmkvoid; first F1 H2 failure crosses z=0 inside obstacle footprint",
+    "single_variable_change": [
+      "add bottom to the obstacle mainlist boundary drawbox boxfill",
+      "add bottom to the obstacle GeometryForNormals drawbox boxfill"
+    ],
+    "unchanged": [
+      "CFL=0.2 and actual DtIni/DtMin",
+      "mDBC Boundary=2, SlipMode=2, NoPenetration=1, -mdbc_noslip:1",
+      "fluid continuum box, q=0.5, dp=0.0075, native mass and density",
+      "tank, obstacle dimensions, gravity, viscosity, runtime domain, TimeMax=2.2 s"
+    ],
+    "falsification": {
+      "pass_condition": "CPU candidate has interior bottom particles and no zero normals; solver canary must then show no first bottom-hole entry under unchanged hard gates",
+      "failure_condition": "any zero normal, fluid-boundary overlap, or retained first bottom-plane penetration keeps this mechanism failed",
+      "no_threshold_relaxation": true,
+      "no_cfl_retry": true
+    },
+    "resource_estimate_from_h2": {
+      "baseline_gpu": "RTX 6000 Ada",
+      "baseline_case_particles": 266134,
+      "candidate_case_particles": 267178,
+      "baseline_gpu_memory_mib": 58.21,
+      "candidate_gpu_memory_estimate_mib": 64.0,
+      "baseline_solver_seconds": 142.782181,
+      "candidate_solver_seconds_estimate": [
+        145.0,
+        180.0
+      ],
+      "estimate_basis": "H2 unchanged numerical controls; +1044 boundary particles and same 2.2 s window"
+    },
+    "qualification_claim": "none; one evidence-based canary proposal, no solver result"
+  },
+  "candidate_cpu_preflight": {
+    "status": "cpu_gencase_pass",
+    "execution_kind": "CPU GenCase only; no solver or GPU",
+    "source_definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_Def.xml",
+    "source_definition_sha256": "889f35707e531257fe1eee78ab49a76681d4c580876e8660d374ecacf457cb42",
+    "candidate_definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/candidate/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face_Def.xml",
+    "candidate_definition_sha256": "fca440534ada0acc76b4d76ee20b06a2fb3a936430d8bd15ca26b71d956846a3",
+    "candidate_changes": [
+      {
+        "parent": "list",
+        "parent_name": "GeometryForNormals",
+        "old_boxfill": "top | left | right | front | back",
+        "new_boxfill": "bottom | top | left | right | front | back"
+      },
+      {
+        "parent": "mainlist",
+        "parent_name": "",
+        "old_boxfill": "top | left | right | front | back",
+        "new_boxfill": "bottom | top | left | right | front | back"
+      }
+    ],
+    "gencase_binary": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+    "gencase_binary_sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226",
+    "gencase_command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/candidate/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face_Def",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/candidate/generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face",
+      "-save:all"
+    ],
+    "gencase_log": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/candidate/gencase.log",
+    "gencase_log_summary": {
+      "points_loaded": 267178,
+      "fixed_particles": 146520,
+      "fluid_particles": 120658,
+      "nonzero_normals": [
+        146520,
+        146520
+      ],
+      "final_zero_normals": [
+        0,
+        146520
+      ],
+      "normal_size_range": [
+        0.00125,
+        0.032668
+      ]
+    },
+    "generated_total_particles": 267178,
+    "generated_boundary_particles": 146520,
+    "generated_fluid_particles": 120658,
+    "generated_boundary_mk_counts": {
+      "17": 134562,
+      "18": 11958
+    },
+    "generated_obstacle_bottom_edge_particles": 418,
+    "generated_obstacle_bottom_interior_particles": 208,
+    "generated_bound_fluid_exact_overlap_count": 0,
+    "generated_normal_count": 146520,
+    "generated_zero_normal_count": 0,
+    "generated_normal_size_range_m": [
+      0.0012499940348789096,
+      0.03266783058643341
+    ],
+    "generated_inputs_sha256": {
+      "CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face_Def.xml": "fca440534ada0acc76b4d76ee20b06a2fb3a936430d8bd15ca26b71d956846a3",
+      "gencase.log": "56922e56ced1cc6ac5acfa0336282b6831fa4f64574a2c8b9b0fa713463eef7d",
+      "generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face.bi4": "d9af2655429e23b1fb6ea8852282b305478532c7e03d35fc448ddef839f7794f",
+      "generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face.out": "865059c3a4acacb69d6ea6baa1fb8756b03eda132ea390ad6c8a4cabda626e66",
+      "generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face.xml": "b6be9dfbe195bd886b0bae705565938a8e8eeeba6d1612c5241a15c2aab087a2",
+      "generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face_All.vtk": "148c576f678fa1277014edc38f2e99eddacff54cefb8ed5c6d77afc7a231414e",
+      "generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face_Bound.vtk": "6fb3e0158262af49dbe6ea34f8ea0087ecc7c0c699400cb799274ff5f18a607a",
+      "generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face_Fluid.vtk": "90e2bab131cbb987f0657eefd70b246c246869522f227855682aa838ae7f4f94",
+      "generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face_GeometryShapes.vtk": "389031756edd995390ac2ffc76c16af9f1107c4d1d3d47a91058e9dee04e62f0",
+      "generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face_MkCells.vtk": "f5a389ab8fc6067676238b59a8acc0b7a04f0878f863b3be72e0ccd25b6318fa",
+      "generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face_hdp_Actual.vtk": "1082446e240967aeb18d5d3e0791de95b93df4526deef2cf95134633c6b6e14c"
+    },
+    "qualification_claim": "none; static repair candidate only"
+  },
+  "qualification_claim": "none; F1 H2 remains a retained negative result and the H3 candidate has no solver result"
+}

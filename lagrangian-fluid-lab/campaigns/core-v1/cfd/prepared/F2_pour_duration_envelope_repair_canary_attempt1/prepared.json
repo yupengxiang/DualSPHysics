@@ -1,0 +1,388 @@
+{
+  "schema": "core.cfd.v1",
+  "created_at": "2026-09-19T11:38:05.600728+00:00",
+  "config": {
+    "schema": "core.cfd.v1",
+    "family": "F2",
+    "scope_id": "F2_pour_duration_runtime_envelope_repair_x_v1",
+    "revision_id": "F2_pour_duration_runtime_envelope_repair_v1",
+    "observer_revision": "F2_geometry_aware_observer_v1",
+    "case_id": "CORE_F2_pour_duration_q0p50000000_dp0p007500000000_envelope_repair_canary",
+    "recipe_id": "F2_rotating_pour_runtime_envelope_repair_canary_v1",
+    "recipe": "native_dbc",
+    "stage": "repair_canary",
+    "qualification_only": false,
+    "split": "qualification_only",
+    "parameter": {
+      "name": "rotation_duration_s",
+      "q": 0.5,
+      "value": 0.85,
+      "candidate_range": [
+        0.5,
+        1.2
+      ],
+      "held_out": false
+    },
+    "dp_m": 0.0075,
+    "cfl": 0.2,
+    "time_control": {
+      "cflnumber": 0.2,
+      "DtIni": 0.0,
+      "DtMin": 0.0,
+      "DtFixed": 0.0
+    },
+    "time_max_s": 2.5,
+    "maximum_extended_time_s": 5.0,
+    "output_interval_s": 0.01,
+    "angle_degrees": -105.0,
+    "motion_start_s": 0.5,
+    "receiver_center": [
+      0.45,
+      0.0
+    ],
+    "cup": {
+      "low": [
+        0.0,
+        -0.15,
+        0.65
+      ],
+      "size": [
+        0.425,
+        0.3,
+        0.45
+      ],
+      "mkbound": 0
+    },
+    "receiver": {
+      "low": [
+        0.45,
+        -0.3,
+        0.0
+      ],
+      "size": [
+        1.1,
+        0.6,
+        0.45
+      ],
+      "mkbound": 1
+    },
+    "tray": {
+      "low": [
+        -0.6,
+        -0.55,
+        -0.2
+      ],
+      "size": [
+        2.6,
+        1.1,
+        0.1
+      ],
+      "mkbound": 2
+    },
+    "wall_bounds": {
+      "xmin": -0.6,
+      "xmax": 2.0,
+      "ymin": -0.55,
+      "ymax": 0.55,
+      "zmin": -0.2,
+      "zmax": 1.1
+    },
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "open_faces": [
+      "top"
+    ],
+    "fluid_boxes": [
+      {
+        "low": [
+          0.05,
+          -0.11,
+          0.7
+        ],
+        "size": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "mkfluid": 0
+      },
+      {
+        "low": [
+          0.05,
+          -0.11,
+          0.81
+        ],
+        "size": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "mkfluid": 1
+      },
+      {
+        "low": [
+          0.05,
+          -0.11,
+          0.92
+        ],
+        "size": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "mkfluid": 2
+      }
+    ],
+    "initial_fluid_height_m": 0.33,
+    "initial_fluid_bottom_m": 0.7,
+    "initial_fluid_top_m": 1.03,
+    "runtime_domain": {
+      "posmin": [
+        -0.95,
+        -0.9,
+        -0.9
+      ],
+      "posmax": [
+        2.45,
+        1.1,
+        2.4
+      ],
+      "baseline_zmax_m": 1.8,
+      "changed_zmax_m": 2.4,
+      "change_is_computational_only": true,
+      "candidate": "all-face finite margin around the generated XML envelope",
+      "margin_relative_to_failed_generated_xml_m": {
+        "xmin": 0.25,
+        "xmax": 0.25,
+        "ymin": 0.25,
+        "ymax": 0.3,
+        "zmin": 0.5,
+        "zmax": 0.0
+      }
+    },
+    "design_cell": "dynamic_envelope_repair",
+    "temporal_variant": null,
+    "physical_geometry_changed": false,
+    "mass_rescaling": false,
+    "resource_estimate": {
+      "cpu_cores": 2,
+      "ram_mib": 16384,
+      "gpu_peak_mib": 4096,
+      "io_weight": 1
+    },
+    "source_label_semantics": "initial Mk is a numerical source partition; not material truth",
+    "physical_case_id": "F2_standard_centered_rotating_pour_v1",
+    "lineage_group_id": "F2_pour_duration_x_v1",
+    "qualification_claim": "none; F2 envelope repair canary only",
+    "repair_candidate_id": "computational_envelope_all_faces_canary",
+    "event_window": {
+      "registered_initial_window_s": 2.5,
+      "maximum_extended_window_s": 5.0,
+      "output_interval_s": 0.01,
+      "motion_start_s": 0.5,
+      "motion_source_file_duration_s": 2.5,
+      "post_settle_observation_s": 0.35,
+      "settle_hold_s": 0.2,
+      "right_censor_policy": "run the whole registered window; if a required event is right-censored, extend once to 2x and retain the censored status",
+      "events": [
+        {
+          "id": "motion_complete",
+          "definition": "prescribed cup angle reaches -105 degrees at 0.50 + duration(q) s"
+        },
+        {
+          "id": "receiver_contact",
+          "definition": "valid native fluid mass inside the one-dp-clear receiver interior first reaches 1% of initial fluid mass"
+        },
+        {
+          "id": "spill_or_escape",
+          "definition": "valid native fluid mass outside the cup, receiver and tray observation volumes first reaches 1% of initial mass; missing identities remain a separate integrity failure"
+        },
+        {
+          "id": "settled",
+          "definition": "after motion completion, speed p95 <= 0.10 m/s and kinetic energy <= 5% of initial gravitational potential for 0.20 s continuously"
+        },
+        {
+          "id": "event_window_complete",
+          "definition": "motion, receiver contact and settled are observed, with 0.35 s of saved output after the last required transition"
+        }
+      ]
+    }
+  },
+  "sampling": {
+    "fluid_boxes": [
+      {
+        "continuous_low_m": [
+          0.05,
+          -0.11,
+          0.7
+        ],
+        "continuous_size_m": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "first_center_m": [
+          0.056249999999999994,
+          -0.10875,
+          0.7012499999999999
+        ],
+        "draw_size_m": [
+          0.315,
+          0.21,
+          0.105
+        ],
+        "counts": [
+          43,
+          29,
+          15
+        ],
+        "particle_count": 18705,
+        "continuous_mass_kg": 7.865,
+        "discrete_mass_kg": 7.891171874999999,
+        "mkfluid": 0,
+        "native_cell_centre_sampling": true
+      },
+      {
+        "continuous_low_m": [
+          0.05,
+          -0.11,
+          0.81
+        ],
+        "continuous_size_m": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "first_center_m": [
+          0.056249999999999994,
+          -0.10875,
+          0.81375
+        ],
+        "draw_size_m": [
+          0.315,
+          0.21,
+          0.105
+        ],
+        "counts": [
+          43,
+          29,
+          15
+        ],
+        "particle_count": 18705,
+        "continuous_mass_kg": 7.865,
+        "discrete_mass_kg": 7.891171874999999,
+        "mkfluid": 1,
+        "native_cell_centre_sampling": true
+      },
+      {
+        "continuous_low_m": [
+          0.05,
+          -0.11,
+          0.92
+        ],
+        "continuous_size_m": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "first_center_m": [
+          0.056249999999999994,
+          -0.10875,
+          0.92625
+        ],
+        "draw_size_m": [
+          0.315,
+          0.21,
+          0.105
+        ],
+        "counts": [
+          43,
+          29,
+          15
+        ],
+        "particle_count": 18705,
+        "continuous_mass_kg": 7.865,
+        "discrete_mass_kg": 7.891171874999999,
+        "mkfluid": 2,
+        "native_cell_centre_sampling": true
+      }
+    ],
+    "expected_fluid_particles": 56115,
+    "continuous_mass_kg": 23.595,
+    "sampled_mass_kg": 23.673515624999997,
+    "mass_policy": "native rho*dp^3, no mass rescaling"
+  },
+  "mass_preflight": {
+    "source_relative_errors": [
+      0.0033276382708198327,
+      0.0033276382708198327,
+      0.0033276382708198327
+    ],
+    "max_abs_source_relative_error": 0.0033276382708198327,
+    "total_discrete_mass_kg": 23.673515624999997,
+    "total_continuous_mass_kg": 23.595,
+    "total_relative_error": 0.0033276382708200547,
+    "source_error_max": 0.025,
+    "total_error_max": 0.03,
+    "mass_rescaling": false,
+    "pass": true,
+    "mass_gate_pass": true
+  },
+  "native_initial": {
+    "total_particles": 375723,
+    "boundary_particles": 319608,
+    "fluid_particles": 56115,
+    "expected_fluid_particles": 56115,
+    "unique_ids": true,
+    "finite_initial_arrays": true
+  },
+  "resolved_runtime_domain": {
+    "posmin": [
+      -0.95,
+      -0.9,
+      -0.9
+    ],
+    "posmax": [
+      2.45,
+      1.1,
+      2.4
+    ]
+  },
+  "dynamic_canary_preflight": {
+    "generated_fluid_counts": true,
+    "native_state_finite_unique": true,
+    "full_window_s": 2.5,
+    "maximum_extended_window_s": 5.0,
+    "motion_duration_s": 0.85
+  },
+  "preflight_pass": true,
+  "generated_prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_envelope_repair_canary/generated/CORE_F2_pour_duration_q0p50000000_dp0p007500000000_envelope_repair_canary",
+  "source_template": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l2-multifamily/c1-canary/cases/L2_C1_F2_rotation_center_nominal_Def.xml",
+  "source_template_sha256": "7a59e4873842e91b19bbb523bb7100d12445131f800d1341c615c0bbe4a7a911",
+  "definition_sha256": "969c519ea0e06a4d35587d25166fa0835ba74c7b8a47bac8fcdb224dc0588e8d",
+  "motion_sha256": "e382f12cad5ce2dced748af1f73a04a1dfb7f5d0c93fba754eaef47bf89468f8",
+  "solver_binary": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+  "solver_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+  "decoder": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+  "decoder_sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+  "solver_arguments": [],
+  "qualification_claim": "none; F2 full-window dynamic canary only",
+  "inputs": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_envelope_repair_canary/gencase.log": "d0ccf2223f589ce94aac9253252389990a4994aaa9b20f44703f6a5e01b5b422",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_envelope_repair_canary/CORE_F2_pour_duration_q0p50000000_dp0p007500000000_envelope_repair_canary_Def.xml": "969c519ea0e06a4d35587d25166fa0835ba74c7b8a47bac8fcdb224dc0588e8d",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_envelope_repair_canary/CORE_F2_pour_duration_q0p50000000_dp0p007500000000_envelope_repair_canary_motion.dat": "e382f12cad5ce2dced748af1f73a04a1dfb7f5d0c93fba754eaef47bf89468f8",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_envelope_repair_canary/generated/CORE_F2_pour_duration_q0p50000000_dp0p007500000000_envelope_repair_canary_Fluid.vtk": "f9be3ca14f9cea0cc854e94eacbabebdd6b7e8412a2361ea85e6a04908a1ae14",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_envelope_repair_canary/generated/CORE_F2_pour_duration_q0p50000000_dp0p007500000000_envelope_repair_canary_All.vtk": "6a176af1e2df92ed1fbc13cf778b212c22ad6a0293916caedf31d400d794924c",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_envelope_repair_canary/generated/CORE_F2_pour_duration_q0p50000000_dp0p007500000000_envelope_repair_canary_Bound.vtk": "c1ad5f5299003ce298c0d8eb7466f8d6e4a756fdc5de7e7d0b6ab50197224186",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_envelope_repair_canary/generated/CORE_F2_pour_duration_q0p50000000_dp0p007500000000_envelope_repair_canary_motion.dat": "e382f12cad5ce2dced748af1f73a04a1dfb7f5d0c93fba754eaef47bf89468f8",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_envelope_repair_canary/generated/CORE_F2_pour_duration_q0p50000000_dp0p007500000000_envelope_repair_canary.xml": "b46e540588a1bb2e8dd1613daeb8672207d648ca5ac9da23afd624f24017c4d1",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_envelope_repair_canary/generated/CORE_F2_pour_duration_q0p50000000_dp0p007500000000_envelope_repair_canary_MkCells.vtk": "e065d9b20397b13d26ed1247d83ac854d3f360cc916faf8b27c3e431171a6285",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_envelope_repair_canary/generated/CORE_F2_pour_duration_q0p50000000_dp0p007500000000_envelope_repair_canary.bi4": "78cbbffd319910804f7c0edc908c59b45972a2358f8831c36b1ffff3b78b4df8",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_envelope_repair_canary/generated/CORE_F2_pour_duration_q0p50000000_dp0p007500000000_envelope_repair_canary.out": "7c6c310adca73459b719033b829c51735e9d1afdae9fa3b5c3ba1d92748dc841"
+  }
+}

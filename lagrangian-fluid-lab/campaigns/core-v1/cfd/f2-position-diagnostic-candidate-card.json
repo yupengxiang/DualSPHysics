@@ -1,0 +1,165 @@
+{
+  "schema": "core.f2.position_diagnostic.candidate.v1",
+  "revision_id": "F2_position_diagnostic_v1",
+  "family": "F2",
+  "source_failure": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h0-position-loss-forensics.json",
+    "sha256": "2a642537bb3418fefb0006b19357194b8bee8e3b88e1881e00ca53abf20a4713"
+  },
+  "source_failure_status": "retained_failed_h0_static_hold",
+  "qualification_claim": "none",
+  "physical_geometry_changed": false,
+  "candidates": [
+    {
+      "id": "F2_H1_runtime_domain_extension_canary_v1",
+      "axis": "runtime_domain_ceiling",
+      "status": "prepared_ready_for_root_queue",
+      "hypothesis": "separate solver-domain censoring from already physical open-cup escape",
+      "changed_inputs": {
+        "runtime_domain_zmax_m": [
+          1.8,
+          2.4
+        ],
+        "geometry_pointmax_z_m": [
+          1.8,
+          2.4
+        ]
+      },
+      "unchanged_inputs": [
+        "cup/receiver/tray boxes",
+        "fluid boxes",
+        "gravity",
+        "zero motion",
+        "DBC",
+        "dp=.0075",
+        "native rho*dp^3"
+      ],
+      "prepared": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H1_runtime_domain_extension_canary/prepared.json",
+        "sha256": "1232f095eae0bab2218c89a177b1e53fe57e781c8653af72c09a7867016ef49a"
+      },
+      "job": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h1-runtime-domain-extension-canary-job.json",
+        "sha256": "38bc5419bcf21b7ef969926d1d884a388477a94ba0aba088c254051c91c17170"
+      },
+      "preflight": {
+        "generated_fluid_counts": true,
+        "mdbc_normals_complete_nonzero": true,
+        "runtime_domain_zmax_m": 2.4
+      }
+    },
+    {
+      "id": "F2_H2_mdbc_boundary_repair_canary_v1",
+      "axis": "boundary_formulation",
+      "status": "blocked_cpu_preflight_zero_normals",
+      "hypothesis": "DBC bottom impact treatment drives upward plume; mDBC tests boundary treatment only after normals are complete",
+      "changed_inputs": {
+        "boundary": [
+          "DBC",
+          "mDBC"
+        ],
+        "runtime_domain_zmax_m": [
+          1.8,
+          2.4
+        ]
+      },
+      "unchanged_inputs": [
+        "cup/receiver/tray boxes",
+        "fluid boxes",
+        "gravity",
+        "zero motion",
+        "dp=.0075",
+        "native rho*dp^3"
+      ],
+      "prepared": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H2_mdbc_boundary_repair_canary/prepared.json",
+        "sha256": "f569f17e15a722f4e6a8e01d30adc091f7a407f003b6187f2a913a6906781997"
+      },
+      "preflight": {
+        "generated_fluid_counts": true,
+        "mdbc_normals_complete_nonzero": false,
+        "runtime_domain_zmax_m": 2.4,
+        "serialized_zero_normals_current": 40440,
+        "serialized_boundary_normals_current": 319608
+      },
+      "blocker": "current retained H2 v1 has 40,440/319,608 serialized zero normals (12.65%); the earlier zero_normals artifact with 64,722 zeros is retained separately",
+      "historical_failed_revisions": [
+        {
+          "id": "F2_position_diagnostic_mdbc_boundary_v1_initial",
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H2_mdbc_boundary_repair_canary_zero_normals/prepared.json",
+          "sha256": "dbcbdff78e42dc9a83bd32afe1eb7188ea0cb79453bde8cb44783675ba6ea84c",
+          "zero_boundary_normals": 64722,
+          "total_boundary_normals": 319608,
+          "preflight_pass": false
+        }
+      ],
+      "repair_revision": {
+        "id": "F2_position_diagnostic_mdbc_boundary_v2",
+        "status": "prepared_ready_for_root_queue; no GPU launched by subagent",
+        "hypothesis": "same H2 mDBC boundary mechanism; normal search radius was too short for the three-layer corner shell",
+        "changed_inputs": {
+          "normal_layers": "vdp=-0.5 (normal construction only; main boundary remains vdp=0,1,2)",
+          "normal_distanceh": [
+            2.0,
+            3.0
+          ],
+          "svshapes": true
+        },
+        "prepared": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H2_mdbc_boundary_repair_canary_v2/prepared.json",
+          "sha256": "70d78a80f2181e2cb54f0f3eab5c69c52fb6ca9cd909e532a407bea8f8ec91a4"
+        },
+        "job": {
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-boundary-repair-v2-canary-job.json",
+          "sha256": "e40bfd70f3682b9c04b564c8dd0d893483f39bc10110b089bbf7f8f5c4ed0171"
+        },
+        "preflight": {
+          "boundary_particles": 319608,
+          "serialized_normals": 319608,
+          "serialized_zero_normals": 0,
+          "preflight_pass": true
+        },
+        "qualification_claim": "none; H2 repair canary only"
+      }
+    }
+  ],
+  "execution_status": "proposal_only",
+  "central_ledger_mutation": 0,
+  "gpu_launch_by_subagent": false,
+  "initial_condition_forensics": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h0-initial-impact-forensics.json",
+    "sha256": "1bfb3ced181cf54912e051a25fb57eafb4e7b23b64bda8ed3dd59d127594b3cd",
+    "evidence": {
+      "initial_velocity_max_m_s": 0.0,
+      "initial_native_mass_kg": 23.673516239068704,
+      "initial_potential_energy_relative_to_cup_floor_J": 51.09218274715808,
+      "bottom_clearance_m": 0.05500000000000005,
+      "top_clearance_m": 0.06500000000000017,
+      "ballistic_free_fall_time_s": 0.10589168008061646,
+      "first_saved_near_bottom_s": 0.1000270820682417,
+      "peak_saved_upward_vz_m_s": 6.014502048492432
+    },
+    "interpretation": "initial water is a zero-velocity column with finite bottom clearance; it falls into the cup floor on the 0.10 s scale and generates an upward plume. A resting-fill initial condition would be an independently registered physical scope, not an H0/H1/H2 numerical repair."
+  },
+  "followup_dynamic_design": {
+    "design_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-pour-duration-qualification-design.json",
+    "design_sha256": "5ccb1103df03f4c08bf118a656031240fa0c2aedbd0916c26f45c100a7627065",
+    "matrix_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-pour-duration-qualification-matrix.json",
+    "matrix_sha256": "dee6d4bdb884fa890728852ba01108b05dd9e4880642ebdbf4932154b9c63f9b",
+    "canary_prepared_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_dynamic_canary/prepared.json",
+    "canary_prepared_sha256": "8c631d80ca4b79ee72bd829c3595b6e05cd46e8e199652a6a38ce027205066cf",
+    "canary_job_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-pour-duration-fullwindow-canary-job.json",
+    "canary_job_sha256": "d91aaf537fbb6e665173eb63e08579c1f81aa6eec7588cc0d084f3b8aa0dde60",
+    "status": "design and canary preparation only; no qualification cells launched",
+    "parameter_axis": "rotation_duration_s",
+    "range_s": [
+      0.5,
+      1.2
+    ],
+    "matrix_cells": 15,
+    "registered_window_s": 2.5,
+    "maximum_extended_window_s": 5.0,
+    "parameter_card_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-pour-duration-parameter-card.json",
+    "parameter_card_sha256": "9d144cb16dd2cac99c0f3bb23f940b32bcf4b160e0a2db7fabd71d6b89b266b3"
+  }
+}

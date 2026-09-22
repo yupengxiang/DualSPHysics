@@ -1,0 +1,699 @@
+{
+  "schema": "core.cfd.v1",
+  "created_at": "2026-09-19T16:06:18.175977+00:00",
+  "config": {
+    "schema": "core.f2.full_cup_closed_catchment_mdbc_cfl_repair.v1",
+    "family": "F2",
+    "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_x_v1",
+    "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1",
+    "case_id": "CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1",
+    "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_v1_cfl010",
+    "recipe": "mdbc_native",
+    "stage": "repair_canary",
+    "split": "qualification_only",
+    "qualification_only": true,
+    "parameter": {
+      "name": "rotation_duration_s",
+      "q": 0.5,
+      "value": 0.85,
+      "candidate_range": [
+        0.5,
+        1.2
+      ],
+      "held_out": false
+    },
+    "dp_m": 0.0075,
+    "cfl": 0.1,
+    "time_max_s": 2.5,
+    "output_interval_s": 0.01,
+    "source_definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/CORE_F2_resting_fill_side_wet_full_cup_q0p50000000_dp0p007500000000_canary_v3_Def.xml",
+    "physical_case_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_geometry_v1",
+    "lineage_group_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_x_v1",
+    "paired_background_id": "F2_resting_fill_side_wet_no_pair",
+    "view_id": "world_fluid_particle_v1",
+    "control_semantics": "prescribed centered rotation starts at 0.50 s; mDBC wall velocity is supplied by the native mvrotfile",
+    "source_label_semantics": "single initial Mk is a numerical source partition; not material truth",
+    "cup": {
+      "low": [
+        0.0,
+        -0.15,
+        0.65
+      ],
+      "size": [
+        0.425,
+        0.3,
+        0.45
+      ],
+      "mkbound": 0
+    },
+    "receiver": {
+      "low": [
+        0.45,
+        -0.3,
+        0.0
+      ],
+      "size": [
+        1.1,
+        0.6,
+        0.45
+      ],
+      "mkbound": 1
+    },
+    "tray": {
+      "low": [
+        -0.6,
+        -0.55,
+        -0.2
+      ],
+      "size": [
+        2.6,
+        1.1,
+        0.1
+      ],
+      "mkbound": 2
+    },
+    "fluid_boxes": [
+      {
+        "low": [
+          0.0,
+          -0.15,
+          0.65
+        ],
+        "size": [
+          0.425,
+          0.3,
+          0.18505882352941178
+        ],
+        "mkfluid": 0
+      }
+    ],
+    "wall_bounds": {
+      "xmin": -0.7,
+      "xmax": 2.2,
+      "ymin": -0.65,
+      "ymax": 0.8,
+      "zmin": -0.4,
+      "zmax": 2.4
+    },
+    "runtime_domain": {
+      "posmin": [
+        -0.7,
+        -0.65,
+        -0.4
+      ],
+      "posmax": [
+        2.2,
+        0.8,
+        2.4
+      ],
+      "baseline_zmax_m": 1.8,
+      "changed_zmax_m": 2.4,
+      "change_is_computational_only": true
+    },
+    "initial_condition": {
+      "variant": "side_wet_full_cup_fixed_volume",
+      "continuum_wall_geometry_changed": false,
+      "fluid_initial_condition_changed": true,
+      "continuous_fluid_faces_are_physical_cup_faces": true,
+      "side_wetted_candidate": true,
+      "continuum_box_matches_cup_interior_faces": true,
+      "continuous_volume_m3": 0.023595,
+      "predecessor_continuous_volume_m3": 0.023595,
+      "continuum_height_derivation": "0.023595/(0.425*0.30)=0.18505882352941177 m",
+      "target_first_native_fluid_center_m": [
+        0.0025,
+        -0.145,
+        0.66
+      ],
+      "native_particle_count_not_inherited": true,
+      "mass_rescaling": false,
+      "predecessor_side_clearances_m": {
+        "left": 0.055,
+        "right": 0.055,
+        "front": 0.0425,
+        "back": 0.0475
+      },
+      "predecessor_open_top_escape_fraction_max": 0.024396328967299295,
+      "predecessor_pre_motion_escape_fraction_max": 0.04006058986010871,
+      "preflight_artifact": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/static-preflight.json",
+      "native_sampling_is_separate_from_continuum_faces": true,
+      "native_sampling_source_point_m": [
+        0.00125,
+        -0.14875,
+        0.66125
+      ],
+      "native_sampling_source_size_m": [
+        0.42,
+        0.2925,
+        0.1725
+      ]
+    },
+    "static_hold": {
+      "drive_start_s": 0.5,
+      "requested_horizon_s": 0.6,
+      "settled_speed_p95_m_s_max": 0.1,
+      "settled_kinetic_over_initial_potential_max": 0.05,
+      "settled_hold_s": 0.2,
+      "cup_retention_gate": 1.0,
+      "event_window_complete_requires_settled": true
+    },
+    "qualification_inheritance": "none; independent full-cup closed-catchment mDBC physical scope",
+    "qualification_claim": "none; independent CFL contact-resolution canary only",
+    "qualified": false,
+    "definition_audit": {
+      "source_definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/CORE_F2_resting_fill_side_wet_full_cup_q0p50000000_dp0p007500000000_canary_v3_Def.xml",
+      "source_definition_sha256": "434bfbaa3839ed4e9c67d409b28893f7131bfeab75c5edf28ae94e01488be9a4",
+      "definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1_Def.xml",
+      "definition_sha256": "a13ee7810ef094fb329bf94e5eaf02dd64c11817a5722a299a6a24a600f5d239",
+      "motion_file": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1_motion.dat",
+      "motion_sha256": "e382f12cad5ce2dced748af1f73a04a1dfb7f5d0c93fba754eaef47bf89468f8",
+      "changed_fields": [
+        "new fixed catchment side walls mkbound=3 over retained tray footprint",
+        "Boundary=2 mDBC with explicit cup/receiver/tray/catchment normal geometry",
+        "full-window TimeMax=2.50 and TimeOut=0.01",
+        "runtime domain zmax=2.40",
+        "prescribed centered rotation replaces v3 zero-motion hold",
+        "single numerical contact-resolution change: CFLnumber 0.20 -> 0.10"
+      ],
+      "unchanged_fields": [
+        "v3 full-cup continuous volume and native fluid lattice",
+        "cup/receiver/tray source geometry and tray floor plane",
+        "gravity, EOS, viscosity, no mass rescaling",
+        "mDBC normal construction, rigid motion and all physical geometry",
+        "DtIni, DtMin, DtFixed, TimeMax and TimeOut"
+      ],
+      "qualification_claim": "none"
+    },
+    "sampling_rule": "continuous fluid box exactly matches the cup interior faces; native sampling uses a separately declared inset lattice, native rho*dp^3, no rescaling",
+    "time_control": {
+      "cflnumber": 0.1,
+      "DtIni": 0.0,
+      "DtMin": 0.0,
+      "DtFixed": 0.0
+    },
+    "maximum_extended_time_s": 5.0,
+    "angle_degrees": -105.0,
+    "motion_start_s": 0.5,
+    "boundary_method": 2,
+    "repair_candidate_id": "moving_mdbc_contact_time_resolution_cfl_half",
+    "physical_geometry_changed": true,
+    "initial_condition_changed": false,
+    "mass_rescaling": false,
+    "source_geometry_contract": {
+      "fluid_initial_state": "exact v3 full-cup native lattice and fixed continuous volume; static predecessor is hash-bound",
+      "cup": "passed full-cup v3 finite moving cup, unchanged",
+      "receiver": "registered finite fixed receiver, unchanged",
+      "tray_floor": "registered boxfill=bottom tray floor mkbound=2 retained at source plane z=-0.20 m",
+      "catchment_side_walls": "new fixed mkbound=3 left/right/front/back walls over the tray footprint; top remains open",
+      "motion": "prescribed centered rotation, y axis through z=0.65, q=0.5 duration 0.85 s, unchanged control family"
+    },
+    "catchment": {
+      "low": [
+        -0.6,
+        -0.55,
+        -0.2
+      ],
+      "size": [
+        2.6,
+        1.1,
+        0.8
+      ],
+      "fluid_floor_surface_z_m": -0.2,
+      "mkbound": 3,
+      "floor_material_mkbound": 2,
+      "drawn_faces": [
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_layers_vdp": [
+        0,
+        1,
+        2
+      ],
+      "nominal_wall_thickness_m": 0.0225,
+      "continuous_geometry": "fixed side-wall box over the original tray footprint; the original tray bottom is retained",
+      "material_purpose": "external rigid spill/overflow collection walls; mkbound=3 is a new physical material region",
+      "floor_purpose": "original registered tray bottom, mkbound=2, retained as the collection floor",
+      "physical_geometry_changed": true,
+      "physical_surface_thickness_m": 0.0,
+      "wall_thickness_semantics": "numerical particle shell only; continuous physical boundary is the declared source plane"
+    },
+    "catchment_wall_spec": {
+      "container_interior": {
+        "xmin": -0.6,
+        "xmax": 2.0,
+        "ymin": -0.55,
+        "ymax": 0.55,
+        "zmin": -0.2,
+        "zmax": 0.6000000000000001
+      },
+      "closed_faces": [
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "mkbound": 3,
+      "surface_convention": "continuous source planes; no inward layer-center shrink",
+      "wall_layers_vdp": [
+        0,
+        1,
+        2
+      ],
+      "nominal_wall_thickness_m": 0.0225,
+      "physical_surface_thickness_m": 0.0,
+      "wall_thickness_semantics": "numerical particle shell only; continuous physical boundary is the declared source plane",
+      "fluid_facing_surface": {
+        "xmin": -0.6,
+        "xmax": 2.0,
+        "ymin": -0.55,
+        "ymax": 0.55,
+        "floor_z_m": -0.2,
+        "top_z_m": 0.6000000000000001
+      },
+      "floor": {
+        "material_mkbound": 2,
+        "fluid_facing_surface_z_m": -0.2,
+        "nominal_outer_low_z_m": -0.2,
+        "solid_slab_thickness_m": 0.0,
+        "surface_basis": "source boxfill=bottom plane; source size z is not a top face",
+        "preserved_tray_definition": {
+          "low": [
+            -0.6,
+            -0.55,
+            -0.2
+          ],
+          "size": [
+            2.6,
+            1.1,
+            0.1
+          ]
+        },
+        "closed_faces": [
+          "bottom"
+        ],
+        "open_faces": [
+          "top",
+          "left",
+          "right",
+          "front",
+          "back"
+        ]
+      },
+      "material_purpose": "external rigid spill/overflow collection walls; mkbound=3 is a new physical material region",
+      "qualification_effect": "new physical geometry scope; no inherited qualification"
+    },
+    "catchment_event_window_estimate": {
+      "basis": "zero-initial-vertical-speed free-fall estimate from the highest initial fluid layer; impacts, pressure and cup motion can only change this diagnostic estimate",
+      "gravity_m_s2": -9.81,
+      "initial_fluid_top_m": 1.03,
+      "release_time_s": 0.5,
+      "retained_tray_floor_surface_z_m": -0.2,
+      "catchment_outer_floor_z_m": -0.2,
+      "nominal_floor_flight_s": 0.5007639423859148,
+      "nominal_floor_contact_from_release_s": 0.5007639423859148,
+      "nominal_floor_contact_from_simulation_start_s": 1.0007639423859147,
+      "conservative_outer_bound_flight_s": 0.5007639423859148,
+      "conservative_outer_bound_contact_from_simulation_start_s": 1.0007639423859147,
+      "motion_duration_s": 0.85,
+      "motion_complete_s": 1.35,
+      "registered_window_s": 2.5,
+      "maximum_extended_window_s": 5.0,
+      "output_interval_s": 0.01,
+      "settled_gate_unchanged": true,
+      "estimate_only": true
+    },
+    "catchment_observer_candidate": {
+      "status": "separate_candidate_not_enabled",
+      "purpose": "destination-aware accounting for mass inside the new catchment, including material retained after leaving the cup/receiver",
+      "interior_bounds_m": {
+        "xmin": -0.5775,
+        "xmax": 1.9775,
+        "ymin": -0.5275000000000001,
+        "ymax": 0.5275000000000001,
+        "zmin": -0.17750000000000002,
+        "zmax": 0.5775000000000001
+      },
+      "open_top": true,
+      "uses_current_legacy_tray_observer": false,
+      "replaces_current_settled_gate": false,
+      "spill_is_deleted": false,
+      "qualification_effect": "none; a future observer must be calibrated and reviewed independently"
+    },
+    "observer_revision": "F2_geometry_aware_observer_v1",
+    "event_window": {
+      "registered_initial_window_s": 2.5,
+      "maximum_extended_window_s": 5.0,
+      "output_interval_s": 0.01,
+      "motion_start_s": 0.5,
+      "motion_source_file_duration_s": 2.5,
+      "post_settle_observation_s": 0.35,
+      "settle_hold_s": 0.2,
+      "right_censor_policy": "run the whole registered window; if a required event is right-censored, extend once to 2x and retain the censored status",
+      "events": [
+        {
+          "id": "motion_complete",
+          "definition": "prescribed cup angle reaches -105 degrees at 0.50 + duration(q) s"
+        },
+        {
+          "id": "receiver_contact",
+          "definition": "valid native fluid mass inside the one-dp-clear receiver interior first reaches 1% of initial fluid mass"
+        },
+        {
+          "id": "spill_or_escape",
+          "definition": "valid native fluid mass outside the cup, receiver and tray observation volumes first reaches 1% of initial mass; missing identities remain a separate integrity failure"
+        },
+        {
+          "id": "settled",
+          "definition": "after motion completion, speed p95 <= 0.10 m/s and kinetic energy <= 5% of initial gravitational potential for 0.20 s continuously"
+        },
+        {
+          "id": "event_window_complete",
+          "definition": "motion, receiver contact and settled are observed, with 0.35 s of saved output after the last required transition"
+        }
+      ]
+    },
+    "static_predecessor": {
+      "prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/prepared.json",
+      "prepared_sha256": "2bb1dac4bef30bea2926184641c9d4f3a18895b5b9468ac86b14cbbe28f256c7",
+      "integration_receipt": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-full-cup-v3-static-hold-root-integration-v1.json",
+      "integration_receipt_sha256": "5d8cc041fa63f80401105e1d6884a0c77004326f6c85f6309e9bd82df0dfc589",
+      "hard_integrity_pass": true,
+      "event_window_complete": true,
+      "native_fluid_particles": 54720,
+      "mass_rescaling": false,
+      "qualification_claim": "static nominal canary only; no moving or range qualification"
+    },
+    "wall_audit_contract": {
+      "cup": {
+        "frame": "moving cup body frame",
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "saved_chord_and_endpoint_hard": true
+      },
+      "receiver": {
+        "frame": "world",
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "saved_chord_and_endpoint_hard": true
+      },
+      "tray": {
+        "frame": "world",
+        "closed_faces": [
+          "bottom"
+        ],
+        "open_faces": [
+          "top",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "saved_chord_and_endpoint_hard": true
+      },
+      "catchment": {
+        "frame": "world",
+        "closed_faces": [
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "floor_source_plane_z_m": -0.2,
+        "saved_chord_and_endpoint_hard": true
+      },
+      "ownership": "open-top ownership is separate; side entry and recontact cannot be hidden by ownership",
+      "geometry_audit_owner": "core_f2_qualification.audit_dynamic"
+    },
+    "motion_solver_convention": {
+      "xml_axis_p1": [
+        0.0,
+        -1.0,
+        0.65
+      ],
+      "xml_axis_p2": [
+        0.0,
+        1.0,
+        0.65
+      ],
+      "file_angle_units": "degrees",
+      "official_solver_world_from_body": "Ry(-file_angle) for this XML axis path",
+      "public_adapter_reconciliation_required": true,
+      "evidence": "f2-full-cup-closed-catchment-mdbc-v2-motion-contact-preflight-v1"
+    },
+    "dynamic_canary_preflight": {
+      "generated_fluid_count": 54720,
+      "expected_fluid_count": 54720,
+      "native_initial_state_finite_unique": true,
+      "native_sampling_matches_passed_static": true,
+      "mdbc_normals_complete_nonzero": true,
+      "zero_boundary_normals": 0,
+      "catchment_wall_particles_present": true,
+      "registered_full_window_s": 2.5,
+      "maximum_extended_window_s": 5.0,
+      "motion_duration_s": 0.85,
+      "single_variable_change": {
+        "field": "time_control.cflnumber",
+        "baseline": 0.2,
+        "candidate": 0.1
+      },
+      "qualification_only": true
+    }
+  },
+  "sampling": {
+    "fluid_boxes": [
+      {
+        "continuous_low_m": [
+          0.0,
+          -0.15,
+          0.65
+        ],
+        "continuous_size_m": [
+          0.425,
+          0.3,
+          0.18505882352941178
+        ],
+        "first_center_m": [
+          0.0025,
+          -0.145,
+          0.66
+        ],
+        "draw_size_m": [
+          0.42,
+          0.2925,
+          0.1725
+        ],
+        "counts": [
+          57,
+          40,
+          24
+        ],
+        "particle_count": 54720,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.084999999999997,
+        "mkfluid": 0,
+        "native_cell_centre_sampling": true,
+        "source_draw_point_m": [
+          0.00125,
+          -0.14875,
+          0.66125
+        ],
+        "source_draw_size_m": [
+          0.42,
+          0.2925,
+          0.1725
+        ]
+      }
+    ],
+    "expected_fluid_particles": 54720,
+    "continuous_mass_kg": 23.595000000000002,
+    "sampled_mass_kg": 23.084999999999997,
+    "mass_policy": "native rho*dp^3, no mass rescaling"
+  },
+  "mass_preflight": {
+    "source_relative_errors": [
+      -0.021614748887476387
+    ],
+    "max_abs_source_relative_error": 0.021614748887476387,
+    "total_discrete_mass_kg": 23.084999999999997,
+    "total_continuous_mass_kg": 23.595000000000002,
+    "total_relative_error": -0.021614748887476387,
+    "source_error_max": 0.025,
+    "total_error_max": 0.03,
+    "mass_rescaling": false,
+    "pass": true,
+    "mass_gate_pass": true
+  },
+  "native_initial": {
+    "total_particles": 692158,
+    "fixed_particles": 596443,
+    "moving_particles": 40995,
+    "boundary_particles": 637438,
+    "fluid_particles": 54720,
+    "expected_fluid_particles": 54720,
+    "unique_ids": true,
+    "finite_initial_arrays": true,
+    "initial_fluid_zero_velocity": true,
+    "native_sampling_matches_passed_static": true,
+    "normal_count": 637438,
+    "zero_boundary_normals": 0,
+    "normal_preflight_pass": true,
+    "normal_file": "decoder scratch BoundNor.bin (not retained)"
+  },
+  "resolved_runtime_domain": {
+    "posmin": [
+      -0.7,
+      -0.65,
+      -0.4
+    ],
+    "posmax": [
+      2.2,
+      0.8,
+      2.4
+    ]
+  },
+  "dynamic_canary_preflight": {
+    "generated_fluid_count": 54720,
+    "expected_fluid_count": 54720,
+    "native_initial_state_finite_unique": true,
+    "native_sampling_matches_passed_static": true,
+    "mdbc_normals_complete_nonzero": true,
+    "zero_boundary_normals": 0,
+    "catchment_wall_particles_present": true,
+    "registered_full_window_s": 2.5,
+    "maximum_extended_window_s": 5.0,
+    "motion_duration_s": 0.85
+  },
+  "definition_audit": {
+    "source_definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/CORE_F2_resting_fill_side_wet_full_cup_q0p50000000_dp0p007500000000_canary_v3_Def.xml",
+    "source_definition_sha256": "434bfbaa3839ed4e9c67d409b28893f7131bfeab75c5edf28ae94e01488be9a4",
+    "definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1_Def.xml",
+    "definition_sha256": "a13ee7810ef094fb329bf94e5eaf02dd64c11817a5722a299a6a24a600f5d239",
+    "motion_file": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1_motion.dat",
+    "motion_sha256": "e382f12cad5ce2dced748af1f73a04a1dfb7f5d0c93fba754eaef47bf89468f8",
+    "changed_fields": [
+      "new fixed catchment side walls mkbound=3 over retained tray footprint",
+      "Boundary=2 mDBC with explicit cup/receiver/tray/catchment normal geometry",
+      "full-window TimeMax=2.50 and TimeOut=0.01",
+      "runtime domain zmax=2.40",
+      "prescribed centered rotation replaces v3 zero-motion hold",
+      "single numerical contact-resolution change: CFLnumber 0.20 -> 0.10"
+    ],
+    "unchanged_fields": [
+      "v3 full-cup continuous volume and native fluid lattice",
+      "cup/receiver/tray source geometry and tray floor plane",
+      "gravity, EOS, viscosity, no mass rescaling",
+      "mDBC normal construction, rigid motion and all physical geometry",
+      "DtIni, DtMin, DtFixed, TimeMax and TimeOut"
+    ],
+    "qualification_claim": "none"
+  },
+  "wall_recipe": {
+    "mkbound": 3,
+    "floor_mkbound": 2,
+    "drawn_faces": [
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "top_open": true,
+    "retained_tray_bottom": true
+  },
+  "boundary_recipe": {
+    "boundary_method": "mDBC",
+    "normal_construction_layers_vdp": -0.5,
+    "normal_search_distance_h": 3.0,
+    "svshapes": true,
+    "normal_geometry_file": "[CaseName]_hdp_Actual.vtk",
+    "geometry_groups": [
+      "cup",
+      "receiver",
+      "tray_floor",
+      "catchment_side_walls"
+    ],
+    "moving_wall_velocity": "solver mvrotfile rigid-body velocity about y through pivot z=0.65"
+  },
+  "preflight_pass": true,
+  "generated_prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/generated/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1",
+  "source_template": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1_Def.xml",
+  "source_template_sha256": "a13ee7810ef094fb329bf94e5eaf02dd64c11817a5722a299a6a24a600f5d239",
+  "solver_binary": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+  "solver_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+  "decoder": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+  "decoder_sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+  "solver_arguments": [
+    "-mdbc_noslip:1"
+  ],
+  "qualification_only": true,
+  "qualification_claim": "none; independent CFL contact-resolution canary only",
+  "inputs": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1_Def.xml": "a13ee7810ef094fb329bf94e5eaf02dd64c11817a5722a299a6a24a600f5d239",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1_motion.dat": "e382f12cad5ce2dced748af1f73a04a1dfb7f5d0c93fba754eaef47bf89468f8",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/gencase.log": "d8129d1a281a4a9bc59eddf3db1e29788d521d24ea7f1349e6072f3c4da034d5",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/generated/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1.bi4": "1dca6d57f7c88100db83a4b1929025e11ef0a0d396f093b2706161c5edf3c809",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/generated/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1.xml": "7f36103392416a8a782e8c993315cc7a8c4c0ecbe5ab126570f4dd06321a7e51",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/generated/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1_All.vtk": "d25f83806bc30d6a410ca1d6153a73a1b40e0bb0b380a8babb212fe2ad6e6b0c",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/generated/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1_Bound.vtk": "6bfd9a176bf3a090801a7248f1fdfdf3e77cb7ad9ee4bcea76e97ed7c259eaf8",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/generated/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1_Fluid.vtk": "3f476ce514b725c33095c9e9991758389cdcc0d1a5a8968eaad8ec141f107186",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/generated/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1_GeometryShapes.vtk": "362c431fadc334ec7a669562309eb4b4eb9b6720a1bf5bc7132b3002058a82fd",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/generated/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1_MkCells.vtk": "4e7e1a02344d39ea79b39462eb5f1faa0a96c67e5e1ef9a85964e1e2de7a7704",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/generated/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1_hdp_Actual.vtk": "b3d59e7eb3f4e9384cd2e4bbbaebc4069d29f95ec49eda2b39d5291648a77741",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/generated/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2_cfl010_v1_motion.dat": "e382f12cad5ce2dced748af1f73a04a1dfb7f5d0c93fba754eaef47bf89468f8"
+  },
+  "revision_basis": {
+    "source_prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_v2/prepared.json",
+    "source_prepared_sha256": "784708e9449c7b54145521e706f922d23a92c95f4c792898c7a84ca3aa75c7a4",
+    "change": "only cflnumber in Def.xml/generated solver XML and matching config metadata",
+    "source_geometry_bytes_reused": true,
+    "native_particle_assets_reused": true
+  },
+  "native_candidate_preflight": {
+    "total_particles": 692158,
+    "fixed_particles": 596443,
+    "moving_particles": 40995,
+    "boundary_particles": 637438,
+    "fluid_particles": 54720,
+    "normal_count": 637438,
+    "zero_boundary_normals": 0,
+    "unique_ids": true,
+    "finite_initial_arrays": true,
+    "counts_match_source": true,
+    "normal_preflight_pass": true,
+    "pass": true
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "schema": "core.f2.dbc_slow_duration.preparation_review.v1",
+  "created_at": "2026-09-19T23:02:40.800896+00:00",
+  "family": "F2",
+  "candidate_id": "F2_dbc_slow_rotation_duration_q1p0_canary",
+  "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_x_v1",
+  "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_q1p0_v1",
+  "qualification_claim": "none; CPU prepared canary only",
+  "prepared": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_q1p0_v1/prepared.json",
+    "relative_to_lab": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_q1p0_v1/prepared.json",
+    "sha256": "c1200c143b93d0ff4c142d74d6196dc1a4894e61b1194f1501e5bd82f3bd7091",
+    "bytes": 40207,
+    "role": "q=1.0 prepared manifest"
+  },
+  "job": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dbc-slow-duration-q1p0-canary-job-v1.json",
+    "relative_to_lab": "campaigns/core-v1/cfd/f2-dbc-slow-duration-q1p0-canary-job-v1.json",
+    "sha256": "36c02f44ce6d9f3da8a5a37afdcbb7a8281f4a89a6ecdb880c3a34ac3b6e9368",
+    "bytes": 15438,
+    "role": "unsubmitted root-review job spec"
+  },
+  "candidate_card": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dbc-slow-duration-q1p0-canary-proposal-v1.json",
+    "relative_to_lab": "campaigns/core-v1/cfd/f2-dbc-slow-duration-q1p0-canary-proposal-v1.json",
+    "sha256": "c00276957020c3065de461dbd04a34a06e45ef7d9f9e59183fa5ea0a1ee68821",
+    "bytes": 18187,
+    "role": "candidate design card"
+  },
+  "dynamics_forensics": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dbc-extension5s-dynamics-forensics-v1.json",
+    "relative_to_lab": "campaigns/core-v1/cfd/f2-dbc-extension5s-dynamics-forensics-v1.json",
+    "sha256": "db0f8409413dc071682b8a13dfed722d459078891fe4c4cdb0391fc87f88427a",
+    "bytes": 11584,
+    "role": "baseline dynamics evidence"
+  },
+  "preflight": {
+    "preflight_pass": true,
+    "qualification_only": true,
+    "motion_proof": {
+      "definition_mvrotfile_duration_s": 5.0,
+      "definition_motion_filename": "CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_q1p00000000_dp0p007500000000_canary_motion.dat",
+      "motion_file_first_time_s": 0.0,
+      "motion_file_first_angle_degrees": 0.0,
+      "requested_rotation_duration_s": 1.2,
+      "expected_target_time_s": 1.7,
+      "first_target_time_s": 1.7,
+      "first_target_angle_degrees": -105.0,
+      "last_time_s": 5.0,
+      "last_angle_degrees": -105.0,
+      "target_hold_present": true,
+      "pass": true
+    },
+    "solver_control_proof": {
+      "expected": {
+        "cflnumber": 0.2,
+        "Boundary": 1,
+        "ViscoTreatment": 1,
+        "Visco": 0.03,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0,
+        "TimeMax": 5.0,
+        "TimeOut": 0.01
+      },
+      "actual": {
+        "cflnumber": 0.2,
+        "Boundary": 1,
+        "ViscoTreatment": 1,
+        "Visco": 0.03,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0,
+        "TimeMax": 5.0,
+        "TimeOut": 0.01
+      },
+      "pass": true
+    },
+    "native_equivalence_to_completed_dbc": {
+      "decoded_ids_positions_velocities_density_equal": true,
+      "metadata_differences": {
+        "CaseName": [
+          "CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_q0p50000000_dp0p007500000000_extension5s_v2",
+          "CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_q1p00000000_dp0p007500000000_canary"
+        ]
+      },
+      "only_case_name_metadata_changed": true,
+      "pass": true
+    },
+    "native_equivalence_to_static_anchor": true,
+    "native_input_hash_count": 11,
+    "job_input_hash_count": 22,
+    "job_inputs_checked": 22,
+    "job_input_hashes_pass": true
+  },
+  "configuration_contract": {
+    "boundary_method": 1,
+    "cfl": 0.2,
+    "dp_m": 0.0075,
+    "visco_treatment": 1,
+    "visco": 0.03,
+    "time_max_s": 5.0,
+    "output_interval_s": 0.01,
+    "rotation_duration_s": 1.2,
+    "motion_complete_s": 1.7,
+    "physical_geometry_changed": false,
+    "initial_condition_changed": false,
+    "mass_rescaling": false
+  },
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 32768,
+    "gpu_peak_mib": 12288,
+    "io_weight": 2
+  },
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "execution_status": "CPU GenCase and native preflight complete; solver not invoked; GPU not submitted; ledger not written",
+  "solver_product_present": false,
+  "input_closure": {
+    "all_hashes_verified_at_prepare": true,
+    "prepared_manifest_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_q1p0_v1/prepared.json",
+    "prepared_manifest_sha256": "c1200c143b93d0ff4c142d74d6196dc1a4894e61b1194f1501e5bd82f3bd7091",
+    "input_file_count": 22,
+    "runtime_source_snapshot_required": true,
+    "solver_binary_hash_bound": true,
+    "decoder_hash_bound": true,
+    "no_live_lab_import_allowed": true
+  },
+  "review_code": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_dbc_slow_duration_prepare.py",
+    "relative_to_lab": "scripts/f2_dbc_slow_duration_prepare.py",
+    "sha256": "6cd0707c30b0097ec73cc6bbe1dae882631fd349a28e817c816f860c05f02388",
+    "bytes": 32853,
+    "role": "preparation and closure verifier"
+  }
+}

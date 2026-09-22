@@ -1,0 +1,81 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f4-resting-pool-native-dense-002-center-q0p5",
+  "logical_id": "f4-resting-pool-native-dense-002-center-q0p5",
+  "attempt_role": "initial",
+  "category": "qualification_cadence_native_dense",
+  "host": "ada",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_cfd.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_native_dense_002/center-q0p5/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 16384,
+    "gpu_peak_mib": 4096,
+    "io_weight": 1
+  },
+  "timeout_seconds": 7200,
+  "depends_on": [],
+  "qualification_claim": "none",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_native_dense_002/center-q0p5/prepared.json",
+      "sha256": "c0793a45bce0d6e8dfa246b168e8b3ed91f2f559092e3c5ac4b05b9c2448874e"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    }
+  ],
+  "prepared_case_id": "RESTING_CORE_F4_mdbc_native_q0p50000000_dp0p007500000000_qualification_native_dense_002",
+  "registered_window_s": 4.34,
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0",
+  "study_id": "F4_resting_pool_native_dense_002",
+  "scope_id": "F4_drop_resting_pool_x_v2",
+  "family": "F4",
+  "recipe_id": "F4_resting_pool_mdbc_native_v2",
+  "split": "qualification_only",
+  "stage": "qualification",
+  "qualified": false,
+  "execution_status": "prepared_only",
+  "central_ledger_mutation": 0,
+  "t1_matrix_mutation": false,
+  "cadence_study": {
+    "study_id": "F4_resting_pool_native_dense_002",
+    "parent_t1_cell": "cell-04",
+    "parent_t1_prepared_sha256": "5cc3e1828354ff344182198de2ef5b1f3ede31a22da1cc050fce3c337fad2cdd",
+    "parent_t1_output_interval_s": 0.02,
+    "native_output_interval_s": 0.002,
+    "purpose": "independent cadence control for macro T2; no T1 mutation or qualification inheritance"
+  },
+  "parent_t1_cell": "cell-04",
+  "parent_t1_prepared_sha256": "5cc3e1828354ff344182198de2ef5b1f3ede31a22da1cc050fce3c337fad2cdd",
+  "registered_output_interval_s": 0.002,
+  "expected_frame_count": 2171,
+  "estimated_trajectory_h5_bytes": 20685503444,
+  "estimated_product_bytes_including_solver_staging": 66315853546,
+  "resource_basis": "core_cfd._resource_estimate(dp=.0075, canary=False), same production class as existing F4 T1 specs",
+  "storage_estimate_basis": {
+    "receipt": "campaigns/core-v1/runtime/attempts/f4-h1-qualification-cell-14/20260919T170147-07d925ad2dea",
+    "frames": 1086,
+    "particles": 126711,
+    "trajectory_h5_bytes": 6028664372,
+    "product_directory_bytes_rounded": 19327352832
+  }
+}

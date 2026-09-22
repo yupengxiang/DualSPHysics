@@ -1,0 +1,203 @@
+{
+  "schema": "core.f2.dynamic_third_family_candidate_card.v1",
+  "created_at": "2026-09-20T08:20:00+00:00",
+  "family": "F2",
+  "scope_id": "F2_dynamic_third_family_dbc_duration_x_v1",
+  "revision_id": "F2_dynamic_third_family_dbc_duration_v1",
+  "candidate_id": "F2_dynamic_third_family_dbc_duration_q0p75_anchor",
+  "status": "candidate_handoff_root_review_only",
+  "qualification_claim": "none; independent dynamic candidate only",
+  "qualified": false,
+  "mechanism_class": "prescribed_continuous_motion_native_dbc",
+  "third_family_role": {
+    "current_registered_t1_families": ["F3", "F4"],
+    "candidate_family": "F2",
+    "static_hold_excluded": true,
+    "dynamic_mechanism_required": true,
+    "physical_question": "full-cup fluid transfer into a finite receiver/catchment under a prescribed rotating cup",
+    "why_this_scope": "native DBC has a completed hard-integrity pass; the new q=.75 input is executable and is not a same-input retry; its geometry is compared with the existing dynamic closed-catchment DBC baselines"
+  },
+  "lineage_clarification": {
+    "path": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-lineage-clarification-v1.json",
+    "sha256": "abed3b35ea5459f725814cad574e636d2f6dd31ec51775f1c4cb6daeb70ab6b3",
+    "comparison_basis": "q=.5 and q=1.0 native-DBC full-cup closed-catchment dynamic baselines",
+    "static_v3_role": "source lattice/provenance only; adding catchment side walls changes geometry relative to static v3",
+    "dynamic_baseline_role": "same cup, receiver, tray floor, catchment side walls and DBC boundary; q=.75 changes rotation duration only"
+  },
+  "physical_scope": {
+    "initial_condition": "full-cup side-wet native lattice, fixed volume 0.023595 m3",
+    "cup": "finite moving cup; bottom/left/right/front/back closed, top open",
+    "receiver": "finite fixed receiver; bottom/left/right/front/back closed, top open",
+    "tray": "retained bottom plane at z=-0.20 m; top and side faces open",
+    "catchment": "fixed left/right/front/back walls over the tray footprint; top open",
+    "geometry_lineage": {
+      "relative_to_static_v3_source": {
+        "physical_geometry_changed": true,
+        "change": "fixed mkbound=3 catchment side walls are added over the retained tray footprint"
+      },
+      "relative_to_dynamic_dbc_baseline": {
+        "physical_geometry_changed": false,
+        "baseline_q_values": [0.5, 1.0],
+        "frozen_geometry": "cup, receiver, tray floor and four catchment side walls"
+      }
+    },
+    "boundary": "native DBC Boundary=1",
+    "motion": {
+      "axis": "+y through z=0.65 m",
+      "start_s": 0.5,
+      "target_angle_degrees": -105.0,
+      "duration_mapping": "rotation_duration_s = 0.50 + 0.70*q",
+      "anchor_q": 0.75,
+      "anchor_rotation_duration_s": 1.025,
+      "anchor_target_time_s": 1.525,
+      "hold_until_s": 5.0
+    },
+    "runtime_domain": {
+      "posmin_m": [-0.70, -0.65, -0.40],
+      "posmax_m": [2.20, 0.80, 2.40],
+      "zmax_change_is_computational_only": true
+    },
+    "numerics": {
+      "dp_anchor_m": 0.0075,
+      "dp_matrix_m": [0.01, 0.0075, 0.005],
+      "cfl": 0.2,
+      "output_interval_s": 0.01,
+      "gravity_m_s2": -9.81,
+      "mass_policy": "native rho*dp^3; no rescaling",
+      "visco_treatment": 1,
+      "visco": 0.03,
+      "time_max_s": 5.0
+    }
+  },
+  "single_change": {
+    "parameter": "rotation_duration_s",
+    "comparison_basis": "existing native-DBC closed-catchment dynamic baselines, q=.5 and q=1.0",
+    "baseline_reference_s": 0.85,
+    "dynamic_baseline_durations_s": [0.85, 1.2],
+    "candidate_s": 1.025,
+    "q": 0.75,
+    "all_other_controls_frozen": true,
+    "all_other_controls_frozen_relative_to_dynamic_baseline": true,
+    "geometry_changed_relative_to_static_source": true,
+    "geometry_changed_relative_to_dynamic_baseline": false,
+    "static_source_is_not_single_change_baseline": true,
+    "same_input_retry": false,
+    "threshold_change": false,
+    "horizon_extension": false,
+    "ownership_change": false,
+    "mass_rescaling": false
+  },
+  "qualification_design": {
+    "matrix_ref": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-matrix-v1.json",
+    "denominator": 15,
+    "numerator_at_handoff": 0,
+    "spatial_rows": 13,
+    "temporal_rows": 2,
+    "q_points": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "qualification_q_points": [0.0, 0.5, 1.0],
+    "held_out_q_points": [0.25, 0.75],
+    "dp_points_m": [0.01, 0.0075, 0.005],
+    "all_cells_independent": true,
+    "canary_reuse_allowed": false,
+    "event_window_s": 5.0,
+    "maximum_extension_s": 5.0,
+    "qualification_requires_all_cells": true
+  },
+  "preregistered_gates": {
+    "source_initial_mass_relative_error_max": 0.025,
+    "initial_mass_spread_over_continuous_mass_max": 0.03,
+    "mass_change_relative_max": 1e-08,
+    "closed_wall_endpoint_tolerance_m": 1e-08,
+    "saved_chord_crossings_allowed": 0,
+    "no_missing_native_fluid_ids": true,
+    "no_nonfinite_active_values": true,
+    "receiver_contact_fraction": 0.01,
+    "spill_or_escape_fraction": 0.01,
+    "settle_speed_p95_m_s_max": 0.1,
+    "settle_kinetic_fraction_max": 0.05,
+    "settle_hold_s": 0.2,
+    "post_settle_observation_s": 0.35,
+    "event_window_complete_required": true,
+    "no_threshold_relaxation": true,
+    "no_survivor_renormalization": true
+  },
+  "preflight": {
+    "adapter": {
+      "path": "scripts/f2_dynamic_third_family_dbc_duration_preflight_v1.py",
+      "sha256": "eaa881580541f8f167ff0c50ab73433021b3ea579bae7fb9ed84fed82f6064e5",
+      "bytes": 15031
+    },
+    "prepared_manifest": {
+      "path": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-q0p75-preflight-v1/prepared.json",
+      "sha256": "0e20f0a1931f069b0b049a7f33b9b9e27bbc6293cd706708c9619d83e723ff9d",
+      "bytes": 31931
+    },
+    "status": "cpu_preflight_passed_unsubmitted",
+    "checks": {
+      "gencase": true,
+      "native_decode": true,
+      "native_initial_ids_unique": true,
+      "native_initial_arrays_finite": true,
+      "native_initial_fluid_zero_velocity": true,
+      "native_initial_matches_full_cup_source": true,
+      "mass_gate_pass": true,
+      "motion_target_and_hold_proof": true,
+      "geometry_changed_relative_to_static_source": true,
+      "geometry_changed_relative_to_dynamic_baseline": false,
+      "solver_product_present": false
+    },
+    "execution_controls": {
+      "solver_invoked": false,
+      "gpu_invoked": false,
+      "central_queue_mutation": 0,
+      "central_ledger_mutation": 0,
+      "central_registry_mutation": 0
+    }
+  },
+  "executable_path": {
+    "cpu_prepare": "scripts/f2_dynamic_third_family_dbc_duration_preflight_v1.py",
+    "runtime_runner_after_root_approval": "scripts/core_f2_qualification.py run --prepared <hash-bound-manifest> --output <attempt>/product",
+    "audit_owner": "scripts/core_f2_qualification.py::audit_dynamic",
+    "input_closure": "prepared manifest hashes every generated definition, motion, BI4, decoder and source dependency",
+    "current_launch_allowed": false,
+    "root_review_required_before_solver": true
+  },
+  "evidence_basis": [
+    {
+      "path": "campaigns/core-v1/cfd/f2-dbc-extension5s-root-completion-v1.json",
+      "sha256": "4dd2e8aec30ba58caf7e2f9fccf4ac32a92afa1939cabbbbf111ccd1aa74664f",
+      "role": "native DBC 5 s hard-integrity pass, event window right-censored"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-dbc-slow-duration-q1p0-terminal-root-v1/terminal-evidence-v2.json",
+      "sha256": "9ecada1f5c88a69ef8f2a2bc2e4426e570e16a22b570f548b228a820988caf05",
+      "role": "q=1.0 5 s hard-integrity pass with speed-p95 settled gate unmet"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-dbc-extension5s-dynamics-forensics-v1.json",
+      "sha256": "db0f8409413dc071682b8a13dfed722d459078891fe4c4cdb0391fc87f88427a",
+      "role": "read-only DBC dynamics diagnosis; no missing native IDs"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-full-cup-closed-catchment-mdbc-v2-root-integration.json",
+      "sha256": "e1ae70329d7cf3165369a1b03884d2cdf436bffef003d8d0502d585b6201ac82",
+      "role": "mDBC moving-cup/contact negative evidence retained outside this candidate"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-dynamic-canary-forensics.json",
+      "sha256": "23c61c3720170fd3e53eee1fb3b76deeff75ccd79fda2b9d2c5cd7fbd2eb99b7",
+      "role": "open-tray native position-loss negative evidence retained outside this candidate"
+    }
+  ],
+  "decision_rule": "The q=.75 preflight establishes an executable dynamic input only. Relative to static v3 the candidate adds catchment side-wall geometry; relative to the existing q=.5/q=1.0 native-DBC closed-catchment dynamic baselines, rotation duration is the only changed variable. No T1, family registration, numerator credit, or matrix launch is implied until root approves the fresh matrix and every row independently passes all hard and event gates.",
+  "launch_policy": {
+    "cpu_preflight": true,
+    "solver_submit": false,
+    "gpu_submit": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "root_review_required": true,
+    "qualification_claim_allowed_now": false
+  }
+}

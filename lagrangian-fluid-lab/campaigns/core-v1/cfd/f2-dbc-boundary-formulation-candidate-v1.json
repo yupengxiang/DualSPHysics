@@ -1,0 +1,105 @@
+{
+  "schema": "core.f2.boundary_formulation_candidate_card.v1",
+  "family": "F2",
+  "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_boundary_formulation_x_v1",
+  "candidate_id": "moving_boundary_formulation_dbc",
+  "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_boundary_v2",
+  "created_from_code": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_full_cup_closed_catchment_dbc.py",
+  "created_from_code_sha256": "ae98d525653992df41f304aad90957e56c4f481ebfe86631d71704034e0226b1",
+  "qualification_claim": "none; candidate-only canary proposal; no T1 or range qualification",
+  "failure_accounting": {
+    "parent_negative_result": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-cfl010-completed-v1/result.json",
+    "parent_negative_result_sha256": "901484e8301aef2b8bc95cc6979b2485f471cd64cbe98b735c0b1dbf40b16e24",
+    "parent_prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_cfl010_v1/prepared.json",
+    "parent_prepared_sha256": "876e5f6a793e1ad20c67e7abd56e26ca301c948aca4239ca441652b2285b08ba",
+    "parent_run_is_preserved": true,
+    "same_cfl_retry": false,
+    "threshold_relaxation": false
+  },
+  "root_cause_evidence": {
+    "time_resolution_test": {
+      "cfl010": 0.1,
+      "native_exclusions": 0,
+      "first_cup_closed_face_event_s": 0.840022688448976,
+      "first_receiver_closed_face_event_s": 0.9500128284032898,
+      "full_vector_classification": "full_vector_saved_chord_closed_face_entry",
+      "result_audit_sha256": "5bd5b30e9eeaad1500a44185828948254d6ce7c5de8d0982de84272ff2a8a85b",
+      "conclusion": "CFL reduction removed native identity loss but did not remove moving cup/receiver closed-face entries; time resolution alone is insufficient."
+    },
+    "normal_and_motion_check": {
+      "preflight": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-full-cup-closed-catchment-mdbc-v2-motion-contact-preflight-v1.json",
+      "preflight_sha256": "7cac79eccd8c1aa462a3fa68358a8d3db99c95166094da7bff642d67f5101d03",
+      "mdbc_normal_count": 637438,
+      "zero_boundary_normals": 0,
+      "normal_preflight_pass": true,
+      "motion_sign_status": "native Ry(-file_angle) proof recorded separately; adapter sign issue is not a solver-boundary mismatch",
+      "conclusion": "No evidence supports another normal construction or motion-sign edit as the next single mechanism."
+    },
+    "domain_and_identity_check": {
+      "native_exclusions": 0,
+      "catchment_hard_checks": "all catchment endpoint/chord/entry booleans true",
+      "tray_hard_checks": "tray endpoint/chord booleans true",
+      "conclusion": "The CFL.1 run retained all native identities and passed catchment/tray checks; domain loss is not the observed remaining failure.",
+      "no_catchment_closed_wall_endpoint_penetrations": true,
+      "no_catchment_floor_endpoint_penetrations": true,
+      "no_catchment_saved_chord_crossings": true,
+      "no_catchment_floor_saved_chord_crossings": true,
+      "no_tray_bottom_endpoint_penetrations": true,
+      "no_tray_saved_chord_crossings": true,
+      "hard_integrity_pass": false
+    }
+  },
+  "single_variable_repair": {
+    "boundary_before": "mDBC Boundary=2 with -mdbc_noslip:1",
+    "boundary_after": "native DBC Boundary=1 with no -mdbc_noslip argument",
+    "cfl": 0.2,
+    "dp_m": 0.0075,
+    "same_full_cup_initial_native_lattice": true,
+    "same_continuous_geometry_and_catchment": true,
+    "same_motion_start_s": 0.5,
+    "same_rotation_duration_s": 0.85,
+    "same_angle_degrees": -105.0,
+    "same_window_s": 2.5,
+    "extended_window_s": 5.0,
+    "mass_rescaling": false,
+    "gate_policy": "retain hard integrity, full-vector endpoint/chord/entry, global mass, event and settled gates unchanged"
+  },
+  "candidate_prepared": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_boundary_v2/prepared.json",
+    "sha256": "c07e099ff6c593acb2162a5321f26ec62c601bc8ecf8d709726d5aaf0f944eeb",
+    "preflight_pass": true,
+    "fluid_particles": 54720,
+    "native_sampling_matches_passed_static": true,
+    "boundary_method": 1,
+    "normal_preflight_applicability": "not_applicable_for_DBC"
+  },
+  "candidate_job": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-boundary-v2-job.json",
+    "sha256": "2ac72b8c931c6243d84f3ef230de861922493b9e13bc5bb70310d39ab7752403",
+    "job_id": "f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-boundary-canary-v2-001",
+    "host": "h200",
+    "submitted": false,
+    "qualification_only": true
+  },
+  "resource_estimate": {
+    "cpu_cores": 2,
+    "ram_mib": 32768,
+    "gpu_peak_mib": 12288,
+    "timeout_seconds": 14400,
+    "basis": "F2 CFL.1 54,720-fluid run used 249.748 solver seconds and ~738 MiB observed peak; reservation retains the prior 32 GiB/12 GiB worker envelope."
+  },
+  "decision_rule": "A canary result may decide only this boundary-formulation hypothesis; it cannot grant T1, range, or 13+2 qualification.",
+  "prior_family_evidence": {
+    "f1_dbc_failed_audit": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/evidence/f1-fullwindow-failed-audit.json",
+      "sha256": "28b3ecc77d5a461e1cbddb3857506386f038aed12c61302151406da020c0d93a",
+      "interpretation": "prior F1 DBC failure is retained; it used a different partial-footprint/domain setup and is not treated as positive DBC evidence."
+    },
+    "f1_mdbc_failed_result": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/evidence/f1-h2-mdbc-result.json",
+      "sha256": "929764f6808aa60b8a0c773ad520572c6e0197a34a14b14b5ccc78c5c84302a4",
+      "interpretation": "mDBC failure is retained as cross-family context; the new canary isolates formulation on the passed F2 full-cup initial state."
+    },
+    "scope_reason": "The candidate tests a formulation variable on a materially different, static-validated full-cup setup; it does not inherit or overwrite either F1 result."
+  }
+}

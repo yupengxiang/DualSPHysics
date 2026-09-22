@@ -1,0 +1,124 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f4-tallwall120-production-dev-16",
+  "logical_id": "f4-tallwall120-production-dev-16",
+  "attempt_role": "production",
+  "category": "production_remaining_24",
+  "host": "scheduler-selected",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_cfd.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/remaining-24/case-16/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 24576,
+    "gpu_peak_mib": 6144,
+    "io_weight": 2
+  },
+  "timeout_seconds": 14400,
+  "depends_on": [],
+  "qualification_claim": "none; production evidence pending",
+  "qualification_only": false,
+  "split": "train",
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/remaining-24/case-16/prepared.json",
+      "sha256": "35072b6c3686b17b9838be9bd5e852bdc88dfea04a911ab29e7fdfded843642b",
+      "role": "prepared production case"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+      "role": "solver binary"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+      "role": "native decoder"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_cfd.py",
+      "sha256": "fd6e56ab6c8f42e55c15c0e9d742c9289fca0a4214e5e203a3b357a23040adfb",
+      "role": "frozen CFD source"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/remaining-24/case-16/gencase.log",
+      "sha256": "5c98e366be5b9ea3adece6a1b1875d0d53613c8ce99c81d444c0b50569788295",
+      "role": "prepared CFD input"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/remaining-24/case-16/F4_resting_pool_laminar_tallwall120_x_v1_DEV_16_Def.xml",
+      "sha256": "9618bdb071ca406e7d562a4e7391f3508e511e83e7901a42b543e600facea05a",
+      "role": "prepared CFD input"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/remaining-24/case-16/generated/F4_resting_pool_laminar_tallwall120_x_v1_DEV_16_MkCells.vtk",
+      "sha256": "53502556b94447bb734ca85a43b8641ba527a66f610cf8cc5fd35cc9c59a6ca9",
+      "role": "prepared CFD input"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/remaining-24/case-16/generated/F4_resting_pool_laminar_tallwall120_x_v1_DEV_16.out",
+      "sha256": "59ff81957cb2b6fc202ae5ccc9f2ec473ea0df268bc788781120f3541ef86e7c",
+      "role": "prepared CFD input"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/remaining-24/case-16/generated/F4_resting_pool_laminar_tallwall120_x_v1_DEV_16_hdp_Actual.vtk",
+      "sha256": "5825fc73249860d6316be5a70e2e10b1793662b0b88a1f089810941360edca76",
+      "role": "prepared CFD input"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/remaining-24/case-16/generated/F4_resting_pool_laminar_tallwall120_x_v1_DEV_16_All.vtk",
+      "sha256": "f602c7138afc3c1f2920b2c562342f866635c45ba2b440068d3f981011411202",
+      "role": "prepared CFD input"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/remaining-24/case-16/generated/F4_resting_pool_laminar_tallwall120_x_v1_DEV_16_Fluid.vtk",
+      "sha256": "9389730af845f54f9e80c398236d2c73efa32b2662eac2e17fa5a597a4b4cee3",
+      "role": "prepared CFD input"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/remaining-24/case-16/generated/F4_resting_pool_laminar_tallwall120_x_v1_DEV_16.bi4",
+      "sha256": "4fe635ea4d30148c76ffbcffa7c328e67233b96975220acb3d7428b66af93584",
+      "role": "prepared CFD input"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/remaining-24/case-16/generated/F4_resting_pool_laminar_tallwall120_x_v1_DEV_16_Bound.vtk",
+      "sha256": "2c7119161cb187c764c48f77286e39db9d83069ebbfcbd6542e6dd854e6cec58",
+      "role": "prepared CFD input"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/remaining-24/case-16/generated/F4_resting_pool_laminar_tallwall120_x_v1_DEV_16.xml",
+      "sha256": "0d56835b854d3d2ae636518b0484228e907c296b69c239cacad27a76e90eb4d8",
+      "role": "prepared CFD input"
+    }
+  ],
+  "prepared_case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_16",
+  "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+  "revision_id": "F4_tallwall120_13plus2_v2",
+  "family": "F4",
+  "production_index": 16,
+  "registered_parameter_name": "drop_left_x_m",
+  "registered_parameter": 0.36343749999999997,
+  "first_batch": false,
+  "batch_status": "remaining_24",
+  "container_height_m": 1.2,
+  "observer_version": "fixed_015m_vertical_reference060_v2",
+  "qualification_receipt_sha256": "89d0571504e1dbed408c224ec53cb8be2ff643247ff39e69481f7c06185a8e26",
+  "production_design_sha256": "9ab35663e39a2b6227c2948bc7070e512cc681d2d3d3dfbe6f82e004ebd1027b"
+}

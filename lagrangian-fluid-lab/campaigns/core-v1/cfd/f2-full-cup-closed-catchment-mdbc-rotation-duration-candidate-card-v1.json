@@ -1,0 +1,103 @@
+{
+  "schema": "core.f2.full_cup_closed_catchment_mdbc.parameter_candidate.v1",
+  "family": "F2",
+  "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_duration_v1",
+  "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_duration_candidate_v1",
+  "status": "candidate_registration_only",
+  "qualification_claim": "none",
+  "qualification_only": true,
+  "physical_geometry_changed": true,
+  "initial_condition_changed": false,
+  "mass_rescaling": false,
+  "parameter_axis": {
+    "normalized_name": "q",
+    "normalized_domain": [
+      0.0,
+      1.0
+    ],
+    "physical_name": "rotation_duration_s",
+    "mapping": "rotation_duration_s = 0.50 + 0.70*q",
+    "range_s": [
+      0.5,
+      1.2
+    ],
+    "candidate_q_points": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "qualification_anchor_q": [
+      0.0,
+      0.5,
+      1.0
+    ],
+    "held_out_q": [
+      0.25,
+      0.75
+    ],
+    "semantic_rule": "q is only a normalized control coordinate; every case record and solver input must carry the mapped rotation_duration_s."
+  },
+  "canary_anchor": {
+    "q": 0.5,
+    "rotation_duration_s": 0.85,
+    "case_id": "CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_q0p50000000_dp0p007500000000_canary_v2",
+    "prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_v2/prepared.json",
+    "prepared_sha256": "784708e9449c7b54145521e706f922d23a92c95f4c792898c7a84ca3aa75c7a4",
+    "job": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-resting-fill-side-wet-full-cup-closed-catchment-mdbc-v2-final-job.json",
+    "job_sha256": "2385951f16f5d211e2794b2701b0908194947b0626a3e504d634fa76816eed90",
+    "execution_status": "submitted; first attempt failed before solver due missing remote input; content-hash retry is infrastructure-only"
+  },
+  "fixed_physical_recipe": {
+    "dp_m": 0.0075,
+    "angle_degrees": -105.0,
+    "motion_start_s": 0.5,
+    "event_window_s": 2.5,
+    "maximum_extended_window_s": 5.0,
+    "cup": "full-cup v3 continuum and native initial lattice",
+    "receiver": "registered finite receiver, world-fixed",
+    "tray_floor": "registered mkbound=2 boxfill=bottom, fluid-facing source plane z=-0.20 m",
+    "catchment": "fixed mkbound=3 left/right/front/back walls, top open, continuous bounds x[-0.6,2.0], y[-0.55,0.55], z[-0.2,0.6]",
+    "boundary": "mDBC Boundary=2, -mdbc_noslip:1, all cup/receiver/tray/catchment surfaces included in normal construction",
+    "initial_mass_policy": "native rho*dp^3, no rescaling; full-cup v3 mass error -2.1615%"
+  },
+  "preregistered_gates": {
+    "qualification_only": true,
+    "no_missing_native_fluid_ids": true,
+    "no_nonfinite_active_values": true,
+    "no_runtime_domain_endpoint_outside": true,
+    "no_cup_receiver_tray_catchment_closed_face_endpoint_or_saved_chord_crossings": true,
+    "event_window_complete_required": true,
+    "settled_gate": "speed p95 <= 0.10 m/s and KE/initial potential <= 0.05 for 0.20 s, plus 0.35 s saved output",
+    "destination_spill_is_retained": "spill is observed separately; no deletion or survivor renormalization"
+  },
+  "range_plan": {
+    "spatial_rows": "q=(0,0.5,1), dp=(0.010,0.0075,0.005) plus held-out q=(0.25,0.75) at dp=(0.0075,0.005)",
+    "temporal_rows": "midpoint q=0.5, dp=0.0075 with actual-time and native-output cadence variants",
+    "cell_count": 15,
+    "launch_status": "not prepared or launched; canary result required before any matrix submission",
+    "qualification_inheritance": "none from old open-tray or old closed-catchment scopes"
+  },
+  "resources_reference": {
+    "canary_cpu_cores": 2,
+    "canary_ram_mib": 32768,
+    "canary_gpu_peak_mib": 12288,
+    "canary_timeout_seconds": 14400
+  },
+  "provenance": {
+    "static_predecessor": {
+      "prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/prepared.json",
+      "prepared_sha256": "2bb1dac4bef30bea2926184641c9d4f3a18895b5b9468ac86b14cbbe28f256c7",
+      "integration_receipt": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-full-cup-v3-static-hold-root-integration-v1.json",
+      "integration_receipt_sha256": "5d8cc041fa63f80401105e1d6884a0c77004326f6c85f6309e9bd82df0dfc589",
+      "hard_integrity_pass": true,
+      "event_window_complete": true,
+      "native_fluid_particles": 54720,
+      "mass_rescaling": false,
+      "qualification_claim": "static nominal canary only; no moving or range qualification"
+    },
+    "prepared_revision": "F2_resting_fill_side_wet_full_cup_closed_catchment_mdbc_v2",
+    "candidate_card_generated_from_prepared_sha256": "784708e9449c7b54145521e706f922d23a92c95f4c792898c7a84ca3aa75c7a4"
+  }
+}

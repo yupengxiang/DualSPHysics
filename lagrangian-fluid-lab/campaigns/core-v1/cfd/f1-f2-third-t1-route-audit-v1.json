@@ -1,0 +1,356 @@
+{
+  "schema": "core.third_t1.f1_f2_route_audit.v1",
+  "created_at_utc": "2026-09-20T18:08:59.686079+00:00",
+  "status": "proposal_only_selected_independent_f2_after_f1_f2_negative_audit",
+  "review_order": [
+    "F1",
+    "F2_receiver_overflow_weir",
+    "F2_submerged_orifice"
+  ],
+  "core_gate": {
+    "current_registered_t1_families": [
+      "F3",
+      "F4"
+    ],
+    "required_t1_family_count": 3,
+    "third_t1_family_established": false,
+    "qualification_credit_added": 0,
+    "core_gate_changed": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0
+  },
+  "f1_audit": {
+    "status": "closed_for_current_repair_lineage",
+    "qualified": false,
+    "T1_numerical": false,
+    "qualification_claim": "none; canary and 13+2 comparator evidence only",
+    "h1_h2_decision": "stop this F1 repair mechanism after H1 and H2 negative canaries; promote F2 fallback; no gate relaxation",
+    "h1_canary_hard_integrity": false,
+    "suspended_obstacle_hard_integrity": false,
+    "suspended_obstacle_event_complete": true,
+    "same_input_retry": false,
+    "matrix_credit": 0,
+    "blocker": "H1/H2 repair mechanism is explicitly stopped after hard-integrity failures; no same-class F1 retry is proposed.",
+    "evidence": {
+      "qualification": {
+        "path": "campaigns/core-v1/cfd/f1-qualification-evaluation.json",
+        "sha256": "a88578e9e661f80cece90412ca7fb69c6add437f33742ec6ac731399e3121027",
+        "bytes": 4263,
+        "role": "F1 qualification evaluation"
+      },
+      "h1_h2_summary": {
+        "path": "campaigns/core-v1/evidence/f1-h2-mdbc-summary.json",
+        "sha256": "8af3da1ea18d4fbdf4dd6a89827480780e27837c85015225aeb1d9229fc49f80",
+        "bytes": 1114,
+        "role": "F1 H1/H2 repair stop summary"
+      },
+      "suspended_obstacle": {
+        "path": "campaigns/core-v1/evidence/f1-suspended-obstacle-gap-g1-anchor-negative-evidence-v1.json",
+        "sha256": "d9bd24ead4064b1e4f87aa8194be668370b0a3648835309791399ae3194a37e2",
+        "bytes": 5431,
+        "role": "F1 completed hard-integrity negative anchor"
+      },
+      "forensics": {
+        "path": "campaigns/core-v1/cfd/f1-canary-forensics.json",
+        "sha256": "a5a1acca94fd09d1a821d5cd1304abfe5a3292d2898b00b3dde616c453037d7a",
+        "bytes": 12226,
+        "role": "F1 canary forensics"
+      }
+    }
+  },
+  "f2_receiver_overflow_weir_audit": {
+    "status": "terminal_anchor_negative_route_preserved",
+    "qualified": false,
+    "qualification_claim": "none",
+    "planned": 15,
+    "executed": 1,
+    "passed": 0,
+    "failed": 1,
+    "event_censored": 1,
+    "unattempted": 14,
+    "matrix_credit": 0,
+    "hard_integrity_pass": false,
+    "event_window_complete": false,
+    "endpoint_violation_particle_frames": 74,
+    "weir_penetration_particle_frames": 1490604,
+    "saved_chord_crossing_count": 1490609,
+    "same_input_retry": false,
+    "blocker": "The registered q=.5 receiver/weir anchor failed hard integrity and was event-censored; it is retained with zero credit and is not retried.",
+    "evidence": {
+      "route_audit": {
+        "path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/route-audit-v1.json",
+        "sha256": "650e4bf3c5a0e55629c9ab267c1a41b72c4ce0e770f288b05851ca121b1e6038",
+        "bytes": 3864,
+        "role": "F2 receiver/weir route audit"
+      },
+      "terminal_matrix": {
+        "path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/terminal-matrix-v1.json",
+        "sha256": "8089ceb988ee8ed0e51bfb135939affe237741478f368cf7d6acc4f1367e12e4",
+        "bytes": 7069,
+        "role": "F2 receiver/weir terminal matrix"
+      },
+      "terminal_denominator": {
+        "path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/terminal-failure-denominator-v1.json",
+        "sha256": "c10bf4b0e4eca59931384ddf30e2ebac5b231d7455ec8cd4e55db48e24e2f591",
+        "bytes": 2022,
+        "role": "F2 receiver/weir terminal denominator"
+      },
+      "negative_anchor": {
+        "path": "campaigns/core-v1/evidence/f2-receiver-overflow-weir-anchor-negative-evidence-v1.json",
+        "sha256": "844bb4c6e41b1000205b875d8efd540dd8c0438131c74f1b2324168cdb53d608",
+        "bytes": 4850,
+        "role": "F2 receiver/weir hard-integrity negative anchor"
+      }
+    }
+  },
+  "selected_next_step": {
+    "family": "F2",
+    "scope_id": "F2_submerged_orifice_transfer_v1",
+    "revision_id": "F2_submerged_orifice_normal_remediation_v2",
+    "candidate_id": "F2_submerged_orifice_normal_remediation_q0p5_anchor_v2",
+    "status": "proposal_only_root_review_required",
+    "decision": "select_independent_f2_submerged_orifice_normal_remediation",
+    "reason": [
+      "F1 has an explicit H1/H2 repair stop and a completed suspended-obstacle hard-integrity negative anchor.",
+      "The F2 receiver/weir anchor is terminal hard-integrity failure plus event censoring; repeating that input is prohibited.",
+      "The submerged-orifice route changes the topology to a stationary reservoir and real underflow aperture, and retains a separate 15-row denominator.",
+      "Its original q=.5 CPU/native input failed only the zero-normal gate; the v2 fresh Definition is statically hash-reviewed and is the smallest auditable next step."
+    ],
+    "required_review_before_action": "separately review v3 static receipt and authorize exactly one fresh CPU/native preflight",
+    "future_case_id": "F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v2",
+    "future_output_stem": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/fresh-definition-v2/generated/F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v2",
+    "future_cpu_native_gates": {
+      "zero_boundnor": {
+        "required": true,
+        "metric": "BoundNor vectors with norm <= threshold",
+        "threshold_m": 1e-12,
+        "operator": "==",
+        "required_value": 0,
+        "observed": null,
+        "status": "pending_fresh_cpu_native_preflight"
+      },
+      "normal_size": {
+        "required": true,
+        "metric": "NormalSize entries <= threshold",
+        "threshold_m": 1e-12,
+        "operator": "==",
+        "required_value": 0,
+        "observed": null,
+        "status": "pending_fresh_cpu_native_preflight"
+      },
+      "ids": {
+        "required": true,
+        "checks": [
+          "native particle IDs are unique",
+          "native IDs align exactly with generated XML IDs"
+        ],
+        "required_value": true,
+        "observed": null,
+        "status": "pending_fresh_cpu_native_preflight"
+      },
+      "finite": {
+        "required": true,
+        "checks": [
+          "positions",
+          "BoundNor",
+          "NormalSize",
+          "mass/density arrays"
+        ],
+        "required_value": true,
+        "observed": null,
+        "status": "pending_fresh_cpu_native_preflight"
+      },
+      "mass": {
+        "required": true,
+        "metric": "native mass relative error",
+        "operator": "<=",
+        "max_relative_error": 0.025,
+        "observed": null,
+        "status": "pending_fresh_cpu_native_preflight"
+      },
+      "endpoints": {
+        "required": true,
+        "checks": {
+          "outer_wall_endpoint_count": {
+            "operator": "==",
+            "required_value": 0,
+            "observed": null
+          },
+          "gate_endpoint_penetration_count": {
+            "operator": "==",
+            "required_value": 0,
+            "observed": null
+          }
+        },
+        "status": "pending_fresh_cpu_native_preflight"
+      }
+    },
+    "future_execution_order": [
+      "read fresh literal v2 Definition and verify its binding",
+      "run CPU GenCase only into the new normalremediation_v2 output stem",
+      "decode native XML/BI4 and evaluate zero BoundNor, finite arrays, IDs, mass, and endpoint gates",
+      "write a zero-credit result; stop before solver/GPU/queue/ledger/registry"
+    ],
+    "authorization_now": {
+      "definition_writer": false,
+      "cpu_gencase": false,
+      "native_decode": false,
+      "solver": false,
+      "gpu": false,
+      "queue_mutation": 0,
+      "ledger_mutation": 0,
+      "registry_mutation": 0,
+      "matrix_submission": false,
+      "qualification_credit": 0
+    },
+    "denominator": {
+      "planned": 15,
+      "executed": 0,
+      "passed": 0,
+      "failed": 0,
+      "event_censored": 0,
+      "unattempted": 15,
+      "credit": 0,
+      "same_input_retry": false,
+      "threshold_relaxation": false,
+      "survivor_renormalization": false
+    },
+    "blockers": [
+      "The original q=.5 orifice preflight has 63161 zero boundary normals and therefore failed the hard input gate.",
+      "The v2 fresh Definition has a static review only; no fresh generated XML/BI4 exists for v2.",
+      "The v3 root receipt explicitly denies CPU/native authority; a separate root review is required.",
+      "No solver, GPU, queue, ledger, registry, or T1 qualification action is authorized by this audit."
+    ],
+    "old_failed_input_reused": false,
+    "old_failed_trajectory_reused": false
+  },
+  "hash_bindings": {
+    "f1_qualification": {
+      "path": "campaigns/core-v1/cfd/f1-qualification-evaluation.json",
+      "sha256": "a88578e9e661f80cece90412ca7fb69c6add437f33742ec6ac731399e3121027",
+      "bytes": 4263,
+      "role": "F1 qualification evaluation"
+    },
+    "f1_h2_negative_summary": {
+      "path": "campaigns/core-v1/evidence/f1-h2-mdbc-summary.json",
+      "sha256": "8af3da1ea18d4fbdf4dd6a89827480780e27837c85015225aeb1d9229fc49f80",
+      "bytes": 1114,
+      "role": "F1 H1/H2 repair stop summary"
+    },
+    "f1_suspended_obstacle_negative": {
+      "path": "campaigns/core-v1/evidence/f1-suspended-obstacle-gap-g1-anchor-negative-evidence-v1.json",
+      "sha256": "d9bd24ead4064b1e4f87aa8194be668370b0a3648835309791399ae3194a37e2",
+      "bytes": 5431,
+      "role": "F1 completed hard-integrity negative anchor"
+    },
+    "f1_canary_forensics": {
+      "path": "campaigns/core-v1/cfd/f1-canary-forensics.json",
+      "sha256": "a5a1acca94fd09d1a821d5cd1304abfe5a3292d2898b00b3dde616c453037d7a",
+      "bytes": 12226,
+      "role": "F1 canary forensics"
+    },
+    "f2_receiver_route_audit": {
+      "path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/route-audit-v1.json",
+      "sha256": "650e4bf3c5a0e55629c9ab267c1a41b72c4ce0e770f288b05851ca121b1e6038",
+      "bytes": 3864,
+      "role": "F2 receiver/weir route audit"
+    },
+    "f2_receiver_terminal_matrix": {
+      "path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/terminal-matrix-v1.json",
+      "sha256": "8089ceb988ee8ed0e51bfb135939affe237741478f368cf7d6acc4f1367e12e4",
+      "bytes": 7069,
+      "role": "F2 receiver/weir terminal matrix"
+    },
+    "f2_receiver_terminal_denominator": {
+      "path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/terminal-failure-denominator-v1.json",
+      "sha256": "c10bf4b0e4eca59931384ddf30e2ebac5b231d7455ec8cd4e55db48e24e2f591",
+      "bytes": 2022,
+      "role": "F2 receiver/weir terminal denominator"
+    },
+    "f2_receiver_negative_anchor": {
+      "path": "campaigns/core-v1/evidence/f2-receiver-overflow-weir-anchor-negative-evidence-v1.json",
+      "sha256": "844bb4c6e41b1000205b875d8efd540dd8c0438131c74f1b2324168cdb53d608",
+      "bytes": 4850,
+      "role": "F2 receiver/weir hard-integrity negative anchor"
+    },
+    "selected_orifice_candidate": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/candidate-card-v1.json",
+      "sha256": "0726648a24db7b0889870b7c35f852503dca42288cf88cd780408eb1167fac1d",
+      "bytes": 7527,
+      "role": "independent F2 candidate"
+    },
+    "selected_orifice_matrix": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/fixed-matrix-v1.json",
+      "sha256": "d3a275b6e6dc130bdf249f6d01a69d54c7f651831dd6a6ea289f70fd18c916eb",
+      "bytes": 5910,
+      "role": "independent F2 15-row matrix"
+    },
+    "selected_orifice_denominator": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/failure-denominator-v1.json",
+      "sha256": "cc34093a811db4a23edab3cf6e8dfc7ec5c01bb391eabe38b539ac55fb2edbc3",
+      "bytes": 691,
+      "role": "independent F2 zero-credit denominator"
+    },
+    "selected_orifice_lineage": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/lineage-clarification-v1.json",
+      "sha256": "42dbbe2181096855175110f74de6a997f37d3c5e23c7dcbb75be8d3406dd0e69",
+      "bytes": 2735,
+      "role": "independent F2 lineage"
+    },
+    "failed_orifice_preflight": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/anchor-q0p5-dp0p0075/preflight.json",
+      "sha256": "a29673207eba9cf2d3e62ad3693a0224b749e3cdfc95a9c50eb5733d375837dc",
+      "bytes": 7292,
+      "role": "failed original F2 orifice CPU/native preflight"
+    },
+    "v2_normal_remediation_candidate": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/normal-remediation-candidate-v2.json",
+      "sha256": "d653c684726bb2f5114b3a3b0f7e59e73a4733778c7c6b6c1f49b6982e8e114e",
+      "bytes": 8034,
+      "role": "fresh normal-remediation candidate"
+    },
+    "v2_normal_remediation_contract": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/root-review-only-contract-v2.json",
+      "sha256": "90c5d7bc956f1d0dce2032c6c9feb413b5aff2173b93706a7d38ce92b7125168",
+      "bytes": 6156,
+      "role": "fresh normal-remediation root-review-only contract"
+    },
+    "v2_definition_contract": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/fresh-definition-contract-v2.json",
+      "sha256": "0ad110108f76394af9778af08d8b5ddbc33eabbe0bd1ec04d45bb8f724aa0f94",
+      "bytes": 7589,
+      "role": "fresh literal Definition static contract"
+    },
+    "v2_definition_proposal": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/fresh-definition-proposal-v2.json",
+      "sha256": "5d740d09add150d213c6ed034cf6f433880039688231271b3258edaaded7fd65",
+      "bytes": 7487,
+      "role": "fresh literal Definition proposal"
+    },
+    "v3_definition_root_receipt": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/root-review-receipt-v3.json",
+      "sha256": "789ba8e926e266f324f57f4ce2d066a6493c9ce218ba53d6c9dabf7f1252eebb",
+      "bytes": 9881,
+      "role": "fresh Definition static root receipt"
+    },
+    "v3_cpu_native_preflight_contract": {
+      "path": "campaigns/core-v1/cfd/f2-submerged-orifice-transfer-scope-v1/normal-remediation-v2/preflight-contract-v3.json",
+      "sha256": "123356e7e843ca3a885d0f11baf7802ac00de844f353ad7203d540b03f950009",
+      "bytes": 6481,
+      "role": "future CPU/native preflight contract"
+    },
+    "implementation": {
+      "path": "scripts/f1_f2_third_t1_route_audit_v1.py",
+      "sha256": "a2a605a48b92a207f7f16a15ffa31800b7a531c0614281b5d556795c16f3a070",
+      "bytes": 20278,
+      "role": "read-only route audit implementation"
+    },
+    "test": {
+      "path": "tests/test_f1_f2_third_t1_route_audit_v1.py",
+      "sha256": "a266c41d3feea4a70873bd57cebdec6a7726a2d1041ebe327c49ae155751ccff",
+      "bytes": 3378,
+      "role": "read-only route audit regression test"
+    }
+  },
+  "interpretation_boundary": "read-only route audit and proposal contract; it changes no scientific denominator, registry, ledger, or Core gate"
+}

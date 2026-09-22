@@ -1,0 +1,302 @@
+{
+  "schema": "core.f6.physical_anchor.definition_contract.v1",
+  "contract_id": "F6_OBS_V10_Q0P00_DP0P025_SPATIAL_definition_contract",
+  "status": "fresh_definition_written_cpu_native_preflight_pending",
+  "family": "F6",
+  "scope_id": "F6_fluid_rigid_body_physical_anchor_aligned_sampling_v2",
+  "revision_id": "F6_observation_axis_13plus2_v3",
+  "case_id": "CORE_F6_OBS_V10_Q0P00_DP0P025_SPATIAL_FRESH_Definition",
+  "body_id": "F6_physical_anchor_body_F6_OBS_V10_Q0P00_DP0P025_SPATIAL",
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "physical_f6_qualification": false,
+  "execution_profile": {
+    "model": "gpt-5.6-luna",
+    "reasoning": "max"
+  },
+  "implementation": {
+    "path": "scripts/f6_physical_anchor_observation_axis_v10_fresh_preflight.py",
+    "sha256": "5e50b4b3cf1a787268aad7cfcb6a69c5e4f22794c9faa6db60f5a0645825462d",
+    "bytes": 22434,
+    "role": "fresh v10 observation-axis worker",
+    "hash_only": false
+  },
+  "fresh_input": {
+    "definition": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-qualification-preflight-v3-20260921/cell-00/source/CORE_F6_OBS_V10_Q0P00_DP0P025_SPATIAL_FRESH_Definition_Def.xml",
+      "sha256": "3bf1bbda9078833adb3b6bc27a41e6496f9691b0fba43ed187fcfe3b28ec2ca8",
+      "bytes": 3734,
+      "role": "fresh v10 gravity=-9.81 Definition",
+      "hash_only": false
+    },
+    "old_assets_reused": false,
+    "old_xml_copied": false,
+    "old_bi4_reused": false,
+    "old_hdf5_reused": false,
+    "old_trajectory_reused": false
+  },
+  "gravity_m_s2": [
+    0.0,
+    0.0,
+    -9.81
+  ],
+  "fluid": {
+    "mkfluid": 0,
+    "density_kg_m3": 1000.0,
+    "low_m": [
+      0.175,
+      0.07,
+      0.04
+    ],
+    "size_m": [
+      1.14,
+      0.44,
+      0.24
+    ],
+    "high_m": [
+      1.315,
+      0.51,
+      0.27999999999999997
+    ],
+    "free_surface_z_m": 0.27999999999999997,
+    "initial_velocity_m_s": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "sampling_contract": {
+      "mode": "endpoint_safe_support_centres",
+      "dp_m": 0.025,
+      "continuous_box_size_m": [
+        1.14,
+        0.44,
+        0.24
+      ],
+      "drawbox_size_m": [
+        1.115,
+        0.415,
+        0.215
+      ],
+      "drawbox_high_m": [
+        1.29,
+        0.485,
+        0.255
+      ],
+      "endpoint_rule": "GenCase includes both endpoint support centres; drawbox size is continuous_size_minus_dp",
+      "continuous_volume_mass_gate": true,
+      "particle_centres_inside_continuous_box": true,
+      "mass_gate_definition": "MassFluid * native fluid particle count versus density * continuous_box_volume"
+    }
+  },
+  "tank": {
+    "low_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "size_m": [
+      1.5,
+      0.6,
+      0.9
+    ],
+    "high_m": [
+      1.5,
+      0.6,
+      0.9
+    ],
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "open_faces": [
+      "top"
+    ],
+    "boundary_method": "standard_closed_faces_with_open_top_contract",
+    "entity_boundary_contract": {
+      "closed_face_entity": "bottom | left | right | front | back",
+      "open_face_entity": "top",
+      "open_face_mass_flux_required_kg_s": 0.0,
+      "closed_face_contact_required": 0,
+      "penetration_required_m": 0.0
+    }
+  },
+  "body": {
+    "body_id": "F6_physical_anchor_body_F6_OBS_V10_Q0P00_DP0P025_SPATIAL",
+    "mkbound": 8,
+    "shape": "axis_aligned_box",
+    "size_m": [
+      0.2,
+      0.16,
+      0.12
+    ],
+    "bbox_low_m": [
+      0.65,
+      0.21999999999999997,
+      0.43
+    ],
+    "bbox_high_m": [
+      0.8500000000000001,
+      0.38,
+      0.55
+    ],
+    "com_m": [
+      0.75,
+      0.3,
+      0.49
+    ],
+    "density_kg_m3": 780.0,
+    "volume_m3": 0.00384,
+    "mass_kg": 2.9952,
+    "inertia_about_com_kg_m2": [
+      [
+        0.009984000000000002,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.01357824,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.01637376
+      ]
+    ],
+    "inertia_convention": "world-aligned body axes at initial COM; tensor about COM",
+    "initial_linear_velocity_m_s": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "initial_angular_velocity_rad_s": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "predicted_events": {
+    "initial_fluid_surface_gap_m": 0.15000000000000002,
+    "predicted_contact_com_z_m": 0.33999999999999997,
+    "predicted_contact_time_s": 0.17487435419566724,
+    "predicted_impact_speed_m_s": 1.7155174146594958,
+    "contact_prediction_window_s": [
+      0.15487435419566725,
+      0.19487435419566723
+    ],
+    "equilibrium_submerged_fraction": 0.78,
+    "equilibrium_submerged_depth_m": 0.0936,
+    "equilibrium_bottom_z_m": 0.18639999999999995,
+    "equilibrium_com_z_m": 0.24639999999999995,
+    "equilibrium_top_z_m": 0.30639999999999995,
+    "tank_bottom_clearance_at_equilibrium_m": 0.18639999999999995,
+    "tank_top_clearance_at_equilibrium_m": 0.5936000000000001,
+    "hydrodynamic_response_is_runtime_unknown": true
+  },
+  "sidecar_schema": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-qualification-preflight-v3-20260921/cell-00/source/body-state-force-torque-sidecar-schema.json",
+    "sha256": "9dc4d0213cac74356b13b9e16552c93a73b4796af60a40918d8845841da89edd",
+    "bytes": 4234,
+    "role": "fresh v10 body-state/force/torque sidecar schema",
+    "hash_only": false
+  },
+  "event_window": {
+    "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-qualification-preflight-v3-20260921/cell-00/source/event-window-contract.json",
+    "sha256": "87e2561f87ba074c8625ea216f7b6ffbf27b5cd1d87b37387babfe5b5a868bc9",
+    "bytes": 3781,
+    "role": "fresh v10 analytical event-window contract",
+    "hash_only": false
+  },
+  "time_axis_contract": {
+    "requested_output_interval_s": 0.005,
+    "native_time_axis": "solver_reported_actual_TimeStep",
+    "max_gap_s": 0.0055,
+    "terminal_overshoot_max_s": 0.0005,
+    "coverage_mode": "native_time_bracket_with_max_gap_s",
+    "expected_frame_count": 301
+  },
+  "observation_window_contract": {
+    "name": "observation_hold",
+    "start_s": 1.0,
+    "end_s": 1.5,
+    "requires_equilibrium_claim": false,
+    "equilibrium_status": "not_claimed"
+  },
+  "input_binding": {
+    "proposal": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-qualification-preflight-v3-20260921/cell-00/source/proposal.json",
+      "sha256": "079f6a6e3d30ab3b6077d80c19cfcea8e1a9c3f281023d705cec7c923fe0cfdd",
+      "bytes": 1877,
+      "role": "hash-bound derived v10 proposal",
+      "hash_only": false
+    },
+    "proposal_context": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-root-review-20260921/proposal.json",
+      "sha256": "f026ecc47f229a732e3a5a3a3b78f18a6705018de35928a6314147a5ecaf70f3",
+      "bytes": 5263,
+      "role": "existing v10 proposal identity context",
+      "hash_only": false
+    },
+    "definition_id": "CORE_F6_OBS_V10_Q0P00_DP0P025_SPATIAL_FRESH_Definition",
+    "case_id": "F6_OBS_V10_Q0P00_DP0P025_SPATIAL_native_preflight",
+    "revision_id": "F6_observation_axis_13plus2_v3",
+    "body_id": "F6_physical_anchor_body_F6_OBS_V10_Q0P00_DP0P025_SPATIAL",
+    "fresh_generated_xml_required": true,
+    "fresh_generated_bi4_required": true
+  },
+  "geometry_contract": {
+    "closed_face_entity": "bottom | left | right | front | back",
+    "open_face_entity": "top",
+    "open_face_present_in_definition": false,
+    "open_face_mass_flux_required_kg_s": 0.0,
+    "closed_face_contact_required": 0,
+    "penetration_required_m": 0.0
+  },
+  "gate_policy": {
+    "static_cpu_only": true,
+    "exactly_one_gencase": true,
+    "exactly_one_native_decode": true,
+    "event_window_complete_required": false,
+    "solver_canary_authorization_in_this_receipt": false,
+    "qualification_credit": 0
+  },
+  "provenance_policy": {
+    "old_xml_bi4_hdf5_as_inputs": false,
+    "old_trajectory_as_input": false,
+    "prior_v9_context_hash_only": true,
+    "prior_v9_context_not_read_as_input": true
+  },
+  "execution_controls": {
+    "definition_written": true,
+    "xml_parsed": false,
+    "cpu_preflight_run": false,
+    "gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "matrix_submission": false
+  },
+  "cell_binding": {
+    "cell_id": "F6_OBS_V10_Q0P00_DP0P025_SPATIAL",
+    "definition_id": "CORE_F6_OBS_V10_Q0P00_DP0P025_SPATIAL_FRESH_Definition",
+    "body_id": "F6_physical_anchor_body_F6_OBS_V10_Q0P00_DP0P025_SPATIAL",
+    "case_id": "F6_OBS_V10_Q0P00_DP0P025_SPATIAL_native_preflight",
+    "authorization_id": "F6_OBS_V10_Q0P00_DP0P025_SPATIAL_authorization",
+    "q": 0.0,
+    "dp_m": 0.025,
+    "body_com_z_m": 0.49,
+    "variant": "spatial",
+    "output_interval_s": 0.005,
+    "max_gap_s": 0.0055,
+    "terminal_overshoot_max_s": 0.0005,
+    "cfl": 0.2,
+    "expected_frame_count": 301
+  }
+}

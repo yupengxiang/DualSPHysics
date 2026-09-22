@@ -1,0 +1,325 @@
+{
+  "schema": "core.cfd.v1",
+  "created_at": "2026-09-19T10:13:37.709342+00:00",
+  "config": {
+    "schema": "core.cfd.v1",
+    "family": "F2",
+    "scope_id": "F2_H1_runtime_domain_extension_canary_v1",
+    "revision_id": "F2_position_diagnostic_domain_extension_v1",
+    "case_id": "CORE_F2_H1_runtime_domain_extension_dp0p007500000000_canary",
+    "recipe_id": "F2_static_hold_dbc_domain_audit_v1",
+    "recipe": "native_dbc",
+    "stage": "canary",
+    "parameter": {
+      "name": "cup_angle_degrees",
+      "value": 0.0,
+      "range": [
+        0.0,
+        0.0
+      ]
+    },
+    "dp_m": 0.0075,
+    "cfl": 0.2,
+    "time_max_s": 0.6,
+    "output_interval_s": 0.02,
+    "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F2_rotation_center_nominal_Def.xml",
+    "physical_case_id": "F2_static_cup_hold_geometry_v1",
+    "lineage_group_id": "F2_static_cup_hold_v1",
+    "paired_background_id": "F2_static_hold_only_no_pair",
+    "view_id": "world_fluid_particle_v1",
+    "control_semantics": "prescribed zero cup angle; gravity and initial fluid are fixed inputs",
+    "source_label_semantics": "initial Mk is a numerical source partition; not material truth",
+    "cup": {
+      "low": [
+        0.0,
+        -0.15,
+        0.65
+      ],
+      "size": [
+        0.425,
+        0.3,
+        0.45
+      ],
+      "mkbound": 0
+    },
+    "receiver": {
+      "low": [
+        0.45,
+        -0.3,
+        0.0
+      ],
+      "size": [
+        1.1,
+        0.6,
+        0.45
+      ],
+      "mkbound": 1
+    },
+    "tray": {
+      "low": [
+        -0.6,
+        -0.55,
+        -0.2
+      ],
+      "size": [
+        2.6,
+        1.1,
+        0.1
+      ],
+      "mkbound": 2
+    },
+    "fluid_boxes": [
+      {
+        "low": [
+          0.05,
+          -0.11,
+          0.7
+        ],
+        "size": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "mkfluid": 0
+      },
+      {
+        "low": [
+          0.05,
+          -0.11,
+          0.81
+        ],
+        "size": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "mkfluid": 1
+      },
+      {
+        "low": [
+          0.05,
+          -0.11,
+          0.92
+        ],
+        "size": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "mkfluid": 2
+      }
+    ],
+    "wall_bounds": {
+      "xmin": -0.6,
+      "xmax": 2.0,
+      "ymin": -0.55,
+      "ymax": 0.55,
+      "zmin": -0.2,
+      "zmax": 1.1
+    },
+    "qualification_claim": "none",
+    "qualified": false,
+    "hold_gate": {
+      "cup_retention_mass_fraction_min": 0.95,
+      "meaning": "fixed initial native mass fraction remaining in finite cup interior at every saved frame",
+      "full_window_required": true
+    },
+    "boundary_method": 1,
+    "runtime_domain": {
+      "posmin": [
+        -0.6,
+        -0.55,
+        -0.2
+      ],
+      "posmax": [
+        2.0,
+        0.55,
+        2.4
+      ],
+      "baseline_zmax_m": 1.8,
+      "changed_zmax_m": 2.4
+    },
+    "physical_geometry_changed": false,
+    "repair_hypothesis": "runtime domain ceiling censored an already escaping static-hold plume"
+  },
+  "sampling": {
+    "fluid_boxes": [
+      {
+        "continuous_low_m": [
+          0.05,
+          -0.11,
+          0.7
+        ],
+        "continuous_size_m": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "first_center_m": [
+          0.056249999999999994,
+          -0.10875,
+          0.7012499999999999
+        ],
+        "draw_size_m": [
+          0.315,
+          0.21,
+          0.105
+        ],
+        "counts": [
+          43,
+          29,
+          15
+        ],
+        "particle_count": 18705,
+        "continuous_mass_kg": 7.865,
+        "discrete_mass_kg": 7.891171874999999,
+        "mkfluid": 0,
+        "native_cell_centre_sampling": true
+      },
+      {
+        "continuous_low_m": [
+          0.05,
+          -0.11,
+          0.81
+        ],
+        "continuous_size_m": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "first_center_m": [
+          0.056249999999999994,
+          -0.10875,
+          0.81375
+        ],
+        "draw_size_m": [
+          0.315,
+          0.21,
+          0.105
+        ],
+        "counts": [
+          43,
+          29,
+          15
+        ],
+        "particle_count": 18705,
+        "continuous_mass_kg": 7.865,
+        "discrete_mass_kg": 7.891171874999999,
+        "mkfluid": 1,
+        "native_cell_centre_sampling": true
+      },
+      {
+        "continuous_low_m": [
+          0.05,
+          -0.11,
+          0.92
+        ],
+        "continuous_size_m": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "first_center_m": [
+          0.056249999999999994,
+          -0.10875,
+          0.92625
+        ],
+        "draw_size_m": [
+          0.315,
+          0.21,
+          0.105
+        ],
+        "counts": [
+          43,
+          29,
+          15
+        ],
+        "particle_count": 18705,
+        "continuous_mass_kg": 7.865,
+        "discrete_mass_kg": 7.891171874999999,
+        "mkfluid": 2,
+        "native_cell_centre_sampling": true
+      }
+    ],
+    "expected_fluid_particles": 56115,
+    "continuous_mass_kg": 23.595,
+    "sampled_mass_kg": 23.673515624999997,
+    "mass_policy": "native rho*dp^3, no mass rescaling"
+  },
+  "mass_preflight": {
+    "source_relative_errors": [
+      0.0033276382708198327,
+      0.0033276382708198327,
+      0.0033276382708198327
+    ],
+    "max_abs_source_relative_error": 0.0033276382708198327,
+    "total_discrete_mass_kg": 23.673515624999997,
+    "total_continuous_mass_kg": 23.595,
+    "total_relative_error": 0.0033276382708200547,
+    "source_error_max": 0.025,
+    "total_error_max": 0.03,
+    "mass_rescaling": false,
+    "pass": true,
+    "mass_gate_pass": true
+  },
+  "native_initial": {
+    "total_particles": 375723,
+    "boundary_particles": 275373,
+    "fluid_particles": 56115,
+    "normal_count": 0,
+    "zero_boundary_normals": 0,
+    "initial_state_pass": true
+  },
+  "static_diagnostic_preflight": {
+    "generated_fluid_counts": true,
+    "mdbc_normals_complete_nonzero": true,
+    "runtime_domain_zmax_m": 2.4
+  },
+  "preflight_pass": true,
+  "generated_prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H1_runtime_domain_extension_canary/generated/CORE_F2_H1_runtime_domain_extension_dp0p007500000000_canary",
+  "source_template": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l2-multifamily/c1-canary/cases/L2_C1_F2_rotation_center_nominal_Def.xml",
+  "source_template_sha256": "7a59e4873842e91b19bbb523bb7100d12445131f800d1341c615c0bbe4a7a911",
+  "definition_audit": {
+    "source_definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l2-multifamily/c1-canary/cases/L2_C1_F2_rotation_center_nominal_Def.xml",
+    "source_definition_sha256": "7a59e4873842e91b19bbb523bb7100d12445131f800d1341c615c0bbe4a7a911",
+    "definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H1_runtime_domain_extension_canary/CORE_F2_H1_runtime_domain_extension_dp0p007500000000_canary_Def.xml",
+    "definition_sha256": "d359657434e3fc503b5b30dbcfa23f7f7e9a0596203a7c69dce3e895179ecc48",
+    "runtime_domain_zmax_m": 2.4,
+    "boundary_method": "DBC",
+    "normal_geometry": false,
+    "changed_fields": [
+      "runtime and GenCase domain zmax=2.4 m",
+      "motion angle fixed at zero",
+      "registered nearest cell-centre fluid sampling"
+    ],
+    "physical_geometry_changed": false,
+    "qualification_claim": "none"
+  },
+  "generated_particle_counts": [
+    18705,
+    18705,
+    18705
+  ],
+  "resolved_runtime_domain": {
+    "zmax": 2.4
+  },
+  "inputs": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H1_runtime_domain_extension_canary/gencase.log": "24acecbe88c400b5525557454c933d31f86dede2ed6e9729e4354745d8fdefb3",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H1_runtime_domain_extension_canary/CORE_F2_H1_runtime_domain_extension_dp0p007500000000_canary_motion.dat": "fd53e4fef8cc6cc2a57dcdc078c8601c7a2ed58741068788a4910625d2fbce25",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H1_runtime_domain_extension_canary/CORE_F2_H1_runtime_domain_extension_dp0p007500000000_canary_Def.xml": "d359657434e3fc503b5b30dbcfa23f7f7e9a0596203a7c69dce3e895179ecc48",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H1_runtime_domain_extension_canary/generated/CORE_F2_H1_runtime_domain_extension_dp0p007500000000_canary.bi4": "d3b12b3e7dd1ec0724c994a39478132fa7666dd7c2e09edeac57982629fb8512",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H1_runtime_domain_extension_canary/generated/CORE_F2_H1_runtime_domain_extension_dp0p007500000000_canary_All.vtk": "6a176af1e2df92ed1fbc13cf778b212c22ad6a0293916caedf31d400d794924c",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H1_runtime_domain_extension_canary/generated/CORE_F2_H1_runtime_domain_extension_dp0p007500000000_canary_motion.dat": "fd53e4fef8cc6cc2a57dcdc078c8601c7a2ed58741068788a4910625d2fbce25",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H1_runtime_domain_extension_canary/generated/CORE_F2_H1_runtime_domain_extension_dp0p007500000000_canary.out": "0aee93d2322b3e23390b775060840e3de30c39a0c53f066a41a0a750c0fbe6a5",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H1_runtime_domain_extension_canary/generated/CORE_F2_H1_runtime_domain_extension_dp0p007500000000_canary_MkCells.vtk": "e065d9b20397b13d26ed1247d83ac854d3f360cc916faf8b27c3e431171a6285",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H1_runtime_domain_extension_canary/generated/CORE_F2_H1_runtime_domain_extension_dp0p007500000000_canary.xml": "17face9a2bff32b4ec4c3a7f4c830f722b688637f6f29e144c61366f2c250db2",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H1_runtime_domain_extension_canary/generated/CORE_F2_H1_runtime_domain_extension_dp0p007500000000_canary_Bound.vtk": "c1ad5f5299003ce298c0d8eb7466f8d6e4a756fdc5de7e7d0b6ab50197224186",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H1_runtime_domain_extension_canary/generated/CORE_F2_H1_runtime_domain_extension_dp0p007500000000_canary_Fluid.vtk": "f9be3ca14f9cea0cc854e94eacbabebdd6b7e8412a2361ea85e6a04908a1ae14"
+  },
+  "solver_binary": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+  "solver_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+  "decoder": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+  "decoder_sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+  "solver_arguments": [],
+  "qualification_claim": "none; F2 position diagnostic candidate only"
+}

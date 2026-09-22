@@ -1,0 +1,131 @@
+{
+  "schema": "core.f2.dynamic_third_family.root_review_draft.v1",
+  "created_at": "2026-09-20T08:20:00+00:00",
+  "family": "F2",
+  "scope_id": "F2_dynamic_third_family_dbc_duration_x_v1",
+  "revision_id": "F2_dynamic_third_family_dbc_duration_v1",
+  "candidate_id": "F2_dynamic_third_family_dbc_duration_q0p75_anchor",
+  "status": "draft_pending_root_review",
+  "qualification_claim": "none",
+  "approval": {
+    "root_approval_present": false,
+    "solver_launch_allowed_by_this_draft": false,
+    "gpu_launch_allowed_by_this_draft": false,
+    "queue_mutation_by_this_draft": 0,
+    "ledger_mutation_by_this_draft": 0,
+    "registry_mutation_by_this_draft": 0,
+    "approval_required_before_any_solver": true
+  },
+  "review_inputs": [
+    {
+      "path": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-candidate-card-v1.json",
+      "role": "independent candidate card"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-matrix-v1.json",
+      "role": "fixed 15-row qualification design"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-failure-denominator-v1.json",
+      "role": "failure and denominator policy"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-lineage-clarification-v1.json",
+      "role": "static-source versus dynamic-baseline comparison rule"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-q0p75-preflight-v1/prepared.json",
+      "role": "CPU/native q=.75 input closure"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_boundary_v2_extension5s_v2/prepared.json",
+      "role": "q=.5 native-DBC dynamic geometry baseline"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_q1p0_v1/prepared.json",
+      "role": "q=1.0 native-DBC dynamic geometry baseline"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-dbc-extension5s-root-completion-v1.json",
+      "role": "hard-integrity-positive/event-censored DBC precedent"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-dbc-slow-duration-q1p0-terminal-root-v1/terminal-evidence-v2.json",
+      "role": "slow-duration hard-integrity-positive/event-censored precedent"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-full-cup-closed-catchment-mdbc-v2-root-integration.json",
+      "role": "mDBC moving-contact negative evidence"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-dynamic-canary-forensics.json",
+      "role": "open-tray position-loss negative evidence"
+    }
+  ],
+  "review_question": "Does Core want to admit this independently named native-DBC duration scope as a third-family candidate, comparing q=.75/dp=.0075 against the existing q=.5/q=1.0 dynamic closed-catchment DBC baselines while treating static v3 only as the input source?",
+  "why_executable": [
+    "The q=.75 Definition.xml, motion.dat, GenCase output and native BI4 were generated successfully on CPU.",
+    "The prepared manifest proves finite unique native arrays, zero initial fluid velocity, source-lattice equality, mass gate and target-angle hold through 5 s.",
+    "The prepared manifest records physical_geometry_changed=false relative to the dynamic DBC baselines and physical_geometry_changed=true relative to static v3 because the catchment side walls are a new physical region.",
+    "The existing core_f2_qualification dynamic runner and audit owner can consume the prepared manifest after a root-approved job.",
+    "The new q=.75 input is a new case identity and does not retry the completed q=.5 or q=1.0 canary input."
+  ],
+  "known_risks": [
+    "The q=.5 and q=1.0 DBC canaries both reached 5 s with hard integrity but were right-censored by the settled speed gate; q=.75 may fail the same event gate.",
+    "The mDBC moving-contact failures remain evidence that boundary formulation and continuous contact are separate risks; this candidate fixes DBC Boundary=1 and does not claim mDBC behavior.",
+    "The finite catchment observes spill and recontact but does not turn event completion into T1 until all 15 independent rows pass."
+  ],
+  "requested_decision_sequence": [
+    {
+      "step": 1,
+      "action": "accept_or_reject candidate card and fixed denominator",
+      "allowed_without_new_solver": true,
+      "required_checks": [
+        "all new artifact hashes resolve",
+        "scope/case names do not overlap old F2/H2 v4 evidence",
+        "static v3 is treated as source provenance; geometry change relative to it is explicit",
+        "q=.5/q=1.0 native-DBC closed-catchment inputs are the dynamic comparison baselines",
+        "q=.75 changes rotation duration only relative to those dynamic baselines",
+        "static hold is excluded from the dynamic family claim",
+        "historical DBC/mDBC/open-tray failures remain bound"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "if accepted, CPU-prepare the remaining 14 matrix rows with the same independent hash closure",
+      "allowed_without_solver": true,
+      "solver_launch_allowed": false,
+      "required_outputs": ["one Definition.xml, motion.dat, GenCase/native manifest per row", "no trajectory.h5", "no result/audit/observations"]
+    },
+    {
+      "step": 3,
+      "action": "issue a separate root approval for the first scientific matrix row q=.75, dp=.0075",
+      "allowed_by_this_draft": false,
+      "requested_host": "scheduler-selected",
+      "requested_horizon_s": 5.0,
+      "requested_output_interval_s": 0.01,
+      "required_outputs": ["execution receipt", "trajectory.h5", "result.json", "audit.json", "observations.json"],
+      "gate": "hard_integrity_pass=true AND requested_horizon_reached=true AND event_window_complete=true"
+    },
+    {
+      "step": 4,
+      "action": "only after row-level audit, decide whether to execute the remaining 14 independent rows",
+      "allowed_by_this_draft": false,
+      "qualification_claim_allowed": false
+    }
+  ],
+  "failure_handling": {
+    "preflight_failure": "retain the new row as preflight failed; do not launch solver or silently substitute q/dp",
+    "hard_integrity_failure": "retain row in 15-cell denominator, preserve trajectory and audit, prohibit same-input retry",
+    "event_censor": "retain row in denominator, mark event_window_complete=false, no horizon extension or threshold relaxation",
+    "infrastructure_failure": "retain receipt and row status; classify separately from scientific failure and do not count as pass",
+    "all_rows_required": true
+  },
+  "explicit_non_actions": [
+    "do not update the Core registry",
+    "do not update a central ledger",
+    "do not submit a queue job",
+    "do not reuse old F2 v4/H2 v4 evidence as a pass",
+    "do not call the static hold a third dynamic mechanism"
+  ]
+}

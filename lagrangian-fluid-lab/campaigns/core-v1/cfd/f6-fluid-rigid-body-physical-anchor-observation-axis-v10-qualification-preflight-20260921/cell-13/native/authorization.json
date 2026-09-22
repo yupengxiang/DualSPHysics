@@ -1,0 +1,103 @@
+{
+  "schema": "core.f6.physical_anchor.cpu_native_preflight_authorization.v1",
+  "authorization_id": "F6_OBS_V10_Q0P50_DP0P020_INTERNAL_TIME_authorization",
+  "created_at_utc": "2026-09-21T11:35:35.371503+00:00",
+  "status": "authorized_for_exactly_one_cpu_native_preflight",
+  "family": "F6",
+  "scope_id": "F6_fluid_rigid_body_physical_anchor_v1",
+  "case_id": "F6_OBS_V10_Q0P50_DP0P020_INTERNAL_TIME_native_preflight",
+  "definition_id": "CORE_F6_OBS_V10_Q0P50_DP0P020_INTERNAL_TIME_FRESH_Definition",
+  "body_id": "F6_physical_anchor_body_F6_OBS_V10_Q0P50_DP0P020_INTERNAL_TIME",
+  "root_authorized_for_cpu_native_preflight": true,
+  "authorization_basis": "F6 physical-anchor root review plus passed static CPU preflight; CPU GenCase/native entry only",
+  "single_input": {
+    "simulation_input_count": 1,
+    "definition": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-qualification-preflight-20260921/cell-13/source/CORE_F6_OBS_V10_Q0P50_DP0P020_INTERNAL_TIME_FRESH_Definition_Def.xml",
+      "sha256": "348e3109d849dd37935aa6278c78af40cb9e3c247ce0830ed371aa3e8e24e7e3",
+      "bytes": 3769,
+      "role": "single fresh physical-anchor Definition input"
+    },
+    "old_xml_bi4_hdf5_reused_as_input": false,
+    "trajectory_input": null
+  },
+  "read_only_contract_inputs": {
+    "definition_contract": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-qualification-preflight-20260921/cell-13/source/definition-contract.json",
+      "sha256": "8428e7c7061802c57d4c9852675fc1a1c220f4a03b37aabe8b816b31e5483ffa",
+      "bytes": 9199,
+      "role": "physical-anchor Definition contract"
+    },
+    "sidecar_schema": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-qualification-preflight-20260921/cell-13/source/body-state-force-torque-sidecar-schema.json",
+      "sha256": "596ad38c59564d3c8c96b1fe8bbe0081ef6196696920627abd3d48a803a7d31a",
+      "bytes": 4307,
+      "role": "body-state/force/torque sidecar schema"
+    },
+    "event_window_contract": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-qualification-preflight-20260921/cell-13/source/event-window-contract.json",
+      "sha256": "23763e3bd8f8154ee09b0cc888c5e54b2b9efabb0908d2965697420c04e001af",
+      "bytes": 3820,
+      "role": "physical-anchor event-window contract"
+    },
+    "static_preflight": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-qualification-preflight-20260921/cell-13/source/preflight-static.json",
+      "sha256": "bce73520f7163c9d3e37ecc87e51688f8f183be67f1328b47e367a90a2a9c83b",
+      "bytes": 1600,
+      "role": "passed static physical-anchor preflight"
+    },
+    "proposal": {
+      "path": "campaigns/core-v1/cfd/f6-fluid-rigid-body-physical-anchor-observation-axis-v10-qualification-preflight-20260921/cell-13/source/proposal.json",
+      "sha256": "11db55f4060f8b9366e60a9de80fac721ca605f2fc3c24f24e9038848fa9284f",
+      "bytes": 1891,
+      "role": "physical-anchor root-review proposal"
+    }
+  },
+  "cpu_native_entry": {
+    "gencase_binary": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226",
+      "bytes": 5809384,
+      "role": "pinned CPU GenCase entry"
+    },
+    "native_decoder": {
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+      "bytes": 324368,
+      "role": "pinned native BI4 decoder entry"
+    },
+    "gencase_invocation_limit": 1,
+    "native_decode_invocation_limit": 1,
+    "output_interval_s": 0.005,
+    "event_window_s": [
+      0.0,
+      1.5
+    ]
+  },
+  "permissions": {
+    "definition_read": true,
+    "cpu_gencase": true,
+    "native_decode": true,
+    "solver_launch": false,
+    "gpu_launch": false,
+    "job_spec_creation": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "matrix_submission": false,
+    "qualification_credit": 0
+  },
+  "execution_policy": {
+    "exactly_one_definition_input": true,
+    "exactly_one_cpu_gencase_invocation": true,
+    "exactly_one_native_decode_invocation": true,
+    "same_input_retry": false,
+    "retry_after_gencase_failure": false,
+    "retry_after_native_decode_failure": false,
+    "solver_or_gpu_product_not_allowed": true,
+    "runtime_sidecar_is_contract_only_until_solver": true,
+    "event_window_complete_in_this_preflight": false
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0
+}

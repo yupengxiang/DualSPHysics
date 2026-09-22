@@ -1,0 +1,90 @@
+{
+  "schema": "core.root_review.v1",
+  "review_id": "f2-h2-mdbc-static-range-v5-runtime-root-review-batch8-v1",
+  "created_at_utc": "2026-09-21T03:00:00+08:00",
+  "family": "F2",
+  "scope_id": "F2_H2_mdbc_static_range_qualification_v5",
+  "revision_id": "F2_H2_mdbc_static_range_mdbc_v5_top_layer_lateral_lattice",
+  "decision": "approved_for_8_cell_canary",
+  "authorized_cell_indices": [0, 1, 2, 3, 4, 5, 6, 7],
+  "candidate": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-candidate-v5.json",
+    "sha256": "b0b1691aa24f2db3b5ee886a6fea917a63fd2784219e33d983393f8607433f33",
+    "bytes": 15909,
+    "role": "v5 candidate card"
+  },
+  "matrix_report": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/prepared-20260920-v5-all/matrix-preparation.json",
+    "sha256": "d82e019cd59d26dbed6846912371062206b6e6ef4b83568537d822a9fa8f0495",
+    "bytes": 54885,
+    "role": "v5 fixed-denominator fifteen-row CPU/native matrix"
+  },
+  "repair_contract": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-repair-preflight-contract-20260921.json",
+    "sha256": "81be89887567287134ed2874bda433dcf1629066f4778bdd3b0999729b2ddb9f",
+    "bytes": 9279,
+    "role": "H2 v4-to-v5 mass repair contract"
+  },
+  "batch_adapter": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_h2_mdbc_static_range_v5_batch.py",
+    "sha256": "ad8a01fb749b0ca9e451a076466cdb06c169e254a5246ed5c788ef7997fc96ba",
+    "bytes": 31967,
+    "role": "fixed-denominator batch admission and evidence collector"
+  },
+  "runtime_code": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_h2_mdbc_static_range_v5_runtime.py",
+    "sha256": "6e65078ec7756d0f485d837578dac1fd299e1ae7c0728a5f11ff4815863aa97b",
+    "bytes": 23962,
+    "role": "hash-bound runtime adapter with ledger/registry deny gate"
+  },
+  "anchor_prepared": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H2_mdbc_boundary_repair_canary_v2/prepared.json",
+    "sha256": "70d78a80f2181e2cb54f0f3eab5c69c52fb6ca9cd909e532a407bea8f8ec91a4",
+    "bytes": 11908,
+    "role": "positive H2 mDBC anchor for solver and decoder hashes"
+  },
+  "prior_canary": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/runtime-canary-evidence-cell11-v1.json",
+    "sha256": "28bb42c91cc00c293a0be7d17570cf39c6e080e66c37f86447fe5a8cbe792735",
+    "bytes": 4535,
+    "role": "prior zero-credit hard-integrity canary"
+  },
+  "hypothesis": "Execute exactly the first eight fixed rows of the v5 fifteen-row static hold scope after independent CPU/native closure. The only declared physical input change is the v5 top-layer lateral lattice balance; no rotation, receiver transfer, material sidecar, training, or dynamic mechanism is introduced.",
+  "authorization": {
+    "solver_launch": true,
+    "gpu_launch": true,
+    "job_spec_creation": true,
+    "queue_mutation": true,
+    "ledger_mutation": false,
+    "registry_mutation": false,
+    "material_training": false,
+    "model_training": false
+  },
+  "execution_policy": {
+    "batch_size": 8,
+    "cell_indices_fixed": [0, 1, 2, 3, 4, 5, 6, 7],
+    "full_scope_denominator": 15,
+    "full_window_s": 0.6,
+    "output_interval_s": 0.02,
+    "qualification_claim_none": true,
+    "no_t1_registration": true,
+    "no_material_sidecar": true,
+    "no_training": true,
+    "no_same_input_retry": true,
+    "failed_rows_retained": true,
+    "matrix_credit_before_15_rows": 0,
+    "event_censor_is_scientific_failure": true,
+    "infrastructure_retry_policy": "at most one retry only for a proven infrastructure failure with a new attempt receipt; no scientific retry"
+  },
+  "required_postconditions": [
+    "all candidate, matrix, repair, adapter and native tool hashes remain exact before each launch",
+    "each attempt retains execution receipt, prepared view, result, trajectory and hard/event audit",
+    "hard integrity and static hold event completion are reported independently",
+    "result remains qualification_only and registry/ledger mutation is zero",
+    "successful first eight rows remain zero credit until all fifteen fixed rows are independently evaluated"
+  ],
+  "qualification_claim": "none",
+  "scientific_status": "eight_cell_runtime_canary_only",
+  "registry_mutation": 0,
+  "ledger_mutation": 0
+}

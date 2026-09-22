@@ -1,0 +1,88 @@
+{
+  "schema": "core.f1.h3.qualification_handoff.v1",
+  "created_at": "2026-09-19T21:04:37.683635+00:00",
+  "family": "F1",
+  "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+  "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+  "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+  "status": "conditional_blocked_until_h3_canary",
+  "qualification_claim": "none",
+  "qualification_design": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h3-qualification-handoff-v1/qualification-design.json",
+    "sha256": "9c7de2f4f78f266b81550889d7e89cf49dbfdaaa94ab2368c9c83e4e2ee3c155",
+    "role": "H3 15-cell conditional design"
+  },
+  "production_design": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h3-qualification-handoff-v1/production-design.json",
+    "sha256": "8a17e708178c16833958118c4929bb23ee32afc3fb43c341a3935dac60638ddb",
+    "role": "H3 32-case conditional production design"
+  },
+  "observer_audit": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h3-qualification-handoff-v1/observer-audit.json",
+    "sha256": "983d1f0157ebcd815e761d1d35540333744383b2bc596267756af5b7e70b80eb",
+    "role": "F1 observer/full-obstacle audit"
+  },
+  "manufactured_calibration": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h3-qualification-handoff-v1/manufactured-observer-calibration.json",
+    "sha256": "7119686077451ef2aa69ac5e08a5e0429acc4399fc82d99da53d37efee55e48d",
+    "role": "F1 manufactured observer calibration"
+  },
+  "canary_dependency": {
+    "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+    "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+    "prepared": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/candidate/prepared.json",
+      "sha256": "c90ebd8492f28e510d2b5a35b1fecdb252859d10c963249ef74d026854325458",
+      "role": "H3 canary prepared"
+    },
+    "required_pass_fields": [
+      "hard_integrity_pass",
+      "source mass gate",
+      "requested_horizon_reached",
+      "event_window_complete",
+      "full solid obstacle audit"
+    ],
+    "admission_command": "f1_h3_qualification_handoff.py audit-canary --product <terminal-product>"
+  },
+  "matrix_materialization": {
+    "authorized_now": false,
+    "gen_case_run": false,
+    "solver_run": false,
+    "jobs_written": false,
+    "central_ledger_written": false,
+    "after_canary_pass": "materialize H3-specific 15 cells with bottom face at each dp, then run static hash/mass/normal preflight before jobs"
+  },
+  "production_batches": {
+    "registered_denominator": 32,
+    "first_batch_indices": [
+      0,
+      4,
+      8,
+      13,
+      18,
+      23,
+      27,
+      31
+    ],
+    "first_batch_size": 8,
+    "remaining_batch_size": 24,
+    "requires_hash_verified_T1_receipt": true,
+    "qualification_inheritance": false
+  },
+  "legacy_records": {
+    "old_design": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-reference-qualification-design.json",
+      "sha256": "4e4dd82b35a674342a48f56c0080b5aee280ac58e59be633f3464f58571671d3",
+      "role": "retained H1 design"
+    },
+    "old_evaluation": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-qualification-evaluation.json",
+      "sha256": "a88578e9e661f80cece90412ca7fb69c6add437f33742ec6ac731399e3121027",
+      "role": "retained H1 evaluation"
+    },
+    "old_matrix_reusable": false,
+    "reason": "old H1 native-DBC inputs do not bind the H3 mDBC bottom-face recipe"
+  },
+  "no_gpu": true,
+  "no_ledger": true
+}

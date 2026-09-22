@@ -1,0 +1,71 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f2-resting-fill-side-wet-canary-v1-001",
+  "logical_id": "f2-resting-fill-side-wet-canary-v1-001",
+  "attempt_role": "independent_side_wetted_initial_condition_static_hold",
+  "category": "f2_resting_fill_side_wet_canary",
+  "host": "h200",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_resting_fill_side_wet.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_canary_v1/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 16384,
+    "gpu_peak_mib": 4096,
+    "io_weight": 0.25
+  },
+  "timeout_seconds": 1800,
+  "depends_on": [],
+  "qualification_claim": "none",
+  "qualification_only": true,
+  "qualification_status": "candidate-only; independent side-wetted initial condition; no moving-cup/range qualification",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_canary_v1/prepared.json",
+      "sha256": "c587eb3f7528736c2e27121fa18d76b133dbe5885c5e0c1885d2bbb0dc4e1e68"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_resting_fill_side_wet.py",
+      "sha256": "d7c9da80ac2e1e05c0ffc473d1377f6c3b713d1ea14541aff0e1101fafa57c4f"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2_resting_fill.py",
+      "sha256": "4ff6a0fcc03d97ca073e68a696ffbf393b0bd9ddb49903df7271c8f98e7a6de2"
+    }
+  ],
+  "prepared_case_id": "CORE_F2_resting_fill_side_wet_q0p50000000_dp0p007500000000_canary",
+  "registered_window_s": 0.6,
+  "pre_motion_window_s": 0.5,
+  "scope_id": "F2_resting_fill_side_wet_x_v1",
+  "revision_id": "F2_resting_fill_side_wet_v1",
+  "family": "F2",
+  "physical_geometry_changed": false,
+  "initial_condition_changed": true,
+  "mass_rescaling": false,
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0; output is attempt_dir/product",
+  "launch_recommendation": "root review/queue only after CPU preflight; subagent does not launch"
+}

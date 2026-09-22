@@ -1,0 +1,50 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f1-h2-mdbc-repair-canary-001",
+  "logical_id": "f1-h2-mdbc-repair-canary-001",
+  "attempt_role": "conditional_repair",
+  "category": "repair_canary",
+  "host": "ada",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f1.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 16384,
+    "gpu_peak_mib": 4096,
+    "io_weight": 0.25
+  },
+  "timeout_seconds": 3600,
+  "depends_on": [],
+  "qualification_claim": "none",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/prepared.json",
+      "sha256": "36b60d5860debb77811b61fcecf450a7c792a82da59e6fe2260999296823258e"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    }
+  ],
+  "prepared_case_id": "CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary",
+  "registered_window_s": 2.2,
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0",
+  "root_cause_evidence": "f1-canary-forensics.json",
+  "qualification_status": "conditional repair evidence; original H1 failure retained"
+}

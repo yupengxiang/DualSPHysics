@@ -1,0 +1,474 @@
+{
+  "schema": "core.f2.static_full_cup_volume_candidate.v1",
+  "created_at": "2026-09-19T22:29:08.915799+00:00",
+  "family": "F2",
+  "candidate_id": "F2_static_full_cup_volume_hold",
+  "scope_id": "F2_static_full_cup_volume_hold_x_v1",
+  "revision_id": "F2_static_full_cup_volume_hold_qualification_v1",
+  "status": "design_only_anchor_canary_supported",
+  "qualification_only": true,
+  "qualification_claim": "none; independent static scene candidate, not yet range qualified",
+  "qualified": false,
+  "supersedes_nothing": true,
+  "central_ledger_mutation": 0,
+  "gpu_launch_by_subagent": false,
+  "physical_contract": {
+    "scene": "fixed cup at zero angle; no prescribed rotation and no receiver-transfer event",
+    "cup": {
+      "low_m": [
+        0.0,
+        -0.15,
+        0.65
+      ],
+      "size_m": [
+        0.425,
+        0.3,
+        0.45
+      ],
+      "mkbound": 0
+    },
+    "receiver": {
+      "low_m": [
+        0.45,
+        -0.3,
+        0.0
+      ],
+      "size_m": [
+        1.1,
+        0.6,
+        0.45
+      ],
+      "mkbound": 1
+    },
+    "tray": {
+      "low_m": [
+        -0.6,
+        -0.55,
+        -0.2
+      ],
+      "size_m": [
+        2.6,
+        1.1,
+        0.1
+      ],
+      "mkbound": 2
+    },
+    "runtime_domain": {
+      "posmin_m": [
+        -0.7,
+        -0.65,
+        -0.4
+      ],
+      "posmax_m": [
+        2.2,
+        0.8,
+        1.8
+      ]
+    },
+    "continuum_fluid_footprint": "x/y faces exactly coincide with cup interior source planes; bottom starts at cup floor z=0.65",
+    "native_sampling": "per-cell decoded center lattice is separate from continuum faces; all centers must be inside cup and have positive distance to bound particles",
+    "boundary_method": "native DBC Boundary=1, unchanged from the passed static anchor",
+    "gravity_m_s2": -9.81,
+    "mass_policy": "native rho*dp^3; no mass rescaling",
+    "motion": {
+      "angle_degrees": 0.0,
+      "motion_file": "zero angle for the complete 0.60 s hold"
+    },
+    "physical_geometry_changed_from_anchor": false,
+    "initial_condition_is_the_parameter": true
+  },
+  "parameter_axis": {
+    "normalized_name": "initial_liquid_volume",
+    "physical_name": "initial_liquid_volume_m3",
+    "mapping": "V(q)=0.022950 + 0.001290*q m3; h(q)=V(q)/(0.425*0.30)",
+    "range_m3": [
+      0.02295,
+      0.02424
+    ],
+    "range_fill_height_m": [
+      0.18,
+      0.19011764705882353
+    ],
+    "anchor": {
+      "q": 0.5,
+      "volume_m3": 0.023595,
+      "height_m": 0.18505882352941178
+    },
+    "q_points": [
+      0.0,
+      0.5,
+      1.0,
+      0.25,
+      0.75
+    ],
+    "qualification_q": [
+      0.0,
+      0.5,
+      1.0
+    ],
+    "held_out_q": [
+      0.25,
+      0.75
+    ],
+    "continuum_volume_is_not_native_mass": true,
+    "sampling_rule": "each q/dp requires fresh CPU GenCase decode and mass/no-overlap preflight; source phase may be selected to fit the declared physical faces, never by changing continuum volume or rescaling mass"
+  },
+  "anchor_evidence": {
+    "integration": {
+      "path": "campaigns/core-v1/cfd/f2-full-cup-v3-static-hold-root-integration-v1.json",
+      "sha256": "5d8cc041fa63f80401105e1d6884a0c77004326f6c85f6309e9bd82df0dfc589",
+      "bytes": 1312,
+      "role": "hash-verified static anchor integration"
+    },
+    "prepared": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/prepared.json",
+      "sha256": "2bb1dac4bef30bea2926184641c9d4f3a18895b5b9468ac86b14cbbe28f256c7",
+      "bytes": 18016,
+      "role": "frozen full-cup static prepared input"
+    },
+    "static_preflight": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/static-preflight.json",
+      "sha256": "8e6d30ccf7ea3c1e4f1e56de400411671590f6696b7c4d338cbd1ff3ada1142d",
+      "bytes": 3954,
+      "role": "decoded native no-overlap preflight"
+    },
+    "candidate_card": {
+      "path": "campaigns/core-v1/cfd/f2-resting-fill-side-wet-full-cup-v3-candidate-card.json",
+      "sha256": "b8defa73a7f785e44de4b62d410b278a68a90eb6161a573386d4082775fdaf71",
+      "bytes": 11028,
+      "role": "original independent full-cup candidate card"
+    },
+    "anchor_result": {
+      "hard_integrity_pass": true,
+      "event_window_complete": true,
+      "static_settled": true,
+      "native_missing_count_max": 0,
+      "maximum_outside_cup_mass_fraction": 0.0,
+      "minimum_cup_retention_mass_fraction": 1.0,
+      "maximum_speed_p95_m_s": 0.03666363262481136,
+      "maximum_kinetic_over_initial_potential": 0.00019179944700252995,
+      "native_fluid_particles": 54720,
+      "mass_error_fraction": -0.021614748887476387,
+      "window_s": 0.6,
+      "qualification_claim": "static nominal canary only; no moving or range qualification"
+    }
+  },
+  "qualification_design": {
+    "cell_count": 15,
+    "cells": [
+      {
+        "index": 0,
+        "case_id": "CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial",
+        "q": 0.0,
+        "initial_volume_m3": 0.02295,
+        "initial_fill_height_m": 0.18000000000000002,
+        "dp_m": 0.01,
+        "design_cell": "spatial",
+        "held_out": false,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      },
+      {
+        "index": 1,
+        "case_id": "CORE_F2_static_full_cup_volume_q0p00000000_dp0p007500000000_spatial",
+        "q": 0.0,
+        "initial_volume_m3": 0.02295,
+        "initial_fill_height_m": 0.18000000000000002,
+        "dp_m": 0.0075,
+        "design_cell": "spatial",
+        "held_out": false,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      },
+      {
+        "index": 2,
+        "case_id": "CORE_F2_static_full_cup_volume_q0p00000000_dp0p005000000000_spatial",
+        "q": 0.0,
+        "initial_volume_m3": 0.02295,
+        "initial_fill_height_m": 0.18000000000000002,
+        "dp_m": 0.005,
+        "design_cell": "spatial",
+        "held_out": false,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      },
+      {
+        "index": 3,
+        "case_id": "CORE_F2_static_full_cup_volume_q0p50000000_dp0p010000000000_spatial",
+        "q": 0.5,
+        "initial_volume_m3": 0.023595,
+        "initial_fill_height_m": 0.18505882352941178,
+        "dp_m": 0.01,
+        "design_cell": "spatial",
+        "held_out": false,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      },
+      {
+        "index": 4,
+        "case_id": "CORE_F2_static_full_cup_volume_q0p50000000_dp0p007500000000_spatial",
+        "q": 0.5,
+        "initial_volume_m3": 0.023595,
+        "initial_fill_height_m": 0.18505882352941178,
+        "dp_m": 0.0075,
+        "design_cell": "spatial",
+        "held_out": false,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      },
+      {
+        "index": 5,
+        "case_id": "CORE_F2_static_full_cup_volume_q0p50000000_dp0p005000000000_spatial",
+        "q": 0.5,
+        "initial_volume_m3": 0.023595,
+        "initial_fill_height_m": 0.18505882352941178,
+        "dp_m": 0.005,
+        "design_cell": "spatial",
+        "held_out": false,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      },
+      {
+        "index": 6,
+        "case_id": "CORE_F2_static_full_cup_volume_q1p00000000_dp0p010000000000_spatial",
+        "q": 1.0,
+        "initial_volume_m3": 0.02424,
+        "initial_fill_height_m": 0.19011764705882353,
+        "dp_m": 0.01,
+        "design_cell": "spatial",
+        "held_out": false,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      },
+      {
+        "index": 7,
+        "case_id": "CORE_F2_static_full_cup_volume_q1p00000000_dp0p007500000000_spatial",
+        "q": 1.0,
+        "initial_volume_m3": 0.02424,
+        "initial_fill_height_m": 0.19011764705882353,
+        "dp_m": 0.0075,
+        "design_cell": "spatial",
+        "held_out": false,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      },
+      {
+        "index": 8,
+        "case_id": "CORE_F2_static_full_cup_volume_q1p00000000_dp0p005000000000_spatial",
+        "q": 1.0,
+        "initial_volume_m3": 0.02424,
+        "initial_fill_height_m": 0.19011764705882353,
+        "dp_m": 0.005,
+        "design_cell": "spatial",
+        "held_out": false,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      },
+      {
+        "index": 9,
+        "case_id": "CORE_F2_static_full_cup_volume_q0p25000000_dp0p007500000000_spatial_held_out",
+        "q": 0.25,
+        "initial_volume_m3": 0.0232725,
+        "initial_fill_height_m": 0.18252941176470588,
+        "dp_m": 0.0075,
+        "design_cell": "spatial_held_out",
+        "held_out": true,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      },
+      {
+        "index": 10,
+        "case_id": "CORE_F2_static_full_cup_volume_q0p25000000_dp0p005000000000_spatial_held_out",
+        "q": 0.25,
+        "initial_volume_m3": 0.0232725,
+        "initial_fill_height_m": 0.18252941176470588,
+        "dp_m": 0.005,
+        "design_cell": "spatial_held_out",
+        "held_out": true,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      },
+      {
+        "index": 11,
+        "case_id": "CORE_F2_static_full_cup_volume_q0p75000000_dp0p007500000000_spatial_held_out",
+        "q": 0.75,
+        "initial_volume_m3": 0.0239175,
+        "initial_fill_height_m": 0.18758823529411767,
+        "dp_m": 0.0075,
+        "design_cell": "spatial_held_out",
+        "held_out": true,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      },
+      {
+        "index": 12,
+        "case_id": "CORE_F2_static_full_cup_volume_q0p75000000_dp0p005000000000_spatial_held_out",
+        "q": 0.75,
+        "initial_volume_m3": 0.0239175,
+        "initial_fill_height_m": 0.18758823529411767,
+        "dp_m": 0.005,
+        "design_cell": "spatial_held_out",
+        "held_out": true,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      },
+      {
+        "index": 13,
+        "case_id": "CORE_F2_static_full_cup_volume_q0p50000000_dp0p007500000000_internal_time",
+        "q": 0.5,
+        "initial_volume_m3": 0.023595,
+        "initial_fill_height_m": 0.18505882352941178,
+        "dp_m": 0.0075,
+        "design_cell": "internal_time",
+        "held_out": false,
+        "temporal_variant": "internal_time",
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      },
+      {
+        "index": 14,
+        "case_id": "CORE_F2_static_full_cup_volume_q0p50000000_dp0p007500000000_native_output",
+        "q": 0.5,
+        "initial_volume_m3": 0.023595,
+        "initial_fill_height_m": 0.18505882352941178,
+        "dp_m": 0.0075,
+        "design_cell": "native_output",
+        "held_out": false,
+        "temporal_variant": "native_output",
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null
+      }
+    ],
+    "registered_window_s": 0.6,
+    "output_interval_s": 0.02,
+    "settle_hold_s": 0.2,
+    "events": [
+      "static_hold_complete"
+    ],
+    "static_event_definition": "all native fluid identities remain valid and inside the physical cup for 0.60 s; speed p95 <=0.10 m/s and KE/initial potential <=0.05 continuously for the final 0.20 s",
+    "no_receiver_transfer_expected": true,
+    "independent_interior_policy": "q=.25 and q=.75 held-out volume rows at dp=.0075 and .005; the q=.5 anchor canary is excluded from the numerator",
+    "time_rows": {
+      "internal_time": "q=.5, dp=.0075; same physical scene with preregistered actual-step control and output .02 s",
+      "native_output": "q=.5, dp=.0075; same physical scene and solver control with finer native output cadence"
+    },
+    "matrix_inputs_materialized": false,
+    "matrix_jobs_materialized": false
+  },
+  "gates": {
+    "source_initial_mass_relative_error_max": 0.025,
+    "total_discrete_to_continuum_mass_error_max": 0.03,
+    "mass_change_relative_max": 1e-08,
+    "no_missing_native_fluid_ids": true,
+    "no_nonfinite_active_values": true,
+    "no_runtime_domain_endpoint_outside": true,
+    "no_cup_closed_face_endpoint_or_saved_chord_crossings": true,
+    "no_open_cup_escape": true,
+    "no_unexpected_receiver_or_tray_mass": true,
+    "static_speed_p95_m_s_max": 0.1,
+    "static_kinetic_over_initial_potential_max": 0.05,
+    "static_settle_hold_s": 0.2,
+    "event_window_complete_required": true,
+    "spatial_max_absolute_normalized_difference": 0.05,
+    "temporal_max_absolute_normalized_difference": 0.01,
+    "thresholds_changed_from_dynamic_F2": false,
+    "survivor_renormalization": false
+  },
+  "input_closure": {
+    "anchor_only_frozen_inputs": [
+      {
+        "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/prepared.json",
+        "sha256": "2bb1dac4bef30bea2926184641c9d4f3a18895b5b9468ac86b14cbbe28f256c7",
+        "bytes": 18016,
+        "role": "anchor prepared"
+      },
+      {
+        "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/static-preflight.json",
+        "sha256": "8e6d30ccf7ea3c1e4f1e56de400411671590f6696b7c4d338cbd1ff3ada1142d",
+        "bytes": 3954,
+        "role": "anchor native preflight"
+      },
+      {
+        "path": "scripts/f2_resting_fill_side_wet_v3.py",
+        "sha256": "c42f9ef249ede7c3a77c82f5403de345155f7f80cebf4931029c33d98ae299e1",
+        "bytes": 25817,
+        "role": "anchor CPU preparation script"
+      },
+      {
+        "path": "scripts/core_f2_resting_fill.py",
+        "sha256": "4ff6a0fcc03d97ca073e68a696ffbf393b0bd9ddb49903df7271c8f98e7a6de2",
+        "bytes": 43125,
+        "role": "anchor static observer"
+      },
+      {
+        "path": "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+        "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+        "bytes": 159206984,
+        "role": "pinned solver binary"
+      },
+      {
+        "path": "campaigns/l1-resume/artifacts/bi4_dump",
+        "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+        "bytes": 324368,
+        "role": "pinned native decoder"
+      }
+    ],
+    "future_matrix_rule": "no matrix case may reuse the anchor trajectory or invent a prepared hash; each case must have its own XML, motion file, BI4, decoded native preflight, observer code hash and job input list",
+    "frozen_source_snapshot_required": true
+  },
+  "resource_estimate": {
+    "basis": "static anchor observed 530 MiB peak GPU, 425 MiB peak RSS, 27.41 s wall; reservations include resolution growth and fresh GenCase assets",
+    "per_cell": {
+      "dp_0.010": {
+        "cpu_cores": 2,
+        "ram_mib": 12288,
+        "gpu_peak_mib": 3072,
+        "timeout_seconds": 1800
+      },
+      "dp_0.0075": {
+        "cpu_cores": 2,
+        "ram_mib": 16384,
+        "gpu_peak_mib": 4096,
+        "timeout_seconds": 1800
+      },
+      "dp_0.005": {
+        "cpu_cores": 2,
+        "ram_mib": 24576,
+        "gpu_peak_mib": 8192,
+        "timeout_seconds": 3600
+      }
+    },
+    "matrix_disk_policy": "estimate after CPU GenCase; do not reserve or submit until all 15 decoded inputs and hashes are available"
+  },
+  "relation_to_failed_dynamic_scopes": {
+    "legacy_static_H0": "retained negative: inset fluid lost 598 native IDs at t=0.420038 s; this candidate changes the initial physical footprint and is not a repair retry",
+    "legacy_dynamic_domain": "retained negative: 16038 position exclusions and ballistic projection; this static scene has no free-flight spill and does not claim dynamic-domain evidence",
+    "closed_catchment_mdbc": "retained negative: 4 native losses plus cup/receiver endpoint/chord failures; no moving wall is used here",
+    "mdbc_cfl010": "retained negative: native losses removed but cup/receiver contact still failed; no CFL change is proposed",
+    "dbc_2p5_and_5s": "hard integrity passed, but settled remained null at 5.000003 s; one registered extension was exhausted, no further extension or dynamic qualification",
+    "scope_boundary": "a static qualification result would establish only a resting full-cup numerical family; it cannot qualify rotation duration, receiver transfer or dynamic catchment behavior"
+  },
+  "decision_rule": "The anchor pass supports preparation of this distinct static scene only. Root may later materialize and review the 15 cells; every hard or static-event failure remains in the denominator. No dynamic F2 qualification is inherited.",
+  "launch_policy": {
+    "gpu_submit": false,
+    "ledger_submit": false,
+    "root_review_required": true,
+    "candidate_canary_relaunch": false,
+    "qualification_claim_allowed_now": false
+  }
+}

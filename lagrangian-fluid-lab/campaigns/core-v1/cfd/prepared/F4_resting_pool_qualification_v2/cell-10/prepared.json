@@ -1,0 +1,221 @@
+{
+  "schema": "core.cfd.v1",
+  "created_at": "2026-09-19T09:28:40.843107+00:00",
+  "config": {
+    "schema": "core.cfd.v1",
+    "family": "F4",
+    "scope_id": "F4_drop_resting_pool_x_v2",
+    "case_id": "RESTING_CORE_F4_mdbc_native_q0p25000000_dp0p005000000000_qualification",
+    "recipe_id": "F4_resting_pool_mdbc_native_v2",
+    "recipe": "mdbc_native",
+    "stage": "qualification",
+    "qualification_claim": "none",
+    "qualified": false,
+    "parameter": {
+      "name": "drop_left_x_m",
+      "q": 0.25,
+      "value": 0.305,
+      "candidate_range": [
+        0.25,
+        0.47
+      ]
+    },
+    "dp_m": 0.005,
+    "pool": {
+      "low": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "mkfluid": 0
+    },
+    "drop": {
+      "low": [
+        0.305,
+        0.12,
+        0.4
+      ],
+      "size": [
+        0.26,
+        0.16,
+        0.14
+      ],
+      "mkfluid": 1
+    },
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_drop_velocity_m_s": [
+      0.0,
+      0.0,
+      -0.5
+    ],
+    "wall_bounds": {
+      "xmin": 0.0,
+      "xmax": 1.2,
+      "ymin": 0.0,
+      "ymax": 0.4,
+      "zmin": 0.0,
+      "zmax": 0.6
+    },
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "open_faces": [
+      "top"
+    ],
+    "output_interval_s": 0.02,
+    "time_max_s": 4.34,
+    "horizon": {
+      "ballistic_time_s": 0.2246985610139098,
+      "gravity_time_s": 0.3497487083913345,
+      "wave_time_s": 0.9030472819714619,
+      "predeclared_multiplier": 4,
+      "initial_horizon_s": 3.84,
+      "maximum_extended_horizon_s": 7.68,
+      "policy": "one whole-scope doubling for event right-censoring; never shorten on failure",
+      "event_completion_proven": false
+    },
+    "canary_window_reason": "historical first failure at .18 s plus six .02 s outputs",
+    "cfl": 0.05,
+    "boundary_layers": [
+      0,
+      1,
+      2
+    ],
+    "source_label_semantics": "initial native Mk numerical source partition; not material truth",
+    "physical_case_id": "F4_resting_pool_q0.25",
+    "lineage_group_id": "F4_resting_pool_q0.25",
+    "design_cell": "spatial",
+    "split": "qualification_only"
+  },
+  "sampling": {
+    "fluid_boxes": [
+      {
+        "continuous_low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "continuous_size_m": [
+          1.2,
+          0.4,
+          0.18
+        ],
+        "first_center_m": [
+          0.0025,
+          0.0025,
+          0.0025
+        ],
+        "draw_size_m": [
+          1.195,
+          0.395,
+          0.17500000000000002
+        ],
+        "counts": [
+          240,
+          80,
+          36
+        ],
+        "particle_count": 691200,
+        "continuous_mass_kg": 86.39999999999999,
+        "discrete_mass_kg": 86.40000000000002,
+        "mkfluid": 0
+      },
+      {
+        "continuous_low_m": [
+          0.305,
+          0.12,
+          0.4
+        ],
+        "continuous_size_m": [
+          0.26,
+          0.16,
+          0.14
+        ],
+        "first_center_m": [
+          0.3075,
+          0.1225,
+          0.4025
+        ],
+        "draw_size_m": [
+          0.255,
+          0.155,
+          0.135
+        ],
+        "counts": [
+          52,
+          32,
+          28
+        ],
+        "particle_count": 46592,
+        "continuous_mass_kg": 5.824000000000001,
+        "discrete_mass_kg": 5.824000000000001,
+        "mkfluid": 1
+      }
+    ],
+    "expected_fluid_particles": 737792,
+    "continuous_mass_kg": 92.22399999999999,
+    "sampled_mass_kg": 92.22400000000002,
+    "mass_policy": "native rho*dp^3, no mass rescaling; continuous-volume representation error explicit"
+  },
+  "native_initial": {
+    "total_particles": 1037936,
+    "boundary_particles": 300144,
+    "fluid_particles": 737792,
+    "normal_count": 300144,
+    "zero_boundary_normals": 0,
+    "native_initial_mass_kg": 92.224,
+    "initial_state_pass": true
+  },
+  "mass_preflight": {
+    "source_relative_errors": [
+      2.220446049250313e-16,
+      0.0
+    ],
+    "max_abs_source_relative_error": 2.220446049250313e-16,
+    "total_discrete_mass_kg": 92.22400000000002,
+    "total_continuous_mass_kg": 92.22399999999999,
+    "total_relative_error": 2.220446049250313e-16,
+    "source_error_max": 0.025,
+    "total_error_max": 0.03,
+    "mass_rescaling": false,
+    "pass": true,
+    "mass_gate_pass": true
+  },
+  "preflight_pass": true,
+  "generated_prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-10/generated/RESTING_CORE_F4_mdbc_native_q0p25000000_dp0p005000000000_qualification",
+  "source_template": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-0075/F3_CELL3_plain_0p0075_Def.xml",
+  "source_template_sha256": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5",
+  "inputs": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-10/gencase.log": "9d2ff02ea79486ae1ef79324d96a3633d19e8f96cb79cd2a5e7e5d748173bc9a",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-10/RESTING_CORE_F4_mdbc_native_q0p25000000_dp0p005000000000_qualification_Def.xml": "8c902a9e2f37d84cdffbcf578bcda6653a647fce2900713dcae03bbdc02241a5",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-10/generated/RESTING_CORE_F4_mdbc_native_q0p25000000_dp0p005000000000_qualification.xml": "dfc425dacdd9b5c39309baf3ae26910ba81af6e63050cbcf559bf58e787f88be",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-10/generated/RESTING_CORE_F4_mdbc_native_q0p25000000_dp0p005000000000_qualification_All.vtk": "e9bdfb3cd704a2af982f886d01f334894ae8bf1f56b1172de4124d3ce663130a",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-10/generated/RESTING_CORE_F4_mdbc_native_q0p25000000_dp0p005000000000_qualification_Fluid.vtk": "2b6f6a31d57eb5833e5b75b84bc87b6731f8ca52010c884bc6300c97055291a9",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-10/generated/RESTING_CORE_F4_mdbc_native_q0p25000000_dp0p005000000000_qualification_hdp_Actual.vtk": "bb5169e26f20df6e91dd115e46d7bfc93bbb7c3cb7ced85dca4878ed6e7db122",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-10/generated/RESTING_CORE_F4_mdbc_native_q0p25000000_dp0p005000000000_qualification.bi4": "e50c6e9d532263f8ffeb4da6d2b23a60d9ddd82a52615a6362d9ef59b7dc0f2e",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-10/generated/RESTING_CORE_F4_mdbc_native_q0p25000000_dp0p005000000000_qualification_MkCells.vtk": "4f4e787dd44a24036d14a8e3fc5e518f6fbee58ae1f3fb5f8f83f9bf249f939d",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-10/generated/RESTING_CORE_F4_mdbc_native_q0p25000000_dp0p005000000000_qualification.out": "c1c3d594d8756c115c4c18b7b8192fc50f164547dc2a32e94ed9b3f48f57d263",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_qualification_v2/cell-10/generated/RESTING_CORE_F4_mdbc_native_q0p25000000_dp0p005000000000_qualification_Bound.vtk": "cf225b7b0673ee893cd5c251f7dd6e7032091df8bc18acf0012713bd7099d526"
+  },
+  "solver_binary": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+  "solver_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+  "decoder": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+  "decoder_sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+  "solver_arguments": [
+    "-mdbc_noslip:1"
+  ],
+  "qualification_claim": "none; preparation only"
+}

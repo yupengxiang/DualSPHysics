@@ -1,0 +1,73 @@
+{
+  "schema": "core.f2.receiver_overflow_weir.route_audit.v1",
+  "created_at_utc": "2026-09-20T14:20:00+00:00",
+  "scope_id": "F2_receiver_overflow_weir_v1",
+  "revision_id": "F2_receiver_overflow_weir_mdbc_v1",
+  "status": "candidate_design_audit_complete_root_review_only",
+  "route_decision": "adopt_candidate_for root review; do not submit runtime",
+  "candidate_mechanism": "stationary upstream finite reservoir overflowing an internal finite-height weir into a downstream finite receiver basin inside a closed outer tank",
+  "why_lineage_is_new": [
+    "It has no rotating cup, prescribed duration, DBC motion schedule or dynamic DBC q=.75 input.",
+    "It has no suspended obstacle, obstacle-gap or F1 contact topology.",
+    "It has no wave maker, runup gauge or F5 external-wave source recipe.",
+    "The q parameter changes only internal crest height, so the physical event is crest crossing and receiver contact."
+  ],
+  "evidence": {
+    "candidate_card": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/candidate-card-v1.json",
+    "fixed_matrix": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/fixed-matrix-v1.json",
+    "failure_denominator": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/failure-denominator-v1.json",
+    "lineage": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/lineage-clarification-v1.json",
+    "cpu_native_preflight": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/cpu-native-preflight-v1.json",
+    "root_review_only_job_spec": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/root-review-only-job-spec-v1.json",
+    "anchor_definition": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/CORE_F2_receiver_overflow_weir_q0p50000000_crest0p26000000_dp0p007500000000_Def.xml",
+    "bound_generation": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/generated_v4/CORE_F2_receiver_overflow_weir_q0p50000000_crest0p26000000_dp0p007500000000.bi4"
+  },
+  "preflight_finding": {
+    "kind": "CPU/native input contract only",
+    "gencase_return_code": 0,
+    "total_particles": 474147,
+    "boundary_particles": 245667,
+    "fluid_particles": 228480,
+    "zero_normals": 0,
+    "ids_unique": true,
+    "arrays_finite": true,
+    "fluid_velocity_max_abs_m_s": 0.0,
+    "continuous_mass_kg": 96.768,
+    "discrete_native_mass_kg": 96.39,
+    "relative_mass_error": -0.00390625,
+    "mass_gate_pass": true,
+    "solver_product_present": false
+  },
+  "matrix_and_credit": {
+    "planned_rows": 15,
+    "executed_rows": 0,
+    "passed_rows": 0,
+    "event_censored_rows": 0,
+    "unattempted_rows": 15,
+    "matrix_credit": 0,
+    "qualification_claim": "none",
+    "controls_executed": false
+  },
+  "execution_controls": {
+    "gencase_cpu_native_only": true,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "central_ledger_mutation": 0,
+    "central_registry_mutation": 0,
+    "runtime_submitted": false
+  },
+  "blockers": [
+    "A read-only receiver-overflow contract adapter exists, but no solver-integrated runtime adapter/observer has received root review.",
+    "The fixed 15-row matrix is design-only and has not been materialized or submitted.",
+    "Root review must decide whether the new topology and event observer are admissible before any solver/GPU action.",
+    "No qualification, T1 registration, event completion or runtime integrity evidence exists."
+  ],
+  "discarded_artifacts": {
+    "generated_v1": "excluded: mass-gate failure; not a row",
+    "generated_v2": "excluded: mass-gate failure; not a row",
+    "generated_v3": "excluded: mass-gate failure; not a row",
+    "final_bound": "generated_v4 only"
+  },
+  "next_minimum_step": "Root review the candidate and, only if accepted, authorize authoring/review of the receiver/crest observer and a single protected anchor job spec."
+}

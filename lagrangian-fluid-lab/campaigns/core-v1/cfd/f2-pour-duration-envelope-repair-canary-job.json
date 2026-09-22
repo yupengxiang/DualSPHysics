@@ -1,0 +1,64 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f2-pour-duration-envelope-repair-canary-001",
+  "logical_id": "f2-pour-duration-envelope-repair-canary-001",
+  "attempt_role": "computational_envelope_repair_canary",
+  "category": "f2_dynamic_envelope_repair_canary",
+  "host": "ada",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2_qualification.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_envelope_repair_canary/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 24576,
+    "gpu_peak_mib": 6144,
+    "io_weight": 1
+  },
+  "timeout_seconds": 7200,
+  "depends_on": [],
+  "qualification_claim": "none",
+  "qualification_status": "candidate-only; envelope repair evidence; F2 dynamic range remains unqualified",
+  "launch_recommendation": "hold; ballistic full-window analysis predicts all six finite-margin faces can be reached before 2.5 s",
+  "superseded_by": "f2-pour-duration-ballistic-envelope-canary-001",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_envelope_repair_canary/prepared.json",
+      "sha256": "5914b37f3904f81e19174fe4612b8339c0562d78b2a68c7207fa5e330701719c"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    }
+  ],
+  "prepared_case_id": "CORE_F2_pour_duration_q0p50000000_dp0p007500000000_envelope_repair_canary",
+  "registered_window_s": 2.5,
+  "maximum_extended_window_s": 5.0,
+  "scope_id": "F2_pour_duration_runtime_envelope_repair_x_v1",
+  "revision_id": "F2_pour_duration_runtime_envelope_repair_v1",
+  "family": "F2",
+  "parameter_axis": "rotation_duration_s",
+  "repair_candidate_id": "computational_envelope_all_faces_canary",
+  "physical_geometry_changed": false,
+  "mass_rescaling": false,
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0"
+}

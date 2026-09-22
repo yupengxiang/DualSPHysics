@@ -1,0 +1,55 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f2-pour-duration-fullwindow-canary-001",
+  "logical_id": "f2-pour-duration-fullwindow-canary-001",
+  "attempt_role": "dynamic_event_window_canary",
+  "category": "f2_dynamic_event_window_canary",
+  "host": "ada",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2_qualification.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_dynamic_canary/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 16384,
+    "gpu_peak_mib": 4096,
+    "io_weight": 0.5
+  },
+  "timeout_seconds": 7200,
+  "depends_on": [],
+  "qualification_claim": "none",
+  "qualification_status": "candidate-only; F2 dynamic range remains unqualified",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_dynamic_canary/prepared.json",
+      "sha256": "8c631d80ca4b79ee72bd829c3595b6e05cd46e8e199652a6a38ce027205066cf"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    }
+  ],
+  "prepared_case_id": "CORE_F2_pour_duration_q0p50000000_dp0p007500000000_fullwindow_canary",
+  "registered_window_s": 2.5,
+  "maximum_extended_window_s": 5.0,
+  "scope_id": "F2_pour_duration_dynamic_canary_v1",
+  "revision_id": "F2_pour_duration_dynamic_event_window_v1",
+  "family": "F2",
+  "parameter_axis": "rotation_duration_s",
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0"
+}

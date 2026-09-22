@@ -1,0 +1,71 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f2-pour-duration-mdbc-closed-wall-canary-001",
+  "logical_id": "f2-pour-duration-mdbc-closed-wall-canary-001",
+  "attempt_role": "moving_mdbc_closed_wall_diagnostic_canary",
+  "category": "f2_dynamic_mdbc_closed_wall_canary",
+  "host": "ada",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2_qualification.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_mdbc_closed_wall_canary/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 32768,
+    "gpu_peak_mib": 12288,
+    "io_weight": 2
+  },
+  "timeout_seconds": 14400,
+  "depends_on": [],
+  "qualification_claim": "none",
+  "qualification_status": "candidate-only; moving mDBC contact diagnostic; F2 dynamic range remains unqualified",
+  "launch_recommendation": "hold pending root review; current corrected full-vector audits show no cup closed-face entry, so this is a boundary-formulation diagnostic rather than a confirmed repair",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_mdbc_closed_wall_canary/prepared.json",
+      "sha256": "b3e978beef6eacc9afb9102630a9caa44fe60feed707291105a3afc200783782"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    }
+  ],
+  "prepared_case_id": "CORE_F2_pour_duration_q0p50000000_dp0p007500000000_mdbc_closed_wall_canary",
+  "registered_window_s": 2.5,
+  "maximum_extended_window_s": 5.0,
+  "scope_id": "F2_pour_duration_mdbc_closed_wall_x_v1",
+  "revision_id": "F2_pour_duration_mdbc_closed_wall_canary_v1",
+  "family": "F2",
+  "parameter_axis": "rotation_duration_s",
+  "repair_candidate_id": "dynamic_mdbc_closed_wall_contact",
+  "boundary_method": "mDBC Boundary=2 with -mdbc_noslip:1",
+  "normal_ghost_basis": {
+    "normal_construction_layers_vdp": -0.5,
+    "normal_search_distance_h": 3.0,
+    "svshapes": true,
+    "moving_boundary_count_included": true,
+    "wall_velocity": "prescribed mvrotfile rigid-body velocity about y axis and z=0.65 pivot"
+  },
+  "physical_geometry_changed": false,
+  "mass_rescaling": false,
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0"
+}

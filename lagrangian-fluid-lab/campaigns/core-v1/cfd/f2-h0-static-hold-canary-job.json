@@ -1,0 +1,50 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f2-h0-static-hold-canary-001",
+  "logical_id": "f2-h0-static-hold-canary-001",
+  "attempt_role": "initial_state_substitute",
+  "category": "static_hold_canary",
+  "host": "ada",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H0_static_cup_hold_canary/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 16384,
+    "gpu_peak_mib": 4096,
+    "io_weight": 0.25
+  },
+  "timeout_seconds": 1800,
+  "depends_on": [],
+  "qualification_claim": "none",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H0_static_cup_hold_canary/prepared.json",
+      "sha256": "f0d021f9293b75f51d28b861868fd918f1b8e797a3a51692c51186f95161689e"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    }
+  ],
+  "prepared_case_id": "CORE_F2_H0_static_cup_hold_q0p50000000_dp0p007500000000_canary",
+  "registered_window_s": 0.6,
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0",
+  "qualification_status": "static hold substitute; moving-cup F2 scope remains unqualified"
+}

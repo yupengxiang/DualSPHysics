@@ -1,0 +1,206 @@
+{
+  "schema": "core.cfd.v1",
+  "created_at": "2026-09-19T08:22:56.973140+00:00",
+  "config": {
+    "schema": "core.cfd.v1",
+    "family": "F4",
+    "scope_id": "F4_drop_pool_x_v1",
+    "case_id": "CORE_F4_mdbc_native_q1p00000000_dp0p010000000000_qualification",
+    "recipe_id": "CORE_F4_mdbc_native_cell_center_v1",
+    "recipe": "mdbc_native",
+    "stage": "qualification",
+    "qualification_claim": "none",
+    "qualified": false,
+    "parameter": {
+      "name": "drop_left_x_m",
+      "q": 1.0,
+      "value": 0.47,
+      "candidate_range": [
+        0.25,
+        0.47
+      ]
+    },
+    "dp_m": 0.01,
+    "pool": {
+      "low": [
+        0.08,
+        0.04,
+        0.04
+      ],
+      "size": [
+        1.04,
+        0.32,
+        0.14
+      ],
+      "mkfluid": 0
+    },
+    "drop": {
+      "low": [
+        0.47,
+        0.12,
+        0.4
+      ],
+      "size": [
+        0.26,
+        0.16,
+        0.14
+      ],
+      "mkfluid": 1
+    },
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_drop_velocity_m_s": [
+      0.0,
+      0.0,
+      -0.5
+    ],
+    "wall_bounds": {
+      "xmin": 0.0,
+      "xmax": 1.2,
+      "ymin": 0.0,
+      "ymax": 0.4,
+      "zmin": 0.0,
+      "zmax": 0.6
+    },
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "open_faces": [
+      "top"
+    ],
+    "output_interval_s": 0.02,
+    "time_max_s": 4.34,
+    "horizon": {
+      "ballistic_time_s": 0.22469856101390975,
+      "gravity_time_s": 0.3497487083913345,
+      "wave_time_s": 1.0239593700982756,
+      "predeclared_multiplier": 4,
+      "initial_horizon_s": 4.34,
+      "maximum_extended_horizon_s": 8.68,
+      "policy": "one whole-scope doubling for event right-censoring; never shorten on failure",
+      "event_completion_proven": false
+    },
+    "canary_window_reason": "historical first failure at .18 s plus six .02 s outputs",
+    "cfl": 0.05,
+    "boundary_layers": [
+      0,
+      1,
+      2
+    ],
+    "source_label_semantics": "initial native Mk numerical source partition; not material truth",
+    "physical_case_id": "F4_drop_pool_x_q1",
+    "lineage_group_id": "F4_drop_pool_x_q1",
+    "design_cell": "spatial",
+    "split": "qualification_only"
+  },
+  "sampling": {
+    "fluid_boxes": [
+      {
+        "continuous_low_m": [
+          0.08,
+          0.04,
+          0.04
+        ],
+        "continuous_size_m": [
+          1.04,
+          0.32,
+          0.14
+        ],
+        "first_center_m": [
+          0.085,
+          0.045,
+          0.045
+        ],
+        "draw_size_m": [
+          1.03,
+          0.31,
+          0.13
+        ],
+        "counts": [
+          104,
+          32,
+          14
+        ],
+        "particle_count": 46592,
+        "continuous_mass_kg": 46.592000000000006,
+        "discrete_mass_kg": 46.592000000000006,
+        "mkfluid": 0
+      },
+      {
+        "continuous_low_m": [
+          0.47,
+          0.12,
+          0.4
+        ],
+        "continuous_size_m": [
+          0.26,
+          0.16,
+          0.14
+        ],
+        "first_center_m": [
+          0.47500000000000003,
+          0.125,
+          0.405
+        ],
+        "draw_size_m": [
+          0.25,
+          0.15,
+          0.13
+        ],
+        "counts": [
+          26,
+          16,
+          14
+        ],
+        "particle_count": 5824,
+        "continuous_mass_kg": 5.824000000000001,
+        "discrete_mass_kg": 5.824000000000001,
+        "mkfluid": 1
+      }
+    ],
+    "expected_fluid_particles": 52416,
+    "continuous_mass_kg": 52.416000000000004,
+    "sampled_mass_kg": 52.416000000000004,
+    "mass_policy": "native rho*dp^3, no mass rescaling; continuous-volume representation error explicit"
+  },
+  "native_initial": {
+    "total_particles": 129564,
+    "boundary_particles": 77148,
+    "fluid_particles": 52416,
+    "normal_count": 77148,
+    "zero_boundary_normals": 0,
+    "native_initial_mass_kg": 52.416000000000004,
+    "initial_state_pass": true
+  },
+  "preflight_pass": true,
+  "generated_prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_H1_qualification_massresolved/cell-06/generated/CORE_F4_mdbc_native_q1p00000000_dp0p010000000000_qualification",
+  "source_template": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-0075/F3_CELL3_plain_0p0075_Def.xml",
+  "source_template_sha256": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5",
+  "inputs": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_H1_qualification_massresolved/cell-06/gencase.log": "9cea8f4049549f3a81ef3aadc3bc4024d23763607f4880cac94988ad63be4323",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_H1_qualification_massresolved/cell-06/CORE_F4_mdbc_native_q1p00000000_dp0p010000000000_qualification_Def.xml": "c08d891adfdbac6f79a57876668e1678fd0556fdfe3091ae2fad59b4f475d22f",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_H1_qualification_massresolved/cell-06/generated/CORE_F4_mdbc_native_q1p00000000_dp0p010000000000_qualification_Bound.vtk": "7d9b786c350d44279f51e6b253c136aaace9aa5448535340a6b6d25ce3a40191",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_H1_qualification_massresolved/cell-06/generated/CORE_F4_mdbc_native_q1p00000000_dp0p010000000000_qualification.bi4": "069cbc9982416d6213b3db6a3b873852fbc6cbf6d78b190f441c0319f5b4fb10",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_H1_qualification_massresolved/cell-06/generated/CORE_F4_mdbc_native_q1p00000000_dp0p010000000000_qualification_MkCells.vtk": "c91c413c456c0ff008c0762f19272a978ce8ce8c733191db166bb04c28489f08",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_H1_qualification_massresolved/cell-06/generated/CORE_F4_mdbc_native_q1p00000000_dp0p010000000000_qualification.out": "7107f8227940ee0d3cdbd33b79b4e32523ce7f5ea0c0889ab120844320aa62d7",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_H1_qualification_massresolved/cell-06/generated/CORE_F4_mdbc_native_q1p00000000_dp0p010000000000_qualification_All.vtk": "68011599bddf0685dc23f98845292872fa792083f7a2059ab4bbf5a9b35ef730",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_H1_qualification_massresolved/cell-06/generated/CORE_F4_mdbc_native_q1p00000000_dp0p010000000000_qualification_hdp_Actual.vtk": "bb5169e26f20df6e91dd115e46d7bfc93bbb7c3cb7ced85dca4878ed6e7db122",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_H1_qualification_massresolved/cell-06/generated/CORE_F4_mdbc_native_q1p00000000_dp0p010000000000_qualification_Fluid.vtk": "d6d302f96702fe48693651b95fce94bc9fe58113b159e83b907f6ade3137acf0",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_H1_qualification_massresolved/cell-06/generated/CORE_F4_mdbc_native_q1p00000000_dp0p010000000000_qualification.xml": "e1892b75c044d02961be839096ff6ee7f36fb9e81d76239287af075e6f1ba7fb"
+  },
+  "solver_binary": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+  "solver_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+  "decoder": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+  "decoder_sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+  "solver_arguments": [
+    "-mdbc_noslip:1"
+  ],
+  "qualification_claim": "none; preparation only"
+}

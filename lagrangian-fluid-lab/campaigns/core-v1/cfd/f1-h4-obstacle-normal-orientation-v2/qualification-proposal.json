@@ -1,0 +1,141 @@
+{
+  "schema": "core.f1.h4.qualification_proposal.v1",
+  "created_at": "2026-09-19T22:04:12.531707+00:00",
+  "family": "F1",
+  "scope_id": "F1_single_obstacle_mdbc_normal_orientation_height_range_v1",
+  "revision_id": "F1_H4_obstacle_normal_orientation_mdbc_13plus2_v1",
+  "recipe_id": "F1_H4_obstacle_normal_orientation_mdbc_v1",
+  "status": "blocked_until_h4_canary_result",
+  "qualification_claim": "none; design/proposal only",
+  "canary_gate": {
+    "job": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/f1-h4-obstacle-normal-orientation-canary-job.json",
+      "sha256": "13b974ba63e6f585c537de092ca2c3964f4f89b53669701303cc19f755daa6b9",
+      "role": "H4 canary job proposal"
+    },
+    "submission": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/root-frozen/submission.json",
+      "sha256": "bc549f2a3b4a850a21ede41cc957934adb783b8e8be89a4937460f7e50361759",
+      "role": "root H4 canary submission receipt"
+    },
+    "static_proposal": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/f1-h4-obstacle-normal-orientation-canary-proposal-v1.json",
+      "sha256": "7e7f2d3b8ef5deed835b79735c1924d11e2321c445b0142884611ab425a68b9c",
+      "role": "H4 static canary proposal"
+    },
+    "required_pass": [
+      "hard_integrity_pass",
+      "source_mass_gate_pass",
+      "requested_horizon_reached",
+      "event_window_complete",
+      "full_solid_obstacle_audit"
+    ],
+    "required_before_matrix_materialization": true
+  },
+  "generator_contract": {
+    "entrypoint": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f1_h4_qualification.py",
+      "sha256": "e283c3f95fc97c97a320fe9237198b855597af673ebcb9a1648d98707b89c2be",
+      "role": "H4 qualification generator/config entrypoint"
+    },
+    "gencase_binary": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226",
+      "role": "fixed GenCase binary"
+    },
+    "source_template": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/candidate/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face_Def.xml",
+      "sha256": "fca440534ada0acc76b4d76ee20b06a2fb3a936430d8bd15ca26b71d956846a3",
+      "role": "H3 XML template used only as fresh H4 source"
+    },
+    "static_h4_audit": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/static-normal-orientation-audit.json",
+      "sha256": "2e0495e9558980f5eb2199a5ec19209c1acc668afa7e4e25d92c9aac73f9346c",
+      "role": "H4 canary static normal audit"
+    },
+    "definition_rule": "patch source XML for each registered dp/q/time cell, then run this exact GenCase binary; no reuse of H3 generated BI4",
+    "obstacle_shell_rule": "point=low+dp/2, size=continuum_size-dp, layers=0,-1,-2",
+    "normal_rule": "all obstacle faces setnormalinvert=false; tank inner faces setnormalinvert=true",
+    "source_snapshot_required": true
+  },
+  "qualification_design": {
+    "cell_count": 15,
+    "spatial_cells": 13,
+    "temporal_cells": 2,
+    "q_values": [
+      0.0,
+      0.5,
+      1.0,
+      0.25,
+      0.75
+    ],
+    "height_range_m": [
+      0.4,
+      0.52
+    ],
+    "resolutions_m": [
+      0.01,
+      0.0075,
+      0.005
+    ],
+    "initial_window_s": 2.2,
+    "single_extension_window_s": 4.4,
+    "observer_revision": "F1_H1_geometry_observer_qualification_v1"
+  },
+  "admission_requirements": {
+    "canary_must_pass_before_any_matrix_materialization": true,
+    "canary_result_must_bind_source_snapshot_and_all_output_hashes": true,
+    "all_15_cells_must_be_freshly_generated_with_h4_recipe": true,
+    "h3_generated_inputs_must_not_be_reused": true,
+    "mass_rescaling": false,
+    "continuum_geometry_change": false,
+    "hard_integrity_and_event_gates_unchanged": true
+  },
+  "after_canary_pass": {
+    "step_1": "freeze source snapshot containing this entrypoint, core_f1.py, core_cfd.py, finite_wall_audit.py, observer/evaluator, and exact native tools",
+    "step_2": "write fresh H4 definitions for all 15 cells with registered q/dp/time controls",
+    "step_3": "run GenCase for all 15 cells and require zero normals, no exact fluid-boundary overlap, fixed mass gates, and all face contract checks",
+    "step_4": "only after static preflight, write scheduler-neutral 15 qualification job specs; root remains submission owner",
+    "step_5": "evaluate all 15 products using actual temporal/cadence evidence and geometry-aware observer"
+  },
+  "on_canary_failure": {
+    "status": "terminal_negative_result",
+    "retain_h4_canary_product_and_denominator": true,
+    "materialize_matrix": false,
+    "launch_more_same_class_canaries": false,
+    "qualification_claim": "none"
+  },
+  "production_after_t1_only": {
+    "registered_case_count": 32,
+    "first_batch_indices": [
+      0,
+      4,
+      8,
+      13,
+      18,
+      23,
+      27,
+      31
+    ],
+    "remaining_batch_size": 24,
+    "qualification_inheritance": false,
+    "preparation_now": false
+  },
+  "execution": {
+    "gen_case_run": false,
+    "solver_run": false,
+    "gpu_launched": false,
+    "jobs_written": false,
+    "ledger_written": false
+  },
+  "design": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/qualification-design.json",
+    "sha256": "65a8116ca42b473dcf0d760d1014e7a175406d4f5cb19f766b4a5f48a44037cc",
+    "role": "H4 qualification design"
+  },
+  "static_preflight": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/qualification-static-preflight.json",
+    "sha256": "c5ac09d61008cf46178aaebc7b780716cbbd87071a822683eb7713f14b21323a",
+    "role": "H4 15-cell arithmetic/mass preflight"
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "schema": "core.f2.dbc_duration.parameter_card.v1",
+  "family": "F2",
+  "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+  "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+  "status": "candidate_registration_only",
+  "qualification_claim": "none",
+  "parameter_axis": {
+    "normalized_name": "q",
+    "physical_name": "rotation_duration_s",
+    "candidate_range_s": [
+      0.5,
+      1.2
+    ],
+    "mapping": "rotation_duration_s = 0.50 + 0.70*q",
+    "candidate_q_points": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "qualification_anchor_q": [
+      0.0,
+      0.5,
+      1.0
+    ],
+    "held_out_q": [
+      0.25,
+      0.75
+    ],
+    "semantic_rule": "q is a normalized coordinate; each execution carries the mapped physical duration"
+  },
+  "fixed_recipe": {
+    "boundary_method": 1,
+    "boundary": "native DBC Boundary=1",
+    "cflnumber": 0.2,
+    "dp_resolutions_m": [
+      0.01,
+      0.0075,
+      0.005
+    ],
+    "angle_degrees": -105.0,
+    "motion_start_s": 0.5,
+    "gravity_m_s2": -9.81,
+    "geometry_contract": "full-cup side-wet initial continuum box, retained cup/receiver/tray floor, four fixed catchment walls, top open",
+    "continuous_surface_contract": "catchment floor is the retained tray boxfill=bottom source plane z=-0.20 m; wall shell thickness is numerical only",
+    "initial_mass_policy": "native rho*dp^3 with no mass rescaling"
+  },
+  "event_window": {
+    "registered_initial_window_s": 5.0,
+    "maximum_extended_window_s": 5.0,
+    "output_interval_s": 0.01,
+    "motion_start_s": 0.5,
+    "motion_source_file_duration_s": 5.0,
+    "post_settle_observation_s": 0.35,
+    "settle_hold_s": 0.2,
+    "right_censor_policy": "5 s is the registered qualification window; a right-censored required event fails the cell and no further extension is permitted",
+    "events": [
+      {
+        "id": "motion_complete",
+        "definition": "prescribed cup angle reaches -105 degrees at 0.50 + duration(q) s"
+      },
+      {
+        "id": "receiver_contact",
+        "definition": "valid native fluid mass inside the one-dp-clear receiver interior first reaches 1% of initial fluid mass"
+      },
+      {
+        "id": "spill_or_escape",
+        "definition": "valid native fluid mass outside the cup, receiver and tray observation volumes first reaches 1% of initial mass; missing identities remain a separate integrity failure"
+      },
+      {
+        "id": "settled",
+        "definition": "after motion completion, speed p95 <= 0.10 m/s and kinetic energy <= 5% of initial gravitational potential for 0.20 s continuously"
+      },
+      {
+        "id": "event_window_complete",
+        "definition": "motion, receiver contact and settled are observed, with 0.35 s of saved output after the last required transition"
+      }
+    ],
+    "development_canary_exclusion": "the 2.5 s DBC canary and its one-time 5 s extension are evidence for launch readiness only and cannot populate a qualification cell"
+  },
+  "preregistered_gates": {
+    "source_initial_mass_relative_error_max": 0.025,
+    "initial_mass_spread_over_continuous_mass_max": 0.03,
+    "mass_change_relative_max": 1e-08,
+    "closed_wall_endpoint_tolerance_m": 1e-08,
+    "saved_chord_crossings_allowed": 0,
+    "no_missing_native_fluid_ids": true,
+    "no_nonfinite_active_values": true,
+    "spatial_max_absolute_normalized_difference": 0.05,
+    "temporal_fraction_of_spatial_budget": 0.2,
+    "temporal_max_absolute_normalized_difference": 0.01,
+    "event_time_relative_error_max": 0.05,
+    "actual_dt_ratio_max_for_internal_time": 0.8,
+    "actual_step_ratio_min_for_internal_time": 1.25,
+    "native_output_interval_ratio_max": 0.3,
+    "native_output_frame_ratio_min": 3.0,
+    "event_window_complete_required": true,
+    "qualification_requires_all_15_cells": true
+  },
+  "independent_interior_policy": {
+    "spatial": "q=.25 and .75 held-out rows are independent interior checks at dp=.0075 and .005",
+    "temporal": "q=.5, dp=.0075 controls are comparator rows and do not replace spatial interiors",
+    "canaries": "2.5 s and 5 s q=.5, dp=.0075 DBC canaries are excluded from all 15 rows"
+  },
+  "failure_policy": {
+    "hard_or_event_failure": "retain the failed row and denominator; no threshold or ownership relaxation",
+    "five_second_right_censor": "candidate insufficient; no additional horizon extension",
+    "f1_fallback": "review the recorded F1 H1/H2 negative evidence before proposing any distinct mechanism"
+  },
+  "execution_status": "design_only; no GPU launch"
+}

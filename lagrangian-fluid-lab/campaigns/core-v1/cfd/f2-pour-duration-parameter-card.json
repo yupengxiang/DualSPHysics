@@ -1,0 +1,254 @@
+{
+  "schema": "core.f2.parameter_card.v1",
+  "revision_id": "F2_pour_duration_qualification_v1",
+  "scope_id": "F2_pour_duration_x_v1",
+  "family": "F2",
+  "parameter": {
+    "name": "rotation_duration_s",
+    "candidate_range_s": [
+      0.5,
+      1.2
+    ],
+    "mapping": "duration(q)=0.50+0.70*q",
+    "q_points": [
+      0.0,
+      0.5,
+      1.0,
+      0.25,
+      0.75
+    ],
+    "qualification_q": [
+      0.0,
+      0.5,
+      1.0
+    ],
+    "held_out_q": [
+      0.25,
+      0.75
+    ],
+    "endpoint_provenance": {
+      "fast_center_duration_s": 0.5,
+      "slow_center_duration_s": 1.2,
+      "source": "existing centered F2 rotating-pour controls; no new geometry endpoint"
+    }
+  },
+  "fixed_physical_geometry": {
+    "geometry": "standard finite cup, receiver and tray from F2 center nominal source",
+    "cup": {
+      "low": [
+        0.0,
+        -0.15,
+        0.65
+      ],
+      "size": [
+        0.425,
+        0.3,
+        0.45
+      ],
+      "mkbound": 0
+    },
+    "receiver": {
+      "low": [
+        0.45,
+        -0.3,
+        0.0
+      ],
+      "size": [
+        1.1,
+        0.6,
+        0.45
+      ],
+      "mkbound": 1
+    },
+    "tray": {
+      "low": [
+        -0.6,
+        -0.55,
+        -0.2
+      ],
+      "size": [
+        2.6,
+        1.1,
+        0.1
+      ],
+      "mkbound": 2
+    },
+    "initial_fluid_boxes": [
+      {
+        "low": [
+          0.05,
+          -0.11,
+          0.7
+        ],
+        "size": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "mkfluid": 0
+      },
+      {
+        "low": [
+          0.05,
+          -0.11,
+          0.81
+        ],
+        "size": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "mkfluid": 1
+      },
+      {
+        "low": [
+          0.05,
+          -0.11,
+          0.92
+        ],
+        "size": [
+          0.325,
+          0.22,
+          0.11
+        ],
+        "mkfluid": 2
+      }
+    ],
+    "initial_fluid_height_m": 0.33,
+    "initial_fluid_bottom_m": 0.7,
+    "initial_fluid_top_m": 1.03,
+    "angle_degrees": -105.0,
+    "receiver_center": [
+      0.45,
+      0.0
+    ],
+    "gravity_m_s2": -9.81,
+    "unchanged": true
+  },
+  "initial_condition": {
+    "continuum_fluid_height_m": 0.33,
+    "continuum_fluid_bottom_m": 0.7,
+    "continuum_fluid_top_m": 1.03,
+    "native_sampling": "nearest in-box cell centres at each dp; native rho*dp^3; no mass rescaling",
+    "separate_h0_forensics": "campaigns/core-v1/cfd/f2-h0-initial-impact-forensics.json"
+  },
+  "computational_envelope": {
+    "runtime_domain_zmax_m": 2.4,
+    "baseline_runtime_domain_zmax_m": 1.8,
+    "purpose": "retain the H1 diagnostic envelope while separating domain censoring from the physical pour",
+    "physical_geometry_changed": false
+  },
+  "resolutions_m": [
+    0.01,
+    0.0075,
+    0.005
+  ],
+  "resource_estimates": {
+    "0.01": {
+      "cpu_cores": 2,
+      "ram_mib": 12288,
+      "gpu_peak_mib": 3072,
+      "io_weight": 1
+    },
+    "0.0075": {
+      "cpu_cores": 2,
+      "ram_mib": 16384,
+      "gpu_peak_mib": 4096,
+      "io_weight": 1
+    },
+    "0.005": {
+      "cpu_cores": 2,
+      "ram_mib": 24576,
+      "gpu_peak_mib": 6144,
+      "io_weight": 1
+    }
+  },
+  "event_window": {
+    "registered_initial_window_s": 2.5,
+    "maximum_extended_window_s": 5.0,
+    "output_interval_s": 0.01,
+    "motion_start_s": 0.5,
+    "motion_source_file_duration_s": 2.5,
+    "post_settle_observation_s": 0.35,
+    "settle_hold_s": 0.2,
+    "right_censor_policy": "run the whole registered window; if a required event is right-censored, extend once to 2x and retain the censored status",
+    "events": [
+      {
+        "id": "motion_complete",
+        "definition": "prescribed cup angle reaches -105 degrees at 0.50 + duration(q) s"
+      },
+      {
+        "id": "receiver_contact",
+        "definition": "valid native fluid mass inside the one-dp-clear receiver interior first reaches 1% of initial fluid mass"
+      },
+      {
+        "id": "spill_or_escape",
+        "definition": "valid native fluid mass outside the cup, receiver and tray observation volumes first reaches 1% of initial mass; missing identities remain a separate integrity failure"
+      },
+      {
+        "id": "settled",
+        "definition": "after motion completion, speed p95 <= 0.10 m/s and kinetic energy <= 5% of initial gravitational potential for 0.20 s continuously"
+      },
+      {
+        "id": "event_window_complete",
+        "definition": "motion, receiver contact and settled are observed, with 0.35 s of saved output after the last required transition"
+      }
+    ]
+  },
+  "observer": {
+    "revision_id": "F2_geometry_aware_observer_v1",
+    "observable_names": [
+      "cup_mass_fraction",
+      "receiver_mass_fraction",
+      "tray_mass_fraction",
+      "outside_observation_mass_fraction",
+      "center_of_mass_world_x_over_runtime_x_span",
+      "center_of_mass_world_y_over_runtime_y_span",
+      "center_of_mass_world_z_over_runtime_z_span",
+      "center_of_mass_cup_body_x_over_cup_x_span",
+      "center_of_mass_cup_body_y_over_cup_y_span",
+      "center_of_mass_cup_body_z_over_cup_z_span",
+      "kinetic_energy_over_initial_potential",
+      "speed_p95_over_1m_s"
+    ],
+    "geometry": "moving cup body frame plus world receiver/tray; source Mk is not material identity",
+    "normalization": "fixed initial-native-mass denominator; runtime/cup dimensions; initial gravitational potential; no survivor renormalization",
+    "calibration_required": true
+  },
+  "preregistered_gates": {
+    "source_initial_mass_relative_error_max": 0.025,
+    "initial_mass_spread_over_continuous_mass_max": 0.03,
+    "mass_change_relative_max": 1e-08,
+    "closed_wall_endpoint_tolerance_m": 1e-08,
+    "saved_chord_crossings_allowed": 0,
+    "no_missing_native_fluid_ids": true,
+    "no_nonfinite_active_values": true,
+    "spatial_max_absolute_normalized_difference": 0.05,
+    "temporal_fraction_of_spatial_budget": 0.2,
+    "temporal_max_absolute_normalized_difference": 0.01,
+    "event_time_relative_error_max": 0.05,
+    "actual_dt_ratio_max_for_internal_time": 0.8,
+    "actual_step_ratio_min_for_internal_time": 1.25,
+    "native_output_interval_ratio_max": 0.3,
+    "native_output_frame_ratio_min": 3.0,
+    "event_window_complete_required": true,
+    "qualification_requires_all_15_cells": true
+  },
+  "matrix": {
+    "cell_count": 15,
+    "spatial_cell_count": 13,
+    "temporal_cell_count": 2,
+    "held_out_q": [
+      0.25,
+      0.75
+    ],
+    "qualification_claim": "none until all 15 cells, integrity, event-window and comparator gates pass"
+  },
+  "source_provenance": {
+    "nominal_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F2_rotation_center_nominal_Def.xml",
+    "endpoint_controls": "existing centered fast duration 0.50 s and slow duration 1.20 s",
+    "geometry_change": false
+  },
+  "execution_status": "design_only; no GPU launch",
+  "qualification_claim": "none"
+}

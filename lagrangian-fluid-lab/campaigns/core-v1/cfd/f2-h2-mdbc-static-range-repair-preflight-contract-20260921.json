@@ -1,0 +1,206 @@
+{
+  "schema": "core.f2.h2_mdbc.static_range.repair_preflight_contract.v1",
+  "created_at_utc": "2026-09-20T18:25:48.260255+00:00",
+  "status": "completed_cpu_native_repair_evidence_zero_credit",
+  "family": "F2",
+  "scope_id": "F2_H2_mdbc_static_range_qualification_v5",
+  "parent_scope_id": "F2_H2_mdbc_static_range_qualification_v1",
+  "candidate_id": "F2_H2_mdbc_static_range_qualification_v5",
+  "qualification_claim": "none; CPU/native repair evidence only",
+  "qualified": false,
+  "T1_numerical": false,
+  "hypothesis_policy": {
+    "maximum_hypothesis_classes": 2,
+    "selected_hypothesis_classes": 1,
+    "second_class": "not_needed_after_v5_full_scope_preflight_pass",
+    "reason": "The single evidence-backed top-layer lattice change resolves the retained cell-11 mass gate across the full 15-cell CPU/native closure; adding an untested second class would add no evidence and is deferred."
+  },
+  "proposal": {
+    "status": "hash_bound_candidate_proposal_with_historical_cpu_native_closure",
+    "candidate": {
+      "path": "campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-candidate-v5.json",
+      "sha256": "b0b1691aa24f2db3b5ee886a6fea917a63fd2784219e33d983393f8607433f33",
+      "bytes": 15909,
+      "role": "H2 v5 repair candidate proposal"
+    },
+    "new_input_identity": true,
+    "old_v4_input_reused": false,
+    "output_stem": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/prepared-20260920-v5-all",
+    "full_scope_materialized": true,
+    "runtime_authorized": false,
+    "solver_gpu_queue_authorized": false,
+    "qualification_claim_allowed": false,
+    "qualification_credit": 0
+  },
+  "retained_failure": {
+    "matrix_cell_count": 15,
+    "prepared_cell_count": 14,
+    "failed_cell_count": 1,
+    "failed_index": 11,
+    "case_id": "CORE_F2_H2_mdbc_static_range_q0p75000000_dp0p007500000000_spatial_held_out",
+    "q": 0.75,
+    "dp_m": 0.0075,
+    "source_relative_errors": [
+      0.0033276382708198327,
+      0.0033276382708198327,
+      0.02806106870228997
+    ],
+    "failing_third_layer_error": 0.02806106870228997,
+    "source_gate": 0.025,
+    "total_gate": 0.03,
+    "mass_rescaling": false,
+    "same_input_retry": false,
+    "failure_remains_in_denominator": true,
+    "evidence": {
+      "path": "campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v1/prepared-20260920-v4/cells/11-CORE_F2_H2_mdbc_static_range_q0p75000000_dp0p007500000000_spatial_held_out/preflight.json",
+      "sha256": "349b855372d8f29a9e76b3784232c1910db1b8550be17d9e30ecc228a2788fa6",
+      "bytes": 6071,
+      "role": "retained v4 cell-11 negative preflight"
+    }
+  },
+  "repair_hypotheses": [
+    {
+      "hypothesis_id": "H2_v5_top_layer_lateral_lattice_balance",
+      "class": "top_layer_lateral_integer_lattice_balance",
+      "status": "supported_and_cpu_native_verified",
+      "independent_input_identity": true,
+      "same_input_retry": false,
+      "changed_counts": {
+        "old_layer_counts": [
+          43,
+          29,
+          16
+        ],
+        "new_layer_counts": [
+          42,
+          29,
+          16
+        ]
+      },
+      "old_third_layer_error": 0.02806106870228997,
+      "predicted_third_layer_error": 0.004152671755724979,
+      "predicted_total_error": 0.0036100658513638084,
+      "observed_third_layer_error": 0.004152671755724757,
+      "observed_total_error": 0.0036100658513640305,
+      "selection_rule": "for each horizontal axis, enumerate integer counts floor(size/dp)-1 through ceil(size/dp), retaining only positive counts whose center span fits inside the source footprint",
+      "center_rule": "top-layer particle centers are centered inside the unchanged x/y source footprint; the lower-layer centers and all continuous faces remain frozen",
+      "threshold_rule": "source relative mass error <= 0.025 and total discrete-to-continuum error <= 0.03; thresholds are fixed and excluded from optimization",
+      "mass_policy": "native rho*dp^3; no mass rescaling",
+      "falsifier": "if the changed top-layer native preflight fails identity, geometry, finite, normal, total-mass or source-mass gates, retain the v4 failure and do not advance to solver review"
+    }
+  ],
+  "cpu_native_preflight_contract": {
+    "mode": "CPU GenCase plus native BI4 decode only",
+    "input_output_stem": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/prepared-20260920-v5-all",
+    "full_scope_rows": 15,
+    "full_scope_preflight_passed": 15,
+    "full_scope_failed": 0,
+    "full_scope_unattempted": 0,
+    "cell_11": {
+      "index": 11,
+      "case_id": "CORE_F2_H2_mdbc_static_range_v5_q0p75000000_dp0p007500000000_spatial_held_out",
+      "preflight_pass": true,
+      "source_relative_errors": [
+        0.0033276382708198327,
+        0.0033276382708198327,
+        0.004152671755724757
+      ],
+      "source_gate": 0.025,
+      "total_error": 0.0036100658513640305,
+      "total_gate": 0.03,
+      "mass_rescaling": false,
+      "normal_count": 319608,
+      "zero_normal_gate": true
+    },
+    "qualification_credit": 0,
+    "solver_product_present": false,
+    "future_runtime_authorization": false
+  },
+  "failure_denominator": {
+    "planned": 15,
+    "cpu_native_preflight_passed": 15,
+    "qualification_numerator": 0,
+    "failed_rows_dropped": false,
+    "parent_v4_failure_retained": true,
+    "survivor_renormalization": false,
+    "threshold_relaxation": false,
+    "same_input_retry": false
+  },
+  "execution_controls": {
+    "this_contract_runs_gencase": false,
+    "this_contract_runs_decoder": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "qualification_credit": 0
+  },
+  "core_gate_effect": {
+    "current_registered_t1_families": [
+      "F3",
+      "F4"
+    ],
+    "third_t1_family_established": false,
+    "qualification_credit_added": 0,
+    "core_gate_changed": false
+  },
+  "hash_bindings": {
+    "baseline_v4_matrix": {
+      "path": "campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v1/prepared-20260920-v4/matrix-preparation.json",
+      "sha256": "959ef8d420ecc6a70e545cf63871c60c334dced8648e6c39e9fe63bed0ebaa03",
+      "bytes": 42153,
+      "role": "retained v4 15-cell denominator"
+    },
+    "baseline_v4_cell11": {
+      "path": "campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v1/prepared-20260920-v4/cells/11-CORE_F2_H2_mdbc_static_range_q0p75000000_dp0p007500000000_spatial_held_out/preflight.json",
+      "sha256": "349b855372d8f29a9e76b3784232c1910db1b8550be17d9e30ecc228a2788fa6",
+      "bytes": 6071,
+      "role": "retained v4 cell-11 negative preflight"
+    },
+    "v5_candidate": {
+      "path": "campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-candidate-v5.json",
+      "sha256": "b0b1691aa24f2db3b5ee886a6fea917a63fd2784219e33d983393f8607433f33",
+      "bytes": 15909,
+      "role": "H2 v5 repair candidate proposal"
+    },
+    "v5_plan": {
+      "path": "campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/v5-plan-20260920-final.json",
+      "sha256": "3384e48705426785e3ed679f600aa2d96811f82796df0f241aa7d0dda2d07697",
+      "bytes": 43299,
+      "role": "H2 v5 CPU/native preparation plan"
+    },
+    "v5_matrix": {
+      "path": "campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/prepared-20260920-v5-all/matrix-preparation.json",
+      "sha256": "d82e019cd59d26dbed6846912371062206b6e6ef4b83568537d822a9fa8f0495",
+      "bytes": 54885,
+      "role": "H2 v5 full-scope CPU/native preflight"
+    },
+    "v5_cell11_preflight": {
+      "path": "campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/prepared-20260920-v5-all/cells/11-CORE_F2_H2_mdbc_static_range_v5_q0p75000000_dp0p007500000000_spatial_held_out/preflight.json",
+      "sha256": "54fd1302aa67576128036c7a8bf1789ce4dc7929106ffc91b742cd9b3fb9d808",
+      "bytes": 6111,
+      "role": "H2 v5 repaired cell-11 preflight"
+    },
+    "v5_cell11_prepared": {
+      "path": "campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/prepared-20260920-v5-all/cells/11-CORE_F2_H2_mdbc_static_range_v5_q0p75000000_dp0p007500000000_spatial_held_out/prepared.json",
+      "sha256": "3ca0d5c22ffd1457481a77e3754aaf738c38623ba72f3f5b58eb2075ba77a5c1",
+      "bytes": 27241,
+      "role": "H2 v5 repaired cell-11 prepared input"
+    },
+    "v5_implementation": {
+      "path": "scripts/f2_h2_mdbc_static_range_v5_prepare.py",
+      "sha256": "9bcf81d456b16805259055ce00cb0a78084afac65d8ab93e2cbc2ab3c6e6c2ef",
+      "bytes": 31504,
+      "role": "H2 v5 materializer implementation"
+    },
+    "prior_test": {
+      "path": "tests/test_f2_h2_mdbc_static_range_v5_prepare.py",
+      "sha256": "d4e8444ecb63d2a4b01dad946834502e2787b5ba069c7623db4e7fac1e440a2e",
+      "bytes": 3149,
+      "role": "H2 v5 materializer regression test"
+    }
+  },
+  "required_next_review": "independent root review of the completed v5 CPU/native closure before any solver or T1 consideration",
+  "interpretation_boundary": "This contract proves only a fresh CPU/native mass/identity/normal input closure. It does not prove static event, runtime integrity, range qualification, or T1 registration."
+}

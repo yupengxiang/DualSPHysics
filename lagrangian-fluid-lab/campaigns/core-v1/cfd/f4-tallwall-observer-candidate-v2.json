@@ -1,0 +1,44 @@
+{
+  "schema": "core.f4.observer_candidate.v2",
+  "status": "implemented_not_calibrated",
+  "config_patch": {
+    "container_height_m": 1.2,
+    "observation_version": "fixed_015m_vertical_reference060_v2"
+  },
+  "bin_edges_m": [
+    [
+      0.0,
+      0.3,
+      0.6,
+      0.8999999999999999,
+      1.2
+    ],
+    [
+      0.0,
+      0.2,
+      0.4
+    ],
+    [
+      0.0,
+      0.15,
+      0.3,
+      0.44999999999999996,
+      0.6,
+      0.75,
+      0.8999999999999999,
+      1.05,
+      1.2
+    ]
+  ],
+  "com_scale_m": [
+    1.2,
+    0.4,
+    0.6
+  ],
+  "code_sha256": "fd6e56ab6c8f42e55c15c0e9d742c9289fca0a4214e5e203a3b357a23040adfb",
+  "tests": "13 passed: observation_geometry, tall_wall, core_cfd",
+  "qualification_claim": false,
+  "inflight_effect": "none; existing canary remains on frozen c900 snapshot and original observer",
+  "reason": "Preserve .15m vertical spatial sensitivity and .6m COM normalization when height increases to1.2m. New layout has64 mass bins rather than32.",
+  "required_before_qualification": "Freeze scope-specific observer calibration and thresholds; use same version and geometry for every resolution/time/cadence comparison; never compare vectors of different layouts."
+}

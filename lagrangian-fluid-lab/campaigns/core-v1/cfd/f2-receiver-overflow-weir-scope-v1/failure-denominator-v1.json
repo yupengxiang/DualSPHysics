@@ -1,0 +1,43 @@
+{
+  "schema": "core.f2.receiver_overflow_weir.failure_denominator.v1",
+  "scope_id": "F2_receiver_overflow_weir_v1",
+  "revision_id": "F2_receiver_overflow_weir_mdbc_v1",
+  "qualification_claim": "none",
+  "qualified": false,
+  "matrix_path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/fixed-matrix-v1.json",
+  "planned": 15,
+  "executed": 0,
+  "passed": 0,
+  "failed": 0,
+  "event_censored": 0,
+  "unattempted": 15,
+  "credit": 0,
+  "preservation": {
+    "all_rows_retained": true,
+    "same_input_retry": false,
+    "threshold_relaxation": false,
+    "horizon_extension_before_anchor": false,
+    "static_hold_substitution": false,
+    "survivor_renormalization": false,
+    "canary_credit": 0,
+    "cpu_native_preflight_credit": 0,
+    "prior_lineages_merged": false
+  },
+  "failure_classes": [
+    "solver_or_infrastructure_failure",
+    "hard_integrity_failure",
+    "crest_crossing_event_failure",
+    "receiver_contact_event_failure",
+    "event_censored_at_registered_horizon",
+    "nonfinite_or_missing_native_state",
+    "mass_or_closed_boundary_contract_failure"
+  ],
+  "denominator_rule": "Every fixed row remains counted once after root-authorized execution, including failed, censored and unresolved rows; no row can be removed or retried as a substitute for failure.",
+  "prior_denominators_not_merged": [
+    {"scope": "F1_suspended_obstacle_gap_v1", "status": "separate F1 geometry; terminal runtime hard failure"},
+    {"scope": "F2_dynamic_third_family_dbc_duration_x_v1", "status": "separate rotating DBC duration; historical q=.75 event censored and cannot be rerun"},
+    {"scope": "F2_static_full_cup_volume_hold_v1", "status": "separate static full-cup topology; no qualification inheritance"},
+    {"scope": "F5_wave_runup_probe", "status": "separate wave/runup probe; no source or event inheritance"}
+  ],
+  "exploratory_preflight_policy": "The discarded anchor generation attempts v1-v3 are excluded from the 15-row denominator and have zero credit; only generated_v4 is the bound CPU/native anchor artifact."
+}

@@ -1,0 +1,76 @@
+{
+  "schema": "core.f3.baffle_exchange.runtime_canary_report.v1",
+  "created_at_utc": "2026-09-20T18:18:00+08:00",
+  "scope_id": "F3_baffle_exchange_native_mdbc_x_v1",
+  "revision_id": "F3_baffle_exchange_native_mdbc_v1",
+  "job_id": "f3-baffle-exchange-q0p5-dp0075-anchor-canary-001",
+  "matrix_index": 4,
+  "matrix_row_id": "CORE_F3_BAFFLE_EXCHANGE_q0p50000000_dp0p007500000000_spatial",
+  "prepared_case_id": "CORE_F3_BAFFLE_EXCHANGE_q0p50000000_dp0p007500000000_anchor",
+  "qualification_claim": "none",
+  "matrix_credit": 0,
+  "t1_registration": false,
+  "input_hashes": {
+    "candidate_card": "4a0d6e07cc198e68f448ba33ba1f85c872d8ef7797746a47e9475724d2e2df33",
+    "matrix": "5f2478ebfa446badc895e806c1eb4a55e35fc2fc3cbf9b7980549db74ceb9696",
+    "failure_denominator": "0c9f988ce3d917de540949eb28ca61b563a5fc5f0fdaf5763ec1e745354de5da",
+    "prepared_anchor": "09b8501815eca988f5f9a8387aa4ee3498db939fd02559d45be5be89410526ea",
+    "root_review": "2c24b18f003c9549e6d3fd42af89b3557eb9c47f11cfee0a03fb70b95f5ff3cb",
+    "runtime_adapter": "4a4d45c0d5aac52b3abd2ea7cef2db30a558f180d2e360bd438443a71423eb99",
+    "runtime_job_spec": "c652258df4a36be5de62b1a9f77b56bba341f7d730d762b9c237014c92e5fe9f",
+    "solver": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+    "decoder": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+  },
+  "tests": {
+    "command": "cd lagrangian-fluid-lab && .venv/bin/pytest -q tests/test_core_f3_baffle_runtime.py tests/test_core_f3_baffled_source_scope_v1.py",
+    "passed": 9,
+    "failed": 0,
+    "dry_run_status": "dry_run_pass"
+  },
+  "execution": {
+    "host": "ada",
+    "gpu_uuid": "GPU-3dd8e277-f7e1-3893-292a-5928ea229599",
+    "gpu_index": 0,
+    "attempt_id": "20260920T181419-a763db04ce04",
+    "attempt_dir": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f3-baffle-exchange-q0p5-dp0075-anchor-canary-001/20260920T181419-a763db04ce04",
+    "coordinator_status": "failed",
+    "receipt_sha256": "6e9a8fb7fe74b7a39716e97dce3e9a4cb78f39ac98d4c9528b9d23da3b0c4748",
+    "request_sha256": "fb41423008ad3562fbf419f510aa927fdead050ae5f16075408fe5f10dc687d7",
+    "source_snapshot_sha256": "3615f2074446863149a0e7959c93fda20b421cb14874b16a71914ad87e4d2099",
+    "wall_seconds": 2.9709584712982178,
+    "cpu_seconds_children": 1.312064,
+    "peak_rss_mib": 125.0,
+    "peak_gpu_mib_sampled": 0.0,
+    "gpu_process_reservation_hours": 0.0008252662420272827,
+    "central_queue_ledger_mutation": 1,
+    "scientific_registry_mutation": 0
+  },
+  "solver_result": {
+    "status": "blocked_before_time_integration",
+    "returncode": 1,
+    "stdout_sha256": "d60bd6d4965fcf2e48421d75abfbd230eb81ea406013f39f2e1525bb21ed88d1",
+    "blocker_sha256": "d65b07b4fed0a6af1e61a025e1fe8a748ac7a690abd7da37e94a8353ba2c7d50",
+    "blocker": "DualSPHysics JSphGpuSingle::ConfigDomain reported: No normal data for mDBC in the input file.",
+    "solver_loaded_particles": 77294,
+    "solver_loaded_fluid_particles": 33120,
+    "native_h5_created": false,
+    "trajectory_created": false,
+    "hard_integrity_pass": null,
+    "requested_horizon_reached": null,
+    "event_window_complete": null
+  },
+  "next_code_gap": {
+    "status": "blocked",
+    "required_change": "extend the baffle GenCase definition/preflight to generate and hash-bound valid BoundNor normal data for both mkbound=0 outer walls and mkbound=1 internal baffle before another root review",
+    "prohibited_action": "do not retry this unchanged input, do not relax mDBC, hard-integrity, event, or time gates, and do not expand the 15-row matrix",
+    "preflight_current_status": "prepared_only; zero matrix credit"
+  },
+  "execution_controls": {
+    "matrix_expansion": 0,
+    "qualification_numerator_credit": 0,
+    "t1_registration": 0,
+    "scientific_registry_mutation": 0,
+    "material_training": 0,
+    "model_training": 0
+  }
+}

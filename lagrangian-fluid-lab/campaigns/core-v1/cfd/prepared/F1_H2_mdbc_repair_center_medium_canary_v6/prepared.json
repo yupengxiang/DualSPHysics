@@ -1,0 +1,361 @@
+{
+  "schema": "core.cfd.v1",
+  "created_at": "2026-09-19T00:00:00+00:00",
+  "config": {
+    "schema": "core.cfd.v1",
+    "family": "F1",
+    "scope_id": "F1_single_obstacle_mdbc_repair_canary",
+    "revision_id": "F1_H2_mdbc_obstacle_normals_repair_v1",
+    "case_id": "CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary",
+    "recipe_id": "F1_H2_mdbc_obstacle_normals_repair_v1",
+    "recipe": "mdbc_native_repair",
+    "stage": "canary",
+    "design_cell": "spatial",
+    "temporal_variant": null,
+    "qualification_claim": "none",
+    "qualified": false,
+    "parameter": {
+      "name": "initial_water_height_m",
+      "q": 0.5,
+      "value": 0.46,
+      "candidate_range": [
+        0.4,
+        0.52
+      ],
+      "mapping": "h(q)=0.40+0.12*q m"
+    },
+    "dp_m": 0.0075,
+    "fluid_box": {
+      "low": [
+        0.04,
+        0.04,
+        0.04
+      ],
+      "size": [
+        0.34,
+        0.32,
+        0.46
+      ],
+      "mkfluid": 0
+    },
+    "initialization_rule": {
+      "name": "cell_centre_drawbox_sampling",
+      "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+      "mass_rescaling": false,
+      "continuum_box_preserved": true
+    },
+    "continuum_geometry": {
+      "tank": {
+        "low": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          1.2,
+          0.4,
+          0.6
+        ]
+      },
+      "obstacle": {
+        "id": "center_obstacle",
+        "low": [
+          0.68,
+          0.15,
+          0.0
+        ],
+        "size": [
+          0.12,
+          0.1,
+          0.34
+        ]
+      },
+      "density_kg_m3": 1000.0,
+      "unchanged": true
+    },
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_velocity_m_s": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "wall_bounds": {
+      "xmin": 0.0,
+      "xmax": 1.2,
+      "ymin": 0.0,
+      "ymax": 0.4,
+      "zmin": 0.0,
+      "zmax": 0.6
+    },
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "open_faces": [
+      "top"
+    ],
+    "wall_spec": {
+      "container_interior": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "obstacles": [
+        {
+          "id": "center_obstacle",
+          "xmin": 0.68,
+          "xmax": 0.8,
+          "ymin": 0.15,
+          "ymax": 0.25,
+          "zmin": 0.0,
+          "zmax": 0.34
+        }
+      ],
+      "runtime_domain": {
+        "xmin": -0.3,
+        "xmax": 1.5,
+        "ymin": -0.099375,
+        "ymax": 0.496875,
+        "zmin": -0.15,
+        "zmax": 1.8
+      }
+    },
+    "runtime_domain_zmax_m": 1.8,
+    "boundary_semantics": "mDBC no-slip, complete finite tank+obstacle normals, ghost normals, NoPenetration=1",
+    "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+    "cfl": 0.2,
+    "output_interval_s": 0.02,
+    "time_max_s": 2.2,
+    "event_window": {
+      "initial_time_max_s": 2.2,
+      "maximum_extended_time_max_s": 4.4,
+      "output_interval_s": 0.02,
+      "extension_policy": "double whole scope once if return event is right-censored",
+      "completion_required_for_qualification": true
+    },
+    "physical_case_id": "L2_C1_F1_obstacle_nominal",
+    "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+    "source_label_semantics": "native numerical source identity, no material qualification",
+    "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+    "hypothesis": "H1 failure starts at the finite front wall near y=-0.099 m and high z; mDBC normals/ghost/no-penetration may prevent boundary leakage and subsequent density exclusions",
+    "solver_arguments": [
+      "-mdbc_noslip:1"
+    ]
+  },
+  "sampling": {
+    "fluid_boxes": [
+      {
+        "continuous_low_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "continuous_size_m": [
+          0.34,
+          0.32,
+          0.46
+        ],
+        "first_center_m": [
+          0.041249999999999995,
+          0.041249999999999995,
+          0.041249999999999995
+        ],
+        "draw_size_m": [
+          0.33749999999999997,
+          0.315,
+          0.44999999999999996
+        ],
+        "counts": [
+          46,
+          43,
+          61
+        ],
+        "particle_count": 120658,
+        "continuous_mass_kg": 50.04800000000001,
+        "discrete_mass_kg": 50.90259374999999,
+        "native_cell_centre_sampling": true,
+        "mkfluid": 0
+      }
+    ],
+    "expected_fluid_particles": 120658,
+    "continuous_mass_kg": 50.04800000000001,
+    "sampled_mass_kg": 50.90259374999999,
+    "mass_policy": "native rho*dp^3, no mass rescaling; cell-centre volume error is gated",
+    "initialization_rule": "H2 cell-centre drawbox sampling on explicit pointref=dp/2 lattice; declared continuum box and native rho*dp^3 mass unchanged"
+  },
+  "mass_preflight": {
+    "source_relative_errors": [
+      0.017075482536764275
+    ],
+    "max_abs_source_relative_error": 0.017075482536764275,
+    "total_discrete_mass_kg": 50.90259374999999,
+    "total_continuous_mass_kg": 50.04800000000001,
+    "total_relative_error": 0.017075482536764275,
+    "source_error_max": 0.025,
+    "total_error_max": 0.03,
+    "mass_rescaling": false,
+    "pass": true,
+    "mass_gate_pass": true
+  },
+  "native_initial": {
+    "total_particles": 266134,
+    "boundary_particles": 145476,
+    "fluid_particles": 120658,
+    "normal_count": 145476,
+    "zero_boundary_normals": 0,
+    "normal_file_present": true,
+    "unique_ids": true,
+    "finite_initial_arrays": true,
+    "native_initial_mass_kg": 50.90259375
+  },
+  "mdbc_preflight": {
+    "generated_normals_active": true,
+    "generated_normal_geometry": true,
+    "generated_normal_list": true,
+    "generated_no_penetration": true,
+    "generated_boundary_mdbc": true,
+    "generated_slip_mode": true,
+    "native_normals_complete": true,
+    "native_normals_finite_nonzero": true,
+    "native_state_finite_unique": true,
+    "native_fluid_count": true,
+    "mass_gate": true
+  },
+  "preflight_pass": true,
+  "generated_prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary",
+  "source_template": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+  "source_template_sha256": "0cc4e20c2e9f0c9aace99e509aa6eeccb2c7f28a061d64f6c1286abe24952e27",
+  "definition_audit": {
+    "source_template": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+    "source_template_sha256": "0cc4e20c2e9f0c9aace99e509aa6eeccb2c7f28a061d64f6c1286abe24952e27",
+    "definition_sha256": "889f35707e531257fe1eee78ab49a76681d4c580876e8660d374ecacf457cb42",
+    "allowed_changes": [
+      "simulationdomain: materialized explicit runtime domain with zmax=1.8 m",
+      "geometry.definition.dp: registered spatial resolution",
+      "fluid initial drawbox point/size: registered cell-centre sampling of the declared water box",
+      "fluid initial drawbox size.z: registered initial water height",
+      "execution.parameters.TimeMax: registered 2.2 s window",
+      "execution.parameters.TimeOut: registered native output cadence",
+      "constantsdef.cflnumber: 0.2, or 0.1 for internal-time cell",
+      "execution.parameters.DtIni/DtMin: explicit base or half-step temporal study control"
+    ],
+    "continuum_geometry_unchanged": true,
+    "physical_geometry_unchanged": true,
+    "boundary_semantics_unchanged": false,
+    "mass_rescaling": false,
+    "revision_id": "F1_H2_mdbc_obstacle_normals_repair_v1",
+    "boundary_recipe_changed": true,
+    "boundary_recipe": "mDBC no-slip with explicit tank+obstacle normals, ghost normals, NoPenetration=1",
+    "normal_geometry": {
+      "tank_faces": "all^top",
+      "obstacle_faces": "top|left|right|front|back",
+      "distanceh": 3.0,
+      "svshapes": true,
+      "normal_invert": true,
+      "shapeout": "hdp"
+    },
+    "initial_fluid_lattice": {
+      "pointref": "dp/2",
+      "declared_box_unchanged": true,
+      "native_centres_shifted_from_H1_by_m": [
+        -0.00375,
+        -0.00375,
+        -0.00375
+      ],
+      "native_mass_and_particle_count_unchanged": true
+    },
+    "changed_fields": [
+      "casedef.geometry.commands.GeometryForNormals",
+      "casedef.geometry.commands.mainlist.boundary.layers=0,1,2",
+      "casedef.geometry.commands.mainlist.boundary.support_box=physical_face+/-dp/2",
+      "casedef.geometry.definition.pointref=dp/2 for boundary lattice alignment",
+      "fluid initial drawbox point shifted to same dp/2 lattice",
+      "casedef.normals",
+      "execution.parameters.Boundary=2",
+      "execution.parameters.SlipMode=2",
+      "execution.parameters.NoPenetration=1",
+      "solver_arguments=-mdbc_noslip:1"
+    ],
+    "unchanged_fields": [
+      "CFL",
+      "TimeMax",
+      "TimeOut",
+      "DtIni",
+      "DtMin",
+      "fluid density and native mass policy",
+      "declared continuum fluid box",
+      "tank",
+      "obstacle",
+      "runtime domain"
+    ]
+  },
+  "resolved_runtime_domain": {
+    "xmin": -0.3,
+    "xmax": 1.5,
+    "ymin": -0.099375,
+    "ymax": 0.496875,
+    "zmin": -0.15,
+    "zmax": 1.8,
+    "fluid_envelope": {
+      "xmin": -0.01875,
+      "xmax": 1.21875,
+      "ymin": -0.01875,
+      "ymax": 0.41625,
+      "zmin": -0.01875,
+      "zmax": 0.60375
+    },
+    "expressions": {
+      "min": {
+        "x": "-0.3",
+        "y": "-0.099375",
+        "z": "-0.15"
+      },
+      "max": {
+        "x": "1.5",
+        "y": "0.496875",
+        "z": "1.8"
+      }
+    }
+  },
+  "inputs": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/gencase.log": "c7d30c353019fc7e33aae10d9bd6dc0b689b05a0b0227d3c1a7b7fef2ca9bbc7",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_Def.xml": "889f35707e531257fe1eee78ab49a76681d4c580876e8660d374ecacf457cb42",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_Bound.vtk": "9d9c293c39b286954eb3a692c6d3528c5451cf35eb9168e031101d2e72536bc7",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary.xml": "37e8a260ef69dbd61c007fec8f112c76568b1a411a7ab58ff1fd32c842a1ca50",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_Fluid.vtk": "ad43538c981efa8b1bea81d8f971605e7622ad0c17a00ad9c97292a1c6c52325",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary.bi4": "d0553b3a4b73df7a31e02579276e41cbdd5018a63d0c4354f27c2343dea8f597",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_GeometryShapes.vtk": "55988e1c1b40cd23019730438187618573b4446deb13a5163a72d442c580558b",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_hdp_Actual.vtk": "7ba3e79a045d41981b42154b6740aa1c35de719663351bb2460e31cdc9bffc3d",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary.out": "8c6a1acfddf873b28a7b8ddbfb22fa38462e2fa350de44af1cce0f221f4bff05",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_MkCells.vtk": "edb80d7c19a9db1169885fe6012d6189076d2db76fe193e26efc4b1fa6f7340d",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H2_mdbc_repair_center_medium_canary_v6/generated/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_All.vtk": "398c4cbda0dfeacc89d0ee13142a6942800028fdd9603ea4a819012a0bcd861d"
+  },
+  "solver_binary": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+  "solver_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+  "decoder": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+  "decoder_sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+  "solver_arguments": [
+    "-mdbc_noslip:1"
+  ],
+  "qualification_claim": "none; conditional mDBC repair canary only"
+}

@@ -1,0 +1,212 @@
+{
+  "schema": "core.f1.h4.obstacle_normal_orientation_canary_proposal.v1",
+  "proposal_id": "f1-h4-obstacle-normal-orientation-canary-001",
+  "created_at": "2026-09-19T21:51:17.994307+00:00",
+  "status": "prepared_cpu_only_not_submitted",
+  "family": "F1",
+  "scope_id": "F1_single_obstacle_mdbc_repair_canary",
+  "revision_id": "F1_H4_obstacle_normal_orientation_v1",
+  "case_id": "CORE_F1_H4_mdbc_obstacle_normal_orientation_q0p50000000_h0p46000000_dp0p007500000000_canary",
+  "mechanism_class": "boundary_configuration",
+  "mechanism_class_attempt": 2,
+  "qualification_claim": "none; one bounded canary proposal, no solver result and no range claim",
+  "hypothesis": "H4 boundary-configuration repair: H3 obstacle shell was fluid-side and inherited tank inversion; place all obstacle faces on the solid side and set obstacle normal inversion false so x_gamma=x_boundary+n reaches the continuous obstacle surface",
+  "evidence": {
+    "h2_forensics": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/f1-h2-bottom-contact-forensics-v1.json",
+      "sha256": "976d812918db277129da06a3fad7ca0ff643d2008ed8d983ade099540b145105",
+      "role": "retained F1 H2 failure forensic"
+    },
+    "h3_forensics": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h3-bottom-face-forensics-v1.json",
+      "sha256": "ac2e8c92fbc3fdaee6137580cc462e33bde3e6daad817f0cff6e6a8797652a0e",
+      "role": "retained F1 H3 failure forensic"
+    },
+    "h3_binding": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h3-forensics-root-binding-v1.json",
+      "sha256": "f1204dab36c705f3c10bc03b2795eb7c2406561132d3d523c866e24cc7f8575a",
+      "role": "root binding of retained H3 evidence"
+    },
+    "h3_prepared": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h3-obstacle-bottom-face-mdbc-canary-001/20260920T044917-0b7e36021c06/product/prepared.json",
+      "sha256": "c90ebd8492f28e510d2b5a35b1fecdb252859d10c963249ef74d026854325458",
+      "role": "retained H3 prepared input"
+    },
+    "h3_result": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h3-obstacle-bottom-face-mdbc-canary-001/20260920T044917-0b7e36021c06/product/result.json",
+      "sha256": "dab7c8ed31d6727ba6151b8bc1484ad1fab10a58ab0c1206ae453f173b08d922",
+      "role": "retained H3 result"
+    },
+    "h3_audit": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h3-obstacle-bottom-face-mdbc-canary-001/20260920T044917-0b7e36021c06/product/audit.json",
+      "sha256": "dab7c8ed31d6727ba6151b8bc1484ad1fab10a58ab0c1206ae453f173b08d922",
+      "role": "retained H3 audit"
+    },
+    "source_cpu_mdbc": {
+      "path": "/home/jade/Projects/DualSPHysics/src/source/JSphCpu_mdbc.cpp",
+      "sha256": "c5682a06c312352c84bf3844490ba4f77e06af61744a7cb0b42a1acae7573ac7",
+      "role": "DualSPHysics CPU mDBC implementation"
+    },
+    "official_solid_side_recipe": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/r3-fixed-box-force-gauge/fixed_box_mdbc_canonical_Def.xml",
+      "sha256": "7fbf0b443d17c9cd3e50636859fea525bda2f88cc9397484e768bbf16c6f068f",
+      "role": "official solid-side mDBC recipe"
+    },
+    "candidate_static_audit": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/static-normal-orientation-audit.json",
+      "sha256": "2e0495e9558980f5eb2199a5ec19209c1acc668afa7e4e25d92c9aac73f9346c",
+      "role": "H4 CPU normal/geometry audit"
+    },
+    "candidate_audit_code": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f1_h4_obstacle_normal_orientation.py",
+      "sha256": "e680dfa9e5984ecf5cfd6afb0920a1fe1903c06a9f1a9cd27270cf6f8cf51901",
+      "role": "H4 static audit script"
+    },
+    "normal_ghost_thickness_forensics": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/f1-h4-normal-ghost-thickness-forensics-v1.json",
+      "sha256": "05d55d6ce6f0a5a1eb2ad7e59e3695038397066d127b8a6b8358c1da5dcb3b94",
+      "role": "H4 normal/ghost/thickness forensic report"
+    }
+  },
+  "root_cause_evidence": {
+    "h3_first_strict_obstacle_volume_time_s": 0.2400141317433157,
+    "h3_first_wall_endpoint_time_s": 0.4400016105248274,
+    "h3_obstacle_penetration_particle_frames": 302558,
+    "h3_finite_geometry_chord_crossings": 302559,
+    "h3_zero_normals": 0,
+    "h3_obstacle_shell_semantics": "fluid-side shell inherited tank setnormalinvert=true; normal points from fluid-side boundary point toward obstacle interface with the wrong solid-side placement for this recipe",
+    "source_semantics": "JSphCpu_mdbc uses gpos=pos+boundnor and dpos=-boundnor; the stored vector is boundary-to-limit/interface displacement, not a unit outward normal",
+    "official_recipe_semantics": "immersed solid shell uses layers 0,-1,-2 on the solid side and setnormalinvert=false; tank inner faces retain true inversion"
+  },
+  "single_candidate_change": {
+    "continuum_surface_unchanged": true,
+    "fluid_initial_box_unchanged": true,
+    "native_mass_and_density_unchanged": true,
+    "numerical_controls_unchanged": [
+      "CFL=0.2",
+      "actual DtIni/DtMin",
+      "TimeMax=2.2 s",
+      "output cadence=0.02 s"
+    ],
+    "obstacle_boundary_shell": {
+      "old_point": [
+        0.67625,
+        0.14625,
+        -0.00375
+      ],
+      "old_size": [
+        0.1275,
+        0.1075,
+        0.3475
+      ],
+      "old_layers": "0,1,2",
+      "new_point": [
+        0.68375,
+        0.15375,
+        0.00375
+      ],
+      "new_size": [
+        0.1125,
+        0.0925,
+        0.3325
+      ],
+      "new_layers": "0,-1,-2"
+    },
+    "obstacle_normal_geometry": {
+      "faces": [
+        "bottom",
+        "top",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "setnormalinvert": false
+    },
+    "tank_normal_geometry": {
+      "faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "setnormalinvert": true,
+      "changed": false
+    },
+    "bottom_semantics": "bottom mDBC vector is -z from solid-side boundary center above z=0 to interface z=0; accessible fluid side is +z"
+  },
+  "static_preflight": {
+    "prepared": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/prepared.json",
+      "sha256": "377631776dddbd206ae2598494d20d1a23c20b7a82b23e6df9dd6c28cbe86d2e",
+      "role": "H4 CPU-only prepared description"
+    },
+    "candidate_definition": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/CORE_F1_H4_mdbc_obstacle_normal_orientation_Def.xml",
+      "sha256": "d337222f76aa0a3be68f16b17c23c4cc156829c5834d2deda6f2249d73bf5049",
+      "role": "H4 candidate XML"
+    },
+    "generated_prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/generated/CORE_F1_H4_mdbc_obstacle_normal_orientation",
+    "generated_boundary_particles": 141192,
+    "generated_fluid_particles": 120658,
+    "zero_normal_count": 0,
+    "exact_fluid_boundary_overlap_count": 0,
+    "all_required_face_signs_pass": true,
+    "max_interface_error_m": 4.768371586472142e-08,
+    "mass_rescaling": false,
+    "physical_continuum_geometry_changed": false,
+    "boundary_discretization_changed": true
+  },
+  "canary_window_and_gates": {
+    "initial_time_max_s": 2.2,
+    "maximum_extended_time_max_s": 4.4,
+    "extension_policy": "single preregistered doubling only if the 2.2 s event is right-censored",
+    "hard_gates_unchanged": true,
+    "full_solid_obstacle_audit": true,
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "open_faces": [
+      "top"
+    ],
+    "event_window_completion_required": true,
+    "no_threshold_relaxation": true
+  },
+  "repair_budget": {
+    "max_mechanism_classes": 2,
+    "max_canaries_per_class": 2,
+    "mechanism_class": "boundary_configuration",
+    "mechanism_class_attempt": 2,
+    "prior_boundary_configuration_canary": "F1 H2 retained negative",
+    "this_is_final_boundary_configuration_candidate_without_new_evidence": true,
+    "additional_same_class_canaries_after_this": 0
+  },
+  "resource_estimate": {
+    "basis": "retained H3 same CFL/dp/window, 267178 total particles; H4 reduces boundary shell to 141192 while fluid remains 120658",
+    "host_candidate": "Ada",
+    "cpu_cores": 2,
+    "ram_mib": 16384,
+    "gpu_peak_mib": 4096,
+    "timeout_seconds": 3600,
+    "solver_seconds_reference_h3": 76.28,
+    "total_seconds_reference_h3": 153.46
+  },
+  "job_spec": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/f1-h4-obstacle-normal-orientation-canary-job.json",
+    "sha256": "13b974ba63e6f585c537de092ca2c3964f4f89b53669701303cc19f755daa6b9",
+    "role": "unsubmitted H4 canary job proposal"
+  },
+  "execution": {
+    "status": "prepared_cpu_only_not_submitted",
+    "gpu_launched": false,
+    "job_specs_submitted": false,
+    "ledger_written": false,
+    "central_registry_written": false,
+    "root_review_required": true
+  }
+}

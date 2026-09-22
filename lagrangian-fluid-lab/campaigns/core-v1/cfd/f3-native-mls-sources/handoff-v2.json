@@ -1,0 +1,56 @@
+{
+  "canonical_version": "v2",
+  "conversion_helper": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_cfd.py",
+    "sha256": "fd6e56ab6c8f42e55c15c0e9d742c9289fca0a4214e5e203a3b357a23040adfb"
+  },
+  "created_at_utc": "2026-09-19T19:55:36.644178+00:00",
+  "execution_contract": {
+    "attempt_product": "{attempt_dir}/product",
+    "conversion_audit_hash_closure": true,
+    "scheduler_cuda_visible_devices": "exactly one assigned value",
+    "solver_gpu_argument": "-gpu:0",
+    "worker": "scripts/core_runtime.py"
+  },
+  "full_window_s": [
+    0.0,
+    8.35
+  ],
+  "hosts": [
+    "ada",
+    "h200"
+  ],
+  "job_manifest": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/jobs-v2/manifest.json",
+    "sha256": "9ad87d73814682115e945a1d50e101b1ad8f293a2ec86b19bdea0a8d67f1a13b"
+  },
+  "jobs_root": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/jobs-v2",
+  "prepared_root": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/prepared-v2",
+  "qualification_claim": "none; qualification_only source generation",
+  "runner": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f3_cfd_source.py",
+    "sha256": "71f180a2524dfe8ab5ca80f50ecd05305e858c1e163e7c70ddd210b3b9bf6d85"
+  },
+  "safety": {
+    "central_ledger_mutation": 0,
+    "gpu_started_by_preparation": false,
+    "legacy_l1_resume_namespace_modified": false,
+    "qualification_granted": false
+  },
+  "schema": "core.f3.cfd.native_volume_mls.source_handoff.v1",
+  "source_count": 5,
+  "status": "prepared_only",
+  "submit_paths": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/jobs-v2/f3_fine_amp0p95_native010.json",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/jobs-v2/f3_fine_amp1p05_native010.json",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/jobs-v2/f3_production_amp0p95_native010.json",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/jobs-v2/f3_production_amp1p05_native010.json",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/jobs-v2/f3_production_amp1p1_native002.json"
+  ],
+  "validation": {
+    "all_job_specs_validated": true,
+    "all_prepared_revalidated": true,
+    "command": "env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 .venv/bin/pytest -q tests/test_core_runtime.py tests/test_core_cfd.py tests/test_core_f3_cfd_source.py",
+    "result": "36 passed in 4.95s"
+  }
+}

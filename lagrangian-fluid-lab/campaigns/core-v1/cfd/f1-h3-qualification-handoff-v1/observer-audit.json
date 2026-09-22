@@ -1,0 +1,106 @@
+{
+  "schema": "core.f1.h3.observer_audit.v1",
+  "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+  "worker": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f1.py",
+    "sha256": "bd9d06cc4d12a6a44899b7d079afa12705022074fa67baf771961da6b2f2e5c9",
+    "role": "F1 worker source"
+  },
+  "observer_evaluator": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f1_qualification.py",
+    "sha256": "3fafbc039cbc1dad222d5a4fc95e146940b794b93e870dc95d5084ec0b2bae55",
+    "role": "F1 observer/evaluator source"
+  },
+  "wall_spec": {
+    "container_interior": {
+      "xmin": 0.0,
+      "xmax": 1.2,
+      "ymin": 0.0,
+      "ymax": 0.4,
+      "zmin": 0.0,
+      "zmax": 0.6
+    },
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "open_faces": [
+      "top"
+    ],
+    "obstacles": [
+      {
+        "id": "center_obstacle",
+        "xmin": 0.68,
+        "xmax": 0.8,
+        "ymin": 0.15,
+        "ymax": 0.25,
+        "zmin": 0.0,
+        "zmax": 0.34
+      }
+    ],
+    "runtime_domain": {
+      "xmin": -0.3,
+      "xmax": 1.5,
+      "ymin": -0.099375,
+      "ymax": 0.496875,
+      "zmin": -0.15,
+      "zmax": 1.8
+    }
+  },
+  "finite_obstacle": {
+    "id": "center_obstacle",
+    "xmin": 0.68,
+    "xmax": 0.8,
+    "ymin": 0.15,
+    "ymax": 0.25,
+    "zmin": 0.0,
+    "zmax": 0.34
+  },
+  "observable_names": [
+    "center_of_mass_x_over_tank_length",
+    "center_of_mass_y_over_tank_width",
+    "center_of_mass_z_over_tank_height",
+    "kinetic_energy_over_initial_potential_energy",
+    "active_mass_over_initial_native_mass",
+    "obstacle_approach_mass_fraction",
+    "downstream_mass_fraction",
+    "front_bypass_mass_fraction",
+    "back_bypass_mass_fraction",
+    "rejoin_mass_fraction",
+    "downstream_lateral_centroid_over_tank_width",
+    "minimum_obstacle_clearance_over_tank_length",
+    "returning_mass_fraction"
+  ],
+  "event_names": [
+    "approach",
+    "downstream",
+    "split",
+    "rejoin",
+    "return"
+  ],
+  "event_window": {
+    "initial_time_max_s": 2.2,
+    "maximum_extended_time_max_s": 4.4,
+    "completion": "horizon reached + approach/downstream/split/rejoin/return + gravity-time tail"
+  },
+  "checks": {
+    "worker_execute_calls_wall_penetration": true,
+    "worker_execute_accumulates_obstacle_frames": true,
+    "worker_execute_accumulates_saved_chords": true,
+    "worker_wall_spec_has_full_obstacle": true,
+    "observer_uses_finite_obstacle_distance": true,
+    "observer_marks_geometry_aware": true,
+    "observer_requires_horizon_return_tail": true,
+    "evaluator_requires_event_complete": true,
+    "evaluator_reads_actual_run_metrics": true
+  },
+  "all_checks_pass": true,
+  "limitations": [
+    "observer calibration is manufactured geometry evidence, not external physical validation",
+    "H1 prepared matrix/jobs are not H3 inputs because their boundary recipe is native DBC",
+    "qualification remains false until H3 canary, all 15 products, and comparator gates pass"
+  ]
+}

@@ -1,0 +1,287 @@
+{
+  "schema": "core.f2.receiver_overflow_weir.runtime_prepared_proposal.v1",
+  "created_at_utc": "2026-09-20T15:22:41.030231+00:00",
+  "scope_id": "F2_receiver_overflow_weir_v1",
+  "revision_id": "F2_receiver_overflow_weir_mdbc_v1",
+  "status": "prepared_proposal_not_runtime_authorized",
+  "qualification_claim": "none",
+  "matrix_credit": 0,
+  "candidate_contract": {
+    "schema": "core.f2.receiver_overflow_weir.adapter_contract.v1",
+    "created_at_utc": "2026-09-20T15:22:40.606233+00:00",
+    "scope_id": "F2_receiver_overflow_weir_v1",
+    "revision_id": "F2_receiver_overflow_weir_mdbc_v1",
+    "status": "adapter_contract_only_root_review_required",
+    "candidate": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/candidate-card-v1.json",
+      "sha256": "7820661d6e2921137c3e6fc3306e2312ec5f9e532dd0233c5f88325434e26abc",
+      "matrix_rows": 15,
+      "matrix_credit": 0,
+      "qualification_claim": "none"
+    },
+    "native_anchor": {
+      "preflight_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/cpu-native-preflight-v1.json",
+      "preflight_sha256": "b1507eca9120d85a6ea620d7be2c42321b3eff3deb29267be25f6fcc00d45127",
+      "definition_sha256": "dc5908b2e88d0384fc01801ce043ec389052431f80271e766b1571d9168bae21",
+      "native_bi4_sha256": "5f7eb737b08009d2c8b899e128f6d75fd243d9e78131cbbc8addd73a6e720292",
+      "fluid_particles": 228480,
+      "boundary_particles": 245667,
+      "zero_normals": 0,
+      "native_mass_error": -0.00390625
+    },
+    "observer_contract": {
+      "weir_x_m": 0.78,
+      "receiver_region_m": {
+        "xmin": 0.78,
+        "xmax": 1.56,
+        "ymin": 0.04,
+        "ymax": 0.46,
+        "zmin": 0.0,
+        "zmax": 0.8
+      },
+      "event_mass_fraction": 0.01,
+      "sustained_contact_s": 0.2,
+      "future_state_access": false,
+      "trajectory_product_required": true
+    },
+    "execution_controls": {
+      "solver_invoked": false,
+      "gpu_invoked": false,
+      "queue_mutation": 0,
+      "central_ledger_mutation": 0,
+      "central_registry_mutation": 0,
+      "runtime_submission": false
+    },
+    "root_review": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/root-review-only-job-spec-v2.json",
+      "submit_allowed": false,
+      "adapter_runtime_authorized": false
+    },
+    "adapter": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2_receiver_overflow_weir_v1.py",
+      "sha256": "cb21fffbf8de336361e451504e1ea81f580250680d124b1847d0fffc74673721",
+      "mode": "contract_and_pure_observer_only",
+      "solver_calls": 0,
+      "queue_mutations": 0,
+      "ledger_mutations": 0,
+      "registry_mutations": 0
+    }
+  },
+  "config": {
+    "family": "F2",
+    "scope_id": "F2_receiver_overflow_weir_v1",
+    "revision_id": "F2_receiver_overflow_weir_mdbc_v1",
+    "case_id": "F2_receiver_overflow_weir_q0p5_anchor",
+    "recipe": "mdbc_native",
+    "recipe_id": "F2_receiver_overflow_weir_mdbc_v1",
+    "stage": "anchor_proposal",
+    "design_cell": "anchor",
+    "qualification_only": true,
+    "parameter": {
+      "name": "weir_crest_height_m",
+      "q": 0.5,
+      "value": 0.26,
+      "mapping": "crest_height_m=0.20+0.12*q"
+    },
+    "dp_m": 0.0075,
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_velocity_m_s": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "continuum_geometry": {
+      "outer_tank": {
+        "low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          1.6,
+          0.5,
+          0.8
+        ],
+        "faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "mkbound": 0
+      },
+      "internal_weir": {
+        "low_m": [
+          0.72,
+          0.04,
+          0.0
+        ],
+        "size_m": [
+          0.06,
+          0.42,
+          0.26
+        ],
+        "crest_height_anchor_m": 0.26,
+        "faces": [
+          "top",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "mkbound": 1
+      },
+      "receiver": {
+        "region_m": {
+          "xmin": 0.78,
+          "xmax": 1.56,
+          "ymin": 0.04,
+          "ymax": 0.46,
+          "zmin": 0.0,
+          "zmax": 0.8
+        },
+        "containment": "outer tank floor and side walls; top open",
+        "initial_fluid": false
+      }
+    },
+    "source_label_semantics": "native numerical source identity; no material qualification",
+    "physical_case_id": "F2_receiver_overflow_weir_q0p5_anchor",
+    "lineage_group_id": "F2_receiver_overflow_weir_v1",
+    "wall_spec": {
+      "container_interior": {
+        "xmin": 0.0,
+        "xmax": 1.6,
+        "ymin": 0.0,
+        "ymax": 0.5,
+        "zmin": 0.0,
+        "zmax": 0.8
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "obstacles": [
+        {
+          "id": "internal_weir",
+          "xmin": 0.72,
+          "xmax": 0.78,
+          "ymin": 0.04,
+          "ymax": 0.45999999999999996,
+          "zmin": 0.0,
+          "zmax": 0.26
+        }
+      ],
+      "runtime_domain": {
+        "xmin": -0.3,
+        "xmax": 1.9,
+        "ymin": -0.15,
+        "ymax": 0.65,
+        "zmin": -0.15,
+        "zmax": 1.2
+      }
+    },
+    "runtime_domain": {
+      "xmin": -0.3,
+      "xmax": 1.9,
+      "ymin": -0.15,
+      "ymax": 0.65,
+      "zmin": -0.15,
+      "zmax": 1.2
+    },
+    "time_max_s": 1.5,
+    "output_interval_s": 0.01,
+    "event_window": {
+      "initial_time_max_s": 1.5,
+      "maximum_extended_time_max_s": 3.0,
+      "extension_policy": "one whole scope extension only after a complete hard pass; event censoring remains in the denominator",
+      "event_completion_required": true
+    }
+  },
+  "sampling": {
+    "fluid_boxes": [
+      {
+        "continuous_low_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "continuous_size_m": [
+          0.64,
+          0.42,
+          0.36
+        ],
+        "continuous_mass_kg": 96.768,
+        "discrete_mass_kg": 96.39,
+        "particle_count": 228480,
+        "mkfluid": 1,
+        "native_cell_centre_sampling": true
+      }
+    ],
+    "expected_fluid_particles": 228480,
+    "continuous_mass_kg": 96.768,
+    "sampled_mass_kg": 96.39,
+    "mass_policy": "native rho*dp^3; no mass rescaling"
+  },
+  "native_initial": {
+    "definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/CORE_F2_receiver_overflow_weir_q0p50000000_crest0p26000000_dp0p007500000000_Def.xml",
+    "definition_sha256": "dc5908b2e88d0384fc01801ce043ec389052431f80271e766b1571d9168bae21",
+    "generated_prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/generated_v4/CORE_F2_receiver_overflow_weir_q0p50000000_crest0p26000000_dp0p007500000000",
+    "native_bi4": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/generated_v4/CORE_F2_receiver_overflow_weir_q0p50000000_crest0p26000000_dp0p007500000000.bi4",
+    "native_bi4_sha256": "5f7eb737b08009d2c8b899e128f6d75fd243d9e78131cbbc8addd73a6e720292",
+    "native_metadata": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/generated_v4/CORE_F2_receiver_overflow_weir_q0p50000000_crest0p26000000_dp0p007500000000_.xml",
+    "native_metadata_sha256": "09a38f51705160c0c6321a01351576faacae44fe655ed8491a47e0884199fc55",
+    "decoder": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+    "decoder_sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+    "boundary_particles": 245667,
+    "fluid_particles": 228480,
+    "total_particles": 474147,
+    "dp_m": 0.0075,
+    "native_mass_fluid_kg": 96.39,
+    "initial_time_s": 0.0,
+    "normal_decode_probe": "passed"
+  },
+  "preflight_pass": true,
+  "generated_prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/generated_v4/CORE_F2_receiver_overflow_weir_q0p50000000_crest0p26000000_dp0p007500000000",
+  "solver_binary": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+  "solver_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+  "decoder": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+  "decoder_sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+  "solver_arguments": [
+    "-mdbc_noslip:1"
+  ],
+  "input_hashes": {
+    "candidate_card": "7820661d6e2921137c3e6fc3306e2312ec5f9e532dd0233c5f88325434e26abc",
+    "fixed_matrix": "c90ee044c3e7305fcc9a94326eaf49f9ec1ffc8c5da4a149effdb68cab3b628e",
+    "failure_denominator": "ff8a1443ea4d8075bf75e51be5a0bc84dded62f7dc1a834ba79736635d7d0a1f",
+    "lineage": "e9f07666fc0cb36d05c583869c1c9f8861522b154763a564f84fba70f01332a8",
+    "cpu_native_preflight": "b1507eca9120d85a6ea620d7be2c42321b3eff3deb29267be25f6fcc00d45127",
+    "root_review_only_job_spec_v2": "94d645b571e723515bbb60adee32e726f8bd097012deb8bc290e834a9ef029f8",
+    "adapter": "cb21fffbf8de336361e451504e1ea81f580250680d124b1847d0fffc74673721",
+    "runtime_preparation_script": "b3b18d275f16cb71bfe59c2383433f00b712d4e5486b600ef49ee2b6acb360fa",
+    "definition": "dc5908b2e88d0384fc01801ce043ec389052431f80271e766b1571d9168bae21",
+    "native_bi4": "5f7eb737b08009d2c8b899e128f6d75fd243d9e78131cbbc8addd73a6e720292",
+    "native_metadata": "09a38f51705160c0c6321a01351576faacae44fe655ed8491a47e0884199fc55"
+  },
+  "execution_controls": {
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "runtime_preparation_authorized": false,
+    "submit_allowed": false
+  },
+  "root_review_required": true,
+  "interpretation_boundary": "proposal only; no solver product, event result, T1 credit, or qualification claim"
+}

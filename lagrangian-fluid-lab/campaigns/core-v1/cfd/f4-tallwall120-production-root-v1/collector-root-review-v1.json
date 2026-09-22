@@ -1,0 +1,31 @@
+{
+  "schema": "core.code_review.v1",
+  "created_at": "2026-09-19T22:09:33.025612+00:00",
+  "files": [
+    {
+      "path": "scripts/core_f4_tallwall120_production_collector.py",
+      "sha256": "fa6325abf2144120918339099e76fc7f592321aa479b37db6c21b76f4b0bcc1d"
+    },
+    {
+      "path": "scripts/core_cfd_dataset.py",
+      "sha256": "9a8b5ed364735804cc66521060ed04a18845a80bd95870d2727eda5392997523"
+    },
+    {
+      "path": "tests/test_core_f4_tallwall120_production_collector.py",
+      "sha256": "7ae59d2fed7f98a7ea7a5066b41318770357b6874e58d0458bcb4c9325cd95bf"
+    }
+  ],
+  "status": "changes_requested",
+  "findings": [
+    {
+      "id": "qualification-evidence-chain",
+      "function": "_validate_qualification",
+      "finding": "The collector checks summary T1/matrix_complete/binding.verified flags and outer file hash, but does not independently validate the underlying qualification evidence before formal release. A rehashed fabricated receipt can satisfy this local gate.",
+      "required_change": "Reuse connector evidence validation for formal release and add a forged, consistently rehashed receipt regression test."
+    }
+  ],
+  "formal_release_approved": false,
+  "diagnostic_case08_retained": true,
+  "owner": "root",
+  "assigned_to": "luna_ml"
+}

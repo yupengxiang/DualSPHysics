@@ -1,0 +1,119 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f2-h2-v5-qualification-batch8-cell00",
+  "logical_id": "f2-h2-v5-qualification-batch8-cell00",
+  "attempt_role": "f2_h2_v5_qualification_batch8_draft",
+  "category": "qualification_batch_draft",
+  "host": "scheduler-selected",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "submission_status": "blocked_pending_root_review",
+  "root_review_required": true,
+  "argv": [],
+  "runtime_prepare_argv_template": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_h2_mdbc_static_range_v5_runtime.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "prepare-runtime",
+    "--source-prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/prepared-20260920-v5-all/cells/00-CORE_F2_H2_mdbc_static_range_v5_q0p00000000_dp0p010000000000_spatial/prepared.json",
+    "--candidate",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-candidate-v5.json",
+    "--matrix",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/prepared-20260920-v5-all/matrix-preparation.json",
+    "--admission",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5-batch8-root-review-v1/admission.json",
+    "--root-review",
+    "<new-eight-cell-root-review>",
+    "--output",
+    "{attempt_dir}/runtime",
+    "--cell-index",
+    "0"
+  ],
+  "run_argv_template": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_h2_mdbc_static_range_v5_runtime.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "{attempt_dir}/runtime/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/prepared.json",
+    "product/worker-status.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 20480,
+    "gpu_peak_mib": 8192,
+    "io_weight": 1
+  },
+  "timeout_seconds": 3600,
+  "depends_on": [],
+  "qualification_claim": "none",
+  "qualification_only": true,
+  "family": "F2",
+  "scope_id": "F2_H2_mdbc_static_range_qualification_v5",
+  "revision_id": "F2_H2_mdbc_static_range_mdbc_v5_top_layer_lateral_lattice",
+  "cell_index": 0,
+  "prepared_case_id": "CORE_F2_H2_mdbc_static_range_v5_q0p00000000_dp0p010000000000_spatial",
+  "prepared_source": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/prepared-20260920-v5-all/cells/00-CORE_F2_H2_mdbc_static_range_v5_q0p00000000_dp0p010000000000_spatial/prepared.json",
+    "sha256": "7c8faf325a832dd695946ebf4805a2db18b973ebd34b2dc89884fb5c09228ea5"
+  },
+  "registered_denominator": 15,
+  "batch_index": 0,
+  "batch_size": 8,
+  "solver_launch_authorized": false,
+  "gpu_launch_authorized": false,
+  "job_spec_creation_authorized": false,
+  "queue_mutation_authorized": false,
+  "ledger_mutation_authorized": false,
+  "registry_mutation_authorized": false,
+  "qualification_matrix_expanded": false,
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5-batch8-root-review-v1/admission.json",
+      "sha256": "c328698e0f3b886bb1dc9c2a50eecd2db1bd351bb48b7228ceca8364ff7bc12a",
+      "bytes": 4740,
+      "role": "batch admission"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-candidate-v5.json",
+      "sha256": "b0b1691aa24f2db3b5ee886a6fea917a63fd2784219e33d983393f8607433f33",
+      "bytes": 15909,
+      "role": "v5 candidate card"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/prepared-20260920-v5-all/matrix-preparation.json",
+      "sha256": "d82e019cd59d26dbed6846912371062206b6e6ef4b83568537d822a9fa8f0495",
+      "bytes": 54885,
+      "role": "v5 fifteen-row matrix"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/prepared-20260920-v5-all/cells/00-CORE_F2_H2_mdbc_static_range_v5_q0p00000000_dp0p010000000000_spatial/prepared.json",
+      "sha256": "7c8faf325a832dd695946ebf4805a2db18b973ebd34b2dc89884fb5c09228ea5",
+      "bytes": 26496,
+      "role": "v5 CPU/native prepared cell"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_h2_mdbc_static_range_v5_runtime.py",
+      "sha256": "6e65078ec7756d0f485d837578dac1fd299e1ae7c0728a5f11ff4815863aa97b",
+      "bytes": 23962,
+      "role": "runtime adapter"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_h2_mdbc_static_range_v5_batch.py",
+      "sha256": "ad8a01fb749b0ca9e451a076466cdb06c169e254a5246ed5c788ef7997fc96ba",
+      "bytes": 31967,
+      "role": "independent batch adapter"
+    }
+  ]
+}

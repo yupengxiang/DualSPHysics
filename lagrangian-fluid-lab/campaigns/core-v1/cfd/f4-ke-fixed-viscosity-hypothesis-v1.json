@@ -1,0 +1,51 @@
+{
+  "candidate_recipe": {
+    "Visco": 1e-06,
+    "ViscoTreatment": 3,
+    "interpretation": "explicit candidate physical viscosity, not equivalent to the artificial coefficient .05",
+    "viscosity_units": "m2/s"
+  },
+  "decision": "one full-window production-resolution hard-integrity canary first; only if viable, preregister fresh three-resolution/reference study; no T1 inherited",
+  "evidence": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-q1-energy-forensics.json",
+      "sha256": "f4135c86fdf4025bde8bfbc2b471d1bb7bd8db52f34b433934dfa70da2062059"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-q1-three-resolution-diagnostic.json",
+      "sha256": "cc59bae6ad4337613bfdfe7d6c16ffcfad125c4b911c49af5c92d15902738736"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-qhalf-three-resolution-diagnostic.json",
+      "sha256": "ea849d579e414345f4417701f551b2b401a15b7c07e69e47fbc06a65cc50a7ca"
+    }
+  ],
+  "existing_recipe": {
+    "Visco": 0.05,
+    "ViscoTreatment": 1
+  },
+  "failure_policy": "retain all original cells and gates; no tolerance adjustment; at most two evidenced repair hypotheses for this mechanism",
+  "family": "F4",
+  "first_canary": {
+    "boundary": "same mDBC no-slip",
+    "dp_m": 0.0075,
+    "geometry_and_continuous_initial_state": "same resting-pool scope",
+    "output_interval_s": 0.02,
+    "q": 1.0,
+    "time_controls": "unchanged unless stability preflight rejects, in which case retain failure",
+    "time_max_s": 4.34
+  },
+  "hypothesis_id": "F4_KE_H1_fixed_physical_laminar_viscosity",
+  "mechanism": "nonmonotone KE refinement under artificial viscosity",
+  "qualification_claim": "none",
+  "registered_at": 1789817671.0327227,
+  "resource_prior": {
+    "cpu_cores": 2,
+    "gpu_peak_mib_reservation": 4096,
+    "production_reference_solver_seconds": 4233.39,
+    "ram_mib": 16384,
+    "runtime_uncertainty": "new viscosity formulation can change stability/time-step cost"
+  },
+  "schema": "core.repair_hypothesis.v1",
+  "status": "hypothesis_registered_not_prepared_or_executed"
+}

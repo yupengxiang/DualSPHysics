@@ -1,0 +1,217 @@
+{
+  "schema": "core.f2.third_family_next_step_candidate.v1",
+  "created_at": "2026-09-20T04:52:24.281518Z",
+  "family": "F2",
+  "status": "candidate_handoff_root_review_only",
+  "qualification_claim": "none; no F2 T1 qualification is established by this handoff",
+  "core_gate": {
+    "current_registered_t1_families": [
+      "F3",
+      "F4"
+    ],
+    "required_t1_family_count": 3,
+    "candidate_family": "F2",
+    "candidate_can_satisfy_third_family_conditionally": true,
+    "condition": "the separately registered 15-cell static full-cup volume matrix must be freshly materialized, pass all hard/static/event/comparator gates, and then be accepted by the Core qualification evaluator",
+    "dynamic_f2_is_not_promoted": true
+  },
+  "execution_controls": {
+    "read_only_audit": true,
+    "gen_case_run_by_this_handoff": false,
+    "decoder_run_by_this_handoff": false,
+    "solver_run_by_this_handoff": false,
+    "gpu_launched_by_this_handoff": false,
+    "central_queue_mutation": 0,
+    "central_ledger_mutation": 0,
+    "central_registry_mutation": 0,
+    "matrix_materialized": false,
+    "matrix_submitted": false
+  },
+  "dynamic_f2_audit": {
+    "five_second_terminal": {
+      "path": "campaigns/core-v1/cfd/f2-dbc-slow-duration-q1p0-terminal-root-v1/terminal-evidence-v2.json",
+      "sha256": "9ecada1f5c88a69ef8f2a2bc2e4426e570e16a22b570f548b228a820988caf05",
+      "bytes": 26534,
+      "hard_integrity_pass": true,
+      "requested_horizon_reached": true,
+      "event_window_complete": false,
+      "qualified": false,
+      "settled_event_time_s": null,
+      "decision": "preserve negative canary; no dynamic F2 promotion"
+    },
+    "five_second_forensics": {
+      "path": "campaigns/core-v1/cfd/f2-dbc-slow-duration-q1p0-terminal-root-v1/forensics-v1.json",
+      "sha256": "c34a5d8e4044086d1f84b8c11e4db9d41035592b6314fb7d87930c5148420bcf",
+      "bytes": 6693,
+      "read_only": true,
+      "repair_candidate_count": 1,
+      "same_boundary_retry_withheld": true,
+      "threshold_change_supported": false
+    },
+    "ten_second_extension": {
+      "proposal": {
+        "path": "campaigns/core-v1/cfd/f2-dbc-slow-duration-extension10s-canary-proposal-v1.json",
+        "sha256": "6571af799638173dd7aa46dfb392643c39dfd7f7248dbf971775664fc426d7c0",
+        "bytes": 5693
+      },
+      "preflight": {
+        "path": "campaigns/core-v1/cfd/f2-dbc-slow-duration-extension10s-preflight-v1.json",
+        "sha256": "97da91db7a947da970d6e83630e9ecab8620088c192caedec2582b8999fede60",
+        "bytes": 6484,
+        "preflight_pass": true,
+        "solver_product_present": false,
+        "submission_status": "not_submitted_by_subagent"
+      },
+      "audit": {
+        "path": "campaigns/core-v1/cfd/f2-dbc-slow-duration-extension10s-canary-root-v1/product/audit.json",
+        "sha256": "7680e60cbbc581aa8e690b8db7812d62ca1b02bcd41a772ad3fbde587c19aad7",
+        "bytes": 27734,
+        "hard_integrity_pass": true,
+        "requested_horizon_reached": true,
+        "event_window_complete": false,
+        "qualified": false,
+        "settled_event_time_s": null
+      },
+      "scientific_lock": {
+        "path": "campaigns/core-v1/cfd/f2-dbc-slow-duration-extension10s-archives-v1/scientific-audit-lock-v1.json",
+        "sha256": "cd51bfc32e1e94465fcb97cba2b46497aaeaad9ecd64c8ba86b0fbbbaae4a1e7",
+        "bytes": 7160,
+        "decision": "negative_dynamic_canary_incomplete_event_window",
+        "next_action": "hold; no production or T1 promotion until the event window is scientifically complete and reviewed"
+      }
+    },
+    "repair_budget_conclusion": "the DBC 5 s result and its registered one-time 10 s extension both retain native identities and hard geometry integrity but never observe settled; no further horizon, threshold, survivor, material, or same-boundary retry is admitted by this handoff"
+  },
+  "candidate": {
+    "card": {
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-volume-hold-candidate-v1.json",
+      "sha256": "fcbaa77fe28c2ec43a4fd7eb28023555d15a520439f31b01151600cc0342c26f",
+      "bytes": 16996,
+      "role": "existing registered design-only candidate card"
+    },
+    "candidate_id": "F2_static_full_cup_volume_hold",
+    "scope_id": "F2_static_full_cup_volume_hold_x_v1",
+    "revision_id": "F2_static_full_cup_volume_hold_qualification_v1",
+    "status": "design_only_anchor_canary_supported",
+    "qualification_only": true,
+    "qualified": false,
+    "physical_difference_from_failed_dynamic_scope": "zero-motion full-cup resting hold with initial liquid volume as the declared control axis",
+    "registered_design": {
+      "cell_count": 15,
+      "qualification_q": [
+        0.0,
+        0.5,
+        1.0
+      ],
+      "held_out_q": [
+        0.25,
+        0.75
+      ],
+      "resolutions_m": [
+        0.01,
+        0.0075,
+        0.005
+      ],
+      "temporal_rows": [
+        "internal_time",
+        "native_output"
+      ],
+      "registered_window_s": 0.6,
+      "static_settle_hold_s": 0.2,
+      "matrix_materialized": false,
+      "prepared_count": 0,
+      "job_count": 0,
+      "all_cell_statuses": [
+        "design_only_unprepared"
+      ]
+    },
+    "launch_policy": {
+      "gpu_submit": false,
+      "ledger_submit": false,
+      "root_review_required": true,
+      "candidate_canary_relaunch": false,
+      "qualification_claim_allowed_now": false
+    },
+    "scope_boundary": [
+      "a pass would establish only a resting full-cup numerical F2 family",
+      "it cannot qualify rotating-cup motion, receiver transfer, spill, or catchment dynamics",
+      "the passed static anchor is a canary and is excluded from the 15-cell numerator"
+    ]
+  },
+  "dependency_closure": [
+    {
+      "path": "campaigns/core-v1/cfd/f2-third-family-review-v1.json",
+      "sha256": "5610df06f552c407fcb1fbcbd164b4d7bed5526b55b6228bce7ec0d9499ab34e",
+      "bytes": 8359,
+      "role": "prior read-only F2 repair-budget review; identifies static route as remaining legal path"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-full-cup-v3-static-hold-root-integration-v1.json",
+      "sha256": "5d8cc041fa63f80401105e1d6884a0c77004326f6c85f6309e9bd82df0dfc589",
+      "bytes": 1312,
+      "role": "passed static anchor integration receipt"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/prepared.json",
+      "sha256": "2bb1dac4bef30bea2926184641c9d4f3a18895b5b9468ac86b14cbbe28f256c7",
+      "bytes": 18016,
+      "role": "frozen full-cup static anchor prepared input"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/static-preflight.json",
+      "sha256": "8e6d30ccf7ea3c1e4f1e56de400411671590f6696b7c4d338cbd1ff3ada1142d",
+      "bytes": 3954,
+      "role": "decoded native no-overlap and mass preflight"
+    },
+    {
+      "path": "scripts/core_f2.py",
+      "sha256": "0800a84d32e4a519f25925f738e3334e8a2c3a3dd54548968f9796cd910110bd",
+      "bytes": 19417,
+      "role": "static F2 preparation/observer dependency"
+    },
+    {
+      "path": "scripts/core_f2_resting_fill.py",
+      "sha256": "4ff6a0fcc03d97ca073e68a696ffbf393b0bd9ddb49903df7271c8f98e7a6de2",
+      "bytes": 43125,
+      "role": "static anchor observer dependency"
+    },
+    {
+      "path": "scripts/f2_resting_fill_side_wet_v3.py",
+      "sha256": "c42f9ef249ede7c3a77c82f5403de345155f7f80cebf4931029c33d98ae299e1",
+      "bytes": 25817,
+      "role": "static anchor CPU preparation dependency"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+      "bytes": 159206984,
+      "role": "pinned solver binary for a future root-controlled run"
+    },
+    {
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+      "bytes": 324368,
+      "role": "pinned native decoder for a future root-controlled preflight"
+    }
+  ],
+  "admission_gates": [
+    "root review must accept the candidate card and its independent static scope",
+    "if accepted, every one of the 15 cells must be freshly generated and decoded with its own hash closure",
+    "all registered hard integrity, static event, spatial comparator, temporal comparator, and held-out gates must remain unchanged",
+    "no anchor trajectory may be reused as a matrix numerator and no native mass may be rescaled",
+    "failure of any cell retains the failure in the fixed denominator and blocks F2 T1 registration"
+  ],
+  "next_step": {
+    "decision": "candidate_available_for_root_review",
+    "safe_action": "review this candidate card and dependency closure; a later root-authorized step may CPU-prepare/decode all 15 cells before any worker submission",
+    "execution_status": "candidate_card_and_dependencies_only",
+    "not_executed": [
+      "no GenCase",
+      "no decoder",
+      "no solver",
+      "no GPU submission",
+      "no matrix job creation",
+      "no registry, ledger, or queue mutation"
+    ]
+  }
+}

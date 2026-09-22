@@ -1,0 +1,116 @@
+{
+  "schema": "core.f2.h2_mdbc.static_range_v5.batch_admission.v1",
+  "created_at_utc": "2026-09-20T18:29:48.498843+00:00",
+  "family": "F2",
+  "scope_id": "F2_H2_mdbc_static_range_qualification_v5",
+  "revision_id": "F2_H2_mdbc_static_range_mdbc_v5_top_layer_lateral_lattice",
+  "candidate_id": "F2_H2_mdbc_static_range_qualification_v5",
+  "status": "root_review_ready",
+  "decision": "eligible_for_root_review_only",
+  "qualification_only": true,
+  "qualified": false,
+  "T1_numerical": false,
+  "fixed_denominator": {
+    "registered_cell_denominator": 15,
+    "all_rows_in_denominator": true,
+    "failed_rows_retained": true,
+    "unprepared_rows_are_not_successes": true,
+    "survivor_renormalization": false,
+    "qualification_requires": "15/15 independent rows; first batch cannot claim T1"
+  },
+  "batch": {
+    "stage": "first_8_of_fixed_15",
+    "requested_size": 8,
+    "requested_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "case_ids": [
+      "CORE_F2_H2_mdbc_static_range_v5_q0p00000000_dp0p010000000000_spatial",
+      "CORE_F2_H2_mdbc_static_range_v5_q0p00000000_dp0p007500000000_spatial",
+      "CORE_F2_H2_mdbc_static_range_v5_q0p00000000_dp0p005000000000_spatial",
+      "CORE_F2_H2_mdbc_static_range_v5_q0p50000000_dp0p010000000000_spatial",
+      "CORE_F2_H2_mdbc_static_range_v5_q0p50000000_dp0p007500000000_spatial",
+      "CORE_F2_H2_mdbc_static_range_v5_q0p50000000_dp0p005000000000_spatial",
+      "CORE_F2_H2_mdbc_static_range_v5_q1p00000000_dp0p010000000000_spatial",
+      "CORE_F2_H2_mdbc_static_range_v5_q1p00000000_dp0p007500000000_spatial"
+    ],
+    "remaining_scope_indices": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "fixed_8_to_32_compatible": false,
+    "fixed_8_to_32_note": "the Core 8-to-32 production rule is not this scope's qualification denominator; v5 remains a fixed fifteen-row qualification scope"
+  },
+  "source_closure": {
+    "candidate": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-candidate-v5.json",
+      "sha256": "b0b1691aa24f2db3b5ee886a6fea917a63fd2784219e33d983393f8607433f33",
+      "bytes": 15909,
+      "role": "v5 candidate card"
+    },
+    "matrix": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/prepared-20260920-v5-all/matrix-preparation.json",
+      "sha256": "d82e019cd59d26dbed6846912371062206b6e6ef4b83568537d822a9fa8f0495",
+      "bytes": 54885,
+      "role": "v5 fifteen-row CPU/native matrix"
+    },
+    "canary": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5/runtime-canary-evidence-cell11-v1.json",
+      "sha256": "28bb42c91cc00c293a0be7d17570cf39c6e080e66c37f86447fe5a8cbe792735",
+      "bytes": 4535,
+      "role": "cell-11 runtime canary, zero credit"
+    },
+    "adapter": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_h2_mdbc_static_range_v5_batch.py",
+      "sha256": "ad8a01fb749b0ca9e451a076466cdb06c169e254a5246ed5c788ef7997fc96ba",
+      "bytes": 31967,
+      "role": "independent batch admission/collector code"
+    }
+  },
+  "cell11_canary": {
+    "status": "completed_bounded_runtime_canary",
+    "hard_integrity_pass": true,
+    "event_window_complete": false,
+    "matrix_credit": 0,
+    "qualification_claim": "none"
+  },
+  "root_review": {
+    "status": "approved",
+    "review": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v5-runtime-root-review-batch8-v1.json",
+      "sha256": "c7059bb4d52998af1da31297fc035fd4304c2e7204dea1511f0bc0db0dca5e30",
+      "bytes": 4596,
+      "role": "eight-cell root review"
+    }
+  },
+  "authorization": {
+    "solver_launch": false,
+    "gpu_launch": false,
+    "job_spec_creation": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "material_training": false,
+    "model_training": false,
+    "submission_status": "not_submitted"
+  },
+  "failure_policy": {
+    "preflight_failure": "retain row in fixed fifteen-row denominator",
+    "infrastructure_failure": "retain receipt and classify separately; never drop row",
+    "hard_integrity_failure": "retain audit and prohibit same-input retry",
+    "event_censor": "retain row as failure; no horizon extension or threshold relaxation",
+    "successful_batch_rows": "zero qualification credit until all fifteen rows pass"
+  }
+}

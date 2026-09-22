@@ -1,0 +1,45 @@
+{
+  "schema": "core.f1.suspended_obstacle_gap.candidate_card.v1",
+  "scope_id": "F1_suspended_obstacle_gap_v1",
+  "revision_id": "F1_suspended_obstacle_gap_mdbc_v1",
+  "family": "F1",
+  "candidate_status": "root_review_only_cpu_native_preflight_pass",
+  "qualification_claim": "none",
+  "admission": {"root_review_admissible": true, "solver_submission_status": "protected_job_spec_only_not_submitted", "central_registry_mutated": false, "central_ledger_mutated": false},
+  "mechanism": {
+    "class": "physical_geometry_free_standing_obstacle",
+    "hypothesis": "A fixed obstacle lifted 0.06 m above the tank bottom exposes a fluid corridor below it and removes the贴底 contact topology that failed H1-H4; gravity-driven approach/split/rejoin remains dynamic.",
+    "scientific_difference": ["Continuum obstacle z-range changes from [0.00,0.34] m to [0.06,0.40] m.", "setmkvoid and mDBC shell both move, so the bottom gap is a real fluid domain rather than a repaired contact face.", "Source fill, gravity, mDBC no-slip semantics and registered event observer remain fixed."],
+    "disallowed_shortcuts_not_used": ["no static hold", "no repeated input: new scope/case identity and changed physical geometry", "no threshold relaxation", "no horizon extension before the 2.20 s window", "no survivor renormalization or point-diagnostic credit"]
+  },
+  "fixed_geometry": {
+    "tank": {"low_m": [0.0,0.0,0.0], "size_m": [1.2,0.4,0.6]},
+    "obstacle": {"id": "suspended_center_obstacle", "low_m": [0.68,0.15,0.06], "size_m": [0.12,0.1,0.34], "high_m": [0.8,0.25,0.4]},
+    "bottom_fluid_gap_m": 0.06,
+    "initial_fluid_box": {"low_m": [0.04,0.04,0.04], "size_m": [0.34,0.32,0.46]},
+    "density_kg_m3": 1000.0,
+    "gravity_m_s2": [0.0,0.0,-9.81],
+    "boundary_semantics": "native mDBC with solid-side obstacle shell, obstacle setnormalinvert=false, tank inner-face construction retained",
+    "runtime_domain_m": {"xmin":-0.3,"xmax":1.5,"ymin":-0.099375,"ymax":0.496875,"zmin":-0.15,"zmax":1.8}
+  },
+  "one_dimensional_parameter": {"name":"initial_water_height_m", "coordinate":"q in [0,1]", "mapping":"h(q)=0.40+0.12*q m", "q_values":[0.0,0.5,1.0,0.25,0.75], "registered_range_m":[0.4,0.52]},
+  "resolutions_m": [0.01,0.0075,0.005],
+  "registered_window": {"initial_time_max_s":2.2,"maximum_extended_time_max_s":4.4,"output_interval_s":0.02,"extension_policy":"one whole-scope doubling only after a complete hard-pass canary is right-censored","event_completion_required":true},
+  "observer": {
+    "hard_integrity": ["requested horizon reached","no missing native fluid IDs","all active values finite","zero closed-wall endpoint violations","zero saved-frame chord crossings","zero obstacle penetration particle frames"],
+    "event": {"approach": ">=1% active mass within 2dp of obstacle footprint at/above obstacle top", "downstream": ">=5% active mass beyond obstacle xmax+2dp", "return": "COM x decreases >=max(0.02 m,2dp) after downstream and 0.1 s separation", "completion": "horizon reached, return observed, one gravity-time tail", "credit_policy": "hard-pass and complete event required; CPU/static/canary evidence has zero T1 credit"},
+    "mass": {"native_policy":"rho*dp^3","source_relative_error_max":0.025,"total_relative_error_max":0.03,"mass_rescaling":false}
+  },
+  "fixed_matrix": {"path":"campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/fixed-matrix-v1.json","cell_count":15,"spatial_cells":13,"temporal_cells":2,"denominator_policy":"all 15 rows remain in denominator regardless of outcome"},
+  "lineage": {
+    "parent_scope":"F1_single_obstacle_height_range_v1",
+    "parent_revisions":["F1_H1_obstacle_height_range_v1","F1_H2_mdbc_repair_v1","F1_H3_obstacle_bottom_face_mdbc_v1","F1_H4_obstacle_normal_orientation_v1"],
+    "source_definition":"campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/candidate/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face_Def.xml",
+    "lineage_clarification":"G1 retains tank, fill, gravity, solver controls and observer but changes continuum obstacle placement and void/shell geometry. It is a new physical-geometry scope, not a repair or replay of the exhausted H1-H4贴底 boundary class.",
+    "prior_failure_references":["campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/terminal-forensics-v1/root-terminal-gate-v1.json","campaigns/core-v1/cfd/f1-h3-obstacle-bottom-face-mdbc-canary-001/","campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/"],
+    "independence_from_other_families": {"F3":"F3 baffle exchange uses fixed internal baffle and source-side impulse/exchange; G1 is gravity-driven suspended obstacle with mDBC wall interaction and no prescribed source exchange.","F4":"F4 is drop/pool free-surface impact; G1 has no F4 drop trajectory or pool recipe.","unique_family_count_effect":"If qualified, G1 supplies the missing F1 family label; F3 baffle cannot create a third unique family."}
+  },
+  "preflight": {"path":"campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/cpu-native-preflight.json","claim":"one q=0.5, dp=0.0075 anchor; CPU GenCase plus native .bi4 decode","solver_run":false,"gpu_launched":false,"observed":{"fluid_particles":120658,"boundary_particles":142446,"zero_normals":0,"exact_fluid_boundary_overlap":0,"all_obstacle_face_signs_pass":true,"gap_geometry_pass":true}},
+  "resource_estimate": {"anchor_basis":"F1 H4 full-window retry: 305.30 s solver, 378.11 s total at dp=0.0075, 120658 fluid particles","protected_anchor_request":{"gpu_peak_mib":4096,"ram_mib":16384,"timeout_s":3600,"estimated_gpu_hours":0.12},"full_15_cell_upper_bound":{"gpu_hours":3.0,"wall_hours_serial":2.0,"note":"conservative H4 scaling; dp=0.005 rows have higher particle counts"},"cost_policy":"one protected anchor only after root review; do not submit matrix from this card"},
+  "root_review_dependencies":["review changed physical geometry and G1 event semantics","approve protected anchor spec without registry/ledger mutation","retain all prior F1/F2/F3 failures and denominators","only after a hard-pass complete anchor decide whether to materialize/submit 15-cell matrix"]
+}

@@ -1,0 +1,99 @@
+{
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/9b612d5b30e300b4c391b5843cc32f7c8086c53c83c879a74d907ef276cfd6af/lagrangian-fluid-lab/scripts/core_f2_qualification.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_ballistic_envelope_canary/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "attempt_role": "physics_based_ballistic_envelope_canary",
+  "category": "f2_dynamic_ballistic_envelope_canary",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "depends_on": [],
+  "domain_cost_estimate": {
+    "cell_dimensions": [
+      683,
+      529,
+      1083
+    ],
+    "cells": 391295481,
+    "estimated_gpu_cell_memory_mib": 5982,
+    "relative_cells_to_failed_generated_domain": 243.16,
+    "source_cell_size_m": 0.0195
+  },
+  "env": {
+    "PYTHONPATH": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/9b612d5b30e300b4c391b5843cc32f7c8086c53c83c879a74d907ef276cfd6af/lagrangian-fluid-lab:/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/9b612d5b30e300b4c391b5843cc32f7c8086c53c83c879a74d907ef276cfd6af/lagrangian-fluid-lab/scripts"
+  },
+  "family": "F2",
+  "host": "h200",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_ballistic_envelope_canary/prepared.json",
+      "sha256": "9ac6fec57ca99f4a7986e4c1a6288a096b7b7647ee9cf56bf3a083c7d8fbcded"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    }
+  ],
+  "job_id": "h200-f2-ballistic-envelope-canary-001",
+  "logical_id": "f2-pour-duration-ballistic-envelope-canary-001",
+  "mass_rescaling": false,
+  "maximum_extended_window_s": 5.0,
+  "parameter_axis": "rotation_duration_s",
+  "physical_geometry_changed": false,
+  "physics_basis": {
+    "gravity_m_s2": -9.81,
+    "horizon_s": 2.5,
+    "mass_rescaling": false,
+    "outward_margin_m": 0.5,
+    "physical_geometry_changed": false,
+    "unbounded_projection_max_m": [
+      5.5949228745348645,
+      4.9581413575907565,
+      0.86040312
+    ],
+    "unbounded_projection_min_m": [
+      -6.661849072934432,
+      -4.208418867899198,
+      -18.137911536362306
+    ],
+    "xy_model": "constant observed PartOut velocity",
+    "z_model": "observed PartOut velocity plus public gravity"
+  },
+  "prepared_case_id": "CORE_F2_pour_duration_q0p50000000_dp0p007500000000_ballistic_envelope_canary",
+  "qualification_claim": "none",
+  "qualification_status": "candidate-only; physics-based envelope diagnostic; F2 dynamic range remains unqualified",
+  "registered_window_s": 2.5,
+  "repair_candidate_id": "observed_partout_ballistic_full_window_envelope",
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "gpu_peak_mib": 12288,
+    "io_weight": 1,
+    "ram_mib": 32768
+  },
+  "revision_id": "F2_pour_duration_ballistic_envelope_canary_v1",
+  "schema": "core.cfd.job.v1",
+  "scope_id": "F2_pour_duration_ballistic_envelope_x_v1",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "source_snapshot": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/9b612d5b30e300b4c391b5843cc32f7c8086c53c83c879a74d907ef276cfd6af/lagrangian-fluid-lab",
+    "sha256": "9b612d5b30e300b4c391b5843cc32f7c8086c53c83c879a74d907ef276cfd6af"
+  },
+  "timeout_seconds": 14400,
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0"
+}

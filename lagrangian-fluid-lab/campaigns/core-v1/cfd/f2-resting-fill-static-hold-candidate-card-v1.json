@@ -1,0 +1,170 @@
+{
+  "schema": "core.f2.resting_fill_static_hold.candidate.v1",
+  "revision_id": "F2_resting_fill_static_hold_v1",
+  "family": "F2",
+  "scope_id": "F2_resting_fill_static_hold_x_v1",
+  "status": "proposal_only_unprepared",
+  "execution_status": "proposal_only",
+  "qualification_claim": "none",
+  "central_ledger_mutation": 0,
+  "gpu_launch_by_subagent": false,
+  "purpose": "independent initial-condition scope to remove the measured free-fall transient before any rotating-pour qualification design",
+  "supersedes_nothing": true,
+  "source_failure_context": {
+    "current_scope_not_relabelled": true,
+    "current_closed_catchment_scope": "F2_closed_catchment_geometry_x_v1",
+    "evidence": {
+      "initial_impact_forensics": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h0-initial-impact-forensics.json",
+        "sha256": "1bfb3ced181cf54912e051a25fb57eafb4e7b23b64bda8ed3dd59d127594b3cd"
+      },
+      "premotion_diagnostic": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/evidence/f2-closed-catchment-v2-h200/premotion-initial-state-diagnostic.json",
+        "sha256": "f62044d35109122e7821f5a5b653cf897373981b0dd407785086e56a773887ee"
+      },
+      "five_second_feasibility": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/evidence/f2-closed-catchment-v2-h200/five-second-feasibility-v1.json",
+        "sha256": "c251fb38ec1ad100146448c4557f8d4e812b0032d1ccd5718b92da22b67c57a1"
+      },
+      "trajectory": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/evidence/f2-closed-catchment-v2-h200/trajectory.h5",
+        "sha256": "92332173a43ba5eea8abb426281706d2908e7eb05e519062b4d9e054b1c2d540"
+      },
+      "observations": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/evidence/f2-closed-catchment-v2-h200/observations.json",
+        "sha256": "21915146d21b622841dfb32ffca91f29df4dabd0a8bcefd5da924061f384b505"
+      },
+      "audit": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/evidence/f2-closed-catchment-v2-h200/audit.json",
+        "sha256": "24e39fa129ac47c0240de505e78ea82efae3aa0f3015fc448872d9607a525765"
+      }
+    },
+    "measured_initial_bottom_gap_m": 0.05500000000000005,
+    "cup_floor_z_m": 0.65,
+    "initial_fluid_low_z_m": 0.7050000000000001,
+    "zero_initial_velocity": true,
+    "free_fall_reference": {
+      "gravity_m_s2": -9.81,
+      "time_to_floor_s": 0.10589168008061646,
+      "speed_at_floor_m_s": 1.0387973815908476
+    },
+    "pre_motion_evidence": {
+      "rotation_start_s": 0.5,
+      "outside_observation_mass_fraction_max": 0.04006058986010871,
+      "speed_p95_m_s_max": 1.9228316079199967,
+      "kinetic_over_initial_potential_max": 0.28575467006294863
+    },
+    "impact_evidence": {
+      "first_saved_near_bottom_s": 0.1000270820682417,
+      "peak_upward_vz_m_s": 6.014502048492432,
+      "peak_upward_vz_time_s": 0.1800150441235097
+    }
+  },
+  "physical_contract": {
+    "cup": {
+      "low": [
+        0.0,
+        -0.15,
+        0.65
+      ],
+      "size": [
+        0.425,
+        0.3,
+        0.45
+      ],
+      "motion_during_static_hold": "fixed angle 0 degrees"
+    },
+    "receiver": {
+      "low": [
+        0.45,
+        -0.3,
+        0.0
+      ],
+      "size": [
+        1.1,
+        0.6,
+        0.45
+      ]
+    },
+    "tray": {
+      "low": [
+        -0.6,
+        -0.55,
+        -0.2
+      ],
+      "size": [
+        2.6,
+        1.1,
+        0.1
+      ]
+    },
+    "gravity_m_s2": -9.81,
+    "continuum_wall_geometry_changed": false,
+    "fluid_initial_condition_changed": true,
+    "native_particle_count": 56115,
+    "native_mass_kg": 23.673516239068704,
+    "mass_policy": "native rho*dp^3; no mass rescaling",
+    "prescribed_rotation": "not active during static-hold canary; dynamic control is a later independent follow-up"
+  },
+  "initial_condition_recipe": {
+    "id": "hydrostatic_native_fill_at_cup_floor_clearance",
+    "fluid_boxes": "same x/y footprint and 0.33 m fill height as the retained F2 source, translated only in z for the independent initial-state scope",
+    "initial_velocity_m_s": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "initial_pressure": "hydrostatic initialization from the unchanged gravity/rho model; no fitted pressure or mass adjustment",
+    "native_boundary_reference": {
+      "dp_m": 0.0075,
+      "highest_generated_cup_bottom_boundary_layer_z_m": 0.6525,
+      "proposed_first_fluid_center_z_m": 0.665,
+      "proposed_physical_floor_clearance_m": 0.015,
+      "proposed_center_clearance_above_highest_boundary_layer_m": 0.0125,
+      "basis": "two dp above the physical cup floor and at least one dp above the highest native bottom boundary layer; exact generated no-overlap check is required before any launch"
+    },
+    "mass_and_geometry_preflight_required": true,
+    "no_overlap_required": true,
+    "unresolved_before_prepare": [
+      "exact native center lattice after z translation",
+      "hydrostatic pressure serialization",
+      "static-hold loss/settling evidence"
+    ]
+  },
+  "static_hold_canary": {
+    "duration_s": 0.6,
+    "output_interval_s": 0.02,
+    "cup_angle_degrees": 0.0,
+    "motion_file": "zero rotation / no prescribed motion",
+    "gates_reused_without_relaxation": {
+      "all_native_ids_retained": true,
+      "finite_arrays_and_native_mass_unchanged": true,
+      "cup_closed_wall_endpoint_and_saved_chord_frames": 0,
+      "outside_observation_mass_fraction_max": 0.01,
+      "settle_speed_p95_m_s": 0.1,
+      "settle_kinetic_over_initial_potential": 0.05,
+      "settle_hold_s": 0.2
+    },
+    "gate_policy": "diagnostic canary only; no existing F2 dynamic threshold is changed and no canary result grants T1 qualification",
+    "failure_policy": "preserve all missing IDs, wall events, and right-censored settling as negative evidence"
+  },
+  "followup_dynamic_scope": {
+    "status": "blocked_until_static_hold_passes_and_initial_state_is_frozen",
+    "rotation_duration_range_s": [
+      0.5,
+      1.2
+    ],
+    "registered_event_window_s": 2.5,
+    "maximum_extended_window_s": 5.0,
+    "requires_new_13_plus_2_registration": true,
+    "inherits_current_f2_qualification": false,
+    "qualification_claim": "none"
+  },
+  "launch_policy": {
+    "prepared": false,
+    "gpu_submit": false,
+    "matrix_submit": false,
+    "ledger_submit": false,
+    "next_action": "CPU-only native geometry/mass preflight for the proposed first-fluid-center plane; root review required before any canary preparation"
+  }
+}

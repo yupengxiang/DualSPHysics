@@ -1,0 +1,95 @@
+{
+  "schema": "core.f2.dbc_duration.extension_scientific_review.v1",
+  "family": "F2",
+  "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_boundary_formulation_x_v1",
+  "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_boundary_v2_extension5s_v2",
+  "qualification_claim": "none",
+  "evidence": {
+    "root_completion": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dbc-extension5s-root-completion-v1.json",
+      "sha256": "4dd2e8aec30ba58caf7e2f9fccf4ac32a92afa1939cabbbbf111ccd1aa74664f",
+      "bytes": 2611
+    },
+    "collection": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dbc-extension5s-collection-v1.json",
+      "sha256": "2318c8e89ed2e3ee5fb8dbebd4e21359b3d592bb1ae10434e795856765f3ee5e",
+      "bytes": 3145
+    },
+    "observer_reaudit_v2": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dbc-extension5s-observer-v2-reaudit.json",
+      "sha256": "cde9613398164abd69446e0f180819ba0db11f9dbddce3cf32a4720406fb8304",
+      "bytes": 3887
+    },
+    "result": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-boundary-extension5s-v2-001/20260920T031752-07b411be288d/product/result.json",
+      "sha256": "ecdf2d492d6eeedb86d51129ec871df149d6a71255f5fb9678e29d874c9b0b75",
+      "bytes": 388376
+    },
+    "audit": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-boundary-extension5s-v2-001/20260920T031752-07b411be288d/product/audit.json",
+      "sha256": "ef60c6967dc570b0fd85f4d209a1de405d4cb2c3eef5644433a95b47cc5b401f",
+      "bytes": 17723
+    },
+    "observations": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-boundary-extension5s-v2-001/20260920T031752-07b411be288d/product/observations.json",
+      "sha256": "226d04b79761bba1606805eed58087f4a3ca534258e3a61f7ab713f276e502c5",
+      "bytes": 338937
+    }
+  },
+  "execution": {
+    "execution_status": "succeeded",
+    "requested_horizon_reached": true,
+    "last_time_s": 5.000003231001079,
+    "frames": 501,
+    "native_fluid_particles": 54720,
+    "solver_input_repair_changed": false
+  },
+  "hard_integrity": {
+    "hard_integrity_pass": true,
+    "all_20_hard_checks_true": true,
+    "native_missing_count": 0,
+    "runtime_domain_outside_count": 0,
+    "cup_receiver_catchment_endpoint_or_chord_failures": 0
+  },
+  "event_window": {
+    "event_window_complete": false,
+    "motion_complete_s": 1.35,
+    "receiver_contact_s": 1.000049053802739,
+    "settled_s": null,
+    "settled_failure_basis": {
+      "settle_speed_p95_m_s_max": 0.1,
+      "post_motion_min_speed_p95_m_s": 0.3996844587968333,
+      "post_motion_min_kinetic_fraction": 0.029855209920741182,
+      "post_motion_max_kinetic_fraction": 1.1561968036999586,
+      "settled_candidate_frame_count": 0,
+      "interpretation": "kinetic energy briefly enters the threshold band, but speed p95 never reaches the settled speed threshold for the required continuous hold"
+    }
+  },
+  "spill_observer_forensics": {
+    "original_event_time_s": 0.0,
+    "original_initial_cup_fraction": 0.9166666666666666,
+    "original_initial_outside_fraction": 0.08333333333333333,
+    "revised_observer_revision": "F2_geometry_aware_observer_v2_full_cup_physical_cup_contract",
+    "revised_initial_cup_fraction": 1.0,
+    "revised_initial_outside_fraction": 0.0,
+    "revised_first_post_initial_spill_time_s": 1.010040218469912,
+    "explanation": "the original observer shrank the moving cup by one dp while the full-cup side-wet native layer is physically inside the cup; t=0 spill is a classification artifact, not evidence of escape",
+    "numeric_thresholds_changed": false,
+    "hard_audit_changed": false
+  },
+  "decision": {
+    "candidate_status": "insufficient_event_window",
+    "matrix_launch_eligible": false,
+    "independent_matrix_numerator_eligible": false,
+    "further_horizon_extension_allowed": false,
+    "threshold_relaxation": false,
+    "canary_reuse": false,
+    "preserve_failure_denominator": true
+  },
+  "f1_next_step": {
+    "review": "campaigns/core-v1/cfd/f2-dbc-boundary-failure-f1-review-v1.json",
+    "action": "do not retry F1 H1 DBC, H2 mDBC, or CFL under the same mechanisms; require a separately evidenced physical or observer hypothesis and a new full-window canary before touching the preregistered 15-cell card",
+    "short_domain_canary_not_qualification": true
+  },
+  "execution_status": "read-only scientific review; no solver rerun, no GPU submission, no ledger write"
+}

@@ -1,0 +1,116 @@
+{
+  "schema": "core.f4.tallwall_candidate.v1",
+  "created_at": "2026-09-19T16:23:33.037597+00:00",
+  "source_prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_laminar_qualification_v1/cell-12/prepared.json",
+  "source_sha256": "57c3709f8c0890a6788aac2ca99a1be6ffa00fee0ef5662f27cfef1472c6a377",
+  "config": {
+    "boundary_layers": [
+      0,
+      1,
+      2
+    ],
+    "case_id": "F4_TALLWALL120_Q075_DP005_CANARY_V1",
+    "cfl": 0.05,
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "design_cell": "spatial",
+    "dp_m": 0.005,
+    "drop": {
+      "low": [
+        0.41500000000000004,
+        0.12,
+        0.4
+      ],
+      "mkfluid": 1,
+      "size": [
+        0.26,
+        0.16,
+        0.14
+      ]
+    },
+    "family": "F4",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "horizon": {
+      "ballistic_time_s": 0.2246985610139098,
+      "event_completion_proven": false,
+      "gravity_time_s": 0.3497487083913345,
+      "initial_horizon_s": 3.84,
+      "maximum_extended_horizon_s": 7.68,
+      "policy": "one whole-scope doubling for event right-censoring; never shorten on failure",
+      "predeclared_multiplier": 4,
+      "wave_time_s": 0.9030472819714619
+    },
+    "initial_drop_velocity_m_s": [
+      0.0,
+      0.0,
+      -0.5
+    ],
+    "lineage_group_id": "F4_tallwall120_drop_x_q0p75",
+    "open_faces": [
+      "top"
+    ],
+    "output_interval_s": 0.02,
+    "parameter": {
+      "candidate_range": [
+        0.25,
+        0.47
+      ],
+      "name": "drop_left_x_m",
+      "q": 0.75,
+      "value": 0.41500000000000004
+    },
+    "physical_case_id": "F4_tallwall120_drop_x_q0p75",
+    "pool": {
+      "low": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mkfluid": 0,
+      "size": [
+        1.2,
+        0.4,
+        0.18
+      ]
+    },
+    "qualification_claim": "none",
+    "qualified": false,
+    "recipe": "mdbc_native",
+    "recipe_id": "F4_mdbc_laminar_nu1e6_tallwall120_v1",
+    "schema": "core.cfd.v1",
+    "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+    "source_label_semantics": "initial native Mk numerical source partition; not material truth",
+    "split": "qualification_only",
+    "stage": "canary",
+    "time_max_s": 4.34,
+    "wall_bounds": {
+      "xmax": 1.2,
+      "xmin": 0.0,
+      "ymax": 0.4,
+      "ymin": 0.0,
+      "zmax": 1.2,
+      "zmin": 0.0
+    },
+    "revision_id": "F4_resting_pool_laminar_13plus2_v1",
+    "physical_kinematic_viscosity_m2_s": 1e-06,
+    "viscosity_formulation": "laminar",
+    "qualification_only": true,
+    "container_height_m": 1.2
+  },
+  "physical_change": "side-wall top .6 m to 1.2 m, open top retained",
+  "hypothesis": "contain splash without the former rim crossing and external free fall",
+  "motivation": "prior q0/q.25 rim events and q.75 over-rim domain losses",
+  "height_policy": "one declared geometry candidate, not an inferred qualified height range",
+  "limits": "new physical scope; old failures retained; no inherited qualification",
+  "acceptance": "full 4.34 s native identity, unchanged hard wall gate, source mass and event completeness",
+  "qualification_claim": false
+}

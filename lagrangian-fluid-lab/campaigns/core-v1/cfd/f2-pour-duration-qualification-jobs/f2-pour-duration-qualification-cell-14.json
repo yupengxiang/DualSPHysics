@@ -1,0 +1,77 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f2-pour-duration-qualification-cell-14",
+  "logical_id": "f2-pour-duration-qualification-cell-14",
+  "attempt_role": "initial",
+  "category": "qualification",
+  "host": "ada",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2_qualification.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_qualification_v1/cell-14/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 16384,
+    "gpu_peak_mib": 4096,
+    "io_weight": 1
+  },
+  "timeout_seconds": 7200,
+  "depends_on": [],
+  "qualification_claim": "none",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_qualification_v1/cell-14/prepared.json",
+      "sha256": "2888dc61b339b5d820429d98ca599b8293f27d7c9fb7457edf8c02605379eea0"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    }
+  ],
+  "prepared_case_id": "CORE_F2_pour_duration_q0p50000000_dp0p007500000000_native_output_native_output",
+  "registered_window_s": 2.5,
+  "maximum_extended_window_s": 5.0,
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0",
+  "canary_gate_required": "f2-pour-duration-fullwindow-canary-001",
+  "observer_revision": "F2_geometry_aware_observer_v1",
+  "time_control_gate": "actual solver Run.csv steps/dt and native output cadence are required",
+  "static_validation": {
+    "schema": "core.f2.static.v1",
+    "revision_id": "F2_pour_duration_qualification_v1",
+    "prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_pour_duration_qualification_v1/cell-14/prepared.json",
+    "case_id": "CORE_F2_pour_duration_q0p50000000_dp0p007500000000_native_output_native_output",
+    "design_cell": "native_output",
+    "static_quality_pass": true,
+    "preflight_pass": true,
+    "mass_gate_pass": true,
+    "mass_rescaling": false,
+    "continuum_geometry_unchanged": true,
+    "time_control": {
+      "cflnumber": 0.2,
+      "DtIni": 0.0,
+      "DtMin": 0.0,
+      "DtFixed": 0.0
+    },
+    "qualification_claim": "none",
+    "issues": []
+  }
+}

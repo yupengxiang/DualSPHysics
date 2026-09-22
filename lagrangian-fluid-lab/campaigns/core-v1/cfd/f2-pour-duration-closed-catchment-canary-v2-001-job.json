@@ -1,0 +1,149 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f2-pour-duration-closed-catchment-canary-v2-001",
+  "logical_id": "f2-pour-duration-closed-catchment-canary-v2-001",
+  "attempt_role": "closed_external_catchment_geometry_canary",
+  "category": "f2_dynamic_closed_catchment_geometry_canary",
+  "host": "ada",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2_qualification.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_closed_catchment_geometry_canary_v2/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 32768,
+    "gpu_peak_mib": 12288,
+    "io_weight": 2
+  },
+  "timeout_seconds": 14400,
+  "depends_on": [],
+  "qualification_claim": "none",
+  "qualification_status": "candidate-only; independent physical catchment scope remains unqualified",
+  "launch_recommendation": "hold pending root review; new closed-catchment geometry is a separate physical scope and does not inherit old F2 evidence",
+  "qualification_only": true,
+  "split": "qualification_only",
+  "supersedes_prepared_revision": "F2_closed_catchment_geometry_canary_v1",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_closed_catchment_geometry_canary_v2/prepared.json",
+      "sha256": "0e6040d0a39136daae6743951833725743af98a9e41bf6c94325b6fd78f39b81"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    }
+  ],
+  "prepared_case_id": "CORE_F2_pour_duration_q0p50000000_dp0p007500000000_closed_catchment_canary_v2",
+  "registered_window_s": 2.5,
+  "maximum_extended_window_s": 5.0,
+  "event_window_estimate": {
+    "basis": "zero-initial-vertical-speed free-fall estimate from the highest initial fluid layer; impacts, pressure and cup motion can only change this diagnostic estimate",
+    "gravity_m_s2": -9.81,
+    "initial_fluid_top_m": 1.03,
+    "release_time_s": 0.5,
+    "retained_tray_floor_surface_z_m": -0.1,
+    "catchment_outer_floor_z_m": -0.2,
+    "nominal_floor_flight_s": 0.47997621415751707,
+    "nominal_floor_contact_from_release_s": 0.47997621415751707,
+    "nominal_floor_contact_from_simulation_start_s": 0.979976214157517,
+    "conservative_outer_bound_flight_s": 0.5007639423859148,
+    "conservative_outer_bound_contact_from_simulation_start_s": 1.0007639423859147,
+    "motion_duration_s": 0.85,
+    "motion_complete_s": 1.35,
+    "registered_window_s": 2.5,
+    "maximum_extended_window_s": 5.0,
+    "output_interval_s": 0.01,
+    "settled_gate_unchanged": true,
+    "estimate_only": true
+  },
+  "scope_id": "F2_closed_catchment_geometry_x_v1",
+  "revision_id": "F2_closed_catchment_geometry_canary_v2",
+  "family": "F2",
+  "parameter_axis": "rotation_duration_s",
+  "parameter_q": 0.5,
+  "repair_candidate_id": "closed_external_catchment_geometry",
+  "physical_geometry_changed": true,
+  "mass_rescaling": false,
+  "geometry_contract": {
+    "continuous_low_m": [
+      -0.6,
+      -0.55,
+      -0.2
+    ],
+    "continuous_size_m": [
+      2.6,
+      1.1,
+      0.8
+    ],
+    "continuous_high_m": [
+      2.0,
+      0.55,
+      0.6000000000000001
+    ],
+    "wall_mkbound": 3,
+    "floor_mkbound": 2,
+    "drawn_faces": [
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "open_faces": [
+      "top"
+    ],
+    "wall_layers_vdp": [
+      0,
+      1,
+      2
+    ],
+    "nominal_wall_thickness_m": 0.0225,
+    "surface_convention": "continuous source planes; no inward layer-center shrink",
+    "fluid_facing_bounds": {
+      "xmin": -0.6,
+      "xmax": 2.0,
+      "ymin": -0.55,
+      "ymax": 0.55,
+      "zmin": -0.1,
+      "zmax": 0.6000000000000001
+    },
+    "floor_fluid_facing_surface_z_m": -0.1,
+    "floor_nominal_outer_low_z_m": -0.2,
+    "material_purpose": "external rigid spill/overflow collection walls; mkbound=3 is a new physical material region",
+    "floor_purpose": "original registered tray bottom, mkbound=2, retained as the collection floor",
+    "old_tray_bottom_retained": true
+  },
+  "observer_contract": {
+    "legacy_observer_unchanged": true,
+    "legacy_settled_gate_unchanged": true,
+    "legacy_spill_mass_retained": true,
+    "destination_aware_observer": "separate candidate only; not enabled by this job",
+    "qualification_inheritance": "none"
+  },
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0"
+}

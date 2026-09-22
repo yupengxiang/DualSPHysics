@@ -1,0 +1,127 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f2-receiver-overflow-weir-q05-dp0075-anchor-001",
+  "logical_id": "f2-receiver-overflow-weir-q05-dp0075-anchor-001",
+  "attempt_role": "protected_single_scientific_anchor",
+  "category": "qualification_canary",
+  "host": "ada",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_receiver_overflow_solver_v1.py",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/runtime-prepared-proposal-v1.json",
+    "--root-review",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/root-review-one-anchor-v1.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 4,
+    "ram_mib": 32768,
+    "gpu_peak_mib": 12288,
+    "io_weight": 2
+  },
+  "timeout_seconds": 3600,
+  "depends_on": [],
+  "qualification_claim": "none",
+  "qualification_status": "one-anchor scientific canary; matrix remains unqualified",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/runtime-prepared-proposal-v1.json",
+      "sha256": "98f63576ef981dd554ed8dd9a1103d56334c154dd622893f877e9d88dffb535e",
+      "bytes": 10401,
+      "role": "protected prepared F2 anchor proposal"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/candidate-card-v1.json",
+      "sha256": "7820661d6e2921137c3e6fc3306e2312ec5f9e532dd0233c5f88325434e26abc",
+      "bytes": 7383,
+      "role": "F2 candidate card"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/fixed-matrix-v1.json",
+      "sha256": "c90ee044c3e7305fcc9a94326eaf49f9ec1ffc8c5da4a149effdb68cab3b628e",
+      "bytes": 4836,
+      "role": "fixed fifteen-row denominator"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/failure-denominator-v1.json",
+      "sha256": "ff8a1443ea4d8075bf75e51be5a0bc84dded62f7dc1a834ba79736635d7d0a1f",
+      "bytes": 2054,
+      "role": "failure denominator"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/lineage-clarification-v1.json",
+      "sha256": "e9f07666fc0cb36d05c583869c1c9f8861522b154763a564f84fba70f01332a8",
+      "bytes": 3497,
+      "role": "new F2 physical lineage"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/root-review-one-anchor-v1.json",
+      "sha256": "d9e8ac3879510beb73ab1725f497cb9a7501f589b10656803518e82c1e834ca4",
+      "bytes": 2973,
+      "role": "exact-one-anchor root review"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2_receiver_overflow_weir_v1.py",
+      "sha256": "cb21fffbf8de336361e451504e1ea81f580250680d124b1847d0fffc74673721",
+      "bytes": 17639,
+      "role": "pure receiver/crest observer"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_receiver_overflow_runtime_v1.py",
+      "sha256": "b3b18d275f16cb71bfe59c2383433f00b712d4e5486b600ef49ee2b6acb360fa",
+      "bytes": 18578,
+      "role": "proposal preparation implementation"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_receiver_overflow_solver_v1.py",
+      "sha256": "9829e4f66a108daa79564dcfdb8727e142473a17f6aad130d0674156ce74fb72",
+      "bytes": 19407,
+      "role": "solver-integrated worker"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+      "bytes": 159206984,
+      "role": "pinned DualSPHysics solver"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+      "bytes": 324368,
+      "role": "pinned native decoder"
+    }
+  ],
+  "prepared_case_id": "F2_receiver_overflow_weir_q0p5_anchor",
+  "matrix_case_id": "CORE_F2_RECEIVER_OVERFLOW_WEIR_q0p50000000_crest0p26000000_dp0p007500000000_spatial",
+  "matrix_index": 4,
+  "registered_window_s": 1.5,
+  "maximum_extended_window_s": 3.0,
+  "output_interval_s": 0.01,
+  "scope_id": "F2_receiver_overflow_weir_v1",
+  "revision_id": "F2_receiver_overflow_weir_mdbc_v1",
+  "family": "F2",
+  "parameter_axis": "weir_crest_height_m",
+  "parameter_q": 0.5,
+  "parameter_value": 0.26,
+  "root_review_decision": "approved_for_one_anchor_runtime",
+  "solver_launch_authorized": true,
+  "gpu_launch_authorized": true,
+  "job_spec_creation_authorized": true,
+  "queue_mutation_authorized": true,
+  "ledger_mutation_authorized": true,
+  "registry_mutation_authorized": false,
+  "matrix_submission_authorized": false,
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0",
+  "postcondition": "retain solver result; hard integrity and complete crest/receiver event are required before any separate scope review"
+}

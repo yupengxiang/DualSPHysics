@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<case app="GenCase v5.4.354.01 (07-04-2025)" date="21-09-2026 03:45:45">
+    <casedef>
+        <constantsdef>
+            <gravity x="0" y="0" z="-9.81" />
+            <rhop0 value="1000" />
+            <rhopgradient value="2" />
+            <hswl value="0" auto="true" />
+            <gamma value="7" />
+            <speedsystem value="0" auto="true" />
+            <coefsound value="20" />
+            <speedsound value="0" auto="true" />
+            <coefh value="1.0" />
+            <cflnumber value="0.2" />
+        </constantsdef>
+        <mkconfig boundcount="220" fluidcount="16" />
+        <geometry>
+            <definition dp="0.0074999999999999997">
+                <pointmin x="-0.30" y="-0.15" z="-0.15" />
+                <pointmax x="1.90" y="0.65" z="1.20" />
+                <pointref x="0.0037499999999999999" y="0.0037499999999999999" z="0.0037499999999999999" />
+            </definition>
+            <commands>
+                <list name="GeometryForNormals">
+                    <setactive drawpoints="0" drawshapes="1" />
+                    <setshapemode>actual | bound</setshapemode>
+                    <setnormalinvert invert="true" />
+                    <setmkbound mk="0" />
+                    <drawbox>
+                        <boxfill>bottom | left | right | front | back</boxfill>
+                        <point x="0" y="0" z="0" />
+                        <size x="1.6000000000000001" y="0.5" z="0.80000000000000004" />
+                        <layers vdp="0,1,2" />
+                    </drawbox>
+                    <setmkbound mk="1" />
+                    <setnormalinvert invert="false" />
+                    <drawbox>
+                        <boxfill>bottom | top | left | right | front | back</boxfill>
+                        <point x="0.71999999999999997" y="0.040000000000000001" z="0.17999999999999999" />
+                        <size x="0.059999999999999998" y="0.41999999999999998" z="0.62" />
+                        <layers vdp="0,-1,-2" />
+                    </drawbox>
+                    <shapeout file="hdp" />
+                    <resetdraw />
+                </list>
+                <mainlist>
+                    <runlist name="GeometryForNormals" />
+                    <setshapemode>actual | bound</setshapemode>
+                    <setdrawmode mode="full" />
+                    <setmkbound mk="0" />
+                    <drawbox>
+                        <boxfill>bottom | left | right | front | back</boxfill>
+                        <point x="0" y="0" z="0" />
+                        <size x="1.6000000000000001" y="0.5" z="0.80000000000000004" />
+                        <layers vdp="0,1,2" />
+                    </drawbox>
+                    <setmkvoid />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.71625000000000005" y="0.036249999999999998" z="0.17624999999999999" />
+                        <size x="0.067500000000000004" y="0.42749999999999999" z="0.62749999999999995" />
+                    </drawbox>
+                    <setmkbound mk="1" />
+                    <drawbox>
+                        <boxfill>bottom | top | left | right | front | back</boxfill>
+                        <point x="0.72375" y="0.043749999999999997" z="0.18375" />
+                        <size x="0.052499999999999998" y="0.41249999999999998" z="0.61250000000000004" />
+                        <layers vdp="0,-1,-2" />
+                    </drawbox>
+                    <setmkfluid mk="0" />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0.041250000000000002" y="0.041250000000000002" z="0.041250000000000002" />
+                        <size x="0.63" y="0.40500000000000003" z="0.34499999999999997" />
+                    </drawbox>
+                </mainlist>
+            </commands>
+        </geometry>
+        <normals active="true">
+            <norgeometry>
+                <geometryfile file="[CaseName]_hdp_Actual.vtk" />
+                <distanceh v="3.0" />
+                <svshapes v="true" />
+            </norgeometry>
+        </normals>
+    </casedef>
+    <execution>
+        <parameters>
+            <parameter key="SavePosDouble" value="2" />
+            <parameter key="Boundary" value="2" />
+            <parameter key="SlipMode" value="1" />
+            <parameter key="StepAlgorithm" value="2" />
+            <parameter key="Kernel" value="2" />
+            <parameter key="ViscoTreatment" value="1" />
+            <parameter key="Visco" value="0.03" />
+            <parameter key="ViscoBoundFactor" value="1" />
+            <parameter key="DensityDT" value="3" />
+            <parameter key="DensityDTvalue" value="0.1" />
+            <parameter key="Shifting" value="0" />
+            <parameter key="RigidAlgorithm" value="1" />
+            <parameter key="FtPause" value="0" />
+            <parameter key="CoefDtMin" value="0.05" />
+            <parameter key="DtIni" value="0" />
+            <parameter key="DtMin" value="0" />
+            <parameter key="DtFixed" value="0" />
+            <parameter key="DtAllParticles" value="0" />
+            <parameter key="TimeMax" value="1.5" />
+            <parameter key="TimeOut" value="0.01" />
+            <parameter key="PartsOutMax" value="1" comment="**DEPRECATED** " />
+            <parameter key="RhopOutMin" value="700" />
+            <parameter key="RhopOutMax" value="1300" />
+            <parameter key="MinFluidStop" value="0" />
+            <parameter key="NoPenetration" value="1" />
+            <simulationdomain comment="Defines domain of simulation (default=Uses minimum and maximum position of the generated particles)">
+                <posmin x="-0.30" y="-0.15" z="-0.15" comment="e.g.: x=0.5, y=default-1, z=default-10%" />
+                <posmax x="1.90" y="0.65" z="1.20" />
+            </simulationdomain>
+        </parameters>
+        <particles np="475631" nb="255906" nbf="255906" mkboundfirst="17" mkfluidfirst="1">
+            <_summary>
+                <positions units_comment="metres (m)">
+                    <posmin x="-0.01125" y="-0.01125" z="-0.01125" />
+                    <posmax x="1.61625" y="0.51375" z="0.79875" />
+                </positions>
+                <fixed count="255906" id="0-255905" mkcount="2" mkvalues="17-18" />
+                <fluid count="219725" id="255906-475630" mkcount="1" mkvalues="1" />
+            </_summary>
+            <fixed mkbound="0" mk="17" begin="0" count="226422" />
+            <fixed mkbound="1" mk="18" begin="226422" count="29484" />
+            <fluid mkfluid="0" mk="1" begin="255906" count="219725" />
+        </particles>
+        <constants>
+            <data2d value="false" />
+            <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
+            <cflnumber value="0.2" />
+            <gamma value="7" />
+            <rhop0 value="1000" units_comment="kg/m^3" />
+            <dp value="0.0075" units_comment="metres (m)" />
+            <h value="0.012990381057" units_comment="metres (m)" />
+            <b value="193397.14286" units_comment="Pascal (Pa)" />
+            <massbound value="0.000421875" units_comment="kg" />
+            <massfluid value="0.000421875" units_comment="kg" />
+        </constants>
+        <uservars>
+            <varnum name="VResId" value="0" />
+        </uservars>
+        <motion />
+        <vtkout mkboundfirst="17" mkfluidfirst="1">
+            <vtkfile name="F2_ORIFICE_q0p50_dp0075_spatial_normalremediation_v3_hdp_Actual.vtk" mk="17-18" mkbound="0-1" />
+        </vtkout>
+    </execution>
+</case>

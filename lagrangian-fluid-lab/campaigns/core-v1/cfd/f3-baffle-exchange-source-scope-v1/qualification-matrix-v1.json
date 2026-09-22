@@ -1,0 +1,247 @@
+{
+  "schema": "core.f3.baffle_exchange_source_scope.qualification_matrix.v1",
+  "matrix_id": "F3_baffle_exchange_native_mdbc_x_v1_matrix",
+  "scope_id": "F3_baffle_exchange_native_mdbc_x_v1",
+  "revision_id": "F3_baffle_exchange_native_mdbc_v1",
+  "family": "F3",
+  "status": "fixed_design_preflight_anchor_only",
+  "design_only": true,
+  "qualification_claim": "none; no runtime row has been executed",
+  "candidate_card_path": "campaigns/core-v1/cfd/f3-baffle-exchange-source-scope-v1/candidate-card-v1.json",
+  "anchor": {
+    "case_id": "CORE_F3_BAFFLE_EXCHANGE_q0p50000000_dp0p007500000000_anchor",
+    "path": "campaigns/core-v1/cfd/f3-baffle-exchange-source-scope-v1/anchor-q0p5-dp0p0075-v3/prepared.json",
+    "preflight_credit": 0,
+    "reason": "CPU/native initial-state preparation does not satisfy runtime trajectory, full-window, event, or hard-integrity gates."
+  },
+  "physical_scope": {
+    "mechanism": "fixed_internal_baffle_exchange",
+    "boundary_method": "native mDBC/no-slip (Boundary=2, -mdbc_noslip:1)",
+    "outer_wall": "finite tank with bottom, left, right, front and back walls; open top",
+    "internal_baffle": {
+      "mkbound": 1,
+      "low_m": [0.58, 0.04, 0.0],
+      "size_m": [0.03, 0.18, 0.19],
+      "fill": "top | left | right | front | back"
+    },
+    "fluid_box": {
+      "continuous_low_m": [0.1, 0.04, 0.04],
+      "continuous_size_m": [0.9, 0.18, 0.09],
+      "baffle_overlap_removed": true
+    },
+    "impulse_axis": {
+      "name": "initial_impulse_velocity_x_m_s",
+      "mapping": "u0_x = 0.45 + 0.60*q",
+      "q_domain": [0.0, 1.0],
+      "u0_x_domain_m_s": [0.45, 1.05]
+    },
+    "source_window_s": [0.0, 8.35],
+    "native_mass_policy": "rho*dp^3 with no rescaling"
+  },
+  "fixed_recipe": {
+    "gravity_m_s2": [0.0, 0.0, -9.81],
+    "cfl": 0.05,
+    "visco_treatment": 1,
+    "visco": 0.05,
+    "shifting": 0,
+    "output_intervals_s": [0.01, 0.005, 0.002],
+    "time_max_s": 8.35,
+    "native_mass_error_abs_max": 0.03,
+    "no_threshold_relaxation": true,
+    "no_horizon_extension": true,
+    "no_survivor_renormalization": true
+  },
+  "qualification_rule": {
+    "denominator": 15,
+    "required_pass_count": 15,
+    "required_pass_fraction": 1.0,
+    "preflight_rows_credit": 0,
+    "same_input_retry": false,
+    "unattempted_rows_remain_in_denominator": true,
+    "infrastructure_failures_remain_in_denominator": true,
+    "scientific_failures_remain_in_denominator": true,
+    "event_censor_is_failure": true
+  },
+  "gates": {
+    "source_hash_closure": true,
+    "native_initial_finite_and_unique": true,
+    "native_mass_gate": true,
+    "requested_horizon_reached": true,
+    "event_window_complete": true,
+    "hard_integrity_pass": true,
+    "no_native_exclusion": true,
+    "no_wall_penetration": true,
+    "no_nonfinite_active_values": true,
+    "native_mls_material_readout": true
+  },
+  "rows": [
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q0p00000000_dp0p010000000000_spatial",
+      "row_kind": "spatial_anchor",
+      "q": 0.0,
+      "u0_x_m_s": 0.45,
+      "dp_m": 0.01,
+      "output_interval_s": 0.01,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    },
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q0p50000000_dp0p010000000000_spatial",
+      "row_kind": "spatial_anchor",
+      "q": 0.5,
+      "u0_x_m_s": 0.75,
+      "dp_m": 0.01,
+      "output_interval_s": 0.01,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    },
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q1p00000000_dp0p010000000000_spatial",
+      "row_kind": "spatial_anchor",
+      "q": 1.0,
+      "u0_x_m_s": 1.05,
+      "dp_m": 0.01,
+      "output_interval_s": 0.01,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    },
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q0p00000000_dp0p007500000000_spatial",
+      "row_kind": "spatial_anchor",
+      "q": 0.0,
+      "u0_x_m_s": 0.45,
+      "dp_m": 0.0075,
+      "output_interval_s": 0.01,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    },
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q0p50000000_dp0p007500000000_spatial",
+      "row_kind": "spatial_anchor",
+      "q": 0.5,
+      "u0_x_m_s": 0.75,
+      "dp_m": 0.0075,
+      "output_interval_s": 0.01,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    },
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q1p00000000_dp0p007500000000_spatial",
+      "row_kind": "spatial_anchor",
+      "q": 1.0,
+      "u0_x_m_s": 1.05,
+      "dp_m": 0.0075,
+      "output_interval_s": 0.01,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    },
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q0p00000000_dp0p005000000000_spatial",
+      "row_kind": "spatial_anchor",
+      "q": 0.0,
+      "u0_x_m_s": 0.45,
+      "dp_m": 0.005,
+      "output_interval_s": 0.01,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    },
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q0p50000000_dp0p005000000000_spatial",
+      "row_kind": "spatial_anchor",
+      "q": 0.5,
+      "u0_x_m_s": 0.75,
+      "dp_m": 0.005,
+      "output_interval_s": 0.01,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    },
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q1p00000000_dp0p005000000000_spatial",
+      "row_kind": "spatial_anchor",
+      "q": 1.0,
+      "u0_x_m_s": 1.05,
+      "dp_m": 0.005,
+      "output_interval_s": 0.01,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    },
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q0p25000000_dp0p007500000000_heldout",
+      "row_kind": "held_out_impulse",
+      "q": 0.25,
+      "u0_x_m_s": 0.6,
+      "dp_m": 0.0075,
+      "output_interval_s": 0.01,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    },
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q0p75000000_dp0p007500000000_heldout",
+      "row_kind": "held_out_impulse",
+      "q": 0.75,
+      "u0_x_m_s": 0.9,
+      "dp_m": 0.0075,
+      "output_interval_s": 0.01,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    },
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q0p25000000_dp0p005000000000_heldout",
+      "row_kind": "held_out_impulse",
+      "q": 0.25,
+      "u0_x_m_s": 0.6,
+      "dp_m": 0.005,
+      "output_interval_s": 0.01,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    },
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q0p75000000_dp0p005000000000_heldout",
+      "row_kind": "held_out_impulse",
+      "q": 0.75,
+      "u0_x_m_s": 0.9,
+      "dp_m": 0.005,
+      "output_interval_s": 0.01,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    },
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q0p50000000_dp0p007500000000_temporal005",
+      "row_kind": "temporal_output_cadence",
+      "q": 0.5,
+      "u0_x_m_s": 0.75,
+      "dp_m": 0.0075,
+      "output_interval_s": 0.005,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    },
+    {
+      "row_id": "CORE_F3_BAFFLE_EXCHANGE_q0p50000000_dp0p007500000000_temporal002",
+      "row_kind": "temporal_output_cadence",
+      "q": 0.5,
+      "u0_x_m_s": 0.75,
+      "dp_m": 0.0075,
+      "output_interval_s": 0.002,
+      "time_max_s": 8.35,
+      "status": "not_started"
+    }
+  ],
+  "execution_controls": {
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_launch": false
+  },
+  "downstream": {
+    "next_owner": "root review",
+    "required_before_launch": [
+      "root approval of this candidate card",
+      "immutable job specs bound to each row and the prepared source recipe",
+      "runtime hard-integrity and full-window audit implementation",
+      "material consumer contract bound to native MLS output"
+    ],
+    "prohibited_before_approval": ["solver", "GPU", "queue", "ledger", "registry", "material training"]
+  }
+}

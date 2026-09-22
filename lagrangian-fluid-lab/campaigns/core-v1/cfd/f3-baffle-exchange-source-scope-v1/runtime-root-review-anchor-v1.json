@@ -1,0 +1,95 @@
+{
+  "schema": "core.root_review.v1",
+  "review_id": "f3-baffle-exchange-runtime-root-review-anchor-v1",
+  "created_at_utc": "2026-09-20T18:12:00+08:00",
+  "family": "F3",
+  "scope_id": "F3_baffle_exchange_native_mdbc_x_v1",
+  "revision_id": "F3_baffle_exchange_native_mdbc_v1",
+  "decision": "approved_for_anchor_canary",
+  "authorized_matrix_indices": [4],
+  "authorized_case_ids": [
+    "CORE_F3_BAFFLE_EXCHANGE_q0p50000000_dp0p007500000000_anchor"
+  ],
+  "candidate_card": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-baffle-exchange-source-scope-v1/candidate-card-v1.json",
+    "sha256": "4a0d6e07cc198e68f448ba33ba1f85c872d8ef7797746a47e9475724d2e2df33",
+    "role": "F3 baffle candidate card"
+  },
+  "matrix": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-baffle-exchange-source-scope-v1/qualification-matrix-v1.json",
+    "sha256": "5f2478ebfa446badc895e806c1eb4a55e35fc2fc3cbf9b7980549db74ceb9696",
+    "role": "fixed 15-row F3 baffle qualification matrix"
+  },
+  "failure_denominator": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-baffle-exchange-source-scope-v1/failure-denominator-v1.json",
+    "sha256": "0c9f988ce3d917de540949eb28ca61b563a5fc5f0fdaf5763ec1e745354de5da",
+    "role": "fixed F3 baffle failure denominator"
+  },
+  "prepared_anchor": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-baffle-exchange-source-scope-v1/anchor-q0p5-dp0p0075-v3/prepared.json",
+    "sha256": "09b8501815eca988f5f9a8387aa4ee3498db939fd02559d45be5be89410526ea",
+    "role": "CPU/native q=.5 dp=.0075 baffle anchor preflight"
+  },
+  "runtime_adapter": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f3_baffle_runtime.py",
+    "sha256": "4a4d45c0d5aac52b3abd2ea7cef2db30a558f180d2e360bd438443a71423eb99",
+    "role": "specialized F3 baffle runtime adapter and obstacle/event audit"
+  },
+  "solver": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+    "role": "pinned DualSPHysics solver"
+  },
+  "decoder": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+    "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+    "role": "pinned native decoder"
+  },
+  "authorization": {
+    "solver_launch": true,
+    "gpu_launch": true,
+    "job_spec_creation": true,
+    "direct_execution": true,
+    "queue_mutation": false,
+    "ledger_mutation": false,
+    "registry_mutation": false,
+    "matrix_expansion": false,
+    "material_training": false,
+    "model_training": false,
+    "t1_registration": false
+  },
+  "execution_policy": {
+    "one_anchor_only": true,
+    "authorized_row_kind": "spatial_anchor",
+    "authorized_q": 0.5,
+    "authorized_dp_m": 0.0075,
+    "requested_output_interval_s": 0.01,
+    "requested_horizon_s": 8.35,
+    "matrix_credit": 0,
+    "preflight_anchor_credit": 0,
+    "matrix_expansion_allowed": false,
+    "same_input_retry": false,
+    "event_censor_is_failure": true,
+    "hard_integrity_failure_is_failure": true,
+    "no_t1_registration": true,
+    "host_preference": "ada",
+    "max_parallel_jobs": 1,
+    "baffle_audit": "finite outer closed faces plus internal mkbound=1 obstacle",
+    "event_contract": "baffle encounter plus one forward and one reverse obstacle-aware exchange, with complete native saved-time window"
+  },
+  "known_risks": [
+    "core_cfd.py is F4-shaped and is not used as the F3 baffle runtime entrypoint",
+    "solver compatibility with the new internal-baffle source is proven only by this single canary",
+    "event-window failure or hard-integrity failure remains diagnostic negative evidence"
+  ],
+  "required_postconditions": [
+    "all five source identity hashes remain closed before launch",
+    "native BI4 conversion and internal-baffle obstacle audit are written",
+    "hard-integrity, requested-horizon and event-window outcomes are retained",
+    "matrix numerator remains zero and no T1 or registry mutation occurs"
+  ],
+  "qualification_claim": "none",
+  "scientific_status": "single-anchor-diagnostic-canary-only",
+  "matrix_numerator_credit": 0,
+  "registry_mutation": 0
+}

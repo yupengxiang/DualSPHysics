@@ -1,0 +1,111 @@
+{
+  "schema": "core.f4.tallwall120.qualification_evaluator_change_record.v1",
+  "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+  "revision_id": "F4_tallwall120_13plus2_v2",
+  "status": "frozen_ready",
+  "schema_resolution": {
+    "v2_manifest_schema": "core.f4.tallwall120.qualification_evaluator.v2",
+    "required_entrypoint": "scripts/f4_tallwall_qualification_evaluator_v2.py:evaluate",
+    "wrong_invocation_preserved": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-qualification-root-evaluation-v2.json",
+      "sha256": "db90caa0728a64ba48055bceb3e91564a76a5a4f03f06a08d3ae6ce95fea7432",
+      "role": "diagnostic produced by v1 entrypoint against v2 manifest"
+    },
+    "wrong_invocation_output_schema": "core.f4.tallwall120.qualification_evaluation.v1",
+    "wrong_invocation_static_issues": [
+      "schema"
+    ],
+    "cause": "scripts/f4_tallwall_qualification_evaluator.py validates only core.f4.tallwall120.qualification_evaluator.v1; the v2 manifest must be run with the versioned v2 entrypoint.",
+    "correct_reproducible_output": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-qualification-evaluation-v2-root.json",
+      "sha256": "960f592e3b2eace7ad74215f11bec510d8a5c25d1286c94deae0fd0a55ef64b5",
+      "role": "v2 evaluator output with runtime plus archive roots"
+    }
+  },
+  "preserved_v1_chain": {
+    "evaluator_manifest": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-qualification-evaluator-v1.json",
+      "sha256": "d2f91ab35b971f139ff0d651597acd08df44c1613aeebb75a542be897e513672",
+      "role": "original v1 evaluator manifest"
+    },
+    "evaluator_code": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_tallwall_qualification_evaluator.py",
+      "sha256": "afe35438a3f7a040b58e7eee84057e122582f27d8ebe7887042cc052ef985cd5",
+      "role": "original v1 evaluator code hash recorded by v1 manifest; file intentionally unchanged"
+    },
+    "root_submission": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-root-scheduled-v2/submission.json",
+      "sha256": "e5216590a1fb28a70b550749da6df0525e54522b86d0d87c3fcc43ad306a022b",
+      "role": "original frozen root submission"
+    },
+    "jobs_manifest": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-qualification-jobs-v2/manifest.json",
+      "sha256": "2f52eedc0606d7dfc9309aa50494803d1d80a289399575ec3f70ad09dc21a9e9",
+      "role": "original frozen 15-cell jobs manifest"
+    }
+  },
+  "auxiliary_metadata_change": {
+    "changed_file": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_tallwall120_qualification_v2/static-validation.json",
+      "current_sha256": "c1c2992d8a801bf7f4b6d316628ce65e134f0234391c447d65d6ef40da8b206d",
+      "jobs_manifest_recorded_sha256": "f3144385617dc62eaf04cbc66f9c8e58d1bcf82e391a0e196de9b7f31f9d63c1",
+      "reason": "f4_tallwall_matrix.py validate re-emits static-validation metadata; it did not change prepared cells, solver inputs, or frozen scheduled input_files."
+    },
+    "unchanged_frozen_inputs": true,
+    "difference_is_explicit": true,
+    "not_a_solver_or_geometry_change": true
+  },
+  "new_versioned_artifacts": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_tallwall_qualification_evaluator_v2.py",
+      "sha256": "ee2673cda352558884177c2bb10c7c57d92589de5645c5ffebe215007c5b6eb8",
+      "role": "new read-only v2 evaluator"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f4_tallwall_qualification_evaluator_v2.py",
+      "sha256": "fe929f9e91478ecd0cd7abc970b920803875d4f8f74b3de284eb1a22c724689e",
+      "role": "new v2 evaluator regression tests"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-qualification-evaluator-v2.json",
+      "sha256": "dc6ebde73388ab69d2eb2ba5df8cd52f511f378dc2655e68c17a356547a8bbfe",
+      "role": "new v2 evaluator manifest"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-qualification-evaluation-v2.json",
+      "sha256": "367ce105d41fabd18b21de38b1220c5881e10b7162d9f4fa41d9deb13bb4271d",
+      "role": "v2 local archive/results evaluation"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-qualification-evaluation-v2-root.json",
+      "sha256": "960f592e3b2eace7ad74215f11bec510d8a5c25d1286c94deae0fd0a55ef64b5",
+      "role": "v2 runtime plus archive evaluation"
+    }
+  ],
+  "matrix_accounting": {
+    "denominator": 15,
+    "scheduled_solver_cells": 14,
+    "reused_canary_cell": 12,
+    "currently_verified_external_cells": [
+      0,
+      1,
+      3,
+      6
+    ],
+    "missing_scheduled_cells": [
+      2,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10,
+      11,
+      13,
+      14
+    ],
+    "qualification_claim": "none",
+    "T1_numerical": false
+  },
+  "reproducible_command": "./.venv/bin/python scripts/f4_tallwall_qualification_evaluator_v2.py --manifest campaigns/core-v1/cfd/f4-tallwall120-qualification-evaluator-v2.json --runtime-root campaigns/core-v1/runtime --archive-root campaigns/core-v1/cfd/f4-tallwall120-archives-v2 --output campaigns/core-v1/cfd/f4-tallwall120-qualification-evaluation-v2-root.json"
+}

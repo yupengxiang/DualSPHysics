@@ -1,0 +1,63 @@
+{
+  "schema": "core.f1.suspended_obstacle_gap.protected_job_spec.v1",
+  "job_id": "f1-suspended-obstacle-gap-g1-anchor-q05-dp0075-review-only",
+  "logical_id": "F1_suspended_obstacle_gap_v1_anchor",
+  "scope_id": "F1_suspended_obstacle_gap_v1",
+  "revision_id": "F1_suspended_obstacle_gap_mdbc_v1",
+  "attempt_role": "root_review_protected_anchor",
+  "category": "root_review_only_not_submitted",
+  "submission_status": "protected_not_submitted",
+  "root_review_required": true,
+  "queue_mutation": false,
+  "ledger_write": false,
+  "registry_write": false,
+  "solver_launch": "forbidden_until_root_review_approval",
+  "host": "ada",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv_after_approval": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f1_suspended_obstacle_gap_runtime_v1.py",
+    "--lab-root", "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "--prepared", "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/prepared.json",
+    "--output", "{attempt_dir}/product"
+  ],
+  "prepared_case_id": "CORE_F1_G1_suspended_obstacle_gap_q0p50000000_h0p46000000_dp0p007500000000_canary",
+  "registered_window_s": 2.2,
+  "maximum_extended_window_s": 4.4,
+  "event_completion_required": true,
+  "resources": {"cpu_cores": 2, "ram_mib": 16384, "gpu_peak_mib": 4096, "timeout_seconds": 3600, "estimated_gpu_hours": 0.12},
+  "required_outputs": ["product/result.json", "product/trajectory.h5", "product/audit.json", "product/observations.json"],
+  "input_files": [
+    {"path":"campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/prepared.json","sha256":"661b42a02873918bc4a753250a1775da6bb83260ce3154a76a5ae73b3f1c3f26"},
+    {"path":"campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/cpu-native-preflight.json","sha256":"7b1076a38c1d2121d0527079c493efe8474e555ea6e6cc1b8631c1846c248007"},
+    {"path":"campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/candidate-card-v1.json","sha256":"e419ab8acc78861e17e8ea8f672358c1819f918bb997813ce7edf4b23f098978"},
+    {"path":"campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/fixed-matrix-v1.json","sha256":"136151eafbec649f4361e5a8416efa70adbced9cf58221e2d025c2f8673d9f4d"},
+    {"path":"scripts/f1_suspended_obstacle_gap_runtime_v1.py","sha256":"86af6c5e3089e8c0a3712e9c34205a488264db989b138bb78851d28a40aff796"},
+    {"path":"vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64","sha256":"0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"},
+    {"path":"campaigns/l1-resume/artifacts/bi4_dump","sha256":"b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"}
+  ],
+  "static_validation": {
+    "cpu_native_preflight_path":"campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/cpu-native-preflight.json",
+    "preflight_pass":true,
+    "fluid_particles":120658,
+    "boundary_particles":142446,
+    "zero_normals":0,
+    "all_obstacle_face_signs_pass":true,
+    "exact_fluid_boundary_overlap":0,
+    "native_mass_relative_error":0.017075482536764497,
+    "solver_run":false,
+    "gpu_launched":false
+  },
+  "hard_integrity_contract": {
+    "no_missing_native_fluid_ids":true,
+    "all_active_values_finite":true,
+    "closed_wall_endpoint_particle_frames":0,
+    "finite_geometry_chord_crossings":0,
+    "obstacle_penetration_particle_frames":0,
+    "requested_horizon_reached":true
+  },
+  "event_contract": {"approach":">=1% active mass in 2dp footprint at/above obstacle top","downstream":">=5% beyond obstacle xmax+2dp","return":"COM x decrease >=max(0.02m,2dp) after downstream and 0.1s","completion":"horizon + return + gravity-time tail"},
+  "failure_policy": {"same_input_retry":false,"threshold_relaxation":false,"horizon_extension_before_anchor":false,"static_substitution":false,"anchor_credit":0,"if_failed":"retain one failed/censored row in the fixed 15-row denominator"},
+  "review_dependencies": ["root verifies G1 geometry is physically distinct from H1-H4", "root approves this exact protected anchor spec", "root keeps registry/ledger untouched during review", "matrix submission requires a later explicit root decision after anchor evidence"]
+}

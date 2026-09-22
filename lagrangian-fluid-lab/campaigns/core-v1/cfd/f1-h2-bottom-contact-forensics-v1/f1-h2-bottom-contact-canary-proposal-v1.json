@@ -1,0 +1,36 @@
+{
+  "proposal_id": "F1_H3_obstacle_bottom_face_mdbc_canary_v1",
+  "status": "prepared_cpu_only_not_submitted",
+  "mechanism_class": "boundary topology: restore obstacle bottom contact face",
+  "evidence_root": "missing obstacle-bottom interior boundary after setmkvoid; first F1 H2 failure crosses z=0 inside obstacle footprint",
+  "single_variable_change": [
+    "add bottom to the obstacle mainlist boundary drawbox boxfill",
+    "add bottom to the obstacle GeometryForNormals drawbox boxfill"
+  ],
+  "unchanged": [
+    "CFL=0.2 and actual DtIni/DtMin",
+    "mDBC Boundary=2, SlipMode=2, NoPenetration=1, -mdbc_noslip:1",
+    "fluid continuum box, q=0.5, dp=0.0075, native mass and density",
+    "tank, obstacle dimensions, gravity, viscosity, runtime domain, TimeMax=2.2 s"
+  ],
+  "falsification": {
+    "pass_condition": "CPU candidate has interior bottom particles and no zero normals; solver canary must then show no first bottom-hole entry under unchanged hard gates",
+    "failure_condition": "any zero normal, fluid-boundary overlap, or retained first bottom-plane penetration keeps this mechanism failed",
+    "no_threshold_relaxation": true,
+    "no_cfl_retry": true
+  },
+  "resource_estimate_from_h2": {
+    "baseline_gpu": "RTX 6000 Ada",
+    "baseline_case_particles": 266134,
+    "candidate_case_particles": 267178,
+    "baseline_gpu_memory_mib": 58.21,
+    "candidate_gpu_memory_estimate_mib": 64.0,
+    "baseline_solver_seconds": 142.782181,
+    "candidate_solver_seconds_estimate": [
+      145.0,
+      180.0
+    ],
+    "estimate_basis": "H2 unchanged numerical controls; +1044 boundary particles and same 2.2 s window"
+  },
+  "qualification_claim": "none; one evidence-based canary proposal, no solver result"
+}

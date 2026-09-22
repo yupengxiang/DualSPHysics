@@ -1,0 +1,75 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f1-h1-qualification-cell-03",
+  "logical_id": "f1-h1-qualification-cell-03",
+  "attempt_role": "initial",
+  "category": "qualification",
+  "host": "ada",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f1.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-03/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 12288,
+    "gpu_peak_mib": 3072,
+    "io_weight": 1
+  },
+  "timeout_seconds": 7200,
+  "depends_on": [],
+  "qualification_claim": "none",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-03/prepared.json",
+      "sha256": "b8f90107216f23a531061c7b7ecc49bca8682d6e29c34cd993297207238bab8f"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    }
+  ],
+  "prepared_case_id": "CORE_F1_H1_obstacle_q0p50000000_h0p46000000_dp0p010000000000_qualification",
+  "registered_window_s": 2.2,
+  "maximum_extended_window_s": 4.4,
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0",
+  "canary_gate_required": "f1-h1-reference-fullwindow-canary-001",
+  "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+  "time_control_gate": "actual Run.csv Steps/PhysicalTime required for internal_time cell",
+  "static_validation": {
+    "schema": "core.f1.static.v1",
+    "revision_id": "F1_H1_geometry_observer_qualification_v1",
+    "prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-03/prepared.json",
+    "case_id": "CORE_F1_H1_obstacle_q0p50000000_h0p46000000_dp0p010000000000_qualification",
+    "design_cell": "spatial",
+    "static_quality_pass": true,
+    "preflight_pass": true,
+    "mass_rescaling": false,
+    "continuum_geometry_unchanged": true,
+    "time_control": {
+      "DtIni": 0.000345882,
+      "DtMin": 1.72941e-05,
+      "DtFixed": 0.0
+    },
+    "qualification_claim": "none",
+    "issues": []
+  }
+}

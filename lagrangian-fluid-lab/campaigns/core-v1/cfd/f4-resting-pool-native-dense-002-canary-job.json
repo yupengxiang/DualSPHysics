@@ -1,0 +1,93 @@
+{
+  "schema": "core.cfd.job.v1",
+  "job_id": "f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5",
+  "logical_id": "f4-resting-pool-native-dense-002-canary-s0p3-center-q0p5",
+  "attempt_role": "initial",
+  "category": "f4_cadence_control_canary",
+  "host": "ada",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_cfd.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_native_dense_002_canary/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "ram_mib": 16384,
+    "gpu_peak_mib": 4096,
+    "io_weight": 1
+  },
+  "timeout_seconds": 1800,
+  "depends_on": [],
+  "qualification_claim": "none; native output cadence comparator only",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_native_dense_002_canary/prepared.json",
+      "sha256": "438bc45e7587d559bf5a8e938b9834284b08c1b058e1b516f63ac35801778f6d"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    }
+  ],
+  "prepared_case_id": "F4_RESTING_POOL_CENTER_NATIVE_DENSE_002_CANARY",
+  "registered_window_s": 0.3,
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0",
+  "execution_status": "prepared_only",
+  "central_ledger_mutation": 0,
+  "gpu_started": false,
+  "stage": "canary",
+  "cadence_control": {
+    "schema": "core.cfd.cadence_control.v1",
+    "role": "native_output_cadence_control",
+    "parent_prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_medium_canary/prepared.json",
+    "parent_prepared_sha256": "170aa5facc7f1d08688a3f7ef01af45cbc4226cc660aa91a4e89f74c03893abd",
+    "parent_case_id": "F4_RESTING_POOL_CENTER_MEDIUM_CANARY",
+    "parent_output_interval_s": 0.02,
+    "dense_case_id": "F4_RESTING_POOL_CENTER_NATIVE_DENSE_002_CANARY",
+    "dense_output_interval_s": 0.002,
+    "changed_config_fields": [
+      "case_id",
+      "output_interval_s"
+    ],
+    "unchanged_numerical_progression": true,
+    "progression_fingerprint_sha256": "cc09eff4d168535b013fc7d4dd5a8e7f0d7109e254a6c85f91e7fe1648f2b6c2",
+    "dense_progression_fingerprint_sha256": "cc09eff4d168535b013fc7d4dd5a8e7f0d7109e254a6c85f91e7fe1648f2b6c2",
+    "declared_time_max_s": 0.3,
+    "expected_native_frames": 151,
+    "comparison_purpose": "separate saved-output cadence from reconstruction-error reliability; no qualification claim"
+  },
+  "comparison_baseline": {
+    "job_id": "f4-resting-pool-canary-001",
+    "prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F4_resting_pool_center_medium_canary/prepared.json",
+    "prepared_sha256": "170aa5facc7f1d08688a3f7ef01af45cbc4226cc660aa91a4e89f74c03893abd",
+    "trajectory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f4-resting-pool-canary-001/20260919T172542-d49b17d63c4f/product/trajectory.h5",
+    "trajectory_sha256": "892583601f507a2f66977a337718e29e108196aa3d6e83c8a9c3d59d634b6be6",
+    "output_interval_s": 0.02,
+    "time_max_s": 0.3,
+    "observed_frame_count": 16
+  },
+  "code_provenance": {
+    "core_cfd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_cfd.py",
+    "core_cfd_sha256": "76b01c93554ff5e13046f580a3d224c5db2f200ebacd0f062afdf4aaf74396b1",
+    "prepare_operation": "CPU GenCase + native initial-state/mass preflight; solver not started"
+  },
+  "expected_native_frame_count": 151,
+  "same_physics_changed_only": [
+    "case_id",
+    "output_interval_s"
+  ]
+}

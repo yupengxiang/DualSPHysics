@@ -1,0 +1,52 @@
+{
+  "schema": "core.root_review.v1",
+  "review_id": "f2-static-full-cup-boundary-repair-h1-root-review-v1",
+  "created_at_utc": "2026-09-20T06:45:00Z",
+  "family": "F2",
+  "scope_id": "F2_static_full_cup_volume_hold_x_v1",
+  "repair_id": "F2_static_full_cup_boundary_mdbc_h1_v1",
+  "decision": "approved_for_cpu_native_prepare_only",
+  "hypothesis_class": "H1_boundary_formulation_only",
+  "hypothesis": "replace native DBC Boundary=1 with mDBC Boundary=2 and explicit normal geometry; retain the v4 cell-0 fluid lattice, continuum geometry, mass policy and 0.60 s window",
+  "source_smoke_negative_evidence": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-runtime-smoke-negative-evidence-v1.json",
+    "sha256": "299487272bd2a84cb5c517e59a2662240f8447f3b6b30543079d1e4626a37e19",
+    "bytes": 155331,
+    "role": "DBC smoke negative evidence"
+  },
+  "source_prepared": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-matrix-prepared-v4/cells/00-CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial/prepared.json",
+    "sha256": "b317b9a6cc159652a45bdb9ec4aa29acba7d7fcf3886580102aff8fd55d90223",
+    "bytes": 18062,
+    "role": "v4 source cell"
+  },
+  "repair_prepared": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/prepared.json",
+    "sha256": "8a419c61d3ec64dc19cbcaa0126fe946df6acbf169462ddb214e82f431c51104",
+    "bytes": 9936,
+    "role": "H1 CPU/native repair preflight"
+  },
+  "repair_code": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_static_full_cup_boundary_repair_prepare.py",
+    "sha256": "b8a77b108e58f983097cc845f87259d140c83224104d273a444e28f3e24242c4",
+    "bytes": 13055,
+    "role": "H1 CPU repair preparer"
+  },
+  "authorization": {
+    "solver_launch": false,
+    "gpu_launch": false,
+    "job_spec_creation": false,
+    "queue_mutation": false,
+    "ledger_mutation": false,
+    "registry_mutation": false
+  },
+  "required_checks": [
+    "fluid and continuum geometry hash unchanged",
+    "native fluid count and identity axis unchanged",
+    "normal count equals boundary count and all normals finite/nonzero",
+    "mass representation remains native with no rescaling",
+    "repair remains qualification_only and unqualified"
+  ],
+  "qualification_claim": "none",
+  "registry_mutation": 0
+}

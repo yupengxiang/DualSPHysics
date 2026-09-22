@@ -1,0 +1,63 @@
+{
+  "schema": "core.f2.receiver_overflow_weir.lineage_clarification.v1",
+  "scope_id": "F2_receiver_overflow_weir_v1",
+  "revision_id": "F2_receiver_overflow_weir_mdbc_v1",
+  "qualification_claim": "none",
+  "qualified": false,
+  "new_scope": {
+    "family": "F2",
+    "mechanism_class": "stationary_upstream_reservoir_internal_crest_downstream_receiver",
+    "physical_geometry_changed": true,
+    "input_identity_changed": true,
+    "source_definition": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/CORE_F2_receiver_overflow_weir_q0p50000000_crest0p26000000_dp0p007500000000_Def.xml",
+    "boundary_semantics": "native mDBC Boundary=2, SlipMode=1, generated outer and weir normals",
+    "prescribed_motion": false,
+    "source_exchange": false,
+    "static_hold": false
+  },
+  "comparison_and_noninheritance": [
+    {
+      "scope": "F1_suspended_obstacle_gap_v1",
+      "reference": "campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/",
+      "difference": "F1 is gravity-driven flow around a suspended obstacle; this route has no suspended obstacle and instead transfers an initially stationary reservoir over an internal crest.",
+      "inheritance": false,
+      "same_input_retry": false
+    },
+    {
+      "scope": "F2_dynamic_third_family_dbc_duration_x_v1",
+      "reference": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-candidate-card-v1.json",
+      "difference": "The historical q=.75 case changes rotating-cup duration and has a hard-pass but event-censored execution. This route has no rotating cup, no duration parameter, no prior horizon extension and a new reservoir/crest/receiver topology.",
+      "historical_execution_reused": false,
+      "same_input_retry": false,
+      "qualification_inheritance": false
+    },
+    {
+      "scope": "F2_static_full_cup_volume_hold_v1",
+      "reference": "campaigns/core-v1/cfd/f2-static-full-cup-volume-hold-candidate-v1.json",
+      "difference": "The static full-cup scope starts with a filled cup and holds it; this route starts with a continuous upstream reservoir and has a separate internal crest and downstream receiver.",
+      "source_reused": false,
+      "qualification_inheritance": false
+    },
+    {
+      "scope": "F2_H2_mDBC_static",
+      "reference": "existing H2 mDBC static evidence",
+      "difference": "mDBC is retained only as a native boundary implementation reference; no H2 result, case identity or qualification credit is imported.",
+      "source_reused": false,
+      "qualification_inheritance": false
+    },
+    {
+      "scope": "F5_wave_runup_probe",
+      "reference": "campaigns/v0.1-candidate/R3-F5-WAVE-RUNUP-CONCLUSION.md",
+      "difference": "F5 is an external wave/runup measurement probe with wave source and gauge semantics; this route has no wave maker, runup gauge or external wave reference.",
+      "source_reused": false,
+      "qualification_inheritance": false
+    }
+  ],
+  "lineage_decision": "This is a fresh F2 physical and boundary/topology hypothesis. Prior F1 hard failure and F2 dynamic event-censored execution remain preserved evidence and are not retried, relabeled or merged into this scope.",
+  "prohibited_conflations": [
+    "Do not call the q=.5 CPU/native anchor a dynamic result.",
+    "Do not count generated_v1-v3 mass-gate attempts as matrix rows.",
+    "Do not reuse the historical F2 dynamic q=.75 input, horizon or event result.",
+    "Do not inherit any prior qualification, family registration or canary credit."
+  ]
+}

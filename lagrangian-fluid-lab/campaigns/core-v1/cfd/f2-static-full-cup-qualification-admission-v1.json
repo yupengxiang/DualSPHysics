@@ -1,0 +1,69 @@
+{
+  "schema": "core.f2.static_full_cup.qualification_admission.v1",
+  "created_at": "2026-09-20T06:11:47.417049+00:00",
+  "family": "F2",
+  "candidate_id": "F2_static_full_cup_volume_hold",
+  "scope_id": "F2_static_full_cup_volume_hold_x_v1",
+  "candidate_card": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-volume-hold-candidate-v1.json",
+    "sha256": "fcbaa77fe28c2ec43a4fd7eb28023555d15a520439f31b01151600cc0342c26f",
+    "bytes": 16996,
+    "role": "15-cell candidate card"
+  },
+  "source_preparation": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-matrix-prepared-v4/matrix-preparation.json",
+    "sha256": "f5bfacfc38b700aa43f7bc9b2db3cacfbd126666419b3eaa8422d45ff2056746",
+    "bytes": 41677,
+    "role": "v4 CPU preparation report"
+  },
+  "source_preparation_audit": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-matrix-prepared-v4/matrix-preparation-audit.json",
+    "sha256": "bc44fbf64aff429eb9ddb5e71117548413e7db047ceabbee627a6fe0312ecc25",
+    "bytes": 15198,
+    "role": "v4 preparation audit"
+  },
+  "observer_code": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_static_full_cup_qualification_observer.py",
+    "sha256": "0a60e38af015e24ea086f6505ee312ab36c1a13d137f4eec5ceff046c066089d",
+    "bytes": 43965,
+    "role": "read-only F2 static-volume observer/evaluator"
+  },
+  "legacy_static_observer_code": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2_resting_fill.py",
+    "sha256": "4ff6a0fcc03d97ca073e68a696ffbf393b0bd9ddb49903df7271c8f98e7a6de2",
+    "bytes": 43125,
+    "role": "reused static hold/open-top helper source"
+  },
+  "qualification_claim": "none; candidate static-volume scope only",
+  "admission_controls": {
+    "solver_launch_allowed": false,
+    "gpu_launch_allowed": false,
+    "job_spec_creation_allowed": false,
+    "queue_mutation_allowed": false,
+    "ledger_mutation_allowed": false,
+    "registry_mutation_allowed": false,
+    "anchor_trajectory_reuse_allowed": false,
+    "survivor_renormalization_allowed": false,
+    "threshold_relaxation_allowed": false
+  },
+  "required_runtime_product_per_cell": {
+    "fixed_denominator": 15,
+    "trajectory_hdf5": true,
+    "trajectory_sha256_and_bytes": true,
+    "prepared_sha256_exact_match": true,
+    "case_id_exact_match": true,
+    "native_identity_axis_exact_match": true,
+    "solver_product_is_read_only_input": true,
+    "anchor_trajectory_reuse": false,
+    "missing_or_failed_rows_retained": true
+  },
+  "required_temporal_evidence": {
+    "internal_time": "trajectory comparison plus explicit actual-step control evidence supplied by root runtime receipt",
+    "native_output": "trajectory comparison at the independently declared finer saved cadence"
+  },
+  "future_job_review": {
+    "this_module_does_not_create_jobs": true,
+    "root_review_required_before_any_solver_or_gpu_submission": true,
+    "registry_scope_registration_deferred": true
+  }
+}

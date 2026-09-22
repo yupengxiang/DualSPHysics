@@ -1,0 +1,3258 @@
+{
+  "schema": "core.f1.h3.qualification_handoff.v1",
+  "family": "F1",
+  "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+  "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+  "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+  "recipe": "mdbc_native_boundary_topology_repair",
+  "qualification_claim": "none",
+  "candidate_status": "conditional_pre_registered_unqualified",
+  "qualification_only": true,
+  "qualification_inheritance": false,
+  "cell_count": 15,
+  "spatial_cells": 13,
+  "temporal_cells": 2,
+  "cells": [
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q0p00000000_h0p40000000_dp0p010000000000_qualification",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 0.0,
+        "value": 0.4,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.01,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.4
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.2,
+      "output_interval_s": 0.02,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.02,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000345882,
+        "DtMin": 1.72941e-05,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q0p00000000_h0p40000000_dp0p007500000000_qualification",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 0.0,
+        "value": 0.4,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.0075,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.4
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.2,
+      "output_interval_s": 0.02,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.02,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000345882,
+        "DtMin": 1.72941e-05,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q0p00000000_h0p40000000_dp0p005000000000_qualification",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 0.0,
+        "value": 0.4,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.005,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.4
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.2,
+      "output_interval_s": 0.02,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.02,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000345882,
+        "DtMin": 1.72941e-05,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q0p50000000_h0p46000000_dp0p010000000000_qualification",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 0.5,
+        "value": 0.46,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.01,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.46
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.2,
+      "output_interval_s": 0.02,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.02,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000345882,
+        "DtMin": 1.72941e-05,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q0p50000000_h0p46000000_dp0p007500000000_qualification",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 0.5,
+        "value": 0.46,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.0075,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.46
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.2,
+      "output_interval_s": 0.02,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.02,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000345882,
+        "DtMin": 1.72941e-05,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q0p50000000_h0p46000000_dp0p005000000000_qualification",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 0.5,
+        "value": 0.46,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.005,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.46
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.2,
+      "output_interval_s": 0.02,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.02,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000345882,
+        "DtMin": 1.72941e-05,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q1p00000000_h0p52000000_dp0p010000000000_qualification",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 1.0,
+        "value": 0.52,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.01,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.52
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.2,
+      "output_interval_s": 0.02,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.02,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000345882,
+        "DtMin": 1.72941e-05,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q1p00000000_h0p52000000_dp0p007500000000_qualification",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 1.0,
+        "value": 0.52,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.0075,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.52
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.2,
+      "output_interval_s": 0.02,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.02,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000345882,
+        "DtMin": 1.72941e-05,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q1p00000000_h0p52000000_dp0p005000000000_qualification",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 1.0,
+        "value": 0.52,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.005,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.52
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.2,
+      "output_interval_s": 0.02,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.02,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000345882,
+        "DtMin": 1.72941e-05,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q0p25000000_h0p43000000_dp0p007500000000_qualification",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 0.25,
+        "value": 0.43000000000000005,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.0075,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.43000000000000005
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.2,
+      "output_interval_s": 0.02,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.02,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000345882,
+        "DtMin": 1.72941e-05,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q0p25000000_h0p43000000_dp0p005000000000_qualification",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 0.25,
+        "value": 0.43000000000000005,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.005,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.43000000000000005
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.2,
+      "output_interval_s": 0.02,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.02,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000345882,
+        "DtMin": 1.72941e-05,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q0p75000000_h0p49000000_dp0p007500000000_qualification",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 0.75,
+        "value": 0.49,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.0075,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.49
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.2,
+      "output_interval_s": 0.02,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.02,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000345882,
+        "DtMin": 1.72941e-05,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q0p75000000_h0p49000000_dp0p005000000000_qualification",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 0.75,
+        "value": 0.49,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.005,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.49
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.2,
+      "output_interval_s": 0.02,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.02,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000345882,
+        "DtMin": 1.72941e-05,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q0p50000000_h0p46000000_dp0p007500000000_qualification_internal_time",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "internal_time",
+      "temporal_variant": "internal_time",
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 0.5,
+        "value": 0.46,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.0075,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.46
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.1,
+      "output_interval_s": 0.02,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.02,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000172941,
+        "DtMin": 8.64705e-06,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F1",
+      "scope_id": "F1_single_obstacle_mdbc_bottom_face_height_range_v1",
+      "revision_id": "F1_H3_obstacle_bottom_face_mdbc_13plus2_v1",
+      "case_id": "CORE_F1_H3_obstacle_bottom_face_mdbc_q0p50000000_h0p46000000_dp0p007500000000_qualification_native_output",
+      "recipe_id": "F1_H3_obstacle_bottom_face_mdbc_v1",
+      "recipe": "mdbc_native_boundary_topology_repair",
+      "stage": "qualification",
+      "design_cell": "native_output",
+      "temporal_variant": "native_output",
+      "qualification_claim": "none",
+      "qualified": false,
+      "parameter": {
+        "name": "initial_water_height_m",
+        "q": 0.5,
+        "value": 0.46,
+        "candidate_range": [
+          0.4,
+          0.52
+        ],
+        "mapping": "h(q)=0.40+0.12*q m"
+      },
+      "dp_m": 0.0075,
+      "fluid_box": {
+        "low": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "size": [
+          0.34,
+          0.32,
+          0.46
+        ],
+        "mkfluid": 0
+      },
+      "initialization_rule": {
+        "name": "cell_centre_drawbox_sampling",
+        "reason": "retained inclusive drawbox adds edge cells at non-grid-aligned bounds; explicit cell-centre sampling keeps native representation error within the mass gate",
+        "mass_rescaling": false,
+        "continuum_box_preserved": true
+      },
+      "continuum_geometry": {
+        "tank": {
+          "low": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "obstacle": {
+          "id": "center_obstacle",
+          "low": [
+            0.68,
+            0.15,
+            0.0
+          ],
+          "size": [
+            0.12,
+            0.1,
+            0.34
+          ]
+        },
+        "density_kg_m3": 1000.0,
+        "unchanged": true
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "wall_bounds": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_spec": {
+        "container_interior": {
+          "xmin": 0.0,
+          "xmax": 1.2,
+          "ymin": 0.0,
+          "ymax": 0.4,
+          "zmin": 0.0,
+          "zmax": 0.6
+        },
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "obstacles": [
+          {
+            "id": "center_obstacle",
+            "xmin": 0.68,
+            "xmax": 0.8,
+            "ymin": 0.15,
+            "ymax": 0.25,
+            "zmin": 0.0,
+            "zmax": 0.34
+          }
+        ],
+        "runtime_domain": {
+          "xmin": -0.3,
+          "xmax": 1.5,
+          "ymin": -0.099375,
+          "ymax": 0.496875,
+          "zmin": -0.15,
+          "zmax": 1.8
+        }
+      },
+      "runtime_domain_zmax_m": 1.8,
+      "boundary_semantics": "mDBC no-slip with complete tank and finite-obstacle normals; obstacle bottom face closed in mainlist and GeometryForNormals",
+      "source_definition": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F1_obstacle_nominal_Def.xml",
+      "cfl": 0.2,
+      "output_interval_s": 0.004,
+      "time_max_s": 2.2,
+      "event_window": {
+        "initial_time_max_s": 2.2,
+        "maximum_extended_time_max_s": 4.4,
+        "output_interval_s": 0.004,
+        "extension_policy": "double whole scope once if return event is right-censored",
+        "completion_required_for_qualification": true
+      },
+      "physical_case_id": "L2_C1_F1_obstacle_nominal",
+      "lineage_group_id": "L2_C1_F1_obstacle_nominal_height_range",
+      "source_label_semantics": "native numerical source identity, no material qualification",
+      "canary_window_reason": "2.20 s covers obstacle approach, downstream split/rejoin and one gravity-time tail; 4.40 s is the single preregistered right-censor extension",
+      "time_control": {
+        "DtIni": 0.000345882,
+        "DtMin": 1.72941e-05,
+        "DtFixed": 0.0
+      },
+      "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+      "observer_observable_names": [
+        "center_of_mass_x_over_tank_length",
+        "center_of_mass_y_over_tank_width",
+        "center_of_mass_z_over_tank_height",
+        "kinetic_energy_over_initial_potential_energy",
+        "active_mass_over_initial_native_mass",
+        "obstacle_approach_mass_fraction",
+        "downstream_mass_fraction",
+        "front_bypass_mass_fraction",
+        "back_bypass_mass_fraction",
+        "rejoin_mass_fraction",
+        "downstream_lateral_centroid_over_tank_width",
+        "minimum_obstacle_clearance_over_tank_length",
+        "returning_mass_fraction"
+      ],
+      "event_registration": {
+        "approach_mass_fraction": 0.01,
+        "downstream_mass_fraction": 0.05,
+        "split_each_channel_mass_fraction": 0.01,
+        "rejoin_mass_fraction": 0.05,
+        "return_com_x_drop_m": "max(0.02, 2*dp)",
+        "return_separation_s": 0.1,
+        "post_return_tail_s": "sqrt(1.2/9.81)"
+      },
+      "qualification_only": true,
+      "solver_arguments": [
+        "-mdbc_noslip:1"
+      ],
+      "h3_boundary_topology": {
+        "mainlist_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "geometry_for_normals_obstacle_boxfill": "bottom | top | left | right | front | back",
+        "continuum_geometry_changed": false,
+        "mass_rescaling": false,
+        "zero_normals_allowed": 0,
+        "exact_fluid_boundary_overlap_allowed": 0
+      },
+      "canary_dependency": {
+        "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+        "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+        "required_before_materialization": true
+      }
+    }
+  ],
+  "parameter": {
+    "name": "initial_water_height_m",
+    "q_values": [
+      0.0,
+      0.5,
+      1.0,
+      0.25,
+      0.75
+    ],
+    "height_values_m": [
+      0.4,
+      0.46,
+      0.52,
+      0.43000000000000005,
+      0.49
+    ],
+    "range_m": [
+      0.4,
+      0.52
+    ],
+    "mapping": "h(q)=0.40+0.12*q m"
+  },
+  "spatial_resolutions_m": [
+    0.01,
+    0.0075,
+    0.005
+  ],
+  "fixed_geometry": {
+    "tank": {
+      "low": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        1.2,
+        0.4,
+        0.6
+      ]
+    },
+    "obstacle": {
+      "id": "center_obstacle",
+      "low": [
+        0.68,
+        0.15,
+        0.0
+      ],
+      "size": [
+        0.12,
+        0.1,
+        0.34
+      ]
+    },
+    "runtime_domain": {
+      "xmin": -0.3,
+      "xmax": 1.5,
+      "ymin": -0.099375,
+      "ymax": 0.496875,
+      "zmin": -0.15,
+      "zmax": 1.8
+    },
+    "continuum_geometry_changed": false,
+    "boundary_topology_changed": true
+  },
+  "registered_window": {
+    "initial_time_max_s": 2.2,
+    "output_interval_s": 0.02,
+    "maximum_extended_time_max_s": 4.4,
+    "extension_policy": "one whole-scope doubling after a frozen right-censor",
+    "event_completion_required": true
+  },
+  "observer": {
+    "schema": "core.f1.observations.v1",
+    "revision_id": "F1_H1_geometry_observer_qualification_v1",
+    "observable_names": [
+      "center_of_mass_x_over_tank_length",
+      "center_of_mass_y_over_tank_width",
+      "center_of_mass_z_over_tank_height",
+      "kinetic_energy_over_initial_potential_energy",
+      "active_mass_over_initial_native_mass",
+      "obstacle_approach_mass_fraction",
+      "downstream_mass_fraction",
+      "front_bypass_mass_fraction",
+      "back_bypass_mass_fraction",
+      "rejoin_mass_fraction",
+      "downstream_lateral_centroid_over_tank_width",
+      "minimum_obstacle_clearance_over_tank_length",
+      "returning_mass_fraction"
+    ],
+    "normalization": {
+      "mass_denominator": "initial_native_fluid_mass_kg_from_frame_zero; never survivor-renormalized",
+      "center_of_mass": "active native mass weighted, divided by fixed tank dimensions",
+      "kinetic_energy": "active kinetic energy divided by frame-zero native initial gravitational potential energy",
+      "obstacle_clearance": "signed nearest distance to finite obstacle, divided by tank length",
+      "channel_fractions": "fixed initial-native-mass denominator; front/back/rejoin regions use obstacle geometry",
+      "time": "linear interpolation on the common registered output grid; no point-index comparison"
+    },
+    "geometry": {
+      "obstacle_source": "config.continuum_geometry.obstacle",
+      "container_source": "config.continuum_geometry.tank",
+      "clearance": "finite center_obstacle box, 2dp approach margin",
+      "front_channel": "downstream x and y < obstacle ymin - 2dp",
+      "back_channel": "downstream x and y > obstacle ymax + 2dp",
+      "rejoin": "downstream x >= obstacle xmax + 4dp and lateral centroid within 0.125 tank widths of centerline"
+    },
+    "event_thresholds": {
+      "approach_mass_fraction": 0.01,
+      "downstream_mass_fraction": 0.05,
+      "split_each_channel_mass_fraction": 0.01,
+      "rejoin_mass_fraction": 0.05,
+      "return_com_x_drop_m": "max(0.02, 2*dp)",
+      "return_separation_s": 0.1,
+      "post_return_tail_s": "sqrt(1.2/9.81)"
+    },
+    "event_order": [
+      "approach",
+      "downstream",
+      "split",
+      "rejoin",
+      "return"
+    ],
+    "qualification_use": "geometry-aware diagnostic and numerical consistency comparison; no external physical truth claim"
+  },
+  "hard_integrity_contract": {
+    "no_missing_native_fluid_ids": true,
+    "no_nonfinite_active_values": true,
+    "closed_wall_endpoint_tolerance_m": 1e-08,
+    "saved_chord_crossings_allowed": 0,
+    "full_solid_obstacle_audit": true,
+    "obstacle_penetration_particle_frames_allowed": 0,
+    "fluid_boundary_exact_overlap_allowed": 0
+  },
+  "preregistered_gates": {
+    "spatial_max_absolute_normalized_difference": 0.05,
+    "temporal_max_absolute_normalized_difference": 0.01,
+    "event_time_relative_error_max": 0.05,
+    "actual_dt_ratio_max_for_internal_time": 0.8,
+    "actual_step_ratio_min_for_internal_time": 1.25,
+    "native_output_interval_ratio_max": 0.3,
+    "native_output_frame_ratio_min": 3.0,
+    "source_initial_mass_relative_error_max": 0.025,
+    "initial_mass_spread_over_continuous_mass_max": 0.03,
+    "no_survivor_renormalization": true,
+    "all_15_cells_required": true
+  },
+  "canary_dependency": {
+    "job_id": "f1-h3-obstacle-bottom-face-mdbc-canary-001",
+    "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+    "prepared": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/candidate/prepared.json",
+      "sha256": "c90ebd8492f28e510d2b5a35b1fecdb252859d10c963249ef74d026854325458",
+      "role": "H3 canary prepared"
+    },
+    "job": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/candidate/f1-h3-obstacle-bottom-face-mdbc-canary-job.json",
+      "sha256": "cf53583984d31ac0cd39f799362268c3e490c8b4ddc92413a35ced635c021313",
+      "role": "H3 canary job"
+    },
+    "proposal": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/candidate/f1-h3-obstacle-bottom-face-canary-proposal-v1.json",
+      "sha256": "c0d606b1950abfe6784d8ec6025fe1977b0fd63b2539aa667156a232aaa8e84c",
+      "role": "H3 canary proposal"
+    },
+    "required_status": "succeeded",
+    "required_checks": [
+      "hard_integrity_pass",
+      "source_mass_gate_pass",
+      "requested_horizon_reached",
+      "event_window_complete",
+      "full_solid_obstacle_audit"
+    ]
+  },
+  "materialization_policy": {
+    "gen_case_run": false,
+    "solver_run": false,
+    "prepared_matrix_written": false,
+    "jobs_written": false,
+    "reason": "H3 canary must pass before any H3-specific 15-cell GenCase preparation",
+    "legacy_h1_matrix_reusable": false,
+    "legacy_h1_matrix_reason": "native DBC recipe and H1 canary dependency differ from H3 mDBC topology recipe"
+  }
+}

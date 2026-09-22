@@ -1,0 +1,278 @@
+{
+  "schema": "core.f2.resting_fill_side_wet.candidate_card.v3",
+  "created_at": "2026-09-19T15:07:21.106787+00:00",
+  "family": "F2",
+  "scope_id": "F2_resting_fill_side_wet_full_cup_x_v3",
+  "revision_id": "F2_resting_fill_side_wet_full_cup_v3",
+  "case_id": "CORE_F2_resting_fill_side_wet_full_cup_q0p50000000_dp0p007500000000_canary_v3",
+  "status": "cpu_prepared_unsubmitted",
+  "execution_status": "proposal_only",
+  "qualification_claim": "none; independent full-cup side-wetted static-hold canary only",
+  "qualified": false,
+  "qualification_only": true,
+  "supersedes_nothing": true,
+  "central_ledger_mutation": 0,
+  "gpu_launch_by_subagent": false,
+  "purpose": "Test an independently registered side-wetted resting-fill initial condition before any moving-cup F2 qualification design.",
+  "source_failure_context": {
+    "retained_scope_not_relabelled": true,
+    "predecessor_scope": "F2_resting_fill_static_hold_x_v1",
+    "predecessor_prepared": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_static_hold_canary_v2/prepared.json",
+      "sha256": "87de27239de1575752f9ec653b4c97cda6b720965e76eac428ff97e71ac85fb8"
+    },
+    "immutable_reaudit": {
+      "forensics": "campaigns/core-v1/evidence/f2-resting-fill-static-hold-v2-h200/observer-reaudit-v3/forensics.json",
+      "forensics_sha256": "51ad42a8177c40c334865042e912200c696a2ccfa542dc1639ead8ac56ea9a0d",
+      "manifest": "campaigns/core-v1/evidence/f2-resting-fill-static-hold-v2-h200/observer-reaudit-v3/manifest.json",
+      "manifest_sha256": "4c38179689f925d25c9ad5b7895504b5d24e2db21da903024c83a4074d5733d6",
+      "solver_rerun": false,
+      "original_evidence_preserved": true
+    },
+    "prior_candidate_preflight_records": [
+      {
+        "id": "F2_resting_fill_side_wet_v1",
+        "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_canary_v1",
+        "status": "prepared_but_not_frozen",
+        "reason": "continuous box remained inset from physical cup faces"
+      },
+      {
+        "id": "F2_resting_fill_side_wet_full_cup_v2",
+        "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v2",
+        "status": "preflight_failed_and_retained",
+        "reason": "GenCase sampling phase put decoded x/y centers outside physical cup bounds"
+      }
+    ],
+    "evidence": {
+      "first_missing_time_s": 0.4800123333107795,
+      "first_missing_count": 6,
+      "native_missing_count_max": 144,
+      "maximum_open_top_spill_mass_fraction": 0.024396328967299295,
+      "pre_motion_open_top_spill_mass_fraction": 0.024396328967299295,
+      "pre_motion_escape_fraction_max": 0.04006058986010871,
+      "closed_wall_endpoint_frames": 0,
+      "closed_wall_saved_chord_crossings": 0,
+      "initial_pressure_fit_slope_pa_m": -9809.961,
+      "initial_pressure_expected_slope_pa_m": -9810.0,
+      "initial_velocity_max_m_s": 0.0,
+      "predecessor_physical_side_clearance_m": {
+        "left": 0.055,
+        "right": 0.055,
+        "front": 0.0425,
+        "back": 0.0475
+      }
+    },
+    "interpretation": "The retained source pressure was hydrostatic and velocity was zero, but the liquid footprint was 4.25-5.25 cm from cup side faces. This candidate changes only the fluid initial continuum footprint/height; the fixed cup/receiver/tray and numerical material recipe remain unchanged."
+  },
+  "physical_contract": {
+    "continuum_wall_geometry_changed": false,
+    "fluid_initial_condition_changed": true,
+    "cup": {
+      "low": [
+        0.0,
+        -0.15,
+        0.65
+      ],
+      "size": [
+        0.425,
+        0.3,
+        0.45
+      ],
+      "mouth_open": true,
+      "motion_during_hold": "fixed angle 0 degrees"
+    },
+    "receiver": {
+      "low": [
+        0.45,
+        -0.3,
+        0.0
+      ],
+      "size": [
+        1.1,
+        0.6,
+        0.45
+      ]
+    },
+    "tray": {
+      "low": [
+        -0.6,
+        -0.55,
+        -0.2
+      ],
+      "size": [
+        2.6,
+        1.1,
+        0.1
+      ]
+    },
+    "gravity_m_s2": -9.81,
+    "continuum_fluid_box": {
+      "low": [
+        0.0,
+        -0.15,
+        0.65
+      ],
+      "size": [
+        0.425,
+        0.3,
+        0.18505882352941178
+      ],
+      "mkfluid": 0
+    },
+    "continuum_faces_are_physical_cup_faces": true,
+    "predecessor_continuum_volume_m3": 0.023595,
+    "candidate_continuum_volume_m3": 0.023595,
+    "volume_difference_m3": 0.0,
+    "height_derivation": "0.023595/(0.425*0.30)=0.18505882352941177 m",
+    "native_sampling": "separate inset cell-centre lattice; decoded positions, not the continuum box, determine native no-overlap",
+    "native_sampling_source_point_m": [
+      0.00125,
+      -0.14875,
+      0.66125
+    ],
+    "native_sampling_source_size_m": [
+      0.42,
+      0.2925,
+      0.1725
+    ],
+    "native_particle_count": 54720,
+    "native_mass_kg": 23.084999999999997,
+    "continuous_mass_kg": 23.595000000000002,
+    "mass_rescaling": false,
+    "mass_gate": {
+      "source_relative_errors": [
+        -0.021614748887476387
+      ],
+      "max_abs_source_relative_error": 0.021614748887476387,
+      "total_discrete_mass_kg": 23.084999999999997,
+      "total_continuous_mass_kg": 23.595000000000002,
+      "total_relative_error": -0.021614748887476387,
+      "source_error_max": 0.025,
+      "total_error_max": 0.03,
+      "mass_rescaling": false,
+      "pass": true,
+      "mass_gate_pass": true
+    },
+    "native_fluid_bounds_m": {
+      "low": [
+        0.0024999999999999467,
+        -0.14500000000000002,
+        0.6599999999999999
+      ],
+      "high": [
+        0.4224999999999999,
+        0.14749999999999996,
+        0.8325
+      ]
+    },
+    "physical_face_clearance_m": {
+      "bottom": 0.009999999999999898,
+      "left": 0.0024999999999999467,
+      "right": 0.0025000000000001132,
+      "front": 0.004999999999999977,
+      "back": 0.00250000000000003,
+      "top": 0.26750000000000007
+    },
+    "minimum_native_cup_boundary_center_distance_m": 0.00749999999999984,
+    "initial_velocity_m_s": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "runtime_domain_unchanged": true
+  },
+  "candidate_basis": {
+    "hypothesis": "The predecessor side free surfaces were not wall-confined: 4-5 cm side clearances permit lateral startup collapse despite hydrostatic pressure. The candidate continuum box lies exactly on the cup interior faces and its height is derived from the predecessor continuum volume; the decoded native lattice is inset only as a sampling/no-overlap rule.",
+    "changed_parameter": "fluid initial continuum footprint and height plus its explicit native sampling phase; no physical wall, solver material, gravity, or mass-rescaling change",
+    "continuous_volume_rule": "exactly 0.023595 m3 = 0.425*0.30*0.18505882352941177",
+    "no_overlap_definition": "continuous fluid faces are the physical cup interior faces; native fluid centers use a separately declared inset lattice, all decoded centers are inside the physical cup bounds, have positive distance from generated cup particles, and meet native support; no mass or geometry rescaling",
+    "native_geometry_checks": {
+      "generated_fluid_count": true,
+      "native_fluid_count": true,
+      "native_ids_unique_finite": true,
+      "native_initial_zero_velocity": true,
+      "fluid_inside_physical_cup": true,
+      "target_native_position_bounds": true,
+      "native_boundary_present": true,
+      "positive_fluid_to_boundary_center_distance": true,
+      "side_wall_within_native_smoothing_support": true
+    },
+    "mass_gate_pass": true,
+    "qualification_inheritance": "none",
+    "negative_controls_retained": [
+      "predecessor missing-ID/open-spill failure",
+      "v1 inset-continuum record",
+      "v2 sampling-phase preflight failure",
+      "runtime-domain ceiling remains diagnostic only",
+      "CPU preflight does not establish settling"
+    ]
+  },
+  "static_hold_canary": {
+    "window_s": 0.6,
+    "original_drive_start_s": 0.5,
+    "pre_motion_coverage_s": 0.5,
+    "output_interval_s": 0.02,
+    "cup_angle_degrees": 0.0,
+    "motion_file": "CORE_F2_resting_fill_side_wet_full_cup_v3_zero_motion.dat",
+    "gates_reused_without_relaxation": {
+      "all_native_ids_retained": true,
+      "finite_arrays_and_native_mass_unchanged": true,
+      "cup_closed_wall_endpoint_and_saved_chord_frames": 0,
+      "open_top_escape_mass_fraction_max": 0.01,
+      "settle_speed_p95_m_s_max": 0.1,
+      "settle_kinetic_over_initial_potential_max": 0.05,
+      "settle_continuous_hold_s": 0.2
+    },
+    "event_window_complete_requires_settled": true,
+    "failure_policy": "preserve missing identities, closed-wall events, open-top spill, and right-censored settling; no canary result grants moving-pour qualification"
+  },
+  "artifacts": {
+    "prepared": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/prepared.json",
+      "sha256": "2bb1dac4bef30bea2926184641c9d4f3a18895b5b9468ac86b14cbbe28f256c7"
+    },
+    "static_preflight": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/static-preflight.json",
+      "sha256": "8e6d30ccf7ea3c1e4f1e56de400411671590f6696b7c4d338cbd1ff3ada1142d"
+    },
+    "definition": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/CORE_F2_resting_fill_side_wet_full_cup_q0p50000000_dp0p007500000000_canary_v3_Def.xml",
+      "sha256": "434bfbaa3839ed4e9c67d409b28893f7131bfeab75c5edf28ae94e01488be9a4"
+    },
+    "generated_native": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/generated/CORE_F2_resting_fill_side_wet_full_cup_q0p50000000_dp0p007500000000_canary_v3.bi4",
+      "sha256": "4b2af086e40dc14c9f26961cc3d3b19680424bbc5d670e9cf7e924c324497d68"
+    },
+    "job": {
+      "path": "campaigns/core-v1/cfd/f2-resting-fill-side-wet-full-cup-v3-canary-job.json",
+      "sha256": "f5300f69abf41210de20e599a967f1a916e6dacbad0ce5791f6d4552562db483"
+    },
+    "source_template": {
+      "path": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F2_rotation_center_nominal_Def.xml",
+      "sha256": "7a59e4873842e91b19bbb523bb7100d12445131f800d1341c615c0bbe4a7a911"
+    },
+    "generator_script": {
+      "path": "scripts/f2_resting_fill_side_wet_v3.py",
+      "sha256": "c42f9ef249ede7c3a77c82f5403de345155f7f80cebf4931029c33d98ae299e1"
+    },
+    "observer_script": {
+      "path": "scripts/core_f2_resting_fill.py",
+      "sha256": "4ff6a0fcc03d97ca073e68a696ffbf393b0bd9ddb49903df7271c8f98e7a6de2"
+    }
+  },
+  "job_resources": {
+    "cpu_cores": 2,
+    "ram_mib": 16384,
+    "gpu_peak_mib": 4096,
+    "io_weight": 0.25
+  },
+  "job_timeout_seconds": 1800,
+  "launch_policy": {
+    "prepared": true,
+    "gpu_submit": false,
+    "matrix_submit": false,
+    "ledger_submit": false,
+    "coordinator_review_required": true,
+    "next_action": "root may freeze this version and queue one independent static-hold canary after reviewing CPU preflight; no matrix or moving-pour qualification follows automatically"
+  }
+}

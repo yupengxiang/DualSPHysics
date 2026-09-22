@@ -1,0 +1,1815 @@
+{
+  "schema": "core.f2.h2_mdbc_static_qualification_design.v1",
+  "created_at_utc": "2026-09-20T07:12:15.806381+00:00",
+  "family": "F2",
+  "candidate_id": "F2_H2_mdbc_static_range_hold",
+  "scope_id": "F2_H2_mdbc_static_range_hold_x_v1",
+  "revision_id": "F2_H2_mdbc_static_range_qualification_v1",
+  "status": "design_only_cpu_preparation_plan",
+  "qualification_only": true,
+  "qualification_claim": "none; independent H2 static-range candidate only",
+  "qualified": false,
+  "central_registry_mutation": 0,
+  "gpu_launch_by_subagent": false,
+  "canary_support": {
+    "historical_canary": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-boundary-repair-v2-canary-evidence-20260920.json",
+      "sha256": "6f15f9d2a6d604694d7a2572f5827ac06379fb8a13e8826f9173ffcca9793211",
+      "bytes": 4728,
+      "role": "positive single-cell H2 hard/static evidence"
+    },
+    "prepared": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H2_mdbc_boundary_repair_canary_v2/prepared.json",
+      "sha256": "70d78a80f2181e2cb54f0f3eab5c69c52fb6ca9cd909e532a407bea8f8ec91a4",
+      "bytes": 11908,
+      "role": "H2 mDBC v2 prepared canary; historical input only"
+    },
+    "root_review": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-boundary-repair-v2-runtime-root-review-20260920.json",
+      "sha256": "0b6fbca807dfb44c4ec0c1e4040495c6db79cdfa9ab2d479044f759ceb5473c9",
+      "bytes": 3607,
+      "role": "single-cell H2 root smoke review"
+    },
+    "source_template": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l2-multifamily/c1-canary/cases/L2_C1_F2_rotation_center_nominal_Def.xml",
+      "sha256": "7a59e4873842e91b19bbb523bb7100d12445131f800d1341c615c0bbe4a7a911",
+      "bytes": 4820,
+      "role": "H2 Definition source template; future cells must copy/adapt"
+    },
+    "positive_scope": "single-cell hard/static hold only",
+    "inheritance": "geometry and H2 normal hypothesis inform this design; no runtime, range, temporal, or T1 result is inherited",
+    "canary_event_window_complete": false,
+    "canary_minimum_retention": 0.96685378241112
+  },
+  "physical_contract": {
+    "scene": "fixed cup at zero angle; static hold only",
+    "physical_geometry_changed_from_h2_canary": false,
+    "cup": {
+      "low": [
+        0.0,
+        -0.15,
+        0.65
+      ],
+      "size": [
+        0.425,
+        0.3,
+        0.45
+      ],
+      "mkbound": 0
+    },
+    "receiver": {
+      "low": [
+        0.45,
+        -0.3,
+        0.0
+      ],
+      "size": [
+        1.1,
+        0.6,
+        0.45
+      ],
+      "mkbound": 1
+    },
+    "tray": {
+      "low": [
+        -0.6,
+        -0.55,
+        -0.2
+      ],
+      "size": [
+        2.6,
+        1.1,
+        0.1
+      ],
+      "mkbound": 2
+    },
+    "runtime_domain": {
+      "posmin": [
+        -0.6,
+        -0.55,
+        -0.2
+      ],
+      "posmax": [
+        2.0,
+        0.55,
+        2.4
+      ],
+      "baseline_zmax_m": 1.8,
+      "changed_zmax_m": 2.4
+    },
+    "boundary_method": "mDBC Boundary=2 with -mdbc_noslip:1 in a future root-reviewed runtime only",
+    "normal_hypothesis": "three-layer normal support with expanded normal search",
+    "motion": {
+      "angle_degrees": 0.0,
+      "motion_file": "fresh zero-angle file per cell"
+    },
+    "continuum_fluid_footprint": {
+      "x_low_m": 0.05,
+      "y_low_m": -0.11,
+      "x_size_m": 0.325,
+      "y_size_m": 0.22,
+      "area_m2": 0.07150000000000001,
+      "volume_mapping": "V(q)=0.022950 + 0.001290*q m3",
+      "fill_height_mapping": "h(q)=V(q)/(0.425*0.30)",
+      "fluid_layer_policy": "two 0.11 m lower layers plus q-dependent upper layer; q=.5 reproduces canary continuum volume"
+    }
+  },
+  "normal_contract": {
+    "boundary_method": 2,
+    "solver_argument_reference": "-mdbc_noslip:1; declaration only, no solver invocation here",
+    "normal_layers_vdp": -0.5,
+    "main_boundary_layers_vdp": [
+      0,
+      1,
+      2
+    ],
+    "normal_distanceh": 3.0,
+    "svshapes": true,
+    "required_groups": [
+      "cup",
+      "receiver",
+      "tray"
+    ],
+    "every_cell_fresh_normal_preflight": true,
+    "zero_boundary_normals_max": 0,
+    "normal_count_equals_boundary_count": true,
+    "normal_vectors_finite_nonzero": true
+  },
+  "sampling_contract": {
+    "native_sampling": "cell-centre pointref=dp/2 lattice; actual generated groups and positions must be decoded per cell",
+    "fresh_definition_motion_gencase_decode_preflight_per_cell": true,
+    "native_identity_axis_from_actual_preflight": true,
+    "native_mass_policy": "native rho*dp^3; no mass rescaling",
+    "canary_trajectory_reuse": false,
+    "temporal_rows_are_independent_inputs": true
+  },
+  "qualification_design": {
+    "cell_count": 15,
+    "qualification_q": [
+      0.0,
+      0.5,
+      1.0
+    ],
+    "held_out_q": [
+      0.25,
+      0.75
+    ],
+    "dp_m": [
+      0.01,
+      0.0075,
+      0.005
+    ],
+    "registered_window_s": 0.6,
+    "output_interval_s": 0.02,
+    "native_output_interval_s": 0.01,
+    "settle_hold_s": 0.2,
+    "cells": [
+      {
+        "index": 0,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p00000000_dp0p010000000000_spatial_00",
+        "q": 0.0,
+        "dp_m": 0.01,
+        "design_cell": "spatial",
+        "temporal_variant": null,
+        "held_out": false,
+        "initial_volume_m3": 0.02295,
+        "initial_fill_height_m": 0.18000000000000002,
+        "output_interval_s": 0.02,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 0.0,
+          "dp_m": 0.01,
+          "design_cell": "spatial",
+          "held_out": false,
+          "temporal_variant": null,
+          "initial_volume_m3": 0.02295,
+          "initial_fill_height_m": 0.18000000000000002,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.10097902097902098
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.02,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "058fd69525e5c8cf988cd036396f65c0003ac01f07e14b604c66768be802c86a",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 1,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p00000000_dp0p007500000000_spatial_01",
+        "q": 0.0,
+        "dp_m": 0.0075,
+        "design_cell": "spatial",
+        "temporal_variant": null,
+        "held_out": false,
+        "initial_volume_m3": 0.02295,
+        "initial_fill_height_m": 0.18000000000000002,
+        "output_interval_s": 0.02,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 0.0,
+          "dp_m": 0.0075,
+          "design_cell": "spatial",
+          "held_out": false,
+          "temporal_variant": null,
+          "initial_volume_m3": 0.02295,
+          "initial_fill_height_m": 0.18000000000000002,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.10097902097902098
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.02,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "29c365f9b6559950af4a2ae93841a58777462e1ae749bf2bbfabc4d8ed956124",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 2,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p00000000_dp0p005000000000_spatial_02",
+        "q": 0.0,
+        "dp_m": 0.005,
+        "design_cell": "spatial",
+        "temporal_variant": null,
+        "held_out": false,
+        "initial_volume_m3": 0.02295,
+        "initial_fill_height_m": 0.18000000000000002,
+        "output_interval_s": 0.02,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 0.0,
+          "dp_m": 0.005,
+          "design_cell": "spatial",
+          "held_out": false,
+          "temporal_variant": null,
+          "initial_volume_m3": 0.02295,
+          "initial_fill_height_m": 0.18000000000000002,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.10097902097902098
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.02,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "4c9c72957b1f0fecc49820f879ba755d92dd144daddca453e85f49553c7a5816",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 3,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p50000000_dp0p010000000000_spatial_03",
+        "q": 0.5,
+        "dp_m": 0.01,
+        "design_cell": "spatial",
+        "temporal_variant": null,
+        "held_out": false,
+        "initial_volume_m3": 0.023595,
+        "initial_fill_height_m": 0.18505882352941178,
+        "output_interval_s": 0.02,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 0.5,
+          "dp_m": 0.01,
+          "design_cell": "spatial",
+          "held_out": false,
+          "temporal_variant": null,
+          "initial_volume_m3": 0.023595,
+          "initial_fill_height_m": 0.18505882352941178,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.10999999999999996
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.02,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "55e06246207760a7cfcb99edc53f588d0c186ac2d9b546336e82536bedb3ac2a",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 4,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p50000000_dp0p007500000000_spatial_04",
+        "q": 0.5,
+        "dp_m": 0.0075,
+        "design_cell": "spatial",
+        "temporal_variant": null,
+        "held_out": false,
+        "initial_volume_m3": 0.023595,
+        "initial_fill_height_m": 0.18505882352941178,
+        "output_interval_s": 0.02,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 0.5,
+          "dp_m": 0.0075,
+          "design_cell": "spatial",
+          "held_out": false,
+          "temporal_variant": null,
+          "initial_volume_m3": 0.023595,
+          "initial_fill_height_m": 0.18505882352941178,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.10999999999999996
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.02,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "16030c21d65b85059b927d7a41623da7529a996355426a6d4809301a2d2cca2f",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 5,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p50000000_dp0p005000000000_spatial_05",
+        "q": 0.5,
+        "dp_m": 0.005,
+        "design_cell": "spatial",
+        "temporal_variant": null,
+        "held_out": false,
+        "initial_volume_m3": 0.023595,
+        "initial_fill_height_m": 0.18505882352941178,
+        "output_interval_s": 0.02,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 0.5,
+          "dp_m": 0.005,
+          "design_cell": "spatial",
+          "held_out": false,
+          "temporal_variant": null,
+          "initial_volume_m3": 0.023595,
+          "initial_fill_height_m": 0.18505882352941178,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.10999999999999996
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.02,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "9701ccd0164e410ec4f08abe0e1f6c242a49f0cb57e3aa6fd3adce68b575a945",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 6,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q1p00000000_dp0p010000000000_spatial_06",
+        "q": 1.0,
+        "dp_m": 0.01,
+        "design_cell": "spatial",
+        "temporal_variant": null,
+        "held_out": false,
+        "initial_volume_m3": 0.02424,
+        "initial_fill_height_m": 0.19011764705882353,
+        "output_interval_s": 0.02,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 1.0,
+          "dp_m": 0.01,
+          "design_cell": "spatial",
+          "held_out": false,
+          "temporal_variant": null,
+          "initial_volume_m3": 0.02424,
+          "initial_fill_height_m": 0.19011764705882353,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.119020979020979
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.02,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "ed8128ba85751818d97591bc5d1fb3bdc47623686c5eaaa523b0e19affa7464d",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 7,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q1p00000000_dp0p007500000000_spatial_07",
+        "q": 1.0,
+        "dp_m": 0.0075,
+        "design_cell": "spatial",
+        "temporal_variant": null,
+        "held_out": false,
+        "initial_volume_m3": 0.02424,
+        "initial_fill_height_m": 0.19011764705882353,
+        "output_interval_s": 0.02,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 1.0,
+          "dp_m": 0.0075,
+          "design_cell": "spatial",
+          "held_out": false,
+          "temporal_variant": null,
+          "initial_volume_m3": 0.02424,
+          "initial_fill_height_m": 0.19011764705882353,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.119020979020979
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.02,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "7637a676313961dfb554fa980cd474b1ece2fba091f72d89b5aeacea01ef19fc",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 8,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q1p00000000_dp0p005000000000_spatial_08",
+        "q": 1.0,
+        "dp_m": 0.005,
+        "design_cell": "spatial",
+        "temporal_variant": null,
+        "held_out": false,
+        "initial_volume_m3": 0.02424,
+        "initial_fill_height_m": 0.19011764705882353,
+        "output_interval_s": 0.02,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 1.0,
+          "dp_m": 0.005,
+          "design_cell": "spatial",
+          "held_out": false,
+          "temporal_variant": null,
+          "initial_volume_m3": 0.02424,
+          "initial_fill_height_m": 0.19011764705882353,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.119020979020979
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.02,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "908ebd0b7bf46116cdecb6cea4fe1a0b44558ec536020daf7918bf6418d4eb60",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 9,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p25000000_dp0p007500000000_spatial_held_out_09",
+        "q": 0.25,
+        "dp_m": 0.0075,
+        "design_cell": "spatial_held_out",
+        "temporal_variant": null,
+        "held_out": true,
+        "initial_volume_m3": 0.0232725,
+        "initial_fill_height_m": 0.18252941176470588,
+        "output_interval_s": 0.02,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 0.25,
+          "dp_m": 0.0075,
+          "design_cell": "spatial_held_out",
+          "held_out": true,
+          "temporal_variant": null,
+          "initial_volume_m3": 0.0232725,
+          "initial_fill_height_m": 0.18252941176470588,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.10548951048951047
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.02,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "29822e86d3192adb3f0f8c6f718f533b71f371c56dee1878d63a065724ebca54",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 10,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p25000000_dp0p005000000000_spatial_held_out_10",
+        "q": 0.25,
+        "dp_m": 0.005,
+        "design_cell": "spatial_held_out",
+        "temporal_variant": null,
+        "held_out": true,
+        "initial_volume_m3": 0.0232725,
+        "initial_fill_height_m": 0.18252941176470588,
+        "output_interval_s": 0.02,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 0.25,
+          "dp_m": 0.005,
+          "design_cell": "spatial_held_out",
+          "held_out": true,
+          "temporal_variant": null,
+          "initial_volume_m3": 0.0232725,
+          "initial_fill_height_m": 0.18252941176470588,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.10548951048951047
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.02,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "52f31c04e6d5f153a3cee5f7b6b297cd5d1474bc2fa523ecb9ab463c0ea7cec2",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 11,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p75000000_dp0p007500000000_spatial_held_out_11",
+        "q": 0.75,
+        "dp_m": 0.0075,
+        "design_cell": "spatial_held_out",
+        "temporal_variant": null,
+        "held_out": true,
+        "initial_volume_m3": 0.0239175,
+        "initial_fill_height_m": 0.18758823529411767,
+        "output_interval_s": 0.02,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 0.75,
+          "dp_m": 0.0075,
+          "design_cell": "spatial_held_out",
+          "held_out": true,
+          "temporal_variant": null,
+          "initial_volume_m3": 0.0239175,
+          "initial_fill_height_m": 0.18758823529411767,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.1145104895104895
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.02,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "f8983ea091fa677783068a36e75f05384f25f088251b7a2290f8300d7a7e8b3a",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 12,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p75000000_dp0p005000000000_spatial_held_out_12",
+        "q": 0.75,
+        "dp_m": 0.005,
+        "design_cell": "spatial_held_out",
+        "temporal_variant": null,
+        "held_out": true,
+        "initial_volume_m3": 0.0239175,
+        "initial_fill_height_m": 0.18758823529411767,
+        "output_interval_s": 0.02,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 0.75,
+          "dp_m": 0.005,
+          "design_cell": "spatial_held_out",
+          "held_out": true,
+          "temporal_variant": null,
+          "initial_volume_m3": 0.0239175,
+          "initial_fill_height_m": 0.18758823529411767,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.1145104895104895
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.02,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "28aa5d9bec0fc2b3a28f11b3f67e55d941c413240b7eba1dd2af5ece2390b30b",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 13,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p50000000_dp0p007500000000_internal_time_13",
+        "q": 0.5,
+        "dp_m": 0.0075,
+        "design_cell": "internal_time",
+        "temporal_variant": "internal_time",
+        "held_out": false,
+        "initial_volume_m3": 0.023595,
+        "initial_fill_height_m": 0.18505882352941178,
+        "output_interval_s": 0.02,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 0.5,
+          "dp_m": 0.0075,
+          "design_cell": "internal_time",
+          "held_out": false,
+          "temporal_variant": "internal_time",
+          "initial_volume_m3": 0.023595,
+          "initial_fill_height_m": 0.18505882352941178,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.10999999999999996
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.02,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "5e1a582ea4581eb3cceb39d59c738be7973048a60cbfbc03acd28370d5c6f1aa",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 14,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p50000000_dp0p007500000000_native_output_14",
+        "q": 0.5,
+        "dp_m": 0.0075,
+        "design_cell": "native_output",
+        "temporal_variant": "native_output",
+        "held_out": false,
+        "initial_volume_m3": 0.023595,
+        "initial_fill_height_m": 0.18505882352941178,
+        "output_interval_s": 0.01,
+        "status": "design_only_unprepared",
+        "prepared": null,
+        "job": null,
+        "trajectory": null,
+        "input_contract": {
+          "q": 0.5,
+          "dp_m": 0.0075,
+          "design_cell": "native_output",
+          "held_out": false,
+          "temporal_variant": "native_output",
+          "initial_volume_m3": 0.023595,
+          "initial_fill_height_m": 0.18505882352941178,
+          "fluid_boxes": [
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.7
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 0
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.8099999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.11
+              ],
+              "mkfluid": 1
+            },
+            {
+              "continuous_low_m": [
+                0.05,
+                -0.11,
+                0.9199999999999999
+              ],
+              "continuous_size_m": [
+                0.325,
+                0.22,
+                0.10999999999999996
+              ],
+              "mkfluid": 2
+            }
+          ],
+          "output_interval_s": 0.01,
+          "registered_window_s": 0.6,
+          "mdbc_normal_support": {
+            "boundary_method": 2,
+            "normal_layers_vdp": -0.5,
+            "normal_distanceh": 3.0,
+            "svshapes": true
+          },
+          "native_sampling": {
+            "mode": "cell-centre lattice pointref=dp/2",
+            "decode_each_cell": true,
+            "expected_particle_axis_from_preflight": true,
+            "mass_policy": "native rho*dp^3; no mass rescaling"
+          }
+        },
+        "design_cell_sha256": "929a220266b49ade4d23d5dd1e8ef0191b683cac36c8c7dd9718a0366eea4506",
+        "materialization": {
+          "definition_required": true,
+          "motion_required": true,
+          "gencase_required": true,
+          "native_decode_required": true,
+          "preflight_required": true,
+          "independent_input_hash_required": true,
+          "reuse_canary_trajectory": false,
+          "status": "not_materialized"
+        },
+        "failure_categories_if_unavailable": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      }
+    ],
+    "matrix_inputs_materialized": false,
+    "matrix_jobs_materialized": false,
+    "temporal_rows": {
+      "internal_time": "q=.5, dp=.0075, fresh input and .02 s declared output; explicit actual-step evidence required",
+      "native_output": "q=.5, dp=.0075, fresh input and independently declared .01 s native output"
+    },
+    "held_out_policy": "q=.25/.75 rows are independent denominator rows and are excluded from qualification-q numerator"
+  },
+  "gates": {
+    "source_initial_mass_relative_error_max": 0.025,
+    "total_discrete_to_continuum_mass_error_max": 0.03,
+    "mass_change_relative_max": 1e-08,
+    "mass_rescaling_allowed": false,
+    "no_missing_native_fluid_ids": true,
+    "no_unexpected_native_ids": true,
+    "no_nonfinite_active_values": true,
+    "no_runtime_domain_endpoint_outside": true,
+    "no_cup_closed_face_endpoint_or_saved_chord_crossings": true,
+    "no_open_cup_escape": true,
+    "cup_retention_mass_fraction_min": 0.95,
+    "static_speed_p95_m_s_max": 0.1,
+    "static_kinetic_over_initial_potential_max": 0.05,
+    "static_settle_hold_s": 0.2,
+    "event_window_complete_required": true,
+    "spatial_max_absolute_normalized_difference": 0.05,
+    "temporal_max_absolute_normalized_difference": 0.01,
+    "internal_time_actual_step_evidence_required": true,
+    "thresholds_changed": false,
+    "survivor_renormalization": false
+  },
+  "failure_denominator": {
+    "fixed": 15,
+    "survivor_renormalization": false,
+    "categories": [
+      "not_materialized",
+      "missing_runtime_product",
+      "mass_quality",
+      "native_identity_axis",
+      "nonfinite_active_value",
+      "mdbc_normal_zero_or_incomplete",
+      "runtime_domain_endpoint",
+      "cup_closed_face_endpoint_or_saved_chord",
+      "open_cup_escape",
+      "static_settle",
+      "event_window_incomplete",
+      "spatial_comparison",
+      "temporal_comparison",
+      "temporal_control_evidence"
+    ],
+    "rows": [
+      {
+        "index": 0,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p00000000_dp0p010000000000_spatial_00",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 1,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p00000000_dp0p007500000000_spatial_01",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 2,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p00000000_dp0p005000000000_spatial_02",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 3,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p50000000_dp0p010000000000_spatial_03",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 4,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p50000000_dp0p007500000000_spatial_04",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 5,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p50000000_dp0p005000000000_spatial_05",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 6,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q1p00000000_dp0p010000000000_spatial_06",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 7,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q1p00000000_dp0p007500000000_spatial_07",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 8,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q1p00000000_dp0p005000000000_spatial_08",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 9,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p25000000_dp0p007500000000_spatial_held_out_09",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 10,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p25000000_dp0p005000000000_spatial_held_out_10",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 11,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p75000000_dp0p007500000000_spatial_held_out_11",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 12,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p75000000_dp0p005000000000_spatial_held_out_12",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 13,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p50000000_dp0p007500000000_internal_time_13",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      },
+      {
+        "index": 14,
+        "case_id": "CORE_F2_H2_mdbc_static_volume_q0p50000000_dp0p007500000000_native_output_14",
+        "status": "design_only_unprepared",
+        "failure_categories": [
+          "not_materialized",
+          "missing_runtime_product"
+        ]
+      }
+    ]
+  },
+  "admission_controls": {
+    "cpu_design_only": true,
+    "solver_launch_allowed": false,
+    "gpu_launch_allowed": false,
+    "job_spec_creation_allowed": false,
+    "queue_mutation_allowed": false,
+    "ledger_mutation_allowed": false,
+    "registry_mutation_allowed": false,
+    "anchor_trajectory_reuse_allowed": false,
+    "threshold_relaxation_allowed": false,
+    "survivor_renormalization_allowed": false,
+    "qualification_claim_allowed": false
+  },
+  "materialization_decision": {
+    "cpu_materialization_safe_now": false,
+    "status": "blocked_until_new_root_review",
+    "blockers": [
+      "existing root review authorizes only canary cell 0 smoke and explicitly rejects matrix expansion",
+      "q endpoints and dp=.010/.005 have no H2 Definition/GenCase/native preflight hashes",
+      "canary event_window_complete is false and supplies no range or temporal comparison evidence",
+      "each temporal row must be independently materialized even though geometry is equal"
+    ],
+    "next_step": "obtain a new root review for CPU/native preflight only; then materialize each cell independently without creating jobs"
+  },
+  "execution_controls": {
+    "definition_generated_by_this_command": false,
+    "gencase_invoked": false,
+    "native_decoder_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "job_spec_created": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0
+  }
+}

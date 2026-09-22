@@ -1,0 +1,151 @@
+{
+  "schema": "core.f2.dynamic_canary.forensics.v1",
+  "created_at": "2026-09-20T01:37:10.056275+00:00",
+  "family": "F2",
+  "case_id": "CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_q1p00000000_dp0p007500000000_canary",
+  "product": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-slow-duration-q1p0-canary-v1-001/20260920T092246-a6828cc79671/product",
+  "read_only": true,
+  "solver_relaunched": false,
+  "qualification_claim": "none; failed dynamic canary root-cause evidence only",
+  "domain_comparison": {
+    "declared_runtime_domain": {
+      "posmin": [
+        -0.7,
+        -0.65,
+        -0.4
+      ],
+      "posmax": [
+        2.2,
+        0.8,
+        2.4
+      ],
+      "baseline_zmax_m": 1.8,
+      "changed_zmax_m": 2.4,
+      "change_is_computational_only": true
+    },
+    "generated_xml_runtime_domain": {
+      "posmin": [
+        -0.7,
+        -0.65,
+        -0.4
+      ],
+      "posmax": [
+        2.2,
+        0.8,
+        2.4
+      ]
+    },
+    "declaration_matches_generated_xml": true,
+    "interpretation": "legacy declared-domain endpoint count is not valid evidence when it differs from generated XML"
+  },
+  "endpoint_recount": {
+    "declared_domain": {
+      "valid_endpoint_count": 0,
+      "nonfinite_endpoint_count": 0,
+      "first": null,
+      "by_face": {
+        "xmin": 0,
+        "xmax": 0,
+        "ymin": 0,
+        "ymax": 0,
+        "zmin": 0,
+        "zmax": 0
+      }
+    },
+    "generated_xml_domain": {
+      "valid_endpoint_count": 0,
+      "nonfinite_endpoint_count": 0,
+      "first": null,
+      "by_face": {
+        "xmin": 0,
+        "xmax": 0,
+        "ymin": 0,
+        "ymax": 0,
+        "zmin": 0,
+        "zmax": 0
+      }
+    },
+    "generated_domain_endpoint_count_is_zero": true
+  },
+  "native_identity_loss": {
+    "initial_native_fluid_count": 54720,
+    "final_active_count": 54720,
+    "missing_native_fluid_count": 0,
+    "minimum_active_fraction": 1.0,
+    "first_loss": null,
+    "runparts": {
+      "status": "available",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-slow-duration-q1p0-canary-v1-001/20260920T092246-a6828cc79671/product/solver/RunPARTs.csv",
+      "rows": 501,
+      "malformed_rows": 0,
+      "totals": {
+        "NpOut": 0,
+        "NpOutPos": 0,
+        "NpOutRho": 0,
+        "NpOutMov": 0
+      },
+      "first_nonzero": {}
+    },
+    "partout": {
+      "status": "available",
+      "binary": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/ce83f6eb5ba1ac1f5680bdd2f7df955ccaebe42b1ad03e797b15e2883c6729aa/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTKOut_linux64",
+      "rows": 0,
+      "motive_counts": {},
+      "part_counts_first": {},
+      "first_rows": [],
+      "command": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/ce83f6eb5ba1ac1f5680bdd2f7df955ccaebe42b1ad03e797b15e2883c6729aa/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTKOut_linux64",
+        "-dirdata",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-slow-duration-q1p0-canary-v1-001/20260920T092246-a6828cc79671/product/solver",
+        "-savecsv",
+        "/tmp/f2-partout-forensics-cwxwgh1m/excluded.csv",
+        "-csvsep:0"
+      ]
+    },
+    "interpretation": "all recorded exclusions are position exclusions; no density or movement exclusions"
+  },
+  "tray_reclassification": {
+    "legacy_frame_index": null,
+    "legacy_time_s": null,
+    "candidate_count": 0,
+    "candidates": [],
+    "classification": "not_recomputed"
+  },
+  "ownership_recontact_reaudit": {
+    "hard_integrity_pass": true,
+    "cup_open_top_exit_count": 54720,
+    "cup_open_top_entry_count": 19,
+    "cup_closed_face_entry_count": 0,
+    "cup_first_closed_face_entry": null,
+    "receiver_closed_face_entry_count": 0,
+    "semantics": "re-audit is in-memory only; old product audit.json is retained"
+  },
+  "legacy_audit_snapshot": {
+    "hard_integrity_pass": true,
+    "runtime_domain_endpoint_count": 0,
+    "tray_endpoint_count": 0,
+    "saved_chord_count": 0
+  },
+  "repair_candidates": [
+    {
+      "id": "computational_envelope_all_faces_canary",
+      "evidence": [
+        "generated XML and declared audit AABBs differed on x/y/lower-z faces",
+        "PartVTKOut first and later records are Motive=1 at generated-domain faces"
+      ],
+      "change": "freeze the actual six-face runtime envelope explicitly and test a finite margin canary; preserve continuum geometry, native mass and physical tray/cup/receiver",
+      "status": "candidate_only; requires one new canary and does not repair physical-wall semantics"
+    }
+  ],
+  "withheld_repair_classes": [
+    "mDBC/cup-wall change: withheld because cup and receiver closed-wall endpoint/chord audits had no findings",
+    "tray geometry change: withheld because the one tray point entered the finite footprint from the side while already below the open slab; no bottom chord crossing"
+  ],
+  "analysis_script_sha256": "d3a063dd951e03887ee2d6454ecb79c9a3b190865fe6e122a4cdc22ed2c0ddad",
+  "input_sha256": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-slow-duration-q1p0-canary-v1-001/20260920T092246-a6828cc79671/product/prepared.json": "c1200c143b93d0ff4c142d74d6196dc1a4894e61b1194f1501e5bd82f3bd7091",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-slow-duration-q1p0-canary-v1-001/20260920T092246-a6828cc79671/product/trajectory.h5": "13864c7bef805097be28a65dce3d4f8867998a04a4514341cfdc6bf53138165f",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_q1p0_v1/generated/CORE_F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_q1p00000000_dp0p007500000000_canary.xml": "f8935cf9213fcaf28590202c841f5b2000ad908911dcb4f9a01b99f788296966",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-slow-duration-q1p0-canary-v1-001/20260920T092246-a6828cc79671/product/solver/RunPARTs.csv": "1d72fb54278dac657c9b9f375ff270d6be46ac19190ec520dc6cdd4184cfa1f6"
+  }
+}

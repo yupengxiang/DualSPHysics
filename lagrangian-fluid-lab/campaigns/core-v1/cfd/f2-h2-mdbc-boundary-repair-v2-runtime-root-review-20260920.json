@@ -1,0 +1,80 @@
+{
+  "schema": "core.root_review.v1",
+  "review_id": "f2-h2-mdbc-boundary-repair-v2-runtime-root-review-20260920",
+  "created_at_utc": "2026-09-20T07:25:00Z",
+  "family": "F2",
+  "scope_id": "F2_H2_mdbc_boundary_repair_canary_v1",
+  "repair_id": "F2_position_diagnostic_mdbc_boundary_v2",
+  "decision": "approved_for_runtime_smoke",
+  "authorized_cell_indices": [
+    0
+  ],
+  "hypothesis_class": "H2_three_layer_normal_support_only",
+  "hypothesis": "run the already CPU-closed three-layer mDBC candidate with expanded normal search and surface-shape support; keep the finite cup/receiver/tray, fluid lattice, native mass and zero-angle 0.60 s canary unchanged",
+  "candidate_card": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-position-diagnostic-candidate-card.json",
+    "sha256": "7e68aea486cae3b64a7d6810497510462cfccdcfd525cf131f5a86b08d6a5258",
+    "bytes": 7603,
+    "role": "F2 position-diagnostic candidate card"
+  },
+  "prepared": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H2_mdbc_boundary_repair_canary_v2/prepared.json",
+    "sha256": "70d78a80f2181e2cb54f0f3eab5c69c52fb6ca9cd909e532a407bea8f8ec91a4",
+    "bytes": 11908,
+    "role": "H2 mDBC v2 prepared input"
+  },
+  "superseded_prepared": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H2_mdbc_boundary_repair_canary/prepared.json",
+    "sha256": "f569f17e15a722f4e6a8e01d30adc091f7a407f003b6187f2a913a6906781997",
+    "bytes": 11467,
+    "role": "H2 v1 retained preflight"
+  },
+  "superseded_zero_normal_prepared": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_H2_mdbc_boundary_repair_canary_zero_normals/prepared.json",
+    "sha256": "dbcbdff78e42dc9a83bd32afe1eb7188ea0cb79453bde8cb44783675ba6ea84c",
+    "bytes": 11467,
+    "role": "H2 zero-normal failed preflight"
+  },
+  "source_job_template": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-h2-mdbc-boundary-repair-v2-canary-job.json",
+    "sha256": "e40bfd70f3682b9c04b564c8dd0d893483f39bc10110b089bbf7f8f5c4ed0171",
+    "bytes": 2186,
+    "role": "unsubmitted H2 job template"
+  },
+  "runtime_code": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2.py",
+    "sha256": "0800a84d32e4a519f25925f738e3334e8a2c3a3dd54548968f9796cd910110bd",
+    "bytes": 19417,
+    "role": "F2 runtime worker"
+  },
+  "authorization": {
+    "solver_launch": true,
+    "gpu_launch": true,
+    "job_spec_creation": true,
+    "queue_mutation": true,
+    "ledger_mutation": true,
+    "registry_mutation": false,
+    "material_training": false,
+    "model_training": false
+  },
+  "execution_policy": {
+    "smoke_only": true,
+    "selected_cells_are_fixed": true,
+    "max_parallel_jobs": 1,
+    "first_cell_must_be_inspected_before_expansion": true,
+    "qualification_claim_none": true,
+    "no_t1_registration": true,
+    "missing_or_failed_rows_retained": true,
+    "same_input_retry_allowed": false,
+    "host_preference": "ada; no H200 disk use for this canary"
+  },
+  "required_postconditions": [
+    "H2 v2 prepared and normal-support hashes remain unchanged",
+    "one solver/native-conversion/audit receipt is complete",
+    "result is diagnostic only and does not enter Core T1 registry",
+    "a failed hard gate is preserved as evidence rather than repaired by threshold changes"
+  ],
+  "qualification_claim": "none",
+  "scientific_status": "execution_smoke_only",
+  "registry_mutation": 0
+}

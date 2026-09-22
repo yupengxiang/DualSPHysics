@@ -1,0 +1,264 @@
+{
+  "allocation": {
+    "gpu_index": 0,
+    "gpu_uuid": "GPU-4f2b9f08-9c17-7902-d3dd-159087442e46",
+    "reserved_gpu_mib": 4916
+  },
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab/scripts/core_f1.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/root-frozen/prepared-portable-inputs-v1.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "attempt_role": "infrastructure_retry",
+  "category": "boundary_configuration_repair_canary",
+  "comparison_baseline": {
+    "baseline_product": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h3-obstacle-bottom-face-mdbc-canary-001/20260920T044917-0b7e36021c06/product/result.json",
+    "baseline_product_sha256": "dab7c8ed31d6727ba6151b8bc1484ad1fab10a58ab0c1206ae453f173b08d922",
+    "boundary_only_change": true,
+    "case_id": "CORE_F1_H3_mdbc_obstacle_bottom_face_q0p50000000_h0p46000000_dp0p007500000000_canary",
+    "cfl_unchanged": 0.2,
+    "mass_rescaling": false,
+    "output_interval_unchanged_s": 0.02,
+    "physical_geometry_unchanged": true,
+    "time_max_unchanged_s": 2.2
+  },
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "depends_on": [],
+  "env": {
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONPATH": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab:/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab/scripts"
+  },
+  "hard_integrity_contract": {
+    "closed_wall_endpoint_tolerance_m": 1e-08,
+    "event_window_completion_required": true,
+    "fluid_boundary_exact_overlap_allowed": 0,
+    "full_solid_obstacle_audit": true,
+    "no_missing_native_fluid_ids": true,
+    "no_nonfinite_active_values": true,
+    "obstacle_penetration_particle_frames_allowed": 0,
+    "saved_chord_crossings_allowed": 0
+  },
+  "host": "h200",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/root-frozen/prepared-portable-inputs-v1.json",
+      "role": "prepared H4 canary",
+      "sha256": "a1d1063a6d292d8deb12474e994705ba7415200afa9928367afbe167c1e9c24a"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "role": "official DualSPHysics solver",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "role": "native decoder",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab/scripts/core_f1.py",
+      "role": "frozen F1 worker source",
+      "sha256": "bd9d06cc4d12a6a44899b7d079afa12705022074fa67baf771961da6b2f2e5c9"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab/scripts/core_cfd.py",
+      "role": "frozen CFD worker source",
+      "sha256": "fd6e56ab6c8f42e55c15c0e9d742c9289fca0a4214e5e203a3b357a23040adfb"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab/scripts/finite_wall_audit.py",
+      "role": "frozen finite-wall audit source",
+      "sha256": "41a4bae8e21d4e1d78205199389bb60d1cc265e2574065e5ee08f6763172a70c"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab/scripts/l2_f1r_audit.py",
+      "role": "frozen F1 audit source",
+      "sha256": "36cfe1e6533f276f28ddc74e332c99afb587b1950a6ee04377607afc7d5b800b"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab/scripts/l2_f1r_h1_canary.py",
+      "role": "frozen F1 canary source",
+      "sha256": "c157310b249310919f85f32895da81261a3e1b9de8d81cd7b22e3557ea3b7321"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab/scripts/l2_campaign.py",
+      "role": "frozen native conversion source",
+      "sha256": "fb2184ec03e94db2d7f19cdc5c37955a20c5c6ceba46c3f56008f6484eced739"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/CORE_F1_H4_mdbc_obstacle_normal_orientation_Def.xml",
+      "role": "H4 candidate native input",
+      "sha256": "d337222f76aa0a3be68f16b17c23c4cc156829c5834d2deda6f2249d73bf5049"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/gencase.log",
+      "role": "H4 candidate native input",
+      "sha256": "bba74ad8d8129fd0cd54220531c6c62a1caa61f571eb54d0ec37c9e160745ead"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/generated/CORE_F1_H4_mdbc_obstacle_normal_orientation.bi4",
+      "role": "H4 candidate native input",
+      "sha256": "d52ccce18636170cf2a69ebf57cbe8a10dfd01a33590f24744b39686a3ce4cfd"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/generated/CORE_F1_H4_mdbc_obstacle_normal_orientation.out",
+      "role": "H4 candidate native input",
+      "sha256": "9a2facba10dae02949fbe3278f3cf17a7e9f98df4b0b454b49152034c5a7a2cc"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/generated/CORE_F1_H4_mdbc_obstacle_normal_orientation.xml",
+      "role": "H4 candidate native input",
+      "sha256": "eb81dbc12962d1af2f410ac1c6510b7ab6e7f9e6d2f3994d3bff74ef2d3e27f6"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/generated/CORE_F1_H4_mdbc_obstacle_normal_orientation_All.vtk",
+      "role": "H4 candidate native input",
+      "sha256": "6dbf9aed317ff3b5faffd2ca33bc07f9bf6c599a954046563e73a2781e1c3767"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/generated/CORE_F1_H4_mdbc_obstacle_normal_orientation_Bound.vtk",
+      "role": "H4 candidate native input",
+      "sha256": "8172444efc2b9c5d42280561bf39956e9b97f92cc112eb9b044910332c921b4a"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/generated/CORE_F1_H4_mdbc_obstacle_normal_orientation_Fluid.vtk",
+      "role": "H4 candidate native input",
+      "sha256": "9264ee5ff96a606414cfacbcf26314dded52821bc4dcfcd9f9e8c6c8225fe931"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/generated/CORE_F1_H4_mdbc_obstacle_normal_orientation_GeometryShapes.vtk",
+      "role": "H4 candidate native input",
+      "sha256": "3d031570f89c54a8911cba1f6d2dbe6a05bb051f02e98f2edf583ff3794c9ae3"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/generated/CORE_F1_H4_mdbc_obstacle_normal_orientation_MkCells.vtk",
+      "role": "H4 candidate native input",
+      "sha256": "6adcbcdd6ab7228105ba4ad7ece9dfbd98217949713e9ad0c3260cb67091e30c"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/generated/CORE_F1_H4_mdbc_obstacle_normal_orientation_hdp_Actual.vtk",
+      "role": "H4 candidate native input",
+      "sha256": "07b45ed50c920e2b16b15cec39d8ae99985ea043ffbce9a738ace45d97f54668"
+    }
+  ],
+  "job_id": "f1-h4-obstacle-normal-orientation-canary-infra-retry-001",
+  "logical_id": "f1-h4-obstacle-normal-orientation-canary-001",
+  "maximum_extended_window_s": 4.4,
+  "prepared_case_id": "CORE_F1_H4_mdbc_obstacle_normal_orientation_q0p50000000_h0p46000000_dp0p007500000000_canary",
+  "qualification_claim": "none",
+  "registered_window_s": 2.2,
+  "repair_budget": {
+    "additional_same_class_canaries_after_this": 0,
+    "max_canaries_per_class": 2,
+    "max_mechanism_classes": 2,
+    "mechanism_class": "boundary_configuration",
+    "mechanism_class_attempt": 2,
+    "prior_boundary_configuration_canary": "F1 H2 retained negative",
+    "this_is_final_boundary_configuration_candidate_without_new_evidence": true
+  },
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "gpu_peak_mib": 4096,
+    "io_weight": 1,
+    "ram_mib": 16384
+  },
+  "root_review": {
+    "failure_mechanism": "solid-side obstacle shell and boundary-to-interface displacement incorrectly configured",
+    "host_reason": "Use H200 to avoid measured Ada IO contention.",
+    "infrastructure_retry": {
+      "original_prepared_sha256": "377631776dddbd206ae2598494d20d1a23c20b7a82b23e6df9dd6c28cbe86d2e",
+      "physical_and_numerical_config_equal": true,
+      "portable_prepared_sha256": "a1d1063a6d292d8deb12474e994705ba7415200afa9928367afbe167c1e9c24a",
+      "prior_attempt": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h4-obstacle-normal-orientation-canary-001/20260920T055539-557dacadb770",
+      "prior_job": "f1-h4-obstacle-normal-orientation-canary-001",
+      "retry_number": 1,
+      "script_references_same_hash": [
+        {
+          "frozen": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab/scripts/core_f1.py",
+          "original": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f1.py",
+          "sha256": "bd9d06cc4d12a6a44899b7d079afa12705022074fa67baf771961da6b2f2e5c9"
+        },
+        {
+          "frozen": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab/scripts/core_cfd.py",
+          "original": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_cfd.py",
+          "sha256": "fd6e56ab6c8f42e55c15c0e9d742c9289fca0a4214e5e203a3b357a23040adfb"
+        },
+        {
+          "frozen": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab/scripts/finite_wall_audit.py",
+          "original": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/finite_wall_audit.py",
+          "sha256": "41a4bae8e21d4e1d78205199389bb60d1cc265e2574065e5ee08f6763172a70c"
+        },
+        {
+          "frozen": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab/scripts/l2_f1r_audit.py",
+          "original": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/l2_f1r_audit.py",
+          "sha256": "36cfe1e6533f276f28ddc74e332c99afb587b1950a6ee04377607afc7d5b800b"
+        },
+        {
+          "frozen": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab/scripts/l2_f1r_h1_canary.py",
+          "original": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/l2_f1r_h1_canary.py",
+          "sha256": "c157310b249310919f85f32895da81261a3e1b9de8d81cd7b22e3557ea3b7321"
+        },
+        {
+          "frozen": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab/scripts/l2_campaign.py",
+          "original": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/l2_campaign.py",
+          "sha256": "fb2184ec03e94db2d7f19cdc5c37955a20c5c6ceba46c3f56008f6484eced739"
+        }
+      ],
+      "solver_not_started": true
+    },
+    "input_hashes_verified": true,
+    "proposal_sha256": "7e7f2d3b8ef5deed835b79735c1924d11e2321c445b0142884611ab425a68b9c",
+    "repair_policy": "One evidence-based orientation canary; no threshold relaxation, automatic extra repair or inherited qualification.",
+    "static_audit_pass": true
+  },
+  "schema": "core.cfd.job.v1",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "source_snapshot": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab",
+    "sha256": "f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624"
+  },
+  "source_snapshot_required": true,
+  "static_validation": {
+    "all_required_face_signs_pass": true,
+    "all_required_faces_nonempty": true,
+    "audit_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/static-normal-orientation-audit.json",
+    "audit_script": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f1_h4_obstacle_normal_orientation.py",
+    "audit_script_sha256": "e680dfa9e5984ecf5cfd6afb0920a1fe1903c06a9f1a9cd27270cf6f8cf51901",
+    "audit_sha256": "2e0495e9558980f5eb2199a5ec19209c1acc668afa7e4e25d92c9aac73f9346c",
+    "boundary_particles": 141192,
+    "continuum_geometry_changed": false,
+    "exact_fluid_boundary_overlap_count": 0,
+    "fluid_particles": 120658,
+    "mass_rescaling": false,
+    "max_interface_error_m": 4.768371586472142e-08,
+    "preflight_pass": true,
+    "schema": "core.f1.h4.obstacle_normal_orientation_static.v1",
+    "static_quality_pass": true,
+    "zero_normal_count": 0
+  },
+  "submission": {
+    "central_registry_written": false,
+    "gpu_launched": false,
+    "job_specs_submitted": false,
+    "ledger_written": false,
+    "root_review_required": true,
+    "status": "prepared_cpu_only_not_submitted"
+  },
+  "timeout_seconds": 3600,
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0"
+}

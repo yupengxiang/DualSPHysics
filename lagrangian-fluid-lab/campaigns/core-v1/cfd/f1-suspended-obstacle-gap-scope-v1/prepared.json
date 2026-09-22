@@ -1,0 +1,317 @@
+{
+  "schema": "core.cfd.v1",
+  "created_at": "2026-09-20T13:37:46.536627+00:00",
+  "config": {
+    "schema": "core.cfd.v1",
+    "family": "F1",
+    "scope_id": "F1_suspended_obstacle_gap_v1",
+    "revision_id": "F1_suspended_obstacle_gap_mdbc_v1",
+    "case_id": "CORE_F1_G1_suspended_obstacle_gap_q0p50000000_h0p46000000_dp0p007500000000_canary",
+    "recipe_id": "F1_G1_suspended_obstacle_mdbc_v1",
+    "recipe": "mdbc_native",
+    "stage": "canary",
+    "design_cell": "spatial",
+    "temporal_variant": null,
+    "qualification_claim": "none",
+    "qualified": false,
+    "parameter": {
+      "name": "initial_water_height_m",
+      "q": 0.5,
+      "value": 0.46,
+      "candidate_range": [
+        0.4,
+        0.52
+      ],
+      "mapping": "h(q)=0.40+0.12*q m"
+    },
+    "dp_m": 0.0075,
+    "fluid_box": {
+      "low": [
+        0.04,
+        0.04,
+        0.04
+      ],
+      "size": [
+        0.34,
+        0.32,
+        0.46
+      ],
+      "mkfluid": 0
+    },
+    "initialization_rule": {
+      "name": "cell_centre_drawbox_sampling",
+      "mass_rescaling": false,
+      "continuum_box_preserved": true
+    },
+    "continuum_geometry": {
+      "tank": {
+        "low": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          1.2,
+          0.4,
+          0.6
+        ]
+      },
+      "obstacle": {
+        "id": "suspended_center_obstacle",
+        "low": [
+          0.68,
+          0.15,
+          0.06
+        ],
+        "size": [
+          0.12,
+          0.1,
+          0.34
+        ]
+      },
+      "density_kg_m3": 1000.0,
+      "unchanged": false,
+      "geometry_revision": "bottom_gap_0p06m"
+    },
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_velocity_m_s": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "wall_bounds": {
+      "xmin": 0.0,
+      "xmax": 1.2,
+      "ymin": 0.0,
+      "ymax": 0.4,
+      "zmin": 0.0,
+      "zmax": 0.6
+    },
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "open_faces": [
+      "top"
+    ],
+    "wall_spec": {
+      "container_interior": {
+        "xmin": 0.0,
+        "xmax": 1.2,
+        "ymin": 0.0,
+        "ymax": 0.4,
+        "zmin": 0.0,
+        "zmax": 0.6
+      },
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "obstacles": [
+        {
+          "id": "suspended_center_obstacle",
+          "xmin": 0.68,
+          "xmax": 0.8,
+          "ymin": 0.15,
+          "ymax": 0.25,
+          "zmin": 0.06,
+          "zmax": 0.4
+        }
+      ],
+      "runtime_domain": {
+        "xmin": -0.3,
+        "xmax": 1.5,
+        "ymin": -0.099375,
+        "ymax": 0.496875,
+        "zmin": -0.15,
+        "zmax": 1.8
+      }
+    },
+    "runtime_domain_zmax_m": 1.8,
+    "boundary_semantics": "mDBC no-slip with free-standing solid-side obstacle shell; no threshold relaxation",
+    "source_definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/CORE_F1_suspended_obstacle_gap_q0p50000000_h0p46000000_dp0p007500000000_Def.xml",
+    "cfl": 0.2,
+    "output_interval_s": 0.02,
+    "time_max_s": 2.2,
+    "event_window": {
+      "initial_time_max_s": 2.2,
+      "maximum_extended_time_max_s": 4.4,
+      "output_interval_s": 0.02,
+      "extension_policy": "one whole-scope doubling only if right-censored after hard pass",
+      "completion_required_for_qualification": true
+    },
+    "physical_case_id": "L2_C1_F1_suspended_obstacle_gap",
+    "lineage_group_id": "L2_C1_F1_suspended_obstacle_gap_height_range",
+    "source_label_semantics": "new physical geometry identity, no material qualification",
+    "mechanism_class": "physical_geometry_free_standing_obstacle",
+    "mechanism_class_attempt": 1,
+    "solver_arguments": [
+      "-mdbc_noslip:1"
+    ]
+  },
+  "sampling": {
+    "fluid_boxes": [
+      {
+        "continuous_low_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "continuous_size_m": [
+          0.34,
+          0.32,
+          0.46
+        ],
+        "first_center_m": [
+          0.04125,
+          0.04125,
+          0.04125
+        ],
+        "draw_size_m": [
+          0.3375,
+          0.315,
+          0.45
+        ],
+        "counts": [
+          46,
+          43,
+          61
+        ],
+        "particle_count": 120658,
+        "continuous_mass_kg": 50.048,
+        "discrete_mass_kg": 50.90259374999999,
+        "native_cell_centre_sampling": true,
+        "mkfluid": 0
+      }
+    ],
+    "expected_fluid_particles": 120658,
+    "total_continuous_mass_kg": 50.048,
+    "total_discrete_mass_kg": 50.90259374999999
+  },
+  "mass_preflight": {
+    "source_relative_errors": [
+      0.017075482536764497
+    ],
+    "max_abs_source_relative_error": 0.017075482536764497,
+    "total_discrete_mass_kg": 50.90259374999999,
+    "total_continuous_mass_kg": 50.048,
+    "total_relative_error": 0.017075482536764497,
+    "source_error_max": 0.025,
+    "total_error_max": 0.03,
+    "mass_rescaling": false,
+    "mass_gate_pass": true
+  },
+  "native_initial": {
+    "total_particles": 263104,
+    "boundary_particles": 142446,
+    "fluid_particles": 120658,
+    "normal_count": 142446,
+    "zero_boundary_normals": 0,
+    "unique_ids": true,
+    "finite_initial_arrays": true,
+    "normal_file_present": true,
+    "initial_state_pass": true
+  },
+  "preflight_pass": true,
+  "generated_prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/generated/CORE_F1_suspended_obstacle_gap_q0p50000000_h0p46000000_dp0p007500000000",
+  "source_template": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/candidate/CORE_F1_H2_mdbc_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary_bottom_face_Def.xml",
+  "source_template_sha256": "fca440534ada0acc76b4d76ee20b06a2fb3a936430d8bd15ca26b71d956846a3",
+  "definition_audit": {
+    "continuum_geometry": {
+      "tank_low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tank_high_m": [
+        1.2,
+        0.4,
+        0.6
+      ],
+      "obstacle_low_m": [
+        0.68,
+        0.15,
+        0.06
+      ],
+      "obstacle_high_m": [
+        0.8,
+        0.25,
+        0.4
+      ],
+      "bottom_fluid_gap_m": 0.06
+    },
+    "normal_change": {
+      "obstacle_all_faces_setnormalinvert": false,
+      "tank_inner_faces_unchanged": true
+    },
+    "mainlist_changes": [
+      {
+        "kind": "void",
+        "old_point": [
+          0.67625,
+          0.14625,
+          -0.00375
+        ],
+        "new_point": [
+          0.67625,
+          0.14625,
+          0.056249999999999994
+        ]
+      },
+      {
+        "kind": "1",
+        "old_point": [
+          0.67625,
+          0.14625,
+          -0.00375
+        ],
+        "new_point": [
+          0.6837500000000001,
+          0.15375,
+          0.06375
+        ]
+      }
+    ],
+    "source_sha256": "fca440534ada0acc76b4d76ee20b06a2fb3a936430d8bd15ca26b71d956846a3"
+  },
+  "resolved_runtime_domain": {
+    "xmin": -0.3,
+    "xmax": 1.5,
+    "ymin": -0.099375,
+    "ymax": 0.496875,
+    "zmin": -0.15,
+    "zmax": 1.8
+  },
+  "inputs": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/CORE_F1_suspended_obstacle_gap_q0p50000000_h0p46000000_dp0p007500000000_Def.xml": "37203d1b3a9f70bec801e7e0287fc78728979ed61fec79f7df82e7bd1b5b60cb",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/gencase.log": "8fcfe04f02ef7187abb26e9d50883a4a90fdd776c070798e4e4d4760167c478f",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/generated/CORE_F1_suspended_obstacle_gap_q0p50000000_h0p46000000_dp0p007500000000.bi4": "3007d4224e005110d5616a91dc78dbe3516df94770f5749cb309604be1afea92",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/generated/CORE_F1_suspended_obstacle_gap_q0p50000000_h0p46000000_dp0p007500000000.xml": "66e6b95f74e023126799729ecc613531ae6d0ef83206a7cfa63d7378fc1a26d2",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/generated/CORE_F1_suspended_obstacle_gap_q0p50000000_h0p46000000_dp0p007500000000_Bound.vtk": "fc912da9f3c2cb890abf68368e52084aaba375fa343152ed679df51d87858c9f",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/generated/CORE_F1_suspended_obstacle_gap_q0p50000000_h0p46000000_dp0p007500000000_Fluid.vtk": "28ceffdc827b3f3f034d8a68da88ad92353802569df01c0568654177d4c54cde",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-suspended-obstacle-gap-scope-v1/generated/CORE_F1_suspended_obstacle_gap_q0p50000000_h0p46000000_dp0p007500000000_hdp_Actual.vtk": "2f65bd189807b7b9b4a1f01071d300653aa9b30c4ac5a26c0f1c8fe3d37e75b3"
+  },
+  "solver_binary": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+  "solver_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+  "decoder": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+  "decoder_sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+  "solver_arguments": [
+    "-mdbc_noslip:1"
+  ],
+  "qualification_claim": "none; one G1 anchor preparation, not range or qualification evidence",
+  "central_registry_mutated": false,
+  "central_ledger_mutated": false
+}

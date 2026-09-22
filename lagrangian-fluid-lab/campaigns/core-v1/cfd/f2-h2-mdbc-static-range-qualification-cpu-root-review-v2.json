@@ -1,0 +1,84 @@
+{
+  "schema": "core.root_review.v1",
+  "review_id": "f2-h2-mdbc-static-range-qualification-cpu-root-review-v2",
+  "created_at_utc": "2026-09-20T07:45:00Z",
+  "family": "F2",
+  "scope_id": "F2_H2_mdbc_static_range_qualification_v1",
+  "repair_id": "F2_H2_mdbc_static_range_mdbc_v1_cpu_endpoint_guard_v1",
+  "decision": "approved_for_cpu_native_prepare_only",
+  "authorized_cell_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+  ],
+  "hypothesis_class": "H2_three_layer_normal_support_only",
+  "hypothesis": "materialize the independently frozen 15-cell H2 static range design from the positive three-layer mDBC canary, preserving native mass, fluid identity partitions, finite cup/receiver/tray geometry, mDBC Boundary=2, vdp=-0.5 normal construction, 3h search and svshapes support; apply one-representable-float GenCase endpoint guards for the two known exact-ratio serialization cases without changing continuous dimensions, centers, mass policy or thresholds",
+  "candidate": {
+    "path": "campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-candidate-v1.json",
+    "sha256": "d0926ee5c0b02cc6364a7f7f40d1d245cdaa8d1543cf77c7bd02cdbc32938866",
+    "role": "independent 15-cell H2 mDBC candidate card"
+  },
+  "preparation_plan": {
+    "path": "campaigns/core-v1/cfd/f2-h2-mdbc-static-range-qualification-v1/preparation-plan-20260920-v2.json",
+    "sha256": "c6803f964f88e4fb4242bb0a9a248e77bfe6916dd16aedcb8a1f85621ac7fa4c",
+    "role": "read-only 15-cell CPU/native preparation plan with GenCase endpoint guards"
+  },
+  "anchor_canary": {
+    "prepared_path": "campaigns/core-v1/cfd/prepared/F2_H2_mdbc_boundary_repair_canary_v2/prepared.json",
+    "prepared_sha256": "70d78a80f2181e2cb54f0f3eab5c69c52fb6ca9cd909e532a407bea8f8ec91a4",
+    "evidence_path": "campaigns/core-v1/cfd/f2-h2-mdbc-boundary-repair-v2-canary-evidence-20260920.json",
+    "evidence_sha256": "6f15f9d2a6d604694d7a2572f5827ac06379fb8a13e8826f9173ffcca9793211",
+    "root_review_path": "campaigns/core-v1/cfd/f2-h2-mdbc-boundary-repair-v2-runtime-root-review-20260920.json",
+    "root_review_sha256": "0b6fbca807dfb44c4ec0c1e4040495c6db79cdfa9ab2d479044f759ceb5473c9"
+  },
+  "preparation_code": {
+    "path": "scripts/f2_h2_mdbc_static_range_prepare.py",
+    "sha256": "6aef8f9d80b3b905ebd747dab6f50a483b6cc634cc4c709dbe8c16dd6b372df4",
+    "role": "H2 CPU/native range preparer"
+  },
+  "authorization": {
+    "cpu_gencase": true,
+    "cpu_native_decoder": true,
+    "solver_launch": false,
+    "gpu_launch": false,
+    "job_spec_creation": false,
+    "queue_mutation": false,
+    "ledger_mutation": false,
+    "registry_mutation": false,
+    "material_training": false,
+    "model_training": false
+  },
+  "execution_policy": {
+    "all_registered_rows_remain_in_fixed_denominator": true,
+    "failed_rows_retained": true,
+    "unattempted_rows_not_successes": true,
+    "native_mass_no_rescaling": true,
+    "fresh_definition_motion_gencase_decode_for_each_row": true,
+    "plan_only_already_completed": true,
+    "future_solver_review_required": true,
+    "qualification_claim_none": true,
+    "no_t1_registration": true
+  },
+  "required_postconditions": [
+    "each selected row records input hashes and native identity/mass/finite checks",
+    "CPU preparation failures remain explicit rows in the 15-cell denominator",
+    "matrix preparation report records no solver, GPU, queue, ledger or registry action",
+    "positive CPU/native closure does not inherit the canary as a scientific numerator",
+    "endpoint guard changes remain confined to serialized drawbox extents and are recorded per source box"
+  ],
+  "qualification_claim": "none",
+  "scientific_status": "cpu_native_preparation_only",
+  "registry_mutation": 0
+}

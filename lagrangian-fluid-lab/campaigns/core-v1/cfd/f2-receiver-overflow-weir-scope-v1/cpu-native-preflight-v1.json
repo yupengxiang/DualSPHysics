@@ -1,0 +1,89 @@
+{
+  "schema": "core.f2.receiver_overflow_weir.cpu_native_preflight.v1",
+  "created_at_utc": "2026-09-20T14:20:00+00:00",
+  "execution_kind": "CPU GenCase plus native BI4 metadata/decode; solver/GPU/queue not run",
+  "scope_id": "F2_receiver_overflow_weir_v1",
+  "revision_id": "F2_receiver_overflow_weir_mdbc_v1",
+  "qualification_claim": "none",
+  "qualified": false,
+  "matrix_credit": 0,
+  "anchor": {
+    "q": 0.5,
+    "crest_height_m": 0.26,
+    "dp_m": 0.0075,
+    "definition": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/CORE_F2_receiver_overflow_weir_q0p50000000_crest0p26000000_dp0p007500000000_Def.xml",
+    "generated_prefix": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/generated_v4/CORE_F2_receiver_overflow_weir_q0p50000000_crest0p26000000_dp0p007500000000",
+    "bound_generation_revision": "generated_v4"
+  },
+  "preflight_status": "pass_for_input_contract_only",
+  "generated_counts": {
+    "boundary_particles": 245667,
+    "fluid_particles": 228480,
+    "total_particles": 474147,
+    "normal_particles": 245667,
+    "zero_normals": 0
+  },
+  "native_initial": {
+    "ids_unique": true,
+    "arrays_finite": true,
+    "fluid_velocity_max_abs_m_s": 0.0,
+    "fluid_particles_decoded": 228480,
+    "boundary_particles_decoded": 245667,
+    "total_particles_decoded": 474147,
+    "normal_file_present": true,
+    "boundary_normal_count": 245667,
+    "boundary_zero_normal_count": 0
+  },
+  "mass_contract": {
+    "continuous_source_mass_kg": 96.768,
+    "discrete_native_mass_kg": 96.39,
+    "relative_error": -0.00390625,
+    "source_relative_error_max": 0.025,
+    "pass": true,
+    "mass_rescaling": false,
+    "policy": "native rho*dp^3"
+  },
+  "geometry_contract": {
+    "outer_tank_closed_faces_present": true,
+    "internal_weir_crest_present": true,
+    "initial_source_ends_before_weir": true,
+    "free_surface_above_all_registered_crests": true,
+    "fluid_boundary_overlap_checked": true,
+    "runtime_event_observer_checked": false
+  },
+  "native_tools": {
+    "gencase_return_code": 0,
+    "bifileinfo_return_code": 0,
+    "native_decoder": "campaigns/l1-resume/artifacts/bi4_dump",
+    "solver_product_present": false
+  },
+  "excluded_exploratory_attempts": [
+    {"revision": "generated_v1", "reason": "mass gate failed; approximately +6.35% discrete source mass error; zero credit"},
+    {"revision": "generated_v2", "reason": "mass gate failed; approximately +6.48% discrete source mass error; zero credit"},
+    {"revision": "generated_v3", "reason": "mass gate failed; approximately +6.35% discrete source mass error; zero credit"}
+  ],
+  "artifacts": {
+    "definition_path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/CORE_F2_receiver_overflow_weir_q0p50000000_crest0p26000000_dp0p007500000000_Def.xml",
+    "gencase_log_path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/gencase-v4.log",
+    "native_bi4_path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/generated_v4/CORE_F2_receiver_overflow_weir_q0p50000000_crest0p26000000_dp0p007500000000.bi4",
+    "native_metadata_path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/generated_v4/CORE_F2_receiver_overflow_weir_q0p50000000_crest0p26000000_dp0p007500000000_.xml",
+    "bifileinfo_log_path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/generated_v4/bifileinfo.stdout.log",
+    "sha256": {
+      "definition": "dc5908b2e88d0384fc01801ce043ec389052431f80271e766b1571d9168bae21",
+      "gencase_log": "66f13a6a204554912038f3f70d6f4b8b710cac1d1684304cf58d7b82e56933d8",
+      "native_bi4": "5f7eb737b08009d2c8b899e128f6d75fd243d9e78131cbbc8addd73a6e720292",
+      "native_metadata": "09a38f51705160c0c6321a01351576faacae44fe655ed8491a47e0884199fc55",
+      "bifileinfo_log": "178d73a0d4edc7a2063c6d4f2def47b97408b1276b147d7841179a311b297944"
+    }
+  },
+  "execution_controls": {
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "central_ledger_mutation": 0,
+    "central_registry_mutation": 0,
+    "runtime_controls_executed": false
+  },
+  "interpretation_boundary": "This proves only a mass-gated, native-readable anchor input and generated normals. It proves no fluid transfer event, hard runtime integrity, event completion, qualification or T1 status.",
+  "preflight_pass": true
+}

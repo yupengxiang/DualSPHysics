@@ -1,0 +1,240 @@
+{
+  "schema": "core.f2.dynamic_third_family_dbc_duration.matrix.v1",
+  "created_at": "2026-09-20T08:20:00+00:00",
+  "family": "F2",
+  "scope_id": "F2_dynamic_third_family_dbc_duration_x_v1",
+  "revision_id": "F2_dynamic_third_family_dbc_duration_v1",
+  "candidate_card": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-candidate-card-v1.json",
+  "lineage_clarification": {
+    "path": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-lineage-clarification-v1.json",
+    "sha256": "abed3b35ea5459f725814cad574e636d2f6dd31ec51775f1c4cb6daeb70ab6b3"
+  },
+  "status": "fixed_design_cpu_preflight_anchor_only",
+  "qualification_claim": "none",
+  "design_only": true,
+  "denominator": 15,
+  "numerator": 0,
+  "numerator_status": "0/15 executed; no development-canary reuse",
+  "axis": {
+    "q_values": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "duration_mapping": "rotation_duration_s = 0.50 + 0.70*q",
+    "duration_range_s": [0.5, 1.2],
+    "dp_values_m": [0.01, 0.0075, 0.005],
+    "spatial_q_values": [0.0, 0.5, 1.0],
+    "held_out_q_values": [0.25, 0.75],
+    "temporal_comparator": "q=.5, dp=.0075 with internal-time and native-output variants"
+  },
+  "fixed_recipe": {
+    "boundary_method": 1,
+    "boundary_semantics": "native DBC Boundary=1",
+    "cfl": 0.2,
+    "angle_degrees": -105.0,
+    "motion_start_s": 0.5,
+    "runtime_window_s": 5.0,
+    "maximum_extension_s": 5.0,
+    "output_interval_s": 0.01,
+    "native_output_interval_s": 0.002,
+    "gravity_m_s2": -9.81,
+    "initial_mass_policy": "native rho*dp^3; no rescaling",
+    "physical_geometry": "full-cup side-wet initial fluid, finite cup/receiver, retained tray floor, four fixed catchment side walls, open top; this geometry is changed relative to static v3 source but frozen across the dynamic DBC duration matrix",
+    "geometry_comparison_basis": "existing q=.5 and q=1.0 native-DBC full-cup closed-catchment dynamic baselines",
+    "geometry_changed_relative_to_static_source": true,
+    "geometry_changed_relative_to_dynamic_baseline": false,
+    "runtime_domain_m": {
+      "posmin": [-0.7, -0.65, -0.4],
+      "posmax": [2.2, 0.8, 2.4]
+    }
+  },
+  "observer_gates": {
+    "source_initial_mass_relative_error_max": 0.025,
+    "initial_mass_spread_over_continuous_mass_max": 0.03,
+    "mass_change_relative_max": 1e-08,
+    "closed_wall_endpoint_tolerance_m": 1e-08,
+    "saved_chord_crossings_allowed": 0,
+    "no_missing_native_fluid_ids": true,
+    "no_nonfinite_active_values": true,
+    "receiver_contact_fraction": 0.01,
+    "spill_or_escape_fraction": 0.01,
+    "settle_speed_p95_m_s_max": 0.1,
+    "settle_kinetic_fraction_max": 0.05,
+    "settle_hold_s": 0.2,
+    "post_settle_observation_s": 0.35,
+    "event_window_complete_required": true,
+    "all_15_cells_required": true,
+    "no_survivor_renormalization": true
+  },
+  "cells": [
+    {
+      "index": 0,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p00000000_dp0p010000000000_spatial",
+      "q": 0.0,
+      "rotation_duration_s": 0.5,
+      "dp_m": 0.01,
+      "row_kind": "spatial_anchor",
+      "status": "not_started"
+    },
+    {
+      "index": 1,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p00000000_dp0p007500000000_spatial",
+      "q": 0.0,
+      "rotation_duration_s": 0.5,
+      "dp_m": 0.0075,
+      "row_kind": "spatial_anchor",
+      "status": "not_started"
+    },
+    {
+      "index": 2,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p00000000_dp0p005000000000_spatial",
+      "q": 0.0,
+      "rotation_duration_s": 0.5,
+      "dp_m": 0.005,
+      "row_kind": "spatial_anchor",
+      "status": "not_started"
+    },
+    {
+      "index": 3,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p50000000_dp0p010000000000_spatial",
+      "q": 0.5,
+      "rotation_duration_s": 0.85,
+      "dp_m": 0.01,
+      "row_kind": "spatial_anchor",
+      "status": "not_started"
+    },
+    {
+      "index": 4,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p50000000_dp0p007500000000_spatial",
+      "q": 0.5,
+      "rotation_duration_s": 0.85,
+      "dp_m": 0.0075,
+      "row_kind": "spatial_anchor",
+      "status": "not_started"
+    },
+    {
+      "index": 5,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p50000000_dp0p005000000000_spatial",
+      "q": 0.5,
+      "rotation_duration_s": 0.85,
+      "dp_m": 0.005,
+      "row_kind": "spatial_anchor",
+      "status": "not_started"
+    },
+    {
+      "index": 6,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q1p00000000_dp0p010000000000_spatial",
+      "q": 1.0,
+      "rotation_duration_s": 1.2,
+      "dp_m": 0.01,
+      "row_kind": "spatial_anchor",
+      "status": "not_started"
+    },
+    {
+      "index": 7,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q1p00000000_dp0p007500000000_spatial",
+      "q": 1.0,
+      "rotation_duration_s": 1.2,
+      "dp_m": 0.0075,
+      "row_kind": "spatial_anchor",
+      "status": "not_started"
+    },
+    {
+      "index": 8,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q1p00000000_dp0p005000000000_spatial",
+      "q": 1.0,
+      "rotation_duration_s": 1.2,
+      "dp_m": 0.005,
+      "row_kind": "spatial_anchor",
+      "status": "not_started"
+    },
+    {
+      "index": 9,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p25000000_dp0p007500000000_held_out",
+      "q": 0.25,
+      "rotation_duration_s": 0.675,
+      "dp_m": 0.0075,
+      "row_kind": "spatial_held_out",
+      "status": "not_started"
+    },
+    {
+      "index": 10,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p25000000_dp0p005000000000_held_out",
+      "q": 0.25,
+      "rotation_duration_s": 0.675,
+      "dp_m": 0.005,
+      "row_kind": "spatial_held_out",
+      "status": "not_started"
+    },
+    {
+      "index": 11,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p75000000_dp0p007500000000_held_out",
+      "q": 0.75,
+      "rotation_duration_s": 1.025,
+      "dp_m": 0.0075,
+      "row_kind": "spatial_held_out",
+      "status": "not_started"
+    },
+    {
+      "index": 12,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p75000000_dp0p005000000000_held_out",
+      "q": 0.75,
+      "rotation_duration_s": 1.025,
+      "dp_m": 0.005,
+      "row_kind": "spatial_held_out",
+      "status": "not_started"
+    },
+    {
+      "index": 13,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p50000000_dp0p007500000000_internal_time",
+      "q": 0.5,
+      "rotation_duration_s": 0.85,
+      "dp_m": 0.0075,
+      "row_kind": "temporal_internal_time",
+      "temporal_variant": "internal_time",
+      "status": "not_started"
+    },
+    {
+      "index": 14,
+      "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p50000000_dp0p007500000000_native_output",
+      "q": 0.5,
+      "rotation_duration_s": 0.85,
+      "dp_m": 0.0075,
+      "row_kind": "temporal_native_output",
+      "temporal_variant": "native_output",
+      "status": "not_started"
+    }
+  ],
+  "anchor_preflight": {
+    "case_id": "CORE_F2_DYNAMIC_THIRD_DBC_DURATION_q0p75000000_dp0p007500000000_anchor",
+    "q": 0.75,
+    "dp_m": 0.0075,
+    "prepared_manifest": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-q0p75-preflight-v1/prepared.json",
+    "prepared_manifest_sha256": "0e20f0a1931f069b0b049a7f33b9b9e27bbc6293cd706708c9619d83e723ff9d",
+    "preflight_pass": true,
+    "geometry_changed_relative_to_static_source": true,
+    "geometry_changed_relative_to_dynamic_baseline": false,
+    "solver_product_present": false,
+    "matrix_cell_credit": 0,
+    "reason": "anchor is a root-review input check and remains outside the 15-cell numerator until independently scheduled as a matrix row"
+  },
+  "denominator_policy": {
+    "fixed_at_creation": true,
+    "unattempted_rows_remain_in_denominator": true,
+    "infrastructure_failures_remain_rows": true,
+    "scientific_failures_remain_rows": true,
+    "right_censored_event_window_is_failure": true,
+    "same_input_retry_is_forbidden": true,
+    "development_canaries_never_credit_matrix": true,
+    "threshold_or_ownership_relaxation_forbidden": true,
+    "qualification_requires": "15/15 independent rows with hard_integrity_pass=true and event_window_complete=true"
+  },
+  "execution_controls": {
+    "materialized_cells": 0,
+    "submitted_cells": 0,
+    "solver_invoked_by_this_artifact": false,
+    "gpu_invoked_by_this_artifact": false,
+    "central_queue_mutation": 0,
+    "central_ledger_mutation": 0,
+    "central_registry_mutation": 0,
+    "root_review_required": true
+  },
+  "execution_status": "fixed design and q=.75 CPU/native preflight only; no solver/GPU/queue launch"
+}

@@ -1,0 +1,75 @@
+{
+  "schema": "core.root_review.v1",
+  "review_id": "f2-static-full-cup-runtime-root-review-smoke-v1",
+  "created_at_utc": "2026-09-20T06:30:00Z",
+  "family": "F2",
+  "scope_id": "F2_static_full_cup_volume_hold_x_v1",
+  "decision": "approved_for_runtime_smoke",
+  "authorized_cell_indices": [
+    0
+  ],
+  "candidate_card": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-volume-hold-candidate-v1.json",
+    "sha256": "fcbaa77fe28c2ec43a4fd7eb28023555d15a520439f31b01151600cc0342c26f",
+    "bytes": 16996,
+    "role": "15-cell candidate card"
+  },
+  "source_preparation": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-matrix-prepared-v4/matrix-preparation.json",
+    "sha256": "f5bfacfc38b700aa43f7bc9b2db3cacfbd126666419b3eaa8422d45ff2056746",
+    "bytes": 41677,
+    "role": "v4 CPU matrix preparation"
+  },
+  "source_preparation_audit": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-matrix-prepared-v4/matrix-preparation-audit.json",
+    "sha256": "bc44fbf64aff429eb9ddb5e71117548413e7db047ceabbee627a6fe0312ecc25",
+    "bytes": 15198,
+    "role": "v4 preparation audit"
+  },
+  "admission_contract": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-qualification-admission-v1.json",
+    "sha256": "bbeac0f554fd2975f9c3bc12a3bd60f5a48ade50ba4c64cc73b240181a8f7f2d",
+    "bytes": 3122,
+    "role": "candidate admission contract"
+  },
+  "observer_code": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_static_full_cup_qualification_observer.py",
+    "sha256": "0a60e38af015e24ea086f6505ee312ab36c1a13d137f4eec5ceff046c066089d",
+    "bytes": 43965,
+    "role": "read-only scientific observer"
+  },
+  "runtime_adapter_code": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_static_full_cup_runtime.py",
+    "sha256": "a1223abe7fa421fa7b32713b54cf072f437d2826aec53387eab4a20e97dcc4e3",
+    "bytes": 20376,
+    "role": "F2 runtime adapter"
+  },
+  "authorization": {
+    "solver_launch": true,
+    "gpu_launch": true,
+    "job_spec_creation": true,
+    "queue_mutation": true,
+    "ledger_mutation": true,
+    "registry_mutation": false,
+    "material_training": false,
+    "model_training": false
+  },
+  "execution_policy": {
+    "smoke_only": true,
+    "selected_cells_are_fixed": true,
+    "first_cell_must_be_inspected_before_expansion": true,
+    "candidate_scope_pass_does_not_register_t1": true,
+    "missing_or_failed_rows_remain_in_denominator": true,
+    "host_preference": "ada; avoid H200 disk pressure for the first runtime smoke",
+    "max_parallel_jobs": 1
+  },
+  "required_postconditions": [
+    "runtime prepared hash binds exactly to v4 cell 0 and this review",
+    "solver and native conversion receipts are complete",
+    "F2 observer consumes the trajectory as read-only input",
+    "no registry mutation or T1 claim"
+  ],
+  "qualification_claim": "none",
+  "scientific_status": "execution_smoke_only",
+  "registry_mutation": 0
+}

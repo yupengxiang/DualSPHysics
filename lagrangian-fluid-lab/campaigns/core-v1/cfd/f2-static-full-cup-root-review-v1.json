@@ -1,0 +1,291 @@
+{
+  "schema": "core.f2.static_full_cup.root_review.v1",
+  "created_at": "2026-09-20T04:59:56.656503Z",
+  "family": "F2",
+  "candidate_id": "F2_static_full_cup_volume_hold",
+  "scope_id": "F2_static_full_cup_volume_hold_x_v1",
+  "revision_id": "F2_static_full_cup_volume_hold_root_review_v1",
+  "status": "approved_for_cpu_only_prepare_decode_pending_execution",
+  "qualification_claim": "none; root review does not establish F2 T1 qualification",
+  "root_review_decision": {
+    "candidate_card_consistent": true,
+    "static_anchor_consistent": true,
+    "dependency_hashes_consistent": true,
+    "resource_contract_consistent": true,
+    "admission_contract_consistent": true,
+    "failure_denominator_contract_consistent": true,
+    "cpu_only_full_matrix_prepare_decode_allowed_subsequently": true,
+    "cpu_only_authorization_scope": "fresh GenCase/native decode and hash/preflight closure for all 15 registered cells only",
+    "solver_allowed": false,
+    "gpu_allowed": false,
+    "matrix_job_creation_allowed": false,
+    "central_registry_mutation_allowed": false,
+    "central_ledger_mutation_allowed": false
+  },
+  "execution_controls": {
+    "read_only_review": true,
+    "gen_case_run_now": false,
+    "decoder_run_now": false,
+    "solver_run_now": false,
+    "gpu_launch_now": false,
+    "matrix_inputs_materialized_now": false,
+    "matrix_jobs_materialized_now": false,
+    "queue_mutation_now": 0,
+    "ledger_mutation_now": 0,
+    "registry_mutation_now": 0
+  },
+  "candidate_card": {
+    "path": "campaigns/core-v1/cfd/f2-static-full-cup-volume-hold-candidate-v1.json",
+    "sha256": "fcbaa77fe28c2ec43a4fd7eb28023555d15a520439f31b01151600cc0342c26f",
+    "bytes": 16996,
+    "status": "design_only_anchor_canary_supported",
+    "qualification_only": true,
+    "qualified": false,
+    "supersedes_nothing": true,
+    "launch_policy": {
+      "gpu_submit": false,
+      "ledger_submit": false,
+      "root_review_required": true,
+      "candidate_canary_relaunch": false,
+      "qualification_claim_allowed_now": false
+    }
+  },
+  "registered_15_cell_design": {
+    "cell_count": 15,
+    "spatial_cell_count": 13,
+    "temporal_cell_count": 2,
+    "qualification_q": [
+      0.0,
+      0.5,
+      1.0
+    ],
+    "held_out_q": [
+      0.25,
+      0.75
+    ],
+    "resolutions_m": [
+      0.01,
+      0.0075,
+      0.005
+    ],
+    "temporal_variants": [
+      "internal_time",
+      "native_output"
+    ],
+    "registered_window_s": 0.6,
+    "output_interval_s": 0.02,
+    "static_settle_hold_s": 0.2,
+    "parameter_axis": "initial_liquid_volume",
+    "physical_geometry_change": false,
+    "motion_angle_degrees": 0.0,
+    "matrix_inputs_materialized": false,
+    "matrix_jobs_materialized": false,
+    "cell_statuses": [
+      "design_only_unprepared"
+    ],
+    "anchor_excluded_from_numerator": true
+  },
+  "static_anchor_review": {
+    "integration": {
+      "path": "campaigns/core-v1/cfd/f2-full-cup-v3-static-hold-root-integration-v1.json",
+      "sha256": "5d8cc041fa63f80401105e1d6884a0c77004326f6c85f6309e9bd82df0dfc589",
+      "bytes": 1312,
+      "hard_integrity_pass": true,
+      "event_window_complete": true,
+      "static_settled": true,
+      "qualification_claim": "static nominal canary only; no moving cup or T1 range qualification"
+    },
+    "prepared": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/prepared.json",
+      "sha256": "2bb1dac4bef30bea2926184641c9d4f3a18895b5b9468ac86b14cbbe28f256c7",
+      "bytes": 18016,
+      "preflight_pass": true,
+      "qualification_claim": "none; independent full-cup side-wetted static-hold canary only"
+    },
+    "native_preflight": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/static-preflight.json",
+      "sha256": "8e6d30ccf7ea3c1e4f1e56de400411671590f6696b7c4d338cbd1ff3ada1142d",
+      "bytes": 3954,
+      "preflight_pass": true,
+      "mass_rescaling": false,
+      "native_initial_zero_velocity": true,
+      "native_ids_unique_finite": true
+    },
+    "anchor_result": {
+      "native_fluid_particles": 54720,
+      "native_missing_count_max": 0,
+      "minimum_cup_retention_mass_fraction": 1.0,
+      "maximum_outside_cup_mass_fraction": 0.0,
+      "maximum_speed_p95_m_s": 0.03666363262481136,
+      "maximum_kinetic_over_initial_potential": 0.00019179944700252995,
+      "mass_error_fraction": -0.021614748887476387,
+      "window_s": 0.6,
+      "claim": "canary anchor only; excluded from 15-cell numerator"
+    }
+  },
+  "resource_contract": {
+    "source": "candidate_card.resource_estimate",
+    "per_cell": {
+      "dp_0.010": {
+        "cpu_cores": 2,
+        "ram_mib": 12288,
+        "gpu_peak_mib_recorded": 3072,
+        "timeout_seconds": 1800
+      },
+      "dp_0.0075": {
+        "cpu_cores": 2,
+        "ram_mib": 16384,
+        "gpu_peak_mib_recorded": 4096,
+        "timeout_seconds": 1800
+      },
+      "dp_0.005": {
+        "cpu_cores": 2,
+        "ram_mib": 24576,
+        "gpu_peak_mib_recorded": 8192,
+        "timeout_seconds": 3600
+      }
+    },
+    "gpu_fields_are_estimates_only": true,
+    "cpu_only_phase_may_use_recorded_cpu_and_ram_bounds": true,
+    "matrix_disk_policy": "estimate after CPU GenCase; do not reserve or submit until all 15 decoded inputs and hashes are available"
+  },
+  "admission_contract": {
+    "frozen_source_snapshot_required": true,
+    "fresh_definition_per_cell_required": true,
+    "fresh_motion_file_per_cell_required": true,
+    "fresh_native_bi4_and_decoded_preflight_per_cell_required": true,
+    "fresh_observer_code_hash_per_cell_required": true,
+    "fresh_job_input_list_required_before_any_future_job_review": true,
+    "anchor_trajectory_reuse_allowed": false,
+    "invented_prepared_hash_allowed": false,
+    "native_mass_rescaling_allowed": false,
+    "threshold_relaxation_allowed": false,
+    "survivor_renormalization_allowed": false,
+    "dynamic_f2_qualification_inherited": false,
+    "solver_or_gpu_admission_in_this_decision": false
+  },
+  "qualification_gate_contract": {
+    "source": "candidate_card.gates",
+    "source_initial_mass_relative_error_max": 0.025,
+    "total_discrete_to_continuum_mass_error_max": 0.03,
+    "mass_change_relative_max": 1e-08,
+    "no_missing_native_fluid_ids": true,
+    "no_nonfinite_active_values": true,
+    "no_runtime_domain_endpoint_outside": true,
+    "no_cup_closed_face_endpoint_or_saved_chord_crossings": true,
+    "no_open_cup_escape": true,
+    "no_unexpected_receiver_or_tray_mass": true,
+    "static_speed_p95_m_s_max": 0.1,
+    "static_kinetic_over_initial_potential_max": 0.05,
+    "static_settle_hold_s": 0.2,
+    "event_window_complete_required": true,
+    "spatial_max_absolute_normalized_difference": 0.05,
+    "temporal_max_absolute_normalized_difference": 0.01,
+    "thresholds_changed_from_dynamic_F2": false,
+    "survivor_renormalization": false
+  },
+  "failure_denominator_contract": {
+    "fixed_registered_cell_denominator": 15,
+    "all_15_cells_remain_in_denominator": true,
+    "held_out_rows_remain_registered": true,
+    "temporal_rows_remain_registered": true,
+    "unprepared_rows_are_not_successes": true,
+    "missing_or_failed_rows_are_not_dropped": true,
+    "failed_rows_are_not_replaced": true,
+    "anchor_canary_is_excluded_from_numerator": true,
+    "survivor_renormalization": false,
+    "any_cell_failure_blocks_f2_t1_registration": true,
+    "raw_failure_evidence_retained": true
+  },
+  "dependency_closure": [
+    {
+      "path": "campaigns/core-v1/cfd/f2-third-family-next-step-candidate-v1.json",
+      "sha256": "0c8a216a1ef67c491e6a466890ab727a5889aefb4b67ff1fa566e4e5e73648ae",
+      "bytes": 9083,
+      "role": "hash-bound dynamic hold audit and candidate handoff"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-volume-hold-candidate-v1.json",
+      "sha256": "fcbaa77fe28c2ec43a4fd7eb28023555d15a520439f31b01151600cc0342c26f",
+      "bytes": 16996,
+      "role": "15-cell static candidate card"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f2-full-cup-v3-static-hold-root-integration-v1.json",
+      "sha256": "5d8cc041fa63f80401105e1d6884a0c77004326f6c85f6309e9bd82df0dfc589",
+      "bytes": 1312,
+      "role": "static anchor integration receipt"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/prepared.json",
+      "sha256": "2bb1dac4bef30bea2926184641c9d4f3a18895b5b9468ac86b14cbbe28f256c7",
+      "bytes": 18016,
+      "role": "static anchor prepared manifest"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/static-preflight.json",
+      "sha256": "8e6d30ccf7ea3c1e4f1e56de400411671590f6696b7c4d338cbd1ff3ada1142d",
+      "bytes": 3954,
+      "role": "static anchor native preflight"
+    },
+    {
+      "path": "scripts/f2_resting_fill_side_wet_v3.py",
+      "sha256": "c42f9ef249ede7c3a77c82f5403de345155f7f80cebf4931029c33d98ae299e1",
+      "bytes": 25817,
+      "role": "anchor CPU preparation dependency"
+    },
+    {
+      "path": "scripts/core_f2_resting_fill.py",
+      "sha256": "4ff6a0fcc03d97ca073e68a696ffbf393b0bd9ddb49903df7271c8f98e7a6de2",
+      "bytes": 43125,
+      "role": "anchor static observer dependency"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+      "bytes": 159206984,
+      "role": "pinned solver dependency; not admitted by this decision"
+    },
+    {
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+      "bytes": 324368,
+      "role": "pinned native decoder for future CPU-only preflight"
+    }
+  ],
+  "central_state_observation": {
+    "registry_path": "campaigns/core-v1/registry.json",
+    "registry_sha256": "1ddfeda5b2d3eb142f94be4bb2cbc6f1b65271d6b77efc8b65c829b94e66b38d",
+    "registry_bytes": 41714,
+    "registered_scope_families": [
+      "F3",
+      "F4"
+    ],
+    "f2_scope_present_at_review": false,
+    "mutation_by_this_review": 0
+  },
+  "future_step_contract": {
+    "allowed_after_separate_root_authorization": [
+      "CPU-only GenCase for each of the 15 cells",
+      "CPU-only native decode for each generated input",
+      "per-cell mass/no-overlap/identity/preflight checks",
+      "per-cell input and observer hash closure",
+      "read-only matrix completeness report"
+    ],
+    "forbidden_until_a_later_explicit_admission": [
+      "solver invocation",
+      "GPU reservation or launch",
+      "matrix job specification or queue submission",
+      "ledger mutation",
+      "registry mutation",
+      "T1 qualification claim"
+    ],
+    "stop_conditions": [
+      "any source/input hash mismatch",
+      "any mass or no-overlap preflight failure",
+      "any missing/ambiguous cell identity",
+      "any attempt to reuse the anchor trajectory as a numerator",
+      "any request to relax thresholds or remove a failed row"
+    ]
+  }
+}

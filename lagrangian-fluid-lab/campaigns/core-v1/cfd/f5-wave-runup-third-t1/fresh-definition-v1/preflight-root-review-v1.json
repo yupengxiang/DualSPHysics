@@ -1,0 +1,95 @@
+{
+  "schema": "core.f5.third_t1.preflight_root_review_receipt.v1",
+  "created_at_utc": "2026-09-20T21:36:28.297443+00:00",
+  "record_id": "f5-wave-runup-third-t1-preflight-root-review-v1",
+  "status": "authorized_one_fresh_cpu_native_preflight_only",
+  "review_decision": {
+    "candidate_scope_id": "F5_prescribed_wave_runup_x_v1",
+    "authorized_now": true,
+    "authorized_action": "run_exactly_one_fresh_cpu_gencase_native_decode",
+    "authorized_case": "F5_wave_runup_q0p50_dp0p0075",
+    "authorized_solver": false,
+    "authorized_gpu": false,
+    "authorized_queue": false,
+    "authorized_matrix": false,
+    "reason": "fresh Definition, motion, official provenance and fixed hard gates are hash-closed",
+    "failure_policy": "any hard gate failure stops and remains zero credit; no same-input retry"
+  },
+  "input_review": {
+    "root_review": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-root-review-v1.json",
+      "sha256": "c47481f9700543a238a44f13c9aa64b21862ced4a813d78d720eaa1cec741d16",
+      "bytes": 5413,
+      "role": "F5 initial root review"
+    },
+    "definition_contract": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v1/fresh-definition-contract-v1.json",
+      "sha256": "03fdf51916444a121e9949aa053cbbe146aaa6f6ede4ce28b3c1db261afd9fe2",
+      "bytes": 4643,
+      "role": "fresh Definition contract"
+    },
+    "definition": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v1/F5_wave_runup_q0p50_dp0p0075_Def.xml",
+      "sha256": "76c38600c791200b9aacaab6b379952ba2a27ef3ce11b1d7fa560515e5942b80",
+      "bytes": 11316,
+      "role": "fresh F5 Definition"
+    },
+    "motion": {
+      "path": "campaigns/core-v1/cfd/f5-wave-runup-third-t1/fresh-definition-v1/Mov_piston_q0p50_scaled.dat",
+      "sha256": "ffabedc2331533d7950554368f20d33db0ab08c0002b1c053cf996f800756204",
+      "bytes": 16708,
+      "role": "fresh F5 piston motion"
+    },
+    "motion_row_count": 626,
+    "motion_time_end_s": 15.6,
+    "xml_dp_m": 0.0075,
+    "xml_time_max_s": 16.0,
+    "xml_output_interval_s": 0.02,
+    "external_gauges": [
+      "WG1",
+      "WG2",
+      "WG3",
+      "WG4"
+    ],
+    "preflight_output_absent": true,
+    "old_generated_or_trajectory_reused": false
+  },
+  "fixed_hard_gates": {
+    "id_unique_and_xml_aligned": "pending",
+    "finite_native_arrays": "pending",
+    "mass_gate": "pending",
+    "piston_slope_block_endpoint_violations": 0,
+    "saved_chord_crossings": 0,
+    "full_window_reached": "pending",
+    "event_completion": "pending",
+    "denominator_rows": 15,
+    "qualification_credit": 0
+  },
+  "execution_constraints": {
+    "review_only": true,
+    "gencase_invoked": false,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_mutation": 0,
+    "qualification_credit": 0,
+    "core_gate_changed": false
+  },
+  "hash_bindings": {
+    "implementation": {
+      "path": "scripts/f5_wave_runup_preflight_root_review_v1.py",
+      "sha256": "e871606fab72f96029fecdcc1778a2fd5ddf3a1ec9cc08f6e32e5c57deec3bd1",
+      "bytes": 7374,
+      "role": "F5 preflight root-review implementation"
+    },
+    "test": {
+      "path": "tests/test_f5_wave_runup_preflight_root_review_v1.py",
+      "sha256": "8c34a87f2be93a1abb3518b7c834c07e7d80841e456e8955a6928c8a636588f5",
+      "bytes": 2414,
+      "role": "F5 preflight root-review regression test"
+    }
+  }
+}

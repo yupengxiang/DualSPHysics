@@ -1,0 +1,94 @@
+{
+  "schema": "core.root_review.v1",
+  "review_id": "f2-static-full-cup-boundary-repair-h1-runtime-root-review-v1",
+  "created_at_utc": "2026-09-20T06:55:00Z",
+  "family": "F2",
+  "scope_id": "F2_static_full_cup_volume_hold_x_v1",
+  "repair_id": "F2_static_full_cup_boundary_mdbc_h1_v1",
+  "decision": "approved_for_runtime_smoke",
+  "authorized_cell_indices": [
+    0
+  ],
+  "hypothesis_class": "H1_boundary_formulation_only",
+  "hypothesis": "run exactly one cell-0 mDBC boundary-formulation canary after the CPU/native preflight; retain the v4 fluid lattice, continuum geometry, native mass policy and 0.60 s observation window",
+  "candidate_card": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-volume-hold-candidate-v1.json",
+    "sha256": "fcbaa77fe28c2ec43a4fd7eb28023555d15a520439f31b01151600cc0342c26f",
+    "bytes": 16996,
+    "role": "15-cell candidate card"
+  },
+  "admission_contract": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-qualification-admission-v1.json",
+    "sha256": "bbeac0f554fd2975f9c3bc12a3bd60f5a48ade50ba4c64cc73b240181a8f7f2d",
+    "bytes": 3122,
+    "role": "candidate admission contract"
+  },
+  "source_preparation": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/prepared.json",
+    "sha256": "8a419c61d3ec64dc19cbcaa0126fe946df6acbf169462ddb214e82f431c51104",
+    "bytes": 9936,
+    "role": "H1 CPU/native repair preflight"
+  },
+  "source_preparation_audit": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-matrix-prepared-v4/matrix-preparation-audit.json",
+    "sha256": "bc44fbf64aff429eb9ddb5e71117548413e7db047ceabbee627a6fe0312ecc25",
+    "bytes": 15198,
+    "role": "v4 preparation audit"
+  },
+  "source_smoke_negative_evidence": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-runtime-smoke-negative-evidence-v1.json",
+    "sha256": "299487272bd2a84cb5c517e59a2662240f8447f3b6b30543079d1e4626a37e19",
+    "bytes": 155331,
+    "role": "DBC smoke negative evidence"
+  },
+  "repair_code": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_static_full_cup_boundary_repair_prepare.py",
+    "sha256": "b8a77b108e58f983097cc845f87259d140c83224104d273a444e28f3e24242c4",
+    "bytes": 13055,
+    "role": "H1 CPU/native repair preparer"
+  },
+  "runtime_repair_adapter_code": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_static_full_cup_boundary_repair_runtime.py",
+    "sha256": "d449177b6865e4b4ed1cfbdfe5c90683d0b593e20fa3371d9c6f8f71cb3bbe23",
+    "bytes": 7732,
+    "role": "H1 runtime materializer"
+  },
+  "runtime_worker_code": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_static_full_cup_runtime.py",
+    "sha256": "60d4a7813183c561977a2771782f77ee5573ccd1a5f4e51cb033aadd3820852a",
+    "bytes": 20515,
+    "role": "common F2 runtime worker"
+  },
+  "authorization": {
+    "solver_launch": true,
+    "gpu_launch": true,
+    "job_spec_creation": true,
+    "queue_mutation": true,
+    "ledger_mutation": true,
+    "registry_mutation": false,
+    "material_training": false,
+    "model_training": false
+  },
+  "execution_policy": {
+    "smoke_only": true,
+    "selected_cells_are_fixed": true,
+    "first_cell_must_be_inspected_before_expansion": true,
+    "candidate_scope_pass_does_not_register_t1": true,
+    "missing_or_failed_rows_remain_in_denominator": true,
+    "no_same_input_retry": true,
+    "repair_budget_max_classes": 2,
+    "repair_class": "H1_boundary_formulation_only",
+    "host_preference": "ada; avoid H200 disk pressure for the canary",
+    "max_parallel_jobs": 1
+  },
+  "required_postconditions": [
+    "H1 runtime prepared hash binds exactly to H1 cell-0 preflight and this review",
+    "only one solver canary is submitted",
+    "native conversion and hard audit receipts are complete",
+    "F2 observer consumes the trajectory as read-only input",
+    "no registry mutation, T1 claim, material label or model training"
+  ],
+  "qualification_claim": "none",
+  "scientific_status": "repair_execution_smoke_only",
+  "registry_mutation": 0
+}

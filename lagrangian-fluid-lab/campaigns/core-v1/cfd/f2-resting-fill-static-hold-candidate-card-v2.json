@@ -1,0 +1,107 @@
+{
+  "schema": "core.f2.resting_fill.candidate_card.v2",
+  "created_at": "2026-09-19T00:00:00+08:00",
+  "scope_id": "F2_resting_fill_static_hold_x_v1",
+  "revision_id": "F2_resting_fill_static_hold_v2",
+  "case_id": "CORE_F2_resting_fill_static_hold_z0p660_q0p50000000_dp0p007500000000_canary",
+  "status": "cpu_prepared_unsubmitted",
+  "qualification_claim": "none; native CPU GenCase/no-overlap preflight only",
+  "qualified": false,
+  "supersedes_nothing": true,
+  "qualification_only": true,
+  "physical_contract": {
+    "continuum_wall_geometry_changed": false,
+    "fluid_initial_condition_changed": true,
+    "cup_low_m": [
+      0.0,
+      -0.15,
+      0.65
+    ],
+    "cup_size_m": [
+      0.425,
+      0.3,
+      0.45
+    ],
+    "continuum_floor_z_m": 0.65,
+    "native_first_fluid_center_z_m": 0.6599999999999999,
+    "native_last_fluid_center_z_m": 0.99,
+    "source_draw_first_fluid_point_z_m": 0.66125,
+    "highest_generated_cup_bottom_boundary_layer_z_m": 0.6525,
+    "minimum_physical_floor_clearance_m": 0.009999999999999898,
+    "minimum_native_cup_boundary_center_distance_m": 0.00749999999999984,
+    "initial_velocity_m_s": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "native_particle_count": 56115,
+    "native_mass_kg": 23.673515625,
+    "mass_rescaling": false
+  },
+  "candidate_basis": {
+    "z0p665_hypothesis_result": "The prior continuous z=0.665 hypothesis was not accepted as a native-coordinate claim: the decoded GenCase lattice for the source point z=0.66125 produced z=0.660. This v2 freezes the decoded z=0.660 value.",
+    "no_overlap_definition": "all fluid centers lie inside the physical cup bounds and have positive center distance from generated moving-cup boundary particles; no mass or geometry rescaling",
+    "all_native_geometry_checks_pass": true,
+    "mass_gate_pass": true,
+    "source_relative_mass_error_max": 0.0033276382708198327,
+    "total_mass_error": 0.0033276382708200547,
+    "initial_state_claim": "The static solver canary must decide whether this initial condition settles; CPU placement and zero velocity do not establish hydrostatic balance."
+  },
+  "static_hold_canary": {
+    "window_s": 0.6,
+    "original_drive_start_s": 0.5,
+    "pre_motion_coverage_s": 0.5,
+    "output_interval_s": 0.02,
+    "settled_speed_p95_m_s_max": 0.1,
+    "settled_kinetic_over_initial_potential_max": 0.05,
+    "settled_continuous_hold_s": 0.2,
+    "event_window_complete_requires_settled": true,
+    "no_static_result_yet": true
+  },
+  "source_failure_context": {
+    "predecessor_bottom_gap_m": 0.05500000000000005,
+    "predecessor_pre_motion_escape_fraction_max": 0.04006058986010871,
+    "predecessor_h0_result": "campaigns/core-v1/evidence/f2-h0-static-hold-canary/result.json",
+    "floor_contract_repair_evidence": "campaigns/core-v1/evidence/f2-closed-catchment-v2-h200/floor-contract-forensics-v1.json",
+    "five_second_negative_evidence": "campaigns/core-v1/evidence/f2-closed-catchment-v2-h200/five-second-feasibility-v1.json"
+  },
+  "artifacts": {
+    "prepared": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_static_hold_canary_v2/prepared.json",
+      "sha256": "87de27239de1575752f9ec653b4c97cda6b720965e76eac428ff97e71ac85fb8"
+    },
+    "static_preflight": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_static_hold_canary_v2/static-preflight.json",
+      "sha256": "f1a466651388c5ddf3b57ebbcd6f3105b9a619bbe346201037043fbc710e06bd"
+    },
+    "definition": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_static_hold_canary_v2/CORE_F2_resting_fill_static_hold_z0p660_q0p50000000_dp0p007500000000_canary_Def.xml",
+      "sha256": "7a8cc714dfee4ff40c3437f85118c3b231f6d8d9134a87c03d6faf0257cfcbb4"
+    },
+    "generated_native": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_static_hold_canary_v2/generated/CORE_F2_resting_fill_static_hold_z0p660_q0p50000000_dp0p007500000000_canary.bi4",
+      "sha256": "7c44eb0716fea8f77b25776b336703c7124105a8b2bb8c731c1a1a90abe0990f"
+    },
+    "job": {
+      "path": "campaigns/core-v1/cfd/f2-resting-fill-static-hold-canary-v2-job.json",
+      "sha256": "0459ca1179cc3ae73b7700ab886a125971d64bd452fda9b02671cc673332e04a"
+    },
+    "source_template": {
+      "path": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F2_rotation_center_nominal_Def.xml",
+      "sha256": "7a59e4873842e91b19bbb523bb7100d12445131f800d1341c615c0bbe4a7a911"
+    }
+  },
+  "launch_policy": {
+    "prepared": true,
+    "gpu_launch_by_subagent": false,
+    "central_ledger_mutation": 0,
+    "coordinator_review_required": true,
+    "result_must_not_be_called_scope_qualification": true
+  },
+  "job_resources": {
+    "cpu_cores": 2,
+    "ram_mib": 16384,
+    "gpu_peak_mib": 4096,
+    "io_weight": 0.25
+  }
+}

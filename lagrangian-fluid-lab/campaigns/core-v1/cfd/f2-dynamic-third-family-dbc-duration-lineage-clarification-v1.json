@@ -1,0 +1,93 @@
+{
+  "schema": "core.f2.dynamic_third_family.lineage_clarification.v1",
+  "created_at": "2026-09-20T08:45:00+00:00",
+  "family": "F2",
+  "scope_id": "F2_dynamic_third_family_dbc_duration_x_v1",
+  "revision_id": "F2_dynamic_third_family_dbc_duration_v1",
+  "purpose": "separate the static input source comparison from the dynamic DBC duration comparison",
+  "comparison_rule": "physical_geometry_changed is interpreted relative to the declared comparison basis; static v3 is a source/provenance predecessor, while q=.5 and q=1.0 native-DBC closed-catchment canaries are the dynamic baselines",
+  "static_source": {
+    "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/prepared.json",
+    "sha256": "2bb1dac4bef30bea2926184641c9d4f3a18895b5b9468ac86b14cbbe28f256c7",
+    "scope_id": "F2_resting_fill_side_wet_full_cup_x_v3",
+    "role": "full-cup native lattice and fixed-volume source only",
+    "physical_geometry_changed_relative_to_source": true,
+    "change": "the dynamic closed-catchment recipe adds fixed mkbound=3 left/right/front/back catchment side walls over the retained tray footprint",
+    "qualification_inheritance": "none",
+    "static_receipt": {
+      "path": "campaigns/core-v1/cfd/f2-full-cup-v3-static-hold-root-integration-v1.json",
+      "sha256": "5d8cc041fa63f80401105e1d6884a0c77004326f6c85f6309e9bd82df0dfc589",
+      "qualification_claim": "static nominal canary only; no moving or range qualification"
+    }
+  },
+  "dynamic_baseline": {
+    "comparison_basis": "native DBC Boundary=1 full-cup closed-catchment dynamic canaries",
+    "geometry_signature": {
+      "cup": "same finite moving cup; bottom/left/right/front/back closed, top open",
+      "receiver": "same finite fixed receiver; bottom/left/right/front/back closed, top open",
+      "tray_floor": "same retained boxfill=bottom source plane z=-0.20 m",
+      "catchment_side_walls": "same fixed mkbound=3 left/right/front/back walls; top open",
+      "runtime_domain_m": {
+        "posmin": [-0.70, -0.65, -0.40],
+        "posmax": [2.20, 0.80, 2.40]
+      },
+      "boundary_method": 1,
+      "dp_anchor_m": 0.0075
+    },
+    "physical_geometry_changed_relative_to_dynamic_baseline": false,
+    "baselines": [
+      {
+        "id": "dbc_q0p5_extension5s",
+        "q": 0.5,
+        "rotation_duration_s": 0.85,
+        "prepared": {
+          "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_boundary_v2_extension5s_v2/prepared.json",
+          "sha256": "b63377edf7c3ac3758da06a3e8065feab36fa793cf4ba718c1f8f0b1ef6a067d"
+        },
+        "completion": {
+          "path": "campaigns/core-v1/cfd/f2-dbc-extension5s-root-completion-v1.json",
+          "sha256": "4dd2e8aec30ba58caf7e2f9fccf4ac32a92afa1939cabbbbf111ccd1aa74664f"
+        },
+        "event_status": "hard_integrity_pass=true; event_window_complete=false"
+      },
+      {
+        "id": "dbc_q1p0_slow_duration",
+        "q": 1.0,
+        "rotation_duration_s": 1.2,
+        "prepared": {
+          "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_q1p0_v1/prepared.json",
+          "sha256": "c1200c143b93d0ff4c142d74d6196dc1a4894e61b1194f1501e5bd82f3bd7091"
+        },
+        "terminal_evidence": {
+          "path": "campaigns/core-v1/cfd/f2-dbc-slow-duration-q1p0-terminal-root-v1/terminal-evidence-v2.json",
+          "sha256": "9ecada1f5c88a69ef8f2a2bc2e4426e570e16a22b570f548b228a820988caf05"
+        },
+        "event_status": "hard_integrity_pass=true; event_window_complete=false"
+      }
+    ]
+  },
+  "candidate_comparison": {
+    "candidate_q": 0.75,
+    "candidate_rotation_duration_s": 1.025,
+    "candidate_prepared_geometry_changed_relative_to_static_source": true,
+    "candidate_prepared_geometry_changed_relative_to_dynamic_baseline": false,
+    "single_variable_change_relative_to_dynamic_baseline": "rotation_duration_s only",
+    "frozen_fields": [
+      "cup/receiver/tray/catchment geometry",
+      "native DBC Boundary=1",
+      "full-cup side-wet initial native lattice",
+      "runtime domain",
+      "5 s horizon and output cadence",
+      "observer thresholds and no-rescaling mass policy"
+    ],
+    "not_a_claim": "this clarification does not transfer static or dynamic qualification; all 15 matrix rows remain unexecuted"
+  },
+  "execution_controls": {
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "central_queue_mutation": 0,
+    "central_ledger_mutation": 0,
+    "central_registry_mutation": 0
+  },
+  "qualification_claim": "none; lineage clarification only"
+}

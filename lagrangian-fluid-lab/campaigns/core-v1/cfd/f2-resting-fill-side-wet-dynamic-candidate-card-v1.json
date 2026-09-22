@@ -1,0 +1,330 @@
+{
+  "schema": "core.f2.resting_fill_side_wet.dynamic_candidate_card.v1",
+  "created_at": "2026-09-19T15:20:01.519366+00:00",
+  "family": "F2",
+  "scope_id": "F2_resting_fill_side_wet_dynamic_x_v1",
+  "revision_id": "F2_resting_fill_side_wet_dynamic_canary_v1",
+  "case_id": "CORE_F2_resting_fill_side_wet_dynamic_q0p50000000_dp0p007500000000_fullwindow_canary",
+  "status": "cpu_prepared_unsubmitted",
+  "execution_status": "proposal_only",
+  "qualification_claim": "none; independent full-cup side-wetted moving-cup canary only",
+  "qualified": false,
+  "qualification_only": true,
+  "supersedes_nothing": true,
+  "central_ledger_mutation": 0,
+  "gpu_launch_by_subagent": false,
+  "purpose": "Carry the passed full-cup resting-fill initial condition through one prescribed centered rotation and receiver/tray observation window before any 13+2 range work.",
+  "static_predecessor": {
+    "static_prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/prepared.json",
+    "static_prepared_sha256": "2bb1dac4bef30bea2926184641c9d4f3a18895b5b9468ac86b14cbbe28f256c7",
+    "static_integration_receipt": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-full-cup-v3-static-hold-root-integration-v1.json",
+    "static_integration_receipt_sha256": "5d8cc041fa63f80401105e1d6884a0c77004326f6c85f6309e9bd82df0dfc589",
+    "static_result": {
+      "hard_integrity_pass": true,
+      "event_window_complete": true,
+      "minimum_cup_retention_mass_fraction": 1.0,
+      "native_missing_count_max": 0,
+      "qualification_claim": "static nominal canary only; no moving cup or T1 range qualification"
+    }
+  },
+  "dynamic_control": {
+    "parameter": "rotation_duration_s",
+    "q": 0.5,
+    "duration_s": 0.85,
+    "candidate_range_s": [
+      0.5,
+      1.2
+    ],
+    "angle_degrees": -105.0,
+    "motion_start_s": 0.5,
+    "motion_file_duration_s": 2.5,
+    "rotation_axis_body_and_native_file": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "pivot_m": [
+      0.0,
+      0.0,
+      0.65
+    ]
+  },
+  "event_window": {
+    "registered_initial_window_s": 2.5,
+    "maximum_extended_window_s": 5.0,
+    "output_interval_s": 0.01,
+    "motion_start_s": 0.5,
+    "motion_source_file_duration_s": 2.5,
+    "post_settle_observation_s": 0.35,
+    "settle_hold_s": 0.2,
+    "right_censor_policy": "run the whole registered window; if a required event is right-censored, extend once to 2x and retain the censored status",
+    "events": [
+      {
+        "id": "motion_complete",
+        "definition": "prescribed cup angle reaches -105 degrees at 0.50 + duration(q) s"
+      },
+      {
+        "id": "receiver_contact",
+        "definition": "valid native fluid mass inside the one-dp-clear receiver interior first reaches 1% of initial fluid mass"
+      },
+      {
+        "id": "spill_or_escape",
+        "definition": "valid native fluid mass outside the cup, receiver and tray observation volumes first reaches 1% of initial mass; missing identities remain a separate integrity failure"
+      },
+      {
+        "id": "settled",
+        "definition": "after motion completion, speed p95 <= 0.10 m/s and kinetic energy <= 5% of initial gravitational potential for 0.20 s continuously"
+      },
+      {
+        "id": "event_window_complete",
+        "definition": "motion, receiver contact and settled are observed, with 0.35 s of saved output after the last required transition"
+      }
+    ]
+  },
+  "physical_contract": {
+    "continuum_wall_geometry_changed": false,
+    "initial_condition_changed_from_legacy_F2": true,
+    "cup": {
+      "low": [
+        0.0,
+        -0.15,
+        0.65
+      ],
+      "size": [
+        0.425,
+        0.3,
+        0.45
+      ],
+      "mkbound": 0
+    },
+    "receiver": {
+      "low": [
+        0.45,
+        -0.3,
+        0.0
+      ],
+      "size": [
+        1.1,
+        0.6,
+        0.45
+      ],
+      "mkbound": 1
+    },
+    "tray": {
+      "low": [
+        -0.6,
+        -0.55,
+        -0.2
+      ],
+      "size": [
+        2.6,
+        1.1,
+        0.1
+      ],
+      "mkbound": 2
+    },
+    "full_cup_continuum_box": {
+      "low": [
+        0.0,
+        -0.15,
+        0.65
+      ],
+      "size": [
+        0.425,
+        0.3,
+        0.18505882352941178
+      ],
+      "mkfluid": 0
+    },
+    "native_particle_count": 54720,
+    "native_sampling_matches_static_pass": true,
+    "mass_preflight": {
+      "source_relative_errors": [
+        -0.021614748887476387
+      ],
+      "max_abs_source_relative_error": 0.021614748887476387,
+      "total_discrete_mass_kg": 23.084999999999997,
+      "total_continuous_mass_kg": 23.595000000000002,
+      "total_relative_error": -0.021614748887476387,
+      "source_error_max": 0.025,
+      "total_error_max": 0.03,
+      "mass_rescaling": false,
+      "pass": true,
+      "mass_gate_pass": true
+    },
+    "mass_rescaling": false,
+    "runtime_domain": {
+      "posmin": [
+        -0.7,
+        -0.65,
+        -0.4
+      ],
+      "posmax": [
+        2.2,
+        0.8,
+        2.4
+      ],
+      "baseline_zmax_m": 1.8,
+      "changed_zmax_m": 2.4,
+      "change_is_computational_only": true,
+      "basis": "retain the previously required upward-domain margin while keeping finite cup/receiver/tray surfaces unchanged"
+    },
+    "computational_domain_change_only": true
+  },
+  "observer_contract": {
+    "revision_id": "F2_side_wet_geometry_aware_observer_v1",
+    "cup_observation": "physical cup source planes to keep side-wetted native centres inside at t=0; no one-dp shrink",
+    "receiver_observation": "registered one-dp-clear world interior",
+    "tray_observation": "registered one-dp-clear horizontal interior with bottom floor",
+    "normalization": "initial native mass; no survivor renormalization",
+    "settled_gate": "p95 speed <=0.10 m/s and KE <=5% initial potential for 0.20 s, plus 0.35 s post-settle output",
+    "spill_gate": "outside cup/receiver/tray observation volumes >=1% initial mass remains an event observation and does not delete mass"
+  },
+  "finite_wall_audit_contract": {
+    "cup": {
+      "frame": "moving cup body frame",
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "surface": "physical cup source planes",
+      "saved_chord_and_endpoint_hard": true
+    },
+    "receiver": {
+      "frame": "world",
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "saved_chord_and_endpoint_hard": true
+    },
+    "tray": {
+      "frame": "world",
+      "closed_faces": [
+        "bottom"
+      ],
+      "open_faces": [
+        "top",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "saved_chord_and_endpoint_hard": true
+    },
+    "ownership": "open-top entry/exit ownership is separate from closed-face entry checks; ownership cannot hide side entry",
+    "geometry_audit_owner": "core_f2_qualification.audit_dynamic"
+  },
+  "preflight": {
+    "schema": "core.f2.resting_fill_side_wet.dynamic_preflight.v1",
+    "revision_id": "F2_resting_fill_side_wet_dynamic_canary_v1",
+    "scope_id": "F2_resting_fill_side_wet_dynamic_x_v1",
+    "case_id": "CORE_F2_resting_fill_side_wet_dynamic_q0p50000000_dp0p007500000000_fullwindow_canary",
+    "generated_fluid_counts": true,
+    "native_state_finite_unique": true,
+    "native_initial_zero_velocity": true,
+    "native_sampling_matches_passed_static": true,
+    "runtime_domain_declaration_matches_generated": true,
+    "motion_file_finite": true,
+    "motion_start_s": 0.5,
+    "rotation_duration_s": 0.85,
+    "registered_window_s": 2.5,
+    "maximum_extended_window_s": 5.0,
+    "static_pass_receipt_bound": true,
+    "mass_gate_pass": true,
+    "native": {
+      "total_particles": 371088,
+      "fixed_particles": 275373,
+      "fluid_particles": 54720,
+      "expected_fluid_particles": 54720,
+      "unique_ids": true,
+      "finite_initial_arrays": true,
+      "initial_fluid_zero_velocity": true,
+      "native_sampling_matches_passed_static": true,
+      "runtime_domain": {
+        "posmin": [
+          -0.7,
+          -0.65,
+          -0.4
+        ],
+        "posmax": [
+          2.2,
+          0.8,
+          2.4
+        ]
+      }
+    },
+    "generated_fluid_groups": [
+      {
+        "mkfluid": 0,
+        "mk": 1,
+        "begin": 316368,
+        "count": 54720
+      }
+    ],
+    "expected_fluid_counts": [
+      54720
+    ],
+    "qualification_claim": "none; CPU dynamic XML/GenCase/native preflight only",
+    "preflight_pass": true
+  },
+  "negative_evidence_preserved": [
+    "legacy F2 static/moving failures remain separate records",
+    "full-cup static pass is not moving-cup qualification",
+    "old 13+2 range design is not launched by this canary",
+    "open-top spill and finite-wall events remain hard/observational according to the frozen audit; no threshold relaxation"
+  ],
+  "artifacts": {
+    "prepared": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_dynamic_canary_v1/prepared.json",
+      "sha256": "e629a70a0785877a7875706964a7464b7b906d8315a2c7bee0e8e63b292f2097"
+    },
+    "dynamic_preflight": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_dynamic_canary_v1/dynamic-preflight.json",
+      "sha256": "1d355e31c38ccf3f74eb6eef0c681751d5496a8a5b8104abfd22deacdc2de88c"
+    },
+    "job": {
+      "path": "campaigns/core-v1/cfd/f2-resting-fill-side-wet-dynamic-canary-v1-job.json",
+      "sha256": "80bef14410d83f87932ef64d10f877cbf170c7e43d328cae517c51b5d56bae05"
+    },
+    "runner": {
+      "path": "scripts/f2_resting_fill_side_wet_dynamic.py",
+      "sha256": "5a8f811c7902cb400e2d93a1115caec593a8e895f9fea652d4ac2f59060e4d86"
+    },
+    "audit_script": {
+      "path": "scripts/core_f2_qualification.py",
+      "sha256": "d3a063dd951e03887ee2d6454ecb79c9a3b190865fe6e122a4cdc22ed2c0ddad"
+    },
+    "static_sampling_script": {
+      "path": "scripts/f2_resting_fill_side_wet_v3.py",
+      "sha256": "c42f9ef249ede7c3a77c82f5403de345155f7f80cebf4931029c33d98ae299e1"
+    }
+  },
+  "job_resources": {
+    "cpu_cores": 2,
+    "ram_mib": 16384,
+    "gpu_peak_mib": 4096,
+    "io_weight": 0.5
+  },
+  "job_timeout_seconds": 7200,
+  "launch_policy": {
+    "prepared": true,
+    "gpu_submit": false,
+    "matrix_submit": false,
+    "ledger_submit": false,
+    "coordinator_review_required": true,
+    "next_action": "root may freeze and queue one moving-cup canary; inspect hard finite-wall audit, native integrity, receiver contact, spill and settled/event results separately before designing range cells"
+  }
+}

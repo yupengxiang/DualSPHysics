@@ -1,0 +1,191 @@
+{
+  "schema": "core.f3.baffle_exchange_source_scope.candidate_card.v1",
+  "candidate_id": "F3_baffle_exchange_native_mdbc_x_v1_candidate",
+  "scope_id": "F3_baffle_exchange_native_mdbc_x_v1",
+  "revision_id": "F3_baffle_exchange_native_mdbc_v1",
+  "family": "F3",
+  "status": "candidate_handoff_root_review_only",
+  "decision": "admissible_for_root_review_only",
+  "qualified": false,
+  "qualification_claim": "none; independent source-scope preflight only",
+  "scientific_question": "Does a native mDBC finite tank with a fixed internal baffle preserve a full-window, hard-integrity F3 source while resolving repeated baffle exchange over a new impulse and resolution axis?",
+  "independent_mechanism": {
+    "class": "fixed_internal_baffle_exchange",
+    "physical_boundary": "mkbound=1 internal baffle with top/left/right/front/back solid fill inside a finite outer tank",
+    "outer_boundary": "mkbound=0 bottom/left/right/front/back wall with open top",
+    "solver_boundary_semantics": "Boundary=2 and -mdbc_noslip:1",
+    "source_driver": "initial x impulse u0_x = 0.45 + 0.60*q m/s",
+    "why_independent": "The current F3 MLS handoff is a plain tank with prescribed acceleration. This scope adds a resolved internal boundary mechanism and uses a new impulse axis, geometry, case identity and source artifacts."
+  },
+  "geometry_identity": {
+    "continuous_fluid_low_m": [0.1, 0.04, 0.04],
+    "continuous_fluid_size_m": [0.9, 0.18, 0.09],
+    "internal_baffle_low_m": [0.58, 0.04, 0.0],
+    "internal_baffle_size_m": [0.03, 0.18, 0.19],
+    "baffle_overlap_removed_from_fluid": true,
+    "native_mass_rescaling": false,
+    "physical_geometry_changed_relative_to_plain_source": true,
+    "physical_geometry_changed_relative_to_legacy_probe": true
+  },
+  "parameter_scope": {
+    "q_values": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "u0_x_mapping": "u0_x = 0.45 + 0.60*q",
+    "u0_x_values_m_s": [0.45, 0.6, 0.75, 0.9, 1.05],
+    "legacy_probe_u0_x_m_s": 0.65,
+    "legacy_probe_value_reused": false,
+    "resolution_values_m": [0.01, 0.0075, 0.005],
+    "native_output_values_s": [0.01, 0.005, 0.002],
+    "source_window_s": [0.0, 8.35]
+  },
+  "novelty_audit": {
+    "current_f3_mls_handoff": {
+      "path": "campaigns/core-v1/cfd/f3-native-mls-sources/handoff-v2.json",
+      "sha256": "613485e2dfa0ba45421084db6bd5b0bda9a7499846cfd95dee5388fa85b3c121",
+      "status": "prepared_only",
+      "known_scope": "plain finite tank with prescribed acceleration and no internal baffle",
+      "reused": false
+    },
+    "legacy_baffle_probe_definition": {
+      "path": "cases/F3/F3_baffled_slosh/F3_baffled_slosh_Def.xml",
+      "sha256": "e4811e7c3bfdba6ae06ccc073fbf9cec0a9d2d62221a0df69e43fa5278e3c147",
+      "historical_role": "geometry provenance only",
+      "legacy_inputs": {
+        "dp_m": 0.04,
+        "u0_x_m_s": 0.65,
+        "time_max_s": 0.9,
+        "output_interval_s": 0.05,
+        "baffle_size_m": [0.04, 0.32, 0.25]
+      },
+      "new_inputs_reused": false,
+      "legacy_generated_source_reused": false,
+      "legacy_trajectory_reused": false
+    },
+    "legacy_hard_audit": {
+      "path": "campaigns/core-v1/evidence/f3-legacy-hard-audit-adapter-v1.json",
+      "sha256": "33fbe9cb48300f671c08d5dc1b14a43901ab723d8839f3cff7850a8543d17f0b",
+      "role": "historical trajectory rebinding; no new numerical or material qualification",
+      "credit": 0
+    }
+  },
+  "recipe": {
+    "gravity_m_s2": [0.0, 0.0, -9.81],
+    "dp_anchor_m": 0.0075,
+    "cfl": 0.05,
+    "visco_treatment": 1,
+    "visco": 0.05,
+    "shifting": 0,
+    "boundary_method": 2,
+    "solver_arguments": ["-mdbc_noslip:1"],
+    "time_max_s": 8.35,
+    "output_interval_anchor_s": 0.01,
+    "mass_policy": "native rho*dp^3; no rescaling",
+    "mass_gate_abs_relative_error_max": 0.03
+  },
+  "qualification_design": {
+    "matrix": {
+      "path": "campaigns/core-v1/cfd/f3-baffle-exchange-source-scope-v1/qualification-matrix-v1.json",
+      "sha256": "5f2478ebfa446badc895e806c1eb4a55e35fc2fc3cbf9b7980549db74ceb9696",
+      "rows": 15,
+      "row_kinds": {
+        "spatial_anchor": 9,
+        "held_out_impulse": 4,
+        "temporal_output_cadence": 2
+      },
+      "status": "fixed_design_no_launch"
+    },
+    "failure_denominator": {
+      "path": "campaigns/core-v1/cfd/f3-baffle-exchange-source-scope-v1/failure-denominator-v1.json",
+      "sha256": "0c9f988ce3d917de540949eb28ca61b563a5fc5f0fdaf5763ec1e745354de5da",
+      "denominator": 15,
+      "numerator": 0,
+      "preflight_credit": 0,
+      "status": "fixed_before_runtime"
+    },
+    "qualification_rule": "15/15 rows must pass all fixed source/hash, native lifecycle, full-window, event, hard-integrity, and native-MLS material-readout gates; no threshold or denominator relaxation."
+  },
+  "preflight": {
+    "status": "prepared_only_pass",
+    "prepared": {
+      "path": "campaigns/core-v1/cfd/f3-baffle-exchange-source-scope-v1/anchor-q0p5-dp0p0075-v3/prepared.json",
+      "sha256": "09b8501815eca988f5f9a8387aa4ee3498db939fd02559d45be5be89410526ea",
+      "case_id": "CORE_F3_BAFFLE_EXCHANGE_q0p50000000_dp0p007500000000_anchor",
+      "fluid_particles": 33120,
+      "boundary_particles": 44174,
+      "total_particles": 77294,
+      "native_relative_mass_error": -0.008620689655172598,
+      "native_mass_gate_pass": true,
+      "initial_state_pass": true,
+      "solver_product_present": false
+    },
+    "runner": {
+      "path": "scripts/core_f3_baffled_source_scope_preflight_v1.py",
+      "sha256": "601c396b7a25338cd8adcca4eb0d029e428118e80212494dad75c44914c3801a",
+      "role": "CPU GenCase/native initial preflight only"
+    },
+    "execution_controls": {
+      "cpu_gencase_invoked": true,
+      "cpu_native_decode_invoked": true,
+      "solver_invoked": false,
+      "gpu_invoked": false,
+      "queue_mutation": 0,
+      "ledger_mutation": 0,
+      "registry_mutation": 0,
+      "qualification_numerator_credit": 0
+    }
+  },
+  "evidence": {
+    "conversion_helper": {
+      "path": "scripts/core_cfd.py",
+      "sha256": "fd6e56ab6c8f42e55c15c0e9d742c9289fca0a4214e5e203a3b357a23040adfb"
+    },
+    "solver": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+      "invoked": false
+    },
+    "decoder": {
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    }
+  },
+  "admission_gates": {
+    "independent_physical_or_boundary_mechanism": true,
+    "independent_source_scope": true,
+    "legacy_input_reuse": false,
+    "current_plain_f3_handoff_reuse": false,
+    "threshold_relaxation": false,
+    "point_diagnostic_as_qualification": false,
+    "fixed_matrix_present": true,
+    "fixed_failure_denominator_present": true,
+    "preflight_evidence_bound_by_sha": true,
+    "root_review_admissible": true,
+    "t1_qualification_admissible_now": false
+  },
+  "execution_controls": {
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "matrix_launched": false,
+    "material_training_started": false
+  },
+  "downstream": {
+    "next_owner": "root review",
+    "required_before_runtime": [
+      "root approval of candidate-card-v1",
+      "immutable job specs for all 15 rows bound to matrix and denominator SHAs",
+      "runtime hard-integrity, event and full-window audit",
+      "native MLS material consumer contract and audit"
+    ],
+    "required_runtime_outputs": [
+      "source/hash closure",
+      "trajectory and conversion audit",
+      "hard_integrity_pass",
+      "requested_horizon_reached",
+      "event_window_complete",
+      "native MLS readout audit"
+    ],
+    "prohibited_until_root_approval": ["solver", "GPU", "queue", "ledger", "registry", "material training"]
+  }
+}

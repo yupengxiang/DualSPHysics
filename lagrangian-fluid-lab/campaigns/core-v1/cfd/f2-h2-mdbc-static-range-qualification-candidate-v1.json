@@ -1,0 +1,217 @@
+{
+  "schema": "core.f2.h2_mdbc.static_range_candidate.v1",
+  "created_at": "2026-09-20T09:00:00+00:00",
+  "family": "F2",
+  "candidate_id": "F2_H2_mdbc_static_range_qualification",
+  "scope_id": "F2_H2_mdbc_static_range_qualification_v1",
+  "revision_id": "F2_H2_mdbc_static_range_mdbc_v1",
+  "status": "design_only_anchor_bound",
+  "qualification_only": true,
+  "qualification_claim": "none; independent H2 mDBC static range candidate",
+  "qualified": false,
+  "supersedes_nothing": true,
+  "central_ledger_mutation": 0,
+  "gpu_launch_by_subagent": false,
+  "source_template": "campaigns/core-v1/cfd/prepared/F2_H2_mdbc_boundary_repair_canary_v2/CORE_F2_H2_mdbc_boundary_repair_dp0p007500000000_canary_Def.xml",
+  "anchor_evidence": {
+    "canary_evidence": {
+      "path": "campaigns/core-v1/cfd/f2-h2-mdbc-boundary-repair-v2-canary-evidence-20260920.json",
+      "sha256": "6f15f9d2a6d604694d7a2572f5827ac06379fb8a13e8826f9173ffcca9793211",
+      "bytes": 4728,
+      "role": "positive H2 v2 canary evidence",
+      "scope_id": "F2_H2_mdbc_boundary_repair_canary_v1"
+    },
+    "root_review": {
+      "path": "campaigns/core-v1/cfd/f2-h2-mdbc-boundary-repair-v2-runtime-root-review-20260920.json",
+      "sha256": "0b6fbca807dfb44c4ec0c1e4040495c6db79cdfa9ab2d479044f759ceb5473c9",
+      "bytes": 3607,
+      "role": "H2 v2 canary root review",
+      "scope_id": "F2_H2_mdbc_boundary_repair_canary_v1"
+    },
+    "prepared": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_H2_mdbc_boundary_repair_canary_v2/prepared.json",
+      "sha256": "70d78a80f2181e2cb54f0f3eab5c69c52fb6ca9cd909e532a407bea8f8ec91a4",
+      "bytes": 11908,
+      "role": "H2 v2 mDBC prepared input",
+      "scope_id": "F2_H2_mdbc_boundary_repair_canary_v1"
+    },
+    "definition": {
+      "path": "campaigns/core-v1/cfd/prepared/F2_H2_mdbc_boundary_repair_canary_v2/CORE_F2_H2_mdbc_boundary_repair_dp0p007500000000_canary_Def.xml",
+      "sha256": "c931491ad7e80a36b7c9481402436a9f2bc8942ee353a7b0c337f877ce544048",
+      "bytes": 6965,
+      "role": "H2 v2 mDBC Definition template"
+    }
+  },
+  "physical_contract": {
+    "scene": "fixed cup at zero angle; no prescribed rotation and no receiver-transfer event",
+    "boundary_method": 2,
+    "boundary_recipe": "mDBC Boundary=2 with -mdbc_noslip:1 reserved for a future solver review",
+    "cup": {
+      "low_m": [0.0, -0.15, 0.65],
+      "size_m": [0.425, 0.3, 0.45],
+      "mkbound": 0
+    },
+    "receiver": {
+      "low_m": [0.45, -0.3, 0.0],
+      "size_m": [1.1, 0.6, 0.45],
+      "mkbound": 1
+    },
+    "tray": {
+      "low_m": [-0.6, -0.55, -0.2],
+      "size_m": [2.6, 1.1, 0.1],
+      "mkbound": 2
+    },
+    "runtime_domain": {
+      "posmin_m": [-0.6, -0.55, -0.2],
+      "posmax_m": [2.0, 0.55, 2.4]
+    },
+    "fluid_initial_condition": {
+      "footprint": {
+        "low_m": [0.05, -0.11, 0.7],
+        "size_m": [0.325, 0.22, 0.33],
+        "base_layer_height_m": 0.11,
+        "mkfluid": [0, 1, 2]
+      },
+      "continuous_faces_are_h2_canary_source_faces": true,
+      "three_source_layers_are_preserved": true,
+      "native_sampling": "per-cell cell-centre lattice with native rho*dp^3 and no mass rescaling"
+    },
+    "mdbc_normals": {
+      "normal_geometry_active": true,
+      "normal_construction_layers_vdp": -0.5,
+      "main_boundary_layers_vdp": "0,1,2",
+      "normal_search_distance_h": 3.0,
+      "svshapes": true,
+      "required_zero_boundary_normals": 0,
+      "normal_geometry_file": "[CaseName]_hdp_Actual.vtk"
+    },
+    "runtime_window": {
+      "time_max_s": 0.6,
+      "registered_output_interval_s": 0.02,
+      "settle_hold_s": 0.2,
+      "motion_angle_degrees": 0.0
+    },
+    "gravity_m_s2": -9.81,
+    "mass_policy": "native rho*dp^3; no mass rescaling",
+    "physical_geometry_changed_from_h2_anchor": false,
+    "qualification_scope_boundary": "static initial-volume and spatial-resolution range only; no rotation, transfer, or T1 claim"
+  },
+  "parameter_axis": {
+    "normalized_name": "q",
+    "physical_name": "initial_liquid_volume_m3",
+    "mapping": "V(q)=0.022950 + 0.001290*q m3; h(q)=V(q)/(0.325*0.220)",
+    "range_m3": [0.02295, 0.02424],
+    "range_height_m": [0.320979020979021, 0.339020979020979],
+    "anchor": {
+      "q": 0.5,
+      "volume_m3": 0.023595,
+      "height_m": 0.33,
+      "source": "H2 v2 positive canary three-layer fluid footprint"
+    },
+    "q_points": [0.0, 0.5, 1.0, 0.25, 0.75],
+    "qualification_q": [0.0, 0.5, 1.0],
+    "held_out_q": [0.25, 0.75],
+    "volume_at_q_m3": {
+      "0.0": 0.02295,
+      "0.25": 0.0232725,
+      "0.5": 0.023595,
+      "0.75": 0.0239175,
+      "1.0": 0.02424
+    },
+    "native_layer_rule": "choose nearest total native z-layer count under the fixed source footprint, then preserve two .11 m H2 layers and adjust only the third layer drawbox"
+  },
+  "gates": {
+    "source_initial_mass_relative_error_max": 0.025,
+    "total_discrete_to_continuum_mass_error_max": 0.03,
+    "mass_rescaling": false,
+    "no_missing_native_fluid_ids": true,
+    "native_fluid_group_counts_match": true,
+    "unique_native_ids": true,
+    "no_nonfinite_active_values": true,
+    "fluid_inside_physical_cup": true,
+    "no_runtime_domain_endpoint_outside": true,
+    "positive_distance_to_mkbound0_cup": true,
+    "mdbc_normal_count_equals_boundary_count": true,
+    "mdbc_zero_boundary_normals_max": 0,
+    "mdbc_normals_finite": true,
+    "no_cup_closed_face_endpoint_or_saved_chord_crossings": true,
+    "no_open_cup_escape": true,
+    "no_unexpected_receiver_or_tray_mass": true,
+    "static_speed_p95_m_s_max": 0.1,
+    "static_kinetic_over_initial_potential_max": 0.05,
+    "event_window_complete_required": true,
+    "spatial_max_absolute_normalized_difference": 0.05,
+    "temporal_max_absolute_normalized_difference": 0.01,
+    "survivor_renormalization": false,
+    "solver_or_gpu_execution_in_preparation": false
+  },
+  "qualification_design": {
+    "cell_count": 15,
+    "registered_window_s": 0.6,
+    "output_interval_s": 0.02,
+    "settle_hold_s": 0.2,
+    "events": ["static_hold_complete"],
+    "static_event_definition": "all native fluid identities remain valid and inside the physical cup for 0.60 s; scientific speed/energy gates apply only after a future solver review",
+    "no_receiver_transfer_expected": true,
+    "independent_interior_policy": "q=.25 and q=.75 held-out rows exclude the q=.5 canary from the numerator; every row stays in the fixed denominator",
+    "time_rows": {
+      "internal_time": "q=.5, dp=.0075; registered .02 s output and future actual/internal-step audit",
+      "native_output": "q=.5, dp=.0075; same scene and future solver controls with .01 s native output cadence"
+    },
+    "cells": [
+      {"index": 0, "case_id": "CORE_F2_H2_mdbc_static_range_q0p00000000_dp0p010000000000_spatial", "q": 0.0, "initial_volume_m3": 0.02295, "dp_m": 0.01, "target_total_native_layers": 33, "design_cell": "spatial", "held_out": false, "status": "design_only_unprepared", "prepared": null, "job": null},
+      {"index": 1, "case_id": "CORE_F2_H2_mdbc_static_range_q0p00000000_dp0p007500000000_spatial", "q": 0.0, "initial_volume_m3": 0.02295, "dp_m": 0.0075, "target_total_native_layers": 44, "design_cell": "spatial", "held_out": false, "status": "design_only_unprepared", "prepared": null, "job": null},
+      {"index": 2, "case_id": "CORE_F2_H2_mdbc_static_range_q0p00000000_dp0p005000000000_spatial", "q": 0.0, "initial_volume_m3": 0.02295, "dp_m": 0.005, "target_total_native_layers": 64, "design_cell": "spatial", "held_out": false, "status": "design_only_unprepared", "prepared": null, "job": null},
+      {"index": 3, "case_id": "CORE_F2_H2_mdbc_static_range_q0p50000000_dp0p010000000000_spatial", "q": 0.5, "initial_volume_m3": 0.023595, "dp_m": 0.01, "target_total_native_layers": 34, "design_cell": "spatial", "held_out": false, "status": "design_only_unprepared", "prepared": null, "job": null},
+      {"index": 4, "case_id": "CORE_F2_H2_mdbc_static_range_q0p50000000_dp0p007500000000_spatial", "q": 0.5, "initial_volume_m3": 0.023595, "dp_m": 0.0075, "target_total_native_layers": 45, "design_cell": "spatial", "held_out": false, "status": "design_only_unprepared", "prepared": null, "job": null},
+      {"index": 5, "case_id": "CORE_F2_H2_mdbc_static_range_q0p50000000_dp0p005000000000_spatial", "q": 0.5, "initial_volume_m3": 0.023595, "dp_m": 0.005, "target_total_native_layers": 66, "design_cell": "spatial", "held_out": false, "status": "design_only_unprepared", "prepared": null, "job": null},
+      {"index": 6, "case_id": "CORE_F2_H2_mdbc_static_range_q1p00000000_dp0p010000000000_spatial", "q": 1.0, "initial_volume_m3": 0.02424, "dp_m": 0.01, "target_total_native_layers": 34, "design_cell": "spatial", "held_out": false, "status": "design_only_unprepared", "prepared": null, "job": null},
+      {"index": 7, "case_id": "CORE_F2_H2_mdbc_static_range_q1p00000000_dp0p007500000000_spatial", "q": 1.0, "initial_volume_m3": 0.02424, "dp_m": 0.0075, "target_total_native_layers": 46, "design_cell": "spatial", "held_out": false, "status": "design_only_unprepared", "prepared": null, "job": null},
+      {"index": 8, "case_id": "CORE_F2_H2_mdbc_static_range_q1p00000000_dp0p005000000000_spatial", "q": 1.0, "initial_volume_m3": 0.02424, "dp_m": 0.005, "target_total_native_layers": 68, "design_cell": "spatial", "held_out": false, "status": "design_only_unprepared", "prepared": null, "job": null},
+      {"index": 9, "case_id": "CORE_F2_H2_mdbc_static_range_q0p25000000_dp0p007500000000_spatial_held_out", "q": 0.25, "initial_volume_m3": 0.0232725, "dp_m": 0.0075, "target_total_native_layers": 44, "design_cell": "spatial_held_out", "held_out": true, "status": "design_only_unprepared", "prepared": null, "job": null},
+      {"index": 10, "case_id": "CORE_F2_H2_mdbc_static_range_q0p25000000_dp0p005000000000_spatial_held_out", "q": 0.25, "initial_volume_m3": 0.0232725, "dp_m": 0.005, "target_total_native_layers": 65, "design_cell": "spatial_held_out", "held_out": true, "status": "design_only_unprepared", "prepared": null, "job": null},
+      {"index": 11, "case_id": "CORE_F2_H2_mdbc_static_range_q0p75000000_dp0p007500000000_spatial_held_out", "q": 0.75, "initial_volume_m3": 0.0239175, "dp_m": 0.0075, "target_total_native_layers": 45, "design_cell": "spatial_held_out", "held_out": true, "status": "design_only_unprepared", "prepared": null, "job": null},
+      {"index": 12, "case_id": "CORE_F2_H2_mdbc_static_range_q0p75000000_dp0p005000000000_spatial_held_out", "q": 0.75, "initial_volume_m3": 0.0239175, "dp_m": 0.005, "target_total_native_layers": 67, "design_cell": "spatial_held_out", "held_out": true, "status": "design_only_unprepared", "prepared": null, "job": null},
+      {"index": 13, "case_id": "CORE_F2_H2_mdbc_static_range_q0p50000000_dp0p007500000000_internal_time", "q": 0.5, "initial_volume_m3": 0.023595, "dp_m": 0.0075, "target_total_native_layers": 45, "design_cell": "internal_time", "held_out": false, "temporal_variant": "internal_time", "status": "design_only_unprepared", "prepared": null, "job": null},
+      {"index": 14, "case_id": "CORE_F2_H2_mdbc_static_range_q0p50000000_dp0p007500000000_native_output", "q": 0.5, "initial_volume_m3": 0.023595, "dp_m": 0.0075, "target_total_native_layers": 45, "design_cell": "native_output", "held_out": false, "temporal_variant": "native_output", "status": "design_only_unprepared", "prepared": null, "job": null}
+    ],
+    "matrix_inputs_materialized": false,
+    "matrix_jobs_materialized": false
+  },
+  "failure_denominator": {
+    "fixed_registered_cell_denominator": 15,
+    "all_rows_in_denominator": true,
+    "unprepared_rows_are_not_successes": true,
+    "failed_rows_are_not_dropped": true,
+    "survivor_renormalization": false,
+    "row_state_rule": "prepared, failed and unattempted rows all remain visible in the 15-row denominator"
+  },
+  "input_closure": {
+    "anchor_only_frozen_inputs": true,
+    "source_definition_is_h2_v2_definition": true,
+    "matrix_jobs_materialized": false,
+    "solver_binary_read_or_hashed": false,
+    "future_materialization_rule": "each row receives its own Definition, motion file, GenCase BI4/XML, decoded native arrays, preflight and hash closure"
+  },
+  "resource_estimate": {
+    "preparation_only": true,
+    "cpu_materialization": {
+      "dp_0.010": {"cpu_cores": 2, "ram_mib": 12288},
+      "dp_0.0075": {"cpu_cores": 2, "ram_mib": 16384},
+      "dp_0.005": {"cpu_cores": 2, "ram_mib": 24576}
+    },
+    "solver_or_gpu_reservation": "none; requires a new root review"
+  },
+  "launch_policy": {
+    "solver_submit": false,
+    "gpu_submit": false,
+    "queue_submit": false,
+    "ledger_submit": false,
+    "registry_mutation": false,
+    "root_review_required_before_solver": true,
+    "candidate_canary_relaunch": false,
+    "qualification_claim_allowed_now": false,
+    "T1_registration_authorized": false
+  },
+  "decision_rule": "A positive CPU/native closure permits a future root review of this independent H2 static matrix; it does not qualify range behavior, inherit the canary as a numerator, or authorize T1 registration. Any hard, normal, mass, identity or future scientific failure remains in the fixed 15-row denominator."
+}

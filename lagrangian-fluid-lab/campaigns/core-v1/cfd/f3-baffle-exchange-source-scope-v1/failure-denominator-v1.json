@@ -1,0 +1,102 @@
+{
+  "schema": "core.f3.baffle_exchange_source_scope.failure_denominator.v1",
+  "denominator_id": "F3_baffle_exchange_native_mdbc_x_v1_failure_denominator",
+  "scope_id": "F3_baffle_exchange_native_mdbc_x_v1",
+  "revision_id": "F3_baffle_exchange_native_mdbc_v1",
+  "family": "F3",
+  "status": "fixed_before_runtime",
+  "matrix_path": "campaigns/core-v1/cfd/f3-baffle-exchange-source-scope-v1/qualification-matrix-v1.json",
+  "denominator": {
+    "planned_rows": 15,
+    "executed_rows": 0,
+    "passed_rows": 0,
+    "failed_rows": 0,
+    "unattempted_rows": 15,
+    "preflight_rows_credited": 0,
+    "qualification_numerator": 0
+  },
+  "fixed_rules": {
+    "all_planned_rows_stay_in_denominator": true,
+    "unattempted_rows_stay_in_denominator": true,
+    "infrastructure_failures_stay_in_denominator": true,
+    "scientific_failures_stay_in_denominator": true,
+    "event_censor_is_failure": true,
+    "same_input_retry": false,
+    "threshold_relaxation": false,
+    "horizon_extension": false,
+    "survivor_renormalization": false,
+    "single_point_diagnostic_is_qualification": false,
+    "preflight_anchor_is_qualification": false
+  },
+  "row_statuses": {
+    "not_started": 15,
+    "prepared_only": 0,
+    "running": 0,
+    "passed": 0,
+    "failed": 0,
+    "infrastructure_failed": 0,
+    "event_failed": 0
+  },
+  "historical_noncredit_evidence": [
+    {
+      "id": "current_plain_f3_mls_handoff",
+      "path": "campaigns/core-v1/cfd/f3-native-mls-sources/handoff-v2.json",
+      "sha256": "613485e2dfa0ba45421084db6bd5b0bda9a7499846cfd95dee5388fa85b3c121",
+      "status": "prepared_only",
+      "reason": "plain finite tank with prescribed acceleration; no internal baffle and no qualification granted"
+    },
+    {
+      "id": "legacy_baffle_definition",
+      "path": "cases/F3/F3_baffled_slosh/F3_baffled_slosh_Def.xml",
+      "sha256": "e4811e7c3bfdba6ae06ccc073fbf9cec0a9d2d62221a0df69e43fa5278e3c147",
+      "status": "historical_probe_input",
+      "reason": "legacy .04 m, .65 m/s, .9 s, .05 s probe is provenance only; its input and generated trajectory receive zero credit"
+    },
+    {
+      "id": "legacy_hard_audit_adapter",
+      "path": "campaigns/core-v1/evidence/f3-legacy-hard-audit-adapter-v1.json",
+      "sha256": "33fbe9cb48300f671c08d5dc1b14a43901ab723d8839f3cff7850a8543d17f0b",
+      "status": "historical_rebinding",
+      "reason": "adapter explicitly records existing trajectory rebindings and no new numerical or material qualification"
+    },
+    {
+      "id": "legacy_baffle_trajectory",
+      "path": "data/F3_baffled_slosh.h5",
+      "sha256": "21bfebfd2323e2211a7f7580c9938fe96a7c857536b1becb98a630cd18ed840a",
+      "status": "historical_probe_trajectory",
+      "reason": "legacy trajectory is not reused by the new source scope and cannot seed a qualification row"
+    },
+    {
+      "id": "new_anchor_preflight",
+      "path": "campaigns/core-v1/cfd/f3-baffle-exchange-source-scope-v1/anchor-q0p5-dp0p0075-v3/prepared.json",
+      "sha256": "09b8501815eca988f5f9a8387aa4ee3498db939fd02559d45be5be89410526ea",
+      "status": "prepared_only",
+      "reason": "CPU GenCase/native initial-state pass only; solver was not invoked and numerator credit is zero"
+    }
+  ],
+  "failure_accounting": {
+    "qualification_requires": "15/15 rows satisfy all fixed source, native lifecycle, full-window, event, hard-integrity and material-readout gates",
+    "row_failure_examples": [
+      "nonfinite active values",
+      "native exclusion or missing output",
+      "wall penetration or hard-integrity failure",
+      "event-censored window",
+      "requested horizon not reached",
+      "source/hash closure failure",
+      "infrastructure failure before a valid trajectory"
+    ],
+    "reporting": "Do not remove, replace, retry, or renormalize a failed row without a new versioned denominator approved by root."
+  },
+  "execution_controls": {
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0
+  },
+  "downstream": {
+    "next_owner": "root review",
+    "required_input": "fixed denominator bound into immutable row job specs before any launch",
+    "prohibited": "no matrix launch from this artifact alone"
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f1.py",
+    "--lab-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "run",
+    "--prepared",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H1_reference_center_medium_canary/prepared.json",
+    "--output",
+    "{attempt_dir}/product"
+  ],
+  "attempt_role": "initial",
+  "category": "reference_canary",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "depends_on": [],
+  "host": "ada",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H1_reference_center_medium_canary/prepared.json",
+      "sha256": "67c7febbadbad87b9efae67a2b34c0ebf879d6d6842063dffed829c8bc4e09f9"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    }
+  ],
+  "job_id": "f1-h1-reference-fullwindow-canary-io-calibrated-001",
+  "logical_id": "f1-h1-reference-fullwindow-canary-001",
+  "maximum_extended_window_s": 4.4,
+  "prepared_case_id": "CORE_F1_H1_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary",
+  "qualification_claim": "none",
+  "registered_window_s": 2.2,
+  "required_outputs": [
+    "product/result.json",
+    "product/trajectory.h5",
+    "product/audit.json",
+    "product/observations.json"
+  ],
+  "resource_calibration": {
+    "artifact_bytes": 413000141,
+    "rationale": "measured F1 emission ~10.6 MB/s; match CFD stream token weight .25 rather than generic bulk-transfer weight 1; RAM/GPU reservations unchanged",
+    "source_job": "f1-h1-domain-z1p8-canary-001",
+    "wall_seconds": 38.876320123672485
+  },
+  "resources": {
+    "cpu_cores": 2,
+    "gpu_peak_mib": 4096,
+    "io_weight": 0.25,
+    "ram_mib": 16384
+  },
+  "schema": "core.cfd.job.v1",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "static_validation": {
+    "case_id": "CORE_F1_H1_obstacle_q0p50000000_h0p46000000_dp0p007500000000_canary",
+    "continuum_geometry_unchanged": true,
+    "event_window_s": 2.2,
+    "issues": [],
+    "mass_preflight": {
+      "mass_gate_pass": true,
+      "mass_rescaling": false,
+      "max_abs_source_relative_error": 0.017075482536764275,
+      "pass": true,
+      "source_error_max": 0.025,
+      "source_relative_errors": [
+        0.017075482536764275
+      ],
+      "total_continuous_mass_kg": 50.04800000000001,
+      "total_discrete_mass_kg": 50.90259374999999,
+      "total_error_max": 0.03,
+      "total_relative_error": 0.017075482536764275
+    },
+    "mass_rescaling": false,
+    "maximum_extended_window_s": 4.4,
+    "preflight_pass": true,
+    "prepared": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F1_H1_reference_center_medium_canary/prepared.json",
+    "qualification_claim": "none",
+    "revision_id": "F1_H1_obstacle_height_range_v1",
+    "schema": "core.cfd.static.v1",
+    "static_quality_pass": true
+  },
+  "timeout_seconds": 3600,
+  "worker_contract": "core_runtime worker; scheduler supplies one CUDA UUID and solver uses -gpu:0"
+}

@@ -1,0 +1,125 @@
+{
+  "acceptance": {
+    "failure_if_10s_right_censored": true,
+    "failure_if_hard_integrity_fails": true,
+    "must_observe_motion_complete_receiver_contact_and_settled": true,
+    "must_pass_hard_integrity": true,
+    "must_reach_requested_horizon": true,
+    "must_save_post_settle_observation_s": 0.35,
+    "no_future_truth_or_survivor_renormalization": true,
+    "no_threshold_relaxation": true,
+    "qualification_claim_on_pass": "still canary evidence only; root may separately review a fresh 13+2 matrix"
+  },
+  "artifacts": {
+    "prepared": {
+      "bytes": 45357,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_extension10s_v1/prepared.json",
+      "relative_to_lab": "campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_extension10s_v1/prepared.json",
+      "role": "CPU-prepared extension manifest",
+      "sha256": "f77c6168b246cbafdc61682e5862504e9a8654856a4de409c63810f5585f3c72"
+    },
+    "proposal": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dbc-slow-duration-extension10s-canary-proposal-v1.json",
+      "relative_to_lab": "campaigns/core-v1/cfd/f2-dbc-slow-duration-extension10s-canary-proposal-v1.json",
+      "role": "this proposal"
+    }
+  },
+  "candidate_id": "F2_dbc_slow_rotation_duration_horizon_extension10s_canary",
+  "central_queue_mutation": 0,
+  "created_at": "2026-09-20T01:47:30.065212+00:00",
+  "family": "F2",
+  "fixed_contract": {
+    "DtFixed": 0.0,
+    "DtIni": 0.0,
+    "DtMin": 0.0,
+    "boundary_method": "native DBC Boundary=1",
+    "cfl": 0.2,
+    "dp_m": 0.0075,
+    "event_thresholds": {
+      "kinetic_fraction_max": 0.05,
+      "post_settle_observation_s": 0.35,
+      "receiver_fraction": 0.01,
+      "settle_hold_s": 0.2,
+      "speed_p95_m_s_max": 0.1,
+      "spill_fraction": 0.01
+    },
+    "geometry": "same full-cup/catchment/receiver/tray and runtime domain",
+    "initial_condition": "native initial arrays exactly equal to 5 s canary",
+    "mass_policy": "native rho*dp^3; no rescaling",
+    "output_interval_s": 0.01,
+    "visco": 0.03,
+    "visco_treatment": 1
+  },
+  "gpu_launch_by_subagent": false,
+  "qualification_claim": "none; this canary cannot populate the 15-cell duration matrix or establish T1",
+  "qualification_only": true,
+  "registration_basis": {
+    "basis_evidence": {
+      "bytes": 26534,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dbc-slow-duration-q1p0-terminal-root-v1/terminal-evidence-v2.json",
+      "relative_to_lab": "campaigns/core-v1/cfd/f2-dbc-slow-duration-q1p0-terminal-root-v1/terminal-evidence-v2.json",
+      "role": "completed q=1.0 5 s terminal evidence",
+      "sha256": "9ecada1f5c88a69ef8f2a2bc2e4426e570e16a22b570f548b228a820988caf05"
+    },
+    "derived_extension_horizon_s": 10.0,
+    "hard_integrity_pass": true,
+    "observed_basis": {
+      "interpretation": "KE crossed its threshold but speed-p95 did not; the required conjunction was never observed by 5 s",
+      "last_time_s": 5.000051840237767,
+      "motion_complete_s": 1.7,
+      "post_motion_final_kinetic_fraction": 0.02339382774733406,
+      "post_motion_final_speed_p95_m_s": 0.3504738636643466,
+      "post_motion_min_kinetic_fraction": 0.02339382774733406,
+      "post_motion_min_speed_p95_m_s": 0.3504738636643466,
+      "sampled_frame_count": 501,
+      "settle_kinetic_threshold_fraction": 0.05,
+      "settle_speed_threshold_m_s": 0.1,
+      "settled_event_time_s": null,
+      "simultaneous_settle_frames": 0,
+      "source_event_window_complete": false,
+      "source_hard_integrity_pass": true,
+      "source_horizon_s": 5.0,
+      "source_qualified": false,
+      "source_requested_horizon_reached": true,
+      "source_terminal_evidence": "core.f2.slow_duration_terminal_evidence.v2"
+    },
+    "one_time_extension_rule": "T_extension = 2 * T_previous",
+    "post_extension_no_further_extension": true,
+    "previous_canary_right_censored": true,
+    "previous_registered_horizon_s": 5.0,
+    "source_parameter_card": {
+      "bytes": 4615,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dbc-duration-qualification-parameter-card-v1.json",
+      "relative_to_lab": "campaigns/core-v1/cfd/f2-dbc-duration-qualification-parameter-card-v1.json",
+      "role": "existing F2 duration registration",
+      "sha256": "527cba5112a7581c1c47ba06a6c0f0eff6492e058ceec6b80bd829e610981098"
+    }
+  },
+  "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_horizon_extension10s_v1",
+  "schema": "core.f2.dbc_slow_duration_horizon_extension.canary_proposal.v1",
+  "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_slow_duration_horizon_extension_x_v1",
+  "single_change": {
+    "candidate_s": 10.0,
+    "implementation_fields": [
+      "TimeMax",
+      "mvrotfile duration",
+      "begin finish",
+      "motion-file hold endpoint"
+    ],
+    "physical_motion_unchanged": {
+      "motion_start_s": 0.5,
+      "rotation_duration_s": 1.2,
+      "target_angle_degrees": -105.0,
+      "target_reached_s": 1.7
+    },
+    "previous_s": 5.0,
+    "scientific_variable": "full event-window horizon"
+  },
+  "status": "design_only_cpu_preflight_no_solver_no_queue",
+  "submission": {
+    "job_spec_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dbc-slow-duration-extension10s-canary-job-v1.json",
+    "ledger_mutation": 0,
+    "scheduler_job_id": null,
+    "status": "job_spec_created_unsubmitted_root_review_required"
+  }
+}

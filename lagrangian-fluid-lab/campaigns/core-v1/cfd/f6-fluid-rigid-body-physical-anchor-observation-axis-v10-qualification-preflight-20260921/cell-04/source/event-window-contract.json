@@ -1,0 +1,96 @@
+{
+  "schema": "core.f6.physical_anchor.event_window_contract.v1",
+  "event_id": "F6_physical_anchor_observation_axis_v10_event_window",
+  "body_id": "F6_physical_anchor_body_F6_OBS_V10_Q0P50_DP0P020_SPATIAL",
+  "forcing_mode": "gravity_minus_9p81_fluid_body_coupling_expected",
+  "physical_f6_qualification": false,
+  "window": {
+    "start_s": 0.0,
+    "end_s": 1.5,
+    "output_interval_s": 0.005,
+    "expected_frame_count": 301,
+    "settle_hold_start_s": 1.0,
+    "settle_hold_end_s": 1.5
+  },
+  "time_axis_contract": {
+    "requested_output_interval_s": 0.005,
+    "native_time_axis": "solver_reported_actual_TimeStep",
+    "frame_count": 301,
+    "start_time_s": 0.0,
+    "end_time_target_s": 1.5,
+    "strictly_increasing": true,
+    "max_gap_s": 0.0055,
+    "max_gap_basis": "pre_registered_10_percent_envelope_over_requested_interval",
+    "terminal_coverage": {
+      "mode": "bracket_target",
+      "target_end_s": 1.5,
+      "last_native_time_must_be_at_least_target": true,
+      "terminal_overshoot_max_s": 0.0005
+    },
+    "interpolation_for_common_grid": "linear_in_solver_reported_actual_time_only; no future CFD values"
+  },
+  "observation_window": {
+    "name": "observation_hold",
+    "start_s": 1.0,
+    "end_s": 1.5,
+    "coverage": "native_time_bracket_with_max_gap_s",
+    "requires_equilibrium_claim": false,
+    "equilibrium_status": "not_claimed",
+    "equilibrium_thresholds": null
+  },
+  "predicted_events": {
+    "initial_fluid_surface_gap_m": 0.21000000000000008,
+    "predicted_contact_com_z_m": 0.33999999999999997,
+    "predicted_contact_time_s": 0.20691412628791772,
+    "predicted_impact_speed_m_s": 2.029827578884473,
+    "contact_prediction_window_s": [
+      0.18691412628791773,
+      0.2269141262879177
+    ],
+    "equilibrium_submerged_fraction": 0.78,
+    "equilibrium_submerged_depth_m": 0.0936,
+    "equilibrium_bottom_z_m": 0.18639999999999995,
+    "equilibrium_com_z_m": 0.24639999999999995,
+    "equilibrium_top_z_m": 0.30639999999999995,
+    "tank_bottom_clearance_at_equilibrium_m": 0.18639999999999995,
+    "tank_top_clearance_at_equilibrium_m": 0.5936000000000001,
+    "hydrodynamic_response_is_runtime_unknown": true
+  },
+  "required_runtime_events": [
+    "body_free_fall_started",
+    "fluid_contact_observed_once_or_more",
+    "buoyant_response_observed",
+    "no_closed_tank_face_contact_or_penetration",
+    "no_unaccounted_open_top_mass_flux",
+    "observation_hold_present_and_uncensored"
+  ],
+  "completion_rule": [
+    "all 301 frames exist on the solver-reported actual TimeStep axis",
+    "body_id is present on every row and all body/force/torque values are finite",
+    "all native gaps are <= 0.0055 s and terminal time is in [1.5,1.5005] s",
+    "fluid-contact time lies within the independently recomputed prediction window",
+    "closed-face contact count and penetration depth are zero throughout",
+    "open-top mass flux is zero",
+    "the final [1.0,1.5] s observation interval is bracketed without an equilibrium claim"
+  ],
+  "uncensored_required": true,
+  "status_without_runtime": "auditable_prediction_pending_runtime_event_window",
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "cell_binding": {
+    "cell_id": "F6_OBS_V10_Q0P50_DP0P020_SPATIAL",
+    "definition_id": "CORE_F6_OBS_V10_Q0P50_DP0P020_SPATIAL_FRESH_Definition",
+    "body_id": "F6_physical_anchor_body_F6_OBS_V10_Q0P50_DP0P020_SPATIAL",
+    "case_id": "F6_OBS_V10_Q0P50_DP0P020_SPATIAL_native_preflight",
+    "authorization_id": "F6_OBS_V10_Q0P50_DP0P020_SPATIAL_authorization",
+    "q": 0.5,
+    "dp_m": 0.02,
+    "body_com_z_m": 0.55,
+    "variant": "spatial",
+    "output_interval_s": 0.005,
+    "max_gap_s": 0.0055,
+    "terminal_overshoot_max_s": 0.0005,
+    "cfl": 0.2,
+    "expected_frame_count": 301
+  }
+}

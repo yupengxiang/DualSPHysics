@@ -1,0 +1,170 @@
+{
+  "schema": "core.f2.receiver_overflow_weir.candidate_card.v1",
+  "created_at_utc": "2026-09-20T14:20:00+00:00",
+  "family": "F2",
+  "scope_id": "F2_receiver_overflow_weir_v1",
+  "revision_id": "F2_receiver_overflow_weir_mdbc_v1",
+  "candidate_id": "F2_receiver_overflow_weir_q0p5_anchor",
+  "candidate_status": "root_review_only_cpu_native_preflight_pass",
+  "qualification_claim": "none",
+  "qualified": false,
+  "T1_numerical": false,
+  "matrix_credit": 0,
+  "admission": {
+    "root_review_admissible": true,
+    "solver_submission_status": "protected_job_spec_only_not_submitted",
+    "controls_executed": false,
+    "central_registry_mutated": false,
+    "central_ledger_mutated": false
+  },
+  "mechanism": {
+    "class": "finite_reservoir_internal_overflow_weir_receiver",
+    "hypothesis": "A gravity driven upstream reservoir overflowing a finite height internal crest into a downstream receiver produces a boundary and transfer mechanism that is independent of rotating cup duration and suspended obstacle contact.",
+    "physical_question": "Does a closed outer tank with a fixed internal crest produce a reproducible reservoir to receiver transfer event when crest height is varied over a preregistered range?",
+    "scientific_difference": [
+      "The fluid is initially continuous and stationary in an upstream reservoir; there is no prescribed cup motion or source impulse.",
+      "The internal finite height weir creates a true crest crossing and downstream receiver basin within one closed outer tank.",
+      "The only q dependent physical parameter is crest height; duration, horizon, observer and outer tank remain fixed.",
+      "Native mDBC Boundary=2 with generated normals is used on the outer tank and weir shell; this boundary/topology combination is new for this scope."
+    ],
+    "disallowed_shortcuts_not_used": [
+      "no rotating cup or DBC duration reuse",
+      "no F1 suspended obstacle geometry",
+      "no F5 wave or runup source recipe",
+      "no same input retry",
+      "no threshold relaxation",
+      "no horizon extension before a complete hard pass",
+      "no survivor renormalization or point diagnostic credit"
+    ]
+  },
+  "fixed_geometry": {
+    "outer_tank": {
+      "low_m": [0.0, 0.0, 0.0],
+      "size_m": [1.6, 0.5, 0.8],
+      "faces": ["bottom", "left", "right", "front", "back"],
+      "mkbound": 0
+    },
+    "internal_weir": {
+      "low_m": [0.72, 0.04, 0.0],
+      "size_m": [0.06, 0.42, 0.26],
+      "crest_height_anchor_m": 0.26,
+      "faces": ["top", "left", "right", "front", "back"],
+      "mkbound": 1
+    },
+    "upstream_source_contract": {
+      "low_m": [0.04, 0.04, 0.04],
+      "size_m": [0.64, 0.42, 0.36],
+      "free_surface_m": 0.40,
+      "source_end_x_m": 0.68,
+      "continuous_volume_m3": 0.16128,
+      "density_kg_m3": 1000.0
+    },
+    "downstream_receiver": {
+      "region_m": {"xmin": 0.78, "xmax": 1.56, "ymin": 0.04, "ymax": 0.46, "zmin": 0.0, "zmax": 0.8},
+      "containment": "outer tank floor and side walls; top open",
+      "initial_fluid": false
+    },
+    "runtime_domain_m": {"xmin": -0.30, "xmax": 1.90, "ymin": -0.15, "ymax": 0.65, "zmin": -0.15, "zmax": 1.20},
+    "gravity_m_s2": [0.0, 0.0, -9.81]
+  },
+  "boundary_and_numerics": {
+    "boundary": "native mDBC Boundary=2",
+    "slip_mode": 1,
+    "normal_generation": "GeometryForNormals with distanceh=3, svshapes=true, explicit invert contract",
+    "dp_anchor_m": 0.0075,
+    "dp_matrix_m": [0.01, 0.0075, 0.005],
+    "cfl": 0.2,
+    "visco_treatment": 1,
+    "visco": 0.03,
+    "mass_policy": "native rho*dp^3; no rescaling",
+    "output_interval_s": 0.01,
+    "time_max_s": 1.5
+  },
+  "one_dimensional_parameter": {
+    "name": "weir_crest_height_m",
+    "coordinate": "q in [0,1]",
+    "mapping": "crest_height_m = 0.20 + 0.12*q",
+    "q_values": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "crest_height_values_m": [0.20, 0.23, 0.26, 0.29, 0.32],
+    "free_surface_minus_crest_range_m": [0.08, 0.20]
+  },
+  "registered_window": {
+    "initial_time_max_s": 1.5,
+    "maximum_extended_time_max_s": 3.0,
+    "extension_policy": "one whole scope extension only after a complete hard pass; event censoring remains in the denominator",
+    "event_completion_required": true
+  },
+  "observer": {
+    "hard_integrity": [
+      "requested horizon reached",
+      "native fluid IDs unique and no active fluid ID missing",
+      "all active arrays finite",
+      "zero closed outer-wall and weir endpoint violations",
+      "zero saved chord crossings",
+      "zero outer-wall or weir penetration particle frames",
+      "relative mass change <= 1e-8",
+      "zero fluid particles outside the closed outer tank"
+    ],
+    "event": {
+      "crest_crossing": "at least 1% of initial fluid mass crosses x=0.78 m above the crest plane",
+      "receiver_contact": "at least 1% of initial fluid mass enters the downstream receiver region",
+      "completion": "receiver contact is sustained for 0.20 s and a complete registered window is observed",
+      "credit_policy": "hard pass and complete event are both required; CPU/native preflight and canary evidence have zero T1 credit"
+    },
+    "mass": {
+      "native_policy": "rho*dp^3",
+      "source_relative_error_max": 0.025,
+      "total_relative_error_max": 0.03,
+      "mass_change_relative_max": 1e-08,
+      "mass_rescaling": false
+    },
+    "event_censoring_policy": "a hard pass without crest/receiver completion is event_censored and remains in the denominator"
+  },
+  "fixed_matrix": {
+    "path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/fixed-matrix-v1.json",
+    "cell_count": 15,
+    "spatial_cells": 13,
+    "temporal_cells": 2,
+    "denominator_policy": "all 15 rows remain in the denominator regardless of outcome"
+  },
+  "lineage": {
+    "path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/lineage-clarification-v1.json",
+    "source_definition": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/anchor/CORE_F2_receiver_overflow_weir_q0p50000000_crest0p26000000_dp0p007500000000_Def.xml",
+    "input_identity_changed": true,
+    "source_reuse": false,
+    "same_input_retry": false,
+    "qualification_inheritance": false
+  },
+  "preflight": {
+    "path": "campaigns/core-v1/cfd/f2-receiver-overflow-weir-scope-v1/cpu-native-preflight-v1.json",
+    "status": "cpu_native_preflight_pass_anchor_only",
+    "solver_run": false,
+    "gpu_launched": false,
+    "matrix_prepared": false,
+    "matrix_credit": 0
+  },
+  "blockers": [
+    "A read-only receiver/crest contract adapter now exists, but no solver-integrated runtime adapter or observer has received root review.",
+    "Only one CPU/native anchor input exists; the 15 solver rows are not materialized or executed.",
+    "No solver product, event result, qualification result or T1 registration exists.",
+    "Root review lock is required before any solver, GPU or queue action."
+  ],
+  "execution_controls": {
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "central_ledger_mutation": 0,
+    "central_registry_mutation": 0,
+    "controls_executed": false
+  },
+  "launch_policy": {
+    "cpu_native_preflight_allowed": true,
+    "solver_submit": false,
+    "gpu_submit": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "root_review_required": true,
+    "qualification_claim_allowed_now": false
+  }
+}

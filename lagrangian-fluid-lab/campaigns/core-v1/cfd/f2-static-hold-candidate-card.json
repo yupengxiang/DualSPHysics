@@ -1,0 +1,32 @@
+{
+  "schema": "core.f2.candidate.v1",
+  "revision_id": "F2_H0_static_cup_hold_v1",
+  "family": "F2",
+  "scope_id": "F2_static_cup_hold_canary_v1",
+  "case_id": "CORE_F2_H0_static_cup_hold_q0p50000000_dp0p007500000000_canary",
+  "source_geometry": "campaigns/l2-multifamily/c1-canary/cases/L2_C1_F2_rotation_center_nominal_Def.xml",
+  "physical_geometry": {
+    "cup": {"low": [0.0, -0.15, 0.65], "size": [0.425, 0.30, 0.45], "mouth_open": true},
+    "receiver": {"low": [0.45, -0.30, 0.0], "size": [1.10, 0.60, 0.45]},
+    "tray": {"low": [-0.60, -0.55, -0.20], "size": [2.60, 1.10, 0.10]}
+  },
+  "control": {
+    "cup_angle_degrees": 0.0,
+    "motion_file": "CORE_F2_H0_static_cup_hold_motion.dat",
+    "time_max_s": 0.60,
+    "output_interval_s": 0.02
+  },
+  "mass_policy": "nearest in-box cell-centre sampling; native rho*dp^3; no mass rescaling",
+  "gates": {
+    "source_mass_error_max": 0.025,
+    "cup_retention_mass_fraction_min": 0.95,
+    "full_window_required": true,
+    "finite_ids_and_arrays": true,
+    "closed_world_wall_endpoint_frames": 0,
+    "qualification_claim": "none"
+  },
+  "status": "prepared_unqualified",
+  "qualification_claim": "none; static hold canary only",
+  "purpose": "minimum static retention evidence before designing the real rotating-cup F2 scope",
+  "moving_f2_qualification": "not assessed"
+}

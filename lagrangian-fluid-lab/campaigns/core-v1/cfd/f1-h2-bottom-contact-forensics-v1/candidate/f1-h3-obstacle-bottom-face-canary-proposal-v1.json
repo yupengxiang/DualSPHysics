@@ -1,0 +1,47 @@
+{
+  "schema": "core.f1.h3.obstacle_bottom_face_canary.v1",
+  "proposal_id": "F1_H3_obstacle_bottom_face_mdbc_canary_v1",
+  "status": "prepared_cpu_only_not_submitted",
+  "mechanism_class": "boundary_topology",
+  "mechanism_class_attempt": 1,
+  "max_mechanism_classes": 2,
+  "h1_h2_history": {
+    "h1": "original F1 full-window mDBC failure retained",
+    "h2": "mDBC normals/ghost/no-penetration repair failure retained",
+    "new_evidence": "H2 first violation is inside obstacle xy and below continuous z=0 where no obstacle bottom interior boundary exists"
+  },
+  "single_variable_change": [
+    "obstacle mainlist boundary drawbox adds bottom face",
+    "obstacle GeometryForNormals drawbox adds bottom face"
+  ],
+  "unchanged": [
+    "CFL=0.2, DtIni, DtMin, output cadence, TimeMax=2.2 s",
+    "mDBC Boundary=2, SlipMode=2, NoPenetration=1, -mdbc_noslip:1",
+    "continuum fluid/obstacle/tank geometry, gravity, density and native rho*dp^3 mass",
+    "runtime domain and all hard thresholds"
+  ],
+  "prepared": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/candidate/prepared.json",
+    "sha256": "c90ebd8492f28e510d2b5a35b1fecdb252859d10c963249ef74d026854325458"
+  },
+  "job": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/candidate/f1-h3-obstacle-bottom-face-mdbc-canary-job.json",
+    "sha256": "cf53583984d31ac0cd39f799362268c3e490c8b4ddc92413a35ced635c021313"
+  },
+  "candidate_preflight": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h2-bottom-contact-forensics-v1/candidate/candidate-preflight.json",
+    "sha256": "b0e06397d05f1af5aad1990315e827a7fc4c025b941f19dc5695d79a3030c78d"
+  },
+  "hard_integrity_contract": {
+    "no_missing_native_fluid_ids": true,
+    "no_nonfinite_active_values": true,
+    "closed_wall_endpoint_tolerance_m": 1e-08,
+    "saved_chord_crossings_allowed": 0,
+    "full_solid_obstacle_audit": true,
+    "obstacle_penetration_particle_frames_allowed": 0,
+    "fluid_boundary_exact_overlap_allowed": 0
+  },
+  "qualification_claim": "none; solver not run",
+  "gpu_launched": false,
+  "ledger_written": false
+}

@@ -1,0 +1,41 @@
+{
+  "schema": "core.f2.dbc_duration.extension_collection.v1",
+  "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+  "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+  "created_at": "2026-09-19T19:26:12.319571+00:00",
+  "attempt_product": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-boundary-extension5s-v2-001/20260920T031752-07b411be288d/product",
+  "prepared": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_boundary_v2_extension5s_v2/prepared.json",
+    "sha256": "b63377edf7c3ac3758da06a3e8065feab36fa793cf4ba718c1f8f0b1ef6a067d"
+  },
+  "safe_collection_contract": {
+    "read_json_only": [
+      "worker-status.json",
+      "execution.json",
+      "result.json",
+      "audit.json",
+      "observations.json"
+    ],
+    "do_not_read": [
+      "trajectory.h5",
+      "trajectory.h5.partial"
+    ],
+    "wait_until": [
+      "worker-status.status is terminal",
+      "trajectory.h5.partial is absent",
+      "all four JSON outputs exist"
+    ],
+    "hash_every_collected_file": true
+  },
+  "scientific_decision": {
+    "matrix_eligibility": "hard_integrity_pass AND requested_horizon_reached AND event_window_complete AND execution_succeeded",
+    "pass_meaning": "eligible for root review of independent matrix launch; never a qualification result",
+    "fail_meaning": "candidate insufficient; preserve hard/event failure and do not extend again",
+    "canary_denominator_rule": "the extension is excluded from the 15-cell numerator and denominator"
+  },
+  "f1_fallback_review": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dbc-boundary-failure-f1-review-v1.json",
+    "sha256": "b50b334cec8ff84a7a78b7fcc47b7221a2fd9d50e24b1ac5e3cd33f54f51233e"
+  },
+  "execution_status": "collection plan only; no H5 read, no GPU submission, no ledger write"
+}

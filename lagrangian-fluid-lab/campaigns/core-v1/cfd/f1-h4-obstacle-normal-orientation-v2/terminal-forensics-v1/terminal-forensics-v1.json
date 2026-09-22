@@ -1,0 +1,354 @@
+{
+  "attempt": {
+    "attempt_id": "20260920T055914-7faaa83219bc",
+    "attempt_role": "infrastructure_retry",
+    "host": "h200",
+    "input_hashes_verified": true,
+    "job_id": "f1-h4-obstacle-normal-orientation-canary-infra-retry-001",
+    "local_capture_root": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/terminal-forensics-v1/raw",
+    "portable_prepared": {
+      "bytes": 15589,
+      "captured_locally": true,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/root-frozen/prepared-portable-inputs-v1.json",
+      "role": "portable prepared input",
+      "sha256": "a1d1063a6d292d8deb12474e994705ba7415200afa9928367afbe167c1e9c24a"
+    },
+    "remote_attempt_root": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h4-obstacle-normal-orientation-canary-infra-retry-001/20260920T055914-7faaa83219bc",
+    "retry_spec": {
+      "bytes": 15467,
+      "captured_locally": true,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/root-frozen/f1-h4-obstacle-normal-orientation-canary-infra-retry-001.json",
+      "role": "frozen retry job spec",
+      "sha256": "062163de7cbe1c2a2fe4bde73ac40cf4b6c25c05c099d4e76432fbe4a200da2f"
+    },
+    "source_snapshot": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624/lagrangian-fluid-lab",
+      "sha256": "f01a440a60de008e91ace1002c560d6208008433475b758139db66b32fbe4624"
+    }
+  },
+  "created_at": "2026-09-19T22:16:43.414778+00:00",
+  "execution_classification": {
+    "initial_attempt": {
+      "classification": "infrastructure_failure_before_solver",
+      "evidence": {
+        "bytes": 8105,
+        "captured_locally": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/root-frozen/infrastructure-retry-submission-v1.json",
+        "role": "root infrastructure retry record",
+        "sha256": "5f2db4a483aca935068e1efbb311f9ebd63450fede800a7afcf9d63bcc869e81"
+      },
+      "job_id": "f1-h4-obstacle-normal-orientation-canary-001",
+      "missing_outputs": [
+        "product/result.json",
+        "product/trajectory.h5",
+        "product/audit.json",
+        "product/observations.json"
+      ],
+      "outputs": [],
+      "peak_gpu_mib_sampled": 0.0,
+      "preserved_as_denominator": true,
+      "returncode": 1,
+      "scientific_status": "not_inferred",
+      "solver_started": false
+    },
+    "retry": {
+      "classification": [
+        "post_solver_output_contract_failure",
+        "scientific_hard_integrity_failure"
+      ],
+      "error": null,
+      "execution_receipt": {
+        "bytes": 24898,
+        "captured_locally": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/terminal-forensics-v1/raw/attempt-result.json",
+        "remote_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h4-obstacle-normal-orientation-canary-infra-retry-001/20260920T055914-7faaa83219bc/result.json",
+        "role": "core.execution_receipt.v1 terminal receipt",
+        "sha256": "4d9daae57b91cc87d284738c836aa6e15c4f96378957ffd2ed94cbc0c19dad93"
+      },
+      "missing_outputs": [
+        "product/observations.json"
+      ],
+      "reason": "returncode=0 and result/audit/trajectory were produced, but required product/observations.json was absent; hard audit independently fails, so the negative is not attributable only to packaging.",
+      "returncode": 0,
+      "scientific_status_field": "not_inferred_from_execution",
+      "solver_ran_to_requested_horizon": true,
+      "store_status": "failed",
+      "timeout": false
+    }
+  },
+  "execution_controls": {
+    "cfds_run_by_this_task": false,
+    "gpu_launched_by_this_task": false,
+    "ledger_written": false,
+    "qualification_matrix_materialized": false
+  },
+  "hard_audit": {
+    "audit": {
+      "bytes": 404384,
+      "captured_locally": true,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/terminal-forensics-v1/raw/audit.json",
+      "remote_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h4-obstacle-normal-orientation-canary-infra-retry-001/20260920T055914-7faaa83219bc/product/audit.json",
+      "role": "terminal hard audit",
+      "sha256": "38767394a2c415a61f99689e642378f5b24dc16cdf8efb47074ceae9ca1da5d9"
+    },
+    "endpoint_violation_particle_frames": 265270,
+    "event_window_complete": false,
+    "event_window_status": "not_assessed",
+    "finite_geometry_chord_crossings": 38953,
+    "first_endpoint_interpretation": {
+      "interpretation": "The first hard endpoint is a real saved-position violation below tank z=0 near the obstacle left/bottom corner; obstacle-volume penetration and saved-chord crossings are separately nonzero. This is not an observations-file-only failure.",
+      "position_bounds_observed_m": {
+        "x_max": 0.6725477024002978,
+        "x_min": 0.6624573549094718,
+        "y_max": 0.2437848508771013,
+        "y_min": 0.16811746598414906,
+        "z_max": -1.039249947889171e-05,
+        "z_min": -0.005323898322294875
+      },
+      "positions_are_below_declared_tank_floor": true,
+      "time_s": 0.2400007982307899
+    },
+    "first_wall_violation": {
+      "ids": [
+        260325,
+        260386,
+        260447,
+        260508,
+        260630,
+        260691,
+        260752
+      ],
+      "positions_m": [
+        [
+          0.6694098028130254,
+          0.16811746598414906,
+          -0.0026627349821645115
+        ],
+        [
+          0.6720538474382948,
+          0.17966050773493122,
+          -0.004451117069777198
+        ],
+        [
+          0.6673708424946494,
+          0.1889846040212329,
+          -0.005323898322294875
+        ],
+        [
+          0.6656198496698141,
+          0.1973648740293459,
+          -0.004848033274700978
+        ],
+        [
+          0.6725477024002978,
+          0.21943183061817575,
+          -0.0034940447911325466
+        ],
+        [
+          0.6704372969701453,
+          0.23066923611215265,
+          -0.0019032684482937782
+        ],
+        [
+          0.6624573549094718,
+          0.2437848508771013,
+          -1.039249947889171e-05
+        ]
+      ],
+      "time_s": 0.2400007982307899
+    },
+    "hard_integrity_pass": false,
+    "mass": {
+      "final_mass_fraction_of_initial": 0.7455452601568069,
+      "final_mass_kg": 37.95018848439213,
+      "initial_mass_kg": 50.90259507036535,
+      "mass_change_max_relative": 0.0,
+      "mass_loss_kg": 12.952406585973222
+    },
+    "obstacle_penetration_particle_frames": 1358,
+    "qualified": false,
+    "requested_horizon_reached": true,
+    "result": {
+      "bytes": 404384,
+      "captured_locally": true,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/terminal-forensics-v1/raw/result.json",
+      "remote_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h4-obstacle-normal-orientation-canary-infra-retry-001/20260920T055914-7faaa83219bc/product/result.json",
+      "role": "terminal scientific result",
+      "sha256": "38767394a2c415a61f99689e642378f5b24dc16cdf8efb47074ceae9ca1da5d9"
+    },
+    "saved_chord_crossing_count": 33403,
+    "saved_chord_semantics": "saved-frame chord is a diagnostic, not exact substep path",
+    "unique_wall_violation_id_count": 33244
+  },
+  "native_run": {
+    "actual_horizon_s": 2.200008808882064,
+    "dt_min_adjustments": {
+      "run_log_warnings": "present at t=.265266, .26556, .306417 and >1000 adjustment warning at t=1.64129",
+      "sum_reported_part_adjustments": 1771
+    },
+    "frame_count": 111,
+    "native_exclusions": {
+      "cumulative_npart_out": 30702,
+      "cumulative_npart_out_mov": 0,
+      "cumulative_npart_out_pos": 30643,
+      "cumulative_npart_out_rho": 59,
+      "final_part": {
+        "DTsMin": 2,
+        "NpOut": 327,
+        "NpOutMov": 0,
+        "NpOutPos": 325,
+        "NpOutRho": 2,
+        "NpSave": "231,148",
+        "NpSim": "231,148",
+        "Part": "110",
+        "Steps": 436,
+        "TimeStep [s]": "2.200008808882064"
+      },
+      "first_nonzero_by_type": {
+        "DTsMin": {
+          "count": 76,
+          "part": 14,
+          "time_s": 0.2800080181441859
+        },
+        "NpOut": {
+          "count": 1,
+          "part": 13,
+          "time_s": 0.2600191673267624
+        },
+        "NpOutMov": null,
+        "NpOutPos": {
+          "count": 2,
+          "part": 18,
+          "time_s": 0.3600084741705085
+        },
+        "NpOutRho": {
+          "count": 1,
+          "part": 13,
+          "time_s": 0.2600191673267624
+        }
+      },
+      "total_death_count_from_audit": 30702
+    },
+    "native_fluid_particles_final": 89956,
+    "native_fluid_particles_initial": 120658,
+    "native_log_evidence": [
+      {
+        "bytes": 25840,
+        "captured_locally": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/terminal-forensics-v1/raw/solver/RunPARTs.csv",
+        "remote_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h4-obstacle-normal-orientation-canary-infra-retry-001/20260920T055914-7faaa83219bc/product/solver/RunPARTs.csv",
+        "role": "native per-PART exclusion/cadence log",
+        "sha256": "752c11e7630ff1722a9317f32652df3d3e757a5bd2eea5838970528fd723e07a"
+      },
+      {
+        "bytes": 27841,
+        "captured_locally": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/terminal-forensics-v1/raw/solver/Run.out",
+        "remote_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h4-obstacle-normal-orientation-canary-infra-retry-001/20260920T055914-7faaa83219bc/product/solver/Run.out",
+        "role": "native solver log",
+        "sha256": "7e141a5295d03167ed8fcecf79e3457bd41a2109b6e4b21b672bce367cda1756"
+      },
+      {
+        "bytes": 1115,
+        "captured_locally": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/terminal-forensics-v1/raw/solver/Run.csv",
+        "remote_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h4-obstacle-normal-orientation-canary-infra-retry-001/20260920T055914-7faaa83219bc/product/solver/Run.csv",
+        "role": "native terminal summary",
+        "sha256": "764ec6f1d69af4aa8645d5f7cd1dce4aacaf7b745975b1f07ef9787c43716560"
+      },
+      {
+        "bytes": 27886,
+        "captured_locally": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f1-h4-obstacle-normal-orientation-v2/terminal-forensics-v1/raw/solver.stdout.log",
+        "remote_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h4-obstacle-normal-orientation-canary-infra-retry-001/20260920T055914-7faaa83219bc/product/solver.stdout.log",
+        "role": "solver stdout log",
+        "sha256": "182f0603392e738032557f89921503c2431a299ac4af451b41abbc82a54283c8"
+      }
+    ],
+    "native_total_particles_final": "231,148",
+    "native_total_particles_initial": 261850,
+    "requested_horizon_s": 2.2,
+    "solver_elapsed_seconds": 305.30091592192184,
+    "total_elapsed_seconds": 378.1110429359833,
+    "trajectory": {
+      "bytes": 536001310,
+      "captured_locally": false,
+      "remote_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f1-h4-obstacle-normal-orientation-canary-infra-retry-001/20260920T055914-7faaa83219bc/product/trajectory.h5",
+      "sha256": "90e5aed2fa6a530369b85aa2ec66b51c5fcff0c1dfc71d025b697bcf4e5bdd74"
+    },
+    "worker_status": {
+      "finished_at": "2026-09-19T22:05:38.583324+00:00",
+      "hard_integrity_pass": false,
+      "status": "complete_with_evidence"
+    }
+  },
+  "remaining_third_family_options": [
+    {
+      "class": "independent_native_source_material_interface",
+      "evidence": {
+        "bytes": 2776,
+        "captured_locally": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f3-native-mls-sources/handoff-v2.json",
+        "role": "independent F3 source handoff",
+        "sha256": "613485e2dfa0ba45421084db6bd5b0bda9a7499846cfd95dee5388fa85b3c121"
+      },
+      "evidence_sha256": "613485e2dfa0ba45421084db6bd5b0bda9a7499846cfd95dee5388fa85b3c121",
+      "family": "F3",
+      "id": "F3_native_volume_mls_source_handoff_v2",
+      "next_step": "root may select one fresh bounded hard-integrity canary after checking current runtime/resource status; no launch is authorized by this report.",
+      "scope": "five prepared native-volume/MLS source cases; no F1 obstacle mDBC recipe inheritance",
+      "status": "prepared_only_unqualified"
+    },
+    {
+      "class": "native_no_penetration_velocity_displacement_correction",
+      "evidence": {
+        "bytes": 2871,
+        "captured_locally": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-NATIVE-NOPEN-DESIGN.json",
+        "role": "independent F3 NoPen design",
+        "sha256": "558a4b2cad88c66973f95d1955ab7dfdd8a42e04fbe280f0e47149157e1ce215"
+      },
+      "family": "F3",
+      "id": "F3_native_nopen_boundary_correction",
+      "next_step": "only a separately authorized, evidence-led new canary may be considered; do not repeat H4 or treat prior NoPen diagnostics as passed.",
+      "nominal_gate": {
+        "bytes": 5817175,
+        "captured_locally": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-NOPEN-NOMINAL-SCORES-526417a59f665d1d25987d473e9c29c581868a1d1367d979a2ddc6e76a4bcf5d.json",
+        "role": "F3 NoPen nominal score",
+        "sha256": "526417a59f665d1d25987d473e9c29c581868a1d1367d979a2ddc6e76a4bcf5d"
+      },
+      "scope": "separate native NoPen recipe with unchanged tank/initial state; existing nominal score is failed and cannot grant qualification.",
+      "status": "registered_diagnostic_but_nominal_stage_failed"
+    }
+  ],
+  "repair_budget": {
+    "additional_same_class_canaries_after_this": 0,
+    "boundary_class_exhausted": true,
+    "h1_h2_h3_h4_records_retained": true,
+    "max_canaries_per_class": 2,
+    "max_mechanism_classes": 2,
+    "mechanism_class": "boundary_configuration",
+    "mechanism_class_attempt": 2
+  },
+  "schema": "core.f1.h4.terminal_forensics.v1",
+  "scope": {
+    "case_id": "CORE_F1_H4_mdbc_obstacle_normal_orientation_q0p50000000_h0p46000000_dp0p007500000000_canary",
+    "family": "F1",
+    "qualification_claim": "none",
+    "recipe_id": "F1_H4_obstacle_normal_orientation_mdbc_v1",
+    "revision_id": "F1_H4_obstacle_normal_orientation_v1",
+    "scope_id": "F1_single_obstacle_mdbc_repair_canary"
+  },
+  "scope_conclusion": {
+    "basis": "H4 reached 2.2 s with frozen portable inputs and independent hard failures: 265270 endpoint frames, 1358 obstacle-penetration frames, 38953 finite-geometry saved chords, 30702 native deaths and 12.952406585973222 kg mass loss.",
+    "do_not_materialize_h4_matrix": true,
+    "do_not_retry_same_boundary_configuration_class_without_new_evidence": true,
+    "event_extension_admitted": false,
+    "execution_contract_status": "failed_due_missing_observations_output",
+    "qualification_claim": "none",
+    "qualification_matrix_admitted": false,
+    "retain_canary_and_denominator": true,
+    "status": "terminal_negative_scientific_result"
+  }
+}

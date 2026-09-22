@@ -1,0 +1,214 @@
+{
+  "schema": "core.f2.static_full_cup.runtime_prepared.v1",
+  "created_at": "2026-09-20T06:43:07.920200+00:00",
+  "family": "F2",
+  "scope_id": "F2_static_full_cup_volume_hold_x_v1",
+  "cell_index": 0,
+  "repair_id": "F2_static_full_cup_boundary_mdbc_h1_v1",
+  "source_prepared": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/prepared.json",
+    "sha256": "8a419c61d3ec64dc19cbcaa0126fe946df6acbf169462ddb214e82f431c51104",
+    "bytes": 9936,
+    "role": "H1 CPU/native repair preparation"
+  },
+  "source_prepared_sha256": "8a419c61d3ec64dc19cbcaa0126fe946df6acbf169462ddb214e82f431c51104",
+  "base_source_prepared": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-matrix-prepared-v4/cells/00-CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial/prepared.json",
+    "sha256": "b317b9a6cc159652a45bdb9ec4aa29acba7d7fcf3886580102aff8fd55d90223",
+    "bytes": 18062,
+    "role": "v4 DBC source cell"
+  },
+  "candidate_card": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-volume-hold-candidate-v1.json",
+    "sha256": "fcbaa77fe28c2ec43a4fd7eb28023555d15a520439f31b01151600cc0342c26f",
+    "bytes": 16996,
+    "role": "15-cell candidate card"
+  },
+  "admission_contract": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-qualification-admission-v1.json",
+    "sha256": "bbeac0f554fd2975f9c3bc12a3bd60f5a48ade50ba4c64cc73b240181a8f7f2d",
+    "bytes": 3122,
+    "role": "F2 candidate admission contract"
+  },
+  "root_review": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-runtime-root-review-v1.json",
+    "sha256": "6a782ba2d8682a720d91ea39c71544695ff4d8cc7785dc8a1e976003d0011ef3",
+    "bytes": 4343,
+    "role": "H1 solver-canary root review"
+  },
+  "root_review_decision": "approved_for_runtime_smoke",
+  "config": {
+    "schema": "core.cfd.v1",
+    "family": "F2",
+    "scope_id": "F2_static_full_cup_volume_hold_x_v1",
+    "revision_id": "F2_static_full_cup_boundary_mdbc_h1_v1",
+    "case_id": "CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial",
+    "recipe_id": "F2_static_full_cup_volume_hold_mdbc_h1_v1",
+    "recipe": "mdbc_native",
+    "stage": "repair_canary",
+    "split": "qualification_only",
+    "qualification_only": true,
+    "parameter": {
+      "name": "initial_volume_q",
+      "q": 0.0,
+      "value_m3": 0.02295
+    },
+    "dp_m": 0.01,
+    "cfl": 0.2,
+    "time_max_s": 0.6,
+    "output_interval_s": 0.02,
+    "registered_output_interval_s": 0.02,
+    "source_definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_H1_mdbc_Def.xml",
+    "physical_case_id": "CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial",
+    "lineage_group_id": "F2_static_full_cup_volume_hold_x_v1/F2_static_full_cup_boundary_mdbc_h1_v1/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial",
+    "source_label_semantics": "single initial numerical fluid source; not material truth",
+    "control_semantics": "fixed cup at zero angle; H1 mDBC boundary repair only",
+    "cup": {
+      "low": [
+        0.0,
+        -0.15,
+        0.65
+      ],
+      "size": [
+        0.425,
+        0.3,
+        0.45
+      ],
+      "mkbound": 0
+    },
+    "wall_bounds": {
+      "xmin": 0.0,
+      "xmax": 0.425,
+      "ymin": -0.15,
+      "ymax": 0.15,
+      "zmin": 0.65,
+      "zmax": 1.1
+    },
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "open_faces": [
+      "top"
+    ],
+    "runtime_domain": {
+      "posmin_m": [
+        -0.7,
+        -0.65,
+        -0.4
+      ],
+      "posmax_m": [
+        2.2,
+        0.8,
+        1.8
+      ]
+    },
+    "initial_condition": {
+      "q": 0.0,
+      "initial_volume_m3": 0.02295,
+      "fill_height_m": 0.18000000000000002,
+      "mass_rescaling": false
+    },
+    "repair_hypothesis": "F2_static_full_cup_boundary_mdbc_h1_v1",
+    "qualification_claim": "none; H1 solver canary only",
+    "qualified": false
+  },
+  "sampling": {
+    "fluid_boxes": [
+      {
+        "continuous_low_m": [
+          0.0,
+          -0.15,
+          0.65
+        ],
+        "continuous_size_m": [
+          0.425,
+          0.3,
+          0.18000000000000002
+        ],
+        "first_center_m": [
+          0.005,
+          -0.145,
+          0.655
+        ],
+        "draw_size_m": [
+          0.41000000000000003,
+          0.29,
+          0.17
+        ],
+        "counts": [
+          42,
+          31,
+          18
+        ],
+        "particle_count": 23436,
+        "continuous_mass_kg": 22.950000000000003,
+        "discrete_mass_kg": 23.436000000000007,
+        "mkfluid": 0,
+        "native_cell_centre_sampling": true
+      }
+    ],
+    "expected_fluid_particles": 23436,
+    "continuous_mass_kg": 22.950000000000003,
+    "sampled_mass_kg": 23.436000000000007,
+    "mass_policy": "native rho*dp^3; no mass rescaling"
+  },
+  "mass_preflight": {
+    "source_relative_errors": [
+      0.021176470588235574
+    ],
+    "max_abs_source_relative_error": 0.021176470588235574,
+    "total_discrete_mass_kg": 23.436000000000007,
+    "total_continuous_mass_kg": 22.950000000000003,
+    "total_relative_error": 0.021176470588235574,
+    "source_error_max": 0.025,
+    "total_error_max": 0.03,
+    "mass_rescaling": false,
+    "pass": true,
+    "mass_gate_pass": true
+  },
+  "preflight_pass": true,
+  "generated_prefix": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/generated/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_H1_mdbc",
+  "source_template": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_H1_mdbc_Def.xml",
+  "source_template_sha256": "671e2a41b0083e02210fc212e89c6d15b2e9d7557ad4e7f7d118a2ec066dbfa2",
+  "inputs": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_H1_mdbc_Def.xml": "671e2a41b0083e02210fc212e89c6d15b2e9d7557ad4e7f7d118a2ec066dbfa2",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_motion.dat": "6a6fd803c618b9b1c7c98acff0f49d297c167982372818cf7e9a8bf495e04fba",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/gencase.log": "8ae44af0d35bac51c8acdcf0483242fd4173bf195b11ea9acde22e815114e0dc",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/generated/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_H1_mdbc.bi4": "fbb933ab04588e8175e569a2ea3af060a229f91aef9d437ad7c735fd78fa5ecb",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/generated/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_H1_mdbc.out": "bda40713c8d618cb2aef934f1c3c7a484a163c4b748738cddf42af4349ff8845",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/generated/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_H1_mdbc.xml": "556a525190147cf2e6f915b2995d301d638369aac539382733fb99e8d17b7b92",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/generated/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_H1_mdbc_All.vtk": "ce644a36f73715949a02e4e6c82b8452f64b5ac8008d1f9c2e384b70aebb7bc7",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/generated/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_H1_mdbc_Bound.vtk": "a23255df2245f83c3a6f895349beab51029cf46a59af48519b2f9f5a6d8c3fd9",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/generated/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_H1_mdbc_Fluid.vtk": "423fcd1eebc953da84bcb514d62dba08f578c6d18b6f702ae04e30eab6dfe246",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/generated/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_H1_mdbc_GeometryShapes.vtk": "0f4a09e700939f3fbdbd5dfff09e6a95170ddf8911c01a8db5ab80e6247a166c",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/generated/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_H1_mdbc_MkCells.vtk": "970b9993d62528b77ea82eaf860b6c0b6cf1659d15368d013ef887891a866f84",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/generated/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_H1_mdbc_hdp_Actual.vtk": "6b231cb447074b7012b546968a2ebcc48e65c246cd342a00267c9a52ecab3cef",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/generated/CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial_motion.dat": "6a6fd803c618b9b1c7c98acff0f49d297c167982372818cf7e9a8bf495e04fba",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-cell0-v2/prepared.json": "8a419c61d3ec64dc19cbcaa0126fe946df6acbf169462ddb214e82f431c51104",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-boundary-repair-h1-runtime-root-review-v1.json": "6a782ba2d8682a720d91ea39c71544695ff4d8cc7785dc8a1e976003d0011ef3",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-matrix-prepared-v4/cells/00-CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial/prepared.json": "b317b9a6cc159652a45bdb9ec4aa29acba7d7fcf3886580102aff8fd55d90223",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-qualification-admission-v1.json": "bbeac0f554fd2975f9c3bc12a3bd60f5a48ade50ba4c64cc73b240181a8f7f2d",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-static-full-cup-volume-hold-candidate-v1.json": "fcbaa77fe28c2ec43a4fd7eb28023555d15a520439f31b01151600cc0342c26f",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29"
+  },
+  "solver_binary": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+  "solver_sha256": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+  "decoder": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+  "decoder_sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+  "solver_arguments": [
+    "-mdbc_noslip:1"
+  ],
+  "solver_launch_authorized": true,
+  "gpu_launch_authorized": true,
+  "job_spec_creation_authorized": true,
+  "queue_mutation_authorized": true,
+  "ledger_mutation_authorized": true,
+  "registry_mutation_authorized": false,
+  "qualification_claim": "none; H1 solver canary only",
+  "qualified": false
+}

@@ -1,0 +1,1828 @@
+{
+  "schema": "core.f2.dbc_duration.qualification.v1",
+  "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+  "created_at": "2026-09-19T19:26:12.311535+00:00",
+  "family": "F2",
+  "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+  "status": "candidate_registration_only",
+  "qualification_claim": "none",
+  "qualification_only": true,
+  "physical_geometry_changed": true,
+  "initial_condition_changed": false,
+  "mass_rescaling": false,
+  "recipe": "native_dbc",
+  "parameter_axis": {
+    "normalized_name": "q",
+    "physical_name": "rotation_duration_s",
+    "candidate_range_s": [
+      0.5,
+      1.2
+    ],
+    "mapping": "rotation_duration_s = 0.50 + 0.70*q",
+    "candidate_q_points": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "qualification_anchor_q": [
+      0.0,
+      0.5,
+      1.0
+    ],
+    "held_out_q": [
+      0.25,
+      0.75
+    ],
+    "semantic_rule": "q is a normalized coordinate; each execution carries the mapped physical duration"
+  },
+  "fixed_physical_case": {
+    "cup": {
+      "low": [
+        0.0,
+        -0.15,
+        0.65
+      ],
+      "size": [
+        0.425,
+        0.3,
+        0.45
+      ],
+      "mkbound": 0
+    },
+    "receiver": {
+      "low": [
+        0.45,
+        -0.3,
+        0.0
+      ],
+      "size": [
+        1.1,
+        0.6,
+        0.45
+      ],
+      "mkbound": 1
+    },
+    "tray": {
+      "low": [
+        -0.6,
+        -0.55,
+        -0.2
+      ],
+      "size": [
+        2.6,
+        1.1,
+        0.1
+      ],
+      "mkbound": 2
+    },
+    "fluid_boxes": [
+      {
+        "low": [
+          0.0,
+          -0.15,
+          0.65
+        ],
+        "size": [
+          0.425,
+          0.3,
+          0.18505882352941178
+        ],
+        "mkfluid": 0
+      }
+    ],
+    "catchment": {
+      "low": [
+        -0.6,
+        -0.55,
+        -0.2
+      ],
+      "size": [
+        2.6,
+        1.1,
+        0.8
+      ],
+      "fluid_floor_surface_z_m": -0.2,
+      "mkbound": 3,
+      "floor_material_mkbound": 2,
+      "drawn_faces": [
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "closed_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "wall_layers_vdp": [
+        0,
+        1,
+        2
+      ],
+      "nominal_wall_thickness_m": 0.0225,
+      "continuous_geometry": "fixed side-wall box over the original tray footprint; the original tray bottom is retained",
+      "material_purpose": "external rigid spill/overflow collection walls; mkbound=3 is a new physical material region",
+      "floor_purpose": "original registered tray bottom, mkbound=2, retained as the collection floor",
+      "physical_geometry_changed": true,
+      "physical_surface_thickness_m": 0.0,
+      "wall_thickness_semantics": "numerical particle shell only; continuous physical boundary is the declared source plane"
+    },
+    "catchment_wall_spec": {
+      "container_interior": {
+        "xmin": -0.6,
+        "xmax": 2.0,
+        "ymin": -0.55,
+        "ymax": 0.55,
+        "zmin": -0.2,
+        "zmax": 0.6000000000000001
+      },
+      "closed_faces": [
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "open_faces": [
+        "top"
+      ],
+      "mkbound": 3,
+      "surface_convention": "continuous source planes; no inward layer-center shrink",
+      "wall_layers_vdp": [
+        0,
+        1,
+        2
+      ],
+      "nominal_wall_thickness_m": 0.0225,
+      "physical_surface_thickness_m": 0.0,
+      "wall_thickness_semantics": "numerical particle shell only; continuous physical boundary is the declared source plane",
+      "fluid_facing_surface": {
+        "xmin": -0.6,
+        "xmax": 2.0,
+        "ymin": -0.55,
+        "ymax": 0.55,
+        "floor_z_m": -0.2,
+        "top_z_m": 0.6000000000000001
+      },
+      "floor": {
+        "material_mkbound": 2,
+        "fluid_facing_surface_z_m": -0.2,
+        "nominal_outer_low_z_m": -0.2,
+        "solid_slab_thickness_m": 0.0,
+        "surface_basis": "source boxfill=bottom plane; source size z is not a top face",
+        "preserved_tray_definition": {
+          "low": [
+            -0.6,
+            -0.55,
+            -0.2
+          ],
+          "size": [
+            2.6,
+            1.1,
+            0.1
+          ]
+        },
+        "closed_faces": [
+          "bottom"
+        ],
+        "open_faces": [
+          "top",
+          "left",
+          "right",
+          "front",
+          "back"
+        ]
+      },
+      "material_purpose": "external rigid spill/overflow collection walls; mkbound=3 is a new physical material region",
+      "qualification_effect": "new physical geometry scope; no inherited qualification"
+    },
+    "runtime_domain": {
+      "posmin": [
+        -0.7,
+        -0.65,
+        -0.4
+      ],
+      "posmax": [
+        2.2,
+        0.8,
+        2.4
+      ],
+      "baseline_zmax_m": 1.8,
+      "changed_zmax_m": 2.4,
+      "change_is_computational_only": true
+    },
+    "wall_bounds": {
+      "xmin": -0.7,
+      "xmax": 2.2,
+      "ymin": -0.65,
+      "ymax": 0.8,
+      "zmin": -0.4,
+      "zmax": 2.4
+    },
+    "initial_condition": {
+      "variant": "side_wet_full_cup_fixed_volume",
+      "continuum_wall_geometry_changed": false,
+      "fluid_initial_condition_changed": true,
+      "continuous_fluid_faces_are_physical_cup_faces": true,
+      "side_wetted_candidate": true,
+      "continuum_box_matches_cup_interior_faces": true,
+      "continuous_volume_m3": 0.023595,
+      "predecessor_continuous_volume_m3": 0.023595,
+      "continuum_height_derivation": "0.023595/(0.425*0.30)=0.18505882352941177 m",
+      "target_first_native_fluid_center_m": [
+        0.0025,
+        -0.145,
+        0.66
+      ],
+      "native_particle_count_not_inherited": true,
+      "mass_rescaling": false,
+      "predecessor_side_clearances_m": {
+        "left": 0.055,
+        "right": 0.055,
+        "front": 0.0425,
+        "back": 0.0475
+      },
+      "predecessor_open_top_escape_fraction_max": 0.024396328967299295,
+      "predecessor_pre_motion_escape_fraction_max": 0.04006058986010871,
+      "preflight_artifact": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_canary_v3/static-preflight.json",
+      "native_sampling_is_separate_from_continuum_faces": true,
+      "native_sampling_source_point_m": [
+        0.00125,
+        -0.14875,
+        0.66125
+      ],
+      "native_sampling_source_size_m": [
+        0.42,
+        0.2925,
+        0.1725
+      ]
+    },
+    "source_geometry_contract": {
+      "fluid_initial_state": "exact v3 full-cup native lattice and fixed continuous volume; static predecessor is hash-bound",
+      "cup": "passed full-cup v3 finite moving cup, unchanged",
+      "receiver": "registered finite fixed receiver, unchanged",
+      "tray_floor": "registered boxfill=bottom tray floor mkbound=2 retained at source plane z=-0.20 m",
+      "catchment_side_walls": "new fixed mkbound=3 left/right/front/back walls over the tray footprint; top remains open",
+      "motion": "prescribed centered rotation, y axis through z=0.65, q=0.5 duration 0.85 s, unchanged control family"
+    },
+    "wall_audit_contract": {
+      "cup": {
+        "frame": "moving cup body frame",
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "saved_chord_and_endpoint_hard": true
+      },
+      "receiver": {
+        "frame": "world",
+        "closed_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "saved_chord_and_endpoint_hard": true
+      },
+      "tray": {
+        "frame": "world",
+        "closed_faces": [
+          "bottom"
+        ],
+        "open_faces": [
+          "top",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "saved_chord_and_endpoint_hard": true
+      },
+      "catchment": {
+        "frame": "world",
+        "closed_faces": [
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "open_faces": [
+          "top"
+        ],
+        "floor_source_plane_z_m": -0.2,
+        "saved_chord_and_endpoint_hard": true
+      },
+      "ownership": "open-top ownership is separate; side entry and recontact cannot be hidden by ownership",
+      "geometry_audit_owner": "core_f2_qualification.audit_dynamic"
+    },
+    "sampling_rule": "continuous fluid box exactly matches the cup interior faces; native sampling uses a separately declared inset lattice, native rho*dp^3, no rescaling",
+    "angle_degrees": -105.0,
+    "motion_start_s": 0.5,
+    "boundary_method": 1,
+    "control_semantics": "prescribed centered rotation starts at 0.50 s; DBC uses the native mvrotfile rigid-body motion",
+    "observer_revision": "F2_geometry_aware_observer_v1"
+  },
+  "fixed_recipe": {
+    "boundary_method": 1,
+    "boundary": "native DBC Boundary=1",
+    "cflnumber": 0.2,
+    "dp_resolutions_m": [
+      0.01,
+      0.0075,
+      0.005
+    ],
+    "angle_degrees": -105.0,
+    "motion_start_s": 0.5,
+    "gravity_m_s2": -9.81,
+    "geometry_contract": "full-cup side-wet initial continuum box, retained cup/receiver/tray floor, four fixed catchment walls, top open",
+    "continuous_surface_contract": "catchment floor is the retained tray boxfill=bottom source plane z=-0.20 m; wall shell thickness is numerical only",
+    "initial_mass_policy": "native rho*dp^3 with no mass rescaling"
+  },
+  "event_window": {
+    "registered_initial_window_s": 5.0,
+    "maximum_extended_window_s": 5.0,
+    "output_interval_s": 0.01,
+    "motion_start_s": 0.5,
+    "motion_source_file_duration_s": 5.0,
+    "post_settle_observation_s": 0.35,
+    "settle_hold_s": 0.2,
+    "right_censor_policy": "5 s is the registered qualification window; a right-censored required event fails the cell and no further extension is permitted",
+    "events": [
+      {
+        "id": "motion_complete",
+        "definition": "prescribed cup angle reaches -105 degrees at 0.50 + duration(q) s"
+      },
+      {
+        "id": "receiver_contact",
+        "definition": "valid native fluid mass inside the one-dp-clear receiver interior first reaches 1% of initial fluid mass"
+      },
+      {
+        "id": "spill_or_escape",
+        "definition": "valid native fluid mass outside the cup, receiver and tray observation volumes first reaches 1% of initial mass; missing identities remain a separate integrity failure"
+      },
+      {
+        "id": "settled",
+        "definition": "after motion completion, speed p95 <= 0.10 m/s and kinetic energy <= 5% of initial gravitational potential for 0.20 s continuously"
+      },
+      {
+        "id": "event_window_complete",
+        "definition": "motion, receiver contact and settled are observed, with 0.35 s of saved output after the last required transition"
+      }
+    ],
+    "development_canary_exclusion": "the 2.5 s DBC canary and its one-time 5 s extension are evidence for launch readiness only and cannot populate a qualification cell"
+  },
+  "observer": {
+    "revision_id": "F2_geometry_aware_observer_v1",
+    "geometry": "moving cup body frame plus world receiver/tray/catchment; destination spill remains observable",
+    "normalization": "fixed initial-native-mass denominator; no survivor renormalization",
+    "calibration_required": true,
+    "settled_gate_unchanged": true
+  },
+  "preregistered_gates": {
+    "source_initial_mass_relative_error_max": 0.025,
+    "initial_mass_spread_over_continuous_mass_max": 0.03,
+    "mass_change_relative_max": 1e-08,
+    "closed_wall_endpoint_tolerance_m": 1e-08,
+    "saved_chord_crossings_allowed": 0,
+    "no_missing_native_fluid_ids": true,
+    "no_nonfinite_active_values": true,
+    "spatial_max_absolute_normalized_difference": 0.05,
+    "temporal_fraction_of_spatial_budget": 0.2,
+    "temporal_max_absolute_normalized_difference": 0.01,
+    "event_time_relative_error_max": 0.05,
+    "actual_dt_ratio_max_for_internal_time": 0.8,
+    "actual_step_ratio_min_for_internal_time": 1.25,
+    "native_output_interval_ratio_max": 0.3,
+    "native_output_frame_ratio_min": 3.0,
+    "event_window_complete_required": true,
+    "qualification_requires_all_15_cells": true
+  },
+  "cells": [
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q0p00000000_dp0p010000000000_spatial",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 0.0,
+        "value": 0.5,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": false
+      },
+      "dp_m": 0.01,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.01,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.01,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          23940
+        ],
+        "expected_fluid_particles": 23940,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.94,
+        "source_relative_errors": [
+          0.014621741894469187
+        ],
+        "total_relative_error": 0.014621741894469187,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 32768,
+        "gpu_peak_mib": 12288,
+        "timeout_seconds": 14400,
+        "io_weight": 1,
+        "trajectory_estimate_gib": 1.3
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q0p00000000_dp0p007500000000_spatial",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 0.0,
+        "value": 0.5,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": false
+      },
+      "dp_m": 0.0075,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.01,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.0075,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          54720
+        ],
+        "expected_fluid_particles": 54720,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.084999999999997,
+        "source_relative_errors": [
+          -0.021614748887476387
+        ],
+        "total_relative_error": -0.021614748887476387,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 32768,
+        "gpu_peak_mib": 12288,
+        "timeout_seconds": 14400,
+        "io_weight": 1,
+        "trajectory_estimate_gib": 1.3
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q0p00000000_dp0p005000000000_spatial",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 0.0,
+        "value": 0.5,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": false
+      },
+      "dp_m": 0.005,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.01,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.005,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          188700
+        ],
+        "expected_fluid_particles": 188700,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.587500000000006,
+        "source_relative_errors": [
+          -0.00031786395422750413
+        ],
+        "total_relative_error": -0.00031786395422750413,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 65536,
+        "gpu_peak_mib": 24576,
+        "timeout_seconds": 28800,
+        "io_weight": 3,
+        "trajectory_estimate_gib": 2.0
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q0p50000000_dp0p010000000000_spatial",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 0.5,
+        "value": 0.85,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": false
+      },
+      "dp_m": 0.01,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.01,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.01,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          23940
+        ],
+        "expected_fluid_particles": 23940,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.94,
+        "source_relative_errors": [
+          0.014621741894469187
+        ],
+        "total_relative_error": 0.014621741894469187,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 32768,
+        "gpu_peak_mib": 12288,
+        "timeout_seconds": 14400,
+        "io_weight": 1,
+        "trajectory_estimate_gib": 1.3
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q0p50000000_dp0p007500000000_spatial",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 0.5,
+        "value": 0.85,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": false
+      },
+      "dp_m": 0.0075,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.01,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.0075,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          54720
+        ],
+        "expected_fluid_particles": 54720,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.084999999999997,
+        "source_relative_errors": [
+          -0.021614748887476387
+        ],
+        "total_relative_error": -0.021614748887476387,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 32768,
+        "gpu_peak_mib": 12288,
+        "timeout_seconds": 14400,
+        "io_weight": 1,
+        "trajectory_estimate_gib": 1.3
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q0p50000000_dp0p005000000000_spatial",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 0.5,
+        "value": 0.85,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": false
+      },
+      "dp_m": 0.005,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.01,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.005,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          188700
+        ],
+        "expected_fluid_particles": 188700,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.587500000000006,
+        "source_relative_errors": [
+          -0.00031786395422750413
+        ],
+        "total_relative_error": -0.00031786395422750413,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 65536,
+        "gpu_peak_mib": 24576,
+        "timeout_seconds": 28800,
+        "io_weight": 3,
+        "trajectory_estimate_gib": 2.0
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q1p00000000_dp0p010000000000_spatial",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 1.0,
+        "value": 1.2,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": false
+      },
+      "dp_m": 0.01,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.01,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.01,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          23940
+        ],
+        "expected_fluid_particles": 23940,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.94,
+        "source_relative_errors": [
+          0.014621741894469187
+        ],
+        "total_relative_error": 0.014621741894469187,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 32768,
+        "gpu_peak_mib": 12288,
+        "timeout_seconds": 14400,
+        "io_weight": 1,
+        "trajectory_estimate_gib": 1.3
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q1p00000000_dp0p007500000000_spatial",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 1.0,
+        "value": 1.2,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": false
+      },
+      "dp_m": 0.0075,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.01,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.0075,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          54720
+        ],
+        "expected_fluid_particles": 54720,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.084999999999997,
+        "source_relative_errors": [
+          -0.021614748887476387
+        ],
+        "total_relative_error": -0.021614748887476387,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 32768,
+        "gpu_peak_mib": 12288,
+        "timeout_seconds": 14400,
+        "io_weight": 1,
+        "trajectory_estimate_gib": 1.3
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q1p00000000_dp0p005000000000_spatial",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 1.0,
+        "value": 1.2,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": false
+      },
+      "dp_m": 0.005,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.01,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "spatial",
+      "temporal_variant": null,
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.005,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          188700
+        ],
+        "expected_fluid_particles": 188700,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.587500000000006,
+        "source_relative_errors": [
+          -0.00031786395422750413
+        ],
+        "total_relative_error": -0.00031786395422750413,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 65536,
+        "gpu_peak_mib": 24576,
+        "timeout_seconds": 28800,
+        "io_weight": 3,
+        "trajectory_estimate_gib": 2.0
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q0p25000000_dp0p007500000000_spatial_held_out",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 0.25,
+        "value": 0.675,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": true
+      },
+      "dp_m": 0.0075,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.01,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "spatial_held_out",
+      "temporal_variant": null,
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.0075,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          54720
+        ],
+        "expected_fluid_particles": 54720,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.084999999999997,
+        "source_relative_errors": [
+          -0.021614748887476387
+        ],
+        "total_relative_error": -0.021614748887476387,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 32768,
+        "gpu_peak_mib": 12288,
+        "timeout_seconds": 14400,
+        "io_weight": 1,
+        "trajectory_estimate_gib": 1.3
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q0p25000000_dp0p005000000000_spatial_held_out",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 0.25,
+        "value": 0.675,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": true
+      },
+      "dp_m": 0.005,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.01,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "spatial_held_out",
+      "temporal_variant": null,
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.005,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          188700
+        ],
+        "expected_fluid_particles": 188700,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.587500000000006,
+        "source_relative_errors": [
+          -0.00031786395422750413
+        ],
+        "total_relative_error": -0.00031786395422750413,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 65536,
+        "gpu_peak_mib": 24576,
+        "timeout_seconds": 28800,
+        "io_weight": 3,
+        "trajectory_estimate_gib": 2.0
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q0p75000000_dp0p007500000000_spatial_held_out",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 0.75,
+        "value": 1.025,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": true
+      },
+      "dp_m": 0.0075,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.01,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "spatial_held_out",
+      "temporal_variant": null,
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.0075,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          54720
+        ],
+        "expected_fluid_particles": 54720,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.084999999999997,
+        "source_relative_errors": [
+          -0.021614748887476387
+        ],
+        "total_relative_error": -0.021614748887476387,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 32768,
+        "gpu_peak_mib": 12288,
+        "timeout_seconds": 14400,
+        "io_weight": 1,
+        "trajectory_estimate_gib": 1.3
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q0p75000000_dp0p005000000000_spatial_held_out",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 0.75,
+        "value": 1.025,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": true
+      },
+      "dp_m": 0.005,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.01,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "spatial_held_out",
+      "temporal_variant": null,
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.005,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          188700
+        ],
+        "expected_fluid_particles": 188700,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.587500000000006,
+        "source_relative_errors": [
+          -0.00031786395422750413
+        ],
+        "total_relative_error": -0.00031786395422750413,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 65536,
+        "gpu_peak_mib": 24576,
+        "timeout_seconds": 28800,
+        "io_weight": 3,
+        "trajectory_estimate_gib": 2.0
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q0p50000000_dp0p007500000000_internal_time_internal_time",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 0.5,
+        "value": 0.85,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": false
+      },
+      "dp_m": 0.0075,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.00014674518427046254,
+        "DtMin": 7.33725932285681e-06,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.01,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "internal_time",
+      "temporal_variant": "internal_time",
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.0075,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          54720
+        ],
+        "expected_fluid_particles": 54720,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.084999999999997,
+        "source_relative_errors": [
+          -0.021614748887476387
+        ],
+        "total_relative_error": -0.021614748887476387,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 32768,
+        "gpu_peak_mib": 12288,
+        "timeout_seconds": 14400,
+        "io_weight": 1,
+        "trajectory_estimate_gib": 1.3
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    },
+    {
+      "schema": "core.cfd.v1",
+      "family": "F2",
+      "scope_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_x_v1",
+      "revision_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "observer_revision": "F2_geometry_aware_observer_v1",
+      "case_id": "CORE_F2_dbc_duration_q0p50000000_dp0p007500000000_native_output_native_output",
+      "recipe_id": "F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_duration_qualification_v1",
+      "recipe": "native_dbc",
+      "stage": "qualification",
+      "qualification_only": true,
+      "split": "qualification_only",
+      "qualification_claim": "none",
+      "status": "not_started; design-only registration",
+      "parameter": {
+        "name": "rotation_duration_s",
+        "q": 0.5,
+        "value": 0.85,
+        "candidate_range_s": [
+          0.5,
+          1.2
+        ],
+        "held_out": false
+      },
+      "dp_m": 0.0075,
+      "cfl": 0.2,
+      "time_control": {
+        "cflnumber": 0.2,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0
+      },
+      "time_max_s": 5.0,
+      "maximum_extended_time_s": 5.0,
+      "output_interval_s": 0.002,
+      "angle_degrees": -105.0,
+      "motion_start_s": 0.5,
+      "design_cell": "native_output",
+      "temporal_variant": "native_output",
+      "physical_geometry_changed": true,
+      "initial_condition_changed": false,
+      "mass_rescaling": false,
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1; fixed within this matrix",
+      "fixed_recipe_inherited_from_extension": true,
+      "canary_reuse": {
+        "allowed": false,
+        "reason": "the 2.5 s DBC canary and 5 s extension are development evidence, not independent matrix executions"
+      },
+      "static_mass_check": {
+        "dp_m": 0.0075,
+        "continuous_box_m": {
+          "low": [
+            0.0,
+            -0.15,
+            0.65
+          ],
+          "size": [
+            0.425,
+            0.3,
+            0.18505882352941178
+          ]
+        },
+        "particle_counts_by_box": [
+          54720
+        ],
+        "expected_fluid_particles": 54720,
+        "continuous_mass_kg": 23.595000000000002,
+        "discrete_mass_kg": 23.084999999999997,
+        "source_relative_errors": [
+          -0.021614748887476387
+        ],
+        "total_relative_error": -0.021614748887476387,
+        "mass_rescaling": false,
+        "mass_gate_pass": true,
+        "sampling_rule": "cell-centre lattice in the fixed continuous full-cup box; native rho*dp^3"
+      },
+      "resource_estimate": {
+        "cpu_cores": 2,
+        "ram_mib": 32768,
+        "gpu_peak_mib": 12288,
+        "timeout_seconds": 14400,
+        "io_weight": 2,
+        "trajectory_estimate_gib": 2.5
+      },
+      "source_label_semantics": "initial native Mk is a numerical source partition, not material identity"
+    }
+  ],
+  "cell_count": 15,
+  "spatial_cell_count": 13,
+  "temporal_cell_count": 2,
+  "held_out_q": [
+    0.25,
+    0.75
+  ],
+  "replacement_q": [
+    0.125,
+    0.375,
+    0.625,
+    0.875
+  ],
+  "static_mass_status": {
+    "all_15_rows_present": true,
+    "all_mass_gates_pass": true,
+    "mass_rescaling": false,
+    "continuous_volume_m3": 0.023595,
+    "native_count_is_resolution_dependent": true
+  },
+  "time_control_provenance": {
+    "baseline_run_out": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f2-dbc-boundary-canary-v1/20260920T030416-78fe3cfbab20/product/solver/Run.out",
+      "sha256": "36a8eb347ce1ab1ddb15368d0b7bc28055544ade8a236ccf0a4f0f40bdf729c8",
+      "actual_dt_ini_s": 0.0002934903685409251,
+      "actual_dt_min_s": 1.467451864571362e-05,
+      "source": "completed 2.5 s DBC solver log; controls were zero in XML and solver selected these actual values"
+    },
+    "internal_time_row": {
+      "requested_dt_ini_s": 0.00014674518427046254,
+      "requested_dt_min_s": 7.33725932285681e-06,
+      "ratio_to_baseline_requested": 0.5,
+      "gate_basis": "actual dt and actual step counts from solver output; configuration values alone cannot pass"
+    },
+    "native_output_row": {
+      "output_interval_s": 0.002,
+      "ratio_to_baseline": 0.2
+    }
+  },
+  "development_canaries": {
+    "two_point_five_second": {
+      "job_id": "ada-f2-dbc-boundary-canary-v1",
+      "prepared": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_boundary_v2/prepared.json",
+        "sha256": "c07e099ff6c593acb2162a5321f26ec62c601bc8ecf8d709726d5aaf0f944eeb"
+      },
+      "attempt_product": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/ada-f2-dbc-boundary-canary-v1/20260920T030416-78fe3cfbab20/product",
+      "status": "development_only; hard integrity passed at 2.5 s, event window was incomplete",
+      "independent_matrix_cell": false
+    },
+    "five_second_extension": {
+      "job_id": "f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-boundary-extension5s-v2-001",
+      "prepared": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_boundary_v2_extension5s_v2/prepared.json",
+        "sha256": "b63377edf7c3ac3758da06a3e8065feab36fa793cf4ba718c1f8f0b1ef6a067d"
+      },
+      "job_spec": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-boundary-extension5s-v2-job.json",
+        "sha256": "1b95e158de26345810d808534cd9180fe83e32f375f57876d82aac572cc00093"
+      },
+      "attempt_product": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/f2-resting-fill-side-wet-full-cup-closed-catchment-dbc-boundary-extension5s-v2-001/20260920T031752-07b411be288d/product",
+      "status_at_registration": "solver completed; core audit/collection pending",
+      "independent_matrix_cell": false
+    },
+    "reuse_rule": "neither development canary may populate cell 04 or any other matrix numerator"
+  },
+  "matrix_launch_gate": {
+    "required_extension_checks": [
+      "execution_succeeded",
+      "requested_horizon_reached",
+      "hard_integrity_pass",
+      "event_window_complete",
+      "settled_gate_observed_without_threshold_change"
+    ],
+    "if_any_false": "candidate_insufficient; retain design and all failure denominators; do not extend again",
+    "if_all_true": "eligible_for_root_review and independent 15-cell preparation; still not qualified",
+    "no_gpu_submission_in_this_artifact": true,
+    "ledger_written": false
+  },
+  "provenance": {
+    "extension_snapshot": "93f49c0d7ad153c73685ba3695e5341c7fff025715aad7e4a8c1340e7c99a319",
+    "source_prepared_sha256": {
+      "base_prepared": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_boundary_v2/prepared.json",
+        "sha256": "c07e099ff6c593acb2162a5321f26ec62c601bc8ecf8d709726d5aaf0f944eeb"
+      },
+      "extension_prepared": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/prepared/F2_resting_fill_side_wet_full_cup_closed_catchment_dbc_boundary_v2_extension5s_v2/prepared.json",
+        "sha256": "b63377edf7c3ac3758da06a3e8065feab36fa793cf4ba718c1f8f0b1ef6a067d"
+      }
+    },
+    "f1_fallback_review": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f2-dbc-boundary-failure-f1-review-v1.json",
+      "sha256": "b50b334cec8ff84a7a78b7fcc47b7221a2fd9d50e24b1ac5e3cd33f54f51233e",
+      "use": "review only if the 5 s extension is incomplete or hard-fails; no blind further extension"
+    },
+    "code_source": {
+      "core_f2_qualification": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f2_qualification.py",
+      "core_f2_qualification_sha256": "d3a063dd951e03887ee2d6454ecb79c9a3b190865fe6e122a4cdc22ed2c0ddad",
+      "design_script": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f2_dbc_duration_qualification_design.py",
+      "design_script_sha256": "78cd97730b1093a54a596866a2bde9e53ce7508e569dcca59bbbf6ce7d4b6b48"
+    }
+  },
+  "execution_status": "design_only; no GenCase, no solver, no GPU submission"
+}
