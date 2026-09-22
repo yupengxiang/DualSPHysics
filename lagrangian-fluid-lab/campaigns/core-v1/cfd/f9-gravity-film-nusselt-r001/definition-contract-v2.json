@@ -1,0 +1,212 @@
+{
+  "schema": "core.cfd.f9.definition_contract.v2",
+  "scope_id": "F9_GRAVITY_FILM_NUSSELT_R001",
+  "case_definition_revision": "r001",
+  "contract_revision": "v2",
+  "supersedes": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/definition-contract-v1.json",
+  "status": "static_review_hold",
+  "decision": "REJECT_STATIC_ADMISSION_PENDING_MAP_AND_METRIC_EVIDENCE",
+  "admission_granted": false,
+  "qualification_credit": 0,
+  "audit_basis": "Independent read-only audit of the current DualSPHysics source tree and the materialized F9 r001 Definition. No GenCase, BI4/native preflight, solver, GPU, queue, registry, ledger, denominator, or training operation was performed.",
+  "provenance_path_audit": {
+    "status": "v1_evidence_not_rerunnable_from_current_worktree",
+    "missing_v1_reference_prefix": "vendor/official/DualSPHysics_v5.4/",
+    "canonical_current_tree_prefix": "",
+    "impact": "The v1 receipts cite an absent vendor/official mirror, so their source-binding checks cannot be independently rerun from this checkout. The v2 receipt binds the canonical root source paths instead; this is a provenance defect, not runtime evidence.",
+    "missing_paths_observed": [
+      "vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp",
+      "vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML__Parameters.xml",
+      "vendor/official/DualSPHysics_v5.4/examples/inletoutlet/02_OpenChannel/CaseOpenChannel_Re100_Def.xml",
+      "vendor/official/DualSPHysics_v5.4/examples/mdbc/02_Poiseuille/CasePoiseuille_FS_LR_Def.xml",
+      "vendor/official/DualSPHysics_v5.4/examples/main/02_Periodicity/CasePeriodicity_Def.xml"
+    ],
+    "canonical_replacements_used_by_v2": [
+      "src/source/JSph.cpp",
+      "src/source/JSph.h",
+      "src/source/JPartsLoad4.cpp",
+      "doc/xml_format/_FmtXML__Parameters.xml"
+    ]
+  },
+  "execution_controls": {
+    "definition_written": false,
+    "gencase_invoked": false,
+    "bi4_invoked": false,
+    "native_preflight_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "training_started": false
+  },
+  "static_verdict": {
+    "xml_is_well_formed": true,
+    "one_fluid_and_bottom_only_boundary_are_declared": true,
+    "xy_periodic_is_absent": true,
+    "global_gravity_is_0_0_minus_g": true,
+    "frozen_runtime_parameters_match_definition": {
+      "DtFixed_s": 0.00001,
+      "TimeOut_s": 0.01,
+      "TimeMax_s": 5.0,
+      "expected_output_rows": 501,
+      "status": "verified_from_xml_and_arithmetic_only"
+    },
+    "nusselt_reference_and_local_projection": {
+      "status": "mathematically_consistent_but_not_runtime_verified",
+      "local_streamwise": "s=x*cos(theta)-z*sin(theta)",
+      "local_normal": "n=x*sin(theta)+z*cos(theta)",
+      "velocity_streamwise": "u_s=v_x*cos(theta)-v_z*sin(theta)",
+      "velocity_normal": "u_n=v_x*sin(theta)+v_z*cos(theta)",
+      "velocity_spanwise": "u_y=v_y",
+      "steady_profile": "u_s(n)=g*sin(theta)/nu*(h*n-n^2/2)",
+      "mean_speed": "ubar=g*sin(theta)*h^2/(3*nu)",
+      "free_surface_speed": "u_s(h)=1.5*ubar",
+      "U_ref": "case-specific analytic free-surface speed 1.5*ubar",
+      "flux": "q_prime=integral_0^h u_s(n)dn in m^2/s per unit span; Q=Ly*q_prime"
+    }
+  },
+  "periodic_contract_audit": {
+    "configured_parameters": {
+      "XPeriodicIncZ_m": 0.025225016464,
+      "YPeriodicIncZ_m": 0.0,
+      "XYPeriodic": "forbidden"
+    },
+    "geometric_forward_translation_m": [
+      0.24,
+      0.0,
+      -0.02522501646376235
+    ],
+    "configured_z_offset_sign": {
+      "status": "verified",
+      "expected": "positive Lx*tan(theta) in XPeriodicIncZ",
+      "absolute_rounding_error_m": 2.3764999999999997e-13
+    },
+    "runtime_mapping": {
+      "status": "conditionally_correct",
+      "source_rule": "for dx>=MapRealSize.x, the runtime adds PeriXinc; for dx<0, it subtracts PeriXinc",
+      "runtime_x_component": "-MapRealSize.x",
+      "runtime_z_component": "+XPeriodicIncZ",
+      "required_vector_if_map_is_verified": "(-0.24, 0, +0.025225016464)",
+      "interpretation": "The sign maps the high-x/downstream copy back to the low-x/upstream copy while adding the positive z offset. The x width is not supplied by the XML parameter."
+    }
+  },
+  "map_real_size_gate": {
+    "target_MapRealSize_x_m": 0.24,
+    "xml_point_extent_x_m": 0.24,
+    "status": "UNPROVEN",
+    "reason": "JSph computes MapRealSize from loaded BI4 map limits when present, otherwise from initial particle CasePosMin/CasePosMax plus periodic border handling. The XML pointmax and simulationdomain values do not constitute evidence of the loaded MapRealSize.x.",
+    "source_behavior": {
+      "map_size_formula": "MapRealSize=MapRealPosMax-MapRealPosMin",
+      "periodic_x_override": "PeriXinc.x=-MapRealSize.x",
+      "source_files": [
+        "src/source/JSph.cpp",
+        "src/source/JPartsLoad4.cpp",
+        "src/source/JSph.h"
+      ],
+      "source_lines": [
+        "src/source/JSph.cpp:2174-2186",
+        "src/source/JPartsLoad4.cpp:357-382",
+        "src/source/JSph.h:369-372"
+      ]
+    },
+    "admission_requirement": "Do not claim MapRealSize.x=0.24 until a target-specific BI4 header or native startup/domain receipt records MapPosMax.x-MapPosMin.x=0.24 within the declared tolerance.",
+    "static_substitution_for_runtime_evidence": false
+  },
+  "frozen_time_contract": {
+    "DtFixed_s": 0.00001,
+    "TimeOut_s": 0.01,
+    "TimeMax_s": 5.0,
+    "expected_rows_including_t0": 501,
+    "status": "static_definition_verified_runtime_unverified",
+    "note": "The XML contains these values and 5.0/0.01+1=501. No output row receipt exists, and this audit does not create one."
+  },
+  "metric_contract_audit": {
+    "status": "definition_text_present_but_executable_binding_missing",
+    "local_coordinate_and_velocity_components": {
+      "status": "formula_can_be_frozen",
+      "required_coordinate_origin": "bottom-plane origin at x=0,z=0 for the anchor cell",
+      "required_components": ["s", "n", "u_s", "u_n", "u_y"],
+      "required_signs": {
+        "u_s": "v_x*cos(theta)-v_z*sin(theta)",
+        "u_n": "v_x*sin(theta)+v_z*cos(theta)",
+        "u_y": "v_y"
+      }
+    },
+    "pressure": {
+      "declared_reference": "p_atm+rho*g*cos(theta)*(h-n)",
+      "status": "INCOMPLETE",
+      "blocking_detail": "The contract does not bind the pressure channel convention (absolute pressure versus DualSPHysics native/gauge EOS pressure) or state whether p_atm is removed before the L2 comparison.",
+      "required_static_closure": "Declare one pressure convention and bind the parser and reference array to it before admission."
+    },
+    "velocity_gates": {
+      "declared_U_ref": "1.5*ubar",
+      "status": "INCOMPLETE",
+      "blocking_detail": "The candidate states that velocity gates use U_ref but does not bind an implementation that projects native velocity into u_s/u_n/u_y or proves that Mach, normal-velocity and spanwise-RMS denominators use the case-specific U_ref.",
+      "required_static_closure": "Add a versioned F9 metric-parser contract or receipt naming the fields, projections, denominators and finite-value/exclusion handling."
+    },
+    "surface_height": {
+      "declared_reference": "local n after subtracting theoretical plane n=h and time-window mean",
+      "status": "INCOMPLETE",
+      "blocking_detail": "Mean surface-height bias and demeaned RMS are named separately, but the surface-particle/interface selection, per-frame estimator, time-window aggregation, and sign convention are not bound to an implementation.",
+      "required_static_closure": "Freeze the interface estimator and separately compute signed mean bias and demeaned RMS over the same fixed denominator."
+    },
+    "profile_and_flux": {
+      "declared_reference": "64 fixed midpoint samples in n and q_prime integral of u_s",
+      "status": "INCOMPLETE",
+      "blocking_detail": "The Definition contract describes the reference but no F9-specific parser/receipt is present in the current worktree to establish interpolation, particle weighting, periodic image handling, or excluded-particle policy.",
+      "required_static_closure": "Bind an F9 parser schema and a static self-check before any qualification execution."
+    }
+  },
+  "definition_revision_decision": {
+    "new_definition_contract_revision_required": true,
+    "implemented_revision": "definition-contract-v2.json",
+    "new_case_definition_xml_revision_required_now": false,
+    "reason": "The r001 XML has a statically consistent geometry and frozen parameters, but the v1 contract incorrectly treats the requested Lx as the runtime periodic x width and overstates metric/parser closure. A contract revision is required now; a new XML case revision should be created only if the target-specific map receipt or the frozen metric semantics require changing the Definition.",
+    "r002_xml_trigger": "MapRealSize.x cannot be made 0.24 with the current materialized input, or any Definition/geometry/parameter change is needed to satisfy the corrected contract.",
+    "r002_xml_admission": false
+  },
+  "required_next_static_artifacts": [
+    "A target-specific map/domain receipt that reports BI4 MapPosMin/MapPosMax and MapRealSize.x.",
+    "A versioned F9 metric-parser contract covering local coordinates, u_s/u_n/u_y, pressure convention, U_ref denominators, surface estimator, separate mean bias/RMS, profile bins and flux.",
+    "Fresh hashes for the corrected candidate, Definition and contract after any static change."
+  ],
+  "evidence": [
+    {
+      "path": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml",
+      "sha256": "940417e139fb42add49de3f2d7720a13e982ebc76826ecbe51b30b55b2278433",
+      "role": "materialized r001 Definition, read only"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/definition-contract-v1.json",
+      "sha256": "e5a92f0871cdb4f73566090e162b526b31843eebab1354392b52189e775ca8a6",
+      "role": "superseded static contract; retained for history"
+    },
+    {
+      "path": "src/source/JSph.cpp",
+      "sha256": "206e4486a3a0d304e02da1a73d2e7c7ed96354d559ce481275d09f5245b8c9e7",
+      "role": "periodic parameter precedence, map loading, MapRealSize and runtime periodic sign"
+    },
+    {
+      "path": "src/source/JPartsLoad4.cpp",
+      "sha256": "50926bd6c47bfb9a3807bc98b85f6784f8d4d92c318ad7dd5722d4592935735b",
+      "role": "particle/map-limit fallback calculation"
+    },
+    {
+      "path": "src/source/JSph.h",
+      "sha256": "abb087c020641d94c3968507f0ce067da4f45cac246ff6bc586d4e8665e39eda",
+      "role": "MapRealSize definition and periodic-domain notes"
+    },
+    {
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-contract-review-v2.json",
+      "sha256": "f9fa7d5b988ce3922e5d623d4f73142c3623b3b92b36dbb0734aa96fbaabd865",
+      "role": "Terra High v2 review"
+    },
+    {
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-definition-review-v3.json",
+      "sha256": "2efa644ef9eb988056bb35c6845bb82b45829c9da29fa3fd5c15fac214682729",
+      "role": "Terra High v3 review"
+    }
+  ]
+}
