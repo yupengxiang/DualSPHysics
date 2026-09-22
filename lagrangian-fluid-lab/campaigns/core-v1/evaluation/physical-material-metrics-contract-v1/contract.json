@@ -1,0 +1,113 @@
+{
+  "compatibility": {
+    "existing_formal_score_unchanged": true,
+    "existing_score_schema": "core.scoring_protocol.v1",
+    "integration": "additive_contract_only"
+  },
+  "denominator_policy": {
+    "frame": "all registered future frames; missing/failed/nonfinite frame is penalty, never dropped",
+    "geometry": "all registered geometry elements in every registered future frame",
+    "material": "all registered initial source particles and initial source mass",
+    "survivor_renormalization": false
+  },
+  "execution_policy": {
+    "gpu_started": false,
+    "ledger_written": false,
+    "registry_written": false,
+    "solver_started": false,
+    "static_only": true,
+    "synthetic_fixture_only": true,
+    "training_started": false
+  },
+  "failure_policy": {
+    "early_failure": "fail_closed; retain registered denominator",
+    "material_sidecar_missing": "fail_closed; no material metric is evaluable",
+    "missing": "fail_closed",
+    "nan_or_infinite": "fail_closed",
+    "right_censor": "explicit_negative_result; retain denominator"
+  },
+  "metric_definitions": {
+    "first_passage": {
+      "denominator": "all registered source particles",
+      "fixed_denominator": true,
+      "formula": "first target-entry time; right-censored particles remain in denominator",
+      "kind": "source_particle_first_arrival",
+      "units": "s"
+    },
+    "geometry_aware_field": {
+      "denominator": "registered geometry elements per future frame",
+      "fixed_denominator": true,
+      "formula": "sqrt(sum_q(weight_q * error_q^2) / sum_q(weight_q)) / registered_scale",
+      "kind": "geometry_sampled_normalized_rmse",
+      "units": "dimensionless"
+    },
+    "kinetic_energy": {
+      "denominator": "registered future frames, excluding initial state",
+      "fixed_denominator": true,
+      "formula": "sum_i(0.5 * mass_i * dot(velocity_i, velocity_i))",
+      "kind": "mass_weighted_scalar_time_series",
+      "units": "J"
+    },
+    "material_transfer": {
+      "denominator": "initial source mass; no survivor renormalization",
+      "fixed_denominator": true,
+      "formula": "category_mass / initial_source_mass",
+      "kind": "source_mass_partition",
+      "units": "mass_fraction"
+    },
+    "residence": {
+      "denominator": "all registered source particles",
+      "fixed_denominator": true,
+      "formula": "integral of destination membership over the registered window",
+      "kind": "source_particle_destination_dwell_time",
+      "units": "s"
+    },
+    "return": {
+      "denominator": "all registered source particles",
+      "fixed_denominator": true,
+      "formula": "returned_source_particles / all_registered_source_particles",
+      "kind": "first_passage_then_exit_fraction",
+      "units": "fraction"
+    },
+    "unknown_bound": {
+      "bound": 0.01,
+      "denominator": "initial source mass; no survivor renormalization",
+      "fixed_denominator": true,
+      "formula": "unknown_mass / initial_source_mass",
+      "kind": "unassigned_source_mass_fraction",
+      "units": "mass_fraction"
+    }
+  },
+  "namespace": "core-v1/evaluation/physical-material-metrics-contract-v1",
+  "negative_result_policy": {
+    "credit": 0,
+    "evaluated_negative_results_are_valid_evidence": true,
+    "qualification_claim": "none"
+  },
+  "schema": "core.evaluator_physical_material_metrics.v1",
+  "source_closure": {
+    "source_bindings": [
+      {
+        "bytes": 30379,
+        "path": "../PLAN.md",
+        "sha256": "17491b1f5ea5b7c8464c7afb6f2dc21bdff7cf396cb47aebd625ca22d38c3263"
+      },
+      {
+        "bytes": 23749,
+        "path": "scripts/core_metrics_contract.py",
+        "sha256": "1a4006758364a89e2637db427e37d9d67d27d81bc7df3c1be20b06b04e42645f"
+      },
+      {
+        "bytes": 21838,
+        "path": "scripts/core_evaluation.py",
+        "sha256": "fb732905ccc92c35be226ef9ac1a62a61d4f9535aa9409356a04a8df2d2419e2"
+      },
+      {
+        "bytes": 10030,
+        "path": "scripts/transport_metrics.py",
+        "sha256": "19025c7749277b18865693799413bae05487d715451c13917135ef042c7b61c4"
+      }
+    ]
+  },
+  "status": "planning_only"
+}
