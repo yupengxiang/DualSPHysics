@@ -1,6 +1,7 @@
 import copy
 import json
 from pathlib import Path
+import shutil
 import sys
 
 import pytest
@@ -116,6 +117,34 @@ def test_invalid_resource_numbers_hold_the_formal_plan(tmp_path):
     assert plan["formal_job_count"] == 0
     assert any("invalid positive gpu_peak_mib" in reason
                for reason in plan["hold_reasons"])
+
+
+def test_source_snapshot_directory_is_compared_to_code_root(tmp_path):
+    manifest_path, _ = _manifest(tmp_path)
+    root = Path(__file__).parents[1]
+    snapshot_dir = tmp_path / "snapshot"
+    for relative in REQUIRED_CODE_FILES:
+        target = snapshot_dir / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(root / relative, target)
+
+    plan = build_plan(
+        manifest_path, profile=_profile(), environment=_environment(),
+        data_root=tmp_path, code_root=root, source_snapshot=snapshot_dir,
+    )
+    assert plan["status"] == "ready"
+    assert plan["source_snapshot"]["verified"] is True
+
+    broken_file = snapshot_dir / REQUIRED_CODE_FILES[0]
+    broken_file.write_text(broken_file.read_text(encoding="utf-8") + "\n")
+    broken = build_plan(
+        manifest_path, profile=_profile(), environment=_environment(),
+        data_root=tmp_path, code_root=root, source_snapshot=snapshot_dir,
+    )
+    assert broken["status"] == "hold"
+    assert any("source snapshot hash mismatch" in reason
+               or "source snapshot byte count mismatch" in reason
+               for reason in broken["hold_reasons"])
 
 
 @pytest.mark.parametrize('replacement, reason', [('train', 'requires 12'), ('unassigned', 'unrecognized production splits')])

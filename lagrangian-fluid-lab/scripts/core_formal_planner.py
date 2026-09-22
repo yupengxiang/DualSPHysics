@@ -473,11 +473,21 @@ def _snapshot_check(snapshot: Any, *, code_root: Path, required: Sequence[str]) 
     if isinstance(snapshot, (str, Path)):
         path = _resolve_path(snapshot, base=code_root, data_root=code_root)
         if path.is_dir():
-            files = {relative: (path / relative).resolve() for relative in required}
-            missing = [relative for relative, candidate in files.items() if not candidate.is_file()]
-            errors.extend(f"source snapshot missing {relative}" for relative in missing)
+            for relative in required:
+                snapshot_file = (path / relative).resolve()
+                current_file = (code_root / relative).resolve()
+                if not snapshot_file.is_file():
+                    errors.append(f"source snapshot missing {relative}")
+                    continue
+                if not current_file.is_file():
+                    errors.append(f"source snapshot current file missing {relative}")
+                    continue
+                if sha256_file(snapshot_file).lower() != sha256_file(current_file).lower():
+                    errors.append(f"source snapshot hash mismatch for {relative}")
+                if snapshot_file.stat().st_size != current_file.stat().st_size:
+                    errors.append(f"source snapshot byte count mismatch for {relative}")
             return {"path": str(path), "sha256": None,
-                    "required_files": sorted(required)}, errors
+                    "required_files": sorted(required), "verified": not errors}, errors
         if path.is_file():
             try:
                 payload = json.loads(path.read_text())
