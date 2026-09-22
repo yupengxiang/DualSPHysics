@@ -1,0 +1,75 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "bindings": {
+    "compute_forces_help": {
+      "bytes": 6137,
+      "path": "vendor/official/DualSPHysics_v5.4/doc/help/ComputeForces_Help.out",
+      "role": "official ComputeForces command contract",
+      "sha256": "ff01ceeaddf800ea992db16d7655cfee9de8eec31fc8ef69dc650f878946396a"
+    },
+    "pump_cpu_wrapper": {
+      "bytes": 2568,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/xCasePump_linux64_CPU.sh",
+      "role": "official Pump wrapper reference",
+      "sha256": "67d1c6c58d76ce4c765f347bf5db2398904a1fcd7edec546e3eea646600971ba"
+    },
+    "pump_definition": {
+      "bytes": 6983,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/CasePump_Def.xml",
+      "role": "official Pump Definition source",
+      "sha256": "746ae80f4c21bca62a01d59ee04d0eaaf3d1af830c36dafef4b684ca8f3c9453"
+    }
+  },
+  "candidate_id": "F7_pump_prescribed_internal_rotor_recirculation_v1",
+  "command_template": [
+    "ComputeForces",
+    "-dirdata <native_bi4_directory>",
+    "-filexml <pump_definition.xml_or_AUTO>",
+    "-onlymk:2",
+    "-viscoauto",
+    "-momentaxisex:<axis_p1_x>:<axis_p1_y>:<axis_p1_z>:<axis_p2_x>:<axis_p2_y>:<axis_p2_z>:pump_axis_ex",
+    "-momentaxisin:<axis_p1_x>:<axis_p1_y>:<axis_p1_z>:<axis_p2_x>:<axis_p2_y>:<axis_p2_z>:pump_axis_in",
+    "-savecsv <output/pump-force-moment.csv>",
+    "-saveascii <output/pump-force-moment.asc>"
+  ],
+  "execution": {
+    "authorized": false,
+    "executed": false,
+    "native_bi4_present": false,
+    "solver_or_queue_mutation": 0
+  },
+  "not_yet_available": [
+    "native BI4 frame archive for the existing F7 canary",
+    "ComputeForces CSV/ASCII output",
+    "energy consistency receipt",
+    "root admission for fresh direct-torque observation"
+  ],
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "required_inputs": {
+    "definition_xml": "exact hash-bound F7 Definition used by the native run",
+    "geometry_and_motion": "exact fixed/moving geometry and two-point rotation-axis schedule",
+    "native_bi4": "all declared frames, including mk=2 moving pump particles and fluid neighbors",
+    "solver_and_parameters": "binary, kernel, viscosity, gravity, output cadence and time-axis hashes"
+  },
+  "required_outputs": {
+    "energy_check": "tau dot omega compared with fluid energy and declared dissipation budget",
+    "pump_force_world": "ForceFluid vector for onlymk=2, N",
+    "pump_torque_axis": "named intrinsic/extrinsic moment scalar with sign convention",
+    "pump_torque_world": "Moment vector from the declared axis options",
+    "time": "same time axis as native trajectory and control sidecar"
+  },
+  "root_gates": {
+    "energy_consistency": true,
+    "intrinsic_extrinsic_axis_semantics_frozen": true,
+    "mk2_filter_exact": true,
+    "no_external_angular_force_or_floating_body": true,
+    "nonzero_torque_during_motion": true,
+    "source_return_residence_unknown_regions_frozen": true,
+    "time_alignment_and_hash_binding": true
+  },
+  "schema": "core.f7.pump.compute_forces_contract.v1",
+  "status": "root_review_only_pending_native_bi4_and_admission"
+}
