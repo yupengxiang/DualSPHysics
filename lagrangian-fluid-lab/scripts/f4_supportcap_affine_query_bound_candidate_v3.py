@@ -13,13 +13,18 @@ from typing import Any
 
 import numpy as np
 
-from scripts.core_material import CurrentField
+from scripts.core_material import (
+    CurrentField,
+    F4_V3_BACKEND,
+    F4_V3_ERROR_ESTIMATOR,
+    F4_V3_NEIGHBOURS,
+)
 
 
 CANDIDATE_ID = "f4_supportcap_affine_query_bound_v3"
-BACKEND = "f4_ckdtree_visible_shepard_ess32_affine_bound_v3"
-ERROR_ESTIMATOR = "residual_plus_local_affine_query_bias"
-NEIGHBOURS = 32
+BACKEND = F4_V3_BACKEND
+ERROR_ESTIMATOR = F4_V3_ERROR_ESTIMATOR
+NEIGHBOURS = F4_V3_NEIGHBOURS
 REGULARIZATION_M = 0.004
 MAXIMUM_SUPPORT_DISTANCE_M = 0.03
 

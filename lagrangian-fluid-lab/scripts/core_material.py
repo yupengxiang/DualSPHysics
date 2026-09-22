@@ -60,12 +60,19 @@ F4_ESS32_BACKEND = "f4_ckdtree_visible_shepard_ess32_v2"
 F4_ESS32_NEIGHBOURS = 32
 F4_AFFINE_BACKEND = "f4_ckdtree_visible_shepard_affine_bound_v2"
 F4_AFFINE_NEIGHBOURS = 24
+# F4 v3 is a new composition, not a threshold or cadence revision.  It is
+# deliberately registered under its own namespace so old variants retain
+# byte-for-byte dispatch semantics and provenance.
+F4_V3_BACKEND = "f4_ckdtree_visible_shepard_ess32_affine_bound_v3"
+F4_V3_NEIGHBOURS = 32
+F4_V3_ERROR_ESTIMATOR = "residual_plus_local_affine_query_bias"
 NEIGHBOUR_VARIANTS = {
     "baseline24": (NEIGHBOUR_BACKEND, NEIGHBOURS),
     "h2_k48": (H2_NEIGHBOUR_BACKEND, H2_NEIGHBOURS),
     "h1_affine_bound": (H1_ERROR_BACKEND, H1_NEIGHBOURS),
     "f4_ess32_v2": (F4_ESS32_BACKEND, F4_ESS32_NEIGHBOURS),
     "f4_affine_bound_v2": (F4_AFFINE_BACKEND, F4_AFFINE_NEIGHBOURS),
+    "f4_supportcap_affine_query_bound_v3": (F4_V3_BACKEND, F4_V3_NEIGHBOURS),
 }
 ERROR_ESTIMATORS = {
     "baseline24": "local_residual",
@@ -73,6 +80,7 @@ ERROR_ESTIMATORS = {
     "h1_affine_bound": "residual_plus_local_affine_query_bias",
     "f4_ess32_v2": "local_residual",
     "f4_affine_bound_v2": "residual_plus_local_affine_query_bias",
+    "f4_supportcap_affine_query_bound_v3": F4_V3_ERROR_ESTIMATOR,
 }
 REGULARIZATION_M = 0.004
 MAXIMUM_SUPPORT_DISTANCE_M = 0.03

@@ -13,7 +13,7 @@ from pathlib import Path
 LAB_ROOT = Path(__file__).resolve().parents[1]
 RECEIPT_PATH = LAB_ROOT / (
     "campaigns/core-v1/material/candidates/"
-    "f4-supportcap-affine-query-bound-v3/terra-high-root-review-v2.json"
+    "f4-supportcap-affine-query-bound-v3/terra-high-root-review-v3.json"
 )
 
 
@@ -28,7 +28,7 @@ def test_terra_high_review_is_hash_closed_and_denies_canary() -> None:
     assert receipt["reviewer"]["reasoning_effort"] == "high"
     assert receipt["review_method"]["runtime_execution"] is False
     assert receipt["decision"] == (
-        "DENY_ONE_CPU_CANARY_PENDING_INTEGRATION_AND_HASH_REPAIR"
+        "STATIC_REVISION_ACCEPTED_FOR_FUTURE_ROOT_REVIEW__NO_CPU_AUTHORIZATION"
     )
     assert receipt["authorized_one_cpu_only"] is False
     assert receipt["qualification_claim"] == "none"
@@ -42,15 +42,11 @@ def test_terra_high_review_is_hash_closed_and_denies_canary() -> None:
         assert path.is_file(), binding["path"]
         assert _sha256(path) == binding["sha256"], binding["path"]
 
-    blocker_ids = {item["id"] for item in receipt["hard_blockers"]}
-    assert blocker_ids == {
-        "HB-F4-V3-NOT-INTEGRATED-INTO-TRACE",
-        "HB-F4-V3-CARD-TEST-HASH-STALE",
-        "HB-F4-V3-COMPOSITION-NOT-MANUFACTURED-VALIDATED",
-    }
+    assert len(receipt["resolved_prior_blockers"]) == 3
+    assert receipt["remaining_boundary"]["one_cpu_canary"] == "not authorized"
 
 
-def test_candidate_has_no_registered_runtime_variant_or_execution_authority() -> None:
+def test_candidate_has_a_versioned_runtime_variant_without_execution_authority() -> None:
     candidate_id = "f4_supportcap_affine_query_bound_v3"
     core_material = (LAB_ROOT / "scripts/core_material.py").read_text(encoding="utf-8")
     candidate = (LAB_ROOT / "scripts/f4_supportcap_affine_query_bound_candidate_v3.py").read_text(
@@ -58,7 +54,7 @@ def test_candidate_has_no_registered_runtime_variant_or_execution_authority() ->
     )
 
     assert candidate_id in candidate
-    assert candidate_id not in core_material
+    assert candidate_id in core_material
     assert '"native_started": False' in candidate
     assert '"solver_started": False' in candidate
     assert '"gpu_started": False' in candidate
