@@ -5,8 +5,9 @@ import sys
 
 import pytest
 
-from scripts.core_formal_planner import (CASES_PER_FAMILY, MILESTONES, MODELS, SEEDS,
-                                         _qualification_marker, build_plan, inspect_inputs, main)
+from scripts.core_formal_planner import (CASES_PER_FAMILY, MILESTONES, MODELS, REQUIRED_CODE_FILES,
+                                         SEEDS, _qualification_marker, build_plan, inspect_inputs,
+                                         main, sha256_file)
 
 
 def _manifest(tmp_path, *, family_count=3):
@@ -64,6 +65,57 @@ def test_complete_manifest_emits_exact_nine_specs_and_frozen_protocol(tmp_path):
     assert job["source_snapshot_policy"]["inherited_profile_argv"] is False
     assert job["resources"]["profile_sha256"]
     assert job["bindings"]["code_files"]
+
+
+def _source_snapshot() -> dict:
+    root = Path(__file__).parents[1]
+    return {
+        "files": [
+            {
+                "relative_path": relative,
+                "sha256": sha256_file(root / relative),
+                "bytes": (root / relative).stat().st_size,
+            }
+            for relative in REQUIRED_CODE_FILES
+        ]
+    }
+
+
+def test_explicit_source_snapshot_is_hash_and_byte_bound(tmp_path):
+    manifest_path, _ = _manifest(tmp_path)
+    snapshot = _source_snapshot()
+    plan = build_plan(
+        manifest_path, profile=_profile(), environment=_environment(),
+        data_root=tmp_path, code_root=Path(__file__).parents[1],
+        source_snapshot=snapshot,
+    )
+    assert plan["status"] == "ready"
+    assert plan["source_snapshot"]["verified"] is True
+
+    snapshot["files"][0]["sha256"] = "0" * 64
+    broken = build_plan(
+        manifest_path, profile=_profile(), environment=_environment(),
+        data_root=tmp_path, code_root=Path(__file__).parents[1],
+        source_snapshot=snapshot,
+    )
+    assert broken["status"] == "hold"
+    assert broken["formal_job_count"] == 0
+    assert any("source snapshot hash mismatch" in reason
+               for reason in broken["hold_reasons"])
+
+
+def test_invalid_resource_numbers_hold_the_formal_plan(tmp_path):
+    manifest_path, _ = _manifest(tmp_path)
+    profile = _profile()
+    profile["resources"]["gpu_peak_mib"] = "nan"
+    plan = build_plan(
+        manifest_path, profile=profile, environment=_environment(),
+        data_root=tmp_path, code_root=Path(__file__).parents[1],
+    )
+    assert plan["status"] == "hold"
+    assert plan["formal_job_count"] == 0
+    assert any("invalid positive gpu_peak_mib" in reason
+               for reason in plan["hold_reasons"])
 
 
 @pytest.mark.parametrize('replacement, reason', [('train', 'requires 12'), ('unassigned', 'unrecognized production splits')])

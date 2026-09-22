@@ -17,6 +17,7 @@ import argparse
 from collections import Counter, defaultdict
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import sys
@@ -413,6 +414,15 @@ def _profile_resources(profile: Mapping[str, Any], model: str) -> dict[str, Any]
         raise ValueError(f"resource profile has no {', '.join(missing)} for {model}")
     resources.setdefault("cpu_cores", 4)
     resources.setdefault("io_weight", 0.1)
+    for key in ("gpu_peak_mib", "ram_mib", "cpu_cores"):
+        value = resources.get(key)
+        if (isinstance(value, bool) or not isinstance(value, (int, float))
+                or not math.isfinite(float(value)) or float(value) <= 0):
+            raise ValueError(f"resource profile has invalid positive {key} for {model}")
+    io_weight = resources.get("io_weight")
+    if (isinstance(io_weight, bool) or not isinstance(io_weight, (int, float))
+            or not math.isfinite(float(io_weight)) or float(io_weight) < 0):
+        raise ValueError(f"resource profile has invalid nonnegative io_weight for {model}")
     return resources
 
 
@@ -480,16 +490,49 @@ def _snapshot_check(snapshot: Any, *, code_root: Path, required: Sequence[str]) 
     else:
         snapshot_ref = {"path": "<in-memory>", "sha256": _json_hash(snapshot)}
     files = snapshot.get("files", snapshot.get("input_files", snapshot)) if isinstance(snapshot, Mapping) else {}
-    names = set()
+    rows: dict[str, dict[str, Any]] = {}
     if isinstance(files, Mapping):
-        names.update(str(key) for key in files)
-        names.update(str(item.get("relative_path", item.get("path", "")))
-                     for item in files.values() if isinstance(item, Mapping))
+        for key, value in files.items():
+            if isinstance(value, Mapping):
+                name = value.get("relative_path", value.get("path", key))
+                row = dict(value)
+            else:
+                name = key
+                row = {"sha256": value}
+            rows[str(name)] = row
     elif isinstance(files, list):
         for item in files:
-            names.add(str(item.get("relative_path", item.get("path", ""))) if isinstance(item, Mapping) else str(item))
-    errors.extend(f"source snapshot missing {relative}" for relative in required if relative not in names and Path(relative).name not in names)
-    return {**snapshot_ref, "required_files": sorted(required)}, errors
+            if isinstance(item, Mapping):
+                name = item.get("relative_path", item.get("path"))
+                if name is not None:
+                    rows[str(name)] = dict(item)
+            else:
+                rows[str(item)] = {}
+
+    required_set = set(required)
+    for relative in required:
+        row = rows.get(relative)
+        if row is None:
+            errors.append(f"source snapshot missing {relative}")
+            continue
+        current = (code_root / relative).resolve()
+        if not current.is_file():
+            errors.append(f"source snapshot current file missing {relative}")
+            continue
+        declared_sha = row.get("sha256")
+        if not isinstance(declared_sha, str) or len(declared_sha) != 64:
+            errors.append(f"source snapshot missing SHA-256 for {relative}")
+        elif declared_sha.lower() != sha256_file(current).lower():
+            errors.append(f"source snapshot hash mismatch for {relative}")
+        declared_bytes = row.get("bytes")
+        if declared_bytes is not None and (
+                isinstance(declared_bytes, bool)
+                or not isinstance(declared_bytes, int)
+                or declared_bytes != current.stat().st_size):
+            errors.append(f"source snapshot byte count mismatch for {relative}")
+    extras = sorted(set(rows) - required_set)
+    errors.extend(f"source snapshot has unexpected file {relative}" for relative in extras)
+    return {**snapshot_ref, "required_files": sorted(required), "verified": not errors}, errors
 
 
 def _family_global_markers(family: str, global_rows: Iterable[Mapping[str, Any]],
