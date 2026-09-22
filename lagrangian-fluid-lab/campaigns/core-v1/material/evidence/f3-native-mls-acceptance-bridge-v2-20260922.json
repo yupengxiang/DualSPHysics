@@ -1,0 +1,395 @@
+{
+  "T2_macro": false,
+  "T2_path": false,
+  "acceptance_gates": {
+    "checkpoint_schema_binding": true,
+    "first_passage_return_residence_cdf": false,
+    "full_event_window": false,
+    "native_cadence_provenance": true,
+    "per_matrix_formal_acceptance_receipts": false,
+    "per_source_unknown_fraction": false,
+    "residence_cdf_bounds_present": true,
+    "right_censored_event": false,
+    "source_window_integrity": true,
+    "trace_schema_binding": true
+  },
+  "admission_surface_pass": false,
+  "blocking_reasons": [
+    "per-source unknown gate fails: maximum 0.015625 > 0.01",
+    "first-passage/return/residence CDF gate fails: maximum 0.06103515625 > 0.02",
+    "bounded native-cadence canary is right-censored or shorter than the full registered event window; it has zero acceptance credit",
+    "the registered 33-row overlay contains diagnostic rows only; diagnostic completion cannot promote a row to T2"
+  ],
+  "cadence_provenance": {
+    "bounded_canary": {
+      "acceptance_credit": 0,
+      "committed_frames": 5,
+      "full_event_window": false,
+      "right_censored": true,
+      "time_end_s": 0.04001995862593706
+    },
+    "cadence_tolerance_s": 5e-05,
+    "direct_every_fifth_view": {
+      "derived_view_is_independent_solve": false,
+      "interpolation": false,
+      "logical_frame_count": 836,
+      "mode": "every_fifth_direct_native_frame",
+      "pass": true,
+      "source_frame_count": 4176
+    },
+    "inherited_json_bindings": {
+      "native_cadence_canary": {
+        "bytes": 3866,
+        "path": "campaigns/core-v1/material/evidence/f3-native-cadence-bounded-canary-evidence-v1.json",
+        "sha256": "34873b663379b7ac659ff1d0c142367b3df9a1b7548f133dbbc0e764945dc634"
+      },
+      "native_cadence_preflight": {
+        "bytes": 28467,
+        "path": "campaigns/core-v1/material/evidence/f3-native-cadence-adapter-v1-preflight-20260920.json",
+        "sha256": "9f2bef012459cba60a6d5c62723b567a5d56496f8436bb40d7fb4bc2fc6db651"
+      },
+      "native_cadence_selection": {
+        "bytes": 9006,
+        "path": "campaigns/core-v1/material/evidence/f3-native-cadence-adapter-v1-every-fifth-selection-20260920.json",
+        "sha256": "6c2c4a1059f7b43dd7235294395e574368f8d7c3649451d45a08a22cf2da3bac"
+      }
+    },
+    "native_interval_s": 0.002,
+    "source": {
+      "cadence_pass": true,
+      "frames": 4176,
+      "full_event_window_available": true,
+      "interpolation": false,
+      "max_cumulative_time_error_s": 2.2084453489945588e-05,
+      "max_interval_error_s": 1.3165414925133193e-05,
+      "time_end_s": 8.350012828223477
+    },
+    "source_preflight_pass": true
+  },
+  "cdf_bounds": {
+    "all_events_pass": false,
+    "by_source": [
+      {
+        "cdf_gate_pass": false,
+        "denominator_policy": "all seeds in this source half; permanent_unknown remains in the source denominator and unresolved events contribute upper bounds",
+        "first_passage_cdf_sup_abs_difference": 0.0537109375,
+        "maximum_cdf_sup_abs_difference": 0.06103515625,
+        "residence_cdf_bounds_present": true,
+        "residence_cdf_sup_abs_difference": 0.06103515625,
+        "return_cdf_sup_abs_difference": 0.05029296875,
+        "source_id": "0"
+      },
+      {
+        "cdf_gate_pass": false,
+        "denominator_policy": "all seeds in this source half; permanent_unknown remains in the source denominator and unresolved events contribute upper bounds",
+        "first_passage_cdf_sup_abs_difference": 0.06005859375,
+        "maximum_cdf_sup_abs_difference": 0.06005859375,
+        "residence_cdf_bounds_present": true,
+        "residence_cdf_sup_abs_difference": 0.06005859375,
+        "return_cdf_sup_abs_difference": 0.06005859375,
+        "source_id": "1"
+      }
+    ],
+    "comparison_status": "diagnostic_only",
+    "event_names": [
+      "first_passage",
+      "return",
+      "residence"
+    ],
+    "limit": 0.02,
+    "maximum_observed": 0.06103515625,
+    "qualification_claim": "none",
+    "source_count": 2,
+    "source_rows_reused_across_diagnostic_rows": true
+  },
+  "created_at_utc": "2026-09-22T07:39:16.984216+00:00",
+  "decision": "blocked",
+  "denominator_policy": {
+    "cdf": "all seeds in each source half; no reliable-only denominator",
+    "partial_credit": false,
+    "right_censor": "right-censored event paths remain in the denominator",
+    "source": "all geometric seeds carrying each source label",
+    "unknown": "unknown seeds remain in each source denominator"
+  },
+  "event_contract": {
+    "first_passage": "continuous crossing of x=0 into opposite source half on accepted linear RK segment",
+    "residence": "accepted segment time in the opposite source half",
+    "residence_policy": "all seeds contribute observed residence; support-loss seeds receive a conservative remaining-window upper interval; reliable no-event seeds contribute exact zero",
+    "return": "first later crossing back to the seed's origin half",
+    "right_censoring": {
+      "full_window_required_for_acceptance": true,
+      "partial_window_credit": false,
+      "right_censored_counts_as_acceptance": false,
+      "unknown_event_paths_are_right_censored": true
+    },
+    "schema": "core.material.f3.native_volume_mls.event_contract.v1",
+    "unknown_policy": "permanent_unknown seeds remain in every source denominator; event lower bound uses finite observed times and upper bound adds unresolved unknown mass from its first possible failure time"
+  },
+  "execution_constraints": {
+    "T1_denominator_changed": false,
+    "T2_denominator_changed": false,
+    "central_ledger_mutation": 0,
+    "gpu_started": false,
+    "json_and_source_only": true,
+    "matrix_mutation": 0,
+    "new_job_submitted": false,
+    "old_evidence_overwritten": false,
+    "queue_mutation": 0,
+    "queue_started": false,
+    "read_only": true,
+    "registry_mutation": 0,
+    "scientific_denominator_changed": false,
+    "solver_started": false,
+    "source_h5_opened": false,
+    "terminal_h5_opened": false,
+    "thresholds_changed": false
+  },
+  "fixed_gates": {
+    "cdf_sup_abs_difference_max": 0.02,
+    "denominator_policy": "all independent geometric seeds in each source; unknown and right-censored mass remain in the denominator",
+    "full_source_window_s": 8.35,
+    "native_source_cadence_integrity_tolerance_s": 5e-05,
+    "native_source_interval_s": 0.002,
+    "no_partial_credit": true,
+    "right_censored_is_not_acceptance": true,
+    "unknown_fraction_per_source_max": 0.01
+  },
+  "formal_acceptance_receipt": {
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "decision": "blocked",
+    "diagnostic_rows_promoted": false,
+    "independent_collector_required": true,
+    "qualification_claim": "none",
+    "qualification_credit": "none",
+    "schema": "core.material.f3.native_volume_mls.acceptance_receipt.v1",
+    "status": "blocked",
+    "version": 1
+  },
+  "input_bindings": {
+    "bridge_implementation": {
+      "bytes": 41242,
+      "path": "scripts/f3_native_mls_acceptance_bridge_v1.py",
+      "role": "versioned acceptance bridge implementation",
+      "sha256": "10832aeffeb9a06a994a56056849df34c646b54711747832e6de298b357cc14d"
+    },
+    "core_material_acceptance": {
+      "bytes": 59243,
+      "path": "scripts/core_material_acceptance.py",
+      "role": "bridge input",
+      "sha256": "b9cb49cacf19590356bda4f32d32ef3d2255b9c97a8afa29a920e5a38bd6c4a7"
+    },
+    "native_cadence_adapter": {
+      "bytes": 25252,
+      "path": "scripts/f3_native_cadence_adapter_v1.py",
+      "role": "bridge input",
+      "sha256": "746477383578df5edcef927e72aaff706d8a2621ff01f435cb9d65fd425dd42e"
+    },
+    "native_mls_compare": {
+      "bytes": 51185,
+      "path": "scripts/f3_native_volume_mls_compare.py",
+      "role": "bridge input",
+      "sha256": "d4fc40b0b0057b4b0fc2487560d709f01c95068109a028e2664bc9f6fdf44acb"
+    },
+    "native_mls_temporal_v3": {
+      "bytes": 75268,
+      "path": "scripts/f3_native_volume_mls_temporal_v3.py",
+      "role": "bridge input",
+      "sha256": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395"
+    },
+    "native_mls_v1": {
+      "bytes": 58481,
+      "path": "scripts/f3_native_volume_mls.py",
+      "role": "bridge input",
+      "sha256": "e1c5fc39e73781d386c7da2874c1749b5223c8209eaf8f25bb4453346df51ff9"
+    },
+    "native_mls_v2": {
+      "bytes": 67812,
+      "path": "scripts/f3_native_volume_mls_v2.py",
+      "role": "bridge input",
+      "sha256": "cd1c050757df7b0d5832181464d446cf6e8c678e2b150aa07bae0ddb0ee3b5f9"
+    },
+    "t2_gap_audit": {
+      "bytes": 24337,
+      "path": "campaigns/core-v1/material/evidence/f3-t2-admission-acceptance-gap-audit-20260921.json",
+      "role": "bridge input",
+      "sha256": "6a62d5b5857cd1512e33d557c87a96b51adb98ad1b336e5067e2c73e43e68f1a"
+    }
+  },
+  "interpretation_boundary": "This bridge adapts diagnostic JSON into a fail-closed formal receipt shape. A blocked receipt has zero credit. A future accepted bridge receipt still cannot promote diagnostic rows or claim T2 without an independent collector.",
+  "matrix": {
+    "diagnostic_rows_do_not_upgrade_t2": true,
+    "diagnostic_terminal_rows": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "formal_acceptance_receipt_count": 0,
+    "material_matrix_ready": false,
+    "qualification_credit": "none",
+    "registered_row_count": 33,
+    "registered_row_order": "0-23 resolution_substep; 24-27 cadence; 28-32 seed_density",
+    "upstream_formal_acceptance_receipt_count": 0
+  },
+  "per_source_unknown": {
+    "all_rows_pass": false,
+    "limit": 0.01,
+    "maximum_observed": 0.015625,
+    "rows": [
+      {
+        "case_id": "F3_REV075_MATERIAL-AMP0P95-0075",
+        "gate_pass": false,
+        "maximum_source_unknown_fraction": 0.01220703125,
+        "row": 29,
+        "sources": [
+          {
+            "denominator_policy": "all geometric seeds carrying this source label; unknown and right-censored event paths remain in the denominator",
+            "first_failure_frame": 456,
+            "first_failure_reason_counts": {
+              "low_effective_sample_size": 1,
+              "wall_occluded": 24
+            },
+            "first_failure_time_s": 4.560018769008347,
+            "maximum_allowed_unknown_fraction": 0.01,
+            "seed_denominator": 2048,
+            "source_id": "0",
+            "terminal_unknown_count": 25,
+            "terminal_unknown_fraction": 0.01220703125,
+            "unknown_gate_pass": false
+          },
+          {
+            "denominator_policy": "all geometric seeds carrying this source label; unknown and right-censored event paths remain in the denominator",
+            "first_failure_frame": 394,
+            "first_failure_reason_counts": {
+              "wall_occluded": 19
+            },
+            "first_failure_time_s": 3.940008066606618,
+            "maximum_allowed_unknown_fraction": 0.01,
+            "seed_denominator": 2048,
+            "source_id": "1",
+            "terminal_unknown_count": 19,
+            "terminal_unknown_fraction": 0.00927734375,
+            "unknown_gate_pass": true
+          }
+        ]
+      },
+      {
+        "case_id": "F3_REV075_MATERIAL-AMP1P05-0075",
+        "gate_pass": false,
+        "maximum_source_unknown_fraction": 0.015625,
+        "row": 31,
+        "sources": [
+          {
+            "denominator_policy": "all geometric seeds carrying this source label; unknown and right-censored event paths remain in the denominator",
+            "first_failure_frame": 281,
+            "first_failure_reason_counts": {
+              "low_effective_sample_size": 4,
+              "no_support": 1,
+              "wall_occluded": 27
+            },
+            "first_failure_time_s": 2.810002833344516,
+            "maximum_allowed_unknown_fraction": 0.01,
+            "seed_denominator": 2048,
+            "source_id": "0",
+            "terminal_unknown_count": 32,
+            "terminal_unknown_fraction": 0.015625,
+            "unknown_gate_pass": false
+          },
+          {
+            "denominator_policy": "all geometric seeds carrying this source label; unknown and right-censored event paths remain in the denominator",
+            "first_failure_frame": 237,
+            "first_failure_reason_counts": {
+              "low_effective_sample_size": 3,
+              "wall_occluded": 26
+            },
+            "first_failure_time_s": 2.370004515359631,
+            "maximum_allowed_unknown_fraction": 0.01,
+            "seed_denominator": 2048,
+            "source_id": "1",
+            "terminal_unknown_count": 29,
+            "terminal_unknown_fraction": 0.01416015625,
+            "unknown_gate_pass": false
+          }
+        ]
+      }
+    ]
+  },
+  "qualification_claim": "none",
+  "qualification_credit": "none",
+  "schema": "core.material.f3.native_volume_mls.acceptance_bridge.v1",
+  "source_window_provenance": {
+    "audit_binding": {
+      "bytes": 70623,
+      "path": "campaigns/core-v1/material/evidence/f3-f4-t2-cpu-source-window-audit-v1-20260920.json",
+      "role": "inherited source-window JSON audit; not reopened by bridge",
+      "sha256": "983e15aae8e1ce4df705590c7b1cc89e27a0445c8152f4a003123392e3aaa279"
+    },
+    "required_full_window_s": 8.35,
+    "rows": [
+      {
+        "case_id": "F3_REV075_MATERIAL-AMP0P95-0075",
+        "checkpoint_schema": "core.material.f3.native_volume_mls.checkpoint.v2",
+        "frames": 836,
+        "full_window_complete": true,
+        "provenance_role": "inherited source-window audit; HDF5 not reopened by bridge",
+        "row": 29,
+        "time_end_s": 8.350012828223477,
+        "trace_schema": "core.material.f3.native_volume_mls.trace.v2"
+      },
+      {
+        "case_id": "F3_REV075_MATERIAL-AMP1P05-0075",
+        "checkpoint_schema": "core.material.f3.native_volume_mls.checkpoint.v2",
+        "frames": 836,
+        "full_window_complete": true,
+        "provenance_role": "inherited source-window audit; HDF5 not reopened by bridge",
+        "row": 31,
+        "time_end_s": 8.350012828223477,
+        "trace_schema": "core.material.f3.native_volume_mls.trace.v2"
+      }
+    ],
+    "source_paths_and_hashes": "inherited from the upstream gap audit's source-window JSON closure; bridge did not reopen or rehash HDF5"
+  },
+  "status": "blocked_for_acceptance",
+  "trace_and_checkpoint_schema": {
+    "accepted_trace_schemas": [
+      "core.material.f3.native_volume_mls.trace.temporal.v3",
+      "core.material.f3.native_volume_mls.trace.v1",
+      "core.material.f3.native_volume_mls.trace.v2"
+    ],
+    "rows": [
+      {
+        "checkpoint_schema": "core.material.f3.native_volume_mls.checkpoint.v2",
+        "checkpoint_schema_pass": true,
+        "row": 29,
+        "trace_schema": "core.material.f3.native_volume_mls.trace.v2",
+        "trace_schema_pass": true
+      },
+      {
+        "checkpoint_schema": "core.material.f3.native_volume_mls.checkpoint.v2",
+        "checkpoint_schema_pass": true,
+        "row": 31,
+        "trace_schema": "core.material.f3.native_volume_mls.trace.v2",
+        "trace_schema_pass": true
+      }
+    ],
+    "trace_to_checkpoint": {
+      "core.material.f3.native_volume_mls.trace.temporal.v3": "core.material.f3.native_volume_mls.checkpoint.temporal.v3",
+      "core.material.f3.native_volume_mls.trace.v1": "core.material.f3.native_volume_mls.checkpoint.v1",
+      "core.material.f3.native_volume_mls.trace.v2": "core.material.f3.native_volume_mls.checkpoint.v2"
+    }
+  }
+}

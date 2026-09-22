@@ -20,9 +20,9 @@ from scripts.f3_native_mls_acceptance_bridge_v1 import (
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / (
     "campaigns/core-v1/material/evidence/"
-    "f3-native-mls-acceptance-bridge-v1-20260921.json"
+    "f3-native-mls-acceptance-bridge-v2-20260922.json"
 )
-REPORT = ROOT / "reports/F3-NATIVE-MLS-ACCEPTANCE-BRIDGE-2026-09-21.zh-CN.md"
+REPORT = ROOT / "reports/F3-NATIVE-MLS-ACCEPTANCE-BRIDGE-2026-09-22.zh-CN.md"
 
 
 def test_bridge_is_blocked_and_preserves_fixed_negative_gates() -> None:

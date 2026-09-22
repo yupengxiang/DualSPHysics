@@ -14,9 +14,9 @@ from scripts.f3_t2_admission_acceptance_gap_audit_v1 import (
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / (
     "campaigns/core-v1/material/evidence/"
-    "f3-t2-admission-acceptance-gap-audit-20260921.json"
+    "f3-t2-admission-acceptance-gap-audit-v2-20260922.json"
 )
-REPORT = ROOT / "reports/F3-T2-ADMISSION-ACCEPTANCE-GAP-AUDIT-2026-09-21.zh-CN.md"
+REPORT = ROOT / "reports/F3-T2-ADMISSION-ACCEPTANCE-GAP-AUDIT-2026-09-22.zh-CN.md"
 
 
 def test_audit_preserves_negative_scientific_gates_and_denominators() -> None:

@@ -51,3 +51,7 @@ def test_row24_receipt_binds_comparison_artifact() -> None:
     binding = receipt["artifacts"]["comparison"]
     assert (ROOT / binding["path"]).is_file()
     assert _sha256(ROOT / binding["path"]) == binding["sha256"]
+    for key in ("matched010_trace", "native002_trace"):
+        trace = receipt["artifacts"][key]
+        assert (ROOT / trace["path"]).is_file()
+        assert _sha256(ROOT / trace["path"]) == trace["sha256"]
