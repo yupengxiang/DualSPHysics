@@ -245,7 +245,7 @@
   "root_review_blockers": [
     "The F7 geometry adapter is now wired through a read-only Core CFD adapter boundary, but its Core pose/gradient velocity is a bounded sample approximation, not runtime evidence or a Definition/trajectory producer.",
     "The adapter's analytic finish clamp is source-faithful, but Core sampled gradient velocity is not certified exact at the finish boundary.",
-    "The isolated F7 source/discharge/return/residence observer has no trajectory, body-pose, angular-control, or provenance-verified torque runtime evidence.",
+    "The isolated F7 observer has no solver trajectory or provenance-verified torque runtime evidence; the new causal sidecar is interface-only and cannot certify runtime motion.",
     "No generated Definition, XML, BI4, trajectory, or solver evidence exists.",
     "The official CPU/GPU wrappers contain destructive cleanup and execution commands and are reference-only.",
     "The physical distinction must survive adversarial review with a finite torque/control gate against generic moving-boundary and F6 overlap."
@@ -320,6 +320,18 @@
         "sha256": "7de173e0586ddf3c0c3576e34ae9916fed4e4a1594fbf1cd4e0883cd566836b6",
         "bytes": 5728,
         "role": "root-review contract v2 synthetic regression tests"
+      },
+      {
+        "path": "scripts/f7_pump_causal_sidecar_v1.py",
+        "sha256": "a8149e7e45cb53093e583afe5128165634c2d09b126e33d1f6a1b965d7e38907",
+        "bytes": 10873,
+        "role": "read-only hash-bound causal control sidecar producer"
+      },
+      {
+        "path": "tests/test_f7_pump_causal_sidecar_v1.py",
+        "sha256": "833a2bc0924dd6a8ca63597e0a052bd45f5691ef52858a522a5b914929c5f45d",
+        "bytes": 3912,
+        "role": "causal control sidecar producer regression tests"
       },
       {
         "path": "scripts/f7_pump_geometry_adapter_v1.py",

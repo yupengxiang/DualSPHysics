@@ -36,6 +36,8 @@ OBSERVER_TEST = "tests/test_f7_pump_transport_observer_v1.py"
 CORE_ADAPTER_TEST = "tests/test_f7_core_cfd_adapter_v1.py"
 ROOT_CONTRACT_V2_SCRIPT = "scripts/f7_pump_root_review_contract_v2.py"
 ROOT_CONTRACT_V2_TEST = "tests/test_f7_pump_root_review_contract_v2.py"
+CAUSAL_SIDECAR_SCRIPT = "scripts/f7_pump_causal_sidecar_v1.py"
+CAUSAL_SIDECAR_TEST = "tests/test_f7_pump_causal_sidecar_v1.py"
 
 PUMP_DIR = "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump"
 PUMP_XML = f"{PUMP_DIR}/CasePump_Def.xml"
@@ -205,6 +207,8 @@ def isolated_implementation_bindings() -> list[dict[str, Any]]:
     return [
         binding(ROOT_CONTRACT_V2_SCRIPT, "fail-closed F7 root-review contract v2"),
         binding(ROOT_CONTRACT_V2_TEST, "root-review contract v2 synthetic regression tests"),
+        binding(CAUSAL_SIDECAR_SCRIPT, "read-only hash-bound causal control sidecar producer"),
+        binding(CAUSAL_SIDECAR_TEST, "causal control sidecar producer regression tests"),
         binding(ADAPTER_SCRIPT, "isolated read-only F7 Pump geometry adapter"),
         binding(ADAPTER_TEST, "geometry adapter synthetic regression tests"),
         binding(CORE_ADAPTER_TEST, "read-only Core F7 adapter contract regression tests"),
@@ -382,7 +386,7 @@ def build_candidate() -> dict[str, Any]:
         "root_review_blockers": [
             "The F7 geometry adapter is now wired through a read-only Core CFD adapter boundary, but its Core pose/gradient velocity is a bounded sample approximation, not runtime evidence or a Definition/trajectory producer.",
             "The adapter's analytic finish clamp is source-faithful, but Core sampled gradient velocity is not certified exact at the finish boundary.",
-            "The isolated F7 source/discharge/return/residence observer has no trajectory, body-pose, angular-control, or provenance-verified torque runtime evidence.",
+            "The isolated F7 observer has no solver trajectory or provenance-verified torque runtime evidence; the new causal sidecar is interface-only and cannot certify runtime motion.",
             "No generated Definition, XML, BI4, trajectory, or solver evidence exists.",
             "The official CPU/GPU wrappers contain destructive cleanup and execution commands and are reference-only.",
             "The physical distinction must survive adversarial review with a finite torque/control gate against generic moving-boundary and F6 overlap.",
@@ -517,6 +521,7 @@ def build_interface_review(candidate: dict[str, Any]) -> dict[str, Any]:
             "moving_wall_saved_chord_operator_present": "def moving_wall_crossings" in physics_source,
             "moving_affine_material_frame_present": "moving_affine" in transport_source,
             "f7_transform_dataset_producer_present": "control/frame" in dataset_source,
+            "f7_causal_sidecar_producer_present": local(CAUSAL_SIDECAR_SCRIPT).is_file(),
             "f7_return_observer_present": "recirculation" in transport_source.lower(),
             "isolated_f7_geometry_adapter_present": True,
             "isolated_f7_material_observer_present": True,
@@ -529,7 +534,7 @@ def build_interface_review(candidate: dict[str, Any]) -> dict[str, Any]:
         ],
         "blocking_gaps": [
             "Resolve or explicitly certify the Core sampled pose/gradient-velocity behavior at start and finish knots before runtime use.",
-            "No F7 trajectory producer currently emits the Core pose/frame and angular-control contract; the adapter remains source-only and read-only.",
+            "The F7 causal sidecar producer is interface-only: no solver trajectory producer currently certifies that runtime motion followed the schedule.",
             "Emit a causal body-pose/frame and angular-control dataset hash-bound to every trajectory.",
             "Freeze source, discharge/return, residence, and unknown-exit regions before material data.",
             "Produce real trajectory evidence and a hash/semantic/time-bound nonzero torque dataset, then verify its producer/geometry provenance and energy consistency; the isolated observer intentionally cannot claim independence without root provenance review.",

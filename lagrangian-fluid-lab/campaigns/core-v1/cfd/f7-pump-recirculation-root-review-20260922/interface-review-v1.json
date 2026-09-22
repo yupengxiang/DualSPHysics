@@ -34,6 +34,18 @@
       "role": "root-review contract v2 synthetic regression tests"
     },
     {
+      "path": "scripts/f7_pump_causal_sidecar_v1.py",
+      "sha256": "a8149e7e45cb53093e583afe5128165634c2d09b126e33d1f6a1b965d7e38907",
+      "bytes": 10873,
+      "role": "read-only hash-bound causal control sidecar producer"
+    },
+    {
+      "path": "tests/test_f7_pump_causal_sidecar_v1.py",
+      "sha256": "833a2bc0924dd6a8ca63597e0a052bd45f5691ef52858a522a5b914929c5f45d",
+      "bytes": 3912,
+      "role": "causal control sidecar producer regression tests"
+    },
+    {
       "path": "scripts/f7_pump_geometry_adapter_v1.py",
       "sha256": "d7434546a617fe563137eb27e9fceda760888baa722ed424d80bfdf3153d38d9",
       "bytes": 22080,
@@ -78,6 +90,7 @@
     "moving_wall_saved_chord_operator_present": true,
     "moving_affine_material_frame_present": true,
     "f7_transform_dataset_producer_present": false,
+    "f7_causal_sidecar_producer_present": true,
     "f7_return_observer_present": false,
     "isolated_f7_geometry_adapter_present": true,
     "isolated_f7_material_observer_present": true,
@@ -90,7 +103,7 @@
   ],
   "blocking_gaps": [
     "Resolve or explicitly certify the Core sampled pose/gradient-velocity behavior at start and finish knots before runtime use.",
-    "No F7 trajectory producer currently emits the Core pose/frame and angular-control contract; the adapter remains source-only and read-only.",
+    "The F7 causal sidecar producer is interface-only: no solver trajectory producer currently certifies that runtime motion followed the schedule.",
     "Emit a causal body-pose/frame and angular-control dataset hash-bound to every trajectory.",
     "Freeze source, discharge/return, residence, and unknown-exit regions before material data.",
     "Produce real trajectory evidence and a hash/semantic/time-bound nonzero torque dataset, then verify its producer/geometry provenance and energy consistency; the isolated observer intentionally cannot claim independence without root provenance review.",
