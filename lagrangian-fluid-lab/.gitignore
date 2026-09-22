@@ -43,5 +43,28 @@ campaigns/core-v1/cfd/f2-distributed-slot-transfer-v1/preflight-v1/generated/
 campaigns/core-v1/cfd/f2-distributed-slot-transfer-v1/preflight-v1/gencase.log
 campaigns/core-v1/cfd/f2-distributed-slot-transfer-v1/normal-repair-v2/preflight-v2/generated/
 campaigns/core-v1/cfd/f2-distributed-slot-transfer-v1/normal-repair-v2/preflight-v2/gencase.log
+
+# Raw CFD and post-processing products remain in the local evidence store.
+# Commit compact definitions, manifests, receipts, reports and hashes instead.
+campaigns/core-v1/**/generated/
+campaigns/core-v1/**/generated*/
+campaigns/core-v1/**/decoded/
+campaigns/core-v1/**/solver/
+campaigns/core-v1/**/attempt-*/
+campaigns/core-v1/**/*.bin
+campaigns/core-v1/**/*.csv
+campaigns/core-v1/**/*.out
+campaigns/core-v1/**/*.log
+campaigns/core-v1/**/*.sqlite3*
+campaigns/core-v1/**/*.lock
+campaigns/core-v1/**/*.partial
+campaigns/core-v1/**/*.tmp
+
+# Large derived rollout/reproduction payloads are retained locally and
+# represented in Git by their compact receipts and comparison summaries.
+campaigns/core-v1/reproduction/**/collected/
+campaigns/core-v1/reproduction/**/bundle/code/
+campaigns/core-v1/evidence/*rollout*.json
+campaigns/core-v1/evidence/*validation*.json
 # Superseded inline control manifest; compact v2 is the reviewable source.
 campaigns/core-v1/f3-dataset.json
