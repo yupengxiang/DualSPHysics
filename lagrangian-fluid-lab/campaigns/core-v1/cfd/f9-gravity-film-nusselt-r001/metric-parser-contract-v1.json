@@ -1,0 +1,138 @@
+{
+  "admission_granted": false,
+  "analytic_anchor_values": {
+    "Ly_m": 0.12,
+    "Q_m3ps": 0.0011074581626281347,
+    "U_ref_mps": 0.4614409010950562,
+    "g_n_abs_mps2": 9.756259793562762,
+    "g_s_mps2": 1.0254242246556806,
+    "h_m": 0.03,
+    "nu_m2ps": 0.001,
+    "q_prime_m2ps": 0.009228818021901123,
+    "rho0_kgm3": 1000.0,
+    "theta_deg": 6.0,
+    "ubar_mps": 0.30762726739670415
+  },
+  "case_definition_revision": "r001",
+  "contract_revision": "v1",
+  "denominators_and_gates": {
+    "Mach_denominator": "sound_speed=20 m/s and U_ref, never a measured survivor maximum",
+    "U_ref_mps": "1.5*ubar, case-specific analytic free-surface speed",
+    "U_ref_value_mps": 0.4614409010950562,
+    "fixed_denominator": true,
+    "mass_denominator": "registered initial fluid mass",
+    "no_survivor_renormalization": true,
+    "normal_velocity_denominator": "U_ref",
+    "profile_samples": 64,
+    "spanwise_rms_denominator": "U_ref",
+    "surface_cells": 512,
+    "ubar_mps": 0.30762726739670415
+  },
+  "execution_controls": {
+    "bi4_decoded": false,
+    "denominator_mutation": 0,
+    "gpu_started": false,
+    "hdf5_opened": false,
+    "ledger_mutation": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_invoked": false,
+    "training_started": false
+  },
+  "field_conventions": {
+    "excluded_particle_policy": "excluded particles remain in the fixed denominator and contribute to unknown mass; they are never renormalized away",
+    "mass_density_volume": "volume_weight_m3 = mass_kg / density_kg_m3",
+    "pressure": {
+      "atmospheric_offset": "p_atm is removed by the solver field contract; parser must reject an unknown offset",
+      "comparison_field": "gauge_pressure_pa",
+      "native_field": "pressure",
+      "reference": "rho0*g*cos(theta)*(h-n)",
+      "reference_units": "Pa",
+      "required_receipt_flag": "pressure_is_gauge=true"
+    },
+    "valid_particle": "valid=true, finite position/velocity/pressure/mass/density, and 900 <= density <= 1100 kg/m^3"
+  },
+  "input_bindings": {
+    "candidate_card": {
+      "path": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json",
+      "sha256": "ecb6afa637e47f1afd539db9d941b7411119bac8e20ae0c6beced4df36b2f8b9"
+    },
+    "definition": {
+      "path": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml",
+      "sha256": "940417e139fb42add49de3f2d7720a13e982ebc76826ecbe51b30b55b2278433"
+    },
+    "definition_contract_v2": {
+      "path": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/definition-contract-v2.json",
+      "sha256": "cd02b43c45c2cd2a5e30ad3383d270876594b983edfb9ceb1bf337396817e851"
+    }
+  },
+  "local_coordinates": {
+    "fluid_interval": "0 <= n <= h",
+    "normal_n": "x*sin(theta)+z*cos(theta)",
+    "origin": "bottom-plane origin at x=0,z=0 for the anchor cell",
+    "periodic_images": "project each native particle once in the primary cell; never duplicate image particles in a denominator",
+    "spanwise_y": "global y",
+    "streamwise_s": "x*cos(theta)-z*sin(theta)",
+    "velocity_projection": {
+      "u_n_mps": "vx*sin(theta)+vz*cos(theta)",
+      "u_s_mps": "vx*cos(theta)-vz*sin(theta)",
+      "u_y_mps": "vy"
+    }
+  },
+  "profile_and_flux": {
+    "Q": "Ly*q_prime",
+    "bin_assignment": "linear hat interpolation from each valid particle n to adjacent fixed midpoint bins",
+    "bin_locations": "n_j=(j+0.5)*h/64 for j=0..63",
+    "empty_bin": "hard failure; no interpolation from future frames or neighboring time windows",
+    "flux_error": "abs(q_prime-q_prime_reference)/max(abs(q_prime_reference),1e-12)",
+    "normal_bins": 64,
+    "profile": "weighted mean u_s at each fixed midpoint bin",
+    "profile_error": "L2(profile-reference)/max(L2(reference),1e-12)",
+    "q_prime": "h/64 * sum_j profile_u_s[j]",
+    "reference_profile": "g*sin(theta)/nu*(h*n-n^2/2)",
+    "unknown_mass": "mass of invalid, excluded, or unsupported particles divided by total registered fluid mass",
+    "weight": "mass_density_volume"
+  },
+  "qualification_credit": 0,
+  "required_runtime_receipt_fields": [
+    "pressure_is_gauge",
+    "theta_deg",
+    "MapRealSize_x_m",
+    "expected_output_rows",
+    "frames_scored",
+    "unknown_mass_fraction",
+    "profile_u_s",
+    "profile_reference_u_s",
+    "q_prime_m2ps",
+    "surface_mean_height_bias_m",
+    "surface_demeaned_rms_m",
+    "surface_normal_velocity_over_U_ref",
+    "spanwise_velocity_rms_over_U_ref",
+    "failure_category"
+  ],
+  "schema": "core.cfd.f9.metric_parser_contract.v1",
+  "scope_id": "F9_GRAVITY_FILM_NUSSELT_R001",
+  "static_self_check": {
+    "admission_remains_false": true,
+    "definition_xml_parameters_match": true,
+    "parser_implementation_receipt_required_before_execution": true,
+    "runtime_map_width_still_requires_bi4_receipt": true
+  },
+  "status": "static_parser_contract_bound_no_runtime_authorization",
+  "surface_height": {
+    "cell_estimator": "maximum valid local n in each cell after fixed density/finite gates",
+    "demeaned_rms": "sqrt(mean(((cell_n_max-mean(cell_n_max))-0)^2)) over the same fixed denominator",
+    "grid": "32 uniform streamwise cells x 16 uniform spanwise cells in the primary periodic cell",
+    "missing_cell": "hard failure; no carry-forward, temporal interpolation, or survivor renormalization",
+    "normal_velocity": "mean absolute u_n at the selected surface particle per occupied cell, with missing cells failing",
+    "signed_bias": "mean(cell_n_max-h) over the fixed 512-cell denominator",
+    "surface_reference": "theoretical local plane n=h, not a fitted or time-shifted plane"
+  },
+  "time_window": {
+    "discard": "0 <= t < 3*tau",
+    "expected_output_rows": 501,
+    "frame_selection": "fixed TimeOut axis; right-censored or missing frames fail the case",
+    "score": "3*tau <= t <= 5*tau",
+    "tau_s": "h^2/nu"
+  }
+}
