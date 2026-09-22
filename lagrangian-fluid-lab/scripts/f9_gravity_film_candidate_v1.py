@@ -98,10 +98,11 @@ def build_card() -> dict[str, Any]:
     re_min = pi_min / 3.0
     re_max = pi_max / 3.0
     ubar_max = gs_max * h**2 / (3.0 * nu)
-    mach_max = ubar_max / 20.0
+    usurface_max = 1.5 * ubar_max
+    mach_max = usurface_max / 20.0
     assert pi_min > 10.0 and pi_max < 50.0
     assert re_max < 20.0
-    assert mach_max < 0.03
+    assert mach_max < 0.04
 
     return {
         "schema": "core.cfd.f9.gravity_film_nusselt_candidate.v1",
@@ -115,9 +116,10 @@ def build_card() -> dict[str, Any]:
         "mechanism": {
             "name": "gravity-driven free-surface viscous film / Nusselt film",
             "description": "A fully developed single-phase Newtonian film on a fixed inclined plane: tangential gravity drives viscous shear, the bottom is no-slip, and the top is a real free surface with zero tangential stress.",
+            "local_coordinates": "s=x*cos(theta)-z*sin(theta), n=x*sin(theta)+z*cos(theta), 0<=n<=h",
             "governing_1d_model": "du/dt = g_s + nu*d2u/dn2; u(0)=0; du/dn(h)=0",
-            "steady_prediction": "u(n)=g_s/nu*(h*n-n^2/2), ubar=g_s*h^2/(3*nu), q=g_s*h^3/(3*nu)",
-            "transient_prediction": "startup decay on h^2/nu with half-integer Neumann/Dirichlet modes",
+            "steady_prediction": "u(n)=g_s/nu*(h*n-n^2/2), ubar=g_s*h^2/(3*nu), q_prime=g_s*h^3/(3*nu) [m^2/s per unit span], Q=Ly*q_prime",
+            "transient_prediction": "u(n,t)=u_inf(n)-(2*g_s*h^2/nu)*sum_k[sin(mu_k*n/h)/mu_k^3*exp(-mu_k^2*nu*t/h^2)], mu_k=(k+1/2)*pi",
             "falsifiable_observables": [
                 "full wall-normal velocity profile",
                 "free-surface height and normal velocity",
@@ -138,7 +140,7 @@ def build_card() -> dict[str, Any]:
         },
         "physical_contract": {
             "rho0_kg_m3": 1000.0,
-            "gravity_m_s2": gravity,
+            "gravity_global_m_s2": {"x": 0.0, "y": 0.0, "z": -gravity},
             "film_thickness_h_m": h,
             "kinematic_viscosity_m2_s": nu,
             "theta_range_deg": [theta_min_deg, theta_max_deg],
@@ -146,9 +148,11 @@ def build_card() -> dict[str, Any]:
             "Pi_range": [pi_min, pi_max],
             "Re_f_range": [re_min, re_max],
             "mean_speed_max_m_s": ubar_max,
+            "free_surface_speed_max_m_s": usurface_max,
             "sound_speed_m_s": 20.0,
             "Mach_max": mach_max,
             "domain": {"streamwise_length_m": 0.24, "spanwise_length_m": 0.12, "boundary": "periodic streamwise/spanwise with streamwise normal offset; no inlet/outlet"},
+            "coordinate_convention": {"bottom": "z_b(x)=-x*tan(theta)", "streamwise_unit": "(cos(theta),0,-sin(theta))", "normal_unit": "(sin(theta),0,cos(theta))", "gravity_projection": "g_s=g*sin(theta), g_n=g*cos(theta)"},
             "resolution_dp_m": {"coarse": 0.01, "production": 0.0075, "fine": 0.006},
             "surface_tension": False,
             "initial_state": "fluid at rest, film parallel to fixed inclined plane, no inherited velocity",
@@ -157,7 +161,7 @@ def build_card() -> dict[str, Any]:
             "must_have": [
                 "one fluid block and no top-wall particles",
                 "fixed mDBC bottom with no-slip and a real free surface at n=h",
-                "gravity decomposed into tangential and normal components",
+                "global gravity is (0,0,-g), with g_s and g_n obtained only by local projection",
             "periodic streamwise/spanwise boundaries using individual XPeriodicIncZ and YPeriodicIncZ parameters, never XYPeriodic, plus explicitly verified offset sign",
                 "no inlet/outlet, pump, moving boundary, floating, Chrono, obstacle, material body, or surface tension",
                 "particle identity, mass, finite-value, overlap, initial exclusion, and lifecycle checks",
@@ -167,11 +171,26 @@ def build_card() -> dict[str, Any]:
             "hard_failure_policy": "fixed denominator, close scope, no threshold relaxation and no same-input retry",
         },
         "error_gates": {
+            "reference_profile": "64 fixed midpoint samples n_j=(j+0.5)*h/64; particle velocities interpolated/averaged in local (s,n) coordinates",
+            "reference_time_window": "tau=h^2/nu=0.9 s; discard [0,3*tau); average diagnostics over [3*tau,5*tau] at fixed TimeOut",
+            "profile_l2_normalization": "L2 error divided by max(L2 analytic profile,1e-12)",
             "production_profile_relative_l2_max": 0.05,
             "production_flux_relative_max": 0.05,
+            "flux_definition": "q_prime=integral_0^h u(n)dn [m^2/s per unit span]; Q=Ly*q_prime [m^3/s]",
             "fine_vs_production_profile_relative_max": 0.03,
             "fine_vs_production_flux_relative_max": 0.03,
+            "surface_height_reference": "local normal coordinate n after subtracting theoretical plane n=h and time-window mean",
             "surface_height_rms_max_m": 0.5 * 0.0075,
+            "surface_mean_height_bias_max_m": 0.25 * 0.0075,
+            "pressure_reference": "p(n)=p_atm+rho*g_n_abs*(h-n), g_n_abs=g*cos(theta); gravity dot normal is -g_n_abs",
+            "pressure_profile_relative_l2_max": 0.10,
+            "surface_normal_velocity_over_uref_max": 0.05,
+            "spanwise_velocity_rms_over_uref_max": 0.05,
+            "mass_drift_relative_max": 0.001,
+            "U_ref_definition": "U_ref=analytic free-surface speed=1.5*ubar; all velocity gates and Mach use case-specific U_ref",
+            "solver_density_valid_interval_kg_m3": [900.0, 1100.0],
+            "output_rows_expected": 501,
+            "steady_window_and_denominator": "same theta, same physical window, same fixed sample count for fine/production comparisons",
             "excluded_fluid_particles": 0,
             "density_interval_kg_m3": [950.0, 1050.0],
             "hard_failure_policy": "fixed denominator, no threshold relaxation, no same-input retry",

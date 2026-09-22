@@ -20,6 +20,8 @@ def test_f9_has_distinct_nusselt_falsifier_and_no_open_channel_reuse() -> None:
     assert "u(n)=g_s/nu*(h*n-n^2/2)" in card["mechanism"]["steady_prediction"]
     assert "no inlet/outlet" in card["physical_contract"]["domain"]["boundary"]
     assert card["independence_review"]["not_a_parameter_rename"]
+    assert card["error_gates"]["U_ref_definition"].startswith("U_ref=")
+    assert card["physical_contract"]["free_surface_speed_max_m_s"] > card["physical_contract"]["mean_speed_max_m_s"]
 
 
 def test_f9_does_not_mutate_core_controls() -> None:

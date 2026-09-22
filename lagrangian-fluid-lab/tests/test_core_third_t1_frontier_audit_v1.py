@@ -27,5 +27,5 @@ def test_committed_frontier_audit_is_hash_bound_and_non_mutating() -> None:
     assert result["route_decisions"]["F8"]["terra_high_review"] == "conditional_go_static_preparation_no_admission"
     assert result["route_decisions"]["F8"]["parameter_contract"] == "pre_admission_static_contract_frozen"
     assert result["route_decisions"]["F9"]["admission_granted"] is False
-    assert result["route_decisions"]["F9"]["terra_high_review"] == "conditional_go_static_preparation_no_admission"
+    assert result["route_decisions"]["F9"]["terra_high_review"] == "conditional_go_definition_preparation_only"
     assert result["route_decisions"]["F9"]["definition_contract"] == "static_definition_contract_only_no_runtime_authorization"

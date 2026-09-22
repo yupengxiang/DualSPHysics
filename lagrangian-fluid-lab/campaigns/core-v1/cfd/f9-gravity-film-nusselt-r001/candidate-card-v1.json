@@ -7,6 +7,7 @@
     "formal root admission must explicitly accept F9 as the third Core family before any execution"
   ],
   "error_gates": {
+    "U_ref_definition": "U_ref=analytic free-surface speed=1.5*ubar; all velocity gates and Mach use case-specific U_ref",
     "density_interval_kg_m3": [
       950.0,
       1050.0
@@ -14,10 +15,27 @@
     "excluded_fluid_particles": 0,
     "fine_vs_production_flux_relative_max": 0.03,
     "fine_vs_production_profile_relative_max": 0.03,
+    "flux_definition": "q_prime=integral_0^h u(n)dn [m^2/s per unit span]; Q=Ly*q_prime [m^3/s]",
     "hard_failure_policy": "fixed denominator, no threshold relaxation, no same-input retry",
+    "mass_drift_relative_max": 0.001,
+    "output_rows_expected": 501,
+    "pressure_profile_relative_l2_max": 0.1,
+    "pressure_reference": "p(n)=p_atm+rho*g_n_abs*(h-n), g_n_abs=g*cos(theta); gravity dot normal is -g_n_abs",
     "production_flux_relative_max": 0.05,
     "production_profile_relative_l2_max": 0.05,
-    "surface_height_rms_max_m": 0.00375
+    "profile_l2_normalization": "L2 error divided by max(L2 analytic profile,1e-12)",
+    "reference_profile": "64 fixed midpoint samples n_j=(j+0.5)*h/64; particle velocities interpolated/averaged in local (s,n) coordinates",
+    "reference_time_window": "tau=h^2/nu=0.9 s; discard [0,3*tau); average diagnostics over [3*tau,5*tau] at fixed TimeOut",
+    "solver_density_valid_interval_kg_m3": [
+      900.0,
+      1100.0
+    ],
+    "spanwise_velocity_rms_over_uref_max": 0.05,
+    "steady_window_and_denominator": "same theta, same physical window, same fixed sample count for fine/production comparisons",
+    "surface_height_reference": "local normal coordinate n after subtracting theoretical plane n=h and time-window mean",
+    "surface_height_rms_max_m": 0.00375,
+    "surface_mean_height_bias_max_m": 0.001875,
+    "surface_normal_velocity_over_uref_max": 0.05
   },
   "evidence": [
     {
@@ -129,12 +147,13 @@
       "resolution and time-step convergence"
     ],
     "governing_1d_model": "du/dt = g_s + nu*d2u/dn2; u(0)=0; du/dn(h)=0",
+    "local_coordinates": "s=x*cos(theta)-z*sin(theta), n=x*sin(theta)+z*cos(theta), 0<=n<=h",
     "name": "gravity-driven free-surface viscous film / Nusselt film",
-    "steady_prediction": "u(n)=g_s/nu*(h*n-n^2/2), ubar=g_s*h^2/(3*nu), q=g_s*h^3/(3*nu)",
-    "transient_prediction": "startup decay on h^2/nu with half-integer Neumann/Dirichlet modes"
+    "steady_prediction": "u(n)=g_s/nu*(h*n-n^2/2), ubar=g_s*h^2/(3*nu), q_prime=g_s*h^3/(3*nu) [m^2/s per unit span], Q=Ly*q_prime",
+    "transient_prediction": "u(n,t)=u_inf(n)-(2*g_s*h^2/nu)*sum_k[sin(mu_k*n/h)/mu_k^3*exp(-mu_k^2*nu*t/h^2)], mu_k=(k+1/2)*pi"
   },
   "physical_contract": {
-    "Mach_max": 0.023019331530669974,
+    "Mach_max": 0.03452899729600496,
     "Pi_range": [
       13.862224730068533,
       41.434796755205944
@@ -143,17 +162,28 @@
       4.620741576689511,
       13.811598918401982
     ],
+    "coordinate_convention": {
+      "bottom": "z_b(x)=-x*tan(theta)",
+      "gravity_projection": "g_s=g*sin(theta), g_n=g*cos(theta)",
+      "normal_unit": "(sin(theta),0,cos(theta))",
+      "streamwise_unit": "(cos(theta),0,-sin(theta))"
+    },
     "domain": {
       "boundary": "periodic streamwise/spanwise with streamwise normal offset; no inlet/outlet",
       "spanwise_length_m": 0.12,
       "streamwise_length_m": 0.24
     },
     "film_thickness_h_m": 0.03,
+    "free_surface_speed_max_m_s": 0.6905799459200992,
     "g_tangent_range_m_s2": [
       0.5134157307432791,
       1.5346221020446649
     ],
-    "gravity_m_s2": 9.81,
+    "gravity_global_m_s2": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": -9.81
+    },
     "initial_state": "fluid at rest, film parallel to fixed inclined plane, no inherited velocity",
     "kinematic_viscosity_m2_s": 0.001,
     "mean_speed_max_m_s": 0.46038663061339946,
@@ -192,7 +222,7 @@
     "must_have": [
       "one fluid block and no top-wall particles",
       "fixed mDBC bottom with no-slip and a real free surface at n=h",
-      "gravity decomposed into tangential and normal components",
+      "global gravity is (0,0,-g), with g_s and g_n obtained only by local projection",
       "periodic streamwise/spanwise boundaries using individual XPeriodicIncZ and YPeriodicIncZ parameters, never XYPeriodic, plus explicitly verified offset sign",
       "no inlet/outlet, pump, moving boundary, floating, Chrono, obstacle, material body, or surface tension",
       "particle identity, mass, finite-value, overlap, initial exclusion, and lifecycle checks",

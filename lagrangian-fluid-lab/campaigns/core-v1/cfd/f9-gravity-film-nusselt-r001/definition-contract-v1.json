@@ -3,43 +3,57 @@
   "anchor_geometry": {
     "film_normal_thickness_m": 0.03,
     "free_surface_vertical_offset_at_anchor_m": 0.030165248386905492,
-    "length_x_m": 0.24,
-    "length_y_m": 0.12,
-    "periodic_x_translation_m": [
+    "geometric_forward_translation_m": [
       0.24,
       0.0,
       -0.02522501646376235
     ],
+    "length_x_m": 0.24,
+    "length_y_m": 0.12,
     "periodic_y_translation_m": [
       0.0,
       0.12,
       0.0
     ],
+    "runtime_periodic_x_vector_m": [
+      -0.24,
+      0.0,
+      0.02522501646376235
+    ],
     "theta_deg": 6.0
   },
   "constantsdef_contract": {
+    "density_diffusion": 0,
+    "gamma": 7.0,
     "gravity_is_only_driving_input": true,
     "gravity_m_s2": {
-      "x": 1.0254242246556806,
+      "x": 0.0,
       "y": 0.0,
-      "z": -9.756259793562762
+      "z": -9.81
+    },
+    "gravity_projection": {
+      "g_n_abs_for_pressure_m_s2": 9.756259793562762,
+      "g_s_m_s2": 1.0254242246556806,
+      "gravity_dot_normal_m_s2": -9.756259793562762
     },
     "kinematic_viscosity_m2_s": 0.001,
     "rhop0_kg_m3": 1000.0,
+    "rhopgradient": 1,
     "sound_speed_m_s": 20.0
   },
   "coordinate_convention": {
     "bottom_plane": "z_b(x)=-x*tan(theta_anchor) over one periodic cell",
     "fluid_region": "z_b(x) <= z <= z_b(x)+h/cos(theta_anchor), with no top-wall particles",
     "free_surface": "upper geometric boundary of fluid only; no solid top wall",
+    "normal": "local n=x*sin(theta)+z*cos(theta), 0<=n<=h",
     "spanwise": "global y",
-    "streamwise": "global x = s",
+    "streamwise": "local s=x*cos(theta)-z*sin(theta)",
     "up": "global z"
   },
   "evidence": [
     {
       "path": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json",
-      "sha256": "5692425c7e5db31040dc33a6575564170a0a5b7799da32c364b63694dd0b2863"
+      "sha256": "22f889cf51d83fe32206326e2e3bdd3b9bdc49495dda88d6d48c7cdf24458165"
     },
     {
       "path": "vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp",
@@ -52,14 +66,24 @@
   ],
   "execution_parameters_contract": {
     "Boundary": 2,
-    "DtFixed": "must be explicitly frozen before native preflight",
+    "DtFixed": "1e-5 s",
+    "DtFixed_s": 1e-05,
+    "Kernel": 2,
+    "NoPenetration": 1,
     "ShiftTFS": 2.75,
     "SlipMode": 2,
-    "TimeOut": "must be explicitly frozen before native preflight",
-    "ViscoTreatment": 2,
-    "XPeriodicIncZ": -0.02522501646376235,
+    "StepAlgorithm": 2,
+    "TimeMax": "5.0 s",
+    "TimeMax_s": 5.0,
+    "TimeOut": "0.01 s",
+    "TimeOut_s": 0.01,
+    "ViscoBoundFactor": 1,
+    "ViscoTreatment": 3,
+    "Visco_m2_s": 0.001,
+    "XPeriodicIncZ": 0.02522501646376235,
     "XYPeriodic_parameter": "forbidden",
-    "YPeriodicIncZ": 0.0
+    "YPeriodicIncZ": 0.0,
+    "expected_output_rows": 501
   },
   "geometry_contract": {
     "allowed_geometry_operations": [
@@ -98,9 +122,14 @@
   "scope_id": "F9_GRAVITY_FILM_NUSSELT_R001",
   "semantic_gates_before_any_runtime": [
     "XML parser accepts one fluid and bottom-only boundary geometry",
-    "periodic x copies translate by (Lx,0,-Lx*tan(theta)) and preserve bottom/free-surface planes",
+    "geometric x copies translate by (+Lx,0,-Lx*tan(theta)); runtime periodic duplicate vector is (-MapRealSize.x,0,+XPeriodicIncZ), with MapRealSize.x required to equal Lx",
     "y copies translate by (0,Ly,0)",
-    "gravity vector is tangent/normal decomposition for the same theta",
+    "global gravity is (0,0,-g), and its local projections are g_s=g*sin(theta), gravity dot normal=-g*cos(theta)",
+    "Nusselt q_prime is unit-span flux in m^2/s and total Q=Ly*q_prime in m^3/s",
+    "pressure reference is p_atm+rho*g*cos(theta)*(h-n) in local n",
+    "U_ref is analytic free-surface speed 1.5*ubar, and Mach uses U_ref/sound_speed",
+    "NoPenetration=1, gamma=7, rhopgradient=1, density diffusion=0, DtFixed=1e-5 s, TimeOut=0.01 s and TimeMax=5 s are explicit",
+    "profile samples, transient discard/window, norms, denominators, surface reference, pressure and velocity gates are frozen",
     "initial fluid particles occupy the film without top-wall particles, overlaps, or exclusions",
     "all q cases change only the pre-registered theta/geometry axis and dp resolution rules",
     "profile, free-surface, pressure, flux, mass, lifecycle, and exclusion parsers are available"

@@ -12,6 +12,6 @@ F9 是固定倾斜平面上的单相牛顿薄膜：切向重力驱动黏性剪�
 
 机器可读收据：`campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json`。
 
-Terra High 的独立 frontier review 判定 F9 为当前最可信的自由表面第三 T1 候选，但仅给出 `CONDITIONAL-GO`（静态准备）；正式 admission 仍为 `NO-GO`。审查收据位于 `campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-frontier-review-v1.json`。
+Terra High 的独立 frontier review 判定 F9 为当前最可信的自由表面第三 T1 候选，但仅给出 `CONDITIONAL-GO`（静态准备）；正式 admission 仍为 `NO-GO`。v1 审查因几何/重力/周期符号问题保留为历史记录；修正后的 v2 审查只授权准备候选 Definition 文件，收据位于 `campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-contract-review-v2.json`。
 
 本轮新增 Definition contract，冻结 anchor 的倾斜底面、自由表面高度、重力分解、`XPeriodicIncZ`／`YPeriodicIncZ` 以及禁止 `XYPeriodic` 的规则。该合同明确 `definition_write=false`、`native_preflight=false`、`solver=false`，只是下一次 root review 的输入：`campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/definition-contract-v1.json`。

@@ -1,0 +1,53 @@
+{
+  "schema": "core.cfd.f9.root_review.terra_high.v2",
+  "reviewer": {
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "agent_id": "01a0c87f-4b73-7120-9062-c96d1915bc90"
+  },
+  "scope_id": "F9_GRAVITY_FILM_NUSSELT_R001",
+  "decision": "conditional_go_definition_preparation_only",
+  "admission_granted": false,
+  "qualification_credit": 0,
+  "confirmed": [
+    "global gravity (0,0,-g) is consistent with local slope coordinates",
+    "Nusselt steady profile and half-integer startup series are mathematically consistent",
+    "q_prime and Q units are explicit",
+    "ViscoTreatment=3 is pure Laminar",
+    "XPeriodicIncZ positive sign is consistent with JSph perinc and ps plus/minus semantics",
+    "XYPeriodic remains forbidden"
+  ],
+  "remaining_definition_gates": [
+    "materialized target geometry must make MapRealSize.x exactly Lx before using runtime periodic vector (-MapRealSize.x,0,+XPeriodicIncZ)",
+    "target XML must use the frozen DtFixed=1e-5 s, TimeOut=0.01 s, TimeMax=5.0 s and produce 501 expected output rows",
+    "all profile, flux, pressure, surface-height, normal/spanwise velocity, mass and Mach metrics must use the frozen local coordinates, U_ref and denominators",
+    "mean surface-height bias must be checked separately from demeaned surface RMS",
+    "pressure uses positive g_n_abs while gravity dot local normal remains negative",
+    "NoPenetration=1, Gamma=7, RhopGradient=1 and density diffusion=0 must be explicit",
+    "fresh Definition, BI4, native preflight, decoder and integrity receipts are still absent"
+  ],
+  "authorized_next_step": "prepare the candidate Definition file for a fresh static root review only",
+  "forbidden_until_new_admission": ["GenCase", "native_preflight", "solver", "GPU", "queue", "registry", "ledger", "denominator", "qualification"],
+  "execution_controls": {
+    "definition_written": false,
+    "gencase_invoked": false,
+    "native_preflight": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "training_started": false
+  },
+  "bound_artifacts": [
+    {
+      "path": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json",
+      "sha256": "22f889cf51d83fe32206326e2e3bdd3b9bdc49495dda88d6d48c7cdf24458165"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/definition-contract-v1.json",
+      "sha256": "d8de9fc706c7f3e103d06b806e5c57576cede5e2fb63383330f66187f79040ef"
+    }
+  ]
+}

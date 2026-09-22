@@ -11,14 +11,20 @@ def test_f9_definition_contract_is_static_only() -> None:
     assert contract["admission_granted"] is False
     assert contract["geometry_contract"]["top_boundary_particles"] is False
     assert contract["execution_parameters_contract"]["XYPeriodic_parameter"] == "forbidden"
-    assert contract["anchor_geometry"]["periodic_x_translation_m"][2] < 0.0
+    assert contract["anchor_geometry"]["geometric_forward_translation_m"][2] < 0.0
+    assert contract["anchor_geometry"]["runtime_periodic_x_vector_m"][0] < 0.0
+    assert contract["anchor_geometry"]["runtime_periodic_x_vector_m"][2] > 0.0
 
 
 def test_f9_definition_contract_freezes_nusselt_boundary_semantics() -> None:
     contract = build_contract()
     assert contract["execution_parameters_contract"]["Boundary"] == 2
     assert contract["execution_parameters_contract"]["SlipMode"] == 2
+    assert contract["execution_parameters_contract"]["ViscoTreatment"] == 3
+    assert contract["execution_parameters_contract"]["NoPenetration"] == 1
     assert contract["constantsdef_contract"]["gravity_is_only_driving_input"] is True
+    assert contract["execution_parameters_contract"]["DtFixed_s"] == 0.00001
+    assert contract["execution_parameters_contract"]["expected_output_rows"] == 501
     assert contract["runtime_authorization"]["definition_write"] is False
     assert contract["runtime_authorization"]["solver"] is False
 
