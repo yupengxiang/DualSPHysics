@@ -1,0 +1,98 @@
+{
+  "schema": "core.material.f4.reconstruction_candidate_card.v3",
+  "candidate_id": "f4_supportcap_affine_query_bound_v3",
+  "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+  "family": "F4",
+  "status": "proposal_only_root_review_required",
+  "purpose": "new composition of fixed visible support cap and conservative affine query-bound estimate",
+  "mechanism": {
+    "backend": "f4_ckdtree_visible_shepard_ess32_affine_bound_v3",
+    "support_cap": 32,
+    "weights": "1/(distance_squared+regularization_squared)",
+    "regularization_m": 0.004,
+    "error_estimator": "residual_plus_local_affine_query_bias",
+    "maximum_support_distance_m": 0.03
+  },
+  "independent_technical_basis": [
+    {
+      "basis": "F4-H1-ess32-support-cap",
+      "role": "increase local visible support while retaining the fixed gate and weights",
+      "limitation": "the prior ESS32 real-source counterfactual had zero survivors; no result is inherited"
+    },
+    {
+      "basis": "F4-H2-affine-query-bound",
+      "role": "bound query-point bias in addition to support-sample residual",
+      "limitation": "the prior affine real-source counterfactual had zero survivors; no result is inherited"
+    },
+    {
+      "basis": "cell14-root-cause",
+      "role": "targets the observed field1 reconstruction-error failure at frame 40->41",
+      "limitation": "the root cause does not prove that this composition will pass"
+    }
+  ],
+  "fixed_gate": {
+    "minimum_effective_sample_size": 4.0,
+    "minimum_geometry_rank": 3,
+    "minimum_anisotropy": 0.005,
+    "maximum_reconstruction_error_mps": 0.04698137929009748,
+    "unknown_fraction_limit": 0.01
+  },
+  "denominator_policy": "all source seeds remain in denominator; unknown and right-censored paths are not dropped",
+  "falsifiers": [
+    "synthetic regression fails",
+    "a future explicitly authorized CPU canary has unknown fraction above 0.01",
+    "a future canary remains right-censored at the registered event horizon",
+    "any implementation changes the fixed gate, denominator, cadence, or event tolerance"
+  ],
+  "qualification_claim": "none",
+  "credit": 0,
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "root_review_only": true,
+  "authorized_one_cpu_only": false,
+  "execution_policy": {
+    "synthetic_regression_only": true,
+    "native_started": false,
+    "solver_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "old_ess32_rerun": false,
+    "old_affine_rerun": false,
+    "future_cpu_canary_requires_new_root_review": true
+  },
+  "input_bindings": {
+    "core_material": {
+      "path": "scripts/core_material.py",
+      "role": "visible support and affine estimator primitives",
+      "sha256": "75564f6fba20f8f3298dd6882e211ad4ad8278676c67083fb24e4ab140bb614c"
+    },
+    "f4_material_calibration_v2": {
+      "path": "scripts/f4_material_calibration_v2.py",
+      "role": "independent manufactured H1/H2 technical basis",
+      "sha256": "5a19310dfe770f25fa583a1b62e35d1cdb10c1a7cae68de31026832ab607274b"
+    },
+    "cell14_root_cause": {
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-root-cause-audit-20260921.json",
+      "role": "read-only first-failure decomposition",
+      "sha256": "a4fa8e9283b4588f8ff25ace474ef57705191ba27c84a5ec9fbceefca935d0e6"
+    },
+    "prior_zero_credit_root_review": {
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-f4-ess32-root-review-20260921.json",
+      "role": "prior candidate boundary; not reused as evidence of success",
+      "sha256": "b6e7e92435179d25cc524e006b53c482259dc22065e30b5297d6ed4975dc7b7a"
+    },
+    "implementation": {
+      "path": "scripts/f4_supportcap_affine_query_bound_candidate_v3.py",
+      "role": "new array-only implementation",
+      "sha256": "78f7ff541b2cb5d0540e31abbf80c6786c15524913f76f314e25368cc603df4a"
+    },
+    "synthetic_tests": {
+      "path": "tests/test_f4_supportcap_affine_query_bound_candidate_v3.py",
+      "role": "minimal synthetic regression suite",
+      "sha256": "3710cbd72eaee827407d3ad1156d730f4f51bcf699808f7111c3e6b64077ee14"
+    }
+  }
+}
