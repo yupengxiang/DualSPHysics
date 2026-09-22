@@ -45,9 +45,13 @@ def test_candidate_binds_current_closure_and_keeps_formal_gate_closed() -> None:
 
 
 def _ready_audit(closure_sha256: str) -> dict:
+    closure = release_candidate.materialize_source_closure(root=ROOT, code_root=ROOT)
     return {
+        "schema": release_candidate.ADMISSION_SCHEMA,
+        "record_id": "test-ready-admission",
         "status": "ready",
         "formal_admission": True,
+        "formal_job_count": 0,
         "required_formal_job_count": 9,
         "blockers": [],
         "manifests": [],
@@ -58,11 +62,23 @@ def _ready_audit(closure_sha256: str) -> dict:
             "fresh_admission_closure_complete": True,
             "missing_files": [],
             "current_closure_sha256": closure_sha256,
+            "required_files": list(release_candidate.REQUIRED_CODE_FILES),
+            "current_files": closure["files"],
         },
         "resource_profile": {},
         "resource_dryrun": {},
         "graph_probe": {},
-        "execution_constraints": {},
+        "execution_constraints": {
+            "read_only": True,
+            "formal_runs_started": 0,
+            "gpu_started": False,
+            "solver_started": False,
+            "submitted": False,
+            "central_registry_mutation": 0,
+            "central_ledger_mutation": 0,
+            "manifest_written": False,
+            "formal_specs_written": False,
+        },
         "admission_next_dependency": None,
     }
 
@@ -77,12 +93,26 @@ def _candidate_inputs(tmp_path: Path, closure_sha256: str = "closure") -> dict:
         "resource_profile": None,
         "resource_dryrun": None,
         "graph_probe": None,
-        "source_closure": {
-            "complete": True,
-            "missing_files": [],
-            "closure_sha256": closure_sha256,
-        },
+        "source_closure": release_candidate.materialize_source_closure(
+            root=ROOT, code_root=ROOT,
+        ),
         "registry": {},
+    }
+
+
+def _complete_campaign() -> dict:
+    checks = {name: True for name in release_candidate.CAMPAIGN_CHECKS}
+    return {
+        "schema": "core.completion.v1",
+        "can_finalize": True,
+        "checks": checks,
+        "t1_families": ["F1", "F2", "F3"],
+        "macro_t2_families": ["F1", "F2"],
+        "training_runs": [f"run-{index}" for index in range(9)],
+        "expected_training_runs": [f"run-{index}" for index in range(9)],
+        "missing_training_runs": [],
+        **{field: 0 for field in release_candidate.CAMPAIGN_COMPLETION_INTEGER_FIELDS},
+        "issues": [],
     }
 
 
@@ -92,7 +122,11 @@ def test_ready_admission_cannot_promote_an_incomplete_closure(
     monkeypatch.setattr(
         release_candidate,
         "audit_admission",
-        lambda *args, **kwargs: _ready_audit("closure"),
+        lambda *args, **kwargs: _ready_audit(
+            release_candidate.materialize_source_closure(root=ROOT, code_root=ROOT)[
+                "closure_sha256"
+            ]
+        ),
     )
     monkeypatch.setattr(
         release_candidate,
@@ -119,14 +153,18 @@ def test_ready_admission_cannot_promote_an_incomplete_closure(
     assert candidate["source_closure_contract"]["passed"] is False
 
 
-def test_candidate_observes_but_does_not_require_final_campaign_completion(
+def test_candidate_requires_final_campaign_completion(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
     monkeypatch.setattr(
         release_candidate,
         "audit_admission",
-        lambda *args, **kwargs: _ready_audit("closure"),
+        lambda *args, **kwargs: _ready_audit(
+            release_candidate.materialize_source_closure(root=ROOT, code_root=ROOT)[
+                "closure_sha256"
+            ]
+        ),
     )
     registry = tmp_path / "registry.json"
     registry.write_text("{}\n", encoding="utf-8")
@@ -136,10 +174,10 @@ def test_candidate_observes_but_does_not_require_final_campaign_completion(
 
     candidate = release_candidate.build_candidate(**inputs)
 
-    assert candidate["status"] == "released"
-    assert candidate["formal_training_ready"] is True
-    assert candidate["formal_release"] is True
-    assert "CAMPAIGN_COMPLETION_REQUIRED" not in candidate["blocker_codes"]
+    assert candidate["status"] == "blocked"
+    assert candidate["formal_training_ready"] is False
+    assert candidate["formal_release"] is False
+    assert "CAMPAIGN_COMPLETION_REQUIRED" in candidate["blocker_codes"]
     assert candidate["campaign_completion"]["valid"] is True
     assert candidate["campaign_completion"]["can_finalize"] is False
     assert candidate["campaign_completion"]["checks"]
@@ -153,16 +191,16 @@ def test_candidate_promotes_only_when_closure_and_completion_both_pass(
     monkeypatch.setattr(
         release_candidate,
         "audit_admission",
-        lambda *args, **kwargs: _ready_audit("closure"),
+        lambda *args, **kwargs: _ready_audit(
+            release_candidate.materialize_source_closure(root=ROOT, code_root=ROOT)[
+                "closure_sha256"
+            ]
+        ),
     )
     monkeypatch.setattr(
         release_candidate,
         "campaign_completion",
-        lambda payload, root: {
-            "schema": "core.completion.v1",
-            "can_finalize": True,
-            "checks": {"all": True},
-        },
+        lambda payload, root: _complete_campaign(),
     )
 
     candidate = release_candidate.build_candidate(**_candidate_inputs(tmp_path))
