@@ -1,0 +1,126 @@
+{
+  "admission_granted": false,
+  "blockers": [
+    "the official sources separately demonstrate viscous channel, accinput, and periodic syntax; their exact combined Definition has not been executed",
+    "weakly-compressible SPH phase and density error gates are not yet calibrated",
+    "the attached plan's free-surface emphasis requires explicit root interpretation",
+    "no fresh Definition, BI4, native preflight, solver, decoder, or qualification receipt exists"
+  ],
+  "evidence": [
+    {
+      "bytes": 30379,
+      "path": "/home/jade/.codex/attachments/ece07836-13f3-4e3a-9dd4-55120224dcee/PLAN.md",
+      "role": "attached Core plan; target and boundary interpretation",
+      "sha256": "17491b1f5ea5b7c8464c7afb6f2dc21bdff7cf396cb47aebd625ca22d38c3263"
+    },
+    {
+      "bytes": 6505,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/15_Poiseuille/CasePoiseuille_Def.xml",
+      "role": "official viscous channel geometry and laminar parameter precedent",
+      "sha256": "ab7e06d9a5a2c5bad899f36ef393bc1d3867cd88fbf7aba5a734ee1e4ffaa2fe"
+    },
+    {
+      "bytes": 7824,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/04_ExternalForces/CaseForces_Def.xml",
+      "role": "official accinput and time-file precedent",
+      "sha256": "1db880334bcfa0ca8514644005edbdc201f6a003e847e43901a68e9b5fa5487f"
+    },
+    {
+      "bytes": 7654,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/02_Periodicity/CasePeriodicity_Def.xml",
+      "role": "official periodic-boundary example",
+      "sha256": "af3f081d047f0abc7e3239c96f473318ce5c2ab5070228edb55d8dd22ce7fcae"
+    },
+    {
+      "bytes": 2798,
+      "path": "vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML_AccInput.xml",
+      "role": "official acceleration-input syntax",
+      "sha256": "ffbf4d8a70e249f78adb6790b58dd809a6cef02d8acee7e786f2b900367fad74"
+    },
+    {
+      "bytes": 8439,
+      "path": "vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML__Parameters.xml",
+      "role": "official periodic and mDBC parameter syntax",
+      "sha256": "bee50a855249befd30ad2029b22043b029a1f0e5ff376af423b8b37c8d30bc6f"
+    }
+  ],
+  "execution_controls": {
+    "definition_written": false,
+    "denominator_mutation": 0,
+    "gencase_invoked": false,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_invoked": false,
+    "training_started": false
+  },
+  "family": "F8",
+  "identity": {
+    "anchor_case": "F8_OPC_q0p500_dp0p0075_anchor_r001",
+    "parameter": "q in [0,1], alpha = 2 + 6*q",
+    "planned_control": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/input/acceleration/F8_OPC_q0p500_acceleration.csv",
+    "planned_definition": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001_Def.xml",
+    "planned_output_root": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/cases",
+    "production_case_count": 32,
+    "production_case_rule": "q_i=(i+0.5)/32, i=0..31",
+    "split": {
+      "id_test": 6,
+      "ood_test": 6,
+      "train": 16,
+      "validation": 4
+    }
+  },
+  "independence_review": {
+    "boundary_interpretation": "PLAN foregrounds 3D free-surface flow but its explicit Core family gate says three genuinely different mechanisms; root must decide whether non-free-surface F8 is in Core scope before admission.",
+    "distinct_from": {
+      "F1_F2_F5": "no free-surface release, catchment, wave/runup, opening, transfer, or impact event",
+      "F3_F4": "no sloshing free surface, falling liquid mass, droplet, or collision event",
+      "F6": "no floating body, Chrono state, or fluid-rigid-body feedback",
+      "F7": "no prescribed pump, moving boundary, rotation axis, torque, or angular-momentum output"
+    }
+  },
+  "mechanism": {
+    "analytical_reference": "Womersley harmonic response of du/dt = ax(t) + nu*d2u/dz2",
+    "description": "Fully filled single-phase viscous fluid in a channel periodic in x/y, with fixed no-slip walls at z=+/-H and uniform ax(t)=A sin(omega t).",
+    "falsifiable_observables": [
+      "wall-normal velocity profile amplitude and phase",
+      "centerline phase lag relative to acceleration",
+      "near-zero transverse velocity",
+      "near-zero cycle-mean flux for zero-mean forcing",
+      "startup decay on the H^2/nu viscous diffusion scale",
+      "pre-registered spatial and time-step convergence"
+    ],
+    "name": "oscillatory pressure-driven viscous channel"
+  },
+  "qualification_credit": 0,
+  "revision": "r001",
+  "schema": "core.cfd.f8_oscillatory_pressure_channel_candidate.v1",
+  "scientific_status": "not_executed_not_admitted_zero_credit",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001",
+  "static_checks": {
+    "accinput_spec_supports_globalgravity_zero": true,
+    "external_forces_has_accinput_and_time_file": true,
+    "official_xml_parses": true,
+    "periodic_example_present": true,
+    "periodic_parameter_names_documented": true,
+    "plan_has_free_surface_positioning": true,
+    "plan_has_three_family_core_gate": true,
+    "poiseuille_has_fluid_and_fixed_wall_geometry": true,
+    "poiseuille_laminar_viscosity_precedent": true
+  },
+  "static_contract": {
+    "hard_failure_policy": "any hard-gate failure closes the scope with fixed denominator; no threshold relaxation or same-input retry",
+    "must_have": [
+      "one mkfluid and gravity zero",
+      "one fluid accinput with globalgravity zero and finite monotonic control table",
+      "x/y periodicity and fixed no-slip z walls",
+      "no floating, Chrono, moving body, pump, torque, or material body",
+      "fixed geometry and control semantics across coarse/production/fine dp",
+      "particle identity, mass, finite-value, overlap, wall-clearance, and lifecycle checks",
+      "parser for time, center velocity, full wall-normal profile, and mean flux"
+    ],
+    "qualification_matrix": "13 physical/spatial cells plus 2 control cells; root review must freeze gates before any execution"
+  },
+  "status": "proposal_only_root_review_required"
+}

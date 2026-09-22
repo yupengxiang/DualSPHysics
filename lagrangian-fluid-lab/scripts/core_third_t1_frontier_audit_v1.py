@@ -37,6 +37,7 @@ def build_audit() -> dict[str, Any]:
     f1_f2 = load("campaigns/core-v1/cfd/f1-f2-third-t1-route-closed-v2.json")
     f6 = load("campaigns/core-v1/cfd/f6-observation-axis-v4-third-t1-route-closed-v1.json")
     f7 = load("campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/root-review-receipt-v2-20260922.json")
+    f8 = load("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/candidate-card-v1.json")
     readiness = load("campaigns/core-v1/learning/core-formal-readiness-audit-20260922.json")
 
     assert completion["t1_families"] == ["F3", "F4"]
@@ -46,6 +47,8 @@ def build_audit() -> dict[str, Any]:
     assert f6["existing_scope_audit"]["solver_canary"]["failed_cell_index"] == 8
     assert f7["status"] == "root_review_only_no_go_missing_fresh_materialization"
     assert f7["admission_granted"] is False
+    assert f8["status"] == "proposal_only_root_review_required"
+    assert f8["admission_granted"] is False
     assert readiness["status"] == "blocked"
 
     return {
@@ -79,6 +82,14 @@ def build_audit() -> dict[str, Any]:
                 "native_integrity_receipt_present": f7["fresh_artifact_integrity"]["native_integrity_receipt"]["exists"],
                 "next_allowed_action": "new root admission review only; no solver or ComputeForces execution",
             },
+            "F8": {
+                "status": f8["status"],
+                "scope_id": f8["scope_id"],
+                "admission_granted": f8["admission_granted"],
+                "qualification_credit": f8["qualification_credit"],
+                "fresh_definition_present": f8["execution_controls"]["definition_written"],
+                "next_allowed_action": "root interpretation and independent admission review only; no GenCase or solver execution",
+            },
         },
         "formal_readiness": {
             "status": readiness["status"],
@@ -104,6 +115,7 @@ def build_audit() -> dict[str, Any]:
             bind("campaigns/core-v1/cfd/f6-observation-axis-v4-third-t1-route-closed-v1.json", "F6 closure card"),
             bind("campaigns/core-v1/evidence/f6-observation-axis-v4-third-t1-route-decision-receipt-v1.json", "F6 closure receipt"),
             bind("campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/root-review-receipt-v2-20260922.json", "F7 no-go root receipt"),
+            bind("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/candidate-card-v1.json", "F8 proposal-only candidate card"),
             bind("campaigns/core-v1/learning/core-formal-readiness-audit-20260922.json", "current formal readiness"),
         ],
     }
