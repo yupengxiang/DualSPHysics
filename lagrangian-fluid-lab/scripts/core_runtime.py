@@ -1066,6 +1066,16 @@ class Coordinator:
 
     def tick(self):
         self.reconcile()
+        # A persistent coordinator must remain available for a later submit,
+        # but terminal-only queues have no admission decision to make.  Avoid
+        # repeatedly probing every host (and sampling every GPU) until there
+        # is queued work to admit. Reconciliation above still runs first so an
+        # active worker can always finalize before this decision.
+        jobs = self.store.jobs()
+        if not any(job["status"] == "queued" for job in jobs):
+            summary = self.summary()
+            atomic_json(self.store.root / "status.json", summary)
+            return summary
         snapshots = {}
         for name, host in self.hosts.items():
             try:

@@ -105,6 +105,33 @@ def test_scheduler_selected_routes_and_persists_effective_host(tmp_path):
     assert coordinator.job_host(store.jobs()[0]) == "h200"
 
 
+def test_terminal_only_queue_skips_host_probes_but_persists_status(tmp_path):
+    coordinator = Coordinator(
+        tmp_path / "runtime",
+        {"ada": {"lab": str(tmp_path), "python": "python"}},
+    )
+    coordinator.store.submit(
+        {
+            "job_id": "terminal-only",
+            "argv": ["/bin/true"],
+            "cwd": "/tmp",
+            "host": "ada",
+            "resources": {"cpu_cores": 1, "ram_mib": 128, "gpu_peak_mib": 0, "io_weight": 0},
+            "required_outputs": [],
+            "timeout_seconds": 10,
+        }
+    )
+    coordinator.store.update("terminal-only", "succeeded")
+    calls = []
+    coordinator.call = lambda *args: calls.append(args)
+
+    summary = coordinator.tick()
+
+    assert calls == []
+    assert summary["counts"]["succeeded"] == 1
+    assert json.loads((coordinator.store.root / "status.json").read_text())["counts"]["queued"] == 0
+
+
 def test_cas_transition_allows_only_one_observer_to_advance_attempt(tmp_path):
     first = Store(tmp_path / "runtime")
     first.submit(
