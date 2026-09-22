@@ -1,0 +1,374 @@
+{
+  "bindings": [
+    {
+      "bytes": 6101,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/candidate-card-v1.json",
+      "role": "candidate_card",
+      "sha256": "7663c9244decd142321835182f2d61043785023aea5f745870b06870c87322d4"
+    },
+    {
+      "bytes": 4151,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/parameter-contract-v1.json",
+      "role": "parameter_contract",
+      "sha256": "f15d9db7e41fd626311f0040b3a3fd4c4498cf6152f23e446d0c23cc495865d6"
+    },
+    {
+      "bytes": 2528,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/root-review/terra-high-root-review-v1.json",
+      "role": "prior_root_review",
+      "sha256": "4360d9e240a05e1de9eeb372bda9ef2044fd22fffeab6f30fdb9c713d801b03a"
+    },
+    {
+      "bytes": 1965,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/reference-oracle-v1/contract.json",
+      "role": "oracle_contract",
+      "sha256": "4584db7da9704dc602d890f9f3191e03c4ba27debf7a69760a9d213dc4c048e4"
+    },
+    {
+      "bytes": 7285,
+      "path": "scripts/f8_womersley_oracle.py",
+      "role": "oracle_implementation",
+      "sha256": "bf9a3f975d4a25ba72d65ff2f9edafa29fd565d366d2c940fc85043bd84b469f"
+    },
+    {
+      "bytes": 5365,
+      "path": "tests/test_f8_womersley_oracle.py",
+      "role": "oracle_test",
+      "sha256": "963e73ab42709c1828f94aea0267f386373a74562dd03014ff6122e0160d6110"
+    },
+    {
+      "bytes": 1389,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/reference-oracle-v2/contract.json",
+      "role": "F8 v2 static extension: startup_oracle_contract",
+      "sha256": "888d24b9e14e9226c41d32e5fc4fae85b2b369ec50ea1618f04e9736e975c4e8"
+    },
+    {
+      "bytes": 3351,
+      "path": "scripts/f8_womersley_oracle_v2.py",
+      "role": "F8 v2 static extension: startup_oracle_implementation",
+      "sha256": "8f5ab2c3b61c947cd2bbc97ecc0e16928c52a804df03d3154c4e4ce12ebf2d66"
+    },
+    {
+      "bytes": 1573,
+      "path": "tests/test_f8_womersley_oracle_v2.py",
+      "role": "F8 v2 static extension: startup_oracle_test",
+      "sha256": "3e076ec4049ff9322a5b6522ae1da1b9c4268b5b074eb42d9af3cc0962a342a5"
+    },
+    {
+      "bytes": 1173,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/observation-parser-v1/contract.json",
+      "role": "F8 v2 static extension: observation_parser_contract",
+      "sha256": "b39ce6a804bad6927cd2c235caf16036567e5bf295a489c4c38a042a85d97f99"
+    },
+    {
+      "bytes": 3870,
+      "path": "scripts/f8_observation_parser_v1.py",
+      "role": "F8 v2 static extension: observation_parser_implementation",
+      "sha256": "7bc357f091b6c360522ab6386591d6ab07af64626b89219ab43e4e83553ba079"
+    },
+    {
+      "bytes": 1904,
+      "path": "tests/test_f8_observation_parser_v1.py",
+      "role": "F8 v2 static extension: observation_parser_test",
+      "sha256": "54582f0c2acd78b96ac3dbe7bc13243179d95c653b14eceebdce86429ee3ed1a"
+    },
+    {
+      "bytes": 1268,
+      "path": "tests/test_f8_reference_contracts_v2.py",
+      "role": "F8 v2 static extension: extension_contract_test",
+      "sha256": "c5bf441cd9f937851292eb063732e5e52f97acd2fa301d81deaff94f6369fb91"
+    }
+  ],
+  "definition_semantics": {
+    "materialization": {
+      "authorized_by_bundle": false,
+      "control_path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/input/acceleration/F8_OPC_q0p500_acceleration.csv",
+      "control_written": false,
+      "definition_path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001_Def.xml",
+      "definition_written": false
+    },
+    "naming_decision": {
+      "body_force_driven_label_required": true,
+      "pressure_driven_label_admitted": false,
+      "root_scope_interpretation_required": true
+    },
+    "required_semantics": {
+      "fixed_no_slip_walls": [
+        "z=-H",
+        "z=+H"
+      ],
+      "forbidden_components": [
+        "free_surface",
+        "moving_body",
+        "Chrono",
+        "pump",
+        "torque"
+      ],
+      "forcing_name": "body-force-driven_oscillatory_channel",
+      "globalgravity": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "input_kind": "accinput_linear_acceleration",
+      "input_units": "m/s^2",
+      "one_mkfluid": true,
+      "periodic_axes": [
+        "x",
+        "y"
+      ],
+      "pressure_equivalence": "dp/dx=-rho*ax(t), constant-density interpretation only"
+    },
+    "schema": "core.cfd.f8.definition_semantics_contract.v1",
+    "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001",
+    "status": "expected_semantics_only_definition_not_materialized"
+  },
+  "execution_controls": {
+    "control_written": false,
+    "definition_written": false,
+    "denominator_mutation": 0,
+    "gencase_invoked": false,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "native_decode_invoked": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_invoked": false,
+    "training_started": false
+  },
+  "parser_contract": {
+    "flux_observable": "cross_sectional_integral_over_registered_z_grid",
+    "missing_output_policy": "row_failure_fixed_denominator",
+    "phase_observable": {
+      "future_reference_access": false,
+      "method": "least_squares_sine_cosine_after_registered_observation_start",
+      "observation_start_rule": "max(2*tau_viscous, 2*period)",
+      "time_shift_fitting": false
+    },
+    "profile_observable": "wall_normal_velocity_amplitude_and_phase_at_registered_z_samples",
+    "required_arrays": {
+      "center_velocity_mps": {
+        "finite": true,
+        "shape": [
+          "T"
+        ]
+      },
+      "mean_flux_m3_s_per_m": {
+        "finite": true,
+        "shape": [
+          "T"
+        ]
+      },
+      "profile_velocity_mps": {
+        "finite": true,
+        "shape": [
+          "T",
+          "Z"
+        ]
+      },
+      "profile_z_m": {
+        "finite": true,
+        "shape": [
+          "Z"
+        ],
+        "strictly_increasing": true
+      },
+      "time_s": {
+        "finite": true,
+        "shape": [
+          "T"
+        ],
+        "strictly_increasing": true
+      }
+    },
+    "schema": "core.cfd.f8.observation_parser_contract.v1",
+    "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001",
+    "status": "implemented_static_parser_no_source_present"
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "qualification_matrix": {
+    "control_row_count": 2,
+    "denominator_policy": "all 15 rows retained; no partial credit, no survivor renormalization",
+    "parameter_rule": "q_i=(i+0.5)/32 for production; qualification q points are fixed independently",
+    "physical_spatial_row_count": 13,
+    "planned_row_count": 15,
+    "resolution_rule": {
+      "coarse_dp_m": 0.009,
+      "fine_dp_m": 0.006,
+      "production_dp_m": 0.0075
+    },
+    "rows": [
+      {
+        "cadence_policy": "registered_0p02_s",
+        "dp_m": 0.009,
+        "purpose": "spatial_anchor_coarse",
+        "q": 0.0,
+        "qualification_only": true,
+        "row_id": "F8-R00",
+        "status": "planned_not_executed",
+        "time_step_policy": "baseline_registered_after_preflight"
+      },
+      {
+        "cadence_policy": "registered_0p02_s",
+        "dp_m": 0.0075,
+        "purpose": "spatial_anchor_production",
+        "q": 0.0,
+        "qualification_only": true,
+        "row_id": "F8-R01",
+        "status": "planned_not_executed",
+        "time_step_policy": "baseline_registered_after_preflight"
+      },
+      {
+        "cadence_policy": "registered_0p02_s",
+        "dp_m": 0.006,
+        "purpose": "spatial_anchor_fine",
+        "q": 0.0,
+        "qualification_only": true,
+        "row_id": "F8-R02",
+        "status": "planned_not_executed",
+        "time_step_policy": "baseline_registered_after_preflight"
+      },
+      {
+        "cadence_policy": "registered_0p02_s",
+        "dp_m": 0.009,
+        "purpose": "spatial_anchor_coarse",
+        "q": 0.5,
+        "qualification_only": true,
+        "row_id": "F8-R03",
+        "status": "planned_not_executed",
+        "time_step_policy": "baseline_registered_after_preflight"
+      },
+      {
+        "cadence_policy": "registered_0p02_s",
+        "dp_m": 0.0075,
+        "purpose": "spatial_anchor_production",
+        "q": 0.5,
+        "qualification_only": true,
+        "row_id": "F8-R04",
+        "status": "planned_not_executed",
+        "time_step_policy": "baseline_registered_after_preflight"
+      },
+      {
+        "cadence_policy": "registered_0p02_s",
+        "dp_m": 0.006,
+        "purpose": "spatial_anchor_fine",
+        "q": 0.5,
+        "qualification_only": true,
+        "row_id": "F8-R05",
+        "status": "planned_not_executed",
+        "time_step_policy": "baseline_registered_after_preflight"
+      },
+      {
+        "cadence_policy": "registered_0p02_s",
+        "dp_m": 0.009,
+        "purpose": "spatial_anchor_coarse",
+        "q": 1.0,
+        "qualification_only": true,
+        "row_id": "F8-R06",
+        "status": "planned_not_executed",
+        "time_step_policy": "baseline_registered_after_preflight"
+      },
+      {
+        "cadence_policy": "registered_0p02_s",
+        "dp_m": 0.0075,
+        "purpose": "spatial_anchor_production",
+        "q": 1.0,
+        "qualification_only": true,
+        "row_id": "F8-R07",
+        "status": "planned_not_executed",
+        "time_step_policy": "baseline_registered_after_preflight"
+      },
+      {
+        "cadence_policy": "registered_0p02_s",
+        "dp_m": 0.006,
+        "purpose": "spatial_anchor_fine",
+        "q": 1.0,
+        "qualification_only": true,
+        "row_id": "F8-R08",
+        "status": "planned_not_executed",
+        "time_step_policy": "baseline_registered_after_preflight"
+      },
+      {
+        "cadence_policy": "registered_0p02_s",
+        "dp_m": 0.0075,
+        "purpose": "independent_internal_production",
+        "q": 0.25,
+        "qualification_only": true,
+        "row_id": "F8-R09",
+        "status": "planned_not_executed",
+        "time_step_policy": "baseline_registered_after_preflight"
+      },
+      {
+        "cadence_policy": "registered_0p02_s",
+        "dp_m": 0.006,
+        "purpose": "independent_internal_fine",
+        "q": 0.25,
+        "qualification_only": true,
+        "row_id": "F8-R10",
+        "status": "planned_not_executed",
+        "time_step_policy": "baseline_registered_after_preflight"
+      },
+      {
+        "cadence_policy": "registered_0p02_s",
+        "dp_m": 0.0075,
+        "purpose": "independent_internal_production",
+        "q": 0.75,
+        "qualification_only": true,
+        "row_id": "F8-R11",
+        "status": "planned_not_executed",
+        "time_step_policy": "baseline_registered_after_preflight"
+      },
+      {
+        "cadence_policy": "registered_0p02_s",
+        "dp_m": 0.006,
+        "purpose": "independent_internal_fine",
+        "q": 0.75,
+        "qualification_only": true,
+        "row_id": "F8-R12",
+        "status": "planned_not_executed",
+        "time_step_policy": "baseline_registered_after_preflight"
+      },
+      {
+        "cadence_policy": "registered_0p02_s",
+        "dp_m": 0.0075,
+        "purpose": "time_step_control",
+        "q": 0.5,
+        "qualification_only": true,
+        "row_id": "F8-R13",
+        "status": "planned_not_executed",
+        "time_step_policy": "tightened_half_baseline_after_preflight"
+      },
+      {
+        "cadence_policy": "native_dense_0p002_s_vs_registered_0p02_s",
+        "dp_m": 0.0075,
+        "purpose": "native_cadence_control",
+        "q": 0.5,
+        "qualification_only": true,
+        "row_id": "F8-R14",
+        "status": "planned_not_executed",
+        "time_step_policy": "baseline_registered_after_preflight"
+      }
+    ],
+    "schema": "core.cfd.f8.qualification_matrix.v1",
+    "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001"
+  },
+  "schema": "core.cfd.f8.static_review_bundle.v2",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001",
+  "scope_interpretation": {
+    "candidate_is_principally_independent": true,
+    "decision": "pending_root_decision",
+    "free_surface_required_by_absolute_t1_gate": false,
+    "plan_boundary_still_requires_root_interpretation": true
+  },
+  "status": "static_review_bundle_v2_pending_root_decision",
+  "transient_boundary": {
+    "cfd_weakly_compressible_startup_evidence_required": true,
+    "startup_decay_scale_s": "H^2/nu",
+    "startup_evidence_required": "fresh CFD transient or separately derived transient oracle",
+    "startup_oracle_available": true,
+    "startup_oracle_steady_limit_tested": true,
+    "steady_oracle_supports_startup_decay": false,
+    "steady_reference_must_not_be_used_as_startup_truth": true
+  }
+}
