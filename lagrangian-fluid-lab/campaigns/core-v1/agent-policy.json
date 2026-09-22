@@ -1,10 +1,10 @@
 {
-  "schema": "core.agent_policy.v1",
+  "schema": "core.agent_policy.v2",
   "requested_by": "user",
   "subagents": {
-    "model": "gpt-5.6-luna",
-    "reasoning_effort": "max",
-    "explicit_override_required": true
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "explicit_override_required": false
   },
   "primary_requested": {
     "model": "gpt-6-astra",
@@ -12,10 +12,16 @@
     "application_setting_change_required": true
   },
   "active_replacement_agents": [
-    "luna_ml",
-    "luna_cfd",
-    "luna_material"
+    "terra_ml",
+    "terra_cfd",
+    "terra_material"
   ],
+  "historical_policy": {
+    "schema": "core.agent_policy.v1",
+    "model": "gpt-5.6-luna",
+    "reasoning_effort": "max",
+    "retained_in_historical_receipts": true
+  },
   "previous_agents_interrupted": [
     "core_ml",
     "core_cfd",
