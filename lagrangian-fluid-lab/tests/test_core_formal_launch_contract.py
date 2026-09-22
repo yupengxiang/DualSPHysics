@@ -89,3 +89,18 @@ def test_cli_writes_only_contract_and_preserves_registry(tmp_path: Path) -> None
     assert payload["execution_constraints"]["ledger_written"] is False
     assert digest.read_text().split()[0] == _sha256(output)
     assert _sha256(REGISTRY) == before
+
+
+def test_contract_without_source_closure_stays_blocked() -> None:
+    contract = build_contract(
+        data_root=ROOT,
+        readiness=READINESS,
+        phase_plan=PHASE_PLAN,
+        resource_profile=PROFILE,
+        resource_plan=RESOURCE_PLAN,
+    )
+
+    assert contract["gate_evaluation"]["source_closure_complete"] is True
+    assert contract["gate_evaluation"]["fresh_source_closure"] is False
+    assert any("source closure" in blocker for blocker in contract["blockers"])
+    assert contract["launch_allowed"] is False

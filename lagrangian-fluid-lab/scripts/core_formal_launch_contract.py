@@ -303,7 +303,11 @@ def build_contract(*, data_root: str | Path, readiness: str | Path,
         "phase_plan_denominator": phase_contract,
         "failure_penalty": evaluator_contract,
         "source_closure_complete": closure["complete"],
-        "fresh_source_closure": snapshot is None or snapshot.get("matches_current") is True,
+        # A source closure is an admission binding, not an optional hint.  An
+        # omitted snapshot must remain blocked even when the live closure is
+        # internally complete; otherwise a future all-green gate evaluation
+        # could authorize formal work without a persisted source identity.
+        "fresh_source_closure": snapshot is not None and snapshot.get("matches_current") is True,
         "same_card_concurrency": False,
         "output_checkpoint_lineage_contract": True,
         "no_formal_job_emission": True,
