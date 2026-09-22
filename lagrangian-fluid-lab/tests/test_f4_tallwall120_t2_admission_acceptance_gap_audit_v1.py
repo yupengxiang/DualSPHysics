@@ -15,9 +15,9 @@ from scripts.f4_tallwall120_t2_admission_acceptance_gap_audit_v1 import (
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / (
     "campaigns/core-v1/material/evidence/"
-    "f4-tallwall120-t2-admission-acceptance-gap-audit-20260921.json"
+    "f4-tallwall120-t2-admission-acceptance-gap-audit-20260922-v2.json"
 )
-REPORT = ROOT / "reports/F4-TALLWALL120-T2-ADMISSION-ACCEPTANCE-GAP-AUDIT-2026-09-21.zh-CN.md"
+REPORT = ROOT / "reports/F4-TALLWALL120-T2-ADMISSION-ACCEPTANCE-GAP-AUDIT-2026-09-22-v2.zh-CN.md"
 
 
 def test_audit_keeps_fixed_scientific_gates_and_denominators_negative() -> None:
@@ -42,7 +42,7 @@ def test_acceptance_gap_is_explicit_for_tallwall_residence_and_event_contract() 
     assert acceptance["per_source_unknown_gate"] is True
     assert acceptance["generic_cdf_difference_gate"] is True
     assert acceptance["tallwall_schema"] is False
-    assert acceptance["tallwall_checkpoint_v2"] is False
+    assert acceptance["tallwall_checkpoint_v2"] is True
     assert acceptance["residence_cdf_gate"] is False
     assert acceptance["f4_event_tolerance_gate"] is False
     assert acceptance["content_addressed_generation_gate"] is False

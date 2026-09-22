@@ -32,9 +32,9 @@ SAVED_CHORD_CROSSINGS_ALLOWED = 0
 
 DEFAULT_OUTPUT_NAME = (
     "campaigns/core-v1/material/evidence/"
-    "f4-tallwall120-t2-admission-acceptance-gap-audit-20260921.json"
+    "f4-tallwall120-t2-admission-acceptance-gap-audit-20260922-v2.json"
 )
-DEFAULT_REPORT_NAME = "reports/F4-TALLWALL120-T2-ADMISSION-ACCEPTANCE-GAP-AUDIT-2026-09-21.zh-CN.md"
+DEFAULT_REPORT_NAME = "reports/F4-TALLWALL120-T2-ADMISSION-ACCEPTANCE-GAP-AUDIT-2026-09-22-v2.zh-CN.md"
 
 
 INPUTS: dict[str, Path] = {
@@ -528,7 +528,7 @@ def build_audit(lab_root: Path) -> dict[str, Any]:
             f"{matrix_summary['existing_f4_cfd_cell_count']} CFD cells, with 24 resolution/substep and 5 seed-density overlays pending"
         ),
         "the ESS32 full-source candidate is proposal-only and root review has authorized_one_cpu_only=false; its counterfactual first-loss cohort has zero survivors",
-        "core_material_acceptance does not admit the tallwall120 schema/checkpoint-v2 used by the versioned tallwall sidecar, so a complete future sidecar has no shared acceptance route",
+        "core_material_acceptance contains the checkpoint-v2 validator surface, but does not yet expose a complete shared tallwall120 acceptance route (schema, residence/event tolerances, generation, per-case, and matrix gates)",
     ]
 
     # These booleans are deliberately admission booleans, not claims about
@@ -681,7 +681,7 @@ def render_report(audit: dict[str, Any], evidence_path: Path) -> str:
             "## 接口缺口",
             "",
             f"- `core_material.py` 已产生 F4 `residence_cdf` 和 event-window 摘要，但没有 tallwall120 schema 或 content-addressed generation checkpoint；版本化 tallwall tracer 自己具备 schema/checkpoint-v2/generation。",
-            f"- `core_material_acceptance.py` 的 per-source unknown 与通用 CDF difference 检查存在，但没有 tallwall120 schema/checkpoint-v2、residence CDF、F4 event tolerance、generation history 或逐矩阵 case acceptance。",
+            f"- `core_material_acceptance.py` 的 per-source unknown 与通用 CDF difference 检查存在，且已有 checkpoint-v2 validator surface；但尚未形成完整 tallwall120 schema、residence CDF、F4 event tolerance、generation history 或逐矩阵 case acceptance。",
             f"- `f4_macro_t2_sidecar_preflight_v1.py` 保留 unknown/event/matrix negative 状态和 sidecar provenance，但没有调用 `audit_material_h5`，也没有逐例 residence/CDF、事件容差或 recovery receipt 汇总。",
             "",
             "## 仍阻塞宏观 T2 的条件",

@@ -19,9 +19,9 @@ from scripts.f4_tallwall120_t2_acceptance_bridge_v1 import (
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / (
     "campaigns/core-v1/material/evidence/"
-    "f4-tallwall120-t2-acceptance-bridge-v1-20260922.json"
+    "f4-tallwall120-t2-acceptance-bridge-v1-20260922-v3.json"
 )
-REPORT = ROOT / "reports/F4-TALLWALL120-T2-ACCEPTANCE-BRIDGE-2026-09-22.zh-CN.md"
+REPORT = ROOT / "reports/F4-TALLWALL120-T2-ACCEPTANCE-BRIDGE-2026-09-22-v3.zh-CN.md"
 
 
 def test_engineering_receipt_is_distinct_from_blocked_scientific_qualification() -> None:

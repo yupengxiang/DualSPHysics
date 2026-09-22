@@ -52,9 +52,9 @@ TALLWALL_CHECKPOINT_SCHEMA = "core.material.f4.tallwall120.checkpoint.v2"
 
 DEFAULT_OUTPUT_NAME = (
     "campaigns/core-v1/material/evidence/"
-    "f4-tallwall120-t2-acceptance-bridge-v1-20260922.json"
+    "f4-tallwall120-t2-acceptance-bridge-v1-20260922-v3.json"
 )
-DEFAULT_REPORT_NAME = "reports/F4-TALLWALL120-T2-ACCEPTANCE-BRIDGE-2026-09-22.zh-CN.md"
+DEFAULT_REPORT_NAME = "reports/F4-TALLWALL120-T2-ACCEPTANCE-BRIDGE-2026-09-22-v3.zh-CN.md"
 
 
 # These are intentionally a new namespace.  The bridge reads the old gap
@@ -62,7 +62,7 @@ DEFAULT_REPORT_NAME = "reports/F4-TALLWALL120-T2-ACCEPTANCE-BRIDGE-2026-09-22.zh
 INPUTS: dict[str, Path] = {
     "t2_gap_audit": Path(
         "campaigns/core-v1/material/evidence/"
-        "f4-tallwall120-t2-admission-acceptance-gap-audit-20260921.json"
+        "f4-tallwall120-t2-admission-acceptance-gap-audit-20260922-v2.json"
     ),
     "macro_sidecar_preflight": Path(
         "campaigns/core-v1/material/evidence/f4-macro-t2-sidecar-preflight-20260920.json"
@@ -118,7 +118,7 @@ INPUTS: dict[str, Path] = {
     ),
     "f3_bridge_report_reference": Path("reports/F3-NATIVE-MLS-ACCEPTANCE-BRIDGE-2026-09-21.zh-CN.md"),
     "gap_audit_report_reference": Path(
-        "reports/F4-TALLWALL120-T2-ADMISSION-ACCEPTANCE-GAP-AUDIT-2026-09-21.zh-CN.md"
+        "reports/F4-TALLWALL120-T2-ADMISSION-ACCEPTANCE-GAP-AUDIT-2026-09-22-v2.zh-CN.md"
     ),
     "material_root_cause_report_reference": Path(
         "reports/F4-TALLWALL120-MATERIAL-ROOT-CAUSE-AUDIT-2026-09-21.zh-CN.md"
