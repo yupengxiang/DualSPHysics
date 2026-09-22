@@ -21,6 +21,7 @@ from scripts.core_material import (
     f4_continuous_source_labels,
     f4_destination_membership,
     f4_destination_region,
+    f4_event_summary,
     f4_source_membership,
     f4_source_region,
     f4_resting_pool_definition,
@@ -164,6 +165,74 @@ def test_f3_macro_summary_residence_bounds_use_first_unreliable_history(tmp_path
         "unresolved_unknown_mass_fraction": 0.5,
         "reliable_no_event_right_censored_mass_fraction": 0.0,
     }
+
+
+def test_f4_event_summary_bounds_separate_reliability_and_window_censoring(tmp_path):
+    path = tmp_path / "f4-trace.h5"
+    with h5py.File(path, "w") as out:
+        out.attrs["committed"] = 2
+        out["time"] = [0.0, 1.0, 2.0]
+        out["weight"] = [0.25, 0.25, 0.25, 0.25]
+        out["source_label"] = [0, 0, 1, 1]
+        out["position"] = np.zeros((3, 4, 3))
+        out["reliable"] = [
+            [True, True, True, True],
+            [True, False, True, True],
+            [True, False, True, False],
+        ]
+        out["contact_time"] = [[0.5, np.nan, np.nan, np.nan]] * 3
+        out["upward_time"] = [[0.75, np.nan, np.nan, np.nan]] * 3
+        out["return_time"] = [[1.0, np.nan, np.nan, np.nan]] * 3
+        out["contacted"] = [[True, False, False, False]] * 3
+        out["upward"] = [[True, False, False, False]] * 3
+        out["returned"] = [[True, False, False, False]] * 3
+        out["residence"] = [[0.25, 0.5, 0.4, 0.8]] * 3
+        summary = f4_event_summary(out)
+
+    source_zero, source_one = summary["by_source"]
+    assert source_zero["contact_cdf"] == {
+        "time_s": [0.5], "mass_fraction": [0.5],
+        "lower": [0.5], "upper": [0.5], "event_mass_fraction": 0.5,
+    }
+    assert source_zero["contact_cdf_bounds"] == {
+        "time_s": [0.0, 0.5, 2.0],
+        "lower_mass_fraction": [0.0, 0.5, 0.5],
+        "upper_mass_fraction": [0.5, 1.0, 1.0],
+        "observed_event_mass_fraction": 0.5,
+        "upper_event_mass_fraction": 1.0,
+        "unresolved_unknown_mass_fraction": 0.5,
+        "reliable_no_event_right_censored_mass_fraction": 0.0,
+    }
+    assert source_zero["upward_cdf_bounds"]["upper_mass_fraction"] == [0.5, 1.0, 1.0]
+    assert source_zero["return_cdf_bounds"]["upper_mass_fraction"] == [0.5, 1.0, 1.0]
+    assert source_zero["residence_mean_s_bounds"] == {
+        "lower": pytest.approx(0.375), "upper": pytest.approx(1.375),
+    }
+    assert source_zero["residence_cdf_bounds"] == {
+        "value_s": [0.0, 0.25, 0.5, 2.5],
+        "lower_mass_fraction": [0.0, 0.5, 0.5, 1.0],
+        "upper_mass_fraction": [0.0, 0.5, 1.0, 1.0],
+        "zero_mass_fraction_lower": 0.0,
+        "zero_mass_fraction_upper": 0.0,
+    }
+    assert source_zero["residence_right_censored_unknown_mass_fraction"] == pytest.approx(0.5)
+    assert source_zero["reliable_unreturned_observation_window_right_censored_mass_fraction"] == 0.0
+    assert source_zero["first_unreliable_frame"] == 1
+    assert source_zero["first_unreliable_time_s"] == pytest.approx(1.0)
+
+    assert source_one["contact_cdf_bounds"] == {
+        "time_s": [0.0, 1.0, 2.0],
+        "lower_mass_fraction": [0.0, 0.0, 0.0],
+        "upper_mass_fraction": [0.0, 0.5, 0.5],
+        "observed_event_mass_fraction": 0.0,
+        "upper_event_mass_fraction": 0.5,
+        "unresolved_unknown_mass_fraction": 0.5,
+        "reliable_no_event_right_censored_mass_fraction": 0.5,
+    }
+    assert source_one["residence_right_censored_unknown_mass_fraction"] == pytest.approx(0.5)
+    assert source_one["reliable_unreturned_observation_window_right_censored_mass_fraction"] == pytest.approx(0.5)
+    assert source_one["first_unreliable_frame"] == 2
+    assert source_one["first_unreliable_time_s"] == pytest.approx(2.0)
 
 
 def test_h2_k48_is_explicit_backend_variant(tmp_path):
