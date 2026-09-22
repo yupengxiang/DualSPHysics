@@ -1,0 +1,146 @@
+{
+  "code_provenance": {
+    "calibration_script": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_material_calibration_v3.py",
+    "calibration_script_sha256": "eebef9046173851897370dde2f78d2ac788ac9fc22f6a8937aa920d9d50d5706"
+  },
+  "composition": {
+    "backend": "f4_ckdtree_visible_shepard_ess32_affine_bound_v3",
+    "candidate_id": "f4_supportcap_affine_query_bound_v3",
+    "error_estimator": "residual_plus_local_affine_query_bias",
+    "gate": {
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "minimum_anisotropy": 0.005,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3
+    },
+    "maximum_support_distance_m": 0.03,
+    "neighbours": 32,
+    "regularization_m": 0.004,
+    "weights": "1/(distance_squared+regularization_squared)"
+  },
+  "created_at": "2026-09-22T12:50:09.325727+00:00",
+  "denominator_policy": {
+    "failure_policy": "unknown support remains in the fixed denominator; no survivor renormalization",
+    "source": "all 512 source seeds per q and field",
+    "unknown_limit": 0.01
+  },
+  "execution": {
+    "device": "CPU analytic arrays only",
+    "gencase_started": false,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "native_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_started": false
+  },
+  "geometry": {
+    "destination_region": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "box_low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "box_size_m": [
+        1.2,
+        0.4,
+        0.18
+      ],
+      "destination_role": "resting basin liquid and post-contact destination volume",
+      "kind": "continuous_resting_pool_box",
+      "pool_free_surface_z_m": 0.18
+    },
+    "event_definition": {
+      "contact": {
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "path_interpolation": "continuous_linear_segment_per_tracer_substep",
+      "post_return_window": {
+        "completion_required": true,
+        "extension_policy": "double whole scope once if any required event is right-censored; never shorten",
+        "gravity_time_s": 0.3497487083913345,
+        "initial_horizon_s": 4.34,
+        "maximum_extended_horizon_s": 8.68
+      },
+      "residence": {
+        "definition": "time inside destination box after contact, right-censored if unresolved"
+      },
+      "return": {
+        "direction": "downward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_lt": 0.0
+      },
+      "upward_propagation": {
+        "direction": "upward",
+        "interface_plane_z_m": 0.18,
+        "requires_vertical_velocity_mps_gt": 0.0
+      }
+    },
+    "q_cases": [
+      0.375,
+      0.875
+    ],
+    "source_region": {
+      "boundary_policy": "closed_box_membership",
+      "box_high_m": [
+        0.5925,
+        0.28,
+        0.54
+      ],
+      "box_low_m": [
+        0.3325,
+        0.12,
+        0.4
+      ],
+      "box_size_m": [
+        0.26,
+        0.16,
+        0.14
+      ],
+      "drop_left_x_m": 0.3325,
+      "initial_velocity_mps": [
+        0.0,
+        0.0,
+        -0.5
+      ],
+      "kind": "continuous_drop_box",
+      "q": 0.375,
+      "source_role": "falling liquid drop, initial fluid box"
+    },
+    "support_spacing_m": 0.015,
+    "wall_definition": "f4_walls(): bottom and four closed side faces; top open"
+  },
+  "held_out_fields": [
+    {
+      "id": "quintic_shear",
+      "truth": "analytic degree-five shear with cross terms"
+    },
+    {
+      "id": "gaussian_interface",
+      "truth": "analytic localized interface-scale field"
+    }
+  ],
+  "purpose": "held-out analytic validation of the exact F4 v3 reconstruction composition",
+  "qualification_claim": "none",
+  "revision_id": "F4_supportcap_affine_query_bound_v3_heldout_20260922",
+  "schema": "core.material.f4.reconstruction_calibration.v3",
+  "semantic_invariants": {
+    "cadence": "native saved-frame cadence; unchanged",
+    "event_horizon_s": {
+      "initial": 4.34,
+      "maximum_extended": 8.68
+    },
+    "event_semantics": "F4 continuous linear-segment contact/upward/return/residence; unchanged",
+    "t2_macro": false,
+    "t2_path": false
+  },
+  "source_policy": "held-out analytic fields and q=.375/.875 only; no native failure rows or fitted thresholds"
+}

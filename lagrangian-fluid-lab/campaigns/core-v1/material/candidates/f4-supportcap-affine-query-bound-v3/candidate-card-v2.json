@@ -1,0 +1,96 @@
+{
+  "schema": "core.material.f4.reconstruction_candidate_card.v3",
+  "candidate_id": "f4_supportcap_affine_query_bound_v3",
+  "revision": "v2-integrated-static-20260922",
+  "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+  "family": "F4",
+  "status": "proposal_only_root_review_required",
+  "purpose": "versioned registration of fixed k=32 plus conservative affine query-bound estimate",
+  "mechanism": {
+    "backend": "f4_ckdtree_visible_shepard_ess32_affine_bound_v3",
+    "support_cap": 32,
+    "weights": "1/(distance_squared+regularization_squared)",
+    "regularization_m": 0.004,
+    "error_estimator": "residual_plus_local_affine_query_bias",
+    "maximum_support_distance_m": 0.03
+  },
+  "integration": {
+    "registered_variant": "f4_supportcap_affine_query_bound_v3",
+    "adapter": "scripts/core_material.py::_neighbour_variant -> trace/trace_f4_resting_pool",
+    "old_variants_unchanged": true,
+    "cadence_semantics": "native saved-frame cadence; unchanged",
+    "event_semantics": "F4 continuous linear-segment contact/upward/return/residence; unchanged",
+    "denominator_semantics": "all source seeds remain in denominator; unknown and right-censored paths are not dropped"
+  },
+  "fixed_gate": {
+    "minimum_effective_sample_size": 4.0,
+    "minimum_geometry_rank": 3,
+    "minimum_anisotropy": 0.005,
+    "maximum_reconstruction_error_mps": 0.04698137929009748,
+    "unknown_fraction_limit": 0.01
+  },
+  "held_out_calibration": {
+    "design": {
+      "path": "campaigns/core-v1/material/evidence/f4-reconstruction-calibration-v3-20260922-design.json",
+      "sha256": "b8bf7af60de7c35d42699135e907538c8325b7f038010f5a178aa314db0d7e07"
+    },
+    "receipt": {
+      "path": "campaigns/core-v1/material/evidence/f4-reconstruction-calibration-v3-20260922-result.json",
+      "sha256": "28458a2bb58127e3668a94c1314881b2e365334c96da71f7c9860f38a56af777"
+    },
+    "composition": "exact k=32 + residual_plus_local_affine_query_bias",
+    "q_cases": [0.375, 0.875],
+    "fields": ["quintic_shear", "gaussian_interface"],
+    "source_macro_budget_pass": true,
+    "all_mass_closure_pass": true,
+    "qualification_claim": "none",
+    "credit": 0
+  },
+  "falsifiers": [
+    "future explicitly authorized CPU canary has unknown fraction above 0.01",
+    "future canary remains right-censored at the registered event horizon",
+    "any implementation changes the fixed gate, denominator, cadence, or event tolerance"
+  ],
+  "qualification_claim": "none",
+  "credit": 0,
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "root_review_only": true,
+  "authorized_one_cpu_only": false,
+  "execution_policy": {
+    "synthetic_regression_only": true,
+    "native_started": false,
+    "gencase_started": false,
+    "solver_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "old_ess32_rerun": false,
+    "old_affine_rerun": false,
+    "future_cpu_canary_requires_new_root_review": true
+  },
+  "input_bindings": {
+    "core_material": {
+      "path": "scripts/core_material.py",
+      "role": "new v3 registered variant plus unchanged trace/event implementation",
+      "sha256": "431fe2a355037423e01629412315a7d5e73f3b259bee262e1384ebb33168cf3e"
+    },
+    "implementation": {
+      "path": "scripts/f4_supportcap_affine_query_bound_candidate_v3.py",
+      "role": "array-only candidate wrapper bound to the registered v3 constants",
+      "sha256": "b8cfb6efa8d76f0201c5a5293f29c5cfd76691d6f3578ff03d1b577075c25116"
+    },
+    "synthetic_tests": {
+      "path": "tests/test_f4_supportcap_affine_query_bound_candidate_v3_revision2.py",
+      "role": "integration, hash closure, and held-out receipt regression",
+      "sha256": "379faef88976576f94c5e28f62796fa764ec4ded05a02453c3d1af199957b619"
+    },
+    "calibration_script": {
+      "path": "scripts/f4_material_calibration_v3.py",
+      "role": "exact-composition held-out synthetic calibration",
+      "sha256": "eebef9046173851897370dde2f78d2ac788ac9fc22f6a8937aa920d9d50d5706"
+    }
+  }
+}
