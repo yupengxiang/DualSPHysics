@@ -1,0 +1,109 @@
+{
+  "admission_granted": false,
+  "anchor_geometry": {
+    "film_normal_thickness_m": 0.03,
+    "free_surface_vertical_offset_at_anchor_m": 0.030165248386905492,
+    "length_x_m": 0.24,
+    "length_y_m": 0.12,
+    "periodic_x_translation_m": [
+      0.24,
+      0.0,
+      -0.02522501646376235
+    ],
+    "periodic_y_translation_m": [
+      0.0,
+      0.12,
+      0.0
+    ],
+    "theta_deg": 6.0
+  },
+  "constantsdef_contract": {
+    "gravity_is_only_driving_input": true,
+    "gravity_m_s2": {
+      "x": 1.0254242246556806,
+      "y": 0.0,
+      "z": -9.756259793562762
+    },
+    "kinematic_viscosity_m2_s": 0.001,
+    "rhop0_kg_m3": 1000.0,
+    "sound_speed_m_s": 20.0
+  },
+  "coordinate_convention": {
+    "bottom_plane": "z_b(x)=-x*tan(theta_anchor) over one periodic cell",
+    "fluid_region": "z_b(x) <= z <= z_b(x)+h/cos(theta_anchor), with no top-wall particles",
+    "free_surface": "upper geometric boundary of fluid only; no solid top wall",
+    "spanwise": "global y",
+    "streamwise": "global x = s",
+    "up": "global z"
+  },
+  "evidence": [
+    {
+      "path": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json",
+      "sha256": "5692425c7e5db31040dc33a6575564170a0a5b7799da32c364b63694dd0b2863"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp",
+      "sha256": "8729eb29db778288b0495855a04fa0984000896546f484dcf96176ec48da5454"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML__Parameters.xml",
+      "sha256": "bee50a855249befd30ad2029b22043b029a1f0e5ff376af423b8b37c8d30bc6f"
+    }
+  ],
+  "execution_parameters_contract": {
+    "Boundary": 2,
+    "DtFixed": "must be explicitly frozen before native preflight",
+    "ShiftTFS": 2.75,
+    "SlipMode": 2,
+    "TimeOut": "must be explicitly frozen before native preflight",
+    "ViscoTreatment": 2,
+    "XPeriodicIncZ": -0.02522501646376235,
+    "XYPeriodic_parameter": "forbidden",
+    "YPeriodicIncZ": 0.0
+  },
+  "geometry_contract": {
+    "allowed_geometry_operations": [
+      "drawbeach or equivalent tilted bottom surface",
+      "fluid fill bounded by bottom and free-surface height"
+    ],
+    "fixed_bottom_boundary": "mDBC no-slip bottom plane only",
+    "floating_chrono_pump_moving_body": false,
+    "inlet_outlet": false,
+    "must_reject": [
+      "rectangular top wall",
+      "fluid inlet/outlet zones",
+      "XYPeriodic parameter when nonzero X offset is required"
+    ],
+    "obstacle": false,
+    "one_fluid_marker": true,
+    "surface_tension": false,
+    "top_boundary_particles": false
+  },
+  "planned_definition": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml",
+  "planned_output_root": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/cases",
+  "qualification_credit": 0,
+  "revision": "r001",
+  "runtime_authorization": {
+    "definition_write": false,
+    "denominator": false,
+    "gencase": false,
+    "gpu": false,
+    "ledger": false,
+    "native_preflight": false,
+    "queue": false,
+    "registry": false,
+    "solver": false
+  },
+  "schema": "core.cfd.f9.definition_contract.v1",
+  "scope_id": "F9_GRAVITY_FILM_NUSSELT_R001",
+  "semantic_gates_before_any_runtime": [
+    "XML parser accepts one fluid and bottom-only boundary geometry",
+    "periodic x copies translate by (Lx,0,-Lx*tan(theta)) and preserve bottom/free-surface planes",
+    "y copies translate by (0,Ly,0)",
+    "gravity vector is tangent/normal decomposition for the same theta",
+    "initial fluid particles occupy the film without top-wall particles, overlaps, or exclusions",
+    "all q cases change only the pre-registered theta/geometry axis and dp resolution rules",
+    "profile, free-surface, pressure, flux, mass, lifecycle, and exclusion parsers are available"
+  ],
+  "status": "static_definition_contract_only_no_runtime_authorization"
+}
