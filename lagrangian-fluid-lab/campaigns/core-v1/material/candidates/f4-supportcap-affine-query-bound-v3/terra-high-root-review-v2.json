@@ -1,0 +1,141 @@
+{
+  "schema": "core.material.f4.reconstruction_candidate.terra_high_root_review.v2",
+  "record_id": "f4-supportcap-affine-query-bound-v3-terra-high-root-review-20260922",
+  "reviewer": {
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "role": "independent Terra High root reviewer"
+  },
+  "review_scope": {
+    "candidate_id": "f4_supportcap_affine_query_bound_v3",
+    "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+    "files_reviewed": [
+      "scripts/f4_supportcap_affine_query_bound_candidate_v3.py",
+      "tests/test_f4_supportcap_affine_query_bound_candidate_v3.py",
+      "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/candidate-card-v1.json",
+      "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/root-review-receipt-v1.json",
+      "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-root-cause-audit-20260921.json",
+      "campaigns/core-v1/material/evidence/f4-reconstruction-calibration-v2-20260919-result.json",
+      "scripts/f4_material_calibration_v2.py"
+    ],
+    "historical_receipts_modified": false
+  },
+  "review_method": {
+    "static_only": true,
+    "runtime_execution": false,
+    "native_started": false,
+    "gencase_started": false,
+    "solver_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "historical_receipts_overwritten": false
+  },
+  "decision": "DENY_ONE_CPU_CANARY_PENDING_INTEGRATION_AND_HASH_REPAIR",
+  "status": "static_review_completed_canary_denied",
+  "authorized_one_cpu_only": false,
+  "formal_scientific_admission": false,
+  "qualification_claim": "none",
+  "credit": 0,
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "hard_blockers": [
+    {
+      "id": "HB-F4-V3-NOT-INTEGRATED-INTO-TRACE",
+      "severity": "hard",
+      "finding": "The v3 module exposes an array-only sample_candidate() wrapper but is not registered in core_material.py's runtime neighbour variants and has no source-side CLI or trace adapter.",
+      "evidence": [
+        "scripts/f4_supportcap_affine_query_bound_candidate_v3.py",
+        "scripts/core_material.py"
+      ],
+      "required_before_canary": "Add a versioned source-side adapter/variant with an explicit new output namespace and regression coverage for the unchanged F4 cadence, event, denominator, and support-distance rules."
+    },
+    {
+      "id": "HB-F4-V3-CARD-TEST-HASH-STALE",
+      "severity": "hard",
+      "finding": "candidate-card-v1.json declares synthetic_tests.sha256=3710cbd72eaee827407d3ad1156d730f4f51bcf699808f7111c3e6b64077ee14, while the reviewed test currently hashes to fc610199397ff0b4b5fc2ae1e2de5dc0661f7b2fec7767600724919ce5f40a6c.",
+      "evidence": [
+        "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/candidate-card-v1.json",
+        "tests/test_f4_supportcap_affine_query_bound_candidate_v3.py"
+      ],
+      "required_before_canary": "Repair the candidate-card binding in a new candidate revision; do not rewrite the historical v1 root-review receipt."
+    },
+    {
+      "id": "HB-F4-V3-COMPOSITION-NOT-MANUFACTURED-VALIDATED",
+      "severity": "hard",
+      "finding": "The v2 manufactured calibration validates f4_ess32_v2 and f4_affine_bound_v2 as separate variants; it does not validate the exact v3 composition with neighbours=32 and residual_plus_local_affine_query_bias.",
+      "evidence": [
+        "scripts/f4_material_calibration_v2.py",
+        "campaigns/core-v1/material/evidence/f4-reconstruction-calibration-v2-20260919-result.json"
+      ],
+      "required_before_canary": "Add a held-out synthetic row or otherwise bind an explicit composition-level calibration result; no success or survivor result may be inherited from either failed native counterfactual."
+    }
+  ],
+  "historical_evidence_interpretation": {
+    "cell14_root_cause": "The historical audit isolates field1 reconstruction_error_gate at frame 40->41 and records no wall, distance, finite, ESS, rank, or anisotropy failure for its 128-seed first-failure cohort.",
+    "v2_manufactured_calibration": {
+      "f4_ess32_v2_source_macro_budget_pass": true,
+      "f4_affine_bound_v2_source_macro_budget_pass": false,
+      "qualification_claim": "none",
+      "interpretation": "Useful bounded technical basis only; neither result proves the v3 composition or any native material outcome."
+    },
+    "prior_native_counterfactuals": "Both historical f4_ess32_v2 and f4_affine_bound_v2 cell14 counterfactuals had zero cohort survivors; their results are not reused as v3 success evidence."
+  },
+  "execution_boundary_if_reopened": {
+    "one_cpu_canary": "not authorized",
+    "full_source_sidecar": false,
+    "gpu": false,
+    "queue": false,
+    "registry": false,
+    "ledger": false,
+    "T2_remains_false": true
+  },
+  "hash_bindings": {
+    "candidate_card": {
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/candidate-card-v1.json",
+      "sha256": "7dc2424375177eac3919578c845e1792016787945c5e8ff3fb87937f5c7f83e6"
+    },
+    "implementation": {
+      "path": "scripts/f4_supportcap_affine_query_bound_candidate_v3.py",
+      "sha256": "78f7ff541b2cb5d0540e31abbf80c6786c15524913f76f314e25368cc603df4a"
+    },
+    "candidate_synthetic_tests": {
+      "path": "tests/test_f4_supportcap_affine_query_bound_candidate_v3.py",
+      "sha256": "fc610199397ff0b4b5fc2ae1e2de5dc0661f7b2fec7767600724919ce5f40a6c"
+    },
+    "independent_root_review_regression": {
+      "path": "tests/test_f4_supportcap_affine_query_bound_candidate_v3_root_review.py",
+      "sha256": "902f1194112964396536200103be286a8f1cc60b5c10312d924d7c6f355e3260"
+    },
+    "core_material": {
+      "path": "scripts/core_material.py",
+      "sha256": "75564f6fba20f8f3298dd6882e211ad4ad8278676c67083fb24e4ab140bb614c"
+    },
+    "manufactured_calibration_script": {
+      "path": "scripts/f4_material_calibration_v2.py",
+      "sha256": "5a19310dfe770f25fa583a1b62e35d1cdb10c1a7cae68de31026832ab607274b"
+    },
+    "manufactured_calibration_receipt": {
+      "path": "campaigns/core-v1/material/evidence/f4-reconstruction-calibration-v2-20260919-result.json",
+      "sha256": "81ad35f4154cc43a11716755d449b79ca6d59422bc25140c693fa3e4d13d1333"
+    },
+    "cell14_root_cause": {
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-root-cause-audit-20260921.json",
+      "sha256": "a4fa8e9283b4588f8ff25ace474ef57705191ba27c84a5ec9fbceefca935d0e6"
+    },
+    "historical_candidate_contract": {
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-candidate-contract-20260921.json",
+      "sha256": "566d39c8c32f42859d7f2b1b93ef087dbf6e01d1666bead10d740d9ca2709d6d"
+    },
+    "historical_v2_root_review": {
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-f4-ess32-root-review-20260921.json",
+      "sha256": "b6e7e92435179d25cc524e006b53c482259dc22065e30b5297d6ed4975dc7b7a"
+    },
+    "historical_v3_root_review": {
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/root-review-receipt-v1.json",
+      "sha256": "0b5b734434d2cdad5f79a3d3a106a2f8d7f6abcc9459e73aecc345f7f83efed8"
+    }
+  }
+}
