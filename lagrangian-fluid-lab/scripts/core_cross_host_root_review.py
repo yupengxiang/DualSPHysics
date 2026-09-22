@@ -33,10 +33,19 @@ EXPECTED_STEPS = 20
 EXPECTED_FRAMES = 21
 EXPECTED_PARTICLES = 34560
 EXPECTED_MODEL = "graph_residual"
+EXPECTED_REGISTERED_CASES = (EXPECTED_CASE,)
+EXPECTED_REGISTERED_FRAMES = {EXPECTED_CASE: 835}
+EXPECTED_REGISTERED_TRANSITIONS = EXPECTED_REGISTERED_FRAMES[EXPECTED_CASE]
+EXPECTED_REGISTERED_TRAJECTORY_FRAMES = EXPECTED_REGISTERED_TRANSITIONS + 1
 EXPECTED_MANIFEST = "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
 EXPECTED_CHECKPOINT = "9af1dc3cb68991c38fd31b59d92895326e3abe89d5d29d33dd086d7fa462b8a8"
 EXPECTED_MODELS = "73a98b262500c30e46f14aafd2a89f2bea34116c77b6e34ce5e33e7412c38c77"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+
+# The trajectory comparator is deliberately cached only by already-verified
+# content hashes.  This keeps repeated read-only reviews cheap without making
+# a path/mtime cache part of the admission boundary.
+_PAIR_COMPARISON_CACHE: dict[tuple[str, str, str, str], tuple[dict[str, Any], dict[str, Any]]] = {}
 
 
 class ReviewError(ValueError):
@@ -67,7 +76,7 @@ def _ref(path: Path, root: Path) -> dict[str, Any]:
     try:
         relative = path.resolve().relative_to(root.resolve()).as_posix()
     except ValueError:
-        relative = str(path.resolve())
+        raise ReviewError("NON_PORTABLE_PATH", f"evidence is outside review root: {path}")
     return {"path": relative, "sha256": sha256_file(path), "bytes": path.stat().st_size}
 
 
@@ -80,6 +89,61 @@ def _sha(value: Any, *, role: str) -> str:
     _require(isinstance(value, str) and SHA256_RE.fullmatch(value) is not None,
              "INVALID_HASH", f"{role} is not a SHA-256 string")
     return value.lower()
+
+
+def _portable_relative(value: Any, *, role: str) -> Path:
+    """Return a slash-separated, non-escaping relative artifact path."""
+    _require(isinstance(value, str) and value, "ARTIFACT_PATH_INVALID",
+             f"{role} path is missing")
+    _require("\\" not in value and not value.startswith("/"
+             ) and re.fullmatch(r"[A-Za-z]:[\\/].*", value) is None,
+             "NON_PORTABLE_PATH", f"{role} path is not portable: {value!r}")
+    candidate = Path(value)
+    _require(not candidate.is_absolute() and ".." not in candidate.parts
+             and candidate.parts not in ((), (".",)),
+             "NON_PORTABLE_PATH", f"{role} path escapes its portable root: {value!r}")
+    return candidate
+
+
+def _resolve_relative(base: Path, value: Any, *, role: str) -> Path:
+    relative = _portable_relative(value, role=role)
+    base_resolved = base.resolve()
+    resolved = (base_resolved / relative).resolve()
+    try:
+        resolved.relative_to(base_resolved)
+    except ValueError:
+        raise ReviewError("NON_PORTABLE_PATH", f"{role} path escapes its root: {value!r}")
+    _require(resolved.is_file(), "ARTIFACT_MISSING", f"{role} artifact is missing: {value!r}")
+    return resolved
+
+
+def _file_identity(path: Path, cache: dict[Path, dict[str, Any]]) -> dict[str, Any]:
+    resolved = path.resolve()
+    if resolved not in cache:
+        cache[resolved] = {"sha256": sha256_file(resolved), "bytes": resolved.stat().st_size}
+    return cache[resolved]
+
+
+def _verify_file_reference(ref: Mapping[str, Any], path: Path, *, role: str,
+                           cache: dict[Path, dict[str, Any]]) -> dict[str, Any]:
+    _require(isinstance(ref, Mapping), "ARTIFACT_REFERENCE_MISSING",
+             f"{role} artifact reference is missing")
+    actual = _file_identity(path, cache)
+    declared_bytes = ref.get("bytes")
+    _require(type(declared_bytes) is int and declared_bytes >= 0,
+             "ARTIFACT_BYTES_INVALID", f"{role} artifact bytes are invalid")
+    _require(declared_bytes == actual["bytes"], "ARTIFACT_BYTES_MISMATCH",
+             f"{role} artifact byte count differs from the file")
+    declared_sha = _sha(ref.get("sha256"), role=f"{role} artifact")
+    _require(declared_sha == actual["sha256"], "ARTIFACT_HASH_MISMATCH",
+             f"{role} artifact hash differs from the file")
+    return {"path": path.resolve(), **actual}
+
+
+def _same_identity(left: Mapping[str, Any], right: Mapping[str, Any], *, role: str) -> None:
+    _require(left.get("sha256") == right.get("sha256")
+             and left.get("bytes") == right.get("bytes"),
+             "ARTIFACT_IDENTITY_MISMATCH", f"{role} references different artifact bytes")
 
 
 def _gpu_uuids(record: Mapping[str, Any]) -> set[str]:
@@ -292,48 +356,354 @@ def validate_canary_comparison(comparison: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _validate_execution_artifacts(execution: Mapping[str, Any], *, report_path: Path,
+                                  root: Path, label: str,
+                                  cache: dict[Path, dict[str, Any]]) -> dict[str, Any]:
+    """Bind a terminal receipt to the supplied report and all four outputs."""
+    _require(isinstance(execution, Mapping), "A8_EXECUTION_REFERENCE",
+             f"{label} execution reference is missing")
+    _require(execution.get("execution_status") == "succeeded", "A8_EXECUTION_STATUS",
+             f"{label} execution receipt is not successful")
+    report_reference = execution.get("report")
+    _require(isinstance(report_reference, Mapping), "A8_REPORT_REFERENCE",
+             f"{label} execution has no report reference")
+    _portable_relative(report_reference.get("relative_path"), role=f"{label} report")
+    bound_report = _resolve_relative(root, report_reference.get("relative_path"),
+                                     role=f"{label} report")
+    _require(bound_report == report_path.resolve(), "A8_REPORT_BINDING",
+             f"{label} comparison receipt points at a different report")
+    report_identity = _verify_file_reference(report_reference, bound_report,
+                                             role=f"{label} report", cache=cache)
+
+    attempt_root = report_path.resolve().parent.parent
+    required_outputs = execution.get("required_outputs")
+    _require(isinstance(required_outputs, list), "A8_REQUIRED_OUTPUTS_MISSING",
+             f"{label} required-output list is missing")
+    expected_paths = {
+        "reproduction/reproduction.json",
+        "reproduction/scores.json",
+        f"reproduction/cases/000-{EXPECTED_CASE}/trajectory.h5",
+        f"reproduction/cases/000-{EXPECTED_CASE}/progress.json",
+    }
+    observed_paths: set[str] = set()
+    artifacts: dict[Path, dict[str, Any]] = {}
+    for index, reference in enumerate(required_outputs):
+        _require(isinstance(reference, Mapping), "A8_REQUIRED_OUTPUT_REFERENCE",
+                 f"{label} required output {index} is malformed")
+        relative = _portable_relative(reference.get("path"),
+                                      role=f"{label} required output {index}")
+        relative_text = relative.as_posix()
+        _require(relative_text not in observed_paths, "A8_REQUIRED_OUTPUT_DUPLICATE",
+                 f"{label} required outputs contain a duplicate path")
+        observed_paths.add(relative_text)
+        actual = _resolve_relative(attempt_root, reference.get("path"),
+                                   role=f"{label} required output {index}")
+        _require(reference.get("verified") is True, "A8_REQUIRED_OUTPUT_UNVERIFIED",
+                 f"{label} required output {relative_text} is not verified")
+        artifacts[actual] = _verify_file_reference(
+            reference, actual, role=f"{label} required output {relative_text}", cache=cache)
+    _require(observed_paths == expected_paths, "A8_REQUIRED_OUTPUT_DENOMINATOR",
+             f"{label} required outputs do not close the registered artifact denominator")
+    _require(report_path.resolve() in artifacts, "A8_REPORT_NOT_IN_OUTPUTS",
+             f"{label} report is not one of the verified required outputs")
+    _same_identity(report_identity, artifacts[report_path.resolve()], role=f"{label} report")
+
+    receipt = execution.get("receipt")
+    _require(isinstance(receipt, Mapping), "A8_EXECUTION_RECEIPT_MISSING",
+             f"{label} execution receipt is missing")
+    receipt_path = _resolve_relative(root, receipt.get("relative_path"),
+                                     role=f"{label} execution receipt")
+    receipt_identity = _verify_file_reference(receipt, receipt_path,
+                                              role=f"{label} execution receipt", cache=cache)
+
+    root_collection = execution.get("root_collection")
+    root_collection_identity = None
+    if root_collection is not None:
+        _require(isinstance(root_collection, Mapping), "A8_ROOT_COLLECTION_REFERENCE",
+                 f"{label} root collection reference is malformed")
+        collection_path = _resolve_relative(root, root_collection.get("relative_path"),
+                                            role=f"{label} root collection")
+        root_collection_identity = _verify_file_reference(
+            root_collection, collection_path, role=f"{label} root collection", cache=cache)
+    return {
+        "report": report_identity,
+        "artifacts": artifacts,
+        "receipt": receipt_identity,
+        "root_collection": root_collection_identity,
+    }
+
+
+def _validate_report_artifact(report: Mapping[str, Any], reference: Mapping[str, Any], *,
+                              report_path: Path, label: str,
+                              execution_artifacts: Mapping[Path, Mapping[str, Any]],
+                              cache: dict[Path, dict[str, Any]]) -> dict[str, Any]:
+    relative = _portable_relative(reference.get("path"), role=f"{label} report artifact")
+    actual = _resolve_relative(report_path.parent, reference.get("path"),
+                               role=f"{label} report artifact")
+    identity = _verify_file_reference(reference, actual, role=f"{label} report artifact",
+                                      cache=cache)
+    _require(actual in execution_artifacts, "A8_ARTIFACT_NOT_REGISTERED",
+             f"{label} report artifact is absent from the required-output registry")
+    _same_identity(identity, execution_artifacts[actual], role=f"{label} report artifact")
+    return {"path": actual, **identity}
+
+
+def _host_aliases(record: Mapping[str, Any]) -> set[str]:
+    return {str(record[key]) for key in ("hostname", "host_label") if record.get(key)}
+
+
+def _validate_a8_terminal(report: Mapping[str, Any], *, report_path: Path,
+                          execution_artifacts: Mapping[Path, Mapping[str, Any]],
+                          label: str, own_host: Mapping[str, Any],
+                          other_host: Mapping[str, Any], cache: dict[Path, dict[str, Any]]) -> dict[str, Any]:
+    """Validate terminal facts from the report and its materialized artifacts."""
+    _require(report.get("schema") == A8_TERMINAL_SCHEMA, "A8_TERMINAL_SCHEMA",
+             f"{label} A8 terminal report schema is unsupported")
+    own_hostname = str(own_host["hostname"])
+    _require(report.get("reproduction_host") == own_hostname,
+             "A8_TERMINAL_HOST_MISMATCH", f"{label} reproduction host is not bound to its probe")
+    source_host = report.get("source_host")
+    _require(isinstance(source_host, str) and source_host in _host_aliases(other_host),
+             "A8_SOURCE_HOST_MISMATCH", f"{label} source host is not the other physical host")
+    _require(report.get("cross_host_reproduction") is False,
+             "A8_TERMINAL_SINGLE_HOST_MARKER", f"{label} terminal report must remain single-host")
+    _require(report.get("full_product_reproduction") is False,
+             "A8_TERMINAL_PRODUCT_MARKER", f"{label} terminal report is marked product-complete")
+    _require(report.get("predictor_future_state_inputs") is False,
+             "A8_TERMINAL_FUTURE_STATE", f"{label} terminal report used future states")
+    verification = report.get("verification")
+    _require(isinstance(verification, Mapping) and verification.get("host") == own_hostname,
+             "A8_TERMINAL_VERIFICATION_HOST", f"{label} verification host is not bound")
+
+    _require(report.get("case_ids") == list(EXPECTED_REGISTERED_CASES),
+             "A8_REGISTERED_DENOMINATOR", f"{label} case registry is incomplete or reordered")
+    cases = report.get("cases")
+    _require(isinstance(cases, Mapping) and set(cases) == set(EXPECTED_REGISTERED_CASES),
+             "A8_REGISTERED_DENOMINATOR", f"{label} case rows do not close the registered denominator")
+    full_horizon = report.get("full_horizon")
+    _require(isinstance(full_horizon, Mapping)
+             and full_horizon.get("trajectory_frames") == {
+                 EXPECTED_CASE: EXPECTED_REGISTERED_TRAJECTORY_FRAMES
+             },
+             "A8_FRAME_DENOMINATOR", f"{label} full-horizon denominator is incomplete")
+    _require(report.get("manifest_sha256") == EXPECTED_MANIFEST,
+             "A8_IDENTITY_MISMATCH", f"{label} manifest identity is unexpected")
+    for key in ("checkpoint_sha256", "bundle_sha256"):
+        _sha(report.get(key), role=f"{label} {key}")
+    _require(report.get("model_kind") == "mlp" and report.get("seed") == 17
+             and report.get("hidden") == 64, "A8_IDENTITY_MISMATCH",
+             f"{label} model identity is unexpected")
+
+    row = cases[EXPECTED_CASE]
+    _require(isinstance(row, Mapping) and row.get("case_id") == EXPECTED_CASE,
+             "A8_CASE_ROW", f"{label} case row is malformed")
+    rollout = row.get("rollout")
+    _require(isinstance(rollout, Mapping), "A8_CASE_ROLLOUT", f"{label} rollout is missing")
+    for key in ("expected_frames", "frames_expected", "frames_executed", "frames_predicted"):
+        _require(rollout.get(key) == EXPECTED_REGISTERED_TRANSITIONS, "A8_FRAME_DENOMINATOR",
+                 f"{label} rollout {key} does not retain the registered horizon")
+    for key in ("executed", "execution_complete", "finite_rollout_complete", "autonomous"):
+        _require(rollout.get(key) is True, "A8_CASE_ROLLOUT", f"{label} rollout {key} is not true")
+    _require(rollout.get("future_state_inputs") is False
+             and rollout.get("failure_category") is None
+             and rollout.get("first_failure_frame") is None
+             and rollout.get("particles") == EXPECTED_PARTICLES,
+             "A8_CASE_ROLLOUT", f"{label} rollout carries an invalid completion contract")
+
+    score = row.get("score")
+    _require(isinstance(score, Mapping)
+             and score.get("expected_frames") == EXPECTED_REGISTERED_TRANSITIONS
+             and score.get("finite_prefix_frames") == EXPECTED_REGISTERED_TRANSITIONS
+             and score.get("executed") is True and score.get("complete") is True
+             and score.get("failure_category") is None
+             and score.get("first_failure_frame") is None
+             and score.get("raw_error_coverage") == 1.0,
+             "A8_SCORE_DENOMINATOR", f"{label} score row does not close the registered horizon")
+    _require(isinstance(score.get("selection_score"), (int, float))
+             and not isinstance(score.get("selection_score"), bool)
+             and 0 <= float(score["selection_score"]) <= 1,
+             "A8_SCORE_INVALID", f"{label} score row is not finite")
+
+    artifacts = execution_artifacts
+    score_artifact = _validate_report_artifact(
+        report, report.get("score_artifact", {}), report_path=report_path,
+        label=f"{label} score", execution_artifacts=artifacts, cache=cache)
+    trajectory_artifact = _validate_report_artifact(
+        report, row.get("trajectory", {}), report_path=report_path,
+        label=f"{label} trajectory", execution_artifacts=artifacts, cache=cache)
+    progress_artifact = _validate_report_artifact(
+        report, row.get("progress", {}), report_path=report_path,
+        label=f"{label} progress", execution_artifacts=artifacts, cache=cache)
+    verification_cases = verification.get("cases")
+    _require(isinstance(verification_cases, list) and len(verification_cases) == 1,
+             "A8_VERIFICATION_DENOMINATOR", f"{label} verification case denominator is incomplete")
+    verification_case = verification_cases[0]
+    _require(isinstance(verification_case, Mapping)
+             and verification_case.get("case_id") == EXPECTED_CASE
+             and verification_case.get("full_particle_axis") is True,
+             "A8_VERIFICATION_DENOMINATOR", f"{label} verification case is not registered")
+    _require(report.get("full_horizon_reproduction") is True and report.get("passed") is True,
+             "A8_TERMINAL_SELF_REPORT", f"{label} terminal status disagrees with its verified facts")
+    return {
+        "case_ids": list(EXPECTED_REGISTERED_CASES),
+        "expected_frames": dict(EXPECTED_REGISTERED_FRAMES),
+        "score_path": score_artifact["path"],
+        "trajectory_path": trajectory_artifact["path"],
+        "progress_path": progress_artifact["path"],
+        "report_identity": {key: report.get(key) for key in (
+            "dataset_id", "manifest_sha256", "checkpoint_sha256", "bundle_sha256",
+            "model_kind", "seed", "hidden")},
+        "code_closure_sha256": report.get("code", {}).get("closure_sha256")
+        if isinstance(report.get("code"), Mapping) else None,
+        "score": score,
+    }
+
+
 def validate_a8_pair(*, ada_report: Mapping[str, Any], h200_report: Mapping[str, Any],
-                     comparison: Mapping[str, Any], root_review: Mapping[str, Any]) -> dict[str, Any]:
-    """Require paired terminal A8 evidence; reject single-host semantics."""
-    for label, report, expected_reproduction in (
-        ("ada", ada_report, "user-SYS-421GE-TNRT"),
-        ("h200", h200_report, "h200"),
-    ):
-        _require(report.get("schema") == A8_TERMINAL_SCHEMA, "A8_TERMINAL_SCHEMA",
-                 f"{label} A8 terminal report schema is unsupported")
-        _require(report.get("passed") is True and report.get("full_horizon_reproduction") is True,
-                 "A8_TERMINAL_INCOMPLETE", f"{label} A8 terminal report is incomplete")
-        _require(report.get("reproduction_host") == expected_reproduction,
-                 "A8_TERMINAL_HOST_MISMATCH", f"{label} A8 reproduction host is unexpected")
-        _require(report.get("cross_host_reproduction") is False,
-                 "A8_TERMINAL_SINGLE_HOST_MARKER", f"{label} terminal report must remain single-host")
-        _require(report.get("full_product_reproduction") is False,
-                 "A8_TERMINAL_PRODUCT_MARKER", f"{label} terminal report is marked product-complete")
-        _require(report.get("predictor_future_state_inputs") is False,
-                 "A8_TERMINAL_FUTURE_STATE", f"{label} terminal report used future states")
+                     comparison: Mapping[str, Any], root_review: Mapping[str, Any],
+                     ada_report_path: Path, h200_report_path: Path,
+                     comparison_path: Path, root_review_path: Path,
+                     host_pair: Mapping[str, Any], root: Path,
+                     cache: dict[Path, dict[str, Any]]) -> dict[str, Any]:
+    """Require paired terminal evidence from independently verified artifacts."""
+    ada_execution = comparison.get("executions", {}).get("ada")
+    h200_execution = comparison.get("executions", {}).get("h200")
+    ada_execution_info = _validate_execution_artifacts(
+        ada_execution, report_path=ada_report_path, root=root, label="ada", cache=cache)
+    h200_execution_info = _validate_execution_artifacts(
+        h200_execution, report_path=h200_report_path, root=root, label="h200", cache=cache)
+    ada_info = _validate_a8_terminal(
+        ada_report, report_path=ada_report_path,
+        execution_artifacts=ada_execution_info["artifacts"], label="ada",
+        own_host=host_pair["ada"], other_host=host_pair["h200"], cache=cache)
+    h200_info = _validate_a8_terminal(
+        h200_report, report_path=h200_report_path,
+        execution_artifacts=h200_execution_info["artifacts"], label="h200",
+        own_host=host_pair["h200"], other_host=host_pair["ada"], cache=cache)
+
+    _require(ada_info["report_identity"] == h200_info["report_identity"],
+             "A8_IDENTITY_MISMATCH", "Ada/H200 terminal reports bind different model identities")
+    _require(ada_info["code_closure_sha256"] == h200_info["code_closure_sha256"]
+             and isinstance(ada_info["code_closure_sha256"], str),
+             "A8_IDENTITY_MISMATCH", "Ada/H200 code closures differ")
+
     _require(comparison.get("schema") == A8_COMPARISON_SCHEMA,
              "A8_COMPARISON_SCHEMA", "A8 paired comparison schema is unsupported")
-    block = comparison.get("comparison", {})
+    _require(comparison.get("status") == "passed", "A8_COMPARISON_STATUS",
+             "A8 paired comparison is not a completed comparison")
+    hosts = comparison.get("hosts")
+    expected_hosts = {
+        "ada_report_host": ada_report.get("reproduction_host"),
+        "ada_source_host": ada_report.get("source_host"),
+        "h200_report_host": h200_report.get("reproduction_host"),
+        "h200_source_host": h200_report.get("source_host"),
+        "observed_hosts": sorted([ada_report["reproduction_host"],
+                                   h200_report["reproduction_host"]]),
+    }
+    _require(
+        hosts == {**expected_hosts, "distinct_host_evidence": True},
+        "A8_HOST_BINDING",
+        "comparison host fields are self-reported or stale",
+    )
+    block = comparison.get("comparison")
+    _require(isinstance(block, Mapping), "A8_COMPARISON_PAYLOAD", "A8 comparison payload is missing")
+    _require(block.get("schema") == "core.model_reproduction.comparison.v1",
+             "A8_COMPARISON_SCHEMA", "A8 comparison payload schema is unsupported")
+    _require(block.get("status") == "compared", "A8_COMPARISON_STATUS",
+             "A8 paired comparison payload is not a completed comparison")
+    _require(block.get("observed_hosts") == expected_hosts["observed_hosts"],
+             "A8_HOST_BINDING", "A8 comparison observed hosts are not bound")
+    paired_report = block.get("paired_report")
+    _require(isinstance(paired_report, str) and paired_report
+             and Path(paired_report).resolve() == h200_report_path.resolve(), "A8_REPORT_BINDING",
+             "A8 comparison paired report is not the supplied H200 report")
+
+    scope = comparison.get("scope")
+    expected_scope = {
+        "all_particle_axis": True, "case_id": EXPECTED_CASE, "diagnostic_only": True,
+        "family": "F3", "formal_training_count": 0, "full_horizon": True,
+        "particle_count": EXPECTED_PARTICLES, "scientific_qualification": False,
+        "split": "validation", "trajectory_frames": EXPECTED_REGISTERED_TRAJECTORY_FRAMES,
+        "transitions": EXPECTED_REGISTERED_TRANSITIONS,
+    }
+    _require(scope == expected_scope, "A8_REGISTERED_DENOMINATOR",
+             "A8 comparison scope does not close the registered denominator")
+    _require(comparison.get("identity", {}).get("identity_equal") is True,
+             "A8_IDENTITY_MISMATCH", "A8 comparison identity is not equal")
+    for key in ("manifest_sha256", "checkpoint_sha256", "bundle_sha256", "model_kind", "seed", "hidden"):
+        _require(comparison.get("identity", {}).get(key) == ada_info["report_identity"].get(key),
+                 "A8_IDENTITY_MISMATCH", f"A8 comparison identity differs for {key}")
+    _sha(comparison.get("identity", {}).get("code_closure_sha256"), role="A8 comparison code closure")
+    _require(comparison["identity"]["code_closure_sha256"] == ada_info["code_closure_sha256"],
+             "A8_IDENTITY_MISMATCH", "A8 comparison code closure is stale")
+
+    score_path_key = (str(ada_info["score_path"]), str(h200_info["score_path"]))
+    trajectory_path_key = (str(ada_info["trajectory_path"]), str(h200_info["trajectory_path"]))
+    score_ids = (_file_identity(ada_info["score_path"], cache)["sha256"],
+                 _file_identity(h200_info["score_path"], cache)["sha256"])
+    trajectory_ids = (_file_identity(ada_info["trajectory_path"], cache)["sha256"],
+                      _file_identity(h200_info["trajectory_path"], cache)["sha256"])
+    cache_key = (score_ids[0], score_ids[1], trajectory_ids[0], trajectory_ids[1])
+    if cache_key not in _PAIR_COMPARISON_CACHE:
+        from scripts import core_reproduction_check
+        score_result = core_reproduction_check.compare_scores(
+            ada_info["score_path"], h200_info["score_path"],
+            expected_frames=EXPECTED_REGISTERED_TRANSITIONS)
+        trajectory_result = core_reproduction_check.compare(
+            ada_info["trajectory_path"], h200_info["trajectory_path"],
+            expected_frames=EXPECTED_REGISTERED_TRAJECTORY_FRAMES)
+        _PAIR_COMPARISON_CACHE[cache_key] = (score_result, trajectory_result)
+    score_result, trajectory_result = _PAIR_COMPARISON_CACHE[cache_key]
+    _require(score_result.get("passed") is True and trajectory_result.get("passed") is True,
+             "A8_PAIRED_COMPARISON_FAILED", "independent artifact comparison did not pass")
+    reported_score = block.get("score")
+    reported_trajectory = block.get("trajectory")
+    _require(reported_score == score_result and reported_trajectory == {EXPECTED_CASE: trajectory_result},
+             "A8_COMPARISON_SELF_REPORT", "comparison summary does not match independently computed artifacts")
     _require(block.get("passed") is True and block.get("distinct_host_evidence") is True,
-             "A8_PAIRED_COMPARISON_FAILED", "A8 paired comparison lacks distinct-host pass")
-    hosts = block.get("observed_hosts", [])
-    _require(isinstance(hosts, list) and len(set(hosts)) == 2,
-             "A8_HOST_PAIR_INCOMPLETE", "A8 comparison does not contain two physical hosts")
+             "A8_PAIRED_COMPARISON_FAILED", "A8 paired comparison lacks an explicit pass")
+    headline = comparison.get("headline")
+    _require(isinstance(headline, Mapping), "A8_COMPARISON_SELF_REPORT", "comparison headline is missing")
+    score_case = score_result["cases"][EXPECTED_CASE]
+    _require(headline.get("absolute_score_difference") == score_case["absolute_score_difference"]
+             and headline.get("score_left_ada") == score_case["left"]["selection_score"]
+             and headline.get("score_right_h200") == score_case["right"]["selection_score"]
+             and headline.get("maximum_position_absolute_difference_m")
+             == trajectory_result["maximum_absolute_difference"]["position"]
+             and headline.get("maximum_velocity_absolute_difference_mps")
+             == trajectory_result["maximum_absolute_difference"]["velocity"]
+             and headline.get("physics_and_failure_categories_passed") is True
+             and headline.get("passed") is True,
+             "A8_COMPARISON_SELF_REPORT", "comparison headline is not independently bound")
+
     _require(root_review.get("schema") == ROOT_REVIEW_SCHEMA,
              "A8_ROOT_REVIEW_SCHEMA", "A8 root review schema is unsupported")
+    _require(_sha(root_review.get("receipt_sha256"), role="A8 root review receipt")
+             == sha256_file(comparison_path), "A8_ROOT_REVIEW_RECEIPT",
+             "A8 root review is not bound to the supplied comparison receipt")
     _require(root_review.get("registered_comparison_pass") is True
-             and root_review.get("two_terminal_reports_verified") is True,
-             "A8_ROOT_REVIEW_UNVERIFIED", "A8 root review did not verify both terminal reports")
+             and root_review.get("two_terminal_reports_verified") is True
+             and root_review.get("all_eight_required_outputs_verified") is True,
+             "A8_ROOT_REVIEW_UNVERIFIED", "A8 root review did not verify the complete pair")
     _require(root_review.get("diagnostic_only") is True
              and root_review.get("formal_training_count") == 0
              and root_review.get("full_core_reproduction_proven") is False,
              "A8_ROOT_REVIEW_SCOPE", "A8 root review carries a formal/product claim")
-    scope = root_review.get("scope", {})
-    _require(scope.get("full_horizon") is True and scope.get("transitions") == 835,
-             "A8_ROOT_REVIEW_HORIZON", "A8 root review does not bind the 835-transition horizon")
+    root_scope = root_review.get("scope")
+    _require(root_scope == {"all_particle_axis": True, "case_id": EXPECTED_CASE,
+                            "diagnostic_only": True, "family": "F3",
+                            "formal_training_count": 0, "full_horizon": True,
+                            "particle_count": EXPECTED_PARTICLES,
+                            "scientific_qualification": False, "split": "validation",
+                            "trajectory_frames": EXPECTED_REGISTERED_TRAJECTORY_FRAMES,
+                            "transitions": EXPECTED_REGISTERED_TRANSITIONS},
+             "A8_REGISTERED_DENOMINATOR", "A8 root review scope is incomplete")
+    _require(root_review.get("headline") == headline, "A8_ROOT_REVIEW_SELF_REPORT",
+             "A8 root review headline is not bound to the comparison")
     return {
         "paired_comparison_pass": True, "distinct_host_evidence": True,
-        "observed_hosts": list(hosts), "transitions": 835,
+        "observed_hosts": expected_hosts["observed_hosts"],
+        "transitions": EXPECTED_REGISTERED_TRANSITIONS,
         "diagnostic_only": True, "formal_training_count": 0,
     }
 
@@ -398,9 +768,13 @@ def build_review(*, root: str | Path, ada_record: str | Path, h200_record: str |
     _require(h200_gpu in host_pair["h200"]["gpu_uuids"], "CANARY_GPU_UNBOUND",
              "H200 canary GPU UUID is absent from its environment probe")
     canary_pair = validate_canary_comparison(inputs["canary_comparison"][0])
+    artifact_cache: dict[Path, dict[str, Any]] = {}
     a8_pair = validate_a8_pair(
         ada_report=inputs["a8_ada_report"][0], h200_report=inputs["a8_h200_report"][0],
-        comparison=inputs["a8_comparison"][0], root_review=inputs["a8_root_review"][0])
+        comparison=inputs["a8_comparison"][0], root_review=inputs["a8_root_review"][0],
+        ada_report_path=inputs["a8_ada_report"][1], h200_report_path=inputs["a8_h200_report"][1],
+        comparison_path=inputs["a8_comparison"][1], root_review_path=inputs["a8_root_review"][1],
+        host_pair=host_pair, root=root_path, cache=artifact_cache)
     metadata = _validate_metadata(Path(metadata_root).expanduser().resolve())
     evidence = {label: _ref(path, root_path) for label, (_, path) in inputs.items()}
     evidence["metadata_bundle"] = _ref(Path(metadata_root).expanduser().resolve() / "bundle.json", root_path)
