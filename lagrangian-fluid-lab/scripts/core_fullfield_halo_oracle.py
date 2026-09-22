@@ -50,6 +50,7 @@ from scripts.core_models import (
 
 
 SCHEMA = "core.fullfield_halo_oracle_diagnostic.v1"
+SCHEMA_V2 = "core.fullfield_halo_oracle_diagnostic.v2"
 DT_S = 0.1
 H_M = 0.016
 CHUNK_SIZE = 2
@@ -364,7 +365,7 @@ def verify_receipt(payload: Mapping[str, Any], *, data_root: str | Path) -> dict
         if observed != binding.get("sha256"):
             mismatches.append(path_value)
     checks = {
-        "schema": payload.get("schema") == SCHEMA,
+        "schema": payload.get("schema") in {SCHEMA, SCHEMA_V2},
         "source_bindings_present": len(bindings) == 4,
         "source_hashes_match": not mismatches,
         "diagnostic_only": payload.get("diagnostic_only") is True

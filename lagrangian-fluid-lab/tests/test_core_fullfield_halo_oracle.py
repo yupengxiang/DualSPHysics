@@ -29,6 +29,7 @@ def test_real_receipt_is_hash_bound_and_nonformal() -> None:
     # below still proves the live interface.
     assert result["ok"] is False
     assert result["mismatch_paths"] == [
+        "scripts/core_fullfield_halo_oracle.py",
         "scripts/core_learning.py", "scripts/core_models.py",
         "scripts/core_contract.py",
     ]
