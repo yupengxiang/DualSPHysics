@@ -50,10 +50,11 @@
     "streamwise": "local s=x*cos(theta)-z*sin(theta)",
     "up": "global z"
   },
+  "definition_materialized": true,
   "evidence": [
     {
       "path": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json",
-      "sha256": "22f889cf51d83fe32206326e2e3bdd3b9bdc49495dda88d6d48c7cdf24458165"
+      "sha256": "ecb6afa637e47f1afd539db9d941b7411119bac8e20ae0c6beced4df36b2f8b9"
     },
     {
       "path": "vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp",
@@ -62,6 +63,10 @@
     {
       "path": "vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML__Parameters.xml",
       "sha256": "bee50a855249befd30ad2029b22043b029a1f0e5ff376af423b8b37c8d30bc6f"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml",
+      "sha256": "940417e139fb42add49de3f2d7720a13e982ebc76826ecbe51b30b55b2278433"
     }
   ],
   "execution_parameters_contract": {
@@ -108,7 +113,8 @@
   "qualification_credit": 0,
   "revision": "r001",
   "runtime_authorization": {
-    "definition_write": false,
+    "definition_candidate_materialized": true,
+    "definition_write_authorization": false,
     "denominator": false,
     "gencase": false,
     "gpu": false,
@@ -134,5 +140,5 @@
     "all q cases change only the pre-registered theta/geometry axis and dp resolution rules",
     "profile, free-surface, pressure, flux, mass, lifecycle, and exclusion parsers are available"
   ],
-  "status": "static_definition_contract_only_no_runtime_authorization"
+  "status": "static_definition_materialized_no_runtime_authorization"
 }

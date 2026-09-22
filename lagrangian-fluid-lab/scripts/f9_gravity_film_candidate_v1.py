@@ -15,6 +15,7 @@ from typing import Any
 LAB = Path(__file__).resolve().parents[1]
 PLAN = Path("/home/jade/.codex/attachments/ece07836-13f3-4e3a-9dd4-55120224dcee/PLAN.md")
 OUTPUT = LAB / "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json"
+DEFINITION = LAB / "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml"
 
 
 SOURCE_ROLES = {
@@ -70,6 +71,14 @@ def build_card() -> dict[str, Any]:
     parameter_text = parameter_doc.read_text(encoding="utf-8")
     periodic_source_text = periodic_source.read_text(encoding="utf-8")
     plan_text = PLAN.read_text(encoding="utf-8")
+    definition_text = DEFINITION.read_text(encoding="utf-8") if DEFINITION.is_file() else ""
+    definition_parameters = {
+        node.attrib.get("key"): node.attrib.get("value")
+        for node in ET.parse(DEFINITION).getroot().findall(".//parameter")
+    } if DEFINITION.is_file() else {}
+    drawextrudes = ET.parse(DEFINITION).getroot().findall(".//drawextrude") if DEFINITION.is_file() else []
+    bottom_top_points = drawextrudes[0].findall("./point")[2:4] if len(drawextrudes) >= 2 else []
+    fluid_bottom_points = drawextrudes[1].findall("./point")[0:2] if len(drawextrudes) >= 2 else []
 
     static_checks = {
         "official_xml_examples_parse": True,
@@ -82,6 +91,17 @@ def build_card() -> dict[str, Any]:
         "no_slip_mdbc_documented": "SlipMode" in parameter_text and "No-slip" in parameter_text,
         "plan_default_boundary_mentions_free_surface": "自由表面机制" in plan_text,
         "plan_three_family_gate": "至少三个真正不同家族" in plan_text,
+        "definition_candidate_exists_and_parses": DEFINITION.is_file(),
+        "definition_has_vertical_global_gravity": 'gravity x="0" y="0" z="-9.81"' in definition_text,
+        "definition_has_free_surface_volume_and_bottom": "<drawextrude closed=\"true\">" in definition_text and "<setmkfluid mk=\"0\" />" in definition_text,
+        "definition_has_no_open_or_rigid_components": not any(token in definition_text for token in ("<inout>", "<wavepaddles>", "<floatings>", "<accinputs>")),
+        "definition_has_no_xyperiodic": "XYPeriodic" not in definition_parameters,
+        "definition_fluid_bottom_matches_boundary_top": len(bottom_top_points) == 2 and len(fluid_bottom_points) == 2 and all(
+            math.isclose(float(boundary.attrib["x"]), float(fluid.attrib["x"]), abs_tol=1e-12)
+            and math.isclose(float(boundary.attrib["z"]), float(fluid.attrib["z"]), abs_tol=1e-12)
+            for boundary, fluid in zip(sorted(bottom_top_points, key=lambda p: float(p.attrib["x"])), sorted(fluid_bottom_points, key=lambda p: float(p.attrib["x"])))
+        ),
+        "definition_has_frozen_runtime_parameters": definition_parameters.get("DtFixed") == "0.00001" and definition_parameters.get("TimeOut") == "0.01" and definition_parameters.get("TimeMax") == "5.0",
     }
     if not all(static_checks.values()):
         raise AssertionError(static_checks)
@@ -209,11 +229,12 @@ def build_card() -> dict[str, Any]:
         "blockers": [
             "periodic inclined free-surface geometry and streamwise normal-offset sign require target-specific native semantic verification",
             "the official OpenChannel example has inlet/outlet and cannot be reused as a qualification result",
-            "no fresh F9 Definition, BI4, native preflight, solver, decoder, or qualification receipt exists",
+            "candidate F9 Definition is materialized, but no BI4, native preflight, solver, decoder, or qualification receipt exists",
             "formal root admission must explicitly accept F9 as the third Core family before any execution",
         ],
         "execution_controls": {
-            "definition_written": False,
+            "definition_written": DEFINITION.is_file(),
+            "definition_candidate_materialized": DEFINITION.is_file(),
             "gencase_invoked": False,
             "solver_invoked": False,
             "gpu_started": False,
@@ -224,7 +245,7 @@ def build_card() -> dict[str, Any]:
             "training_started": False,
         },
         "static_checks": static_checks,
-        "evidence": bind_sources(),
+        "evidence": bind_sources() + [{"path": str(DEFINITION.relative_to(LAB)), "sha256": sha256(DEFINITION), "bytes": DEFINITION.stat().st_size, "role": "F9 static candidate Definition; not executed"}],
     }
 
 

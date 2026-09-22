@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  F9 anchor candidate Definition, prepared under Terra High static-only
+  authorization.  This file has not been passed to GenCase or any solver.
+  Geometry: z_b(x)=-x*tan(6 deg), h=0.03 m, Lx=0.24 m, Ly=0.12 m.
+-->
+<case>
+  <casedef>
+    <constantsdef>
+      <gravity x="0" y="0" z="-9.81" comment="Global vertical gravity" units_comment="m/s^2" />
+      <rhop0 value="1000" comment="Reference density" units_comment="kg/m^3" />
+      <rhopgradient value="1" comment="Uniform initial density gradient mode" />
+      <hswl value="0" auto="false" comment="No still-water height used for sound speed" units_comment="m" />
+      <gamma value="7" comment="Polytropic exponent" />
+      <speedsystem value="0" auto="true" comment="System speed is fixed by explicit sound speed" />
+      <coefsound value="1" comment="Sound-speed coefficient" />
+      <speedsound value="20" auto="false" comment="Explicit sound speed" units_comment="m/s" />
+      <coefh value="0.8" comment="Smoothing-length coefficient" />
+      <cflnumber value="0.1" comment="CFL coefficient" />
+    </constantsdef>
+    <mkconfig boundcount="1" fluidcount="1" />
+    <geometry>
+      <definition dp="0.0075" units_comment="metres (m)">
+        <pointref x="0" y="-0.06" z="-0.02" />
+        <pointmin x="0" y="-0.06" z="-0.06" />
+        <pointmax x="0.24" y="0.06" z="0.04" />
+      </definition>
+      <commands>
+        <mainlist>
+          <setshapemode>actual | dp | bound</setshapemode>
+          <setdrawmode mode="full" />
+
+          <!-- Fixed bottom slab. Its upper face is z_b(x)=-x*tan(6 deg). -->
+          <setmkbound mk="0" />
+          <drawextrude closed="true">
+            <point x="0" y="-0.06" z="-0.05" />
+            <point x="0.24" y="-0.06" z="-0.075225016464" />
+            <point x="0.24" y="-0.06" z="-0.025225016464" />
+            <point x="0" y="-0.06" z="0" />
+            <extrude x="0" y="0.12" z="0" />
+            <layers vdp="-1*,0,1*" />
+          </drawextrude>
+          <shapeout file="F9_bottom" />
+
+          <!-- One fluid volume; its upper face is the real free surface. -->
+          <setmkfluid mk="0" />
+          <drawextrude closed="true">
+            <point x="0" y="-0.06" z="0" />
+            <point x="0.24" y="-0.06" z="-0.025225016464" />
+            <point x="0.24" y="-0.06" z="0.004940231923" />
+            <point x="0" y="-0.06" z="0.030165248387" />
+            <extrude x="0" y="0.12" z="0" />
+          </drawextrude>
+          <shapeout file="" reset="true" />
+        </mainlist>
+      </commands>
+    </geometry>
+    <normals active="true">
+      <norplane mkbound="0">
+        <point auto="true" />
+        <normal x="0.104528463" y="0" z="0.994521895" />
+        <maxdisth v="2.0" />
+      </norplane>
+    </normals>
+  </casedef>
+  <execution>
+    <parameters>
+      <parameter key="SavePosDouble" value="0" />
+      <parameter key="Boundary" value="2" />
+      <parameter key="SlipMode" value="2" />
+      <parameter key="NoPenetration" value="1" />
+      <parameter key="StepAlgorithm" value="2" />
+      <parameter key="VerletSteps" value="40" />
+      <parameter key="Kernel" value="2" />
+      <parameter key="ViscoTreatment" value="3" />
+      <parameter key="Visco" value="0.001" units_comment="m^2/s" />
+      <parameter key="ViscoBoundFactor" value="1" />
+      <parameter key="DensityDT" value="0" />
+      <parameter key="DensityDTvalue" value="0" />
+      <parameter key="Shifting" value="0" />
+      <parameter key="ShiftCoef" value="-2" />
+      <parameter key="ShiftTFS" value="2.75" />
+      <parameter key="RigidAlgorithm" value="1" />
+      <parameter key="FtPause" value="0" />
+      <parameter key="CoefDtMin" value="0.05" />
+      <parameter key="DtIni" value="0.00001" units_comment="seconds" />
+      <parameter key="DtMin" value="0.00001" units_comment="seconds" />
+      <parameter key="DtFixed" value="0.00001" units_comment="seconds" />
+      <parameter key="DtFixedFile" value="NONE" />
+      <parameter key="DtAllParticles" value="1" />
+      <parameter key="TimeMax" value="5.0" units_comment="seconds" />
+      <parameter key="TimeOut" value="0.01" units_comment="seconds" />
+      <parameter key="PartsOutMax" value="0" />
+      <parameter key="RhopOutMin" value="900" units_comment="kg/m^3" />
+      <parameter key="RhopOutMax" value="1100" units_comment="kg/m^3" />
+      <!-- Individual periodic parameters are required; XYPeriodic is forbidden. -->
+      <parameter key="XPeriodicIncZ" value="0.025225016464" units_comment="metres (m)" />
+      <parameter key="YPeriodicIncZ" value="0" units_comment="metres (m)" />
+      <simulationdomain>
+        <posmin x="0" y="-0.06" z="-0.06" />
+        <posmax x="0.24" y="0.06" z="0.04" />
+      </simulationdomain>
+    </parameters>
+  </execution>
+</case>

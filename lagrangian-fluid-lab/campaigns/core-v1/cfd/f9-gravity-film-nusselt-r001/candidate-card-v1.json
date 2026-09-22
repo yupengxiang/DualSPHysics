@@ -3,7 +3,7 @@
   "blockers": [
     "periodic inclined free-surface geometry and streamwise normal-offset sign require target-specific native semantic verification",
     "the official OpenChannel example has inlet/outlet and cannot be reused as a qualification result",
-    "no fresh F9 Definition, BI4, native preflight, solver, decoder, or qualification receipt exists",
+    "candidate F9 Definition is materialized, but no BI4, native preflight, solver, decoder, or qualification receipt exists",
     "formal root admission must explicitly accept F9 as the third Core family before any execution"
   ],
   "error_gates": {
@@ -97,10 +97,17 @@
       "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/root-review-receipt-v2-20260922.json",
       "role": "F7 no-go receipt used for independence review",
       "sha256": "a9c04e4d9242673ecb645d10f89021b0e9fff8a5ce2abea329b6f72976689cc2"
+    },
+    {
+      "bytes": 4815,
+      "path": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml",
+      "role": "F9 static candidate Definition; not executed",
+      "sha256": "940417e139fb42add49de3f2d7720a13e982ebc76826ecbe51b30b55b2278433"
     }
   ],
   "execution_controls": {
-    "definition_written": false,
+    "definition_candidate_materialized": true,
+    "definition_written": true,
     "denominator_mutation": 0,
     "gencase_invoked": false,
     "gpu_started": false,
@@ -206,6 +213,13 @@
   "scientific_status": "not_executed_not_admitted_zero_credit",
   "scope_id": "F9_GRAVITY_FILM_NUSSELT_R001",
   "static_checks": {
+    "definition_candidate_exists_and_parses": true,
+    "definition_fluid_bottom_matches_boundary_top": true,
+    "definition_has_free_surface_volume_and_bottom": true,
+    "definition_has_frozen_runtime_parameters": true,
+    "definition_has_no_open_or_rigid_components": true,
+    "definition_has_no_xyperiodic": true,
+    "definition_has_vertical_global_gravity": true,
     "mdbc_example_has_mdbc_and_viscosity": true,
     "no_slip_mdbc_documented": true,
     "official_xml_examples_parse": true,

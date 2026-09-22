@@ -41,7 +41,7 @@ def build_audit() -> dict[str, Any]:
     f8_review = load("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/root-review/terra-high-root-review-v1.json")
     f8_contract = load("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/parameter-contract-v1.json")
     f9 = load("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json")
-    f9_review = load("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-contract-review-v2.json")
+    f9_review = load("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-definition-review-v3.json")
     f9_contract = load("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/definition-contract-v1.json")
     readiness = load("campaigns/core-v1/learning/core-formal-readiness-audit-20260922.json")
 
@@ -60,11 +60,12 @@ def build_audit() -> dict[str, Any]:
     assert f8_contract["admission_granted"] is False
     assert f9["status"] == "proposal_only_root_review_required"
     assert f9["admission_granted"] is False
-    assert f9_review["decision"] == "conditional_go_definition_preparation_only"
+    assert f9_review["decision"] == "CONDITIONAL-GO"
     assert f9_review["admission_granted"] is False
-    assert f9_review["bound_artifacts"][0]["sha256"] == sha256(LAB / "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json")
-    assert f9_review["bound_artifacts"][1]["sha256"] == sha256(LAB / "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/definition-contract-v1.json")
-    assert f9_contract["status"] == "static_definition_contract_only_no_runtime_authorization"
+    assert f9_review["reviewed_hashes"]["candidate_card_v1.json"] == sha256(LAB / "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json")
+    assert f9_review["reviewed_hashes"]["definition-contract-v1.json"] == sha256(LAB / "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/definition-contract-v1.json")
+    assert f9_review["reviewed_hashes"]["F9_GRAVITY_FILM_NUSSELT_R001_Def.xml"] == sha256(LAB / "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml")
+    assert f9_contract["status"] == "static_definition_materialized_no_runtime_authorization"
     assert f9_contract["admission_granted"] is False
     assert f9_contract["runtime_authorization"]["solver"] is False
     assert readiness["status"] == "blocked"
@@ -118,7 +119,7 @@ def build_audit() -> dict[str, Any]:
                 "terra_high_review": f9_review["decision"],
                 "definition_contract": f9_contract["status"],
                 "fresh_definition_present": f9["execution_controls"]["definition_written"],
-                "next_allowed_action": "root admission review and target-specific native semantic preparation only; no GenCase or solver execution",
+                "next_allowed_action": "formal root admission review only; after admission, target-specific native semantic preparation may be considered; no GenCase or solver execution",
             },
         },
         "formal_readiness": {
@@ -149,8 +150,9 @@ def build_audit() -> dict[str, Any]:
             bind("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/root-review/terra-high-root-review-v1.json", "F8 Terra High root-style review"),
             bind("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/parameter-contract-v1.json", "F8 frozen pre-admission parameter contract"),
             bind("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json", "F9 proposal-only candidate card"),
-            bind("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-contract-review-v2.json", "F9 Terra High contract review v2"),
+            bind("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-definition-review-v3.json", "F9 Terra High corrected Definition review v3"),
             bind("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/definition-contract-v1.json", "F9 static Definition contract"),
+            bind("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml", "F9 static Definition XML"),
             bind("campaigns/core-v1/learning/core-formal-readiness-audit-20260922.json", "current formal readiness"),
         ],
     }

@@ -10,6 +10,8 @@ def test_f9_is_free_surface_candidate_and_not_admitted() -> None:
     assert card["status"] == "proposal_only_root_review_required"
     assert card["admission_granted"] is False
     assert card["qualification_credit"] == 0
+    assert card["static_checks"]["definition_candidate_exists_and_parses"] is True
+    assert card["execution_controls"]["definition_written"] is True
     assert card["physical_contract"]["surface_tension"] is False
     assert card["identity"]["production_case_count"] == 32
     assert card["identity"]["split"] == {"train": 16, "validation": 4, "id_test": 6, "ood_test": 6}
@@ -26,7 +28,7 @@ def test_f9_has_distinct_nusselt_falsifier_and_no_open_channel_reuse() -> None:
 
 def test_f9_does_not_mutate_core_controls() -> None:
     controls = build_card()["execution_controls"]
-    assert controls["definition_written"] is False
+    assert controls["definition_written"] is True
     assert controls["gencase_invoked"] is False
     assert controls["solver_invoked"] is False
     assert controls["registry_mutation"] == 0
@@ -37,5 +39,5 @@ def test_committed_f9_card_is_hash_bound_and_unqualified() -> None:
     assert OUTPUT.is_file()
     card = json.loads(OUTPUT.read_text(encoding="utf-8"))
     assert card["status"] == "proposal_only_root_review_required"
-    assert len(card["evidence"]) == 10
+    assert len(card["evidence"]) == 11
     assert all(item["sha256"] for item in card["evidence"])

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Freeze the F9 Definition semantics without materializing or executing it."""
+"""Freeze the F9 Definition semantics without executing it."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import math
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +18,7 @@ CARD = ROOT / "candidate-card-v1.json"
 OUTPUT = ROOT / "definition-contract-v1.json"
 PERIODIC_SOURCE = LAB / "vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp"
 PARAMETER_DOC = LAB / "vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML__Parameters.xml"
+DEFINITION = ROOT / "input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml"
 
 
 def sha256(path: Path) -> str:
@@ -31,6 +33,11 @@ def build_contract() -> dict[str, Any]:
     card = json.loads(CARD.read_text(encoding="utf-8"))
     source = PERIODIC_SOURCE.read_text(encoding="utf-8")
     parameter_doc = PARAMETER_DOC.read_text(encoding="utf-8")
+    assert DEFINITION.is_file()
+    definition_text = DEFINITION.read_text(encoding="utf-8")
+    assert "<drawextrude closed=\"true\">" in definition_text
+    assert 'gravity x="0" y="0" z="-9.81"' in definition_text
+    assert "XYPeriodic" not in {node.attrib.get("key") for node in ET.parse(DEFINITION).getroot().findall(".//parameter")}
     assert card["scope_id"] == "F9_GRAVITY_FILM_NUSSELT_R001"
     assert card["admission_granted"] is False
     assert 'if(eparms.Exists("XPeriodicIncZ"))' in source
@@ -54,13 +61,14 @@ def build_contract() -> dict[str, Any]:
 
     return {
         "schema": "core.cfd.f9.definition_contract.v1",
-        "status": "static_definition_contract_only_no_runtime_authorization",
+        "status": "static_definition_materialized_no_runtime_authorization",
         "scope_id": card["scope_id"],
         "revision": "r001",
         "admission_granted": False,
         "qualification_credit": 0,
         "planned_definition": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml",
         "planned_output_root": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/cases",
+        "definition_materialized": True,
         "coordinate_convention": {
             "streamwise": "local s=x*cos(theta)-z*sin(theta)",
             "spanwise": "global y",
@@ -138,7 +146,8 @@ def build_contract() -> dict[str, Any]:
             "profile, free-surface, pressure, flux, mass, lifecycle, and exclusion parsers are available",
         ],
         "runtime_authorization": {
-            "definition_write": False,
+            "definition_candidate_materialized": True,
+            "definition_write_authorization": False,
             "gencase": False,
             "native_preflight": False,
             "solver": False,
@@ -152,6 +161,7 @@ def build_contract() -> dict[str, Any]:
             {"path": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json", "sha256": sha256(CARD)},
             {"path": "vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp", "sha256": sha256(PERIODIC_SOURCE)},
             {"path": "vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML__Parameters.xml", "sha256": sha256(PARAMETER_DOC)},
+            {"path": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml", "sha256": sha256(DEFINITION)},
         ],
     }
 

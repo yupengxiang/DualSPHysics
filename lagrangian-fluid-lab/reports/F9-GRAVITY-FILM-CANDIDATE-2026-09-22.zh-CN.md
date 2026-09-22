@@ -6,12 +6,12 @@ F9 是固定倾斜平面上的单相牛顿薄膜：切向重力驱动黏性剪�
 
 本轮只核对官方 OpenChannel、mDBC Poiseuille、Periodicity 示例及参数文档，并绑定 F1/F2/F5/F6/F7 的 closure evidence。官方 OpenChannel 含 inlet/outlet，不能作为 F9 运行结果；它只提供自由表面和层流语义先例。倾斜周期自由表面与 streamwise normal-offset 的组合仍需目标-specific native 语义验证。
 
-进一步绑定了官方 `JSph.cpp`：`XPeriodicIncZ`／`YPeriodicIncZ` 的独立参数可以设置周期偏移，而 `XYPeriodic` 分支会重置偏移量。因此 F9 的未来 Definition 必须使用独立的 X/Y 周期参数，不能声明 `XYPeriodic`，且偏移符号仍须通过目标 native preflight 验证。
+进一步绑定了官方 `JSph.cpp`：`XPeriodicIncZ`／`YPeriodicIncZ` 的独立参数可以设置周期偏移，而 `XYPeriodic` 分支会重置偏移量。因此 F9 Definition 使用独立的 X/Y 周期参数，未声明 `XYPeriodic`；偏移符号仍须通过目标 native preflight 验证。
 
-当前状态：`proposal_only_root_review_required`，资格 credit 为 0。没有写 Definition，没有运行 GenCase、solver、GPU、decoder 或 queue，也没有改变 registry、ledger、denominator 或 training。
+当前状态：`proposal_only_root_review_required`，资格 credit 为 0。Definition 已静态物化，但没有运行 GenCase、solver、GPU、decoder 或 queue，也没有改变 registry、ledger、denominator 或 training。流体下边界已与底板上表面严格重合，法向膜厚为 `0.030000000000094 m`，与 `h=0.03 m` 一致。
 
-机器可读收据：`campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json`。
+机器可读收据：`campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json`、`campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/definition-contract-v1.json`、`campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml`。
 
-Terra High 的独立 frontier review 判定 F9 为当前最可信的自由表面第三 T1 候选，但仅给出 `CONDITIONAL-GO`（静态准备）；正式 admission 仍为 `NO-GO`。v1 审查因几何/重力/周期符号问题保留为历史记录；修正后的 v2 审查只授权准备候选 Definition 文件，收据位于 `campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-contract-review-v2.json`。
+Terra High 的独立 Definition review 在修正几何后给出 `CONDITIONAL-GO`：确认底部/流体接触与膜厚，但指出尚无正式 root admission、BI4、MapRealSize.x 运行时证据或 native/solver 资格证据。v1/v2 审查保留为历史记录；当前收据位于 `campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-definition-review-v3.json`。
 
-本轮新增 Definition contract，冻结 anchor 的倾斜底面、自由表面高度、重力分解、`XPeriodicIncZ`／`YPeriodicIncZ` 以及禁止 `XYPeriodic` 的规则。该合同明确 `definition_write=false`、`native_preflight=false`、`solver=false`，只是下一次 root review 的输入：`campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/definition-contract-v1.json`。
+本轮新增 Definition contract，冻结 anchor 的倾斜底面、自由表面高度、重力分解、`XPeriodicIncZ`／`YPeriodicIncZ` 以及禁止 `XYPeriodic` 的规则。该合同明确候选已物化，但 `definition_write_authorization=false`、`native_preflight=false`、`solver=false`；下一步只能进行正式 root admission 审查。
