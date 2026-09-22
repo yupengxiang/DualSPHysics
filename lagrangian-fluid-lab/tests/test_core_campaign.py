@@ -18,11 +18,43 @@ def test_empty_queue_never_completes_product(tmp_path):
 
 def _write_evaluation(tmp_path, *, axis, run_id, case_id, **extra):
     payload = {"schema": "core.evaluation.v1", "execution_status": "complete",
-               "axis": axis, "run_id": run_id, "case_id": case_id}
+               "axis": axis, "run_id": run_id, "case_id": case_id,
+               "evaluation_mode": "formal", "formal_eligible": True,
+               "diagnostic": False, "autonomous": True,
+               "future_state_inputs": False,
+               "registered_case_ids": [case_id], "selected_case_ids": [case_id],
+               "registered_case_count": 1, "case_count": 1,
+               "expected_frames": {case_id: 1},
+               "cases": {
+                   case_id: {
+                       "score": {
+                           "expected_frames": 1, "complete": True, "executed": True,
+                           "failure_category": None, "selection_score": 0.0,
+                       },
+                       "rollout": {"expected_frames": 1, "frames_expected": 1},
+                   },
+               }}
     payload.update(extra)
     path = tmp_path / f"{axis}-{run_id}-{case_id}.json"
     atomic_json(path, payload)
     return {"path": path.name, "sha256": digest(path)}
+
+
+def test_minimal_evaluation_receipt_cannot_count_as_completed_evaluation(tmp_path):
+    reference = _write_evaluation(
+        tmp_path, axis="T1", run_id="mlp-seed17", case_id="case-0")
+    path = tmp_path / reference["path"]
+    payload = json.loads(path.read_text())
+    payload.pop("cases")
+    atomic_json(path, payload)
+    reference["sha256"] = digest(path)
+
+    result = completion({"evaluations": [{"receipt": reference}]}, tmp_path)
+
+    assert not result["checks"]["evidence_valid"]
+    assert result["observed_t1_case_runs"] == 0
+    assert any("score row is missing" in issue["reason"]
+               for issue in result["issues"])
 
 
 def test_unregistered_evaluations_do_not_shrink_any_target_denominator(tmp_path):

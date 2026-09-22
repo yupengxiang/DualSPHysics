@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import json
+import math
 from pathlib import Path
 import subprocess
 
@@ -171,6 +172,78 @@ def _require_passed_root_review(reference, data_root, label):
             receipt.get("status") not in ("pass", "passed", "approved", "accepted")
             and receipt.get("passed") is not True):
         raise ValueError(f"{label} root review is not passed")
+
+
+def _validate_evaluation_receipt(receipt, *, axis, run_id, case_id):
+    """Validate one formal evaluation receipt before counting its case.
+
+    Registry membership alone is not evaluation evidence.  The receipt must
+    retain its formal/autonomous identity, the selected case registry, and a
+    fixed-denominator score/rollout row.  A model failure is admissible as a
+    negative benchmark result, but it must still carry the same denominator
+    and an explicit failure category.
+    """
+    if not isinstance(receipt, dict) or receipt.get("schema") != "core.evaluation.v1":
+        raise ValueError("evaluation receipt schema mismatch")
+    if receipt.get("execution_status") not in ("complete", "model_failed"):
+        raise ValueError("evaluation missing or infrastructure failure")
+    if receipt.get("axis") != axis or receipt.get("run_id") != run_id or receipt.get("case_id") != case_id:
+        raise ValueError("evaluation identity mismatch")
+    if (receipt.get("formal_eligible") is not True
+            or receipt.get("diagnostic") is not False
+            or receipt.get("autonomous") is not True
+            or receipt.get("future_state_inputs") is not False):
+        raise ValueError("evaluation is not a formal autonomous future-state-free result")
+
+    registered_case_ids = receipt.get("registered_case_ids")
+    selected_case_ids = receipt.get("selected_case_ids")
+    if (not isinstance(registered_case_ids, list)
+            or not registered_case_ids
+            or len(set(registered_case_ids)) != len(registered_case_ids)
+            or not isinstance(selected_case_ids, list)
+            or not selected_case_ids
+            or len(set(selected_case_ids)) != len(selected_case_ids)
+            or case_id not in selected_case_ids
+            or not set(selected_case_ids).issubset(registered_case_ids)):
+        raise ValueError("evaluation case registry is missing or inconsistent")
+    if receipt.get("registered_case_count") != len(registered_case_ids):
+        raise ValueError("evaluation registered case denominator mismatch")
+    if receipt.get("case_count") != len(selected_case_ids):
+        raise ValueError("evaluation selected case denominator mismatch")
+
+    expected_frames = receipt.get("expected_frames")
+    if not isinstance(expected_frames, dict) or case_id not in expected_frames:
+        raise ValueError("evaluation frame denominator is missing")
+    expected = expected_frames[case_id]
+    if isinstance(expected, bool) or not isinstance(expected, int) or expected < 1:
+        raise ValueError("evaluation frame denominator is invalid")
+    cases = receipt.get("cases")
+    row = cases.get(case_id) if isinstance(cases, dict) else None
+    if not isinstance(row, dict):
+        raise ValueError("evaluation case score row is missing")
+    score = row.get("score")
+    rollout = row.get("rollout")
+    if not isinstance(score, dict) or not isinstance(rollout, dict):
+        raise ValueError("evaluation score/rollout row is incomplete")
+    if score.get("expected_frames") != expected:
+        raise ValueError("evaluation score frame denominator mismatch")
+    selection_score = score.get("selection_score")
+    if (isinstance(selection_score, bool)
+            or not isinstance(selection_score, (int, float))
+            or not math.isfinite(float(selection_score))
+            or not 0 <= float(selection_score) <= 1):
+        raise ValueError("evaluation selection score is invalid")
+    complete = score.get("complete")
+    executed = score.get("executed")
+    if not isinstance(complete, bool) or not isinstance(executed, bool):
+        raise ValueError("evaluation score completion flags are invalid")
+    failure_category = score.get("failure_category")
+    if complete and (not executed or failure_category is not None):
+        raise ValueError("completed evaluation score has invalid failure metadata")
+    if not complete and (not isinstance(failure_category, str) or not failure_category):
+        raise ValueError("incomplete evaluation score lacks failure category")
+    if rollout.get("expected_frames") != expected or rollout.get("frames_expected") != expected:
+        raise ValueError("evaluation rollout frame denominator mismatch")
 
 
 def import_registered_f3(lab=LAB, root=ROOT):
@@ -447,10 +520,6 @@ def completion(registry, data_root):
             continue
         try:
             receipt = load_evidence(entry["receipt"], data_root)
-            if not isinstance(receipt, dict) or receipt.get("schema") != "core.evaluation.v1":
-                raise ValueError("evaluation receipt schema mismatch")
-            if receipt.get("execution_status") not in ("complete", "model_failed"):
-                raise ValueError("evaluation missing or infrastructure failure")
             _reject_nonformal_or_nonroot(receipt, "evaluation receipt")
             axis = receipt["axis"]
             if axis not in received:
@@ -459,6 +528,8 @@ def completion(registry, data_root):
             if (not isinstance(run_id, str) or not isinstance(case_id, str)
                     or not run_id or not case_id):
                 raise ValueError("evaluation identity is incomplete")
+            _validate_evaluation_receipt(
+                receipt, axis=axis, run_id=run_id, case_id=case_id)
             key = (run_id, case_id)
             if key in seen_evaluations[axis]:
                 raise ValueError("duplicate evaluation receipt")
