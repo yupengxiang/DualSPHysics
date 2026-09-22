@@ -1,0 +1,267 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "bindings": {
+    "candidate_card": {
+      "bytes": 22468,
+      "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/candidate-card-v1.json",
+      "role": "F7 physical candidate card",
+      "sha256": "a896dbe62d49a434c07bfe1eb4aae1cba76d252abe395dd70d9498ffee63ffc2"
+    },
+    "compute_forces_binary": {
+      "bytes": 6222440,
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+      "role": "official ComputeForces executable; not invoked",
+      "sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+    },
+    "compute_forces_contract": {
+      "bytes": 3475,
+      "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/compute-forces-contract-v1.json",
+      "role": "official ComputeForces contract",
+      "sha256": "17a8f2b296b7349ff709c63d2508dfdafbe5fa9ef17f2194e23b5ab473f8bb7b"
+    },
+    "compute_forces_help": {
+      "bytes": 6137,
+      "path": "vendor/official/DualSPHysics_v5.4/doc/help/ComputeForces_Help.out",
+      "role": "official command and output help; not invoked",
+      "sha256": "ff01ceeaddf800ea992db16d7655cfee9de8eec31fc8ef69dc650f878946396a"
+    },
+    "current_root_review": {
+      "bytes": 7314,
+      "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/root-review-receipt-v1.json",
+      "role": "current F7 root review; denies admission",
+      "sha256": "5559f70aac902b5ff4cb169f57e341c9cc8349205d0cd79c097941cc74fa0e1e"
+    },
+    "force_gauge_audit": {
+      "bytes": 3957,
+      "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/force-gauge-capability-audit-v1.json",
+      "role": "official force-gauge capability audit",
+      "sha256": "48406a6e1a5add93e7078e76cd4b13cee00de34f8e1dbe36eaae3e022bbd8984"
+    },
+    "geometry_motion_contract": {
+      "bytes": 22080,
+      "path": "scripts/f7_pump_geometry_adapter_v1.py",
+      "role": "hash-checked geometry/motion parser",
+      "sha256": "d7434546a617fe563137eb27e9fceda760888baa722ed424d80bfdf3153d38d9"
+    },
+    "pump_cpu_wrapper": {
+      "bytes": 2568,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/xCasePump_linux64_CPU.sh",
+      "role": "official CPU wrapper reference; not invoked",
+      "sha256": "67d1c6c58d76ce4c765f347bf5db2398904a1fcd7edec546e3eea646600971ba"
+    },
+    "pump_definition": {
+      "bytes": 6983,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/CasePump_Def.xml",
+      "role": "official geometry and motion source",
+      "sha256": "746ae80f4c21bca62a01d59ee04d0eaaf3d1af830c36dafef4b684ca8f3c9453"
+    },
+    "v1_proposal": {
+      "bytes": 4203,
+      "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/direct-torque-admission-proposal-v1.json",
+      "role": "superseded incomplete proposal; retained for audit",
+      "sha256": "bbaabbf36b734e2e301e7fe967fb7fc690d8c6693cdd9b2b73e1fb48312b2d5c"
+    }
+  },
+  "candidate_id": "F7_pump_prescribed_internal_rotor_recirculation_v1",
+  "compute_forces_command": {
+    "argv": [
+      "vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+      "-dirdata campaigns/core-v1/cfd/f7-pump-direct-torque-anchor-v1/native/data",
+      "-filexml campaigns/core-v1/cfd/f7-pump-direct-torque-anchor-v1/input/F7_pump_torque_anchor_Def.xml",
+      "-first:0",
+      "-last:300",
+      "-onlymk:2",
+      "-viscoauto",
+      "-momentaxisin:-0.0176:-0.29:-0.7275:-0.0176:-0.49:-0.7275:pump_axis_in",
+      "-momentaxisex:-0.0176:-0.29:-0.7275:-0.0176:-0.49:-0.7275:pump_axis_ex",
+      "-savecsv campaigns/core-v1/cfd/f7-pump-direct-torque-anchor-v1/compute-forces/pump-force-moment.csv",
+      "-saveascii campaigns/core-v1/cfd/f7-pump-direct-torque-anchor-v1/compute-forces/pump-force-moment.asc"
+    ],
+    "axis_coordinate_system": "world Cartesian metres for command input",
+    "axis_points_m": {
+      "p1": [
+        -0.0176,
+        -0.29,
+        -0.7275
+      ],
+      "p2": [
+        -0.0176,
+        -0.49,
+        -0.7275
+      ]
+    },
+    "execution_authorized": false,
+    "execution_completed": false,
+    "extrinsic_axis_name": "pump_axis_ex",
+    "files": 301,
+    "filter": "onlymk:2 exactly; no other boundary group",
+    "first": 0,
+    "intrinsic_axis_name": "pump_axis_in",
+    "last": 300,
+    "output_ascii": "campaigns/core-v1/cfd/f7-pump-direct-torque-anchor-v1/compute-forces/pump-force-moment.asc",
+    "output_csv": "campaigns/core-v1/cfd/f7-pump-direct-torque-anchor-v1/compute-forces/pump-force-moment.csv",
+    "viscosity": "viscoauto"
+  },
+  "core_credit_firewall": {
+    "credit_even_if_all_diagnostic_gates_pass": 0,
+    "evaluate_production_matrix": false,
+    "modify_t1_or_t2_denominators": false,
+    "register_t1_scope": false,
+    "register_t2_scope": false,
+    "release_training": false
+  },
+  "diagnostic_only": true,
+  "fresh_definition_contract": {
+    "literal_path": "campaigns/core-v1/cfd/f7-pump-direct-torque-anchor-v1/input/F7_pump_torque_anchor_Def.xml",
+    "materialized_hash_must_be_recorded_before_solver": true,
+    "must_copy_official_geometry_and_motion": true,
+    "required_axis_coordinate_system": "world Cartesian metres",
+    "required_axis_p2_m": [
+      -0.0176,
+      -0.49,
+      -0.7275
+    ],
+    "required_axis_point_m": [
+      -0.0176,
+      -0.29,
+      -0.7275
+    ],
+    "required_mk_labels": {
+      "fixed": 0,
+      "fluid": 1,
+      "moving": 2
+    },
+    "required_motion_begin_s": 0.5,
+    "required_motion_finish_s": 1000.0,
+    "source_definition_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/CasePump_Def.xml",
+    "source_definition_sha256": "746ae80f4c21bca62a01d59ee04d0eaaf3d1af830c36dafef4b684ca8f3c9453"
+  },
+  "fresh_lineage": {
+    "existing_h5_canary_reused_as_input": false,
+    "existing_h5_canary_reused_as_torque_evidence": false,
+    "fresh_definition_expected_source_sha256": "746ae80f4c21bca62a01d59ee04d0eaaf3d1af830c36dafef4b684ca8f3c9453",
+    "fresh_definition_materialization_required": true,
+    "fresh_definition_path": "campaigns/core-v1/cfd/f7-pump-direct-torque-anchor-v1/input/F7_pump_torque_anchor_Def.xml",
+    "fresh_output_namespace": "campaigns/core-v1/cfd/f7-pump-direct-torque-anchor-v1",
+    "new_case_id": true,
+    "new_revision_id": true,
+    "new_scope_id": true,
+    "overwrite_existing_namespace": false,
+    "same_input_retry": false
+  },
+  "hard_failure_policy": {
+    "any_gate_failure": "zero credit",
+    "denominator_policy": "preserve all Core denominators; add no case or family credit",
+    "partial_csv_or_partial_bi4": "failure; retain immutable artifacts for audit",
+    "retry_requires": "new scope, new revision, new case, new output namespace, and a new root review",
+    "same_input_retry": "forbidden",
+    "solver_gpu_queue_registry_ledger_matrix_training_mutation_outside_exact_counts": "failure"
+  },
+  "moment_result_contract": {
+    "duplicate_or_missing_time_is_failure": true,
+    "empty_or_nan_required_field_is_failure": true,
+    "force_units": "N",
+    "moment_units": "N*m; reject ambiguous headers instead of silently relabeling the official [Nn] help text",
+    "parser_schema": "core.f7.pump.compute_forces.result_parser.v1",
+    "raw_source": "official ComputeForces CSV and ASCII outputs; raw headers and files are immutable evidence",
+    "required_force_fields": [
+      "ForceFluid_x [N]",
+      "ForceFluid_y [N]",
+      "ForceFluid_z [N]"
+    ],
+    "required_moment_fields": [
+      "pump_axis_in",
+      "pump_axis_ex"
+    ],
+    "required_time_field": "Time [s] or an explicitly mapped official equivalent",
+    "sign_convention": "right-hand rule about p1->p2; intrinsic axis rotates with body, extrinsic axis translates but does not rotate",
+    "time_alignment_tolerance_s": 1e-09,
+    "world_axis_semantics": "axis points are world-coordinate inputs; parser records official intrinsic/extrinsic mapping"
+  },
+  "native_bi4_contract": {
+    "data_directory": "campaigns/core-v1/cfd/f7-pump-direct-torque-anchor-v1/native/data",
+    "decoder_identity": "official Part_XXXX.bi4 decoder used by the audit harness; version and SHA256 must be recorded in the native integrity receipt",
+    "expected_frame_count": 301,
+    "expected_frame_first": 0,
+    "expected_frame_last": 300,
+    "expected_output_step_s": 0.02,
+    "expected_time_end_s": 6.0,
+    "expected_time_start_s": 0.0,
+    "preflight_authorized": false,
+    "preflight_present": false,
+    "required_mass_metadata": "must be decoded and hash-bound before acceptance",
+    "required_mk2_particle_count_and_id_hash": "must be measured and hash-bound before acceptance",
+    "required_particle_groups": [
+      "mk=1 fluid",
+      "mk=2 moving boundary"
+    ]
+  },
+  "numeric_acceptance_gates": {
+    "energy_absolute_floor_J": 1e-12,
+    "energy_dataset": "campaigns/core-v1/cfd/f7-pump-direct-torque-anchor-v1/compute-forces/energy-consistency.csv",
+    "energy_definition": "integral(tau_intrinsic * omega_prescribed) compared against decoded fluid mechanical-energy change plus declared viscous/gravity terms on the same native time axis",
+    "energy_failure_on_missing_nan_or_unaligned_samples": true,
+    "energy_relative_residual_tolerance": 0.1,
+    "minimum_abs_torque_Nm": 1e-08,
+    "minimum_active_frames_at_or_above_threshold": 2,
+    "motion_active_interval_s": [
+      0.5,
+      2.5
+    ],
+    "nonzero_torque_requires_finite_values": true,
+    "thresholds_frozen_before_execution": true
+  },
+  "protected_state_mutation": {
+    "compute_forces_executed": 0,
+    "denominator": 0,
+    "gencase_executed": 0,
+    "gpu": 0,
+    "job_submission": 0,
+    "ledger": 0,
+    "matrix": 0,
+    "native_decode_executed": 0,
+    "native_solver_executed": 0,
+    "proposal_generation": 0,
+    "queue": 0,
+    "registry": 0,
+    "training": 0
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "requested_case_id": "F7_PUMP_RECIRCULATION_TORQUE_q0p50_dp0p0200_anchor",
+  "requested_permissions_exact_counts": {
+    "T1_denominator_mutation": 0,
+    "T2_denominator_mutation": 0,
+    "compute_forces_cpu": 1,
+    "gencase": 1,
+    "gpu": 0,
+    "job_submission": 0,
+    "ledger_mutation": 0,
+    "matrix_mutation": 0,
+    "native_cpu_solver": 1,
+    "native_decode": 1,
+    "new_definition_materialization": 1,
+    "qualification_credit": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "training_mutation": 0
+  },
+  "requested_scope_id": "F7_pump_recirculation_direct_torque_anchor_x_v1",
+  "revision_id": "F7_pump_direct_torque_anchor_revision_20260922_v2",
+  "root_review_decision_required": {
+    "admit_32_case_production": false,
+    "admit_compute_forces_once": true,
+    "admit_exactly_one_protected_cpu_anchor": true,
+    "admit_gencase_once": true,
+    "admit_native_decode_once": true,
+    "admit_native_solver_once": true,
+    "admit_production_matrix": false,
+    "admit_t1_credit": false,
+    "admit_training": false
+  },
+  "schema": "core.f7.pump.direct_torque_admission_proposal.v2",
+  "scientific_purpose": "Obtain one provenance-verified moving-pump fluid force and intrinsic/extrinsic axis-torque observation for an independence review; this observation cannot register or qualify F7.",
+  "status": "proposal_pending_root_review_not_authorized"
+}
