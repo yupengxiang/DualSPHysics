@@ -695,6 +695,8 @@ def main():
     sub.add_parser("import-f3")
     p = sub.add_parser("status")
     p.add_argument("--registry", type=Path)
+    p.add_argument("--write-snapshot", action="store_true",
+                   help="explicitly update the hash-bound completion snapshot")
     args = parser.parse_args()
     if args.command == "adopt":
         result = adopt(args.lab_root, args.root)
@@ -704,7 +706,8 @@ def main():
         path = args.registry or args.root / "registry.json"
         registry = json.loads(path.read_text()) if path.exists() else {}
         result = completion(registry, args.lab_root)
-        atomic_json(args.root / "completion.json", result)
+        if args.write_snapshot:
+            atomic_json(args.root / "completion.json", result)
     print(json.dumps(result, indent=2))
 
 

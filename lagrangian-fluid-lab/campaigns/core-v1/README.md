@@ -24,6 +24,7 @@ to Git wholesale. Existing solver and source trajectory assets are not rewritten
 ```sh
 .venv/bin/python scripts/core_campaign.py adopt
 .venv/bin/python scripts/core_campaign.py status
+.venv/bin/python scripts/core_campaign.py status --write-snapshot
 .venv/bin/python scripts/core_runtime.py status
 .venv/bin/python scripts/core_runtime.py submit --spec /absolute/job.json
 .venv/bin/python scripts/core_runtime.py run
@@ -111,6 +112,9 @@ reproduction is explicitly separate from final GPU-model product reproduction.
   their registered matrices and complete case-run denominators pass.
 
 `core_campaign.py status` verifies hashed typed evidence, not task-label strings.
+The status command is read-only by default; use `--write-snapshot` only when an
+intentional completion snapshot refresh is being reviewed and its dependent
+hash-bound receipts will be re-bound as a separate change.
 It reports unregistered denominators as well as missing registered evaluations.
 Do not edit a gate or remove a failed case to make that status turn green.
 

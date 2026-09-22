@@ -1,6 +1,7 @@
 import json
+import sys
 
-from scripts.core_campaign import completion, load_evidence
+from scripts.core_campaign import completion, load_evidence, main
 from scripts.core_runtime import atomic_json, digest
 import pytest
 
@@ -21,6 +22,23 @@ def test_empty_queue_never_completes_product(tmp_path):
         "independent_reproduction", "causal_lineage_contracts",
     } <= gaps
     assert result["issues"] == []
+
+
+def test_status_is_read_only_unless_snapshot_write_is_explicit(tmp_path, monkeypatch, capsys):
+    root = tmp_path / "campaign"
+    root.mkdir()
+    monkeypatch.setattr(sys, "argv", ["core_campaign.py", "--lab-root", str(tmp_path),
+                                        "--root", str(root), "status"])
+    main()
+    assert not (root / "completion.json").exists()
+    json.loads(capsys.readouterr().out)
+
+    monkeypatch.setattr(sys, "argv", ["core_campaign.py", "--lab-root", str(tmp_path),
+                                        "--root", str(root), "status", "--write-snapshot"])
+    main()
+    snapshot = root / "completion.json"
+    assert snapshot.is_file()
+    assert "completion_gaps" in json.loads(snapshot.read_text())
 
 
 def _write_evaluation(tmp_path, *, axis, run_id, case_id, **extra):
