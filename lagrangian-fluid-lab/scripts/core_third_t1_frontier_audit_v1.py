@@ -40,6 +40,8 @@ def build_audit() -> dict[str, Any]:
     f8 = load("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/candidate-card-v1.json")
     f8_review = load("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/root-review/terra-high-root-review-v1.json")
     f8_contract = load("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/parameter-contract-v1.json")
+    f9 = load("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json")
+    f9_review = load("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-frontier-review-v1.json")
     readiness = load("campaigns/core-v1/learning/core-formal-readiness-audit-20260922.json")
 
     assert completion["t1_families"] == ["F3", "F4"]
@@ -55,6 +57,10 @@ def build_audit() -> dict[str, Any]:
     assert f8_review["admission_granted"] is False
     assert f8_contract["status"] == "pre_admission_static_contract_frozen"
     assert f8_contract["admission_granted"] is False
+    assert f9["status"] == "proposal_only_root_review_required"
+    assert f9["admission_granted"] is False
+    assert f9_review["decision"] == "conditional_go_static_preparation_no_admission"
+    assert f9_review["admission_granted"] is False
     assert readiness["status"] == "blocked"
 
     return {
@@ -98,6 +104,15 @@ def build_audit() -> dict[str, Any]:
                 "fresh_definition_present": f8["execution_controls"]["definition_written"],
                 "next_allowed_action": "root interpretation and independent admission review only; no GenCase or solver execution",
             },
+            "F9": {
+                "status": f9["status"],
+                "scope_id": f9["scope_id"],
+                "admission_granted": f9["admission_granted"],
+                "qualification_credit": f9["qualification_credit"],
+                "terra_high_review": f9_review["decision"],
+                "fresh_definition_present": f9["execution_controls"]["definition_written"],
+                "next_allowed_action": "root admission review and target-specific native semantic preparation only; no GenCase or solver execution",
+            },
         },
         "formal_readiness": {
             "status": readiness["status"],
@@ -126,6 +141,8 @@ def build_audit() -> dict[str, Any]:
             bind("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/candidate-card-v1.json", "F8 proposal-only candidate card"),
             bind("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/root-review/terra-high-root-review-v1.json", "F8 Terra High root-style review"),
             bind("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/parameter-contract-v1.json", "F8 frozen pre-admission parameter contract"),
+            bind("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/candidate-card-v1.json", "F9 proposal-only candidate card"),
+            bind("campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/root-review/terra-high-frontier-review-v1.json", "F9 Terra High frontier review"),
             bind("campaigns/core-v1/learning/core-formal-readiness-audit-20260922.json", "current formal readiness"),
         ],
     }

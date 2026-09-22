@@ -1,0 +1,197 @@
+{
+  "admission_granted": false,
+  "blockers": [
+    "periodic inclined free-surface geometry and streamwise normal-offset sign require target-specific native semantic verification",
+    "the official OpenChannel example has inlet/outlet and cannot be reused as a qualification result",
+    "no fresh F9 Definition, BI4, native preflight, solver, decoder, or qualification receipt exists",
+    "formal root admission must explicitly accept F9 as the third Core family before any execution"
+  ],
+  "error_gates": {
+    "density_interval_kg_m3": [
+      950.0,
+      1050.0
+    ],
+    "excluded_fluid_particles": 0,
+    "fine_vs_production_flux_relative_max": 0.03,
+    "fine_vs_production_profile_relative_max": 0.03,
+    "hard_failure_policy": "fixed denominator, no threshold relaxation, no same-input retry",
+    "production_flux_relative_max": 0.05,
+    "production_profile_relative_l2_max": 0.05,
+    "surface_height_rms_max_m": 0.00375
+  },
+  "evidence": [
+    {
+      "bytes": 30379,
+      "path": "/home/jade/.codex/attachments/ece07836-13f3-4e3a-9dd4-55120224dcee/PLAN.md",
+      "role": "attached Core plan; default free-surface boundary and completion gates",
+      "sha256": "17491b1f5ea5b7c8464c7afb6f2dc21bdff7cf396cb47aebd625ca22d38c3263"
+    },
+    {
+      "bytes": 10847,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/inletoutlet/02_OpenChannel/CaseOpenChannel_Re100_Def.xml",
+      "role": "official free-surface open-channel and laminar-parameter precedent; inlet/outlet explicitly excluded from F9",
+      "sha256": "5c9f96ede7769ba73801aeba024f25cc377f4a0ebfa3f95a1b48696e8df521f3"
+    },
+    {
+      "bytes": 8030,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/mdbc/02_Poiseuille/CasePoiseuille_FS_LR_Def.xml",
+      "role": "official mDBC, free-surface threshold, laminar-viscosity syntax precedent; solid upper wall not reused",
+      "sha256": "fe96e8a7471ed6df241c4fc60d53068b335f75ecee6cf9444cc4b2810a1c1e49"
+    },
+    {
+      "bytes": 7654,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/02_Periodicity/CasePeriodicity_Def.xml",
+      "role": "official periodic-boundary example",
+      "sha256": "af3f081d047f0abc7e3239c96f473318ce5c2ab5070228edb55d8dd22ce7fcae"
+    },
+    {
+      "bytes": 8439,
+      "path": "vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML__Parameters.xml",
+      "role": "official periodic-offset, mDBC and free-surface parameter syntax",
+      "sha256": "bee50a855249befd30ad2029b22043b029a1f0e5ff376af423b8b37c8d30bc6f"
+    },
+    {
+      "bytes": 9964,
+      "path": "campaigns/core-v1/cfd/f1-f2-third-t1-route-closed-v3.json",
+      "role": "closed F1/F2 lineages used for independence review",
+      "sha256": "b8e3a17aa46daa29a51daa71e170f844cf114f4f2ad76f09d814abaaa90a8e0a"
+    },
+    {
+      "bytes": 9278,
+      "path": "campaigns/core-v1/evidence/f5-wave-runup-third-t1-route-closed-no-new-hypothesis-v1.json",
+      "role": "closed F5 lineage used for independence review",
+      "sha256": "b192dadb44706ec8af5246a4fcb09855aeed49b4b49ada5db348eef8a7574e92"
+    },
+    {
+      "bytes": 9170,
+      "path": "campaigns/core-v1/cfd/f6-observation-axis-v4-third-t1-route-closed-v1.json",
+      "role": "closed F6 lineage used for independence review",
+      "sha256": "55d40fa5ae78ea23c43c52a4451e8c9ff20d9d64e80908e30c9db670b6f759cb"
+    },
+    {
+      "bytes": 8552,
+      "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/root-review-receipt-v2-20260922.json",
+      "role": "F7 no-go receipt used for independence review",
+      "sha256": "a9c04e4d9242673ecb645d10f89021b0e9fff8a5ce2abea329b6f72976689cc2"
+    }
+  ],
+  "execution_controls": {
+    "definition_written": false,
+    "denominator_mutation": 0,
+    "gencase_invoked": false,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_invoked": false,
+    "training_started": false
+  },
+  "family": "F9",
+  "identity": {
+    "anchor_case": "F9_GFN_q0p500_dp0p0075_anchor_r001",
+    "parameter": "q in [0,1], theta_deg=3+6*q, Pi=g*sin(theta)*h^3/nu^2",
+    "planned_definition": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/input/F9_GRAVITY_FILM_NUSSELT_R001_Def.xml",
+    "planned_output_root": "campaigns/core-v1/cfd/f9-gravity-film-nusselt-r001/cases",
+    "production_case_count": 32,
+    "production_case_rule": "q_i=(i+0.5)/32, i=0..31",
+    "split": {
+      "id_test": 6,
+      "ood_test": 6,
+      "train": 16,
+      "validation": 4
+    }
+  },
+  "independence_review": {
+    "distinct_from": {
+      "F1_F2": "no dam-break release, obstacle, catchment, weir, or source-to-receiver transfer",
+      "F3": "no enclosed-container sloshing or oscillatory free-surface memory",
+      "F4": "no falling liquid mass, droplet, collision, or impact",
+      "F5": "no wave maker, wave train, runup, shoreline, or breaking wave",
+      "F6": "no floating body or fluid-rigid-body feedback",
+      "F7": "no pump, moving boundary, rotation, torque, or angular-momentum observation"
+    },
+    "not_a_parameter_rename": "the falsifier is a different boundary-value problem with free-surface stress condition and Nusselt profile/flux law"
+  },
+  "mechanism": {
+    "description": "A fully developed single-phase Newtonian film on a fixed inclined plane: tangential gravity drives viscous shear, the bottom is no-slip, and the top is a real free surface with zero tangential stress.",
+    "falsifiable_observables": [
+      "full wall-normal velocity profile",
+      "free-surface height and normal velocity",
+      "volume flux",
+      "hydrostatic normal pressure profile",
+      "zero spanwise velocity",
+      "resolution and time-step convergence"
+    ],
+    "governing_1d_model": "du/dt = g_s + nu*d2u/dn2; u(0)=0; du/dn(h)=0",
+    "name": "gravity-driven free-surface viscous film / Nusselt film",
+    "steady_prediction": "u(n)=g_s/nu*(h*n-n^2/2), ubar=g_s*h^2/(3*nu), q=g_s*h^3/(3*nu)",
+    "transient_prediction": "startup decay on h^2/nu with half-integer Neumann/Dirichlet modes"
+  },
+  "physical_contract": {
+    "Mach_max": 0.023019331530669974,
+    "Pi_range": [
+      13.862224730068533,
+      41.434796755205944
+    ],
+    "Re_f_range": [
+      4.620741576689511,
+      13.811598918401982
+    ],
+    "domain": {
+      "boundary": "periodic streamwise/spanwise with streamwise normal offset; no inlet/outlet",
+      "spanwise_length_m": 0.12,
+      "streamwise_length_m": 0.24
+    },
+    "film_thickness_h_m": 0.03,
+    "g_tangent_range_m_s2": [
+      0.5134157307432791,
+      1.5346221020446649
+    ],
+    "gravity_m_s2": 9.81,
+    "initial_state": "fluid at rest, film parallel to fixed inclined plane, no inherited velocity",
+    "kinematic_viscosity_m2_s": 0.001,
+    "mean_speed_max_m_s": 0.46038663061339946,
+    "resolution_dp_m": {
+      "coarse": 0.01,
+      "fine": 0.006,
+      "production": 0.0075
+    },
+    "rho0_kg_m3": 1000.0,
+    "sound_speed_m_s": 20.0,
+    "surface_tension": false,
+    "theta_range_deg": [
+      3.0,
+      9.0
+    ]
+  },
+  "qualification_credit": 0,
+  "revision": "r001",
+  "schema": "core.cfd.f9.gravity_film_nusselt_candidate.v1",
+  "scientific_status": "not_executed_not_admitted_zero_credit",
+  "scope_id": "F9_GRAVITY_FILM_NUSSELT_R001",
+  "static_checks": {
+    "mdbc_example_has_mdbc_and_viscosity": true,
+    "no_slip_mdbc_documented": true,
+    "official_xml_examples_parse": true,
+    "openchannel_has_free_surface_candidate_geometry": true,
+    "openchannel_has_laminar_and_free_surface_threshold": true,
+    "periodic_example_present": true,
+    "periodic_offset_documented": true,
+    "plan_default_boundary_mentions_free_surface": true,
+    "plan_three_family_gate": true
+  },
+  "static_contract": {
+    "hard_failure_policy": "fixed denominator, close scope, no threshold relaxation and no same-input retry",
+    "must_have": [
+      "one fluid block and no top-wall particles",
+      "fixed mDBC bottom with no-slip and a real free surface at n=h",
+      "gravity decomposed into tangential and normal components",
+      "periodic streamwise/spanwise boundaries and explicitly verified streamwise normal offset sign",
+      "no inlet/outlet, pump, moving boundary, floating, Chrono, obstacle, material body, or surface tension",
+      "particle identity, mass, finite-value, overlap, initial exclusion, and lifecycle checks",
+      "parser for full velocity profile, free-surface height, pressure, flux, and exclusion statistics"
+    ],
+    "qualification_matrix": "13 physical/spatial cells plus 2 control cells; qualification-only until root admission"
+  },
+  "status": "proposal_only_root_review_required"
+}
