@@ -274,15 +274,24 @@ def completion(registry, data_root):
     material = {}
     eval_ids = set()
     material_eval_ids = set()
+    registered_case_owners = {}
+    registered_physical_case_owners = {}
     for scope in entries("scopes"):
         if not isinstance(scope, dict):
             issues.append({"scope_id": None, "reason": "scope entry is not an object"})
             continue
         sid = scope.get("scope_id", "unknown")
         try:
+            if not isinstance(sid, str) or not sid:
+                raise ValueError("scope id is missing")
+            family = scope.get("family")
+            if not isinstance(family, str) or not family:
+                raise ValueError("scope family is missing")
             receipt = load_evidence(scope["qualification"], data_root)
             _reject_nonformal_or_nonroot(receipt, "qualification")
-            if receipt.get("schema") != "core.qualification.v1" or receipt.get("scope_id") != sid:
+            if (receipt.get("schema") != "core.qualification.v1"
+                    or receipt.get("scope_id") != sid
+                    or receipt.get("family") != family):
                 raise ValueError("qualification schema/scope mismatch")
             if receipt.get("T1_numerical") is not True or receipt.get("extent") != "parameter_range":
                 raise ValueError("T1 range not qualified")
@@ -304,7 +313,9 @@ def completion(registry, data_root):
                 c.get("case_id") for c in accepted
                 if isinstance(c.get("case_id"), str) and c.get("case_id")
             }
-            if len(physical_ids) < 32 or len(ids) < 32 or len(ids) != len(accepted):
+            if (len(physical_ids) < 32 or len(ids) < 32
+                    or len(ids) != len(accepted)
+                    or len(physical_ids) != len(accepted)):
                 raise ValueError("fewer than 32 distinct accepted physical cases")
             for c in accepted:
                 if (not isinstance(c.get("physical_case_id"), str)
@@ -313,15 +324,26 @@ def completion(registry, data_root):
                         or not c.get("case_id")
                         or not isinstance(c.get("split"), str)):
                     raise ValueError("accepted case identity/split is incomplete")
+                case_id = c["case_id"]
+                physical_case_id = c["physical_case_id"]
+                previous_scope = registered_case_owners.get(case_id)
+                if previous_scope is not None:
+                    raise ValueError(
+                        f"case id is registered in multiple scopes: {case_id}"
+                    )
+                previous_physical_scope = registered_physical_case_owners.get(physical_case_id)
+                if previous_physical_scope is not None:
+                    raise ValueError(
+                        f"physical case id is registered in multiple scopes: {physical_case_id}"
+                    )
+                registered_case_owners[case_id] = sid
+                registered_physical_case_owners[physical_case_id] = sid
                 audit = load_evidence(c["audit"], data_root)
                 _reject_nonformal_or_nonroot(audit, "case audit")
                 if (audit.get("schema") != "core.case_audit.v1"
                         or audit.get("hard_integrity_pass") is not True
                         or audit.get("case_id") != c["case_id"]):
                     raise ValueError("case hard audit mismatch")
-            family = scope["family"]
-            if not isinstance(family, str) or not family:
-                raise ValueError("scope family is missing")
             families.setdefault(family, set()).update(ids)
             evaluation = {c["case_id"] for c in accepted if c["split"] in ("validation", "test", "id_test", "ood_test")}
             if len(evaluation) < 16:
@@ -392,9 +414,12 @@ def completion(registry, data_root):
                 raise ValueError("training is not bound to the formal data and validation protocol")
             counts = config.get("validation_family_counts", {})
             if (not isinstance(counts, dict) or len(counts) < 3
+                    or (families and set(counts) != set(families))
                     or any(not isinstance(n, int) or isinstance(n, bool) or n < 4
                            for n in counts.values())):
-                raise ValueError("formal training lacks three families with four validation cases each")
+                raise ValueError(
+                    "formal training lacks exactly the registered families with four validation cases each"
+                )
             checkpoint = receipt.get("checkpoint", {})
             if (not isinstance(checkpoint, dict)
                     or checkpoint.get("schema") != "core.checkpoint.v1"

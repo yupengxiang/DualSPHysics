@@ -49,8 +49,9 @@ def test_unregistered_evaluations_do_not_shrink_any_target_denominator(tmp_path)
                for issue in result["issues"])
 
 
-def _qualified_scope_fixture(tmp_path, *, material=False, formal_material_receipt=None):
-    scope_id = "scope-with-material" if material else "scope-t1-only"
+def _qualified_scope_fixture(tmp_path, *, material=False, formal_material_receipt=None,
+                            scope_id=None):
+    scope_id = scope_id or ("scope-with-material" if material else "scope-t1-only")
     qualification_path = tmp_path / f"{scope_id}-qualification.json"
     atomic_json(qualification_path, {
         "schema": "core.qualification.v1", "scope_id": scope_id, "family": "F3",
@@ -214,6 +215,60 @@ def test_report_existence_or_job_success_is_not_qualification(tmp_path):
     assert not result["can_finalize"]
     assert not result["t1_families"]
     assert "schema" in result["issues"][0]["reason"]
+
+
+def test_scope_family_must_match_qualification_family(tmp_path):
+    scope = _qualified_scope_fixture(tmp_path)
+    scope["family"] = "F4"
+
+    result = completion({"scopes": [scope]}, tmp_path)
+
+    assert not result["t1_families"]
+    assert not result["checks"]["evidence_valid"]
+    assert any("schema/scope mismatch" in issue["reason"]
+               for issue in result["issues"])
+
+
+def test_case_identity_cannot_be_reused_across_scopes(tmp_path):
+    first = _qualified_scope_fixture(tmp_path, scope_id="scope-first")
+    second = _qualified_scope_fixture(tmp_path, scope_id="scope-second")
+    second["scope_id"] = "scope-second"
+    second_qualification = tmp_path / "scope-second-qualification.json"
+    atomic_json(second_qualification, {
+        "schema": "core.qualification.v1", "scope_id": "scope-second", "family": "F4",
+        "T1_numerical": True, "extent": "parameter_range", "matrix_complete": True,
+        "independent_checks_passed": True,
+    })
+    second["family"] = "F4"
+    second["qualification"] = {
+        "path": second_qualification.name, "sha256": digest(second_qualification),
+    }
+    for source, duplicate in zip(first["cases"], second["cases"]):
+        duplicate["case_id"] = source["case_id"]
+        duplicate["physical_case_id"] = source["physical_case_id"]
+        duplicate["audit"] = source["audit"]
+
+    result = completion({"scopes": [first, second]}, tmp_path)
+
+    assert result["t1_families"] == ["F3"]
+    assert not result["checks"]["evidence_valid"]
+    assert any("registered in multiple scopes" in issue["reason"]
+               for issue in result["issues"])
+
+
+def test_training_validation_counts_must_bind_to_registered_families(tmp_path):
+    scope = _qualified_scope_fixture(tmp_path)
+    receipt = _formal_training_receipt(tmp_path, "mlp-seed17")
+    registry = {
+        "scopes": [scope],
+        "training_runs": [{"run_id": "mlp-seed17", "receipt": receipt}],
+    }
+
+    result = completion(registry, tmp_path)
+
+    assert result["training_runs"] == []
+    assert any("exactly the registered families" in issue["reason"]
+               for issue in result["issues"])
 
 
 def test_changed_evidence_rejected(tmp_path):
