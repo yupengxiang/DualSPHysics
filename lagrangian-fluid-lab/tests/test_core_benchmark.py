@@ -9,7 +9,7 @@ import h5py
 import pytest
 
 from test_core_contract import tiny_manifest
-from scripts import core_learning
+from scripts import core_benchmark, core_learning
 from scripts.core_benchmark import (_checkpoint_registration,
                                      _compare_paired_reproduction,
                                      inspect_dataset, phase_plan, reproduce,
@@ -17,6 +17,28 @@ from scripts.core_benchmark import (_checkpoint_registration,
 from scripts.core_dataset import CoreDataset, sha256_file
 from scripts.core_learning import train_model
 from scripts.core_package import build_bundle
+
+
+@pytest.mark.parametrize("command", [
+    "train", "profile", "rollout", "evaluate", "evaluate-checkpoints",
+])
+def test_unified_entrypoint_delegates_explicit_arguments_without_mutating_sys_argv(
+        monkeypatch, command):
+    """All learning phases honour ``main(argv)`` just like the shell CLI."""
+    observed = []
+    process_argv = list(sys.argv)
+
+    def delegated(argv):
+        observed.append(list(argv))
+        return 37
+
+    monkeypatch.setattr(core_learning, "main", delegated)
+
+    result = core_benchmark.main([command, "--example", "value"])
+
+    assert result == 37
+    assert observed == [[command, "--example", "value"]]
+    assert sys.argv == process_argv
 
 
 def test_phase_plan_connects_all_entrypoints_and_freezes_denominator(tmp_path, monkeypatch):

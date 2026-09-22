@@ -1059,7 +1059,21 @@ def reproduce(manifest, data_root, case_ids=None, source_host=None, *, checkpoin
             "full_product_reproduction": False}
 
 
-def main():
+def main(argv=None):
+    """Run one Core product entrypoint from an explicit argument vector.
+
+    ``train``, ``rollout`` and ``evaluate`` intentionally share the learning
+    implementation, but they remain product commands of this module.  Keep
+    their delegation independent from process-global ``sys.argv`` so an
+    embedding caller receives exactly the same command interpretation as the
+    command-line executable and this entrypoint never mutates its host.
+    """
+    argv = list(sys.argv[1:] if argv is None else argv)
+    delegated = ("train", "profile", "rollout", "evaluate", "evaluate-checkpoints")
+    if argv and argv[0] in delegated:
+        from scripts import core_learning
+        return core_learning.main(argv)
+
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("import-f3")
@@ -1091,14 +1105,11 @@ def main():
     p.add_argument("--data-root", type=Path, required=True)
     p.add_argument("--case-id", action="append")
     p.add_argument("--output", type=Path)
-    # Delegate without silently swallowing unsupported flags.
-    for command in ("train", "profile", "rollout", "evaluate", "evaluate-checkpoints"):
+    # The delegated commands are handled above.  Keep their names in this
+    # parser only for an accurate top-level command listing.
+    for command in delegated:
         sub.add_parser(command, add_help=False).add_argument("args", nargs=argparse.REMAINDER)
-    if len(sys.argv) > 1 and sys.argv[1] in ("train", "profile", "rollout", "evaluate", "evaluate-checkpoints"):
-        from scripts import core_learning
-        sys.argv[0] = "core_learning"
-        return core_learning.main()
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.command == "import-f3":
         result = import_f3_manifest(args.source_manifest, args.data_root, compact=not args.inline_v1,
                                     asset_dir=args.asset_dir)
