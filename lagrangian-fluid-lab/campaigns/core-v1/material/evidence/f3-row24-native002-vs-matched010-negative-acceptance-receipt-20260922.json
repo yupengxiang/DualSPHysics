@@ -1,0 +1,91 @@
+{
+  "schema": "core.material.f3.t2.row24.temporal_acceptance_receipt.v1",
+  "status": "scientific_gate_failed_zero_credit",
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "T2_macro": false,
+  "T2_path": false,
+  "created_at_utc": "2026-09-22T00:00:00+00:00",
+  "scope": {
+    "family": "F3",
+    "matrix_row": 24,
+    "case_id": "F3_REV075_R075-OUTPUT",
+    "comparison_mode": "same_source_cadence",
+    "event_definition": {
+      "first_passage": "continuous crossing of x=0 into opposite source half on accepted linear RK segment",
+      "return": "first later crossing back to the seed's origin half",
+      "residence": "accepted segment time in the opposite source half"
+    },
+    "seed_count": 512,
+    "source_ids": ["0", "1"],
+    "full_window_s": 8.350012828223477,
+    "dense_interval_s": 0.0019910427180569457,
+    "matched_interval_s": 0.009999458984018439,
+    "matched_view_policy": "direct_native_frame_selection_every_fifth; no interpolation"
+  },
+  "registered_gates": {
+    "unknown_fraction_per_source_max": 0.01,
+    "cdf_sup_abs_difference_max": 0.02,
+    "right_censored_is_not_acceptance": true,
+    "no_partial_credit": true
+  },
+  "observed": {
+    "left_max_unknown_fraction": 0.001953125,
+    "right_max_unknown_fraction": 0.001953125,
+    "common_full_path_fraction": 0.998046875,
+    "mass_closure_left_max_abs_error": 0.0,
+    "mass_closure_right_max_abs_error": 0.0,
+    "by_source": {
+      "0": {
+        "first_passage_cdf_sup_abs_difference": 0.015625,
+        "return_cdf_sup_abs_difference": 0.0234375,
+        "residence_cdf_sup_abs_difference": 0.01171875,
+        "unknown_fraction_left": 0.00390625,
+        "unknown_fraction_right": 0.00390625
+      },
+      "1": {
+        "first_passage_cdf_sup_abs_difference": 0.03125,
+        "return_cdf_sup_abs_difference": 0.0234375,
+        "residence_cdf_sup_abs_difference": 0.00390625,
+        "unknown_fraction_left": 0.0,
+        "unknown_fraction_right": 0.0
+      }
+    }
+  },
+  "gate_results": {
+    "source_window_complete": true,
+    "unknown_gate_pass": true,
+    "mass_closure_pass": true,
+    "residence_cdf_gate_pass": true,
+    "first_passage_cdf_gate_pass": false,
+    "return_cdf_gate_pass": false,
+    "all_cdf_events_pass": false,
+    "scientific_acceptance_pass": false
+  },
+  "blocking_reasons": [
+    "source 0 return CDF bound 0.0234375 exceeds the registered 0.02 limit",
+    "source 1 first-passage CDF bound 0.03125 exceeds the registered 0.02 limit",
+    "source 1 return CDF bound 0.0234375 exceeds the registered 0.02 limit",
+    "native MLS comparison remains diagnostic-only and does not establish material reliability or T2"
+  ],
+  "artifacts": {
+    "comparison": {
+      "path": "campaigns/core-v1/material/evidence/f3-row24-native002-vs-matched010-comparison-20260922.json",
+      "sha256": "a26091424c87ac393a7b4fc4d852308c28c738e3c0c91ba754ade94cca1b7482"
+    },
+    "matched010_trace": {
+      "path": "campaigns/core-v1/runtime/attempts/ada-f3-native-mls-dense-matched010-production-s4-full835-v2/20260920T000549-206354e2f1dd/trace.h5",
+      "sha256": "49448863a831cadc157933fd61e0d81e32cea01b926033b9ddb6d786550a3ef3"
+    },
+    "native002_trace": {
+      "path": "campaigns/core-v1/runtime/attempts/ada-f3-native-mls-dense-native002-production-s4-full835-v2/20260920T000456-ba294af97b9d/trace.h5",
+      "sha256": "737a5ff8e5d5f09254b1b7fcd224a6722272d91060067e0b671dcb9d859bffa8"
+    }
+  },
+  "denominator_effect": {
+    "registry_mutated": false,
+    "central_ledger_mutated": false,
+    "t2_denominator_increment": 0,
+    "reason": "negative scientific acceptance receipt; no partial credit"
+  }
+}
