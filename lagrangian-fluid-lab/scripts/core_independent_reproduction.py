@@ -31,6 +31,8 @@ from scripts.core_runtime import atomic_json, digest
 
 SCHEMA = "core.independent_reproduction.run.v1"
 DATASET_SCHEMA = "core.dataset.v2"
+READER_SCHEMA = "core.reader_reproduction.v1"
+MODEL_REPRODUCTION_SCHEMA = "core.model_reproduction.v1"
 LARGE_ASSET_SUFFIXES = {".h5", ".npz"}
 DEFAULT_CASE = "F3_DEV_08_a0p953125"
 DEFAULT_F4_CASE = "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04"
@@ -244,6 +246,48 @@ def _relocation_identity(source_root, destination, relocation):
     }
 
 
+def _independent_reproduction_gates(*, protected_unchanged, reader_run,
+                                    f3_reader, f4_reader, model_run, model_report):
+    """Apply the fail-closed gates used by the independent-run receipt.
+
+    A child process can leave a syntactically valid report behind even when it
+    exits non-zero. Likewise, a model report may describe a full horizon while
+    its top-level ``passed`` flag is false (for example, source verification
+    failed). Neither state is sufficient evidence for an independent
+    reproduction, so the aggregator requires the process status, schema, and
+    report-level pass contract together.
+    """
+    f3_passed = (
+        isinstance(reader_run, dict)
+        and reader_run.get("exit_code") == 0
+        and isinstance(f3_reader, dict)
+        and f3_reader.get("schema") == READER_SCHEMA
+        and f3_reader.get("passed") is True
+    )
+    f4_passed = (
+        isinstance(f4_reader, dict)
+        and f4_reader.get("schema") == "core.verification.v1"
+        and f4_reader.get("passed") is True
+    )
+    model_passed = (
+        isinstance(model_run, dict)
+        and model_run.get("exit_code") == 0
+        and isinstance(model_report, dict)
+        and model_report.get("schema") == MODEL_REPRODUCTION_SCHEMA
+        and model_report.get("passed") is True
+        and model_report.get("full_horizon_reproduction") is True
+        and model_report.get("predictor_future_state_inputs") is False
+    )
+    read_only_contract_passed = bool(protected_unchanged and f3_passed and f4_passed)
+    return {
+        "f3_reader_passed": f3_passed,
+        "f4_reader_passed": f4_passed,
+        "model_passed": model_passed,
+        "read_only_contract_passed": read_only_contract_passed,
+        "independent_reproduction_evidence": bool(read_only_contract_passed and model_passed),
+    }
+
+
 def run(args):
     bundle = Path(args.bundle).resolve()
     output_root = Path(args.output_dir).resolve()
@@ -365,6 +409,14 @@ def run(args):
 
     protected_after = _state_fingerprints(lab_root)
     protected_unchanged = protected_before == protected_after
+    gate_checks = _independent_reproduction_gates(
+        protected_unchanged=protected_unchanged,
+        reader_run=reader_run,
+        f3_reader=f3_reader,
+        f4_reader=f4_reader,
+        model_run=model_run,
+        model_report=model_report,
+    )
     receipt = {
         "schema": SCHEMA,
         "version": "a8-independent-relocated-v1",
@@ -398,10 +450,10 @@ def run(args):
         "manifests": {"f3": f3_manifest_audit, "f4": f4_manifest_audit},
         "reader": {
             "f3": {"run": reader_run, "receipt": str(reader_output), "receipt_sha256": digest(reader_output),
-                   "passed": bool(f3_reader.get("passed")), "oracle_role": "privileged_reference_integrity_check_only",
+                   "passed": gate_checks["f3_reader_passed"], "oracle_role": "privileged_reference_integrity_check_only",
                    "learned_model_result": False},
             "f4": {"receipt": str(f4_reader_path), "receipt_sha256": digest(f4_reader_path),
-                   "passed": bool(f4_reader.get("passed")), "oracle_role": f4_reader["oracle_role"],
+                   "passed": gate_checks["f4_reader_passed"], "oracle_role": f4_reader["oracle_role"],
                    "learned_model_result": False},
         },
         "model": {
@@ -412,7 +464,7 @@ def run(args):
             "report_snapshot_sha256": digest(model_report_snapshot),
             "score_snapshot": str(score_snapshot) if score_snapshot else None,
             "score_snapshot_sha256": digest(score_snapshot) if score_snapshot else None,
-            "passed": bool(model_report.get("passed")),
+            "passed": gate_checks["model_passed"],
             "full_horizon_reproduction": bool(model_report.get("full_horizon_reproduction")),
             "full_product_reproduction": bool(model_report.get("full_product_reproduction")),
             "cross_host_reproduction": bool(model_report.get("cross_host_reproduction")),
@@ -432,12 +484,7 @@ def run(args):
             "unchanged": protected_unchanged,
         },
         "result": {
-            "read_only_contract_passed": bool(protected_unchanged and f3_reader.get("passed") and f4_reader.get("passed")),
-            "independent_reproduction_evidence": bool(
-                protected_unchanged and f3_reader.get("passed") and f4_reader.get("passed")
-                and model_report.get("full_horizon_reproduction")
-                and model_report.get("predictor_future_state_inputs") is False
-            ),
+            **gate_checks,
             "core_gate_status": "blocked_for_full_product_release; diagnostic_model_reproduction_only",
             "blockers": [
                 "The checkpoint is an engineering/preprofile artifact and no scientific qualification is inferred.",

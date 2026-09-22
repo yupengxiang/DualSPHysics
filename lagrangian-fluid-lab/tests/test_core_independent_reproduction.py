@@ -1,7 +1,10 @@
 import json
 from pathlib import Path
 
-from scripts.core_independent_reproduction import audit_manifest
+from scripts.core_independent_reproduction import (
+    _independent_reproduction_gates,
+    audit_manifest,
+)
 
 
 def test_registered_f3_v2_and_f4_compact_v2_are_portable_without_oracle_claim(tmp_path):
@@ -38,3 +41,46 @@ def test_manifest_audit_rejects_absolute_or_parent_asset_paths(tmp_path):
         assert "portable" in str(error)
     else:
         raise AssertionError("absolute compact asset path was accepted")
+
+
+def _valid_independent_gate_inputs():
+    return {
+        "protected_unchanged": True,
+        "reader_run": {"exit_code": 0},
+        "f3_reader": {"schema": "core.reader_reproduction.v1", "passed": True},
+        "f4_reader": {"schema": "core.verification.v1", "passed": True},
+        "model_run": {"exit_code": 0},
+        "model_report": {
+            "schema": "core.model_reproduction.v1",
+            "passed": True,
+            "full_horizon_reproduction": True,
+            "predictor_future_state_inputs": False,
+        },
+    }
+
+
+def test_independent_reproduction_gate_requires_model_report_pass(tmp_path):
+    del tmp_path
+    inputs = _valid_independent_gate_inputs()
+    inputs["model_report"]["passed"] = False
+    inputs["model_report"]["full_horizon_reproduction"] = True
+
+    result = _independent_reproduction_gates(**inputs)
+
+    assert result["read_only_contract_passed"] is True
+    assert result["model_passed"] is False
+    assert result["independent_reproduction_evidence"] is False
+
+
+def test_independent_reproduction_gate_requires_zero_child_exit(tmp_path):
+    del tmp_path
+    inputs = _valid_independent_gate_inputs()
+    inputs["model_run"]["exit_code"] = 1
+    inputs["reader_run"]["exit_code"] = 1
+
+    result = _independent_reproduction_gates(**inputs)
+
+    assert result["f3_reader_passed"] is False
+    assert result["model_passed"] is False
+    assert result["read_only_contract_passed"] is False
+    assert result["independent_reproduction_evidence"] is False
