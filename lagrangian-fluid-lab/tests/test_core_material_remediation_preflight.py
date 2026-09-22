@@ -67,7 +67,10 @@ def test_preflight_evidence_hashes_and_stale_implementation_binding_is_visible()
     # This blocked, immutable preflight predates the current material
     # acceptance implementation.  The mismatch remains explicit and cannot
     # be used as a current formal binding.
-    assert mismatches == ["scripts/core_material_acceptance.py"]
+    assert mismatches == [
+        "scripts/core_material.py",
+        "scripts/core_material_acceptance.py",
+    ]
 
 
 def test_fixed_unknown_cadence_and_scope_gates_are_preserved() -> None:

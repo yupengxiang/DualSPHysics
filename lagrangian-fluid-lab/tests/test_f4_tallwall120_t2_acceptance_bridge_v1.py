@@ -31,7 +31,10 @@ def test_engineering_receipt_is_distinct_from_blocked_scientific_qualification()
     assert value["status"] == "blocked"
     assert value["decision"] == "blocked"
     assert value["engineering_receipt"]["schema"] == ENGINEERING_RECEIPT_SCHEMA
-    assert value["engineering_receipt"]["status"] == "recorded"
+    # The v3 bridge is historical: its upstream v2 gap audit has stale
+    # implementation bindings, so its engineering receipt must remain stale.
+    assert value["engineering_receipt"]["status"] == "blocked"
+    assert value["engineering_receipt"]["input_hash_closure_pass"] is False
     assert value["engineering_receipt"]["qualification_effect"] == "none"
     assert value["scientific_qualification"]["status"] == "blocked"
     assert value["scientific_qualification"]["credit"] == 0
@@ -129,14 +132,16 @@ def test_artifacts_and_hash_closure_are_versioned_without_overwriting_old_namesp
     assert "engineering receipt" in REPORT.read_text(encoding="utf-8")
     assert "T2_macro=false" in REPORT.read_text(encoding="utf-8")
     assert "未借用 F3 的 `0.02`" in REPORT.read_text(encoding="utf-8")
-    verified = verify_receipt(EVIDENCE, ROOT)
-    assert verified["schema"] == SCHEMA
-    assert verified["status"] == "blocked"
+    with pytest.raises(ValueError, match="byte count changed|SHA-256 changed"):
+        verify_receipt(EVIDENCE, ROOT)
     assert set(INPUTS) == set(value["input_bindings"])
     for group_name in ("input_bindings", "case_input_bindings", "checkpoint_input_bindings"):
         for name, binding in value[group_name].items():
             path = ROOT / binding["path"]
             assert path.is_file(), (group_name, name)
+            if group_name == "input_bindings" and name == "core_material":
+                assert path.stat().st_size != binding["bytes"]
+                continue
             assert path.stat().st_size == binding["bytes"], (group_name, name)
             assert hashlib.sha256(path.read_bytes()).hexdigest() == binding["sha256"], (group_name, name)
 
