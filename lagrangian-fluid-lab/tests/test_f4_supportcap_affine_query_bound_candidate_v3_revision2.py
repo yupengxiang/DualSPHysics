@@ -21,8 +21,8 @@ from scripts.f4_supportcap_affine_query_bound_candidate_v3 import candidate_spec
 
 LAB = Path(__file__).resolve().parents[1]
 ROOT = LAB / "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3"
-CARD = ROOT / "candidate-card-v2.json"
-REVIEW = ROOT / "terra-high-root-review-v3.json"
+CARD = ROOT / "candidate-card-v3.json"
+REVIEW = ROOT / "terra-high-root-review-v4.json"
 CALIBRATION = LAB / "campaigns/core-v1/material/evidence/f4-reconstruction-calibration-v3-20260922-result.json"
 
 
@@ -100,4 +100,3 @@ def test_v3_held_out_calibration_is_exact_composition_and_zero_credit() -> None:
     assert result["T2_path"] is False
     assert all(row["backend"] == F4_V3_BACKEND for row in result["rows"])
     assert all(row["neighbours"] == F4_V3_NEIGHBOURS for row in result["rows"])
-

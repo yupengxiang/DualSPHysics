@@ -13,7 +13,7 @@ from pathlib import Path
 LAB_ROOT = Path(__file__).resolve().parents[1]
 RECEIPT_PATH = LAB_ROOT / (
     "campaigns/core-v1/material/candidates/"
-    "f4-supportcap-affine-query-bound-v3/terra-high-root-review-v3.json"
+    "f4-supportcap-affine-query-bound-v3/terra-high-root-review-v4.json"
 )
 
 

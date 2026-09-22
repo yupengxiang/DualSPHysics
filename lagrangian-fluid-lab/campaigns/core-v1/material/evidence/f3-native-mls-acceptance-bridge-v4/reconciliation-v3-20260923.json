@@ -1,0 +1,1478 @@
+{
+  "T2_macro": false,
+  "T2_path": false,
+  "acceptance_gates": {
+    "checkpoint_schema_binding": true,
+    "first_passage_return_residence_cdf": false,
+    "full_event_window": false,
+    "per_matrix_formal_acceptance_receipts": false,
+    "per_source_unknown_fraction": false,
+    "right_censored_event": false,
+    "source_cadence_provenance": false,
+    "source_window_integrity": true,
+    "trace_schema_binding": true
+  },
+  "blocking_reasons": [
+    "retained per-source unknown maximum 0.015625 exceeds 0.01",
+    "retained first-passage/return/residence CDF maximum 0.06103515625 exceeds 0.02",
+    "row 24 is a negative scientific receipt: first-passage and return CDF gates fail despite complete window",
+    "dense source cadence provenance fails closed because retained nominal interval .01 disagrees with required .002",
+    "row 28 has only a short profile source audit; row 32 has no exact source audit",
+    "rows 16-23, 26-27, 29 and 31 remain missing exact root-owned CFD sources",
+    "all 33 matrix rows lack an independent formal acceptance receipt"
+  ],
+  "candidate": {
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "id": "f3-native-mls-acceptance-reconciliation-v2",
+    "qualification_claim": "none"
+  },
+  "cdf_metrics": {
+    "all_required_sources_have_receipts": false,
+    "all_rows_pass": false,
+    "events": [
+      "first_passage",
+      "return",
+      "residence"
+    ],
+    "limit": 0.02,
+    "retained_full_window": {
+      "all_events_pass": false,
+      "by_source": [
+        {
+          "cdf_gate_pass": false,
+          "denominator_policy": "all seeds in this source half; permanent_unknown remains in the source denominator and unresolved events contribute upper bounds",
+          "first_passage_cdf_sup_abs_difference": 0.0537109375,
+          "maximum_cdf_sup_abs_difference": 0.06103515625,
+          "residence_cdf_bounds_present": true,
+          "residence_cdf_sup_abs_difference": 0.06103515625,
+          "return_cdf_sup_abs_difference": 0.05029296875,
+          "source_id": "0"
+        },
+        {
+          "cdf_gate_pass": false,
+          "denominator_policy": "all seeds in this source half; permanent_unknown remains in the source denominator and unresolved events contribute upper bounds",
+          "first_passage_cdf_sup_abs_difference": 0.06005859375,
+          "maximum_cdf_sup_abs_difference": 0.06005859375,
+          "residence_cdf_bounds_present": true,
+          "residence_cdf_sup_abs_difference": 0.06005859375,
+          "return_cdf_sup_abs_difference": 0.06005859375,
+          "source_id": "1"
+        }
+      ],
+      "comparison_status": "diagnostic_only",
+      "event_names": [
+        "first_passage",
+        "return",
+        "residence"
+      ],
+      "limit": 0.02,
+      "maximum_observed": 0.06103515625,
+      "qualification_claim": "none",
+      "source_count": 2,
+      "source_rows_reused_across_diagnostic_rows": true
+    },
+    "row24": {
+      "by_source": {
+        "0": {
+          "first_passage_cdf_sup_abs_difference": 0.015625,
+          "residence_cdf_sup_abs_difference": 0.01171875,
+          "return_cdf_sup_abs_difference": 0.0234375,
+          "unknown_fraction_left": 0.00390625,
+          "unknown_fraction_right": 0.00390625
+        },
+        "1": {
+          "first_passage_cdf_sup_abs_difference": 0.03125,
+          "residence_cdf_sup_abs_difference": 0.00390625,
+          "return_cdf_sup_abs_difference": 0.0234375,
+          "unknown_fraction_left": 0.0,
+          "unknown_fraction_right": 0.0
+        }
+      },
+      "credit": 0,
+      "first_passage_receipt": true,
+      "gate_results": {
+        "all_cdf_events_pass": false,
+        "first_passage_cdf_gate_pass": false,
+        "mass_closure_pass": true,
+        "residence_cdf_gate_pass": true,
+        "return_cdf_gate_pass": false,
+        "scientific_acceptance_pass": false,
+        "source_window_complete": true,
+        "unknown_gate_pass": true
+      },
+      "residence_receipt": true,
+      "return_receipt": true,
+      "scientific_acceptance": false
+    },
+    "row28": {
+      "credit": 0,
+      "first_passage_receipt": false,
+      "residence_receipt": false,
+      "return_receipt": false,
+      "scientific_acceptance": false
+    },
+    "row32": {
+      "credit": 0,
+      "first_passage_receipt": false,
+      "residence_receipt": false,
+      "return_receipt": false,
+      "scientific_acceptance": false
+    }
+  },
+  "created_at_utc": "2026-09-22T17:24:04.532046+00:00",
+  "credit": 0,
+  "decision": "read_only_reconciliation_complete_no_qualification",
+  "execution_constraints": {
+    "T1_denominator_changed": false,
+    "T2_denominator_changed": false,
+    "central_ledger_mutation": 0,
+    "gpu_started": false,
+    "hdf5_opened": false,
+    "historical_receipts_overwritten": false,
+    "json_and_source_only": true,
+    "matrix_mutation": 0,
+    "new_cfd_generated": false,
+    "new_job_submitted": false,
+    "queue_mutation": 0,
+    "queue_started": false,
+    "read_only": true,
+    "registry_mutation": 0,
+    "scientific_denominator_changed": false,
+    "solver_started": false,
+    "source_h5_opened": false,
+    "terminal_h5_opened": false,
+    "thresholds_changed": false
+  },
+  "fixed_gates": {
+    "cdf_sup_abs_difference_max": 0.02,
+    "full_source_window_s": 8.35,
+    "native_cadence_tolerance_s": 5e-05,
+    "native_source_interval_s": 0.002,
+    "no_partial_credit": true,
+    "right_censored_is_not_acceptance": true,
+    "unknown_fraction_per_source_max": 0.01
+  },
+  "formal_acceptance_receipt": {
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "decision": "not_accepted",
+    "qualification_claim": "none",
+    "schema": "core.material.f3.native_volume_mls.acceptance_reconciliation.v3",
+    "status": "blocked"
+  },
+  "input_bindings": {
+    "bridge_implementation": {
+      "bytes": 3225,
+      "path": "scripts/f3_native_mls_acceptance_bridge_v4.py",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "1f5f7eb043342fa97761671ef7849766aec79d57d9df79eef888c77f8c8fd1d7"
+    },
+    "core_material": {
+      "bytes": 116805,
+      "path": "scripts/core_material.py",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "9e294e64c431c725717caf86eb001dc3a3505a312e279386796b6a472b5ee94e"
+    },
+    "core_material_acceptance": {
+      "bytes": 59243,
+      "path": "scripts/core_material_acceptance.py",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "b9cb49cacf19590356bda4f32d32ef3d2255b9c97a8afa29a920e5a38bd6c4a7"
+    },
+    "dense_source_preflight": {
+      "bytes": 54691,
+      "path": "campaigns/core-v1/runtime/attempts/ada-f3-native-mls-dense-native002-production-s4-full835-v2/20260920T000456-ba294af97b9d/source-preflight.json",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "2891b764294a3a8c6ad1b1dadbf06e507ca936da3dc50a64f8d4d6deb58a124b"
+    },
+    "gap_audit_v2": {
+      "bytes": 24337,
+      "path": "campaigns/core-v1/material/evidence/f3-t2-admission-acceptance-gap-audit-v2-20260922.json",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "90986f272225ac7faf08c75a1403dc19b140cd7351062ebe8aa133cb6bc1b5f0"
+    },
+    "matrix_gap_audit": {
+      "bytes": 41584,
+      "path": "campaigns/core-v1/material/evidence/f3-native-mls-33-matrix-gap-audit-v1.json",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "b1cf2d4943d07e095343c664d8b704d4217ac920cd3672600da5a3e28af288a3"
+    },
+    "native_mls": {
+      "bytes": 58481,
+      "path": "scripts/f3_native_volume_mls.py",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "e1c5fc39e73781d386c7da2874c1749b5223c8209eaf8f25bb4453346df51ff9"
+    },
+    "native_mls_compare": {
+      "bytes": 51185,
+      "path": "scripts/f3_native_volume_mls_compare.py",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "d4fc40b0b0057b4b0fc2487560d709f01c95068109a028e2664bc9f6fdf44acb"
+    },
+    "native_mls_temporal_v3": {
+      "bytes": 75268,
+      "path": "scripts/f3_native_volume_mls_temporal_v3.py",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395"
+    },
+    "prior_bridge_v2": {
+      "bytes": 15511,
+      "path": "campaigns/core-v1/material/evidence/f3-native-mls-acceptance-bridge-v2-20260922.json",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "9826c1b543a861226b38e941b214bdd45f03a353bdf390f87f9b4778449160f3"
+    },
+    "row24_comparison": {
+      "bytes": 468123,
+      "path": "campaigns/core-v1/material/evidence/f3-row24-native002-vs-matched010-comparison-20260922.json",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "a26091424c87ac393a7b4fc4d852308c28c738e3c0c91ba754ade94cca1b7482"
+    },
+    "row24_negative_receipt": {
+      "bytes": 3646,
+      "path": "campaigns/core-v1/material/evidence/f3-row24-native002-vs-matched010-negative-acceptance-receipt-20260922.json",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "47009460f0b7d28155fbc8a6291327f8c2c186c1cb6214f54b9da5e62d30fe17"
+    },
+    "row28_checkpoint_manifest": {
+      "bytes": 1003,
+      "path": "campaigns/core-v1/material/derived/f3-t2-seed-density-s4-row28-profile20-v1/trace.h5.checkpoint.json",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "febab5ea8c4474905b8cc7d653e6d13b26f1b9b1fa87d27da3978d005422b761"
+    },
+    "row28_profile_receipt": {
+      "bytes": 2270,
+      "path": "campaigns/core-v1/material/evidence/f3-t2-seed-density-s4-row28-profile20-receipt-v1.json",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "0c4e3483363fcb6060630e559684089123810f37b62e5f75a485ac6d0396d0bb"
+    },
+    "row28_source_preflight": {
+      "bytes": 14817,
+      "path": "campaigns/core-v1/material/derived/f3-t2-seed-density-s4-row28-profile20-v1/source-preflight.json",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "7a3c2cad85e6bcea17742f16379d7759992b7f330ea0d94bf7bdb8b516182da5"
+    },
+    "row28_trace_summary": {
+      "bytes": 49382,
+      "path": "campaigns/core-v1/material/derived/f3-t2-seed-density-s4-row28-profile20-v1/trace.summary.json",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "ae6821b6d63a5c665779ec4b935c6953380b49fb726ed4ec81dc546f08a77806"
+    },
+    "source_closure_audit_v1": {
+      "bytes": 25305,
+      "path": "campaigns/core-v1/material/evidence/f3-t2-source-closure-audit-v1-20260922.json",
+      "read_only_input": true,
+      "role": "current source or immutable upstream receipt",
+      "sha256": "84332ab4fd6c17094ce52f7039978d9c1e5274d70a6c374ac258868d457394a3"
+    }
+  },
+  "interpretation_boundary": "This versioned artifact reconciles existing evidence and repairs the current core_material.py hash closure by binding the current file. It does not rewrite historical receipts, reopen HDF5, generate CFD, or grant any qualification credit.",
+  "matrix": {
+    "diagnostic_rows_do_not_upgrade_t2": true,
+    "formal_acceptance_receipt_count": 0,
+    "material_matrix_ready": false,
+    "registered_row_count": 33,
+    "registered_row_order": "0-23 resolution_substep; 24-27 cadence; 28-32 seed_density",
+    "rows": [
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-00",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-mls-nominal-coarse-s2-full835-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 0.5,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 0,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-01",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-mls-nominal-coarse-s4-full835-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 0.5,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 1,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-02",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-volume-mls-full835-s2-512-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 0.5,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 2,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "running_inflight_engineering",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-03",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-volume-mls-full835-s4-512-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 0.5,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 3,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "running_inflight_engineering",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-04",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-mls-nominal-fine-s2-full835-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 0.5,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 4,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-05",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-mls-nominal-fine-s4-full835-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 0.5,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 5,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-06",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-mls-high-coarse-s2-full835-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 1.0,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 6,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-07",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-mls-high-coarse-s4-full835-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 1.0,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 7,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-08",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-mls-high-production-s2-full835-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 1.0,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 8,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-09",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-mls-high-production-s4-full835-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 1.0,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 9,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-10",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-mls-high-fine-s2-full835-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 1.0,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 10,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-11",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-mls-high-fine-s4-full835-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 1.0,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 11,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-12",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-mls-low-production-s2-full835-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 0.0,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 12,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-13",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-mls-low-production-s4-full835-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 0.0,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 13,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-14",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-mls-low-fine-s2-full835-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 0.0,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 14,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-15",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": true,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": "ada-f3-native-mls-low-fine-s4-full835-v1",
+        "observed_job_status": "terminal_succeeded",
+        "q": 0.0,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_diagnostic_no_formal_acceptance",
+        "row": 15,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "terminal_diagnostic_observed"
+      },
+      {
+        "blocking_assets": [
+          "f3_production_amp0p95_native010"
+        ],
+        "cadence": "native",
+        "configuration_id": "F3-material-16",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": null,
+        "observed_job_status": null,
+        "q": 0.25,
+        "qualification_claim": "none",
+        "reconciliation_status": "blocked_or_pending_exact_source",
+        "row": 16,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "missing_exact_control_asset",
+        "status_from_registered_matrix": "blocked_missing_registered_source"
+      },
+      {
+        "blocking_assets": [
+          "f3_production_amp0p95_native010"
+        ],
+        "cadence": "native",
+        "configuration_id": "F3-material-17",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": null,
+        "observed_job_status": null,
+        "q": 0.25,
+        "qualification_claim": "none",
+        "reconciliation_status": "blocked_or_pending_exact_source",
+        "row": 17,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "missing_exact_control_asset",
+        "status_from_registered_matrix": "blocked_missing_registered_source"
+      },
+      {
+        "blocking_assets": [
+          "f3_fine_amp0p95_native010"
+        ],
+        "cadence": "native",
+        "configuration_id": "F3-material-18",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": null,
+        "observed_job_status": null,
+        "q": 0.25,
+        "qualification_claim": "none",
+        "reconciliation_status": "blocked_or_pending_exact_source",
+        "row": 18,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "missing_exact_control_asset",
+        "status_from_registered_matrix": "blocked_missing_registered_source"
+      },
+      {
+        "blocking_assets": [
+          "f3_fine_amp0p95_native010"
+        ],
+        "cadence": "native",
+        "configuration_id": "F3-material-19",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": null,
+        "observed_job_status": null,
+        "q": 0.25,
+        "qualification_claim": "none",
+        "reconciliation_status": "blocked_or_pending_exact_source",
+        "row": 19,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "missing_exact_control_asset",
+        "status_from_registered_matrix": "blocked_missing_registered_source"
+      },
+      {
+        "blocking_assets": [
+          "f3_production_amp1p05_native010"
+        ],
+        "cadence": "native",
+        "configuration_id": "F3-material-20",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": null,
+        "observed_job_status": null,
+        "q": 0.75,
+        "qualification_claim": "none",
+        "reconciliation_status": "blocked_or_pending_exact_source",
+        "row": 20,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "missing_exact_control_asset",
+        "status_from_registered_matrix": "blocked_missing_registered_source"
+      },
+      {
+        "blocking_assets": [
+          "f3_production_amp1p05_native010"
+        ],
+        "cadence": "native",
+        "configuration_id": "F3-material-21",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": null,
+        "observed_job_status": null,
+        "q": 0.75,
+        "qualification_claim": "none",
+        "reconciliation_status": "blocked_or_pending_exact_source",
+        "row": 21,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "missing_exact_control_asset",
+        "status_from_registered_matrix": "blocked_missing_registered_source"
+      },
+      {
+        "blocking_assets": [
+          "f3_fine_amp1p05_native010"
+        ],
+        "cadence": "native",
+        "configuration_id": "F3-material-22",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": null,
+        "observed_job_status": null,
+        "q": 0.75,
+        "qualification_claim": "none",
+        "reconciliation_status": "blocked_or_pending_exact_source",
+        "row": 22,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "missing_exact_control_asset",
+        "status_from_registered_matrix": "blocked_missing_registered_source"
+      },
+      {
+        "blocking_assets": [
+          "f3_fine_amp1p05_native010"
+        ],
+        "cadence": "native",
+        "configuration_id": "F3-material-23",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "resolution_substep",
+        "observed_job_id": null,
+        "observed_job_status": null,
+        "q": 0.75,
+        "qualification_claim": "none",
+        "reconciliation_status": "blocked_or_pending_exact_source",
+        "row": 23,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "missing_exact_control_asset",
+        "status_from_registered_matrix": "blocked_missing_registered_source"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native_dense",
+        "configuration_id": "F3-material-24",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "cadence",
+        "observed_job_id": "ada-f3-native-mls-dense-native002-production-s4-full835-v2",
+        "observed_job_status": "running_no_terminal_receipt",
+        "q": 0.5,
+        "qualification_claim": "none",
+        "reconciliation_status": "terminal_negative_receipt_zero_credit",
+        "row": 24,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "native_dense_material_postprocess_running"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "matched_decimation",
+        "configuration_id": "F3-material-25",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "cadence",
+        "observed_job_id": "ada-f3-native-mls-dense-matched010-production-s4-full835-v2",
+        "observed_job_status": "terminal_succeeded",
+        "q": 0.5,
+        "qualification_claim": "none",
+        "reconciliation_status": "matched_decimation_diagnostic_no_native_acceptance",
+        "row": 25,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "derived_from_dense_source",
+        "status_from_registered_matrix": "terminal_matched_decimation_diagnostic_only"
+      },
+      {
+        "blocking_assets": [
+          "f3_production_amp1p1_native002"
+        ],
+        "cadence": "native_dense",
+        "configuration_id": "F3-material-26",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "cadence",
+        "observed_job_id": null,
+        "observed_job_status": null,
+        "q": 1.0,
+        "qualification_claim": "none",
+        "reconciliation_status": "blocked_or_pending_exact_source",
+        "row": 26,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "missing_native_dense_control_asset",
+        "status_from_registered_matrix": "blocked_missing_registered_source"
+      },
+      {
+        "blocking_assets": [
+          "f3_production_amp1p1_native002"
+        ],
+        "cadence": "matched_decimation",
+        "configuration_id": "F3-material-27",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "cadence",
+        "observed_job_id": null,
+        "observed_job_status": null,
+        "q": 1.0,
+        "qualification_claim": "none",
+        "reconciliation_status": "blocked_or_pending_exact_source",
+        "row": 27,
+        "seeds": 512,
+        "source_asset_status_from_registered_audit": "missing_native_dense_control_asset",
+        "status_from_registered_matrix": "blocked_missing_registered_source"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-28",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "seed_density",
+        "observed_job_id": null,
+        "observed_job_status": null,
+        "q": 0.0,
+        "qualification_claim": "none",
+        "reconciliation_status": "profile_source_audit_only_zero_credit",
+        "row": 28,
+        "seeds": 4096,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "source_available_not_submitted"
+      },
+      {
+        "blocking_assets": [
+          "f3_production_amp0p95_native010"
+        ],
+        "cadence": "native",
+        "configuration_id": "F3-material-29",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "seed_density",
+        "observed_job_id": null,
+        "observed_job_status": null,
+        "q": 0.25,
+        "qualification_claim": "none",
+        "reconciliation_status": "blocked_or_pending_exact_source",
+        "row": 29,
+        "seeds": 4096,
+        "source_asset_status_from_registered_audit": "missing_exact_control_asset",
+        "status_from_registered_matrix": "blocked_missing_registered_source"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-30",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "seed_density",
+        "observed_job_id": "ada-f3-native-mls-temporal-v3-nominal-production-seeds4096-full835-s2-v1",
+        "observed_job_status": "running_no_terminal_receipt",
+        "q": 0.5,
+        "qualification_claim": "none",
+        "reconciliation_status": "blocked_or_pending_exact_source",
+        "row": 30,
+        "seeds": 4096,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "related_v3_s2_diagnostic_running_not_canonical_s4_row"
+      },
+      {
+        "blocking_assets": [
+          "f3_production_amp1p05_native010"
+        ],
+        "cadence": "native",
+        "configuration_id": "F3-material-31",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "seed_density",
+        "observed_job_id": null,
+        "observed_job_status": null,
+        "q": 0.75,
+        "qualification_claim": "none",
+        "reconciliation_status": "blocked_or_pending_exact_source",
+        "row": 31,
+        "seeds": 4096,
+        "source_asset_status_from_registered_audit": "missing_exact_control_asset",
+        "status_from_registered_matrix": "blocked_missing_registered_source"
+      },
+      {
+        "blocking_assets": [],
+        "cadence": "native",
+        "configuration_id": "F3-material-32",
+        "credit": 0,
+        "formal_acceptance_receipt": false,
+        "formal_row_complete": false,
+        "matrix_stage": "seed_density",
+        "observed_job_id": null,
+        "observed_job_status": null,
+        "q": 1.0,
+        "qualification_claim": "none",
+        "reconciliation_status": "source_available_but_no_source_audit",
+        "row": 32,
+        "seeds": 4096,
+        "source_asset_status_from_registered_audit": "source_available_not_run",
+        "status_from_registered_matrix": "source_available_not_submitted"
+      }
+    ]
+  },
+  "per_source_unknown": {
+    "all_required_sources_have_receipts": false,
+    "all_rows_pass": false,
+    "limit": 0.01,
+    "retained_full_window": {
+      "all_rows_pass": false,
+      "limit": 0.01,
+      "maximum_observed": 0.015625,
+      "rows": [
+        {
+          "case_id": "F3_REV075_MATERIAL-AMP0P95-0075",
+          "gate_pass": false,
+          "maximum_source_unknown_fraction": 0.01220703125,
+          "row": 29,
+          "sources": [
+            {
+              "denominator_policy": "all geometric seeds carrying this source label; unknown and right-censored event paths remain in the denominator",
+              "first_failure_frame": 456,
+              "first_failure_reason_counts": {
+                "low_effective_sample_size": 1,
+                "wall_occluded": 24
+              },
+              "first_failure_time_s": 4.560018769008347,
+              "maximum_allowed_unknown_fraction": 0.01,
+              "seed_denominator": 2048,
+              "source_id": "0",
+              "terminal_unknown_count": 25,
+              "terminal_unknown_fraction": 0.01220703125,
+              "unknown_gate_pass": false
+            },
+            {
+              "denominator_policy": "all geometric seeds carrying this source label; unknown and right-censored event paths remain in the denominator",
+              "first_failure_frame": 394,
+              "first_failure_reason_counts": {
+                "wall_occluded": 19
+              },
+              "first_failure_time_s": 3.940008066606618,
+              "maximum_allowed_unknown_fraction": 0.01,
+              "seed_denominator": 2048,
+              "source_id": "1",
+              "terminal_unknown_count": 19,
+              "terminal_unknown_fraction": 0.00927734375,
+              "unknown_gate_pass": true
+            }
+          ]
+        },
+        {
+          "case_id": "F3_REV075_MATERIAL-AMP1P05-0075",
+          "gate_pass": false,
+          "maximum_source_unknown_fraction": 0.015625,
+          "row": 31,
+          "sources": [
+            {
+              "denominator_policy": "all geometric seeds carrying this source label; unknown and right-censored event paths remain in the denominator",
+              "first_failure_frame": 281,
+              "first_failure_reason_counts": {
+                "low_effective_sample_size": 4,
+                "no_support": 1,
+                "wall_occluded": 27
+              },
+              "first_failure_time_s": 2.810002833344516,
+              "maximum_allowed_unknown_fraction": 0.01,
+              "seed_denominator": 2048,
+              "source_id": "0",
+              "terminal_unknown_count": 32,
+              "terminal_unknown_fraction": 0.015625,
+              "unknown_gate_pass": false
+            },
+            {
+              "denominator_policy": "all geometric seeds carrying this source label; unknown and right-censored event paths remain in the denominator",
+              "first_failure_frame": 237,
+              "first_failure_reason_counts": {
+                "low_effective_sample_size": 3,
+                "wall_occluded": 26
+              },
+              "first_failure_time_s": 2.370004515359631,
+              "maximum_allowed_unknown_fraction": 0.01,
+              "seed_denominator": 2048,
+              "source_id": "1",
+              "terminal_unknown_count": 29,
+              "terminal_unknown_fraction": 0.01416015625,
+              "unknown_gate_pass": false
+            }
+          ]
+        }
+      ]
+    },
+    "row24": {
+      "gate_pass": true,
+      "source_values": {
+        "0": {
+          "gate_pass": true,
+          "unknown_fraction_left": 0.00390625,
+          "unknown_fraction_right": 0.00390625
+        },
+        "1": {
+          "gate_pass": true,
+          "unknown_fraction_left": 0.0,
+          "unknown_fraction_right": 0.0
+        }
+      }
+    },
+    "row28": {
+      "gate_pass": true,
+      "maximum_observed": 0.0
+    },
+    "row32": {
+      "gate_pass": false,
+      "maximum_observed": null,
+      "receipt_present": false
+    }
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "review_model": "gpt-5.6-terra",
+  "right_censoring": {
+    "bounded_canary_is_right_censored": true,
+    "partial_credit": false,
+    "policy": "unknown and right-censored paths remain in the full source denominator",
+    "right_censored_is_not_acceptance": true,
+    "row28_is_right_censored": true,
+    "row32_is_right_censored": true
+  },
+  "schema": "core.material.f3.native_volume_mls.acceptance_bridge.v4",
+  "source_cadence_and_window": {
+    "bounded_canary": {
+      "credit": 0,
+      "full_window": false,
+      "right_censored": true,
+      "time_end_s": 0.04001995862593706
+    },
+    "dense_cadence_failure": {
+      "cadence_gate_pass": false,
+      "declared_nominal_interval_s": 0.01,
+      "failure_class": "dense_source_preflight_nominal_interval_mismatch",
+      "interpolation": false,
+      "observed_interval_error_s": 8.957281943054382e-06,
+      "observed_median_interval_s": 0.0019910427180569457,
+      "reason": "the dense source is observed near .002 s, but its retained source-preflight declares native_output_interval_nominal_s=.01; provenance is not accepted until the declaration and frame map agree",
+      "required_native_interval_s": 0.002,
+      "source_frames": 4176,
+      "time_end_s": 8.350012828223477,
+      "tolerance_s": 5e-05
+    },
+    "required_full_window_s": 8.35,
+    "required_native_interval_s": 0.002,
+    "retained_full_window_audit": {
+      "path": "campaigns/core-v1/material/evidence/f3-f4-t2-cpu-source-window-audit-v1-20260920.json",
+      "rows": [
+        {
+          "case_id": "F3_REV075_MATERIAL-AMP0P95-0075",
+          "checkpoint_schema": "core.material.f3.native_volume_mls.checkpoint.v2",
+          "frames": 836,
+          "full_window_complete": true,
+          "provenance_role": "inherited source-window audit; HDF5 not reopened by bridge",
+          "row": 29,
+          "time_end_s": 8.350012828223477,
+          "trace_schema": "core.material.f3.native_volume_mls.trace.v2"
+        },
+        {
+          "case_id": "F3_REV075_MATERIAL-AMP1P05-0075",
+          "checkpoint_schema": "core.material.f3.native_volume_mls.checkpoint.v2",
+          "frames": 836,
+          "full_window_complete": true,
+          "provenance_role": "inherited source-window audit; HDF5 not reopened by bridge",
+          "row": 31,
+          "time_end_s": 8.350012828223477,
+          "trace_schema": "core.material.f3.native_volume_mls.trace.v2"
+        }
+      ],
+      "source_window_gate": true
+    },
+    "row24": {
+      "cadence_gate": true,
+      "credit": 0,
+      "full_window": false,
+      "right_censored": false
+    },
+    "row28": {
+      "credit": 0,
+      "full_window": false,
+      "observed_time_end_s": 0.2000113023685942
+    },
+    "row32": {
+      "credit": 0,
+      "full_window": false,
+      "source_audit_present": false
+    }
+  },
+  "source_closure_reconciliation": {
+    "dense_cadence_failure": {
+      "cadence_gate_pass": false,
+      "declared_nominal_interval_s": 0.01,
+      "failure_class": "dense_source_preflight_nominal_interval_mismatch",
+      "interpolation": false,
+      "observed_interval_error_s": 8.957281943054382e-06,
+      "observed_median_interval_s": 0.0019910427180569457,
+      "reason": "the dense source is observed near .002 s, but its retained source-preflight declares native_output_interval_nominal_s=.01; provenance is not accepted until the declaration and frame map agree",
+      "required_native_interval_s": 0.002,
+      "source_frames": 4176,
+      "time_end_s": 8.350012828223477,
+      "tolerance_s": 5e-05
+    },
+    "historical_closure_receipt_preserved": true,
+    "historical_gap_receipt_preserved": true,
+    "missing_exact_sources": [
+      {
+        "dependency": "root-owned exact amp=.95/.1.05 prepared/H5/XML/control assets and hashes",
+        "kind": "exact_control_source_missing",
+        "qualification_claim": "none",
+        "rows": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          29,
+          31
+        ]
+      },
+      {
+        "dependency": "root-owned production dp=.0075 amp=1.1 native .002 CFD source and its frame map",
+        "kind": "native_dense_hard_endpoint_source_missing",
+        "qualification_claim": "none",
+        "rows": [
+          26,
+          27
+        ]
+      },
+      {
+        "dependency": "currently running native .002 material trace; collect terminal receipt before reading its H5",
+        "kind": "native_dense_center_postprocess_pending",
+        "qualification_claim": "none",
+        "rows": [
+          24
+        ]
+      },
+      {
+        "dependency": "production amp=.9/1.0/1.1 native .01, current-frame MLS, s4, 4096 seeds; row30's v3 s2 run is not equivalent",
+        "kind": "seed_density_formal_rows_not_run",
+        "qualification_claim": "none",
+        "rows": [
+          28,
+          30,
+          32
+        ]
+      },
+      {
+        "dependency": "row25 has a terminal v2 matched-decimation diagnostic; retain paired native-dense result and source map before any matrix interpretation",
+        "kind": "matched_decimation_observed_but_not_native_dense_pair_complete",
+        "qualification_claim": "none",
+        "rows": [
+          25
+        ]
+      }
+    ],
+    "row24_negative_receipt": {
+      "blocking_reasons": [
+        "source 0 return CDF bound 0.0234375 exceeds the registered 0.02 limit",
+        "source 1 first-passage CDF bound 0.03125 exceeds the registered 0.02 limit",
+        "source 1 return CDF bound 0.0234375 exceeds the registered 0.02 limit",
+        "native MLS comparison remains diagnostic-only and does not establish material reliability or T2"
+      ],
+      "credit": 0,
+      "gate_results": {
+        "all_cdf_events_pass": false,
+        "first_passage_cdf_gate_pass": false,
+        "mass_closure_pass": true,
+        "residence_cdf_gate_pass": true,
+        "return_cdf_gate_pass": false,
+        "scientific_acceptance_pass": false,
+        "source_window_complete": true,
+        "unknown_gate_pass": true
+      },
+      "qualification_claim": "none",
+      "status": "scientific_gate_failed_zero_credit"
+    },
+    "rows_28_32": {
+      "inherited_source_closure_view": {
+        "interpretation": "rows 28/32 have registered .01 source references and prepared/hash lineage, but no terminal source-consumer receipts; metadata is not material acceptance",
+        "rows": {
+          "28": {
+            "case_id": "F3_REV075_R075-ENDPOINT-LOW-0075",
+            "closure_blockers": [
+              "no independent immutable source-window audit receipt",
+              "no per-source unknown receipt",
+              "no per-source CDF receipt",
+              "no per-source residence-CDF receipt",
+              "formal_release=false and qualified=false"
+            ],
+            "declared_native_cadence": {
+              "frames": 836,
+              "independent_receipt": false,
+              "interval_s": 0.01,
+              "pass": true
+            },
+            "declared_source_window": {
+              "frames": 836,
+              "full_window": true,
+              "independent_receipt": false,
+              "time_end_s": 8.350012828223477
+            },
+            "dp_m": 0.0075,
+            "drive_amplitude": 0.9,
+            "exact_lineage": true,
+            "h5": {
+              "bytes_declared": 899157580,
+              "exists": true,
+              "hash_opened": false,
+              "path": "campaigns/l1-resume/data/continuation/F3_REV075_R075-ENDPOINT-LOW-0075.h5",
+              "sha256_declared": "83b065cf15b9ef15fdfa71ac6e6d6239337e22a3794812a173eee1b2de3528c7"
+            },
+            "prepared": {
+              "all_input_hashes_pass": true,
+              "case_id": "F3_REV075_R075-ENDPOINT-LOW-0075",
+              "declared_sha256": "129541fe3561050849624e922cbe5c996641d1293df52d3766ad7419895516c6",
+              "dp_m": 0.0075,
+              "drive_amplitude": 0.9,
+              "exists": true,
+              "formal_release": false,
+              "hash_pass": true,
+              "input_assets": {
+                "CaseSloshingAccData.csv": {
+                  "declared_sha256": "7dccdc38015038cea6a9f8cbd0b80389f0c87f34e25f89d224c36e6bd3ac0c12",
+                  "exists": true,
+                  "hash_checked": true,
+                  "pass": true,
+                  "path": "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-0075/CaseSloshingAccData.csv",
+                  "sha256": "7dccdc38015038cea6a9f8cbd0b80389f0c87f34e25f89d224c36e6bd3ac0c12"
+                },
+                "F3_CELL3_plain_0p0075.bi4": {
+                  "declared_sha256": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545",
+                  "exists": true,
+                  "hash_checked": true,
+                  "pass": true,
+                  "path": "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-0075/F3_CELL3_plain_0p0075.bi4",
+                  "sha256": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545"
+                },
+                "F3_CELL3_plain_0p0075.xml": {
+                  "declared_sha256": "bd6c155b2112f0860293283def01b981c0364a1e67fbb146dd267a1dda8b58df",
+                  "exists": true,
+                  "hash_checked": true,
+                  "pass": true,
+                  "path": "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-0075/F3_CELL3_plain_0p0075.xml",
+                  "sha256": "bd6c155b2112f0860293283def01b981c0364a1e67fbb146dd267a1dda8b58df"
+                },
+                "F3_CELL3_plain_0p0075_Def.xml": {
+                  "declared_sha256": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5",
+                  "exists": true,
+                  "hash_checked": true,
+                  "pass": true,
+                  "path": "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-0075/F3_CELL3_plain_0p0075_Def.xml",
+                  "sha256": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5"
+                },
+                "F3_CELL3_plain_0p0075_hdp_Actual.vtk": {
+                  "declared_sha256": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c",
+                  "exists": true,
+                  "hash_checked": true,
+                  "pass": true,
+                  "path": "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-LOW-0075/F3_CELL3_plain_0p0075_hdp_Actual.vtk",
+                  "sha256": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c"
+                }
+              },
+              "path": "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-LOW-0075-PREPARED.json",
+              "preparation_status": "completed",
+              "qualified": false,
+              "sha256": "129541fe3561050849624e922cbe5c996641d1293df52d3766ad7419895516c6",
+              "time_max_s": 8.35,
+              "time_out_s": 0.01
+            },
+            "q": 0.0,
+            "qualification_claim": "none",
+            "qualification_credit": 0,
+            "source_asset_id": "f3_production_amp0p9_native010",
+            "source_role": "production",
+            "source_side_closure_pass": false
+          },
+          "32": {
+            "case_id": "F3_REV075_R075-ENDPOINT-HIGH-0075",
+            "closure_blockers": [
+              "no independent immutable source-window audit receipt",
+              "no per-source unknown receipt",
+              "no per-source CDF receipt",
+              "no per-source residence-CDF receipt",
+              "formal_release=false and qualified=false"
+            ],
+            "declared_native_cadence": {
+              "frames": 836,
+              "independent_receipt": false,
+              "interval_s": 0.01,
+              "pass": true
+            },
+            "declared_source_window": {
+              "frames": 836,
+              "full_window": true,
+              "independent_receipt": false,
+              "time_end_s": 8.350012828223477
+            },
+            "dp_m": 0.0075,
+            "drive_amplitude": 1.1,
+            "exact_lineage": true,
+            "h5": {
+              "bytes_declared": 901491833,
+              "exists": true,
+              "hash_opened": false,
+              "path": "campaigns/l1-resume/data/continuation/F3_REV075_R075-ENDPOINT-HIGH-0075.h5",
+              "sha256_declared": "fdc55cf1f802f3224af2d37032b0ea7b617cd4f1b3884e69edcb0b856e20076d"
+            },
+            "prepared": {
+              "all_input_hashes_pass": true,
+              "case_id": "F3_REV075_R075-ENDPOINT-HIGH-0075",
+              "declared_sha256": "1c2677813d94900bfd294bdc19dc9eb881c06173a11943372b5d7667959a9035",
+              "dp_m": 0.0075,
+              "drive_amplitude": 1.1,
+              "exists": true,
+              "formal_release": false,
+              "hash_pass": true,
+              "input_assets": {
+                "CaseSloshingAccData.csv": {
+                  "declared_sha256": "d4633105a7f403f181511171775e17bbae92fbafed0216fedb2de02ad14ee16b",
+                  "exists": true,
+                  "hash_checked": true,
+                  "pass": true,
+                  "path": "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-0075/CaseSloshingAccData.csv",
+                  "sha256": "d4633105a7f403f181511171775e17bbae92fbafed0216fedb2de02ad14ee16b"
+                },
+                "F3_CELL3_plain_0p0075.bi4": {
+                  "declared_sha256": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545",
+                  "exists": true,
+                  "hash_checked": true,
+                  "pass": true,
+                  "path": "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-0075/F3_CELL3_plain_0p0075.bi4",
+                  "sha256": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545"
+                },
+                "F3_CELL3_plain_0p0075.xml": {
+                  "declared_sha256": "bd6c155b2112f0860293283def01b981c0364a1e67fbb146dd267a1dda8b58df",
+                  "exists": true,
+                  "hash_checked": true,
+                  "pass": true,
+                  "path": "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-0075/F3_CELL3_plain_0p0075.xml",
+                  "sha256": "bd6c155b2112f0860293283def01b981c0364a1e67fbb146dd267a1dda8b58df"
+                },
+                "F3_CELL3_plain_0p0075_Def.xml": {
+                  "declared_sha256": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5",
+                  "exists": true,
+                  "hash_checked": true,
+                  "pass": true,
+                  "path": "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-0075/F3_CELL3_plain_0p0075_Def.xml",
+                  "sha256": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5"
+                },
+                "F3_CELL3_plain_0p0075_hdp_Actual.vtk": {
+                  "declared_sha256": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c",
+                  "exists": true,
+                  "hash_checked": true,
+                  "pass": true,
+                  "path": "campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-ENDPOINT-HIGH-0075/F3_CELL3_plain_0p0075_hdp_Actual.vtk",
+                  "sha256": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c"
+                }
+              },
+              "path": "campaigns/l1-resume/continuation/F3_REV075_R075-ENDPOINT-HIGH-0075-PREPARED.json",
+              "preparation_status": "completed",
+              "qualified": false,
+              "sha256": "1c2677813d94900bfd294bdc19dc9eb881c06173a11943372b5d7667959a9035",
+              "time_max_s": 8.35,
+              "time_out_s": 0.01
+            },
+            "q": 1.0,
+            "qualification_claim": "none",
+            "qualification_credit": 0,
+            "source_asset_id": "f3_production_amp1p1_native010",
+            "source_role": "production",
+            "source_side_closure_pass": false
+          }
+        },
+        "summary": {
+          "exact_lineage_present": true,
+          "full_source_window_declared": true,
+          "independent_source_window_receipt": false,
+          "native_cadence_declared": true,
+          "per_source_cdf_receipt": false,
+          "per_source_residence_cdf_receipt": false,
+          "per_source_unknown_receipt": false,
+          "qualification_credit": 0,
+          "source_side_closure_pass": false
+        }
+      },
+      "reconciled_row28": {
+        "blocking_reasons": [
+          "profile stops at approximately 0.2 s and is not the registered 8.35 s acceptance window",
+          "profile receipt has no formal first-passage/return/residence CDF package",
+          "diagnostic source completion cannot promote matrix row 28 to T2"
+        ],
+        "case_id": "F3_REV075_R075-ENDPOINT-LOW-0075",
+        "checkpoint_schema": "core.material.f3.native_volume_mls.checkpoint.v2",
+        "credit": 0,
+        "first_passage_cdf_receipt": false,
+        "formal_acceptance_receipt": false,
+        "full_event_window": false,
+        "mass_closed": true,
+        "observed_committed_frames": 21,
+        "observed_time_end_s": 0.2000113023685942,
+        "qualification_claim": "none",
+        "required_full_window_frames": 836,
+        "required_native_interval_s": 0.002,
+        "required_window_s": 8.35,
+        "residence_cdf_receipt": false,
+        "return_cdf_receipt": false,
+        "right_censored": true,
+        "row": 28,
+        "source_audit_kind": "short_profile_not_full_acceptance_source",
+        "source_audit_present": true,
+        "source_preflight_schema": "core.material.f3.native_volume_mls.source_preflight.v2",
+        "trace_schema": "core.material.f3.native_volume_mls.trace.v2",
+        "unknown_fraction_max": 0.0
+      },
+      "reconciled_row32": {
+        "blocking_reasons": [
+          "no exact row-32 native source audit or terminal source-consumer receipt",
+          "source-available matrix status is not a source output and cannot substitute for one"
+        ],
+        "case_id": "F3_REV075_R075-ENDPOINT-HIGH-0075",
+        "credit": 0,
+        "first_passage_cdf_receipt": false,
+        "formal_acceptance_receipt": false,
+        "full_event_window": false,
+        "per_source_unknown_receipt": false,
+        "qualification_claim": "none",
+        "required_native_interval_s": 0.002,
+        "required_window_s": 8.35,
+        "residence_cdf_receipt": false,
+        "return_cdf_receipt": false,
+        "right_censored": true,
+        "row": 32,
+        "source_asset_status_from_registered_matrix": "source_available_not_run",
+        "source_audit_kind": "none_found_in_current_evidence_namespace",
+        "source_audit_present": false
+      }
+    }
+  },
+  "status": "blocked_for_acceptance_zero_credit",
+  "trace_and_checkpoint_schema": {
+    "accepted_pairs": {
+      "core.material.f3.native_volume_mls.trace.temporal.v3": "core.material.f3.native_volume_mls.checkpoint.temporal.v3",
+      "core.material.f3.native_volume_mls.trace.v1": "core.material.f3.native_volume_mls.checkpoint.v1",
+      "core.material.f3.native_volume_mls.trace.v2": "core.material.f3.native_volume_mls.checkpoint.v2"
+    },
+    "interpretation": "schema binding is necessary provenance, not material acceptance",
+    "observed_row24": {
+      "checkpoint_schema": "core.material.f3.native_volume_mls.checkpoint.v2",
+      "schema_binding_inherited": true,
+      "trace_schema": "core.material.f3.native_volume_mls.trace.v2"
+    },
+    "observed_row28": {
+      "checkpoint_schema": "core.material.f3.native_volume_mls.checkpoint.v2",
+      "schema_binding_inherited": true,
+      "trace_schema": "core.material.f3.native_volume_mls.trace.v2"
+    },
+    "schema_gate_pass": true
+  },
+  "versioned_namespace": "f3-native-mls-acceptance-bridge-v2/reconciliation-v1"
+}

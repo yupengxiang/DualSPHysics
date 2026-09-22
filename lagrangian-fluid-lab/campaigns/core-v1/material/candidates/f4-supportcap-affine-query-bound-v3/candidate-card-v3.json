@@ -1,0 +1,68 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "authorized_one_cpu_only": false,
+  "candidate_id": "f4_supportcap_affine_query_bound_v3",
+  "credit": 0,
+  "execution_policy": {
+    "gencase_started": false,
+    "gpu_started": false,
+    "historical_receipts_overwritten": false,
+    "ledger_mutation": 0,
+    "native_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_started": false,
+    "synthetic_regression_only": true
+  },
+  "family": "F4",
+  "fixed_gate": {
+    "maximum_reconstruction_error_mps": 0.04698137929009748,
+    "minimum_anisotropy": 0.005,
+    "minimum_effective_sample_size": 4.0,
+    "minimum_geometry_rank": 3,
+    "unknown_fraction_limit": 0.01
+  },
+  "historical_receipts_preserved": [
+    "candidate-card-v1.json",
+    "candidate-card-v2.json",
+    "terra-high-root-review-v2.json",
+    "terra-high-root-review-v3.json"
+  ],
+  "input_bindings": {
+    "calibration_script": {
+      "path": "scripts/f4_material_calibration_v3.py",
+      "role": "held-out synthetic calibration",
+      "sha256": "eebef9046173851897370dde2f78d2ac788ac9fc22f6a8937aa920d9d50d5706"
+    },
+    "core_material": {
+      "path": "scripts/core_material.py",
+      "role": "registered candidate and event implementation",
+      "sha256": "9e294e64c431c725717caf86eb001dc3a3505a312e279386796b6a472b5ee94e"
+    },
+    "implementation": {
+      "path": "scripts/f4_supportcap_affine_query_bound_candidate_v3.py",
+      "role": "array-only candidate wrapper",
+      "sha256": "b8cfb6efa8d76f0201c5a5293f29c5cfd76691d6f3578ff03d1b577075c25116"
+    },
+    "synthetic_tests": {
+      "path": "tests/test_f4_supportcap_affine_query_bound_candidate_v3_revision2.py",
+      "role": "static integration and hash-closure regression",
+      "sha256": "23a71ba84cfee705da1d3c56574d5396a4b38a879a030e24765037703b80b705"
+    }
+  },
+  "mechanism": {
+    "backend": "f4_ckdtree_visible_shepard_ess32_affine_bound_v3",
+    "error_estimator": "residual_plus_local_affine_query_bias",
+    "maximum_support_distance_m": 0.03,
+    "support_cap": 32
+  },
+  "purpose": "versioned static hash closure after reliability-censoring semantics changed",
+  "qualification_claim": "none",
+  "revision": "v3-reliability-censoring-hash-closure-20260923",
+  "root_review_only": true,
+  "schema": "core.material.f4.reconstruction_candidate_card.v4",
+  "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+  "status": "proposal_only_root_review_required"
+}

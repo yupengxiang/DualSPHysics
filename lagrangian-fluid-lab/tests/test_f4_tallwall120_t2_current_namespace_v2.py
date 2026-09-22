@@ -4,12 +4,12 @@ import hashlib
 import json
 from pathlib import Path
 
-from scripts.f4_tallwall120_t2_acceptance_bridge_v2 import (
+from scripts.f4_tallwall120_t2_acceptance_bridge_v3 import (
     FORMAL_RECEIPT_SCHEMA,
     SCHEMA as BRIDGE_SCHEMA,
     verify_receipt,
 )
-from scripts.f4_tallwall120_t2_admission_acceptance_gap_audit_v2 import (
+from scripts.f4_tallwall120_t2_admission_acceptance_gap_audit_v3 import (
     SCHEMA as GAP_SCHEMA,
     build_audit,
 )
@@ -18,14 +18,14 @@ from scripts.f4_tallwall120_t2_admission_acceptance_gap_audit_v2 import (
 ROOT = Path(__file__).resolve().parents[1]
 GAP_EVIDENCE = ROOT / (
     "campaigns/core-v1/material/evidence/"
-    "f4-tallwall120-t2-admission-acceptance-gap-audit-20260922-v3.json"
+    "f4-tallwall120-t2-admission-acceptance-gap-audit-20260923-v4.json"
 )
-GAP_REPORT = ROOT / "reports/F4-TALLWALL120-T2-ADMISSION-ACCEPTANCE-GAP-AUDIT-2026-09-22-v3.zh-CN.md"
+GAP_REPORT = ROOT / "reports/F4-TALLWALL120-T2-ADMISSION-ACCEPTANCE-GAP-AUDIT-2026-09-23-v4.zh-CN.md"
 BRIDGE_EVIDENCE = ROOT / (
     "campaigns/core-v1/material/evidence/"
-    "f4-tallwall120-t2-acceptance-bridge-v1-20260922-v4.json"
+    "f4-tallwall120-t2-acceptance-bridge-v1-20260923-v5.json"
 )
-BRIDGE_REPORT = ROOT / "reports/F4-TALLWALL120-T2-ACCEPTANCE-BRIDGE-2026-09-22-v4.zh-CN.md"
+BRIDGE_REPORT = ROOT / "reports/F4-TALLWALL120-T2-ACCEPTANCE-BRIDGE-2026-09-23-v5.zh-CN.md"
 
 
 def test_current_gap_audit_is_a_new_namespace_and_binds_current_material_code() -> None:
@@ -83,6 +83,6 @@ def test_current_bridge_verifier_passes_without_opening_h5_or_mutating_qualifica
 def test_current_artifacts_are_distinct_from_historical_namespace() -> None:
     assert GAP_EVIDENCE.is_file() and GAP_REPORT.is_file()
     assert BRIDGE_EVIDENCE.is_file() and BRIDGE_REPORT.is_file()
-    assert "v3" in GAP_EVIDENCE.name and "v4" in BRIDGE_EVIDENCE.name
+    assert "v4" in GAP_EVIDENCE.name and "v5" in BRIDGE_EVIDENCE.name
     assert "T2_macro=false" in GAP_REPORT.read_text(encoding="utf-8")
     assert "T2_macro=false" in BRIDGE_REPORT.read_text(encoding="utf-8")

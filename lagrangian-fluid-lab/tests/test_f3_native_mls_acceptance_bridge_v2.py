@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from scripts.f3_native_mls_acceptance_bridge_v2 import (
+from scripts.f3_native_mls_acceptance_bridge_v4 import (
     CDF_LIMIT,
     FULL_WINDOW_S,
     INPUTS,
@@ -20,9 +20,9 @@ from scripts.f3_native_mls_acceptance_bridge_v2 import (
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / (
     "campaigns/core-v1/material/evidence/"
-    "f3-native-mls-acceptance-bridge-v2/reconciliation-v1-20260922.json"
+    "f3-native-mls-acceptance-bridge-v4/reconciliation-v3-20260923.json"
 )
-REPORT = ROOT / "reports/F3-NATIVE-MLS-ACCEPTANCE-BRIDGE-V2-2026-09-22.zh-CN.md"
+REPORT = ROOT / "reports/F3-NATIVE-MLS-ACCEPTANCE-BRIDGE-V4-2026-09-23.zh-CN.md"
 
 
 def test_reconciliation_is_zero_credit_and_repairs_current_hash_closure() -> None:
