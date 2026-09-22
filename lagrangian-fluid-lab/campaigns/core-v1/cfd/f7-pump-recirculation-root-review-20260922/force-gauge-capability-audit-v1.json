@@ -1,0 +1,100 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "bindings": {
+    "gauge_header": {
+      "bytes": 27237,
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JDsGaugeItem.h",
+      "role": "official force-gauge result schema",
+      "sha256": "2611be747e75ec1b638a00478b6f656eaeb9a0a58fba8e867ad8353683bd55cb"
+    },
+    "gauge_item": {
+      "bytes": 81846,
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JDsGaugeItem.cpp",
+      "role": "official force-gauge implementation",
+      "sha256": "8b425f92d63c48cb65b9c034017d30acfca32c923b81c007ccec130c1eebda59"
+    },
+    "gauge_system": {
+      "bytes": 31720,
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JDsGaugeSystem.cpp",
+      "role": "official force-gauge XML dispatch",
+      "sha256": "b1044898bbedb90b3840a79067e151bf24eb71ff91aa7dd9406e28081568c0c1"
+    },
+    "pump_definition": {
+      "bytes": 6983,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/CasePump_Def.xml",
+      "role": "official Pump definition source",
+      "sha256": "746ae80f4c21bca62a01d59ee04d0eaaf3d1af830c36dafef4b684ca8f3c9453"
+    },
+    "root_review": {
+      "bytes": 7314,
+      "path": "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/root-review-receipt-v1.json",
+      "role": "current F7 root review receipt",
+      "sha256": "5559f70aac902b5ff4cb169f57e341c9cc8349205d0cd79c097941cc74fa0e1e"
+    }
+  },
+  "candidate_id": "F7_pump_prescribed_internal_rotor_recirculation_v1",
+  "checks": {
+    "force_csv_output_present": true,
+    "force_gauge_accepts_moving_boundary": true,
+    "force_gauge_reads_target_mkbound": true,
+    "force_gauge_xml_dispatch_present": true,
+    "force_result_has_vector": true,
+    "force_vtk_output_present": true,
+    "force_vtk_particle_distribution_present": true,
+    "pump_moving_mk2_present": true,
+    "torque_cross_product_in_gauge": false,
+    "torque_result_field_present": false
+  },
+  "interpretation": [
+    "The official gauge can measure an aggregate force vector on moving mkbound=2 particles.",
+    "The saved CSV contains only force magnitude and xyz components; the VTK result contains only the initial center and aggregate force.",
+    "A fluid angular-momentum finite difference remains a response proxy, not a wall-reaction torque.",
+    "F7 cannot pass its independence gate without a new solver instrumentation or geometry/force partition contract and a fresh root review."
+  ],
+  "official_capability": {
+    "aggregate_force_on_moving_mkbound": true,
+    "direct_torque_output": false,
+    "force_csv_vector": true,
+    "force_vtk_is_center_aggregate": true,
+    "per_boundary_particle_force_output": false,
+    "pump_moving_mkbound": 2,
+    "torque_provenance_available": false
+  },
+  "protected_state_mutation": {
+    "definition": 0,
+    "denominator": 0,
+    "gencase": 0,
+    "gpu": 0,
+    "ledger": 0,
+    "matrix": 0,
+    "native_decode": 0,
+    "queue": 0,
+    "registry": 0,
+    "solver": 0
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "required_next_contract": {
+    "acceptable_options": [
+      "instrument the moving-boundary interaction to emit per-particle force and r-cross-F torque with source hashes",
+      "materialize independently labeled moving-boundary sectors and prove their force sums and torque reconstruction"
+    ],
+    "direct_torque_source_required": true,
+    "fresh_output_namespace": true,
+    "new_scope_or_revision": true,
+    "not_acceptable": [
+      "renaming fluid angular-momentum finite differences as torque",
+      "reusing the existing coarse canary as direct torque evidence",
+      "starting solver/GPU/queue before root admission"
+    ]
+  },
+  "root_review_state": {
+    "admission_granted": false,
+    "definition_authorized": false,
+    "preflight_authorized": false
+  },
+  "schema": "core.f7.pump.force_gauge_capability_audit.v1",
+  "status": "root_review_only_instrumentation_gap"
+}
