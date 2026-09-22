@@ -1,0 +1,232 @@
+{
+  "cases": [
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_08",
+      "dt_s": 0.02001143530103224,
+      "features": {
+        "dimension": 23,
+        "finite": true,
+        "shape": [
+          217485,
+          23
+        ]
+      },
+      "finite_geometry": {
+        "coordinate_frame": "fixed tank computational coordinates",
+        "open_top": true,
+        "triangle_count": 10
+      },
+      "frames_used": [
+        0,
+        1
+      ],
+      "halo": {
+        "center_count": 256,
+        "center_only_loss_rows": 256,
+        "full_field_particle_count": 217485,
+        "indices_in_range": true,
+        "one_hop_count": 1075,
+        "two_hop_count": 2001
+      },
+      "identity_axis_exact": true,
+      "models": [
+        {
+          "model_kind": "mlp",
+          "output_finite": true,
+          "output_shape": [
+            256,
+            6
+          ],
+          "parameter_count": 18566
+        },
+        {
+          "model_kind": "graph_raw",
+          "output_finite": true,
+          "output_shape": [
+            256,
+            6
+          ],
+          "parameter_count": 85766
+        },
+        {
+          "model_kind": "graph_residual",
+          "output_finite": true,
+          "output_shape": [
+            256,
+            6
+          ],
+          "parameter_count": 85766
+        }
+      ],
+      "native_dv_finite": true,
+      "native_dx_finite": true,
+      "native_target_shape": [
+        217485,
+        6
+      ],
+      "neighbors": {
+        "field_particle_count": 217485,
+        "finite": true,
+        "max_neighbors": 64,
+        "negative_padding_count": 10992,
+        "neighbor_radius_over_h": 2.0,
+        "neighbor_truncation_fraction": 0.6221302618571396,
+        "shape": [
+          217485,
+          64
+        ]
+      },
+      "particle_count": 217485,
+      "prior": {
+        "dv_unit": "m/s",
+        "dx_unit": "m",
+        "exact_formula_check": true,
+        "finite": true,
+        "shape": [
+          217485,
+          6
+        ]
+      },
+      "seconds": 28.647165959933773,
+      "split": "validation",
+      "valid_active_count": 217485,
+      "valid_axis_exact": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_23",
+      "dt_s": 0.02001143530103224,
+      "features": {
+        "dimension": 23,
+        "finite": true,
+        "shape": [
+          217485,
+          23
+        ]
+      },
+      "finite_geometry": {
+        "coordinate_frame": "fixed tank computational coordinates",
+        "open_top": true,
+        "triangle_count": 10
+      },
+      "frames_used": [
+        0,
+        1
+      ],
+      "halo": {
+        "center_count": 256,
+        "center_only_loss_rows": 256,
+        "full_field_particle_count": 217485,
+        "indices_in_range": true,
+        "one_hop_count": 1075,
+        "two_hop_count": 2001
+      },
+      "identity_axis_exact": true,
+      "models": [
+        {
+          "model_kind": "mlp",
+          "output_finite": true,
+          "output_shape": [
+            256,
+            6
+          ],
+          "parameter_count": 18566
+        },
+        {
+          "model_kind": "graph_raw",
+          "output_finite": true,
+          "output_shape": [
+            256,
+            6
+          ],
+          "parameter_count": 85766
+        },
+        {
+          "model_kind": "graph_residual",
+          "output_finite": true,
+          "output_shape": [
+            256,
+            6
+          ],
+          "parameter_count": 85766
+        }
+      ],
+      "native_dv_finite": true,
+      "native_dx_finite": true,
+      "native_target_shape": [
+        217485,
+        6
+      ],
+      "neighbors": {
+        "field_particle_count": 217485,
+        "finite": true,
+        "max_neighbors": 64,
+        "negative_padding_count": 10992,
+        "neighbor_radius_over_h": 2.0,
+        "neighbor_truncation_fraction": 0.6196933121824494,
+        "shape": [
+          217485,
+          64
+        ]
+      },
+      "particle_count": 217485,
+      "prior": {
+        "dv_unit": "m/s",
+        "dx_unit": "m",
+        "exact_formula_check": true,
+        "finite": true,
+        "shape": [
+          217485,
+          6
+        ]
+      },
+      "seconds": 27.776407544966787,
+      "split": "validation",
+      "valid_active_count": 217485,
+      "valid_axis_exact": true
+    }
+  ],
+  "diagnostic_only": true,
+  "elapsed_seconds": 56.42848081502598,
+  "gpu_started": false,
+  "ledger_written": false,
+  "manifest": {
+    "canonical_sha256": "0060d732410c277fa6a905569d716f507d5e5f1e10b737bd7864aa3484ba23c1",
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/learning/f4-diagnostic-profile-v2/f4-diagnostic-train-dev04-interface-v2.json",
+    "raw_sha256": "f28806686f28be60e3576f6c3ff2ac3582eeadce54890c81be2e3b3cf52cf672"
+  },
+  "protocol": {
+    "halo": "exact full-field two-hop center halo",
+    "hidden": 64,
+    "known_force_prior": "dx=v*dt+.5*a*dt^2; dv=a*dt",
+    "loss_centers": 256,
+    "max_neighbors": 64,
+    "message_edge_features": 7,
+    "model_kinds": [
+      "mlp",
+      "graph_raw",
+      "graph_residual"
+    ],
+    "neighbor_radius_over_h": 2.0,
+    "state": "core.state.native_velocity.v1",
+    "target": "native following.position-now.position and following.velocity-now.velocity"
+  },
+  "revision": {
+    "reason": "re-executed against corrected v2 dataset manifest",
+    "supersedes": "campaigns/core-v1/learning/f4-diagnostic-profile-v1/f4-interface-cpu-check-v1.json",
+    "version": "f4-diagnostic-profile-v2"
+  },
+  "schema": "core.f4.fullfield_interface_cpu_check.v1",
+  "status": "passed",
+  "train_sampling_guard": {
+    "normalization_source_split": "train",
+    "qualification_case_ids": [],
+    "train_case_ids": [
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04"
+    ],
+    "validation_case_ids": [
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_08",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_23"
+    ],
+    "validation_not_train": true
+  }
+}

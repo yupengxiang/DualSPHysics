@@ -1,0 +1,154 @@
+{
+  "admission_observation": {
+    "execution_constraints": {
+      "central_ledger_mutation": 0,
+      "central_registry_mutation": 0,
+      "formal_runs_started": 0,
+      "formal_specs_written": false,
+      "future_state_inputs": false,
+      "gpu_started": false,
+      "manifest_written": false,
+      "read_only": true,
+      "solver_started": false,
+      "submitted": false,
+      "trajectory_files_opened": false
+    },
+    "family_summary": {
+      "families": [
+        "F3",
+        "F4"
+      ],
+      "family_counts": {
+        "F3": 32,
+        "F4": 32
+      },
+      "split_counts": {
+        "F3": {
+          "test": 12,
+          "train": 16,
+          "validation": 4
+        },
+        "F4": {
+          "test": 12,
+          "train": 16,
+          "validation": 4
+        }
+      },
+      "split_shape_mismatches": {},
+      "t1_families": {
+        "F3": true,
+        "F4": true
+      },
+      "t1_family_count": 2,
+      "validation_counts": {
+        "F3": 4,
+        "F4": 4
+      }
+    },
+    "production_denominator": {
+      "audit_gap_case_ids": [],
+      "failed_or_unresolved_case_count": 0,
+      "failure_denominator_preserved": true,
+      "formal_audit_pass_count": 64,
+      "hard_gap_case_ids": [],
+      "hard_integrity_pass_bound_count": 64,
+      "included_case_count": 64,
+      "manifest_case_count": 64,
+      "qualification_excluded_case_count": 0,
+      "structural_gap_case_ids": [],
+      "structural_pass_bound_count": 64
+    },
+    "resource_profile": {
+      "bound": true,
+      "diagnostic_only": true,
+      "formal_capacity_evidence": false,
+      "formal_update_target": 32000,
+      "limits": "16-update engineering canaries; not formal training or multi-family memory upper bounds",
+      "observed_update_frontier": 16,
+      "path": "campaigns/core-v1/learning/backward-resource-measurements.json",
+      "sha256": "fedc3e65080381dd1a6c22caa9394a1eacbb8b7a1f60f53b1c68a44cfbc7d315"
+    }
+  },
+  "blocker_codes": [
+    "STALE_SOURCE_CLOSURE",
+    "FORMAL_RELEASE_REQUIRED",
+    "THIRD_FAMILY_REQUIRED",
+    "VALIDATION_DENOMINATOR",
+    "RESOURCE_FRONTIER_UNPROVEN"
+  ],
+  "candidate_version": "core-formal-release-candidate-v1",
+  "data_blocker_codes": [],
+  "data_contract_ready": true,
+  "diagnostic_runs_counted_as_formal": false,
+  "evidence_bindings": [
+    {
+      "case_count": 0,
+      "path": "campaigns/core-v1/evidence/f3-inherited-qualification.json",
+      "read_only": true,
+      "schema": "core.qualification.v1",
+      "sha256": "a28bf89e231fdb1bd7399c4ed8e2a6cbb297194c5cfee7cc93a1eb9d1d40d8a2"
+    },
+    {
+      "case_count": 32,
+      "path": "campaigns/core-v1/evidence/f3-legacy-hard-audit-adapter-v1.json",
+      "read_only": true,
+      "schema": "core.f3.legacy_hard_audit_adapter.v1",
+      "sha256": "33fbe9cb48300f671c08d5dc1b14a43901ab723d8839f3cff7850a8543d17f0b"
+    },
+    {
+      "case_count": 32,
+      "path": "campaigns/core-v1/evidence/f3-structural-audit-adapter-v1.json",
+      "read_only": true,
+      "schema": "core.f3.structural_audit_adapter.v1",
+      "sha256": "f4cee346e2e07aa191eb6743ee25a61b7f2ce56cd0a9f3920859a5d3dc6766b1"
+    },
+    {
+      "case_count": 0,
+      "path": "campaigns/core-v1/evidence/f4-tallwall120-formal-qualification-20260920.json",
+      "read_only": true,
+      "schema": "core.qualification.v1",
+      "sha256": "865f2481a28b4935635264c58d72bff166f267e943ba509a602d9f67f3c38307"
+    }
+  ],
+  "formal_job_count": 0,
+  "formal_release": false,
+  "formal_release_requested": false,
+  "formal_training_ready": false,
+  "generator": {
+    "path": "scripts/core_formal_release_candidate.py",
+    "sha256": "fdc1c086afb0619df094d2dc74bee594029ccb1593917ca90983ca7071bf3a8a"
+  },
+  "manifest_bindings": [
+    {
+      "case_count": 32,
+      "dataset_id": "F3_registered32_core_native_v2",
+      "formal_release": false,
+      "manifest_errors": [],
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "read_only": true,
+      "schema": "core.dataset.v2",
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+    },
+    {
+      "case_count": 32,
+      "dataset_id": "F4_tallwall120_production_training_v1_compact_v2",
+      "formal_release": true,
+      "manifest_errors": [],
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "read_only": true,
+      "schema": "core.dataset.v2",
+      "sha256": "eb417b2774817039776b50d18e12e2500634d8c60f4465c42f5633a033c04a16"
+    }
+  ],
+  "next_dependency": "release a third independently qualified T1 family, publish formal_release=true for every source, bind explicit F3 structural receipts, refresh the source closure, and re-run the planner",
+  "record_id": "core-formal-release-candidate-f3-f4-v1-20260920",
+  "required_formal_job_count": 9,
+  "schema": "core.formal_release_candidate.v1",
+  "source_closure": {
+    "closure_sha256": "76c93c4d4effa6bf7ffa1bb124b5a43efc3c5f31bbb107f570a750fb6e5b9b22",
+    "complete": true,
+    "path": "campaigns/core-v1/learning/formal-release-candidate-v1/source-closure.json",
+    "sha256": "497367742f68ec798a0b14d51442dbd478a07eae9d72b2aa8a0c0e41996f4611"
+  },
+  "status": "blocked"
+}

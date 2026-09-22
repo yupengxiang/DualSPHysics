@@ -1,0 +1,195 @@
+{
+  "blocker_codes": [
+    "CAPACITY_CHECKPOINT_SEMANTICS",
+    "CAPACITY_EXECUTION_EVIDENCE",
+    "CAPACITY_MANIFEST_BINDING",
+    "CAPACITY_MODEL_ADAPTER",
+    "CAPACITY_PATH_BINDING",
+    "CAPACITY_RESOURCE_METRICS",
+    "CAPACITY_UPDATE_FRONTIER"
+  ],
+  "blockers": [
+    {
+      "code": "CAPACITY_CHECKPOINT_SEMANTICS",
+      "message": "receipt must bind exactly the four 8k/16k/24k/32k milestone checkpoints"
+    },
+    {
+      "code": "CAPACITY_CHECKPOINT_SEMANTICS",
+      "message": "training evidence must be complete"
+    },
+    {
+      "code": "CAPACITY_EXECUTION_EVIDENCE",
+      "message": "execution constraint central_ledger_mutation must be 0"
+    },
+    {
+      "code": "CAPACITY_EXECUTION_EVIDENCE",
+      "message": "execution constraint central_registry_mutation must be 0"
+    },
+    {
+      "code": "CAPACITY_EXECUTION_EVIDENCE",
+      "message": "execution constraint checkpoint_written must be true"
+    },
+    {
+      "code": "CAPACITY_EXECUTION_EVIDENCE",
+      "message": "execution constraint formal_job_count must be 0"
+    },
+    {
+      "code": "CAPACITY_EXECUTION_EVIDENCE",
+      "message": "execution constraint formal_runs_started must be 0"
+    },
+    {
+      "code": "CAPACITY_EXECUTION_EVIDENCE",
+      "message": "execution constraint formal_training must be False"
+    },
+    {
+      "code": "CAPACITY_EXECUTION_EVIDENCE",
+      "message": "execution constraint full_particle_axis must be true"
+    },
+    {
+      "code": "CAPACITY_EXECUTION_EVIDENCE",
+      "message": "execution constraint solver_started must be False"
+    },
+    {
+      "code": "CAPACITY_EXECUTION_EVIDENCE",
+      "message": "execution constraint submitted must be False"
+    },
+    {
+      "code": "CAPACITY_EXECUTION_EVIDENCE",
+      "message": "execution constraint synthetic_input must be False"
+    },
+    {
+      "code": "CAPACITY_EXECUTION_EVIDENCE",
+      "message": "execution constraint trajectory_files_opened must be true"
+    },
+    {
+      "code": "CAPACITY_EXECUTION_EVIDENCE",
+      "message": "execution sidecar schema is invalid"
+    },
+    {
+      "code": "CAPACITY_MANIFEST_BINDING",
+      "message": "reader manifest does not declare formal_release=true"
+    },
+    {
+      "code": "CAPACITY_MODEL_ADAPTER",
+      "message": "execution sidecar is not bound to the Core dual-increment model adapter"
+    },
+    {
+      "code": "CAPACITY_PATH_BINDING",
+      "message": "final checkpoint is missing: /home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/attempts/h200-f3-fullfield-integration-pilot-graph_raw-1000/20260919T173203-ca1726fd3ed1/checkpoint.pt"
+    },
+    {
+      "code": "CAPACITY_RESOURCE_METRICS",
+      "message": "execution sidecar has no resource metrics"
+    },
+    {
+      "code": "CAPACITY_RESOURCE_METRICS",
+      "message": "wall_seconds and peak_gpu_memory_bytes must be finite positive values"
+    },
+    {
+      "code": "CAPACITY_UPDATE_FRONTIER",
+      "message": "execution sidecar updates_completed must be 32000"
+    },
+    {
+      "code": "CAPACITY_UPDATE_FRONTIER",
+      "message": "receipt and config must both complete exactly 32000 updates"
+    },
+    {
+      "code": "CAPACITY_UPDATE_FRONTIER",
+      "message": "sampler draw count must equal 32000 updates"
+    }
+  ],
+  "checkpoints": [],
+  "diagnostic_runs_counted_as_formal": false,
+  "execution": {
+    "bytes": 3568,
+    "path": "campaigns/core-v1/evidence/h200-f3-fullfield-integration-pilot-graph_raw-1000-execution.json",
+    "sha256": "c2c03005f5d2728a3f118a1b43c2a73ac19841342e3b42bf2a57f4b9aa1fa12c"
+  },
+  "execution_constraints": {
+    "central_ledger_mutation": 0,
+    "central_registry_mutation": 0,
+    "checkpoint_written": false,
+    "formal_runs_started": 0,
+    "future_state_inputs": false,
+    "gpu_started": false,
+    "read_only": true,
+    "solver_started": false,
+    "submitted": false,
+    "training_receipt_written": false,
+    "trajectory_files_opened": false
+  },
+  "formal_capacity_evidence": false,
+  "formal_job_count": 0,
+  "formal_runs_counted": 0,
+  "formal_training": false,
+  "formal_update_target": 32000,
+  "interpretation": "A valid record is a read-only adapter over a real 32000-update full-field CUDA receipt. It proves resource/checkpoint capacity for admission review only; it never counts a formal model-seed run or authorizes submission.",
+  "manifest": {
+    "bound": true,
+    "canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "case_count": 32,
+    "formal_release": false,
+    "path": "campaigns/core-v1/f3-dataset-v2.json",
+    "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "valid": false
+  },
+  "observed_update_frontier": 1000,
+  "receipt": {
+    "bytes": 6468,
+    "path": "campaigns/core-v1/evidence/h200-f3-fullfield-integration-pilot-graph_raw-1000-training.json",
+    "sha256": "49649ea41a38e954ca62ba5f1b10ece2df3b7f8afa7a49436f8181d5120428ba"
+  },
+  "resource": {},
+  "schema": "core.formal_capacity_evidence.v1",
+  "source_closure": {
+    "bound": true,
+    "closure_sha256": "76c93c4d4effa6bf7ffa1bb124b5a43efc3c5f31bbb107f570a750fb6e5b9b22",
+    "files": [
+      {
+        "bytes": 111794,
+        "relative_path": "scripts/core_learning.py",
+        "sha256": "20fee75b02fa9ce5cee6fdc7645bc4970ccbdd5d3a62aed7b9fedeb512c6392f"
+      },
+      {
+        "bytes": 26739,
+        "relative_path": "scripts/core_contract.py",
+        "sha256": "99ff892dfe2c1ae1c7d97af00241f736cf3ebcc3c5e018ab74581fbcb079b261"
+      },
+      {
+        "bytes": 30550,
+        "relative_path": "scripts/core_dataset.py",
+        "sha256": "41b9b65ed196cc39e9d0d3fc4028119c5cd111f4cf97d2f950da57148892d25d"
+      },
+      {
+        "bytes": 22521,
+        "relative_path": "scripts/core_models.py",
+        "sha256": "27a323244554aa564676e957e072197248cc3fb3a923e5816443fd589bbae66f"
+      },
+      {
+        "bytes": 38880,
+        "relative_path": "scripts/core_cfd_dataset.py",
+        "sha256": "9a8b5ed364735804cc66521060ed04a18845a80bd95870d2727eda5392997523"
+      },
+      {
+        "bytes": 8160,
+        "relative_path": "scripts/core_evaluation.py",
+        "sha256": "8256905a9ee5961acfc815ef860b39f918af8fb31714eadfeb33269e608952ec"
+      },
+      {
+        "bytes": 30607,
+        "relative_path": "scripts/core_physics.py",
+        "sha256": "af5469f88791cdd16bf2ee6234c73e76e0dc453fe2030ccb33c03cf6fd84f892"
+      },
+      {
+        "bytes": 52402,
+        "relative_path": "scripts/core_formal_planner.py",
+        "sha256": "f958023abc92147209d976a52978bd5d50c3a4ef1c792aa105f8187cbf6fbc6b"
+      }
+    ],
+    "path": "campaigns/core-v1/learning/formal-release-frontier-v1/source-closure.json",
+    "sha256": "9e8abdbc0ab6c6432a40cdfde445a96ef92c2af6b205d26f978dfef45c9fe0fb",
+    "valid": true
+  },
+  "status": "blocked",
+  "valid": false
+}

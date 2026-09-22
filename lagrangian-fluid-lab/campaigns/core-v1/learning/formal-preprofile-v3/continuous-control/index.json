@@ -1,0 +1,98 @@
+{
+  "comparison_command_template": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_preprofile_resume_compare.py",
+    "--base",
+    "{base_training.json}",
+    "--resumed",
+    "{resumed_training.json}",
+    "--continuous",
+    "{continuous_training.json}",
+    "--manifest",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "--data-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "--model",
+    "{model_kind}",
+    "--output",
+    "{comparison_output}"
+  ],
+  "diagnostic_job_count": 0,
+  "formal_job_count": 0,
+  "formal_training": false,
+  "gpu_started": false,
+  "job_set_sha256": "2fad8b06c4465c1d462e4053aab50f227c6588fe51beec5fd541ebe8e9ee09e2",
+  "jobs": [
+    {
+      "base_job_id": "h200-core-preprofile-mlp-seed17-v3",
+      "job_id": "h200-core-preprofile-mlp-seed17-continuous-control18-v1",
+      "model_kind": "mlp",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/learning/formal-preprofile-v3/continuous-control/h200-core-preprofile-mlp-seed17-continuous-control18-v1.json",
+      "ready": false,
+      "resume_canary_job_id": "h200-core-preprofile-mlp-seed17-resume-evidence-canary-v1",
+      "seed": 17,
+      "sha256": "98a6808cb49be5fe45e14bfa7c92fe676315d2f628ee28209de80f1015fe2e9a",
+      "updates": 18
+    },
+    {
+      "base_job_id": "h200-core-preprofile-graph_raw-seed17-v3",
+      "job_id": "h200-core-preprofile-graph_raw-seed17-continuous-control18-v1",
+      "model_kind": "graph_raw",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/learning/formal-preprofile-v3/continuous-control/h200-core-preprofile-graph_raw-seed17-continuous-control18-v1.json",
+      "ready": false,
+      "resume_canary_job_id": "h200-core-preprofile-graph_raw-seed17-resume-evidence-canary-v1",
+      "seed": 17,
+      "sha256": "f6c9d6914899b40b08bb4c6a9d7105e3dec0f0154220f968018e990d8023d9c7",
+      "updates": 18
+    },
+    {
+      "base_job_id": "h200-core-preprofile-graph_residual-seed17-v3",
+      "job_id": "h200-core-preprofile-graph_residual-seed17-continuous-control18-v1",
+      "model_kind": "graph_residual",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/learning/formal-preprofile-v3/continuous-control/h200-core-preprofile-graph_residual-seed17-continuous-control18-v1.json",
+      "ready": false,
+      "resume_canary_job_id": "h200-core-preprofile-graph_residual-seed17-resume-evidence-canary-v1",
+      "seed": 17,
+      "sha256": "6bb1167af54cfce8cbdb63a0bd07488ee626b7693964ebc8840306cea473f8f1",
+      "updates": 18
+    }
+  ],
+  "launch_precondition": "Root must explicitly submit only after the corresponding resume canary is staged/verified; this index is not a ledger request.",
+  "manifest": {
+    "formal_release": false,
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "train_case_count": 16,
+    "uses_test": false
+  },
+  "purpose": "Same-seed 18-update continuous controls required to test 16->18 resume equivalence; no formal count.",
+  "schema": "core.preprofile_continuous_control_set.v1",
+  "source_snapshot": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/e0f001cbc8daf4d7d4aec5a70ea69d415e97e2e7be7dac12577603db2a94486d/lagrangian-fluid-lab",
+    "sha256": "e0f001cbc8daf4d7d4aec5a70ea69d415e97e2e7be7dac12577603db2a94486d"
+  },
+  "status": "prepared_not_submitted",
+  "submitted": false,
+  "training_protocol": {
+    "centers_per_update": 256,
+    "checkpoint_every": 16,
+    "comparison_schema": "core.preprofile.resume_comparison.v1",
+    "evaluate_milestones": false,
+    "evidence_required": true,
+    "evidence_schema": "core.training.evidence.v1",
+    "hidden": 64,
+    "learning_rate": 0.001,
+    "log_every": 1,
+    "model_kinds": [
+      "mlp",
+      "graph_raw",
+      "graph_residual"
+    ],
+    "normalization_source_split": "train",
+    "normalization_transitions": 256,
+    "seed": 17,
+    "updates": 18,
+    "validation_every": 0
+  },
+  "writes_ledger": false
+}

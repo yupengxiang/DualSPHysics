@@ -1,0 +1,185 @@
+{
+  "blockers": [
+    {
+      "code": "formal_validation_case_gate",
+      "message": "formal validation requires at least 12 cases; observed 8",
+      "required_input": "at least twelve validation cases",
+      "scope": "formal"
+    },
+    {
+      "code": "formal_validation_family_gate",
+      "message": "formal validation requires at least 3 families with validation cases; observed 2",
+      "required_input": "a third independently qualified family/T1 validation block before formal planning",
+      "scope": "formal"
+    },
+    {
+      "code": "source_not_formal",
+      "message": "source manifest does not declare formal_release=true",
+      "required_input": "a separately qualified formal reader manifest",
+      "scope": "formal",
+      "source": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json"
+    }
+  ],
+  "family_case_counts": {
+    "F3": 32,
+    "F4": 32
+  },
+  "formal_eligible": false,
+  "formal_gate": {
+    "minimum_validation_cases": 12,
+    "minimum_validation_cases_per_family": 4,
+    "minimum_validation_families": 3,
+    "observed_validation_case_counts": {
+      "F3": 4,
+      "F4": 4
+    },
+    "observed_validation_cases": 8,
+    "observed_validation_families": 2,
+    "third_family_required": true,
+    "validation_split": "validation"
+  },
+  "formal_preflight_passed": false,
+  "formal_ready": false,
+  "future_state_inputs": false,
+  "hold_reasons": [
+    "formal validation requires at least 12 cases; observed 8",
+    "formal validation requires at least 3 families with validation cases; observed 2",
+    "source manifest does not declare formal_release=true"
+  ],
+  "manifest_count": 2,
+  "manifest_written": false,
+  "normalization_contract": {
+    "case_field_mapping": {
+      "known_inputs.contract_version": "known_inputs_ref.contract_version",
+      "known_inputs.control": "known_inputs_ref.control",
+      "known_inputs.coordinate_frame": "known_inputs_ref.coordinate_frame",
+      "known_inputs.geometry": "known_inputs_ref.geometry",
+      "known_inputs.numerics": "known_inputs_ref.numerics",
+      "known_inputs.physics": "known_inputs_ref.physics"
+    },
+    "control_asset_payload": [
+      "samples",
+      "centre",
+      "semantics"
+    ],
+    "geometry_asset_payload": [
+      "triangles",
+      "component_id",
+      "body_id",
+      "wall_velocity",
+      "coordinate_frame",
+      "version"
+    ],
+    "post_materialization_checks": [
+      "all input asset paths are relative to the explicit data root",
+      "all input asset hashes match their bytes",
+      "known_inputs_from_record contract hash equals known_inputs_sha256 for every case",
+      "native trajectory bindings remain byte/hash identical"
+    ],
+    "preserve_case_fields": [
+      "case_id",
+      "physical_case_id",
+      "lineage_group_id",
+      "family",
+      "split",
+      "evaluation_role",
+      "scope_id",
+      "hdf5",
+      "bytes",
+      "sha256",
+      "known_inputs_sha256",
+      "qualification_case",
+      "provenance",
+      "semantics"
+    ],
+    "target_schema": "core.dataset.v2"
+  },
+  "normalization_ready": true,
+  "qualification_claimed": false,
+  "read_only": true,
+  "registry_written": false,
+  "schema": "core.reader_manifest_normalization_plan.v1",
+  "source_schema_versions": [
+    "core.dataset.v2"
+  ],
+  "sources": [
+    {
+      "case_count": 32,
+      "dataset_id": "F3_registered32_core_native_v2",
+      "family_counts": {
+        "F3": 32
+      },
+      "formal_release": false,
+      "normalization_action": "retain_compact_input_references",
+      "normalization_status": "already_target_schema",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+      "read_only": true,
+      "required_inputs": [
+        "verify every known_inputs_ref geometry/control path is relative",
+        "verify every known_inputs_ref geometry/control SHA-256 against its asset",
+        "preserve each known_inputs_sha256 and all native trajectory bindings"
+      ],
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "source_schema": "core.dataset.v2",
+      "split_counts": {
+        "F3": {
+          "test": 12,
+          "train": 16,
+          "validation": 4
+        }
+      },
+      "target_schema": "core.dataset.v2",
+      "trajectory_files_opened": false
+    },
+    {
+      "case_count": 32,
+      "dataset_id": "F4_tallwall120_production_training_v1_compact_v2",
+      "family_counts": {
+        "F4": 32
+      },
+      "formal_release": true,
+      "normalization_action": "retain_compact_input_references",
+      "normalization_status": "already_target_schema",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "read_only": true,
+      "required_inputs": [
+        "verify every known_inputs_ref geometry/control path is relative",
+        "verify every known_inputs_ref geometry/control SHA-256 against its asset",
+        "preserve each known_inputs_sha256 and all native trajectory bindings"
+      ],
+      "sha256": "eb417b2774817039776b50d18e12e2500634d8c60f4465c42f5633a033c04a16",
+      "source_schema": "core.dataset.v2",
+      "split_counts": {
+        "F4": {
+          "id_test": 6,
+          "ood_test": 6,
+          "train": 16,
+          "validation": 4
+        }
+      },
+      "target_schema": "core.dataset.v2",
+      "trajectory_files_opened": false
+    }
+  ],
+  "split_policy": {
+    "formal_split": "validation",
+    "observed_splits_by_family": {
+      "F3": {
+        "test": 12,
+        "train": 16,
+        "validation": 4
+      },
+      "F4": {
+        "id_test": 6,
+        "ood_test": 6,
+        "train": 16,
+        "validation": 4
+      }
+    },
+    "resolution": "retain native test/id_test/ood_test names, or provide an explicit role map before any combined test evaluation; this plan does not silently relabel cases",
+    "test_roles_must_remain_explicit": true
+  },
+  "target_schema": "core.dataset.v2",
+  "training_started": false,
+  "trajectory_files_opened": false
+}

@@ -1,0 +1,71 @@
+{
+  "case_basis": {
+    "frames": 218,
+    "full_field": true,
+    "h5_bytes_each": 2068000000,
+    "loss_centers": 256,
+    "particles": 217485,
+    "train_case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04",
+    "transitions": 217,
+    "validation_interface_cases": [
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_08",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_23"
+    ]
+  },
+  "configurations": {
+    "graph_raw": {
+      "cpu_cores": 8,
+      "estimated_gpu_peak_mib": 73728,
+      "ram_mib": 32768,
+      "scheduler_gpu_request_mib": 73728,
+      "timeout_seconds": 7200,
+      "updates": 16,
+      "wall_seconds_estimate": 3600
+    },
+    "graph_residual": {
+      "cpu_cores": 8,
+      "estimated_gpu_peak_mib": 73728,
+      "ram_mib": 32768,
+      "scheduler_gpu_request_mib": 73728,
+      "timeout_seconds": 7200,
+      "updates": 16,
+      "wall_seconds_estimate": 3600
+    },
+    "mlp": {
+      "cpu_cores": 8,
+      "estimated_gpu_peak_mib": 8192,
+      "ram_mib": 32768,
+      "scheduler_gpu_request_mib": 8192,
+      "timeout_seconds": 7200,
+      "updates": 16,
+      "wall_seconds_estimate": 1800
+    }
+  },
+  "diagnostic_only": true,
+  "h200_capacity_note": "H200 NVL has ample headroom for the 72 GiB graph declaration; root must remeasure before any longer run",
+  "io_note": "three immutable 2.0 GiB H5 assets are hash-bound; training opens only DEV04, validation rows are not sampled",
+  "reference": {
+    "measured_gpu_peak_mib": {
+      "graph_raw": 9674,
+      "graph_residual": 9674,
+      "mlp": 912
+    },
+    "measured_particles": 34560,
+    "measured_ram_peak_mib": {
+      "graph_raw": 2235.918,
+      "graph_residual": 2238.665,
+      "mlp": 2129.043
+    },
+    "measured_updates": 16,
+    "path": "campaigns/core-v1/learning/backward-resource-measurements.json",
+    "sha256": "fedc3e65080381dd1a6c22caa9394a1eacbb8b7a1f60f53b1c68a44cfbc7d315"
+  },
+  "reservation_rule": "scheduler applies its normal device margin; no result counts as formal evidence",
+  "scale": {
+    "graph_memory_rule": "linear particle-axis extrapolation from measured 16-update full-field graph canary; add conservative margin; must be replaced by H200 measurement",
+    "particle_ratio": 6.29296875,
+    "ram_rule": "linear particle-axis extrapolation plus 2x operational margin"
+  },
+  "schema": "core.f4.diagnostic_profile.resource_estimate.v1",
+  "status": "conservative_estimate_not_measured_on_f4_gpu"
+}

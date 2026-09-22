@@ -1,0 +1,105 @@
+{
+  "comparison_command_template": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/1180503728c33e2180ca7c86d25a585a7cad6634ecdc9f4c9beefe3b1600d58d/lagrangian-fluid-lab/scripts/core_preprofile_resume_compare.py",
+    "--base",
+    "{base_training.json}",
+    "--resumed",
+    "{resumed_training.json}",
+    "--continuous",
+    "{continuous_training.json}",
+    "--manifest",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "--data-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "--model",
+    "{model_kind}",
+    "--output",
+    "{comparison_output}"
+  ],
+  "diagnostic_job_count": 3,
+  "formal_job_count": 0,
+  "formal_training": false,
+  "gpu_started": false,
+  "job_set_sha256": "21264e5ced0a307fc4530ade128f890a445c20bb768e64b3ecbee7579e2d83e8",
+  "jobs": [
+    {
+      "base_job_id": "h200-core-preprofile-graph_raw-seed17-v3",
+      "job_id": "h200-core-preprofile-graph_raw-seed17-continuous-control18-v2",
+      "model_kind": "graph_raw",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/learning/formal-preprofile-v3/continuous-control-v2/h200-core-preprofile-graph_raw-seed17-continuous-control18-v2.json",
+      "ready": true,
+      "resume_canary_index_sha256": "956a976b9009816c12c221bb31fba003a3b4d87ca0d14f2cea651b3ee852b872",
+      "resume_canary_job_id": "h200-core-preprofile-graph_raw-seed17-resume-evidence-canary-v3",
+      "seed": 17,
+      "sha256": "1d6ae3a569def79b6c5baa3fcd90d982c9c1d4666ae3ee1d40b06c38f1720ab7",
+      "updates": 18
+    },
+    {
+      "base_job_id": "h200-core-preprofile-graph_residual-seed17-v3",
+      "job_id": "h200-core-preprofile-graph_residual-seed17-continuous-control18-v2",
+      "model_kind": "graph_residual",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/learning/formal-preprofile-v3/continuous-control-v2/h200-core-preprofile-graph_residual-seed17-continuous-control18-v2.json",
+      "ready": true,
+      "resume_canary_index_sha256": "956a976b9009816c12c221bb31fba003a3b4d87ca0d14f2cea651b3ee852b872",
+      "resume_canary_job_id": "h200-core-preprofile-graph_residual-seed17-resume-evidence-canary-v3",
+      "seed": 17,
+      "sha256": "41a6ce6f1be575376505d08231a1b2c7c30f41a6090742336847481105919f6c",
+      "updates": 18
+    },
+    {
+      "base_job_id": "h200-core-preprofile-mlp-seed17-v3",
+      "job_id": "h200-core-preprofile-mlp-seed17-continuous-control18-v2",
+      "model_kind": "mlp",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/learning/formal-preprofile-v3/continuous-control-v2/h200-core-preprofile-mlp-seed17-continuous-control18-v2.json",
+      "ready": true,
+      "resume_canary_index_sha256": "956a976b9009816c12c221bb31fba003a3b4d87ca0d14f2cea651b3ee852b872",
+      "resume_canary_job_id": "h200-core-preprofile-mlp-seed17-resume-evidence-canary-v3",
+      "seed": 17,
+      "sha256": "0f95dd0c4c78a96788d0ef6c1776f6d7ed7bc7d006e99944aca6a8a0b8fa5293",
+      "updates": 18
+    }
+  ],
+  "launch_allowed_for_diagnostic_preprofile": true,
+  "launch_precondition": "Submit only after the matching post-fix resume-canary-v2 spec is reviewed and, preferably, its same-model MLP recovery passes. This index is diagnostic only and is not a ledger request.",
+  "manifest": {
+    "formal_release": false,
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "train_case_count": 16,
+    "uses_test": false
+  },
+  "purpose": "Same-seed 18-update continuous controls for post-fix 16-to-18 resume equivalence; v1 historical bindings remain unchanged and no formal count is implied.",
+  "resume_canary_index": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/learning/formal-preprofile-v3/resume-canary-v2/index.json",
+  "resume_canary_index_sha256": "956a976b9009816c12c221bb31fba003a3b4d87ca0d14f2cea651b3ee852b872",
+  "schema": "core.preprofile_continuous_control_set.v2",
+  "source_snapshot": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/runtime/snapshots/1180503728c33e2180ca7c86d25a585a7cad6634ecdc9f4c9beefe3b1600d58d/lagrangian-fluid-lab",
+    "sha256": "1180503728c33e2180ca7c86d25a585a7cad6634ecdc9f4c9beefe3b1600d58d"
+  },
+  "status": "ready_diagnostic_only",
+  "submitted": false,
+  "training_protocol": {
+    "centers_per_update": 256,
+    "checkpoint_every": 16,
+    "comparison_schema": "core.preprofile.resume_comparison.v1",
+    "evaluate_milestones": false,
+    "evidence_required": true,
+    "evidence_schema": "core.training.evidence.v1",
+    "hidden": 64,
+    "learning_rate": 0.001,
+    "log_every": 1,
+    "model_kinds": [
+      "mlp",
+      "graph_raw",
+      "graph_residual"
+    ],
+    "normalization_source_split": "train",
+    "normalization_transitions": 256,
+    "resume_rng_restore_schema": "core.training.rng_restore.v2",
+    "seed": 17,
+    "updates": 18,
+    "validation_every": 0
+  },
+  "writes_ledger": false
+}

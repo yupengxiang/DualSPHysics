@@ -1,0 +1,53 @@
+{
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_learning.py",
+    "rollout",
+    "--manifest",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "--data-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "--checkpoint",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/learning/pilot-checkpoint-snapshots/h200-f3-fullfield-integration-pilot-mlp-1000-diagnostic.pt",
+    "--case-id",
+    "F3_DEV_08_a0p953125",
+    "--device",
+    "cuda",
+    "--chunk-size",
+    "256",
+    "--trajectory-output",
+    "{attempt_dir}/trajectory.h5",
+    "--output",
+    "{attempt_dir}/rollout.json"
+  ],
+  "category": "model_profile",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "depends_on": [],
+  "formal_core_case_run": false,
+  "host": "h200",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/learning/pilot-checkpoint-snapshots/h200-f3-fullfield-integration-pilot-mlp-1000-diagnostic.pt",
+      "sha256": "1777e81182fc57b5062d3e26bc066baba423371f94d1d7b70ad9007413984831"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+    }
+  ],
+  "job_id": "h200-f3-pilot-rollout-mlp-step500-001",
+  "logical_id": "h200-f3-pilot-rollout-mlp-step500-001",
+  "required_outputs": [
+    "rollout.json",
+    "trajectory.h5"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "gpu_peak_mib": 2048,
+    "io_weight": 0.15,
+    "ram_mib": 8192
+  },
+  "scientific_scope": "full-field full-window engineering diagnostic; fixed first validation case, update500, no test selection",
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "timeout_seconds": 14400
+}

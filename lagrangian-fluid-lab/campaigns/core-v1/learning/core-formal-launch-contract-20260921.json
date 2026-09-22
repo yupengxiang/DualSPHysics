@@ -1,0 +1,988 @@
+{
+  "admission_next_step": "after all gates pass, regenerate a fresh source closure and invoke the existing core_formal_planner; this proposal contract itself never emits or submits jobs",
+  "blockers": [
+    "formal readiness artifact is blocked",
+    "third T1 family gate is not met",
+    "12-case validation denominator gate is not met",
+    "9 formal model-seed runs are not complete",
+    "288 material case-run target remains incomplete",
+    "existing source closure is stale; fresh closure must be admitted",
+    "same-card concurrency is unproven and remains disabled"
+  ],
+  "data_root": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "execution_constraints": {
+    "formal_job_specs_written": false,
+    "formal_jobs_submitted": false,
+    "formal_runs_started": 0,
+    "future_state_inputs": false,
+    "gpu_started": false,
+    "ledger_written": false,
+    "optimizer_started": false,
+    "read_only": true,
+    "registry_written": false,
+    "solver_started": false,
+    "trajectory_state_frames_read": 0
+  },
+  "formal_job_count": 0,
+  "gate_evaluation": {
+    "failure_penalty": true,
+    "formal_readiness": false,
+    "formal_runs_9": false,
+    "fresh_source_closure": false,
+    "material_case_runs_288": false,
+    "no_formal_job_emission": true,
+    "output_checkpoint_lineage_contract": true,
+    "phase_plan_denominator": true,
+    "same_card_concurrency": false,
+    "source_closure_complete": true,
+    "third_t1_family": false,
+    "validation_12_case": false
+  },
+  "inputs": {
+    "phase_plan": {
+      "bytes": 12489,
+      "path": "campaigns/core-v1/learning/core-phase-plan-denominator-audit-20260921.json",
+      "sha256": "cd6e1a432d1f8b626d7df41a2a27c3ce02356faa2242236550fa52971f37311c"
+    },
+    "readiness": {
+      "bytes": 7757,
+      "path": "campaigns/core-v1/learning/core-formal-readiness-audit-20260921.json",
+      "sha256": "2553c81ea57ded94a9419bd09a2567f4b16203e4d390b80a36d34ee710ff69f6"
+    },
+    "resource_plan": {
+      "bytes": 617,
+      "path": "campaigns/core-v1/learning/integration-pilot-resource-plan.json",
+      "sha256": "8f04803a30ee10502dcd45d18e6ba209eece162bad07d1a49b2a86742fd35afe"
+    },
+    "resource_profile": {
+      "bytes": 1306,
+      "path": "campaigns/core-v1/learning/backward-resource-measurements.json",
+      "sha256": "fedc3e65080381dd1a6c22caa9394a1eacbb8b7a1f60f53b1c68a44cfbc7d315"
+    },
+    "source_closure": {
+      "current_closure_sha256": "17e06aab45536b9df5f2a00dc347be05231d4f7c6196f07698976b86bea7ede0",
+      "fresh_snapshot_required": true,
+      "matches_current": false,
+      "mismatch_files": [
+        "scripts/core_contract.py",
+        "scripts/core_learning.py"
+      ],
+      "snapshot": {
+        "bytes": 2090,
+        "path": "campaigns/core-v1/learning/formal-release-candidate-v4/source-closure.json",
+        "sha256": "1125b30a2ea750f9be4a7ace016ea23032a0a752c55e42b1562bfacf04e3937b"
+      },
+      "snapshot_closure_sha256": "76c93c4d4effa6bf7ffa1bb124b5a43efc3c5f31bbb107f570a750fb6e5b9b22"
+    }
+  },
+  "launch_allowed": false,
+  "proposal_only": true,
+  "protocol": {
+    "checkpoint_milestones": [
+      8000,
+      16000,
+      24000,
+      32000
+    ],
+    "fixed_denominator": "all registered future frames, excluding initial state",
+    "missing_failed_nonfinite_frame_score": 1.0,
+    "models": [
+      "mlp",
+      "graph_raw",
+      "graph_residual"
+    ],
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "selection": "complete case fraction descending, score ascending, update ascending",
+    "test_included": false,
+    "updates": 32000,
+    "validation_split": "validation"
+  },
+  "record_id": "core-formal-launch-contract-20260921",
+  "required_formal_job_count": 9,
+  "resource_estimates": {
+    "all_three_model_types_concurrent_reservation": {
+      "cpu_cores": 12,
+      "gpu_mib": 21504,
+      "ram_mib": 24576
+    },
+    "capacity_claim": "diagnostic extrapolation only; no 32000-update capacity proof",
+    "models": {
+      "graph_raw": {
+        "estimate_is_diagnostic_extrapolation": true,
+        "io_weight": 0.25,
+        "linear_32000_update_wall_seconds": 126674.73602294922,
+        "linear_32000_update_wall_seconds_with_margin": 152009.68322753906,
+        "measured_gpu_peak_mib": 9674.0,
+        "measured_optimizer_updates": 16,
+        "measured_wall_seconds": 63.33736801147461,
+        "reserved_cpu_cores": 4,
+        "reserved_gpu_mib": 10240,
+        "reserved_ram_mib": 8192
+      },
+      "graph_residual": {
+        "estimate_is_diagnostic_extrapolation": true,
+        "io_weight": 0.25,
+        "linear_32000_update_wall_seconds": 127992.79499053955,
+        "linear_32000_update_wall_seconds_with_margin": 153591.35398864746,
+        "measured_gpu_peak_mib": 9674.0,
+        "measured_optimizer_updates": 16,
+        "measured_wall_seconds": 63.996397495269775,
+        "reserved_cpu_cores": 4,
+        "reserved_gpu_mib": 10240,
+        "reserved_ram_mib": 8192
+      },
+      "mlp": {
+        "estimate_is_diagnostic_extrapolation": true,
+        "io_weight": 0.25,
+        "linear_32000_update_wall_seconds": 124884.70649719238,
+        "linear_32000_update_wall_seconds_with_margin": 149861.64779663086,
+        "measured_gpu_peak_mib": 912.0,
+        "measured_optimizer_updates": 16,
+        "measured_wall_seconds": 62.44235324859619,
+        "reserved_cpu_cores": 4,
+        "reserved_gpu_mib": 1024,
+        "reserved_ram_mib": 8192
+      }
+    },
+    "profile_updates": [
+      16
+    ],
+    "resource_margin": 1.2,
+    "same_card_concurrency": {
+      "allowed": false,
+      "max_workers_per_card": 1,
+      "reason": "16-update profiles are single-worker measurements; no live free-memory/PSI admission evidence proves co-location",
+      "required_live_observations": [
+        "free_cuda_memory_mib",
+        "free_host_ram_mib",
+        "memory_psi",
+        "io_psi",
+        "active_same_card_processes",
+        "reserved_sum_with_safety_margin"
+      ]
+    },
+    "total_proposed_gpu_hours_with_margin": 379.55223751068115
+  },
+  "run_matrix": [
+    {
+      "checkpoint_selection": {
+        "function": "select_checkpoint",
+        "milestones": [
+          8000,
+          16000,
+          24000,
+          32000
+        ],
+        "module": "scripts/core_evaluation.py",
+        "requires_all_milestones": true,
+        "split": "validation",
+        "test_included": false
+      },
+      "failure_denominator": {
+        "failed_case_retained": true,
+        "missing_execution_penalty": 1.0,
+        "source": "registered time axis; expected_frames=len(time)-1"
+      },
+      "formal_job": false,
+      "launch_allowed": false,
+      "model": "mlp",
+      "output_lineage": {
+        "final_checkpoint": "campaigns/core-v1/runtime/formal/mlp-seed17/checkpoints/model.pt",
+        "manifest_sha256_binding_required": true,
+        "milestone_checkpoints": [
+          "campaigns/core-v1/runtime/formal/mlp-seed17/checkpoints/model.step-00008000.pt",
+          "campaigns/core-v1/runtime/formal/mlp-seed17/checkpoints/model.step-00016000.pt",
+          "campaigns/core-v1/runtime/formal/mlp-seed17/checkpoints/model.step-00024000.pt",
+          "campaigns/core-v1/runtime/formal/mlp-seed17/checkpoints/model.step-00032000.pt"
+        ],
+        "milestone_evaluations": [
+          "campaigns/core-v1/runtime/formal/mlp-seed17/checkpoints/model.step-00008000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/mlp-seed17/checkpoints/model.step-00016000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/mlp-seed17/checkpoints/model.step-00024000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/mlp-seed17/checkpoints/model.step-00032000.evaluation.json"
+        ],
+        "model_seed_binding": {
+          "model": "mlp",
+          "seed": 17
+        },
+        "progress_sidecar": "campaigns/core-v1/runtime/formal/mlp-seed17/training-progress.json",
+        "run_id_binding": "mlp-seed17",
+        "run_root": "campaigns/core-v1/runtime/formal/mlp-seed17",
+        "source_snapshot_binding_required": true,
+        "training_receipt": "campaigns/core-v1/runtime/formal/mlp-seed17/training.json"
+      },
+      "phase_dependencies": {
+        "evaluate": "four validation milestone reports; fixed denominator; select_checkpoint",
+        "inspect": "source manifest, family/validation shape, and input hashes pass",
+        "reproduce": "selected checkpoint on a distinct host with source/output hashes",
+        "rollout": "training receipt and all four milestone checkpoints verified",
+        "train": "formal admission ready; exactly one fresh run_id/model/seed",
+        "verify": "phase-plan and formal input audit pass"
+      },
+      "proposal_id": "mlp-seed17",
+      "resources": {
+        "estimate_is_diagnostic_extrapolation": true,
+        "io_weight": 0.25,
+        "linear_32000_update_wall_seconds": 124884.70649719238,
+        "linear_32000_update_wall_seconds_with_margin": 149861.64779663086,
+        "measured_gpu_peak_mib": 912.0,
+        "measured_optimizer_updates": 16,
+        "measured_wall_seconds": 62.44235324859619,
+        "reserved_cpu_cores": 4,
+        "reserved_gpu_mib": 1024,
+        "reserved_ram_mib": 8192
+      },
+      "run_id": "mlp-seed17",
+      "seed": 17,
+      "status": "blocked_by_formal_gates",
+      "training": {
+        "centers_per_update": 256,
+        "checkpoint_every": 8000,
+        "evaluate_milestones": true,
+        "hidden": 64,
+        "learning_rate": 0.001,
+        "normalization_transitions": 256,
+        "test_included": false,
+        "updates": 32000,
+        "validation_centers": 256,
+        "validation_transitions": 4
+      }
+    },
+    {
+      "checkpoint_selection": {
+        "function": "select_checkpoint",
+        "milestones": [
+          8000,
+          16000,
+          24000,
+          32000
+        ],
+        "module": "scripts/core_evaluation.py",
+        "requires_all_milestones": true,
+        "split": "validation",
+        "test_included": false
+      },
+      "failure_denominator": {
+        "failed_case_retained": true,
+        "missing_execution_penalty": 1.0,
+        "source": "registered time axis; expected_frames=len(time)-1"
+      },
+      "formal_job": false,
+      "launch_allowed": false,
+      "model": "mlp",
+      "output_lineage": {
+        "final_checkpoint": "campaigns/core-v1/runtime/formal/mlp-seed29/checkpoints/model.pt",
+        "manifest_sha256_binding_required": true,
+        "milestone_checkpoints": [
+          "campaigns/core-v1/runtime/formal/mlp-seed29/checkpoints/model.step-00008000.pt",
+          "campaigns/core-v1/runtime/formal/mlp-seed29/checkpoints/model.step-00016000.pt",
+          "campaigns/core-v1/runtime/formal/mlp-seed29/checkpoints/model.step-00024000.pt",
+          "campaigns/core-v1/runtime/formal/mlp-seed29/checkpoints/model.step-00032000.pt"
+        ],
+        "milestone_evaluations": [
+          "campaigns/core-v1/runtime/formal/mlp-seed29/checkpoints/model.step-00008000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/mlp-seed29/checkpoints/model.step-00016000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/mlp-seed29/checkpoints/model.step-00024000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/mlp-seed29/checkpoints/model.step-00032000.evaluation.json"
+        ],
+        "model_seed_binding": {
+          "model": "mlp",
+          "seed": 29
+        },
+        "progress_sidecar": "campaigns/core-v1/runtime/formal/mlp-seed29/training-progress.json",
+        "run_id_binding": "mlp-seed29",
+        "run_root": "campaigns/core-v1/runtime/formal/mlp-seed29",
+        "source_snapshot_binding_required": true,
+        "training_receipt": "campaigns/core-v1/runtime/formal/mlp-seed29/training.json"
+      },
+      "phase_dependencies": {
+        "evaluate": "four validation milestone reports; fixed denominator; select_checkpoint",
+        "inspect": "source manifest, family/validation shape, and input hashes pass",
+        "reproduce": "selected checkpoint on a distinct host with source/output hashes",
+        "rollout": "training receipt and all four milestone checkpoints verified",
+        "train": "formal admission ready; exactly one fresh run_id/model/seed",
+        "verify": "phase-plan and formal input audit pass"
+      },
+      "proposal_id": "mlp-seed29",
+      "resources": {
+        "estimate_is_diagnostic_extrapolation": true,
+        "io_weight": 0.25,
+        "linear_32000_update_wall_seconds": 124884.70649719238,
+        "linear_32000_update_wall_seconds_with_margin": 149861.64779663086,
+        "measured_gpu_peak_mib": 912.0,
+        "measured_optimizer_updates": 16,
+        "measured_wall_seconds": 62.44235324859619,
+        "reserved_cpu_cores": 4,
+        "reserved_gpu_mib": 1024,
+        "reserved_ram_mib": 8192
+      },
+      "run_id": "mlp-seed29",
+      "seed": 29,
+      "status": "blocked_by_formal_gates",
+      "training": {
+        "centers_per_update": 256,
+        "checkpoint_every": 8000,
+        "evaluate_milestones": true,
+        "hidden": 64,
+        "learning_rate": 0.001,
+        "normalization_transitions": 256,
+        "test_included": false,
+        "updates": 32000,
+        "validation_centers": 256,
+        "validation_transitions": 4
+      }
+    },
+    {
+      "checkpoint_selection": {
+        "function": "select_checkpoint",
+        "milestones": [
+          8000,
+          16000,
+          24000,
+          32000
+        ],
+        "module": "scripts/core_evaluation.py",
+        "requires_all_milestones": true,
+        "split": "validation",
+        "test_included": false
+      },
+      "failure_denominator": {
+        "failed_case_retained": true,
+        "missing_execution_penalty": 1.0,
+        "source": "registered time axis; expected_frames=len(time)-1"
+      },
+      "formal_job": false,
+      "launch_allowed": false,
+      "model": "mlp",
+      "output_lineage": {
+        "final_checkpoint": "campaigns/core-v1/runtime/formal/mlp-seed43/checkpoints/model.pt",
+        "manifest_sha256_binding_required": true,
+        "milestone_checkpoints": [
+          "campaigns/core-v1/runtime/formal/mlp-seed43/checkpoints/model.step-00008000.pt",
+          "campaigns/core-v1/runtime/formal/mlp-seed43/checkpoints/model.step-00016000.pt",
+          "campaigns/core-v1/runtime/formal/mlp-seed43/checkpoints/model.step-00024000.pt",
+          "campaigns/core-v1/runtime/formal/mlp-seed43/checkpoints/model.step-00032000.pt"
+        ],
+        "milestone_evaluations": [
+          "campaigns/core-v1/runtime/formal/mlp-seed43/checkpoints/model.step-00008000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/mlp-seed43/checkpoints/model.step-00016000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/mlp-seed43/checkpoints/model.step-00024000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/mlp-seed43/checkpoints/model.step-00032000.evaluation.json"
+        ],
+        "model_seed_binding": {
+          "model": "mlp",
+          "seed": 43
+        },
+        "progress_sidecar": "campaigns/core-v1/runtime/formal/mlp-seed43/training-progress.json",
+        "run_id_binding": "mlp-seed43",
+        "run_root": "campaigns/core-v1/runtime/formal/mlp-seed43",
+        "source_snapshot_binding_required": true,
+        "training_receipt": "campaigns/core-v1/runtime/formal/mlp-seed43/training.json"
+      },
+      "phase_dependencies": {
+        "evaluate": "four validation milestone reports; fixed denominator; select_checkpoint",
+        "inspect": "source manifest, family/validation shape, and input hashes pass",
+        "reproduce": "selected checkpoint on a distinct host with source/output hashes",
+        "rollout": "training receipt and all four milestone checkpoints verified",
+        "train": "formal admission ready; exactly one fresh run_id/model/seed",
+        "verify": "phase-plan and formal input audit pass"
+      },
+      "proposal_id": "mlp-seed43",
+      "resources": {
+        "estimate_is_diagnostic_extrapolation": true,
+        "io_weight": 0.25,
+        "linear_32000_update_wall_seconds": 124884.70649719238,
+        "linear_32000_update_wall_seconds_with_margin": 149861.64779663086,
+        "measured_gpu_peak_mib": 912.0,
+        "measured_optimizer_updates": 16,
+        "measured_wall_seconds": 62.44235324859619,
+        "reserved_cpu_cores": 4,
+        "reserved_gpu_mib": 1024,
+        "reserved_ram_mib": 8192
+      },
+      "run_id": "mlp-seed43",
+      "seed": 43,
+      "status": "blocked_by_formal_gates",
+      "training": {
+        "centers_per_update": 256,
+        "checkpoint_every": 8000,
+        "evaluate_milestones": true,
+        "hidden": 64,
+        "learning_rate": 0.001,
+        "normalization_transitions": 256,
+        "test_included": false,
+        "updates": 32000,
+        "validation_centers": 256,
+        "validation_transitions": 4
+      }
+    },
+    {
+      "checkpoint_selection": {
+        "function": "select_checkpoint",
+        "milestones": [
+          8000,
+          16000,
+          24000,
+          32000
+        ],
+        "module": "scripts/core_evaluation.py",
+        "requires_all_milestones": true,
+        "split": "validation",
+        "test_included": false
+      },
+      "failure_denominator": {
+        "failed_case_retained": true,
+        "missing_execution_penalty": 1.0,
+        "source": "registered time axis; expected_frames=len(time)-1"
+      },
+      "formal_job": false,
+      "launch_allowed": false,
+      "model": "graph_raw",
+      "output_lineage": {
+        "final_checkpoint": "campaigns/core-v1/runtime/formal/graph_raw-seed17/checkpoints/model.pt",
+        "manifest_sha256_binding_required": true,
+        "milestone_checkpoints": [
+          "campaigns/core-v1/runtime/formal/graph_raw-seed17/checkpoints/model.step-00008000.pt",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed17/checkpoints/model.step-00016000.pt",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed17/checkpoints/model.step-00024000.pt",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed17/checkpoints/model.step-00032000.pt"
+        ],
+        "milestone_evaluations": [
+          "campaigns/core-v1/runtime/formal/graph_raw-seed17/checkpoints/model.step-00008000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed17/checkpoints/model.step-00016000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed17/checkpoints/model.step-00024000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed17/checkpoints/model.step-00032000.evaluation.json"
+        ],
+        "model_seed_binding": {
+          "model": "graph_raw",
+          "seed": 17
+        },
+        "progress_sidecar": "campaigns/core-v1/runtime/formal/graph_raw-seed17/training-progress.json",
+        "run_id_binding": "graph_raw-seed17",
+        "run_root": "campaigns/core-v1/runtime/formal/graph_raw-seed17",
+        "source_snapshot_binding_required": true,
+        "training_receipt": "campaigns/core-v1/runtime/formal/graph_raw-seed17/training.json"
+      },
+      "phase_dependencies": {
+        "evaluate": "four validation milestone reports; fixed denominator; select_checkpoint",
+        "inspect": "source manifest, family/validation shape, and input hashes pass",
+        "reproduce": "selected checkpoint on a distinct host with source/output hashes",
+        "rollout": "training receipt and all four milestone checkpoints verified",
+        "train": "formal admission ready; exactly one fresh run_id/model/seed",
+        "verify": "phase-plan and formal input audit pass"
+      },
+      "proposal_id": "graph_raw-seed17",
+      "resources": {
+        "estimate_is_diagnostic_extrapolation": true,
+        "io_weight": 0.25,
+        "linear_32000_update_wall_seconds": 126674.73602294922,
+        "linear_32000_update_wall_seconds_with_margin": 152009.68322753906,
+        "measured_gpu_peak_mib": 9674.0,
+        "measured_optimizer_updates": 16,
+        "measured_wall_seconds": 63.33736801147461,
+        "reserved_cpu_cores": 4,
+        "reserved_gpu_mib": 10240,
+        "reserved_ram_mib": 8192
+      },
+      "run_id": "graph_raw-seed17",
+      "seed": 17,
+      "status": "blocked_by_formal_gates",
+      "training": {
+        "centers_per_update": 256,
+        "checkpoint_every": 8000,
+        "evaluate_milestones": true,
+        "hidden": 64,
+        "learning_rate": 0.001,
+        "normalization_transitions": 256,
+        "test_included": false,
+        "updates": 32000,
+        "validation_centers": 256,
+        "validation_transitions": 4
+      }
+    },
+    {
+      "checkpoint_selection": {
+        "function": "select_checkpoint",
+        "milestones": [
+          8000,
+          16000,
+          24000,
+          32000
+        ],
+        "module": "scripts/core_evaluation.py",
+        "requires_all_milestones": true,
+        "split": "validation",
+        "test_included": false
+      },
+      "failure_denominator": {
+        "failed_case_retained": true,
+        "missing_execution_penalty": 1.0,
+        "source": "registered time axis; expected_frames=len(time)-1"
+      },
+      "formal_job": false,
+      "launch_allowed": false,
+      "model": "graph_raw",
+      "output_lineage": {
+        "final_checkpoint": "campaigns/core-v1/runtime/formal/graph_raw-seed29/checkpoints/model.pt",
+        "manifest_sha256_binding_required": true,
+        "milestone_checkpoints": [
+          "campaigns/core-v1/runtime/formal/graph_raw-seed29/checkpoints/model.step-00008000.pt",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed29/checkpoints/model.step-00016000.pt",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed29/checkpoints/model.step-00024000.pt",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed29/checkpoints/model.step-00032000.pt"
+        ],
+        "milestone_evaluations": [
+          "campaigns/core-v1/runtime/formal/graph_raw-seed29/checkpoints/model.step-00008000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed29/checkpoints/model.step-00016000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed29/checkpoints/model.step-00024000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed29/checkpoints/model.step-00032000.evaluation.json"
+        ],
+        "model_seed_binding": {
+          "model": "graph_raw",
+          "seed": 29
+        },
+        "progress_sidecar": "campaigns/core-v1/runtime/formal/graph_raw-seed29/training-progress.json",
+        "run_id_binding": "graph_raw-seed29",
+        "run_root": "campaigns/core-v1/runtime/formal/graph_raw-seed29",
+        "source_snapshot_binding_required": true,
+        "training_receipt": "campaigns/core-v1/runtime/formal/graph_raw-seed29/training.json"
+      },
+      "phase_dependencies": {
+        "evaluate": "four validation milestone reports; fixed denominator; select_checkpoint",
+        "inspect": "source manifest, family/validation shape, and input hashes pass",
+        "reproduce": "selected checkpoint on a distinct host with source/output hashes",
+        "rollout": "training receipt and all four milestone checkpoints verified",
+        "train": "formal admission ready; exactly one fresh run_id/model/seed",
+        "verify": "phase-plan and formal input audit pass"
+      },
+      "proposal_id": "graph_raw-seed29",
+      "resources": {
+        "estimate_is_diagnostic_extrapolation": true,
+        "io_weight": 0.25,
+        "linear_32000_update_wall_seconds": 126674.73602294922,
+        "linear_32000_update_wall_seconds_with_margin": 152009.68322753906,
+        "measured_gpu_peak_mib": 9674.0,
+        "measured_optimizer_updates": 16,
+        "measured_wall_seconds": 63.33736801147461,
+        "reserved_cpu_cores": 4,
+        "reserved_gpu_mib": 10240,
+        "reserved_ram_mib": 8192
+      },
+      "run_id": "graph_raw-seed29",
+      "seed": 29,
+      "status": "blocked_by_formal_gates",
+      "training": {
+        "centers_per_update": 256,
+        "checkpoint_every": 8000,
+        "evaluate_milestones": true,
+        "hidden": 64,
+        "learning_rate": 0.001,
+        "normalization_transitions": 256,
+        "test_included": false,
+        "updates": 32000,
+        "validation_centers": 256,
+        "validation_transitions": 4
+      }
+    },
+    {
+      "checkpoint_selection": {
+        "function": "select_checkpoint",
+        "milestones": [
+          8000,
+          16000,
+          24000,
+          32000
+        ],
+        "module": "scripts/core_evaluation.py",
+        "requires_all_milestones": true,
+        "split": "validation",
+        "test_included": false
+      },
+      "failure_denominator": {
+        "failed_case_retained": true,
+        "missing_execution_penalty": 1.0,
+        "source": "registered time axis; expected_frames=len(time)-1"
+      },
+      "formal_job": false,
+      "launch_allowed": false,
+      "model": "graph_raw",
+      "output_lineage": {
+        "final_checkpoint": "campaigns/core-v1/runtime/formal/graph_raw-seed43/checkpoints/model.pt",
+        "manifest_sha256_binding_required": true,
+        "milestone_checkpoints": [
+          "campaigns/core-v1/runtime/formal/graph_raw-seed43/checkpoints/model.step-00008000.pt",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed43/checkpoints/model.step-00016000.pt",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed43/checkpoints/model.step-00024000.pt",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed43/checkpoints/model.step-00032000.pt"
+        ],
+        "milestone_evaluations": [
+          "campaigns/core-v1/runtime/formal/graph_raw-seed43/checkpoints/model.step-00008000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed43/checkpoints/model.step-00016000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed43/checkpoints/model.step-00024000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_raw-seed43/checkpoints/model.step-00032000.evaluation.json"
+        ],
+        "model_seed_binding": {
+          "model": "graph_raw",
+          "seed": 43
+        },
+        "progress_sidecar": "campaigns/core-v1/runtime/formal/graph_raw-seed43/training-progress.json",
+        "run_id_binding": "graph_raw-seed43",
+        "run_root": "campaigns/core-v1/runtime/formal/graph_raw-seed43",
+        "source_snapshot_binding_required": true,
+        "training_receipt": "campaigns/core-v1/runtime/formal/graph_raw-seed43/training.json"
+      },
+      "phase_dependencies": {
+        "evaluate": "four validation milestone reports; fixed denominator; select_checkpoint",
+        "inspect": "source manifest, family/validation shape, and input hashes pass",
+        "reproduce": "selected checkpoint on a distinct host with source/output hashes",
+        "rollout": "training receipt and all four milestone checkpoints verified",
+        "train": "formal admission ready; exactly one fresh run_id/model/seed",
+        "verify": "phase-plan and formal input audit pass"
+      },
+      "proposal_id": "graph_raw-seed43",
+      "resources": {
+        "estimate_is_diagnostic_extrapolation": true,
+        "io_weight": 0.25,
+        "linear_32000_update_wall_seconds": 126674.73602294922,
+        "linear_32000_update_wall_seconds_with_margin": 152009.68322753906,
+        "measured_gpu_peak_mib": 9674.0,
+        "measured_optimizer_updates": 16,
+        "measured_wall_seconds": 63.33736801147461,
+        "reserved_cpu_cores": 4,
+        "reserved_gpu_mib": 10240,
+        "reserved_ram_mib": 8192
+      },
+      "run_id": "graph_raw-seed43",
+      "seed": 43,
+      "status": "blocked_by_formal_gates",
+      "training": {
+        "centers_per_update": 256,
+        "checkpoint_every": 8000,
+        "evaluate_milestones": true,
+        "hidden": 64,
+        "learning_rate": 0.001,
+        "normalization_transitions": 256,
+        "test_included": false,
+        "updates": 32000,
+        "validation_centers": 256,
+        "validation_transitions": 4
+      }
+    },
+    {
+      "checkpoint_selection": {
+        "function": "select_checkpoint",
+        "milestones": [
+          8000,
+          16000,
+          24000,
+          32000
+        ],
+        "module": "scripts/core_evaluation.py",
+        "requires_all_milestones": true,
+        "split": "validation",
+        "test_included": false
+      },
+      "failure_denominator": {
+        "failed_case_retained": true,
+        "missing_execution_penalty": 1.0,
+        "source": "registered time axis; expected_frames=len(time)-1"
+      },
+      "formal_job": false,
+      "launch_allowed": false,
+      "model": "graph_residual",
+      "output_lineage": {
+        "final_checkpoint": "campaigns/core-v1/runtime/formal/graph_residual-seed17/checkpoints/model.pt",
+        "manifest_sha256_binding_required": true,
+        "milestone_checkpoints": [
+          "campaigns/core-v1/runtime/formal/graph_residual-seed17/checkpoints/model.step-00008000.pt",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed17/checkpoints/model.step-00016000.pt",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed17/checkpoints/model.step-00024000.pt",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed17/checkpoints/model.step-00032000.pt"
+        ],
+        "milestone_evaluations": [
+          "campaigns/core-v1/runtime/formal/graph_residual-seed17/checkpoints/model.step-00008000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed17/checkpoints/model.step-00016000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed17/checkpoints/model.step-00024000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed17/checkpoints/model.step-00032000.evaluation.json"
+        ],
+        "model_seed_binding": {
+          "model": "graph_residual",
+          "seed": 17
+        },
+        "progress_sidecar": "campaigns/core-v1/runtime/formal/graph_residual-seed17/training-progress.json",
+        "run_id_binding": "graph_residual-seed17",
+        "run_root": "campaigns/core-v1/runtime/formal/graph_residual-seed17",
+        "source_snapshot_binding_required": true,
+        "training_receipt": "campaigns/core-v1/runtime/formal/graph_residual-seed17/training.json"
+      },
+      "phase_dependencies": {
+        "evaluate": "four validation milestone reports; fixed denominator; select_checkpoint",
+        "inspect": "source manifest, family/validation shape, and input hashes pass",
+        "reproduce": "selected checkpoint on a distinct host with source/output hashes",
+        "rollout": "training receipt and all four milestone checkpoints verified",
+        "train": "formal admission ready; exactly one fresh run_id/model/seed",
+        "verify": "phase-plan and formal input audit pass"
+      },
+      "proposal_id": "graph_residual-seed17",
+      "resources": {
+        "estimate_is_diagnostic_extrapolation": true,
+        "io_weight": 0.25,
+        "linear_32000_update_wall_seconds": 127992.79499053955,
+        "linear_32000_update_wall_seconds_with_margin": 153591.35398864746,
+        "measured_gpu_peak_mib": 9674.0,
+        "measured_optimizer_updates": 16,
+        "measured_wall_seconds": 63.996397495269775,
+        "reserved_cpu_cores": 4,
+        "reserved_gpu_mib": 10240,
+        "reserved_ram_mib": 8192
+      },
+      "run_id": "graph_residual-seed17",
+      "seed": 17,
+      "status": "blocked_by_formal_gates",
+      "training": {
+        "centers_per_update": 256,
+        "checkpoint_every": 8000,
+        "evaluate_milestones": true,
+        "hidden": 64,
+        "learning_rate": 0.001,
+        "normalization_transitions": 256,
+        "test_included": false,
+        "updates": 32000,
+        "validation_centers": 256,
+        "validation_transitions": 4
+      }
+    },
+    {
+      "checkpoint_selection": {
+        "function": "select_checkpoint",
+        "milestones": [
+          8000,
+          16000,
+          24000,
+          32000
+        ],
+        "module": "scripts/core_evaluation.py",
+        "requires_all_milestones": true,
+        "split": "validation",
+        "test_included": false
+      },
+      "failure_denominator": {
+        "failed_case_retained": true,
+        "missing_execution_penalty": 1.0,
+        "source": "registered time axis; expected_frames=len(time)-1"
+      },
+      "formal_job": false,
+      "launch_allowed": false,
+      "model": "graph_residual",
+      "output_lineage": {
+        "final_checkpoint": "campaigns/core-v1/runtime/formal/graph_residual-seed29/checkpoints/model.pt",
+        "manifest_sha256_binding_required": true,
+        "milestone_checkpoints": [
+          "campaigns/core-v1/runtime/formal/graph_residual-seed29/checkpoints/model.step-00008000.pt",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed29/checkpoints/model.step-00016000.pt",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed29/checkpoints/model.step-00024000.pt",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed29/checkpoints/model.step-00032000.pt"
+        ],
+        "milestone_evaluations": [
+          "campaigns/core-v1/runtime/formal/graph_residual-seed29/checkpoints/model.step-00008000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed29/checkpoints/model.step-00016000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed29/checkpoints/model.step-00024000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed29/checkpoints/model.step-00032000.evaluation.json"
+        ],
+        "model_seed_binding": {
+          "model": "graph_residual",
+          "seed": 29
+        },
+        "progress_sidecar": "campaigns/core-v1/runtime/formal/graph_residual-seed29/training-progress.json",
+        "run_id_binding": "graph_residual-seed29",
+        "run_root": "campaigns/core-v1/runtime/formal/graph_residual-seed29",
+        "source_snapshot_binding_required": true,
+        "training_receipt": "campaigns/core-v1/runtime/formal/graph_residual-seed29/training.json"
+      },
+      "phase_dependencies": {
+        "evaluate": "four validation milestone reports; fixed denominator; select_checkpoint",
+        "inspect": "source manifest, family/validation shape, and input hashes pass",
+        "reproduce": "selected checkpoint on a distinct host with source/output hashes",
+        "rollout": "training receipt and all four milestone checkpoints verified",
+        "train": "formal admission ready; exactly one fresh run_id/model/seed",
+        "verify": "phase-plan and formal input audit pass"
+      },
+      "proposal_id": "graph_residual-seed29",
+      "resources": {
+        "estimate_is_diagnostic_extrapolation": true,
+        "io_weight": 0.25,
+        "linear_32000_update_wall_seconds": 127992.79499053955,
+        "linear_32000_update_wall_seconds_with_margin": 153591.35398864746,
+        "measured_gpu_peak_mib": 9674.0,
+        "measured_optimizer_updates": 16,
+        "measured_wall_seconds": 63.996397495269775,
+        "reserved_cpu_cores": 4,
+        "reserved_gpu_mib": 10240,
+        "reserved_ram_mib": 8192
+      },
+      "run_id": "graph_residual-seed29",
+      "seed": 29,
+      "status": "blocked_by_formal_gates",
+      "training": {
+        "centers_per_update": 256,
+        "checkpoint_every": 8000,
+        "evaluate_milestones": true,
+        "hidden": 64,
+        "learning_rate": 0.001,
+        "normalization_transitions": 256,
+        "test_included": false,
+        "updates": 32000,
+        "validation_centers": 256,
+        "validation_transitions": 4
+      }
+    },
+    {
+      "checkpoint_selection": {
+        "function": "select_checkpoint",
+        "milestones": [
+          8000,
+          16000,
+          24000,
+          32000
+        ],
+        "module": "scripts/core_evaluation.py",
+        "requires_all_milestones": true,
+        "split": "validation",
+        "test_included": false
+      },
+      "failure_denominator": {
+        "failed_case_retained": true,
+        "missing_execution_penalty": 1.0,
+        "source": "registered time axis; expected_frames=len(time)-1"
+      },
+      "formal_job": false,
+      "launch_allowed": false,
+      "model": "graph_residual",
+      "output_lineage": {
+        "final_checkpoint": "campaigns/core-v1/runtime/formal/graph_residual-seed43/checkpoints/model.pt",
+        "manifest_sha256_binding_required": true,
+        "milestone_checkpoints": [
+          "campaigns/core-v1/runtime/formal/graph_residual-seed43/checkpoints/model.step-00008000.pt",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed43/checkpoints/model.step-00016000.pt",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed43/checkpoints/model.step-00024000.pt",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed43/checkpoints/model.step-00032000.pt"
+        ],
+        "milestone_evaluations": [
+          "campaigns/core-v1/runtime/formal/graph_residual-seed43/checkpoints/model.step-00008000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed43/checkpoints/model.step-00016000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed43/checkpoints/model.step-00024000.evaluation.json",
+          "campaigns/core-v1/runtime/formal/graph_residual-seed43/checkpoints/model.step-00032000.evaluation.json"
+        ],
+        "model_seed_binding": {
+          "model": "graph_residual",
+          "seed": 43
+        },
+        "progress_sidecar": "campaigns/core-v1/runtime/formal/graph_residual-seed43/training-progress.json",
+        "run_id_binding": "graph_residual-seed43",
+        "run_root": "campaigns/core-v1/runtime/formal/graph_residual-seed43",
+        "source_snapshot_binding_required": true,
+        "training_receipt": "campaigns/core-v1/runtime/formal/graph_residual-seed43/training.json"
+      },
+      "phase_dependencies": {
+        "evaluate": "four validation milestone reports; fixed denominator; select_checkpoint",
+        "inspect": "source manifest, family/validation shape, and input hashes pass",
+        "reproduce": "selected checkpoint on a distinct host with source/output hashes",
+        "rollout": "training receipt and all four milestone checkpoints verified",
+        "train": "formal admission ready; exactly one fresh run_id/model/seed",
+        "verify": "phase-plan and formal input audit pass"
+      },
+      "proposal_id": "graph_residual-seed43",
+      "resources": {
+        "estimate_is_diagnostic_extrapolation": true,
+        "io_weight": 0.25,
+        "linear_32000_update_wall_seconds": 127992.79499053955,
+        "linear_32000_update_wall_seconds_with_margin": 153591.35398864746,
+        "measured_gpu_peak_mib": 9674.0,
+        "measured_optimizer_updates": 16,
+        "measured_wall_seconds": 63.996397495269775,
+        "reserved_cpu_cores": 4,
+        "reserved_gpu_mib": 10240,
+        "reserved_ram_mib": 8192
+      },
+      "run_id": "graph_residual-seed43",
+      "seed": 43,
+      "status": "blocked_by_formal_gates",
+      "training": {
+        "centers_per_update": 256,
+        "checkpoint_every": 8000,
+        "evaluate_milestones": true,
+        "hidden": 64,
+        "learning_rate": 0.001,
+        "normalization_transitions": 256,
+        "test_included": false,
+        "updates": 32000,
+        "validation_centers": 256,
+        "validation_transitions": 4
+      }
+    }
+  ],
+  "schema": "core.formal_launch_contract.v1",
+  "source_closure": {
+    "closure_sha256": "17e06aab45536b9df5f2a00dc347be05231d4f7c6196f07698976b86bea7ede0",
+    "complete": true,
+    "files": [
+      {
+        "bytes": 112453,
+        "relative_path": "scripts/core_learning.py",
+        "sha256": "50e50edc003bdc8b7723163e32cb2b6d56fcd0285ac97db96bac30c7751fc6d0"
+      },
+      {
+        "bytes": 28464,
+        "relative_path": "scripts/core_contract.py",
+        "sha256": "57ffb15cea1e9a8510a5c66b2ef11fec9214c8416ab574f286cee16ebded3523"
+      },
+      {
+        "bytes": 30550,
+        "relative_path": "scripts/core_dataset.py",
+        "sha256": "41b9b65ed196cc39e9d0d3fc4028119c5cd111f4cf97d2f950da57148892d25d"
+      },
+      {
+        "bytes": 22521,
+        "relative_path": "scripts/core_models.py",
+        "sha256": "27a323244554aa564676e957e072197248cc3fb3a923e5816443fd589bbae66f"
+      },
+      {
+        "bytes": 38880,
+        "relative_path": "scripts/core_cfd_dataset.py",
+        "sha256": "9a8b5ed364735804cc66521060ed04a18845a80bd95870d2727eda5392997523"
+      },
+      {
+        "bytes": 8160,
+        "relative_path": "scripts/core_evaluation.py",
+        "sha256": "8256905a9ee5961acfc815ef860b39f918af8fb31714eadfeb33269e608952ec"
+      },
+      {
+        "bytes": 30607,
+        "relative_path": "scripts/core_physics.py",
+        "sha256": "af5469f88791cdd16bf2ee6234c73e76e0dc453fe2030ccb33c03cf6fd84f892"
+      },
+      {
+        "bytes": 52402,
+        "relative_path": "scripts/core_formal_planner.py",
+        "sha256": "f958023abc92147209d976a52978bd5d50c3a4ef1c792aa105f8187cbf6fbc6b"
+      }
+    ],
+    "missing_files": [],
+    "required_files": [
+      "scripts/core_learning.py",
+      "scripts/core_contract.py",
+      "scripts/core_dataset.py",
+      "scripts/core_models.py",
+      "scripts/core_cfd_dataset.py",
+      "scripts/core_evaluation.py",
+      "scripts/core_physics.py",
+      "scripts/core_formal_planner.py"
+    ],
+    "source_snapshot_policy": "fresh_code_closure_at_formal_admission"
+  },
+  "status": "proposal_only_blocked"
+}

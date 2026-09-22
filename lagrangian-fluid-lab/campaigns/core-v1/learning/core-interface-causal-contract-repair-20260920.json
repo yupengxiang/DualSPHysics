@@ -1,0 +1,77 @@
+{
+  "schema": "core.interface_contract_repair_receipt.v1",
+  "record_id": "core-interface-causal-contract-repair-20260920",
+  "created_at_utc": "2026-09-20T00:00:00Z",
+  "status": "diagnostic_repair_passed",
+  "scope": "known_inputs_future_state_causal_boundary",
+  "change_kind": "low_cost_interface_contract_repair",
+  "change": {
+    "bug": "KnownInputs rejected future_fluid_* and reference_state keys but accepted generic future_state/future_velocity aliases, allowing a future particle state to be serialized as known metadata.",
+    "repair": "Added exact and prefix guards for future/reference particle-state, target-state, and trajectory keys, including nested mappings.",
+    "preserved_metadata": [
+      "reference_density_kgm3 remains valid physical metadata",
+      "declared prescribed geometry/control schedules remain valid known inputs"
+    ],
+    "predictor_contract": {
+      "future_state_inputs": false,
+      "trajectory_reader_in_known_inputs": false,
+      "reference_state_in_known_inputs": false
+    }
+  },
+  "formal_admission": false,
+  "formal_training": false,
+  "formal_job_count": 0,
+  "required_formal_job_count": 9,
+  "diagnostic_runs_counted_as_formal": false,
+  "qualification_claim": "none",
+  "requested_compute_configuration": {
+    "label": "Luna Max",
+    "launch_requested": false,
+    "interpretation": "The repair is a CPU contract test; no optimizer or GPU was started."
+  },
+  "execution_constraints": {
+    "formal_updates_started": 0,
+    "optimizer_started": false,
+    "gpu_started": false,
+    "solver_started": false,
+    "central_registry_mutation": 0,
+    "central_ledger_mutation": 0,
+    "old_evidence_modified": false
+  },
+  "source_bindings": [
+    {
+      "path": "scripts/core_contract.py",
+      "sha256": "57ffb15cea1e9a8510a5c66b2ef11fec9214c8416ab574f286cee16ebded3523"
+    },
+    {
+      "path": "tests/test_core_contract.py",
+      "sha256": "3b5d06e1a72869c5a990912361a26d2560df69f057073b1711657c8363acfd9e"
+    }
+  ],
+  "validation": {
+    "targeted_command": ".venv/bin/python -m pytest -q tests/test_core_contract.py::test_known_input_cannot_carry_a_reader_or_future_reference tests/test_core_contract.py::test_known_input_rejects_generic_future_state_aliases_recursively",
+    "targeted_result": "2 passed in 0.48s",
+    "contract_and_model_command": ".venv/bin/python -m pytest -q tests/test_core_contract.py tests/test_core_models.py",
+    "contract_and_model_result": "19 passed in 69.89s",
+    "new_regression_test": "test_known_input_rejects_generic_future_state_aliases_recursively",
+    "causal_oracle_command": ".venv/bin/python -m pytest -q tests/test_core_causal_contract_audit.py tests/test_core_privileged_oracle.py",
+    "causal_oracle_result": "7 passed in 0.41s",
+    "learning_command": ".venv/bin/python -m pytest -q tests/test_core_learning.py",
+    "learning_result": "29 passed in 7.73s",
+    "preserved_old_evidence_recheck": {
+      "command": ".venv/bin/python -m pytest -q tests/test_core_formal_admission_readiness.py",
+      "result": "4 passed, 1 failed",
+      "reason": "The preserved readiness receipt pins the pre-repair core_contract.py SHA; the intentional source-closure mismatch prevents silently admitting the repaired source as old formal evidence.",
+      "formal_training_started": false
+    }
+  },
+  "formal_readiness_snapshot": {
+    "path": "campaigns/core-v1/learning/formal-training-admission-readiness-luna-max-20260920.json",
+    "sha256": "a40345cdd3550a2b15e19a3175ab58835db64be0453a39933b924625ebf86495",
+    "status": "blocked",
+    "formal_admission": false,
+    "formal_job_count": 0,
+    "required_formal_job_count": 9,
+    "preserved": true
+  }
+}

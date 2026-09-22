@@ -1,0 +1,49 @@
+{
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_package.py",
+    "--manifest",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "--data-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "--destination",
+    "{attempt_dir}/bundle",
+    "--checkpoint-manifest",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/learning/pilot-checkpoint-snapshots/receipt.json",
+    "--hardlink",
+    "--verify-reader",
+    "--source-host",
+    "ada"
+  ],
+  "category": "product_reproduction",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "depends_on": [],
+  "full_core_release": false,
+  "host": "h200",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/learning/pilot-checkpoint-snapshots/receipt.json",
+      "sha256": "f29050348bec210ec846ee29334fd1304ad7c6e757459376d5d3cb42b419abfa"
+    }
+  ],
+  "job_id": "h200-f3-model-bundle-reproduction-v3",
+  "logical_id": "f3-model-bundle-reproduction-v3",
+  "required_outputs": [
+    "bundle/bundle.json",
+    "bundle/checkpoints.json",
+    "bundle/reader-reproduction.json"
+  ],
+  "resources": {
+    "cpu_cores": 2,
+    "gpu_peak_mib": 0,
+    "io_weight": 0.5,
+    "ram_mib": 8192
+  },
+  "source_lab": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "timeout_seconds": 3600,
+  "validation_scope": "all32 F3 reader reproduction and inclusion of3 hash-verified checkpoint artifacts; actual relocated-model rollout is a subsequent gate"
+}

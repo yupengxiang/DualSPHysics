@@ -1,0 +1,62 @@
+{
+  "argv": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_learning.py",
+    "train",
+    "--manifest",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "--data-root",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "--model",
+    "graph_raw",
+    "--seed",
+    "17",
+    "--updates",
+    "1000",
+    "--normalization-transitions",
+    "256",
+    "--centers",
+    "256",
+    "--device",
+    "cuda",
+    "--checkpoint",
+    "{attempt_dir}/checkpoint.pt",
+    "--checkpoint-every",
+    "250",
+    "--log-every",
+    "100",
+    "--validation-every",
+    "1000",
+    "--run-id",
+    "h200-f3-fullfield-integration-pilot-graph_raw-1000",
+    "--output",
+    "{attempt_dir}/training.json"
+  ],
+  "category": "fullfield_training_integration_pilot",
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "depends_on": [
+    "h200-f3-backward-canary-graph_raw-001"
+  ],
+  "formal_training": false,
+  "host": "h200",
+  "input_files": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+    }
+  ],
+  "job_id": "h200-f3-fullfield-integration-pilot-graph_raw-1000",
+  "logical_id": "h200-f3-fullfield-integration-pilot-graph_raw-1000",
+  "required_outputs": [
+    "training.json",
+    "checkpoint.pt"
+  ],
+  "resources": {
+    "cpu_cores": 4,
+    "gpu_peak_mib": 10240,
+    "io_weight": 0.25,
+    "ram_mib": 8192
+  },
+  "scope_note": "F3-only integration pilot; does not count toward nine 32000-update multi-family runs",
+  "timeout_seconds": 14400
+}

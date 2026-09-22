@@ -1,0 +1,82 @@
+{
+  "schema": "core.package_portability_repair_receipt.v1",
+  "record_id": "core-package-relative-root-repair-20260921",
+  "created_at_utc": "2026-09-21T00:00:00Z",
+  "status": "diagnostic_repair_passed",
+  "scope": "package_builder_relative_manifest_resolution",
+  "change_kind": "low_cost_portability_contract_repair",
+  "audit": {
+    "entrypoint_chain": [
+      "verify",
+      "inspect",
+      "train",
+      "rollout",
+      "evaluate",
+      "reproduce"
+    ],
+    "selected_gap": "build_bundle interpreted a relative manifest path from the caller cwd while inspect_reader_manifests/open_dataset interpreted it relative to explicit data_root.",
+    "impact": "A worker launched outside the repository could fail at packaging before the portable verify/reproduce path, despite the same manifest being valid under data_root.",
+    "formal_training_relevance": "The fix only normalizes input path resolution; it does not infer qualification or alter model/evaluator scoring."
+  },
+  "repair": {
+    "behavior": "build_bundle now resolves a relative manifest as data_root/<manifest> before opening the dataset.",
+    "cross_machine_invariant": "The package builder and inspect/open_dataset share the same explicit data_root-relative manifest interpretation.",
+    "trajectory_files_opened_by_preflight": false,
+    "future_state_inputs": false
+  },
+  "formal_admission": false,
+  "formal_training": false,
+  "formal_job_count": 0,
+  "required_formal_job_count": 9,
+  "diagnostic_runs_counted_as_formal": false,
+  "qualification_claim": "none",
+  "requested_compute_configuration": {
+    "label": "Luna Max",
+    "launch_requested": false,
+    "interpretation": "CPU packaging and relocation tests only; no optimizer, GPU, or solver was started."
+  },
+  "execution_constraints": {
+    "formal_updates_started": 0,
+    "optimizer_started": false,
+    "gpu_started": false,
+    "solver_started": false,
+    "central_registry_mutation": 0,
+    "central_ledger_mutation": 0,
+    "old_evidence_modified": false
+  },
+  "source_bindings": [
+    {
+      "path": "scripts/core_package.py",
+      "sha256": "2f033cd0bd4ee34baae8a088f2b9c9c27572a603467d2c61506d1a0b0d442218"
+    },
+    {
+      "path": "tests/test_core_package.py",
+      "sha256": "7e4f55df534e1dd1ae7ddec62435fa9886897aa7baab036d030e4c0023e6d2e6"
+    }
+  ],
+  "validation": {
+    "targeted_command": ".venv/bin/python -m pytest -q tests/test_core_package.py::test_bundle_builder_resolves_relative_manifest_against_data_root",
+    "targeted_result": "1 passed in 1.44s",
+    "package_suite_command": ".venv/bin/python -m pytest -q tests/test_core_package.py",
+    "package_suite_result": "13 passed in 39.18s",
+    "evaluator_contract_command": ".venv/bin/python -m pytest -q tests/test_core_evaluation.py",
+    "evaluator_contract_result": "5 passed in 0.59s",
+    "rollout_denominator_regression_command": ".venv/bin/python -m pytest -q tests/test_core_learning.py::test_rollout_failure_keeps_expected_frame_denominator tests/test_core_learning.py::test_rollout_failure_marks_unexecuted_public_state_invalid",
+    "rollout_denominator_regression_result": "2 passed in 7.36s",
+    "regression_test": "test_bundle_builder_resolves_relative_manifest_against_data_root",
+    "assertions": [
+      "caller cwd differs from data_root",
+      "bundle verifies after build",
+      "relocated dataset verifies against relocated data_root"
+    ]
+  },
+  "formal_readiness_snapshot": {
+    "path": "campaigns/core-v1/learning/formal-training-admission-readiness-luna-max-20260920.json",
+    "sha256": "a40345cdd3550a2b15e19a3175ab58835db64be0453a39933b924625ebf86495",
+    "status": "blocked",
+    "formal_admission": false,
+    "formal_job_count": 0,
+    "required_formal_job_count": 9,
+    "preserved": true
+  }
+}

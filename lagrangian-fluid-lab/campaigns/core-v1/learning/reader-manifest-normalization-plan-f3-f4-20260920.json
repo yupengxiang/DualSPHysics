@@ -1,0 +1,204 @@
+{
+  "blockers": [
+    {
+      "code": "formal_validation_case_gate",
+      "message": "formal validation requires at least 12 cases; observed 8",
+      "required_input": "at least twelve validation cases",
+      "scope": "formal"
+    },
+    {
+      "code": "formal_validation_family_gate",
+      "message": "formal validation requires at least 3 families with validation cases; observed 2",
+      "required_input": "a third independently qualified family/T1 validation block before formal planning",
+      "scope": "formal"
+    },
+    {
+      "code": "source_not_formal",
+      "message": "source manifest does not declare formal_release=true",
+      "required_input": "a separately qualified formal reader manifest",
+      "scope": "formal",
+      "source": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json"
+    },
+    {
+      "code": "inline_inputs_require_compact_assets",
+      "message": "v1 inline known_inputs must be materialized as hash-bound geometry/control assets",
+      "required_input": "content-addressed geometry/control assets plus post-materialization known_inputs_sha256 equality",
+      "scope": "normalization",
+      "source": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v1.json"
+    },
+    {
+      "code": "mixed_source_schema",
+      "message": "v1 inline and v2 compact reader manifests cannot be published as one common-schema manifest until v1 inputs are normalized",
+      "required_input": "normalize every v1 source to core.dataset.v2",
+      "scope": "normalization"
+    }
+  ],
+  "family_case_counts": {
+    "F3": 32,
+    "F4": 32
+  },
+  "formal_eligible": false,
+  "formal_gate": {
+    "minimum_validation_cases": 12,
+    "minimum_validation_cases_per_family": 4,
+    "minimum_validation_families": 3,
+    "observed_validation_case_counts": {
+      "F3": 4,
+      "F4": 4
+    },
+    "observed_validation_cases": 8,
+    "observed_validation_families": 2,
+    "third_family_required": true,
+    "validation_split": "validation"
+  },
+  "formal_preflight_passed": false,
+  "formal_ready": false,
+  "future_state_inputs": false,
+  "hold_reasons": [
+    "formal validation requires at least 12 cases; observed 8",
+    "formal validation requires at least 3 families with validation cases; observed 2",
+    "source manifest does not declare formal_release=true",
+    "v1 inline and v2 compact reader manifests cannot be published as one common-schema manifest until v1 inputs are normalized",
+    "v1 inline known_inputs must be materialized as hash-bound geometry/control assets"
+  ],
+  "manifest_count": 2,
+  "manifest_written": false,
+  "normalization_contract": {
+    "case_field_mapping": {
+      "known_inputs.contract_version": "known_inputs_ref.contract_version",
+      "known_inputs.control": "known_inputs_ref.control",
+      "known_inputs.coordinate_frame": "known_inputs_ref.coordinate_frame",
+      "known_inputs.geometry": "known_inputs_ref.geometry",
+      "known_inputs.numerics": "known_inputs_ref.numerics",
+      "known_inputs.physics": "known_inputs_ref.physics"
+    },
+    "control_asset_payload": [
+      "samples",
+      "centre",
+      "semantics"
+    ],
+    "geometry_asset_payload": [
+      "triangles",
+      "component_id",
+      "body_id",
+      "wall_velocity",
+      "coordinate_frame",
+      "version"
+    ],
+    "post_materialization_checks": [
+      "all input asset paths are relative to the explicit data root",
+      "all input asset hashes match their bytes",
+      "known_inputs_from_record contract hash equals known_inputs_sha256 for every case",
+      "native trajectory bindings remain byte/hash identical"
+    ],
+    "preserve_case_fields": [
+      "case_id",
+      "physical_case_id",
+      "lineage_group_id",
+      "family",
+      "split",
+      "evaluation_role",
+      "scope_id",
+      "hdf5",
+      "bytes",
+      "sha256",
+      "known_inputs_sha256",
+      "qualification_case",
+      "provenance",
+      "semantics"
+    ],
+    "target_schema": "core.dataset.v2"
+  },
+  "normalization_ready": false,
+  "qualification_claimed": false,
+  "read_only": true,
+  "registry_written": false,
+  "schema": "core.reader_manifest_normalization_plan.v1",
+  "source_schema_versions": [
+    "core.dataset.v1",
+    "core.dataset.v2"
+  ],
+  "sources": [
+    {
+      "case_count": 32,
+      "dataset_id": "F3_registered32_core_native_v2",
+      "family_counts": {
+        "F3": 32
+      },
+      "formal_release": false,
+      "normalization_action": "retain_compact_input_references",
+      "normalization_status": "already_target_schema",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+      "read_only": true,
+      "required_inputs": [
+        "verify every known_inputs_ref geometry/control path is relative",
+        "verify every known_inputs_ref geometry/control SHA-256 against its asset",
+        "preserve each known_inputs_sha256 and all native trajectory bindings"
+      ],
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "source_schema": "core.dataset.v2",
+      "split_counts": {
+        "F3": {
+          "test": 12,
+          "train": 16,
+          "validation": 4
+        }
+      },
+      "target_schema": "core.dataset.v2",
+      "trajectory_files_opened": false
+    },
+    {
+      "case_count": 32,
+      "dataset_id": "F4_tallwall120_production_training_v1",
+      "family_counts": {
+        "F4": 32
+      },
+      "formal_release": true,
+      "normalization_action": "materialize_inline_inputs_as_compact_assets",
+      "normalization_status": "pending_asset_materialization",
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v1.json",
+      "read_only": true,
+      "required_inputs": [
+        "materialize one content-addressed geometry asset per distinct inline geometry",
+        "materialize one content-addressed control asset per distinct inline control",
+        "record relative path and SHA-256 for each geometry/control asset",
+        "copy physics, numerics, coordinate_frame, and contract_version metadata",
+        "recompute contract hash and require equality with known_inputs_sha256",
+        "preserve hdf5 path, byte count, trajectory SHA-256, and case identity fields"
+      ],
+      "sha256": "49143d915371ad660807f2e63f9550636bfd0ca3cbd4a039cee94da96bc7f08f",
+      "source_schema": "core.dataset.v1",
+      "split_counts": {
+        "F4": {
+          "id_test": 6,
+          "ood_test": 6,
+          "train": 16,
+          "validation": 4
+        }
+      },
+      "target_schema": "core.dataset.v2",
+      "trajectory_files_opened": false
+    }
+  ],
+  "split_policy": {
+    "formal_split": "validation",
+    "observed_splits_by_family": {
+      "F3": {
+        "test": 12,
+        "train": 16,
+        "validation": 4
+      },
+      "F4": {
+        "id_test": 6,
+        "ood_test": 6,
+        "train": 16,
+        "validation": 4
+      }
+    },
+    "resolution": "retain native test/id_test/ood_test names, or provide an explicit role map before any combined test evaluation; this plan does not silently relabel cases",
+    "test_roles_must_remain_explicit": true
+  },
+  "target_schema": "core.dataset.v2",
+  "training_started": false,
+  "trajectory_files_opened": false
+}

@@ -1,0 +1,120 @@
+{
+  "schema": "core.profile.concurrency_evidence.v1",
+  "evidence_id": "f4-compact-interface-gpu-concurrency-20260920",
+  "created_at_utc": "2026-09-20T09:12:00Z",
+  "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04",
+  "model_kind": "graph_raw",
+  "full_field": true,
+  "device_probe": {
+    "command": "nvidia-smi --query-gpu=index,name,memory.total,memory.used,utilization.gpu --format=csv,noheader,nounits",
+    "ada_rows": [
+      [
+        "0",
+        "NVIDIA RTX 6000 Ada Generation",
+        "49140",
+        "15",
+        "0"
+      ],
+      [
+        "1",
+        "NVIDIA RTX 6000 Ada Generation",
+        "49140",
+        "15",
+        "0"
+      ],
+      [
+        "2",
+        "NVIDIA RTX 6000 Ada Generation",
+        "49140",
+        "15",
+        "0"
+      ],
+      [
+        "3",
+        "NVIDIA RTX 6000 Ada Generation",
+        "49140",
+        "15",
+        "0"
+      ],
+      [
+        "4",
+        "NVIDIA RTX 6000 Ada Generation",
+        "49140",
+        "15",
+        "0"
+      ],
+      [
+        "5",
+        "NVIDIA RTX 6000 Ada Generation",
+        "49140",
+        "15",
+        "0"
+      ],
+      [
+        "6",
+        "NVIDIA RTX 6000 Ada Generation",
+        "49140",
+        "15",
+        "0"
+      ],
+      [
+        "7",
+        "NVIDIA RTX 6000 Ada Generation",
+        "49140",
+        "15",
+        "0"
+      ]
+    ]
+  },
+  "profiles": {
+    "single": {
+      "path": "campaigns/core-v1/learning/f4-compact-interface-profile-ada0-20260920.json",
+      "sha256": "a147c2b1dd2fd74a6e6f3e115879a8f192bd3e31a137de619fc96f5a4d1c275e",
+      "mean_step_seconds": 20.933183504035696,
+      "peak_gpu_memory_bytes": 373622272,
+      "peak_rss_mib": 1132.8125
+    },
+    "concurrent_a": {
+      "path": "campaigns/core-v1/learning/f4-compact-interface-profile-ada0-concurrent-a-20260920.json",
+      "sha256": "ec46bf0871c6cce95d76c6753c05df5e9d4e153b684f013b7e8edf5355ce03c3",
+      "mean_step_seconds": 22.385616718092933,
+      "peak_gpu_memory_bytes": 373622272,
+      "peak_rss_mib": 1137.2578125
+    },
+    "concurrent_b": {
+      "path": "campaigns/core-v1/learning/f4-compact-interface-profile-ada0-concurrent-b-20260920.json",
+      "sha256": "355a691f362fc7085d1b60995af0726a5f834337caff19a4d4d6e9bdfbe2b278",
+      "mean_step_seconds": 22.498006901005283,
+      "peak_gpu_memory_bytes": 373622272,
+      "peak_rss_mib": 1163.8828125
+    },
+    "cpu": {
+      "path": "campaigns/core-v1/learning/f4-compact-interface-profile-20260920.json",
+      "sha256": "aa82e4a3e5ce9459be3e4bcd53815b0cf8b3f5618d03f115a88e8f2e85f21fd4",
+      "mean_step_seconds": 64.23010791593697,
+      "peak_gpu_memory_bytes": 0,
+      "peak_rss_mib": 1146.36328125
+    }
+  },
+  "comparison": {
+    "single_mean_step_seconds": 20.933183504035696,
+    "concurrent_mean_step_seconds": [
+      22.385616718092933,
+      22.498006901005283
+    ],
+    "per_process_slowdown_fraction": [
+      0.06938424887820926,
+      0.07475324508897097
+    ],
+    "peak_gpu_memory_gib_each": 0.3479628562927246,
+    "concurrency_observation": "two same-GPU full-field profile processes completed without OOM; each used approximately 0.348 GiB GPU memory; measured per-process step slowdown stayed below 10%",
+    "wall_union_measured": false
+  },
+  "admission_decision": {
+    "recommended_initial_same_gpu_full_field_profile_concurrency": 2,
+    "formal_training_concurrency_allowed_now": false,
+    "reason": "training profile, I/O and optimizer memory are not represented by one-step inference; run a representative training canary before raising formal concurrency"
+  },
+  "qualification_claim": "none; resource/interface profile only",
+  "scientific_status": "diagnostic_only"
+}

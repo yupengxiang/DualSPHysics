@@ -1,0 +1,392 @@
+{
+  "acceptance": [
+    "all three model kinds complete 10 forward steps and 16 backward updates with finite outputs/loss",
+    "profile reports full_field=true, particle_count=34560, radius_over_h=2.0, max_neighbors=64",
+    "training receipt binds train-only normalization, paired initialization/sampler seeds, checkpoint RNG and sampler state",
+    "raw and residual normalization dictionaries are byte-identical; residual prior remains SI dx=v*dt+0.5*a*dt^2 and dv=a*dt",
+    "no future reference state is read by predictor; no test case enters any input or score",
+    "result remains diagnostic and cannot satisfy the formal planner or checkpoint selector"
+  ],
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/python3.10",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_learning.py",
+        "profile",
+        "--manifest",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+        "--data-root",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+        "--case-id",
+        "F3_DEV_06_a0p940625",
+        "--model",
+        "mlp",
+        "--seed",
+        "17",
+        "--steps",
+        "10",
+        "--hidden",
+        "64",
+        "--chunk-size",
+        "256",
+        "--device",
+        "cuda",
+        "--output",
+        "{attempt_dir}/profile.json"
+      ],
+      "case_id": "F3_DEV_06_a0p940625",
+      "kind": "forward_profile",
+      "model_kind": "mlp",
+      "required_outputs": [
+        "profile.json"
+      ],
+      "resources": {
+        "cpu_cores": 4,
+        "gpu_peak_mib": 1024,
+        "ram_mib": 8192,
+        "timeout_seconds": 1800
+      },
+      "seed": 17
+    },
+    {
+      "argv": [
+        "/usr/bin/python3.10",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_learning.py",
+        "train",
+        "--manifest",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+        "--data-root",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+        "--model",
+        "mlp",
+        "--seed",
+        "17",
+        "--updates",
+        "16",
+        "--centers",
+        "256",
+        "--hidden",
+        "64",
+        "--learning-rate",
+        "0.001",
+        "--normalization-transitions",
+        "256",
+        "--checkpoint",
+        "{attempt_dir}/checkpoint.pt",
+        "--checkpoint-every",
+        "16",
+        "--log-every",
+        "1",
+        "--validation-every",
+        "0",
+        "--no-evaluate-milestones",
+        "--device",
+        "cuda",
+        "--progress-output",
+        "{attempt_dir}/training-progress.json",
+        "--output",
+        "{attempt_dir}/training.json"
+      ],
+      "case_id": "F3_DEV_06_a0p940625",
+      "kind": "backward_canary",
+      "model_kind": "mlp",
+      "required_outputs": [
+        "training.json",
+        "training-progress.json",
+        "checkpoint.pt"
+      ],
+      "resources": {
+        "cpu_cores": 4,
+        "gpu_peak_mib": 1024,
+        "ram_mib": 8192,
+        "timeout_seconds": 1800
+      },
+      "seed": 17
+    },
+    {
+      "argv": [
+        "/usr/bin/python3.10",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_learning.py",
+        "profile",
+        "--manifest",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+        "--data-root",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+        "--case-id",
+        "F3_DEV_06_a0p940625",
+        "--model",
+        "graph_raw",
+        "--seed",
+        "17",
+        "--steps",
+        "10",
+        "--hidden",
+        "64",
+        "--chunk-size",
+        "256",
+        "--device",
+        "cuda",
+        "--output",
+        "{attempt_dir}/profile.json"
+      ],
+      "case_id": "F3_DEV_06_a0p940625",
+      "kind": "forward_profile",
+      "model_kind": "graph_raw",
+      "required_outputs": [
+        "profile.json"
+      ],
+      "resources": {
+        "cpu_cores": 4,
+        "gpu_peak_mib": 10240,
+        "ram_mib": 8192,
+        "timeout_seconds": 1800
+      },
+      "seed": 17
+    },
+    {
+      "argv": [
+        "/usr/bin/python3.10",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_learning.py",
+        "train",
+        "--manifest",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+        "--data-root",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+        "--model",
+        "graph_raw",
+        "--seed",
+        "17",
+        "--updates",
+        "16",
+        "--centers",
+        "256",
+        "--hidden",
+        "64",
+        "--learning-rate",
+        "0.001",
+        "--normalization-transitions",
+        "256",
+        "--checkpoint",
+        "{attempt_dir}/checkpoint.pt",
+        "--checkpoint-every",
+        "16",
+        "--log-every",
+        "1",
+        "--validation-every",
+        "0",
+        "--no-evaluate-milestones",
+        "--device",
+        "cuda",
+        "--progress-output",
+        "{attempt_dir}/training-progress.json",
+        "--output",
+        "{attempt_dir}/training.json"
+      ],
+      "case_id": "F3_DEV_06_a0p940625",
+      "kind": "backward_canary",
+      "model_kind": "graph_raw",
+      "required_outputs": [
+        "training.json",
+        "training-progress.json",
+        "checkpoint.pt"
+      ],
+      "resources": {
+        "cpu_cores": 4,
+        "gpu_peak_mib": 10240,
+        "ram_mib": 8192,
+        "timeout_seconds": 1800
+      },
+      "seed": 17
+    },
+    {
+      "argv": [
+        "/usr/bin/python3.10",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_learning.py",
+        "profile",
+        "--manifest",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+        "--data-root",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+        "--case-id",
+        "F3_DEV_06_a0p940625",
+        "--model",
+        "graph_residual",
+        "--seed",
+        "17",
+        "--steps",
+        "10",
+        "--hidden",
+        "64",
+        "--chunk-size",
+        "256",
+        "--device",
+        "cuda",
+        "--output",
+        "{attempt_dir}/profile.json"
+      ],
+      "case_id": "F3_DEV_06_a0p940625",
+      "kind": "forward_profile",
+      "model_kind": "graph_residual",
+      "required_outputs": [
+        "profile.json"
+      ],
+      "resources": {
+        "cpu_cores": 4,
+        "gpu_peak_mib": 10240,
+        "ram_mib": 8192,
+        "timeout_seconds": 1800
+      },
+      "seed": 17
+    },
+    {
+      "argv": [
+        "/usr/bin/python3.10",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_learning.py",
+        "train",
+        "--manifest",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+        "--data-root",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+        "--model",
+        "graph_residual",
+        "--seed",
+        "17",
+        "--updates",
+        "16",
+        "--centers",
+        "256",
+        "--hidden",
+        "64",
+        "--learning-rate",
+        "0.001",
+        "--normalization-transitions",
+        "256",
+        "--checkpoint",
+        "{attempt_dir}/checkpoint.pt",
+        "--checkpoint-every",
+        "16",
+        "--log-every",
+        "1",
+        "--validation-every",
+        "0",
+        "--no-evaluate-milestones",
+        "--device",
+        "cuda",
+        "--progress-output",
+        "{attempt_dir}/training-progress.json",
+        "--output",
+        "{attempt_dir}/training.json"
+      ],
+      "case_id": "F3_DEV_06_a0p940625",
+      "kind": "backward_canary",
+      "model_kind": "graph_residual",
+      "required_outputs": [
+        "training.json",
+        "training-progress.json",
+        "checkpoint.pt"
+      ],
+      "resources": {
+        "cpu_cores": 4,
+        "gpu_peak_mib": 10240,
+        "ram_mib": 8192,
+        "timeout_seconds": 1800
+      },
+      "seed": 17
+    }
+  ],
+  "dataset": {
+    "case_id": "F3_DEV_06_a0p940625",
+    "data_root": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "family": "F3",
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "particle_count": 34560,
+    "qualification_only": false,
+    "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "split": "train",
+    "uses_test": false
+  },
+  "formal_job_count": 0,
+  "formal_training": false,
+  "hold_reason": "current portable manifest is F3-only; this proposal must not be promoted to formal training or checkpoint selection",
+  "launch_allowed": false,
+  "measured_resource_basis": {
+    "full_field_particles": 34560,
+    "host": "h200",
+    "path": "campaigns/core-v1/learning/backward-resource-measurements.json",
+    "sha256": "fedc3e65080381dd1a6c22caa9394a1eacbb8b7a1f60f53b1c68a44cfbc7d315",
+    "source_limit": "16-update engineering canaries; not formal multi-family capacity"
+  },
+  "outputs_are_not_formal_evidence": true,
+  "pairing": {
+    "common_encoder_and_head_same_seed": true,
+    "initialization": "core.paired_initialization.common_encoder_head.v1",
+    "raw_residual_complete_topology_pair": true,
+    "sampler_seed_equals_model_seed": true,
+    "sampling_scope": "train transitions and centers only",
+    "seed_before_model_construction": true
+  },
+  "proposal_only": true,
+  "purpose": "bounded resource and protocol preflight before any formal three-family nine-run admission",
+  "schema": "core.formal_preprofile.v1",
+  "scientific_status": "diagnostic_preflight_only",
+  "source_closure": [
+    {
+      "path": "scripts/core_learning.py",
+      "sha256": "3e8734b993fb7c1ade921461f814caa7035e916dee653c33e956061d16818480"
+    },
+    {
+      "path": "scripts/core_models.py",
+      "sha256": "797bfd814c64a689ff37ce04f0a3eeb39388c301677b3e9a6e647c89b7b5fb11"
+    },
+    {
+      "path": "scripts/core_dataset.py",
+      "sha256": "00cdbba36c7816421a9d384ef258185adf6a1d3c41840f7842f1c934db76941f"
+    },
+    {
+      "path": "scripts/core_contract.py",
+      "sha256": "9dd0dd6eae979d3764250c2a620a1e5417affeed3332010ec026e8db8782f767"
+    },
+    {
+      "path": "scripts/core_evaluation.py",
+      "sha256": "83279b11fa1ae981b863ee89e88c9107f8e2fb60c0aaad56e5984f65adf0b708"
+    },
+    {
+      "path": "scripts/core_physics.py",
+      "sha256": "29ae06a1fb9cba00c6e8592047ffdb64dcbaa031e352c7c80e863d26f2e7404f"
+    }
+  ],
+  "status": "proposal_only",
+  "submitted": false,
+  "training_protocol": {
+    "centers_per_update": 256,
+    "evaluate_milestones": false,
+    "formal_checkpoint_milestones": [
+      8000,
+      16000,
+      24000,
+      32000
+    ],
+    "formal_updates": 32000,
+    "graph_halo": "exact full-field two-hop center halo; center-only loss",
+    "hidden": 64,
+    "history_states": 1,
+    "learning_rate": 0.001,
+    "max_neighbors": 64,
+    "models": [
+      "mlp",
+      "graph_raw",
+      "graph_residual"
+    ],
+    "normalization_split": "train",
+    "normalization_transitions": 256,
+    "optimizer": "Adam",
+    "radius_over_h": 2.0,
+    "seeds": [
+      17
+    ],
+    "target_normalization": "raw_dual_increment_train_shared",
+    "test_included": false,
+    "updates": 16
+  },
+  "writes_ledger": false
+}
