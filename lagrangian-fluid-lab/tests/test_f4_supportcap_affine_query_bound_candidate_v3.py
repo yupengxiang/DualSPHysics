@@ -1,6 +1,10 @@
 """Synthetic regression tests for the F4 v3 proposal-only candidate."""
 from __future__ import annotations
 
+import hashlib
+import json
+from pathlib import Path
+
 import numpy as np
 
 from scripts.f4_supportcap_affine_query_bound_candidate_v3 import (
@@ -79,3 +83,16 @@ def test_static_review_is_fail_closed_and_has_no_execution_authority() -> None:
     assert controls["queue_mutation"] == 0
     assert controls["old_ess32_rerun"] is False
     assert controls["old_affine_rerun"] is False
+
+
+def test_root_review_receipt_closes_candidate_card_hash() -> None:
+    lab_root = Path(__file__).resolve().parents[1]
+    receipt_path = lab_root / (
+        "campaigns/core-v1/material/candidates/"
+        "f4-supportcap-affine-query-bound-v3/root-review-receipt-v1.json"
+    )
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    reference = receipt["candidate_card"]
+    card_path = lab_root / reference["path"]
+    actual = hashlib.sha256(card_path.read_bytes()).hexdigest()
+    assert actual == reference["sha256"]
