@@ -1,0 +1,122 @@
+{
+  "checkpoint": {
+    "binding_semantics": {
+      "model_state": "model parameters at every resumable checkpoint",
+      "normalization": "train-only feature/target normalization statistics",
+      "optimizer_state": "Adam optimizer state",
+      "rng_state": "Python/NumPy/Torch RNG state",
+      "sampler_state": "transition sampler state and draw progress"
+    },
+    "milestone_updates": [
+      8000,
+      16000,
+      24000,
+      32000
+    ],
+    "required_bindings": [
+      "model_state",
+      "optimizer_state",
+      "rng_state",
+      "sampler_state",
+      "normalization"
+    ]
+  },
+  "contract": {
+    "bytes": 4327,
+    "path": "campaigns/core-v1/learning/training-contract-v1/contract.json",
+    "sha256": "a75a74013bdc82886f41cd5f7098cb78253fee3adc69bcfd65bca6193394d0be"
+  },
+  "credit": 0,
+  "execution_constraints": {
+    "gpu_started": false,
+    "ledger_written": false,
+    "optimizer_started": false,
+    "read_only": true,
+    "registry_written": false,
+    "solver_started": false,
+    "training_started": false
+  },
+  "formal_job_count": 0,
+  "formal_training_allowed": false,
+  "matrix": {
+    "expected_run_count": 9,
+    "expected_run_ids": [
+      "mlp-seed17",
+      "mlp-seed29",
+      "mlp-seed43",
+      "graph_raw-seed17",
+      "graph_raw-seed29",
+      "graph_raw-seed43",
+      "graph_residual-seed17",
+      "graph_residual-seed29",
+      "graph_residual-seed43"
+    ],
+    "models": [
+      "mlp",
+      "graph_raw",
+      "graph_residual"
+    ],
+    "seeds": [
+      17,
+      29,
+      43
+    ]
+  },
+  "namespace": "core-v1/learning/training-contract-v1",
+  "planning_only": true,
+  "qualification_claim": "none",
+  "schema": "core.training_contract.planning_receipt.v1",
+  "source_closure": {
+    "observation_mismatches": [],
+    "source_bindings": [
+      {
+        "bytes": 30379,
+        "path": "../PLAN.md",
+        "sha256": "17491b1f5ea5b7c8464c7afb6f2dc21bdff7cf396cb47aebd625ca22d38c3263"
+      },
+      {
+        "bytes": 23426,
+        "path": "scripts/core_training_contract.py",
+        "sha256": "935002cc30afd585edbd751e91cb058589ac9a976414c2f68ad7b65654c8370a"
+      },
+      {
+        "bytes": 138512,
+        "path": "scripts/core_learning.py",
+        "sha256": "78f3e7675feff5d5e265c53ac75b9fba44bb6c2dd471e33895af67ceaaa2014a"
+      },
+      {
+        "bytes": 54941,
+        "path": "scripts/core_formal_planner.py",
+        "sha256": "b5363a4724d6ce27bea58080387e29449d16fc83406f8e3ef91133e1dc9dc15e"
+      },
+      {
+        "bytes": 42126,
+        "path": "scripts/core_models.py",
+        "sha256": "fac36b125991dc251544cfcc19d935c40521a409622c79a31c3e33dcce6fc637"
+      },
+      {
+        "bytes": 34073,
+        "path": "scripts/core_contract.py",
+        "sha256": "9c1da8dd772e232ab5eb249be7285e689c0d958c8073fc63828a2d4625b0e410"
+      }
+    ]
+  },
+  "status": "planning_only",
+  "training": {
+    "hidden": 64,
+    "learning_rate": 0.001,
+    "loss_centers": 256,
+    "max_neighbors": 64,
+    "milestones": [
+      8000,
+      16000,
+      24000,
+      32000
+    ],
+    "normalization_source_split": "train",
+    "optimizer": "Adam",
+    "radius_over_h": 2.0,
+    "target_normalization": "raw_dual_increment_train_shared",
+    "updates": 32000
+  }
+}
