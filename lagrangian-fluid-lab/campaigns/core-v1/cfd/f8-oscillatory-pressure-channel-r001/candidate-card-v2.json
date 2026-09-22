@@ -1,0 +1,169 @@
+{
+  "admission_granted": false,
+  "blockers": [
+    "the official sources separately demonstrate viscous channel, accinput, and periodic syntax; their exact combined Definition has not been executed",
+    "weakly-compressible SPH phase and density error gates are not yet calibrated",
+    "the attached plan's free-surface emphasis requires explicit root interpretation",
+    "no fresh Definition, BI4, native preflight, solver, decoder, or qualification receipt exists"
+  ],
+  "current_static_evidence": [
+    {
+      "bytes": 12762,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/static-review-bundle-v2/bundle.json",
+      "role": "current F8 static review bundle v2",
+      "sha256": "bd227b4e88857eb1c5b4119e335663a0d3e7ef7b2579593c67cbb85343d5d467"
+    },
+    {
+      "bytes": 4846,
+      "path": "scripts/f8_candidate_card_v2.py",
+      "role": "v2 card builder",
+      "sha256": "4f44302238518109b420753a403c0de47bddc7c66d9fdd0188255717342ee72c"
+    }
+  ],
+  "evidence": [
+    {
+      "bytes": 30379,
+      "path": "/home/jade/.codex/attachments/ece07836-13f3-4e3a-9dd4-55120224dcee/PLAN.md",
+      "role": "attached Core plan; target and boundary interpretation",
+      "sha256": "17491b1f5ea5b7c8464c7afb6f2dc21bdff7cf396cb47aebd625ca22d38c3263"
+    },
+    {
+      "bytes": 6505,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/15_Poiseuille/CasePoiseuille_Def.xml",
+      "role": "official viscous channel geometry and laminar parameter precedent",
+      "sha256": "ab7e06d9a5a2c5bad899f36ef393bc1d3867cd88fbf7aba5a734ee1e4ffaa2fe"
+    },
+    {
+      "bytes": 7824,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/04_ExternalForces/CaseForces_Def.xml",
+      "role": "official accinput and time-file precedent",
+      "sha256": "1db880334bcfa0ca8514644005edbdc201f6a003e847e43901a68e9b5fa5487f"
+    },
+    {
+      "bytes": 7654,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/02_Periodicity/CasePeriodicity_Def.xml",
+      "role": "official periodic-boundary example",
+      "sha256": "af3f081d047f0abc7e3239c96f473318ce5c2ab5070228edb55d8dd22ce7fcae"
+    },
+    {
+      "bytes": 2798,
+      "path": "vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML_AccInput.xml",
+      "role": "official acceleration-input syntax",
+      "sha256": "ffbf4d8a70e249f78adb6790b58dd809a6cef02d8acee7e786f2b900367fad74"
+    },
+    {
+      "bytes": 8439,
+      "path": "vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML__Parameters.xml",
+      "role": "official periodic and mDBC parameter syntax",
+      "sha256": "bee50a855249befd30ad2029b22043b029a1f0e5ff376af423b8b37c8d30bc6f"
+    }
+  ],
+  "execution_controls": {
+    "control_written": false,
+    "definition_written": false,
+    "denominator_mutation": 0,
+    "gencase_invoked": false,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "native_decode_invoked": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_invoked": false,
+    "training_started": false
+  },
+  "family": "F8",
+  "identity": {
+    "anchor_case": "F8_OPC_q0p500_dp0p0075_anchor_r001",
+    "parameter": "q in [0,1], alpha = 2 + 6*q",
+    "planned_control": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/input/acceleration/F8_OPC_q0p500_acceleration.csv",
+    "planned_definition": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001_Def.xml",
+    "planned_output_root": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/cases",
+    "production_case_count": 32,
+    "production_case_rule": "q_i=(i+0.5)/32, i=0..31",
+    "split": {
+      "id_test": 6,
+      "ood_test": 6,
+      "train": 16,
+      "validation": 4
+    }
+  },
+  "independence_review": {
+    "boundary_interpretation": "Static evidence supports a distinct mechanism family; root must decide whether a fully filled non-free-surface family is admissible for Core.",
+    "distinct_from": {
+      "F1_F2_F5": "no free-surface release, catchment, wave/runup, opening, transfer, or impact event",
+      "F3_F4": "no sloshing free surface, falling liquid mass, droplet, or collision event",
+      "F6": "no floating body, Chrono state, or fluid-rigid-body feedback",
+      "F7": "no prescribed pump, moving boundary, rotation axis, torque, or angular-momentum output"
+    }
+  },
+  "mechanism": {
+    "analytical_reference": "Womersley harmonic and zero-initial-velocity startup response of du/dt = ax(t) + nu*d2u/dz2",
+    "description": "Fully filled single-phase viscous fluid in a channel periodic in x/y, with fixed no-slip walls at z=+/-H and uniform body acceleration ax(t)=A sin(omega t).",
+    "falsifiable_observables": [
+      "wall-normal velocity profile amplitude and phase",
+      "centerline phase lag relative to acceleration",
+      "near-zero transverse velocity",
+      "near-zero cycle-mean flux for zero-mean forcing",
+      "startup decay on the H^2/nu viscous diffusion scale",
+      "pre-registered spatial and time-step convergence"
+    ],
+    "name": "body-force-driven oscillatory viscous channel"
+  },
+  "qualification_credit": 0,
+  "revision": "r002",
+  "root_decision": {
+    "no_implicit_selection": true,
+    "option_if_free_surface_gate": {
+      "admissible_candidate": false,
+      "next_action": "retain as post-Core extension candidate",
+      "qualification_credit": 0
+    },
+    "option_if_mechanism_family_gate": {
+      "admissible_candidate": true,
+      "next_action_after_root_yes": "new root review for Definition/control static hash closure",
+      "qualification_credit": 0
+    },
+    "question": "Does PLAN Core accept a fully filled non-free-surface mechanism as the third family?",
+    "status": "pending_formal_root_scope_ruling"
+  },
+  "schema": "core.cfd.f8_oscillatory_body_force_channel_candidate.v2",
+  "scientific_status": "not_executed_not_admitted_zero_credit",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001",
+  "static_checks": {
+    "accinput_spec_supports_globalgravity_zero": true,
+    "external_forces_has_accinput_and_time_file": true,
+    "official_xml_parses": true,
+    "periodic_example_present": true,
+    "periodic_parameter_names_documented": true,
+    "plan_has_free_surface_positioning": true,
+    "plan_has_three_family_core_gate": true,
+    "poiseuille_has_fluid_and_fixed_wall_geometry": true,
+    "poiseuille_laminar_viscosity_precedent": true
+  },
+  "static_contract": {
+    "hard_failure_policy": "any hard-gate failure closes the scope with fixed denominator; no threshold relaxation or same-input retry",
+    "must_have": [
+      "one mkfluid and gravity zero",
+      "one fluid accinput with globalgravity zero and finite monotonic control table",
+      "x/y periodicity and fixed no-slip z walls",
+      "no floating, Chrono, moving body, pump, torque, or material body",
+      "fixed geometry and control semantics across coarse/production/fine dp",
+      "particle identity, mass, finite-value, overlap, wall-clearance, and lifecycle checks",
+      "parser for time, center velocity, full wall-normal profile, and mean flux",
+      "body-force-driven naming and explicit constant-density pressure-equivalence statement"
+    ],
+    "qualification_matrix": "13 physical/spatial cells plus 2 control cells; root review must freeze gates before any execution",
+    "reference_oracle": {
+      "observation_parser_contract": "observation-parser-v1/contract.json",
+      "startup_contract": "reference-oracle-v2/contract.json",
+      "startup_is_continuum_reference_not_weakly_compressible_evidence": true,
+      "steady_contract": "reference-oracle-v1/contract.json"
+    }
+  },
+  "status": "static_revision_pending_root_scope_ruling",
+  "supersedes_for_current_static_review": {
+    "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/candidate-card-v1.json",
+    "role": "immutable historical v1 candidate card",
+    "sha256": "7663c9244decd142321835182f2d61043785023aea5f745870b06870c87322d4"
+  }
+}
