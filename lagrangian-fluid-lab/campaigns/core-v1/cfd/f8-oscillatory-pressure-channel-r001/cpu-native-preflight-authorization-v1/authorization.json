@@ -1,0 +1,191 @@
+{
+  "authorization_basis": "user-approved F8 mechanism scope plus passed immutable post-write static review; this receipt adds CPU/native preflight only",
+  "bindings": [
+    {
+      "bytes": 5958,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/postwrite-static-review-v2/review.json",
+      "role": "passed immutable F8 post-write static review",
+      "sha256": "11253d8be4ab895c10a2c86ad304c64550a99f961a0378110c035c1f0e756862"
+    },
+    {
+      "bytes": 3150,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/input-materialization-v1/receipt.json",
+      "role": "immutable one-time F8 input materialization receipt",
+      "sha256": "420abb7a82dbb6d4533d70bdbbcd4189bb525b6f69af816d3db64d06bfb48912"
+    },
+    {
+      "bytes": 4344,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001_Def.xml",
+      "role": "only permitted F8 Definition input",
+      "sha256": "933ecb0e817b5834f0a16efc0fd369fe5850c414e794a56ed5df656fefc90358"
+    },
+    {
+      "bytes": 35956,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/input/acceleration/F8_OPC_q0p500_acceleration.csv",
+      "role": "only permitted F8 acceleration control input",
+      "sha256": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1"
+    },
+    {
+      "bytes": 4151,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/parameter-contract-v1.json",
+      "role": "frozen F8 parameter contract",
+      "sha256": "f15d9db7e41fd626311f0040b3a3fd4c4498cf6152f23e446d0c23cc495865d6"
+    },
+    {
+      "bytes": 1965,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/reference-oracle-v1/contract.json",
+      "role": "steady Womersley reference contract",
+      "sha256": "4584db7da9704dc602d890f9f3191e03c4ba27debf7a69760a9d213dc4c048e4"
+    },
+    {
+      "bytes": 1389,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/reference-oracle-v2/contract.json",
+      "role": "startup Womersley reference contract",
+      "sha256": "888d24b9e14e9226c41d32e5fc4fae85b2b369ec50ea1618f04e9736e975c4e8"
+    },
+    {
+      "bytes": 1173,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/observation-parser-v1/contract.json",
+      "role": "native-observation parser contract",
+      "sha256": "b39ce6a804bad6927cd2c235caf16036567e5bf295a489c4c38a042a85d97f99"
+    },
+    {
+      "bytes": 5809384,
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "role": "official CPU GenCase binary",
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226"
+    },
+    {
+      "bytes": 324368,
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "role": "pinned native BI4 decode binary",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    },
+    {
+      "bytes": 10689,
+      "path": "scripts/f8_cpu_native_preflight_authorization_v1.py",
+      "role": "static authorization builder",
+      "sha256": "7b21142846dd1ee79a13a82dc41a95846e778580c61cd20756f466ccbd132aff"
+    },
+    {
+      "bytes": 5808,
+      "path": "scripts/f8_cpu_native_preflight_runner_v1.py",
+      "role": "argv-only fail-closed runner",
+      "sha256": "cf2fb290542a5b52ee69e2e8efdccae9ce6de5a90afca3df4975d7cfcd24ba0e"
+    }
+  ],
+  "cpu_native_entry": {
+    "gencase_binary": {
+      "bytes": 5809384,
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "role": "official CPU GenCase binary",
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226"
+    },
+    "gencase_invocation_limit": 1,
+    "gencase_version": "DualSPHysics official vendor tree v5.4; ELF BuildID 605b69da2232fb968dab0c6e57ebff3cb482ed72",
+    "native_decode_invocation_limit": 1,
+    "native_decoder": {
+      "bytes": 324368,
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "role": "pinned native BI4 decode binary",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    },
+    "native_decoder_version": "bi4_dump ELF BuildID 849e881d39081e58f81acfef8faa3951612fe226"
+  },
+  "execution_policy": {
+    "exactly_one_cpu_gencase": true,
+    "exactly_one_native_decode": true,
+    "fail_closed_on_any_failure": true,
+    "no_solver_gpu_queue_registry_ledger_training_or_qualification": true,
+    "preflight_output_reuse_forbidden": true,
+    "same_input_retry_forbidden": true,
+    "zero_credit_on_failure": true
+  },
+  "hard_gates": {
+    "accinput_count_exactly": 1,
+    "accinput_fluid_marker": 0,
+    "control_table": {
+      "finite": true,
+      "no_extrapolation": true,
+      "strictly_monotonic_time": true,
+      "t_end_s": 11.196636217394023
+    },
+    "fixed_wall_axes": [
+      "z"
+    ],
+    "global_gravity_exact_m_s2": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "lifecycle_checks": {
+      "failure_preserves_fixed_zero_credit": true,
+      "gencase_invocation_limit": 1,
+      "native_decode_invocation_limit": 1,
+      "old_output_reuse": false,
+      "only_registered_output_namespace": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/cpu-native-preflight-v1",
+      "only_registered_xml_and_csv_inputs": true,
+      "retry_after_any_failure": false
+    },
+    "native_initial_particle_checks": {
+      "boundary_normal_count_equals_boundary_particle_count": true,
+      "boundary_normals_finite": true,
+      "boundary_normals_nonzero": true,
+      "boundary_particle_count_min": 1,
+      "excluded_fluid_particle_count_exact": 0,
+      "finite_id_position_velocity_density_arrays": true,
+      "fluid_mass_kg_expected": 2.5919999999999996,
+      "fluid_particle_count_exact": 6144,
+      "fluid_particle_mass_kg": 0.00042187499999999994,
+      "no_particle_overlap": true,
+      "unique_particle_ids": true
+    },
+    "one_boundary_marker_exactly": 1,
+    "one_fluid_marker_exactly": 1,
+    "periodic_axes": [
+      "x",
+      "y"
+    ],
+    "xml_csv_hashes_verified_by_postwrite_review": true
+  },
+  "output_namespace": {
+    "must_not_exist_before_execution": true,
+    "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/cpu-native-preflight-v1",
+    "reuse_or_retry_allowed": false
+  },
+  "permissions": {
+    "cpu_gencase": true,
+    "denominator_mutation": 0,
+    "gpu": false,
+    "ledger": false,
+    "ledger_mutation": 0,
+    "native_decode": true,
+    "qualification": false,
+    "queue": false,
+    "queue_mutation": 0,
+    "registry": false,
+    "registry_mutation": 0,
+    "solver": false,
+    "training": false
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "schema": "core.cfd.f8.cpu_native_preflight_authorization.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001",
+  "single_input": {
+    "control": {
+      "bytes": 35956,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/input/acceleration/F8_OPC_q0p500_acceleration.csv",
+      "role": "only allowed acceleration control",
+      "sha256": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1"
+    },
+    "definition": {
+      "bytes": 4344,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001_Def.xml",
+      "role": "only allowed simulation Definition",
+      "sha256": "933ecb0e817b5834f0a16efc0fd369fe5850c414e794a56ed5df656fefc90358"
+    },
+    "old_xml_bi4_hdf5_reused_as_input": false
+  },
+  "status": "authorized_for_exactly_one_cpu_native_preflight"
+}
