@@ -50,17 +50,28 @@ def test_authorization_cannot_be_overwritten() -> None:
         authorization_module.write_authorization()
 
 
-def test_runner_only_builds_argv_and_does_not_create_or_execute_output() -> None:
-    assert not runner.OUTPUT_DIR.exists()
-    plan = runner.build_execution_plan()
-    assert plan["status"] == "validated_argv_only_not_executed"
-    assert plan["execution_controls"]["cpu_gencase_invoked"] is False
-    assert plan["execution_controls"]["native_decode_invoked"] is False
-    assert plan["execution_controls"]["solver_invoked"] is False
-    assert plan["execution_controls"]["gpu_invoked"] is False
-    assert plan["execution_controls"]["qualification_credit"] == 0
-    assert plan["commands"]["cpu_gencase"][-1] == "-save:all"
-    assert not runner.OUTPUT_DIR.exists()
+def test_runner_is_argv_only_before_execution_and_refuses_any_executed_namespace() -> None:
+    # This repository may be inspected either before the one-shot execution or
+    # after its retained result is committed.  In the latter lifecycle the
+    # argv-only runner must fail closed rather than offer the same input again.
+    if runner.OUTPUT_DIR.exists():
+        receipt = json.loads((runner.OUTPUT_DIR / "receipt.json").read_text(encoding="utf-8"))
+        assert receipt["status"] == "cpu_native_preflight_failed_hard_audit"
+        assert receipt["execution_controls"]["cpu_gencase_invoked"] is True
+        assert receipt["execution_controls"]["native_decode_invoked"] is True
+        assert receipt["execution_controls"]["solver_invoked"] is False
+        assert receipt["qualification_credit"] == 0
+        with pytest.raises(RuntimeError, match="retry or reuse is forbidden"):
+            runner.build_execution_plan()
+    else:
+        plan = runner.build_execution_plan()
+        assert plan["status"] == "validated_argv_only_not_executed"
+        assert plan["execution_controls"]["cpu_gencase_invoked"] is False
+        assert plan["execution_controls"]["native_decode_invoked"] is False
+        assert plan["execution_controls"]["solver_invoked"] is False
+        assert plan["execution_controls"]["gpu_invoked"] is False
+        assert plan["execution_controls"]["qualification_credit"] == 0
+        assert plan["commands"]["cpu_gencase"][-1] == "-save:all"
 
 
 def test_runner_rejects_changed_input_binding_and_existing_namespace(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
