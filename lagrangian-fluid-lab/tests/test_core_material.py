@@ -26,6 +26,7 @@ from scripts.core_material import (
     f4_resting_pool_definition,
     f4_matrix,
     matrix,
+    macro_summary,
     seeds_f4,
     trace,
     trace_f4_resting_pool,
@@ -107,6 +108,62 @@ def test_provider_permissions_source_definition_and_cdf(tmp_path):
     np.testing.assert_array_equal(continuous_source_labels(points),[0,1,1])
     cdf=weighted_cdf(np.array([.2,.1,np.nan]),np.array([1.,1.,1.]),denominator=3.)
     assert cdf['time_s']==[.1,.2] and cdf['event_mass_fraction']==pytest.approx(2/3)
+
+
+def test_f3_macro_summary_residence_bounds_use_first_unreliable_history(tmp_path):
+    path = tmp_path / "f3-trace.h5"
+    with h5py.File(path, "w") as out:
+        out.attrs["committed"] = 2
+        out["time"] = [0.0, 1.0, 2.0]
+        out["weight"] = [0.25, 0.25, 0.25, 0.25]
+        out["source_label"] = [0, 0, 1, 1]
+        out["position"] = np.zeros((3, 4, 3))
+        out["reliable"] = [
+            [True, True, True, True],
+            [True, False, True, True],
+            [True, False, True, False],
+        ]
+        out["first_passage"] = [
+            [0.5, np.nan, 1.5, np.nan],
+            [0.5, np.nan, 1.5, np.nan],
+            [0.5, np.nan, 1.5, np.nan],
+        ]
+        out["return_time"] = [
+            [1.0, np.nan, np.nan, np.nan],
+            [1.0, np.nan, np.nan, np.nan],
+            [1.0, np.nan, np.nan, np.nan],
+        ]
+        out["returned"] = [[True, False, False, False]] * 3
+        out["residence"] = [[0.25, 0.5, 0.4, 0.8]] * 3
+        out["residence_left"] = np.zeros((3, 4))
+        out["residence_right"] = np.zeros((3, 4))
+        summary = macro_summary(out)
+
+    source_zero = summary["by_source"][0]
+    assert source_zero["residence_opposite_s"] == pytest.approx(0.375)
+    assert source_zero["residence_mean_s_bounds"] == {
+        "lower": pytest.approx(0.375), "upper": pytest.approx(1.375),
+    }
+    assert source_zero["residence_right_censored_unknown_mass_fraction"] == pytest.approx(0.5)
+    assert source_zero["first_unreliable_frame"] == 1
+    assert source_zero["first_unreliable_time_s"] == pytest.approx(1.0)
+    assert source_zero["residence_cdf_bounds"] == {
+        "value_s": [0.0, 0.25, 0.5, 2.5],
+        "lower_mass_fraction": [0.0, 0.5, 0.5, 1.0],
+        "upper_mass_fraction": [0.0, 0.5, 1.0, 1.0],
+        "zero_mass_fraction_lower": 0.0,
+        "zero_mass_fraction_upper": 0.0,
+    }
+    assert source_zero["first_passage_cdf"]["upper"] == [1.0]
+    assert source_zero["first_passage_cdf_bounds"] == {
+        "time_s": [0.0, 0.5, 2.0],
+        "lower_mass_fraction": [0.0, 0.5, 0.5],
+        "upper_mass_fraction": [0.5, 1.0, 1.0],
+        "observed_event_mass_fraction": 0.5,
+        "upper_event_mass_fraction": 1.0,
+        "unresolved_unknown_mass_fraction": 0.5,
+        "reliable_no_event_right_censored_mass_fraction": 0.0,
+    }
 
 
 def test_h2_k48_is_explicit_backend_variant(tmp_path):

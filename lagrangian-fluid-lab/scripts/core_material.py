@@ -1439,6 +1439,108 @@ def _weighted_fraction(weight, select, denominator):
     return float(weight[select].sum() / denominator) if denominator else 0.0
 
 
+def _f3_unknown_window(out, committed, count):
+    """Return final unknown seeds and conservative onset times from F3 history.
+
+    F3's ``reliable`` state is monotone: a seed is only advanced while it is
+    reliable, so a failed support/reconstruction check cannot later recover.
+    A saved frame only brackets the failure, however.  The earliest time at
+    which an unobserved event or residence could have occurred is therefore
+    the preceding saved time, not the first saved unreliable timestamp.
+    """
+    history = np.asarray(out["reliable"][:committed + 1], dtype=bool)
+    if history.shape != (committed + 1, count):
+        raise ValueError("F3 reliable history axes do not match trace seed axis")
+    times = np.asarray(out["time"][:committed + 1], dtype=np.float64)
+    if times.shape != (committed + 1,) or not np.isfinite(times).all():
+        raise ValueError("F3 trace time history is incomplete or non-finite")
+    first_unreliable = np.full(count, -1, dtype=np.int64)
+    failed = ~history
+    for seed in range(count):
+        candidates = np.flatnonzero(failed[:, seed])
+        if len(candidates):
+            first_unreliable[seed] = int(candidates[0])
+    possible_from = np.full(count, np.nan, dtype=np.float64)
+    for seed, frame in enumerate(first_unreliable):
+        if frame >= 0:
+            possible_from[seed] = times[max(0, frame - 1)]
+    return ~history[-1], first_unreliable, possible_from
+
+
+def _f3_event_cdf_bounds(event_time, weight, select, final_unknown,
+                         unknown_possible_from, observation_end, denominator):
+    """Bound an event CDF using the saved reliability failure bracket."""
+    event_time = np.asarray(event_time, dtype=np.float64)
+    select = np.asarray(select, dtype=bool)
+    finite = select & np.isfinite(event_time)
+    unresolved = select & final_unknown & ~finite & np.isfinite(unknown_possible_from)
+    values = np.asarray([0.0, observation_end, *event_time[finite],
+                         *unknown_possible_from[unresolved]], dtype=np.float64)
+    values = np.unique(values[np.isfinite(values)])
+    values.sort()
+    if denominator <= 0.0:
+        return {
+            "time_s": [], "lower_mass_fraction": [], "upper_mass_fraction": [],
+            "observed_event_mass_fraction": 0.0, "upper_event_mass_fraction": 0.0,
+            "unresolved_unknown_mass_fraction": 0.0,
+            "reliable_no_event_right_censored_mass_fraction": 0.0,
+        }
+    lower = np.asarray([
+        float(np.sum(weight[finite & (event_time <= value)]) / denominator)
+        for value in values
+    ])
+    upper = lower + np.asarray([
+        float(np.sum(weight[unresolved & (unknown_possible_from <= value)]) / denominator)
+        for value in values
+    ])
+    observed = float(np.sum(weight[finite]) / denominator)
+    unresolved_mass = float(np.sum(weight[unresolved]) / denominator)
+    return {
+        "time_s": values.tolist(),
+        "lower_mass_fraction": lower.tolist(),
+        "upper_mass_fraction": upper.tolist(),
+        "observed_event_mass_fraction": observed,
+        "upper_event_mass_fraction": observed + unresolved_mass,
+        "unresolved_unknown_mass_fraction": unresolved_mass,
+        "reliable_no_event_right_censored_mass_fraction": float(
+            np.sum(weight[select & ~final_unknown & ~finite]) / denominator
+        ),
+    }
+
+
+def _f3_interval_cdf(lower_value, upper_value, weight, select, denominator):
+    """Bound a CDF for per-seed residence intervals, including zero values."""
+    lower_value = np.maximum(np.nan_to_num(lower_value, nan=0.0), 0.0)
+    upper_value = np.maximum(np.nan_to_num(upper_value, nan=0.0), lower_value)
+    finite = select & np.isfinite(lower_value) & np.isfinite(upper_value)
+    values = np.unique(np.concatenate(([0.0], lower_value[finite], upper_value[finite])))
+    values.sort()
+    if denominator <= 0.0:
+        return {
+            "value_s": [], "lower_mass_fraction": [], "upper_mass_fraction": [],
+            "zero_mass_fraction_lower": 0.0, "zero_mass_fraction_upper": 0.0,
+        }
+    lower_cdf = np.asarray([
+        float(np.sum(weight[finite & (upper_value <= value)]) / denominator)
+        for value in values
+    ])
+    upper_cdf = np.asarray([
+        float(np.sum(weight[finite & (lower_value <= value)]) / denominator)
+        for value in values
+    ])
+    return {
+        "value_s": values.tolist(),
+        "lower_mass_fraction": lower_cdf.tolist(),
+        "upper_mass_fraction": upper_cdf.tolist(),
+        "zero_mass_fraction_lower": float(
+            np.sum(weight[finite & (upper_value == 0.0)]) / denominator
+        ),
+        "zero_mass_fraction_upper": float(
+            np.sum(weight[finite & (lower_value == 0.0)]) / denominator
+        ),
+    }
+
+
 def macro_summary(out):
     """Summarize closure, first-passage CDF, residence, and return by source."""
     committed = int(out.attrs["committed"])
@@ -1452,6 +1554,16 @@ def macro_summary(out):
     residence = np.asarray(out["residence"][committed], dtype=np.float64)
     residence_left = np.asarray(out["residence_left"][committed], dtype=np.float64) if "residence_left" in out else np.zeros(len(first))
     residence_right = np.asarray(out["residence_right"][committed], dtype=np.float64) if "residence_right" in out else np.zeros(len(first))
+    final_unknown, first_unreliable, unknown_possible_from = _f3_unknown_window(
+        out, committed, len(first)
+    )
+    observation_end = float(out["time"][committed])
+    residence_lower = np.maximum(np.nan_to_num(residence, nan=0.0), 0.0)
+    residence_upper = residence_lower.copy()
+    can_right_censor = final_unknown & np.isfinite(unknown_possible_from)
+    residence_upper[can_right_censor] += np.maximum(
+        0.0, observation_end - unknown_possible_from[can_right_censor]
+    )
     total_mass = float(weight.sum())
     rows = []
     for source in np.unique(labels):
@@ -1471,6 +1583,20 @@ def macro_summary(out):
         event_cdf["unknown_upper_addition"] = unknown
         event_cdf["upper"] = [min(1.0, value + unknown) for value in event_cdf["lower"]]
         return_cdf = weighted_cdf(return_time, weight, mask=select & np.isfinite(return_time), denominator=source_mass)
+        first_cdf_bounds = _f3_event_cdf_bounds(
+            first, weight, select, final_unknown, unknown_possible_from,
+            observation_end, source_mass,
+        )
+        return_cdf_bounds = _f3_event_cdf_bounds(
+            return_time, weight, select, final_unknown, unknown_possible_from,
+            observation_end, source_mass,
+        )
+        residence_cdf_bounds = _f3_interval_cdf(
+            residence_lower, residence_upper, weight, select, source_mass,
+        )
+        residence_lower_mean = float(np.sum(weight[select] * residence_lower[select]) / source_mass)
+        residence_upper_mean = float(np.sum(weight[select] * residence_upper[select]) / source_mass)
+        source_failure = first_unreliable[select & (first_unreliable >= 0)]
         closure = terminal_left + terminal_right + unknown
         rows.append(
             {
@@ -1490,11 +1616,27 @@ def macro_summary(out):
                 "no_first_passage_fraction": _weighted_fraction(weight, no_event, source_mass),
                 "unknown_first_passage_fraction_max": _weighted_fraction(weight, event_unknown, source_mass),
                 "first_passage_cdf": event_cdf,
+                "first_passage_cdf_bounds": first_cdf_bounds,
                 "observed_return_fraction": _weighted_fraction(weight, select & returned, source_mass),
                 "return_cdf": return_cdf,
+                "return_cdf_bounds": return_cdf_bounds,
                 "residence_opposite_s": float(np.sum(weight[select] * residence[select]) / source_mass),
                 "residence_left_s": float(np.sum(weight[select] * residence_left[select]) / source_mass),
                 "residence_right_s": float(np.sum(weight[select] * residence_right[select]) / source_mass),
+                "residence_mean_s_bounds": {
+                    "lower": residence_lower_mean,
+                    "upper": residence_upper_mean,
+                },
+                "residence_cdf_bounds": residence_cdf_bounds,
+                "residence_zero_mass_fraction_bounds": {
+                    "lower": residence_cdf_bounds["zero_mass_fraction_lower"],
+                    "upper": residence_cdf_bounds["zero_mass_fraction_upper"],
+                },
+                "residence_right_censored_unknown_mass_fraction": _weighted_fraction(
+                    weight, select & final_unknown, source_mass
+                ),
+                "first_unreliable_frame": int(np.min(source_failure)) if len(source_failure) else None,
+                "first_unreliable_time_s": float(out["time"][int(np.min(source_failure))]) if len(source_failure) else None,
             }
         )
     definition = json.loads(out.attrs.get("source_definition", json.dumps(source_definition())))
