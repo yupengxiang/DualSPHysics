@@ -1,0 +1,130 @@
+{
+  "schema": "core.cfd.f8.r002_static_design_review_postmortem.v1",
+  "record_id": "f8-oscillatory-pressure-channel-r002-static-design-review-postmortem-v1",
+  "status": "failed_posthoc_static_design_validation",
+  "original_review": {
+    "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/static-design-review-v1/receipt.json",
+    "recorded_status": "r002_static_design_review_passed_inputs_not_authorized",
+    "disposition": "historical receipt preserved; its PASS is insufficient for static GenCase-realizability"
+  },
+  "independent_reviewer": {
+    "agent_id": "01a0cd2e-72c2-79e2-98c2-adf7dd5a4c98",
+    "display_name": "Laplace",
+    "requested_model": "gpt-5.6-terra",
+    "requested_reasoning_effort": "high",
+    "actual_model_attestation_in_response": false,
+    "verdict": "FAIL"
+  },
+  "findings": [
+    {
+      "id": "F8-R002-MISSING-HSWL",
+      "severity": "static_design_blocker",
+      "evidence": "GenCase v5.4.354.01 stdout reports that the constantsdef element is missing hswl at Definition XML row 5 and exits with code 1.",
+      "cause": "The static review builder and its test did not validate required Definition constants against the bound official syntax precedent.",
+      "impact": "The recorded PASS did not establish that the Definition was GenCase-realizable; the authorized native preflight stopped before native decode.",
+      "disposition": "Do not retry or rewrite the terminal R002 attempt or its inputs. Any future scope requires a separately authorized fresh revision and new namespace."
+    },
+    {
+      "id": "F8-R002-STALE-TEST-BINDING",
+      "severity": "evidence_integrity",
+      "recorded": {
+        "bytes": 2991,
+        "path": "tests/test_f8_r002_static_design_review_v1.py",
+        "sha256": "d63be63273b245124c92529ec93e30a089a35f302d77915e17bcc29e071f18f8"
+      },
+      "observed": {
+        "bytes": 3251,
+        "path": "tests/test_f8_r002_static_design_review_v1.py",
+        "sha256": "6faf6f216c0827ec58c2dfb99b0459a64f1d98a1b0dc77ac373f0917cc1f93f4"
+      },
+      "impact": "The original static review receipt is no longer hash-closed over its test source."
+    }
+  ],
+  "static_xml_check": {
+    "checked_constant_names": [
+      "gravity",
+      "rhop0",
+      "rhopgradient",
+      "hswl",
+      "gamma",
+      "speedsystem",
+      "coefsound",
+      "speedsound",
+      "coefh",
+      "cflnumber"
+    ],
+    "r002_definition_missing_from_this_set": [
+      "rhopgradient",
+      "hswl",
+      "gamma",
+      "speedsystem",
+      "coefsound"
+    ],
+    "gencase_log_explicitly_rejected": "hswl",
+    "r008_pack_definition_count_checked": 47,
+    "r008_definitions_missing_from_checked_constant_set": 0,
+    "r008_check_method": "read-only XML parsing of only the 47 hash-listed Definition XML inputs in the R008 static pack"
+  },
+  "attempt_boundary": {
+    "r002_cpu_native_preflight_status": "cpu_gencase_or_control_copy_failed_hard_audit",
+    "gencase_returncode": 1,
+    "native_decode_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "qualification_credit": 0,
+    "same_input_retry_allowed": false,
+    "r001_history_modified": false
+  },
+  "review_scope": {
+    "static_receipt_and_text_outputs_only": true,
+    "project_code_or_tests_run": false,
+    "standard_library_xml_parse_of_r008_inputs": true,
+    "hdf5_npz_accessed": false,
+    "native_tool_invoked": false,
+    "runtime_outputs_modified": false
+  },
+  "input_bindings": [
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/static-design-review-v1/receipt.json",
+      "bytes": 6989,
+      "sha256": "3548a497c8676ac8397b70c53798fc03fa6d677485ad0a8ed2125a30c0dbe62b",
+      "role": "historical static review receipt"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002_Def.xml",
+      "bytes": 2176,
+      "sha256": "086fa1cab8019c39c2d22fdfbee069441663b0615cdf9246c4383fd51b1b0bea",
+      "role": "materialized R002 Definition"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/cpu-native-preflight-v1/gencase.stdout.log",
+      "bytes": 2248,
+      "sha256": "9d6233c836781b84f840145d8e0597920430b395dad8686a5342516244a8a26b",
+      "role": "plain-text GenCase failure log"
+    },
+    {
+      "path": "tests/test_f8_r002_static_design_review_v1.py",
+      "bytes": 3251,
+      "sha256": "6faf6f216c0827ec58c2dfb99b0459a64f1d98a1b0dc77ac373f0917cc1f93f4",
+      "role": "current test source; differs from historical review binding"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/definition-control-pack-v1/receipt.json",
+      "bytes": 127849,
+      "sha256": "d5b657db398e0c0b102cdb84de8fe0a302c22c85d4bbf16bc0b6e6bf16065fcb",
+      "role": "hash-listed R008 static Definition/control pack"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/15_Poiseuille/CasePoiseuille_Def.xml",
+      "bytes": 6505,
+      "sha256": "ab7e06d9a5a2c5bad899f36ef393bc1d3867cd88fbf7aba5a734ee1e4ffaa2fe",
+      "role": "official syntax precedent bound by the original review"
+    }
+  ],
+  "qualification": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0
+  }
+}

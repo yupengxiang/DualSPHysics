@@ -171,3 +171,9 @@ remain later, distinct gates. No
 R007 input or output is reusable as R008 qualification evidence. The previously
 explored F6 Definition failure remains immutable and cannot be retried or
 relabeled to satisfy the third-family gate.
+
+The historical F8 R002 static-review PASS was later found insufficient: its
+Definition omitted GenCase's required `hswl` element, and the review's test-file
+hash binding had drifted. Its single CPU preflight is terminal-failed and must
+not be retried. The immutable postmortem is
+[`static-design-review-postmortem-v1/receipt.json`](cfd/f8-oscillatory-pressure-channel-r002/static-design-review-postmortem-v1/receipt.json).
