@@ -29,7 +29,18 @@ def test_f3_f4_causal_lineage_audit_passes(tmp_path):
     assert report["passed"] is True
     assert report["checks"]["physical_case_split_isolation"] is True
     assert report["checks"]["lineage_split_isolation"] is True
+    assert report["checks"]["future_frame_intervention_predictions_invariant"] is True
     assert report["interface"]["predict_step_arguments"] == ["previous", "known", "dt"]
+    intervention = report["future_frame_intervention"]
+    assert intervention["future_reference_frames_replaced"] == 2
+    assert intervention["full_horizon_steps"] == 2
+    assert intervention["prediction_inputs_bitwise_identical"] is True
+    assert intervention["prediction_increments_bitwise_identical"] is True
+    assert intervention["evaluator_scores_changed"] is True
+    assert intervention["predictor_future_state_inputs"] is False
+    assert intervention["read_predict_order"] == [
+        "read:0", "predict", "read:1", "predict", "read:2",
+    ]
     assert json.loads(output.read_text())["passed"] is True
 
 

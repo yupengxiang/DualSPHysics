@@ -1,0 +1,132 @@
+{
+  "audit_version": "causal_lineage_contracts_v2_future_frame_intervention",
+  "checks": {
+    "future_frame_intervention_predictions_invariant": true,
+    "future_reference_reads_are_evaluator_side": true,
+    "known_inputs_exclude_future_reference_fields": true,
+    "lineage_split_isolation": true,
+    "manifest_schema_and_hash_contract": true,
+    "physical_case_split_isolation": true,
+    "predictor_receives_current_state_known_inputs_dt_only": true,
+    "reproduction_receipts_bind_future_state_false": true
+  },
+  "future_frame_intervention": {
+    "baseline_position_rmse_m": 0.004281744192888378,
+    "baseline_velocity_rmse_mps": 1.0963576058932596,
+    "evaluator_scores_changed": true,
+    "full_horizon_steps": 2,
+    "future_reference_frames_replaced": 2,
+    "implementation": {
+      "path": "scripts/core_causal_contract_audit.py",
+      "sha256": "84a14a97f869294aee20c8de242eaa4465e48c95d1e1a14743604eb197dfe018"
+    },
+    "intervened_position_rmse_m": 0.05478746815346249,
+    "intervened_velocity_rmse_mps": 1.0150533647711992,
+    "passed": true,
+    "prediction_increments_bitwise_identical": true,
+    "prediction_inputs_bitwise_identical": true,
+    "predictor_future_state_inputs": false,
+    "read_predict_order": [
+      "read:0",
+      "predict",
+      "read:1",
+      "predict",
+      "read:2"
+    ],
+    "regression_test": {
+      "path": "tests/test_core_causal_contract_audit.py",
+      "sha256": "a0f174ded5f195d8c8d95f535514b13a04839d67ad887e12c8280f5567666e23"
+    },
+    "synthetic_only": true
+  },
+  "host": "user-SYS-421GE-TNRT",
+  "interface": {
+    "future_reference_reads_after_predict": 1,
+    "future_reference_reads_are_evaluator_side": true,
+    "passed": true,
+    "predict_step_arguments": [
+      "previous",
+      "known",
+      "dt"
+    ],
+    "predict_step_call_count": 1,
+    "receipt_markers": {
+      "progress_future_state_inputs_false": true,
+      "rollout_future_state_inputs_false": true
+    },
+    "source_sha256": "78f3e7675feff5d5e265c53ac75b9fba44bb6c2dd471e33895af67ceaaa2014a"
+  },
+  "limitations": [
+    "The causal intervention uses a tiny synthetic fixture; it does not read or qualify registered F3/F4 CFD trajectories.",
+    "A passed contract does not establish T1/T2 qualification or model accuracy."
+  ],
+  "manifests": [
+    {
+      "case_count": 32,
+      "cross_split_lineage_count": 0,
+      "cross_split_physical_case_count": 0,
+      "dataset_id": "F3_registered32_core_native_v2",
+      "family_counts": {
+        "F3": 32
+      },
+      "formal_release": false,
+      "future_state_known_input_fields": [],
+      "lineage_count": 32,
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "physical_case_count": 32,
+      "qualification_case_count": 0,
+      "schema": "core.dataset.v2",
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "split_counts": {
+        "test": 12,
+        "train": 16,
+        "validation": 4
+      }
+    },
+    {
+      "case_count": 32,
+      "cross_split_lineage_count": 0,
+      "cross_split_physical_case_count": 0,
+      "dataset_id": "F4_tallwall120_production_training_v1_compact_v2",
+      "family_counts": {
+        "F4": 32
+      },
+      "formal_release": true,
+      "future_state_known_input_fields": [],
+      "lineage_count": 32,
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "physical_case_count": 32,
+      "qualification_case_count": 0,
+      "schema": "core.dataset.v2",
+      "sha256": "eb417b2774817039776b50d18e12e2500634d8c60f4465c42f5633a033c04a16",
+      "split_counts": {
+        "id_test": 6,
+        "ood_test": 6,
+        "train": 16,
+        "validation": 4
+      }
+    }
+  ],
+  "passed": true,
+  "reproduction_reports": [
+    {
+      "future_reference_state_used_by_oracle": true,
+      "passed": true,
+      "path": "campaigns/core-v1/reproduction/a8-full-reproduce-v1/collected/h200/reproduction/reproduction.json",
+      "predictor_future_state_inputs": false,
+      "schema": "core.model_reproduction.v1",
+      "sha256": "44012edb5f7f8adcec9b20c2ebf3c0d1b2006ca00dad3264f45283a1c7a27b63"
+    },
+    {
+      "future_reference_state_used_by_oracle": true,
+      "passed": true,
+      "path": "campaigns/core-v1/runtime/attempts/ada-a8-f3-mlp-seed17-v3-fullcase-reproduce-v1/20260920T055509-90f7455a5a24/reproduction/reproduction.json",
+      "predictor_future_state_inputs": false,
+      "schema": "core.model_reproduction.v1",
+      "sha256": "31713b81c28707ac395ef8687678eea1def8ea6fe63d548703cfd489ad8617ee"
+    }
+  ],
+  "root": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "schema": "core.contract_audit.v1",
+  "scope": "reader manifest split/lineage, predictor input contract, and a synthetic future-reference intervention; not model quality or CFD qualification"
+}

@@ -5,11 +5,13 @@ The audit deliberately separates two questions that are easy to conflate:
 
 * the predictor receives only the current state and public known inputs; and
 * reference future frames may be read by the evaluator after a prediction for
-  scoring and diagnostics.
+  scoring and diagnostics; and
+* replacing synthetic future frames leaves autonomous predictions unchanged.
 
-It validates the immutable reader manifests and performs a small source-level
-interface audit of :func:`scripts.core_learning.rollout_case`.  It does not
-claim model quality, CFD qualification, or a full causal intervention study.
+It validates the immutable reader manifests, performs a small source-level
+interface audit of :func:`scripts.core_learning.rollout_case`, and executes a
+two-step synthetic future-frame intervention. It does not claim model quality,
+CFD qualification, or a full registered-data causal study.
 The resulting evidence is suitable for the typed ``core.contract_audit.v1``
 completion gate, while its scope records the limits explicitly.
 """
@@ -23,15 +25,19 @@ import platform
 import sys
 from typing import Any
 
+import numpy as np
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from scripts.core_dataset import validate_manifest
 from scripts.core_runtime import atomic_json, digest
 from scripts.protocol_metrics import validate_split_lineage
+from scripts.core_contract import (FiniteGeometry, KnownInputs, PrescribedControl,
+                                   State, StepPrediction, contract_hash)
 
 
 SCHEMA = "core.contract_audit.v1"
-AUDIT_VERSION = "causal_lineage_contracts_v1"
+AUDIT_VERSION = "causal_lineage_contracts_v2_future_frame_intervention"
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -111,6 +117,153 @@ def _rollout_interface_audit(source_path: Path) -> dict[str, Any]:
     }
 
 
+def future_frame_intervention_probe() -> dict[str, Any]:
+    """Verify future reference substitutions cannot change autonomous outputs.
+
+    This deliberately tiny synthetic probe exercises the actual public
+    ``rollout_case`` path, not a registered trajectory.  Two runs receive the
+    same initial state, prescribed inputs, intervals, and deterministic
+    predictor; both future reference frames are then changed in the second
+    run.  Prediction inputs and increments must remain bitwise identical,
+    while evaluator-side scores must respond to the changed references.
+    """
+    from scripts.core_learning import rollout_case
+
+    wall_spec = {
+        "container_interior": {
+            "xmin": -1.0, "xmax": 1.0, "ymin": -1.0, "ymax": 1.0,
+            "zmin": 0.0, "zmax": 1.0,
+        },
+        "closed_faces": ["left", "right", "front", "back", "bottom"],
+        "open_faces": ["top"], "obstacles": [],
+    }
+    geometry = FiniteGeometry.from_wall_spec(wall_spec, coordinate_frame="causal-probe")
+    control = PrescribedControl(np.array([
+        [0.0, 0.0, 0.0, -9.81, 0.0, 0.0, 0.0],
+        [0.02, 0.0, 0.0, -9.81, 0.0, 0.0, 0.0],
+    ]))
+    known = KnownInputs(
+        geometry, control,
+        {"gravity_mps2": [0.0, 0.0, -9.81], "reference_density_kgm3": 1000.0},
+        {"dp_m": 0.01, "h_m": 0.016}, "causal-probe",
+    )
+    initial = State(
+        0.0, np.array([[0.0, 0.0, 0.1], [0.01, 0.0, 0.1]]),
+        np.zeros((2, 3)), np.array([11, 12]), np.zeros(2, dtype=int),
+        np.ones(2), np.ones(2, dtype=bool),
+    )
+    times = np.array([0.0, 0.01, 0.02])
+    base_positions = (
+        initial.position,
+        initial.position + np.array([[0.001, 0.0, 0.0], [0.0, 0.001, 0.0]]),
+        initial.position + np.array([[0.002, 0.0, 0.0], [0.0, 0.002, 0.0]]),
+    )
+    base_velocities = (
+        initial.velocity,
+        initial.velocity + np.array([[0.02, 0.0, 0.0], [0.0, 0.02, 0.0]]),
+        initial.velocity + np.array([[0.04, 0.0, 0.0], [0.0, 0.04, 0.0]]),
+    )
+
+    class SyntheticDataset:
+        def __init__(self, intervention):
+            self.events = []
+            self.states = [initial]
+            for frame in (1, 2):
+                position = np.array(base_positions[frame], copy=True)
+                velocity = np.array(base_velocities[frame], copy=True)
+                if intervention:
+                    position += np.array([0.05, -0.03, 0.02]) * frame
+                    velocity += np.array([0.4, -0.2, 0.1]) * frame
+                self.states.append(State(
+                    times[frame], position, velocity, initial.particle_id,
+                    initial.particle_zone, initial.mass, initial.valid,
+                ))
+
+        def times(self, case_id):
+            if case_id != "synthetic-causal-probe":
+                raise KeyError(case_id)
+            return times
+
+        def known_inputs(self, case_id):
+            if case_id != "synthetic-causal-probe":
+                raise KeyError(case_id)
+            return known
+
+        def read_state(self, case_id, frame):
+            if case_id != "synthetic-causal-probe":
+                raise KeyError(case_id)
+            self.events.append(f"read:{frame}")
+            return self.states[frame]
+
+    def run(intervention):
+        dataset = SyntheticDataset(intervention)
+        events = dataset.events
+
+        class Recorder:
+            def __init__(self):
+                self.inputs = []
+                self.increments = []
+
+            def predict_step(self, state, current_known, dt):
+                events.append("predict")
+                self.inputs.append({
+                    "time_s": state.time_s,
+                    "position": np.array(state.position, copy=True),
+                    "velocity": np.array(state.velocity, copy=True),
+                    "known_sha256": contract_hash(current_known),
+                    "dt": float(dt),
+                })
+                displacement = np.full_like(state.position, 0.003)
+                delta_velocity = np.full_like(state.velocity, 0.7)
+                self.increments.append((displacement.copy(), delta_velocity.copy()))
+                return StepPrediction(displacement, delta_velocity)
+
+        predictor = Recorder()
+        result = rollout_case(dataset, "synthetic-causal-probe", predictor)
+        return dataset, predictor, result
+
+    baseline = run(False)
+    altered = run(True)
+    baseline_events, baseline_predictor, baseline_report = baseline
+    altered_events, altered_predictor, altered_report = altered
+    if baseline_events.events != altered_events.events:
+        raise AssertionError("future-frame intervention changed predictor/read ordering")
+    if baseline_events.events != ["read:0", "predict", "read:1", "predict", "read:2"]:
+        raise AssertionError("reference frames are not read only at evaluator boundaries")
+    if len(baseline_predictor.inputs) != 2 or len(altered_predictor.inputs) != 2:
+        raise AssertionError("synthetic rollout did not execute the full two-step horizon")
+    for left, right in zip(baseline_predictor.inputs, altered_predictor.inputs):
+        if (left["time_s"] != right["time_s"] or left["dt"] != right["dt"]
+                or left["known_sha256"] != right["known_sha256"]
+                or not np.array_equal(left["position"], right["position"])
+                or not np.array_equal(left["velocity"], right["velocity"])):
+            raise AssertionError("future-frame intervention changed predictor inputs")
+    for left, right in zip(baseline_predictor.increments, altered_predictor.increments):
+        if not all(np.array_equal(a, b) for a, b in zip(left, right)):
+            raise AssertionError("future-frame intervention changed predictor outputs")
+    if (baseline_report["position_rmse_m"] == altered_report["position_rmse_m"]
+            or baseline_report["velocity_rmse_mps"] == altered_report["velocity_rmse_mps"]):
+        raise AssertionError("intervention did not alter evaluator-side scores")
+    if (baseline_report["future_state_inputs"] is not False
+            or altered_report["future_state_inputs"] is not False):
+        raise AssertionError("rollout did not retain its future-state exclusion marker")
+    return {
+        "passed": True,
+        "synthetic_only": True,
+        "future_reference_frames_replaced": 2,
+        "full_horizon_steps": 2,
+        "predictor_future_state_inputs": False,
+        "prediction_inputs_bitwise_identical": True,
+        "prediction_increments_bitwise_identical": True,
+        "evaluator_scores_changed": True,
+        "baseline_position_rmse_m": float(baseline_report["position_rmse_m"]),
+        "intervened_position_rmse_m": float(altered_report["position_rmse_m"]),
+        "baseline_velocity_rmse_mps": float(baseline_report["velocity_rmse_mps"]),
+        "intervened_velocity_rmse_mps": float(altered_report["velocity_rmse_mps"]),
+        "read_predict_order": baseline_events.events,
+    }
+
+
 def _manifest_audit(path: Path, root: Path) -> dict[str, Any]:
     payload = _load(path)
     validate_manifest(payload)
@@ -171,6 +324,18 @@ def audit(*, root: Path, manifests: list[Path], output: Path,
         raise FileNotFoundError(source_path)
     manifest_rows = [_manifest_audit(path.resolve(), root) for path in manifests]
     interface = _rollout_interface_audit(source_path)
+    future_intervention = future_frame_intervention_probe()
+    intervention_test_path = root / "tests/test_core_causal_contract_audit.py"
+    if not intervention_test_path.is_file():
+        raise FileNotFoundError(intervention_test_path)
+    future_intervention["implementation"] = {
+        "path": _relative(Path(__file__).resolve(), root),
+        "sha256": digest(Path(__file__).resolve()),
+    }
+    future_intervention["regression_test"] = {
+        "path": _relative(intervention_test_path, root),
+        "sha256": digest(intervention_test_path),
+    }
     reproduction_rows = []
     for report_path in reproduction_reports or []:
         report = _load(report_path.resolve())
@@ -188,7 +353,7 @@ def audit(*, root: Path, manifests: list[Path], output: Path,
         "schema": SCHEMA,
         "audit_version": AUDIT_VERSION,
         "passed": True,
-        "scope": "reader manifest split/lineage and predictor input contract; not model quality or CFD qualification",
+        "scope": "reader manifest split/lineage, predictor input contract, and a synthetic future-reference intervention; not model quality or CFD qualification",
         "root": str(root),
         "host": platform.node(),
         "manifests": manifest_rows,
@@ -201,12 +366,14 @@ def audit(*, root: Path, manifests: list[Path], output: Path,
             "known_inputs_exclude_future_reference_fields": True,
             "predictor_receives_current_state_known_inputs_dt_only": True,
             "future_reference_reads_are_evaluator_side": True,
+            "future_frame_intervention_predictions_invariant": future_intervention["passed"],
             "reproduction_receipts_bind_future_state_false": all(
                 row["predictor_future_state_inputs"] is False for row in reproduction_rows
             ),
         },
+        "future_frame_intervention": future_intervention,
         "limitations": [
-            "This is a contract audit, not an intervention rerun with mutated future CFD frames.",
+            "The causal intervention uses a tiny synthetic fixture; it does not read or qualify registered F3/F4 CFD trajectories.",
             "A passed contract does not establish T1/T2 qualification or model accuracy.",
         ],
     }
