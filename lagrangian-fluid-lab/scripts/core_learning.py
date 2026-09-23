@@ -19,6 +19,7 @@ from pathlib import Path
 import platform
 import random
 import resource
+import subprocess
 import sys
 import tempfile
 import time
@@ -1851,12 +1852,16 @@ def checkpoint_refs_from_receipt(receipt):
 
 
 def _failed_rollout_receipt(dataset, case_id, error):
-    """Make setup failures scoreable without dropping their frame denominator."""
+    """Make interrupted case evaluations scoreable without dropping frames."""
     times = dataset.times(case_id)
     known = dataset.known_inputs(case_id)
     length_m, speed_mps = _characteristic_scales(known)
     expected = max(0, len(times) - 1)
-    failure_category = "rollout_setup_error"
+    failure_category = (
+        "rollout_timeout"
+        if isinstance(error, (TimeoutError, subprocess.TimeoutExpired))
+        else "rollout_setup_error"
+    )
     completion = rollout_completion_semantics(
         expected_frames=expected, frames_executed=0,
         failure_category=failure_category,

@@ -347,6 +347,60 @@ def test_rollout_failure_keeps_expected_frame_denominator(tmp_path):
     assert result["scientific_status"] == "not_assessed"
 
 
+def test_evaluate_nonfinite_prediction_keeps_registered_frame_penalty(tmp_path):
+    from scripts.core_contract import StepPrediction
+
+    manifest = tiny_manifest(tmp_path)
+
+    class NaNPredictor:
+        def predict_step(self, state, *_):
+            return StepPrediction(
+                np.full_like(state.position, np.nan),
+                np.zeros_like(state.velocity),
+            )
+
+    with CoreDataset(manifest, tmp_path) as data:
+        result = evaluate(data, NaNPredictor(), case_ids=["tiny"], diagnostic=True)
+
+    row = result["cases"]["tiny"]
+    assert result["registered_case_ids"] == ["tiny"]
+    assert result["expected_frames"] == {"tiny": 1}
+    assert row["position_rmse"] == [None]
+    assert row["failure_category"] == "nonfinite_prediction"
+    assert row["score"]["expected_frames"] == 1
+    assert row["score"]["failure_category"] == "nonfinite_prediction"
+    assert row["score"]["selection_score"] == 1.0
+    assert result["aggregate"]["complete_fraction"] == 0.0
+
+
+@pytest.mark.parametrize("timeout_error", [
+    TimeoutError("fixture timeout"),
+    subprocess.TimeoutExpired("rollout", 0.01),
+])
+def test_evaluation_timeout_keeps_registered_frame_denominator(
+        tmp_path, monkeypatch, timeout_error):
+    manifest = tiny_manifest(tmp_path)
+
+    def timed_out(*_args, **_kwargs):
+        raise timeout_error
+
+    monkeypatch.setattr(learning, "rollout_case", timed_out)
+    with CoreDataset(manifest, tmp_path) as data:
+        predictor, _ = learning._build_predictor_from_baseline("constant_velocity")
+        result = evaluate(data, predictor, case_ids=["tiny"], diagnostic=True)
+
+    row = result["cases"]["tiny"]
+    assert result["registered_case_count"] == 1
+    assert result["fixed_denominator"]["tiny"]["expected_frames"] == 1
+    assert row["position_rmse"] == [None]
+    assert row["failure_category"] == "rollout_timeout"
+    assert row["score"]["expected_frames"] == 1
+    assert row["score"]["failure_category"] == "rollout_timeout"
+    assert row["score"]["selection_score"] == 1.0
+    assert result["execution_summary"]["missing_execution_case_count"] == 1
+    assert result["aggregate"]["complete_fraction"] == 0.0
+
+
 def test_rollout_failure_marks_unexecuted_public_state_invalid(tmp_path):
     manifest = tiny_manifest(tmp_path)
 
