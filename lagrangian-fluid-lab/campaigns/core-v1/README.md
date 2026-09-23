@@ -183,6 +183,12 @@ Definition omitted GenCase's required `hswl` element, and the review's test-file
 hash binding had drifted. Its single CPU preflight is terminal-failed and must
 not be retried. The immutable postmortem is
 [`static-design-review-postmortem-v1/receipt.json`](cfd/f8-oscillatory-pressure-channel-r002/static-design-review-postmortem-v1/receipt.json).
+The fresh 2026-09-24 read-only static review v3 rechecked the closed R002 inputs
+and retained log, confirmed the `hswl` blocker and other template-compatibility
+gaps, and granted no retry or execution authority. The log's current hash
+matches its historical v2 binding; a transcription error in the new review
+request was corrected and recorded in
+[`static-design-review-v3/receipt.json`](cfd/f8-oscillatory-pressure-channel-r002/static-design-review-v3/receipt.json).
 The active R008 renderer now has a separate regression test for the frozen
 constant set across all 47 rendered Definitions:
 [`test_f8_r008_definition_genesis_contract_v1.py`](../../tests/test_f8_r008_definition_genesis_contract_v1.py).

@@ -1,0 +1,103 @@
+{
+  "schema": "core.cfd.f8.r002_static_design_review.v3",
+  "record_id": "f8-oscillatory-pressure-channel-r002-static-design-review-v3",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002",
+  "created_at_utc": "2026-09-23T18:04:42+00:00",
+  "status": "r002_static_design_review_v3_failed_scope_closed_no_retry",
+  "verdict": "FAIL_static_GenCase_readiness",
+  "review_scope": "fresh read-only review of the exact closed R002 Definition/control and retained text failure evidence; no execution readiness beyond static inspection is claimed",
+  "reviewer": {
+    "agent_id": "01a0cf6b-280d-7c83-b461-6c61e43078a9",
+    "nickname": "Nash",
+    "requested_model": "gpt-5.6-terra",
+    "requested_reasoning_effort": "high",
+    "model_attestation_available": false,
+    "model_identity_note": "The reviewer did not attest its actual model identity; the requested Terra model/effort is recorded without claiming independent attestation."
+  },
+  "review_bindings": [
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002_Def.xml",
+      "bytes": 2176,
+      "sha256": "086fa1cab8019c39c2d22fdfbee069441663b0615cdf9246c4383fd51b1b0bea"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/input/acceleration/F8_OPC_q0p500_r002_acceleration.csv",
+      "bytes": 35956,
+      "sha256": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/cpu-native-preflight-v1/receipt.json",
+      "bytes": 3934,
+      "sha256": "2c4680deffeeb09d5220ac2f760745e28575126fc9ebf33f55a562fd20675928"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/cpu-native-preflight-v1/gencase.stdout.log",
+      "bytes": 2248,
+      "sha256": "9d6233c836781b84f840145d8e0597920430b395dad8686a5342516244a8a26b"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/15_Poiseuille/CasePoiseuille_Def.xml",
+      "bytes": 6505,
+      "sha256": "ab7e06d9a5a2c5bad899f36ef393bc1d3867cd88fbf7aba5a734ee1e4ffaa2fe"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/static-design-review-postmortem-v1/receipt.json",
+      "bytes": 5294,
+      "sha256": "adc098d9498f847a3c2914b0d071a823cfa609169f011ed08def8778c9155dd0"
+    }
+  ],
+  "integration_references": [
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/static-design-review-v2/receipt.json",
+      "bytes": 10417,
+      "sha256": "9ccd5266bc0edd6f9d5e126110787ab59e0d0a2063bab5b9aefa94dbcd90d2dc",
+      "check": "The historical v2 receipt's gencase.stdout.log binding equals the current log SHA-256."
+    }
+  ],
+  "review_request_correction": {
+    "id": "review_request_log_hash_transcription_error",
+    "initially_supplied_expected_sha256": "9d6233c836781b84a3a2bdfbee0597920430b395dad8686a5342516244a8a26b",
+    "verified_current_and_historical_binding_sha256": "9d6233c836781b84f840145d8e0597920430b395dad8686a5342516244a8a26b",
+    "disposition": "Reviewer withdrew the log-integrity finding after correction; the current log matches the existing v2 repository binding."
+  },
+  "findings": [
+    {
+      "id": "R002_GENCASE_REQUIRED_HSWL_MISSING",
+      "severity": "static_design_blocker",
+      "detail": "The hash-verified R002 Definition omits hswl. The hash-verified retained GenCase log reports missing hswl at Definition row 5 and exit code 1. This establishes failure of the retained attempt, not permission to retry it."
+    },
+    {
+      "id": "R002_OFFICIAL_TEMPLATE_COMPATIBILITY_GAPS",
+      "severity": "compatibility_gap",
+      "detail": "The R002 Definition also omits rhopgradient, gamma, speedsystem, and coefsound present in the bound official Poiseuille Definition precedent. Their absence is a static compatibility/completeness gap; the retained log specifically demonstrates rejection for hswl only."
+    },
+    {
+      "id": "R002_CONTROL_TABLE_STATIC_TEXT_VALID",
+      "severity": "informational_pass",
+      "detail": "The bound CSV has the declared seven-column header and 705 finite numeric rows, with strictly increasing unique times from 0 through 11.196636217394023 s. Its nominal interval matches TimeOut, and the Definition references this exact relative path. Since GenCase stopped at Definition parsing, this does not prove control-file copy or loading."
+    },
+    {
+      "id": "R002_EXECUTION_AND_QUALIFICATION_NOT_ESTABLISHED",
+      "severity": "boundary",
+      "detail": "No reviewed artifact establishes successful particle generation, native decoding, solver/GPU execution, Womersley agreement, or numerical qualification."
+    }
+  ],
+  "execution_controls": {
+    "reviewer_modified_files": false,
+    "reviewer_ran_tests_or_scripts": false,
+    "gencase_invoked_by_review": false,
+    "native_decoder_invoked_by_review": false,
+    "solver_invoked_by_review": false,
+    "gpu_started_by_review": false,
+    "queue_or_worker_started_by_review": false,
+    "hdf5_or_npz_accessed_by_review": false,
+    "r001_modified_or_retried": false,
+    "r002_modified_or_retried": false,
+    "qualification_credit": 0
+  },
+  "retry_or_execution_authority_granted": false,
+  "r002_remains_closed": true,
+  "next_allowed_action": "Do not edit or retry R001/R002. Any corrected candidate must use a separately named fresh F8 revision and namespace with its own scope-specific authorization.",
+  "qualification_claim": "none",
+  "qualification_credit": 0
+}
