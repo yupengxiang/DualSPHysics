@@ -315,7 +315,8 @@ def event_summary(out, definition: dict) -> dict:
 
 
 def _build_binding(frames, source, initial, weight, labels, tracer_ids, walls, definition,
-                   substeps: int, provider_role: str) -> dict:
+                   substeps: int, provider_role: str, *, neighbour_variant: str,
+                   backend: str, neighbours: int, error_estimator: str) -> dict:
     source_hash = getattr(frames, "source_sha256", None) or digest(source)
     binding = {
         "schema": SCHEMA,
@@ -337,10 +338,10 @@ def _build_binding(frames, source, initial, weight, labels, tracer_ids, walls, d
         "substeps": substeps,
         "source_semantics": "reference_native_saved_frames",
         "provider_role": provider_role,
-        "backend": NEIGHBOUR_BACKEND,
-        "neighbour_variant": NEIGHBOUR_VARIANT,
-        "neighbours": NEIGHBOURS,
-        "error_estimator": "local_residual",
+        "backend": backend,
+        "neighbour_variant": neighbour_variant,
+        "neighbours": neighbours,
+        "error_estimator": error_estimator,
         "regularization_m": REGULARIZATION_M,
         "maximum_support_distance_m": MAXIMUM_SUPPORT_DISTANCE_M,
         "support_gate": GATE,
@@ -363,12 +364,13 @@ def trace_tallwall120(source: Path, output: Path, *, q: float = 0.5,
                       dp_m: float | None = None, seeds: int = 512,
                       substeps: int = 2, stop_after: int | None = None,
                       resume: bool = False, kill_after: int | None = None,
-                      provider=None):
+                      provider=None, neighbour_variant: str = NEIGHBOUR_VARIANT):
     """Run the versioned tall-wall material overlay on a terminal source H5."""
     q = cm._f4_q(q)
     if seeds not in (512, 4096):
         raise ValueError("seeds must be 512 or 4096")
     substeps = cm._positive_integer(substeps, "substeps")
+    neighbour_variant, backend, neighbours, error_estimator = cm._neighbour_variant(neighbour_variant)
     if stop_after is not None and (isinstance(stop_after, bool) or int(stop_after) < 0):
         raise ValueError("stop_after must be nonnegative")
     if kill_after is not None and (isinstance(kill_after, bool) or int(kill_after) < 0):
@@ -397,7 +399,9 @@ def trace_tallwall120(source: Path, output: Path, *, q: float = 0.5,
         definition["event_definition"] = event_definition
     provider_role = getattr(frames, "provider_role", "reference")
     binding = _build_binding(frames, source, initial, weight, labels, tracer_ids, walls,
-                             definition, substeps, provider_role)
+                             definition, substeps, provider_role,
+                             neighbour_variant=neighbour_variant, backend=backend,
+                             neighbours=neighbours, error_estimator=error_estimator)
     binding_text = canonical(binding)
     manifest_path, generation_dir, legacy_npz = _checkpoint_paths(output)
     tracker = cm.F4EventTracker(len(initial), definition=definition)
@@ -431,8 +435,8 @@ def trace_tallwall120(source: Path, output: Path, *, q: float = 0.5,
             else:
                 _create_output(out, initial, weight, labels, tracer_ids, binding_text,
                                definition, provider_role)
-                state = cm._f4_initial_state(initial, frames, walls, NEIGHBOURS,
-                                             "local_residual", tracker)
+                state = cm._f4_initial_state(initial, frames, walls, neighbours,
+                                             error_estimator, tracker)
                 write_checkpoint(output, binding_text, 0, state)
                 if kill_after == 0:
                     os.kill(os.getpid(), signal.SIGKILL)
@@ -449,7 +453,7 @@ def trace_tallwall120(source: Path, output: Path, *, q: float = 0.5,
                     cm._f4_advance_state(
                         state, tracker, field0, field1, walls,
                         float(frames.times[frame_index]) + substep * dt,
-                        dt, NEIGHBOURS, "local_residual",
+                        dt, neighbours, error_estimator,
                     )
                     field0 = field1
                 next_frame = frame_index + 1
@@ -491,6 +495,8 @@ def main() -> int:
     parser.add_argument("--dp-m", type=float, default=0.0075)
     parser.add_argument("--seeds", type=int, choices=(512, 4096), default=512)
     parser.add_argument("--substeps", type=int, default=2)
+    parser.add_argument("--neighbour-variant", choices=tuple(cm.NEIGHBOUR_VARIANTS),
+                        default=NEIGHBOUR_VARIANT)
     parser.add_argument("--stop-after", type=int)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--kill-after", type=int, help=argparse.SUPPRESS)
@@ -499,6 +505,7 @@ def main() -> int:
         Path(args.source), Path(args.output), q=args.q, dp_m=args.dp_m,
         seeds=args.seeds, substeps=args.substeps, stop_after=args.stop_after,
         resume=args.resume, kill_after=args.kill_after,
+        neighbour_variant=args.neighbour_variant,
     )
     if result is not None:
         print(json.dumps({

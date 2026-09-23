@@ -18,7 +18,10 @@ def _sha256(path: Path) -> str:
 
 
 def test_authorization_is_hash_closed_and_requires_later_execution_authority() -> None:
-    value = authorization.verify()
+    # The authorization is a pre-execution historical record.  Its planned
+    # namespace is now expected to exist because the separately authorized
+    # executor has consumed its only attempt; do not rewrite this record.
+    value = json.loads(authorization.OUTPUT.read_text(encoding="utf-8"))
     assert value["authorization"]["candidate_id"] == "f4_supportcap_affine_query_bound_v3"
     assert value["authorization"]["authorization_grants_runtime_execution"] is False
     assert value["execution_contract"]["future_executor_status"] == "not_implemented_or_authorized_by_this_record"
@@ -30,10 +33,17 @@ def test_authorization_is_hash_closed_and_requires_later_execution_authority() -
         "material_qualification": False,
         "qualification_claim": "none",
     }
-    for item in value["hash_bindings"].values():
+    for name, item in value["hash_bindings"].items():
         path = ROOT / item["path"]
-        assert path.is_file() and path.stat().st_size == item["bytes"]
-        assert _sha256(path) == item["sha256"]
+        assert path.is_file()
+        if name != "authorization_test":
+            assert path.stat().st_size == item["bytes"]
+            assert _sha256(path) == item["sha256"]
+    # This test evolves only to validate the terminal state; the authorization
+    # keeps the prior test digest as immutable historical provenance.
+    assert value["hash_bindings"]["authorization_test"]["sha256"] == (
+        "a73025b3ad905a22da2b03c3433989cb5701df0526546ed6a5b91d996f9595a6"
+    )
 
 
 def test_contract_is_one_attempt_new_namespace_and_preserves_failure_evidence() -> None:
@@ -43,8 +53,12 @@ def test_contract_is_one_attempt_new_namespace_and_preserves_failure_evidence() 
     assert attempt["retry"] is False
     assert attempt["old_output_reuse_forbidden"] is True
     assert attempt["old_failure_evidence_modification_forbidden"] is True
-    assert not (ROOT / attempt["new_output_namespace"]).exists()
+    namespace = ROOT / attempt["new_output_namespace"]
+    assert namespace.is_dir()
     assert all(item["exists"] is False for item in attempt["planned_artifacts_absent_at_authorization"].values())
+    receipt = json.loads((namespace / "acceptance-receipt.json").read_text(encoding="utf-8"))
+    assert receipt["status"] == "failed_one_attempt_zero_credit"
+    assert receipt["authorization_contract"]["same_input_retry"] is False
     assert value["input_contract"]["source"]["sha256"] == authorization.SOURCE_SHA256
     assert value["input_contract"]["bounded_canary"]["seed_denominator"] == 512
     assert value["acceptance_and_failure_semantics"]["failure_status"] == "failed_one_attempt_zero_credit"
