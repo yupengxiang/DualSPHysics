@@ -570,6 +570,38 @@ def test_report_existence_or_job_success_is_not_qualification(tmp_path):
     assert "schema" in result["issues"][0]["reason"]
 
 
+@pytest.mark.parametrize(("marker", "reason"), [
+    ("diagnostic_only", "qualification-only/diagnostic"),
+    ("qualification_only", "qualification-only/diagnostic"),
+    ("root_review_only", "not root-admitted"),
+    ("formal_eligible_false", "not formal evidence"),
+])
+def test_preflight_or_diagnostic_cannot_claim_qualification_credit(tmp_path, marker, reason):
+    scope = _qualified_scope_fixture(tmp_path)
+    qualification_path = tmp_path / scope["qualification"]["path"]
+    receipt = json.loads(qualification_path.read_text(encoding="utf-8"))
+    receipt.update({
+        "status": "cpu_native_preflight_passed_zero_credit",
+        "qualification_credit": 0,
+        "T1_numerical": True,
+    })
+    if marker == "formal_eligible_false":
+        receipt["formal_eligible"] = False
+    else:
+        receipt[marker] = True
+    atomic_json(qualification_path, receipt)
+    scope["qualification"]["sha256"] = digest(qualification_path)
+
+    result = completion({"scopes": [scope]}, tmp_path)
+
+    assert result["t1_families"] == []
+    assert result["required_t1_case_runs"] == 0
+    assert result["missing_target_t1_case_runs"] == 432
+    assert not result["checks"]["three_t1_families"]
+    assert not result["checks"]["evidence_valid"]
+    assert any(reason in issue["reason"] for issue in result["issues"])
+
+
 def test_scope_family_must_match_qualification_family(tmp_path):
     scope = _qualified_scope_fixture(tmp_path)
     scope["family"] = "F4"
