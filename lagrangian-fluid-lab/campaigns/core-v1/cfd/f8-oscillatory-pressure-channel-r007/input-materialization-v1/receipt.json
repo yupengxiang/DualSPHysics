@@ -1,0 +1,228 @@
+{
+  "authorization": {
+    "consumed": true,
+    "control_target": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r007/input/F8_OPC_q0p500_r007_acceleration.csv",
+    "definition_target": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r007/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R007_Def.xml",
+    "overwrite_or_reuse_allowed": false,
+    "review_schema": "core.cfd.f8.r007_static_design_review.v1",
+    "source": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r007/static-design-review-v1/receipt.json"
+  },
+  "bindings": [
+    {
+      "bytes": 13114,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r007/static-design-review-v1/receipt.json",
+      "role": "immutable passed F8 r007 static design review",
+      "sha256": "bc3a3a9f6e332034709ad2dee91a1dede5a2ca39d52f84a115582a791b1f7330"
+    },
+    {
+      "bytes": 19467,
+      "path": "scripts/f8_r007_static_design_review_v1.py",
+      "role": "r007 precommitted Definition renderer",
+      "sha256": "e2869b84448c62a226cea60d54d23fca8d0f57ef800513a7863845f2326c4512"
+    },
+    {
+      "bytes": 13174,
+      "path": "scripts/f8_r007_input_materialization_v1.py",
+      "role": "exclusive-create r007 input materializer",
+      "sha256": "c8f77c08bf952a61c392f13b91d8e99971b1a12112717f33407473c0066c6944"
+    },
+    {
+      "bytes": 3795,
+      "path": "tests/test_f8_r007_input_materialization_v1.py",
+      "role": "r007 materialization contract tests",
+      "sha256": "f80dfc840a9c96bee59fee0da8c691971608af973e005c41a6a69c756221fae3"
+    },
+    {
+      "bytes": 3114,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r007/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R007_Def.xml",
+      "role": "materialized r007 Definition",
+      "sha256": "444cba748d9e5a9e7d8a016585acb8ba2db421d3847adbb363e78382c67927fd"
+    },
+    {
+      "bytes": 35956,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r007/input/F8_OPC_q0p500_r007_acceleration.csv",
+      "role": "materialized r007 colocated control CSV",
+      "sha256": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1"
+    }
+  ],
+  "closed_prior_execution_scopes": [
+    {
+      "prior_output_reuse_forbidden": true,
+      "same_input_retry_forbidden": true,
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001"
+    },
+    {
+      "prior_output_reuse_forbidden": true,
+      "same_input_retry_forbidden": true,
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002"
+    },
+    {
+      "prior_output_reuse_forbidden": true,
+      "same_input_retry_forbidden": true,
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R003"
+    },
+    {
+      "prior_output_reuse_forbidden": true,
+      "same_input_retry_forbidden": true,
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R004"
+    },
+    {
+      "prior_output_reuse_forbidden": true,
+      "same_input_retry_forbidden": true,
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R005"
+    },
+    {
+      "prior_output_reuse_forbidden": true,
+      "same_input_retry_forbidden": true,
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R006"
+    }
+  ],
+  "control_dependency_copy_proof": {
+    "definition_relative_reference": "F8_OPC_q0p500_r007_acceleration.csv",
+    "required_copy_hash": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1",
+    "required_generated_copy": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r007/cpu-native-preflight-v1/generated/F8_OPC_q0p500_r007_acceleration.csv",
+    "source_control": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r007/input/F8_OPC_q0p500_r007_acceleration.csv",
+    "source_is_colocated_with_definition": true
+  },
+  "definition_proof": {
+    "base_wall_faces_z_m": [
+      -0.0525,
+      0.0525
+    ],
+    "boundary_layers_vdp": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "boundary_particles_expected": 4096,
+    "boundary_z_planes_expected_m": [
+      -0.075,
+      -0.0675,
+      -0.06,
+      -0.0525,
+      0.0525,
+      0.06,
+      0.0675,
+      0.075
+    ],
+    "constantsdef": {
+      "cflnumber": {
+        "value": "0.2"
+      },
+      "coefh": {
+        "value": "1.0"
+      },
+      "coefsound": {
+        "value": "1"
+      },
+      "gamma": {
+        "value": "7"
+      },
+      "gravity": {
+        "x": "0",
+        "y": "0",
+        "z": "0"
+      },
+      "hswl": {
+        "auto": "true",
+        "value": "0"
+      },
+      "rhop0": {
+        "value": "1000"
+      },
+      "rhopgradient": {
+        "value": "1"
+      },
+      "speedsound": {
+        "auto": "false",
+        "value": "10"
+      },
+      "speedsystem": {
+        "auto": "true",
+        "value": "0"
+      }
+    },
+    "domain_clearance_beyond_outer_layers_dp": 2.0,
+    "domain_z_m": [
+      -0.09,
+      0.09
+    ],
+    "fluid_particles_expected": 6656,
+    "fluid_z_interval_m": [
+      -0.045,
+      0.045
+    ],
+    "normal_distanceh": 3.0,
+    "normal_geometry_layers_vdp": -0.5,
+    "normal_interface_expected_z_m": [
+      -0.04875,
+      0.04875
+    ],
+    "normal_magnitude_minimum_m": 0.001875,
+    "normal_svshapes": true,
+    "static_proof_only": true,
+    "total_particles_expected": 10752
+  },
+  "execution_controls": {
+    "control_written": true,
+    "definition_written": true,
+    "denominator_mutation": 0,
+    "gencase_invoked": false,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "native_decode_invoked": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_invoked": false,
+    "training_started": false,
+    "worker_started": false
+  },
+  "explicitly_not_authorized": [
+    "GenCase",
+    "native decoder",
+    "solver",
+    "GPU",
+    "queue",
+    "worker",
+    "registry",
+    "ledger",
+    "T1/T2 qualification",
+    "training"
+  ],
+  "materialized_inputs": {
+    "control": {
+      "bytes": 35956,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r007/input/F8_OPC_q0p500_r007_acceleration.csv",
+      "role": "precommitted F8 r007 colocated acceleration CSV",
+      "sha256": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1"
+    },
+    "control_matches_review_precommit": true,
+    "definition": {
+      "bytes": 3114,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r007/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R007_Def.xml",
+      "role": "precommitted F8 r007 Definition XML",
+      "sha256": "444cba748d9e5a9e7d8a016585acb8ba2db421d3847adbb363e78382c67927fd"
+    },
+    "definition_matches_review_precommit": true
+  },
+  "next_automatic_step": {
+    "kind": "one-time F8 r007 CPU-native-preflight authorization and execution",
+    "requires": [
+      "new immutable authorization binding r007 review, materialization, tools, and test hashes",
+      "one isolated r007 output namespace and invocation lock",
+      "one GenCase followed by frozen geometry gates before at most one native decode"
+    ]
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "retained_r006_failure": {
+    "native_decode_invoked": false,
+    "receipt": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r006/cpu-native-preflight-v1/receipt.json",
+    "same_input_retry_forbidden": true,
+    "status": "generated_geometry_failed_hard_audit"
+  },
+  "schema": "core.cfd.f8.r007_input_materialization.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R007",
+  "status": "one_time_r007_inputs_materialized_static_only"
+}
