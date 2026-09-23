@@ -26,16 +26,26 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def test_committed_v2_receipt_and_source_closure_verify() -> None:
+def test_committed_v2_receipt_retains_historical_source_bindings() -> None:
     result = verify_v2_receipt(RECEIPT, data_root=ROOT, closure_path=CLOSURE)
-    assert result["ok"] is True
-    assert result["mismatch_paths"] == []
     payload = json.loads(RECEIPT.read_text(encoding="utf-8"))
+    closure = json.loads(CLOSURE.read_text(encoding="utf-8"))
+    expected_source_drift = {
+        binding["path"] for binding in closure["source_bindings"]
+        if _sha256(ROOT / binding["path"]) != binding["sha256"]
+    }
+    # This dated v2 receipt is immutable evidence for its 2026-09-22 source
+    # snapshot. Current live-witness verification belongs to the fresh bundle
+    # test below, not by rewriting this historical receipt after source edits.
+    assert expected_source_drift
+    assert set(result["mismatch_paths"]) == expected_source_drift
+    assert result["ok"] is False
     assert payload["diagnostic_only"] is True
     assert payload["formal_training"] is False
     assert payload["execution_constraints"]["registry_written"] is False
     assert payload["execution_constraints"]["ledger_written"] is False
     assert payload["source_closure"]["closure_version"] == CLOSURE_VERSION
+    assert payload["source_closure"]["source_bindings"] == closure["source_bindings"]
     assert RECEIPT_SHA256.read_text(encoding="utf-8").split()[0] == _sha256(RECEIPT)
     assert CLOSURE_SHA256.read_text(encoding="utf-8").split()[0] == _sha256(CLOSURE)
 

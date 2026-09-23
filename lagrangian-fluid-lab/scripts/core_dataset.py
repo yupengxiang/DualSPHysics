@@ -228,6 +228,10 @@ def _load_npz_asset(root, reference, *, kind, observed_hash=None, verify_hash=Tr
                     archive["samples"],
                     tuple(metadata.get("centre", (.45, 0.0, 0.0))),
                     metadata.get("semantics", "dualsphysics_f3_accinput_v1"),
+                    metadata.get("source_sha256"),
+                    metadata.get("source_path"),
+                    metadata.get("source_bytes"),
+                    metadata.get("source_format"),
                 )
     except (KeyError, OSError, ValueError) as error:
         raise ValueError(f"invalid {kind} asset: {reference['path']}") from error
@@ -326,11 +330,19 @@ def compactify_manifest(source_manifest, data_root, *, asset_dir=None,
         control_dict = known.control.as_dict()
         control_key = _canonical_hash(control_dict)
         if control_key not in control_cache:
+            control_metadata = {
+                "version": "core.input_asset.v1",
+                "centre": list(known.control.centre),
+                "semantics": known.control.semantics,
+            }
+            if known.control.source_sha256 is not None:
+                control_metadata["source_sha256"] = known.control.source_sha256
+                control_metadata["source_path"] = known.control.source_path
+                control_metadata["source_bytes"] = known.control.source_bytes
+                control_metadata["source_format"] = known.control.source_format
             control_cache[control_key] = asset_reference(
                 "control", control_dict, {"samples": known.control.samples}, {
-                    "version": "core.input_asset.v1",
-                    "centre": list(known.control.centre),
-                    "semantics": known.control.semantics,
+                    **control_metadata,
                 })
 
         compact = {key: value for key, value in row.items() if key != "known_inputs"}

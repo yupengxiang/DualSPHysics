@@ -10,6 +10,8 @@ from dataclasses import dataclass, field
 import hashlib
 import json
 import math
+from pathlib import Path
+import re
 from types import MappingProxyType
 from typing import Mapping, Protocol, runtime_checkable
 
@@ -36,9 +38,13 @@ _PRESCRIBED_ROTATION_SIGNS = {
 # contract.  Adding a field requires an explicit schema change.
 _KNOWN_INPUT_FIELD_TYPES = {
     "physics": {
+        "boundary_semantics": "string",
         "drive_amplitude": "finite_number",
+        "drive_angular_frequency_rad_s": "finite_number",
+        "dimensionless_drive_parameter": "finite_number",
         "family": "string",
         "gravity_mps2": "finite_vector3",
+        "periodic_lengths_m": "finite_vector3",
         "physical_kinematic_viscosity_m2_s": "finite_number",
         "reference_density_kgm3": "finite_number",
         "scope_id": "string",
@@ -513,22 +519,56 @@ class PrescribedControl:
     samples: np.ndarray
     centre: tuple = (.45, 0., 0.)
     semantics: str = "dualsphysics_f3_accinput_v1"
+    source_sha256: str | None = None
+    source_path: str | None = None
+    source_bytes: int | None = None
+    source_format: str | None = None
     _compiled: object = field(default=None, init=False, repr=False, compare=False)
 
     def __post_init__(self):
         from scripts.f3_control import AccelerationControl
         control = AccelerationControl(self.samples)
-        if self.semantics != "dualsphysics_f3_accinput_v1":
+        if self.semantics not in {
+                "dualsphysics_f3_accinput_v1",
+                "dualsphysics_accinput_v1",
+        }:
             raise ValueError("unknown prescribed control semantics")
         if np.asarray(self.centre).shape != (3,) or not np.isfinite(self.centre).all():
             raise ValueError("invalid control centre")
+        source_sha256 = self.source_sha256
+        if source_sha256 is not None and (
+                not isinstance(source_sha256, str)
+                or re.fullmatch(r"[0-9a-fA-F]{64}", source_sha256) is None):
+            raise ValueError("prescribed control source_sha256 must be a SHA-256 digest")
+        source_fields = (source_sha256, self.source_path, self.source_bytes, self.source_format)
+        if any(value is not None for value in source_fields):
+            if any(value is None for value in source_fields):
+                raise ValueError("prescribed control source provenance must bind path, bytes, format and SHA-256")
+            if not isinstance(self.source_path, str) or not self.source_path:
+                raise ValueError("prescribed control source_path must be portable and relative")
+            source_path = Path(self.source_path)
+            if (source_path.is_absolute() or ".." in source_path.parts
+                    or ".." in self.source_path.replace("\\", "/").split("/")):
+                raise ValueError("prescribed control source_path must be portable and relative")
+            if (isinstance(self.source_bytes, (bool, np.bool_))
+                    or not isinstance(self.source_bytes, (int, np.integer))
+                    or int(self.source_bytes) < 1):
+                raise ValueError("prescribed control source_bytes must be a positive integer")
+            if not isinstance(self.source_format, str) or not self.source_format:
+                raise ValueError("prescribed control source_format must be a nonempty string")
         object.__setattr__(self, "samples", _array(control.values))
         object.__setattr__(self, "centre", tuple(float(x) for x in self.centre))
+        if source_sha256 is not None:
+            object.__setattr__(self, "source_sha256", source_sha256.lower())
+            object.__setattr__(self, "source_bytes", int(self.source_bytes))
         # The acceleration schedule is immutable metadata. Compile its
         # cumulative integral once so each causal feature call only brackets
         # the current time and interpolates six columns; no future state is
         # introduced by this cache.
         object.__setattr__(self, "_compiled", control)
+        if self.semantics == "dualsphysics_accinput_v1" and np.any(
+                np.asarray(self.samples)[:, 2:] != 0):
+            raise ValueError("F8 prescribed acceleration must be x-only with zero angular control")
 
     def acceleration(self, state):
         return self._compiled.body_acceleration(
@@ -538,7 +578,16 @@ class PrescribedControl:
         return self._compiled.at(time_s)
 
     def as_dict(self):
-        return {"samples": self.samples.tolist(), "centre": list(self.centre), "semantics": self.semantics}
+        result = {"samples": self.samples.tolist(), "centre": list(self.centre),
+                  "semantics": self.semantics}
+        if self.source_sha256 is not None:
+            result.update({
+                "source_sha256": self.source_sha256,
+                "source_path": self.source_path,
+                "source_bytes": self.source_bytes,
+                "source_format": self.source_format,
+            })
+        return result
 
 
 @dataclass(frozen=True)
@@ -560,6 +609,26 @@ class KnownInputs:
         for key in ("dp_m", "h_m"):
             if key not in self.numerics or not math.isfinite(self.numerics[key]) or self.numerics[key] <= 0:
                 raise ValueError("positive dp_m/h_m required")
+        if self.physics.get("family") == "F8":
+            periodic = self.physics.get("periodic_lengths_m")
+            gravity = self.physics.get("gravity_mps2")
+            if (periodic is None or len(periodic) != 3
+                    or periodic[0] <= 0 or periodic[1] <= 0 or periodic[2] != 0):
+                raise ValueError("F8 requires periodic x/y lengths and a nonperiodic z axis")
+            if gravity is None or any(value != 0 for value in gravity):
+                raise ValueError("F8 prescribed acceleration requires zero gravity")
+            if (self.physics.get("boundary_semantics")
+                    != "periodic_xy_fixed_no_slip_mdbc_z"):
+                raise ValueError("F8 boundary semantics must declare periodic x/y and fixed mDBC z walls")
+            viscosity = self.physics.get("physical_kinematic_viscosity_m2_s")
+            if viscosity is None or viscosity <= 0 or self.physics.get("viscosity_formulation") != "laminar":
+                raise ValueError("F8 requires a declared positive laminar physical viscosity")
+            if (self.control.semantics != "dualsphysics_accinput_v1"
+                    or self.control.source_sha256 is None
+                    or self.control.source_path is None
+                    or self.control.source_bytes is None
+                    or self.control.source_format != "dualsphysics_accinput_csv_v1"):
+                raise ValueError("F8 requires hash-bound DualSPHysics prescribed acceleration")
 
     def geometry_at(self, time_s):
         """Return the finite geometry visible to a causal predictor now."""

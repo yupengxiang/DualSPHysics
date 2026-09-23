@@ -9,7 +9,7 @@ known inputs and it maps qualification records to the separate
 
 The adapter accepts either the compact ``core.cfd.dataset.v1`` form below, an
 F4 production collection report with an explicit materialized reader view, or
-the existing F1/F2/F4/F7 design/production records when each case has a trajectory
+the existing F1/F2/F4/F7/F8 design/production records when each case has a trajectory
 and a prepared record attached (inline or through ``prepared``).  Static
 qualification designs without HDF5 products are rejected with an actionable
 error; they are design registrations, not trainable data.
@@ -45,6 +45,7 @@ SOURCE_SCHEMAS = {
     "core.f4.qualification.v1",
     "core.f2.static_hold.v1",
     "core.f2.dynamic.v1",
+    "core.f8.oscillatory_pressure_channel.v1",
 }
 SPLITS = {"train", "validation", "test", "id_test", "ood_test", "qualification"}
 COORDINATE_FRAME = "fixed tank computational coordinates"
@@ -527,6 +528,105 @@ def _horizon(config):
     return max(values + [10.0]) + 1e-6
 
 
+def _f8_control_from_config(config, *, data_root, source_parent=None):
+    """Load the exact, hash-bound R008 prescribed acceleration CSV."""
+    from scripts.core_contract import PrescribedControl
+
+    if data_root is None:
+        raise ValueError("F8 prescribed control requires an explicit data_root")
+    references = [config.get(key) for key in ("control_asset", "acceleration_control")
+                  if config.get(key) is not None]
+    if config.get("control") is not None:
+        references.append(config["control"])
+    if len(references) != 1 or not isinstance(references[0], dict):
+        raise ValueError("F8 config requires exactly one hash-bound control_asset mapping")
+    reference = references[0]
+    source_format = reference.get("format", "dualsphysics_accinput_csv_v1")
+    if source_format != "dualsphysics_accinput_csv_v1":
+        raise ValueError("unsupported F8 prescribed acceleration CSV format")
+    declared_hash = reference.get("sha256")
+    if not isinstance(declared_hash, str) or re.fullmatch(r"[0-9a-fA-F]{64}", declared_hash) is None:
+        raise ValueError("F8 control asset requires a declared SHA-256")
+    relative_path, path = _resolve_path(reference.get("path"), data_root,
+                                        source_parent=source_parent, must_exist=True)
+    raw = path.read_bytes()
+    observed_hash = hashlib.sha256(raw).hexdigest()
+    if observed_hash != declared_hash.lower():
+        raise ValueError("F8 prescribed control CSV hash mismatch")
+    declared_bytes = reference.get("bytes")
+    if (isinstance(declared_bytes, bool) or not isinstance(declared_bytes, int)
+            or declared_bytes != len(raw)):
+        raise ValueError("F8 prescribed control CSV byte count mismatch")
+    expected_header = "Time;LinearAccX;LinearAccY;LinearAccZ;AngularAccX;AngularAccY;AngularAccZ"
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise ValueError("F8 prescribed acceleration CSV must be UTF-8 text") from error
+    headers = [line.lstrip()[1:].strip() for line in text.splitlines()
+               if line.lstrip().startswith("#")]
+    if not headers or headers[0] != expected_header:
+        raise ValueError("F8 prescribed acceleration CSV has an unknown column header")
+    try:
+        samples = np.loadtxt(path, delimiter=";", comments="#", ndmin=2)
+    except (OSError, ValueError) as error:
+        raise ValueError("invalid F8 prescribed acceleration CSV") from error
+    if samples.ndim != 2 or samples.shape[1] != 7 or len(samples) < 2:
+        raise ValueError("F8 prescribed acceleration CSV must contain time plus six columns")
+    if not np.isfinite(samples).all() or not np.all(np.diff(samples[:, 0]) > 0):
+        raise ValueError("F8 prescribed acceleration CSV must be finite and strictly time ordered")
+    if abs(float(samples[0, 0])) > 1e-12:
+        raise ValueError("F8 prescribed acceleration must begin at t=0")
+    horizon = config.get("time_max_s", config.get("time_horizon_s"))
+    if (isinstance(horizon, bool) or not isinstance(horizon, (int, float))
+            or not np.isfinite(horizon) or horizon <= 0):
+        raise ValueError("F8 config requires a finite positive time_max_s")
+    if samples[-1, 0] + 1e-12 < float(horizon):
+        raise ValueError("F8 prescribed acceleration CSV does not cover the case horizon")
+    return PrescribedControl(
+        samples, centre=(0., 0., 0.), semantics="dualsphysics_accinput_v1",
+        source_sha256=observed_hash, source_path=relative_path,
+        source_bytes=len(raw), source_format=source_format)
+
+
+def _f8_periodic_lengths(config):
+    if config.get("periodic_axes") not in ("xy", ["x", "y"], ("x", "y")):
+        raise ValueError("F8 config must explicitly declare periodic_axes='xy'")
+    bounds = config.get("wall_bounds")
+    if bounds is None and isinstance(config.get("wall_spec"), dict):
+        bounds = config["wall_spec"].get("container_interior")
+    if not isinstance(bounds, dict):
+        raise ValueError("F8 config requires finite wall_bounds for the periodic cell")
+    try:
+        xmin, xmax = float(bounds["xmin"]), float(bounds["xmax"])
+        ymin, ymax = float(bounds["ymin"]), float(bounds["ymax"])
+        derived = np.array([xmax - xmin, ymax - ymin, 0.])
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValueError("F8 wall_bounds require finite x/y extents") from error
+    if (not np.isfinite([xmin, xmax, ymin, ymax]).all()
+            or abs(xmin) > 1e-12 or abs(ymin) > 1e-12):
+        raise ValueError("F8 periodic x/y bounds must use the zero-origin base cell")
+    declared = config.get("periodic_lengths_m")
+    if declared is not None:
+        declared = np.asarray(declared, dtype=float)
+        if declared.shape != (3,) or not np.isfinite(declared).all() or not np.allclose(
+                declared, derived, rtol=0., atol=1e-12):
+            raise ValueError("F8 periodic lengths must match the declared x/y wall bounds")
+    if not np.isfinite(derived).all() or np.any(derived[:2] <= 0):
+        raise ValueError("F8 periodic cell lengths must be finite and positive")
+    wall_spec = config.get("wall_spec")
+    if isinstance(wall_spec, dict):
+        closed = set(wall_spec.get("closed_faces", ()))
+        obstacles = wall_spec.get("obstacles", ())
+    else:
+        closed = set(config.get("closed_faces", ()))
+        obstacles = config.get("obstacles", ())
+    if closed != {"bottom", "top"}:
+        raise ValueError("F8 finite geometry must contain only the fixed no-slip z walls")
+    if obstacles:
+        raise ValueError("F8 periodic pressure channel cannot contain finite side obstacles")
+    return derived.tolist()
+
+
 def known_inputs_from_cfd_config(config, *, family, scope_id=None,
                                  coordinate_frame=COORDINATE_FRAME,
                                  data_root=None, source_parent=None):
@@ -540,14 +640,22 @@ def known_inputs_from_cfd_config(config, *, family, scope_id=None,
                          dtype=float)
     if gravity.shape != (3,) or not np.isfinite(gravity).all():
         raise ValueError("CFD gravity must be a finite 3-vector")
-    # CFD cases have prescribed gravity.  The two-row schedule is explicit
-    # metadata, not sampled from a trajectory.  F2 rigid motion lives in the
-    # geometry contract, so it is intentionally not encoded as future fluid
-    # control data here.
-    control = PrescribedControl(np.array([
-        [0., *gravity.tolist(), 0., 0., 0.],
-        [_horizon(config), *gravity.tolist(), 0., 0., 0.],
-    ], dtype=float))
+    if str(family).upper() == "F8":
+        if np.any(gravity != 0):
+            raise ValueError("F8 oscillatory pressure channel requires zero gravity")
+        control = _f8_control_from_config(
+            config, data_root=data_root, source_parent=source_parent)
+        periodic_lengths = _f8_periodic_lengths(config)
+    else:
+        # CFD cases have prescribed gravity.  The two-row schedule is explicit
+        # metadata, not sampled from a trajectory.  F2 rigid motion lives in the
+        # geometry contract, so it is intentionally not encoded as future fluid
+        # control data here.
+        control = PrescribedControl(np.array([
+            [0., *gravity.tolist(), 0., 0., 0.],
+            [_horizon(config), *gravity.tolist(), 0., 0., 0.],
+        ], dtype=float))
+        periodic_lengths = None
     dp = config.get("dp_m", config.get("resolution_m"))
     if not isinstance(dp, (int, float)) or not np.isfinite(dp) or float(dp) <= 0:
         raise ValueError("CFD config requires positive dp_m/resolution_m")
@@ -563,11 +671,24 @@ def known_inputs_from_cfd_config(config, *, family, scope_id=None,
         "gravity_mps2": gravity.tolist(), "reference_density_kgm3": float(density),
         "family": str(family), "scope_id": str(scope_id or config.get("scope_id", "cfd")),
     }
+    if str(family).upper() == "F8":
+        physics.update({
+            "periodic_lengths_m": periodic_lengths,
+            "boundary_semantics": "periodic_xy_fixed_no_slip_mdbc_z",
+        })
+        for source_key, public_key in (
+                ("control_amplitude_m_s2", "drive_amplitude"),
+                ("omega_rad_s", "drive_angular_frequency_rad_s"),
+                ("alpha", "dimensionless_drive_parameter")):
+            if source_key in config:
+                physics[public_key] = float(config[source_key])
     # Preserve only an explicitly declared physical kinematic viscosity.  The
     # solver's artificial ``Visco`` coefficient is a numerical treatment and
     # must never be exposed as material viscosity in the public contract.
     viscosity_declared = "physical_kinematic_viscosity_m2_s" in config
     formulation_declared = "viscosity_formulation" in config
+    if str(family).upper() == "F8" and not viscosity_declared:
+        raise ValueError("F8 requires declared physical_kinematic_viscosity_m2_s")
     if formulation_declared and not viscosity_declared:
         raise ValueError(
             "viscosity_formulation requires physical_kinematic_viscosity_m2_s")
@@ -690,8 +811,8 @@ def adapt_manifest(manifest, data_root, *, require_existing=True):
         prepared = _load_prepared(row, root, source_parent=source_parent)
         config = _config_from_prepared(prepared) if prepared is not None else row
         family = str(row.get("family", config.get("family", family_default or "")))
-        if family not in {"F1", "F2", "F4", "F7"}:
-            raise ValueError(f"CFD case {case_id} requires family F1, F2, F4 or F7")
+        if family not in {"F1", "F2", "F4", "F7", "F8"}:
+            raise ValueError(f"CFD case {case_id} requires family F1, F2, F4, F7 or F8")
         split = _split(row, config, source_schema=schema, family=family)
         source_hdf5 = _source_path(row)
         if source_hdf5 is None:

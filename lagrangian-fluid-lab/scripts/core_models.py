@@ -22,7 +22,7 @@ MODEL_VERSION = "core.dual_increment.v1"
 FEATURE_VERSION = "core.finite_triangle_features.v1"
 NORMALIZATION_VERSION = "core.train_normalization.v1"
 INITIALIZATION_VERSION = "core.paired_initialization.common_encoder_head.v1"
-NEIGHBOR_PROVENANCE_VERSION = "core.neighbor_provenance.v1"
+NEIGHBOR_PROVENANCE_VERSION = "core.neighbor_provenance.v2"
 TWO_HOP_SOURCE_RULE = "center-plus-neighbors-of-center-and-one-hop.v1"
 FEATURE_DIM = 23
 OUTPUT_DIM = 6
@@ -67,6 +67,50 @@ def _readonly_boolean_array(value: Any, *, shape=None, name="array") -> np.ndarr
     return result
 
 
+def _periodic_lengths(value=None) -> np.ndarray:
+    """Validate a zero-origin periodic cell; zero lengths denote open axes."""
+    if value is None:
+        value = (0., 0., 0.)
+    original = np.asarray(value)
+    if original.dtype.kind == "b":
+        raise ValueError("periodic lengths must be finite nonnegative metres")
+    try:
+        result = np.asarray(value, dtype=np.float64)
+    except (TypeError, ValueError) as error:
+        raise ValueError("periodic lengths must be finite nonnegative metres") from error
+    if result.shape != (3,) or not np.isfinite(result).all() or np.any(result < 0):
+        raise ValueError("periodic lengths must be a finite nonnegative 3-vector")
+    result = np.array(result, dtype=np.float64, copy=True)
+    result.setflags(write=False)
+    return result
+
+
+def _validate_periodic_positions(position, lengths):
+    """Use the R008 zero-origin cell and reject positions outside that cell."""
+    coordinates = np.asarray(position, dtype=np.float64)
+    if coordinates.ndim != 2 or coordinates.shape[1] != 3 or not np.isfinite(coordinates).all():
+        raise ValueError("position must be finite [N,3]")
+    periodic_axes = np.flatnonzero(lengths > 0)
+    canonical = coordinates.copy()
+    for axis in periodic_axes:
+        length = float(lengths[axis])
+        tolerance = max(1e-12, length * 1e-10)
+        values = coordinates[:, axis]
+        if np.any(values < -tolerance) or np.any(values > length + tolerance):
+            raise ValueError("periodic particle position lies outside its declared base cell")
+        canonical[:, axis] = np.mod(values, length)
+    return canonical
+
+
+def _minimum_image_delta(source, destination, lengths):
+    delta = np.asarray(source, dtype=np.float64) - np.asarray(destination, dtype=np.float64)
+    periodic_axes = np.flatnonzero(lengths > 0)
+    if len(periodic_axes):
+        delta[..., periodic_axes] -= lengths[periodic_axes] * np.rint(
+            delta[..., periodic_axes] / lengths[periodic_axes])
+    return delta
+
+
 @dataclass(frozen=True)
 class NeighborProvenance:
     """Auditable binding for one complete-field neighbor table.
@@ -92,6 +136,7 @@ class NeighborProvenance:
     max_neighbors: int
     truncated_rows: np.ndarray
     radius: float
+    periodic_lengths: np.ndarray | None = None
     version: str = NEIGHBOR_PROVENANCE_VERSION
     required_two_hop_source_rule: str = TWO_HOP_SOURCE_RULE
 
@@ -107,6 +152,7 @@ class NeighborProvenance:
         neighbor_distance2 = np.array(self.neighbor_distance2, dtype=np.float64, copy=True)
         truncated_rows = _readonly_boolean_array(
             self.truncated_rows, name="provenance truncated_rows")
+        periodic_lengths = _periodic_lengths(self.periodic_lengths)
 
         if center_indices.ndim != 1:
             raise ValueError("provenance center_indices must be one-dimensional")
@@ -149,6 +195,7 @@ class NeighborProvenance:
         object.__setattr__(self, "max_neighbors", int(self.max_neighbors))
         object.__setattr__(self, "truncated_rows", truncated_rows)
         object.__setattr__(self, "radius", radius)
+        object.__setattr__(self, "periodic_lengths", periodic_lengths)
 
     def required_two_hop_sources(self, centers=None):
         """Return the canonical source rows bound to the requested centers."""
@@ -310,12 +357,17 @@ def validate_neighbor_provenance(neighbors, provenance, *, centers=None, n=None,
                        if torch.is_tensor(position) else np.asarray(position))
         if coordinates.shape != (rows, 3) or not np.isfinite(coordinates).all():
             raise ValueError("position must be finite [N,3] for provenance validation")
+        lengths = provenance.periodic_lengths
+        if np.any(lengths > 0):
+            coordinates = _validate_periodic_positions(coordinates, lengths)
         for row in range(rows):
             valid_count = int(np.count_nonzero(table[row] >= 0))
             if not valid_count:
                 continue
             row_indices = table[row, :valid_count]
-            actual_distance2 = np.sum((coordinates[row_indices] - coordinates[row]) ** 2, axis=1)
+            actual_distance2 = np.sum(
+                _minimum_image_delta(coordinates[row_indices], coordinates[row], lengths) ** 2,
+                axis=1)
             if not np.allclose(actual_distance2, neighbor_distance2[row, :valid_count],
                                rtol=2e-5, atol=1e-10):
                 raise ValueError("neighbor provenance distance does not match position")
@@ -387,7 +439,8 @@ class Normalization:
                    payload.get("target_reference", "raw_dual_increment_train_shared"))
 
 
-def neighbor_table(state, h, limit=MAX_NEIGHBORS, *, return_provenance=False):
+def neighbor_table(state, h, limit=MAX_NEIGHBORS, *, return_provenance=False,
+                   periodic_lengths=None):
     """Return deterministic complete-field neighbors within ``2h``.
 
     Rows contain source indices sorted by squared distance, then the public
@@ -409,29 +462,49 @@ def neighbor_table(state, h, limit=MAX_NEIGHBORS, *, return_provenance=False):
     n = len(x)
     if n < 1 or x.ndim != 2 or x.shape[1] != 3:
         raise ValueError("state must contain a nonempty [N,3] position field")
-    tree = cKDTree(x)
     radius = float(NEIGHBOR_RADIUS_OVER_H * h)
     radius2 = radius * radius
-    k = min(n, int(limit) + 1)  # self plus up to limit sources
-    distance, index = tree.query(x, k=k, distance_upper_bound=radius, workers=1)
+    lengths = _periodic_lengths(periodic_lengths)
+    if np.any(lengths > 0):
+        if np.any(lengths[lengths > 0] <= 2. * radius):
+            raise ValueError("periodic lengths must exceed twice the neighbor radius")
+        query_points = _validate_periodic_positions(x, lengths)
+        shifts = [((-length, 0., length) if length > 0 else (0.,))
+                  for length in lengths]
+        offsets = np.stack(np.meshgrid(*shifts, indexing="ij"), axis=-1).reshape(-1, 3)
+        image_ids = np.tile(np.arange(n, dtype=np.int64), len(offsets))
+        tree = cKDTree(np.concatenate([query_points + offset for offset in offsets], axis=0))
+    else:
+        query_points = x
+        image_ids = np.arange(n, dtype=np.int64)
+        tree = cKDTree(x)
+    k = min(len(image_ids), int(limit) + 1)  # nearest images plus one truncation witness
+    distance, image_index = tree.query(query_points, k=k,
+                                       distance_upper_bound=radius, workers=1)
     distance = np.asarray(distance).reshape(n, k)
-    index = np.asarray(index).reshape(n, k)
+    image_index = np.asarray(image_index).reshape(n, k)
     neighbors = np.full((n, int(limit)), -1, dtype=np.int64)
     neighbor_distance2 = (np.full((n, int(limit)), np.inf, dtype=np.float64)
                           if return_provenance else None)
     truncated_rows = np.zeros(n, dtype=bool) if return_provenance else None
     truncated = 0
     for i in range(n):
-        ids = index[i][(index[i] < n) & (index[i] != i)]
+        candidates = image_index[i]
+        candidates = candidates[candidates < len(image_ids)]
+        ids = image_ids[candidates]
+        ids = np.unique(ids[ids != i])
         if len(ids) >= int(limit):
             # query() is distance ordered but does not promise deterministic
             # ordering among ties. Expand the boundary before ID sorting.
-            d2 = np.sum((x[ids] - x[i]) ** 2, axis=1)
+            d2 = np.sum(_minimum_image_delta(x[ids], x[i], lengths) ** 2, axis=1)
             cutoff = float(np.partition(d2, int(limit) - 1)[int(limit) - 1])
             expanded_radius = np.nextafter(min(radius, np.sqrt(max(cutoff, 0.0))), np.inf)
-            ids = np.asarray(tree.query_ball_point(x[i], expanded_radius), dtype=np.int64)
-            ids = ids[(ids != i) & (np.sum((x[ids] - x[i]) ** 2, axis=1) <= radius2 * (1.0 + 1e-12))]
-        d2 = np.sum((x[ids] - x[i]) ** 2, axis=1)
+            candidates = np.asarray(tree.query_ball_point(query_points[i], expanded_radius), dtype=np.int64)
+            ids = np.unique(image_ids[candidates])
+            ids = ids[ids != i]
+            d2 = np.sum(_minimum_image_delta(x[ids], x[i], lengths) ** 2, axis=1)
+            ids = ids[d2 <= radius2 * (1.0 + 1e-12)]
+        d2 = np.sum(_minimum_image_delta(x[ids], x[i], lengths) ** 2, axis=1)
         # np.lexsort uses the final key as primary: distance, then ID, then
         # zone for the rare case where IDs are reused across zones.
         order = np.lexsort((state.particle_zone[ids], state.particle_id[ids], d2))
@@ -451,6 +524,7 @@ def neighbor_table(state, h, limit=MAX_NEIGHBORS, *, return_provenance=False):
         "field_particle_count": int(n),
         "neighbor_radius_over_h": NEIGHBOR_RADIUS_OVER_H,
         "max_neighbors": int(limit),
+        "periodic_lengths_m": lengths.tolist(),
     }
     if not return_provenance:
         return neighbors, diagnostics
@@ -473,6 +547,7 @@ def neighbor_table(state, h, limit=MAX_NEIGHBORS, *, return_provenance=False):
         max_neighbors=int(limit),
         truncated_rows=truncated_rows,
         radius=radius,
+        periodic_lengths=lengths,
     )
     return neighbors, diagnostics, provenance
 
@@ -725,7 +800,17 @@ class DualIncrementModel(nn.Module):
                 raise RuntimeError("two-hop halo omitted a required source")
             src = values[source_index]
             dst = values[target_index]
-            relative_position = (position[safe] - position[destinations, None]) / smoothing_length
+            relative_position = position[safe] - position[destinations, None]
+            if provenance is not None and np.any(provenance.periodic_lengths > 0):
+                lengths = torch.as_tensor(
+                    np.array(provenance.periodic_lengths, copy=True),
+                    dtype=relative_position.dtype,
+                    device=relative_position.device)
+                safe_lengths = torch.where(lengths > 0, lengths, torch.ones_like(lengths))
+                minimum_image = relative_position - torch.round(
+                    relative_position / safe_lengths) * lengths
+                relative_position = torch.where(lengths > 0, minimum_image, relative_position)
+            relative_position = relative_position / smoothing_length
             relative_velocity = features[safe, 3:6] - features[destinations, None, 3:6]
             distance = torch.linalg.vector_norm(relative_position, dim=-1, keepdim=True)
             edge = torch.cat((dst[:, None].expand_as(src), src,
@@ -745,8 +830,10 @@ def tensors(state, known, dt, device):
     normalizing features or changing center chunks.
     """
     features, acceleration = node_features(state, known, dt)
+    periodic_lengths = known.physics.get("periodic_lengths_m", (0., 0., 0.))
     neighbors, diagnostics, provenance = neighbor_table(
-        state, float(known.numerics["h_m"]), return_provenance=True)
+        state, float(known.numerics["h_m"]), return_provenance=True,
+        periodic_lengths=periodic_lengths)
     args = (
         torch.as_tensor(features, dtype=torch.float32, device=device),
         torch.tensor(np.asarray(state.position), dtype=torch.float32, device=device),
