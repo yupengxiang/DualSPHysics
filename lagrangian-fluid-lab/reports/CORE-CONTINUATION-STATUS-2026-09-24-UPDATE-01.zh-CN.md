@@ -6,7 +6,7 @@
 
 - 对 PLAN 中六项文献人工核对官方出版页/项目页，书目信息和核心主张已记入[文献来源审计](LITERATURE-SOURCE-AUDIT-2026-09-24.zh-CN.md)。缺少规范 `verify_papers.py`，因此六项的自动交叉验证仍全为 **UNVERIFIED**。
 - F4 supportcap R002 的授权、冻结 recipe 和静态绑定通过只读检查；新的环境快照发现 1 分钟 load 超过 CPU affinity，故未调用会先写入 one-shot start receipt 的执行器。详见[资源门快照](F4-SUPPORTCAP-R002-CPU-PREFLIGHT-RESOURCE-GATE-2026-09-24.zh-CN.md)。一次 CPU-native 预检授权仍未消耗，solver/GPU/queue/T2/runtime 均未获授权。
-- F3 material row30 R003 的完整运行已有终态审计：进程返回成功、836/836 帧完整且质量闭合，但每来源未知比例分别为 1.0742% 和 1.0254%，均超过冻结的 1% 门；该 attempt 未绑定独立 512-vs-4096 CDF 对照。因此 `row_acceptance=false`、T2 credit=0。审计未打开/哈希大型 HDF5/NPZ 负载；不能把其回执复核说成原始负载独立验证。新 attempt 仍需新的 root decision，旧尝试不重跑。
+- F3 material row30 R003 的完整运行已有终态审计：进程返回成功、836/836 帧完整且质量闭合，但每来源未知比例分别为 1.0742% 和 1.0254%，均超过冻结的 1% 门；该 attempt 未绑定独立 512-vs-4096 CDF 对照。因此 `row_acceptance=false`、T2 credit=0。终态审计本身未独立打开/哈希 HDF5；随后单独完成了输出 HDF5 哈希核验与 43 个失败 seed 的只读近壁诊断，细节见 [R003 失败归因](F3-MATERIAL-ROW30-R003-FAILURE-ATTRIBUTION-2026-09-24.zh-CN.md)。新 attempt 仍需新的 root decision，旧尝试不重跑。
 - F8 R008 CPU/native 预检已有 post-run 审计确认其证据哈希闭合：GenCase 与 native decode 成功、几何审计通过；固定粒子数为 4,096、流体粒子数为 6,656、总数 10,752。该结果仍为 zero-credit preflight，solver 未启动，也不计为 T1 家族。
 - Core 接口、打包、评测、复现、训练契约和完成判据的定向测试共 **120 passed**：Core reader/model/package/reproduction 71 项、F4 supportcap R002 静态/预检 17 项、Core campaign 完成判据 32 项。
 - 上述文献审计和 F4 资源快照已各自提交并推送；本更新本身只是工作记录，不更改数据、登记或资格。
