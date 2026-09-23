@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -37,3 +38,14 @@ def test_authorization_writer_is_immutable(tmp_path: Path) -> None:
     authorization.write_authorization(target)
     with pytest.raises(FileExistsError, match="immutable F8 r002 authorization"):
         authorization.write_authorization(target)
+
+
+def test_retained_r002_attempt_is_zero_credit_and_does_not_decode_after_gencase_failure() -> None:
+    receipt_path = ROOT / "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/cpu-native-preflight-v1/receipt.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert receipt["scope_id"].endswith("R002")
+    assert receipt["qualification_credit"] == 0
+    assert receipt["execution_controls"]["cpu_gencase_invoked"] is True
+    assert receipt["execution_controls"]["native_decode_invoked"] is False
+    assert receipt["execution_controls"]["solver_invoked"] is False
+    assert receipt["r001_is_immutable_closed_history"]["r001_evidence_mutated"] is False
