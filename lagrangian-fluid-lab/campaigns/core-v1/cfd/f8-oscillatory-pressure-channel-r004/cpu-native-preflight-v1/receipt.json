@@ -1,0 +1,212 @@
+{
+  "authorization": {
+    "bytes": 7446,
+    "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-authorization-v1/authorization.json",
+    "role": "r004 one-shot authorization",
+    "sha256": "1272882062a2403ec33b77535a925d88d66956ceea8b3e542ea7af376bf8c0fd"
+  },
+  "checks": {
+    "generated_fixed_boundary_count_positive": true,
+    "generated_one_fluid_marker": true,
+    "generated_z_wall_planes_present": false,
+    "native_arrays_finite": true,
+    "native_boundary_normal_count_positive": false,
+    "native_boundary_normals_finite_and_nonzero": false,
+    "native_boundary_particle_count_positive": true,
+    "native_fluid_mass_matches": false,
+    "native_fluid_particle_count_exact": false,
+    "native_ids_unique": true,
+    "native_total_count_consistent": true
+  },
+  "closed_prior_scopes": [
+    {
+      "same_input_retry_forbidden": true,
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001"
+    },
+    {
+      "r002_output_reuse_forbidden": true,
+      "same_input_retry_forbidden": true,
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002"
+    },
+    {
+      "r003_output_reuse_forbidden": true,
+      "same_input_retry_forbidden": true,
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R003"
+    }
+  ],
+  "commands": {
+    "cpu_gencase": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R004_Def",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1/generated/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R004",
+      "-save:all"
+    ],
+    "native_decode": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1/generated/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R004.bi4",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1/native-initial"
+    ]
+  },
+  "created_at_utc": "2026-09-23T03:05:45.004570+00:00",
+  "execution_controls": {
+    "cpu_gencase_invoked": true,
+    "denominator_mutation": 0,
+    "gpu_invoked": false,
+    "ledger_mutation": 0,
+    "native_decode_invoked": true,
+    "qualification_credit": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_invoked": false,
+    "training_started": false,
+    "worker_started": false
+  },
+  "failure": "one or more frozen r004 native-initial hard gates failed",
+  "failure_policy": "Any failure closes r004; same-input retry and r001--r003 output reuse are forbidden.",
+  "finished_at_utc": "2026-09-23T03:05:45.357215+00:00",
+  "gencase": {
+    "generated_xml": {
+      "bytes": 4640,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1/generated/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R004.xml",
+      "role": "GenCase XML",
+      "sha256": "9b3d637a0f22d557af11d03fb4bac0103621df311bcaeb63f6f7a3dab2c4d377"
+    },
+    "native_bi4": {
+      "bytes": 316840,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1/generated/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R004.bi4",
+      "role": "GenCase BI4",
+      "sha256": "5bd2f64dd7687d3c9f63829ef7d8cf871a0d199cd6cae452a50d0f71f27606ad"
+    },
+    "returncode": 0,
+    "stdout": {
+      "bytes": 5482,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1/gencase.stdout.log",
+      "role": "CPU GenCase stdout",
+      "sha256": "c754bfc418963ed4ab71943edfea4ac30f2080d4e3de225a5e4c110d531a918b"
+    }
+  },
+  "generated_colocated_control_copy": {
+    "expected_path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1/generated/F8_OPC_q0p500_r004_acceleration.csv",
+    "hash_matches": true,
+    "observed": {
+      "bytes": 35956,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1/generated/F8_OPC_q0p500_r004_acceleration.csv",
+      "role": "generated colocated acceleration control",
+      "sha256": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1"
+    }
+  },
+  "generated_groups": {
+    "fixed": [
+      {
+        "begin": "0",
+        "count": "512",
+        "mk": "2",
+        "mkbound": "0"
+      }
+    ],
+    "fluid": [
+      {
+        "begin": "512",
+        "count": "6656",
+        "mk": "1",
+        "mkfluid": "0"
+      }
+    ]
+  },
+  "input": {
+    "control": {
+      "bytes": 35956,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/input/F8_OPC_q0p500_r004_acceleration.csv",
+      "role": "r004 colocated control",
+      "sha256": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1"
+    },
+    "definition": {
+      "bytes": 2266,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R004_Def.xml",
+      "role": "r004 Definition",
+      "sha256": "d26fddf60f11467485d35996315344fcb2385784379b9e4767c2dff295464a83"
+    }
+  },
+  "input_constantsdef": {
+    "checks": {
+      "cflnumber": true,
+      "coefh": true,
+      "coefsound": true,
+      "gamma": true,
+      "gravity": true,
+      "hswl": true,
+      "hswl_explicit_auto_zero": true,
+      "rhop0": true,
+      "rhopgradient": true,
+      "speedsound": true,
+      "speedsystem": true
+    },
+    "observed": {
+      "cflnumber": {
+        "value": "0.2"
+      },
+      "coefh": {
+        "value": "1.0"
+      },
+      "coefsound": {
+        "value": "1"
+      },
+      "gamma": {
+        "value": "7"
+      },
+      "gravity": {
+        "x": "0",
+        "y": "0",
+        "z": "0"
+      },
+      "hswl": {
+        "auto": "true",
+        "value": "0"
+      },
+      "rhop0": {
+        "value": "1000"
+      },
+      "rhopgradient": {
+        "value": "1"
+      },
+      "speedsound": {
+        "auto": "false",
+        "value": "10"
+      },
+      "speedsystem": {
+        "auto": "true",
+        "value": "0"
+      }
+    },
+    "pass": true
+  },
+  "native": {
+    "boundary_normals": null,
+    "boundary_particles": 512,
+    "decoded_arrays": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1/native-initial/PART_0000",
+    "fluid_mass_kg": 2.808,
+    "fluid_particles": 6656,
+    "total_particles": 7168
+  },
+  "native_decode": {
+    "returncode": 0,
+    "stdout": {
+      "bytes": 722,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1/native-decode.stdout.log",
+      "role": "native BI4 decoder stdout",
+      "sha256": "3132e83019a3365a811f9fa0eb58de31d8174ebb4f3f6bca6eed1ee3b90a42ff"
+    }
+  },
+  "one_shot_lock": {
+    "bytes": 523,
+    "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1/one-shot-lock.json",
+    "role": "pre-execution retry lock",
+    "sha256": "deb713be2333ae89e3d4a8d21e8105128faa21170877eaa3b484d60553fca606"
+  },
+  "pass": false,
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "schema": "core.cfd.f8.r004_cpu_native_preflight.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R004",
+  "status": "cpu_native_preflight_failed_hard_audit"
+}
