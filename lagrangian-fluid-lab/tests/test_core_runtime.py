@@ -266,6 +266,18 @@ def test_throughput_plateau_stops_increasing_colocation():
         validate_spec(invalid)
 
 
+def test_oom_at_higher_concurrency_stops_upscaling_despite_throughput_gain():
+    rows = [
+        {"concurrency": 1, "qualified_units_per_hour": 100, "oom": False},
+        {"concurrency": 2, "qualified_units_per_hour": 180, "oom": True},
+    ]
+
+    decision = concurrency_decision(rows)
+
+    assert decision["increase"] is False
+    assert decision["reason"] == "failure_or_oom"
+
+
 def test_repair_canary_unblocks_before_bulk_cells_without_changing_fifo_ties():
     from scripts.core_runtime import queue_priority
     jobs=[{'job_id':'bulk','created':1,'spec':{'category':'qualification'}},
