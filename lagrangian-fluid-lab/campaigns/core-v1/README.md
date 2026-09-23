@@ -136,19 +136,25 @@ The full-field graph inference profiles used all 34,560 particles: one cold step
 was 3.08 s on Ada and 2.75 s on H200. These are bounded inference measurements,
 not training-memory or steady-state throughput measurements.
 
-### Completion snapshot
+### Completion snapshot (2026-09-23)
 
 The authoritative `completion.json` currently reports `can_finalize=false`:
 
 - T1 families: F3 and F4 (2 of the required 3);
+- third-family route: F8's fully filled, body-force-driven oscillatory channel is accepted as the selected mechanism, but is **not yet T1-qualified**;
 - macro-T2 families: 0 of 2;
 - formal training runs: 0 of 9;
-- missing registered T1 case-runs: 288 of 432;
+- missing registered T1 case-runs: 288 for the currently qualified F3/F4 denominator; the remaining 144 of the 432 target runs depend on a third qualified family;
 - missing registered material case-runs: 288 of 288;
 - independent reader reproduction and causal-lineage checks: passed.
 
 These counts are completion denominators, not a request to pad the dataset with
-unqualified or duplicate cases. The next admissible step is a new F6 Definition
-revision with explicit `massbody`, `center`, and `inertia`, followed by an
-independent root review and CPU/native gate. The failed Definition cannot be
-retried or relabeled to satisfy the gate.
+unqualified or duplicate cases. F8 R007 remains a geometry-only native preflight
+with zero qualification credit. The R008 scope design passed Terra High static
+review, also with zero credit and no execution authority. The next static step
+is to materialize and hash-close fresh per-configuration R008 Definitions and
+controls. Any native preflight, solver run, T1 qualification, or resource
+admission remains a separate gate; no R007 inputs or outputs are reusable as
+R008 qualification evidence. The previously explored F6 Definition failure
+remains immutable and cannot be retried or relabeled to satisfy the third-family
+gate.
