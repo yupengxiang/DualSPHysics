@@ -51,15 +51,15 @@
 
 ### 3. 调研如何影响设计
 
-文献已按原始论文／项目页面人工核对。当前环境缺少 `research-lit` 的自动引用校验器，下列论文的自动交叉校验状态统一记为 **UNVERIFIED**，不声称完成了自动引用审计。
+截至 2026-09-24，六项依据已按出版方论文页、arXiv 作者记录或官方项目页逐条人工复核；书目与主张的核验结果见[文献来源审计](lagrangian-fluid-lab/reports/PLAN-REFERENCES-AUDIT-2026-09-24.zh-CN.md)。当前环境缺少 `research-lit` 的三源自动引用校验器，因此机器自动交叉校验状态仍统一为 **UNVERIFIED**；人工主来源核验不替代自动核验，也不声称自动审计通过。
 
 | 工作 | 对本项目的直接启示 |
 |---|---|
 | [GNS](https://proceedings.mlr.press/v119/sanchez-gonzalez20a.html) | 图消息传递和长期误差积累必须纳入基线设计；单步误差不足以说明模拟能力 |
-| [LagrangeBench](https://arxiv.org/abs/2309.16342) | 已有拉格朗日流体数据、统一训练接口和物理指标；我们的贡献不能只表述为“粒子轨迹数据集” |
-| [Neural SPH](https://arxiv.org/abs/2402.06275) | 聚团、压力／黏性等物理成分影响长期稳定性；当前已知外力残差模型不能冒称完整 Neural SPH |
-| [FD-Bench](https://arxiv.org/abs/2505.20349) | 空间模型、时间推进、损失函数和数值求解器比较应分别控制变量 |
-| [Fueltank](https://ojs.aaai.org/index.php/AAAI/article/view/33752) | 三维晃荡和多方向驱动已有相关数据，不能据此直接主张创新性 |
+| [LagrangeBench](https://proceedings.neurips.cc/paper_files/paper/2023/hash/ccac3b120c7dc86d45f56830732b62be-Abstract.html) | 已有多类 SPH 拉格朗日数据集、JAX API、GNS／SEGNN 基线和动能／点云距离指标；我们的贡献不能只表述为“粒子轨迹数据集” |
+| [Neural SPH](https://proceedings.mlr.press/v235/toshev24a.html) | 该工作指出张力不稳定导致的粒子聚团，并将压力、黏性、外力等 SPH 成分加入 GNN；当前已知外力残差模型不能冒称完整 Neural SPH |
+| [FD-Bench](https://arxiv.org/abs/2505.20349) | 作者 arXiv v2 记录标注已被 KDD 2026 接收；其空间、时间、损失模块对照及传统求解器比较提示应分别控制变量 |
+| [Fueltank：A Pioneering Neural Network Method for Efficient and Robust Fuel Sloshing Simulation in Aircraft](https://ojs.aaai.org/index.php/AAAI/article/view/33752) | 已有航空燃油晃荡数据集覆盖多方向旋转工况；不能据此直接主张相关晃荡／多方向驱动问题具有创新性 |
 | [FluidLab](https://fluidlab2023.github.io/) | 流体任务可以围绕输运和交互设计，但其模拟数据不能直接充当本项目的 CFD 真值 |
 
 据此，本项目重点验证的贡献是：**在有明确数值可信范围的三维自由表面流动中，建立材料来源、通过、驻留、回流和终点任务，并与动力学预测、泛化能力及计算成本统一评估。**
