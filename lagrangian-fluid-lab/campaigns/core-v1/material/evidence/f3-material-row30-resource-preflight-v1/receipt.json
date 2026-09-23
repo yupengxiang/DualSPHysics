@@ -1,0 +1,142 @@
+{
+  "authorized_scope": "one fresh F3-material-30 resource/scheduler preflight only",
+  "bindings": {
+    "backend": {
+      "bytes": 58481,
+      "exists": true,
+      "expected_sha256": null,
+      "hash_matches_expected": true,
+      "path": "scripts/f3_native_volume_mls.py",
+      "role": "current-frame MLS backend",
+      "sha256": "e1c5fc39e73781d386c7da2874c1749b5223c8209eaf8f25bb4453346df51ff9"
+    },
+    "launch_readiness": {
+      "bytes": 42626,
+      "exists": true,
+      "expected_sha256": null,
+      "hash_matches_expected": true,
+      "path": "campaigns/core-v1/material/evidence/f3-material-t2-launch-readiness-v1/receipt.json",
+      "role": "row30 readiness audit",
+      "sha256": "954b9e261422cf4c515c108e0d72c0a67aa800bc9af78f340584e30decd09c5b"
+    },
+    "prepared": {
+      "bytes": 4185,
+      "exists": true,
+      "expected_sha256": "23d151c07c53c83b3048be9b665722161baaef37fc31e6ce6ec42e4b26b36894",
+      "hash_matches_expected": true,
+      "path": "campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json",
+      "role": "production source preparation",
+      "sha256": "23d151c07c53c83b3048be9b665722161baaef37fc31e6ce6ec42e4b26b36894"
+    },
+    "resource_ledger": {
+      "bytes": 142018,
+      "exists": true,
+      "expected_sha256": null,
+      "hash_matches_expected": true,
+      "path": "campaigns/l1-resume/continuation/RESOURCE-LEDGER.json",
+      "role": "immutable historical resource ledger",
+      "sha256": "3601f948928ec9760bcf562b56d4b5511d35025f98992c98ed2c45e07909294e"
+    },
+    "resource_limits": {
+      "bytes": 1630,
+      "exists": true,
+      "expected_sha256": null,
+      "hash_matches_expected": true,
+      "path": "campaigns/l1-resume/continuation/RESOURCE-LIMITS.json",
+      "role": "historical limit record",
+      "sha256": "a991ec3cc84471c223a754ecd65e2fdc80b34b5b8e73f4c66115d1fbd5140808"
+    },
+    "root_decision": {
+      "bytes": 2514,
+      "exists": true,
+      "expected_sha256": null,
+      "hash_matches_expected": true,
+      "path": "campaigns/core-v1/material/evidence/f3-material-row30-root-decision-v1/packet.json",
+      "role": "authorized root decision",
+      "sha256": "a4c02db71caef05e53c53accea9766473eaa80032844ca9bc6e812a38b4b0af9"
+    },
+    "runtime_status": {
+      "bytes": 20368806,
+      "exists": true,
+      "expected_sha256": null,
+      "hash_matches_expected": true,
+      "path": "campaigns/core-v1/runtime/status.json",
+      "role": "scheduler observation",
+      "sha256": "d674a29482524cc7107cada9b10163965c403b9d157575cf9aab29a7d0e5b672"
+    },
+    "source_h5": {
+      "bytes": 900096638,
+      "exists": true,
+      "expected_sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+      "hash_matches_expected": true,
+      "path": "campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+      "role": "read-only production CFD source",
+      "sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4"
+    }
+  },
+  "blockers": [
+    "historical resource ledger has expired",
+    "historical CPU core-hour cap is already exceeded before row30 reservation"
+  ],
+  "candidate": {
+    "backend": "f3_native_volume_mls_current_frame_rk4_v1",
+    "configuration_id": "F3-material-30",
+    "matrix_row": 30,
+    "q": 0.5,
+    "seeds": 4096,
+    "source_role": "production",
+    "substeps": 4,
+    "window": "full native 0--8.35 s"
+  },
+  "execution_controls": {
+    "T2_credit": 0,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "material_worker_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_started": false
+  },
+  "next_required_authority": "A new root decision must establish a non-expired resource budget before any separate worker-launch authorization can be considered.",
+  "proposed_execution_contract": {
+    "argv_template": [
+      "<python>",
+      "<frozen-backend>",
+      "--source",
+      "campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+      "--prepared",
+      "campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen-PREPARED.json",
+      "--output",
+      "campaigns/core-v1/material/attempts/f3-material-30-canonical-s4-r001/trace.h5",
+      "--audit-output",
+      "campaigns/core-v1/material/attempts/f3-material-30-canonical-s4-r001/source-preflight.json",
+      "--seeds",
+      "4096",
+      "--substeps",
+      "4"
+    ],
+    "new_output_namespace": "campaigns/core-v1/material/attempts/f3-material-30-canonical-s4-r001",
+    "resource_request": {
+      "cpu_cores": 2,
+      "gpu_peak_mib": 0,
+      "io_weight": 0.25,
+      "ram_mib": 8192
+    },
+    "reuse_of_prior_s2_or_any_prior_output": "forbidden",
+    "same_argv_resume_only": true
+  },
+  "resource_assessment": {
+    "historical_cpu_limit_core_hours": 896.0,
+    "historical_cpu_used_core_hours": 911.9579510388137,
+    "historical_expiry_utc": "2026-09-16T00:00:00+00:00",
+    "historical_material_limit": 32,
+    "historical_material_used": 16,
+    "postprocess_reserve_seconds": 600.0,
+    "proposed_cpu_core_hours": 11.893361255095547,
+    "runtime_active_owned_jobs": 0,
+    "s2_observed_wall_seconds": 10404.025129585993,
+    "s4_conservative_estimated_wall_seconds": 20808.050259171985
+  },
+  "schema": "core.material.f3.row30.resource_preflight.v1",
+  "status": "blocked_no_worker_authorized"
+}
