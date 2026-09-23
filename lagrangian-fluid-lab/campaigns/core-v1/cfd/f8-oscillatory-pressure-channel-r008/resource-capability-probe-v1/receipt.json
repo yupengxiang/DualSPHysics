@@ -1,0 +1,78 @@
+{
+  "schema": "core.cfd.f8_r008_rootless_cgroup_memory_capability_probe.v1",
+  "record_id": "f8-oscillatory-pressure-channel-r008-rootless-cgroup-memory-capability-probe-v1",
+  "created_at_utc": "2026-09-23T10:54:52Z",
+  "host": {
+    "hostname": "user-SYS-421GE-TNRT",
+    "user_uid": 1001,
+    "systemd_version": "249 (249.11-0ubuntu3.22)",
+    "cgroup_version": 2
+  },
+  "subject": {
+    "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+    "resource_admission_reference": {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/resource-admission-v1/receipt.json",
+      "sha256": "cadbef915bddc1888a927b7aa74e5f3f163a91d204f28db0afcf9742710a2077"
+    },
+    "preflight_request_reference": {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-request-v1/request.json",
+      "sha256": "bd6995f4e21614fc400a06262b1458e876517af5c588f4b9441ae05e54ec3873"
+    }
+  },
+  "probe": {
+    "kind": "rootless_transient_systemd_scope_memory_limit_and_process_tree_membership",
+    "unit": "codex-f8-r008-memorycap-4g-probe-20260923.scope",
+    "command": [
+      "systemd-run", "--user", "--scope",
+      "--unit=codex-f8-r008-memorycap-4g-probe-20260923",
+      "--property=MemoryMax=4294967296",
+      "--property=MemoryAccounting=yes",
+      "/usr/bin/python3", "-c",
+      "import os,subprocess,time; p=subprocess.Popen(['/usr/bin/sleep','16']); print('parent_pid',os.getpid(),'child_pid',p.pid,flush=True); time.sleep(16)"
+    ],
+    "unit_active_during_measurement": true,
+    "systemd_control_group": "/user.slice/user-1001.slice/user@1001.service/app.slice/codex-f8-r008-memorycap-4g-probe-20260923.scope",
+    "systemd_memory_accounting": true,
+    "systemd_memory_max_bytes": 4294967296,
+    "cgroup_memory_max_bytes": 4294967296,
+    "cgroup_memory_peak_bytes": 4657152,
+    "cgroup_process_ids": [1420752, 1420753],
+    "parent_pid": 1420752,
+    "child_pid": 1420753,
+    "parent_and_child_same_cgroup": true,
+    "memory_events": {
+      "low": 0,
+      "high": 0,
+      "max": 0,
+      "oom": 0,
+      "oom_kill": 0,
+      "oom_group_kill": 0
+    }
+  },
+  "assessment": {
+    "requested_cap_applied_to_test_scope": true,
+    "process_tree_membership_observed": true,
+    "native_workload_peak_rss_measured": false,
+    "cap_pressure_or_oom_behavior_tested": false,
+    "f8_r008_resource_admission_resolved": false,
+    "qualification_credit": 0,
+    "remaining_blockers": [
+      "The probe used only a Python parent and sleep child; it did not run GenCase or the native decoder.",
+      "Actual R008 native-process peak memory and any limit event remain unmeasured.",
+      "The one-case native preflight request remains request-only and grants no native execution authority.",
+      "The current host CPU schedule remains blocked while F3 material row30 R003 is active and load exceeds available CPUs."
+    ]
+  },
+  "execution_controls": {
+    "systemd_scope_probe_started": true,
+    "gencase_invoked": false,
+    "native_decoder_invoked": false,
+    "solver_invoked": false,
+    "gpu_started": false,
+    "queue_or_scheduler_started": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "runtime_namespace_created": false,
+    "qualification_credit": 0
+  }
+}
