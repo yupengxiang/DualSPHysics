@@ -295,3 +295,72 @@ def test_missing_receipt_after_recovery_window_stays_attention(tmp_path, monkeyp
     row = store.jobs()[0]
     assert row["status"] == "attention"
     assert row["result"]["reason"] == "missing_receipt_requires_reconciliation"
+
+
+def test_unreachable_active_host_keeps_reservation_and_never_duplicates_launch(tmp_path):
+    store = _active_store(tmp_path, job_id="unreachable-active", attempt_id="attempt-live")
+    store.update(
+        "unreachable-active", "running",
+        allocation={"_host": "ada", "reserved_gpu_mib": 0},
+    )
+    store.submit(
+        {
+            "job_id": "queued-competitor",
+            "argv": ["/bin/true"],
+            "cwd": "/tmp",
+            "host": "ada",
+            "resources": {"cpu_cores": 1, "ram_mib": 128,
+                          "gpu_peak_mib": 0, "io_weight": 0},
+            "required_outputs": [],
+            "timeout_seconds": 10,
+        }
+    )
+    coordinator = Coordinator(
+        store.root,
+        {"ada": {"lab": str(tmp_path), "python": "python"}},
+    )
+    snapshot = {
+        "time": 0,
+        "hostname": "test",
+        "cpu_count": 2,
+        "ram_total_mib": 4096,
+        "ram_available_mib": 3072,
+        "disk_free_bytes": 10**9,
+        "gpus": [],
+        "gpu_processes": [],
+    }
+    calls = []
+    launches = []
+
+    def unavailable_collect_but_live_probe(name, *args):
+        calls.append((name, args[0]))
+        if args[0] == "collect":
+            raise TimeoutError("host is temporarily unreachable")
+        if args[0] == "probe":
+            return snapshot
+        raise AssertionError(args)
+
+    coordinator.call = unavailable_collect_but_live_probe
+    coordinator.launch = lambda *args, **kwargs: launches.append((args, kwargs))
+
+    first = coordinator.tick()
+    active = store.jobs()[0]
+    assert active["status"] == "attention"
+    assert active["attempt_id"] == "attempt-live"
+    assert active["allocation"] == {"_host": "ada", "reserved_gpu_mib": 0}
+    assert active["result"]["reason"] == "host_unreachable"
+    assert first["counts"]["attention"] == 1
+    assert first["counts"]["queued"] == 1
+    assert launches == []
+
+    coordinator.tick()
+    events = store.db.execute(
+        "SELECT event FROM events WHERE job_id=? ORDER BY id", ("unreachable-active",)
+    ).fetchall()
+    assert [row[0] for row in events].count("recovery_registered") == 1
+    assert calls == [
+        ("ada", "collect"), ("ada", "probe"),
+        ("ada", "collect"), ("ada", "probe"),
+    ]
+    assert launches == []
+    assert [row["status"] for row in store.jobs()] == ["attention", "queued"]
