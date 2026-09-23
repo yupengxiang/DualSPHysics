@@ -50,11 +50,14 @@ def normalize_doi(value: str) -> str:
 def _request_bytes(
     url: str, *, data: bytes | None = None, timeout: float = 20
 ) -> bytes | None:
-    accept = "application/atom+xml" if url.startswith(ARXIV_API) else "application/json"
     headers = {
         "User-Agent": USER_AGENT,
-        "Accept": accept,
     }
+    # arXiv returns Atom by contract. Its official urllib example sends no
+    # Accept header; some API frontends reject an explicit Atom media type
+    # with HTTP 406, so leave content negotiation at the HTTP default there.
+    if not url.startswith(ARXIV_API):
+        headers["Accept"] = "application/json"
     if url.startswith(S2_BATCH_API) and os.environ.get("S2_API_KEY"):
         headers["x-api-key"] = os.environ["S2_API_KEY"]
     if data is not None:

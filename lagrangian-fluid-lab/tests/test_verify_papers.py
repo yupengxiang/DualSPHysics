@@ -40,7 +40,7 @@ def _install_catalog_responses(monkeypatch, *, crossref_title=None, fail=False):
         if fail:
             raise OSError("temporary catalog outage")
         if url.startswith(verifier.ARXIV_API):
-            assert request.get_header("Accept") == "application/atom+xml"
+            assert request.get_header("Accept") is None
             return _Response(
                 b'<feed xmlns="http://www.w3.org/2005/Atom">'
                 b"<entry><id>https://arxiv.org/abs/2401.01234v2</id>"

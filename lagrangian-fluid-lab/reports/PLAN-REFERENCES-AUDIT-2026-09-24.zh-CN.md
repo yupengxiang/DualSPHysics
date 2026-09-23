@@ -27,4 +27,6 @@
 
 随后在新会话按技能规则重试一次，见[第三份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN2.json)：状态仍为 2 项 `verified`、1 项 `unverified`、3 项 `verify_pending`。Semantic Scholar 本次可用；三条无 DOI 记录的 Crossref 精确标题搜索均为 `not_found`，不再报冲突；arXiv 对五条有 arXiv ID 的记录仍统一返回 HTTP 406。依技能规则，这三篇保持 pending，不在本会话继续重试；自动核验尚未整体通过。
 
+对持续 406 的本地根因排查发现，请求代码此前显式发送 `Accept: application/atom+xml`；[arXiv 官方 API 手册](https://info.arxiv.org/help/api/user-manual.html)的 Python `urllib` 示例不设置 `Accept`，并说明 API 响应固定为 Atom。现已移除该显式头并添加请求头回归断言；这是待下一会话在线核验的修复假设，尚未据此声称 406 已解决。
+
 离线回归：`tests/test_verify_papers.py`，7 项通过，覆盖三源成功、标题冲突、临时网络失败、无 DOI 的 Crossref 精确标题查找与模糊未命中、以及 DOI-only 记录。该工具只验证书目身份，不判断论文主张、质量或本项目创新性。
