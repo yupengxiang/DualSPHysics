@@ -121,6 +121,9 @@ reproduction is explicitly separate from final GPU-model product reproduction.
   independent 512-versus-4096 CDF comparison was not bound. It receives no T2
   credit; see
   [`row30 R003 terminal audit`](material/evidence/f3-material-row30-r003-terminal-audit-v1/receipt.json).
+  A read-only failure attribution separates late support loss dominated by
+  wall-occlusion rejection from the small low-effective-sample-size component:
+  [`F3 row30 failure analysis`](../../reports/F3-MATERIAL-ROW30-R003-FAILURE-ANALYSIS-2026-09-24.zh-CN.md).
   The separately requested row-30 resource/scheduler preflight was blocked and
   did not authorize a worker; see
   [`row30 resource preflight v2`](material/evidence/f3-material-row30-resource-preflight-v2/receipt.json).
