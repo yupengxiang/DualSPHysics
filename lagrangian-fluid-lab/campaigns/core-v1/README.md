@@ -177,3 +177,6 @@ Definition omitted GenCase's required `hswl` element, and the review's test-file
 hash binding had drifted. Its single CPU preflight is terminal-failed and must
 not be retried. The immutable postmortem is
 [`static-design-review-postmortem-v1/receipt.json`](cfd/f8-oscillatory-pressure-channel-r002/static-design-review-postmortem-v1/receipt.json).
+The active R008 renderer now has a separate regression test for the frozen
+constant set across all 47 rendered Definitions:
+[`test_f8_r008_definition_genesis_contract_v1.py`](../../tests/test_f8_r008_definition_genesis_contract_v1.py).
