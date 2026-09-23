@@ -4,6 +4,8 @@ import subprocess
 import sys
 import time
 
+import pytest
+
 import scripts.core_runtime as runtime
 from scripts.core_runtime import Coordinator, Store
 
@@ -431,3 +433,108 @@ def test_unreachable_active_host_keeps_reservation_and_never_duplicates_launch(t
     ]
     assert launches == []
     assert [row["status"] for row in store.jobs()] == ["attention", "queued"]
+
+
+@pytest.mark.parametrize("live_identity", ["worker_without_heartbeat", "orphan_child"])
+def test_restarted_coordinator_keeps_live_attempt_reserved_without_duplicate_launch(
+        tmp_path, monkeypatch, live_identity):
+    root = tmp_path / "runtime"
+    store = Store(root)
+    active_spec = {
+        "job_id": "live-worker-after-restart",
+        "argv": [sys.executable, "-c", "pass"],
+        "cwd": "/tmp",
+        "host": "ada",
+        "resources": {"cpu_cores": 1, "ram_mib": 512,
+                       "gpu_peak_mib": 20000, "io_weight": 0.5},
+        "required_outputs": [],
+        "timeout_seconds": 120,
+    }
+    competitor = {
+        "job_id": "must-wait-for-live-worker",
+        "argv": [sys.executable, "-c", "pass"],
+        "cwd": "/tmp",
+        "host": "ada",
+        "resources": {"cpu_cores": 1, "ram_mib": 512,
+                       "gpu_peak_mib": 18000, "io_weight": 0.5},
+        "required_outputs": [],
+        "timeout_seconds": 120,
+    }
+    store.submit(active_spec)
+    attempt_id = "attempt-live-worker"
+    attempt_dir = tmp_path / "attempts" / active_spec["job_id"] / attempt_id
+    attempt_dir.mkdir(parents=True)
+    allocation = {"_host": "ada", "gpu_uuid": "GPU-a", "reserved_gpu_mib": 24000}
+    assert store.cas_update(
+        active_spec["job_id"], "running", expected_status="queued",
+        expected_attempt_id=None, expected_job_id=active_spec["job_id"],
+        attempt_id=attempt_id, attempt_dir=str(attempt_dir), allocation=allocation,
+    )
+    store.submit(competitor)
+
+    live_process = subprocess.Popen(
+        [sys.executable, "-c", "import time; time.sleep(60)"])
+    try:
+        live_process_identity = runtime.proc_identity(live_process.pid)
+        assert live_process_identity is not None
+        heartbeat = {}
+        runtime.atomic_json(attempt_dir / "launch.json", {
+            "worker_identity": (live_process_identity
+                                if live_identity == "worker_without_heartbeat"
+                                else {"pid": 999999999, "start_ticks": 0,
+                                      "boot_id": "previous-boot"}),
+        })
+        if live_identity == "orphan_child":
+            heartbeat = {
+                "child_identity": live_process_identity,
+                "process_ids": [live_process.pid],
+                "peak_gpu_mib": 20000,
+            }
+            runtime.atomic_json(attempt_dir / "heartbeat.json", heartbeat)
+        else:
+            assert not (attempt_dir / "heartbeat.json").exists()
+        collected = runtime.collect_attempt(attempt_dir)
+        assert collected["worker_alive"] is (live_identity == "worker_without_heartbeat")
+        assert collected["child_alive"] is (live_identity == "orphan_child")
+
+        coordinator = Coordinator(
+            root, {"ada": {"lab": str(tmp_path), "python": sys.executable}})
+        snapshot = {
+            "time": 0,
+            "hostname": "test",
+            "cpu_count": 128,
+            "ram_total_mib": 250000,
+            "ram_available_mib": 230000,
+            "disk_free_bytes": 10**12,
+            "gpus": [{"index": 0, "uuid": "GPU-a", "name": "test",
+                      "total_mib": 48000, "used_mib": 0, "utilization": 0}],
+            "gpu_processes": [],
+        }
+
+        def observe(host, *argv):
+            if argv[0] == "collect":
+                return runtime.collect_attempt(attempt_dir)
+            if argv[0] == "probe":
+                return dict(snapshot)
+            raise AssertionError(argv)
+
+        monkeypatch.setattr(coordinator, "call", observe)
+        launches = []
+        monkeypatch.setattr(
+            coordinator, "launch",
+            lambda *args, **kwargs: launches.append((args, kwargs)))
+
+        coordinator.tick()
+
+        jobs = {row["job_id"]: row for row in coordinator.store.jobs()}
+        live = jobs[active_spec["job_id"]]
+        assert live["status"] == "running"
+        assert live["attempt_id"] == attempt_id
+        assert live["allocation"] == allocation
+        assert live["heartbeat"] == heartbeat
+        assert jobs[competitor["job_id"]]["status"] == "queued"
+        assert launches == []
+        assert runtime.is_alive(live_process_identity)
+    finally:
+        live_process.terminate()
+        live_process.wait(timeout=5)
