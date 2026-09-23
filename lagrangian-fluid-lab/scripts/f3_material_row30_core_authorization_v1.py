@@ -89,7 +89,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
         "schema": "core.runtime.job_spec.v1", "job_id": JOB_ID, "logical_id": JOB_ID,
         "category": "material_qualification_diagnostic", "attempt_role": "initial",
         "cwd": str(LAB), "host": "ada", "timeout_seconds": TIMEOUT_SECONDS,
-        "argv": [str(LAB / ".venv/bin/python"), str(BACKEND), "--source", str(SOURCE), "--prepared", str(PREPARED), "--output", "{attempt_dir}/trace.h5", "--audit-output", "{attempt_dir}/source-preflight.json", "--seeds", "4096", "--substeps", "4"],
+        "argv": [str(LAB / ".venv/bin/python"), str(BACKEND), "--source", str(SOURCE), "--prepared", str(PREPARED), "--output", "{attempt_dir}/trace.h5", "--audit-output", "{attempt_dir}/source-preflight.json", "--seeds", "4096", "--substeps", "4", "--stop-after", "835"],
         "env": {"OMP_NUM_THREADS": "2", "OPENBLAS_NUM_THREADS": "2", "MKL_NUM_THREADS": "2"},
         "resources": {"cpu_cores": 2, "ram_mib": 8192, "gpu_peak_mib": 0, "io_weight": 0.25},
         "min_free_disk_bytes": 8 * 1024**3,

@@ -18,7 +18,7 @@ def test_authorization_is_isolated_from_expired_historical_ledger() -> None:
     assert value["invariants"]["historical_s2_output_reuse_forbidden"] is True
     assert value["execution_controls"]["worker_started"] is False
     assert spec["job_id"] == authorization.JOB_ID
-    assert spec["argv"][-4:] == ["--seeds", "4096", "--substeps", "4"]
+    assert spec["argv"][-6:] == ["--seeds", "4096", "--substeps", "4", "--stop-after", "835"]
     assert core_runtime.validate_spec(dict(spec))["resources"]["gpu_peak_mib"] == 0
 
 
