@@ -43,3 +43,9 @@
 - blocker：`one-minute load average exceeds the CPUs available to this task`。
 
 因此目前仍不能调用一次性预检执行器；此结论只适用于这些快照时点，后续应在执行前重新检查。
+
+## 后续资源复查（UTC 2026-09-23 16:59:57）
+
+再做一次新的非消耗性快照。F4 R002 授权及全部静态绑定仍通过；CPU affinity 为 128，1 分钟 load 为 `140.03271484375`，仍高于 128。RAM 为 `222,418,374,656` bytes、可用磁盘为 `8,186,364,747,776` bytes，均高于门槛；活跃 F3 material worker 为空。receipt 和输出 namespace 均不存在。
+
+唯一 blocker 仍是 1 分钟 load。没有调用 `run_preflight()` 或 CLI one-shot runner，没有打开或哈希 10.3 GB 源 HDF5，没有启动 tracer/solver/GPU/queue，也没有消耗一次 CPU-native preflight 授权。机器快照：[resource-gate-snapshot-20260923T165957Z-v1.json](../campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/cpu-native-canary-preflight-r002-v1/resource-gate-snapshot-20260923T165957Z-v1.json)，SHA-256：`526a489acf35a3876b7f77cce77d68935f9f461561b8be1218045a424f6edfde`。
