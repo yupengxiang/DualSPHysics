@@ -4,12 +4,12 @@
 
 | 工作／主来源 | 书目核对 | 来源直接支持的启示 | 状态 |
 |---|---|---|---|
-| [Learning to Simulate Complex Physics with Graph Networks — PMLR](https://proceedings.mlr.press/v119/sanchez-gonzalez20a.html) | Sanchez-Gonzalez et al., ICML 2020, PMLR 119 | 粒子图与消息传递可学习物理演化；论文评估多步 rollout 和误差积累，单步误差不足以代表长期能力。 | 人工主来源核对通过；机器核验 `verify_pending`（arXiv 406；Semantic Scholar 精确匹配；Crossref 标题搜索无精确命中） |
+| [Learning to Simulate Complex Physics with Graph Networks — PMLR](https://proceedings.mlr.press/v119/sanchez-gonzalez20a.html) | Sanchez-Gonzalez et al., ICML 2020, PMLR 119；另由 [DBLP ICML 记录](https://dblp.org/rec/conf/icml/Sanchez-Gonzalez20)交叉核对 | 粒子图与消息传递可学习物理演化；论文评估多步 rollout 和误差积累，单步误差不足以代表长期能力。 | 出版方与 DBLP 人工书目交叉核对通过；机器核验仍为 `verify_pending`（arXiv 406；Semantic Scholar 精确匹配；Crossref 标题搜索无精确命中） |
 | [LagrangeBench — NeurIPS 2023 Datasets and Benchmarks](https://proceedings.neurips.cc/paper_files/paper/2023/hash/ccac3b120c7dc86d45f56830732b62be-Abstract.html) | Toshev et al., NeurIPS 2023, Datasets and Benchmarks Track；DOI `10.52202/075280-2830` | 七个 2D/3D SPH 数据集、JAX API、GNS/SEGNN 基线，以及动能 MSE、Sinkhorn 距离等指标；计划已把“统一训练接口”收紧为来源可直接支持的 API 描述。 | 人工主来源核对通过；机器核验 `verified`（Crossref + Semantic Scholar 精确匹配） |
-| [Neural SPH — PMLR](https://proceedings.mlr.press/v235/toshev24a.html) | Toshev et al., ICML 2024, PMLR 235 | 论文指出张力不稳定引起的粒子聚团，并研究将压力、黏性、外力成分加入 GNN；这支持计划中不把仅含已知外力的残差基线称为完整 Neural SPH。 | 人工主来源核对通过；机器核验 `verify_pending`（arXiv 406；Semantic Scholar 精确匹配；Crossref 标题搜索无精确命中） |
+| [Neural SPH — PMLR](https://proceedings.mlr.press/v235/toshev24a.html) | Toshev et al., ICML 2024, PMLR 235；另由 [DBLP ICML 记录](https://dblp.org/rec/conf/icml/ToshevEAB24)及 [arXiv 作者记录](https://arxiv.org/abs/2402.06275)交叉核对 | 论文指出张力不稳定引起的粒子聚团，并研究将压力、黏性、外力成分加入 GNN；这支持计划中不把仅含已知外力的残差基线称为完整 Neural SPH。 | 出版方、DBLP 与 arXiv 人工书目交叉核对通过；机器核验仍为 `verify_pending`（arXiv API 406；Semantic Scholar 精确匹配；Crossref 标题搜索无精确命中） |
 | [FD-Bench — arXiv 2505.20349](https://arxiv.org/abs/2505.20349) | Wang et al.; arXiv v2 页面记录日期为 2026-05-21，并在 comments 标注 accepted by KDD 2026。此处不声称已核到独立 ACM proceedings 页面。 | 来源直接提出空间、时间、损失模块的公平对照、传统数值求解器比较及跨分辨率／初始条件／时间窗泛化；对应计划中的变量隔离设计。 | 作者 arXiv 主来源人工核对通过；机器核验 `verified`（Crossref + Semantic Scholar 精确匹配） |
-| [Fueltank — AAAI proceedings](https://ojs.aaai.org/index.php/AAAI/article/view/33752) | Chen et al., *A Pioneering Neural Network Method for Efficient and Robust Fuel Sloshing Simulation in Aircraft*, AAAI 2025, 39(15), 15957–15965；DOI `10.1609/aaai.v39i15.33752` | AAAI 页面称其航空燃油晃荡数据覆盖四类油箱和多方向旋转工况。计划据此只指出相关工作已存在，不推导本项目 F8 的资格或优先权。 | 出版方主来源人工核对通过；机器核验 `unverified`（Crossref 精确匹配；Semantic Scholar 未找到；不足两个目录） |
-| [FluidLab — 官方项目页](https://fluidlab2023.github.io/) | Xian et al., ICLR 2023 Spotlight；作者项目页提供论文与项目链接。OpenReview 直链在本次访问时触发浏览器验证，未以该页面补充核验。 | 官方页描述的是多材料、可微分的流体操控仿真环境。将其与 CFD 真值数据区分，是本项目的数据来源／证据规则，而不是 FluidLab 页面直接声称的结论。 | 人工主来源核对通过；机器核验 `verify_pending`（arXiv 406；Semantic Scholar 精确匹配；Crossref 标题搜索无精确命中） |
+| [Fueltank — AAAI proceedings](https://ojs.aaai.org/index.php/AAAI/article/view/33752) | Chen et al., *A Pioneering Neural Network Method for Efficient and Robust Fuel Sloshing Simulation in Aircraft*, AAAI 2025, 39(15), 15957–15965；DOI `10.1609/aaai.v39i15.33752`；另由 [DBLP AAAI 记录](https://dblp.org/rec/conf/aaai/ChenZWJC25)交叉核对 | AAAI 页面称其航空燃油晃荡数据覆盖四类油箱和多方向旋转工况。计划据此只指出相关工作已存在，不推导本项目 F8 的资格或优先权。 | 出版方与 DBLP 人工书目交叉核对通过；机器核验仍为 `unverified`（Crossref 精确匹配；Semantic Scholar 未找到；按工具既定规则确认目录不足两个） |
+| [FluidLab — 官方项目页](https://fluidlab2023.github.io/) | Xian et al., ICLR 2023 Spotlight；作者项目页、[OpenReview 论文](https://openreview.net/pdf?id=Cp-io_BoFaE)和 [DBLP ICLR 记录](https://dblp.org/rec/conf/iclr/XianZXT0FG23)交叉核对 | 官方页描述的是多材料、可微分的流体操控仿真环境。将其与 CFD 真值数据区分，是本项目的数据来源／证据规则，而不是 FluidLab 页面直接声称的结论。 | 官方项目页、OpenReview 与 DBLP 人工书目交叉核对通过；机器核验仍为 `verify_pending`（arXiv API 406；Semantic Scholar 精确匹配；Crossref 标题搜索无精确命中） |
 
 ## 核验范围与限制
 
@@ -29,6 +29,8 @@
 
 对持续 406 的本地根因排查发现，请求代码此前显式发送 `Accept: application/atom+xml`；[arXiv 官方 API 手册](https://info.arxiv.org/help/api/user-manual.html)的 Python `urllib` 示例不设置 `Accept`，并说明 API 响应固定为 Atom。已移除该显式头并添加请求头回归断言；但在线结果尚未验证这一推测。
 
-第四次全量核验见[第四份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN3.json)：仍为 2 项 `verified`、1 项 `unverified`、3 项 `verify_pending`。移除显式 `Accept` 头后，五条 arXiv 请求仍全部返回 HTTP 406，故该改动不足以解决当前失败；三篇继续保持 pending，本会话不再重试。Semantic Scholar 与 Crossref 的结果和第三次相同。
+第四次全量核验见[第四份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN3.json)：仍为 2 项 `verified`、1 项 `unverified`、3 项 `verify_pending`。移除显式 `Accept` 头后，五条 arXiv 请求仍全部返回 HTTP 406，故该改动不足以解决当前失败；Semantic Scholar 与 Crossref 的结果和第三次相同。
+
+在新的续作会话进行的第五次重跑见[第五份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN4.json)：结果仍为 2 项 `verified`、1 项 `unverified`、3 项 `verify_pending`，五条 arXiv 请求仍返回 HTTP 406。另对原先机器状态未闭合的条目人工补做独立目录交叉核对：GNS、Neural SPH、Fueltank 和 FluidLab 的出版信息分别能在 PMLR／AAAI／ICLR 官方页面与 DBLP 记录中对应；Neural SPH 另有 arXiv 作者记录，FluidLab 另有 OpenReview 论文页。该人工补核提高了书目来源的可追溯性，但不改变 `verify_papers.py` 的三源机器 verdict，也不替代其预定 API 结果，因此上述三项 pending 和 FuelTank 的 unverified 状态保持不变。
 
 离线回归：`tests/test_verify_papers.py`，7 项通过，覆盖三源成功、标题冲突、临时网络失败、无 DOI 的 Crossref 精确标题查找与模糊未命中、以及 DOI-only 记录。该工具只验证书目身份，不判断论文主张、质量或本项目创新性。
