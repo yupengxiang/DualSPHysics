@@ -33,4 +33,6 @@
 
 在新的续作会话进行的第五次重跑见[第五份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN4.json)：结果仍为 2 项 `verified`、1 项 `unverified`、3 项 `verify_pending`，五条 arXiv 请求仍返回 HTTP 406。另对原先机器状态未闭合的条目人工补做独立目录交叉核对：GNS、Neural SPH、Fueltank 和 FluidLab 的出版信息分别能在 PMLR／AAAI／ICLR 官方页面与 DBLP 记录中对应；Neural SPH 另有 arXiv 作者记录，FluidLab 另有 OpenReview 论文页。该人工补核提高了书目来源的可追溯性，但不改变 `verify_papers.py` 的三源机器 verdict，也不替代其预定 API 结果，因此上述三项 pending 和 FuelTank 的 unverified 状态保持不变。
 
+本会话按技能要求在下一次会话重试一次，见[第六份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN5.json)：结果仍为 2 项 `verified`、1 项 `unverified`、3 项 `verify_pending`，arXiv 仍返回 HTTP 406。依 `verify_pending` 规则，本会话不再重试；需等后续会话或上游 API 状态改变后再试，不能根据人工来源核对提升机器状态。
+
 离线回归：`tests/test_verify_papers.py`，7 项通过，覆盖三源成功、标题冲突、临时网络失败、无 DOI 的 Crossref 精确标题查找与模糊未命中、以及 DOI-only 记录。该工具只验证书目身份，不判断论文主张、质量或本项目创新性。
