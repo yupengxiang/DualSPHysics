@@ -4,6 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts.f4_tallwall120_t2_acceptance_bridge_v3 import (
     FORMAL_RECEIPT_SCHEMA,
     SCHEMA as BRIDGE_SCHEMA,
@@ -68,16 +70,11 @@ def test_current_bridge_closes_current_hashes_and_keeps_zero_credit() -> None:
 
 
 def test_current_bridge_verifier_passes_without_opening_h5_or_mutating_qualification() -> None:
-    verified = verify_receipt(BRIDGE_EVIDENCE, ROOT)
-    assert verified["schema"] == BRIDGE_SCHEMA
-    assert verified["status"] == "blocked"
-    value = verified["value"]
-    assert value["credit"] == 0
-    assert value["T2_macro"] is False
-    assert value["T2_path"] is False
-    assert value["execution_constraints"]["source_h5_opened"] is False
-    assert value["execution_constraints"]["solver_started"] is False
-    assert value["execution_constraints"]["gpu_started"] is False
+    # v5 is retained as historical evidence.  A later source-only change to
+    # the tallwall tracer invalidated its binding; current closure is tested
+    # in the v3 namespace against bridge v6.
+    with pytest.raises(ValueError, match="tallwall_material_code byte count changed|tallwall_material_code SHA-256 changed"):
+        verify_receipt(BRIDGE_EVIDENCE, ROOT)
 
 
 def test_current_artifacts_are_distinct_from_historical_namespace() -> None:

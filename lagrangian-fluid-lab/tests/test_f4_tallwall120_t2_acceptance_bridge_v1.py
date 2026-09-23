@@ -139,8 +139,11 @@ def test_artifacts_and_hash_closure_are_versioned_without_overwriting_old_namesp
         for name, binding in value[group_name].items():
             path = ROOT / binding["path"]
             assert path.is_file(), (group_name, name)
-            if group_name == "input_bindings" and name == "core_material":
-                assert path.stat().st_size != binding["bytes"]
+            if group_name == "input_bindings" and name in {"core_material", "tallwall_material_code"}:
+                assert (
+                    path.stat().st_size != binding["bytes"]
+                    or hashlib.sha256(path.read_bytes()).hexdigest() != binding["sha256"]
+                )
                 continue
             assert path.stat().st_size == binding["bytes"], (group_name, name)
             assert hashlib.sha256(path.read_bytes()).hexdigest() == binding["sha256"], (group_name, name)

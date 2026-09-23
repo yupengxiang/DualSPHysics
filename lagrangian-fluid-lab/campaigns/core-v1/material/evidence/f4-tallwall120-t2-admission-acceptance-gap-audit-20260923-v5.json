@@ -1,0 +1,598 @@
+{
+  "T2_macro": false,
+  "T2_path": false,
+  "acceptance_gates": {
+    "event_tolerance_acceptance": false,
+    "event_window_gate": false,
+    "f4_cdf_tolerance_registered": false,
+    "material_matrix_ready": false,
+    "per_case_sidecar_acceptance": false,
+    "recovery_contract_accepted": false,
+    "recovery_contract_bound": true,
+    "residence_distribution_present_in_all_retained_results": false,
+    "residence_tolerance_acceptance": false,
+    "sidecar_preflight_bridges_acceptance": true,
+    "tallwall_diagnostic_validator_present": true,
+    "tallwall_schema_accepted": false,
+    "unknown_mass_gate": false
+  },
+  "acceptance_implementation": {
+    "authoritative_f4_cdf_tolerance_registered": false,
+    "authoritative_f4_residence_tolerance_registered": false,
+    "content_addressed_generation_present_in_tracer": true,
+    "diagnostic_schema": "core.material.f4.tallwall120.diagnostic.v1",
+    "diagnostic_validator_present": true,
+    "endpoint_and_saved_chord_comparators_present": true,
+    "f4_cdf_and_residence_comparators_present": true,
+    "formal_acceptance_receipt_count": 0,
+    "per_source_unknown_evaluator_present": true,
+    "qualification_credit": 0,
+    "registered_sidecar_count": 6,
+    "residence_fields_and_censor_validator_present": true,
+    "sidecar_preflight_calls_validator": true,
+    "validator_blocked_case_count": 6,
+    "validator_invocation_count": 6,
+    "validator_passed_case_count": 0
+  },
+  "admission_surface_pass": false,
+  "blocking_reasons": [
+    "all six retained F4 cases fail the fixed per-source unknown-mass gate: maximum 1.0 > 0.01",
+    "all six retained F4 cases are right-censored or unresolved before the required event window completes",
+    "the migration contract still has no authoritative F4 numerical CDF tolerance; the diagnostic comparator only checks a supplied tolerance field",
+    "the migration contract provides gravity time but no authoritative residence-distribution tolerance",
+    "the v2 sidecar preflight invoked the validator for 6 cases; 6 are blocked and 0 formal receipts exist",
+    "the registered overlay is not ready: 33 rows span 15 CFD cells, with resolution/substep and seed-density material overlays pending",
+    "the ESS32 full-source candidate remains proposal-only because its candidate-specific root review has authorized_one_cpu_only=false; this does not override the separate user authorization for the supportcap preflight",
+    "the diagnostic validator is not a T2 qualification collector: it does not close the full material matrix, authoritative tolerance registry, recovery receipt, or formal per-case receipts"
+  ],
+  "case_sidecars": {
+    "case_count": 6,
+    "cases": [
+      {
+        "acceptance_receipt_present": false,
+        "canary_id": "f4_real_material_baseline_s2",
+        "case_id": "f4_real_material_baseline_s2::f4-real-material-canary-result",
+        "cdf_fields_present": true,
+        "checkpoint": {
+          "checkpoint_pass_from_case_audit": true,
+          "committed_frame": 15,
+          "committed_frame_matches_result": true,
+          "content_addressed_generation": false,
+          "generation_exists": true,
+          "generation_hash_pass": true,
+          "generation_policy": null,
+          "manifest_exists": true,
+          "manifest_path": "campaigns/core-v1/runtime/attempts/core-f4-material-resting-pool-canary-s2/20260919T182233-c7ddf4fda108/material.h5.checkpoint.json",
+          "manifest_schema": "core.material.f4.checkpoint.v1",
+          "result_committed_frame": 15,
+          "result_references_checkpoint": true,
+          "state_hash_pass_from_case_audit": true
+        },
+        "event_fields_present": true,
+        "event_window_complete": false,
+        "event_window_status": "right_censored_or_unresolved",
+        "mass_closed": true,
+        "qualification_credit": "none",
+        "residence_fields_present": true,
+        "result_exists": true,
+        "result_path": "campaigns/core-v1/evidence/f4-real-material-canary-result.json",
+        "result_schema": null,
+        "result_status": "completed",
+        "seed_denominator": 512,
+        "unknown_fraction_max": 0.84765625,
+        "unknown_gate_pass": false
+      },
+      {
+        "acceptance_receipt_present": false,
+        "canary_id": "f4_native_dense_pair_s2_s4",
+        "case_id": "f4_native_dense_pair_s2_s4::f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5-material",
+        "cdf_fields_present": true,
+        "checkpoint": {
+          "checkpoint_pass_from_case_audit": true,
+          "committed_frame": 150,
+          "committed_frame_matches_result": true,
+          "content_addressed_generation": false,
+          "generation_exists": true,
+          "generation_hash_pass": true,
+          "generation_policy": null,
+          "manifest_exists": true,
+          "manifest_path": "campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5/20260919T190454-2aac05fec061/product/material.h5.checkpoint.json",
+          "manifest_schema": "core.material.f4.checkpoint.v1",
+          "result_committed_frame": 150,
+          "result_references_checkpoint": true,
+          "state_hash_pass_from_case_audit": true
+        },
+        "event_fields_present": true,
+        "event_window_complete": false,
+        "event_window_status": "right_censored_or_unresolved",
+        "mass_closed": true,
+        "qualification_credit": "none",
+        "residence_fields_present": true,
+        "result_exists": true,
+        "result_path": "campaigns/core-v1/evidence/f4-resting-pool-native-dense-002-material-s2-s0p3-center-q0p5-material.json",
+        "result_schema": null,
+        "result_status": "completed",
+        "seed_denominator": 512,
+        "unknown_fraction_max": 0.896484375,
+        "unknown_gate_pass": false
+      },
+      {
+        "acceptance_receipt_present": false,
+        "canary_id": "f4_native_dense_pair_s2_s4",
+        "case_id": "f4_native_dense_pair_s2_s4::f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5-material",
+        "cdf_fields_present": true,
+        "checkpoint": {
+          "checkpoint_pass_from_case_audit": true,
+          "committed_frame": 150,
+          "committed_frame_matches_result": true,
+          "content_addressed_generation": false,
+          "generation_exists": true,
+          "generation_hash_pass": true,
+          "generation_policy": null,
+          "manifest_exists": true,
+          "manifest_path": "campaigns/core-v1/runtime/attempts/f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5/20260919T190454-3005556b3515/product/material.h5.checkpoint.json",
+          "manifest_schema": "core.material.f4.checkpoint.v1",
+          "result_committed_frame": 150,
+          "result_references_checkpoint": true,
+          "state_hash_pass_from_case_audit": true
+        },
+        "event_fields_present": true,
+        "event_window_complete": false,
+        "event_window_status": "right_censored_or_unresolved",
+        "mass_closed": true,
+        "qualification_credit": "none",
+        "residence_fields_present": true,
+        "result_exists": true,
+        "result_path": "campaigns/core-v1/evidence/f4-resting-pool-native-dense-002-material-s4-s0p3-center-q0p5-material.json",
+        "result_schema": null,
+        "result_status": "completed",
+        "seed_denominator": 512,
+        "unknown_fraction_max": 0.896484375,
+        "unknown_gate_pass": false
+      },
+      {
+        "acceptance_receipt_present": false,
+        "canary_id": "f4_repair_canaries_ess32_and_affine_bound",
+        "case_id": "f4_repair_canaries_ess32_and_affine_bound::f4-material-repair-ess32-v2-canary-s0p3-center-q0p5-result",
+        "cdf_fields_present": true,
+        "checkpoint": {
+          "checkpoint_pass_from_case_audit": true,
+          "committed_frame": 150,
+          "committed_frame_matches_result": true,
+          "content_addressed_generation": false,
+          "generation_exists": true,
+          "generation_hash_pass": true,
+          "generation_policy": null,
+          "manifest_exists": true,
+          "manifest_path": "campaigns/core-v1/runtime/attempts/f4-material-repair-ess32-v2-canary-s0p3-center-q0p5/20260919T193535-adc113f4faa2/material.h5.checkpoint.json",
+          "manifest_schema": "core.material.f4.checkpoint.v1",
+          "result_committed_frame": 150,
+          "result_references_checkpoint": true,
+          "state_hash_pass_from_case_audit": true
+        },
+        "event_fields_present": true,
+        "event_window_complete": false,
+        "event_window_status": "right_censored_or_unresolved",
+        "mass_closed": true,
+        "qualification_credit": "none",
+        "residence_fields_present": true,
+        "result_exists": true,
+        "result_path": "campaigns/core-v1/material/evidence/f4-material-repair-ess32-v2-canary-s0p3-center-q0p5-result.json",
+        "result_schema": null,
+        "result_status": "completed",
+        "seed_denominator": 512,
+        "unknown_fraction_max": 0.923828125,
+        "unknown_gate_pass": false
+      },
+      {
+        "acceptance_receipt_present": false,
+        "canary_id": "f4_repair_canaries_ess32_and_affine_bound",
+        "case_id": "f4_repair_canaries_ess32_and_affine_bound::f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5-result",
+        "cdf_fields_present": true,
+        "checkpoint": {
+          "checkpoint_pass_from_case_audit": true,
+          "committed_frame": 150,
+          "committed_frame_matches_result": true,
+          "content_addressed_generation": false,
+          "generation_exists": true,
+          "generation_hash_pass": true,
+          "generation_policy": null,
+          "manifest_exists": true,
+          "manifest_path": "campaigns/core-v1/runtime/attempts/f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5/20260919T193535-e8bc4e52ab93/material.h5.checkpoint.json",
+          "manifest_schema": "core.material.f4.checkpoint.v1",
+          "result_committed_frame": 150,
+          "result_references_checkpoint": true,
+          "state_hash_pass_from_case_audit": true
+        },
+        "event_fields_present": true,
+        "event_window_complete": false,
+        "event_window_status": "right_censored_or_unresolved",
+        "mass_closed": true,
+        "qualification_credit": "none",
+        "residence_fields_present": true,
+        "result_exists": true,
+        "result_path": "campaigns/core-v1/material/evidence/f4-material-repair-affine-bound-v2-canary-s0p3-center-q0p5-result.json",
+        "result_schema": null,
+        "result_status": "completed",
+        "seed_denominator": 512,
+        "unknown_fraction_max": 0.955078125,
+        "unknown_gate_pass": false
+      },
+      {
+        "acceptance_receipt_present": false,
+        "canary_id": "f4_tallwall120_short_canary",
+        "case_id": "f4_tallwall120_short_canary",
+        "cdf_fields_present": false,
+        "checkpoint": {
+          "checkpoint_pass_from_case_audit": true,
+          "committed_frame": 20,
+          "committed_frame_matches_result": false,
+          "content_addressed_generation": true,
+          "generation_exists": true,
+          "generation_hash_pass": true,
+          "generation_policy": "append-only; no pre-manifest overwrite",
+          "manifest_exists": true,
+          "manifest_path": "campaigns/core-v1/runtime/attempts/core-f4-tallwall120-material-canary-s2-v1/20260920T053432-7ccabc4f7247/product/tallwall120_material.h5.checkpoint.json",
+          "manifest_schema": "core.material.f4.tallwall120.checkpoint.v2",
+          "result_committed_frame": null,
+          "result_references_checkpoint": false,
+          "state_hash_pass_from_case_audit": true
+        },
+        "event_fields_present": false,
+        "event_window_complete": false,
+        "event_window_status": "right_censored_or_unresolved",
+        "mass_closed": true,
+        "qualification_credit": "none",
+        "residence_fields_present": false,
+        "result_exists": true,
+        "result_path": "campaigns/core-v1/material/evidence/f4-tallwall120-canary-support-diagnosis-summary-v1.json",
+        "result_schema": "core.material.f4.tallwall120.support_diagnosis_summary.v1",
+        "result_status": null,
+        "seed_denominator": 512,
+        "unknown_fraction_max": 1.0,
+        "unknown_gate_pass": false
+      }
+    ],
+    "cdf_complete_case_count": 5,
+    "checkpoint_integrity_pass_count": 6,
+    "content_addressed_checkpoint_count": 1,
+    "event_fields_complete_case_count": 5,
+    "formal_acceptance_receipt_count": 0,
+    "interpretation": "The retained source-window audit has six case rows and checkpoint hashes, but a case result sidecar is accepted only when its terminal CDF/residence fields and event status are present. A checkpoint hash alone is recovery evidence, not a material acceptance receipt.",
+    "residence_complete_case_count": 5,
+    "result_sidecars_present": 6
+  },
+  "code_contracts": {
+    "core_material": {
+      "content_addressed_generation_checkpoint": false,
+      "f4_event_window_summary": true,
+      "f4_residence_cdf_summary": true,
+      "tallwall_schema": false,
+      "weighted_cdf": true
+    },
+    "core_material_acceptance": {
+      "authoritative_f4_cdf_tolerance_registered": false,
+      "authoritative_f4_residence_tolerance_registered": false,
+      "content_addressed_generation_gate": false,
+      "f4_event_tolerance_gate": false,
+      "f4_tolerance_comparators": true,
+      "generic_cdf_difference_gate": true,
+      "per_case_matrix_gate": false,
+      "per_source_unknown_gate": true,
+      "residence_cdf_gate": false,
+      "residence_fields_and_censor_validator": true,
+      "tallwall_checkpoint_v2": true,
+      "tallwall_diagnostic_schema": true,
+      "tallwall_schema": false
+    },
+    "macro_sidecar_preflight": {
+      "acceptance_adapter_called": true,
+      "all_registered_cases_accepted": false,
+      "f3_cdf_gate_named": true,
+      "f4_event_tolerance_gate": false,
+      "f4_residence_gate": false,
+      "formal_acceptance_receipt_count": 0,
+      "per_case_acceptance": false,
+      "per_case_acceptance_route": true,
+      "unknown_gate": true
+    },
+    "tallwall_material": {
+      "content_addressed_generation": true,
+      "residence_event_summary": true,
+      "tallwall_checkpoint_v2": true,
+      "tallwall_schema": true
+    }
+  },
+  "created_at_utc": "2026-09-23T13:22:41.973978+00:00",
+  "current_qualification_state": {
+    "candidate_counterfactual_survivors": 0,
+    "candidate_id": "f4_ess32_v2",
+    "core_gate_changed": false,
+    "diagnostic_validator_blocked_cases": 6,
+    "diagnostic_validator_invocations": 6,
+    "formal_acceptance_receipt_count": 0,
+    "macro_preflight_T2_macro": false,
+    "macro_preflight_T2_path": false,
+    "overall_T2_credit": 0,
+    "root_authorized_one_cpu_only": false,
+    "tallwall_preflight_T2_macro": false,
+    "tallwall_preflight_T2_path": false
+  },
+  "execution_constraints": {
+    "T1_denominator_changed": false,
+    "T2_denominator_changed": false,
+    "central_ledger_mutation": 0,
+    "diagnostic_validator_invocations": 6,
+    "diagnostic_validator_mutation": 0,
+    "gpu_started": false,
+    "json_and_source_only": true,
+    "matrix_mutation": 0,
+    "new_job_submitted": false,
+    "old_evidence_overwritten": false,
+    "queue_mutation": 0,
+    "read_only": true,
+    "registry_mutation": 0,
+    "scientific_denominator_changed": false,
+    "solver_started": false,
+    "source_h5_opened": false,
+    "terminal_h5_opened": false,
+    "thresholds_changed": false
+  },
+  "input_bindings": {
+    "admission_contract": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-f4-t2-admission-root-review-contract-20260921.json",
+      "bytes": 14650,
+      "path": "campaigns/core-v1/material/evidence/f3-f4-t2-admission-root-review-contract-20260921.json",
+      "sha256": "04e02868af86d65758fb739ff4630fec658e384b7325bbdf66abd55d60edafac"
+    },
+    "candidate_contract": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-candidate-contract-20260921.json",
+      "bytes": 4185,
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-candidate-contract-20260921.json",
+      "sha256": "566d39c8c32f42859d7f2b1b93ef087dbf6e01d1666bead10d740d9ca2709d6d"
+    },
+    "core_material": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_material.py",
+      "bytes": 116805,
+      "path": "scripts/core_material.py",
+      "sha256": "9e294e64c431c725717caf86eb001dc3a3505a312e279386796b6a472b5ee94e"
+    },
+    "core_material_acceptance": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_material_acceptance.py",
+      "bytes": 59243,
+      "path": "scripts/core_material_acceptance.py",
+      "sha256": "b9cb49cacf19590356bda4f32d32ef3d2255b9c97a8afa29a920e5a38bd6c4a7"
+    },
+    "full_source_contract": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-f4-ess32-full-source-canary-contract-20260921.json",
+      "bytes": 9729,
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-f4-ess32-full-source-canary-contract-20260921.json",
+      "sha256": "cfb7f20c8e5276d1148f21b32980ae2ef55afdf656924dc72aeddc06631a8f91"
+    },
+    "gap_audit_implementation": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_tallwall120_t2_admission_acceptance_gap_audit_v4.py",
+      "bytes": 14135,
+      "path": "scripts/f4_tallwall120_t2_admission_acceptance_gap_audit_v4.py",
+      "sha256": "6a02c77127f21c09e8f876e724b3c5f0e5103f3236546e207df8d0bae5f8746e"
+    },
+    "macro_sidecar_preflight": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-macro-t2-sidecar-preflight-v2-20260923.json",
+      "bytes": 21759,
+      "path": "campaigns/core-v1/material/evidence/f4-macro-t2-sidecar-preflight-v2-20260923.json",
+      "sha256": "e098e26cc6db8186789b6b8165b6f6a6686bd374a02f0f5d18b4b59d2608d078"
+    },
+    "macro_sidecar_preflight_code": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_macro_t2_sidecar_preflight_v2.py",
+      "bytes": 8718,
+      "path": "scripts/f4_macro_t2_sidecar_preflight_v2.py",
+      "sha256": "bcbfe026ed4e4d71294755b1f478b1b530bf8f9862c6df7e9c6ab279fd59133b"
+    },
+    "macro_sidecar_preflight_v1_code": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_macro_t2_sidecar_preflight_v1.py",
+      "bytes": 24002,
+      "path": "scripts/f4_macro_t2_sidecar_preflight_v1.py",
+      "sha256": "54dd170ca74be0160c70f2667779ebaeacc884fe614aa9927128167a77b66c0b"
+    },
+    "macro_sidecar_preflight_v1_evidence": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-macro-t2-sidecar-preflight-20260920.json",
+      "bytes": 15133,
+      "path": "campaigns/core-v1/material/evidence/f4-macro-t2-sidecar-preflight-20260920.json",
+      "sha256": "636b212081852921c209fe4b4124a99f64eac975c67b054b2fa2f48ab1172cb8"
+    },
+    "matrix_review": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-resting-pool-33-to-15-matrix-review-2026-09-19.json",
+      "bytes": 21672,
+      "path": "campaigns/core-v1/material/evidence/f4-resting-pool-33-to-15-matrix-review-2026-09-19.json",
+      "sha256": "7fd6c5f5c8f42a28a424a3a30e528eef549b6787895c3c9216b0c246d88710ff"
+    },
+    "migration_spec": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-resting-pool-migration-spec-2026-09-19.json",
+      "bytes": 12665,
+      "path": "campaigns/core-v1/material/evidence/f4-resting-pool-migration-spec-2026-09-19.json",
+      "sha256": "76dfc5fe035ddcfa374fa09fec5b3f2472199ee58e9e13496f88f4c04d25b562"
+    },
+    "negative_evidence": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-material-negative-evidence-audit-20260920.json",
+      "bytes": 6873,
+      "path": "campaigns/core-v1/material/evidence/f4-material-negative-evidence-audit-20260920.json",
+      "sha256": "6aa41b16acdf6562a7b40c4e79f1e3ee18b59db080c2fd8ce642d04749bf33dd"
+    },
+    "report_admission_contract": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-F4-T2-ADMISSION-CONTRACT-2026-09-21.zh-CN.md",
+      "bytes": 3105,
+      "path": "reports/F3-F4-T2-ADMISSION-CONTRACT-2026-09-21.zh-CN.md",
+      "sha256": "91392c03c66b2c0674c91c4997409dd3497ac157111b29b399eeb8da4d163952"
+    },
+    "report_full_source_contract": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F4-TALLWALL120-FULL-SOURCE-CANARY-CONTRACT-2026-09-21.zh-CN.md",
+      "bytes": 3817,
+      "path": "reports/F4-TALLWALL120-FULL-SOURCE-CANARY-CONTRACT-2026-09-21.zh-CN.md",
+      "sha256": "4902365c6e0695ef1ec3fe4a4e1bc70ef1e971403cca93e51e64e4e64c90cd2e"
+    },
+    "report_material_preflight": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F4-TALLWALL120-MATERIAL-PREFLIGHT-2026-09-21.zh-CN.md",
+      "bytes": 3195,
+      "path": "reports/F4-TALLWALL120-MATERIAL-PREFLIGHT-2026-09-21.zh-CN.md",
+      "sha256": "5cb367d06e2940d4945305f870a6e72c0aabec49ee77de88d4a9b606f5efc5f9"
+    },
+    "report_root_cause": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F4-TALLWALL120-MATERIAL-ROOT-CAUSE-AUDIT-2026-09-21.zh-CN.md",
+      "bytes": 3407,
+      "path": "reports/F4-TALLWALL120-MATERIAL-ROOT-CAUSE-AUDIT-2026-09-21.zh-CN.md",
+      "sha256": "b96922076db10d43c023a5875f83ef4a42531d82a10654f49ce289305063e986"
+    },
+    "root_review": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-f4-ess32-root-review-20260921.json",
+      "bytes": 8956,
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-f4-ess32-root-review-20260921.json",
+      "sha256": "b6e7e92435179d25cc524e006b53c482259dc22065e30b5297d6ed4975dc7b7a"
+    },
+    "source_window_audit": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f3-f4-t2-cpu-source-window-audit-v1-20260920.json",
+      "bytes": 70623,
+      "path": "campaigns/core-v1/material/evidence/f3-f4-t2-cpu-source-window-audit-v1-20260920.json",
+      "sha256": "983e15aae8e1ce4df705590c7b1cc89e27a0445c8152f4a003123392e3aaa279"
+    },
+    "tallwall_material_code": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_tallwall120_material.py",
+      "bytes": 24647,
+      "path": "scripts/f4_tallwall120_material.py",
+      "sha256": "dc3c06e5b689eb64b7c3c7ee87b022699cfed19483d38662031570ea24b66f26"
+    },
+    "tallwall_preflight": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-material-preflight-20260921.json",
+      "bytes": 10992,
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-material-preflight-20260921.json",
+      "sha256": "f5e6dc499e19349324799f36a154b5bfc7c6bb9be03b0c0e9df27a4acd7fc9bf"
+    },
+    "tallwall_preflight_code": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_tallwall120_material_preflight_v1.py",
+      "bytes": 24436,
+      "path": "scripts/f4_tallwall120_material_preflight_v1.py",
+      "sha256": "872daf5a8f3a5cf1e5cccc55d599c21396b4da3634d6a0ffdefddb335ddbcbd2"
+    },
+    "tallwall_trace_result": {
+      "absolute_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-material-preflight-20260921.trace.json",
+      "bytes": 12459,
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-material-preflight-20260921.trace.json",
+      "sha256": "b12a0e4a26a61e226f386776c54b90b6752a668b642b13e2b4f5a704f2c4973c"
+    }
+  },
+  "interpretation_boundary": "The implemented F4 JSON validator and per-case preflight route are present. Their current inputs are legacy/incomplete diagnostics and all six fail closed. Comparator presence is not authoritative threshold registration, acceptance, or T2 credit.",
+  "matrix": {
+    "exact_cadence_rows_available": 0,
+    "exact_cadence_rows_missing": 4,
+    "existing_f4_cfd_cell_count": 15,
+    "formal_acceptance_receipt_count": 0,
+    "interpretation": "The 33-row material template is an overlay plan. The existing F4 CFD design has 15 native source cells; no missing material result may be filled by interpolation or by treating the .3 s canary as a full-window product.",
+    "material_matrix_ready": false,
+    "material_resolution_rows_pending": 24,
+    "material_seed_density_rows_pending": 5,
+    "registered_cadence_rows": 4,
+    "registered_overlay_rows": 33,
+    "registered_resolution_substep_rows": 24,
+    "registered_seed_density_rows": 5,
+    "retained_case_sidecar_count": 6
+  },
+  "observed_gate_comparison": {
+    "cdf": {
+      "f3_limit_in_preflight": 0.02,
+      "f4_acceptance_limit_available": false,
+      "f4_limit_in_migration": null,
+      "f4_limit_registered": false,
+      "gap": "F4 declares CDF distributions but no F4 numerical CDF tolerance; 0.02 is explicitly named as an F3 limit."
+    },
+    "event_tolerance": {
+      "acceptance_enforced": false,
+      "closed_wall_endpoint_tolerance_m": 1e-08,
+      "macro_preflight_enforced": false,
+      "registered": true,
+      "saved_chord_crossings_allowed": 0
+    },
+    "event_window": {
+      "all_cases_complete": false,
+      "initial_horizon_s": 4.34,
+      "maximum_extension_s": 8.68,
+      "migration_initial_horizon_s": 4.34,
+      "migration_maximum_extension_s": 8.68,
+      "preflight_gate_pass": false,
+      "tallwall_canary_gate_pass": false
+    },
+    "mass_closure": {
+      "all_retained_cases_closed": true,
+      "preflight_all_mass_closed": true
+    },
+    "residence": {
+      "distribution_declared": true,
+      "gravity_time_s": 0.3497487083913345,
+      "residence_acceptance_implemented": false,
+      "residence_tolerance_registered": false,
+      "right_censored_duration_declared": true
+    },
+    "unknown_mass": {
+      "all_cases_pass": false,
+      "limits_match": true,
+      "maximum_observed": 1.0,
+      "preflight_limit": 0.01,
+      "registered_limit": 0.01
+    }
+  },
+  "qualification_claim": "none",
+  "qualification_credit": "none",
+  "recovery_contract": {
+    "acceptance_generation_support": false,
+    "append_only_required": true,
+    "automatic_execution": false,
+    "candidate_output_stem_absent": true,
+    "checkpoint_every_native_frame": true,
+    "contract_present": true,
+    "core_material_generation_support": false,
+    "frame_end": 1085,
+    "frame_start": 0,
+    "full_window_s": 4.340002980805959,
+    "generation_policy": "content-addressed append-only; never overwrite or delete prior generation",
+    "recovery_point": 40,
+    "rerun_from_zero_forbidden": true,
+    "root_authorized_one_cpu_only": false,
+    "status": "contract_bound_but_not_authorized",
+    "tallwall_generation_support": true
+  },
+  "registered_gates": {
+    "closed_wall_endpoint_tolerance_m": 1e-08,
+    "denominator_policy": "all geometric seeds carrying the declared source label; unknown/right-censored remains in denominator",
+    "f3_cdf_sup_abs_difference_max": 0.02,
+    "f4_full_event_window_s": 4.34,
+    "f4_maximum_right_censored_extension_s": 8.68,
+    "residence_gravity_time_s": 0.3497487083913345,
+    "saved_chord_crossings_allowed": 0,
+    "unknown_fraction_per_source_max": 0.01
+  },
+  "schema": "core.material.f4.tallwall120.t2_admission_acceptance_gap_audit.v4",
+  "scope": {
+    "family": "F4",
+    "focus": "tallwall120 macro material admission/acceptance",
+    "json_and_source_only": true,
+    "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+    "source_h5_opened": false,
+    "terminal_h5_opened": false
+  },
+  "sidecar_preflight_v2": {
+    "all_cases_pass": false,
+    "blocked_case_count": 6,
+    "formal_acceptance_receipt_count": 0,
+    "passed_case_count": 0,
+    "registered_case_count": 6,
+    "schema": "core.material.f4.macro_t2_sidecar_preflight.v2",
+    "status": "blocked_for_qualification",
+    "validator_invocation_count": 6
+  },
+  "source_evidence_snapshot": {
+    "tallwall_checkpoint_schema": "core.material.f4.tallwall120.checkpoint.v2",
+    "tallwall_committed_frame": 70,
+    "tallwall_committed_time_s": 0.280007101649063,
+    "tallwall_event_window_status": "right_censored_or_unresolved",
+    "tallwall_trace_schema": "core.material.f4.tallwall120.v1",
+    "tallwall_unknown_fraction_max": 0.998046875
+  },
+  "status": "blocked_for_macro_t2"
+}

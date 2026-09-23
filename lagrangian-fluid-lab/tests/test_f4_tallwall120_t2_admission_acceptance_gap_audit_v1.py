@@ -86,11 +86,10 @@ def test_audit_artifact_and_report_bind_current_inputs_without_overwriting_old_e
             or hashlib.sha256(path.read_bytes()).hexdigest() != binding["sha256"]
         ):
             stale.append(name)
-    # v2 is retained as immutable historical evidence.  Its core_material
-    # binding predates the current source and is intentionally not repaired in
-    # place; the acceptance implementation happened not to drift in this
-    # historical snapshot.
-    assert stale == ["core_material"]
+    # v2 is immutable historical evidence.  Both the core material source and
+    # later tallwall tracer additions postdate this snapshot; neither old hash
+    # is repaired in place.
+    assert stale == ["core_material", "tallwall_material_code"]
 
 
 def test_case_sidecar_helper_fails_closed_when_a_result_lacks_event_fields(tmp_path: Path) -> None:
