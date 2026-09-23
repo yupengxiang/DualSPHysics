@@ -51,7 +51,7 @@
 
 ### 3. 调研如何影响设计
 
-截至 2026-09-24，六项依据已按出版方论文页、arXiv 作者记录或官方项目页逐条人工复核；书目与主张的核验结果见[文献来源审计](lagrangian-fluid-lab/reports/PLAN-REFERENCES-AUDIT-2026-09-24.zh-CN.md)。三源工具已验证 LagrangeBench 与 FD-Bench；FuelTank 仍只有一个目录确认，另三篇因 arXiv API 406 待核，故六项自动核验尚未整体完成。执行回执见[首次记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24.json)、[第二次记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN1.json)和[第三次记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN2.json)。
+截至 2026-09-24，六项依据已按出版方论文页、arXiv 作者记录或官方项目页逐条人工复核；书目与主张的核验结果见[文献来源审计](lagrangian-fluid-lab/reports/PLAN-REFERENCES-AUDIT-2026-09-24.zh-CN.md)。三源工具已验证 LagrangeBench 与 FD-Bench；FuelTank 仍只有一个目录确认，另三篇因 arXiv API 406 待核，故六项自动核验尚未整体完成。执行回执见[首次记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24.json)、[第二次记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN1.json)、[第三次记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN2.json)和[第四次记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN3.json)。第四次记录仍为 2 项 `verified`、1 项 `unverified`、3 项 `verify_pending`；移除显式 `Accept` 头后 arXiv 仍返回 HTTP 406，自动核验尚未整体通过。
 
 | 工作 | 对本项目的直接启示 |
 |---|---|
