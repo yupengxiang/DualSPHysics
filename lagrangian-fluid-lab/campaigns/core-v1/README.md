@@ -151,10 +151,14 @@ The authoritative `completion.json` currently reports `can_finalize=false`:
 These counts are completion denominators, not a request to pad the dataset with
 unqualified or duplicate cases. F8 R007 remains a geometry-only native preflight
 with zero qualification credit. The R008 scope design passed Terra High static
-review, also with zero credit and no execution authority. The next static step
-is to materialize and hash-close fresh per-configuration R008 Definitions and
-controls. Any native preflight, solver run, T1 qualification, or resource
-admission remains a separate gate; no R007 inputs or outputs are reusable as
+review, also with zero credit and no execution authority. Fresh Definition and
+control files for all 15 qualification configurations and 32 planned production
+cases are now hash-closed in
+[`definition-control-pack-v1`](cfd/f8-oscillatory-pressure-channel-r008/definition-control-pack-v1/receipt.json).
+This static pack did not create solver input/case directories and did not invoke
+GenCase. The next gate is a separate explicit one-shot native-preflight
+authorization bound to the exact R008 inputs; solver execution and T1/resource
+admission remain later, distinct gates. No R007 input or output is reusable as
 R008 qualification evidence. The previously explored F6 Definition failure
 remains immutable and cannot be retried or relabeled to satisfy the third-family
 gate.

@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='utf-8'?>
+<case>
+  <!--Fresh R008 static input candidate; not execution authority.--><casedef>
+    <constantsdef>
+      <gravity x="0" y="0" z="0" />
+      <rhop0 value="1000" />
+      <rhopgradient value="1" />
+      <hswl value="0" auto="true" />
+      <gamma value="7" />
+      <speedsystem value="0" auto="true" />
+      <coefsound value="1" />
+      <speedsound value="10" auto="false" />
+      <coefh value="1.0" />
+      <cflnumber value="0.20000000000000001" />
+    </constantsdef>
+    <mkconfig boundcount="1" fluidcount="1" />
+    <geometry>
+      <definition dp="0.0074999999999999997">
+        <pointref x="0" y="0" z="0" />
+        <pointmin x="0" y="0" z="-0.089999999999999997" />
+        <pointmax x="0.23999999999999999" y="0.12" z="0.089999999999999997" />
+      </definition>
+      <commands>
+      <list name="GeometryForNormals">
+        <setactive drawpoints="0" drawshapes="1" />
+        <setshapemode>actual | bound</setshapemode>
+        <setnormalinvert invert="true" />
+        <setmkbound mk="0" name="FiniteNoSlipZWalls" />
+          <drawbox><boxfill>top | bottom</boxfill>
+            <layers vdp="-0.5" />
+            <point x="0" y="0" z="-0.052499999999999998" />
+            <size x="0.23999999999999999" y="0.12" z="0.105" />
+          </drawbox>
+        <shapeout file="hdp" />
+        <resetdraw />
+      </list>
+      <mainlist>
+        <runlist name="GeometryForNormals" />
+        <setshapemode>dp | bound</setshapemode>
+        <setdrawmode mode="full" />
+        <setmkbound mk="0" name="FiniteNoSlipZWalls" />
+        <drawbox><boxfill>top | bottom</boxfill>
+          <layers vdp="0,1,2,3" />
+          <point x="0" y="0" z="-0.052499999999999998" />
+          <size x="0.23999999999999999" y="0.12" z="0.105" />
+        </drawbox>
+        <setmkfluid mk="0" name="FullyFilledChannelFluid" />
+        <drawbox><boxfill>solid</boxfill>
+          <point x="0" y="0" z="-0.044999999999999998" />
+          <size x="0.23999999999999999" y="0.12" z="0.089999999999999997" />
+        </drawbox>
+      </mainlist>
+      </commands>
+    </geometry>
+    <normals active="true">
+        <norgeometry>
+          <geometryfile file="[CaseName]_hdp_Actual.vtk" />
+          <distanceh v="3.0" />
+          <svshapes v="true" />
+        </norgeometry>
+    </normals>
+  </casedef>
+  <execution>
+    <special><accinputs><accinput mkfluid="0">
+      <acccentre x="0" y="0" z="0" />
+      <globalgravity value="0" />
+      <acctimesfile value="F8_OPC_prod-i07-q0p234375-dp0p0075_acceleration.csv" />
+    </accinput></accinputs></special>
+    <parameters>
+      <parameter key="Boundary" value="2" />
+      <parameter key="ViscoTreatment" value="3" />
+      <parameter key="Visco" value="0.00050000000000000001" />
+      <parameter key="TimeMax" value="14.701416125860343" />
+      <parameter key="TimeOut" value="0.034269035258415716" />
+      <parameter key="PartsOutMax" value="0" />
+      <parameter key="RhopOutMin" value="950" />
+      <parameter key="RhopOutMax" value="1050" />
+      <parameter key="XYPeriodic" value="0" />
+    </parameters>
+  </execution>
+</case>
