@@ -149,6 +149,51 @@ def test_no_doi_candidate_uses_exact_crossref_title_match(monkeypatch):
     assert result["papers"][0]["checks"]["crossref"]["doi"] == "10.1000/example"
 
 
+def test_no_exact_crossref_search_result_is_not_a_title_conflict(monkeypatch):
+    candidate = _candidate()
+    candidate.pop("doi")
+
+    def fake_urlopen(request, timeout):
+        if request.full_url.startswith(verifier.ARXIV_API):
+            return _Response(
+                b'<feed xmlns="http://www.w3.org/2005/Atom">'
+                b"<entry><id>https://arxiv.org/abs/2401.01234</id>"
+                b"<title>A Sample Paper: Exact Metadata</title></entry></feed>"
+            )
+        if request.full_url.startswith(verifier.CROSSREF_API):
+            return _Response(
+                {
+                    "message": {
+                        "items": [
+                            {
+                                "DOI": "10.2000/unrelated",
+                                "title": ["Unrelated Search Result"],
+                            }
+                        ]
+                    }
+                }
+            )
+        if request.full_url.startswith(verifier.S2_BATCH_API):
+            return _Response(
+                [
+                    {
+                        "title": candidate["title"],
+                        "year": 2024,
+                        "venue": "Test Venue",
+                        "externalIds": {"ArXiv": "2401.01234"},
+                    }
+                ]
+            )
+        raise AssertionError(request.full_url)
+
+    monkeypatch.setattr(verifier, "urlopen", fake_urlopen)
+    result = verifier.verify_records([candidate], crossref_delay=0)
+
+    paper = result["papers"][0]
+    assert paper["status"] == "verified"
+    assert paper["checks"]["crossref"]["status"] == "not_found"
+
+
 def test_doi_only_candidate_uses_crossref_and_s2(monkeypatch):
     candidate = _candidate()
     candidate.pop("arxiv_id")

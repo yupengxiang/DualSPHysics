@@ -51,7 +51,7 @@
 
 ### 3. 调研如何影响设计
 
-截至 2026-09-24，六项依据已按出版方论文页、arXiv 作者记录或官方项目页逐条人工复核；书目与主张的核验结果见[文献来源审计](lagrangian-fluid-lab/reports/PLAN-REFERENCES-AUDIT-2026-09-24.zh-CN.md)。随后新增了本地三源核验入口 `lagrangian-fluid-lab/scripts/verify_papers.py`，但首次在线执行遇到 arXiv 内容协商错误（406）和 Semantic Scholar 限流（429），六项均保留 `verify_pending`；自动核验仍未通过，人工主来源核验不替代自动核验。执行与重试边界见[机器核验记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24.json)。
+截至 2026-09-24，六项依据已按出版方论文页、arXiv 作者记录或官方项目页逐条人工复核；书目与主张的核验结果见[文献来源审计](lagrangian-fluid-lab/reports/PLAN-REFERENCES-AUDIT-2026-09-24.zh-CN.md)。三源工具的后续重跑已验证 LagrangeBench 与 FD-Bench，FuelTank 仍仅有一个目录确认，另三篇因 arXiv API 406 待核；因此六项的自动核验尚未整体完成。执行回执及限制见[首次记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24.json)和[重跑记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN1.json)。
 
 | 工作 | 对本项目的直接启示 |
 |---|---|

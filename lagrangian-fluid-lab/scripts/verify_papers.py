@@ -120,7 +120,7 @@ def _fetch_crossref(candidate: dict, *, timeout: float) -> dict | None:
                 normalize_title(title) == expected for title in item.get("title", [])
             )
         ),
-        items[0] if items else None,
+        None,
     )
 
 
