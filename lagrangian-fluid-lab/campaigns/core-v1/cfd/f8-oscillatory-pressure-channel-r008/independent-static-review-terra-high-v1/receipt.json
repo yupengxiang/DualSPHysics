@@ -1,0 +1,88 @@
+{
+  "schema": "core.cfd.f8.r008_independent_static_review.v1",
+  "record_id": "f8-oscillatory-pressure-channel-r008-independent-static-review-terra-high-v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "reviewer": {
+    "agent_id": "01a0ce1f-233e-70e0-bd5c-b2d28cbb8a79",
+    "nickname": "Heisenberg",
+    "requested_model": "gpt-5.6-terra",
+    "requested_reasoning_effort": "high",
+    "model_identity_attested": false
+  },
+  "verdict": "pass-with-gaps",
+  "status": "r008_static_design_conditionally_passed_cpu_native_preflight_only",
+  "review_scope": {
+    "t1_scope_design_reviewed": true,
+    "definition_control_pack_reviewed": true,
+    "request_v3_reviewed": true,
+    "resource_admission_reviewed": true,
+    "plan_requirements_reviewed": true,
+    "runtime_tools_invoked": false,
+    "files_modified_by_reviewer": false
+  },
+  "verified": {
+    "qualification_matrix": "13 spatial cases plus CFL and output-cadence controls; qualification-only; frozen three-period observation window and gates",
+    "representative_case_id": "space-q0p5-dp0p0075",
+    "r008_input_binding_count": 94,
+    "r008_input_bindings_verified": 94,
+    "r008_source_binding_count": 24,
+    "r008_source_bindings_verified": 24,
+    "representative_definition_and_control_hashes_match_request_v3": true,
+    "native_binary_hashes_match_request_v3": true,
+    "r007_geometry_subtree_matches_r008_anchor": true,
+    "r007_outputs_or_qualification_credit_reused": false,
+    "r008_runtime_namespace_absent_at_review": true
+  },
+  "gaps": [
+    {
+      "severity": "P1",
+      "finding": "Existing resource-admission and capability-probe receipts refer to request-v1, not request-v3.",
+      "required_closure": "A separate one-shot authorization must bind request-v3 directly, verify all 94 inputs and 24 source bindings, and bind the cap probe."
+    },
+    {
+      "severity": "P1",
+      "finding": "Request-v3 and the input pack do not themselves authorize native execution.",
+      "required_closure": "Use a separate exact-scope user authorization; do not infer solver, T1, T2, production, training, or worker permission."
+    },
+    {
+      "severity": "P1",
+      "finding": "The cgroup probe measured Python plus sleep only; R008 native peak, pressure, and OOM behavior remain unknown.",
+      "required_closure": "For one CPU-only GenCase plus at most one native decode, capture cgroup memory.peak, memory.events, and sampled process-tree RSS; any cap pressure/OOM fails closed."
+    },
+    {
+      "severity": "P1",
+      "finding": "The last recorded host snapshot was blocked by F3 activity and load above available CPUs.",
+      "required_closure": "Recheck CPU affinity, current load, free memory/disk, F3 activity, and rootless systemd immediately before consuming the one-shot lock."
+    },
+    {
+      "severity": "P2",
+      "finding": "No solver/T1/T2 evidence exists; the scope receipt remains a design candidate.",
+      "required_closure": "Keep this preflight at zero qualification credit and do not mutate any denominator or ledger."
+    },
+    {
+      "severity": "P2",
+      "finding": "The reviewer tool cannot independently attest the resolved model identity.",
+      "required_closure": "Preserve the requested Terra model and effort metadata without claiming cryptographic model attestation."
+    }
+  ],
+  "decision_boundary": {
+    "may_prepare_separate_one_shot_cpu_native_authorization": true,
+    "execution_authorized_by_this_review": false,
+    "may_run_one_representative_gencase_and_native_decode_only_after_separate_user_authorization_and_live_resource_gates": true,
+    "solver_authorized": false,
+    "gpu_authorized": false,
+    "worker_or_queue_authorized": false,
+    "t1_t2_or_qualification_credit": 0
+  },
+  "execution_controls": {
+    "gencase_invoked": false,
+    "native_decoder_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "worker_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "qualification_credit": 0
+  }
+}
