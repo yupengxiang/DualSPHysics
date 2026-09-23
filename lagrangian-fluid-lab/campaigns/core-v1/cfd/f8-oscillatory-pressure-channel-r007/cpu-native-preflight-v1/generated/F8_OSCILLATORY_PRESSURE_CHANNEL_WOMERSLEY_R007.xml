@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Proposed F8 r007 static input.  Not materialized or executable authority. -->
+<case app="GenCase v5.4.354.01 (07-04-2025)" date="23-09-2026 12:35:02">
+    <casedef>
+        <constantsdef>
+            <gravity x="0" y="0" z="0" />
+            <rhop0 value="1000" />
+            <rhopgradient value="1" />
+            <hswl value="0" auto="true" />
+            <gamma value="7" />
+            <speedsystem value="0" auto="true" />
+            <coefsound value="1" />
+            <speedsound value="10" auto="false" />
+            <coefh value="1.0" />
+            <cflnumber value="0.2" />
+        </constantsdef>
+        <mkconfig boundcount="1" fluidcount="1" />
+        <geometry>
+            <definition dp="0.0074999999999999997">
+                <pointref x="0" y="0" z="0" />
+                <pointmin x="0" y="0" z="-0.089999999999999997" />
+                <pointmax x="0.23999999999999999" y="0.12" z="0.089999999999999997" />
+            </definition>
+            <commands>
+                <list name="GeometryForNormals">
+                    <setactive drawpoints="0" drawshapes="1" />
+                    <setshapemode>actual | bound</setshapemode>
+                    <setnormalinvert invert="true" />
+                    <setmkbound mk="0" name="FiniteNoSlipZWalls" />
+                    <drawbox>
+                        <boxfill>top | bottom</boxfill>
+                        <layers vdp="-0.5" />
+                        <point x="0" y="0" z="-0.052499999999999998" />
+                        <size x="0.23999999999999999" y="0.12" z="0.105" />
+                    </drawbox>
+                    <shapeout file="hdp" />
+                    <resetdraw />
+                </list>
+                <mainlist>
+                    <runlist name="GeometryForNormals" />
+                    <setshapemode>dp | bound</setshapemode>
+                    <setdrawmode mode="full" />
+                    <setmkbound mk="0" name="FiniteNoSlipZWalls" />
+                    <drawbox>
+                        <boxfill>top | bottom</boxfill>
+                        <layers vdp="0,1,2,3" />
+                        <point x="0" y="0" z="-0.052499999999999998" />
+                        <size x="0.23999999999999999" y="0.12" z="0.105" />
+                    </drawbox>
+                    <setmkfluid mk="0" name="FullyFilledChannelFluid" />
+                    <drawbox>
+                        <boxfill>solid</boxfill>
+                        <point x="0" y="0" z="-0.044999999999999998" />
+                        <size x="0.23999999999999999" y="0.12" z="0.089999999999999997" />
+                    </drawbox>
+                </mainlist>
+            </commands>
+        </geometry>
+        <normals active="true">
+            <norgeometry>
+                <geometryfile file="[CaseName]_hdp_Actual.vtk" />
+                <distanceh v="3.0" />
+                <svshapes v="true" />
+            </norgeometry>
+        </normals>
+    </casedef>
+    <execution>
+        <special>
+            <accinputs>
+                <accinput mkfluid="0">
+                    <acccentre x="0" y="0" z="0" />
+                    <globalgravity value="0" />
+                    <acctimesfile value="F8_OPC_q0p500_r007_acceleration.csv" />
+                </accinput>
+            </accinputs>
+        </special>
+        <parameters>
+            <parameter key="Boundary" value="2" />
+            <parameter key="ViscoTreatment" value="3" />
+            <parameter key="Visco" value="0.00050000000000000001" />
+            <parameter key="TimeMax" value="11.196636217394023" />
+            <parameter key="TimeOut" value="0.015904312808798327" />
+            <parameter key="PartsOutMax" value="0" comment="**DEPRECATED** " />
+            <parameter key="RhopOutMin" value="950" />
+            <parameter key="RhopOutMax" value="1050" />
+            <parameter key="XYPeriodic" value="0" />
+            <simulationdomain comment="Defines domain of simulation (default=Uses minimum and maximum position of the generated particles)">
+                <posmin x="default" y="default" z="default" comment="e.g.: x=0.5, y=default-1, z=default-10%" />
+                <posmax x="default" y="default" z="default" />
+            </simulationdomain>
+        </parameters>
+        <particles np="10752" nb="4096" nbf="4096" mkboundfirst="2" mkfluidfirst="1">
+            <_summary>
+                <positions units_comment="metres (m)">
+                    <posmin x="0" y="0" z="-0.075" />
+                    <posmax x="0.2325" y="0.1125" z="0.075" />
+                </positions>
+                <fixed count="4096" id="0-4095" mkcount="1" mkvalues="2" />
+                <fluid count="6656" id="4096-10751" mkcount="1" mkvalues="1" />
+            </_summary>
+            <fixed mkbound="0" mk="2" begin="0" count="4096" />
+            <fluid mkfluid="0" mk="1" begin="4096" count="6656" />
+        </particles>
+        <constants>
+            <data2d value="false" />
+            <gravity x="0" y="0" z="0" units_comment="m/s^2" />
+            <cflnumber value="0.2" />
+            <gamma value="7" />
+            <rhop0 value="1000" units_comment="kg/m^3" />
+            <dp value="0.0075" units_comment="metres (m)" />
+            <h value="0.012990381057" units_comment="metres (m)" />
+            <b value="14285.714286" units_comment="Pascal (Pa)" />
+            <massbound value="0.000421875" units_comment="kg" />
+            <massfluid value="0.000421875" units_comment="kg" />
+        </constants>
+        <uservars>
+            <varnum name="VResId" value="0" />
+        </uservars>
+        <motion />
+        <vtkout mkboundfirst="2" mkfluidfirst="1">
+            <vtkfile name="F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R007_hdp_Actual.vtk" mk="2" mkbound="0" />
+        </vtkout>
+    </execution>
+</case>
