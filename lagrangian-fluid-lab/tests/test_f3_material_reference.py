@@ -249,6 +249,15 @@ def test_alignment_rejects_synthesizing_dense_cadence_from_coarse_native_source(
     assert not (tmp_path/"dense.h5.partial").exists()
 
 
+def test_alignment_rejects_sparse_hdf5_even_if_cadence_metadata_claims_dense(tmp_path):
+    source = h5_source(tmp_path, step_s=.01)
+    source["entry"]["output_interval_s"] = .002
+    with pytest.raises(ValueError, match="complete audited native time axis"):
+        reference.align_source(source, tmp_path/"forged-dense.h5", step_s=.002)
+    assert not (tmp_path/"forged-dense.h5").exists()
+    assert not (tmp_path/"forged-dense.h5.partial").exists()
+
+
 def test_alignment_accepts_genuinely_dense_native_source_at_its_cadence(tmp_path):
     source = h5_source(tmp_path, step_s=.002)
     result = reference.align_source(source, tmp_path/"dense.h5", step_s=.002)
