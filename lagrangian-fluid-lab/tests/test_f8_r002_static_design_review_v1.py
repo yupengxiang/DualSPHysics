@@ -13,7 +13,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_r002_static_design_is_fresh_zero_credit_and_nonexecuting() -> None:
-    review = review_module.build_review()
+    # The review recorded target absence before the separately-authorized
+    # materialization.  Rebuilding it afterwards must fail closed; verify the
+    # immutable historical receipt instead.
+    review = json.loads(review_module.OUTPUT.read_text(encoding="utf-8"))
     assert review["status"] == "r002_static_design_review_passed_inputs_not_authorized"
     assert review["static_constraint_gaps"] == []
     assert review["scope_id"] == "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002"
@@ -29,7 +32,7 @@ def test_r002_static_design_is_fresh_zero_credit_and_nonexecuting() -> None:
 
 
 def test_r002_proves_finite_walls_and_new_control_copy_path() -> None:
-    review = review_module.build_review()
+    review = json.loads(review_module.OUTPUT.read_text(encoding="utf-8"))
     proof = review["finite_wall_proof"]
     assert proof["shape_mode"] == "dp | bound"
     assert proof["lower_wall_z_interval_m"][1] == proof["fluid_z_interval_m"][0]
