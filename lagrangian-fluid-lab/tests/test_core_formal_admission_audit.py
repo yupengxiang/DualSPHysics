@@ -56,6 +56,11 @@ def _real_audit() -> dict:
 def test_real_f3_f4_audit_keeps_the_hard_and_structural_denominators() -> None:
     report = _real_audit()
 
+    implementation = report["audit_implementation"]
+    implementation_path = ROOT / implementation["path"]
+    assert implementation_path == ROOT / "scripts/core_formal_admission_audit.py"
+    assert implementation["sha256"] == _sha256(implementation_path)
+    assert implementation["bytes"] == implementation_path.stat().st_size
     assert report["status"] == "blocked"
     assert report["formal_admission"] is False
     assert report["formal_job_count"] == 0

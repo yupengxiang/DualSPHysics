@@ -1071,6 +1071,7 @@ def audit_admission(
     return {
         "schema": SCHEMA,
         "record_id": record_id,
+        "audit_implementation": _ref(Path(__file__).resolve(), root),
         "purpose": "Read-only cross-manifest admission audit; no formal jobs are emitted.",
         "qualification_claim": "none",
         "status": "ready" if not blockers else "blocked",

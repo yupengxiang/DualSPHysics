@@ -1,0 +1,2556 @@
+{
+  "admission_next_dependency": "release a third independently qualified T1 family, publish formal_release=true for every source, regenerate stale diagnostic preprofile evidence under the current source closure, and produce real 32000-update full-field graph checkpoint/IO evidence before re-running the planner",
+  "audit_implementation": {
+    "bytes": 56684,
+    "path": "scripts/core_formal_admission_audit.py",
+    "sha256": "2c79c6d902e8576a03164b387a797eb96e47aa9b921567e8b65f2ba64373af37"
+  },
+  "blockers": [
+    {
+      "code": "STALE_SOURCE_CLOSURE",
+      "message": "existing diagnostic preprofile evidence was produced under a different source closure",
+      "observed": 7,
+      "required": 0,
+      "scope": "evidence"
+    },
+    {
+      "code": "FORMAL_RELEASE_REQUIRED",
+      "message": "every source reader manifest must declare formal_release=true; this audit never upgrades it",
+      "observed": [
+        "campaigns/core-v1/f3-dataset-v2.json"
+      ],
+      "required": "all source manifests formal_release=true",
+      "scope": "formal"
+    },
+    {
+      "code": "THIRD_FAMILY_REQUIRED",
+      "message": "formal training requires three distinct T1 families with validation cases",
+      "observed": 2,
+      "required": 3,
+      "scope": "formal"
+    },
+    {
+      "code": "VALIDATION_DENOMINATOR",
+      "message": "formal validation requires twelve cases, four per family",
+      "observed": 8,
+      "required": 12,
+      "scope": "formal"
+    },
+    {
+      "code": "RESOURCE_CAPACITY_EVIDENCE_INVALID",
+      "message": "the supplied real-capacity adapter record failed its hash, checkpoint, or execution contract",
+      "observed": "campaigns/core-v1/learning/formal-release-frontier-v1/capacity-evidence-from-1000-pilot.json",
+      "required": "valid core.formal_capacity_evidence.v1",
+      "scope": "resource"
+    },
+    {
+      "code": "RESOURCE_FRONTIER_UNPROVEN",
+      "message": "formal admission requires explicit valid full-field 32000-update capacity evidence",
+      "observed": {
+        "capacity_evidence_bound": true,
+        "capacity_evidence_valid": false,
+        "observed_update_frontier": 1000,
+        "resource_formal_capacity_evidence": false,
+        "resource_profile_bound": true
+      },
+      "required": {
+        "capacity_evidence_valid": true,
+        "observed_update_frontier": 32000,
+        "resource_formal_capacity_evidence": true
+      },
+      "scope": "resource"
+    }
+  ],
+  "capacity_evidence": {
+    "bound": true,
+    "checkpoints": [],
+    "execution_constraints": {
+      "central_ledger_mutation": 0,
+      "central_registry_mutation": 0,
+      "checkpoint_written": false,
+      "formal_runs_started": 0,
+      "future_state_inputs": false,
+      "gpu_started": false,
+      "read_only": true,
+      "solver_started": false,
+      "submitted": false,
+      "training_receipt_written": false,
+      "trajectory_files_opened": false
+    },
+    "formal_capacity_evidence": false,
+    "formal_runs_counted": 0,
+    "manifest": {
+      "bound": true,
+      "canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "case_count": 32,
+      "formal_release": false,
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "valid": false
+    },
+    "observed_update_frontier": 1000,
+    "path": "campaigns/core-v1/learning/formal-release-frontier-v1/capacity-evidence-from-1000-pilot.json",
+    "references": [
+      {
+        "declared_sha256": "49649ea41a38e954ca62ba5f1b10ece2df3b7f8afa7a49436f8181d5120428ba",
+        "name": "receipt",
+        "path": "campaigns/core-v1/evidence/h200-f3-fullfield-integration-pilot-graph_raw-1000-training.json",
+        "sha256": "49649ea41a38e954ca62ba5f1b10ece2df3b7f8afa7a49436f8181d5120428ba"
+      },
+      {
+        "declared_sha256": "c2c03005f5d2728a3f118a1b43c2a73ac19841342e3b42bf2a57f4b9aa1fa12c",
+        "name": "execution",
+        "path": "campaigns/core-v1/evidence/h200-f3-fullfield-integration-pilot-graph_raw-1000-execution.json",
+        "sha256": "c2c03005f5d2728a3f118a1b43c2a73ac19841342e3b42bf2a57f4b9aa1fa12c"
+      }
+    ],
+    "schema": "core.formal_capacity_evidence.v1",
+    "sha256": "6e4641eee0eb02ba2cad8e8677ecde66e992c9891424a12181db28e5b0b5a32d",
+    "source_closure": {
+      "bound": true,
+      "closure_sha256": "76c93c4d4effa6bf7ffa1bb124b5a43efc3c5f31bbb107f570a750fb6e5b9b22",
+      "files": [
+        {
+          "bytes": 111794,
+          "relative_path": "scripts/core_learning.py",
+          "sha256": "20fee75b02fa9ce5cee6fdc7645bc4970ccbdd5d3a62aed7b9fedeb512c6392f"
+        },
+        {
+          "bytes": 26739,
+          "relative_path": "scripts/core_contract.py",
+          "sha256": "99ff892dfe2c1ae1c7d97af00241f736cf3ebcc3c5e018ab74581fbcb079b261"
+        },
+        {
+          "bytes": 30550,
+          "relative_path": "scripts/core_dataset.py",
+          "sha256": "41b9b65ed196cc39e9d0d3fc4028119c5cd111f4cf97d2f950da57148892d25d"
+        },
+        {
+          "bytes": 22521,
+          "relative_path": "scripts/core_models.py",
+          "sha256": "27a323244554aa564676e957e072197248cc3fb3a923e5816443fd589bbae66f"
+        },
+        {
+          "bytes": 38880,
+          "relative_path": "scripts/core_cfd_dataset.py",
+          "sha256": "9a8b5ed364735804cc66521060ed04a18845a80bd95870d2727eda5392997523"
+        },
+        {
+          "bytes": 8160,
+          "relative_path": "scripts/core_evaluation.py",
+          "sha256": "8256905a9ee5961acfc815ef860b39f918af8fb31714eadfeb33269e608952ec"
+        },
+        {
+          "bytes": 30607,
+          "relative_path": "scripts/core_physics.py",
+          "sha256": "af5469f88791cdd16bf2ee6234c73e76e0dc453fe2030ccb33c03cf6fd84f892"
+        },
+        {
+          "bytes": 52402,
+          "relative_path": "scripts/core_formal_planner.py",
+          "sha256": "f958023abc92147209d976a52978bd5d50c3a4ef1c792aa105f8187cbf6fbc6b"
+        }
+      ],
+      "path": "campaigns/core-v1/learning/formal-release-frontier-v1/source-closure.json",
+      "sha256": "9e8abdbc0ab6c6432a40cdfde445a96ef92c2af6b205d26f978dfef45c9fe0fb",
+      "valid": true
+    },
+    "valid": false
+  },
+  "case_observations": [
+    {
+      "case_id": "F3_DEV_00_a0p903125",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "5c6c8bc8110256d89ba053a305558f04aad8e22f9172d46bdac9c8f8ced8c061",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_00_a0p903125-AUDIT.json",
+          "role": "F3_DEV_00_a0p903125 manifest audit",
+          "sha256": "5c6c8bc8110256d89ba053a305558f04aad8e22f9172d46bdac9c8f8ced8c061"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_01_a0p909375",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "977064975ab3ca77eee91a5abd1fc2666b1fbc12804b3fdcceeb880d6f2858b9",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_01_a0p909375-AUDIT.json",
+          "role": "F3_DEV_01_a0p909375 manifest audit",
+          "sha256": "977064975ab3ca77eee91a5abd1fc2666b1fbc12804b3fdcceeb880d6f2858b9"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_02_a0p915625",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "0b092bb3c750be0a4272e52417876ec5e217235eec7d9c9d823d067660a7af80",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_02_a0p915625-AUDIT.json",
+          "role": "F3_DEV_02_a0p915625 manifest audit",
+          "sha256": "0b092bb3c750be0a4272e52417876ec5e217235eec7d9c9d823d067660a7af80"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_03_a0p921875",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "b2fbeae51be600564d46f5a555d6b8b1d8ebd5e62938b80a384f0d1f1319d408",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_03_a0p921875-AUDIT.json",
+          "role": "F3_DEV_03_a0p921875 manifest audit",
+          "sha256": "b2fbeae51be600564d46f5a555d6b8b1d8ebd5e62938b80a384f0d1f1319d408"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_04_a0p928125",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "36c1c197c614652820283d817f27ca31e4431b25dc19a400f119d95715bf86b0",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_04_a0p928125-AUDIT.json",
+          "role": "F3_DEV_04_a0p928125 manifest audit",
+          "sha256": "36c1c197c614652820283d817f27ca31e4431b25dc19a400f119d95715bf86b0"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_05_a0p934375",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "a7dd8bd8cb904cb254caab293218f2a072d34dc3403bbdc553c03d81da572567",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_05_a0p934375-AUDIT.json",
+          "role": "F3_DEV_05_a0p934375 manifest audit",
+          "sha256": "a7dd8bd8cb904cb254caab293218f2a072d34dc3403bbdc553c03d81da572567"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_06_a0p940625",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "97908f56456318970628726b4a77d24f1dbeda93b2d54372296d0e39c943ef78",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_06_a0p940625-AUDIT.json",
+          "role": "F3_DEV_06_a0p940625 manifest audit",
+          "sha256": "97908f56456318970628726b4a77d24f1dbeda93b2d54372296d0e39c943ef78"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_07_a0p946875",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "58b7cc49dc70bbfa913992c5ca92151f0c3ab181ad9a74ca1511207b324514ce",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_07_a0p946875-AUDIT.json",
+          "role": "F3_DEV_07_a0p946875 manifest audit",
+          "sha256": "58b7cc49dc70bbfa913992c5ca92151f0c3ab181ad9a74ca1511207b324514ce"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_08_a0p953125",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "4954dd5232ecf42519ab3db121bc443f1c1ff188e1f1d23aaa049d7a59d48eea",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_08_a0p953125-AUDIT.json",
+          "role": "F3_DEV_08_a0p953125 manifest audit",
+          "sha256": "4954dd5232ecf42519ab3db121bc443f1c1ff188e1f1d23aaa049d7a59d48eea"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "validation",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_09_a0p959375",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "ba95e5726ced12bf83065109e6baf75caa5c8d0f4d5c843a39481fd34eb49f8c",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_09_a0p959375-AUDIT.json",
+          "role": "F3_DEV_09_a0p959375 manifest audit",
+          "sha256": "ba95e5726ced12bf83065109e6baf75caa5c8d0f4d5c843a39481fd34eb49f8c"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_10_a0p965625",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "31cb8a68567c6682a8cb56faf805ff41ea3d4ea53bdfa499efb8d97de3d0163c",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_10_a0p965625-AUDIT.json",
+          "role": "F3_DEV_10_a0p965625 manifest audit",
+          "sha256": "31cb8a68567c6682a8cb56faf805ff41ea3d4ea53bdfa499efb8d97de3d0163c"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_11_a0p971875",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "1ae58f2018a46d7fb4c5fd0468ab7fb4d68963b8126a363351a1c76d541951e5",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_11_a0p971875-AUDIT.json",
+          "role": "F3_DEV_11_a0p971875 manifest audit",
+          "sha256": "1ae58f2018a46d7fb4c5fd0468ab7fb4d68963b8126a363351a1c76d541951e5"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_12_a0p978125",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "4e7ae6715716925e3b66abe57efe3b360eef2fc1a3a5733f8979afe8a31c8262",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_12_a0p978125-AUDIT.json",
+          "role": "F3_DEV_12_a0p978125 manifest audit",
+          "sha256": "4e7ae6715716925e3b66abe57efe3b360eef2fc1a3a5733f8979afe8a31c8262"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_13_a0p984375",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "2f492029e2cecb1dd73cef09fe51eca965f64a8ee38735f7ee4cc32bbb1df4cb",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_13_a0p984375-AUDIT.json",
+          "role": "F3_DEV_13_a0p984375 manifest audit",
+          "sha256": "2f492029e2cecb1dd73cef09fe51eca965f64a8ee38735f7ee4cc32bbb1df4cb"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "validation",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_14_a0p990625",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "f199b9ec5d9afd793dde626637f8f8a3216dff435f699414ab1b81d946ba0ce7",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_14_a0p990625-AUDIT.json",
+          "role": "F3_DEV_14_a0p990625 manifest audit",
+          "sha256": "f199b9ec5d9afd793dde626637f8f8a3216dff435f699414ab1b81d946ba0ce7"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_15_a0p996875",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "4d8a358fa49ca6f0a6fff763bc900a98109955290d7fc97b1d835d5576b04533",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_15_a0p996875-AUDIT.json",
+          "role": "F3_DEV_15_a0p996875 manifest audit",
+          "sha256": "4d8a358fa49ca6f0a6fff763bc900a98109955290d7fc97b1d835d5576b04533"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_16_a1p003125",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "42e416d8c90cc811c0abb07d01f2b73b7b2f03b9f3929eeb0ebe7d206495f75d",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_16_a1p003125-AUDIT.json",
+          "role": "F3_DEV_16_a1p003125 manifest audit",
+          "sha256": "42e416d8c90cc811c0abb07d01f2b73b7b2f03b9f3929eeb0ebe7d206495f75d"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_17_a1p009375",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "2fe4cf4b6fa2567b8052911d0ab77508cfd61a520c8fff68d5ba03bc8a7cbc83",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_17_a1p009375-AUDIT.json",
+          "role": "F3_DEV_17_a1p009375 manifest audit",
+          "sha256": "2fe4cf4b6fa2567b8052911d0ab77508cfd61a520c8fff68d5ba03bc8a7cbc83"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_18_a1p015625",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "2e395fbaed834dbd3c134a9dde192f5d7472bbb74888d6ef95d1d95cf222b39e",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_18_a1p015625-AUDIT.json",
+          "role": "F3_DEV_18_a1p015625 manifest audit",
+          "sha256": "2e395fbaed834dbd3c134a9dde192f5d7472bbb74888d6ef95d1d95cf222b39e"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "validation",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_19_a1p021875",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "4bab492a54b404aebccb2afed927a76b6bb86bd5e683a34c7c89efd5b2c85724",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_19_a1p021875-AUDIT.json",
+          "role": "F3_DEV_19_a1p021875 manifest audit",
+          "sha256": "4bab492a54b404aebccb2afed927a76b6bb86bd5e683a34c7c89efd5b2c85724"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_20_a1p028125",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "a815e53a89215f36f03df790f835cd1dd3a5c262ba5318d26ab3d04624418a45",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_20_a1p028125-AUDIT.json",
+          "role": "F3_DEV_20_a1p028125 manifest audit",
+          "sha256": "a815e53a89215f36f03df790f835cd1dd3a5c262ba5318d26ab3d04624418a45"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_21_a1p034375",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "be1752f18c4ed3937fc5134445da2ce1315188b7267c406cb32e64ca47d153a9",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_21_a1p034375-AUDIT.json",
+          "role": "F3_DEV_21_a1p034375 manifest audit",
+          "sha256": "be1752f18c4ed3937fc5134445da2ce1315188b7267c406cb32e64ca47d153a9"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_22_a1p040625",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "284660a886c4a7c7e08c6618fbb8d1fecc7bc1e52df02a15b45c531f59ff9f09",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_22_a1p040625-AUDIT.json",
+          "role": "F3_DEV_22_a1p040625 manifest audit",
+          "sha256": "284660a886c4a7c7e08c6618fbb8d1fecc7bc1e52df02a15b45c531f59ff9f09"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_23_a1p046875",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "4105affddc958e3be77857f5cdd07f39971f562a570a31fd847653d56a0ff879",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_23_a1p046875-AUDIT.json",
+          "role": "F3_DEV_23_a1p046875 manifest audit",
+          "sha256": "4105affddc958e3be77857f5cdd07f39971f562a570a31fd847653d56a0ff879"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "validation",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_24_a1p053125",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "f87f1fdcbc9cfaf23d42f20117aafa3c0571850fd51045d36fe728e4bb43bd45",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_24_a1p053125-AUDIT.json",
+          "role": "F3_DEV_24_a1p053125 manifest audit",
+          "sha256": "f87f1fdcbc9cfaf23d42f20117aafa3c0571850fd51045d36fe728e4bb43bd45"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_25_a1p059375",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "35d721104efbbcf6b1c40556bde23328fe6f82aba9d9c5159174839fa10d18a2",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_25_a1p059375-AUDIT.json",
+          "role": "F3_DEV_25_a1p059375 manifest audit",
+          "sha256": "35d721104efbbcf6b1c40556bde23328fe6f82aba9d9c5159174839fa10d18a2"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_26_a1p065625",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "d4e74f7c76d27c484871cac033b616ed4b0f414e71997008ca1a5698830a2719",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_26_a1p065625-AUDIT.json",
+          "role": "F3_DEV_26_a1p065625 manifest audit",
+          "sha256": "d4e74f7c76d27c484871cac033b616ed4b0f414e71997008ca1a5698830a2719"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_27_a1p071875",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "b177cb64d955193f2bbc89c67d1008d2d3814a9477822069a26bc75b79a9d661",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_27_a1p071875-AUDIT.json",
+          "role": "F3_DEV_27_a1p071875 manifest audit",
+          "sha256": "b177cb64d955193f2bbc89c67d1008d2d3814a9477822069a26bc75b79a9d661"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_28_a1p078125",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "923db54ee7cad1389b15c729c2d14395bdfab5cbe014d401df2c7ae8e845408b",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_28_a1p078125-AUDIT.json",
+          "role": "F3_DEV_28_a1p078125 manifest audit",
+          "sha256": "923db54ee7cad1389b15c729c2d14395bdfab5cbe014d401df2c7ae8e845408b"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_29_a1p084375",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "baa62cc6899b7b16007e46212e097e2c3688cada46b125d8943f307978264b57",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_29_a1p084375-AUDIT.json",
+          "role": "F3_DEV_29_a1p084375 manifest audit",
+          "sha256": "baa62cc6899b7b16007e46212e097e2c3688cada46b125d8943f307978264b57"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_30_a1p090625",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "0c0d2dd99c3bbd18776c4f356c26c6c5350e9218bb349e3fb5b2417006ab76f2",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_30_a1p090625-AUDIT.json",
+          "role": "F3_DEV_30_a1p090625 manifest audit",
+          "sha256": "0c0d2dd99c3bbd18776c4f356c26c6c5350e9218bb349e3fb5b2417006ab76f2"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F3_DEV_31_a1p096875",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": null,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "fa1cdaddcfd93116100f8a8e3d16db4476d7cbe3cf55717d9b4ff2a800096070",
+          "path": "campaigns/l1-resume/continuation/F3_DEV_31_a1p096875-AUDIT.json",
+          "role": "F3_DEV_31_a1p096875 manifest audit",
+          "sha256": "fa1cdaddcfd93116100f8a8e3d16db4476d7cbe3cf55717d9b4ff2a800096070"
+        },
+        "reference_present": true,
+        "structural_pass": null
+      },
+      "external_audit": {
+        "adapter_bound": true,
+        "hard_integrity_pass": true,
+        "identity_bound": true,
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "family": "F3",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+      "split": "test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_00",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "fd709048180f37105c85f4fe3c5811dc9e9288a781f7bfed82ddf7eb12cefa4d",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-00/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_00 manifest audit",
+          "sha256": "fd709048180f37105c85f4fe3c5811dc9e9288a781f7bfed82ddf7eb12cefa4d"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "ood_test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_01",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "0590ebc43fa6913e6869474fd1084b6b1e18222c24786751ecf094eb750ab0ca",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-01/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_01 manifest audit",
+          "sha256": "0590ebc43fa6913e6869474fd1084b6b1e18222c24786751ecf094eb750ab0ca"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "ood_test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_02",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "c81a3cc44deac1f7d8e1b7944cbe541b3aa934e061fd3e7d6f54d6d90f282f37",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-02/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_02 manifest audit",
+          "sha256": "c81a3cc44deac1f7d8e1b7944cbe541b3aa934e061fd3e7d6f54d6d90f282f37"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "ood_test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_03",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "1aac1d86a44b1fc17bcef9537d1c34cb369d3760b67ad4261423cb936468f6ec",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-03/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_03 manifest audit",
+          "sha256": "1aac1d86a44b1fc17bcef9537d1c34cb369d3760b67ad4261423cb936468f6ec"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "e7c9401d91dec90380001d6f682995ca5e9525ba654145f3c17f537513849447",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-04/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04 manifest audit",
+          "sha256": "e7c9401d91dec90380001d6f682995ca5e9525ba654145f3c17f537513849447"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_05",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "d5c72cc30c77ce5a13419811de6bc33a5d9d9dee67f4e253959d9b6b1911474f",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-05/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_05 manifest audit",
+          "sha256": "d5c72cc30c77ce5a13419811de6bc33a5d9d9dee67f4e253959d9b6b1911474f"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "id_test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_06",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "cb871cecc2647843afdc126d01a789706664faa66edaee43316fba6bebae9fc0",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-06/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_06 manifest audit",
+          "sha256": "cb871cecc2647843afdc126d01a789706664faa66edaee43316fba6bebae9fc0"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "e55dcd6fa2b4a8415bb998a3a8160fb84165cc041983217942a73f659b1cfa28",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-07/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07 manifest audit",
+          "sha256": "e55dcd6fa2b4a8415bb998a3a8160fb84165cc041983217942a73f659b1cfa28"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_08",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "6f3c38956cc4ab2dd2daa933874d26ad0f94b1cfe42dd4cda4ed05db9c7edf08",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-08/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_08 manifest audit",
+          "sha256": "6f3c38956cc4ab2dd2daa933874d26ad0f94b1cfe42dd4cda4ed05db9c7edf08"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "validation",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_09",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "d88097804a7a62d6347d80cf1833a885d7a1070ab669383a656d868f21713104",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-09/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_09 manifest audit",
+          "sha256": "d88097804a7a62d6347d80cf1833a885d7a1070ab669383a656d868f21713104"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "id_test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_10",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "3bc4b46cb8822fb19fee50b7b50f537dace623ac831c5387ce70fdffc56a6fb5",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-10/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_10 manifest audit",
+          "sha256": "3bc4b46cb8822fb19fee50b7b50f537dace623ac831c5387ce70fdffc56a6fb5"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_11",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "8ba603bf1e8f01f26e80646582593c615dfbca731893879d7169170853e3bbd1",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-11/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_11 manifest audit",
+          "sha256": "8ba603bf1e8f01f26e80646582593c615dfbca731893879d7169170853e3bbd1"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_12",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "5198aa60864c6dc5dd3ed9f9ec32310fae9ae5d23bffe98ea0ec2f5d2237217b",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-12/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_12 manifest audit",
+          "sha256": "5198aa60864c6dc5dd3ed9f9ec32310fae9ae5d23bffe98ea0ec2f5d2237217b"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_13",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "6c0c8335f7529116a7b32464c90611803bb1651c61a988da18bae18a52721a96",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-13/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_13 manifest audit",
+          "sha256": "6c0c8335f7529116a7b32464c90611803bb1651c61a988da18bae18a52721a96"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "validation",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_14",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "59b8ff4b9c1d85f20f9aeb85651aabb9ee604ab3457b2a8278b2b2cb1b7ea4f0",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-14/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_14 manifest audit",
+          "sha256": "59b8ff4b9c1d85f20f9aeb85651aabb9ee604ab3457b2a8278b2b2cb1b7ea4f0"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "id_test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_15",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "78d6f1857e523f35bab1ced6cbfee136567b3b4257f37bfb38a9870f7d89629a",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-15/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_15 manifest audit",
+          "sha256": "78d6f1857e523f35bab1ced6cbfee136567b3b4257f37bfb38a9870f7d89629a"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_16",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "7844c8928af7f037c4b9bff698e5a5fb318bf1501a1b840cefb9f6f60a981190",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-16/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_16 manifest audit",
+          "sha256": "7844c8928af7f037c4b9bff698e5a5fb318bf1501a1b840cefb9f6f60a981190"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_17",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "15a83ff0c3c29b3d11286832995165e16ec06fb1e1b83cdbf9d4ae10ea353c4f",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-17/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_17 manifest audit",
+          "sha256": "15a83ff0c3c29b3d11286832995165e16ec06fb1e1b83cdbf9d4ae10ea353c4f"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "id_test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_18",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "404e4748f630f292b11b5713e4ee1009b6984c3e0e1863ca2ca5904c616510cb",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-18/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_18 manifest audit",
+          "sha256": "404e4748f630f292b11b5713e4ee1009b6984c3e0e1863ca2ca5904c616510cb"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "validation",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_19",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "9717d7fb7ad27e789280a47bedf155161c8e64cd640392ea30d5f1205cd5caf6",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-19/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_19 manifest audit",
+          "sha256": "9717d7fb7ad27e789280a47bedf155161c8e64cd640392ea30d5f1205cd5caf6"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_20",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "b14cc296016cee1276957e8c2d6ab9a6be726edc5e13ad6bd1c6bc868f7c11cd",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-20/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_20 manifest audit",
+          "sha256": "b14cc296016cee1276957e8c2d6ab9a6be726edc5e13ad6bd1c6bc868f7c11cd"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_21",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "bb244f5a2d201c45f29ad713dec8a46d3628dffafac9cc914def4d4988ca5ee9",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-21/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_21 manifest audit",
+          "sha256": "bb244f5a2d201c45f29ad713dec8a46d3628dffafac9cc914def4d4988ca5ee9"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_22",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "16fd539a43a5c80b88dfaa89fd16945f09fbd15120715593a0ddbc3950ef068d",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-22/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_22 manifest audit",
+          "sha256": "16fd539a43a5c80b88dfaa89fd16945f09fbd15120715593a0ddbc3950ef068d"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "id_test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_23",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "4b893c81b53dbe3a5793f76615b2719aa2ff77ca56b263f73ae3f61edd676502",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-23/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_23 manifest audit",
+          "sha256": "4b893c81b53dbe3a5793f76615b2719aa2ff77ca56b263f73ae3f61edd676502"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "validation",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_24",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "8af15df76af8a03fb9f3812e4baf55eb4200cfbf1f85c4535ed68c270007d2e1",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-24/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_24 manifest audit",
+          "sha256": "8af15df76af8a03fb9f3812e4baf55eb4200cfbf1f85c4535ed68c270007d2e1"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_25",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "44915f1a36050fd82397f4c0f3efcf5c75ab6a0ace83ade99804cb9e2ab41ea0",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-25/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_25 manifest audit",
+          "sha256": "44915f1a36050fd82397f4c0f3efcf5c75ab6a0ace83ade99804cb9e2ab41ea0"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_26",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "c3368205e9f8d2ad64e03f05c19ae9de424268b64d65d99bf638d88c90eeb73a",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-26/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_26 manifest audit",
+          "sha256": "c3368205e9f8d2ad64e03f05c19ae9de424268b64d65d99bf638d88c90eeb73a"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "id_test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_27",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "6ec98fbc04b83e22f747e2286e486e6de53e0d267c56441cdbd7cf59704437c7",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-27/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_27 manifest audit",
+          "sha256": "6ec98fbc04b83e22f747e2286e486e6de53e0d267c56441cdbd7cf59704437c7"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_28",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "a86812e3ce9a2d0bbd990e40eaccac7c9e2d0307528a751d18ec3e31d935bb49",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-28/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_28 manifest audit",
+          "sha256": "a86812e3ce9a2d0bbd990e40eaccac7c9e2d0307528a751d18ec3e31d935bb49"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "train",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_29",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "b1849a51d53102c11ae38ac40b52e0d2f1926d44e27f3095103668708e1d7011",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-29/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_29 manifest audit",
+          "sha256": "b1849a51d53102c11ae38ac40b52e0d2f1926d44e27f3095103668708e1d7011"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "ood_test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_30",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "dba807e07e853a3c5f52820dd95f9b75825c619931cae03ba2171e3bf3c6ba95",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-30/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_30 manifest audit",
+          "sha256": "dba807e07e853a3c5f52820dd95f9b75825c619931cae03ba2171e3bf3c6ba95"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "ood_test",
+      "status": "passed",
+      "structural_pass_bound": true
+    },
+    {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_31",
+      "denominator_included": true,
+      "direct_audit": {
+        "error": null,
+        "hard_integrity_pass": true,
+        "hash_verified": true,
+        "identity_bound": true,
+        "reference": {
+          "declared_sha256": "e2915d6426ba909ff52b19e1e9825aa940cdbc9da4d6f0b4c79923f91557764e",
+          "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-31/product/audit.json",
+          "role": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_31 manifest audit",
+          "sha256": "e2915d6426ba909ff52b19e1e9825aa940cdbc9da4d6f0b4c79923f91557764e"
+        },
+        "reference_present": true,
+        "structural_pass": true
+      },
+      "external_audit": {
+        "adapter_bound": false,
+        "hard_integrity_pass": null,
+        "identity_bound": false,
+        "reference_present": false,
+        "structural_pass": null
+      },
+      "family": "F4",
+      "formal_audit_pass": true,
+      "hard_integrity_pass_bound": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "split": "ood_test",
+      "status": "passed",
+      "structural_pass_bound": true
+    }
+  ],
+  "diagnostic_exclusion": {
+    "diagnostic_job_count": 3,
+    "diagnostic_runs_counted_as_formal": false,
+    "formal_job_count": 0,
+    "profile_is_diagnostic_only": true
+  },
+  "duplicate_case_ids": [],
+  "evidence": [
+    {
+      "case_count": 0,
+      "path": "campaigns/core-v1/evidence/f3-inherited-qualification.json",
+      "read_only": true,
+      "schema": "core.qualification.v1",
+      "sha256": "a28bf89e231fdb1bd7399c4ed8e2a6cbb297194c5cfee7cc93a1eb9d1d40d8a2"
+    },
+    {
+      "case_count": 32,
+      "path": "campaigns/core-v1/evidence/f3-legacy-hard-audit-adapter-v1.json",
+      "read_only": true,
+      "schema": "core.f3.legacy_hard_audit_adapter.v1",
+      "sha256": "33fbe9cb48300f671c08d5dc1b14a43901ab723d8839f3cff7850a8543d17f0b"
+    },
+    {
+      "case_count": 32,
+      "path": "campaigns/core-v1/evidence/f3-structural-audit-adapter-v1.json",
+      "read_only": true,
+      "schema": "core.f3.structural_audit_adapter.v1",
+      "sha256": "f4cee346e2e07aa191eb6743ee25a61b7f2ce56cd0a9f3920859a5d3dc6766b1"
+    },
+    {
+      "case_count": 0,
+      "path": "campaigns/core-v1/evidence/f4-tallwall120-formal-qualification-20260920.json",
+      "read_only": true,
+      "schema": "core.qualification.v1",
+      "sha256": "865f2481a28b4935635264c58d72bff166f267e943ba509a602d9f67f3c38307"
+    }
+  ],
+  "evidence_binding_errors": [],
+  "execution_constraints": {
+    "central_ledger_mutation": 0,
+    "central_registry_mutation": 0,
+    "formal_runs_started": 0,
+    "formal_specs_written": false,
+    "future_state_inputs": false,
+    "gpu_started": false,
+    "manifest_written": false,
+    "read_only": true,
+    "solver_started": false,
+    "submitted": false,
+    "trajectory_files_opened": false
+  },
+  "family_summary": {
+    "families": [
+      "F3",
+      "F4"
+    ],
+    "family_counts": {
+      "F3": 32,
+      "F4": 32
+    },
+    "split_counts": {
+      "F3": {
+        "test": 12,
+        "train": 16,
+        "validation": 4
+      },
+      "F4": {
+        "test": 12,
+        "train": 16,
+        "validation": 4
+      }
+    },
+    "split_shape_mismatches": {},
+    "t1_families": {
+      "F3": true,
+      "F4": true
+    },
+    "t1_family_count": 2,
+    "validation_counts": {
+      "F3": 4,
+      "F4": 4
+    }
+  },
+  "formal_admission": false,
+  "formal_job_count": 0,
+  "formal_protocol": {
+    "model_seed_product_count": 9,
+    "models": [
+      "mlp",
+      "graph_raw",
+      "graph_residual"
+    ],
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "test_included": false,
+    "updates": 32000,
+    "validation_cases_per_family_required": 4,
+    "validation_cases_required": 12
+  },
+  "graph_probe": {
+    "bound": true,
+    "case": {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_03",
+      "family": "F4",
+      "frame": 0,
+      "particles": 217086,
+      "split": "train",
+      "trajectory_bytes": 2063976977,
+      "trajectory_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-03/product/trajectory.h5",
+      "trajectory_sha256": "0269edfa627e35981fe241d17a798f217fbf62442f0a2287c194b677578b05d7"
+    },
+    "diagnostic_only": true,
+    "execution_constraints": {
+      "central_ledger_mutation": 0,
+      "central_registry_mutation": 0,
+      "checkpoint_written": false,
+      "formal_runs_started": 0,
+      "future_state_inputs": false,
+      "gpu_started": true,
+      "solver_started": false,
+      "submitted": false,
+      "training_receipt_written": false,
+      "trajectory_files_opened": true
+    },
+    "formal_capacity_evidence": false,
+    "formal_runs_counted": 0,
+    "io_and_graph": {
+      "hdf5_opened_for_diagnostic": true,
+      "neighbor_diagnostics": {
+        "field_particle_count": 217086,
+        "max_neighbors": 64,
+        "neighbor_radius_over_h": 2.0,
+        "neighbor_truncation_fraction": 0.6239140248565085
+      },
+      "read_transition_seconds": 0.6088119000196457,
+      "tensor_and_neighbor_build_seconds": 13.208973300061189
+    },
+    "path": "campaigns/core-v1/learning/formal-release-candidate-v2/full-field-graph-raw-capacity-probe-f4-train0-4updates-v2.json",
+    "protocol": {
+      "centers_per_update": 256,
+      "device": "cuda",
+      "full_particle_axis": true,
+      "gpu_name": "NVIDIA RTX 6000 Ada Generation",
+      "hidden": 64,
+      "learning_rate": 0.001,
+      "model_kind": "graph_raw",
+      "optimizer": "Adam",
+      "probe_updates": 4,
+      "seed": 17,
+      "target_updates": 32000
+    },
+    "resource": {
+      "peak_gpu_memory_bytes": 607522816,
+      "peak_gpu_memory_mib": 579.37890625,
+      "peak_rss_mib": 1462.71484375,
+      "system_cpu_seconds": 1.573112,
+      "user_cpu_seconds": 112.722061
+    },
+    "schema": "core.formal_graph_capacity_probe.v1",
+    "sha256": "9af0b53936dd75473e364decdd85a699203b0be1b65b73a9c081f01b19566af9",
+    "updates": {
+      "completed": 4,
+      "estimate_is_extrapolation": true,
+      "estimated_32000_full_pipeline_hours": 122.90022269822657,
+      "estimated_32000_full_pipeline_seconds": 442440.80171361566,
+      "estimated_32000_update_seconds_median": 271.67531102895737,
+      "estimated_32000_update_seconds_plus_one_io": 285.4930962290382,
+      "full_pipeline_basis": "one representative HDF5 transition plus neighbor rebuild per optimizer update",
+      "loss_mse": [
+        0.005516541190445423,
+        0.004106926266103983,
+        0.0028979326598346233,
+        0.0018820834811776876
+      ],
+      "mean_update_seconds": 0.12320454348810017,
+      "median_update_seconds": 0.008489853469654918,
+      "update_seconds": [
+        0.4675712250173092,
+        0.008604264934547246,
+        0.00826724199578166,
+        0.00837544200476259
+      ]
+    },
+    "valid": true
+  },
+  "lineage_split_violations": [],
+  "manifests": [
+    {
+      "case_count": 32,
+      "dataset_id": "F3_registered32_core_native_v2",
+      "formal_release": false,
+      "manifest_errors": [],
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "read_only": true,
+      "schema": "core.dataset.v2",
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+    },
+    {
+      "case_count": 32,
+      "dataset_id": "F4_tallwall120_production_training_v1_compact_v2",
+      "formal_release": true,
+      "manifest_errors": [],
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+      "read_only": true,
+      "schema": "core.dataset.v2",
+      "sha256": "eb417b2774817039776b50d18e12e2500634d8c60f4465c42f5633a033c04a16"
+    }
+  ],
+  "physical_split_violations": [],
+  "production_denominator": {
+    "audit_gap_case_ids": [],
+    "failed_or_unresolved_case_count": 0,
+    "failure_denominator_preserved": true,
+    "formal_audit_pass_count": 64,
+    "hard_gap_case_ids": [],
+    "hard_integrity_pass_bound_count": 64,
+    "included_case_count": 64,
+    "manifest_case_count": 64,
+    "qualification_excluded_case_count": 0,
+    "structural_gap_case_ids": [],
+    "structural_pass_bound_count": 64
+  },
+  "purpose": "Read-only cross-manifest admission audit; no formal jobs are emitted.",
+  "qualification_claim": "none",
+  "record_id": "core-formal-admission-20260924-r002",
+  "required_formal_job_count": 9,
+  "resource_dryrun": {
+    "bound": true,
+    "dry_run": true,
+    "execution_constraints": {
+      "central_ledger_mutation": 0,
+      "central_registry_mutation": 0,
+      "checkpoint_written": false,
+      "formal_runs_started": 0,
+      "future_state_inputs": false,
+      "gpu_started": false,
+      "solver_started": false,
+      "submitted": false,
+      "training_receipt_written": false,
+      "trajectory_files_opened": false
+    },
+    "formal_capacity_evidence": false,
+    "formal_runs_counted": 0,
+    "path": "campaigns/core-v1/learning/formal-release-candidate-v1/resource-frontier-dryrun-mlp-seed17-32000.json",
+    "resource": {
+      "peak_rss_mib": 651.5859375,
+      "system_cpu_seconds": 0.888434,
+      "updates_per_second": 786.0293205806739,
+      "user_cpu_seconds": 58.018262,
+      "wall_seconds": 40.710949530941434
+    },
+    "schema": "core.formal_resource_dryrun.v1",
+    "sha256": "af2865957d8a6c51841c15303db6a0346429338bffd49fd67dd91fa3c2fc3979",
+    "updates_completed": 32000,
+    "valid": true
+  },
+  "resource_profile": {
+    "bound": true,
+    "diagnostic_only": true,
+    "formal_capacity_evidence": false,
+    "formal_update_target": 32000,
+    "limits": "16-update engineering canaries; not formal training or multi-family memory upper bounds",
+    "observed_update_frontier": 16,
+    "path": "campaigns/core-v1/learning/backward-resource-measurements.json",
+    "sha256": "fedc3e65080381dd1a6c22caa9394a1eacbb8b7a1f60f53b1c68a44cfbc7d315"
+  },
+  "schema": "core.formal_admission_audit.v1",
+  "source_closure": {
+    "current_closure_sha256": "385dcdd70ca150393b42355413c4cc732c0db1ec09b1bdc42624d7a996ca803a",
+    "current_files": [
+      {
+        "bytes": 138646,
+        "relative_path": "scripts/core_learning.py",
+        "sha256": "2ea5d7628d088cf3f7eeffe887481ae8e637cc830992607d486aeadfb4a4fa63"
+      },
+      {
+        "bytes": 34073,
+        "relative_path": "scripts/core_contract.py",
+        "sha256": "9c1da8dd772e232ab5eb249be7285e689c0d958c8073fc63828a2d4625b0e410"
+      },
+      {
+        "bytes": 34470,
+        "relative_path": "scripts/core_dataset.py",
+        "sha256": "cd5969d156b43e5631a3229119d7c1a193a5b7878e2653af2a709f53192418ae"
+      },
+      {
+        "bytes": 42126,
+        "relative_path": "scripts/core_models.py",
+        "sha256": "fac36b125991dc251544cfcc19d935c40521a409622c79a31c3e33dcce6fc637"
+      },
+      {
+        "bytes": 42240,
+        "relative_path": "scripts/core_cfd_dataset.py",
+        "sha256": "0e9f693df7e8ffcae54a9e446295275ed19605ba2309001eb8e0293b82e2f065"
+      },
+      {
+        "bytes": 21838,
+        "relative_path": "scripts/core_evaluation.py",
+        "sha256": "fb732905ccc92c35be226ef9ac1a62a61d4f9535aa9409356a04a8df2d2419e2"
+      },
+      {
+        "bytes": 30607,
+        "relative_path": "scripts/core_physics.py",
+        "sha256": "af5469f88791cdd16bf2ee6234c73e76e0dc453fe2030ccb33c03cf6fd84f892"
+      },
+      {
+        "bytes": 54941,
+        "relative_path": "scripts/core_formal_planner.py",
+        "sha256": "b5363a4724d6ce27bea58080387e29449d16fc83406f8e3ef91133e1dc9dc15e"
+      }
+    ],
+    "fresh_admission_closure_complete": true,
+    "hash_algorithm": "sha256",
+    "missing_files": [],
+    "preprofile": {
+      "closure_sha256": "9b1266de9642403357470420119ef04e7b44d3d8b21557db50813ee401b93916",
+      "file_count": 8,
+      "mismatch_files": [
+        "scripts/core_cfd_dataset.py",
+        "scripts/core_contract.py",
+        "scripts/core_dataset.py",
+        "scripts/core_evaluation.py",
+        "scripts/core_formal_planner.py",
+        "scripts/core_learning.py",
+        "scripts/core_models.py"
+      ],
+      "path": "campaigns/core-v1/learning/formal-preprofile-v3/index.json",
+      "sha256": "5fc470a23c044b182e970d08a5acdea1ea407869607c118e26935b0370bde67e"
+    },
+    "preprofile_mismatch_count": 7,
+    "preprofile_source_closure_match": false,
+    "required_files": [
+      "scripts/core_learning.py",
+      "scripts/core_contract.py",
+      "scripts/core_dataset.py",
+      "scripts/core_models.py",
+      "scripts/core_cfd_dataset.py",
+      "scripts/core_evaluation.py",
+      "scripts/core_physics.py",
+      "scripts/core_formal_planner.py"
+    ]
+  },
+  "status": "blocked"
+}
