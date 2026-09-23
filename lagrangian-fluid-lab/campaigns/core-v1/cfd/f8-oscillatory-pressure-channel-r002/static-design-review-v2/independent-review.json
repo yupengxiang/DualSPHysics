@@ -1,0 +1,63 @@
+{
+  "schema": "core.cfd.f8.r002_static_design_independent_review.v1",
+  "reviewer": {
+    "agent_id": "01a0cd9a-43d4-78b2-936c-e38cd3d90c32",
+    "nickname": "Ptolemy",
+    "requested_model": "gpt-6-luna",
+    "requested_reasoning_effort": "max",
+    "actual_model_attestation_available": false
+  },
+  "scope": "read-only review of the exact closed F8 R002 static inputs and retained execution evidence",
+  "verdict": "FAIL_static_GenCase_readiness",
+  "findings": [
+    {
+      "id": "R002_MISSING_HSWL",
+      "severity": "static_design_blocker",
+      "detail": "The exact R002 Definition lacks hswl; its retained GenCase log explicitly rejects that same file for missing hswl and exits with code 1."
+    },
+    {
+      "id": "R002_OTHER_TEMPLATE_FIELDS_ABSENT",
+      "severity": "compatibility_gap",
+      "detail": "rhopgradient, gamma, speedsystem, and coefsound are also absent from the official-template constant set; these are not asserted to be observed GenCase errors."
+    },
+    {
+      "id": "R002_FINITE_WALL_SYNTAX_STATICALLY_SUPPORTED",
+      "severity": "informational_pass",
+      "detail": "The dp | bound shape mode and top|bottom wall fill have an official v5.4 Poiseuille precedent; static geometry does not prove successful particle generation."
+    },
+    {
+      "id": "R002_CONTROL_TABLE_STATICALLY_VALID",
+      "severity": "informational_pass",
+      "detail": "The R002-relative control reference resolves to a seven-column semicolon-delimited table with 705 data rows covering 0 through 11.196636217394023 seconds."
+    },
+    {
+      "id": "R002_ATTEMPT_CLOSED",
+      "severity": "boundary",
+      "detail": "The existing one-shot receipt forbids same-input retry; native decode and solver were not invoked, and qualification credit is zero."
+    }
+  ],
+  "review_bindings": [
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002_Def.xml",
+      "sha256": "086fa1cab8019c39c2d22fdfbee069441663b0615cdf9246c4383fd51b1b0bea"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/input/acceleration/F8_OPC_q0p500_r002_acceleration.csv",
+      "sha256": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/cpu-native-preflight-v1/receipt.json",
+      "sha256": "2c4680deffeeb09d5220ac2f760745e28575126fc9ebf33f55a562fd20675928"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/cpu-native-preflight-v1/gencase.stdout.log",
+      "sha256": "9d6233c836781b84f840145d8e0597920430b395dad8686a5342516244a8a26b"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/15_Poiseuille/CasePoiseuille_Def.xml",
+      "sha256": "ab7e06d9a5a2c5bad899f36ef393bc1d3867cd88fbf7aba5a734ee1e4ffaa2fe"
+    }
+  ],
+  "retry_or_execution_authority_granted": false,
+  "required_future_action": "Any correction or GenCase attempt requires a new F8 revision and namespace; do not modify or retry R002 or R001."
+}

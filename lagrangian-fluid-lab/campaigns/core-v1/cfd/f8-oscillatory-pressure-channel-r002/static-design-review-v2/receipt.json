@@ -1,0 +1,235 @@
+{
+  "bindings": [
+    {
+      "bytes": 4499,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/cpu-native-preflight-postrun-audit-v1/receipt.json",
+      "role": "immutable closed R001 hard-failure audit",
+      "sha256": "d67f5055bd74769694dd43187fcb4447c84d8294454da8cc5f4e55c343d5b638"
+    },
+    {
+      "bytes": 6989,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/static-design-review-v1/receipt.json",
+      "role": "historical R002 static review; retained, not trusted as sufficient",
+      "sha256": "3548a497c8676ac8397b70c53798fc03fa6d677485ad0a8ed2125a30c0dbe62b"
+    },
+    {
+      "bytes": 5294,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/static-design-review-postmortem-v1/receipt.json",
+      "role": "R002 static-review postmortem",
+      "sha256": "adc098d9498f847a3c2914b0d071a823cfa609169f011ed08def8778c9155dd0"
+    },
+    {
+      "bytes": 3934,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/cpu-native-preflight-v1/receipt.json",
+      "role": "immutable failed one-shot R002 CPU preflight",
+      "sha256": "2c4680deffeeb09d5220ac2f760745e28575126fc9ebf33f55a562fd20675928"
+    },
+    {
+      "bytes": 2248,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/cpu-native-preflight-v1/gencase.stdout.log",
+      "role": "actual GenCase missing-hswl parser failure",
+      "sha256": "9d6233c836781b84f840145d8e0597920430b395dad8686a5342516244a8a26b"
+    },
+    {
+      "bytes": 2176,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002_Def.xml",
+      "role": "exact closed R002 Definition; read-only",
+      "sha256": "086fa1cab8019c39c2d22fdfbee069441663b0615cdf9246c4383fd51b1b0bea"
+    },
+    {
+      "bytes": 35956,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/input/acceleration/F8_OPC_q0p500_r002_acceleration.csv",
+      "role": "exact closed R002 acceleration table; read-only",
+      "sha256": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1"
+    },
+    {
+      "bytes": 6505,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/15_Poiseuille/CasePoiseuille_Def.xml",
+      "role": "official DualSPHysics v5.4 Poiseuille Definition precedent",
+      "sha256": "ab7e06d9a5a2c5bad899f36ef393bc1d3867cd88fbf7aba5a734ee1e4ffaa2fe"
+    },
+    {
+      "bytes": 3091,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/static-design-review-v2/independent-review.json",
+      "role": "independent read-only static review result",
+      "sha256": "7e7588856d4a5ef09ae5f162cfa1862c3325914226d15457cd27511db97ed172"
+    },
+    {
+      "bytes": 15479,
+      "path": "scripts/f8_r002_static_design_review_v2.py",
+      "role": "fresh R002 static-review builder",
+      "sha256": "c44317526a01554dc94bd99e005dac195fd3d42d57ccaccfffacc0a8d1227b8a"
+    },
+    {
+      "bytes": 2928,
+      "path": "tests/test_f8_r002_static_design_review_v2.py",
+      "role": "fresh R002 static-review tests",
+      "sha256": "67554e9d59ed33f8f2ee7e52d412c9f317cfa9970681de639bbbd42968f0fff4"
+    }
+  ],
+  "constants_compatibility": {
+    "engine_confirmed_required_field": "hswl",
+    "engine_log_explicitly_rejects_r002": true,
+    "missing_from_r002_definition": [
+      "rhopgradient",
+      "hswl",
+      "gamma",
+      "speedsystem",
+      "coefsound"
+    ],
+    "official_precedent": "vendor/official/DualSPHysics_v5.4/examples/main/15_Poiseuille/CasePoiseuille_Def.xml",
+    "official_precedent_contains_all_fields": true,
+    "official_template_fields": [
+      "gravity",
+      "rhop0",
+      "rhopgradient",
+      "hswl",
+      "gamma",
+      "speedsystem",
+      "coefsound",
+      "speedsound",
+      "coefh",
+      "cflnumber"
+    ],
+    "other_missing_fields_are_not_claimed_as_observed_genCase_errors": true,
+    "r002_definition_fields": [
+      "gravity",
+      "rhop0",
+      "speedsound",
+      "coefh",
+      "cflnumber"
+    ]
+  },
+  "definition_control_audit": {
+    "acceleration_table": {
+      "all_values_finite": true,
+      "data_rows": 705,
+      "expected_data_rows": 705,
+      "expected_time_end_s": 11.196636217394023,
+      "header_matches_official_acceleration_table_shape": true,
+      "time_coverage_valid": true,
+      "time_end_s": 11.196636217394023,
+      "times_strictly_increasing": true,
+      "valid": true
+    },
+    "control_path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/input/acceleration/F8_OPC_q0p500_r002_acceleration.csv",
+    "control_reference_matches_expected_r002_path": true,
+    "control_sha256": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1",
+    "definition_control_reference": "acceleration/F8_OPC_q0p500_r002_acceleration.csv",
+    "definition_path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002_Def.xml",
+    "definition_sha256": "086fa1cab8019c39c2d22fdfbee069441663b0615cdf9246c4383fd51b1b0bea",
+    "finite_z_wall_markers_present": true
+  },
+  "disposition": {
+    "new_review_invoked_gencase_or_decoder": false,
+    "new_review_invoked_solver_gpu_worker_or_queue": false,
+    "next_repair_requires": "a separately named fresh F8 revision and separate scope-specific authorization; do not edit or retry R002",
+    "r001_mutated_or_retried": false,
+    "r002_definition_or_control_modified": false,
+    "r002_outputs_reused_or_retried": false
+  },
+  "execution_controls": {
+    "control_written": false,
+    "definition_written": false,
+    "gencase_invoked": false,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "native_decode_invoked": false,
+    "qualification_credit": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_invoked": false,
+    "worker_started": false
+  },
+  "independent_review": {
+    "findings": [
+      {
+        "detail": "The exact R002 Definition lacks hswl; its retained GenCase log explicitly rejects that same file for missing hswl and exits with code 1.",
+        "id": "R002_MISSING_HSWL",
+        "severity": "static_design_blocker"
+      },
+      {
+        "detail": "rhopgradient, gamma, speedsystem, and coefsound are also absent from the official-template constant set; these are not asserted to be observed GenCase errors.",
+        "id": "R002_OTHER_TEMPLATE_FIELDS_ABSENT",
+        "severity": "compatibility_gap"
+      },
+      {
+        "detail": "The dp | bound shape mode and top|bottom wall fill have an official v5.4 Poiseuille precedent; static geometry does not prove successful particle generation.",
+        "id": "R002_FINITE_WALL_SYNTAX_STATICALLY_SUPPORTED",
+        "severity": "informational_pass"
+      },
+      {
+        "detail": "The R002-relative control reference resolves to a seven-column semicolon-delimited table with 705 data rows covering 0 through 11.196636217394023 seconds.",
+        "id": "R002_CONTROL_TABLE_STATICALLY_VALID",
+        "severity": "informational_pass"
+      },
+      {
+        "detail": "The existing one-shot receipt forbids same-input retry; native decode and solver were not invoked, and qualification credit is zero.",
+        "id": "R002_ATTEMPT_CLOSED",
+        "severity": "boundary"
+      }
+    ],
+    "required_future_action": "Any correction or GenCase attempt requires a new F8 revision and namespace; do not modify or retry R002 or R001.",
+    "retry_or_execution_authority_granted": false,
+    "review_bindings": [
+      {
+        "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002_Def.xml",
+        "sha256": "086fa1cab8019c39c2d22fdfbee069441663b0615cdf9246c4383fd51b1b0bea"
+      },
+      {
+        "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/input/acceleration/F8_OPC_q0p500_r002_acceleration.csv",
+        "sha256": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1"
+      },
+      {
+        "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/cpu-native-preflight-v1/receipt.json",
+        "sha256": "2c4680deffeeb09d5220ac2f760745e28575126fc9ebf33f55a562fd20675928"
+      },
+      {
+        "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/cpu-native-preflight-v1/gencase.stdout.log",
+        "sha256": "9d6233c836781b84f840145d8e0597920430b395dad8686a5342516244a8a26b"
+      },
+      {
+        "path": "vendor/official/DualSPHysics_v5.4/examples/main/15_Poiseuille/CasePoiseuille_Def.xml",
+        "sha256": "ab7e06d9a5a2c5bad899f36ef393bc1d3867cd88fbf7aba5a734ee1e4ffaa2fe"
+      }
+    ],
+    "reviewer": {
+      "actual_model_attestation_available": false,
+      "agent_id": "01a0cd9a-43d4-78b2-936c-e38cd3d90c32",
+      "nickname": "Ptolemy",
+      "requested_model": "gpt-6-luna",
+      "requested_reasoning_effort": "max"
+    },
+    "schema": "core.cfd.f8.r002_static_design_independent_review.v1",
+    "scope": "read-only review of the exact closed F8 R002 static inputs and retained execution evidence",
+    "verdict": "FAIL_static_GenCase_readiness"
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "record_id": "f8-oscillatory-pressure-channel-r002-static-design-review-v2",
+  "retained_execution_evidence": {
+    "gencase_returncode": 1,
+    "native_decode_invoked": false,
+    "previous_postmortem_confirmed": true,
+    "r001_same_input_retry_forbidden": true,
+    "r002_preflight_status": "cpu_gencase_or_control_copy_failed_hard_audit",
+    "r002_same_input_retry_forbidden": true,
+    "solver_invoked": false
+  },
+  "review_scope": "read-only static audit of the exact already-materialized R002 Definition/control and retained failure evidence",
+  "schema": "core.cfd.f8.r002_static_design_review.v2",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002",
+  "static_constraint_gaps": [
+    {
+      "detail": "The exact R002 Definition omits hswl, and its retained GenCase log rejects that same file for missing hswl.",
+      "id": "R002_GENCASE_REQUIRED_HSWL_MISSING",
+      "severity": "static_design_blocker"
+    },
+    {
+      "detail": "Fields absent from the official-template compatibility set: rhopgradient, hswl, gamma, speedsystem, coefsound",
+      "id": "R002_OFFICIAL_CONSTANTS_COMPATIBILITY_GAP",
+      "severity": "compatibility_gap"
+    }
+  ],
+  "status": "r002_static_design_review_v2_failed_scope_closed_no_retry"
+}
