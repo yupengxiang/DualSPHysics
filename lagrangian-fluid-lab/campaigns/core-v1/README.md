@@ -157,8 +157,12 @@ cases are now hash-closed in
 [`definition-control-pack-v1`](cfd/f8-oscillatory-pressure-channel-r008/definition-control-pack-v1/receipt.json).
 This static pack did not create solver input/case directories and did not invoke
 GenCase. The next gate is a separate explicit one-shot native-preflight
-authorization bound to the exact R008 inputs; solver execution and T1/resource
-admission remain later, distinct gates. No R007 input or output is reusable as
-R008 qualification evidence. The previously explored F6 Definition failure
-remains immutable and cannot be retried or relabeled to satisfy the third-family
-gate.
+authorization bound to the exact R008 inputs. A static request packet now
+binds all 94 new inputs and proposes one representative CPU GenCase/native-
+decode check; it explicitly grants no execution permission and created no
+runtime namespace. See
+[`cpu-native-preflight-request-v1`](cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-request-v1/request.json).
+Solver execution and T1/resource admission remain later, distinct gates. No
+R007 input or output is reusable as R008 qualification evidence. The previously
+explored F6 Definition failure remains immutable and cannot be retried or
+relabeled to satisfy the third-family gate.
