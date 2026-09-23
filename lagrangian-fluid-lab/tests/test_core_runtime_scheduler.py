@@ -1,5 +1,7 @@
 import json
 import pathlib
+import subprocess
+import sys
 import time
 
 import scripts.core_runtime as runtime
@@ -130,6 +132,71 @@ def test_terminal_only_queue_skips_host_probes_but_persists_status(tmp_path):
     assert calls == []
     assert summary["counts"]["succeeded"] == 1
     assert json.loads((coordinator.store.root / "status.json").read_text())["counts"]["queued"] == 0
+
+
+def test_compact_summary_keeps_live_jobs_and_summarizes_terminal_receipts(tmp_path):
+    coordinator = Coordinator(
+        tmp_path / "runtime",
+        {"ada": {"lab": str(tmp_path), "python": "python"}},
+    )
+    terminal = {
+        "job_id": "terminal-large", "argv": ["/bin/true"], "cwd": "/tmp",
+        "host": "ada", "resources": {"cpu_cores": 1, "ram_mib": 128,
+                                           "gpu_peak_mib": 0, "io_weight": 0},
+        "required_outputs": [], "timeout_seconds": 10,
+    }
+    active = dict(terminal, job_id="live-job")
+    coordinator.store.submit(terminal)
+    coordinator.store.submit(active)
+    coordinator.store.update(
+        "terminal-large", "succeeded",
+        result={
+            "usage": {"wall_seconds": 1, "cpu_seconds_children": 2,
+                      "gpu_process_reservation_hours": 0},
+            "started": 1, "finished": 2, "allocation": {},
+            "artifact_index": [
+                {"path": f"artifact-{index}", "bytes": 10,
+                 "sha256": f"{index:064x}"}
+                for index in range(100)
+            ],
+        },
+    )
+    coordinator.store.update(
+        "live-job", "running", attempt_id="attempt-live",
+        attempt_dir=str(tmp_path / "attempt-live"),
+        allocation={"_host": "ada", "gpu_uuid": None}, result={},
+    )
+
+    compact = coordinator.summary(compact=True)
+    full = coordinator.summary()
+
+    assert compact["schema"] == "core.queue_status_summary.v1"
+    assert full["schema"] == "core.queue_status.v1"
+    assert compact["counts"] == full["counts"]
+    assert compact["usage"] == full["usage"]
+    assert compact["terminal_history"] == "summarized_by_counts_and_usage"
+    assert [item["job_id"] for item in compact["current_jobs"]] == ["live-job"]
+    assert compact["current_jobs"][0]["attempt_id"] == "attempt-live"
+    assert "result" not in compact["current_jobs"][0]
+    assert "artifact_index" not in json.dumps(compact)
+    full_terminal = next(item for item in full["jobs"] if item["job_id"] == "terminal-large")
+    assert len(full_terminal["result"]["artifact_index"]) == 100
+    assert len(json.dumps(compact)) < len(json.dumps(full))
+
+
+def test_compact_status_cli_emits_summary_schema(tmp_path):
+    root = tmp_path / "runtime"
+    result = subprocess.run(
+        [sys.executable, runtime.__file__, "--root", str(root), "status", "--compact"],
+        check=True, capture_output=True, text=True,
+    )
+
+    summary = json.loads(result.stdout)
+    assert summary["schema"] == "core.queue_status_summary.v1"
+    assert summary["counts"]["queued"] == 0
+    assert summary["current_jobs"] == []
+    assert "jobs" not in summary
+    assert len(result.stdout.encode()) < 2000
 
 
 def test_cas_transition_allows_only_one_observer_to_advance_attempt(tmp_path):

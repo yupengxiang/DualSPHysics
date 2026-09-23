@@ -1132,14 +1132,45 @@ class Coordinator:
         atomic_json(self.store.root / "status.json", summary)
         return summary
 
-    def summary(self):
+    def summary(self, *, compact=False):
         jobs = self.store.jobs()
         counts = {status: sum(x["status"] == status for x in jobs) for status in ("queued",) + ACTIVE + TERMINAL}
-        return {"schema": "core.queue_status.v1", "time": time.time(), "counts": counts, "usage": usage_summary(jobs),
-                "scientific_completion": "not_inferred_from_queue", "jobs": [
-                    {"job_id": x["job_id"], "status": x["status"], "host": x["spec"]["host"],
-                     "effective_host": self.job_host(x),
-                     "attempt_dir": x["attempt_dir"], "allocation": x["allocation"], "result": x["result"]} for x in jobs]}
+        common = {"time": time.time(), "counts": counts, "usage": usage_summary(jobs),
+                  "scientific_completion": "not_inferred_from_queue"}
+        if compact:
+            # The detailed status remains the audit view. The compact view is
+            # for routine monitoring: retain actionable queued/live identities
+            # while summarizing terminal history only by counts and usage.
+            current = []
+            for x in jobs:
+                if x["status"] in TERMINAL:
+                    continue
+                spec = x["spec"]
+                entry = {
+                    "job_id": x["job_id"], "status": x["status"],
+                    "host": spec.get("host"), "effective_host": self.job_host(x),
+                    "attempt_id": x["attempt_id"], "attempt_dir": x["attempt_dir"],
+                    "created": x["created"], "updated": x["updated"],
+                    "spec_hash": x["spec_hash"], "allocation": x["allocation"],
+                    "resources": spec.get("resources", {}),
+                }
+                if x["status"] == "attention" and isinstance(x["result"], dict):
+                    result = x["result"]
+                    attention = {key: result[key] for key in ("reason", "error") if key in result}
+                    for key in ("errors", "receipt_errors"):
+                        value = result.get(key)
+                        if isinstance(value, list):
+                            attention[key] = value[:8]
+                    if attention:
+                        entry["attention"] = attention
+                current.append(entry)
+            return {"schema": "core.queue_status_summary.v1", **common,
+                    "current_jobs": current,
+                    "terminal_history": "summarized_by_counts_and_usage"}
+        return {"schema": "core.queue_status.v1", **common, "jobs": [
+            {"job_id": x["job_id"], "status": x["status"], "host": x["spec"]["host"],
+             "effective_host": self.job_host(x),
+             "attempt_dir": x["attempt_dir"], "allocation": x["allocation"], "result": x["result"]} for x in jobs]}
 
 
 def main():
@@ -1147,7 +1178,9 @@ def main():
     parser.add_argument("--root", type=Path, default=DEFAULT_ROOT)
     parser.add_argument("--hosts", type=Path)
     commands = parser.add_subparsers(dest="command", required=True)
-    commands.add_parser("status")
+    status = commands.add_parser("status")
+    status.add_argument("--compact", action="store_true",
+                        help="summarize terminal history; retain details only for queued/live jobs")
     for name in ("inspect-inputs", "publish-inputs"):
         p = commands.add_parser(name)
         p.add_argument("--spec", type=Path, required=True)
@@ -1197,7 +1230,7 @@ def main():
         hosts = json.loads(args.hosts.read_text()) if args.hosts else default_hosts(LAB)
         coordinator = Coordinator(args.root, hosts)
         if args.command == "status":
-            print(json.dumps(coordinator.summary(), indent=2))
+            print(json.dumps(coordinator.summary(compact=args.compact), indent=2))
         else:
             args.root.mkdir(parents=True, exist_ok=True)
             with (args.root / "coordinator.lock").open("a") as lock:

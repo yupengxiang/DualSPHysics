@@ -26,9 +26,14 @@ to Git wholesale. Existing solver and source trajectory assets are not rewritten
 .venv/bin/python scripts/core_campaign.py status
 .venv/bin/python scripts/core_campaign.py status --write-snapshot
 .venv/bin/python scripts/core_runtime.py status
+.venv/bin/python scripts/core_runtime.py status --compact
 .venv/bin/python scripts/core_runtime.py submit --spec /absolute/job.json
 .venv/bin/python scripts/core_runtime.py run
 ```
+
+The default runtime status includes full historical attempt receipts for audit.
+Use `status --compact` for routine monitoring: it retains queued/live job
+identities and summarizes terminal history by counts and resource usage.
 
 The coordinator holds a single-process lock. It polls actual worker identities
 and receipts, and can be restarted without restarting live workers. An unreachable
