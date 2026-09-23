@@ -1,0 +1,102 @@
+{
+  "schema": "core.material.f4.supportcap_r002_cpu_canary_preflight_static_review.v1",
+  "record_id": "f4-supportcap-affine-query-bound-v3-cpu-native-canary-preflight-r002-review-v1",
+  "created_at_utc": "2026-09-23T09:04:55Z",
+  "status": "passed_independent_static_review_preflight_only",
+  "reviewer": {
+    "requested_model": "gpt-6-luna",
+    "reasoning_effort": "max",
+    "actual_model_attestation": "not supplied by review tool metadata"
+  },
+  "review_scope": {
+    "static_text_and_json_only": true,
+    "tests_or_preflight_executed_by_reviewer": false,
+    "hdf5_npz_path_stat_open_parse_or_hash_by_reviewer": false,
+    "solver_gpu_queue_scheduler_or_worker_started": false,
+    "registry_or_ledger_mutation": 0,
+    "runtime_execution_authorized": false,
+    "qualification_credit": 0
+  },
+  "input_bindings": [
+    {
+      "path": "scripts/f4_supportcap_r002_cpu_canary_preflight_v1.py",
+      "bytes": 24015,
+      "sha256": "2d103461511935339f4c6b488d8ddebea1a3886c0eec5f30a3c56fb98e96847f",
+      "role": "one-shot read-only CPU preflight implementation"
+    },
+    {
+      "path": "tests/test_f4_supportcap_r002_cpu_canary_preflight_v1.py",
+      "bytes": 19240,
+      "sha256": "ce019eddba4ce3789387663bfa8256f6976f88f4fbd38f21a90cdf8d298cbd47",
+      "role": "preflight boundary and failure-mode regression tests"
+    },
+    {
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/r002-static-design-v3/recipe.json",
+      "bytes": 15134,
+      "sha256": "8940c8263d4bb18a6e249638293b77aad02aa9ef5ee037ef74bb93c5f71bff73",
+      "role": "frozen r002 row-0-to-41 static design"
+    }
+  ],
+  "assessment": {
+    "required_static_bindings_are_closed_and_size_capped": true,
+    "recipe_parsed_from_verified_binding_bytes": true,
+    "row_0_to_41_forward_seed_advection_locked": true,
+    "original_t0_seed_query_at_row40_forbidden": true,
+    "source_sha256_precedes_hdf5_access": true,
+    "source_hash_and_hdf5_share_one_nofollow_fd": true,
+    "source_dev_inode_size_mtime_ctime_stability_checked": true,
+    "one_shot_start_record_and_parent_directory_synced_before_probe": true,
+    "terminal_receipt_update_is_atomic_and_failure_is_nonretryable": true,
+    "authorization_exact_bytes_bound_into_receipt": true,
+    "module_import_has_no_environment_side_effect": true,
+    "no_tracer_or_solver_execution_path": true,
+    "no_gpu_queue_or_t2_expansion": true
+  },
+  "prior_findings_and_dispositions": [
+    {
+      "finding": "Static recipe/source hashes were not mandatory.",
+      "disposition": "Required static bindings and exact frozen recipe assertions added; tests reject missing bindings and changed recipe parameters."
+    },
+    {
+      "finding": "Path reopening could separate the hashed source/recipe from bytes subsequently inspected.",
+      "disposition": "Recipe is parsed from the verified byte buffer; source hash and HDF5 access share one O_NOFOLLOW file descriptor."
+    },
+    {
+      "finding": "A failed terminal receipt write could leave an ambiguous consumed attempt.",
+      "disposition": "Exclusive started receipt is file- and directory-synced before probes; atomic terminal replacement failure leaves a durable non-success record and blocks retry."
+    },
+    {
+      "finding": "Import-time thread/GPU environment mutation affected test callers.",
+      "disposition": "Environment limits are applied only by the CLI entrypoint; sentinel regression test added."
+    },
+    {
+      "finding": "mtime alone did not detect same-size in-place source modification with restored mtime.",
+      "disposition": "ctime_ns is included in pre/post hash and HDF5 identity signatures; a same-size in-place mutation test restores mtime and expects fail-closed behavior."
+    }
+  ],
+  "local_validation": {
+    "commands": [
+      ".venv/bin/python -m pytest -q tests/test_f4_supportcap_r002_cpu_canary_preflight_v1.py tests/test_f4_supportcap_r002_static_design_v3.py tests/test_f4_supportcap_r002_static_design_v2.py"
+    ],
+    "result": "22 passed",
+    "static_recipe_and_binding_check": "passed",
+    "actual_cpu_native_preflight_run": false
+  },
+  "execution_boundary": {
+    "preflight_attempt_consumed": false,
+    "canary_started": false,
+    "tracer_started": false,
+    "source_hdf5_opened": false,
+    "solver_started": false,
+    "gpu_started": false,
+    "queue_or_scheduler_started": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "qualification_credit": 0,
+    "historical_r001_modified_or_retried": false
+  },
+  "next_step": "Wait until the active F3 material worker is no longer competing for CPU, then consume the single explicitly authorized F4 r002 CPU-native preflight. A passing preflight still does not authorize tracer/canary runtime execution."
+}

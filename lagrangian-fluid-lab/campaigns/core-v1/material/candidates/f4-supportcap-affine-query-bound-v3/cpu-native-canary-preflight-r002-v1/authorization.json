@@ -1,0 +1,132 @@
+{
+  "schema": "core.material.f4.supportcap_affine_query_bound.r002_cpu_canary_preflight_authorization.v1",
+  "record_id": "f4-supportcap-affine-query-bound-v3-cpu-native-canary-preflight-r002-authorization-v1",
+  "created_at_utc": "2026-09-23T09:04:55Z",
+  "status": "authorized_one_cpu_native_canary_preflight_runtime_not_authorized",
+  "authority_source": {
+    "kind": "explicit_user_instruction_in_current_task_thread",
+    "scope": "one F4 supportcap CPU-native canary preflight only",
+    "exclusions": ["runtime canary launch", "solver", "GPU", "queue", "T2 expansion"]
+  },
+  "authorization": {
+    "attempt_id": "f4-supportcap-affine-query-bound-v3-cpu-native-canary-r002",
+    "candidate_id": "f4_supportcap_affine_query_bound_v3",
+    "grants_one_cpu_native_canary_preflight": true,
+    "grants_runtime_execution": false
+  },
+  "preflight_contract": {
+    "max_preflight_attempts": 1,
+    "same_input_retry_allowed": false,
+    "native_rows_inclusive": [0, 41],
+    "target_transition": [40, 41],
+    "seed_denominator": 512,
+    "q": 0.5,
+    "dp_m": 0.0075,
+    "substeps": 2,
+    "output_namespace": "campaigns/core-v1/material/evidence/f4-supportcap-affine-query-bound-v3-cpu-native-canary-r002/trace.h5",
+    "source_sha256": "91846866c177e4c3036b7ef92c33a4e0bde7d9e8993efb01dde300811b7c096e",
+    "source": {
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-14/product/trajectory.h5",
+      "bytes": 10326356548,
+      "sha256": "91846866c177e4c3036b7ef92c33a4e0bde7d9e8993efb01dde300811b7c096e",
+      "frame_count": 1086,
+      "particle_count": 217485,
+      "identity_inherited_from": "campaigns/core-v1/material/evidence/f4-supportcap-affine-query-bound-v3-cpu-native-canary-r001-failure-attribution-v1.json"
+    },
+    "resource_floor": {
+      "available_cpu_count": "current_affinity_at_preflight",
+      "maximum_one_minute_load_average": "available_cpu_count",
+      "minimum_available_ram_bytes": 17179869184,
+      "minimum_filesystem_free_bytes": 8589934592,
+      "active_f3_material_worker_allowed": false
+    },
+    "source_access": {
+      "hash_before_hdf5": true,
+      "read_only": true,
+      "hdf5_metadata_and_time_rows_only": true,
+      "rows_inclusive": [0, 41],
+      "source_path_or_inode_change": "fail closed"
+    },
+    "permitted_result": "environment and source preflight receipt only; a pass does not grant runtime execution"
+  },
+  "execution_controls": {
+    "tracer_started": false,
+    "solver_started": false,
+    "gpu_started": false,
+    "queue_or_scheduler_started": false,
+    "t2_started": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "training_started": false,
+    "qualification_credit": 0
+  },
+  "qualification": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "material_qualification": false,
+    "credit": 0
+  },
+  "static_bindings": [
+    {
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/r002-static-design-v3/recipe.json",
+      "bytes": 15134,
+      "sha256": "8940c8263d4bb18a6e249638293b77aad02aa9ef5ee037ef74bb93c5f71bff73",
+      "role": "frozen r002 static design and input identity"
+    },
+    {
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/r002-static-design-v3/review-v1.json",
+      "bytes": 3279,
+      "sha256": "837bac05956e306f5519474db0d7c2b7e3be82c8cb69a889ae95d9c083a0883b",
+      "role": "prior independent r002 design review"
+    },
+    {
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/candidate-card-v3.json",
+      "bytes": 2474,
+      "sha256": "0b47e4690633e0d531414873eb1a54afece77c367ecf023ada3a80fd9ced7c92",
+      "role": "candidate identity and contract"
+    },
+    {
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/terra-high-root-review-v4.json",
+      "bytes": 3161,
+      "sha256": "7a64ecc8a0696aaef34beb93fb26e5ac6a06483f3aaa08183697efcd8cc78055",
+      "role": "independent static candidate review; runtime denied"
+    },
+    {
+      "path": "scripts/core_material.py",
+      "bytes": 116805,
+      "sha256": "9e294e64c431c725717caf86eb001dc3a3505a312e279386796b6a472b5ee94e",
+      "role": "registered F4 gate and event semantics"
+    },
+    {
+      "path": "scripts/f4_tallwall120_material.py",
+      "bytes": 24647,
+      "sha256": "dc3c06e5b689eb64b7c3c7ee87b022699cfed19483d38662031570ea24b66f26",
+      "role": "registered F4 source and tracer contract"
+    },
+    {
+      "path": "scripts/f4_supportcap_affine_query_bound_candidate_v3.py",
+      "bytes": 4717,
+      "sha256": "b8cfb6efa8d76f0201c5a5293f29c5cfd76691d6f3578ff03d1b577075c25116",
+      "role": "registered supportcap candidate implementation"
+    },
+    {
+      "path": "scripts/f4_supportcap_r002_cpu_canary_preflight_v1.py",
+      "bytes": 24015,
+      "sha256": "2d103461511935339f4c6b488d8ddebea1a3886c0eec5f30a3c56fb98e96847f",
+      "role": "one-shot preflight executor; no runtime path"
+    },
+    {
+      "path": "tests/test_f4_supportcap_r002_cpu_canary_preflight_v1.py",
+      "bytes": 19240,
+      "sha256": "ce019eddba4ce3789387663bfa8256f6976f88f4fbd38f21a90cdf8d298cbd47",
+      "role": "preflight-only failure and scope regression tests"
+    },
+    {
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/cpu-native-canary-preflight-r002-v1/review-v1.json",
+      "bytes": 4839,
+      "sha256": "a1d6963f7f19ea383eeeb0283c40b7691783933726ee08c4dea2602350162f47",
+      "role": "final independent static review of preflight executor and tests"
+    }
+  ]
+}
