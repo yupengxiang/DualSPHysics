@@ -2,7 +2,9 @@ import json
 import pathlib
 import subprocess
 import sys
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
@@ -107,6 +109,98 @@ def test_scheduler_selected_routes_and_persists_effective_host(tmp_path):
 
     assert launched and launched[0][0] == "h200"
     assert coordinator.job_host(store.jobs()[0]) == "h200"
+
+
+def test_concurrent_coordinators_serialize_resource_admission(tmp_path):
+    root = tmp_path / "runtime"
+    setup = Store(root)
+    for job_id in ("gpu-job-a", "gpu-job-b"):
+        setup.submit({
+            "job_id": job_id,
+            "argv": ["/bin/true"],
+            "cwd": "/tmp",
+            "host": "ada",
+            "resources": {"cpu_cores": 1, "ram_mib": 512,
+                          "gpu_peak_mib": 20000, "io_weight": 0},
+            "required_outputs": [],
+            "timeout_seconds": 10,
+        })
+    setup.db.close()
+
+    snapshot = {
+        "time": 0, "hostname": "test", "cpu_count": 8,
+        "ram_total_mib": 16000, "ram_available_mib": 12000,
+        "disk_free_bytes": 10**12,
+        "gpus": [{"index": 0, "uuid": "GPU-a", "name": "test",
+                  "total_mib": 48000, "used_mib": 0, "utilization": 0}],
+        "gpu_processes": [],
+    }
+    first_launch_entered = threading.Event()
+    release_first_launch = threading.Event()
+    second_tick_started = threading.Event()
+    second_probe_before_release = threading.Event()
+    launches = []
+    launches_lock = threading.Lock()
+    hosts = {"ada": {"lab": str(tmp_path), "python": sys.executable}}
+
+    def run_coordinator(index):
+        coordinator = Coordinator(root, hosts)
+
+        def fake_call(_name, *args):
+            if args[0] == "probe":
+                if index == 2 and not release_first_launch.is_set():
+                    second_probe_before_release.set()
+                return dict(snapshot)
+            if args[0] == "collect":
+                return {"worker_alive": True, "child_alive": False,
+                        "heartbeat": {"process_ids": [101]}}
+            raise AssertionError(args)
+
+        def fake_launch(job, allocation, host_name=None):
+            if index == 1:
+                first_launch_entered.set()
+                if not release_first_launch.wait(timeout=3):
+                    raise TimeoutError("test did not release the first launch")
+            attempt_id = f"attempt-{job['job_id']}-{index}"
+            effective_allocation = {**allocation, "_host": host_name}
+            accepted = coordinator.store.cas_update(
+                job["job_id"], "reserved", expected_status="queued",
+                expected_attempt_id=None, expected_job_id=job["job_id"],
+                attempt_id=attempt_id,
+                attempt_dir=str(tmp_path / "attempts" / attempt_id),
+                allocation=effective_allocation,
+            )
+            if not accepted:
+                raise RuntimeError("job was reserved by another coordinator")
+            with launches_lock:
+                launches.append(job["job_id"])
+
+        coordinator.call = fake_call
+        coordinator.launch = fake_launch
+        if index == 2:
+            second_tick_started.set()
+        return coordinator.tick()
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        first = pool.submit(run_coordinator, 1)
+        assert first_launch_entered.wait(timeout=3)
+        second = pool.submit(run_coordinator, 2)
+        try:
+            assert second_tick_started.wait(timeout=3)
+            # If the queue-wide lock is absent, the second coordinator probes
+            # and admits against the same pre-launch GPU snapshot here.
+            assert not second_probe_before_release.wait(timeout=0.25)
+        finally:
+            release_first_launch.set()
+        first.result(timeout=5)
+        second.result(timeout=5)
+
+    observed = Store(root)
+    jobs = {job["job_id"]: job for job in observed.jobs()}
+    assert len(launches) == 1
+    assert jobs["gpu-job-a"]["status"] in ("reserved", "running")
+    assert jobs["gpu-job-b"]["status"] == "queued"
+    observed.db.close()
 
 
 def test_terminal_only_queue_skips_host_probes_but_persists_status(tmp_path):

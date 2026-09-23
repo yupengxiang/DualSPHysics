@@ -1064,7 +1064,28 @@ class Coordinator:
                 expected_job_id=job["job_id"],
             )
 
+    @contextlib.contextmanager
+    def _tick_lock(self):
+        """Serialize reconciliation and admission across coordinator processes.
+
+        SQLite CAS protects one job's identity, but resource decisions span
+        multiple jobs and host snapshots. Without a queue-wide lock, two
+        coordinators can each admit work against the same stale free-capacity
+        observation. The lock is advisory and scoped to this shared queue.
+        """
+        lock_path = self.store.root / "coordinator.lock"
+        with lock_path.open("a") as lockfile:
+            fcntl.flock(lockfile.fileno(), fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(lockfile.fileno(), fcntl.LOCK_UN)
+
     def tick(self):
+        with self._tick_lock():
+            return self._tick_locked()
+
+    def _tick_locked(self):
         self.reconcile()
         # A persistent coordinator must remain available for a later submit,
         # but terminal-only queues have no admission decision to make.  Avoid
