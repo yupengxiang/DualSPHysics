@@ -298,7 +298,8 @@ def _evaluator_observation() -> dict[str, Any]:
 
 def build_readiness(*, data_root: str | Path, phase_plan: str | Path,
                     admission_audit: str | Path,
-                    registry: str | Path | None = None) -> dict[str, Any]:
+                    registry: str | Path | None = None,
+                    record_id: str = "core-formal-readiness-audit-20260921") -> dict[str, Any]:
     """Build a portable read-only formal-readiness observation."""
     root = Path(data_root).expanduser().resolve()
     phase_payload, _, phase_reference = _load_json(phase_plan, root=root, role="phase plan")
@@ -372,7 +373,7 @@ def build_readiness(*, data_root: str | Path, phase_plan: str | Path,
     }
     return {
         "schema": SCHEMA,
-        "record_id": "core-formal-readiness-audit-20260921",
+        "record_id": record_id,
         "status": "ready" if all(checks.values()) and not blockers else "blocked",
         "formal_admission": False,
         "formal_training": False,
@@ -462,6 +463,8 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--registry", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--sha256-output", type=Path)
+    parser.add_argument("--record-id", default="core-formal-readiness-audit-20260921",
+                        help="identity for this readiness observation")
     return parser
 
 
@@ -472,6 +475,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         phase_plan=args.phase_plan,
         admission_audit=args.admission_audit,
         registry=args.registry,
+        record_id=args.record_id,
     )
     write_json(args.output, report)
     if args.sha256_output is not None:

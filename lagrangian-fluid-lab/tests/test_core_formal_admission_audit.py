@@ -292,11 +292,13 @@ def test_cli_writes_a_digest_and_never_emits_formal_jobs(tmp_path: Path) -> None
         "--resource-profile", str(PROFILE), "--output", str(output),
         "--resource-dryrun", str(RESOURCE_DRYRUN),
         "--graph-probe", str(GRAPH_PROBE),
+        "--record-id", "core-formal-admission-test-r001",
         "--sha256-output", str(digest),
     ])
 
     assert exit_code == 2
     report = json.loads(output.read_text())
+    assert report["record_id"] == "core-formal-admission-test-r001"
     assert report["execution_constraints"]["read_only"] is True
     assert report["execution_constraints"]["formal_runs_started"] == 0
     assert report["execution_constraints"]["central_registry_mutation"] == 0

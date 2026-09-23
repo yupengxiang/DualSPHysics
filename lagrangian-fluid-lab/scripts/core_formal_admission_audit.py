@@ -710,6 +710,7 @@ def _blocker(code: str, message: str, *, observed: Any = None,
 def audit_admission(
     manifests: Sequence[str | Path | Mapping[str, Any]], *,
     data_root: str | Path,
+    record_id: str = "core-formal-admission-f3-f4-20260920",
     evidence: Sequence[str | Path | Mapping[str, Any]] = (),
     code_root: str | Path | None = None,
     preprofile_index: str | Path | None = None,
@@ -1069,7 +1070,7 @@ def audit_admission(
 
     return {
         "schema": SCHEMA,
-        "record_id": "core-formal-admission-f3-f4-20260920",
+        "record_id": record_id,
         "purpose": "Read-only cross-manifest admission audit; no formal jobs are emitted.",
         "qualification_claim": "none",
         "status": "ready" if not blockers else "blocked",
@@ -1184,6 +1185,8 @@ def _parser() -> argparse.ArgumentParser:
                         help="optional bounded full-field graph capacity probe")
     parser.add_argument("--capacity-evidence", type=Path,
                         help="optional real 32000-update capacity adapter record")
+    parser.add_argument("--record-id", default="core-formal-admission-f3-f4-20260920",
+                        help="identity for this audit observation")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--sha256-output", type=Path,
                         help="optional sidecar SHA-256 file for --output")
@@ -1193,7 +1196,8 @@ def _parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     report = audit_admission(
-        args.manifest, data_root=args.data_root, evidence=args.evidence,
+        args.manifest, data_root=args.data_root, record_id=args.record_id,
+        evidence=args.evidence,
         code_root=args.code_root, preprofile_index=args.preprofile_index,
         resource_profile=args.resource_profile, resource_dryrun=args.resource_dryrun,
         graph_probe=args.graph_probe, capacity_evidence=args.capacity_evidence)

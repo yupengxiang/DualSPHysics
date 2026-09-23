@@ -67,10 +67,12 @@ def test_cli_is_portable_and_does_not_mutate_registry(tmp_path: Path, monkeypatc
         "--phase-plan", "campaigns/core-v1/learning/core-phase-plan-denominator-audit-20260921.json",
         "--admission-audit", "campaigns/core-v1/learning/formal-admission-audit-f3-f4-20260920.json",
         "--registry", "campaigns/core-v1/registry.json",
+        "--record-id", "core-formal-readiness-test-r001",
         "--output", str(output), "--sha256-output", str(digest),
     ])
     assert exit_code == 2
     report = json.loads(output.read_text())
+    assert report["record_id"] == "core-formal-readiness-test-r001"
     assert report["status"] == "blocked"
     assert report["core_status"]["registry"]["path"] == "campaigns/core-v1/registry.json"
     assert digest.read_text().split()[0] == _sha256(output)
