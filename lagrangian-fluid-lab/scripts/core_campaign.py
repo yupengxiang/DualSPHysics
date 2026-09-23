@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 import math
+import posixpath
 from pathlib import Path
 import subprocess
 
@@ -143,19 +145,95 @@ def _contract_evidence_reference(name, registry, data_root):
         return None
 
 
-def _independent_reproduction_passes(receipt):
+_REPRODUCTION_CLAIM_FIELDS = (
+    "source_host", "reproduction_host", "source_data_root", "reproduction_data_root",
+    "diagnostic_only", "cross_host_reproduction", "full_horizon_reproduction",
+    "full_product_reproduction", "reader_reproduced", "prediction_reproduced",
+    "scoring_reproduced", "predictor_future_state_inputs",
+)
+_REPRODUCTION_EVIDENCE_ROLES = {
+    "source_host", "reproduction_host", "data_roots", "reader", "prediction", "scoring",
+}
+
+
+def _canonical_data_root(value):
+    """Lexically normalize a remote POSIX root without consulting this host."""
+    if not isinstance(value, str) or not value.strip():
+        return None
+    value = value.strip()
+    if not value.startswith("/"):
+        return None
+    return posixpath.normpath(value)
+
+
+def _valid_sha256(value):
+    if not isinstance(value, str) or len(value) != 64:
+        return False
+    try:
+        int(value, 16)
+    except ValueError:
+        return False
+    return True
+
+
+def _component_output_passes(component, report):
+    """Require a typed, successful output artifact for each product stage."""
+    if not isinstance(report, dict):
+        return False
+    if component == "reader":
+        return (
+            report.get("schema") in ("core.reader_reproduction.v1", "core.verification.v1")
+            and report.get("passed") is True
+        )
+    if component == "prediction":
+        return (
+            report.get("schema") == "core.model_reproduction.v1"
+            and report.get("passed") is True
+            and report.get("full_horizon_reproduction") is True
+            and report.get("full_product_reproduction") is True
+            and report.get("predictor_future_state_inputs") is False
+        )
+    if component == "scoring":
+        metrics = report.get("metrics")
+        return (
+            report.get("schema") == "core.model_reproduction.score.v1"
+            and isinstance(metrics, dict)
+            and type(metrics.get("registered_cases")) is int
+            and metrics["registered_cases"] > 0
+            and metrics.get("complete_fraction") == 1.0
+            and metrics.get("missing_execution") == 0
+            and isinstance(report.get("cases"), list)
+            and bool(report["cases"])
+            and report.get("predictor_future_state_inputs") is False
+        )
+    return False
+
+
+def _independent_reproduction_binding(receipt):
+    """Canonical claims and evidence references that a root review must bind."""
+    return {
+        "claims": {field: receipt.get(field) for field in _REPRODUCTION_CLAIM_FIELDS},
+        "supporting_evidence": receipt.get("supporting_evidence"),
+    }
+
+
+def _independent_reproduction_passes(receipt, data_root):
     """Require the complete, non-diagnostic product chain on a relocated root.
 
     A cross-host numerical comparison or full-horizon rollout alone is not a
     product reproduction.  The plan requires the reader, autonomous
-    prediction, and scoring chain to work on another host and a distinct data
-    root, with a separate passed root review.
+    prediction, and scoring chain to work on another physical host and a
+    distinct data root.  Summary booleans are insufficient: the separately
+    hash-bound root review must bind the exact claims and hash-bound evidence
+    for host identity, relocation, reader, prediction, and scoring.
     """
+    if not isinstance(receipt, dict):
+        return False
     source_host = receipt.get("source_host")
     reproduction_host = receipt.get("reproduction_host")
-    source_data_root = receipt.get("source_data_root")
-    reproduction_data_root = receipt.get("reproduction_data_root")
-    return (
+    source_root = _canonical_data_root(receipt.get("source_data_root"))
+    reproduction_root = _canonical_data_root(receipt.get("reproduction_data_root"))
+    base_claims_pass = (
         receipt.get("schema") == "core.reproduction.v1"
         and receipt.get("passed") is True
         and receipt.get("diagnostic_only") is False
@@ -170,13 +248,121 @@ def _independent_reproduction_passes(receipt):
         and bool(source_host.strip())
         and isinstance(reproduction_host, str)
         and bool(reproduction_host.strip())
-        and source_host != reproduction_host
-        and isinstance(source_data_root, str)
-        and bool(source_data_root.strip())
-        and isinstance(reproduction_data_root, str)
-        and bool(reproduction_data_root.strip())
-        and source_data_root != reproduction_data_root
+        and source_host.strip().rstrip(".").casefold()
+        != reproduction_host.strip().rstrip(".").casefold()
+        and source_root is not None
+        and reproduction_root is not None
+        and source_root != reproduction_root
     )
+    if not base_claims_pass:
+        return False
+
+    try:
+        evidence_refs = receipt.get("supporting_evidence")
+        if not isinstance(evidence_refs, dict) or set(evidence_refs) != _REPRODUCTION_EVIDENCE_ROLES:
+            return False
+        evidence = {
+            role: load_evidence(reference, data_root)
+            for role, reference in evidence_refs.items()
+        }
+        source_host_evidence = evidence["source_host"]
+        reproduction_host_evidence = evidence["reproduction_host"]
+        roots_evidence = evidence["data_roots"]
+        if any(not isinstance(item, dict) for item in evidence.values()):
+            return False
+
+        source_host_id = source_host_evidence.get("physical_host_id")
+        reproduction_host_id = reproduction_host_evidence.get("physical_host_id")
+        if not (
+            source_host_evidence.get("schema") == "core.reproduction.host_identity.v1"
+            and source_host_evidence.get("passed") is True
+            and source_host_evidence.get("hostname") == source_host
+            and isinstance(source_host_id, str) and bool(source_host_id.strip())
+            and reproduction_host_evidence.get("schema") == "core.reproduction.host_identity.v1"
+            and reproduction_host_evidence.get("passed") is True
+            and reproduction_host_evidence.get("hostname") == reproduction_host
+            and isinstance(reproduction_host_id, str) and bool(reproduction_host_id.strip())
+            and source_host_id != reproduction_host_id
+        ):
+            return False
+
+        if not (
+            roots_evidence.get("schema") == "core.reproduction.data_roots.v1"
+            and roots_evidence.get("passed") is True
+            and roots_evidence.get("source_data_root") == receipt.get("source_data_root")
+            and roots_evidence.get("reproduction_data_root") == receipt.get("reproduction_data_root")
+            and roots_evidence.get("different_data_root") is True
+            and _valid_sha256(roots_evidence.get("source_manifest_sha256"))
+            and _valid_sha256(roots_evidence.get("reproduction_manifest_sha256"))
+        ):
+            return False
+        source_manifest = load_evidence(roots_evidence.get("source_manifest"), data_root)
+        reproduction_manifest = load_evidence(roots_evidence.get("reproduction_manifest"), data_root)
+        if not (
+            isinstance(source_manifest, dict)
+            and source_manifest.get("schema") == "core.reproduction.package_manifest.v1"
+            and source_manifest.get("data_root") == receipt.get("source_data_root")
+            and isinstance(reproduction_manifest, dict)
+            and reproduction_manifest.get("schema") == "core.reproduction.package_manifest.v1"
+            and reproduction_manifest.get("data_root") == receipt.get("reproduction_data_root")
+            and _valid_sha256(source_manifest.get("package_sha256"))
+            and source_manifest.get("package_sha256") == reproduction_manifest.get("package_sha256")
+            and roots_evidence.get("source_manifest_sha256") == roots_evidence["source_manifest"].get("sha256")
+            and roots_evidence.get("reproduction_manifest_sha256")
+            == roots_evidence["reproduction_manifest"].get("sha256")
+        ):
+            return False
+
+        expected_component_claims = {
+            "reader": "reader_reproduced",
+            "prediction": "prediction_reproduced",
+            "scoring": "scoring_reproduced",
+        }
+        for component, claim in expected_component_claims.items():
+            report = evidence[component]
+            if not (
+                report.get("schema") == "core.reproduction.component.v1"
+                and report.get("component") == component
+                and report.get("passed") is True
+                and report.get(claim) is True
+                and report.get("physical_host_id") == reproduction_host_id
+                and _canonical_data_root(report.get("data_root")) == reproduction_root
+            ):
+                return False
+            if component == "prediction" and not (
+                report.get("autonomous") is True
+                and report.get("full_horizon") is True
+                and report.get("future_state_inputs") is False
+            ):
+                return False
+            output_ref = report.get("output_report")
+            output_report = load_evidence(output_ref, data_root)
+            if not _component_output_passes(component, output_report):
+                return False
+
+        root_review_ref = receipt.get("root_review")
+        root_review = load_evidence(root_review_ref, data_root)
+        if not isinstance(root_review, dict):
+            return False
+        review_binding = _independent_reproduction_binding(receipt)
+        review_binding_sha256 = hashlib.sha256(canonical(review_binding).encode("utf-8")).hexdigest()
+        required_review_checks = {
+            "distinct_physical_hosts": True,
+            "distinct_data_roots": True,
+            "reader_evidence_verified": True,
+            "prediction_evidence_verified": True,
+            "scoring_evidence_verified": True,
+        }
+        return (
+            root_review.get("schema") == "core.reproduction.root_review.v1"
+            and root_review.get("status") in ("pass", "passed")
+            and root_review.get("diagnostic_only") is False
+            and root_review.get("full_core_reproduction_proven") is True
+            and root_review.get("reviewed_binding_sha256") == review_binding_sha256
+            and root_review.get("verified_checks") == required_review_checks
+        )
+    except (KeyError, ValueError, OSError, TypeError):
+        return False
 
 
 def _reject_nonformal_or_nonroot(payload, label):
@@ -618,18 +804,7 @@ def completion(registry, data_root):
             receipt = load_evidence(reference, data_root)
             checks[name] = receipt.get("schema") == schema and receipt.get("passed") is True
             if name == "independent_reproduction":
-                root_review = receipt.get("root_review")
-                root_passed = False
-                if isinstance(root_review, dict):
-                    root_receipt = load_evidence(root_review, data_root)
-                    root_passed = (
-                        isinstance(root_receipt, dict)
-                        and root_receipt.get("status") in ("pass", "passed")
-                    )
-                checks[name] = (
-                    _independent_reproduction_passes(receipt)
-                    and root_passed
-                )
+                checks[name] = _independent_reproduction_passes(receipt, data_root)
         except (KeyError, ValueError, OSError, TypeError):
             pass
     # Keep two distinct counts: the registered-material denominator (which is

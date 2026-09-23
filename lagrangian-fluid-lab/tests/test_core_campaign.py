@@ -1,9 +1,10 @@
 import json
+import hashlib
 import sys
 from pathlib import Path
 
 from scripts.core_campaign import completion, load_evidence, main
-from scripts.core_runtime import atomic_json, digest
+from scripts.core_runtime import atomic_json, canonical, digest
 import pytest
 
 
@@ -107,11 +108,122 @@ def test_unregistered_evaluations_do_not_shrink_any_target_denominator(tmp_path)
                for issue in result["issues"])
 
 
-def _reproduction_fixture(tmp_path, *, diagnostic_only, full_product_reproduction):
-    root_review_path = tmp_path / "root-review.json"
-    atomic_json(root_review_path, {"status": "passed"})
+_REPRODUCTION_CLAIM_FIELDS = (
+    "source_host", "reproduction_host", "source_data_root", "reproduction_data_root",
+    "diagnostic_only", "cross_host_reproduction", "full_horizon_reproduction",
+    "full_product_reproduction", "reader_reproduced", "prediction_reproduced",
+    "scoring_reproduced", "predictor_future_state_inputs",
+)
+
+
+def _write_json_reference(tmp_path, name, payload):
+    path = tmp_path / name
+    atomic_json(path, payload)
+    return {"path": path.name, "sha256": digest(path)}
+
+
+def _reproduction_review_binding(receipt):
+    return {
+        "claims": {field: receipt[field] for field in _REPRODUCTION_CLAIM_FIELDS},
+        "supporting_evidence": receipt["supporting_evidence"],
+    }
+
+
+def _seal_reproduction_fixture(receipt_path, root_review_path, registry):
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    binding = _reproduction_review_binding(receipt)
+    review = {
+        "schema": "core.reproduction.root_review.v1",
+        "status": "passed",
+        "diagnostic_only": False,
+        "full_core_reproduction_proven": True,
+        "reviewed_binding_sha256": hashlib.sha256(canonical(binding).encode("utf-8")).hexdigest(),
+        "verified_checks": {
+            "distinct_physical_hosts": True,
+            "distinct_data_roots": True,
+            "reader_evidence_verified": True,
+            "prediction_evidence_verified": True,
+            "scoring_evidence_verified": True,
+        },
+    }
+    atomic_json(root_review_path, review)
+    receipt["root_review"] = {"path": root_review_path.name, "sha256": digest(root_review_path)}
+    atomic_json(receipt_path, receipt)
+    registry["independent_reproduction"] = {
+        "path": receipt_path.name, "sha256": digest(receipt_path),
+    }
+
+
+def _reproduction_fixture(tmp_path, *, diagnostic_only, full_product_reproduction,
+                          bind_root_review=True):
     source_data_root = "/datasets/core-source"
     reproduction_data_root = "/scratch/core-relocated"
+    package_sha256 = "a" * 64
+    source_manifest = _write_json_reference(tmp_path, "source-package.json", {
+        "schema": "core.reproduction.package_manifest.v1",
+        "data_root": source_data_root, "package_sha256": package_sha256,
+    })
+    reproduction_manifest = _write_json_reference(tmp_path, "relocated-package.json", {
+        "schema": "core.reproduction.package_manifest.v1",
+        "data_root": reproduction_data_root, "package_sha256": package_sha256,
+    })
+    source_host_id, reproduction_host_id = "machine-source", "machine-independent"
+    supporting_evidence = {
+        "source_host": _write_json_reference(tmp_path, "source-host.json", {
+            "schema": "core.reproduction.host_identity.v1", "passed": True,
+            "hostname": "host-source", "physical_host_id": source_host_id,
+        }),
+        "reproduction_host": _write_json_reference(tmp_path, "reproduction-host.json", {
+            "schema": "core.reproduction.host_identity.v1", "passed": True,
+            "hostname": "host-independent", "physical_host_id": reproduction_host_id,
+        }),
+        "data_roots": _write_json_reference(tmp_path, "data-roots.json", {
+            "schema": "core.reproduction.data_roots.v1", "passed": True,
+            "source_data_root": source_data_root,
+            "reproduction_data_root": reproduction_data_root,
+            "different_data_root": True,
+            "source_manifest": source_manifest,
+            "reproduction_manifest": reproduction_manifest,
+            "source_manifest_sha256": source_manifest["sha256"],
+            "reproduction_manifest_sha256": reproduction_manifest["sha256"],
+        }),
+    }
+    for component, claim in (("reader", "reader_reproduced"),
+                             ("prediction", "prediction_reproduced"),
+                             ("scoring", "scoring_reproduced")):
+        component_claim_passes = full_product_reproduction
+        evidence_payload = {
+            "schema": "core.reproduction.component.v1",
+            "component": component,
+            "passed": component_claim_passes,
+            claim: component_claim_passes,
+            "physical_host_id": reproduction_host_id,
+            "data_root": reproduction_data_root,
+            "output_report": _write_json_reference(tmp_path, f"{component}-output.json", {
+                "schema": {
+                    "reader": "core.verification.v1",
+                    "prediction": "core.model_reproduction.v1",
+                    "scoring": "core.model_reproduction.score.v1",
+                }[component],
+                "passed": True,
+                "full_horizon_reproduction": True,
+                "full_product_reproduction": True,
+                "predictor_future_state_inputs": False,
+                "metrics": {
+                    "registered_cases": 1,
+                    "complete_fraction": 1.0,
+                    "missing_execution": 0,
+                },
+                "cases": ["case-0"],
+            }),
+        }
+        if component == "prediction":
+            evidence_payload.update({
+                "autonomous": True, "full_horizon": True, "future_state_inputs": False,
+            })
+        supporting_evidence[component] = _write_json_reference(
+            tmp_path, f"{component}-evidence.json", evidence_payload)
+
     receipt_path = tmp_path / "reproduction.json"
     atomic_json(receipt_path, {
         "schema": "core.reproduction.v1",
@@ -128,9 +240,22 @@ def _reproduction_fixture(tmp_path, *, diagnostic_only, full_product_reproductio
         "reproduction_host": "host-independent",
         "source_data_root": source_data_root,
         "reproduction_data_root": reproduction_data_root,
-        "root_review": {"path": root_review_path.name, "sha256": digest(root_review_path)},
+        "supporting_evidence": supporting_evidence,
     })
-    return {"independent_reproduction": {"path": receipt_path.name, "sha256": digest(receipt_path)}}
+    registry = {}
+    if bind_root_review:
+        root_review_path = tmp_path / "root-review.json"
+        _seal_reproduction_fixture(receipt_path, root_review_path, registry)
+    else:
+        root_review_path = tmp_path / "root-review.json"
+        atomic_json(root_review_path, {"status": "passed"})
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        receipt["root_review"] = {"path": root_review_path.name, "sha256": digest(root_review_path)}
+        atomic_json(receipt_path, receipt)
+        registry["independent_reproduction"] = {
+            "path": receipt_path.name, "sha256": digest(receipt_path),
+        }
+    return registry
 
 
 def test_diagnostic_cross_host_receipt_does_not_satisfy_independent_reproduction(tmp_path):
@@ -152,6 +277,99 @@ def test_full_product_cross_host_reproduction_requires_relocated_reader_predicti
     result = completion(registry, tmp_path)
 
     assert result["checks"]["independent_reproduction"] is True
+
+
+def test_status_only_root_review_cannot_admit_unbound_product_claims(tmp_path):
+    registry = _reproduction_fixture(
+        tmp_path, diagnostic_only=False, full_product_reproduction=True,
+        bind_root_review=False)
+
+    result = completion(registry, tmp_path)
+
+    assert result["checks"]["independent_reproduction"] is False
+
+
+def test_review_binding_must_match_the_claims_and_hashed_component_evidence(tmp_path):
+    registry = _reproduction_fixture(
+        tmp_path, diagnostic_only=False, full_product_reproduction=True)
+    receipt_path = tmp_path / "reproduction.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    receipt["supporting_evidence"].pop("reader")
+    atomic_json(receipt_path, receipt)
+    registry["independent_reproduction"]["sha256"] = digest(receipt_path)
+
+    result = completion(registry, tmp_path)
+
+    assert result["checks"]["independent_reproduction"] is False
+
+
+def test_untyped_component_output_cannot_pass_even_with_a_fresh_root_review(tmp_path):
+    registry = _reproduction_fixture(
+        tmp_path, diagnostic_only=False, full_product_reproduction=True)
+    receipt_path = tmp_path / "reproduction.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    reader_ref = receipt["supporting_evidence"]["reader"]
+    reader_path = tmp_path / reader_ref["path"]
+    reader = json.loads(reader_path.read_text(encoding="utf-8"))
+    output_ref = reader["output_report"]
+    output_path = tmp_path / output_ref["path"]
+    atomic_json(output_path, {"status": "passed"})
+    output_ref["sha256"] = digest(output_path)
+    atomic_json(reader_path, reader)
+    reader_ref["sha256"] = digest(reader_path)
+    atomic_json(receipt_path, receipt)
+    _seal_reproduction_fixture(receipt_path, tmp_path / "root-review.json", registry)
+
+    result = completion(registry, tmp_path)
+
+    assert result["checks"]["independent_reproduction"] is False
+
+
+def test_different_hostnames_with_same_physical_host_identity_do_not_pass(tmp_path):
+    registry = _reproduction_fixture(
+        tmp_path, diagnostic_only=False, full_product_reproduction=True)
+    receipt_path = tmp_path / "reproduction.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    source_host_ref = receipt["supporting_evidence"]["source_host"]
+    source_host_path = tmp_path / source_host_ref["path"]
+    source_host = json.loads(source_host_path.read_text(encoding="utf-8"))
+    source_host["physical_host_id"] = "machine-independent"
+    atomic_json(source_host_path, source_host)
+    receipt["supporting_evidence"]["source_host"]["sha256"] = digest(source_host_path)
+    atomic_json(receipt_path, receipt)
+    _seal_reproduction_fixture(receipt_path, tmp_path / "root-review.json", registry)
+
+    result = completion(registry, tmp_path)
+
+    assert result["checks"]["independent_reproduction"] is False
+
+
+def test_different_path_strings_for_same_canonical_data_root_do_not_pass(tmp_path):
+    registry = _reproduction_fixture(
+        tmp_path, diagnostic_only=False, full_product_reproduction=True)
+    receipt_path = tmp_path / "reproduction.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    aliased_source_root = "/scratch/core-relocated/."
+    source_manifest_ref = receipt["supporting_evidence"]["data_roots"]
+    roots_path = tmp_path / source_manifest_ref["path"]
+    roots = json.loads(roots_path.read_text(encoding="utf-8"))
+    manifest_ref = roots["source_manifest"]
+    manifest_path = tmp_path / manifest_ref["path"]
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["data_root"] = aliased_source_root
+    atomic_json(manifest_path, manifest)
+    roots["source_manifest"]["sha256"] = digest(manifest_path)
+    roots["source_manifest_sha256"] = digest(manifest_path)
+    roots["source_data_root"] = aliased_source_root
+    atomic_json(roots_path, roots)
+    receipt["supporting_evidence"]["data_roots"]["sha256"] = digest(roots_path)
+    receipt["source_data_root"] = aliased_source_root
+    atomic_json(receipt_path, receipt)
+    _seal_reproduction_fixture(receipt_path, tmp_path / "root-review.json", registry)
+
+    result = completion(registry, tmp_path)
+
+    assert result["checks"]["independent_reproduction"] is False
 
 
 @pytest.mark.parametrize("field,value", [
