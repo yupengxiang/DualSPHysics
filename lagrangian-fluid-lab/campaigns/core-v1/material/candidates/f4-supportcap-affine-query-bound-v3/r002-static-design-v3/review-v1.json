@@ -1,0 +1,82 @@
+{
+  "schema": "core.material.f4.supportcap_r002_static_design_review.v1",
+  "record_id": "f4-supportcap-affine-query-bound-v3-r002-static-design-v3-review-v1",
+  "status": "conditional_static_review_zero_execution",
+  "reviewer_request": {
+    "model": "gpt-6-luna",
+    "reasoning_effort": "max",
+    "actual_model_attestation": "not included in the review response metadata"
+  },
+  "review_scope": {
+    "static_files_only": true,
+    "code_or_test_execution": false,
+    "hdf5_npz_stat_open_read_or_hash": false,
+    "solver_gpu_worker_queue_registry_or_ledger": false
+  },
+  "assessment": {
+    "r001_trace_hash_inherited_from_attribution_json": true,
+    "unexpected_hdf5_hdf5_like_npz_parent_bindings_rejected": true,
+    "v3_pathlib_accessors_and_sha_helper_guarded_by_test": true,
+    "text_source_bindings_closed": true,
+    "row_0_to_41_advected_alignment_preserved": true,
+    "seed_count": 512,
+    "q": 0.5,
+    "dp_m": 0.0075,
+    "substeps": 2,
+    "fixed_gates_and_right_censoring_preserved": true,
+    "r001_immutable_and_not_retried": true,
+    "r002_uses_fresh_runtime_namespace": true,
+    "runtime_authority_false_and_credit_zero": true
+  },
+  "conditional_findings": [
+    {
+      "id": "F4-R002-V3-GUARD-SCOPE",
+      "severity": "documentation_scope",
+      "finding": "The regression guard covers the listed pathlib accessors and the SHA helper for paths with .h5/.hdf5/.npz suffixes; it is not an OS-level sandbox against arbitrary extensions or uninstrumented low-level I/O APIs.",
+      "disposition": "Keep claims limited to the current static builder's known file-access paths; do not describe this test as a general filesystem sandbox."
+    },
+    {
+      "id": "F4-R002-V3-RUNTIME-NAMESPACE-CHECK",
+      "severity": "evidence_scope",
+      "finding": "The reviewer did not independently inspect runtime namespace existence; the static builder performs an absence check while producing the recipe, and this review makes no runtime claim.",
+      "disposition": "No execution authority or qualification credit follows from this review."
+    }
+  ],
+  "input_bindings": [
+    {
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/r002-static-design-v3/recipe.json",
+      "bytes": 15134,
+      "sha256": "8940c8263d4bb18a6e249638293b77aad02aa9ef5ee037ef74bb93c5f71bff73",
+      "role": "reviewed static design receipt"
+    },
+    {
+      "path": "scripts/f4_supportcap_r002_static_design_v3.py",
+      "bytes": 3470,
+      "sha256": "5141f3c0d3f4e2c56e360149f8a93abae66d12dd76e60e19d8fb20dce2ba0f34",
+      "role": "reviewed receipt builder"
+    },
+    {
+      "path": "tests/test_f4_supportcap_r002_static_design_v3.py",
+      "bytes": 3252,
+      "sha256": "872e91d38fbfef0a7156daeeaca720d455be5e1915a2517ef7e155555d66efce",
+      "role": "reviewed filesystem-access regression tests"
+    }
+  ],
+  "execution_controls": {
+    "native_hdf5_opened": false,
+    "historical_r001_modified": false,
+    "r002_runtime_started": false,
+    "solver_started": false,
+    "gpu_started": false,
+    "worker_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0
+  },
+  "qualification": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0
+  }
+}
