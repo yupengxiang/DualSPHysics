@@ -1,0 +1,197 @@
+{
+  "bindings": [
+    {
+      "bytes": 9025,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/static-design-review-v1/receipt.json",
+      "role": "immutable rejected r004 v1 static review",
+      "sha256": "7c5036cf1762f71fa99ada90fdad163b3a4d27a86f1d2f83603d79d23b4c8810"
+    },
+    {
+      "bytes": 2919,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r003/cpu-native-preflight-postrun-audit-v1/receipt.json",
+      "role": "immutable closed r003 audit",
+      "sha256": "b1b269c82275f1ce47bb397821920f19c321542e7b2c8dff37f231bacc8934b9"
+    },
+    {
+      "bytes": 6005,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r003/cpu-native-preflight-v1/gencase.stdout.log",
+      "role": "r003 failed control-copy evidence",
+      "sha256": "884eaa7643cb3f51c41f141f6698560ed37e11ad3407e264e8309f8a19face9d"
+    },
+    {
+      "bytes": 17162,
+      "path": "scripts/f8_r003_static_design_review_v1.py",
+      "role": "r003 compatibility renderer",
+      "sha256": "ebb988aa7996753ebd9fc6d6cc577bed32ce522632d68ab3e68ac7380f53c255"
+    },
+    {
+      "bytes": 14715,
+      "path": "scripts/f8_r004_static_design_review_v1.py",
+      "role": "r004 v1 rejected renderer",
+      "sha256": "5f3858bb4e62bc0cb709dbea18ef93953b0b410c4078194b5244797e489eb17d"
+    },
+    {
+      "bytes": 11224,
+      "path": "scripts/f8_r004_static_design_review_v2.py",
+      "role": "r004 v2 review builder",
+      "sha256": "7b978d236fd3a9f81da2f23430fd2072ce18c7e1f72e272dd4ec0a668bdd4de0"
+    },
+    {
+      "bytes": 3733,
+      "path": "tests/test_f8_r004_static_design_review_v2.py",
+      "role": "r004 v2 review tests",
+      "sha256": "49f5a1a035b94e302adb035bff8721dbca592fa90edfb1ecb21dc7735cc7ef21"
+    },
+    {
+      "bytes": 7824,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/04_ExternalForces/CaseForces_Def.xml",
+      "role": "official colocated accel-input Definition precedent",
+      "sha256": "1db880334bcfa0ca8514644005edbdc201f6a003e847e43901a68e9b5fa5487f"
+    },
+    {
+      "bytes": 657,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/04_ExternalForces/CaseForcesData_0.csv",
+      "role": "official colocated accel-input CSV precedent",
+      "sha256": "13481d574413bff169bc35b05fc8fe9ff6a8debc27ded57e114cc69550bbb8ed"
+    },
+    {
+      "bytes": 2798,
+      "path": "vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML_AccInput.xml",
+      "role": "official acceleration format documentation",
+      "sha256": "ffbf4d8a70e249f78adb6790b58dd809a6cef02d8acee7e786f2b900367fad74"
+    }
+  ],
+  "closed_prior_execution_scopes": [
+    {
+      "same_input_retry_forbidden": true,
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001"
+    },
+    {
+      "r002_output_reuse_forbidden": true,
+      "same_input_retry_forbidden": true,
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002"
+    },
+    {
+      "r003_output_reuse_forbidden": true,
+      "same_input_retry_forbidden": true,
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R003"
+    }
+  ],
+  "control_dependency_copy_proof": {
+    "copy_layout": "source adjacent to Definition; bare filename in acctimesfile; expected generated copy adjacent to generated Definition",
+    "definition_relative_reference": "F8_OPC_q0p500_r004_acceleration.csv",
+    "required_copy_hash": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1",
+    "required_generated_copy": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1/generated/F8_OPC_q0p500_r004_acceleration.csv",
+    "source_control": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/input/F8_OPC_q0p500_r004_acceleration.csv"
+  },
+  "execution_controls": {
+    "control_written": false,
+    "definition_written": false,
+    "gencase_invoked": false,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "native_decode_invoked": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_invoked": false,
+    "training_started": false,
+    "worker_started": false
+  },
+  "future_cpu_preflight_hard_gates": [
+    "new r004-only authorization binds v2 and both precommitted hashes",
+    "one GenCase maximum in the empty r004 output namespace",
+    "positive fixed boundary count with both z-wall planes",
+    "generated colocated control copy exists and hash-matches before native decode",
+    "any failure closes r004 without retry or r001--r003 output reuse"
+  ],
+  "minimal_mechanism_repair": {
+    "change": "remove the child-directory prefix so source CSV is colocated with Definition",
+    "non_changes": [
+      "constantsdef",
+      "hswl",
+      "finite dp | bound z walls",
+      "fluid geometry",
+      "physics parameters",
+      "control table values"
+    ],
+    "official_colocation_proof": {
+      "control": "vendor/official/DualSPHysics_v5.4/examples/main/04_ExternalForces/CaseForcesData_0.csv",
+      "control_is_colocated_with_definition": true,
+      "definition": "vendor/official/DualSPHysics_v5.4/examples/main/04_ExternalForces/CaseForces_Def.xml",
+      "format_document": "vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML_AccInput.xml",
+      "inference": "Use the official colocated bare-filename mode because r003's child-directory reference emitted one GenCase copy warning.",
+      "official_reference": "CaseForcesData_0.csv",
+      "reference_is_bare_filename": true
+    },
+    "r003_failed_reference": "acceleration/F8_OPC_q0p500_r003_acceleration.csv",
+    "r004_reference": "F8_OPC_q0p500_r004_acceleration.csv",
+    "r004_source_control": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/input/F8_OPC_q0p500_r004_acceleration.csv"
+  },
+  "next_automatic_step": {
+    "does_not_authorize": [
+      "GenCase",
+      "native decoder",
+      "solver",
+      "GPU",
+      "queue",
+      "worker",
+      "registry",
+      "ledger",
+      "qualification",
+      "training"
+    ],
+    "kind": "one-time r004 static input materialization",
+    "requires": [
+      "exclusive creation of exactly the two precommitted colocated inputs",
+      "immutable materialization receipt"
+    ]
+  },
+  "parameters": {
+    "alpha": 5.0,
+    "amplitude": 0.01,
+    "dp": 0.0075,
+    "half_height": 0.045,
+    "length_x": 0.24,
+    "length_y": 0.12,
+    "observation_cycles": 3,
+    "observation_start": 8.1,
+    "omega": 6.17283950617284,
+    "period": 1.017876019763093,
+    "points_per_period": 64,
+    "q": 0.5,
+    "rho0": 1000.0,
+    "sound_speed": 10.0,
+    "t_end": 11.196636217394023,
+    "total_cycles": 11,
+    "viscosity": 0.0005,
+    "warmup_cycles": 8
+  },
+  "precommitted_input_bytes": {
+    "control_bytes": 35956,
+    "control_sha256": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1",
+    "definition_bytes": 2266,
+    "definition_sha256": "d26fddf60f11467485d35996315344fcb2385784379b9e4767c2dff295464a83",
+    "future_writer_must_match_exactly": true,
+    "materialized": false
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "r004_namespace": {
+    "all_input_and_preflight_targets_absent_at_review": true,
+    "control_target": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/input/F8_OPC_q0p500_r004_acceleration.csv",
+    "definition_target": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R004_Def.xml",
+    "generated_control_copy": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1/generated/F8_OPC_q0p500_r004_acceleration.csv",
+    "generated_prefix": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1/generated/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R004",
+    "preflight_output_root": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/cpu-native-preflight-v1"
+  },
+  "retained_static_rejection": {
+    "correction": "v2 removes the leftover acceleration/ prefix; v1 is not overwritten",
+    "execution_performed": false,
+    "receipt": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r004/static-design-review-v1/receipt.json",
+    "status": "r004_static_design_review_failed"
+  },
+  "schema": "core.cfd.f8.r004_static_design_review.v2",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R004",
+  "static_constraint_gaps": [],
+  "status": "r004_static_design_review_v2_passed_inputs_not_authorized"
+}
