@@ -33,3 +33,13 @@
 - `output_exists`: false
 - `solver_started` / `gpu_started` / `queue_or_scheduler_started`: false
 - `registry_mutation` / `ledger_mutation` / `qualification_credit`: 0
+
+## 后续资源复查
+
+在首次快照后约每隔一分钟又做了两次同样的非消耗性环境探针；没有运行 one-shot 执行器。两次结果均只有 load 门阻塞，F3 worker 仍为空，receipt 和输出目录仍不存在。最新一次：
+
+- CPU affinity：128；load：`134.72998046875 / 132.81787109375 / 133.74853515625`。
+- 可用 RAM：`227,678,404,608` bytes；磁盘可用：`8,186,861,146,112` bytes。
+- blocker：`one-minute load average exceeds the CPUs available to this task`。
+
+因此目前仍不能调用一次性预检执行器；此结论只适用于这些快照时点，后续应在执行前重新检查。
