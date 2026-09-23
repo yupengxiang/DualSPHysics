@@ -1,0 +1,162 @@
+{
+  "bindings": [
+    {
+      "bytes": 3397,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/r002-continuation-decision-v1/packet.json",
+      "role": "immutable r002 continuation decision packet",
+      "sha256": "9343ebcb6296a1caf80480071d301eb9ddaa6ef7a0749c098d1999f61566e73c"
+    },
+    {
+      "bytes": 4499,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/cpu-native-preflight-postrun-audit-v1/receipt.json",
+      "role": "immutable closed r001 hard-failure audit",
+      "sha256": "d67f5055bd74769694dd43187fcb4447c84d8294454da8cc5f4e55c343d5b638"
+    },
+    {
+      "bytes": 16236,
+      "path": "scripts/f8_r002_static_design_review_v1.py",
+      "role": "r002 static design review builder",
+      "sha256": "be4e1e6ff2959111a5a08bd619762dc1b04514646e5dc2d1f4b9ddbdf1bbb39f"
+    },
+    {
+      "bytes": 2991,
+      "path": "tests/test_f8_r002_static_design_review_v1.py",
+      "role": "r002 static design review tests",
+      "sha256": "d63be63273b245124c92529ec93e30a089a35f302d77915e17bcc29e071f18f8"
+    },
+    {
+      "bytes": 6505,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/15_Poiseuille/CasePoiseuille_Def.xml",
+      "role": "official syntax precedent: finite_wall_geometry",
+      "sha256": "ab7e06d9a5a2c5bad899f36ef393bc1d3867cd88fbf7aba5a734ee1e4ffaa2fe"
+    },
+    {
+      "bytes": 7824,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/04_ExternalForces/CaseForces_Def.xml",
+      "role": "official syntax precedent: acceleration_input",
+      "sha256": "1db880334bcfa0ca8514644005edbdc201f6a003e847e43901a68e9b5fa5487f"
+    },
+    {
+      "bytes": 7654,
+      "path": "vendor/official/DualSPHysics_v5.4/examples/main/02_Periodicity/CasePeriodicity_Def.xml",
+      "role": "official syntax precedent: periodic_boundary",
+      "sha256": "af3f081d047f0abc7e3239c96f473318ce5c2ab5070228edb55d8dd22ce7fcae"
+    },
+    {
+      "bytes": 2798,
+      "path": "vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML_AccInput.xml",
+      "role": "official syntax precedent: acceleration_format",
+      "sha256": "ffbf4d8a70e249f78adb6790b58dd809a6cef02d8acee7e786f2b900367fad74"
+    }
+  ],
+  "control_dependency_copy_proof": {
+    "definition_relative_reference": "acceleration/F8_OPC_q0p500_r002_acceleration.csv",
+    "r001_path_explicitly_forbidden": "acceleration/F8_OPC_q0p500_acceleration.csv",
+    "required_copy_hash": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1",
+    "required_generated_copy": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/cpu-native-preflight-v1/generated/acceleration/F8_OPC_q0p500_r002_acceleration.csv",
+    "source_control": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/input/acceleration/F8_OPC_q0p500_r002_acceleration.csv"
+  },
+  "execution_controls": {
+    "control_written": false,
+    "definition_written": false,
+    "denominator_mutation": 0,
+    "gencase_invoked": false,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "native_decode_invoked": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_invoked": false,
+    "training_started": false
+  },
+  "expected_cpu_preflight_hard_gates": [
+    "separate immutable CPU-preflight authorization must name this r002 scope and exact two precommitted hashes",
+    "GenCase may be invoked at most once only after that authorization; no r001 executable or output may be reused",
+    "generated fixed boundary-particle count must be positive and contain both z-wall planes",
+    "native decode must report positive boundary-particle and boundary-normal counts with finite nonzero normals",
+    "the generated acceleration dependency must exist at required_generated_copy and hash-match required_copy_hash before native decode",
+    "fluid particle count must be positive; zero excluded particles, zero solver/GPU/queue/registry/ledger mutations, and zero qualification credit remain required",
+    "any failure closes r002 with no threshold relaxation or same-input retry"
+  ],
+  "finite_wall_proof": {
+    "claim": "static construction proof only; GenCase realization remains untested",
+    "fluid_marker": "FullyFilledChannelFluid",
+    "fluid_z_interval_m": [
+      -0.045,
+      0.045
+    ],
+    "lower_wall_z_interval_m": [
+      -0.0525,
+      -0.045
+    ],
+    "shape_mode": "dp | bound",
+    "upper_wall_z_interval_m": [
+      0.045,
+      0.0525
+    ],
+    "wall_constructor": "drawbox boxfill=top|bottom",
+    "wall_marker": "FiniteNoSlipZWalls"
+  },
+  "next_authorization_required": {
+    "does_not_authorize": [
+      "GenCase",
+      "native decoder",
+      "solver",
+      "GPU",
+      "queue",
+      "registry",
+      "ledger",
+      "qualification",
+      "training"
+    ],
+    "kind": "one-time r002 static input materialization only",
+    "required_before": "writing either precommitted input file"
+  },
+  "parameters": {
+    "alpha": 5.0,
+    "amplitude": 0.01,
+    "dp": 0.0075,
+    "half_height": 0.045,
+    "length_x": 0.24,
+    "length_y": 0.12,
+    "observation_cycles": 3,
+    "observation_start": 8.1,
+    "omega": 6.17283950617284,
+    "period": 1.017876019763093,
+    "points_per_period": 64,
+    "q": 0.5,
+    "rho0": 1000.0,
+    "sound_speed": 10.0,
+    "t_end": 11.196636217394023,
+    "total_cycles": 11,
+    "viscosity": 0.0005,
+    "warmup_cycles": 8
+  },
+  "precommitted_input_bytes": {
+    "control_bytes": 35956,
+    "control_sha256": "bd623b5681f449804a3a2bdf61cded339e180065cf37e2d5d8b6ac92f9e3cfc1",
+    "definition_bytes": 2176,
+    "definition_sha256": "086fa1cab8019c39c2d22fdfbee069441663b0615cdf9246c4383fd51b1b0bea",
+    "future_writer_must_match_exactly": true,
+    "materialized": false
+  },
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "r001_is_immutable_closed_history": {
+    "r001_evidence_mutated": false,
+    "same_input_retry_forbidden": true,
+    "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R001"
+  },
+  "r002_namespace": {
+    "all_targets_absent_at_review": true,
+    "control_target": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/input/acceleration/F8_OPC_q0p500_r002_acceleration.csv",
+    "definition_target": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002_Def.xml",
+    "generated_control_copy": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/cpu-native-preflight-v1/generated/acceleration/F8_OPC_q0p500_r002_acceleration.csv",
+    "generated_prefix": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/cpu-native-preflight-v1/generated/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002",
+    "preflight_output_root": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/cpu-native-preflight-v1"
+  },
+  "schema": "core.cfd.f8.r002_static_design_review.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R002",
+  "static_constraint_gaps": [],
+  "status": "r002_static_design_review_passed_inputs_not_authorized"
+}
