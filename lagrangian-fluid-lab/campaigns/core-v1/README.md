@@ -162,7 +162,12 @@ binds all 94 new inputs and proposes one representative CPU GenCase/native-
 decode check; it explicitly grants no execution permission and created no
 runtime namespace. See
 [`cpu-native-preflight-request-v1`](cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-request-v1/request.json).
-Solver execution and T1/resource admission remain later, distinct gates. No
+The request-only static review passed: all 94 fresh inputs and source hashes
+close against the R008 pack, and no R007 inputs or outputs are reused. The
+review record is
+[`review-v1.json`](cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-request-v1/review-v1.json);
+it grants no execution authority. Solver execution and T1/resource admission
+remain later, distinct gates. No
 R007 input or output is reusable as R008 qualification evidence. The previously
 explored F6 Definition failure remains immutable and cannot be retried or
 relabeled to satisfy the third-family gate.
