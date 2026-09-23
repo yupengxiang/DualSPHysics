@@ -3,6 +3,7 @@
 import h5py
 import numpy as np
 import json
+from collections import Counter
 from pathlib import Path
 import subprocess
 import sys
@@ -11,6 +12,9 @@ from scripts.f3_native_volume_mls import (
     F3CurrentFrame,
     F3NativeVolumeMLS,
     F3ReferenceProvider,
+    _advance_rk4,
+    _new_state,
+    f3_walls,
     seeds_f3,
     source_labels,
     wendland_quintic_c2_3d,
@@ -50,6 +54,40 @@ def test_native_volume_affine_mls_reconstructs_affine_field():
     assert np.allclose(result.velocity, expected, atol=1e-12, rtol=0.0)
     assert np.max(result.reconstruction_error_mps) < 1e-12
     assert np.all(result.geometry_rank == 4)
+
+
+def test_rk4_censors_outward_intermediate_stage_at_closed_wall():
+    axes = [
+        np.array([0.41, 0.42, 0.43, 0.44, 0.4475]),
+        np.array([-0.02, 0.0, 0.02]),
+        np.array([0.08, 0.10, 0.12]),
+    ]
+    position = np.stack(np.meshgrid(*axes, indexing="ij"), axis=-1).reshape(-1, 3)
+    velocity = np.tile([1.0, 0.0, 0.0], (len(position), 1))
+    frame = F3CurrentFrame(
+        position,
+        velocity,
+        np.full(len(position), 1.0e-3),
+        np.full(len(position), 1000.0),
+        np.ones(len(position), dtype=bool),
+        frame_index=0,
+        time_s=0.0,
+    )
+    tracer = F3NativeVolumeMLS(0.02)
+    query = np.asarray([[0.449, 0.0, 0.10]])
+    assert tracer.reconstruct(query, frame, f3_walls()).reliable.all()
+
+    state = _new_state(query, np.asarray([1], dtype=np.int8))
+    state["reliable"][:] = True
+    state["failure_reason"] = np.asarray(["reliable"], dtype=object)
+    diagnostics = {"stage_failure_counts": Counter()}
+    _advance_rk4(state, tracer, frame, f3_walls(), 0.0, 0.004, diagnostics)
+
+    assert not state["reliable"][0]
+    assert state["permanent_unknown"][0]
+    assert state["failure_reason"][0] == "wall_occluded"
+    np.testing.assert_array_equal(state["position"], query)
+    assert diagnostics["stage_failure_counts"]["wall_occluded"] == 2
 
 
 def test_seed_identity_is_geometric_and_source_balanced():
