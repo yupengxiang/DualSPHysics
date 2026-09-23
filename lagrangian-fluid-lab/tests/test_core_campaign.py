@@ -1,5 +1,6 @@
 import json
 import sys
+from pathlib import Path
 
 from scripts.core_campaign import completion, load_evidence, main
 from scripts.core_runtime import atomic_json, digest
@@ -104,6 +105,83 @@ def test_unregistered_evaluations_do_not_shrink_any_target_denominator(tmp_path)
     assert not result["checks"]["evidence_valid"]
     assert all("outside the registered completion denominator" in issue["reason"]
                for issue in result["issues"])
+
+
+def _reproduction_fixture(tmp_path, *, diagnostic_only, full_product_reproduction):
+    root_review_path = tmp_path / "root-review.json"
+    atomic_json(root_review_path, {"status": "passed"})
+    source_data_root = "/datasets/core-source"
+    reproduction_data_root = "/scratch/core-relocated"
+    receipt_path = tmp_path / "reproduction.json"
+    atomic_json(receipt_path, {
+        "schema": "core.reproduction.v1",
+        "passed": True,
+        "diagnostic_only": diagnostic_only,
+        "cross_host_reproduction": True,
+        "full_horizon_reproduction": True,
+        "full_product_reproduction": full_product_reproduction,
+        "reader_reproduced": full_product_reproduction,
+        "prediction_reproduced": full_product_reproduction,
+        "scoring_reproduced": full_product_reproduction,
+        "predictor_future_state_inputs": False,
+        "source_host": "host-source",
+        "reproduction_host": "host-independent",
+        "source_data_root": source_data_root,
+        "reproduction_data_root": reproduction_data_root,
+        "root_review": {"path": root_review_path.name, "sha256": digest(root_review_path)},
+    })
+    return {"independent_reproduction": {"path": receipt_path.name, "sha256": digest(receipt_path)}}
+
+
+def test_diagnostic_cross_host_receipt_does_not_satisfy_independent_reproduction(tmp_path):
+    registry = _reproduction_fixture(
+        tmp_path, diagnostic_only=True, full_product_reproduction=False)
+
+    result = completion(registry, tmp_path)
+
+    assert result["checks"]["independent_reproduction"] is False
+    gap = next(item for item in result["completion_gaps"] if item["gate"] == "independent_reproduction")
+    assert "distinct data root" in gap["reason"]
+    assert result["issues"] == []
+
+
+def test_full_product_cross_host_reproduction_requires_relocated_reader_prediction_and_score(tmp_path):
+    registry = _reproduction_fixture(
+        tmp_path, diagnostic_only=False, full_product_reproduction=True)
+
+    result = completion(registry, tmp_path)
+
+    assert result["checks"]["independent_reproduction"] is True
+
+
+@pytest.mark.parametrize("field,value", [
+    ("reproduction_data_root", "/datasets/core-source"),
+    ("source_host", "host-independent"),
+    ("reader_reproduced", False),
+    ("prediction_reproduced", False),
+    ("scoring_reproduced", False),
+])
+def test_reproduction_gate_rejects_same_host_root_or_missing_product_step(tmp_path, field, value):
+    registry = _reproduction_fixture(
+        tmp_path, diagnostic_only=False, full_product_reproduction=True)
+    receipt_path = tmp_path / "reproduction.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    receipt[field] = value
+    atomic_json(receipt_path, receipt)
+    registry["independent_reproduction"]["sha256"] = digest(receipt_path)
+
+    result = completion(registry, tmp_path)
+
+    assert result["checks"]["independent_reproduction"] is False
+
+
+def test_current_registered_diagnostic_receipt_is_not_independent_reproduction():
+    lab = Path(__file__).resolve().parents[1]
+    registry = json.loads((lab / "campaigns/core-v1/registry.json").read_text(encoding="utf-8"))
+
+    result = completion(registry, lab)
+
+    assert result["checks"]["independent_reproduction"] is False
 
 
 def _qualified_scope_fixture(tmp_path, *, material=False, formal_material_receipt=None,

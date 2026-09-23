@@ -143,6 +143,42 @@ def _contract_evidence_reference(name, registry, data_root):
         return None
 
 
+def _independent_reproduction_passes(receipt):
+    """Require the complete, non-diagnostic product chain on a relocated root.
+
+    A cross-host numerical comparison or full-horizon rollout alone is not a
+    product reproduction.  The plan requires the reader, autonomous
+    prediction, and scoring chain to work on another host and a distinct data
+    root, with a separate passed root review.
+    """
+    source_host = receipt.get("source_host")
+    reproduction_host = receipt.get("reproduction_host")
+    source_data_root = receipt.get("source_data_root")
+    reproduction_data_root = receipt.get("reproduction_data_root")
+    return (
+        receipt.get("schema") == "core.reproduction.v1"
+        and receipt.get("passed") is True
+        and receipt.get("diagnostic_only") is False
+        and receipt.get("cross_host_reproduction") is True
+        and receipt.get("full_horizon_reproduction") is True
+        and receipt.get("full_product_reproduction") is True
+        and receipt.get("reader_reproduced") is True
+        and receipt.get("prediction_reproduced") is True
+        and receipt.get("scoring_reproduced") is True
+        and receipt.get("predictor_future_state_inputs") is False
+        and isinstance(source_host, str)
+        and bool(source_host.strip())
+        and isinstance(reproduction_host, str)
+        and bool(reproduction_host.strip())
+        and source_host != reproduction_host
+        and isinstance(source_data_root, str)
+        and bool(source_data_root.strip())
+        and isinstance(reproduction_data_root, str)
+        and bool(reproduction_data_root.strip())
+        and source_data_root != reproduction_data_root
+    )
+
+
 def _reject_nonformal_or_nonroot(payload, label):
     """Reject explicit diagnostic/blocked evidence instead of inferring credit."""
     if not isinstance(payload, dict):
@@ -591,9 +627,7 @@ def completion(registry, data_root):
                         and root_receipt.get("status") in ("pass", "passed")
                     )
                 checks[name] = (
-                    checks[name]
-                    and receipt.get("source_host") != receipt.get("reproduction_host")
-                    and bool(receipt.get("source_host"))
+                    _independent_reproduction_passes(receipt)
                     and root_passed
                 )
         except (KeyError, ValueError, OSError, TypeError):
@@ -648,7 +682,7 @@ def completion(registry, data_root):
     if not checks["independent_reproduction"]:
         completion_gaps.append({
             "gate": "independent_reproduction",
-            "reason": "no valid cross-host reproduction receipt with passed root review is registered",
+            "reason": "requires a passed non-diagnostic full-product receipt proving reader, prediction, and scoring on another host and a distinct data root, plus passed root review",
         })
     if not checks["causal_lineage_contracts"]:
         completion_gaps.append({
