@@ -4,12 +4,12 @@
 
 | 工作／主来源 | 书目核对 | 来源直接支持的启示 | 状态 |
 |---|---|---|---|
-| [Learning to Simulate Complex Physics with Graph Networks — PMLR](https://proceedings.mlr.press/v119/sanchez-gonzalez20a.html) | Sanchez-Gonzalez et al., ICML 2020, PMLR 119 | 粒子图与消息传递可学习物理演化；论文评估多步 rollout 和误差积累，单步误差不足以代表长期能力。 | 人工主来源核对通过；机器核验 `verify_pending`（arXiv 406；Semantic Scholar 精确匹配；需后续重跑） |
+| [Learning to Simulate Complex Physics with Graph Networks — PMLR](https://proceedings.mlr.press/v119/sanchez-gonzalez20a.html) | Sanchez-Gonzalez et al., ICML 2020, PMLR 119 | 粒子图与消息传递可学习物理演化；论文评估多步 rollout 和误差积累，单步误差不足以代表长期能力。 | 人工主来源核对通过；机器核验 `verify_pending`（arXiv 406；Semantic Scholar 精确匹配；Crossref 标题搜索无精确命中） |
 | [LagrangeBench — NeurIPS 2023 Datasets and Benchmarks](https://proceedings.neurips.cc/paper_files/paper/2023/hash/ccac3b120c7dc86d45f56830732b62be-Abstract.html) | Toshev et al., NeurIPS 2023, Datasets and Benchmarks Track；DOI `10.52202/075280-2830` | 七个 2D/3D SPH 数据集、JAX API、GNS/SEGNN 基线，以及动能 MSE、Sinkhorn 距离等指标；计划已把“统一训练接口”收紧为来源可直接支持的 API 描述。 | 人工主来源核对通过；机器核验 `verified`（Crossref + Semantic Scholar 精确匹配） |
-| [Neural SPH — PMLR](https://proceedings.mlr.press/v235/toshev24a.html) | Toshev et al., ICML 2024, PMLR 235 | 论文指出张力不稳定引起的粒子聚团，并研究将压力、黏性、外力成分加入 GNN；这支持计划中不把仅含已知外力的残差基线称为完整 Neural SPH。 | 人工主来源核对通过；机器核验 `verify_pending`（arXiv 406；Semantic Scholar 精确匹配；需后续重跑） |
+| [Neural SPH — PMLR](https://proceedings.mlr.press/v235/toshev24a.html) | Toshev et al., ICML 2024, PMLR 235 | 论文指出张力不稳定引起的粒子聚团，并研究将压力、黏性、外力成分加入 GNN；这支持计划中不把仅含已知外力的残差基线称为完整 Neural SPH。 | 人工主来源核对通过；机器核验 `verify_pending`（arXiv 406；Semantic Scholar 精确匹配；Crossref 标题搜索无精确命中） |
 | [FD-Bench — arXiv 2505.20349](https://arxiv.org/abs/2505.20349) | Wang et al.; arXiv v2 页面记录日期为 2026-05-21，并在 comments 标注 accepted by KDD 2026。此处不声称已核到独立 ACM proceedings 页面。 | 来源直接提出空间、时间、损失模块的公平对照、传统数值求解器比较及跨分辨率／初始条件／时间窗泛化；对应计划中的变量隔离设计。 | 作者 arXiv 主来源人工核对通过；机器核验 `verified`（Crossref + Semantic Scholar 精确匹配） |
 | [Fueltank — AAAI proceedings](https://ojs.aaai.org/index.php/AAAI/article/view/33752) | Chen et al., *A Pioneering Neural Network Method for Efficient and Robust Fuel Sloshing Simulation in Aircraft*, AAAI 2025, 39(15), 15957–15965；DOI `10.1609/aaai.v39i15.33752` | AAAI 页面称其航空燃油晃荡数据覆盖四类油箱和多方向旋转工况。计划据此只指出相关工作已存在，不推导本项目 F8 的资格或优先权。 | 出版方主来源人工核对通过；机器核验 `unverified`（Crossref 精确匹配；Semantic Scholar 未找到；不足两个目录） |
-| [FluidLab — 官方项目页](https://fluidlab2023.github.io/) | Xian et al., ICLR 2023 Spotlight；作者项目页提供论文与项目链接。OpenReview 直链在本次访问时触发浏览器验证，未以该页面补充核验。 | 官方页描述的是多材料、可微分的流体操控仿真环境。将其与 CFD 真值数据区分，是本项目的数据来源／证据规则，而不是 FluidLab 页面直接声称的结论。 | 人工主来源核对通过；机器核验 `verify_pending`（arXiv 406；Semantic Scholar 精确匹配；需后续重跑） |
+| [FluidLab — 官方项目页](https://fluidlab2023.github.io/) | Xian et al., ICLR 2023 Spotlight；作者项目页提供论文与项目链接。OpenReview 直链在本次访问时触发浏览器验证，未以该页面补充核验。 | 官方页描述的是多材料、可微分的流体操控仿真环境。将其与 CFD 真值数据区分，是本项目的数据来源／证据规则，而不是 FluidLab 页面直接声称的结论。 | 人工主来源核对通过；机器核验 `verify_pending`（arXiv 406；Semantic Scholar 精确匹配；Crossref 标题搜索无精确命中） |
 
 ## 核验范围与限制
 
@@ -23,6 +23,8 @@
 
 首次在线记录见[机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-24.json)：arXiv 请求因内容协商返回 406，Semantic Scholar batch 请求被限流（429），故六项均为 `verify_pending`。修正 Accept 头后，曾对 GNS 做只读单记录诊断并获得官方 API 标题匹配；该诊断没有改动首次回执。
 
-新会话全量重跑见[第二份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN1.json)：2 项 `verified`（LagrangeBench、FD-Bench）、1 项 `unverified`（Fueltank 只有 Crossref 确认）、3 项 `verify_pending`（GNS、Neural SPH、FluidLab；批量 arXiv 请求仍返回 HTTP 406）。该次原始回执中三条无 DOI 文献被 Crossref 的首个模糊搜索结果记作 `mismatch`；代码复核发现，未命中精确标题时将模糊首条结果当成冲突会造成误报。现已改为将无精确标题结果记为 `not_found`，并新增回归测试；原始回执保持不变。依 research-lit 规则，不因目录缺失或网络错误把待核验项升级，修正后的在线回执留待下一会话生成。自动核验仍未整体通过。
+第二次全量重跑见[第二份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN1.json)：2 项 `verified`（LagrangeBench、FD-Bench）、1 项 `unverified`（Fueltank 只有 Crossref 确认）、3 项 `verify_pending`（GNS、Neural SPH、FluidLab；批量 arXiv 请求仍返回 HTTP 406）。该次原始回执中三条无 DOI 文献被 Crossref 的首个模糊搜索结果记作 `mismatch`；代码复核发现这是把非精确搜索首项当作冲突造成的误报。修正后新增的回归测试通过，原始回执保持不变。
+
+随后在新会话按技能规则重试一次，见[第三份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN2.json)：状态仍为 2 项 `verified`、1 项 `unverified`、3 项 `verify_pending`。Semantic Scholar 本次可用；三条无 DOI 记录的 Crossref 精确标题搜索均为 `not_found`，不再报冲突；arXiv 对五条有 arXiv ID 的记录仍统一返回 HTTP 406。依技能规则，这三篇保持 pending，不在本会话继续重试；自动核验尚未整体通过。
 
 离线回归：`tests/test_verify_papers.py`，7 项通过，覆盖三源成功、标题冲突、临时网络失败、无 DOI 的 Crossref 精确标题查找与模糊未命中、以及 DOI-only 记录。该工具只验证书目身份，不判断论文主张、质量或本项目创新性。

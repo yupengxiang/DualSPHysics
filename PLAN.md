@@ -51,7 +51,7 @@
 
 ### 3. 调研如何影响设计
 
-截至 2026-09-24，六项依据已按出版方论文页、arXiv 作者记录或官方项目页逐条人工复核；书目与主张的核验结果见[文献来源审计](lagrangian-fluid-lab/reports/PLAN-REFERENCES-AUDIT-2026-09-24.zh-CN.md)。三源工具的后续重跑已验证 LagrangeBench 与 FD-Bench，FuelTank 仍仅有一个目录确认，另三篇因 arXiv API 406 待核；因此六项的自动核验尚未整体完成。执行回执及限制见[首次记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24.json)和[重跑记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN1.json)。
+截至 2026-09-24，六项依据已按出版方论文页、arXiv 作者记录或官方项目页逐条人工复核；书目与主张的核验结果见[文献来源审计](lagrangian-fluid-lab/reports/PLAN-REFERENCES-AUDIT-2026-09-24.zh-CN.md)。三源工具已验证 LagrangeBench 与 FD-Bench；FuelTank 仍只有一个目录确认，另三篇因 arXiv API 406 待核，故六项自动核验尚未整体完成。执行回执见[首次记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24.json)、[第二次记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN1.json)和[第三次记录](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN2.json)。
 
 | 工作 | 对本项目的直接启示 |
 |---|---|
