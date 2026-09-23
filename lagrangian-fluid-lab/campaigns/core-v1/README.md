@@ -160,28 +160,22 @@ review, also with zero credit and no execution authority. Fresh Definition and
 control files for all 15 qualification configurations and 32 planned production
 cases are now hash-closed in
 [`definition-control-pack-v1`](cfd/f8-oscillatory-pressure-channel-r008/definition-control-pack-v1/receipt.json).
-This static pack did not create solver input/case directories and did not invoke
-GenCase. The next gate is a separate explicit one-shot native-preflight
-authorization bound to the exact R008 inputs. A static request packet now
-binds all 94 new inputs and proposes one representative CPU GenCase/native-
-decode check; it explicitly grants no execution permission and created no
-runtime namespace. See
-[`cpu-native-preflight-request-v1`](cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-request-v1/request.json).
-The request-only static review passed: all 94 fresh inputs and source hashes
-close against the R008 pack, and no R007 inputs or outputs are reused. The
-review record is
-[`review-v1.json`](cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-request-v1/review-v1.json);
-it grants no execution authority. Solver execution and T1/resource admission
-remain later, distinct gates. No
-R007 input or output is reusable as R008 qualification evidence. The previously
-explored F6 Definition failure remains immutable and cannot be retried or
-relabeled to satisfy the third-family gate.
-
-An exploratory R008 resource snapshot proposes a conditional 4096 MiB hard
-cap (not measured peak demand) and blocks scheduling under the observed
-oversubscribed CPU load. See
-[`resource-admission-v1/receipt.json`](cfd/f8-oscillatory-pressure-channel-r008/resource-admission-v1/receipt.json);
-it grants no native execution authority.
+The static pack itself did not invoke GenCase. On 2026-09-23, the exact-input
+R008 v3 request and its one-shot authorization were used for one representative
+CPU GenCase plus native BI4 decode. Both passed geometry/native integrity checks
+under the bounded CPU preflight; the immutable result is
+[`cpu-native-preflight-v3/receipt.json`](cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-v3/receipt.json),
+and its read-only postrun audit is
+[`cpu-native-postrun-audit-v1/receipt.json`](cfd/f8-oscillatory-pressure-channel-r008/cpu-native-postrun-audit-v1/receipt.json).
+The one-shot is consumed. It invoked no solver, GPU, worker, training, queue,
+registry, or ledger, and earns zero T1 credit. The older request-only v1 packet
+and review are historical; R007 outputs were not reused. The separate resource
+snapshot recorded a transient CPU scheduling block. Passing the single-case
+preflight does not qualify or resource-admit the 15-row T1 matrix. The next
+gates are fresh matrix-level resource/scheduling admission and separate
+explicit solver/T1 execution authority. The previously explored F6 Definition
+failure remains immutable and cannot be retried or relabeled to satisfy the
+third-family gate.
 
 The historical F8 R002 static-review PASS was later found insufficient: its
 Definition omitted GenCase's required `hswl` element, and the review's test-file
