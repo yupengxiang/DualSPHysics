@@ -1,0 +1,145 @@
+{
+  "schema": "core.cfd.f8_r008_resource_admission.v1",
+  "record_id": "f8-oscillatory-pressure-channel-r008-resource-admission-v1",
+  "status": "conditional_ram_cap_cpu_schedule_blocked_no_execution_authority",
+  "resource_decision": {
+    "scope": "one representative R008 GenCase plus native-decode preflight only",
+    "proposed_ram_limit_mib": 4096,
+    "ram_limit_semantics": "hard admission ceiling, not an estimate or measurement of peak demand",
+    "ram_cap_verdict": "conditional",
+    "ram_cap_condition": "A future runner must enforce the limit across the full native process tree and record actual peak usage and any OOM/limit event. The current evidence does not establish enforcement or measured peak RSS.",
+    "cpu_workers": 1,
+    "max_concurrent_native_processes": 1,
+    "gpu_allowed": false,
+    "solver_invocations": 0,
+    "queue_or_scheduler": false,
+    "qualification_credit": 0
+  },
+  "hard_limit_enforcement_probe": {
+    "cgroup_v2_memory_controller_advertised": true,
+    "cgroup_mount_root_directly_writable": false,
+    "systemd_run_available": true,
+    "user_scope_memory_limit_application_tested": false,
+    "prlimit_available": true,
+    "prlimit_is_physical_rss_cap": false,
+    "enforcement_status": "not_yet_verified_for_the_full_native_process_tree"
+  },
+  "analogue": {
+    "r007_receipt": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r007/cpu-native-preflight-v1/receipt.json",
+    "r007_generated_particle_counts": {
+      "fluid": 6656,
+      "fixed_boundary": 4096,
+      "total": 10752
+    },
+    "r007_generated_output_bytes": {
+      "bound_vtk": 176409,
+      "fluid_vtk": 279824,
+      "native_bi4": 523730
+    },
+    "geometry_comparison": {
+      "r007_definition": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r007/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R007_Def.xml",
+      "r008_definition": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/definition-control-pack-v1/qualification/space-q0p5-dp0p0075/F8_OPC_space-q0p5-dp0p0075_Def.xml",
+      "parsed_geometry_subtrees_identical": true,
+      "nominal_q": 0.5,
+      "dp_m": 0.0075
+    },
+    "peak_rss_measured": false,
+    "r007_receipt_contains_peak_rss": false
+  },
+  "host_snapshot": {
+    "observed_at_utc": "2026-09-23T07:55:41Z",
+    "logical_cpu_count": 128,
+    "load_average_1_5_15_min": [
+      135.62,
+      135.55,
+      136.07
+    ],
+    "mem_available_bytes": 224522719232,
+    "filesystem_free_bytes": 8192709652480,
+    "scheduling_admission": "blocked_at_snapshot",
+    "scheduling_blockers": [
+      "all observed load averages exceed the 128 logical CPU count",
+      "F3 material row30 R003 worker PID 1151871 was live at approximately 99.5% CPU",
+      "runtime coordinator PID 2809995 was also live"
+    ],
+    "snapshot_is_transient": true
+  },
+  "latest_refresh": {
+    "observed_at_utc": "2026-09-23T08:10:54Z",
+    "logical_cpu_count": 128,
+    "load_average_1_5_15_min": [
+      143.43,
+      143.30,
+      139.07
+    ],
+    "mem_available_bytes": 225288245248,
+    "filesystem_free_bytes": 8192686780416,
+    "scheduling_admission": "still_blocked_at_refresh",
+    "f3_r003_process": {
+      "pid": 1151871,
+      "state": "running",
+      "elapsed": "05:14:30",
+      "cpu_percent": 99.5,
+      "checkpoint_committed_frame": 375,
+      "required_final_frame": 835
+    },
+    "runtime_coordinator": {
+      "pid": 2809995,
+      "state": "live"
+    },
+    "read_boundary": "process metadata and atomic checkpoint JSON only; no trace HDF5 or NPZ opened"
+  },
+  "review": {
+    "verdict": "conditional",
+    "reviewer_agent_id": "01a0cd46-6c93-74b0-ad48-64737eeb8a87",
+    "requested_model": "gpt-6-luna",
+    "requested_reasoning_effort": "max",
+    "actual_model_attestation_in_response": false,
+    "conclusion": "4096 MiB is a possible hard admission cap but not evidenced peak demand; enforcement across the native process tree and actual peak recording are required. Do not schedule under the recorded host load."
+  },
+  "authorization_boundary": {
+    "source_request_is_request_only": true,
+    "request_grants_native_execution": false,
+    "this_receipt_grants_native_execution": false,
+    "separate_explicit_execution_authorization_required": true,
+    "runtime_namespace_created": false,
+    "gencase_invoked": false,
+    "native_decoder_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "worker_started_by_this_task": false,
+    "queue_registry_or_ledger_mutation": 0
+  },
+  "input_bindings": [
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-request-v1/request.json",
+      "bytes": 44228,
+      "sha256": "bd6995f4e21614fc400a06262b1458e876517af5c588f4b9441ae05e54ec3873",
+      "role": "request-only R008 preflight proposal"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r007/cpu-native-preflight-v1/receipt.json",
+      "bytes": 12290,
+      "sha256": "7ebb5a4d1330dd929c77847a62f56ea3c284f64738479377083a811b6b810118",
+      "role": "text resource and generated-count analogue; contains no peak RSS"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r007/input/F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R007_Def.xml",
+      "bytes": 3114,
+      "sha256": "444cba748d9e5a9e7d8a016585acb8ba2db421d3847adbb363e78382c67927fd",
+      "role": "R007 representative geometry text"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/definition-control-pack-v1/qualification/space-q0p5-dp0p0075/F8_OPC_space-q0p5-dp0p0075_Def.xml",
+      "bytes": 3121,
+      "sha256": "711e8fddc6906b61349ec15eb3182976ce5e94cbca8efd99934a2c7bd1fb2987",
+      "role": "R008 representative geometry text"
+    }
+  ],
+  "qualification": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0
+  }
+}

@@ -172,6 +172,12 @@ R007 input or output is reusable as R008 qualification evidence. The previously
 explored F6 Definition failure remains immutable and cannot be retried or
 relabeled to satisfy the third-family gate.
 
+An exploratory R008 resource snapshot proposes a conditional 4096 MiB hard
+cap (not measured peak demand) and blocks scheduling under the observed
+oversubscribed CPU load. See
+[`resource-admission-v1/receipt.json`](cfd/f8-oscillatory-pressure-channel-r008/resource-admission-v1/receipt.json);
+it grants no native execution authority.
+
 The historical F8 R002 static-review PASS was later found insufficient: its
 Definition omitted GenCase's required `hswl` element, and the review's test-file
 hash binding had drifted. Its single CPU preflight is terminal-failed and must
