@@ -115,6 +115,19 @@ reproduction is explicitly separate from final GPU-model product reproduction.
 - No family currently has a macro-T2 material qualification. Existing material
   readers, tracers, profiles, and smoke runs remain engineering evidence until
   their registered matrices and complete case-run denominators pass.
+- The F3 material row-30 R003 attempt completed all 835 native intervals, but
+  its terminal scientific audit failed the frozen acceptance gate: per-source
+  unknown fractions were 1.0742% and 1.0254% against a 1% maximum, and the
+  independent 512-versus-4096 CDF comparison was not bound. It receives no T2
+  credit; see
+  [`row30 R003 terminal audit`](material/evidence/f3-material-row30-r003-terminal-audit-v1/receipt.json).
+  The separately requested row-30 resource/scheduler preflight was blocked and
+  did not authorize a worker; see
+  [`row30 resource preflight v2`](material/evidence/f3-material-row30-resource-preflight-v2/receipt.json).
+- The F4 support-cap R002 CPU-native canary preflight passed its environment
+  and input checks, but explicitly did not start the canary, tracer, solver,
+  GPU, or queue. Runtime remains unauthorized and no T2 credit was issued; see
+  [`F4 support-cap preflight`](material/candidates/f4-supportcap-affine-query-bound-v3/cpu-native-canary-preflight-r002-v1/preflight-receipt.json).
 
 `core_campaign.py status` verifies hashed typed evidence, not task-label strings.
 The status command is read-only by default; use `--write-snapshot` only when an
