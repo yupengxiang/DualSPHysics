@@ -206,8 +206,8 @@ def test_missing_or_changed_new_backend_calibration_fails_closed(calibration, ch
     with pytest.raises(ValueError): reference.register(reference._reference(path))
 
 
-def h5_source(tmp_path):
-    target = reference.source_score.target_grid(.01)
+def h5_source(tmp_path, *, step_s=.01):
+    target = reference.source_score.target_grid(step_s)
     times = target.copy(); times[1:] += 1e-5
     path = tmp_path/"source.h5"
     p = np.tile(np.array([[-.01, 0., .04], [.01, 0., .04]]), (len(times), 1, 1))
@@ -218,7 +218,7 @@ def h5_source(tmp_path):
         h["mass"] = np.full((len(times), 2), .5)
         h["valid"] = np.ones((len(times), 2), bool); h["type"] = np.full((len(times), 2), 3)
     return dict(plan_case_id="NP01", case_id="fixture", hdf5_path=path,
-                entry=dict(output_interval_s=.01, dp_m=.01, amplitude=1.),
+                entry=dict(output_interval_s=step_s, dp_m=.01, amplitude=1.),
                 native_timestep=dict(dt_max_s=.00002, last_time_s=float(times[-1])),
                 audit=dict(frames=len(times), time_end_s=float(times[-1]), particle_axis_count=2,
                            initial_fluid_mass_kg=1., hdf5_sha256=reference.sha256(path)))
@@ -228,6 +228,8 @@ def test_alignment_uses_last_bracket_without_extending_control_or_changing_sourc
     source = h5_source(tmp_path)
     result = reference.align_source(source, tmp_path/"aligned.h5")
     assert result["target_count"] == 836
+    assert result["source_native_output_interval_s"] == .01
+    assert result["no_synthetic_upsampling"] is True
     assert result["input_sha256_before"] == result["input_sha256_after"] == reference.sha256(source["hdf5_path"])
     with h5py.File(result["path"], "r") as h:
         assert h["time"][0] == 0 and h["time"][-1] == 8.35
@@ -237,6 +239,22 @@ def test_alignment_uses_last_bracket_without_extending_control_or_changing_sourc
         np.testing.assert_array_equal(h["particle_id"][:], [30, 40])
         assert h["valid"][:].all() and np.all(h["mass"][:] == .5)
     assert not (tmp_path/"aligned.h5.partial").exists()
+
+
+def test_alignment_rejects_synthesizing_dense_cadence_from_coarse_native_source(tmp_path):
+    source = h5_source(tmp_path, step_s=.01)
+    with pytest.raises(ValueError, match="denser than the 0.01s native source cadence"):
+        reference.align_source(source, tmp_path/"dense.h5", step_s=.002)
+    assert not (tmp_path/"dense.h5").exists()
+    assert not (tmp_path/"dense.h5.partial").exists()
+
+
+def test_alignment_accepts_genuinely_dense_native_source_at_its_cadence(tmp_path):
+    source = h5_source(tmp_path, step_s=.002)
+    result = reference.align_source(source, tmp_path/"dense.h5", step_s=.002)
+    assert result["target_count"] == 4176
+    assert result["source_native_output_interval_s"] == .002
+    assert result["no_synthetic_upsampling"] is True
 
 
 def test_alignment_rejects_changed_source_and_invalid_identity_mass(tmp_path):

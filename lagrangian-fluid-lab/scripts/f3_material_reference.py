@@ -203,11 +203,19 @@ def align_source(source, target, *, step_s=.01):
     target = Path(target)
     if target.exists():
         raise ValueError("aligned reference already exists")
+    times = source_score.target_grid(step_s)
+    source_step_s = float(source["entry"]["output_interval_s"])
+    if not math.isfinite(source_step_s) or source_step_s <= 0:
+        raise ValueError("source has no valid native output cadence")
+    if step_s + max(1e-12, source_step_s*1e-9) < source_step_s:
+        raise ValueError(
+            f"requested {step_s:g}s alignment is denser than the "
+            f"{source_step_s:g}s native source cadence; interpolation cannot create native outputs"
+        )
     original = Path(source["hdf5_path"])
     before = sha256(original)
     if before != source["audit"]["hdf5_sha256"]:
         raise ValueError("source HDF5 changed before alignment")
-    times = source_score.target_grid(step_s)
     temporary = target.with_name(target.name+".partial")
     with source_score.CachedSource(source) as cached, h5py.File(temporary, "w") as h:
         n, frames = len(cached.ids), len(times)
@@ -242,6 +250,8 @@ def align_source(source, target, *, step_s=.01):
     os.replace(temporary, target)
     return dict(path=str(target.resolve()), sha256=sha256(target), input_path=str(original.resolve()),
                 input_sha256_before=before, input_sha256_after=after, step_s=step_s,
+                source_native_output_interval_s=source_step_s,
+                no_synthetic_upsampling=True,
                 time_window_s=[0., 8.35], target_count=len(times),
                 bracket_datasets=["native_bracket_indices", "native_bracket_s", "native_alpha"])
 
