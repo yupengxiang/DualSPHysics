@@ -155,6 +155,25 @@ def test_writer_refuses_to_overwrite_receipt(tmp_path, monkeypatch):
         design.write_recipe()
 
 
+def test_output_namespace_guard_rejects_directory_file_and_dangling_symlink(tmp_path):
+    existing_dir = tmp_path / "existing-dir"
+    existing_dir.mkdir()
+    with pytest.raises(FileExistsError, match="fresh r002 output namespace"):
+        design.require_absent_output_namespace(tmp_path, Path("existing-dir"))
+
+    existing_file = tmp_path / "existing-file"
+    existing_file.write_text("occupied", encoding="utf-8")
+    with pytest.raises(FileExistsError, match="fresh r002 output namespace"):
+        design.require_absent_output_namespace(tmp_path, Path("existing-file"))
+
+    dangling_link = tmp_path / "dangling-link"
+    dangling_link.symlink_to(tmp_path / "missing-target", target_is_directory=True)
+    assert not dangling_link.exists()
+    assert dangling_link.is_symlink()
+    with pytest.raises(FileExistsError, match="fresh r002 output namespace"):
+        design.require_absent_output_namespace(tmp_path, Path("dangling-link"))
+
+
 def test_written_recipe_matches_current_sources_and_parent_hashes():
     path = design.LAB / design.RECEIPT
     receipt = json.loads(path.read_text(encoding="utf-8"))

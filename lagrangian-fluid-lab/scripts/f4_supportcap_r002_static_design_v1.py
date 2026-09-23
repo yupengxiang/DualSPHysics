@@ -78,6 +78,13 @@ def validate_alignment_contract(contract: dict[str, Any]) -> None:
         raise ValueError(f"F4 r002 temporal-alignment contract is invalid: {mismatches}")
 
 
+def require_absent_output_namespace(lab_root: Path, namespace: Path) -> None:
+    """Refuse any existing filesystem entry, including a dangling symlink."""
+    target = lab_root / namespace
+    if target.exists() or target.is_symlink():
+        raise FileExistsError(f"fresh r002 output namespace already exists: {namespace}")
+
+
 def _parent_bindings(attribution: dict[str, Any]) -> list[dict[str, Any]]:
     # Revalidate the attribution's bounded evidence files, but deliberately do
     # not hash/read the full native HDF5 here. Its immutable digest is inherited
@@ -159,8 +166,7 @@ def build_recipe() -> dict[str, Any]:
         raise ValueError("candidate card unknown-fraction gate changed")
     source_path = str(source["path"])
     output_namespace = Path("campaigns/core-v1/material/evidence") / R002_ID
-    if (LAB / output_namespace).exists():
-        raise FileExistsError(f"fresh r002 output namespace already exists: {output_namespace}")
+    require_absent_output_namespace(LAB, output_namespace)
     output_path = str(output_namespace / "trace.h5")
     command = [
         ".venv/bin/python", "-m", "scripts.f4_tallwall120_material",
