@@ -1,0 +1,125 @@
+{
+  "schema": "core.cfd.f8.r008_t1_scope_design_independent_review.v1",
+  "record_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008-t1-scope-design-review-v1",
+  "created_at_utc": "2026-09-23T09:18:59Z",
+  "status": "static_design_review_passed_execution_readiness_blocked",
+  "reviewer": {
+    "requested_model": "gpt-6-luna",
+    "reasoning_effort": "max",
+    "actual_model_attestation": "not supplied by review tool metadata",
+    "model_policy_note": "Uses the user's later instruction to standardize subagents on GPT-6 Luna Max; does not modify the frozen design or its historical review records."
+  },
+  "review_scope": {
+    "static_text_and_json_only": true,
+    "code_or_tests_run_by_reviewer": false,
+    "hdf5_npz_bi4_vtk_bin_or_native_outputs_accessed": false,
+    "solver_gencase_native_decoder_gpu_or_worker_started": false,
+    "queue_registry_or_ledger_mutation": 0,
+    "execution_authority_granted": false,
+    "T1_numerical": false,
+    "qualification_credit": 0
+  },
+  "input_bindings": [
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-scope-design-v1/receipt.json",
+      "bytes": 68034,
+      "sha256": "65671b42523cd3a5f82338cc7e2d88890af634195d7013ad969311166ab36ac8",
+      "role": "frozen R008 T1 design candidate"
+    },
+    {
+      "path": "scripts/f8_t1_scope_design_v1.py",
+      "bytes": 30582,
+      "sha256": "14fde946169093a2d1d2b8709809f751f93620c0b7c2292004982bb413a1c672",
+      "role": "scope matrix builder"
+    },
+    {
+      "path": "tests/test_f8_t1_scope_design_v1.py",
+      "bytes": 6843,
+      "sha256": "b1211f2b050082c588811b6d551e758abdc569191bc9290e05171f6c0a04e573",
+      "role": "scope matrix and execution-boundary tests"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/definition-control-pack-v1/receipt.json",
+      "bytes": 127849,
+      "sha256": "d5b657db398e0c0b102cdb84de8fe0a302c22c85d4bbf16bc0b6e6bf16065fcb",
+      "role": "47 Definition and 47 control static pack closure"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-request-v1/request.json",
+      "bytes": 44228,
+      "sha256": "bd6995f4e21614fc400a06262b1458e876517af5c588f4b9441ae05e54ec3873",
+      "role": "request-only preflight proposal"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-request-v1/review-v1.json",
+      "bytes": 2550,
+      "sha256": "fa07e4677f22e0dc4abc95cf7c5b128ea9ae75a6f41471a508e2f3b927ba29c9",
+      "role": "static request review; not treated as a T1 matrix review"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/resource-admission-v1/receipt.json",
+      "bytes": 5881,
+      "sha256": "cadbef915bddc1888a927b7aa74e5f3f163a91d204f28db0afcf9742710a2077",
+      "role": "conditional cap and blocked resource admission"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r002/static-design-review-postmortem-v1/receipt.json",
+      "bytes": 5294,
+      "sha256": "adc098d9498f847a3c2914b0d071a823cfa609169f011ed08def8778c9155dd0",
+      "role": "terminal R002 no-retry postmortem"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/cpu-native-preflight-v1/receipt.json",
+      "bytes": 5830,
+      "sha256": "851bcf9234dcde326b484db150f31d866000a768c621df8d23515db82c8294f3",
+      "role": "terminal R001 preflight receipt"
+    }
+  ],
+  "assessment": {
+    "internal_design_consistency": "pass",
+    "physics_and_boundary_contract": "fully filled body-force-driven oscillatory channel; periodic x/y, fixed no-slip mDBC z walls, zero gravity, nu=0.0005, ax=0.01 sin(omega t), alpha=2+6q, omega=alpha^2 nu/H^2",
+    "observation_window": "inclusive three-period window on the T/64 native grid; nominal q=0.5 rows 510..702 (192 intervals, 193 samples); R007's longer window is not reused",
+    "qualification_matrix": "15 logical configurations: 9 spatial anchors + 4 independent internal points + 1 timestep control + 1 native-output-cadence control",
+    "production": "32 cases at q_i=(i+0.5)/32; split 16 train / 4 validation / 6 ID test / 6 OOD test",
+    "production_release": "all 15 qualification rows must pass; fixed first 8 cover every split; remaining 24 release only after declared gates pass; failures retain denominator and stop the scope",
+    "fresh_input_hash_closure": "PASS: static pack and request review close 47 Definitions plus 47 controls; request remains request-only",
+    "independent_matrix_review": "PASS: this exact-scope GPT-6 Luna Max review satisfies the user's later model instruction; the older Terra High label is not treated as evidence by itself",
+    "resource_admission": "BLOCKED: 4096 MiB is only a proposed hard cap, process-tree enforcement is unverified, measured peak RSS is absent, and the recorded host snapshot was CPU-schedule blocked",
+    "execution_readiness": "BLOCKED: separate explicit preflight/runtime authorization and cleared resource admission are still required"
+  },
+  "historical_terminal_boundaries": {
+    "R001_retry_allowed": false,
+    "R001_modified": false,
+    "R002_retry_allowed": false,
+    "R002_modified": false,
+    "R002_failure": "GenCase rejected Definition due to missing hswl; terminal postmortem preserved",
+    "qualification_credit_from_R001_or_R002": 0
+  },
+  "execution_controls": {
+    "gencase_invoked": false,
+    "native_decoder_invoked": false,
+    "solver_invoked": false,
+    "gpu_invoked": false,
+    "worker_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "runtime_namespace_created": false
+  },
+  "qualification": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0
+  },
+  "local_validation": {
+    "tests_run_by_parent_agent": "29 passed",
+    "tests_run_by_reviewer": false
+  },
+  "next_required_steps": [
+    "Preserve this independent static review as a separate record; do not mutate the frozen design receipt.",
+    "Resolve a full process-tree memory cap and actual peak-RSS measurement plan; 4096 MiB is not an evidenced demand estimate.",
+    "Wait for the active F3 material worker and CPU load to clear, then request/perform only the separately authorized one-time F8 R008 preflight if that authorization is in scope.",
+    "Obtain separate explicit solver/T1 execution authorization before any R008 solver or qualification matrix run."
+  ]
+}
