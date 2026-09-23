@@ -1,0 +1,196 @@
+{
+  "acceptance_and_failure_semantics": {
+    "failure_requires": [
+      "write an immutable negative receipt if output creation has begun",
+      "do not retry, rename into, or reuse any old or partial output namespace",
+      "do not alter thresholds, source, denominator, event semantics, or historical evidence"
+    ],
+    "failure_status": "failed_one_attempt_zero_credit",
+    "success_requires": [
+      "all input, environment, resource, and output-absence checks pass",
+      "one immutable attempt manifest, preflight records, result, and acceptance receipt are written in the new namespace",
+      "receipt records no solver/GPU/queue/worker/registry/ledger activity",
+      "receipt retains T1/T2/material qualification false and credit 0"
+    ],
+    "success_status": "completed_cpu_canary_preflight_zero_credit"
+  },
+  "authorization": {
+    "attempt_id": "f4-supportcap-affine-query-bound-v3-cpu-native-canary-r001",
+    "authority": "explicit user authorization: F4 supportcap CPU canary preflight",
+    "authorization_grants_runtime_execution": false,
+    "candidate_id": "f4_supportcap_affine_query_bound_v3",
+    "reason": "this artifact authorizes a versioned preflight contract only; a separately explicit execution authorization is required before a CPU canary may start"
+  },
+  "environment_and_resource_preflight": {
+    "resource_limits": {
+      "cpu_workers": 1,
+      "gpu_allowed": false,
+      "max_concurrent_processes": 1
+    },
+    "runtime_checks_required": [
+      "Python >= 3.10 with importable numpy, scipy, and h5py",
+      "CUDA_VISIBLE_DEVICES is empty or unset and no GPU API is initialized",
+      "one process, one CPU worker, OMP_NUM_THREADS=1, OPENBLAS_NUM_THREADS=1, MKL_NUM_THREADS=1",
+      "fresh writable parent for the new output namespace while the namespace itself remains absent",
+      "available RAM is at least 16 GiB and free filesystem capacity is at least 8 GiB before start",
+      "no active queue, scheduler, worker, solver, registry, or ledger operation is used"
+    ]
+  },
+  "execution_contract": {
+    "future_executor_status": "not_implemented_or_authorized_by_this_record",
+    "must_not_call": [
+      "solver",
+      "GPU",
+      "queue",
+      "worker scheduler",
+      "registry",
+      "ledger",
+      "matrix writer"
+    ],
+    "must_preserve": [
+      "registered F4 fixed support/reconstruction/unknown/event gates",
+      "full 512-seed denominator and right-censor semantics",
+      "all historical negative receipts including the ESS32 zero-survivor review"
+    ],
+    "required_before_start": "a separate explicit execution authorization must bind a new executor hash and this exact authorization hash"
+  },
+  "execution_controls": {
+    "canary_started": false,
+    "gpu_started": false,
+    "historical_receipts_modified": false,
+    "ledger_mutation": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_started": false,
+    "source_hdf5_opened": false,
+    "worker_started": false
+  },
+  "hash_bindings": {
+    "authorization_builder": {
+      "bytes": 14039,
+      "path": "scripts/f4_supportcap_affine_query_bound_cpu_canary_authorization_v1.py",
+      "role": "authorization contract builder",
+      "sha256": "0f941cd81becde2ba1a826431f549696e2e27324474d58357b4344a0aa746366"
+    },
+    "authorization_test": {
+      "bytes": 2804,
+      "path": "tests/test_f4_supportcap_affine_query_bound_cpu_canary_authorization_v1.py",
+      "role": "authorization regression test",
+      "sha256": "a73025b3ad905a22da2b03c3433989cb5701df0526546ed6a5b91d996f9595a6"
+    },
+    "candidate_card_v3": {
+      "bytes": 2474,
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/candidate-card-v3.json",
+      "role": "authorized F4 supportcap candidate card",
+      "sha256": "0b47e4690633e0d531414873eb1a54afece77c367ecf023ada3a80fd9ced7c92"
+    },
+    "existing_cpu_manager": {
+      "bytes": 24436,
+      "path": "scripts/f4_tallwall120_material_preflight_v1.py",
+      "role": "existing F4 CPU preflight manager consulted for safeguards",
+      "sha256": "872daf5a8f3a5cf1e5cccc55d599c21396b4da3634d6a0ffdefddb335ddbcbd2"
+    },
+    "formal_f4_t1_qualification": {
+      "bytes": 1234,
+      "path": "campaigns/core-v1/evidence/f4-tallwall120-formal-qualification-20260920.json",
+      "role": "T1-only formal F4 scope qualification",
+      "sha256": "865f2481a28b4935635264c58d72bff166f267e943ba509a602d9f67f3c38307"
+    },
+    "historical_negative_cpu_preflight": {
+      "bytes": 10992,
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-native-cell14-material-preflight-20260921.json",
+      "role": "preserved non-reusable F4 baseline preflight",
+      "sha256": "f5e6dc499e19349324799f36a154b5bfc7c6bb9be03b0c0e9df27a4acd7fc9bf"
+    },
+    "static_candidate_implementation": {
+      "bytes": 4717,
+      "path": "scripts/f4_supportcap_affine_query_bound_candidate_v3.py",
+      "role": "array-only candidate implementation",
+      "sha256": "b8cfb6efa8d76f0201c5a5293f29c5cfd76691d6f3578ff03d1b577075c25116"
+    },
+    "terra_high_root_review_v4": {
+      "bytes": 3161,
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/terra-high-root-review-v4.json",
+      "role": "static root review preceding this authorization",
+      "sha256": "7a64ecc8a0696aaef34beb93fb26e5ac6a06483f3aaa08183697efcd8cc78055"
+    }
+  },
+  "input_contract": {
+    "bounded_canary": {
+      "dp_m": 0.0075,
+      "frame_start": 40,
+      "frame_stop_inclusive": 41,
+      "purpose": "one-transition CPU integration and fixed-gate preflight only",
+      "q": 0.5,
+      "seed_denominator": 512,
+      "substeps": 2
+    },
+    "runtime_input_checks_required": [
+      "recompute and exactly match source SHA256 before any HDF5 open",
+      "open only the hash-matched source read-only and require time/position/velocity/valid/particle_zone datasets",
+      "require frames 40 and 41 with strictly increasing native time",
+      "require the original 512-seed denominator and unchanged F4 gate/event/unknown semantics",
+      "require candidate-card-v3 and terra-high-root-review-v4 hashes to match this authorization"
+    ],
+    "source": {
+      "exact_native_rows": true,
+      "frame_count": 1086,
+      "particle_count": 217485,
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-14/product/trajectory.h5",
+      "role": "T1-qualified terminal native trajectory; read-only input only",
+      "sha256": "91846866c177e4c3036b7ef92c33a4e0bde7d9e8993efb01dde300811b7c096e",
+      "time_end_s": 4.340002980805959,
+      "time_start_s": 0.0
+    }
+  },
+  "one_attempt_contract": {
+    "max_attempts": 1,
+    "new_output_namespace": "campaigns/core-v1/material/evidence/f4-supportcap-affine-query-bound-v3-cpu-native-canary-r001",
+    "old_failure_evidence_modification_forbidden": true,
+    "old_output_reuse_forbidden": true,
+    "output_namespace_must_be_absent_before_start": true,
+    "planned_artifacts_absent_at_authorization": {
+      "acceptance_receipt": {
+        "exists": false,
+        "path": "campaigns/core-v1/material/evidence/f4-supportcap-affine-query-bound-v3-cpu-native-canary-r001/acceptance-receipt.json"
+      },
+      "attempt_manifest": {
+        "exists": false,
+        "path": "campaigns/core-v1/material/evidence/f4-supportcap-affine-query-bound-v3-cpu-native-canary-r001/attempt-manifest.json"
+      },
+      "checkpoint_manifest": {
+        "exists": false,
+        "path": "campaigns/core-v1/material/evidence/f4-supportcap-affine-query-bound-v3-cpu-native-canary-r001/trace.h5.checkpoint.json"
+      },
+      "environment_preflight": {
+        "exists": false,
+        "path": "campaigns/core-v1/material/evidence/f4-supportcap-affine-query-bound-v3-cpu-native-canary-r001/environment-preflight.json"
+      },
+      "input_preflight": {
+        "exists": false,
+        "path": "campaigns/core-v1/material/evidence/f4-supportcap-affine-query-bound-v3-cpu-native-canary-r001/input-preflight.json"
+      },
+      "result": {
+        "exists": false,
+        "path": "campaigns/core-v1/material/evidence/f4-supportcap-affine-query-bound-v3-cpu-native-canary-r001/result.json"
+      },
+      "trace": {
+        "exists": false,
+        "path": "campaigns/core-v1/material/evidence/f4-supportcap-affine-query-bound-v3-cpu-native-canary-r001/trace.h5"
+      }
+    },
+    "resume_only_within_same_attempt": true,
+    "retry": false
+  },
+  "qualification_boundary": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "material_qualification": false,
+    "qualification_claim": "none"
+  },
+  "record_id": "f4-supportcap-affine-query-bound-v3-cpu-native-canary-preflight-authorization-v1",
+  "schema": "core.material.f4.supportcap_affine_query_bound.cpu_canary_authorization.v1",
+  "status": "authorized_preflight_contract_only_canary_not_started"
+}
