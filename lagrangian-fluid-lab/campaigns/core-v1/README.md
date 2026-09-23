@@ -190,6 +190,14 @@ explicit solver/T1 execution authority. The previously explored F6 Definition
 failure remains immutable and cannot be retried or relabeled to satisfy the
 third-family gate.
 
+The hash-bound R008 request/authorization builder tests assume the one-shot
+output namespace is still absent, so they are pre-execution checks and must not
+be replayed after this completed run. Current post-consumption behavior is
+covered by
+[`test_f8_r008_cpu_native_preflight_consumed_state_v1.py`](../../tests/test_f8_r008_cpu_native_preflight_consumed_state_v1.py):
+it verifies the immutable zero-credit receipt and that request/authorization
+builders fail closed instead of issuing a second one-shot.
+
 The historical F8 R002 static-review PASS was later found insufficient: its
 Definition omitted GenCase's required `hswl` element, and the review's test-file
 hash binding had drifted. Its single CPU preflight is terminal-failed and must

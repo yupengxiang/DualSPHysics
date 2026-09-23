@@ -7,6 +7,7 @@ import pytest
 
 from scripts import f8_r008_cpu_native_preflight_authorization_v1 as authorization
 from scripts import f8_r008_cpu_native_preflight_execute_v1 as execute
+from scripts import f8_r008_preflight_request_v3 as request
 
 
 LAB = Path(__file__).resolve().parents[1]
@@ -29,5 +30,7 @@ def test_consumed_r008_preflight_is_auditable_but_cannot_be_reauthorized() -> No
     assert lock["native_decode_invocation_budget"] == 1
     assert lock["solver_invocation_budget"] == 0
 
+    with pytest.raises(FileExistsError, match="fresh R008 v3 runtime namespace is occupied"):
+        request.build_request()
     with pytest.raises(FileExistsError, match="runtime output namespace must remain unused"):
         authorization.build_authorization()
