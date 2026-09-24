@@ -14,6 +14,8 @@ EVIDENCE = LAB / "campaigns/core-v1/material/evidence"
 READINESS = EVIDENCE / "f3-material-t2-launch-readiness-v1/receipt.json"
 QUALIFICATION = LAB / "campaigns/core-v1/evidence/f3-inherited-qualification.json"
 OUTPUT = EVIDENCE / "f3-material-row30-root-decision-v1/packet.json"
+READINESS_SCHEMA = "core.material.f3.t2.launch_readiness.v1"
+QUALIFICATION_SCHEMA = "core.qualification.v1"
 
 
 def sha256(path: Path) -> str:
@@ -31,13 +33,20 @@ def ref(path: Path, role: str) -> dict[str, Any]:
     return {"path": str(path.relative_to(LAB)), "bytes": path.stat().st_size, "sha256": sha256(path), "role": role}
 
 
+def _require_schema(value: dict[str, Any], expected: str, role: str) -> None:
+    schema = value.get("schema")
+    if type(schema) is not str or schema != expected:
+        raise ValueError(f"{role} schema mismatch")
+
+
 def build_packet() -> dict[str, Any]:
     readiness = json.loads(READINESS.read_text(encoding="utf-8"))
+    _require_schema(readiness, READINESS_SCHEMA, "F3 readiness")
     qualification = json.loads(QUALIFICATION.read_text(encoding="utf-8"))
+    _require_schema(qualification, QUALIFICATION_SCHEMA, "F3 qualification")
     candidate = readiness.get("next_executable_step", {})
     if not (
-        readiness.get("schema") == "core.material.f3.t2.launch_readiness.v1"
-        and candidate.get("candidate_configuration_id") == "F3-material-30"
+        candidate.get("candidate_configuration_id") == "F3-material-30"
         and candidate.get("candidate_matrix_row") == 30
         and candidate.get("status") == "authorization_required_before_execution"
         and qualification.get("T1_numerical") is True

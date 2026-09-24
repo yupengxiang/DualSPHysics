@@ -12,6 +12,35 @@ from scripts import f3_material_row30_root_decision_packet_v1 as packet_module
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.mark.parametrize(
+    ("expected", "role"),
+    [
+        (packet_module.READINESS_SCHEMA, "F3 readiness"),
+        (packet_module.QUALIFICATION_SCHEMA, "F3 qualification"),
+    ],
+)
+def test_synthetic_gate_schema_rejected_before_root_packet_markers(expected, role) -> None:
+    class SchemaReadProbe(dict):
+        reads = []
+
+        def get(self, key, default=None):
+            self.reads.append(key)
+            if key != "schema":
+                raise AssertionError(f"root packet field read before schema rejection: {key}")
+            return super().get(key, default)
+
+    probe = SchemaReadProbe({
+        "schema": "core.f8.synthetic_diagnostic.v1",
+        "status": "authorization_required_before_execution",
+        "candidate_matrix_row": 30,
+        "T1_numerical": True,
+        "T2_macro": True,
+    })
+    with pytest.raises(ValueError, match=f"{role} schema mismatch"):
+        packet_module._require_schema(probe, expected, role)
+    assert probe.reads == ["schema"]
+
+
 def test_packet_is_closed_to_new_row30_authorization_only() -> None:
     value = json.loads(packet_module.OUTPUT.read_text(encoding="utf-8"))
     assert value["status"] == "awaiting_user_root_decision_for_new_row30_attempt"
