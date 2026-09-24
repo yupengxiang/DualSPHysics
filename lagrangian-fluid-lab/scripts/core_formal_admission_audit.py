@@ -227,7 +227,6 @@ def _load_bound_json(reference: Mapping[str, Any], *, root: Path,
 
 
 def _evidence_rows(payload: Mapping[str, Any]) -> tuple[dict[str, list[Mapping[str, Any]]], list[Mapping[str, Any]]]:
-    by_case: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     schema = payload.get("schema")
     # Only the registered qualification schema may contribute a global T1
     # claim.  This discriminator rejects diagnostic/unknown wrappers before
@@ -238,11 +237,12 @@ def _evidence_rows(payload: Mapping[str, Any]) -> tuple[dict[str, list[Mapping[s
         if type(schema) is str and schema == GLOBAL_QUALIFICATION_EVIDENCE_SCHEMA
         else []
     )
-    for row in _rows(payload):
-        case_id = _case_id(row)
-        if case_id:
-            by_case[case_id].append(row)
-    return by_case, global_rows
+    # Raw evidence mappings have no registered case-audit-set schema or
+    # source-bound capability.  Do not extract their ``cases``/``rows`` as
+    # per-case audit claims.  Versioned adapters are loaded separately through
+    # _bound_adapter_cases(), and case audits may enter through a manifest
+    # reference whose bytes/hash are checked for that case.
+    return {}, global_rows
 
 
 def _bound_adapter_cases(

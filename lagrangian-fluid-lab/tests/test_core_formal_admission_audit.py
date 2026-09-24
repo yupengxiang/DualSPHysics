@@ -7,6 +7,7 @@ import hashlib
 from pathlib import Path
 
 from scripts.core_formal_admission_audit import (
+    _evidence_rows,
     _is_qualification,
     audit_admission,
     main,
@@ -133,6 +134,62 @@ def test_synthetic_evidence_rejected_before_global_t1_extraction(tmp_path: Path)
         assert report["family_summary"]["t1_families"] == {"F3": accepted}
         assert report["family_summary"]["t1_family_count"] == int(accepted)
         assert report["formal_job_count"] == 0
+
+
+def test_synthetic_case_rows_rejected_before_case_audit_binding(tmp_path: Path) -> None:
+    case = {
+        "case_id": "F3-synthetic-00",
+        "physical_case_id": "physical-F3-synthetic-00",
+        "lineage_group_id": "lineage-F3-synthetic-00",
+        "family": "F3",
+        "scope_id": "scope-F3-synthetic",
+        "split": "train",
+        "hdf5": "assets/F3-synthetic-00.h5",
+        "known_inputs_ref": {
+            "geometry": {"path": "assets/F3-synthetic-00-geometry.npz"},
+            "control": {"path": "assets/F3-synthetic-00-control.npz"},
+        },
+    }
+    diagnostic_rewrap = {
+        "schema": "core.cfd.f8.r008.synthetic_non_qualifying_diagnostic.v8",
+        "mode": "synthetic_only",
+        "evidence_class": "synthetic_non_qualifying",
+        "diagnostic_outcome": "non_qualifying",
+        "cases": [{
+            "schema": "core.cfd.f8.r008.synthetic_non_qualifying_diagnostic.v8",
+            "case_id": case["case_id"],
+            "family": "F3",
+            "physical_case_id": case["physical_case_id"],
+            "lineage_group_id": case["lineage_group_id"],
+            "scope_id": "scope-F3-synthetic",
+            "hard_integrity_pass": True,
+            "structural_pass": True,
+        }],
+    }
+
+    by_case, global_rows = _evidence_rows(diagnostic_rewrap)
+
+    assert by_case == {}
+    assert global_rows == []
+
+    manifest = {
+        "schema": "core.dataset.v2",
+        "dataset_id": "synthetic-case-evidence-fixture",
+        "formal_release": False,
+        "cases": [case],
+    }
+    report = audit_admission(
+        [manifest], data_root=tmp_path, code_root=tmp_path,
+        evidence=[diagnostic_rewrap],
+    )
+
+    denominator = report["production_denominator"]
+    assert denominator["included_case_count"] == 1
+    assert denominator["hard_integrity_pass_bound_count"] == 0
+    assert denominator["structural_pass_bound_count"] == 0
+    assert denominator["formal_audit_pass_count"] == 0
+    assert report["family_summary"]["t1_families"] == {"F3": False}
+    assert report["formal_job_count"] == 0
 
 
 def test_structural_receipt_set_has_32_immutable_case_bindings() -> None:
