@@ -75,6 +75,46 @@ def test_reduces_only_the_inclusive_fluid_window_and_keeps_other_gates_open(tmp_
     assert result["qualification_credit"] == 0
 
 
+def test_synthetic_verification_mapping_rejected_before_reduction(tmp_path, monkeypatch) -> None:
+    _path, fd, verification, byte_count, digest = _table(tmp_path)
+    diagnostic = {
+        "schema": "core.cfd.f8.r008.synthetic_non_qualifying_diagnostic.v8",
+        "mode": "synthetic_only",
+        "evidence_class": "synthetic_non_qualifying",
+        "diagnostic_outcome": "non_qualifying",
+        "diagnostic_code": "synthetic_bindings_match",
+        "payload_shape_valid": True,
+        "scope_binding_matches": True,
+        "qualification_row_binding_matches": True,
+        "qualification_eligible": False,
+        "qualification_authorized": False,
+        "execution_authorized": False,
+        "qualification_credit": 0,
+        "gate_transition": "none",
+        "registry_write": False,
+        "harness_performed_external_io": False,
+    }
+    invalid_inputs = [
+        (diagnostic, "no case identity"),
+        ({**verification, **diagnostic}, "fields are not exact"),
+        ({**verification, "schema": diagnostic["schema"]}, "zero-credit"),
+    ]
+
+    def fail_if_reduction_reached(*args, **kwargs):
+        raise AssertionError("synthetic verification reached native gate reduction")
+
+    monkeypatch.setattr(reducer, "_reduce_window", fail_if_reduction_reached)
+    try:
+        for invalid, expected_error in invalid_inputs:
+            with pytest.raises(reducer.NativeFluidGateReducerError, match=expected_error):
+                reducer.evaluate_native_fluid_window_gates_fd(
+                    fd, table_verification=invalid,
+                    expected_table_bytes=byte_count, expected_table_sha256=digest,
+                )
+    finally:
+        os.close(fd)
+
+
 def test_density_interval_is_closed_at_both_frozen_endpoints(tmp_path) -> None:
     start, end = _window_ordinals()
 
