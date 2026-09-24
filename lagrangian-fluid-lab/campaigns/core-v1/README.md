@@ -12,8 +12,8 @@ process, canary, schema test, or report does not establish scientific qualificat
 and hashed references to the existing L2 records. Those records and their usage
 are retained. Both Ada and H200 are authorized, including multiple processes per
 GPU when peak-memory reservations and measured throughput permit. `agent-policy.json`
-records the current user instruction that all subsequent subagents use Terra High;
-older Luna Max receipts remain historical evidence only.
+records the current user instruction that all subsequent subagents use GPT-6 Luna
+Max. Earlier Terra High and Luna Max receipts remain historical evidence only.
 
 All commands below run from `lagrangian-fluid-lab` using `.venv/bin/python`.
 Raw artifacts live in the ignored `runtime/` tree. Run outputs must not be added
