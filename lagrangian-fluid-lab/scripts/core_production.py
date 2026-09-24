@@ -3,6 +3,7 @@ import math
 from scripts.core_dataset import new_scope_split
 
 FIRST_EIGHT = (0,4,8,13,18,23,27,31)
+QUALIFICATION_SCHEMA = 'core.qualification.v1'
 
 
 def register_scope(family, scope_id, parameter_name, lower, upper, qualification_points):
@@ -28,6 +29,9 @@ def register_scope(family, scope_id, parameter_name, lower, upper, qualification
 
 def next_batch(design, qualification, audits):
     """Caller must load hash-verified receipts; no file-existence completion rule."""
+    qualification_schema = qualification.get('schema')
+    if type(qualification_schema) is not str or qualification_schema != QUALIFICATION_SCHEMA:
+        raise ValueError('qualification schema mismatch')
     if qualification.get('scope_id') != design['scope_id'] or qualification.get('family') != design['family']:
         raise ValueError('qualification is for another scope or mechanism')
     if not qualification.get('T1_numerical') or not qualification.get('matrix_complete'):
