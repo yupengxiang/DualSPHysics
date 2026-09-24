@@ -25,6 +25,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 
 SCHEMA = "core.formal_admission_audit.v1"
+GLOBAL_QUALIFICATION_EVIDENCE_SCHEMA = "core.qualification.v1"
 FORMAL_MODELS = ("mlp", "graph_raw", "graph_residual")
 FORMAL_SEEDS = (17, 29, 43)
 FORMAL_JOB_COUNT = len(FORMAL_MODELS) * len(FORMAL_SEEDS)
@@ -227,7 +228,16 @@ def _load_bound_json(reference: Mapping[str, Any], *, root: Path,
 
 def _evidence_rows(payload: Mapping[str, Any]) -> tuple[dict[str, list[Mapping[str, Any]]], list[Mapping[str, Any]]]:
     by_case: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
-    global_rows: list[Mapping[str, Any]] = [payload]
+    schema = payload.get("schema")
+    # Only the registered qualification schema may contribute a global T1
+    # claim.  This discriminator rejects diagnostic/unknown wrappers before
+    # their family, scope, or gate fields are inspected; it does not
+    # authenticate the producer or source.
+    global_rows: list[Mapping[str, Any]] = (
+        [payload]
+        if type(schema) is str and schema == GLOBAL_QUALIFICATION_EVIDENCE_SCHEMA
+        else []
+    )
     for row in _rows(payload):
         case_id = _case_id(row)
         if case_id:

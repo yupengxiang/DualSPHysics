@@ -66,6 +66,8 @@ def test_real_f3_f4_audit_keeps_the_hard_and_structural_denominators() -> None:
     assert report["formal_job_count"] == 0
     assert report["required_formal_job_count"] == 9
     assert report["family_summary"]["families"] == ["F3", "F4"]
+    assert report["family_summary"]["t1_families"] == {"F3": True, "F4": True}
+    assert report["family_summary"]["t1_family_count"] == 2
     assert report["family_summary"]["split_counts"] == {
         "F3": {"train": 16, "validation": 4, "test": 12},
         "F4": {"train": 16, "validation": 4, "test": 12},
@@ -90,6 +92,47 @@ def test_real_f3_f4_audit_keeps_the_hard_and_structural_denominators() -> None:
         "THIRD_FAMILY_REQUIRED",
         "VALIDATION_DENOMINATOR",
     }
+
+
+def test_synthetic_evidence_rejected_before_global_t1_extraction(tmp_path: Path) -> None:
+    manifest = {
+        "schema": "core.dataset.v2",
+        "dataset_id": "global-evidence-schema-fixture",
+        "formal_release": False,
+        "cases": [{
+            "case_id": "F3-fixture-00",
+            "physical_case_id": "physical-F3-fixture-00",
+            "lineage_group_id": "lineage-F3-fixture-00",
+            "family": "F3",
+            "scope_id": "scope-F3-fixture",
+            "split": "train",
+            "hdf5": "assets/F3-fixture-00.h5",
+            "known_inputs_ref": {
+                "geometry": {"path": "assets/F3-fixture-00-geometry.npz"},
+                "control": {"path": "assets/F3-fixture-00-control.npz"},
+            },
+        }],
+    }
+    schemas = [
+        "core.cfd.f8.r008.synthetic_non_qualifying_diagnostic.v8",
+        "unknown.evidence.v1",
+        None,
+        "core.qualification.v1",
+    ]
+
+    for schema in schemas:
+        evidence = {
+            "family": "F3",
+            "scope_id": "scope-F3-fixture",
+            "T1_numerical": True,
+        }
+        if schema is not None:
+            evidence["schema"] = schema
+        report = audit_admission([manifest], data_root=tmp_path, evidence=[evidence])
+        accepted = schema == "core.qualification.v1"
+        assert report["family_summary"]["t1_families"] == {"F3": accepted}
+        assert report["family_summary"]["t1_family_count"] == int(accepted)
+        assert report["formal_job_count"] == 0
 
 
 def test_structural_receipt_set_has_32_immutable_case_bindings() -> None:
