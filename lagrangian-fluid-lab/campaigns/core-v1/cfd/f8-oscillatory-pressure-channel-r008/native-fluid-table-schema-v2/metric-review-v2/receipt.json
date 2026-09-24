@@ -1,0 +1,120 @@
+{
+  "evidence": [
+    {
+      "bytes": 27886,
+      "path": "scripts/f8_r008_native_fluid_table_metric_bundle_verifier_v2.py",
+      "sha256": "175ee27d470e05f5fdb6e86a65cf2d6f96b7870bd9a9dae0886928e6486707a9"
+    },
+    {
+      "bytes": 18236,
+      "path": "scripts/f8_r008_t1_metric_adapter_v2.py",
+      "sha256": "a71c1000388207177cd4d163c7ad9cbe8e7b4686f481cb4f332b2b24848f2485"
+    },
+    {
+      "bytes": 65100,
+      "path": "scripts/f8_r008_t1_metric_adapter_v1.py",
+      "sha256": "f51940c775bdf6bc80dd410bbb4c080dfe6331d09299145d11f6124cba5ae650"
+    },
+    {
+      "bytes": 7902,
+      "path": "tests/test_f8_r008_t1_metric_adapter_v2.py",
+      "sha256": "c6969f1263b498c951ef9dfa6e9bcb54f908cd75e3d279df910a42124b5a5a04"
+    },
+    {
+      "bytes": 12087,
+      "path": "tests/test_f8_r008_native_fluid_table_metric_bundle_verifier_v2.py",
+      "sha256": "42da3c0cf6e3155b410de17a410328ab5d65e64fcefa98f9767ae60ff963ac6a"
+    },
+    {
+      "bytes": 2104,
+      "path": "tests/test_f8_r008_native_fluid_table_metric_review_v2.py",
+      "sha256": "3091bc27d8fa271683982b66a8d3059b5185a84daff6d4892393ec85488b48c4"
+    },
+    {
+      "bytes": 9150,
+      "path": "scripts/f8_r008_native_fluid_table_metric_review_v2.py",
+      "sha256": "04b71d451f65a1945eb06cfa544b00878e525a6673846195b4cb229d41088abc"
+    }
+  ],
+  "execution_authority": {
+    "T1_numerical": false,
+    "gpu": false,
+    "qualification_credit": 0,
+    "queue": false,
+    "solver": false,
+    "worker": false
+  },
+  "findings": [
+    {
+      "basis": "B/C/D and v2 table semantics close before case metrics; the metric adapter consumes the held read-only D descriptor, checks its identity and digest, and the orchestrator re-closes B/C/D, safely reopens the bound path without following links, and confirms it still resolves to the same single-link inode before return.",
+      "topic": "same-descriptor table consumption",
+      "verdict": "PASS"
+    },
+    {
+      "basis": "The adapter pins the R008 scope, parameter contract, window parser and Womersley oracle; it requires complete frame/ID/position/velocity/density/mass/valid verification and reads only the time, fluid ID, initial z, invariant mass, and selected velocity inputs needed for case metrics.",
+      "topic": "frozen metric inputs and v2 semantic preconditions",
+      "verdict": "PASS"
+    },
+    {
+      "basis": "Fixed-frequency coefficients, exact closed native window, three-cycle shared seams, case-specific Uref gates, and mass-weighted transverse RMS are computed; native integrity, solver timestep audit, 15-case matrix adjudication, full T1, readiness, and credit remain false or absent.",
+      "topic": "metric and qualification boundary",
+      "verdict": "PASS"
+    },
+    {
+      "basis": "The exact reused helper source is included in the v2 review binding and must also match the immutable Terra High v1 metric-adapter receipt before use.",
+      "topic": "reused v1 metric helpers",
+      "verdict": "PASS"
+    },
+    {
+      "basis": "The v1 reader and verifier remain unchanged; the additive v2 adapter does not call the GenCase-bound v1 high-level readers or launch tools/jobs.",
+      "topic": "v1 compatibility and execution isolation",
+      "verdict": "PASS"
+    }
+  ],
+  "known_limitations": [
+    "This implementation evaluates one frozen case's diagnostic metric gates only; no v2 15-case/cross-resolution/time-step matrix adjudicator is implemented.",
+    "No solver timestep audit or native-integrity gate is consumed; no production bundle or solver frame was read.",
+    "Caller-supplied authorization/review authenticity and loaded-module/runtime identity are not authenticated by this receipt."
+  ],
+  "parent_validation": {
+    "command": "PYTHONPATH=. .venv/bin/pytest -q tests/test_f8_r008_t1_metric_adapter_v2.py tests/test_f8_r008_native_fluid_table_metric_bundle_verifier_v2.py",
+    "failed": 0,
+    "fixture_scope": "temporary synthetic HDF5/BI4/B/C/D bundle only",
+    "passed": 14
+  },
+  "record_id": "f8-r008-native-fluid-table-metric-implementation-review-v2",
+  "review_boundary": {
+    "T1_numerical": false,
+    "gpu_or_queue_invoked": false,
+    "native_integrity_evaluated": false,
+    "production_bundle_read": false,
+    "qualification_credit": 0,
+    "registry_or_ledger_mutated": false,
+    "solver_or_worker_invoked": false
+  },
+  "reviewed_scope": {
+    "15_case_matrix_adjudication": false,
+    "B_C_D_chain_closed_on_held_table_fd": true,
+    "consumer_schema": "core.cfd.f8.r008_native_fluid_frame_table.v2",
+    "native_integrity_or_T1_adjudication": false,
+    "v2_case_metric_gates": true
+  },
+  "reviewer": {
+    "agent_id": "01a0d2ed-c88b-76c0-9ec5-38077fa80a7a",
+    "archive_note": "Parent-authored source-hash archive; not represented as reviewer-authored content.",
+    "execution_or_evidence_mutation": false,
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "review_mode": "read_only_static_implementation_review",
+    "reviewer_ran_tests": true,
+    "verdict": "PASS"
+  },
+  "reviewer_validation": {
+    "command": "PYTHONPATH=. .venv/bin/pytest -q tests/test_f8_r008_t1_metric_adapter_v2.py tests/test_f8_r008_native_fluid_table_metric_bundle_verifier_v2.py",
+    "failed": 0,
+    "fixture_scope": "temporary synthetic HDF5/BI4/B/C/D bundle only",
+    "passed": 14
+  },
+  "schema": "core.cfd.f8.r008_native_fluid_table_metric_implementation_review.v2",
+  "status": "static_metric_implementation_review_passed_no_execution_or_t1_credit"
+}
