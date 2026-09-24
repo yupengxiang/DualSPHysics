@@ -222,6 +222,8 @@ T_0=\left\lceil
 - 现行独立候选是 `F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008`。R008 的 15 项资格矩阵、47 组 Definition／控制静态闭合和独立静态设计审查已完成；一次 CPU GenCase/native-decode 预检成功，但资格信用为零。
 - R001/R002 已关闭，不得重试。R008 的 solver 尚未运行，`T1_numerical=false`；必须完整执行并审查其预登记 15 项资格矩阵，所有硬门通过后才能把 F8 计入第三家族。运行前仍须遵守当前资源准入与正式执行门，不能把 CPU/native 预检当作 solver 授权。
 - R008 生产候选固定为 32 例 `q_i=(i+0.5)/32`，分为 16 train、4 validation、6 ID test、6 OOD test；只有范围资格通过后才按既定 8→32 规则生产。
+- 2026-09-24 只读复核重新验证了 CPU/native post-run audit、15+32 输入合同、周期图适配和跨家族数据合同，共 64 项静态回归测试通过。另有 5 项仅适用于预执行空命名空间的 request/authorization builder 测试，在 R008 一次性目录已被占用后按设计 fail-closed；没有删除、覆盖或重试任何证据。相关 post-consumption 与 immutable-audit 测试通过。
+- 执行工程仍有明确缺口：当前 `scripts/core_cfd.py` 仅提供 F4 专用 `prepare-f4`/矩阵与 F4 观察审计；虽然 F8 reader、控制合同和周期邻接图已接入，仍没有将 R008 solver 输出转换成 Core 轨迹并按 Womersley oracle 完成 15 格 T1 判定的 F8 worker/调度适配器。下一步先实现并静态验证独立 F8 worker、原生帧转换和预登记指标审计，再按资源及正式执行门申请运行；当前不得把静态输入闭合视为可调度资格作业。
 - F8 未能取得 T1 时，按计划转向 F1，再以 F2 为替补；不得将 F8 的 canary、预检或静态通过记为资格信用。
 
 #### F1／F2：主线与替补同时准备
