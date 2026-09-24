@@ -1,0 +1,349 @@
+{
+  "schema": "core.cfd.f8.r008_per_case_provenance_contract.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "static_contract_for_review_not_execution_authority",
+  "review_parent": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-per-case-provenance-design-review-v2/receipt.json",
+  "purpose": "Define exact post-run B/C/D provenance receipts and a v2 native-fluid table contract; admission, execution, native integrity, metrics, and T1 adjudication remain separate gates.",
+  "prelaunch_admission_contract": {
+    "separate_from_postrun_verifier": true,
+    "required_before_any_stage": [
+      "independently authenticated authority authorizes this exact case, stage, executable/wrapper SHA-256, exact argv, input bindings, output root, invocation budget, CPU/memory/disk/walltime/process limits, and expiry",
+      "independent resource/scheduling gate passes for the exact envelope",
+      "the exclusive output root does not exist and no lock, receipt, manifest, or output is present",
+      "all frozen scope/input/definition-control checks pass without native tool invocation"
+    ],
+    "lock_creation": "Only after all admission checks pass, executor uses exclusive-create to consume the one-shot namespace and writes a lock binding authority SHA-256, stage, attempt_id, nonce, scope_id, case_id, exclusive output root, and created_at_utc before starting any native process.",
+    "failed_or_expired_admission": "No namespace or lock is created; do not retry using the same authority/nonce.",
+    "not_implied_by_this_schema_or_review": true
+  },
+  "common_bundle_contract": {
+    "root_entries_exact": ["authorization.json", "one-shot-lock.json", "receipt.json", "manifests", "outputs"],
+    "manifest_directory_exact_entries_by_stage": {
+      "B": ["materialization-output-manifest.json"],
+      "C": ["raw-solver-manifest.json"],
+      "D": ["decoded-frame-manifest.json", "outputs-manifest.json"]
+    },
+    "detached_manifest_contract": {
+      "canonical_bytes": "UTF-8 JSON with ASCII object keys, keys sorted lexicographically, separators ',' and ':', ensure_ascii=false, allow_nan=false, and exactly one trailing LF; arrays preserve contract order; all time values are canonical IEEE-754 binary64 hex strings, never JSON numbers.",
+      "sha256_subject": "SHA-256 of the exact detached manifest file bytes, not an enclosing mutable receipt.",
+      "immutability": "Manifest path is exclusive-created once, never overwritten; receipt binds its exact byte count and SHA-256.",
+      "no_self_or_downstream_hashes": "A manifest may bind only its own stage inputs and outputs; it must not contain its own hash, its enclosing receipt hash, or any downstream manifest/receipt/table hash.",
+      "tree_closure_fields": "Every output-tree manifest has separate files and directories arrays. files are sorted unique relative paths with bytes/SHA-256/type/link-count; directories are sorted unique relative paths. Their union must equal the recursively enumerated tree exactly."
+    },
+    "file_entry_fields_exact": ["path", "bytes", "sha256", "regular_file", "link_count"],
+    "directory_entry_type": "A relative POSIX path string; the directory itself has no bytes/hash or hardlink-count field.",
+    "manifest_document_fields_by_stage": {
+      "B": ["schema", "stage", "files", "directories"],
+      "C": ["schema", "stage", "files", "directories", "frames"],
+      "D_outputs": ["schema", "stage", "files", "directories"],
+      "D_frames": ["schema", "stage", "case_id", "attempt_id", "raw_solver_manifest_sha256", "frames"]
+    },
+    "manifest_forbidden_digest_keys_by_kind": {
+      "all": ["receipt_sha256", "enclosing_receipt_sha256", "output_manifest_sha256", "decoded_frame_manifest_sha256", "table_sha256", "downstream_output_digest"],
+      "B": ["solver_receipt_sha256", "raw_solver_manifest_sha256", "decoded_frame_manifest_sha256", "table_sha256"],
+      "C": ["solver_receipt_sha256", "raw_solver_manifest_sha256", "decoded_frame_manifest_sha256", "decode_receipt_sha256", "table_sha256"],
+      "D_frames": ["decode_table_receipt_sha256", "native_fluid_table_sha256"]
+    },
+    "receipt_reference_binding_fields_exact": ["path", "bytes", "sha256"],
+    "receipt_reference_bindings": {
+      "all_stages": {"authorization_binding.path": "authorization.json", "one_shot_lock_binding.path": "one-shot-lock.json"},
+      "upstream_receipt_path_encoding": "Absolute normalized path to the immutable upstream receipt; bind its exact bytes and SHA-256. This is distinct from bundle-internal relative paths.",
+      "B": {"output_manifest.path": "manifests/materialization-output-manifest.json"},
+      "C": {"raw_output_manifest.path": "manifests/raw-solver-manifest.json"},
+      "D": {
+        "decoded_frame_manifest_binding.path": "manifests/decoded-frame-manifest.json",
+        "outputs_manifest_binding.path": "manifests/outputs-manifest.json",
+        "native_fluid_table_binding.path": "outputs/native-fluid-frame-table-v2.h5"
+      }
+    },
+    "authorization_and_lock_encoding": "UTF-8 JSON using sorted ASCII keys, compact separators, no NaN/Infinity, and exactly one trailing LF; caller trust is over the exact bytes/hash.",
+    "outputs_subtree": "all stage outputs; its recursive file and directory set must equal that stage's detached output manifest exactly",
+    "stage_outputs_manifest_name": {"B": "materialization-output-manifest.json", "C": "raw-solver-manifest.json", "D": "outputs-manifest.json"},
+    "json_receipt_max_bytes": 8388608,
+    "files_max_per_stage": 20000,
+    "bytes_max_per_stage": 68719476736,
+    "path_policy": {
+      "relative_posix_only": true,
+      "component_regex": "[A-Za-z0-9][A-Za-z0-9_.-]{0,127}",
+      "max_depth": 16,
+      "reject_dot_dot_empty_absolute_backslash_and_duplicate_paths": true
+    },
+    "file_policy": {
+      "openat_no_follow_each_component": true,
+      "require_regular_file": true,
+      "require_st_nlink_exactly": 1,
+      "hash": "sha256",
+      "fstat_identity_checked_before_and_after_hash": true,
+      "manifest_sorted_by_path_and_unique": true,
+      "manifest_equals_recursive_outputs_tree": true
+    },
+    "directory_policy": {
+      "open_each_component_as_directory_with_no_follow_beneath_held_root_fd": true,
+      "compare_opened_directory_identity_to_no_follow_parent_entry": true,
+      "no_hardlink_count_requirement": true,
+      "manifest_directories_sorted_unique_relative_paths": true,
+      "manifest_directories_equal_recursive_tree_directory_set_exactly": true,
+      "reject_symlink_special_object_or_unmanifested_directory": true
+    },
+    "authorization_binding": {
+      "same_attempt_id_nonce_scope_case_and_output_root_in_authorization_lock_receipt": true,
+      "lock_created_before_every_native_stage_start": true,
+      "exclusive_create_succeeded_is_executor_attested_not_cryptographically_proved_by_bundle_verifier": true,
+      "budgets_must_equal_exact_stage_contract": true,
+      "expiry_semantics": "A passed stage must end no later than expires_at_utc. An attempt ending after expiry is retained only as a failed/incomplete attempt and cannot be accepted as passed.",
+      "authorization_exact_fields": ["schema", "authority_id", "stage", "scope_id", "case_id", "attempt_id", "nonce", "exclusive_output_root", "executable_sha256", "wrapper_sha256", "argv", "input_bindings", "invocation_budget", "resource_limits", "issued_at_utc", "expires_at_utc"],
+      "authorization_forbidden_fields_or_embedded_digests": ["receipt_sha256", "output_manifest_sha256", "raw_solver_manifest_sha256", "decoded_frame_manifest_sha256", "table_sha256", "downstream_output_digest"],
+      "lock_exact_fields": ["schema", "authority_sha256", "stage", "scope_id", "case_id", "attempt_id", "nonce", "exclusive_output_root", "created_at_utc", "exclusive_create_succeeded"],
+      "lock_forbidden_fields_or_embedded_digests": ["receipt_sha256", "output_manifest_sha256", "raw_solver_manifest_sha256", "decoded_frame_manifest_sha256", "table_sha256", "downstream_output_digest"],
+      "verifier_requires_caller_supplied_trusted_authorization_path_bytes_sha256_and_expected_envelope": true,
+      "expected_envelope_must_cover_exact_stage_tool_argv_inputs_output_root_invocation_budget_and_resource_limits": true,
+      "caller_must_validate_authority_signature_or_other_out_of_band_authenticity_before_trusting_the_expected_envelope": true,
+      "receipt_self_assertion_is_not_authority_authentication": true
+    },
+    "failure_policy": {
+      "retain_consumed_namespace_and_failed_receipt": true,
+      "same_namespace_retry": false,
+      "failed_or_missing_attempt_removed_from_frozen_denominator": false,
+      "stage_status_enum": ["passed", "failed", "incomplete", "timeout", "oom", "signaled"],
+      "failed_stage_result_is_retained_not_accepted_as_success": true,
+      "matrix_aggregator_records_all_15_frozen_qualification_rows_including_failure_or_missing": true
+    }
+  },
+  "stage_B_materialization": {
+    "receipt_schema": "core.cfd.f8.r008_materialization_receipt.v1",
+    "scope_membership": "case_id must identify exactly one qualification_only=true row in the frozen 15-row R008 scope; production, anchor, historical, and unknown rows reject",
+      "required_receipt_fields": [
+        "schema", "scope_id", "case_id", "attempt_id", "nonce", "status", "started_at_utc", "ended_at_utc",
+        "authorization_binding", "one_shot_lock_binding", "definition_binding", "control_binding",
+        "gencase_execution", "generated_xml_path", "initial_bi4_path", "safe_decode_receipt", "metadata_binding",
+      "particle_cohorts", "output_manifest", "execution_controls"
+    ],
+    "input_and_output_binding_shapes": {
+      "definition_binding": "exact {path,bytes,sha256}, must equal the frozen pack row and actual bytes",
+      "control_binding": "exact {path,bytes,sha256}, must equal the frozen pack row and actual bytes",
+      "generated_xml_path": "exact {path,bytes,sha256}; path is bundle-internal outputs-relative with literal outputs/ prefix",
+      "initial_bi4_path": "exact {path,bytes,sha256}; path is bundle-internal outputs-relative with literal outputs/ prefix",
+      "metadata_binding": "exact {manifest,manifest_sha256}; manifest is the exact read-only safe metadata API result and is recomputed from initial_bi4_path"
+    },
+    "frozen_input_checks": [
+      "Definition/control canonical relative paths, byte counts, and SHA-256 exactly equal the frozen definition-control pack row",
+      "Read bytes with no-follow regular-file descriptors and call the pinned validate_case(row, definition_bytes, control_bytes, control_basename)",
+      "Recompute generated XML fluid and nonfluid ID cohorts; require unique disjoint complete uint32 ranges and bind generated XML hash",
+      "Recompute geometry, boundary, normal, particle-count, and native-initial required-array gates from files; never accept receipt booleans alone"
+    ],
+    "gencase_execution_contract": {
+      "invocation_budget": 1,
+      "exact_executable_wrapper_argv_input_hashes_and_return_code_recorded": true,
+      "cgroup_cap_peak_events_timeout_signal_process_tree_and_logs_bound": true,
+      "success_requires_zero_exit_no_timeout_no_signal_clean_process_tree": true
+    },
+    "native_initial_contract": {
+      "decoder_schema": "core.cfd.f8.r008.safe_bi4_decode.v1",
+      "metadata_binding_api": "core.cfd.f8.r008.safe_bi4_metadata_binding.v1",
+      "metadata_binding_api_source_path": "scripts/f8_r008_safe_bi4_metadata_binding_v1.py",
+      "metadata_binding_api_sha256_must_equal_independently_reviewed_binding": true,
+      "native_decode_invocation_budget": 1,
+      "raw_bi4_input_sha256_equals_generated_initial_bi4_manifest": true,
+      "array_manifest_complete_and_exact_even_for_opaque_numeric_arrays": true,
+      "required_arrays": ["Idp", "Vel", "Rhop", "exactly_one_of(Pos, Posd)"],
+      "all_array_files_regular_nofollow_st_nlink_1_and_hash_closed": true
+    },
+    "output_manifest": {
+      "detached_path": "manifests/materialization-output-manifest.json",
+      "schema": "core.cfd.f8.r008_materialization_output_manifest.v1",
+      "stage": "B",
+      "contains_exact_recursive_outputs_tree": true,
+      "required_fields": ["schema", "stage", "files", "directories"],
+      "receipt_binds_manifest_byte_count_and_sha256": true
+    },
+    "mass_reference_binding": "Recompute the initial native BI4 root/global MassFluid value with the safe parser metadata-binding API; require JBinaryData type double (type_code 12), bind exact little-endian IEEE-754 bytes and float.hex value, require finite positive binary64 kg/particle, and use this immutable per-particle reference later. XML's %.15E rendering is display-only, not the source of exact bits; mass is not computed from dynamic Rhop.",
+    "qualification_effect": "materialization provenance only; no solver/T1 result or credit"
+  },
+  "stage_C_solver_attempt": {
+    "receipt_schema": "core.cfd.f8.r008_solver_attempt_receipt.v1",
+    "required_receipt_fields": [
+      "schema", "scope_id", "case_id", "attempt_id", "nonce", "status", "started_at_utc", "ended_at_utc",
+      "authorization_binding", "one_shot_lock_binding", "materialization_receipt_binding",
+      "solver_execution", "raw_output_manifest", "execution_controls"
+    ],
+    "solver_execution_contract": {
+      "invocation_budget": 1,
+      "executable_wrapper_exact_argv_input_bindings_and_exit_state_recorded": true,
+      "cgroup_cap_peak_events_timeout_signal_process_tree_and_logs_bound": true,
+      "success_requires_zero_exit_no_timeout_no_signal_clean_process_tree": true
+    },
+    "raw_output_manifest": {
+      "detached_path": "manifests/raw-solver-manifest.json",
+      "schema": "core.cfd.f8.r008_raw_solver_manifest.v1",
+      "upstream_materialization_receipt_binding": "C materialization_receipt_binding is exact {path,bytes,sha256}; path is the absolute normalized B receipt path.",
+      "canonical_serialization_and_sha256": "common_bundle_contract.detached_manifest_contract",
+      "one_entry_per_native_output": true,
+      "required_frame_fields": ["ordinal", "expected_time_s_ieee754_hex", "path", "bytes", "sha256"],
+      "files_entries_include_every_frame_and_log": true,
+      "frame_path_bytes_sha256_must_equal_corresponding_files_entry": true,
+      "frames_array_sorted_by_ordinal": true,
+      "ordinals_exactly_zero_through_n_minus_one": true,
+      "tree_closure_fields": {"files": "sorted raw BI4 file entries", "directories": "sorted exact recursive output directory paths"},
+      "expected_time_axis_construction": "Read frozen row native_output_dt_s, observation_end_s, and full_native_output_rows_to_timemax as binary64/bounded integer. For N rows, set t[0]=positive binary64 zero; for 1<=i<N-1 compute one IEEE-754 binary64 multiplication float(i)*float(native_output_dt_s) (no cumulative addition); set t[N-1]=binary64(observation_end_s) exactly. Encode each with float.hex(). Require N>=2, finite strict increase, last equals the frozen endpoint, and the frozen row's TimeMax/cadence validator passes.",
+      "expected_time_source": "The C manifest records only expected_time_s_ieee754_hex constructed from the frozen row by the operation above. Stage C does not parse BI4 metadata or claim an observed TimeStep.",
+      "manifest_sha256_is_of_detached_canonical_manifest_bytes_not_solver_receipt": true,
+      "recursive_solver_outputs_tree_exactly_equals_manifest": true,
+      "missing_extra_duplicate_hardlink_symlink_or_path_escape_rejected": true
+    },
+    "qualification_effect": "raw solver-attempt provenance only; no native integrity/T1 decision or credit"
+  },
+  "stage_D_decode_table_provenance": {
+    "receipt_schema": "core.cfd.f8.r008_decode_table_provenance.v1",
+    "required_receipt_fields": [
+      "schema", "scope_id", "case_id", "attempt_id", "nonce", "status", "started_at_utc", "ended_at_utc",
+      "authorization_binding", "one_shot_lock_binding", "solver_receipt_binding",
+      "decoder_code_binding", "decoded_frame_manifest_binding", "outputs_manifest_binding",
+      "frame_mappings", "native_fluid_table_binding", "execution_controls"
+    ],
+    "decoder_contract": {
+      "decoder_code_sha256_equals_independently_reviewed_safe_decoder_binding": true,
+      "metadata_binding_api_code_sha256_equals_independently_reviewed_binding": true,
+      "D_receipt_decoder_code_binding_exact_fields": ["safe_bi4_decoder", "metadata_binding_api", "per_case_bundle_verifier", "independent_review_receipt_sha256"],
+      "each_source_binding_exact_fields": ["path", "bytes", "sha256"],
+      "source_paths": {
+        "safe_bi4_decoder": "scripts/f8_r008_safe_bi4_decoder_v1.py",
+        "metadata_binding_api": "scripts/f8_r008_safe_bi4_metadata_binding_v1.py",
+        "per_case_bundle_verifier": "scripts/f8_r008_per_case_bundle_verifier_v1.py"
+      },
+      "caller_trust_gate": "Caller supplies exact immutable Terra High review-receipt bytes after authenticating them out-of-band. The verifier requires the frozen PASS receipt schema/record/model/reasoning/agent/verdict and read-only execution boundary, checks its digest against the D receipt, extracts the reviewed source bindings, no-follow stable-reads all three local source files, and recomputes their byte counts/SHA-256 before D provenance recomputation. It does not authenticate the caller's review receipt or reviewer identity.",
+      "runtime_module_identity_boundary": {
+        "source_hash_alone_proves_loaded_module_bytecode_identity": false,
+        "required_caller_attestation_fields": ["interpreter_trusted", "fresh_process", "import_path_pinned", "preloaded_module_state_unmodified"],
+        "assumption": "The caller must invoke the verifier in a trusted fresh Python process with a pinned import path and no module monkeypatch/import-cache poisoning. The verifier cannot independently prove the identity of Python module objects imported before this function runs.",
+        "receipt_result_loaded_module_code_identity_verified": false,
+        "runtime_environment_assumption_status": "caller_attested_not_independently_verified"
+      },
+      "metadata_binding_api": {
+        "schema": "core.cfd.f8.r008.safe_bi4_metadata_binding.v1",
+        "source_path": "scripts/f8_r008_safe_bi4_metadata_binding_v1.py",
+        "version_and_sha256": "Exact source version and SHA-256 are supplied by the independent review receipt and verified before use; this API source is itself hash-bound, not transitively assumed from the v1 scanner review.",
+        "input": "The held, no-follow raw BI4 descriptor and expected raw-solver manifest SHA-256 are passed to the same bounded JBinaryData parser; API re-hashes and re-checks descriptor identity before and after parsing.",
+        "exact_value_record_fields": ["item_path", "metadata_name", "type_code", "type_name", "raw_value_bytes_hex", "canonical_value", "float_hex_components"],
+        "raw_value_bytes_encoding": "Numeric values are their JBinaryData little-endian wire bytes; text values are exact UTF-8 bytes.",
+        "float_hex_cardinality": "For scalar float/double values, float_hex_components has exactly one element; float3/double3 have exactly three. Non-floating values have an empty list.",
+        "required_exact_values": {"root.MassFluid": "type_code 12 positive finite binary64", "PART.TimeStep": "type_code 12 finite binary64", "PART.Npok": "type_code 8 uint32"},
+        "raw_bits_source": "Capture from the typed ValueRecord produced by the bounded BI4 parser, not by reparsing its %.15E XML rendering.",
+        "xml_is_display_cross_check_only": true,
+        "receipt_binds_input_sha256_and_exact_metadata_records": true
+      },
+      "one_mapping_for_every_solver_manifest_frame_in_original_order": true,
+      "each_mapping_binds_ordinal_expected_and_observed_time_raw_path_bytes_sha256_safe_decode_receipt_and_metadata_binding_manifest_sha256": true,
+      "safe_decode_receipt_and_metadata_binding_artifacts": {
+        "both_artifacts_are_files_inside_the_exact_recursive_D_outputs_manifest": true,
+        "each_frame_records_relative_path_exact_byte_count_and_sha256_for_both_artifacts": true,
+        "both_artifacts_are_reopened_nofollow_and_rehashed_against_the_closed_outputs_tree": true,
+        "safe_decode_receipt_uses_exact_canonical_json_and_binds_raw_input_hash_and_bytes": true,
+        "metadata_manifest_uses_exact_canonical_json_and_is_byte_for_byte_recomputed_from_the_C_raw_BI4": true
+      },
+      "decoded_output_recomputation": {
+        "every_array_slice_is_rehashed_from_the_exact_C_raw_BI4_offset_and_compared_to_its_D_output_file": true,
+        "safe_decode_receipt_array_manifest_must_equal_the_bounded_parser_array_inventory": true,
+        "generated_XML_bytes_are_recomputed_from_the_raw_BI4_and_compared_to_the_D_output": true,
+        "decoded_output_files_and_directories_must_equal_the_raw_BI4_item_and_array_tree": true,
+        "B_initial_MassFluid_little_endian_binary64_bits_must_equal_every_C_to_D_frame": true
+      },
+      "each_safe_decode_input_hash_equals_the_corresponding_solver_output_hash": true,
+      "time_representation": {
+        "source": "The selected PART item's type-double TimeStep metadata is read by the safe metadata-binding API directly from raw BI4; XML TimeStep is display-only.",
+        "canonical_value": "C raw-solver-manifest.json stores only expected_time_s_ieee754_hex from the frozen schedule. D decoded-frame-manifest.json stores both expected_time_s_ieee754_hex and parser-observed_time_s_ieee754_hex from the raw BI4 metadata binding; require exact binary64 bit equality, not tolerance-based equality, before table construction.",
+        "table_value": "Only after the D expected/observed bit-equality gate passes, reconstruct each HDF5 time dataset value from parser-observed_time_s_ieee754_hex; its binary64 bits must match exactly.",
+        "negative_zero_nan_infinity_and_noncanonical_hex_rejected": true
+      },
+      "recompute_PART_TimeStep_raw_bits_from_BI4_with_the_hash_bound_metadata_binding_API_and_require_exact_match_to_frozen_expected_axis": true,
+      "require_frame_count_and_times_equal_the_frozen_full_zero_to_TimeMax_native_cadence": true,
+      "each_output_tree_exactly_matches_full_array_manifest_with_st_nlink_1": true,
+      "array_type_contract": {
+        "Idp": "little-endian uint32 count x 1",
+        "Pos": "float3 count x 3; exactly one of Pos or Posd",
+        "Posd": "double3 count x 3; exactly one of Pos or Posd",
+        "Vel": "float3 count x 3",
+        "Rhop": "float count x 1",
+        "all_counts_equal_PART_Npok": true,
+        "all_supported_extra_arrays_remain_in_the_exact_manifest": true
+      },
+      "required_arrays_and_particle_counts_are_recomputed_not_receipt_asserted": true,
+      "mass_density_and_identity_closure": {
+        "density_source": "Rhop array, mapped by raw Idp; all Npok raw values are finite and strictly positive.",
+        "mass_source": "Root/global JBinaryData MassFluid type-double value from the safe metadata-binding API, captured from raw BI4 as exact little-endian IEEE-754 bytes and positive finite binary64 kg/particle for every frame.",
+        "mass_binding": "Every frame MassFluid must exactly equal the stage-B initial native BI4 MassFluid binary64 value; convert once using IEEE-754 binary32 round-to-nearest-ties-to-even, require the converted value finite and strictly positive (reject overflow/underflow-to-zero), then broadcast that exact binary32 scalar across the fluid particle axis. Never derive per-frame mass as Rhop*dp^3.",
+        "generated_xml_id_cohort": "Recompute all fluid, fixed, moving, and floating [begin, begin+count) ranges from the exact B-bound generated GenCase XML; require ranges to be pairwise disjoint and their union to equal exactly [0, CaseNp), and group totals to equal global CaseNfluid/CaseNfixed/CaseNmoving/CaseNfloat.",
+        "raw_frame_id_cohort": "For every frame, raw little-endian Idp must contain every ID in the complete fluid plus all registered nonfluid generated-XML cohorts exactly once; no missing, duplicate, unknown, unclassified, or out-of-range ID is permitted. Recompute the sorted fluid projection by ID; never filter an incomplete/unknown raw cohort and then accept it.",
+        "counts": "PART Npok, all required array counts, generated XML CaseNp, and exact raw Idp length must be equal for each frame."
+      },
+      "detached_decoded_frame_manifest": {
+        "path": "manifests/decoded-frame-manifest.json",
+        "schema": "core.cfd.f8.r008_decoded_frame_manifest.v1",
+        "stage": "D",
+        "manifest_digest_subject": "Exact canonical detached manifest bytes, never the enclosing D receipt.",
+        "frames_array_sorted_by_ordinal": true,
+        "one_entry_per_solver_manifest_frame_in_original_order": true,
+        "frame_entry_fields_exact": ["ordinal", "expected_time_s_ieee754_hex", "parser_observed_time_s_ieee754_hex", "raw_solver_manifest_sha256", "raw_solver_ordinal", "raw_path", "raw_bytes", "raw_sha256", "safe_decode_input_sha256", "safe_decode_receipt_path", "safe_decode_receipt_bytes", "safe_decode_receipt_sha256", "metadata_binding_manifest_path", "metadata_binding_manifest_bytes", "metadata_binding_manifest_sha256", "decoded_output_parent_relative_path", "decoded_output_name"],
+        "binds": ["ordinal", "expected_time_s_ieee754_hex", "parser_observed_time_s_ieee754_hex", "raw_solver_manifest_sha256", "raw_solver_ordinal", "raw_path", "raw_bytes", "raw_sha256", "PART metadata values including MassFluid/Npok", "array names/types/shapes/endian/bytes/SHA-256", "safe_decode_receipt_path/bytes/SHA-256", "metadata_binding_manifest_path/bytes/SHA-256", "decoded_output_parent_relative_path", "decoded_output_name"],
+        "D_receipt_frame_mappings_equal_detached_frames_exactly": true,
+        "upstream_solver_receipt_binding": "D solver_receipt_binding is exact {path,bytes,sha256}; path is the absolute normalized C receipt path.",
+        "raw_solver_binding_rule": "For each decoded frame, raw_solver_manifest_sha256 is the SHA-256 of the entire canonical detached C manifest; raw_solver_ordinal must equal the frame ordinal; raw_path/raw_bytes/raw_sha256 must exactly equal that ordinal's entry and the corresponding C files-tree entry. No per-entry digest is implied.",
+        "contains_no_table_or_D_receipt_digest": true
+      }
+    },
+    "outputs_manifest": {
+      "detached_path": "manifests/outputs-manifest.json",
+      "schema": "core.cfd.f8.r008_decode_outputs_manifest.v1",
+      "stage": "D",
+      "contains_exact_recursive_D_outputs_tree_including_decoded_arrays_and_final_table": true,
+      "required_fields": ["schema", "stage", "files", "directories"],
+      "tree_closure_fields": {"files": "sorted unique relative paths with byte/hash/type/link closure", "directories": "sorted unique relative directory paths, including empty directories"},
+      "does_not_list_files_under_manifests_or_itself": true,
+      "receipt_binds_manifest_byte_count_and_sha256": true,
+      "table_does_not_embed_outputs_manifest_sha256": true
+    },
+    "table_schema": {
+      "schema": "core.cfd.f8.r008_native_fluid_frame_table.v2",
+      "datasets": {
+        "time": {"shape": ["T"], "dtype": "<f8", "requires_full_native_axis_from_zero": true},
+        "particle_id": {"shape": ["P"], "dtype": "<u4", "requires_sorted_exact_generated_fluid_ids": true},
+        "position": {"shape": ["T", "P", 3], "dtype": "<f8"},
+        "velocity": {"shape": ["T", "P", 3], "dtype": "<f4"},
+        "density": {"shape": ["T", "P"], "dtype": "<f4", "source": "Rhop mapped by Idp"},
+        "mass": {"shape": ["T", "P"], "dtype": "<f4"},
+        "valid": {"shape": ["T", "P"], "dtype": "bool", "requires_all_true": true}
+      },
+      "required_bindings": [
+        "scope_row_sha256", "definition_sha256", "control_sha256", "materialization_receipt_sha256",
+        "solver_receipt_sha256", "raw_solver_manifest_sha256",
+        "decoded_frame_manifest_sha256", "converter_code_sha256"
+      ],
+      "time_axis_exactly_matches_full_solver_manifest": true,
+      "no_interpolation_synthesis_row_drop_or_observation_window_crop": true,
+      "fluid_id_axis_and_fluid-only_projection_recomputed_from_generated_xml_and_raw_Idp_each_frame": true,
+      "position_velocity_density_rows_recomputed_by_particle_id_from_decoded_arrays": true,
+      "mass_rows_equal_float32_cast_of_stage_B_MassFluid_metadata_scalar_broadcast_for_all_T_and_P": true,
+      "mass_float32_cast_must_be_finite_and_strictly_positive": true,
+      "metric_window_is_rederived_from_frozen_observation_window_parser": true,
+      "old_v1_or_synthetic_unbound_tables_rejected": true
+    },
+    "hash_direction": "Stage-B receipt binds the B detached manifest; stage-C receipt binds the B receipt plus detached raw solver manifest; stage-D receipt binds the C receipt, detached decoded-frame manifest, D outputs manifest, and final table SHA-256. The table may bind only upstream B/C receipts and detached raw/decoded manifest hashes; authorization and lock contain prelaunch authority only. No authorization, lock, manifest, or table embeds its own hash, enclosing receipt hash, or a downstream hash.",
+    "qualification_effect": "provenance/table binding only; native-integrity gates, metrics, comparisons, and T1 adjudication remain separate"
+  },
+  "verifier_result": {
+    "success_status": "bundle_and_B_C_D_reference_chain_closed_zero_credit_not_t1",
+    "provenance_status_and_native_integrity_status_are_separate_fields": true,
+    "metrics_and_comparisons_are_not_evaluated_by_the_provenance_verifier": true,
+    "must_report_authority_authenticity_and_exact_stage_tool_resource_envelope_as_separate_external_gate": true,
+    "must_report_lock_exclusive_creation_as_executor_self_attested_unless_separate_trusted_admission_proof_is_supplied": true,
+    "qualification_eligible": false,
+    "readiness_pass": false,
+    "qualification_credit": 0,
+    "failed_or_missing_attempt_remains_in_15_row_denominator": true,
+    "does_not_run_tools_or_mutate_state": true
+  },
+  "threat_model_limits": [
+    "SHA-256 detects content changes but does not authenticate a signer or establish trusted wall-clock time.",
+    "The verifier requires a caller-supplied trusted authority binding; internal self-consistent authorization JSON is not enough.",
+    "Bundle-root caller must exclude ACL, capability, privileged-mount, and same-UID concurrent mutation paths; all reads remain descriptor-relative and no-follow below held roots."
+  ]
+}
