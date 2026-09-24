@@ -1,0 +1,13 @@
+# UPDATE-73：C execution evidence contract v4 静态修订
+
+新增 [C execution-evidence synthetic schema v4 草案](F8-R008-C-SOLVER-EXECUTION-EVIDENCE-CONTRACT-V4-SYNTHETIC-ONLY-DRAFT-2026-09-25.zh-CN.md)。基于只读源码追踪，将 v3 的全局 `effective_TimeMax <= table_end` 条件替换为逐展开 accinput entry、逐实际 CPU/GPU poll 的 query journal；每个 active query独立验证当时 loop guard、entry active window、table 闭区间，binary64 比较无容差。V4 独立 schema/signature domain 与 query-journal ref 加入 exact payload；cache hit 只引用先前同时间 cache-miss 样本，不伪称再次查表。空/未激活 query 不获得控制资格或 credit。补充 process journal v4、PID namespace/PID/kernel starttime/birth-sequence identity、连续 journal sequence、fork/clone/exec/exit/reap 状态机与 supervisor cgroup 隔离；inline `<acctimes>` 以 XML raw document + byte slice hash + parsed-sample digest 绑定，input 对象继续按 descriptor-relative raw bytes/hash/mount identity 处理。
+
+静态依据包括 `F8-R008-ACCINPUT-QUERY-CALLGRAPH-AUDIT-2026-09-25.zh-CN.md`、`CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-63.zh-CN.md`，当前 `JDsAccInput.cpp`, `JSphCpu.cpp`, `JSphGpu.cpp`, `JSphCpuSingle.cpp`, `JSphGpuSingle.cpp`, `JSphVResDriver.h`, CPU/GPU VRes source 与 `JLinearValue.cpp` 的源码行为。Terra/high 配置的 follow-up 只读复审为 `REVISE`（无独立 reviewer/effort attestation），指出 V4 ref 七/五字段矛盾、VRes driver guard 被错误要求 instance-specific、active miss 表未绑定对应 entry，以及 Linux `clone` 未区分线程。其后复审认为 V12 无新确定性阻塞，但发现 C `source_callgraph_binding` 未定义 exact object/ref schema 与 runtime/build 交叉绑定，scope/qualification digests 也未绑定已验证 payload refs。当前草案已明确 V3 五字段 ref、由一个 VRes driver guard 覆盖其多实例、miss/hit table binding 与 entry 等值、process/TGID 与 thread generation 分离，并新增 fixed callgraph schema/role/object、runtime image/build attestation cross-bind、driver-instance-interstep schedule 与 scope/row raw-hash equality。最新改动仍待复审，未进入实现。
+
+最终 build/source/feature closure 未绑定，V4 仍 synthetic-only；trusted supervisor/event source、out-of-band trust activation/revocation、builder/source-to-binary/load closure、cgroup 完整 schema、GPU/multi-device terminate 传播、最终 R008 runtime/query evidence 均 BLOCKED。
+
+未实现 schema/parser/test，未运行任何测试、solver、worker、GPU、queue、native 或 GenCase；不创建 production activation，不改 C-v1，不写 gate registry。V4 的未来 synthetic negative-node 名称均为提案且未执行；gate 保持 open、qualification credit 为零。
+
+最后一次 Terra/high 配置只读复核指出：source-callgraph 虽已 raw/build/runtime hash 交叉绑定，仍须由 root-pinned verifier 实际重算，不能采信声明 JSON。当前草案加入固定 function/source-file ID map、byte-range/raw/normalized-AST/call-edge hashes、以 V3 verified refs 和 flags 重解析 runtime topology 的 extractor 规则；extractor 尚不存在，future verifier activation 未建立，故此仍为明确 BLOCKED 项。该补充仍待只读复审。
+
+后续限定复核发现 `input_count=0` 与 entry-ID 集合条件一度矛盾；已改为零输入实例仍保留在 topology、不得有 entry/poll，entries 集合仅等于正 `input_count` 实例。最终 Terra/high 配置技术复核确认该矛盾消除，并确认本轮 callgraph、scope/row digest 与 V12 摘要链修订未见新阻塞；此为文档审阅，不是独立 attestation，更不代表 extractor/producer 已实现。
