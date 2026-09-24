@@ -1,0 +1,174 @@
+{
+  "blocking_gaps": [
+    {
+      "code": "production_z_plane_count_semantics_unresolved",
+      "detail": "The frozen contract says 12 production fluid layers, while the retained dp=0.0075 m native anchor has 13 distinct z particle planes. 2H/dp=12; the records do not say whether the contract counts spacing intervals or particle planes. Do not reinterpret the count silently."
+    },
+    {
+      "code": "profile_sampling_definition_not_frozen",
+      "detail": "No operational profile sampling rule is present in the R008 scope, parameter, or parser contract."
+    },
+    {
+      "code": "reference_velocity_definition_not_frozen",
+      "detail": "No operational reference velocity rule is present in the R008 scope, parameter, or parser contract."
+    },
+    {
+      "code": "transverse_rms_definition_not_frozen",
+      "detail": "No operational transverse rms rule is present in the R008 scope, parameter, or parser contract."
+    },
+    {
+      "code": "flux_normalization_definition_not_frozen",
+      "detail": "No operational flux normalization rule is present in the R008 scope, parameter, or parser contract."
+    },
+    {
+      "code": "cross_resolution_alignment_definition_not_frozen",
+      "detail": "No operational cross resolution alignment rule is present in the R008 scope, parameter, or parser contract."
+    }
+  ],
+  "evidence": [
+    {
+      "bytes": 68034,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-scope-design-v1/receipt.json",
+      "role": "frozen R008 T1 scope and metric gates",
+      "sha256": "65671b42523cd3a5f82338cc7e2d88890af634195d7013ad969311166ab36ac8"
+    },
+    {
+      "bytes": 4151,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/parameter-contract-v1.json",
+      "role": "frozen F8 physical and resolution contract",
+      "sha256": "f15d9db7e41fd626311f0040b3a3fd4c4498cf6152f23e446d0c23cc495865d6"
+    },
+    {
+      "bytes": 1173,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/observation-parser-v1/contract.json",
+      "role": "F8 observation payload and fit contract",
+      "sha256": "b39ce6a804bad6927cd2c235caf16036567e5bf295a489c4c38a042a85d97f99"
+    },
+    {
+      "bytes": 3870,
+      "path": "scripts/f8_observation_parser_v1.py",
+      "role": "F8 harmonic observation parser",
+      "sha256": "7bc357f091b6c360522ab6386591d6ab07af64626b89219ab43e4e83553ba079"
+    },
+    {
+      "bytes": 4001,
+      "path": "scripts/f8_observation_window_parser_v2.py",
+      "role": "R008 closed native observation-window selector",
+      "sha256": "abb41029f9137511e5a4361538c34fe04a7c682e7a568b866fb86ef0b95bfdd1"
+    },
+    {
+      "bytes": 1389,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/reference-oracle-v2/contract.json",
+      "role": "F8 continuum reference contract",
+      "sha256": "888d24b9e14e9226c41d32e5fc4fae85b2b369ec50ea1618f04e9736e975c4e8"
+    },
+    {
+      "bytes": 7285,
+      "path": "scripts/f8_womersley_oracle.py",
+      "role": "steady Womersley continuum oracle",
+      "sha256": "bf9a3f975d4a25ba72d65ff2f9edafa29fd565d366d2c940fc85043bd84b469f"
+    },
+    {
+      "bytes": 3351,
+      "path": "scripts/f8_womersley_oracle_v2.py",
+      "role": "startup-transient Womersley continuum oracle",
+      "sha256": "8f5ab2c3b61c947cd2bbc97ecc0e16928c52a804df03d3154c4e4ce12ebf2d66"
+    },
+    {
+      "bytes": 21683,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-v3/receipt.json",
+      "role": "zero-credit R008 CPU/native preflight receipt",
+      "sha256": "4db07cb997746352d13850103aba86f58bbd9af4d71e22bafdcde67919d38b13"
+    },
+    {
+      "bytes": 6735,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/cpu-native-postrun-audit-v1/receipt.json",
+      "role": "read-only R008 postrun audit",
+      "sha256": "d9241529770bc310a52a0a247912dcd3044be14f4af728de2667ac8be433b8ba"
+    },
+    {
+      "bytes": 3121,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/definition-control-pack-v1/qualification/space-q0p5-dp0p0075/F8_OPC_space-q0p5-dp0p0075_Def.xml",
+      "role": "R008 production-resolution anchor Definition",
+      "sha256": "711e8fddc6906b61349ec15eb3182976ce5e94cbca8efd99934a2c7bd1fb2987"
+    },
+    {
+      "bytes": 279824,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-v3/generated/space-q0p5-dp0p0075_Fluid.vtk",
+      "role": "retained R008 generated representative fluid points",
+      "sha256": "e83c41d8685e421587d63b67f1c6baafc2a4f7f426f68e686ece414e92bfa024"
+    },
+    {
+      "bytes": 12272,
+      "path": "scripts/f8_r008_execution_readiness_audit_v1.py",
+      "role": "read-only execution-readiness audit builder",
+      "sha256": "bbef919e2866330dead06d2999ee37d1c42d3f249f24bce91e238e65c8f5aff5"
+    },
+    {
+      "bytes": 2189,
+      "path": "tests/test_f8_r008_execution_readiness_audit_v1.py",
+      "role": "execution-readiness audit regression tests",
+      "sha256": "47df5bf0258cb77e82aa71fed375e28e44067fb9d3e211e8661510dfc9330b2d"
+    }
+  ],
+  "execution_authority": {
+    "denominator_mutation": 0,
+    "gpu": false,
+    "ledger_mutation": 0,
+    "queue": false,
+    "registry_mutation": 0,
+    "solver": false,
+    "worker": false
+  },
+  "execution_controls": {
+    "denominator_mutation": 0,
+    "gpu_invoked": false,
+    "ledger_mutation": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_invoked": false,
+    "worker_started": false
+  },
+  "missing_metric_definitions": [
+    "profile_sampling",
+    "reference_velocity",
+    "transverse_rms",
+    "flux_normalization",
+    "cross_resolution_alignment"
+  ],
+  "qualification_claim": "none",
+  "qualification_credit": 0,
+  "readiness_pass": false,
+  "record_id": "f8-r008-execution-readiness-audit-v1",
+  "retained_geometry": {
+    "case_id": "space-q0p5-dp0p0075",
+    "contract_expected_production_layers": 12,
+    "dp_m": 0.0075,
+    "half_height_m": 0.045,
+    "nominal_2H_over_dp_intervals": 12,
+    "particle_count": 6656,
+    "x_plane_count": 32,
+    "xy_counts_match_contract": true,
+    "y_plane_count": 16,
+    "z_count_interpretation": "unresolved",
+    "z_plane_count": 13,
+    "z_planes_m": [
+      -0.045,
+      -0.0375,
+      -0.03,
+      -0.0225,
+      -0.015,
+      -0.0075,
+      0.0,
+      0.0075,
+      0.015,
+      0.0225,
+      0.03,
+      0.0375,
+      0.045
+    ]
+  },
+  "schema": "core.cfd.f8.r008_execution_readiness_audit.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "blocked_preexecution_semantics_closure"
+}

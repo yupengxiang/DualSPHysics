@@ -223,7 +223,8 @@ T_0=\left\lceil
 - R001/R002 已关闭，不得重试。R008 的 solver 尚未运行，`T1_numerical=false`；必须完整执行并审查其预登记 15 项资格矩阵，所有硬门通过后才能把 F8 计入第三家族。运行前仍须遵守当前资源准入与正式执行门，不能把 CPU/native 预检当作 solver 授权。
 - R008 生产候选固定为 32 例 `q_i=(i+0.5)/32`，分为 16 train、4 validation、6 ID test、6 OOD test；只有范围资格通过后才按既定 8→32 规则生产。
 - 2026-09-24 只读复核重新验证了 CPU/native post-run audit、15+32 输入合同、周期图适配和跨家族数据合同，共 64 项静态回归测试通过。另有 5 项仅适用于预执行空命名空间的 request/authorization builder 测试，在 R008 一次性目录已被占用后按设计 fail-closed；没有删除、覆盖或重试任何证据。相关 post-consumption 与 immutable-audit 测试通过。
-- 执行工程仍有明确缺口：当前 `scripts/core_cfd.py` 仅提供 F4 专用 `prepare-f4`/矩阵与 F4 观察审计；虽然 F8 reader、控制合同和周期邻接图已接入，仍没有将 R008 solver 输出转换成 Core 轨迹并按 Womersley oracle 完成 15 格 T1 判定的 F8 worker/调度适配器。下一步先实现并静态验证独立 F8 worker、原生帧转换和预登记指标审计，再按资源及正式执行门申请运行；当前不得把静态输入闭合视为可调度资格作业。
+- 后续只读就绪审计 v2 `campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-execution-readiness-audit-v2/receipt.json` 修正了 v1 未绑定其导入 VTK 解码器源码的证据链缺陷，并发现 6 个执行前阻塞项。几何问题是明确的冻结计数合同冲突：现有消费者按 32×16×12 预期 6,144 个粒子，而保留的生产分辨率 Fluid.vtk 是 32×16×13、共 6,656 个粒子；虽然 `2H/dp=12`，不得静默把 12 层改释为 12 个间隔。其余五项是 profile z 采样规则、`Uref`、横向速度 RMS、周期平均通量的归一化分母及 CFD 到门控标量的映射、跨分辨率 profile 对齐规则未冻结（Womersley oracle 已有单位跨度面通量积分和零均值周期判据）。v2 保持 `readiness_pass=false`、零资格信用且无执行权限；这不是数值资格失败，也不授权改写 R008 冻结输入。v1 收据保留为被 v2 取代的历史诊断。
+- 执行工程仍有明确缺口：当前 `scripts/core_cfd.py` 仅提供 F4 专用 `prepare-f4`/矩阵与 F4 观察审计；虽然 F8 reader、控制合同和周期邻接图已接入，仍没有将 R008 solver 输出转换成 Core 轨迹并按 Womersley oracle 完成 15 格 T1 判定的 F8 worker/调度适配器。先用经独立审查的追加设计记录闭合上述六项语义，再实现并静态验证 F8 worker、原生帧转换及矩阵判定；若不兼容 R008 的冻结合同则建立全新替代 scope。其后仍须通过资源和正式执行门，不能把静态闭合视为可调度资格作业。
 - F8 未能取得 T1 时，按计划转向 F1，再以 F2 为替补；不得将 F8 的 canary、预检或静态通过记为资格信用。
 
 #### F1／F2：主线与替补同时准备
