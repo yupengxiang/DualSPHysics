@@ -3,6 +3,7 @@ import hashlib
 import sys
 from pathlib import Path
 
+from scripts import core_campaign as campaign
 from scripts.core_campaign import completion, load_evidence, main
 from scripts.core_runtime import atomic_json, canonical, digest
 import pytest
@@ -716,6 +717,42 @@ def test_completed_negative_scope_is_valid_evidence_not_product_completion(tmp_p
     assert result['checks']['evidence_valid']
     assert result['scope_studies'][0]['status']=='completed_negative_result'
     assert result['t1_families']==[] and not result['can_finalize']
+
+
+@pytest.mark.parametrize("entry_key", ["scope_studies", "scopes"])
+def test_synthetic_qualification_schema_rejected_before_gate_markers(
+    tmp_path, monkeypatch, entry_key,
+):
+    reads = []
+
+    class SchemaReadProbe(dict):
+        def get(self, key, default=None):
+            reads.append(key)
+            if key in {
+                "qualification_only", "diagnostic_only", "formal_eligible",
+                "formal_release", "formal", "root_review_only", "root_admitted",
+                "root_admission", "root_review", "T1_numerical", "matrix_complete",
+            }:
+                raise AssertionError(f"gate marker read before schema rejection: {key}")
+            if key == "schema":
+                return "core.cfd.f8.r008.synthetic_non_qualifying_diagnostic.v8"
+            return default
+
+    monkeypatch.setattr(campaign, "load_evidence", lambda *_args: SchemaReadProbe())
+    ref = {"path": "synthetic.json", "sha256": "0" * 64}
+    if entry_key == "scope_studies":
+        registration = {"scope_id": "synthetic-scope", "family": "F8",
+                        "qualification": ref}
+    else:
+        registration = {"scope_id": "synthetic-scope", "family": "F8",
+                        "qualification": ref, "cases": []}
+
+    result = completion({entry_key: [registration]}, tmp_path)
+
+    assert reads == ["schema"]
+    assert result["scope_studies"] == []
+    assert result["t1_families"] == []
+    assert any("schema mismatch" in issue["reason"] for issue in result["issues"])
 
 
 def test_contract_catalog_supplies_typed_audit_without_registry_mutation(tmp_path):

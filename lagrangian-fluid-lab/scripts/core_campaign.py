@@ -29,6 +29,7 @@ MODELS = ["mlp", "graph_raw", "graph_residual"]
 FORMAL_UPDATES = 32000
 MINIMUM_T1_CASE_RUNS = 432
 MINIMUM_MATERIAL_CASE_RUNS = 288
+QUALIFICATION_SCHEMA = "core.qualification.v1"
 
 
 def expected_runs():
@@ -385,6 +386,15 @@ def _reject_nonformal_or_nonroot(payload, label):
         raise ValueError(f"{label} lacks root review")
 
 
+def _require_qualification_schema(payload, label):
+    """Check the evidence discriminator before reading any gate markers."""
+    if not isinstance(payload, dict):
+        raise ValueError(f"{label} is not a JSON object")
+    schema = payload.get("schema")
+    if type(schema) is not str or schema != QUALIFICATION_SCHEMA:
+        raise ValueError(f"{label} schema mismatch")
+
+
 def _require_passed_root_review(reference, data_root, label):
     """Require a hash-bound root receipt before granting formal material credit."""
     if not isinstance(reference, dict):
@@ -553,9 +563,9 @@ def completion(registry, data_root):
             continue
         try:
             receipt = load_evidence(study['qualification'], data_root)
+            _require_qualification_schema(receipt, "scope study")
             _reject_nonformal_or_nonroot(receipt, "scope study")
-            if (receipt.get('schema') != 'core.qualification.v1'
-                    or receipt.get('scope_id') != study['scope_id']
+            if (receipt.get('scope_id') != study['scope_id']
                     or receipt.get('family') != study['family']):
                 raise ValueError('scope study identity/schema mismatch')
             studies.append({'scope_id': study['scope_id'], 'family': study['family'],
@@ -583,9 +593,9 @@ def completion(registry, data_root):
             if not isinstance(family, str) or not family:
                 raise ValueError("scope family is missing")
             receipt = load_evidence(scope["qualification"], data_root)
+            _require_qualification_schema(receipt, "qualification")
             _reject_nonformal_or_nonroot(receipt, "qualification")
-            if (receipt.get("schema") != "core.qualification.v1"
-                    or receipt.get("scope_id") != sid
+            if (receipt.get("scope_id") != sid
                     or receipt.get("family") != family):
                 raise ValueError("qualification schema/scope mismatch")
             if receipt.get("T1_numerical") is not True or receipt.get("extent") != "parameter_range":
