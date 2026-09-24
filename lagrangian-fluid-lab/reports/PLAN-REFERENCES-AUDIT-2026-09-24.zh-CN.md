@@ -35,4 +35,6 @@
 
 本会话按技能要求在下一次会话重试一次，见[第六份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN5.json)：结果仍为 2 项 `verified`、1 项 `unverified`、3 项 `verify_pending`，arXiv 仍返回 HTTP 406。依 `verify_pending` 规则，本会话不再重试；需等后续会话或上游 API 状态改变后再试，不能根据人工来源核对提升机器状态。
 
+后续续作会话再次按规则只重试一次，见[第七份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-24-RERUN6.json)：状态仍为 2 项 `verified`、1 项 `unverified`、3 项 `verify_pending`。五个 arXiv ID 查询继续返回 HTTP 406；FluidLab 的 Crossref 请求遇到临时 TLS EOF；FuelTank 仍只有 Crossref 精确命中。另用出版方/作者主页面只读核对了 GNS、LagrangeBench、Neural SPH、FuelTank 和 FluidLab 的相应书目信息与设计启示（详见 UPDATE-39），但没有把人工核对替代三源机器判据。本次已重试，按规则不在同一会话继续请求。
+
 离线回归：`tests/test_verify_papers.py`，7 项通过，覆盖三源成功、标题冲突、临时网络失败、无 DOI 的 Crossref 精确标题查找与模糊未命中、以及 DOI-only 记录。该工具只验证书目身份，不判断论文主张、质量或本项目创新性。
