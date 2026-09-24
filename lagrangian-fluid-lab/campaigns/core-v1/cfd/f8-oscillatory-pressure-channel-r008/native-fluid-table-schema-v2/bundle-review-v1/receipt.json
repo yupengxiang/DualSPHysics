@@ -1,0 +1,139 @@
+{
+  "evidence": [
+    {
+      "bytes": 19209,
+      "path": "scripts/f8_r008_native_fluid_table_bundle_verifier_v1.py",
+      "sha256": "2d280b12699fdeaee479a6219a35dae08ce9b33d265d07af5fd41f9b80a21da8"
+    },
+    {
+      "bytes": 14425,
+      "path": "tests/test_f8_r008_native_fluid_table_bundle_verifier_v1.py",
+      "sha256": "5fb3982ddbb1114e11ff424894da9a8009a7ee8f64b3954cd26f64e2145312cb"
+    },
+    {
+      "bytes": 32025,
+      "path": "scripts/f8_r008_native_fluid_table_v2.py",
+      "sha256": "91c064acfe5fd4c8c70f5cf8a7b049ef789e55061f232991dfafb71167fdc455"
+    },
+    {
+      "bytes": 7611,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/native-fluid-table-schema-v2/schema.json",
+      "sha256": "c99d4b205e83ede7350291f9979bb5d2079db31c75b2243ff4fb0a325d113e80"
+    },
+    {
+      "bytes": 5252,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/native-fluid-table-schema-v2/design-review-v2/receipt.json",
+      "sha256": "2a478f1935aaaf28d6bb0c407248180a7337cdebf94095443d90638a63ddd94e"
+    },
+    {
+      "bytes": 100583,
+      "path": "scripts/f8_r008_per_case_bundle_verifier_v1.py",
+      "sha256": "6c668743f1e8476df7c9b173dc91d1dee2d2748a0ba864af561337631c581752"
+    },
+    {
+      "bytes": 32315,
+      "path": "scripts/f8_r008_safe_bi4_decoder_v1.py",
+      "sha256": "affbbb6c04a4d21d03037e74d0023112c60c7d8e5972cc6dfc882e1c7c5dc319"
+    },
+    {
+      "bytes": 6660,
+      "path": "scripts/f8_r008_safe_bi4_metadata_binding_v1.py",
+      "sha256": "2ef65401df395e4d16fc6757304b658f7b4494d308730581bcc11e9008382096"
+    },
+    {
+      "bytes": 1285,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/per-case-provenance-implementation-review-v2/receipt.json",
+      "sha256": "335f0d3207ec7e108a430ee65270eb00eeb5cde860f3cc2415f995fe4d0d0489"
+    },
+    {
+      "bytes": 127849,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/definition-control-pack-v1/receipt.json",
+      "sha256": "d5b657db398e0c0b102cdb84de8fe0a302c22c85d4bbf16bc0b6e6bf16065fcb"
+    },
+    {
+      "bytes": 68034,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-scope-design-v1/receipt.json",
+      "sha256": "65671b42523cd3a5f82338cc7e2d88890af634195d7013ad969311166ab36ac8"
+    },
+    {
+      "bytes": 4151,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r001/parameter-contract-v1.json",
+      "sha256": "f15d9db7e41fd626311f0040b3a3fd4c4498cf6152f23e446d0c23cc495865d6"
+    },
+    {
+      "bytes": 9087,
+      "path": "scripts/f8_r008_native_fluid_table_bundle_review_v1.py",
+      "sha256": "08f52d833822384d36454dfd9ead26f2d4ebe2cfac749639205b70fa406f1680"
+    },
+    {
+      "bytes": 2147,
+      "path": "tests/test_f8_r008_native_fluid_table_bundle_review_v1.py",
+      "sha256": "7976a3c3d68ac3fb86387b25d71ee1cf4d855558b2353d7ab5f917529fd7ac20"
+    }
+  ],
+  "execution_authority": {
+    "T1_numerical": false,
+    "gpu": false,
+    "qualification_credit": 0,
+    "queue": false,
+    "solver": false,
+    "worker": false
+  },
+  "findings": [
+    {
+      "detail": "B Definition/control receipt bindings are matched to the frozen R008 pack row, then the actual source bytes and pinned parameter contract are reread and hashed before and after semantic verification.",
+      "topic": "frozen B inputs",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "The wrapper composes the reviewed stage verifier, re-derives fluid IDs and MassFluid from B, streams held-FD C raw frames into the standalone v2 HDF5 verifier, binds the result to D, and revalidates the full chain after the pass.",
+      "topic": "B/C/D composition",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Receipt, manifest, source and table bindings are checked across the semantic pass; the source-frame generator and per-frame raw file descriptor close on success and injected midstream failure.",
+      "topic": "mutation and descriptor closure",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Synthetic fixtures exercise successful B/C/D composition and reject drift in frozen Definition/control, trusted table-review binding, parameter contract, D table binding, and final chain digests.",
+      "topic": "negative integration coverage",
+      "verdict": "PASS"
+    }
+  ],
+  "known_boundary": "Authorization authenticity, wrapper/module code identity, and runtime assumptions remain caller-supplied trust inputs. No production bundle or solver frame was read; this wrapper performs no native integrity adjudication, metric evaluation, readiness decision, T1 qualification, or credit assignment.",
+  "parent_validation": {
+    "command": "./.venv/bin/python -m pytest -q tests/test_f8_r008_native_fluid_table_bundle_verifier_v1.py",
+    "failed": 0,
+    "fixture_scope": "temporary synthetic B/C/D receipts, BI4, and HDF5 only",
+    "passed": 10,
+    "reviewer_ran_tests": false
+  },
+  "record_id": "f8-r008-native-fluid-table-bundle-implementation-review-v1",
+  "review_boundary": {
+    "gpu_or_queue_invoked": false,
+    "native_tools_invoked": false,
+    "production_bundle_read": false,
+    "qualification_credit": 0,
+    "registry_or_ledger_mutated": false,
+    "solver_or_worker_invoked": false
+  },
+  "reviewed_scope": {
+    "frozen_definition_and_control_source_bytes": true,
+    "native_fluid_table_v2_semantics_from_C_raw_frames": true,
+    "revalidated_B_C_D_provenance_chain": true,
+    "solver_or_T1_adjudication": false,
+    "synthetic_and_adversarial_integration_tests": true
+  },
+  "reviewer": {
+    "agent_id": "01a0d2a7-a95a-72d0-bdc2-7192cf9900ba",
+    "execution_or_evidence_mutation": false,
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "review_mode": "read_only_static_implementation_review",
+    "reviewer_ran_tests": false,
+    "verdict": "PASS"
+  },
+  "schema": "core.cfd.f8.r008_native_fluid_table_bundle_implementation_review.v1",
+  "status": "static_implementation_review_passed_no_execution_or_t1_credit"
+}
