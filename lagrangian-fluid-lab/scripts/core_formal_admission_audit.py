@@ -260,12 +260,12 @@ def _bound_adapter_cases(
     adapter_present = False
     errors: list[str] = []
     for payload, evidence_path in loaded_evidence:
-        if payload.get("schema") not in ADAPTER_SCHEMAS:
+        schema = payload.get("schema")
+        if type(schema) is not str or schema not in ADAPTER_SCHEMAS:
             continue
         if payload.get("manifest_sha256") not in manifest_hashes:
             continue
         adapter_present = True
-        schema = payload.get("schema")
         if schema == "core.f3.legacy_hard_audit_adapter.v1":
             for row in _rows(payload):
                 case_id = _case_id(row)

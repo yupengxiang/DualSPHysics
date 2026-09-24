@@ -7,6 +7,7 @@ import hashlib
 from pathlib import Path
 
 from scripts.core_formal_admission_audit import (
+    _bound_adapter_cases,
     _evidence_rows,
     _is_qualification,
     audit_admission,
@@ -190,6 +191,33 @@ def test_synthetic_case_rows_rejected_before_case_audit_binding(tmp_path: Path) 
     assert denominator["formal_audit_pass_count"] == 0
     assert report["family_summary"]["t1_families"] == {"F3": False}
     assert report["formal_job_count"] == 0
+
+
+def test_synthetic_adapter_rejected_before_case_binding(tmp_path: Path) -> None:
+    class SchemaReadProbe(dict):
+        def __init__(self):
+            super().__init__({
+                "schema": "core.f8.synthetic_diagnostic.v1",
+                "manifest_sha256": "known-manifest",
+                "T1_numerical": True,
+                "cases": [{"case_id": "synthetic-case", "structural_pass": True}],
+            })
+            self.reads = []
+
+        def get(self, key, default=None):
+            self.reads.append(key)
+            if key != "schema":
+                raise AssertionError(f"adapter field read before schema rejection: {key}")
+            return super().get(key, default)
+
+    probe = SchemaReadProbe()
+    bound, adapter_present, errors = _bound_adapter_cases(
+        [(probe, None)], manifest_hashes={"known-manifest"}, root=tmp_path
+    )
+    assert bound == {}
+    assert adapter_present is False
+    assert errors == []
+    assert probe.reads == ["schema"]
 
 
 def test_structural_receipt_set_has_32_immutable_case_bindings() -> None:
