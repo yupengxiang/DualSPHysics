@@ -3,7 +3,14 @@ from __future__ import annotations
 import hashlib
 import json
 
-from scripts.f3_f4_t2_admission_contract_v1 import LAB, OUTPUT, REPORT, verify
+from scripts.f3_f4_t2_admission_contract_v1 import (
+    LAB,
+    OUTPUT,
+    QUALIFICATION_SCHEMA,
+    REPORT,
+    _require_qualification_schema,
+    verify,
+)
 
 
 def _sha(path):
@@ -12,6 +19,34 @@ def _sha(path):
 
 def _contract() -> dict:
     return json.loads(OUTPUT.read_text(encoding="utf-8"))
+
+
+def test_synthetic_qualification_rejected_before_t2_admission_markers() -> None:
+    class SchemaReadProbe(dict):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.reads = []
+
+        def get(self, key, default=None):
+            self.reads.append(key)
+            if key != "schema":
+                raise AssertionError(f"qualification field read before schema rejection: {key}")
+            return super().get(key, default)
+
+    for family in ("F3", "F4"):
+        probe = SchemaReadProbe({
+            "schema": "core.f8.synthetic_diagnostic.v1",
+            "T1_numerical": True, "T2_macro": True,
+            "T2_path": True, "matrix_complete": True,
+        })
+        try:
+            _require_qualification_schema(probe, family)
+        except ValueError as exc:
+            assert f"{family} qualification schema mismatch" in str(exc)
+        else:
+            raise AssertionError(f"synthetic {family} qualification schema was accepted")
+        assert probe.reads == ["schema"]
+    assert QUALIFICATION_SCHEMA == "core.qualification.v1"
 
 
 def test_hash_closure_covers_current_f3_f4_receipts_and_contract_code() -> None:

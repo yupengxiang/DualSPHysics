@@ -25,6 +25,7 @@ OUTPUT = LAB / (
     "f3-f4-t2-admission-root-review-contract-20260921.json"
 )
 REPORT = LAB / "reports/F3-F4-T2-ADMISSION-CONTRACT-2026-09-21.zh-CN.md"
+QUALIFICATION_SCHEMA = "core.qualification.v1"
 
 SOURCE_WINDOW_AUDIT = LAB / (
     "campaigns/core-v1/material/evidence/"
@@ -81,6 +82,12 @@ def load(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise TypeError(f"expected JSON object: {path}")
     return value
+
+
+def _require_qualification_schema(qualification: dict[str, Any], family: str) -> None:
+    schema = qualification.get("schema")
+    if type(schema) is not str or schema != QUALIFICATION_SCHEMA:
+        raise ValueError(f"{family} qualification schema mismatch")
 
 
 def rel(path: Path) -> str:
@@ -168,7 +175,9 @@ def build_contract() -> dict[str, Any]:
     root_cause = load(F4_ROOT_CAUSE_AUDIT)
     material_preflight = load(F4_MATERIAL_PREFLIGHT)
     f3_qualification = load(F3_QUALIFICATION)
+    _require_qualification_schema(f3_qualification, "F3")
     f4_qualification = load(F4_QUALIFICATION)
+    _require_qualification_schema(f4_qualification, "F4")
 
     assert audit["schema"] == "core.material.t2.cpu_source_window_audit.v1"
     assert audit["status"] == "completed_negative_cpu_audit"
