@@ -55,7 +55,9 @@ def _value(name: str, type_code: int, value: bytes) -> bytes:
 
 
 def _array(name: str, type_code: int, payload: bytes) -> bytes:
-    count = 1
+    element_bytes = {8: 4, 11: 4, 22: 12, 23: 24}[type_code]
+    assert len(payload) % element_bytes == 0
+    count = len(payload) // element_bytes
     definition = (_string(decoder.CODE_ARRAY) + _string(name)
                   + struct.pack("<iiII", 0, type_code, count, len(payload)))
     return struct.pack("<I", len(definition)) + definition + payload
@@ -80,21 +82,32 @@ def _item(
             + b"".join(arrays) + b"".join(children))
 
 
-def _synthetic_bi4(time_s: float) -> bytes:
+def _synthetic_bi4(
+    time_s: float,
+    particle_ids: tuple[int, ...] = (0, 1),
+    case_counts: tuple[int, int, int, int] | None = None,
+) -> bytes:
+    particle_count = len(particle_ids)
+    if case_counts is None:
+        case_counts = (1, particle_count - 1, 0, 0)
+    assert len(case_counts) == 4 and sum(case_counts) == particle_count
     arrays = (
-        _array("Idp", 8, struct.pack("<I", 0)),
-        _array("Posd", 23, struct.pack("<3d", 1.0, 2.0, 3.0)),
-        _array("Vel", 22, struct.pack("<3f", 0.1, 0.2, 0.3)),
-        _array("Rhop", 11, struct.pack("<f", 1000.0)),
+        _array("Idp", 8, struct.pack(f"<{particle_count}I", *particle_ids)),
+        _array("Posd", 23, struct.pack(f"<{particle_count * 3}d", *([1.0, 2.0, 3.0] * particle_count))),
+        _array("Vel", 22, struct.pack(f"<{particle_count * 3}f", *([0.1, 0.2, 0.3] * particle_count))),
+        _array("Rhop", 11, struct.pack(f"<{particle_count}f", *([1000.0] * particle_count))),
     )
     part_values = (
         _value("TimeStep", 12, struct.pack("<d", time_s)),
-        _value("Npok", 8, struct.pack("<I", 1)),
+        _value("Npok", 8, struct.pack("<I", particle_count)),
     )
     part = _item("PART_0000", values=part_values, arrays=arrays)
     root_values = (
-        _value("CaseNp", 10, struct.pack("<Q", 1)),
-        _value("CaseNfluid", 10, struct.pack("<Q", 1)),
+        _value("CaseNp", 10, struct.pack("<Q", particle_count)),
+        _value("CaseNfluid", 10, struct.pack("<Q", case_counts[0])),
+        _value("CaseNfixed", 10, struct.pack("<Q", case_counts[1])),
+        _value("CaseNmoving", 10, struct.pack("<Q", case_counts[2])),
+        _value("CaseNfloat", 10, struct.pack("<Q", case_counts[3])),
         _value("MassFluid", 12, struct.pack("<d", 0.000421875)),
     )
     root = _item("JPartDataBi4", values=root_values, children=(part,))
@@ -102,8 +115,24 @@ def _synthetic_bi4(time_s: float) -> bytes:
     return title + b"\0\0\0\0" + root
 
 
+def _synthetic_metadata_manifest(
+    tmp_path: Path,
+    particle_ids: tuple[int, ...] = (0, 1),
+    case_counts: tuple[int, int, int, int] | None = None,
+) -> dict:
+    raw_payload = _synthetic_bi4(0.0, particle_ids, case_counts)
+    raw_path = tmp_path / "synthetic-metadata-source.bi4"
+    raw_path.write_bytes(raw_payload)
+    raw_fd = os.open(raw_path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+    try:
+        result = metadata_binding.bind_metadata_fd(raw_fd, hashlib.sha256(raw_payload).hexdigest())
+        return result["manifest"]
+    finally:
+        os.close(raw_fd)
+
+
 def _trusted_code_review_receipt_bytes() -> bytes:
-    relative = "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/per-case-provenance-implementation-review-v1/receipt.json"
+    relative = "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/per-case-provenance-implementation-review-v2/receipt.json"
     return (verifier.LAB / relative).read_bytes()
 
 
@@ -120,7 +149,17 @@ def _trusted_runtime_assumption() -> dict[str, bool]:
     return {key: True for key in verifier.TRUSTED_RUNTIME_ASSUMPTION_FIELDS}
 
 
-def _build_bundle(tmp_path: Path, stage: str, *, tamper_axis: bool = False) -> tuple[Path, bytes, dict]:
+def _build_bundle(
+    tmp_path: Path,
+    stage: str,
+    *,
+    tamper_axis: bool = False,
+    initial_ids: tuple[int, ...] = (0, 1),
+    frame_ids: tuple[int, ...] = (0, 1),
+    initial_case_counts: tuple[int, int, int, int] | None = None,
+    frame_case_counts: tuple[int, int, int, int] | None = None,
+    generated_xml: bytes | None = None,
+) -> tuple[Path, bytes, dict]:
     root = tmp_path / f"bundle-{stage}"
     root.mkdir()
     outputs_root = root / "outputs"
@@ -131,9 +170,13 @@ def _build_bundle(tmp_path: Path, stage: str, *, tamper_axis: bool = False) -> t
     frames: list[dict] = []
     directories: list[str] = []
     if stage == "B":
-        initial_payload = _synthetic_bi4(0.0)
+        initial_payload = _synthetic_bi4(0.0, initial_ids, initial_case_counts)
+        if generated_xml is None:
+            generated_xml = (
+                b"<case><particles><fixed begin='1' count='1'/><fluid begin='0' count='1'/></particles></case>"
+            )
         output_payloads = {
-            "materialized/generated.xml": b"synthetic-xml",
+            "materialized/generated.xml": generated_xml,
             "materialized/initial.bi4": initial_payload,
         }
         directories = ["materialized"]
@@ -142,7 +185,7 @@ def _build_bundle(tmp_path: Path, stage: str, *, tamper_axis: bool = False) -> t
         times = verifier.expected_time_axis_hex(row)
         for ordinal, time_hex in enumerate(times):
             path = f"frames/Part_{ordinal:04d}.bi4"
-            payload = _synthetic_bi4(float.fromhex(time_hex))
+            payload = _synthetic_bi4(float.fromhex(time_hex), frame_ids, frame_case_counts)
             output_payloads[path] = payload
             frames.append({
                 "ordinal": ordinal,
@@ -162,7 +205,7 @@ def _build_bundle(tmp_path: Path, stage: str, *, tamper_axis: bool = False) -> t
         expected_axis = verifier.expected_time_axis_hex(row)
         raw_manifest_sha = "a" * 64
         for ordinal, time_hex in enumerate(expected_axis):
-            raw_payload = _synthetic_bi4(float.fromhex(time_hex))
+            raw_payload = _synthetic_bi4(float.fromhex(time_hex), frame_ids, frame_case_counts)
             raw_path = tmp_path / f"synthetic-D-frame-{ordinal:04d}.bi4"
             raw_path.write_bytes(raw_payload)
             raw_fd = os.open(raw_path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
@@ -322,6 +365,11 @@ def _build_bundle(tmp_path: Path, stage: str, *, tamper_axis: bool = False) -> t
             )
         finally:
             os.close(initial_fd)
+        particle_cohorts = verifier._derive_particle_cohorts(
+            output_payloads["materialized/generated.xml"],
+            b_metadata["manifest"],
+            hashlib.sha256(output_payloads["materialized/generated.xml"]).hexdigest(),
+        )
         receipt.update({
             "definition_binding": {}, "control_binding": {}, "gencase_execution": {},
             "generated_xml_path": {
@@ -338,7 +386,7 @@ def _build_bundle(tmp_path: Path, stage: str, *, tamper_axis: bool = False) -> t
                 "manifest": b_metadata["manifest"],
                 "manifest_sha256": b_metadata["manifest_sha256"],
             },
-            "particle_cohorts": {},
+            "particle_cohorts": particle_cohorts,
             "output_manifest": manifest_bindings["materialization-output-manifest.json"],
         })
     elif stage == "C":
@@ -373,12 +421,21 @@ def _update_reference(target: dict, field: str, reference_path: Path) -> None:
     }
 
 
-def _build_chain(tmp_path: Path) -> tuple[dict, dict, dict, dict]:
+def _build_chain(
+    tmp_path: Path,
+    *,
+    initial_ids: tuple[int, ...] = (0, 1),
+    frame_ids: tuple[int, ...] = (0, 1),
+    frame_case_counts: tuple[int, int, int, int] | None = None,
+) -> tuple[dict, dict, dict, dict]:
     roots: dict[str, Path] = {}
     auth_bytes: dict[str, bytes] = {}
     auth: dict[str, dict] = {}
     for stage in ("B", "C", "D"):
-        roots[stage], auth_bytes[stage], auth[stage] = _build_bundle(tmp_path, stage)
+        kwargs = {"initial_ids": initial_ids} if stage == "B" else {
+            "frame_ids": frame_ids, "frame_case_counts": frame_case_counts,
+        }
+        roots[stage], auth_bytes[stage], auth[stage] = _build_bundle(tmp_path, stage, **kwargs)
 
     c_receipt_path = roots["C"] / "receipt.json"
     c_receipt = json.loads(c_receipt_path.read_text())
@@ -500,6 +557,140 @@ def test_synthetic_stage_bundle_closes_without_granting_authority_or_credit(
     assert result["readiness_pass"] is False
     assert result["qualification_credit"] == 0
     assert result["native_integrity_evaluated"] is False
+    if stage == "B":
+        assert result["particle_count"] == 2
+        assert result["particle_group_counts"] == {
+            "fluid": 1, "fixed": 1, "moving": 0, "floating": 0,
+        }
+
+
+def test_b_materialization_rejects_duplicate_initial_particle_ids(tmp_path: Path) -> None:
+    root, auth_bytes, auth = _build_bundle(tmp_path, "B", initial_ids=(0, 0))
+    with pytest.raises(verifier.BundleVerificationError, match="missing, duplicate, unknown"):
+        verifier.verify_stage_bundle(
+            root, "B",
+            trusted_authorization_bytes=auth_bytes,
+            trusted_authorization_sha256=hashlib.sha256(auth_bytes).hexdigest(),
+            expected_authorization_envelope=auth,
+        )
+
+
+def test_b_materialization_rejects_cohort_receipt_not_recomputed_from_xml(tmp_path: Path) -> None:
+    root, auth_bytes, auth = _build_bundle(tmp_path, "B")
+    receipt_path = root / "receipt.json"
+    receipt = json.loads(receipt_path.read_text())
+    receipt["particle_cohorts"]["group_counts"]["fluid"] = 2
+    receipt_path.write_bytes(_canonical(receipt))
+    with pytest.raises(verifier.BundleVerificationError, match="cohort receipt differs"):
+        verifier.verify_stage_bundle(
+            root, "B",
+            trusted_authorization_bytes=auth_bytes,
+            trusted_authorization_sha256=hashlib.sha256(auth_bytes).hexdigest(),
+            expected_authorization_envelope=auth,
+        )
+
+
+def test_c_to_d_chain_rejects_incomplete_native_identity_universe(tmp_path: Path) -> None:
+    roots, auth_bytes, auth, _frames = _build_chain(tmp_path, frame_ids=(0, 0))
+    with pytest.raises(verifier.BundleVerificationError, match="missing, duplicate, unknown"):
+        verifier.verify_provenance_chain(
+            roots,
+            trusted_authorization_bytes=auth_bytes,
+            trusted_authorization_sha256={stage: hashlib.sha256(value).hexdigest()
+                                          for stage, value in auth_bytes.items()},
+            expected_authorization_envelopes=auth,
+            trusted_code_review_receipt_bytes=_trusted_code_review_receipt_bytes(),
+            trusted_runtime_assumption=_trusted_runtime_assumption(),
+        )
+
+
+def test_c_to_d_chain_rejects_complete_ids_with_changed_case_group_counts(tmp_path: Path) -> None:
+    roots, auth_bytes, auth, _frames = _build_chain(
+        tmp_path, frame_ids=(0, 1), frame_case_counts=(2, 0, 0, 0),
+    )
+    with pytest.raises(verifier.BundleVerificationError, match="CaseN\\* metadata differs"):
+        verifier.verify_provenance_chain(
+            roots,
+            trusted_authorization_bytes=auth_bytes,
+            trusted_authorization_sha256={stage: hashlib.sha256(value).hexdigest()
+                                          for stage, value in auth_bytes.items()},
+            expected_authorization_envelopes=auth,
+            trusted_code_review_receipt_bytes=_trusted_code_review_receipt_bytes(),
+            trusted_runtime_assumption=_trusted_runtime_assumption(),
+        )
+
+
+@pytest.mark.parametrize(
+    ("xml_payload", "message"),
+    [
+        (b"<case><particles><fluid begin='0' count='1'/><fixed begin='0' count='1'/></particles></case>",
+         "overlap or leave an ID gap"),
+        (b"<case><particles><fluid begin='0' count='1'/><fixed begin='2' count='1'/></particles></case>",
+         "overlap or leave an ID gap"),
+        (b"<case><particles><fluid begin='0' count='1'/><tracer begin='1' count='1'/></particles></case>",
+         "unclassified particle group"),
+        (b"<!DOCTYPE case [<!ENTITY x 'x'>]><case><particles/></case>", "DTD or entity declarations"),
+        (b"<case><particles><fluid begin='00' count='1'/><fixed begin='1' count='1'/></particles></case>",
+         "canonical decimal integers"),
+        (b'<?xml version="1.0"?><!DOCTYPE case SYSTEM "file:///etc/passwd"><case/>',
+         "DTD or entity declarations"),
+        ('<?xml version="1.0" encoding="UTF-16"?><!DOCTYPE case [<!ENTITY x "x">]><case/>'.encode("utf-16"),
+         "DTD or entity declarations"),
+    ],
+)
+def test_generated_xml_particle_cohort_parser_fails_closed(
+    tmp_path: Path, xml_payload: bytes, message: str,
+) -> None:
+    metadata_manifest = _synthetic_metadata_manifest(tmp_path)
+    with pytest.raises(verifier.BundleVerificationError, match=message):
+        verifier._derive_particle_cohorts(
+            xml_payload, metadata_manifest, hashlib.sha256(xml_payload).hexdigest(),
+        )
+
+
+def test_generated_xml_particle_cohorts_support_multiple_ranges_and_all_groups(tmp_path: Path) -> None:
+    metadata_manifest = _synthetic_metadata_manifest(
+        tmp_path, (0, 1, 2, 3, 4), (2, 1, 1, 1),
+    )
+    xml_payload = (
+        b"<case><particles>"
+        b"<floating begin='3' count='1'/><fluid begin='4' count='1'/>"
+        b"<moving begin='2' count='1'/><fluid begin='0' count='1'/>"
+        b"<fixed begin='1' count='1'/></particles></case>"
+    )
+    result = verifier._derive_particle_cohorts(
+        xml_payload, metadata_manifest, hashlib.sha256(xml_payload).hexdigest(),
+    )
+    assert result["case_np"] == 5
+    assert result["group_counts"] == {"fluid": 2, "fixed": 1, "moving": 1, "floating": 1}
+    assert result["group_ranges"]["fluid"] == [
+        {"begin": 0, "count": 1}, {"begin": 4, "count": 1},
+    ]
+
+
+def test_generated_xml_parser_resource_limits_fail_closed(tmp_path: Path) -> None:
+    metadata_manifest = _synthetic_metadata_manifest(tmp_path)
+    oversized = b" " * (verifier.MAX_GENERATED_XML_BYTES + 1)
+    with pytest.raises(verifier.BundleVerificationError, match="parser limit"):
+        verifier._derive_particle_cohorts(oversized, metadata_manifest, "0" * 64)
+
+    deep_xml = (
+        b"<root>" + b"<n>" * (verifier.MAX_GENERATED_XML_DEPTH + 1)
+        + b"<particles><fluid begin='0' count='1'/><fixed begin='1' count='1'/></particles>"
+        + b"</n>" * (verifier.MAX_GENERATED_XML_DEPTH + 1) + b"</root>"
+    )
+    with pytest.raises(verifier.BundleVerificationError, match="nesting-depth limit"):
+        verifier._derive_particle_cohorts(
+            deep_xml, metadata_manifest, hashlib.sha256(deep_xml).hexdigest(),
+        )
+
+    too_many_elements = (
+        b"<root>" + b"<node/>" * verifier.MAX_GENERATED_XML_ELEMENTS + b"</root>"
+    )
+    with pytest.raises(verifier.BundleVerificationError, match="element-count limit"):
+        verifier._derive_particle_cohorts(
+            too_many_elements, metadata_manifest, hashlib.sha256(too_many_elements).hexdigest(),
+        )
 
 
 def test_raw_solver_manifest_must_match_frozen_full_axis(tmp_path: Path) -> None:

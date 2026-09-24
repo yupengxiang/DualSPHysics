@@ -17,6 +17,7 @@ import re
 import stat
 import struct
 from typing import Any, Mapping
+from xml.parsers import expat
 
 from scripts import f8_r008_safe_bi4_decoder_v1 as decoder
 from scripts import f8_r008_safe_bi4_metadata_binding_v1 as metadata_binding
@@ -136,7 +137,8 @@ TRUSTED_CODE_BINDING_FIELDS = {
     "independent_review_receipt_sha256",
 }
 CODE_SOURCE_BINDING_FIELDS = {"path", "bytes", "sha256"}
-CODE_REVIEW_SCHEMA = "core.cfd.f8.r008_per_case_provenance_implementation_review.v1"
+CODE_REVIEW_SCHEMA = "core.cfd.f8.r008_per_case_provenance_implementation_review.v2"
+CODE_REVIEW_RECORD_ID = "f8-r008-per-case-provenance-implementation-review-v2"
 CODE_REVIEW_FIELDS = {
     "schema", "record_id", "status", "reviewer", "code_bindings", "review_boundary",
 }
@@ -160,6 +162,11 @@ MAX_FILE_COUNT = 20000
 MAX_STAGE_BYTES = 64 * 1024**3
 MAX_DEPTH = 16
 READ_CHUNK = 1024 * 1024
+MAX_GENERATED_XML_BYTES = 16 * 1024 * 1024
+MAX_GENERATED_XML_DEPTH = 256
+MAX_GENERATED_XML_ELEMENTS = 250000
+PARTICLE_COHORT_SCHEMA = "core.cfd.f8.r008_particle_cohorts.v1"
+PARTICLE_GROUPS = ("fluid", "fixed", "moving", "floating")
 O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
 O_DIRECTORY = getattr(os, "O_DIRECTORY", 0)
 O_CLOEXEC = getattr(os, "O_CLOEXEC", 0)
@@ -602,9 +609,11 @@ def _read_bound_output(
     byte_count: Any,
     digest: Any,
     label: str,
+    *,
+    max_bytes: int = MAX_RECEIPT_BYTES,
 ) -> tuple[str, bytes]:
     relative = _verify_bound_output(outputs_fd, output_files, path, byte_count, digest, label)
-    payload = _stable_read_beneath(outputs_fd, relative, MAX_RECEIPT_BYTES)
+    payload = _stable_read_beneath(outputs_fd, relative, max_bytes)
     _require(len(payload) == byte_count and hashlib.sha256(payload).hexdigest() == digest,
              f"{label} changed after outputs-tree inventory")
     return relative, payload
@@ -671,14 +680,14 @@ def _verify_d_code_binding(
     review = _parse_json(trusted_review_receipt_bytes, "trusted independent code review receipt")
     _require(isinstance(review, dict) and set(review) == CODE_REVIEW_FIELDS
              and review.get("schema") == CODE_REVIEW_SCHEMA
-             and review.get("record_id") == "f8-r008-per-case-provenance-implementation-review-v1"
+             and review.get("record_id") == CODE_REVIEW_RECORD_ID
              and review.get("status") == "PASS",
              "caller-trusted code review receipt is not the exact expected PASS record")
     reviewer = review.get("reviewer")
     _require(isinstance(reviewer, dict) and set(reviewer) == CODE_REVIEWER_FIELDS
              and reviewer.get("model") == "gpt-5.6-terra"
              and reviewer.get("reasoning_effort") == "high"
-             and reviewer.get("agent_id") == "01a0d167-4db5-7f90-aee2-94547602a273"
+             and reviewer.get("agent_id") == "01a0d24d-50f6-78a2-8ab3-8943a9e48cda"
              and reviewer.get("verdict") == "PASS"
              and reviewer.get("review_mode") == "read_only_static_implementation_review"
              and reviewer.get("reviewer_ran_tests") is False
@@ -1001,6 +1010,11 @@ def verify_stage_bundle(
                 _require(b_metadata.get("input_sha256") == b_initial["sha256"]
                          and b_metadata.get("input_bytes") == b_initial["bytes"],
                          "B metadata-binding input differs from the initial BI4 binding")
+                cohort_document, _initial_mass_bits = _verify_b_materialization_semantics(
+                    outputs_fd, output_files, receipt,
+                )
+                extra_manifest_values["particle_count"] = cohort_document["case_np"]
+                extra_manifest_values["particle_group_counts"] = cohort_document["group_counts"]
 
             if stage == "C":
                 case_row = _frozen_qualification_row(receipt["case_id"])
@@ -1212,6 +1226,204 @@ def _metadata_mass_bits(document: Mapping[str, Any]) -> str:
     _require(math.isfinite(value) and value > 0.0,
              "raw BI4 MassFluid is not positive finite binary64")
     return record["raw_value_bytes_hex"]
+
+
+def _bi4_case_counts(document: Mapping[str, Any]) -> tuple[int, dict[str, int]]:
+    field_names = {
+        "case_np": "CaseNp",
+        "fluid": "CaseNfluid",
+        "fixed": "CaseNfixed",
+        "moving": "CaseNmoving",
+        "floating": "CaseNfloat",
+    }
+    values: dict[str, int] = {}
+    for key, name in field_names.items():
+        record = _metadata_record(document, ("JPartDataBi4",), name)
+        value = record.get("canonical_value")
+        _require(record.get("type_code") == 10 and isinstance(value, int)
+                 and not isinstance(value, bool) and value >= 0,
+                 f"raw BI4 {name} is not an unsigned 64-bit count")
+        values[key] = value
+    _require(values["case_np"] > 0 and values["fluid"] > 0,
+             "raw BI4 particle universe and fluid cohort must be nonempty")
+    _require(sum(values[name] for name in PARTICLE_GROUPS) == values["case_np"],
+             "raw BI4 particle group counts do not sum to CaseNp")
+    return values["case_np"], {name: values[name] for name in PARTICLE_GROUPS}
+
+
+def _derive_particle_cohorts(
+    xml_payload: bytes,
+    metadata_document: Mapping[str, Any],
+    xml_sha256: str,
+) -> dict[str, Any]:
+    _require(isinstance(xml_payload, bytes) and 0 < len(xml_payload) <= MAX_GENERATED_XML_BYTES,
+             "B generated GenCase XML is empty or exceeds its bounded parser limit")
+    _require(isinstance(xml_sha256, str) and bool(SHA256_RE.fullmatch(xml_sha256))
+             and hashlib.sha256(xml_payload).hexdigest() == xml_sha256,
+             "B generated GenCase XML bytes differ from their bound SHA-256")
+    upper_xml = xml_payload.upper()
+    _require(b"<!DOCTYPE" not in upper_xml and b"<!ENTITY" not in upper_xml,
+             "B generated GenCase XML must not contain DTD or entity declarations")
+    group_ranges: dict[str, list[dict[str, int]]] = {name: [] for name in PARTICLE_GROUPS}
+    all_ranges: list[tuple[int, int, str]] = []
+    particle_container_count = 0
+    element_count = 0
+    element_stack: list[str] = []
+
+    def reject_declaration(*_args: Any) -> None:
+        raise BundleVerificationError("B generated GenCase XML must not contain DTD or entity declarations")
+
+    def start_element(name: str, attributes: dict[str, str]) -> None:
+        nonlocal particle_container_count, element_count
+        element_count += 1
+        _require(element_count <= MAX_GENERATED_XML_ELEMENTS,
+                 "B generated GenCase XML exceeds the bounded element-count limit")
+        _require(len(element_stack) < MAX_GENERATED_XML_DEPTH,
+                 "B generated GenCase XML exceeds the bounded nesting-depth limit")
+        parent = element_stack[-1] if element_stack else None
+        if name == "particles":
+            particle_container_count += 1
+        elif parent == "particles":
+            if name != "_summary":
+                _require(name in PARTICLE_GROUPS,
+                         f"B generated GenCase XML contains an unclassified particle group: {name}")
+                begin_text = attributes.get("begin")
+                count_text = attributes.get("count")
+                _require(isinstance(begin_text, str)
+                         and re.fullmatch(r"(?:0|[1-9][0-9]*)", begin_text, re.ASCII)
+                         and isinstance(count_text, str)
+                         and re.fullmatch(r"(?:0|[1-9][0-9]*)", count_text, re.ASCII),
+                         "B generated GenCase XML particle begin/count must be canonical decimal integers")
+                begin, count = int(begin_text), int(count_text)
+                _require(count > 0 and begin + count <= 2**32,
+                         "B generated GenCase XML particle range is empty or outside uint32")
+                group_ranges[name].append({"begin": begin, "count": count})
+                all_ranges.append((begin, begin + count, name))
+        element_stack.append(name)
+
+    def end_element(name: str) -> None:
+        _require(bool(element_stack) and element_stack[-1] == name,
+                 "B generated GenCase XML has mismatched element nesting")
+        element_stack.pop()
+
+    parser = expat.ParserCreate()
+    parser.StartElementHandler = start_element
+    parser.EndElementHandler = end_element
+    parser.StartDoctypeDeclHandler = reject_declaration
+    parser.EntityDeclHandler = reject_declaration
+    parser.UnparsedEntityDeclHandler = reject_declaration
+    parser.ExternalEntityRefHandler = reject_declaration
+    try:
+        parser.Parse(xml_payload, True)
+    except BundleVerificationError:
+        raise
+    except (expat.ExpatError, ValueError, RecursionError) as error:
+        raise BundleVerificationError("B generated GenCase XML is malformed") from error
+    _require(not element_stack and particle_container_count == 1,
+             "B generated GenCase XML must contain exactly one particles element")
+    _require(bool(all_ranges) and bool(group_ranges["fluid"]),
+             "B generated GenCase XML must declare at least one fluid ID range")
+    for ranges in group_ranges.values():
+        ranges.sort(key=lambda value: value["begin"])
+    all_ranges.sort()
+    cursor = 0
+    for begin, end, _group in all_ranges:
+        _require(begin == cursor, "B generated GenCase XML particle ranges overlap or leave an ID gap")
+        cursor = end
+
+    case_np, metadata_counts = _bi4_case_counts(metadata_document)
+    group_counts = {
+        name: sum(entry["count"] for entry in group_ranges[name])
+        for name in PARTICLE_GROUPS
+    }
+    _require(cursor == case_np,
+             "B generated GenCase XML particle ID ranges do not cover exactly [0, CaseNp)")
+    _require(group_counts == metadata_counts,
+             "B generated GenCase XML particle group counts differ from BI4 CaseN* metadata")
+    return {
+        "schema": PARTICLE_COHORT_SCHEMA,
+        "generated_xml_sha256": xml_sha256,
+        "case_np": case_np,
+        "group_counts": group_counts,
+        "group_ranges": group_ranges,
+    }
+
+
+def _read_fd_range(fd: int, offset: int, byte_count: int) -> bytes:
+    _require(offset >= 0 and byte_count >= 0, "raw BI4 array range is invalid")
+    chunks: list[bytes] = []
+    remaining = byte_count
+    position = offset
+    while remaining:
+        block = os.pread(fd, min(READ_CHUNK, remaining), position)
+        _require(bool(block), "raw BI4 array range was truncated during provenance verification")
+        chunks.append(block)
+        position += len(block)
+        remaining -= len(block)
+    return b"".join(chunks)
+
+
+def _verify_raw_particle_ids(
+    raw_fd: int,
+    scan: decoder.ScanResult,
+    cohort: Mapping[str, Any],
+    expected_sha256: str,
+    label: str,
+) -> list[int]:
+    case_np = cohort.get("case_np")
+    _require(isinstance(case_np, int) and not isinstance(case_np, bool)
+             and 0 < case_np <= decoder.MAX_ARRAY_COUNT,
+             f"{label} generated XML particle count is outside the BI4 array cap")
+    matches = [array for array in scan.arrays if array.name == "Idp"]
+    _require(len(matches) == 1 and matches[0].type_code == 8
+             and matches[0].count == case_np and matches[0].byte_count == case_np * 4,
+             f"{label} raw BI4 Idp must be one little-endian uint32 value per generated particle")
+    ids_payload = _read_fd_range(raw_fd, matches[0].offset, matches[0].byte_count)
+    ids = [value[0] for value in struct.iter_unpack("<I", ids_payload)]
+    _require(sorted(ids) == list(range(case_np)),
+             f"{label} raw BI4 Idp has a missing, duplicate, unknown, or out-of-range particle ID")
+    observed = os.fstat(raw_fd)
+    _require(_identity(observed) == scan.input_identity
+             and decoder._hash_fd(raw_fd, scan.input_bytes) == expected_sha256,
+             f"{label} raw BI4 changed while its particle IDs were verified")
+    return ids
+
+
+def _verify_b_materialization_semantics(
+    outputs_fd: int,
+    output_files: Mapping[str, Mapping[str, Any]],
+    receipt: Mapping[str, Any],
+) -> tuple[dict[str, Any], str]:
+    initial = receipt.get("initial_bi4_path")
+    generated = receipt.get("generated_xml_path")
+    _require(isinstance(initial, dict) and isinstance(generated, dict),
+             "B initial BI4 or generated XML binding is absent")
+    initial_relative = _validate_relative_path(initial["path"][len("outputs/"):])
+    generated_relative = _validate_relative_path(generated["path"][len("outputs/"):])
+    _, xml_payload = _read_bound_output(
+        outputs_fd, output_files, generated_relative, generated["bytes"], generated["sha256"],
+        "B generated GenCase XML", max_bytes=MAX_GENERATED_XML_BYTES,
+    )
+    initial_fd = decoder.open_regular_beneath(outputs_fd, initial_relative)
+    try:
+        result = metadata_binding.bind_metadata_fd(initial_fd, initial["sha256"])
+        _require(result["scan"].input_bytes == initial["bytes"],
+                 "B initial BI4 byte count differs from its exact input")
+        binding = receipt.get("metadata_binding")
+        _require(isinstance(binding, dict)
+                 and binding.get("manifest") == result["manifest"]
+                 and binding.get("manifest_sha256") == result["manifest_sha256"],
+                 "B embedded metadata manifest does not recompute from the bound initial BI4")
+        _require_native_arrays(result["scan"], result["manifest"])
+        cohorts = _derive_particle_cohorts(xml_payload, result["manifest"], generated["sha256"])
+        _require(receipt.get("particle_cohorts") == cohorts,
+                 "B particle-cohort receipt differs from generated XML and raw BI4 metadata")
+        _verify_raw_particle_ids(
+            initial_fd, result["scan"], cohorts, initial["sha256"], "B initial",
+        )
+        return cohorts, _metadata_mass_bits(result["manifest"])
+    finally:
+        os.close(initial_fd)
 
 
 def _require_native_arrays(scan: decoder.ScanResult, metadata_document: Mapping[str, Any]) -> None:
@@ -1438,31 +1650,9 @@ def verify_provenance_chain(
         _require(isinstance(c_frames, list) and isinstance(d_frames, list)
                  and len(c_frames) == len(d_frames), "C/D frame counts differ")
 
-        b_initial = b_receipt.get("initial_bi4_path")
-        b_metadata_binding = b_receipt.get("metadata_binding")
-        _require(isinstance(b_initial, dict) and isinstance(b_metadata_binding, dict),
-                 "B initial BI4 or metadata binding is absent")
-        b_relative = _validate_relative_path(b_initial["path"][len("outputs/"):])
-        _verify_bound_output(b_outputs_fd, checked["B"]["_output_file_manifest"], b_relative,
-                             b_initial["bytes"], b_initial["sha256"], "B initial BI4")
-        b_generated = b_receipt["generated_xml_path"]
-        _verify_bound_output(
-            b_outputs_fd, checked["B"]["_output_file_manifest"],
-            b_generated["path"][len("outputs/"):], b_generated["bytes"],
-            b_generated["sha256"], "B generated XML",
+        b_cohorts, initial_mass_bits = _verify_b_materialization_semantics(
+            b_outputs_fd, checked["B"]["_output_file_manifest"], b_receipt,
         )
-        b_raw_fd = decoder.open_regular_beneath(b_outputs_fd, b_relative)
-        try:
-            b_metadata_result = metadata_binding.bind_metadata_fd(b_raw_fd, b_initial["sha256"])
-            _require(b_metadata_result["manifest"] == b_metadata_binding["manifest"]
-                     and b_metadata_result["manifest_sha256"] == b_metadata_binding["manifest_sha256"],
-                     "B embedded metadata manifest does not recompute from the bound initial BI4")
-            _require(b_metadata_result["scan"].input_bytes == b_initial["bytes"],
-                     "B initial BI4 byte count differs from its exact input")
-            _require_native_arrays(b_metadata_result["scan"], b_metadata_result["manifest"])
-            initial_mass_bits = _metadata_mass_bits(b_metadata_result["manifest"])
-        finally:
-            os.close(b_raw_fd)
 
         recomputed_mass_bits: set[str] = set()
         for ordinal, (raw_frame, decoded_frame) in enumerate(zip(c_frames, d_frames)):
@@ -1489,6 +1679,13 @@ def verify_provenance_chain(
                 _require(scan.input_bytes == raw_frame["bytes"],
                          "C raw frame byte count differs from its parsed input")
                 _require_native_arrays(scan, metadata_result["manifest"])
+                frame_case_np, frame_group_counts = _bi4_case_counts(metadata_result["manifest"])
+                _require(frame_case_np == b_cohorts["case_np"]
+                         and frame_group_counts == b_cohorts["group_counts"],
+                         "C raw BI4 CaseN* metadata differs from the B generated XML particle cohorts")
+                _verify_raw_particle_ids(
+                    raw_fd, scan, b_cohorts, raw_frame["sha256"], f"C frame {ordinal}",
+                )
                 metadata_relative, metadata_payload = _read_bound_output(
                     d_outputs_fd, checked["D"]["_output_file_manifest"],
                     decoded_frame["metadata_binding_manifest_path"],

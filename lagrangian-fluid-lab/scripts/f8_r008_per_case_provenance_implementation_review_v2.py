@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Historical v1 Terra High review receipt; v2 supersedes it without rewriting it."""
+"""Archive Terra High's versioned static review binding for F8 R008 provenance."""
 from __future__ import annotations
 
 import hashlib
@@ -14,10 +14,9 @@ LAB = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(LAB))
 
 ROOT = Path("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008")
-OUTPUT = LAB / ROOT / "per-case-provenance-implementation-review-v1/receipt.json"
-SCHEMA = "core.cfd.f8.r008_per_case_provenance_implementation_review.v1"
-RECORD_ID = "f8-r008-per-case-provenance-implementation-review-v1"
-HISTORICAL_RECEIPT_SHA256 = "41480968a8197b493bb3829e53989725eb27c3615dc6196cba74033c15b5e05d"
+OUTPUT = LAB / ROOT / "per-case-provenance-implementation-review-v2/receipt.json"
+SCHEMA = "core.cfd.f8.r008_per_case_provenance_implementation_review.v2"
+RECORD_ID = "f8-r008-per-case-provenance-implementation-review-v2"
 CODE_PATHS = {
     "safe_bi4_decoder": "scripts/f8_r008_safe_bi4_decoder_v1.py",
     "metadata_binding_api": "scripts/f8_r008_safe_bi4_metadata_binding_v1.py",
@@ -26,7 +25,7 @@ CODE_PATHS = {
 REVIEWER = {
     "model": "gpt-5.6-terra",
     "reasoning_effort": "high",
-    "agent_id": "01a0d167-4db5-7f90-aee2-94547602a273",
+    "agent_id": "01a0d24d-50f6-78a2-8ab3-8943a9e48cda",
     "verdict": "PASS",
     "review_mode": "read_only_static_implementation_review",
     "reviewer_ran_tests": False,
@@ -70,12 +69,14 @@ def _binding(relative_path: str) -> dict[str, Any]:
 def build_receipt() -> dict[str, Any]:
     from scripts import f8_r008_per_case_bundle_verifier_v1 as verifier
 
-    if verifier.CODE_REVIEW_SCHEMA != SCHEMA or verifier.CODE_REVIEW_FIELDS != {
+    if verifier.CODE_REVIEW_SCHEMA != SCHEMA or verifier.CODE_REVIEW_RECORD_ID != RECORD_ID:
+        raise ValueError("bundle verifier's versioned caller-trusted code-review contract changed")
+    if verifier.CODE_REVIEW_FIELDS != {
         "schema", "record_id", "status", "reviewer", "code_bindings", "review_boundary",
     }:
-        raise ValueError("bundle verifier's caller-trusted code-review contract changed")
+        raise ValueError("bundle verifier's caller-trusted code-review fields changed")
     if verifier.CODE_SOURCE_PATHS != CODE_PATHS:
-        raise ValueError("review source inventory differs from the verifier's D code binding contract")
+        raise ValueError("review source inventory differs from the verifier's D code-binding contract")
     return {
         "schema": SCHEMA,
         "record_id": RECORD_ID,
@@ -87,26 +88,9 @@ def build_receipt() -> dict[str, Any]:
 
 
 def verify_receipt(path: Path = OUTPUT) -> dict[str, Any]:
-    payload = Path(path).read_bytes()
-    if hashlib.sha256(payload).hexdigest() != HISTORICAL_RECEIPT_SHA256:
-        raise ValueError("historical immutable Terra High F8 R008 v1 review receipt changed")
-    value = json.loads(payload)
-    if (not isinstance(value, dict)
-            or set(value) != {"schema", "record_id", "status", "reviewer", "code_bindings", "review_boundary"}
-            or value.get("schema") != SCHEMA
-            or value.get("record_id") != RECORD_ID
-            or value.get("status") != "PASS"
-            or value.get("reviewer") != REVIEWER
-            or value.get("review_boundary") != REVIEW_BOUNDARY
-            or not isinstance(value.get("code_bindings"), dict)
-            or set(value["code_bindings"]) != set(CODE_PATHS)):
-        raise ValueError("historical Terra High F8 R008 v1 receipt contract changed")
-    for name, binding in value["code_bindings"].items():
-        if (not isinstance(binding, dict) or set(binding) != {"path", "bytes", "sha256"}
-                or binding.get("path") != CODE_PATHS[name]
-                or not isinstance(binding.get("bytes"), int) or binding["bytes"] <= 0
-                or not isinstance(binding.get("sha256"), str) or len(binding["sha256"]) != 64):
-            raise ValueError("historical Terra High F8 R008 v1 source binding changed")
+    value = json.loads(Path(path).read_text(encoding="utf-8"))
+    if value != build_receipt():
+        raise ValueError("immutable Terra High F8 R008 v2 implementation review no longer matches source bytes")
     return value
 
 
@@ -115,7 +99,7 @@ def write_receipt(path: Path = OUTPUT) -> Path:
     if not target.is_absolute():
         target = LAB / target
     if target.exists() or target.is_symlink():
-        raise FileExistsError(f"refusing to overwrite immutable F8 R008 implementation review: {target}")
+        raise FileExistsError(f"refusing to overwrite immutable F8 R008 v2 implementation review: {target}")
     payload = json.dumps(build_receipt(), indent=2, sort_keys=True, allow_nan=False) + "\n"
     target.parent.mkdir(parents=True, exist_ok=True)
     descriptor = os.open(

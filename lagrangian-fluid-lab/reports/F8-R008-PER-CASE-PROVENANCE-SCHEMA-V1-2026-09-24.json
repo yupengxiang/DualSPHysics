@@ -125,11 +125,21 @@
       "initial_bi4_path": "exact {path,bytes,sha256}; path is bundle-internal outputs-relative with literal outputs/ prefix",
       "metadata_binding": "exact {manifest,manifest_sha256}; manifest is the exact read-only safe metadata API result and is recomputed from initial_bi4_path"
     },
+    "particle_cohort_receipt": {
+      "schema": "core.cfd.f8.r008_particle_cohorts.v1",
+      "fields_exact": ["schema", "generated_xml_sha256", "case_np", "group_counts", "group_ranges"],
+      "group_names_exact": ["fluid", "fixed", "moving", "floating"],
+      "generated_xml_policy": "Bound XML is stable-read no-follow and parsed event-wise under 16 MiB, depth-256, and 250000-element caps; reject DTD/entity declarations, malformed XML, unknown particle groups, noncanonical decimal IDs, empty ranges, overlap, gaps, and ranges outside uint32.",
+      "identity_ranges": "Sorted [begin,begin+count) ranges across all four groups are disjoint and cover exactly [0,CaseNp); group totals equal the exact BI4 CaseNfluid/CaseNfixed/CaseNmoving/CaseNfloat fields.",
+      "initial_and_solver_identity": "B initial and each C raw BI4 contain exactly one little-endian uint32 Idp per CaseNp particle; sorted Idp must equal [0,CaseNp), rejecting missing, duplicate, unknown, unclassified, or out-of-range IDs.",
+      "qualification_effect": "B/C identity provenance only; no geometry, boundary-normal, native-integrity, metrics, or T1 claim"
+    },
     "frozen_input_checks": [
       "Definition/control canonical relative paths, byte counts, and SHA-256 exactly equal the frozen definition-control pack row",
       "Read bytes with no-follow regular-file descriptors and call the pinned validate_case(row, definition_bytes, control_bytes, control_basename)",
       "Recompute generated XML fluid and nonfluid ID cohorts; require unique disjoint complete uint32 ranges and bind generated XML hash",
-      "Recompute geometry, boundary, normal, particle-count, and native-initial required-array gates from files; never accept receipt booleans alone"
+      "Recompute B particle ranges and initial Idp identity from generated XML and raw BI4; each C frame must preserve the exact BI4 CaseN* counts and complete ID universe",
+      "Geometry, boundary, normal, and full Definition/control input gates remain unimplemented; never infer them from receipt booleans"
     ],
     "gencase_execution_contract": {
       "invocation_budget": 1,
@@ -210,7 +220,13 @@
         "metadata_binding_api": "scripts/f8_r008_safe_bi4_metadata_binding_v1.py",
         "per_case_bundle_verifier": "scripts/f8_r008_per_case_bundle_verifier_v1.py"
       },
-      "caller_trust_gate": "Caller supplies exact immutable Terra High review-receipt bytes after authenticating them out-of-band. The verifier requires the frozen PASS receipt schema/record/model/reasoning/agent/verdict and read-only execution boundary, checks its digest against the D receipt, extracts the reviewed source bindings, no-follow stable-reads all three local source files, and recomputes their byte counts/SHA-256 before D provenance recomputation. It does not authenticate the caller's review receipt or reviewer identity.",
+      "implementation_review_receipt": {
+        "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/per-case-provenance-implementation-review-v2/receipt.json",
+        "schema": "core.cfd.f8.r008_per_case_provenance_implementation_review.v2",
+        "record_id": "f8-r008-per-case-provenance-implementation-review-v2",
+        "review_boundary": "Terra High high-effort read-only static review; reviewer runs no tests or native tools and mutates no evidence"
+      },
+      "caller_trust_gate": "Caller supplies exact immutable v2 Terra High review-receipt bytes after authenticating them out-of-band. The verifier requires the frozen PASS receipt schema/record/model/reasoning/agent/verdict and read-only execution boundary, checks its digest against the D receipt, extracts the reviewed source bindings, no-follow stable-reads all three local source files, and recomputes their byte counts/SHA-256 before D provenance recomputation. It does not authenticate the caller's review receipt or reviewer identity.",
       "runtime_module_identity_boundary": {
         "source_hash_alone_proves_loaded_module_bytecode_identity": false,
         "required_caller_attestation_fields": ["interpreter_trusted", "fresh_process", "import_path_pinned", "preloaded_module_state_unmodified"],
