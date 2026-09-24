@@ -224,7 +224,7 @@ T_0=\left\lceil
 - R008 生产候选固定为 32 例 `q_i=(i+0.5)/32`，分为 16 train、4 validation、6 ID test、6 OOD test；只有范围资格通过后才按既定 8→32 规则生产。
 - 2026-09-24 只读复核重新验证了 CPU/native post-run audit、15+32 输入合同、周期图适配和跨家族数据合同，共 64 项静态回归测试通过。另有 5 项仅适用于预执行空命名空间的 request/authorization builder 测试，在 R008 一次性目录已被占用后按设计 fail-closed；没有删除、覆盖或重试任何证据。相关 post-consumption 与 immutable-audit 测试通过。
 - 更正后的只读就绪审计 v3 `campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-execution-readiness-audit-v3/receipt.json` 发现六项执行前语义阻塞。v2 曾把 R001 专用的旧授权构建器误认成 R008 消费者；v3 绑定并核对了 R008 自己的授权与预检链，两者均预期 6,656 个粒子，和保留 Fluid.vtk 的 13 个 z 平面相符。合同记录 `2H/dp=12`，因此“12 个间隔、含两端共13个平面”与实际几何相容；但合同没有明文固定 interval/plane 关系，R001 旧 helper 算出的 6,144 不能归属到 R008。其余五项是 profile z 采样规则、`Uref`、横向速度 RMS、周期平均通量的归一化分母及 CFD 到门控标量的映射、跨分辨率 profile 对齐规则未冻结（Womersley oracle 已有单位跨度面通量积分和零均值周期判据）。v3 保持 `readiness_pass=false`、零资格信用且无执行权限；这不是数值资格失败，也不授权改写 R008 冻结输入。v1/v2 收据均保留为更正链上的历史记录。
-- 执行工程仍有明确缺口：当前 `scripts/core_cfd.py` 仅提供 F4 专用 `prepare-f4`/矩阵与 F4 观察审计；虽然 F8 reader、控制合同和周期邻接图已接入，仍没有将 R008 solver 输出转换成 Core 轨迹并按 Womersley oracle 完成 15 格 T1 判定的 F8 worker/调度适配器。先用经独立审查的追加设计记录闭合上述六项语义，再实现并静态验证 F8 worker、原生帧转换及矩阵判定；若不兼容 R008 的冻结合同则建立全新替代 scope。其后仍须通过资源和正式执行门，不能把静态闭合视为可调度资格作业。
+- 执行工程仍有明确缺口：当前 `scripts/core_cfd.py` 仅提供 F4 专用 `prepare-f4`/矩阵与 F4 观察审计；虽然 F8 reader、控制合同和周期邻接图已接入，仍没有将 R008 solver 输出转换成 Core 轨迹并按 Womersley oracle 完成 15 格 T1 判定的 F8 worker/调度适配器。`t1-metric-semantics-proposal-v1/receipt.json` 已形成只读追加定义提案，正等待 Terra High 独立审查；通过后再冻结兼容 R008 的追加合同，否则建立新 scope。随后实现并静态验证 F8 worker、原生帧转换及矩阵判定；其后仍须通过资源和正式执行门，不能把静态闭合视为可调度资格作业。
 - F8 未能取得 T1 时，按计划转向 F1，再以 F2 为替补；不得将 F8 的 canary、预检或静态通过记为资格信用。
 
 #### F1／F2：主线与替补同时准备
