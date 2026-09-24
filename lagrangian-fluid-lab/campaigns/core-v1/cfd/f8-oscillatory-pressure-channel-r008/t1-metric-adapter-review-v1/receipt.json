@@ -1,0 +1,156 @@
+{
+  "disposition": {
+    "gpu_or_queue_authorized": false,
+    "next_permitted_work": "design and independently review a per-case materialization provenance verifier; keep solver, worker, GPU, and queue execution behind separate gates",
+    "qualification_credit": 0,
+    "solver_or_worker_authorized": false,
+    "static_adapter_accepted": true
+  },
+  "evidence": [
+    {
+      "bytes": 65100,
+      "path": "scripts/f8_r008_t1_metric_adapter_v1.py",
+      "role": "reviewed static F8 R008 metric adapter",
+      "sha256": "f51940c775bdf6bc80dd410bbb4c080dfe6331d09299145d11f6124cba5ae650"
+    },
+    {
+      "bytes": 16844,
+      "path": "tests/test_f8_r008_t1_metric_adapter_v1.py",
+      "role": "adapter identity, metric, provenance, and matrix tests",
+      "sha256": "2826c16d0a99b43028f558da4c5d29e5ce05ab31e69546a75b21ecc41aa38655"
+    },
+    {
+      "bytes": 50218,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-metric-semantics-proposal-v2/receipt.json",
+      "role": "adopted F8 R008 metric semantics proposal v2",
+      "sha256": "fecbdfea584c9984e700126d8ca34942bfeddaa6c7b733cec88df8145c0e1008"
+    },
+    {
+      "bytes": 4874,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-metric-semantics-review-v2/receipt.json",
+      "role": "Terra High PASS review of metric semantics v2",
+      "sha256": "6242b5c0d70bb31509c438af5e569e3a54ca8e3d3f1020f2766074b054035042"
+    },
+    {
+      "bytes": 127849,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/definition-control-pack-v1/receipt.json",
+      "role": "frozen R008 Definition bindings",
+      "sha256": "d5b657db398e0c0b102cdb84de8fe0a302c22c85d4bbf16bc0b6e6bf16065fcb"
+    },
+    {
+      "bytes": 4001,
+      "path": "scripts/f8_observation_window_parser_v2.py",
+      "role": "pinned native observation-window parser",
+      "sha256": "abb41029f9137511e5a4361538c34fe04a7c682e7a568b866fb86ef0b95bfdd1"
+    },
+    {
+      "bytes": 7285,
+      "path": "scripts/f8_womersley_oracle.py",
+      "role": "pinned Womersley reference oracle",
+      "sha256": "bf9a3f975d4a25ba72d65ff2f9edafa29fd565d366d2c940fc85043bd84b469f"
+    },
+    {
+      "bytes": 21683,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-v3/receipt.json",
+      "role": "pinned zero-credit R008 CPU/native anchor receipt",
+      "sha256": "4db07cb997746352d13850103aba86f58bbd9af4d71e22bafdcde67919d38b13"
+    },
+    {
+      "bytes": 5828,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-v3/generated/space-q0p5-dp0p0075.xml",
+      "role": "verified anchor generated XML",
+      "sha256": "f5ace179780036437e2b35d576a876a09cc2e76fb6fb95d94cfc7a1f293915d3"
+    },
+    {
+      "bytes": 1616,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-v3/gencase.scope-metrics.json",
+      "role": "pinned scoped GenCase wrapper metrics",
+      "sha256": "e549824c4d2d57360d76119b31bf3ae12d03ee0a505ba2c3eb0364f1b895bdf6"
+    },
+    {
+      "bytes": 5809384,
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "role": "pinned GenCase executable",
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226"
+    },
+    {
+      "bytes": 8288,
+      "path": "scripts/f8_r008_t1_metric_adapter_review_v1.py",
+      "role": "parent-authored archive of Terra High adapter review",
+      "sha256": "08d17b72887219e33715b8b2fce65d7e5c9d2ae7b5f08f4aa7b00d4258df4824"
+    },
+    {
+      "bytes": 2769,
+      "path": "tests/test_f8_r008_t1_metric_adapter_review_v1.py",
+      "role": "adapter review archive contract tests",
+      "sha256": "d3ddabf8220f4c5c26263fd11b8413ae154039a1e524903aa21221e5d3c55c96"
+    }
+  ],
+  "execution_authority": {
+    "denominator_mutation": 0,
+    "gpu": false,
+    "ledger_mutation": 0,
+    "queue": false,
+    "registry_mutation": 0,
+    "solver": false,
+    "worker": false
+  },
+  "findings": [
+    {
+      "basis": "scope, parameter contract, Definition pack, metric proposal/review, anchor receipt, wrapper metrics, and GenCase binary are pinned and checked before trusted metric paths",
+      "topic": "frozen input trust anchors",
+      "verdict": "PASS"
+    },
+    {
+      "basis": "only the exact anchor receipt is accepted; Definition, XML cohorts/hash, executable, argv, wrapper metrics, zero exit, no timeout, clean process tree, and fixed zero-credit controls are checked",
+      "topic": "anchor GenCase provenance",
+      "verdict": "PASS"
+    },
+    {
+      "basis": "frozen H/dp, exact 15-row scope, provenance-bound HDF5 reread, case metric recomputation, frozen comparisons, and safety-field equality are enforced",
+      "topic": "case table and matrix recomputation",
+      "verdict": "PASS"
+    },
+    {
+      "basis": "fixed-frequency coefficients, exact 3N+1 cycle seams, mass-weighted RMS, cross-resolution interpolation, false full-T1 decision, zero credit, and no execution authority remain intact",
+      "topic": "metric and qualification boundary",
+      "verdict": "PASS"
+    }
+  ],
+  "parent_validation": {
+    "command": "PYTHONPATH=. .venv/bin/pytest -q tests/test_f8_r008_t1_metric_adapter_v1.py",
+    "failed": 0,
+    "passed": 18
+  },
+  "qualification_credit": 0,
+  "record_id": "f8-r008-t1-metric-adapter-review-v1",
+  "remaining_limitations": [
+    "No reviewed per-case materialization receipt verifier is implemented; all such receipts fail closed.",
+    "No complete provenance-verified 15-row solver result matrix exists; adapter PASS is not T1 qualification."
+  ],
+  "reviewer": {
+    "agent_id": "01a0d12c-53fc-7840-b965-a0982d69c4f0",
+    "archive_note": "Parent-authored transcription of the reviewer response; not represented as reviewer-authored content.",
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "review_mode": "read_only_static_code_and_sha256_review",
+    "review_thread_note": "Follow-up review in the same Terra High agent thread as the prior adapter reviews; not represented as a newly spawned second reviewer.",
+    "reviewer_ran_pytest": true,
+    "verdict": "PASS"
+  },
+  "reviewer_validation": {
+    "adapter_tests": {
+      "command": "PYTHONPATH=. .venv/bin/pytest -q tests/test_f8_r008_t1_metric_adapter_v1.py",
+      "failed": 0,
+      "passed": 18
+    },
+    "archive_tests": {
+      "command": "PYTHONPATH=. .venv/bin/pytest -q tests/test_f8_r008_t1_metric_adapter_review_v1.py",
+      "failed": 0,
+      "passed": 4
+    }
+  },
+  "schema": "core.cfd.f8.r008_t1_metric_adapter_review.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "independent_static_review_passed_no_execution"
+}

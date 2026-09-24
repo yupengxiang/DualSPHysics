@@ -39,6 +39,8 @@ FROZEN_METRIC_REVIEW = LAB / "campaigns/core-v1/cfd/f8-oscillatory-pressure-chan
 FROZEN_ANCHOR_PREFLIGHT = LAB / "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-v3/receipt.json"
 FROZEN_GENCASE_METRICS = LAB / "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/cpu-native-preflight-v3/gencase.scope-metrics.json"
 FROZEN_GENCASE_BINARY = LAB / "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64"
+FROZEN_WINDOW_PARSER = LAB / "scripts/f8_observation_window_parser_v2.py"
+FROZEN_WOMERSLEY_ORACLE = LAB / "scripts/f8_womersley_oracle.py"
 # These digests pin the adopted R008 scope/semantics and the sole existing
 # zero-credit native preflight. Any future execution receipt needs a separately
 # reviewed verifier; changing these anchors is a contract revision.
@@ -51,6 +53,8 @@ FROZEN_INPUT_SHA256 = {
     "anchor_preflight": "4db07cb997746352d13850103aba86f58bbd9af4d71e22bafdcde67919d38b13",
     "gencase_metrics": "e549824c4d2d57360d76119b31bf3ae12d03ee0a505ba2c3eb0364f1b895bdf6",
     "gencase_binary": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226",
+    "window_parser": "abb41029f9137511e5a4361538c34fe04a7c682e7a568b866fb86ef0b95bfdd1",
+    "womersley_oracle": "bf9a3f975d4a25ba72d65ff2f9edafa29fd565d366d2c940fc85043bd84b469f",
 }
 ANCHOR_CASE_ID = "space-q0p5-dp0p0075"
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
@@ -99,6 +103,8 @@ def _assert_frozen_inputs() -> None:
         "anchor_preflight": FROZEN_ANCHOR_PREFLIGHT,
         "gencase_metrics": FROZEN_GENCASE_METRICS,
         "gencase_binary": FROZEN_GENCASE_BINARY,
+        "window_parser": FROZEN_WINDOW_PARSER,
+        "womersley_oracle": FROZEN_WOMERSLEY_ORACLE,
     }
     for name, path in files.items():
         if not path.is_file() or sha256_file(path) != FROZEN_INPUT_SHA256[name]:

@@ -168,6 +168,15 @@ def test_frozen_scope_hash_is_a_fixed_trust_anchor(tmp_path, monkeypatch) -> Non
         adapter._assert_frozen_inputs()
 
 
+def test_metric_calculation_dependencies_are_fixed_trust_anchors(tmp_path, monkeypatch) -> None:
+    changed = tmp_path / "changed-window-parser.py"
+    changed.write_text(adapter.FROZEN_WINDOW_PARSER.read_text(encoding="utf-8") + "\n",
+                       encoding="utf-8")
+    monkeypatch.setattr(adapter, "FROZEN_WINDOW_PARSER", changed)
+    with pytest.raises(ValueError, match="frozen F8 R008 input changed or is missing: window_parser"):
+        adapter._assert_frozen_inputs()
+
+
 def test_unreviewed_per_case_gencase_receipts_are_not_provenance(tmp_path) -> None:
     receipt = tmp_path / "self-asserted-gencase.json"
     receipt.write_text(json.dumps({
