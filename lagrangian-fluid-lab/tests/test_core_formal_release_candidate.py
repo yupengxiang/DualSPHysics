@@ -153,6 +153,40 @@ def test_ready_admission_cannot_promote_an_incomplete_closure(
     assert candidate["source_closure_contract"]["passed"] is False
 
 
+def test_synthetic_admission_receipt_cannot_release(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    closure = release_candidate.materialize_source_closure(root=ROOT, code_root=ROOT)
+    synthetic_admission = _ready_audit(closure["closure_sha256"])
+    assert release_candidate._validate_admission_observation(synthetic_admission) == []
+    # Preserve an otherwise release-capable admission object and alter only
+    # its schema, so this exercises the schema discriminator specifically.
+    synthetic_admission["schema"] = (
+        "core.cfd.f8.r008.synthetic_non_qualifying_diagnostic.v8")
+    assert release_candidate._validate_admission_observation(synthetic_admission) == [
+        "admission audit schema is missing or unsupported",
+    ]
+    monkeypatch.setattr(
+        release_candidate, "audit_admission",
+        lambda *args, **kwargs: synthetic_admission,
+    )
+    monkeypatch.setattr(
+        release_candidate, "campaign_completion",
+        lambda payload, root: _complete_campaign(),
+    )
+
+    candidate = release_candidate.build_candidate(**_candidate_inputs(tmp_path))
+
+    assert candidate["status"] == "blocked"
+    assert candidate["formal_release"] is False
+    assert candidate["formal_training_ready"] is False
+    assert candidate["formal_job_count"] == 0
+    assert candidate["admission_contract_valid"] is False
+    assert "ADMISSION_AUDIT_INVALID" in candidate["blocker_codes"]
+    assert candidate["campaign_completion"]["valid"] is True
+    assert candidate["campaign_completion"]["can_finalize"] is True
+
+
 def test_candidate_requires_final_campaign_completion(
     tmp_path: Path,
     monkeypatch,
