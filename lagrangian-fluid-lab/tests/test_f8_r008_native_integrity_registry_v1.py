@@ -65,6 +65,52 @@ def test_15_by_8_matrix_is_incomplete_while_four_definitions_are_open() -> None:
                for item in result["gate_registry"])
 
 
+@pytest.mark.parametrize("wrapped", [False, True])
+def test_synthetic_gate_diagnostic_rejected_before_aggregation(wrapped: bool, monkeypatch) -> None:
+    monkeypatch.setattr(
+        registry, "frozen_qualification_case_ids",
+        lambda: registry.EXPECTED_QUALIFICATION_CASE_IDS,
+    )
+    rows = _rows()
+    diagnostic = {
+        "schema": "core.cfd.f8.r008.synthetic_non_qualifying_diagnostic.v8",
+        "mode": "synthetic_only",
+        "evidence_class": "synthetic_non_qualifying",
+        "diagnostic_outcome": "non_qualifying",
+        "diagnostic_code": "synthetic_bindings_match",
+        "payload_shape_valid": True,
+        "scope_binding_matches": True,
+        "qualification_row_binding_matches": True,
+        "qualification_eligible": False,
+        "qualification_authorized": False,
+        "execution_authorized": False,
+        "qualification_credit": 0,
+        "gate_transition": "none",
+        "registry_write": False,
+        "harness_performed_external_io": False,
+    }
+    if wrapped:
+        diagnostic = {
+            **diagnostic,
+            "case_id": rows[0]["case_id"],
+            "gate_results": rows[0]["gate_results"],
+        }
+
+    class GateReadProbe(dict):
+        def __getitem__(self, key):
+            if key in {"case_id", "gate_results"}:
+                raise AssertionError(f"gate-shaped row read before exact-row rejection: {key}")
+            return super().__getitem__(key)
+
+    rows[0] = GateReadProbe(diagnostic)
+
+    with pytest.raises(
+        registry.NativeIntegrityRegistryError,
+        match="case row 0 has unexpected or missing fields",
+    ):
+        registry.aggregate_native_integrity_statuses(rows)
+
+
 def test_defined_failure_is_preserved_without_shrinking_denominator() -> None:
     rows = _rows()
     rows[2]["gate_results"]["density_range"] = _cell("defined_fail", EVIDENCE_SHA256)
