@@ -301,6 +301,31 @@ def test_synthetic_qualification_schema_rejected_before_binding_and_gate_fields(
     assert qualification.reads == ["schema"]
 
 
+def test_synthetic_evaluation_rejected_before_t1_derivation():
+    class SchemaReadProbe(dict):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.reads = []
+
+        def get(self, key, default=None):
+            self.reads.append(key)
+            if key != "schema":
+                raise AssertionError(f"evaluation field read before schema rejection: {key}")
+            return super().get(key, default)
+
+    evaluation = SchemaReadProbe({
+        "schema": "core.f8.synthetic_diagnostic.v1",
+        "scope_id": connector.SCOPE_ID,
+        "revision_id": connector.QUALIFICATION_REVISION_ID,
+        "T1_numerical": True,
+        "matrix_complete": True,
+        "cells": [{"passed": True}],
+    })
+    with pytest.raises(connector.ConnectorError, match="qualification evaluation schema mismatch"):
+        connector.validate_evaluation(evaluation, Path("unused-manifest.json"))
+    assert evaluation.reads == ["schema"]
+
+
 def test_bound_audit_rejects_unbound_wrapper_flags(tmp_path):
     registered = connector.build_production_design(load(DESIGN_PATH))
     row = registered["cases"][0]

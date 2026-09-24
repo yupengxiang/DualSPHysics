@@ -46,6 +46,7 @@ FAMILY = "F4"
 SCOPE_ID = "F4_resting_pool_laminar_tallwall120_x_v1"
 QUALIFICATION_REVISION_ID = "F4_tallwall120_13plus2_v2"
 CONNECTOR_REVISION_ID = "F4_tallwall120_production_8to32_v1"
+QUALIFICATION_EVALUATION_SCHEMA = "core.f4.tallwall120.qualification_evaluation.v2"
 QUALIFICATION_BINDING_SCHEMA = "core.f4.tallwall120.production_qualification_binding.v1"
 RECIPE_ID = "F4_mdbc_laminar_nu1e6_tallwall120_v1"
 RECIPE = "mdbc_native"
@@ -137,6 +138,12 @@ def _same(value: Any, expected: Any) -> bool:
 
 def _scope_error(label: str, value: Any, expected: Any) -> ConnectorError:
     return ConnectorError(f"{label} mismatch: {value!r} != {expected!r}")
+
+
+def _require_evaluation_schema(evaluation: Mapping[str, Any]) -> None:
+    schema = evaluation.get("schema")
+    if type(schema) is not str or schema != QUALIFICATION_EVALUATION_SCHEMA:
+        raise ConnectorError("qualification evaluation schema mismatch")
 
 
 def validate_design(design: Mapping[str, Any]) -> dict[str, Any]:
@@ -492,8 +499,8 @@ def _verify_native_payload(
 
 def _receipt_summary(evaluation: Mapping[str, Any], manifest_path: Path) -> dict[str, Any]:
     """Derive gates from every evaluator cell and its bound product files."""
+    _require_evaluation_schema(evaluation)
     for key, expected in (
-        ("schema", "core.f4.tallwall120.qualification_evaluation.v2"),
         ("scope_id", SCOPE_ID),
         ("revision_id", QUALIFICATION_REVISION_ID),
     ):
