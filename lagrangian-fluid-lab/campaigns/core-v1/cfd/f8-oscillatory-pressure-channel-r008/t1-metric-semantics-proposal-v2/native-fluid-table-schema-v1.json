@@ -1,0 +1,75 @@
+{
+  "schema": "core.cfd.f8.r008_native_fluid_frame_table.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "proposed_contract_pending_independent_review",
+  "source_container": {
+    "schema": "core.cfd.v1",
+    "schema_version": 3,
+    "producer_reference": "scripts/core_cfd.py::convert_native",
+    "trajectory_semantics": "native numerical particle identity; not material identity",
+    "compatibility_note": "This describes the proposed F8 fluid-only table using the Core HDF5 layout. The current generic converter is not asserted to enforce the strict raw-frame membership checks below; an F8 adapter must validate before projecting rows."
+  },
+  "datasets": {
+    "time": {
+      "shape": ["T"],
+      "dtype": "float64",
+      "semantics": "strictly increasing native solver times in seconds; require row 0 to equal exactly 0.0"
+    },
+    "particle_id": {
+      "shape": ["P"],
+      "dtype": "uint32",
+      "semantics": "unique, immutable, sorted fluid IDs declared by the hash-bound generated Definition"
+    },
+    "position": {
+      "shape": ["T", "P", 3],
+      "dtype": "float64",
+      "components": ["x_m", "y_m", "z_m"]
+    },
+    "velocity": {
+      "shape": ["T", "P", 3],
+      "dtype": "float32",
+      "components": ["vx_m_s", "vy_m_s", "vz_m_s"]
+    },
+    "mass": {
+      "shape": ["T", "P"],
+      "dtype": "float32",
+      "unit": "kg",
+      "semantics": "native particle mass; finite, positive, and invariant for each particle_id"
+    },
+    "valid": {
+      "shape": ["T", "P"],
+      "dtype": "bool",
+      "semantics": "true only when the corresponding native fluid ID was decoded exactly once; all entries must be true for selected rows"
+    }
+  },
+  "fluid_cohort": {
+    "membership_source": "hash-bound generated XML fluid particle groups for this exact matrix row",
+    "table_is_fluid_only": true,
+    "boundary_and_nonfluid_ids_in_table": false,
+    "pre_projection_raw_frame_check": "derive the complete expected native ID universe from the generated XML particle groups and bind its hash; in each decoded native frame require every expected ID exactly once and reject every missing, duplicate, changed, or unknown ID; classify registered fluid IDs versus registered boundary/nonfluid IDs, then project only the exact fluid cohort",
+    "classification_failure": "if generated XML particle groups do not uniquely and completely classify the expected native ID universe, fail closed before table creation"
+  },
+  "initial_fluid_table": {
+    "source_row": 0,
+    "required_initial_time_s": 0.0,
+    "particle_id": "particle_id[:]",
+    "initial_z_m": "position[0,:,2]",
+    "mass_kg": "mass[0,:]",
+    "validation": "all IDs unique; all initial coordinates and masses finite; all masses strictly positive; every z maps to exactly one registered plane within max(1e-6*dp_m,1e-9 m)"
+  },
+  "per_frame_validation": {
+    "selected_native_rows": "inclusive exact rows returned by select_closed_native_window; no interpolation or synthesized rows",
+    "fluid_id_order": "exactly the initial particle_id order",
+    "valid": "all true for every selected fluid row",
+    "velocity_and_position": "all finite for every selected fluid row",
+    "mass": "all finite, positive, and unchanged by particle_id from row 0",
+    "failure_policy": "fail the case closed before any profile, flux, or transverse-RMS reduction"
+  },
+  "authority": {
+    "solver": false,
+    "gpu": false,
+    "worker": false,
+    "queue": false,
+    "qualification_credit": 0
+  }
+}
