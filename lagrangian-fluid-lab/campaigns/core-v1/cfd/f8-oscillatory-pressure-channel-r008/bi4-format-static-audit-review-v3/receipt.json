@@ -1,0 +1,81 @@
+{
+  "schema": "core.cfd.f8.r008_bi4_format_static_audit_review.v1",
+  "reviewed_at_utc": "2026-09-24",
+  "reviewer": {
+    "name": "Terra High",
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "review_thread_id": "01a0d167-4db5-7f90-aee2-94547602a273",
+    "relationship": "same reviewer follow-up thread as BI4 audit v1/v2; not a new independent reviewer"
+  },
+  "verdict": "PASS_static_contract_only",
+  "evidence": [
+    {
+      "path": "scripts/f8_r008_bi4_format_static_audit_v3.py",
+      "bytes": 7334,
+      "sha256": "03817dbf3dca869422ebd9ee07c5c1a28eebce93f0a24bfdf91a0348cf27af8a",
+      "role": "v3 bounded pre-allocation format contract"
+    },
+    {
+      "path": "tests/test_f8_r008_bi4_format_static_audit_v3.py",
+      "bytes": 2036,
+      "sha256": "6ce9a195609e6b0707771c904767b21e5ed38df1a8e073079b2062304e9a5307",
+      "role": "v3 static audit regression tests"
+    },
+    {
+      "path": "reports/F8-R008-BI4-FORMAT-STATIC-AUDIT-V3-2026-09-24.zh-CN.md",
+      "bytes": 3321,
+      "sha256": "a811947dcf59de1a8ce79b995f063d5a7f197ad9268f4c4a4a371c8f38c23e03",
+      "role": "v3 audit report"
+    },
+    {
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/bi4-format-static-audit-v3/receipt.json",
+      "bytes": 23750,
+      "sha256": "1a59a9ca58fdd7074805aafedc3ccf747e491dde7f09b3bbf38f545d925135bf",
+      "role": "immutable v3 static audit receipt"
+    },
+    {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JBinaryData.cpp",
+      "bytes": 120438,
+      "sha256": "a166250e1d339b45c549c25ed49e9533742bf52ce722102b96042f54c750566d",
+      "role": "official JBinaryData parser/writer implementation used by the audit"
+    }
+  ],
+  "findings": [
+    {
+      "topic": "pre-allocation resource exhaustion",
+      "verdict": "PASS",
+      "detail": "Requires a same-descriptor no-follow/hash/fstat sequence followed by bounded streaming checks before object, array, payload allocation or output mutation; rejects LoadFile(memory=true) for adversarial preflight."
+    },
+    {
+      "topic": "R008 resource limits",
+      "verdict": "PASS",
+      "detail": "64-byte header, 10,752*24-byte maximum array, 64-array/16-MiB aggregate cap, 64-MiB raw input cap, and root-plus-PART tree bounds are consistent with the frozen R008 initial anchor and official writer path."
+    },
+    {
+      "topic": "historical binary/source provenance",
+      "verdict": "OPEN_NOT_OVERCLAIMED",
+      "detail": "The ignored decoder binary still lacks a located build command and historical invocation-time hash binding."
+    },
+    {
+      "topic": "implementation and execution state",
+      "verdict": "OPEN_NOT_OVERCLAIMED",
+      "detail": "No bounded scanner or safe decoder implementation exists yet; no R008 solver frames, per-case provenance verifier, T1 results, or qualification credit are claimed."
+    }
+  ],
+  "review_actions": {
+    "files_modified": false,
+    "native_binary_invoked": false,
+    "decoder_invoked": false,
+    "gencase_invoked": false,
+    "solver_invoked": false,
+    "tests_or_builds_run_by_reviewer": false,
+    "worker_started": false,
+    "gpu_invoked": false,
+    "queue_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "qualification_credit": 0,
+    "execution_authority_granted": false
+  }
+}

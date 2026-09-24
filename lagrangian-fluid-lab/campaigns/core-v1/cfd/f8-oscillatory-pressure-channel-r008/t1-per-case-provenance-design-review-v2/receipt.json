@@ -1,0 +1,157 @@
+{
+  "evidence": [
+    {
+      "bytes": 5681,
+      "path": "reports/F8-R008-PER-CASE-PROVENANCE-DESIGN-PROPOSAL-2026-09-24.zh-CN.md",
+      "role": "Terra High REVISE design draft v1",
+      "sha256": "34d345372490acc9b08cfb7cc04f0f4c1757bced57f851820707c3db61eb5438"
+    },
+    {
+      "bytes": 10827,
+      "path": "reports/F8-R008-PER-CASE-PROVENANCE-DESIGN-PROPOSAL-V2-2026-09-24.zh-CN.md",
+      "role": "Terra High PASS design proposal v2",
+      "sha256": "47f9b6af3f55d142a69dfd225cc33f3bf4f32aeac8694809f407b599bcf3ebac"
+    },
+    {
+      "bytes": 65100,
+      "path": "scripts/f8_r008_t1_metric_adapter_v1.py",
+      "role": "current F8 R008 adapter reviewed as an input to the design",
+      "sha256": "f51940c775bdf6bc80dd410bbb4c080dfe6331d09299145d11f6124cba5ae650"
+    },
+    {
+      "bytes": 16844,
+      "path": "tests/test_f8_r008_t1_metric_adapter_v1.py",
+      "role": "current F8 R008 adapter regression tests",
+      "sha256": "2826c16d0a99b43028f558da4c5d29e5ce05ab31e69546a75b21ecc41aa38655"
+    },
+    {
+      "bytes": 23498,
+      "path": "scripts/f8_r008_definition_control_pack_v1.py",
+      "role": "Definition/control row validator referenced by the design",
+      "sha256": "5ad723632111be6b55e4a02f9a74e2ec7c60c613aeeaaa7c60cd597e35e3a8e4"
+    },
+    {
+      "bytes": 10223,
+      "path": "tests/test_f8_r008_definition_control_pack_v1.py",
+      "role": "Definition/control row and cadence contract tests",
+      "sha256": "650fe35bf2b2d45ec8237be4f4db32660d072569e36c09ff81e7064cca071923"
+    },
+    {
+      "bytes": 68034,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-scope-design-v1/receipt.json",
+      "role": "frozen R008 qualification scope and comparison contract",
+      "sha256": "65671b42523cd3a5f82338cc7e2d88890af634195d7013ad969311166ab36ac8"
+    },
+    {
+      "bytes": 127849,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/definition-control-pack-v1/receipt.json",
+      "role": "frozen 15+32 Definition/control bindings",
+      "sha256": "d5b657db398e0c0b102cdb84de8fe0a302c22c85d4bbf16bc0b6e6bf16065fcb"
+    },
+    {
+      "bytes": 16713,
+      "path": "scripts/f8_r008_execution_readiness_audit_v4.py",
+      "role": "current zero-credit readiness audit implementation",
+      "sha256": "5f497c5656ab2228f6bdaa7b4425f1688af527b7d30cfb748e2edefeafa65301"
+    },
+    {
+      "bytes": 10220,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-execution-readiness-audit-v4/receipt.json",
+      "role": "current immutable readiness audit receipt",
+      "sha256": "554cb26e087df69a3a0b17d4827151361ccf835916e545dcb76a06be5826364f"
+    },
+    {
+      "bytes": 53931,
+      "path": "scripts/core_cfd.py",
+      "role": "existing BI4/native frame conversion path inspected during review",
+      "sha256": "fd6e56ab6c8f42e55c15c0e9d742c9289fca0a4214e5e203a3b357a23040adfb"
+    },
+    {
+      "bytes": 324368,
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "role": "native BI4 decoder binary; hash-bound but not executed or reverse-engineered",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    },
+    {
+      "bytes": 8409,
+      "path": "scripts/f8_r008_per_case_provenance_design_review_v2.py",
+      "role": "parent-authored review archive builder",
+      "sha256": "d7b975e3bd2984f1e9c856489555dcedfce502f6020665f46939d5721e6cf141"
+    },
+    {
+      "bytes": 2437,
+      "path": "tests/test_f8_r008_per_case_provenance_design_review_v2.py",
+      "role": "review archive contract tests",
+      "sha256": "0789907fb3bad482c58a81bcbfc93bfba0c1f09117cea8446abfb52a1c244471"
+    }
+  ],
+  "execution_authority": {
+    "denominator_mutation": 0,
+    "gencase": false,
+    "gpu": false,
+    "ledger_mutation": 0,
+    "native_decode": false,
+    "queue": false,
+    "registry_mutation": 0,
+    "solver": false,
+    "worker": false
+  },
+  "findings": [
+    {
+      "detail": "Separate contracts require an absent target before launch and an existing, consumed target for post-run verification.",
+      "topic": "prelaunch admission versus post-run consumed namespace",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Requires a new table/adapter schema and rejects v1, GenCase-only, and synthetic provenance at qualification entry.",
+      "topic": "adapter/table provenance schema",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Defines solver output manifests, decoder input-output mapping, per-frame raw arrays and full-axis to table/window binding.",
+      "topic": "raw solver/decode lineage",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Requires the XML-to-CSV reference, exact hashes and validation of row-specific CFL, TimeMax, TimeOut and cadence controls.",
+      "topic": "Definition/control case binding",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Keeps provenance, native integrity, metric/comparison gates and final T1 adjudication as distinct stages.",
+      "topic": "provenance versus T1 boundary",
+      "verdict": "PASS"
+    }
+  ],
+  "parent_validation": {
+    "command": "PYTHONPATH=. .venv/bin/pytest -q tests/test_f8_r008_definition_control_pack_v1.py",
+    "failed": 0,
+    "passed": 15,
+    "scope_note": "Supporting static Definition/control validation only; no native tools invoked."
+  },
+  "qualification_credit": 0,
+  "record_id": "f8-r008-per-case-provenance-design-review-v2",
+  "remaining_prerequisites": [
+    "Statically freeze the complete BI4/bi4_dump output layout, byte order, metadata semantics and exact output manifest before implementing B/C/D verifiers; no runtime probe is authorized.",
+    "If hard-link substitution is prohibited, the implementation must explicitly require st_nlink == 1 in addition to no-follow regular-file checks.",
+    "A design review PASS does not authorize GenCase, native decode, solver, worker, GPU, queue, registry, ledger or qualification work."
+  ],
+  "reviewed_proposal": {
+    "bytes": 10827,
+    "path": "reports/F8-R008-PER-CASE-PROVENANCE-DESIGN-PROPOSAL-V2-2026-09-24.zh-CN.md",
+    "sha256": "47f9b6af3f55d142a69dfd225cc33f3bf4f32aeac8694809f407b599bcf3ebac"
+  },
+  "reviewer": {
+    "agent_id": "01a0d167-4db5-7f90-aee2-94547602a273",
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "review_mode": "read_only_static_design_review",
+    "review_thread_note": "Follow-up by the same Terra High agent after its v1 REVISE; not represented as a newly independent second reviewer.",
+    "reviewer_execution_or_evidence_mutation": false,
+    "reviewer_ran_tests": false,
+    "verdict": "PASS"
+  },
+  "schema": "core.cfd.f8.r008_per_case_provenance_design_review.v2",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "static_design_review_passed_implementation_prerequisites_open"
+}
