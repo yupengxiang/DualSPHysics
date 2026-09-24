@@ -670,6 +670,7 @@ def _receipt_summary(evaluation: Mapping[str, Any], manifest_path: Path) -> dict
             "qualification evaluator booleans do not match its cell/audit/check evidence"
         )
     return {
+        "schema": "core.qualification.v1",
         "family": FAMILY,
         "scope_id": SCOPE_ID,
         "matrix_complete": derived_matrix_complete,

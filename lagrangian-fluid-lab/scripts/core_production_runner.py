@@ -330,11 +330,14 @@ def verify_qualification_receipt(
     """Load a v2 qualification receipt only after source/evidence hash checks."""
     path = Path(receipt_path).resolve()
     receipt = _load(path)
+    receipt_schema = receipt.get("schema")
+    if type(receipt_schema) is not str or receipt_schema != "core.qualification.v1":
+        raise VerificationError("qualification receipt schema/family mismatch")
+    if receipt.get("family") != FAMILY:
+        raise VerificationError("qualification receipt schema/family mismatch")
     _new_scope_guard(receipt.get("scope_id"))
     if receipt.get("scope_id") != matrix["design"]["scope_id"]:
         raise VerificationError("qualification receipt belongs to another registered scope")
-    if receipt.get("schema") != "core.qualification.v1" or receipt.get("family") != FAMILY:
-        raise VerificationError("qualification receipt schema/family mismatch")
     if receipt.get("design_sha256") != matrix["design_sha256"]:
         raise VerificationError("qualification receipt design hash does not match v2 matrix")
     for key in ("prepared_matrix_sha256", "matrix_sha256"):

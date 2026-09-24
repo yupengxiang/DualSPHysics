@@ -242,6 +242,7 @@ def test_tampered_fixed_production_registration_is_rejected(field, value):
 def test_qualified_receipt_transitions_first_eight_then_remaining_24(tmp_path):
     registered = connector.build_production_design(load(DESIGN_PATH))
     qualification = {
+        "schema": "core.qualification.v1",
         "family": "F4",
         "scope_id": connector.SCOPE_ID,
         "matrix_complete": True,

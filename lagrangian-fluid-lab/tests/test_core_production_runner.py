@@ -55,6 +55,23 @@ def test_old_scope_qualification_receipt_is_rejected(tmp_path):
         verify_qualification_receipt(path, matrix)
 
 
+@pytest.mark.parametrize("schema", ["core.f8.synthetic_diagnostic.v1", None])
+def test_synthetic_qualification_schema_rejected_before_scope_or_family_guard(tmp_path, schema):
+    receipt = {
+        "family": "synthetic-family",
+        "scope_id": "unregistered-synthetic-scope",
+        "T1_numerical": True,
+        "matrix_complete": True,
+    }
+    if schema is not None:
+        receipt["schema"] = schema
+    path = tmp_path / "synthetic-qualification.json"
+    _write_json(path, receipt)
+
+    with pytest.raises(VerificationError, match="qualification receipt schema/family mismatch"):
+        verify_qualification_receipt(path, matrix={})
+
+
 def test_hash_verified_complete_receipt(tmp_path):
     matrix = inspect_qualification_matrix(MATRIX_ROOT)
     cells = []
@@ -136,6 +153,7 @@ def test_batch_failure_keeps_the_fixed_denominator():
     matrix = inspect_qualification_matrix(MATRIX_ROOT)
     design = production_design(matrix)
     qualification = {
+        "schema": "core.qualification.v1",
         "family": FAMILY,
         "scope_id": SCOPE_ID,
         "T1_numerical": True,
