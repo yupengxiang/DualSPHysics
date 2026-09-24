@@ -1,0 +1,165 @@
+{
+  "evidence": [
+    {
+      "bytes": 32315,
+      "path": "scripts/f8_r008_safe_bi4_decoder_v1.py",
+      "role": "reviewed bounded streaming BI4 scanner and safe materializer",
+      "sha256": "affbbb6c04a4d21d03037e74d0023112c60c7d8e5972cc6dfc882e1c7c5dc319"
+    },
+    {
+      "bytes": 19692,
+      "path": "tests/test_f8_r008_safe_bi4_decoder_v1.py",
+      "role": "synthetic BI4 wire-format, bound, mutation, and output-closure tests",
+      "sha256": "803c64b7fcc484e2577bb953d83ce4c767b6332e859c5967d65ebcb1b324be13"
+    },
+    {
+      "bytes": 120438,
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JBinaryData.cpp",
+      "role": "pinned official JBinaryData writer/parser source",
+      "sha256": "a166250e1d339b45c549c25ed49e9533742bf52ce722102b96042f54c750566d"
+    },
+    {
+      "bytes": 28244,
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JBinaryData.h",
+      "role": "pinned official JBinaryData types and wire declarations",
+      "sha256": "e63f60e6ae6d3ee8ed1f137ebca1bf45e6b783fb5a54c510fa80a3b09556af38"
+    },
+    {
+      "bytes": 29430,
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JPartDataBi4.cpp",
+      "role": "pinned official R008 particle-item layout source",
+      "sha256": "e507d88c8fac9b990b74d8dce71edb3524f71f46a04b3bdc5d289bf0af4ecdfc"
+    },
+    {
+      "bytes": 7334,
+      "path": "scripts/f8_r008_bi4_format_static_audit_v3.py",
+      "role": "frozen bounded BI4 format contract",
+      "sha256": "03817dbf3dca869422ebd9ee07c5c1a28eebce93f0a24bfdf91a0348cf27af8a"
+    },
+    {
+      "bytes": 23750,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/bi4-format-static-audit-v3/receipt.json",
+      "role": "immutable v3 format audit and resource-cap receipt",
+      "sha256": "1a59a9ca58fdd7074805aafedc3ccf747e491dde7f09b3bbf38f545d925135bf"
+    },
+    {
+      "bytes": 3311,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/bi4-format-static-audit-review-v3/receipt.json",
+      "role": "Terra High PASS for the static format contract only",
+      "sha256": "2767d7be023148957f6ae4dddff63ed5d50cb199ba6674eccdfd91402c31f610"
+    },
+    {
+      "bytes": 10827,
+      "path": "reports/F8-R008-PER-CASE-PROVENANCE-DESIGN-PROPOSAL-V2-2026-09-24.zh-CN.md",
+      "role": "reviewed boundary between decode materialization and later provenance/T1 gates",
+      "sha256": "47f9b6af3f55d142a69dfd225cc33f3bf4f32aeac8694809f407b599bcf3ebac"
+    },
+    {
+      "bytes": 6816,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-per-case-provenance-design-review-v2/receipt.json",
+      "role": "Terra High PASS for static provenance design only",
+      "sha256": "8e268481cbd18aec7327537a49ffbc6e322588562d6443a36a28440ad3a75acf"
+    },
+    {
+      "bytes": 16713,
+      "path": "scripts/f8_r008_execution_readiness_audit_v4.py",
+      "role": "current readiness/zero-credit gate implementation",
+      "sha256": "5f497c5656ab2228f6bdaa7b4425f1688af527b7d30cfb748e2edefeafa65301"
+    },
+    {
+      "bytes": 10220,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-execution-readiness-audit-v4/receipt.json",
+      "role": "current immutable R008 readiness receipt",
+      "sha256": "554cb26e087df69a3a0b17d4827151361ccf835916e545dcb76a06be5826364f"
+    },
+    {
+      "bytes": 10207,
+      "path": "scripts/f8_r008_safe_bi4_decoder_review_v1.py",
+      "role": "parent-authored archive builder, not reviewer-authored content",
+      "sha256": "5ed97e90c12c05b0b27c259d0f98a9ec227a8e3d64824ba68f00a03c2c205f1b"
+    },
+    {
+      "bytes": 3340,
+      "path": "tests/test_f8_r008_safe_bi4_decoder_review_v1.py",
+      "role": "review archive immutability and canonical binding tests",
+      "sha256": "00049076b55081b0e8af9529841e4baf6a446d1d569137302ebe6b9cd44ffd82"
+    }
+  ],
+  "execution_controls": {
+    "gencase_invoked": false,
+    "gpu_invoked": false,
+    "ledger_mutation": 0,
+    "native_decoder_invoked": false,
+    "production_bi4_read": false,
+    "qualification_credit": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_invoked": false,
+    "worker_started": false
+  },
+  "parent_validation": {
+    "decoder_tests": {
+      "command": "PYTHONPATH=. .venv/bin/pytest -q tests/test_f8_r008_safe_bi4_decoder_v1.py",
+      "failed": 0,
+      "input_scope": "temporary synthetic BI4 byte fixtures only",
+      "passed": 17
+    },
+    "python_bytecode_validation": "passed",
+    "r008_regression": {
+      "command": ".venv/bin/pytest -q tests/test_f8_r008_*.py -k 'not test_v3_native_commands_use_absolute_paths_and_the_verified_cap and not test_v3_supersedes_unexecuted_v2_and_grants_no_execution_or_credit and not test_v3_hash_closes_inputs_v2_request_builder_and_tests and not test_v3_rejects_a_changed_superseded_request and not test_authorization_builder_verifies_frozen_request_and_review'",
+      "deselected": 5,
+      "deselection_reason": "one-time prelaunch request/authorization tests require an absent R008 runtime namespace; the already-consumed namespace is intentionally preserved and was not reset or retried",
+      "failed": 0,
+      "passed": 128
+    }
+  },
+  "readiness_effect": {
+    "execution_authority_granted": false,
+    "qualification_credit": 0,
+    "readiness_pass": false
+  },
+  "record_id": "f8-r008-safe-bi4-decoder-review-v1",
+  "remaining_limitations": [
+    "This is a pure-Python narrow safe scanner/materializer; it does not invoke, replace, or establish historical source/build provenance for the existing bi4_dump executable.",
+    "No production R008 BI4 was read or decoded; generated XML/array output was exercised only with temporary synthetic fixtures.",
+    "No R008 per-case materialization/solver/decode provenance verifier, provenance-v2 table, solver frames, or formal 15-row T1 result exists yet.",
+    "readiness_pass remains false, qualification credit remains zero, and all native/solver/worker/GPU/queue execution remains unauthorized by this review."
+  ],
+  "review_findings": [
+    {
+      "detail": "Same-descriptor hash/fstat checks, fixed header validation, bounded metadata/tree/count/type checks and streaming array payload handling precede output creation; no whole-file native JBinaryData load is used.",
+      "topic": "bounded pre-allocation parser",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Input is opened beneath a held root with no-follow checks and st_nlink==1. Output uses exclusive no-follow creation, 0700 child directories, exact manifest/tree/hash verification, and an explicit caller precondition for a dedicated parent with no ACL/capability/privileged cross-UID writer; same-UID writers are trusted.",
+      "topic": "filesystem threat model and output closure",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Item and array visibility flags are kept distinct. The R008 subset pins and tests the official JBinaryData default float/double formats (%.7E/%.15E) and rejects format deviations before materialization.",
+      "topic": "official metadata and visibility fidelity",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Synthetic tests cover byte/count mismatch, path traversal, hard links/symlinks, hash mismatch, unsupported endian/SI64, invalid XML metadata, long sidecar names, shared writable output parents, and input mutation between bounded array reads.",
+      "topic": "mutation, resource and adversarial fixture coverage",
+      "verdict": "PASS"
+    }
+  ],
+  "reviewer": {
+    "agent_id": "01a0d167-4db5-7f90-aee2-94547602a273",
+    "model": "gpt-5.6-terra",
+    "name": "Terra High",
+    "reasoning_effort": "high",
+    "review_mode": "read_only_static_code_review",
+    "review_thread_note": "Follow-up in the same Terra High thread as the R008 format/design reviews; not a newly independent reviewer.",
+    "reviewer_modified_files": false,
+    "reviewer_ran_tests": false,
+    "reviewer_read_production_bi4": false,
+    "verdict": "PASS"
+  },
+  "schema": "core.cfd.f8.r008_safe_bi4_decoder_review.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "static_safe_decoder_review_passed_no_native_execution"
+}
