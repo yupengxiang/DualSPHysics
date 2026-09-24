@@ -182,6 +182,44 @@ def test_v2_metric_matrix_evaluates_frozen_15_case_synthetic_matrix(tmp_path) ->
     assert result["qualification_credit"] == 0
 
 
+def test_synthetic_or_rewrapped_result_rejected_before_metric_parse(tmp_path, monkeypatch) -> None:
+    results, audits = _inputs(tmp_path)
+    first_id = next(iter(results))
+    diagnostic = {
+        "schema": "core.cfd.f8.r008.synthetic_non_qualifying_diagnostic.v8",
+        "mode": "synthetic_only",
+        "evidence_class": "synthetic_non_qualifying",
+        "diagnostic_outcome": "non_qualifying",
+        "diagnostic_code": "synthetic_bindings_match",
+        "payload_shape_valid": True,
+        "scope_binding_matches": True,
+        "qualification_row_binding_matches": True,
+        "qualification_eligible": False,
+        "qualification_authorized": False,
+        "execution_authorized": False,
+        "qualification_credit": 0,
+        "gate_transition": "none",
+        "registry_write": False,
+        "harness_performed_external_io": False,
+    }
+    rewrapped = dict(results[first_id])
+    rewrapped.update(diagnostic)
+    payloads = [diagnostic, rewrapped]
+
+    def fail_if_metric_parser_reached(*args, **kwargs):
+        raise AssertionError("synthetic input reached metric parsing")
+
+    monkeypatch.setattr(metric_bundle, "_validate_case_metrics", fail_if_metric_parser_reached)
+    for payload in payloads:
+        supplied = dict(results)
+        supplied[first_id] = payload
+        with pytest.raises(
+            matrix_v2.NativeFluidMetricMatrixError,
+            match="per-case v2 result is absent, unclosed, or overstates T1",
+        ):
+            matrix_v2.evaluate_metric_matrix_v2(supplied, solver_timestep_audits=audits)
+
+
 def test_v2_metric_matrix_rejects_omitted_case_instead_of_shrinking_denominator(tmp_path) -> None:
     results, audits = _inputs(tmp_path)
     results.pop(next(iter(results)))
