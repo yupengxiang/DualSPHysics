@@ -3,9 +3,37 @@ from pathlib import Path
 
 import pytest
 
-from scripts.core_production_dispatch import submit_batch, tick
+from scripts.core_production_dispatch import _qualification_t1_claim, submit_batch, tick
 from scripts.core_production_runner import VerificationError
 from scripts.core_runtime import Store, atomic_json, digest, snapshot_code
+
+
+def test_synthetic_qualification_rejected_before_dispatch_t1_claim():
+    class SchemaReadProbe(dict):
+        reads = []
+
+        def get(self, key, default=None):
+            self.reads.append(key)
+            if key != 'schema':
+                raise AssertionError(f'qualification field read before schema rejection: {key}')
+            return super().get(key, default)
+
+    receipt = SchemaReadProbe({
+        'schema': 'core.f8.synthetic_diagnostic.v1',
+        'T1_numerical': True,
+    })
+    with pytest.raises(VerificationError, match='qualification receipt schema mismatch'):
+        _qualification_t1_claim(receipt)
+    assert receipt.reads == ['schema']
+
+
+def test_dispatch_t1_claim_accepts_only_versioned_qualification():
+    assert _qualification_t1_claim({
+        'schema': 'core.qualification.v1', 'T1_numerical': True,
+    }) is True
+    assert _qualification_t1_claim({
+        'schema': 'core.qualification.v1', 'T1_numerical': False,
+    }) is False
 
 
 def test_pending_gate_never_prepares_or_submits(tmp_path):

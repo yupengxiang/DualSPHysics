@@ -13,6 +13,7 @@ import json
 from pathlib import Path
 import sys
 import time
+from typing import Any, Mapping
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.core_runtime import Store, atomic_json, digest, freeze_job
@@ -24,6 +25,16 @@ from scripts.core_production_runner import (
 
 def reference(path):
     return {"path": str(Path(path).resolve()), "sha256": digest(Path(path))}
+
+
+def _qualification_t1_claim(receipt: Mapping[str, Any]) -> bool:
+    """Read the T1 marker only after the versioned qualification schema."""
+    if not isinstance(receipt, Mapping):
+        raise VerificationError("qualification receipt object required")
+    schema = receipt.get("schema")
+    if type(schema) is not str or schema != "core.qualification.v1":
+        raise VerificationError("qualification receipt schema mismatch")
+    return receipt.get("T1_numerical") is True
 
 
 def collect_audits(jobs, design, output):
@@ -150,7 +161,7 @@ def tick(*, lab, runtime_root, matrix_root, qualification_job, state_root):
                 status.update(status='infrastructure_review_required', failures=failures)
             else:
                 qualified_source = gate['result'].get('source_snapshot')
-                if json.loads(qualification.read_text()).get('T1_numerical') is True:
+                if _qualification_t1_claim(json.loads(qualification.read_text())):
                     if (not qualified_source or
                             digest(Path(qualified_source['path'])/'scripts/core_cfd.py')
                             != digest(Path(core_cfd.__file__))):
