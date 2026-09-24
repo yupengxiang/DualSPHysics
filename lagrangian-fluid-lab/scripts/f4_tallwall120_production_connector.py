@@ -33,7 +33,12 @@ SOURCE_ROOT = Path(__file__).resolve().parents[1]
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from scripts.core_production import FIRST_EIGHT, next_batch, register_scope
+from scripts.core_production import (
+    FIRST_EIGHT,
+    QUALIFICATION_SCHEMA,
+    next_batch,
+    register_scope,
+)
 
 
 SCHEMA = "core.f4.tallwall120.production_connector.v1"
@@ -670,7 +675,7 @@ def _receipt_summary(evaluation: Mapping[str, Any], manifest_path: Path) -> dict
             "qualification evaluator booleans do not match its cell/audit/check evidence"
         )
     return {
-        "schema": "core.qualification.v1",
+        "schema": QUALIFICATION_SCHEMA,
         "family": FAMILY,
         "scope_id": SCOPE_ID,
         "matrix_complete": derived_matrix_complete,
@@ -1242,6 +1247,16 @@ def batch_decision(
     audits: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Return the fail-closed 8 -> 24 decision without writing state."""
+    qualification_schema = qualification.get("schema")
+    if type(qualification_schema) is not str or qualification_schema != QUALIFICATION_SCHEMA:
+        validate_production_design(production_design)
+        return {
+            "status": "scope_review_required",
+            "ready": [],
+            "failed": ["qualification:schema_mismatch"],
+            "missing": [row["case_id"] for row in production_design["cases"]],
+            "registered_denominator": PRODUCTION_CASE_COUNT,
+        }
     validate_production_design(production_design)
     audits = {} if audits is None else dict(audits)
     binding = qualification.get("binding")
@@ -1327,6 +1342,7 @@ def negative_contract_checks(
     results: list[dict[str, Any]] = []
 
     partial_qualification = {
+        "schema": QUALIFICATION_SCHEMA,
         "family": FAMILY,
         "scope_id": SCOPE_ID,
         "matrix_complete": False,

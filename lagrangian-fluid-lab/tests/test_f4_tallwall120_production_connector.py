@@ -269,6 +269,38 @@ def test_qualified_receipt_transitions_first_eight_then_remaining_24(tmp_path):
     assert set(second["ready"]).isdisjoint(first["ready"])
 
 
+def test_synthetic_qualification_schema_rejected_before_binding_and_gate_fields():
+    registered = connector.build_production_design(load(DESIGN_PATH))
+
+    class SchemaReadProbe(dict):
+        reads = []
+
+        def get(self, key, default=None):
+            self.reads.append(key)
+            if key != "schema":
+                raise AssertionError(f"qualification field read before schema rejection: {key}")
+            return super().get(key, default)
+
+    class AuditReadProbe:
+        def keys(self):
+            raise AssertionError("audits read before qualification schema rejection")
+
+    qualification = SchemaReadProbe({
+        "schema": "core.f8.synthetic_diagnostic.v1",
+        "family": "F4",
+        "scope_id": connector.SCOPE_ID,
+        "matrix_complete": True,
+        "T1_numerical": True,
+        "binding": synthetic_binding(True, True),
+    })
+
+    decision = connector.batch_decision(registered, qualification, AuditReadProbe())
+    assert decision["status"] == "scope_review_required"
+    assert decision["failed"] == ["qualification:schema_mismatch"]
+    assert decision["ready"] == []
+    assert qualification.reads == ["schema"]
+
+
 def test_bound_audit_rejects_unbound_wrapper_flags(tmp_path):
     registered = connector.build_production_design(load(DESIGN_PATH))
     row = registered["cases"][0]
@@ -296,6 +328,7 @@ def test_bound_audit_requires_native_execution_output_index(tmp_path):
 def test_partial_matrix_cannot_open_first_batch():
     registered = connector.build_production_design(load(DESIGN_PATH))
     qualification = {
+        "schema": connector.QUALIFICATION_SCHEMA,
         "family": "F4",
         "scope_id": connector.SCOPE_ID,
         "matrix_complete": False,
