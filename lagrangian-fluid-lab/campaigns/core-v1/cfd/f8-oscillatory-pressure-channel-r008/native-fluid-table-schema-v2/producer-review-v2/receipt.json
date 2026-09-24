@@ -1,0 +1,126 @@
+{
+  "evidence": [
+    {
+      "bytes": 17637,
+      "path": "scripts/f8_r008_native_fluid_table_producer_v2.py",
+      "sha256": "e4ee6c50ee2ceb16b8f511e5d108a797db528fd1aaf6e7250b9b1785c2c42071"
+    },
+    {
+      "bytes": 32025,
+      "path": "scripts/f8_r008_native_fluid_table_v2.py",
+      "sha256": "91c064acfe5fd4c8c70f5cf8a7b049ef789e55061f232991dfafb71167fdc455"
+    },
+    {
+      "bytes": 32315,
+      "path": "scripts/f8_r008_safe_bi4_decoder_v1.py",
+      "sha256": "affbbb6c04a4d21d03037e74d0023112c60c7d8e5972cc6dfc882e1c7c5dc319"
+    },
+    {
+      "bytes": 18851,
+      "path": "tests/test_f8_r008_native_fluid_table_v2.py",
+      "sha256": "451abf7a685989938a35f0911b61cc11b639761e448864eafd62d9f263b799da"
+    },
+    {
+      "bytes": 6509,
+      "path": "tests/test_f8_r008_native_fluid_table_producer_v2.py",
+      "sha256": "d880e1e4d3541c7a7b080e9e894056fca0344b91148d780702914b9e1a6de007"
+    },
+    {
+      "bytes": 2245,
+      "path": "tests/test_f8_r008_native_fluid_table_producer_review_v2.py",
+      "sha256": "34f14c7ecd4b26467f662eabd28b678d73ec025947319bba07345c22bad19df7"
+    },
+    {
+      "bytes": 5252,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/native-fluid-table-schema-v2/design-review-v2/receipt.json",
+      "sha256": "2a478f1935aaaf28d6bb0c407248180a7337cdebf94095443d90638a63ddd94e"
+    },
+    {
+      "bytes": 8954,
+      "path": "scripts/f8_r008_native_fluid_table_producer_review_v2.py",
+      "sha256": "57cccf6997872fd5bfa397ee1fb8d325dbd2c8cf92ea7899d8dbb5ed4e0ea241"
+    }
+  ],
+  "execution_authority": {
+    "T1_numerical": false,
+    "gpu": false,
+    "qualification_credit": 0,
+    "queue": false,
+    "solver": false,
+    "worker": false
+  },
+  "findings": [
+    {
+      "detail": "The writer emits the exact reviewed attribute/dataset inventory, dtypes, row chunks, compression and native boolean enums under the table-v2 verifier contract.",
+      "topic": "v2 serialization contract",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Every source pass checks the complete time axis, full CaseNp uint32 ID permutation, B-bound CaseNp/MassFluid, selected fluid IDs, and finite typed position/velocity/density rows; the independent verifier recomputes the generated table against the second stream.",
+      "topic": "raw source projection",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "The temporary HDF5 image starts with conversion_complete false, is made true only after all rows are durable, and is semantically verified before no-replace link publication. Inode-bound cleanup preserves pre-existing/rebound names.",
+      "topic": "completion and publication atomicity",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "The primitive reports that B/C provenance, authorization authenticity, native integrity, T1, and qualification credit are not established; safe reopening and hash authentication of both source-factory passes remain caller responsibilities.",
+      "topic": "caller-context boundary",
+      "verdict": "PASS"
+    }
+  ],
+  "known_limitations": [
+    "This primitive does not verify B/C/D provenance, authorization authenticity, or loaded-module/runtime identity.",
+    "The caller's source_frames_factory must independently reopen and hash-bind the exact C inputs on both invocations.",
+    "No production bundle, solver frame, native decoder, solver, worker, GPU, or queue was used."
+  ],
+  "parent_validation": {
+    "command": "./.venv/bin/pytest -q tests/test_f8_r008_native_fluid_table_producer_v2.py",
+    "failed": 0,
+    "fixture_scope": "temporary synthetic source frames and HDF5 output only",
+    "passed": 7
+  },
+  "record_id": "f8-r008-native-fluid-table-producer-implementation-review-v2",
+  "review_boundary": {
+    "T1_numerical": false,
+    "gencase_invoked": false,
+    "gpu_or_queue_invoked": false,
+    "native_decoder_invoked": false,
+    "native_integrity_evaluated": false,
+    "native_solver_frame_read": false,
+    "production_bundle_read": false,
+    "qualification_credit": 0,
+    "registry_or_ledger_mutated": false,
+    "solver_or_worker_invoked": false
+  },
+  "reviewed_scope": {
+    "authorization_authenticity": false,
+    "bounded_streaming_serialization": true,
+    "independent_semantic_verifier": true,
+    "native_integrity_or_T1_adjudication": false,
+    "table_schema": "core.cfd.f8.r008_native_fluid_frame_table.v2",
+    "two_pass_source_recomputation": true,
+    "verified_B_C_D_orchestration": false
+  },
+  "reviewer": {
+    "agent_id": "01a0d2ed-c88b-76c0-9ec5-38077fa80a7a",
+    "archive_note": "Parent-authored source-hash archive; not represented as reviewer-authored content.",
+    "execution_or_evidence_mutation": false,
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "review_mode": "read_only_static_implementation_review",
+    "reviewer_ran_tests": true,
+    "verdict": "PASS"
+  },
+  "reviewer_validation": {
+    "command": "./.venv/bin/pytest -q tests/test_f8_r008_native_fluid_table_producer_v2.py",
+    "failed": 0,
+    "fixture_scope": "temporary synthetic source frames and HDF5 output only",
+    "passed": 7
+  },
+  "schema": "core.cfd.f8.r008_native_fluid_table_producer_implementation_review.v2",
+  "schema_review_receipt_sha256": "2a478f1935aaaf28d6bb0c407248180a7337cdebf94095443d90638a63ddd94e",
+  "status": "static_implementation_review_passed_no_execution_or_t1_credit"
+}
