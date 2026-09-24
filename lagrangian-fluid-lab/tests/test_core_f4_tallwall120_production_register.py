@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from scripts import core_f4_tallwall120_production_register as register_module
 from scripts.core_f4_tallwall120_production_register import RegistrationError, register_f4
 
 
@@ -68,6 +69,44 @@ def _make_fixture(root: Path) -> tuple[Path, Path, Path, Path, Path, Path]:
     case_dir = root / "registered-cases"
     registration = root / "registration.json"
     return collection, range_path, registry, qualification, case_dir, registration
+
+
+@pytest.mark.parametrize(
+    ("validator", "expected_error"),
+    [
+        ("range", "range qualification schema is unsupported"),
+        ("collection", "formal collection schema is unsupported"),
+    ],
+)
+def test_synthetic_t1_inputs_rejected_before_registry_evidence_fields(
+    tmp_path: Path, monkeypatch, validator: str, expected_error: str
+) -> None:
+    class SchemaReadProbe(dict):
+        def __init__(self):
+            super().__init__({
+                "schema": "core.f8.synthetic_diagnostic.v1",
+                "scope_id": "synthetic-scope", "family": "F4",
+                "T1_numerical": True, "matrix_complete": True,
+                "formal_eligible": True, "qualification_evidence_verified": True,
+                "cases": [{"scientific_status": "passed"}],
+            })
+            self.reads = []
+
+        def get(self, key, default=None):
+            self.reads.append(key)
+            if key != "schema":
+                raise AssertionError(f"registry evidence read before schema rejection: {key}")
+            return super().get(key, default)
+
+    probe = SchemaReadProbe()
+    monkeypatch.setattr(register_module, "_load", lambda _path: probe)
+    path = tmp_path / "synthetic.json"
+    with pytest.raises(RegistrationError, match=expected_error):
+        if validator == "range":
+            register_module._validate_range_qualification(tmp_path, path)
+        else:
+            register_module._validate_collection(tmp_path, path)
+    assert probe.reads == ["schema"]
 
 
 def test_formal_f4_registration_is_hash_bound_and_idempotent(tmp_path: Path) -> None:
