@@ -6,7 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from scripts.core_formal_readiness import build_readiness, main
+from scripts.core_formal_readiness import _admission_observation, build_readiness, main
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -55,6 +55,93 @@ def test_real_readiness_preserves_all_formal_denominators_and_penalty_contract()
         "trajectory_files_opened": False,
         "trajectory_state_frames_read": 0,
     }
+
+
+def test_unknown_or_synthetic_admission_schema_rejected_before_gate_parse() -> None:
+    synthetic_diagnostic = {
+        "schema": "core.cfd.f8.r008.synthetic_non_qualifying_diagnostic.v8",
+        "mode": "synthetic_only",
+        "evidence_class": "synthetic_non_qualifying",
+        "diagnostic_outcome": "non_qualifying",
+        "diagnostic_code": "synthetic_bindings_match",
+        "payload_shape_valid": True,
+        "scope_binding_matches": True,
+        "qualification_row_binding_matches": True,
+        "qualification_eligible": False,
+        "qualification_authorized": False,
+        "execution_authorized": False,
+        "qualification_credit": 0,
+        "gate_transition": "none",
+        "registry_write": False,
+        "harness_performed_external_io": False,
+    }
+    gate_shaped_fields = {
+        "family_summary": {
+            "t1_families": {"F3": True, "F4": True, "F8": True},
+            "validation_counts": {"F3": 4, "F4": 4, "F8": 4},
+        },
+        "formal_admission": True,
+        "formal_job_count": 9,
+    }
+    probes = [
+        synthetic_diagnostic,
+        {**synthetic_diagnostic, **gate_shaped_fields},
+        {"schema": "unknown.schema.v1", **gate_shaped_fields},
+        gate_shaped_fields,
+    ]
+
+    class GateFieldProbe(dict):
+        def __init__(self, value):
+            super().__init__(value)
+            self.reads = []
+
+        def get(self, key, default=None):
+            self.reads.append(key)
+            if key in {"family_summary", "formal_admission", "formal_protocol"}:
+                raise AssertionError(f"gate field read before schema rejection: {key}")
+            return super().get(key, default)
+
+    for payload in probes:
+        probe = GateFieldProbe(payload)
+        observation = _admission_observation(
+            probe, {"path": "synthetic-only", "sha256": "0" * 64, "bytes": 0})
+        assert observation["schema_valid"] is False
+        assert observation["status"] == "invalid_schema"
+        assert observation["formal_admission"] is False
+        assert observation["t1_families"] == []
+        assert observation["validation_case_count"] == 0
+        assert probe.reads == ["schema"]
+
+
+def test_build_readiness_blocks_synthetic_admission_without_counting_gate_fields(
+    tmp_path: Path,
+) -> None:
+    payload = {
+        "schema": "core.cfd.f8.r008.synthetic_non_qualifying_diagnostic.v8",
+        "mode": "synthetic_only",
+        "evidence_class": "synthetic_non_qualifying",
+        "family_summary": {
+            "t1_families": {"F3": True, "F4": True, "F8": True},
+            "validation_counts": {"F3": 4, "F4": 4, "F8": 4},
+        },
+        "formal_admission": True,
+        "formal_job_count": 9,
+    }
+    admission_path = tmp_path / "synthetic-admission.json"
+    admission_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    report = build_readiness(
+        data_root=ROOT,
+        phase_plan=PHASE_PLAN,
+        admission_audit=admission_path,
+        registry=REGISTRY,
+    )
+
+    assert report["status"] == "blocked"
+    assert report["formal_admission"] is False
+    assert report["admission_audit"]["t1_family_count"] == 0
+    assert report["admission_audit"]["validation_case_count"] == 0
+    assert "ADMISSION_SCHEMA" in {item["code"] for item in report["blockers"]}
 
 
 def test_cli_is_portable_and_does_not_mutate_registry(tmp_path: Path, monkeypatch) -> None:

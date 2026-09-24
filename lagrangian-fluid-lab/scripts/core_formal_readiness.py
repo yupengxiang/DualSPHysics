@@ -206,6 +206,28 @@ def _phase_observation(payload: Mapping[str, Any], reference: Mapping[str, Any])
 
 
 def _admission_observation(payload: Mapping[str, Any], reference: Mapping[str, Any]) -> dict[str, Any]:
+    schema = payload.get("schema")
+    if type(schema) is not str or schema != ADMISSION_SCHEMA:
+        # This is only a schema discriminator, not producer authentication.
+        # Reject unknown/synthetic schemas before looking at any gate-shaped
+        # fields so diagnostic objects cannot inflate the readiness summary.
+        return {
+            "artifact": dict(reference),
+            "schema": schema,
+            "schema_valid": False,
+            "status": "invalid_schema",
+            "formal_admission": False,
+            "formal_job_count": None,
+            "required_formal_job_count": None,
+            "t1_families": [],
+            "t1_family_count": 0,
+            "validation_counts": {},
+            "validation_case_count": 0,
+            "protocol": {},
+            "capacity_evidence": {},
+            "upstream_blockers": [],
+        }
+
     summary = payload.get("family_summary")
     summary = summary if isinstance(summary, Mapping) else {}
     t1_families = summary.get("t1_families")
@@ -228,7 +250,8 @@ def _admission_observation(payload: Mapping[str, Any], reference: Mapping[str, A
     capacity_evidence = dict(capacity_evidence) if isinstance(capacity_evidence, Mapping) else {}
     return {
         "artifact": dict(reference),
-        "schema": payload.get("schema"),
+        "schema": schema,
+        "schema_valid": True,
         "status": payload.get("status"),
         "formal_admission": payload.get("formal_admission"),
         "formal_job_count": payload.get("formal_job_count"),
@@ -333,6 +356,9 @@ def build_readiness(*, data_root: str | Path, phase_plan: str | Path,
         blockers.append({"code": code, "message": message, "observed": observed,
                          "required": required, "scope": scope})
 
+    if not admission["schema_valid"]:
+        blocker("ADMISSION_SCHEMA", "formal admission audit schema is not accepted",
+                admission["schema"], ADMISSION_SCHEMA, scope="contract")
     if admission["t1_family_count"] < REQUIRED_T1_FAMILIES:
         blocker("THIRD_T1_FAMILY", "formal admission needs three distinct T1 families",
                 admission["t1_family_count"], REQUIRED_T1_FAMILIES)
