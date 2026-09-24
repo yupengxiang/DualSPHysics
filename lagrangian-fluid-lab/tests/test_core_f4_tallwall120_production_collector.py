@@ -151,6 +151,29 @@ def _synthetic_collection(tmp_path: Path, *, missing: set[int] | None = None,
     return design_path, batch_path, qualification_path, products_path
 
 
+def test_synthetic_qualification_rejected_before_collection(tmp_path):
+    class SchemaReadProbe(dict):
+        reads = []
+
+        def get(self, key, default=None):
+            self.reads.append(key)
+            if key != "schema":
+                raise AssertionError(f"qualification field read before schema rejection: {key}")
+            return super().get(key, default)
+
+    qualification = SchemaReadProbe({
+        "schema": "core.f8.synthetic_diagnostic.v1",
+        "summary": {
+            "family": "F4", "scope_id": collector.SCOPE_ID,
+            "matrix_complete": True, "T1_numerical": True,
+        },
+    })
+
+    with pytest.raises(collector.CollectionError, match="qualification receipt schema mismatch"):
+        collector.collect_f4_production({}, {}, qualification, tmp_path)
+    assert qualification.reads == ["schema"]
+
+
 def test_real_first_eight_is_reader_hold_with_fixed_denominator(tmp_path):
     result = collector.collect_f4_production(
         PRODUCTION_ROOT / "production-design.json",

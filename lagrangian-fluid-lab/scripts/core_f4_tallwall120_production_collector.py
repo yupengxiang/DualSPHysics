@@ -40,6 +40,7 @@ SCHEMA = "core.f4.tallwall120.production_collection.v1"
 ASSEMBLY_SCHEMA = "core.multifamily.dataset_collection.v1"
 PRODUCTION_DESIGN_SCHEMA = "core.production_design.v1"
 PRODUCTION_BATCH_SCHEMA = "core.f4.tallwall120.production_batch.v1"
+LEGACY_QUALIFICATION_RECEIPT_SCHEMA = "core.f4.tallwall120.production_qualification_binding.v1"
 FAMILY = "F4"
 SCOPE_ID = "F4_resting_pool_laminar_tallwall120_x_v1"
 HEIGHT_M = 1.2
@@ -49,6 +50,12 @@ EXPECTED_SPLITS = {"train": 16, "validation": 4, "id_test": 6, "ood_test": 6}
 
 class CollectionError(ValueError):
     """Raised when an immutable production binding is inconsistent."""
+
+
+def _require_qualification_receipt_schema(payload: Mapping[str, Any]) -> None:
+    schema = payload.get("schema")
+    if type(schema) is not str or schema != LEGACY_QUALIFICATION_RECEIPT_SCHEMA:
+        raise CollectionError("qualification receipt schema mismatch")
 
 
 def utc_now() -> str:
@@ -840,11 +847,15 @@ def collect_f4_production(
         if isinstance(value, (str, Path)):
             target = _resolve_path(value, root, None, role)
             payload = _read_json(target, role)
+            if role == "qualification receipt":
+                _require_qualification_receipt_schema(payload)
             binding = _ref(target, root, role=role)
             binding["canonical_sha256"] = canonical_sha256(payload)
             return payload, binding, True, target.parent
         if not isinstance(value, Mapping):
             raise CollectionError(f"{role} must be a JSON path or object")
+        if role == "qualification receipt":
+            _require_qualification_receipt_schema(value)
         payload = copy.deepcopy(dict(value))
         return payload, {"path": "<inline>", "sha256": canonical_sha256(payload), "role": role}, False, None
 
