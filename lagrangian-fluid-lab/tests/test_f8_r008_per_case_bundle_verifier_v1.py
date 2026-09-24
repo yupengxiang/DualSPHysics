@@ -564,6 +564,37 @@ def test_synthetic_stage_bundle_closes_without_granting_authority_or_credit(
         }
 
 
+@pytest.mark.parametrize("stage", ["B", "C", "D"])
+def test_synthetic_diagnostic_rejected_for_every_stage(tmp_path: Path, stage: str) -> None:
+    root, auth_bytes, auth = _build_bundle(tmp_path, stage)
+    diagnostic = {
+        "schema": "core.cfd.f8.r008.synthetic_non_qualifying_diagnostic.v8",
+        "mode": "synthetic_only",
+        "evidence_class": "synthetic_non_qualifying",
+        "diagnostic_outcome": "non_qualifying",
+        "diagnostic_code": "synthetic_bindings_match",
+        "payload_shape_valid": True,
+        "scope_binding_matches": True,
+        "qualification_row_binding_matches": True,
+        "qualification_eligible": False,
+        "qualification_authorized": False,
+        "execution_authorized": False,
+        "qualification_credit": 0,
+        "gate_transition": "none",
+        "registry_write": False,
+        "harness_performed_external_io": False,
+    }
+    (root / "receipt.json").write_bytes(_canonical(diagnostic))
+
+    with pytest.raises(verifier.BundleVerificationError, match="unexpected stage receipt schema"):
+        verifier.verify_stage_bundle(
+            root, stage,
+            trusted_authorization_bytes=auth_bytes,
+            trusted_authorization_sha256=hashlib.sha256(auth_bytes).hexdigest(),
+            expected_authorization_envelope=auth,
+        )
+
+
 def test_b_materialization_rejects_duplicate_initial_particle_ids(tmp_path: Path) -> None:
     root, auth_bytes, auth = _build_bundle(tmp_path, "B", initial_ids=(0, 0))
     with pytest.raises(verifier.BundleVerificationError, match="missing, duplicate, unknown"):
