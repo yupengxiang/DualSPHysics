@@ -1,0 +1,109 @@
+{
+  "disposition": {
+    "additive_semantics_contract": "frozen_for_static_implementation",
+    "gpu_or_queue_authorized": false,
+    "next_permitted_work": "implement and statically test the F8 R008 metric adapter and strict native-frame validation; keep all runtime execution behind its separate resource and execution gates",
+    "qualification_credit": 0,
+    "scope_inputs_or_thresholds_changed": false,
+    "solver_or_worker_authorized": false
+  },
+  "evidence": [
+    {
+      "bytes": 50218,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-metric-semantics-proposal-v2/receipt.json",
+      "role": "reviewed immutable F8 R008 metric proposal v2",
+      "sha256": "fecbdfea584c9984e700126d8ca34942bfeddaa6c7b733cec88df8145c0e1008"
+    },
+    {
+      "bytes": 3519,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-metric-semantics-proposal-v2/native-fluid-table-schema-v1.json",
+      "role": "reviewed F8 native fluid-frame table schema",
+      "sha256": "2258f903146ee1e0a2b09b616864b770d928270818128826b327aeb625e7a8a8"
+    },
+    {
+      "bytes": 3870,
+      "path": "scripts/f8_observation_parser_v1.py",
+      "role": "fixed-frequency harmonic fit inspected by reviewer",
+      "sha256": "7bc357f091b6c360522ab6386591d6ab07af64626b89219ab43e4e83553ba079"
+    },
+    {
+      "bytes": 4001,
+      "path": "scripts/f8_observation_window_parser_v2.py",
+      "role": "native closed-window selector inspected by reviewer",
+      "sha256": "abb41029f9137511e5a4361538c34fe04a7c682e7a568b866fb86ef0b95bfdd1"
+    },
+    {
+      "bytes": 53931,
+      "path": "scripts/core_cfd.py",
+      "role": "generic converter behavior inspected by reviewer",
+      "sha256": "fd6e56ab6c8f42e55c15c0e9d742c9289fca0a4214e5e203a3b357a23040adfb"
+    },
+    {
+      "bytes": 6768,
+      "path": "scripts/f8_r008_t1_metric_semantics_review_v2.py",
+      "role": "parent-authored independent-review archive and static adoption decision",
+      "sha256": "17debc6b2511d48c4fbf0c3d6f05c7012e2b92f6aa15a6726530aa77715f4e8c"
+    },
+    {
+      "bytes": 2164,
+      "path": "tests/test_f8_r008_t1_metric_semantics_review_v2.py",
+      "role": "review archive contract tests",
+      "sha256": "ee4cb95a955747f7bffc6081f838e08d45fa3be605bf9d3e4930985a36b74983"
+    }
+  ],
+  "execution_authority": {
+    "denominator_mutation": 0,
+    "gpu": false,
+    "ledger_mutation": 0,
+    "queue": false,
+    "registry_mutation": 0,
+    "solver": false,
+    "worker": false
+  },
+  "findings": [
+    {
+      "basis": "mean + a*sin(omega*t) + b*cos(omega*t), amplitude hypot(a,b), phase atan2(b,a), with interpolation of a/b only; the existing parser's limited output is accurately disclosed",
+      "finding": "fixed-frequency coefficient convention and cross-grid phasor interpolation",
+      "severity": null,
+      "verdict": "PASS"
+    },
+    {
+      "basis": "schema requires exact raw ID membership before fluid projection, rejects missing/duplicate/unknown/unclassified IDs, and gates finite positions/velocities plus positive invariant per-ID mass; generic converter disclaimer is accurate",
+      "finding": "strict native fluid cohort and frame-value contract",
+      "severity": null,
+      "verdict": "PASS"
+    },
+    {
+      "basis": "exactly 3N+1 rows partition into inclusive 0..N, N..2N, and 2N..3N slices; each integrates one period independently with shared seam endpoints",
+      "finding": "three-cycle inclusive seam partition",
+      "severity": null,
+      "verdict": "PASS"
+    },
+    {
+      "basis": "15 rows, 8 cross-resolution pairs, windows, thresholds, failure denominator, and zero solver/GPU/worker/queue authority are unchanged",
+      "finding": "scope, frozen gates, and execution boundary",
+      "severity": null,
+      "verdict": "PASS"
+    }
+  ],
+  "qualification_credit": 0,
+  "record_id": "f8-r008-t1-metric-semantics-review-v2",
+  "reviewed_proposal": {
+    "all_bound_evidence_hashes_and_sizes_match": true,
+    "receipt_path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-metric-semantics-proposal-v2/receipt.json",
+    "receipt_sha256": "fecbdfea584c9984e700126d8ca34942bfeddaa6c7b733cec88df8145c0e1008",
+    "record_id": "f8-r008-t1-metric-semantics-proposal-v2",
+    "verified_bound_evidence_count": 82
+  },
+  "reviewer": {
+    "agent_id": "01a0d0f3-a5bc-7640-a4fe-545cdcee80a3",
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "review_archive_note": "This receipt is a parent-authored transcription of the independent reviewer response; it is not represented as a reviewer-authored artifact.",
+    "review_mode": "read_only_static_design_review",
+    "verdict": "PASS"
+  },
+  "schema": "core.cfd.f8.r008_t1_metric_semantics_review.v2",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "independent_review_passed_static_semantics_frozen"
+}
