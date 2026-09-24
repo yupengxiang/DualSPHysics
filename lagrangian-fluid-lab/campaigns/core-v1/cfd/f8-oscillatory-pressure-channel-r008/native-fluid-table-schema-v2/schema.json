@@ -1,0 +1,123 @@
+{
+  "schema": "core.cfd.f8.r008_native_fluid_frame_table.v2",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "static_design_review_passed_implementation_only",
+  "supersedes_for_new_D_tables": "core.cfd.f8.r008_native_fluid_frame_table.v1",
+  "v1_policy": "retain schema, adapter, and receipts unchanged for historical v1 tables",
+  "container": {
+    "schema": "core.cfd.v1",
+    "schema_version": 3,
+    "maximum_file_bytes": 2147483648,
+    "maximum_uncompressed_dataset_bytes": 1073741824,
+    "maximum_time_rows": 1497,
+    "maximum_particle_rows": 10752,
+    "maximum_time_particle_cells": 16095744,
+    "logical_bytes_formula": "8*T + 4*P + 45*T*P; reject before reading dataset values if above the uncompressed-byte cap",
+    "dimensions_must_be_checked_before_dataset_reads": true,
+    "stream_reading": "verify one time row and at most 65536 particles per dataset chunk; never load a whole trajectory dataset",
+    "single_link_regular_file": true,
+    "external_links_or_storage": false,
+    "virtual_datasets": false,
+    "user_block_bytes": 0,
+    "root_objects": "exactly the registered datasets below; every link is hard, each link resolves to a distinct dataset, and no group or other HDF5 object is allowed",
+    "dataset_attribute_set": "empty for every dataset",
+    "particle_dataset_chunking": "exactly (1,min(P,65536),3) for vectors and (1,min(P,65536)) for scalars; exactly one complete chunk per time row is allocated; LZF is the only filter; shuffle=false, fletcher32=false, scaleoffset=null",
+    "time_and_id_layout": "contiguous, uncompressed, and allocated storage equals the full logical dataset size"
+  },
+  "root_attributes": {
+    "exact_set": [
+      "schema", "schema_version", "f8_table_schema", "scope_id", "case_id",
+      "identity_key", "trajectory_semantics", "conversion_complete",
+      "data_qualification_status", "generated_xml_sha256", "definition_sha256",
+      "materialization_receipt_sha256", "raw_solver_manifest_sha256",
+      "scope_receipt_sha256", "parameter_contract_sha256"
+    ],
+    "fixed_values": {
+      "schema": "core.cfd.v1",
+      "schema_version": 3,
+      "f8_table_schema": "core.cfd.f8.r008_native_fluid_frame_table.v2",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "identity_key": "particle_id",
+      "trajectory_semantics": "native numerical SPH particle identity; fluid cohort only; not material identity",
+      "conversion_complete": true,
+        "data_qualification_status": "qualification_only"
+    },
+    "case_id_source": "the exact case_id shared by the frozen R008 scope row and B, C, and D receipts",
+    "attribute_types": {
+      "schema_version": "little-endian uint32 scalar",
+      "conversion_complete": "HDF5 boolean enum over unsigned byte with exactly FALSE=0 and TRUE=1",
+      "all_other_attributes": "scalar fixed-length UTF-8 strings whose declared byte length equals the exact expected UTF-8 value; maximum 256 bytes; compare exact encoded bytes before decoding; no variable-length heap allocation, arrays, compound types, or alternate encodings"
+    },
+    "hash_attribute_sources": {
+      "generated_xml_sha256": "SHA-256 of the exact B generated_xml_path bytes, independently recomputed",
+      "definition_sha256": "SHA-256 in B definition_binding, checked against the hash-closed R008 Definition/control pack entry",
+      "materialization_receipt_sha256": "SHA-256 of the exact canonical B receipt.json bytes",
+      "raw_solver_manifest_sha256": "SHA-256 of the exact canonical C raw-solver-manifest.json bytes",
+      "scope_receipt_sha256": "SHA-256 of the frozen R008 t1-scope-design-v1 receipt bytes",
+      "parameter_contract_sha256": "SHA-256 of the frozen R001 parameter-contract-v1 bytes"
+    }
+  },
+  "datasets": {
+    "time": {
+      "shape": ["T"],
+      "dtype": "little-endian float64",
+      "semantics": "the complete frozen C raw-solver axis in order; exact IEEE-754 bits, beginning with positive zero and strictly increasing; no dropped, duplicated, interpolated, or synthesized frames"
+    },
+    "particle_id": {
+      "shape": ["P"],
+      "dtype": "little-endian uint32",
+      "semantics": "strictly increasing exact fluid-ID projection derived from the hash-bound B generated XML groups"
+    },
+    "position": {
+      "shape": ["T", "P", 3],
+      "dtype": "little-endian float64",
+      "components": ["x_m", "y_m", "z_m"],
+      "semantics": "raw native Posd values, or exact float64 promotion of native Pos values, projected by particle_id; every selected component must be finite"
+    },
+    "velocity": {
+      "shape": ["T", "P", 3],
+      "dtype": "little-endian float32",
+      "components": ["vx_m_s", "vy_m_s", "vz_m_s"],
+      "semantics": "raw native Vel values projected by particle_id; every selected component must be finite"
+    },
+    "density": {
+      "shape": ["T", "P"],
+      "dtype": "little-endian float32",
+      "unit": "kg/m^3",
+      "semantics": "raw native Rhop values projected by particle_id; finite and strictly positive"
+    },
+    "mass": {
+      "shape": ["T", "P"],
+      "dtype": "little-endian float32",
+      "unit": "kg",
+      "semantics": "the exact per-particle MassFluid binary64 value bound in B/C, rounded once to float32 using IEEE-754 roundTiesToEven; positive, finite, and bitwise invariant across every ID and frame; never recomputed from time-varying density"
+    },
+    "valid": {
+      "shape": ["T", "P"],
+      "dtype": "HDF5 boolean enum over unsigned byte with exactly FALSE=0 and TRUE=1",
+      "semantics": "all true; every registered fluid ID occurs exactly once in every complete native frame"
+    }
+  },
+  "source_projection": {
+    "membership_source": "B materialization receipt plus generated XML, with BI4 CaseNp and CaseN* metadata",
+    "raw_frame_identity_gate": "each C frame must contain the complete uint32 ID universe [0, CaseNp) exactly once before any fluid projection; reject missing, duplicate, changed, or unknown IDs",
+    "required_native_arrays": "unique Idp:uint32, exactly one Pos:float32 or Posd:float64, Vel:float32x3, and Rhop:float32; all counts equal CaseNp",
+    "source_recomputation": "re-read each hash-bound C BI4 frame and compare time, projected position/velocity/density, and MassFluid-derived mass against the corresponding HDF5 row; exact after the schema-declared dtype conversion",
+    "mass_binary64_gate": "before float32 conversion, require the B initial MassFluid raw little-endian binary64 bytes to exactly equal the raw MassFluid bytes from every C frame; reject bit drift even if both values round to the same float32",
+    "density_mass_distinction": "Rhop is time-varying state; MassFluid is invariant particle mass. They are separate datasets with separate source semantics."
+  },
+  "verification": {
+    "table_file": "open through a held no-follow descriptor; require a stable single-link regular file, exact D output-manifest size/hash, and the file-size cap",
+    "full_axis": "T equals the frozen complete C native axis and every table row maps one-to-one to the corresponding C frame ordinal",
+    "fluid_axis": "P and particle_id exactly equal the sorted fluid cohort derived from B; nonfluid IDs are excluded only after raw-universe validation",
+    "frame_values": "position, velocity, density, mass, and valid are independently recomputed or checked against the upstream raw frame; fail the whole case on any mismatch",
+    "authority": {
+      "solver": false,
+      "gpu": false,
+      "worker": false,
+      "queue": false,
+      "T1_numerical": false,
+      "qualification_credit": 0
+    }
+  }
+}

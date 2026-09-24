@@ -1,0 +1,48 @@
+{
+  "schema": "core.cfd.f8.r008_native_fluid_table_v2_proposal.v1",
+  "proposal_id": "f8-r008-native-fluid-table-schema-v2",
+  "status": "static_design_review_passed_implementation_only",
+  "design_review_receipt_path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/native-fluid-table-schema-v2/design-review-v2/receipt.json",
+  "change_kind": "additive_versioned_table_contract",
+  "contract_path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/native-fluid-table-schema-v2/schema.json",
+  "predecessor": {
+    "schema": "core.cfd.f8.r008_native_fluid_frame_table.v1",
+    "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-metric-semantics-proposal-v2/native-fluid-table-schema-v1.json",
+    "sha256": "2258f903146ee1e0a2b09b616864b770d928270818128826b327aeb625e7a8a8",
+    "preserved_unchanged": true
+  },
+  "reason": "UPDATE-30 requires D-stage persistence and source recomputation of density in addition to the already frozen v1 fields; v1 has no density dataset and its strict reader rejects extra datasets.",
+  "additive_delta": [
+    "add density[T,P] from raw BI4 Rhop, kept distinct from invariant MassFluid-derived particle mass",
+    "require exact full C-frame time-axis equality, not only increasing times or a selected metric window",
+    "require D HDF5 rows to recompute from hash-bound B/C inputs using the reviewed bounded BI4 scanner and cohort contract",
+    "register exact root attributes, HDF5 links/storage, dataset dtypes, and bounded chunking"
+  ],
+  "changed_fields": [],
+  "gates_unchanged": {
+    "definition_control_hashes": true,
+    "scope_matrix_or_case_count": true,
+    "observation_window_or_metric_thresholds": true,
+    "metric_definitions": true,
+    "solver_or_worker_authority": true,
+    "gpu_or_queue_authority": true,
+    "T1_credit": true
+  },
+  "execution_authority": {
+    "solver": false,
+    "worker": false,
+    "gpu": false,
+    "queue": false,
+    "T1_numerical": false,
+    "qualification_credit": 0
+  },
+  "compatibility": {
+    "v1_tables_and_adapter": "remain readable only through the unchanged v1 interface",
+    "v2_consumers": "require a new versioned adapter/verifier and independent review; no implicit v1 promotion"
+  },
+  "implementation_boundary": {
+    "allowed": ["static contract review", "static code", "synthetic HDF5/BI4 fixtures", "unit tests"],
+    "forbidden_in_this_proposal": ["production bundle reads", "GenCase", "native decoder", "solver", "worker", "GPU", "queue", "registry or ledger mutation"],
+    "qualification_claim": "none"
+  }
+}

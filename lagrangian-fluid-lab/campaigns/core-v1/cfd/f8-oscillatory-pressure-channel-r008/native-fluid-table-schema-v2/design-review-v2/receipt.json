@@ -1,0 +1,122 @@
+{
+  "evidence": [
+    {
+      "bytes": 7611,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/native-fluid-table-schema-v2/schema.json",
+      "role": "reviewed additive v2 HDF5 table contract",
+      "sha256": "c99d4b205e83ede7350291f9979bb5d2079db31c75b2243ff4fb0a325d113e80"
+    },
+    {
+      "bytes": 2566,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/native-fluid-table-schema-v2/proposal.json",
+      "role": "reviewed proposal and unchanged scientific/execution gates",
+      "sha256": "ae7ce78ba0a83e1c8582535d7e134df26b03c7b660778d8ae249fac0fc771b2f"
+    },
+    {
+      "bytes": 3519,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-metric-semantics-proposal-v2/native-fluid-table-schema-v1.json",
+      "role": "unchanged historical v1 schema",
+      "sha256": "2258f903146ee1e0a2b09b616864b770d928270818128826b327aeb625e7a8a8"
+    },
+    {
+      "bytes": 32025,
+      "path": "scripts/f8_r008_native_fluid_table_v2.py",
+      "role": "reviewed standalone bounded native-table semantic verifier",
+      "sha256": "91c064acfe5fd4c8c70f5cf8a7b049ef789e55061f232991dfafb71167fdc455"
+    },
+    {
+      "bytes": 4650,
+      "path": "tests/test_f8_r008_native_fluid_table_schema_v2.py",
+      "role": "v2 contract and v1-preservation tests",
+      "sha256": "441174a3a6814fa9f9b337cc76c9cd2b7454c6ed6cf869b0e07b2b967cf2f09a"
+    },
+    {
+      "bytes": 18851,
+      "path": "tests/test_f8_r008_native_fluid_table_v2.py",
+      "role": "synthetic BI4/HDF5 semantic and adversarial regression tests",
+      "sha256": "451abf7a685989938a35f0911b61cc11b639761e448864eafd62d9f263b799da"
+    },
+    {
+      "bytes": 8293,
+      "path": "scripts/f8_r008_native_fluid_table_schema_review_v2.py",
+      "role": "parent-authored immutable review archive builder",
+      "sha256": "2d9578994342167f94b447803e1ddc2c221ac1bc49350828d0a96716a1ea0798"
+    },
+    {
+      "bytes": 1632,
+      "path": "tests/test_f8_r008_native_fluid_table_schema_review_v2.py",
+      "role": "review archive integrity tests",
+      "sha256": "26dd436e59bae0cea804fd464e982eeedc2ff64c48d68fec808824d533abcf2c"
+    }
+  ],
+  "execution_authority": {
+    "T1_numerical": false,
+    "gpu": false,
+    "qualification_credit": 0,
+    "queue": false,
+    "solver": false,
+    "worker": false
+  },
+  "findings": [
+    {
+      "detail": "The verifier rebuilds the full canonical root-attribute mapping, so caller-supplied expectations cannot override fixed schema/version/semantics/status fields.",
+      "topic": "fixed root attributes",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Exactly seven direct links are required; all seven registered names must resolve to unique hard-linked datasets. This proves exact closure without allocating unknown attacker-sized names.",
+      "topic": "HDF5 root-link closure",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "The enum type is checked and the raw uint8 representation is read without bool coercion; conversion_complete and every valid cell must equal one exactly.",
+      "topic": "boolean enum values",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "Synthetic regression covers both Posd float64 and Pos float32 promotion, plus roundTiesToEven midpoint cases for MassFluid conversion.",
+      "topic": "source projection and rounding",
+      "verdict": "PASS"
+    },
+    {
+      "detail": "The contract and implementation agree on fixed-length bounded UTF-8 attributes, complete dimensions, one LZF chunk per time row, HDF5 storage classes, and the 45-byte per-cell logical-size formula.",
+      "topic": "bounded attributes and datasets",
+      "verdict": "PASS"
+    }
+  ],
+  "known_boundary": "Callers must first verify B/C/D provenance and supply hash-bound source frames and expected provenance attributes; this receipt does not certify that orchestration or any production bundle.",
+  "parent_validation": {
+    "command": "./.venv/bin/python -m pytest -q tests/test_f8_r008_native_fluid_table_schema_v2.py tests/test_f8_r008_native_fluid_table_v2.py",
+    "failed": 0,
+    "fixture_scope": "temporary synthetic BI4/HDF5 only",
+    "passed": 32,
+    "reviewer_ran_tests": false
+  },
+  "record_id": "f8-r008-native-fluid-table-schema-implementation-review-v2",
+  "review_boundary": {
+    "gencase_invoked": false,
+    "gpu_or_queue_invoked": false,
+    "native_decoder_invoked": false,
+    "production_bundle_read": false,
+    "qualification_credit": 0,
+    "registry_or_ledger_mutated": false,
+    "solver_or_worker_invoked": false
+  },
+  "reviewed_scope": {
+    "solver_or_T1_adjudication": false,
+    "standalone_semantic_verifier": true,
+    "table_schema": "core.cfd.f8.r008_native_fluid_frame_table.v2",
+    "verified_B_C_D_bundle_orchestration": false
+  },
+  "reviewer": {
+    "agent_id": "01a0d297-70b1-79b3-b4ba-40c479490929",
+    "execution_or_evidence_mutation": false,
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "high",
+    "review_mode": "read_only_static_implementation_review",
+    "reviewer_ran_tests": false,
+    "verdict": "PASS"
+  },
+  "schema": "core.cfd.f8.r008_native_fluid_table_schema_implementation_review.v2",
+  "status": "static_implementation_review_passed_no_execution_or_t1_credit"
+}
