@@ -5,12 +5,41 @@ from pathlib import Path
 from scripts.f3_material_t2_launch_readiness_v1 import (
     DEFAULT_OUTPUT,
     INPUTS,
+    QUALIFICATION_SCHEMA,
     SCHEMA,
+    _require_qualification_schema,
     build_audit,
 )
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_synthetic_qualification_rejected_before_readiness_extraction() -> None:
+    class SchemaReadProbe(dict):
+        reads = []
+
+        def get(self, key, default=None):
+            self.reads.append(key)
+            if key != "schema":
+                raise AssertionError(f"qualification field read before schema rejection: {key}")
+            return super().get(key, default)
+
+    qualification = SchemaReadProbe({
+        "schema": "core.f8.synthetic_diagnostic.v1",
+        "T1_numerical": True,
+        "T2_macro": True,
+        "T2_path": True,
+        "scope_id": "synthetic-scope",
+    })
+    try:
+        _require_qualification_schema(qualification)
+    except ValueError as exc:
+        assert "schema mismatch" in str(exc)
+    else:
+        raise AssertionError("synthetic qualification schema was accepted")
+    assert qualification.reads == ["schema"]
+    assert QUALIFICATION_SCHEMA == "core.qualification.v1"
 
 
 def test_readiness_maps_all_plan_rows_without_t2_promotion() -> None:

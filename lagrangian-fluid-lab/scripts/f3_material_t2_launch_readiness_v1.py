@@ -18,6 +18,7 @@ from typing import Any
 
 
 SCHEMA = "core.material.f3.t2.launch_readiness.v1"
+QUALIFICATION_SCHEMA = "core.qualification.v1"
 DEFAULT_OUTPUT = Path(
     "campaigns/core-v1/material/evidence/"
     "f3-material-t2-launch-readiness-v1/receipt.json"
@@ -108,6 +109,12 @@ def load_json(lab_root: str | Path, path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError(f"expected JSON object: {resolved}")
     return value
+
+
+def _require_qualification_schema(qualification: dict[str, Any]) -> None:
+    schema = qualification.get("schema")
+    if type(schema) is not str or schema != QUALIFICATION_SCHEMA:
+        raise ValueError("F3 qualification schema mismatch")
 
 
 def _rows(
@@ -213,6 +220,7 @@ def build_audit(lab_root: str | Path) -> dict[str, Any]:
     inputs = {name: bind_file(root, path) for name, path in INPUTS.items()}
     canonical = load_json(root, INPUTS["f3_canonical_manifest"])
     qualification = load_json(root, INPUTS["f3_inherited_qualification"])
+    _require_qualification_schema(qualification)
     dataset = load_json(root, INPUTS["f3_dataset"])
     assets = load_json(root, INPUTS["matrix_asset_audit"])
     gap = load_json(root, INPUTS["matrix_gap_audit"])
