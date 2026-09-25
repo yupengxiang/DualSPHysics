@@ -1,5 +1,7 @@
 import copy
+import fcntl
 import json
+import os
 from pathlib import Path
 
 import h5py
@@ -193,6 +195,46 @@ def test_portable_reader_and_train_only_boundary(tmp_path):
     manifest["cases"][0]["hdf5"] = "../outside.h5"
     with pytest.raises(ValueError, match="nonportable"):
         CoreDataset(manifest, tmp_path)
+
+
+def test_descriptor_only_reader_uses_held_hdf5_fd_after_path_replacement(tmp_path):
+    manifest = tiny_manifest(tmp_path)
+    path = tmp_path / "data.h5"
+    source_fd = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+    try:
+        path.unlink()
+        path.write_bytes(b"replacement at the manifest pathname")
+        data = CoreDataset(manifest, tmp_path, snapshot_fds={"tiny": source_fd})
+        with data:
+            assert data.formal_eligible is False
+            assert data.integrity_mode == "strict"
+            assert data.verify_sources()["tiny"] == manifest["cases"][0]["sha256"]
+            state = data.read_state("tiny", 1)
+            assert state.time_s == pytest.approx(0.01)
+            assert np.allclose(state.position, example_state().position + 0.003)
+        with pytest.raises(ValueError, match="descriptor-only dataset is closed"):
+            data.times("tiny")
+        # The reader owns only its duplicate; the caller retains its descriptor.
+        assert fcntl.fcntl(source_fd, fcntl.F_GETFD) & fcntl.FD_CLOEXEC
+    finally:
+        os.close(source_fd)
+
+
+def test_descriptor_only_reader_requires_readonly_fd_and_exact_case_coverage(tmp_path):
+    manifest = tiny_manifest(tmp_path)
+    path = tmp_path / "data.h5"
+    writable_fd = os.open(path, os.O_RDWR | os.O_CLOEXEC | os.O_NOFOLLOW)
+    readonly_fd = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+    try:
+        with pytest.raises(ValueError, match="read-only"):
+            CoreDataset(manifest, tmp_path, snapshot_fds={"tiny": writable_fd})
+        with pytest.raises(ValueError, match="every case"):
+            CoreDataset(manifest, tmp_path, snapshot_fds={})
+        with pytest.raises(ValueError, match="strict source"):
+            CoreDataset(manifest, tmp_path, strict=False, snapshot_fds={"tiny": readonly_fd})
+    finally:
+        os.close(writable_fd)
+        os.close(readonly_fd)
 
 
 def test_formal_manifest_flag_never_qualifies_legacy_mapping_or_path_reader(tmp_path):

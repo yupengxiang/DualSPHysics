@@ -11,7 +11,13 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import stat
 import tempfile
+
+try:
+    import fcntl
+except ImportError:  # The ordinary path reader remains usable off POSIX.
+    fcntl = None
 
 import h5py
 import numpy as np
@@ -36,6 +42,49 @@ def sha256_file(path):
         for block in iter(lambda: stream.read(8 * 1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _fd_identity(fd):
+    """Return metadata used only to detect ordinary held-FD changes."""
+    info = os.fstat(fd)
+    return (info.st_dev, info.st_ino, info.st_mode, info.st_nlink, info.st_size,
+            info.st_mtime_ns, info.st_ctime_ns)
+
+
+def _sha256_fd(fd, expected_bytes):
+    """Hash exactly the declared bytes through a held descriptor using pread."""
+    digest = hashlib.sha256()
+    offset = 0
+    while offset < expected_bytes:
+        block = os.pread(fd, min(8 * 1024 * 1024, expected_bytes - offset), offset)
+        if not block:
+            raise ValueError("snapshot FD ended before its declared byte count")
+        digest.update(block)
+        offset += len(block)
+    if os.pread(fd, 1, expected_bytes):
+        raise ValueError("snapshot FD exceeds its declared byte count")
+    return digest.hexdigest()
+
+
+def _validate_snapshot_fd(fd, row):
+    if fcntl is None or not hasattr(os, "pread") or not hasattr(fcntl, "F_DUPFD_CLOEXEC"):
+        raise ValueError("snapshot FD reader requires POSIX pread and close-on-exec FD duplication")
+    if isinstance(fd, bool) or not isinstance(fd, int) or fd < 0:
+        raise ValueError("snapshot FD must be a nonnegative descriptor")
+    try:
+        flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+        info = os.fstat(fd)
+    except OSError as error:
+        raise ValueError("snapshot FD is not open") from error
+    if flags & os.O_ACCMODE != os.O_RDONLY:
+        raise ValueError("snapshot FD must be read-only")
+    if not stat.S_ISREG(info.st_mode) or info.st_nlink not in (0, 1):
+        raise ValueError("snapshot FD must reference an unlinked or single-link regular file")
+    expected_bytes = row.get("bytes")
+    if (isinstance(expected_bytes, bool) or not isinstance(expected_bytes, int)
+            or expected_bytes <= 0 or info.st_size != expected_bytes):
+        raise ValueError("snapshot FD requires the exact positive manifest byte count")
+    return _fd_identity(fd)
 
 
 def _canonical_hash(value):
@@ -495,7 +544,16 @@ def new_scope_split(parameter_min, parameter_max):
 
 
 class CoreDataset:
-    def __init__(self, manifest, data_root=None, *, max_open_files=4, strict=True):
+    """Diagnostic dataset reader; an FD-backed instance is not a trust capability.
+
+    ``snapshot_fds`` is an all-cases map of already-open, read-only HDF5 file
+    descriptors. In that mode HDF5 is opened through duplicates of those held
+    descriptors and pathname fallback is disabled. This binds parsing to the
+    supplied inode, but does not authenticate its producer or prove immutability.
+    """
+
+    def __init__(self, manifest, data_root=None, *, max_open_files=4, strict=True,
+                 snapshot_fds=None):
         if isinstance(manifest, (str, Path)):
             path = absolute_path_without_following_leaf(manifest)
             raw = read_bounded_raw_json(
@@ -543,6 +601,31 @@ class CoreDataset:
         # still force a fresh check.
         self._hash_cache = {}
         self._source_hashes = {}
+        self._descriptor_only = snapshot_fds is not None
+        self._snapshot_fds = {}
+        if self._descriptor_only:
+            if strict is not True:
+                raise ValueError("snapshot FD reader requires strict source verification")
+            if not isinstance(snapshot_fds, dict):
+                raise ValueError("snapshot_fds must map every case ID to an open FD")
+            if set(snapshot_fds) != set(self._records):
+                raise ValueError("snapshot_fds must cover every case exactly; path fallback is disabled")
+            try:
+                for case_id, source_fd in snapshot_fds.items():
+                    row = self._records[case_id]
+                    _validate_snapshot_fd(source_fd, row)
+                    held_fd = fcntl.fcntl(source_fd, fcntl.F_DUPFD_CLOEXEC, 0)
+                    try:
+                        _validate_snapshot_fd(held_fd, row)
+                    except BaseException:
+                        os.close(held_fd)
+                        raise
+                    self._snapshot_fds[case_id] = held_fd
+            except BaseException:
+                for held_fd in self._snapshot_fds.values():
+                    os.close(held_fd)
+                self._snapshot_fds.clear()
+                raise
 
     def case_ids(self, split=None):
         return tuple(key for key, row in self._records.items() if split is None or row["split"] == split)
@@ -558,16 +641,29 @@ class CoreDataset:
 
     def _bind_sources(self, case_id, *, force=False):
         row = self._records[case_id]
-        path = _asset(self.data_root, row["hdf5"])
-        if row.get("bytes") and path.stat().st_size != row["bytes"]:
-            raise ValueError("source HDF5 size mismatch")
+        snapshot_fd = self._snapshot_fds.get(case_id)
+        if self._descriptor_only:
+            if snapshot_fd is None:
+                raise ValueError("descriptor-only dataset is closed or missing a case FD")
+            path = None
+            before = _validate_snapshot_fd(snapshot_fd, row)
+        else:
+            path = _asset(self.data_root, row["hdf5"])
+            if row.get("bytes") and path.stat().st_size != row["bytes"]:
+                raise ValueError("source HDF5 size mismatch")
 
         verify = self.strict or force
         if verify:
             expected = row["sha256"]
             if not _is_sha256(expected):
                 raise ValueError(f"HDF5 SHA-256 registration is invalid: {case_id}")
-            observed = self._observed_hash(path, force=force)
+            if self._descriptor_only:
+                observed = _sha256_fd(snapshot_fd, row["bytes"])
+                after = _validate_snapshot_fd(snapshot_fd, row)
+                if before != after:
+                    raise ValueError("snapshot FD metadata changed while hashing")
+            else:
+                observed = self._observed_hash(path, force=force)
             if observed != expected:
                 raise ValueError(f"source integrity failure: HDF5 hash mismatch: {case_id}")
             self._source_hashes[case_id] = observed
@@ -587,7 +683,15 @@ class CoreDataset:
             self._handles.move_to_end(case_id)
             return self._handles[case_id]
         path = self._bind_sources(case_id)
-        handle = h5py.File(path, "r")
+        if self._descriptor_only:
+            file_obj = os.fdopen(os.dup(self._snapshot_fds[case_id]), "rb", buffering=0)
+            try:
+                handle = h5py.File(file_obj, "r", driver="fileobj")
+            except BaseException:
+                file_obj.close()
+                raise
+        else:
+            handle = h5py.File(path, "r")
         required = {"time", "position", "velocity", "particle_id", "particle_zone", "mass", "valid"}
         try:
             if not required <= set(handle):
@@ -681,6 +785,9 @@ class CoreDataset:
         for handle in self._handles.values():
             handle.close()
         self._handles.clear()
+        for fd in self._snapshot_fds.values():
+            os.close(fd)
+        self._snapshot_fds.clear()
         self._mass_reference.clear()
         self._hash_cache.clear()
         self._source_hashes.clear()
