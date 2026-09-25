@@ -1,9 +1,10 @@
-"""Non-authorizing structural parser for the synthetic F8 R008 C journal V5.
+"""Non-authorizing parser for the synthetic F8 R008 C journal V5.
 
 This parser checks serialization, exact event field sets, primitive domains,
-journal-local sequence/clock consistency, and process/thread state transitions.
-It does not establish that the journal is complete or truthful, validate the
-source callgraph/query causality or cache replay, attest runtime identity, or
+journal-local sequence/clock and process/thread state, guard links, and a
+single-slot cache replay over caller-provided events. It does not establish
+that the journal is complete or truthful, validate the source callgraph,
+recompute active windows/table provenance, attest runtime identity, or
 authorize execution/qualification.
 """
 from __future__ import annotations
@@ -192,6 +193,19 @@ def _table_binding(value: Any, label: str) -> None:
         raise JournalV5Error(f"{label} must be null or an object")
 
 
+def _same_json_value(left: Any, right: Any) -> bool:
+    """Compare parsed JSON values without Python's bool/int equivalence."""
+    if type(left) is not type(right):
+        return False
+    if type(left) is dict:
+        return (set(left) == set(right)
+                and all(_same_json_value(left[key], right[key]) for key in left))
+    if type(left) is list:
+        return (len(left) == len(right)
+                and all(_same_json_value(a, b) for a, b in zip(left, right)))
+    return left == right
+
+
 def _validate_event(event: Any, *, expected_seq: int, nonce: str) -> dict[str, Any]:
     if type(event) is not dict:
         raise JournalV5Error("event must be an object")
@@ -278,6 +292,8 @@ def _validate_event(event: Any, *, expected_seq: int, nonce: str) -> dict[str, A
         _table_binding(event["table_raw_binding"], "poll_begin.table_raw_binding")
         if not event["active"] and event["table_raw_binding"] is not None:
             raise JournalV5Error("inactive poll must have a null table binding")
+        if event["active"] and event["table_raw_binding"] is None:
+            raise JournalV5Error("active poll must have an object table binding")
     elif kind == "poll_end":
         _builtin_int(event["poll_begin_id"], "poll_end.poll_begin_id")
         if event["poll_begin_id"] >= expected_seq:
@@ -420,6 +436,170 @@ def _observe_process_lifecycle(events: list[dict[str, Any]]) -> dict[str, int | 
     }
 
 
+def _observe_query_and_cache(
+    events: list[dict[str, Any]], ends: dict[int, dict[str, Any]],
+) -> dict[str, int | bool | str]:
+    """Replay guard links and the journal-local LastTimestepInput slot."""
+    guards = {event["seq"]: event for event in events if event["kind"] == "loop_guard"}
+    end_seq_by_begin = {begin_seq: end["seq"] for begin_seq, end in ends.items()}
+    begins = {event["seq"]: event for event in events if event["kind"] == "poll_begin"}
+    for begin_seq, begin in begins.items():
+        end_seq = end_seq_by_begin.get(begin_seq)
+        upper = end_seq if end_seq is not None else len(events)
+        for candidate in events[begin_seq + 1:upper]:
+            if (candidate.get("process_generation_id") == begin["process_generation_id"]
+                    and candidate["kind"] == "exec"):
+                raise JournalV5Error("poll_end must precede a later exec in the same process generation")
+
+    cache: dict[tuple[Any, ...], dict[str, Any]] = {}
+    last_begin_by_slot: dict[tuple[Any, ...], int] = {}
+    process_exec_epoch: dict[tuple[Any, ...], int] = {}
+    guard_exec_epoch: dict[int, int] = {}
+    clone_cache_unknown: set[tuple[Any, ...]] = set()
+    linked_query_count = 0
+    unknown_cache_source_count = 0
+    hit_with_unknown_source_count = 0
+    unterminated_hit_count = 0
+    exec_epoch_reset_count = 0
+    unresolved_clone_poll_count = 0
+    unclosed_prior_poll_count = 0
+
+    for event in events:
+        kind = event["kind"]
+        if kind == "spawn":
+            process_exec_epoch[_process_key(event["process_generation_id"])] = 0
+            continue
+        if kind in {"fork", "clone_process"}:
+            parent_key = _process_key(event["parent_generation_id"])
+            child_key = _process_key(event["process_generation_id"])
+            process_exec_epoch[child_key] = process_exec_epoch.get(parent_key, 0)
+            # A fork/clone may inherit the parent's live C++ object/cache
+            # memory. Until exec or a source-bound reconstruction proves a
+            # fresh JDsAccInputMk, the child's initial cache cannot be assumed.
+            clone_cache_unknown.add(child_key)
+            continue
+        if kind == "exec":
+            process_key = _process_key(event["process_generation_id"])
+            stale_keys = [key for key in cache if key[0] == process_key]
+            if stale_keys or process_key in clone_cache_unknown:
+                exec_epoch_reset_count += 1
+                for key in stale_keys:
+                    del cache[key]
+            clone_cache_unknown.discard(process_key)
+            process_exec_epoch[process_key] = process_exec_epoch.get(process_key, 0) + 1
+            continue
+        if kind == "loop_guard":
+            process_key = _process_key(event["process_generation_id"])
+            guard_exec_epoch[event["seq"]] = process_exec_epoch.get(process_key, 0)
+            continue
+        if kind != "poll_begin":
+            continue
+
+        process_key = _process_key(event["process_generation_id"])
+        guard = guards.get(event["guard_seq"])
+        if (guard is None
+                or guard["process_generation_id"] != event["process_generation_id"]
+                or guard["driver_id"] != event["driver_id"]
+                or guard["condition_result"] is not True
+                or guard["time_step_ieee754_hex"] != event["timestep_ieee754_hex"]
+                or guard_exec_epoch.get(event["guard_seq"]) != process_exec_epoch.get(process_key, 0)):
+            raise JournalV5Error("poll_begin does not match its true same-generation driver/iteration guard")
+        linked_query_count += 1
+
+        instance_key = (
+            process_key,
+            event["solver_instance_id"],
+            event["input_entry_index"],
+        )
+        previous_begin_seq = last_begin_by_slot.get(instance_key)
+        previous_end_seq = end_seq_by_begin.get(previous_begin_seq)
+        if previous_end_seq is not None and previous_end_seq > event["seq"]:
+            raise JournalV5Error("poll calls overlap for the same cache slot")
+        if previous_begin_seq is not None and previous_end_seq is None:
+            # The previous call may have returned with a lost terminal record
+            # or may still be in flight; neither permits complete replay.
+            unclosed_prior_poll_count += 1
+        last_begin_by_slot[instance_key] = event["seq"]
+
+        if process_key in clone_cache_unknown:
+            unresolved_clone_poll_count += 1
+            continue
+
+        slot = cache.setdefault(instance_key, {
+            "last_timestep": -1.0,
+            "source_seq": None,
+            "output_known": True,
+        })
+        timestep = struct.unpack(">d", bytes.fromhex(event["timestep_ieee754_hex"]))[0]
+        is_hit = slot["last_timestep"] >= 0 and timestep == slot["last_timestep"]
+        expected_action = "hit" if is_hit else "miss"
+        if event["cache_action"] != expected_action:
+            raise JournalV5Error("poll cache_action differs from the source single-slot numeric comparison")
+
+        end = ends.get(event["seq"])
+        if is_hit:
+            if slot["source_seq"] is None or event["cache_source_seq"] != slot["source_seq"]:
+                raise JournalV5Error("cache hit does not reference the current same-slot miss")
+            if event["active"]:
+                source_begin = begins[slot["source_seq"]]
+                if (not source_begin["active"]
+                        or not _same_json_value(
+                            event["table_raw_binding"], source_begin["table_raw_binding"]
+                        )):
+                    raise JournalV5Error("active cache-hit table binding differs from its current miss")
+            if not slot["output_known"]:
+                hit_with_unknown_source_count += 1
+            if end is not None and end["outcome"] == "exception":
+                raise JournalV5Error("source cache-hit branch cannot produce a table-read exception")
+            if end is None:
+                # A hit returns early without mutating LastTimestepInput or
+                # LastOutput. It is still an incomplete poll, but does not
+                # poison the prior successful miss's cached value.
+                unterminated_hit_count += 1
+        else:
+            if event["cache_source_seq"] is not None:
+                raise JournalV5Error("cache miss unexpectedly references an older cache source")
+            # The C++ method writes LastTimestepInput before table reads. An
+            # exception or absent end therefore poisons only the cached value,
+            # not the new timestamp/source slot.
+            slot["last_timestep"] = timestep
+            slot["source_seq"] = event["seq"]
+            slot["output_known"] = end is not None and end["outcome"] == "returned"
+            if end is not None and end["outcome"] == "exception" and not event["active"]:
+                raise JournalV5Error("inactive source branch cannot produce a table-read exception")
+            if not slot["output_known"]:
+                unknown_cache_source_count += 1
+
+    has_unknown_state = (
+        unknown_cache_source_count > 0
+        or hit_with_unknown_source_count > 0
+        or exec_epoch_reset_count > 0
+        or unresolved_clone_poll_count > 0
+        or unclosed_prior_poll_count > 0
+        or unterminated_hit_count > 0
+    )
+    return {
+        "query_guard_link_count": linked_query_count,
+        "cache_unknown_source_count": unknown_cache_source_count,
+        "cache_hit_with_unknown_source_count": hit_with_unknown_source_count,
+        "cache_unterminated_hit_count": unterminated_hit_count,
+        "cache_exec_epoch_reset_count": exec_epoch_reset_count,
+        "cache_fork_unresolved_poll_count": unresolved_clone_poll_count,
+        "cache_unclosed_prior_poll_count": unclosed_prior_poll_count,
+        "query_guard_links_observed_consistent": True,
+        "cache_transitions_observed_consistent": (
+            unresolved_clone_poll_count == 0 and unclosed_prior_poll_count == 0
+        ),
+        "cache_replay_diagnostic_state": (
+            "unresolved_fork_cache_state" if unresolved_clone_poll_count > 0
+            else "unresolved_call_order" if unclosed_prior_poll_count > 0
+            else "incomplete_poll_state" if unterminated_hit_count > 0
+            else "unresolved_output_state" if has_unknown_state
+            else "journal_local_consistent_unverified"
+        ),
+    }
+
+
 def inspect_untrusted_v5_journal(raw: bytes) -> dict[str, Any]:
     """Inspect journal bytes and return only a non-authorizing diagnostic."""
     journal = _parse_json(raw)
@@ -471,6 +651,7 @@ def inspect_untrusted_v5_journal(raw: bytes) -> dict[str, Any]:
             poll_exceptions += event["outcome"] == "exception"
 
     lifecycle = _observe_process_lifecycle(validated_events)
+    query_cache = _observe_query_and_cache(validated_events, ends)
     return {
         "status": "untrusted_v5_journal_shape_consistent",
         "journal_raw_sha256": hashlib.sha256(raw).hexdigest(),
@@ -483,6 +664,7 @@ def inspect_untrusted_v5_journal(raw: bytes) -> dict[str, Any]:
         "all_polls_terminal": len(begins) == len(ends),
         "all_polls_returned": len(begins) == len(ends) and poll_exceptions == 0,
         **lifecycle,
+        **query_cache,
         "gate_state": "open",
         "event_source_completeness_verified": False,
         "runtime_identity_verified": False,

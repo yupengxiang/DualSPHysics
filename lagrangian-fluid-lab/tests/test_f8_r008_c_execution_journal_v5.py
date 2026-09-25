@@ -1,5 +1,6 @@
 """Synthetic-only tests for the non-authorizing V5 journal shape parser."""
 import json
+import struct
 
 import pytest
 
@@ -77,6 +78,65 @@ def _main_events(*, poll_outcome="returned", include_poll_end=True):
     return events
 
 
+def _journal_with_polls(specs):
+    proc = _process()
+    events = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={"synthetic": True}),
+        _event(
+            "exec", 1, process_generation_id=proc, executable_binding={"synthetic": True},
+            argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64,
+        ),
+    ]
+    caches = {}
+    for iteration, spec in enumerate(specs):
+        timestep_hex = spec.get("timestep", "0000000000000000")
+        timestep = struct.unpack(">d", bytes.fromhex(timestep_hex))[0]
+        solver_instance_id = spec.get("solver_instance_id", "main")
+        input_entry_index = spec.get("input_entry_index", 0)
+        slot = caches.setdefault((solver_instance_id, input_entry_index), {
+            "last_timestep": -1.0,
+            "source_seq": None,
+        })
+        guard_seq = len(events)
+        events.append(_event(
+            "loop_guard", guard_seq, process_generation_id=proc, driver_id="main",
+            loop_iteration_id=iteration, time_step_ieee754_hex=timestep_hex,
+            time_max_ieee754_hex="3ff0000000000000", condition_result=True,
+        ))
+        begin_seq = len(events)
+        is_hit = slot["last_timestep"] >= 0 and timestep == slot["last_timestep"]
+        action = "hit" if is_hit else "miss"
+        ref = slot["source_seq"] if is_hit else None
+        action = spec.get("cache_action", action)
+        ref = spec.get("cache_source_seq", ref)
+        active = spec.get("active", False)
+        events.append(_event(
+            "poll_begin", begin_seq, poll_begin_id=begin_seq, process_generation_id=proc,
+            solver_instance_id=solver_instance_id, driver_id="main", guard_seq=guard_seq,
+            callsite_id="cpu.pre_interaction_forces.run_cpu", integrator="Verlet",
+            interstep="INTERSTEP_Verlet", input_entry_index=input_entry_index,
+            timestep_ieee754_hex=timestep_hex, active=active,
+            cache_action=action, cache_source_seq=ref,
+            table_raw_binding=spec.get(
+                "table_raw_binding", {"synthetic": True} if active else None
+            ),
+        ))
+        if not is_hit:
+            slot["last_timestep"] = timestep
+            slot["source_seq"] = begin_seq
+        if spec.get("outcome", "returned") is not None:
+            events.append(_event(
+                "poll_end", len(events), poll_begin_id=begin_seq,
+                process_generation_id=proc, outcome=spec.get("outcome", "returned"),
+            ))
+
+    events.extend([
+        _event("exit", len(events), process_generation_id=proc, exit_code=0, signal=None),
+        _event("reap", len(events) + 1, process_generation_id=proc),
+    ])
+    return _journal(events)
+
+
 def _journal(events, **updates):
     value = {
         "schema": JOURNAL_SCHEMA,
@@ -107,6 +167,10 @@ def test_valid_synthetic_journal_remains_open_and_non_authorizing():
     assert result["process_lifecycle_verified"] is False
     assert result["query_causality_verified"] is False
     assert result["cache_replay_verified"] is False
+    assert result["query_guard_link_count"] == 1
+    assert result["query_guard_links_observed_consistent"] is True
+    assert result["cache_transitions_observed_consistent"] is True
+    assert result["cache_replay_diagnostic_state"] == "journal_local_consistent_unverified"
     assert result["execution_semantics_verified"] is False
     assert result["qualification_adjudicated"] is False
     assert result["T1_numerical"] is False
@@ -123,7 +187,10 @@ def test_missing_poll_end_is_retained_as_incomplete_not_passed():
 
 
 def test_exception_poll_end_is_terminal_but_never_execution_success():
-    result = inspect_untrusted_v5_journal(_journal(_main_events(poll_outcome="exception")))
+    events = _main_events(poll_outcome="exception")
+    events[3]["active"] = True
+    events[3]["table_raw_binding"] = {"synthetic": True}
+    result = inspect_untrusted_v5_journal(_journal(events))
     assert result["all_polls_terminal"] is True
     assert result["poll_exception_count"] == 1
     assert result["all_polls_returned"] is False
@@ -246,6 +313,277 @@ def test_process_query_before_root_exec_is_rejected():
     ]
     with pytest.raises(JournalV5Error, match="requires a running process"):
         inspect_untrusted_v5_journal(_journal(events))
+
+
+def test_poll_must_match_true_guard_generation_driver_iteration_and_exact_time():
+    raw = _journal_with_polls([{"timestep": "3ff0000000000000"}])
+    journal = json.loads(raw)
+    poll = next(event for event in journal["events"] if event["kind"] == "poll_begin")
+    guard = next(event for event in journal["events"] if event["kind"] == "loop_guard")
+    guard["condition_result"] = False
+    with pytest.raises(JournalV5Error, match="same-generation driver/iteration guard"):
+        inspect_untrusted_v5_journal(json.dumps(journal).encode())
+
+    journal = json.loads(raw)
+    poll = next(event for event in journal["events"] if event["kind"] == "poll_begin")
+    poll["timestep_ieee754_hex"] = "0000000000000000"
+    with pytest.raises(JournalV5Error, match="same-generation driver/iteration guard"):
+        inspect_untrusted_v5_journal(json.dumps(journal).encode())
+
+
+def test_cache_single_slot_replay_uses_numeric_binary64_equality_and_current_source():
+    raw = _journal_with_polls([
+        {"timestep": "0000000000000000"},
+        {"timestep": "8000000000000000"},  # -0.0 compares equal to +0.0 in C++.
+    ])
+    result = inspect_untrusted_v5_journal(raw)
+    begins = [event for event in json.loads(raw)["events"] if event["kind"] == "poll_begin"]
+    assert begins[0]["cache_action"] == "miss"
+    assert begins[1]["cache_action"] == "hit"
+    assert begins[1]["cache_source_seq"] == begins[0]["seq"]
+    assert result["cache_unknown_source_count"] == 0
+    assert result["cache_hit_with_unknown_source_count"] == 0
+
+
+def test_negative_timestep_repeats_are_misses_under_source_guard():
+    raw = _journal_with_polls([
+        {"timestep": "c000000000000000"},
+        {"timestep": "c000000000000000"},
+    ])
+    result = inspect_untrusted_v5_journal(raw)
+    begins = [event for event in json.loads(raw)["events"] if event["kind"] == "poll_begin"]
+    assert [event["cache_action"] for event in begins] == ["miss", "miss"]
+    assert [event["cache_source_seq"] for event in begins] == [None, None]
+    assert result["cache_replay_diagnostic_state"] == "journal_local_consistent_unverified"
+
+
+def test_cache_slots_are_isolated_by_solver_instance_and_input_entry():
+    raw = _journal_with_polls([
+        {"input_entry_index": 0},
+        {"input_entry_index": 1},
+        {"input_entry_index": 0},
+        {"solver_instance_id": "other", "input_entry_index": 0},
+    ])
+    inspect_untrusted_v5_journal(raw)
+    begins = [event for event in json.loads(raw)["events"] if event["kind"] == "poll_begin"]
+    assert [event["cache_action"] for event in begins] == ["miss", "miss", "hit", "miss"]
+    assert [event["cache_source_seq"] for event in begins] == [None, None, begins[0]["seq"], None]
+
+
+def test_cache_slot_does_not_cross_process_generation():
+    root = _process()
+    child = _process(5, pid=43)
+    events = [
+        _event("spawn", 0, process_generation_id=root, supervisor_identity_binding={"synthetic": True}),
+        _event("exec", 1, process_generation_id=root, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        _event("loop_guard", 2, process_generation_id=root, driver_id="main", loop_iteration_id=0, time_step_ieee754_hex="0000000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=True),
+        _event("poll_begin", 3, poll_begin_id=3, process_generation_id=root, solver_instance_id="main", driver_id="main", guard_seq=2, callsite_id="cpu.pre_interaction_forces.run_cpu", integrator="Verlet", interstep="INTERSTEP_Verlet", input_entry_index=0, timestep_ieee754_hex="0000000000000000", active=False, cache_action="miss", cache_source_seq=None, table_raw_binding=None),
+        _event("poll_end", 4, poll_begin_id=3, process_generation_id=root, outcome="returned"),
+        _event("fork", 5, parent_generation_id=root, process_generation_id=child),
+        _event("loop_guard", 6, process_generation_id=child, driver_id="main", loop_iteration_id=0, time_step_ieee754_hex="0000000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=True),
+        _event("poll_begin", 7, poll_begin_id=7, process_generation_id=child, solver_instance_id="main", driver_id="main", guard_seq=6, callsite_id="cpu.pre_interaction_forces.run_cpu", integrator="Verlet", interstep="INTERSTEP_Verlet", input_entry_index=0, timestep_ieee754_hex="0000000000000000", active=False, cache_action="miss", cache_source_seq=None, table_raw_binding=None),
+        _event("poll_end", 8, poll_begin_id=7, process_generation_id=child, outcome="returned"),
+        _event("exit", 9, process_generation_id=child, exit_code=0, signal=None),
+        _event("reap", 10, process_generation_id=child),
+        _event("exit", 11, process_generation_id=root, exit_code=0, signal=None),
+        _event("reap", 12, process_generation_id=root),
+    ]
+    result = inspect_untrusted_v5_journal(_journal(events))
+    assert result["poll_begin_count"] == 2
+    assert result["cache_fork_unresolved_poll_count"] == 1
+    assert result["cache_transitions_observed_consistent"] is False
+    assert result["cache_replay_diagnostic_state"] == "unresolved_fork_cache_state"
+
+
+def test_intervening_miss_invalidates_older_same_time_cache_source():
+    raw = _journal_with_polls([
+        {"timestep": "0000000000000000"},
+        {"timestep": "3ff0000000000000"},
+        {"timestep": "0000000000000000"},
+    ])
+    journal = json.loads(raw)
+    begins = [event for event in journal["events"] if event["kind"] == "poll_begin"]
+    begins[2]["cache_action"] = "hit"
+    begins[2]["cache_source_seq"] = begins[0]["seq"]
+    with pytest.raises(JournalV5Error, match="cache_action differs"):
+        inspect_untrusted_v5_journal(json.dumps(journal).encode())
+
+
+@pytest.mark.parametrize("first_outcome", ["exception", None])
+def test_unknown_miss_output_poisoning_is_not_backfilled_by_same_time_hit(first_outcome):
+    result = inspect_untrusted_v5_journal(_journal_with_polls([
+        {"active": True, "outcome": first_outcome},
+        {"timestep": "0000000000000000"},
+    ]))
+    assert result["cache_unknown_source_count"] == 1
+    assert result["cache_hit_with_unknown_source_count"] == 1
+    assert result["cache_replay_diagnostic_state"] == (
+        "unresolved_call_order" if first_outcome is None else "unresolved_output_state"
+    )
+    assert result["cache_unclosed_prior_poll_count"] == (1 if first_outcome is None else 0)
+    assert result["cache_replay_verified"] is False
+
+
+def test_unterminated_cache_hit_keeps_later_same_time_hit_unverified():
+    result = inspect_untrusted_v5_journal(_journal_with_polls([
+        {}, {"outcome": None}, {},
+    ]))
+    assert result["unterminated_poll_count"] == 1
+    assert result["cache_unterminated_hit_count"] == 1
+    assert result["cache_hit_with_unknown_source_count"] == 0
+    assert result["cache_unclosed_prior_poll_count"] == 1
+    assert result["cache_replay_diagnostic_state"] == "unresolved_call_order"
+    assert result["all_polls_terminal"] is False
+
+
+def test_terminal_unterminated_hit_gets_incomplete_cache_diagnostic():
+    result = inspect_untrusted_v5_journal(_journal_with_polls([
+        {}, {"outcome": None},
+    ]))
+    assert result["all_polls_terminal"] is False
+    assert result["gate_state"] == "open"
+    assert result["cache_unterminated_hit_count"] == 1
+    assert result["cache_replay_diagnostic_state"] == "incomplete_poll_state"
+
+
+def test_exception_on_inactive_or_cache_hit_branch_is_rejected():
+    with pytest.raises(JournalV5Error, match="inactive source branch"):
+        inspect_untrusted_v5_journal(_journal_with_polls([
+            {"outcome": "exception"},
+        ]))
+    with pytest.raises(JournalV5Error, match="cache-hit branch"):
+        inspect_untrusted_v5_journal(_journal_with_polls([
+            {}, {"outcome": "exception"},
+        ]))
+
+
+def test_cache_hit_must_reference_the_current_miss_event():
+    raw = _journal_with_polls([
+        {"timestep": "0000000000000000"},
+        {"timestep": "0000000000000000"},
+    ])
+    journal = json.loads(raw)
+    begins = [event for event in journal["events"] if event["kind"] == "poll_begin"]
+    begins[1]["cache_source_seq"] = begins[1]["seq"] - 1
+    with pytest.raises(JournalV5Error, match="current same-slot miss"):
+        inspect_untrusted_v5_journal(json.dumps(journal).encode())
+
+
+def test_active_cache_hit_binding_matches_current_miss_with_exact_json_types():
+    raw = _journal_with_polls([
+        {"active": True, "table_raw_binding": {"table": {"id": 1}}},
+        {"active": True, "table_raw_binding": {"table": {"id": 1}}},
+    ])
+    inspect_untrusted_v5_journal(raw)
+    journal = json.loads(raw)
+    begins = [event for event in journal["events"] if event["kind"] == "poll_begin"]
+    begins[1]["table_raw_binding"] = {"table": {"id": True}}
+    with pytest.raises(JournalV5Error, match="table binding differs"):
+        inspect_untrusted_v5_journal(json.dumps(journal).encode())
+
+    begins[1]["table_raw_binding"] = {"table": {"id": 1}}
+    begins[0]["table_raw_binding"] = None
+    with pytest.raises(JournalV5Error, match="active poll must have an object"):
+        inspect_untrusted_v5_journal(json.dumps(journal).encode())
+
+
+def test_poll_end_must_precede_exec_and_exec_starts_a_fresh_cache_epoch():
+    proc = _process()
+    guard = lambda seq: _event(
+        "loop_guard", seq, process_generation_id=proc, driver_id="main",
+        loop_iteration_id=seq, time_step_ieee754_hex="0000000000000000",
+        time_max_ieee754_hex="3ff0000000000000", condition_result=True,
+    )
+    poll = lambda seq, guard_seq, action, source: _event(
+        "poll_begin", seq, poll_begin_id=seq, process_generation_id=proc,
+        solver_instance_id="main", driver_id="main", guard_seq=guard_seq,
+        callsite_id="cpu.pre_interaction_forces.run_cpu", integrator="Verlet",
+        interstep="INTERSTEP_Verlet", input_entry_index=0,
+        timestep_ieee754_hex="0000000000000000", active=False,
+        cache_action=action, cache_source_seq=source, table_raw_binding=None,
+    )
+    exec_event = lambda seq: _event(
+        "exec", seq, process_generation_id=proc, executable_binding={},
+        argv_sha256="4" * 64, cwd_object_id="cwd-v2", environment_sha256="5" * 64,
+    )
+    events = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={}),
+        _event("exec", 1, process_generation_id=proc, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        guard(2), poll(3, 2, "miss", None), exec_event(4),
+        _event("poll_end", 5, poll_begin_id=3, process_generation_id=proc, outcome="returned"),
+        _event("exit", 6, process_generation_id=proc, exit_code=0, signal=None),
+        _event("reap", 7, process_generation_id=proc),
+    ]
+    with pytest.raises(JournalV5Error, match="poll_end must precede a later exec"):
+        inspect_untrusted_v5_journal(_journal(events))
+
+    events = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={}),
+        _event("exec", 1, process_generation_id=proc, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        guard(2), poll(3, 2, "miss", None),
+        _event("poll_end", 4, poll_begin_id=3, process_generation_id=proc, outcome="returned"),
+        exec_event(5), guard(6), poll(7, 6, "hit", 3),
+        _event("poll_end", 8, poll_begin_id=7, process_generation_id=proc, outcome="returned"),
+        _event("exit", 9, process_generation_id=proc, exit_code=0, signal=None),
+        _event("reap", 10, process_generation_id=proc),
+    ]
+    with pytest.raises(JournalV5Error, match="cache_action differs"):
+        inspect_untrusted_v5_journal(_journal(events))
+
+    events = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={}),
+        _event("exec", 1, process_generation_id=proc, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        guard(2), poll(3, 2, "miss", None),
+        _event("poll_end", 4, poll_begin_id=3, process_generation_id=proc, outcome="returned"),
+        exec_event(5), guard(6), poll(7, 6, "miss", None),
+        _event("poll_end", 8, poll_begin_id=7, process_generation_id=proc, outcome="returned"),
+        _event("exit", 9, process_generation_id=proc, exit_code=0, signal=None),
+        _event("reap", 10, process_generation_id=proc),
+    ]
+    result = inspect_untrusted_v5_journal(_journal(events))
+    assert result["cache_exec_epoch_reset_count"] == 1
+    assert result["cache_replay_diagnostic_state"] == "unresolved_output_state"
+
+    events = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={}),
+        _event("exec", 1, process_generation_id=proc, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        guard(2), exec_event(3), poll(4, 2, "miss", None),
+        _event("poll_end", 5, poll_begin_id=4, process_generation_id=proc, outcome="returned"),
+        _event("exit", 6, process_generation_id=proc, exit_code=0, signal=None),
+        _event("reap", 7, process_generation_id=proc),
+    ]
+    with pytest.raises(JournalV5Error, match="same-generation driver/iteration guard"):
+        inspect_untrusted_v5_journal(_journal(events))
+
+
+def test_overlapping_poll_calls_for_one_cache_slot_are_rejected():
+    proc = _process()
+    events = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={}),
+        _event("exec", 1, process_generation_id=proc, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        _event("loop_guard", 2, process_generation_id=proc, driver_id="main", loop_iteration_id=0, time_step_ieee754_hex="0000000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=True),
+        _event("poll_begin", 3, poll_begin_id=3, process_generation_id=proc, solver_instance_id="main", driver_id="main", guard_seq=2, callsite_id="cpu.pre_interaction_forces.run_cpu", integrator="Verlet", interstep="INTERSTEP_Verlet", input_entry_index=0, timestep_ieee754_hex="0000000000000000", active=True, cache_action="miss", cache_source_seq=None, table_raw_binding={}),
+        _event("loop_guard", 4, process_generation_id=proc, driver_id="main", loop_iteration_id=1, time_step_ieee754_hex="0000000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=True),
+        _event("poll_begin", 5, poll_begin_id=5, process_generation_id=proc, solver_instance_id="main", driver_id="main", guard_seq=4, callsite_id="cpu.pre_interaction_forces.run_cpu", integrator="Verlet", interstep="INTERSTEP_Verlet", input_entry_index=0, timestep_ieee754_hex="0000000000000000", active=True, cache_action="hit", cache_source_seq=3, table_raw_binding={}),
+        _event("poll_end", 6, poll_begin_id=5, process_generation_id=proc, outcome="returned"),
+        _event("poll_end", 7, poll_begin_id=3, process_generation_id=proc, outcome="returned"),
+        _event("exit", 8, process_generation_id=proc, exit_code=0, signal=None),
+        _event("reap", 9, process_generation_id=proc),
+    ]
+    with pytest.raises(JournalV5Error, match="poll calls overlap"):
+        inspect_untrusted_v5_journal(_journal(events))
+
+
+def test_unclosed_same_slot_poll_followed_by_another_call_is_explicitly_unresolved():
+    result = inspect_untrusted_v5_journal(_journal_with_polls([
+        {"outcome": None}, {},
+    ]))
+    assert result["poll_begin_count"] == 2
+    assert result["unterminated_poll_count"] == 1
+    assert result["cache_unclosed_prior_poll_count"] == 1
+    assert result["cache_transitions_observed_consistent"] is False
+    assert result["cache_replay_diagnostic_state"] == "unresolved_call_order"
+    assert result["gate_state"] == "open"
 
 
 def test_fork_from_created_root_and_multiple_root_spawn_are_rejected():
