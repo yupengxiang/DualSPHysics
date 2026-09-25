@@ -11,7 +11,9 @@ ledger.
 
 The current v2 receipt is incomplete, so the checked-in proposal contains the
 32-case design and a blocked batch decision but no prepared production input
-or job submission.
+or job submission. The legacy Mapping ingress has no source-bound V3
+qualification bundle capability; batch admission, preparation, and job-spec
+emission therefore remain fail-closed even if caller fields claim a pass.
 """
 
 from __future__ import annotations
@@ -36,7 +38,6 @@ if str(SOURCE_ROOT) not in sys.path:
 from scripts.core_production import (
     FIRST_EIGHT,
     QUALIFICATION_SCHEMA,
-    next_batch,
     register_scope,
 )
 
@@ -915,7 +916,11 @@ def production_job_spec(
     qualification_receipt_sha256: str,
     production_design_sha256: str,
 ) -> dict[str, Any]:
-    """Build one scheduler-neutral job spec from an already prepared case."""
+    """Refuse legacy Mapping-to-job conversion until V3 capability exists."""
+    raise ConnectorError(
+        "trusted V3 qualification bundle capability is unavailable; "
+        "legacy Mapping job-spec emission is disabled"
+    )
     _validate_canonical_production_row(row)
     prepared_path = Path(prepared_path).resolve()
     prepared = load_json(prepared_path)
@@ -1002,6 +1007,12 @@ def prepare_production_batch(
     ``T1_numerical`` true.  Calling it with the current receipt fails before
     importing GenCase or writing any production case.
     """
+    # Reject before inspecting caller-controlled gate fields, re-evaluating
+    # runtime evidence, importing core_cfd, or creating output.
+    raise ConnectorError(
+        "trusted V3 qualification bundle capability is unavailable; "
+        "legacy Mapping preparation is disabled"
+    )
     validate_production_design(production_design)
     supplied_binding = qualification.get("binding")
     if not isinstance(supplied_binding, Mapping) or supplied_binding.get("schema") != QUALIFICATION_BINDING_SCHEMA:
@@ -1253,58 +1264,43 @@ def batch_decision(
     qualification: Mapping[str, Any],
     audits: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Return the fail-closed 8 -> 24 decision without writing state."""
-    qualification_schema = qualification.get("schema")
-    if type(qualification_schema) is not str or qualification_schema != QUALIFICATION_SCHEMA:
-        validate_production_design(production_design)
-        return {
-            "status": "scope_review_required",
-            "ready": [],
-            "failed": ["qualification:schema_mismatch"],
-            "missing": [row["case_id"] for row in production_design["cases"]],
-            "registered_denominator": PRODUCTION_CASE_COUNT,
-        }
-    validate_production_design(production_design)
-    audits = {} if audits is None else dict(audits)
-    binding = qualification.get("binding")
-    binding_valid = (
-        isinstance(binding, Mapping)
-        and binding.get("schema") == QUALIFICATION_BINDING_SCHEMA
-        and binding.get("verified") is True
-        and binding.get("artifact_bindings_verified") is True
-        and binding.get("manifest_sha256") == qualification.get("manifest_sha256")
-        and binding.get("matrix_complete") == qualification.get("matrix_complete")
-        and binding.get("T1_numerical") == qualification.get("T1_numerical")
-    )
-    if not binding_valid:
-        return {
-            "status": "scope_review_required",
-            "ready": [],
-            "failed": ["qualification:unbound_or_unverified_tick"],
-            "missing": [row["case_id"] for row in production_design["cases"]],
-            "registered_denominator": PRODUCTION_CASE_COUNT,
-        }
-    if not qualification.get("matrix_complete"):
-        return {
-            "status": "awaiting_qualification",
-            "ready": [],
-            "failed": ["qualification:matrix_incomplete"],
-            "missing": [row["case_id"] for row in production_design["cases"]],
-            "registered_denominator": PRODUCTION_CASE_COUNT,
-        }
-    if not qualification.get("T1_numerical"):
-        return {
-            "status": "scope_review_required",
-            "ready": [],
-            "failed": ["qualification:T1_numerical"],
-            "missing": [row["case_id"] for row in production_design["cases"]],
-            "registered_denominator": PRODUCTION_CASE_COUNT,
-        }
-    if audits:
-        audits = verify_bound_audits(production_design, audits)
-    decision = next_batch(dict(production_design), dict(qualification), audits)
-    decision.setdefault("registered_denominator", PRODUCTION_CASE_COUNT)
-    return decision
+    """Return a non-authorizing hold until a trusted V3 bundle is available.
+
+    This legacy Mapping API intentionally does not inspect the design,
+    qualification, or audit arguments. ``missing=None`` means case-level
+    accounting was not performed by a trusted consumer.
+    """
+    return {
+        "status": "scope_review_required",
+        "ready": [],
+        "failed": ["qualification:trusted_bundle_capability_unavailable"],
+        "missing": None,
+        "registered_denominator": PRODUCTION_CASE_COUNT,
+    }
+
+
+def _qualification_admission_view(evaluation: Mapping[str, Any]) -> dict[str, Any]:
+    """Separate observed legacy evaluation fields from admitted qualification."""
+    missing = evaluation.get("missing", [])
+    failures = evaluation.get("failures", [])
+    return {
+        "trusted_bundle_capability_available": False,
+        "formal_qualification_admitted": False,
+        "static_contract_pass": False,
+        "observed_static_contract_pass": evaluation.get("static_contract_pass"),
+        "matrix_complete": False,
+        "observed_matrix_complete": evaluation.get("matrix_complete"),
+        "T1_numerical": False,
+        "observed_T1_numerical": evaluation.get("T1_numerical"),
+        "qualification_claim": "none; trusted V3 bundle capability unavailable",
+        "promotion_status": "not_admitted",
+        "reevaluation_match": False,
+        "observed_reevaluation_match": evaluation.get("reevaluation_match"),
+        "artifact_bindings_verified": False,
+        "observed_artifact_bindings_verified": evaluation.get("artifact_bindings_verified"),
+        "missing_cell_count": len(missing) if isinstance(missing, (list, tuple)) else None,
+        "failure_cell_count": len(failures) if isinstance(failures, (list, tuple)) else None,
+    }
 
 
 def _resource_summary(resource: Mapping[str, Any]) -> dict[str, Any]:
@@ -1368,9 +1364,9 @@ def negative_contract_checks(
     results.append(
         {
             "name": "partial_matrix",
-            "rejected": partial_decision["status"] == "awaiting_qualification" and not partial_decision["ready"],
+            "rejected": partial_decision["status"] == "scope_review_required" and not partial_decision["ready"],
             "observed": partial_decision["status"],
-            "reason": "matrix_incomplete blocks first_8",
+            "reason": "legacy Mapping has no trusted bundle capability",
         }
     )
 
@@ -1542,17 +1538,11 @@ def build_proposal(
         "recipe_id": RECIPE_ID,
         "recipe": RECIPE,
         "status": status,
+        "trusted_qualification_bundle_available": False,
+        "formal_batch_admitted": False,
         "qualification_admission": {
-            "static_contract_pass": evaluation_summary["static_contract_pass"],
-            "matrix_complete": evaluation_summary["matrix_complete"],
-            "T1_numerical": evaluation_summary["T1_numerical"],
-            "qualification_claim": evaluation.get("qualification_claim"),
-            "promotion_status": evaluation_summary["promotion_status"],
-            "reevaluation_match": evaluation_summary["reevaluation_match"],
-            "artifact_bindings_verified": evaluation_summary["artifact_bindings_verified"],
-            "missing_cell_count": len(evaluation_summary["missing"]),
-            "failure_cell_count": len(evaluation_summary["failures"]),
-            "claim_limit": "current receipt is not range-qualified; no 8 or 32 production case is ready",
+            **_qualification_admission_view(evaluation_summary),
+            "claim_limit": "legacy evaluation is diagnostic only; no 8 or 32 production case is admitted",
         },
         "evidence": {
             "integration_gap": path_ref(

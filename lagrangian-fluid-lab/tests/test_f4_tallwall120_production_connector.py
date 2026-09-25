@@ -150,27 +150,57 @@ def bound_production_receipt(tmp_path: Path, case_id: str, index: int) -> dict:
     }
 
 
-def test_current_receipt_is_bound_and_status_tracks_readonly_qualification_tick():
+def test_current_receipt_remains_unadmitted_without_running_root_tick(monkeypatch):
+    binding = {
+        "schema": connector.QUALIFICATION_BINDING_SCHEMA,
+        "manifest_path": str(MANIFEST_PATH),
+        "manifest_sha256": "a" * 64,
+        "runtime_root": str(RUNTIME_ROOT),
+        "archive_root": str(ARCHIVE_ROOT),
+        "reevaluation_sha256": "b" * 64,
+        "matrix_complete": True,
+        "T1_numerical": True,
+        "cell_indices": list(range(connector.QUALIFICATION_CELL_COUNT)),
+        "missing": [],
+        "failures": [],
+        "checks": {"synthetic": True},
+        "artifact_bindings_verified": True,
+        "verified": True,
+    }
+    monkeypatch.setattr(
+        connector,
+        "tick_qualification",
+        lambda **_kwargs: {"result": {"synthetic": True}, "binding": binding},
+    )
+    monkeypatch.setattr(
+        connector,
+        "validate_evaluation",
+        lambda *_args, **_kwargs: {
+            "static_contract_pass": True,
+            "matrix_complete": True,
+            "T1_numerical": True,
+            "reevaluation_match": True,
+            "artifact_bindings_verified": True,
+            "promotion_status": "candidate_qualified",
+            "missing": [],
+            "failures": [],
+        },
+    )
     proposal = connector.build_proposal(**real_inputs())
 
     assert proposal["schema"] == connector.SCHEMA
     admission = proposal["qualification_admission"]
-    assert admission["static_contract_pass"] is True
-    if admission["T1_numerical"] is True:
-        assert admission["matrix_complete"] is True
-        assert proposal["status"] == "production_batch_ready_for_root_review"
-        assert proposal["batches"]["decision"]["ready"] == [
-            row["case_id"] for row in proposal["production_design"]["cases"]
-            if row["first_batch"]
-        ]
-    elif admission["matrix_complete"] is False:
-        assert admission["T1_numerical"] is False
-        assert proposal["status"] == "awaiting_qualification"
-        assert proposal["batches"]["decision"]["ready"] == []
-    else:
-        assert admission["T1_numerical"] is False
-        assert proposal["status"] == "scope_review_required"
-        assert proposal["batches"]["decision"]["ready"] == []
+    assert proposal["trusted_qualification_bundle_available"] is False
+    assert proposal["formal_batch_admitted"] is False
+    assert admission["trusted_bundle_capability_available"] is False
+    assert admission["formal_qualification_admitted"] is False
+    assert admission["observed_T1_numerical"] is True
+    assert admission["static_contract_pass"] is False
+    assert admission["matrix_complete"] is False
+    assert admission["T1_numerical"] is False
+    assert proposal["status"] == "scope_review_required"
+    assert proposal["batches"]["decision"]["ready"] == []
+    assert proposal["batches"]["decision"]["missing"] is None
     assert proposal["production_design"]["case_count"] == 32
     assert proposal["batches"]["job_specs"] == []
     assert proposal["template_derivation"]["derived_container_heights_m"] == [1.2]
@@ -235,11 +265,13 @@ def test_tampered_fixed_production_registration_is_rejected(field, value):
         "manifest_sha256": "synthetic",
         "binding": synthetic_binding(True, True),
     }
-    with pytest.raises(connector.ConnectorError):
-        connector.batch_decision(registered, qualification)
+    decision = connector.batch_decision(registered, qualification)
+    assert decision["status"] == "scope_review_required"
+    assert decision["ready"] == []
+    assert decision["missing"] is None
 
 
-def test_qualified_receipt_transitions_first_eight_then_remaining_24(tmp_path):
+def test_qualified_mapping_cannot_transition_first_eight_or_remaining_24():
     registered = connector.build_production_design(load(DESIGN_PATH))
     qualification = {
         "schema": "core.qualification.v1",
@@ -252,24 +284,17 @@ def test_qualified_receipt_transitions_first_eight_then_remaining_24(tmp_path):
     }
 
     first = connector.batch_decision(registered, qualification)
-    assert first["status"] == "first_8"
-    assert len(first["ready"]) == 8
+    assert first["status"] == "scope_review_required"
+    assert first["ready"] == []
     assert first["registered_denominator"] == 32
-
-    audits = {}
-    for row in registered["cases"]:
-        if not row["first_batch"]:
-            continue
-        audits[row["case_id"]] = bound_production_receipt(
-            tmp_path, row["case_id"], row["index"]
-        )
-    second = connector.batch_decision(registered, qualification, audits)
-    assert second["status"] == "remaining_24"
-    assert len(second["ready"]) == 24
-    assert set(second["ready"]).isdisjoint(first["ready"])
+    second = connector.batch_decision(registered, qualification, {"forged": {"hard_integrity_pass": True}})
+    assert second["status"] == "scope_review_required"
+    assert second["ready"] == []
+    assert second["failed"] == ["qualification:trusted_bundle_capability_unavailable"]
+    assert second["missing"] is None
 
 
-def test_synthetic_qualification_schema_rejected_before_binding_and_gate_fields():
+def test_legacy_qualification_is_rejected_before_any_caller_field_read():
     registered = connector.build_production_design(load(DESIGN_PATH))
 
     class SchemaReadProbe(dict):
@@ -296,9 +321,10 @@ def test_synthetic_qualification_schema_rejected_before_binding_and_gate_fields(
 
     decision = connector.batch_decision(registered, qualification, AuditReadProbe())
     assert decision["status"] == "scope_review_required"
-    assert decision["failed"] == ["qualification:schema_mismatch"]
+    assert decision["failed"] == ["qualification:trusted_bundle_capability_unavailable"]
     assert decision["ready"] == []
-    assert qualification.reads == ["schema"]
+    assert decision["missing"] is None
+    assert qualification.reads == []
 
 
 def test_synthetic_evaluation_rejected_before_t1_derivation():
@@ -363,9 +389,61 @@ def test_partial_matrix_cannot_open_first_batch():
     }
 
     decision = connector.batch_decision(registered, qualification)
-    assert decision["status"] == "awaiting_qualification"
+    assert decision["status"] == "scope_review_required"
     assert decision["ready"] == []
-    assert "qualification:matrix_incomplete" in decision["failed"]
+    assert decision["failed"] == ["qualification:trusted_bundle_capability_unavailable"]
+    assert decision["missing"] is None
+
+
+def test_legacy_job_spec_emission_fails_before_reading_inputs():
+    class ReadProbe(dict):
+        def get(self, key, default=None):
+            raise AssertionError(f"job-spec input read before capability rejection: {key}")
+
+    with pytest.raises(connector.ConnectorError, match="trusted V3 qualification bundle capability"):
+        connector.production_job_spec(
+            Path("missing-prepared.json"), ReadProbe(),
+            lab_root=Path("missing-lab"), batch_status="first_8",
+            qualification_receipt_sha256="a" * 64,
+            production_design_sha256="b" * 64,
+        )
+
+
+def test_legacy_preparation_fails_before_gate_reads_and_output_creation(tmp_path):
+    class ReadProbe(dict):
+        def get(self, key, default=None):
+            raise AssertionError(f"preparation input read before capability rejection: {key}")
+
+    output_root = tmp_path / "must-stay-absent"
+    with pytest.raises(connector.ConnectorError, match="trusted V3 qualification bundle capability"):
+        connector.prepare_production_batch(
+            production_design=ReadProbe(), template_config=ReadProbe(),
+            qualification=ReadProbe(), batch_status="first_8",
+            lab_root=tmp_path / "lab", output_root=output_root,
+            qualification_receipt_sha256="a" * 64,
+            template_prepared_sha256="b" * 64,
+            manifest_path=tmp_path / "manifest.json",
+            runtime_root=tmp_path / "runtime", archive_root=tmp_path / "archive",
+        )
+    assert not output_root.exists()
+
+
+def test_legacy_qualification_summary_keeps_claims_unadmitted():
+    view = connector._qualification_admission_view({
+        "static_contract_pass": True,
+        "matrix_complete": True,
+        "T1_numerical": True,
+        "reevaluation_match": True,
+        "artifact_bindings_verified": True,
+        "missing": [],
+        "failures": [],
+    })
+    assert view["trusted_bundle_capability_available"] is False
+    assert view["formal_qualification_admitted"] is False
+    assert view["matrix_complete"] is False and view["observed_matrix_complete"] is True
+    assert view["T1_numerical"] is False and view["observed_T1_numerical"] is True
+    assert view["artifact_bindings_verified"] is False
+    assert view["observed_artifact_bindings_verified"] is True
 
 
 def test_old_scope_receipt_is_rejected():
@@ -428,7 +506,7 @@ def test_prepare_batch_refuses_current_unqualified_receipt_before_gen_case(tmp_p
         "T1_numerical": evaluation["T1_numerical"],
     }
 
-    with pytest.raises(connector.ConnectorError, match="binding is missing"):
+    with pytest.raises(connector.ConnectorError, match="trusted V3 qualification bundle capability"):
         connector.prepare_production_batch(
             production_design=registered,
             template_config=template,
