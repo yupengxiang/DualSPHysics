@@ -9,6 +9,7 @@ import pytest
 
 from scripts.core_strict_json import read_bounded_raw_json, strict_json_object
 from scripts import f8_r008_attempt_ledger_v1 as ledger_v1
+from scripts import f8_r008_attempt_evidence_binding_v1 as evidence_binding_v1
 from scripts import f8_r008_c_execution_journal_v5 as journal_v5
 from scripts import f8_r008_native_integrity_registry_v1 as native_registry
 from scripts import f8_r008_per_case_bundle_verifier_v2 as attempt_v2
@@ -236,6 +237,17 @@ def _attempt_result() -> dict[str, object]:
         "T1_numerical": False,
         "qualification_credit": 0,
     }
+
+
+def _attempt_result_bound_to_ledger(raw: bytes) -> dict[str, object]:
+    result = _attempt_result()
+    events = json.loads(raw)["events"]
+    result["stage_bundle_refs"] = {
+        stage: next(event["receipt_ref"] for event in events
+                    if event["kind"] == "stage_receipt" and event["stage"] == stage)
+        for stage in ledger_v1.STAGES
+    }
+    return result
 
 
 def test_structurally_closed_ledger_stays_untrusted_and_unresolved() -> None:
@@ -534,6 +546,136 @@ def test_raw_object_binding_accepts_empty_not_started_inventory_without_qualifyi
     assert result["qualification_credit"] == 0
     assert result["c_v5_process_journal_check_count"] == 0
     assert result["c_v5_process_journal_nonce_bindings_match_ledger"] is False
+
+
+def test_integrated_attempt_binding_cross_checks_receipts_and_preserves_unresolved_denominator() -> None:
+    raw, artifacts = _ledger_and_raw_objects(stage_receipt_status="passed")
+    result = evidence_binding_v1.bind_untrusted_attempt_evidence_v1(
+        MATRIX_RAW,
+        raw,
+        attempt_ledger_ref=_ledger_ref(raw),
+        attempt_results=[_attempt_result_bound_to_ledger(raw)],
+        artifact_raw_by_ref=artifacts,
+    )
+
+    assert result["schema"] == evidence_binding_v1.SCHEMA
+    assert result["case_count"] == 15
+    assert result["attempt_count"] == 1
+    assert result["raw_object_count"] == 7
+    assert result["stage_receipt_status_binding_count"] == 3
+    assert result["referenced_stage_receipt_status_claims_match_projection"] is True
+    assert result["unbound_non_not_run_stage_status_count"] == 0
+    assert result["all_stage_status_claims_have_receipt_or_not_run"] is True
+    assert result["c_v5_process_journal_nonce_bindings_match_ledger"] is True
+    assert result["case_rows"][0]["case_outcome"] == "unresolved"
+    assert result["case_rows"][0]["attempts"][0]["attempt_outcome"] == "unresolved"
+    assert result["case_rows"][1]["case_outcome"] == "unresolved"
+    assert result["attempt_ledger_complete"] is False
+    assert result["stage_bundle_semantics_verified"] is False
+    assert result["T1_numerical"] is False
+    assert result["qualification_credit"] == 0
+
+
+def test_integrated_open_attempt_does_not_overstate_unreferenced_failure_statuses() -> None:
+    raw = _raw(_ledger_document([_event("attempt_registered", 0)]))
+    result_row = _attempt_result()
+    result_row["attempt_ledger_event_seqs"] = [0]
+    result_row["stage_bundle_refs"] = {stage: None for stage in ledger_v1.STAGES}
+    result_row["stage_receipt_statuses"] = {stage: "failed" for stage in ledger_v1.STAGES}
+    result = evidence_binding_v1.bind_untrusted_attempt_evidence_v1(
+        MATRIX_RAW,
+        raw,
+        attempt_ledger_ref=_ledger_ref(raw),
+        attempt_results=[result_row],
+        artifact_raw_by_ref={},
+    )
+
+    assert result["attempt_count"] == 1
+    assert result["referenced_stage_receipt_status_claims_match_projection"] is True
+    assert result["unbound_non_not_run_stage_status_count"] == 3
+    assert result["all_stage_status_claims_have_receipt_or_not_run"] is False
+    assert result["case_rows"][0]["attempts"][0]["attempt_outcome"] == "unresolved"
+    assert result["case_rows"][0]["case_outcome"] == "unresolved"
+    assert result["T1_numerical"] is False
+    assert result["qualification_credit"] == 0
+
+
+def test_integrated_retry_preserves_every_attempt_in_registration_order() -> None:
+    events = _complete_event_chain()
+    retry_registration = _event("attempt_registered", 11)
+    retry_registration.update({"attempt_id": "attempt-002", "nonce_hex": "e" * 32})
+    events.append(retry_registration)
+    raw, artifacts = _ledger_and_raw_objects(events, stage_receipt_status="passed")
+
+    first_result = _attempt_result_bound_to_ledger(raw)
+    retry_result = copy.deepcopy(_attempt_result())
+    retry_result.update({
+        "attempt_id": "attempt-002",
+        "nonce_hex": "e" * 32,
+        "attempt_ledger_registration_seq": 11,
+        "attempt_ledger_event_seqs": [11],
+        "stage_bundle_refs": {stage: None for stage in ledger_v1.STAGES},
+        "stage_receipt_statuses": {stage: "not_run" for stage in ledger_v1.STAGES},
+        "actual_frame_ordinals": [],
+        "actual_time_axis_ieee754_hex": [],
+    })
+    result = evidence_binding_v1.bind_untrusted_attempt_evidence_v1(
+        MATRIX_RAW,
+        raw,
+        attempt_ledger_ref=_ledger_ref(raw),
+        attempt_results=[first_result, retry_result],
+        artifact_raw_by_ref=artifacts,
+    )
+
+    attempts = result["case_rows"][0]["attempts"]
+    assert [attempt["attempt_id"] for attempt in attempts] == [ATTEMPT_ID, "attempt-002"]
+    assert [attempt["attempt_outcome"] for attempt in attempts] == ["unresolved", "unresolved"]
+    assert result["attempt_count"] == 2
+    assert result["stage_receipt_status_binding_count"] == 3
+    assert result["case_rows"][0]["case_outcome"] == "unresolved"
+    assert result["case_rows"][1]["case_outcome"] == "unresolved"
+    assert result["T1_numerical"] is False
+    assert result["qualification_credit"] == 0
+
+
+def test_integrated_attempt_binding_rejects_receipt_status_claim_mismatch() -> None:
+    raw, artifacts = _ledger_and_raw_objects(stage_receipt_status="failed")
+    with pytest.raises(evidence_binding_v1.AttemptEvidenceBindingError,
+                       match="raw receipt status claim differs"):
+        evidence_binding_v1.bind_untrusted_attempt_evidence_v1(
+        MATRIX_RAW,
+        raw,
+        attempt_ledger_ref=_ledger_ref(raw),
+        attempt_results=[_attempt_result_bound_to_ledger(raw)],
+        artifact_raw_by_ref=artifacts,
+        )
+
+
+def test_integrated_attempt_binding_retains_not_started_case_as_unresolved() -> None:
+    events = [
+        _event("attempt_registered", 0),
+        _event("attempt_terminal", 1, outcome="not_started", terminal_ref=None),
+    ]
+    raw = _raw(_ledger_document(events))
+    result_row = _attempt_result()
+    result_row["attempt_ledger_event_seqs"] = [0, 1]
+    result_row["stage_bundle_refs"] = {stage: None for stage in ledger_v1.STAGES}
+    result_row["stage_receipt_statuses"] = {stage: "not_run" for stage in ledger_v1.STAGES}
+    result = evidence_binding_v1.bind_untrusted_attempt_evidence_v1(
+        MATRIX_RAW,
+        raw,
+        attempt_ledger_ref=_ledger_ref(raw),
+        attempt_results=[result_row],
+        artifact_raw_by_ref={},
+    )
+
+    assert result["attempt_count"] == 1
+    assert result["raw_object_count"] == 0
+    assert result["stage_receipt_status_binding_count"] == 0
+    assert result["case_rows"][0]["case_outcome"] == "unresolved"
+    assert result["case_rows"][0]["attempts"][0]["attempt_outcome"] == "unresolved"
+    assert sum(row["case_outcome"] == "missing" for row in result["case_rows"]) == 0
+    assert result["qualification_credit"] == 0
 
 
 @pytest.mark.parametrize("limit_name", ["MAX_REFERENCED_OBJECTS", "MAX_REFERENCED_RAW_BYTES"])

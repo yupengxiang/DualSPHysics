@@ -121,3 +121,25 @@ def test_expected_frame_count_has_a_fixed_scope_bound() -> None:
     result["expected_frame_count"] = verifier.MAX_EXPECTED_FRAME_COUNT + 1
     with pytest.raises(verifier.AttemptResultV2Error, match="exceeds the fixed F8 R008 maximum"):
         verifier.validate_untrusted_attempt_result_v2(result)
+
+
+def test_oversized_time_hex_is_rejected_before_float_parsing(monkeypatch) -> None:
+    result = _diagnostic()
+    result["actual_time_axis_ieee754_hex"] = ["0" * (verifier.MAX_TIME_HEX_CHARS + 1)]
+
+    class ForbiddenFloatParser:
+        @staticmethod
+        def fromhex(_value):
+            raise AssertionError("oversized string reached float.fromhex")
+
+    monkeypatch.setattr(verifier, "float", ForbiddenFloatParser, raising=False)
+    with pytest.raises(verifier.AttemptResultV2Error, match="fixed string-length limit"):
+        verifier.validate_untrusted_attempt_result_v2(result)
+
+
+def test_attempt_event_sequence_inventory_has_a_hard_count_bound(monkeypatch) -> None:
+    monkeypatch.setattr(verifier, "MAX_ATTEMPT_EVENT_SEQS", 2)
+    result = _diagnostic()
+    result["attempt_ledger_event_seqs"] = [7, 9, 12]
+    with pytest.raises(verifier.AttemptResultV2Error, match="fixed count limit"):
+        verifier.validate_untrusted_attempt_result_v2(result)

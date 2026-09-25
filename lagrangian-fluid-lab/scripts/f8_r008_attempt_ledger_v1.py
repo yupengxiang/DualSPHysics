@@ -150,6 +150,23 @@ def _canonical_json_bytes(value: Any, label: str) -> bytes:
         raise AttemptLedgerV1Error(f"{label} is not canonically JSON-serializable") from error
 
 
+def _canonical_json_size(value: Any, label: str, *, max_bytes: int) -> int:
+    """Count canonical UTF-8 bytes incrementally, stopping before over-allocation."""
+    _int(max_bytes, f"{label} max_bytes", minimum=0)
+    encoder = json.JSONEncoder(sort_keys=True, separators=(",", ":"), allow_nan=False)
+    total = 0
+    try:
+        for fragment in encoder.iterencode(value):
+            total += len(fragment.encode("utf-8"))
+            if total > max_bytes:
+                raise AttemptLedgerV1Error(f"{label} exceeds its bounded byte allowance")
+    except AttemptLedgerV1Error:
+        raise
+    except (TypeError, ValueError, UnicodeEncodeError, OverflowError, RecursionError) as error:
+        raise AttemptLedgerV1Error(f"{label} is not canonically JSON-serializable") from error
+    return total
+
+
 def inspect_untrusted_qualification_matrix(raw: bytes) -> dict[str, Any]:
     """Return ordered case IDs and row digests from an untrusted frozen-matrix object.
 
@@ -914,9 +931,14 @@ def build_untrusted_attempt_aggregate_v2(
         seen_attempt_ids.add(result["attempt_id"])
         seen_nonces.add(result["nonce_hex"])
         ledger_attempt = _validate_attempt_projection(result, ledger, parsed)
-        total_attempt_result_bytes += len(_canonical_json_bytes(result, "aggregate attempt result"))
-        _require(total_attempt_result_bytes <= MAX_LEDGER_BYTES - 1_048_576,
+        remaining_attempt_result_bytes = MAX_LEDGER_BYTES - 1_048_576 - total_attempt_result_bytes
+        _require(remaining_attempt_result_bytes >= 0,
                  "aggregate attempt results exceed the bounded output allowance")
+        total_attempt_result_bytes += _canonical_json_size(
+            result,
+            "aggregate attempt result",
+            max_bytes=remaining_attempt_result_bytes,
+        )
         result_by_identity[identity] = (ledger_attempt["registration_seq"], result)
     _require(set(result_by_identity) == set(ledger_by_identity),
              "aggregate attempt records do not preserve the complete observed ledger registration inventory")

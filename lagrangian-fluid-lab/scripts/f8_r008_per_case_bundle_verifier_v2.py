@@ -28,6 +28,8 @@ ATTEMPT_RESULT_FIELDS = frozenset({
 STAGES = ("B", "C", "D")
 STAGE_RECEIPT_ROLES = {"B": "b_receipt", "C": "c_v1_receipt", "D": "d_receipt"}
 MAX_EXPECTED_FRAME_COUNT = 385
+MAX_ATTEMPT_EVENT_SEQS = 1_000_000
+MAX_TIME_HEX_CHARS = 32
 STAGE_STATUSES = frozenset({
     "not_run", "passed", "failed", "incomplete", "timeout", "oom", "signaled",
 })
@@ -110,6 +112,8 @@ def validate_untrusted_attempt_result_v2(value: Any) -> None:
     event_seqs = value["attempt_ledger_event_seqs"]
     _require(type(event_seqs) is list and bool(event_seqs),
              "attempt_ledger_event_seqs must be a nonempty builtin list")
+    _require(len(event_seqs) <= MAX_ATTEMPT_EVENT_SEQS,
+             f"attempt_ledger_event_seqs exceeds the fixed count limit {MAX_ATTEMPT_EVENT_SEQS}")
     for index, seq in enumerate(event_seqs):
         _builtin_int(seq, f"attempt_ledger_event_seqs[{index}]")
         if index:
@@ -150,6 +154,8 @@ def validate_untrusted_attempt_result_v2(value: Any) -> None:
         _require(value_ordinal == ordinal, "actual frame ordinals must be a contiguous zero-based prefix")
     for index, encoded in enumerate(times):
         _require(type(encoded) is str, f"actual_time_axis_ieee754_hex[{index}] must be a string")
+        _require(len(encoded) <= MAX_TIME_HEX_CHARS,
+                 f"actual_time_axis_ieee754_hex[{index}] exceeds the fixed string-length limit")
         try:
             number = float.fromhex(encoded)
         except (ValueError, OverflowError) as error:
