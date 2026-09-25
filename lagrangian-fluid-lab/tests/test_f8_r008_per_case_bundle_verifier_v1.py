@@ -86,6 +86,10 @@ def _synthetic_bi4(
     time_s: float,
     particle_ids: tuple[int, ...] = (0, 1),
     case_counts: tuple[int, int, int, int] | None = None,
+    *,
+    cpart: int = 0,
+    step: int = 0,
+    child_part: int | None = None,
 ) -> bytes:
     particle_count = len(particle_ids)
     if case_counts is None:
@@ -100,8 +104,11 @@ def _synthetic_bi4(
     part_values = (
         _value("TimeStep", 12, struct.pack("<d", time_s)),
         _value("Npok", 8, struct.pack("<I", particle_count)),
+        _value("Cpart", 8, struct.pack("<I", cpart)),
+        _value("Step", 8, struct.pack("<I", step)),
     )
-    part = _item("PART_0000", values=part_values, arrays=arrays)
+    part = _item(f"PART_{cpart if child_part is None else child_part:04d}",
+                 values=part_values, arrays=arrays)
     root_values = (
         _value("CaseNp", 10, struct.pack("<Q", particle_count)),
         _value("CaseNfluid", 10, struct.pack("<Q", case_counts[0])),
@@ -161,6 +168,10 @@ def _build_bundle(
     initial_case_counts: tuple[int, int, int, int] | None = None,
     frame_case_counts: tuple[int, int, int, int] | None = None,
     generated_xml: bytes | None = None,
+    extra_output_payloads: dict[str, bytes] | None = None,
+    frame_cpart_overrides: dict[int, int] | None = None,
+    frame_step_overrides: dict[int, int] | None = None,
+    frame_child_part_overrides: dict[int, int] | None = None,
 ) -> tuple[Path, bytes, dict]:
     bundle_attempt_id = attempt_id if attempt_id is not None else f"attempt-{stage.lower()}"
     bundle_nonce = nonce if nonce is not None else f"nonce-{stage.lower()}"
@@ -189,7 +200,12 @@ def _build_bundle(
         times = verifier.expected_time_axis_hex(row)
         for ordinal, time_hex in enumerate(times):
             path = f"frames/Part_{ordinal:04d}.bi4"
-            payload = _synthetic_bi4(float.fromhex(time_hex), frame_ids, frame_case_counts)
+            payload = _synthetic_bi4(
+                float.fromhex(time_hex), frame_ids, frame_case_counts,
+                cpart=(frame_cpart_overrides or {}).get(ordinal, ordinal),
+                step=(frame_step_overrides or {}).get(ordinal, ordinal),
+                child_part=(frame_child_part_overrides or {}).get(ordinal, ordinal),
+            )
             output_payloads[path] = payload
             frames.append({
                 "ordinal": ordinal,
@@ -199,6 +215,11 @@ def _build_bundle(
                 "bytes": len(payload),
                 "sha256": hashlib.sha256(payload).hexdigest(),
             })
+        if extra_output_payloads:
+            for relative, payload in extra_output_payloads.items():
+                verifier._validate_relative_path(relative)
+                assert relative not in output_payloads
+                output_payloads[relative] = payload
         directories = ["frames"]
     else:
         output_payloads["native-fluid-frame-table-v2.h5"] = b"synthetic-table-placeholder"
@@ -209,7 +230,10 @@ def _build_bundle(
         expected_axis = verifier.expected_time_axis_hex(row)
         raw_manifest_sha = "a" * 64
         for ordinal, time_hex in enumerate(expected_axis):
-            raw_payload = _synthetic_bi4(float.fromhex(time_hex), frame_ids, frame_case_counts)
+            raw_payload = _synthetic_bi4(
+                float.fromhex(time_hex), frame_ids, frame_case_counts,
+                cpart=ordinal, step=ordinal, child_part=ordinal,
+            )
             raw_path = tmp_path / f"synthetic-D-frame-{ordinal:04d}.bi4"
             raw_path.write_bytes(raw_payload)
             raw_fd = os.open(raw_path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))

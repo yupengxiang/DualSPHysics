@@ -19,6 +19,7 @@ def _synthetic_part_extra(
     case_nfloat: int = 1,
     use_normals_ft: bool = False,
     timestep: float = 0.125,
+    step: int = 17,
     normals: tuple[float, ...] | None = None,
     format_version: int = inventory.FORMAT_VERSION,
     unknown_metadata: bool = False,
@@ -34,7 +35,7 @@ def _synthetic_part_extra(
         bi4_fixture._value("CaseNbound", 8, struct.pack("<I", case_nbound)),
         bi4_fixture._value("CaseNfloat", 8, struct.pack("<I", case_nfloat)),
         bi4_fixture._value("Cpart", 7, struct.pack("<i", part)),
-        bi4_fixture._value("Step", 8, struct.pack("<I", 17)),
+        bi4_fixture._value("Step", 8, struct.pack("<I", step)),
         bi4_fixture._value("TimeStep", 12, struct.pack("<d", timestep)),
         bi4_fixture._value("UseNormalsFt", 2, struct.pack("<i", int(use_normals_ft))),
     ]

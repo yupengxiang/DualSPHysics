@@ -35,9 +35,9 @@ def _synthetic_bundle_with_nonfluid_nonfinites(tmp_path, monkeypatch):
     original = bundle_fixtures._synthetic_bi4
     call_count = 0
 
-    def synthetic_with_nonfinites(time_s, particle_ids=(0, 1), case_counts=None):
+    def synthetic_with_nonfinites(time_s, particle_ids=(0, 1), case_counts=None, **kwargs):
         nonlocal call_count
-        payload = original(time_s, particle_ids, case_counts)
+        payload = original(time_s, particle_ids, case_counts, **kwargs)
         # _build_chain creates B first, then all C frames and all D decode inputs.
         call_count += 1
         if call_count == 1:
