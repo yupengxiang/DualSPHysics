@@ -999,13 +999,15 @@ def inspect_untrusted_v5_source_callgraph(
 
 
 def _controlled_git_environment() -> dict[str, str]:
-    """Keep inherited Git variables/config from redirecting snapshot reads."""
+    """Isolate reads from inherited config, replacement refs, and lazy fetches."""
     env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
     env.update({
         "GIT_CONFIG_NOSYSTEM": "1",
         "GIT_CONFIG_GLOBAL": os.devnull,
         "GIT_OPTIONAL_LOCKS": "0",
         "GIT_TERMINAL_PROMPT": "0",
+        "GIT_NO_REPLACE_OBJECTS": "1",
+        "GIT_NO_LAZY_FETCH": "1",
     })
     return env
 
@@ -1027,6 +1029,7 @@ def _git_read(
         completed = subprocess.run(
             [
                 "git", "--no-pager", "--no-optional-locks",
+                "--no-replace-objects",
                 "-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null",
                 *args,
             ],

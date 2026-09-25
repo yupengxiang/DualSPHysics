@@ -53,6 +53,8 @@ UPDATE-109 的 `inspect_untrusted_v5_source_callgraph_against_clean_git_head` �
 
 安全复审后的当前实现由 UPDATE-110 修订：函数现为 `inspect_untrusted_v5_source_callgraph_against_git_head`，将一次捕获的完整 commit ID 用于所有 tree 查询，以 tree entry 的 blob OID 读取 immutable object 并复算 Git blob OID；开始与结束再次读取 HEAD，变化即拒绝。Git 子进程剔除继承的 `GIT_*` 重定向变量、禁用 fsmonitor/hook 与可选锁；不调用 `git status`，因此不要求 index clean，也不以 status/索引刷新作为源快照证据。仓库 root 打开为 directory FD；Git `cwd` 与每个 no-follow 源文件读取共用该 FD，并在开始/结束校验路径仍指向同一 root inode，拒绝路径替换。源文件逐块与 pinned blob 比对，限制每文件 1 MiB、所有引用文件合计 2 MiB，逐 blob 有界处理 slice 后释放内容。其含义只是同一个 HEAD snapshot 与 worktree bytes 相符，不等于 clean worktree 或可信构建证明；函数范围/AST/call edge/source-tree-to-build/runtime 仍未验证，所有相关旗标 false、gate open、zero credit。
 
+UPDATE-111 再固定 Git 对象语义：Git 命令加入 `--no-replace-objects`，并在受控子进程环境设置 `GIT_NO_REPLACE_OBJECTS=1`、`GIT_NO_LAZY_FETCH=1`。因此 replacement refs 不可把记录的 commit ID 映射到另一树，partial clone 缺失对象应本地失败、不应触发 promisor fetch。由于本地 Git 2.34 不识别较新版本的 `--no-lazy-fetch` CLI 参数，只设置其官方支持的环境变量；合成 replacement-ref 测试和 env 断言已加入。根路径替换测试也在 `ls-tree` 后触发，以验证后续查询继续绑定已打开的 root FD。详见 UPDATE-111；未以真实远端或 partial clone 测量网络行为。
+
 同时以已绑定的 source-callgraph 重算 loop guard、active-window、table-domain 和 poll 序列。空 journal、零 active poll、缺少一个应有 poll、query 在进程退出后出现或 cache 记录与单槽重算不一致，只能生成明确失败/未证明诊断：`gate_state="open"`、`execution_semantics_verified=false`、`qualification_credit=0`。
 
 建议独立 synthetic negative nodes：

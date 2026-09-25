@@ -470,6 +470,8 @@ def test_git_environment_redirection_and_fsmonitor_hook_are_not_used(tmp_path, m
 
     def record_git_args(root, args, label, *, env=None):
         observed_git_args.append(tuple(args))
+        assert env["GIT_NO_REPLACE_OBJECTS"] == "1"
+        assert env["GIT_NO_LAZY_FETCH"] == "1"
         return original_git_read(root, args, label, env=env)
 
     monkeypatch.setattr(journal_v5, "_git_read", record_git_args)
@@ -481,6 +483,45 @@ def test_git_environment_redirection_and_fsmonitor_hook_are_not_used(tmp_path, m
     assert result["source_fragment_raw_hashes_match_git_head_snapshot"] is True
     assert not any(args and args[0] == "status" for args in observed_git_args)
     assert not marker.exists()
+
+
+def test_replacement_refs_cannot_rebind_pinned_commit_to_another_tree(tmp_path):
+    source_path = "src/source/main.cpp"
+    bytes_a = b"int main() { return 1; }\n"
+    bytes_b = b"int main() { return 2; }\n"
+    repo = _synthetic_source_repo(tmp_path, {source_path: bytes_a})
+    commit_a = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"], check=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    ).stdout.decode().strip()
+    (repo / source_path).write_bytes(bytes_b)
+    subprocess.run(
+        ["git", "-C", str(repo), "add", source_path], check=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "--quiet", "-m", "replacement target"],
+        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+    commit_b = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"], check=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    ).stdout.decode().strip()
+    subprocess.run(
+        ["git", "-C", str(repo), "checkout", "--quiet", "--detach", commit_a],
+        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+    (repo / source_path).write_bytes(bytes_b)
+    subprocess.run(
+        ["git", "-C", str(repo), "replace", commit_a, commit_b], check=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+
+    fragment = _source_fragment_for_test("main.dispatch", "source.main_cpp", bytes_b)
+    with pytest.raises(JournalV5Error, match="pinned Git blob"):
+        inspect_untrusted_v5_source_callgraph_against_git_head(
+            _source_callgraph(fragments=[fragment]), repo,
+        )
 
 
 def test_git_head_is_pinned_and_movement_during_inspection_fails_closed(tmp_path, monkeypatch):
@@ -540,7 +581,7 @@ def test_git_and_worktree_reads_stay_bound_to_open_repository_root(tmp_path, mon
     def replace_root_after_git_probe(root, args, label, *, env=None):
         nonlocal replaced
         result = original_git_read(root, args, label, env=env)
-        if args == ["rev-parse", "--show-toplevel"] and not replaced:
+        if args and args[0] == "ls-tree" and not replaced:
             repo.rename(moved_repo)
             replacement.rename(repo)
             replaced = True
