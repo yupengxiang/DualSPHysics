@@ -518,7 +518,11 @@ class CoreDataset:
         self.data_root = root
         self.strict = strict
         self.integrity_mode = "strict" if strict else "diagnostic_only"
-        self.formal_eligible = bool(strict and formal_release is True)
+        # Strict source hashing is an integrity check, not a trusted-reader
+        # capability.  The legacy Mapping/path API does not provide the V13
+        # snapshot, broker, and worker identity closure required for formal
+        # use, so manifest metadata can never promote this reader.
+        self.formal_eligible = False
         self._records = {row["case_id"]: row for row in payload["cases"]}
         if not isinstance(max_open_files, int) or max_open_files < 1:
             raise ValueError("positive open-file bound required")

@@ -195,6 +195,22 @@ def test_portable_reader_and_train_only_boundary(tmp_path):
         CoreDataset(manifest, tmp_path)
 
 
+def test_formal_manifest_flag_never_qualifies_legacy_mapping_or_path_reader(tmp_path):
+    manifest = tiny_manifest(tmp_path)
+    manifest["formal_release"] = True
+    manifest_path = tmp_path / "formal-manifest.json"
+    manifest_path.write_text(json.dumps(manifest))
+
+    with CoreDataset(manifest, tmp_path) as data:
+        assert data.strict is True
+        assert data.integrity_mode == "strict"
+        assert data.formal_eligible is False
+    with CoreDataset(manifest_path, tmp_path) as data:
+        assert data.strict is True
+        assert data.integrity_mode == "strict"
+        assert data.formal_eligible is False
+
+
 def test_reader_rejects_same_size_hdf5_tamper_on_first_open(tmp_path):
     manifest = tiny_manifest(tmp_path)
     path = tmp_path / "data.h5"

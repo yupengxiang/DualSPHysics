@@ -520,7 +520,7 @@ def test_resume_rejects_run_and_learning_rate_mismatch(tmp_path):
                         resume=checkpoint, checkpoint_every=1, validation_every=0)
 
 
-def test_formal_evaluation_requires_manifest_release_even_with_family_counts(tmp_path):
+def test_manifest_flag_cannot_authorize_formal_evaluation_on_legacy_reader(tmp_path):
     manifest = tiny_manifest(tmp_path)
     template = manifest["cases"][0]
     for family_index in range(3):
@@ -532,8 +532,13 @@ def test_formal_evaluation_requires_manifest_release_even_with_family_counts(tmp
                        family=f"F{family_index + 1}", split="validation",
                        evaluation_role="validation")
             manifest["cases"].append(row)
+    manifest["formal_release"] = True
     with CoreDataset(manifest, tmp_path) as data:
-        with pytest.raises(ValueError, match="formal_release"):
+        assert data.formal_eligible is False
+        assert learning._manifest_formal_release(data) is False
+        assert learning._formal_validation_eligible(
+            data, data.case_ids("validation"), {"F1": 4, "F2": 4, "F3": 4}) is False
+        with pytest.raises(ValueError, match="V13 verified-reader capability"):
             evaluate_checkpoints(data, ["missing-1.pt", "missing-2.pt", "missing-3.pt", "missing-4.pt"])
 
 
@@ -618,19 +623,18 @@ def test_cli_relative_manifest_is_resolved_under_data_root_from_other_cwd(tmp_pa
     assert receipt["future_state_inputs"] is False
 
 
-def test_formal_evaluate_rejects_short_horizon_subset_and_non_test_split(tmp_path):
+def test_formal_manifest_flag_keeps_legacy_evaluation_diagnostic(tmp_path):
     manifest = _formal_capacity_manifest(tmp_path)
     with CoreDataset(manifest, tmp_path) as data:
         predictor, _ = learning._build_predictor_from_baseline("constant_velocity")
-        with pytest.raises(ValueError, match="maximum_steps"):
-            evaluate(data, predictor, maximum_steps=1)
-        with pytest.raises(ValueError, match="every registered test case"):
-            evaluate(data, predictor, case_ids=["formal-test-0"])
-        with pytest.raises(ValueError, match="split='test'"):
-            evaluate(data, predictor, split="validation")
+        result = evaluate(data, predictor, case_ids=["formal-test-0"])
+    assert result["evaluation_mode"] == "diagnostic"
+    assert result["formal_eligible"] is False
+    assert result["formal_capacity"] is None
+    assert result["selected_case_ids"] == ["formal-test-0"]
 
 
-def test_formal_evaluate_cli_binds_full_registered_test_registry(tmp_path):
+def test_formal_manifest_cli_evaluation_is_diagnostic_and_scoped(tmp_path):
     manifest = _formal_capacity_manifest(tmp_path)
     manifest_path = tmp_path / "formal-manifest.json"
     manifest_path.write_text(json.dumps(manifest))
@@ -640,23 +644,27 @@ def test_formal_evaluate_cli_binds_full_registered_test_registry(tmp_path):
         "--baseline", "constant_velocity", "--output", str(output),
     ]) == 0
     receipt = json.loads(output.read_text())
-    assert receipt["evaluation_mode"] == "formal"
+    assert receipt["evaluation_mode"] == "diagnostic"
+    assert receipt["formal_eligible"] is False
+    assert receipt["formal_capacity"] is None
     test_case_ids = {row["case_id"] for row in manifest["cases"] if row["split"] == "test"}
     assert receipt["registered_case_count"] == len(test_case_ids) == 36
     assert receipt["aggregate"]["registered_cases"] == len(test_case_ids)
     assert set(receipt["cases"]) == test_case_ids
-    assert receipt["formal_capacity"]["test_family_counts"] == {"F1": 12, "F2": 12, "F3": 12}
-    assert receipt["formal_capacity"]["validation_family_counts"] == {"F1": 4, "F2": 4, "F3": 4}
     assert all(row["expected_frames"] == 1 for row in receipt["cases"].values())
-    with pytest.raises(ValueError, match="every registered test case"):
-        main([
-            "evaluate", "--manifest", str(manifest_path), "--data-root", str(tmp_path),
-            "--baseline", "constant_velocity", "--case-id", "formal-test-0",
-            "--output", str(tmp_path / "subset.json"),
-        ])
+    subset_path = tmp_path / "subset.json"
+    assert main([
+        "evaluate", "--manifest", str(manifest_path), "--data-root", str(tmp_path),
+        "--baseline", "constant_velocity", "--case-id", "formal-test-0",
+        "--output", str(subset_path),
+    ]) == 0
+    subset = json.loads(subset_path.read_text())
+    assert subset["evaluation_mode"] == "diagnostic"
+    assert subset["selected_case_ids"] == ["formal-test-0"]
+    assert subset["formal_eligible"] is False
 
 
-def test_formal_evaluate_rejects_unknown_and_duplicate_cases(tmp_path):
+def test_legacy_evaluate_rejects_unknown_and_duplicate_cases(tmp_path):
     manifest = _formal_capacity_manifest(tmp_path)
     with CoreDataset(manifest, tmp_path) as data:
         predictor, _ = learning._build_predictor_from_baseline("constant_velocity")
@@ -673,20 +681,6 @@ def test_formal_evaluate_rejects_unknown_and_duplicate_cases(tmp_path):
         )
 
 
-@pytest.mark.parametrize(("family_count", "test_per_family", "message"), [
-    (2, 12, "at least 3 T1 families"),
-    (3, 11, "at least 12 test cases per family"),
-])
-def test_formal_evaluate_rejects_manifest_below_planner_capacity(
-        tmp_path, family_count, test_per_family, message):
-    manifest = _formal_capacity_manifest(
-        tmp_path, family_count=family_count, test_per_family=test_per_family)
-    with CoreDataset(manifest, tmp_path) as data:
-        predictor, _ = learning._build_predictor_from_baseline("constant_velocity")
-        with pytest.raises(ValueError, match=message):
-            evaluate(data, predictor)
-
-
 def test_formal_evaluation_gate_requires_family_denominator_metadata():
     with pytest.raises(ValueError, match="family denominator"):
         formal_evaluation_gate(registered_case_ids=("case",))
@@ -697,7 +691,7 @@ def test_formal_evaluation_rejects_missing_fixed_denominator():
         _validate_fixed_denominator(("formal-test-0",), {})
 
 
-def test_formal_evaluate_retains_finite_failed_rollout_as_incomplete(tmp_path, monkeypatch):
+def test_diagnostic_evaluate_retains_finite_failed_rollout_as_incomplete(tmp_path, monkeypatch):
     manifest = _formal_capacity_manifest(tmp_path)
 
     def finite_but_failed_rollout(dataset, case_id, predictor, **kwargs):

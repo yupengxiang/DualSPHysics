@@ -339,15 +339,14 @@ def _dataset_manifest_sha256(dataset):
 
 
 def _manifest_formal_release(dataset):
-    """Whether this reader came from a manifest released for formal runs.
+    """Fail closed until a V13 verified-reader capability is implemented.
 
-    A family/count-shaped fixture is useful for CPU tests, but it must not be
-    allowed to turn a development or qualification manifest into a formal
-    checkpoint selection.  The planner remains the primary admission gate;
-    this learning-side check protects direct train/evaluate entry points too.
+    The legacy Mapping/path reader exposes manifest metadata and strict
+    content hashes, but does not bind the same-FD snapshot, broker, and worker
+    identities required for formal admission.  A ``formal_release`` boolean
+    is therefore descriptive only and cannot authorize training or scoring.
     """
-    manifest = getattr(dataset, "manifest", None)
-    return isinstance(manifest, dict) and manifest.get("formal_release") is True
+    return False
 
 
 def _formal_validation_eligible(dataset, validation_cases, family_counts):
@@ -2056,7 +2055,9 @@ def evaluate_checkpoints(dataset, checkpoints, *, device="cpu", chunk_size=DEFAU
                 "formal Core evaluation requires at least 3 families with 4 validation cases each; "
                 "use qualification_only=True for a diagnostic fixture")
         if not _manifest_formal_release(dataset):
-            raise ValueError("formal Core evaluation requires manifest formal_release=true")
+            raise ValueError(
+                "formal Core evaluation requires a V13 verified-reader capability; "
+                "the legacy CoreDataset reader is diagnostic-only")
     lineage_group_ids = {case_id: dataset.record(case_id)["lineage_group_id"]
                          for case_id in validation_cases}
     physical_case_ids = {case_id: dataset.record(case_id)["physical_case_id"]
@@ -2313,11 +2314,10 @@ def evaluate(dataset, predictor, *, split="test", case_ids=None, maximum_steps=N
              progress_output_for_case=None, progress_every=25):
     """Evaluate a predictor with a fixed registered denominator.
 
-    A manifest released for formal work can only be evaluated over its entire
-    registered ``test`` split.  Non-released manifests retain a deliberately
-    diagnostic mode for small fixtures and bounded investigations; those
-    results carry no formal eligibility and retain the actual manifest split
-    labels in the receipt.
+    The legacy CoreDataset reader is diagnostic-only, even when its manifest
+    declares ``formal_release``.  Formal evaluation requires the not-yet-
+    implemented V13 verified-reader capability.  Diagnostic results retain
+    the actual manifest split labels in the receipt.
     """
     from scripts.core_evaluation import aggregate_cases, score_case
 
