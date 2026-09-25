@@ -174,6 +174,37 @@ def test_synthetic_qualification_rejected_before_collection(tmp_path):
     assert qualification.reads == ["schema"]
 
 
+@pytest.mark.parametrize(("requested", "message"), [
+    (True, "trusted V3 collector capability is unavailable"),
+    (1, "formal_release_requested must be a bool"),
+])
+def test_formal_collection_rejects_legacy_inputs_before_reading_or_resolving_paths(
+        tmp_path, requested, message):
+    class ReadProbe(dict):
+        def get(self, key, default=None):
+            raise AssertionError(f"formal collector read caller input before capability rejection: {key}")
+
+    missing_root = tmp_path / "must-not-be-resolved"
+    probe = ReadProbe()
+    with pytest.raises(collector.CollectionError, match=message):
+        collector.collect_f4_production(
+            probe, probe, probe, missing_root,
+            formal_release_requested=requested)
+    assert not missing_root.exists()
+
+
+def test_multifamily_formal_assembly_rejects_before_iterating_sources(tmp_path):
+    class IterationProbe:
+        def __iter__(self):
+            raise AssertionError("formal assembler iterated caller sources before capability rejection")
+
+    missing_root = tmp_path / "must-not-be-resolved"
+    with pytest.raises(collector.CollectionError, match="trusted V3 collector capability is unavailable"):
+        collector.assemble_multifamily_manifest(
+            IterationProbe(), missing_root, formal_release_requested=True)
+    assert not missing_root.exists()
+
+
 def test_real_first_eight_is_reader_hold_with_fixed_denominator(tmp_path):
     result = collector.collect_f4_production(
         PRODUCTION_ROOT / "production-design.json",
@@ -263,9 +294,7 @@ def test_rehashed_qualification_and_batch_cannot_open_formal_release(tmp_path):
     batch_payload["qualification_receipt_sha256"] = _sha(forged_path)
     forged_batch = _write_json(tmp_path / "forged-batch.json", batch_payload)
     with pytest.raises(collector.CollectionError, match="differs from the bound summary"):
-        collector.collect_f4_production(
-            design, forged_batch, forged_path, tmp_path, products=products,
-            formal_release_requested=True)
+        collector._validate_qualification(forged, formal=True)
 
 
 def test_formal_case_reuses_authoritative_full_axis_audit(tmp_path):
@@ -342,7 +371,7 @@ def test_multifamily_assembly_holds_when_a_family_is_missing(tmp_path):
         formal_release_requested=False)
     assembly = collector.assemble_multifamily_manifest(
         [result], tmp_path, required_families=("F3", "F4"),
-        expected_case_counts={"F3": 32, "F4": 32}, formal_release_requested=True)
+        expected_case_counts={"F3": 32, "F4": 32}, formal_release_requested=False)
     assert assembly["formal_eligible"] is False
     assert any("family F3" in reason for reason in assembly["hold_reasons"])
     assert assembly["manifest"]["formal_release"] is False

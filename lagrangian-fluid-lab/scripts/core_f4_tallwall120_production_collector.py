@@ -9,9 +9,10 @@ failure remains a failed case; neither is silently dropped from the report.
 
 The collector emits a diagnostic ``core.dataset.v1`` reader manifest whenever
 there are hash-checked trajectory products.  It only marks that manifest as a
-formal release when the caller requests release *and* all 32 registered cases
-have complete, passing production audits.  Qualification artifacts are
-recorded as an admission binding and are never copied into the reader cases.
+formal release through a future capability-only ingress.  The current legacy
+Mapping/path APIs are diagnostic-only and reject formal-release requests before
+reading caller inputs.  Qualification artifacts are recorded as an admission
+binding and are never copied into the reader cases.
 """
 from __future__ import annotations
 
@@ -50,6 +51,17 @@ EXPECTED_SPLITS = {"train": 16, "validation": 4, "id_test": 6, "ood_test": 6}
 
 class CollectionError(ValueError):
     """Raised when an immutable production binding is inconsistent."""
+
+
+def _require_diagnostic_only(formal_release_requested: Any) -> None:
+    """Keep legacy Mapping/path collectors from minting formal admission."""
+    if type(formal_release_requested) is not bool:
+        raise CollectionError("formal_release_requested must be a bool")
+    if formal_release_requested:
+        raise CollectionError(
+            "trusted V3 collector capability is unavailable; "
+            "legacy Mapping/path formal release is disabled"
+        )
 
 
 def _require_qualification_receipt_schema(payload: Mapping[str, Any]) -> None:
@@ -836,7 +848,8 @@ def collect_f4_production(
     formal_release_requested: bool = False,
     expected_case_count: int = EXPECTED_CASE_COUNT,
 ) -> dict[str, Any]:
-    """Collect a fixed F4 production denominator without writing shared state."""
+    """Collect a fixed F4 denominator diagnostically; never admit formal release."""
+    _require_diagnostic_only(formal_release_requested)
     if expected_case_count != EXPECTED_CASE_COUNT:
         raise CollectionError("F4 tallwall120 collector is fixed to a 32-case denominator")
     root = Path(data_root).expanduser().resolve()
@@ -1044,7 +1057,8 @@ def assemble_multifamily_manifest(
     required_families: Sequence[str] = ("F1", "F2", "F4"),
     formal_release_requested: bool = False,
 ) -> dict[str, Any]:
-    """Prepare a merged reader manifest while retaining formal hold reasons."""
+    """Prepare a diagnostic merged manifest; legacy formal requests are denied."""
+    _require_diagnostic_only(formal_release_requested)
     root = Path(data_root).expanduser().resolve()
     expected = dict(expected_case_counts or {family: EXPECTED_CASE_COUNT for family in required_families})
     all_cases: list[dict[str, Any]] = []
