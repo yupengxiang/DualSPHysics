@@ -25,6 +25,7 @@ import numpy as np
 from scripts.core_contract import (FiniteGeometry, KnownInputs, PrescribedControl,
                                    PrescribedGeometry,
                                    State, StepPrediction, contract_hash, updater_oracle)
+from scripts.core_fsverity import FsVerityMeasurement, fd_identity, verify_fd
 from scripts.core_strict_json import (MAX_JSON_INPUT_BYTES,
                                       absolute_path_without_following_leaf,
                                       read_bounded_raw_json, strict_json_object)
@@ -66,23 +67,30 @@ def _sha256_fd(fd, expected_bytes):
     return digest.hexdigest()
 
 
-def _validate_snapshot_fd(fd, row):
+def _validate_snapshot_fd(fd, row, *, require_linked=False):
     if fcntl is None or not hasattr(os, "pread") or not hasattr(fcntl, "F_DUPFD_CLOEXEC"):
         raise ValueError("snapshot FD reader requires POSIX pread and close-on-exec FD duplication")
-    if isinstance(fd, bool) or not isinstance(fd, int) or fd < 0:
+    if type(fd) is not int or fd < 0:
         raise ValueError("snapshot FD must be a nonnegative descriptor")
     try:
         flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+        descriptor_flags = fcntl.fcntl(fd, fcntl.F_GETFD)
         info = os.fstat(fd)
     except OSError as error:
         raise ValueError("snapshot FD is not open") from error
     if flags & os.O_ACCMODE != os.O_RDONLY:
         raise ValueError("snapshot FD must be read-only")
-    if not stat.S_ISREG(info.st_mode) or info.st_nlink not in (0, 1):
+    if not descriptor_flags & fcntl.FD_CLOEXEC:
+        raise ValueError("snapshot FD must be close-on-exec")
+    if not stat.S_ISREG(info.st_mode):
+        raise ValueError("snapshot FD must reference a regular file")
+    if require_linked and info.st_nlink != 1:
+        raise ValueError("fs-verity snapshot FD must have st_nlink == 1")
+    if not require_linked and info.st_nlink not in (0, 1):
         raise ValueError("snapshot FD must reference an unlinked or single-link regular file")
     expected_bytes = row.get("bytes")
-    if (isinstance(expected_bytes, bool) or not isinstance(expected_bytes, int)
-            or expected_bytes <= 0 or info.st_size != expected_bytes):
+    if (type(expected_bytes) is not int or expected_bytes <= 0
+            or info.st_size != expected_bytes):
         raise ValueError("snapshot FD requires the exact positive manifest byte count")
     return _fd_identity(fd)
 
@@ -550,10 +558,13 @@ class CoreDataset:
     descriptors. In that mode HDF5 is opened through duplicates of those held
     descriptors and pathname fallback is disabled. This binds parsing to the
     supplied inode, but does not authenticate its producer or prove immutability.
+    ``snapshot_measurements`` adds an expected fs-verity measurement and held
+    identity check before/after HDF5 access; caller-provided measurements are
+    still not authenticated capabilities.
     """
 
     def __init__(self, manifest, data_root=None, *, max_open_files=4, strict=True,
-                 snapshot_fds=None):
+                 snapshot_fds=None, snapshot_measurements=None):
         if isinstance(manifest, (str, Path)):
             path = absolute_path_without_following_leaf(manifest)
             raw = read_bounded_raw_json(
@@ -603,20 +614,43 @@ class CoreDataset:
         self._source_hashes = {}
         self._descriptor_only = snapshot_fds is not None
         self._snapshot_fds = {}
+        self._snapshot_measurements = {}
+        self._snapshot_identities = {}
+        if snapshot_measurements is not None and snapshot_fds is None:
+            raise ValueError("snapshot measurements require descriptor-only HDF5 inputs")
         if self._descriptor_only:
             if strict is not True:
                 raise ValueError("snapshot FD reader requires strict source verification")
-            if not isinstance(snapshot_fds, dict):
+            if type(snapshot_fds) is not dict:
                 raise ValueError("snapshot_fds must map every case ID to an open FD")
-            if set(snapshot_fds) != set(self._records):
+            fd_map = snapshot_fds.copy()
+            if set(fd_map) != set(self._records):
                 raise ValueError("snapshot_fds must cover every case exactly; path fallback is disabled")
+            measurement_map = None
+            if snapshot_measurements is not None:
+                if type(snapshot_measurements) is not dict:
+                    raise ValueError("snapshot_measurements must be an exact dictionary")
+                measurement_map = snapshot_measurements.copy()
+                if set(measurement_map) != set(self._records):
+                    raise ValueError("snapshot_measurements must cover every case exactly")
+                if any(type(item) is not FsVerityMeasurement for item in measurement_map.values()):
+                    raise ValueError("snapshot_measurements require exact fs-verity measurements")
             try:
-                for case_id, source_fd in snapshot_fds.items():
+                for case_id, source_fd in fd_map.items():
                     row = self._records[case_id]
                     _validate_snapshot_fd(source_fd, row)
                     held_fd = fcntl.fcntl(source_fd, fcntl.F_DUPFD_CLOEXEC, 0)
                     try:
-                        _validate_snapshot_fd(held_fd, row)
+                        _validate_snapshot_fd(
+                            held_fd, row, require_linked=measurement_map is not None)
+                        if measurement_map is not None:
+                            expected_measurement = measurement_map[case_id]
+                            pinned_identity = fd_identity(held_fd)
+                            observed_measurement = verify_fd(held_fd, expected_measurement)
+                            if observed_measurement != expected_measurement or fd_identity(held_fd) != pinned_identity:
+                                raise ValueError("snapshot verity identity/measurement did not bind")
+                            self._snapshot_measurements[case_id] = expected_measurement
+                            self._snapshot_identities[case_id] = pinned_identity
                     except BaseException:
                         os.close(held_fd)
                         raise
@@ -625,6 +659,8 @@ class CoreDataset:
                 for held_fd in self._snapshot_fds.values():
                     os.close(held_fd)
                 self._snapshot_fds.clear()
+                self._snapshot_measurements.clear()
+                self._snapshot_identities.clear()
                 raise
 
     def case_ids(self, split=None):
@@ -639,6 +675,21 @@ class CoreDataset:
             self._hash_cache[path] = sha256_file(path)
         return self._hash_cache[path]
 
+    def _verify_snapshot_measurement(self, case_id):
+        expected = self._snapshot_measurements.get(case_id)
+        if expected is None:
+            return
+        fd = self._snapshot_fds.get(case_id)
+        if fd is None:
+            raise ValueError("descriptor-only dataset is closed or missing a case FD")
+        before = fd_identity(fd)
+        if before != self._snapshot_identities[case_id]:
+            raise ValueError("snapshot FD identity differs from its pinned verity identity")
+        observed = verify_fd(fd, expected)
+        after = fd_identity(fd)
+        if observed != expected or after != before:
+            raise ValueError("snapshot verity measurement or identity changed")
+
     def _bind_sources(self, case_id, *, force=False):
         row = self._records[case_id]
         snapshot_fd = self._snapshot_fds.get(case_id)
@@ -647,6 +698,7 @@ class CoreDataset:
                 raise ValueError("descriptor-only dataset is closed or missing a case FD")
             path = None
             before = _validate_snapshot_fd(snapshot_fd, row)
+            self._verify_snapshot_measurement(case_id)
         else:
             path = _asset(self.data_root, row["hdf5"])
             if row.get("bytes") and path.stat().st_size != row["bytes"]:
@@ -659,6 +711,7 @@ class CoreDataset:
                 raise ValueError(f"HDF5 SHA-256 registration is invalid: {case_id}")
             if self._descriptor_only:
                 observed = _sha256_fd(snapshot_fd, row["bytes"])
+                self._verify_snapshot_measurement(case_id)
                 after = _validate_snapshot_fd(snapshot_fd, row)
                 if before != after:
                     raise ValueError("snapshot FD metadata changed while hashing")
@@ -680,11 +733,14 @@ class CoreDataset:
 
     def _handle(self, case_id):
         if case_id in self._handles:
+            self._verify_snapshot_measurement(case_id)
             self._handles.move_to_end(case_id)
             return self._handles[case_id]
         path = self._bind_sources(case_id)
         if self._descriptor_only:
-            file_obj = os.fdopen(os.dup(self._snapshot_fds[case_id]), "rb", buffering=0)
+            hdf5_fd = fcntl.fcntl(
+                self._snapshot_fds[case_id], fcntl.F_DUPFD_CLOEXEC, 0)
+            file_obj = os.fdopen(hdf5_fd, "rb", buffering=0)
             try:
                 handle = h5py.File(file_obj, "r", driver="fileobj")
             except BaseException:
@@ -707,6 +763,7 @@ class CoreDataset:
             _validate_binary_valid_dataset(handle["valid"])
             if handle["mass"].shape not in ((n,), (len(time), n)):
                 raise ValueError("invalid mass shape")
+            self._verify_snapshot_measurement(case_id)
         except BaseException:
             handle.close(); raise
         while len(self._handles) >= self.max_open_files:
@@ -723,6 +780,7 @@ class CoreDataset:
 
     def times(self, case_id):
         result = np.array(self._handle(case_id)["time"], dtype=float)
+        self._verify_snapshot_measurement(case_id)
         result.setflags(write=False)
         return result
 
@@ -762,6 +820,7 @@ class CoreDataset:
                 raise ValueError("changed active particle masses require another lifecycle contract")
         state = State(float(handle["time"][frame]), handle["position"][frame], handle["velocity"][frame],
                       handle["particle_id"][:], handle["particle_zone"][:], initial_mass, valid)
+        self._verify_snapshot_measurement(case_id)
         self.read_log.append((case_id, int(frame)))
         return state
 
@@ -788,6 +847,8 @@ class CoreDataset:
         for fd in self._snapshot_fds.values():
             os.close(fd)
         self._snapshot_fds.clear()
+        self._snapshot_measurements.clear()
+        self._snapshot_identities.clear()
         self._mass_reference.clear()
         self._hash_cache.clear()
         self._source_hashes.clear()

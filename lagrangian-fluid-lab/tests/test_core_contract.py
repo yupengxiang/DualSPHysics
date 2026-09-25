@@ -15,6 +15,9 @@ from scripts.core_contract import (FiniteGeometry, KnownInputs, PrescribedContro
                                    updater_oracle)
 from scripts.core_dataset import (CoreDataset, import_f3_manifest, new_scope_split,
                                   sha256_file, validate_manifest)
+from scripts.core_fsverity import (FS_VERITY_HASH_ALG_SHA256, FsVerityMeasurement,
+                                   FsVerityFileIdentity, FsVerityNotEnabledError,
+                                   FsVerityUnsupportedError)
 
 
 def example_state(time=0.):
@@ -232,9 +235,83 @@ def test_descriptor_only_reader_requires_readonly_fd_and_exact_case_coverage(tmp
             CoreDataset(manifest, tmp_path, snapshot_fds={})
         with pytest.raises(ValueError, match="strict source"):
             CoreDataset(manifest, tmp_path, strict=False, snapshot_fds={"tiny": readonly_fd})
+        class ByteCount(int):
+            pass
+
+        nonbuiltin_bytes = copy.deepcopy(manifest)
+        nonbuiltin_bytes["cases"][0]["bytes"] = ByteCount(
+            nonbuiltin_bytes["cases"][0]["bytes"])
+        with pytest.raises(ValueError, match="exact positive manifest byte count"):
+            CoreDataset(nonbuiltin_bytes, tmp_path, snapshot_fds={"tiny": readonly_fd})
     finally:
         os.close(writable_fd)
         os.close(readonly_fd)
+
+
+def test_dataset_pinned_verity_mode_fails_closed_without_kernel_measurement(tmp_path):
+    manifest = tiny_manifest(tmp_path)
+    path = tmp_path / "data.h5"
+    moved = tmp_path / "held-snapshot.h5"
+    source_fd = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+    try:
+        path.rename(moved)
+        path.write_bytes(b"replacement at the manifest pathname")
+        expected = FsVerityMeasurement(FS_VERITY_HASH_ALG_SHA256, bytes(32))
+        with pytest.raises((FsVerityUnsupportedError, FsVerityNotEnabledError)):
+            CoreDataset(
+                manifest, tmp_path, snapshot_fds={"tiny": source_fd},
+                snapshot_measurements={"tiny": expected},
+            )
+        # Construction must reject before any pathname/HDF5 fallback; the
+        # caller still owns its original descriptor after constructor failure.
+        assert fcntl.fcntl(source_fd, fcntl.F_GETFD) & fcntl.FD_CLOEXEC
+        assert path.read_bytes() == b"replacement at the manifest pathname"
+    finally:
+        os.close(source_fd)
+
+
+def test_dataset_verity_measurement_hooks_bracket_same_fd_hdf5_reads(tmp_path, monkeypatch):
+    """Plumbing-only: the measurement verifier is stubbed; no verity is claimed."""
+    manifest = tiny_manifest(tmp_path)
+    path = tmp_path / "data.h5"
+    moved = tmp_path / "held-snapshot.h5"
+    source_fd = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+    path.rename(moved)
+    path.write_bytes(b"replacement at the manifest pathname")
+    expected = FsVerityMeasurement(FS_VERITY_HASH_ALG_SHA256, b"m" * 32)
+    calls = []
+
+    def synthetic_identity(fd):
+        info = os.fstat(fd)
+        return FsVerityFileIdentity(
+            info.st_dev, info.st_ino, 4242, info.st_size, info.st_nlink,
+            info.st_mtime_ns, info.st_ctime_ns,
+        )
+
+    def synthetic_verify(fd, candidate):
+        assert candidate == expected
+        before = synthetic_identity(fd)
+        after = synthetic_identity(fd)
+        assert before == after
+        calls.append(fd)
+        return candidate
+
+    monkeypatch.setattr(core_dataset_module, "fd_identity", synthetic_identity)
+    monkeypatch.setattr(core_dataset_module, "verify_fd", synthetic_verify)
+    try:
+        with CoreDataset(
+            manifest, tmp_path, snapshot_fds={"tiny": source_fd},
+            snapshot_measurements={"tiny": expected},
+        ) as data:
+            state = data.read_state("tiny", 1)
+            assert state.time_s == pytest.approx(0.01)
+            assert np.allclose(state.position, example_state().position + 0.003)
+            assert np.allclose(data.times("tiny"), [0.0, 0.01])
+            assert data.formal_eligible is False
+        assert len(calls) >= 7
+        assert len(set(calls)) == 1
+    finally:
+        os.close(source_fd)
 
 
 def test_formal_manifest_flag_never_qualifies_legacy_mapping_or_path_reader(tmp_path):
