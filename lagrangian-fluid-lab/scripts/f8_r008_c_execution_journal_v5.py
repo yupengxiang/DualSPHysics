@@ -2,10 +2,11 @@
 
 This parser checks serialization, exact event field sets, primitive domains,
 journal-local sequence/clock and process/thread state, guard links, and a
-single-slot cache replay over caller-provided events. It does not establish
-that the journal is complete or truthful, validate the source callgraph,
-recompute active windows/table provenance, attest runtime identity, or
-authorize execution/qualification.
+single-slot cache replay over caller-provided events. Its optional source-
+callgraph inspector checks only declared structure and observed schedule
+consistency; it does not reparse source or runtime configuration, establish
+journal completeness/truth, recompute active windows/table provenance, attest
+runtime identity, or authorize execution/qualification.
 """
 from __future__ import annotations
 
@@ -18,6 +19,8 @@ from typing import Any
 
 
 JOURNAL_SCHEMA = "core.cfd.f8.r008_c_execution_journal.synthetic.v5"
+SOURCE_CALLGRAPH_SCHEMA = "core.cfd.f8.r008_c_execution_source_callgraph.synthetic.v5"
+SOURCE_CALLGRAPH_OBJECT_ID = "f8-r008-source-callgraph-v5"
 MAX_RAW_BYTES = 1_073_741_824
 MAX_EVENT_COUNT = 100_000_000
 _HEX16 = re.compile(r"^[0-9a-f]{16}$")
@@ -75,6 +78,44 @@ _INTEGRATORS = frozenset({"Verlet", "Symplectic", "VRes"})
 _INTERSTEPS = frozenset({
     "INTERSTEP_Verlet", "INTERSTEP_SymPredictor", "INTERSTEP_SymCorrector",
 })
+_SOURCE_FUNCTIONS = {
+    "main.dispatch": "source.main_cpp",
+    "jsph.load_case_config": "source.jsph_cpp",
+    "accinput.load_xml": "source.accinput_cpp",
+    "accinput.read_xml": "source.accinput_cpp",
+    "accinput.run_cpu": "source.accinput_cpp",
+    "accinput.run_gpu": "source.accinput_cpp",
+    "accinput.get_acc_values": "source.accinput_cpp",
+    "accinput_mk.get_acc_values": "source.accinput_cpp",
+    "cpu.pre_interaction_forces": "source.cpu_cpp",
+    "gpu.pre_interaction_forces": "source.gpu_cpp",
+    "cpu.compute_step_verlet": "source.cpu_single_cpp",
+    "cpu.compute_step_symplectic": "source.cpu_single_cpp",
+    "cpu.run_loop": "source.cpu_single_cpp",
+    "gpu.compute_step_verlet": "source.gpu_single_cpp",
+    "gpu.compute_step_symplectic": "source.gpu_single_cpp",
+    "gpu.run_loop": "source.gpu_single_cpp",
+    "vres.driver_loop": "source.vres_driver_h",
+    "cpu_vres.compute_step": "source.cpu_vres_cpp",
+    "gpu_vres.compute_step": "source.gpu_vres_cpp",
+    "linear_value.get_value3d3d": "source.linear_value_cpp",
+    "linear_value.find_time": "source.linear_value_cpp",
+}
+_SOURCE_FRAGMENT_KEYS = frozenset({
+    "function_id", "source_file_object_id", "byte_start", "byte_end",
+    "fragment_raw_sha256", "normalized_ast_sha256", "ordered_call_edges",
+})
+_CALL_EDGE_KEYS = frozenset({
+    "ordinal", "callsite_id", "target_function_id", "active_preprocessor_condition",
+})
+_SOURCE_CALLGRAPH_TOP_KEYS = frozenset({
+    "schema", "source_id", "source_binary_sha256", "source_tree_sha256",
+    "build_provenance_ref", "runtime_image_ref", "source_fragments", "drivers", "instances",
+})
+_DRIVER_KEYS = frozenset({"driver_id", "loop_model", "solver_instance_ids"})
+_INSTANCE_KEYS = frozenset({
+    "solver_instance_id", "driver_id", "input_count", "callsite_id", "integrator", "intersteps",
+})
 
 
 class JournalV5Error(ValueError):
@@ -101,15 +142,15 @@ def _parse_finite_float(token: str) -> float:
     return value
 
 
-def _parse_json(raw: bytes) -> dict[str, Any]:
+def _parse_json(raw: bytes, *, label: str = "journal") -> dict[str, Any]:
     if type(raw) is not bytes:
-        raise JournalV5Error("journal must be exact bytes")
+        raise JournalV5Error(f"{label} must be exact bytes")
     if len(raw) > MAX_RAW_BYTES:
-        raise JournalV5Error("journal exceeds the V4-inherited raw byte limit")
+        raise JournalV5Error(f"{label} exceeds the V4-inherited raw byte limit")
     try:
         text = raw.decode("utf-8", errors="strict")
     except UnicodeDecodeError as error:
-        raise JournalV5Error("journal is not strict UTF-8") from error
+        raise JournalV5Error(f"{label} is not strict UTF-8") from error
     try:
         value = json.loads(
             text,
@@ -121,9 +162,9 @@ def _parse_json(raw: bytes) -> dict[str, Any]:
     except JournalV5Error:
         raise
     except (json.JSONDecodeError, ValueError, OverflowError, RecursionError) as error:
-        raise JournalV5Error("journal is not valid strict JSON") from error
+        raise JournalV5Error(f"{label} is not valid strict JSON") from error
     if type(value) is not dict:
-        raise JournalV5Error("journal top level must be an object")
+        raise JournalV5Error(f"{label} top level must be an object")
     return value
 
 
@@ -667,8 +708,8 @@ def _observe_query_and_cache(
     }
 
 
-def inspect_untrusted_v5_journal(raw: bytes) -> dict[str, Any]:
-    """Inspect journal bytes and return only a non-authorizing diagnostic."""
+def _inspect_untrusted_v5_journal(raw: bytes) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Internal inspector retaining validated events for combined replay."""
     journal = _parse_json(raw)
     journal = _exact_object(journal, _TOP_KEYS, "journal")
     if type(journal["schema"]) is not str or journal["schema"] != JOURNAL_SCHEMA:
@@ -719,10 +760,11 @@ def inspect_untrusted_v5_journal(raw: bytes) -> dict[str, Any]:
 
     lifecycle = _observe_process_lifecycle(validated_events)
     query_cache = _observe_query_and_cache(validated_events, ends)
-    return {
+    result = {
         "status": "untrusted_v5_journal_shape_consistent",
         "journal_raw_sha256": hashlib.sha256(raw).hexdigest(),
         "source_id_observed": source_id,
+        "source_binary_sha256_observed": journal["source_binary_sha256"],
         "event_count": event_count,
         "poll_begin_count": len(begins),
         "poll_end_count": len(ends),
@@ -741,5 +783,324 @@ def inspect_untrusted_v5_journal(raw: bytes) -> dict[str, Any]:
         "execution_semantics_verified": False,
         "qualification_adjudicated": False,
         "T1_numerical": False,
+        "qualification_credit": 0,
+    }
+    return result, validated_events
+
+
+def inspect_untrusted_v5_journal(raw: bytes) -> dict[str, Any]:
+    """Inspect journal bytes and return only a non-authorizing diagnostic."""
+    result, _ = _inspect_untrusted_v5_journal(raw)
+    return result
+
+
+def _validate_callgraph_reference(value: Any, label: str, *, stage: str, role: str) -> dict[str, Any]:
+    ref = _exact_object(value, _REFERENCE_KEYS, label)
+    if ref["stage"] != stage or ref["role"] != role:
+        raise JournalV5Error(f"{label} has an unexpected stage or role")
+    _identifier(ref["object_id"], f"{label}.object_id")
+    _builtin_int(ref["bytes"], f"{label}.bytes", minimum=1, maximum=MAX_RAW_BYTES)
+    _hex(ref["sha256"], f"{label}.sha256", _SHA256)
+    return ref
+
+
+def inspect_untrusted_v5_source_callgraph(
+    raw: bytes,
+    *,
+    source_callgraph_binding: Any = None,
+    _include_topology: bool = False,
+) -> dict[str, Any]:
+    """Check declared V5 source-callgraph shape without trusting its claims.
+
+    If supplied, ``source_callgraph_binding`` is checked against the raw bytes;
+    this local hash comparison is not descriptor-root or evidence-payload trust.
+    """
+    graph = _parse_json(raw, label="source callgraph")
+    graph = _exact_object(graph, _SOURCE_CALLGRAPH_TOP_KEYS, "source callgraph")
+    if type(graph["schema"]) is not str or graph["schema"] != SOURCE_CALLGRAPH_SCHEMA:
+        raise JournalV5Error("source callgraph schema mismatch")
+
+    source_id = _identifier(graph["source_id"], "source_callgraph.source_id")
+    binary_sha256 = _hex(graph["source_binary_sha256"], "source_callgraph.source_binary_sha256", _SHA256)
+    _hex(graph["source_tree_sha256"], "source_callgraph.source_tree_sha256", _SHA256)
+    build_ref = _validate_callgraph_reference(
+        graph["build_provenance_ref"], "source_callgraph.build_provenance_ref",
+        stage="build", role="build_attestation",
+    )
+    runtime_ref = _validate_callgraph_reference(
+        graph["runtime_image_ref"], "source_callgraph.runtime_image_ref",
+        stage="runtime", role="runtime_image",
+    )
+    if source_id != runtime_ref["object_id"] or binary_sha256 != runtime_ref["sha256"]:
+        raise JournalV5Error("source callgraph identity copies disagree with runtime_image_ref")
+
+    binding_hash_verified = False
+    if source_callgraph_binding is not None:
+        binding = _validate_callgraph_reference(
+            source_callgraph_binding, "source_callgraph_binding",
+            stage="build", role="source_callgraph",
+        )
+        if binding["object_id"] != SOURCE_CALLGRAPH_OBJECT_ID:
+            raise JournalV5Error("source_callgraph_binding.object_id is not the frozen V5 object ID")
+        if binding["bytes"] != len(raw) or binding["sha256"] != hashlib.sha256(raw).hexdigest():
+            raise JournalV5Error("source callgraph raw bytes do not match the supplied descriptor ref")
+        binding_hash_verified = True
+
+    fragments = graph["source_fragments"]
+    if type(fragments) is not list or not 1 <= len(fragments) <= len(_SOURCE_FUNCTIONS):
+        raise JournalV5Error("source_fragments must be a nonempty bounded array")
+    seen_functions: set[str] = set()
+    call_edge_count = 0
+    for index, fragment_value in enumerate(fragments):
+        fragment = _exact_object(fragment_value, _SOURCE_FRAGMENT_KEYS, f"source_fragments[{index}]")
+        function_id = fragment["function_id"]
+        if type(function_id) is not str or function_id not in _SOURCE_FUNCTIONS:
+            raise JournalV5Error(f"source_fragments[{index}].function_id is not allowlisted")
+        if function_id in seen_functions:
+            raise JournalV5Error("source fragment function IDs must be unique")
+        seen_functions.add(function_id)
+        if fragment["source_file_object_id"] != _SOURCE_FUNCTIONS[function_id]:
+            raise JournalV5Error(f"source fragment {function_id} has the wrong source-file object ID")
+        start = _builtin_int(fragment["byte_start"], f"source_fragments[{index}].byte_start", maximum=2**63 - 1)
+        end = _builtin_int(fragment["byte_end"], f"source_fragments[{index}].byte_end", maximum=2**63 - 1)
+        if end <= start:
+            raise JournalV5Error("source fragment byte range must be nonempty and half-open")
+        _hex(fragment["fragment_raw_sha256"], f"source_fragments[{index}].fragment_raw_sha256", _SHA256)
+        _hex(fragment["normalized_ast_sha256"], f"source_fragments[{index}].normalized_ast_sha256", _SHA256)
+        edges = fragment["ordered_call_edges"]
+        if type(edges) is not list or len(edges) > MAX_EVENT_COUNT:
+            raise JournalV5Error(f"source_fragments[{index}].ordered_call_edges must be a bounded array")
+        seen_callsites: set[str] = set()
+        for ordinal, edge_value in enumerate(edges):
+            edge = _exact_object(edge_value, _CALL_EDGE_KEYS, f"source_fragments[{index}].ordered_call_edges[{ordinal}]")
+            if _builtin_int(edge["ordinal"], "call edge ordinal") != ordinal:
+                raise JournalV5Error("call-edge ordinals must be contiguous in declared source order")
+            callsite_id = _identifier(edge["callsite_id"], "call edge callsite_id")
+            if callsite_id in seen_callsites:
+                raise JournalV5Error("callsite IDs must be unique within a source fragment")
+            seen_callsites.add(callsite_id)
+            target = edge["target_function_id"]
+            if type(target) is not str or target not in _SOURCE_FUNCTIONS:
+                raise JournalV5Error("call edge target_function_id is not allowlisted")
+            if type(edge["active_preprocessor_condition"]) is not str or edge["active_preprocessor_condition"] != "active":
+                raise JournalV5Error("call edge preprocessor condition must be the fixed active marker")
+        call_edge_count += len(edges)
+
+    drivers = graph["drivers"]
+    if type(drivers) is not list or len(drivers) != 1:
+        raise JournalV5Error("R008 source callgraph must declare exactly one driver")
+    driver = _exact_object(drivers[0], _DRIVER_KEYS, "drivers[0]")
+    driver_id = _identifier(driver["driver_id"], "drivers[0].driver_id")
+    loop_model = driver["loop_model"]
+    if type(loop_model) is not str or loop_model not in {"single_solver_loop", "vres_driver_loop"}:
+        raise JournalV5Error("driver loop_model is not allowlisted")
+    solver_ids = driver["solver_instance_ids"]
+    if type(solver_ids) is not list or not 1 <= len(solver_ids) <= 65536:
+        raise JournalV5Error("driver solver_instance_ids must be a nonempty bounded array")
+    normalized_solver_ids = [_identifier(value, "driver solver_instance_id") for value in solver_ids]
+    if len(set(normalized_solver_ids)) != len(normalized_solver_ids):
+        raise JournalV5Error("driver solver_instance_ids must be unique")
+    if loop_model == "single_solver_loop":
+        if driver_id != "main" or normalized_solver_ids != ["main"]:
+            raise JournalV5Error("single_solver_loop must map exactly the main driver and instance")
+    else:
+        expected_vres_ids = [f"vres.{index:02d}" for index in range(len(normalized_solver_ids))]
+        if driver_id != "vres" or normalized_solver_ids != expected_vres_ids:
+            raise JournalV5Error("VRes driver IDs must follow zero-based VResObj vector order")
+
+    instances_value = graph["instances"]
+    if type(instances_value) is not list or not 1 <= len(instances_value) <= 65536:
+        raise JournalV5Error("instances must be a nonempty bounded array")
+    instance_by_id: dict[str, dict[str, Any]] = {}
+    instance_ids_in_order: list[str] = []
+    input_entry_count = 0
+    for index, instance_value in enumerate(instances_value):
+        instance = _exact_object(instance_value, _INSTANCE_KEYS, f"instances[{index}]")
+        instance_id = _identifier(instance["solver_instance_id"], f"instances[{index}].solver_instance_id")
+        if instance_id in instance_by_id:
+            raise JournalV5Error("solver_instance_ids must be unique")
+        if instance["driver_id"] != driver_id:
+            raise JournalV5Error("instance driver_id differs from the sole declared driver")
+        input_count = _builtin_int(instance["input_count"], f"instances[{index}].input_count", maximum=65536)
+        callsite_id = instance["callsite_id"]
+        if type(callsite_id) is not str or callsite_id not in _CALLSITES:
+            raise JournalV5Error("instance callsite_id is not allowlisted")
+        integrator = instance["integrator"]
+        if type(integrator) is not str or integrator not in _INTEGRATORS:
+            raise JournalV5Error("instance integrator is not allowlisted")
+        intersteps = instance["intersteps"]
+        if type(intersteps) is not list or any(type(step) is not str for step in intersteps):
+            raise JournalV5Error("instance intersteps must be a string array")
+        expected_intersteps = (
+            ["INTERSTEP_Verlet"] if integrator == "Verlet"
+            else ["INTERSTEP_SymPredictor", "INTERSTEP_SymCorrector"]
+        )
+        if intersteps != expected_intersteps:
+            raise JournalV5Error("instance intersteps do not match its integrator")
+        if loop_model == "vres_driver_loop" and integrator != "VRes":
+            raise JournalV5Error("all instances in a VRes driver must use the VRes integrator")
+        if loop_model == "single_solver_loop" and integrator == "VRes":
+            raise JournalV5Error("a single_solver_loop cannot declare the VRes integrator")
+        instance_by_id[instance_id] = instance
+        instance_ids_in_order.append(instance_id)
+        input_entry_count += input_count
+    if instance_ids_in_order != sorted(instance_ids_in_order):
+        raise JournalV5Error("instances must be sorted by solver_instance_id")
+    if set(instance_ids_in_order) != set(normalized_solver_ids):
+        raise JournalV5Error("driver and instance IDs must form an exact partition")
+
+    result = {
+        "status": "untrusted_v5_source_callgraph_declared_shape_consistent",
+        "source_callgraph_raw_sha256": hashlib.sha256(raw).hexdigest(),
+        "source_callgraph_binding_raw_hash_verified": binding_hash_verified,
+        "source_id_observed": source_id,
+        "source_binary_sha256_observed": binary_sha256,
+        "source_fragment_count": len(fragments),
+        "source_call_edge_count_declared": call_edge_count,
+        "source_fragment_ids_allowlisted": True,
+        "source_callgraph_complete_declaration_verified": False,
+        "source_fragment_feature_coverage_verified": False,
+        "source_fragments_reparsed_from_source": False,
+        "driver_count_declared": len(drivers),
+        "driver_id_declared": driver_id,
+        "loop_model_declared": loop_model,
+        "solver_instance_ids_in_driver_order": normalized_solver_ids,
+        "instance_count_declared": len(instance_by_id),
+        "input_entry_count_declared": input_entry_count,
+        "instances_in_solver_id_order": [instance_by_id[key] for key in instance_ids_in_order],
+        "_driver_records": [driver],
+        "_instances_by_id": instance_by_id,
+    }
+    if not _include_topology:
+        result.pop("_driver_records")
+        result.pop("_instances_by_id")
+    return result
+
+
+def inspect_untrusted_v5_journal_with_source_callgraph(
+    journal_raw: bytes,
+    source_callgraph_raw: bytes,
+    *,
+    source_callgraph_binding: Any = None,
+) -> dict[str, Any]:
+    """Replay declared host-call × entry schedules against observed true guards.
+
+    A complete match is only consistency among caller-provided bytes. It cannot
+    prove source/configuration closure, event-source completeness, or execution.
+    """
+    journal_result, events = _inspect_untrusted_v5_journal(journal_raw)
+    graph_result = inspect_untrusted_v5_source_callgraph(
+        source_callgraph_raw, source_callgraph_binding=source_callgraph_binding,
+        _include_topology=True,
+    )
+    driver = graph_result["_driver_records"][0]
+    instances = graph_result["_instances_by_id"]
+    expected_driver_ids = {driver["driver_id"]}
+    observed_driver_ids: set[str] = set()
+    guards: dict[int, dict[str, Any]] = {}
+    polls_by_guard: dict[int, list[dict[str, Any]]] = {}
+    for event in events:
+        if event["kind"] == "loop_guard":
+            guards[event["seq"]] = event
+            observed_driver_ids.add(event["driver_id"])
+        elif event["kind"] == "poll_begin":
+            polls_by_guard.setdefault(event["guard_seq"], []).append(event)
+
+    schedule_mismatch_guard_count = 0
+    schedule_content_mismatch_count = 0
+    expected_poll_count = 0
+    for guard_seq, guard in guards.items():
+        actual = polls_by_guard.get(guard_seq, [])
+        if not guard["condition_result"]:
+            if actual:
+                schedule_mismatch_guard_count += 1
+                schedule_content_mismatch_count += len(actual)
+            continue
+        if guard["driver_id"] != driver["driver_id"]:
+            schedule_mismatch_guard_count += 1
+            schedule_content_mismatch_count += len(actual)
+            continue
+        expected_count = sum(
+            instances[instance_id]["input_count"] * len(instances[instance_id]["intersteps"])
+            for instance_id in driver["solver_instance_ids"]
+        )
+        expected_poll_count += expected_count
+        if len(actual) != expected_count:
+            schedule_mismatch_guard_count += 1
+            schedule_content_mismatch_count += abs(len(actual) - expected_count)
+            continue
+
+        actual_index = 0
+        guard_matches = True
+        for instance_id in driver["solver_instance_ids"]:
+            instance = instances[instance_id]
+            for interstep in instance["intersteps"]:
+                for input_index in range(instance["input_count"]):
+                    poll = actual[actual_index]
+                    expected_fields = (
+                        instance_id,
+                        driver["driver_id"],
+                        instance["callsite_id"],
+                        instance["integrator"],
+                        interstep,
+                        input_index,
+                    )
+                    observed_fields = (
+                        poll["solver_instance_id"],
+                        poll["driver_id"],
+                        poll["callsite_id"],
+                        poll["integrator"],
+                        poll["interstep"],
+                        poll["input_entry_index"],
+                    )
+                    if observed_fields != expected_fields:
+                        guard_matches = False
+                        schedule_content_mismatch_count += 1
+                    actual_index += 1
+        if not guard_matches:
+            schedule_mismatch_guard_count += 1
+
+    driver_ids_match = observed_driver_ids == expected_driver_ids
+    identity_copy_matches = (
+        journal_result["source_id_observed"] == graph_result["source_id_observed"]
+        and journal_result["source_binary_sha256_observed"] == graph_result["source_binary_sha256_observed"]
+    )
+    schedule_matches = schedule_mismatch_guard_count == 0 and driver_ids_match
+    return {
+        **journal_result,
+        "source_callgraph_shape_status": graph_result["status"],
+        "source_callgraph_raw_sha256": graph_result["source_callgraph_raw_sha256"],
+        "source_callgraph_binding_raw_hash_verified": graph_result["source_callgraph_binding_raw_hash_verified"],
+        "source_callgraph_identity_copies_match_journal": identity_copy_matches,
+        "source_callgraph_verified": False,
+        "source_callgraph_complete_declaration_verified": False,
+        "source_fragment_feature_coverage_verified": False,
+        "source_fragments_reparsed_from_source": False,
+        "source_callgraph_fragment_count_declared": graph_result["source_fragment_count"],
+        "source_callgraph_edge_count_declared": graph_result["source_call_edge_count_declared"],
+        "source_callgraph_instance_count_declared": graph_result["instance_count_declared"],
+        "source_callgraph_entry_count_declared": graph_result["input_entry_count_declared"],
+        "observed_driver_ids": sorted(observed_driver_ids),
+        "callgraph_driver_id_set_matches_observed": driver_ids_match,
+        "observed_guard_count": len(guards),
+        "observed_true_guard_count": sum(guard["condition_result"] for guard in guards.values()),
+        "observed_false_guard_count": sum(not guard["condition_result"] for guard in guards.values()),
+        "expected_poll_count_for_observed_true_guards": expected_poll_count,
+        "poll_schedule_mismatch_guard_count": schedule_mismatch_guard_count,
+        "poll_schedule_content_mismatch_count": schedule_content_mismatch_count,
+        "expected_poll_schedule_matches_observed": schedule_matches,
+        "expected_query_completeness_verified": False,
+        "combined_untrusted_consistency": (
+            schedule_matches
+            and identity_copy_matches
+            and graph_result["source_callgraph_binding_raw_hash_verified"]
+            and journal_result["all_polls_returned"]
+            and journal_result["observed_driver_loops_complete"]
+            and journal_result["cache_transitions_observed_consistent"]
+            and journal_result["cache_replay_diagnostic_state"] == "journal_local_consistent_unverified"
+            and journal_result["observed_process_lifecycle_complete"]
+        ),
+        "gate_state": "open",
+        "execution_semantics_verified": False,
         "qualification_credit": 0,
     }

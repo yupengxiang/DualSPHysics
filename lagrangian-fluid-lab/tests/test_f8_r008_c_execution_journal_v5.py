@@ -8,7 +8,11 @@ import pytest
 from scripts.f8_r008_c_execution_journal_v5 import (
     JOURNAL_SCHEMA,
     JournalV5Error,
+    SOURCE_CALLGRAPH_OBJECT_ID,
+    SOURCE_CALLGRAPH_SCHEMA,
     inspect_untrusted_v5_journal,
+    inspect_untrusted_v5_journal_with_source_callgraph,
+    inspect_untrusted_v5_source_callgraph,
 )
 
 
@@ -45,7 +49,7 @@ def _event(kind, seq, **fields):
     }
 
 
-def _main_events(*, poll_outcome="returned", include_poll_end=True):
+def _main_events(*, poll_outcome="returned", include_poll_end=True, include_terminal_guard=False):
     proc = _process()
     events = [
         _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={"synthetic": True}),
@@ -72,9 +76,16 @@ def _main_events(*, poll_outcome="returned", include_poll_end=True):
             "poll_end", 4, poll_begin_id=3, process_generation_id=proc,
             outcome=poll_outcome,
         ))
+        if include_terminal_guard:
+            events.append(_event(
+                "loop_guard", len(events), process_generation_id=proc, driver_id="main",
+                loop_iteration_id=1, time_step_ieee754_hex="3ff0000000000000",
+                time_max_ieee754_hex="3ff0000000000000", condition_result=False,
+            ))
+        exit_seq = len(events)
         events.extend([
-            _event("exit", 5, process_generation_id=proc, exit_code=0, signal=None),
-            _event("reap", 6, process_generation_id=proc),
+            _event("exit", exit_seq, process_generation_id=proc, exit_code=0, signal=None),
+            _event("reap", exit_seq + 1, process_generation_id=proc),
         ])
     return events
 
@@ -172,6 +183,111 @@ def _journal(events, **updates):
     return json.dumps(value, separators=(",", ":")).encode()
 
 
+def _source_callgraph(*, instances=None, driver_id="main", loop_model="single_solver_loop", solver_ids=None, fragments=None):
+    if solver_ids is None:
+        solver_ids = ["main"]
+    if instances is None:
+        instances = [{
+            "solver_instance_id": "main",
+            "driver_id": "main",
+            "input_count": 1,
+            "callsite_id": "cpu.pre_interaction_forces.run_cpu",
+            "integrator": "Verlet",
+            "intersteps": ["INTERSTEP_Verlet"],
+        }]
+    if fragments is None:
+        fragments = [{
+            "function_id": "main.dispatch",
+            "source_file_object_id": "source.main_cpp",
+            "byte_start": 1,
+            "byte_end": 2,
+            "fragment_raw_sha256": "c" * 64,
+            "normalized_ast_sha256": "d" * 64,
+            "ordered_call_edges": [],
+        }]
+    value = {
+        "schema": SOURCE_CALLGRAPH_SCHEMA,
+        "source_id": "runtime-image-v5",
+        "source_binary_sha256": "b" * 64,
+        "source_tree_sha256": "e" * 64,
+        "build_provenance_ref": {
+            "stage": "build", "role": "build_attestation", "object_id": "build-attestation-v5",
+            "bytes": 128, "sha256": "f" * 64,
+        },
+        "runtime_image_ref": {
+            "stage": "runtime", "role": "runtime_image", "object_id": "runtime-image-v5",
+            "bytes": 256, "sha256": "b" * 64,
+        },
+        "source_fragments": fragments,
+        "drivers": [{
+            "driver_id": driver_id,
+            "loop_model": loop_model,
+            "solver_instance_ids": solver_ids,
+        }],
+        "instances": instances,
+    }
+    return json.dumps(value, separators=(",", ":")).encode()
+
+
+def _source_callgraph_binding(raw, *, sha256=None, byte_count=None):
+    import hashlib
+
+    return {
+        "stage": "build",
+        "role": "source_callgraph",
+        "object_id": SOURCE_CALLGRAPH_OBJECT_ID,
+        "bytes": len(raw) if byte_count is None else byte_count,
+        "sha256": hashlib.sha256(raw).hexdigest() if sha256 is None else sha256,
+    }
+
+
+def _vres_events(*, swap_intersteps=False):
+    proc = _process()
+    events = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={"synthetic": True}),
+        _event(
+            "exec", 1, process_generation_id=proc, executable_binding={"synthetic": True},
+            argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64,
+        ),
+        _event(
+            "loop_guard", 2, process_generation_id=proc, driver_id="vres",
+            loop_iteration_id=0, time_step_ieee754_hex="0000000000000000",
+            time_max_ieee754_hex="3ff0000000000000", condition_result=True,
+        ),
+    ]
+    for instance_id in ("vres.00", "vres.01"):
+        miss_seq = len(events)
+        steps = ["INTERSTEP_SymPredictor", "INTERSTEP_SymCorrector"]
+        if swap_intersteps:
+            steps.reverse()
+        for step_index, interstep in enumerate(steps):
+            begin_seq = len(events)
+            is_hit = step_index == 1
+            events.append(_event(
+                "poll_begin", begin_seq, poll_begin_id=begin_seq, process_generation_id=proc,
+                solver_instance_id=instance_id, driver_id="vres", guard_seq=2,
+                callsite_id="cpu.pre_interaction_forces.run_cpu", integrator="VRes",
+                interstep=interstep, input_entry_index=0, timestep_ieee754_hex="0000000000000000",
+                active=False, cache_action="hit" if is_hit else "miss",
+                cache_source_seq=miss_seq if is_hit else None, table_raw_binding=None,
+            ))
+            events.append(_event(
+                "poll_end", len(events), poll_begin_id=begin_seq,
+                process_generation_id=proc, outcome="returned",
+            ))
+    terminal_seq = len(events)
+    events.extend([
+        _event(
+            "loop_guard", terminal_seq, process_generation_id=proc, driver_id="vres",
+            loop_iteration_id=1, time_step_ieee754_hex="3ff0000000000000",
+            time_max_ieee754_hex="3ff0000000000000", condition_result=False,
+        ),
+        _event("exit", terminal_seq + 1, process_generation_id=proc, exit_code=0, signal=None),
+        _event("reap", terminal_seq + 2, process_generation_id=proc),
+    ])
+    return events
+
+
 def test_valid_synthetic_journal_remains_open_and_non_authorizing():
     result = inspect_untrusted_v5_journal(_journal(_main_events()))
     assert result["status"] == "untrusted_v5_journal_shape_consistent"
@@ -193,6 +309,190 @@ def test_valid_synthetic_journal_remains_open_and_non_authorizing():
     assert result["qualification_adjudicated"] is False
     assert result["T1_numerical"] is False
     assert result["qualification_credit"] == 0
+
+
+def test_source_callgraph_structural_parse_is_explicitly_untrusted_and_checks_raw_ref():
+    raw = _source_callgraph()
+    result = inspect_untrusted_v5_source_callgraph(
+        raw, source_callgraph_binding=_source_callgraph_binding(raw),
+    )
+    assert result["status"] == "untrusted_v5_source_callgraph_declared_shape_consistent"
+    assert result["source_callgraph_binding_raw_hash_verified"] is True
+    assert result["source_fragment_ids_allowlisted"] is True
+    assert result["source_fragment_feature_coverage_verified"] is False
+    assert result["source_fragments_reparsed_from_source"] is False
+    assert "_instances_by_id" not in result
+
+    with pytest.raises(JournalV5Error, match="raw bytes do not match"):
+        inspect_untrusted_v5_source_callgraph(
+            raw, source_callgraph_binding=_source_callgraph_binding(raw, sha256="a" * 64),
+        )
+    old_binding = _source_callgraph_binding(raw)
+    old_binding["object_id"] = "f8-r008-source-callgraph-v4"
+    with pytest.raises(JournalV5Error, match="frozen V5 object ID"):
+        inspect_untrusted_v5_source_callgraph(raw, source_callgraph_binding=old_binding)
+
+
+@pytest.mark.parametrize("bad_fragment", [
+    {"function_id": "not.allowlisted", "source_file_object_id": "source.main_cpp", "byte_start": 1,
+     "byte_end": 2, "fragment_raw_sha256": "c" * 64, "normalized_ast_sha256": "d" * 64,
+     "ordered_call_edges": []},
+    {"function_id": "main.dispatch", "source_file_object_id": "source.gpu_cpp", "byte_start": 1,
+     "byte_end": 2, "fragment_raw_sha256": "c" * 64, "normalized_ast_sha256": "d" * 64,
+     "ordered_call_edges": []},
+    {"function_id": "main.dispatch", "source_file_object_id": "source.main_cpp", "byte_start": 2,
+     "byte_end": 2, "fragment_raw_sha256": "c" * 64, "normalized_ast_sha256": "d" * 64,
+     "ordered_call_edges": []},
+])
+def test_source_callgraph_rejects_unknown_or_malformed_fragment_projection(bad_fragment):
+    with pytest.raises(JournalV5Error):
+        inspect_untrusted_v5_source_callgraph(_source_callgraph(fragments=[bad_fragment]))
+
+
+def test_source_callgraph_rejects_runtime_identity_copy_mismatch_and_bool_input_count():
+    raw = _source_callgraph().replace(b'"source_id":"runtime-image-v5"', b'"source_id":"other-runtime"', 1)
+    with pytest.raises(JournalV5Error, match="identity copies disagree"):
+        inspect_untrusted_v5_source_callgraph(raw)
+
+    instance = {
+        "solver_instance_id": "main", "driver_id": "main", "input_count": True,
+        "callsite_id": "cpu.pre_interaction_forces.run_cpu", "integrator": "Verlet",
+        "intersteps": ["INTERSTEP_Verlet"],
+    }
+    with pytest.raises(JournalV5Error, match="builtin integer"):
+        inspect_untrusted_v5_source_callgraph(_source_callgraph(instances=[instance]))
+
+
+def test_main_callgraph_schedule_matches_observed_guard_but_never_authorizes():
+    raw_graph = _source_callgraph()
+    result = inspect_untrusted_v5_journal_with_source_callgraph(
+        _journal(_main_events(include_terminal_guard=True)), raw_graph,
+        source_callgraph_binding=_source_callgraph_binding(raw_graph),
+    )
+    assert result["callgraph_driver_id_set_matches_observed"] is True
+    assert result["expected_poll_count_for_observed_true_guards"] == 1
+    assert result["poll_schedule_mismatch_guard_count"] == 0
+    assert result["expected_poll_schedule_matches_observed"] is True
+    assert result["source_callgraph_identity_copies_match_journal"] is True
+    assert result["combined_untrusted_consistency"] is True
+    assert result["source_callgraph_verified"] is False
+    assert result["expected_query_completeness_verified"] is False
+    assert result["gate_state"] == "open"
+    assert result["qualification_credit"] == 0
+
+    unbound = inspect_untrusted_v5_journal_with_source_callgraph(
+        _journal(_main_events(include_terminal_guard=True)), raw_graph,
+    )
+    assert unbound["expected_poll_schedule_matches_observed"] is True
+    assert unbound["source_callgraph_binding_raw_hash_verified"] is False
+    assert unbound["combined_untrusted_consistency"] is False
+
+
+def test_combined_consistency_requires_terminal_success_and_driver_loop_closure():
+    graph = _source_callgraph()
+    binding = _source_callgraph_binding(graph)
+
+    missing_end = inspect_untrusted_v5_journal_with_source_callgraph(
+        _journal(_main_events(include_poll_end=False)), graph,
+        source_callgraph_binding=binding,
+    )
+    assert missing_end["expected_poll_schedule_matches_observed"] is True
+    assert missing_end["all_polls_returned"] is False
+    assert missing_end["combined_untrusted_consistency"] is False
+
+    exception_events = _main_events(poll_outcome="exception", include_terminal_guard=True)
+    exception_events[3]["active"] = True
+    exception_events[3]["table_raw_binding"] = {"synthetic": True}
+    exception = inspect_untrusted_v5_journal_with_source_callgraph(
+        _journal(exception_events), graph, source_callgraph_binding=binding,
+    )
+    assert exception["all_polls_terminal"] is True
+    assert exception["all_polls_returned"] is False
+    assert exception["combined_untrusted_consistency"] is False
+
+    no_terminal_guard = inspect_untrusted_v5_journal_with_source_callgraph(
+        _journal(_main_events()), graph, source_callgraph_binding=binding,
+    )
+    assert no_terminal_guard["expected_poll_schedule_matches_observed"] is True
+    assert no_terminal_guard["observed_driver_loops_complete"] is False
+    assert no_terminal_guard["combined_untrusted_consistency"] is False
+
+    reexec_events = _main_events(include_terminal_guard=True)
+    proc = reexec_events[0]["process_generation_id"]
+    reexec_events.insert(-2, _event(
+        "exec", len(reexec_events) - 2, process_generation_id=proc,
+        executable_binding={"synthetic": True}, argv_sha256="4" * 64,
+        cwd_object_id="cwd-v2", environment_sha256="5" * 64,
+    ))
+    for seq, event in enumerate(reexec_events):
+        event["seq"] = seq
+    reexec = inspect_untrusted_v5_journal_with_source_callgraph(
+        _journal(reexec_events), graph, source_callgraph_binding=binding,
+    )
+    assert reexec["cache_replay_diagnostic_state"] == "unresolved_output_state"
+    assert reexec["combined_untrusted_consistency"] is False
+
+
+def test_schedule_replay_marks_missing_entry_poll_and_wrong_callsite_incomplete():
+    two_entry_instance = {
+        "solver_instance_id": "main", "driver_id": "main", "input_count": 2,
+        "callsite_id": "cpu.pre_interaction_forces.run_cpu", "integrator": "Verlet",
+        "intersteps": ["INTERSTEP_Verlet"],
+    }
+    graph = _source_callgraph(instances=[two_entry_instance])
+    result = inspect_untrusted_v5_journal_with_source_callgraph(_journal(_main_events()), graph)
+    assert result["expected_poll_count_for_observed_true_guards"] == 2
+    assert result["poll_schedule_mismatch_guard_count"] == 1
+    assert result["expected_poll_schedule_matches_observed"] is False
+
+    events = _main_events()
+    events[3]["callsite_id"] = "gpu.pre_interaction_forces.run_gpu"
+    result = inspect_untrusted_v5_journal_with_source_callgraph(
+        _journal(events), _source_callgraph(),
+    )
+    assert result["poll_schedule_content_mismatch_count"] == 1
+    assert result["expected_poll_schedule_matches_observed"] is False
+    assert result["gate_state"] == "open"
+
+
+def test_one_vres_guard_replays_two_ordered_instances_and_both_intersteps():
+    instances = [
+        {
+            "solver_instance_id": instance_id, "driver_id": "vres", "input_count": 1,
+            "callsite_id": "cpu.pre_interaction_forces.run_cpu", "integrator": "VRes",
+            "intersteps": ["INTERSTEP_SymPredictor", "INTERSTEP_SymCorrector"],
+        }
+        for instance_id in ("vres.00", "vres.01")
+    ]
+    graph = _source_callgraph(
+        instances=instances, driver_id="vres", loop_model="vres_driver_loop",
+        solver_ids=["vres.00", "vres.01"],
+    )
+    result = inspect_untrusted_v5_journal_with_source_callgraph(_journal(_vres_events()), graph)
+    assert result["observed_true_guard_count"] == 1
+    assert result["observed_false_guard_count"] == 1
+    assert result["expected_poll_count_for_observed_true_guards"] == 4
+    assert result["poll_schedule_mismatch_guard_count"] == 0
+    assert result["expected_poll_schedule_matches_observed"] is True
+    assert result["gate_state"] == "open"
+
+    result = inspect_untrusted_v5_journal_with_source_callgraph(
+        _journal(_vres_events(swap_intersteps=True)), graph,
+    )
+    assert result["poll_schedule_content_mismatch_count"] == 4
+    assert result["expected_poll_schedule_matches_observed"] is False
+
+
+def test_missing_expected_driver_observation_is_not_called_complete():
+    events = _main_events()
+    events[2]["driver_id"] = "unlisted"
+    events[3]["driver_id"] = "unlisted"
+    result = inspect_untrusted_v5_journal_with_source_callgraph(
+        _journal(events), _source_callgraph(),
+    )
+    assert result["callgraph_driver_id_set_matches_observed"] is False
+    assert result["expected_poll_schedule_matches_observed"] is False
+    assert result["combined_untrusted_consistency"] is False
 
 
 def test_missing_poll_end_is_retained_as_incomplete_not_passed():
