@@ -440,11 +440,15 @@ def evaluate_metric_matrix_v2(
         baseline_metrics["center_coefficients"]["phase_rad"],
         refined_metrics["center_coefficients"]["phase_rad"],
     )
-    time_step_passed = bool(
+    caller_claimed_time_step_relation_passed = bool(
         baseline_metrics["metric_gates_passed"] and refined_metrics["metric_gates_passed"]
         and refined_dt < baseline_dt
         and phase_difference <= float(time_comparison["phase_difference_absolute_max_rad"])
     )
+    # v2 binds a caller-supplied scalar to bytes but does not parse RunPARTs.csv
+    # or establish attempt identity/completion. Keep the comparison diagnostic;
+    # it must not be reported as an adjudicated timestep gate.
+    time_step_passed = False
 
     cadence = applicability.get("output_cadence_comparison")
     _require(isinstance(cadence, dict), "frozen output-cadence comparison is absent")
@@ -491,12 +495,20 @@ def evaluate_metric_matrix_v2(
         "time_step_comparison": {
             "baseline_case_id": baseline_id,
             "refined_case_id": refined_id,
-            "baseline_solver_max_dt_s": baseline_dt,
-            "refined_solver_max_dt_s": refined_dt,
+            "baseline_claimed_solver_max_dt_s": baseline_dt,
+            "refined_claimed_solver_max_dt_s": refined_dt,
             "baseline_solver_timestep_audit": baseline_audit,
             "refined_solver_timestep_audit": refined_audit,
             "wrapped_center_phase_difference_rad": phase_difference,
-            "passed": time_step_passed,
+            "caller_claimed_relation_code": (
+                "unverified_refinement_and_phase_relation_claimed"
+                if caller_claimed_time_step_relation_passed
+                else "unverified_refinement_and_phase_relation_not_claimed"
+            ),
+            "adjudication_status": "unverified_v2_caller_claims_not_qualified",
+            "execution_attempt_identity_verified": False,
+            "normal_completion_verified": False,
+            "passed": False,
         },
         "output_cadence_comparison": {
             "baseline_case_id": cadence_baseline_id,

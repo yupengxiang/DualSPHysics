@@ -177,9 +177,15 @@ def test_v2_metric_matrix_evaluates_frozen_15_case_synthetic_matrix(tmp_path) ->
     assert len(result["cross_resolution"]) == 8
     assert result["case_metric_gates_passed"] is True
     assert result["cross_resolution_gates_passed"] is True
-    assert result["time_step_comparison"]["passed"] is True
+    assert result["time_step_comparison"]["caller_claimed_relation_code"] == (
+        "unverified_refinement_and_phase_relation_claimed"
+    )
+    assert result["time_step_comparison"]["adjudication_status"] == "unverified_v2_caller_claims_not_qualified"
+    assert result["time_step_comparison"]["execution_attempt_identity_verified"] is False
+    assert result["time_step_comparison"]["normal_completion_verified"] is False
+    assert result["time_step_comparison"]["passed"] is False
     assert result["output_cadence_comparison"]["passed"] is True
-    assert result["all_metric_and_comparison_gates_passed"] is True
+    assert result["all_metric_and_comparison_gates_passed"] is False
     assert result["native_integrity_evaluated"] is False
     assert result["full_t1_decision"] is False
     assert result["readiness_pass"] is False
