@@ -538,3 +538,51 @@ def test_aggregate_rejects_caller_asserted_attempt_pass() -> None:
     raw = _raw()
     with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="attempt outcome must remain unresolved"):
         _aggregate(raw, [result])
+
+
+def test_untrusted_aggregate_validator_accepts_exact_rederived_projection() -> None:
+    raw = _raw()
+    aggregate = _aggregate(raw, [_attempt_result()])
+    assert ledger_v1.validate_untrusted_attempt_aggregate_v2(
+        aggregate, MATRIX_RAW, raw,
+    ) is None
+
+
+@pytest.mark.parametrize("mutate,message", [
+    (lambda aggregate: aggregate.__setitem__("expected_case_count", 14),
+     "aggregate differs from the unresolved matrix/ledger projection"),
+    (lambda aggregate: aggregate["case_rows"].__setitem__(0, aggregate["case_rows"][1]),
+     "complete observed ledger registration inventory"),
+    (lambda aggregate: aggregate["case_rows"][0].__setitem__("case_outcome", "missing"),
+     "aggregate differs from the unresolved matrix/ledger projection"),
+    (lambda aggregate: aggregate["case_outcome_counts"].__setitem__("missing", 1),
+     "aggregate differs from the unresolved matrix/ledger projection"),
+    (lambda aggregate: aggregate["attempt_outcome_counts"].__setitem__("unresolved", False),
+     "aggregate differs from the unresolved matrix/ledger projection"),
+    (lambda aggregate: aggregate.__setitem__("qualification_credit", False),
+     "aggregate differs from the unresolved matrix/ledger projection"),
+])
+def test_untrusted_aggregate_validator_rejects_tampered_projection(mutate, message: str) -> None:
+    raw = _raw()
+    aggregate = _aggregate(raw, [_attempt_result()])
+    mutate(aggregate)
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match=message):
+        ledger_v1.validate_untrusted_attempt_aggregate_v2(aggregate, MATRIX_RAW, raw)
+
+
+def test_untrusted_aggregate_validator_rejects_extra_row_fields() -> None:
+    raw = _raw()
+    aggregate = _aggregate(raw, [_attempt_result()])
+    aggregate["case_rows"][0]["unreviewed_claim"] = True
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="exact field set"):
+        ledger_v1.validate_untrusted_attempt_aggregate_v2(aggregate, MATRIX_RAW, raw)
+
+
+def test_untrusted_aggregate_validator_rejects_unverified_attestation() -> None:
+    raw = _raw()
+    aggregate = _aggregate(raw, [_attempt_result()])
+    aggregate["attempt_ledger_attestation_ref"] = _ref(
+        "runtime", "ledger_attestation", "attestation-001",
+    )
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="active supervisor trust verifier"):
+        ledger_v1.validate_untrusted_attempt_aggregate_v2(aggregate, MATRIX_RAW, raw)

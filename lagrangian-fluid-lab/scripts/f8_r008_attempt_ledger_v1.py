@@ -49,6 +49,9 @@ AGGREGATE_FIELDS = frozenset({
     "case_rows", "case_outcome_counts", "attempt_outcome_counts", "aggregate_outcome",
     "attempt_ledger_complete", "qualification_adjudicated", "T1_numerical", "qualification_credit",
 })
+AGGREGATE_CASE_ROW_FIELDS = frozenset({
+    "case_id", "qualification_row_sha256", "case_outcome", "qualifying_attempt_id", "attempts",
+})
 EVENT_COMMON_FIELDS = frozenset({
     "seq", "mono_ns_hex", "kind", "case_id", "qualification_row_sha256", "attempt_id", "nonce_hex",
 })
@@ -592,9 +595,46 @@ def build_untrusted_attempt_aggregate_v2(
     return aggregate
 
 
+def validate_untrusted_attempt_aggregate_v2(
+    aggregate: Any,
+    qualification_matrix_raw: bytes,
+    ledger_raw: bytes,
+) -> None:
+    """Independently rederive the restricted diagnostic aggregate projection.
+
+    This verifies only internal consistency against caller-supplied matrix and
+    ledger bytes. It does not authenticate their sources or grant completeness.
+    """
+    _require(type(aggregate) is dict and set(aggregate) == AGGREGATE_FIELDS,
+             "aggregate must be a builtin object with the exact V2 field set")
+    rows = aggregate["case_rows"]
+    _require(type(rows) is list,
+             "aggregate case_rows must be a builtin list")
+    attempt_results: list[dict[str, Any]] = []
+    for ordinal, row in enumerate(rows):
+        _require(type(row) is dict and set(row) == AGGREGATE_CASE_ROW_FIELDS,
+                 f"aggregate case row {ordinal} does not have the exact field set")
+        attempts = row["attempts"]
+        _require(type(attempts) is list,
+                 f"aggregate case row {ordinal}.attempts must be a builtin list")
+        attempt_results.extend(attempts)
+
+    expected = build_untrusted_attempt_aggregate_v2(
+        qualification_matrix_raw,
+        ledger_raw,
+        attempt_ledger_ref=aggregate["attempt_ledger_ref"],
+        attempt_results=attempt_results,
+        attempt_ledger_attestation_ref=aggregate["attempt_ledger_attestation_ref"],
+    )
+    _require(_canonical_json_bytes(aggregate, "aggregate")
+             == _canonical_json_bytes(expected, "rederived aggregate"),
+             "aggregate differs from the unresolved matrix/ledger projection")
+
+
 __all__ = [
-    "AGGREGATE_FIELDS", "AGGREGATE_SCHEMA", "AttemptLedgerV1Error", "DIAGNOSTIC_SCHEMA", "LEDGER_SCHEMA",
+    "AGGREGATE_CASE_ROW_FIELDS", "AGGREGATE_FIELDS", "AGGREGATE_SCHEMA", "AttemptLedgerV1Error",
+    "DIAGNOSTIC_SCHEMA", "LEDGER_SCHEMA",
     "build_untrusted_attempt_aggregate_v2",
     "inspect_untrusted_attempt_ledger", "inspect_untrusted_qualification_matrix",
-    "validate_attempt_result_ledger_projection_v2",
+    "validate_attempt_result_ledger_projection_v2", "validate_untrusted_attempt_aggregate_v2",
 ]
