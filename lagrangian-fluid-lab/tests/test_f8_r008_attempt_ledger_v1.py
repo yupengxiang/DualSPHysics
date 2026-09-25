@@ -142,6 +142,8 @@ def test_structurally_closed_ledger_stays_untrusted_and_unresolved() -> None:
     assert result["ledger_structure_valid"] is True
     assert result["ledger_raw_bytes"] == len(raw)
     assert result["ledger_raw_sha256"] == hashlib.sha256(raw).hexdigest()
+    assert result["overflow"] is False
+    assert result["lost_count"] == 0
     assert result["supervisor_attestation_verified"] is False
     assert result["attempt_ledger_complete"] is False
     assert result["attempt_count"] == 1

@@ -701,3 +701,4 @@ agent 提交持久作业后即可继续实现或接手其他工作，不必占�
 - H200和Ada均可使用，同卡多任务由实测显存与吞吐准入。
 - 数值阈值和范围先登记再研究，不能观察失败后放宽。
 - 初始调研和计划阶段已结束，现按依赖进入实施续推；后续波次由总控根据依赖自动推进。2026-09-25 已完成 F8 R008 非授权 attempt-ledger / 15-case aggregate 静态验证器加固及 Terra High 复核（见 [UPDATE-127](lagrangian-fluid-lab/reports/CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-127.zh-CN.md)）；这不代表可信来源认证、运行准入或资格完成。
+- 2026-09-25 UPDATE-128 新增 F8 R008 attempt-ledger attestation 的非授权 Ed25519 verifier：严格 canonical JSON / Base64 / exact schema 校验、matrix/ledger/coverage bindings 复核和临时 key 合成测试均已实现；GPT-6 Luna Max 独立只读安全复核 PASS、无 P1/P2。即便签名有效也不认证 candidate key、不验证 descriptor-root/supervisor/runtime，不 mint capability，T1 false、credit 0。attestation、ledger、V2 attempt projection 与 V5 journal 定向测试合计 173 passed；详见 [UPDATE-128](lagrangian-fluid-lab/reports/CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-128.zh-CN.md)。

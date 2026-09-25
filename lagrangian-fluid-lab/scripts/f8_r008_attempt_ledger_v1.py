@@ -552,6 +552,8 @@ def inspect_untrusted_attempt_ledger(raw: bytes, *, qualification_matrix_raw: by
         "coverage_start_ns_hex": ledger["coverage_start_ns_hex"],
         "coverage_end_ns_hex": ledger["coverage_end_ns_hex"],
         "event_count": ledger["event_count"],
+        "overflow": ledger["overflow"],
+        "lost_count": ledger["lost_count"],
         "attempt_count": len(parsed["attempts"]),
         "ledger_raw_bytes": len(raw),
         "ledger_raw_sha256": sha256_bytes(raw),
