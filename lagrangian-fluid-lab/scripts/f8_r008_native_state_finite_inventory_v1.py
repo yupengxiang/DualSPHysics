@@ -29,12 +29,46 @@ MAX_CONTROL_BYTES = 1024 * 1024
 FLOAT_METADATA_TYPES = frozenset({11, 12, 22, 23})
 
 STATE_ARRAYS = {
-    "Pos": {"type_code": 22, "dtype": "<f4", "components": 3, "unit": "m"},
-    "Posd": {"type_code": 23, "dtype": "<f8", "components": 3, "unit": "m"},
-    "Vel": {"type_code": 22, "dtype": "<f4", "components": 3, "unit": "m/s"},
-    "Rhop": {"type_code": 11, "dtype": "<f4", "components": 1, "unit": "kg/m^3"},
+    "Pos": {"type_code": 22, "dtype": "<f4", "components": 3, "unit": "m",
+            "semantic": "solver-saved particle position"},
+    "Posd": {"type_code": 23, "dtype": "<f8", "components": 3, "unit": "m",
+             "semantic": "solver-saved particle position"},
+    "Vel": {"type_code": 22, "dtype": "<f4", "components": 3, "unit": "m/s",
+            "semantic": "solver-saved particle velocity"},
+    "Rhop": {"type_code": 11, "dtype": "<f4", "components": 1, "unit": "kg/m^3",
+             "semantic": "solver-saved particle density"},
 }
 CONTROL_UNITS = ("s", "m/s^2", "m/s^2", "m/s^2", "rad/s^2", "rad/s^2", "rad/s^2")
+CONTROL_SEMANTICS = (
+    "simulation time at which the following accelerations apply",
+    "x linear acceleration control", "y linear acceleration control", "z linear acceleration control",
+    "x angular acceleration control", "y angular acceleration control", "z angular acceleration control",
+)
+_ROOT_METADATA_SEMANTICS = {
+    "Data2dPosY": ("m", "out-of-plane coordinate for a 2D case"),
+    "CasePosMin": ("m", "initial case bounding-box minimum"),
+    "CasePosMax": ("m", "initial case bounding-box maximum"),
+    "MapPosMin": ("m", "solver map bounding-box minimum"),
+    "MapPosMax": ("m", "solver map bounding-box maximum"),
+    "PeriXinc": ("m", "periodic-image translation vector along x"),
+    "PeriYinc": ("m", "periodic-image translation vector along y"),
+    "PeriZinc": ("m", "periodic-image translation vector along z"),
+    "ViscoValue": ("native-model-dependent", "configured viscosity value; interpreted by ViscoType, not converted here"),
+    "ViscoBoundFactor": ("dimensionless", "boundary-viscosity multiplier"),
+    "Dp": ("m", "configured particle spacing"),
+    "H": ("m", "configured smoothing length"),
+    "B": ("native-model-dependent", "equation-of-state coefficient as stored by the solver"),
+    "Rhop0": ("kg/m^3", "configured reference density"),
+    "Gamma": ("dimensionless", "configured equation-of-state exponent"),
+    "MassBound": ("kg", "configured bound-particle mass"),
+    "MassFluid": ("kg", "configured fluid-particle mass"),
+}
+_PART_METADATA_SEMANTICS = {
+    "TimeStep": ("s", "simulation time represented by this saved PART"),
+    "RunTime": ("s", "elapsed solver runtime recorded for this PART"),
+    "DomainMin": ("m", "PART computational-domain minimum"),
+    "DomainMax": ("m", "PART computational-domain maximum"),
+}
 
 
 class NativeStateFiniteInventoryError(ValueError):
@@ -105,9 +139,12 @@ def _validate_native_array_inventory(scan: decoder.ScanResult, case_np: int) -> 
     return part
 
 
-def _summarize_float_metadata(root: decoder.ItemRecord, part: decoder.ItemRecord) -> dict[str, Any]:
+def _summarize_float_metadata(
+    root: decoder.ItemRecord, part: decoder.ItemRecord, source_frame_sha256: str,
+) -> dict[str, Any]:
     records: list[dict[str, Any]] = []
     finite_count = nonfinite_count = 0
+    unclassified_count = 0
     for item in (root, part):
         for value in item.values:
             if value.type_code not in FLOAT_METADATA_TYPES:
@@ -118,27 +155,43 @@ def _summarize_float_metadata(root: decoder.ItemRecord, part: decoder.ItemRecord
             this_nonfinite = len(component_finite) - this_finite
             finite_count += this_finite
             nonfinite_count += this_nonfinite
+            semantic_map = _ROOT_METADATA_SEMANTICS if item is root else _PART_METADATA_SEMANTICS
+            unit, semantic = semantic_map.get(
+                value.name,
+                ("unclassified", "raw BI4 floating metadata; R008 field semantics are not classified"),
+            )
+            classified = value.name in semantic_map
+            unclassified_count += int(not classified)
+            type_name, dtype, _size, _triple = decoder.VALUE_INFO[value.type_code]
             records.append({
                 "item_path": [root.name, *([] if item is root else [part.name])],
                 "metadata_name": value.name,
                 "type_code": value.type_code,
+                "type_name": type_name,
+                "dtype": dtype,
                 "component_count": len(components),
+                "unit": unit,
+                "semantic": semantic,
+                "semantics_classified": classified,
+                "population": "one root/PART metadata field",
+                "source_frame_sha256": source_frame_sha256,
                 "finite_count": this_finite,
                 "nonfinite_count": this_nonfinite,
             })
     return {
-        "policy": "all IEEE floating scalar/vector metadata values in the root and selected PART are included",
+        "policy": "all IEEE floating scalar/vector metadata values in the root and selected PART are included; field identity, native dtype, unit and semantic are reported per entry",
         "records": records,
         "finite_count": finite_count,
         "nonfinite_count": nonfinite_count,
         "all_floating_metadata_finite": nonfinite_count == 0,
+        "unclassified_field_count": unclassified_count,
+        "all_floating_metadata_semantics_classified": unclassified_count == 0,
     }
 
 
 def summarize_native_frame_fd(
     raw_fd: int,
     expected_frame_sha256: str,
-    scan: decoder.ScanResult,
     *,
     case_np: int,
 ) -> dict[str, Any]:
@@ -150,12 +203,29 @@ def summarize_native_frame_fd(
     Separate ``PartExtra`` files are not inputs to this API and remain
     unclassified at the bundle level.
     """
-    _require(isinstance(scan, decoder.ScanResult), "a safe BI4 ScanResult is required")
+    # Never accept a caller-constructed ScanResult: rebuild every descriptor
+    # and metadata field from the held bytes whose digest is checked here.
+    try:
+        scan = decoder.scan_bi4_fd(raw_fd, expected_frame_sha256)
+    except (OSError, ValueError, OverflowError) as error:
+        raise NativeStateFiniteInventoryError(
+            "held raw BI4 frame did not produce an internally scanned R008 tree"
+        ) from error
     part = _validate_native_array_inventory(scan, case_np)
-    arrays = state_scan.summarize_native_state_fd(
+    scanned_arrays = state_scan.summarize_native_state_fd(
         raw_fd, expected_frame_sha256, scan, case_np=case_np,
     )
-    metadata = _summarize_float_metadata(scan.root, part)
+    arrays = []
+    for array in scanned_arrays:
+        contract = STATE_ARRAYS[array["array_name"]]
+        arrays.append({
+            **array,
+            "unit": contract["unit"],
+            "semantic": contract["semantic"],
+            "population": "all CaseNp particles in this native PART frame",
+            "source_frame_sha256": expected_frame_sha256,
+        })
+    metadata = _summarize_float_metadata(scan.root, part, expected_frame_sha256)
     return {
         "schema": SCHEMA,
         "status": "diagnostic_only_not_adjudicated",
@@ -164,9 +234,12 @@ def summarize_native_frame_fd(
         "array_inventory": {
             "population": "all CaseNp particles in the raw PART frame",
             "identifier_array": {
-                "raw_name": "Idp", "type_code": 8, "dtype": "<u4",
-                "particle_count": case_np,
-                "finite_semantics": "integer identity; not an IEEE floating-value tally",
+            "raw_name": "Idp", "type_code": 8, "dtype": "<u4",
+            "particle_count": case_np,
+            "unit": "unitless",
+            "semantic": "uint32 particle identity; domain/uniqueness are separate integrity checks",
+            "source_frame_sha256": expected_frame_sha256,
+            "finite_semantics": "integer identity; not an IEEE floating-value tally",
             },
             "state_arrays": arrays,
             "all_required_state_values_finite": all(
@@ -205,7 +278,11 @@ def summarize_control_table_bytes(
     t_end = _positive_finite(expected_t_end_s, "expected T_end")
     period = _positive_finite(expected_period_s, "expected period")
     control_dt = period / CONTROL_SAMPLES_PER_PERIOD
-    end_tick = int(round(t_end / control_dt))
+    _require(math.isfinite(control_dt) and control_dt > 0.0,
+             "period divided by 64 underflows the representable control timestep")
+    tick_ratio = t_end / control_dt
+    _require(math.isfinite(tick_ratio), "R008 control horizon/timestep ratio is non-finite")
+    end_tick = int(round(tick_ratio))
     _require(0 < end_tick < MAX_CONTROL_ROWS
              and math.isclose(end_tick * control_dt, t_end, rel_tol=0.0, abs_tol=1e-12),
              "declared R008 control horizon is outside the frozen T/64 grid bound")
@@ -257,6 +334,9 @@ def summarize_control_table_bytes(
         {
             "name": name,
             "unit": CONTROL_UNITS[index],
+            "semantic": CONTROL_SEMANTICS[index],
+            "numeric_text_interpreted_as": "IEEE-754 binary64",
+            "source_control_sha256": hashlib.sha256(payload).hexdigest(),
             "numeric_value_count": counts[index],
             "nonfinite_count": nonfinite[index],
             "all_values_finite": counts[index] == row_count and nonfinite[index] == 0,

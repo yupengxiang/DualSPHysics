@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import replace
 import hashlib
 import os
 import struct
@@ -8,10 +7,10 @@ import struct
 import pytest
 
 from scripts import f8_r008_native_state_finite_inventory_v1 as inventory
+from scripts import f8_r008_definition_control_pack_v1 as control_pack
 from scripts import f8_r008_safe_bi4_decoder_v1 as decoder
 from scripts import f8_t1_scope_design_v1 as scope
 from tests import test_f8_r008_native_state_finite_scan_v1 as state_fixture
-from tests import test_f8_r008_per_case_bundle_verifier_v1 as bi4_fixture
 
 
 def _scan_tmp(tmp_path, payload: bytes):
@@ -38,7 +37,7 @@ def test_native_inventory_scans_primary_state_and_float_metadata(tmp_path) -> No
     payload = state_fixture._synthetic_bi4()
     fd, scan, digest = _scan_tmp(tmp_path, payload)
     try:
-        result = inventory.summarize_native_frame_fd(fd, digest, scan, case_np=2)
+        result = inventory.summarize_native_frame_fd(fd, digest, case_np=2)
     finally:
         os.close(fd)
 
@@ -49,7 +48,10 @@ def test_native_inventory_scans_primary_state_and_float_metadata(tmp_path) -> No
     assert result["array_inventory"]["identifier_array"]["dtype"] == "<u4"
     assert result["array_inventory"]["all_required_state_values_finite"] is True
     assert result["floating_metadata"]["all_floating_metadata_finite"] is True
+    assert result["floating_metadata"]["all_floating_metadata_semantics_classified"] is True
     assert result["floating_metadata"]["finite_count"] == 2  # root MassFluid + PART TimeStep
+    assert all(item["unit"] and item["semantic"] and item["source_frame_sha256"] == digest
+               for item in result["array_inventory"]["state_arrays"])
     assert result["native_integrity_evaluated"] is False
     assert result["qualification_credit"] == 0
 
@@ -61,7 +63,7 @@ def test_native_inventory_counts_nonfinite_float_metadata(tmp_path) -> None:
     payload = payload.replace(finite_mass, struct.pack("<d", float("nan")), 1)
     fd, scan, digest = _scan_tmp(tmp_path, payload)
     try:
-        result = inventory.summarize_native_frame_fd(fd, digest, scan, case_np=2)
+        result = inventory.summarize_native_frame_fd(fd, digest, case_np=2)
     finally:
         os.close(fd)
 
@@ -71,16 +73,12 @@ def test_native_inventory_counts_nonfinite_float_metadata(tmp_path) -> None:
     assert result["native_integrity_evaluated"] is False
 
 
-def test_native_inventory_rejects_unclassified_frame_arrays(tmp_path) -> None:
-    payload = state_fixture._synthetic_bi4()
-    fd, scan, digest = _scan_tmp(tmp_path, payload)
-    extension = replace(scan.arrays[0], name="UnclassifiedExtension")
-    part = replace(scan.root.children[0], arrays=scan.root.children[0].arrays + (extension,))
-    root = replace(scan.root, children=(part,))
-    scan_with_extension = replace(scan, root=root, arrays=scan.arrays + (extension,))
+def test_native_inventory_rejects_unclassified_frame_array_from_held_bytes(tmp_path) -> None:
+    payload = state_fixture._synthetic_bi4(extra_array_name="UnclassifiedExtension")
+    fd, _scan, digest = _scan_tmp(tmp_path, payload)
     try:
-        with pytest.raises(inventory.NativeStateFiniteInventoryError, match="unclassified extension"):
-            inventory.summarize_native_frame_fd(fd, digest, scan_with_extension, case_np=2)
+        with pytest.raises(inventory.NativeStateFiniteInventoryError, match="unclassified extension array"):
+            inventory.summarize_native_frame_fd(fd, digest, case_np=2)
     finally:
         os.close(fd)
 
@@ -112,6 +110,28 @@ def test_control_row_cap_covers_every_frozen_r008_qualification_case() -> None:
         assert end_tick + 1 <= inventory.MAX_CONTROL_ROWS
         assert abs(end_tick * control_dt - row["observation_end_s"]) <= 1e-12
     assert max(observed_rows) == inventory.MAX_CONTROL_ROWS
+
+
+def test_frozen_control_generator_outputs_all_pass_finite_and_horizon_checks() -> None:
+    rows = scope.qualification_matrix()
+    summaries = []
+    for row in rows:
+        payload = control_pack.render_control(row)
+        summary = inventory.summarize_control_table_bytes(
+            payload,
+            expected_t_end_s=row["observation_end_s"],
+            expected_period_s=row["period_s"],
+        )
+        summaries.append(summary)
+        assert summary["all_seven_control_columns_finite"] is True
+        assert summary["time_axis_covers_zero_to_t_end_on_t_over_64_grid"] is True
+        expected_tick = round(
+            row["observation_end_s"]
+            / (row["period_s"] / inventory.CONTROL_SAMPLES_PER_PERIOD)
+        )
+        assert summary["rows"] == expected_tick + 1
+    assert len(summaries) == 15
+    assert max(summary["rows"] for summary in summaries) == inventory.MAX_CONTROL_ROWS
 
 
 @pytest.mark.parametrize("column", range(7))
@@ -174,4 +194,13 @@ def test_control_inventory_rejects_horizon_off_grid_or_above_r008_bound() -> Non
     with pytest.raises(inventory.NativeStateFiniteInventoryError, match="T/64 grid bound"):
         inventory.summarize_control_table_bytes(
             payload, expected_t_end_s=float(inventory.MAX_CONTROL_ROWS), expected_period_s=64.0,
+        )
+
+
+def test_control_inventory_rejects_t64_timestep_underflow() -> None:
+    with pytest.raises(inventory.NativeStateFiniteInventoryError, match="underflows"):
+        inventory.summarize_control_table_bytes(
+            b"#Time;LinearAccX;LinearAccY;LinearAccZ;AngularAccX;AngularAccY;AngularAccZ\n",
+            expected_t_end_s=1e-323,
+            expected_period_s=1e-323,
         )

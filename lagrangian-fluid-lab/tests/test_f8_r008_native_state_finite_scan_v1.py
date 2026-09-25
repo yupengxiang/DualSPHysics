@@ -44,6 +44,7 @@ def _synthetic_bi4(
     include_velocity: bool = True,
     include_density: bool = True,
     duplicate_velocity: bool = False,
+    extra_array_name: str | None = None,
 ) -> bytes:
     particle_ids = (0, 1)
     position_name = position_name or ("Pos" if position_type == 22 else "Posd")
@@ -59,6 +60,8 @@ def _synthetic_bi4(
             arrays.append(_array("Vel", velocity_code, _raw_array(velocity_code, velocities)))
     if include_density:
         arrays.append(_array("Rhop", density_code, _raw_array(density_code, densities)))
+    if extra_array_name is not None:
+        arrays.append(_array(extra_array_name, 22, _raw_array(22, (1.0,) * 6)))
     part_values = (
         bi4_fixture._value("TimeStep", 12, struct.pack("<d", 0.0)),
         bi4_fixture._value("Npok", 8, struct.pack("<I", len(particle_ids))),
