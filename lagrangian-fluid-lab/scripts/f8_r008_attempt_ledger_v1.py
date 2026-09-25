@@ -14,6 +14,7 @@ import copy
 import json
 import math
 import re
+from dataclasses import dataclass
 from typing import Any
 
 from scripts import f8_r008_c_execution_journal_v5 as journal_v5
@@ -110,6 +111,32 @@ _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 class AttemptLedgerV1Error(ValueError):
     """The raw ledger is malformed or violates its structural event contract."""
+
+
+@dataclass(frozen=True, slots=True)
+class UntrustedCProcessTerminalProjectionV1:
+    """Narrow immutable projection of one ledger-derived C process terminal."""
+
+    scope_id: str
+    qualification_matrix_raw_sha256: str
+    qualification_row_sha256: str
+    ledger_raw_sha256: str
+    supervisor_source_id: str
+    coverage_start_ns_hex: str
+    coverage_end_ns_hex: str
+    event_count: int
+    overflow: bool
+    lost_count: int
+    case_id: str
+    attempt_id: str
+    nonce_hex: str
+    process_terminal_seq: int
+    ledger_process_generation_id: str
+    process_journal_ref_stage: str
+    process_journal_ref_role: str
+    process_journal_ref_object_id: str
+    process_journal_ref_bytes: int
+    process_journal_ref_sha256: str
 
 
 def _require(condition: bool, message: str) -> None:
@@ -592,6 +619,69 @@ def inspect_untrusted_attempt_ledger(raw: bytes, *, qualification_matrix_raw: by
         "T1_numerical": False,
         "qualification_credit": 0,
     }
+
+
+def inspect_untrusted_c_process_terminal_projection_v1(
+    raw: bytes,
+    *,
+    qualification_matrix_raw: bytes,
+    case_id: str,
+    attempt_id: str,
+    nonce_hex: str,
+) -> UntrustedCProcessTerminalProjectionV1:
+    """Derive one C process-terminal/journal-ref projection from raw ledger bytes.
+
+    The case/attempt/nonce are selectors only. The function validates the
+    complete bounded ledger against the supplied matrix, then requires exactly
+    one C ``process_terminal`` belonging to that identity. Every returned field
+    remains an untrusted claim; this projection does not authenticate the
+    ledger producer, process identity, journal source, or runtime.
+    """
+    _require(type(raw) is bytes, "ledger input must be exact raw bytes")
+    _require(type(case_id) is str and bool(_IDENTIFIER.fullmatch(case_id)),
+             "case_id selector is malformed")
+    _require(type(attempt_id) is str and bool(_IDENTIFIER.fullmatch(attempt_id)),
+             "attempt_id selector is malformed")
+    _require(type(nonce_hex) is str and bool(_HEX32.fullmatch(nonce_hex)),
+             "nonce_hex selector is malformed")
+    ledger, parsed = _inspect(raw, qualification_matrix_raw)
+    attempt = parsed["attempt_by_identity"].get((attempt_id, nonce_hex))
+    _require(attempt is not None and attempt["case_id"] == case_id,
+             "selected C process terminal does not identify a registered ledger attempt")
+    matches = [
+        row["event"] for row in parsed["events"]
+        if row["event"]["kind"] == "process_terminal"
+        and row["event"]["stage"] == "C"
+        and row["event"]["case_id"] == case_id
+        and row["event"]["attempt_id"] == attempt_id
+        and row["event"]["nonce_hex"] == nonce_hex
+    ]
+    _require(len(matches) == 1,
+             "selected ledger attempt must have exactly one C process-terminal event")
+    event = matches[0]
+    ref = event["process_journal_ref"]
+    return UntrustedCProcessTerminalProjectionV1(
+        scope_id=ledger["scope_id"],
+        qualification_matrix_raw_sha256=ledger["qualification_matrix_raw_sha256"],
+        qualification_row_sha256=event["qualification_row_sha256"],
+        ledger_raw_sha256=sha256_bytes(raw),
+        supervisor_source_id=ledger["supervisor_source_id"],
+        coverage_start_ns_hex=ledger["coverage_start_ns_hex"],
+        coverage_end_ns_hex=ledger["coverage_end_ns_hex"],
+        event_count=ledger["event_count"],
+        overflow=ledger["overflow"],
+        lost_count=ledger["lost_count"],
+        case_id=event["case_id"],
+        attempt_id=event["attempt_id"],
+        nonce_hex=event["nonce_hex"],
+        process_terminal_seq=event["seq"],
+        ledger_process_generation_id=event["process_generation_id"],
+        process_journal_ref_stage=ref["stage"],
+        process_journal_ref_role=ref["role"],
+        process_journal_ref_object_id=ref["object_id"],
+        process_journal_ref_bytes=ref["bytes"],
+        process_journal_ref_sha256=ref["sha256"],
+    )
 
 
 def _inspect_untrusted_stage_receipt_envelope(raw: bytes, stage: str) -> dict[str, Any]:
@@ -1106,8 +1196,9 @@ def validate_untrusted_attempt_aggregate_v2(
 
 __all__ = [
     "AGGREGATE_CASE_ROW_FIELDS", "AGGREGATE_FIELDS", "AGGREGATE_SCHEMA", "AttemptLedgerV1Error",
-    "DIAGNOSTIC_SCHEMA", "LEDGER_SCHEMA",
+    "DIAGNOSTIC_SCHEMA", "LEDGER_SCHEMA", "UntrustedCProcessTerminalProjectionV1",
     "build_untrusted_attempt_aggregate_v2",
-    "inspect_untrusted_attempt_ledger", "inspect_untrusted_qualification_matrix",
+    "inspect_untrusted_attempt_ledger", "inspect_untrusted_c_process_terminal_projection_v1",
+    "inspect_untrusted_qualification_matrix",
     "validate_attempt_result_ledger_projection_v2", "validate_untrusted_attempt_aggregate_v2",
 ]

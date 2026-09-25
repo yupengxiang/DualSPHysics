@@ -18,6 +18,7 @@ import re
 import stat
 import struct
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -141,6 +142,24 @@ _INSTANCE_KEYS = frozenset({
 
 class JournalV5Error(ValueError):
     """Raw journal bytes or fields violate the synthetic V5 structural contract."""
+
+
+@dataclass(frozen=True, slots=True)
+class UntrustedV5RuntimeIdentityProjectionV1:
+    """Narrow immutable projection of observed V5 process/runtime claims."""
+
+    journal_raw_sha256: str
+    attempt_nonce_hex: str
+    source_id_observed: str
+    source_binary_sha256_observed: str
+    event_count: int
+    root_spawn_seq: int
+    root_process_generation_sha256: str
+    root_supervisor_identity_binding_sha256: str
+    root_exec_seq: int
+    root_exec_event_sha256: str
+    observed_load_event_count: int
+    observed_load_events_sha256: str
 
 
 def _reject_duplicate_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -831,6 +850,70 @@ def inspect_untrusted_v5_journal(
         raw, expected_attempt_nonce_hex=expected_attempt_nonce_hex,
     )
     return result
+
+
+def inspect_untrusted_v5_runtime_identity_projection_v1(
+    raw: bytes,
+    *,
+    expected_attempt_nonce_hex: str,
+) -> UntrustedV5RuntimeIdentityProjectionV1:
+    """Return observed spawn/exec/load bindings without exposing journal events.
+
+    This projection deliberately requires one root ``spawn`` and exactly one
+    ``exec`` for that root generation. Load entries are retained in journal
+    sequence order across the entire observed process tree and hashed as a
+    canonical array. This is not a root-only or complete load map. The digest
+    covers only caller-supplied observations; it does not prove that the event
+    source is complete or authentic, nor that ``source_binary_sha256`` is a
+    runtime measurement.
+    """
+    if type(expected_attempt_nonce_hex) is not str or not _HEX32.fullmatch(expected_attempt_nonce_hex):
+        raise JournalV5Error("expected_attempt_nonce_hex is malformed")
+    summary, events = _inspect_untrusted_v5_journal(
+        raw, expected_attempt_nonce_hex=expected_attempt_nonce_hex,
+    )
+    roots = [event for event in events if event["kind"] == "spawn"]
+    if len(roots) != 1:
+        raise JournalV5Error("runtime identity projection requires exactly one observed root spawn")
+    root = roots[0]
+    root_generation = root["process_generation_id"]
+    root_execs = [
+        event for event in events
+        if event["kind"] == "exec"
+        and _same_json_value(event["process_generation_id"], root_generation)
+    ]
+    if len(root_execs) != 1:
+        raise JournalV5Error("runtime identity projection requires exactly one root-generation exec")
+    load_events = [event for event in events if event["kind"] == "load"]
+
+    def canonical_sha256(value: Any, label: str) -> str:
+        try:
+            payload = json.dumps(
+                value, sort_keys=True, separators=(",", ":"), allow_nan=False,
+            ).encode("utf-8")
+        except (TypeError, ValueError, UnicodeEncodeError, OverflowError, RecursionError) as error:
+            raise JournalV5Error(f"{label} is not canonically JSON-serializable") from error
+        return hashlib.sha256(payload).hexdigest()
+
+    root_exec = root_execs[0]
+    return UntrustedV5RuntimeIdentityProjectionV1(
+        journal_raw_sha256=summary["journal_raw_sha256"],
+        attempt_nonce_hex=expected_attempt_nonce_hex,
+        source_id_observed=summary["source_id_observed"],
+        source_binary_sha256_observed=summary["source_binary_sha256_observed"],
+        event_count=summary["event_count"],
+        root_spawn_seq=root["seq"],
+        root_process_generation_sha256=canonical_sha256(
+            root_generation, "root process generation",
+        ),
+        root_supervisor_identity_binding_sha256=canonical_sha256(
+            root["supervisor_identity_binding"], "root supervisor identity binding",
+        ),
+        root_exec_seq=root_exec["seq"],
+        root_exec_event_sha256=canonical_sha256(root_exec, "root exec event"),
+        observed_load_event_count=len(load_events),
+        observed_load_events_sha256=canonical_sha256(load_events, "observed load events"),
+    )
 
 
 def _validate_callgraph_reference(value: Any, label: str, *, stage: str, role: str) -> dict[str, Any]:
