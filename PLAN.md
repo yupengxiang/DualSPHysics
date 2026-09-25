@@ -55,6 +55,8 @@
 
 2026-09-25 新增[第九份回执 RERUN8](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-25-RERUN8.json)：原判据下 5 项 `verified`、1 项 `unverified`、0 项 pending；此前 arXiv 406 在本轮消失并匹配五篇 arXiv 标题。FuelTank 仍只有 Crossref 精确命中；Semantic Scholar title-match 收到 429，DBLP 查询遇 bot challenge，均未重试或替代机器 verdict。故自动核验仍未整体通过，详见[UPDATE-62](lagrangian-fluid-lab/reports/CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-62.zh-CN.md)。
 
+随后一次新会话按原三源工具重跑，仅新增[RERUN9 回执](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-25-RERUN9.json)：0 项 `verified`、0 项 `unverified`、6 项 `verify_pending`。六项 Semantic Scholar 请求均为 HTTP 429；五个 arXiv 请求均为 HTTP 406；Crossref 对 LagrangeBench、FD-Bench、FuelTank 仍精确命中。按工具规则，API 暂时错误使项目保持 pending；本会话不再重试，人工来源核对不替代机器状态，自动核验仍未整体完成。详见[UPDATE-130](lagrangian-fluid-lab/reports/CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-130.zh-CN.md)及[文献来源审计](lagrangian-fluid-lab/reports/PLAN-REFERENCES-AUDIT-2026-09-24.zh-CN.md)中的逐轮记录。
+
 | 工作 | 对本项目的直接启示 |
 |---|---|
 | [GNS](https://proceedings.mlr.press/v119/sanchez-gonzalez20a.html) | 图消息传递和长期误差积累必须纳入基线设计；单步误差不足以说明模拟能力 |
@@ -703,3 +705,4 @@ agent 提交持久作业后即可继续实现或接手其他工作，不必占�
 - 初始调研和计划阶段已结束，现按依赖进入实施续推；后续波次由总控根据依赖自动推进。2026-09-25 已完成 F8 R008 非授权 attempt-ledger / 15-case aggregate 静态验证器加固及 Terra High 复核（见 [UPDATE-127](lagrangian-fluid-lab/reports/CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-127.zh-CN.md)）；这不代表可信来源认证、运行准入或资格完成。
 - 2026-09-25 UPDATE-128 新增 F8 R008 attempt-ledger attestation 的非授权 Ed25519 verifier：严格 canonical JSON / Base64 / exact schema 校验、matrix/ledger/coverage bindings 复核和临时 key 合成测试均已实现；GPT-6 Luna Max 独立只读安全复核 PASS、无 P1/P2。即便签名有效也不认证 candidate key、不验证 descriptor-root/supervisor/runtime，不 mint capability，T1 false、credit 0。attestation、ledger、V2 attempt projection 与 V5 journal 定向测试合计 173 passed；详见 [UPDATE-128](lagrangian-fluid-lab/reports/CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-128.zh-CN.md)。
 - 2026-09-25 UPDATE-129 增加 F8 native-fluid-table 到 Core HDF5 的诊断转换原语，补 `particle_zone=0` 并保留资格 split；source table 经 held-FD/raw-frame 复核，输出分块复验并 no-replace 发布。GPT-6 Luna Max 针对 size-cap 与最终路径 rebind 修订复核 PASS。75 项定向 F8/Core 测试通过；当前仍无 trusted provenance、worker/scheduler 或 15-case T1，T1 false、credit 0。详见 [UPDATE-129](lagrangian-fluid-lab/reports/CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-129.zh-CN.md)。
+- 2026-09-25 UPDATE-130 按原三源文献核验规则新增 RERUN9：0 verified、0 unverified、6 verify_pending。arXiv HTTP 406 与 Semantic Scholar HTTP 429 为本轮 API 错误；Crossref 仍精确命中三项。遵循规则未在本会话重试、未以人工页面核对升格机器 verdict；详见 [UPDATE-130](lagrangian-fluid-lab/reports/CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-130.zh-CN.md)。

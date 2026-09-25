@@ -39,4 +39,8 @@
 
 2026-09-25 上海时间的新会话再次按原三源判据重试一次，候选输入固定于[清单](PLAN-REFERENCES-CANDIDATES-2026-09-25.json)，新增[第八份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-25-RERUN7.json)：结果仍为 2 项 `verified`、1 项 `unverified`、3 项 `verify_pending`。五条 arXiv ID 的批量 API 请求仍返回 HTTP 406；Neural SPH 的 Crossref 请求遇到临时 TLS EOF，GNS 与 FluidLab 的 Crossref 精确标题搜索未命中；FuelTank 仍只有 Crossref 机器目录确认。离线回归 7 项通过，核验器代码未改。本会话已用完一次重试额度，不再重试或由人工网页状态升格。详见 [UPDATE-51](CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-51.zh-CN.md)。
 
+同日稍后的 RERUN8 见[第九份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-25-RERUN8.json)：5 项 `verified`、1 项 `unverified`、0 项 pending。五个 arXiv 标题均成功匹配，Semantic Scholar 也匹配五篇；FuelTank 只有 Crossref 精确命中，Semantic Scholar DOI 查询未找到，因此仍为 `unverified`。附加的 Semantic Scholar title-match 请求遇 HTTP 429，DBLP 查询遇 bot challenge；这些诊断未重试，也未替代机器判据。详见 [UPDATE-62](CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-62.zh-CN.md)。
+
+新会话按原三源工具执行一次 RERUN9，见[第十份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-25-RERUN9.json)：6 项全部为 `verify_pending`，没有 `verified` 或 `unverified`。五个 arXiv API 请求均返回 HTTP 406；六项 Semantic Scholar 请求均返回 HTTP 429；Crossref 仍对 LagrangeBench、FD-Bench 与 FuelTank 返回精确 DOI／标题匹配，对 GNS、Neural SPH、FluidLab 的精确标题查询未命中。由于 transient API errors 按工具语义优先产生 pending，本结果不构成负面书目结论。遵循每会话一次的规则，本会话不再重试；既有人工书目交叉核对不更改机器 verdict。详见 [UPDATE-130](CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-130.zh-CN.md)。
+
 离线回归：`tests/test_verify_papers.py`，7 项通过，覆盖三源成功、标题冲突、临时网络失败、无 DOI 的 Crossref 精确标题查找与模糊未命中、以及 DOI-only 记录。该工具只验证书目身份，不判断论文主张、质量或本项目创新性。
