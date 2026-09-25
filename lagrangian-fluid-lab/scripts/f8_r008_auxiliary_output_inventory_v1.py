@@ -1,10 +1,11 @@
 """Read-only auxiliary-output inventory for a closed R008 B/C bundle pair.
 
 This diagnostic verifies B and C bundle membership, binds C to the exact B
-receipt, derives boundary populations from B, and scans every manifest-bound
-PartExtra file. Other known auxiliary formats are reported as unscanned, and
-unknown files remain explicitly unclassified. Optional-output activation is
-not authenticated here, so absence never means that an output mode was off.
+receipt, derives particle populations from B, and scans manifest-bound native
+auxiliary outputs for which a bounded writer-backed parser exists. Unsupported
+known formats remain visible as unscanned, and unknown files stay explicitly
+unclassified. Optional-output activation is not authenticated here, so absence
+never means that an output mode was off.
 """
 from __future__ import annotations
 
@@ -17,6 +18,8 @@ import stat
 import struct
 from typing import Any, Mapping
 
+from scripts import f8_r008_head_info_finite_inventory_v1 as head_info
+from scripts import f8_r008_motion_float_finite_inventory_v1 as motion_float
 from scripts import f8_r008_part_extra_finite_inventory_v1 as part_extra
 from scripts import f8_r008_partout_runparts_diagnostic_v1 as partout
 from scripts import f8_r008_per_case_bundle_verifier_v1 as bundle
@@ -29,11 +32,9 @@ STATUS = "partial_auxiliary_output_inventory_not_adjudicated"
 PART_EXTRA_NAME = re.compile(r"PartExtra_([0-9]{4,})\.bi4\Z", re.ASCII)
 PRIMARY_FRAME_PATH = re.compile(r"frames/Part_([0-9]{4})\.bi4\Z", re.ASCII)
 PART_OUT_NAME = re.compile(r"PartOut_(?:p[0-9]{2,}_)?[0-9]{3,}\.obi4\Z", re.ASCII)
-KNOWN_UNSCANNED_ROOT_NAMES = frozenset({
-    "Part_Head.ibi4", "PartInfo.ibi4",
-    "PartMotionRef.ibi4", "PartMotionRef2.ibi4",
-    "PartFloatInfo.ibi4", "PartFloatInfo2.ibi4",
-})
+PART_INFO_NAME = re.compile(r"PartInfo(?:_p[0-9]{2,})?\.ibi4\Z", re.ASCII)
+NATIVE_AUXILIARY_FILES_MAX = 64
+NATIVE_AUXILIARY_BYTES_MAX = 256 * 1024 * 1024
 STAGES = ("B", "C")
 
 
@@ -98,10 +99,15 @@ def _recheck_manifest_file(
 ) -> None:
     fd, observed_identity = _open_root_output(outputs_fd, path)
     try:
-        max_bytes = (
-            runparts.MAX_RUNPARTS_BYTES if path == "RunPARTs.csv"
-            else partout.MAX_PARTOUT_TOTAL_BYTES
-        )
+        basename = path.rsplit("/", 1)[-1]
+        if path == "RunPARTs.csv":
+            max_bytes = runparts.MAX_RUNPARTS_BYTES
+        elif basename == "Part_Head.ibi4" or PART_INFO_NAME.fullmatch(basename):
+            max_bytes = head_info.MAX_INPUT_BYTES
+        elif basename in motion_float.SUPPORTED_BASENAMES:
+            max_bytes = motion_float.bi4.MAX_RAW_BYTES
+        else:
+            max_bytes = partout.MAX_PARTOUT_TOTAL_BYTES
         _require(
             observed_identity == identity
             and observed_identity[2] == expected["bytes"]
@@ -266,11 +272,6 @@ def _raw_frame_identity(
 
 
 def _classify_other_file(path: str) -> tuple[str, str]:
-    basename = path.rsplit("/", 1)[-1]
-    if "/" not in path and basename in KNOWN_UNSCANNED_ROOT_NAMES:
-        return "known_auxiliary_not_finite_scanned", (
-            "recognized native auxiliary format; its numeric payload is outside current scans"
-        )
     return "unclassified_output", "no frozen output-class parser is registered for this path"
 
 
@@ -349,6 +350,10 @@ def inventory_c_outputs_with_part_extra(
         runparts_payload = b""
         partout_sources: list[partout.PartOutSource] = []
         partout_total_bytes = 0
+        native_auxiliary_total_bytes = 0
+        native_auxiliary_file_count = 0
+        head_info_records: list[dict[str, Any]] = []
+        motion_float_records: list[dict[str, Any]] = []
         classification_by_path: dict[str, dict[str, Any]] = {}
 
         for path in sorted(c_files):
@@ -456,6 +461,79 @@ def inventory_c_outputs_with_part_extra(
                     "bytes": binding["bytes"],
                     "sha256": binding["sha256"],
                     "classification": "partout_pending_runparts_join",
+                }
+                classifications.append(entry)
+                classification_by_path[path] = entry
+                continue
+
+            is_head_info = (
+                "/" not in path
+                and (basename == "Part_Head.ibi4" or PART_INFO_NAME.fullmatch(basename))
+            )
+            is_motion_float = (
+                "/" not in path and basename in motion_float.SUPPORTED_BASENAMES
+            )
+            if is_head_info or is_motion_float:
+                native_auxiliary_file_count += 1
+                _require(native_auxiliary_file_count <= NATIVE_AUXILIARY_FILES_MAX,
+                         "manifest-bound native auxiliary file count exceeds the diagnostic cap")
+                fd, identity = _open_root_output(output_fds["C"], path)
+                auxiliary_input_fds.append(fd)
+                native_auxiliary_total_bytes += identity[2]
+                _require(native_auxiliary_total_bytes <= NATIVE_AUXILIARY_BYTES_MAX,
+                         "manifest-bound native auxiliary aggregate exceeds the diagnostic cap")
+                scanner_cap = (
+                    head_info.MAX_INPUT_BYTES if is_head_info
+                    else motion_float.bi4.MAX_RAW_BYTES
+                )
+                _require(identity[2] == binding["bytes"] and identity[2] <= scanner_cap,
+                         f"manifest-bound {path} size differs from or exceeds its scanner cap")
+                try:
+                    if is_head_info:
+                        diagnostic = head_info.summarize_head_info_fd(
+                            fd, basename, binding["sha256"],
+                        )
+                        record = {"path": path, "diagnostic": diagnostic}
+                        head_info_records.append(record)
+                        family = diagnostic["kind"]
+                        finite = diagnostic["floating_value_inventory"]["all_components_finite"]
+                        classification = (
+                            "part_head_float_values_scanned" if family == "Part_Head"
+                            else "part_info_float_values_scanned"
+                        )
+                    else:
+                        diagnostic = motion_float.summarize_motion_float_fd(
+                            fd, basename, binding["sha256"],
+                        )
+                        motion_float_records.append({"path": path, "diagnostic": diagnostic})
+                        family = diagnostic["interpretation"]["family"]
+                        finite = diagnostic["floating_value_inventory"][
+                            "all_floating_components_finite"
+                        ]
+                        classification = (
+                            "motion_ref_float_values_scanned" if family == "PartMotionRef"
+                            else "floating_body_float_values_scanned"
+                        )
+                except head_info.HeadInfoFiniteInventoryError as error:
+                    raise AuxiliaryOutputInventoryError(
+                        f"manifest-bound {path} failed its writer-bound finite scan: {error}"
+                    ) from error
+                except motion_float.MotionFloatInventoryError as error:
+                    raise AuxiliaryOutputInventoryError(
+                        f"manifest-bound {path} failed its writer-bound finite scan: {error}"
+                    ) from error
+                identity_after = _file_identity(fd)
+                _require(identity_after == identity
+                         and diagnostic.get("input_sha256", diagnostic.get("source", {}).get("sha256"))
+                         == binding["sha256"],
+                         f"held {path} identity/hash differs from its exact C manifest binding")
+                held_auxiliary_input_identities[path] = identity_after
+                entry = {
+                    "path": path,
+                    "bytes": binding["bytes"],
+                    "sha256": binding["sha256"],
+                    "classification": classification,
+                    "finite_scan_status": finite,
                 }
                 classifications.append(entry)
                 classification_by_path[path] = entry
@@ -608,6 +686,8 @@ def inventory_c_outputs_with_part_extra(
             "primary_frame_count": len(frame_paths),
             "output_classifications": classifications,
             "part_extra_records": part_extra_records,
+            "part_head_info_records": head_info_records,
+            "motion_float_records": motion_float_records,
             "partout_runparts_diagnostic": partout_diagnostic,
             "runparts_presence": (
                 "manifest_member_scanned_and_bound" if "RunPARTs.csv" in classification_by_path
@@ -622,6 +702,33 @@ def inventory_c_outputs_with_part_extra(
                 else "one_or_more_manifest_members_scanned"
             ),
             "part_extra_presence_expectation_resolved": False,
+            "native_auxiliary_presence": {
+                "Part_Head": (
+                    "manifest_member_scanned"
+                    if any(record["diagnostic"]["kind"] == "Part_Head"
+                           for record in head_info_records)
+                    else "no_manifest_member_observed_expectation_unknown"
+                ),
+                "PartInfo": (
+                    "manifest_member_scanned"
+                    if any(record["diagnostic"]["kind"] == "PartInfo"
+                           for record in head_info_records)
+                    else "no_manifest_member_observed_expectation_unknown"
+                ),
+                "PartMotionRef": (
+                    "manifest_member_scanned"
+                    if any(record["diagnostic"]["interpretation"]["family"] == "PartMotionRef"
+                           for record in motion_float_records)
+                    else "no_manifest_member_observed_expectation_unknown"
+                ),
+                "PartFloatInfo": (
+                    "manifest_member_scanned"
+                    if any(record["diagnostic"]["interpretation"]["family"] == "PartFloatInfo"
+                           for record in motion_float_records)
+                    else "no_manifest_member_observed_expectation_unknown"
+                ),
+                "expectations_resolved": False,
+            },
             "part_extra_observed_all_floating_values_finite": (
                 all(record["part_extra"]["floating_value_inventory"][
                     "all_floating_values_finite"

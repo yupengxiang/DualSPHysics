@@ -10,6 +10,8 @@ import pytest
 from scripts import f8_r008_auxiliary_output_inventory_v1 as inventory
 from scripts import f8_r008_per_case_bundle_verifier_v1 as verifier
 from scripts import f8_r008_safe_bi4_decoder_v1 as decoder
+from tests import test_f8_r008_head_info_finite_inventory_v1 as head_info_fixture
+from tests import test_f8_r008_motion_float_finite_inventory_v1 as motion_float_fixture
 from tests import test_f8_r008_part_extra_finite_inventory_v1 as part_extra_fixture
 from tests import test_f8_r008_partout_runparts_diagnostic_v1 as partout_fixture
 from tests import test_f8_r008_per_case_bundle_verifier_v1 as bundle_fixture
@@ -149,17 +151,100 @@ def test_known_but_unscanned_and_unknown_outputs_remain_visible(tmp_path) -> Non
     result = _inventory(_build_pair(tmp_path, extra_output_payloads={
         "RunPARTs.csv": b"synthetic-runparts-placeholder\n",
         "opaque-extension.bin": b"unclassified\n",
-        "Part_Head.ibi4": b"known-header\n",
-        "PartInfo.ibi4": b"known-run-info\n",
         "PartOut_p00_000.obi4": b"known-multipart-partout\n",
     }))
 
     assert result["known_but_unscanned_auxiliary_paths"] == [
-        "PartInfo.ibi4", "PartOut_p00_000.obi4", "Part_Head.ibi4", "RunPARTs.csv",
+        "PartOut_p00_000.obi4", "RunPARTs.csv",
     ]
     assert result["unclassified_output_paths"] == ["opaque-extension.bin"]
     assert result["all_present_output_paths_have_known_class"] is False
     assert result["all_native_auxiliary_float_sources_scanned"] is False
+
+
+def test_manifest_bound_head_info_motion_float_files_are_finite_scanned(tmp_path) -> None:
+    head = head_info_fixture._head_blob(blocks=(
+        ("Fixed", 10, 0, 1), ("Fluid", 30, 0, 1),
+    ))
+    info = head_info_fixture._info_blob(cparts=(0, 1, 2))
+    info_piece = head_info_fixture._info_blob(
+        filename="PartInfo_p02.ibi4", piece=2, npiece=3, cparts=(0, 1, 2),
+    )
+    motion = motion_float_fixture._motion_payload()
+    floating = motion_float_fixture._float_payload()
+    result = _inventory(_build_pair(tmp_path, extra_output_payloads={
+        "Part_Head.ibi4": head,
+        "PartInfo.ibi4": info,
+        "PartInfo_p02.ibi4": info_piece,
+        "PartMotionRef.ibi4": motion,
+        "PartFloatInfo.ibi4": floating,
+    }))
+
+    classes = {entry["path"]: entry for entry in result["output_classifications"]}
+    assert classes["Part_Head.ibi4"]["classification"] == "part_head_float_values_scanned"
+    assert classes["PartInfo.ibi4"]["classification"] == "part_info_float_values_scanned"
+    assert classes["PartInfo_p02.ibi4"]["classification"] == "part_info_float_values_scanned"
+    assert classes["PartMotionRef.ibi4"]["classification"] == "motion_ref_float_values_scanned"
+    assert classes["PartFloatInfo.ibi4"]["classification"] == "floating_body_float_values_scanned"
+    assert all(classes[name]["finite_scan_status"] is True for name in (
+        "Part_Head.ibi4", "PartInfo.ibi4", "PartMotionRef.ibi4", "PartFloatInfo.ibi4",
+    ))
+    assert len(result["part_head_info_records"]) == 3
+    assert len(result["motion_float_records"]) == 2
+    assert result["native_auxiliary_presence"]["expectations_resolved"] is False
+    assert result["all_native_auxiliary_float_sources_scanned"] is False
+    assert result["qualification_credit"] == 0
+    assert result["native_integrity_evaluated"] is False
+
+
+def test_manifest_bound_auxiliary_nonfinite_values_are_reported_not_promoted(tmp_path) -> None:
+    head = head_info_fixture._head_blob(
+        blocks=(("Fixed", 10, 0, 1), ("Fluid", 30, 0, 1)),
+        overrides={"Dp": float("nan")},
+    )
+    info = head_info_fixture._info_blob(
+        cparts=(0, 1, 2), part_bad=("TimeStep", 12, float("inf")),
+    )
+    motion = motion_float_fixture._motion_payload(nonfinite_pos=True)
+    floating = motion_float_fixture._float_payload(fpt_count=1, nonfinite_force=True)
+    result = _inventory(_build_pair(tmp_path, extra_output_payloads={
+        "Part_Head.ibi4": head,
+        "PartInfo.ibi4": info,
+        "PartMotionRef.ibi4": motion,
+        "PartFloatInfo.ibi4": floating,
+    }))
+
+    classes = {entry["path"]: entry for entry in result["output_classifications"]}
+    assert all(classes[name]["finite_scan_status"] is False for name in (
+        "Part_Head.ibi4", "PartInfo.ibi4", "PartMotionRef.ibi4", "PartFloatInfo.ibi4",
+    ))
+    assert result["qualification_credit"] == 0
+    assert result["native_integrity_evaluated"] is False
+    assert result["T1_numerical"] is False
+    assert result["readiness_pass"] is False
+
+
+def test_manifest_bound_writer_scan_rechecks_held_file_identity(tmp_path, monkeypatch) -> None:
+    payload = head_info_fixture._head_blob(blocks=(
+        ("Fixed", 10, 0, 1), ("Fluid", 30, 0, 1),
+    ))
+    pair = _build_pair(tmp_path, extra_output_payloads={"Part_Head.ibi4": payload})
+    path = pair["bundle_roots"]["C"] / "outputs/Part_Head.ibi4"
+    original = inventory.head_info.summarize_head_info_fd
+
+    def summarize_then_mutate(fd, filename, digest):
+        result = original(fd, filename, digest)
+        file_fd = os.open(path, os.O_RDWR | os.O_NOFOLLOW)
+        try:
+            old = os.pread(file_fd, 1, 70)
+            os.pwrite(file_fd, bytes((old[0] ^ 1,)), 70)
+        finally:
+            os.close(file_fd)
+        return result
+
+    monkeypatch.setattr(inventory.head_info, "summarize_head_info_fd", summarize_then_mutate)
+    with pytest.raises(inventory.AuxiliaryOutputInventoryError, match="identity/hash"):
+        _inventory(pair)
 
 
 def test_manifest_bound_runparts_and_partout_are_joined_and_float_scanned(tmp_path) -> None:
