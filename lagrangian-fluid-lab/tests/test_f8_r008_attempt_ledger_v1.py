@@ -150,6 +150,7 @@ def test_empty_ledger_does_not_prove_any_case_missing() -> None:
     result = ledger_v1.inspect_untrusted_attempt_ledger(_raw(_ledger_document([])))
     assert result["ledger_structure_valid"] is True
     assert result["attempt_count"] == 0
+    assert result["attempt_events_closed"] is False
     assert result["attempt_ledger_complete"] is False
 
 

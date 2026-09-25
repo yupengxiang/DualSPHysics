@@ -329,7 +329,8 @@ def inspect_untrusted_attempt_ledger(raw: bytes) -> dict[str, Any]:
         "ledger_raw_bytes": len(raw),
         "ledger_raw_sha256": sha256_bytes(raw),
         "ledger_structure_valid": True,
-        "attempt_events_closed": all(item["attempt_events_closed"] for item in parsed["attempts"]),
+        "attempt_events_closed": bool(parsed["attempts"])
+        and all(item["attempt_events_closed"] for item in parsed["attempts"]),
         "supervisor_attestation_verified": False,
         "attempt_ledger_complete": False,
         "attempts": parsed["attempts"],
