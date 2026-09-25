@@ -1012,7 +1012,10 @@ def _build_job(*, model: str, seed: int, audit: Mapping[str, Any],
             [{"relative_path": item["relative_path"], "sha256": item["sha256"]}
              for item in code_files]),
         "scientific_claim": "formal three-family Core training job specification; execution pending central admission",
-        "launch_allowed_by_planner": True,
+        # A job specification is descriptive only.  The planner never grants
+        # execution authority; a separately trusted launch broker must do so.
+        "launch_allowed_by_planner": False,
+        "launch_allowed": False,
     }
 
 
@@ -1027,8 +1030,10 @@ def build_plan(manifest: Any, *, evidence: Sequence[Any] | Any | None = None,
                write_specs: bool = True) -> dict[str, Any]:
     """Create a hold report or nine immutable job specifications.
 
-    A hold always returns ``jobs: []`` and never creates spec files.  The
-    caller may still write the returned report for scheduler inspection.
+    A hold always returns ``jobs: []`` and never creates spec files.  A
+    ready plan can describe jobs but still never grants launch authority; a
+    separately trusted broker must authorize execution.  The caller may
+    write the returned report for scheduler inspection.
     """
     root = Path(data_root).expanduser().resolve() if data_root is not None else Path.cwd().resolve()
     code = Path(code_root).expanduser().resolve() if code_root is not None else Path(__file__).resolve().parents[1]
@@ -1088,7 +1093,8 @@ def build_plan(manifest: Any, *, evidence: Sequence[Any] | Any | None = None,
     result = {
         "schema": PLANNER_SCHEMA,
         "status": "ready" if jobs and not hold_reasons else "hold",
-        "launch_allowed": bool(jobs and not hold_reasons),
+        "plan_ready": bool(jobs and not hold_reasons),
+        "launch_allowed": False,
         "formal_job_count": len(jobs),
         "required_job_count": len(MODELS) * len(SEEDS),
         "models": list(MODELS), "seeds": list(SEEDS),

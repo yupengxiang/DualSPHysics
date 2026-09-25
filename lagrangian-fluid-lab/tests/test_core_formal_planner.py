@@ -10,7 +10,7 @@ import pytest
 import scripts.core_formal_planner as formal_planner
 
 from scripts.core_formal_planner import (CASES_PER_FAMILY, MODELS, REQUIRED_CODE_FILES,
-                                         SEEDS, _qualification_marker, build_plan, inspect_inputs,
+                                         SEEDS, _build_job, _qualification_marker, build_plan, inspect_inputs,
                                          main, sha256_bytes, sha256_file)
 
 
@@ -57,6 +57,7 @@ def _ready_plan(tmp_path):
 def test_complete_metadata_manifest_cannot_authorize_nine_formal_jobs(tmp_path):
     plan = _ready_plan(tmp_path)
     assert plan["status"] == "hold"
+    assert plan["plan_ready"] is False
     assert plan["launch_allowed"] is False
     assert plan["formal_job_count"] == 0
     assert plan["required_job_count"] == len(MODELS) * len(SEEDS) == 9
@@ -90,8 +91,54 @@ def test_complete_in_memory_mapping_is_also_diagnostic_only(tmp_path):
     assert report["admission_basis"] == "metadata_only_untrusted"
     assert report["family_t1"] == {"F1": None, "F2": None, "F4": None}
     assert plan["status"] == "hold"
+    assert plan["plan_ready"] is False
     assert plan["launch_allowed"] is False
     assert plan["formal_job_count"] == 0
+
+
+def test_descriptive_job_spec_never_grants_launch_authority(tmp_path):
+    audit = {
+        "manifest": {"path": "manifest.json", "sha256": "a" * 64},
+        "evidence": [],
+        "validation_family_counts": {"F1": 4, "F2": 4, "F4": 4},
+    }
+    job = _build_job(
+        model="mlp", seed=17, audit=audit, profile=_profile(),
+        profile_ref={"path": "profile.json", "sha256": "b" * 64},
+        code_files=[{"relative_path": "scripts/core_learning.py",
+                     "path": str(tmp_path / "core_learning.py"), "sha256": "c" * 64}],
+        code_root=tmp_path, data_root=tmp_path, environment=_environment(),
+        environment_ref={"path": "environment.json", "sha256": "d" * 64},
+        device="cuda", run_prefix="synthetic-plan",
+    )
+    assert job["launch_allowed_by_planner"] is False
+    assert job["launch_allowed"] is False
+
+
+def test_ready_plan_is_prepared_but_never_authorizes_launch(tmp_path, monkeypatch):
+    manifest_path, _ = _manifest(tmp_path)
+    # Stub only the audit result to exercise the ready serialization branch;
+    # this does not mint a capability or invoke a writer/launcher.
+    diagnostic_audit = {
+        "hold_reasons": [],
+        "manifest": {"path": str(manifest_path), "sha256": "a" * 64},
+        "evidence": [],
+        "validation_family_counts": {"F1": 4, "F2": 4, "F4": 4},
+    }
+    monkeypatch.setattr(
+        formal_planner, "inspect_inputs", lambda *args, **kwargs: diagnostic_audit
+    )
+    plan = build_plan(
+        manifest_path, profile=_profile(), environment=_environment(),
+        data_root=tmp_path, code_root=Path(__file__).parents[1], write_specs=False,
+    )
+
+    assert plan["status"] == "ready"
+    assert plan["plan_ready"] is True
+    assert plan["launch_allowed"] is False
+    assert plan["formal_job_count"] == 9
+    assert all(job["launch_allowed"] is False for job in plan["jobs"])
+    assert all(job["launch_allowed_by_planner"] is False for job in plan["jobs"])
 
 
 @pytest.mark.parametrize("raw", [
