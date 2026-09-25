@@ -24,6 +24,11 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from scripts.core_models import FEATURE_DIM, DualIncrementModel
+from scripts.core_strict_json import (
+    absolute_path_without_following_leaf,
+    read_bounded_raw_json,
+    strict_json_object,
+)
 
 
 SCHEMA = "core.formal_resource_dryrun.v1"
@@ -41,9 +46,9 @@ DATA_BLOCKERS = {
 
 
 def _load_candidate(path: str | Path) -> Mapping[str, Any]:
-    payload = json.loads(Path(path).read_text(encoding="utf-8"))
-    if not isinstance(payload, Mapping):
-        raise ValueError("release candidate must be a JSON object")
+    resolved = absolute_path_without_following_leaf(path)
+    raw = read_bounded_raw_json(resolved, label="resource probe candidate")
+    payload = strict_json_object(raw, label="resource probe candidate")
     if payload.get("schema") != "core.formal_release_candidate.v1":
         raise ValueError("resource probe requires core.formal_release_candidate.v1")
     if payload.get("data_contract_ready") is not True:

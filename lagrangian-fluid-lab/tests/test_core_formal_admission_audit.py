@@ -5,11 +5,13 @@ from __future__ import annotations
 import json
 import hashlib
 from pathlib import Path
+import pytest
 
 from scripts.core_formal_admission_audit import (
     _bound_adapter_cases,
     _evidence_rows,
     _is_qualification,
+    _load_json,
     audit_admission,
     main,
     sha256_file,
@@ -36,6 +38,30 @@ GRAPH_PROBE = ROOT / (
     "campaigns/core-v1/learning/formal-release-candidate-v2/"
     "full-field-graph-raw-capacity-probe-f4-train0-4updates-v2.json"
 )
+
+
+def test_admission_json_reader_is_strict_bounded_and_hashes_the_parsed_bytes(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "manifest.json"
+    raw = b'{"schema":"core.fixture.v1","value":3}'
+    source.write_bytes(raw)
+
+    payload, resolved, digest = _load_json(source, root=tmp_path)
+
+    assert payload == {"schema": "core.fixture.v1", "value": 3}
+    assert resolved == source
+    assert digest == hashlib.sha256(raw).hexdigest()
+
+    duplicate = tmp_path / "duplicate.json"
+    duplicate.write_bytes(b'{"schema":"first","schema":"second"}')
+    with pytest.raises(ValueError, match="duplicate JSON object key"):
+        _load_json(duplicate, root=tmp_path)
+
+    symlink = tmp_path / "manifest-link.json"
+    symlink.symlink_to(source)
+    with pytest.raises(ValueError, match="symlink is forbidden"):
+        _load_json(symlink, root=tmp_path)
 
 
 def _sha256(path: Path) -> str:

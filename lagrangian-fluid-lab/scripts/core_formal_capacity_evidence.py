@@ -30,6 +30,11 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from scripts.core_formal_planner import REQUIRED_CODE_FILES
+from scripts.core_strict_json import (
+    absolute_path_without_following_leaf,
+    read_bounded_raw_json,
+    strict_json_object,
+)
 
 
 SCHEMA = "core.formal_capacity_evidence.v1"
@@ -88,10 +93,10 @@ def _resolve(value: str | Path, *, root: Path, base: Path | None = None) -> Path
     """
     candidate = Path(value).expanduser()
     if candidate.is_absolute():
-        return candidate.resolve()
-    options = [(root / candidate).resolve()]
+        return absolute_path_without_following_leaf(candidate)
+    options = [absolute_path_without_following_leaf(root / candidate)]
     if base is not None:
-        options.append((base / candidate).resolve())
+        options.append(absolute_path_without_following_leaf(base / candidate))
     for option in options:
         if option.exists():
             return option
@@ -106,19 +111,24 @@ def _relative(path: Path, root: Path) -> str:
 
 
 def _load_json(source: str | Path | Mapping[str, Any], *, root: Path,
-               base: Path | None = None) -> tuple[dict[str, Any], Path | None]:
+               base: Path | None = None
+               ) -> tuple[dict[str, Any], Path | None, str, int | None]:
     if isinstance(source, Mapping):
-        return dict(source), None
+        payload = dict(source)
+        return payload, None, canonical_sha256(payload), None
     path = _resolve(source, root=root, base=base)
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(payload, Mapping):
-        raise ValueError(f"JSON object required: {path}")
-    return dict(payload), path
+    raw = read_bounded_raw_json(path, label=f"capacity input {path}")
+    payload = strict_json_object(raw, label=f"capacity input {path}")
+    return payload, path, sha256_bytes(raw), len(raw)
 
 
-def _ref(path: Path, root: Path) -> dict[str, Any]:
-    return {"path": _relative(path, root), "sha256": sha256_file(path),
-            "bytes": path.stat().st_size}
+def _ref(path: Path, root: Path, *, digest: str | None = None,
+         byte_count: int | None = None) -> dict[str, Any]:
+    return {
+        "path": _relative(path, root),
+        "sha256": digest if digest is not None else sha256_file(path),
+        "bytes": byte_count if byte_count is not None else path.stat().st_size,
+    }
 
 
 def _portable_path(value: Any) -> bool:
@@ -216,7 +226,7 @@ def _verify_source_closure(source: Any, *, root: Path, code_root: Path,
         _record_failure(failures, "CAPACITY_SOURCE_CLOSURE", "a current formal source closure is required")
         return {"bound": False, "valid": False}
     try:
-        payload, path = _load_json(source, root=root)
+        payload, path, source_digest, _ = _load_json(source, root=root)
     except (OSError, ValueError, TypeError, json.JSONDecodeError) as error:
         _record_failure(failures, "CAPACITY_SOURCE_CLOSURE", f"cannot load source closure: {error}")
         return {"bound": True, "valid": False}
@@ -274,7 +284,7 @@ def _verify_source_closure(source: Any, *, root: Path, code_root: Path,
     result = {
         "bound": True, "valid": not any(item["code"] == "CAPACITY_SOURCE_CLOSURE" for item in failures),
         "path": _relative(path, root) if path is not None else "<in-memory>",
-        "sha256": sha256_file(path) if path is not None else canonical_sha256(payload),
+        "sha256": source_digest,
         "closure_sha256": closure_hash, "files": normalized,
     }
     return result
@@ -287,7 +297,7 @@ def _verify_manifest(source: Any, *, root: Path, receipt: Mapping[str, Any],
         _record_failure(failures, "CAPACITY_MANIFEST_BINDING", "a released reader manifest is required")
         return {"bound": False, "valid": False}
     try:
-        manifest, path = _load_json(source, root=root)
+        manifest, path, raw_sha, _ = _load_json(source, root=root)
     except (OSError, ValueError, TypeError, json.JSONDecodeError) as error:
         _record_failure(failures, "CAPACITY_MANIFEST_BINDING", f"cannot load reader manifest: {error}")
         return {"bound": True, "valid": False}
@@ -298,7 +308,6 @@ def _verify_manifest(source: Any, *, root: Path, receipt: Mapping[str, Any],
     rows = manifest.get("cases")
     if not isinstance(rows, list) or not rows:
         _record_failure(failures, "CAPACITY_MANIFEST_BINDING", "reader manifest has no cases")
-    raw_sha = sha256_file(path) if path is not None else canonical_sha256(manifest)
     canonical_sha = canonical_sha256(manifest)
     declared = receipt.get("config", {}).get("manifest_sha256") if isinstance(receipt.get("config"), Mapping) else None
     sidecar_declared = execution.get("manifest_sha256")
@@ -331,16 +340,16 @@ def inspect_capacity_evidence(
     code = Path(code_root).expanduser().resolve()
     failures: list[dict[str, Any]] = []
     try:
-        receipt_payload, receipt_path = _load_json(receipt, root=root)
+        receipt_payload, receipt_path, receipt_sha, receipt_bytes = _load_json(receipt, root=root)
     except (OSError, ValueError, TypeError, json.JSONDecodeError) as error:
         _record_failure(failures, "CAPACITY_RECEIPT_SCHEMA", f"cannot load training receipt: {error}")
         return _result(None, None, failures, root=root)
     if receipt_payload.get("schema") != TRAINING_SCHEMA:
         _record_failure(failures, "CAPACITY_RECEIPT_SCHEMA", "receipt schema is not core.training.v1")
     try:
-        execution_payload, execution_path = _load_json(
+        execution_payload, execution_path, execution_sha, execution_bytes = _load_json(
             execution, root=root, base=receipt_path.parent if receipt_path else None
-        ) if execution is not None else ({}, None)
+        ) if execution is not None else ({}, None, canonical_sha256({}), None)
     except (OSError, ValueError, TypeError, json.JSONDecodeError) as error:
         _record_failure(failures, "CAPACITY_EXECUTION_EVIDENCE", f"cannot load execution sidecar: {error}")
         execution_payload, execution_path = {}, None
@@ -452,6 +461,14 @@ def inspect_capacity_evidence(
     return _result(
         receipt_payload, receipt_path, failures, root=root,
         execution=execution_payload, execution_path=execution_path,
+        receipt_reference=(
+            _ref(receipt_path, root, digest=receipt_sha, byte_count=receipt_bytes)
+            if receipt_path is not None and receipt_bytes is not None else None
+        ),
+        execution_reference=(
+            _ref(execution_path, root, digest=execution_sha, byte_count=execution_bytes)
+            if execution_path is not None and execution_bytes is not None else None
+        ),
         manifest=manifest_observation, source_closure=closure_observation,
         checkpoints=checkpoint_observations, resource=dict(resource),
         observed_update_frontier=int(completed) if isinstance(completed, int) else 0,
@@ -462,6 +479,8 @@ def _result(
     receipt: Mapping[str, Any] | None, receipt_path: Path | None,
     failures: Sequence[Mapping[str, Any]], *, root: Path,
     execution: Mapping[str, Any] | None = None, execution_path: Path | None = None,
+    receipt_reference: Mapping[str, Any] | None = None,
+    execution_reference: Mapping[str, Any] | None = None,
     manifest: Mapping[str, Any] | None = None,
     source_closure: Mapping[str, Any] | None = None,
     checkpoints: Sequence[Mapping[str, Any]] = (), resource: Mapping[str, Any] | None = None,
@@ -477,11 +496,11 @@ def _result(
             unique.append(row)
     unique.sort(key=lambda item: (item["code"], item["message"]))
     valid = not unique
-    receipt_ref = None
-    if receipt_path is not None and receipt_path.is_file():
+    receipt_ref = dict(receipt_reference) if receipt_reference is not None else None
+    if receipt_ref is None and receipt_path is not None and receipt_path.is_file():
         receipt_ref = _ref(receipt_path, root)
-    execution_ref = None
-    if execution_path is not None and execution_path.is_file():
+    execution_ref = dict(execution_reference) if execution_reference is not None else None
+    if execution_ref is None and execution_path is not None and execution_path.is_file():
         execution_ref = _ref(execution_path, root)
     return {
         "schema": SCHEMA,

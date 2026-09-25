@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
 import pytest
 
 from scripts.core_formal_admission_audit import _graph_probe_observation
-from scripts.core_formal_graph_capacity_probe import _load_candidate
+from scripts.core_formal_graph_capacity_probe import _load_candidate, _manifest_binding
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,6 +42,43 @@ def test_probe_without_explicit_extrapolation_semantics_fails_closed(tmp_path: P
     path.write_text(json.dumps(payload), encoding="utf-8")
     observation = _graph_probe_observation(path, root=tmp_path)
     assert observation["valid"] is False
+
+
+def test_graph_probe_candidate_reader_rejects_duplicate_keys_and_symlinks(
+    tmp_path: Path,
+) -> None:
+    duplicate = tmp_path / "duplicate.json"
+    duplicate.write_bytes(b'{"schema":"first","schema":"second"}')
+    with pytest.raises(ValueError, match="duplicate JSON object key"):
+        _load_candidate(duplicate)
+
+    source = ROOT / "campaigns/core-v1/learning/formal-release-candidate-v4/f3-f4-candidate.json"
+    symlink = tmp_path / "candidate-link.json"
+    symlink.symlink_to(source)
+    with pytest.raises(ValueError, match="symlink is forbidden"):
+        _load_candidate(symlink)
+
+
+def test_graph_manifest_binding_parses_and_hashes_one_strict_byte_snapshot(
+    tmp_path: Path,
+) -> None:
+    manifest = tmp_path / "manifest.json"
+    raw = b'{"schema":"core.dataset.v2","cases":[]}'
+    manifest.write_bytes(raw)
+    candidate = {
+        "manifest_bindings": [{
+            "path": "manifest.json",
+            "sha256": hashlib.sha256(raw).hexdigest(),
+        }],
+    }
+
+    payload, binding = _manifest_binding(candidate, manifest, tmp_path)
+
+    assert payload == {"schema": "core.dataset.v2", "cases": []}
+    assert binding == {
+        "path": "manifest.json",
+        "sha256": hashlib.sha256(raw).hexdigest(),
+    }
 
 
 def test_graph_probe_refuses_missing_production_denominator(tmp_path: Path) -> None:

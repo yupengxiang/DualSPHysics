@@ -213,6 +213,16 @@ def test_admission_consumes_only_a_hash_bound_capacity_record(tmp_path: Path) ->
         source_closure=closure, data_root=tmp_path, code_root=ROOT,
     )
     assert adapted["valid"] is True
+    assert adapted["receipt"] == {
+        "path": "training.json",
+        "sha256": hashlib.sha256(receipt_path.read_bytes()).hexdigest(),
+        "bytes": receipt_path.stat().st_size,
+    }
+    assert adapted["execution"] == {
+        "path": "execution.json",
+        "sha256": hashlib.sha256(execution_path.read_bytes()).hexdigest(),
+        "bytes": execution_path.stat().st_size,
+    }
     adapter_path = tmp_path / "capacity.json"
     adapter_path.write_text(json.dumps(adapted), encoding="utf-8")
     audit = audit_admission(

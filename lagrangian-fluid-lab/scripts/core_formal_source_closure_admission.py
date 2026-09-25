@@ -22,6 +22,11 @@ if str(LAB_ROOT) not in sys.path:
     sys.path.insert(0, str(LAB_ROOT))
 
 from scripts.core_formal_planner import REQUIRED_CODE_FILES
+from scripts.core_strict_json import (
+    absolute_path_without_following_leaf,
+    read_bounded_raw_json,
+    strict_json_object,
+)
 
 
 CLOSURE_SCHEMA = "core.formal_source_closure.v1"
@@ -54,7 +59,7 @@ def _resolve(value: str | Path, root: Path) -> Path:
     path = Path(value).expanduser()
     if not path.is_absolute():
         path = root / path
-    return path.resolve()
+    return absolute_path_without_following_leaf(path)
 
 
 def _relative(path: Path, root: Path) -> str:
@@ -64,20 +69,22 @@ def _relative(path: Path, root: Path) -> str:
         return str(path.resolve())
 
 
-def _reference(path: Path, root: Path) -> dict[str, Any]:
+def _reference(path: Path, root: Path, *, digest: str | None = None,
+               byte_count: int | None = None) -> dict[str, Any]:
     return {
         "path": _relative(path, root),
-        "sha256": sha256_file(path),
-        "bytes": path.stat().st_size,
+        "sha256": digest if digest is not None else sha256_file(path),
+        "bytes": byte_count if byte_count is not None else path.stat().st_size,
     }
 
 
 def _load_json(value: str | Path, *, root: Path, role: str) -> tuple[dict[str, Any], Path, dict[str, Any]]:
     path = _resolve(value, root)
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(payload, Mapping):
-        raise ValueError(f"{role} must be a JSON object: {path}")
-    return dict(payload), path, _reference(path, root)
+    raw = read_bounded_raw_json(path, label=f"{role} {path}")
+    payload = strict_json_object(raw, label=f"{role} {path}")
+    return payload, path, _reference(
+        path, root, digest=sha256_bytes(raw), byte_count=len(raw)
+    )
 
 
 def _generator_reference(root: Path) -> dict[str, Any]:

@@ -10,6 +10,7 @@ no checkpoint, registry, ledger, job, or formal denominator is touched.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import resource
 from pathlib import Path
@@ -26,6 +27,11 @@ if __package__ in (None, ""):
 from scripts.core_dataset import CoreDataset
 from scripts.core_learning import _known_inputs_for_learning, tensors
 from scripts.core_models import DualIncrementModel
+from scripts.core_strict_json import (
+    absolute_path_without_following_leaf,
+    read_bounded_raw_json,
+    strict_json_object,
+)
 
 
 SCHEMA = "core.formal_graph_capacity_probe.v1"
@@ -34,8 +40,10 @@ MAX_PROBE_UPDATES = 8
 
 
 def _load_candidate(path: str | Path) -> Mapping[str, Any]:
-    payload = json.loads(Path(path).read_text(encoding="utf-8"))
-    if not isinstance(payload, Mapping) or payload.get("schema") != "core.formal_release_candidate.v1":
+    resolved = absolute_path_without_following_leaf(path)
+    raw = read_bounded_raw_json(resolved, label="graph probe candidate")
+    payload = strict_json_object(raw, label="graph probe candidate")
+    if payload.get("schema") != "core.formal_release_candidate.v1":
         raise ValueError("graph probe requires a formal release candidate record")
     if payload.get("data_contract_ready") is not True:
         raise ValueError("schema/data gate is not ready; graph probe was not started")
@@ -65,13 +73,16 @@ def _load_candidate(path: str | Path) -> Mapping[str, Any]:
     return payload
 
 
-def _manifest_binding(candidate: Mapping[str, Any], manifest: Path, root: Path) -> dict[str, Any]:
-    observed = __import__("hashlib").sha256(manifest.read_bytes()).hexdigest()
+def _manifest_binding(candidate: Mapping[str, Any], manifest: Path, root: Path
+                      ) -> tuple[dict[str, Any], dict[str, Any]]:
+    raw = read_bounded_raw_json(manifest, label="graph probe reader manifest")
+    payload = strict_json_object(raw, label="graph probe reader manifest")
+    observed = hashlib.sha256(raw).hexdigest()
     for binding in candidate.get("manifest_bindings", []):
         if binding.get("path") == manifest.resolve().relative_to(root.resolve()).as_posix():
             if binding.get("sha256") != observed:
                 raise ValueError("graph probe manifest hash differs from candidate binding")
-            return {"path": binding["path"], "sha256": observed}
+            return payload, {"path": binding["path"], "sha256": observed}
     raise ValueError("graph probe manifest is not bound by the candidate")
 
 
@@ -83,14 +94,14 @@ def run_probe(candidate: Mapping[str, Any], *, manifest: str | Path,
     if int(hidden) < 1 or int(centers) < 1:
         raise ValueError("hidden and centers must be positive")
     root = Path(data_root).expanduser().resolve()
-    manifest_path = Path(manifest).expanduser().resolve()
-    binding = _manifest_binding(candidate, manifest_path, root)
+    manifest_path = absolute_path_without_following_leaf(manifest)
+    manifest_payload, binding = _manifest_binding(candidate, manifest_path, root)
     if torch.device(device).type == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA requested for full-field graph probe but unavailable")
     resolved_device = torch.device(device)
     torch.manual_seed(int(seed))
     read_started = time.perf_counter()
-    with CoreDataset(manifest_path, root) as dataset:
+    with CoreDataset(manifest_payload, root) as dataset:
         train_cases = dataset.case_ids("train")
         if not train_cases:
             raise ValueError("bound F4 compact manifest has no train cases")

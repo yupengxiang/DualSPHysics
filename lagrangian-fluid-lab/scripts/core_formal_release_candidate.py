@@ -27,9 +27,15 @@ from scripts.core_formal_admission_audit import (
     SCHEMA as ADMISSION_SCHEMA,
     audit_admission,
     canonical_sha256,
+    sha256_bytes,
     sha256_file,
 )
 from scripts.core_campaign import completion as campaign_completion
+from scripts.core_strict_json import (
+    absolute_path_without_following_leaf,
+    read_bounded_raw_json,
+    strict_json_object,
+)
 
 
 CLOSURE_SCHEMA = "core.formal_source_closure.v1"
@@ -109,15 +115,16 @@ def _immutable_json(path: Path, payload: Mapping[str, Any]) -> None:
     partial.replace(path)
 
 
-def _registry_reference(path: Path, *, root: Path) -> dict[str, Any]:
+def _registry_reference(path: Path, *, root: Path, digest: str | None = None,
+                        byte_count: int | None = None) -> dict[str, Any]:
     try:
         relative = _relative(path, root)
     except ValueError:
         relative = str(path)
     return {
         "path": relative,
-        "sha256": sha256_file(path),
-        "bytes": path.stat().st_size,
+        "sha256": digest if digest is not None else sha256_file(path),
+        "bytes": byte_count if byte_count is not None else path.stat().st_size,
     }
 
 
@@ -203,16 +210,17 @@ def _campaign_completion_observation(
         registry_path = Path(registry).expanduser() if registry is not None else root / CAMPAIGN_REGISTRY
         if not registry_path.is_absolute():
             registry_path = root / registry_path
-        registry_path = registry_path.resolve()
+        registry_path = absolute_path_without_following_leaf(registry_path)
         reference = {"path": str(registry_path), "sha256": None, "bytes": None}
         try:
             if not registry_path.is_file():
                 raise FileNotFoundError(registry_path)
-            reference = _registry_reference(registry_path, root=root)
-            loaded = json.loads(registry_path.read_text(encoding="utf-8"))
-            if not isinstance(loaded, Mapping):
-                raise ValueError("campaign registry must be a JSON object")
-            payload = dict(loaded)
+            raw = read_bounded_raw_json(registry_path, label="campaign registry")
+            payload = strict_json_object(raw, label="campaign registry")
+            reference = _registry_reference(
+                registry_path, root=root,
+                digest=sha256_bytes(raw), byte_count=len(raw),
+            )
         except (OSError, TypeError, ValueError, json.JSONDecodeError) as error:
             return _invalid_campaign_observation(
                 reference=reference, bound=False, error=str(error),

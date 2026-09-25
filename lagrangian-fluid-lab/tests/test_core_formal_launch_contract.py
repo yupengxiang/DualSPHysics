@@ -5,8 +5,9 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import pytest
 
-from scripts.core_formal_launch_contract import build_contract, main
+from scripts.core_formal_launch_contract import _load_json, build_contract, main
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +32,18 @@ def _contract() -> dict:
         resource_plan=RESOURCE_PLAN,
         source_closure=SOURCE_CLOSURE,
     )
+
+
+def test_launch_contract_reader_rejects_duplicate_keys_and_symlinks(tmp_path: Path) -> None:
+    duplicate = tmp_path / "duplicate.json"
+    duplicate.write_bytes(b'{"schema":"first","schema":"second"}')
+    with pytest.raises(ValueError, match="duplicate JSON object key"):
+        _load_json(duplicate, root=tmp_path, role="fixture")
+
+    symlink = tmp_path / "phase-link.json"
+    symlink.symlink_to(PHASE_PLAN)
+    with pytest.raises(ValueError, match="symlink is forbidden"):
+        _load_json(symlink, root=tmp_path, role="fixture")
 
 
 def test_real_contract_lists_nine_proposals_without_emitting_jobs() -> None:

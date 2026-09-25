@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import pytest
 
 import scripts.core_formal_release_candidate as release_candidate
 
@@ -16,6 +17,22 @@ CLOSURE = ROOT / "campaigns/core-v1/learning/formal-release-candidate-v4/source-
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def test_campaign_registry_reader_rejects_duplicate_keys_and_symlinks(tmp_path: Path) -> None:
+    duplicate = tmp_path / "duplicate-registry.json"
+    duplicate.write_bytes(b'{"schema":"first","schema":"second"}')
+    observation = release_candidate._campaign_completion_observation(
+        root=tmp_path, registry=duplicate)
+    assert observation["valid"] is False
+    assert "duplicate JSON object key" in observation["error"]
+
+    symlink = tmp_path / "registry-link.json"
+    symlink.symlink_to(ROOT / "campaigns/core-v1/registry.json")
+    observation = release_candidate._campaign_completion_observation(
+        root=tmp_path, registry=symlink)
+    assert observation["valid"] is False
+    assert "symlink is forbidden" in observation["error"]
 
 
 def test_candidate_binds_current_closure_and_keeps_formal_gate_closed() -> None:

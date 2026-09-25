@@ -46,6 +46,22 @@ def test_resource_probe_refuses_a_candidate_with_data_gate_closed(tmp_path: Path
         _load_candidate(path)
 
 
+def test_resource_probe_candidate_reader_rejects_duplicate_keys_and_symlinks(
+    tmp_path: Path,
+) -> None:
+    duplicate = tmp_path / "duplicate.json"
+    duplicate.write_bytes(b'{"schema":"first","schema":"second"}')
+    with pytest.raises(ValueError, match="duplicate JSON object key"):
+        _load_candidate(duplicate)
+
+    target = tmp_path / "target.json"
+    target.write_text(CANDIDATE.read_text(encoding="utf-8"), encoding="utf-8")
+    symlink = tmp_path / "candidate-link.json"
+    symlink.symlink_to(target)
+    with pytest.raises(ValueError, match="symlink is forbidden"):
+        _load_candidate(symlink)
+
+
 def test_resource_probe_refuses_missing_production_denominator(tmp_path: Path) -> None:
     candidate = json.loads(CANDIDATE.read_text(encoding="utf-8"))
     candidate["admission_observation"].pop("production_denominator")

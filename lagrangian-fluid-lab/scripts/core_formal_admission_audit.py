@@ -28,6 +28,11 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from scripts.core_formal_planner import REQUIRED_CODE_FILES
+from scripts.core_strict_json import (
+    absolute_path_without_following_leaf,
+    read_bounded_raw_json,
+    strict_json_object,
+)
 
 
 SCHEMA = "core.formal_admission_audit.v1"
@@ -72,11 +77,11 @@ def canonical_sha256(value: Any) -> str:
 def _resolve(value: str | Path, *, root: Path, base: Path | None = None) -> Path:
     candidate = Path(value).expanduser()
     if candidate.is_absolute():
-        return candidate.resolve()
+        return absolute_path_without_following_leaf(candidate)
     options = []
     if base is not None:
-        options.append((base / candidate).resolve())
-    options.append((root / candidate).resolve())
+        options.append(absolute_path_without_following_leaf(base / candidate))
+    options.append(absolute_path_without_following_leaf(root / candidate))
     for option in options:
         if option.exists():
             return option
@@ -90,14 +95,15 @@ def _relative(path: Path, root: Path) -> str:
         return str(path.resolve())
 
 
-def _load_json(source: str | Path | Mapping[str, Any], *, root: Path) -> tuple[dict[str, Any], Path | None]:
+def _load_json(source: str | Path | Mapping[str, Any], *, root: Path
+               ) -> tuple[dict[str, Any], Path | None, str]:
     if isinstance(source, Mapping):
-        return dict(source), None
+        payload = dict(source)
+        return payload, None, canonical_sha256(payload)
     path = _resolve(source, root=root)
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(payload, Mapping):
-        raise ValueError(f"JSON object required: {path}")
-    return dict(payload), path
+    raw = read_bounded_raw_json(path, label=f"admission input {path}")
+    payload = strict_json_object(raw, label=f"admission input {path}")
+    return payload, path, sha256_bytes(raw)
 
 
 def _ref(path: Path, root: Path) -> dict[str, Any]:
@@ -201,20 +207,22 @@ def _load_bound_json(reference: Mapping[str, Any], *, root: Path,
         return None, {"role": role}, f"{role} has no path"
     path = _resolve(path_value, root=root, base=base)
     ref = {"role": role, "path": _relative(path, root), "declared_sha256": declared}
-    if not path.is_file():
+    try:
+        raw = read_bounded_raw_json(path, label=role)
+    except FileNotFoundError:
         return None, ref, f"{role} is missing: {path}"
-    observed = sha256_file(path)
+    except (OSError, ValueError) as error:
+        return None, ref, f"{role} is invalid JSON: {path}: {error}"
+    observed = sha256_bytes(raw)
     ref["sha256"] = observed
     if not isinstance(declared, str) or len(declared) != 64:
         return None, ref, f"{role} has no declared SHA-256: {path}"
     if observed.lower() != declared.lower():
         return None, ref, f"{role} SHA-256 mismatch: {path}"
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError) as error:
+        payload = strict_json_object(raw, label=role)
+    except ValueError as error:
         return None, ref, f"{role} is invalid JSON: {path}: {error}"
-    if not isinstance(payload, Mapping):
-        return None, ref, f"{role} JSON is not an object: {path}"
     return payload, ref, None
 
 
@@ -410,8 +418,9 @@ def _source_closure(code_root: Path, preprofile_index: Path | None,
     previous: dict[str, Any] | None = None
     mismatches: list[str] = []
     if preprofile_index is not None and preprofile_index.is_file():
-        payload = json.loads(preprofile_index.read_text(encoding="utf-8"))
-        closure = payload.get("planner_closure", {}) if isinstance(payload, Mapping) else {}
+        raw = read_bounded_raw_json(preprofile_index, label="preprofile index")
+        payload = strict_json_object(raw, label="preprofile index")
+        closure = payload.get("planner_closure", {})
         files = closure.get("files", []) if isinstance(closure, Mapping) else []
         previous_by_name = {
             str(item.get("relative_path", item.get("path", ""))): item.get("sha256")
@@ -422,7 +431,7 @@ def _source_closure(code_root: Path, preprofile_index: Path | None,
         mismatches = [name for name in names if previous_by_name.get(name) != current_by_name.get(name)]
         previous = {
             "path": _relative(preprofile_index, root),
-            "sha256": sha256_file(preprofile_index),
+            "sha256": sha256_bytes(raw),
             "closure_sha256": closure.get("sha256") if isinstance(closure, Mapping) else None,
             "file_count": len(files),
             "mismatch_files": mismatches,
@@ -457,9 +466,14 @@ def _capacity_evidence_observation(source: Path | Mapping[str, Any] | None, *, r
         }
     try:
         path = _resolve(source, root=root) if isinstance(source, (str, Path)) else None
-        payload = (json.loads(path.read_text(encoding="utf-8")) if path is not None
-                   else dict(source))
-    except (OSError, ValueError, TypeError, json.JSONDecodeError) as error:
+        if path is not None:
+            raw = read_bounded_raw_json(path, label="capacity evidence")
+            payload = strict_json_object(raw, label="capacity evidence")
+            source_digest = sha256_bytes(raw)
+        else:
+            payload = dict(source)
+            source_digest = canonical_sha256(payload)
+    except (OSError, ValueError, TypeError) as error:
         return {
             "bound": True, "valid": False, "formal_capacity_evidence": False,
             "formal_runs_counted": 0, "error": str(error),
@@ -525,7 +539,7 @@ def _capacity_evidence_observation(source: Path | Mapping[str, Any] | None, *, r
         "bound": True,
         "valid": valid,
         "path": _relative(path, root) if path is not None else "<in-memory>",
-        "sha256": sha256_file(path) if path is not None and path.is_file() else canonical_sha256(payload),
+        "sha256": source_digest,
         "schema": payload.get("schema"),
         "formal_capacity_evidence": bool(payload.get("formal_capacity_evidence")),
         "formal_runs_counted": payload.get("formal_runs_counted", 0),
@@ -552,15 +566,16 @@ def _resource_observation(profile: Path | None, *, root: Path,
                 "capacity_evidence": dict(capacity),
             })
         return result
-    payload = json.loads(profile.read_text(encoding="utf-8"))
-    configurations = payload.get("configurations", []) if isinstance(payload, Mapping) else []
+    raw = read_bounded_raw_json(profile, label="resource profile")
+    payload = strict_json_object(raw, label="resource profile")
+    configurations = payload.get("configurations", [])
     updates = [item.get("optimizer_updates") for item in configurations
                if isinstance(item, Mapping) and isinstance(item.get("optimizer_updates"), int)]
     frontier = max(updates, default=0)
     result = {
         "bound": True,
         "path": _relative(profile, root),
-        "sha256": sha256_file(profile),
+        "sha256": sha256_bytes(raw),
         "observed_update_frontier": frontier,
         "formal_update_target": FORMAL_UPDATES,
         # A resource profile is observational metadata only.  Even a
@@ -589,7 +604,8 @@ def _resource_dryrun_observation(path: Path | None, *, root: Path) -> dict[str, 
             "formal_capacity_evidence": False,
             "formal_runs_counted": 0,
         }
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    raw = read_bounded_raw_json(path, label="resource dry-run receipt")
+    payload = strict_json_object(raw, label="resource dry-run receipt")
     constraints = payload.get("execution_constraints", {})
     protocol = payload.get("protocol", {})
     valid = bool(
@@ -609,7 +625,7 @@ def _resource_dryrun_observation(path: Path | None, *, root: Path) -> dict[str, 
         "bound": True,
         "valid": valid,
         "path": _relative(path, root),
-        "sha256": sha256_file(path),
+        "sha256": sha256_bytes(raw),
         "schema": payload.get("schema"),
         "dry_run": payload.get("dry_run"),
         "formal_capacity_evidence": False,
@@ -629,7 +645,8 @@ def _graph_probe_observation(path: Path | None, *, root: Path) -> dict[str, Any]
             "formal_capacity_evidence": False,
             "formal_runs_counted": 0,
         }
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    raw = read_bounded_raw_json(path, label="graph capacity probe")
+    payload = strict_json_object(raw, label="graph capacity probe")
     constraints = payload.get("execution_constraints", {})
     protocol = payload.get("protocol", {})
     updates = payload.get("updates", {})
@@ -681,7 +698,7 @@ def _graph_probe_observation(path: Path | None, *, root: Path) -> dict[str, Any]
         "bound": True,
         "valid": valid,
         "path": _relative(path, root),
-        "sha256": sha256_file(path),
+        "sha256": sha256_bytes(raw),
         "schema": payload.get("schema"),
         "diagnostic_only": payload.get("diagnostic_only"),
         "formal_capacity_evidence": False,
@@ -729,11 +746,11 @@ def audit_admission(
     all_rows: list[tuple[dict[str, Any], Path | None, dict[str, Any]]] = []
     for source in manifests:
         try:
-            payload, path = _load_json(source, root=root)
+            payload, path, source_digest = _load_json(source, root=root)
             errors = _validate_manifest(payload)
             source_record = {
                 "path": _relative(path, root) if path is not None else "<in-memory>",
-                "sha256": sha256_file(path) if path is not None else canonical_sha256(payload),
+                "sha256": source_digest,
                 "schema": payload.get("schema"),
                 "dataset_id": payload.get("dataset_id"),
                 "formal_release": payload.get("formal_release"),
@@ -753,7 +770,7 @@ def audit_admission(
     evidence_records: list[dict[str, Any]] = []
     loaded_evidence: list[tuple[dict[str, Any], Path | None]] = []
     for source in evidence:
-        payload, path = _load_json(source, root=root)
+        payload, path, source_digest = _load_json(source, root=root)
         loaded_evidence.append((payload, path))
         by_case, global_rows = _evidence_rows(payload)
         # Adapter rows are only admissible through their top-level manifest
@@ -766,7 +783,7 @@ def audit_admission(
         evidence_global.extend(global_rows)
         evidence_records.append({
             "path": _relative(path, root) if path is not None else "<in-memory>",
-            "sha256": sha256_file(path) if path is not None else canonical_sha256(payload),
+            "sha256": source_digest,
             "schema": payload.get("schema"),
             "case_count": len(_rows(payload)),
             "read_only": True,

@@ -5,8 +5,9 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import pytest
 
-from scripts.core_formal_readiness import _admission_observation, build_readiness, main
+from scripts.core_formal_readiness import _admission_observation, _load_json, build_readiness, main
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,6 +18,20 @@ REGISTRY = ROOT / "campaigns/core-v1/registry.json"
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def test_readiness_inputs_reject_duplicate_keys_and_final_symlinks(tmp_path: Path) -> None:
+    duplicate = tmp_path / "duplicate.json"
+    duplicate.write_bytes(b'{"schema":"first","schema":"second"}')
+    with pytest.raises(ValueError, match="duplicate JSON object key"):
+        _load_json(duplicate, root=tmp_path, role="fixture")
+
+    target = tmp_path / "target.json"
+    target.write_bytes(b'{"schema":"core.fixture.v1"}')
+    symlink = tmp_path / "input-link.json"
+    symlink.symlink_to(target)
+    with pytest.raises(ValueError, match="symlink is forbidden"):
+        _load_json(symlink, root=tmp_path, role="fixture")
 
 
 def test_real_readiness_preserves_all_formal_denominators_and_penalty_contract() -> None:
