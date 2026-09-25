@@ -1,5 +1,6 @@
 """Synthetic-only tests for the non-authorizing V5 journal shape parser."""
 import json
+import math
 import struct
 
 import pytest
@@ -88,9 +89,14 @@ def _journal_with_polls(specs):
         ),
     ]
     caches = {}
+    observed_timesteps = []
     for iteration, spec in enumerate(specs):
         timestep_hex = spec.get("timestep", "0000000000000000")
         timestep = struct.unpack(">d", bytes.fromhex(timestep_hex))[0]
+        time_max = math.nextafter(timestep, math.inf)
+        if not math.isfinite(time_max):
+            raise ValueError("synthetic true guard requires a finite next binary64 timestep")
+        observed_timesteps.append(timestep)
         solver_instance_id = spec.get("solver_instance_id", "main")
         input_entry_index = spec.get("input_entry_index", 0)
         slot = caches.setdefault((solver_instance_id, input_entry_index), {
@@ -101,7 +107,7 @@ def _journal_with_polls(specs):
         events.append(_event(
             "loop_guard", guard_seq, process_generation_id=proc, driver_id="main",
             loop_iteration_id=iteration, time_step_ieee754_hex=timestep_hex,
-            time_max_ieee754_hex="3ff0000000000000", condition_result=True,
+            time_max_ieee754_hex=struct.pack(">d", time_max).hex(), condition_result=True,
         ))
         begin_seq = len(events)
         is_hit = slot["last_timestep"] >= 0 and timestep == slot["last_timestep"]
@@ -130,10 +136,22 @@ def _journal_with_polls(specs):
                 process_generation_id=proc, outcome=spec.get("outcome", "returned"),
             ))
 
-    events.extend([
-        _event("exit", len(events), process_generation_id=proc, exit_code=0, signal=None),
-        _event("reap", len(events) + 1, process_generation_id=proc),
-    ])
+    all_polls_terminal = all(spec.get("outcome", "returned") is not None for spec in specs)
+    if all_polls_terminal:
+        terminal_step = math.nextafter(max(observed_timesteps, default=1.0), math.inf)
+        if not math.isfinite(terminal_step):
+            raise ValueError("synthetic terminal guard requires a finite next binary64 timestep")
+        terminal_hex = struct.pack(">d", terminal_step).hex()
+        terminal_seq = len(events)
+        events.append(_event(
+            "loop_guard", terminal_seq, process_generation_id=proc, driver_id="main",
+            loop_iteration_id=len(specs), time_step_ieee754_hex=terminal_hex,
+            time_max_ieee754_hex=terminal_hex, condition_result=False,
+        ))
+        events.extend([
+            _event("exit", len(events), process_generation_id=proc, exit_code=0, signal=None),
+            _event("reap", len(events) + 1, process_generation_id=proc),
+        ])
     return _journal(events)
 
 
@@ -321,7 +339,7 @@ def test_poll_must_match_true_guard_generation_driver_iteration_and_exact_time()
     poll = next(event for event in journal["events"] if event["kind"] == "poll_begin")
     guard = next(event for event in journal["events"] if event["kind"] == "loop_guard")
     guard["condition_result"] = False
-    with pytest.raises(JournalV5Error, match="same-generation driver/iteration guard"):
+    with pytest.raises(JournalV5Error, match="condition_result differs"):
         inspect_untrusted_v5_journal(json.dumps(journal).encode())
 
     journal = json.loads(raw)
@@ -329,6 +347,146 @@ def test_poll_must_match_true_guard_generation_driver_iteration_and_exact_time()
     poll["timestep_ieee754_hex"] = "0000000000000000"
     with pytest.raises(JournalV5Error, match="same-generation driver/iteration guard"):
         inspect_untrusted_v5_journal(json.dumps(journal).encode())
+
+
+def test_observed_driver_loop_requires_one_terminal_false_guard():
+    proc = _process()
+    events = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={}),
+        _event("exec", 1, process_generation_id=proc, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        _event("loop_guard", 2, process_generation_id=proc, driver_id="main", loop_iteration_id=0, time_step_ieee754_hex="0000000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=True),
+        _event("loop_guard", 3, process_generation_id=proc, driver_id="main", loop_iteration_id=1, time_step_ieee754_hex="3ff0000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=False),
+        _event("exit", 4, process_generation_id=proc, exit_code=0, signal=None),
+        _event("reap", 5, process_generation_id=proc),
+    ]
+    result = inspect_untrusted_v5_journal(_journal(events))
+    assert result["observed_driver_loop_count"] == 1
+    assert result["observed_driver_loop_termination_guard_count"] == 1
+    assert result["observed_driver_loops_complete"] is True
+    assert result["driver_loop_termination_verified"] is False
+
+    incomplete = inspect_untrusted_v5_journal(_journal(_main_events()))
+    assert incomplete["observed_driver_loops_complete"] is False
+
+
+def test_driver_guard_after_false_termination_is_rejected():
+    proc = _process()
+    events = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={}),
+        _event("exec", 1, process_generation_id=proc, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        _event("loop_guard", 2, process_generation_id=proc, driver_id="main", loop_iteration_id=0, time_step_ieee754_hex="3ff0000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=False),
+        _event("loop_guard", 3, process_generation_id=proc, driver_id="main", loop_iteration_id=1, time_step_ieee754_hex="0000000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=True),
+        _event("exit", 4, process_generation_id=proc, exit_code=0, signal=None),
+        _event("reap", 5, process_generation_id=proc),
+    ]
+    with pytest.raises(JournalV5Error, match="after its terminal false guard"):
+        inspect_untrusted_v5_journal(_journal(events))
+
+
+def test_poll_cannot_reuse_a_guard_after_terminal_false_or_newer_iteration():
+    proc = _process()
+    base = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={}),
+        _event("exec", 1, process_generation_id=proc, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        _event("loop_guard", 2, process_generation_id=proc, driver_id="main", loop_iteration_id=0, time_step_ieee754_hex="0000000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=True),
+    ]
+    old_guard_poll = _event(
+        "poll_begin", 4, poll_begin_id=4, process_generation_id=proc,
+        solver_instance_id="main", driver_id="main", guard_seq=2,
+        callsite_id="cpu.pre_interaction_forces.run_cpu", integrator="Verlet",
+        interstep="INTERSTEP_Verlet", input_entry_index=0,
+        timestep_ieee754_hex="0000000000000000", active=False,
+        cache_action="miss", cache_source_seq=None, table_raw_binding=None,
+    )
+    terminal_then_poll = base + [
+        _event("loop_guard", 3, process_generation_id=proc, driver_id="main", loop_iteration_id=1, time_step_ieee754_hex="3ff0000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=False),
+        old_guard_poll,
+        _event("poll_end", 5, poll_begin_id=4, process_generation_id=proc, outcome="returned"),
+        _event("exit", 6, process_generation_id=proc, exit_code=0, signal=None),
+        _event("reap", 7, process_generation_id=proc),
+    ]
+    with pytest.raises(JournalV5Error, match="outside an active observed driver loop"):
+        inspect_untrusted_v5_journal(_journal(terminal_then_poll))
+
+    next_iteration_then_stale_poll = base + [
+        _event("loop_guard", 3, process_generation_id=proc, driver_id="main", loop_iteration_id=1, time_step_ieee754_hex="0000000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=True),
+        old_guard_poll,
+        _event("poll_end", 5, poll_begin_id=4, process_generation_id=proc, outcome="returned"),
+        _event("exit", 6, process_generation_id=proc, exit_code=0, signal=None),
+        _event("reap", 7, process_generation_id=proc),
+    ]
+    with pytest.raises(JournalV5Error, match="stale driver loop guard"):
+        inspect_untrusted_v5_journal(_journal(next_iteration_then_stale_poll))
+
+
+def test_one_vres_driver_guard_can_serve_ordered_multiple_instances():
+    proc = _process()
+    events = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={}),
+        _event("exec", 1, process_generation_id=proc, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        _event("loop_guard", 2, process_generation_id=proc, driver_id="vres", loop_iteration_id=0, time_step_ieee754_hex="0000000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=True),
+    ]
+    for instance, interstep, action, source in [
+        ("vres.00", "INTERSTEP_SymPredictor", "miss", None),
+        ("vres.00", "INTERSTEP_SymCorrector", "hit", 3),
+        ("vres.01", "INTERSTEP_SymPredictor", "miss", None),
+        ("vres.01", "INTERSTEP_SymCorrector", "hit", 7),
+    ]:
+        seq = len(events)
+        events.append(_event(
+            "poll_begin", seq, poll_begin_id=seq, process_generation_id=proc,
+            solver_instance_id=instance, driver_id="vres", guard_seq=2,
+            callsite_id="cpu.pre_interaction_forces.run_cpu", integrator="VRes",
+            interstep=interstep, input_entry_index=0,
+            timestep_ieee754_hex="0000000000000000", active=False,
+            cache_action=action, cache_source_seq=source, table_raw_binding=None,
+        ))
+        events.append(_event(
+            "poll_end", len(events), poll_begin_id=seq,
+            process_generation_id=proc, outcome="returned",
+        ))
+    events.extend([
+        _event("loop_guard", len(events), process_generation_id=proc, driver_id="vres", loop_iteration_id=1, time_step_ieee754_hex="3ff0000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=False),
+        _event("exit", len(events) + 1, process_generation_id=proc, exit_code=0, signal=None),
+        _event("reap", len(events) + 2, process_generation_id=proc),
+    ])
+    result = inspect_untrusted_v5_journal(_journal(events))
+    assert result["query_guard_link_count"] == 4
+    assert result["observed_driver_loops_complete"] is True
+
+
+def test_driver_guard_cannot_overtake_a_poll_end():
+    proc = _process()
+    events = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={}),
+        _event("exec", 1, process_generation_id=proc, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        _event("loop_guard", 2, process_generation_id=proc, driver_id="main", loop_iteration_id=0, time_step_ieee754_hex="0000000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=True),
+        _event("poll_begin", 3, poll_begin_id=3, process_generation_id=proc, solver_instance_id="main", driver_id="main", guard_seq=2, callsite_id="cpu.pre_interaction_forces.run_cpu", integrator="Verlet", interstep="INTERSTEP_Verlet", input_entry_index=0, timestep_ieee754_hex="0000000000000000", active=False, cache_action="miss", cache_source_seq=None, table_raw_binding=None),
+        _event("loop_guard", 4, process_generation_id=proc, driver_id="main", loop_iteration_id=1, time_step_ieee754_hex="3ff0000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=False),
+        _event("poll_end", 5, poll_begin_id=3, process_generation_id=proc, outcome="returned"),
+        _event("exit", 6, process_generation_id=proc, exit_code=0, signal=None),
+        _event("reap", 7, process_generation_id=proc),
+    ]
+    with pytest.raises(JournalV5Error, match="driver loop event occurs before a prior poll_end"):
+        inspect_untrusted_v5_journal(_journal(events))
+
+
+def test_missing_poll_end_before_next_guard_marks_loop_incomplete():
+    proc = _process()
+    events = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={}),
+        _event("exec", 1, process_generation_id=proc, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        _event("loop_guard", 2, process_generation_id=proc, driver_id="main", loop_iteration_id=0, time_step_ieee754_hex="0000000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=True),
+        _event("poll_begin", 3, poll_begin_id=3, process_generation_id=proc, solver_instance_id="main", driver_id="main", guard_seq=2, callsite_id="cpu.pre_interaction_forces.run_cpu", integrator="Verlet", interstep="INTERSTEP_Verlet", input_entry_index=0, timestep_ieee754_hex="0000000000000000", active=False, cache_action="miss", cache_source_seq=None, table_raw_binding=None),
+        _event("loop_guard", 4, process_generation_id=proc, driver_id="main", loop_iteration_id=1, time_step_ieee754_hex="3ff0000000000000", time_max_ieee754_hex="3ff0000000000000", condition_result=False),
+        _event("exit", 5, process_generation_id=proc, exit_code=0, signal=None),
+        _event("reap", 6, process_generation_id=proc),
+    ]
+    result = inspect_untrusted_v5_journal(_journal(events))
+    assert result["all_polls_terminal"] is False
+    assert result["driver_unclosed_poll_count"] == 1
+    assert result["observed_driver_loops_complete"] is False
+    assert result["cache_replay_diagnostic_state"] == "unresolved_call_order"
 
 
 def test_cache_single_slot_replay_uses_numeric_binary64_equality_and_current_source():
@@ -570,7 +728,7 @@ def test_overlapping_poll_calls_for_one_cache_slot_are_rejected():
         _event("exit", 8, process_generation_id=proc, exit_code=0, signal=None),
         _event("reap", 9, process_generation_id=proc),
     ]
-    with pytest.raises(JournalV5Error, match="poll calls overlap"):
+    with pytest.raises(JournalV5Error, match="driver loop event occurs before a prior poll_end"):
         inspect_untrusted_v5_journal(_journal(events))
 
 

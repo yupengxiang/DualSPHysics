@@ -262,6 +262,10 @@ def _validate_event(event: Any, *, expected_seq: int, nonce: str) -> dict[str, A
         _finite_binary64_hex(event["time_max_ieee754_hex"], "loop_guard.time_max_ieee754_hex")
         if type(event["condition_result"]) is not bool:
             raise JournalV5Error("loop_guard.condition_result must be an exact boolean")
+        time_step = struct.unpack(">d", bytes.fromhex(event["time_step_ieee754_hex"]))[0]
+        time_max = struct.unpack(">d", bytes.fromhex(event["time_max_ieee754_hex"]))[0]
+        if event["condition_result"] is not (time_step < time_max):
+            raise JournalV5Error("loop_guard.condition_result differs from strict binary64 time comparison")
     elif kind == "poll_begin":
         if _builtin_int(event["poll_begin_id"], "poll_begin.poll_begin_id") != expected_seq:
             raise JournalV5Error("poll_begin_id must equal its event seq")
@@ -456,6 +460,10 @@ def _observe_query_and_cache(
     process_exec_epoch: dict[tuple[Any, ...], int] = {}
     guard_exec_epoch: dict[int, int] = {}
     clone_cache_unknown: set[tuple[Any, ...]] = set()
+    driver_loops: dict[tuple[Any, ...], dict[str, Any]] = {}
+    latest_guard_by_driver: dict[tuple[Any, ...], int] = {}
+    polls_by_driver: dict[tuple[Any, ...], list[int]] = {}
+    reported_unclosed_driver_polls: set[int] = set()
     linked_query_count = 0
     unknown_cache_source_count = 0
     hit_with_unknown_source_count = 0
@@ -463,6 +471,23 @@ def _observe_query_and_cache(
     exec_epoch_reset_count = 0
     unresolved_clone_poll_count = 0
     unclosed_prior_poll_count = 0
+    driver_unclosed_poll_count = 0
+
+    def check_prior_driver_polls(driver_key: tuple[Any, ...], boundary_seq: int) -> None:
+        nonlocal driver_unclosed_poll_count
+        for begin_seq in polls_by_driver.get(driver_key, []):
+            if begin_seq >= boundary_seq:
+                continue
+            end_seq = end_seq_by_begin.get(begin_seq)
+            if end_seq is not None:
+                if end_seq > boundary_seq:
+                    raise JournalV5Error("driver loop event occurs before a prior poll_end")
+            elif begin_seq not in reported_unclosed_driver_polls:
+                reported_unclosed_driver_polls.add(begin_seq)
+                driver_unclosed_poll_count += 1
+                driver_state = driver_loops.get(driver_key)
+                if driver_state is not None:
+                    driver_state["unclosed_poll_count"] += 1
 
     for event in events:
         kind = event["kind"]
@@ -490,7 +515,26 @@ def _observe_query_and_cache(
             continue
         if kind == "loop_guard":
             process_key = _process_key(event["process_generation_id"])
-            guard_exec_epoch[event["seq"]] = process_exec_epoch.get(process_key, 0)
+            epoch = process_exec_epoch.get(process_key, 0)
+            guard_exec_epoch[event["seq"]] = epoch
+            driver_key = (process_key, epoch, event["driver_id"])
+            check_prior_driver_polls(driver_key, event["seq"])
+            driver_state = driver_loops.setdefault(driver_key, {
+                "iteration_ids": set(),
+                "termination_guard_count": 0,
+                "terminated": False,
+                "unclosed_poll_count": 0,
+            })
+            if driver_state["terminated"]:
+                raise JournalV5Error("driver loop guard occurred after its terminal false guard")
+            iteration_id = event["loop_iteration_id"]
+            if iteration_id in driver_state["iteration_ids"]:
+                raise JournalV5Error("driver loop iteration id is duplicated within one exec epoch")
+            driver_state["iteration_ids"].add(iteration_id)
+            latest_guard_by_driver[driver_key] = event["seq"]
+            if event["condition_result"] is False:
+                driver_state["termination_guard_count"] += 1
+                driver_state["terminated"] = True
             continue
         if kind != "poll_begin":
             continue
@@ -505,6 +549,14 @@ def _observe_query_and_cache(
                 or guard_exec_epoch.get(event["guard_seq"]) != process_exec_epoch.get(process_key, 0)):
             raise JournalV5Error("poll_begin does not match its true same-generation driver/iteration guard")
         linked_query_count += 1
+        driver_key = (process_key, process_exec_epoch.get(process_key, 0), event["driver_id"])
+        driver_state = driver_loops.get(driver_key)
+        if driver_state is None or driver_state["terminated"]:
+            raise JournalV5Error("poll_begin occurs outside an active observed driver loop")
+        if latest_guard_by_driver.get(driver_key) != event["guard_seq"]:
+            raise JournalV5Error("poll_begin references a stale driver loop guard")
+        check_prior_driver_polls(driver_key, event["seq"])
+        polls_by_driver.setdefault(driver_key, []).append(event["seq"])
 
         instance_key = (
             process_key,
@@ -576,7 +628,13 @@ def _observe_query_and_cache(
         or exec_epoch_reset_count > 0
         or unresolved_clone_poll_count > 0
         or unclosed_prior_poll_count > 0
+        or driver_unclosed_poll_count > 0
         or unterminated_hit_count > 0
+    )
+    terminated_driver_loop_count = sum(state["terminated"] for state in driver_loops.values())
+    observed_driver_loops_complete = bool(driver_loops) and (
+        terminated_driver_loop_count == len(driver_loops)
+        and all(state["unclosed_poll_count"] == 0 for state in driver_loops.values())
     )
     return {
         "query_guard_link_count": linked_query_count,
@@ -586,13 +644,22 @@ def _observe_query_and_cache(
         "cache_exec_epoch_reset_count": exec_epoch_reset_count,
         "cache_fork_unresolved_poll_count": unresolved_clone_poll_count,
         "cache_unclosed_prior_poll_count": unclosed_prior_poll_count,
+        "driver_unclosed_poll_count": driver_unclosed_poll_count,
+        "observed_driver_loop_count": len(driver_loops),
+        "observed_driver_loop_termination_guard_count": sum(
+            state["termination_guard_count"] for state in driver_loops.values()
+        ),
+        "observed_driver_loops_complete": observed_driver_loops_complete,
+        "driver_loop_termination_verified": False,
         "query_guard_links_observed_consistent": True,
         "cache_transitions_observed_consistent": (
-            unresolved_clone_poll_count == 0 and unclosed_prior_poll_count == 0
+            unresolved_clone_poll_count == 0
+            and unclosed_prior_poll_count == 0
+            and driver_unclosed_poll_count == 0
         ),
         "cache_replay_diagnostic_state": (
             "unresolved_fork_cache_state" if unresolved_clone_poll_count > 0
-            else "unresolved_call_order" if unclosed_prior_poll_count > 0
+            else "unresolved_call_order" if unclosed_prior_poll_count > 0 or driver_unclosed_poll_count > 0
             else "incomplete_poll_state" if unterminated_hit_count > 0
             else "unresolved_output_state" if has_unknown_state
             else "journal_local_consistent_unverified"
