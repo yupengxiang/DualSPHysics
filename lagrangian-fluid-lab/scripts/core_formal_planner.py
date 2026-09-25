@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Plan the nine formal Core learning jobs without launching them.
+"""Audit metadata for the nine formal Core learning jobs without launching.
 
-The planner is deliberately a metadata gate.  It does not open trajectory
-HDF5 files, submit jobs, update a ledger, or turn a qualification/canary row
-into a production case.  A plan is emitted only after the portable manifest,
-per-case audit evidence, lineage partition, code bundle, environment, and a
-measured resource profile are all bound.
+The current Mapping/JSON-path interface has no source-bound trusted admission
+capability, so it is diagnostic-only and always holds formal job emission,
+even when its metadata, code bundle, environment, and resource profile appear
+complete.  This module does not open trajectory HDF5 files, submit jobs,
+update a ledger, or turn a qualification/canary row into a production case.
+Formal specifications require a future verified admission interface.
 
 The training command in each emitted specification is the existing
 ``scripts/core_learning.py train`` command.  In particular, this module does
@@ -574,11 +575,19 @@ def _family_global_markers(family: str, global_rows: Iterable[Mapping[str, Any]]
 
 def inspect_inputs(manifest: Any, *, evidence: Sequence[Any] | Any | None = None,
                    data_root: str | Path | None = None) -> dict[str, Any]:
-    """Audit manifest/evidence metadata and return a launch gate report."""
+    """Audit metadata diagnostically; it cannot authorize formal jobs.
+
+    The current Mapping/JSON-path inputs are not accompanied by a verified
+    source-bound admission capability.  Until that capability exists, keep a
+    permanent hold even when all descriptive metadata claims a pass.
+    """
     root = Path(data_root).expanduser().resolve() if data_root is not None else None
     payload, manifest_path = _load_json(manifest, data_root=root)
     if not isinstance(payload, Mapping):
         raise ValueError("formal manifest must be a JSON object")
+    hold_reasons: list[str] = [
+        "trusted formal admission capability is unavailable; Mapping/path metadata is diagnostic-only"
+    ]
     rows = _iter_rows(payload)
     evidence_sources = [] if evidence is None else (list(evidence) if isinstance(evidence, (list, tuple)) else [evidence])
     evidence_case_rows: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
@@ -622,7 +631,6 @@ def inspect_inputs(manifest: Any, *, evidence: Sequence[Any] | Any | None = None
                 audit_refs[str(audit_path)] = _ref(audit_path)
 
     all_case_ids = [_case_id(row) for row in rows]
-    hold_reasons: list[str] = []
     duplicate_case_ids = sorted(case_id for case_id, count in Counter(all_case_ids).items()
                                  if case_id is not None and count > 1)
     if duplicate_case_ids:
@@ -733,11 +741,11 @@ def inspect_inputs(manifest: Any, *, evidence: Sequence[Any] | Any | None = None
 
     # Per-case evidence must establish T1 and a hard/structural audit.  A
     # family-level qualification record may supply T1 status, while the audit
-    # still has to be present for every production row.
+    # still has to be present for every production row.  These marker checks
+    # are diagnostic only; without a trusted admission capability, no family
+    # T1 result is exported as verified.
     missing_evidence, t1_failures, audit_failures = [], [], []
     t1_binding_failures = []
-    family_t1: dict[str, bool | None] = {}
-    family_t1_rows: dict[str, list[bool]] = defaultdict(list)
     for item in production:
         family = item["family"]
         values = item["evidence"]
@@ -757,8 +765,6 @@ def inspect_inputs(manifest: Any, *, evidence: Sequence[Any] | Any | None = None
                 family, evidence_global_rows, case_row=row), _T1_KEYS)
         if t1 is not True:
             t1_failures.append(item["case_id"])
-        else:
-            family_t1_rows[family].append(True)
         # Audit payloads are linked through the manifest's case-specific
         # reference, so they need not repeat scope/recipe fields.  An inline
         # row audit is also accepted only because it is nested under this row.
@@ -767,11 +773,6 @@ def inspect_inputs(manifest: Any, *, evidence: Sequence[Any] | Any | None = None
         # remains unresolved; never treat a path string as a pass marker.
         if audit is not True:
             audit_failures.append(item["case_id"])
-    for family in families:
-        family_t1[family] = (True if len(family_t1_rows.get(family, [])) == family_counts[family]
-                             else False if any(item["case_id"] in t1_failures
-                                               for item in production if item["family"] == family)
-                             else _bool_marker(_family_global_markers(family, evidence_global_rows), _T1_KEYS))
     if missing_evidence:
         hold_reasons.append("missing per-case qualification/audit evidence: " + ", ".join(sorted(missing_evidence)))
     if t1_failures:
@@ -804,7 +805,7 @@ def inspect_inputs(manifest: Any, *, evidence: Sequence[Any] | Any | None = None
         "validation_family_counts": dict(sorted(validation_counts.items())),
         "split_counts": dict(sorted(split_counts.items())),
         "families": families,
-        "family_t1": dict(sorted(family_t1.items())),
+        "family_t1": {family: None for family in families},
         "lineage_isolation": {
             "passed": not lineage_split_violations and not lineage_family_violations,
             "split_violations": lineage_split_violations,
@@ -815,6 +816,7 @@ def inspect_inputs(manifest: Any, *, evidence: Sequence[Any] | Any | None = None
         "physical_split_violations": physical_split_violations,
         "qualification_leaks": sorted(qualification_leaks),
         "evidence": unique_evidence_refs,
+        "admission_basis": "metadata_only_untrusted",
         "hold_reasons": sorted(set(hold_reasons)),
         "formal_eligible": not hold_reasons,
     }

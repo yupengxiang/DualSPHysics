@@ -6,7 +6,7 @@ import sys
 
 import pytest
 
-from scripts.core_formal_planner import (CASES_PER_FAMILY, MILESTONES, MODELS, REQUIRED_CODE_FILES,
+from scripts.core_formal_planner import (CASES_PER_FAMILY, MODELS, REQUIRED_CODE_FILES,
                                          SEEDS, _qualification_marker, build_plan, inspect_inputs,
                                          main, sha256_file)
 
@@ -51,21 +51,34 @@ def _ready_plan(tmp_path):
                       output_dir=tmp_path / "specs")
 
 
-def test_complete_manifest_emits_exact_nine_specs_and_frozen_protocol(tmp_path):
+def test_complete_metadata_manifest_cannot_authorize_nine_formal_jobs(tmp_path):
     plan = _ready_plan(tmp_path)
-    assert plan["status"] == "ready"
-    assert plan["formal_job_count"] == len(MODELS) * len(SEEDS) == 9
-    assert len(plan["spec_paths"]) == 9
-    job = json.loads(Path(plan["spec_paths"][0]).read_text())
-    assert job["training_protocol"]["updates"] == 32000
-    assert job["training_protocol"]["checkpoint_milestones"] == list(MILESTONES)
-    assert job["training_protocol"]["full_validation_rollout_at_each_milestone"] is True
-    assert job["training_protocol"]["test_included"] is False
-    assert job["resume"]["supported"] is True
-    assert "--resume" in job["resume_argv"]
-    assert job["source_snapshot_policy"]["inherited_profile_argv"] is False
-    assert job["resources"]["profile_sha256"]
-    assert job["bindings"]["code_files"]
+    assert plan["status"] == "hold"
+    assert plan["launch_allowed"] is False
+    assert plan["formal_job_count"] == 0
+    assert plan["required_job_count"] == len(MODELS) * len(SEEDS) == 9
+    assert plan["spec_paths"] == []
+    assert plan["audit"]["formal_eligible"] is False
+    assert plan["audit"]["admission_basis"] == "metadata_only_untrusted"
+    assert set(plan["audit"]["family_t1"].values()) == {None}
+    assert any("trusted formal admission capability is unavailable"
+               in reason for reason in plan["hold_reasons"])
+    assert not (tmp_path / "specs").exists()
+
+
+def test_complete_in_memory_mapping_is_also_diagnostic_only(tmp_path):
+    _, payload = _manifest(tmp_path)
+    report = inspect_inputs(payload)
+    plan = build_plan(
+        payload, profile=_profile(), environment=_environment(),
+        data_root=tmp_path, code_root=Path(__file__).parents[1],
+    )
+    assert report["formal_eligible"] is False
+    assert report["admission_basis"] == "metadata_only_untrusted"
+    assert report["family_t1"] == {"F1": None, "F2": None, "F4": None}
+    assert plan["status"] == "hold"
+    assert plan["launch_allowed"] is False
+    assert plan["formal_job_count"] == 0
 
 
 def _source_snapshot() -> dict:
@@ -90,7 +103,9 @@ def test_explicit_source_snapshot_is_hash_and_byte_bound(tmp_path):
         data_root=tmp_path, code_root=Path(__file__).parents[1],
         source_snapshot=snapshot,
     )
-    assert plan["status"] == "ready"
+    assert plan["status"] == "hold"
+    assert plan["formal_job_count"] == 0
+    assert plan["launch_allowed"] is False
     assert plan["source_snapshot"]["verified"] is True
 
     snapshot["files"][0]["sha256"] = "0" * 64
@@ -132,7 +147,9 @@ def test_source_snapshot_directory_is_compared_to_code_root(tmp_path):
         manifest_path, profile=_profile(), environment=_environment(),
         data_root=tmp_path, code_root=root, source_snapshot=snapshot_dir,
     )
-    assert plan["status"] == "ready"
+    assert plan["status"] == "hold"
+    assert plan["formal_job_count"] == 0
+    assert plan["launch_allowed"] is False
     assert plan["source_snapshot"]["verified"] is True
 
     broken_file = snapshot_dir / REQUIRED_CODE_FILES[0]

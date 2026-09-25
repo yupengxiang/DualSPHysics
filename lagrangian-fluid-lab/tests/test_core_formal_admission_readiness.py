@@ -88,7 +88,9 @@ def test_current_planner_reproduces_the_blocked_admission_without_writing_specs(
     assert report["audit"]["families"] == ["F3"]
     assert report["audit"]["manifest_formal_release"] is False
     assert report["audit"]["formal_eligible"] is False
-    assert len(report["audit"]["hold_reasons"]) == 3
+    assert len(report["audit"]["hold_reasons"]) == 4
+    assert any("trusted formal admission capability is unavailable" in reason
+               for reason in report["audit"]["hold_reasons"])
     assert data["planner_observation"]["audit"]["hard_audit_failure_case_count"] == 32
 
 
