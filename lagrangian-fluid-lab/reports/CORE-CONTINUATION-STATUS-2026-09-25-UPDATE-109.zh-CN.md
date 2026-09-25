@@ -16,6 +16,8 @@
 
 本轮只处理小型合成 Git 仓库和 tracked source bytes；未读取 production bundle/HDF5/one-shot receipt，未运行 planner/tick/canary/preparation/GenCase/native/solver/worker/GPU/queue。F8 T1、完整可信 source/build/runtime closure 与 PLAN Core 完成条件仍未满足。
 
+注：本报告记录 UPDATE-109 初版实现。后续只读复审发现其 Git 环境、HEAD 固定、根目录绑定和读取上限仍需加固；当前实现与修复测试以 [UPDATE-110](CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-110.zh-CN.md) 为准。
+
 ## 后续依赖
 
 下一步需提供并固定受支持的 C++ frontend 与精确 build feature/flags，再实现 source function-definition range、normalized AST 和 ordered call edge 重算；之后才可做 runtime/config topology 与 journal entry 的绑定。除此之外，event-source completeness、active-window/table provenance、outer evidence/attempt binding 和可信 consumer 仍未闭合。

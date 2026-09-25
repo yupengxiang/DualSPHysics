@@ -2,10 +2,12 @@
 import hashlib
 import json
 import math
+import shlex
 import subprocess
 import struct
 
 import pytest
+import scripts.f8_r008_c_execution_journal_v5 as journal_v5
 
 from scripts.f8_r008_c_execution_journal_v5 import (
     JOURNAL_SCHEMA,
@@ -15,7 +17,7 @@ from scripts.f8_r008_c_execution_journal_v5 import (
     inspect_untrusted_v5_journal,
     inspect_untrusted_v5_journal_with_source_callgraph,
     inspect_untrusted_v5_source_callgraph,
-    inspect_untrusted_v5_source_callgraph_against_clean_git_head,
+    inspect_untrusted_v5_source_callgraph_against_git_head,
 )
 
 
@@ -366,12 +368,12 @@ def test_source_callgraph_rejects_runtime_identity_copy_mismatch_and_bool_input_
         inspect_untrusted_v5_source_callgraph(_source_callgraph(instances=[instance]))
 
 
-def test_source_callgraph_fragment_raw_hash_is_rechecked_against_clean_git_head(tmp_path):
+def _synthetic_source_repo(tmp_path, files):
     repo = tmp_path / "repo"
-    source_path = repo / "src" / "source" / "main.cpp"
-    source_path.parent.mkdir(parents=True)
-    source_bytes = b"int main() { return 0; }\n"
-    source_path.write_bytes(source_bytes)
+    for relative_path, contents in files.items():
+        source_path = repo / relative_path
+        source_path.parent.mkdir(parents=True, exist_ok=True)
+        source_path.write_bytes(contents)
     subprocess.run(
         ["git", "init", "--quiet", "--initial-branch=main", str(repo)],
         check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -382,44 +384,217 @@ def test_source_callgraph_fragment_raw_hash_is_rechecked_against_clean_git_head(
             check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         )
     subprocess.run(
-        ["git", "-C", str(repo), "add", "src/source/main.cpp"],
+        ["git", "-C", str(repo), "add", *files],
         check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
     )
     subprocess.run(
         ["git", "-C", str(repo), "commit", "--quiet", "-m", "synthetic source snapshot"],
         check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
     )
+    return repo
 
-    fragment = {
-        "function_id": "main.dispatch",
-        "source_file_object_id": "source.main_cpp",
+
+def _source_fragment_for_test(function_id, object_id, source_bytes):
+    return {
+        "function_id": function_id,
+        "source_file_object_id": object_id,
         "byte_start": 0,
         "byte_end": len(source_bytes),
         "fragment_raw_sha256": hashlib.sha256(source_bytes).hexdigest(),
         "normalized_ast_sha256": "d" * 64,
         "ordered_call_edges": [],
     }
+
+
+def test_source_callgraph_fragment_raw_hash_is_rechecked_against_pinned_git_head(tmp_path):
+    source_bytes = b"int main() { return 0; }\n"
+    repo = _synthetic_source_repo(tmp_path, {"src/source/main.cpp": source_bytes})
+    source_path = repo / "src" / "source" / "main.cpp"
+    fragment = _source_fragment_for_test("main.dispatch", "source.main_cpp", source_bytes)
     graph = _source_callgraph(fragments=[fragment])
-    result = inspect_untrusted_v5_source_callgraph_against_clean_git_head(graph, repo)
-    assert result["status"] == "untrusted_v5_source_fragment_bytes_match_clean_git_head"
-    assert result["source_fragment_raw_hashes_match_clean_git_head"] is True
+    result = inspect_untrusted_v5_source_callgraph_against_git_head(graph, repo)
+    assert result["status"] == "untrusted_v5_source_fragment_bytes_match_git_head_snapshot"
+    assert result["source_fragment_raw_hashes_match_git_head_snapshot"] is True
     assert result["source_function_definition_ranges_verified"] is False
     assert result["source_fragments_reparsed_from_source"] is False
     assert result["source_tree_sha256_matched_build_attestation"] is False
     assert result["source_callgraph_verified"] is False
     assert result["gate_state"] == "open"
+    assert result["git_head_commit_at_start_and_end_matched"] is True
 
     wrong_fragment = {**fragment, "fragment_raw_sha256": "a" * 64}
-    mismatch = inspect_untrusted_v5_source_callgraph_against_clean_git_head(
+    mismatch = inspect_untrusted_v5_source_callgraph_against_git_head(
         _source_callgraph(fragments=[wrong_fragment]), repo,
     )
     assert mismatch["status"] == "untrusted_v5_source_fragment_bytes_mismatch"
     assert mismatch["source_fragment_mismatch_function_ids"] == ["main.dispatch"]
     assert mismatch["gate_state"] == "open"
 
+    source_path.write_bytes(b"staged-only difference\n")
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "src/source/main.cpp"],
+        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+    source_path.write_bytes(source_bytes)
+    staged_index_result = inspect_untrusted_v5_source_callgraph_against_git_head(graph, repo)
+    assert staged_index_result["source_fragment_raw_hashes_match_git_head_snapshot"] is True
+
     source_path.write_bytes(b"int main() { return 1; }\n")
-    with pytest.raises(JournalV5Error, match="clean Git worktree"):
-        inspect_untrusted_v5_source_callgraph_against_clean_git_head(graph, repo)
+    with pytest.raises(JournalV5Error, match="pinned Git blob"):
+        inspect_untrusted_v5_source_callgraph_against_git_head(graph, repo)
+
+
+def test_git_environment_redirection_and_fsmonitor_hook_are_not_used(tmp_path, monkeypatch):
+    original_bytes = b"int main() { return 0; }\n"
+    repo = _synthetic_source_repo(tmp_path / "original", {"src/source/main.cpp": original_bytes})
+    expected_head = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"], check=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    ).stdout.decode().strip()
+    decoy = _synthetic_source_repo(
+        tmp_path / "decoy", {"src/source/main.cpp": b"int main() { return 999; }\n"},
+    )
+    marker = tmp_path / "fsmonitor-ran"
+    hook = tmp_path / "fsmonitor-hook.sh"
+    hook.write_text(f"#!/bin/sh\nprintf x > {shlex.quote(str(marker))}\n")
+    hook.chmod(0o755)
+    subprocess.run(
+        ["git", "-C", str(repo), "config", "core.fsmonitor", f"sh {shlex.quote(str(hook))}"],
+        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+
+    monkeypatch.setenv("GIT_DIR", str(decoy / ".git"))
+    monkeypatch.setenv("GIT_WORK_TREE", str(decoy))
+    observed_git_args = []
+    original_git_read = journal_v5._git_read
+
+    def record_git_args(root, args, label, *, env=None):
+        observed_git_args.append(tuple(args))
+        return original_git_read(root, args, label, env=env)
+
+    monkeypatch.setattr(journal_v5, "_git_read", record_git_args)
+    fragment = _source_fragment_for_test("main.dispatch", "source.main_cpp", original_bytes)
+    result = inspect_untrusted_v5_source_callgraph_against_git_head(
+        _source_callgraph(fragments=[fragment]), repo,
+    )
+    assert result["git_head_commit_observed"] == expected_head
+    assert result["source_fragment_raw_hashes_match_git_head_snapshot"] is True
+    assert not any(args and args[0] == "status" for args in observed_git_args)
+    assert not marker.exists()
+
+
+def test_git_head_is_pinned_and_movement_during_inspection_fails_closed(tmp_path, monkeypatch):
+    source_path = "src/source/main.cpp"
+    bytes_a = b"int main() { return 1; }\n"
+    bytes_b = b"int main() { return 2; }\n"
+    repo = _synthetic_source_repo(tmp_path, {source_path: bytes_a})
+    commit_a = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"], check=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    ).stdout.decode().strip()
+    (repo / source_path).write_bytes(bytes_b)
+    subprocess.run(
+        ["git", "-C", str(repo), "add", source_path], check=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "--quiet", "-m", "second snapshot"],
+        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+    original_git_read = journal_v5._git_read
+    head_capture_count = 0
+
+    def move_head_after_capture(root, args, label, *, env=None):
+        nonlocal head_capture_count
+        result = original_git_read(root, args, label, env=env)
+        if args == ["rev-parse", "--verify", "HEAD^{commit}"]:
+            head_capture_count += 1
+            if head_capture_count == 1:
+                subprocess.run(
+                    ["git", "-C", str(repo), "checkout", "--quiet", "--detach", commit_a],
+                    check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                )
+        return result
+
+    monkeypatch.setattr(journal_v5, "_git_read", move_head_after_capture)
+    fragment = _source_fragment_for_test("main.dispatch", "source.main_cpp", bytes_a)
+    with pytest.raises(JournalV5Error, match="pinned Git blob"):
+        inspect_untrusted_v5_source_callgraph_against_git_head(
+            _source_callgraph(fragments=[fragment]), repo,
+        )
+
+
+def test_git_and_worktree_reads_stay_bound_to_open_repository_root(tmp_path, monkeypatch):
+    original_bytes = b"int main() { return 1; }\n"
+    replacement_bytes = b"int main() { return 2; }\n"
+    repo = _synthetic_source_repo(
+        tmp_path / "original", {"src/source/main.cpp": original_bytes},
+    )
+    replacement = _synthetic_source_repo(
+        tmp_path / "replacement", {"src/source/main.cpp": replacement_bytes},
+    )
+    moved_repo = repo.with_name("repo-original")
+    original_git_read = journal_v5._git_read
+    replaced = False
+
+    def replace_root_after_git_probe(root, args, label, *, env=None):
+        nonlocal replaced
+        result = original_git_read(root, args, label, env=env)
+        if args == ["rev-parse", "--show-toplevel"] and not replaced:
+            repo.rename(moved_repo)
+            replacement.rename(repo)
+            replaced = True
+        return result
+
+    monkeypatch.setattr(journal_v5, "_git_read", replace_root_after_git_probe)
+    fragment = _source_fragment_for_test(
+        "main.dispatch", "source.main_cpp", replacement_bytes,
+    )
+    with pytest.raises(JournalV5Error, match="repository root path changed"):
+        inspect_untrusted_v5_source_callgraph_against_git_head(
+            _source_callgraph(fragments=[fragment]), repo,
+        )
+
+
+def test_source_inspection_enforces_per_file_and_aggregate_caps(tmp_path, monkeypatch):
+    monkeypatch.setattr(journal_v5, "MAX_SOURCE_FILE_BYTES", 100)
+    monkeypatch.setattr(journal_v5, "MAX_SOURCE_TOTAL_BYTES", 150)
+    single_bytes = b"x" * 101
+    repo = _synthetic_source_repo(tmp_path / "single", {"src/source/main.cpp": single_bytes})
+    fragment = _source_fragment_for_test("main.dispatch", "source.main_cpp", single_bytes)
+    with pytest.raises(JournalV5Error, match="per-file inspection cap"):
+        inspect_untrusted_v5_source_callgraph_against_git_head(
+            _source_callgraph(fragments=[fragment]), repo,
+        )
+
+    first_bytes = b"a" * 80
+    second_bytes = b"b" * 80
+    repo = _synthetic_source_repo(tmp_path / "aggregate", {
+        "src/source/main.cpp": first_bytes,
+        "src/source/JSph.cpp": second_bytes,
+    })
+    fragments = [
+        _source_fragment_for_test("main.dispatch", "source.main_cpp", first_bytes),
+        _source_fragment_for_test("jsph.load_case_config", "source.jsph_cpp", second_bytes),
+    ]
+    with pytest.raises(JournalV5Error, match="aggregate inspection cap"):
+        inspect_untrusted_v5_source_callgraph_against_git_head(
+            _source_callgraph(fragments=fragments), repo,
+        )
+
+
+def test_source_inspection_rejects_symlinked_source_directory(tmp_path):
+    source_bytes = b"int main() { return 0; }\n"
+    repo = _synthetic_source_repo(tmp_path, {"src/source/main.cpp": source_bytes})
+    source_dir = repo / "src" / "source"
+    moved_source_dir = repo / "src" / "source-real"
+    source_dir.rename(moved_source_dir)
+    source_dir.symlink_to(moved_source_dir, target_is_directory=True)
+    fragment = _source_fragment_for_test("main.dispatch", "source.main_cpp", source_bytes)
+    with pytest.raises(JournalV5Error, match="cannot safely read allowlisted source path"):
+        inspect_untrusted_v5_source_callgraph_against_git_head(
+            _source_callgraph(fragments=[fragment]), repo,
+        )
 
 
 def test_main_callgraph_schedule_matches_observed_guard_but_never_authorizes():

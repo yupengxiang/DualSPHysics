@@ -27,6 +27,8 @@ SOURCE_CALLGRAPH_SCHEMA = "core.cfd.f8.r008_c_execution_source_callgraph.synthet
 SOURCE_CALLGRAPH_OBJECT_ID = "f8-r008-source-callgraph-v5"
 MAX_RAW_BYTES = 1_073_741_824
 MAX_EVENT_COUNT = 100_000_000
+MAX_SOURCE_FILE_BYTES = 1_048_576
+MAX_SOURCE_TOTAL_BYTES = 2_097_152
 _HEX16 = re.compile(r"^[0-9a-f]{16}$")
 _HEX32 = re.compile(r"^[0-9a-f]{32}$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -996,77 +998,162 @@ def inspect_untrusted_v5_source_callgraph(
     return result
 
 
-def _git_read(root: Path, args: list[str], label: str) -> bytes:
+def _controlled_git_environment() -> dict[str, str]:
+    """Keep inherited Git variables/config from redirecting snapshot reads."""
+    env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+    env.update({
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_OPTIONAL_LOCKS": "0",
+        "GIT_TERMINAL_PROMPT": "0",
+    })
+    return env
+
+
+def _git_read(
+    root: Path | int,
+    args: list[str],
+    label: str,
+    *,
+    env: dict[str, str] | None = None,
+) -> bytes:
+    if isinstance(root, int):
+        cwd: str | Path = f"/proc/self/fd/{root}"
+        pass_fds = (root,)
+    else:
+        cwd = root
+        pass_fds = ()
     try:
         completed = subprocess.run(
-            ["git", *args], cwd=root, check=True,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            [
+                "git", "--no-pager", "--no-optional-locks",
+                "-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null",
+                *args,
+            ],
+            cwd=cwd, pass_fds=pass_fds,
+            env=env if env is not None else _controlled_git_environment(),
+            stdin=subprocess.DEVNULL, check=True,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30,
         )
-    except (OSError, subprocess.CalledProcessError) as error:
-        raise JournalV5Error(f"cannot inspect clean Git source snapshot: {label}") from error
+    except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+        raise JournalV5Error(f"cannot inspect pinned Git source snapshot: {label}") from error
     return completed.stdout
 
 
-def _read_source_path_nofollow(root: Path, relative_path: str) -> bytes:
-    """Read one fixed source path via directory FDs and reject symlinks."""
+def _worktree_source_matches_blob(repository_fd: int, relative_path: str, expected_bytes: bytes) -> None:
+    """Compare a no-follow worktree read with one already bounded Git blob."""
     directory_flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_CLOEXEC", 0)
     nofollow = getattr(os, "O_NOFOLLOW", 0)
     if not nofollow or not getattr(os, "O_DIRECTORY", 0):
         raise JournalV5Error("platform lacks no-follow directory-FD source inspection")
-    root_fd: int | None = None
+    source_root_fd: int | None = None
     parent_fd: int | None = None
     file_fd: int | None = None
     try:
-        root_fd = os.open(root, directory_flags | nofollow)
-        parent_fd = root_fd
+        source_root_fd = os.dup(repository_fd)
+        if not stat.S_ISDIR(os.fstat(source_root_fd).st_mode):
+            raise JournalV5Error("pinned repository descriptor is not a directory")
+        parent_fd = source_root_fd
         parts = relative_path.split("/")
         for part in parts[:-1]:
             child_fd = os.open(part, directory_flags | nofollow, dir_fd=parent_fd)
-            if parent_fd != root_fd:
+            if parent_fd != source_root_fd:
                 os.close(parent_fd)
             parent_fd = child_fd
         file_fd = os.open(
             parts[-1], os.O_RDONLY | os.O_CLOEXEC | nofollow, dir_fd=parent_fd,
         )
         before = os.fstat(file_fd)
-        if not stat.S_ISREG(before.st_mode) or before.st_size > 268_435_456:
-            raise JournalV5Error("allowlisted worktree source is not a bounded regular file")
-        chunks: list[bytes] = []
-        remaining = before.st_size
-        while remaining:
-            chunk = os.read(file_fd, min(1_048_576, remaining))
+        if (
+            not stat.S_ISREG(before.st_mode)
+            or before.st_size != len(expected_bytes)
+            or before.st_size > MAX_SOURCE_FILE_BYTES
+        ):
+            raise JournalV5Error("allowlisted worktree source is not the bounded Git blob size")
+        offset = 0
+        bytes_match = True
+        while offset < len(expected_bytes):
+            chunk = os.read(file_fd, min(65_536, len(expected_bytes) - offset))
             if not chunk:
                 break
-            chunks.append(chunk)
-            remaining -= len(chunk)
-        source_bytes = b"".join(chunks)
+            if chunk != memoryview(expected_bytes)[offset:offset + len(chunk)]:
+                bytes_match = False
+            offset += len(chunk)
+        trailing = os.read(file_fd, 1)
         after = os.fstat(file_fd)
         stable_before = (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns, before.st_ctime_ns)
         stable_after = (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns, after.st_ctime_ns)
-        if remaining != 0 or stable_before != stable_after or len(source_bytes) != before.st_size:
+        if offset != len(expected_bytes) or trailing or stable_before != stable_after:
             raise JournalV5Error("allowlisted worktree source changed during snapshot read")
-        return source_bytes
+        if not bytes_match:
+            raise JournalV5Error(f"worktree source bytes differ from pinned Git blob: {relative_path}")
     except OSError as error:
         raise JournalV5Error(f"cannot safely read allowlisted source path: {relative_path}") from error
     finally:
         if file_fd is not None:
             os.close(file_fd)
-        if parent_fd is not None and parent_fd != root_fd:
+        if parent_fd is not None and parent_fd != source_root_fd:
             os.close(parent_fd)
-        if root_fd is not None:
-            os.close(root_fd)
+        if source_root_fd is not None:
+            os.close(source_root_fd)
 
 
-def inspect_untrusted_v5_source_callgraph_against_clean_git_head(
+def _open_repository_root(root: Path) -> tuple[int, tuple[int, int]]:
+    directory_flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_CLOEXEC", 0)
+    nofollow = getattr(os, "O_NOFOLLOW", 0)
+    if not nofollow or not getattr(os, "O_DIRECTORY", 0):
+        raise JournalV5Error("platform lacks no-follow directory-FD repository inspection")
+    repository_fd: int | None = None
+    try:
+        repository_fd = os.open(root, directory_flags | nofollow)
+        opened = os.fstat(repository_fd)
+        named = os.stat(root, follow_symlinks=False)
+    except OSError as error:
+        if repository_fd is not None:
+            os.close(repository_fd)
+        raise JournalV5Error("cannot pin repository root directory") from error
+    assert repository_fd is not None
+    identity = (opened.st_dev, opened.st_ino)
+    if (
+        not stat.S_ISDIR(opened.st_mode)
+        or not stat.S_ISDIR(named.st_mode)
+        or identity != (named.st_dev, named.st_ino)
+    ):
+        os.close(repository_fd)
+        raise JournalV5Error("repository root path changed while pinning its directory")
+    return repository_fd, identity
+
+
+def _verify_repository_root_identity(
+    root: Path,
+    repository_fd: int,
+    expected_identity: tuple[int, int],
+) -> None:
+    try:
+        opened = os.fstat(repository_fd)
+        named = os.stat(root, follow_symlinks=False)
+    except OSError as error:
+        raise JournalV5Error("repository root path changed during source inspection") from error
+    if (
+        not stat.S_ISDIR(opened.st_mode)
+        or not stat.S_ISDIR(named.st_mode)
+        or (opened.st_dev, opened.st_ino) != expected_identity
+        or (named.st_dev, named.st_ino) != expected_identity
+    ):
+        raise JournalV5Error("repository root path changed during source inspection")
+
+
+def inspect_untrusted_v5_source_callgraph_against_git_head(
     raw: bytes,
     repository_root: str | Path,
     *,
     source_callgraph_binding: Any = None,
 ) -> dict[str, Any]:
-    """Compare declared fragment raw hashes with allowlisted blobs at clean HEAD.
+    """Compare declared fragment raw hashes with bounded blobs at one Git HEAD.
 
     This verifies byte-slice equality only. It does not prove that offsets span
     the named C++ function, recompute AST/call edges, or bind HEAD to a build.
+    Referenced worktree files must match the pinned blobs; the index need not be clean.
     """
     graph_result = inspect_untrusted_v5_source_callgraph(
         raw, source_callgraph_binding=source_callgraph_binding, _include_topology=True,
@@ -1077,26 +1164,42 @@ def inspect_untrusted_v5_source_callgraph_against_clean_git_head(
         raise JournalV5Error("repository_root is not an existing directory") from error
     if not root.is_dir():
         raise JournalV5Error("repository_root is not a directory")
-    top = _git_read(root, ["rev-parse", "--show-toplevel"], "repository root")
+    repository_fd, root_identity = _open_repository_root(root)
+    try:
+        return _inspect_untrusted_v5_source_callgraph_at_root_fd(
+            graph_result, root, repository_fd, root_identity,
+        )
+    finally:
+        os.close(repository_fd)
+
+
+def _inspect_untrusted_v5_source_callgraph_at_root_fd(
+    graph_result: dict[str, Any],
+    root: Path,
+    repository_fd: int,
+    root_identity: tuple[int, int],
+) -> dict[str, Any]:
+    git_env = _controlled_git_environment()
+    top = _git_read(
+        repository_fd, ["rev-parse", "--show-toplevel"], "repository root", env=git_env,
+    )
     try:
         git_root = Path(top.decode("utf-8", errors="strict").strip()).resolve(strict=True)
     except (UnicodeDecodeError, OSError, RuntimeError) as error:
         raise JournalV5Error("Git reported an invalid repository root") from error
     if git_root != root:
         raise JournalV5Error("repository_root must be the exact Git worktree root")
+    _verify_repository_root_identity(root, repository_fd, root_identity)
 
     fragments = graph_result["_source_fragments"]
-    used_object_ids = sorted({fragment["source_file_object_id"] for fragment in fragments})
-    used_paths = [_SOURCE_FILES[object_id] for object_id in used_object_ids]
-    dirty = _git_read(
-        root,
-        ["status", "--porcelain=v1", "--untracked-files=no", "--", *used_paths],
-        "source paths status",
-    )
-    if dirty:
-        raise JournalV5Error("allowlisted source paths differ from a clean Git worktree")
+    fragments_by_object_id: dict[str, list[dict[str, Any]]] = {}
+    for fragment in fragments:
+        fragments_by_object_id.setdefault(fragment["source_file_object_id"], []).append(fragment)
+    used_object_ids = sorted(fragments_by_object_id)
 
-    head_raw = _git_read(root, ["rev-parse", "--verify", "HEAD"], "HEAD commit")
+    head_raw = _git_read(
+        repository_fd, ["rev-parse", "--verify", "HEAD^{commit}"], "HEAD commit", env=git_env,
+    )
     try:
         head_commit = head_raw.decode("ascii", errors="strict").strip()
     except UnicodeDecodeError as error:
@@ -1104,11 +1207,14 @@ def inspect_untrusted_v5_source_callgraph_against_clean_git_head(
     if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head_commit):
         raise JournalV5Error("Git HEAD commit ID has an unsupported object format")
 
-    source_bytes_by_id: dict[str, bytes] = {}
-    source_blobs: list[dict[str, Any]] = []
+    blob_metadata: list[tuple[str, str, str, int]] = []
+    total_source_size = 0
     for object_id in used_object_ids:
         path = _SOURCE_FILES[object_id]
-        tree_entry = _git_read(root, ["ls-tree", "HEAD", "--", path], f"tracked source {path}")
+        tree_entry = _git_read(
+            repository_fd, ["ls-tree", head_commit, "--", path],
+            f"tracked source {path}", env=git_env,
+        )
         lines = tree_entry.splitlines()
         if len(lines) != 1 or b"\t" not in lines[0]:
             raise JournalV5Error(f"allowlisted source is not a unique Git HEAD entry: {path}")
@@ -1118,22 +1224,42 @@ def inspect_untrusted_v5_source_callgraph_against_clean_git_head(
             listed_path_text = listed_path.decode("utf-8", errors="strict")
         except (UnicodeDecodeError, ValueError) as error:
             raise JournalV5Error(f"Git tree entry is malformed: {path}") from error
-        if mode not in {"100644", "100755"} or object_type != "blob" or listed_path_text != path:
+        if (
+            mode not in {"100644", "100755"} or object_type != "blob"
+            or listed_path_text != path
+            or not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", blob_oid)
+            or len(blob_oid) != len(head_commit)
+        ):
             raise JournalV5Error(f"allowlisted source is not a regular tracked file: {path}")
-        size_raw = _git_read(root, ["cat-file", "-s", f"HEAD:{path}"], f"source size {path}")
+        size_raw = _git_read(
+            repository_fd, ["cat-file", "-s", blob_oid], f"source size {path}", env=git_env,
+        )
         try:
             source_size = int(size_raw.decode("ascii", errors="strict").strip())
         except (UnicodeDecodeError, ValueError) as error:
             raise JournalV5Error(f"Git source size is malformed: {path}") from error
-        if not 0 <= source_size <= 268_435_456:
-            raise JournalV5Error(f"allowlisted source exceeds the static inspection cap: {path}")
-        source_bytes = _git_read(root, ["show", f"HEAD:{path}"], f"source blob {path}")
+        if not 0 <= source_size <= MAX_SOURCE_FILE_BYTES:
+            raise JournalV5Error(f"allowlisted source exceeds the per-file inspection cap: {path}")
+        total_source_size += source_size
+        if total_source_size > MAX_SOURCE_TOTAL_BYTES:
+            raise JournalV5Error("allowlisted sources exceed the aggregate inspection cap")
+        blob_metadata.append((object_id, path, blob_oid, source_size))
+
+    source_blobs: list[dict[str, Any]] = []
+    mismatched_function_ids: list[str] = []
+    for object_id, path, blob_oid, source_size in blob_metadata:
+        source_bytes = _git_read(
+            repository_fd, ["cat-file", "blob", blob_oid],
+            f"source blob {path}", env=git_env,
+        )
         if len(source_bytes) != source_size:
             raise JournalV5Error(f"Git source blob length changed while reading: {path}")
-        worktree_bytes = _read_source_path_nofollow(root, path)
-        if worktree_bytes != source_bytes:
-            raise JournalV5Error(f"worktree source bytes differ from clean Git HEAD: {path}")
-        source_bytes_by_id[object_id] = source_bytes
+        object_hash = hashlib.new("sha1" if len(blob_oid) == 40 else "sha256")
+        object_hash.update(b"blob " + str(source_size).encode("ascii") + b"\0")
+        object_hash.update(source_bytes)
+        if object_hash.hexdigest() != blob_oid:
+            raise JournalV5Error(f"Git blob object ID does not match its bytes: {path}")
+        _worktree_source_matches_blob(repository_fd, path, source_bytes)
         source_blobs.append({
             "source_file_object_id": object_id,
             "path": path,
@@ -1141,23 +1267,32 @@ def inspect_untrusted_v5_source_callgraph_against_clean_git_head(
             "bytes": source_size,
             "raw_sha256": hashlib.sha256(source_bytes).hexdigest(),
         })
+        for fragment in fragments_by_object_id[object_id]:
+            start = fragment["byte_start"]
+            end = fragment["byte_end"]
+            if end > len(source_bytes):
+                mismatched_function_ids.append(fragment["function_id"])
+                continue
+            actual_sha256 = hashlib.sha256(memoryview(source_bytes)[start:end]).hexdigest()
+            if actual_sha256 != fragment["fragment_raw_sha256"]:
+                mismatched_function_ids.append(fragment["function_id"])
 
-    mismatched_function_ids: list[str] = []
-    for fragment in fragments:
-        source_bytes = source_bytes_by_id[fragment["source_file_object_id"]]
-        start = fragment["byte_start"]
-        end = fragment["byte_end"]
-        if end > len(source_bytes):
-            mismatched_function_ids.append(fragment["function_id"])
-            continue
-        actual_sha256 = hashlib.sha256(source_bytes[start:end]).hexdigest()
-        if actual_sha256 != fragment["fragment_raw_sha256"]:
-            mismatched_function_ids.append(fragment["function_id"])
+    final_head_raw = _git_read(
+        repository_fd, ["rev-parse", "--verify", "HEAD^{commit}"],
+        "final HEAD commit", env=git_env,
+    )
+    try:
+        final_head_commit = final_head_raw.decode("ascii", errors="strict").strip()
+    except UnicodeDecodeError as error:
+        raise JournalV5Error("Git final HEAD commit ID is not ASCII") from error
+    if final_head_commit != head_commit:
+        raise JournalV5Error("Git HEAD moved during source inspection")
+    _verify_repository_root_identity(root, repository_fd, root_identity)
 
     raw_hashes_match = not mismatched_function_ids
     return {
         "status": (
-            "untrusted_v5_source_fragment_bytes_match_clean_git_head"
+            "untrusted_v5_source_fragment_bytes_match_git_head_snapshot"
             if raw_hashes_match else "untrusted_v5_source_fragment_bytes_mismatch"
         ),
         "source_callgraph_raw_sha256": graph_result["source_callgraph_raw_sha256"],
@@ -1165,7 +1300,8 @@ def inspect_untrusted_v5_source_callgraph_against_clean_git_head(
         "git_head_commit_observed": head_commit,
         "source_blobs_observed": source_blobs,
         "source_fragment_count": graph_result["source_fragment_count"],
-        "source_fragment_raw_hashes_match_clean_git_head": raw_hashes_match,
+        "git_head_commit_at_start_and_end_matched": True,
+        "source_fragment_raw_hashes_match_git_head_snapshot": raw_hashes_match,
         "source_fragment_mismatch_function_ids": mismatched_function_ids,
         "source_function_definition_ranges_verified": False,
         "source_fragments_reparsed_from_source": False,

@@ -51,6 +51,8 @@ UPDATE-108 新增的 `inspect_untrusted_v5_source_callgraph` 仅检查 caller JS
 
 UPDATE-109 的 `inspect_untrusted_v5_source_callgraph_against_clean_git_head` 按固定 object-ID→tracked path allowlist，从当前 Git `HEAD` 读取源 blob，并通过 `openat` 风格 directory FD + `O_NOFOLLOW` 读取工作树同一路径，要求其字节与 HEAD blob 相等；随后逐 fragment 检查 `[byte_start,byte_end)` 在源文件范围内且 raw SHA 匹配。成功仅证明 caller 声明的 slice bytes 与该本地 clean-HEAD 文件字节一致；函数不证明 range 恰好覆盖目标函数定义，不检查 `normalized_ast_sha256`/call edges，不比较 `source_tree_sha256` 与 build attestation，也不把 HEAD 与任何已加载/构建 binary 绑定。输出 `source_function_definition_ranges_verified=false`、`source_fragments_reparsed_from_source=false`、`source_tree_sha256_matched_build_attestation=false`、`source_callgraph_verified=false`、gate open。当前运行环境没有 Clang/Tree-sitter 或 GCC plugin headers，故尚无可用于合同要求的完整 C++ AST frontend；不得以 lexical/raw hash 比较冒称 extractor 完成。
 
+安全复审后的当前实现由 UPDATE-110 修订：函数现为 `inspect_untrusted_v5_source_callgraph_against_git_head`，将一次捕获的完整 commit ID 用于所有 tree 查询，以 tree entry 的 blob OID 读取 immutable object 并复算 Git blob OID；开始与结束再次读取 HEAD，变化即拒绝。Git 子进程剔除继承的 `GIT_*` 重定向变量、禁用 fsmonitor/hook 与可选锁；不调用 `git status`，因此不要求 index clean，也不以 status/索引刷新作为源快照证据。仓库 root 打开为 directory FD；Git `cwd` 与每个 no-follow 源文件读取共用该 FD，并在开始/结束校验路径仍指向同一 root inode，拒绝路径替换。源文件逐块与 pinned blob 比对，限制每文件 1 MiB、所有引用文件合计 2 MiB，逐 blob 有界处理 slice 后释放内容。其含义只是同一个 HEAD snapshot 与 worktree bytes 相符，不等于 clean worktree 或可信构建证明；函数范围/AST/call edge/source-tree-to-build/runtime 仍未验证，所有相关旗标 false、gate open、zero credit。
+
 同时以已绑定的 source-callgraph 重算 loop guard、active-window、table-domain 和 poll 序列。空 journal、零 active poll、缺少一个应有 poll、query 在进程退出后出现或 cache 记录与单槽重算不一致，只能生成明确失败/未证明诊断：`gate_state="open"`、`execution_semantics_verified=false`、`qualification_credit=0`。
 
 建议独立 synthetic negative nodes：
