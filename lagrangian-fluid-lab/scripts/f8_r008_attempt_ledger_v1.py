@@ -2,9 +2,10 @@
 
 The inspector validates strict JSON encoding, the fixed event union, ledger
 ordering, per-attempt identity, and local stage/process event relationships.
-It has no descriptor-root, receipt reader, attestation key registry, trusted
-supervisor, or execution capability. Its summaries therefore always remain
-untrusted and unresolved, even when the supplied ledger is structurally closed.
+It has no descriptor-root, full stage-bundle verifier, attestation key
+registry, trusted supervisor, or execution capability. The optional raw-object
+binding includes only a bounded stage-receipt envelope/identity check; summaries
+therefore remain untrusted and unresolved even when caller bytes match refs.
 """
 from __future__ import annotations
 
@@ -14,6 +15,7 @@ import math
 import re
 from typing import Any
 
+from scripts import f8_r008_per_case_bundle_verifier_v1 as stage_v1
 from scripts.core_strict_json import sha256_bytes, strict_json_object
 from scripts.f8_r008_per_case_bundle_verifier_v2 import (
     AttemptResultV2Error,
@@ -572,6 +574,54 @@ def inspect_untrusted_attempt_ledger(raw: bytes, *, qualification_matrix_raw: by
     }
 
 
+def _inspect_untrusted_stage_receipt_envelope(raw: bytes, stage: str) -> dict[str, Any]:
+    """Check only a bounded B/C/D receipt envelope, not its complete bundle."""
+    receipt_error = stage_v1.BundleVerificationError
+
+    def reject_unless(condition: bool, message: str) -> None:
+        if not condition:
+            raise receipt_error(message)
+
+    reject_unless(type(raw) is bytes and 0 < len(raw) <= stage_v1.MAX_RECEIPT_BYTES,
+                  "stage receipt must be non-empty exact bytes within the fixed receipt cap")
+    reject_unless(type(stage) is str and stage in stage_v1.STAGE_RECEIPT_SCHEMAS,
+                  "stage receipt stage must be B, C, or D")
+    try:
+        receipt = strict_json_object(
+            raw, label=f"{stage} stage receipt", max_bytes=stage_v1.MAX_RECEIPT_BYTES,
+        )
+    except ValueError as error:
+        raise receipt_error(str(error)) from error
+    reject_unless(receipt.get("schema") == stage_v1.STAGE_RECEIPT_SCHEMAS[stage],
+                  "unexpected stage receipt schema")
+    reject_unless(stage_v1.STAGE_REQUIRED_FIELDS[stage].issubset(receipt),
+                  "stage receipt is missing required fields")
+    reject_unless(type(receipt.get("scope_id")) is str and receipt["scope_id"] == SCOPE_ID,
+                  "stage receipt scope mismatch")
+    for field in ("case_id", "attempt_id"):
+        value = receipt.get(field)
+        reject_unless(type(value) is str and bool(_IDENTIFIER.fullmatch(value)),
+                      f"stage receipt {field} is malformed")
+    nonce = receipt.get("nonce")
+    reject_unless(type(nonce) is str and bool(_HEX32.fullmatch(nonce)),
+                  "stage receipt nonce is malformed")
+    status = receipt.get("status")
+    reject_unless(type(status) is str
+                  and status in {"passed", "failed", "incomplete", "timeout", "oom", "signaled"},
+                  "stage receipt status is outside the frozen enum")
+    started = stage_v1._parse_utc(receipt.get("started_at_utc"), "receipt started_at_utc")
+    ended = stage_v1._parse_utc(receipt.get("ended_at_utc"), "receipt ended_at_utc")
+    reject_unless(ended >= started, "stage receipt end precedes its start")
+    return {
+        "scope_id": receipt["scope_id"],
+        "case_id": receipt["case_id"],
+        "attempt_id": receipt["attempt_id"],
+        "nonce": nonce,
+        "status_claim": status,
+        "raw_sha256": sha256_bytes(raw),
+    }
+
+
 def bind_untrusted_attempt_ledger_raw_objects(
     raw: bytes,
     *,
@@ -581,9 +631,10 @@ def bind_untrusted_attempt_ledger_raw_objects(
     """Bind every non-null ledger ref to caller-supplied raw bytes, without trusting them.
 
     The mapping key is ``(stage, role, object_id)``. This function performs no
-    filesystem lookup, artifact parsing, stage-semantic verification, or source
-    authentication; it only checks an exact object inventory plus each
-    descriptor's byte count and SHA-256 against the supplied bytes.
+    filesystem lookup, full bundle or stage-semantic verification, or source
+    authentication. Stage receipt bytes receive only a bounded envelope and
+    ledger-identity check; every referenced object also receives exact byte and
+    SHA-256 comparison.
     """
     ledger, parsed = _inspect(raw, qualification_matrix_raw)
     _require(type(artifact_raw_by_ref) is dict,
@@ -648,6 +699,40 @@ def bind_untrusted_attempt_ledger_raw_objects(
             "raw_bytes_match_ref": True,
         })
 
+    stage_receipt_envelopes = []
+    for row in parsed["events"]:
+        event = row["event"]
+        if event["kind"] != "stage_receipt":
+            continue
+        ref = event["receipt_ref"]
+        key = (ref["stage"], ref["role"], ref["object_id"])
+        try:
+            envelope = _inspect_untrusted_stage_receipt_envelope(
+                artifact_raw_by_ref[key], event["stage"],
+            )
+        except stage_v1.BundleVerificationError as error:
+            raise AttemptLedgerV1Error(
+                f"referenced stage receipt envelope is invalid: {error}"
+            ) from error
+        _require(envelope["scope_id"] == ledger["scope_id"],
+                 f"referenced {event['stage']} stage receipt scope_id differs from ledger scope")
+        for receipt_field, ledger_field in (
+            ("case_id", "case_id"),
+            ("attempt_id", "attempt_id"),
+            ("nonce", "nonce_hex"),
+        ):
+            _require(envelope[receipt_field] == event[ledger_field],
+                     f"referenced {event['stage']} stage receipt {receipt_field} differs from ledger")
+        stage_receipt_envelopes.append({
+            "stage": event["stage"],
+            "case_id": event["case_id"],
+            "attempt_id": event["attempt_id"],
+            "receipt_status_claim": envelope["status_claim"],
+            "receipt_raw_sha256": envelope["raw_sha256"],
+            "receipt_envelope_identity_matches_ledger": True,
+            "stage_bundle_verified": False,
+        })
+
     return {
         "schema": RAW_BINDING_SCHEMA,
         "ledger_schema": LEDGER_SCHEMA,
@@ -661,6 +746,9 @@ def bind_untrusted_attempt_ledger_raw_objects(
         "supplied_raw_bytes": total_raw_bytes,
         "all_non_null_refs_bound_to_supplied_raw_bytes": True,
         "objects": objects,
+        "stage_receipt_envelope_count": len(stage_receipt_envelopes),
+        "stage_receipt_envelope_identity_matches_ledger": True,
+        "stage_receipt_envelopes": stage_receipt_envelopes,
         "artifact_producer_authenticated": False,
         "descriptor_root_authenticated": False,
         "stage_receipt_semantics_verified": False,

@@ -11,6 +11,7 @@ from scripts.core_strict_json import read_bounded_raw_json, strict_json_object
 from scripts import f8_r008_attempt_ledger_v1 as ledger_v1
 from scripts import f8_r008_native_integrity_registry_v1 as native_registry
 from scripts import f8_r008_per_case_bundle_verifier_v2 as attempt_v2
+from scripts import f8_r008_per_case_bundle_verifier_v1 as stage_v1
 
 
 CASE_ID = "space-q0-dp0p0090"
@@ -100,6 +101,34 @@ def _raw(document: dict[str, object] | None = None) -> bytes:
     return json.dumps(document or _ledger_document(), separators=(",", ":"), allow_nan=False).encode()
 
 
+def _synthetic_stage_receipt_raw(event: dict[str, object]) -> bytes:
+    stage = event["stage"]
+    receipt = {field: None for field in stage_v1.STAGE_REQUIRED_FIELDS[stage]}
+    receipt.update({
+        "schema": stage_v1.STAGE_RECEIPT_SCHEMAS[stage],
+        "scope_id": ledger_v1.SCOPE_ID,
+        "case_id": event["case_id"],
+        "attempt_id": event["attempt_id"],
+        "nonce": event["nonce_hex"],
+        "status": "failed",
+        "started_at_utc": "2026-09-25T00:00:00Z",
+        "ended_at_utc": "2026-09-25T00:00:00Z",
+    })
+    return json.dumps(receipt, separators=(",", ":"), allow_nan=False).encode()
+
+
+def _replace_artifact_raw(raw: bytes, artifacts: dict, key: tuple[str, str, str],
+                          replacement: bytes) -> bytes:
+    document = json.loads(raw)
+    for event in document["events"]:
+        ref = event.get("receipt_ref", event.get("process_journal_ref", event.get("terminal_ref")))
+        if ref is not None and (ref["stage"], ref["role"], ref["object_id"]) == key:
+            ref["bytes"] = len(replacement)
+            ref["sha256"] = hashlib.sha256(replacement).hexdigest()
+    artifacts[key] = replacement
+    return _raw(document)
+
+
 def _ledger_and_raw_objects() -> tuple[bytes, dict[tuple[str, str, str], bytes]]:
     document = _ledger_document()
     artifacts = {}
@@ -108,7 +137,11 @@ def _ledger_and_raw_objects() -> tuple[bytes, dict[tuple[str, str, str], bytes]]
         if ref is None:
             continue
         key = (ref["stage"], ref["role"], ref["object_id"])
-        object_raw = b"synthetic\x00raw:" + "/".join(key).encode()
+        object_raw = (
+            _synthetic_stage_receipt_raw(event)
+            if event["kind"] == "stage_receipt"
+            else b"synthetic\x00raw:" + "/".join(key).encode()
+        )
         ref["bytes"] = len(object_raw)
         ref["sha256"] = hashlib.sha256(object_raw).hexdigest()
         artifacts[key] = object_raw
@@ -182,6 +215,11 @@ def test_raw_object_binding_requires_exact_refs_and_only_proves_bytes_and_digest
     assert result["referenced_object_count"] == 7
     assert result["supplied_raw_object_count"] == 7
     assert all(item["raw_bytes_match_ref"] for item in result["objects"])
+    assert result["stage_receipt_envelope_count"] == 3
+    assert result["stage_receipt_envelope_identity_matches_ledger"] is True
+    assert all(item["receipt_envelope_identity_matches_ledger"]
+               and not item["stage_bundle_verified"]
+               for item in result["stage_receipt_envelopes"])
     assert result["artifact_producer_authenticated"] is False
     assert result["descriptor_root_authenticated"] is False
     assert result["stage_receipt_semantics_verified"] is False
@@ -190,6 +228,67 @@ def test_raw_object_binding_requires_exact_refs_and_only_proves_bytes_and_digest
     assert result["attempt_outcomes_resolved"] is False
     assert result["T1_numerical"] is False
     assert result["qualification_credit"] == 0
+
+
+@pytest.mark.parametrize(("field", "value"), [
+    ("case_id", "other-case"),
+    ("attempt_id", "other-attempt"),
+    ("nonce", "e" * 32),
+])
+def test_raw_object_binding_rejects_stage_receipt_identity_mismatch(field: str, value: str) -> None:
+    raw, artifacts = _ledger_and_raw_objects()
+    key = next(item for item in artifacts if item[1] == "b_receipt")
+    receipt = json.loads(artifacts[key])
+    receipt[field] = value
+    replacement = json.dumps(receipt, separators=(",", ":"), allow_nan=False).encode()
+    raw = _replace_artifact_raw(raw, artifacts, key, replacement)
+    expected_message = "nonce differs from ledger" if field == "nonce" else f"{field} differs from ledger"
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match=expected_message):
+        ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+            raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
+        )
+
+
+def test_raw_object_binding_rejects_malformed_stage_receipt_even_when_ref_matches() -> None:
+    raw, artifacts = _ledger_and_raw_objects()
+    key = next(item for item in artifacts if item[1] == "c_v1_receipt")
+    raw = _replace_artifact_raw(raw, artifacts, key, b"{malformed-json")
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="stage receipt envelope is invalid"):
+        ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+            raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
+        )
+
+
+def test_raw_object_binding_enforces_stage_receipt_parser_byte_cap(monkeypatch) -> None:
+    raw, artifacts = _ledger_and_raw_objects()
+    key = next(item for item in artifacts if item[1] == "b_receipt")
+    monkeypatch.setattr(stage_v1, "MAX_RECEIPT_BYTES", len(artifacts[key]) - 1)
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="stage receipt envelope is invalid"):
+        ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+            raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
+        )
+
+
+@pytest.mark.parametrize(("edit", "message"), [
+    (lambda receipt: receipt.__setitem__("schema", "wrong-schema"), "unexpected stage receipt schema"),
+    (lambda receipt: receipt.__setitem__("scope_id", "wrong-scope"), "stage receipt scope mismatch"),
+    (lambda receipt: receipt.__setitem__("status", "unknown"), "status is outside the frozen enum"),
+    (lambda receipt: receipt.__setitem__("started_at_utc", "not-a-time"), "started_at_utc must be an RFC3339"),
+    (lambda receipt: receipt.__setitem__("ended_at_utc", "2026-09-24T00:00:00Z"),
+     "stage receipt end precedes its start"),
+    (lambda receipt: receipt.pop("authorization_binding"), "missing required fields"),
+])
+def test_raw_object_binding_rejects_invalid_stage_receipt_envelopes(edit, message: str) -> None:
+    raw, artifacts = _ledger_and_raw_objects()
+    key = next(item for item in artifacts if item[1] == "d_receipt")
+    receipt = json.loads(artifacts[key])
+    edit(receipt)
+    replacement = json.dumps(receipt, separators=(",", ":"), allow_nan=False).encode()
+    raw = _replace_artifact_raw(raw, artifacts, key, replacement)
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match=message):
+        ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+            raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
+        )
 
 
 @pytest.mark.parametrize("inventory_edit, message", [
