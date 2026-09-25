@@ -10,7 +10,13 @@ import array
 import fcntl
 import os
 from pathlib import Path
+import shutil
 import socket
+import struct
+import subprocess
+import sys
+
+import pytest
 
 
 def _receive_one_fd(channel: socket.socket) -> int:
@@ -80,3 +86,68 @@ def test_scm_rights_preserves_readonly_open_file_description_after_path_replacem
         os.close(source_fd)
         receiver.close()
         sender.close()
+
+
+def test_rootless_bwrap_peercred_pidfd_binds_namespaced_worker_process(
+    tmp_path: Path,
+) -> None:
+    bwrap = shutil.which("bwrap")
+    if bwrap is None or not hasattr(os, "pidfd_open") or not hasattr(socket, "SO_PEERCRED"):
+        pytest.skip("requires bubblewrap, Linux SO_PEERCRED, and pidfd_open")
+    namespace_probe = subprocess.run(
+        [bwrap, "--unshare-user", "--unshare-pid", "--ro-bind", "/", "/", "/bin/true"],
+        capture_output=True, text=True, check=False,
+    )
+    if namespace_probe.returncode != 0:
+        pytest.skip(f"rootless user/PID namespaces unavailable: {namespace_probe.stderr.strip()}")
+
+    socket_path = tmp_path / "broker.sock"
+    listener = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
+    listener.bind(str(socket_path))
+    os.chmod(socket_path, 0o600)
+    listener.listen(1)
+    listener.settimeout(10)
+    child_code = (
+        "import socket,sys; "
+        "s=socket.socket(socket.AF_UNIX,socket.SOCK_SEQPACKET); "
+        "s.connect(sys.argv[1]); s.sendall(b'R'); s.recv(1); s.close()"
+    )
+    worker = subprocess.Popen([
+        bwrap, "--unshare-user", "--unshare-pid", "--ro-bind", "/", "/",
+        sys.executable, "-c", child_code, str(socket_path),
+    ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    connection: socket.socket | None = None
+    pidfd: int | None = None
+    try:
+        connection, _ = listener.accept()
+        connection.settimeout(10)
+        assert connection.recv(1) == b"R"
+        credentials = connection.getsockopt(
+            socket.SOL_SOCKET, socket.SO_PEERCRED, struct.calcsize("3i")
+        )
+        peer_pid, peer_uid, peer_gid = struct.unpack("3i", credentials)
+        nspids = next(
+            line.split()[1:]
+            for line in Path(f"/proc/{peer_pid}/status").read_text().splitlines()
+            if line.startswith("NSpid:")
+        )
+        pidfd = os.pidfd_open(peer_pid)
+
+        assert peer_pid != worker.pid
+        assert int(nspids[0]) == peer_pid
+        assert len(nspids) >= 2
+        assert peer_uid == os.getuid()
+        assert peer_gid == os.getgid()
+        assert fcntl.fcntl(pidfd, fcntl.F_GETFD) & fcntl.FD_CLOEXEC
+
+        connection.sendall(b"x")
+        assert worker.wait(timeout=10) == 0, worker.stderr.read()
+    finally:
+        if connection is not None:
+            connection.close()
+        if pidfd is not None:
+            os.close(pidfd)
+        listener.close()
+        if worker.poll() is None:
+            worker.kill()
+            worker.wait()
