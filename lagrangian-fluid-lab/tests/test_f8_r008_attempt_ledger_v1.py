@@ -9,6 +9,7 @@ import pytest
 
 from scripts.core_strict_json import read_bounded_raw_json, strict_json_object
 from scripts import f8_r008_attempt_ledger_v1 as ledger_v1
+from scripts import f8_r008_c_execution_journal_v5 as journal_v5
 from scripts import f8_r008_native_integrity_registry_v1 as native_registry
 from scripts import f8_r008_per_case_bundle_verifier_v2 as attempt_v2
 from scripts import f8_r008_per_case_bundle_verifier_v1 as stage_v1
@@ -117,6 +118,22 @@ def _synthetic_stage_receipt_raw(event: dict[str, object]) -> bytes:
     return json.dumps(receipt, separators=(",", ":"), allow_nan=False).encode()
 
 
+def _synthetic_c_v5_journal_raw(event: dict[str, object]) -> bytes:
+    journal = {
+        "schema": journal_v5.JOURNAL_SCHEMA,
+        "attempt_nonce_hex": event["nonce_hex"],
+        "source_id": "synthetic-c-runtime",
+        "source_binary_sha256": "a" * 64,
+        "coverage_start_ns_hex": "0000000000000000",
+        "coverage_end_ns_hex": "0000000000000000",
+        "event_count": 0,
+        "overflow": False,
+        "lost_count": 0,
+        "events": [],
+    }
+    return json.dumps(journal, separators=(",", ":"), allow_nan=False).encode()
+
+
 def _replace_artifact_raw(raw: bytes, artifacts: dict, key: tuple[str, str, str],
                           replacement: bytes) -> bytes:
     document = json.loads(raw)
@@ -137,11 +154,12 @@ def _ledger_and_raw_objects() -> tuple[bytes, dict[tuple[str, str, str], bytes]]
         if ref is None:
             continue
         key = (ref["stage"], ref["role"], ref["object_id"])
-        object_raw = (
-            _synthetic_stage_receipt_raw(event)
-            if event["kind"] == "stage_receipt"
-            else b"synthetic\x00raw:" + "/".join(key).encode()
-        )
+        if event["kind"] == "stage_receipt":
+            object_raw = _synthetic_stage_receipt_raw(event)
+        elif event["kind"] == "process_terminal" and event["stage"] == "C":
+            object_raw = _synthetic_c_v5_journal_raw(event)
+        else:
+            object_raw = b"synthetic\x00raw:" + "/".join(key).encode()
         ref["bytes"] = len(object_raw)
         ref["sha256"] = hashlib.sha256(object_raw).hexdigest()
         artifacts[key] = object_raw
@@ -220,6 +238,14 @@ def test_raw_object_binding_requires_exact_refs_and_only_proves_bytes_and_digest
     assert all(item["receipt_envelope_identity_matches_ledger"]
                and not item["stage_bundle_verified"]
                for item in result["stage_receipt_envelopes"])
+    assert result["c_v5_process_journal_check_count"] == 1
+    assert result["c_v5_process_journal_nonce_bindings_match_ledger"] is True
+    assert result["c_v5_process_journal_checks"][0]["outer_attempt_nonce_matches"] is True
+    assert result["c_v5_process_journal_checks"][0][
+        "journal_local_observed_process_lifecycle_complete_unverified"
+    ] is False
+    assert result["c_v5_process_journal_checks"][0]["event_source_completeness_verified"] is False
+    assert result["c_v5_process_journal_checks"][0]["process_generation_identity_linked"] is False
     assert result["artifact_producer_authenticated"] is False
     assert result["descriptor_root_authenticated"] is False
     assert result["stage_receipt_semantics_verified"] is False
@@ -257,6 +283,49 @@ def test_raw_object_binding_rejects_malformed_stage_receipt_even_when_ref_matche
         ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
             raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
         )
+
+
+def test_raw_object_binding_rejects_cross_attempt_c_v5_journal_replay() -> None:
+    raw, artifacts = _ledger_and_raw_objects()
+    key = next(item for item in artifacts if item[0] == "C" and item[1] == "process_journal")
+    journal = json.loads(artifacts[key])
+    journal["attempt_nonce_hex"] = "e" * 32
+    replacement = json.dumps(journal, separators=(",", ":"), allow_nan=False).encode()
+    raw = _replace_artifact_raw(raw, artifacts, key, replacement)
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="nonce-mismatched"):
+        ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+            raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
+        )
+
+
+def test_raw_object_binding_rejects_malformed_c_v5_journal_after_ref_match() -> None:
+    raw, artifacts = _ledger_and_raw_objects()
+    key = next(item for item in artifacts if item[0] == "C" and item[1] == "process_journal")
+    raw = _replace_artifact_raw(raw, artifacts, key, b"{malformed-c-v5-journal")
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="C V5 process journal is invalid"):
+        ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+            raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
+        )
+
+
+def test_raw_object_binding_enforces_c_v5_journal_byte_cap_before_hash(monkeypatch) -> None:
+    raw, artifacts = _ledger_and_raw_objects()
+    key = next(item for item in artifacts if item[0] == "C" and item[1] == "process_journal")
+    c_journal_raw = artifacts[key]
+    monkeypatch.setattr(ledger_v1, "MAX_C_V5_JOURNAL_BINDING_BYTES", len(c_journal_raw) - 1)
+    hashed: list[bytes] = []
+    original_sha256_bytes = ledger_v1.sha256_bytes
+
+    def observe_hashed_bytes(value: bytes) -> str:
+        hashed.append(value)
+        return original_sha256_bytes(value)
+
+    monkeypatch.setattr(ledger_v1, "sha256_bytes", observe_hashed_bytes)
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="C V5 journal exceeds"):
+        ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+            raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
+        )
+    assert c_journal_raw not in hashed
 
 
 def test_raw_object_binding_enforces_stage_receipt_parser_byte_cap(monkeypatch) -> None:
@@ -383,6 +452,8 @@ def test_raw_object_binding_accepts_empty_not_started_inventory_without_qualifyi
     assert result["all_non_null_refs_bound_to_supplied_raw_bytes"] is True
     assert result["attempt_ledger_complete"] is False
     assert result["qualification_credit"] == 0
+    assert result["c_v5_process_journal_check_count"] == 0
+    assert result["c_v5_process_journal_nonce_bindings_match_ledger"] is False
 
 
 @pytest.mark.parametrize("limit_name", ["MAX_REFERENCED_OBJECTS", "MAX_REFERENCED_RAW_BYTES"])

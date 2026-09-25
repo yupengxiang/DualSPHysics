@@ -316,6 +316,25 @@ def test_valid_synthetic_journal_remains_open_and_non_authorizing():
     assert result["qualification_credit"] == 0
 
 
+def test_outer_attempt_nonce_binding_is_consistency_only():
+    raw = _journal(_main_events())
+    result = inspect_untrusted_v5_journal(raw, expected_attempt_nonce_hex=NONCE)
+    assert result["journal_raw_sha256"] == hashlib.sha256(raw).hexdigest()
+    assert result["event_source_completeness_verified"] is False
+    assert result["runtime_identity_verified"] is False
+    assert result["qualification_credit"] == 0
+    with pytest.raises(JournalV5Error, match="nonce differs from the outer attempt registration"):
+        inspect_untrusted_v5_journal(raw, expected_attempt_nonce_hex="c" * 32)
+    with pytest.raises(JournalV5Error, match="expected_attempt_nonce_hex"):
+        inspect_untrusted_v5_journal(raw, expected_attempt_nonce_hex="bad-nonce")
+
+
+def test_v5_journal_raw_byte_cap_rejects_before_json_decode(monkeypatch):
+    monkeypatch.setattr(journal_v5, "MAX_RAW_BYTES", 16)
+    with pytest.raises(JournalV5Error, match="fixed bounded raw byte limit"):
+        inspect_untrusted_v5_journal(b"x" * 17)
+
+
 def test_source_callgraph_structural_parse_is_explicitly_untrusted_and_checks_raw_ref():
     raw = _source_callgraph()
     result = inspect_untrusted_v5_source_callgraph(

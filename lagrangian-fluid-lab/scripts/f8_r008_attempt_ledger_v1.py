@@ -4,8 +4,9 @@ The inspector validates strict JSON encoding, the fixed event union, ledger
 ordering, per-attempt identity, and local stage/process event relationships.
 It has no descriptor-root, full stage-bundle verifier, attestation key
 registry, trusted supervisor, or execution capability. The optional raw-object
-binding includes only a bounded stage-receipt envelope/identity check; summaries
-therefore remain untrusted and unresolved even when caller bytes match refs.
+binding includes only bounded stage-receipt envelope checks and C-V5
+journal-shape/outer-nonce consistency; summaries remain untrusted and
+unresolved even when caller bytes match refs.
 """
 from __future__ import annotations
 
@@ -15,6 +16,7 @@ import math
 import re
 from typing import Any
 
+from scripts import f8_r008_c_execution_journal_v5 as journal_v5
 from scripts import f8_r008_per_case_bundle_verifier_v1 as stage_v1
 from scripts.core_strict_json import sha256_bytes, strict_json_object
 from scripts.f8_r008_per_case_bundle_verifier_v2 import (
@@ -97,8 +99,9 @@ ATTEMPT_OUTCOMES = frozenset({
 })
 REFERENCE_FIELDS = frozenset({"stage", "role", "object_id", "bytes", "sha256"})
 MAX_LEDGER_BYTES = 67_108_864
-MAX_REFERENCED_RAW_BYTES = 1_073_741_824
+MAX_REFERENCED_RAW_BYTES = 67_108_864
 MAX_REFERENCED_OBJECTS = 1_000_000
+MAX_C_V5_JOURNAL_BINDING_BYTES = 16_777_216
 _IDENTIFIER = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
 _HEX16 = re.compile(r"^[0-9a-f]{16}$")
 _HEX32 = re.compile(r"^[0-9a-f]{32}$")
@@ -632,8 +635,9 @@ def bind_untrusted_attempt_ledger_raw_objects(
 
     The mapping key is ``(stage, role, object_id)``. This function performs no
     filesystem lookup, full bundle or stage-semantic verification, or source
-    authentication. Stage receipt bytes receive only a bounded envelope and
-    ledger-identity check; every referenced object also receives exact byte and
+    authentication. Stage receipts receive only a bounded envelope and
+    ledger-identity check, and C process journals receive only a V5 shape plus
+    outer-attempt-nonce consistency check; every object receives exact byte and
     SHA-256 comparison.
     """
     ledger, parsed = _inspect(raw, qualification_matrix_raw)
@@ -681,6 +685,10 @@ def bind_untrusted_attempt_ledger_raw_objects(
     for key in sorted(referenced):
         ref = referenced[key]
         object_raw = artifact_raw_by_ref[key]
+        if key[0] == "C" and key[1] == PROCESS_JOURNAL_ROLE:
+            _require(len(object_raw) <= MAX_C_V5_JOURNAL_BINDING_BYTES
+                     and ref["bytes"] <= MAX_C_V5_JOURNAL_BINDING_BYTES,
+                     "C V5 journal exceeds the fixed binding byte cap")
         total_raw_bytes += len(object_raw)
         _require(total_raw_bytes <= MAX_REFERENCED_RAW_BYTES,
                  "supplied raw objects exceed the fixed aggregate byte limit")
@@ -733,6 +741,37 @@ def bind_untrusted_attempt_ledger_raw_objects(
             "stage_bundle_verified": False,
         })
 
+    c_v5_journal_checks = []
+    for row in parsed["events"]:
+        event = row["event"]
+        if event["kind"] != "process_terminal" or event["stage"] != "C":
+            continue
+        ref = event["process_journal_ref"]
+        key = (ref["stage"], ref["role"], ref["object_id"])
+        try:
+            journal_summary = journal_v5.inspect_untrusted_v5_journal(
+                artifact_raw_by_ref[key],
+                expected_attempt_nonce_hex=event["nonce_hex"],
+            )
+        except journal_v5.JournalV5Error as error:
+            raise AttemptLedgerV1Error(
+                f"referenced C V5 process journal is invalid or nonce-mismatched: {error}"
+            ) from error
+        c_v5_journal_checks.append({
+            "case_id": event["case_id"],
+            "attempt_id": event["attempt_id"],
+            "ledger_process_generation_id": event["process_generation_id"],
+            "journal_raw_sha256": journal_summary["journal_raw_sha256"],
+            "journal_event_count": journal_summary["event_count"],
+            "journal_local_observed_process_lifecycle_complete_unverified": (
+                journal_summary["observed_process_lifecycle_complete"]
+            ),
+            "outer_attempt_nonce_matches": True,
+            "event_source_completeness_verified": False,
+            "runtime_identity_verified": False,
+            "process_generation_identity_linked": False,
+        })
+
     return {
         "schema": RAW_BINDING_SCHEMA,
         "ledger_schema": LEDGER_SCHEMA,
@@ -749,6 +788,9 @@ def bind_untrusted_attempt_ledger_raw_objects(
         "stage_receipt_envelope_count": len(stage_receipt_envelopes),
         "stage_receipt_envelope_identity_matches_ledger": True,
         "stage_receipt_envelopes": stage_receipt_envelopes,
+        "c_v5_process_journal_check_count": len(c_v5_journal_checks),
+        "c_v5_process_journal_nonce_bindings_match_ledger": bool(c_v5_journal_checks),
+        "c_v5_process_journal_checks": c_v5_journal_checks,
         "artifact_producer_authenticated": False,
         "descriptor_root_authenticated": False,
         "stage_receipt_semantics_verified": False,

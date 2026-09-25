@@ -25,7 +25,9 @@ from typing import Any
 JOURNAL_SCHEMA = "core.cfd.f8.r008_c_execution_journal.synthetic.v5"
 SOURCE_CALLGRAPH_SCHEMA = "core.cfd.f8.r008_c_execution_source_callgraph.synthetic.v5"
 SOURCE_CALLGRAPH_OBJECT_ID = "f8-r008-source-callgraph-v5"
-MAX_RAW_BYTES = 1_073_741_824
+# Keep JSON expansion bounded for caller-supplied diagnostics; large journals
+# require a separately reviewed streaming parser rather than this in-memory API.
+MAX_RAW_BYTES = 16_777_216
 MAX_EVENT_COUNT = 100_000_000
 MAX_SOURCE_FILE_BYTES = 1_048_576
 MAX_SOURCE_TOTAL_BYTES = 2_097_152
@@ -165,7 +167,7 @@ def _parse_json(raw: bytes, *, label: str = "journal") -> dict[str, Any]:
     if type(raw) is not bytes:
         raise JournalV5Error(f"{label} must be exact bytes")
     if len(raw) > MAX_RAW_BYTES:
-        raise JournalV5Error(f"{label} exceeds the V4-inherited raw byte limit")
+        raise JournalV5Error(f"{label} exceeds the fixed bounded raw byte limit")
     try:
         text = raw.decode("utf-8", errors="strict")
     except UnicodeDecodeError as error:
@@ -727,13 +729,21 @@ def _observe_query_and_cache(
     }
 
 
-def _inspect_untrusted_v5_journal(raw: bytes) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+def _inspect_untrusted_v5_journal(
+    raw: bytes,
+    *,
+    expected_attempt_nonce_hex: str | None = None,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Internal inspector retaining validated events for combined replay."""
     journal = _parse_json(raw)
     journal = _exact_object(journal, _TOP_KEYS, "journal")
     if type(journal["schema"]) is not str or journal["schema"] != JOURNAL_SCHEMA:
         raise JournalV5Error("journal schema mismatch")
     nonce = _hex(journal["attempt_nonce_hex"], "journal.attempt_nonce_hex", _HEX32)
+    if expected_attempt_nonce_hex is not None:
+        expected_nonce = _hex(expected_attempt_nonce_hex, "expected_attempt_nonce_hex", _HEX32)
+        if nonce != expected_nonce:
+            raise JournalV5Error("journal attempt nonce differs from the outer attempt registration")
     source_id = _identifier(journal["source_id"], "journal.source_id")
     _hex(journal["source_binary_sha256"], "journal.source_binary_sha256", _SHA256)
     coverage_start = int(_hex(journal["coverage_start_ns_hex"], "journal.coverage_start_ns_hex", _HEX16), 16)
@@ -807,9 +817,19 @@ def _inspect_untrusted_v5_journal(raw: bytes) -> tuple[dict[str, Any], list[dict
     return result, validated_events
 
 
-def inspect_untrusted_v5_journal(raw: bytes) -> dict[str, Any]:
-    """Inspect journal bytes and return only a non-authorizing diagnostic."""
-    result, _ = _inspect_untrusted_v5_journal(raw)
+def inspect_untrusted_v5_journal(
+    raw: bytes,
+    *,
+    expected_attempt_nonce_hex: str | None = None,
+) -> dict[str, Any]:
+    """Inspect journal bytes and optionally bind its nonce to an outer record.
+
+    ``expected_attempt_nonce_hex`` is only a consistency check against the
+    caller-supplied outer value; it does not authenticate either source.
+    """
+    result, _ = _inspect_untrusted_v5_journal(
+        raw, expected_attempt_nonce_hex=expected_attempt_nonce_hex,
+    )
     return result
 
 
