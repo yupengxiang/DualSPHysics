@@ -8,6 +8,7 @@ not authenticated here, so absence never means that an output mode was off.
 """
 from __future__ import annotations
 
+import hashlib
 import math
 import os
 from pathlib import Path
@@ -17,8 +18,10 @@ import struct
 from typing import Any, Mapping
 
 from scripts import f8_r008_part_extra_finite_inventory_v1 as part_extra
+from scripts import f8_r008_partout_runparts_diagnostic_v1 as partout
 from scripts import f8_r008_per_case_bundle_verifier_v1 as bundle
 from scripts import f8_r008_safe_bi4_decoder_v1 as decoder
+from scripts import f8_r008_runparts_timestep_diagnostic_v1 as runparts
 
 
 SCHEMA = "core.cfd.f8.r008_auxiliary_output_inventory.v1"
@@ -27,7 +30,6 @@ PART_EXTRA_NAME = re.compile(r"PartExtra_([0-9]{4,})\.bi4\Z", re.ASCII)
 PRIMARY_FRAME_PATH = re.compile(r"frames/Part_([0-9]{4})\.bi4\Z", re.ASCII)
 PART_OUT_NAME = re.compile(r"PartOut_(?:p[0-9]{2,}_)?[0-9]{3,}\.obi4\Z", re.ASCII)
 KNOWN_UNSCANNED_ROOT_NAMES = frozenset({
-    "RunPARTs.csv",
     "Part_Head.ibi4", "PartInfo.ibi4",
     "PartMotionRef.ibi4", "PartMotionRef2.ibi4",
     "PartFloatInfo.ibi4", "PartFloatInfo2.ibi4",
@@ -37,6 +39,90 @@ STAGES = ("B", "C")
 
 class AuxiliaryOutputInventoryError(ValueError):
     """The held B/C bundle pair or one of its classified outputs is invalid."""
+
+
+def _open_root_output(outputs_fd: int, path: str) -> tuple[int, tuple[int, int, int, int, int, int]]:
+    _require("/" not in path and path not in {"", ".", ".."},
+             "auxiliary diagnostic inputs must be root-level C outputs")
+    try:
+        fd = os.open(
+            path,
+            os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | getattr(os, "O_CLOEXEC", 0),
+            dir_fd=outputs_fd,
+        )
+    except OSError as error:
+        raise AuxiliaryOutputInventoryError(
+            f"manifest-bound auxiliary output {path} cannot be opened safely"
+        ) from error
+    try:
+        return fd, _file_identity(fd)
+    except Exception:
+        os.close(fd)
+        raise
+
+
+def _open_and_read_runparts(
+    outputs_fd: int, path: str, expected: Mapping[str, Any],
+) -> tuple[int, bytes, tuple[int, int, int, int, int, int]]:
+    _require(path == "RunPARTs.csv", "RunPARTs must be a root-level C output")
+    fd, identity = _open_root_output(outputs_fd, path)
+    try:
+        size = identity[2]
+        _require(0 < size <= runparts.MAX_RUNPARTS_BYTES,
+                 "manifest-bound RunPARTs.csv size is outside its parser cap")
+        _require(size == expected["bytes"],
+                 "held RunPARTs.csv size differs from the C output manifest")
+        payload = bytearray()
+        offset = 0
+        while offset < size:
+            block = os.pread(fd, min(1024 * 1024, size - offset), offset)
+            _require(bool(block), "manifest-bound RunPARTs.csv was truncated while reading")
+            payload.extend(block)
+            offset += len(block)
+        digest = hashlib.sha256(payload).hexdigest()
+        _require(digest == expected["sha256"],
+                 "held RunPARTs.csv SHA-256 differs from the C output manifest")
+        _require(_file_identity(fd) == identity,
+                 "held RunPARTs.csv identity changed during bounded read")
+        return fd, bytes(payload), identity
+    except Exception:
+        os.close(fd)
+        raise
+
+
+def _recheck_manifest_file(
+    outputs_fd: int,
+    path: str,
+    expected: Mapping[str, Any],
+    identity: tuple[int, int, int, int, int, int],
+) -> None:
+    fd, observed_identity = _open_root_output(outputs_fd, path)
+    try:
+        max_bytes = (
+            runparts.MAX_RUNPARTS_BYTES if path == "RunPARTs.csv"
+            else partout.MAX_PARTOUT_TOTAL_BYTES
+        )
+        _require(
+            observed_identity == identity
+            and observed_identity[2] == expected["bytes"]
+            and observed_identity[2] <= max_bytes,
+            f"{path} identity/size differs before final bounded hash",
+        )
+        digest = hashlib.sha256()
+        offset = 0
+        while offset < expected["bytes"]:
+            block = os.pread(fd, min(1024 * 1024, expected["bytes"] - offset), offset)
+            _require(bool(block), f"{path} was truncated during final identity verification")
+            digest.update(block)
+            offset += len(block)
+        _require(
+            _file_identity(fd) == identity
+            and os.fstat(fd).st_size == expected["bytes"]
+            and digest.hexdigest() == expected["sha256"],
+            f"{path} no longer resolves to the exact scanned C-manifest inode/bytes",
+        )
+    finally:
+        os.close(fd)
 
 
 def _require(condition: bool, message: str) -> None:
@@ -181,11 +267,9 @@ def _raw_frame_identity(
 
 def _classify_other_file(path: str) -> tuple[str, str]:
     basename = path.rsplit("/", 1)[-1]
-    if "/" not in path and (
-        basename in KNOWN_UNSCANNED_ROOT_NAMES or PART_OUT_NAME.fullmatch(basename)
-    ):
+    if "/" not in path and basename in KNOWN_UNSCANNED_ROOT_NAMES:
         return "known_auxiliary_not_finite_scanned", (
-            "recognized native auxiliary format; its numeric payload is outside this PartExtra scan"
+            "recognized native auxiliary format; its numeric payload is outside current scans"
         )
     return "unclassified_output", "no frozen output-class parser is registered for this path"
 
@@ -197,7 +281,7 @@ def inventory_c_outputs_with_part_extra(
     trusted_authorization_sha256: Mapping[str, str],
     expected_authorization_envelopes: Mapping[str, Mapping[str, Any]],
 ) -> dict[str, Any]:
-    """Verify a read-only B/C bundle pair and scan every bound PartExtra file.
+    """Verify a read-only B/C bundle pair and scan bound auxiliary outputs.
 
     Trust inputs must come from a caller-controlled authorization store. The
     returned record is diagnostic only: it never writes into either bundle,
@@ -212,6 +296,7 @@ def inventory_c_outputs_with_part_extra(
     roots: dict[str, str] = {}
     root_fds: dict[str, int] = {}
     output_fds: dict[str, int] = {}
+    auxiliary_input_fds: list[int] = []
     try:
         for stage in STAGES:
             root_fd, absolute = bundle._open_absolute_directory(bundle_roots[stage])
@@ -233,6 +318,7 @@ def inventory_c_outputs_with_part_extra(
         )
         _bind_c_to_b(checked_before)
         case_nbound, case_nfloat = _case_boundary_populations(checked_before["B"])
+        case_np = sum(checked_before["B"]["particle_group_counts"].values())
 
         c_files = checked_before["C"]["_output_file_manifest"]
         c_manifest = checked_before["C"]["_manifest_document"]
@@ -259,6 +345,11 @@ def inventory_c_outputs_with_part_extra(
         part_numbers: set[int] = set()
         held_primary_frame_identities: dict[str, tuple[int, int, int, int, int]] = {}
         held_part_extra_identities: dict[str, tuple[int, int, int, int, int, int]] = {}
+        held_auxiliary_input_identities: dict[str, tuple[int, int, int, int, int, int]] = {}
+        runparts_payload = b""
+        partout_sources: list[partout.PartOutSource] = []
+        partout_total_bytes = 0
+        classification_by_path: dict[str, dict[str, Any]] = {}
 
         for path in sorted(c_files):
             binding = c_files[path]
@@ -331,18 +422,111 @@ def inventory_c_outputs_with_part_extra(
                 })
                 continue
 
+            if "/" not in path and basename == "RunPARTs.csv":
+                fd, payload, identity = _open_and_read_runparts(
+                    output_fds["C"], path, binding,
+                )
+                auxiliary_input_fds.append(fd)
+                held_auxiliary_input_identities[path] = identity
+                runparts_payload = payload
+                entry = {
+                    "path": path,
+                    "bytes": binding["bytes"],
+                    "sha256": binding["sha256"],
+                    "classification": "runparts_pending_partout_diagnostic",
+                }
+                classifications.append(entry)
+                classification_by_path[path] = entry
+                continue
+
+            if "/" not in path and PART_OUT_NAME.fullmatch(basename):
+                _require(len(partout_sources) < partout.MAX_PARTOUT_BLOCKS,
+                         "manifest-bound PartOut file count exceeds the diagnostic cap")
+                fd, identity = _open_root_output(output_fds["C"], path)
+                auxiliary_input_fds.append(fd)
+                partout_total_bytes += identity[2]
+                _require(partout_total_bytes <= partout.MAX_PARTOUT_TOTAL_BYTES,
+                         f"manifest-bound {path} exceeds the PartOut diagnostic aggregate cap")
+                held_auxiliary_input_identities[path] = identity
+                partout_sources.append(partout.PartOutSource(
+                    filename=basename, fd=fd, expected_sha256=binding["sha256"],
+                ))
+                entry = {
+                    "path": path,
+                    "bytes": binding["bytes"],
+                    "sha256": binding["sha256"],
+                    "classification": "partout_pending_runparts_join",
+                }
+                classifications.append(entry)
+                classification_by_path[path] = entry
+                continue
+
             classification, reason = _classify_other_file(path)
-            classifications.append({
+            entry = {
                 "path": path,
                 "bytes": binding["bytes"],
                 "sha256": binding["sha256"],
                 "classification": classification,
                 "reason": reason,
-            })
+            }
+            classifications.append(entry)
+            classification_by_path[path] = entry
             if classification == "known_auxiliary_not_finite_scanned":
                 known_unscanned_paths.append(path)
             else:
                 unclassified_paths.append(path)
+
+        expected_part_time_hex: dict[int, str] = {}
+        expected_part_time_reference_requested = False
+        if runparts_payload and partout_sources:
+            try:
+                _parsed_runparts, runparts_rows = partout._parse_runparts(runparts_payload)
+            except partout.PartOutDiagnosticError:
+                runparts_rows = []
+            event_parts = {row["Part"] for row in runparts_rows if row["NpOut"] > 0}
+            expected_part_time_reference_requested = bool(event_parts)
+            for part_number in sorted(event_parts):
+                peer = frame_by_part.get(part_number)
+                if peer is None:
+                    continue
+                observed_bits, _frame_step, frame_identity = _raw_frame_identity(
+                    output_fds["C"], peer,
+                    expected_part=part_number,
+                    expected_group_counts=checked_before["B"]["particle_group_counts"],
+                )
+                frame_time = float.fromhex(peer["expected_time_s_ieee754_hex"])
+                _require(observed_bits == struct.pack("<d", frame_time).hex(),
+                         f"C frame PART {part_number} raw time differs from the frozen frame axis")
+                expected_part_time_hex[part_number] = frame_time.hex()
+                held_primary_frame_identities[peer["path"]] = frame_identity
+        partout_diagnostic = partout.diagnose(
+            runparts_payload, tuple(partout_sources), expected_pos_double=None,
+            expected_case_np=case_np,
+            expected_part_time_s_ieee754_hex=(
+                expected_part_time_hex if expected_part_time_reference_requested else None
+            ),
+        )
+        if runparts_payload:
+            for path, entry in classification_by_path.items():
+                if path == "RunPARTs.csv":
+                    runparts_scan = partout_diagnostic.get("runparts_input", {})
+                    if runparts_scan.get("all_26_numeric_fields_finite") is True:
+                        entry["classification"] = "runparts_numeric_fields_scanned"
+                    else:
+                        entry["classification"] = "runparts_parse_incomplete"
+                        known_unscanned_paths.append(path)
+        for source in partout_sources:
+            path = source.filename
+            entry = classification_by_path[path]
+            if partout_diagnostic.get("status") == "diagnostic_only_consistent_inputs_gate_open":
+                entry["classification"] = "partout_structure_and_float_values_scanned"
+                entry["finite_scan_status"] = partout_diagnostic[
+                    "partout_float_value_inventory"
+                ]["all_observed_floating_values_finite"]
+            else:
+                entry["classification"] = "partout_diagnostic_incomplete"
+                entry["reason"] = "RunPARTs/PartOut structural join did not close"
+                known_unscanned_paths.append(path)
 
         checked_after = _verify_stages(
             roots, root_fds, output_fds,
@@ -394,6 +578,11 @@ def inventory_c_outputs_with_part_extra(
             finally:
                 os.close(reopened_fd)
 
+        for path, identity in held_auxiliary_input_identities.items():
+            _recheck_manifest_file(
+                output_fds["C"], path, c_files[path], identity,
+            )
+
         unknown_presence = not part_extra_records
         return {
             "schema": SCHEMA,
@@ -409,6 +598,7 @@ def inventory_c_outputs_with_part_extra(
                 for stage in STAGES
             },
             "verified_case_populations": {
+                "case_np": case_np,
                 "case_nbound": case_nbound,
                 "case_nfloat": case_nfloat,
                 "derived_from": "B generated XML and initial BI4 particle cohorts",
@@ -418,6 +608,15 @@ def inventory_c_outputs_with_part_extra(
             "primary_frame_count": len(frame_paths),
             "output_classifications": classifications,
             "part_extra_records": part_extra_records,
+            "partout_runparts_diagnostic": partout_diagnostic,
+            "runparts_presence": (
+                "manifest_member_scanned_and_bound" if "RunPARTs.csv" in classification_by_path
+                else "no_manifest_member_observed_expectation_unknown"
+            ),
+            "partout_presence": (
+                "one_or_more_manifest_members_scanned_or_classified_incomplete"
+                if partout_sources else "no_manifest_member_observed_expectation_unknown"
+            ),
             "part_extra_presence": (
                 "no_manifest_member_observed_expectation_unknown" if unknown_presence
                 else "one_or_more_manifest_members_scanned"
@@ -428,8 +627,8 @@ def inventory_c_outputs_with_part_extra(
                     "all_floating_values_finite"
                 ] for record in part_extra_records) if part_extra_records else None
             ),
-            "known_but_unscanned_auxiliary_paths": known_unscanned_paths,
-            "unclassified_output_paths": unclassified_paths,
+            "known_but_unscanned_auxiliary_paths": sorted(set(known_unscanned_paths)),
+            "unclassified_output_paths": sorted(set(unclassified_paths)),
             "all_present_output_paths_have_known_class": not unclassified_paths,
             "all_native_auxiliary_float_sources_scanned": False,
             "native_integrity_evaluated": False,
@@ -445,6 +644,8 @@ def inventory_c_outputs_with_part_extra(
         ) from error
     finally:
         for fd in output_fds.values():
+            os.close(fd)
+        for fd in auxiliary_input_fds:
             os.close(fd)
         for fd in root_fds.values():
             os.close(fd)

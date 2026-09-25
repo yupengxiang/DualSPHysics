@@ -1,9 +1,10 @@
 """Synthetic-input-only diagnostic join for R008 RunPARTs and PartOut.
 
-The parser verifies bounded file structure and per-PART count consistency. It
-does not authenticate production provenance, output-mode activation, complete
-execution through T_end, or terminal flush; its exclusion gate is therefore
-permanently diagnostic-only (open/missing) and can never pass or fail here.
+The parser verifies bounded file structure, per-PART count/time consistency,
+and finite values in every supported floating PartOut metadata field and
+array. It does not authenticate production provenance, output-mode activation,
+complete execution through T_end, or terminal flush; its exclusion gate is
+therefore permanently diagnostic-only (open/missing) and can never pass or fail.
 """
 from __future__ import annotations
 
@@ -15,7 +16,9 @@ import io
 import math
 import re
 import struct
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
+
+import numpy as np
 
 from scripts import f8_r008_runparts_timestep_diagnostic_v2 as runparts
 from scripts import f8_r008_safe_bi4_decoder_v1 as bi4
@@ -25,6 +28,7 @@ SCHEMA = "core.cfd.f8.r008.partout_runparts_diagnostic.v1"
 MAX_PARTOUT_BLOCKS = 128
 MAX_PARTOUT_TOTAL_BYTES = 256 * 1024 * 1024
 MAX_PARTOUT_RECORDS = runparts.MAX_RUNPARTS_ROWS
+STREAM_CHUNK_ELEMENTS = 1 << 16
 PARTOUT_FILE = re.compile(r"PartOut_([0-9]{3,})\.obi4\Z", re.ASCII)
 PART_NAME = re.compile(r"PART_([0-9]{4,})\Z", re.ASCII)
 PARTOUT_FILECODE = b"#FileJBD JPartOutBi4"
@@ -40,6 +44,13 @@ _ARRAY_TYPES = {
     "Rhop": 11,
     "Motive": 4,
 }
+_FLOAT_ARRAY_TYPES = {
+    11: ("<f4", 1),
+    12: ("<f8", 1),
+    22: ("<f4", 3),
+    23: ("<f8", 3),
+}
+_FLOAT_VALUE_TYPES = {11, 12, 22, 23}
 
 
 class PartOutDiagnosticError(ValueError):
@@ -57,6 +68,7 @@ class PartOutSource:
 class _ParsedPartOut:
     part: int
     nout: int
+    time_step: float
     fd: int
     arrays: dict[str, bi4.ArrayRecord]
 
@@ -78,7 +90,7 @@ def _value_map(item: bi4.ItemRecord, label: str) -> dict[str, bi4.ValueRecord]:
     return result
 
 
-def _parse_runparts(payload: bytes) -> tuple[dict[str, Any], list[dict[str, int]]]:
+def _parse_runparts(payload: bytes) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     if not isinstance(payload, bytes):
         _fail("RunPARTs input must be immutable bytes")
     try:
@@ -88,7 +100,7 @@ def _parse_runparts(payload: bytes) -> tuple[dict[str, Any], list[dict[str, int]
         header = next(rows)
         if tuple(header) != runparts.RUNPARTS_HEADER:
             _fail("RunPARTs header changed after its bounded validation")
-        data: list[dict[str, int]] = []
+        data: list[dict[str, Any]] = []
         for cells in rows:
             if cells == []:
                 break
@@ -98,6 +110,7 @@ def _parse_runparts(payload: bytes) -> tuple[dict[str, Any], list[dict[str, int]
                 name: int(cells[index].replace(",", ""))
                 for name, index in _COLUMN.items()
             }
+            row["TimeStep"] = float(cells[runparts.RUNPARTS_HEADER.index("TimeStep [s]")])
             if row["NpOut"] != row["NpOutPos"] + row["NpOutRho"] + row["NpOutMov"]:
                 _fail(f"RunPARTs PART {row['Part']} reason counts do not sum to NpOut")
             data.append(row)
@@ -134,6 +147,82 @@ def _root_identity(
         (entry.name, entry.type_code, entry.value)
         for entry in root.values if entry.name != "Block"
     )), case_np
+
+
+def _float_metadata_inventory(item: bi4.ItemRecord, label: str) -> dict[str, Any]:
+    records: list[dict[str, Any]] = []
+    finite_count = nonfinite_count = 0
+    for value in item.values:
+        if value.type_code not in _FLOAT_VALUE_TYPES:
+            continue
+        components = value.value if isinstance(value.value, tuple) else (value.value,)
+        finite = [math.isfinite(float(component)) for component in components]
+        good = sum(finite)
+        bad = len(finite) - good
+        finite_count += good
+        nonfinite_count += bad
+        fmt, _components_per_particle = _FLOAT_ARRAY_TYPES[value.type_code]
+        records.append({
+            "item": label,
+            "name": value.name,
+            "type_code": value.type_code,
+            "dtype": fmt,
+            "component_count": len(components),
+            "finite_count": good,
+            "nonfinite_count": bad,
+        })
+    return {
+        "records": records,
+        "finite_count": finite_count,
+        "nonfinite_count": nonfinite_count,
+        "all_finite": nonfinite_count == 0,
+    }
+
+
+def _float_array_inventory(
+    fd: int,
+    file_size: int,
+    array: bi4.ArrayRecord,
+) -> dict[str, Any]:
+    try:
+        dtype, components_per_particle = _FLOAT_ARRAY_TYPES[array.type_code]
+    except KeyError as error:
+        raise PartOutDiagnosticError(
+            f"PartOut.{array.name} is not a classified floating array"
+        ) from error
+    digest = hashlib.sha256()
+    finite_count = nonfinite_count = 0
+    element_count = array.count * components_per_particle
+    elements_per_chunk = max(1, STREAM_CHUNK_ELEMENTS // components_per_particle)
+    try:
+        for start in range(0, array.count, elements_per_chunk):
+            count = min(elements_per_chunk, array.count - start)
+            byte_offset = array.offset + start * components_per_particle * np.dtype(dtype).itemsize
+            byte_count = count * components_per_particle * np.dtype(dtype).itemsize
+            block = bi4._pread_exact(fd, byte_count, byte_offset, file_size)
+            digest.update(block)
+            values = np.frombuffer(block, dtype=dtype)
+            finite = np.isfinite(values)
+            current_finite = int(np.count_nonzero(finite))
+            finite_count += current_finite
+            nonfinite_count += int(finite.size - current_finite)
+    except (OSError, bi4.Bi4FormatError, OverflowError, ValueError) as error:
+        raise PartOutDiagnosticError(
+            f"PartOut.{array.name} bounded finite scan failed: {type(error).__name__}"
+        ) from error
+    if finite_count + nonfinite_count != element_count:
+        _fail(f"PartOut.{array.name} finite scan did not cover every scalar component")
+    return {
+        "name": array.name,
+        "type_code": array.type_code,
+        "dtype": dtype,
+        "shape": [array.count, components_per_particle] if components_per_particle > 1 else [array.count],
+        "raw_array_sha256": digest.hexdigest(),
+        "component_count": element_count,
+        "finite_count": finite_count,
+        "nonfinite_count": nonfinite_count,
+        "all_finite": nonfinite_count == 0,
+    }
 
 
 def _scan_partout_source(
@@ -251,6 +340,7 @@ def _scan_partout_source(
         records.append(_ParsedPartOut(
             part=part,
             nout=nout,
+            time_step=float(values["TimeStep"].value),
             fd=source.fd,
             arrays=arrays,
         ))
@@ -260,6 +350,7 @@ def _scan_partout_source(
         "sha256": raw_hash,
         "block": block,
         "part_record_count": len(records),
+        "root_floating_metadata": _float_metadata_inventory(root, "JPartOutBi4"),
     }, input_identity
 
 
@@ -288,9 +379,10 @@ def _stable_after_payload_reads(
 def _event_payload_check(
     record: _ParsedPartOut,
     *,
-    expected_counts: dict[str, int],
+    expected_counts: dict[str, Any],
     expected_pos_double: bool | None,
     case_np: int,
+    expected_time_s_ieee754_hex: str | None,
 ) -> dict[str, Any]:
     if record.nout > case_np:
         _fail(f"PartOut PART {record.part} Nout exceeds the declared CaseNp")
@@ -331,8 +423,36 @@ def _event_payload_check(
         _fail(f"PartOut PART {record.part} Motive histogram disagrees with RunPARTs")
     if record.nout != expected_counts["NpOut"]:
         _fail(f"PartOut PART {record.part} Nout disagrees with RunPARTs NpOut")
+    runparts_time_candidate = float(format(record.time_step, ".16g"))
+    if runparts_time_candidate != expected_counts["TimeStep"]:
+        _fail(f"PartOut PART {record.part} TimeStep disagrees with RunPARTs RealStr(16) value")
+    time_matches_reference = False
+    if expected_time_s_ieee754_hex is not None:
+        expected_time = float.fromhex(expected_time_s_ieee754_hex)
+        if (
+            not math.isfinite(expected_time)
+            or expected_time.hex() != expected_time_s_ieee754_hex
+            or struct.pack("<d", record.time_step) != struct.pack("<d", expected_time)
+        ):
+            _fail(f"PartOut PART {record.part} TimeStep differs from its C frame reference")
+        time_matches_reference = True
+    try:
+        file_size = bi4._check_input_stat(record.fd).st_size
+    except Exception as error:
+        raise PartOutDiagnosticError(
+            f"PartOut PART {record.part} descriptor is no longer a bounded regular file"
+        ) from error
+    float_arrays = [
+        _float_array_inventory(record.fd, file_size, arrays[name])
+        for name in (pos_name, "Vel", "Rhop")
+    ]
     return {
         "part": record.part,
+        "runparts_time_s": expected_counts["TimeStep"],
+        "partout_time_s": record.time_step,
+        "partout_time_raw_bits_le_hex": struct.pack("<d", record.time_step).hex(),
+        "partout_time_matches_runparts_realstr16": True,
+        "partout_time_matches_supplied_c_frame": time_matches_reference,
         "runparts_npout": expected_counts["NpOut"],
         "partout_nout": record.nout,
         "id_count": len(ids),
@@ -341,6 +461,25 @@ def _event_payload_check(
         "position_array": pos_name,
         "motive_histogram": {str(key): histogram.get(key, 0) for key in (1, 2, 3)},
         "reason_counts_match": True,
+        "floating_value_inventory": {
+            "metadata": {
+                "records": [{
+                    "name": "TimeStep",
+                    "type_code": 12,
+                    "dtype": "<f8",
+                    "component_count": 1,
+                    "finite_count": 1,
+                    "nonfinite_count": 0,
+                }],
+                "finite_count": 1,
+                "nonfinite_count": 0,
+                "all_finite": True,
+            },
+            "arrays": float_arrays,
+            "finite_count": 1 + sum(item["finite_count"] for item in float_arrays),
+            "nonfinite_count": sum(item["nonfinite_count"] for item in float_arrays),
+            "all_floating_values_finite": all(item["all_finite"] for item in float_arrays),
+        },
     }
 
 
@@ -379,6 +518,8 @@ def diagnose(
     partout_sources: Sequence[PartOutSource] = (),
     *,
     expected_pos_double: bool | None = None,
+    expected_case_np: int | None = None,
+    expected_part_time_s_ieee754_hex: Mapping[int, str] | None = None,
 ) -> dict[str, Any]:
     """Return diagnostic-only per-PART consistency for supplied held inputs.
 
@@ -399,11 +540,29 @@ def diagnose(
         }
         if expected_pos_double is not None and type(expected_pos_double) is not bool:
             _fail("expected_pos_double must be bool or None")
+        if expected_case_np is not None and (
+            type(expected_case_np) is not int or expected_case_np <= 0
+        ):
+            _fail("expected_case_np must be a positive integer or None")
+        if expected_part_time_s_ieee754_hex is not None:
+            if not isinstance(expected_part_time_s_ieee754_hex, Mapping):
+                _fail("expected_part_time_s_ieee754_hex must be a mapping or None")
+            for part, time_hex in expected_part_time_s_ieee754_hex.items():
+                if type(part) is not int or part < 0 or not isinstance(time_hex, str):
+                    _fail("C frame time references require nonnegative PART integers and hex strings")
+                try:
+                    time_value = float.fromhex(time_hex)
+                except ValueError as error:
+                    raise PartOutDiagnosticError("C frame time reference is invalid") from error
+                if not math.isfinite(time_value) or time_value.hex() != time_hex:
+                    _fail("C frame time reference must be canonical finite binary64 hex")
         if not isinstance(partout_sources, Sequence) or isinstance(partout_sources, (str, bytes)):
             _fail("PartOut sources must be a bounded sequence of held descriptors")
         if len(partout_sources) > MAX_PARTOUT_BLOCKS:
             _fail("PartOut block count exceeds the diagnostic cap")
         parsed_runparts, rows = _parse_runparts(runparts_payload)
+        runparts_input["structural_parse_passed"] = True
+        runparts_input["all_26_numeric_fields_finite"] = True
         source_specs = list(partout_sources)
         if any(not isinstance(source, PartOutSource) for source in source_specs):
             _fail("every PartOut source must use the PartOutSource descriptor contract")
@@ -462,6 +621,10 @@ def diagnose(
             file_refs.append(file_ref)
             source_identities.append((source, source_identity))
 
+        if common_case_np is not None and expected_case_np is not None:
+            if common_case_np != expected_case_np:
+                _fail("PartOut CaseNp disagrees with the verified B materialization population")
+
         details: list[dict[str, Any]] = []
         for row in rows:
             part = row["Part"]
@@ -475,6 +638,8 @@ def diagnose(
                     "partout_record_present": False,
                 })
                 continue
+            if expected_part_time_s_ieee754_hex is not None and part not in expected_part_time_s_ieee754_hex:
+                _fail(f"PartOut PART {part} is absent from the supplied C frame time axis")
             if event is None:
                 _fail(f"RunPARTs PART {part} has NpOut>0 but no matching PartOut payload")
             details.append(_event_payload_check(
@@ -482,6 +647,10 @@ def diagnose(
                 expected_counts=row,
                 expected_pos_double=expected_pos_double,
                 case_np=common_case_np,
+                expected_time_s_ieee754_hex=(
+                    expected_part_time_s_ieee754_hex.get(part)
+                    if expected_part_time_s_ieee754_hex is not None else None
+                ),
             ))
         if events:
             _fail(f"PartOut contains PART {min(events)} absent from RunPARTs")
@@ -503,6 +672,22 @@ def diagnose(
                 "code": "SOURCE_AND_TERMINAL_EVIDENCE_UNAUTHENTICATED",
                 "detail": "Structural joins agree, but source, output mode, full T_end coverage, and final flush remain unverified.",
             }
+        root_float_finite = sum(
+            ref["root_floating_metadata"]["finite_count"] for ref in file_refs
+        )
+        root_float_nonfinite = sum(
+            ref["root_floating_metadata"]["nonfinite_count"] for ref in file_refs
+        )
+        part_float_finite = sum(
+            detail.get("floating_value_inventory", {}).get("finite_count", 0)
+            for detail in details
+        )
+        part_float_nonfinite = sum(
+            detail.get("floating_value_inventory", {}).get("nonfinite_count", 0)
+            for detail in details
+        )
+        float_nonfinite = root_float_nonfinite + part_float_nonfinite
+        float_finite = root_float_finite + part_float_finite
         return {
             "schema": SCHEMA,
             "status": "diagnostic_only_consistent_inputs_gate_open",
@@ -517,7 +702,19 @@ def diagnose(
                 "partout_id_and_array_counts_match_nout": True,
                 "particle_ids_unique_within_each_part": True,
                 "particle_ids_within_declared_case_np": True,
+                "partout_case_np_matches_verified_b": (
+                    common_case_np == expected_case_np if expected_case_np is not None
+                    and common_case_np is not None else False
+                ),
                 "motive_histograms_match_runparts": True,
+                "partout_times_match_runparts_representations": True,
+                "partout_times_match_supplied_c_frame_axis": (
+                    all(detail.get("partout_time_matches_supplied_c_frame") is True
+                        for detail in details if detail.get("partout_record_present") is not False)
+                    if expected_part_time_s_ieee754_hex is not None else False
+                ),
+                "runparts_all_26_numeric_fields_finite": True,
+                "partout_all_floating_metadata_and_arrays_scanned": bool(ordered_sources),
                 "position_precision_expectation_supplied": expected_pos_double is not None,
                 "position_precision_expected_value": expected_pos_double,
                 "partout_absence_treated_as_zero": False,
@@ -530,6 +727,20 @@ def diagnose(
                 "matched_nonzero_parts": sum(row["NpOut"] > 0 for row in rows),
             },
             "part_diagnostics": details,
+            "partout_float_value_inventory": {
+                "status": (
+                    "all_observed_values_scanned" if ordered_sources
+                    else "no_partout_source_observed_expectation_unknown"
+                ),
+                "finite_count": float_finite if ordered_sources else None,
+                "nonfinite_count": float_nonfinite if ordered_sources else None,
+                "all_observed_floating_values_finite": (
+                    float_nonfinite == 0 if ordered_sources else None
+                ),
+                "source_partout_blocks": len(ordered_sources),
+                "includes_root_metadata": bool(ordered_sources),
+                "includes_each_nonzero_part_timestep_and_float_array": bool(ordered_sources),
+            },
             "runparts_input": runparts_input,
             "partout_inputs": file_refs,
             "source_attempt_identity_verified": False,

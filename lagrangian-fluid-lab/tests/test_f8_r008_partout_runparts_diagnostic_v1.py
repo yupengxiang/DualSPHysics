@@ -54,8 +54,11 @@ def _partout_record(
     position: str = "Posd",
     id_double: bool = False,
     omit: str | None = None,
+    float_values: dict[str, tuple[float, ...]] | None = None,
+    time_step: float | None = None,
 ) -> bytes:
     count = len(ids)
+    float_values = float_values or {}
     id_name = "Idpd" if id_double else "Idp"
     id_code = "Q" if id_double else "I"
     id_type = 10 if id_double else 8
@@ -63,16 +66,20 @@ def _partout_record(
         _array(id_name, id_type, count, struct.pack("<" + id_code * count, *ids)),
         _array(position, 23 if position == "Posd" else 22,
                count, struct.pack("<" + ("d" if position == "Posd" else "f") * count * 3,
-                                  *([0.25] * count * 3))),
-        _array("Vel", 22, count, struct.pack("<" + "f" * count * 3, *([0.5] * count * 3))),
-        _array("Rhop", 11, count, struct.pack("<" + "f" * count, *([1000.0] * count))),
+                                  *float_values.get(position, tuple([0.25] * count * 3)))),
+        _array("Vel", 22, count, struct.pack(
+            "<" + "f" * count * 3, *float_values.get("Vel", tuple([0.5] * count * 3))
+        )),
+        _array("Rhop", 11, count, struct.pack(
+            "<" + "f" * count, *float_values.get("Rhop", tuple([1000.0] * count))
+        )),
         _array("Motive", 4, count, motives),
     ]
     if omit is not None:
         arrays = [entry for entry, name in zip(arrays, (id_name, position, "Vel", "Rhop", "Motive")) if name != omit]
     values = (
         _value("Cpart", 8, struct.pack("<I", part)),
-        _value("TimeStep", 12, struct.pack("<d", part / 10.0)),
+        _value("TimeStep", 12, struct.pack("<d", part / 10.0 if time_step is None else time_step)),
         _value("Nout", 8, struct.pack("<I", count)),
     )
     return _item(f"PART_{part:04d}", values=values, arrays=tuple(arrays))
@@ -84,6 +91,7 @@ def _partout_block(
     *,
     root_name: str = "JPartOutBi4",
     case_np: int = 10752,
+    extra_root_values: tuple[bytes, ...] = (),
 ) -> bytes:
     values = (
         _value("Piece", 8, struct.pack("<I", 0)),
@@ -94,13 +102,18 @@ def _partout_block(
     prefix = b"#FileJBD " + root_name.encode("ascii")
     header = prefix + b" " * (58 - len(prefix)) + b"\n\0\0\0\0\0"
     assert len(header) == bi4.HEADER_BYTES
-    return header + _item("JPartOutBi4", values=values) + b"".join(records)
+    return header + _item("JPartOutBi4", values=values + extra_root_values) + b"".join(records)
 
 
-def _row(part: int, *, counts: tuple[int, int, int] = (0, 0, 0)) -> str:
+def _row(
+    part: int,
+    *,
+    counts: tuple[int, int, int] = (0, 0, 0),
+    time_step_text: str | None = None,
+) -> str:
     cells = ["0"] * len(runparts.RUNPARTS_HEADER)
     cells[0] = str(part)
-    cells[1] = str(part / 10.0)
+    cells[1] = str(part / 10.0) if time_step_text is None else time_step_text
     cells[2] = "0" if part == 0 else "10"
     cells[19] = "0" if part == 0 else "0.001"
     cells[20] = "0" if part == 0 else "0.002"
@@ -110,11 +123,20 @@ def _row(part: int, *, counts: tuple[int, int, int] = (0, 0, 0)) -> str:
     return ";".join(cells)
 
 
-def _runparts(*, counts: dict[int, tuple[int, int, int]] | None = None) -> bytes:
+def _runparts(
+    *,
+    counts: dict[int, tuple[int, int, int]] | None = None,
+    time_steps: dict[int, str] | None = None,
+) -> bytes:
     counts = counts or {}
+    time_steps = time_steps or {}
     lines = [
         ";".join(runparts.RUNPARTS_HEADER),
-        *(_row(part, counts=counts.get(part, (0, 0, 0))) for part in range(3)),
+        *(_row(
+            part,
+            counts=counts.get(part, (0, 0, 0)),
+            time_step_text=time_steps.get(part),
+        ) for part in range(3)),
         "",
         *runparts.RUNPARTS_FOOTER,
         "",
@@ -158,7 +180,108 @@ def test_consistent_synthetic_partout_join_stays_open_and_zero_credit(tmp_path: 
     assert result["execution_authority"]["solver_started"] is False
     assert result["checks"]["motive_histograms_match_runparts"] is True
     assert result["part_diagnostics"][1]["motive_histogram"] == {"1": 1, "2": 1, "3": 1}
-    assert result["runparts_input"]["sha256"] == hashlib.sha256(_runparts(counts={1: (1, 1, 1)})).hexdigest()
+
+
+def test_all_partout_float_arrays_and_metadata_are_counted(tmp_path: Path) -> None:
+    source = _source(
+        tmp_path,
+        "PartOut_000.obi4",
+        _partout_block(
+            0,
+            (_partout_record(1, (10, 11, 12), bytes((1, 2, 3))),),
+            extra_root_values=(
+                _value("MapPosMin", 23, struct.pack("<ddd", -1.0, -2.0, -3.0)),
+                _value("RhopMax", 11, struct.pack("<f", 1200.0)),
+            ),
+        ),
+    )
+    try:
+        result = diagnostic.diagnose(
+            _runparts(counts={1: (1, 1, 1)}), (source,), expected_pos_double=True
+        )
+    finally:
+        _close((source,))
+
+    inventory = result["partout_float_value_inventory"]
+    assert inventory["status"] == "all_observed_values_scanned"
+    assert inventory["finite_count"] == 26  # 4 root + PART timestep + 21 array components.
+    assert inventory["nonfinite_count"] == 0
+    assert inventory["all_observed_floating_values_finite"] is True
+    part_floats = result["part_diagnostics"][1]["floating_value_inventory"]
+    assert {item["name"] for item in part_floats["arrays"]} == {"Posd", "Vel", "Rhop"}
+    assert all(item["raw_array_sha256"] for item in part_floats["arrays"])
+
+
+def test_nonfinite_partout_float_is_reported_without_gate_adjudication(tmp_path: Path) -> None:
+    source = _source(
+        tmp_path,
+        "PartOut_000.obi4",
+        _partout_block(0, (
+            _partout_record(
+                1, (10,), b"\x01",
+                float_values={"Posd": (float("nan"), 0.0, 0.0)},
+            ),
+        )),
+    )
+    try:
+        result = diagnostic.diagnose(
+            _runparts(counts={1: (1, 0, 0)}), (source,), expected_case_np=10752,
+        )
+    finally:
+        _close((source,))
+
+    assert result["status"] == "diagnostic_only_consistent_inputs_gate_open"
+    assert result["excluded_fluid_particles_zero"] == "open"
+    assert result["partout_float_value_inventory"]["nonfinite_count"] == 1
+    assert result["partout_float_value_inventory"]["all_observed_floating_values_finite"] is False
+    assert result["part_diagnostics"][1]["floating_value_inventory"]["all_floating_values_finite"] is False
+    assert result["qualification_credit"] == 0
+    assert result["runparts_input"]["sha256"] == hashlib.sha256(_runparts(counts={1: (1, 0, 0)})).hexdigest()
+
+
+def test_nonfinite_partout_root_metadata_is_included_in_inventory(tmp_path: Path) -> None:
+    source = _source(
+        tmp_path,
+        "PartOut_000.obi4",
+        _partout_block(0, extra_root_values=(
+            _value("MapPosMax", 23, struct.pack("<ddd", 1.0, float("inf"), 3.0)),
+        )),
+    )
+    try:
+        result = diagnostic.diagnose(_runparts(), (source,))
+    finally:
+        _close((source,))
+
+    assert result["status"] == "diagnostic_only_consistent_inputs_gate_open"
+    assert result["partout_float_value_inventory"]["finite_count"] == 2
+    assert result["partout_float_value_inventory"]["nonfinite_count"] == 1
+    assert result["partout_float_value_inventory"]["all_observed_floating_values_finite"] is False
+
+
+def test_partout_case_population_must_match_verified_b_claim(tmp_path: Path) -> None:
+    source = _source(tmp_path, "PartOut_000.obi4", _partout_block(0, case_np=2))
+    try:
+        result = diagnostic.diagnose(_runparts(), (source,), expected_case_np=3)
+    finally:
+        _close((source,))
+
+    assert result["status"] == "diagnostic_only_missing_or_inconsistent"
+    assert result["excluded_fluid_particles_zero"] == "missing"
+    assert "verified B materialization population" in result["diagnostic_findings"][0]["detail"]
+
+
+def test_partout_timestep_must_match_runparts_realstr_value(tmp_path: Path) -> None:
+    source = _source(
+        tmp_path, "PartOut_000.obi4",
+        _partout_block(0, (_partout_record(1, (0,), b"\x01", time_step=0.2),)),
+    )
+    try:
+        result = diagnostic.diagnose(_runparts(counts={1: (1, 0, 0)}), (source,))
+    finally:
+        _close((source,))
+
+    assert result["status"] == "diagnostic_only_missing_or_inconsistent"
+    assert "TimeStep disagrees with RunPARTs" in result["diagnostic_findings"][0]["detail"]
 
 
 def test_appended_blocks_are_joined_by_part_not_aggregate_count(tmp_path: Path) -> None:

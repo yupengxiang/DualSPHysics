@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 
 import pytest
@@ -10,6 +11,7 @@ from scripts import f8_r008_auxiliary_output_inventory_v1 as inventory
 from scripts import f8_r008_per_case_bundle_verifier_v1 as verifier
 from scripts import f8_r008_safe_bi4_decoder_v1 as decoder
 from tests import test_f8_r008_part_extra_finite_inventory_v1 as part_extra_fixture
+from tests import test_f8_r008_partout_runparts_diagnostic_v1 as partout_fixture
 from tests import test_f8_r008_per_case_bundle_verifier_v1 as bundle_fixture
 
 
@@ -66,6 +68,21 @@ def _inventory(pair):
     return inventory.inventory_c_outputs_with_part_extra(**pair)
 
 
+def _partout_payload(
+    *,
+    velocity: tuple[float, ...] | None = None,
+    time_step: float = 0.1,
+) -> bytes:
+    float_values = {} if velocity is None else {"Vel": velocity}
+    return partout_fixture._partout_block(
+        0,
+        (partout_fixture._partout_record(
+            1, (0,), b"\x01", float_values=float_values, time_step=time_step,
+        ),),
+        case_np=2,
+    )
+
+
 def test_inventories_every_manifest_part_extra_from_verified_b_cohorts(tmp_path) -> None:
     pair = _build_pair(tmp_path, extra_output_payloads={
         "PartExtra_0001.bi4": _part_extra_payload(),
@@ -76,6 +93,7 @@ def test_inventories_every_manifest_part_extra_from_verified_b_cohorts(tmp_path)
     assert result["status"] == inventory.STATUS
     assert result["stage_statuses"] == {"B": "passed", "C": "passed"}
     assert result["verified_case_populations"] == {
+        "case_np": 2,
         "case_nbound": 1,
         "case_nfloat": 0,
         "derived_from": "B generated XML and initial BI4 particle cohorts",
@@ -84,6 +102,7 @@ def test_inventories_every_manifest_part_extra_from_verified_b_cohorts(tmp_path)
     assert result["part_extra_presence_expectation_resolved"] is False
     assert result["part_extra_observed_all_floating_values_finite"] is True
     assert result["all_native_auxiliary_float_sources_scanned"] is False
+    assert result["partout_runparts_diagnostic"]["status"] == "diagnostic_only_missing_or_inconsistent"
     assert result["part_extra_records"][0]["primary_frame_path"] == "frames/Part_0001.bi4"
     assert result["part_extra_records"][0]["part_extra"]["floating_value_inventory"][
         "all_floating_values_finite"
@@ -141,6 +160,145 @@ def test_known_but_unscanned_and_unknown_outputs_remain_visible(tmp_path) -> Non
     assert result["unclassified_output_paths"] == ["opaque-extension.bin"]
     assert result["all_present_output_paths_have_known_class"] is False
     assert result["all_native_auxiliary_float_sources_scanned"] is False
+
+
+def test_manifest_bound_runparts_and_partout_are_joined_and_float_scanned(tmp_path) -> None:
+    row = verifier._frozen_qualification_row(bundle_fixture.CASE_ID)
+    frame_time = float.fromhex(verifier.expected_time_axis_hex(row)[1])
+    pair = _build_pair(tmp_path, extra_output_payloads={
+        "RunPARTs.csv": partout_fixture._runparts(
+            counts={1: (1, 0, 0)}, time_steps={1: format(frame_time, ".16g")},
+        ),
+        "PartOut_000.obi4": _partout_payload(time_step=frame_time),
+    })
+
+    result = _inventory(pair)
+
+    diagnostic = result["partout_runparts_diagnostic"]
+    assert diagnostic["status"] == "diagnostic_only_consistent_inputs_gate_open"
+    assert diagnostic["checks"]["partout_case_np_matches_verified_b"] is True
+    assert diagnostic["partout_float_value_inventory"]["all_observed_floating_values_finite"] is True
+    assert diagnostic["excluded_fluid_particles_zero"] == "open"
+    assert result["qualification_credit"] == 0
+    assert result["native_integrity_evaluated"] is False
+    classes = {entry["path"]: entry for entry in result["output_classifications"]}
+    assert classes["RunPARTs.csv"]["classification"] == "runparts_numeric_fields_scanned"
+    assert classes["PartOut_000.obi4"]["classification"] == "partout_structure_and_float_values_scanned"
+    assert classes["PartOut_000.obi4"]["finite_scan_status"] is True
+
+
+def test_manifest_bound_nonfinite_partout_is_reported_not_promoted_to_gate(tmp_path) -> None:
+    row = verifier._frozen_qualification_row(bundle_fixture.CASE_ID)
+    frame_time = float.fromhex(verifier.expected_time_axis_hex(row)[1])
+    pair = _build_pair(tmp_path, extra_output_payloads={
+        "RunPARTs.csv": partout_fixture._runparts(
+            counts={1: (1, 0, 0)}, time_steps={1: format(frame_time, ".16g")},
+        ),
+        "PartOut_000.obi4": _partout_payload(
+            velocity=(float("inf"), 0.0, 0.0), time_step=frame_time,
+        ),
+    })
+
+    result = _inventory(pair)
+
+    diagnostic = result["partout_runparts_diagnostic"]
+    assert diagnostic["status"] == "diagnostic_only_consistent_inputs_gate_open"
+    assert diagnostic["excluded_fluid_particles_zero"] == "open"
+    assert diagnostic["partout_float_value_inventory"]["nonfinite_count"] == 1
+    classes = {entry["path"]: entry for entry in result["output_classifications"]}
+    assert classes["PartOut_000.obi4"]["finite_scan_status"] is False
+    assert result["qualification_credit"] == 0
+
+
+def test_auxiliary_input_identity_is_rechecked_after_join(tmp_path, monkeypatch) -> None:
+    row = verifier._frozen_qualification_row(bundle_fixture.CASE_ID)
+    frame_time = float.fromhex(verifier.expected_time_axis_hex(row)[1])
+    pair = _build_pair(tmp_path, extra_output_payloads={
+        "RunPARTs.csv": partout_fixture._runparts(
+            counts={1: (1, 0, 0)}, time_steps={1: format(frame_time, ".16g")},
+        ),
+        "PartOut_000.obi4": _partout_payload(time_step=frame_time),
+    })
+    runparts_path = pair["bundle_roots"]["C"] / "outputs/RunPARTs.csv"
+    original_diagnose = inventory.partout.diagnose
+
+    def diagnose_then_mutate_and_restore(*args, **kwargs):
+        result = original_diagnose(*args, **kwargs)
+        fd = os.open(runparts_path, os.O_RDWR)
+        try:
+            original_byte = os.pread(fd, 1, 0)
+            os.pwrite(fd, bytes((original_byte[0] ^ 1,)), 0)
+            os.pwrite(fd, original_byte, 0)
+        finally:
+            os.close(fd)
+        return result
+
+    monkeypatch.setattr(inventory.partout, "diagnose", diagnose_then_mutate_and_restore)
+
+    with pytest.raises(inventory.AuxiliaryOutputInventoryError, match="RunPARTs.csv identity/size differs"):
+        _inventory(pair)
+
+
+def test_partout_time_must_match_the_manifest_bound_c_frame_axis(tmp_path) -> None:
+    row = verifier._frozen_qualification_row(bundle_fixture.CASE_ID)
+    frame_time = float.fromhex(verifier.expected_time_axis_hex(row)[1])
+    mismatched_time = math.nextafter(frame_time, float("inf"))
+    pair = _build_pair(tmp_path, extra_output_payloads={
+        "RunPARTs.csv": partout_fixture._runparts(
+            counts={1: (1, 0, 0)}, time_steps={1: format(mismatched_time, ".16g")},
+        ),
+        "PartOut_000.obi4": _partout_payload(time_step=mismatched_time),
+    })
+
+    result = _inventory(pair)
+
+    assert result["partout_runparts_diagnostic"]["status"] == "diagnostic_only_missing_or_inconsistent"
+    assert "C frame reference" in result["partout_runparts_diagnostic"]["diagnostic_findings"][0]["detail"]
+    assert result["qualification_credit"] == 0
+
+
+def test_final_auxiliary_recheck_rejects_changed_size_before_hash(tmp_path, monkeypatch) -> None:
+    output_root = tmp_path / "outputs"
+    output_root.mkdir()
+    path = output_root / "RunPARTs.csv"
+    path.write_bytes(b"x" * 4096)
+    outputs_fd = os.open(output_root, os.O_RDONLY | os.O_DIRECTORY)
+    fd, identity = inventory._open_root_output(outputs_fd, path.name)
+    os.close(fd)
+
+    def forbidden_hash():
+        raise AssertionError("size mismatch must be rejected before reading/hashing")
+
+    monkeypatch.setattr(inventory.hashlib, "sha256", forbidden_hash)
+    try:
+        with pytest.raises(inventory.AuxiliaryOutputInventoryError, match="identity/size differs"):
+            inventory._recheck_manifest_file(
+                outputs_fd, path.name, {"bytes": 1, "sha256": "0" * 64}, identity,
+            )
+    finally:
+        os.close(outputs_fd)
+
+
+def test_oversized_partout_descriptor_is_closed_on_early_rejection(tmp_path, monkeypatch) -> None:
+    pair = _build_pair(tmp_path, extra_output_payloads={
+        "PartOut_000.obi4": b"x" * 128,
+    })
+    monkeypatch.setattr(inventory.partout, "MAX_PARTOUT_TOTAL_BYTES", 64)
+    opened_fds: list[int] = []
+    original_open = inventory._open_root_output
+
+    def track_open(outputs_fd: int, path: str):
+        fd, identity = original_open(outputs_fd, path)
+        opened_fds.append(fd)
+        return fd, identity
+
+    monkeypatch.setattr(inventory, "_open_root_output", track_open)
+    with pytest.raises(inventory.AuxiliaryOutputInventoryError, match="aggregate cap"):
+        _inventory(pair)
+
+    assert len(opened_fds) == 1
+    with pytest.raises(OSError):
+        os.fstat(opened_fds[0])
 
 
 def test_part_extra_population_must_match_verified_b_cohorts(tmp_path) -> None:
