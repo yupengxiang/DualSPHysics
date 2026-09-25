@@ -1,7 +1,9 @@
 import copy
 import json
+import os
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 
 import pytest
@@ -108,6 +110,58 @@ def test_path_backed_manifest_enforces_configured_byte_cap(tmp_path, monkeypatch
     manifest_path.write_bytes(b"{" + b" " * 32 + b"}")
     with pytest.raises(ValueError, match="byte limit"):
         inspect_inputs(manifest_path, data_root=tmp_path)
+
+
+def test_bounded_json_reader_rejects_symlink(tmp_path):
+    target = tmp_path / "target.json"
+    target.write_text('{"cases": []}')
+    link = tmp_path / "input.json"
+    link.symlink_to(target)
+    with pytest.raises(ValueError, match="symlink"):
+        inspect_inputs(link, data_root=tmp_path)
+
+
+def test_bounded_json_reader_rejects_fifo_without_blocking(tmp_path):
+    if not hasattr(os, "mkfifo") or not hasattr(os, "O_NOFOLLOW"):
+        pytest.skip("FIFO/no-follow semantics require POSIX support")
+    fifo = tmp_path / "planner-input.fifo"
+    os.mkfifo(fifo)
+    script = (
+        "from pathlib import Path; import sys; "
+        "from scripts.core_formal_planner import _read_bounded_raw_json; "
+        "_read_bounded_raw_json(Path(sys.argv[1]))"
+    )
+    completed = subprocess.run(
+        [sys.executable, "-c", script, str(fifo)],
+        cwd=Path(__file__).parents[1], capture_output=True, text=True,
+        timeout=3, check=False,
+    )
+    assert completed.returncode != 0
+    assert "not a regular file" in completed.stderr
+
+
+def test_manifest_reference_hash_is_from_exact_bytes_parsed(tmp_path, monkeypatch):
+    manifest_path, _ = _manifest(tmp_path)
+    parsed_raw = manifest_path.read_bytes()
+    replacement_raw = b'{"schema":"core.dataset.v2","cases":[]}'
+    read_raw = formal_planner._read_bounded_raw_json
+    replaced = False
+
+    def read_then_replace(path):
+        nonlocal replaced
+        raw = read_raw(path)
+        if Path(path) == manifest_path and not replaced:
+            manifest_path.write_bytes(replacement_raw)
+            replaced = True
+        return raw
+
+    monkeypatch.setattr(formal_planner, "_read_bounded_raw_json", read_then_replace)
+    report = inspect_inputs(manifest_path, data_root=tmp_path)
+    assert replaced
+    assert manifest_path.read_bytes() == replacement_raw
+    assert report["case_count"] == 3 * CASES_PER_FAMILY
+    assert report["manifest"]["sha256"] == sha256_bytes(parsed_raw)
+    assert report["manifest"]["sha256"] != sha256_bytes(replacement_raw)
 
 
 def test_referenced_audit_json_with_duplicate_keys_is_rejected(tmp_path):

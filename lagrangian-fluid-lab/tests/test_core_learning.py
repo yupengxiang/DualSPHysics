@@ -542,6 +542,22 @@ def test_manifest_flag_cannot_authorize_formal_evaluation_on_legacy_reader(tmp_p
             evaluate_checkpoints(data, ["missing-1.pt", "missing-2.pt", "missing-3.pt", "missing-4.pt"])
 
 
+def test_legacy_formal_manifest_is_rejected_before_training_reads_or_outputs(tmp_path):
+    manifest = tiny_manifest(tmp_path)
+    manifest["formal_release"] = True
+    checkpoint = tmp_path / "should-not-exist.pt"
+    output = tmp_path / "should-not-exist.json"
+    with CoreDataset(manifest, tmp_path) as data:
+        with pytest.raises(ValueError, match="V13 verified-reader capability"):
+            train_model(data, model_kind="mlp", seed=17, updates=1,
+                        centers_per_update=1, hidden=8,
+                        normalization_transitions=1,
+                        checkpoint=checkpoint, output=output)
+        assert data.read_log == []
+    assert not checkpoint.exists()
+    assert not output.exists()
+
+
 def test_training_receipt_milestones_require_hashes():
     receipt = {"checkpoints": [
         {"path": f"step-{update:08d}.pt", "update": update, "sha256": "a" * 63}

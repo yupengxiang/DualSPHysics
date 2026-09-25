@@ -349,6 +349,12 @@ def _manifest_formal_release(dataset):
     return False
 
 
+def _dataset_declares_formal_release(dataset):
+    """Return whether legacy-visible metadata claims formal-release status."""
+    manifest = getattr(dataset, "manifest", None)
+    return isinstance(manifest, Mapping) and manifest.get("formal_release") is True
+
+
 def _formal_validation_eligible(dataset, validation_cases, family_counts):
     return bool(
         _manifest_formal_release(dataset)
@@ -873,6 +879,11 @@ def train_model(dataset, *, model_kind="graph_raw", seed=17, updates=DEFAULT_UPD
                 validation_centers=DEFAULT_CENTERS, progress_output=None,
                 evaluate_milestones=True):
     """Train one complete baseline and return a ``core.training.v1`` receipt."""
+    if (_dataset_declares_formal_release(dataset)
+            and not _manifest_formal_release(dataset)):
+        raise ValueError(
+            "formal training requires a V13 verified-reader capability; "
+            "the legacy reader is diagnostic-only")
     if model_kind not in MODEL_KINDS:
         raise ValueError(f"unknown model kind {model_kind}")
     if isinstance(updates, bool) or int(updates) < 1:

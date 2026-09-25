@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter, defaultdict
+import errno
 import hashlib
 import json
 import math
@@ -125,7 +126,17 @@ def _parse_bounded_json_int(token: str) -> int:
 
 def _read_bounded_raw_json(path: Path) -> bytes:
     """Read one regular JSON file with a strict byte and mutation bound."""
-    with path.open("rb") as stream:
+    nofollow = getattr(os, "O_NOFOLLOW", None)
+    if nofollow is None:
+        raise ValueError("platform cannot safely open planner JSON without following symlinks")
+    flags = os.O_RDONLY | os.O_NONBLOCK | nofollow | getattr(os, "O_CLOEXEC", 0)
+    try:
+        descriptor = os.open(path, flags)
+    except OSError as error:
+        if error.errno == errno.ELOOP:
+            raise ValueError("JSON input symlink is forbidden") from error
+        raise
+    with os.fdopen(descriptor, "rb") as stream:
         before = os.fstat(stream.fileno())
         if not stat.S_ISREG(before.st_mode):
             raise ValueError("JSON input is not a regular file")
@@ -179,38 +190,51 @@ def _load_json_object(path: Path, *, label: str) -> dict[str, Any]:
 
 
 def _resolve_path(value: str | Path, *, base: Path | None = None,
-                  data_root: Path | None = None) -> Path:
+                  data_root: Path | None = None,
+                  no_follow_leaf: bool = False) -> Path:
     """Resolve a campaign-relative path without permitting ambiguity."""
     candidate = Path(value).expanduser()
+    def normalize(path: Path) -> Path:
+        if not no_follow_leaf:
+            return path.resolve()
+        absolute = Path(os.path.abspath(path))
+        return absolute.parent.resolve() / absolute.name
+
     if candidate.is_absolute():
-        return candidate.resolve()
+        return normalize(candidate)
     options = []
     if base is not None:
-        options.append((base / candidate).resolve())
+        options.append(normalize(base / candidate))
     if data_root is not None:
-        options.append((data_root / candidate).resolve())
-    options.append((Path.cwd() / candidate).resolve())
-    options.append((Path(__file__).resolve().parents[1] / candidate).resolve())
+        options.append(normalize(data_root / candidate))
+    options.append(normalize(Path.cwd() / candidate))
+    options.append(normalize(Path(__file__).resolve().parents[1] / candidate))
     for option in options:
-        if option.exists():
+        if option.exists() or (no_follow_leaf and option.is_symlink()):
             return option
     # The first candidate gives an actionable path for a missing input.
     return options[0] if options else candidate.resolve()
 
 
-def _load_json(source: Any, *, data_root: Path | None = None) -> tuple[Any, Path | None]:
+def _load_json(source: Any, *, data_root: Path | None = None
+               ) -> tuple[Any, Path | None, str | None]:
     if isinstance(source, (str, Path)):
-        path = _resolve_path(source, data_root=data_root)
-        return _load_json_object(path, label=f"planner input {path}"), path
+        path = _resolve_path(source, data_root=data_root, no_follow_leaf=True)
+        raw = _read_bounded_raw_json(path)
+        return (_strict_json_object(raw, label=f"planner input {path}"),
+                path, sha256_bytes(raw))
     if isinstance(source, Mapping):
-        return dict(source), None
+        return dict(source), None, None
     raise TypeError("planner input must be a JSON path or mapping")
 
 
 def _ref(path: Path | None, *, supplied: str | None = None,
-         payload: Any | None = None) -> dict[str, Any]:
+         payload: Any | None = None,
+         raw_sha256: str | None = None) -> dict[str, Any]:
     if path is not None:
-        return {"path": str(path), "sha256": sha256_file(path)}
+        if not isinstance(raw_sha256, str) or len(raw_sha256) != 64:
+            raise ValueError("path-backed planner references require the parsed raw-byte SHA-256")
+        return {"path": str(path), "sha256": raw_sha256}
     return {"path": supplied or "<in-memory>", "sha256": _json_hash(payload)}
 
 
@@ -435,35 +459,36 @@ def _audit_reference(row: Mapping[str, Any]) -> Any:
 
 
 def _load_referenced_audit(reference: Any, *, base: Path | None,
-                           data_root: Path | None) -> tuple[Mapping[str, Any] | None, Path | None, str | None]:
+                           data_root: Path | None
+                           ) -> tuple[Mapping[str, Any] | None, Path | None, str | None, str | None]:
     if isinstance(reference, Mapping):
         path_value = reference.get("path")
         if path_value is None:
-            return reference, None, None
-        path = _resolve_path(path_value, base=base, data_root=data_root)
+            return reference, None, None, None
+        path = _resolve_path(path_value, base=base, data_root=data_root,
+                             no_follow_leaf=True)
         declared = reference.get("sha256")
         if not isinstance(declared, str) or len(declared) != 64:
-            return None, path, f"audit reference has no declared SHA-256: {path}"
-        if not path.is_file():
-            return None, path, f"audit reference is missing: {path}"
+            return None, path, f"audit reference has no declared SHA-256: {path}", None
         try:
             raw = _read_bounded_raw_json(path)
         except (OSError, ValueError) as error:
-            return None, path, f"invalid audit JSON: {path}: {error}"
+            return None, path, f"invalid audit JSON: {path}: {error}", None
         observed = sha256_bytes(raw)
         if observed != declared:
-            return None, path, f"audit SHA-256 mismatch: {path}"
+            return None, path, f"audit SHA-256 mismatch: {path}", observed
         try:
             payload = _strict_json_object(raw, label=f"audit JSON {path}")
         except (OSError, ValueError) as error:
-            return None, path, f"invalid audit JSON: {path}: {error}"
+            return None, path, f"invalid audit JSON: {path}: {error}", observed
         if not isinstance(payload, Mapping):
-            return None, path, f"audit JSON is not an object: {path}"
-        return payload, path, None
+            return None, path, f"audit JSON is not an object: {path}", observed
+        return payload, path, None, observed
     if isinstance(reference, (str, Path)):
-        path = _resolve_path(reference, base=base, data_root=data_root)
-        return None, path, f"audit path has no declared SHA-256: {path}"
-    return None, None, "unsupported audit reference"
+        path = _resolve_path(reference, base=base, data_root=data_root,
+                             no_follow_leaf=True)
+        return None, path, f"audit path has no declared SHA-256: {path}", None
+    return None, None, "unsupported audit reference", None
 
 
 def _profile_resources(profile: Mapping[str, Any], model: str) -> dict[str, Any]:
@@ -516,21 +541,27 @@ def _profile_resources(profile: Mapping[str, Any], model: str) -> dict[str, Any]
 
 
 def _environment_binding(environment: Any, *, data_root: Path | None,
-                          python_executable: str | Path | None) -> tuple[dict[str, Any] | None, Path | None]:
+                          python_executable: str | Path | None
+                          ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     if environment is None:
         return None, None
-    payload, path = _load_json(environment, data_root=data_root) if isinstance(environment, (str, Path)) else (environment, None)
+    if isinstance(environment, (str, Path)):
+        payload, path, raw_sha256 = _load_json(environment, data_root=data_root)
+    else:
+        payload, path, raw_sha256 = environment, None, None
     if isinstance(payload, Mapping):
         result = dict(payload)
         if path is not None:
-            result["source"] = _ref(path)
+            source_ref = _ref(path, raw_sha256=raw_sha256)
         else:
-            result.setdefault("source", _ref(None, payload=payload))
+            source_ref = _ref(None, payload=payload)
+        result["source"] = source_ref
     else:
-        result = {"id": str(payload), "source": _ref(None, payload=payload)}
+        source_ref = _ref(None, payload=payload)
+        result = {"id": str(payload), "source": source_ref}
     executable = python_executable or result.get("python_executable") or result.get("python")
     if executable is None:
-        return None, path
+        return None, None
     resolved = _resolve_path(executable, data_root=data_root)
     if not resolved.is_file() or not os.access(resolved, os.X_OK):
         result["python_executable"] = str(resolved)
@@ -539,7 +570,7 @@ def _environment_binding(environment: Any, *, data_root: Path | None,
         result["python_executable"] = str(resolved)
         result["python_exists"] = True
     result.setdefault("id", result.get("environment_id", "unidentified-environment"))
-    return result, path
+    return result, source_ref
 
 
 def _code_bundle(code_root: Path) -> tuple[list[dict[str, Any]], list[str]]:
@@ -560,7 +591,8 @@ def _snapshot_check(snapshot: Any, *, code_root: Path, required: Sequence[str]) 
         return None, []
     errors: list[str] = []
     if isinstance(snapshot, (str, Path)):
-        path = _resolve_path(snapshot, base=code_root, data_root=code_root)
+        path = _resolve_path(snapshot, base=code_root, data_root=code_root,
+                             no_follow_leaf=True)
         if path.is_dir():
             for relative in required:
                 snapshot_file = (path / relative).resolve()
@@ -671,7 +703,7 @@ def inspect_inputs(manifest: Any, *, evidence: Sequence[Any] | Any | None = None
     permanent hold even when all descriptive metadata claims a pass.
     """
     root = Path(data_root).expanduser().resolve() if data_root is not None else None
-    payload, manifest_path = _load_json(manifest, data_root=root)
+    payload, manifest_path, manifest_raw_sha256 = _load_json(manifest, data_root=root)
     if not isinstance(payload, Mapping):
         raise ValueError("formal manifest must be a JSON object")
     hold_reasons: list[str] = [
@@ -683,7 +715,7 @@ def inspect_inputs(manifest: Any, *, evidence: Sequence[Any] | Any | None = None
     evidence_global_rows: list[Mapping[str, Any]] = []
     evidence_refs: list[dict[str, Any]] = []
     for source in evidence_sources:
-        evidence_payload, evidence_path = _load_json(source, data_root=root)
+        evidence_payload, evidence_path, evidence_raw_sha256 = _load_json(source, data_root=root)
         if not isinstance(evidence_payload, Mapping):
             raise ValueError("qualification evidence must be a JSON object")
         case_items, global_items = _extract_evidence_rows(evidence_payload)
@@ -692,8 +724,10 @@ def inspect_inputs(manifest: Any, *, evidence: Sequence[Any] | Any | None = None
             case_id = _case_id(item)
             if case_id:
                 evidence_case_rows[case_id].append(item)
-        evidence_refs.append(_ref(evidence_path, supplied="<in-memory-evidence>" if evidence_path is None else None,
-                                  payload=evidence_payload))
+        evidence_refs.append(_ref(
+            evidence_path,
+            supplied="<in-memory-evidence>" if evidence_path is None else None,
+            payload=evidence_payload, raw_sha256=evidence_raw_sha256))
 
     # Attach inline or referenced per-case audits.  Referenced audit files are
     # hashed as metadata inputs; trajectories themselves are intentionally not
@@ -709,15 +743,16 @@ def inspect_inputs(manifest: Any, *, evidence: Sequence[Any] | Any | None = None
         if isinstance(reference, Mapping) and not reference.get("path"):
             audit_payloads[case_id].append(reference)
         elif isinstance(reference, Mapping) or isinstance(reference, (str, Path)):
-            audit_payload, audit_path, audit_error = _load_referenced_audit(
+            audit_payload, audit_path, audit_error, audit_raw_sha256 = _load_referenced_audit(
                 reference, base=manifest_path.parent if manifest_path else None,
                 data_root=root)
             if audit_payload is not None:
                 audit_payloads[case_id].append(audit_payload)
             if audit_error is not None:
                 audit_hash_errors.append(f"{case_id}: {audit_error}")
-            if audit_path is not None and audit_path.is_file():
-                audit_refs[str(audit_path)] = _ref(audit_path)
+            if audit_path is not None and audit_raw_sha256 is not None:
+                audit_refs[str(audit_path)] = _ref(
+                    audit_path, raw_sha256=audit_raw_sha256)
 
     all_case_ids = [_case_id(row) for row in rows]
     duplicate_case_ids = sorted(case_id for case_id, count in Counter(all_case_ids).items()
@@ -885,7 +920,10 @@ def inspect_inputs(manifest: Any, *, evidence: Sequence[Any] | Any | None = None
 
     return {
         "schema": "core.formal_input_audit.v1",
-        "manifest": _ref(manifest_path, supplied="<in-memory-manifest>" if manifest_path is None else None, payload=payload),
+        "manifest": _ref(
+            manifest_path,
+            supplied="<in-memory-manifest>" if manifest_path is None else None,
+            payload=payload, raw_sha256=manifest_raw_sha256),
         "manifest_schema": payload.get("schema"),
         "manifest_formal_release": payload.get("formal_release"),
         "case_count": len(rows),
@@ -1071,14 +1109,16 @@ def build_plan(manifest: Any, *, evidence: Sequence[Any] | Any | None = None,
         hold_reasons.append("a measured profile resource is required")
         profile_ref = {"path": "<missing-profile>", "sha256": None}
     else:
-        profile_payload, profile_path = _load_json(profile, data_root=root)
+        profile_payload, profile_path, profile_raw_sha256 = _load_json(profile, data_root=root)
         if not isinstance(profile_payload, Mapping):
             hold_reasons.append("profile resource must be a JSON object")
             profile_payload = {}
-        profile_ref = _ref(profile_path, supplied="<in-memory-profile>" if profile_path is None else None,
-                           payload=profile_payload)
+        profile_ref = _ref(
+            profile_path,
+            supplied="<in-memory-profile>" if profile_path is None else None,
+            payload=profile_payload, raw_sha256=profile_raw_sha256)
 
-    environment_payload, environment_path = _environment_binding(
+    environment_payload, environment_ref = _environment_binding(
         environment, data_root=root, python_executable=python_executable)
     if environment_payload is None:
         hold_reasons.append("an explicit execution environment and python executable are required")
@@ -1089,12 +1129,6 @@ def build_plan(manifest: Any, *, evidence: Sequence[Any] | Any | None = None,
         # spec and defer its existence check to launch admission; an absent
         # environment record or an absent executable declaration still holds.
         environment_payload["python_verification"] = "deferred_to_declared_host"
-        environment_ref = {"path": str(environment_path) if environment_path else "<in-memory>",
-                            "sha256": (sha256_file(environment_path) if environment_path
-                                       else _json_hash(environment_payload))}
-    else:
-        environment_ref = {"path": str(environment_path) if environment_path else "<in-memory>",
-                            "sha256": (sha256_file(environment_path) if environment_path else _json_hash(environment_payload))}
 
     code_files, missing_code = _code_bundle(code)
     if missing_code:
