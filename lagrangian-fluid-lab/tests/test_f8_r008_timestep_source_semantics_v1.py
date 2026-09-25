@@ -404,6 +404,12 @@ def test_strict_json_rejects_duplicate_keys():
         audit._strict_json(b'{"cases":[],"cases":[]}')
 
 
+@pytest.mark.parametrize("constant", [b"NaN", b"Infinity", b"-Infinity"])
+def test_strict_json_rejects_nonstandard_numeric_constants(constant):
+    with pytest.raises(audit.TimestepSemanticsError, match="non-standard JSON numeric constant"):
+        audit._strict_json(b'{"cases":[{"value":' + constant + b"}]}")
+
+
 def test_read_regular_rejects_parent_traversal(tmp_path: Path):
     with pytest.raises(audit.TimestepSemanticsError, match="bounded relative path"):
         audit._read_regular(tmp_path, "../outside")

@@ -748,8 +748,14 @@ def _strict_json(payload: bytes) -> Any:
             result[key] = value
         return result
 
+    def reject_nonfinite(token: str):
+        raise TimestepSemanticsError(
+            f"scope receipt contains a non-standard JSON numeric constant: {token}"
+        )
+
     try:
-        return json.loads(payload.decode("utf-8"), object_pairs_hook=reject_duplicates)
+        return json.loads(payload.decode("utf-8"), object_pairs_hook=reject_duplicates,
+                          parse_constant=reject_nonfinite)
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
         raise TimestepSemanticsError("scope receipt is not strict UTF-8 JSON") from error
 
