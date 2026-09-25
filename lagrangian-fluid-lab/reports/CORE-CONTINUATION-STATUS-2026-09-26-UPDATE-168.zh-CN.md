@@ -14,7 +14,7 @@
 
 - 新 inventory + 原 raw finite scanner 定向套件：**34 passed**，包含七列各自注入 NaN、非有限 metadata、未知扩展数组及完整最大行数负测。
 - 扩大七文件回归最初为 **137 passed / 1 failed**；唯一失败揭示实现把最大控制轴误设为 321 行。以冻结矩阵实际最大 1,497 行修正后，新 inventory/raw scanner 专项复跑 34 passed。其余六个回归文件在该次扩大运行均通过。
-- `py_compile` 与 `git diff --check` 待本次最终提交前复验。
+- 最终 `py_compile` 与暂存区 `git diff --check` 均通过。
 - 只使用合成 BI4/CSV 与仓库内冻结 scope/源码定义；没有读生产 bundle/HDF5/frame、没有运行 GenCase/native decoder/solver/worker/GPU/queue，也没有写 evidence receipt、registry、ledger 或改资格分母。
 
 下一步需要对 provisional inventory 做独立静态复核，再决定是否写新的 evidence schema 接线；在 source/build/runtime、控制字节绑定、全输出扩展 inventory 与完整执行证据未闭合前，不可把诊断结果用于 native-integrity adjudication。
