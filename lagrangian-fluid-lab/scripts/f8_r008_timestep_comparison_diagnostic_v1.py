@@ -109,8 +109,8 @@ def _load_frozen_pair_contract() -> tuple[str, str, float]:
              and comparison["refined_max_dt_must_be_strictly_less_than_baseline"] is True,
              "frozen timestep pair relation requirements are malformed")
     _require(type(phase_limit) in (int, float)
-             and math.isfinite(phase_limit)
-             and phase_limit == FROZEN_PHASE_LIMIT_RAD,
+             and phase_limit == FROZEN_PHASE_LIMIT_RAD
+             and math.isfinite(phase_limit),
              "frozen phase-difference limit is not the expected finite 0.05 rad")
     return baseline_id, refined_id, float(phase_limit)
 
@@ -159,8 +159,20 @@ def _diagnose_case(case: dict[str, Any], label: str) -> dict[str, Any]:
              and type(diagnostic.get("runtime_completion_diagnostic")) is dict
              and set(diagnostic["runtime_completion_diagnostic"])
              == COMPLETION_DIAGNOSTIC_FIELDS
+             and diagnostic["runtime_completion_diagnostic"].get("schema")
+             == case_adjudicator.source_semantics_v1.RUNTIME_EVIDENCE_SCHEMA
+             and diagnostic["runtime_completion_diagnostic"].get("state")
+             == "untrusted_runtime_evidence_diagnostic_only"
              and type(diagnostic["runtime_completion_diagnostic"].get(
                  "conditions_satisfied_untrusted")) is bool
+             and diagnostic["runtime_completion_diagnostic"].get(
+                 "evidence_authenticated") is False
+             and diagnostic["runtime_completion_diagnostic"].get(
+                 "solver_timestep_adjudicated") is False
+             and diagnostic["runtime_completion_diagnostic"].get(
+                 "normal_completion_verified") is False
+             and diagnostic["runtime_completion_diagnostic"].get(
+                 "trusted_acceptance_verdict_issued") is False
              and type(diagnostic.get("runparts_runtime_claims_consistent_untrusted"))
              in (bool, type(None))
              and type(diagnostic.get("runparts_observation")) is dict
@@ -219,9 +231,15 @@ def diagnose_frozen_timestep_comparison_pair_v1(
     baseline_id, refined_id, phase_limit = _load_frozen_pair_contract()
     baseline_input = _snapshot_case(baseline_case, baseline_id, "baseline")
     refined_input = _snapshot_case(refined_case, refined_id, "refined")
-    _require(type(wrapped_phase_difference_rad) in (int, float)
-             and math.isfinite(wrapped_phase_difference_rad)
-             and 0.0 <= wrapped_phase_difference_rad <= math.pi,
+    phase_in_range = False
+    if type(wrapped_phase_difference_rad) is int:
+        # Integers are intrinsically finite; avoiding math.isfinite() here
+        # prevents OverflowError for hostile, extremely large Python ints.
+        phase_in_range = 0 <= wrapped_phase_difference_rad <= math.pi
+    elif type(wrapped_phase_difference_rad) is float:
+        phase_in_range = (math.isfinite(wrapped_phase_difference_rad)
+                          and 0.0 <= wrapped_phase_difference_rad <= math.pi)
+    _require(phase_in_range,
              "wrapped phase difference must be a finite builtin number in [0, pi]")
     phase_difference = float(wrapped_phase_difference_rad)
 

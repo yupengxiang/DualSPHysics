@@ -188,6 +188,17 @@ def test_phase_difference_uses_frozen_limit_and_reports_excess():
     assert result["frozen_pair_contract"]["phase_difference_absolute_max_rad"] == 0.05
 
 
+def test_phase_difference_exactly_at_frozen_limit_is_within_limit():
+    result = _pair(phase_difference=0.05)
+
+    observations = result["untrusted_pair_observations"]
+    assert observations["wrapped_phase_difference_rad"] == 0.05
+    assert observations["phase_difference_within_frozen_limit"] is True
+    assert observations["diagnostic_code"] == (
+        "unverified_refinement_and_phase_observations_match_frozen_pair"
+    )
+
+
 def test_early_runparts_endpoint_remains_unresolved_and_dt_relation_is_not_computed():
     result = _pair(refined_time="9.9")
 
@@ -268,6 +279,19 @@ def test_numpy_scalar_is_not_accepted_as_exact_numeric_input():
         )
 
 
+def test_extremely_large_integer_phase_is_rejected_with_contract_error():
+    baseline = _case(pair_v1.BASELINE_CASE_ID)
+    refined = _case(pair_v1.REFINED_CASE_ID)
+
+    with pytest.raises(pair_v1.TimestepComparisonDiagnosticError,
+                       match="wrapped phase difference"):
+        pair_v1.diagnose_frozen_timestep_comparison_pair_v1(
+            baseline_case=baseline,
+            refined_case=refined,
+            wrapped_phase_difference_rad=10 ** 10000,
+        )
+
+
 def test_non_cpu_single_runtime_claim_prevents_dtmax_comparison():
     result = _pair(refined_completion_updates={"openmp_enabled": True})
 
@@ -311,3 +335,27 @@ def test_completion_evidence_shape_errors_are_wrapped_and_fail_closed():
             refined_case=refined,
             wrapped_phase_difference_rad=0.01,
         )
+
+
+@pytest.mark.parametrize("field", [
+    "evidence_authenticated",
+    "solver_timestep_adjudicated",
+    "normal_completion_verified",
+    "trusted_acceptance_verdict_issued",
+])
+def test_upstream_completion_qualification_boundary_drift_fails_closed(monkeypatch, field):
+    original = pair_v1.case_adjudicator.diagnose_runtime_timestep_case_v1
+
+    def drifted(**kwargs):
+        diagnostic = original(**kwargs)
+        diagnostic["runtime_completion_diagnostic"][field] = True
+        return diagnostic
+
+    monkeypatch.setattr(
+        pair_v1.case_adjudicator,
+        "diagnose_runtime_timestep_case_v1",
+        drifted,
+    )
+    with pytest.raises(pair_v1.TimestepComparisonDiagnosticError,
+                       match="no longer matches the expected v1 contract"):
+        _pair()
