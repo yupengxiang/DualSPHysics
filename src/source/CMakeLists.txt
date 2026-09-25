@@ -130,26 +130,38 @@ endif()
 #------------------------------------------------------------------
 # Binaries
 #------------------------------------------------------------------
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../bin/${PLATFORM}) # Generic output directory
+# Preserve the historical source-tree destination by default, but allow a
+# caller to provide an isolated output directory for reproducible builds.
+if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../bin/${PLATFORM})
+endif()
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})         # Release output directory
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})           # Debug output directory
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_executable(DualSPHysics5.4CPU_linux64 ${OBJXML} ${OBJSPHMOTION} ${OBCOMMON} ${OBCOMMONDSPH} ${OBSPH} ${OBSPHSINGLE} ${OBWAVERZ} ${OBWAVERZGPU}  ${OBCHRONO} ${OBMOORDYNPLUS} ${OBINOUT} ${OBMESH} ${OBVRES} ${OBFLEXSTRUC})
-  add_dependencies(DualSPHysics5.4CPU_linux64 LibDSphMoorDynPlus)
+  if(ENABLE_MOORDYNPLUS)
+    add_dependencies(DualSPHysics5.4CPU_linux64 LibDSphMoorDynPlus)
+  endif()
   install(TARGETS	DualSPHysics5.4CPU_linux64 DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
   if (CUDA_FOUND)
     cuda_add_executable(DualSPHysics5.4_linux64 ${OBJXML} ${OBJSPHMOTION} ${OBCOMMON} ${OBCOMMONDSPH} ${OBSPH} ${OBSPHSINGLE} ${OBCOMMONGPU} ${OBSPHGPU} ${OBSPHSINGLEGPU} ${OBCUDA} ${OBWAVERZ} ${OBWAVERZCUDA} ${OBCHRONO} ${OBMOORDYNPLUS} ${OBINOUT} ${OBINOUTGPU} ${OBVRESGPU} ${OBWAVERZGPU} ${OBINOUTGPU} ${OBMESH} ${OBVRES} ${OBFLEXSTRUC})
-    add_dependencies(DualSPHysics5.4_linux64 LibDSphMoorDynPlus)
+    if(ENABLE_MOORDYNPLUS)
+      add_dependencies(DualSPHysics5.4_linux64 LibDSphMoorDynPlus)
+    endif()
     install(TARGETS DualSPHysics5.4_linux64 DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
   endif(CUDA_FOUND)
 elseif(MSVC) 
   add_executable(DualSPHysics5.4CPU_win64 ${OBJXML} ${OBJSPHMOTION} ${OBCOMMON} ${OBCOMMONDSPH} ${OBSPH} ${OBSPHSINGLE} ${OBWAVERZ} ${OBWAVERZGPU}  ${OBCHRONO} ${OBMOORDYNPLUS} ${OBINOUT} ${OBMESH} ${OBVRES} ${OBFLEXSTRUC})
-  add_dependencies(DualSPHysics5.4CPU_win64 LibDSphMoorDynPlus)
+  if(ENABLE_MOORDYNPLUS)
+    add_dependencies(DualSPHysics5.4CPU_win64 LibDSphMoorDynPlus)
+  endif()
   install(TARGETS	DualSPHysics5.4CPU_win64 DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
   if (CUDA_FOUND)
     cuda_add_executable(DualSPHysics5.4_win64 ${OBJXML} ${OBJSPHMOTION} ${OBCOMMON} ${OBCOMMONDSPH} ${OBSPH} ${OBSPHSINGLE} ${OBCOMMONGPU} ${OBSPHGPU} ${OBSPHSINGLEGPU} ${OBCUDA} ${OBWAVERZ} ${OBWAVERZCUDA} ${OBCHRONO} ${OBMOORDYNPLUS} ${OBINOUT} ${OBINOUTGPU} ${OBVRESGPU} ${OBWAVERZGPU} ${OBINOUTGPU} ${OBMESH} ${OBVRES} ${OBFLEXSTRUC})
-    add_dependencies(DualSPHysics5.4_win64 LibDSphMoorDynPlus)
+    if(ENABLE_MOORDYNPLUS)
+      add_dependencies(DualSPHysics5.4_win64 LibDSphMoorDynPlus)
+    endif()
     install(TARGETS DualSPHysics5.4_win64 DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
   endif(CUDA_FOUND)
 endif()
@@ -213,7 +225,7 @@ endif(ENABLE_MOORDYNPLUS)
 #------------------------------------------------------------------
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   target_link_libraries(DualSPHysics5.4CPU_linux64 ${LINKER_FLAGS})
-  set_target_properties(DualSPHysics5.4CPU_linux64 PROPERTIES COMPILE_FLAGS "-use_fast_math -O3 -D_WITHMR -fPIC -std=c++0x")
+  set_target_properties(DualSPHysics5.4CPU_linux64 PROPERTIES COMPILE_FLAGS "-ffast-math -O3 -D_WITHMR -fPIC -std=c++0x")
   
   if (CUDA_FOUND)
     target_link_libraries(DualSPHysics5.4_linux64 ${LINKER_FLAGS})
