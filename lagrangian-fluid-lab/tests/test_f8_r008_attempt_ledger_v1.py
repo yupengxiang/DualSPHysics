@@ -100,6 +100,21 @@ def _raw(document: dict[str, object] | None = None) -> bytes:
     return json.dumps(document or _ledger_document(), separators=(",", ":"), allow_nan=False).encode()
 
 
+def _ledger_and_raw_objects() -> tuple[bytes, dict[tuple[str, str, str], bytes]]:
+    document = _ledger_document()
+    artifacts = {}
+    for event in document["events"]:
+        ref = event.get("receipt_ref", event.get("process_journal_ref", event.get("terminal_ref")))
+        if ref is None:
+            continue
+        key = (ref["stage"], ref["role"], ref["object_id"])
+        object_raw = b"synthetic\x00raw:" + "/".join(key).encode()
+        ref["bytes"] = len(object_raw)
+        ref["sha256"] = hashlib.sha256(object_raw).hexdigest()
+        artifacts[key] = object_raw
+    return _raw(document), artifacts
+
+
 def _attempt_result() -> dict[str, object]:
     events = _complete_event_chain()
     refs = {
@@ -155,6 +170,135 @@ def test_structurally_closed_ledger_stays_untrusted_and_unresolved() -> None:
     assert result["qualification_adjudicated"] is False
     assert result["T1_numerical"] is False
     assert result["qualification_credit"] == 0
+
+
+def test_raw_object_binding_requires_exact_refs_and_only_proves_bytes_and_digest() -> None:
+    raw, artifacts = _ledger_and_raw_objects()
+    result = ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+        raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
+    )
+    assert result["all_non_null_refs_bound_to_supplied_raw_bytes"] is True
+    assert result["reference_occurrence_count"] == 7
+    assert result["referenced_object_count"] == 7
+    assert result["supplied_raw_object_count"] == 7
+    assert all(item["raw_bytes_match_ref"] for item in result["objects"])
+    assert result["artifact_producer_authenticated"] is False
+    assert result["descriptor_root_authenticated"] is False
+    assert result["stage_receipt_semantics_verified"] is False
+    assert result["process_journal_semantics_verified"] is False
+    assert result["attempt_ledger_complete"] is False
+    assert result["attempt_outcomes_resolved"] is False
+    assert result["T1_numerical"] is False
+    assert result["qualification_credit"] == 0
+
+
+@pytest.mark.parametrize("inventory_edit, message", [
+    (lambda artifacts: artifacts.pop(next(iter(artifacts))), "inventory differs"),
+    (lambda artifacts: artifacts.__setitem__(("runtime", "unreferenced", "extra"), b"extra"),
+     "inventory differs"),
+    (lambda artifacts: artifacts.__setitem__(next(iter(artifacts)), b"x" * len(next(iter(artifacts.values())))),
+     "SHA-256 differs"),
+])
+def test_raw_object_binding_rejects_missing_extra_or_mismatched_objects(inventory_edit, message: str) -> None:
+    raw, artifacts = _ledger_and_raw_objects()
+    inventory_edit(artifacts)
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match=message):
+        ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+            raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
+        )
+
+
+def test_raw_object_binding_rejects_non_builtin_containers_and_non_bytes_values() -> None:
+    raw, artifacts = _ledger_and_raw_objects()
+
+    class DictSubclass(dict):
+        pass
+
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="builtin dict"):
+        ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+            raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=DictSubclass(artifacts),
+        )
+    bad_values = dict(artifacts)
+    bad_values[next(iter(bad_values))] = bytearray(bad_values[next(iter(bad_values))])
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="exact raw bytes"):
+        ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+            raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=bad_values,
+        )
+
+
+def test_raw_object_binding_rejects_conflicting_descriptors_for_one_identity() -> None:
+    document = _ledger_document()
+    original_ref = copy.deepcopy(document["events"][3]["receipt_ref"])
+    second_attempt_id = "attempt-002"
+    second_nonce = "d" * 32
+    document["events"].extend([
+        _event("attempt_registered", 11, attempt_id=second_attempt_id, nonce_hex=second_nonce),
+        _event("attempt_spawn", 12, stage="B", process_generation_id="b-root-002",
+               attempt_id=second_attempt_id, nonce_hex=second_nonce),
+        _event("process_terminal", 13, stage="B", process_generation_id="b-root-002",
+               process_journal_ref=_ref("B", "process_journal", "b-process-journal-002"),
+               attempt_id=second_attempt_id, nonce_hex=second_nonce),
+        _event("stage_receipt", 14, stage="B", receipt_ref=original_ref,
+               attempt_id=second_attempt_id, nonce_hex=second_nonce),
+    ])
+    document["event_count"] = len(document["events"])
+    document["coverage_end_ns_hex"] = f"{len(document['events']) - 1:016x}"
+    document["events"][-1]["receipt_ref"]["bytes"] += 1
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="conflicting byte-count or SHA"):
+        ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+            _raw(document), qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref={},
+        )
+
+
+@pytest.mark.parametrize("bad_key", [("B",), ("B", "b_receipt", 1)])
+def test_raw_object_binding_rejects_malformed_reference_map_keys(bad_key) -> None:
+    raw, artifacts = _ledger_and_raw_objects()
+    artifacts[bad_key] = b"extra"
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match=r"exact \(stage, role, object_id\)"):
+        ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+            raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
+        )
+
+
+def test_raw_object_binding_checks_byte_count_before_digest() -> None:
+    raw, artifacts = _ledger_and_raw_objects()
+    key = next(iter(artifacts))
+    artifacts[key] += b"x"
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="byte count differs"):
+        ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+            raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
+        )
+
+
+def test_raw_object_binding_accepts_empty_not_started_inventory_without_qualifying() -> None:
+    events = [
+        _event("attempt_registered", 0),
+        _event("attempt_terminal", 1, outcome="not_started", terminal_ref=None),
+    ]
+    result = ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+        _raw(_ledger_document(events)), qualification_matrix_raw=MATRIX_RAW,
+        artifact_raw_by_ref={},
+    )
+    assert result["reference_occurrence_count"] == 0
+    assert result["referenced_object_count"] == 0
+    assert result["all_non_null_refs_bound_to_supplied_raw_bytes"] is True
+    assert result["attempt_ledger_complete"] is False
+    assert result["qualification_credit"] == 0
+
+
+@pytest.mark.parametrize("limit_name", ["MAX_REFERENCED_OBJECTS", "MAX_REFERENCED_RAW_BYTES"])
+def test_raw_object_binding_enforces_resource_limits(monkeypatch, limit_name: str) -> None:
+    raw, artifacts = _ledger_and_raw_objects()
+    if limit_name == "MAX_REFERENCED_OBJECTS":
+        monkeypatch.setattr(ledger_v1, limit_name, len(artifacts) - 1)
+        message = "object-count limit"
+    else:
+        monkeypatch.setattr(ledger_v1, limit_name, sum(map(len, artifacts.values())) - 1)
+        message = "aggregate byte limit"
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match=message):
+        ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+            raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
+        )
 
 
 def test_structural_terminal_pass_claim_is_preserved_but_never_derived() -> None:

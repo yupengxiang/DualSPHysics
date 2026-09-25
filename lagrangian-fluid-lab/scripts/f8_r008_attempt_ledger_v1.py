@@ -23,6 +23,7 @@ from scripts.f8_r008_per_case_bundle_verifier_v2 import (
 
 LEDGER_SCHEMA = "core.cfd.f8.r008_attempt_ledger.v1"
 DIAGNOSTIC_SCHEMA = "core.cfd.f8.r008_untrusted_attempt_ledger_diagnostic.v1"
+RAW_BINDING_SCHEMA = "core.cfd.f8.r008_untrusted_attempt_ledger_raw_binding.v1"
 AGGREGATE_SCHEMA = "core.cfd.f8.r008_t1_case_attempt_aggregate.v2"
 SCOPE_ID = "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008"
 MATRIX_SCHEMA = "core.cfd.f8.t1_scope_design.v1"
@@ -94,6 +95,8 @@ ATTEMPT_OUTCOMES = frozenset({
 })
 REFERENCE_FIELDS = frozenset({"stage", "role", "object_id", "bytes", "sha256"})
 MAX_LEDGER_BYTES = 67_108_864
+MAX_REFERENCED_RAW_BYTES = 1_073_741_824
+MAX_REFERENCED_OBJECTS = 1_000_000
 _IDENTIFIER = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
 _HEX16 = re.compile(r"^[0-9a-f]{16}$")
 _HEX32 = re.compile(r"^[0-9a-f]{32}$")
@@ -563,6 +566,108 @@ def inspect_untrusted_attempt_ledger(raw: bytes, *, qualification_matrix_raw: by
         "supervisor_attestation_verified": False,
         "attempt_ledger_complete": False,
         "attempts": parsed["attempts"],
+        "qualification_adjudicated": False,
+        "T1_numerical": False,
+        "qualification_credit": 0,
+    }
+
+
+def bind_untrusted_attempt_ledger_raw_objects(
+    raw: bytes,
+    *,
+    qualification_matrix_raw: bytes,
+    artifact_raw_by_ref: dict[tuple[str, str, str], bytes],
+) -> dict[str, Any]:
+    """Bind every non-null ledger ref to caller-supplied raw bytes, without trusting them.
+
+    The mapping key is ``(stage, role, object_id)``. This function performs no
+    filesystem lookup, artifact parsing, stage-semantic verification, or source
+    authentication; it only checks an exact object inventory plus each
+    descriptor's byte count and SHA-256 against the supplied bytes.
+    """
+    ledger, parsed = _inspect(raw, qualification_matrix_raw)
+    _require(type(artifact_raw_by_ref) is dict,
+             "artifact_raw_by_ref must be a builtin dict keyed by exact ref identity tuples")
+    _require(len(artifact_raw_by_ref) <= MAX_REFERENCED_OBJECTS,
+             "artifact_raw_by_ref exceeds the fixed object-count limit")
+
+    referenced: dict[tuple[str, str, str], dict[str, Any]] = {}
+    reference_counts: dict[tuple[str, str, str], int] = {}
+    reference_occurrences = 0
+    for row in parsed["events"]:
+        event = row["event"]
+        ref = None
+        if event["kind"] == "stage_receipt":
+            ref = event["receipt_ref"]
+        elif event["kind"] == "process_terminal":
+            ref = event["process_journal_ref"]
+        elif event["kind"] == "attempt_terminal":
+            ref = event["terminal_ref"]
+        if ref is None:
+            continue
+        reference_occurrences += 1
+        key = (ref["stage"], ref["role"], ref["object_id"])
+        prior = referenced.setdefault(key, ref)
+        _require(prior == ref,
+                 "one referenced object identity has conflicting byte-count or SHA descriptors")
+        reference_counts[key] = reference_counts.get(key, 0) + 1
+
+    _require(len(referenced) <= MAX_REFERENCED_OBJECTS,
+             "ledger reference inventory exceeds the fixed object-count limit")
+    supplied_keys: set[tuple[str, str, str]] = set()
+    for key, value in artifact_raw_by_ref.items():
+        _require(type(key) is tuple and len(key) == 3
+                 and all(type(part) is str for part in key),
+                 "artifact_raw_by_ref keys must be exact (stage, role, object_id) string tuples")
+        _require(type(value) is bytes,
+                 "artifact_raw_by_ref values must be exact raw bytes")
+        supplied_keys.add(key)
+    _require(supplied_keys == set(referenced),
+             "supplied raw object inventory differs from the exact non-null ledger references")
+
+    total_raw_bytes = 0
+    objects = []
+    for key in sorted(referenced):
+        ref = referenced[key]
+        object_raw = artifact_raw_by_ref[key]
+        total_raw_bytes += len(object_raw)
+        _require(total_raw_bytes <= MAX_REFERENCED_RAW_BYTES,
+                 "supplied raw objects exceed the fixed aggregate byte limit")
+        _require(len(object_raw) == ref["bytes"],
+                 f"raw object byte count differs from ledger ref for {key!r}")
+        object_sha256 = sha256_bytes(object_raw)
+        _require(object_sha256 == ref["sha256"],
+                 f"raw object SHA-256 differs from ledger ref for {key!r}")
+        objects.append({
+            "stage": key[0],
+            "role": key[1],
+            "object_id": key[2],
+            "reference_occurrence_count": reference_counts[key],
+            "raw_bytes": len(object_raw),
+            "raw_sha256": object_sha256,
+            "raw_bytes_match_ref": True,
+        })
+
+    return {
+        "schema": RAW_BINDING_SCHEMA,
+        "ledger_schema": LEDGER_SCHEMA,
+        "scope_id": ledger["scope_id"],
+        "ledger_raw_sha256": sha256_bytes(raw),
+        "qualification_matrix_raw_sha256": ledger["qualification_matrix_raw_sha256"],
+        "ledger_structure_valid": True,
+        "reference_occurrence_count": reference_occurrences,
+        "referenced_object_count": len(referenced),
+        "supplied_raw_object_count": len(artifact_raw_by_ref),
+        "supplied_raw_bytes": total_raw_bytes,
+        "all_non_null_refs_bound_to_supplied_raw_bytes": True,
+        "objects": objects,
+        "artifact_producer_authenticated": False,
+        "descriptor_root_authenticated": False,
+        "stage_receipt_semantics_verified": False,
+        "process_journal_semantics_verified": False,
+        "attempt_terminal_semantics_verified": False,
+        "attempt_ledger_complete": False,
+        "attempt_outcomes_resolved": False,
         "qualification_adjudicated": False,
         "T1_numerical": False,
         "qualification_credit": 0,
