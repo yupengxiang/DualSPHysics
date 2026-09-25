@@ -75,7 +75,7 @@ def _ioc(direction: int, number: int, size: int) -> int:
     return (direction << 30) | (size << 16) | (ord("f") << 8) | number
 
 
-if sys.platform.startswith("linux"):
+if sys.platform.startswith("linux") and os.uname().machine == "x86_64":
     _FS_IOC_ENABLE_VERITY = _ioc(1, 133, _ENABLE_ARG.size)
     # The UAPI declares a four-byte flexible-array header; the ioctl accepts the
     # caller's larger buffer up to the digest bytes negotiated in that header.
@@ -83,9 +83,9 @@ if sys.platform.startswith("linux"):
 
 
 def _require_linux_support() -> None:
-    if (not sys.platform.startswith("linux") or fcntl is None
+    if (not sys.platform.startswith("linux") or os.uname().machine != "x86_64" or fcntl is None
             or _FS_IOC_ENABLE_VERITY is None or _FS_IOC_MEASURE_VERITY is None):
-        raise FsVerityUnsupportedError("Linux fs-verity ioctls are unavailable")
+        raise FsVerityUnsupportedError("tested Linux x86_64 fs-verity ioctl ABI is unavailable")
 
 
 def _stat_key(info: os.stat_result) -> tuple[int, ...]:

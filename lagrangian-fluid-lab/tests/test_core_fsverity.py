@@ -13,7 +13,10 @@ from scripts.core_fsverity import (FS_VERITY_HASH_ALG_SHA256, FsVerityError,
                                    enable_fd, fd_identity, measure_fd, verify_fd)
 
 
-pytestmark = pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux fs-verity UAPI")
+pytestmark = pytest.mark.skipif(
+    not sys.platform.startswith("linux") or os.uname().machine != "x86_64",
+    reason="tested Linux x86_64 fs-verity UAPI",
+)
 
 
 def _readonly_synthetic_file(tmp_path: Path) -> tuple[Path, int]:
@@ -51,7 +54,6 @@ def test_fd_identity_includes_kernel_mount_id(tmp_path):
 
 def test_fsverity_enable_measures_or_fails_closed_without_path_fallback(tmp_path):
     path, fd = _readonly_synthetic_file(tmp_path)
-    expected = None
     try:
         before = fd_identity(fd)
         try:

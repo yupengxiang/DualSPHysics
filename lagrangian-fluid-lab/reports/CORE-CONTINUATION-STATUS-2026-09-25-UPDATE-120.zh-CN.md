@@ -4,7 +4,7 @@
 
 ## 本次推进：fs-verity UAPI 原语与本机挂载能力实测
 
-新增 `scripts/core_fsverity.py`，直接绑定 Linux `FS_IOC_ENABLE_VERITY` / `FS_IOC_MEASURE_VERITY`，提供只读/CLOEXEC/single-link regular FD 检查、bounded `/proc/self/fdinfo` mount-ID 读取、含 algorithm+digest 的稳定 measurement 编码、启用及前后 identity/measurement 复核。unsupported filesystem/kernel 映射为明确 fail-closed 异常，不存在 pathname 或普通 SHA 替代路径。调用方仍必须先完成写入和 `fsync`、关闭 writable FD，再以 O_RDONLY FD 请求 enable；内核负责拒绝仍有 writable opener 的文件。
+新增 `scripts/core_fsverity.py`，直接绑定并仅在实测过的 Linux x86_64 ioctl ABI 上启用 `FS_IOC_ENABLE_VERITY` / `FS_IOC_MEASURE_VERITY`；其他 OS/架构 fail closed。它提供只读/CLOEXEC/single-link regular FD 检查、bounded `/proc/self/fdinfo` mount-ID 读取、含 algorithm+digest 的稳定 measurement 编码、启用及前后 identity/measurement 复核。unsupported filesystem/kernel 映射为明确 fail-closed 异常，不存在 pathname 或普通 SHA 替代路径。调用方仍必须先完成写入和 `fsync`、关闭 writable FD，再以 O_RDONLY FD 请求 enable；内核负责拒绝仍有 writable opener 的文件。
 
 本机只读事实：`/home` 为 ext4 `/dev/sdc1`；`/tmp` 位于 root ext4 `/dev/nvme0n1p2`；`/sys/fs/ext4/features/verity` 显示驱动支持该能力，但该信息不证明任何已挂载 superblock 已启用 verity feature。对两个挂载点各创建一份短暂 synthetic 文件并调用 enable ioctl，均得 `errno=95 EOPNOTSUPP`；测试文件/临时目录随后清理。结果与 ext4 的 superblock feature 前置条件相符，但无法由该 ioctl 单独判定具体缺失配置；superblock 仍未读取。未调用 sudo、未改变挂载或 superblock。Linux 内核文档明确 ext4 需预先带 `-O verity` 格式化或经 `tune2fs -O verity` 设置 superblock feature，且 fs-verity digest 本身不认证 producer：[官方 fs-verity 文档](https://docs.kernel.org/filesystems/fsverity.html)。
 
