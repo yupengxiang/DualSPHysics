@@ -46,8 +46,47 @@ def _ref(raw, *, role, target_schema, object_id):
     }
 
 
-def _valid_untrusted_graph(*, mode="formal_release", t1=True):
-    source_raw = canonical_json_bytes({"schema": EVALUATION_SOURCE_SCHEMA, "raw_result": "opaque"})
+def _synthetic_evaluation_source(variant="base"):
+    value = {
+        "schema": EVALUATION_SOURCE_SCHEMA,
+        "scope_id": F4_SCOPE_ID,
+        "revision_id": F4_REVISION_ID,
+        "qualification_claim": "none",
+        "static_manifest": "synthetic-manifest.json",
+        "static_manifest_sha256": "2" * 64,
+        "static_contract_pass": True,
+        "static_issues": [],
+        "binding_results": {},
+        "cell_count": 15,
+        "scheduled_solver_cells": sorted((*range(12), 13, 14)),
+        "reused_canary_cells": [12],
+        "matrix_complete": False,
+        "T1_numerical": False,
+        "promotion_status": "blocked_until_14_scheduled_products_and_all_gates",
+    }
+    if variant in {"matrix", "complete"}:
+        value.update(cells=[], missing=[], failures=[])
+    if variant == "complete":
+        value.update(
+            comparisons=[],
+            checks={
+                "static_contract": True,
+                "matrix_complete": False,
+                "all_case_hard_mass_event_gates": False,
+                "spatial": False,
+                "independent_checks": False,
+                "time_and_output": False,
+                "cell12_reuse_verified": False,
+                "cell12_reuse_does_not_inherit_qualification": True,
+            },
+        )
+    return value
+
+
+def _valid_untrusted_graph(*, mode="formal_release", t1=True, source_variant="base", source_payload=None):
+    if source_payload is None:
+        source_payload = _synthetic_evaluation_source(source_variant)
+    source_raw = canonical_json_bytes(source_payload)
     source_ref = _ref(
         source_raw, role="qualification_evaluation_raw",
         target_schema=EVALUATION_SOURCE_SCHEMA, object_id="evaluation-source-v1",
@@ -204,8 +243,9 @@ def test_canonical_json_uses_v12_utf8_digest_rules_without_newline():
 
 
 @pytest.mark.parametrize("mode", ["formal_release", "preparation_only"])
-def test_v12_v13_reference_graph_is_consistent_but_never_a_capability(mode):
-    envelope, documents = _valid_untrusted_graph(mode=mode)
+@pytest.mark.parametrize("source_variant", ["base", "matrix", "complete"])
+def test_v12_v13_reference_graph_is_consistent_but_never_a_capability(mode, source_variant):
+    envelope, documents = _valid_untrusted_graph(mode=mode, source_variant=source_variant)
     result = inspect_untrusted_admission_envelope(envelope, documents)
     assert result["status"] == "metadata_ref_graph_consistent_untrusted"
     assert result["mode"] == mode
@@ -276,3 +316,24 @@ def test_reference_graph_rejects_unknown_fields_bad_object_id_and_prep_copy():
     prep["evaluation_ref"] = {"not": "null"}
     with pytest.raises(BundleCodecError, match="must have a null outer evaluation_ref"):
         inspect_untrusted_admission_envelope(canonical_json_bytes(prep), prep_documents)
+
+
+def test_reference_graph_rejects_inexact_evaluation_source_result_shape():
+    source = _synthetic_evaluation_source()
+    source["unreviewed_claim"] = True
+    envelope, documents = _valid_untrusted_graph(source_payload=source)
+    with pytest.raises(BundleCodecError, match="exact evaluator-v2 result shape"):
+        inspect_untrusted_admission_envelope(envelope, documents)
+
+    source = _synthetic_evaluation_source()
+    source["cell_count"] = True
+    envelope, documents = _valid_untrusted_graph(source_payload=source)
+    with pytest.raises(BundleCodecError, match="exact positive integer"):
+        inspect_untrusted_admission_envelope(envelope, documents)
+
+    for bad_status in ([], {}):
+        source = _synthetic_evaluation_source()
+        source["promotion_status"] = bad_status
+        envelope, documents = _valid_untrusted_graph(source_payload=source)
+        with pytest.raises(BundleCodecError, match="promotion_status"):
+            inspect_untrusted_admission_envelope(envelope, documents)

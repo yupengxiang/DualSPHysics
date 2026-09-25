@@ -49,6 +49,14 @@ _EVALUATION_KEYS = frozenset({
 })
 _BINDING_WRAPPER_KEYS = frozenset({"schema", "binding", "evaluation_ref"})
 _OUTER_KEYS = frozenset({"schema", "mode", "scope_id", "binding_ref", "evaluation_ref"})
+_EVALUATION_SOURCE_BASE_KEYS = frozenset({
+    "schema", "scope_id", "revision_id", "qualification_claim", "static_manifest",
+    "static_manifest_sha256", "static_contract_pass", "static_issues", "binding_results",
+    "cell_count", "scheduled_solver_cells", "reused_canary_cells", "matrix_complete",
+    "T1_numerical", "promotion_status",
+})
+_EVALUATION_SOURCE_MATRIX_KEYS = _EVALUATION_SOURCE_BASE_KEYS | frozenset({"cells", "missing", "failures"})
+_EVALUATION_SOURCE_COMPLETE_KEYS = _EVALUATION_SOURCE_MATRIX_KEYS | frozenset({"comparisons", "checks"})
 _SCHEDULED_INDICES = frozenset((*range(12), 13, 14))
 _ALL_INDICES = tuple(range(15))
 _MAX_REF_BYTES = 1_073_741_824
@@ -211,6 +219,53 @@ def _parse_referenced_document(
     return parsed, canonical_sha256
 
 
+def _validate_evaluation_source_shape(value: dict[str, Any]) -> None:
+    """Validate the legacy evaluator-v2 serialization shape, never its claims."""
+    fields = frozenset(value)
+    if fields not in {
+        _EVALUATION_SOURCE_BASE_KEYS,
+        _EVALUATION_SOURCE_MATRIX_KEYS,
+        _EVALUATION_SOURCE_COMPLETE_KEYS,
+    }:
+        raise BundleCodecError("evaluation source fields do not match an exact evaluator-v2 result shape")
+    _require_string(value["schema"], name="source.schema", expected=EVALUATION_SOURCE_SCHEMA)
+    _require_string(value["scope_id"], name="source.scope_id", expected=F4_SCOPE_ID)
+    _require_string(value["revision_id"], name="source.revision_id", expected=F4_REVISION_ID)
+    _require_string(value["qualification_claim"], name="source.qualification_claim", expected="none")
+    _require_string(value["static_manifest"], name="source.static_manifest")
+    _require_sha256(value["static_manifest_sha256"], name="source.static_manifest_sha256")
+    if type(value["static_contract_pass"]) is not bool:
+        raise BundleCodecError("source.static_contract_pass must be an exact boolean")
+    if type(value["static_issues"]) is not list or any(type(item) is not str for item in value["static_issues"]):
+        raise BundleCodecError("source.static_issues must be an array of strings")
+    if type(value["binding_results"]) is not dict or any(type(key) is not str for key in value["binding_results"]):
+        raise BundleCodecError("source.binding_results must be an object with string keys")
+    if positive_builtin_int(value["cell_count"], name="source.cell_count") != 15:
+        raise BundleCodecError("source.cell_count must equal the frozen 15-cell denominator")
+    if _validate_indices(value["scheduled_solver_cells"], name="source.scheduled_solver_cells") != sorted(_SCHEDULED_INDICES):
+        raise BundleCodecError("source scheduled solver cells differ from the frozen set")
+    if _validate_indices(value["reused_canary_cells"], name="source.reused_canary_cells") != [12]:
+        raise BundleCodecError("source reused canary cells differ from the frozen set")
+    for key in ("matrix_complete", "T1_numerical"):
+        if type(value[key]) is not bool:
+            raise BundleCodecError(f"source.{key} must be an exact boolean")
+    promotion_status = value["promotion_status"]
+    if type(promotion_status) is not str or promotion_status not in {
+        "blocked_until_14_scheduled_products_and_all_gates",
+        "blocked_until_all_gates",
+        "qualified_candidate_pending_root_review",
+    }:
+        raise BundleCodecError("source.promotion_status is outside the frozen enum")
+    if fields != _EVALUATION_SOURCE_BASE_KEYS:
+        for key in ("cells", "missing", "failures"):
+            if type(value[key]) is not list or any(type(item) is not dict for item in value[key]):
+                raise BundleCodecError(f"source.{key} must be an array of objects")
+    if fields == _EVALUATION_SOURCE_COMPLETE_KEYS:
+        if type(value["comparisons"]) is not list or any(type(item) is not dict for item in value["comparisons"]):
+            raise BundleCodecError("source.comparisons must be an array of objects")
+        _validate_checks(value["checks"], name="source.checks")
+
+
 def _validate_indices(value: Any, *, name: str) -> list[int]:
     if type(value) is not list or any(type(item) is not int or item not in _ALL_INDICES for item in value):
         raise BundleCodecError(f"{name} must contain exact builtin indices in 0..14")
@@ -356,10 +411,11 @@ def inspect_untrusted_admission_envelope(
         evaluation_ref.get("evaluation_source_ref"),
         role="qualification_evaluation_raw", target_schema=EVALUATION_SOURCE_SCHEMA,
     )
-    _parse_referenced_document(
+    source_value, _ = _parse_referenced_document(
         source_ref, source_raw, role="qualification_evaluation_raw",
         target_schema=EVALUATION_SOURCE_SCHEMA,
     )
+    _validate_evaluation_source_shape(source_value)
     _validate_evaluation_projection(evaluation_ref, evaluation_source_ref=source_ref)
 
     projection_fields = (
