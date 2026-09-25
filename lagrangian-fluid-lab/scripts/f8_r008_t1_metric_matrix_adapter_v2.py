@@ -38,6 +38,7 @@ SOLVER_TIMESTEP_AUDIT_SCHEMA = "core.cfd.f8.r008_solver_timestep_audit.v2"
 SOLVER_TIMESTEP_AUDIT_FIELDS = frozenset({
     "schema", "status", "case_id", "max_solver_dt_s", "checks", "source_log",
 })
+SOLVER_TIMESTEP_AUDIT_CHECKS = frozenset({"finite_positive_max_step"})
 SOLVER_TIMESTEP_SOURCE_LOG_FIELDS = frozenset({"path", "bytes", "sha256"})
 CASE_RESULT_FIELDS = frozenset({
     "schema", "case_id", "provenance_chain_references_closed",
@@ -187,11 +188,14 @@ def _read_bounded_audit(path: Path | str, case_id: str) -> tuple[float, dict[str
                  and receipt.get("status") == "passed"
                  and receipt.get("case_id") == case_id
                  and isinstance(receipt.get("checks"), dict)
-                 and bool(receipt["checks"])
+                 and set(receipt["checks"]) == SOLVER_TIMESTEP_AUDIT_CHECKS
                  and all(value is True for value in receipt["checks"].values()),
                  "solver timestep audit is absent, failed, or bound to another case")
+        max_step_claim = receipt.get("max_solver_dt_s")
+        _require(type(max_step_claim) in {int, float},
+                 "solver timestep audit max_solver_dt_s must be a JSON number")
         maximum_step = metric_v1._finite_scalar(
-            receipt.get("max_solver_dt_s"), "max_solver_dt_s", positive=True,
+            max_step_claim, "max_solver_dt_s", positive=True,
         )
         source = receipt.get("source_log")
         _require(isinstance(source, dict) and set(source) == SOLVER_TIMESTEP_SOURCE_LOG_FIELDS

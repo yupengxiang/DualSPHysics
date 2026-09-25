@@ -424,6 +424,35 @@ def test_v2_matrix_audit_requires_explicit_v2_path_contract(tmp_path) -> None:
         matrix_v2._read_bounded_audit(audit_path, case_id)
 
 
+@pytest.mark.parametrize("mutation", [
+    "max_dt_string", "max_dt_boolean", "check_unknown_key", "check_missing_key", "check_false",
+])
+def test_v2_matrix_audit_requires_exact_numeric_and_check_contract(tmp_path, mutation) -> None:
+    _, audits = _inputs(tmp_path)
+    case_id = "time-q0p5-dp0p0075-cfl0p1"
+    audit_path = audits[case_id]
+    receipt = json.loads(audit_path.read_text(encoding="utf-8"))
+    if mutation == "max_dt_string":
+        receipt["max_solver_dt_s"] = "0.001"
+        error = "must be a JSON number"
+    elif mutation == "max_dt_boolean":
+        receipt["max_solver_dt_s"] = True
+        error = "must be a JSON number"
+    elif mutation == "check_unknown_key":
+        receipt["checks"]["caller_asserted_complete"] = True
+        error = "audit is absent, failed, or bound to another case"
+    elif mutation == "check_missing_key":
+        receipt["checks"] = {}
+        error = "audit is absent, failed, or bound to another case"
+    else:
+        receipt["checks"]["finite_positive_max_step"] = False
+        error = "audit is absent, failed, or bound to another case"
+    audit_path.write_text(json.dumps(receipt), encoding="utf-8")
+
+    with pytest.raises(matrix_v2.NativeFluidMetricMatrixError, match=error):
+        matrix_v2._read_bounded_audit(audit_path, case_id)
+
+
 @pytest.mark.parametrize("mutation", ["oversized", "symlink", "fifo", "hardlink"])
 def test_v2_matrix_timestep_source_log_is_bounded_single_link_and_nofollow(tmp_path, mutation) -> None:
     _, audits = _inputs(tmp_path)
