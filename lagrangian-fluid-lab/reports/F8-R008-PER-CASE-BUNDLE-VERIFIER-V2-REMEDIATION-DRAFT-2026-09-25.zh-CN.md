@@ -2,6 +2,8 @@
 
 状态：首轮只读交叉设计复核为 `REVISE`；本版补入 exact per-attempt/15-case aggregate、受信完整 ledger、stage/ref/root/nonce 与 seq 偏序。focused follow-up 确认最后一轮 ledger identity/terminal/order 修订在文本层面闭合。仍未实现、未运行测试；保留 v1 源码、receipt 和历史结果不变，不读取或改写生产 bundle/solver frame，不运行 B/C/D、native、GenCase、solver、worker、GPU 或 queue。
 
+nonce 格式补充：本 synthetic V2 attempt `nonce_hex` 与 C V5 `attempt_nonce_hex` 统一为 32 位小写 hex（128-bit）；这里只冻结字符串编码长度，不证明随机来源、attempt 唯一性或 supervisor trust。
+
 ## 1. 消费者分层
 
 v1 `verify_stage_bundle()` / `verify_provenance_chain()` 保留为 structural receipt/output-tree/reference verifier。其 `all_stages_passed` 只能解释为“B/C/D receipt 的 status 字段均为 `passed`”，**不能**解释为 GenCase、solver execution、native decode、HDF5/table 内容或资格语义均已验证。该旧字段禁止作为新 qualification consumer 的唯一通过条件。

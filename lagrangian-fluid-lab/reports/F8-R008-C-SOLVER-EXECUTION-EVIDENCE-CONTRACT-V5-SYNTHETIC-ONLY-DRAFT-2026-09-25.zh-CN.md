@@ -1,6 +1,6 @@
 # F8 R008 C 阶段 execution-evidence synthetic schema V5（草案）
 
-状态：V5 首轮只读交叉复核为 `REVISE` 后已修订；focused follow-up 确认 query/process 生命周期、terminal guard 与异常/中断 cache 规则在文本层面闭合。它仍是 synthetic-only successor，不是 production execution schema，不生成 solver 许可、不关闭 gate、不授予资格信用。未实现 parser/producer/test；未运行 solver/native/GenCase/worker/GPU/queue。V3/V4 字节、签名 domain、one-shot 收据和历史版本均不得重解释为 V5。
+状态：V5 首轮只读交叉复核为 `REVISE` 后已修订；focused follow-up 确认 query/process 生命周期、terminal guard 与异常/中断 cache 规则在文本层面闭合。当前已实现 synthetic-only journal 的 strict structural parser 与合成测试，但尚无 process/query 因果图、source-callgraph 重算、单槽 cache replay、trusted producer/event source 或 runtime identity 验证。它仍不是 production execution schema，不生成 solver 许可、不关闭 gate、不授予资格信用；有效 parse 也必须输出 `gate_state="open"`、`execution_semantics_verified=false`、T1 false、zero credit。未运行 solver/native/GenCase/worker/GPU/queue。V3/V4 字节、签名 domain、one-shot 收据和历史版本均不得重解释为 V5。
 
 V5 envelope 与 payload schema 固定为 `core.cfd.f8.r008_c_execution_evidence.synthetic.v5`，signature domain separator 固定为 ASCII 字节 `F8-R008-C-EXEC-SYNTHETIC-V5` 后接单个 LF (`0x0a`)；V4 prefix/schema 一律拒绝。source-callgraph ref 的固定 registry target 为 `core.cfd.f8.r008_c_execution_source_callgraph.synthetic.v5`，除本合同明示新增的 process/query closure 字段外，V4 exact source-fragment/AST/driver/instance 规则继承且不得放宽。
 
@@ -14,6 +14,10 @@ journal 顶层 exact keys 为：
 {schema,attempt_nonce_hex,source_id,source_binary_sha256,
  coverage_start_ns_hex,coverage_end_ns_hex,event_count,overflow,lost_count,events}
 ```
+
+本版将 `attempt_nonce_hex` 精确冻结为 32 位小写 hex（128-bit nonce），补足 V2/V4 旧合同仅称“固定长度”但未注明长度的歧义；此格式约束仅用于 V5/V2 synthetic schema，不是 nonce 来源或真实性证明。
+
+V5 structural schema 将 process `exit` 的 `exit_code` 冻结为 exact builtin JSON integer `0..255`，且 `signal=null`；signal 终态则要求 `exit_code=null`、`signal` 为正 builtin integer。V5 单 journal parser 只验证 event nonce 与 journal 顶层 nonce 相等；它尚未接收 evidence payload/V2 attempt 对象，不能声称完成外层 nonce cross-binding。
 
 `schema` 固定如上；nonce/source/binary 必须分别等于同一 evidence payload 的 nonce、runtime-image object id 与 runtime-image raw SHA-256；digest 为 64 位小写 hex。`coverage_start_ns_hex` / `coverage_end_ns_hex` 是 16 位小写 hex binary monotonic nanoseconds，且 start 不晚于 end、每个 event 时间均在闭区间内。可信监测须从 root spawn 前的 invocation 校验覆盖启动边界，并持续覆盖 spawn/exec、全部 solver process/thread 直到 exit/reap；这不表示 exec 先于 spawn。边界覆盖的可信性仍依赖 V5 §4 外部 event-source trust。`overflow` 必须是 builtin `false`，`lost_count` 是 builtin integer `0`（bool 不算 integer）。`event_count == len(events)`，且事件的唯一 `seq` 必须恰为 `0..event_count-1`；`seq`/count 是有界非负 builtin JSON integer（bool 不算 integer）；`mono_ns_hex` 为 16 位小写 hex 且全局非递减（允许相邻事件同一时钟刻度）。全局 `seq` 是唯一事件先后顺序；任何跨事件先后约束都用严格 `seq` 不等式表达，不能要求时钟值严格递增。字节/事件/数组界限沿用 V4 对应的上限。process event 与 loop/poll query event 共用这个 seq 空间，不再通过两份日志各自的 seq 或仅靠同一 attempt nonce 推断因果。
 
