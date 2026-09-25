@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import copy
 import json
+import math
 import re
 from typing import Any
 
@@ -26,6 +27,31 @@ AGGREGATE_SCHEMA = "core.cfd.f8.r008_t1_case_attempt_aggregate.v2"
 SCOPE_ID = "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008"
 MATRIX_SCHEMA = "core.cfd.f8.t1_scope_design.v1"
 MATRIX_RECORD_ID = "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008-t1-scope-design-v1"
+QUALIFICATION_CASE_IDS = (
+    "space-q0-dp0p0090", "space-q0-dp0p0075", "space-q0-dp0p0060",
+    "space-q0p5-dp0p0090", "space-q0p5-dp0p0075", "space-q0p5-dp0p0060",
+    "space-q1-dp0p0090", "space-q1-dp0p0075", "space-q1-dp0p0060",
+    "internal-q0p25-dp0p0075", "internal-q0p25-dp0p0060",
+    "internal-q0p75-dp0p0075", "internal-q0p75-dp0p0060",
+    "time-q0p5-dp0p0075-cfl0p1", "cadence-q0p5-dp0p0075-output128",
+)
+MATRIX_ROW_KINDS = (
+    *("spatial_anchor" for _ in range(9)),
+    *("independent_internal" for _ in range(4)),
+    "time_step_control", "native_output_cadence_control",
+)
+MATRIX_Q_VALUES = (0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0,
+                   0.25, 0.25, 0.75, 0.75, 0.5, 0.5)
+MATRIX_DP_VALUES = (0.009, 0.0075, 0.006, 0.009, 0.0075, 0.006, 0.009, 0.0075, 0.006,
+                    0.0075, 0.006, 0.0075, 0.006, 0.0075, 0.0075)
+# This pins bytes to the existing frozen scope receipt; it does not authenticate
+# the caller, the loaded code, or the producer of those bytes.
+FROZEN_MATRIX_RAW_SHA256 = "65671b42523cd3a5f82338cc7e2d88890af634195d7013ad969311166ab36ac8"
+STAGE_RECEIPT_ROLES = {"B": "b_receipt", "C": "c_v1_receipt", "D": "d_receipt"}
+PROCESS_JOURNAL_ROLE = "process_journal"
+ATTEMPT_TERMINAL_ROLE = "attempt_terminal"
+ATTEMPT_LEDGER_ROLE = "attempt_ledger"
+ATTEMPT_LEDGER_ATTESTATION_ROLE = "attempt_ledger_attestation"
 LEDGER_FIELDS = frozenset({
     "schema", "scope_id", "qualification_matrix_raw_sha256", "supervisor_source_id",
     "coverage_start_ns_hex", "coverage_end_ns_hex", "event_count", "overflow",
@@ -102,6 +128,12 @@ def _digest(value: Any, label: str) -> None:
              f"{label} must be 64 lowercase hexadecimal characters")
 
 
+def _finite_float(value: Any, label: str, *, minimum: float | None = None) -> None:
+    _require(type(value) is float and math.isfinite(value), f"{label} must be a finite builtin float")
+    if minimum is not None:
+        _require(value >= minimum, f"{label} must be >= {minimum}")
+
+
 def _canonical_json_bytes(value: Any, label: str) -> bytes:
     """Use the shared V12 canonical JSON byte rule (default ASCII escaping, no LF)."""
     try:
@@ -134,10 +166,22 @@ def inspect_untrusted_qualification_matrix(raw: bytes) -> dict[str, Any]:
     _require(type(matrix["all_rows_are_qualification_only"]) is bool
              and matrix["all_rows_are_qualification_only"] is True,
              "qualification matrix must assert all rows are qualification-only")
+    for field, expected in (("control_count", 2), ("independent_internal_count", 4),
+                            ("spatial_anchor_count", 9)):
+        _require(type(matrix[field]) is int and matrix[field] == expected,
+                 f"qualification matrix {field} must be the builtin integer {expected}")
+    _require(matrix["design_rule"] ==
+             "13 spatial configurations + 2 controls = 15 frozen qualification logical configurations",
+             "qualification matrix design_rule is not the fixed 15-case rule")
+    _require(type(matrix["no_failure_deletion_or_replacement"]) is bool
+             and matrix["no_failure_deletion_or_replacement"] is True,
+             "qualification matrix must prohibit failure deletion or replacement")
+    _require(type(matrix["gate_applicability"]) is dict,
+             "qualification matrix gate_applicability must be a builtin object")
     rows = matrix["rows"]
     _require(type(rows) is list and len(rows) == 15,
              "qualification matrix must contain exactly 15 rows in frozen order")
-    row_index: list[dict[str, str]] = []
+    row_index: list[dict[str, Any]] = []
     seen_case_ids: set[str] = set()
     for ordinal, row in enumerate(rows):
         _require(type(row) is dict and set(row) == MATRIX_ROW_FIELDS,
@@ -146,15 +190,77 @@ def inspect_untrusted_qualification_matrix(raw: bytes) -> dict[str, Any]:
         _require(row["case_id"] not in seen_case_ids,
                  f"qualification matrix duplicates case_id {row['case_id']}")
         seen_case_ids.add(row["case_id"])
+        _require(row["case_id"] == QUALIFICATION_CASE_IDS[ordinal],
+                 f"qualification row {ordinal}.case_id differs from the fixed matrix order")
         _require(type(row["qualification_only"]) is bool and row["qualification_only"] is True,
                  f"qualification row {ordinal} is not marked qualification-only")
+        for field in ("alpha", "cflnumber", "control_amplitude_m_s2", "dp_m", "native_output_dt_s",
+                      "observation_end_s", "observation_start_s", "omega_rad_s", "period_s", "q"):
+            _finite_float(row[field], f"qualification row {ordinal}.{field}")
+        for field in ("alpha", "cflnumber", "dp_m", "native_output_dt_s", "omega_rad_s", "period_s"):
+            _require(row[field] > 0.0, f"qualification row {ordinal}.{field} must be positive")
+        _require(row["control_amplitude_m_s2"] >= 0.0,
+                 f"qualification row {ordinal}.control_amplitude_m_s2 must be nonnegative")
+        _require(0.0 <= row["q"] <= 1.0,
+                 f"qualification row {ordinal}.q must be in the closed interval [0, 1]")
+        _require(row["q"] == MATRIX_Q_VALUES[ordinal]
+                 and row["dp_m"] == MATRIX_DP_VALUES[ordinal],
+                 f"qualification row {ordinal} q/dp differs from the fixed matrix parameters")
+        for field in ("control_samples_per_period", "expected_observation_output_count",
+                      "native_output_samples_per_period", "observation_cycles",
+                      "observation_end_output_index", "observation_start_output_index"):
+            _int(row[field], f"qualification row {ordinal}.{field}", minimum=1 if field in {
+                "control_samples_per_period", "expected_observation_output_count",
+                "native_output_samples_per_period", "observation_cycles",
+            } else 0)
+        _require(row["kind"] == MATRIX_ROW_KINDS[ordinal],
+                 f"qualification row {ordinal}.kind differs from the fixed matrix design")
+        _require(row["cflnumber"] == (0.1 if ordinal == 13 else 0.2),
+                 f"qualification row {ordinal}.cflnumber differs from the fixed matrix design")
+        _require(row["control_samples_per_period"] == 64
+                 and row["observation_cycles"] == 3,
+                 f"qualification row {ordinal} control cadence/cycle count differs from the fixed design")
+        expected_native_samples = 128 if ordinal == 14 else 64
+        _require(row["native_output_samples_per_period"] == expected_native_samples,
+                 f"qualification row {ordinal} native output cadence differs from the fixed design")
+        expected_output_count = 3 * expected_native_samples + 1
+        _require(row["expected_observation_output_count"] == expected_output_count,
+                 f"qualification row {ordinal} observation count differs from the fixed cadence")
+        compare_to = row["compare_to"]
+        if ordinal >= 13:
+            _require(compare_to == "space-q0p5-dp0p0075",
+                     f"qualification control row {ordinal} must compare to the fixed spatial anchor")
+        else:
+            _require(compare_to is None,
+                     f"qualification row {ordinal}.compare_to must be null outside the two controls")
+        _require(row["observation_end_output_index"] >= row["observation_start_output_index"],
+                 f"qualification row {ordinal} observation output indices are reversed")
+        _require(row["observation_end_output_index"] - row["observation_start_output_index"] + 1
+                 == row["expected_observation_output_count"],
+                 f"qualification row {ordinal} observation output count differs from its inclusive indices")
+        _require(row["observation_end_s"] > row["observation_start_s"],
+                 f"qualification row {ordinal} observation time bounds are reversed")
+        _require(math.isclose(row["native_output_dt_s"] * expected_native_samples,
+                              row["period_s"], rel_tol=1e-12, abs_tol=1e-12),
+                 f"qualification row {ordinal} native output dt disagrees with its period/cadence")
+        _require(math.isclose(row["observation_end_s"] - row["observation_start_s"],
+                              row["observation_cycles"] * row["period_s"],
+                              rel_tol=1e-12, abs_tol=1e-12),
+                 f"qualification row {ordinal} observation window disagrees with its period/cycles")
+        _require(math.isclose(row["omega_rad_s"] * row["period_s"], 2.0 * math.pi,
+                              rel_tol=1e-12, abs_tol=1e-12),
+                 f"qualification row {ordinal} omega/period pair is inconsistent")
         row_index.append({
             "case_id": row["case_id"],
             "qualification_row_sha256": sha256_bytes(_canonical_json_bytes(row, f"qualification row {ordinal}")),
+            "expected_observation_output_count": row["expected_observation_output_count"],
         })
+    matrix_raw_sha256 = sha256_bytes(raw)
+    _require(matrix_raw_sha256 == FROZEN_MATRIX_RAW_SHA256,
+             "qualification matrix raw digest differs from the pinned F8 R008 frozen scope")
     return {
         "matrix_raw_bytes": len(raw),
-        "matrix_raw_sha256": sha256_bytes(raw),
+        "matrix_raw_sha256": matrix_raw_sha256,
         "matrix_schema": MATRIX_SCHEMA,
         "scope_id": SCOPE_ID,
         "row_count": len(row_index),
@@ -163,7 +269,13 @@ def inspect_untrusted_qualification_matrix(raw: bytes) -> dict[str, Any]:
     }
 
 
-def _reference(value: Any, *, expected_stage: str | None, label: str) -> dict[str, Any]:
+def _reference(
+    value: Any,
+    *,
+    expected_stage: str | None,
+    label: str,
+    expected_role: str | None = None,
+) -> dict[str, Any]:
     _require(type(value) is dict and set(value) == REFERENCE_FIELDS,
              f"{label} must use the exact descriptor-ref fields")
     _string(value["stage"], f"{label}.stage")
@@ -173,6 +285,8 @@ def _reference(value: Any, *, expected_stage: str | None, label: str) -> dict[st
         _require(value["stage"] in {*STAGES, "runtime"},
                  f"{label}.stage is outside the fixed stage registry")
     _identifier(value["role"], f"{label}.role")
+    if expected_role is not None:
+        _require(value["role"] == expected_role, f"{label} does not target the fixed role {expected_role}")
     _identifier(value["object_id"], f"{label}.object_id")
     _int(value["bytes"], f"{label}.bytes", minimum=1)
     _digest(value["sha256"], f"{label}.sha256")
@@ -207,10 +321,12 @@ def _parse_event(value: Any, expected_seq: int, *, start_ns: int, end_ns: int) -
         _identifier(value["process_generation_id"], f"event {expected_seq}.process_generation_id")
     elif kind == "stage_receipt":
         _reference(value["receipt_ref"], expected_stage=value["stage"],
+                   expected_role=STAGE_RECEIPT_ROLES[value["stage"]],
                    label=f"event {expected_seq}.receipt_ref")
     elif kind == "process_terminal":
         _identifier(value["process_generation_id"], f"event {expected_seq}.process_generation_id")
         _reference(value["process_journal_ref"], expected_stage=value["stage"],
+                   expected_role=PROCESS_JOURNAL_ROLE,
                    label=f"event {expected_seq}.process_journal_ref")
     elif kind == "attempt_terminal":
         outcome = value["outcome"]
@@ -220,7 +336,8 @@ def _parse_event(value: Any, expected_seq: int, *, start_ns: int, end_ns: int) -
             _require(value["terminal_ref"] is None,
                      f"event {expected_seq} not_started terminal_ref must be null")
         else:
-            _reference(value["terminal_ref"], expected_stage=None,
+            _reference(value["terminal_ref"], expected_stage="runtime",
+                       expected_role=ATTEMPT_TERMINAL_ROLE,
                        label=f"event {expected_seq}.terminal_ref")
     return {"event": value, "mono_ns": mono_ns}
 
@@ -347,6 +464,7 @@ def _inspect(raw: bytes, qualification_matrix_raw: bytes) -> tuple[dict[str, Any
     _require(matrix["matrix_raw_sha256"] == ledger["qualification_matrix_raw_sha256"],
              "raw qualification matrix bytes do not match the ledger matrix digest")
     matrix_rows = {row["case_id"]: row["qualification_row_sha256"] for row in matrix["rows"]}
+    matrix_row_by_case = {row["case_id"]: row for row in matrix["rows"]}
     _identifier(ledger["supervisor_source_id"], "supervisor_source_id")
     start_hex = ledger["coverage_start_ns_hex"]
     end_hex = ledger["coverage_end_ns_hex"]
@@ -407,6 +525,7 @@ def _inspect(raw: bytes, qualification_matrix_raw: bytes) -> tuple[dict[str, Any
         "coverage_start_ns": start_ns,
         "coverage_end_ns": end_ns,
         "matrix": matrix,
+        "matrix_row_by_case": matrix_row_by_case,
     }
 
 
@@ -481,6 +600,9 @@ def _validate_attempt_projection(
     for field in ("case_id", "qualification_row_sha256"):
         _require(attempt_result[field] == attempt[field],
                  f"attempt result {field} differs from its ledger registration")
+    matrix_row = parsed["matrix_row_by_case"].get(attempt["case_id"])
+    _require(attempt_result["expected_frame_count"] == matrix_row["expected_observation_output_count"],
+             "attempt result expected_frame_count differs from its frozen qualification row")
     _require(attempt_result["attempt_ledger_registration_seq"] == attempt["registration_seq"],
              "attempt result registration seq differs from ledger")
     _require(attempt_result["attempt_ledger_event_seqs"] == attempt["event_seqs"],
@@ -518,9 +640,9 @@ def build_untrusted_attempt_aggregate_v2(
     _require(attempt_ledger_attestation_ref is None,
              "non-null ledger attestations require an active supervisor trust verifier")
     ledger, parsed = _inspect(ledger_raw, qualification_matrix_raw)
-    _reference(attempt_ledger_ref, expected_stage=None, label="attempt_ledger_ref")
-    _require(attempt_ledger_ref["stage"] == "runtime"
-             and attempt_ledger_ref["role"] == "attempt_ledger",
+    _reference(attempt_ledger_ref, expected_stage="runtime", expected_role=ATTEMPT_LEDGER_ROLE,
+               label="attempt_ledger_ref")
+    _require(attempt_ledger_ref["stage"] == "runtime",
              "attempt_ledger_ref must target the fixed runtime/attempt_ledger role")
     _require(attempt_ledger_ref["bytes"] == len(ledger_raw)
              and attempt_ledger_ref["sha256"] == sha256_bytes(ledger_raw),
@@ -529,10 +651,18 @@ def build_untrusted_attempt_aggregate_v2(
              "attempt_results must be a builtin list containing every observed ledger attempt")
 
     ledger_by_identity = parsed["attempt_by_identity"]
+    _require(len(attempt_results) == len(ledger_by_identity),
+             "aggregate attempt records do not preserve the complete observed ledger registration inventory")
     result_by_identity: dict[tuple[str, str], tuple[int, dict[str, Any]]] = {}
     seen_attempt_ids: set[str] = set()
     seen_nonces: set[str] = set()
+    total_attempt_result_bytes = 0
     for result in attempt_results:
+        if type(result) is dict:
+            row = parsed["matrix_row_by_case"].get(result.get("case_id"))
+            if row is not None:
+                _require(result.get("expected_frame_count") == row["expected_observation_output_count"],
+                         "attempt result expected_frame_count differs from its frozen qualification row")
         try:
             validate_untrusted_attempt_result_v2(result)
         except AttemptResultV2Error as error:
@@ -547,6 +677,9 @@ def build_untrusted_attempt_aggregate_v2(
         seen_attempt_ids.add(result["attempt_id"])
         seen_nonces.add(result["nonce_hex"])
         ledger_attempt = _validate_attempt_projection(result, ledger, parsed)
+        total_attempt_result_bytes += len(_canonical_json_bytes(result, "aggregate attempt result"))
+        _require(total_attempt_result_bytes <= MAX_LEDGER_BYTES - 1_048_576,
+                 "aggregate attempt results exceed the bounded output allowance")
         result_by_identity[identity] = (ledger_attempt["registration_seq"], result)
     _require(set(result_by_identity) == set(ledger_by_identity),
              "aggregate attempt records do not preserve the complete observed ledger registration inventory")
@@ -596,39 +729,120 @@ def build_untrusted_attempt_aggregate_v2(
 
 
 def validate_untrusted_attempt_aggregate_v2(
-    aggregate: Any,
+    aggregate_raw: bytes,
     qualification_matrix_raw: bytes,
     ledger_raw: bytes,
 ) -> None:
-    """Independently rederive the restricted diagnostic aggregate projection.
+    """Independently rederive the bounded, restricted diagnostic aggregate.
 
     This verifies only internal consistency against caller-supplied matrix and
     ledger bytes. It does not authenticate their sources or grant completeness.
     """
+    try:
+        aggregate = strict_json_object(
+            aggregate_raw,
+            label="F8 R008 untrusted attempt aggregate",
+            max_bytes=MAX_LEDGER_BYTES,
+        )
+    except ValueError as error:
+        raise AttemptLedgerV1Error(str(error)) from error
+    ledger, parsed = _inspect(ledger_raw, qualification_matrix_raw)
     _require(type(aggregate) is dict and set(aggregate) == AGGREGATE_FIELDS,
              "aggregate must be a builtin object with the exact V2 field set")
+    _require(aggregate["schema"] == AGGREGATE_SCHEMA and aggregate["scope_id"] == SCOPE_ID,
+             "aggregate schema or scope is not the fixed F8 R008 V2 contract")
+    _require(aggregate["qualification_matrix_raw_sha256"] == parsed["matrix"]["matrix_raw_sha256"],
+             "aggregate matrix raw SHA differs from the supplied frozen matrix bytes")
+    ledger_sha256 = sha256_bytes(ledger_raw)
+    _require(aggregate["attempt_ledger_raw_sha256"] == ledger_sha256,
+             "aggregate ledger raw SHA differs from the supplied ledger bytes")
+    reference = _reference(aggregate["attempt_ledger_ref"], expected_stage="runtime",
+                           expected_role=ATTEMPT_LEDGER_ROLE,
+                           label="aggregate.attempt_ledger_ref")
+    _require(reference["stage"] == "runtime",
+             "aggregate ledger ref must target the fixed runtime/attempt_ledger role")
+    _require(reference["bytes"] == len(ledger_raw) and reference["sha256"] == ledger_sha256,
+             "aggregate ledger ref byte count or raw SHA differs from the supplied ledger")
+    _require(aggregate["attempt_ledger_attestation_ref"] is None,
+             "non-null ledger attestations require an active supervisor trust verifier")
+    _require(type(aggregate["expected_case_count"]) is int
+             and aggregate["expected_case_count"] == parsed["matrix"]["row_count"] == 15,
+             "aggregate expected_case_count must be the builtin integer 15")
+    for field in ("attempt_ledger_complete", "qualification_adjudicated", "T1_numerical"):
+        _require(type(aggregate[field]) is bool and aggregate[field] is False,
+                 f"aggregate {field} is fixed false in the untrusted projection")
+    _require(type(aggregate["qualification_credit"]) is int and aggregate["qualification_credit"] == 0,
+             "aggregate qualification_credit must be the builtin integer zero")
+    _require(aggregate["aggregate_outcome"] == "accounting_unresolved",
+             "untrusted aggregate outcome must remain accounting_unresolved")
+
     rows = aggregate["case_rows"]
-    _require(type(rows) is list,
-             "aggregate case_rows must be a builtin list")
-    attempt_results: list[dict[str, Any]] = []
-    for ordinal, row in enumerate(rows):
+    matrix_rows = parsed["matrix"]["rows"]
+    _require(type(rows) is list and len(rows) == len(matrix_rows) == 15,
+             "aggregate case_rows must cover exactly the 15 frozen matrix rows")
+    case_outcome_counts = {name: 0 for name in ("passed", "failed", "missing", "unresolved")}
+    attempt_outcome_counts = {name: 0 for name in (
+        "not_started", "passed", "failed", "incomplete", "timeout", "oom", "signaled", "unresolved",
+    )}
+    ledger_attempts = parsed["attempt_by_identity"]
+    result_identities: set[tuple[str, str]] = set()
+    result_attempt_ids: set[str] = set()
+    result_nonces: set[str] = set()
+    for ordinal, (row, matrix_row) in enumerate(zip(rows, matrix_rows)):
         _require(type(row) is dict and set(row) == AGGREGATE_CASE_ROW_FIELDS,
                  f"aggregate case row {ordinal} does not have the exact field set")
+        _require(row["case_id"] == matrix_row["case_id"]
+                 and row["qualification_row_sha256"] == matrix_row["qualification_row_sha256"],
+                 f"aggregate case row {ordinal} identity/order differs from the frozen matrix")
+        _require(row["case_outcome"] == "unresolved" and row["qualifying_attempt_id"] is None,
+                 f"aggregate case row {ordinal} must remain unresolved without trusted adjudication")
+        case_outcome_counts[row["case_outcome"]] += 1
         attempts = row["attempts"]
         _require(type(attempts) is list,
                  f"aggregate case row {ordinal}.attempts must be a builtin list")
-        attempt_results.extend(attempts)
+        previous_registration_seq = -1
+        for attempt in attempts:
+            try:
+                validate_untrusted_attempt_result_v2(attempt)
+            except AttemptResultV2Error as error:
+                raise AttemptLedgerV1Error(
+                    f"aggregate case row {ordinal} contains an inadmissible unresolved V2 attempt: {error}"
+                ) from error
+            identity = (attempt["attempt_id"], attempt["nonce_hex"])
+            _require(identity in ledger_attempts,
+                     "aggregate contains an attempt not registered in the supplied ledger")
+            _require(identity not in result_identities
+                     and attempt["attempt_id"] not in result_attempt_ids
+                     and attempt["nonce_hex"] not in result_nonces,
+                     "aggregate repeats an attempt identity, ID, or nonce")
+            result_identities.add(identity)
+            result_attempt_ids.add(attempt["attempt_id"])
+            result_nonces.add(attempt["nonce_hex"])
+            ledger_attempt = _validate_attempt_projection(attempt, ledger, parsed)
+            _require(attempt["case_id"] == row["case_id"],
+                     "aggregate attempt is placed under a different matrix case row")
+            registration_seq = ledger_attempt["registration_seq"]
+            _require(registration_seq > previous_registration_seq,
+                     "aggregate attempts within a case must follow ledger registration seq")
+            previous_registration_seq = registration_seq
+            attempt_outcome_counts[attempt["attempt_outcome"]] += 1
 
-    expected = build_untrusted_attempt_aggregate_v2(
-        qualification_matrix_raw,
-        ledger_raw,
-        attempt_ledger_ref=aggregate["attempt_ledger_ref"],
-        attempt_results=attempt_results,
-        attempt_ledger_attestation_ref=aggregate["attempt_ledger_attestation_ref"],
-    )
-    _require(_canonical_json_bytes(aggregate, "aggregate")
-             == _canonical_json_bytes(expected, "rederived aggregate"),
-             "aggregate differs from the unresolved matrix/ledger projection")
+    _require(result_identities == set(ledger_attempts),
+             "aggregate attempts do not preserve the complete observed ledger registration inventory")
+    _require(type(aggregate["case_outcome_counts"]) is dict
+             and set(aggregate["case_outcome_counts"]) == set(case_outcome_counts),
+             "aggregate case_outcome_counts fields are not exact")
+    for name, expected_count in case_outcome_counts.items():
+        _int(aggregate["case_outcome_counts"][name], f"case_outcome_counts.{name}")
+        _require(aggregate["case_outcome_counts"][name] == expected_count,
+                 f"aggregate case_outcome_counts.{name} differs from its case rows")
+    _require(type(aggregate["attempt_outcome_counts"]) is dict
+             and set(aggregate["attempt_outcome_counts"]) == set(attempt_outcome_counts),
+             "aggregate attempt_outcome_counts fields are not exact")
+    for name, expected_count in attempt_outcome_counts.items():
+        _int(aggregate["attempt_outcome_counts"][name], f"attempt_outcome_counts.{name}")
+        _require(aggregate["attempt_outcome_counts"][name] == expected_count,
+                 f"aggregate attempt_outcome_counts.{name} differs from its attempt records")
 
 
 __all__ = [

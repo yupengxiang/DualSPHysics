@@ -20,7 +20,7 @@ def _diagnostic() -> dict[str, object]:
         "stage_bundle_refs": {
             stage: {
                 "stage": stage,
-                "role": f"{stage.lower()}_receipt",
+                "role": {"B": "b_receipt", "C": "c_v1_receipt", "D": "d_receipt"}[stage],
                 "object_id": f"{stage.lower()}-receipt-001",
                 "bytes": 1,
                 "sha256": "c" * 64,
@@ -54,6 +54,21 @@ def test_structural_pass_statuses_remain_non_authorizing_diagnostics() -> None:
     assert result["qualification_adjudicated"] is False
     assert result["T1_numerical"] is False
     assert result["qualification_credit"] == 0
+
+
+@pytest.mark.parametrize("stage", ("B", "C", "D"))
+def test_stage_receipt_role_is_fixed_by_stage(stage: str) -> None:
+    result = _diagnostic()
+    result["stage_bundle_refs"][stage]["role"] = "arbitrary_receipt"
+    with pytest.raises(verifier.AttemptResultV2Error, match="does not target the fixed"):
+        verifier.validate_untrusted_attempt_result_v2(result)
+
+
+def test_c_stage_v1_contract_role_is_not_legacy_guess() -> None:
+    result = _diagnostic()
+    result["stage_bundle_refs"]["C"]["role"] = "c_receipt"
+    with pytest.raises(verifier.AttemptResultV2Error, match="fixed c_v1_receipt role"):
+        verifier.validate_untrusted_attempt_result_v2(result)
 
 
 @pytest.mark.parametrize("field", sorted(verifier.SEMANTIC_BOOLEAN_FIELDS))
@@ -98,4 +113,11 @@ def test_invalid_primitive_types_and_noncanonical_sequences_fail_closed(mutate) 
     result = copy.deepcopy(_diagnostic())
     mutate(result)
     with pytest.raises(verifier.AttemptResultV2Error):
+        verifier.validate_untrusted_attempt_result_v2(result)
+
+
+def test_expected_frame_count_has_a_fixed_scope_bound() -> None:
+    result = _diagnostic()
+    result["expected_frame_count"] = verifier.MAX_EXPECTED_FRAME_COUNT + 1
+    with pytest.raises(verifier.AttemptResultV2Error, match="exceeds the fixed F8 R008 maximum"):
         verifier.validate_untrusted_attempt_result_v2(result)

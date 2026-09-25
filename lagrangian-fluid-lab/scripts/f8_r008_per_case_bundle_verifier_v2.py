@@ -26,6 +26,8 @@ ATTEMPT_RESULT_FIELDS = frozenset({
     "failure_position", "qualification_adjudicated", "T1_numerical", "qualification_credit",
 })
 STAGES = ("B", "C", "D")
+STAGE_RECEIPT_ROLES = {"B": "b_receipt", "C": "c_v1_receipt", "D": "d_receipt"}
+MAX_EXPECTED_FRAME_COUNT = 385
 STAGE_STATUSES = frozenset({
     "not_run", "passed", "failed", "incomplete", "timeout", "oom", "signaled",
 })
@@ -73,6 +75,8 @@ def _validate_ref(value: Any, stage: str) -> None:
     _builtin_str(value["stage"], f"{stage} reference stage")
     _require(value["stage"] == stage, f"{stage} stage reference names another stage")
     _identifier(value["role"], f"{stage} reference role")
+    _require(value["role"] == STAGE_RECEIPT_ROLES[stage],
+             f"{stage} reference does not target the fixed {STAGE_RECEIPT_ROLES[stage]} role")
     _identifier(value["object_id"], f"{stage} reference object_id")
     _builtin_int(value["bytes"], f"{stage} reference bytes", minimum=1)
     _require(type(value["sha256"]) is str and bool(_SHA256.fullmatch(value["sha256"])),
@@ -133,6 +137,8 @@ def validate_untrusted_attempt_result_v2(value: Any) -> None:
 
     expected_count = value["expected_frame_count"]
     _builtin_int(expected_count, "expected_frame_count")
+    _require(expected_count <= MAX_EXPECTED_FRAME_COUNT,
+             f"expected_frame_count exceeds the fixed F8 R008 maximum {MAX_EXPECTED_FRAME_COUNT}")
     ordinals = value["actual_frame_ordinals"]
     times = value["actual_time_axis_ieee754_hex"]
     _require(type(ordinals) is list and type(times) is list,

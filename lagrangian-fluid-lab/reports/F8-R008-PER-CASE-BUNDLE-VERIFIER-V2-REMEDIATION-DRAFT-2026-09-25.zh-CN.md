@@ -1,6 +1,6 @@
 # F8 R008 per-case B/C/D bundle verifier v2 remediation（草案）
 
-状态：首轮只读交叉设计复核为 `REVISE`；本版补入 exact per-attempt/15-case aggregate、受信完整 ledger、stage/ref/root/nonce 与 seq 偏序。focused follow-up 确认最后一轮 ledger identity/terminal/order 修订在文本层面闭合。仍未实现、未运行测试；保留 v1 源码、receipt 和历史结果不变，不读取或改写生产 bundle/solver frame，不运行 B/C/D、native、GenCase、solver、worker、GPU 或 queue。
+状态：首轮只读交叉设计复核为 `REVISE`；本版补入 exact per-attempt/15-case aggregate、受信完整 ledger、stage/ref/root/nonce 与 seq 偏序。首轮实现复核及 follow-up 要求冻结完整 matrix 原始字节、限定终态 ref stage、对齐 C v3 role；修订后由 `gpt-5.6-terra` / high 只读最终复核为 `PASS`，无 P1/P2。保留 v1 源码、receipt 和历史结果不变；仅使用冻结静态 scope receipt 与合成 ledger，不读取或改写生产 bundle/solver frame，不运行 B/C/D、native、GenCase、solver、worker、GPU 或 queue。实现与验证详情见 [UPDATE-127](CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-127.zh-CN.md)。
 
 nonce 格式补充：本 synthetic V2 attempt `nonce_hex` 与 C V5 `attempt_nonce_hex` 统一为 32 位小写 hex（128-bit）；这里只冻结字符串编码长度，不证明随机来源、attempt 唯一性或 supervisor trust。
 
@@ -74,6 +74,14 @@ case/scope 正向及缺失派生谓词唯一如下：`case_outcome="passed"` 当
 
 上句“15 个 attempt 的 gates”指 15 个 frozen row 各自被选中的 qualifying attempt，不是把 retry 历史缩成 15 项；资格判定仍须输入整个 append-only attempt history。
 
+当前静态 matrix inspector 对 exact 15-case 顺序、固定 case IDs/kinds、q/dp/control/cadence 参数、有限 builtin float、builtin integer/bool、包含端点的 observation counts、时间/周期关系作结构与数值关系检查，并要求 matrix 原始 bytes SHA-256 精确等于代码固定的既有 scope receipt digest；语义/字段错误优先返回具体结构错误。该摘要钉定内容，不认证调用者、加载代码、运行时或 receipt producer，`frozen_matrix_source_authenticated` 仍为 `false`。非授权 diagnostic role 映射固定为 stage receipt `B/b_receipt`,`C/c_v1_receipt`,`D/d_receipt`，process journal `B|C|D/process_journal`，attempt terminal `runtime/attempt_terminal`，ledger `runtime/attempt_ledger`，attestation `runtime/attempt_ledger_attestation`。其中 C 名称与 C v3 合同枚举一致；D role 当前只是本地 diagnostic 拼写，并不宣称存在固定 descriptor registry。终态引用 stage 精确限定为 `runtime`。精确 role/stage 检查不等于 descriptor registry 存在或目标对象已解析/认证。
+
+aggregate diagnostic validator 只接收 strict JSON raw bytes，上限 64 MiB，并在遍历前要求恰好 15 个 case rows；builder 也会先要求 attempt-results 数量与 ledger 中 observed registration 数相等。它独立复算每行身份/结果归属、case 与 attempt counts、行内 registration seq 顺序和 false/zero 门，不复用 aggregate builder。所有测试使用内存/合成 JSON，不读取生产 bundle、HDF5、solver frame 或 one-shot namespace。对应 focused tests 位于 `tests/test_f8_r008_attempt_ledger_v1.py` 与 `tests/test_f8_r008_per_case_bundle_verifier_v2.py`，覆盖矩阵字段/类型和值域、固定 role、空 ledger 不产生 missing、15-row 分母、retry/inventory、aggregate 篡改及 64 MiB strict raw-input contract。
+
+V2 `expected_frame_count` 必须与对应冻结 row 的 `expected_observation_output_count` 精确相等；固定 R008 上限为 385，所有 actual frame/time arrays 因此受有界 count 限制。builder 对序列化后的完整 attempt-result inventory 另施加不超过 63 MiB 的累计预算，为 aggregate row/count 外壳留出余量。stage-role 常量目前是本诊断协议内的固定字符串映射；它们未由 live descriptor registry 查证，不能被解释成 registry/object source authentication。若将来正式 registry 使用不同 target，须先版本化修订协议，不能靠调用方自选 role。
+
+每个 public v2 entry 都需断言拒绝/降级发生在 qualification/T1 派生之前；任何 synthetic PASS 固定 `qualification_adjudicated=false`、T1 false 和零 credit。以上只定义可审查的软件语义，不替代 V5 producer、trusted launcher、15-case 实际证据或计划中的正式资格/资源准入。
+
 `attempt_ledger_ref` 必须是固定 `(stage="runtime",role="attempt_ledger")` descriptor-ref，且其 bytes/SHA 必须绑定被读取的 ledger 原始 bytes。`attempt_ledger_attestation_ref` 在 attestation 对象存在时必须是固定 role 的 exact descriptor-ref；仅当 attestation 对象不存在时允许为 null，而 null 必须强制 `attempt_ledger_complete=false` 与 `aggregate_outcome="accounting_unresolved"`，绝不从空 case rows/attempts 推导 missing。非 null 引用只定位对象；只有 descriptor-root reader、canonical/signature 校验与 active supervisor-key 验证全部成功才可建立 trusted capability。
 
 当前 synthetic aggregate helper 仅作 fail-closed 结构投影：要求 attempt-result inventory 与 ledger 中观察到的每个 registration 一一对应，并按 registration seq 保留 retries；但原始 ledger、matrix 与 descriptor-ref 均未通过可信 registry/source authentication。因此所有 15 行固定 `unresolved`（包括无 attempt 行）、attempt outcome 固定 `unresolved`、missing/failed/passed 均为零、attestation ref 为 null、账目 unresolved、资格/T1 false 且 credit 为零。该 helper 只接受 null attestation ref，不能验证或消费非 null attestation，也不能据其输出声称 trusted append-only completeness。缺少任何 registration 的 result projection 时直接拒绝构造 aggregate，避免静默丢弃历史；拒绝本身不把该行自动解释为 `missing`。
@@ -82,16 +90,4 @@ case/scope 正向及缺失派生谓词唯一如下：`case_outcome="passed"` 当
 
 ## 3. Synthetic-only 验收节点
 
-以下均用内存/`tmp_path` 小型 BI4/HDF5，不加载固定生产 receipt、bundle、HDF5、solver frame 或 one-shot namespace：
-
-- `test_f8_r008_per_case_bundle_verifier_v2.py::test_structural_all_stage_status_does_not_claim_execution_or_t1`
-- `test_f8_r008_per_case_bundle_verifier_v2.py::test_empty_b_gencase_and_safe_decode_objects_cannot_set_materialization_verified`
-- `test_f8_r008_per_case_bundle_verifier_v2.py::test_empty_c_execution_controls_cannot_set_solver_execution_verified`
-- `test_f8_r008_per_case_bundle_verifier_v2.py::test_failed_partial_c_attempt_is_retained_but_never_passed`
-- `test_f8_r008_per_case_bundle_verifier_v2.py::test_held_fd_table_content_pass_remains_separate_from_execution_semantics`
-- `test_f8_r008_per_case_bundle_verifier_v2.py::test_aggregate_has_all_fifteen_rows_and_marks_unattempted_rows_missing`
-- `test_f8_r008_per_case_bundle_verifier_v2.py::test_not_started_only_case_is_missing_but_attempt_history_is_retained`
-- `test_f8_r008_per_case_bundle_verifier_v2.py::test_rejected_retry_pass_claim_does_not_erase_earlier_failed_attempt`
-- `test_f8_r008_per_case_bundle_verifier_v2.py::test_poll_without_terminal_event_is_preserved_as_incomplete`
-
-每个 public v2 entry 都需断言拒绝/降级发生在 qualification/T1 派生之前；任何 synthetic PASS 固定 `qualification_adjudicated=false`、T1 false 和零 credit。以上只定义可审查的软件语义，不替代 V5 producer、trusted launcher、15-case 实际证据或计划中的正式资格/资源准入。
+所有合成测试均不得读取生产 bundle/frame/HDF5/BI4/one-shot 数据或运行 GenCase/native decoder/solver/worker/GPU/queue。当前重点回归在 `tests/test_f8_r008_attempt_ledger_v1.py`（矩阵/ledger/aggregate）和 `tests/test_f8_r008_per_case_bundle_verifier_v2.py`（attempt-result shape）中，包括 `test_empty_ledger_aggregate_keeps_all_rows_unresolved_not_missing`、`test_aggregate_preserves_retry_history_in_registration_order`、`test_aggregate_requires_exact_registration_inventory`、`test_ledger_reference_roles_are_fixed_by_event_kind`、`test_untrusted_aggregate_validator_rejects_tampered_projection`、`test_untrusted_aggregate_validator_bounds_rows_before_processing` 与 `test_expected_frame_count_has_a_fixed_scope_bound`。任何诊断 PASS 固定不派生资格/T1，零 credit。以上只定义可审查的软件语义，不替代 V5 producer、trusted launcher、15-case 实际证据或正式资格/资源准入。
