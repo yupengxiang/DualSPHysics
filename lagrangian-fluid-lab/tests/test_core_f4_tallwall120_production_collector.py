@@ -205,28 +205,17 @@ def test_multifamily_formal_assembly_rejects_before_iterating_sources(tmp_path):
     assert not missing_root.exists()
 
 
-def test_real_first_eight_is_reader_hold_with_fixed_denominator(tmp_path):
-    result = collector.collect_f4_production(
-        PRODUCTION_ROOT / "production-design.json",
-        PRODUCTION_ROOT / "first-eight/manifest.json",
-        PRODUCTION_ROOT / "qualification-tick.json",
-        LAB,
-    )
-    assert result["registered_case_count"] == 32
-    assert result["prepared_case_count"] == 8
-    assert result["fixed_split_counts"] == collector.EXPECTED_SPLITS
-    assert result["observed_split_counts"] == collector.EXPECTED_SPLITS
-    assert result["execution_complete_count"] == 0
-    assert result["reader_manifest"] is None
-    assert result["formal_eligible"] is False
-    assert "formal release was not requested" in result["hold_reasons"]
-    assert all(row["split"] in collector.EXPECTED_SPLITS for row in result["cases"])
-
-    # A partial collection never becomes a reader by accident: pending
-    # denominator rows must fail closed until an explicit reader view exists.
-    partial_path = _write_json(tmp_path / "partial-collection.json", result)
-    with pytest.raises(ValueError, match="no reader manifest"):
-        open_dataset(partial_path, LAB)
+def test_unwrapped_historical_qualification_tick_is_rejected():
+    # UPDATE-87 requires the legacy discriminator at the outermost level.
+    # This preserved historical tick has only nested binding/result objects,
+    # so it must not be interpreted as a current diagnostic qualification.
+    with pytest.raises(collector.CollectionError, match="qualification receipt schema mismatch"):
+        collector.collect_f4_production(
+            PRODUCTION_ROOT / "production-design.json",
+            PRODUCTION_ROOT / "first-eight/manifest.json",
+            PRODUCTION_ROOT / "qualification-tick.json",
+            LAB,
+        )
 
 
 def test_complete_products_bind_reader_and_preserve_tall_wall(tmp_path):
