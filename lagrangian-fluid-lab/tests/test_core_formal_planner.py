@@ -5,10 +5,11 @@ import shutil
 import sys
 
 import pytest
+import scripts.core_formal_planner as formal_planner
 
 from scripts.core_formal_planner import (CASES_PER_FAMILY, MODELS, REQUIRED_CODE_FILES,
                                          SEEDS, _qualification_marker, build_plan, inspect_inputs,
-                                         main, sha256_file)
+                                         main, sha256_bytes, sha256_file)
 
 
 def _manifest(tmp_path, *, family_count=3):
@@ -79,6 +80,52 @@ def test_complete_in_memory_mapping_is_also_diagnostic_only(tmp_path):
     assert plan["status"] == "hold"
     assert plan["launch_allowed"] is False
     assert plan["formal_job_count"] == 0
+
+
+@pytest.mark.parametrize("raw", [
+    b'{"schema":"core.dataset.v2","schema":"core.dataset.v3","cases":[]}',
+    b'{"schema":"core.dataset.v2","cases":[],"marker":NaN}',
+    b'{"schema":"core.dataset.v2","cases":[],"marker":1e400}',
+    b'{"schema":"core.dataset.v2","cases":[],"marker":' + b"9" * 129 + b"}",
+    b'{"schema":"core.dataset.v2","label":"\xff"}',
+])
+def test_path_backed_manifest_requires_bounded_strict_raw_json(tmp_path, raw):
+    manifest_path = tmp_path / "strict-manifest.json"
+    manifest_path.write_bytes(raw)
+    specs = tmp_path / "specs"
+    with pytest.raises(ValueError):
+        build_plan(
+            manifest_path,
+            profile=_profile(), environment=_environment(), data_root=tmp_path,
+            code_root=Path(__file__).parents[1], output_dir=specs,
+        )
+    assert not specs.exists()
+
+
+def test_path_backed_manifest_enforces_configured_byte_cap(tmp_path, monkeypatch):
+    monkeypatch.setattr(formal_planner, "MAX_PLANNER_JSON_BYTES", 32)
+    manifest_path = tmp_path / "oversized-manifest.json"
+    manifest_path.write_bytes(b"{" + b" " * 32 + b"}")
+    with pytest.raises(ValueError, match="byte limit"):
+        inspect_inputs(manifest_path, data_root=tmp_path)
+
+
+def test_referenced_audit_json_with_duplicate_keys_is_rejected(tmp_path):
+    manifest_path, payload = _manifest(tmp_path)
+    audit_raw = (
+        b'{"case_id":"F1_PROD_00","hard_integrity_pass":false,'
+        b'"hard_integrity_pass":true,"structural_pass":true}'
+    )
+    audit_path = tmp_path / "duplicate-audit.json"
+    audit_path.write_bytes(audit_raw)
+    payload["cases"][0]["audit"] = {
+        "path": audit_path.name,
+        "sha256": sha256_bytes(audit_raw),
+    }
+    manifest_path.write_text(json.dumps(payload))
+    report = inspect_inputs(manifest_path, data_root=tmp_path)
+    assert report["formal_eligible"] is False
+    assert any("invalid audit JSON" in reason for reason in report["hold_reasons"])
 
 
 def _source_snapshot() -> dict:

@@ -21,6 +21,7 @@ import json
 import math
 import os
 from pathlib import Path
+import stat
 import sys
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -43,6 +44,7 @@ VALIDATION_EVERY = 1000
 MIN_FAMILIES = 3
 CASES_PER_FAMILY = 32
 VALIDATION_PER_FAMILY = 4
+MAX_PLANNER_JSON_BYTES = 67_108_864
 
 # The source snapshot warning that motivated this module is easy to re-create
 # when a job copies a previous profile's argv.  These are the files whose
@@ -94,6 +96,88 @@ def _json_hash(value: Any) -> str:
     return sha256_bytes(canonical(value).encode())
 
 
+def _reject_duplicate_json_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    value: dict[str, Any] = {}
+    for key, item in pairs:
+        if key in value:
+            raise ValueError(f"duplicate JSON object key: {key}")
+        value[key] = item
+    return value
+
+
+def _parse_finite_json_float(token: str) -> float:
+    value = float(token)
+    if not math.isfinite(value):
+        raise ValueError("JSON number is outside the finite float domain")
+    return value
+
+
+def _reject_nonfinite_json_constant(token: str) -> None:
+    raise ValueError(f"non-finite JSON constant is forbidden: {token}")
+
+
+def _parse_bounded_json_int(token: str) -> int:
+    digits = token[1:] if token.startswith("-") else token
+    if len(digits) > 128:
+        raise ValueError("JSON integer exceeds the planner digit limit")
+    return int(token)
+
+
+def _read_bounded_raw_json(path: Path) -> bytes:
+    """Read one regular JSON file with a strict byte and mutation bound."""
+    with path.open("rb") as stream:
+        before = os.fstat(stream.fileno())
+        if not stat.S_ISREG(before.st_mode):
+            raise ValueError("JSON input is not a regular file")
+        if before.st_size > MAX_PLANNER_JSON_BYTES:
+            raise ValueError("JSON input exceeds the planner byte limit")
+        raw = stream.read(MAX_PLANNER_JSON_BYTES + 1)
+        after = os.fstat(stream.fileno())
+    before_identity = (
+        before.st_dev, before.st_ino, before.st_size,
+        before.st_mtime_ns, before.st_ctime_ns,
+    )
+    after_identity = (
+        after.st_dev, after.st_ino, after.st_size,
+        after.st_mtime_ns, after.st_ctime_ns,
+    )
+    if len(raw) > MAX_PLANNER_JSON_BYTES:
+        raise ValueError("JSON input exceeds the planner byte limit")
+    if len(raw) != before.st_size or before_identity != after_identity:
+        raise ValueError("JSON input changed during bounded read")
+    return raw
+
+
+def _strict_json_object(raw: bytes, *, label: str) -> dict[str, Any]:
+    """Parse path-backed planner JSON without duplicate or non-finite values."""
+    if type(raw) is not bytes:
+        raise ValueError(f"{label} must be exact bytes")
+    if len(raw) > MAX_PLANNER_JSON_BYTES:
+        raise ValueError(f"{label} exceeds the planner byte limit")
+    try:
+        text = raw.decode("utf-8", errors="strict")
+    except UnicodeDecodeError as error:
+        raise ValueError(f"{label} is not strict UTF-8") from error
+    try:
+        value = json.loads(
+            text,
+            strict=True,
+            object_pairs_hook=_reject_duplicate_json_pairs,
+            parse_constant=_reject_nonfinite_json_constant,
+            parse_float=_parse_finite_json_float,
+            parse_int=_parse_bounded_json_int,
+        )
+    except (json.JSONDecodeError, ValueError, OverflowError, RecursionError) as error:
+        raise ValueError(f"{label} is not valid strict JSON: {error}") from error
+    if type(value) is not dict:
+        raise ValueError(f"{label} top level must be a JSON object")
+    return value
+
+
+def _load_json_object(path: Path, *, label: str) -> dict[str, Any]:
+    return _strict_json_object(_read_bounded_raw_json(path), label=label)
+
+
 def _resolve_path(value: str | Path, *, base: Path | None = None,
                   data_root: Path | None = None) -> Path:
     """Resolve a campaign-relative path without permitting ambiguity."""
@@ -117,7 +201,7 @@ def _resolve_path(value: str | Path, *, base: Path | None = None,
 def _load_json(source: Any, *, data_root: Path | None = None) -> tuple[Any, Path | None]:
     if isinstance(source, (str, Path)):
         path = _resolve_path(source, data_root=data_root)
-        return json.loads(path.read_text()), path
+        return _load_json_object(path, label=f"planner input {path}"), path
     if isinstance(source, Mapping):
         return dict(source), None
     raise TypeError("planner input must be a JSON path or mapping")
@@ -362,11 +446,15 @@ def _load_referenced_audit(reference: Any, *, base: Path | None,
             return None, path, f"audit reference has no declared SHA-256: {path}"
         if not path.is_file():
             return None, path, f"audit reference is missing: {path}"
-        observed = sha256_file(path)
+        try:
+            raw = _read_bounded_raw_json(path)
+        except (OSError, ValueError) as error:
+            return None, path, f"invalid audit JSON: {path}: {error}"
+        observed = sha256_bytes(raw)
         if observed != declared:
             return None, path, f"audit SHA-256 mismatch: {path}"
         try:
-            payload = json.loads(path.read_text())
+            payload = _strict_json_object(raw, label=f"audit JSON {path}")
         except (OSError, ValueError) as error:
             return None, path, f"invalid audit JSON: {path}: {error}"
         if not isinstance(payload, Mapping):
@@ -491,11 +579,12 @@ def _snapshot_check(snapshot: Any, *, code_root: Path, required: Sequence[str]) 
                     "required_files": sorted(required), "verified": not errors}, errors
         if path.is_file():
             try:
-                payload = json.loads(path.read_text())
+                raw = _read_bounded_raw_json(path)
+                payload = _strict_json_object(raw, label=f"source snapshot {path}")
             except (OSError, ValueError) as error:
-                return {"path": str(path), "sha256": sha256_file(path)}, [f"invalid source snapshot: {error}"]
+                return {"path": str(path), "sha256": None}, [f"invalid source snapshot: {error}"]
             snapshot = payload
-            snapshot_ref = {"path": str(path), "sha256": sha256_file(path)}
+            snapshot_ref = {"path": str(path), "sha256": sha256_bytes(raw)}
         else:
             return None, [f"source snapshot does not exist: {path}"]
     else:

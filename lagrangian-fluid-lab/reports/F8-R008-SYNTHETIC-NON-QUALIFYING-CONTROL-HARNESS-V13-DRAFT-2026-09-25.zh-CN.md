@@ -2,6 +2,8 @@
 
 状态：V13 首轮只读交叉复核为 `REVISE` 后已修订；focused text review 确认 serialization-only digest vector 与 `hdf5_size_bytes` builtin-int 规则明确。它仍是 V12 的 synthetic-only 设计增补，不是实现或资格合同。它只替换下列 V12 语义，不改历史收据、冻结输入、资格矩阵、失败分母或已消费授权。旧 Mapping/path API 的禁用要求尚未在现有源码落实。未实现、未运行测试；未运行 planner/collector/preparation、GenCase/native/solver/worker/GPU/queue。R008 `readiness_pass=false`、`T1_numerical=false`、资格信用为零。
 
+实施边界更新：UPDATE-112 仅把 `core_formal_planner` 已有的 path-backed JSON metadata parser 收紧为 bounded strict raw-byte 解析；这不实现 V13 的唯一 root reader，也不关闭 legacy Mapping/path diagnostic API，更不 mint/consume capability。V13 中 trusted producer、descriptor-root、same-FD snapshot、fs-verity、固定 launcher/runtime identity 与正式 ingress 的要求仍未实现。
+
 ## 1. 唯一 qualification bundle 与各层摘要
 
 V12 §1/§3 中并列的 `VerifiedF4QualificationV2`、`VerifiedF4QualificationEvaluationV2` 与 `qualification_receipt_sha256` 被替换为一个由固定 collector consumer 的可信 root reader 创建的不可变 `VerifiedF4QualificationBundleV3`。缺少该 root capability 时，公开 collector、batch-decision 和 preparation 入口一律在读取 gate 字段、导入执行器或创建输出前 fail closed；普通 Mapping、caller digest、schema 自述或 `verified=true` 不能 mint capability。
