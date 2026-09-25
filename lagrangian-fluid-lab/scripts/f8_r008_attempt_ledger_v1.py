@@ -8,6 +8,7 @@ untrusted and unresolved, even when the supplied ledger is structurally closed.
 """
 from __future__ import annotations
 
+import json
 import re
 from typing import Any
 
@@ -21,10 +22,24 @@ from scripts.f8_r008_per_case_bundle_verifier_v2 import (
 LEDGER_SCHEMA = "core.cfd.f8.r008_attempt_ledger.v1"
 DIAGNOSTIC_SCHEMA = "core.cfd.f8.r008_untrusted_attempt_ledger_diagnostic.v1"
 SCOPE_ID = "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008"
+MATRIX_SCHEMA = "core.cfd.f8.t1_scope_design.v1"
+MATRIX_RECORD_ID = "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008-t1-scope-design-v1"
 LEDGER_FIELDS = frozenset({
     "schema", "scope_id", "qualification_matrix_raw_sha256", "supervisor_source_id",
     "coverage_start_ns_hex", "coverage_end_ns_hex", "event_count", "overflow",
     "lost_count", "events",
+})
+MATRIX_FIELDS = frozenset({
+    "all_rows_are_qualification_only", "case_count", "control_count", "design_rule",
+    "gate_applicability", "independent_internal_count", "no_failure_deletion_or_replacement",
+    "rows", "spatial_anchor_count",
+})
+MATRIX_ROW_FIELDS = frozenset({
+    "alpha", "case_id", "cflnumber", "compare_to", "control_amplitude_m_s2",
+    "control_samples_per_period", "dp_m", "expected_observation_output_count", "kind",
+    "native_output_dt_s", "native_output_samples_per_period", "observation_cycles",
+    "observation_end_output_index", "observation_end_s", "observation_start_output_index",
+    "observation_start_s", "omega_rad_s", "period_s", "q", "qualification_only",
 })
 EVENT_COMMON_FIELDS = frozenset({
     "seq", "mono_ns_hex", "kind", "case_id", "qualification_row_sha256", "attempt_id", "nonce_hex",
@@ -74,6 +89,67 @@ def _identifier(value: Any, label: str) -> None:
 def _digest(value: Any, label: str) -> None:
     _require(type(value) is str and bool(_SHA256.fullmatch(value)),
              f"{label} must be 64 lowercase hexadecimal characters")
+
+
+def _canonical_json_bytes(value: Any, label: str) -> bytes:
+    """Use the shared V12 canonical JSON byte rule (default ASCII escaping, no LF)."""
+    try:
+        return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+    except (TypeError, ValueError, UnicodeEncodeError, OverflowError, RecursionError) as error:
+        raise AttemptLedgerV1Error(f"{label} is not canonically JSON-serializable") from error
+
+
+def inspect_untrusted_qualification_matrix(raw: bytes) -> dict[str, Any]:
+    """Return ordered case IDs and row digests from an untrusted frozen-matrix object.
+
+    Row identity is SHA-256 of the exact row encoded with V12 canonical JSON
+    bytes. The raw matrix digest is kept separate; neither value authenticates
+    that the supplied scope receipt is the active frozen artifact.
+    """
+    _require(type(raw) is bytes, "qualification matrix input must be exact raw bytes")
+    try:
+        document = strict_json_object(raw, label="F8 R008 frozen qualification matrix",
+                                      max_bytes=MAX_LEDGER_BYTES)
+    except ValueError as error:
+        raise AttemptLedgerV1Error(str(error)) from error
+    _require(document.get("schema") == MATRIX_SCHEMA and document.get("scope_id") == SCOPE_ID
+             and document.get("record_id") == MATRIX_RECORD_ID,
+             "qualification matrix schema, record, or scope is not the fixed F8 R008 design")
+    matrix = document.get("matrix")
+    _require(type(matrix) is dict and set(matrix) == MATRIX_FIELDS,
+             "qualification matrix fields are not exact")
+    _require(type(matrix["case_count"]) is int and matrix["case_count"] == 15,
+             "qualification matrix case_count must be the builtin integer 15")
+    _require(type(matrix["all_rows_are_qualification_only"]) is bool
+             and matrix["all_rows_are_qualification_only"] is True,
+             "qualification matrix must assert all rows are qualification-only")
+    rows = matrix["rows"]
+    _require(type(rows) is list and len(rows) == 15,
+             "qualification matrix must contain exactly 15 rows in frozen order")
+    row_index: list[dict[str, str]] = []
+    seen_case_ids: set[str] = set()
+    for ordinal, row in enumerate(rows):
+        _require(type(row) is dict and set(row) == MATRIX_ROW_FIELDS,
+                 f"qualification row {ordinal} fields are not exact")
+        _identifier(row["case_id"], f"qualification row {ordinal}.case_id")
+        _require(row["case_id"] not in seen_case_ids,
+                 f"qualification matrix duplicates case_id {row['case_id']}")
+        seen_case_ids.add(row["case_id"])
+        _require(type(row["qualification_only"]) is bool and row["qualification_only"] is True,
+                 f"qualification row {ordinal} is not marked qualification-only")
+        row_index.append({
+            "case_id": row["case_id"],
+            "qualification_row_sha256": sha256_bytes(_canonical_json_bytes(row, f"qualification row {ordinal}")),
+        })
+    return {
+        "matrix_raw_bytes": len(raw),
+        "matrix_raw_sha256": sha256_bytes(raw),
+        "matrix_schema": MATRIX_SCHEMA,
+        "scope_id": SCOPE_ID,
+        "row_count": len(row_index),
+        "rows": row_index,
+        "frozen_matrix_source_authenticated": False,
+    }
 
 
 def _reference(value: Any, *, expected_stage: str | None, label: str) -> dict[str, Any]:
@@ -247,7 +323,7 @@ def _check_attempt_events(key: tuple[str, str], rows: list[dict[str, Any]]) -> d
     }
 
 
-def _inspect(raw: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
+def _inspect(raw: bytes, qualification_matrix_raw: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
     try:
         ledger = strict_json_object(raw, label="F8 R008 attempt ledger", max_bytes=MAX_LEDGER_BYTES)
     except ValueError as error:
@@ -256,6 +332,10 @@ def _inspect(raw: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
     _require(ledger["schema"] == LEDGER_SCHEMA, "ledger schema is not the fixed V1 schema")
     _require(ledger["scope_id"] == SCOPE_ID, "ledger scope is not the fixed F8 R008 scope")
     _digest(ledger["qualification_matrix_raw_sha256"], "qualification_matrix_raw_sha256")
+    matrix = inspect_untrusted_qualification_matrix(qualification_matrix_raw)
+    _require(matrix["matrix_raw_sha256"] == ledger["qualification_matrix_raw_sha256"],
+             "raw qualification matrix bytes do not match the ledger matrix digest")
+    matrix_rows = {row["case_id"]: row["qualification_row_sha256"] for row in matrix["rows"]}
     _identifier(ledger["supervisor_source_id"], "supervisor_source_id")
     start_hex = ledger["coverage_start_ns_hex"]
     end_hex = ledger["coverage_end_ns_hex"]
@@ -301,11 +381,16 @@ def _inspect(raw: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
         _check_attempt_events(key, rows)
         for key, rows in sorted(grouped.items(), key=lambda item: item[1][0]["event"]["seq"])
     ]
+    for attempt in attempts:
+        _require(attempt["case_id"] in matrix_rows,
+                 f"ledger attempt references non-qualification case {attempt['case_id']}")
+        _require(attempt["qualification_row_sha256"] == matrix_rows[attempt["case_id"]],
+                 f"ledger row digest differs from frozen matrix row {attempt['case_id']}")
     return ledger, {"attempts": attempts, "events": parsed_events, "coverage_start_ns": start_ns,
-                    "coverage_end_ns": end_ns}
+                    "coverage_end_ns": end_ns, "matrix": matrix}
 
 
-def inspect_untrusted_attempt_ledger(raw: bytes) -> dict[str, Any]:
+def inspect_untrusted_attempt_ledger(raw: bytes, *, qualification_matrix_raw: bytes) -> dict[str, Any]:
     """Parse a bounded raw ledger and return only an untrusted structural summary.
 
     ``attempt_ledger_complete`` is fixed false: this API has no trusted
@@ -315,12 +400,15 @@ def inspect_untrusted_attempt_ledger(raw: bytes) -> dict[str, Any]:
     ledger claim.
     """
     _require(type(raw) is bytes, "ledger input must be exact raw bytes")
-    ledger, parsed = _inspect(raw)
+    ledger, parsed = _inspect(raw, qualification_matrix_raw)
     return {
         "schema": DIAGNOSTIC_SCHEMA,
         "ledger_schema": LEDGER_SCHEMA,
         "scope_id": SCOPE_ID,
         "qualification_matrix_raw_sha256": ledger["qualification_matrix_raw_sha256"],
+        "qualification_matrix_row_count": parsed["matrix"]["row_count"],
+        "qualification_matrix_rows": parsed["matrix"]["rows"],
+        "frozen_matrix_source_authenticated": False,
         "supervisor_source_id": ledger["supervisor_source_id"],
         "coverage_start_ns_hex": ledger["coverage_start_ns_hex"],
         "coverage_end_ns_hex": ledger["coverage_end_ns_hex"],
@@ -340,7 +428,12 @@ def inspect_untrusted_attempt_ledger(raw: bytes) -> dict[str, Any]:
     }
 
 
-def validate_attempt_result_ledger_projection_v2(attempt_result: Any, ledger_raw: bytes) -> None:
+def validate_attempt_result_ledger_projection_v2(
+    attempt_result: Any,
+    ledger_raw: bytes,
+    *,
+    qualification_matrix_raw: bytes,
+) -> None:
     """Check an untrusted V2 result's identity/seq/receipt-ref projection.
 
     This proves only that the two caller-provided structures agree with one
@@ -350,7 +443,7 @@ def validate_attempt_result_ledger_projection_v2(attempt_result: Any, ledger_raw
         validate_untrusted_attempt_result_v2(attempt_result)
     except AttemptResultV2Error as error:
         raise AttemptLedgerV1Error(f"attempt result is not an admissible unresolved V2 diagnostic: {error}") from error
-    ledger, parsed = _inspect(ledger_raw)
+    ledger, parsed = _inspect(ledger_raw, qualification_matrix_raw)
     _require(attempt_result["scope_id"] == ledger["scope_id"],
              "attempt result scope differs from ledger scope")
     candidates = [item for item in parsed["attempts"]
@@ -380,5 +473,6 @@ def validate_attempt_result_ledger_projection_v2(attempt_result: Any, ledger_raw
 
 __all__ = [
     "AttemptLedgerV1Error", "DIAGNOSTIC_SCHEMA", "LEDGER_SCHEMA",
-    "inspect_untrusted_attempt_ledger", "validate_attempt_result_ledger_projection_v2",
+    "inspect_untrusted_attempt_ledger", "inspect_untrusted_qualification_matrix",
+    "validate_attempt_result_ledger_projection_v2",
 ]

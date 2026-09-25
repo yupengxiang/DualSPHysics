@@ -13,7 +13,55 @@ from scripts import f8_r008_per_case_bundle_verifier_v2 as attempt_v2
 CASE_ID = "space-q0-dp0p0090"
 ATTEMPT_ID = "attempt-001"
 NONCE = "b" * 32
-ROW_SHA = "a" * 64
+
+
+def _matrix_document() -> dict[str, object]:
+    rows = []
+    for index in range(15):
+        rows.append({
+            "alpha": 2.0,
+            "case_id": CASE_ID if index == 0 else f"matrix-case-{index:02d}",
+            "cflnumber": 0.2,
+            "compare_to": None,
+            "control_amplitude_m_s2": 0.01,
+            "control_samples_per_period": 64,
+            "dp_m": 0.009,
+            "expected_observation_output_count": 193,
+            "kind": "spatial_anchor",
+            "native_output_dt_s": 0.09940195505498954,
+            "native_output_samples_per_period": 64,
+            "observation_cycles": 3,
+            "observation_end_output_index": 320,
+            "observation_end_s": 31.808625617596654,
+            "observation_start_output_index": 128,
+            "observation_start_s": 12.723450247038661,
+            "omega_rad_s": 0.9876543209876544,
+            "period_s": 6.361725123519331,
+            "q": float(index) / 14.0,
+            "qualification_only": True,
+        })
+    return {
+        "schema": "core.cfd.f8.t1_scope_design.v1",
+        "record_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008-t1-scope-design-v1",
+        "scope_id": ledger_v1.SCOPE_ID,
+        "matrix": {
+            "all_rows_are_qualification_only": True,
+            "case_count": 15,
+            "control_count": 2,
+            "design_rule": "13 spatial configurations + 2 controls",
+            "gate_applicability": {},
+            "independent_internal_count": 4,
+            "no_failure_deletion_or_replacement": True,
+            "rows": rows,
+            "spatial_anchor_count": 13,
+        },
+    }
+
+
+MATRIX_RAW = json.dumps(_matrix_document(), separators=(",", ":"), allow_nan=False).encode()
+MATRIX_INDEX = ledger_v1.inspect_untrusted_qualification_matrix(MATRIX_RAW)
+ROW_SHA = MATRIX_INDEX["rows"][0]["qualification_row_sha256"]
+MATRIX_SHA = hashlib.sha256(MATRIX_RAW).hexdigest()
 
 
 def _ref(stage: str, role: str, object_id: str) -> dict[str, object]:
@@ -65,7 +113,7 @@ def _ledger_document(events: list[dict[str, object]] | None = None) -> dict[str,
     return {
         "schema": ledger_v1.LEDGER_SCHEMA,
         "scope_id": ledger_v1.SCOPE_ID,
-        "qualification_matrix_raw_sha256": "d" * 64,
+        "qualification_matrix_raw_sha256": MATRIX_SHA,
         "supervisor_source_id": "f8-supervisor-v1",
         "coverage_start_ns_hex": "0000000000000000",
         "coverage_end_ns_hex": f"{end:016x}",
@@ -118,7 +166,7 @@ def _attempt_result() -> dict[str, object]:
 
 def test_structurally_closed_ledger_stays_untrusted_and_unresolved() -> None:
     raw = _raw()
-    result = ledger_v1.inspect_untrusted_attempt_ledger(raw)
+    result = ledger_v1.inspect_untrusted_attempt_ledger(raw, qualification_matrix_raw=MATRIX_RAW)
     assert result["ledger_structure_valid"] is True
     assert result["ledger_raw_bytes"] == len(raw)
     assert result["ledger_raw_sha256"] == hashlib.sha256(raw).hexdigest()
@@ -138,7 +186,9 @@ def test_structurally_closed_ledger_stays_untrusted_and_unresolved() -> None:
 def test_structural_terminal_pass_claim_is_preserved_but_never_derived() -> None:
     events = _complete_event_chain()
     events[-1]["outcome"] = "passed"
-    result = ledger_v1.inspect_untrusted_attempt_ledger(_raw(_ledger_document(events)))
+    result = ledger_v1.inspect_untrusted_attempt_ledger(
+        _raw(_ledger_document(events)), qualification_matrix_raw=MATRIX_RAW,
+    )
     assert result["attempts"][0]["claimed_terminal_outcome"] == "passed"
     assert result["attempts"][0]["attempt_outcome"] == "unresolved"
     assert result["attempt_ledger_complete"] is False
@@ -147,16 +197,75 @@ def test_structural_terminal_pass_claim_is_preserved_but_never_derived() -> None
 
 
 def test_empty_ledger_does_not_prove_any_case_missing() -> None:
-    result = ledger_v1.inspect_untrusted_attempt_ledger(_raw(_ledger_document([])))
+    result = ledger_v1.inspect_untrusted_attempt_ledger(
+        _raw(_ledger_document([])), qualification_matrix_raw=MATRIX_RAW,
+    )
     assert result["ledger_structure_valid"] is True
     assert result["attempt_count"] == 0
     assert result["attempt_events_closed"] is False
     assert result["attempt_ledger_complete"] is False
 
 
+def test_matrix_row_digest_uses_v12_canonical_json_and_preserves_order() -> None:
+    matrix = _matrix_document()
+    raw = MATRIX_RAW
+    inspected = ledger_v1.inspect_untrusted_qualification_matrix(raw)
+    first_row = matrix["matrix"]["rows"][0]
+    canonical = json.dumps(first_row, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    assert inspected["row_count"] == 15
+    assert [item["case_id"] for item in inspected["rows"]] == [
+        row["case_id"] for row in matrix["matrix"]["rows"]
+    ]
+    assert inspected["rows"][0]["qualification_row_sha256"] == hashlib.sha256(canonical).hexdigest()
+    assert inspected["frozen_matrix_source_authenticated"] is False
+
+
+@pytest.mark.parametrize("mutate, message", [
+    (lambda doc: doc["matrix"].__setitem__("case_count", True), "case_count must be the builtin integer 15"),
+    (lambda doc: doc["matrix"]["rows"][1].__setitem__("case_id", CASE_ID), "duplicates case_id"),
+    (lambda doc: doc["matrix"]["rows"][0].__setitem__("qualification_only", False),
+     "not marked qualification-only"),
+    (lambda doc: doc["matrix"]["rows"][0].__setitem__("unfrozen_extra", 1), "row 0 fields are not exact"),
+])
+def test_invalid_frozen_matrix_rows_reject(mutate, message: str) -> None:
+    document = copy.deepcopy(_matrix_document())
+    mutate(document)
+    raw = json.dumps(document, separators=(",", ":"), allow_nan=False).encode()
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match=message):
+        ledger_v1.inspect_untrusted_qualification_matrix(raw)
+
+
+def test_ledger_matrix_raw_digest_and_event_row_digest_must_both_match() -> None:
+    document = _ledger_document()
+    document["qualification_matrix_raw_sha256"] = "e" * 64
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="do not match the ledger matrix digest"):
+        ledger_v1.inspect_untrusted_attempt_ledger(
+            _raw(document), qualification_matrix_raw=MATRIX_RAW,
+        )
+    document = _ledger_document()
+    for event in document["events"]:
+        event["qualification_row_sha256"] = "e" * 64
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="row digest differs from frozen matrix row"):
+        ledger_v1.inspect_untrusted_attempt_ledger(
+            _raw(document), qualification_matrix_raw=MATRIX_RAW,
+        )
+
+
+def test_ledger_cannot_reference_case_outside_frozen_qualification_matrix() -> None:
+    document = _ledger_document()
+    for event in document["events"]:
+        event["case_id"] = "not-in-frozen-matrix"
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="non-qualification case"):
+        ledger_v1.inspect_untrusted_attempt_ledger(
+            _raw(document), qualification_matrix_raw=MATRIX_RAW,
+        )
+
+
 def test_open_attempt_is_retained_but_not_marked_locally_closed() -> None:
     events = [_event("attempt_registered", 0)]
-    result = ledger_v1.inspect_untrusted_attempt_ledger(_raw(_ledger_document(events)))
+    result = ledger_v1.inspect_untrusted_attempt_ledger(
+        _raw(_ledger_document(events)), qualification_matrix_raw=MATRIX_RAW,
+    )
     assert result["attempt_count"] == 1
     assert result["attempt_events_closed"] is False
     assert result["attempts"][0]["attempt_events_closed"] is False
@@ -169,7 +278,9 @@ def test_not_started_terminal_requires_no_spawn_and_is_still_unresolved() -> Non
         _event("attempt_registered", 0),
         _event("attempt_terminal", 1, outcome="not_started", terminal_ref=None),
     ]
-    result = ledger_v1.inspect_untrusted_attempt_ledger(_raw(_ledger_document(events)))
+    result = ledger_v1.inspect_untrusted_attempt_ledger(
+        _raw(_ledger_document(events)), qualification_matrix_raw=MATRIX_RAW,
+    )
     attempt = result["attempts"][0]
     assert attempt["claimed_terminal_outcome"] == "not_started"
     assert attempt["attempt_events_closed"] is True
@@ -188,7 +299,7 @@ def test_malformed_top_level_event_domains_and_refs_reject(mutate, message: str)
     document = copy.deepcopy(_ledger_document())
     mutate(document)
     with pytest.raises(ledger_v1.AttemptLedgerV1Error, match=message):
-        ledger_v1.inspect_untrusted_attempt_ledger(_raw(document))
+        ledger_v1.inspect_untrusted_attempt_ledger(_raw(document), qualification_matrix_raw=MATRIX_RAW)
 
 
 def test_duplicate_json_keys_reject_before_structural_validation() -> None:
@@ -197,7 +308,7 @@ def test_duplicate_json_keys_reject_before_structural_validation() -> None:
                             b'"schema":"core.cfd.f8.r008_attempt_ledger.v1",'
                             b'"schema":"core.cfd.f8.r008_attempt_ledger.v1",', 1)
     with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="duplicate JSON object key"):
-        ledger_v1.inspect_untrusted_attempt_ledger(duplicate)
+        ledger_v1.inspect_untrusted_attempt_ledger(duplicate, qualification_matrix_raw=MATRIX_RAW)
 
 
 @pytest.mark.parametrize("reuse", ["attempt_id", "nonce_hex"])
@@ -210,14 +321,18 @@ def test_attempt_id_and_nonce_are_unique_across_scope(reuse: str) -> None:
                   "case_id": "space-q1-dp0p0090", "qualification_row_sha256": "f" * 64})
     events.append(event)
     with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="reused"):
-        ledger_v1.inspect_untrusted_attempt_ledger(_raw(_ledger_document(events)))
+        ledger_v1.inspect_untrusted_attempt_ledger(
+            _raw(_ledger_document(events)), qualification_matrix_raw=MATRIX_RAW,
+        )
 
 
 def test_attempt_cannot_change_case_or_row_after_registration() -> None:
     events = _complete_event_chain()
     events[6]["case_id"] = "space-q1-dp0p0090"
     with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="changes its registered case_id"):
-        ledger_v1.inspect_untrusted_attempt_ledger(_raw(_ledger_document(events)))
+        ledger_v1.inspect_untrusted_attempt_ledger(
+            _raw(_ledger_document(events)), qualification_matrix_raw=MATRIX_RAW,
+        )
 
 
 @pytest.mark.parametrize("edit, message", [
@@ -236,7 +351,9 @@ def test_attempt_level_order_and_terminal_conflicts_reject(edit, message: str) -
     events = copy.deepcopy(_complete_event_chain())
     edit(events)
     with pytest.raises(ledger_v1.AttemptLedgerV1Error, match=message):
-        ledger_v1.inspect_untrusted_attempt_ledger(_raw(_ledger_document(events)))
+        ledger_v1.inspect_untrusted_attempt_ledger(
+            _raw(_ledger_document(events)), qualification_matrix_raw=MATRIX_RAW,
+        )
 
 
 def test_cannot_start_c_before_b_receipt() -> None:
@@ -252,11 +369,15 @@ def test_cannot_start_c_before_b_receipt() -> None:
         _event("stage_receipt", 6, stage="B", receipt_ref=_ref("B", "b_receipt", "b-receipt-001")),
     ]
     with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="C stage appears before"):
-        ledger_v1.inspect_untrusted_attempt_ledger(_raw(_ledger_document(events)))
+        ledger_v1.inspect_untrusted_attempt_ledger(
+            _raw(_ledger_document(events)), qualification_matrix_raw=MATRIX_RAW,
+        )
 
 
 def test_attempt_result_projection_must_match_exact_ledger_inventory() -> None:
-    ledger_v1.validate_attempt_result_ledger_projection_v2(_attempt_result(), _raw())
+    ledger_v1.validate_attempt_result_ledger_projection_v2(
+        _attempt_result(), _raw(), qualification_matrix_raw=MATRIX_RAW,
+    )
 
 
 @pytest.mark.parametrize("mutate, message", [
@@ -270,11 +391,15 @@ def test_attempt_result_projection_rejects_cross_attempt_or_partial_claims(mutat
     result = _attempt_result()
     mutate(result)
     with pytest.raises(ledger_v1.AttemptLedgerV1Error, match=message):
-        ledger_v1.validate_attempt_result_ledger_projection_v2(result, _raw())
+        ledger_v1.validate_attempt_result_ledger_projection_v2(
+            result, _raw(), qualification_matrix_raw=MATRIX_RAW,
+        )
 
 
 def test_attempt_result_pass_status_without_stage_receipt_event_is_rejected() -> None:
     result = _attempt_result()
     result["stage_bundle_refs"]["C"] = None
     with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="stage refs differ"):
-        ledger_v1.validate_attempt_result_ledger_projection_v2(result, _raw())
+        ledger_v1.validate_attempt_result_ledger_projection_v2(
+            result, _raw(), qualification_matrix_raw=MATRIX_RAW,
+        )
