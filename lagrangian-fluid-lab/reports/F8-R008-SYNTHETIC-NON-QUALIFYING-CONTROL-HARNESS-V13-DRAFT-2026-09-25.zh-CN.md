@@ -1,6 +1,6 @@
 # F8 R008 synthetic non-qualifying control harness V13（规范性增补草案）
 
-状态：V13 首轮只读交叉复核为 `REVISE` 后已修订；focused text review 确认 serialization-only digest vector 与 `hdf5_size_bytes` builtin-int 规则明确。它仍是 V12 的 synthetic-only 设计增补，不是实现或资格合同。它只替换下列 V12 语义，不改历史收据、冻结输入、资格矩阵、失败分母或已消费授权。旧 Mapping/path API 的禁用要求尚未在现有源码落实。未实现、未运行测试；未运行 planner/collector/preparation、GenCase/native/solver/worker/GPU/queue。R008 `readiness_pass=false`、`T1_numerical=false`、资格信用为零。
+状态：V13 首轮只读交叉复核为 `REVISE` 后已修订；focused text review 确认 serialization-only digest vector 与 `hdf5_size_bytes` builtin-int 规则明确。它仍是 V12 的 synthetic-only 设计增补，不是实现或资格合同。它只替换下列 V12 语义，不改历史收据、冻结输入、资格矩阵、失败分母或已消费授权。仓库已有 non-authorizing V3 serialization/ref-graph codec、bounded strict JSON、diagnostic descriptor-only HDF5 reader 与 fs-verity primitives；UPDATE-131 又禁止 descriptor-only reader 重开 compact geometry/control 路径，并以 synthetic-only 测试覆盖。它们都不是 V13 trusted root reader、descriptor registry、supervisor/broker/worker 或 formal capability ingress；collector/F4 connector/formal planner 的 capability-only consumer 也未完成。生产执行链仍未实现或运行；未运行 planner/collector/preparation、GenCase/native/solver/worker/GPU/queue。R008 `readiness_pass=false`、`T1_numerical=false`、资格信用为零。
 
 实施边界更新：UPDATE-112 仅把 `core_formal_planner` 已有的 path-backed JSON metadata parser 收紧为 bounded strict raw-byte 解析；这不实现 V13 的唯一 root reader，也不关闭 legacy Mapping/path diagnostic API，更不 mint/consume capability。V13 中 trusted producer、descriptor-root、same-FD snapshot、fs-verity、固定 launcher/runtime identity 与正式 ingress 的要求仍未实现。
 

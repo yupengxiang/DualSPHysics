@@ -1,5 +1,6 @@
 import copy
 import json
+import os
 
 import pytest
 import scripts.core_dataset as core_dataset_module
@@ -92,6 +93,37 @@ def test_compact_reader_reuses_shared_asset_binding_after_lru_reopen(tmp_path, m
     assert observed_paths.count(second_path.resolve()) == 1
     assert observed_paths.count(geometry.resolve()) == 1
     assert observed_paths.count(control.resolve()) == 1
+
+
+def test_descriptor_only_reader_rejects_path_backed_known_inputs_before_asset_open(
+    tmp_path, monkeypatch,
+):
+    source = tmp_path / "source"
+    source.mkdir()
+    manifest_path = source / "manifest.json"
+    manifest_path.write_text(json.dumps(tiny_manifest(source)))
+    compact = compactify_manifest(manifest_path, source)
+    hdf5_fd = os.open(source / "data.h5", os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+    attempted_asset_opens = []
+
+    def forbidden_asset_open(_root, value):
+        attempted_asset_opens.append(value)
+        raise AssertionError("descriptor-only KnownInputs attempted a pathname open")
+
+    monkeypatch.setattr(core_dataset_module, "_asset", forbidden_asset_open)
+    try:
+        with CoreDataset(compact, source, snapshot_fds={"tiny": hdf5_fd}) as data:
+            with pytest.raises(
+                    ValueError,
+                    match="whole-source verification requires descriptor-backed"):
+                data.verify_sources()
+            with pytest.raises(ValueError, match="cannot reopen path-backed geometry/control"):
+                data.known_inputs("tiny")
+            assert data.times("tiny").tolist() == [0.0, 0.01]
+            assert data.read_state("tiny", 1).time_s == pytest.approx(0.01)
+        assert attempted_asset_opens == []
+    finally:
+        os.close(hdf5_fd)
 
 
 def test_compactify_v1_materializes_hash_bound_assets_without_opening_hdf5(tmp_path):

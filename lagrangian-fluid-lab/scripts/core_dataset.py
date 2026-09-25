@@ -560,7 +560,10 @@ class CoreDataset:
     supplied inode, but does not authenticate its producer or prove immutability.
     ``snapshot_measurements`` adds an expected fs-verity measurement and held
     identity check before/after HDF5 access; caller-provided measurements are
-    still not authenticated capabilities.
+    still not authenticated capabilities. Compact geometry/control assets are
+    never reopened by pathname in descriptor-only mode; ``known_inputs()`` and
+    whole-source verification reject those records until a descriptor-backed
+    input bundle is available.
     """
 
     def __init__(self, manifest, data_root=None, *, max_open_files=4, strict=True,
@@ -722,7 +725,7 @@ class CoreDataset:
             self._source_hashes[case_id] = observed
 
             references = row.get("known_inputs_ref")
-            if references:
+            if references and not self._descriptor_only:
                 for key in ("geometry", "control"):
                     reference = references[key]
                     input_path = _asset(self.data_root, reference["path"])
@@ -772,8 +775,16 @@ class CoreDataset:
         return handle
 
     def verify_sources(self, case_ids=None):
+        selected_case_ids = tuple(self.case_ids() if case_ids is None else case_ids)
+        if self._descriptor_only and any(
+                self._records[case_id].get("known_inputs_ref") is not None
+                for case_id in selected_case_ids):
+            raise ValueError(
+                "descriptor-only whole-source verification requires "
+                "descriptor-backed geometry/control assets"
+            )
         result = {}
-        for case_id in self.case_ids() if case_ids is None else case_ids:
+        for case_id in selected_case_ids:
             self._bind_sources(case_id, force=True)
             result[case_id] = self._source_hashes[case_id]
         return result
@@ -785,13 +796,18 @@ class CoreDataset:
         return result
 
     def known_inputs(self, case_id):
+        row = self._records[case_id]
+        if self._descriptor_only and row.get("known_inputs_ref") is not None:
+            raise ValueError(
+                "descriptor-only dataset cannot reopen path-backed geometry/control assets"
+            )
         self._bind_sources(case_id)
         if case_id not in self._known:
             self._known[case_id] = known_inputs_from_record(
-                self._records[case_id], self.data_root,
+                row, self.data_root,
                 verified_assets=self._hash_cache if self.strict else None,
                 verify_hash=self.strict)
-            if contract_hash(self._known[case_id]) != self._records[case_id]["known_inputs_sha256"]:
+            if contract_hash(self._known[case_id]) != row["known_inputs_sha256"]:
                 raise ValueError("known input contract hash mismatch")
         return self._known[case_id]
 
