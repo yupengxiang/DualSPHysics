@@ -10,6 +10,8 @@ import pytest
 from scripts import f8_r008_native_fluid_table_metric_bundle_verifier_v2 as metric_bundle
 from scripts import f8_r008_native_fluid_table_v2 as table_v2
 from scripts import f8_r008_t1_metric_matrix_adapter_v2 as matrix_v2
+from scripts import f8_r008_t1_metric_matrix_adapter_v3 as matrix_v3
+from scripts import f8_r008_runparts_timestep_diagnostic_v1 as runparts_v1
 
 
 def _case_metrics(case_id: str, row: dict, parameters: dict, *, table_bytes: int, table_sha: str) -> dict:
@@ -86,9 +88,30 @@ def _case_metrics(case_id: str, row: dict, parameters: dict, *, table_bytes: int
 
 
 def _audit(tmp_path: Path, case_id: str, max_dt: float) -> Path:
-    source = tmp_path / f"{case_id}.synthetic.log"
-    source.write_bytes(f"synthetic source for {case_id}\n".encode())
-    audit_path = tmp_path / f"{case_id}.audit.json"
+    case_dir = tmp_path / case_id
+    case_dir.mkdir()
+    source = case_dir / "RunPARTs.csv"
+    initial = ["0"] * len(runparts_v1.RUNPARTS_HEADER)
+    initial[1] = "0"
+    initial[2] = "0"
+    initial[19] = "0"
+    initial[20] = "0"
+    observed = ["0"] * len(runparts_v1.RUNPARTS_HEADER)
+    observed[0] = "1"
+    observed[1] = "0.1"
+    observed[2] = "10"
+    observed[19] = repr(max_dt)
+    observed[20] = repr(max_dt)
+    source_payload = "\n".join((
+        ";".join(runparts_v1.RUNPARTS_HEADER),
+        ";".join(initial),
+        ";".join(observed),
+        "",
+        *runparts_v1.RUNPARTS_FOOTER,
+        "",
+    )).encode("utf-8")
+    source.write_bytes(source_payload)
+    audit_path = case_dir / "timestep.audit.json"
     audit_path.write_text(json.dumps({
         "schema": matrix_v2.SOLVER_TIMESTEP_AUDIT_SCHEMA,
         "status": "passed",
@@ -102,6 +125,46 @@ def _audit(tmp_path: Path, case_id: str, max_dt: float) -> Path:
         },
     }), encoding="utf-8")
     return audit_path
+
+
+def test_v3_metric_matrix_recomputes_runparts_but_keeps_execution_gate_closed(tmp_path) -> None:
+    results, audits = _inputs(tmp_path)
+    sources = {case_id: audit.parent / "RunPARTs.csv" for case_id, audit in audits.items()}
+
+    result = matrix_v3.evaluate_metric_matrix_v3(results, solver_timestep_sources=sources)
+
+    comparison = result["time_step_comparison"]
+    assert result["schema"] == matrix_v3.SCHEMA
+    assert result["case_count"] == 15
+    assert comparison["baseline_observed_recorded_part_dtmax_s"] == pytest.approx(0.002)
+    assert comparison["refined_observed_recorded_part_dtmax_s"] == pytest.approx(0.001)
+    assert comparison["runparts_source_content_recomputed"] is True
+    assert comparison["adjudication_status"] == "diagnostic_only_attempt_identity_and_completion_unverified"
+    assert comparison["execution_attempt_identity_verified"] is False
+    assert comparison["runtime_configuration_verified"] is False
+    assert comparison["normal_completion_verified"] is False
+    assert comparison["frozen_end_time_reached"] is False
+    assert comparison["unverified_source_observation_relation_code"] == (
+        "unverified_observed_refinement_and_phase_relation"
+    )
+    assert "caller_claimed_relation_code" not in comparison
+    assert comparison["passed"] is False
+    assert result["all_metric_and_comparison_gates_passed"] is False
+    assert result["execution_source_identity_verified"] is False
+    assert result["solver_completion_verified"] is False
+    assert result["full_t1_decision"] is False
+    assert result["readiness_pass"] is False
+    assert result["qualification_credit"] == 0
+
+
+def test_v3_metric_matrix_rejects_bad_runparts_source(tmp_path) -> None:
+    results, audits = _inputs(tmp_path)
+    sources = {case_id: audit.parent / "RunPARTs.csv" for case_id, audit in audits.items()}
+    source = sources["time-q0p5-dp0p0075-cfl0p1"]
+    source.write_text("not a RunPARTs CSV\n", encoding="utf-8")
+
+    with pytest.raises(matrix_v2.NativeFluidMetricMatrixError, match="RunPARTs source"):
+        matrix_v3.evaluate_metric_matrix_v3(results, solver_timestep_sources=sources)
 
 
 def _inputs(tmp_path: Path):

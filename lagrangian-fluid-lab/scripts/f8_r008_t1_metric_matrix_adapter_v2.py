@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 import re
 import stat
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 import numpy as np
 
@@ -353,12 +353,13 @@ def _validate_case_result(
     }
 
 
-def evaluate_metric_matrix_v2(
+def _evaluate_metric_matrix(
     case_results: Mapping[str, Mapping[str, Any]],
     *,
     solver_timestep_audits: Mapping[str, Path | str],
+    audit_reader: Callable[[Path | str, str], tuple[float, dict[str, Any]]],
 ) -> dict[str, Any]:
-    """Evaluate all 15 frozen case metrics and 8 comparisons, not full T1.
+    """Shared evaluator core; callers supply a versioned source reader.
 
     The supplied per-case records must be the outputs of the held-FD v2
     B/C/D verifier. This function checks their structure/hashes but does not
@@ -433,8 +434,8 @@ def evaluate_metric_matrix_v2(
              and isinstance(solver_timestep_audits, Mapping)
              and set(solver_timestep_audits) == {baseline_id, refined_id},
              "time-step comparison requires exactly the frozen baseline/refined solver audits")
-    baseline_dt, baseline_audit = _read_bounded_audit(solver_timestep_audits[baseline_id], baseline_id)
-    refined_dt, refined_audit = _read_bounded_audit(solver_timestep_audits[refined_id], refined_id)
+    baseline_dt, baseline_audit = audit_reader(solver_timestep_audits[baseline_id], baseline_id)
+    refined_dt, refined_audit = audit_reader(solver_timestep_audits[refined_id], refined_id)
     baseline_metrics, refined_metrics = metrics_by_id[baseline_id], metrics_by_id[refined_id]
     phase_difference = metric_v1.wrapped_phase_difference(
         baseline_metrics["center_coefficients"]["phase_rad"],
@@ -529,6 +530,24 @@ def evaluate_metric_matrix_v2(
         "readiness_pass": False,
         "qualification_credit": 0,
     }
+
+
+def evaluate_metric_matrix_v2(
+    case_results: Mapping[str, Mapping[str, Any]],
+    *,
+    solver_timestep_audits: Mapping[str, Path | str],
+) -> dict[str, Any]:
+    """Evaluate frozen metrics with the legacy caller-claim audit reader.
+
+    The v2 timestep adjudication is hard-disabled; the input is for historical
+    diagnostic compatibility only. New callers should use the v3 RunPARTs
+    source reader, which recomputes the recorded value from CSV bytes.
+    """
+    return _evaluate_metric_matrix(
+        case_results,
+        solver_timestep_audits=solver_timestep_audits,
+        audit_reader=_read_bounded_audit,
+    )
 
 
 __all__ = ["NativeFluidMetricMatrixError", "SCHEMA", "evaluate_metric_matrix_v2"]
