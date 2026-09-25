@@ -102,7 +102,7 @@ def _raw(document: dict[str, object] | None = None) -> bytes:
     return json.dumps(document or _ledger_document(), separators=(",", ":"), allow_nan=False).encode()
 
 
-def _synthetic_stage_receipt_raw(event: dict[str, object]) -> bytes:
+def _synthetic_stage_receipt_raw(event: dict[str, object], *, status: str = "failed") -> bytes:
     stage = event["stage"]
     receipt = {field: None for field in stage_v1.STAGE_REQUIRED_FIELDS[stage]}
     receipt.update({
@@ -111,25 +111,57 @@ def _synthetic_stage_receipt_raw(event: dict[str, object]) -> bytes:
         "case_id": event["case_id"],
         "attempt_id": event["attempt_id"],
         "nonce": event["nonce_hex"],
-        "status": "failed",
+        "status": status,
         "started_at_utc": "2026-09-25T00:00:00Z",
         "ended_at_utc": "2026-09-25T00:00:00Z",
     })
     return json.dumps(receipt, separators=(",", ":"), allow_nan=False).encode()
 
 
-def _synthetic_c_v5_journal_raw(event: dict[str, object]) -> bytes:
+def _synthetic_c_v5_journal_raw(event: dict[str, object], *, close_process: bool = True) -> bytes:
+    process = {
+        "pid_namespace_inode_hex": "0000000000000001",
+        "pid": 42,
+        "start_monotonic_ns_hex": "0000000000000002",
+        "kernel_starttime_ticks_hex": "0000000000000003",
+        "birth_seq_hex": "0000000000000000",
+    }
+    events = [
+        {
+            "seq": 0, "mono_ns_hex": "0000000000000000", "kind": "spawn",
+            "attempt_nonce_hex": event["nonce_hex"], "process_generation_id": process,
+            "supervisor_identity_binding": {"synthetic": True},
+        },
+        {
+            "seq": 1, "mono_ns_hex": "0000000000000001", "kind": "exec",
+            "attempt_nonce_hex": event["nonce_hex"], "process_generation_id": process,
+            "executable_binding": {"synthetic": True}, "argv_sha256": "b" * 64,
+            "cwd_object_id": "synthetic-cwd", "environment_sha256": "c" * 64,
+        },
+    ]
+    if close_process:
+        events.extend([
+            {
+                "seq": 2, "mono_ns_hex": "0000000000000002", "kind": "exit",
+                "attempt_nonce_hex": event["nonce_hex"], "process_generation_id": process,
+                "exit_code": 0, "signal": None,
+            },
+            {
+                "seq": 3, "mono_ns_hex": "0000000000000003", "kind": "reap",
+                "attempt_nonce_hex": event["nonce_hex"], "process_generation_id": process,
+            },
+        ])
     journal = {
         "schema": journal_v5.JOURNAL_SCHEMA,
         "attempt_nonce_hex": event["nonce_hex"],
         "source_id": "synthetic-c-runtime",
         "source_binary_sha256": "a" * 64,
         "coverage_start_ns_hex": "0000000000000000",
-        "coverage_end_ns_hex": "0000000000000000",
-        "event_count": 0,
+        "coverage_end_ns_hex": f"{len(events) - 1:016x}",
+        "event_count": len(events),
         "overflow": False,
         "lost_count": 0,
-        "events": [],
+        "events": events,
     }
     return json.dumps(journal, separators=(",", ":"), allow_nan=False).encode()
 
@@ -146,8 +178,12 @@ def _replace_artifact_raw(raw: bytes, artifacts: dict, key: tuple[str, str, str]
     return _raw(document)
 
 
-def _ledger_and_raw_objects() -> tuple[bytes, dict[tuple[str, str, str], bytes]]:
-    document = _ledger_document()
+def _ledger_and_raw_objects(
+    events: list[dict[str, object]] | None = None,
+    *,
+    stage_receipt_status: str = "failed",
+) -> tuple[bytes, dict[tuple[str, str, str], bytes]]:
+    document = _ledger_document(events)
     artifacts = {}
     for event in document["events"]:
         ref = event.get("receipt_ref", event.get("process_journal_ref", event.get("terminal_ref")))
@@ -155,7 +191,7 @@ def _ledger_and_raw_objects() -> tuple[bytes, dict[tuple[str, str, str], bytes]]
             continue
         key = (ref["stage"], ref["role"], ref["object_id"])
         if event["kind"] == "stage_receipt":
-            object_raw = _synthetic_stage_receipt_raw(event)
+            object_raw = _synthetic_stage_receipt_raw(event, status=stage_receipt_status)
         elif event["kind"] == "process_terminal" and event["stage"] == "C":
             object_raw = _synthetic_c_v5_journal_raw(event)
         else:
@@ -243,7 +279,7 @@ def test_raw_object_binding_requires_exact_refs_and_only_proves_bytes_and_digest
     assert result["c_v5_process_journal_checks"][0]["outer_attempt_nonce_matches"] is True
     assert result["c_v5_process_journal_checks"][0][
         "journal_local_observed_process_lifecycle_complete_unverified"
-    ] is False
+    ] is True
     assert result["c_v5_process_journal_checks"][0]["event_source_completeness_verified"] is False
     assert result["c_v5_process_journal_checks"][0]["process_generation_identity_linked"] is False
     assert result["artifact_producer_authenticated"] is False
@@ -296,6 +332,50 @@ def test_raw_object_binding_rejects_cross_attempt_c_v5_journal_replay() -> None:
         ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
             raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
         )
+
+
+@pytest.mark.parametrize("terminal_outcome", [
+    "passed", "failed", "incomplete", "timeout", "oom", "signaled", "unresolved",
+])
+def test_raw_object_binding_preserves_incomplete_journal_for_all_terminal_claims(
+    terminal_outcome: str,
+) -> None:
+    events = _complete_event_chain()
+    events[-1]["outcome"] = terminal_outcome
+    raw, artifacts = _ledger_and_raw_objects(
+        events, stage_receipt_status="passed" if terminal_outcome == "passed" else "failed",
+    )
+    key = next(item for item in artifacts if item[0] == "C" and item[1] == "process_journal")
+    replacement = _synthetic_c_v5_journal_raw({"nonce_hex": NONCE}, close_process=False)
+    raw = _replace_artifact_raw(raw, artifacts, key, replacement)
+    result = ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+        raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
+    )
+    check = result["c_v5_process_journal_checks"][0]
+    assert result["attempt_outcomes_resolved"] is False
+    expected_receipt_status = "passed" if terminal_outcome == "passed" else "failed"
+    assert all(item["receipt_status_claim"] == expected_receipt_status
+               for item in result["stage_receipt_envelopes"])
+    assert check["journal_local_observed_process_lifecycle_complete_unverified"] is False
+    assert check["process_generation_identity_linked"] is False
+
+
+def test_raw_object_binding_preserves_open_attempt_with_incomplete_c_v5_journal() -> None:
+    raw, artifacts = _ledger_and_raw_objects(_complete_event_chain()[:6])
+    key = next(item for item in artifacts if item[0] == "C" and item[1] == "process_journal")
+    replacement = _synthetic_c_v5_journal_raw({"nonce_hex": NONCE}, close_process=False)
+    raw = _replace_artifact_raw(raw, artifacts, key, replacement)
+    result = ledger_v1.bind_untrusted_attempt_ledger_raw_objects(
+        raw, qualification_matrix_raw=MATRIX_RAW, artifact_raw_by_ref=artifacts,
+    )
+    ledger_summary = ledger_v1.inspect_untrusted_attempt_ledger(
+        raw, qualification_matrix_raw=MATRIX_RAW,
+    )
+    assert ledger_summary["attempt_events_closed"] is False
+    assert result["attempt_outcomes_resolved"] is False
+    assert result["c_v5_process_journal_checks"][0][
+        "journal_local_observed_process_lifecycle_complete_unverified"
+    ] is False
 
 
 def test_raw_object_binding_rejects_malformed_c_v5_journal_after_ref_match() -> None:
