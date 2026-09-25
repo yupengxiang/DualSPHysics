@@ -403,3 +403,138 @@ def test_attempt_result_pass_status_without_stage_receipt_event_is_rejected() ->
         ledger_v1.validate_attempt_result_ledger_projection_v2(
             result, _raw(), qualification_matrix_raw=MATRIX_RAW,
         )
+
+
+def _ledger_ref(raw: bytes) -> dict[str, object]:
+    return {
+        "stage": "runtime",
+        "role": "attempt_ledger",
+        "object_id": "ledger-object-001",
+        "bytes": len(raw),
+        "sha256": hashlib.sha256(raw).hexdigest(),
+    }
+
+
+def _aggregate(raw: bytes, attempt_results: list[dict[str, object]]) -> dict[str, object]:
+    return ledger_v1.build_untrusted_attempt_aggregate_v2(
+        MATRIX_RAW,
+        raw,
+        attempt_ledger_ref=_ledger_ref(raw),
+        attempt_results=attempt_results,
+    )
+
+
+def test_untrusted_aggregate_emits_all_matrix_rows_and_preserves_unresolved_record() -> None:
+    raw = _raw()
+    aggregate = _aggregate(raw, [_attempt_result()])
+
+    assert set(aggregate) == ledger_v1.AGGREGATE_FIELDS
+    assert aggregate["schema"] == ledger_v1.AGGREGATE_SCHEMA
+    assert aggregate["expected_case_count"] == 15
+    assert [row["case_id"] for row in aggregate["case_rows"]] == [
+        row["case_id"] for row in MATRIX_INDEX["rows"]
+    ]
+    assert aggregate["case_rows"][0]["attempts"] == [_attempt_result()]
+    assert all(row["case_outcome"] == "unresolved" for row in aggregate["case_rows"])
+    assert all(row["qualifying_attempt_id"] is None for row in aggregate["case_rows"])
+    assert aggregate["case_outcome_counts"] == {
+        "passed": 0, "failed": 0, "missing": 0, "unresolved": 15,
+    }
+    assert aggregate["attempt_outcome_counts"]["unresolved"] == 1
+    assert aggregate["aggregate_outcome"] == "accounting_unresolved"
+    assert aggregate["attempt_ledger_attestation_ref"] is None
+    assert aggregate["attempt_ledger_complete"] is False
+    assert aggregate["qualification_adjudicated"] is False
+    assert aggregate["T1_numerical"] is False
+    assert aggregate["qualification_credit"] == 0
+
+
+def test_empty_ledger_aggregate_keeps_all_rows_unresolved_not_missing() -> None:
+    raw = _raw(_ledger_document([]))
+    aggregate = _aggregate(raw, [])
+
+    assert len(aggregate["case_rows"]) == 15
+    assert all(row["case_outcome"] == "unresolved" for row in aggregate["case_rows"])
+    assert all(row["attempts"] == [] for row in aggregate["case_rows"])
+    assert aggregate["case_outcome_counts"] == {
+        "passed": 0, "failed": 0, "missing": 0, "unresolved": 15,
+    }
+    assert sum(aggregate["attempt_outcome_counts"].values()) == 0
+    assert aggregate["aggregate_outcome"] == "accounting_unresolved"
+
+
+def test_aggregate_preserves_retry_history_in_registration_order() -> None:
+    events = _complete_event_chain()
+    retry_registration = _event("attempt_registered", 11)
+    retry_registration.update({"attempt_id": "attempt-002", "nonce_hex": "e" * 32})
+    events.append(retry_registration)
+    raw = _raw(_ledger_document(events))
+
+    retry_result = copy.deepcopy(_attempt_result())
+    retry_result.update({
+        "attempt_id": "attempt-002",
+        "nonce_hex": "e" * 32,
+        "attempt_ledger_registration_seq": 11,
+        "attempt_ledger_event_seqs": [11],
+        "stage_bundle_refs": {stage: None for stage in ledger_v1.STAGES},
+        "stage_receipt_statuses": {stage: "not_run" for stage in ledger_v1.STAGES},
+        "actual_frame_ordinals": [],
+        "actual_time_axis_ieee754_hex": [],
+    })
+    aggregate = _aggregate(raw, [_attempt_result(), retry_result])
+    first_case = aggregate["case_rows"][0]
+
+    assert [attempt["attempt_id"] for attempt in first_case["attempts"]] == [
+        ATTEMPT_ID, "attempt-002",
+    ]
+    assert all(attempt["attempt_outcome"] == "unresolved" for attempt in first_case["attempts"])
+    assert aggregate["attempt_outcome_counts"]["unresolved"] == 2
+    assert aggregate["case_outcome_counts"]["unresolved"] == 15
+
+
+def test_aggregate_requires_exact_registration_inventory() -> None:
+    raw = _raw()
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="complete observed ledger registration inventory"):
+        _aggregate(raw, [])
+
+    extra = copy.deepcopy(_attempt_result())
+    extra.update({"attempt_id": "unregistered-attempt", "nonce_hex": "e" * 32})
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="not registered"):
+        _aggregate(raw, [_attempt_result(), extra])
+
+
+@pytest.mark.parametrize("mutate, message", [
+    (lambda ref: ref.__setitem__("stage", "B"), "fixed runtime/attempt_ledger role"),
+    (lambda ref: ref.__setitem__("role", "other_role"), "fixed runtime/attempt_ledger role"),
+    (lambda ref: ref.__setitem__("bytes", ref["bytes"] + 1), "byte count or raw SHA differs"),
+    (lambda ref: ref.__setitem__("sha256", "f" * 64), "byte count or raw SHA differs"),
+    (lambda ref: ref.__setitem__("unexpected", True), "exact descriptor-ref fields"),
+])
+def test_aggregate_rejects_unbound_or_malformed_ledger_reference(mutate, message: str) -> None:
+    raw = _raw()
+    reference = _ledger_ref(raw)
+    mutate(reference)
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match=message):
+        ledger_v1.build_untrusted_attempt_aggregate_v2(
+            MATRIX_RAW, raw, attempt_ledger_ref=reference, attempt_results=[_attempt_result()],
+        )
+
+
+def test_aggregate_rejects_attestation_reference_without_trust_verifier() -> None:
+    raw = _raw()
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="active supervisor trust verifier"):
+        ledger_v1.build_untrusted_attempt_aggregate_v2(
+            MATRIX_RAW,
+            raw,
+            attempt_ledger_ref=_ledger_ref(raw),
+            attempt_results=[_attempt_result()],
+            attempt_ledger_attestation_ref=_ref("runtime", "ledger_attestation", "attestation-001"),
+        )
+
+
+def test_aggregate_rejects_caller_asserted_attempt_pass() -> None:
+    result = _attempt_result()
+    result["attempt_outcome"] = "passed"
+    raw = _raw()
+    with pytest.raises(ledger_v1.AttemptLedgerV1Error, match="attempt outcome must remain unresolved"):
+        _aggregate(raw, [result])

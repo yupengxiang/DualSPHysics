@@ -74,6 +74,10 @@ case/scope 正向及缺失派生谓词唯一如下：`case_outcome="passed"` 当
 
 上句“15 个 attempt 的 gates”指 15 个 frozen row 各自被选中的 qualifying attempt，不是把 retry 历史缩成 15 项；资格判定仍须输入整个 append-only attempt history。
 
+`attempt_ledger_ref` 必须是固定 `(stage="runtime",role="attempt_ledger")` descriptor-ref，且其 bytes/SHA 必须绑定被读取的 ledger 原始 bytes。`attempt_ledger_attestation_ref` 在 attestation 对象存在时必须是固定 role 的 exact descriptor-ref；仅当 attestation 对象不存在时允许为 null，而 null 必须强制 `attempt_ledger_complete=false` 与 `aggregate_outcome="accounting_unresolved"`，绝不从空 case rows/attempts 推导 missing。非 null 引用只定位对象；只有 descriptor-root reader、canonical/signature 校验与 active supervisor-key 验证全部成功才可建立 trusted capability。
+
+当前 synthetic aggregate helper 仅作 fail-closed 结构投影：要求 attempt-result inventory 与 ledger 中观察到的每个 registration 一一对应，并按 registration seq 保留 retries；但原始 ledger、matrix 与 descriptor-ref 均未通过可信 registry/source authentication。因此所有 15 行固定 `unresolved`（包括无 attempt 行）、attempt outcome 固定 `unresolved`、missing/failed/passed 均为零、attestation ref 为 null、账目 unresolved、资格/T1 false 且 credit 为零。该 helper 只接受 null attestation ref，不能验证或消费非 null attestation，也不能据其输出声称 trusted append-only completeness。缺少任何 registration 的 result projection 时直接拒绝构造 aggregate，避免静默丢弃历史；拒绝本身不把该行自动解释为 `missing`。
+
 失败分母与 retry policy 只按冻结资格合同解释：attempt counts 始终覆盖 append-only ledger 的全部已注册 attempts，任何后续成功均不得删除、覆盖、合并或重编号较早的 failed/timeout/OOM/signaled record；T1 正向谓词还必须对完整 attempt history 按冻结失败分母和 retry allowance 重新判定，不能只挑选每行的 `qualifying_attempt_id` 而忽略其余 attempt outcome。未被冻结 retry policy 明确允许的 retry 不得用来替代失败样本。
 
 ## 3. Synthetic-only 验收节点

@@ -8,6 +8,7 @@ untrusted and unresolved, even when the supplied ledger is structurally closed.
 """
 from __future__ import annotations
 
+import copy
 import json
 import re
 from typing import Any
@@ -21,6 +22,7 @@ from scripts.f8_r008_per_case_bundle_verifier_v2 import (
 
 LEDGER_SCHEMA = "core.cfd.f8.r008_attempt_ledger.v1"
 DIAGNOSTIC_SCHEMA = "core.cfd.f8.r008_untrusted_attempt_ledger_diagnostic.v1"
+AGGREGATE_SCHEMA = "core.cfd.f8.r008_t1_case_attempt_aggregate.v2"
 SCOPE_ID = "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008"
 MATRIX_SCHEMA = "core.cfd.f8.t1_scope_design.v1"
 MATRIX_RECORD_ID = "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008-t1-scope-design-v1"
@@ -40,6 +42,12 @@ MATRIX_ROW_FIELDS = frozenset({
     "native_output_dt_s", "native_output_samples_per_period", "observation_cycles",
     "observation_end_output_index", "observation_end_s", "observation_start_output_index",
     "observation_start_s", "omega_rad_s", "period_s", "q", "qualification_only",
+})
+AGGREGATE_FIELDS = frozenset({
+    "schema", "scope_id", "qualification_matrix_raw_sha256", "attempt_ledger_ref",
+    "attempt_ledger_raw_sha256", "attempt_ledger_attestation_ref", "expected_case_count",
+    "case_rows", "case_outcome_counts", "attempt_outcome_counts", "aggregate_outcome",
+    "attempt_ledger_complete", "qualification_adjudicated", "T1_numerical", "qualification_credit",
 })
 EVENT_COMMON_FIELDS = frozenset({
     "seq", "mono_ns_hex", "kind", "case_id", "qualification_row_sha256", "attempt_id", "nonce_hex",
@@ -386,8 +394,17 @@ def _inspect(raw: bytes, qualification_matrix_raw: bytes) -> tuple[dict[str, Any
                  f"ledger attempt references non-qualification case {attempt['case_id']}")
         _require(attempt["qualification_row_sha256"] == matrix_rows[attempt["case_id"]],
                  f"ledger row digest differs from frozen matrix row {attempt['case_id']}")
-    return ledger, {"attempts": attempts, "events": parsed_events, "coverage_start_ns": start_ns,
-                    "coverage_end_ns": end_ns, "matrix": matrix}
+    attempt_by_identity = {
+        (item["attempt_id"], item["nonce_hex"]): item for item in attempts
+    }
+    return ledger, {
+        "attempts": attempts,
+        "attempt_by_identity": attempt_by_identity,
+        "events": parsed_events,
+        "coverage_start_ns": start_ns,
+        "coverage_end_ns": end_ns,
+        "matrix": matrix,
+    }
 
 
 def inspect_untrusted_attempt_ledger(raw: bytes, *, qualification_matrix_raw: bytes) -> dict[str, Any]:
@@ -444,13 +461,20 @@ def validate_attempt_result_ledger_projection_v2(
     except AttemptResultV2Error as error:
         raise AttemptLedgerV1Error(f"attempt result is not an admissible unresolved V2 diagnostic: {error}") from error
     ledger, parsed = _inspect(ledger_raw, qualification_matrix_raw)
+    _validate_attempt_projection(attempt_result, ledger, parsed)
+
+
+def _validate_attempt_projection(
+    attempt_result: dict[str, Any],
+    ledger: dict[str, Any],
+    parsed: dict[str, Any],
+) -> dict[str, Any]:
     _require(attempt_result["scope_id"] == ledger["scope_id"],
              "attempt result scope differs from ledger scope")
-    candidates = [item for item in parsed["attempts"]
-                  if item["attempt_id"] == attempt_result["attempt_id"]
-                  and item["nonce_hex"] == attempt_result["nonce_hex"]]
-    _require(len(candidates) == 1, "attempt result does not identify exactly one ledger attempt")
-    attempt = candidates[0]
+    attempt = parsed["attempt_by_identity"].get(
+        (attempt_result["attempt_id"], attempt_result["nonce_hex"]),
+    )
+    _require(attempt is not None, "attempt result does not identify exactly one ledger attempt")
     for field in ("case_id", "qualification_row_sha256"):
         _require(attempt_result[field] == attempt[field],
                  f"attempt result {field} differs from its ledger registration")
@@ -469,10 +493,108 @@ def validate_attempt_result_ledger_projection_v2(
         if status == "not_run":
             _require(ref is None,
                      f"attempt result {stage} not_run status conflicts with a ledger stage_receipt ref")
+    return attempt
+
+
+def build_untrusted_attempt_aggregate_v2(
+    qualification_matrix_raw: bytes,
+    ledger_raw: bytes,
+    *,
+    attempt_ledger_ref: Any,
+    attempt_results: Any,
+    attempt_ledger_attestation_ref: Any = None,
+) -> dict[str, Any]:
+    """Build the exact V2 aggregate shape, conservatively unresolved and untrusted.
+
+    It requires one unresolved per-attempt diagnostic for every registration
+    observed in the supplied ledger, preserves retries and all 15 matrix rows,
+    and never infers missing. The ledger ref is checked against supplied bytes,
+    not resolved through a trusted descriptor registry. Non-null attestations
+    are rejected until the active supervisor-key trust verifier exists.
+    """
+    _require(attempt_ledger_attestation_ref is None,
+             "non-null ledger attestations require an active supervisor trust verifier")
+    ledger, parsed = _inspect(ledger_raw, qualification_matrix_raw)
+    _reference(attempt_ledger_ref, expected_stage=None, label="attempt_ledger_ref")
+    _require(attempt_ledger_ref["stage"] == "runtime"
+             and attempt_ledger_ref["role"] == "attempt_ledger",
+             "attempt_ledger_ref must target the fixed runtime/attempt_ledger role")
+    _require(attempt_ledger_ref["bytes"] == len(ledger_raw)
+             and attempt_ledger_ref["sha256"] == sha256_bytes(ledger_raw),
+             "attempt_ledger_ref byte count or raw SHA differs from the supplied ledger")
+    _require(type(attempt_results) is list,
+             "attempt_results must be a builtin list containing every observed ledger attempt")
+
+    ledger_by_identity = parsed["attempt_by_identity"]
+    result_by_identity: dict[tuple[str, str], tuple[int, dict[str, Any]]] = {}
+    seen_attempt_ids: set[str] = set()
+    seen_nonces: set[str] = set()
+    for result in attempt_results:
+        try:
+            validate_untrusted_attempt_result_v2(result)
+        except AttemptResultV2Error as error:
+            raise AttemptLedgerV1Error(
+                f"aggregate attempt is not an admissible unresolved V2 diagnostic: {error}"
+            ) from error
+        identity = (result["attempt_id"], result["nonce_hex"])
+        _require(identity in ledger_by_identity,
+                 "aggregate contains an attempt not registered in the supplied ledger")
+        _require(result["attempt_id"] not in seen_attempt_ids and result["nonce_hex"] not in seen_nonces,
+                 "aggregate repeats an attempt ID or nonce")
+        seen_attempt_ids.add(result["attempt_id"])
+        seen_nonces.add(result["nonce_hex"])
+        ledger_attempt = _validate_attempt_projection(result, ledger, parsed)
+        result_by_identity[identity] = (ledger_attempt["registration_seq"], result)
+    _require(set(result_by_identity) == set(ledger_by_identity),
+             "aggregate attempt records do not preserve the complete observed ledger registration inventory")
+
+    ordered_results = sorted(result_by_identity.values(), key=lambda item: item[0])
+    results_by_case: dict[str, list[dict[str, Any]]] = {
+        row["case_id"]: [] for row in parsed["matrix"]["rows"]
+    }
+    attempt_counts = {
+        "not_started": 0, "passed": 0, "failed": 0, "incomplete": 0,
+        "timeout": 0, "oom": 0, "signaled": 0, "unresolved": 0,
+    }
+    for _registration_seq, result in ordered_results:
+        results_by_case[result["case_id"]].append(copy.deepcopy(result))
+        attempt_counts[result["attempt_outcome"]] += 1
+
+    case_rows = [
+        {
+            "case_id": row["case_id"],
+            "qualification_row_sha256": row["qualification_row_sha256"],
+            "case_outcome": "unresolved",
+            "qualifying_attempt_id": None,
+            "attempts": results_by_case[row["case_id"]],
+        }
+        for row in parsed["matrix"]["rows"]
+    ]
+    aggregate = {
+        "schema": AGGREGATE_SCHEMA,
+        "scope_id": SCOPE_ID,
+        "qualification_matrix_raw_sha256": parsed["matrix"]["matrix_raw_sha256"],
+        "attempt_ledger_ref": copy.deepcopy(attempt_ledger_ref),
+        "attempt_ledger_raw_sha256": sha256_bytes(ledger_raw),
+        "attempt_ledger_attestation_ref": None,
+        "expected_case_count": 15,
+        "case_rows": case_rows,
+        "case_outcome_counts": {"passed": 0, "failed": 0, "missing": 0, "unresolved": 15},
+        "attempt_outcome_counts": attempt_counts,
+        "aggregate_outcome": "accounting_unresolved",
+        "attempt_ledger_complete": False,
+        "qualification_adjudicated": False,
+        "T1_numerical": False,
+        "qualification_credit": 0,
+    }
+    _require(set(aggregate) == AGGREGATE_FIELDS,
+             "internal aggregate projection no longer matches the exact V2 field set")
+    return aggregate
 
 
 __all__ = [
-    "AttemptLedgerV1Error", "DIAGNOSTIC_SCHEMA", "LEDGER_SCHEMA",
+    "AGGREGATE_FIELDS", "AGGREGATE_SCHEMA", "AttemptLedgerV1Error", "DIAGNOSTIC_SCHEMA", "LEDGER_SCHEMA",
+    "build_untrusted_attempt_aggregate_v2",
     "inspect_untrusted_attempt_ledger", "inspect_untrusted_qualification_matrix",
     "validate_attempt_result_ledger_projection_v2",
 ]
