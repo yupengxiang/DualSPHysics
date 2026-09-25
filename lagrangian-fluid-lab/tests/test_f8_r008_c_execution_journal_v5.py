@@ -1,6 +1,8 @@
 """Synthetic-only tests for the non-authorizing V5 journal shape parser."""
+import hashlib
 import json
 import math
+import subprocess
 import struct
 
 import pytest
@@ -13,6 +15,7 @@ from scripts.f8_r008_c_execution_journal_v5 import (
     inspect_untrusted_v5_journal,
     inspect_untrusted_v5_journal_with_source_callgraph,
     inspect_untrusted_v5_source_callgraph,
+    inspect_untrusted_v5_source_callgraph_against_clean_git_head,
 )
 
 
@@ -361,6 +364,62 @@ def test_source_callgraph_rejects_runtime_identity_copy_mismatch_and_bool_input_
     }
     with pytest.raises(JournalV5Error, match="builtin integer"):
         inspect_untrusted_v5_source_callgraph(_source_callgraph(instances=[instance]))
+
+
+def test_source_callgraph_fragment_raw_hash_is_rechecked_against_clean_git_head(tmp_path):
+    repo = tmp_path / "repo"
+    source_path = repo / "src" / "source" / "main.cpp"
+    source_path.parent.mkdir(parents=True)
+    source_bytes = b"int main() { return 0; }\n"
+    source_path.write_bytes(source_bytes)
+    subprocess.run(
+        ["git", "init", "--quiet", "--initial-branch=main", str(repo)],
+        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+    for key, value in (("user.name", "synthetic"), ("user.email", "synthetic@example.invalid")):
+        subprocess.run(
+            ["git", "-C", str(repo), "config", key, value],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        )
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "src/source/main.cpp"],
+        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "--quiet", "-m", "synthetic source snapshot"],
+        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+
+    fragment = {
+        "function_id": "main.dispatch",
+        "source_file_object_id": "source.main_cpp",
+        "byte_start": 0,
+        "byte_end": len(source_bytes),
+        "fragment_raw_sha256": hashlib.sha256(source_bytes).hexdigest(),
+        "normalized_ast_sha256": "d" * 64,
+        "ordered_call_edges": [],
+    }
+    graph = _source_callgraph(fragments=[fragment])
+    result = inspect_untrusted_v5_source_callgraph_against_clean_git_head(graph, repo)
+    assert result["status"] == "untrusted_v5_source_fragment_bytes_match_clean_git_head"
+    assert result["source_fragment_raw_hashes_match_clean_git_head"] is True
+    assert result["source_function_definition_ranges_verified"] is False
+    assert result["source_fragments_reparsed_from_source"] is False
+    assert result["source_tree_sha256_matched_build_attestation"] is False
+    assert result["source_callgraph_verified"] is False
+    assert result["gate_state"] == "open"
+
+    wrong_fragment = {**fragment, "fragment_raw_sha256": "a" * 64}
+    mismatch = inspect_untrusted_v5_source_callgraph_against_clean_git_head(
+        _source_callgraph(fragments=[wrong_fragment]), repo,
+    )
+    assert mismatch["status"] == "untrusted_v5_source_fragment_bytes_mismatch"
+    assert mismatch["source_fragment_mismatch_function_ids"] == ["main.dispatch"]
+    assert mismatch["gate_state"] == "open"
+
+    source_path.write_bytes(b"int main() { return 1; }\n")
+    with pytest.raises(JournalV5Error, match="clean Git worktree"):
+        inspect_untrusted_v5_source_callgraph_against_clean_git_head(graph, repo)
 
 
 def test_main_callgraph_schedule_matches_observed_guard_but_never_authorizes():
