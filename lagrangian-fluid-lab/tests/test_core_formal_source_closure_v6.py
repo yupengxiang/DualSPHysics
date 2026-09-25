@@ -38,11 +38,13 @@ def test_v6_rehash_mismatch_remains_fail_closed_and_planning_only() -> None:
         "scripts/core_cfd_dataset.py", "scripts/core_contract.py",
         "scripts/core_dataset.py", "scripts/core_evaluation.py",
         "scripts/core_formal_planner.py", "scripts/core_learning.py",
-        "scripts/core_models.py"
+        "scripts/core_models.py", "scripts/core_strict_json.py"
     ]
     assert closure["schema"] == "core.formal_source_closure.v2"
     assert closure["namespace"] == "core-formal-release-candidate-v6"
-    assert closure["required_files"] == list(REQUIRED_CODE_FILES)
+    assert closure["required_files"] == [row["relative_path"] for row in closure["files"]]
+    assert "scripts/core_strict_json.py" not in closure["required_files"]
+    assert "scripts/core_strict_json.py" in REQUIRED_CODE_FILES
     assert closure["formal_release"] is False
     assert closure["formal_training_allowed"] is False
     assert closure["formal_job_count"] == 0

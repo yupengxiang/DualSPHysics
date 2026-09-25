@@ -32,6 +32,9 @@ from scripts.core_contract import (FiniteGeometry, KnownInputs, PrescribedContro
 from scripts.core_dataset import (COMPACT_SCHEMA, SCHEMA as DATASET_SCHEMA,
                                   CoreDataset, known_inputs_from_dict,
                                   sha256_file, validate_manifest)
+from scripts.core_strict_json import (absolute_path_without_following_leaf,
+                                      read_bounded_raw_json, sha256_bytes,
+                                      strict_json_object)
 
 
 SCHEMA = "core.cfd.dataset.v1"
@@ -61,26 +64,35 @@ def _digest(value):
 
 def _read_manifest(manifest):
     if isinstance(manifest, (str, Path)):
-        path = Path(manifest).expanduser().resolve()
-        return json.loads(path.read_text()), path
+        path = absolute_path_without_following_leaf(manifest)
+        raw = read_bounded_raw_json(path, label="CFD dataset manifest")
+        return strict_json_object(raw, label="CFD dataset manifest"), path, sha256_bytes(raw)
     if not isinstance(manifest, dict):
         raise ValueError("CFD manifest must be a mapping or JSON path")
-    return manifest, None
+    return manifest, None, None
 
 
-def _resolve_path(value, data_root, *, source_parent=None, must_exist=False):
+def _resolve_path(value, data_root, *, source_parent=None, must_exist=False,
+                  no_follow_leaf=False):
     """Resolve a source path and return a portable path relative to data_root."""
     if not isinstance(value, (str, Path)):
         raise ValueError("CFD asset path must be a string")
     candidate = Path(value).expanduser()
     root = Path(data_root).expanduser().resolve()
+    def normalize(path):
+        if no_follow_leaf:
+            return absolute_path_without_following_leaf(path)
+        return path.resolve()
+
     if candidate.is_absolute():
-        target = candidate.resolve()
+        target = normalize(candidate)
     else:
-        target = (root / candidate).resolve()
-        if not target.exists() and source_parent is not None:
-            alternate = (Path(source_parent) / candidate).resolve()
-            if alternate.exists():
+        target = normalize(root / candidate)
+        if (not target.exists()
+                and not (no_follow_leaf and target.is_symlink())
+                and source_parent is not None):
+            alternate = normalize(Path(source_parent) / candidate)
+            if alternate.exists() or (no_follow_leaf and alternate.is_symlink()):
                 target = alternate
     try:
         relative = target.relative_to(root)
@@ -507,8 +519,10 @@ def _load_prepared(row, data_root, *, source_parent=None):
                  row.get("prepared_json") or row.get("source_prepared"))
     if reference is None:
         return None
-    _, path = _resolve_path(reference, data_root, source_parent=source_parent, must_exist=True)
-    return json.loads(path.read_text())
+    _, path = _resolve_path(reference, data_root, source_parent=source_parent,
+                            must_exist=True, no_follow_leaf=True)
+    raw = read_bounded_raw_json(path, label="prepared CFD record")
+    return strict_json_object(raw, label="prepared CFD record")
 
 
 def _horizon(config):
@@ -772,7 +786,7 @@ def _split(row, config, *, source_schema, family=None):
 
 def adapt_manifest(manifest, data_root, *, require_existing=True):
     """Return a validated ``core.dataset.v1`` manifest for CFD cases."""
-    payload, source_path = _read_manifest(manifest)
+    payload, source_path, source_raw_sha256 = _read_manifest(manifest)
     schema = payload.get("schema")
     if schema in {DATASET_SCHEMA, COMPACT_SCHEMA}:
         validate_manifest(payload)
@@ -797,7 +811,8 @@ def adapt_manifest(manifest, data_root, *, require_existing=True):
         "dataset_id": payload.get("dataset_id", f"{schema}:core"),
         "formal_release": bool(payload.get("formal_release", False)),
         "source_schema": schema,
-        "source_manifest_sha256": (sha256_file(source_path) if source_path is not None else _digest(payload)),
+        "source_manifest_sha256": (
+            source_raw_sha256 if source_path is not None else _digest(payload)),
         "source_qualification_claim": payload.get("qualification_claim", "none"),
         "cases": [],
     }
@@ -886,7 +901,7 @@ class CoreCFDDataset:
         if data_root is None:
             raise ValueError("CFD dataset requires explicit data_root")
         self.data_root = Path(data_root).expanduser().resolve()
-        self.source_manifest, self.source_path = _read_manifest(manifest)
+        self.source_manifest, self.source_path, self.source_manifest_sha256 = _read_manifest(manifest)
         self.canonical_manifest = adapt_manifest(self.source_manifest, self.data_root,
                                                  require_existing=require_existing)
         self._dataset = CoreDataset(self.canonical_manifest, self.data_root,
@@ -911,7 +926,7 @@ CFDDataset = CoreCFDDataset
 
 def open_dataset(manifest, data_root=None, **kwargs):
     """Open a native CoreDataset or a validated F1/F2/F4/F7 source collection."""
-    payload, _ = _read_manifest(manifest)
+    payload, _, _ = _read_manifest(manifest)
     if payload.get("schema") in SOURCE_SCHEMAS and payload.get("schema") not in {DATASET_SCHEMA, COMPACT_SCHEMA}:
         return CoreCFDDataset(manifest, data_root, **kwargs)
     return CoreDataset(manifest, data_root, **kwargs)

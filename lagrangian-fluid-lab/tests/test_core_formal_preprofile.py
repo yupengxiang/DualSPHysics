@@ -8,6 +8,12 @@ from scripts.core_runtime import input_inventory, validate_spec
 
 
 ROOT = Path(__file__).resolve().parents[1]
+HISTORICAL_REQUIRED_CODE_FILES = (
+    "scripts/core_learning.py", "scripts/core_contract.py",
+    "scripts/core_dataset.py", "scripts/core_models.py",
+    "scripts/core_cfd_dataset.py", "scripts/core_evaluation.py",
+    "scripts/core_physics.py", "scripts/core_formal_planner.py",
+)
 PROPOSAL = ROOT / "campaigns/core-v1/learning/formal-preprofile-proposal-v1.json"
 V2_ROOT = ROOT / "campaigns/core-v1/learning/formal-preprofile-v2"
 V2_INDEX = V2_ROOT / "index.json"
@@ -119,7 +125,8 @@ def test_v2_preprofile_is_submit_ready_but_formal_closed():
         "core.paired_initialization.common_encoder_head.v1"
     )
     assert index["training_protocol"]["test_included"] is False
-    assert index["planner_closure"]["required_code_files"] == list(REQUIRED_CODE_FILES)
+    assert index["planner_closure"]["required_code_files"] == list(HISTORICAL_REQUIRED_CODE_FILES)
+    assert "scripts/core_strict_json.py" in REQUIRED_CODE_FILES
     assert index["planner_closure"]["sha256"] == hashlib.sha256(
         _canonical([
             {"relative_path": item["relative_path"], "sha256": item["sha256"]}
@@ -171,7 +178,7 @@ def test_v2_preprofile_is_submit_ready_but_formal_closed():
         )
         assert spec["bindings"]["manifest"]["sha256"] == index["dataset"]["manifest"]["sha256"]
         assert spec["bindings"]["code_closure_sha256"] == index["planner_closure"]["sha256"]
-        assert spec["source_snapshot_policy"]["required_files"] == list(REQUIRED_CODE_FILES)
+        assert spec["source_snapshot_policy"]["required_files"] == list(HISTORICAL_REQUIRED_CODE_FILES)
         profile_case = spec["bindings"]["profile_case"]
         assert profile_case["case_id"] == "F3_DEV_06_a0p940625"
         assert len(profile_case["hdf5"]["sha256"]) == 64
@@ -201,7 +208,7 @@ def test_v3_evidence_preprofile_binds_current_closure_and_preserves_v2_protocol(
     assert index["training_protocol"]["checkpoint_evidence_frontier"] == (
         "actual checkpoint update, not requested terminal update"
     )
-    assert index["planner_closure"]["required_code_files"] == list(REQUIRED_CODE_FILES)
+    assert index["planner_closure"]["required_code_files"] == list(HISTORICAL_REQUIRED_CODE_FILES)
     expected_closure = hashlib.sha256(_canonical([
         {"relative_path": item["relative_path"], "sha256": item["sha256"]}
         for item in index["planner_closure"]["files"]
@@ -236,7 +243,7 @@ def test_v3_evidence_preprofile_binds_current_closure_and_preserves_v2_protocol(
         assert spec["bindings"]["transfer"] == old["bindings"]["transfer"]
         assert spec["bindings"]["train_split"]["case_count"] == 16
         assert spec["bindings"]["code_closure_sha256"] == index["planner_closure"]["sha256"]
-        assert spec["source_snapshot_policy"]["required_files"] == list(REQUIRED_CODE_FILES)
+        assert spec["source_snapshot_policy"]["required_files"] == list(HISTORICAL_REQUIRED_CODE_FILES)
         assert spec["source_snapshot_policy"]["evidence_audit_sha256"] == _sha(auditor)
         assert spec["evidence_auditor"] == "scripts/core_preprofile_collector.py"
 

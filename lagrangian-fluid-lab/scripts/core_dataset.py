@@ -19,11 +19,15 @@ import numpy as np
 from scripts.core_contract import (FiniteGeometry, KnownInputs, PrescribedControl,
                                    PrescribedGeometry,
                                    State, StepPrediction, contract_hash, updater_oracle)
+from scripts.core_strict_json import (MAX_JSON_INPUT_BYTES,
+                                      absolute_path_without_following_leaf,
+                                      read_bounded_raw_json, strict_json_object)
 
 SCHEMA = "core.dataset.v1"
 COMPACT_SCHEMA = "core.dataset.v2"
 SUPPORTED_SCHEMAS = {SCHEMA, COMPACT_SCHEMA}
 SPLITS = {"train", "validation", "test", "id_test", "ood_test", "qualification"}
+MAX_DATASET_MANIFEST_BYTES = MAX_JSON_INPUT_BYTES
 
 
 def sha256_file(path):
@@ -493,8 +497,13 @@ def new_scope_split(parameter_min, parameter_max):
 class CoreDataset:
     def __init__(self, manifest, data_root=None, *, max_open_files=4, strict=True):
         if isinstance(manifest, (str, Path)):
-            path = Path(manifest).expanduser().resolve()
-            payload = json.loads(path.read_text())
+            path = absolute_path_without_following_leaf(manifest)
+            raw = read_bounded_raw_json(
+                path, max_bytes=MAX_DATASET_MANIFEST_BYTES,
+                label="Core dataset manifest")
+            payload = strict_json_object(
+                raw, max_bytes=MAX_DATASET_MANIFEST_BYTES,
+                label="Core dataset manifest")
             root = Path(data_root).expanduser().resolve() if data_root is not None else path.parent
         else:
             if not isinstance(manifest, dict):

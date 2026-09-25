@@ -211,6 +211,37 @@ def test_formal_manifest_flag_never_qualifies_legacy_mapping_or_path_reader(tmp_
         assert data.formal_eligible is False
 
 
+@pytest.mark.parametrize("raw", [
+    b'{"schema":"core.dataset.v1","schema":"core.dataset.v2","cases":[]}',
+    b'{"schema":"core.dataset.v1","cases":[],"marker":NaN}',
+    b'{"schema":"core.dataset.v1","cases":[],"marker":1e400}',
+    b'{"schema":"core.dataset.v1","cases":[],"marker":' + b"9" * 129 + b"}",
+    b'{"schema":"core.dataset.v1","cases":[],"label":"\xff"}',
+])
+def test_path_backed_dataset_manifest_uses_strict_raw_json(tmp_path, raw):
+    manifest_path = tmp_path / "strict-dataset.json"
+    manifest_path.write_bytes(raw)
+    with pytest.raises(ValueError):
+        CoreDataset(manifest_path, tmp_path)
+
+
+def test_path_backed_dataset_manifest_enforces_byte_cap(tmp_path, monkeypatch):
+    monkeypatch.setattr(core_dataset_module, "MAX_DATASET_MANIFEST_BYTES", 32)
+    manifest_path = tmp_path / "oversized-dataset.json"
+    manifest_path.write_bytes(b"{" + b" " * 32 + b"}")
+    with pytest.raises(ValueError, match="byte limit"):
+        CoreDataset(manifest_path, tmp_path)
+
+
+def test_path_backed_dataset_manifest_rejects_symlink(tmp_path):
+    target = tmp_path / "dataset-target.json"
+    target.write_text('{"schema":"core.dataset.v1","cases":[]}')
+    link = tmp_path / "dataset-link.json"
+    link.symlink_to(target)
+    with pytest.raises(ValueError, match="symlink"):
+        CoreDataset(link, tmp_path)
+
+
 def test_reader_rejects_same_size_hdf5_tamper_on_first_open(tmp_path):
     manifest = tiny_manifest(tmp_path)
     path = tmp_path / "data.h5"

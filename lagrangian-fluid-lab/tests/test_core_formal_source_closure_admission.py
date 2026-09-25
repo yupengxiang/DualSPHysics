@@ -34,7 +34,7 @@ def test_v5_closure_is_preserved_and_fails_closed_against_current_sources() -> N
         "scripts/core_cfd_dataset.py", "scripts/core_contract.py",
         "scripts/core_dataset.py", "scripts/core_evaluation.py",
         "scripts/core_formal_planner.py", "scripts/core_learning.py",
-        "scripts/core_models.py"
+        "scripts/core_models.py", "scripts/core_strict_json.py"
     ]
     assert closure["closure_version"] == "core-formal-release-candidate-v5"
     assert closure["formal_release"] is False
@@ -42,7 +42,11 @@ def test_v5_closure_is_preserved_and_fails_closed_against_current_sources() -> N
     assert closure["planning_allowed"] is True
     assert closure["formal_training_allowed"] is False
     assert closure["formal_job_count"] == 0
-    assert [row["relative_path"] for row in closure["files"]] == list(REQUIRED_CODE_FILES)
+    declared_files = [row["relative_path"] for row in closure["files"]]
+    assert declared_files == closure["required_files"]
+    assert "scripts/core_strict_json.py" not in declared_files
+    assert "scripts/core_strict_json.py" in REQUIRED_CODE_FILES
+    assert result["checks"]["required_file_set"] is False
 
     assert closure["source_snapshot_policy"] == "fresh_code_closure_at_formal_admission"
     assert closure["generator"]["path"] == "scripts/core_formal_source_closure_admission.py"

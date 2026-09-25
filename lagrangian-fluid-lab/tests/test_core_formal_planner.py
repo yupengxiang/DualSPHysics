@@ -69,6 +69,16 @@ def test_complete_metadata_manifest_cannot_authorize_nine_formal_jobs(tmp_path):
     assert not (tmp_path / "specs").exists()
 
 
+def test_planner_script_entrypoint_imports_shared_strict_json_module():
+    completed = subprocess.run(
+        [sys.executable, "scripts/core_formal_planner.py", "--help"],
+        cwd=Path(__file__).parents[1], capture_output=True, text=True,
+        timeout=5, check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert "{plan}" in completed.stdout
+
+
 def test_complete_in_memory_mapping_is_also_diagnostic_only(tmp_path):
     _, payload = _manifest(tmp_path)
     report = inspect_inputs(payload)

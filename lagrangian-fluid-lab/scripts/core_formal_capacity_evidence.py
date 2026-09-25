@@ -23,7 +23,13 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import sys
 from typing import Any, Mapping, Sequence
+
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from scripts.core_formal_planner import REQUIRED_CODE_FILES
 
 
 SCHEMA = "core.formal_capacity_evidence.v1"
@@ -36,20 +42,6 @@ MODEL_VERSION = "core.dual_increment.v1"
 FORMAL_UPDATES = 32000
 MILESTONES = (8000, 16000, 24000, 32000)
 GRAPH_MODELS = {"graph_raw", "graph_residual"}
-
-# This is the learning closure used by the formal planner.  The capacity
-# adapter itself is evidence collection code, so it is intentionally outside
-# the closure whose hash identifies the training implementation.
-REQUIRED_CODE_FILES = (
-    "scripts/core_learning.py",
-    "scripts/core_contract.py",
-    "scripts/core_dataset.py",
-    "scripts/core_models.py",
-    "scripts/core_cfd_dataset.py",
-    "scripts/core_evaluation.py",
-    "scripts/core_physics.py",
-    "scripts/core_formal_planner.py",
-)
 
 
 def canonical(value: Any) -> str:

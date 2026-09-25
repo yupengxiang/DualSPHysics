@@ -16,15 +16,22 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter, defaultdict
-import errno
 import hashlib
 import json
 import math
 import os
 from pathlib import Path
-import stat
 import sys
 from typing import Any, Iterable, Mapping, Sequence
+
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from scripts.core_strict_json import (
+    absolute_path_without_following_leaf,
+    read_bounded_raw_json as _shared_read_bounded_raw_json,
+    strict_json_object as _shared_strict_json_object,
+)
 
 
 PLANNER_SCHEMA = "core.formal_training_plan.v1"
@@ -54,6 +61,7 @@ REQUIRED_CODE_FILES = (
     "scripts/core_learning.py",
     "scripts/core_contract.py",
     "scripts/core_dataset.py",
+    "scripts/core_strict_json.py",
     "scripts/core_models.py",
     "scripts/core_cfd_dataset.py",
     "scripts/core_evaluation.py",
@@ -97,92 +105,16 @@ def _json_hash(value: Any) -> str:
     return sha256_bytes(canonical(value).encode())
 
 
-def _reject_duplicate_json_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
-    value: dict[str, Any] = {}
-    for key, item in pairs:
-        if key in value:
-            raise ValueError(f"duplicate JSON object key: {key}")
-        value[key] = item
-    return value
-
-
-def _parse_finite_json_float(token: str) -> float:
-    value = float(token)
-    if not math.isfinite(value):
-        raise ValueError("JSON number is outside the finite float domain")
-    return value
-
-
-def _reject_nonfinite_json_constant(token: str) -> None:
-    raise ValueError(f"non-finite JSON constant is forbidden: {token}")
-
-
-def _parse_bounded_json_int(token: str) -> int:
-    digits = token[1:] if token.startswith("-") else token
-    if len(digits) > 128:
-        raise ValueError("JSON integer exceeds the planner digit limit")
-    return int(token)
-
-
 def _read_bounded_raw_json(path: Path) -> bytes:
-    """Read one regular JSON file with a strict byte and mutation bound."""
-    nofollow = getattr(os, "O_NOFOLLOW", None)
-    if nofollow is None:
-        raise ValueError("platform cannot safely open planner JSON without following symlinks")
-    flags = os.O_RDONLY | os.O_NONBLOCK | nofollow | getattr(os, "O_CLOEXEC", 0)
-    try:
-        descriptor = os.open(path, flags)
-    except OSError as error:
-        if error.errno == errno.ELOOP:
-            raise ValueError("JSON input symlink is forbidden") from error
-        raise
-    with os.fdopen(descriptor, "rb") as stream:
-        before = os.fstat(stream.fileno())
-        if not stat.S_ISREG(before.st_mode):
-            raise ValueError("JSON input is not a regular file")
-        if before.st_size > MAX_PLANNER_JSON_BYTES:
-            raise ValueError("JSON input exceeds the planner byte limit")
-        raw = stream.read(MAX_PLANNER_JSON_BYTES + 1)
-        after = os.fstat(stream.fileno())
-    before_identity = (
-        before.st_dev, before.st_ino, before.st_size,
-        before.st_mtime_ns, before.st_ctime_ns,
-    )
-    after_identity = (
-        after.st_dev, after.st_ino, after.st_size,
-        after.st_mtime_ns, after.st_ctime_ns,
-    )
-    if len(raw) > MAX_PLANNER_JSON_BYTES:
-        raise ValueError("JSON input exceeds the planner byte limit")
-    if len(raw) != before.st_size or before_identity != after_identity:
-        raise ValueError("JSON input changed during bounded read")
-    return raw
+    """Read one stable regular planner JSON file without following symlinks."""
+    return _shared_read_bounded_raw_json(
+        path, max_bytes=MAX_PLANNER_JSON_BYTES, label="planner JSON input")
 
 
 def _strict_json_object(raw: bytes, *, label: str) -> dict[str, Any]:
     """Parse path-backed planner JSON without duplicate or non-finite values."""
-    if type(raw) is not bytes:
-        raise ValueError(f"{label} must be exact bytes")
-    if len(raw) > MAX_PLANNER_JSON_BYTES:
-        raise ValueError(f"{label} exceeds the planner byte limit")
-    try:
-        text = raw.decode("utf-8", errors="strict")
-    except UnicodeDecodeError as error:
-        raise ValueError(f"{label} is not strict UTF-8") from error
-    try:
-        value = json.loads(
-            text,
-            strict=True,
-            object_pairs_hook=_reject_duplicate_json_pairs,
-            parse_constant=_reject_nonfinite_json_constant,
-            parse_float=_parse_finite_json_float,
-            parse_int=_parse_bounded_json_int,
-        )
-    except (json.JSONDecodeError, ValueError, OverflowError, RecursionError) as error:
-        raise ValueError(f"{label} is not valid strict JSON: {error}") from error
-    if type(value) is not dict:
-        raise ValueError(f"{label} top level must be a JSON object")
-    return value
+    return _shared_strict_json_object(
+        raw, label=label, max_bytes=MAX_PLANNER_JSON_BYTES)
 
 
 def _load_json_object(path: Path, *, label: str) -> dict[str, Any]:
@@ -197,8 +129,7 @@ def _resolve_path(value: str | Path, *, base: Path | None = None,
     def normalize(path: Path) -> Path:
         if not no_follow_leaf:
             return path.resolve()
-        absolute = Path(os.path.abspath(path))
-        return absolute.parent.resolve() / absolute.name
+        return absolute_path_without_following_leaf(path)
 
     if candidate.is_absolute():
         return normalize(candidate)

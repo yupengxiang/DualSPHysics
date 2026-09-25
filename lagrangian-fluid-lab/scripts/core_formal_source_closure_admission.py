@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Materialize and verify the proposal-only Core formal source closure v5.
 
-This is a root-review artifact, not a release switch.  It snapshots the eight
-planner files, binds the snapshot to the current readiness and launch audits,
+This is a root-review artifact, not a release switch.  It snapshots the
+planner's declared source files, binds the snapshot to readiness and launch audits,
 and records why formal training remains blocked.  The verifier re-hashes every
 required file from the supplied data root; it does not trust hashes copied
 from the JSON artifact.  No planner job, optimizer, GPU, solver, registry, or
@@ -86,7 +86,7 @@ def _generator_reference(root: Path) -> dict[str, Any]:
 
 def materialize_source_closure(*, data_root: str | Path,
                                code_root: str | Path | None = None) -> dict[str, Any]:
-    """Compute the eight-file closure from the current filesystem."""
+    """Compute the declared planner-file closure from the current filesystem."""
     root = Path(data_root).expanduser().resolve()
     code = Path(code_root).expanduser().resolve() if code_root is not None else root
     files: list[dict[str, Any]] = []

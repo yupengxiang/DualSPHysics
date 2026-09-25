@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Audit and propose a fresh Core formal source closure without admitting it.
 
-The current eight-file closure is recomputed from disk and compared with a
+The current required source closure is recomputed from disk and compared with a
 previous formal-release snapshot.  The resulting JSON is a proposal-only
 observation: it records the exact current hashes and the checks still needed
 before a planner may admit a nine-run matrix.  It never changes the source
@@ -198,7 +198,7 @@ def build_audit(*, data_root: str | Path, historical_snapshot: str | Path,
             "ledger_written": False,
         },
         "admission_next_step": (
-            "root reviews the exact current eight-file hashes, materializes/adopts the fresh closure, "
+            "root reviews the exact current required-file hashes, materializes/adopts the fresh closure, "
             "rebinds formal readiness, and only then re-runs core_formal_planner; no training is authorized by this audit"
         ),
     }

@@ -21,7 +21,13 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import sys
 from typing import Any, Iterable, Mapping, Sequence
+
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from scripts.core_formal_planner import REQUIRED_CODE_FILES
 
 
 SCHEMA = "core.formal_admission_audit.v1"
@@ -41,20 +47,6 @@ ADAPTER_SCHEMAS = {
     "core.f3.legacy_hard_audit_adapter.v1",
     "core.f3.structural_audit_adapter.v1",
 }
-
-# Keep this closure equal to the closure used by core_formal_planner.py.  The
-# admission auditor itself is deliberately outside the learning source
-# closure: changing an audit report must not silently change a training job.
-REQUIRED_CODE_FILES = (
-    "scripts/core_learning.py",
-    "scripts/core_contract.py",
-    "scripts/core_dataset.py",
-    "scripts/core_models.py",
-    "scripts/core_cfd_dataset.py",
-    "scripts/core_evaluation.py",
-    "scripts/core_physics.py",
-    "scripts/core_formal_planner.py",
-)
 
 
 def canonical(value: Any) -> str:
@@ -1030,7 +1022,7 @@ def audit_admission(
     if closure.get("missing_files"):
         blockers.append(_blocker(
             "SOURCE_CLOSURE_INCOMPLETE",
-            "the current eight-file learning source closure is incomplete",
+            "the current required learning source closure is incomplete",
             observed=closure["missing_files"], required=list(REQUIRED_CODE_FILES)))
     if closure.get("preprofile") is not None and not closure.get("preprofile_source_closure_match"):
         blockers.append(_blocker(

@@ -34,6 +34,7 @@ if __package__ in (None, ""):
 
 from scripts.core_contract import commit
 from scripts.core_dataset import CoreDataset
+from scripts.core_strict_json import absolute_path_without_following_leaf
 from scripts.core_physics import frame_physics
 from scripts.core_models import (MODEL_KINDS, AnalyticPredictor, Normalization,
                                   INITIALIZATION_VERSION, DualIncrementModel,
@@ -2463,7 +2464,7 @@ def _manifest_path(manifest, data_root):
     path = Path(manifest).expanduser()
     if not path.is_absolute():
         path = Path(data_root).expanduser() / path
-    return path.resolve()
+    return absolute_path_without_following_leaf(path)
 
 
 def _dataset(args):

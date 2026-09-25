@@ -5,6 +5,7 @@ import h5py
 import numpy as np
 import pytest
 
+import scripts.core_cfd_dataset as cfd_dataset_module
 from scripts.core_cfd_dataset import (CoreCFDDataset, adapt_manifest,
                                       geometry_from_cfd_config, known_inputs_from_cfd_config,
                                       open_dataset)
@@ -154,6 +155,57 @@ def test_cfd_adapter_accepts_absolute_path_under_root_and_cli_factory(tmp_path):
     with open_dataset(source_path, tmp_path) as data:
         assert data.case_ids("validation") == ("f4",)
         assert data.known_inputs("f4").geometry.triangles.shape[0] == 10
+
+
+def test_path_backed_cfd_manifest_rejects_duplicate_json_keys(tmp_path):
+    source_path = tmp_path / "duplicate-source.json"
+    source_path.write_bytes(
+        b'{"schema":"core.cfd.dataset.v1","schema":"core.cfd.dataset.v2","cases":[]}')
+    with pytest.raises(ValueError, match="duplicate JSON object key"):
+        open_dataset(source_path, tmp_path)
+
+
+def test_path_backed_prepared_record_rejects_duplicate_json_keys(tmp_path):
+    prepared_path = tmp_path / "prepared.json"
+    prepared_path.write_bytes(b'{"config":{"stage":"production","stage":"canary"}}')
+    source = {
+        "schema": "core.cfd.dataset.v1", "family": "F4",
+        "cases": [{"case_id": "f4", "family": "F4", "split": "train",
+                   "prepared": prepared_path.name, "hdf5": "missing.h5"}],
+    }
+    with pytest.raises(ValueError, match="duplicate JSON object key"):
+        adapt_manifest(source, tmp_path)
+
+
+def test_cfd_source_manifest_hash_is_bound_to_parsed_raw_bytes(tmp_path, monkeypatch):
+    hdf5 = tmp_path / "trajectory.h5"
+    _trajectory(hdf5)
+    source = {
+        "schema": "core.cfd.dataset.v1", "dataset_id": "bound-source",
+        "cases": [{"case_id": "f1", "family": "F1", "split": "train",
+                   "prepared_record": _prepared("F1"), "hdf5": hdf5.name,
+                   "sha256": sha256_file(hdf5)}],
+    }
+    source_path = tmp_path / "source.json"
+    source_path.write_text(json.dumps(source))
+    parsed_raw = source_path.read_bytes()
+    replacement_raw = b'{"schema":"core.cfd.dataset.v1","cases":[]}'
+    read_raw = cfd_dataset_module.read_bounded_raw_json
+    replaced = False
+
+    def read_then_replace(path, **kwargs):
+        nonlocal replaced
+        raw = read_raw(path, **kwargs)
+        if Path(path) == source_path and not replaced:
+            source_path.write_bytes(replacement_raw)
+            replaced = True
+        return raw
+
+    monkeypatch.setattr(cfd_dataset_module, "read_bounded_raw_json", read_then_replace)
+    adapted = adapt_manifest(source_path, tmp_path)
+    assert replaced
+    assert source_path.read_bytes() == replacement_raw
+    assert adapted["source_manifest_sha256"] == cfd_dataset_module.sha256_bytes(parsed_raw)
 
 
 def test_static_qualification_design_cannot_be_silently_trained(tmp_path):
