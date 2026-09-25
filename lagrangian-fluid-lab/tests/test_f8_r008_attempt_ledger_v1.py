@@ -714,6 +714,19 @@ def test_case_bundle_binding_closes_each_retry_chain_against_ledger_references(t
     retry_result = _attempt_result_bound_to_ledger(
         raw, attempt_id=retry_id, nonce_hex=retry_nonce,
     )
+    scope_row = next(
+        row for row in _matrix_document()["matrix"]["rows"] if row["case_id"] == CASE_ID
+    )
+    full_native_axis = stage_v1.expected_time_axis_hex(
+        stage_v1._frozen_qualification_row(CASE_ID),
+    )
+    observation_axis = full_native_axis[
+        scope_row["observation_start_output_index"]:
+        scope_row["observation_end_output_index"] + 1
+    ]
+    for attempt_result in (first_result, retry_result):
+        attempt_result["actual_frame_ordinals"] = list(range(len(observation_axis)))
+        attempt_result["actual_time_axis_ieee754_hex"] = observation_axis
     with pytest.raises(evidence_binding_v1.AttemptEvidenceBindingError,
                        match="only for each explicitly selected attempt"):
         evidence_binding_v1.bind_untrusted_attempt_evidence_with_case_bundles_v1(
@@ -752,6 +765,9 @@ def test_case_bundle_binding_closes_each_retry_chain_against_ledger_references(t
     assert [item["attempt_outcome"] for item in attempts] == ["unresolved", "unresolved"]
     assert [item["attempt_id"] for item in checks] == [ATTEMPT_ID]
     assert all(item["provenance_chain_references_closed"] is True for item in checks)
+    assert checks[0]["frames_paired"] == len(full_native_axis) == 321
+    assert checks[0]["attempt_result_local_ordinal_origin_full_axis_index"] == 128
+    assert checks[0]["attempt_result_time_axis_matches_frozen_observation_prefix"] is True
     assert all(item["safe_decode_receipts_and_metadata_artifacts_rehashed"] is True for item in checks)
     assert bound_first["complete_b_c_d_case_bundle_check_count"] == 1
     assert bound_first["complete_b_c_d_case_bundle_inventory_count"] == 2
@@ -770,6 +786,20 @@ def test_case_bundle_binding_closes_each_retry_chain_against_ledger_references(t
         assert bound["case_rows"][1]["case_outcome"] == "unresolved"
         assert bound["T1_numerical"] is False
         assert bound["qualification_credit"] == 0
+
+    wrong_projection = copy.deepcopy(first_result)
+    wrong_projection["actual_time_axis_ieee754_hex"][0] = "0x0.0p+0"
+    with pytest.raises(evidence_binding_v1.AttemptEvidenceBindingError,
+                       match="differs from the frozen observation-window prefix"):
+        evidence_binding_v1.bind_untrusted_attempt_evidence_with_case_bundles_v1(
+            MATRIX_RAW,
+            raw,
+            attempt_ledger_ref=_ledger_ref(raw),
+            attempt_results=[wrong_projection, retry_result],
+            artifact_raw_by_ref=artifacts,
+            case_bundle_inputs_by_attempt={first_identity: bundle_inputs[first_identity]},
+            attempt_identities_to_verify=[first_identity],
+        )
 
     with pytest.raises(evidence_binding_v1.AttemptEvidenceBindingError,
                        match="resource limit"):

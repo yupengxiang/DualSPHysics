@@ -11,6 +11,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Mapping
 
+from scripts.core_strict_json import strict_json_object
 from scripts import f8_r008_attempt_ledger_v1 as ledger_v1
 from scripts import f8_r008_per_case_bundle_verifier_v1 as bundle_v1
 
@@ -175,6 +176,14 @@ def bind_untrusted_attempt_evidence_with_case_bundles_v1(
         artifact_raw_by_ref=artifact_raw_by_ref,
     )
     attempts = [attempt for row in result["case_rows"] for attempt in row["attempts"]]
+    frozen_scope = strict_json_object(
+        qualification_matrix_raw,
+        label="frozen F8 R008 qualification matrix",
+        max_bytes=ledger_v1.MAX_LEDGER_BYTES,
+    )
+    frozen_rows_by_case = {
+        row["case_id"]: row for row in frozen_scope["matrix"]["rows"]
+    }
     complete_identities = {
         (attempt["case_id"], attempt["attempt_id"], attempt["nonce_hex"])
         for attempt in attempts
@@ -298,6 +307,26 @@ def bind_untrusted_attempt_evidence_with_case_bundles_v1(
             raise AttemptEvidenceBindingError("B/C/D verifier code-review authenticity boundary changed")
         if chain.get("runtime_environment_assumption") != "caller_attested_not_independently_verified":
             raise AttemptEvidenceBindingError("B/C/D verifier runtime-authenticity boundary changed")
+        frozen_row = frozen_rows_by_case[attempt["case_id"]]
+        full_native_axis = bundle_v1.expected_time_axis_hex(
+            bundle_v1._frozen_qualification_row(attempt["case_id"]),
+        )
+        start_index = frozen_row["observation_start_output_index"]
+        end_index = frozen_row["observation_end_output_index"]
+        if (type(start_index) is not int or type(end_index) is not int
+                or not 0 <= start_index <= end_index < len(full_native_axis)):
+            raise AttemptEvidenceBindingError("frozen observation window indices exceed the verified native axis")
+        observation_axis = full_native_axis[start_index:end_index + 1]
+        if (len(observation_axis) != attempt["expected_frame_count"]
+                or chain["frames_paired"] != len(full_native_axis)):
+            raise AttemptEvidenceBindingError(
+                "verified full native axis or frozen observation-window count changed"
+            )
+        actual_time_prefix = attempt["actual_time_axis_ieee754_hex"]
+        if actual_time_prefix != observation_axis[:len(actual_time_prefix)]:
+            raise AttemptEvidenceBindingError(
+                "attempt projection time axis differs from the frozen observation-window prefix"
+            )
         for stage in STAGES:
             ref = attempt["stage_bundle_refs"][stage]
             if chain["receipt_sha256"][stage] != ref["sha256"]:
@@ -330,6 +359,8 @@ def bind_untrusted_attempt_evidence_with_case_bundles_v1(
             "receipt_sha256": chain["receipt_sha256"],
             "manifest_sha256": chain["manifest_sha256"],
             "frames_paired": chain["frames_paired"],
+            "attempt_result_local_ordinal_origin_full_axis_index": start_index,
+            "attempt_result_time_axis_matches_frozen_observation_prefix": True,
             "provenance_chain_references_closed": True,
             "attempt_result_frame_projection_crosschecked": False,
             "safe_decode_receipts_and_metadata_artifacts_rehashed": True,
