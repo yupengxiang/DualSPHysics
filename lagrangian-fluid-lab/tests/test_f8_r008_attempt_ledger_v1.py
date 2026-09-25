@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
+import test_f8_r008_per_case_bundle_verifier_v1 as bundle_fixtures
 
 from scripts.core_strict_json import read_bounded_raw_json, strict_json_object
 from scripts import f8_r008_attempt_ledger_v1 as ledger_v1
@@ -239,15 +240,39 @@ def _attempt_result() -> dict[str, object]:
     }
 
 
-def _attempt_result_bound_to_ledger(raw: bytes) -> dict[str, object]:
+def _attempt_result_bound_to_ledger(
+    raw: bytes,
+    *,
+    attempt_id: str = ATTEMPT_ID,
+    nonce_hex: str = NONCE,
+) -> dict[str, object]:
     result = _attempt_result()
     events = json.loads(raw)["events"]
+    matching_events = [event for event in events
+                       if event["attempt_id"] == attempt_id and event["nonce_hex"] == nonce_hex]
+    result["attempt_id"] = attempt_id
+    result["nonce_hex"] = nonce_hex
+    result["attempt_ledger_registration_seq"] = matching_events[0]["seq"]
+    result["attempt_ledger_event_seqs"] = [event["seq"] for event in matching_events]
     result["stage_bundle_refs"] = {
-        stage: next(event["receipt_ref"] for event in events
+        stage: next(event["receipt_ref"] for event in matching_events
                     if event["kind"] == "stage_receipt" and event["stage"] == stage)
         for stage in ledger_v1.STAGES
     }
     return result
+
+
+def _bundle_inputs(roots: dict, auth_bytes: dict, auth: dict) -> dict[str, object]:
+    return {
+        "bundle_roots": roots,
+        "trusted_authorization_bytes": auth_bytes,
+        "trusted_authorization_sha256": {
+            stage: hashlib.sha256(raw).hexdigest() for stage, raw in auth_bytes.items()
+        },
+        "expected_authorization_envelopes": auth,
+        "trusted_code_review_receipt_bytes": bundle_fixtures._trusted_code_review_receipt_bytes(),
+        "trusted_runtime_assumption": bundle_fixtures._trusted_runtime_assumption(),
+    }
 
 
 def test_structurally_closed_ledger_stays_untrusted_and_unresolved() -> None:
@@ -636,6 +661,182 @@ def test_integrated_retry_preserves_every_attempt_in_registration_order() -> Non
     assert result["case_rows"][1]["case_outcome"] == "unresolved"
     assert result["T1_numerical"] is False
     assert result["qualification_credit"] == 0
+
+
+def test_case_bundle_binding_closes_each_retry_chain_against_ledger_references(tmp_path) -> None:
+    first_identity = (CASE_ID, ATTEMPT_ID, NONCE)
+    retry_id, retry_nonce = "attempt-002", "e" * 32
+    retry_identity = (CASE_ID, retry_id, retry_nonce)
+    first_dir = tmp_path / "first"
+    retry_dir = tmp_path / "retry"
+    first_dir.mkdir()
+    retry_dir.mkdir()
+    first_roots, first_auth_bytes, first_auth, _ = bundle_fixtures._build_chain(
+        first_dir, attempt_id=ATTEMPT_ID, nonce=NONCE,
+    )
+    retry_roots, retry_auth_bytes, retry_auth, _ = bundle_fixtures._build_chain(
+        retry_dir, attempt_id=retry_id, nonce=retry_nonce,
+    )
+    bundle_inputs = {
+        first_identity: _bundle_inputs(first_roots, first_auth_bytes, first_auth),
+        retry_identity: _bundle_inputs(retry_roots, retry_auth_bytes, retry_auth),
+    }
+
+    events = _complete_event_chain()
+    retry_offset = len(events)
+    for original in _complete_event_chain():
+        retry_event = copy.deepcopy(original)
+        retry_event["seq"] += retry_offset
+        retry_event["mono_ns_hex"] = f"{retry_event['seq']:016x}"
+        retry_event["attempt_id"] = retry_id
+        retry_event["nonce_hex"] = retry_nonce
+        if "process_generation_id" in retry_event:
+            retry_event["process_generation_id"] += "-002"
+        for field in ("receipt_ref", "process_journal_ref", "terminal_ref"):
+            ref = retry_event.get(field)
+            if ref is not None:
+                ref["object_id"] += "-002"
+        events.append(retry_event)
+
+    raw, artifacts = _ledger_and_raw_objects(events, stage_receipt_status="passed")
+    for event in events:
+        if event["kind"] != "stage_receipt":
+            continue
+        identity = (event["case_id"], event["attempt_id"], event["nonce_hex"])
+        stage = event["stage"]
+        receipt_raw = (bundle_inputs[identity]["bundle_roots"][stage] / "receipt.json").read_bytes()
+        ref = event["receipt_ref"]
+        raw = _replace_artifact_raw(
+            raw, artifacts, (ref["stage"], ref["role"], ref["object_id"]), receipt_raw,
+        )
+
+    first_result = _attempt_result_bound_to_ledger(raw)
+    retry_result = _attempt_result_bound_to_ledger(
+        raw, attempt_id=retry_id, nonce_hex=retry_nonce,
+    )
+    with pytest.raises(evidence_binding_v1.AttemptEvidenceBindingError,
+                       match="only for each explicitly selected attempt"):
+        evidence_binding_v1.bind_untrusted_attempt_evidence_with_case_bundles_v1(
+            MATRIX_RAW,
+            raw,
+            attempt_ledger_ref=_ledger_ref(raw),
+            attempt_results=[first_result, retry_result],
+            artifact_raw_by_ref=artifacts,
+            case_bundle_inputs_by_attempt=bundle_inputs,
+            attempt_identities_to_verify=[first_identity],
+        )
+
+    bound_first = evidence_binding_v1.bind_untrusted_attempt_evidence_with_case_bundles_v1(
+        MATRIX_RAW,
+        raw,
+        attempt_ledger_ref=_ledger_ref(raw),
+        attempt_results=[first_result, retry_result],
+        artifact_raw_by_ref=artifacts,
+        case_bundle_inputs_by_attempt={first_identity: bundle_inputs[first_identity]},
+        attempt_identities_to_verify=[first_identity],
+    )
+
+    bound_retry = evidence_binding_v1.bind_untrusted_attempt_evidence_with_case_bundles_v1(
+        MATRIX_RAW,
+        raw,
+        attempt_ledger_ref=_ledger_ref(raw),
+        attempt_results=[first_result, retry_result],
+        artifact_raw_by_ref=artifacts,
+        case_bundle_inputs_by_attempt={retry_identity: bundle_inputs[retry_identity]},
+        attempt_identities_to_verify=[retry_identity],
+    )
+
+    attempts = bound_first["case_rows"][0]["attempts"]
+    checks = bound_first["per_attempt_case_bundle_checks"]
+    assert [item["attempt_id"] for item in attempts] == [ATTEMPT_ID, retry_id]
+    assert [item["attempt_outcome"] for item in attempts] == ["unresolved", "unresolved"]
+    assert [item["attempt_id"] for item in checks] == [ATTEMPT_ID]
+    assert all(item["provenance_chain_references_closed"] is True for item in checks)
+    assert all(item["safe_decode_receipts_and_metadata_artifacts_rehashed"] is True for item in checks)
+    assert bound_first["complete_b_c_d_case_bundle_check_count"] == 1
+    assert bound_first["complete_b_c_d_case_bundle_inventory_count"] == 2
+    assert bound_first["unverified_complete_b_c_d_attempts"] == [
+        {"case_id": CASE_ID, "attempt_id": retry_id, "nonce_hex": retry_nonce},
+    ]
+    assert bound_first["all_supplied_complete_b_c_d_chains_closed"] is False
+    assert bound_retry["per_attempt_case_bundle_checks"][0]["attempt_id"] == retry_id
+    assert bound_retry["unverified_complete_b_c_d_attempts"] == [
+        {"case_id": CASE_ID, "attempt_id": ATTEMPT_ID, "nonce_hex": NONCE},
+    ]
+    for bound in (bound_first, bound_retry):
+        assert bound["case_bundle_authority_authenticated"] is False
+        assert bound["worker_execution_authenticated"] is False
+        assert bound["case_rows"][0]["case_outcome"] == "unresolved"
+        assert bound["case_rows"][1]["case_outcome"] == "unresolved"
+        assert bound["T1_numerical"] is False
+        assert bound["qualification_credit"] == 0
+
+    with pytest.raises(evidence_binding_v1.AttemptEvidenceBindingError,
+                       match="resource limit"):
+        evidence_binding_v1.bind_untrusted_attempt_evidence_with_case_bundles_v1(
+            MATRIX_RAW,
+            raw,
+            attempt_ledger_ref=_ledger_ref(raw),
+            attempt_results=[first_result, retry_result],
+            artifact_raw_by_ref=artifacts,
+            case_bundle_inputs_by_attempt=bundle_inputs,
+            attempt_identities_to_verify=[first_identity, retry_identity],
+        )
+
+    oversized_auth_inputs = {first_identity: copy.deepcopy(bundle_inputs[first_identity])}
+    oversized_auth_inputs[first_identity]["trusted_authorization_bytes"]["B"] = (
+        b"x" * (stage_v1.MAX_RECEIPT_BYTES + 1)
+    )
+    with pytest.raises(evidence_binding_v1.AttemptEvidenceBindingError,
+                       match="authorization bytes exceed"):
+        evidence_binding_v1.bind_untrusted_attempt_evidence_with_case_bundles_v1(
+            MATRIX_RAW,
+            raw,
+            attempt_ledger_ref=_ledger_ref(raw),
+            attempt_results=[first_result, retry_result],
+            artifact_raw_by_ref=artifacts,
+            case_bundle_inputs_by_attempt=oversized_auth_inputs,
+            attempt_identities_to_verify=[first_identity],
+        )
+
+    swapped_bundle_inputs = {first_identity: bundle_inputs[retry_identity]}
+    with pytest.raises(evidence_binding_v1.AttemptEvidenceBindingError,
+                       match="receipt SHA-256 differs from the ledger attempt reference"):
+        evidence_binding_v1.bind_untrusted_attempt_evidence_with_case_bundles_v1(
+            MATRIX_RAW,
+            raw,
+            attempt_ledger_ref=_ledger_ref(raw),
+            attempt_results=[first_result, retry_result],
+            artifact_raw_by_ref=artifacts,
+            case_bundle_inputs_by_attempt=swapped_bundle_inputs,
+            attempt_identities_to_verify=[first_identity],
+        )
+
+
+def test_case_bundle_binding_keeps_open_attempt_without_bundle_unresolved() -> None:
+    raw = _raw(_ledger_document([_event("attempt_registered", 0)]))
+    result_row = _attempt_result()
+    result_row["attempt_ledger_event_seqs"] = [0]
+    result_row["stage_bundle_refs"] = {stage: None for stage in ledger_v1.STAGES}
+    result_row["stage_receipt_statuses"] = {stage: "not_run" for stage in ledger_v1.STAGES}
+
+    bound = evidence_binding_v1.bind_untrusted_attempt_evidence_with_case_bundles_v1(
+        MATRIX_RAW,
+        raw,
+        attempt_ledger_ref=_ledger_ref(raw),
+        attempt_results=[result_row],
+        artifact_raw_by_ref={},
+        case_bundle_inputs_by_attempt={},
+        attempt_identities_to_verify=[],
+    )
+
+    assert bound["complete_b_c_d_case_bundle_check_count"] == 0
+    assert bound["per_attempt_case_bundle_checks"] == []
+    assert bound["case_rows"][0]["case_outcome"] == "unresolved"
+    assert bound["case_rows"][0]["attempts"][0]["attempt_outcome"] == "unresolved"
+    assert sum(row["case_outcome"] == "missing" for row in bound["case_rows"]) == 0
+    assert bound["T1_numerical"] is False
+    assert bound["qualification_credit"] == 0
 
 
 def test_integrated_attempt_binding_rejects_receipt_status_claim_mismatch() -> None:

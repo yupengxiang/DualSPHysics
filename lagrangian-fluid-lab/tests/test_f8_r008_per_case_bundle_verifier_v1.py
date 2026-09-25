@@ -153,6 +153,8 @@ def _build_bundle(
     tmp_path: Path,
     stage: str,
     *,
+    attempt_id: str | None = None,
+    nonce: str | None = None,
     tamper_axis: bool = False,
     initial_ids: tuple[int, ...] = (0, 1),
     frame_ids: tuple[int, ...] = (0, 1),
@@ -160,6 +162,8 @@ def _build_bundle(
     frame_case_counts: tuple[int, int, int, int] | None = None,
     generated_xml: bytes | None = None,
 ) -> tuple[Path, bytes, dict]:
+    bundle_attempt_id = attempt_id if attempt_id is not None else f"attempt-{stage.lower()}"
+    bundle_nonce = nonce if nonce is not None else f"nonce-{stage.lower()}"
     root = tmp_path / f"bundle-{stage}"
     root.mkdir()
     outputs_root = root / "outputs"
@@ -288,7 +292,7 @@ def _build_bundle(
             "schema": "core.cfd.f8.r008_decoded_frame_manifest.v1",
             "stage": "D",
             "case_id": CASE_ID,
-            "attempt_id": f"attempt-{stage.lower()}",
+            "attempt_id": bundle_attempt_id,
             "raw_solver_manifest_sha256": "a" * 64,
             "frames": frames,
         }
@@ -303,8 +307,8 @@ def _build_bundle(
         "stage": stage,
         "scope_id": verifier.SCOPE_ID,
         "case_id": CASE_ID,
-        "attempt_id": f"attempt-{stage.lower()}",
-        "nonce": f"nonce-{stage.lower()}",
+        "attempt_id": bundle_attempt_id,
+        "nonce": bundle_nonce,
         "exclusive_output_root": str(root),
         "executable_sha256": "1" * 64,
         "wrapper_sha256": "2" * 64,
@@ -424,6 +428,8 @@ def _update_reference(target: dict, field: str, reference_path: Path) -> None:
 def _build_chain(
     tmp_path: Path,
     *,
+    attempt_id: str | None = None,
+    nonce: str | None = None,
     initial_ids: tuple[int, ...] = (0, 1),
     frame_ids: tuple[int, ...] = (0, 1),
     frame_case_counts: tuple[int, int, int, int] | None = None,
@@ -435,6 +441,10 @@ def _build_chain(
         kwargs = {"initial_ids": initial_ids} if stage == "B" else {
             "frame_ids": frame_ids, "frame_case_counts": frame_case_counts,
         }
+        if attempt_id is not None:
+            kwargs["attempt_id"] = attempt_id
+        if nonce is not None:
+            kwargs["nonce"] = nonce
         roots[stage], auth_bytes[stage], auth[stage] = _build_bundle(tmp_path, stage, **kwargs)
 
     c_receipt_path = roots["C"] / "receipt.json"
