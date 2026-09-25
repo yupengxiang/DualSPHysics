@@ -10,11 +10,11 @@ supervisor and cannot grant Core/F8 qualification credit.
 """
 from __future__ import annotations
 
+import ctypes
 import fcntl
 import hashlib
 import h5py
 import os
-import secrets
 import stat
 from typing import Any, Callable, Iterable, Mapping
 
@@ -92,6 +92,22 @@ def _require_readonly_single_link(fd: int, *, expected_bytes: int, label: str) -
              and info.st_size == expected_bytes,
              f"{label} FD must be the exact-size single-link regular file")
     return info
+
+
+def _open_readonly_held_fd(fd: int) -> int:
+    """Reopen a held Linux FD read-only without resolving a caller path."""
+    before = os.fstat(fd)
+    readonly_fd = os.open(f"/proc/self/fd/{fd}", os.O_RDONLY | os.O_CLOEXEC)
+    try:
+        after = os.fstat(readonly_fd)
+        _require(stat.S_ISREG(after.st_mode)
+                 and (after.st_dev, after.st_ino, after.st_size)
+                 == (before.st_dev, before.st_ino, before.st_size),
+                 "read-only proc-fd reopen changed the held output inode")
+        return readonly_fd
+    except BaseException:
+        os.close(readonly_fd)
+        raise
 
 
 def _open_h5_file(fd: int, mode: str) -> tuple[Any, h5py.File]:
@@ -228,10 +244,18 @@ def _verify_trajectory_fd(
     expected_output_sha256: str,
     expected_table_sha256: str,
     case_id: str,
+    expected_output_links: int = 1,
 ) -> None:
-    output_before = _require_readonly_single_link(
-        output_fd, expected_bytes=expected_output_bytes, label="Core trajectory",
-    )
+    output_before = os.fstat(output_fd)
+    output_flags = fcntl.fcntl(output_fd, fcntl.F_GETFL)
+    output_descriptor_flags = fcntl.fcntl(output_fd, fcntl.F_GETFD)
+    _require(stat.S_ISREG(output_before.st_mode)
+             and output_flags & os.O_ACCMODE == os.O_RDONLY
+             and output_descriptor_flags & fcntl.FD_CLOEXEC
+             and type(expected_output_links) is int
+             and output_before.st_nlink == expected_output_links
+             and output_before.st_size == expected_output_bytes,
+             "Core trajectory FD has the wrong inode link count or exact size")
     _require(_sha256_fd(output_fd, expected_output_bytes) == expected_output_sha256,
              "Core trajectory hash differs from its exact post-write binding")
     output_stream, output = _open_h5_file(output_fd, "r")
@@ -308,19 +332,35 @@ def _verify_trajectory_fd(
              "published Core trajectory changed during post-write verification")
 
 
-def _unlink_if_ours(directory_fd: int, name: str, fd: int,
-                    initial: os.stat_result) -> None:
-    try:
-        current = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
-        held = os.fstat(fd)
-        if ((current.st_dev, current.st_ino) == (initial.st_dev, initial.st_ino)
-                and (held.st_dev, held.st_ino) == (initial.st_dev, initial.st_ino)):
-            os.unlink(name, dir_fd=directory_fd)
-            os.fsync(directory_fd)
-    except FileNotFoundError:
-        pass
-    except OSError:
-        pass
+def _link_unnamed_noreplace_at(
+    output_fd: int, directory_fd: int, destination: str,
+) -> None:
+    """Publish the exact held O_TMPFILE inode without replacing a name."""
+    before = os.fstat(output_fd)
+    _require(stat.S_ISREG(before.st_mode) and before.st_nlink == 0,
+             "trajectory publication source must be an unnamed regular inode")
+    libc = ctypes.CDLL(None, use_errno=True)
+    linkat = getattr(libc, "linkat", None)
+    if linkat is None:
+        raise CoreTrajectoryAdapterError(
+            "FD-bound AT_SYMLINK_FOLLOW publication is unavailable on this platform",
+        )
+    linkat.argtypes = [ctypes.c_int, ctypes.c_char_p,
+                       ctypes.c_int, ctypes.c_char_p, ctypes.c_int]
+    linkat.restype = ctypes.c_int
+    held_fd_path = os.fsencode(f"/proc/self/fd/{output_fd}")
+    result = linkat(-100, held_fd_path, directory_fd,
+                    os.fsencode(destination), 0x400)  # AT_FDCWD, AT_SYMLINK_FOLLOW
+    if result != 0:
+        error_number = ctypes.get_errno()
+        raise OSError(error_number, os.strerror(error_number), destination)
+    after = os.fstat(output_fd)
+    named = os.stat(destination, dir_fd=directory_fd, follow_symlinks=False)
+    _require((after.st_dev, after.st_ino, after.st_nlink)
+             == (before.st_dev, before.st_ino, 1)
+             and (named.st_dev, named.st_ino, named.st_nlink)
+             == (before.st_dev, before.st_ino, 1),
+             "published trajectory name differs from the exact held O_TMPFILE inode")
 
 
 def materialize_diagnostic_core_trajectory_v1_at(
@@ -337,7 +377,13 @@ def materialize_diagnostic_core_trajectory_v1_at(
     initial_massfluid_binary64_le: bytes,
     source_frames_factory: Callable[[], Iterable[table_v2.NativeSourceFrame]],
 ) -> dict[str, Any]:
-    """Create one no-replace Core-readable, qualification-only HDF5 trajectory."""
+    """Create one no-replace Core-readable, qualification-only HDF5 trajectory.
+
+    The trajectory is built in an unnamed ``O_TMPFILE`` inode and published
+    directly from its held FD. Pre-publication errors leave no named partial;
+    post-publication errors retain the final artifact for explicit review.
+    No temporary source pathname or failure-path unlink is used.
+    """
     _require(type(expected_table_bytes) is int
              and 0 < expected_table_bytes <= table_v2.MAX_TABLE_FILE_BYTES,
              "native-fluid table byte count is outside the frozen v2 file-size cap")
@@ -381,19 +427,22 @@ def materialize_diagnostic_core_trajectory_v1_at(
     )
     _require(_sha256_fd(table_fd, expected_table_bytes) == expected_table_sha256,
              "native-fluid table hash differs from the exact caller binding")
-    temporary_name = f".core-trajectory-v1-{secrets.token_hex(16)}.tmp"
-    output_fd = os.open(
-        temporary_name,
-        os.O_RDWR | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC,
-        0o600,
-        dir_fd=output_directory_fd,
-    )
-    created = os.fstat(output_fd)
-    published = False
+    _require(bool(getattr(os, "O_TMPFILE", 0)),
+             "platform lacks unnamed O_TMPFILE trajectory staging")
     try:
-        _require(stat.S_ISREG(created.st_mode) and created.st_nlink == 1
+        output_fd = os.open(
+            ".", os.O_TMPFILE | os.O_RDWR | os.O_CLOEXEC, 0o600,
+            dir_fd=output_directory_fd,
+        )
+    except OSError as error:
+        raise CoreTrajectoryAdapterError(
+            "output filesystem does not support unnamed O_TMPFILE staging",
+        ) from error
+    created = os.fstat(output_fd)
+    try:
+        _require(stat.S_ISREG(created.st_mode) and created.st_nlink == 0
                  and created.st_size == 0,
-                 "exclusive Core trajectory output is not a new empty single-link file")
+                 "unnamed Core trajectory output is not a new empty unlinked file")
         table_verification, time_count, particle_count = _validate_and_copy_table(
             table_fd, output_fd,
             expected_bytes=expected_table_bytes,
@@ -411,30 +460,24 @@ def materialize_diagnostic_core_trajectory_v1_at(
         _require(0 < output_size <= table_v2.MAX_TABLE_FILE_BYTES,
                  "Core trajectory output size is outside the bounded file limit")
         output_sha256 = _sha256_fd(output_fd, output_size)
-        temp_ro_fd = os.open(
-            temporary_name, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC,
-            dir_fd=output_directory_fd,
-        )
+        temp_ro_fd = _open_readonly_held_fd(output_fd)
         try:
             temp_stat = os.fstat(temp_ro_fd)
             _require((temp_stat.st_dev, temp_stat.st_ino, temp_stat.st_nlink)
-                     == (created.st_dev, created.st_ino, 1),
-                     "temporary trajectory path was rebound before verification")
+                     == (created.st_dev, created.st_ino, 0),
+                     "read-only trajectory FD differs from the unnamed output inode")
             _verify_trajectory_fd(
                 temp_ro_fd, table_fd,
                 expected_output_bytes=output_size,
                 expected_output_sha256=output_sha256,
                 expected_table_sha256=expected_table_sha256,
                 case_id=case_id,
+                expected_output_links=0,
             )
         finally:
             os.close(temp_ro_fd)
 
-        os.link(temporary_name, OUTPUT_FILENAME,
-                src_dir_fd=output_directory_fd, dst_dir_fd=output_directory_fd,
-                follow_symlinks=False)
-        published = True
-        os.unlink(temporary_name, dir_fd=output_directory_fd)
+        _link_unnamed_noreplace_at(output_fd, output_directory_fd, OUTPUT_FILENAME)
         os.fsync(output_directory_fd)
         final_fd = os.open(
             OUTPUT_FILENAME, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC,
@@ -492,11 +535,6 @@ def materialize_diagnostic_core_trajectory_v1_at(
             "qualification_credit": 0,
             "native_table_verification": table_verification,
         }
-    except BaseException:
-        _unlink_if_ours(output_directory_fd, temporary_name, output_fd, created)
-        if published:
-            _unlink_if_ours(output_directory_fd, OUTPUT_FILENAME, output_fd, created)
-        raise
     finally:
         os.close(output_fd)
 

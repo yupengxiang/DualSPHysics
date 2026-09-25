@@ -97,6 +97,7 @@ def test_verified_f8_table_materializes_as_core_qualification_only(tmp_path):
     assert result["qualification_credit"] == 0
     assert trajectory.stat().st_nlink == 1
     assert trajectory.stat().st_mode & 0o777 == 0o600
+    assert list(output_directory.iterdir()) == [trajectory]
 
     config = _config(tmp_path)
     source = {
@@ -183,6 +184,42 @@ def test_existing_final_name_is_never_overwritten(tmp_path):
         os.close(output_fd)
 
     assert final_path.read_bytes() == b"keep existing artifact"
+    assert list(output_directory.iterdir()) == [final_path]
+
+
+def test_final_name_created_after_admission_is_not_overwritten(tmp_path, monkeypatch):
+    table_path, frames, table_bytes, table_sha256 = _table(tmp_path)
+    output_directory = tmp_path / "converted"
+    output_directory.mkdir(mode=0o700)
+    final_path = output_directory / adapter.OUTPUT_FILENAME
+    original = b"concurrently created artifact"
+    original_link = adapter._link_unnamed_noreplace_at
+
+    def race_final_name(output_fd, directory_fd, destination):
+        final_path.write_bytes(original)
+        return original_link(output_fd, directory_fd, destination)
+
+    monkeypatch.setattr(adapter, "_link_unnamed_noreplace_at", race_final_name)
+    table_fd = os.open(table_path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+    output_fd = os.open(output_directory, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    try:
+        with pytest.raises(FileExistsError):
+            adapter.materialize_diagnostic_core_trajectory_v1_at(
+                table_fd, output_fd, case_id=CASE_ID,
+                expected_table_bytes=table_bytes, expected_table_sha256=table_sha256,
+                expected_attributes=table_fixtures.ATTRS,
+                expected_time_axis_hex=[frame.time_ieee754_hex for frame in frames],
+                expected_fluid_ids=table_fixtures.FLUID_IDS,
+                expected_case_np=4,
+                initial_massfluid_binary64_le=table_fixtures.MASS_BYTES,
+                source_frames_factory=lambda: iter(frames),
+            )
+    finally:
+        os.close(table_fd)
+        os.close(output_fd)
+
+    assert final_path.read_bytes() == original
+    assert list(output_directory.iterdir()) == [final_path]
 
 
 def test_oversized_table_is_rejected_before_any_content_hash(tmp_path, monkeypatch):

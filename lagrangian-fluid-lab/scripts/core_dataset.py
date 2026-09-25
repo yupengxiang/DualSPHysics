@@ -734,8 +734,25 @@ class CoreDataset:
                         raise ValueError(f"input asset hash mismatch: {case_id}/{key}")
         return path
 
+    def _verify_hdf5_split(self, case_id, handle):
+        # A manifest is not allowed to relabel a self-declared split.
+        # In particular, qualification-only diagnostic trajectories may be
+        # referenced by a manifest, but cannot become training data by
+        # changing only that manifest row.
+        artifact_split = handle.attrs.get("split")
+        if isinstance(artifact_split, bytes):
+            try:
+                artifact_split = artifact_split.decode("utf-8", errors="strict")
+            except UnicodeDecodeError as error:
+                raise ValueError("HDF5 split attribute is not valid UTF-8") from error
+        if (artifact_split is not None
+                and (not isinstance(artifact_split, str)
+                     or artifact_split != self._records[case_id]["split"])):
+            raise ValueError("HDF5 split attribute differs from the manifest split")
+
     def _handle(self, case_id):
         if case_id in self._handles:
+            self._verify_hdf5_split(case_id, self._handles[case_id])
             self._verify_snapshot_measurement(case_id)
             self._handles.move_to_end(case_id)
             return self._handles[case_id]
@@ -753,6 +770,7 @@ class CoreDataset:
             handle = h5py.File(path, "r")
         required = {"time", "position", "velocity", "particle_id", "particle_zone", "mass", "valid"}
         try:
+            self._verify_hdf5_split(case_id, handle)
             if not required <= set(handle):
                 raise ValueError("missing native HDF5 fields")
             time = np.asarray(handle["time"])
