@@ -11,7 +11,9 @@ from scripts import f8_r008_native_fluid_table_metric_bundle_verifier_v2 as metr
 from scripts import f8_r008_native_fluid_table_v2 as table_v2
 from scripts import f8_r008_t1_metric_matrix_adapter_v2 as matrix_v2
 from scripts import f8_r008_t1_metric_matrix_adapter_v3 as matrix_v3
+from scripts import f8_r008_t1_metric_matrix_adapter_v4 as matrix_v4
 from scripts import f8_r008_runparts_timestep_diagnostic_v1 as runparts_v1
+from scripts import f8_r008_runparts_timestep_diagnostic_v2 as runparts_v2
 
 
 def _case_metrics(case_id: str, row: dict, parameters: dict, *, table_bytes: int, table_sha: str) -> dict:
@@ -165,6 +167,55 @@ def test_v3_metric_matrix_rejects_bad_runparts_source(tmp_path) -> None:
 
     with pytest.raises(matrix_v2.NativeFluidMetricMatrixError, match="RunPARTs source"):
         matrix_v3.evaluate_metric_matrix_v3(results, solver_timestep_sources=sources)
+
+
+def test_v4_metric_matrix_recomputes_all_numeric_fresh_runparts_and_keeps_gates_closed(tmp_path) -> None:
+    results, audits = _inputs(tmp_path)
+    sources = {case_id: audit.parent / "RunPARTs.csv" for case_id, audit in audits.items()}
+
+    result = matrix_v4.evaluate_metric_matrix_v4(results, solver_timestep_sources=sources)
+
+    comparison = result["time_step_comparison"]
+    assert result["schema"] == matrix_v4.SCHEMA
+    assert result["case_count"] == 15
+    assert comparison["baseline_observed_recorded_part_dtmax_s"] == pytest.approx(0.002)
+    assert comparison["refined_observed_recorded_part_dtmax_s"] == pytest.approx(0.001)
+    assert comparison["input_scope"] == runparts_v2.INPUT_SCOPE
+    assert comparison["all_26_fields_type_and_range_checked"] is True
+    assert comparison["cross_field_native_semantics_verified"] is False
+    assert comparison["baseline_runparts_parse_diagnostic"]["input_scope"] == runparts_v2.INPUT_SCOPE
+    assert comparison["passed"] is False
+    assert result["all_metric_and_comparison_gates_passed"] is False
+    assert result["readiness_pass"] is False
+    assert result["full_t1_decision"] is False
+    assert result["qualification_credit"] == 0
+
+
+def test_v4_metric_matrix_rejects_nonnumeric_non_timestep_field(tmp_path) -> None:
+    results, audits = _inputs(tmp_path)
+    sources = {case_id: audit.parent / "RunPARTs.csv" for case_id, audit in audits.items()}
+    source = sources["time-q0p5-dp0p0075-cfl0p1"]
+    lines = source.read_text(encoding="utf-8").splitlines()
+    cells = lines[2].split(";")
+    cells[6] = "not-an-integer"  # NpSim is outside the timestep projection.
+    lines[2] = ";".join(cells)
+    source.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    with pytest.raises(matrix_v2.NativeFluidMetricMatrixError, match="RunPARTs source"):
+        matrix_v4.evaluate_metric_matrix_v4(results, solver_timestep_sources=sources)
+
+
+def test_v4_metric_matrix_rejects_appended_restart_segment(tmp_path) -> None:
+    results, audits = _inputs(tmp_path)
+    sources = {case_id: audit.parent / "RunPARTs.csv" for case_id, audit in audits.items()}
+    source = sources["time-q0p5-dp0p0075-cfl0p1"]
+    cells = ["0"] * len(runparts_v2.RUNPARTS_HEADER)
+    cells[0], cells[1], cells[2], cells[19], cells[20] = "2", "0.2", "0", "0", "0"
+    with source.open("ab") as stream:
+        stream.write((";".join(cells) + "\n").encode("utf-8"))
+
+    with pytest.raises(matrix_v2.NativeFluidMetricMatrixError, match="RunPARTs source"):
+        matrix_v4.evaluate_metric_matrix_v4(results, solver_timestep_sources=sources)
 
 
 def _inputs(tmp_path: Path):
