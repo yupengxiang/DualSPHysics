@@ -1,14 +1,22 @@
-"""Synthetic serialization-only tests; the codec grants no trust or credit."""
+"""Synthetic serialization/ref-graph tests; the codec grants no trust or credit."""
 import hashlib
+import json
 
 import pytest
 
 from scripts.core_f4_qualification_bundle_v3_codec import (
+    BINDING_ADMISSION_SCHEMA,
     BundleCodecError,
     DOMAIN_SEPARATOR,
+    EVALUATION_ADMISSION_SCHEMA,
+    EVALUATION_SOURCE_SCHEMA,
+    F4_REVISION_ID,
+    F4_SCOPE_ID,
+    OUTER_SCHEMA,
     ROLE_ORDER,
     canonical_json_bytes,
     document_digests,
+    inspect_untrusted_admission_envelope,
     positive_builtin_int,
     qualification_bundle_sha256,
     strict_json_object,
@@ -23,6 +31,104 @@ def _golden_inputs():
         "evaluation_source_raw": b'{"c":3}',
     }
     return envelope, documents
+
+
+def _ref(raw, *, role, target_schema, object_id):
+    raw_sha256, canonical_sha256 = document_digests(raw)
+    return {
+        "stage": "qualification",
+        "role": role,
+        "object_id": object_id,
+        "target_schema": target_schema,
+        "bytes": len(raw),
+        "raw_sha256": raw_sha256,
+        "canonical_json_sha256": canonical_sha256,
+    }
+
+
+def _valid_untrusted_graph(*, mode="formal_release", t1=True):
+    source_raw = canonical_json_bytes({"schema": EVALUATION_SOURCE_SCHEMA, "raw_result": "opaque"})
+    source_ref = _ref(
+        source_raw, role="qualification_evaluation_raw",
+        target_schema=EVALUATION_SOURCE_SCHEMA, object_id="evaluation-source-v1",
+    )
+    checks = {
+        "static_contract": True,
+        "matrix_complete": True,
+        "all_case_hard_mass_event_gates": True,
+        "spatial": True,
+        "independent_checks": True,
+        "time_and_output": True,
+        "cell12_reuse_verified": True,
+        "cell12_reuse_does_not_inherit_qualification": True,
+    }
+    all_cells = list(range(15))
+    evaluation = {
+        "schema": EVALUATION_ADMISSION_SCHEMA,
+        "scope_id": F4_SCOPE_ID,
+        "revision_id": F4_REVISION_ID,
+        "manifest_sha256": "1" * 64,
+        "evaluation_source_ref": source_ref,
+        "evaluation_raw_sha256": source_ref["raw_sha256"],
+        "evaluation_canonical_json_sha256": source_ref["canonical_json_sha256"],
+        "cell_indices": all_cells,
+        "passed_cell_indices": all_cells,
+        "missing_indices": [],
+        "failure_indices": [],
+        "checks": checks,
+        "matrix_complete": True,
+        "T1_numerical": t1,
+        "artifact_bindings_verified": True,
+        "declaration_consistent": True,
+        "promotion_status": (
+            "qualified_candidate_pending_root_review" if t1 else "blocked_until_all_gates"
+        ),
+    }
+    evaluation_raw = canonical_json_bytes(evaluation)
+    evaluation_ref = _ref(
+        evaluation_raw, role="qualification_evaluation_admission",
+        target_schema=EVALUATION_ADMISSION_SCHEMA, object_id="evaluation-admission-v1",
+    )
+    binding = {
+        "schema": BINDING_ADMISSION_SCHEMA,
+        "scope_id": F4_SCOPE_ID,
+        "revision_id": F4_REVISION_ID,
+        "manifest_sha256": evaluation["manifest_sha256"],
+        "evaluation_raw_sha256": evaluation["evaluation_raw_sha256"],
+        "reevaluation_sha256": evaluation["evaluation_canonical_json_sha256"],
+        "evaluation_admission_canonical_json_sha256": evaluation_ref["canonical_json_sha256"],
+        "matrix_complete": evaluation["matrix_complete"],
+        "T1_numerical": evaluation["T1_numerical"],
+        "cell_indices": list(evaluation["cell_indices"]),
+        "passed_cell_indices": list(evaluation["passed_cell_indices"]),
+        "missing_indices": [],
+        "failure_indices": [],
+        "checks": dict(checks),
+        "artifact_bindings_verified": True,
+        "declaration_consistent": True,
+    }
+    binding_raw = canonical_json_bytes({
+        "schema": BINDING_ADMISSION_SCHEMA,
+        "binding": binding,
+        "evaluation_ref": evaluation_ref,
+    })
+    binding_ref = _ref(
+        binding_raw, role="qualification_binding_admission",
+        target_schema=BINDING_ADMISSION_SCHEMA, object_id="binding-admission-v1",
+    )
+    envelope_raw = canonical_json_bytes({
+        "schema": OUTER_SCHEMA,
+        "mode": mode,
+        "scope_id": F4_SCOPE_ID,
+        "binding_ref": binding_ref,
+        "evaluation_ref": evaluation_ref if mode == "formal_release" else None,
+    })
+    documents = {
+        "binding_admission": binding_raw,
+        "evaluation_admission": evaluation_raw,
+        "evaluation_source_raw": source_raw,
+    }
+    return envelope_raw, documents
 
 
 def test_v13_serialization_golden_vector_and_domain_separator():
@@ -95,3 +201,78 @@ def test_canonical_json_uses_v12_utf8_digest_rules_without_newline():
     assert hashlib.sha256(canonical).hexdigest() == (
         "5864fa4df6a1158336568275a6eda18da860fbc1b38bc48d247f01b80c47e9d0"
     )
+
+
+@pytest.mark.parametrize("mode", ["formal_release", "preparation_only"])
+def test_v12_v13_reference_graph_is_consistent_but_never_a_capability(mode):
+    envelope, documents = _valid_untrusted_graph(mode=mode)
+    result = inspect_untrusted_admission_envelope(envelope, documents)
+    assert result["status"] == "metadata_ref_graph_consistent_untrusted"
+    assert result["mode"] == mode
+    assert result["qualification_bundle_sha256"]
+    assert result["formal_qualification_admitted"] is False
+    assert result["capability_minted"] is False
+    assert result["evaluation_source_semantics_verified"] is False
+    assert result["object_allowlist_verified"] is False
+    assert result["descriptor_root_verified"] is False
+    assert result["producer_identity_verified"] is False
+
+
+def test_reference_graph_rejects_raw_hash_role_copy_and_exact_type_mismatch():
+    envelope, documents = _valid_untrusted_graph()
+    changed_docs = dict(documents)
+    binding_object = strict_json_object(documents["binding_admission"])
+    changed_binding = json.dumps(
+        dict(reversed(tuple(binding_object.items()))), separators=(",", ":")
+    ).encode("utf-8")
+    assert len(changed_binding) == len(documents["binding_admission"])
+    assert document_digests(changed_binding)[1] == document_digests(
+        documents["binding_admission"]
+    )[1]
+    assert document_digests(changed_binding)[0] != document_digests(
+        documents["binding_admission"]
+    )[0]
+    changed_docs["binding_admission"] = changed_binding
+    with pytest.raises(BundleCodecError, match="raw SHA-256"):
+        inspect_untrusted_admission_envelope(envelope, changed_docs)
+
+    outer = strict_json_object(envelope)
+    outer["binding_ref"]["role"] = "qualification_evaluation_raw"
+    with pytest.raises(BundleCodecError, match="role"):
+        inspect_untrusted_admission_envelope(canonical_json_bytes(outer), documents)
+
+    outer = strict_json_object(envelope)
+    outer["binding_ref"]["bytes"] = True
+    with pytest.raises(BundleCodecError, match="exact positive integer"):
+        inspect_untrusted_admission_envelope(canonical_json_bytes(outer), documents)
+
+
+def test_reference_graph_rejects_outer_copy_mismatch_and_wrong_t1_predicate():
+    envelope, documents = _valid_untrusted_graph()
+    outer = strict_json_object(envelope)
+    outer["evaluation_ref"]["object_id"] = "different-object"
+    with pytest.raises(BundleCodecError, match="refs differ"):
+        inspect_untrusted_admission_envelope(canonical_json_bytes(outer), documents)
+
+    bad_envelope, bad_documents = _valid_untrusted_graph(t1=False)
+    with pytest.raises(BundleCodecError, match="T1_numerical"):
+        inspect_untrusted_admission_envelope(bad_envelope, bad_documents)
+
+
+def test_reference_graph_rejects_unknown_fields_bad_object_id_and_prep_copy():
+    envelope, documents = _valid_untrusted_graph()
+    outer = strict_json_object(envelope)
+    outer["unexpected"] = True
+    with pytest.raises(BundleCodecError, match="exact schema"):
+        inspect_untrusted_admission_envelope(canonical_json_bytes(outer), documents)
+
+    outer = strict_json_object(envelope)
+    outer["binding_ref"]["object_id"] = "../outside"
+    with pytest.raises(BundleCodecError, match="identifier domain"):
+        inspect_untrusted_admission_envelope(canonical_json_bytes(outer), documents)
+
+    prep_envelope, prep_documents = _valid_untrusted_graph(mode="preparation_only")
+    prep = strict_json_object(prep_envelope)
+    prep["evaluation_ref"] = {"not": "null"}
+    with pytest.raises(BundleCodecError, match="must have a null outer evaluation_ref"):
+        inspect_untrusted_admission_envelope(canonical_json_bytes(prep), prep_documents)
