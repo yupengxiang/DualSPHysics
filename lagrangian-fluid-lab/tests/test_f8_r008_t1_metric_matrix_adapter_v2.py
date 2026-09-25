@@ -90,13 +90,13 @@ def _audit(tmp_path: Path, case_id: str, max_dt: float) -> Path:
     source.write_bytes(f"synthetic source for {case_id}\n".encode())
     audit_path = tmp_path / f"{case_id}.audit.json"
     audit_path.write_text(json.dumps({
-        "schema": "core.cfd.f8.r008_solver_timestep_audit.v1",
+        "schema": matrix_v2.SOLVER_TIMESTEP_AUDIT_SCHEMA,
         "status": "passed",
         "case_id": case_id,
         "max_solver_dt_s": max_dt,
         "checks": {"finite_positive_max_step": True},
         "source_log": {
-            "path": str(source),
+            "path": source.name,
             "bytes": source.stat().st_size,
             "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
         },
@@ -119,6 +119,10 @@ def _inputs(tmp_path: Path):
             "provenance_chain_references_closed": True,
             "definition_control_bindings_match_frozen_pack_and_source_bytes": True,
             "reviewed_metric_code_sources_match": True,
+            "native_table_review_authenticity": "caller_supplied_trust_not_authenticated_here",
+            "metric_review_authenticity": "caller_supplied_trust_not_authenticated_here",
+            "authorization_authenticity": "external_gate_not_checked_here",
+            "runtime_environment_assumption": "caller_attested_not_independently_verified",
             "loaded_module_code_identity_verified": False,
             "native_integrity_evaluated": False,
             "metrics_evaluated": True,
@@ -204,6 +208,9 @@ def test_synthetic_or_rewrapped_result_rejected_before_metric_parse(tmp_path, mo
     }
     rewrapped = dict(results[first_id])
     rewrapped.update(diagnostic)
+    # Test the deceptive wrapper case too: retain the canonical schema while
+    # adding unregistered synthetic-diagnostic fields.
+    rewrapped["schema"] = matrix_v2.CASE_RESULT_SCHEMA
     payloads = [diagnostic, rewrapped]
 
     def fail_if_metric_parser_reached(*args, **kwargs):
@@ -341,7 +348,11 @@ def test_v2_metric_matrix_rejects_cross_resolution_timestamp_disagreement(tmp_pa
 
 @pytest.mark.parametrize("mutation", [
     "table_review", "metric_review", "receipt_hashes", "manifest_hashes",
-    "credit", "t1",
+    "native_table_review_authenticity", "metric_review_authenticity",
+    "authorization_authenticity", "runtime_environment_assumption",
+    "credit", "credit_bool", "credit_float",
+    "table_credit_bool", "table_credit_float",
+    "metric_credit_bool", "metric_credit_float", "t1",
 ])
 def test_v2_metric_matrix_rejects_conflicting_receipts_or_overstated_result(tmp_path, mutation) -> None:
     results, audits = _inputs(tmp_path)
@@ -354,13 +365,101 @@ def test_v2_metric_matrix_rejects_conflicting_receipts_or_overstated_result(tmp_
         first["receipt_sha256"]["C"] = "not-a-hash"
     elif mutation == "manifest_hashes":
         first["manifest_sha256"]["C"] = "not-a-hash"
+    elif mutation == "native_table_review_authenticity":
+        first["native_table_review_authenticity"] = "verified"
+    elif mutation == "metric_review_authenticity":
+        first["metric_review_authenticity"] = "verified"
+    elif mutation == "authorization_authenticity":
+        first["authorization_authenticity"] = "verified"
+    elif mutation == "runtime_environment_assumption":
+        first["runtime_environment_assumption"] = "verified"
     elif mutation == "credit":
         first["qualification_credit"] = 1
+    elif mutation == "credit_bool":
+        first["qualification_credit"] = False
+    elif mutation == "credit_float":
+        first["qualification_credit"] = 0.0
+    elif mutation == "table_credit_bool":
+        first["native_fluid_table"]["qualification_credit"] = False
+    elif mutation == "table_credit_float":
+        first["native_fluid_table"]["qualification_credit"] = 0.0
+    elif mutation == "metric_credit_bool":
+        first["case_metrics"]["qualification_credit"] = False
+    elif mutation == "metric_credit_float":
+        first["case_metrics"]["qualification_credit"] = 0.0
     else:
         first["T1_numerical"] = True
 
     with pytest.raises(matrix_v2.NativeFluidMetricMatrixError):
         matrix_v2.evaluate_metric_matrix_v2(results, solver_timestep_audits=audits)
+
+
+@pytest.mark.parametrize("source_path", [
+    "/etc/passwd", "../outside.log", "nested/source.log", ".", "..",
+])
+def test_v2_matrix_timestep_audit_rejects_non_sibling_source_path(tmp_path, source_path) -> None:
+    _, audits = _inputs(tmp_path)
+    case_id = "time-q0p5-dp0p0075-cfl0p1"
+    audit_path = audits[case_id]
+    receipt = json.loads(audit_path.read_text(encoding="utf-8"))
+    receipt["source_log"]["path"] = source_path
+    audit_path.write_text(json.dumps(receipt), encoding="utf-8")
+
+    with pytest.raises(matrix_v2.NativeFluidMetricMatrixError,
+                       match="single relative filename"):
+        matrix_v2._read_bounded_audit(audit_path, case_id)
+
+
+def test_v2_matrix_audit_requires_explicit_v2_path_contract(tmp_path) -> None:
+    _, audits = _inputs(tmp_path)
+    case_id = "time-q0p5-dp0p0075-cfl0p1"
+    audit_path = audits[case_id]
+    receipt = json.loads(audit_path.read_text(encoding="utf-8"))
+    receipt["schema"] = "core.cfd.f8.r008_solver_timestep_audit.v1"
+    receipt["source_log"]["path"] = str(audit_path.parent / receipt["source_log"]["path"])
+    audit_path.write_text(json.dumps(receipt), encoding="utf-8")
+
+    with pytest.raises(matrix_v2.NativeFluidMetricMatrixError,
+                       match="audit is absent, failed, or bound to another case"):
+        matrix_v2._read_bounded_audit(audit_path, case_id)
+
+
+@pytest.mark.parametrize("mutation", ["oversized", "symlink", "fifo", "hardlink"])
+def test_v2_matrix_timestep_source_log_is_bounded_single_link_and_nofollow(tmp_path, mutation) -> None:
+    _, audits = _inputs(tmp_path)
+    case_id = "time-q0p5-dp0p0075-cfl0p1"
+    audit_path = audits[case_id]
+    receipt = json.loads(audit_path.read_text(encoding="utf-8"))
+    source = audit_path.parent / receipt["source_log"]["path"]
+    if mutation == "oversized":
+        with source.open("r+b") as stream:
+            stream.truncate(matrix_v2.MAX_AUDIT_SOURCE_LOG_BYTES + 1)
+        receipt["source_log"]["bytes"] = 1024
+    elif mutation == "symlink":
+        target = source.with_name(source.name + ".target")
+        source.rename(target)
+        source.symlink_to(target.name)
+    elif mutation == "fifo":
+        source.unlink()
+        os.mkfifo(source)
+    else:
+        source.with_name(source.name + ".hardlink").hardlink_to(source)
+    audit_path.write_text(json.dumps(receipt), encoding="utf-8")
+
+    with pytest.raises(matrix_v2.NativeFluidMetricMatrixError):
+        matrix_v2._read_bounded_audit(audit_path, case_id)
+
+
+def test_v2_matrix_timestep_audit_parent_symlink_is_rejected(tmp_path) -> None:
+    real_directory = tmp_path / "real"
+    real_directory.mkdir()
+    audit_path = _audit(real_directory, "case-parent-link", 0.001)
+    alias = tmp_path / "alias"
+    alias.symlink_to(real_directory, target_is_directory=True)
+
+    with pytest.raises(matrix_v2.NativeFluidMetricMatrixError,
+                       match="parent must be a real, no-follow directory path"):
+        matrix_v2._read_bounded_audit(alias / audit_path.name, "case-parent-link")
 
 
 @pytest.mark.parametrize("mutation", ["oversized", "symlink", "fifo"])

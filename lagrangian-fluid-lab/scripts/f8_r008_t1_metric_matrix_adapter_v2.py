@@ -21,6 +21,7 @@ from scripts import f8_r008_native_fluid_table_metric_bundle_verifier_v2 as metr
 from scripts import f8_r008_native_fluid_table_schema_review_v2 as table_review
 from scripts import f8_r008_native_fluid_table_metric_review_v2 as metric_review_v2
 from scripts import f8_r008_native_fluid_table_v2 as table_v2
+from scripts import f8_r008_per_case_bundle_verifier_v1 as bundle_v1
 from scripts import f8_r008_t1_metric_adapter_v1 as metric_v1
 from scripts import f8_r008_t1_metric_adapter_review_v1 as metric_v1_review
 
@@ -32,6 +33,24 @@ CASE_RESULT_SCHEMA = metric_bundle_v2.SCHEMA
 TABLE_SCHEMA = "core.cfd.f8.r008_native_fluid_frame_table.v2"
 STAGES = ("B", "C", "D")
 MAX_AUDIT_RECEIPT_BYTES = 1024 * 1024
+MAX_AUDIT_SOURCE_LOG_BYTES = 256 * 1024 * 1024
+SOLVER_TIMESTEP_AUDIT_SCHEMA = "core.cfd.f8.r008_solver_timestep_audit.v2"
+SOLVER_TIMESTEP_AUDIT_FIELDS = frozenset({
+    "schema", "status", "case_id", "max_solver_dt_s", "checks", "source_log",
+})
+SOLVER_TIMESTEP_SOURCE_LOG_FIELDS = frozenset({"path", "bytes", "sha256"})
+CASE_RESULT_FIELDS = frozenset({
+    "schema", "case_id", "provenance_chain_references_closed",
+    "definition_control_bindings_match_frozen_pack_and_source_bytes",
+    "native_fluid_table", "case_metrics", "stage_statuses", "receipt_sha256",
+    "manifest_sha256", "native_table_review_receipt_sha256",
+    "native_table_review_authenticity", "metric_review_receipt_sha256",
+    "metric_review_authenticity", "reviewed_metric_code_sources_match",
+    "loaded_module_code_identity_verified", "authorization_authenticity",
+    "runtime_environment_assumption", "native_integrity_evaluated",
+    "metrics_evaluated", "metric_gates_passed", "readiness_pass",
+    "T1_numerical", "qualification_credit",
+})
 
 
 class NativeFluidMetricMatrixError(ValueError):
@@ -41,6 +60,92 @@ class NativeFluidMetricMatrixError(ValueError):
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise NativeFluidMetricMatrixError(message)
+
+
+def _is_integer_zero(value: Any) -> bool:
+    return type(value) is int and value == 0
+
+
+def _single_component(value: Any, label: str) -> str:
+    _require(isinstance(value, str) and bool(value)
+             and not Path(value).is_absolute()
+             and value not in {".", ".."}
+             and "/" not in value and "\\" not in value
+             and "\x00" not in value,
+             f"{label} must be a single relative filename")
+    return value
+
+
+def _stable_read_at(parent_fd: int, name: str, *, max_bytes: int, label: str) -> bytes:
+    name = _single_component(name, label)
+    flags = (os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0)
+             | getattr(os, "O_NONBLOCK", 0))
+    try:
+        fd = os.open(name, flags, dir_fd=parent_fd)
+    except OSError as error:
+        raise NativeFluidMetricMatrixError(f"{label} is not safely openable") from error
+    try:
+        before = os.fstat(fd)
+        _require(stat.S_ISREG(before.st_mode) and before.st_nlink == 1
+                 and 0 < before.st_size <= max_bytes,
+                 f"{label} must be a bounded single-link regular file")
+        named = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+        _require(_file_identity(before) == _file_identity(named),
+                 f"{label} path changed while opening")
+        chunks: list[bytes] = []
+        remaining = before.st_size
+        while remaining:
+            block = os.read(fd, min(64 * 1024, remaining))
+            _require(bool(block), f"{label} was truncated while being read")
+            chunks.append(block)
+            remaining -= len(block)
+        _require(os.read(fd, 1) == b"", f"{label} grew while being read")
+        after = os.fstat(fd)
+        named_after = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+        _require(_file_identity(before) == _file_identity(after)
+                 == _file_identity(named_after), f"{label} changed while being read")
+        return b"".join(chunks)
+    finally:
+        os.close(fd)
+
+
+def _stable_hash_at(
+    parent_fd: int, name: str, *, expected_bytes: int, max_bytes: int, label: str,
+) -> dict[str, Any]:
+    name = _single_component(name, label)
+    _require(isinstance(expected_bytes, int) and not isinstance(expected_bytes, bool)
+             and 0 < expected_bytes <= max_bytes,
+             f"{label} byte binding is outside its fixed resource limit")
+    flags = (os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0)
+             | getattr(os, "O_NONBLOCK", 0))
+    try:
+        fd = os.open(name, flags, dir_fd=parent_fd)
+    except OSError as error:
+        raise NativeFluidMetricMatrixError(f"{label} is not safely openable") from error
+    try:
+        before = os.fstat(fd)
+        _require(stat.S_ISREG(before.st_mode) and before.st_nlink == 1
+                 and 0 < before.st_size <= max_bytes
+                 and before.st_size == expected_bytes,
+                 f"{label} must be a bounded single-link regular file matching its byte binding")
+        named = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+        _require(_file_identity(before) == _file_identity(named),
+                 f"{label} path changed while opening")
+        digest = hashlib.sha256()
+        remaining = before.st_size
+        while remaining:
+            block = os.read(fd, min(1024 * 1024, remaining))
+            _require(bool(block), f"{label} was truncated while being hashed")
+            digest.update(block)
+            remaining -= len(block)
+        _require(os.read(fd, 1) == b"", f"{label} grew while being hashed")
+        after = os.fstat(fd)
+        named_after = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+        _require(_file_identity(before) == _file_identity(after)
+                 == _file_identity(named_after), f"{label} changed while being hashed")
+        return {"bytes": before.st_size, "sha256": digest.hexdigest()}
+    finally:
+        os.close(fd)
 
 
 def _hex64(value: Any) -> bool:
@@ -57,104 +162,65 @@ def _read_bounded_audit(path: Path | str, case_id: str) -> tuple[float, dict[str
     report_path = Path(path)
     if not report_path.is_absolute():
         report_path = Path.cwd() / report_path
-    flags = (os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0)
-             | getattr(os, "O_NONBLOCK", 0))
+    _require(".." not in report_path.parts,
+             "solver timestep audit path cannot contain parent traversal")
     try:
-        fd = os.open(report_path, flags)
-    except OSError as error:
-        raise NativeFluidMetricMatrixError("solver timestep audit is not safely openable") from error
+        parent_fd, parent_path = bundle_v1._open_absolute_directory(report_path.parent)
+    except (OSError, ValueError) as error:
+        raise NativeFluidMetricMatrixError(
+            "solver timestep audit parent must be a real, no-follow directory path"
+        ) from error
     try:
-        before = os.fstat(fd)
-        _require(stat.S_ISREG(before.st_mode) and before.st_nlink == 1
-                 and 0 < before.st_size <= MAX_AUDIT_RECEIPT_BYTES,
-                 "solver timestep audit must be a bounded single-link regular file")
-        chunks: list[bytes] = []
-        total = 0
-        while True:
-            block = os.read(fd, min(64 * 1024, MAX_AUDIT_RECEIPT_BYTES + 1 - total))
-            if not block:
-                break
-            chunks.append(block)
-            total += len(block)
-            _require(total <= MAX_AUDIT_RECEIPT_BYTES,
-                     "solver timestep audit exceeds the bounded receipt-size cap")
-        after = os.fstat(fd)
+        audit_name = _single_component(report_path.name, "solver timestep audit path")
+        payload = _stable_read_at(
+            parent_fd, audit_name, max_bytes=MAX_AUDIT_RECEIPT_BYTES,
+            label="solver timestep audit",
+        )
         try:
-            named = os.stat(report_path, follow_symlinks=False)
-        except OSError as error:
-            raise NativeFluidMetricMatrixError("solver timestep audit path changed during read") from error
-        _require(_file_identity(before) == _file_identity(after) == _file_identity(named)
-                 and total == before.st_size,
-                 "solver timestep audit changed or was rebound during read")
-    finally:
-        os.close(fd)
-
-    payload = b"".join(chunks)
-    try:
-        receipt = json.loads(payload.decode("utf-8", errors="strict"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise NativeFluidMetricMatrixError("solver timestep audit is not bounded valid UTF-8 JSON") from error
-    _require(isinstance(receipt, dict)
-             and receipt.get("schema") == "core.cfd.f8.r008_solver_timestep_audit.v1"
-             and receipt.get("status") == "passed"
-             and receipt.get("case_id") == case_id
-             and isinstance(receipt.get("checks"), dict)
-             and bool(receipt["checks"])
-             and all(value is True for value in receipt["checks"].values()),
-             "solver timestep audit is absent, failed, or bound to another case")
-    maximum_step = metric_v1._finite_scalar(
-        receipt.get("max_solver_dt_s"), "max_solver_dt_s", positive=True,
-    )
-    source = receipt.get("source_log")
-    _require(isinstance(source, dict) and isinstance(source.get("path"), str)
-             and isinstance(source.get("bytes"), int) and not isinstance(source.get("bytes"), bool)
-             and _hex64(source.get("sha256")),
-             "solver timestep audit must bind a well-formed native source log")
-    source_path = Path(source["path"])
-    if not source_path.is_absolute():
-        source_path = metric_v1.LAB / source_path
-    source_flags = (os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0)
-                    | getattr(os, "O_NONBLOCK", 0))
-    try:
-        source_fd = os.open(source_path, source_flags)
-    except OSError as error:
-        raise NativeFluidMetricMatrixError("bound solver timestep source log is not safely openable") from error
-    try:
-        source_before = os.fstat(source_fd)
-        _require(stat.S_ISREG(source_before.st_mode),
-                 "bound solver timestep source log is not a regular file")
-        digest = hashlib.sha256()
-        source_bytes = 0
-        while True:
-            block = os.read(source_fd, 1024 * 1024)
-            if not block:
-                break
-            source_bytes += len(block)
-            digest.update(block)
-        source_after = os.fstat(source_fd)
-        try:
-            source_named = os.stat(source_path, follow_symlinks=False)
-        except OSError as error:
-            raise NativeFluidMetricMatrixError("bound solver timestep source log path changed during read") from error
-        _require(_file_identity(source_before) == _file_identity(source_after)
-                 == _file_identity(source_named)
-                 and source_bytes == source_before.st_size
-                 and source_bytes == source["bytes"]
-                 and digest.hexdigest() == source["sha256"],
+            receipt = bundle_v1._parse_json(payload, "solver timestep audit")
+        except ValueError as error:
+            raise NativeFluidMetricMatrixError(
+                "solver timestep audit is not bounded valid UTF-8 JSON"
+            ) from error
+        _require(isinstance(receipt, dict) and set(receipt) == SOLVER_TIMESTEP_AUDIT_FIELDS
+                 and receipt.get("schema") == SOLVER_TIMESTEP_AUDIT_SCHEMA
+                 and receipt.get("status") == "passed"
+                 and receipt.get("case_id") == case_id
+                 and isinstance(receipt.get("checks"), dict)
+                 and bool(receipt["checks"])
+                 and all(value is True for value in receipt["checks"].values()),
+                 "solver timestep audit is absent, failed, or bound to another case")
+        maximum_step = metric_v1._finite_scalar(
+            receipt.get("max_solver_dt_s"), "max_solver_dt_s", positive=True,
+        )
+        source = receipt.get("source_log")
+        _require(isinstance(source, dict) and set(source) == SOLVER_TIMESTEP_SOURCE_LOG_FIELDS
+                 and isinstance(source.get("path"), str)
+                 and isinstance(source.get("bytes"), int) and not isinstance(source.get("bytes"), bool)
+                 and _hex64(source.get("sha256")),
+                 "solver timestep audit must bind a well-formed native source log")
+        source_name = _single_component(source["path"], "bound solver timestep source log path")
+        source_binding = _stable_hash_at(
+            parent_fd, source_name, expected_bytes=source["bytes"],
+            max_bytes=MAX_AUDIT_SOURCE_LOG_BYTES,
+            label="bound solver timestep source log",
+        )
+        _require(source_binding["sha256"] == source["sha256"],
                  "bound native solver timestep source log changed")
-    finally:
-        os.close(source_fd)
 
-    return maximum_step, {
-        "path": str(report_path),
-        "bytes": total,
-        "sha256": hashlib.sha256(payload).hexdigest(),
-        "source_log": {
-            "path": str(source_path),
-            "bytes": source_bytes,
-            "sha256": digest.hexdigest(),
-        },
-    }
+        audit_reference_path = str(Path(parent_path) / audit_name)
+        source_reference_path = str(Path(parent_path) / source_name)
+        return maximum_step, {
+            "path": audit_reference_path,
+            "bytes": len(payload),
+            "sha256": hashlib.sha256(payload).hexdigest(),
+            "source_log": {
+                "path": source_reference_path,
+                **source_binding,
+            },
+        }
+    finally:
+        os.close(parent_fd)
 
 
 def _load_frozen_contract() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], str, str, str, str]:
@@ -197,17 +263,25 @@ def _validate_case_result(
     table_review_sha256: str,
     metric_review_sha256: str,
 ) -> dict[str, Any]:
-    _require(isinstance(outer, dict) and outer.get("schema") == CASE_RESULT_SCHEMA
+    _require(isinstance(outer, dict) and set(outer) == CASE_RESULT_FIELDS
+             and outer.get("schema") == CASE_RESULT_SCHEMA
              and outer.get("case_id") == case_id
              and outer.get("provenance_chain_references_closed") is True
              and outer.get("definition_control_bindings_match_frozen_pack_and_source_bytes") is True
              and outer.get("reviewed_metric_code_sources_match") is True
              and outer.get("loaded_module_code_identity_verified") is False
+             and outer.get("native_table_review_authenticity")
+             == "caller_supplied_trust_not_authenticated_here"
+             and outer.get("metric_review_authenticity")
+             == "caller_supplied_trust_not_authenticated_here"
+             and outer.get("authorization_authenticity") == "external_gate_not_checked_here"
+             and outer.get("runtime_environment_assumption")
+             == "caller_attested_not_independently_verified"
              and outer.get("native_integrity_evaluated") is False
              and outer.get("metrics_evaluated") is True
              and outer.get("readiness_pass") is False
              and outer.get("T1_numerical") is False
-             and outer.get("qualification_credit") == 0,
+             and _is_integer_zero(outer.get("qualification_credit")),
              f"per-case v2 result is absent, unclosed, or overstates T1: {case_id}")
     _require(outer.get("native_table_review_receipt_sha256") == table_review_sha256
              and outer.get("metric_review_receipt_sha256") == metric_review_sha256,
@@ -232,7 +306,8 @@ def _validate_case_result(
              ))
              and table.get("raw_frames_recomputed") == table.get("time_rows")
              and table.get("native_integrity_evaluated") is False
-             and table.get("T1_numerical") is False and table.get("qualification_credit") == 0
+             and table.get("T1_numerical") is False
+             and _is_integer_zero(table.get("qualification_credit"))
              and isinstance(table.get("table_bytes"), int) and not isinstance(table["table_bytes"], bool)
              and 0 < table["table_bytes"] <= table_v2.MAX_TABLE_FILE_BYTES
              and _hex64(table.get("table_sha256")),
@@ -250,7 +325,8 @@ def _validate_case_result(
 
     case_metrics = outer.get("case_metrics")
     _require(isinstance(case_metrics, dict)
-             and outer.get("metric_gates_passed") is case_metrics.get("metric_gates_passed"),
+             and outer.get("metric_gates_passed") is case_metrics.get("metric_gates_passed")
+             and _is_integer_zero(case_metrics.get("qualification_credit")),
              f"outer per-case metric-gate result differs from its case payload: {case_id}")
     _require(case_metrics.get("source_table_bytes") == table["table_bytes"]
              and case_metrics.get("source_table_sha256") == table["table_sha256"],
