@@ -99,6 +99,8 @@ def test_valid_synthetic_journal_remains_open_and_non_authorizing():
     assert result["status"] == "untrusted_v5_journal_shape_consistent"
     assert result["event_count"] == 7
     assert result["all_polls_terminal"] is True
+    assert result["observed_process_lifecycle_complete"] is True
+    assert result["process_generation_count"] == 1
     assert result["all_polls_returned"] is True
     assert result["gate_state"] == "open"
     assert result["event_source_completeness_verified"] is False
@@ -132,18 +134,25 @@ def test_exact_process_event_union_branches_are_structurally_accepted():
     parent = _process(0)
     events = [
         _event("spawn", 0, process_generation_id=parent, supervisor_identity_binding={"synthetic": True}),
-        _event("fork", 1, parent_generation_id=parent, process_generation_id=_process(1, pid=44)),
-        _event("clone_process", 2, parent_generation_id=parent, process_generation_id=_process(2, pid=45), clone_flags_hex="0000000000000000"),
-        _event("thread_create", 3, process_generation_id=parent, thread_generation_id=_thread(3), clone_flags_hex="0000000000000000"),
-        _event("thread_exit", 4, process_generation_id=parent, thread_generation_id=_thread(3)),
-        _event("exec", 5, process_generation_id=parent, executable_binding={"synthetic": True}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
-        _event("exit", 6, process_generation_id=parent, exit_code=0, signal=None),
-        _event("reap", 7, process_generation_id=parent),
-        _event("load", 8, process_generation_id=parent, object_binding={"synthetic": True}, object_kind="library"),
-        _event("cgroup", 9, process_generation_id=parent, action="attach", cgroup_id="cg-v1"),
+        _event("exec", 1, process_generation_id=parent, executable_binding={"synthetic": True}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        _event("fork", 2, parent_generation_id=parent, process_generation_id=_process(2, pid=44)),
+        _event("clone_process", 3, parent_generation_id=parent, process_generation_id=_process(3, pid=45), clone_flags_hex="0000000000000000"),
+        _event("thread_create", 4, process_generation_id=parent, thread_generation_id=_thread(4), clone_flags_hex="0000000000000000"),
+        _event("thread_exit", 5, process_generation_id=parent, thread_generation_id=_thread(4)),
+        _event("load", 6, process_generation_id=parent, object_binding={"synthetic": True}, object_kind="library"),
+        _event("cgroup", 7, process_generation_id=parent, action="attach", cgroup_id="cg-v1"),
+        _event("exit", 8, process_generation_id=_process(2, pid=44), exit_code=0, signal=None),
+        _event("reap", 9, process_generation_id=_process(2, pid=44)),
+        _event("exit", 10, process_generation_id=_process(3, pid=45), exit_code=0, signal=None),
+        _event("reap", 11, process_generation_id=_process(3, pid=45)),
+        _event("exit", 12, process_generation_id=parent, exit_code=0, signal=None),
+        _event("reap", 13, process_generation_id=parent),
     ]
     result = inspect_untrusted_v5_journal(_journal(events))
-    assert result["event_count"] == 10
+    assert result["event_count"] == 14
+    assert result["process_generation_count"] == 3
+    assert result["thread_generation_count"] == 1
+    assert result["observed_process_lifecycle_complete"] is True
     assert result["gate_state"] == "open"
 
 
@@ -222,6 +231,102 @@ def test_exit_code_must_be_exact_builtin_8_bit_value(bad_exit_code):
     events = _main_events()
     events[5]["exit_code"] = bad_exit_code
     with pytest.raises(JournalV5Error, match="exit code"):
+        inspect_untrusted_v5_journal(_journal(events))
+
+
+def test_process_query_before_root_exec_is_rejected():
+    proc = _process()
+    events = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={"synthetic": True}),
+        _event(
+            "loop_guard", 1, process_generation_id=proc, driver_id="main",
+            loop_iteration_id=0, time_step_ieee754_hex="0000000000000000",
+            time_max_ieee754_hex="3ff0000000000000", condition_result=True,
+        ),
+    ]
+    with pytest.raises(JournalV5Error, match="requires a running process"):
+        inspect_untrusted_v5_journal(_journal(events))
+
+
+def test_fork_from_created_root_and_multiple_root_spawn_are_rejected():
+    root = _process()
+    events = [
+        _event("spawn", 0, process_generation_id=root, supervisor_identity_binding={"synthetic": True}),
+        _event("fork", 1, parent_generation_id=root, process_generation_id=_process(1, pid=44)),
+    ]
+    with pytest.raises(JournalV5Error, match="parent must be a running"):
+        inspect_untrusted_v5_journal(_journal(events))
+
+    events = [
+        _event("spawn", 0, process_generation_id=root, supervisor_identity_binding={"synthetic": True}),
+        _event("spawn", 1, process_generation_id=_process(1, pid=44), supervisor_identity_binding={"synthetic": True}),
+    ]
+    with pytest.raises(JournalV5Error, match="multiple solver root"):
+        inspect_untrusted_v5_journal(_journal(events))
+
+
+def test_pid_reuse_before_reap_is_rejected_but_lifecycle_truncation_is_open():
+    root = _process()
+    child = _process(2, pid=44)
+    reused_child = _process(3, pid=44)
+    events = [
+        _event("spawn", 0, process_generation_id=root, supervisor_identity_binding={"synthetic": True}),
+        _event("exec", 1, process_generation_id=root, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        _event("fork", 2, parent_generation_id=root, process_generation_id=child),
+        _event("clone_process", 3, parent_generation_id=root, process_generation_id=reused_child, clone_flags_hex="0000000000000000"),
+    ]
+    with pytest.raises(JournalV5Error, match="PID reuse"):
+        inspect_untrusted_v5_journal(_journal(events))
+
+    result = inspect_untrusted_v5_journal(_journal(_main_events()[:-1]))
+    assert result["observed_process_lifecycle_complete"] is False
+    assert result["gate_state"] == "open"
+
+
+def test_pid_reuse_after_reap_is_accepted_as_a_new_generation():
+    root = _process()
+    first_child = _process(2, pid=44)
+    second_child = _process(5, pid=44)
+    events = [
+        _event("spawn", 0, process_generation_id=root, supervisor_identity_binding={"synthetic": True}),
+        _event("exec", 1, process_generation_id=root, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        _event("fork", 2, parent_generation_id=root, process_generation_id=first_child),
+        _event("exit", 3, process_generation_id=first_child, exit_code=0, signal=None),
+        _event("reap", 4, process_generation_id=first_child),
+        _event("clone_process", 5, parent_generation_id=root, process_generation_id=second_child, clone_flags_hex="0000000000000000"),
+        _event("exit", 6, process_generation_id=second_child, exit_code=0, signal=None),
+        _event("reap", 7, process_generation_id=second_child),
+        _event("exit", 8, process_generation_id=root, exit_code=0, signal=None),
+        _event("reap", 9, process_generation_id=root),
+    ]
+    result = inspect_untrusted_v5_journal(_journal(events))
+    assert result["process_generation_count"] == 3
+    assert result["observed_process_lifecycle_complete"] is True
+
+
+def test_process_exit_before_owned_thread_exit_is_rejected():
+    proc = _process()
+    events = [
+        _event("spawn", 0, process_generation_id=proc, supervisor_identity_binding={"synthetic": True}),
+        _event("exec", 1, process_generation_id=proc, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        _event("thread_create", 2, process_generation_id=proc, thread_generation_id=_thread(2), clone_flags_hex="0000000000000000"),
+        _event("exit", 3, process_generation_id=proc, exit_code=0, signal=None),
+    ]
+    with pytest.raises(JournalV5Error, match="before its threads terminated"):
+        inspect_untrusted_v5_journal(_journal(events))
+
+
+def test_tid_reuse_across_processes_waits_for_prior_thread_exit():
+    root = _process()
+    child = _process(2, pid=44)
+    events = [
+        _event("spawn", 0, process_generation_id=root, supervisor_identity_binding={"synthetic": True}),
+        _event("exec", 1, process_generation_id=root, executable_binding={}, argv_sha256="2" * 64, cwd_object_id="cwd-v1", environment_sha256="3" * 64),
+        _event("fork", 2, parent_generation_id=root, process_generation_id=child),
+        _event("thread_create", 3, process_generation_id=root, thread_generation_id=_thread(3, tid=43), clone_flags_hex="0000000000000000"),
+        _event("thread_create", 4, process_generation_id=child, thread_generation_id=_thread(4, tid=43), clone_flags_hex="0000000000000000"),
+    ]
+    with pytest.raises(JournalV5Error, match="TID reuse"):
         inspect_untrusted_v5_journal(_journal(events))
 
 

@@ -1,9 +1,10 @@
 """Non-authorizing structural parser for the synthetic F8 R008 C journal V5.
 
 This parser checks serialization, exact event field sets, primitive domains,
-and journal-local sequence/clock consistency. It does not establish that the
-journal is complete or truthful, validate process/query causality or cache
-replay, attest runtime identity, or authorize execution/qualification.
+journal-local sequence/clock consistency, and process/thread state transitions.
+It does not establish that the journal is complete or truthful, validate the
+source callgraph/query causality or cache replay, attest runtime identity, or
+authorize execution/qualification.
 """
 from __future__ import annotations
 
@@ -287,6 +288,138 @@ def _validate_event(event: Any, *, expected_seq: int, nonce: str) -> dict[str, A
     return event
 
 
+def _process_key(generation: dict[str, Any]) -> tuple[Any, ...]:
+    return tuple(generation[key] for key in (
+        "pid_namespace_inode_hex", "pid", "start_monotonic_ns_hex",
+        "kernel_starttime_ticks_hex", "birth_seq_hex",
+    ))
+
+
+def _thread_key(generation: dict[str, Any]) -> tuple[Any, ...]:
+    return tuple(generation[key] for key in (
+        "tid", "start_monotonic_ns_hex", "kernel_starttime_ticks_hex", "birth_seq_hex",
+    ))
+
+
+def _observe_process_lifecycle(events: list[dict[str, Any]]) -> dict[str, int | bool]:
+    """Recompute journal-local process/thread transitions without attesting them."""
+    processes: dict[tuple[Any, ...], dict[str, Any]] = {}
+    pid_generations: dict[tuple[str, int], tuple[Any, ...]] = {}
+    threads: dict[tuple[Any, ...], dict[str, Any]] = {}
+    active_tids: dict[tuple[str, int], tuple[Any, ...]] = {}
+    roots = 0
+
+    for event in events:
+        kind = event["kind"]
+        if kind in {"spawn", "fork", "clone_process"}:
+            generation = event["process_generation_id"]
+            generation_key = _process_key(generation)
+            if generation_key in processes:
+                raise JournalV5Error("process generation was created more than once")
+            pid_key = (generation["pid_namespace_inode_hex"], generation["pid"])
+            previous_generation = pid_generations.get(pid_key)
+            if (previous_generation is not None
+                    and processes[previous_generation]["state"] != "reaped"):
+                raise JournalV5Error("PID reuse occurred before the previous generation was reaped")
+
+            if kind == "spawn":
+                roots += 1
+                if roots != 1:
+                    raise JournalV5Error("journal must not create multiple solver root generations")
+                parent_key = None
+                state = "created"
+            else:
+                parent_key = _process_key(event["parent_generation_id"])
+                parent = processes.get(parent_key)
+                if parent is None or parent["state"] != "running":
+                    raise JournalV5Error(f"{kind} parent must be a running known generation")
+                state = "running"
+            processes[generation_key] = {
+                "generation": generation,
+                "parent_key": parent_key,
+                "state": state,
+            }
+            pid_generations[pid_key] = generation_key
+            continue
+
+        if kind == "thread_create":
+            owner_key = _process_key(event["process_generation_id"])
+            owner = processes.get(owner_key)
+            if owner is None or owner["state"] != "running":
+                raise JournalV5Error("thread_create owner must be a running known process")
+            generation = event["thread_generation_id"]
+            generation_key = _thread_key(generation)
+            if generation_key in threads:
+                raise JournalV5Error("thread generation was created more than once")
+            owner_generation = owner["generation"]
+            tid_key = (owner_generation["pid_namespace_inode_hex"], generation["tid"])
+            previous_thread = active_tids.get(tid_key)
+            if previous_thread is not None and threads[previous_thread]["state"] != "thread_exited":
+                raise JournalV5Error("TID reuse occurred before the previous thread exited")
+            threads[generation_key] = {"owner_key": owner_key, "state": "running"}
+            active_tids[tid_key] = generation_key
+            continue
+
+        if kind == "thread_exit":
+            owner_key = _process_key(event["process_generation_id"])
+            owner = processes.get(owner_key)
+            thread_key = _thread_key(event["thread_generation_id"])
+            thread = threads.get(thread_key)
+            if (owner is None or owner["state"] in {"exited", "reaped"}
+                    or thread is None or thread["owner_key"] != owner_key
+                    or thread["state"] != "running"):
+                raise JournalV5Error("thread_exit does not match a live owned thread generation")
+            thread["state"] = "thread_exited"
+            continue
+
+        if kind not in {"exec", "load", "cgroup", "loop_guard", "poll_begin", "poll_end", "exit", "reap"}:
+            continue
+        generation_key = _process_key(event["process_generation_id"])
+        process = processes.get(generation_key)
+        if process is None:
+            raise JournalV5Error(f"{kind} references an unknown process generation")
+        state = process["state"]
+        if kind == "exec":
+            if state not in {"created", "running"}:
+                raise JournalV5Error("exec occurred after process exit or reap")
+            process["state"] = "running"
+        elif kind in {"loop_guard", "poll_begin", "poll_end"}:
+            if state != "running":
+                raise JournalV5Error(f"{kind} requires a running process generation")
+        elif kind in {"load", "cgroup"}:
+            if state in {"exited", "reaped"}:
+                raise JournalV5Error(f"{kind} occurred after process exit or reap")
+        elif kind == "exit":
+            if state != "running":
+                raise JournalV5Error("process exit requires a running generation")
+            if any(
+                thread["owner_key"] == generation_key and thread["state"] == "running"
+                for thread in threads.values()
+            ):
+                raise JournalV5Error("process exited before its threads terminated")
+            process["state"] = "exited"
+        elif kind == "reap":
+            if state != "exited":
+                raise JournalV5Error("process reap must follow exactly one exit")
+            process["state"] = "reaped"
+
+    reaped_count = sum(process["state"] == "reaped" for process in processes.values())
+    exited_threads = sum(thread["state"] == "thread_exited" for thread in threads.values())
+    complete = (
+        roots == 1
+        and reaped_count == len(processes)
+        and exited_threads == len(threads)
+    )
+    return {
+        "process_root_count": roots,
+        "process_generation_count": len(processes),
+        "process_reaped_count": reaped_count,
+        "thread_generation_count": len(threads),
+        "thread_exited_count": exited_threads,
+        "observed_process_lifecycle_complete": complete,
+    }
+
+
 def inspect_untrusted_v5_journal(raw: bytes) -> dict[str, Any]:
     """Inspect journal bytes and return only a non-authorizing diagnostic."""
     journal = _parse_json(raw)
@@ -313,10 +446,12 @@ def inspect_untrusted_v5_journal(raw: bytes) -> dict[str, Any]:
 
     begins: dict[int, dict[str, Any]] = {}
     ends: dict[int, dict[str, Any]] = {}
+    validated_events: list[dict[str, Any]] = []
     poll_exceptions = 0
     previous_mono = coverage_start
     for seq, raw_event in enumerate(journal["events"]):
         event = _validate_event(raw_event, expected_seq=seq, nonce=nonce)
+        validated_events.append(event)
         mono = int(event["mono_ns_hex"], 16)
         if mono < coverage_start or mono > coverage_end:
             raise JournalV5Error("event monotonic time falls outside journal coverage")
@@ -335,6 +470,7 @@ def inspect_untrusted_v5_journal(raw: bytes) -> dict[str, Any]:
             ends[begin_seq] = event
             poll_exceptions += event["outcome"] == "exception"
 
+    lifecycle = _observe_process_lifecycle(validated_events)
     return {
         "status": "untrusted_v5_journal_shape_consistent",
         "journal_raw_sha256": hashlib.sha256(raw).hexdigest(),
@@ -346,6 +482,7 @@ def inspect_untrusted_v5_journal(raw: bytes) -> dict[str, Any]:
         "poll_exception_count": poll_exceptions,
         "all_polls_terminal": len(begins) == len(ends),
         "all_polls_returned": len(begins) == len(ends) and poll_exceptions == 0,
+        **lifecycle,
         "gate_state": "open",
         "event_source_completeness_verified": False,
         "runtime_identity_verified": False,

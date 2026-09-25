@@ -1,6 +1,6 @@
 # F8 R008 C 阶段 execution-evidence synthetic schema V5（草案）
 
-状态：V5 首轮只读交叉复核为 `REVISE` 后已修订；focused follow-up 确认 query/process 生命周期、terminal guard 与异常/中断 cache 规则在文本层面闭合。当前已实现 synthetic-only journal 的 strict structural parser 与合成测试，但尚无 process/query 因果图、source-callgraph 重算、单槽 cache replay、trusted producer/event source 或 runtime identity 验证。它仍不是 production execution schema，不生成 solver 许可、不关闭 gate、不授予资格信用；有效 parse 也必须输出 `gate_state="open"`、`execution_semantics_verified=false`、T1 false、zero credit。未运行 solver/native/GenCase/worker/GPU/queue。V3/V4 字节、签名 domain、one-shot 收据和历史版本均不得重解释为 V5。
+状态：V5 首轮只读交叉复核为 `REVISE` 后已修订；focused follow-up 确认 query/process 生命周期、terminal guard 与异常/中断 cache 规则在文本层面闭合。当前已实现 synthetic-only journal strict parser、journal-local process/thread state replay 与合成测试，但尚无可信 process/query 因果图、source-callgraph 重算、单槽 cache replay、trusted producer/event source 或 runtime identity 验证。它仍不是 production execution schema，不生成 solver 许可、不关闭 gate、不授予资格信用；有效 parse 也必须输出 `gate_state="open"`、`execution_semantics_verified=false`、T1 false、zero credit。未运行 solver/native/GenCase/worker/GPU/queue。V3/V4 字节、签名 domain、one-shot 收据和历史版本均不得重解释为 V5。
 
 V5 envelope 与 payload schema 固定为 `core.cfd.f8.r008_c_execution_evidence.synthetic.v5`，signature domain separator 固定为 ASCII 字节 `F8-R008-C-EXEC-SYNTHETIC-V5` 后接单个 LF (`0x0a`)；V4 prefix/schema 一律拒绝。source-callgraph ref 的固定 registry target 为 `core.cfd.f8.r008_c_execution_source_callgraph.synthetic.v5`，除本合同明示新增的 process/query closure 字段外，V4 exact source-fragment/AST/driver/instance 规则继承且不得放宽。
 
