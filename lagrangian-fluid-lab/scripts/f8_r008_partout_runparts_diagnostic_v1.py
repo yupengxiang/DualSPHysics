@@ -110,7 +110,9 @@ def _parse_runparts(payload: bytes) -> tuple[dict[str, Any], list[dict[str, int]
         raise PartOutDiagnosticError(f"RunPARTs parse failed: {type(error).__name__}") from error
 
 
-def _root_identity(root: bi4.ItemRecord, block: int) -> tuple[tuple[str, int, Any], ...]:
+def _root_identity(
+    root: bi4.ItemRecord, block: int,
+) -> tuple[tuple[tuple[str, int, Any], ...], int]:
     values = _value_map(root, "PartOut root")
     for name in ("Piece", "Npiece", "Block"):
         value = values.get(name)
@@ -122,10 +124,16 @@ def _root_identity(root: bi4.ItemRecord, block: int) -> tuple[tuple[str, int, An
         or values["Block"].value != block
     ):
         _fail("PartOut root piece/block metadata disagrees with the CPU single-piece filename")
+    case_np_value = values.get("CaseNp")
+    if case_np_value is None or case_np_value.type_code != 10:
+        _fail("PartOut root lacks the native uint64 CaseNp value")
+    case_np = _uint(case_np_value.value, "PartOut root CaseNp")
+    if case_np == 0:
+        _fail("PartOut root CaseNp must be positive")
     return tuple(sorted(
         (entry.name, entry.type_code, entry.value)
         for entry in root.values if entry.name != "Block"
-    ))
+    )), case_np
 
 
 def _scan_partout_source(
@@ -133,6 +141,7 @@ def _scan_partout_source(
 ) -> tuple[
     int,
     tuple[tuple[str, int, Any], ...],
+    int,
     list[_ParsedPartOut],
     dict[str, Any],
     tuple[int, int, int, int, int],
@@ -195,7 +204,7 @@ def _scan_partout_source(
     root = items[0]
     if root.name != "JPartOutBi4" or root.arrays or root.children:
         _fail(f"{source.filename} does not start with a leaf JPartOutBi4 root item")
-    root_identity = _root_identity(root, block)
+    root_identity, case_np = _root_identity(root, block)
     records: list[_ParsedPartOut] = []
     last_part = -1
     for item in items[1:]:
@@ -245,7 +254,7 @@ def _scan_partout_source(
             fd=source.fd,
             arrays=arrays,
         ))
-    return block, root_identity, records, {
+    return block, root_identity, case_np, records, {
         "filename": source.filename,
         "bytes": before.st_size,
         "sha256": raw_hash,
@@ -281,7 +290,10 @@ def _event_payload_check(
     *,
     expected_counts: dict[str, int],
     expected_pos_double: bool | None,
+    case_np: int,
 ) -> dict[str, Any]:
+    if record.nout > case_np:
+        _fail(f"PartOut PART {record.part} Nout exceeds the declared CaseNp")
     arrays = record.arrays
     id_name = "Idp"
     pos_name = "Posd" if "Posd" in arrays else "Pos"
@@ -303,6 +315,10 @@ def _event_payload_check(
     ids = struct.unpack("<" + "I" * record.nout, id_bytes)
     if len(set(ids)) != record.nout:
         _fail(f"PartOut PART {record.part} has duplicate particle IDs")
+    # Frozen R008 qualification definitions do not use InOut/VRes dynamic
+    # particle creation. Do not reuse this initial-CaseNp bound for such cases.
+    if any(particle_id >= case_np for particle_id in ids):
+        _fail(f"PartOut PART {record.part} contains an ID outside the declared CaseNp range")
     histogram = Counter(motive_bytes)
     if set(histogram) - {1, 2, 3}:
         _fail(f"PartOut PART {record.part} contains an unknown Motive code")
@@ -321,6 +337,7 @@ def _event_payload_check(
         "partout_nout": record.nout,
         "id_count": len(ids),
         "ids_unique_within_part": True,
+        "ids_within_declared_case_np": True,
         "position_array": pos_name,
         "motive_histogram": {str(key): histogram.get(key, 0) for key in (1, 2, 3)},
         "reason_counts_match": True,
@@ -417,13 +434,20 @@ def diagnose(
         file_refs: list[dict[str, Any]] = []
         source_identities: list[tuple[PartOutSource, tuple[int, int, int, int, int]]] = []
         common_root_identity: tuple[tuple[str, int, Any], ...] | None = None
+        common_case_np: int | None = None
         last_event_part = -1
         for source in ordered_sources:
-            block, root_identity, records, file_ref, source_identity = _scan_partout_source(source)
+            block, root_identity, case_np, records, file_ref, source_identity = (
+                _scan_partout_source(source)
+            )
             if common_root_identity is None:
                 common_root_identity = root_identity
             elif root_identity != common_root_identity:
                 _fail("PartOut root metadata changed between block files")
+            if common_case_np is None:
+                common_case_np = case_np
+            elif case_np != common_case_np:
+                _fail("PartOut CaseNp changed between block files")
             if int(PARTOUT_FILE.fullmatch(source.filename).group(1)) != block:
                 _fail("PartOut filename/block identity changed during validation")
             for record in records:
@@ -457,6 +481,7 @@ def diagnose(
                 event,
                 expected_counts=row,
                 expected_pos_double=expected_pos_double,
+                case_np=common_case_np,
             ))
         if events:
             _fail(f"PartOut contains PART {min(events)} absent from RunPARTs")
@@ -491,6 +516,7 @@ def diagnose(
                 "nonzero_part_payloads_joined_exactly_once": True,
                 "partout_id_and_array_counts_match_nout": True,
                 "particle_ids_unique_within_each_part": True,
+                "particle_ids_within_declared_case_np": True,
                 "motive_histograms_match_runparts": True,
                 "position_precision_expectation_supplied": expected_pos_double is not None,
                 "position_precision_expected_value": expected_pos_double,

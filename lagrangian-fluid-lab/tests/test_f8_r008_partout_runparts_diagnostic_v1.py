@@ -78,12 +78,18 @@ def _partout_record(
     return _item(f"PART_{part:04d}", values=values, arrays=tuple(arrays))
 
 
-def _partout_block(block: int, records: tuple[bytes, ...] = (), *, root_name: str = "JPartOutBi4") -> bytes:
+def _partout_block(
+    block: int,
+    records: tuple[bytes, ...] = (),
+    *,
+    root_name: str = "JPartOutBi4",
+    case_np: int = 10752,
+) -> bytes:
     values = (
         _value("Piece", 8, struct.pack("<I", 0)),
         _value("Npiece", 8, struct.pack("<I", 1)),
         _value("Block", 8, struct.pack("<I", block)),
-        _value("CaseNp", 10, struct.pack("<Q", 100)),
+        _value("CaseNp", 10, struct.pack("<Q", case_np)),
     )
     prefix = b"#FileJBD " + root_name.encode("ascii")
     header = prefix + b" " * (58 - len(prefix)) + b"\n\0\0\0\0\0"
@@ -158,10 +164,10 @@ def test_consistent_synthetic_partout_join_stays_open_and_zero_credit(tmp_path: 
 def test_appended_blocks_are_joined_by_part_not_aggregate_count(tmp_path: Path) -> None:
     sources = (
         _source(tmp_path, "PartOut_000.obi4", _partout_block(
-            0, (_partout_record(1, (100,), bytes((1,))),)
+            0, (_partout_record(1, (100,), bytes((1,))),), case_np=10752,
         )),
         _source(tmp_path, "PartOut_001.obi4", _partout_block(
-            1, (_partout_record(2, (200, 201), bytes((2, 3))),)
+            1, (_partout_record(2, (200, 201), bytes((2, 3))),), case_np=10752,
         )),
     )
     try:
@@ -180,8 +186,8 @@ def test_current_cpu_profile_accepts_float_positions_with_uint32_ids(tmp_path: P
         tmp_path,
         "PartOut_000.obi4",
         _partout_block(0, (_partout_record(
-            1, (2**31 + 5,), bytes((1,)), position="Pos"
-        ),)),
+            1, (10751,), bytes((1,)), position="Pos"
+        ),), case_np=10752),
     )
     try:
         result = diagnostic.diagnose(
@@ -204,6 +210,36 @@ def test_uint64_idpd_is_rejected_for_the_current_cpu_r008_profile(tmp_path: Path
     )
     try:
         result = diagnostic.diagnose(_runparts(counts={1: (1, 0, 0)}), (source,))
+    finally:
+        _close((source,))
+    assert result["status"] == "diagnostic_only_missing_or_inconsistent"
+    assert result["excluded_fluid_particles_zero"] == "missing"
+    assert result["gate_decision_eligible"] is False
+
+
+def test_particle_id_must_be_below_the_partout_declared_case_count(tmp_path: Path) -> None:
+    source = _source(
+        tmp_path,
+        "PartOut_000.obi4",
+        _partout_block(0, (_partout_record(1, (10752,), bytes((1,))),)),
+    )
+    try:
+        result = diagnostic.diagnose(_runparts(counts={1: (1, 0, 0)}), (source,))
+    finally:
+        _close((source,))
+    assert result["status"] == "diagnostic_only_missing_or_inconsistent"
+    assert result["excluded_fluid_particles_zero"] == "missing"
+    assert result["gate_decision_eligible"] is False
+
+
+def test_partout_root_requires_positive_uint64_case_count(tmp_path: Path) -> None:
+    source = _source(
+        tmp_path,
+        "PartOut_000.obi4",
+        _partout_block(0, case_np=0),
+    )
+    try:
+        result = diagnostic.diagnose(_runparts(), (source,))
     finally:
         _close((source,))
     assert result["status"] == "diagnostic_only_missing_or_inconsistent"
