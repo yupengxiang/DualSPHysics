@@ -1,0 +1,83 @@
+{
+  "audit_arch_domain": {
+    "all_other_arch_values_action": "deny",
+    "maximum": 4294967295,
+    "minimum": 0,
+    "partition_complete": true,
+    "target_arch_action": "classify raw_nr using the partition above",
+    "target_arch_value": 3221225534
+  },
+  "policy_state": {
+    "all_unclassified_selectors_default_deny": true,
+    "execution_authority": false,
+    "native_per_number_dispositions_complete": false,
+    "native_per_number_predicates_complete": false,
+    "ptrace_seccomp_order_conformance_passed": false,
+    "qualification_credit": 0,
+    "readiness_pass": false,
+    "syscall_runtime_conformance_passed": false,
+    "target_kernel_build_pinned": false,
+    "target_kernel_config_pinned": false
+  },
+  "raw_nr_domain": {
+    "maximum": 2147483647,
+    "minimum": -2147483648,
+    "partition": [
+      {
+        "raw_nr_max": -2,
+        "raw_nr_min": -2147483648,
+        "required_action": "deny",
+        "selector_class": "negative_non_sentinel_raw_number"
+      },
+      {
+        "raw_nr_max": -1,
+        "raw_nr_min": -1,
+        "required_action": "deny_as_target_request_without_separate_trusted_tracer_state",
+        "selector_class": "minus_one_unattributed_skip_or_user_selector"
+      },
+      {
+        "count": 462,
+        "per_number_dispositions_complete": false,
+        "per_number_predicates_complete": false,
+        "raw_nr_max": 461,
+        "raw_nr_min": 0,
+        "required_action": "deny_until_this_native_number_has_an_explicit_reviewed_policy",
+        "selector_class": "native_source_table_interval",
+        "source_entryless_rows": 16,
+        "source_listed_entry_rows": 357,
+        "source_table_holes": 89
+      },
+      {
+        "raw_nr_max": 1073741823,
+        "raw_nr_min": 462,
+        "required_action": "deny",
+        "selector_class": "unlisted_non_x32_raw_number"
+      },
+      {
+        "raw_nr_max": 2147483647,
+        "raw_nr_min": 1073741824,
+        "required_action": "deny_x32_abi",
+        "selector_class": "x32_tagged_raw_number"
+      }
+    ],
+    "partition_complete": true
+  },
+  "record_id": "f8-r008-syscall-selector-domain-v1",
+  "schema": "core.cfd.f8.r008_syscall_selector_domain.v1",
+  "selector_abi": {
+    "audit_arch_type": "unsigned_int32",
+    "nr_minus_one_is_attributable_to_tracer_from_selector_alone": false,
+    "seccomp_raw_nr_type": "signed_int32",
+    "target_audit_arch_hex": "0xc000003e",
+    "x32_runtime_rejection_verified": false,
+    "x32_syscall_bit_hex": "0x40000000",
+    "x32_table_dispatch_requires_config_x86_x32_abi": true
+  },
+  "source_baseline": {
+    "native_rows_sha256": "b1f28269d2ea1c72f6a0899b77c801f665360309309b7d8a819768d1841e85d7",
+    "record_id": "f8-r008-syscall-universe-linux-v6.8-x86_64-baseline-v1",
+    "upstream_ref": "v6.8",
+    "upstream_table_sha256": "4c30abea9a4b69f3409bea7a0c910a8c8feb9a44b22a448b5c82f2bfdd8249c8"
+  },
+  "status": "static_selector_domain_partition_only_not_execution_policy"
+}
