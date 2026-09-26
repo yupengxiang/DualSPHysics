@@ -4,7 +4,7 @@
 
 完成 UPDATE-181 建议的 F4R center/offset × 三档分辨率 GenCase-only 静态矩阵。六例原始 Definition 的基线输出 `.bi4` 均与仓库现存旧矩阵逐字节一致，确认了旧初始人口可复现。
 
-按每档分辨率选择全局 `<pointref>` 后，池体 MK1 的所有粒子中心都进入连续池盒；但该相位同时移动液滴质心与改变液滴/壁面粒数。候选的中档 fluid 质量比基线低约 6.4%；细档 center/offset 液滴数量差方向翻转。跨分辨率质量 spread 有所下降，不能据此声称守恒或因果修复。因此只保留为 GenCase 设计诊断，不冻结候选、不启动 solver。
+按每档分辨率选择全局 `<pointref>` 后，池体 MK1 的所有粒子中心都进入连续池盒；候选六例的总流体质量也都更接近连续目标 52.416 kg。但该相位同时移动液滴质心与改变液滴/壁面粒数；中档 fluid 质量仍比基线低约 6.4%，细档 center/offset 液滴数量差方向翻转。质量误差改善是全局相位重新离散整个 fluid 初态的结果，不代表守恒或单独修复池边界。因此只保留为 GenCase 设计诊断，不冻结候选、不启动 solver。
 
 详细原始对照、位置/人口/质量分项、输入转换脚本和逐文件哈希见[本轮 campaign 报告及回执](../campaigns/core-v1/cfd/f4r-pointref-phase-matrix-v1/report.zh-CN.md)。本轮未打开 production HDF5，未运行 solver/worker/GPU/队列，未改 registry/ledger；`T1/T2=false`，credit=0。
 
