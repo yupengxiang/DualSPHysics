@@ -158,6 +158,36 @@ def test_graph_loss_backpropagates_through_two_hop_source():
     assert float(features.grad[2].abs().sum()) > 0.0
 
 
+@pytest.mark.parametrize("kind", ["graph_raw", "graph_residual"])
+def test_chunked_halo_matches_full_output_loss_and_parameter_gradients(kind):
+    state, known, dt = _grid_state(), example_known(), .01
+    args, _, _ = tensors(state, known, dt, "cpu")
+    torch.manual_seed(71)
+    model = DualIncrementModel(kind, hidden=8)
+    loss_centers = torch.tensor([0, 2, 4], dtype=torch.long)
+    all_centers = torch.arange(state.count, dtype=torch.long)
+    target = torch.linspace(-.7, .8, state.count * 6).reshape(state.count, 6)
+    parameters = tuple(model.parameters())
+
+    full = model(*args, centers=all_centers)
+    full_selected = full[loss_centers]
+    full_loss = torch.mean((full_selected - target[loss_centers]) ** 2)
+    full_gradients = torch.autograd.grad(full_loss, parameters)
+
+    chunked = torch.cat([
+        model(*args, centers=loss_centers[start:start + 2])
+        for start in range(0, len(loss_centers), 2)
+    ])
+    chunked_loss = torch.mean((chunked - target[loss_centers]) ** 2)
+    chunked_gradients = torch.autograd.grad(chunked_loss, parameters)
+
+    assert torch.allclose(chunked, full_selected, rtol=1e-6, atol=1e-7)
+    assert torch.allclose(chunked_loss, full_loss, rtol=1e-6, atol=1e-7)
+    assert len(chunked_gradients) == len(full_gradients)
+    for chunked_gradient, full_gradient in zip(chunked_gradients, full_gradients):
+        assert torch.allclose(chunked_gradient, full_gradient, rtol=1e-6, atol=1e-7)
+
+
 def test_all_baselines_emit_dual_increment_and_residual_adds_known_prior():
     state, known, dt = example_state(), example_known(), .01
     args, prior, _ = tensors(state, known, dt, "cpu")
