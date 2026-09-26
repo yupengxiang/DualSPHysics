@@ -1,0 +1,118 @@
+{
+  "acceptance": {
+    "candidate_truth_error_limit_mps": 0.04698137929009748,
+    "fixed_denominator": 2816,
+    "gate_decisions_must_match_v3_exactly": true,
+    "rmse": "reported_by_q_and_region; diagnostic_only_not_a_new_gate",
+    "truth_error_limit_basis": "existing_registered_F4_maximum_reconstruction_error",
+    "unknown_or_nonfinite_predictions": "fail_candidate_screen_without_dropping_rows"
+  },
+  "candidates": {
+    "baseline": "f4_supportcap_affine_query_bound_v3",
+    "candidate": "f4_supportcap_affine_shepard_blend_v5",
+    "candidate_parameters_fitted_for_this_set": false,
+    "thresholds_or_candidate_parameters_may_change_after_scoring": false
+  },
+  "code_bindings": {
+    "calibration_geometry_helpers": {
+      "path": "scripts/f4_material_calibration.py",
+      "sha256": "b4f122fddfb581941aab7cad122b121ca693b249a9cbbb9447e978d185d2a9ec"
+    },
+    "f4_geometry_and_gate": {
+      "path": "scripts/core_material.py",
+      "sha256": "9e294e64c431c725717caf86eb001dc3a3505a312e279386796b6a472b5ee94e"
+    },
+    "v3_baseline": {
+      "path": "scripts/f4_supportcap_affine_query_bound_candidate_v3.py",
+      "sha256": "b8cfb6efa8d76f0201c5a5293f29c5cfd76691d6f3578ff03d1b577075c25116"
+    },
+    "v5_candidate": {
+      "path": "scripts/f4_supportcap_affine_shepard_blend_candidate_v5.py",
+      "sha256": "893340c9aed6ff2badb068bf50e02235a5d2a42a8b2cf579bfd2db7540af514e"
+    },
+    "validation_script": {
+      "path": "scripts/f4_supportcap_affine_shepard_blend_heldout_v1.py",
+      "sha256": "476f51e02f893836e2a629fe33f4727c5d930f3f24ec4ed6135ea75cd30e9bde"
+    }
+  },
+  "credit": 0,
+  "execution_boundary": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "analytic_arrays_only": true,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "native_or_tracer_started": false,
+    "registry_mutation": 0,
+    "solver_started": false,
+    "worker_or_queue_started": false
+  },
+  "geometry": {
+    "destination_queries": {
+      "counts": [
+        16,
+        8,
+        4
+      ],
+      "generator": "cell_centers_in_f4_destination_region"
+    },
+    "expected_query_count": 2816,
+    "interface_queries": {
+      "counts": [
+        16,
+        8,
+        3
+      ],
+      "generator": "cell_centers_in_fixed_registered_interface_box",
+      "low_m": [
+        0.0,
+        0.0,
+        0.15
+      ],
+      "size_m": [
+        1.2,
+        0.4,
+        0.06
+      ]
+    },
+    "q_cases": [
+      0.75,
+      0.95
+    ],
+    "source_queries": {
+      "count": 512,
+      "generator": "core_material.seeds_f4"
+    },
+    "support_cloud": "union_of_destination_and_q_specific_source_cell_center_lattices",
+    "support_spacing_m": 0.015
+  },
+  "held_out_field": {
+    "analytic_invariants": [
+      "divergence_free",
+      "x_periodic",
+      "no_slip_at_z_0_and_H"
+    ],
+    "channel_height_m": 0.6,
+    "id": "periodic_no_slip_divergence_free_channel_mode",
+    "streamfunction": "A*sin(2*pi*x/Lx)*sin(pi*z/H)^2",
+    "streamfunction_amplitude_m2ps": 0.025,
+    "type": "two_dimensional_incompressible_streamfunction_mode_in_xz",
+    "velocity": {
+      "u_x": "A*(pi/H)*sin(2*pi*x/Lx)*sin(2*pi*z/H)",
+      "u_y": "0",
+      "u_z": "-A*(2*pi/Lx)*cos(2*pi*x/Lx)*sin(pi*z/H)^2"
+    },
+    "x_period_m": 1.2
+  },
+  "holdout_status": "prospective_unscored_stress_set_not_external_independent_validation",
+  "purpose": "prospective synthetic stress evaluation of the frozen F4 v5 blend",
+  "qualification_claim": "none",
+  "resource_gate": {
+    "load_gate_precedes_cloud_and_query_construction": true,
+    "maximum_one_minute_load": "process_visible_cpu_count",
+    "schema": "one_minute_system_load_le_process_visible_cpu_count"
+  },
+  "revision_id": "f4-v5-prospective-channel-mode-holdout-20260926-v1",
+  "schema": "core.material.f4.supportcap.affine_shepard_blend.heldout.v1"
+}
