@@ -284,6 +284,10 @@ def test_trace_persists_first_failed_stage_reason(tmp_path, monkeypatch):
         _stage_result(reliable=True, reason="reliable"),
         _stage_result(reliable=True, reason="reliable"),
         _stage_result(reliable=True, reason="reliable"),
+        _stage_result(reliable=True, reason="reliable"),  # later interval cannot revive it
+        _stage_result(reliable=True, reason="reliable"),
+        _stage_result(reliable=True, reason="reliable"),
+        _stage_result(reliable=True, reason="reliable"),
     ])
     monkeypatch.setattr(
         material_v2.F3NativeVolumeMLS,
@@ -293,14 +297,19 @@ def test_trace_persists_first_failed_stage_reason(tmp_path, monkeypatch):
 
     report = run_v2(**_inputs(
         source, output, seeds=np.asarray([[0.001, 0.0, 0.0]]),
-        intervals=1, substeps=1, walls=np.empty((0, 3, 3)),
+        intervals=2, substeps=1, walls=np.empty((0, 3, 3)),
     ))
 
     assert report["status"] == "completed"
+    assert report["unknown_fraction_final"] == 1.0
+    assert report["unknown_fraction_by_frame"]["fraction"] == [0.0, 1.0, 1.0]
     with h5py.File(output, "r") as handle:
         assert handle["failure_reason"].asstr()[1].tolist() == ["k1_wall_occluded"]
         assert bool(handle["permanent_unknown"][1, 0])
         np.testing.assert_array_equal(handle["position"][1], [[0.001, 0.0, 0.0]])
+        assert bool(handle["permanent_unknown"][2, 0])
+        assert handle["failure_reason"].asstr()[2].tolist() == ["k1_wall_occluded"]
+        np.testing.assert_array_equal(handle["position"][2], handle["position"][1])
 
 
 def test_rk4_records_earliest_failed_stage_and_preserves_previous_failure():
