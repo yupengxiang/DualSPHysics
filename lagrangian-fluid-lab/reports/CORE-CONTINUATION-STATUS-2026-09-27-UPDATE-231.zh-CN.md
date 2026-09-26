@@ -1,0 +1,7 @@
+# UPDATE-231：F8 final-fput queue-barrier diagnostic V3
+
+新增 additive F8 R008 reducer V3，在 V2 raw fanotify 重解析上增加调用方声明的 shared-journal / pre-close 与 post-close EAGAIN barrier 顺序检查。每条 name-group raw event 都按同 group sequence 与 raw SHA-256 对应 timeline row；检查 cgroup-empty、pre-close EAGAIN、close entry/exit、target `FAN_CLOSE_WRITE` 与 post-close EAGAIN 的一致性，close event 可在 close exit 前或后才被 reader dequeue。专用 timeline 要求从 1 起连续无缺行；两次 drain 必须无 loss/overflow/short read。四个 fanotify parser/reducer 专项测试合计 78 passed，V3 源码及测试 `py_compile` 通过。
+
+V16/V17 没定义跨 cgroup/fanotify/supervisor 的共同 sequence domain，`read_seq` 也不是已定义的跨 producer 时基。V3 的 `journal_seq` 因而是新 schema 中 caller-supplied、未认证的声明；不拿 group/syscall/cgroup 原有计数器相互比较。fanotify timeline row 只是 reader dequeue 顺序，不代表 kernel enqueue 时间。没有改变 V17、V1/V2、历史回执、readiness 或执行门。所有 source/runtime/journal/barrier/object/PIDFD/close-cookie 身份仍不可信；final-close/readiness/T1/execution 均 false、credit 0。
+
+V3 只是原型，可信 producer ABI、attempt-bound shared journal 与 loss semantics、cgroup/写 token quiescence、target-kernel queue/merge conformance、close-token/file-cookie/fput observer bridge 仍未闭合。未做 fanotify/kernel/filesystem probe、sudo/特权操作、native build、生产数据读写、worker/solver/GPU/queue 或 registry/ledger/readiness/T1/T2 修改。详见[实现边界](F8-R008-FINAL-FPUT-JOIN-REDUCER-V3-2026-09-27.zh-CN.md)、[V3 reducer](../scripts/f8_r008_final_fput_join_reducer_v3.py)与[专项测试](../tests/test_f8_r008_final_fput_join_reducer_v3.py)。
