@@ -1,5 +1,7 @@
 # 计划文献来源审计（2026-09-24）
 
+> 本文件正文表格和后续逐轮记载保留各自审计时点的历史状态。最新机器核验状态由 2026-09-26 的 [UPDATE-198](CORE-CONTINUATION-STATUS-2026-09-26-UPDATE-198.zh-CN.md) 与下方 RERUN14 更新覆盖。
+
 范围：仅核查 `PLAN.md` §1.3 六项已列工作是否存在、出版信息及其与表中设计启示是否一致；没有扩展检索新文献，也没有据此判断本项目的创新性。
 
 | 工作／主来源 | 书目核对 | 来源直接支持的启示 | 状态 |
@@ -44,3 +46,9 @@
 新会话按原三源工具执行一次 RERUN9，见[第十份机器核验回执](PLAN-REFERENCES-VERIFICATION-2026-09-25-RERUN9.json)：6 项全部为 `verify_pending`，没有 `verified` 或 `unverified`。五个 arXiv API 请求均返回 HTTP 406；六项 Semantic Scholar 请求均返回 HTTP 429；Crossref 仍对 LagrangeBench、FD-Bench 与 FuelTank 返回精确 DOI／标题匹配，对 GNS、Neural SPH、FluidLab 的精确标题查询未命中。由于 transient API errors 按工具语义优先产生 pending，本结果不构成负面书目结论。遵循每会话一次的规则，本会话不再重试；既有人工书目交叉核对不更改机器 verdict。详见 [UPDATE-130](CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-130.zh-CN.md)。
 
 离线回归：`tests/test_verify_papers.py`，7 项通过，覆盖三源成功、标题冲突、临时网络失败、无 DOI 的 Crossref 精确标题查找与模糊未命中、以及 DOI-only 记录。该工具只验证书目身份，不判断论文主张、质量或本项目创新性。
+
+## 2026-09-26 机器核验收束（RERUN14）
+
+新增 [OpenAlex Works API](https://help.openalex.org/api/) 为第四个独立目录。其官方文档将 API 描述为 OpenAlex 全量 works 数据集的 REST 查询入口，并支持按外部 DOI 获取单条记录（[Get Singleton](https://help.openalex.org/api/get-single-entities/)）。核验器以已给 DOI 精确查询；候选没有出版 DOI 时，以其 arXiv ID 构造规范 `10.48550/arxiv.<id>` DOI 查询。只有 OpenAlex 返回记录的 DOI 与查询身份相符、规范化标题完全相等且记录含合法 OpenAlex work ID 时才记 `matched`；返回身份/标题冲突仍阻止总体验证。总门仍要求至少两个目录精确匹配，未降低标题标准或将人工页面计作机器目录。
+
+[RERUN14](PLAN-REFERENCES-VERIFICATION-2026-09-26-RERUN14.json) 对冻结的六条候选得到 **6 verified、0 unverified、0 verify_pending**，且无目录冲突：GNS、Neural SPH、FluidLab 为 arXiv、Semantic Scholar、OpenAlex 精确匹配；LagrangeBench 与 FD-Bench 四目录均精确匹配；FuelTank 由 Crossref 与 OpenAlex 精确匹配。回执 SHA-256：`1d15f656b6299fe997315ea43d66ec5e8d15fb99b7efce04bef45fd5da259f86`。定向测试 `tests/test_verify_papers.py` **10 passed**，并通过 `py_compile` 与 `git diff --check`。这闭合六条文献的自动书目身份核验，不判断文献主张，也不改变 Core T1/T2、训练、评测或产品复现状态。

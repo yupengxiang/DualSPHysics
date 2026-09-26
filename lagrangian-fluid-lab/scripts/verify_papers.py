@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Conservatively cross-check paper metadata against arXiv, Crossref, and S2.
+"""Conservatively cross-check paper metadata against independent catalogs.
 
 This verifies bibliographic identity only. It does not assess paper claims,
 scientific quality, or the project's novelty.
@@ -23,6 +23,7 @@ import xml.etree.ElementTree as ET
 ARXIV_API = "https://export.arxiv.org/api/query"
 CROSSREF_API = "https://api.crossref.org/works"
 S2_BATCH_API = "https://api.semanticscholar.org/graph/v1/paper/batch"
+OPENALEX_WORKS_API = "https://api.openalex.org/works/"
 USER_AGENT = (
     "CorePlanReferenceVerifier/1.0 (https://github.com/yupengxiang/DualSPHysics)"
 )
@@ -197,10 +198,61 @@ def _s2_match(candidate: dict, item: dict | None) -> dict:
     }
 
 
+def _openalex_lookup_doi(candidate: dict) -> str:
+    """Use the publication DOI, or the stable arXiv DOI, for an exact lookup."""
+    if candidate.get("doi"):
+        return normalize_doi(candidate["doi"])
+    return "10.48550/arxiv." + normalize_arxiv_id(candidate["arxiv_id"])
+
+
+def _fetch_openalex(candidate: dict, *, timeout: float) -> dict | None:
+    doi = _openalex_lookup_doi(candidate)
+    identifier = quote("doi:" + doi, safe=":.")
+    payload = _request_json(f"{OPENALEX_WORKS_API}{identifier}", timeout=timeout)
+    if payload is None:
+        return None
+    if not isinstance(payload, dict) or "error" in payload:
+        raise ValueError("OpenAlex DOI lookup returned a malformed/error response")
+    return payload
+
+
+def _openalex_match(candidate: dict, item: dict | None) -> dict:
+    if item is None:
+        return {"status": "not_found", "lookup_doi": _openalex_lookup_doi(candidate)}
+    title = item.get("display_name")
+    actual_doi = item.get("doi")
+    expected_doi = _openalex_lookup_doi(candidate)
+    doi_matches = isinstance(actual_doi, str) and normalize_doi(actual_doi) == expected_doi
+    if (
+        isinstance(title, str)
+        and normalize_title(title) == normalize_title(candidate["title"])
+        and doi_matches
+        and isinstance(item.get("id"), str)
+        and item["id"].startswith("https://openalex.org/W")
+    ):
+        return {
+            "status": "matched",
+            "title": title,
+            "doi": actual_doi,
+            "openalex_id": item["id"],
+            "year": item.get("publication_year"),
+            "lookup_doi": expected_doi,
+        }
+    return {
+        "status": "mismatch",
+        "title": title,
+        "doi": actual_doi,
+        "openalex_id": item.get("id"),
+        "expected_doi": expected_doi,
+        "lookup_doi": expected_doi,
+    }
+
+
 def verify_records(
-    candidates: list[dict], *, timeout: float = 20, crossref_delay: float = 0.25
+    candidates: list[dict], *, timeout: float = 20, crossref_delay: float = 0.25,
+    openalex_delay: float = 0.25,
 ) -> dict:
-    """Return a three-source identity audit; network errors never become passes."""
+    """Return a multi-catalog identity audit; network errors never become passes."""
     if not isinstance(candidates, list) or not candidates:
         raise ValueError("input must be a nonempty array of paper records")
     for index, candidate in enumerate(candidates):
@@ -233,6 +285,17 @@ def verify_records(
             crossref_results.append({"status": "error", "error": repr(error)})
         if crossref_delay > 0 and index + 1 < len(candidates):
             time.sleep(crossref_delay)
+
+    openalex_results = []
+    for index, candidate in enumerate(candidates):
+        try:
+            openalex_results.append(
+                {"status": "response", "record": _fetch_openalex(candidate, timeout=timeout)}
+            )
+        except Exception as error:
+            openalex_results.append({"status": "error", "error": repr(error)})
+        if openalex_delay > 0 and index + 1 < len(candidates):
+            time.sleep(openalex_delay)
 
     try:
         s2_records = _fetch_s2(candidates, timeout=timeout)
@@ -269,7 +332,18 @@ def verify_records(
         else:
             s2 = _s2_match(candidate, s2_records[index])
 
-        checks = {"arxiv": arxiv, "crossref": crossref, "semantic_scholar": s2}
+        openalex_result = openalex_results[index]
+        if openalex_result["status"] == "error":
+            openalex = {"status": "error", "error": openalex_result["error"]}
+        else:
+            openalex = _openalex_match(candidate, openalex_result["record"])
+
+        checks = {
+            "arxiv": arxiv,
+            "crossref": crossref,
+            "semantic_scholar": s2,
+            "openalex": openalex,
+        }
         matched_sources = [
             name for name, result in checks.items() if result["status"] == "matched"
         ]
@@ -312,7 +386,7 @@ def verify_records(
         "verdict": (
             "PASS" if all(paper["status"] == "verified" for paper in papers) else "WARN"
         ),
-        "method": "exact normalized title cross-check across arXiv, Crossref, and Semantic Scholar; verified requires two matches and no mismatch",
+        "method": "exact normalized title cross-check across arXiv, Crossref, Semantic Scholar, and OpenAlex; verified requires two catalog matches and no mismatch",
         "verified_at_utc": datetime.now(timezone.utc).isoformat(),
         "papers": papers,
     }
@@ -324,6 +398,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--timeout-seconds", type=float, default=20)
     parser.add_argument("--crossref-delay-seconds", type=float, default=0.25)
+    parser.add_argument("--openalex-delay-seconds", type=float, default=0.25)
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
     if not math.isfinite(args.timeout_seconds) or args.timeout_seconds <= 0:
@@ -333,6 +408,8 @@ def main() -> int:
         or args.crossref_delay_seconds < 0
     ):
         parser.error("--crossref-delay-seconds must be nonnegative and finite")
+    if not math.isfinite(args.openalex_delay_seconds) or args.openalex_delay_seconds < 0:
+        parser.error("--openalex-delay-seconds must be nonnegative and finite")
     if args.output.exists() and not args.overwrite:
         parser.error(
             f"output already exists (pass --overwrite to replace): {args.output}"
@@ -342,6 +419,7 @@ def main() -> int:
         candidates,
         timeout=args.timeout_seconds,
         crossref_delay=args.crossref_delay_seconds,
+        openalex_delay=args.openalex_delay_seconds,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     temporary = None
