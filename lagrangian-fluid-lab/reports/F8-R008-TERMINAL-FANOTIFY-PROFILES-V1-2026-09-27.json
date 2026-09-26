@@ -1,0 +1,98 @@
+{
+  "schema": "core.cfd.f8.r008_terminal_fanotify_profiles.v1",
+  "record_id": "f8-r008-terminal-fanotify-profiles-v1",
+  "status": "proposal_only_static_profile_not_runtime_evidence",
+  "contract_bindings": [
+    {
+      "path": "reports/F8-R008-TERMINAL-COMPLETION-EVIDENCE-CONTRACT-V17-2026-09-26.zh-CN.md",
+      "sha256": "5cf9e082765081582163e4d7f88b7900657c9436c3263b6552be6f4bcf5a6111",
+      "canonical_fragment_sha256": "4fe20a55eba85011f73c83cc99e690ca5ab163c0d32bc35d7890063ceadb86d3"
+    },
+    {
+      "path": "reports/F8-R008-TERMINAL-COMPLETION-EVIDENCE-CONTRACT-V18-2026-09-26.zh-CN.md",
+      "sha256": "7d479bb012c3846eee51e29ed7bd822cde14ff34e225e445d65dd1e62b99c87f",
+      "canonical_fragment_sha256": "1688bfb33a84427ead0ae874ea52d16aca552d9b9de76c298c78595238d774f0"
+    }
+  ],
+  "profiles": [
+    {
+      "group_kind": "permission",
+      "init_flags_symbolic": [
+        "FAN_CLASS_CONTENT",
+        "FAN_REPORT_PIDFD",
+        "FAN_CLOEXEC",
+        "FAN_NONBLOCK"
+      ],
+      "observed_linux_v6_8_x86_64_init_flags_hex": "0x0087",
+      "target_abi_raw_init_flags_hex": null,
+      "event_f_flags_symbolic": [
+        "O_RDONLY",
+        "O_CLOEXEC",
+        "O_LARGEFILE"
+      ],
+      "observed_linux_v6_8_x86_64_glibc_event_f_flags_hex": "0x80000",
+      "target_abi_raw_event_f_flags_hex": null,
+      "capability_prerequisite": {
+        "capability": "CAP_SYS_ADMIN",
+        "user_namespace": "init_user_ns"
+      },
+      "permission_event_support_required": true,
+      "metadata_fd_rule": "nonnegative",
+      "event_fd_ref_rule": "required",
+      "required_info_record_types": [
+        "PIDFD"
+      ],
+      "forbidden_info_record_types": [
+        "FID",
+        "DFID",
+        "DFID_NAME",
+        "DFID_NAME_TARGET"
+      ],
+      "actor_pidfd_ref_required": true
+    },
+    {
+      "group_kind": "name",
+      "init_flags_symbolic": [
+        "FAN_CLASS_NOTIF",
+        "FAN_REPORT_PIDFD",
+        "FAN_REPORT_DFID_NAME_TARGET",
+        "FAN_CLOEXEC",
+        "FAN_NONBLOCK"
+      ],
+      "observed_linux_v6_8_x86_64_init_flags_hex": "0x1e83",
+      "target_abi_raw_init_flags_hex": null,
+      "event_f_flags_symbolic": [
+        "O_RDONLY",
+        "O_CLOEXEC",
+        "O_LARGEFILE"
+      ],
+      "observed_linux_v6_8_x86_64_glibc_event_f_flags_hex": "0x80000",
+      "target_abi_raw_event_f_flags_hex": null,
+      "capability_prerequisite": {
+        "capability": "CAP_SYS_ADMIN",
+        "user_namespace": "init_user_ns"
+      },
+      "permission_event_support_required": false,
+      "metadata_fd_rule": "FAN_NOFD",
+      "event_fd_ref_rule": "null",
+      "required_info_record_types": [
+        "PIDFD",
+        "FID",
+        "DFID_NAME"
+      ],
+      "forbidden_info_record_types": [],
+      "name_info_grammar": "exactly_one_of_each_required_type_per_supported_event_bit",
+      "actor_pidfd_ref_required": true
+    }
+  ],
+  "non_claims": {
+    "readiness_pass": false,
+    "qualification_credit": 0,
+    "fanotify_init_called": false,
+    "fanotify_mark_called": false,
+    "host_capability_probed": false,
+    "host_filesystem_probed": false,
+    "pinned_kernel_conformance_passed": false,
+    "nonprivileged_pidfd_downgrade_allowed": false
+  }
+}
