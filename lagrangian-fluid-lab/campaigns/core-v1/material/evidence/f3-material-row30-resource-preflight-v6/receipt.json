@@ -1,0 +1,135 @@
+{
+  "active_f3_row30_workers": [],
+  "authorized_scope": "explicit user authorization: one new F3 material row-30 resource/scheduler preflight; no worker launch",
+  "bindings": [
+    {
+      "bytes": 5437,
+      "path": "campaigns/core-v1/material/evidence/f3-material-row30-resource-preflight-v1/receipt.json",
+      "role": "prior blocked row30 resource preflight",
+      "sha256": "eadd552fe6f8268b58e3844a708c370631073c180c6bdce11b1109c6b504f281"
+    },
+    {
+      "bytes": 2514,
+      "path": "campaigns/core-v1/material/evidence/f3-material-row30-root-decision-v1/packet.json",
+      "role": "row30 root decision packet",
+      "sha256": "a4c02db71caef05e53c53accea9766473eaa80032844ca9bc6e812a38b4b0af9"
+    },
+    {
+      "bytes": 42626,
+      "path": "campaigns/core-v1/material/evidence/f3-material-t2-launch-readiness-v1/receipt.json",
+      "role": "row30 launch-readiness receipt",
+      "sha256": "954b9e261422cf4c515c108e0d72c0a67aa800bc9af78f340584e30decd09c5b"
+    },
+    {
+      "bytes": 142018,
+      "path": "campaigns/l1-resume/continuation/RESOURCE-LEDGER.json",
+      "role": "current historical resource ledger",
+      "sha256": "3601f948928ec9760bcf562b56d4b5511d35025f98992c98ed2c45e07909294e"
+    },
+    {
+      "bytes": 1630,
+      "path": "campaigns/l1-resume/continuation/RESOURCE-LIMITS.json",
+      "role": "current historical resource limits",
+      "sha256": "a991ec3cc84471c223a754ecd65e2fdc80b34b5b8e73f4c66115d1fbd5140808"
+    },
+    {
+      "bytes": 20572940,
+      "path": "campaigns/core-v1/runtime/status.json",
+      "role": "current scheduler status snapshot",
+      "sha256": "8ab20c692e360748e17497aa6a640e131e981f1e4e2be61958933f966b034870"
+    },
+    {
+      "bytes": 14684,
+      "path": "scripts/f3_material_row30_resource_preflight_v2.py",
+      "role": "v2 one-shot preflight builder",
+      "sha256": "3ee03ceaf08a8f905881259a1951c4cebe00b92853d9ca149a9ce558f16e180c"
+    },
+    {
+      "bytes": 2951,
+      "path": "tests/test_f3_material_row30_resource_preflight_v2.py",
+      "role": "v2 preflight tests",
+      "sha256": "42ed82869517c55865aa50918615b6eff6ae0e11be61268718e3bc55e2a1c889"
+    },
+    {
+      "bytes": 5371,
+      "path": "scripts/f3_material_row30_resource_preflight_v6.py",
+      "role": "v6 fresh one-shot preflight wrapper",
+      "sha256": "144851bc7a8055c86fe536da62472a98ef515cf85dd7520a2f09a50464814cf0"
+    },
+    {
+      "bytes": 2955,
+      "path": "tests/test_f3_material_row30_resource_preflight_v6.py",
+      "role": "v6 preflight contract tests",
+      "sha256": "ba346c567072eba992be32aeb4cbe7bfe4e68da2fa5459a7c9e574e8bd791376"
+    }
+  ],
+  "blockers": [
+    "one-minute host load exceeds the CPUs available to this task",
+    "historical resource ledger has expired",
+    "historical CPU core-hour cap would be exceeded by row30"
+  ],
+  "candidate": {
+    "backend": "f3_native_volume_mls_current_frame_rk4_v1",
+    "configuration_id": "F3-material-30",
+    "matrix_row": 30,
+    "q": 0.5,
+    "seeds": 4096,
+    "source_role": "production",
+    "substeps": 4,
+    "window": "full native 0--8.35 s"
+  },
+  "created_at_utc": "2026-09-26T10:32:43.793968+00:00",
+  "current_environment": {
+    "available_cpu_count": 128,
+    "available_ram_bytes": 220186169344,
+    "filesystem_free_bytes": 8172996243456,
+    "load_average_1_5_15_min": [
+      245.71240234375,
+      246.80615234375,
+      249.2470703125
+    ],
+    "observed_at_utc": "2026-09-26T10:32:43.687674+00:00"
+  },
+  "execution_controls": {
+    "T2_credit": 0,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "material_worker_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "solver_started": false
+  },
+  "next_required_authority": "A fresh root resource decision and separate worker-launch authorization are required; this preflight grants neither.",
+  "one_shot_lock": {
+    "bytes": 371,
+    "path": "campaigns/core-v1/material/evidence/f3-material-row30-resource-preflight-v6/one-shot-lock.json",
+    "role": "exclusive lock consuming this single preflight authorization",
+    "sha256": "c47d5448c1dcfcaff79432d3a11926e3b57881eda1d81ed443970c5413adf549"
+  },
+  "record_id": "f3-material-row30-resource-preflight-v6",
+  "resource_assessment": {
+    "current_cpu_core_hours_upper_bound": 911.9579510388137,
+    "current_material_configurations_used": 16,
+    "historical_cpu_core_hour_limit": 896,
+    "historical_expiry_utc": "2026-09-16T00:00:00+00:00",
+    "historical_material_configuration_limit": 32,
+    "proposed_cpu_core_hours": 11.893361255095547,
+    "source_identity": {
+      "expected_sha256_from_v1": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4",
+      "path": "campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+      "prepared_hash_revalidation_performed": false,
+      "reason": "short-circuited because current scheduler/resource blockers already deny admission",
+      "source_hash_revalidation_performed": false
+    }
+  },
+  "scheduler_active_job_count": 0,
+  "schema": "core.material.f3.row30.resource_preflight.v6",
+  "status": "blocked_no_worker_authorized",
+  "supersedes": {
+    "bytes": 5410,
+    "path": "campaigns/core-v1/material/evidence/f3-material-row30-resource-preflight-v5/receipt.json",
+    "role": "prior blocked row30 v5 preflight; preserved as historical evidence",
+    "sha256": "ab0d72386a6f91f625ce320781c581eaad7dc1f448dad8acf46cf3b93f7fed7a"
+  },
+  "worker_launch_authorized": false
+}
