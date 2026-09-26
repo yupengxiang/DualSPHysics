@@ -21,16 +21,36 @@ def _build_pair(
     tmp_path,
     *,
     extra_output_payloads: dict[str, bytes] | None = None,
+    nonzero_body_populations: bool = False,
     frame_cpart_overrides: dict[int, int] | None = None,
     frame_step_overrides: dict[int, int] | None = None,
     frame_child_part_overrides: dict[int, int] | None = None,
 ):
-    b_root, b_auth_bytes, b_auth = bundle_fixture._build_bundle(tmp_path, "B")
+    b_population_kwargs = {}
+    c_population_kwargs = {}
+    if nonzero_body_populations:
+        b_population_kwargs = {
+            "initial_ids": (0, 1, 2, 3),
+            "initial_case_counts": (1, 1, 1, 1),
+            "generated_xml": (
+                b"<case><particles><fixed begin='0' count='1'/>"
+                b"<moving begin='1' count='1'/><floating begin='2' count='1'/>"
+                b"<fluid begin='3' count='1'/></particles></case>"
+            ),
+        }
+        c_population_kwargs = {
+            "frame_ids": (0, 1, 2, 3),
+            "frame_case_counts": (1, 1, 1, 1),
+        }
+    b_root, b_auth_bytes, b_auth = bundle_fixture._build_bundle(
+        tmp_path, "B", **b_population_kwargs,
+    )
     c_root, c_auth_bytes, c_auth = bundle_fixture._build_bundle(
         tmp_path, "C", extra_output_payloads=extra_output_payloads,
         frame_cpart_overrides=frame_cpart_overrides,
         frame_step_overrides=frame_step_overrides,
         frame_child_part_overrides=frame_child_part_overrides,
+        **c_population_kwargs,
     )
     c_receipt_path = c_root / "receipt.json"
     c_receipt = json.loads(c_receipt_path.read_bytes())
@@ -104,6 +124,12 @@ def test_inventories_every_manifest_part_extra_from_verified_b_cohorts(tmp_path)
     assert result["part_extra_presence_expectation_resolved"] is False
     assert result["part_extra_observed_all_floating_values_finite"] is True
     assert result["all_native_auxiliary_float_sources_scanned"] is False
+    assert result["native_auxiliary_presence"]["PartMotionRef"] == "not_applicable_zero_population"
+    assert result["native_auxiliary_presence"]["PartFloatInfo"] == "not_applicable_zero_population"
+    assert result["population_conditional_body_output_expectations"]["writer_source"]["files"] == [
+        {"path": path, "sha256": digest, "bytes": (inventory.bundle.LAB / path).stat().st_size}
+        for path, digest in inventory.CPU_WRITER_SOURCES
+    ]
     assert result["partout_runparts_diagnostic"]["status"] == "diagnostic_only_missing_or_inconsistent"
     assert result["part_extra_records"][0]["primary_frame_path"] == "frames/Part_0001.bi4"
     assert result["part_extra_records"][0]["part_extra"]["floating_value_inventory"][
@@ -112,6 +138,70 @@ def test_inventories_every_manifest_part_extra_from_verified_b_cohorts(tmp_path)
     classes = {entry["path"]: entry["classification"] for entry in result["output_classifications"]}
     assert classes["PartExtra_0001.bi4"] == "part_extra_normals_finite_scanned"
     assert classes["frames/Part_0001.bi4"] == "primary_native_frame"
+
+
+@pytest.mark.parametrize(
+    "filename",
+    [
+        "PartMotionRef.ibi4", "PartMotionRef2.ibi4",
+        "PartFloatInfo.ibi4", "PartFloatInfo2.ibi4",
+    ],
+)
+def test_zero_verified_body_populations_reject_impossible_motion_float_outputs(
+    tmp_path, filename,
+) -> None:
+    pair = _build_pair(tmp_path, extra_output_payloads={filename: b"impossible-under-zero-population"})
+
+    with pytest.raises(inventory.AuxiliaryOutputInventoryError, match="output is impossible"):
+        _inventory(pair)
+
+
+def test_nonzero_motion_population_requires_main_reference_and_allows_optional_extra():
+    writer_source = inventory._verify_cpu_writer_source()
+    groups = {"fixed": 3, "moving": 2, "floating": 0, "fluid": 5}
+
+    result = inventory._body_output_expectations(
+        {"frames/Part_0000.bi4", "PartMotionRef.ibi4", "PartMotionRef2.ibi4"},
+        groups,
+        writer_source=writer_source,
+        binary_frames_present=True,
+    )
+
+    assert result["part_motion_ref"]["verified_moving_plus_floating_population"] == 2
+    assert result["part_motion_ref"]["main_file_status"] == "required_manifest_member_present"
+    assert result["part_motion_ref"]["extra_file"] == "manifest_member_present"
+    assert result["part_float_info"]["main_file_status"] == "not_applicable_zero_population"
+
+
+def test_nonzero_float_population_requires_motion_and_float_main_files():
+    writer_source = inventory._verify_cpu_writer_source()
+    groups = {"fixed": 3, "moving": 0, "floating": 2, "fluid": 5}
+
+    with pytest.raises(inventory.AuxiliaryOutputInventoryError, match="PartMotionRef main output"):
+        inventory._body_output_expectations(
+            {"frames/Part_0000.bi4", "PartFloatInfo.ibi4"},
+            groups,
+            writer_source=writer_source,
+            binary_frames_present=True,
+        )
+
+    with pytest.raises(inventory.AuxiliaryOutputInventoryError, match="PartFloatInfo main output"):
+        inventory._body_output_expectations(
+            {"frames/Part_0000.bi4", "PartMotionRef.ibi4"},
+            groups,
+            writer_source=writer_source,
+            binary_frames_present=True,
+        )
+
+
+def test_population_expectations_fail_if_reviewed_cpu_writer_source_drifts(monkeypatch):
+    monkeypatch.setattr(
+        inventory, "CPU_WRITER_SOURCES",
+        ((inventory.CPU_WRITER_SOURCES[0][0], "0" * 64), *inventory.CPU_WRITER_SOURCES[1:]),
+    )
+
+    with pytest.raises(inventory.AuxiliaryOutputInventoryError, match="writer source differs"):
+        inventory._verify_cpu_writer_source()
 
 
 def test_absent_optional_part_extra_does_not_mean_output_mode_was_disabled(tmp_path) -> None:
@@ -178,7 +268,7 @@ def test_manifest_bound_head_info_motion_float_files_are_finite_scanned(tmp_path
         "PartInfo_p02.ibi4": info_piece,
         "PartMotionRef.ibi4": motion,
         "PartFloatInfo.ibi4": floating,
-    }))
+    }, nonzero_body_populations=True))
 
     classes = {entry["path"]: entry for entry in result["output_classifications"]}
     assert classes["Part_Head.ibi4"]["classification"] == "part_head_float_values_scanned"
@@ -212,7 +302,7 @@ def test_manifest_bound_auxiliary_nonfinite_values_are_reported_not_promoted(tmp
         "PartInfo.ibi4": info,
         "PartMotionRef.ibi4": motion,
         "PartFloatInfo.ibi4": floating,
-    }))
+    }, nonzero_body_populations=True))
 
     classes = {entry["path"]: entry for entry in result["output_classifications"]}
     assert all(classes[name]["finite_scan_status"] is False for name in (

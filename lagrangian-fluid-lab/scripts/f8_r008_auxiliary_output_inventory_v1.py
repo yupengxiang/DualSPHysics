@@ -33,6 +33,21 @@ PART_EXTRA_NAME = re.compile(r"PartExtra_([0-9]{4,})\.bi4\Z", re.ASCII)
 PRIMARY_FRAME_PATH = re.compile(r"frames/Part_([0-9]{4})\.bi4\Z", re.ASCII)
 PART_OUT_NAME = re.compile(r"PartOut_(?:p[0-9]{2,}_)?[0-9]{3,}\.obi4\Z", re.ASCII)
 PART_INFO_NAME = re.compile(r"PartInfo(?:_p[0-9]{2,})?\.ibi4\Z", re.ASCII)
+MOTION_REF_BASENAMES = frozenset({"PartMotionRef.ibi4", "PartMotionRef2.ibi4"})
+FLOAT_INFO_BASENAMES = frozenset({"PartFloatInfo.ibi4", "PartFloatInfo2.ibi4"})
+CPU_WRITER_SOURCES = (
+    ("vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp",
+     "8729eb29db778288b0495855a04fa0984000896546f484dcf96176ec48da5454"),
+    ("vendor/official/DualSPHysics_v5.4/src/source/JDsPartMotionSave.cpp",
+     "4769b2dfecf7bb1b0a957a68454a8321a24d8d84c2fb9da2d0b5c3410d8dbda6"),
+    ("vendor/official/DualSPHysics_v5.4/src/source/JPartMotRefBi4Save.cpp",
+     "de5d3569ff4e7780c1dbe660cb0b7f43ea65364979a35b780cf134ed86bbb8fb"),
+    ("vendor/official/DualSPHysics_v5.4/src/source/JDsPartFloatSave.cpp",
+     "2ffa6a537707e9ff0b66e16283433976f3d763575270b3ff50d90e2af94dafb9"),
+    ("vendor/official/DualSPHysics_v5.4/src/source/JPartFloatInfoBi4.cpp",
+     "ef0262bc93fb93938a0d9ee2e9fed5f9d9da7717571cd8f6ddccad0adc3b721e"),
+)
+CPU_WRITER_SOURCE_MAX_BYTES = 2 * 1024 * 1024
 NATIVE_AUXILIARY_FILES_MAX = 64
 NATIVE_AUXILIARY_BYTES_MAX = 256 * 1024 * 1024
 STAGES = ("B", "C")
@@ -213,6 +228,114 @@ def _case_boundary_populations(b_result: Mapping[str, Any]) -> tuple[int, int]:
     return case_nbound, case_nfloat
 
 
+def _verify_cpu_writer_source() -> dict[str, Any]:
+    """Bind population-conditional output rules to the reviewed CPU writers."""
+    root_fd, _root_path = bundle._open_absolute_directory(bundle.LAB)
+    try:
+        source_files: list[dict[str, Any]] = []
+        for relative, expected_sha256 in CPU_WRITER_SOURCES:
+            try:
+                payload = bundle._stable_read_beneath(
+                    root_fd, relative, CPU_WRITER_SOURCE_MAX_BYTES,
+                )
+            except (OSError, ValueError) as error:
+                raise AuxiliaryOutputInventoryError(
+                    f"the locked official CPU writer source could not be read safely: {relative}"
+                ) from error
+            digest = hashlib.sha256(payload).hexdigest()
+            _require(digest == expected_sha256,
+                     f"the official CPU writer source differs from the reviewed output contract: {relative}")
+            source_files.append({"path": relative, "sha256": digest, "bytes": len(payload)})
+    finally:
+        os.close(root_fd)
+    return {"files": source_files}
+
+
+def _body_output_expectations(
+    output_paths: set[str],
+    group_counts: Mapping[str, Any],
+    *,
+    writer_source: Mapping[str, Any],
+    binary_frames_present: bool,
+) -> dict[str, Any]:
+    """Reconcile body-output filenames with B cohorts and the locked CPU writer.
+
+    A nonempty manifest-bound primary BI4 frame axis proves the binary-save
+    branch was active. Under that branch, the official writer creates motion
+    and floating metadata files exactly when their corresponding populations
+    are nonzero. Extra-stream files remain conditional on separate runtime
+    settings and are not required here.
+    """
+    _require(binary_frames_present,
+             "population-based body-output expectations require a nonempty primary BI4 frame axis")
+    _require(set(group_counts) == {"fixed", "moving", "floating", "fluid"}
+             and all(type(value) is int and value >= 0 for value in group_counts.values()),
+             "verified B particle cohorts are malformed for body-output expectations")
+    observed_writer_sources = [
+        (row.get("path"), row.get("sha256"))
+        for row in writer_source.get("files", ())
+        if isinstance(row, Mapping)
+    ]
+    _require(observed_writer_sources == list(CPU_WRITER_SOURCES),
+             "body-output expectation is not bound to the reviewed official CPU writer")
+
+    named_members: set[str] = set()
+    for path in output_paths:
+        basename = path.rsplit("/", 1)[-1]
+        if basename in MOTION_REF_BASENAMES | FLOAT_INFO_BASENAMES:
+            _require(path == basename,
+                     "official body-output writer files must be root-level C output members")
+            named_members.add(basename)
+
+    motion_population = group_counts["moving"] + group_counts["floating"]
+    float_population = group_counts["floating"]
+    motion_expected = motion_population > 0
+    float_expected = float_population > 0
+
+    if motion_expected:
+        _require("PartMotionRef.ibi4" in named_members,
+                 "nonzero moving/floating population requires the CPU PartMotionRef main output")
+    else:
+        _require(not (named_members & MOTION_REF_BASENAMES),
+                 "PartMotionRef output is impossible when verified moving and floating populations are zero")
+
+    if float_expected:
+        _require("PartFloatInfo.ibi4" in named_members,
+                 "nonzero floating population requires the CPU PartFloatInfo main output")
+    else:
+        _require(not (named_members & FLOAT_INFO_BASENAMES),
+                 "PartFloatInfo output is impossible when verified floating population is zero")
+
+    return {
+        "writer_source": dict(writer_source),
+        "binary_mode_basis": "nonempty manifest-bound primary BI4 frame axis",
+        "part_motion_ref": {
+            "verified_moving_plus_floating_population": motion_population,
+            "main_file_expected": motion_expected,
+            "main_file_status": (
+                "required_manifest_member_present" if motion_expected
+                else "not_applicable_zero_population"
+            ),
+            "extra_file": (
+                "manifest_member_present" if "PartMotionRef2.ibi4" in named_members
+                else "optional_runtime_condition_unresolved"
+            ) if motion_expected else "not_applicable_zero_population",
+        },
+        "part_float_info": {
+            "verified_floating_population": float_population,
+            "main_file_expected": float_expected,
+            "main_file_status": (
+                "required_manifest_member_present" if float_expected
+                else "not_applicable_zero_population"
+            ),
+            "extra_file": (
+                "manifest_member_present" if "PartFloatInfo2.ibi4" in named_members
+                else "optional_runtime_condition_unresolved"
+            ) if float_expected else "not_applicable_zero_population",
+        },
+    }
+
+
 def _one_native_integer(item: decoder.ItemRecord, name: str, type_code: int) -> int:
     matches = [value for value in item.values if value.name == name]
     _require(len(matches) == 1 and matches[0].type_code == type_code
@@ -294,6 +417,7 @@ def inventory_c_outputs_with_part_extra(
              and set(trusted_authorization_sha256) == set(STAGES)
              and set(expected_authorization_envelopes) == set(STAGES),
              "auxiliary inventory requires exact B/C roots and authorization bindings")
+    writer_source_binding = _verify_cpu_writer_source()
     roots: dict[str, str] = {}
     root_fds: dict[str, int] = {}
     output_fds: dict[str, int] = {}
@@ -326,6 +450,11 @@ def inventory_c_outputs_with_part_extra(
         frames = c_manifest.get("frames")
         _require(isinstance(frames, list) and len(frames) == checked_before["C"]["expected_frame_count"],
                  "verified C manifest lacks its complete primary frame axis")
+        body_output_expectations = _body_output_expectations(
+            set(c_files), checked_before["B"]["particle_group_counts"],
+            writer_source=writer_source_binding,
+            binary_frames_present=bool(frames),
+        )
         frame_by_part: dict[int, Mapping[str, Any]] = {}
         frame_paths: set[str] = set()
         for ordinal, frame in enumerate(frames):
@@ -681,6 +810,7 @@ def inventory_c_outputs_with_part_extra(
                 "case_nfloat": case_nfloat,
                 "derived_from": "B generated XML and initial BI4 particle cohorts",
             },
+            "population_conditional_body_output_expectations": body_output_expectations,
             "c_output_tree_closed": True,
             "c_manifest_file_count": len(c_files),
             "primary_frame_count": len(frame_paths),
@@ -716,16 +846,14 @@ def inventory_c_outputs_with_part_extra(
                     else "no_manifest_member_observed_expectation_unknown"
                 ),
                 "PartMotionRef": (
-                    "manifest_member_scanned"
-                    if any(record["diagnostic"]["interpretation"]["family"] == "PartMotionRef"
-                           for record in motion_float_records)
-                    else "no_manifest_member_observed_expectation_unknown"
+                    "not_applicable_zero_population"
+                    if body_output_expectations["part_motion_ref"]["main_file_expected"] is False
+                    else "required_main_and_present_motion_streams_scanned"
                 ),
                 "PartFloatInfo": (
-                    "manifest_member_scanned"
-                    if any(record["diagnostic"]["interpretation"]["family"] == "PartFloatInfo"
-                           for record in motion_float_records)
-                    else "no_manifest_member_observed_expectation_unknown"
+                    "not_applicable_zero_population"
+                    if body_output_expectations["part_float_info"]["main_file_expected"] is False
+                    else "required_main_and_present_float_streams_scanned"
                 ),
                 "expectations_resolved": False,
             },
