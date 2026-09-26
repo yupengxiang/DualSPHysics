@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import copy
 
 import h5py
 import numpy as np
@@ -11,6 +12,7 @@ from scripts.f3_native_volume_mls_model_material import (
     MODEL_ROLE,
     run_material_trace as run_v1,
 )
+from scripts import f3_native_volume_mls_model_material_v2 as material_v2
 from scripts.f3_native_volume_mls_model_material_v2 import (
     run_material_trace as run_v2,
 )
@@ -157,6 +159,20 @@ def test_resume_rejects_changed_source_bytes_and_parameters(tmp_path):
 
     with h5py.File(source, "r+") as handle:
         handle.attrs["synthetic_mutation"] = "changes source bytes"
+    with pytest.raises(ValueError, match="binding mismatch"):
+        run_v2(**_inputs(source, trace, resume=True))
+
+
+def test_resume_rejects_changed_transitive_implementation_dependency(tmp_path, monkeypatch):
+    source = tmp_path / "synthetic-model.h5"
+    _synthetic_source(source)
+    trace = tmp_path / "dependency-change.h5"
+    assert run_v2(**_inputs(source, trace, stop_after_steps=1))["status"] == "interrupted"
+
+    original_binding = material_v2._implementation_binding
+    changed_binding = copy.deepcopy(original_binding())
+    changed_binding["local_execution_dependencies"]["core_material.py"]["sha256"] = "0" * 64
+    monkeypatch.setattr(material_v2, "_implementation_binding", lambda: changed_binding)
     with pytest.raises(ValueError, match="binding mismatch"):
         run_v2(**_inputs(source, trace, resume=True))
 

@@ -28,6 +28,7 @@ from typing import Any
 
 import h5py
 import numpy as np
+import scipy
 
 from scripts import f3_native_volume_mls_model_material as v1
 from scripts.f3_native_volume_mls_temporal_v3 import (
@@ -45,6 +46,12 @@ TRACE_SCHEMA = "core.material.f3.native_volume_mls.model_material_trace.v2"
 BACKEND = "f3_native_volume_mls_shared_current_model_rho0_stream_v2"
 MODEL_ROLE = v1.MODEL_ROLE
 REFERENCE_ROLE = v1.REFERENCE_ROLE
+_EXECUTION_DEPENDENCY_FILES = (
+    "core_material.py",
+    "core_contract.py",
+    "passive_tracers.py",
+    "f3_material_neighbors.py",
+)
 _V1_TRACE_FIELDS = (
     "position", "reliable", "permanent_unknown", "first_passage", "return_time",
     "residence_opposite", "returned", "support_count", "effective_sample_size",
@@ -74,6 +81,14 @@ def _implementation_binding() -> dict[str, Any]:
     v1_path = Path(v1.__file__).resolve()
     shared_path = here.with_name("f3_native_volume_mls_shared.py")
     runner_path = here.with_name("f3_native_volume_mls_temporal_v3.py")
+    scripts_dir = here.parent
+    local_dependencies = {}
+    for name in _EXECUTION_DEPENDENCY_FILES:
+        path = scripts_dir / name
+        local_dependencies[name] = {
+            "path": str(path.resolve()),
+            "sha256": _sha256_file(path),
+        }
     return {
         "version": "f3_native_volume_mls_model_material_v2",
         "module": str(here),
@@ -84,9 +99,11 @@ def _implementation_binding() -> dict[str, Any]:
         "shared_adapter_sha256": _sha256_file(shared_path),
         "mls_runner": str(runner_path.resolve()),
         "mls_runner_sha256": _sha256_file(runner_path),
+        "local_execution_dependencies": local_dependencies,
         "python": sys.version,
         "platform": platform.platform(),
         "numpy": np.__version__,
+        "scipy": scipy.__version__,
         "h5py": h5py.__version__,
     }
 
