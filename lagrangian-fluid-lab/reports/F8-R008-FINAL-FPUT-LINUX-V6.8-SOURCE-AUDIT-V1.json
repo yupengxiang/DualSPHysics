@@ -1,0 +1,97 @@
+{
+  "schema": "core.cfd.f8.r008_final_fput_linux_v6_8_source_audit.v1",
+  "status": "upstream_static_source_audit_only",
+  "source": {
+    "repository": "https://github.com/torvalds/linux",
+    "tag": "v6.8",
+    "tag_object": "90d1f30371ae3337beb01666b226320728d35c70",
+    "peeled_commit": "e8f897f4afef0031fe618a8e94127a0934896aba",
+    "tag_signature_verified": false,
+    "target_kernel_source_pinned": false,
+    "files": [
+      {
+        "path": "fs/open.c",
+        "sha256": "7f304b00ba6d17c33bbec2045569da590cd86664b0e53fccbcc879285aa8e2a7",
+        "reviewed_symbols": ["SYSCALL_DEFINE1(close)", "filp_flush", "filp_close"]
+      },
+      {
+        "path": "fs/file.c",
+        "sha256": "c129e331b9042443bcd516d8fda58f58c755da41b70b94097d5ad7a9412acf43",
+        "reviewed_symbols": ["fd_install", "file_close_fd", "close_fd"]
+      },
+      {
+        "path": "fs/file_table.c",
+        "sha256": "b27545c59c85415f64f4712b226f99ab4947aa5ece376c45095028d67404f9e0",
+        "reviewed_symbols": ["__fput", "fput", "__fput_sync"]
+      },
+      {
+        "path": "include/linux/fsnotify.h",
+        "sha256": "e99360ab38c182a1206dd069c677c7e031e371dab02dd36570900d71ea161df3",
+        "reviewed_symbols": ["fsnotify_close", "fsnotify_file"]
+      },
+      {
+        "path": "fs/notify/fanotify/fanotify.c",
+        "sha256": "f002f083511d4304cc0a4cb61212ebfade1a082564f1dfec5346e28e747c02ec",
+        "reviewed_symbols": ["fanotify_handle_event", "fanotify_should_merge", "fanotify_merge"]
+      },
+      {
+        "path": "fs/notify/fanotify/fanotify_user.c",
+        "sha256": "908d99745cd6893eda7e7331c2e2e3badc757031a82999a5d75908007a37cfac",
+        "reviewed_symbols": ["copy_info_records_to_user", "copy_fid_info_to_user", "copy_pidfd_info_to_user"]
+      },
+      {
+        "path": "include/uapi/linux/fanotify.h",
+        "sha256": "2fca6aa35b2156f09f3b8305d0793ec11efd7aa795108b49d5c038bde79655d0",
+        "reviewed_symbols": ["fanotify_event_metadata", "fanotify_event_info_header", "fanotify_event_info_fid", "fanotify_event_info_pidfd"]
+      }
+    ]
+  },
+  "static_findings": {
+    "fd_install": {
+      "source_fact": "Installs the supplied struct file pointer into an FD table and consumes the file reference.",
+      "output_specific_identity_proven": false
+    },
+    "direct_close_path": {
+      "source_fact": "close(fd) removes the FD-table entry, calls filp_flush(), then calls __fput_sync(file) before returning to user space.",
+      "close_result_is_zero_before_fput": false,
+      "negative_flush_result_can_coexist_with_fd_removal_and_fput_attempt": true,
+      "fput_occurs_only_if_reference_count_reaches_zero": true
+    },
+    "final_fput": {
+      "source_fact": "__fput_sync decrements the file reference count and calls __fput(file) inline only when that decrement reaches zero.",
+      "syscall_exit_alone_proves_final_fput": false,
+      "observed___fput_return_before_direct_close_exit_is_source_order_consistent": true
+    },
+    "fsnotify_close": {
+      "source_fact": "For FMODE_OPENED files, __fput(file) calls fsnotify_close(file) before subsequent cleanup/free; the same struct file pointer is passed.",
+      "write_mask_rule": "FMODE_WRITE selects FS_CLOSE_WRITE; otherwise FS_CLOSE_NOWRITE",
+      "fanotify_mask_mapping": "BUILD_BUG_ON asserts FAN_CLOSE_WRITE == FS_CLOSE_WRITE and FAN_CLOSE_NOWRITE == FS_CLOSE_NOWRITE"
+    },
+    "generic_fput": {
+      "source_fact": "The generic fput() path can queue ____fput as task_work or enqueue delayed work; direct SYSCALL_DEFINE1(close) instead calls __fput_sync.",
+      "observer_must_not_conflate_fput_with_direct_close_path": true
+    },
+    "fanotify_fid_name_merge": {
+      "source_fact": "Queued FID/name events with matching merge identity may merge, and fanotify_merge ORs the new event mask into the queued event.",
+      "merge_identity_includes": ["event hash", "event type", "pid", "fsid", "parent/child file handles", "name bytes", "directory/rename flags"],
+      "single_modify_plus_close_write_can_become_combined_mask": true,
+      "current_v2_single_bit_parser_accepts_combined_mask": false
+    }
+  },
+  "design_implications": [
+    "A source-pinned direct close profile may use close syscall exit as an upper-bound ordering marker only after an observer independently proves the matching final __fput occurred; close exit by itself remains insufficient.",
+    "A close error is not a reliable indication that the descriptor remains installed: sys_close clears it before flush and invokes __fput_sync afterward.",
+    "To preserve separate MODIFY and CLOSE_WRITE raw events under the current strict single-bit parser, the runtime design should persist a name-group EAGAIN barrier after the writer cgroup is empty and before the final close, then record the post-close drain separately. This prevents queued pre-close events from being merged with the close event only if no further writer events can occur after the barrier.",
+    "The barrier is a proposal for a future static contract review, not a runtime observation or guarantee; fanotify queue loss, event merge, target source/build mismatch, or missing trusted observer still makes the attempt incomplete."
+  ],
+  "authorization_and_readiness": {
+    "runtime_or_capability_probe_performed": false,
+    "privileged_action_performed": false,
+    "production_data_read": false,
+    "native_build_or_worker_started": false,
+    "readiness_pass": false,
+    "T1_numerical": false,
+    "execution_authority": false,
+    "qualification_credit": 0
+  }
+}
