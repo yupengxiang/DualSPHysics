@@ -1,0 +1,201 @@
+"""Synthetic-only tests for the streaming/recovery F3 material evaluator."""
+from __future__ import annotations
+
+import hashlib
+
+import h5py
+import numpy as np
+import pytest
+
+from scripts.f3_native_volume_mls_model_material import (
+    MODEL_ROLE,
+    run_material_trace as run_v1,
+)
+from scripts.f3_native_volume_mls_model_material_v2 import (
+    run_material_trace as run_v2,
+)
+
+
+def _synthetic_source(path, *, frames=3):
+    axis = np.asarray([-0.015, 0.0, 0.015], dtype=np.float64)
+    points = np.stack(np.meshgrid(axis, axis, axis, indexing="ij"), axis=-1).reshape(-1, 3)
+    velocity = np.column_stack((
+        np.full(len(points), -0.10),
+        0.2 * points[:, 1],
+        -0.1 * points[:, 2],
+    ))
+    times = np.arange(frames, dtype=np.float64) * 0.01
+    with h5py.File(path, "w") as handle:
+        handle.attrs.update(
+            schema_version=1,
+            state_schema="core.state.native_velocity.v1",
+            velocity_semantics="native saved numerical velocity",
+            future_state_inputs=False,
+            autonomous_prediction=True,
+            identity_semantics="particle_zone,particle_id",
+        )
+        handle["time"] = times
+        handle["position"] = np.stack([points + i * 0.0001 * velocity for i in range(frames)])
+        handle["velocity"] = np.stack([velocity for _ in range(frames)])
+        handle["particle_id"] = np.arange(len(points), dtype=np.int64)
+        handle["particle_zone"] = np.zeros(len(points), dtype=np.int64)
+        handle["mass"] = np.full(len(points), 1.0e-6)
+        handle["valid"] = np.ones((frames, len(points)), dtype=bool)
+
+
+def _inputs(source, output, **overrides):
+    values = {
+        "source": source,
+        "output": output,
+        "role": MODEL_ROLE,
+        "rho0_kgm3": 1000.0,
+        "dp_m": 0.015,
+        "seeds": np.asarray([
+            [-0.001, 0.0, 0.0], [-0.0005, 0.001, 0.001],
+            [0.0005, -0.001, -0.001], [0.001, 0.0, 0.0],
+        ], dtype=np.float64),
+        "intervals": 2,
+        "substeps": 2,
+        "walls": np.empty((0, 3, 3), dtype=np.float64),
+    }
+    values.update(overrides)
+    return values
+
+
+def _dataset_value(dataset):
+    if h5py.check_string_dtype(dataset.dtype) is not None:
+        return np.asarray(dataset.asstr())
+    return np.asarray(dataset)
+
+
+def _assert_trace_datasets_equal(left, right):
+    with h5py.File(left, "r") as lhs, h5py.File(right, "r") as rhs:
+        assert set(lhs) == set(rhs)
+        for name in lhs:
+            if isinstance(lhs[name], h5py.Group):
+                assert set(lhs[name]) == set(rhs[name])
+                for child in lhs[name]:
+                    np.testing.assert_array_equal(
+                        _dataset_value(lhs[name][child]), _dataset_value(rhs[name][child]),
+                        err_msg=f"dataset mismatch: {name}/{child}",
+                    )
+            else:
+                np.testing.assert_array_equal(
+                    _dataset_value(lhs[name]), _dataset_value(rhs[name]),
+                    err_msg=f"dataset mismatch: {name}",
+                )
+        assert int(lhs.attrs["committed_rows"]) == int(rhs.attrs["committed_rows"])
+        assert lhs.attrs["binding_json"] == rhs.attrs["binding_json"]
+        assert lhs.attrs["qualification_claim"] == rhs.attrs["qualification_claim"] == "none"
+
+
+def _assert_scientific_summary_equal(v1_report, v2_report):
+    assert v2_report["qualification_claim"] == "none"
+    assert v2_report["material_reliability"] == "not_established"
+    assert v1_report["source_rows"] == v2_report["source_rows"]
+    assert v1_report["unknown_fraction_max"] == v2_report["unknown_fraction_max"]
+    assert v1_report["unknown_fraction_final"] == v2_report["unknown_fraction_final"]
+    assert v1_report["unknown_fraction_by_frame"] == v2_report["unknown_fraction_by_frame"]
+    assert v1_report["common_reliable_path_fraction"] == v2_report["common_reliable_path_fraction"]
+    assert v1_report["mass_closure"] == v2_report["mass_closure"]
+    assert v1_report["diagnostics"]["stage_failure_counts"] == v2_report["diagnostics"]["stage_failure_counts"]
+
+
+def test_streaming_synthetic_summary_and_trace_match_v1(tmp_path):
+    source = tmp_path / "synthetic-model.h5"
+    _synthetic_source(source)
+    v1_output = tmp_path / "v1-trace.h5"
+    v2_output = tmp_path / "v2-trace.h5"
+    args1 = _inputs(source, v1_output)
+    args2 = _inputs(source, v2_output)
+
+    report1 = run_v1(**args1)
+    report2 = run_v2(**args2)
+
+    _assert_scientific_summary_equal(report1, report2)
+    actual_hash = hashlib.sha256(v2_output.read_bytes()).hexdigest()
+    assert report2["trace_h5_sha256"] == actual_hash
+    with h5py.File(v1_output, "r") as old, h5py.File(v2_output, "r") as new:
+        for name in old:
+            np.testing.assert_array_equal(
+                _dataset_value(old[name]), _dataset_value(new[name]), err_msg=name,
+            )
+        assert new["position"].maxshape[0] is None
+        assert new.attrs["qualification_claim"] == "none"
+
+
+def test_interruption_resume_matches_uninterrupted_trace_exactly(tmp_path):
+    source = tmp_path / "synthetic-model.h5"
+    _synthetic_source(source)
+    continuous = tmp_path / "continuous.h5"
+    resumed = tmp_path / "resumed.h5"
+
+    full_report = run_v2(**_inputs(source, continuous))
+    stopped = run_v2(**_inputs(source, resumed, stop_after_steps=1))
+    assert stopped["status"] == "interrupted"
+    assert stopped["completed_substeps"] == 1
+    with h5py.File(resumed, "r") as handle:
+        assert int(handle.attrs["committed_rows"]) == 2
+        assert len(handle["_journal/commit_log"]) == 2
+
+    resumed_report = run_v2(**_inputs(source, resumed, resume=True))
+    assert resumed_report["status"] == "completed"
+    _assert_trace_datasets_equal(continuous, resumed)
+    _assert_scientific_summary_equal(full_report, resumed_report)
+
+
+def test_resume_rejects_changed_source_bytes_and_parameters(tmp_path):
+    source = tmp_path / "synthetic-model.h5"
+    _synthetic_source(source)
+    trace = tmp_path / "resume.h5"
+    args = _inputs(source, trace, stop_after_steps=1)
+    assert run_v2(**args)["status"] == "interrupted"
+
+    changed_parameters = _inputs(source, trace, resume=True, rho0_kgm3=1001.0)
+    with pytest.raises(ValueError, match="binding mismatch"):
+        run_v2(**changed_parameters)
+
+    with h5py.File(source, "r+") as handle:
+        handle.attrs["synthetic_mutation"] = "changes source bytes"
+    with pytest.raises(ValueError, match="binding mismatch"):
+        run_v2(**_inputs(source, trace, resume=True))
+
+
+def test_resume_truncates_only_uncommitted_hdf5_tail(tmp_path):
+    source = tmp_path / "synthetic-model.h5"
+    _synthetic_source(source)
+    continuous = tmp_path / "continuous.h5"
+    resumed = tmp_path / "tail.h5"
+    run_v2(**_inputs(source, continuous))
+    assert run_v2(**_inputs(source, resumed, stop_after_steps=1))["status"] == "interrupted"
+
+    # Simulate a row payload that was extended but never entered in the commit log.
+    with h5py.File(resumed, "r+") as handle:
+        dataset = handle["time"]
+        dataset.resize((len(dataset) + 1,))
+        dataset[-1] = 12345.0
+        assert int(handle.attrs["committed_rows"]) == 2
+
+    report = run_v2(**_inputs(source, resumed, resume=True))
+    assert report["status"] == "completed"
+    _assert_trace_datasets_equal(continuous, resumed)
+
+
+def test_resume_fails_closed_on_committed_prefix_corruption(tmp_path):
+    source = tmp_path / "synthetic-model.h5"
+    _synthetic_source(source)
+    trace = tmp_path / "corrupt.h5"
+    run_v2(**_inputs(source, trace, stop_after_steps=1))
+    with h5py.File(trace, "r+") as handle:
+        handle["position"][0, 0, 0] += 1.0e-8
+    with pytest.raises(ValueError, match="integrity|commit-log"):
+        run_v2(**_inputs(source, trace, resume=True))
+
+
+def test_output_is_not_silently_overwritten(tmp_path):
+    source = tmp_path / "synthetic-model.h5"
+    _synthetic_source(source)
+    trace = tmp_path / "once.h5"
+    run_v2(**_inputs(source, trace, stop_after_steps=0))
+    with pytest.raises(FileExistsError, match="refusing to overwrite"):
+        run_v2(**_inputs(source, trace))
