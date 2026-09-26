@@ -26,7 +26,8 @@ from scripts.core_runtime import atomic_json, digest
 MODEL_CODE_FILES = (
     "core_benchmark.py", "core_runtime.py", "core_contract.py", "core_dataset.py",
     "core_models.py", "core_learning.py", "core_cfd_dataset.py", "core_evaluation.py",
-    "core_physics.py", "core_reproduction_check.py",
+    "core_physics.py", "core_reproduction_check.py", "core_fsverity.py",
+    "core_strict_json.py",
 )
 CHECKPOINT_REGISTRY_SCHEMA = "core.bundled_checkpoints.v1"
 MODEL_REPRODUCTION_SCHEMA = "core.model_reproduction.v1"

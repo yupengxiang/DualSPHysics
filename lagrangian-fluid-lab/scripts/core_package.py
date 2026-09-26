@@ -22,6 +22,15 @@ from scripts.core_runtime import atomic_json, digest
 
 CHECKPOINT_REGISTRY_SCHEMA = 'core.bundled_checkpoints.v1'
 CHECKPOINT_PAYLOAD_SCHEMA = 'core.checkpoint.v1'
+# v1 omitted modules imported by both public readers. Existing v1 packages stay
+# historical; new packages use v2 with an explicit, verified code closure.
+BUNDLE_SCHEMA = 'core.reader_bundle.v2'
+BUNDLE_CODE_FILES = (
+    'core_benchmark.py', 'core_runtime.py', 'core_contract.py', 'core_dataset.py',
+    'core_models.py', 'core_learning.py', 'core_cfd_dataset.py', 'core_package.py',
+    'core_evaluation.py', 'core_physics.py', 'core_reproduction_check.py',
+    'core_fsverity.py', 'core_strict_json.py', 'passive_tracers.py', 'f3_control.py',
+)
 READER_MANIFEST_PREFLIGHT_SCHEMA = 'core.reader_manifest_preflight.v1'
 READER_MANIFEST_NORMALIZATION_PLAN_SCHEMA = 'core.reader_manifest_normalization_plan.v1'
 READER_MANIFEST_SCHEMAS = {SCHEMA, COMPACT_SCHEMA}
@@ -660,7 +669,7 @@ def verify_bundle(directory):
         report = json.loads((root / 'bundle.json').read_text())
     except (OSError, json.JSONDecodeError) as error:
         raise ValueError('invalid bundle index') from error
-    if not isinstance(report, Mapping) or report.get('schema') != 'core.reader_bundle.v1':
+    if not isinstance(report, Mapping) or report.get('schema') != BUNDLE_SCHEMA:
         raise ValueError('unsupported bundle version')
     entries = report.get('files')
     if not isinstance(entries, list):
@@ -687,11 +696,8 @@ def verify_bundle(directory):
         normalized_entries.append({'path': relative, 'sha256': sha, 'bytes': bytes_value})
     report = dict(report)
     report['files'] = normalized_entries
-    required = {'dataset.json', 'environment.json', 'code/scripts/core_benchmark.py',
-                'code/scripts/core_cfd_dataset.py', 'code/scripts/core_learning.py',
-                'code/scripts/core_models.py', 'code/scripts/core_evaluation.py',
-                'code/scripts/core_contract.py', 'code/scripts/core_physics.py',
-                'code/scripts/core_reproduction_check.py', 'code/scripts/core_package.py'}
+    required = {'dataset.json', 'environment.json', 'README.md', 'code/scripts/__init__.py'}
+    required.update(f'code/scripts/{name}' for name in BUNDLE_CODE_FILES)
     if not required <= seen:
         raise ValueError('bundle is missing required artifact registrations')
     _validate_dataset_assets(root, report, seen)
@@ -926,10 +932,7 @@ def build_bundle(manifest, data_root, destination, *, hardlink=False, checkpoint
         code_root = staging/'code/scripts'
         code_root.mkdir(parents=True)
         (code_root/'__init__.py').write_text('')
-        for name in ('core_benchmark.py','core_runtime.py','core_contract.py','core_dataset.py',
-                     'core_models.py','core_learning.py','core_cfd_dataset.py','core_package.py',
-                     'core_evaluation.py','core_physics.py','core_reproduction_check.py',
-                     'passive_tracers.py','f3_control.py'):
+        for name in BUNDLE_CODE_FILES:
             source = Path(__file__).resolve().parent/name
             target = code_root/name
             shutil.copyfile(source,target)
@@ -956,7 +959,7 @@ def build_bundle(manifest, data_root, destination, *, hardlink=False, checkpoint
         for relative in ('code/scripts/__init__.py','environment.json','README.md'):
             target=staging/relative
             files.append({'path':relative,'sha256':digest(target),'bytes':target.stat().st_size})
-        report = {"schema":"core.reader_bundle.v1", "full_core_release":False,
+        report = {"schema":BUNDLE_SCHEMA, "full_core_release":False,
                   "scope":"registered dataset, public inputs, code and optionally hash-bound model checkpoints; scientific qualification remains separate",
                   "checkpoint_count":len(checkpoints),
                   "case_count":len(payload['cases']),"files":files,

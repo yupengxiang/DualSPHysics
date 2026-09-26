@@ -37,7 +37,7 @@
 | F2 倾倒／接液 | 生成与诊断入口 | 静止保持、运动杯壁、杯口及数值参考接入 |
 | 材料系统 | 示踪积分、实体墙可见性、可靠性诊断 | 未知质量偏高、原生输出 cadence 检验、缓存与恢复 |
 | 学习系统 | 图模型和若干实际训练尝试 | 旧实验只有128粒子、少量 transition，尚未证明完整场学习能力 |
-| 评测与产品 | 协议、审计、manifest、若干打包脚本 | 模型更新语义不统一、路径不便携、完成判据过弱 |
+| 评测与产品 | 协议、审计、manifest；reader bundle v2 现含自足的已哈希 Python 依赖闭包 | 完整三家族产品包的异机读数、预测、评分链仍未通过；Core 总完成判据仍保持严格 |
 
 现有 F3 应继续保留其明确范围：
 
@@ -782,3 +782,4 @@ agent 提交持久作业后即可继续实现或接手其他工作，不必占�
 - 2026-09-26 UPDATE-196：只读刷新 `core_campaign.py status`：`can_finalize=false`、T1 2/3、macro T2 0/2、训练 0/9，T1 目标缺 432、材料缺 288；因果/证据结构有效，`issues=[]`。独立全产品复现为 false：已登记跨机 receipt 是 diagnostic-only；另一份 835-transition 单案例比较未证明可搬运全产品链及绑定 root review。runtime scheduler 无 live/queued job。未写 completion snapshot、未运行 workload、未改 registry/ledger。详见 [UPDATE-196](lagrangian-fluid-lab/reports/CORE-CONTINUATION-STATUS-2026-09-26-UPDATE-196.zh-CN.md)。
 - 2026-09-26 UPDATE-197：定位并修复 arXiv 批量 API 请求的 HTTP 406：同一批量查询在 `urllib` 未带 `Accept` 时返回 406，带 `Accept: */*` 时返回 200；仅对 arXiv 请求增加该 header。离线文献核验测试 7 passed；不可覆盖 RERUN12 保留修复前结果，RERUN13 按原三源规则得到 2 verified、0 unverified、4 pending。Semantic Scholar 六项仍 HTTP 429，三个无 DOI 候选缺第二独立匹配，故本机目标仍未闭环；未放宽验证标准或升格人工来源。详见 [UPDATE-197](lagrangian-fluid-lab/reports/CORE-CONTINUATION-STATUS-2026-09-26-UPDATE-197.zh-CN.md)。
 - 2026-09-26 UPDATE-198：为不改变“至少两目录精确匹配且无冲突”门槛，给机器核验器增加 OpenAlex DOI 精确查询作为第四个目录；新增 10 项离线测试。RERUN14 按冻结的六条候选记录得到 6 verified、0 unverified、0 pending，S2 在本次也对五篇 arXiv 文献成功响应。详见 [UPDATE-198](lagrangian-fluid-lab/reports/CORE-CONTINUATION-STATUS-2026-09-26-UPDATE-198.zh-CN.md) 与 [文献来源审计更新](lagrangian-fluid-lab/reports/PLAN-REFERENCES-AUDIT-2026-09-24.zh-CN.md)。
+- 2026-09-26 UPDATE-199：现有 portable-bundle suite 首轮发现 3 个 standalone reader/reproducer import failure：新 `core_dataset.py` 依赖的 `core_fsverity.py` 与 `core_strict_json.py` 未纳入旧 bundle 代码闭包。builder 已升为 `core.reader_bundle.v2`，复制并完整登记这两个依赖，verifier 对构建器代码清单要求全闭合；`core_benchmark` reproduction code hash closure 也纳入 helper。新 v2 synthetic bundle package suite 21 passed，benchmark/independent-reproduction/campaign gate 相邻测试 55 passed，fullfield/halo oracle suites 6 passed；旧 v1 与实际历史 bundles 保持未改，且不能由新 verifier 冒充为 v2。此项修复只闭合开发包 standalone portability，不等于三家族完整产品异机复现或 Core 完成。详见 [UPDATE-199](lagrangian-fluid-lab/reports/CORE-CONTINUATION-STATUS-2026-09-26-UPDATE-199.zh-CN.md)。

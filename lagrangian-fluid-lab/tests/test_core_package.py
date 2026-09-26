@@ -96,6 +96,59 @@ def test_bundle_rejects_corrupt_code_and_unknown_version(tmp_path):
         verify_bundle(bundle)
 
 
+def test_bundle_v2_requires_and_indexes_transitive_reader_dependencies(tmp_path):
+    source = tmp_path / 'source'
+    source.mkdir()
+    manifest = source / 'manifest.json'
+    manifest.write_text(json.dumps(tiny_manifest(source)))
+    bundle = tmp_path / 'bundle'
+
+    build_bundle(manifest, source, bundle)
+
+    index = json.loads((bundle / 'bundle.json').read_text())
+    paths = {item['path'] for item in index['files']}
+    assert index['schema'] == 'core.reader_bundle.v2'
+    assert 'code/scripts/core_fsverity.py' in paths
+    assert 'code/scripts/core_strict_json.py' in paths
+    assert verify_bundle(bundle)['passed']
+
+
+def test_bundle_verifier_rejects_legacy_v1_schema(tmp_path):
+    source = tmp_path / 'source'
+    source.mkdir()
+    manifest = source / 'manifest.json'
+    manifest.write_text(json.dumps(tiny_manifest(source)))
+    bundle = tmp_path / 'bundle'
+    build_bundle(manifest, source, bundle)
+    index_path = bundle / 'bundle.json'
+    index = json.loads(index_path.read_text())
+    index['schema'] = 'core.reader_bundle.v1'
+    index_path.write_text(json.dumps(index))
+
+    with pytest.raises(ValueError, match='unsupported bundle version'):
+        verify_bundle(bundle)
+
+
+@pytest.mark.parametrize('missing_name', ['core_fsverity.py', 'core_strict_json.py'])
+def test_bundle_v2_rejects_unregistered_transitive_reader_dependency(tmp_path, missing_name):
+    source = tmp_path / 'source'
+    source.mkdir()
+    manifest = source / 'manifest.json'
+    manifest.write_text(json.dumps(tiny_manifest(source)))
+    bundle = tmp_path / 'bundle'
+    build_bundle(manifest, source, bundle)
+    index_path = bundle / 'bundle.json'
+    index = json.loads(index_path.read_text())
+    index['files'] = [
+        item for item in index['files']
+        if item['path'] != f'code/scripts/{missing_name}'
+    ]
+    index_path.write_text(json.dumps(index))
+
+    with pytest.raises(ValueError, match='missing required artifact registrations'):
+        verify_bundle(bundle)
+
+
 def test_cfd_source_bundle_is_normalized_and_relocatable(tmp_path):
     from test_core_cfd_dataset import _trajectory, _prepared
     from scripts.core_dataset import sha256_file
