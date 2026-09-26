@@ -33,7 +33,7 @@ import scipy
 from scripts import f3_native_volume_mls_model_material as v1
 from scripts.f3_native_volume_mls_temporal_v3 import (
     F3NativeVolumeMLS,
-    _advance_rk4,
+    _advance_events,
     _new_state,
     f3_walls,
     h_from_dp,
@@ -139,7 +139,7 @@ def _row_values(state: dict[str, np.ndarray], result, time_s: float) -> dict[str
                       "residence_opposite", "returned"}:
             value = state[name]
         elif name == "failure_reason":
-            value = result.failure_reason
+            value = state[name]
         else:
             value = getattr(result, name)
         if name == "failure_reason":
@@ -602,6 +602,63 @@ def _interrupted_report(handle: h5py.File, output: Path, total_steps: int) -> di
     }
 
 
+def _advance_rk4_with_first_failure(state: dict[str, np.ndarray], tracer,
+                                   provider, walls: np.ndarray,
+                                   interval_index: int, segment_time: float, dt: float,
+                                   diagnostics: dict[str, Any]):
+    """Advance one RK4 segment and preserve the earliest failed stage reason.
+
+    The v2 trace keeps the v3 integration and unknown/censoring semantics, but
+    makes the per-seed diagnostic consistent with the all-four-stage gate.  A
+    later reliable k4 result must not overwrite an earlier k1/k2/k3 failure.
+    """
+    q = state["position"]
+    active = np.asarray(state["reliable"], dtype=bool)
+    k1 = tracer.reconstruct(q, provider.field_at(interval_index, segment_time), walls)
+    k2 = tracer.reconstruct(
+        q + 0.5 * dt * np.nan_to_num(k1.velocity),
+        provider.field_at(interval_index, segment_time + 0.5 * dt), walls,
+    )
+    k3 = tracer.reconstruct(
+        q + 0.5 * dt * np.nan_to_num(k2.velocity),
+        provider.field_at(interval_index, segment_time + 0.5 * dt), walls,
+    )
+    k4 = tracer.reconstruct(
+        q + dt * np.nan_to_num(k3.velocity),
+        provider.field_at(interval_index, segment_time + dt), walls,
+    )
+    stages = (k1, k2, k3, k4)
+    candidate = q + (dt / 6.0) * np.nan_to_num(
+        k1.velocity + 2.0 * k2.velocity + 2.0 * k3.velocity + k4.velocity
+    )
+    usable = active.copy()
+    for stage in stages:
+        usable &= np.asarray(stage.reliable, dtype=bool)
+    usable &= np.isfinite(candidate).all(axis=1)
+
+    _advance_events(state, q, candidate, segment_time, dt, usable, state["origin"])
+    state["position"] = np.where(usable[:, None], candidate, q)
+    state["reliable"] = usable
+    state["permanent_unknown"] = ~usable
+
+    reasons = np.full(len(active), "reliable", dtype=object)
+    first_failure = np.zeros(len(active), dtype=bool)
+    for stage in stages:
+        failed = active & ~np.asarray(stage.reliable, dtype=bool) & ~first_failure
+        stage_reasons = np.asarray(stage.failure_reason, dtype=object)
+        reasons[failed] = stage_reasons[failed]
+        first_failure |= active & ~np.asarray(stage.reliable, dtype=bool)
+        diagnostics["stage_failure_counts"].update(
+            str(value) for value in stage.failure_reason[active]
+        )
+    invalid_candidate = active & ~usable & ~first_failure
+    reasons[invalid_candidate] = "nonfinite_rk4_candidate"
+    reasons[~active] = np.asarray(state["failure_reason"], dtype=object)[~active]
+    reasons[usable] = "reliable"
+    state["failure_reason"] = reasons
+    return k4
+
+
 def run_material_trace(source: str | Path, output: str | Path, *, role: str,
                        rho0_kgm3: float, dp_m: float, seeds: np.ndarray,
                        intervals: int = 20, substeps: int = 1,
@@ -720,7 +777,7 @@ def run_material_trace(source: str | Path, output: str | Path, *, role: str,
                 t0, t1 = float(times[interval]), float(times[interval + 1])
                 dt = (t1 - t0) / substeps
                 segment_time = t0 + substep * dt
-                result = _advance_rk4(
+                result = _advance_rk4_with_first_failure(
                     state, tracer, provider, walls, interval, segment_time, dt,
                     {"stage_failure_counts": diagnostics},
                 )

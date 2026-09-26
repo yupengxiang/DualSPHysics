@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import copy
+from collections import Counter
 
 import h5py
 import numpy as np
@@ -14,8 +15,11 @@ from scripts.f3_native_volume_mls_model_material import (
 )
 from scripts import f3_native_volume_mls_model_material_v2 as material_v2
 from scripts.f3_native_volume_mls_model_material_v2 import (
+    _advance_rk4_with_first_failure,
+    _row_values,
     run_material_trace as run_v2,
 )
+from scripts.f3_native_volume_mls_temporal_v3 import MLSResult, _new_state
 
 
 def _synthetic_source(path, *, frames=3):
@@ -215,3 +219,122 @@ def test_output_is_not_silently_overwritten(tmp_path):
     run_v2(**_inputs(source, trace, stop_after_steps=0))
     with pytest.raises(FileExistsError, match="refusing to overwrite"):
         run_v2(**_inputs(source, trace))
+
+
+class _StageSequenceTracer:
+    def __init__(self, stage_results):
+        self.stage_results = stage_results
+        self.calls = 0
+
+    def reconstruct(self, query, _frame, _walls):
+        result = self.stage_results[self.calls]
+        self.calls += 1
+        return result
+
+
+class _DummyProvider:
+    def field_at(self, _interval, time_s):
+        return time_s
+
+
+def _stage_result(*, reliable, reason, velocity=(0.0, 0.0, 0.0)):
+    return MLSResult(
+        np.asarray([velocity], dtype=np.float64),
+        np.asarray([8], dtype=np.int64), np.asarray([8], dtype=np.int64),
+        np.asarray([0], dtype=np.int64), np.asarray([8.0]), np.asarray([4]),
+        np.asarray([1.0]), np.asarray([0.5]), np.asarray([0.0]),
+        np.asarray([reliable]), np.asarray([reliable]), np.asarray([reliable]),
+        np.asarray([reason], dtype=object),
+    )
+
+
+def test_rk4_records_first_unreliable_stage_even_when_k4_recovers():
+    initial = np.asarray([[0.1, 0.0, 0.0]], dtype=np.float64)
+    state = _new_state(initial, np.asarray([1], dtype=np.int8))
+    state["reliable"][:] = True
+    state["permanent_unknown"][:] = False
+    state["failure_reason"] = np.asarray(["reliable"], dtype=object)
+    tracer = _StageSequenceTracer([
+        _stage_result(reliable=False, reason="k1_wall_occluded"),
+        _stage_result(reliable=True, reason="reliable"),
+        _stage_result(reliable=True, reason="reliable"),
+        _stage_result(reliable=True, reason="reliable"),
+    ])
+
+    result = _advance_rk4_with_first_failure(
+        state, tracer, _DummyProvider(), np.empty((0, 3, 3)), 0, 0.0, 0.1,
+        {"stage_failure_counts": Counter()},
+    )
+
+    assert tracer.calls == 4
+    assert not state["reliable"][0]
+    assert state["permanent_unknown"][0]
+    assert state["failure_reason"][0] == "k1_wall_occluded"
+    np.testing.assert_array_equal(state["position"], initial)
+    assert _row_values(state, result, 0.1)["failure_reason"].tolist() == ["k1_wall_occluded"]
+
+
+def test_trace_persists_first_failed_stage_reason(tmp_path, monkeypatch):
+    source = tmp_path / "synthetic-model.h5"
+    _synthetic_source(source)
+    output = tmp_path / "first-stage-failure.h5"
+    results = iter([
+        _stage_result(reliable=True, reason="reliable"),  # initial state
+        _stage_result(reliable=False, reason="k1_wall_occluded"),
+        _stage_result(reliable=True, reason="reliable"),
+        _stage_result(reliable=True, reason="reliable"),
+        _stage_result(reliable=True, reason="reliable"),
+    ])
+    monkeypatch.setattr(
+        material_v2.F3NativeVolumeMLS,
+        "reconstruct",
+        lambda _self, *_args: next(results),
+    )
+
+    report = run_v2(**_inputs(
+        source, output, seeds=np.asarray([[0.001, 0.0, 0.0]]),
+        intervals=1, substeps=1, walls=np.empty((0, 3, 3)),
+    ))
+
+    assert report["status"] == "completed"
+    with h5py.File(output, "r") as handle:
+        assert handle["failure_reason"].asstr()[1].tolist() == ["k1_wall_occluded"]
+        assert bool(handle["permanent_unknown"][1, 0])
+        np.testing.assert_array_equal(handle["position"][1], [[0.001, 0.0, 0.0]])
+
+
+def test_rk4_records_earliest_failed_stage_and_preserves_previous_failure():
+    initial = np.asarray([[0.1, 0.0, 0.0], [-0.1, 0.0, 0.0]], dtype=np.float64)
+    state = _new_state(initial, np.asarray([1, 0], dtype=np.int8))
+    state["reliable"][:] = [True, False]
+    state["permanent_unknown"][:] = [False, True]
+    state["failure_reason"] = np.asarray(["reliable", "prior_failure"], dtype=object)
+    stage_results = [_stage_result(reliable=False, reason="placeholder") for _ in range(4)]
+    # The active seed has distinct per-stage reasons; the inactive seed is
+    # already unknown and must retain its original first failure.
+    for result, active_reason, inactive_reason in zip(
+        stage_results,
+        ("k1_ok", "k2_failure", "k3_failure", "k4_ok"),
+        ("later_k1", "later_k2", "later_k3", "later_k4"),
+    ):
+        result.failure_reason = np.asarray([active_reason, inactive_reason], dtype=object)
+        result.reliable = np.asarray([active_reason.endswith("_ok"), False])
+        result.velocity = np.zeros((2, 3), dtype=np.float64)
+        result.support_count = np.full(2, 8, dtype=np.int64)
+        result.candidate_count = np.full(2, 8, dtype=np.int64)
+        result.wall_rejected_count = np.zeros(2, dtype=np.int64)
+        result.effective_sample_size = np.full(2, 8.0)
+        result.geometry_rank = np.full(2, 4, dtype=np.int8)
+        result.condition_number = np.ones(2)
+        result.anisotropy = np.full(2, 0.5)
+        result.reconstruction_error_mps = np.zeros(2)
+        result.old_gate_pass = np.zeros(2, dtype=bool)
+        result.candidate_support_pass = np.zeros(2, dtype=bool)
+
+    _advance_rk4_with_first_failure(
+        state, _StageSequenceTracer(stage_results), _DummyProvider(),
+        np.empty((0, 3, 3)), 0, 0.0, 0.1,
+        {"stage_failure_counts": Counter()},
+    )
+
+    assert state["failure_reason"].tolist() == ["k2_failure", "prior_failure"]
