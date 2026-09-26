@@ -53,10 +53,14 @@ def _request_bytes(
     headers = {
         "User-Agent": USER_AGENT,
     }
-    # arXiv returns Atom by contract. Its official urllib example sends no
-    # Accept header; some API frontends reject an explicit Atom media type
-    # with HTTP 406, so leave content negotiation at the HTTP default there.
-    if not url.startswith(ARXIV_API):
+    # arXiv returns Atom by contract. Explicitly send the wildcard accepted by
+    # curl/default HTTP clients: the API endpoint returned 406 for this
+    # verifier's batched urllib request when Accept was omitted, while the
+    # same request with Accept: */* returned 200. Do not narrow this to an Atom
+    # media type; that has also triggered 406 responses from API frontends.
+    if url.startswith(ARXIV_API):
+        headers["Accept"] = "*/*"
+    else:
         headers["Accept"] = "application/json"
     if url.startswith(S2_BATCH_API) and os.environ.get("S2_API_KEY"):
         headers["x-api-key"] = os.environ["S2_API_KEY"]
