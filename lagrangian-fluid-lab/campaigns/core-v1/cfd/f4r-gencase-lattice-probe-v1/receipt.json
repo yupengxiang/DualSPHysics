@@ -1,0 +1,135 @@
+{
+  "schema": "core.cfd.f4r.gencase_lattice_phase_probe.v1",
+  "record_id": "f4r-gencase-lattice-phase-probe-v1",
+  "status": "synthetic_gencase_probe_completed_no_solver",
+  "scope": {
+    "geometry": "single axis-aligned fluid drawbox matching the F4R pool box only",
+    "dp_m": 0.006,
+    "pool_box_low_m": [0.08, 0.04, 0.04],
+    "pool_box_high_m": [1.12, 0.36, 0.18],
+    "droplet_included": false,
+    "walls_included": false,
+    "qualification_claim": "none",
+    "credit": 0
+  },
+  "bindings": {
+    "gencase": {
+      "path": "bin/linux/GenCase_linux64",
+      "bytes": 5809384,
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226",
+      "version": "GenCase v5.4.354.01 (07-04-2025)"
+    },
+    "official_upstream_master_commit": "ef3721a861fda961f0e2f9ec4cd317b19de99086",
+    "inputs": [
+      {
+        "path": "campaigns/core-v1/cfd/f4r-gencase-lattice-probe-v1/default_Def.xml",
+        "bytes": 1255,
+        "sha256": "650b296058c69beb0ed9d9f554dde8e567be371d4f8ef55474ed8dfdf20976a3"
+      },
+      {
+        "path": "campaigns/core-v1/cfd/f4r-gencase-lattice-probe-v1/phase0_Def.xml",
+        "bytes": 1294,
+        "sha256": "ab9dff3f0328cedbe9ae16a43e8572e2d4c1ecb273826b913ec0b6b115689e2d"
+      },
+      {
+        "path": "campaigns/core-v1/cfd/f4r-gencase-lattice-probe-v1/phasehalf_Def.xml",
+        "bytes": 1306,
+        "sha256": "7a745f76e4af1e9a4d22d865174d2aadc87f6b2bab6776be6ab64077271d86c1"
+      },
+      {
+        "path": "campaigns/core-v1/cfd/f4r-gencase-lattice-probe-v1/pointref_inward_Def.xml",
+        "bytes": 1308,
+        "sha256": "ff090db6408502c328e8c280cd095b68a1351ef4eb922ffc6cc6b66df74ba1f3"
+      }
+    ]
+  },
+  "execution": {
+    "command_template": "bin/linux/GenCase_linux64 <input_basename> <fresh_output_basename> -threads:1 -save:vtkfluid",
+    "output_root": "/tmp/f4r-gencase-lattice-probe.ki06B4",
+    "native_gencase_started": true,
+    "solver_started": false,
+    "worker_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "production_hdf5_opened": false,
+    "qualification_attempt": false
+  },
+  "runs": [
+    {
+      "id": "default_pointref_omitted",
+      "input": "default_Def.xml",
+      "pointref_m": null,
+      "pointref_reported_by_gencase_m": [0.0, 0.0, 0.0],
+      "particle_count": 226800,
+      "axis_unique_counts": [175, 54, 24],
+      "coordinate_bounds_m": [[0.078, 1.122], [0.042, 0.36], [0.042, 0.18]],
+      "mass_per_particle_kg": 0.000216,
+      "unscaled_fluid_mass_kg": 48.9888,
+      "outputs": {
+        "stdout_log": {"path": "/tmp/f4r-gencase-lattice-probe.ki06B4/default.out", "bytes": 4254, "sha256": "83a5d9bf49619efb2586f959895a1a9be88b051d7b366408408a2a0c761981e2"},
+        "fluid_vtk": {"path": "/tmp/f4r-gencase-lattice-probe.ki06B4/default_Fluid.vtk", "bytes": 9525887, "sha256": "926c4a2811dc0250bad52be6c17efae11faa14215b7ff24f9d3ab5ac2dfa37d3"}
+      }
+    },
+    {
+      "id": "explicit_zero_pointref",
+      "input": "phase0_Def.xml",
+      "pointref_m": [0.0, 0.0, 0.0],
+      "particle_count": 226800,
+      "axis_unique_counts": [175, 54, 24],
+      "coordinate_bounds_m": [[0.078, 1.122], [0.042, 0.36], [0.042, 0.18]],
+      "mass_per_particle_kg": 0.000216,
+      "unscaled_fluid_mass_kg": 48.9888,
+      "outputs": {
+        "stdout_log": {"path": "/tmp/f4r-gencase-lattice-probe.ki06B4/phase0.out", "bytes": 4277, "sha256": "6f1d8ad5eb87c7611e9e40404769c504f36787a06000f7a1d733dbfde7d272f1"},
+        "fluid_vtk": {"path": "/tmp/f4r-gencase-lattice-probe.ki06B4/phase0_Fluid.vtk", "bytes": 9525887, "sha256": "926c4a2811dc0250bad52be6c17efae11faa14215b7ff24f9d3ab5ac2dfa37d3"}
+      }
+    },
+    {
+      "id": "uniform_half_dp_pointref",
+      "input": "phasehalf_Def.xml",
+      "pointref_m": [0.003, 0.003, 0.003],
+      "particle_count": 239250,
+      "axis_unique_counts": [174, 55, 25],
+      "coordinate_bounds_m": [[0.081, 1.119], [0.039, 0.363], [0.039, 0.183]],
+      "mass_per_particle_kg": 0.000216,
+      "unscaled_fluid_mass_kg": 51.678,
+      "mass_delta_vs_default_percent": 5.48941798941799,
+      "outputs": {
+        "stdout_log": {"path": "/tmp/f4r-gencase-lattice-probe.ki06B4/phasehalf.out", "bytes": 4312, "sha256": "e18a8fa9dfabc2be1abfc5f635bb6509c9b7da5cce014a4f6dfa1b06e1f88254"},
+        "fluid_vtk": {"path": "/tmp/f4r-gencase-lattice-probe.ki06B4/phasehalf_Fluid.vtk", "bytes": 10048787, "sha256": "ee70c9948b2d0b284e19dd09aa99a3dab9bcfbdf03f2112ab065a147499d1074"}
+      }
+    },
+    {
+      "id": "axiswise_inward_endpoint_probe",
+      "input": "pointref_inward_Def.xml",
+      "pointref_m": [0.003, 0.0045, 0.0045],
+      "pointref_over_dp": [0.5, 0.75, 0.75],
+      "particle_count": 225504,
+      "axis_unique_counts": [174, 54, 24],
+      "coordinate_bounds_m": [[0.081, 1.119], [0.0405, 0.3585], [0.0405, 0.1785]],
+      "mass_per_particle_kg": 0.000216,
+      "unscaled_fluid_mass_kg": 48.708864,
+      "mass_delta_vs_default_percent": -0.5714285714285714,
+      "outputs": {
+        "stdout_log": {"path": "/tmp/f4r-gencase-lattice-probe.ki06B4/inward.out", "bytes": 4307, "sha256": "c61d1c18969f5feec4ad48653ecac77bc8ba965da69220641e3aaff200b78fb1"},
+        "fluid_vtk": {"path": "/tmp/f4r-gencase-lattice-probe.ki06B4/inward_Fluid.vtk", "bytes": 9471455, "sha256": "fd17bfb6f58fdabd6ef93c36bbe00d8a4fa9929376d45c7915aefe4e52238aba"}
+      }
+    }
+  ],
+  "comparisons": {
+    "default_and_explicit_zero_vtk_bit_identical": true,
+    "axiswise_probe_all_particle_centers_within_input_box": true,
+    "uniform_half_dp_keeps_all_centers_within_input_box": false,
+    "uniform_phase_changes_particle_count_and_mass": true,
+    "one_common_normalized_pointref_phase_across_three_registered_dps_found_at_1e-4_scan": false
+  },
+  "interpretation": "For this one F4R-sized axis-aligned solid fluid drawbox and GenCase v5.4.354.01, observed point extrema match nearest endpoint-to-lattice rounding; the zero and omitted pointref VTK outputs are byte-identical. This black-box probe is not proof of a general GenCase algorithm or of dynamic wall-crossing causality.",
+  "qualification": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0
+  }
+}
