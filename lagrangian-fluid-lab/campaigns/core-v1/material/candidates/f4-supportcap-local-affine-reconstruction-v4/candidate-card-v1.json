@@ -1,0 +1,150 @@
+{
+  "schema": "core.material.f4.reconstruction_candidate_card.v1",
+  "candidate_id": "f4_supportcap_local_affine_reconstruction_v4",
+  "family": "F4",
+  "scope_id": "F4_drop_resting_pool_x_v2",
+  "status": "proposal_only_cpu_native_preflight_authorized_runtime_not_authorized",
+  "mechanism": {
+    "backend": "f4_ckdtree_visible_shepard_ess32_local_affine_predictor_v4",
+    "support_cap": 32,
+    "support_visibility": "F4 v3 finite-wall visible-support search",
+    "weights": "1/(distance_squared+regularization_squared)",
+    "regularization_m": 0.004,
+    "maximum_support_distance_m": 0.03,
+    "predictor": "weighted_local_affine_least_squares_at_query",
+    "error_estimator": "local_affine_residual_plus_shepard_disagreement"
+  },
+  "hypothesis": {
+    "claim": "Direct local-affine prediction may reduce Shepard kernel bias in smooth/sheared regions while retaining the existing support and reconstruction gates.",
+    "known_risk": "The predictor is less accurate than Shepard near the held-out Gaussian interface; this candidate is not presumed superior across fields.",
+    "does_not_address": "R001's stale t=0 seed coordinates queried against native frame 40. The new static design requires row-0 initialization and temporal advection through row 40 before evaluating 40->41."
+  },
+  "fixed_gate": {
+    "minimum_effective_sample_size": 4.0,
+    "minimum_geometry_rank": 3,
+    "minimum_anisotropy": 0.005,
+    "maximum_reconstruction_error_mps": 0.04698137929009748,
+    "unknown_fraction_per_source_max": 0.01,
+    "denominator_policy": "all 512 original source seeds remain in each source denominator",
+    "right_censored_policy": "unknown"
+  },
+  "synthetic_screen": {
+    "result_path": "campaigns/core-v1/material/evidence/f4-supportcap-local-affine-reconstruction-v4-synthetic-calibration-v1.json",
+    "query_count": 5632,
+    "v3_gate_pass_count": 5632,
+    "v4_gate_pass_count": 5632,
+    "maximum_v4_truth_error_mps": 0.03865060346106944,
+    "qualification_credit": 0,
+    "interpretation": "analytic-array screening only; does not predict correctly advected native support or material-event success"
+  },
+  "preflight_scope": {
+    "authorized_action": "one CPU/native input and environment preflight only",
+    "attempt_id": "f4-supportcap-local-affine-reconstruction-v4-cpu-native-canary-r001",
+    "source_path": "campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-14/product/trajectory.h5",
+    "native_rows_inclusive": [0, 41],
+    "seed_denominator": 512,
+    "q": 0.5,
+    "dp_m": 0.0075,
+    "substeps_if_later_separately_authorized": 2,
+    "actual_canary_authorized": false,
+    "tracer_authorized": false,
+    "solver_authorized": false,
+    "gpu_authorized": false,
+    "worker_or_queue_authorized": false,
+    "T2_expansion_authorized": false
+  },
+  "input_bindings": {
+    "implementation": {
+      "path": "scripts/f4_supportcap_affine_reconstruction_candidate_v4.py",
+      "bytes": 8060,
+      "sha256": "23c7675a0a5882f5c9e267294660ca7be7eb6f4aabc5a47451a7f8d6efe9fe72"
+    },
+    "calibration_script": {
+      "path": "scripts/f4_supportcap_affine_reconstruction_calibration_v1.py",
+      "bytes": 7725,
+      "sha256": "147255766f240df3b2f06446d9a5c21ed44fa5f0fcd85400f3a6760a58339d7c"
+    },
+    "synthetic_tests": {
+      "path": "tests/test_f4_supportcap_affine_reconstruction_candidate_v4.py",
+      "bytes": 9049,
+      "sha256": "0eea0e5276d38c7726dda3bc17e5695da2b86da706c870819200f199d25912c6"
+    },
+    "synthetic_calibration_result": {
+      "path": "campaigns/core-v1/material/evidence/f4-supportcap-local-affine-reconstruction-v4-synthetic-calibration-v1.json",
+      "bytes": 7774,
+      "sha256": "dea4ab6bef6ef1e00ef6553cafaaabf90ce5938724d0934f399673edcb466474"
+    },
+    "core_material": {
+      "path": "scripts/core_material.py",
+      "bytes": 116805,
+      "sha256": "9e294e64c431c725717caf86eb001dc3a3505a312e279386796b6a472b5ee94e"
+    },
+    "visible_support_dependency": {
+      "path": "scripts/f3_material_neighbors.py",
+      "bytes": 10732,
+      "sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752"
+    },
+    "support_metrics_dependency": {
+      "path": "scripts/passive_tracers.py",
+      "bytes": 59901,
+      "sha256": "3c12744133176a20ca955e1b76e0a9b7c0f5e2ddda4fef75d77574fc201f9024"
+    },
+    "synthetic_geometry_dependency": {
+      "path": "scripts/f4_material_calibration.py",
+      "bytes": 16576,
+      "sha256": "b4f122fddfb581941aab7cad122b121ca693b249a9cbbb9447e978d185d2a9ec"
+    },
+    "heldout_field_dependency": {
+      "path": "scripts/f4_material_calibration_v3.py",
+      "bytes": 9973,
+      "sha256": "eebef9046173851897370dde2f78d2ac788ac9fc22f6a8937aa920d9d50d5706"
+    },
+    "baseline_candidate_dependency": {
+      "path": "scripts/f4_supportcap_affine_query_bound_candidate_v3.py",
+      "bytes": 4717,
+      "sha256": "b8cfb6efa8d76f0201c5a5293f29c5cfd76691d6f3578ff03d1b577075c25116"
+    },
+    "f4_trace_contract_dependency": {
+      "path": "scripts/f4_tallwall120_material.py",
+      "bytes": 24647,
+      "sha256": "dc3c06e5b689eb64b7c3c7ee87b022699cfed19483d38662031570ea24b66f26"
+    },
+    "r001_failure_attribution": {
+      "path": "campaigns/core-v1/material/evidence/f4-supportcap-affine-query-bound-v3-cpu-native-canary-r001-failure-attribution-v1.json",
+      "bytes": 8108,
+      "sha256": "d276fc7b7d00351bdeb0ef1e8c4ed988d9cb40b89e48fcb5f86edc99e8c8ba57"
+    },
+    "v3_temporal_alignment_recipe": {
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/r002-static-design-v3/recipe.json",
+      "bytes": 15134,
+      "sha256": "8940c8263d4bb18a6e249638293b77aad02aa9ef5ee037ef74bb93c5f71bff73"
+    },
+    "v3_candidate_card": {
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/candidate-card-v3.json",
+      "bytes": 2474,
+      "sha256": "0b47e4690633e0d531414873eb1a54afece77c367ecf023ada3a80fd9ced7c92"
+    },
+    "v3_synthetic_calibration": {
+      "path": "campaigns/core-v1/material/evidence/f4-reconstruction-calibration-v3-20260922-result.json",
+      "bytes": 20422,
+      "sha256": "28458a2bb58127e3668a94c1314881b2e365334c96da71f7c9860f38a56af777"
+    }
+  },
+  "qualification_claim": "none",
+  "credit": 0,
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "production_tracer_registered": false,
+  "execution_policy": {
+    "native_preflight_authorized": true,
+    "native_preflight_started": false,
+    "canary_started": false,
+    "tracer_started": false,
+    "solver_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0
+  }
+}
