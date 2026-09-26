@@ -59,6 +59,8 @@
 
 2026-09-25 后续续推轮次按相同候选输入和原判据新增[RERUN10 回执](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-25-RERUN10.json)：2 项 `verified`（LagrangeBench、FD-Bench）、1 项 `unverified`（FuelTank）、3 项 `verify_pending`（GNS、Neural SPH、FluidLab）。arXiv 的五个 ID 查询仍为 HTTP 406；Semantic Scholar 恢复并匹配其中五篇，Crossref 匹配 LagrangeBench、FD-Bench、FuelTank。pending 保持原状态，人工来源不替代机器 verdict，六项整体核验仍未完成。详见[UPDATE-142](lagrangian-fluid-lab/reports/CORE-CONTINUATION-STATUS-2026-09-25-UPDATE-142.zh-CN.md)。
 
+随后同日新增[RERUN11 回执](lagrangian-fluid-lab/reports/PLAN-REFERENCES-VERIFICATION-2026-09-25-RERUN11.json)：仍为 2 项 `verified`、1 项 `unverified`、3 项 `verify_pending`；五个 arXiv 查询均 HTTP 406，Semantic Scholar 命中五篇（FuelTank `not_found`），Crossref 命中 LagrangeBench、FD-Bench、FuelTank。2026-09-26 检查官方[arXiv 状态页](https://status.arxiv.org/)和[Crossref 状态页](https://status.crossref.org/)均显示服务可用；这只是系统级状态，未证明本机此前失败的具体请求已恢复，Semantic Scholar 状态页本轮无法由浏览工具访问。未见 endpoint、API 行为或验证规则已改变的证据，因此未重复机器请求；六篇整体自动核验仍未完成。
+
 | 工作 | 对本项目的直接启示 |
 |---|---|
 | [GNS](https://proceedings.mlr.press/v119/sanchez-gonzalez20a.html) | 图消息传递和长期误差积累必须纳入基线设计；单步误差不足以说明模拟能力 |
