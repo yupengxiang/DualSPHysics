@@ -64,6 +64,7 @@ SCIENTIFIC_STATUS_NOT_ASSESSED = "not_assessed"
 FORMAL_MIN_FAMILIES = 3
 FORMAL_MIN_VALIDATION_PER_FAMILY = 4
 FORMAL_MIN_TEST_PER_FAMILY = 12
+HELD_OUT_SPLITS = frozenset({"test", "id_test", "ood_test"})
 
 
 def _strict_integer(value, name):
@@ -2236,7 +2237,7 @@ def _diagnostic_case_selection(dataset, split, case_ids):
     available = tuple(dataset.case_ids())
     available_set = set(available)
     if case_ids is None:
-        selected = tuple(dataset.case_ids(split))
+        selected = _evaluation_case_ids(dataset, split)
     elif isinstance(case_ids, str):
         selected = (case_ids,)
     else:
@@ -2249,6 +2250,21 @@ def _diagnostic_case_selection(dataset, split, case_ids):
     if unknown:
         raise ValueError(f"diagnostic evaluation contains unknown case(s): {unknown}")
     return selected
+
+
+def _evaluation_case_ids(dataset, split):
+    """Resolve the logical test split to every registered held-out partition.
+
+    Legacy families use the literal ``test`` label. New scopes keep ID and
+    parameter-OOD cases distinct as ``id_test``/``ood_test``; evaluating the
+    logical test set must include all three without rewriting those labels.
+    """
+    if split != "test":
+        return tuple(dataset.case_ids(split))
+    return tuple(
+        case_id for case_id in dataset.case_ids()
+        if dataset.record(case_id).get("split") in HELD_OUT_SPLITS
+    )
 
 
 def _pad_rollout_to_expected_frames(rollout, expected_frames, *, horizon_limited=False):
@@ -2338,7 +2354,7 @@ def evaluate(dataset, predictor, *, split="test", case_ids=None, maximum_steps=N
     if formal_release:
         if diagnostic:
             raise ValueError("formal manifests cannot use diagnostic evaluate")
-        registered_case_ids = tuple(dataset.case_ids("test"))
+        registered_case_ids = _evaluation_case_ids(dataset, "test")
         validation_case_ids = tuple(dataset.case_ids("validation"))
         test_family_counts = Counter(
             dataset.record(case_id)["family"] for case_id in registered_case_ids)
@@ -2428,7 +2444,7 @@ def evaluate(dataset, predictor, *, split="test", case_ids=None, maximum_steps=N
         "training": bool(training),
         "split": receipt_split,
         "requested_split": split,
-        "test_included": "test" in observed_splits,
+        "test_included": bool(observed_splits & HELD_OUT_SPLITS),
         "case_splits": case_splits,
         "registered_case_ids": list(registered_case_ids),
         "selected_case_ids": list(selected_case_ids),
@@ -2602,7 +2618,7 @@ def main(argv=None):
             else:
                 predictor, payload = _build_predictor_from_baseline(args.baseline)
                 source_checkpoint = None
-            path_case_ids = tuple(args.case_id or dataset.case_ids(args.split))
+            path_case_ids = tuple(args.case_id or _evaluation_case_ids(dataset, args.split))
             if not path_case_ids:
                 raise ValueError("no rollout cases selected")
             if args.trajectory_output is not None and args.trajectory_output_dir is not None:

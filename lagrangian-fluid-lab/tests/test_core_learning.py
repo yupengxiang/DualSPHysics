@@ -78,6 +78,20 @@ def _formal_capacity_manifest(tmp_path, *, family_count=3,
     return manifest
 
 
+def _new_scope_capacity_manifest(tmp_path):
+    """Use distinct ID/OOD labels for the plan's 12-case held-out set."""
+    manifest = _formal_capacity_manifest(tmp_path)
+    per_family = {}
+    for row in manifest["cases"]:
+        if row["split"] != "test":
+            continue
+        index = per_family.get(row["family"], 0)
+        row["split"] = "id_test" if index < 6 else "ood_test"
+        per_family[row["family"]] = index + 1
+    assert set(per_family.values()) == {12}
+    return manifest
+
+
 def test_normalization_and_sampler_are_train_only_and_resumable(tmp_path):
     manifest = tiny_manifest(tmp_path)
     with CoreDataset(manifest, tmp_path) as data:
@@ -651,7 +665,7 @@ def test_formal_manifest_flag_keeps_legacy_evaluation_diagnostic(tmp_path):
 
 
 def test_formal_manifest_cli_evaluation_is_diagnostic_and_scoped(tmp_path):
-    manifest = _formal_capacity_manifest(tmp_path)
+    manifest = _new_scope_capacity_manifest(tmp_path)
     manifest_path = tmp_path / "formal-manifest.json"
     manifest_path.write_text(json.dumps(manifest))
     output = tmp_path / "formal-evaluate.json"
@@ -663,10 +677,18 @@ def test_formal_manifest_cli_evaluation_is_diagnostic_and_scoped(tmp_path):
     assert receipt["evaluation_mode"] == "diagnostic"
     assert receipt["formal_eligible"] is False
     assert receipt["formal_capacity"] is None
-    test_case_ids = {row["case_id"] for row in manifest["cases"] if row["split"] == "test"}
+    held_out_splits = {"test", "id_test", "ood_test"}
+    test_case_ids = {row["case_id"] for row in manifest["cases"]
+                     if row["split"] in held_out_splits}
     assert receipt["registered_case_count"] == len(test_case_ids) == 36
     assert receipt["aggregate"]["registered_cases"] == len(test_case_ids)
     assert set(receipt["cases"]) == test_case_ids
+    assert receipt["split"] == "mixed"
+    assert receipt["requested_split"] == "test"
+    assert receipt["test_included"] is True
+    assert set(receipt["case_splits"].values()) == {"id_test", "ood_test"}
+    assert {label: list(receipt["case_splits"].values()).count(label)
+            for label in ("id_test", "ood_test")} == {"id_test": 18, "ood_test": 18}
     assert all(row["expected_frames"] == 1 for row in receipt["cases"].values())
     subset_path = tmp_path / "subset.json"
     assert main([
@@ -678,6 +700,33 @@ def test_formal_manifest_cli_evaluation_is_diagnostic_and_scoped(tmp_path):
     assert subset["evaluation_mode"] == "diagnostic"
     assert subset["selected_case_ids"] == ["formal-test-0"]
     assert subset["formal_eligible"] is False
+
+
+def test_formal_evaluation_registers_all_id_and_ood_test_cases(tmp_path, monkeypatch):
+    manifest = _new_scope_capacity_manifest(tmp_path)
+    manifest_path = tmp_path / "planned-split-formal-manifest.json"
+    manifest_path.write_text(json.dumps(manifest))
+    output = tmp_path / "planned-split-formal-evaluate.json"
+    # Exercise the formal branch with a synthetic fixture; this does not grant
+    # formal eligibility to the legacy CoreDataset reader itself.
+    monkeypatch.setattr(learning, "_manifest_formal_release", lambda _dataset: True)
+    assert main([
+        "evaluate", "--manifest", str(manifest_path), "--data-root", str(tmp_path),
+        "--baseline", "constant_velocity", "--output", str(output),
+    ]) == 0
+    receipt = json.loads(output.read_text())
+    held_out_ids = {row["case_id"] for row in manifest["cases"]
+                    if row["split"] in {"test", "id_test", "ood_test"}}
+    assert receipt["evaluation_mode"] == "formal"
+    assert receipt["formal_eligible"] is True
+    assert receipt["registered_case_count"] == 36
+    assert receipt["selected_case_ids"] == [row["case_id"] for row in manifest["cases"]
+                                             if row["case_id"] in held_out_ids]
+    assert set(receipt["case_splits"].values()) == {"id_test", "ood_test"}
+    assert receipt["test_included"] is True
+    assert receipt["formal_capacity"]["test_family_counts"] == {
+        "F1": 12, "F2": 12, "F3": 12,
+    }
 
 
 def test_legacy_evaluate_rejects_unknown_and_duplicate_cases(tmp_path):

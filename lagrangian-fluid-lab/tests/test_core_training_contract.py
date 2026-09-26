@@ -74,10 +74,15 @@ def test_live_source_observations_cover_every_requested_training_field() -> None
     assert observed["milestone_checkpoint_ledger"] is True
 
 
-def test_committed_planning_receipt_is_hash_bound_and_zero_credit() -> None:
+def test_historical_planning_receipt_fails_closed_after_source_drift() -> None:
     report = verify_receipt(DEFAULT_RECEIPT, root=ROOT, contract_path=DEFAULT_CONTRACT)
-    assert report["ok"] is True
-    assert report["mismatches"] == []
+    assert report["ok"] is False
+    assert report["status"] == "invalid"
+    assert report["mismatches"]
+    assert all(item.startswith("contract.source:") for item in report["mismatches"])
+    assert report["formal_training_allowed"] is False
+    assert report["formal_job_count"] == 0
+    assert report["credit"] == 0
     receipt = _load(DEFAULT_RECEIPT)
     contract = _load(DEFAULT_CONTRACT)
     assert receipt["schema"] == "core.training_contract.planning_receipt.v1"
@@ -154,6 +159,11 @@ def test_receipt_verifier_rejects_tampered_bound_contract(tmp_path: Path) -> Non
 def test_verification_is_read_only(tmp_path: Path) -> None:
     tracked = [DEFAULT_CONTRACT, DEFAULT_RECEIPT]
     before = {path: (path.read_bytes(), path.stat().st_mtime_ns) for path in tracked}
-    assert verify_receipt(DEFAULT_RECEIPT, root=ROOT, contract_path=DEFAULT_CONTRACT)["ok"]
+    report = verify_receipt(DEFAULT_RECEIPT, root=ROOT, contract_path=DEFAULT_CONTRACT)
+    assert report["ok"] is False
+    assert all(item.startswith("contract.source:") for item in report["mismatches"])
+    assert report["formal_training_allowed"] is False
+    assert report["formal_job_count"] == 0
+    assert report["credit"] == 0
     after = {path: (path.read_bytes(), path.stat().st_mtime_ns) for path in tracked}
     assert after == before
