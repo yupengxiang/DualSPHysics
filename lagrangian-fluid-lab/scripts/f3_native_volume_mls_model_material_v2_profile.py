@@ -325,6 +325,8 @@ def run_synthetic_profile(*, seed_count: int = 512, particle_count: int = 4096,
             elapsed_cpu = time.process_time() - process_started
         trace_sha256 = result["trace_h5_sha256"]
         source_sha256 = result["source"]["sha256"]
+        source_file_bytes = source.stat().st_size
+        trace_file_bytes = output.stat().st_size
 
     interval_rows = []
     for index in range(intervals):
@@ -376,7 +378,9 @@ def run_synthetic_profile(*, seed_count: int = 512, particle_count: int = 4096,
         },
         "synthetic_artifacts": {
             "source_sha256": source_sha256,
+            "source_file_bytes": int(source_file_bytes),
             "trace_sha256": trace_sha256,
+            "trace_file_bytes": int(trace_file_bytes),
             "temporary_files_removed": True,
         },
         "timing": {

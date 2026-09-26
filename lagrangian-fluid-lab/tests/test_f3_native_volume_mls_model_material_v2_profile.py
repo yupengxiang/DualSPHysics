@@ -40,6 +40,11 @@ def test_small_synthetic_profile_reports_consistent_phase_counts(tmp_path, monke
     assert result["qualification_claim"] == "none"
     assert result["configuration"]["seed_count"] == 4
     assert result["configuration"]["particle_count"] == 64
+    artifacts = result["synthetic_artifacts"]
+    assert type(artifacts["source_file_bytes"]) is int
+    assert artifacts["source_file_bytes"] > 0
+    assert type(artifacts["trace_file_bytes"]) is int
+    assert artifacts["trace_file_bytes"] > 0
     assert result["synthetic_artifacts"]["temporary_files_removed"] is True
     totals = result["timing"]["phase_totals"]
     assert totals["advance_calls"] == 1
