@@ -903,6 +903,11 @@ def test_kill_resume_restores_rng_optimizer_sampler_and_history_exactly(tmp_path
 
 def test_real_process_kill_after_checkpoint_resumes_equivalently(tmp_path):
     manifest = tiny_manifest(tmp_path)
+    validation = copy.deepcopy(manifest["cases"][0])
+    validation.update(case_id="validation-process", physical_case_id="validation-process",
+                      lineage_group_id="validation-process", split="validation",
+                      evaluation_role="validation")
+    manifest["cases"].append(validation)
     manifest_path = tmp_path / "manifest.json"
     manifest_path.write_text(json.dumps(manifest))
     killed_checkpoint = tmp_path / "killed.pt"
@@ -912,7 +917,7 @@ def test_real_process_kill_after_checkpoint_resumes_equivalently(tmp_path):
         "--model", "mlp", "--seed", "17", "--updates", "100000",
         "--centers", "1", "--hidden", "8", "--normalization-transitions", "1",
         "--checkpoint", str(killed_checkpoint), "--checkpoint-every", "1",
-        "--log-every", "100000", "--validation-every", "0", "--device", "cpu",
+        "--log-every", "100000", "--validation-every", "1", "--device", "cpu",
         "--output", str(tmp_path / "killed.json"),
     ], cwd=Path(__file__).resolve().parents[1], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     observed = False
@@ -946,15 +951,42 @@ def test_real_process_kill_after_checkpoint_resumes_equivalently(tmp_path):
     with CoreDataset(manifest, tmp_path) as data:
         full = train_model(data, model_kind="mlp", seed=17, updates=4, centers_per_update=1,
                            hidden=8, normalization_transitions=1, checkpoint=full_path,
-                           checkpoint_every=1, validation_every=0)
+                           checkpoint_every=1, validation_every=1)
         resumed = train_model(data, model_kind="mlp", seed=17, updates=4, centers_per_update=1,
                               hidden=8, normalization_transitions=1, checkpoint=resumed_path,
-                              resume=killed_checkpoint, checkpoint_every=1, validation_every=0)
+                              resume=killed_checkpoint, checkpoint_every=1, validation_every=1)
         full_payload = load_training_checkpoint(full_path, restore_rng=False)
         resumed_payload = load_training_checkpoint(resumed_path, restore_rng=False)
+    assert full_payload["update"] == resumed_payload["update"] == 4
     for key, value in full_payload["model_state"].items():
         assert torch.equal(value, resumed_payload["model_state"][key])
+    assert full_payload["optimizer_state"]["param_groups"] == (
+        resumed_payload["optimizer_state"]["param_groups"])
+    for parameter_id, full_state in full_payload["optimizer_state"]["state"].items():
+        resumed_state = resumed_payload["optimizer_state"]["state"][parameter_id]
+        for key, value in full_state.items():
+            assert torch.equal(value, resumed_state[key])
+    assert full_payload["sampler_state"] == resumed_payload["sampler_state"]
+    assert full_payload["normalization"] == resumed_payload["normalization"]
     assert resumed["history"] == full["history"]
+    assert resumed["validation_history"] == full["validation_history"]
+    assert full_payload["history"] == resumed_payload["history"]
+    assert full_payload["validation_history"] == resumed_payload["validation_history"]
+    assert full_payload["rng_state"].keys() == resumed_payload["rng_state"].keys()
+    assert len(full_payload["validation_history"]) == 4
+    assert full_payload["rng_state"]["python"] == resumed_payload["rng_state"]["python"]
+    full_numpy_rng = full_payload["rng_state"]["numpy"]
+    resumed_numpy_rng = resumed_payload["rng_state"]["numpy"]
+    assert full_numpy_rng[0] == resumed_numpy_rng[0]
+    assert np.array_equal(full_numpy_rng[1], resumed_numpy_rng[1])
+    assert full_numpy_rng[2:] == resumed_numpy_rng[2:]
+    assert torch.equal(full_payload["rng_state"]["torch"],
+                       resumed_payload["rng_state"]["torch"])
+    full_cuda_rng = full_payload["rng_state"].get("torch_cuda", ())
+    resumed_cuda_rng = resumed_payload["rng_state"].get("torch_cuda", ())
+    assert len(full_cuda_rng) == len(resumed_cuda_rng)
+    for full_state, resumed_state in zip(full_cuda_rng, resumed_cuda_rng):
+        assert torch.equal(full_state, resumed_state)
 
 
 def test_milestone_rollouts_are_consumed_and_resume_deduplicates(tmp_path, monkeypatch):
