@@ -12,4 +12,4 @@ Linux v6.8 上游 `include/linux/fanotify.h` 将 `FAN_REPORT_PIDFD` 列入 `FANO
 
 ## 验证
 
-仅作主机非特权 syscall 差分诊断及 Linux v6.8 上游源码核对；文档合同变更未运行 pytest 或工作负载。GPT-6 Luna Max 配置 subagent 首轮独立只读复核认为核心修正正确、无 P0/P1；其 P3 capability namespace 和 exact-argv 记录建议已补入 V18。其 P2 “V18 自称未进行本次探测”与当前 V18 文本不符，疑似混淆 V17 历史记录；已请求针对修订稿作窄范围 follow-up。reviewer 身份未独立 attested，不记作正式模型身份签核。
+仅作主机非特权 syscall 差分诊断及 Linux v6.8 上游源码核对；文档合同变更未运行 pytest 或工作负载。GPT-6 Luna Max 配置 subagent 的首轮与窄范围 follow-up 均确认核心修正、`init_user_ns` 语义及 syscall/flag 数值正确，无 P0/P1；其建议将 `event_f_flags=0x80000` 明确为本机 x86-64 glibc 展开值，并禁止跨 ABI 直接复用，已补入 V18。reviewer 撤回先前“V18 自称未进行本次探测”的 P2（误把 V17 历史说明混入 V18）；/tmp 与 /home 的 FID 观察未由 reviewer 重测，仍只作为本机一次性诊断。reviewer 身份未独立 attested，不记作正式模型身份签核。
