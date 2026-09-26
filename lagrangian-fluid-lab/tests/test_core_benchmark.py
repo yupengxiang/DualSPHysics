@@ -1,3 +1,4 @@
+import ast
 import json
 import os
 from pathlib import Path
@@ -16,6 +17,7 @@ from scripts.core_benchmark import (_checkpoint_registration,
                                      verify_dataset)
 from scripts.core_dataset import CoreDataset, sha256_file
 from scripts.core_learning import train_model
+from scripts.core_code_manifest import CORE_RUNTIME_CODE_FILES
 from scripts.core_package import build_bundle
 
 
@@ -248,6 +250,59 @@ def test_paired_comparison_requires_portable_bound_artifacts_and_fixed_denominat
         report, output / "reproduction.json", paired_report_path)
     assert missing_frames["passed"] is False
     assert any("expected_frames" in error for error in missing_frames["errors"])
+
+
+def test_single_case_paired_run_is_diagnostic_not_full_product(tmp_path):
+    bundle = _model_bundle(tmp_path)
+    output = tmp_path / "reproduction"
+    reproduce(bundle / "dataset.json", bundle, ["tiny"],
+              checkpoint="models/checkpoint-000.pt", output_dir=output)
+    paired_report_path = _make_distinct_host_pair(output, tmp_path)
+
+    report = reproduce(
+        bundle / "dataset.json", bundle, ["tiny"],
+        checkpoint="models/checkpoint-000.pt", output_dir=output,
+        paired_report=paired_report_path,
+    )
+
+    assert report["comparison"]["passed"] is True
+    assert report["cross_host_reproduction"] is True
+    assert report["paired_diagnostic_cross_host"] is True
+    assert report["full_product_reproduction"] is False
+
+
+def test_portable_runtime_code_closure_is_shared_and_covers_local_imports():
+    from scripts.core_benchmark import MODEL_CODE_FILES
+    from scripts.core_package import BUNDLE_CODE_FILES
+
+    assert BUNDLE_CODE_FILES == MODEL_CODE_FILES == CORE_RUNTIME_CODE_FILES
+    assert len(set(CORE_RUNTIME_CODE_FILES)) == len(CORE_RUNTIME_CODE_FILES)
+    assert "core_package.py" in CORE_RUNTIME_CODE_FILES
+    scripts_root = Path(core_benchmark.__file__).resolve().parent
+    local_modules = {Path(name).stem for name in CORE_RUNTIME_CODE_FILES}
+    for name in CORE_RUNTIME_CODE_FILES:
+        tree = ast.parse((scripts_root / name).read_text(encoding="utf-8"))
+        imported = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom) and node.module:
+                if node.module == "scripts":
+                    imported.update(alias.name for alias in node.names)
+                elif node.module.startswith("scripts."):
+                    imported.add(node.module.split(".", 2)[1])
+            elif isinstance(node, ast.Import):
+                imported.update(alias.name.split(".", 2)[1]
+                                 for alias in node.names
+                                 if alias.name.startswith("scripts."))
+            elif (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                  and node.func.attr == "import_module" and node.args
+                  and isinstance(node.args[0], ast.Constant)
+                  and isinstance(node.args[0].value, str)
+                  and node.args[0].value.startswith("scripts.")):
+                imported.add(node.args[0].value.split(".", 2)[1])
+        on_disk_dependencies = {
+            module for module in imported if (scripts_root / f"{module}.py").is_file()
+        }
+        assert on_disk_dependencies <= local_modules, name
 
 
 def test_checkpoint_reproduction_rejects_short_horizon_and_marks_partial(tmp_path, monkeypatch):

@@ -11,12 +11,18 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tempfile
 import uuid
 from collections.abc import Mapping
+# Bundle verification/build entrypoints must not create __pycache__ files in
+# the immutable package tree before its exact file inventory is checked.
+if __name__ == '__main__':
+    sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.core_dataset import (COMPACT_SCHEMA, CoreDataset, SCHEMA,
                                   validate_manifest)
 from scripts.core_cfd_dataset import open_dataset
+from scripts.core_code_manifest import CORE_RUNTIME_CODE_FILES
 from scripts.core_runtime import atomic_json, digest
 
 
@@ -25,12 +31,7 @@ CHECKPOINT_PAYLOAD_SCHEMA = 'core.checkpoint.v1'
 # v1 omitted modules imported by both public readers. Existing v1 packages stay
 # historical; new packages use v2 with an explicit, verified code closure.
 BUNDLE_SCHEMA = 'core.reader_bundle.v2'
-BUNDLE_CODE_FILES = (
-    'core_benchmark.py', 'core_runtime.py', 'core_contract.py', 'core_dataset.py',
-    'core_models.py', 'core_learning.py', 'core_cfd_dataset.py', 'core_package.py',
-    'core_evaluation.py', 'core_physics.py', 'core_reproduction_check.py',
-    'core_fsverity.py', 'core_strict_json.py', 'passive_tracers.py', 'f3_control.py',
-)
+BUNDLE_CODE_FILES = CORE_RUNTIME_CODE_FILES
 READER_MANIFEST_PREFLIGHT_SCHEMA = 'core.reader_manifest_preflight.v1'
 READER_MANIFEST_NORMALIZATION_PLAN_SCHEMA = 'core.reader_manifest_normalization_plan.v1'
 READER_MANIFEST_SCHEMAS = {SCHEMA, COMPACT_SCHEMA}
@@ -662,9 +663,41 @@ def _validate_checkpoint_registry(root, report, seen):
     return len(rows)
 
 
+def _bundle_tree_inventory(root):
+    """Return the exact regular-file/directory tree without following links."""
+    root = Path(root)
+    if not root.is_dir():
+        raise ValueError('bundle root is not a directory')
+    files = set()
+    directories = set()
+    pending = [(root, '')]
+    while pending:
+        directory, prefix = pending.pop()
+        try:
+            with os.scandir(directory) as scan:
+                entries = sorted(scan, key=lambda item: item.name)
+        except OSError as error:
+            raise ValueError('bundle tree cannot be inventoried') from error
+        for entry in entries:
+            relative = f'{prefix}/{entry.name}' if prefix else entry.name
+            if entry.is_symlink():
+                raise ValueError(f'bundle tree contains a symlink: {relative}')
+            if entry.is_dir(follow_symlinks=False):
+                directories.add(relative)
+                pending.append((Path(entry.path), relative))
+            elif entry.is_file(follow_symlinks=False):
+                files.add(relative)
+            else:
+                raise ValueError(f'bundle tree contains a non-regular entry: {relative}')
+    return files, directories
+
+
 def verify_bundle(directory):
     """Verify measured bundle contents before any reproduction entrypoint."""
     root = Path(directory).expanduser().resolve()
+    actual_files, actual_directories = _bundle_tree_inventory(root)
+    if 'bundle.json' not in actual_files:
+        raise ValueError('invalid bundle index')
     try:
         report = json.loads((root / 'bundle.json').read_text())
     except (OSError, json.JSONDecodeError) as error:
@@ -694,6 +727,8 @@ def verify_bundle(directory):
                 or digest(target).lower() != sha):
             raise ValueError(f'bundle artifact integrity failure: {relative}')
         normalized_entries.append({'path': relative, 'sha256': sha, 'bytes': bytes_value})
+    if 'bundle.json' in seen:
+        raise ValueError('bundle index cannot register itself')
     report = dict(report)
     report['files'] = normalized_entries
     required = {'dataset.json', 'environment.json', 'README.md', 'code/scripts/__init__.py'}
@@ -702,6 +737,16 @@ def verify_bundle(directory):
         raise ValueError('bundle is missing required artifact registrations')
     _validate_dataset_assets(root, report, seen)
     checkpoint_count = _validate_checkpoint_registry(root, report, seen)
+    expected_files = seen | {'bundle.json'}
+    if actual_files != expected_files:
+        raise ValueError('bundle tree contains unregistered or missing files')
+    expected_directories = set()
+    for relative in expected_files:
+        components = relative.split('/')[:-1]
+        for index in range(1, len(components) + 1):
+            expected_directories.add('/'.join(components[:index]))
+    if actual_directories != expected_directories:
+        raise ValueError('bundle tree contains unregistered or missing directories')
     declared_count = report.get('checkpoint_count', 0)
     if (isinstance(declared_count, bool) or not isinstance(declared_count, int)
             or declared_count != checkpoint_count):
@@ -1000,17 +1045,27 @@ def main():
     if args.verify_reader:
         destination=args.destination.resolve()
         verify_bundle(destination)
-        command=[sys.executable,str(destination/'code/scripts/core_benchmark.py'),'reproduce',
-                 '--manifest',str(destination/'dataset.json'),'--data-root',str(destination),
-                 '--output',str(destination/'reader-reproduction.json')]
-        if args.source_host:
-            command.extend(['--source-host',args.source_host])
-        env=dict(os.environ)
-        env.pop('PYTHONPATH',None)
-        subprocess.run(command,cwd=destination,env=env,check=True)
-        verification=json.loads((destination/'reader-reproduction.json').read_text())
-        if not verification['passed']:
-            return 1
+        with tempfile.TemporaryDirectory(prefix='core-reader-smoke-') as scratch:
+            smoke_report=Path(scratch)/'reader-reproduction.json'
+            try:
+                smoke_report.resolve().relative_to(destination)
+            except ValueError:
+                pass
+            else:
+                raise ValueError('reader smoke output must be outside the immutable bundle')
+            command=[sys.executable,str(destination/'code/scripts/core_benchmark.py'),'reproduce',
+                     '--manifest',str(destination/'dataset.json'),'--data-root',str(destination),
+                     '--output',str(smoke_report)]
+            if args.source_host:
+                command.extend(['--source-host',args.source_host])
+            env=dict(os.environ)
+            env.pop('PYTHONPATH',None)
+            env['PYTHONDONTWRITEBYTECODE']='1'
+            subprocess.run(command,cwd=destination,env=env,check=True)
+            verification=json.loads(smoke_report.read_text())
+            if not verification['passed']:
+                return 1
+        verify_bundle(destination)
     print(json.dumps({k:v for k,v in report.items() if k!='files'},indent=2))
     return 0
 

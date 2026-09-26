@@ -397,10 +397,32 @@ def test_reproduction_gate_rejects_same_host_root_or_missing_product_step(tmp_pa
 def test_current_registered_diagnostic_receipt_is_not_independent_reproduction():
     lab = Path(__file__).resolve().parents[1]
     registry = json.loads((lab / "campaigns/core-v1/registry.json").read_text(encoding="utf-8"))
+    historical_index = json.loads((lab / "campaigns/core-v1/reproduction/a8-full-reproduce-v1/index.json")
+                                  .read_text(encoding="utf-8"))
+    historical_paired_report = json.loads((
+        lab / "campaigns/core-v1/reproduction/a8-independent-relocated-v1/model-reproduction-report.json"
+    ).read_text(encoding="utf-8"))
+    assert historical_index["diagnostic_only"] is True
+    assert historical_index["case_selection"]["case_count"] == 1
+    assert historical_paired_report["full_product_reproduction"] is True
 
     result = completion(registry, lab)
 
     assert result["checks"]["independent_reproduction"] is False
+
+
+def test_paired_diagnostic_prediction_cannot_be_promoted_by_full_product_flag():
+    from scripts.core_campaign import _component_output_passes
+
+    report = {
+        "schema": "core.model_reproduction.v1",
+        "passed": True,
+        "full_horizon_reproduction": True,
+        "full_product_reproduction": True,
+        "paired_diagnostic_cross_host": True,
+        "predictor_future_state_inputs": False,
+    }
+    assert _component_output_passes("prediction", report) is False
 
 
 def _qualified_scope_fixture(tmp_path, *, material=False, formal_material_receipt=None,

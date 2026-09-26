@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import scripts.core_package as core_package
 import pytest
 from test_core_contract import tiny_manifest
 from scripts.core_package import (build_bundle, inspect_reader_manifests,
@@ -67,7 +68,7 @@ def test_bundle_reader_runs_without_repository_python_path(tmp_path):
     assert json.loads(result.stdout)['passed']
     # The multi-family learning reader is a lazy dependency, so a successful
     # F3 verify alone cannot establish that the learning entrypoint is portable.
-    imported=subprocess.run([sys.executable,'-I','-c',
+    imported=subprocess.run([sys.executable,'-I','-B','-c',
         'import sys; sys.path.insert(0, sys.argv[1]); '
         'from scripts.core_cfd_dataset import open_dataset; '
         'from scripts.core_learning import _dataset',str(bundle/'code')],
@@ -110,7 +111,89 @@ def test_bundle_v2_requires_and_indexes_transitive_reader_dependencies(tmp_path)
     assert index['schema'] == 'core.reader_bundle.v2'
     assert 'code/scripts/core_fsverity.py' in paths
     assert 'code/scripts/core_strict_json.py' in paths
+    assert 'code/scripts/core_package.py' in paths
+    assert 'code/scripts/core_code_manifest.py' in paths
     assert verify_bundle(bundle)['passed']
+
+
+def _bundle_snapshot(root):
+    snapshot = {}
+    for path in sorted(root.rglob('*')):
+        relative = path.relative_to(root).as_posix()
+        if path.is_dir():
+            snapshot[relative + '/'] = None
+        else:
+            snapshot[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return snapshot
+
+
+def test_verify_reader_smoke_does_not_mutate_published_bundle(tmp_path, monkeypatch):
+    source = tmp_path / 'source'
+    source.mkdir()
+    manifest = source / 'manifest.json'
+    manifest.write_text(json.dumps(tiny_manifest(source)))
+    bundle = tmp_path / 'bundle'
+    observed = {}
+    run = core_package.subprocess.run
+
+    def checked_run(command, **kwargs):
+        output = Path(command[command.index('--output') + 1]).resolve()
+        try:
+            output.relative_to(bundle.resolve())
+        except ValueError:
+            pass
+        else:
+            raise AssertionError('reader smoke output was placed inside bundle')
+        before = _bundle_snapshot(bundle)
+        result = run(command, **kwargs)
+        observed['tree_unchanged'] = before == _bundle_snapshot(bundle)
+        observed['smoke_report_exists_during_check'] = output.is_file()
+        return result
+
+    monkeypatch.setattr(core_package.subprocess, 'run', checked_run)
+    monkeypatch.setattr(sys, 'argv', [
+        'core_package.py', '--manifest', str(manifest), '--data-root', str(source),
+        '--destination', str(bundle), '--verify-reader',
+    ])
+
+    assert core_package.main() == 0
+
+    assert observed == {
+        'tree_unchanged': True,
+        'smoke_report_exists_during_check': True,
+    }
+    assert not (bundle / 'reader-reproduction.json').exists()
+    assert verify_bundle(bundle)['passed']
+
+
+def test_bundle_verifier_rejects_unregistered_tree_entries(tmp_path):
+    source = tmp_path / 'source'
+    source.mkdir()
+    manifest = source / 'manifest.json'
+    manifest.write_text(json.dumps(tiny_manifest(source)))
+    bundle = tmp_path / 'bundle'
+    build_bundle(manifest, source, bundle)
+    (bundle / 'unregistered-smoke-output.json').write_text('{}')
+
+    with pytest.raises(ValueError, match='unregistered or missing files'):
+        verify_bundle(bundle)
+
+
+def test_bundle_verifier_rejects_unregistered_runtime_code_omission(tmp_path):
+    source = tmp_path / 'source'
+    source.mkdir()
+    manifest = source / 'manifest.json'
+    manifest.write_text(json.dumps(tiny_manifest(source)))
+    bundle = tmp_path / 'bundle'
+    build_bundle(manifest, source, bundle)
+    index_path = bundle / 'bundle.json'
+    index = json.loads(index_path.read_text())
+    index['files'] = [item for item in index['files']
+                      if item['path'] != 'code/scripts/core_package.py']
+    index_path.write_text(json.dumps(index))
+
+    with pytest.raises(ValueError, match='missing required artifact registrations'):
+        verify_bundle(bundle)
 
 
 def test_bundle_verifier_rejects_legacy_v1_schema(tmp_path):

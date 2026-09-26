@@ -192,6 +192,7 @@ def _component_output_passes(component, report):
             and report.get("passed") is True
             and report.get("full_horizon_reproduction") is True
             and report.get("full_product_reproduction") is True
+            and report.get("paired_diagnostic_cross_host") is not True
             and report.get("predictor_future_state_inputs") is False
         )
     if component == "scoring":

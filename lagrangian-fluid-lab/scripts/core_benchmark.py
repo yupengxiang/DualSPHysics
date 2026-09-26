@@ -15,20 +15,21 @@ import sys
 import tempfile
 import time
 
+# Published bundles are read-only inputs; executing this portable entrypoint
+# must not create __pycache__ files inside the bundle before verification.
+if __name__ == "__main__":
+    sys.dont_write_bytecode = True
+
 # Executable both by absolute script path and python -m scripts.core_benchmark.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.core_contract import updater_oracle
 from scripts.core_dataset import import_f3_manifest
 from scripts.core_cfd_dataset import open_dataset
+from scripts.core_code_manifest import CORE_RUNTIME_CODE_FILES
 from scripts.core_runtime import atomic_json, digest
 
 
-MODEL_CODE_FILES = (
-    "core_benchmark.py", "core_runtime.py", "core_contract.py", "core_dataset.py",
-    "core_models.py", "core_learning.py", "core_cfd_dataset.py", "core_evaluation.py",
-    "core_physics.py", "core_reproduction_check.py", "core_fsverity.py",
-    "core_strict_json.py",
-)
+MODEL_CODE_FILES = CORE_RUNTIME_CODE_FILES
 CHECKPOINT_REGISTRY_SCHEMA = "core.bundled_checkpoints.v1"
 MODEL_REPRODUCTION_SCHEMA = "core.model_reproduction.v1"
 MODEL_SCORE_SCHEMA = "core.model_reproduction.score.v1"
@@ -986,6 +987,7 @@ def _reproduce_checkpoint(manifest, data_root, case_ids, source_host, *, checkpo
         "passed": bool(source_verification["passed"] and full_horizon),
         "full_horizon_reproduction": bool(full_horizon),
         "full_product_reproduction": False, "cross_host_reproduction": False,
+        "paired_diagnostic_cross_host": False,
         "scientific_status": "not_assessed",
         "predictor_future_state_inputs": False,
         "future_reference_state_used_by_oracle": True,
@@ -1025,9 +1027,12 @@ def _reproduce_checkpoint(manifest, data_root, case_ids, source_host, *, checkpo
     if paired_report is not None:
         comparison = _compare_paired_reproduction(report, report_path, paired_report)
         report["comparison"] = comparison
-        report["cross_host_reproduction"] = bool(comparison["passed"] and comparison["distinct_host_evidence"])
-        report["full_product_reproduction"] = bool(
-            report["passed"] and report["cross_host_reproduction"] and comparison["passed"])
+        report["paired_diagnostic_cross_host"] = bool(
+            comparison["passed"] and comparison["distinct_host_evidence"])
+        report["cross_host_reproduction"] = report["paired_diagnostic_cross_host"]
+        # This command accepts explicit case selections and cannot establish
+        # the complete Core product denominator or independent root admission.
+        report["full_product_reproduction"] = False
         report["passed"] = bool(report["passed"] and comparison["passed"])
         if report["source_host"] is None and comparison.get("observed_hosts"):
             report["source_host"] = next((host for host in comparison["observed_hosts"]
@@ -1057,7 +1062,8 @@ def reproduce(manifest, data_root, case_ids=None, source_host=None, *, checkpoin
     return {"schema": "core.reader_reproduction.v1", "passed": result["passed"],
             "source_host": source_host, "reproduction_host": platform.node(), "data_root": str(root),
             "verification": result, "scope": "reader, full-axis oracle, hashes; GPU model reproduction is separate",
-            "full_product_reproduction": False}
+            "full_product_reproduction": False,
+            "paired_diagnostic_cross_host": False}
 
 
 def main(argv=None):
