@@ -4,6 +4,13 @@ from __future__ import annotations
 import hashlib
 import copy
 from collections import Counter
+import json
+import os
+from pathlib import Path
+import select
+import signal
+import subprocess
+import sys
 
 import h5py
 import numpy as np
@@ -148,6 +155,89 @@ def test_interruption_resume_matches_uninterrupted_trace_exactly(tmp_path):
     assert resumed_report["status"] == "completed"
     _assert_trace_datasets_equal(continuous, resumed)
     _assert_scientific_summary_equal(full_report, resumed_report)
+
+
+def test_sigkill_after_committed_row_resumes_in_a_fresh_process(tmp_path):
+    source = tmp_path / "synthetic-model.h5"
+    _synthetic_source(source)
+    continuous = tmp_path / "continuous.h5"
+    killed = tmp_path / "killed.h5"
+    full_report = run_v2(**_inputs(source, continuous))
+
+    child_code = r"""
+import json
+import os
+import sys
+import numpy as np
+from scripts import f3_native_volume_mls_model_material_v2 as material
+
+source, output, mode = sys.argv[1:4]
+arguments = dict(
+    source=source,
+    output=output,
+    role=material.MODEL_ROLE,
+    rho0_kgm3=1000.0,
+    dp_m=0.015,
+    seeds=np.asarray([
+        [-0.001, 0.0, 0.0], [-0.0005, 0.001, 0.001],
+        [0.0005, -0.001, -0.001], [0.001, 0.0, 0.0],
+    ], dtype=np.float64),
+    intervals=2,
+    substeps=2,
+    walls=np.empty((0, 3, 3), dtype=np.float64),
+)
+if mode == "crash":
+    append_row = material._append_row
+    def append_then_wait(handle, row, state, step_index, diagnostics):
+        append_row(handle, row, state, step_index, diagnostics)
+        if step_index == 0:
+            print("first-substep-committed", flush=True)
+            sys.stdin.readline()
+    material._append_row = append_then_wait
+    material.run_material_trace(**arguments)
+elif mode == "resume":
+    report = material.run_material_trace(**arguments, resume=True)
+    print(json.dumps({"status": report["status"]}, sort_keys=True), flush=True)
+else:
+    raise ValueError("unknown test mode")
+"""
+    child = subprocess.Popen(
+        [sys.executable, "-c", child_code, str(source), str(killed), "crash"],
+        cwd=Path(__file__).resolve().parents[1],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        ready, _, _ = select.select([child.stdout], [], [], 30.0)
+        assert ready, "worker did not report its committed checkpoint"
+        assert child.stdout.readline().strip() == "first-substep-committed"
+        child.kill()
+        child.wait(timeout=15.0)
+        assert child.returncode == -signal.SIGKILL
+        _, child_stderr = child.communicate(timeout=15.0)
+        assert not child_stderr
+    finally:
+        if child.poll() is None:
+            child.kill()
+            child.wait(timeout=15.0)
+
+    with h5py.File(killed, "r") as handle:
+        assert int(handle.attrs["committed_rows"]) == 2
+        assert len(handle["_journal/commit_log"]) == 2
+
+    resumed = subprocess.run(
+        [sys.executable, "-c", child_code, str(source), str(killed), "resume"],
+        cwd=Path(__file__).resolve().parents[1],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=60.0,
+    )
+    assert resumed.returncode == 0, resumed.stderr
+    assert json.loads(resumed.stdout) == {"status": "completed"}
+    _assert_trace_datasets_equal(continuous, killed)
 
 
 def test_resume_rejects_changed_source_bytes_and_parameters(tmp_path):
