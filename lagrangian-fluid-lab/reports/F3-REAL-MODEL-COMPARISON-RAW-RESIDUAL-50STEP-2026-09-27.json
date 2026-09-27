@@ -1,0 +1,204 @@
+{
+  "schema": "core.training.f3.real_model_comparison_raw_residual_50step.v1",
+  "diagnostic_only": true,
+  "purpose": "Coarse same-protocol comparison of graph_raw and graph_residual before any formal-run decision",
+  "family": "F3",
+  "source": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "source_manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "case_id": "F3_DEV_00_a0p903125",
+    "case_source_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+    "particles": 34560,
+    "expected_transitions": 835,
+    "expected_trajectory_frames": 836
+  },
+  "training": {
+    "model_kind": "graph_residual",
+    "run_id": "graph_residual-seed17",
+    "seed": 17,
+    "updates_requested": 100,
+    "updates_completed": 100,
+    "centers_per_update": 256,
+    "hidden": 8,
+    "normalization_transitions": 16,
+    "max_neighbors": 192,
+    "device": "cuda:0",
+    "learning_rate": 0.001,
+    "history_states": 1,
+    "target_normalization": "raw_dual_increment_train_shared",
+    "wall_seconds": 437.8605285859667,
+    "peak_rss_mib": 2691.96484375,
+    "peak_gpu_memory_bytes": 1567362048,
+    "evidence_status": "complete",
+    "neighbor_truncation_fraction": 0.0,
+    "residual_prior": {
+      "enabled": true,
+      "execution_calls": 100,
+      "rows": 3456000,
+      "finite": true,
+      "history_complete": true,
+      "semantic": "graph_residual subtracts the SI prior before shared raw-target normalization and adds it back during prediction",
+      "dx_abs_max_m": 0.008237487636506557,
+      "dv_abs_max_mps": 0.10806134343147278
+    },
+    "receipt_path": "/tmp/f3-graph-residual-cap192-updates100-20260927.json",
+    "receipt_sha256": "6520e605c3f3447b2df77ba4b13b8920a3fd881842c3fe862e32c5c2d9e0e34b",
+    "checkpoint_path": "/tmp/f3-graph-residual-cap192-updates100-20260927.pt",
+    "checkpoint_sha256": "e3bd8b3cee132d0bc5b3fdbc7f3630cca94171754ec9c4300a055bb58ac77685",
+    "checkpoint_bytes": 103403,
+    "progress_path": "/tmp/f3-graph-residual-cap192-updates100-20260927.progress.json",
+    "progress_sha256": "0e9a0feb9df98bd9ab6b6b02f49e0720846a8c060b2fdd30f6f3bb99345694b5",
+    "history_tail": [
+      {
+        "update": 60,
+        "case_id": "F3_DEV_12_a0p978125",
+        "frame": 134,
+        "loss_mse": 69.97525024414062,
+        "neighbor_truncation_fraction": 0.0
+      },
+      {
+        "update": 80,
+        "case_id": "F3_DEV_15_a0p996875",
+        "frame": 362,
+        "loss_mse": 79.67723846435547,
+        "neighbor_truncation_fraction": 0.0
+      },
+      {
+        "update": 100,
+        "case_id": "F3_DEV_16_a1p003125",
+        "frame": 609,
+        "loss_mse": 59.954803466796875,
+        "neighbor_truncation_fraction": 0.0
+      }
+    ]
+  },
+  "evaluation": {
+    "mode": "diagnostic",
+    "model_kind": "graph_residual",
+    "device": "cuda:0",
+    "chunk_size": 34560,
+    "maximum_steps": 50,
+    "expected_full_case_frames": 835,
+    "frames_executed": 50,
+    "trajectory_frames_including_initial": 51,
+    "failure_category": "maximum_steps_limit",
+    "first_failure_frame": 51,
+    "execution_complete_for_requested_window": true,
+    "finite_rollout_complete_for_requested_window": true,
+    "complete_over_registered_denominator": false,
+    "finite_prefix_frames": 50,
+    "raw_error_coverage": 0.059880239520958084,
+    "selection_score": 0.9610308999533752,
+    "position_rmse_m": {
+      "step_1": 0.0005380626183427955,
+      "step_10": 0.027853553195119663,
+      "step_20": 0.10700279069637691,
+      "step_30": 0.23718035096628437,
+      "step_40": 0.42016140683660147,
+      "step_50": 0.6584104263563063,
+      "frame_mean": 0.22651765616256245
+    },
+    "velocity_rmse_mps": {
+      "step_1": 0.05316785129281059,
+      "step_10": 0.5200304187352063,
+      "step_20": 1.0308598879309616,
+      "step_30": 1.5459975972644042,
+      "step_40": 2.0872603472117097,
+      "step_50": 2.647095761224807,
+      "frame_mean": 1.327444007232308
+    },
+    "position_ade_m": {
+      "step_1": 0.0009319141549313821,
+      "step_10": 0.04824085779087661,
+      "step_20": 0.18531533303258038,
+      "step_30": 0.4107493911451736,
+      "step_40": 0.7276490856284974,
+      "step_50": 1.1403154677518714
+    },
+    "velocity_ade_mps": {
+      "step_1": 0.09207914107986832,
+      "step_10": 0.9006427949318402,
+      "step_20": 1.7852026761991196,
+      "step_30": 2.6772946421288437,
+      "step_40": 3.6150398259762135,
+      "step_50": 4.584888951634789
+    },
+    "progress_path": "/tmp/f3-graph-residual-cap192-updates100-evaluate50-progress-20260927.json",
+    "progress_sha256": "dbf4c96d04b814426e41c92db32c1d5e23500c38f18ca647efbdbd422bc725a6",
+    "progress_elapsed_seconds": 953.3158193049021,
+    "evaluation_path": "/tmp/f3-graph-residual-cap192-updates100-evaluate50-20260927.json",
+    "evaluation_sha256": "3f73db10db4de1f66c2fd94e4a48c13f39a76c729b5f1807f864ce9cfced9b13",
+    "evaluation_bytes": 509890,
+    "trajectory_path": "/tmp/f3-graph-residual-cap192-updates100-evaluate50-20260927.h5",
+    "trajectory_sha256": "97cdc3b2db86fdb3fd839b201a6aafce65490c89094c30df84832817733638a2",
+    "trajectory_bytes": 44903680,
+    "trajectory_shapes": {
+      "position": [51, 34560, 3],
+      "velocity": [51, 34560, 3],
+      "valid": [51, 34560],
+      "time": [51],
+      "mass": [34560],
+      "particle_id": [34560],
+      "zone": [34560]
+    }
+  },
+  "comparison": {
+    "protocol": {
+      "case_id": "F3_DEV_00_a0p903125",
+      "seed": 17,
+      "centers_per_update": 256,
+      "hidden": 8,
+      "normalization_transitions": 16,
+      "max_neighbors": 192,
+      "maximum_steps": 50,
+      "chunk_size": 34560,
+      "device": "cuda:0"
+    },
+    "graph_raw_train100": {
+      "updates": 100,
+      "selection_score": 0.9407240030483476,
+      "position_rmse_step50_m": 0.013674823926994838,
+      "position_rmse_frame_mean_m": 0.005366971016635309,
+      "velocity_rmse_step50_mps": 0.1001154460710817,
+      "velocity_rmse_frame_mean_mps": 0.04224803431429641
+    },
+    "graph_raw_train500": {
+      "updates": 500,
+      "selection_score": 0.9405794502120072,
+      "position_rmse_step50_m": 0.010808855234180976,
+      "position_rmse_frame_mean_m": 0.006481719115271537,
+      "velocity_rmse_step50_mps": 0.05080001907864858,
+      "velocity_rmse_frame_mean_mps": 0.024221742490882124
+    },
+    "graph_residual_train100": {
+      "updates": 100,
+      "selection_score": 0.9610308999533752,
+      "position_rmse_step50_m": 0.6584104263563063,
+      "position_rmse_frame_mean_m": 0.22651765616256245,
+      "velocity_rmse_step50_mps": 2.647095761224807,
+      "velocity_rmse_frame_mean_mps": 1.327444007232308
+    },
+    "interpretation": {
+      "decision": "reject_graph_residual_for_next_coarse_direction",
+      "summary": "graph_residual is finite for all 50 requested steps and has no execution/provenance failure, but its physical position and velocity errors are far larger than both graph_raw checkpoints; the higher selection score is not sufficient evidence of better rollout quality under this protocol",
+      "next_coarse_direction": "compare mlp under the same 100-update/50-step protocol before considering any formal training or full 835-transition rollout"
+    }
+  },
+  "qualification": {
+    "formal_training": false,
+    "formal_eligible": false,
+    "T1_numerical": false,
+    "T2_macro": false,
+    "qualification_credit": 0
+  },
+  "side_effects": {
+    "production_hdf5_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "solver_started": false,
+    "worker_started": false,
+    "queue_mutation": 0,
+    "future_state_inputs": false
+  }
+}
