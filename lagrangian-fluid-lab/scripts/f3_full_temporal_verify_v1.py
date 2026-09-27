@@ -28,6 +28,7 @@ import numpy as np
 # ``python -m scripts.f3_full_temporal_verify_v1`` resolve the lab package.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.core_dataset import COMPACT_SCHEMA, CoreDataset, sha256_file
+from scripts.core_runtime import atomic_json
 
 
 SCHEMA = "core.f3.full_temporal_verification.v1"
@@ -400,6 +401,8 @@ def main(argv=None):
     parser.add_argument("--case-id", action="append", default=None)
     parser.add_argument("--frame-chunk-size", type=int, default=DEFAULT_FRAME_CHUNK_SIZE)
     parser.add_argument("--max-chunk-bytes", type=int, default=DEFAULT_MAX_CHUNK_BYTES)
+    parser.add_argument("--output", type=Path,
+                        help="optional JSON receipt path; parent directory must already exist")
     args = parser.parse_args(argv)
     result = verify_f3_full_temporal(
         args.manifest,
@@ -408,6 +411,8 @@ def main(argv=None):
         frame_chunk_size=args.frame_chunk_size,
         max_chunk_bytes=args.max_chunk_bytes,
     )
+    if args.output is not None:
+        atomic_json(args.output, result)
     print(json.dumps(result, sort_keys=True, allow_nan=False))
     return 0
 

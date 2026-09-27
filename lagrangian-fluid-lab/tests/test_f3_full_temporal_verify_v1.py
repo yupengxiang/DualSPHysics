@@ -135,6 +135,20 @@ def test_cli_emits_json_only_and_does_not_create_output_directory(tmp_path, caps
     assert not (tmp_path / "output").exists()
 
 
+def test_cli_can_atomically_persist_a_receipt_when_requested(tmp_path, capsys):
+    manifest, _ = _make_v2_case(tmp_path)
+    output = tmp_path / "receipt.json"
+    assert verifier.main([
+        "--manifest", str(manifest), "--data-root", str(tmp_path),
+        "--case-id", "synthetic-f3", "--output", str(output),
+    ]) == 0
+    stdout = json.loads(capsys.readouterr().out)
+    persisted = json.loads(output.read_text())
+    assert persisted == stdout
+    assert persisted["full_temporal_scan"] is True
+    assert persisted["passed"] is True
+
+
 def _make_nonfinite(handle):
     handle["position"][1, 0, 0] = np.nan
 
