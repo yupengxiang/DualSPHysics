@@ -1,0 +1,172 @@
+{
+  "schema": "core.material.f4.tallwall120.binding_audit.v1",
+  "created_at_utc": "2026-09-27T16:50:02Z",
+  "status": "blocked_fail_closed",
+  "diagnostic_only": true,
+  "qualification": {
+    "T1": false,
+    "T2": false,
+    "credit": 0,
+    "t1": false,
+    "t2": false
+  },
+  "scope": {
+    "family": "F4",
+    "case": "tallwall120",
+    "requested_target": "f4-tallwall120-production-dev-07",
+    "baseline_variant": "baseline24",
+    "read_only": true,
+    "central_ledger_mutation": 0,
+    "thresholds_changed": false,
+    "algorithm_changed": false,
+    "registry_changed": false,
+    "qualification_state_changed": false
+  },
+  "target_source": {
+    "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+    "bytes": 2067911708,
+    "sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+    "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+    "physical_case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+    "lineage_group_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+    "recipe_id": "F4_mdbc_laminar_nu1e6_tallwall120_v1",
+    "schema_version": 3,
+    "frame_count": 218,
+    "particle_count": 217485,
+    "hdf5_readable": true,
+    "data_qualification_status": "candidate_unqualified",
+    "t2_macro_status": "not_assessed"
+  },
+  "candidate_material_trace": {
+    "trace_h5": {
+      "path": "campaigns/core-v1/runtime/attempts/core-f4-tallwall120-material-cadence-native004-s2-canary-v1/20260920T061234-bdce1e3722cf/product/tallwall120_native004_material.h5",
+      "bytes": 3318344,
+      "sha256": "d4ab9a2019d383be06289e1a8cc92da4d176d729d2d9cfbe6209dc57de55416f",
+      "schema": "core.material.f4.tallwall120.v1",
+      "reliable_shape": [101, 512],
+      "time_shape": [101],
+      "committed_frame": 100,
+      "committed_time_s": 0.4000145164329399
+    },
+    "trace_result_manifest": {
+      "path": "campaigns/core-v1/runtime/attempts/core-f4-tallwall120-material-cadence-native004-s2-canary-v1/20260920T061234-bdce1e3722cf/product/tallwall120_native004_material.json",
+      "bytes": 12131,
+      "sha256": "e92b8df249a675ea3d6c807eebaf61c984da0088897504e04c8c804c634f9fe8",
+      "schema": "core.material.f4.tallwall120.v1",
+      "status": "partial",
+      "native_frame_count": 1086,
+      "event_window_complete": false,
+      "event_window_status": "right_censored_or_unresolved",
+      "material_reliability_status": "uncalibrated",
+      "qualification_claim": "none",
+      "binding_source_sha256": "91846866c177e4c3036b7ef92c33a4e0bde7d9e8993efb01dde300811b7c096e",
+      "binding_source_case_scope": "F4_mdbc_laminar_nu1e6_tallwall120_v1",
+      "binding_source_path": "campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-14/product/trajectory.h5",
+      "binding_source_role": "qualification-cell-14 native source"
+    }
+  },
+  "candidate_derived_view_manifest": {
+    "path": "campaigns/core-v1/material/derived/f4-tallwall120-native004-stride5/trajectory.h5.manifest.json",
+    "bytes": 3390,
+    "sha256": "73dea6a7bcb4e46fa21ed3efffc0d79dc6eb600d62235add5f8966c4c97d30ea",
+    "schema": "core.cfd.frame_stride_view.v1",
+    "scientific_status": "derived_reference_view; not an independent CFD run and not T2 qualification",
+    "source_path": "campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-14/product/trajectory.h5",
+    "source_sha256": "91846866c177e4c3036b7ef92c33a4e0bde7d9e8993efb01dde300811b7c096e",
+    "view_path": "campaigns/core-v1/material/derived/f4-tallwall120-native004-stride5/trajectory.h5",
+    "view_sha256": "d80756f031d700d7aa91d68a8d9234142267d657376feecbb26ae2a67dc11bf1",
+    "exact_rows_no_interpolation": true,
+    "view_frame_count": 218,
+    "source_frame_count": 1086,
+    "stride": 5
+  },
+  "binding_checks": [
+    {
+      "check": "target_hdf5_exists_and_reads",
+      "passed": true
+    },
+    {
+      "check": "target_case_identity_is_dev_07",
+      "passed": true,
+      "observed": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07"
+    },
+    {
+      "check": "target_bound_material_trace_found_in_campaign_evidence",
+      "passed": false,
+      "matches": [],
+      "searched_tokens": [
+        "f4-tallwall120-production-dev-07",
+        "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+        "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae"
+      ]
+    },
+    {
+      "check": "candidate_trace_source_hash_equals_target_hash",
+      "passed": false,
+      "target_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+      "candidate_source_sha256": "91846866c177e4c3036b7ef92c33a4e0bde7d9e8993efb01dde300811b7c096e"
+    },
+    {
+      "check": "candidate_manifest_source_equals_target",
+      "passed": false,
+      "candidate_source_path": "campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-14/product/trajectory.h5",
+      "target_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5"
+    },
+    {
+      "check": "candidate_trace_is_complete_for_full_source",
+      "passed": false,
+      "committed_frames": 101,
+      "declared_native_frames": 1086,
+      "event_window_complete": false
+    },
+    {
+      "check": "safe_target_binding",
+      "passed": false,
+      "reason": "no explicit target binding, source hash mismatch, and candidate trace is partial"
+    }
+  ],
+  "baseline24": {
+    "requested": true,
+    "executed": false,
+    "unknown_fraction": null,
+    "first_failure_frame": null,
+    "first_failure_time_s": null,
+    "coverage": null,
+    "reason_not_computed": "Fail-closed: no complete material trace explicitly bound to production-dev-07"
+  },
+  "unbound_reference_trace_snapshot": {
+    "eligible_for_target_diagnosis": false,
+    "unknown_fraction_source_1": 1.0,
+    "common_reliable_path_coverage": 0.0,
+    "unknown_gate_pass": false,
+    "note": "These are the partial cell-14 trace's own values and are not assigned to dev-07."
+  },
+  "targeted_checks": {
+    "json_validation": {
+      "passed": true,
+      "inputs": [
+        "target product/result.json",
+        "target product/audit.json",
+        "derived trajectory.h5.manifest.json",
+        "native004 material result manifest"
+      ]
+    },
+    "diagnosis_script_help": {
+      "passed": true,
+      "script": "scripts/f4_tallwall120_material_diagnosis.py"
+    },
+    "pytest": {
+      "passed": true,
+      "command": ".venv/bin/python -m pytest -q tests/test_f4_tallwall120_material.py tests/test_f4_tallwall120_cadence_terminal_diagnosis.py",
+      "result": "6 passed in 2.15s"
+    }
+  },
+  "blocking_gaps": [
+    "No evidence manifest or trace binding names the requested production-dev-07 source.",
+    "The only inspected complete-shape F4 native004 view and material trace bind to qualification-cell-14, not dev-07.",
+    "The material trace is partial at 101/1086 native frames and is marked event_window_complete=false.",
+    "A target-bound complete material trace is required before baseline24 diagnosis can report unknown, first failure, or coverage."
+  ],
+  "next_step": "Produce a complete material trace whose binding carries the exact dev-07 source path and SHA-256, then rerun the unchanged diagnosis script.",
+  "evidence_files_read_only": true
+}
