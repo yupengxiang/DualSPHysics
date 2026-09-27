@@ -26,9 +26,7 @@ from scripts.core_contract import (FiniteGeometry, KnownInputs, PrescribedContro
                                    PrescribedGeometry,
                                    State, StepPrediction, contract_hash, updater_oracle)
 from scripts.core_fsverity import FsVerityMeasurement, fd_identity, verify_fd
-from scripts.core_strict_json import (MAX_JSON_INPUT_BYTES,
-                                      absolute_path_without_following_leaf,
-                                      read_bounded_raw_json, strict_json_object)
+from scripts.core_strict_json import MAX_JSON_INPUT_BYTES, read_bounded_json_object
 
 SCHEMA = "core.dataset.v1"
 COMPACT_SCHEMA = "core.dataset.v2"
@@ -332,8 +330,9 @@ def compactify_manifest(source_manifest, data_root, *, asset_dir=None,
     original HDF5 path, byte count, trajectory hash and input-contract hash.
     """
     root = Path(data_root).expanduser().resolve()
-    source_path = Path(source_manifest).expanduser().resolve()
-    source = json.loads(source_path.read_text())
+    source, _, source_manifest_sha256 = read_bounded_json_object(
+        source_manifest, max_bytes=MAX_DATASET_MANIFEST_BYTES,
+        label="Core dataset source manifest")
     if source.get("schema") != SCHEMA:
         raise ValueError("compactify_manifest expects a core.dataset.v1 source")
     validate_manifest(source)
@@ -421,7 +420,7 @@ def compactify_manifest(source_manifest, data_root, *, asset_dir=None,
     result.update({
         "schema": COMPACT_SCHEMA,
         "source_schema": SCHEMA,
-        "source_manifest_sha256": sha256_file(source_path),
+        "source_manifest_sha256": source_manifest_sha256,
         "dataset_id": f"{source.get('dataset_id', 'core-dataset')}_compact_v2",
         "formal_release": source.get("formal_release", False)
         if formal_release is None else bool(formal_release),
@@ -448,14 +447,15 @@ def import_f3_manifest(source_manifest, data_root, *, compact=False, asset_dir=N
     backwards-compatible diagnostic comparisons.
     """
     root = Path(data_root).expanduser().resolve()
-    source_path = Path(source_manifest).resolve()
-    source = json.loads(source_path.read_text())
+    source, _, source_manifest_sha256 = read_bounded_json_object(
+        source_manifest, max_bytes=MAX_DATASET_MANIFEST_BYTES,
+        label="F3 canonical manifest")
     if source.get("schema") != "l2.f3.canonical_manifest.v1":
         raise ValueError("expected registered F3 canonical manifest")
     result_schema = COMPACT_SCHEMA if compact else SCHEMA
     result = {"schema": result_schema,
               "dataset_id": "F3_registered32_core_native_v2" if compact else "F3_registered32_core_native_v1",
-              "formal_release": False, "source_manifest_sha256": sha256_file(source_path),
+              "formal_release": False, "source_manifest_sha256": source_manifest_sha256,
               "source_qualification_claims": source.get("qualification_axes", {}),
               "case_count": len(source["cases"]), "cases": [],
               "input_asset_policy": "content_addressed_compressed_npz" if compact else "inline"}
@@ -569,12 +569,8 @@ class CoreDataset:
     def __init__(self, manifest, data_root=None, *, max_open_files=4, strict=True,
                  snapshot_fds=None, snapshot_measurements=None):
         if isinstance(manifest, (str, Path)):
-            path = absolute_path_without_following_leaf(manifest)
-            raw = read_bounded_raw_json(
-                path, max_bytes=MAX_DATASET_MANIFEST_BYTES,
-                label="Core dataset manifest")
-            payload = strict_json_object(
-                raw, max_bytes=MAX_DATASET_MANIFEST_BYTES,
+            payload, path, _ = read_bounded_json_object(
+                manifest, max_bytes=MAX_DATASET_MANIFEST_BYTES,
                 label="Core dataset manifest")
             root = Path(data_root).expanduser().resolve() if data_root is not None else path.parent
         else:

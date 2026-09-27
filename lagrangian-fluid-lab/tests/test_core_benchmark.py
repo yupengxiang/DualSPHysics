@@ -104,6 +104,28 @@ def test_verify_dataset_rejects_nonbinary_valid_mask(tmp_path):
         verify_dataset(manifest, source, case_ids=["tiny"])
 
 
+def test_import_f3_cli_rejects_symlink_source_manifest(tmp_path):
+    source = tmp_path / "source"
+    source.mkdir()
+    canonical = source / "canonical.json"
+    canonical.write_bytes(b'{"schema":"l2.f3.canonical_manifest.v1","cases":[]}')
+    link = source / "canonical-link.json"
+    link.symlink_to(canonical)
+    output = tmp_path / "imported.json"
+    script = Path(__file__).resolve().parents[1] / "scripts/core_benchmark.py"
+
+    completed = subprocess.run(
+        [sys.executable, str(script), "import-f3",
+         "--source-manifest", str(link), "--data-root", str(source),
+         "--output", str(output)],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+
+    assert completed.returncode != 0
+    assert "symlink is forbidden" in completed.stderr
+    assert not output.exists()
+
+
 def _model_bundle(tmp_path):
     source = tmp_path / "source"
     source.mkdir()

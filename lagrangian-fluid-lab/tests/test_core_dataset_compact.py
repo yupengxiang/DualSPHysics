@@ -5,7 +5,8 @@ import os
 import pytest
 import scripts.core_dataset as core_dataset_module
 from scripts.core_dataset import (COMPACT_SCHEMA, CoreDataset, _write_npz_asset,
-                                  compactify_manifest, sha256_file, validate_manifest)
+                                  compactify_manifest, import_f3_manifest,
+                                  sha256_file, validate_manifest)
 
 from test_core_contract import example_known, tiny_manifest
 
@@ -153,3 +154,35 @@ def test_compactify_v1_materializes_hash_bound_assets_without_opening_hdf5(tmp_p
         known = data.known_inputs(row["case_id"])
         assert known.control.centre == tuple(example_known().control.centre)
         assert known.geometry.triangles.shape == example_known().geometry.triangles.shape
+
+
+def test_manifest_materializers_reject_symlink_duplicate_and_oversized_sources(
+        tmp_path, monkeypatch):
+    source = tmp_path / "source"
+    source.mkdir()
+    valid_path = source / "source-v1.json"
+    valid_path.write_text(json.dumps(tiny_manifest(source)))
+    link = source / "source-link.json"
+    link.symlink_to(valid_path)
+
+    with pytest.raises(ValueError, match="symlink is forbidden"):
+        compactify_manifest(link, source)
+
+    duplicate = source / "source-duplicate.json"
+    duplicate.write_bytes(
+        b'{"schema":"core.dataset.v1","schema":"core.dataset.v1","cases":[]}')
+    with pytest.raises(ValueError, match="duplicate JSON object key"):
+        compactify_manifest(duplicate, source)
+
+    f3_duplicate = source / "f3-duplicate.json"
+    f3_duplicate.write_bytes(
+        b'{"schema":"l2.f3.canonical_manifest.v1",'
+        b'"schema":"l2.f3.canonical_manifest.v1","cases":[]}')
+    with pytest.raises(ValueError, match="duplicate JSON object key"):
+        import_f3_manifest(f3_duplicate, source)
+
+    monkeypatch.setattr(core_dataset_module, "MAX_DATASET_MANIFEST_BYTES", 64)
+    oversized = source / "source-oversized.json"
+    oversized.write_bytes(valid_path.read_bytes())
+    with pytest.raises(ValueError, match="byte limit"):
+        compactify_manifest(oversized, source)

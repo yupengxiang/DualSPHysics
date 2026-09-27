@@ -24,6 +24,8 @@ from scripts.core_dataset import (COMPACT_SCHEMA, CoreDataset, SCHEMA,
 from scripts.core_cfd_dataset import open_dataset
 from scripts.core_code_manifest import CORE_RUNTIME_CODE_FILES
 from scripts.core_runtime import atomic_json, digest
+from scripts.core_strict_json import (MAX_JSON_INPUT_BYTES,
+                                      read_bounded_json_object)
 
 
 CHECKPOINT_REGISTRY_SCHEMA = 'core.bundled_checkpoints.v1'
@@ -60,11 +62,11 @@ def _load_reader_manifest(value, data_root=None):
         path = Path(value).expanduser()
         if not path.is_absolute():
             path = (Path(data_root).expanduser() if data_root is not None else Path.cwd()) / path
-        path = path.resolve()
-        payload = json.loads(path.read_text())
-        return payload, path
+        payload, path, raw_sha256 = read_bounded_json_object(
+            path, max_bytes=MAX_JSON_INPUT_BYTES, label='reader manifest')
+        return payload, path, raw_sha256
     if isinstance(value, Mapping):
-        return copy.deepcopy(dict(value)), None
+        return copy.deepcopy(dict(value)), None, None
     raise ValueError('reader manifest must be a JSON path or mapping')
 
 
@@ -106,7 +108,7 @@ def inspect_reader_manifests(manifests, *, data_root=None, expected_families=Non
     portable = True
     for source in manifests:
         try:
-            payload, path = _load_reader_manifest(source, data_root)
+            payload, path, raw_sha256 = _load_reader_manifest(source, data_root)
             schema = payload.get('schema') if isinstance(payload, Mapping) else None
             schema_values.add(schema)
             if schema not in READER_MANIFEST_SCHEMAS:
@@ -144,7 +146,7 @@ def inspect_reader_manifests(manifests, *, data_root=None, expected_families=Non
                         raise ValueError(f'{case_id} mixes inline and compact inputs')
             source_record = {
                 'path': str(path) if path is not None else '<in-memory>',
-                'sha256': digest(path) if path is not None else _canonical_hash(payload),
+                'sha256': raw_sha256 if path is not None else _canonical_hash(payload),
                 'schema': schema, 'dataset_id': payload.get('dataset_id'),
                 'formal_release': formal, 'case_count': len(cases),
                 'family_counts': dict(sorted(Counter(row['family'] for row in cases).items())),
@@ -269,7 +271,7 @@ def plan_reader_manifest_normalization(
 
     for source in manifests:
         try:
-            payload, path = _load_reader_manifest(source, data_root)
+            payload, path, raw_sha256 = _load_reader_manifest(source, data_root)
             schema = payload.get('schema') if isinstance(payload, Mapping) else None
             validate_manifest(payload)
             formal = payload.get('formal_release', False)
@@ -282,7 +284,7 @@ def plan_reader_manifest_normalization(
             source_label = str(path) if path is not None else '<in-memory>'
             common = {
                 'path': source_label,
-                'sha256': digest(path) if path is not None else _canonical_hash(payload),
+                'sha256': raw_sha256 if path is not None else _canonical_hash(payload),
                 'dataset_id': payload.get('dataset_id'),
                 'source_schema': schema,
                 'target_schema': READER_MANIFEST_TARGET_SCHEMA,

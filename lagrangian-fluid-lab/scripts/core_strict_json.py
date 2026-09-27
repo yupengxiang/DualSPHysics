@@ -120,3 +120,18 @@ def strict_json_object(raw: bytes, *, label: str = "JSON input",
     if type(value) is not dict:
         raise ValueError(f"{label} top level must be a JSON object")
     return value
+
+
+def read_bounded_json_object(path: str | Path, *,
+                             max_bytes: int = MAX_JSON_INPUT_BYTES,
+                             label: str = "JSON input") -> tuple[dict[str, object], Path, str]:
+    """Read one stable, no-follow JSON object and return its raw-byte digest.
+
+    Manifest entrypoints should share this boundary so a path-backed input is
+    bounded and parsed with the same duplicate-key/non-finite-value rules as
+    the CoreDataset reader.  The digest is computed from the exact bytes that
+    were parsed, avoiding a second pathname read for identity evidence.
+    """
+    safe_path = absolute_path_without_following_leaf(path)
+    raw = read_bounded_raw_json(safe_path, max_bytes=max_bytes, label=label)
+    return strict_json_object(raw, max_bytes=max_bytes, label=label), safe_path, sha256_bytes(raw)

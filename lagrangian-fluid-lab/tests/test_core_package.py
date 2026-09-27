@@ -486,6 +486,27 @@ def test_reader_preflight_accepts_same_schema_formal_fixture(tmp_path):
     assert report["formal_eligible"] is True
 
 
+def test_reader_preflight_uses_strict_bounded_manifest_input(tmp_path):
+    source = tmp_path / "source"
+    source.mkdir()
+    manifest = source / "manifest.json"
+    manifest.write_text(json.dumps(tiny_manifest(source)))
+    link = source / "manifest-link.json"
+    link.symlink_to(manifest)
+
+    linked = inspect_reader_manifests([link], data_root=source)
+    assert linked["portable"] is False
+    assert linked["composable"] is False
+    assert any("symlink is forbidden" in reason for reason in linked["hold_reasons"])
+
+    duplicate = source / "manifest-duplicate.json"
+    duplicate.write_bytes(
+        b'{"schema":"core.dataset.v1","schema":"core.dataset.v1","cases":[]}')
+    repeated = inspect_reader_manifests([duplicate], data_root=source)
+    assert repeated["portable"] is False
+    assert any("duplicate JSON object key" in reason for reason in repeated["hold_reasons"])
+
+
 def _compact_formal_fixture(tmp_path, family, count=4):
     """Make a compact v2 reader fixture without touching trajectory data."""
     import copy
