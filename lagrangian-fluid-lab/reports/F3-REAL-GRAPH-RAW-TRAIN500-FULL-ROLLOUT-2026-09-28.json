@@ -1,0 +1,128 @@
+{
+  "schema": "core.f3.real_graph_raw.full_rollout_receipt.v1",
+  "diagnostic_only": true,
+  "source": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "case_id": "F3_DEV_00_a0p903125",
+    "source_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+    "particles": 34560,
+    "expected_transitions": 835,
+    "expected_frames": 836
+  },
+  "protocol": {
+    "model_kind": "graph_raw",
+    "seed": 17,
+    "hidden": 8,
+    "updates": 500,
+    "centers_per_update": 256,
+    "max_neighbors": 192,
+    "learning_rate": 0.001,
+    "chunk_size": 34560,
+    "device": "cuda:0",
+    "autonomous": true,
+    "maximum_steps": null,
+    "future_state_inputs": false
+  },
+  "training": {
+    "receipt_schema": "core.training.v1",
+    "receipt_sha256": "1acd74e36dee1d4cde590a758a31078d7847ca3799f9b60edc4d16c86423004c",
+    "receipt_bytes": 11695,
+    "evidence_status": "complete",
+    "completed_updates": 500,
+    "wall_seconds": 1888.7126551880501,
+    "parameter_count": 1766,
+    "peak_gpu_memory_bytes": 1566300160,
+    "peak_rss_mib": 2703.7109375,
+    "checkpoint": {
+      "sha256": "c0933dc36b1e55f98814f65dd3c1b8021522b2799db8dfb86230e47a6893bb86",
+      "bytes": 103307,
+      "update": 500
+    }
+  },
+  "evaluation": {
+    "status": "completed",
+    "frames_executed": 835,
+    "finite_rollout_complete": true,
+    "failure_category": null,
+    "evaluation_json_sha256": "6935e7b7591adef275edffc46e96c87042aedbb58f5d70e5cb81cd2102589ef5",
+    "evaluation_json_bytes": 6405251,
+    "progress_json_sha256": "717c90e056b851d5b37ad2bc3efcf13b441f1086175fe1aa7fc5ce568f28d875",
+    "progress_json_bytes": 653,
+    "trajectory_hdf5_sha256": "0d10fa37ceeed033effb7ba1f0ba561e649e953f403496cdd8fbbd14d3e60bdf",
+    "trajectory_hdf5_bytes": 723148320,
+    "validator": {
+      "schema": "core.f3.full_rollout_receipt_hdf5_validation.v1",
+      "passed": true,
+      "complete": true,
+      "trajectory_frames": 836,
+      "trajectory_transitions": 835,
+      "executed_frame_count": 836,
+      "tail_frame_count": 0
+    },
+    "metric_summary": {
+      "schema": "core.f3.rollout_metric_summary.v1",
+      "selection_score": 0.5127170375307817,
+      "raw_error_coverage": 1.0,
+      "physics_mass_error_abs_max_kg": 0.0,
+      "physics_validity_mismatch_frames": 0,
+      "physics_changed_particle_mass_frames": 0,
+      "physics_kinetic_energy_error_abs_max_j": 4511.601056360172
+    },
+    "position_rmse_m": {
+      "step_50": 0.010808855234180976,
+      "step_100": 0.026783097889067665,
+      "step_200": 0.10364015662913219,
+      "step_400": 0.5021602626219878,
+      "step_600": 1.4487313568195435,
+      "step_800": 5.526082172290896,
+      "step_835": 7.0245020288875075,
+      "frame_mean": 1.2378365048742572
+    },
+    "velocity_rmse_mps": {
+      "step_50": 0.05080001907864858,
+      "step_100": 0.049459088126551434,
+      "step_200": 0.1248947121578679,
+      "step_400": 0.8538719004283684,
+      "step_600": 2.799018060505454,
+      "step_800": 11.323184385322115,
+      "step_835": 14.443016181997502,
+      "frame_mean": 2.4534389918535213
+    }
+  },
+  "evidence_pack": {
+    "schema": "core.f3.canonical_evidence_pack.v1",
+    "passed": true,
+    "sha256": "dc9de7569a02b42ae7375563e62541c205612d00b609cecbd7c6dbd4846c3ee1",
+    "bytes": 140795,
+    "full_denominator": true,
+    "hdf5_finite_state": true,
+    "future_state_inputs": false,
+    "qualification_credit": 0
+  },
+  "decision": {
+    "candidate_status": "rejected_for_long_horizon_instability",
+    "interpretation": "执行和证据完整，但误差在长时域快速增长；50-step diagnostic 的短窗表现不能外推为 835-transition 质量。",
+    "retain_as_current_formal_candidate": false,
+    "accepted_for_followup": false
+  },
+  "qualification": {
+    "formal_eligible": false,
+    "t1_eligible": false,
+    "t2_macro": false,
+    "t2_path": false,
+    "qualification_credit": 0
+  },
+  "side_effects": {
+    "production_algorithm_modified": false,
+    "production_hdf5_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "solver_started": false,
+    "worker_started": false,
+    "queue_mutation": 0
+  }
+}
