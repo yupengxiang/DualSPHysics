@@ -392,6 +392,7 @@ def _read_file(root_fd: int, name: str, expected: dict[str, Any]) -> dict[str, A
         raise AttemptOutputBindingError(f"artifact {name} cannot be stat'ed") from error
     _require(not stat.S_ISLNK(before_path.st_mode), f"artifact {name} symlink is rejected")
     _require(stat.S_ISREG(before_path.st_mode), f"artifact {name} is not a regular file")
+    _require(before_path.st_nlink == 1, f"artifact {name} is not single-link")
     flags = os.O_RDONLY | nofollow | getattr(os, "O_CLOEXEC", 0)
     try:
         file_fd = os.open(name, flags, dir_fd=root_fd)
@@ -400,6 +401,7 @@ def _read_file(root_fd: int, name: str, expected: dict[str, Any]) -> dict[str, A
     try:
         before = os.fstat(file_fd)
         _require(stat.S_ISREG(before.st_mode), f"artifact {name} is not a regular file")
+        _require(before.st_nlink == 1, f"artifact {name} is not single-link")
         _require(before.st_size <= MAX_FILE_BYTES,
                  f"artifact {name} exceeds the bounded byte limit")
         chunks: list[bytes] = []
@@ -418,16 +420,18 @@ def _read_file(root_fd: int, name: str, expected: dict[str, Any]) -> dict[str, A
 
     before_identity = (
         before.st_dev, before.st_ino, before.st_size,
-        before.st_mtime_ns, before.st_ctime_ns,
+        before.st_mtime_ns, before.st_ctime_ns, before.st_nlink,
     )
     after_identity = (
         after.st_dev, after.st_ino, after.st_size,
-        after.st_mtime_ns, after.st_ctime_ns,
+        after.st_mtime_ns, after.st_ctime_ns, after.st_nlink,
     )
     path_identity = (
         after_path.st_dev, after_path.st_ino, after_path.st_size,
-        after_path.st_mtime_ns, after_path.st_ctime_ns,
+        after_path.st_mtime_ns, after_path.st_ctime_ns, after_path.st_nlink,
     )
+    _require(after.st_nlink == 1 and after_path.st_nlink == 1,
+             f"artifact {name} is not single-link")
     _require(before_identity == after_identity == path_identity,
              f"artifact {name} changed during bounded read")
     raw = b"".join(chunks)

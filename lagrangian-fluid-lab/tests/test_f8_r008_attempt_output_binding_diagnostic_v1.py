@@ -237,3 +237,17 @@ def test_rejects_symlink_or_unlisted_output_entry(tmp_path: Path) -> None:
     symlink_result = diagnostic.diagnose_synthetic_attempt_output_binding_v1(manifest, root)
     assert symlink_result["binding_status"] == "rejected"
     assert "symlink" in symlink_result["rejection_reason"]
+
+
+def test_rejects_artifact_with_external_hard_link(tmp_path: Path) -> None:
+    root, manifest = _base_root(tmp_path)
+    external_alias = tmp_path / "external-hard-link"
+    os.link(root / "RunPARTs.csv", external_alias)
+
+    result = diagnostic.diagnose_synthetic_attempt_output_binding_v1(manifest, root)
+
+    assert result["binding_status"] == "rejected"
+    assert "single-link" in result["rejection_reason"]
+    assert result["artifact_identity_bound"] is False
+    assert result["gate_decision_eligible"] is False
+    assert result["qualification_credit"] == 0
