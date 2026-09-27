@@ -1,0 +1,57 @@
+{
+  "schema": "core.learning.f3.real_profile_cap192_step10_blocked.v1",
+  "diagnostic_only": true,
+  "case_id": "F3_DEV_00_a0p903125",
+  "source": {
+    "path": "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5",
+    "sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+    "manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+  },
+  "profile_configuration": {
+    "model": "graph_raw",
+    "seed": 17,
+    "hidden": 16,
+    "steps_requested": 10,
+    "chunk_size": 34560,
+    "max_neighbors": 192,
+    "device": "cpu",
+    "autonomous_state_feedback": true
+  },
+  "execution": {
+    "status": "blocked_provenance_distance_mismatch",
+    "steps_completed": 4,
+    "first_failure_step": 5,
+    "state_time_before_failure_s": 0.04001995865810541,
+    "position_min_before_failure": 0.19172677397727966,
+    "position_max_before_failure": 1.0890281051397324,
+    "exception_type": "ValueError",
+    "exception_message": "neighbor provenance distance does not match position",
+    "output_path": "/tmp/f3-model-profile-cap192-fullchunk-step10-retry-20260927.json",
+    "output_exists": false,
+    "trace_log_path": "/tmp/f3-model-profile-cap192-fullchunk-step10-retry-20260927.log",
+    "trace_log_sha256": "e18050d6ae27298e5627237d1715a3ccaf328191febfb7108d9821ec71a622ba"
+  },
+  "interpretation": {
+    "cap_truncation_observed": false,
+    "oom_observed": false,
+    "failure_boundary": "float64 neighbor distances are validated against the float32 model position tensor after autonomous state updates",
+    "next_action": "preserve float64 provenance validation coordinates while retaining float32 model arithmetic",
+    "formal_training": false,
+    "qualification_inferred": false
+  },
+  "qualification": {
+    "T1_numerical": false,
+    "native_integrity": false,
+    "gate_decision_eligible": false,
+    "qualification_credit": 0
+  },
+  "side_effects": {
+    "production_hdf5_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "solver_started": false,
+    "worker_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0
+  }
+}
