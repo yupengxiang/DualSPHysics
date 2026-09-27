@@ -1,0 +1,368 @@
+{
+  "schema": "core.f3.graph_residual.real_50step_diagnostic.summary.v1",
+  "report_id": "F3-GRAPH-RESIDUAL-SEED43-REAL-50STEP-DIAGNOSTIC-2026-09-28",
+  "date": "2026-09-28",
+  "status": "completed",
+  "diagnostic_only": true,
+  "independent": true,
+  "formal_eligible": false,
+  "qualification": false,
+  "credit": 0,
+  "qualification_credit": 0,
+  "future_state_inputs": false,
+  "source": {
+    "repository": "lagrangian-fluid-lab",
+    "baseline_git_commit": "5095c30ba71c6c4605ef48a8e12beebe67f5fa87",
+    "manifest": {
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "data_root": ".",
+      "file_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "declared_source_manifest_sha256": "86e27740d764f9769e3255a82a599013a282f1bc4385ad3c29a657a56d9c5bea",
+      "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "formal_release": false
+    },
+    "case": {
+      "case_id": "F3_DEV_00_a0p903125",
+      "family": "F3",
+      "split": "test",
+      "evaluation_role": "development_extrapolation",
+      "particles": 34560,
+      "expected_transitions": 835,
+      "expected_trajectory_frames": 836,
+      "hdf5": "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5",
+      "case_hdf5_bytes": 899562494,
+      "case_hdf5_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+      "known_inputs_sha256": "089573de6d2c7633b5192bf626fa98eb941f79500f1c1a04b632af68b6ca3bc9",
+      "control_input_sha256": "f6852502c7ae5ad7da14faa2dddf3da04e5f02757528e38f3e8c140c00f6389e",
+      "geometry_input_sha256": "d7ccdc43108fde81c71f1ef6483258e6b0fa2a3bc9561df063b87a580bc55d70",
+      "qualification_case": false,
+      "scope_id": "F3_CELL3_NS_visco1_native_nopen_revision075_ref0081818"
+    },
+    "source_script_sha256": {
+      "scripts/core_learning.py": "3eefe1441dabb350182090c3625f24a8209543a4a31d02521f283074c996c27b",
+      "scripts/core_models.py": "20e635ebd25cd511eeff6f84478678d3364608fd86a5d4b67e2aa53a0d88295d",
+      "scripts/core_dataset.py": "65f583b8fcb1c46e56d10506e22aa1e5fa32c7b2631017de85c88b1f6d53f88f",
+      "scripts/core_evaluation.py": "fb732905ccc92c35be226ef9ac1a62a61d4f9535aa9409356a04a8df2d2419e2",
+      "scripts/core_contract.py": "1866b35259f407e8c0d8b399eb4034eb18cc8b59f4addc1156f20d6777a326bc",
+      "scripts/core_physics.py": "af5469f88791cdd16bf2ee6234c73e76e0dc453fe2030ccb33c03cf6fd84f892"
+    }
+  },
+  "protocol": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "data_root": ".",
+    "case_id": "F3_DEV_00_a0p903125",
+    "split": "test",
+    "model": "graph_residual",
+    "seed": 43,
+    "updates": 500,
+    "centers_per_update": 256,
+    "hidden": 8,
+    "learning_rate": 0.001,
+    "normalization_transitions": 16,
+    "max_neighbors": 192,
+    "chunk_size": 34560,
+    "maximum_steps": 50,
+    "cuda_visible_devices": "2",
+    "physical_gpu_index": 2,
+    "process_device": "cuda:0",
+    "run_id": "f3-graph-residual500-seed43-20260928",
+    "output_prefix": "/tmp/f3-graph-residual500-seed43-20260928-*",
+    "diagnostic": true,
+    "autonomous": true,
+    "future_state_inputs": false
+  },
+  "commands": {
+    "train": "PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES=2 ./.venv/bin/python scripts/core_learning.py train --manifest campaigns/core-v1/f3-dataset-v2.json --data-root . --model graph_residual --seed 43 --updates 500 --centers 256 --hidden 8 --learning-rate 0.001 --normalization-transitions 16 --max-neighbors 192 --device cuda:0 --run-id f3-graph-residual500-seed43-20260928 --checkpoint /tmp/f3-graph-residual500-seed43-20260928-checkpoint.pt --checkpoint-every 500 --log-every 100 --progress-output /tmp/f3-graph-residual500-seed43-20260928-training-progress.json --output /tmp/f3-graph-residual500-seed43-20260928-training.json",
+    "train_log": "/tmp/f3-graph-residual500-seed43-20260928-train.log",
+    "evaluate": "PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES=2 ./.venv/bin/python scripts/core_learning.py evaluate --manifest campaigns/core-v1/f3-dataset-v2.json --data-root . --checkpoint /tmp/f3-graph-residual500-seed43-20260928-checkpoint.pt --case-id F3_DEV_00_a0p903125 --split test --maximum-steps 50 --chunk-size 34560 --device cuda:0 --progress-every 25 --trajectory-output /tmp/f3-graph-residual500-seed43-20260928-trajectory.h5 --progress-output /tmp/f3-graph-residual500-seed43-20260928-evaluation-progress.json --output /tmp/f3-graph-residual500-seed43-20260928-evaluation.json --diagnostic",
+    "evaluate_log": "/tmp/f3-graph-residual500-seed43-20260928-evaluate.log"
+  },
+  "training": {
+    "status": "completed",
+    "schema": "core.training.v1",
+    "evidence_status": "complete",
+    "receipt_path": "/tmp/f3-graph-residual500-seed43-20260928-training.json",
+    "receipt_sha256": "8cb329d50b7647973c6a4ebfb1e7c924ab188219ce4f030b74331d0abff09fe4",
+    "receipt_bytes": 10847,
+    "completed_updates": 500,
+    "checkpoint_verified": true,
+    "run_id": "f3-graph-residual500-seed43-20260928",
+    "model_kind": "graph_residual",
+    "seed": 43,
+    "device": "cuda:0",
+    "torch_version": "2.11.0+cu128",
+    "host": "user-SYS-421GE-TNRT",
+    "parameter_count": 1766,
+    "wall_seconds": 2217.797203957103,
+    "peak_gpu_memory_bytes": 1584764928,
+    "peak_gpu_memory_mib": 1511.349609375,
+    "peak_rss_mib": 3006.09765625,
+    "last_loss_mse": 0.31907951831817627,
+    "neighbor_truncation_fraction_max": 0.0,
+    "normalization": {
+      "source_split": "train",
+      "requested_transitions": 16,
+      "selected_transitions": 16,
+      "available_transition_count": 13360,
+      "selection_seed": 43,
+      "selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+      "target_reference": "raw_dual_increment_train_shared"
+    },
+    "residual_prior": {
+      "enabled": true,
+      "execution_calls": 500,
+      "rows": 17280000,
+      "finite": true,
+      "history_complete": true,
+      "last_update": 500,
+      "dx_abs_max_m": 0.009483016096055508,
+      "dv_abs_max_mps": 0.108108289539814,
+      "semantic": "graph_residual subtracts this SI prior before shared raw-target normalization; predictor adds it back"
+    },
+    "checkpoint": {
+      "path": "/tmp/f3-graph-residual500-seed43-20260928-checkpoint.pt",
+      "bytes": 101549,
+      "sha256": "947346691ff2695cfc5e3b347f0562ab3d53a73227c147c86df4f46050ef0baa",
+      "update": 500,
+      "schema": "core.checkpoint.v1"
+    },
+    "progress": {
+      "path": "/tmp/f3-graph-residual500-seed43-20260928-training-progress.json",
+      "bytes": 488,
+      "sha256": "4b38886edfb9e7a3ef38655b9d50b45ee6eadacc8feb88ceddce5125d33f8e1c",
+      "status": "completed",
+      "update": 500,
+      "elapsed_seconds": 2217.8061420721933
+    }
+  },
+  "evaluation": {
+    "status": "completed",
+    "schema": "core.evaluation.v1",
+    "receipt_path": "/tmp/f3-graph-residual500-seed43-20260928-evaluation.json",
+    "receipt_sha256": "360c522a4d43a1f0e99f5d1b548e3d67919b31e6e8ff9189359e45dd4f2387cc",
+    "receipt_bytes": 511373,
+    "mode": "diagnostic",
+    "diagnostic": true,
+    "formal_eligible": false,
+    "split": "test",
+    "requested_steps": 50,
+    "frames_executed": 50,
+    "trajectory_frames_including_initial": 51,
+    "requested_window_complete": true,
+    "finite_rollout_complete_for_requested_window": true,
+    "expected_full_case_transitions": 835,
+    "expected_full_case_frames": 836,
+    "full_registered_denominator_complete": false,
+    "denominator_unchanged": true,
+    "failure_category": "maximum_steps_limit",
+    "first_failure_frame": 51,
+    "scientific_status": "not_assessed",
+    "scientific_failure_category": null,
+    "raw_error_coverage": {
+      "numerator_transitions": 50,
+      "denominator_transitions": 835,
+      "fraction": 0.059880239520958084
+    },
+    "future_state_inputs": false,
+    "autonomous": true,
+    "wall_seconds": 1020.3887700000778,
+    "progress": {
+      "path": "/tmp/f3-graph-residual500-seed43-20260928-evaluation-progress.json",
+      "bytes": 645,
+      "sha256": "7c6651626a37a22c12af6583d81ffedca02f11dce8ed85a1b9fe2138c0aeaba2",
+      "status": "completed",
+      "frames_executed": 50,
+      "expected_frames": 50,
+      "elapsed_seconds": 1020.3887700000778,
+      "future_state_inputs": false,
+      "scientific_status": "not_assessed"
+    },
+    "trajectory": {
+      "path": "/tmp/f3-graph-residual500-seed43-20260928-trajectory.h5",
+      "bytes": 44903680,
+      "sha256": "5e657abc7cbd6e87d2369a31e736c8aa12f60ca0be720d1bed97f77da8c4143e",
+      "shapes": {
+        "position": [51, 34560, 3],
+        "velocity": [51, 34560, 3],
+        "valid": [51, 34560],
+        "time": [51],
+        "mass": [34560],
+        "particle_id": [34560],
+        "particle_zone": [34560]
+      },
+      "attrs": {
+        "autonomous_prediction": true,
+        "future_state_inputs": false,
+        "identity_semantics": "particle_zone,particle_id",
+        "state_schema": "core.state.native_velocity.v1",
+        "velocity_semantics": "native saved numerical velocity"
+      },
+      "finite": {
+        "position": true,
+        "velocity": true,
+        "mass": true,
+        "time": true,
+        "valid_mask_all_true": true
+      },
+      "valid_true_count": 1762560,
+      "mass_min_kg": 0.00042187501094304025,
+      "mass_max_kg": 0.00042187501094304025,
+      "time_first_s": 0.0,
+      "time_last_s": 0.5000171945830302
+    },
+    "metrics": {
+      "selection_score": 0.9406098533927408,
+      "position_rmse_m": {
+        "step_1": 0.00005605398225739141,
+        "step_10": 0.0004370073616581921,
+        "step_20": 0.0019707348070975425,
+        "step_30": 0.0051571624563015025,
+        "step_40": 0.009522831888332011,
+        "step_50": 0.01412328466913432,
+        "frame_mean": 0.004901553935313918,
+        "executed_frame_scalar": 0.006633422668641149
+      },
+      "velocity_rmse_mps": {
+        "step_1": 0.005092877117404785,
+        "step_10": 0.013002803041554989,
+        "step_20": 0.028085847785592918,
+        "step_30": 0.04219208978899081,
+        "step_40": 0.049724258428188,
+        "step_50": 0.051256512746950575,
+        "frame_mean": 0.032456000356391373,
+        "executed_frame_scalar": 0.03622705633792571
+      },
+      "position_ade_m": {
+        "step_50": 0.022974642559765536,
+        "executed_frame_scalar": 0.007995847039635353
+      },
+      "velocity_ade_mps": {
+        "step_50": 0.07960560302416193,
+        "executed_frame_scalar": 0.05331512216874943
+      },
+      "position_fde_m": 0.022974642559765536,
+      "velocity_fde_mps": 0.07960560302416193
+    },
+    "physics": {
+      "completed_frames": 50,
+      "expected_registered_transitions": 835,
+      "mass_error_abs_max_kg": 0.0,
+      "changed_particle_mass_frames": 0,
+      "validity_mismatch_frames": 0,
+      "kinetic_energy_error_abs_max_j": 0.025125850304006495,
+      "wall_chord_statuses": ["checked_static_saved_chords"],
+      "wall_chord_particle_count": 421,
+      "wall_chord_mass_kg": 0.17760937960701995
+    }
+  },
+  "resources": {
+    "training_wall_seconds": 2217.797203957103,
+    "evaluation_wall_seconds": 1020.3887700000778,
+    "training_receipt_peak_gpu_memory_bytes": 1584764928,
+    "training_receipt_peak_gpu_memory_mib": 1511.349609375,
+    "training_receipt_peak_rss_mib": 3006.09765625,
+    "training_gpu2_memory_mib_observed": 7391,
+    "training_live_rss_samples": {
+      "max_observed_rss_kib": 2720616,
+      "max_observed_rss_mib": 2656.8515625,
+      "sample_count": 223,
+      "measurement_note": "external ps samples; training receipt peak_rss_mib is process-native"
+    },
+    "evaluation_gpu2_memory_mib_observed": 3049,
+    "evaluation_live_rss_samples": {
+      "max_observed_rss_kib": 3404964,
+      "max_observed_rss_mib": 3325.16015625,
+      "sample_count": 102,
+      "measurement_note": "external ps samples; evaluate CLI does not emit allocator/RSS peaks"
+    },
+    "post_run_gpu2_memory_mib": 18,
+    "training_launcher_exit_code": 0,
+    "evaluation_launcher_exit_code": 0,
+    "measurement_note": "nvidia-smi values are external samples, not process-reported allocator peaks"
+  },
+  "qualification_details": {
+    "diagnostic_only": true,
+    "formal_eligible": false,
+    "qualification": false,
+    "T1_numerical": false,
+    "T2_macro": false,
+    "credit": 0,
+    "qualification_credit": 0,
+    "interpretation": "bounded diagnostic evidence only; the 835-transition/836-frame registered denominator was intentionally not completed"
+  },
+  "side_effects": {
+    "production_algorithm_modified": false,
+    "production_hdf5_modified": false,
+    "source_modified": false,
+    "plan_modified": false,
+    "manifest_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "queue_mutation": 0,
+    "solver_started": false,
+    "worker_started": false,
+    "future_state_inputs": false,
+    "other_processes_terminated": false,
+    "only_requested_report_files_added": true,
+    "report_files_added": [
+      "reports/F3-GRAPH-RESIDUAL-SEED43-REAL-50STEP-DIAGNOSTIC-2026-09-28.json",
+      "reports/F3-GRAPH-RESIDUAL-SEED43-REAL-50STEP-DIAGNOSTIC-2026-09-28.zh-CN.md"
+    ]
+  },
+  "artifact_sha256_complete": true,
+  "artifacts": {
+    "training_receipt": {
+      "path": "/tmp/f3-graph-residual500-seed43-20260928-training.json",
+      "bytes": 10847,
+      "sha256": "8cb329d50b7647973c6a4ebfb1e7c924ab188219ce4f030b74331d0abff09fe4"
+    },
+    "checkpoint": {
+      "path": "/tmp/f3-graph-residual500-seed43-20260928-checkpoint.pt",
+      "bytes": 101549,
+      "sha256": "947346691ff2695cfc5e3b347f0562ab3d53a73227c147c86df4f46050ef0baa",
+      "update": 500
+    },
+    "training_progress": {
+      "path": "/tmp/f3-graph-residual500-seed43-20260928-training-progress.json",
+      "bytes": 488,
+      "sha256": "4b38886edfb9e7a3ef38655b9d50b45ee6eadacc8feb88ceddce5125d33f8e1c"
+    },
+    "training_log": {
+      "path": "/tmp/f3-graph-residual500-seed43-20260928-train.log",
+      "bytes": 9513,
+      "sha256": "96a8155ffdbbeb902225c5a6b05db2de5d6a75952ee27bf4dcbac5c4df979770"
+    },
+    "training_resource_samples": {
+      "path": "/tmp/f3-graph-residual500-seed43-20260928-training-resource-samples.log",
+      "bytes": 149160,
+      "sha256": "c70d820690661e5e6d0767da30d8563169d6d54b8b79b64e2f4669d1a19a2c7a"
+    },
+    "evaluation_receipt": {
+      "path": "/tmp/f3-graph-residual500-seed43-20260928-evaluation.json",
+      "bytes": 511373,
+      "sha256": "360c522a4d43a1f0e99f5d1b548e3d67919b31e6e8ff9189359e45dd4f2387cc"
+    },
+    "evaluation_progress": {
+      "path": "/tmp/f3-graph-residual500-seed43-20260928-evaluation-progress.json",
+      "bytes": 645,
+      "sha256": "7c6651626a37a22c12af6583d81ffedca02f11dce8ed85a1b9fe2138c0aeaba2"
+    },
+    "evaluation_log": {
+      "path": "/tmp/f3-graph-residual500-seed43-20260928-evaluate.log",
+      "bytes": 2101,
+      "sha256": "b0a91c15e6e15f5a2fcdaf0a6e5f754be54bfd3cc761aa8d64608d5bd13841ee"
+    },
+    "trajectory": {
+      "path": "/tmp/f3-graph-residual500-seed43-20260928-trajectory.h5",
+      "bytes": 44903680,
+      "sha256": "5e657abc7cbd6e87d2369a31e736c8aa12f60ca0be720d1bed97f77da8c4143e"
+    },
+    "evaluation_resource_samples": {
+      "path": "/tmp/f3-graph-residual500-seed43-20260928-evaluation-resource-samples.log",
+      "bytes": 64927,
+      "sha256": "449842fcb0415e3bb44b55b8bde02b030bcc1d3feba4d07ff29dcf3242c1c6ce"
+    }
+  }
+}
