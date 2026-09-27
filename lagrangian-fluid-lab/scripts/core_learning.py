@@ -67,6 +67,21 @@ FORMAL_MIN_TEST_PER_FAMILY = 12
 HELD_OUT_SPLITS = frozenset({"test", "id_test", "ood_test"})
 
 
+def _validate_max_neighbors(value):
+    if (isinstance(value, (bool, np.bool_))
+            or not isinstance(value, (int, np.integer)) or int(value) < 1):
+        raise ValueError("max_neighbors must be a positive integer")
+    return int(value)
+
+
+def _checkpoint_max_neighbors(payload):
+    """Return the checkpoint-bound cap, preserving legacy 64 behavior."""
+    config = payload.get("config") if isinstance(payload, Mapping) else None
+    if not isinstance(config, Mapping) or "max_neighbors" not in config:
+        return DEFAULT_MAX_NEIGHBORS
+    return _validate_max_neighbors(config["max_neighbors"])
+
+
 def _strict_integer(value, name):
     """Accept integer counters without truncating malformed receipt values."""
     if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, np.integer)):
@@ -696,9 +711,12 @@ class FixedValidationSet:
         self.rows = tuple(rows)
         self.centers = int(centers)
 
-    def evaluate(self, model, normalization, model_kind, device):
+    def evaluate(self, model, normalization, model_kind, device, *,
+                 max_neighbors=DEFAULT_MAX_NEIGHBORS):
+        max_neighbors = _validate_max_neighbors(max_neighbors)
         if not self.rows:
-            return {"available": False, "transition_count": 0, "center_count": 0}
+            return {"available": False, "transition_count": 0, "center_count": 0,
+                    "max_neighbors": max_neighbors}
         model_was_training = model.training
         model.eval()
         losses = []
@@ -708,7 +726,8 @@ class FixedValidationSet:
                 for case_id, frame in self.rows:
                     state, known, dt, target = self.dataset.supervised_transition(case_id, frame)
                     known = _known_inputs_for_learning(known)
-                    args, prior, _ = tensors(state, known, dt, device)
+                    args, prior, _ = tensors(
+                        state, known, dt, device, max_neighbors=max_neighbors)
                     args = (normalization.normalize_features(args[0]), *args[1:])
                     count = min(self.centers, state.count)
                     center_count = max(center_count, count)
@@ -722,6 +741,7 @@ class FixedValidationSet:
         return {
             "available": True, "transition_count": len(self.rows), "center_count": int(center_count),
             "mse": float(np.mean(losses)), "rmse": float(np.sqrt(np.mean(losses))),
+            "max_neighbors": max_neighbors,
             "case_frames": [{"case_id": case_id, "frame": int(frame)} for case_id, frame in self.rows],
         }
 
@@ -784,10 +804,15 @@ def save_training_checkpoint(path, *, model, optimizer, sampler, normalization,
 
 
 def load_training_checkpoint(path, *, model=None, optimizer=None, sampler=None,
-                             map_location="cpu", restore_rng=True):
+                             map_location="cpu", restore_rng=True, max_neighbors=None):
     payload = torch.load(Path(path), map_location=map_location, weights_only=False)
     if payload.get("schema") != CHECKPOINT_SCHEMA:
         raise ValueError("unsupported Core checkpoint schema")
+    if max_neighbors is not None:
+        requested_max_neighbors = _validate_max_neighbors(max_neighbors)
+        saved_max_neighbors = _checkpoint_max_neighbors(payload)
+        if saved_max_neighbors != requested_max_neighbors:
+            raise ValueError("checkpoint max_neighbors differs from requested max_neighbors")
     if "evidence" not in payload:
         payload["evidence_status"] = "missing_legacy"
     elif payload.get("evidence_status") is None:
@@ -878,7 +903,8 @@ def train_model(dataset, *, model_kind="graph_raw", seed=17, updates=DEFAULT_UPD
                 normalization_transitions=256, checkpoint=None, output=None,
                 run_id=None, checkpoint_every=8000, resume=None, log_every=1000,
                 validation_every=1000, validation_transitions=4,
-                validation_centers=DEFAULT_CENTERS, progress_output=None,
+                validation_centers=DEFAULT_CENTERS,
+                max_neighbors=DEFAULT_MAX_NEIGHBORS, progress_output=None,
                 evaluate_milestones=True):
     """Train one complete baseline and return a ``core.training.v1`` receipt."""
     if (_dataset_declares_formal_release(dataset)
@@ -892,6 +918,7 @@ def train_model(dataset, *, model_kind="graph_raw", seed=17, updates=DEFAULT_UPD
         raise ValueError("updates must be positive")
     if float(learning_rate) <= 0:
         raise ValueError("learning rate must be positive")
+    max_neighbors = _validate_max_neighbors(max_neighbors)
     updates, centers_per_update, hidden = int(updates), int(centers_per_update), int(hidden)
     device = torch.device(device)
     if device.type == "cuda" and not torch.cuda.is_available():
@@ -957,7 +984,8 @@ def train_model(dataset, *, model_kind="graph_raw", seed=17, updates=DEFAULT_UPD
     prior_audit = PriorExecutionAudit(model_kind)
     if resume is not None:
         payload = load_training_checkpoint(resume, model=model, optimizer=optimizer,
-                                           sampler=sampler, map_location=device, restore_rng=True)
+                                           sampler=sampler, map_location=device, restore_rng=True,
+                                           max_neighbors=max_neighbors)
         saved_norm = Normalization.from_dict(payload["normalization"])
         if normalization.as_dict() != saved_norm.as_dict():
             raise ValueError("resume normalization differs from current train-only statistics")
@@ -1119,6 +1147,7 @@ def train_model(dataset, *, model_kind="graph_raw", seed=17, updates=DEFAULT_UPD
         "evaluate_milestones": bool(evaluate_milestones),
         "milestone_evaluation_mode": "in_process" if evaluate_milestones else "deferred",
     }
+    config["max_neighbors"] = max_neighbors
     checkpoint = Path(checkpoint) if checkpoint is not None else Path(f"{run_id}.pt")
 
     def training_evidence(completed_updates=None):
@@ -1230,7 +1259,8 @@ def train_model(dataset, *, model_kind="graph_raw", seed=17, updates=DEFAULT_UPD
                     # re-evaluated and a fresh atomic sidecar replaces it.
                     pass
             report = evaluate_milestone(dataset, milestone, device=device,
-                                        chunk_size=centers_per_update, run_id=run_id)
+                                        chunk_size=centers_per_update, run_id=run_id,
+                                        max_neighbors=max_neighbors)
             record_milestone_evaluation(report)
         refresh_milestone_selection()
 
@@ -1267,7 +1297,8 @@ def train_model(dataset, *, model_kind="graph_raw", seed=17, updates=DEFAULT_UPD
     publish_progress(status="running", update=start_update)
     for update in range(start_update + 1, updates + 1):
         case_id, frame, state, known, dt, target, centers = sampler.sample()
-        args, prior, diagnostics = tensors(state, known, dt, device)
+        args, prior, diagnostics = tensors(
+            state, known, dt, device, max_neighbors=max_neighbors)
         if normalization is not None:
             args = (normalization.normalize_features(args[0]), *args[1:])
         centers_t = torch.as_tensor(centers, dtype=torch.long, device=device)
@@ -1292,7 +1323,9 @@ def train_model(dataset, *, model_kind="graph_raw", seed=17, updates=DEFAULT_UPD
                              neighbor_truncation_fraction=diagnostics["neighbor_truncation_fraction"])
         validation = None
         if int(validation_every) > 0 and (update % int(validation_every) == 0 or update == updates):
-            validation = fixed_validation.evaluate(model, normalization, model_kind, device)
+            validation = fixed_validation.evaluate(
+                model, normalization, model_kind, device,
+                max_neighbors=max_neighbors)
             validation["update"] = update
             validation_history.append(validation)
         if update in formal_milestones:
@@ -1323,10 +1356,12 @@ def train_model(dataset, *, model_kind="graph_raw", seed=17, updates=DEFAULT_UPD
                 publish_progress(status="milestone_validation", update=update)
                 predictor = ModelPredictor(model, device=device,
                                            chunk_size=centers_per_update,
-                                           normalization=normalization)
+                                           normalization=normalization,
+                                           max_neighbors=max_neighbors)
                 evaluation = evaluate_milestone(
                     dataset, info, predictor=predictor, device=device,
                     chunk_size=centers_per_update, run_id=run_id,
+                    max_neighbors=max_neighbors,
                 )
                 evaluation_path = _milestone_evaluation_path(info["path"])
                 atomic_json(evaluation_path, evaluation)
@@ -1396,14 +1431,22 @@ def train_model(dataset, *, model_kind="graph_raw", seed=17, updates=DEFAULT_UPD
     return result
 
 
-def _build_predictor_from_checkpoint(checkpoint, device, chunk_size=256):
+def _build_predictor_from_checkpoint(checkpoint, device, chunk_size=256, *,
+                                     max_neighbors=None):
     # Checkpoint evaluation is inference-only; load weights on CPU first so a
     # GPU evaluator does not depend on cross-device state-dict copying.
     payload = load_training_checkpoint(checkpoint, map_location="cpu", restore_rng=False)
+    checkpoint_max_neighbors = _checkpoint_max_neighbors(payload)
+    if max_neighbors is not None:
+        requested_max_neighbors = _validate_max_neighbors(max_neighbors)
+        if requested_max_neighbors != checkpoint_max_neighbors:
+            raise ValueError("checkpoint max_neighbors is bound and cannot be overridden")
     model = DualIncrementModel(payload["model_kind"], hidden=int(payload["hidden"]))
     model.load_state_dict(payload.get("model_state", payload["state_dict"]))
     normalization = Normalization.from_dict(payload["normalization"])
-    return ModelPredictor(model, device=device, chunk_size=chunk_size, normalization=normalization), payload
+    return ModelPredictor(model, device=device, chunk_size=chunk_size,
+                          normalization=normalization,
+                          max_neighbors=checkpoint_max_neighbors), payload
 
 
 def _build_predictor_from_baseline(baseline):
@@ -1899,7 +1942,7 @@ def _failed_rollout_receipt(dataset, case_id, error):
 
 
 def evaluate_milestone(dataset, checkpoint, *, predictor=None, device="cpu",
-                       chunk_size=DEFAULT_CENTERS, run_id=None):
+                       chunk_size=DEFAULT_CENTERS, run_id=None, max_neighbors=None):
     """Evaluate one saved milestone over every registered validation case.
 
     This is the per-milestone operation used by ``train_model``.  It keeps the
@@ -1917,7 +1960,16 @@ def evaluate_milestone(dataset, checkpoint, *, predictor=None, device="cpu",
         raise ValueError(f"checkpoint hash mismatch: {path}")
     payload = None
     if predictor is None:
-        predictor, payload = _build_predictor_from_checkpoint(path, device, chunk_size)
+        predictor, payload = _build_predictor_from_checkpoint(
+            path, device, chunk_size, max_neighbors=max_neighbors)
+    predictor_max_neighbors = getattr(predictor, "max_neighbors", None)
+    if predictor_max_neighbors is None:
+        bound_max_neighbors = (DEFAULT_MAX_NEIGHBORS if max_neighbors is None
+                               else _validate_max_neighbors(max_neighbors))
+    else:
+        bound_max_neighbors = _validate_max_neighbors(predictor_max_neighbors)
+        if max_neighbors is not None and bound_max_neighbors != _validate_max_neighbors(max_neighbors):
+            raise ValueError("milestone predictor max_neighbors differs from requested max_neighbors")
     validation_cases = tuple(dataset.case_ids("validation"))
     if not validation_cases:
         raise ValueError("milestone evaluation requires validation cases")
@@ -1970,6 +2022,7 @@ def evaluate_milestone(dataset, checkpoint, *, predictor=None, device="cpu",
         "protocol": PROTOCOL, "fixed_denominator": fixed_denominator,
         "family_registry": registry, "checkpoint": checkpoint_info,
         "model_kind": model_kind, "seed": seed, "hidden": hidden,
+        "max_neighbors": bound_max_neighbors,
         "metrics": aggregate_cases(registry, scores),
         "case_count": len(case_rows), "cases": case_rows,
         "execution_summary": _execution_summary(case_rows),
@@ -2104,6 +2157,7 @@ def evaluate_checkpoints(dataset, checkpoints, *, device="cpu", chunk_size=DEFAU
         if expected_hash and expected_hash != observed_hash:
             raise ValueError(f"checkpoint hash mismatch: {path}")
         predictor, payload = _build_predictor_from_checkpoint(path, device, chunk_size)
+        checkpoint_max_neighbors = _checkpoint_max_neighbors(payload)
         checkpoint_update = int(payload.get("update", -1))
         if checkpoint_update not in MILESTONE_UPDATES:
             raise ValueError(
@@ -2139,7 +2193,7 @@ def evaluate_checkpoints(dataset, checkpoints, *, device="cpu", chunk_size=DEFAU
         binding = (
             config.get("run_id"), config.get("manifest_sha256"),
             config.get("centers_per_update"), config.get("learning_rate"),
-            config.get("radius_over_h"), config.get("max_neighbors"),
+            config.get("radius_over_h"), checkpoint_max_neighbors,
             config.get("normalization_source_split"), config.get("target_normalization"),
             config.get("updates"), config.get("initialization"),
             config.get("paired_seed"), config.get("sampler_seed"), normalization_digest,
@@ -2183,6 +2237,7 @@ def evaluate_checkpoints(dataset, checkpoints, *, device="cpu", chunk_size=DEFAU
         candidates.append({
             "update": int(payload["update"]), "split": "validation", "metrics": metrics,
             "checkpoint": checkpoint_info, "case_count": len(case_rows), "cases": case_rows,
+            "max_neighbors": checkpoint_max_neighbors,
             "registered_case_count": len(validation_cases),
             "fixed_denominator": fixed_denominator,
             "physical_case_ids": physical_case_ids,
@@ -2216,6 +2271,7 @@ def evaluate_checkpoints(dataset, checkpoints, *, device="cpu", chunk_size=DEFAU
         "model_kind": model_identity[0] if model_identity else None,
         "seed": model_identity[1] if model_identity else None,
         "hidden": model_identity[2] if model_identity else None,
+        "max_neighbors": (_checkpoint_max_neighbors(loaded[0][3]) if loaded else None),
         "split": "validation", "test_included": False,
         "qualification_only": bool(qualification_only),
         "formal_eligible": formal_eligible,
@@ -2342,7 +2398,7 @@ def _pad_rollout_to_expected_frames(rollout, expected_frames, *, horizon_limited
 def evaluate(dataset, predictor, *, split="test", case_ids=None, maximum_steps=None,
              diagnostic=False, model_kind=None, checkpoint=None, baseline=None,
              training=True, trajectory_output_for_case=None,
-             progress_output_for_case=None, progress_every=25):
+             progress_output_for_case=None, progress_every=25, max_neighbors=None):
     """Evaluate a predictor with a fixed registered denominator.
 
     The legacy CoreDataset reader is diagnostic-only, even when its manifest
@@ -2351,6 +2407,27 @@ def evaluate(dataset, predictor, *, split="test", case_ids=None, maximum_steps=N
     the actual manifest split labels in the receipt.
     """
     from scripts.core_evaluation import aggregate_cases, score_case
+
+    requested_max_neighbors = (None if max_neighbors is None
+                               else _validate_max_neighbors(max_neighbors))
+    checkpoint_max_neighbors = None
+    if checkpoint is not None:
+        checkpoint_payload = load_training_checkpoint(
+            checkpoint, map_location="cpu", restore_rng=False)
+        checkpoint_max_neighbors = _checkpoint_max_neighbors(checkpoint_payload)
+    predictor_max_neighbors = getattr(predictor, "max_neighbors", None)
+    if predictor_max_neighbors is not None:
+        predictor_max_neighbors = _validate_max_neighbors(predictor_max_neighbors)
+    if (checkpoint_max_neighbors is not None and predictor_max_neighbors is not None
+            and checkpoint_max_neighbors != predictor_max_neighbors):
+        raise ValueError("predictor max_neighbors differs from checkpoint binding")
+    if (requested_max_neighbors is not None
+            and checkpoint_max_neighbors is not None
+            and requested_max_neighbors != checkpoint_max_neighbors):
+        raise ValueError("checkpoint max_neighbors is bound and cannot be overridden")
+    bound_max_neighbors = (checkpoint_max_neighbors
+                           if checkpoint_max_neighbors is not None
+                           else predictor_max_neighbors)
 
     formal_release = _manifest_formal_release(dataset)
     formal_capacity = None
@@ -2442,6 +2519,7 @@ def evaluate(dataset, predictor, *, split="test", case_ids=None, maximum_steps=N
         "diagnostic": evaluation_mode == "diagnostic",
         "formal_eligible": evaluation_mode == "formal",
         "model_kind": model_kind,
+        "max_neighbors": bound_max_neighbors,
         "checkpoint": str(checkpoint) if checkpoint is not None else None,
         "baseline": baseline,
         "training": bool(training),
@@ -2514,6 +2592,7 @@ def main(argv=None):
     train.add_argument("--hidden", type=int, default=DEFAULT_HIDDEN)
     train.add_argument("--learning-rate", type=float, default=DEFAULT_LR)
     train.add_argument("--normalization-transitions", type=int, default=256)
+    train.add_argument("--max-neighbors", type=int, default=DEFAULT_MAX_NEIGHBORS)
     train.add_argument("--checkpoint", type=Path)
     train.add_argument("--resume", type=Path)
     train.add_argument("--run-id")
@@ -2594,6 +2673,7 @@ def main(argv=None):
                                  centers_per_update=args.centers, hidden=args.hidden,
                                  learning_rate=args.learning_rate, device=args.device,
                                  normalization_transitions=args.normalization_transitions,
+                                 max_neighbors=args.max_neighbors,
                                  checkpoint=args.checkpoint, output=args.output, run_id=args.run_id,
                                  checkpoint_every=args.checkpoint_every, resume=args.resume, log_every=args.log_every,
                                  validation_every=args.validation_every,

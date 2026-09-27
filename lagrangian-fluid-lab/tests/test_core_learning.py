@@ -166,6 +166,59 @@ def test_checkpoint_contains_rng_sampler_and_autonomous_rollout(tmp_path):
         assert trajectory.attrs["future_state_inputs"] == 0
 
 
+def test_max_neighbors_is_bound_in_training_checkpoint_and_predictor(tmp_path):
+    manifest = tiny_manifest(tmp_path)
+    checkpoint = tmp_path / "capped.pt"
+    with CoreDataset(manifest, tmp_path) as data:
+        receipt = train_model(
+            data, model_kind="graph_raw", seed=17, updates=1,
+            centers_per_update=1, hidden=8, normalization_transitions=1,
+            max_neighbors=3, checkpoint=checkpoint,
+            checkpoint_every=1, log_every=1, validation_every=0,
+            evaluate_milestones=False,
+        )
+        payload = load_training_checkpoint(checkpoint, restore_rng=False)
+        assert receipt["config"]["max_neighbors"] == 3
+        assert payload["config"]["max_neighbors"] == 3
+
+        from scripts.core_learning import _build_predictor_from_checkpoint
+        predictor, _ = _build_predictor_from_checkpoint(checkpoint, "cpu", 1)
+        assert predictor.max_neighbors == 3
+
+        with pytest.raises(ValueError, match="max_neighbors"):
+            load_training_checkpoint(checkpoint, restore_rng=False, max_neighbors=4)
+        with pytest.raises(ValueError, match="max_neighbors"):
+            train_model(
+                data, model_kind="graph_raw", seed=17, updates=2,
+                centers_per_update=1, hidden=8, normalization_transitions=1,
+                max_neighbors=4, checkpoint=tmp_path / "mismatch.pt",
+                resume=checkpoint, checkpoint_every=1, log_every=1,
+                validation_every=0, evaluate_milestones=False,
+            )
+
+
+def test_legacy_checkpoint_without_neighbor_cap_defaults_to_64(tmp_path):
+    manifest = tiny_manifest(tmp_path)
+    checkpoint = tmp_path / "legacy-source.pt"
+    legacy = tmp_path / "legacy-no-cap.pt"
+    with CoreDataset(manifest, tmp_path) as data:
+        train_model(
+            data, model_kind="mlp", seed=17, updates=1,
+            centers_per_update=1, hidden=8, normalization_transitions=1,
+            checkpoint=checkpoint, checkpoint_every=1, log_every=1,
+            validation_every=0, evaluate_milestones=False,
+        )
+    payload = load_training_checkpoint(checkpoint, restore_rng=False)
+    payload["config"] = dict(payload["config"])
+    payload["config"].pop("max_neighbors", None)
+    torch.save(payload, legacy)
+
+    from scripts.core_learning import _build_predictor_from_checkpoint
+    predictor, loaded = _build_predictor_from_checkpoint(legacy, "cpu", 1)
+    assert "max_neighbors" not in loaded["config"]
+    assert predictor.max_neighbors == learning.DEFAULT_MAX_NEIGHBORS
+
+
 def test_cuda_mapped_checkpoint_rng_states_restore_from_cpu_bytes(tmp_path):
     """A CUDA map_location must not feed GPU RNG tensors to set_rng_state."""
     if not torch.cuda.is_available():
