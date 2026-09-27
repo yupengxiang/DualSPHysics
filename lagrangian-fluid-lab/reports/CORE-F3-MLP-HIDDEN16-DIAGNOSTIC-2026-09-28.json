@@ -1,0 +1,251 @@
+{
+  "schema": "core.f3.mlp.hidden16.diagnostic.receipt.v1",
+  "report_id": "CORE-F3-MLP-HIDDEN16-DIAGNOSTIC-2026-09-28",
+  "date": "2026-09-28",
+  "status": "completed",
+  "diagnostic_only": true,
+  "source": {
+    "repository": "lagrangian-fluid-lab",
+    "task_start_git_commit": "bb956fffb6313b2a2c50306826bf1b83d7736a21",
+    "current_head_at_receipt": "ca859096601a09411a225805e98120fcaa7dbaf7",
+    "workspace_note": "当前 HEAD 含本任务启动后另一个任务对上级 PLAN.md 的既有 docs 提交；本任务未修改、暂存或提交 PLAN.md。",
+    "manifest": {
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "file_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "declared_source_manifest_sha256": "86e27740d764f9769e3255a82a599013a282f1bc4385ad3c29a657a56d9c5bea",
+      "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "formal_release": false,
+      "case_count": 32,
+      "split_counts": {
+        "train": 16,
+        "validation": 4,
+        "test": 12
+      }
+    },
+    "case": {
+      "case_id": "F3_DEV_00_a0p903125",
+      "family": "F3",
+      "split": "test",
+      "evaluation_role": "development_extrapolation",
+      "particles": 34560,
+      "expected_transitions": 835,
+      "expected_trajectory_frames": 836,
+      "hdf5": "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5",
+      "hdf5_bytes": 899562494,
+      "hdf5_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+      "known_inputs_sha256": "089573de6d2c7633b5192bf626fa98eb941f79500f1c1a04b632af68b6ca3bc9",
+      "control": {
+        "path": "campaigns/core-v1/inputs/control-91e3e3e7310810802fe6bf39f8c2e8499049964329fdec861a52c2c5c1e81794.npz",
+        "sha256": "f6852502c7ae5ad7da14faa2dddf3da04e5f02757528e38f3e8c140c00f6389e"
+      },
+      "geometry": {
+        "path": "campaigns/core-v1/inputs/geometry-d5901a774256848081383d2288d452c48fe398aada9a3708e605c97c2c751a7e.npz",
+        "sha256": "d7ccdc43108fde81c71f1ef6483258e6b0fa2a3bc9561df063b87a580bc55d70"
+      },
+      "physical_case_id": "F3_DEV_00_a0p903125",
+      "lineage_group_id": "3616afe39cddc01baba11af1c3cd11fad14101d7173dd39315339f1de6d748af"
+    },
+    "source_script_sha256": {
+      "scripts/core_learning.py": "3eefe1441dabb350182090c3625f24a8209543a4a31d02521f283074c996c27b"
+    }
+  },
+  "protocol": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "data_root": ".",
+    "model": "mlp",
+    "seed": 17,
+    "updates": 500,
+    "centers_per_update": 256,
+    "hidden": 16,
+    "learning_rate": 0.001,
+    "normalization_transitions": 16,
+    "max_neighbors": 192,
+    "cuda_visible_devices": "5",
+    "physical_gpu_index": 5,
+    "gpu_name": "NVIDIA RTX 6000 Ada Generation",
+    "process_device": "cuda:0",
+    "case_id": "F3_DEV_00_a0p903125",
+    "chunk_size": 34560,
+    "maximum_steps": 50,
+    "diagnostic": true,
+    "autonomous": true,
+    "future_state_inputs": false,
+    "train_command": "CUDA_VISIBLE_DEVICES=5 .venv/bin/python scripts/core_learning.py train --manifest campaigns/core-v1/f3-dataset-v2.json --data-root . --model mlp --seed 17 --updates 500 --centers 256 --hidden 16 --learning-rate 0.001 --normalization-transitions 16 --max-neighbors 192 --checkpoint /tmp/f3-mlp500-hidden16-seed17-20260928-checkpoint.pt --progress-output /tmp/f3-mlp500-hidden16-seed17-20260928-progress.json --run-id f3-mlp500-hidden16-seed17-20260928 --checkpoint-every 500 --log-every 100 --validation-every 0 --no-evaluate-milestones --device cuda:0 --output /tmp/f3-mlp500-hidden16-seed17-20260928-training.json",
+    "evaluate_command": "CUDA_VISIBLE_DEVICES=5 .venv/bin/python scripts/core_learning.py evaluate --manifest campaigns/core-v1/f3-dataset-v2.json --data-root . --checkpoint /tmp/f3-mlp500-hidden16-seed17-20260928-checkpoint.pt --case-id F3_DEV_00_a0p903125 --split test --maximum-steps 50 --chunk-size 34560 --device cuda:0 --progress-every 25 --trajectory-output /tmp/f3-mlp500-hidden16-seed17-20260928-trajectory.h5 --progress-output /tmp/f3-mlp500-hidden16-seed17-20260928-evaluation-progress.json --output /tmp/f3-mlp500-hidden16-seed17-20260928-evaluation.json --diagnostic"
+  },
+  "training": {
+    "status": "completed",
+    "evidence_status": "complete",
+    "run_id": "f3-mlp500-hidden16-seed17-20260928",
+    "model_kind": "mlp",
+    "seed": 17,
+    "device": "cuda:0",
+    "torch_version": "2.11.0+cu128",
+    "host": "user-SYS-421GE-TNRT",
+    "completed_updates": 500,
+    "parameter_count": 1574,
+    "wall_seconds": 979.106672747992,
+    "peak_gpu_memory_bytes": 133985280,
+    "peak_rss_mib": 2560.89453125,
+    "last_progress_loss_mse": 0.0813000351190567,
+    "neighbor_truncation_fraction": 0.0,
+    "normalization": {
+      "source_split": "train",
+      "target_reference": "raw_dual_increment_train_shared",
+      "available_transition_count": 13360,
+      "selected_transition_count": 16,
+      "selection_seed": 17,
+      "selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+      "train_case_count": 16
+    },
+    "validation": {
+      "validation_every": 0,
+      "validation_history": [],
+      "validation_case_count": 4,
+      "validation_formal_eligible": false
+    },
+    "receipt": {
+      "path": "/tmp/f3-mlp500-hidden16-seed17-20260928-training.json",
+      "bytes": 9985,
+      "sha256": "be78c0286d8d6a681bb6323c6887f3351710947e13aab8b98ae3b4aadaffd245"
+    },
+    "checkpoint": {
+      "path": "/tmp/f3-mlp500-hidden16-seed17-20260928-checkpoint.pt",
+      "bytes": 60332,
+      "sha256": "8cd8304c2b8ebda145ec99b1faf1623a0fb222d582eaaabfa7cf00600fb9ceac",
+      "update": 500,
+      "verified": true
+    },
+    "progress": {
+      "path": "/tmp/f3-mlp500-hidden16-seed17-20260928-progress.json",
+      "bytes": 471,
+      "sha256": "549cbb7c807d0cd2489e1ba9f20a7d9e0c77bd6e3af882ff331afc927036df14",
+      "status": "completed",
+      "update": 500
+    }
+  },
+  "evaluation": {
+    "status": "completed",
+    "schema": "core.evaluation.v1",
+    "mode": "diagnostic",
+    "diagnostic": true,
+    "split": "test",
+    "case_id": "F3_DEV_00_a0p903125",
+    "requested_steps": 50,
+    "frames_executed": 50,
+    "requested_window_complete": true,
+    "finite_rollout_complete_for_requested_window": true,
+    "expected_full_case_transitions": 835,
+    "expected_full_case_frames": 836,
+    "full_registered_denominator_complete": false,
+    "failure_category": "maximum_steps_limit",
+    "first_failure_frame": 51,
+    "raw_error_coverage": 0.059880239520958084,
+    "future_state_inputs": false,
+    "elapsed_seconds": 98.55567635595798,
+    "selection_score": 0.94052110744927,
+    "metrics": {
+      "position_rmse_m": {
+        "step_1": 0.00014579790242539504,
+        "step_10": 0.0018143454147784958,
+        "step_20": 0.0038624645616481415,
+        "step_30": 0.005880648219096683,
+        "step_40": 0.007871711007495424,
+        "step_50": 0.01027835577014365,
+        "frame_mean": 0.005000477562474732,
+        "executed_frame_scalar": 0.0058080262576378225,
+        "step_50_ade": 0.015237481182968941
+      },
+      "velocity_rmse_mps": {
+        "step_1": 0.0012592685489076461,
+        "step_10": 0.005855870769470725,
+        "step_20": 0.012997706787589491,
+        "step_30": 0.024591453436175727,
+        "step_40": 0.04096030275500512,
+        "step_50": 0.0593277591759465,
+        "frame_mean": 0.023321941389603487,
+        "executed_frame_scalar": 0.029188332908432982,
+        "step_50_ade": 0.09644043744273981
+      },
+      "physics": {
+        "completed_frames": 50,
+        "mass_error_abs_max_kg": 0.0,
+        "changed_particle_mass_frames": 0,
+        "validity_mismatch_frames": 0,
+        "kinetic_energy_error_abs_max_j": 0.03050219041798594,
+        "wall_chord_statuses": [
+          "checked_static_saved_chords"
+        ],
+        "wall_chord_particle_count": 308,
+        "wall_chord_mass_kg": 0.1299375033704564
+      }
+    },
+    "progress": {
+      "path": "/tmp/f3-mlp500-hidden16-seed17-20260928-evaluation-progress.json",
+      "bytes": 642,
+      "sha256": "b6b62d02995bd884c1e62080383c908d709d684e9354ffd019ab1b78b0e7183f",
+      "status": "completed",
+      "frames_executed": 50,
+      "expected_frames": 50,
+      "scientific_status": "not_assessed"
+    },
+    "trajectory": {
+      "path": "/tmp/f3-mlp500-hidden16-seed17-20260928-trajectory.h5",
+      "bytes": 44903680,
+      "sha256": "8be932cb1ae1f5fcb02cfc7b85d03220d7b11933a0977821f3b83a0739b5ef6b",
+      "shapes": {
+        "position": [51, 34560, 3],
+        "velocity": [51, 34560, 3],
+        "valid": [51, 34560],
+        "time": [51],
+        "mass": [34560],
+        "particle_id": [34560],
+        "particle_zone": [34560]
+      },
+      "finite_position": true,
+      "finite_velocity": true,
+      "all_valid": true,
+      "valid_true_count": 1762560,
+      "identity_unique_count": 34560,
+      "mass_finite_positive": true,
+      "mass_sum_kg": 14.580000378191471,
+      "future_state_inputs": false
+    }
+  },
+  "qualification": {
+    "formal_eligible": false,
+    "qualification": false,
+    "T1_numerical": false,
+    "T2_macro": false,
+    "qualification_credit": 0,
+    "interpretation": "bounded diagnostic evidence only; no formal training or qualification claim"
+  },
+  "side_effects": {
+    "production_algorithm_modified": false,
+    "production_hdf5_modified": false,
+    "manifest_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "plan_modified_by_this_task": false,
+    "solver_started": false,
+    "worker_started": false,
+    "queue_mutation": 0,
+    "future_state_inputs": false
+  },
+  "artifacts": {
+    "training_log": {
+      "path": "/tmp/f3-mlp500-hidden16-seed17-20260928-train.log",
+      "bytes": 8654,
+      "sha256": "78a75e9d7e86fc907f4b3923a5580595fe3c20c6bd215327b4635b7846fa88"
+    },
+    "evaluation_log": {
+      "path": "/tmp/f3-mlp500-hidden16-seed17-20260928-eval.log",
+      "bytes": 2080,
+      "sha256": "6c6abb447296f9cbbf2e4681bf0cec448757e8c043a0b4cb60c97669f2284246"
+    },
+    "parent_plan_observed_sha256": "faf46f78c3996c8279a24779c91aa64a84d8408befcd72c9dc2eae448576a982",
+    "manifest_observed_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+  }
+}
