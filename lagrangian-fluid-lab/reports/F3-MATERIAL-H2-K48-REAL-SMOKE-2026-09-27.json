@@ -1,0 +1,116 @@
+{
+  "schema": "core.material.f3.real_case_neighbor_variant_smoke.v1",
+  "diagnostic_only": true,
+  "case_id": "F3_DEV_00_a0p903125",
+  "source": {
+    "path": "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5",
+    "sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4"
+  },
+  "source_contract": {
+    "frame_count": 836,
+    "particle_count": 34560,
+    "time_start_s": 0.0,
+    "time_end_s": 8.350012828223477,
+    "source_manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+  },
+  "material_configuration": {
+    "schema": "core.material.v2",
+    "backend": "f3_ckdtree_visible_shepard_distance_k48_v1",
+    "neighbour_variant": "h2_k48",
+    "neighbours": 48,
+    "substeps": 2,
+    "seed_count": 512,
+    "source_definition": "continuous_halfspace_axis0_boundary0",
+    "support_gate": {
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "minimum_anisotropy": 0.005,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3
+    }
+  },
+  "execution": {
+    "command": "PYTHONPATH=. .venv/bin/python scripts/core_material.py --source campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5 --output /tmp/f3-material-h2k48-full-20260927.h5 --family f3 --seeds 512 --substeps 2 --neighbour-variant h2_k48",
+    "status": "completed",
+    "committed_frame": 835,
+    "elapsed_seconds": 283.35377051192336,
+    "peak_rss_kib": 635720,
+    "temporary_trace_path": "/tmp/f3-material-h2k48-full-20260927.h5",
+    "temporary_trace_bytes": 28728400,
+    "temporary_trace_sha256": "6d1cc29db627fff2909ac019b715db72fae52491ec6425b267006d54efac1897",
+    "temporary_checkpoint_path": "/tmp/f3-material-h2k48-full-20260927.h5.checkpoint.json",
+    "temporary_checkpoint_sha256": "eee30e3b7eca8d48aa8c6ceb619566327a28ab2984134e67f1ec7153b760c9c8",
+    "checkpoint_binding_sha256": "c2de5ce98d3253b89883ff32cc0e84b86518a6183b110e3bcbd34ab3c031a17e"
+  },
+  "result": {
+    "mass_closed": true,
+    "unknown_fraction_monotone": true,
+    "unknown_gate_pass": false,
+    "common_reliable_path_coverage": 0.95703125,
+    "by_source": [
+      {
+        "source": 0,
+        "final_unknown_fraction": 0.0546875,
+        "unknown_fraction_max": 0.0546875,
+        "reliable_path_coverage": 0.9453125,
+        "terminal_categories": {
+          "left": 0.74609375,
+          "right": 0.19921875,
+          "unknown": 0.0546875
+        },
+        "observed_first_passage_fraction": 0.30859375,
+        "observed_return_fraction": 0.2890625,
+        "residence_opposite_s": 0.5625197855943163,
+        "first_unreliable_frame": 248,
+        "first_unreliable_time_s": 2.480020686878502
+      },
+      {
+        "source": 1,
+        "final_unknown_fraction": 0.03125,
+        "unknown_fraction_max": 0.03125,
+        "reliable_path_coverage": 0.96875,
+        "terminal_categories": {
+          "left": 0.0,
+          "right": 0.96875,
+          "unknown": 0.03125
+        },
+        "observed_first_passage_fraction": 0.296875,
+        "observed_return_fraction": 0.296875,
+        "residence_opposite_s": 0.6475447652291284,
+        "first_unreliable_frame": 339,
+        "first_unreliable_time_s": 3.390015699799728
+      }
+    ]
+  },
+  "comparison_to_baseline24": {
+    "baseline_report": "reports/F3-MATERIAL-REAL-SMOKE-2026-09-27.json",
+    "baseline_common_reliable_path_coverage": 0.96484375,
+    "candidate_common_reliable_path_coverage": 0.95703125,
+    "baseline_final_unknown_fraction": {
+      "source_0": 0.0390625,
+      "source_1": 0.03125
+    },
+    "candidate_final_unknown_fraction": {
+      "source_0": 0.0546875,
+      "source_1": 0.03125
+    },
+    "decision": "candidate_rejected_for_no_improvement"
+  },
+  "qualification": {
+    "qualification_claim": "none",
+    "material_reliability": "not_established",
+    "qualified_T2_macro": false,
+    "qualified_T2_path": false,
+    "T1_numerical": false,
+    "gate_decision_eligible": false,
+    "qualification_credit": 0
+  },
+  "side_effects": {
+    "production_hdf5_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "solver_started": false,
+    "worker_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0
+  }
+}
