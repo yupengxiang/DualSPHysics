@@ -1,0 +1,234 @@
+{
+  "schema": "core.training.f3.real_graph_raw_seed_capacity_matrix_50step.v1",
+  "diagnostic_only": true,
+  "purpose": "Parallel seed and hidden-width coarse diagnostics under the fixed F3 short-window protocol",
+  "family": "F3",
+  "source": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "source_manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "case_id": "F3_DEV_00_a0p903125",
+    "case_source_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+    "particles": 34560,
+    "expected_transitions": 835,
+    "expected_trajectory_frames": 836
+  },
+  "protocol": {
+    "updates": 100,
+    "centers_per_update": 256,
+    "normalization_transitions": 16,
+    "max_neighbors": 192,
+    "learning_rate": 0.001,
+    "chunk_size": 34560,
+    "maximum_steps": 50,
+    "device_family": "NVIDIA RTX 6000 Ada Generation",
+    "target_normalization": "raw_dual_increment_train_shared"
+  },
+  "runs": [
+    {
+      "label": "graph_raw_seed18_hidden8",
+      "model_kind": "graph_raw",
+      "seed": 18,
+      "hidden": 8,
+      "parameter_count": 1766,
+      "device": "cuda:1",
+      "training": {
+        "updates_requested": 100,
+        "updates_completed": 100,
+        "wall_seconds": 444.4755237370264,
+        "peak_rss_mib": 2709.98046875,
+        "peak_gpu_memory_bytes": 1584575488,
+        "evidence_status": "complete",
+        "checkpoint_verified": true,
+        "neighbor_truncation_fraction": 0.0,
+        "receipt_path": "/tmp/f3-graph-raw-seed18-cap192-updates100-20260927.json",
+        "receipt_sha256": "e939b33bb8e8696f3634ff818d61ec5dda097e857aa38bf8c46992918d02cf8c",
+        "checkpoint_path": "/tmp/f3-graph-raw-seed18-cap192-updates100-20260927.pt",
+        "checkpoint_sha256": "51df000675311577fdeeb9d6e36089d609ba1503f7df39fcb3587fdce20eb643",
+        "checkpoint_bytes": 103531,
+        "progress_path": "/tmp/f3-graph-raw-seed18-cap192-updates100-20260927.progress.json",
+        "progress_sha256": "9b14584697e88b139fb4c94004b6afc943847fd969caa5cdf134b4f33240661d"
+      },
+      "evaluation": {
+        "frames_executed": 50,
+        "trajectory_frames_including_initial": 51,
+        "failure_category": "maximum_steps_limit",
+        "first_failure_frame": 51,
+        "execution_complete_for_requested_window": true,
+        "finite_rollout_complete_for_requested_window": true,
+        "complete_over_registered_denominator": false,
+        "raw_error_coverage": 0.059880239520958084,
+        "selection_score": 0.9405702551938904,
+        "position_rmse_m": {
+          "step_1": 0.00014688255579736457,
+          "step_10": 0.0015354319151418758,
+          "step_20": 0.003183918603162448,
+          "step_30": 0.00526016276580732,
+          "step_40": 0.008319700068458046,
+          "step_50": 0.01292192832880347,
+          "frame_mean": 0.005015522061859128
+        },
+        "velocity_rmse_mps": {
+          "step_1": 0.0020003675884509653,
+          "step_10": 0.0144217527126932,
+          "step_20": 0.0271598370910534,
+          "step_30": 0.03529457467228209,
+          "step_40": 0.03900002825361734,
+          "step_50": 0.04359790005465075,
+          "frame_mean": 0.028149867665738185
+        },
+        "position_ade_m": {
+          "step_1": 0.00025404099913850086,
+          "step_10": 0.002654177517920147,
+          "step_20": 0.0054919312419804325,
+          "step_30": 0.009039376773889725,
+          "step_40": 0.014259699192396735,
+          "step_50": 0.022005122152304955,
+          "frame_mean": 0.008601950836446961
+        },
+        "velocity_ade_mps": {
+          "step_1": 0.0031848486589780827,
+          "step_10": 0.024865569035452614,
+          "step_20": 0.04675600048687374,
+          "step_30": 0.060496832846862574,
+          "step_40": 0.06520975426947699,
+          "step_50": 0.0680468727460812,
+          "frame_mean": 0.04733057535482466
+        },
+        "evaluation_path": "/tmp/f3-graph-raw-seed18-cap192-eval50-20260927.json",
+        "evaluation_sha256": "6c6a8996fac39790e70a1eeca742f47b8b632b0ec0ba6e3e37516673080fe368",
+        "evaluation_bytes": 511252,
+        "progress_path": "/tmp/f3-graph-raw-seed18-cap192-eval50-20260927.progress.json",
+        "progress_sha256": "04c436afdf838c9dda3d97f8e394b31e6b9c1996fd219d7eba69ae9cad1aa1c2",
+        "progress_elapsed_seconds": 962.0430630361661,
+        "trajectory_path": "/tmp/f3-graph-raw-seed18-cap192-eval50-20260927.h5",
+        "trajectory_sha256": "d1ca15c385dc9633578d7ca8fb51ed462a6a36a3fea3922d5d157b46d39e1c66",
+        "trajectory_bytes": 44903680,
+        "trajectory_shapes": {
+          "position": [51, 34560, 3],
+          "velocity": [51, 34560, 3],
+          "valid": [51, 34560],
+          "time": [51]
+        }
+      }
+    },
+    {
+      "label": "graph_raw_seed17_hidden16",
+      "model_kind": "graph_raw",
+      "seed": 17,
+      "hidden": 16,
+      "parameter_count": 6086,
+      "device": "cuda:2",
+      "training": {
+        "updates_requested": 100,
+        "updates_completed": 100,
+        "wall_seconds": 442.9830682859756,
+        "peak_rss_mib": 2680.25390625,
+        "peak_gpu_memory_bytes": 2731527680,
+        "evidence_status": "complete",
+        "checkpoint_verified": true,
+        "neighbor_truncation_fraction": 0.0,
+        "receipt_path": "/tmp/f3-graph-raw-hidden16-cap192-updates100-20260927.json",
+        "receipt_sha256": "689ea61c1176b2aed14ea40d6c11e20c260b77791d121035d277e1631e0b2433",
+        "checkpoint_path": "/tmp/f3-graph-raw-hidden16-cap192-updates100-20260927.pt",
+        "checkpoint_sha256": "22a4c6401ace5d2b36680d6fd8b127267cb38377c89debdf13cf29ac5ab1a731",
+        "checkpoint_bytes": 153963,
+        "progress_path": "/tmp/f3-graph-raw-hidden16-cap192-updates100-20260927.progress.json",
+        "progress_sha256": "0ab38c7225807b00d571d7acc7f52802a77fde2674e68392982098fb90972a91"
+      },
+      "evaluation": {
+        "frames_executed": 50,
+        "trajectory_frames_including_initial": 51,
+        "failure_category": "maximum_steps_limit",
+        "first_failure_frame": 51,
+        "execution_complete_for_requested_window": true,
+        "finite_rollout_complete_for_requested_window": true,
+        "complete_over_registered_denominator": false,
+        "raw_error_coverage": 0.059880239520958084,
+        "selection_score": 0.9406178511421647,
+        "position_rmse_m": {
+          "step_1": 0.0002113159630962239,
+          "step_10": 0.0024715394386562424,
+          "step_20": 0.005087699710292571,
+          "step_30": 0.00810884830451749,
+          "step_40": 0.01211305716254941,
+          "step_50": 0.017572980332704397,
+          "frame_mean": 0.007421259489150403
+        },
+        "velocity_rmse_mps": {
+          "step_1": 0.0012960861401800734,
+          "step_10": 0.005939693469098987,
+          "step_20": 0.013198983744230869,
+          "step_30": 0.025554320822506204,
+          "step_40": 0.044285662301430426,
+          "step_50": 0.06646281119272562,
+          "frame_mean": 0.02493088009396753
+        },
+        "position_ade_m": {
+          "step_1": 0.0003581910997703129,
+          "step_10": 0.004130517113108069,
+          "step_20": 0.008509504428689144,
+          "step_30": 0.013610699631222224,
+          "step_40": 0.02038962027812967,
+          "step_50": 0.02952019420001065,
+          "frame_mean": 0.01246504064469018
+        },
+        "velocity_ade_mps": {
+          "step_1": 0.00165957035697454,
+          "step_10": 0.01012505383342063,
+          "step_20": 0.022513351957252018,
+          "step_30": 0.04363682797857751,
+          "step_40": 0.07469161096079507,
+          "step_50": 0.10957012890804092,
+          "frame_mean": 0.041917665164855934
+        },
+        "evaluation_path": "/tmp/f3-graph-raw-hidden16-cap192-eval-F3_DEV_00_a0p903125-20260927.json",
+        "evaluation_sha256": "df4981110f0789d9976f32154d744e440631103e25b46d5cf2920bb1a882e6d8",
+        "evaluation_bytes": 512748,
+        "progress_path": "/tmp/f3-graph-raw-hidden16-cap192-eval-F3_DEV_00_a0p903125-20260927.progress.json",
+        "progress_sha256": "40a8a824d011876466121ffa802a555c76c1b424b43edebade8c7d75ed7ecf48",
+        "progress_elapsed_seconds": 915.1072924260516,
+        "trajectory_path": "/tmp/f3-graph-raw-hidden16-cap192-eval-F3_DEV_00_a0p903125-20260927.h5",
+        "trajectory_sha256": "92d8f4c5052ecc3814660e37bbf7426458d351c037fce93dc4c6e4c090172c85",
+        "trajectory_bytes": 44903680,
+        "trajectory_shapes": {
+          "position": [51, 34560, 3],
+          "velocity": [51, 34560, 3],
+          "valid": [51, 34560],
+          "time": [51]
+        }
+      }
+    }
+  ],
+  "comparison": {
+    "existing_graph_raw_train500_seed17_hidden8": {
+      "selection_score": 0.9405794502120072,
+      "position_rmse_step50_m": 0.010808855234180976,
+      "position_rmse_frame_mean_m": 0.006481719115271537,
+      "velocity_rmse_step50_mps": 0.05080001907864858,
+      "velocity_rmse_frame_mean_mps": 0.024221742490882124
+    },
+    "interpretation": {
+      "seed18_hidden8": "best position frame mean and best endpoint velocity among the two new diagnostics, but velocity frame mean remains worse than graph_raw train500",
+      "seed17_hidden16": "best velocity frame mean among the two new diagnostics, but position endpoint and frame mean are worse; width increase is not a uniformly better model",
+      "decision": "retain graph_raw hidden8 train500 as the current full-rollout checkpoint; do not promote seed18 or hidden16 to formal training from a 50-step window",
+      "score_caveat": "selection scores differ only in the fourth decimal place and the complete 835-transition denominator is not executed"
+    }
+  },
+  "qualification": {
+    "formal_training": false,
+    "formal_eligible": false,
+    "T1_numerical": false,
+    "T2_macro": false,
+    "qualification_credit": 0
+  },
+  "side_effects": {
+    "production_hdf5_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "solver_started": false,
+    "worker_started": false,
+    "queue_mutation": 0,
+    "future_state_inputs": false
+  }
+}
