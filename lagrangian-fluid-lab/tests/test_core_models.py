@@ -4,9 +4,9 @@ import numpy as np
 import pytest
 import torch
 
-from scripts.core_models import (AnalyticPredictor, DualIncrementModel, ModelPredictor,
-                                 Normalization, neighbor_table, nearest_geometry, tensors,
-                                 two_hop_halo)
+from scripts.core_models import (AnalyticPredictor, DualIncrementModel, MAX_NEIGHBORS,
+                                 ModelPredictor, Normalization, neighbor_table,
+                                 nearest_geometry, tensors, two_hop_halo)
 from scripts.core_contract import PrescribedGeometry, State, StepPrediction
 from scripts.core_learning import _target_tensor
 
@@ -48,6 +48,39 @@ def test_two_hop_halo_and_edge_contract_are_explicit():
     diagnostic = model(*args[:4], centers=torch.tensor([0]))
     assert formal.shape == (1, 6)
     assert torch.equal(formal, diagnostic)
+
+
+def test_tensors_default_and_explicit_neighbor_caps_are_auditable():
+    state, known = _grid_state(), example_known()
+    default_args, _, default_diagnostics = tensors(state, known, .01, "cpu")
+    capped_args, _, capped_diagnostics = tensors(
+        state, known, .01, "cpu", max_neighbors=3)
+
+    assert default_args[2].shape == (state.count, MAX_NEIGHBORS)
+    assert default_diagnostics["max_neighbors"] == MAX_NEIGHBORS
+    assert capped_args[2].shape == (state.count, 3)
+    assert capped_diagnostics["max_neighbors"] == 3
+
+
+def test_model_predictor_default_and_explicit_neighbor_caps_propagate():
+    state, known, dt = example_state(), example_known(), .01
+    default = ModelPredictor(DualIncrementModel("mlp", hidden=8)).predict_step(
+        state, known, dt)
+    capped = ModelPredictor(
+        DualIncrementModel("mlp", hidden=8), max_neighbors=3).predict_step(
+            state, known, dt)
+
+    assert default.diagnostics["max_neighbors"] == MAX_NEIGHBORS
+    assert capped.diagnostics["max_neighbors"] == 3
+
+
+@pytest.mark.parametrize("invalid", [0, -1, True, 1.5, "3"])
+def test_neighbor_caps_fail_closed(invalid):
+    state, known = example_state(), example_known()
+    with pytest.raises(ValueError, match="max_neighbors must be a positive integer"):
+        tensors(state, known, .01, "cpu", max_neighbors=invalid)
+    with pytest.raises(ValueError, match="max_neighbors must be a positive integer"):
+        ModelPredictor(DualIncrementModel("mlp", hidden=8), max_neighbors=invalid)
 
 
 def test_formal_halo_path_is_fixed_seed_equivalent_to_diagnostic_path():

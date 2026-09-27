@@ -1424,7 +1424,8 @@ def _memory_snapshot():
 
 
 def profile_case(dataset, case_id, *, model_kind="graph_raw", steps=10, hidden=DEFAULT_HIDDEN,
-                 device="cpu", chunk_size=256, seed=17):
+                 device="cpu", chunk_size=256, seed=17,
+                 max_neighbors=DEFAULT_MAX_NEIGHBORS):
     """Run bounded inference timing on one complete current particle field."""
     if int(steps) < 1:
         raise ValueError("profile steps must be positive")
@@ -1434,7 +1435,8 @@ def profile_case(dataset, case_id, *, model_kind="graph_raw", steps=10, hidden=D
     if torch.device(device).type == "cuda":
         torch.cuda.reset_peak_memory_stats(torch.device(device))
     model = DualIncrementModel(model_kind, hidden=hidden)
-    predictor = ModelPredictor(model, device=device, chunk_size=chunk_size)
+    predictor = ModelPredictor(model, device=device, chunk_size=chunk_size,
+                               max_neighbors=max_neighbors)
     times = dataset.times(case_id)
     current = dataset.read_state(case_id, 0)
     known = _known_inputs_for_learning(dataset.known_inputs(case_id))
@@ -1452,7 +1454,8 @@ def profile_case(dataset, case_id, *, model_kind="graph_raw", steps=10, hidden=D
         "step_seconds": measurements, "mean_step_seconds": float(np.mean(measurements)),
         "p50_step_seconds": float(np.percentile(measurements, 50)),
         "p95_step_seconds": float(np.percentile(measurements, 95)),
-        "diagnostics": {"full_field": True, "radius_over_h": 2.0, "max_neighbors": DEFAULT_MAX_NEIGHBORS,
+        "diagnostics": {"full_field": True, "radius_over_h": 2.0,
+                        "max_neighbors": predictor.max_neighbors,
                         "loss_centers": None, "autonomous_state_feedback": True},
         "resource": memory,
     }
@@ -2538,6 +2541,7 @@ def main(argv=None):
     profile.add_argument("--steps", type=int, default=10)
     profile.add_argument("--hidden", type=int, default=DEFAULT_HIDDEN)
     profile.add_argument("--chunk-size", type=int, default=DEFAULT_CENTERS)
+    profile.add_argument("--max-neighbors", type=int, default=DEFAULT_MAX_NEIGHBORS)
     profile.add_argument("--device", default="cpu")
     profile.add_argument("--output", type=Path, required=True)
 
@@ -2600,7 +2604,8 @@ def main(argv=None):
     elif args.command == "profile":
         with _dataset(args) as dataset:
             result = profile_case(dataset, args.case_id, model_kind=args.model_kind, steps=args.steps,
-                                  hidden=args.hidden, device=args.device, chunk_size=args.chunk_size, seed=args.seed)
+                                  hidden=args.hidden, device=args.device, chunk_size=args.chunk_size,
+                                  seed=args.seed, max_neighbors=args.max_neighbors)
         atomic_json(args.output, result)
     elif args.command == "evaluate-checkpoints":
         refs = (checkpoint_refs_from_receipt(args.training_receipt)

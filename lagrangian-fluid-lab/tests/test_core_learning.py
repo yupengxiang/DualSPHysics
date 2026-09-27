@@ -514,6 +514,19 @@ def test_legacy_known_inputs_geometry_contract_remains_scoreable(tmp_path):
     assert profile["steps_completed"] == 1
 
 
+def test_profile_max_neighbors_is_defaulted_and_reported(tmp_path):
+    manifest = tiny_manifest(tmp_path)
+    with CoreDataset(manifest, tmp_path) as data:
+        default_profile = profile_case(
+            data, "tiny", model_kind="mlp", steps=1, hidden=8, chunk_size=1)
+        capped_profile = profile_case(
+            data, "tiny", model_kind="mlp", steps=1, hidden=8, chunk_size=1,
+            max_neighbors=3)
+
+    assert default_profile["diagnostics"]["max_neighbors"] == learning.DEFAULT_MAX_NEIGHBORS
+    assert capped_profile["diagnostics"]["max_neighbors"] == 3
+
+
 def test_resume_rejects_run_and_learning_rate_mismatch(tmp_path):
     manifest = tiny_manifest(tmp_path)
     checkpoint = tmp_path / "bound.pt"

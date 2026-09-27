@@ -31,6 +31,13 @@ NEIGHBOR_RADIUS_OVER_H = 2.0
 MAX_NEIGHBORS = 64
 
 
+def _validate_max_neighbors(value):
+    if (isinstance(value, (bool, np.bool_))
+            or not isinstance(value, (int, np.integer)) or value < 1):
+        raise ValueError("max_neighbors must be a positive integer")
+    return int(value)
+
+
 def _readonly_array(value: Any, *, dtype=np.float32, shape=None) -> np.ndarray:
     result = np.asarray(value, dtype=dtype).copy()
     if shape is not None and result.shape != shape:
@@ -822,17 +829,19 @@ class DualIncrementModel(nn.Module):
         return self.head(values) * self.target_scale
 
 
-def tensors(state, known, dt, device):
+def tensors(state, known, dt, device, max_neighbors=MAX_NEIGHBORS):
     """Build formal graph inputs and the SI-unit known-force prior.
 
     The provenance is part of ``args`` so the existing training/inference
     call pattern cannot accidentally drop the source contract while
     normalizing features or changing center chunks.
     """
+    max_neighbors = _validate_max_neighbors(max_neighbors)
     features, acceleration = node_features(state, known, dt)
     periodic_lengths = known.physics.get("periodic_lengths_m", (0., 0., 0.))
     neighbors, diagnostics, provenance = neighbor_table(
-        state, float(known.numerics["h_m"]), return_provenance=True,
+        state, float(known.numerics["h_m"]), limit=max_neighbors,
+        return_provenance=True,
         periodic_lengths=periodic_lengths)
     args = (
         torch.as_tensor(features, dtype=torch.float32, device=device),
@@ -872,16 +881,19 @@ class CausalPredictorAdapter:
 class ModelPredictor:
     """Causal inference adapter that commits both displacement and velocity."""
 
-    def __init__(self, model, device="cpu", chunk_size=256, normalization=None):
+    def __init__(self, model, device="cpu", chunk_size=256, normalization=None,
+                 max_neighbors=MAX_NEIGHBORS):
         if int(chunk_size) < 1:
             raise ValueError("positive chunk size required")
+        self.max_neighbors = _validate_max_neighbors(max_neighbors)
         self.model = model.to(device).eval()
         self.device = torch.device(device)
         self.chunk_size = int(chunk_size)
         self.normalization = normalization
 
     def predict_step(self, state, known, dt):
-        args, prior, diagnostics = tensors(state, known, dt, self.device)
+        args, prior, diagnostics = tensors(
+            state, known, dt, self.device, max_neighbors=self.max_neighbors)
         if self.normalization is not None:
             features = self.normalization.normalize_features(args[0])
             args = (features, *args[1:])
