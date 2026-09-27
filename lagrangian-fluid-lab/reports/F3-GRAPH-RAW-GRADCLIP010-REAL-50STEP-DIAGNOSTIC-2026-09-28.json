@@ -1,0 +1,166 @@
+{
+  "schema": "core.f3.graph_raw.gradient_clip_diagnostic.summary.v1",
+  "date": "2026-09-28",
+  "diagnostic_only": true,
+  "case_id": "F3_DEV_00_a0p903125",
+  "candidate": {
+    "model_kind": "graph_raw",
+    "seed": 17,
+    "updates": 500,
+    "centers_per_update": 256,
+    "hidden": 8,
+    "learning_rate": 0.001,
+    "normalization_transitions": 16,
+    "max_neighbors": 192,
+    "gradient_clip_norm": 0.1,
+    "clip_fraction": 0.992,
+    "clipped_updates": 496,
+    "pre_clip_l2_mean": 0.46091622619330885,
+    "pre_clip_l2_max": 1.4819905757904053,
+    "post_clip_l2_mean": 0.09985490249097348,
+    "post_clip_l2_max": 0.09999994188547134
+  },
+  "source": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "dataset_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "case_source_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+    "particles": 34560,
+    "expected_transitions": 835,
+    "expected_frames": 835
+  },
+  "protocol": {
+    "device_binding": "CUDA_VISIBLE_DEVICES=2",
+    "reported_device": "cuda:0",
+    "chunk_size": 34560,
+    "maximum_steps": 50,
+    "future_state_inputs": false,
+    "autonomous": true
+  },
+  "training": {
+    "completed_updates": 500,
+    "evidence_status": "complete",
+    "wall_seconds": 2420.5323821259663,
+    "peak_gpu_memory_bytes": 1567362048,
+    "peak_rss_mib": 2777.94140625,
+    "parameter_count": 1766,
+    "checkpoint": {
+      "path": "/tmp/f3-graph-raw-gradclip010-seed17-20260928-checkpoint.pt",
+      "bytes": 100881,
+      "sha256": "d20dcd3f5030f37647892f7d4e62a1741d56487560e4b2fcfc5b35b08d573130"
+    },
+    "receipt": {
+      "path": "/tmp/f3-graph-raw-gradclip010-seed17-20260928-training.json",
+      "bytes": 100737,
+      "sha256": "ea3ce8b4a081745aa729c1f24a99885f5acfa3743cd480d484188251ea6812e4"
+    },
+    "progress": {
+      "path": "/tmp/f3-graph-raw-gradclip010-seed17-20260928-training-progress.json",
+      "bytes": 379,
+      "sha256": "f90630d4cc8242535020b8d5d6d59adccae5bfbee1367b4d3dc178e72a98eeb0"
+    }
+  },
+  "evaluation": {
+    "requested_steps": 50,
+    "frames_executed": 50,
+    "requested_window_complete": true,
+    "full_registered_denominator_complete": false,
+    "raw_error_coverage": 0.059880239520958084,
+    "failure_category": "maximum_steps_limit",
+    "scientific_failure_category": null,
+    "finite_prefix_frames": 50,
+    "wall_seconds": 974.5730783259496,
+    "future_state_inputs": false,
+    "selection_score": 0.9405477148942557,
+    "position_rmse_step_m": 0.00852116943672181,
+    "position_rmse_frame_mean_m": 0.00450003131706821,
+    "velocity_rmse_step_mps": 0.05704795039416078,
+    "velocity_rmse_frame_mean_mps": 0.027614788975135203,
+    "receipt": {
+      "path": "/tmp/f3-graph-raw-gradclip010-seed17-20260928-evaluate50.json",
+      "bytes": 511437,
+      "sha256": "b8733a4913b8cab076d8ce0b86051ba8dfcdb8f94c444e72b37cac5143751a24"
+    },
+    "progress": {
+      "path": "/tmp/f3-graph-raw-gradclip010-seed17-20260928-evaluate50-progress.json",
+      "bytes": 648,
+      "sha256": "9805f8a756c066e80b1f7ee608581c6b7ecf9735d953b98ca7c47f3fe0bf72b5"
+    },
+    "trajectory": {
+      "path": "/tmp/f3-graph-raw-gradclip010-seed17-20260928-evaluate50.h5",
+      "bytes": 44903680,
+      "sha256": "2fe58c4054d702141ab0f0425b0bd1d81086e8e960eb05008c8144b7ccdd7643"
+    },
+    "hdf5_integrity": {
+      "position_shape": [51, 34560, 3],
+      "velocity_shape": [51, 34560, 3],
+      "valid_shape": [51, 34560],
+      "time_shape": [51],
+      "time_start_s": 0.0,
+      "time_end_s": 0.5000171945830302,
+      "all_position_values_finite": true,
+      "all_velocity_values_finite": true,
+      "all_mass_values_finite": true,
+      "all_valid": true,
+      "unique_particle_ids": 34560
+    },
+    "physics": {
+      "mass_error_abs_max_kg": 0.0,
+      "changed_particle_mass_frames": 0,
+      "validity_mismatch_frames": 0,
+      "kinetic_energy_error_abs_max_j": 0.027688629347378653
+    }
+  },
+  "baseline": {
+    "path": "/tmp/f3-raw500-bounded-baseline-reference-20260928.json",
+    "sha256": "1c426a6bb72e6fa890826e0ecc89a90d8182e7f8a511ef6daac4f889eebf97f4",
+    "selection_score": 0.9405794502120072,
+    "position_rmse_step_m": 0.010808855234180976,
+    "position_rmse_frame_mean_m": 0.006481719115271537,
+    "velocity_rmse_step_mps": 0.05080001907864858,
+    "velocity_rmse_frame_mean_mps": 0.024221742490882124
+  },
+  "comparison": {
+    "decision_rule": "strictly lower selection penalty and no worse bounded/frame-mean position or velocity RMSE",
+    "candidate_better": false,
+    "selection_score_delta": -3.173531775146898e-05,
+    "position_rmse_step_delta_m": -0.0022876857974591658,
+    "position_rmse_frame_mean_delta_m": -0.001981687798413327,
+    "velocity_rmse_step_delta_mps": 0.006247931315512198,
+    "velocity_rmse_frame_mean_delta_mps": 0.003393046484253081
+  },
+  "decision": {
+    "candidate_status": "rejected_not_better_than_raw500",
+    "accepted_for_formal_training": false,
+    "retain_as_current_formal_candidate": false
+  },
+  "qualification": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "formal_eligible": false,
+    "qualification_credit": 0
+  },
+  "original_receipt": {
+    "path": "/tmp/f3-graph-raw-gradclip010-seed17-20260928-receipt.json",
+    "bytes": 188272,
+    "sha256": "802b3bfe154fd7169283f0669d267ed6285b421ed922509e4978f971f0dfd739"
+  },
+  "run_log": {
+    "path": "/tmp/f3-graph-raw-gradclip010-seed17-20260928-run.log",
+    "bytes": 251,
+    "sha256": "c866adaf5858645591056fed9a7da8b6482adbb6e343e3d475b5e7bbb2d269df"
+  },
+  "side_effects": {
+    "production_algorithm_modified": false,
+    "production_hdf5_modified": false,
+    "manifest_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "future_state_inputs": false,
+    "solver_started": false,
+    "worker_started": false,
+    "queue_mutation": 0
+  }
+}
