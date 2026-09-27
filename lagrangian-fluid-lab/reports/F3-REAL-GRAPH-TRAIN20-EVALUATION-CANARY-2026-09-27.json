@@ -1,0 +1,76 @@
+{
+  "schema": "core.training.f3.real_graph_train20_evaluation_canary.v1",
+  "diagnostic_only": true,
+  "family": "F3",
+  "source": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "source_manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "test_case_id": "F3_DEV_00_a0p903125"
+  },
+  "training": {
+    "model_kind": "graph_raw",
+    "run_id": "graph_raw-seed17",
+    "seed": 17,
+    "updates_requested": 20,
+    "updates_completed": 20,
+    "centers_per_update": 256,
+    "hidden": 8,
+    "normalization_transitions": 16,
+    "max_neighbors": 192,
+    "device": "cpu",
+    "wall_seconds": 109.36784281488508,
+    "peak_rss_mib": 2927.78125,
+    "evidence_status": "complete",
+    "history": [
+      {"update": 1, "loss_mse": 1.2797802686691284, "case_id": "F3_DEV_20_a1p028125", "frame": 714, "neighbor_truncation_fraction": 0.0},
+      {"update": 5, "loss_mse": 0.09070780873298645, "case_id": "F3_DEV_24_a1p053125", "frame": 2, "neighbor_truncation_fraction": 0.0},
+      {"update": 10, "loss_mse": 0.17629636824131012, "case_id": "F3_DEV_14_a0p990625", "frame": 57, "neighbor_truncation_fraction": 0.0},
+      {"update": 15, "loss_mse": 1.0932942628860474, "case_id": "F3_DEV_22_a1p040625", "frame": 804, "neighbor_truncation_fraction": 0.0},
+      {"update": 20, "loss_mse": 3.4901435375213623, "case_id": "F3_DEV_22_a1p040625", "frame": 584, "neighbor_truncation_fraction": 0.0}
+    ],
+    "receipt_path": "/tmp/f3-graph-raw-cap192-updates20-20260927.json",
+    "receipt_sha256": "23d0cec72c30527bbc62edfa3dc6a29978e158645c98eb0b16424d1e6ba58c31",
+    "checkpoint_path": "/tmp/f3-graph-raw-cap192-updates20-20260927.pt",
+    "checkpoint_sha256": "571789d5f7e71b5928eac40ed7bc9bdab492f19ae9e3c24be7a7bfb0c292abdf"
+  },
+  "evaluation": {
+    "mode": "diagnostic",
+    "maximum_steps": 10,
+    "expected_full_case_frames": 835,
+    "frames_executed": 10,
+    "failure_category": "maximum_steps_limit",
+    "complete": false,
+    "finite_prefix_frames": 10,
+    "raw_error_coverage": 0.011976047904191617,
+    "selection_score": 0.9880511211531582,
+    "position_rmse_first_m": 0.00021036337262399346,
+    "position_rmse_last_m": 0.0021323269126876953,
+    "velocity_rmse_first_mps": 0.002254926015778417,
+    "velocity_rmse_last_mps": 0.017265891565776067,
+    "evaluation_path": "/tmp/f3-graph-raw-cap192-updates20-evaluate10-20260927.json",
+    "evaluation_sha256": "dcfcbded87122cd4218ea7067f536827a1c0d681beb774878badd3bfbfa626a3"
+  },
+  "interpretation": {
+    "coarse_training_effect_observed": true,
+    "full_case_quality_claim": false,
+    "formal_training": false,
+    "qualification_inferred": false
+  },
+  "qualification": {
+    "formal_eligible": false,
+    "T1_numerical": false,
+    "native_integrity": false,
+    "gate_decision_eligible": false,
+    "qualification_credit": 0
+  },
+  "side_effects": {
+    "production_hdf5_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "solver_started": false,
+    "worker_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0
+  }
+}
