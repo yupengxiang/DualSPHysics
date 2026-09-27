@@ -1,0 +1,64 @@
+{
+  "schema": "core.evaluation.f3.real_graph_rollout_canary.v1",
+  "diagnostic_only": true,
+  "family": "F3",
+  "source": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "source_manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "case_id": "F3_DEV_00_a0p903125",
+    "split": "test"
+  },
+  "checkpoint": {
+    "path": "/tmp/f3-graph-raw-cap192-canary-20260927.pt",
+    "sha256": "aa2032bdd7dcbe146dd5d7b6db6a8ecbdfde1e80aa6472301c2e4656c445ddca",
+    "model_kind": "graph_raw",
+    "seed": 17,
+    "max_neighbors": 192
+  },
+  "rollout": {
+    "steps_requested": 10,
+    "frames_predicted": 10,
+    "frames_expected_for_full_case": 10,
+    "frames_executed": 10,
+    "execution_complete": true,
+    "finite_rollout_complete": true,
+    "future_state_inputs": false,
+    "receipt_path": "/tmp/f3-graph-raw-cap192-canary-rollout10-20260927.json",
+    "receipt_sha256": "4ff195323723f8860256af7c0a033108abc22139a02b936483844d5acb34ab0e",
+    "trajectory_path": "/tmp/f3-graph-raw-cap192-canary-rollout10-20260927.h5",
+    "trajectory_sha256": "936b56a25c3a9a09992bfcf7df319dacbe1701e4817ed4a623e10e0a5bfead32"
+  },
+  "evaluation": {
+    "mode": "diagnostic",
+    "maximum_steps": 10,
+    "full_case_expected_frames": 835,
+    "failure_category": "maximum_steps_limit",
+    "finite_prefix_frames": 10,
+    "raw_error_coverage": 0.011976047904191617,
+    "selection_score": 0.9944103861222086,
+    "position_rmse_first_m": 5.557858646830076e-06,
+    "position_rmse_last_m": 4926.302828693858,
+    "velocity_rmse_first_mps": 0.0011530185610307535,
+    "velocity_rmse_last_mps": 1586745.7896445652,
+    "complete": false,
+    "evaluation_path": "/tmp/f3-graph-raw-cap192-canary-evaluate10-20260927.json",
+    "evaluation_sha256": "f2c9ae30c34c417217b0323e16465a96e2df6c601284aeb3c05118cc2eeb41c6"
+  },
+  "qualification": {
+    "formal_eligible": false,
+    "T1_numerical": false,
+    "native_integrity": false,
+    "gate_decision_eligible": false,
+    "qualification_credit": 0
+  },
+  "side_effects": {
+    "production_hdf5_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "solver_started": false,
+    "worker_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0
+  }
+}
