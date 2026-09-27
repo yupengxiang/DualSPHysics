@@ -1,0 +1,432 @@
+{
+  "audit_version": "v2",
+  "authorizes_formal": false,
+  "blockers": [
+    {
+      "code": "F3_MANIFEST_FORMAL_RELEASE_FALSE",
+      "evidence": [
+        "campaigns/core-v1/f3-dataset-v2.json"
+      ],
+      "message": "the current F3 manifest declares formal_release=false"
+    },
+    {
+      "code": "FORMAL_CAPABILITY_RELEASE_UNBOUND",
+      "evidence": [
+        "campaigns/core-v1/f3-dataset-v2.json"
+      ],
+      "message": "the manifest has no bound capability contract, source authority, identity chain, or release reference"
+    },
+    {
+      "code": "SOURCE_MEASUREMENT_RUNTIME_AUTHORITY_MISSING",
+      "evidence": [
+        "scripts/core_dataset.py",
+        "scripts/core_fsverity.py",
+        "campaigns/core-v1/f3-dataset-v2.json"
+      ],
+      "message": "fs-verity and held-FD checks are caller-supplied code primitives; no trusted producer measurement/runtime authority is bound to the current manifest and reader"
+    },
+    {
+      "code": "PRODUCER_IDENTITY_RUNTIME_AUTHORITY_MISSING",
+      "evidence": [
+        "scripts/f3_formal_reader_capability_contract_v1.py",
+        "scripts/f3_formal_reader_strict_capability_contract_v1.py",
+        "scripts/core_dataset.py",
+        "scripts/core_learning.py"
+      ],
+      "message": "no trusted producer identity, nonce/session binding, or runtime attestation is integrated into the production F3 admission path"
+    },
+    {
+      "code": "BROKER_IDENTITY_RUNTIME_AUTHORITY_MISSING",
+      "evidence": [
+        "scripts/f3_formal_reader_capability_contract_v1.py",
+        "scripts/f3_formal_reader_strict_capability_contract_v1.py",
+        "scripts/core_dataset.py",
+        "scripts/core_learning.py"
+      ],
+      "message": "no trusted broker identity, nonce/session binding, or runtime attestation is integrated into the production F3 admission path"
+    },
+    {
+      "code": "WORKER_IDENTITY_RUNTIME_AUTHORITY_MISSING",
+      "evidence": [
+        "scripts/f3_formal_reader_capability_contract_v1.py",
+        "scripts/f3_formal_reader_strict_capability_contract_v1.py",
+        "scripts/core_dataset.py",
+        "scripts/core_learning.py"
+      ],
+      "message": "no trusted worker identity, nonce/session binding, or runtime attestation is integrated into the production F3 admission path"
+    },
+    {
+      "code": "READER_CAPABILITY_INTEGRATION_MISSING",
+      "evidence": [
+        "scripts/core_dataset.py",
+        "scripts/core_learning.py",
+        "scripts/f3_formal_reader_capability_contract_v1.py",
+        "scripts/f3_formal_reader_strict_capability_contract_v1.py"
+      ],
+      "message": "v1/strict validators are isolated sidecars and are not consumed by CoreDataset or the formal learning/evaluation admission path"
+    },
+    {
+      "code": "CORE_CAMPAIGN_FORMAL_GATE_UNSATISFIED",
+      "evidence": [
+        "scripts/core_campaign.py",
+        "scripts/core_learning.py",
+        "campaigns/core-v1/f3-dataset-v2.json",
+        "campaigns/core-v1/registry.json"
+      ],
+      "message": "core_campaign accepts only formal/root-admitted evidence, while the current F3 path has no formal capability release or trusted runtime evidence"
+    }
+  ],
+  "checks": [
+    {
+      "code_contract_exists": true,
+      "description": "v1 synthetic source/descriptor/identity envelope shape is implemented and tested",
+      "evidence": [
+        "scripts/f3_formal_reader_capability_contract_v1.py",
+        "tests/test_f3_formal_reader_capability_contract_v1.py"
+      ],
+      "id": "v1_capability_shape",
+      "status": "contract_only_non_authorizing",
+      "synthetic_contract_exists": true,
+      "trusted_runtime_evidence_exists": false
+    },
+    {
+      "code_contract_exists": true,
+      "description": "strict same-bundle/session/attempt/replay binding shape is implemented and tested",
+      "evidence": [
+        "scripts/f3_formal_reader_strict_capability_contract_v1.py",
+        "tests/test_f3_formal_reader_strict_capability_contract_v1.py"
+      ],
+      "id": "strict_held_fd_bundle_shape",
+      "status": "contract_only_non_authorizing",
+      "synthetic_contract_exists": true,
+      "trusted_runtime_evidence_exists": false
+    },
+    {
+      "code_contract_exists": true,
+      "description": "current F3 manifest has content-addressed source and geometry/control metadata",
+      "evidence": [
+        "campaigns/core-v1/f3-dataset-v2.json"
+      ],
+      "id": "manifest_source_metadata",
+      "status": "metadata_only",
+      "synthetic_contract_exists": true,
+      "trusted_runtime_evidence_exists": false
+    },
+    {
+      "code_contract_exists": true,
+      "description": "reader and fs-verity modules contain held-FD measurement primitives, but no trusted runtime authority is present",
+      "evidence": [
+        "scripts/core_dataset.py",
+        "scripts/core_fsverity.py",
+        "campaigns/core-v1/f3-dataset-v2.json"
+      ],
+      "id": "source_measurement_runtime_authority",
+      "status": "primitive_only_no_authority",
+      "synthetic_contract_exists": true,
+      "trusted_runtime_evidence_exists": false
+    },
+    {
+      "code_contract_exists": false,
+      "description": "producer identity is expressible only in the synthetic v1 envelope",
+      "evidence": [
+        "scripts/f3_formal_reader_capability_contract_v1.py",
+        "campaigns/core-v1/f3-dataset-v2.json",
+        "scripts/core_dataset.py"
+      ],
+      "id": "producer_identity_runtime_authority",
+      "status": "synthetic_shape_only",
+      "synthetic_contract_exists": true,
+      "trusted_runtime_evidence_exists": false
+    },
+    {
+      "code_contract_exists": false,
+      "description": "broker identity is expressible only in the synthetic v1 envelope",
+      "evidence": [
+        "scripts/f3_formal_reader_capability_contract_v1.py",
+        "campaigns/core-v1/f3-dataset-v2.json",
+        "scripts/core_learning.py"
+      ],
+      "id": "broker_identity_runtime_authority",
+      "status": "synthetic_shape_only",
+      "synthetic_contract_exists": true,
+      "trusted_runtime_evidence_exists": false
+    },
+    {
+      "code_contract_exists": false,
+      "description": "worker identity is expressible only in the synthetic v1 envelope",
+      "evidence": [
+        "scripts/f3_formal_reader_capability_contract_v1.py",
+        "campaigns/core-v1/f3-dataset-v2.json",
+        "scripts/core_learning.py"
+      ],
+      "id": "worker_identity_runtime_authority",
+      "status": "synthetic_shape_only",
+      "synthetic_contract_exists": true,
+      "trusted_runtime_evidence_exists": false
+    },
+    {
+      "code_contract_exists": true,
+      "description": "formal_release is required by the synthetic contracts and remains fail-closed in core_learning",
+      "evidence": [
+        "scripts/f3_formal_reader_capability_contract_v1.py",
+        "scripts/f3_formal_reader_strict_capability_contract_v1.py",
+        "scripts/core_learning.py",
+        "campaigns/core-v1/f3-dataset-v2.json"
+      ],
+      "id": "formal_capability_release",
+      "status": "fail_closed_no_release",
+      "synthetic_contract_exists": true,
+      "trusted_runtime_evidence_exists": false
+    },
+    {
+      "code_contract_exists": false,
+      "description": "the v1/strict sidecars are not integrated into CoreDataset or formal learning/evaluation admission",
+      "evidence": [
+        "scripts/core_dataset.py",
+        "scripts/core_learning.py",
+        "scripts/f3_formal_reader_capability_contract_v1.py",
+        "scripts/f3_formal_reader_strict_capability_contract_v1.py"
+      ],
+      "id": "reader_capability_integration",
+      "status": "isolated_sidecars_not_consumed",
+      "synthetic_contract_exists": true,
+      "trusted_runtime_evidence_exists": false
+    },
+    {
+      "code_contract_exists": true,
+      "description": "core_campaign rejects diagnostic/non-formal evidence and requires formal training/evaluation receipts",
+      "evidence": [
+        "scripts/core_campaign.py",
+        "campaigns/core-v1/registry.json",
+        "campaigns/core-v1/f3-dataset-v2.json"
+      ],
+      "id": "core_campaign_formal_gate",
+      "status": "gate_present_but_unsatisfied",
+      "synthetic_contract_exists": true,
+      "trusted_runtime_evidence_exists": false
+    }
+  ],
+  "contract_layer": {
+    "already_covered_by_v1_strict": [
+      "synthetic capability envelope shape",
+      "same held-FD bundle/session/attempt/replay shape"
+    ],
+    "new_v2_scope": [
+      "manifest-to-capability binding",
+      "production reader/learning integration",
+      "trusted source measurement/runtime authority",
+      "producer/broker/worker runtime identity authority",
+      "formal release consumption and campaign gate compatibility"
+    ],
+    "production_identity_binding_present": false,
+    "production_sidecar_integration_present": false,
+    "strict_present": true,
+    "synthetic_negative_tests_present": true,
+    "v1_present": true
+  },
+  "execution_constraints": {
+    "imports_production_reader": false,
+    "invokes_fsverity": false,
+    "mutates_denominator": false,
+    "mutates_gate": false,
+    "mutates_ledger": false,
+    "mutates_manifest": false,
+    "mutates_reader": false,
+    "mutates_registry": false,
+    "opens_source_fd": false,
+    "read_only": true,
+    "reads_hdf5": false,
+    "starts_gpu": false,
+    "starts_queue": false,
+    "starts_solver": false,
+    "starts_worker": false,
+    "synthetic_only": true,
+    "writes_existing_project_state": false
+  },
+  "formal_eligible": false,
+  "internal_consistency": {
+    "campaign_gate_contract_present": true,
+    "learning_gate_hard_false": true,
+    "manifest_payload_loaded": true,
+    "reader_formal_flag_hard_false": true,
+    "registry_payload_loaded": true
+  },
+  "qualification_credit": 0,
+  "runtime_evidence_layer": {
+    "manifest": {
+      "case_count": 32,
+      "case_count_matches": true,
+      "case_runtime_field_counts": {
+        "broker_identity": 0,
+        "fd_identity": 0,
+        "fd_token": 0,
+        "measurement": 0,
+        "producer_identity": 0,
+        "session_nonce": 0,
+        "source_measurement": 0,
+        "source_snapshot_nonce": 0,
+        "worker_identity": 0
+      },
+      "declared_case_count": 32,
+      "declared_formal_release": false,
+      "declared_source_manifest_sha256": "86e27740d764f9769e3255a82a599013a282f1bc4385ad3c29a657a56d9c5bea",
+      "descriptor_metadata": true,
+      "file": {
+        "all_markers_present": false,
+        "bytes": 93710,
+        "exists": true,
+        "json_object": true,
+        "marker_checks": {},
+        "path": "campaigns/core-v1/f3-dataset-v2.json",
+        "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+      },
+      "runtime_capability_fields": [],
+      "source_hash_byte_metadata": true,
+      "top_level_keys": [
+        "case_count",
+        "cases",
+        "dataset_id",
+        "formal_release",
+        "input_asset_policy",
+        "schema",
+        "source_manifest_sha256",
+        "source_qualification_claims"
+      ],
+      "valid_json_object": true
+    },
+    "reason": "static JSON/source claims are not authority; no producer/broker/worker runtime attestation or released capability is consumed by the production reader",
+    "registry": {
+      "counts": {
+        "evaluations": 0,
+        "scope_studies": 4,
+        "scopes": 2,
+        "training_runs": 0
+      },
+      "evaluation_receipts": 0,
+      "formal_training_receipts": 0,
+      "path": "campaigns/core-v1/registry.json",
+      "schema": "core.registry.v1",
+      "valid_json_object": true
+    },
+    "trusted_runtime_evidence_exists": false
+  },
+  "schema": "core.f3.formal_admission_closure_audit.v2",
+  "side_effects": {
+    "ledger_mutation": false,
+    "new_audit_output_only": true,
+    "production_files_written": false,
+    "qualification_credit_added": 0,
+    "registry_mutation": false
+  },
+  "source_files": {
+    "base_contract": {
+      "all_markers_present": true,
+      "bytes": 17059,
+      "exists": true,
+      "marker_checks": {
+        "\"authorizes_formal\": False": true,
+        "\"formal_eligible\": False": true,
+        "\"opens_source_fd\": False": true,
+        "\"qualification_credit\": 0": true,
+        "def validate_capability_contract": true
+      },
+      "path": "scripts/f3_formal_reader_capability_contract_v1.py",
+      "sha256": "416d5b370700526f3be801c27e07d42963edd88bc38323d6bc5011845690e9b5"
+    },
+    "base_tests": {
+      "all_markers_present": true,
+      "bytes": 6903,
+      "exists": true,
+      "marker_checks": {
+        "test_complete_synthetic_envelope_is_structural_only_and_non_authorizing": true
+      },
+      "path": "tests/test_f3_formal_reader_capability_contract_v1.py",
+      "sha256": "54b3bf272eeae634dde7d943b54e9b6b50e3981c872702015c0c6112285c7e87"
+    },
+    "campaign_gate": {
+      "all_markers_present": true,
+      "bytes": 49883,
+      "exists": true,
+      "marker_checks": {
+        "\"can_finalize\": all(checks.values())": true,
+        "config.get(\"manifest_formal_release\") is not True": true,
+        "def _reject_nonformal_or_nonroot(payload, label):": true,
+        "receipt.get(\"formal_eligible\") is not True": true
+      },
+      "path": "scripts/core_campaign.py",
+      "sha256": "a6a0b334c0b7c5a032a567eaead4767b4dd8af8c1e990e8c6bc535e6c3c0f6f8"
+    },
+    "dataset_reader": {
+      "all_markers_present": true,
+      "bytes": 46246,
+      "exists": true,
+      "marker_checks": {
+        "caller-provided measurements are": true,
+        "producer or prove immutability": true,
+        "self.formal_eligible = False": true,
+        "snapshot_fds=None": true,
+        "snapshot_measurements=None": true,
+        "still not authenticated capabilities": true
+      },
+      "path": "scripts/core_dataset.py",
+      "sha256": "62161e913cfbdd14af96705d36b370616022485cf10b8f8b5851931ae62977a7"
+    },
+    "fsverity_primitives": {
+      "all_markers_present": true,
+      "bytes": 8608,
+      "exists": true,
+      "marker_checks": {
+        "authenticate who produced a file": true,
+        "def verify_fd(": true,
+        "mint a capability": true
+      },
+      "path": "scripts/core_fsverity.py",
+      "sha256": "a23150ccda2443d489af230c73122959b3054928d2e95b01e26df8c0b34ecc75"
+    },
+    "learning_gate": {
+      "all_markers_present": true,
+      "bytes": 144749,
+      "exists": true,
+      "marker_checks": {
+        "V13 verified-reader capability": true,
+        "def _manifest_formal_release(dataset):": true,
+        "formal Core evaluation requires a V13 verified-reader capability": true,
+        "formal training requires a V13 verified-reader capability": true
+      },
+      "path": "scripts/core_learning.py",
+      "sha256": "3eefe1441dabb350182090c3625f24a8209543a4a31d02521f283074c996c27b"
+    },
+    "strict_contract": {
+      "all_markers_present": true,
+      "bytes": 26870,
+      "exists": true,
+      "marker_checks": {
+        "\"formal_eligible\": False": true,
+        "\"opens_source_fd\": False": true,
+        "\"qualification_credit\": 0": true,
+        "attempt_history": true,
+        "bundle.get(\"access_mode\") == \"held_fd_only\"": true,
+        "def validate_strict_capability_contract": true
+      },
+      "path": "scripts/f3_formal_reader_strict_capability_contract_v1.py",
+      "sha256": "2478bd1d40084527dafaaf2a5014934cc8494c2e5751e0cc39ab4c5d38dd200c"
+    },
+    "strict_tests": {
+      "all_markers_present": true,
+      "bytes": 13736,
+      "exists": true,
+      "marker_checks": {
+        "test_complete_strict_envelope_checks_bindings_but_never_authorizes": true
+      },
+      "path": "tests/test_f3_formal_reader_strict_capability_contract_v1.py",
+      "sha256": "1c3109e6b689271966fc533b83c4ecf3a9a2c172b65393a3b4b2d0d06cb31f8d"
+    }
+  },
+  "subject": {
+    "family": "F3",
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "manifest_declared_formal_release": false,
+    "manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+  },
+  "validation_scope": "repository_static_inventory_and_synthetic_contract_closure_only"
+}
