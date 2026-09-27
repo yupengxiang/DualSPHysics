@@ -1,0 +1,67 @@
+{
+  "schema": "core.training.f3.real_graph_canary.v1",
+  "diagnostic_only": true,
+  "case_family": "F3",
+  "source": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "source_manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768"
+  },
+  "training_configuration": {
+    "run_id": "graph_raw-seed17",
+    "model_kind": "graph_raw",
+    "seed": 17,
+    "updates_requested": 1,
+    "updates_completed": 1,
+    "centers_per_update": 1,
+    "hidden": 8,
+    "normalization_transitions": 1,
+    "max_neighbors": 192,
+    "device": "cpu",
+    "evaluate_milestones": false
+  },
+  "execution": {
+    "status": "completed",
+    "wall_seconds": 5.0246339871082455,
+    "peak_rss_mib": 1261.703125,
+    "history": [
+      {
+        "update": 1,
+        "case_id": "F3_DEV_20_a1p028125",
+        "frame": 714,
+        "loss_mse": 51594.68359375,
+        "neighbor_truncation_fraction": 0.0
+      }
+    ],
+    "evidence_status": "complete",
+    "checkpoint": {
+      "path": "/tmp/f3-graph-raw-cap192-canary-20260927.pt",
+      "bytes": 97547,
+      "sha256": "aa2032bdd7dcbe146dd5d7b6db6a8ecbdfde1e80aa6472301c2e4656c445ddca",
+      "update": 1,
+      "schema": "core.checkpoint.v1"
+    },
+    "receipt_path": "/tmp/f3-graph-raw-cap192-canary-20260927.json",
+    "receipt_sha256": "3f814b5185c2d534cb596f50d201bfeee5552e3f6e445967170a02ab3b792c82",
+    "progress_path": "/tmp/f3-graph-raw-cap192-canary-20260927-progress.json",
+    "progress_sha256": "6e9901d57ee72ccf1cb64253f55d521997f033cb07efcd62beff3102b6f6cca0"
+  },
+  "qualification": {
+    "manifest_formal_release": false,
+    "formal_training": false,
+    "validation_formal_eligible": false,
+    "T1_numerical": false,
+    "native_integrity": false,
+    "gate_decision_eligible": false,
+    "qualification_credit": 0
+  },
+  "side_effects": {
+    "production_hdf5_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "solver_started": false,
+    "worker_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0
+  }
+}
