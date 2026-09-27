@@ -1,0 +1,184 @@
+{
+  "schema": "core.f3.mlp.full835_diagnostic.summary.v1",
+  "report_id": "F3-MLP-SEED43-FULL835-ROLLOUT-DIAGNOSTIC-2026-09-28",
+  "date": "2026-09-28",
+  "status": "completed",
+  "diagnostic_only": true,
+  "formal_eligible": false,
+  "qualification": false,
+  "credit": 0,
+  "source": {
+    "repository": "lagrangian-fluid-lab",
+    "baseline_git_commit": "c2cdaac03f79a8c06d11ee3a608c3a9e2e37f400",
+    "manifest": {
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "formal_release": false,
+      "file_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "declared_source_manifest_sha256": "86e27740d764f9769e3255a82a599013a282f1bc4385ad3c29a657a56d9c5bea",
+      "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768"
+    },
+    "case": {
+      "case_id": "F3_DEV_00_a0p903125",
+      "family": "F3",
+      "split": "test",
+      "particles": 34560,
+      "expected_transitions": 835,
+      "expected_trajectory_frames": 836,
+      "hdf5": "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5",
+      "case_hdf5_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4"
+    },
+    "source_script_sha256": {
+      "scripts/core_learning.py": "3eefe1441dabb350182090c3625f24a8209543a4a31d02521f283074c996c27b"
+    }
+  },
+  "checkpoint_verification": {
+    "path": "/tmp/f3-mlp500-seed43-20260928-checkpoint.pt",
+    "sha256": "c2aab25a554c460dfccce9440298a27e7f1f31f4e4d43e5909761f0ede5a5dbb",
+    "bytes": 48043,
+    "update": 500,
+    "schema": "core.checkpoint.v1",
+    "matches_existing_seed43_50step_report": true,
+    "existing_report": "reports/F3-MLP-500-SEED43-REAL-50STEP-DIAGNOSTIC-2026-09-28.json"
+  },
+  "protocol": {
+    "case_id": "F3_DEV_00_a0p903125",
+    "split": "test",
+    "model": "mlp",
+    "seed": 43,
+    "updates": 500,
+    "centers_per_update": 256,
+    "hidden": 8,
+    "learning_rate": 0.001,
+    "normalization_transitions": 16,
+    "max_neighbors": 192,
+    "chunk_size": 34560,
+    "maximum_steps": 835,
+    "expected_transitions": 835,
+    "expected_trajectory_frames": 836,
+    "cuda_visible_devices": "0",
+    "physical_gpu_index": 0,
+    "process_device": "cuda:0",
+    "diagnostic": true,
+    "autonomous": true,
+    "future_state_inputs": false
+  },
+  "command": "PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES=0 ./.venv/bin/python scripts/core_learning.py evaluate --manifest campaigns/core-v1/f3-dataset-v2.json --data-root . --checkpoint /tmp/f3-mlp500-seed43-20260928-checkpoint.pt --case-id F3_DEV_00_a0p903125 --split test --maximum-steps 835 --chunk-size 34560 --device cuda:0 --progress-every 25 --trajectory-output /tmp/f3-mlp500-seed43-full835-20260928-trajectory.h5 --progress-output /tmp/f3-mlp500-seed43-full835-20260928-evaluation-progress.json --output /tmp/f3-mlp500-seed43-full835-20260928-evaluation.json --diagnostic",
+  "receipts": {
+    "progress": {
+      "path": "/tmp/f3-mlp500-seed43-full835-20260928-evaluation-progress.json",
+      "sha256": "87475129dad0acd0c5d84890e46011bd30672810207203a64aaded72af569a12",
+      "bytes": 644,
+      "status": "completed",
+      "completed_frames": 835,
+      "frames_expected": 835,
+      "execution_complete": true,
+      "finite_rollout_complete": true,
+      "future_state_inputs": false,
+      "elapsed_seconds": 2337.252136472147
+    },
+    "evaluation": {
+      "path": "/tmp/f3-mlp500-seed43-full835-20260928-evaluation.json",
+      "sha256": "cfac9c57991c63827cdc3f2d0f39fa1d96639029b836c198ef1237c667650a48",
+      "bytes": 6411824,
+      "schema": "core.evaluation.v1",
+      "mode": "diagnostic",
+      "formal_eligible": false,
+      "maximum_steps": 835,
+      "full_registered_denominator_complete": true,
+      "expected_transitions": 835,
+      "frames_executed": 835,
+      "future_state_inputs": false,
+      "failure_category": null,
+      "scientific_status": "not_assessed",
+      "scientific_failure_category": null
+    },
+    "trajectory": {
+      "path": "/tmp/f3-mlp500-seed43-full835-20260928-trajectory.h5",
+      "sha256": "238c0d937d4985fdc99688d3122a2fcb2ddf6b83ea9e490450b5534ecfffa06a",
+      "bytes": 723148320,
+      "frames": 836,
+      "transitions": 835,
+      "particles": 34560,
+      "shapes": {
+        "position": [836, 34560, 3],
+        "velocity": [836, 34560, 3],
+        "valid": [836, 34560],
+        "time": [836],
+        "mass": [34560],
+        "particle_id": [34560],
+        "particle_zone": [34560]
+      },
+      "time_start_s": 0.0,
+      "time_end_s": 8.350012828223477,
+      "future_state_inputs": false,
+      "tail_frame_count": 0,
+      "finite": {
+        "position_active_prefix": true,
+        "velocity_active_prefix": true,
+        "mass": true,
+        "time": true
+      },
+      "valid_true_count": 28892160,
+      "mass_min_kg": 0.00042187501094304025,
+      "mass_max_kg": 0.00042187501094304025
+    },
+    "hdf5_validation": {
+      "path": "/tmp/f3-mlp500-seed43-full835-20260928-hdf5-validation.json",
+      "sha256": "77966034113395a89e45d63c50487ba4dd644de38793fa57fa3046f6636e4472",
+      "bytes": 1407,
+      "schema": "core.f3.full_rollout_receipt_hdf5_validation.v1",
+      "passed": true,
+      "complete": true,
+      "incomplete": false,
+      "diagnostic_only": true,
+      "synthetic_only": false,
+      "production_artifacts_touched": false,
+      "qualification_credit": 0,
+      "trajectory_frames": 836,
+      "trajectory_transitions": 835,
+      "executed_frame_count": 836,
+      "tail_frame_count": 0,
+      "future_state_inputs_check": true
+    }
+  },
+  "metrics": {
+    "raw_error_coverage": 1.0,
+    "selection_score": 0.28860515014452587,
+    "raw_frame_mean": {
+      "position_rmse_m": 1.0476556152184564,
+      "velocity_rmse_mps": 2.0132262678916883
+    },
+    "step_50": {
+      "position_rmse_m": 0.010629219363048927,
+      "velocity_rmse_mps": 0.026684503887126836
+    },
+    "step_835": {
+      "position_rmse_m": 17.64862820431942,
+      "velocity_rmse_mps": 36.52892656032414
+    },
+    "finite": {
+      "rollout_complete": true,
+      "position_active_prefix": true,
+      "velocity_active_prefix": true,
+      "mass": true,
+      "time": true
+    },
+    "mass": {
+      "mass_error_abs_max_kg": 0.0,
+      "changed_particle_mass_frames": 0
+    },
+    "validity": {
+      "validity_mismatch_frames": 0
+    },
+    "kinetic_energy_error_abs_max_j": 29180.381209075953
+  },
+  "qualification_details": {
+    "diagnostic_only": true,
+    "formal_eligible": false,
+    "T1_numerical": false,
+    "T2_macro": false,
+    "qualification": false,
+    "credit": 0,
+    "interpretation": "Complete full-horizon diagnostic evidence only. It does not change formal training, T1/T2 qualification, registry, ledger, denominator, gate, or production status."
+  }
+}
