@@ -1,0 +1,233 @@
+{
+  "schema": "core.f3.graph_residual.hidden16.diagnostic_receipt.v1",
+  "date": "2026-09-28",
+  "status": "completed_diagnostic",
+  "diagnostic_only": true,
+  "independent": true,
+  "run": {
+    "run_id": "f3-graph-residual500-hidden16-seed17-20260928",
+    "physical_gpu": 6,
+    "cuda_visible_devices": "6",
+    "process_device": "cuda:0",
+    "working_directory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "data_root": ".",
+    "manifest_formal_release": false,
+    "manifest_file_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "manifest_declared_source_sha256": "86e27740d764f9769e3255a82a599013a282f1bc4385ad3c29a657a56d9c5bea",
+    "training_reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "case_id": "F3_DEV_00_a0p903125",
+    "case_split": "test",
+    "evaluation_role": "development_extrapolation",
+    "case_source_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+    "case_known_inputs_sha256": "089573de6d2c7633b5192bf626fa98eb941f79500f1c1a04b632af68b6ca3bc9",
+    "case_hdf5": "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5",
+    "case_particle_count": 34560,
+    "case_registered_transitions": 835,
+    "case_registered_trajectory_frames": 836,
+    "registered_data_read_only": true,
+    "formal_data_claim": "none"
+  },
+  "training": {
+    "model_kind": "graph_residual",
+    "seed": 17,
+    "updates_requested": 500,
+    "updates_completed": 500,
+    "centers_per_update": 256,
+    "hidden": 16,
+    "learning_rate": 0.001,
+    "normalization_transitions_requested": 16,
+    "normalization_transitions_selected": 16,
+    "normalization_source_split": "train",
+    "max_neighbors": 192,
+    "device": "cuda:0",
+    "optimizer": "Adam",
+    "history_states": 1,
+    "target_normalization": "raw_dual_increment_train_shared",
+    "gradient_clipping": null,
+    "neighbor_truncation_fraction_max": 0.0,
+    "evidence_status": "complete",
+    "residual_prior": {
+      "enabled": true,
+      "execution_calls": 500,
+      "rows": 17280000,
+      "finite": true,
+      "history_complete": true,
+      "semantic": "graph_residual subtracts this SI prior before shared raw-target normalization; predictor adds it back",
+      "dx_abs_max_m": 0.008722631260752678,
+      "dv_abs_max_mps": 0.10851999372243881
+    },
+    "wall_seconds": 2226.560415748041,
+    "peak_rss_mib": 3003.5625,
+    "peak_gpu_memory_bytes": 2731527680,
+    "checkpoint": {
+      "path": "/tmp/f3-graph-residual500-hidden16-seed17-20260928-checkpoint.pt",
+      "schema": "core.checkpoint.v1",
+      "update": 500,
+      "bytes": 155470,
+      "sha256": "21dc97a619aa03f6ed9ea203a3d1a47e49c074bb65c5ae12ded66d0a022e16ac"
+    },
+    "training_output": {
+      "path": "/tmp/f3-graph-residual500-hidden16-seed17-20260928-training.json",
+      "bytes": 10891,
+      "sha256": "20369bf7850ecf1088f490272fbb3d9a0d50849d0f81fd385cff2469e15897a7"
+    },
+    "training_progress": {
+      "path": "/tmp/f3-graph-residual500-hidden16-seed17-20260928-training-progress.json",
+      "bytes": 505,
+      "sha256": "abbdc2653f6449c9df3ad2da7a8f3b17849f37a1f7934d45b5f12e789f74a41b"
+    }
+  },
+  "evaluation": {
+    "mode": "diagnostic",
+    "diagnostic": true,
+    "formal_eligible": false,
+    "checkpoint": "/tmp/f3-graph-residual500-hidden16-seed17-20260928-checkpoint.pt",
+    "split": "test",
+    "case_id": "F3_DEV_00_a0p903125",
+    "maximum_steps": 50,
+    "chunk_size": 34560,
+    "frames_executed": 50,
+    "trajectory_frames_including_initial": 51,
+    "requested_window_complete": true,
+    "requested_window_finite": true,
+    "registered_denominator_transitions": 835,
+    "registered_denominator_trajectory_frames": 836,
+    "full_registered_denominator_complete": false,
+    "finite_prefix_frames": 50,
+    "failure_category": "maximum_steps_limit",
+    "first_failure_frame": 51,
+    "raw_error_coverage": 0.059880239520958084,
+    "future_state_inputs": false,
+    "autonomous": true,
+    "selection_score": 0.940417584783162,
+    "position_rmse_frame_mean_m": 0.003139114574614788,
+    "velocity_rmse_frame_mean_mps": 0.019193303511781955,
+    "position_rmse_step50_m": 0.008623251478090026,
+    "velocity_rmse_step50_mps": 0.042308980299237395,
+    "position_ade_step50_m": 0.012487727304967998,
+    "velocity_ade_step50_mps": 0.06354817393378795,
+    "position_fde_step50_m": 0.012487727304967998,
+    "velocity_fde_step50_mps": 0.06354817393378795,
+    "horizon_metrics": [
+      {
+        "step": 1,
+        "position_rmse_m": 0.000021445457431133118,
+        "velocity_rmse_mps": 0.0015505842167467241,
+        "position_ade_m": 0.000035689883408928695,
+        "velocity_ade_mps": 0.0019910189307984928
+      },
+      {
+        "step": 10,
+        "position_rmse_m": 0.0004169994681537563,
+        "velocity_rmse_mps": 0.007258768558018794,
+        "position_ade_m": 0.0006359960699871926,
+        "velocity_ade_mps": 0.01075499181127884
+      },
+      {
+        "step": 20,
+        "position_rmse_m": 0.0015442696598168832,
+        "velocity_rmse_mps": 0.015141830472341763,
+        "position_ade_m": 0.002365758088954748,
+        "velocity_ade_mps": 0.022818683911031337
+      },
+      {
+        "step": 30,
+        "position_rmse_m": 0.003442893075506521,
+        "velocity_rmse_mps": 0.02225800218618368,
+        "position_ade_m": 0.0052568152726533346,
+        "velocity_ade_mps": 0.03302338739560241
+      },
+      {
+        "step": 40,
+        "position_rmse_m": 0.005808222023573304,
+        "velocity_rmse_mps": 0.028981778447056083,
+        "position_ade_m": 0.008620578972900262,
+        "velocity_ade_mps": 0.042256913096346944
+      },
+      {
+        "step": 50,
+        "position_rmse_m": 0.008623251478090026,
+        "velocity_rmse_mps": 0.042308980299237395,
+        "position_ade_m": 0.012487727304967998,
+        "velocity_ade_mps": 0.06354817393378795
+      }
+    ],
+    "physics": {
+      "completed_frames": 50,
+      "expected_registered_frames": 835,
+      "mass_error_abs_max_kg": 0.0,
+      "changed_particle_mass_frames": 0,
+      "validity_mismatch_frames": 0,
+      "active_mass_kg": 14.580000378191471,
+      "active_particle_count": 34560,
+      "kinetic_energy_error_abs_max_j": 0.04139209342002307,
+      "wall_chord": {
+        "status": "checked_static_saved_chords",
+        "particle_count": 760,
+        "mass_kg": 0.3206250083167106,
+        "semantics": "finite surface intersections of saved chords; no exact path claim"
+      }
+    },
+    "trajectory_hdf5_contract": {
+      "path": "/tmp/f3-graph-residual500-hidden16-seed17-20260928-trajectory.h5",
+      "bytes": 44903680,
+      "sha256": "14b99d82c72280cc755491f23b3aa89f2165645dbd784f9e51c5edec8cd6912e",
+      "position_shape": [51, 34560, 3],
+      "velocity_shape": [51, 34560, 3],
+      "valid_shape": [51, 34560],
+      "time_shape": [51],
+      "time_first_s": 0.0,
+      "time_last_s": 0.5000171945830302,
+      "all_position_finite": true,
+      "all_velocity_finite": true,
+      "all_valid": true,
+      "mass_total_kg": 14.580000378191471,
+      "future_state_inputs_attr": false,
+      "autonomous_prediction_attr": true,
+      "state_schema": "core.state.native_velocity.v1",
+      "velocity_semantics": "native saved numerical velocity"
+    },
+    "evaluation_output": {
+      "path": "/tmp/f3-graph-residual500-hidden16-seed17-20260928-evaluation.json",
+      "bytes": 512269,
+      "sha256": "3f5a1acb488dc609d8df4fa7c99207974304f7d7e3f794039e0090a5a3ec5aac"
+    },
+    "evaluation_progress": {
+      "path": "/tmp/f3-graph-residual500-hidden16-seed17-20260928-evaluation-progress.json",
+      "bytes": 654,
+      "sha256": "a23abc65afe83f818565f7eea2e7acb10596077ef87afbe4bb62cfa65afe55f4"
+    },
+    "wall_seconds": 1012.8871589088812
+  },
+  "qualification": {
+    "formal_training": false,
+    "formal_eligible": false,
+    "T1_numerical": false,
+    "T2_macro": false,
+    "qualification_credit": 0,
+    "interpretation": "bounded diagnostic evidence only; no formal or qualification credit"
+  },
+  "side_effects": {
+    "source_modified": false,
+    "production_hdf5_modified": false,
+    "manifest_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "future_state_inputs": false
+  },
+  "logs": {
+    "training_log": {
+      "path": "/tmp/f3-graph-residual500-hidden16-seed17-20260928-train.log",
+      "bytes": 9548,
+      "sha256": "0c156d0aa9caa9868d21d129d4af04f9a4c8dc668ae27e81eaa6ed21a4d42dbd"
+    },
+    "evaluation_log": {
+      "path": "/tmp/f3-graph-residual500-hidden16-seed17-20260928-evaluate.log",
+      "bytes": 2106,
+      "sha256": "f64a28449abc7b0e207cdde41efa828df3fa99413207e752b233b5b6e7c2d696"
+    }
+  }
+}
