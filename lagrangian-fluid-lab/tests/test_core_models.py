@@ -62,6 +62,30 @@ def test_tensors_default_and_explicit_neighbor_caps_are_auditable():
     assert capped_diagnostics["max_neighbors"] == 3
 
 
+def test_formal_graph_keeps_float64_validation_position_at_unit_scale():
+    state = _grid_state()
+    shifted = replace(state, position=np.asarray(state.position + 1.0, dtype=np.float64))
+    known = example_known()
+    args, _, _ = tensors(shifted, known, .01, "cpu")
+
+    assert args[1].dtype is torch.float64
+    assert np.array_equal(args[1].numpy(), shifted.position)
+
+    model = DualIncrementModel("graph_raw", hidden=8).eval()
+    message_inputs = []
+    hook = model.messages[0][0].register_forward_pre_hook(
+        lambda _module, values: message_inputs.append(values[0].detach()))
+    try:
+        prediction = ModelPredictor(model, chunk_size=shifted.count).predict_step(
+            shifted, known, .01)
+    finally:
+        hook.remove()
+
+    assert message_inputs and message_inputs[0].dtype is torch.float32
+    assert np.isfinite(prediction.displacement).all()
+    assert np.isfinite(prediction.delta_velocity).all()
+
+
 def test_model_predictor_default_and_explicit_neighbor_caps_propagate():
     state, known, dt = example_state(), example_known(), .01
     default = ModelPredictor(DualIncrementModel("mlp", hidden=8)).predict_step(

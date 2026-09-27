@@ -745,10 +745,14 @@ class DualIncrementModel(nn.Module):
         """Predict normalized ``(dx,dv)`` rows from a bound graph input.
 
         Formal/training inputs carry ``NeighborProvenance`` as the fifth
-        positional value produced by :func:`tensors`.  Calls without it keep
-        the historical graph behavior for diagnostic compatibility only; they
-        do not establish a formal completeness claim.  A legacy fifth
-        positional center tensor is also accepted and remains unbound.
+        positional value produced by :func:`tensors`.  The position input is
+        split into a provenance-validation value and a compute value: formal
+        tensors retain float64 coordinates for exact distance rechecking,
+        while graph arithmetic follows the feature/network dtype.  Calls
+        without provenance keep the historical graph behavior for diagnostic
+        compatibility only; they do not establish a formal completeness claim.
+        A legacy fifth positional center tensor is also accepted and remains
+        unbound.
         """
         if centers is None and provenance is not None and not isinstance(
                 provenance, NeighborProvenance):
@@ -756,7 +760,15 @@ class DualIncrementModel(nn.Module):
             # reserving the fifth slot for the explicit provenance contract.
             centers, provenance = provenance, None
         features = torch.as_tensor(features)
-        position = torch.as_tensor(position, dtype=features.dtype, device=features.device)
+        position_input = torch.as_tensor(position, device=features.device)
+        # ``tensors`` deliberately supplies float64 here so provenance checks
+        # see the same coordinates that built the neighbor distances.  Keep
+        # the historical feature-dtype conversion for direct/legacy inputs.
+        validation_position = (
+            position_input if position_input.dtype == torch.float64
+            else position_input.to(dtype=features.dtype)
+        )
+        compute_position = validation_position.to(dtype=features.dtype)
         raw_neighbors = torch.as_tensor(neighbors, device=features.device)
         if raw_neighbors.dtype not in (torch.int8, torch.int16, torch.int32,
                                         torch.int64, torch.uint8):
@@ -769,7 +781,8 @@ class DualIncrementModel(nn.Module):
             raise ValueError("neighbors must have shape [N,K]")
         if not torch.isfinite(features).all():
             raise ValueError("features must be finite")
-        if position.shape != (n, 3) or not torch.isfinite(position).all():
+        if (validation_position.shape != (n, 3)
+                or not torch.isfinite(validation_position).all()):
             raise ValueError("position must be finite [N,3]")
         try:
             smoothing_length = float(h)
@@ -792,7 +805,8 @@ class DualIncrementModel(nn.Module):
             return self.head(encoded[centers]) * self.target_scale
 
         s1, s2 = two_hop_halo(
-            centers, neighbors, n=n, provenance=provenance, position=position)
+            centers, neighbors, n=n, provenance=provenance,
+            position=validation_position)
         values = encoded[s2]
         sources = s2
         for layer, destinations in enumerate((s1, centers)):
@@ -807,7 +821,7 @@ class DualIncrementModel(nn.Module):
                 raise RuntimeError("two-hop halo omitted a required source")
             src = values[source_index]
             dst = values[target_index]
-            relative_position = position[safe] - position[destinations, None]
+            relative_position = compute_position[safe] - compute_position[destinations, None]
             if provenance is not None and np.any(provenance.periodic_lengths > 0):
                 lengths = torch.as_tensor(
                     np.array(provenance.periodic_lengths, copy=True),
@@ -834,7 +848,9 @@ def tensors(state, known, dt, device, max_neighbors=MAX_NEIGHBORS):
 
     The provenance is part of ``args`` so the existing training/inference
     call pattern cannot accidentally drop the source contract while
-    normalizing features or changing center chunks.
+    normalizing features or changing center chunks.  Its position slot stays
+    float64 for provenance validation; :class:`DualIncrementModel` derives a
+    feature/network-dtype compute position for graph messages.
     """
     max_neighbors = _validate_max_neighbors(max_neighbors)
     features, acceleration = node_features(state, known, dt)
@@ -845,7 +861,7 @@ def tensors(state, known, dt, device, max_neighbors=MAX_NEIGHBORS):
         periodic_lengths=periodic_lengths)
     args = (
         torch.as_tensor(features, dtype=torch.float32, device=device),
-        torch.tensor(np.asarray(state.position), dtype=torch.float32, device=device),
+        torch.tensor(np.asarray(state.position), dtype=torch.float64, device=device),
         torch.as_tensor(neighbors, dtype=torch.long, device=device),
         float(known.numerics["h_m"]),
         provenance,
