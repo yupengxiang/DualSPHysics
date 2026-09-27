@@ -1,0 +1,358 @@
+{
+  "schema": "core.f3.graph_raw.seed29.real_50step_diagnostic.summary.v1",
+  "report_id": "F3-GRAPH-RAW-SEED29-REAL-50STEP-DIAGNOSTIC-2026-09-28",
+  "date": "2026-09-28",
+  "status": "completed",
+  "diagnostic_only": true,
+  "formal_eligible": false,
+  "qualification": false,
+  "qualification_credit": 0,
+  "future_state_inputs": false,
+  "execution_agent_policy": {
+    "subagents_used": 0,
+    "subagent_model_requirement": "gpt-5.6-luna",
+    "subagent_reasoning_requirement": "max"
+  },
+  "source": {
+    "repository": "lagrangian-fluid-lab",
+    "baseline_git_commit": "d89a708a4e030a78471945f9dc469867f9f795fb",
+    "manifest": {
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "file_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "declared_source_manifest_sha256": "86e27740d764f9769e3255a82a599013a282f1bc4385ad3c29a657a56d9c5bea",
+      "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "formal_release": false
+    },
+    "case": {
+      "case_id": "F3_DEV_00_a0p903125",
+      "family": "F3",
+      "split": "test",
+      "particles": 34560,
+      "expected_transitions": 835,
+      "expected_trajectory_frames": 836,
+      "case_hdf5_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+      "known_inputs_sha256": "089573de6d2c7633b5192bf626fa98eb941f79500f1c1a04b632af68b6ca3bc9",
+      "control_input_sha256": "f6852502c7ae5ad7da14faa2dddf3da04e5f02757528e38f3e8c140c00f6389e",
+      "geometry_input_sha256": "d7ccdc43108fde81c71f1ef6483258e6b0fa2a3bc9561df063b87a580bc55d70",
+      "provenance_audit_sha256": "5c6c8bc8110256d89ba053a305558f04aad8e22f9172d46bdac9c8f8ced8c061",
+      "provenance_control_sha256": "387d9a3380959a719182ae8e041d83de6e2fcd51e61521d5e3ac150a240baeb9",
+      "provenance_prepared_sha256": "9d6af616764163a7796763f061d3f2c7468640eb3b0924ee768f26aa9c7969b9",
+      "qualification_case": false
+    },
+    "source_script_sha256": {
+      "scripts/core_learning.py": "3eefe1441dabb350182090c3625f24a8209543a4a31d02521f283074c996c27b",
+      "scripts/core_models.py": "20e635ebd25cd511eeff6f84478678d3364608fd86a5d4b67e2aa53a0d88295d",
+      "scripts/core_dataset.py": "65f583b8fcb1c46e56d10506e22aa1e5fa32c7b2631017de85c88b1f6d53f88f",
+      "scripts/core_contract.py": "1866b35259f407e8c0d8b399eb4034eb18cc8b59f4addc1156f20d6777a326bc"
+    }
+  },
+  "protocol": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "data_root": ".",
+    "case_id": "F3_DEV_00_a0p903125",
+    "model": "graph_raw",
+    "seed": 29,
+    "updates": 500,
+    "centers_per_update": 256,
+    "hidden": 8,
+    "learning_rate": 0.001,
+    "normalization_transitions": 16,
+    "max_neighbors": 192,
+    "chunk_size": 34560,
+    "maximum_steps": 50,
+    "cuda_visible_devices": "5",
+    "physical_gpu_index": 5,
+    "process_device": "cuda:0",
+    "diagnostic": true,
+    "autonomous": true,
+    "future_state_inputs": false,
+    "resumed_from_update": 0
+  },
+  "commands": {
+    "train": "CUDA_VISIBLE_DEVICES=5 .venv/bin/python scripts/core_learning.py train --manifest campaigns/core-v1/f3-dataset-v2.json --data-root . --model graph_raw --seed 29 --updates 500 --centers 256 --hidden 8 --learning-rate 0.001 --normalization-transitions 16 --max-neighbors 192 --checkpoint /tmp/f3-graph-raw500-seed29-20260928-checkpoint.pt --run-id graph_raw-seed29 --checkpoint-every 500 --log-every 100 --validation-every 500 --device cuda:0 --progress-output /tmp/f3-graph-raw500-seed29-20260928-training-progress.json --output /tmp/f3-graph-raw500-seed29-20260928-training.json",
+    "evaluate": "CUDA_VISIBLE_DEVICES=5 .venv/bin/python scripts/core_learning.py evaluate --manifest campaigns/core-v1/f3-dataset-v2.json --data-root . --checkpoint /tmp/f3-graph-raw500-seed29-20260928-checkpoint.pt --case-id F3_DEV_00_a0p903125 --split test --maximum-steps 50 --diagnostic --chunk-size 34560 --device cuda:0 --trajectory-output /tmp/f3-graph-raw500-seed29-20260928-trajectory.h5 --progress-output /tmp/f3-graph-raw500-seed29-20260928-evaluation-progress.json --progress-every 25 --output /tmp/f3-graph-raw500-seed29-20260928-evaluation.json"
+  },
+  "prelaunch_wrapper_events": [
+    {
+      "stage": "pre-training",
+      "raw_error": "zsh:31: command not found: tee",
+      "python_experiment_started": false,
+      "classification": "launcher_only; no scientific attempt"
+    },
+    {
+      "stage": "pre-training",
+      "raw_error": "zsh:12: command not found: env",
+      "python_experiment_started": false,
+      "classification": "launcher_only; no scientific attempt"
+    }
+  ],
+  "source_verification": {
+    "path": "/tmp/f3-graph-raw500-seed29-20260928-source-verify.json",
+    "sha256": "e0d91dae287e0e43bb11fa1a6726da98ef4e729f79e7f6944b42ece417fffc18",
+    "bytes": 326176,
+    "passed": true,
+    "full_temporal_scan": true,
+    "case_count": 1,
+    "wall_seconds": 110.17645845096558,
+    "qualification_inferred": false
+  },
+  "training": {
+    "status": "completed",
+    "evidence_status": "complete",
+    "receipt_path": "/tmp/f3-graph-raw500-seed29-20260928-training.json",
+    "receipt_sha256": "6ff3e753baf3163cfabe1cde49e0c8e06182b5aa861f45b2ec289f5a1bdfc2da",
+    "receipt_bytes": 10615,
+    "completed_updates": 500,
+    "checkpoint_verified": true,
+    "checkpoint": {
+      "path": "/tmp/f3-graph-raw500-seed29-20260928-checkpoint.pt",
+      "sha256": "c675c1915f05a18df3752b2320c076404015e916dc860f76de1e4d20479dabe5",
+      "bytes": 100592,
+      "update": 500,
+      "schema": "core.checkpoint.v1"
+    },
+    "progress": {
+      "path": "/tmp/f3-graph-raw500-seed29-20260928-training-progress.json",
+      "sha256": "7f77360e51c022214bbe09915e04a3fe38830175077a3ddb58e88280444b1097",
+      "bytes": 457,
+      "status": "completed",
+      "update": 500,
+      "neighbor_truncation_fraction": 0.0,
+      "last_loss_mse": 0.3807699680328369
+    },
+    "run_id": "graph_raw-seed29",
+    "model_kind": "graph_raw",
+    "seed": 29,
+    "device": "cuda:0",
+    "torch_version": "2.11.0+cu128",
+    "host": "user-SYS-421GE-TNRT",
+    "parameter_count": 1766,
+    "wall_seconds": 2197.0679090509657,
+    "peak_gpu_memory_bytes": 1599798272,
+    "peak_gpu_memory_mib": 1525.6865234375,
+    "peak_rss_mib": 3009.578125,
+    "max_neighbors": 192,
+    "normalization_transitions": 16,
+    "resume": false,
+    "initialization_parameter_digest": "782b8cd814974317e19fdd5f47a6972fe80b53670d10867f9209d5e9ec68e2c0",
+    "validation_history": {
+      "available": true,
+      "transition_count": 4,
+      "center_count": 256,
+      "mse": 0.8233042880892754,
+      "rmse": 0.9073611673910645,
+      "update": 500
+    },
+    "normalization_evidence": {
+      "source_split": "train",
+      "selected_transition_count": 16,
+      "available_transition_count": 13360,
+      "selection_policy": "deterministic_evenly_spaced_train_transitions_v1"
+    }
+  },
+  "evaluation": {
+    "status": "completed",
+    "receipt_path": "/tmp/f3-graph-raw500-seed29-20260928-evaluation.json",
+    "receipt_sha256": "d8faa87981def753b113432c4ee1d6b25722ac323cab0228ff9a41f40111ffe3",
+    "receipt_bytes": 513523,
+    "mode": "diagnostic",
+    "diagnostic": true,
+    "formal_eligible": false,
+    "split": "test",
+    "requested_steps": 50,
+    "frames_executed": 50,
+    "trajectory_frames_including_initial": 51,
+    "requested_window_complete": true,
+    "finite_rollout_complete_for_requested_window": true,
+    "expected_full_case_transitions": 835,
+    "expected_full_case_frames": 836,
+    "full_registered_denominator_complete": false,
+    "full_registered_finite_rollout_complete": false,
+    "failure_category": "maximum_steps_limit",
+    "first_failure_frame": 51,
+    "failure_interpretation": "bounded_window_right_censoring_only; not a scientific failure",
+    "scientific_status": "not_assessed",
+    "scientific_failure_category": null,
+    "raw_error_coverage": 0.059880239520958084,
+    "future_state_inputs": false,
+    "progress": {
+      "path": "/tmp/f3-graph-raw500-seed29-20260928-evaluation-progress.json",
+      "sha256": "f3808242be02d538032db3bcd8b4daee058851e931ca26ebf92673bd124218b3",
+      "bytes": 639,
+      "status": "completed",
+      "frames_executed": 50,
+      "expected_frames": 50,
+      "execution_complete": true,
+      "finite_rollout_complete": true,
+      "elapsed_seconds": 952.6699718039017,
+      "scientific_status": "not_assessed"
+    },
+    "trajectory": {
+      "path": "/tmp/f3-graph-raw500-seed29-20260928-trajectory.h5",
+      "sha256": "80fa5c9a86fa9bae514ffc77f57b137502b61f8d22783366111f29cb888b528c",
+      "bytes": 44903680,
+      "bounded_shapes": {
+        "position": [51, 34560, 3],
+        "velocity": [51, 34560, 3],
+        "valid": [51, 34560],
+        "time": [51],
+        "mass": [34560],
+        "particle_id": [34560],
+        "particle_zone": [34560]
+      },
+      "finite_position": true,
+      "finite_velocity": true,
+      "finite_time": true,
+      "valid_true_count": 1762560,
+      "valid_total_count": 1762560,
+      "future_state_inputs": false,
+      "autonomous_prediction": true,
+      "velocity_semantics": "native saved numerical velocity",
+      "state_schema": "core.state.native_velocity.v1",
+      "denominator_note": "bounded trajectory contains 51 frames including the initial state; it is not the registered 836-frame trajectory"
+    },
+    "metrics": {
+      "selection_score": 0.9403616578271421,
+      "position_rmse_m": {
+        "step_1": 0.00013167273554621684,
+        "step_10": 0.0014673441792391433,
+        "step_20": 0.0035649070125166075,
+        "step_30": 0.005695038178226528,
+        "step_40": 0.006398257962484392,
+        "step_50": 0.006190025948475731,
+        "frame_mean": 0.004094388887656441,
+        "executed_frame_scalar": 0.004637182907221926
+      },
+      "velocity_rmse_mps": {
+        "step_1": 0.0012660324566573442,
+        "step_10": 0.0025437760277958656,
+        "step_20": 0.003948135082537215,
+        "step_30": 0.007620330373120689,
+        "step_40": 0.019190777218135894,
+        "step_50": 0.035656176158284106,
+        "frame_mean": 0.010489062408158958,
+        "executed_frame_scalar": 0.014504640925943115
+      },
+      "position_ade_m": {
+        "step_50": 0.008657046060485306,
+        "executed_frame_scalar": 0.005828894872178609,
+        "step_50_fde": 0.008657046060485306
+      },
+      "velocity_ade_mps": {
+        "step_50": 0.054067072515159825,
+        "executed_frame_scalar": 0.01593532657358498,
+      "step_50_fde": 0.054067072515159825
+      },
+      "physics": {
+        "expected_registered_transitions": 835,
+        "expected_registered_trajectory_frames": 836,
+        "completed_frames": 50,
+        "mass_error_abs_max_kg": 0.0,
+        "kinetic_energy_error_abs_max_j": 0.03804619808080111,
+        "validity_mismatch_frames": 0,
+        "changed_particle_mass_frames": 0,
+        "wall_chord_statuses": ["checked_static_saved_chords"],
+        "wall_chord_particle_count": 1008,
+        "wall_chord_mass_kg": 0.4252500110305846
+      }
+    }
+  },
+  "denominators": {
+    "registered": {
+      "transitions": 835,
+      "trajectory_frames": 836,
+      "source": "manifest time axis; expected_frames=len(time)-1"
+    },
+    "bounded_request": {
+      "transitions_executed": 50,
+      "trajectory_frames_including_initial": 51,
+      "missing_registered_transitions": 785,
+      "missing_registered_trajectory_frames": 785,
+      "raw_error_coverage": 0.059880239520958084
+    },
+    "interpretation": "The bounded 50-step window is retained as a prefix diagnostic only and is not used as the complete denominator."
+  },
+  "resources": {
+    "physical_gpu": {
+      "index": 5,
+      "name": "NVIDIA RTX 6000 Ada Generation",
+      "cuda_visible_devices": "5",
+      "process_device": "cuda:0"
+    },
+    "training_receipt": {
+      "wall_seconds": 2197.0679090509657,
+      "peak_gpu_memory_bytes": 1599798272,
+      "peak_gpu_memory_mib": 1525.6865234375,
+      "peak_rss_mib": 3009.578125
+    },
+    "evaluation": {
+      "wall_seconds": 952.6699718039017,
+      "peak_gpu_memory_bytes": null,
+      "peak_rss_mib": null,
+      "live_nvidia_smi_memory_used_mib_max_observed": 3049,
+      "live_ps_rss_kib_max_observed": 3399168,
+      "live_ps_rss_mib_max_observed": 3319.5,
+      "measurement_note": "core_learning.py evaluation emits wall progress but not process peak RSS/GPU allocator fields; GPU and RSS values here are live samples and are not represented as process-reported peaks"
+    },
+    "live_nvidia_smi_samples": {
+      "training_gpu5_memory_used_mib_max_observed": 5477,
+      "evaluation_gpu5_memory_used_mib_max_observed": 3049,
+      "post_run_gpu5_memory_used_mib": 18,
+      "measurement_note": "live nvidia-smi samples; not process-reported allocator peaks"
+    }
+  },
+  "analysis": {
+    "raw_data_table": [
+      {"step": 1, "position_rmse_m": 0.00013167273554621684, "velocity_rmse_mps": 0.0012660324566573442},
+      {"step": 10, "position_rmse_m": 0.0014673441792391433, "velocity_rmse_mps": 0.0025437760277958656},
+      {"step": 20, "position_rmse_m": 0.0035649070125166075, "velocity_rmse_mps": 0.003948135082537215},
+      {"step": 30, "position_rmse_m": 0.005695038178226528, "velocity_rmse_mps": 0.007620330373120689},
+      {"step": 40, "position_rmse_m": 0.006398257962484392, "velocity_rmse_mps": 0.019190777218135894},
+      {"step": 50, "position_rmse_m": 0.006190025948475731, "velocity_rmse_mps": 0.035656176158284106}
+    ],
+    "key_findings": [
+      "训练链路完整：500/500 updates、evidence complete、checkpoint update=500 且 SHA 已重新校验。",
+      "50-step bounded 窗口执行完整且 finite；完整登记分母仍为 835 transitions/836 frames，不能从本窗口外推 full-horizon 质量。",
+      "短窗 selection score 为 0.9403616578271421；position RMSE 在 step 50 为 0.006190025948475731 m，velocity RMSE 在 step 50 为 0.035656176158284106 m/s，均仅是 bounded 诊断指标。",
+      "已执行 50 frames 的 mass error 为 0、validity mismatch 为 0、changed particle mass frames 为 0；scientific status 仍为 not_assessed。",
+      "该证据不满足 formal 或 qualification 语义，qualification credit 固定为 0。"
+    ],
+    "suggested_next_experiments": [
+      "无自动 follow-up 或 gate action；如需解释长时域稳定性，必须另行授权并执行保持 835-transition/836-frame 分母的 full-horizon 评测。"
+    ]
+  },
+  "qualification_details": {
+    "diagnostic_only": true,
+    "qualification": false,
+    "formal_eligible": false,
+    "T1_numerical": false,
+    "T2_macro": false,
+    "qualification_credit": 0,
+    "interpretation": "bounded diagnostic evidence only; no formal training, formal selection, T1/T2 qualification, or gate credit"
+  },
+  "side_effects": {
+    "production_algorithm_modified": false,
+    "production_hdf5_modified": false,
+    "manifest_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "plan_modified": false,
+    "solver_started": false,
+    "worker_started": false,
+    "queue_mutation": 0,
+    "future_state_inputs": false,
+    "qualification": false
+  },
+  "artifacts": {
+    "source_verification_sha256": "e0d91dae287e0e43bb11fa1a6726da98ef4e729f79e7f6944b42ece417fffc18",
+    "training_receipt_sha256": "6ff3e753baf3163cfabe1cde49e0c8e06182b5aa861f45b2ec289f5a1bdfc2da",
+    "checkpoint_sha256": "c675c1915f05a18df3752b2320c076404015e916dc860f76de1e4d20479dabe5",
+    "training_progress_sha256": "7f77360e51c022214bbe09915e04a3fe38830175077a3ddb58e88280444b1097",
+    "evaluation_receipt_sha256": "d8faa87981def753b113432c4ee1d6b25722ac323cab0228ff9a41f40111ffe3",
+    "evaluation_progress_sha256": "f3808242be02d538032db3bcd8b4daee058851e931ca26ebf92673bd124218b3",
+    "trajectory_sha256": "80fa5c9a86fa9bae514ffc77f57b137502b61f8d22783366111f29cb888b528c",
+    "run_log_sha256": "5b654cc363d38d473aab5cbe672cec66324245e93698b33c30a00a53a0370259"
+  }
+}
