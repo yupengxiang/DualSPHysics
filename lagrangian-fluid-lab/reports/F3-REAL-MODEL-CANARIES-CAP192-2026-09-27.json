@@ -1,0 +1,81 @@
+{
+  "schema": "core.training.f3.real_model_canaries_cap192.v1",
+  "diagnostic_only": true,
+  "family": "F3",
+  "source": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "source_manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768"
+  },
+  "shared_configuration": {
+    "seed": 17,
+    "updates_requested": 1,
+    "centers_per_update": 1,
+    "hidden": 8,
+    "normalization_transitions": 1,
+    "max_neighbors": 192,
+    "device": "cpu",
+    "evaluate_milestones": false
+  },
+  "runs": [
+    {
+      "model_kind": "graph_raw",
+      "run_id": "graph_raw-seed17",
+      "wall_seconds": 5.0246339871082455,
+      "peak_rss_mib": 1261.703125,
+      "sampled_case_id": "F3_DEV_20_a1p028125",
+      "sampled_frame": 714,
+      "loss_mse": 51594.68359375,
+      "neighbor_truncation_fraction": 0.0,
+      "receipt_sha256": "3f814b5185c2d534cb596f50d201bfeee5552e3f6e445967170a02ab3b792c82",
+      "checkpoint_sha256": "aa2032bdd7dcbe146dd5d7b6db6a8ecbdfde1e80aa6472301c2e4656c445ddca",
+      "checkpoint_bytes": 97547,
+      "evidence_status": "complete"
+    },
+    {
+      "model_kind": "graph_residual",
+      "run_id": "graph_residual-seed17",
+      "wall_seconds": 5.36543723102659,
+      "peak_rss_mib": 1260.21484375,
+      "sampled_case_id": "F3_DEV_20_a1p028125",
+      "sampled_frame": 714,
+      "loss_mse": 55745.73046875,
+      "neighbor_truncation_fraction": 0.0,
+      "receipt_sha256": "b15c647142f1a9347b625866edafe6f62fe2ea9701e1e5d5724812807ce646c6",
+      "checkpoint_sha256": "c1bbfadc25add6eaa0627fcad04ddc8daf56d7f0318307dcc08c5ff0cc1fbd76",
+      "checkpoint_bytes": 98475,
+      "evidence_status": "complete"
+    },
+    {
+      "model_kind": "mlp",
+      "run_id": "mlp-seed17",
+      "wall_seconds": 2.6338432179763913,
+      "peak_rss_mib": 1260.8046875,
+      "sampled_case_id": "F3_DEV_20_a1p028125",
+      "sampled_frame": 714,
+      "loss_mse": 53226.16796875,
+      "neighbor_truncation_fraction": 0.0,
+      "receipt_sha256": "fb5c244f1919105eabd8a979c7b83ceb1a8367fb439d21e8fb64318aff8e0f50",
+      "checkpoint_sha256": "1fd71bbd412f98876f077bb1f501336cc6d5e2975dfb50557c2d8550e254ff55",
+      "checkpoint_bytes": 46901,
+      "evidence_status": "complete"
+    }
+  ],
+  "qualification": {
+    "manifest_formal_release": false,
+    "formal_training": false,
+    "T1_numerical": false,
+    "native_integrity": false,
+    "gate_decision_eligible": false,
+    "qualification_credit": 0
+  },
+  "side_effects": {
+    "production_hdf5_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "solver_started": false,
+    "worker_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0
+  }
+}
