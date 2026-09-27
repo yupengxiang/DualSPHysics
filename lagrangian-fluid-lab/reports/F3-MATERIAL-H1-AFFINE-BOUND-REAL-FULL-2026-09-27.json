@@ -1,0 +1,186 @@
+{
+  "schema": "core.material.f3.real_case_candidate_diagnostic.v1",
+  "diagnostic_only": true,
+  "candidate": {
+    "id": "h1_affine_bound",
+    "backend": "f3_ckdtree_visible_shepard_query_error_bound_v1",
+    "hypothesis": "在保持 k=24、Shepard 权重、substeps=2 和固定 support gate 不变时，将 local affine query bias 加入重建误差估计，可以识别移动 tracer 查询点的局部重建风险。",
+    "non_repeat_of": "h2_k48",
+    "scientific_control": "h2_k48 只扩大保留邻域；本候选保持邻域数量不变，只改变已有误差估计器。"
+  },
+  "source": {
+    "case_id": "F3_DEV_00_a0p903125",
+    "path": "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5",
+    "sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+    "manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "frame_count": 836,
+    "transition_count": 835,
+    "particle_count": 34560,
+    "time_start_s": 0.0,
+    "time_end_s": 8.350012828223477
+  },
+  "material_configuration": {
+    "schema": "core.material.v2",
+    "neighbour_variant": "h1_affine_bound",
+    "neighbours": 24,
+    "substeps": 2,
+    "seed_count": 512,
+    "source_definition": "continuous_halfspace_axis0_boundary0",
+    "error_estimator": "residual_plus_local_affine_query_bias",
+    "regularization_m": 0.004,
+    "maximum_support_distance_m": 0.03,
+    "support_gate": {
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3,
+      "minimum_anisotropy": 0.005,
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "unknown_fraction_limit": 0.01
+    }
+  },
+  "synthetic_and_contract_preflight": {
+    "pytest_command": "PYTHONPATH=. .venv/bin/python -m pytest -q tests/test_f3_core_material_synthetic_harness_v1.py tests/test_core_material.py tests/test_core_material_acceptance.py",
+    "pytest_result": "62 passed",
+    "harness_schema": "core.material.f3.synthetic_harness.v1",
+    "harness_output_sha256": "152c34b5375a4616043653d993aadd1e83e88e37fa00e2437dcc31170c5fbcae",
+    "harness_output_path": "/tmp/f3-material-h1-synthetic-harness-20260927.json",
+    "harness_constraints": {
+      "diagnostic_only": true,
+      "qualification_credit": 0,
+      "production_artifacts_touched": false,
+      "source_path_opened": false,
+      "fixed_gate_unchanged": true,
+      "unknown_kept_in_full_seed_denominator": true,
+      "gate_relaxed": false,
+      "degenerate_and_invalid_support_fail_closed": true,
+      "substeps_4_rmse_not_greater_than_substeps_2": true
+    },
+    "h1_quadratic_probe": {
+      "same_support_cap": true,
+      "same_fixed_gate": true,
+      "baseline_max_residual_mps": 3.5288183843696714e-05,
+      "h1_max_affine_query_bias_mps": 8.287120632502247e-06,
+      "h1_max_estimated_error_mps": 4.357530447619896e-05,
+      "h1_estimated_error_not_less_than_residual": true,
+      "h1_pass_count_not_greater_than_baseline": true
+    }
+  },
+  "execution": {
+    "command": "PYTHONPATH=. .venv/bin/python scripts/core_material.py --source campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5 --output /tmp/f3-material-h1-affine-bound-full-20260927.h5 --family f3 --seeds 512 --substeps 2 --neighbour-variant h1_affine_bound",
+    "device": "cpu",
+    "status": "completed",
+    "committed_frame": 835,
+    "native_frame_count": 836,
+    "committed_time_s": 8.350012828223477,
+    "elapsed_seconds": 174.80994291696697,
+    "max_rss_kib": 599964,
+    "temporary_output_path": "/tmp/f3-material-h1-affine-bound-full-20260927.h5",
+    "temporary_output_sha256": "31a093cbc47a71222babdceb6299dda3e1dc686e66f777355ba5699bf6c71b01",
+    "temporary_output_bytes": 28730208,
+    "temporary_run_receipt_path": "/tmp/f3-material-h1-affine-bound-full-20260927.json",
+    "temporary_run_receipt_sha256": "5e6ffff1aac4aec3bb265af538268ca29a2acae0976e85b18a17f2b92245c66e",
+    "temporary_checkpoint_path": "/tmp/f3-material-h1-affine-bound-full-20260927.h5.checkpoint.json",
+    "temporary_checkpoint_sha256": "f0c63575ded34547287860103a0cc2ef3c52cd26ec3a199eb474d639cccac505",
+    "hdf5_shapes": {
+      "time": [836],
+      "position": [836, 512, 3],
+      "reliable": [836, 512],
+      "first_passage": [836, 512],
+      "return_time": [836, 512],
+      "residence": [836, 512],
+      "returned": [836, 512]
+    },
+    "binding_hashes": {
+      "code_sha256": "9e294e64c431c725717caf86eb001dc3a3505a312e279386796b6a472b5ee94e",
+      "neighbor_code_sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752",
+      "passive_code_sha256": "3c12744133176a20ca955e1b76e0a9b7c0f5e2ddda4fef75d77574fc201f9024",
+      "initial_sha256": "96a44af3d1a749ed20a196bf8802bf443fef9d1405e9f33cd3fd66b87bc794ec",
+      "weight_sha256": "c315fce8d802f7d0e401560972404f6fe9f6e659d9410110bf239e4ecdc852cc",
+      "source_label_sha256": "29915a058f599ec9026954223f9a3ae6332e3372218766efb35c97c052c27593",
+      "tracer_id_sha256": "f8eab7bc5bf5f3421c3c23b4598d7ecace610c41f635c281e2b4e3a0d58f7e2e",
+      "walls_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217"
+    }
+  },
+  "result": {
+    "mass_closed": true,
+    "unknown_fraction_monotone": true,
+    "unknown_gate_pass": false,
+    "common_reliable_path_coverage": 0.91015625,
+    "by_source": [
+      {
+        "source": 0,
+        "final_unknown_fraction": 0.0859375,
+        "reliable_path_coverage": 0.9140625,
+        "first_unreliable_frame": 244,
+        "first_unreliable_time_s": 2.440000728246361,
+        "observed_first_passage_fraction": 0.30859375,
+        "observed_return_fraction": 0.29296875,
+        "residence_opposite_s": 0.5535751134823133
+      },
+      {
+        "source": 1,
+        "final_unknown_fraction": 0.09375,
+        "reliable_path_coverage": 0.90625,
+        "first_unreliable_frame": 321,
+        "first_unreliable_time_s": 3.210003315394127,
+        "observed_first_passage_fraction": 0.29296875,
+        "observed_return_fraction": 0.29296875,
+        "residence_opposite_s": 0.6256854663081173
+      }
+    ]
+  },
+  "comparison": {
+    "baseline24": {
+      "neighbours": 24,
+      "final_unknown_fraction": [0.0390625, 0.03125],
+      "common_reliable_path_coverage": 0.96484375,
+      "unknown_gate_pass": false
+    },
+    "h2_k48_update253": {
+      "neighbours": 48,
+      "final_unknown_fraction": [0.0546875, 0.03125],
+      "common_reliable_path_coverage": 0.95703125,
+      "unknown_gate_pass": false
+    },
+    "delta_h1_minus_baseline": {
+      "source0_final_unknown_fraction": 0.046875,
+      "source1_final_unknown_fraction": 0.0625,
+      "common_reliable_path_coverage": -0.0546875
+    },
+    "delta_h1_minus_h2": {
+      "source0_final_unknown_fraction": 0.03125,
+      "source1_final_unknown_fraction": 0.0625,
+      "common_reliable_path_coverage": -0.046875
+    }
+  },
+  "decision": {
+    "candidate_status": "rejected",
+    "reason": "candidate_rejected_for_worse_unknown_coverage",
+    "interpretation": "在不改变固定 gate 的前提下，加入 affine query bias 使两个 source 的 unknown 都显著增加；该候选不能改善 F3 材料路径的可靠窗口。",
+    "accepted_for_followup": false
+  },
+  "qualification": {
+    "qualification_claim": "none",
+    "material_reliability": "not_established",
+    "qualified_T2_macro": false,
+    "qualified_T2_path": false,
+    "T1_numerical": false,
+    "gate_decision_eligible": false,
+    "qualification_credit": 0
+  },
+  "side_effects": {
+    "production_hdf5_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "solver_started": false,
+    "worker_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "production_algorithm_modified": false,
+    "repository_write_set": [
+      "reports/F3-MATERIAL-H1-AFFINE-BOUND-REAL-FULL-2026-09-27.json",
+      "reports/CORE-CONTINUATION-STATUS-2026-09-27-UPDATE-261.zh-CN.md"
+    ]
+  }
+}
