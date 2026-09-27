@@ -1,0 +1,275 @@
+{
+  "schema": "core.material.f3.native_volume_mls.real_full_diagnostic_receipt.v1",
+  "created_at_utc": "2026-09-28T00:00:00Z",
+  "status": "completed_diagnostic_only",
+  "scope": {
+    "dataset_family": "F3",
+    "case_id": "F3_DEV_00_a0p903125",
+    "review_type": "bounded_next_candidate_review",
+    "known_candidates_not_repeated": [
+      "core_material_baseline24",
+      "h2_k48",
+      "h1_affine_bound"
+    ],
+    "full_rollout_started": false,
+    "gpu_started": false,
+    "formal_acceptance_attempted": false
+  },
+  "reviewed_candidates": {
+    "temporal_v3": {
+      "path": "scripts/f3_native_volume_mls_temporal_v3.py",
+      "script_sha256": "30ea09d28bcf1edf2a4dfbab5ff314c593e26cc942ab125bbcacad854568d395",
+      "schema": "core.material.f3.native_volume_mls.temporal.v3",
+      "current_source_audit": {
+        "status": "audit_only_passed",
+        "path": "/tmp/f3-temporal-v3-dev-audit-20260928.json",
+        "sha256": "8f19de4a199e3168a7bc92bcb30eeaf9386a2fcf371d0699fd64ace623b3ae3e",
+        "source_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4"
+      },
+      "strict_review_decision": "not_selected",
+      "strict_no_future_reason": "temporal-v3 reads the bounded current-interval endpoint F_{i+1}; under the strict online-causal rule this is a future native true value for intermediate RK stages, even though it is the next saved endpoint of the current interval",
+      "full_run": false,
+      "historical_evidence_reused": false,
+      "historical_evidence_reason": "existing temporal-v3 full evidence is bound to a different historical source asset and cannot substitute for the current F3_DEV source"
+    },
+    "native_volume_mls_v2_current_frame": {
+      "path": "scripts/f3_native_volume_mls_v2.py",
+      "script_sha256": "cd1c050757df7b0d5832181464d446cf6e8c678e2b150aa07bae0ddb0ee3b5f9",
+      "schema": "core.material.f3.native_volume_mls.v2",
+      "backend": "f3_native_volume_mls_wendland_mass_density_v2",
+      "trace_backend": "f3_native_volume_mls_current_frame_rk4_v2",
+      "orthogonal_basis": "current-frame native-volume mass/density with weighted affine MLS SVD, rather than the prior Shepard/CKDTree material paths",
+      "strict_no_future_contract": {
+        "future_state": "forbidden",
+        "future_velocity": "forbidden",
+        "future_density": "forbidden",
+        "interpolation": false,
+        "source_semantics": "reference_native_saved_frames",
+        "frame_policy": "all RK stages for interval i use selected native frame i only"
+      },
+      "selected_for_real_single_case_diagnostic": true
+    }
+  },
+  "input_contract": {
+    "source_h5": "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5",
+    "source_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+    "source_manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "prepared_case": "campaigns/l1-resume/continuation/F3_DEV_00_a0p903125-PREPARED.json",
+    "prepared_sha256": "9d6af616764163a7796763f061d3f2c7468640eb3b0924ee768f26aa9c7969b9",
+    "xml_sha256": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5",
+    "wall_triangles_sha256": "4acd726f5d523df62d856ab807618f1d9d4b2d32cb59752eb581565b99175217",
+    "frames": 836,
+    "transitions": 835,
+    "particles": 34560,
+    "time_start_s": 0.0,
+    "time_end_s": 8.350012828223477,
+    "nominal_output_interval_s": 0.01,
+    "initial_mass_kg": 14.580000378191471,
+    "kernel": "Wendland (Kernel=2)",
+    "h_m": 0.01194127788262211,
+    "contract_audit_status": "preflight_passed"
+  },
+  "execution": {
+    "device": "cpu",
+    "seed_count": 512,
+    "substeps": 2,
+    "committed_frame": 835,
+    "committed_transitions": 835,
+    "status": "completed",
+    "elapsed_seconds": 1347.3224649599288,
+    "peak_rss_kib": 593820,
+    "temporary_trace_path": "/tmp/f3-native-volume-mls-v2-dev-full-20260928.h5",
+    "temporary_trace_sha256": "f99e0c101c5c60ee723132e6bbaea34eddbc8f85d02f909123e6d416502310f0",
+    "temporary_summary_path": "/tmp/f3-native-volume-mls-v2-dev-full-20260928.summary.json",
+    "temporary_summary_sha256": "049ad5434d87defa6a9dcaf8c580502f0e5e8d5022bfb559c8e65a62a063896e",
+    "checkpoint_manifest_path": "/tmp/f3-native-volume-mls-v2-dev-full-20260928.h5.checkpoint.json",
+    "checkpoint_manifest_sha256": "200f28869327e09e56f06e8617268fa53ad5dd285bdca007a796ff62f497bf58",
+    "audit_path": "/tmp/f3-native-v2-dev-audit-20260928.json",
+    "audit_sha256": "ca3a9c1dd6c4761aea1e4fd5b8afc86ec0953db2cd5df01ef84cd431ccb9d175"
+  },
+  "hdf5_verification": {
+    "trace_schema": "core.material.f3.native_volume_mls.trace.v2",
+    "root_qualification_claim": "none",
+    "root_material_reliability": "not_established_by_numerical_support",
+    "time_shape": [836],
+    "position_shape": [836, 512, 3],
+    "time_strictly_increasing": true,
+    "time_first_s": 0.0,
+    "time_last_s": 8.350012828223477,
+    "all_position_values_finite": true,
+    "all_mass_values_finite": true,
+    "seed_mass_closure_error_max_kg": 0.0,
+    "native_mass_constant_kg": 14.580000378191471,
+    "wall_rejected_count_max": 0,
+    "candidate_support_pass_false_total": 0,
+    "candidate_reliable_false_total": 0,
+    "candidate_reliable_false_final": 0,
+    "permanent_unknown_true_total": 0,
+    "common_reliable_path_coverage": 1.0,
+    "final_unknown_fraction_by_source": {
+      "0": 0.0,
+      "1": 0.0
+    },
+    "candidate_support_count_min_all_frames": 51,
+    "candidate_effective_sample_size_min": 12.520080758558398,
+    "candidate_geometry_rank_min": 4,
+    "candidate_condition_number_max": 4.244361077363391,
+    "max_reconstruction_error_mps": 0.09312770934160079
+  },
+  "gate_comparison": {
+    "fixed_unknown_gate": {
+      "per_source_limit": 0.01,
+      "source_0_final_unknown_fraction": 0.0,
+      "source_1_final_unknown_fraction": 0.0,
+      "maximum_observed_unknown_fraction": 0.0,
+      "pass": true
+    },
+    "candidate_mls_gate": {
+      "minimum_support_count": 4,
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 4,
+      "maximum_condition_number": 10000000000.0,
+      "svd_relative_cutoff": 1e-12,
+      "pass_for_all_trace_samples": true
+    },
+    "original_f3_gate_comparison_only": {
+      "minimum_effective_sample_size": 4.0,
+      "minimum_geometry_rank": 3,
+      "minimum_anisotropy": 0.005,
+      "maximum_reconstruction_error_mps": 0.04698137929009748,
+      "maximum_support_distance_m": 0.03,
+      "old_gate_pass_false_total": 441,
+      "old_gate_pass_false_final_frame": 0,
+      "old_gate_pass_false_by_source": {
+        "0": 259,
+        "1": 182
+      },
+      "frames_with_any_old_gate_failure": 107,
+      "first_failure_frame": 249,
+      "last_failure_frame": 788,
+      "failed_sample_reconstruction_error_range_mps": [
+        0.047007481808694684,
+        0.09312770934160079
+      ],
+      "failed_samples_exceeding_residual_limit": 441,
+      "failed_samples_below_anisotropy_limit": 0,
+      "failed_samples_below_effective_sample_size_limit": 0,
+      "failed_samples_below_geometry_rank_limit": 0,
+      "support_distance_trace_field_present": false,
+      "pass": false,
+      "interpretation": "candidate reliable is not the original F3 gate; the separate candidate gate does not erase the 441 historical original-gate failures"
+    }
+  },
+  "comparison_to_prior_real_diagnostics": [
+    {
+      "candidate": "baseline24",
+      "receipt": "reports/F3-MATERIAL-REAL-SMOKE-2026-09-27.json",
+      "source_0_final_unknown_fraction": 0.0390625,
+      "source_1_final_unknown_fraction": 0.03125,
+      "common_reliable_path_coverage": 0.96484375,
+      "fixed_unknown_gate_pass": false,
+      "mass_closed": true
+    },
+    {
+      "candidate": "h2_k48",
+      "receipt": "reports/F3-MATERIAL-H2-K48-REAL-SMOKE-2026-09-27.json",
+      "source_0_final_unknown_fraction": 0.0546875,
+      "source_1_final_unknown_fraction": 0.03125,
+      "common_reliable_path_coverage": 0.95703125,
+      "fixed_unknown_gate_pass": false,
+      "mass_closed": true
+    },
+    {
+      "candidate": "h1_affine_bound",
+      "receipt": "reports/F3-MATERIAL-H1-AFFINE-BOUND-REAL-FULL-2026-09-27.json",
+      "source_0_final_unknown_fraction": 0.0859375,
+      "source_1_final_unknown_fraction": 0.09375,
+      "common_reliable_path_coverage": 0.91015625,
+      "fixed_unknown_gate_pass": false,
+      "mass_closed": true
+    },
+    {
+      "candidate": "native_volume_mls_v2_current_frame",
+      "receipt": "this receipt",
+      "source_0_final_unknown_fraction": 0.0,
+      "source_1_final_unknown_fraction": 0.0,
+      "common_reliable_path_coverage": 1.0,
+      "fixed_unknown_gate_pass": true,
+      "original_f3_gate_pass": false,
+      "original_f3_gate_false_samples": 441,
+      "mass_closed": true
+    }
+  ],
+  "acceptance_bridge": {
+    "existing_bridge_receipt": "campaigns/core-v1/material/evidence/f3-native-mls-acceptance-bridge-v4/reconciliation-v3-20260923.json",
+    "existing_bridge_receipt_sha256": "a4b7a89db522b095ed1b850c01d7c354f348a88e51236eeb59356894c3b34416",
+    "bridge_implementation_sha256": "1f5f7eb043342fa97761671ef7849766aec79d57d9df79eef888c77f8c8fd1d7",
+    "read_only_verify_exit": 0,
+    "bridge_status": "blocked_for_acceptance_zero_credit",
+    "bridge_decision": "read_only_reconciliation_complete_no_qualification",
+    "bridge_fixed_gates": {
+      "unknown_fraction_per_source_max": 0.01,
+      "cdf_sup_abs_difference_max": 0.02,
+      "full_source_window_s": 8.35,
+      "required_native_source_interval_s": 0.002,
+      "native_cadence_tolerance_s": 5e-05,
+      "no_partial_credit": true,
+      "right_censored_is_not_acceptance": true
+    },
+    "current_case_is_not_a_formal_matrix_row": true,
+    "t2_macro": false,
+    "t2_path": false,
+    "credit": 0,
+    "qualification_claim": "none",
+    "blocking_reasons": [
+      "existing bridge retains per-source unknown maximum 0.015625 above 0.01",
+      "existing bridge retains first-passage/return/residence CDF maximum 0.06103515625 above 0.02",
+      "existing bridge has a negative row-24 scientific receipt",
+      "existing bridge dense cadence provenance fails closed (.01 versus required .002)",
+      "existing bridge lacks independent formal receipts for all 33 matrix rows",
+      "this single v2 diagnostic has no CFD truth/CDF acceptance receipt"
+    ]
+  },
+  "decision": {
+    "candidate_contract_status": "clear_and_diagnostic_safe",
+    "candidate_diagnostic_status": "candidate_gate_passes_but_original_f3_gate_fails",
+    "candidate_status": "retained_as_diagnostic_only_not_accepted",
+    "formal_status": "rejected",
+    "t1": false,
+    "t2": false,
+    "credit": 0,
+    "qualification_claim": "none",
+    "reason": "reliable=100% and unknown=0 are bounded v2 support diagnostics only; 441 original F3 gate failures remain in the full trace, and the existing acceptance bridge is independently blocked"
+  },
+  "verification": {
+    "targeted_tests": {
+      "command_scope": [
+        "tests/test_f3_native_volume_mls_v2.py",
+        "tests/test_f3_native_volume_mls_compare.py",
+        "tests/test_f3_native_volume_mls_temporal_v3.py",
+        "tests/test_f3_native_volume_mls_shared.py",
+        "tests/test_f3_native_mls_acceptance_bridge_v1.py",
+        "tests/test_f3_native_mls_acceptance_bridge_v2.py"
+      ],
+      "result": "48 passed in 7.85s"
+    },
+    "py_compile": "passed",
+    "git_diff_check": "passed",
+    "production_code_changed_for_this_review": false
+  },
+  "side_effects": {
+    "new_repo_files": [
+      "reports/F3-MATERIAL-NATIVE-VOLUME-MLS-V2-REAL-FULL-2026-09-28.json",
+      "reports/CORE-CONTINUATION-STATUS-2026-09-28-UPDATE-265.zh-CN.md"
+    ],
+    "algorithm_modified": false,
+    "registry_modified": false,
+    "ledger_modified": false,
+    "denominator_modified": false,
+    "gate_modified": false,
+    "production_hdf5_modified": false,
+    "solver_worker_queue_started": false,
+    "gpu_started": false,
+    "temporary_outputs_committed": false
+  }
+}
