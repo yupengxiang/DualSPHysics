@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -66,7 +67,11 @@ def test_reader_resolves_case_and_frame(tmp_path: Path):
     manifest_path.write_text(json.dumps({
         "schema": "l2.f3.canonical_manifest.v1",
         "repository_root": str(lab_root),
-        "cases": [{"case_id": "toy", "hdf5": "data/toy.h5", "sha256": "x"}],
+        "cases": [{
+            "case_id": "toy",
+            "hdf5": "data/toy.h5",
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        }],
     }))
     manifest = load_manifest(manifest_path)
     frame = read_frame(manifest, "toy", 1, fields=("position", "valid"))
@@ -74,6 +79,80 @@ def test_reader_resolves_case_and_frame(tmp_path: Path):
     assert frame["position"].shape == (2, 3)
     assert frame["valid"].all()
     assert case_metadata(manifest, "toy")["datasets"]["position"] == [2, 2, 3]
+
+
+def test_reader_binds_nested_manifest_hash_and_relocated_data_root(tmp_path: Path):
+    source_root = tmp_path / "source"
+    data = source_root / "data"
+    data.mkdir(parents=True)
+    path = data / "toy.h5"
+    _write_trajectory(path, valid=np.ones((2, 1), dtype=bool))
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    manifest_path = source_root / "manifest.json"
+    manifest_path.write_text(json.dumps({
+        "schema": "l2.f3.canonical_manifest.v1",
+        "repository_root": str(source_root),
+        "cases": [{
+            "case_id": "toy",
+            "hdf5": "data/toy.h5",
+            "file": {"bytes": path.stat().st_size, "sha256": digest},
+        }],
+    }))
+    relocated_root = tmp_path / "relocated"
+    relocated_data = relocated_root / "data"
+    relocated_data.mkdir(parents=True)
+    relocated_path = relocated_data / "toy.h5"
+    relocated_path.write_bytes(path.read_bytes())
+
+    manifest = load_manifest(manifest_path)
+    metadata = case_metadata(manifest, "toy", data_root=relocated_root)
+    assert metadata["hdf5_sha256"] == digest
+    assert metadata["hdf5_bytes"] == relocated_path.stat().st_size
+    assert read_frame(
+        manifest, "toy", 1, fields=("position",), data_root=relocated_root
+    )["position"].shape == (1, 3)
+
+
+def test_reader_rejects_changed_hdf5_before_opening_it(tmp_path: Path):
+    root = tmp_path / "lab"
+    root.mkdir()
+    path = root / "toy.h5"
+    _write_trajectory(path, valid=np.ones((2, 1), dtype=bool))
+    manifest_path = root / "manifest.json"
+    manifest_path.write_text(json.dumps({
+        "schema": "l2.f3.canonical_manifest.v1",
+        "repository_root": str(root),
+        "cases": [{
+            "case_id": "toy",
+            "hdf5": "toy.h5",
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        }],
+    }))
+    manifest = load_manifest(manifest_path)
+    path.write_bytes(path.read_bytes() + b"changed")
+
+    with pytest.raises(ValueError, match="HDF5 integrity failure"):
+        read_frame(manifest, "toy", 0, fields=("position",))
+
+
+def test_reader_rejects_negative_frame_instead_of_using_python_tail_index(tmp_path: Path):
+    root = tmp_path / "lab"
+    root.mkdir()
+    path = root / "toy.h5"
+    _write_trajectory(path, valid=np.ones((2, 1), dtype=bool))
+    manifest_path = root / "manifest.json"
+    manifest_path.write_text(json.dumps({
+        "schema": "l2.f3.canonical_manifest.v1",
+        "repository_root": str(root),
+        "cases": [{
+            "case_id": "toy",
+            "hdf5": "toy.h5",
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        }],
+    }))
+
+    with pytest.raises(IndexError, match="frame outside trajectory"):
+        read_frame(load_manifest(manifest_path), "toy", -1, fields=("position",))
 
 
 def test_failure_summary_separates_wall_and_runtime():
