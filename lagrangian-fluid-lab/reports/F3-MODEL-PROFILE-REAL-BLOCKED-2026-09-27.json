@@ -1,0 +1,54 @@
+{
+  "schema": "core.learning.f3.real_profile_blocked.v1",
+  "diagnostic_only": true,
+  "case_id": "F3_DEV_00_a0p903125",
+  "source": {
+    "path": "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5",
+    "sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+    "manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+  },
+  "profile_configuration": {
+    "command": "PYTHONPATH=. .venv/bin/python scripts/core_learning.py profile --manifest campaigns/core-v1/f3-dataset-v2.json --data-root . --case-id F3_DEV_00_a0p903125 --model graph_raw --seed 17 --steps 2 --hidden 16 --chunk-size 256 --device cpu --output /tmp/f3-model-profile-20260927.json",
+    "model": "graph_raw",
+    "seed": 17,
+    "steps_requested": 2,
+    "hidden": 16,
+    "chunk_size": 256,
+    "device": "cpu"
+  },
+  "execution": {
+    "status": "blocked_neighbor_provenance_truncated",
+    "exit_code": 1,
+    "steps_completed": 0,
+    "output_path": "/tmp/f3-model-profile-20260927.json",
+    "output_exists": false,
+    "checkpoint_created": false,
+    "exception": {
+      "type": "ValueError",
+      "message": "neighbor provenance is truncated for a required two-hop row",
+      "call_path": "profile_case -> ModelPredictor.predict_step -> tensors -> neighbor_table(return_provenance=True) -> two_hop_halo -> validate_neighbor_provenance"
+    }
+  },
+  "interpretation": {
+    "fixed_neighbor_cap": 64,
+    "failure_boundary": "the formal two-hop halo rejects a truncated row when that row is required by the requested center",
+    "next_diagnostic": "synthetic cap/provenance diagnostic; no production cap change is implied",
+    "formal_training": false,
+    "qualification_inferred": false
+  },
+  "qualification": {
+    "T1_numerical": false,
+    "native_integrity": false,
+    "gate_decision_eligible": false,
+    "qualification_credit": 0
+  },
+  "side_effects": {
+    "production_hdf5_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "solver_started": false,
+    "worker_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0
+  }
+}
