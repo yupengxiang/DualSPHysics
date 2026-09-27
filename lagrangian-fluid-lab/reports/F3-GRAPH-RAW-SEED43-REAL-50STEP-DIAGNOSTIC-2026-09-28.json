@@ -1,0 +1,280 @@
+{
+  "schema": "core.f3.graph_raw.real_50step_diagnostic.summary.v1",
+  "date": "2026-09-28",
+  "case_id": "F3_DEV_00_a0p903125",
+  "diagnostic_only": true,
+  "formal_eligible": false,
+  "qualification": false,
+  "credit": 0,
+  "protocol": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "manifest_file_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "manifest_reader_binding_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "data_root": ".",
+    "case_id": "F3_DEV_00_a0p903125",
+    "source_hdf5": "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5",
+    "source_hdf5_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+    "model_kind": "graph_raw",
+    "seed": 43,
+    "updates": 500,
+    "centers_per_update": 256,
+    "hidden": 8,
+    "learning_rate": 0.001,
+    "normalization_transitions": 16,
+    "max_neighbors": 192,
+    "full_chunk": 34560,
+    "diagnostic_maximum_steps": 50,
+    "device_binding": {
+      "physical_gpu": 4,
+      "cuda_visible_devices": "4",
+      "process_device": "cuda:0"
+    }
+  },
+  "training": {
+    "run_id": "f3-graph-raw500-seed43-20260928-gpu4",
+    "device": "cuda:0",
+    "torch_version": "2.11.0+cu128",
+    "completed_updates": 500,
+    "requested_updates": 500,
+    "evidence_status": "complete",
+    "checkpoint_verified": true,
+    "neighbor_truncation_fraction_max": 0.0,
+    "normalization": {
+      "source_split": "train",
+      "target_reference": "raw_dual_increment_train_shared",
+      "selection_seed": 43,
+      "available_transition_count": 13360,
+      "requested_maximum_transitions": 16,
+      "selected_transition_count": 16,
+      "selection_policy": "deterministic_evenly_spaced_train_transitions_v1"
+    },
+    "checkpoint": {
+      "path": "/tmp/f3-graph-raw500-seed43-20260928-gpu4-checkpoint.pt",
+      "bytes": 101485,
+      "update": 500,
+      "sha256": "8c05ea0580af4f22622a095019a4c424a70b9e61259bdbf4e7244bc668d4ba29"
+    },
+    "wall_seconds_from_training_receipt": 2220.8169346349314,
+    "outer_wall_seconds": 2260.69,
+    "peak_rss_mib": 3006.7890625,
+    "peak_gpu_memory_allocated_bytes": 1584764928,
+    "validation_at_final_update": {
+      "available": true,
+      "transition_count": 4,
+      "center_count": 256,
+      "max_neighbors": 192,
+      "mse": 0.8696202337741852,
+      "rmse": 0.9325343070226345
+    }
+  },
+  "evaluation": {
+    "evaluation_mode": "diagnostic",
+    "diagnostic": true,
+    "model_kind": "graph_raw",
+    "max_neighbors": 192,
+    "split": "test",
+    "requested_split": "test",
+    "case_id": "F3_DEV_00_a0p903125",
+    "requested_steps": 50,
+    "frames_executed": 50,
+    "frames_predicted": 50,
+    "bounded_window_complete": true,
+    "bounded_window_finite": true,
+    "registered_transition_denominator": 835,
+    "registered_frame_denominator": 836,
+    "evaluated_transition_count": 50,
+    "raw_error_coverage": 0.059880239520958084,
+    "full_registered_denominator_complete": false,
+    "full_denominator_interpretation": "835 registered transitions and 836 registered frames remain the denominator; the 50-step diagnostic is right-censored and is not a complete-horizon result.",
+    "future_state_inputs": false,
+    "failure_category": "maximum_steps_limit",
+    "first_failure_frame": 51,
+    "scientific_status": "not_assessed",
+    "selection_score": 0.9403748199692692,
+    "position": {
+      "rmse_step_m": 0.006271187203975505,
+      "rmse_frame_mean_m": 0.003812338938588208,
+      "rmse_overall_executed_components_m": 0.004295971384298318,
+      "ade_step_m": 0.005757743826224702,
+      "fde_m": 0.00981469653291758
+    },
+    "velocity": {
+      "rmse_step_mps": 0.03558410184597668,
+      "rmse_frame_mean_mps": 0.01272651200333618,
+      "rmse_overall_executed_components_mps": 0.015878290117600866,
+      "ade_step_mps": 0.020925575096921226,
+      "fde_mps": 0.0576069431414888
+    },
+    "finite_coverage": {
+      "position_error_entries": 835,
+      "position_finite_entries": 50,
+      "position_missing_tail_entries": 785,
+      "velocity_error_entries": 835,
+      "velocity_finite_entries": 50,
+      "velocity_missing_tail_entries": 785,
+      "trajectory_frames_including_initial": 51,
+      "trajectory_position_finite": true,
+      "trajectory_velocity_finite": true
+    },
+    "mass_validity": {
+      "particles": 34560,
+      "trajectory_mass_finite": true,
+      "mass_error_abs_max_kg": 0.0,
+      "changed_particle_mass_frames": 0,
+      "validity_mismatch_frames": 0,
+      "valid_particle_count_initial": 34560,
+      "valid_particle_count_last": 34560,
+      "wall_chord_statuses": [
+        "checked_static_saved_chords"
+      ],
+      "wall_chord_particle_count": 1676,
+      "wall_chord_mass_kg": 0.7070625183405355,
+      "kinetic_energy_error_abs_max_j": 0.02873580995990801
+    },
+    "score": {
+      "complete": false,
+      "executed": true,
+      "expected_frames": 835,
+      "finite_prefix_frames": 50,
+      "failure_category": "maximum_steps_limit",
+      "first_failure_frame": 51,
+      "selection_score": 0.9403748199692692,
+      "raw_position_rmse_frame_mean_m": 0.003812338938588208,
+      "raw_velocity_rmse_frame_mean_mps": 0.01272651200333618
+    }
+  },
+  "resources": {
+    "physical_gpu": 4,
+    "cuda_visible_devices": "4",
+    "process_device": "cuda:0",
+    "training": {
+      "wall_seconds": 2220.8169346349314,
+      "outer_wall_seconds": 2260.69,
+      "peak_rss_mib": 3006.7890625,
+      "peak_gpu_memory_allocated_bytes": 1584764928
+    },
+    "evaluation": {
+      "rollout_wall_seconds": 950.2079779759515,
+      "outer_wall_seconds": 953.98,
+      "peak_rss_mib": 3326.52734375,
+      "gpu_memory_observed_mib": 3049,
+      "gpu_memory_observation_method": "nvidia-smi snapshots during the active rollout; allocator peak was not emitted by the evaluation command"
+    }
+  },
+  "failure_classification": {
+    "category": "maximum_steps_limit",
+    "is_contract_failure": false,
+    "is_scientific_model_failure": false,
+    "meaning": "The evaluator intentionally stopped after the requested bounded 50-step diagnostic window; frames 51 through 835 are missing by protocol, not silently scored as predictions.",
+    "contract_failures": [],
+    "fail_closed": true
+  },
+  "decision": {
+    "diagnostic_only": true,
+    "formal_eligible": false,
+    "qualification": false,
+    "credit": 0,
+    "accepted_for_formal_training": false,
+    "retain_as_formal_candidate": false,
+    "full_horizon_followup_authorized": false
+  },
+  "analysis": {
+    "raw_data_table": [
+      {
+        "model": "graph_raw",
+        "seed": 43,
+        "updates": 500,
+        "bounded_steps": 50,
+        "selection_score": 0.9403748199692692,
+        "position_rmse_step_m": 0.006271187203975505,
+        "position_rmse_frame_mean_m": 0.003812338938588208,
+        "velocity_rmse_step_mps": 0.03558410184597668,
+        "velocity_rmse_frame_mean_mps": 0.01272651200333618,
+        "raw_error_coverage": 0.059880239520958084
+      }
+    ],
+    "key_findings": [
+      "The requested 500-update training completed with complete evidence and a verified update-500 checkpoint.",
+      "The bounded evaluation completed 50/50 finite predicted transitions with no execution, mass, or validity failure in the observed window.",
+      "The result is right-censored at 50/835 transitions and therefore cannot establish complete-horizon or formal qualification performance."
+    ],
+    "suggested_next_experiments": [
+      "If separately authorized by the applicable gate, run a full 835-transition evaluation with the same checkpoint and preserve the same registered denominator.",
+      "Do not use this bounded result alone for formal model selection, qualification, or credit accounting."
+    ],
+    "cross_seed_statistics": {
+      "available_seeds_in_this_report": 1,
+      "mean_std_not_computed": true,
+      "reason": "This is an independent single-seed diagnostic; no cross-seed aggregate is claimed."
+    }
+  },
+  "artifacts": {
+    "training_json": {
+      "path": "/tmp/f3-graph-raw500-seed43-20260928-gpu4-training.json",
+      "sha256": "9e6adb62b7769a5ce0cce99892cb3a869c38d11218f42841e4df2f52cc56ac51"
+    },
+    "checkpoint": {
+      "path": "/tmp/f3-graph-raw500-seed43-20260928-gpu4-checkpoint.pt",
+      "sha256": "8c05ea0580af4f22622a095019a4c424a70b9e61259bdbf4e7244bc668d4ba29"
+    },
+    "evaluation_json": {
+      "path": "/tmp/f3-graph-raw500-seed43-20260928-gpu4-evaluation.json",
+      "sha256": "ab6f198a432a08e6c71d3455885058f03ee79951e5747c1775247d70359f26f3"
+    },
+    "trajectory_hdf5": {
+      "path": "/tmp/f3-graph-raw500-seed43-20260928-gpu4-trajectory.h5",
+      "sha256": "b277bc2b60c7532372651eb3a2f62be0c29997e4b26d25e02fd47ecb5e122d9d"
+    },
+    "training_progress": {
+      "path": "/tmp/f3-graph-raw500-seed43-20260928-gpu4-training-progress.json",
+      "sha256": "fdca3c142269b8cd5356b870075bdbb9933ab9ef8713599e4736eac1449916e0"
+    },
+    "evaluation_progress": {
+      "path": "/tmp/f3-graph-raw500-seed43-20260928-gpu4-evaluation-progress.json",
+      "sha256": "ffc779cdeaa52fa469d21700a131664348223659e582d5727f4b92305e26c846"
+    },
+    "training_stdout": {
+      "path": "/tmp/f3-graph-raw500-seed43-20260928-gpu4-training-stdout.log",
+      "sha256": "f91b9b01cf5b0211b2549451c39228d69652873a89de4088334975a790e97d3f"
+    },
+    "evaluation_stdout": {
+      "path": "/tmp/f3-graph-raw500-seed43-20260928-gpu4-evaluation-stdout.log",
+      "sha256": "47d633f86f7a3b5c6c18b4067390a08f5ef96cf48127b43cb7ef8a0d38b4c0bd"
+    },
+    "training_resource_log": {
+      "path": "/tmp/f3-graph-raw500-seed43-20260928-gpu4-training-time.txt",
+      "sha256": "ac04c72e2191606288d8fe3c1a0f7a5af0cd9d77fa3e2eef9b3c25764921208e"
+    },
+    "evaluation_resource_log": {
+      "path": "/tmp/f3-graph-raw500-seed43-20260928-gpu4-evaluation-time.txt",
+      "sha256": "f4d5febecf7dbb091f70d3f42b8ff7669f5d9f5effb6277b92b4b8f167f24102"
+    }
+  },
+  "launcher_audit": {
+    "initial_wrong_device_attempt": {
+      "status": "stopped_before_scientific_result",
+      "reason": "The first launch omitted --device cuda:0 and was stopped after confirming CPU execution; it produced no training JSON or checkpoint and is excluded from the scientific result.",
+      "scientific_failure": false
+    },
+    "correct_run_exit_codes": {
+      "training": 0,
+      "evaluation": 0
+    }
+  },
+  "side_effects": {
+    "production_algorithm_modified": false,
+    "production_hdf5_modified": false,
+    "source_modified": false,
+    "manifest_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "plan_modified": false,
+    "future_state_inputs": false,
+    "committed_report_files": [
+      "reports/F3-GRAPH-RAW-SEED43-REAL-50STEP-DIAGNOSTIC-2026-09-28.json",
+      "reports/F3-GRAPH-RAW-SEED43-REAL-50STEP-DIAGNOSTIC-2026-09-28.zh-CN.md"
+    ]
+  }
+}
