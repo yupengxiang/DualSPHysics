@@ -35,6 +35,7 @@ import argparse
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 import hashlib
+import hmac
 import json
 import math
 import os
@@ -95,6 +96,13 @@ MAX_STRING_BYTES = 2 * 1024 * 1024
 MAX_ARTIFACT_BYTES = 512 * 1024 * 1024
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 NONCE_RE = re.compile(r"^[0-9a-f]{32}$")
+
+# The bridge never launches in the current diagnostic-only release.  If a
+# separately reviewed runtime is added later, it must use this captured class
+# directly; caller-supplied factories and monkeypatched subprocess modules are
+# not allowed to mint process evidence.
+_REAL_POPEN = subprocess.Popen
+_PROCESS_RECORD_SECRET = secrets.token_bytes(32)
 
 ZERO_CREDIT: dict[str, Any] = {
     "diagnostic_only": True,
@@ -271,48 +279,136 @@ def _reject_symlink_components(path: Path, name: str, *, include_leaf: bool = Tr
             _fail(f"{name} contains a symlink component: {current}")
 
 
-def _regular_stat(path: Path, name: str) -> os.stat_result:
-    _reject_symlink_components(path, name)
+def _stat_identity(info: os.stat_result) -> tuple[int, int, int, int, int, int]:
+    return (
+        int(info.st_dev),
+        int(info.st_ino),
+        int(info.st_mode),
+        int(info.st_nlink),
+        int(info.st_size),
+        int(info.st_mtime_ns),
+    )
+
+
+def _directory_flags() -> int:
+    if not getattr(os, "O_DIRECTORY", 0):
+        _fail("platform does not expose O_DIRECTORY for safe artifact reads")
+    return (
+        os.O_RDONLY
+        | os.O_DIRECTORY
+        | getattr(os, "O_CLOEXEC", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+    )
+
+
+def _read_flags() -> int:
+    return os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+
+
+def _open_directory_chain(path: Path, name: str) -> int:
+    """Hold every parent directory descriptor without following symlinks."""
+
+    _absolute_path(path, name)
+    current_fd: int | None = None
     try:
-        info = os.lstat(path)
+        current_fd = os.open(Path(path.anchor or "/"), _directory_flags())
+        for component in path.parts[1:]:
+            next_fd = os.open(component, _directory_flags(), dir_fd=current_fd)
+            os.close(current_fd)
+            current_fd = next_fd
+        return current_fd
     except OSError as error:
-        _fail(f"cannot stat {name}: {error}")
-    if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
-        _fail(f"{name} must be a regular single-link file")
-    if info.st_size <= 0 or info.st_size > MAX_ARTIFACT_BYTES:
-        _fail(f"{name} has an unsafe size")
-    return info
+        if current_fd is not None:
+            try:
+                os.close(current_fd)
+            except OSError:
+                pass
+        _fail(f"cannot open descriptor chain for {name}: {error}")
+    except BaseException:
+        if current_fd is not None:
+            try:
+                os.close(current_fd)
+            except OSError:
+                pass
+        raise
+
+
+def _read_artifact_snapshot(path: Path, name: str, expected_bytes: int) -> bytes:
+    """Read one artifact from a held descriptor, never by reopening its path.
+
+    The descriptor is opened with ``O_NOFOLLOW`` after every parent directory
+    is walked through a held descriptor.  The bytes are hashed by the caller
+    from this one read.  A final pathname identity check is only an additional
+    drift detector; it is never used as a substitute for descriptor binding.
+    """
+
+    path = _absolute_path(path, name)
+    _reject_symlink_components(path, name)
+    if type(expected_bytes) is not int or expected_bytes < 1:
+        _fail(f"{name}.bytes must be a positive integer")
+    parent_fd: int | None = None
+    leaf_fd: int | None = None
+    before: os.stat_result | None = None
+    bound_path: os.stat_result | None = None
+    chunks: list[bytes] = []
+    try:
+        parent_fd = _open_directory_chain(path.parent, f"{name} parent")
+        leaf_fd = os.open(path.name, _read_flags(), dir_fd=parent_fd)
+        before = os.fstat(leaf_fd)
+        if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
+            _fail(f"{name} must be a regular single-link file")
+        if before.st_size <= 0 or before.st_size > MAX_ARTIFACT_BYTES:
+            _fail(f"{name} has an unsafe size")
+        if int(before.st_size) != expected_bytes:
+            _fail(f"{name}.bytes disagrees with the descriptor identity")
+        expected_identity = _stat_identity(before)
+        total = 0
+        while True:
+            block = os.read(leaf_fd, min(1024 * 1024, MAX_ARTIFACT_BYTES + 1 - total))
+            if not block:
+                break
+            chunks.append(block)
+            total += len(block)
+            if total > MAX_ARTIFACT_BYTES:
+                _fail(f"{name} exceeds the bounded read size")
+        after_fd = os.fstat(leaf_fd)
+        if _stat_identity(after_fd) != expected_identity or total != int(before.st_size):
+            _fail(f"{name} changed during descriptor read")
+        bound_path = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+        if _stat_identity(bound_path) != expected_identity:
+            _fail(f"{name} path identity changed before descriptor release")
+    except OSError as error:
+        _fail(f"cannot read {name} from the bound descriptor: {error}")
+    finally:
+        if leaf_fd is not None:
+            try:
+                os.close(leaf_fd)
+            except OSError:
+                pass
+        if parent_fd is not None:
+            try:
+                os.close(parent_fd)
+            except OSError:
+                pass
+    if before is None:
+        _fail(f"{name} did not produce a descriptor identity")
+    if bound_path is None:
+        _fail(f"{name} did not produce a bound pathname identity")
+    try:
+        after_path = os.lstat(path)
+    except OSError as error:
+        _fail(f"{name} path changed after descriptor read: {error}")
+    if _stat_identity(after_path) != _stat_identity(before):
+        _fail(f"{name} path identity changed after descriptor read")
+    raw = b"".join(chunks)
+    if len(raw) != expected_bytes:
+        _fail(f"{name} read byte count disagrees with the bound descriptor")
+    return raw
 
 
 def _sha256_file(path: Path, name: str, expected_bytes: int) -> str:
-    before = _regular_stat(path, name)
-    if int(before.st_size) != expected_bytes:
-        _fail(f"{name}.bytes disagrees with the bounded stat")
-    digest = hashlib.sha256()
-    read_bytes = 0
-    try:
-        with path.open("rb") as handle:
-            while True:
-                chunk = handle.read(1024 * 1024)
-                if not chunk:
-                    break
-                read_bytes += len(chunk)
-                if read_bytes > MAX_ARTIFACT_BYTES:
-                    _fail(f"{name} exceeds the bounded read size")
-                digest.update(chunk)
-    except OSError as error:
-        _fail(f"cannot read {name}: {error}")
-    after = _regular_stat(path, name)
-    if (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns) != (
-        after.st_dev,
-        after.st_ino,
-        after.st_size,
-        after.st_mtime_ns,
-    ):
-        _fail(f"{name} changed during bounded read")
-    if read_bytes != expected_bytes:
-        _fail(f"{name} read byte count disagrees with the bound")
-    return digest.hexdigest()
+    raw = _read_artifact_snapshot(path, name, expected_bytes)
+    return hashlib.sha256(raw).hexdigest()
 
 
 def _validate_nonce(value: Any, name: str) -> str:
@@ -596,91 +692,169 @@ def validate_terminal_attestation(
     }
 
 
-def validate_process_evidence(plan: BridgePlan, value: Mapping[str, Any]) -> dict[str, Any]:
-    """Validate, but do not mint, a real-Popen/wait proof mapping."""
-
-    item = _mapping(value, "process_evidence")
-    _walk_json(item, "process_evidence")
-    _reject_unknown(
-        item,
-        {
-            "schema",
-            "status",
-            "model",
-            "seed",
-            "namespace",
-            "namespace_nonce",
-            "audited_plan_digest",
-            "command",
-            "command_sha256",
-            "cwd",
-            "env_overrides",
-            "evaluator_pid",
-            "evaluator_returncode",
-            "wait_returncode",
-            "wait_observed",
-            "real_popen_type",
-            "diagnostic_only",
-            "credit",
-        },
-        "process_evidence",
-    )
-    _exact(item, "schema", PROCESS_EVIDENCE_SCHEMA, "process_evidence")
-    _exact(item, "status", "natural_exit_verified", "process_evidence")
-    _exact(item, "model", MODEL, "process_evidence")
-    _exact(item, "seed", plan.audited_plan.identity_plan.seed, "process_evidence")
-    _exact(item, "namespace", str(plan.namespace), "process_evidence")
-    _exact(item, "namespace_nonce", plan.audited_plan.identity_plan.nonce, "process_evidence")
-    _exact(item, "audited_plan_digest", plan.audited_plan.audited_plan_digest, "process_evidence")
-    command = item.get("command")
-    if not isinstance(command, list) or any(not isinstance(part, str) for part in command):
-        _fail("process_evidence.command must be a string array")
-    if tuple(command) != tuple(plan.audited_plan.identity_plan.command):
-        _fail("process_evidence.command differs from the exact audited command")
-    _exact(item, "command_sha256", plan.audited_plan.exact_command_digest, "process_evidence")
-    _exact(item, "cwd", str(plan.audited_plan.identity_plan.root), "process_evidence")
-    env = _mapping(item.get("env_overrides"), "process_evidence.env_overrides")
-    if dict(env) != dict(plan.audited_plan.identity_plan.env):
-        _fail("process_evidence.env_overrides differs from the audited environment")
-    _int(item.get("evaluator_pid"), "process_evidence.evaluator_pid", 1)
-    _exact(item, "evaluator_returncode", 0, "process_evidence")
-    _exact(item, "wait_returncode", 0, "process_evidence")
-    _exact(item, "wait_observed", True, "process_evidence")
-    _exact(item, "real_popen_type", True, "process_evidence")
-    _exact(item, "diagnostic_only", True, "process_evidence")
-    _exact(item, "credit", 0, "process_evidence")
-    return dict(item)
-
-
-@dataclass(frozen=True)
 class _RealProcessRecord:
-    process: subprocess.Popen[Any]
-    evaluator_pid: int
-    returncode: int
-    command: tuple[str, ...]
-    cwd: str
-    env_overrides: Mapping[str, str]
+    """Immutable witness produced only by the direct real-Popen/wait path."""
+
+    __slots__ = (
+        "process",
+        "evaluator_pid",
+        "returncode",
+        "wait_returncode",
+        "waited",
+        "audited_plan_digest",
+        "bridge_plan_digest",
+        "command",
+        "command_sha256",
+        "cwd",
+        "env_overrides",
+        "namespace",
+        "namespace_nonce",
+        "manifest_sha256",
+        "manifest_file_sha256",
+        "training_receipt_sha256",
+        "checkpoint_path",
+        "checkpoint_sha256",
+        "checkpoint_bytes",
+        "_seal_digest",
+    )
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        raise TypeError("_RealProcessRecord is an internal sealed witness")
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        raise AttributeError("_RealProcessRecord is immutable")
 
 
-# Deliberately remains None.  The synthetic validator v1 cannot be upgraded
-# into production authority by an input object, fake token, or monkeypatch in
-# a caller.  A future separately reviewed change may install a private
-# capability and a production HDF5 validator in a new module.
-_PRODUCTION_VALIDATOR_CAPABILITY: object | None = None
+def _record_payload(record: _RealProcessRecord) -> dict[str, Any]:
+    return {
+        "process_object_id": id(record.process),
+        "process_type": f"{type(record.process).__module__}.{type(record.process).__qualname__}",
+        "evaluator_pid": record.evaluator_pid,
+        "returncode": record.returncode,
+        "wait_returncode": record.wait_returncode,
+        "waited": record.waited,
+        "audited_plan_digest": record.audited_plan_digest,
+        "bridge_plan_digest": record.bridge_plan_digest,
+        "command": list(record.command),
+        "command_sha256": record.command_sha256,
+        "cwd": record.cwd,
+        "env_overrides": dict(record.env_overrides),
+        "namespace": record.namespace,
+        "namespace_nonce": record.namespace_nonce,
+        "manifest_sha256": record.manifest_sha256,
+        "manifest_file_sha256": record.manifest_file_sha256,
+        "training_receipt_sha256": record.training_receipt_sha256,
+        "checkpoint_path": record.checkpoint_path,
+        "checkpoint_sha256": record.checkpoint_sha256,
+        "checkpoint_bytes": record.checkpoint_bytes,
+    }
+
+
+def _record_digest(payload: Mapping[str, Any]) -> str:
+    return hmac.new(
+        _PROCESS_RECORD_SECRET,
+        canonical_json(dict(payload)).encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def _new_real_process_record(
+    plan: BridgePlan,
+    process: subprocess.Popen[Any],
+    wait_returncode: int,
+) -> _RealProcessRecord:
+    checkpoint = plan.audited_plan.identity_plan.checkpoint
+    record = object.__new__(_RealProcessRecord)
+    values = {
+        "process": process,
+        "evaluator_pid": int(process.pid),
+        "returncode": int(process.returncode),
+        "wait_returncode": int(wait_returncode),
+        "waited": True,
+        "audited_plan_digest": plan.audited_plan.audited_plan_digest,
+        "bridge_plan_digest": plan.bridge_plan_digest,
+        "command": tuple(plan.audited_plan.identity_plan.command),
+        "command_sha256": plan.audited_plan.exact_command_digest,
+        "cwd": str(plan.audited_plan.identity_plan.root),
+        "env_overrides": dict(plan.audited_plan.identity_plan.env),
+        "namespace": str(plan.namespace),
+        "namespace_nonce": plan.audited_plan.identity_plan.nonce,
+        "manifest_sha256": plan.audited_plan.identity_plan.manifest_sha256,
+        "manifest_file_sha256": plan.audited_plan.identity_plan.manifest_file_sha256,
+        "training_receipt_sha256": plan.audited_plan.identity_plan.training_receipt_sha256,
+        "checkpoint_path": str(checkpoint["path"]),
+        "checkpoint_sha256": str(checkpoint["sha256"]),
+        "checkpoint_bytes": int(checkpoint["bytes"]),
+    }
+    for name, value in values.items():
+        object.__setattr__(record, name, value)
+    object.__setattr__(record, "_seal_digest", _record_digest(_record_payload(record)))
+    return record
+
+
+def _reject_injected_popen(popen_factory: Any) -> None:
+    if popen_factory is not None and popen_factory is not _REAL_POPEN:
+        _fail("caller-supplied, fake, or injected Popen is not admitted")
+
+
+def _validate_real_process_record(plan: BridgePlan, record: Any) -> _RealProcessRecord:
+    if type(record) is not _RealProcessRecord:
+        _fail("process evidence requires a sealed record from the real Popen/wait path")
+    try:
+        sealed_digest = record._seal_digest
+        payload_digest = _record_digest(_record_payload(record))
+    except (AttributeError, KeyError, TypeError, ValueError) as error:
+        _fail(f"process evidence sealed record is malformed: {error}")
+    if sealed_digest != payload_digest:
+        _fail("process evidence sealed record integrity check failed")
+    if type(record.process) is not _REAL_POPEN:
+        _fail("process evidence process is not the captured real subprocess.Popen type")
+    if record.audited_plan_digest != plan.audited_plan.audited_plan_digest:
+        _fail("process evidence record is bound to a different audited plan")
+    if record.bridge_plan_digest != plan.bridge_plan_digest:
+        _fail("process evidence record is bound to a different bridge plan")
+    if not record.waited:
+        _fail("process evidence lacks an observed wait lifecycle")
+    if record.returncode != record.wait_returncode or record.returncode != 0:
+        _fail("process evidence return codes are not a successful natural exit")
+    if record.process.returncode != record.wait_returncode or record.process.poll() != record.wait_returncode:
+        _fail("process evidence process was not naturally reaped by the observed wait")
+    identity_plan = plan.audited_plan.identity_plan
+    checkpoint = identity_plan.checkpoint
+    expected = {
+        "command": tuple(identity_plan.command),
+        "command_sha256": plan.audited_plan.exact_command_digest,
+        "cwd": str(identity_plan.root),
+        "env_overrides": dict(identity_plan.env),
+        "namespace": str(plan.namespace),
+        "namespace_nonce": identity_plan.nonce,
+        "manifest_sha256": identity_plan.manifest_sha256,
+        "manifest_file_sha256": identity_plan.manifest_file_sha256,
+        "training_receipt_sha256": identity_plan.training_receipt_sha256,
+        "checkpoint_path": str(checkpoint["path"]),
+        "checkpoint_sha256": str(checkpoint["sha256"]),
+        "checkpoint_bytes": int(checkpoint["bytes"]),
+    }
+    for field, expected_value in expected.items():
+        if getattr(record, field) != expected_value:
+            _fail(f"process evidence {field} drifted from the audited plan")
+    return record
 
 
 def _run_real_popen_wait(
     plan: BridgePlan,
     *,
-    popen_factory: Callable[..., Any] = subprocess.Popen,
+    popen_factory: Any = None,
     admission_probe: Callable[[int], Mapping[str, Any]] | None = None,
 ) -> _RealProcessRecord:
     """Unreachable today; the guarded future real-Popen/wait path."""
 
-    if _PRODUCTION_VALIDATOR_CAPABILITY is None:
-        _fail("production HDF5 validator capability is not admitted; Popen was not attempted")
-    if popen_factory is not subprocess.Popen:
-        _fail("injectable or fake Popen is not admitted for diagnostic execution")
+    _reject_injected_popen(popen_factory)
+    _fail("production HDF5 validator capability is not admitted; Popen was not attempted")
+
+    # The following is deliberately unreachable until a separately reviewed
+    # capability is installed.  It still documents the only allowed lifecycle:
+    # direct captured Popen, exact argv/cwd, wait, then sealed-record minting.
     _revalidate_bridge_plan(plan, admission_probe=admission_probe)
     log_path = plan.outputs["log"]
     try:
@@ -695,7 +869,7 @@ def _run_real_popen_wait(
     environment = os.environ.copy()
     environment.update({str(k): str(v) for k, v in plan.audited_plan.identity_plan.env.items()})
     try:
-        process = subprocess.Popen(
+        process = _REAL_POPEN(
             list(plan.audited_plan.identity_plan.command),
             cwd=str(plan.audited_plan.identity_plan.root),
             env=environment,
@@ -707,8 +881,8 @@ def _run_real_popen_wait(
         )
     finally:
         log_file.close()
-    if type(process) is not subprocess.Popen:
-        _fail("Popen did not return the real subprocess.Popen type")
+    if type(process) is not _REAL_POPEN:
+        _fail("Popen did not return the captured real subprocess.Popen type")
     if process.args != list(plan.audited_plan.identity_plan.command):
         _fail("Popen args differ from the exact audited command")
     if type(process.pid) is not int or process.pid <= 0:
@@ -720,26 +894,14 @@ def _run_real_popen_wait(
         _fail("Popen did not provide a consistent naturally reaped return code")
     if wait_returncode != 0:
         _fail("non-zero evaluator return code cannot produce diagnostic evidence")
-    return _RealProcessRecord(
-        process=process,
-        evaluator_pid=int(process.pid),
-        returncode=int(wait_returncode),
-        command=tuple(plan.audited_plan.identity_plan.command),
-        cwd=str(plan.audited_plan.identity_plan.root),
-        env_overrides=dict(plan.audited_plan.identity_plan.env),
-    )
+    return _new_real_process_record(plan, process, wait_returncode)
 
 
 def _process_evidence_from_real_record(
     plan: BridgePlan,
-    record: _RealProcessRecord,
+    record: Any,
 ) -> dict[str, Any]:
-    if type(record) is not _RealProcessRecord:
-        _fail("process evidence requires the sealed real-Popen/wait record")
-    if type(record.process) is not subprocess.Popen:
-        _fail("process evidence requires the real subprocess.Popen type")
-    if record.returncode != 0:
-        _fail("non-zero return code cannot produce process evidence")
+    record = _validate_real_process_record(plan, record)
     return {
         "schema": PROCESS_EVIDENCE_SCHEMA,
         "status": "natural_exit_verified",
@@ -748,8 +910,14 @@ def _process_evidence_from_real_record(
         "namespace": str(plan.namespace),
         "namespace_nonce": plan.audited_plan.identity_plan.nonce,
         "audited_plan_digest": plan.audited_plan.audited_plan_digest,
+        "manifest_sha256": record.manifest_sha256,
+        "manifest_file_sha256": record.manifest_file_sha256,
+        "training_receipt_sha256": record.training_receipt_sha256,
+        "checkpoint_path": record.checkpoint_path,
+        "checkpoint_sha256": record.checkpoint_sha256,
+        "checkpoint_bytes": record.checkpoint_bytes,
         "command": list(record.command),
-        "command_sha256": plan.audited_plan.exact_command_digest,
+        "command_sha256": record.command_sha256,
         "cwd": record.cwd,
         "env_overrides": dict(record.env_overrides),
         "evaluator_pid": record.evaluator_pid,
@@ -762,18 +930,30 @@ def _process_evidence_from_real_record(
     }
 
 
+def validate_process_evidence(plan: BridgePlan, value: Any) -> dict[str, Any]:
+    """Only a sealed in-memory witness can be normalized as process evidence."""
+
+    return _process_evidence_from_real_record(plan, value)
+
+
 def build_diagnostic_evidence(
     plan: BridgePlan,
-    process_evidence: Mapping[str, Any],
+    process_record: Any,
     terminal_attestation: Mapping[str, Any],
     *,
     _capability: object | None = None,
 ) -> dict[str, Any]:
-    """Combine both proofs only behind the uninstalled production capability."""
+    """Combine proofs only from a future sealed witness and capability.
 
-    if _capability is None or _capability is not _PRODUCTION_VALIDATOR_CAPABILITY:
-        _fail("production validator capability is not admitted; evidence cannot be minted")
-    process = validate_process_evidence(plan, process_evidence)
+    A serialized mapping is never accepted here.  The current capability is
+    deliberately absent, so this function remains non-authorizing and cannot
+    start a process or promote caller-supplied PID/returncode fields.
+    """
+
+    if _capability is not None:
+        _fail("caller-supplied terminal capability cannot mint diagnostic evidence")
+    process = validate_process_evidence(plan, process_record)
+    _fail("production validator capability is not admitted; evidence cannot be minted")
     terminal = validate_terminal_attestation(plan, terminal_attestation)
     return {
         "schema": DIAGNOSTIC_EVIDENCE_SCHEMA,
@@ -788,7 +968,7 @@ def build_diagnostic_evidence(
 def execute_diagnostic_one_shot(
     plan: BridgePlan,
     *,
-    popen_factory: Callable[..., Any] = subprocess.Popen,
+    popen_factory: Any = None,
     admission_probe: Callable[[int], Mapping[str, Any]] | None = None,
     terminal_validator: Callable[[BridgePlan, Mapping[str, Any]], Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
@@ -798,14 +978,12 @@ def execute_diagnostic_one_shot(
     explicit in tests.  In the current state it is never called.
     """
 
+    _reject_injected_popen(popen_factory)
     _revalidate_bridge_plan(plan, admission_probe=admission_probe)
-    if popen_factory is not subprocess.Popen:
-        _fail("fake/injectable Popen is not admitted; no workload was started")
-    if _PRODUCTION_VALIDATOR_CAPABILITY is None:
-        _fail(
-            "existing terminal_artifact_validator_v1 is synthetic-only; production HDF5 "
-            "validator capability is not admitted, so Popen was not attempted"
-        )
+    _fail(
+        "existing terminal_artifact_validator_v1 is synthetic-only; production HDF5 "
+        "validator capability is not admitted, so Popen was not attempted"
+    )
     if terminal_validator is None:
         _fail("independent production HDF5 validator callback is required")
     record = _run_real_popen_wait(
@@ -817,9 +995,8 @@ def execute_diagnostic_one_shot(
     terminal = terminal_validator(plan, process)
     return build_diagnostic_evidence(
         plan,
-        process,
+        record,
         terminal,
-        _capability=_PRODUCTION_VALIDATOR_CAPABILITY,
     )
 
 

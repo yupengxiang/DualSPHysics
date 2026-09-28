@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -248,7 +249,7 @@ def test_explicit_execute_rejects_before_fake_popen(tmp_path: Path) -> None:
         calls.append(args)
         raise AssertionError("fake Popen must never be called")
 
-    with pytest.raises(bridge.BridgeError, match="fake/injectable Popen"):
+    with pytest.raises(bridge.BridgeError, match="caller-supplied, fake, or injected Popen"):
         bridge.execute_diagnostic_one_shot(
             plan,
             popen_factory=fake_popen,
@@ -275,38 +276,28 @@ def test_real_popen_entry_is_blocked_by_unadmitted_synthetic_validator(
 
 def test_resource_readmission_blocks_before_fake_popen(tmp_path: Path) -> None:
     _fixture, plan = _plan(tmp_path)
-    calls: list[object] = []
-
-    def fake_popen(*args: object, **kwargs: object) -> object:
-        calls.append(args)
-        raise AssertionError("Popen must not be called after resource failure")
 
     with pytest.raises(bridge.executor.ExecutorError, match="resource admission"):
         bridge.execute_diagnostic_one_shot(
             plan,
-            popen_factory=fake_popen,
+            popen_factory=bridge._REAL_POPEN,
             admission_probe=lambda _gpu: _admission(admitted=False),
         )
-    assert calls == []
+    assert not plan.outputs["log"].exists()
 
 
 def test_input_identity_drift_blocks_before_fake_popen(tmp_path: Path) -> None:
     fixture, plan = _plan(tmp_path)
     receipt = fixture["receipts"][17]
     receipt.write_bytes(receipt.read_bytes() + b"drift")
-    calls: list[object] = []
-
-    def fake_popen(*args: object, **kwargs: object) -> object:
-        calls.append(args)
-        raise AssertionError("Popen must not be called after identity drift")
 
     with pytest.raises(bridge.executor.ExecutorError, match="training_receipt changed"):
         bridge.execute_diagnostic_one_shot(
             plan,
-            popen_factory=fake_popen,
+            popen_factory=bridge._REAL_POPEN,
             admission_probe=lambda _gpu: _admission(),
         )
-    assert calls == []
+    assert not plan.outputs["log"].exists()
 
 
 def test_existing_namespace_is_rejected_and_not_reused(tmp_path: Path) -> None:
@@ -315,7 +306,7 @@ def test_existing_namespace_is_rejected_and_not_reused(tmp_path: Path) -> None:
     with pytest.raises(bridge.executor.ExecutorError, match="output namespace"):
         bridge.execute_diagnostic_one_shot(
             plan,
-            popen_factory=lambda *args, **kwargs: pytest.fail("Popen must not run"),
+            popen_factory=bridge._REAL_POPEN,
             admission_probe=lambda _gpu: _admission(),
         )
 
@@ -360,8 +351,20 @@ def test_production_shaped_attestation_binds_artifacts_but_cannot_mint_evidence(
         "diagnostic_only": True,
         "credit": 0,
     }
-    with pytest.raises(bridge.BridgeError, match="capability is not admitted"):
+    with pytest.raises(bridge.BridgeError, match="sealed record"):
         bridge.build_diagnostic_evidence(plan, forged_process, normalized)
+
+    with pytest.raises(bridge.BridgeError, match="sealed record"):
+        bridge.validate_process_evidence(plan, forged_process)
+
+
+def test_real_process_record_cannot_be_caller_constructed(tmp_path: Path) -> None:
+    _fixture, _plan_value = _plan(tmp_path)
+    with pytest.raises(TypeError, match="internal sealed witness"):
+        bridge._RealProcessRecord()
+    malformed_record = object.__new__(bridge._RealProcessRecord)
+    with pytest.raises(bridge.BridgeError, match="sealed record is malformed"):
+        bridge.validate_process_evidence(_plan_value, malformed_record)
 
 
 def test_attestation_digest_and_hdf5_identity_mutations_fail_closed(tmp_path: Path) -> None:
@@ -388,3 +391,37 @@ def test_attestation_digest_and_hdf5_identity_mutations_fail_closed(tmp_path: Pa
     )
     with pytest.raises(bridge.BridgeError, match="nonce must be"):
         bridge.validate_terminal_attestation(plan, wrong_nonce)
+
+
+def test_artifact_leaf_symlink_is_rejected_before_hashing(tmp_path: Path) -> None:
+    _fixture, plan = _plan(tmp_path)
+    attestation = _production_shaped_attestation(plan)
+    outside = tmp_path / "outside-trajectory.h5"
+    outside.write_bytes(b"outside-bytes-that-must-not-be-read\n")
+    trajectory = plan.outputs["trajectory"]
+    trajectory.unlink()
+    os.symlink(outside, trajectory)
+
+    with pytest.raises(bridge.BridgeError, match="symlink"):
+        bridge.validate_terminal_attestation(plan, attestation)
+
+
+def test_artifact_descriptor_read_detects_path_content_drift(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _fixture, plan = _plan(tmp_path)
+    attestation = _production_shaped_attestation(plan)
+    original_read = bridge.os.read
+    changed = {"value": False}
+
+    def racing_read(fd: int, count: int) -> bytes:
+        block = original_read(fd, count)
+        if block and not changed["value"]:
+            changed["value"] = True
+            plan.outputs["trajectory"].write_bytes(b"changed-during-bound-read\n")
+        return block
+
+    monkeypatch.setattr(bridge.os, "read", racing_read)
+    with pytest.raises(bridge.BridgeError, match="changed during descriptor read|path identity changed"):
+        bridge.validate_terminal_attestation(plan, attestation)

@@ -137,47 +137,34 @@ def test_build_audited_plan_binds_fixed_identity_and_exact_digest(tmp_path: Path
 
 def test_execute_blocks_before_popen_when_terminal_capability_is_absent(tmp_path: Path) -> None:
     _fixture_data, plan = _plan(tmp_path)
-    called = {"count": 0}
-
-    def spoof_factory(*args, **kwargs):
-        called["count"] += 1
-        raise AssertionError("Popen must not be reached without terminal capability")
 
     with pytest.raises(executor.ExecutorError, match="terminal HDF5/artifact identity"):
         executor.execute_plan(
             plan,
+            admission_probe=lambda _gpu: _admission(),
+        )
+    assert not plan.namespace.exists()
+
+
+def test_injected_popen_and_caller_capability_are_rejected_before_any_side_effect(
+    tmp_path: Path,
+) -> None:
+    _fixture_data, plan = _plan(tmp_path)
+    called = {"count": 0}
+
+    def spoof_factory(*args: object, **kwargs: object) -> object:
+        called["count"] += 1
+        raise AssertionError("injected Popen must never be called")
+
+    with pytest.raises(executor.ExecutorError, match="caller-supplied, fake, or injected Popen"):
+        executor._run_popen_wait(
+            plan,
+            terminal_capability=object(),
             popen_factory=spoof_factory,
             admission_probe=lambda _gpu: _admission(),
         )
     assert called["count"] == 0
-    assert not plan.namespace.exists()
-
-
-def test_popen_spoof_cannot_mint_process_proof(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    _fixture_data, plan = _plan(tmp_path)
-    token = object()
-    monkeypatch.setattr(executor, "_TERMINAL_CLOSURE_TOKEN", token)
-
-    class SpoofPopen:
-        args = tuple(plan.identity_plan.command)
-        pid = 12345
-        returncode = 0
-
-        def wait(self):
-            return 0
-
-        def poll(self):
-            return 0
-
-    with pytest.raises(executor.ExecutorError, match="real subprocess.Popen"):
-        executor._run_popen_wait(
-            plan,
-            terminal_capability=token,
-            popen_factory=lambda *args, **kwargs: SpoofPopen(),
-            admission_probe=lambda _gpu: _admission(),
-        )
-    assert plan.outputs["log"].exists()
-    assert not plan.outputs["terminal_receipt"].exists()
+    assert not plan.outputs["log"].exists()
 
 
 def test_input_path_toc_tou_drift_is_rejected_before_popen(tmp_path: Path) -> None:
@@ -211,18 +198,23 @@ def test_existing_namespace_is_rejected_and_lexical_alias_is_rejected(tmp_path: 
         )
 
 
-def test_nonzero_wait_returncode_cannot_produce_process_proof(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    _fixture_data, plan = _plan(tmp_path, exit_code=7)
-    token = object()
-    monkeypatch.setattr(executor, "_TERMINAL_CLOSURE_TOKEN", token)
-    record = executor._run_popen_wait(
-        plan,
-        terminal_capability=token,
-        admission_probe=lambda _gpu: _admission(),
-    )
-    assert record.wait_returncode == 7
-    with pytest.raises(executor.ExecutorError, match="non-zero evaluator return code"):
-        executor.build_process_proof(plan, record)
+def test_caller_supplied_pid_returncode_or_mapping_cannot_mint_process_proof(
+    tmp_path: Path,
+) -> None:
+    _fixture_data, plan = _plan(tmp_path)
+    forged = {
+        "evaluator_pid": 12345,
+        "evaluator_returncode": 0,
+        "wait_returncode": 0,
+        "wait_observed": True,
+    }
+    with pytest.raises(executor.ExecutorError, match="sealed record"):
+        executor.build_process_proof(plan, forged)
+    with pytest.raises(TypeError, match="internal sealed witness"):
+        executor._ExecutionRecord()
+    malformed_record = object.__new__(executor._ExecutionRecord)
+    with pytest.raises(executor.ExecutorError, match="sealed record is malformed"):
+        executor.build_process_proof(plan, malformed_record)
 
 
 def test_unknown_authority_alias_is_rejected_from_report(tmp_path: Path) -> None:

@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 import hashlib
+import hmac
 import json
 import math
 import os
@@ -97,6 +98,12 @@ MIN_GPU_FREE_MIB = 8 * 1024
 MIN_CPU_COUNT = 4
 MAX_LOAD_PER_CPU = 2.0
 MIN_DISK_FREE_BYTES = 2 * 1024**3
+
+# Capture the real implementation once.  The execution seam is deliberately
+# not injectable: a caller that replaces ``subprocess.Popen`` after import,
+# or passes a factory argument, must never be able to mint process evidence.
+_REAL_POPEN = subprocess.Popen
+_PROCESS_RECORD_SECRET = secrets.token_bytes(32)
 
 ZERO_CREDIT: dict[str, Any] = {
     "diagnostic_only": True,
@@ -766,37 +773,153 @@ def _revalidate_for_execution(
     return current_admission
 
 
-@dataclass(frozen=True)
 class _ExecutionRecord:
-    _seal: object
-    plan_digest: str
-    process: subprocess.Popen[Any]
-    evaluator_pid: int
-    evaluator_returncode: int
-    wait_returncode: int
-    waited: bool
-    command: tuple[str, ...]
-    cwd: str
-    env_overrides: Mapping[str, str]
+    """Immutable in-memory witness minted only after the real Popen/wait path.
+
+    The constructor is intentionally unusable by callers.  A future admitted
+    runtime path must create this object through ``_new_execution_record``
+    after it has captured the exact process and identity fields.  A mapping,
+    PID, return code, or fake/subclassed process can therefore never be
+    promoted into a process proof by ``build_process_proof``.
+    """
+
+    __slots__ = (
+        "plan_digest",
+        "process",
+        "evaluator_pid",
+        "evaluator_returncode",
+        "wait_returncode",
+        "waited",
+        "command",
+        "command_sha256",
+        "cwd",
+        "env_overrides",
+        "namespace",
+        "namespace_nonce",
+        "manifest_sha256",
+        "manifest_file_sha256",
+        "training_receipt",
+        "training_receipt_sha256",
+        "checkpoint_path",
+        "checkpoint_sha256",
+        "checkpoint_bytes",
+        "_seal_digest",
+    )
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        raise TypeError("_ExecutionRecord is an internal sealed witness")
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        raise AttributeError("_ExecutionRecord is immutable")
 
 
-_EXECUTION_SEAL = object()
-# Deliberately remains None: no implementation in this file can mint terminal
-# HDF5/artifact closure authority, so execute_plan cannot reach Popen today.
-_TERMINAL_CLOSURE_TOKEN: object | None = None
+def _record_payload(record: _ExecutionRecord) -> dict[str, Any]:
+    return {
+        "plan_digest": record.plan_digest,
+        "process_object_id": id(record.process),
+        "process_type": f"{type(record.process).__module__}.{type(record.process).__qualname__}",
+        "evaluator_pid": record.evaluator_pid,
+        "evaluator_returncode": record.evaluator_returncode,
+        "wait_returncode": record.wait_returncode,
+        "waited": record.waited,
+        "command": list(record.command),
+        "command_sha256": record.command_sha256,
+        "cwd": record.cwd,
+        "env_overrides": dict(record.env_overrides),
+        "namespace": record.namespace,
+        "namespace_nonce": record.namespace_nonce,
+        "manifest_sha256": record.manifest_sha256,
+        "manifest_file_sha256": record.manifest_file_sha256,
+        "training_receipt": record.training_receipt,
+        "training_receipt_sha256": record.training_receipt_sha256,
+        "checkpoint_path": record.checkpoint_path,
+        "checkpoint_sha256": record.checkpoint_sha256,
+        "checkpoint_bytes": record.checkpoint_bytes,
+    }
+
+
+def _record_digest(payload: Mapping[str, Any]) -> str:
+    return hmac.new(
+        _PROCESS_RECORD_SECRET,
+        canonical_json(dict(payload)).encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def _new_execution_record(
+    plan: AuditedPlan,
+    process: subprocess.Popen[Any],
+    wait_returncode: int,
+) -> _ExecutionRecord:
+    """Create the only record shape accepted by ``build_process_proof``."""
+
+    checkpoint = plan.identity_plan.checkpoint
+    record = object.__new__(_ExecutionRecord)
+    values = {
+        "plan_digest": plan.audited_plan_digest,
+        "process": process,
+        "evaluator_pid": int(process.pid),
+        "evaluator_returncode": int(process.returncode),
+        "wait_returncode": int(wait_returncode),
+        "waited": True,
+        "command": tuple(plan.identity_plan.command),
+        "command_sha256": plan.exact_command_digest,
+        "cwd": str(plan.identity_plan.root),
+        "env_overrides": dict(plan.identity_plan.env),
+        "namespace": str(plan.namespace),
+        "namespace_nonce": plan.identity_plan.nonce,
+        "manifest_sha256": plan.identity_plan.manifest_sha256,
+        "manifest_file_sha256": plan.identity_plan.manifest_file_sha256,
+        "training_receipt": str(plan.identity_plan.training_receipt),
+        "training_receipt_sha256": plan.identity_plan.training_receipt_sha256,
+        "checkpoint_path": str(checkpoint["path"]),
+        "checkpoint_sha256": str(checkpoint["sha256"]),
+        "checkpoint_bytes": int(checkpoint["bytes"]),
+    }
+    for name, value in values.items():
+        object.__setattr__(record, name, value)
+    object.__setattr__(record, "_seal_digest", _record_digest(_record_payload(record)))
+    return record
+
+
+def _reject_injected_popen(popen_factory: Any) -> None:
+    if popen_factory is not None and popen_factory is not _REAL_POPEN:
+        _fail("caller-supplied, fake, or injected Popen is not admitted")
+
+
+# No runtime capability is installed in this diagnostic-only module.  There
+# is intentionally no mutable token that a caller can monkeypatch into an
+# executable authority; enabling the future path requires a separately
+# reviewed code change.
 
 
 def _run_popen_wait(
     plan: AuditedPlan,
     *,
-    terminal_capability: object,
-    popen_factory: Callable[..., Any] = subprocess.Popen,
+    terminal_capability: object | None = None,
+    popen_factory: Any = None,
     admission_probe: Callable[[int], Mapping[str, Any]] | None = None,
 ) -> _ExecutionRecord:
-    """The only process-start path; process proof requires real Popen/wait."""
+    """The only future process-start path; currently always fail-closed.
 
-    if terminal_capability is not _TERMINAL_CLOSURE_TOKEN:
-        _fail("terminal HDF5/artifact capability is not admitted; Popen was not attempted")
+    The argument is retained solely so tests and callers receive an explicit
+    rejection when they try to inject a factory or self-declared capability.
+    The current contract has no executable capability, so this function never
+    reaches the real Popen call and never creates an output log.
+    """
+
+    _reject_injected_popen(popen_factory)
+    if terminal_capability is not None:
+        _fail("caller-supplied terminal capability cannot authorize Popen")
+    _fail(
+        f"{TERMINAL_CAPABILITY_SCHEMA} is not admitted; no real Popen/wait witness "
+        "can be created in the diagnostic-only boundary"
+    )
+
+    # The code below documents the reviewed future lifecycle.  It is
+    # unreachable while the capability is uninstalled; importantly, it uses
+    # the captured real Popen object and the sealed record factory rather than
+    # any caller-provided process fields or factory.
     _revalidate_for_execution(plan, admission_probe=admission_probe)
     log_path = plan.outputs["log"]
     try:
@@ -811,7 +934,7 @@ def _run_popen_wait(
     environment = os.environ.copy()
     environment.update({str(k): str(v) for k, v in plan.identity_plan.env.items()})
     try:
-        process = popen_factory(
+        process = _REAL_POPEN(
             list(plan.identity_plan.command),
             cwd=str(plan.identity_plan.root),
             env=environment,
@@ -823,8 +946,8 @@ def _run_popen_wait(
         )
     finally:
         log_file.close()
-    if type(process) is not subprocess.Popen:
-        _fail("popen_factory did not return the real subprocess.Popen object")
+    if type(process) is not _REAL_POPEN:
+        _fail("real Popen did not return the exact captured subprocess.Popen type")
     if tuple(process.args) != tuple(plan.identity_plan.command):
         _fail("real Popen args drifted from the exact audited command")
     if process.pid <= 0:
@@ -836,37 +959,52 @@ def _run_popen_wait(
         _fail("Popen.returncode drifted from the observed wait return code")
     if process.poll() != wait_returncode:
         _fail("Popen process was not observed reaped after wait")
-    return _ExecutionRecord(
-        _seal=_EXECUTION_SEAL,
-        plan_digest=plan.audited_plan_digest,
-        process=process,
-        evaluator_pid=int(process.pid),
-        evaluator_returncode=int(process.returncode),
-        wait_returncode=int(wait_returncode),
-        waited=True,
-        command=tuple(plan.identity_plan.command),
-        cwd=str(plan.identity_plan.root),
-        env_overrides=dict(plan.identity_plan.env),
-    )
+    return _new_execution_record(plan, process, wait_returncode)
 
 
 def build_process_proof(plan: AuditedPlan, record: Any) -> dict[str, Any]:
-    """Mint proof only from the sealed real-Popen/wait execution record."""
+    """Mint proof only from an immutable, sealed real-Popen/wait witness."""
 
-    if type(record) is not _ExecutionRecord or record._seal is not _EXECUTION_SEAL:
+    if type(record) is not _ExecutionRecord:
         _fail("process proof requires a sealed record from the real Popen/wait path")
+    try:
+        sealed_digest = record._seal_digest
+        payload_digest = _record_digest(_record_payload(record))
+    except (AttributeError, KeyError, TypeError, ValueError) as error:
+        _fail(f"process proof sealed record is malformed: {error}")
+    if sealed_digest != payload_digest:
+        _fail("process proof sealed record integrity check failed")
     if record.plan_digest != plan.audited_plan_digest:
         _fail("process proof record is bound to a different audited plan")
-    if type(record.process) is not subprocess.Popen:
-        _fail("process proof process is not the real subprocess.Popen type")
+    if type(record.process) is not _REAL_POPEN:
+        _fail("process proof process is not the captured real subprocess.Popen type")
     if not record.waited:
         _fail("process proof lacks an observed wait lifecycle")
     if record.evaluator_returncode != record.wait_returncode:
         _fail("process proof return codes disagree")
     if record.evaluator_returncode != 0:
         _fail("non-zero evaluator return code cannot produce a successful process proof")
-    if record.command != tuple(plan.identity_plan.command) or record.cwd != str(plan.identity_plan.root):
-        _fail("process proof command/cwd drifted from the audited plan")
+    if record.process.returncode != record.wait_returncode or record.process.poll() != record.wait_returncode:
+        _fail("process proof process was not naturally reaped by the observed wait")
+    expected_checkpoint = plan.identity_plan.checkpoint
+    expected_values = {
+        "command": tuple(plan.identity_plan.command),
+        "command_sha256": plan.exact_command_digest,
+        "cwd": str(plan.identity_plan.root),
+        "env_overrides": dict(plan.identity_plan.env),
+        "namespace": str(plan.namespace),
+        "namespace_nonce": plan.identity_plan.nonce,
+        "manifest_sha256": plan.identity_plan.manifest_sha256,
+        "manifest_file_sha256": plan.identity_plan.manifest_file_sha256,
+        "training_receipt": str(plan.identity_plan.training_receipt),
+        "training_receipt_sha256": plan.identity_plan.training_receipt_sha256,
+        "checkpoint_path": str(expected_checkpoint["path"]),
+        "checkpoint_sha256": str(expected_checkpoint["sha256"]),
+        "checkpoint_bytes": int(expected_checkpoint["bytes"]),
+    }
+    for field, expected in expected_values.items():
+        if getattr(record, field) != expected:
+            _fail(f"process proof {field} drifted from the audited plan")
     return {
         "schema": PROCESS_PROOF_SCHEMA,
         "status": "natural_exit_verified",
@@ -875,8 +1013,15 @@ def build_process_proof(plan: AuditedPlan, record: Any) -> dict[str, Any]:
         "namespace": str(plan.namespace),
         "namespace_nonce": plan.identity_plan.nonce,
         "audited_plan_digest": plan.audited_plan_digest,
+        "manifest_sha256": record.manifest_sha256,
+        "manifest_file_sha256": record.manifest_file_sha256,
+        "training_receipt": record.training_receipt,
+        "training_receipt_sha256": record.training_receipt_sha256,
+        "checkpoint_path": record.checkpoint_path,
+        "checkpoint_sha256": record.checkpoint_sha256,
+        "checkpoint_bytes": record.checkpoint_bytes,
         "command": list(record.command),
-        "command_sha256": plan.exact_command_digest,
+        "command_sha256": record.command_sha256,
         "cwd": record.cwd,
         "env_overrides": dict(record.env_overrides),
         "evaluator_pid": record.evaluator_pid,
@@ -892,17 +1037,18 @@ def execute_plan(
     plan: AuditedPlan,
     *,
     terminal_capability: object | None = None,
-    popen_factory: Callable[..., Any] = subprocess.Popen,
+    popen_factory: Any = None,
     admission_probe: Callable[[int], Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    """Attempt one audited execution; current capability always blocks first."""
+    """Reject all caller-supplied execution authority before any side effect."""
 
-    _revalidate_for_execution(plan, admission_probe=admission_probe)
-    if terminal_capability is None or terminal_capability is not _TERMINAL_CLOSURE_TOKEN:
-        _fail(
-            f"{TERMINAL_CAPABILITY_SCHEMA} is not admitted; terminal HDF5/artifact identity "
-            "closure is not safely implemented, so no evaluator was started"
-        )
+    _reject_injected_popen(popen_factory)
+    if terminal_capability is not None:
+        _fail("caller-supplied terminal capability cannot authorize Popen")
+    _fail(
+        f"{TERMINAL_CAPABILITY_SCHEMA} is not admitted; terminal HDF5/artifact identity "
+        "closure is not safely implemented, so no evaluator was started"
+    )
     record = _run_popen_wait(
         plan,
         terminal_capability=terminal_capability,
