@@ -4,6 +4,7 @@ import base64
 import copy
 import hashlib
 import json
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -316,3 +317,8 @@ def test_checked_in_report_describes_the_same_non_authorizing_boundary() -> None
     assert authorization["registry_mutation"] == 0
     assert authorization["ledger_mutation"] == 0
     assert authorization["gate_mutation"] == 0
+
+    report_path = Path(__file__).resolve().parents[1] / (
+        "reports/F8-R008-TRUSTED-AUTHORITY-WORKER-RUNTIME-IDENTITY-CONTRACT-V1.json"
+    )
+    assert json.loads(report_path.read_text(encoding="utf-8")) == report

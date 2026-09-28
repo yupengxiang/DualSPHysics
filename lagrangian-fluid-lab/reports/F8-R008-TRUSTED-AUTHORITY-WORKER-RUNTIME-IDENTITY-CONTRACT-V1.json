@@ -1,0 +1,56 @@
+{
+  "constraints": {
+    "algorithm": "ed25519",
+    "epoch": "current bounded epoch; every root/key/role record must match it",
+    "identity_domain": "CORE-F8-R008-AUTHORITY-WORKER-RUNTIME-IDENTITY-V1",
+    "revocation": "root, active key, authority, worker, and runtime must all be explicitly not revoked",
+    "root_domain": "CORE-F8-R008-TRUST-ROOT-ACTIVE-KEY-V1"
+  },
+  "contract_schema": "core.cfd.f8.r008_trusted_authority_worker_runtime_identity_contract.v1",
+  "input_boundary": {
+    "candidate_key_self_attestation": "reject",
+    "default_trust_root": false,
+    "explicit_trust_root_argument_required": true,
+    "input_origin": "synthetic_fixture",
+    "mode": "bounded_in_memory_raw_json",
+    "synthetic_only": true
+  },
+  "integration_boundary": {
+    "attempt_ledger_and_attestation": "not consumed or mutated",
+    "execution_readiness_v8": "not rewritten or promoted",
+    "registry_ledger_gate": "not read for mutation and never written",
+    "supervisor_session_claims": "not replaced; candidate-key consistency remains non-trusted",
+    "syscall_policy_contract": "not rewritten or executed"
+  },
+  "non_authorizing_boundary": {
+    "T1_numerical": false,
+    "capability_minted": false,
+    "diagnostic_only": true,
+    "execution_authority": false,
+    "formal_admission": false,
+    "gate_mutation": 0,
+    "ledger_mutation": 0,
+    "qualification_credit": 0,
+    "readiness_pass": false,
+    "registry_mutation": 0
+  },
+  "prohibited_operations": [
+    "root_or_sudo",
+    "ptrace_or_seccomp",
+    "fanotify_or_kernel_probe",
+    "native_or_solver",
+    "worker_gpu_or_queue"
+  ],
+  "record_id": "f8-r008-trusted-identity-contract-report-v1",
+  "schema": "core.cfd.f8.r008_trusted_identity_contract_report.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "synthetic_only_non_authorizing_contract_design",
+  "verified_chain": [
+    "explicit_trust_root_to_active_key",
+    "active_key_to_authority_worker_runtime_assertion",
+    "authority_to_worker_parent_binding",
+    "worker_to_runtime_parent_binding",
+    "worker_and_runtime_host_identity_binding",
+    "worker_and_runtime_code_identity_binding"
+  ]
+}

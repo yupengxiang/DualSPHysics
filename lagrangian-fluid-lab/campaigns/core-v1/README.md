@@ -103,6 +103,26 @@ credit. It does not write registry, ledger, denominator, or gate state; a
 successful preflight is not a substitute for the trusted root review and the
 final `core_campaign.py` independent-reproduction verifier.
 
+### F8/R008 synthetic trusted identity contract v1
+
+`scripts/f8_r008_trusted_authority_worker_runtime_identity_v1.py` is an
+additive, synthetic-only verifier for the currently missing authority/worker/
+runtime identity chain. It requires an explicit caller-supplied synthetic
+trust-root public key and verifies root-to-active-key authorization, fixed
+Ed25519 domains, bounded epoch and explicit non-revocation, role/host/runtime
+identity hashes, and authority-to-worker-to-runtime parent bindings. There is
+no default trust root and an active/candidate key cannot self-attest.
+
+The verifier accepts only bounded in-memory canonical JSON bytes and never
+consumes or writes the supervisor-session claims, attempt ledger/attestation,
+readiness receipt, syscall policy, registry, ledger, denominator, or gate. A
+valid synthetic chain remains `diagnostic_only=true`,
+`capability_minted=false`, `readiness_pass=false`, `T1_numerical=false`, and
+zero qualification credit. It performs no root/sudo, ptrace/seccomp,
+fanotify/kernel probe, native/solver/worker/GPU/queue operation. The static
+contract report is
+[`F8/R008 trusted identity contract`](../../reports/F8-R008-TRUSTED-AUTHORITY-WORKER-RUNTIME-IDENTITY-CONTRACT-V1-2026-09-28.zh-CN.md).
+
 ## Current evidence interpretation
 
 - F3 remains the previously registered numerical recipe; importing it does not
