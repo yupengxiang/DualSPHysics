@@ -102,11 +102,11 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, Path]:
     return root, manifest_path, historical_path
 
 
-def _v3_paths() -> dict[int, Path]:
+def _v3_paths(tmp_path: Path) -> dict[int, Path]:
     return {
-        seed: Path(
-            f"/tmp/f3-graph_residual500-hidden16-currentmanifest-seed{seed}-20260929-v3-training.json"
-        )
+        seed: tmp_path
+        / "fixture-receipts"
+        / f"f3-graph_residual500-hidden16-currentmanifest-seed{seed}-20260929-v3-training.json"
         for seed in matrix.SEEDS
     }
 
@@ -119,7 +119,7 @@ def _build(tmp_path: Path, *, paths=None, statuses=None):
         historical_matrix=historical,
         plan_date="20260929",
         python_executable=Path("/tmp/fake-python"),
-        seed_receipts=_v3_paths() if paths is None else paths,
+        seed_receipts=_v3_paths(tmp_path) if paths is None else paths,
         seed_statuses={seed: "running" for seed in matrix.SEEDS} if statuses is None else statuses,
     )
 
@@ -216,7 +216,7 @@ def test_v3_running_explicit_paths_are_fail_closed_without_opening_receipts(tmp_
 
 
 def test_complete_v3_receipts_bind_current_manifest_config_and_case_matrix(tmp_path: Path) -> None:
-    paths = _v3_paths()
+    paths = _v3_paths(tmp_path)
     running = _build(tmp_path, paths=paths)
     _write_receipts(running, paths)
     root, manifest, historical = _fixture(tmp_path)
@@ -242,7 +242,7 @@ def test_complete_v3_receipts_bind_current_manifest_config_and_case_matrix(tmp_p
 
 
 def test_receipt_config_drift_is_rejected_and_remains_zero_credit(tmp_path: Path) -> None:
-    paths = _v3_paths()
+    paths = _v3_paths(tmp_path)
     report = _build(tmp_path, paths=paths)
     _write_receipts(report, paths)
     payload = json.loads(paths[29].read_text(encoding="utf-8"))
@@ -273,7 +273,7 @@ def test_namespace_nonce_and_command_identity_tampering_fails_closed(tmp_path: P
 
 def test_cli_json_markdown_and_read_only_verify(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     root, manifest, historical = _fixture(tmp_path)
-    paths = _v3_paths()
+    paths = _v3_paths(tmp_path)
     output = root / "reports/F3-GRAPH-RESIDUAL-HIDDEN16-CURRENT-MANIFEST-CASE-MATRIX-TEST.json"
     markdown = root / "reports/F3-GRAPH-RESIDUAL-HIDDEN16-CURRENT-MANIFEST-CASE-MATRIX-TEST.zh-CN.md"
     result = matrix.main(
