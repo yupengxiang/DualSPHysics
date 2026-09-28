@@ -118,6 +118,12 @@ def test_complete_receipts_bind_manifest_raw_and_canonical_identity_without_open
     assert checkpoint.read_bytes().startswith(b"binary sentinel")
 
 
+def test_current_contract_defers_milestones_and_validation_for_diagnostic_training() -> None:
+    assert intake.STATIC_CONFIG["evaluate_milestones"] is False
+    assert intake.STATIC_CONFIG["milestone_evaluation_mode"] == "deferred"
+    assert intake.STATIC_CONFIG["validation_every"] == 0
+
+
 def test_default_v3_receipt_paths_fail_closed_when_receipts_are_missing(tmp_path: Path) -> None:
     manifest, _, _ = _manifest(tmp_path)
     paths = {seed: tmp_path / f"f3-graph_raw500-hidden16-currentmanifest-seed{seed}-20260929-v3-training.json" for seed in intake.SEEDS}
@@ -149,6 +155,7 @@ def test_nonterminal_declared_status_is_rejected_before_receipt_read(tmp_path: P
     ("mutation", "needle"),
     [
         (lambda payload: payload["config"].update({"hidden": 32}), "config.hidden"),
+        (lambda payload: payload["config"].update({"evaluate_milestones": True}), "config.evaluate_milestones"),
         (lambda payload: payload.update({"unexpected": True}), "unknown field"),
         (lambda payload: payload.update({"credit": 1}), "credit"),
         (lambda payload: payload.update({"evidence_status": "running"}), "evidence_status"),
