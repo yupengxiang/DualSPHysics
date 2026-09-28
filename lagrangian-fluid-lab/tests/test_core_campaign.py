@@ -4,9 +4,34 @@ import sys
 from pathlib import Path
 
 from scripts import core_campaign as campaign
-from scripts.core_campaign import completion, load_evidence, main
+from scripts.core_campaign import completion, denominator_consistency, load_evidence, main
 from scripts.core_runtime import atomic_json, canonical, digest
 import pytest
+
+
+@pytest.mark.parametrize(
+    ("minimum", "required", "observed", "expected"),
+    [
+        (432, 288, 0, {
+            "missing_target": 432,
+            "missing_registered": 288,
+            "unregistered": 144,
+        }),
+        (432, 288, 144, {
+            "missing_target": 288,
+            "missing_registered": 144,
+            "unregistered": 144,
+        }),
+        (288, 0, 0, {
+            "missing_target": 288,
+            "missing_registered": 0,
+            "unregistered": 288,
+        }),
+    ],
+)
+def test_denominator_consistency_keeps_target_registered_and_unregistered_gaps_distinct(
+        minimum, required, observed, expected):
+    assert denominator_consistency(minimum, required, observed) == expected
 
 
 def test_empty_queue_never_completes_product(tmp_path):

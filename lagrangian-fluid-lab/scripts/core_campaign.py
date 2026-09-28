@@ -32,6 +32,32 @@ MINIMUM_MATERIAL_CASE_RUNS = 288
 QUALIFICATION_SCHEMA = "core.qualification.v1"
 
 
+def denominator_consistency(minimum, required, observed):
+    """Return the three distinct gap semantics for a case-run denominator.
+
+    ``minimum`` is the final Core target, ``required`` is the currently
+    registered denominator, and ``observed`` is valid evidence inside that
+    registered denominator.  The arithmetic is intentionally kept in one
+    place so the legacy completion field names cannot silently swap target
+    and registered gaps.  Gaps remain non-negative for an over-complete
+    denominator, preserving the existing completion behavior.
+    """
+    counts = {"minimum": minimum, "required": required, "observed": observed}
+    if any(not isinstance(value, int) or isinstance(value, bool) or value < 0
+           for value in counts.values()):
+        raise ValueError("denominator counts must be non-negative integers")
+    if observed > required:
+        raise ValueError("observed denominator cannot exceed required denominator")
+    missing_target = minimum - observed
+    missing_registered = required - observed
+    unregistered = minimum - required
+    return {
+        "missing_target": max(0, missing_target),
+        "missing_registered": max(0, missing_registered),
+        "unregistered": max(0, unregistered),
+    }
+
+
 def expected_runs():
     return [f"{model}-seed{seed}" for model in MODELS for seed in SEEDS]
 
@@ -822,10 +848,14 @@ def completion(registry, data_root):
     # empty until two T2 families are accepted) and the Core target denominator.
     # Only the intersection with ``required_t2`` is observed product evidence;
     # arbitrary receipts must never shrink the target denominator.
-    registered_t1_missing = len(required_t1 - registered_received["T1"])
-    registered_material_missing = len(required_t2 - registered_received["T2_macro"])
-    target_t1_missing = max(0, MINIMUM_T1_CASE_RUNS - len(registered_received["T1"]))
-    target_material_missing = max(0, MINIMUM_MATERIAL_CASE_RUNS - len(registered_received["T2_macro"]))
+    t1_denominator = denominator_consistency(
+        MINIMUM_T1_CASE_RUNS, len(required_t1), len(registered_received["T1"]))
+    material_denominator = denominator_consistency(
+        MINIMUM_MATERIAL_CASE_RUNS, len(required_t2), len(registered_received["T2_macro"]))
+    registered_t1_missing = t1_denominator["missing_registered"]
+    registered_material_missing = material_denominator["missing_registered"]
+    target_t1_missing = t1_denominator["missing_target"]
+    target_material_missing = material_denominator["missing_target"]
     completion_gaps = []
     if not checks["three_t1_families"]:
         completion_gaps.append({
@@ -890,8 +920,8 @@ def completion(registry, data_root):
             "missing_registered_t1_case_runs": registered_t1_missing,
             "missing_target_t1_case_runs": target_t1_missing,
             "missing_target_material_case_runs": target_material_missing,
-            "unregistered_t1_case_runs": max(0, MINIMUM_T1_CASE_RUNS - len(required_t1)),
-            "unregistered_material_case_runs": max(0, MINIMUM_MATERIAL_CASE_RUNS - len(required_t2)),
+            "unregistered_t1_case_runs": t1_denominator["unregistered"],
+            "unregistered_material_case_runs": material_denominator["unregistered"],
             "unregistered_t1_evidence_case_runs": len(unregistered_received["T1"]),
             "unregistered_material_evidence_case_runs": len(unregistered_received["T2_macro"]),
             "required_t1_case_runs": len(required_t1),
