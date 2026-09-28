@@ -1,0 +1,314 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "authorization": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "formal": false,
+    "formal_eligible": false,
+    "qualification": false,
+    "qualification_credit": 0
+  },
+  "checks": [
+    {
+      "check": "exact_seed_set",
+      "expected": [
+        17,
+        29,
+        43
+      ],
+      "observed": [
+        17,
+        29,
+        43
+      ],
+      "passed": true,
+      "reason": "receipt slots must contain exactly seeds 17, 29, and 43"
+    },
+    {
+      "check": "manifest_file_sha256",
+      "expected": "lowercase SHA-256 of the actual manifest file",
+      "observed": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "passed": true,
+      "reason": "manifest bytes were hashed from the explicit path"
+    },
+    {
+      "check": "manifest_canonical_sha256",
+      "expected": "lowercase SHA-256 of canonical manifest JSON",
+      "observed": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "passed": true,
+      "reason": "manifest payload identity matches CoreDataset.manifest_sha256 semantics"
+    },
+    {
+      "check": "manifest_sha_matches_receipts",
+      "expected": [
+        "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768"
+      ],
+      "observed": [
+        "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768"
+      ],
+      "passed": true,
+      "reason": "each receipt config.manifest_sha256 equals the canonical manifest payload identity"
+    },
+    {
+      "check": "checkpoint_receipt_identity",
+      "expected": "three independent seed identities",
+      "observed": {
+        "checkpoint_path_sha256": [
+          [
+            "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-20260929-checkpoint.pt",
+            "c1e41d29900e02e50fcf0a0435f8c3427e41761d8114858235c82a8847cf8897"
+          ],
+          [
+            "/tmp/f3-mlp500-hidden16-currentmanifest-seed29-20260929-checkpoint.pt",
+            "be4a789a3d769f97fb6fb535afa09c5d3df545ee5ffde6d533732008caf93a04"
+          ],
+          [
+            "/tmp/f3-mlp500-hidden16-currentmanifest-seed43-20260929-checkpoint.pt",
+            "8916c6a710f0e567767df986ed9e810d6df8503e4a46b8a1970ea1fcadb202ac"
+          ]
+        ],
+        "receipt_sha256": [
+          "e5a90ab6784e57dcc4d573ba5e3608ed81c6f67d77fc3d39e285b201c63352a3",
+          "1f112bbfb52f7649417f749a5216c5ad57c386f2f7506c3d08a0a5cc14122b3a",
+          "758a56942b57ddcb6dd23f44b586f6c5d7f5afc61b97c5b94bb75f9a534aa4c3"
+        ],
+        "run_ids": [
+          "f3-mlp500-hidden16-currentmanifest-seed17-20260929",
+          "f3-mlp500-hidden16-currentmanifest-seed29-20260929",
+          "f3-mlp500-hidden16-currentmanifest-seed43-20260929"
+        ]
+      },
+      "passed": true,
+      "reason": "run, receipt-file, and declared checkpoint identities are unique and internally bound"
+    },
+    {
+      "check": "mlp_hidden16_completed_protocol",
+      "expected": {
+        "completed": true,
+        "hidden": 16,
+        "model": "mlp",
+        "updates": 500
+      },
+      "observed": [
+        {
+          "completed": true,
+          "hidden": 16,
+          "model": "mlp",
+          "seed": 17,
+          "updates": 500
+        },
+        {
+          "completed": true,
+          "hidden": 16,
+          "model": "mlp",
+          "seed": 29,
+          "updates": 500
+        },
+        {
+          "completed": true,
+          "hidden": 16,
+          "model": "mlp",
+          "seed": 43,
+          "updates": 500
+        }
+      ],
+      "passed": true,
+      "reason": "all receipts declare completed MLP hidden16 500-update training"
+    },
+    {
+      "check": "zero_credit_non_authorizing",
+      "expected": true,
+      "observed": true,
+      "passed": true,
+      "reason": "all accepted receipt metadata remains diagnostic-only and zero-credit"
+    }
+  ],
+  "credit": 0,
+  "diagnostic_only": true,
+  "errors": [],
+  "fail_closed": false,
+  "formal": false,
+  "formal_eligible": false,
+  "formal_training_runs_counted": 0,
+  "hidden": 16,
+  "input_boundary": {
+    "bounded_json_only": true,
+    "checkpoint_content_opened": false,
+    "gpu_started": false,
+    "hdf5_content_opened": false,
+    "history_summary_read": false,
+    "ledger_read": false,
+    "manifest_content_opened": true,
+    "matrix_v1_read": false,
+    "registry_read": false,
+    "solver_started": false
+  },
+  "manifest": {
+    "bytes": 93710,
+    "canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "opened": true,
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "schema": "core.dataset.v2",
+    "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+  },
+  "model": "mlp",
+  "observed_at_utc": "2026-09-28T20:03:11.824401+00:00",
+  "qualification": false,
+  "qualification_credit": 0,
+  "report_id": "f3-mlp-hidden16-current-manifest-training-evidence-v1",
+  "runs": [
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "checkpoint_identity": {
+          "bytes": 64380,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-20260929-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "c1e41d29900e02e50fcf0a0435f8c3427e41761d8114858235c82a8847cf8897",
+          "update": 500
+        },
+        "completed": true,
+        "hidden": 16,
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model": "mlp",
+        "receipt_identity": {
+          "bytes": 10075,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-20260929-training.json",
+          "sha256": "e5a90ab6784e57dcc4d573ba5e3608ed81c6f67d77fc3d39e285b201c63352a3"
+        },
+        "run_id": "f3-mlp500-hidden16-currentmanifest-seed17-20260929",
+        "schema": "core.training.v1",
+        "seed": 17,
+        "updates": 500,
+        "zero_credit": {
+          "T1_numerical": false,
+          "T2_macro": false,
+          "T2_path": false,
+          "credit": 0,
+          "diagnostic_only": true,
+          "formal": false
+        }
+      },
+      "seed": 17,
+      "source": {
+        "bytes": 10075,
+        "opened": true,
+        "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-20260929-training.json",
+        "schema": "core.training.v1",
+        "sha256": "e5a90ab6784e57dcc4d573ba5e3608ed81c6f67d77fc3d39e285b201c63352a3"
+      },
+      "status": "bound"
+    },
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "checkpoint_identity": {
+          "bytes": 64380,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed29-20260929-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "be4a789a3d769f97fb6fb535afa09c5d3df545ee5ffde6d533732008caf93a04",
+          "update": 500
+        },
+        "completed": true,
+        "hidden": 16,
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model": "mlp",
+        "receipt_identity": {
+          "bytes": 10076,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed29-20260929-training.json",
+          "sha256": "1f112bbfb52f7649417f749a5216c5ad57c386f2f7506c3d08a0a5cc14122b3a"
+        },
+        "run_id": "f3-mlp500-hidden16-currentmanifest-seed29-20260929",
+        "schema": "core.training.v1",
+        "seed": 29,
+        "updates": 500,
+        "zero_credit": {
+          "T1_numerical": false,
+          "T2_macro": false,
+          "T2_path": false,
+          "credit": 0,
+          "diagnostic_only": true,
+          "formal": false
+        }
+      },
+      "seed": 29,
+      "source": {
+        "bytes": 10076,
+        "opened": true,
+        "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed29-20260929-training.json",
+        "schema": "core.training.v1",
+        "sha256": "1f112bbfb52f7649417f749a5216c5ad57c386f2f7506c3d08a0a5cc14122b3a"
+      },
+      "status": "bound"
+    },
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "checkpoint_identity": {
+          "bytes": 64316,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed43-20260929-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "8916c6a710f0e567767df986ed9e810d6df8503e4a46b8a1970ea1fcadb202ac",
+          "update": 500
+        },
+        "completed": true,
+        "hidden": 16,
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model": "mlp",
+        "receipt_identity": {
+          "bytes": 10079,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed43-20260929-training.json",
+          "sha256": "758a56942b57ddcb6dd23f44b586f6c5d7f5afc61b97c5b94bb75f9a534aa4c3"
+        },
+        "run_id": "f3-mlp500-hidden16-currentmanifest-seed43-20260929",
+        "schema": "core.training.v1",
+        "seed": 43,
+        "updates": 500,
+        "zero_credit": {
+          "T1_numerical": false,
+          "T2_macro": false,
+          "T2_path": false,
+          "credit": 0,
+          "diagnostic_only": true,
+          "formal": false
+        }
+      },
+      "seed": 43,
+      "source": {
+        "bytes": 10079,
+        "opened": true,
+        "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed43-20260929-training.json",
+        "schema": "core.training.v1",
+        "sha256": "758a56942b57ddcb6dd23f44b586f6c5d7f5afc61b97c5b94bb75f9a534aa4c3"
+      },
+      "status": "bound"
+    }
+  ],
+  "schema": "core.f3.mlp.hidden16.current_manifest_training_evidence.v1",
+  "scope_note": "additive bounded current-manifest diagnostic intake; no formal/T1/T2/credit authority",
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "side_effects": {
+    "checkpoint_opened": false,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "hdf5_opened": false,
+    "history_summary_mutation": 0,
+    "ledger_mutation": 0,
+    "matrix_v1_mutation": 0,
+    "registry_mutation": 0,
+    "runtime_started": false
+  },
+  "source_bound": true,
+  "status": "diagnostic_bound",
+  "t1_case_runs_counted": 0,
+  "t2_macro_families_counted": 0,
+  "updates": 500
+}
