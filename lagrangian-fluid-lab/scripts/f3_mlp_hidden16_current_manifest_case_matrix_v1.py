@@ -386,7 +386,7 @@ def _validate_training(
         _exact(payload, key, 0, "training_evidence")
     _exact(payload, "diagnostic_only", True, "training_evidence")
     authorization = _mapping(payload.get("authorization"), "training_evidence.authorization")
-    _zero_credit(authorization, "training_evidence.authorization")
+    _zero_credit(authorization, "training_evidence.authorization", require_diagnostic=False)
     _exact(authorization, "formal", False, "training_evidence.authorization")
 
     manifest = _mapping(payload.get("manifest"), "training_evidence.manifest")

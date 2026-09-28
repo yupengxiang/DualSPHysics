@@ -215,6 +215,15 @@ def test_build_report_covers_exact_32_case_by_3_seed_matrix(tmp_path: Path) -> N
     matrix.validate_report(report)
 
 
+def test_training_authorization_may_omit_redundant_diagnostic_flag(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    payload = json.loads(Path(fixture["training"]).read_text(encoding="utf-8"))
+    payload["authorization"].pop("diagnostic_only")
+    _write_json(Path(fixture["training"]), payload)
+    report = _build(fixture)
+    assert report["training_identity"]["source_bound"] is True
+
+
 def test_plan_commands_bind_case_split_outputs_and_gpu_slot(tmp_path: Path) -> None:
     report = _build(_fixture(tmp_path))
     first = report["plans"][0]
