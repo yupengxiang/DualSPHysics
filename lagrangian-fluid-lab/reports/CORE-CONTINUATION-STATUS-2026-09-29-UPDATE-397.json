@@ -1,0 +1,132 @@
+{
+  "schema": "core.continuation.status.v1",
+  "report_id": "core-continuation-status-2026-09-29-update-397",
+  "observed_at": "2026-09-29T06:26:15+08:00",
+  "status": "continuing_fail_closed",
+  "policy": {
+    "subagent_model": "gpt-5.6-luna",
+    "reasoning_effort": "max",
+    "parallel_delegation": true,
+    "coarse_to_fine_execution": true,
+    "historical_records_rewritten": false,
+    "policy_entry_verified": "lagrangian-fluid-lab/campaigns/core-v1/agent-policy.json"
+  },
+  "commits": [
+    "2a7aee4e",
+    "1a0bb38a",
+    "92ca5674",
+    "7ea82487",
+    "3108b151",
+    "66f3b527"
+  ],
+  "completed_units": {
+    "graph_raw_full835_rollout_contract": {
+      "commit": "1a0bb38a",
+      "status": "blocked_fail_closed",
+      "training_receipts": "0/3",
+      "launch_allowed": false,
+      "formal": false,
+      "credit": 0
+    },
+    "graph_residual_full835_rollout_contract": {
+      "commit": "2a7aee4e",
+      "status": "blocked_fail_closed",
+      "training_receipts": "0/3",
+      "launch_allowed": false,
+      "formal": false,
+      "credit": 0
+    },
+    "fixture_namespace_isolation": {
+      "commit": "92ca5674",
+      "status": "verified",
+      "matrix_tests": 17,
+      "production_tmp_receipts_created_by_tests": 0
+    },
+    "graph_raw_training_intake_contract": {
+      "commit": "7ea82487",
+      "status": "verified",
+      "contract_fix": "bind deferred validation flags emitted by the real diagnostic command",
+      "specialized_tests": 13
+    },
+    "graph_residual_training_intake_contract": {
+      "commit": "3108b151",
+      "status": "verified",
+      "contract_fix": "accept bounded core_learning producer metadata while retaining strict identity/evidence/zero-credit checks",
+      "specialized_tests": 14
+    },
+    "current_graph_training_evidence": {
+      "commit": "66f3b527",
+      "raw_report": {
+        "path": "lagrangian-fluid-lab/reports/F3-GRAPH-RAW-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN2.json",
+        "sha256": "a34479e8ceab6b5d3c3bce67262105923172143736b3ea8766d50d338343d432",
+        "status": "diagnostic_bound",
+        "source_bound": true
+      },
+      "residual_report": {
+        "path": "lagrangian-fluid-lab/reports/F3-GRAPH-RESIDUAL-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN5.json",
+        "sha256": "8e0b02063b0d213a3762d5c1f02ec8e1194b31ef81b5f85ec6544e987da5d7b9",
+        "status": "diagnostic_bound",
+        "source_bound": true
+      },
+      "formal_training_runs_counted": 0,
+      "credit": 0
+    }
+  },
+  "diagnostic_training": {
+    "manifest_raw_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "manifest_canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "models": ["graph_raw", "graph_residual"],
+    "hidden": 16,
+    "seeds": [17, 29, 43],
+    "requested_updates": 500,
+    "observed_updates": "500/500 each",
+    "gpu_ids": [2, 3, 4, 5, 6, 7],
+    "status": "completed_diagnostic_only",
+    "terminal_receipts": "6/6",
+    "loss_finite": true,
+    "neighbor_truncation_fraction": 0.0,
+    "runs": [
+      {"model": "graph_raw", "seed": 17, "loss_mse": 0.07728372514247894, "elapsed_seconds": 2340.336526850937, "receipt_sha256": "8b142b38ea078b2fe3d64521cf2f7e1d34de7bf153bff12f06d00ebe65feb73a"},
+      {"model": "graph_raw", "seed": 29, "loss_mse": 0.27171146869659424, "elapsed_seconds": 2318.3464360688813, "receipt_sha256": "3fb54b82079d925dea7b21fd2db9b6df6a02da1cf7244176f5fef95eb682cc94"},
+      {"model": "graph_raw", "seed": 43, "loss_mse": 0.17583727836608887, "elapsed_seconds": 2323.181903319899, "receipt_sha256": "018f4eecf09ba0d1aaf0ff916519ea683d7424d4091d0093e2a32a6f8abb5ef3"},
+      {"model": "graph_residual", "seed": 17, "loss_mse": 0.05289722606539726, "elapsed_seconds": 2484.6887818160467, "receipt_sha256": "b2c18d08c5fd80387694ad8220ad63a492541ca862e01985e94624dec695b8a4"},
+      {"model": "graph_residual", "seed": 29, "loss_mse": 0.2109590470790863, "elapsed_seconds": 2274.7508640880696, "receipt_sha256": "603b5e5360e3f8f574f485f8fe3953a9cbe9d180a2d614ff27f00010e23b7907"},
+      {"model": "graph_residual", "seed": 43, "loss_mse": 0.2622066140174866, "elapsed_seconds": 2281.89824494184, "receipt_sha256": "7ecf2e0a1a1415477f2fec3aa03e46df5dca974f145a7ecf18921b843d933b80"}
+    ],
+    "formal_training_runs_counted": 0,
+    "credit": 0,
+    "registry_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "existing_jobs_stopped_or_restarted": false
+  },
+  "verification": {
+    "combined_recent_tests_passed": 71,
+    "py_compile": true,
+    "json_verify": true,
+    "git_diff_check": true,
+    "formal_workload_started": false,
+    "rollout_batch_executor_started": false,
+    "checkpoint_content_opened_by_intake": false,
+    "hdf5_content_opened_by_intake": false,
+    "progress_used_as_terminal": false
+  },
+  "core_formal_gates": {
+    "can_finalize": false,
+    "t1_families": ["F3", "F4"],
+    "macro_t2_families": [],
+    "formal_training_runs": [],
+    "missing_training_runs": [
+      "graph_raw-seed17", "graph_raw-seed29", "graph_raw-seed43",
+      "graph_residual-seed17", "graph_residual-seed29", "graph_residual-seed43",
+      "mlp-seed17", "mlp-seed29", "mlp-seed43"
+    ],
+    "missing_t1_case_runs": 288,
+    "missing_material_case_runs": 288,
+    "missing_target_t1_case_runs": 432,
+    "missing_target_material_case_runs": 288,
+    "independent_reproduction": false,
+    "credit": 0
+  }
+}
