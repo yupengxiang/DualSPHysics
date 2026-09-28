@@ -385,6 +385,26 @@ def _python_executable(path: Path) -> None:
     _input_snapshot(path, "Python executable", allow_leaf_symlink=True)
 
 
+def _venv_site_packages(python: Path) -> str | None:
+    """Return the venv package directory needed by a proc-fd interpreter.
+
+    Executing the resolved interpreter through ``/proc/self/fd/N`` preserves
+    the binary identity but hides the original ``.venv/bin/python`` path from
+    Python's venv detection.  Explicitly binding the venv site-packages path
+    keeps imports identical to the dry-run interpreter without weakening the
+    stable-FD input boundary.  Synthetic unit-test roots may not contain a
+    venv package directory, so absence remains an intentional no-override
+    case; an existing unsafe path fails closed.
+    """
+
+    version = f"python{sys.version_info.major}.{sys.version_info.minor}"
+    candidate = python.parent.parent / "lib" / version / "site-packages"
+    if not os.path.lexists(candidate):
+        return None
+    _directory_snapshot(candidate, "venv site-packages")
+    return str(candidate)
+
+
 def _collision(path: Path, name: str) -> None:
     """Reject every existing output, including dangling symlinks and hardlinks."""
 
@@ -1245,6 +1265,14 @@ def build_plan(
         "--output", str(outputs["evaluation"]), "--diagnostic",
     )
     env = {"CUDA_VISIBLE_DEVICES": str(gpu_index), "PYTHONDONTWRITEBYTECODE": "1"}
+    site_packages = _venv_site_packages(python)
+    if site_packages is not None:
+        inherited_pythonpath = os.environ.get("PYTHONPATH")
+        env["PYTHONPATH"] = (
+            site_packages
+            if not inherited_pythonpath
+            else os.pathsep.join((site_packages, inherited_pythonpath))
+        )
     command_sha = _canonical_digest({"argv": list(command), "cwd": str(root), "env_overrides": env})
     return RolloutPlan(
         root=root,

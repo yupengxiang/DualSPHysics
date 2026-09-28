@@ -1203,14 +1203,24 @@ def _canonical_command_digests(
         "--progress-output", str(outputs["progress"]),
         "--output", str(outputs["evaluation"]), "--diagnostic",
     )
+    site_packages = (
+        root / ".venv" / "lib"
+        / f"python{sys.version_info.major}.{sys.version_info.minor}"
+        / "site-packages"
+    )
+    env_overrides = {
+        "PYTHONDONTWRITEBYTECODE": "1",
+    }
+    if os.path.lexists(site_packages):
+        env_overrides["PYTHONPATH"] = str(site_packages)
     return frozenset(
         _canonical_digest(
             {
                 "argv": list(command),
                 "cwd": str(root),
                 "env_overrides": {
+                    **env_overrides,
                     "CUDA_VISIBLE_DEVICES": str(gpu_index),
-                    "PYTHONDONTWRITEBYTECODE": "1",
                 },
             }
         )
