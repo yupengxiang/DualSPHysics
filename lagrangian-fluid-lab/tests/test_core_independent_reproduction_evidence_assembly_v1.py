@@ -186,3 +186,10 @@ def test_report_is_json_serializable() -> None:
     report = assembly.build_report()
     encoded = json.dumps(report, sort_keys=True, ensure_ascii=False)
     assert json.loads(encoded)["assembly_envelope"]["schema"] == assembly.SCHEMA
+
+
+def test_committed_json_report_matches_recomputed_report() -> None:
+    report_path = Path(__file__).resolve().parents[1] / (
+        "reports/CORE-INDEPENDENT-REPRODUCTION-EVIDENCE-ASSEMBLY-V1-2026-09-28.json"
+    )
+    assert json.loads(report_path.read_text(encoding="utf-8")) == assembly.build_report()
