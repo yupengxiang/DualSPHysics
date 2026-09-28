@@ -1,0 +1,396 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "authorization": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "diagnostic_only": true,
+    "formal": false,
+    "formal_eligible": false,
+    "qualification": false,
+    "qualification_credit": 0
+  },
+  "checks": [
+    {
+      "check": "exact_seed_set",
+      "expected": [
+        17,
+        29,
+        43
+      ],
+      "observed": [
+        17,
+        29,
+        43
+      ],
+      "passed": true,
+      "reason": "receipt paths must contain exactly seeds 17, 29, and 43"
+    },
+    {
+      "check": "manifest_raw_identity",
+      "expected": "SHA-256 of the explicit manifest file",
+      "observed": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "passed": true,
+      "reason": "raw manifest bytes were bounded-read and hashed"
+    },
+    {
+      "check": "manifest_canonical_identity",
+      "expected": "SHA-256 of canonical manifest JSON",
+      "observed": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "passed": true,
+      "reason": "canonical manifest payload identity was computed"
+    },
+    {
+      "check": "manifest_canonical_sha_matches_receipts",
+      "expected": [
+        "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768"
+      ],
+      "observed": [
+        "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768"
+      ],
+      "passed": true,
+      "reason": "each receipt config.manifest_sha256 equals the current canonical manifest identity"
+    },
+    {
+      "check": "common_graph_residual_config",
+      "expected": true,
+      "observed": true,
+      "passed": true,
+      "reason": "all accepted receipts share one graph_residual hidden16 v3 configuration"
+    },
+    {
+      "check": "identity_unique_per_seed",
+      "expected": "three unique seed identities",
+      "observed": {
+        "checkpoint_path_sha256": [
+          [
+            "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed17-20260929-v3-checkpoint.pt",
+            "2156f71d5b712f6ffaac9df6176875725aa735c3c0b1a872c9cf2ba68f8d4c00"
+          ],
+          [
+            "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed29-20260929-v3-checkpoint.pt",
+            "86eae167b91aa390874a75de8cdaad97f85c780d497c3b0a5c54d7881cc89e92"
+          ],
+          [
+            "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed43-20260929-v3-checkpoint.pt",
+            "e945606faf64b630b4328de2321bf1fde36cd76619efab574985516806edbf08"
+          ]
+        ],
+        "receipt_sha256": [
+          "b2c18d08c5fd80387694ad8220ad63a492541ca862e01985e94624dec695b8a4",
+          "603b5e5360e3f8f574f485f8fe3953a9cbe9d180a2d614ff27f00010e23b7907",
+          "7ecf2e0a1a1415477f2fec3aa03e46df5dca974f145a7ecf18921b843d933b80"
+        ],
+        "run_ids": [
+          "f3-graph_residual500-hidden16-currentmanifest-seed17-20260929-v3",
+          "f3-graph_residual500-hidden16-currentmanifest-seed29-20260929-v3",
+          "f3-graph_residual500-hidden16-currentmanifest-seed43-20260929-v3"
+        ]
+      },
+      "passed": true,
+      "reason": "run, receipt, and declared checkpoint identities are unique per seed"
+    },
+    {
+      "check": "zero_credit_non_authorizing",
+      "expected": true,
+      "observed": true,
+      "passed": true,
+      "reason": "all accepted training metadata remains diagnostic-only and zero-credit"
+    }
+  ],
+  "credit": 0,
+  "diagnostic_only": true,
+  "errors": [],
+  "expected_contract": {
+    "bounded_manifest_and_receipt_json_only": true,
+    "checkpoint_declared_identity_only": true,
+    "hidden": 16,
+    "model_kind": "graph_residual",
+    "parameter_count": 6086,
+    "plan_date": "20260929",
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "updates": 500,
+    "v3_run_id_suffix": "-v3",
+    "zero_credit_only": true
+  },
+  "fail_closed": false,
+  "formal": false,
+  "formal_eligible": false,
+  "formal_training_runs_counted": 0,
+  "input_boundary": {
+    "bounded_manifest_json_opened": true,
+    "bounded_training_receipt_json_opened": 3,
+    "checkpoint_content_opened": false,
+    "checkpoint_lstat_performed": false,
+    "evaluation_content_opened": false,
+    "gpu_started": false,
+    "hdf5_content_opened": false,
+    "progress_content_opened": false,
+    "queue_started": false,
+    "runtime_started": false,
+    "trajectory_content_opened": false
+  },
+  "manifest": {
+    "bytes": 93710,
+    "canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "formal_release": false,
+    "opened": true,
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "raw_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "schema": "core.dataset.v2"
+  },
+  "observed_at_utc": "2026-09-28T22:24:35.883435+00:00",
+  "qualification": false,
+  "qualification_credit": 0,
+  "report_id": "f3-graph-residual-hidden16-current-manifest-training-evidence-v1",
+  "runs": [
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "bytes": 10343,
+        "checkpoint": {
+          "bytes": 164841,
+          "observed": true,
+          "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed17-20260929-v3-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "2156f71d5b712f6ffaac9df6176875725aa735c3c0b1a872c9cf2ba68f8d4c00",
+          "update": 500
+        },
+        "formal_eligible": false,
+        "hidden": 16,
+        "initialization_parameter_digest": "ce74cb93b1144cf872fce13810c07e9cb14101ca1fe807b458ee1317bca53e89",
+        "manifest_file_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model": "graph_residual",
+        "model_kind": "graph_residual",
+        "normalization_identity_sha256": "4c7a988bbda1eb9f0597808c879ddf986446b461ecc653d1ac884aa8891cec1d",
+        "opened": true,
+        "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed17-20260929-v3-training.json",
+        "qualification_credit": 0,
+        "receipt": {
+          "bytes": 10343,
+          "opened": true,
+          "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed17-20260929-v3-training.json",
+          "sha256": "b2c18d08c5fd80387694ad8220ad63a492541ca862e01985e94624dec695b8a4"
+        },
+        "residual_prior_identity_sha256": "0056a78a6baef20a050b15ff0ef11312a14e84850fb5945743f21d31ce7f944f",
+        "run_id": "f3-graph_residual500-hidden16-currentmanifest-seed17-20260929-v3",
+        "schema": "core.training.v1",
+        "seed": 17,
+        "sha256": "b2c18d08c5fd80387694ad8220ad63a492541ca862e01985e94624dec695b8a4",
+        "shared_config": {
+          "centers_per_update": 256,
+          "checkpoint_every": 500,
+          "evaluate_milestones": false,
+          "gradient_clipping": null,
+          "hidden": 16,
+          "history_states": 1,
+          "initialization": "core.paired_initialization.common_encoder_head.v1",
+          "learning_rate": 0.001,
+          "log_every": 100,
+          "manifest_formal_release": false,
+          "max_neighbors": 192,
+          "milestone_evaluation_mode": "deferred",
+          "model_kind": "graph_residual",
+          "normalization_source_split": "train",
+          "optimizer": "Adam",
+          "radius_over_h": 2.0,
+          "target_normalization": "raw_dual_increment_train_shared",
+          "updates": 500,
+          "validation_case_count": 4,
+          "validation_centers": 256,
+          "validation_every": 0,
+          "validation_family_counts": {
+            "F3": 4
+          },
+          "validation_formal_eligible": false,
+          "validation_transition_count": 4
+        },
+        "updates": 500
+      },
+      "seed": 17,
+      "source": {
+        "bytes": 10343,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed17-20260929-v3-training.json",
+        "schema": "core.training.v1",
+        "sha256": "b2c18d08c5fd80387694ad8220ad63a492541ca862e01985e94624dec695b8a4"
+      },
+      "status": "bound"
+    },
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "bytes": 10341,
+        "checkpoint": {
+          "bytes": 164841,
+          "observed": true,
+          "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed29-20260929-v3-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "86eae167b91aa390874a75de8cdaad97f85c780d497c3b0a5c54d7881cc89e92",
+          "update": 500
+        },
+        "formal_eligible": false,
+        "hidden": 16,
+        "initialization_parameter_digest": "4f4f2555e47bd7b61843d4925eba9853c2f5c667c76f56846247c378d42830e3",
+        "manifest_file_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model": "graph_residual",
+        "model_kind": "graph_residual",
+        "normalization_identity_sha256": "4f2234df32a1670c8b1683704cff72bcc038bf3878bb73b2b5349bb1f1de7a34",
+        "opened": true,
+        "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed29-20260929-v3-training.json",
+        "qualification_credit": 0,
+        "receipt": {
+          "bytes": 10341,
+          "opened": true,
+          "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed29-20260929-v3-training.json",
+          "sha256": "603b5e5360e3f8f574f485f8fe3953a9cbe9d180a2d614ff27f00010e23b7907"
+        },
+        "residual_prior_identity_sha256": "1d3920be34d055d43c43f2a9cff7f3255a7d98c5a4f28d27699481a0512de146",
+        "run_id": "f3-graph_residual500-hidden16-currentmanifest-seed29-20260929-v3",
+        "schema": "core.training.v1",
+        "seed": 29,
+        "sha256": "603b5e5360e3f8f574f485f8fe3953a9cbe9d180a2d614ff27f00010e23b7907",
+        "shared_config": {
+          "centers_per_update": 256,
+          "checkpoint_every": 500,
+          "evaluate_milestones": false,
+          "gradient_clipping": null,
+          "hidden": 16,
+          "history_states": 1,
+          "initialization": "core.paired_initialization.common_encoder_head.v1",
+          "learning_rate": 0.001,
+          "log_every": 100,
+          "manifest_formal_release": false,
+          "max_neighbors": 192,
+          "milestone_evaluation_mode": "deferred",
+          "model_kind": "graph_residual",
+          "normalization_source_split": "train",
+          "optimizer": "Adam",
+          "radius_over_h": 2.0,
+          "target_normalization": "raw_dual_increment_train_shared",
+          "updates": 500,
+          "validation_case_count": 4,
+          "validation_centers": 256,
+          "validation_every": 0,
+          "validation_family_counts": {
+            "F3": 4
+          },
+          "validation_formal_eligible": false,
+          "validation_transition_count": 4
+        },
+        "updates": 500
+      },
+      "seed": 29,
+      "source": {
+        "bytes": 10341,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed29-20260929-v3-training.json",
+        "schema": "core.training.v1",
+        "sha256": "603b5e5360e3f8f574f485f8fe3953a9cbe9d180a2d614ff27f00010e23b7907"
+      },
+      "status": "bound"
+    },
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "bytes": 10339,
+        "checkpoint": {
+          "bytes": 164777,
+          "observed": true,
+          "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed43-20260929-v3-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "e945606faf64b630b4328de2321bf1fde36cd76619efab574985516806edbf08",
+          "update": 500
+        },
+        "formal_eligible": false,
+        "hidden": 16,
+        "initialization_parameter_digest": "8bc6b9b9b11df237be1fb8c203941d659ced805a30fd0dd1c6eb81258c8e5368",
+        "manifest_file_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model": "graph_residual",
+        "model_kind": "graph_residual",
+        "normalization_identity_sha256": "7b3fdc679418cf3cd1e39615665fe349306152f3aad4ce7f2fb2d2bbb3cf0213",
+        "opened": true,
+        "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed43-20260929-v3-training.json",
+        "qualification_credit": 0,
+        "receipt": {
+          "bytes": 10339,
+          "opened": true,
+          "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed43-20260929-v3-training.json",
+          "sha256": "7ecf2e0a1a1415477f2fec3aa03e46df5dca974f145a7ecf18921b843d933b80"
+        },
+        "residual_prior_identity_sha256": "2fc55c2be287e32b89eb702bf622d1ce3a8284825b6c150f1db00c35d2abd735",
+        "run_id": "f3-graph_residual500-hidden16-currentmanifest-seed43-20260929-v3",
+        "schema": "core.training.v1",
+        "seed": 43,
+        "sha256": "7ecf2e0a1a1415477f2fec3aa03e46df5dca974f145a7ecf18921b843d933b80",
+        "shared_config": {
+          "centers_per_update": 256,
+          "checkpoint_every": 500,
+          "evaluate_milestones": false,
+          "gradient_clipping": null,
+          "hidden": 16,
+          "history_states": 1,
+          "initialization": "core.paired_initialization.common_encoder_head.v1",
+          "learning_rate": 0.001,
+          "log_every": 100,
+          "manifest_formal_release": false,
+          "max_neighbors": 192,
+          "milestone_evaluation_mode": "deferred",
+          "model_kind": "graph_residual",
+          "normalization_source_split": "train",
+          "optimizer": "Adam",
+          "radius_over_h": 2.0,
+          "target_normalization": "raw_dual_increment_train_shared",
+          "updates": 500,
+          "validation_case_count": 4,
+          "validation_centers": 256,
+          "validation_every": 0,
+          "validation_family_counts": {
+            "F3": 4
+          },
+          "validation_formal_eligible": false,
+          "validation_transition_count": 4
+        },
+        "updates": 500
+      },
+      "seed": 43,
+      "source": {
+        "bytes": 10339,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed43-20260929-v3-training.json",
+        "schema": "core.training.v1",
+        "sha256": "7ecf2e0a1a1415477f2fec3aa03e46df5dca974f145a7ecf18921b843d933b80"
+      },
+      "status": "bound"
+    }
+  ],
+  "schema": "core.f3.graph_residual.hidden16.current_manifest_training_evidence.v1",
+  "scope_note": "bounded current manifest and training receipt metadata only; checkpoint/HDF5/trajectory/progress are never opened; diagnostic-only and zero-credit",
+  "side_effects": {
+    "completion_writes": 0,
+    "denominator_writes": 0,
+    "gate_writes": 0,
+    "ledger_writes": 0,
+    "processes_restarted": 0,
+    "processes_started": 0,
+    "processes_stopped": 0,
+    "registry_writes": 0
+  },
+  "source_bound": true,
+  "status": "diagnostic_bound",
+  "t1_case_runs_counted": 0,
+  "t2_macro_families_counted": 0
+}

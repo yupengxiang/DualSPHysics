@@ -1,0 +1,358 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "authorization": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "formal": false,
+    "formal_eligible": false,
+    "qualification": false,
+    "qualification_credit": 0
+  },
+  "checks": [
+    {
+      "check": "exact_seed_set",
+      "expected": [
+        17,
+        29,
+        43
+      ],
+      "observed": [
+        17,
+        29,
+        43
+      ],
+      "passed": true,
+      "reason": "receipt slots must contain exactly seeds 17, 29, and 43"
+    },
+    {
+      "check": "manifest_raw_identity",
+      "expected": "actual manifest file SHA-256",
+      "observed": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "passed": true,
+      "reason": "raw manifest bytes were hashed from the explicit path"
+    },
+    {
+      "check": "manifest_canonical_identity",
+      "expected": "canonical manifest SHA-256",
+      "observed": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "passed": true,
+      "reason": "canonical manifest payload identity was computed without opening dataset content"
+    },
+    {
+      "check": "manifest_canonical_and_raw_cross_binding",
+      "expected": {
+        "bytes": 93710,
+        "canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "raw_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+      },
+      "observed": [
+        "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768"
+      ],
+      "passed": true,
+      "reason": "every accepted run carries the actual manifest raw and canonical identities"
+    },
+    {
+      "check": "unique_run_receipt_checkpoint_identity",
+      "expected": "three independent seed identities",
+      "observed": {
+        "checkpoint_path_sha256": [
+          [
+            "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed17-20260929-v3-checkpoint.pt",
+            "1e191bf26505db380c05712b00c099c0ff6f303954065dc02d5da7a13b9ace6b"
+          ],
+          [
+            "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed29-20260929-v3-checkpoint.pt",
+            "d7014bb654f43a2e8a0a82dcd1ac2602aaf4d8e334fbbdbd34f725d4efd480dc"
+          ],
+          [
+            "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed43-20260929-v3-checkpoint.pt",
+            "d9b7ff43433ff8732e551a0eacf75f7d862a5c267c3ce0f01ee52efafec69386"
+          ]
+        ],
+        "receipt_sha256": [
+          "8b142b38ea078b2fe3d64521cf2f7e1d34de7bf153bff12f06d00ebe65feb73a",
+          "3fb54b82079d925dea7b21fd2db9b6df6a02da1cf7244176f5fef95eb682cc94",
+          "018f4eecf09ba0d1aaf0ff916519ea683d7424d4091d0093e2a32a6f8abb5ef3"
+        ],
+        "run_ids": [
+          "f3-graph_raw500-hidden16-currentmanifest-seed17-20260929-v3",
+          "f3-graph_raw500-hidden16-currentmanifest-seed29-20260929-v3",
+          "f3-graph_raw500-hidden16-currentmanifest-seed43-20260929-v3"
+        ]
+      },
+      "passed": true,
+      "reason": "run_id, receipt-file, and declared checkpoint identities are unique"
+    },
+    {
+      "check": "graph_raw_hidden16_completed_protocol",
+      "expected": {
+        "completed": true,
+        "hidden": 16,
+        "model": "graph_raw",
+        "updates": 500
+      },
+      "observed": [
+        {
+          "completed": true,
+          "hidden": 16,
+          "model": "graph_raw",
+          "seed": 17,
+          "updates": 500
+        },
+        {
+          "completed": true,
+          "hidden": 16,
+          "model": "graph_raw",
+          "seed": 29,
+          "updates": 500
+        },
+        {
+          "completed": true,
+          "hidden": 16,
+          "model": "graph_raw",
+          "seed": 43,
+          "updates": 500
+        }
+      ],
+      "passed": true,
+      "reason": "all accepted receipts declare completed graph_raw hidden16 500-update training"
+    },
+    {
+      "check": "zero_credit_non_authorizing",
+      "expected": true,
+      "observed": true,
+      "passed": true,
+      "reason": "all accepted receipt metadata remains diagnostic-only and zero-credit"
+    }
+  ],
+  "credit": 0,
+  "diagnostic_only": true,
+  "errors": [],
+  "fail_closed": false,
+  "formal": false,
+  "formal_eligible": false,
+  "formal_training_runs_counted": 0,
+  "hidden": 16,
+  "input_boundary": {
+    "bounded_json_only": true,
+    "bounded_manifest_json_opened": true,
+    "bounded_training_receipts_json_opened": 3,
+    "checkpoint_content_opened": false,
+    "checkpoint_lstat_performed": false,
+    "gpu_started": false,
+    "hdf5_content_opened": false,
+    "ledger_read": false,
+    "progress_content_opened": false,
+    "registry_read": false,
+    "solver_started": false,
+    "trajectory_content_opened": false
+  },
+  "manifest": {
+    "bytes": 93710,
+    "canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "dataset_id": "F3_registered32_core_native_v2",
+    "opened": true,
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "schema": "core.dataset.v2",
+    "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+  },
+  "model": "graph_raw",
+  "observed_at_utc": "2026-09-28T22:21:04.652865+00:00",
+  "qualification": false,
+  "qualification_credit": 0,
+  "report_id": "f3-graph-raw-hidden16-current-manifest-training-evidence-v1",
+  "runs": [
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "T1_numerical": false,
+        "T2_macro": false,
+        "T2_path": false,
+        "checkpoint_identity": {
+          "bytes": 163948,
+          "path": "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed17-20260929-v3-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "1e191bf26505db380c05712b00c099c0ff6f303954065dc02d5da7a13b9ace6b",
+          "update": 500
+        },
+        "completed": true,
+        "config_identity": {
+          "hidden": 16,
+          "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+          "model_kind": "graph_raw",
+          "run_id": "f3-graph_raw500-hidden16-currentmanifest-seed17-20260929-v3",
+          "updates": 500
+        },
+        "credit": 0,
+        "diagnostic_only": true,
+        "formal": false,
+        "formal_eligible": false,
+        "hidden": 16,
+        "manifest_identity": {
+          "bytes": 93710,
+          "canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+          "raw_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+        },
+        "model": "graph_raw",
+        "qualification": false,
+        "qualification_credit": 0,
+        "receipt_identity": {
+          "bytes": 10143,
+          "path": "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed17-20260929-v3-training.json",
+          "sha256": "8b142b38ea078b2fe3d64521cf2f7e1d34de7bf153bff12f06d00ebe65feb73a"
+        },
+        "run_id": "f3-graph_raw500-hidden16-currentmanifest-seed17-20260929-v3",
+        "seed": 17,
+        "status": "bound",
+        "updates": 500
+      },
+      "seed": 17,
+      "source": {
+        "bytes": 10143,
+        "opened": true,
+        "path": "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed17-20260929-v3-training.json",
+        "schema": "core.training.v1",
+        "sha256": "8b142b38ea078b2fe3d64521cf2f7e1d34de7bf153bff12f06d00ebe65feb73a"
+      },
+      "status": "bound"
+    },
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "T1_numerical": false,
+        "T2_macro": false,
+        "T2_path": false,
+        "checkpoint_identity": {
+          "bytes": 163884,
+          "path": "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed29-20260929-v3-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "d7014bb654f43a2e8a0a82dcd1ac2602aaf4d8e334fbbdbd34f725d4efd480dc",
+          "update": 500
+        },
+        "completed": true,
+        "config_identity": {
+          "hidden": 16,
+          "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+          "model_kind": "graph_raw",
+          "run_id": "f3-graph_raw500-hidden16-currentmanifest-seed29-20260929-v3",
+          "updates": 500
+        },
+        "credit": 0,
+        "diagnostic_only": true,
+        "formal": false,
+        "formal_eligible": false,
+        "hidden": 16,
+        "manifest_identity": {
+          "bytes": 93710,
+          "canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+          "raw_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+        },
+        "model": "graph_raw",
+        "qualification": false,
+        "qualification_credit": 0,
+        "receipt_identity": {
+          "bytes": 10144,
+          "path": "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed29-20260929-v3-training.json",
+          "sha256": "3fb54b82079d925dea7b21fd2db9b6df6a02da1cf7244176f5fef95eb682cc94"
+        },
+        "run_id": "f3-graph_raw500-hidden16-currentmanifest-seed29-20260929-v3",
+        "seed": 29,
+        "status": "bound",
+        "updates": 500
+      },
+      "seed": 29,
+      "source": {
+        "bytes": 10144,
+        "opened": true,
+        "path": "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed29-20260929-v3-training.json",
+        "schema": "core.training.v1",
+        "sha256": "3fb54b82079d925dea7b21fd2db9b6df6a02da1cf7244176f5fef95eb682cc94"
+      },
+      "status": "bound"
+    },
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "T1_numerical": false,
+        "T2_macro": false,
+        "T2_path": false,
+        "checkpoint_identity": {
+          "bytes": 163884,
+          "path": "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed43-20260929-v3-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "d9b7ff43433ff8732e551a0eacf75f7d862a5c267c3ce0f01ee52efafec69386",
+          "update": 500
+        },
+        "completed": true,
+        "config_identity": {
+          "hidden": 16,
+          "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+          "model_kind": "graph_raw",
+          "run_id": "f3-graph_raw500-hidden16-currentmanifest-seed43-20260929-v3",
+          "updates": 500
+        },
+        "credit": 0,
+        "diagnostic_only": true,
+        "formal": false,
+        "formal_eligible": false,
+        "hidden": 16,
+        "manifest_identity": {
+          "bytes": 93710,
+          "canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+          "raw_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+        },
+        "model": "graph_raw",
+        "qualification": false,
+        "qualification_credit": 0,
+        "receipt_identity": {
+          "bytes": 10143,
+          "path": "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed43-20260929-v3-training.json",
+          "sha256": "018f4eecf09ba0d1aaf0ff916519ea683d7424d4091d0093e2a32a6f8abb5ef3"
+        },
+        "run_id": "f3-graph_raw500-hidden16-currentmanifest-seed43-20260929-v3",
+        "seed": 43,
+        "status": "bound",
+        "updates": 500
+      },
+      "seed": 43,
+      "source": {
+        "bytes": 10143,
+        "opened": true,
+        "path": "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed43-20260929-v3-training.json",
+        "schema": "core.training.v1",
+        "sha256": "018f4eecf09ba0d1aaf0ff916519ea683d7424d4091d0093e2a32a6f8abb5ef3"
+      },
+      "status": "bound"
+    }
+  ],
+  "schema": "core.f3.graph_raw.hidden16.current_manifest_training_evidence.v1",
+  "scope_note": "additive bounded graph_raw current-manifest training-evidence intake; no formal/T1/T2/credit authority",
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "side_effects": {
+    "checkpoint_opened": false,
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "hdf5_opened": false,
+    "ledger_mutation": 0,
+    "progress_opened": false,
+    "registry_mutation": 0,
+    "runtime_started": false
+  },
+  "source_bound": true,
+  "status": "diagnostic_bound",
+  "t1_case_runs_counted": 0,
+  "t2_macro_families_counted": 0,
+  "updates": 500
+}
