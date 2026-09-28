@@ -60,6 +60,7 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
 import json
 import re
 import sys
+import time
 from pathlib import Path
 
 
@@ -106,6 +107,7 @@ identity = {
     "validator": {"path": str(validator), "sha256": "5" * 64, "bytes": validator.stat().st_size},
 }
 identity_path.write_text(json.dumps(identity, sort_keys=True), encoding="utf-8")
+time.sleep(2.0)
 """,
         encoding="utf-8",
     )
