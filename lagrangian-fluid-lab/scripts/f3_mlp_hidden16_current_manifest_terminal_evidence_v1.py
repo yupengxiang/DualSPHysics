@@ -67,7 +67,12 @@ MAX_STRING_BYTES = 2 * 1024 * 1024
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 NONCE_RE = re.compile(r"^[0-9a-f]{32}$")
 RUN_ID_RE = re.compile(
-    r"^f3-mlp500-hidden16-currentmanifest-seed(17|29|43)-20[0-9]{6}$"
+    r"^f3-mlp500-hidden16-currentmanifest-seed(?P<seed>17|29|43)-(?P<date>20[0-9]{6})$"
+)
+NAMESPACE_RE = re.compile(
+    r"^f3-mlp500-hidden16-currentmanifest-seed(17|29|43)-full835-"
+    r"(?:(?:nonce(?P<legacy_nonce>[0-9a-f]{32}))|(?:"
+    r"(?P<launcher_date>20[0-9]{6})-(?P<launcher_nonce>[0-9a-f]{32})))$"
 )
 
 ZERO_CREDIT_KEYS = (
@@ -405,6 +410,21 @@ def _checkpoint(value: Any, name: str) -> dict[str, Any]:
     return {"schema": "core.checkpoint.v1", **artifact, "update": UPDATES}
 
 
+def _checkpoint_artifact(value: Any, name: str) -> dict[str, Any]:
+    """Normalize terminal receipts whose legacy identity omits checkpoint schema."""
+    item = _mapping(value, name)
+    _unknown(item, frozenset({"schema", "path", "sha256", "bytes", "update"}), name)
+    if "schema" in item:
+        _exact(item, "schema", "core.checkpoint.v1", name)
+    if "update" in item:
+        _exact(item, "update", UPDATES, name)
+    return _artifact(
+        {"path": item.get("path"), "sha256": item.get("sha256"), "bytes": item.get("bytes")},
+        name,
+        suffix=".pt",
+    )
+
+
 def _validate_run_id(value: Any, seed: int, name: str) -> str:
     run_id = _string(value, name)
     match = RUN_ID_RE.fullmatch(run_id)
@@ -420,15 +440,21 @@ def _validate_nonce(value: Any, name: str) -> str:
     return nonce
 
 
-def _validate_namespace(value: Any, seed: int, nonce: str, name: str) -> str:
+def _validate_namespace(value: Any, seed: int, nonce: str, run_id: str, name: str) -> str:
     namespace = _string(value, name)
     _absolute_path(namespace, name)
-    lowered = namespace.lower()
-    basename = Path(namespace).name.lower()
-    if f"seed{seed}" not in basename or "full835" not in basename or f"nonce{nonce}" not in basename:
+    basename = Path(namespace).name
+    match = NAMESPACE_RE.fullmatch(basename)
+    if match is None or int(match.group(1)) != seed:
         _fail(f"{name} is not bound to seed{seed}, full835, and namespace nonce")
-    if "currentmanifest" not in basename and "current-manifest" not in basename:
-        _fail(f"{name} is not marked current-manifest")
+    matched_nonce = match.group("legacy_nonce") or match.group("launcher_nonce")
+    if matched_nonce != nonce:
+        _fail(f"{name} is not bound to seed{seed}, full835, and namespace nonce")
+    namespace_date = match.group("launcher_date")
+    if namespace_date is not None:
+        run_match = RUN_ID_RE.fullmatch(run_id)
+        if run_match is None or namespace_date != run_match.group("date"):
+            _fail(f"{name} date is not bound to run ID")
     if any(word in basename for word in ("running", "partial", "pending", "legacy")):
         _fail(f"{name} contains a non-terminal namespace marker")
     return namespace
@@ -493,7 +519,7 @@ def _validate_training(
         "T1_numerical", "T2_macro", "T2_path", "qualification", "credit",
         "qualification_credit", "formal_training_runs_counted",
         "t1_case_runs_counted", "t2_macro_families_counted", "model", "hidden",
-        "updates", "seeds", "manifest", "runs", "checks", "authorization",
+        "updates", "seeds", "manifest", "runs", "checks", "errors", "authorization",
         "input_boundary", "side_effects", "scope_note",
     })
     _unknown(payload, allowed, name)
@@ -506,6 +532,11 @@ def _validate_training(
     _exact(payload, "hidden", HIDDEN, name)
     _exact(payload, "updates", UPDATES, name)
     _exact(payload, "seeds", list(SEEDS), name)
+    # The current training intake emits ``errors: []``; older diagnostic
+    # fixtures may omit the optional envelope field. If present, it must be
+    # empty so a rejected training report can never be promoted here.
+    if "errors" in payload:
+        _exact(payload, "errors", [], name)
     training_manifest = _mapping(payload.get("manifest"), f"{name}.manifest")
     _unknown(training_manifest, frozenset({"path", "bytes", "sha256", "opened", "schema", "canonical_sha256"}), f"{name}.manifest")
     training_raw = _source_identity(training_manifest, f"{name}.manifest", suffix=".json")
@@ -623,7 +654,7 @@ def _validate_plan(
     if run_id != training["run_id"]:
         _fail(f"{name}.run_id drifts from training evidence")
     nonce = _validate_nonce(payload.get("namespace_nonce"), f"{name}.namespace_nonce")
-    namespace = _validate_namespace(payload.get("output_namespace"), seed, nonce, f"{name}.output_namespace")
+    namespace = _validate_namespace(payload.get("output_namespace"), seed, nonce, run_id, f"{name}.output_namespace")
     _exact(payload, "manifest", manifest["raw"]["path"], name)
     _exact(payload, "manifest_sha256", manifest["canonical"]["sha256"], name)
     _exact(payload, "manifest_file_sha256", manifest["raw"]["sha256"], name)
@@ -694,7 +725,11 @@ def _validate_plan(
     boundary = _mapping(payload.get("input_boundary"), f"{name}.input_boundary")
     _unknown(boundary, frozenset({"bounded_training_receipt_opened", "manifest_content_opened", "checkpoint_content_opened", "evaluation_content_opened", "trajectory_hdf5_opened", "runtime_started", "queue_submissions"}), f"{name}.input_boundary")
     _exact(boundary, "bounded_training_receipt_opened", True, f"{name}.input_boundary")
-    for key in ("manifest_content_opened", "checkpoint_content_opened", "evaluation_content_opened", "trajectory_hdf5_opened", "runtime_started"):
+    # The launcher must read the manifest to bind its raw and canonical
+    # identities into the dry-run plan. The terminal intake itself remains
+    # projection/lstat-only; all heavyweight/runtime inputs stay unopened.
+    _exact(boundary, "manifest_content_opened", True, f"{name}.input_boundary")
+    for key in ("checkpoint_content_opened", "evaluation_content_opened", "trajectory_hdf5_opened", "runtime_started"):
         _exact(boundary, key, False, f"{name}.input_boundary")
     _exact(boundary, "queue_submissions", 0, f"{name}.input_boundary")
     _stat_reference(root, checkpoint["path"], checkpoint["bytes"], f"{name}.checkpoint", suffix=".pt")
@@ -874,8 +909,9 @@ def _validate_process(
     _exact(payload["launcher_start_identity"], "returncode", None, f"{name}.launcher_start_identity") if "returncode" in payload["launcher_start_identity"] else None
     for key, expected in (("manifest_sha256", plan["manifest_sha256"]), ("training_manifest_sha256", plan["manifest_sha256"]), ("training_receipt_sha256", plan["training_receipt_sha256"])):
         _exact(payload, key, expected, name)
-    checkpoint = _checkpoint(payload.get("checkpoint"), f"{name}.checkpoint")
-    if checkpoint != plan["checkpoint"]:
+    checkpoint = _checkpoint_artifact(payload.get("checkpoint"), f"{name}.checkpoint")
+    expected_checkpoint = {key: plan["checkpoint"][key] for key in ("path", "sha256", "bytes")}
+    if checkpoint != expected_checkpoint:
         _fail(f"{name}.checkpoint identity drifts from rollout plan")
     identities: dict[str, dict[str, Any]] = {}
     for key, suffix, expected_path in (("evaluation", ".json", plan["outputs"]["evaluation"]), ("trajectory", ".h5", plan["outputs"]["trajectory"]), ("validator", ".json", plan["outputs"]["validator"])):
@@ -895,8 +931,9 @@ def _validate_artifact_identity(payload: Mapping[str, Any], source: Mapping[str,
     _validate_common_terminal_fields({**payload, "model": MODEL, "hidden": HIDDEN, "updates": UPDATES, "case_id": CASE_ID, "split": SPLIT, "transitions": TRANSITIONS, "frames": FRAMES}, plan, name)
     if source.get("path") != plan["outputs"]["artifact_identity"]:
         _fail(f"{name} source path drifts from rollout plan")
-    checkpoint = _checkpoint(payload.get("checkpoint"), f"{name}.checkpoint")
-    if checkpoint != plan["checkpoint"]:
+    checkpoint = _checkpoint_artifact(payload.get("checkpoint"), f"{name}.checkpoint")
+    expected_checkpoint = {key: plan["checkpoint"][key] for key in ("path", "sha256", "bytes")}
+    if checkpoint != expected_checkpoint:
         _fail(f"{name}.checkpoint identity drifts from rollout plan")
     normalized: dict[str, Any] = {"checkpoint": checkpoint}
     for key, suffix, expected_path in (("evaluation", ".json", plan["outputs"]["evaluation"]), ("trajectory", ".h5", plan["outputs"]["trajectory"]), ("validator", ".json", plan["outputs"]["validator"])):

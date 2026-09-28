@@ -252,7 +252,7 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
             **_zero(),
             "zero_credit_only": True,
             "side_effects": {"processes_started": 0, "processes_stopped": 0, "processes_restarted": 0, "registry_writes": 0, "ledger_writes": 0, "denominator_writes": 0, "gate_writes": 0, "plan_writes": 0},
-            "input_boundary": {"bounded_training_receipt_opened": True, "manifest_content_opened": False, "checkpoint_content_opened": False, "evaluation_content_opened": False, "trajectory_hdf5_opened": False, "runtime_started": False, "queue_submissions": 0},
+            "input_boundary": {"bounded_training_receipt_opened": True, "manifest_content_opened": True, "checkpoint_content_opened": False, "evaluation_content_opened": False, "trajectory_hdf5_opened": False, "runtime_started": False, "queue_submissions": 0},
         }
         plan_path = reports / f"plan-{seed}.json"
         _write_json(plan_path, plan)
@@ -439,6 +439,78 @@ def test_cli_default_without_inputs_is_blocked(tmp_path: Path, capsys: pytest.Ca
     assert output["status"] == "blocked_fail_closed"
     assert output["source_bound"] is False
     assert output["credit"] == 0
+
+
+def test_training_evidence_nonempty_errors_is_rejected(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    payload = json.loads(fixture["training_evidence"].read_text())
+    payload["errors"] = ["unexpected diagnostic error"]
+    fixture["training_evidence"].write_text(json.dumps(payload, sort_keys=True) + "\n")
+
+    report = _build(tmp_path, fixture)
+
+    assert report["status"] == "blocked_fail_closed"
+    assert any("training evidence" in reason for reason in report["blocked_reasons"])
+
+
+def test_actual_launcher_namespace_format_is_accepted_and_bound() -> None:
+    nonce = "f17a9c4e2d6b8f1035c7e1a9d4b6c802"
+    namespace = (
+        "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-full835-"
+        f"20260929-{nonce}"
+    )
+
+    run_id = "f3-mlp500-hidden16-currentmanifest-seed17-20260929"
+    assert intake._validate_namespace(namespace, 17, nonce, run_id, "namespace") == namespace
+
+    with pytest.raises(intake.IntakeError, match="namespace nonce"):
+        intake._validate_namespace(namespace + "0", 17, nonce, run_id, "namespace")
+
+    mismatched_date = namespace.replace("20260929", "20260928")
+    with pytest.raises(intake.IntakeError, match="date"):
+        intake._validate_namespace(mismatched_date, 17, nonce, run_id, "namespace")
+
+    with pytest.raises(intake.IntakeError, match="seed17"):
+        intake._validate_namespace(namespace.upper(), 17, nonce, run_id, "namespace")
+
+
+def test_launcher_manifest_boundary_contract_is_enforced(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    path = fixture["rollout_plans"][17]
+    payload = json.loads(path.read_text())
+    payload["input_boundary"]["manifest_content_opened"] = False
+    _write_json(path, payload)
+
+    report = _build(tmp_path, fixture)
+
+    assert report["status"] == "blocked_fail_closed"
+    assert any("manifest_content_opened" in reason for reason in report["blocked_reasons"])
+
+
+def test_terminal_receipts_accept_legacy_checkpoint_identity_without_schema(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    for kind in ("proofs", "artifacts"):
+        for path in fixture[kind].values():
+            payload = json.loads(path.read_text())
+            payload["checkpoint"].pop("schema")
+            if kind == "proofs":
+                without_digest = dict(payload)
+                without_digest.pop("exit_proof_sha256", None)
+                payload["exit_proof_sha256"] = _sha_bytes(
+                    json.dumps(
+                        without_digest,
+                        ensure_ascii=False,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                        allow_nan=False,
+                    ).encode()
+                )
+            _write_json(path, payload)
+
+    report = _build(tmp_path, fixture)
+
+    assert report["status"] == "terminal_diagnostic_verified"
+    assert report["source_bound"] is True
 
 
 def test_complete_current_manifest_projection_set_is_terminal_diagnostic_only(tmp_path: Path) -> None:
