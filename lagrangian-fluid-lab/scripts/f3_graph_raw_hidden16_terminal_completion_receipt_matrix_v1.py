@@ -204,6 +204,8 @@ def _read_bounded_json(
         raise
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         _fail(f"cannot read strict UTF-8 {name} {path}: {error}")
+    if len(raw) > MAX_JSON_BYTES:
+        _fail(f"{name} exceeds bounded limit {MAX_JSON_BYTES} after read: {path}")
     payload = dict(_mapping(payload, name))
     _check_finite(payload, name)
     return payload, {
@@ -255,8 +257,13 @@ def _declared_checkpoint_path(value: Any, name: str) -> str:
 
 
 def _check_exact(value: Mapping[str, Any], key: str, expected: Any, name: str) -> None:
-    if value.get(key) != expected:
-        _fail(f"{name}.{key} must be {expected!r}; observed {value.get(key)!r}")
+    observed = value.get(key)
+    if isinstance(expected, bool) and type(observed) is not bool:
+        _fail(f"{name}.{key} must be a boolean; observed {observed!r}")
+    if type(expected) is int and type(observed) is not int:
+        _fail(f"{name}.{key} must be an integer; observed {observed!r}")
+    if observed != expected:
+        _fail(f"{name}.{key} must be {expected!r}; observed {observed!r}")
 
 
 def _validate_zero_formal_markers(value: Any, name: str) -> None:
@@ -290,12 +297,41 @@ def _validate_zero_formal_markers(value: Any, name: str) -> None:
             _validate_zero_formal_markers(item, f"{name}[{index}]")
 
 
-def _validate_side_effects(value: Any, name: str) -> None:
+_SECURITY_FALSE_ALIAS_GROUPS: tuple[tuple[str, ...], ...] = (
+    ("manifest_opened", "manifest_content_opened"),
+    ("case_hdf5_opened", "case_hdf5_content_opened", "hdf5_content_opened"),
+    ("checkpoint_opened", "checkpoint_content_opened"),
+    ("trajectory_hdf5_opened", "trajectory_content_opened", "hdf5_content_opened"),
+    ("progress_opened", "progress_content_opened"),
+)
+
+
+def _require_false_alias_group(
+    effects: Mapping[str, Any], aliases: Sequence[str], name: str
+) -> None:
+    present = [key for key in aliases if key in effects]
+    if not present:
+        _fail(f"{name} is missing one of: {', '.join(aliases)}")
+    for key in present:
+        _strict_bool(effects[key], f"{name}.{key}")
+        if effects[key] is not False:
+            _fail(f"{name}.{key} must be false")
+
+
+def _validate_side_effects(
+    value: Any,
+    name: str,
+    *,
+    require_security_fields: bool = False,
+) -> None:
     effects = _mapping(value, name)
     false_fields = {
         "manifest_opened",
+        "manifest_content_opened",
         "case_hdf5_opened",
+        "case_hdf5_content_opened",
         "checkpoint_opened",
+        "checkpoint_content_opened",
         "trajectory_hdf5_opened",
         "trajectory_content_opened",
         "hdf5_content_opened",
@@ -328,14 +364,14 @@ def _validate_side_effects(value: Any, name: str) -> None:
     true_observation_fields = {"evaluation_stream_hashed_only"}
     for key, item in effects.items():
         lowered = key.lower()
-        if key in false_fields:
-            if item is not False:
+        if lowered in false_fields:
+            if type(item) is not bool or item is not False:
                 _fail(f"{name}.{key} must be false")
-        elif key in zero_fields:
+        elif lowered in zero_fields:
             if type(item) is not int or item != 0:
                 _fail(f"{name}.{key} must be integer zero")
-        elif key in true_read_only_fields or key in true_observation_fields:
-            if item is not True:
+        elif lowered in true_read_only_fields or lowered in true_observation_fields:
+            if type(item) is not bool or item is not True:
                 _fail(f"{name}.{key} must be true")
         elif lowered.endswith("_mutation") or lowered.endswith("_submissions"):
             if type(item) is not int or item != 0:
@@ -344,10 +380,42 @@ def _validate_side_effects(value: Any, name: str) -> None:
             if type(item) is not int or item != 0:
                 _fail(f"{name}.{key} must be integer zero")
         elif lowered in {"t1_numerical", "t2_macro", "t2_path"}:
-            if item is not False:
+            if type(item) is not bool or item is not False:
                 _fail(f"{name}.{key} must be false")
-        elif key == "diagnostic_evaluate_started":
+        elif lowered == "diagnostic_evaluate_started":
             _strict_bool(item, f"{name}.{key}")
+    if require_security_fields:
+        for aliases in _SECURITY_FALSE_ALIAS_GROUPS:
+            _require_false_alias_group(effects, aliases, name)
+
+
+def _validate_input_boundary(
+    value: Any,
+    name: str,
+    *,
+    require_security_fields: bool = True,
+) -> None:
+    boundary = _mapping(value, name)
+    false_fields = {
+        key
+        for aliases in _SECURITY_FALSE_ALIAS_GROUPS
+        for key in aliases
+    } | {
+        "runtime_started",
+        "solver_started",
+        "worker_started",
+        "gpu_started",
+    }
+    for key, item in boundary.items():
+        lowered = key.lower()
+        if lowered in false_fields:
+            if type(item) is not bool or item is not False:
+                _fail(f"{name}.{key} must be false")
+    if require_security_fields:
+        for aliases in _SECURITY_FALSE_ALIAS_GROUPS:
+            _require_false_alias_group(boundary, aliases, name)
+    if "queue_submissions" in boundary:
+        _check_exact(boundary, "queue_submissions", 0, name)
 
 
 def _validate_namespace(evaluation_path: str, seed: int, name: str) -> str:
@@ -401,9 +469,14 @@ def _optional_artifact_hash(
     keys: Sequence[str],
     name: str,
 ) -> str:
+    observed: list[str] = []
     for key in keys:
         if key in value:
-            return _sha256(value[key], f"{name}.{key}")
+            observed.append(_sha256(value[key], f"{name}.{key}"))
+    if observed and any(item != observed[0] for item in observed[1:]):
+        _fail(f"{name} contains conflicting SHA-256 aliases")
+    if observed:
+        return observed[0]
     _fail(f"{name} is missing a SHA-256 claim")
 
 
@@ -412,10 +485,61 @@ def _optional_artifact_bytes(
     keys: Sequence[str],
     name: str,
 ) -> int:
+    observed: list[int] = []
     for key in keys:
         if key in value:
-            return _strict_int(value[key], f"{name}.{key}", 1)
+            observed.append(_strict_int(value[key], f"{name}.{key}", 1))
+    if observed and any(item != observed[0] for item in observed[1:]):
+        _fail(f"{name} contains conflicting byte-count aliases")
+    if observed:
+        return observed[0]
     _fail(f"{name} is missing a byte-count claim")
+
+
+def _resolve_checkpoint_update(
+    checkpoint: Mapping[str, Any],
+    seed: int,
+    name: str,
+    *,
+    source_kind: str,
+    runner_training_shape: bool,
+    training_value: Mapping[str, Any],
+    top_level_value: Mapping[str, Any] | None = None,
+    terminal_markers: Mapping[str, Any] | None = None,
+) -> int:
+    if "update" in checkpoint:
+        _check_exact(checkpoint, "update", UPDATES, name)
+        return UPDATES
+
+    # The seed29 runner's bound nested projection is the one explicit legacy
+    # schema exception: its normalized training checkpoint carries path/SHA/
+    # bytes/content_opened but omits checkpoint.update.  The outer runner
+    # schema and training updates field are both validated before accepting
+    # this compatibility binding; no receipt is synthesized or rewritten.
+    if (
+        seed == 29
+        and source_kind == "completion_report_nested_receipt"
+        and runner_training_shape
+    ):
+        _check_exact(training_value, "schema", "core.training.v1", f"{name}.training")
+        _check_exact(training_value, "updates", UPDATES, f"{name}.training")
+        return UPDATES
+
+    # The checked-in seed43 explicit completion receipt exposes update at the
+    # top-level and terminal-marker layers, while identity_bindings.checkpoint
+    # is stat-only and has no nested update field.  Require both layers before
+    # accepting this narrowly scoped shape.
+    if (
+        seed == 43
+        and source_kind == "completion_report_projection"
+        and top_level_value is not None
+        and terminal_markers is not None
+    ):
+        _check_exact(top_level_value, "updates", UPDATES, f"{name}.top_level")
+        _check_exact(terminal_markers, "updates", UPDATES, f"{name}.terminal_markers")
+        return UPDATES
+
+    _fail(f"{name}.update is missing; no schema-scoped compatibility applies")
 
 
 def _validate_nested_terminal_receipt(
@@ -508,18 +632,24 @@ def _validate_nested_terminal_receipt(
         ("sha256", "sha256_claimed"),
         f"{name}.checkpoint",
     )
-    _check_exact(checkpoint, "update", UPDATES, f"{name}.checkpoint")
-    if "content_opened" in checkpoint:
-        _check_exact(checkpoint, "content_opened", False, f"{name}.checkpoint")
+    checkpoint_update = _resolve_checkpoint_update(
+        checkpoint,
+        seed,
+        f"{name}.checkpoint",
+        source_kind=source_kind,
+        runner_training_shape=runner_training_shape,
+        training_value=training_value,
+    )
+    _check_exact(checkpoint, "content_opened", False, f"{name}.checkpoint")
     if "stat_only" in checkpoint:
         _check_exact(checkpoint, "stat_only", True, f"{name}.checkpoint")
-    checkpoint_bytes = None
-    if "bytes" in checkpoint:
-        checkpoint_bytes = _strict_int(checkpoint["bytes"], f"{name}.checkpoint.bytes", 1)
-    elif "bytes_claimed" in checkpoint:
-        checkpoint_bytes = _strict_int(
-            checkpoint["bytes_claimed"], f"{name}.checkpoint.bytes_claimed", 1
-        )
+    checkpoint_bytes = _optional_artifact_bytes(
+        checkpoint,
+        ("bytes", "bytes_claimed"),
+        f"{name}.checkpoint",
+    )
+    if f"seed{seed}" not in checkpoint_path:
+        _fail(f"{name}.checkpoint.path is not bound to seed{seed}")
 
     if runner_training_shape:
         for key, expected in (
@@ -567,9 +697,16 @@ def _validate_nested_terminal_receipt(
         ("updates", UPDATES),
     ):
         _check_exact(training_config, key, expected, f"{name}.training_binding.config")
-    if "max_neighbors" in training_config:
+    if "paired_seed" in training_config:
+        _check_exact(
+            training_config,
+            "paired_seed",
+            seed,
+            f"{name}.training_binding.config",
+        )
+    if training_config.get("max_neighbors") is not None:
         _check_exact(training_config, "max_neighbors", 192, f"{name}.training_binding.config")
-    if "target_normalization" in training_config:
+    if training_config.get("target_normalization") is not None:
         _check_exact(
             training_config,
             "target_normalization",
@@ -601,6 +738,12 @@ def _validate_nested_terminal_receipt(
                 UPDATES,
                 f"{name}.training_binding.checkpoint",
             )
+        elif not (
+            seed == 29
+            and source_kind == "completion_report_nested_receipt"
+            and runner_training_shape
+        ):
+            _fail(f"{name}.training_binding.checkpoint.update is missing")
     if "path" in training_value:
         if training_path != _declared_path(
             training_value.get("path"), f"{name}.training_binding.path", ".json"
@@ -704,18 +847,17 @@ def _validate_nested_terminal_receipt(
         }
 
     side_effects = value.get("side_effects")
-    _validate_side_effects(side_effects, f"{name}.side_effects")
+    _validate_side_effects(
+        side_effects,
+        f"{name}.side_effects",
+        require_security_fields=True,
+    )
     if "input_boundary" in value:
-        boundary = _mapping(value["input_boundary"], f"{name}.input_boundary")
-        for key in (
-            "manifest_opened",
-            "case_hdf5_opened",
-            "checkpoint_opened",
-            "trajectory_hdf5_opened",
-            "progress_opened",
-        ):
-            if key in boundary and boundary[key] is not False:
-                _fail(f"{name}.input_boundary.{key} must be false")
+        _validate_input_boundary(
+            value["input_boundary"],
+            f"{name}.input_boundary",
+            require_security_fields=source_kind != "terminal_evidence_bridge_receipt",
+        )
 
     return {
         "source_kind": source_kind,
@@ -742,7 +884,7 @@ def _validate_nested_terminal_receipt(
             "path": checkpoint_path,
             "bytes": checkpoint_bytes,
             "sha256": checkpoint_sha,
-            "update": UPDATES,
+            "update": checkpoint_update,
         },
         "training": {
             "path": training_path,
@@ -780,48 +922,115 @@ def _validate_nested_terminal_receipt(
 
 def _validate_projection_scope(value: Mapping[str, Any], name: str) -> None:
     _validate_zero_formal_markers(value, name)
-    scope = value.get("scope", value.get("side_effects"))
-    _validate_side_effects(scope, f"{name}.scope")
+    scope = value.get("scope")
+    side_effects = value.get("side_effects")
+    if scope is None and side_effects is None:
+        _fail(f"{name} is missing scope/side_effects")
+    if scope is not None:
+        _validate_side_effects(
+            scope,
+            f"{name}.scope",
+            require_security_fields=True,
+        )
+    if side_effects is not None:
+        _validate_side_effects(
+            side_effects,
+            f"{name}.side_effects",
+            require_security_fields=True,
+        )
     boundary = value.get("input_boundary")
     if boundary is not None:
-        boundary = _mapping(boundary, f"{name}.input_boundary")
-        for key in (
-            "manifest_opened",
-            "case_hdf5_opened",
-            "checkpoint_opened",
-            "trajectory_hdf5_opened",
-            "progress_opened",
-        ):
-            if key in boundary and boundary[key] is not False:
-                _fail(f"{name}.input_boundary.{key} must be false")
-        if "queue_submissions" in boundary and boundary["queue_submissions"] != 0:
-            _fail(f"{name}.input_boundary.queue_submissions must be zero")
+        _validate_input_boundary(
+            boundary,
+            f"{name}.input_boundary",
+            require_security_fields=value.get("schema") != BRIDGE_SCHEMA,
+        )
+
+
+def _required_bool_alias(
+    value: Mapping[str, Any],
+    aliases: Sequence[str],
+    name: str,
+    expected: bool,
+) -> None:
+    present = [key for key in aliases if key in value]
+    if not present:
+        _fail(f"{name} is missing one of: {', '.join(aliases)}")
+    for key in present:
+        _strict_bool(value[key], f"{name}.{key}")
+        if value[key] is not expected:
+            _fail(f"{name}.{key} must be {expected}")
+
+
+def _required_string_alias(
+    value: Mapping[str, Any],
+    aliases: Sequence[str],
+    name: str,
+    expected: str,
+) -> None:
+    present = [key for key in aliases if key in value]
+    if not present:
+        _fail(f"{name} is missing one of: {', '.join(aliases)}")
+    for key in present:
+        if value[key] != expected:
+            _fail(f"{name}.{key} must be {expected!r}")
 
 
 def _artifact_claim(
     value: Mapping[str, Any],
     name: str,
     *,
-    suffix: str,
+    suffix: str | None,
     require_verified_json: bool = False,
     content_opened: bool | None = None,
+    checkpoint_path: bool = False,
+    seed: int | None = None,
 ) -> dict[str, Any]:
-    path = _declared_path(value.get("path"), f"{name}.path", suffix)
+    if checkpoint_path:
+        path = _declared_checkpoint_path(value.get("path"), f"{name}.path")
+    else:
+        path = _declared_path(value.get("path"), f"{name}.path", suffix)
     bytes_claim = _optional_artifact_bytes(value, ("bytes", "claimed_bytes"), name)
     sha = _optional_artifact_hash(value, ("sha256", "claimed_sha256"), name)
-    if value.get("exists") is False or value.get("regular_file") is False:
-        _fail(f"{name} does not identify an existing regular file")
-    if value.get("symlink") is True:
-        _fail(f"{name} is a symlink")
-    if value.get("bytes_match") is False:
-        _fail(f"{name}.bytes_match must be true")
+    _required_bool_alias(value, ("exists", "file_exists"), name, True)
+    _required_bool_alias(value, ("regular_file", "is_regular_file"), name, True)
+    _required_bool_alias(value, ("symlink", "is_symlink"), name, False)
+    _required_bool_alias(value, ("bytes_match", "size_match"), name, True)
+    stat_bytes = _optional_artifact_bytes(
+        value,
+        ("stat_bytes", "observed_bytes", "actual_bytes"),
+        f"{name}.stat",
+    )
+    if stat_bytes != bytes_claim:
+        _fail(f"{name}.stat byte count differs from its claim")
+    if seed is not None and f"seed{seed}" not in path:
+        _fail(f"{name}.path is not bound to seed{seed}")
     if require_verified_json:
-        if value.get("hash_verification") != "verified":
-            _fail(f"{name}.hash_verification must be verified")
-        if value.get("hash_match") is False:
-            _fail(f"{name}.hash_match must be true")
-    if content_opened is not None and value.get("content_opened") is not content_opened:
-        _fail(f"{name}.content_opened must be {content_opened}")
+        _required_string_alias(
+            value,
+            ("hash_verification", "sha256_verification", "hash_status"),
+            name,
+            "verified",
+        )
+        _required_bool_alias(
+            value,
+            ("hash_match", "sha256_match"),
+            name,
+            True,
+        )
+    else:
+        _required_string_alias(
+            value,
+            ("hash_verification", "sha256_verification", "hash_status"),
+            name,
+            "not_read_by_scope",
+        )
+    if content_opened is not None:
+        if "content_opened" not in value:
+            _fail(f"{name}.content_opened is missing")
+        _strict_bool(value["content_opened"], f"{name}.content_opened")
+        if value["content_opened"] is not content_opened:
+            _fail(f"{name}.content_opened must be {content_opened}")
     return {"path": path, "bytes": bytes_claim, "sha256": sha}
 
 
@@ -837,7 +1046,32 @@ def _validate_direct_completion_report(
     match = COMPLETION_SCHEMA_RE.fullmatch(str(value.get("schema")))
     if match is None or int(match.group("seed")) != seed:
         _fail(f"{name}.schema seed mismatch")
-    _check_exact(value, "seed", seed, name)
+    nested = value.get("seed29_terminal_receipt", value.get("terminal_receipt"))
+    runner_outer_shape = (
+        seed == 29
+        and isinstance(nested, Mapping)
+        and isinstance(value.get("target_contract"), Mapping)
+        and "seed" not in value
+    )
+    if runner_outer_shape:
+        target_contract = _mapping(value["target_contract"], f"{name}.target_contract")
+        for key, expected in (
+            ("model_kind", MODEL_KIND),
+            ("seed", seed),
+            ("hidden", HIDDEN),
+            ("updates", UPDATES),
+            ("case_id", CASE_ID),
+            ("split", SPLIT),
+            ("transitions", TRANSITIONS),
+            ("frames", FRAMES),
+            ("terminal_status", "completed"),
+            ("progress_or_pid_is_not_completion", True),
+        ):
+            _check_exact(target_contract, key, expected, f"{name}.target_contract")
+    elif "seed" not in value:
+        _fail(f"{name}.seed is missing")
+    else:
+        _check_exact(value, "seed", seed, name)
     for key, expected in (
         ("model_kind", MODEL_KIND),
         ("hidden", HIDDEN),
@@ -846,7 +1080,10 @@ def _validate_direct_completion_report(
         ("formal_eligible", False),
         ("qualification_credit", 0),
     ):
-        _check_exact(value, key, expected, name)
+        if key in value:
+            _check_exact(value, key, expected, name)
+        elif not (runner_outer_shape and key in {"model_kind", "hidden", "updates"}):
+            _fail(f"{name}.{key} is missing")
     if "source_bound" in value and value["source_bound"] is not True:
         _fail(f"{name}.source_bound must be true")
     if "fail_closed" in value and value["fail_closed"] is not False:
@@ -860,7 +1097,6 @@ def _validate_direct_completion_report(
         _fail(f"{name} is not a terminal bound status")
     _validate_projection_scope(value, name)
 
-    nested = value.get("seed29_terminal_receipt", value.get("terminal_receipt"))
     if isinstance(nested, Mapping):
         training_source = value.get("training_source")
         if training_source is not None:
@@ -902,6 +1138,7 @@ def _validate_direct_completion_report(
         suffix=".json",
         require_verified_json=True,
         content_opened=True,
+        seed=seed,
     )
     evaluation = _artifact_claim(
         _mapping(identities.get("evaluation_receipt"), f"{name}.identity_bindings.evaluation_receipt"),
@@ -909,38 +1146,42 @@ def _validate_direct_completion_report(
         suffix=".json",
         require_verified_json=True,
         content_opened=True,
+        seed=seed,
     )
     checkpoint_value = _mapping(
         identities.get("checkpoint"), f"{name}.identity_bindings.checkpoint"
     )
-    checkpoint_path = _declared_checkpoint_path(
-        checkpoint_value.get("path"), f"{name}.identity_bindings.checkpoint.path"
-    )
-    checkpoint_bytes = _optional_artifact_bytes(
+    checkpoint = _artifact_claim(
         checkpoint_value,
-        ("bytes", "claimed_bytes"),
         f"{name}.identity_bindings.checkpoint",
+        suffix=None,
+        content_opened=False,
+        checkpoint_path=True,
+        seed=seed,
     )
-    checkpoint_sha = _optional_artifact_hash(
+    checkpoint_update = _resolve_checkpoint_update(
         checkpoint_value,
-        ("sha256", "claimed_sha256"),
+        seed,
         f"{name}.identity_bindings.checkpoint",
+        source_kind="completion_report_projection",
+        runner_training_shape=False,
+        training_value={},
+        top_level_value=value,
+        terminal_markers=markers,
     )
-    if checkpoint_value.get("content_opened") is not False:
-        _fail(f"{name}.identity_bindings.checkpoint.content_opened must be false")
-    if checkpoint_value.get("bytes_match") is False:
-        _fail(f"{name}.identity_bindings.checkpoint.bytes_match must be true")
     trajectory = _artifact_claim(
         _mapping(identities.get("trajectory"), f"{name}.identity_bindings.trajectory"),
         f"{name}.identity_bindings.trajectory",
         suffix=".h5",
         content_opened=False,
+        seed=seed,
     )
     validator_claim = _artifact_claim(
         _mapping(identities.get("hdf5_validation"), f"{name}.identity_bindings.hdf5_validation"),
         f"{name}.identity_bindings.hdf5_validation",
         suffix=".json",
         content_opened=False,
+        seed=seed,
     )
     prefix = _validate_namespace(evaluation["path"], seed, f"{name}.evaluation path")
     if trajectory["path"] != prefix + "-trajectory.h5":
@@ -968,10 +1209,10 @@ def _validate_direct_completion_report(
             "future_state_inputs": False,
         },
         "checkpoint": {
-            "path": checkpoint_path,
-            "bytes": checkpoint_bytes,
-            "sha256": checkpoint_sha,
-            "update": UPDATES,
+            "path": checkpoint["path"],
+            "bytes": checkpoint["bytes"],
+            "sha256": checkpoint["sha256"],
+            "update": checkpoint_update,
         },
         "training": {
             "path": training["path"],
@@ -1035,7 +1276,10 @@ def _validate_bridge_report(value: Mapping[str, Any], seed: int) -> dict[str, An
         _fail(f"{name}.seed_matrix seed{seed} is not terminal-bound")
     if row.get("blocked_reasons") not in ([], None):
         _fail(f"{name}.seed_matrix seed{seed} has blocked reasons")
-    _validate_side_effects(row.get("side_effects"), f"{name}.seed_matrix[{seed}].side_effects")
+    _validate_side_effects(
+        row.get("side_effects"),
+        f"{name}.seed_matrix[{seed}].side_effects",
+    )
     receipt = _mapping(
         row.get("terminal_receipt"), f"{name}.seed_matrix[{seed}].terminal_receipt"
     )
@@ -1097,7 +1341,12 @@ def _validate_normalized_projection(
     ):
         _check_exact(config, key, expected, f"{name}.config")
     checkpoint = _mapping(value.get("checkpoint"), f"{name}.checkpoint")
-    _declared_checkpoint_path(checkpoint.get("path"), f"{name}.checkpoint.path")
+    checkpoint_path = _declared_checkpoint_path(
+        checkpoint.get("path"), f"{name}.checkpoint.path"
+    )
+    if f"seed{seed}" not in checkpoint_path:
+        _fail(f"{name}.checkpoint.path is not bound to seed{seed}")
+    _strict_int(checkpoint.get("bytes"), f"{name}.checkpoint.bytes", 1)
     _sha256(checkpoint.get("sha256"), f"{name}.checkpoint.sha256")
     _check_exact(checkpoint, "update", UPDATES, f"{name}.checkpoint")
     training = _mapping(value.get("training"), f"{name}.training")
@@ -1143,6 +1392,12 @@ def _validate_normalized_projection(
             ("trajectory_transitions", TRANSITIONS),
         ):
             _check_exact(validator, key, expected, f"{name}.validator")
+        if value.get("source_kind") == "completion_report_projection":
+            validator_path = _declared_path(
+                validator.get("path"), f"{name}.validator.path", ".json"
+            )
+            if f"seed{seed}" not in validator_path:
+                _fail(f"{name}.validator.path is not bound to seed{seed}")
 
 
 def _check(
@@ -1224,9 +1479,21 @@ def evaluate_payloads(
             row["blocked_reasons"].append(reason)
             errors.append(reason)
         else:
-            valid[seed] = projection
-            row["status"] = "bound_terminal"
-            row["projection"] = projection
+            try:
+                _validate_normalized_projection(
+                    projection,
+                    seed,
+                    f"evaluate_payloads.seed{seed}.projection",
+                )
+            except (KeyError, MatrixError, TypeError) as error:
+                reason = str(error)
+                row["status"] = "rejected"
+                row["blocked_reasons"].append(reason)
+                errors.append(reason)
+            else:
+                valid[seed] = projection
+                row["status"] = "bound_terminal"
+                row["projection"] = projection
         rows.append(row)
 
     exact_seeds = set(valid) == set(SEEDS)
@@ -1263,12 +1530,15 @@ def evaluate_payloads(
         errors.append("seed terminal receipt model/config/case signature is inconsistent")
 
     checkpoint_consistent = True
+    checkpoint_identities: set[tuple[str, str]] = set()
     for seed, projection in valid.items():
         checkpoint = projection.get("checkpoint")
         if not isinstance(checkpoint, Mapping):
             checkpoint_consistent = False
             errors.append(f"seed{seed} checkpoint binding is missing")
             continue
+        checkpoint_path = checkpoint.get("path")
+        checkpoint_sha = checkpoint.get("sha256")
         if (
             not isinstance(checkpoint.get("path"), str)
             or not isinstance(checkpoint.get("sha256"), str)
@@ -1276,6 +1546,14 @@ def evaluate_payloads(
         ):
             checkpoint_consistent = False
             errors.append(f"seed{seed} checkpoint path/SHA/update binding is incomplete")
+        elif f"seed{seed}" not in checkpoint_path:
+            checkpoint_consistent = False
+            errors.append(f"seed{seed} checkpoint path is not seed-bound")
+        elif (checkpoint_path, checkpoint_sha) in checkpoint_identities:
+            checkpoint_consistent = False
+            errors.append(f"seed{seed} checkpoint path/SHA identity is reused")
+        else:
+            checkpoint_identities.add((checkpoint_path, checkpoint_sha))
         if projection.get("training", {}).get("sha256") is None:
             checkpoint_consistent = False
             errors.append(f"seed{seed} training receipt SHA binding is missing")
@@ -1517,19 +1795,22 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
                 errors.append(f"seed{row.get('seed')} blocked row lacks blocker")
     side_effects = report.get("side_effects")
     try:
-        _validate_side_effects(side_effects, "report.side_effects")
+        _validate_side_effects(
+            side_effects,
+            "report.side_effects",
+            require_security_fields=True,
+        )
     except MatrixError as error:
         errors.append(str(error))
     boundary = report.get("input_boundary")
     if not isinstance(boundary, Mapping):
         errors.append("input_boundary missing")
     else:
+        try:
+            _validate_input_boundary(boundary, "report.input_boundary")
+        except MatrixError as error:
+            errors.append(str(error))
         for key in (
-            "manifest_opened",
-            "case_hdf5_opened",
-            "checkpoint_opened",
-            "trajectory_hdf5_opened",
-            "progress_opened",
             "runtime_started",
             "solver_started",
             "worker_started",
@@ -1615,7 +1896,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.output is not None:
         write_report(report, args.output)
     print(canonical_json(report))
-    return 0
+    return 0 if report["source_bound"] else 2
 
 
 if __name__ == "__main__":

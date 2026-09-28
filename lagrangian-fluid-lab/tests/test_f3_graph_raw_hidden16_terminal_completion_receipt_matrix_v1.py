@@ -6,11 +6,14 @@ import copy
 import hashlib
 import json
 from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 
 from scripts import (
     f3_graph_raw_hidden16_terminal_completion_receipt_matrix_v1 as matrix,
+    f3_graph_raw_hidden16_seed29_terminal_completion_runner_v1 as seed29_runner,
 )
 
 
@@ -263,7 +266,6 @@ def _completion_report(seed: int, *, nested: bool = True) -> dict:
                 "bytes_claimed": checkpoint["bytes"],
                 "sha256_claimed": checkpoint["sha256"],
                 "content_opened": False,
-                "update": matrix.UPDATES,
             }
             training.update(
                 {
@@ -299,6 +301,7 @@ def _completion_report(seed: int, *, nested: bool = True) -> dict:
             "symlink": False,
             "stat_bytes": byte_count,
             "bytes_match": True,
+            "hash_verification": "not_read_by_scope",
             **extra,
         }
 
@@ -405,6 +408,101 @@ def _write_sources(tmp_path: Path, *, seed29_nested: bool = True) -> dict[int, P
         _write_json(path, payload)
         paths[seed] = path
     return paths
+
+
+def _real_seed29_runner_reports(tmp_path: Path) -> tuple[dict, dict]:
+    checkpoint = tmp_path / "f3-graph-raw500-hidden16-seed29-checkpoint.pt"
+    checkpoint.write_bytes(b"checkpoint content is never opened")
+    training = {
+        "schema": "core.training.v1",
+        "evidence_status": "complete",
+        "completed_updates": matrix.UPDATES,
+        "model_kind": matrix.MODEL_KIND,
+        "seed": 29,
+        "checkpoint_verified": True,
+        "config": {
+            "model_kind": matrix.MODEL_KIND,
+            "hidden": matrix.HIDDEN,
+            "seed": 29,
+            "paired_seed": 29,
+            "updates": matrix.UPDATES,
+        },
+        "checkpoint": {
+            "path": str(checkpoint),
+            "bytes": checkpoint.stat().st_size,
+            "sha256": "c" * 64,
+            "update": matrix.UPDATES,
+        },
+    }
+    training_path = tmp_path / "f3-graph-raw500-hidden16-seed29-training.json"
+    _write_json(training_path, training)
+
+    prefix = tmp_path / "f3-graph-raw500-hidden16-seed29-full835-runner-fixture"
+    evaluation_path = Path(f"{prefix}-evaluation.json")
+    trajectory_path = Path(f"{prefix}-trajectory.h5")
+    progress_path = Path(f"{prefix}-evaluation-progress.json")
+    trajectory_path.write_bytes(b"trajectory content is never opened")
+    progress_path.write_bytes(b'{"status":"completed"}\n')
+    case = {
+        "case_id": matrix.CASE_ID,
+        "executed": True,
+        "execution_complete": True,
+        "expected_frames": matrix.TRANSITIONS,
+        "frames_expected": matrix.TRANSITIONS,
+        "frames_predicted": matrix.TRANSITIONS,
+        "frames_executed": matrix.TRANSITIONS,
+        "finite_rollout_complete": True,
+        "failure_category": None,
+        "first_failure_frame": None,
+        "future_state_inputs": False,
+        "rollout": {
+            "case_id": matrix.CASE_ID,
+            "executed": True,
+            "execution_complete": True,
+            "expected_frames": matrix.TRANSITIONS,
+            "frames_expected": matrix.TRANSITIONS,
+            "frames_predicted": matrix.TRANSITIONS,
+            "frames_executed": matrix.TRANSITIONS,
+            "finite_rollout_complete": True,
+            "failure_category": None,
+            "first_failure_frame": None,
+            "future_state_inputs": False,
+            "trajectory_output": str(trajectory_path),
+            "progress_output": str(progress_path),
+        },
+    }
+    _write_json(
+        evaluation_path,
+        {
+            "schema": "core.evaluation.v1",
+            "model_kind": matrix.MODEL_KIND,
+            "evaluation_mode": "diagnostic",
+            "diagnostic": True,
+            "formal_eligible": False,
+            "future_state_inputs": False,
+            "maximum_steps": matrix.TRANSITIONS,
+            "checkpoint": str(checkpoint),
+            "expected_frames": {matrix.CASE_ID: matrix.TRANSITIONS},
+            "selected_case_ids": [matrix.CASE_ID],
+            "cases": {matrix.CASE_ID: case},
+        },
+    )
+    bound = seed29_runner.build_report(
+        tmp_path,
+        training_path=training_path,
+        evaluation_path=evaluation_path,
+        scan_existing=False,
+    )
+    pending = seed29_runner.build_report(
+        tmp_path,
+        training_path=training_path,
+        evaluation_path=tmp_path / "missing-seed29-evaluation.json",
+        launch={"attempted": True, "status": "launched_pending"},
+        scan_existing=False,
+    )
+    assert bound["status"] == "bound_terminal_diagnostic"
+    assert pending["status"] == "diagnostic_launch_pending"
+    return bound, pending
 
 
 def test_complete_matrix_accepts_bridge_and_both_completion_projection_shapes(
@@ -530,6 +628,197 @@ def test_current_checked_in_seed17_bridge_and_seed43_receipt_are_compatible() ->
     assert matrix.validate_report(report) == []
 
 
+def test_real_seed43_fixture_binds_with_seed29_runner_nested_shape(tmp_path: Path) -> None:
+    paths = _write_sources(tmp_path)
+    paths[17] = matrix.DEFAULT_TERMINAL_PATHS[17]
+    paths[43] = matrix.DEFAULT_TERMINAL_PATHS[43]
+
+    report = matrix.build_report(tmp_path, terminal_paths=paths)
+
+    assert report["source_bound"] is True
+    assert report["status"] == "bound_terminal_diagnostic"
+    seed29 = next(row for row in report["seed_matrix"] if row["seed"] == 29)
+    assert seed29["projection"]["checkpoint"]["update"] == matrix.UPDATES
+    seed43 = next(row for row in report["seed_matrix"] if row["seed"] == 43)
+    assert seed43["projection"]["validator"]["trajectory_frames"] == matrix.FRAMES
+    assert matrix.validate_report(report) == []
+
+
+def test_actual_seed29_runner_pending_and_bound_shapes_are_compatible(tmp_path: Path) -> None:
+    bound, pending = _real_seed29_runner_reports(tmp_path)
+    bound_path = tmp_path / "actual-seed29-bound-report.json"
+    pending_path = tmp_path / "actual-seed29-pending-report.json"
+    _write_json(bound_path, bound)
+    _write_json(pending_path, pending)
+
+    paths = _write_sources(tmp_path)
+    paths[17] = matrix.DEFAULT_TERMINAL_PATHS[17]
+    paths[29] = bound_path
+    paths[43] = matrix.DEFAULT_TERMINAL_PATHS[43]
+    report = matrix.build_report(tmp_path, terminal_paths=paths)
+
+    assert report["source_bound"] is True
+    assert matrix.validate_report(report) == []
+
+    paths[29] = pending_path
+    pending_matrix = matrix.build_report(tmp_path, terminal_paths=paths)
+    assert pending_matrix["source_bound"] is False
+    seed29 = next(row for row in pending_matrix["seed_matrix"] if row["seed"] == 29)
+    assert seed29["status"] == "rejected"
+    assert any("terminal" in reason or "status" in reason for reason in seed29["blocked_reasons"])
+    assert matrix.validate_report(pending_matrix) == []
+
+
+def test_seed29_runner_missing_checkpoint_update_is_schema_scoped(tmp_path: Path) -> None:
+    paths = _write_sources(tmp_path)
+    payload = json.loads(paths[29].read_text(encoding="utf-8"))
+    checkpoint = payload["seed29_terminal_receipt"]["training_binding"]["checkpoint"]
+    assert "update" not in checkpoint
+
+    report = matrix.build_report(tmp_path, terminal_paths=paths)
+    assert report["source_bound"] is True
+
+    checkpoint["update"] = matrix.UPDATES - 1
+    _write_json(paths[29], payload)
+    rejected = matrix.build_report(tmp_path, terminal_paths=paths)
+    assert rejected["source_bound"] is False
+    row = next(row for row in rejected["seed_matrix"] if row["seed"] == 29)
+    assert row["status"] == "rejected"
+    assert any("update" in reason for reason in row["blocked_reasons"])
+    assert matrix.validate_report(rejected) == []
+
+
+def test_missing_checkpoint_update_is_rejected_outside_runner_schema(tmp_path: Path) -> None:
+    paths = _write_sources(tmp_path)
+    payload = json.loads(paths[17].read_text(encoding="utf-8"))
+    payload["seed_matrix"][0]["terminal_receipt"]["checkpoint"].pop("update")
+    _write_json(paths[17], payload)
+
+    report = matrix.build_report(tmp_path, terminal_paths=paths)
+
+    assert report["source_bound"] is False
+    row = next(row for row in report["seed_matrix"] if row["seed"] == 17)
+    assert row["status"] == "rejected"
+    assert any("update" in reason for reason in row["blocked_reasons"])
+    assert matrix.validate_report(report) == []
+
+
+def test_direct_checkpoint_path_mismatch_is_fail_closed(tmp_path: Path) -> None:
+    paths = _write_sources(tmp_path)
+    payload = json.loads(paths[43].read_text(encoding="utf-8"))
+    payload["identity_bindings"]["checkpoint"]["path"] = (
+        "/opaque/checkpoints/f3-graph-raw500-hidden16-seed17.pt"
+    )
+    _write_json(paths[43], payload)
+
+    report = matrix.build_report(tmp_path, terminal_paths=paths)
+
+    assert report["source_bound"] is False
+    row = next(row for row in report["seed_matrix"] if row["seed"] == 43)
+    assert row["status"] == "rejected"
+    assert any("checkpoint" in reason for reason in row["blocked_reasons"])
+    assert matrix.validate_report(report) == []
+
+
+def test_direct_checkpoint_update_mismatch_is_fail_closed(tmp_path: Path) -> None:
+    paths = _write_sources(tmp_path)
+    payload = json.loads(paths[43].read_text(encoding="utf-8"))
+    payload["terminal_markers"]["updates"] = matrix.UPDATES - 1
+    _write_json(paths[43], payload)
+
+    report = matrix.build_report(tmp_path, terminal_paths=paths)
+
+    assert report["source_bound"] is False
+    row = next(row for row in report["seed_matrix"] if row["seed"] == 43)
+    assert row["status"] == "rejected"
+    assert any("update" in reason for reason in row["blocked_reasons"])
+    assert matrix.validate_report(report) == []
+
+
+@pytest.mark.parametrize("key", ["checkpoint_content_opened", "manifest_content_opened"])
+def test_scope_security_flag_true_or_missing_is_fail_closed(tmp_path: Path, key: str) -> None:
+    for mode in ("true", "missing"):
+        case_root = tmp_path / f"{key}-{mode}"
+        case_root.mkdir()
+        paths = _write_sources(case_root)
+        payload = json.loads(paths[43].read_text(encoding="utf-8"))
+        if mode == "true":
+            payload["scope"][key] = True
+        else:
+            payload["scope"].pop(key)
+        _write_json(paths[43], payload)
+
+        report = matrix.build_report(
+            case_root,
+            terminal_paths=paths,
+        )
+
+        assert report["source_bound"] is False
+        row = next(row for row in report["seed_matrix"] if row["seed"] == 43)
+        assert row["status"] == "rejected"
+        assert any(key in reason or "missing" in reason for reason in row["blocked_reasons"])
+        assert matrix.validate_report(report) == []
+
+
+@pytest.mark.parametrize("key", ["checkpoint_opened", "manifest_opened"])
+def test_input_boundary_security_field_missing_is_fail_closed(tmp_path: Path, key: str) -> None:
+    bound, _ = _real_seed29_runner_reports(tmp_path)
+    bound["input_boundary"].pop(key)
+    bound_path = tmp_path / f"boundary-missing-{key}.json"
+    _write_json(bound_path, bound)
+
+    paths = _write_sources(tmp_path)
+    paths[29] = bound_path
+    report = matrix.build_report(tmp_path, terminal_paths=paths)
+
+    assert report["source_bound"] is False
+    row = next(row for row in report["seed_matrix"] if row["seed"] == 29)
+    assert row["status"] == "rejected"
+    assert any("input_boundary" in reason or "missing" in reason for reason in row["blocked_reasons"])
+    assert matrix.validate_report(report) == []
+
+
+@pytest.mark.parametrize(
+    ("key", "alias"),
+    [
+        ("exists", "file_exists"),
+        ("regular_file", "is_regular_file"),
+        ("bytes_match", "size_match"),
+        ("hash_match", "sha256_match"),
+    ],
+)
+def test_direct_identity_aliases_are_accepted(tmp_path: Path, key: str, alias: str) -> None:
+    paths = _write_sources(tmp_path)
+    payload = json.loads(paths[43].read_text(encoding="utf-8"))
+    claim = payload["identity_bindings"]["training_receipt"]
+    claim[alias] = claim.pop(key)
+    _write_json(paths[43], payload)
+
+    report = matrix.build_report(tmp_path, terminal_paths=paths)
+
+    assert report["source_bound"] is True
+    assert matrix.validate_report(report) == []
+
+
+@pytest.mark.parametrize(
+    "key",
+    ["exists", "regular_file", "bytes_match", "hash_match", "stat_bytes"],
+)
+def test_direct_identity_security_field_missing_is_fail_closed(tmp_path: Path, key: str) -> None:
+    paths = _write_sources(tmp_path)
+    payload = json.loads(paths[43].read_text(encoding="utf-8"))
+    payload["identity_bindings"]["training_receipt"].pop(key)
+    _write_json(paths[43], payload)
+
+    report = matrix.build_report(tmp_path, terminal_paths=paths)
+
+    assert report["source_bound"] is False
+    row = next(row for row in report["seed_matrix"] if row["seed"] == 43)
+    assert row["status"] == "rejected"
+    assert any("training_receipt" in reason for reason in row["blocked_reasons"])
+    assert matrix.validate_report(report) == []
+
+
 def test_report_validation_catches_zero_credit_or_bound_status_drift(tmp_path: Path) -> None:
     paths = _write_sources(tmp_path)
     report = matrix.build_report(tmp_path, terminal_paths=paths)
@@ -565,3 +854,31 @@ def test_cli_writes_only_explicit_report_path(tmp_path: Path, capsys) -> None:
     assert printed == written
     assert written["source_bound"] is True
     assert matrix.validate_report(written) == []
+
+
+def test_cli_blocked_report_returns_nonzero_without_blocking_library_api(tmp_path: Path) -> None:
+    paths = _write_sources(tmp_path)
+    command = [
+        sys.executable,
+        str(matrix.LAB_ROOT / "scripts/f3_graph_raw_hidden16_terminal_completion_receipt_matrix_v1.py"),
+        "--root",
+        str(tmp_path),
+        "--receipt",
+        f"17={paths[17]}",
+        "--receipt",
+        f"43={paths[43]}",
+    ]
+
+    completed = subprocess.run(
+        command,
+        cwd=matrix.LAB_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 2
+    printed = json.loads(completed.stdout)
+    assert printed["status"] == "blocked_fail_closed"
+    assert printed["source_bound"] is False
+    assert matrix.validate_report(printed) == []
