@@ -178,8 +178,11 @@ def test_audit_records_current_target_code_without_importing_execution_paths() -
     ).read_text(encoding="utf-8")
     assert 'with h5py.File(path, "r")' in raw_validator
     assert 'with h5py.File(path, "r")' in capability
-    assert "_TERMINAL_CAPABILITY_TOKEN = object()" in residual
-    assert "popen_factory(" in residual
+    # The residual P1 hardening removed the injectable capability-token and
+    # fake-Popen path; keep the audit test pinned to the repaired boundary.
+    assert "_TERMINAL_CAPABILITY_TOKEN" not in residual
+    assert "popen_factory(" not in residual
+    assert "subprocess.Popen" in residual
     assert "manifest_sha256" not in capability.split("PROCESS_PROOF_FIELDS", 1)[0]
 
 
