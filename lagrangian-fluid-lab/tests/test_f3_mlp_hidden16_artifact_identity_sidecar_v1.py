@@ -216,6 +216,54 @@ def test_canonical_path_drift_and_parent_traversal_are_blocked(tmp_path: Path):
         _cleanup(paths)
 
 
+def test_checkpoint_path_is_bound_to_training_matrix_for_validate_and_write(tmp_path: Path):
+    root, seed, nonce, paths = _make_fixture(tmp_path)
+    checkpoint = tmp_path / f"checkpoint-{seed}.pt"
+    replacement = tmp_path / "replacement-checkpoint.pt"
+    replacement.write_bytes(checkpoint.read_bytes())
+    identity = sidecar.build_identity(root, seed=seed, nonce=nonce)
+    try:
+        drifted = json.loads(json.dumps(identity))
+        drifted["checkpoint"]["path"] = str(replacement)
+        with pytest.raises(sidecar.SidecarError, match="training-matrix checkpoint path"):
+            sidecar.validate_identity(drifted, root=root, seed=seed, nonce=nonce)
+        with pytest.raises(sidecar.SidecarError, match="training-matrix checkpoint path"):
+            sidecar.write_identity(drifted, root=root, seed=seed, nonce=nonce)
+
+        alias = json.loads(json.dumps(identity))
+        alias["checkpoint"]["path"] = str(checkpoint.parent) + "/./" + checkpoint.name
+        with pytest.raises(sidecar.SidecarError, match="lexical path alias"):
+            sidecar.validate_identity(alias, root=root, seed=seed, nonce=nonce)
+
+        traversal = json.loads(json.dumps(identity))
+        traversal["checkpoint"]["path"] = str(checkpoint.parent) + "/../" + checkpoint.parent.name + "/" + checkpoint.name
+        with pytest.raises(sidecar.SidecarError, match="lexical path alias"):
+            sidecar.write_identity(traversal, root=root, seed=seed, nonce=nonce)
+    finally:
+        _cleanup(paths)
+
+
+def test_checkpoint_symlink_and_hardlink_replacements_are_blocked(tmp_path: Path):
+    root, seed, nonce, paths = _make_fixture(tmp_path)
+    checkpoint = tmp_path / f"checkpoint-{seed}.pt"
+    target = tmp_path / "checkpoint-replacement.pt"
+    target.write_bytes(checkpoint.read_bytes())
+    identity = sidecar.build_identity(root, seed=seed, nonce=nonce)
+    try:
+        checkpoint.unlink()
+        checkpoint.symlink_to(target)
+        with pytest.raises(sidecar.SidecarError, match="symlink"):
+            sidecar.validate_identity(identity, root=root, seed=seed, nonce=nonce)
+        checkpoint.unlink()
+
+        os.link(target, checkpoint)
+        with pytest.raises(sidecar.SidecarError, match="hardlink"):
+            sidecar.write_identity(identity, root=root, seed=seed, nonce=nonce)
+    finally:
+        checkpoint.unlink(missing_ok=True)
+        _cleanup(paths)
+
+
 @pytest.mark.parametrize("nonce", ["0" * 32, "A" * 32, "a" * 31])
 def test_zero_or_noncanonical_nonce_is_blocked(tmp_path: Path, nonce: str):
     root, _seed, _valid_nonce, _paths = _make_fixture(tmp_path)

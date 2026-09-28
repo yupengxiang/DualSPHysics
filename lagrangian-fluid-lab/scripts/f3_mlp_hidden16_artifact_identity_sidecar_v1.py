@@ -641,7 +641,14 @@ def _validate_validator_receipt(payload: Mapping[str, Any], expected: Mapping[st
         _fail(f"{name}.row_fields_checked must be a string list")
 
 
-def _validate_identity_structure(identity: Mapping[str, Any], *, seed: int, nonce: str, paths: Mapping[str, Path]) -> dict[str, Any]:
+def _validate_identity_structure(
+    identity: Mapping[str, Any],
+    *,
+    seed: int,
+    nonce: str,
+    paths: Mapping[str, Path],
+    checkpoint_path: Path,
+) -> dict[str, Any]:
     _unknown(identity, IDENTITY_KEYS, "identity")
     expected_schema = f"{IDENTITY_SCHEMA_PREFIX}{seed}{IDENTITY_SCHEMA_SUFFIX}"
     for key, expected in (
@@ -668,8 +675,15 @@ def _validate_identity_structure(identity: Mapping[str, Any], *, seed: int, nonc
         item = _artifact(identity.get(key), f"identity.{key}")
         if not item["path"].endswith(suffix):
             _fail(f"identity.{key}.path must end with {suffix}")
-        expected_path = paths["evaluation"] if key == "evaluation" else paths["trajectory"] if key == "trajectory" else paths["validator"] if key == "validator" else None
-        if expected_path is not None and Path(item["path"]) != expected_path:
+        expected_path = {
+            "checkpoint": checkpoint_path,
+            "evaluation": paths["evaluation"],
+            "trajectory": paths["trajectory"],
+            "validator": paths["validator"],
+        }[key]
+        if Path(item["path"]) != expected_path:
+            if key == "checkpoint":
+                _fail("identity.checkpoint.path is not the canonical training-matrix checkpoint path")
             _fail(f"identity.{key}.path is not the canonical fresh namespace path")
         normalized[key] = item
     return normalized
@@ -685,11 +699,24 @@ def validate_identity(
 ) -> dict[str, Any]:
     """Validate an identity and optionally re-hash all four artifact files."""
 
-    _root_path(root)
+    root_path = _root_path(root)
     seed = _validate_seed(seed)
     nonce = _validate_nonce(nonce)
     paths = _fresh_paths(seed, nonce)
-    normalized = _validate_identity_structure(identity, seed=seed, nonce=nonce, paths=paths)
+    training = _read_training_context(root_path, seed)
+    checkpoint_path = Path(training["checkpoint"]["path"])
+    normalized = _validate_identity_structure(
+        identity,
+        seed=seed,
+        nonce=nonce,
+        paths=paths,
+        checkpoint_path=checkpoint_path,
+    )
+    # Even structural validation must reject a replaced checkpoint inode.  The
+    # default verify_files=True below additionally re-hashes it, while this
+    # stat-only check keeps verify_files=False from accepting symlink/hardlink
+    # substitutions at the training-matrix-bound path.
+    _regular_single_link(Path(normalized["checkpoint"]["path"]), "identity.checkpoint")
     if verify_files:
         for key in ("checkpoint", "evaluation", "trajectory", "validator"):
             observed = _stream_file(normalized[key]["path"], f"identity.{key}")
@@ -759,7 +786,13 @@ def build_identity(
         "trajectory": trajectory,
         "validator": validator,
     }
-    _validate_identity_structure(identity, seed=seed, nonce=nonce, paths=paths)
+    _validate_identity_structure(
+        identity,
+        seed=seed,
+        nonce=nonce,
+        paths=paths,
+        checkpoint_path=Path(training["checkpoint"]["path"]),
+    )
     return identity
 
 
