@@ -43,6 +43,16 @@ INPUT_RECORD_IDS = {
     "t2_readiness": "f4-tallwall120-t2-readiness-audit-2026-09-28",
 }
 
+INPUT_SCHEMAS = {
+    "coarse_proposal": "core.material.f4.tallwall120.coarse_proposal.v1",
+    "root_scheduler": "core.material.f4.tallwall120.root_scheduler_intake.v1",
+    "source_drift": "core.material.f4.tallwall120.source_drift_reconciliation.v1",
+    "receipt_consistency": "core.material.f4.tallwall120.receipt_consistency_audit.v1",
+    "terminal_evidence": "core.material.f4.tallwall120.terminal_evidence_intake.v1",
+    "sidecar_matrix": "core.material.f4.tallwall120.sidecar_matrix_contract.v1",
+    "t2_readiness": "core.material.f4.tallwall120.t2_readiness_audit.v1",
+}
+
 DEFAULT_REPORT = Path(
     "reports/F4-TALLWALL120-MATERIAL-READINESS-PROJECTION-V1-2026-09-28.json"
 )
@@ -98,9 +108,11 @@ DIAGNOSTIC_RELIABLE_COVERAGE = 0.0
 MATRIX_CASE_COUNT = 32
 
 MAX_JSON_BYTES = 8 * 1024 * 1024
+MAX_JSON_DEPTH = 64
 SHA256_RE = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
-O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
-O_CLOEXEC = getattr(os, "O_CLOEXEC", 0)
+O_NOFOLLOW = getattr(os, "O_NOFOLLOW", None)
+O_DIRECTORY = getattr(os, "O_DIRECTORY", None)
+O_CLOEXEC = getattr(os, "O_CLOEXEC", None)
 
 # These names are authorization or mutation boundaries.  The seven inputs are
 # allowed to contain ordinary observations such as ``sidecar_present`` and
@@ -190,6 +202,12 @@ def _identity(value: os.stat_result) -> tuple[int, int, int, int, int, int, int]
     )
 
 
+def _inode_identity(value: os.stat_result) -> tuple[int, int, int]:
+    """Return the stable identity fields used while a descriptor is held."""
+
+    return value.st_dev, value.st_ino, value.st_mode
+
+
 def _display_path(path: Path) -> str:
     absolute = Path(os.path.abspath(os.fspath(path)))
     try:
@@ -198,73 +216,153 @@ def _display_path(path: Path) -> str:
         return absolute.as_posix()
 
 
-def _canonical_path(value: str | Path, *, suffix: str | None = None) -> Path:
+def _path_is_within(path: Path, root: Path) -> bool:
+    try:
+        path.relative_to(root)
+    except ValueError:
+        return False
+    return True
+
+
+def _canonical_path(
+    value: str | Path,
+    *,
+    suffix: str | None = None,
+    scope: str = "lab",
+) -> Path:
     raw = os.fspath(value)
     _require(isinstance(raw, str) and raw and "\x00" not in raw, "path is malformed", code="path_traversal")
     path = Path(raw)
     _require(path.as_posix() == raw, "path must use canonical POSIX spelling", code="path_traversal")
     _require(not any(part in {"", ".", ".."} for part in path.parts), "path contains traversal components", code="path_traversal")
-    target = path if path.is_absolute() else LAB_ROOT / path
+    lab_root = Path(os.path.abspath(os.fspath(LAB_ROOT)))
+    target = path if path.is_absolute() else lab_root / path
+    target = Path(os.path.abspath(os.fspath(target)))
+    _require(_path_is_within(target, lab_root), "path is outside the checked-in lab root", code="path_scope")
+    if scope == "reports":
+        reports_root = lab_root / "reports"
+        _require(_path_is_within(target, reports_root), "path is outside the fixed reports directory", code="path_scope")
+    else:
+        _require(scope == "lab", f"unknown path scope: {scope}", code="path_scope")
     if suffix is not None:
         _require(target.suffix == suffix, f"path must end in {suffix}", code="path_suffix")
     return target
 
 
-def _assert_no_symlink_components(path: Path) -> None:
+def _safe_open_flags(base: int, *, directory: bool = False) -> int:
+    _require(O_NOFOLLOW is not None, "platform lacks O_NOFOLLOW", code="unsupported_platform")
+    _require(O_CLOEXEC is not None, "platform lacks O_CLOEXEC", code="unsupported_platform")
+    flags = base | O_NOFOLLOW | O_CLOEXEC
+    if directory:
+        _require(O_DIRECTORY is not None, "platform lacks O_DIRECTORY", code="unsupported_platform")
+        flags |= O_DIRECTORY
+    return flags
+
+
+def _open_directory_fd(path: Path, *, label: str) -> int:
+    """Open every directory component from / with held no-follow descriptors."""
+
     absolute = Path(os.path.abspath(os.fspath(path)))
-    current = Path(absolute.anchor)
-    for component in absolute.parts[1:]:
-        current /= component
-        try:
-            info = os.lstat(current)
-        except FileNotFoundError:
-            continue
-        except OSError as error:
-            _fail(f"could not inspect path: {path}", code="path_inspection")
-            raise AssertionError from error
-        if stat.S_ISLNK(info.st_mode):
-            _fail(f"path contains a symlink: {path}", code="symlink_path")
-
-
-def _read_bounded_json(path: str | Path, *, label: str) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Read one regular JSON file with no symlink or read-time rebinding."""
-
-    target = _canonical_path(path, suffix=".json")
-    _assert_no_symlink_components(target)
+    _require(absolute.is_absolute(), f"{label} must be absolute", code="path_scope")
     descriptor: int | None = None
+    success = False
     try:
-        descriptor = os.open(os.fspath(target), os.O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
-    except FileNotFoundError as error:
-        _fail(f"{label} is missing: {_display_path(target)}", code="missing_input")
-        raise AssertionError from error
+        descriptor = os.open(os.sep, _safe_open_flags(os.O_RDONLY, directory=True))
+        for component in absolute.parts[1:]:
+            child = os.open(
+                component,
+                _safe_open_flags(os.O_RDONLY, directory=True),
+                dir_fd=descriptor,
+            )
+            os.close(descriptor)
+            descriptor = child
+            info = os.fstat(descriptor)
+            _require(stat.S_ISDIR(info.st_mode), f"{label} contains a non-directory component", code="not_directory")
+        success = True
+        return descriptor
+    except F4MaterialReadinessProjectionError:
+        raise
     except OSError as error:
-        _fail(f"{label} cannot be opened safely: {_display_path(target)}", code="safe_open")
+        _fail(f"{label} cannot be opened without following symlinks", code="safe_open")
         raise AssertionError from error
+    finally:
+        if descriptor is not None and not success:
+            os.close(descriptor)
+
+
+def _read_fd_bounded(descriptor: int, *, label: str, max_bytes: int = MAX_JSON_BYTES) -> bytes:
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        block = os.read(descriptor, min(1024 * 1024, max_bytes + 1 - total))
+        if not block:
+            break
+        total += len(block)
+        _require(total <= max_bytes, f"{label} exceeds the bounded JSON limit", code="oversize")
+        chunks.append(block)
+    return b"".join(chunks)
+
+
+def _check_json_depth(value: Any, *, label: str) -> None:
+    pending: list[tuple[Any, int]] = [(value, 0)]
+    while pending:
+        current, depth = pending.pop()
+        _require(depth <= MAX_JSON_DEPTH, f"{label} exceeds the JSON nesting limit", code="json_depth")
+        if isinstance(current, dict):
+            pending.extend((child, depth + 1) for child in current.values())
+        elif isinstance(current, list):
+            pending.extend((child, depth + 1) for child in current)
+
+
+def _read_bounded_json(
+    path: str | Path,
+    *,
+    label: str,
+    scope: str = "lab",
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Read one regular JSON file with held no-follow descriptors and double-read binding."""
+
+    target = _canonical_path(path, suffix=".json", scope=scope)
+    parent_fd = _open_directory_fd(target.parent, label=f"{label} parent")
+    descriptor: int | None = None
 
     try:
+        before_named = os.stat(target.name, dir_fd=parent_fd, follow_symlinks=False)
+        _require(stat.S_ISREG(before_named.st_mode), f"{label} must be a regular file", code="not_regular_file")
+        _require(before_named.st_nlink == 1, f"{label} must have one hard link", code="hardlink")
+        _require(before_named.st_size <= MAX_JSON_BYTES, f"{label} exceeds the bounded JSON limit", code="oversize")
+        descriptor = os.open(
+            target.name,
+            _safe_open_flags(os.O_RDONLY),
+            dir_fd=parent_fd,
+        )
         before = os.fstat(descriptor)
-        _require(stat.S_ISREG(before.st_mode), f"{label} must be a regular file", code="not_regular_file")
-        _require(before.st_nlink == 1, f"{label} must have one hard link", code="hardlink")
-        _require(before.st_size <= MAX_JSON_BYTES, f"{label} exceeds the bounded JSON limit", code="oversize")
-        chunks: list[bytes] = []
-        total = 0
-        while True:
-            block = os.read(descriptor, min(1024 * 1024, MAX_JSON_BYTES + 1 - total))
-            if not block:
-                break
-            total += len(block)
-            _require(total <= MAX_JSON_BYTES, f"{label} exceeds the bounded JSON limit", code="oversize")
-            chunks.append(block)
-        after = os.fstat(descriptor)
-        named = os.stat(target, follow_symlinks=False)
         _require(
-            _identity(before) == _identity(after)
-            and _identity(after) == _identity(named)
-            and total == before.st_size,
+            _identity(before) == _identity(before_named),
+            f"{label} changed before it was opened",
+            code="input_drift",
+        )
+        raw = _read_fd_bounded(descriptor, label=label)
+        after = os.fstat(descriptor)
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        reread = _read_fd_bounded(descriptor, label=label)
+        after_reread = os.fstat(descriptor)
+        named = os.stat(target.name, dir_fd=parent_fd, follow_symlinks=False)
+        raw_hash = hashlib.sha256(raw).digest()
+        reread_hash = hashlib.sha256(reread).digest()
+        _require(
+            raw == reread
+            and raw_hash == reread_hash
+            and _identity(before) == _identity(after)
+            and _identity(after) == _identity(after_reread)
+            and _identity(after_reread) == _identity(named)
+            and len(raw) == before.st_size,
             f"{label} changed while being read",
             code="input_drift",
         )
-        raw = b"".join(chunks)
+    except FileNotFoundError as error:
+        _fail(f"{label} is missing: {_display_path(target)}", code="missing_input")
+        raise AssertionError from error
     except F4MaterialReadinessProjectionError:
         raise
     except OSError as error:
@@ -273,6 +371,7 @@ def _read_bounded_json(path: str | Path, *, label: str) -> tuple[dict[str, Any],
     finally:
         if descriptor is not None:
             os.close(descriptor)
+        os.close(parent_fd)
 
     try:
         value = json.loads(
@@ -284,27 +383,32 @@ def _read_bounded_json(path: str | Path, *, label: str) -> tuple[dict[str, Any],
         )
     except F4MaterialReadinessProjectionError:
         raise
+    except RecursionError as error:
+        _fail(f"{label} exceeds the JSON nesting limit", code="json_depth")
+        raise AssertionError from error
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
         _fail(f"{label} is not strict UTF-8 JSON", code="invalid_json")
         raise AssertionError from error
     _require(isinstance(value, dict), f"{label} must be a JSON object", code="json_not_object")
+    _check_json_depth(value, label=label)
     return value, {
         "path": _display_path(target),
         "bytes": len(raw),
-        "sha256": hashlib.sha256(raw).hexdigest(),
+        "sha256": raw_hash.hex(),
     }
 
 
 def _write_new_regular_file(path: str | Path, payload: bytes, *, suffix: str) -> Path:
-    target = _canonical_path(path, suffix=suffix)
-    _assert_no_symlink_components(target)
-    _require(target.parent.is_dir(), f"output parent is not a directory: {target.parent}", code="output_parent")
+    target = _canonical_path(path, suffix=suffix, scope="reports")
+    parent_fd = _open_directory_fd(target.parent, label="output parent")
     descriptor: int | None = None
+    verifier: int | None = None
     try:
         descriptor = os.open(
-            os.fspath(target),
-            os.O_WRONLY | os.O_CREAT | os.O_EXCL | O_NOFOLLOW | O_CLOEXEC,
+            target.name,
+            _safe_open_flags(os.O_WRONLY | os.O_CREAT | os.O_EXCL),
             0o644,
+            dir_fd=parent_fd,
         )
         before = os.fstat(descriptor)
         _require(stat.S_ISREG(before.st_mode), "output is not a regular file", code="output_type")
@@ -314,11 +418,38 @@ def _write_new_regular_file(path: str | Path, payload: bytes, *, suffix: str) ->
             written += os.write(descriptor, payload[written:])
         os.fsync(descriptor)
         after = os.fstat(descriptor)
-        named = os.stat(target, follow_symlinks=False)
+        _require(after.st_nlink > 0, "output was unlinked or replaced while being written", code="output_drift")
+        _require(after.st_nlink == 1, "output has multiple hard links", code="output_hardlink")
+        named = os.stat(target.name, dir_fd=parent_fd, follow_symlinks=False)
         _require(
-            written == len(payload) and _identity(before)[:3] == _identity(after)[:3]
-            and after.st_size == len(payload) and _identity(after) == _identity(named),
+            written == len(payload)
+            and _inode_identity(before) == _inode_identity(after)
+            and after.st_size == len(payload)
+            and _identity(after) == _identity(named),
             "output changed while being written",
+            code="output_drift",
+        )
+        verifier = os.open(target.name, _safe_open_flags(os.O_RDONLY), dir_fd=parent_fd)
+        verified = os.fstat(verifier)
+        _require(
+            _identity(verified) == _identity(after) and verified.st_nlink == 1,
+            "output was replaced while being verified",
+            code="output_drift",
+        )
+        verified_payload = _read_fd_bounded(verifier, label="output", max_bytes=max(MAX_JSON_BYTES, len(payload)))
+        _require(
+            verified_payload == payload
+            and hashlib.sha256(verified_payload).digest() == hashlib.sha256(payload).digest(),
+            "output content changed while being verified",
+            code="output_drift",
+        )
+        verified_after = os.fstat(verifier)
+        named_after = os.stat(target.name, dir_fd=parent_fd, follow_symlinks=False)
+        _require(
+            _identity(verified_after) == _identity(after)
+            and _identity(verified_after) == _identity(named_after)
+            and verified_after.st_nlink == 1,
+            "output was replaced after verification",
             code="output_drift",
         )
     except FileExistsError as error:
@@ -330,8 +461,11 @@ def _write_new_regular_file(path: str | Path, payload: bytes, *, suffix: str) ->
         _fail(f"output cannot be written safely: {_display_path(target)}", code="output_write")
         raise AssertionError from error
     finally:
+        if verifier is not None:
+            os.close(verifier)
         if descriptor is not None:
             os.close(descriptor)
+        os.close(parent_fd)
     return target
 
 
@@ -344,9 +478,25 @@ def _get(value: Mapping[str, Any], path: str) -> Any:
     return current
 
 
+def _strict_equal(actual: Any, expected: Any) -> bool:
+    if type(actual) is not type(expected):
+        return False
+    if isinstance(actual, dict):
+        return (
+            set(actual) == set(expected)
+            and all(_strict_equal(actual[key], expected[key]) for key in expected)
+        )
+    if isinstance(actual, list):
+        return len(actual) == len(expected) and all(
+            _strict_equal(observed, reference)
+            for observed, reference in zip(actual, expected)
+        )
+    return actual == expected
+
+
 def _eq(value: Mapping[str, Any], path: str, expected: Any, *, code: str = "binding_drift") -> Any:
     actual = _get(value, path)
-    _require(actual == expected, f"{path} is not bound to the expected value", code=code)
+    _require(_strict_equal(actual, expected), f"{path} is not bound to the expected value", code=code)
     return actual
 
 
@@ -370,6 +520,13 @@ def _metadata_path(value: Any, label: str, *, suffix: str | None = None) -> str:
     return value
 
 
+def _string_list(value: Any, label: str, *, nonempty: bool = False) -> list[str]:
+    _require(type(value) is list, f"{label} must be a list", code="schema_drift")
+    _require(all(type(item) is str for item in value), f"{label} must contain strings", code="schema_drift")
+    _require(not nonempty or bool(value), f"{label} must not be empty", code="schema_drift")
+    return value
+
+
 def _scan_boundary(value: Any, *, path: str = "root") -> None:
     if isinstance(value, Mapping):
         for key, child in value.items():
@@ -378,18 +535,23 @@ def _scan_boundary(value: Any, *, path: str = "root") -> None:
                 # Some historical receipts use ``qualification`` as a
                 # structured zero-credit section; validate that section below
                 # instead of mistaking its mapping for a promoted boolean.
-                if type(child) is bool:
-                    _require(type(child) is bool and child is False, f"promoted boolean boundary: {child_path}", code="authorization_drift")
+                if key == "qualification" and isinstance(child, Mapping):
+                    pass
+                elif type(child) in {bool, int, float}:
+                    _require(type(child) is bool, f"promoted boolean type: {child_path}", code="schema_drift")
+                    _require(child is False, f"promoted boolean boundary: {child_path}", code="authorization_drift")
             is_credit_boundary = key in PROMOTION_INT_KEYS
             is_mutation_boundary = (
                 (key.endswith("_mutation") or key.endswith("_mutations"))
-                and type(child) in {int, bool}
+                and type(child) in {int, bool, float}
             )
             if is_credit_boundary or is_mutation_boundary:
                 _require(
-                    (type(child) is int and child == 0) or (type(child) is bool and child is False),
+                    (type(child) is int and child == 0)
+                    if is_credit_boundary
+                    else ((type(child) is int and child == 0) or (type(child) is bool and child is False)),
                     f"non-zero credit/mutation boundary: {child_path}",
-                    code="authorization_drift" if is_credit_boundary else "side_effect_drift",
+                    code="schema_drift" if type(child) not in {int, bool} else ("authorization_drift" if is_credit_boundary else "side_effect_drift"),
                 )
             _scan_boundary(child, path=child_path)
     elif isinstance(value, list):
@@ -503,6 +665,10 @@ def _validate_root(value: dict[str, Any]) -> dict[str, Any]:
     }.items():
         _eq(value, path, expected)
     _metadata_path(_get(value, "proposal_observation.target.source_hdf5"), "root target source", suffix=".h5")
+    _metadata_path(
+        _get(value, "binding_projection.fresh_output_namespace.namespace"),
+        "root fresh output namespace",
+    )
     return {
         "status": value["status"],
         "root_authorization_intake_bound": False,
@@ -573,7 +739,7 @@ def _validate_drift(value: dict[str, Any]) -> dict[str, Any]:
         "existing_diagnostic.decision.formal_admission": False,
     }.items():
         _eq(value, path, expected, code="source_drift")
-    _require(isinstance(_get(value, "blockers"), list) and _get(value, "blockers"), "source-drift blockers are missing", code="source_drift")
+    _string_list(_get(value, "blockers"), "source-drift blockers", nonempty=True)
     return {
         "checks": checks,
         "blockers": list(_get(value, "blockers")),
@@ -628,10 +794,18 @@ def _validate_consistency(value: dict[str, Any]) -> dict[str, Any]:
         "qualification.qualification_credit": 0,
     }.items():
         _eq(value, path, expected, code="source_drift")
+    checks = _get(value, "checks")
+    _require(type(checks) is list, "consistency checks must be a list", code="schema_drift")
     parameter_check = next(
-        item for item in _get(value, "checks")
-        if isinstance(item, dict) and item.get("check") == "planner_parameter_contract_matches_committed_receipt"
+        (
+            item
+            for item in checks
+            if isinstance(item, dict)
+            and item.get("check") == "planner_parameter_contract_matches_committed_receipt"
+        ),
+        None,
     )
+    _require(parameter_check is not None, "planner parameter contract check is missing", code="schema_drift")
     observed = _get(parameter_check, "observed")
     for path, expected in {
         "q": Q,
@@ -725,6 +899,7 @@ def _validate_terminal(value: dict[str, Any]) -> dict[str, Any]:
         "fresh terminal evidence path",
         suffix=".json",
     )
+    _string_list(_get(value, "blocking_reasons"), "terminal blocking reasons", nonempty=True)
     return {
         "present": False,
         "status": "missing",
@@ -786,6 +961,7 @@ def _validate_matrix(value: dict[str, Any]) -> dict[str, Any]:
         "execution_controls.gate_mutation": 0,
     }.items():
         _eq(value, path, expected, code="matrix_boundary")
+    _string_list(_get(value, "blocking_reasons"), "matrix blocking reasons", nonempty=True)
     return {
         "expected_case_count": MATRIX_CASE_COUNT,
         "sidecar_count_supplied": 0,
@@ -880,12 +1056,32 @@ def _load_and_validate(input_paths: Mapping[str, str | Path] | None) -> tuple[di
     _validate_terminal(values["terminal_evidence"])
     _validate_matrix(values["sidecar_matrix"])
     _validate_t2(values["t2_readiness"])
+    root_namespace = _metadata_path(
+        _get(values["root_scheduler"], "binding_projection.fresh_output_namespace.namespace"),
+        "root fresh output namespace",
+    ).rstrip("/")
+    terminal_path = _metadata_path(
+        _get(values["terminal_evidence"], "fresh_attempt_contract.terminal_evidence_ref.path"),
+        "fresh terminal evidence path",
+        suffix=".json",
+    )
+    _require(
+        terminal_path.startswith(root_namespace + "/"),
+        "terminal evidence path is outside the root fresh namespace",
+        code="binding_drift",
+    )
     return values, metas
 
 
 def _input_ref(name: str, value: Mapping[str, Any], meta: Mapping[str, Any]) -> dict[str, Any]:
-    record_id = value.get("record_id") or value.get("audit_id") or INPUT_RECORD_IDS[name]
-    _require(isinstance(record_id, str) and record_id, f"{name} record identity is malformed", code="schema_drift")
+    present = [field for field in ("record_id", "audit_id") if field in value]
+    _require(len(present) <= 1, f"{name} has ambiguous record identity fields", code="schema_drift")
+    record_id = value.get(present[0]) if present else INPUT_RECORD_IDS[name]
+    _require(
+        type(record_id) is str and record_id == INPUT_RECORD_IDS[name],
+        f"{name} record identity is not the expected value",
+        code="binding_drift",
+    )
     return {
         "path": meta["path"],
         "bytes": meta["bytes"],
@@ -1029,12 +1225,22 @@ def _build_report_from_loaded(values: Mapping[str, dict[str, Any]], metas: Mappi
         "input_boundary": {
             "bounded_json_only": True,
             "max_json_bytes": MAX_JSON_BYTES,
+            "max_json_depth": MAX_JSON_DEPTH,
             "duplicate_keys_rejected": True,
             "nonfinite_numbers_rejected": True,
             "missing_inputs_fail_closed": True,
             "path_traversal_rejected": True,
+            "lab_root_scope_restricted": True,
+            "reports_output_scope_restricted": True,
             "symlink_paths_rejected": True,
+            "hardlink_paths_rejected": True,
+            "held_directory_fd_no_follow": True,
             "read_toctou_rechecked": True,
+            "read_inode_rechecked": True,
+            "read_hash_rechecked": True,
+            "output_inode_rechecked": True,
+            "record_ids_exact": True,
+            "schemas_exact": True,
             "hdf5_opened": False,
             "hdf5_content_read": False,
             "hdf5_hash_recomputed": False,
@@ -1091,18 +1297,23 @@ def build_report(input_paths: Mapping[str, str | Path] | None = None) -> dict[st
     return report
 
 
-def _validate_input_ref(value: Any, label: str) -> None:
+def _validate_input_ref(value: Any, *, name: str, input_name: str) -> None:
+    label = name
     _require(isinstance(value, dict), f"{label} is malformed", code="report_schema")
     _require(set(value) == {"path", "bytes", "sha256", "schema", "record_id"}, f"{label} fields differ", code="report_schema")
-    # Default reports use lab-relative paths.  Test/consumer callers may bind
-    # an isolated fixture outside the lab root; canonical absolute paths are
-    # still accepted here because the loader has already applied the
-    # no-symlink/TOCTOU checks before producing this reference.
-    _canonical_path(value["path"], suffix=".json")
+    _canonical_path(value["path"], suffix=".json", scope="lab")
     _require(type(value["bytes"]) is int and value["bytes"] > 0, f"{label} bytes are malformed", code="report_schema")
     _sha(value["sha256"], f"{label} SHA")
-    _require(isinstance(value["schema"], str) and value["schema"], f"{label} schema is malformed", code="report_schema")
-    _require(isinstance(value["record_id"], str) and value["record_id"], f"{label} record is malformed", code="report_schema")
+    _require(
+        type(value["schema"]) is str and value["schema"] == INPUT_SCHEMAS[input_name],
+        f"{label} schema is not the expected value",
+        code="report_binding",
+    )
+    _require(
+        type(value["record_id"]) is str and value["record_id"] == INPUT_RECORD_IDS[input_name],
+        f"{label} record is not the expected value",
+        code="report_binding",
+    )
 
 
 def validate_report(value: Any) -> dict[str, Any]:
@@ -1193,29 +1404,61 @@ def validate_report(value: Any) -> dict[str, Any]:
     _metadata_path(_get(value, "source.target_path"), "report target HDF5 metadata", suffix=".h5")
     _metadata_path(_get(value, "source.collection_declared_path"), "report collection HDF5 metadata", suffix=".h5")
     _metadata_path(_get(value, "source.collection_manifest_path"), "report collection manifest", suffix=".json")
-    _metadata_path(_get(value, "terminal_evidence.path"), "report terminal evidence path", suffix=".json")
+    root_namespace = _metadata_path(
+        _get(value, "root_scheduler_authorization.fresh_namespace"),
+        "report fresh output namespace",
+    ).rstrip("/")
+    terminal_path = _metadata_path(
+        _get(value, "terminal_evidence.path"),
+        "report terminal evidence path",
+        suffix=".json",
+    )
+    _require(
+        terminal_path.startswith(root_namespace + "/"),
+        "report terminal evidence path is outside the root fresh namespace",
+        code="report_binding",
+    )
     for name, ref in value["input_refs"].items():
         _require(name in DEFAULT_INPUT_PATHS, f"unexpected report input ref: {name}", code="report_schema")
-        _validate_input_ref(ref, f"report input ref {name}")
+        _validate_input_ref(ref, name=f"report input ref {name}", input_name=name)
     _require(set(value["input_refs"]) == set(DEFAULT_INPUT_PATHS), "report input refs differ", code="report_schema")
     _require(isinstance(value["sidecar_matrix"]["missing_case_ids"], list), "missing sidecar list is malformed", code="report_schema")
-    _require(value["sidecar_matrix"]["missing_case_ids"] == [f"{SCOPE_ID}_DEV_{i:02d}" for i in range(MATRIX_CASE_COUNT)], "missing sidecar list drift", code="report_binding")
-    _require(isinstance(value["source_drift"]["blocking_reasons"], list) and value["source_drift"]["blocking_reasons"], "source drift blockers are missing", code="report_schema")
-    _require(isinstance(value["blockers"], list) and value["blockers"], "projection blockers are missing", code="report_schema")
-    _require(value["input_boundary"] == {
+    _require(
+        _strict_equal(
+            value["sidecar_matrix"]["missing_case_ids"],
+            [f"{SCOPE_ID}_DEV_{i:02d}" for i in range(MATRIX_CASE_COUNT)],
+        ),
+        "missing sidecar list drift",
+        code="report_binding",
+    )
+    _string_list(value["source_drift"]["blocking_reasons"], "report source drift blockers", nonempty=True)
+    _string_list(value["blockers"], "projection blockers", nonempty=True)
+    _string_list(value["evidence_detail"]["terminal_blocking_reasons"], "report terminal blockers", nonempty=True)
+    _string_list(value["evidence_detail"]["matrix_blocking_reasons"], "report matrix blockers", nonempty=True)
+    _require(_strict_equal(value["input_boundary"], {
         "bounded_json_only": True,
         "max_json_bytes": MAX_JSON_BYTES,
+        "max_json_depth": MAX_JSON_DEPTH,
         "duplicate_keys_rejected": True,
         "nonfinite_numbers_rejected": True,
         "missing_inputs_fail_closed": True,
         "path_traversal_rejected": True,
+        "lab_root_scope_restricted": True,
+        "reports_output_scope_restricted": True,
         "symlink_paths_rejected": True,
+        "hardlink_paths_rejected": True,
+        "held_directory_fd_no_follow": True,
         "read_toctou_rechecked": True,
+        "read_inode_rechecked": True,
+        "read_hash_rechecked": True,
+        "output_inode_rechecked": True,
+        "record_ids_exact": True,
+        "schemas_exact": True,
         "hdf5_opened": False,
         "hdf5_content_read": False,
         "hdf5_hash_recomputed": False,
-    }, "input boundary drift", code="authorization_drift")
-    _require(value["execution_controls"] == {
+    }), "input boundary drift", code="authorization_drift")
+    _require(_strict_equal(value["execution_controls"], {
         "gpu_started": False,
         "native_started": False,
         "solver_started": False,
@@ -1228,8 +1471,8 @@ def validate_report(value: Any) -> dict[str, Any]:
         "gate_mutation": 0,
         "completion_mutation": 0,
         "plan_mutation": 0,
-    }, "execution boundary drift", code="side_effect_drift")
-    _require(value["mutations"] == {
+    }), "execution boundary drift", code="side_effect_drift")
+    _require(_strict_equal(value["mutations"], {
         "registry": 0,
         "ledger": 0,
         "denominator": 0,
@@ -1238,15 +1481,15 @@ def validate_report(value: Any) -> dict[str, Any]:
         "plan": 0,
         "queue": 0,
         "material_labels": 0,
-    }, "mutation boundary drift", code="side_effect_drift")
-    _require(value["report_contract"] == {
+    }), "mutation boundary drift", code="side_effect_drift")
+    _require(_strict_equal(value["report_contract"], {
         "builder": "scripts/f4_tallwall120_material_readiness_projection_v1.py",
         "bounded_json_inputs": list(DEFAULT_INPUT_PATHS),
         "recomputed_from_bounded_json": True,
         "exact_build_report_binding_required": True,
         "diagnostic_only_non_authorizing": True,
         "hdf5_paths_are_metadata_only": True,
-    }, "report contract drift", code="report_schema")
+    }), "report contract drift", code="report_schema")
     _require(value["evidence_detail"]["source_drift_report_status"] == "blocked_fail_closed", "source drift status drift", code="report_binding")
     _require(value["evidence_detail"]["consistency_audit_status"] == "blocked_fail_closed", "consistency status drift", code="report_binding")
     _require(value["evidence_detail"]["root_scheduler_status"] == "blocked_missing_fresh_root_scheduler_receipts", "root status drift", code="report_binding")
@@ -1261,10 +1504,14 @@ def verify_report(
 ) -> dict[str, Any]:
     """Verify a report against a fresh bounded read of its seven inputs."""
 
-    value, _ = _read_bounded_json(report_path, label="F4 material readiness projection report")
+    value, _ = _read_bounded_json(
+        report_path,
+        label="F4 material readiness projection report",
+        scope="reports",
+    )
     validate_report(value)
     expected = build_report(input_paths)
-    _require(value == expected, "projection report does not match its bound inputs", code="report_binding_drift")
+    _require(_strict_equal(value, expected), "projection report does not match its bound inputs", code="report_binding_drift")
     return value
 
 

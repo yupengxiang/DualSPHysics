@@ -21,6 +21,6 @@
 
 ## 安全边界
 
-输入读取拒绝 duplicate key、非 finite 数值、越界大小、路径 traversal、symlink 和读时 TOCTOU 变化；报告验证会重新从七份输入构建并逐字节绑定 SHA。
+输入路径限制在 checked-in lab root；report/markdown 输出固定在 `reports/` 子目录。读取通过持有的 directory FD 逐组件拒绝 symlink，并执行 open 前、读后 inode 以及双读 hash/字节复核；输出拒绝 symlink、hardlink 和替换。duplicate key、非 finite 数值、越界大小、路径 traversal、错误 record-id、错误 schema、malformed 结构和超深 JSON 均 fail-closed。报告验证会重新从七份输入构建并逐字节绑定 SHA。
 
 该 projection 是 readiness 记录，不是实际 material trace、terminal evidence、T2 acceptance 或 launch authorization。
