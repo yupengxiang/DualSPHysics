@@ -1,7 +1,7 @@
 # F4 Tallwall120 材料 receipt consistency audit v1
 
-审计时间：2026-09-28T00:00:00Z  
-机器报告：`reports/F4-TALLWALL120-MATERIAL-RECEIPT-CONSISTENCY-AUDIT-2026-09-28.json`  
+审计时间：2026-09-28T00:00:00Z
+机器报告：`reports/F4-TALLWALL120-MATERIAL-RECEIPT-CONSISTENCY-AUDIT-2026-09-28.json`
 状态：`blocked_fail_closed`
 
 ## 范围与输入边界
