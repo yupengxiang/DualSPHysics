@@ -1,0 +1,148 @@
+{
+  "schema": "core.material.f3.t2.launch_readiness_blocked_audit.v1",
+  "created_at": "2026-09-28",
+  "status": "blocked_no_current_launch_authorization",
+  "scope": {
+    "dataset_family": "F3",
+    "plan_diagnostics": 15,
+    "plan_logical_configurations": 33,
+    "diagnostic_indices": "0-11,24,25,30",
+    "row30_r003_retried": false,
+    "qualification_claim": "none",
+    "t2_credit": 0,
+    "diagnostic_only": true
+  },
+  "attempt": {
+    "matrix_attempt_started": false,
+    "first_attempt_path": null,
+    "new_attempt_directory_created": false,
+    "reason": "The latest readiness receipt does not prove a current independent root/resource launch authorization. The bound runtime spec is ready_for_root_queue, and the queue registration requires measured host-I/O admission.",
+    "historical_attempts_reused": false,
+    "row30_r003_touched": false
+  },
+  "entrypoint_probe": {
+    "direct_script_probe": {
+      "argv": [
+        "lagrangian-fluid-lab/.venv/bin/python",
+        "lagrangian-fluid-lab/scripts/core_material.py",
+        "--help"
+      ],
+      "cwd": "/home/jade/Projects/DualSPHysics",
+      "exit_status": 1,
+      "error": "ModuleNotFoundError: No module named 'scripts'",
+      "interpretation": "A raw script-path invocation is not a valid worker launch context."
+    },
+    "normalized_module_probe": {
+      "argv": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+        "-m",
+        "scripts.core_material",
+        "--help"
+      ],
+      "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+      "exit_status": 0,
+      "interpretation": "The independent CPU tracer entrypoint exists, but this probe does not authorize a matrix run."
+    },
+    "worker_probe": {
+      "command": "scripts/core_runtime.py status --compact",
+      "exit_status": 0,
+      "counts": {
+        "queued": 0,
+        "reserved": 0,
+        "launching": 0,
+        "running": 0,
+        "attention": 0,
+        "succeeded": 292,
+        "failed": 19,
+        "cancelled": 13
+      },
+      "current_jobs": []
+    }
+  },
+  "authorization": {
+    "readiness_receipt": {
+      "path": "campaigns/core-v1/material/evidence/f3-material-t2-launch-readiness-v3-20260923/receipt.json",
+      "sha256": "2d6e3151111f5829a33fa165718faabb959d5f3bb242db80f174b50e0869dd57",
+      "audit_status": "matrix_v2_integrated_r003_terminal_failure_no_t2_credit",
+      "current_launch_authorization_proven": false,
+      "same_scope_row30_retry_authorized": false,
+      "r003_terminal_failure_bound": true,
+      "plan_15_availability_counts": {
+        "terminal_diagnostic_only": 12,
+        "terminal_diagnostic_scientific_gate_failure": 1,
+        "terminal_engineering_evidence_incomplete_for_acceptance": 1,
+        "terminal_matched_decimation_diagnostic_only": 1
+      }
+    },
+    "runtime_spec": {
+      "path": "campaigns/core-v1/material/evidence/f3-qualification-diagnostic-runtime-spec-2026-09-19.json",
+      "sha256": "06c2d549d971d679f48b0d46480a7decc64d1ab58a3e35ece8cb5a61a04a1aa9",
+      "status": "ready_for_root_queue",
+      "cpu_only": true,
+      "gpu_forbidden": true,
+      "solver_launch": false,
+      "scheduler_owned_resources": true,
+      "prepared_source_launch_allowed": false,
+      "bound_core_material_sha256": "1880c02a50168ae3325c39993a55103a1ebba06adcc48a486b7f6f4825d94b7e",
+      "current_core_material_sha256": "9e294e64c431c725717caf86eb001dc3a3505a312e279386796b6a472b5ee94e"
+    },
+    "queue_registration": {
+      "path": "campaigns/core-v1/material/evidence/diagnostic-queue-registration.json",
+      "sha256": "71ce17d5421d27dde2f849f7d1b3a226bfa0e6b275440f10f45eb0ec9a9da2cc",
+      "contract_note": "CPU-only material jobs wait for measured host I/O admission; six logical configurations are not T2 qualification."
+    },
+    "job_specs": {
+      "core-f3-material-coarse-s2": "1f1080e497feab414863e3e02dd31dbec91c0d09e4ef9ac855e0cdbbda070628",
+      "core-f3-material-coarse-s4": "89a376b36c3d8c31c8b050b6bbd5a3aa6014d1877c7d7d918ed7cb4eeb889c1b",
+      "core-f3-material-production-s2": "4c246a871761e5cc8e61c879727470c7bab84db1252716ebbd1fd34cdef87441",
+      "core-f3-material-production-s4": "0c245f0599dd180cfe0113244a3db301ae62783c97fc4948b8dd9de7189cfe81",
+      "core-f3-material-fine-s2": "4196fe79559899d836956af9d86a8e0054bfc3518d8ca6921b61120730ead603",
+      "core-f3-material-fine-s4": "47bb3f205c290d8f3bffffbd5db1647da057fb52624c65143c816d56426a8ea4"
+    }
+  },
+  "source_audit": {
+    "core_material_path": "scripts/core_material.py",
+    "core_material_sha256": "9e294e64c431c725717caf86eb001dc3a3505a312e279386796b6a472b5ee94e",
+    "coarse_source_path": "campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+    "coarse_source_sha256": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575",
+    "coarse_source_hash_only": true,
+    "hdf5_or_npz_library_opened": false,
+    "source_window_executed": false,
+    "trace_created": false,
+    "checkpoint_created": false,
+    "metrics_created": false
+  },
+  "resource_snapshot": {
+    "host_cpus": 128,
+    "memory_available_mib": 220635,
+    "swap_total_mib": 0,
+    "runtime_attempts_filesystem_available": "7.5T",
+    "load_average_1m": 16.84,
+    "load_average_5m": 11.95,
+    "load_average_15m": 10.44,
+    "material_backend_gpu_used": false,
+    "active_core_material_processes_observed": false
+  },
+  "protected_state": {
+    "production_hdf5_modified": false,
+    "registry_modified": false,
+    "completion_modified": false,
+    "ledger_modified": false,
+    "denominator_modified": false,
+    "qualification_gate_modified": false,
+    "historical_receipt_overwritten": false
+  },
+  "minimum_next_step": {
+    "required": "Obtain a fresh root/scheduler-owned independent authorization receipt for one non-row30 configuration, bound to the current code SHA, exact source SHA, exact argv, CPU/I/O admission, and a new attempt namespace.",
+    "first_safe_candidate": "CORE-F3-MATERIAL-COARSE-s2",
+    "launch_mechanism": "Reuse core_runtime frozen-worker; do not invoke a raw script path or bypass the queue contract.",
+    "required_outputs": [
+      "exact argv/source audit",
+      "full 836-frame window",
+      "atomic checkpoint and resume evidence",
+      "material.json and execution receipt",
+      "unknown mass/CDF/residence/coverage/performance metrics"
+    ],
+    "row30_policy": "Never retry f3-material-30-canonical-s4-r003 without a separately frozen remedy and new authorization."
+  }
+}
