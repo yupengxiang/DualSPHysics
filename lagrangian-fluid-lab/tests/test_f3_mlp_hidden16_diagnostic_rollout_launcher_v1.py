@@ -54,7 +54,60 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
     (root / "scripts").mkdir()
     (root / "campaigns" / "core-v1").mkdir(parents=True)
     (root / ".venv" / "bin" / "python").write_text("placeholder", encoding="utf-8")
-    (root / "scripts" / "core_learning.py").write_text("placeholder", encoding="utf-8")
+    (root / "scripts" / "core_learning.py").write_text(
+        """import hashlib
+import json
+import re
+import sys
+from pathlib import Path
+
+
+def argument(flag: str) -> Path:
+    return Path(sys.argv[sys.argv.index(flag) + 1])
+
+
+evaluation = argument("--output")
+trajectory = argument("--trajectory-output")
+prefix = str(evaluation)[:-len("-evaluation.json")]
+validator = Path(prefix + "-hdf5-validation.json")
+identity_path = Path(prefix + "-artifact-identity.json")
+checkpoint = argument("--checkpoint").resolve()
+seed = int(re.search(r"seed(17|29|43)", checkpoint.name).group(1))
+evaluation.write_bytes(b"evaluation")
+trajectory.write_bytes(b"trajectory")
+validator.write_bytes(b"validator")
+identity = {
+    "schema": f"core.f3.mlp.hidden16.seed{seed}.evaluator_artifact_identity.v1",
+    "status": "completed_diagnostic",
+    "seed": seed,
+    "run_id": f"f3-mlp500-hidden16-seed{seed}-20260928",
+    "namespace": prefix,
+    "namespace_nonce": prefix.rsplit("nonce", 1)[1],
+    "manifest_sha256": "2" * 64,
+    "training_manifest_sha256": "1" * 64,
+    "training_receipt_sha256": hashlib.sha256(f"training-{seed}".encode()).hexdigest(),
+    "diagnostic_only": True,
+    "formal": False,
+    "formal_eligible": False,
+    "T1_numerical": False,
+    "T2_macro": False,
+    "T2_path": False,
+    "qualification": False,
+    "qualification_credit": 0,
+    "credit": 0,
+    "checkpoint": {
+        "path": str(checkpoint),
+        "sha256": hashlib.sha256(f"checkpoint-{seed}".encode()).hexdigest(),
+        "bytes": checkpoint.stat().st_size,
+    },
+    "evaluation": {"path": str(evaluation), "sha256": "3" * 64, "bytes": evaluation.stat().st_size},
+    "trajectory": {"path": str(trajectory), "sha256": "4" * 64, "bytes": trajectory.stat().st_size},
+    "validator": {"path": str(validator), "sha256": "5" * 64, "bytes": validator.stat().st_size},
+}
+identity_path.write_text(json.dumps(identity, sort_keys=True), encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
     (root / "campaigns" / "core-v1" / "f3-dataset-v2.json").write_text("{}", encoding="utf-8")
     reports.mkdir()
 
@@ -168,6 +221,13 @@ def _plan(fixture: dict[str, object], tmp_path: Path, seed: int = 17):
     )
 
 
+def _install_real_fixture_interpreter(fixture: dict[str, object]) -> None:
+    path = fixture["root"] / ".venv" / "bin" / "python"
+    path.unlink()
+    path.write_bytes(Path(sys.executable).resolve().read_bytes())
+    path.chmod(0o755)
+
+
 def _identity(plan, *, evaluation_bytes: int, trajectory_bytes: int, validator_bytes: int) -> dict[str, object]:
     return {
         "schema": f"{launcher.IDENTITY_SCHEMA_PREFIX}{plan.seed}{launcher.IDENTITY_SCHEMA_SUFFIX}",
@@ -266,6 +326,32 @@ def test_namespace_alias_is_rejected(tmp_path: Path) -> None:
         )
 
 
+def test_all_zero_nonce_is_rejected(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    with pytest.raises(launcher.LauncherError, match="non-zero"):
+        launcher.build_plan(
+            fixture["root"],
+            seed=17,
+            nonce="0" * 32,
+            history_summary=fixture["histories"][17],
+            training_matrix=fixture["matrix"],
+        )
+
+
+def test_build_plan_rejects_symlinked_input_parent(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    scripts = fixture["root"] / "scripts"
+    real_scripts = fixture["root"] / "scripts-real"
+    scripts.rename(real_scripts)
+    scripts.symlink_to(real_scripts, target_is_directory=True)
+    try:
+        with pytest.raises(launcher.LauncherError, match="symlink directory"):
+            _plan(fixture, tmp_path, 17)
+    finally:
+        scripts.unlink()
+        real_scripts.rename(scripts)
+
+
 def test_symlink_and_hardlink_output_reuse_are_rejected(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     symlink_nonce = _nonce(tmp_path, 29)
@@ -320,69 +406,46 @@ def test_history_formal_or_credit_claims_fail_closed(tmp_path: Path) -> None:
         _plan(fixture, tmp_path, 17)
 
 
-def test_process_exit_proof_is_strict_and_zero_credit(tmp_path: Path) -> None:
+def test_process_exit_proof_rejects_synthetic_pid_and_returncode(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     plan = _plan(fixture, tmp_path, 17)
-    plan.outputs["evaluation"].write_bytes(b"evaluation receipt")
-    plan.outputs["trajectory"].write_bytes(b"trajectory placeholder")
-    plan.outputs["validator"].write_bytes(b"validator receipt")
-    identity = _identity(
-        plan,
-        evaluation_bytes=plan.outputs["evaluation"].stat().st_size,
-        trajectory_bytes=plan.outputs["trajectory"].stat().st_size,
-        validator_bytes=plan.outputs["validator"].stat().st_size,
-    )
-    try:
-        proof = launcher.build_process_exit_proof(
+    with pytest.raises(launcher.LauncherError, match="execution_record"):
+        launcher.build_process_exit_proof(
             plan,
-            artifact_identity=identity,
+            artifact_identity={},
             evaluator_pid=12345,
             evaluator_returncode=0,
             launcher_pid=23456,
         )
-        assert proof["status"] == "exited_successfully"
-        assert proof["evaluator_alive"] is False
-        assert proof["launcher_alive"] is False
-        assert proof["evaluator_reaped"] is True
-        assert proof["launcher_reaped"] is True
-        assert proof["returncode"] == 0
-        assert proof["source_bound"] is True
-        assert proof["formal"] is False
-        assert proof["formal_eligible"] is False
-        assert proof["credit"] == 0
-        assert proof["exit_proof_sha256"] == launcher._canonical_digest(launcher._proof_without_digest(proof))
-    finally:
-        _cleanup_external_outputs(plan)
 
 
-def test_artifact_identity_pseudo_authority_field_is_rejected(tmp_path: Path) -> None:
+def test_process_exit_proof_rejects_unsealed_record(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     plan = _plan(fixture, tmp_path, 17)
-    plan.outputs["evaluation"].write_bytes(b"evaluation receipt")
-    plan.outputs["trajectory"].write_bytes(b"trajectory placeholder")
-    plan.outputs["validator"].write_bytes(b"validator receipt")
-    identity = _identity(
-        plan,
-        evaluation_bytes=plan.outputs["evaluation"].stat().st_size,
-        trajectory_bytes=plan.outputs["trajectory"].stat().st_size,
-        validator_bytes=plan.outputs["validator"].stat().st_size,
-    )
-    identity["formal"] = True
+    with pytest.raises(launcher.LauncherError, match="minted by the actual execute_plan"):
+        launcher.build_process_exit_proof(
+            plan,
+            artifact_identity={},
+            execution_record={"status": "exited_successfully"},
+        )
+
+
+def test_artifact_identity_pseudo_authority_field_is_rejected_on_execute(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    _install_real_fixture_interpreter(fixture)
+    core_path = fixture["root"] / "scripts" / "core_learning.py"
+    core_path.write_text(core_path.read_text(encoding="utf-8").replace('"formal": False', '"formal": True'), encoding="utf-8")
+    plan = _plan(fixture, tmp_path, 17)
     try:
         with pytest.raises(launcher.LauncherError, match="formal"):
-            launcher.build_process_exit_proof(
-                plan,
-                artifact_identity=identity,
-                evaluator_pid=12345,
-                evaluator_returncode=0,
-                launcher_pid=23456,
-            )
+            launcher.execute_plan(plan)
     finally:
         _cleanup_external_outputs(plan)
 
 
-def test_execute_with_fake_natural_exit_writes_no_real_evaluator(tmp_path: Path) -> None:
+def test_execute_with_real_popen_natural_exit_writes_zero_credit_proof(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
+    _install_real_fixture_interpreter(fixture)
     plan = _plan(fixture, tmp_path, 29)
     proof_path = fixture["root"] / "reports" / launcher.PROCESS_PROOF_FILENAME.format(seed=29)
     plan = replace(plan, proof_output=proof_path, outputs={**plan.outputs, "process_proof": proof_path})
@@ -398,39 +461,33 @@ def test_execute_with_fake_natural_exit_writes_no_real_evaluator(tmp_path: Path)
         validator_bytes=sizes["validator"],
     )
 
-    class FakeProcess:
-        pid = 54321
-
-        def __init__(self) -> None:
-            self.returncode = None
-
-        def wait(self) -> int:
-            plan.outputs["evaluation"].write_bytes(b"evaluation")
-            plan.outputs["trajectory"].write_bytes(b"trajectory")
-            plan.outputs["validator"].write_bytes(b"validator")
-            _write_json(plan.outputs["artifact_identity"], identity)
-            self.returncode = 0
-            return 0
-
-        def poll(self) -> int | None:
-            return self.returncode
-
     calls: list[list[str]] = []
+    real_popen = launcher.subprocess.Popen
 
-    def fake_popen(command, **kwargs):
+    def recording_popen(command, **kwargs):
         calls.append(command)
         assert kwargs["start_new_session"] is True
-        return FakeProcess()
+        assert kwargs["pass_fds"]
+        assert kwargs["cwd"].startswith("/proc/self/fd/")
+        return real_popen(command, **kwargs)
 
     try:
-        result = launcher.execute_plan(plan, popen_factory=fake_popen, launcher_pid=65432)
+        result = launcher.execute_plan(plan, popen_factory=recording_popen)
         assert result["status"] == "exited_successfully"
         assert result["proof_written"] is True
-        assert calls and calls[0] == list(plan.command)
+        assert calls and calls[0] != list(plan.command)
+        assert calls[0][0].startswith("/proc/self/fd/")
         proof = json.loads(proof_path.read_text(encoding="utf-8"))
-        assert proof["evaluator_pid_observed"] == 54321
-        assert proof["launcher_pid_observed"] == 65432
+        assert proof["evaluator_pid_observed"] > 0
+        assert proof["launcher_pid_observed"] == os.getpid()
+        assert proof["evaluator_start_identity"]["pid"] == proof["evaluator_pid_observed"]
+        assert isinstance(proof["evaluator_start_identity"]["proc_starttime_ticks"], int)
+        assert proof["evaluator_end_identity"]["returncode"] == 0
+        assert proof["launcher_start_identity"]["pid"] == os.getpid()
+        assert proof["launcher_end_identity"]["returncode"] == 0
+        assert proof["command_sha256"] == plan.command_sha256
         assert proof["credit"] == 0
+        assert proof["exit_proof_sha256"] == launcher._canonical_digest(launcher._proof_without_digest(proof))
     finally:
         _cleanup_external_outputs(plan)
 
@@ -439,23 +496,65 @@ def test_nonzero_evaluator_never_mints_success_proof(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     plan = _plan(fixture, tmp_path, 43)
 
-    class FailedProcess:
-        pid = 65431
+    real_popen = launcher.subprocess.Popen
 
-        def wait(self) -> int:
-            return 7
-
-        def poll(self) -> int:
-            return 7
+    def failed_popen(command, **kwargs):
+        return real_popen(
+            [sys.executable, "-c", "raise SystemExit(7)"],
+            cwd=kwargs["cwd"],
+            env=kwargs["env"],
+            stdout=kwargs["stdout"],
+            stderr=kwargs["stderr"],
+            start_new_session=kwargs["start_new_session"],
+            pass_fds=kwargs["pass_fds"],
+        )
 
     try:
         result = launcher.execute_plan(
             plan,
-            popen_factory=lambda command, **kwargs: FailedProcess(),
-            launcher_pid=65432,
+            popen_factory=failed_popen,
         )
         assert result["status"] == "blocked_evaluator_returncode"
         assert result["proof_written"] is False
         assert not plan.proof_output.exists()
+    finally:
+        _cleanup_external_outputs(plan)
+
+
+@pytest.mark.parametrize("input_name", ["interpreter", "core_learning", "manifest", "checkpoint"])
+def test_execute_rejects_input_identity_drift_before_popen(tmp_path: Path, input_name: str) -> None:
+    fixture = _fixture(tmp_path)
+    plan = _plan(fixture, tmp_path, 17)
+    path = Path(plan.input_snapshots[input_name]["path"])
+    path.write_bytes(path.read_bytes() + b"-drift")
+    calls = 0
+
+    def forbidden_popen(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        raise AssertionError("identity drift must be rejected before Popen")
+
+    with pytest.raises(launcher.LauncherError, match="identity drift"):
+        launcher.execute_plan(plan, popen_factory=forbidden_popen)
+    assert calls == 0
+
+
+def test_execute_rejects_spoofed_launcher_pid(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    plan = _plan(fixture, tmp_path, 17)
+    with pytest.raises(launcher.LauncherError, match="launcher_pid overrides"):
+        launcher.execute_plan(plan, popen_factory=lambda *args, **kwargs: None, launcher_pid=os.getpid() + 1)
+
+
+def test_execute_rejects_non_popen_factory_result(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    plan = _plan(fixture, tmp_path, 17)
+
+    class SyntheticProcess:
+        pid = 99999
+
+    try:
+        with pytest.raises(launcher.LauncherError, match="actual subprocess.Popen"):
+            launcher.execute_plan(plan, popen_factory=lambda *args, **kwargs: SyntheticProcess())
     finally:
         _cleanup_external_outputs(plan)
