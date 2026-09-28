@@ -49,6 +49,10 @@ PROCESS_SCHEMA = "core.f3.graph_raw.hidden16.process_exit_proof.v1"
 ROLLOUT_SCHEMA = "core.f3.graph_raw.hidden16.rollout_identity.v1"
 VALIDATOR_ENVELOPE_SCHEMA = "core.f3.graph_raw.hidden16.hdf5_validator_receipt.v1"
 VALIDATOR_SCHEMA = "core.f3.full_rollout_receipt_hdf5_validation.v1"
+EVALUATION_IDENTITY_SCHEMA = "core.f3.graph_raw.hidden16.evaluation_identity.v1"
+PROCESS_PRODUCER_SCHEMA = "core.f3.graph_raw.hidden16.process_proof_producer.v1"
+PROCESS_PRODUCER_ID = "f3-graph-raw-hidden16-diagnostic-runtime-proof-v1"
+PROCESS_ATTESTATION_SCHEMA = "core.f3.graph_raw.hidden16.exit_attestation.v1"
 
 SEEDS = (17, 29, 43)
 MODEL_KIND = "graph_raw"
@@ -63,8 +67,21 @@ NONCE_RE = re.compile(r"^[0-9a-f]{32}$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 MAX_JSON_BYTES = 256 * 1024
 MAX_JSON_DEPTH = 64
+MAX_JSON_ARRAY_ITEMS = 4096
 MAX_DECLARED_BYTES = 1 << 50
 CHECKPOINT_SUFFIXES = frozenset({".pt", ".pth", ".ckpt"})
+
+
+def _canonical_manifest_path() -> str:
+    return "/tmp/f3-graph-raw500-hidden16-20260928-manifest.json"
+
+
+def _canonical_training_path(seed: int) -> str:
+    return f"/tmp/f3-graph-raw500-hidden16-seed{seed}-20260928-training.json"
+
+
+def _canonical_checkpoint_path(seed: int) -> str:
+    return f"/tmp/f3-graph-raw500-hidden16-seed{seed}-20260928-checkpoint.pt"
 
 REPORT_JSON_FILENAME = "F3-GRAPH-RAW-HIDDEN16-TERMINAL-RUNTIME-VERIFIER-V1-2026-09-28.json"
 REPORT_MARKDOWN_FILENAME = REPORT_JSON_FILENAME.removesuffix(".json") + ".zh-CN.md"
@@ -117,6 +134,10 @@ def canonical_json(value: Any) -> str:
     )
 
 
+def _digest(value: Any) -> str:
+    return hashlib.sha256(canonical_json(value).encode("utf-8")).hexdigest()
+
+
 def _reject_constant(token: str) -> None:
     _fail(f"non-finite JSON constant is not allowed: {token}")
 
@@ -146,6 +167,8 @@ def _walk_json(value: Any, name: str = "value", depth: int = 0) -> None:
             _walk_json(item, f"{name}.{key}", depth + 1)
         return
     if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        if len(value) > MAX_JSON_ARRAY_ITEMS:
+            _fail(f"{name} exceeds maximum JSON array length {MAX_JSON_ARRAY_ITEMS}")
         for index, item in enumerate(value):
             _walk_json(item, f"{name}[{index}]", depth + 1)
         return
@@ -405,6 +428,13 @@ def _artifact(value: Any, name: str, *, suffix: str | None = None) -> dict[str, 
     return {"path": path, "sha256": _sha256(item.get("sha256"), f"{name}.sha256"), "bytes": count}
 
 
+def _fixed_artifact(value: Any, name: str, expected_path: str, *, suffix: str | None = None) -> dict[str, Any]:
+    artifact = _artifact(value, name, suffix=suffix)
+    if artifact["path"] != expected_path:
+        _fail(f"{name}.path must be the fixed identity path {expected_path!r}")
+    return artifact
+
+
 def _source_claim(value: Any, name: str, *, absolute: bool = True) -> dict[str, Any]:
     source = _mapping(value, name)
     _reject_unknown(source, SOURCE_KEYS, name)
@@ -419,7 +449,14 @@ def _source_claim(value: Any, name: str, *, absolute: bool = True) -> dict[str, 
             _fail(f"{name}.path contains unsafe traversal or normalization")
         path = raw_path
     count = _strict_int(source.get("bytes"), f"{name}.bytes", 1)
-    return {"path": path, "sha256": _sha256(source.get("sha256"), f"{name}.sha256"), "bytes": count, "schema": source.get("schema")}
+    return {
+        "path": path,
+        "exists": True,
+        "opened": True,
+        "sha256": _sha256(source.get("sha256"), f"{name}.sha256"),
+        "bytes": count,
+        "schema": source.get("schema"),
+    }
 
 
 def _run_id(seed: int) -> str:
@@ -468,17 +505,24 @@ def _validate_shared(value: Mapping[str, Any], seed: int, name: str) -> dict[str
     ):
         _check_exact(value, key, expected, name)
     namespace, nonce = _namespace(seed, value, name)
-    checkpoint = _artifact(value.get("checkpoint"), f"{name}.checkpoint")
-    expected_checkpoint = f"f3-graph-raw500-hidden16-seed{seed}-20260928-checkpoint.pt"
-    if Path(checkpoint["path"]).name != expected_checkpoint:
-        _fail(f"{name}.checkpoint.path is not the canonical graph_raw hidden16 update-500 path")
-    training = _artifact(value.get("training_receipt"), f"{name}.training_receipt", suffix=".json")
-    expected_training = f"f3-graph-raw500-hidden16-seed{seed}-20260928-training.json"
-    if Path(training["path"]).name != expected_training:
-        _fail(f"{name}.training_receipt.path is not the canonical seed training receipt")
-    manifest = _artifact(value.get("manifest"), f"{name}.manifest", suffix=".json")
-    if "manifest" not in Path(manifest["path"]).name.lower():
-        _fail(f"{name}.manifest.path must name a manifest artifact")
+    checkpoint = _fixed_artifact(
+        value.get("checkpoint"),
+        f"{name}.checkpoint",
+        _canonical_checkpoint_path(seed),
+        suffix=".pt",
+    )
+    training = _fixed_artifact(
+        value.get("training_receipt"),
+        f"{name}.training_receipt",
+        _canonical_training_path(seed),
+        suffix=".json",
+    )
+    manifest = _fixed_artifact(
+        value.get("manifest"),
+        f"{name}.manifest",
+        _canonical_manifest_path(),
+        suffix=".json",
+    )
     trajectory = _artifact(value.get("trajectory"), f"{name}.trajectory", suffix=".h5")
     expected_trajectory = namespace + "-trajectory.h5"
     if trajectory["path"] != expected_trajectory:
@@ -552,8 +596,8 @@ def _validate_training_matrix(value: Mapping[str, Any], name: str) -> dict[int, 
         if row.get("blocked_reasons") not in ([], None):
             _fail(f"{name}.runs.seed{seed} has blocked reasons")
         source = _source_claim(row.get("source"), f"{name}.runs.seed{seed}.source")
-        if Path(source["path"]).name != f"f3-graph-raw500-hidden16-seed{seed}-20260928-training.json":
-            _fail(f"{name}.runs.seed{seed}.source.path is not canonical")
+        if source["path"] != _canonical_training_path(seed):
+            _fail(f"{name}.runs.seed{seed}.source.path is not the fixed training identity path")
         evidence = _mapping(row.get("evidence"), f"{name}.runs.seed{seed}.evidence")
         for key, expected in (
             ("schema", "core.training.v1"),
@@ -572,12 +616,20 @@ def _validate_training_matrix(value: Mapping[str, Any], name: str) -> dict[int, 
         _check_exact(checkpoint, "schema", "core.checkpoint.v1", f"{name}.runs.seed{seed}.evidence.checkpoint")
         _check_exact(checkpoint, "update", UPDATES, f"{name}.runs.seed{seed}.evidence.checkpoint")
         checkpoint_path = _declared_path(checkpoint.get("path"), f"{name}.runs.seed{seed}.evidence.checkpoint.path")
-        if Path(checkpoint_path).name != f"f3-graph-raw500-hidden16-seed{seed}-20260928-checkpoint.pt":
-            _fail(f"{name}.runs.seed{seed}.evidence.checkpoint.path is not canonical")
+        if checkpoint_path != _canonical_checkpoint_path(seed):
+            _fail(f"{name}.runs.seed{seed}.evidence.checkpoint.path is not the fixed checkpoint identity path")
         normalized[seed] = {
+            "schema": "core.training.v1",
+            "evidence_status": "complete",
+            "model_kind": MODEL_KIND,
             "seed": seed,
+            "hidden": HIDDEN,
+            "updates": UPDATES,
             "run_id": _run_id(seed),
+            "formal_eligible": False,
+            "qualification_credit": 0,
             "manifest_sha256": manifest_sha,
+            "manifest": {"path": _canonical_manifest_path(), "sha256": manifest_sha},
             "training_receipt": source,
             "checkpoint": {
                 "path": checkpoint_path,
@@ -600,6 +652,8 @@ def _projection_artifact(projection: Mapping[str, Any], key: str, name: str, *, 
     item = _mapping(projection.get(key), f"{name}.{key}")
     path = _declared_path(item.get("path"), f"{name}.{key}.path", suffix)
     count = _strict_int(item.get("bytes"), f"{name}.{key}.bytes", 1)
+    if count > MAX_DECLARED_BYTES:
+        _fail(f"{name}.{key}.bytes exceeds the declared bound")
     result = {"path": path, "bytes": count, "sha256": None}
     if item.get("sha256") is not None:
         result["sha256"] = _sha256(item.get("sha256"), f"{name}.{key}.sha256")
@@ -678,12 +732,15 @@ def _validate_terminal_matrix(value: Mapping[str, Any], name: str) -> dict[int, 
         checkpoint = _projection_artifact(projection, "checkpoint", f"{name}.seed_matrix.seed{seed}.projection")
         _check_exact(_mapping(projection["checkpoint"], "checkpoint"), "update", UPDATES, f"{name}.seed_matrix.seed{seed}.projection.checkpoint")
         training = _projection_artifact(projection, "training", f"{name}.seed_matrix.seed{seed}.projection", suffix=".json")
+        manifest = _projection_artifact(projection, "manifest", f"{name}.seed_matrix.seed{seed}.projection", suffix=".json")
         evaluation = _projection_artifact(projection, "evaluation", f"{name}.seed_matrix.seed{seed}.projection", suffix=".json")
-        trajectory = _projection_artifact(projection, "trajectory", f"{name}.seed_matrix.seed{seed}.projection", suffix=".h5", require_sha=False)
-        if Path(checkpoint["path"]).name != f"f3-graph-raw500-hidden16-seed{seed}-20260928-checkpoint.pt":
+        trajectory = _projection_artifact(projection, "trajectory", f"{name}.seed_matrix.seed{seed}.projection", suffix=".h5")
+        if checkpoint["path"] != _canonical_checkpoint_path(seed):
             _fail(f"{name}.seed_matrix.seed{seed}.checkpoint path drift")
-        if Path(training["path"]).name != f"f3-graph-raw500-hidden16-seed{seed}-20260928-training.json":
+        if training["path"] != _canonical_training_path(seed):
             _fail(f"{name}.seed_matrix.seed{seed}.training path drift")
+        if manifest["path"] != _canonical_manifest_path():
+            _fail(f"{name}.seed_matrix.seed{seed}.manifest path drift")
         if evaluation["path"] != namespace + "-evaluation.json":
             _fail(f"{name}.seed_matrix.seed{seed}.evaluation path drifts from namespace")
         if trajectory["path"] != namespace + "-trajectory.h5":
@@ -695,14 +752,36 @@ def _validate_terminal_matrix(value: Mapping[str, Any], name: str) -> dict[int, 
         for key, expected in (("passed", True), ("complete", True), ("trajectory_transitions", TRANSITIONS), ("trajectory_frames", FRAMES)):
             _check_exact(validator, key, expected, f"{name}.seed_matrix.seed{seed}.projection.validator")
         result[seed] = {
+            "schema": f"core.f3.graph_raw.hidden16.seed{seed}.terminal_matrix_evidence.v1",
+            "status": "bound_terminal_diagnostic",
             "seed": seed,
             "run_id": _run_id(seed),
+            "model_kind": MODEL_KIND,
+            "hidden": HIDDEN,
+            "updates": UPDATES,
+            "case_id": CASE_ID,
+            "split": SPLIT,
+            "transitions": TRANSITIONS,
+            "frames": FRAMES,
             "namespace": namespace,
             "namespace_nonce": nonce,
             "checkpoint": checkpoint,
             "training_receipt": training,
+            "manifest": manifest,
             "evaluation_artifact": evaluation,
             "trajectory": trajectory,
+            "terminal_markers": {
+                "terminal": markers["terminal"],
+                "execution_complete": markers["execution_complete"],
+                "finite_rollout_complete": markers["finite_rollout_complete"],
+                "terminal_status": markers["terminal_status"],
+            },
+            "validator": {
+                "passed": validator["passed"],
+                "complete": validator["complete"],
+                "trajectory_transitions": validator["trajectory_transitions"],
+                "trajectory_frames": validator["trajectory_frames"],
+            },
         }
     if len({item["namespace"] for item in result.values()}) != len(SEEDS) or len({item["namespace_nonce"] for item in result.values()}) != len(SEEDS):
         _fail(f"{name} reuses a full835 namespace or nonce")
@@ -726,30 +805,281 @@ def _envelope(value: Mapping[str, Any], seed: int, name: str, allowed: frozenset
     return shared
 
 
+def _command_sha256(command: Sequence[str]) -> str:
+    return _digest(list(command))
+
+
+def _command(value: Any, name: str) -> tuple[list[str], str]:
+    if not isinstance(value, list) or not value:
+        _fail(f"{name} must be a non-empty argv array")
+    if len(value) > 512:
+        _fail(f"{name} contains too many argv entries")
+    result: list[str] = []
+    for index, item in enumerate(value):
+        token = _string(item, f"{name}[{index}]")
+        if any(ord(character) < 0x20 for character in token):
+            _fail(f"{name}[{index}] contains a control character")
+        lowered = token.lower()
+        if any(forbidden in lowered for forbidden in ("pid", "formal", "credit", "synthetic")):
+            _fail(f"{name}[{index}] contains a forbidden process/authority token")
+        if len(token.encode("utf-8")) > 8192:
+            _fail(f"{name}[{index}] exceeds the bounded argument length")
+        result.append(token)
+    if len(canonical_json(result).encode("utf-8")) > 128 * 1024:
+        _fail(f"{name} exceeds the bounded command size")
+    return result, _command_sha256(result)
+
+
+def _option(argv: Sequence[str], option: str, name: str) -> str:
+    positions = [index for index, item in enumerate(argv) if item == option]
+    if len(positions) != 1:
+        _fail(f"{name} must contain exactly one {option} option")
+    index = positions[0]
+    if index + 1 >= len(argv) or argv[index + 1].startswith("--"):
+        _fail(f"{name}.{option} must have one value")
+    if any(item.startswith(option + "=") for item in argv):
+        _fail(f"{name} must not use {option}=value aliases")
+    return argv[index + 1]
+
+
+def _validate_evaluator_command(
+    argv: Sequence[str],
+    *,
+    checkpoint: str,
+    trajectory: str,
+    evaluation: str,
+    namespace: str,
+    name: str,
+) -> None:
+    if sum(item == "evaluate" for item in argv) != 1:
+        _fail(f"{name} must contain exactly one evaluate action")
+    if sum(Path(item).name == "core_learning.py" for item in argv) != 1:
+        _fail(f"{name} must invoke core_learning.py")
+    expected_options = {
+        "--manifest": "campaigns/core-v1/f3-dataset-v2.json",
+        "--case-id": CASE_ID,
+        "--split": SPLIT,
+        "--maximum-steps": str(TRANSITIONS),
+        "--checkpoint": checkpoint,
+        "--trajectory-output": trajectory,
+        "--progress-output": namespace + "-evaluation-progress.json",
+        "--output": evaluation,
+    }
+    for option, expected in expected_options.items():
+        observed = _option(argv, option, name)
+        if observed != expected:
+            _fail(f"{name}.{option} must be {expected!r}; observed {observed!r}")
+    if sum(item == "--diagnostic" for item in argv) != 1:
+        _fail(f"{name} must contain exactly one --diagnostic flag")
+
+
+PROCESS_PRODUCER_KEYS = frozenset({"schema", "id", "version", "source_bound", "synthetic_only", "digest"})
+PROCESS_COMPONENT_KEYS = frozenset({"alive", "returncode", "reaped", "command", "command_sha256"})
+PROCESS_ARTIFACT_BINDING_KEYS = frozenset({"seed", "run_id", "namespace", "namespace_nonce", "checkpoint", "training_receipt", "manifest", "evaluation_artifact", "trajectory"})
+PROCESS_ATTESTATION_KEYS = frozenset({"schema", "status", "source_bound", "synthetic_only", "natural_exit", "observed_after_exit", "producer_digest", "evaluator", "launcher", "artifact_bindings", "artifact_bindings_sha256", "digest"})
+
+
+def _validate_process_component(value: Any, name: str) -> tuple[dict[str, Any], list[str], str]:
+    component = _mapping(value, name)
+    _reject_unknown(component, PROCESS_COMPONENT_KEYS, name)
+    _check_exact(component, "alive", False, name)
+    _check_exact(component, "returncode", 0, name)
+    _check_exact(component, "reaped", True, name)
+    command, command_sha256 = _command(component.get("command"), f"{name}.command")
+    _check_exact(component, "command_sha256", command_sha256, name)
+    return {
+        "alive": False,
+        "returncode": 0,
+        "reaped": True,
+        "command": command,
+        "command_sha256": command_sha256,
+    }, command, command_sha256
+
+
+def _validate_evaluation_identity(value: Mapping[str, Any], seed: int, name: str) -> dict[str, Any]:
+    allowed = frozenset({
+        "schema", "status", "source_bound", "diagnostic_only", "formal", "formal_eligible",
+        "T1_numerical", "T2_macro", "T2_path", "qualification", "qualification_credit", "credit",
+        "seed", "run_id", "namespace", "namespace_nonce", "model_kind", "hidden", "updates",
+        "case_id", "split", "transitions", "frames", "evaluation_artifact", "terminal_markers", "digest",
+    })
+    _reject_aliases(value, name)
+    _reject_unknown(value, allowed, name)
+    _zero_credit(value, name)
+    for key, expected in (
+        ("schema", EVALUATION_IDENTITY_SCHEMA),
+        ("status", "completed_diagnostic"),
+        ("seed", seed),
+        ("run_id", _run_id(seed)),
+        ("model_kind", MODEL_KIND),
+        ("hidden", HIDDEN),
+        ("updates", UPDATES),
+        ("case_id", CASE_ID),
+        ("split", SPLIT),
+        ("transitions", TRANSITIONS),
+        ("frames", FRAMES),
+    ):
+        _check_exact(value, key, expected, name)
+    namespace, nonce = _namespace(seed, value, name)
+    evaluation = _fixed_artifact(value.get("evaluation_artifact"), f"{name}.evaluation_artifact", namespace + "-evaluation.json", suffix=".json")
+    markers = _mapping(value.get("terminal_markers"), f"{name}.terminal_markers")
+    _reject_unknown(markers, frozenset({"terminal", "execution_complete", "finite_rollout_complete", "terminal_status", "future_state_inputs"}), f"{name}.terminal_markers")
+    for key, expected in (("terminal", True), ("execution_complete", True), ("finite_rollout_complete", True), ("terminal_status", "completed"), ("future_state_inputs", False)):
+        _check_exact(markers, key, expected, f"{name}.terminal_markers")
+    normalized_core = {
+        "schema": EVALUATION_IDENTITY_SCHEMA,
+        "status": "completed_diagnostic",
+        "source_bound": True,
+        "diagnostic_only": True,
+        "formal": False,
+        "formal_eligible": False,
+        "T1_numerical": False,
+        "T2_macro": False,
+        "T2_path": False,
+        "qualification": False,
+        "qualification_credit": 0,
+        "credit": 0,
+        "seed": seed,
+        "run_id": _run_id(seed),
+        "namespace": namespace,
+        "namespace_nonce": nonce,
+        "model_kind": MODEL_KIND,
+        "hidden": HIDDEN,
+        "updates": UPDATES,
+        "case_id": CASE_ID,
+        "split": SPLIT,
+        "transitions": TRANSITIONS,
+        "frames": FRAMES,
+        "evaluation_artifact": evaluation,
+        "terminal_markers": {
+            "terminal": True,
+            "execution_complete": True,
+            "finite_rollout_complete": True,
+            "terminal_status": "completed",
+            "future_state_inputs": False,
+        },
+    }
+    _check_exact(value, "digest", _digest(normalized_core), name)
+    return {**normalized_core, "digest": _digest(normalized_core)}
+
+
 def _validate_rollout(value: Mapping[str, Any], seed: int, name: str) -> dict[str, Any]:
     allowed = COMMON_ENVELOPE_KEYS | frozenset({"schema", "report_id", "status", "evaluation_artifact", "terminal_markers"})
     shared = _envelope(value, seed, name, allowed)
     _check_exact(value, "schema", f"core.f3.graph_raw.hidden16.seed{seed}.rollout_identity.v1", name)
     _check_exact(value, "report_id", f"f3-graph-raw-hidden16-seed{seed}-full835-rollout-identity-v1", name)
     _check_exact(value, "status", "completed_diagnostic", name)
-    evaluation = _artifact(value.get("evaluation_artifact"), f"{name}.evaluation_artifact", suffix=".json")
-    if evaluation["path"] != shared["namespace"] + "-evaluation.json":
-        _fail(f"{name}.evaluation_artifact.path drifts from namespace")
+    evaluation = _fixed_artifact(value.get("evaluation_artifact"), f"{name}.evaluation_artifact", shared["namespace"] + "-evaluation.json", suffix=".json")
     markers = _mapping(value.get("terminal_markers"), f"{name}.terminal_markers")
+    _reject_unknown(markers, frozenset({"terminal", "execution_complete", "finite_rollout_complete", "terminal_status", "future_state_inputs"}), f"{name}.terminal_markers")
     for key, expected in (("terminal", True), ("execution_complete", True), ("finite_rollout_complete", True), ("terminal_status", "completed"), ("future_state_inputs", False)):
         _check_exact(markers, key, expected, f"{name}.terminal_markers")
-    return {**shared, "evaluation_artifact": evaluation}
+    return {
+        **dict(value),
+        **shared,
+        "evaluation_artifact": evaluation,
+        "terminal_markers": {
+            "terminal": True,
+            "execution_complete": True,
+            "finite_rollout_complete": True,
+            "terminal_status": "completed",
+            "future_state_inputs": False,
+        },
+    }
 
 
 def _validate_process(value: Mapping[str, Any], seed: int, name: str) -> dict[str, Any]:
-    allowed = COMMON_ENVELOPE_KEYS | frozenset({"schema", "report_id", "status", "evaluator_alive", "launcher_alive", "evaluator_returncode", "launcher_returncode", "returncode"})
+    allowed = COMMON_ENVELOPE_KEYS | frozenset({
+        "schema", "report_id", "status", "evaluation_artifact", "evaluator_alive", "launcher_alive",
+        "evaluator_returncode", "launcher_returncode", "returncode", "producer", "exit_attestation",
+    })
     shared = _envelope(value, seed, name, allowed)
     _check_exact(value, "schema", f"core.f3.graph_raw.hidden16.seed{seed}.process_exit_proof.v1", name)
     _check_exact(value, "report_id", f"f3-graph-raw-hidden16-seed{seed}-process-exit-proof-v1", name)
     _check_exact(value, "status", "exited_successfully", name)
     for key, expected in (("evaluator_alive", False), ("launcher_alive", False), ("evaluator_returncode", 0), ("launcher_returncode", 0), ("returncode", 0)):
         _check_exact(value, key, expected, name)
-    return shared
+    evaluation = _fixed_artifact(value.get("evaluation_artifact"), f"{name}.evaluation_artifact", shared["namespace"] + "-evaluation.json", suffix=".json")
+
+    producer = _mapping(value.get("producer"), f"{name}.producer")
+    _reject_unknown(producer, PROCESS_PRODUCER_KEYS, f"{name}.producer")
+    for key, expected in (("schema", PROCESS_PRODUCER_SCHEMA), ("id", PROCESS_PRODUCER_ID), ("version", 1), ("source_bound", True), ("synthetic_only", False)):
+        _check_exact(producer, key, expected, f"{name}.producer")
+    producer_core = {key: producer[key] for key in PROCESS_PRODUCER_KEYS if key != "digest"}
+    producer_digest = _digest(producer_core)
+    _check_exact(producer, "digest", producer_digest, f"{name}.producer")
+    normalized_producer = {**producer_core, "digest": producer_digest}
+
+    attestation = _mapping(value.get("exit_attestation"), f"{name}.exit_attestation")
+    _reject_unknown(attestation, PROCESS_ATTESTATION_KEYS, f"{name}.exit_attestation")
+    for key, expected in (("schema", PROCESS_ATTESTATION_SCHEMA), ("status", "exited_successfully"), ("source_bound", True), ("synthetic_only", False), ("natural_exit", True), ("observed_after_exit", True), ("producer_digest", producer_digest)):
+        _check_exact(attestation, key, expected, f"{name}.exit_attestation")
+    evaluator, evaluator_command, evaluator_command_sha256 = _validate_process_component(attestation.get("evaluator"), f"{name}.exit_attestation.evaluator")
+    launcher, launcher_command, launcher_command_sha256 = _validate_process_component(attestation.get("launcher"), f"{name}.exit_attestation.launcher")
+    _validate_evaluator_command(
+        evaluator_command,
+        checkpoint=shared["checkpoint"]["path"],
+        trajectory=shared["trajectory"]["path"],
+        evaluation=evaluation["path"],
+        namespace=shared["namespace"],
+        name=f"{name}.exit_attestation.evaluator.command",
+    )
+    if len(launcher_command) < len(evaluator_command) or launcher_command[-len(evaluator_command):] != evaluator_command:
+        _fail(f"{name}.exit_attestation.launcher.command must end with the evaluator argv")
+
+    bindings = _mapping(attestation.get("artifact_bindings"), f"{name}.exit_attestation.artifact_bindings")
+    _reject_unknown(bindings, PROCESS_ARTIFACT_BINDING_KEYS, f"{name}.exit_attestation.artifact_bindings")
+    for key, expected in (("seed", seed), ("run_id", _run_id(seed)), ("namespace", shared["namespace"]), ("namespace_nonce", shared["namespace_nonce"])):
+        _check_exact(bindings, key, expected, f"{name}.exit_attestation.artifact_bindings")
+    normalized_bindings = {
+        "seed": seed,
+        "run_id": _run_id(seed),
+        "namespace": shared["namespace"],
+        "namespace_nonce": shared["namespace_nonce"],
+        "checkpoint": _fixed_artifact(bindings.get("checkpoint"), f"{name}.exit_attestation.artifact_bindings.checkpoint", shared["checkpoint"]["path"], suffix=".pt"),
+        "training_receipt": _fixed_artifact(bindings.get("training_receipt"), f"{name}.exit_attestation.artifact_bindings.training_receipt", shared["training_receipt"]["path"], suffix=".json"),
+        "manifest": _fixed_artifact(bindings.get("manifest"), f"{name}.exit_attestation.artifact_bindings.manifest", shared["manifest"]["path"], suffix=".json"),
+        "evaluation_artifact": _fixed_artifact(bindings.get("evaluation_artifact"), f"{name}.exit_attestation.artifact_bindings.evaluation_artifact", evaluation["path"], suffix=".json"),
+        "trajectory": _fixed_artifact(bindings.get("trajectory"), f"{name}.exit_attestation.artifact_bindings.trajectory", shared["trajectory"]["path"], suffix=".h5"),
+    }
+    for artifact_name in ("checkpoint", "training_receipt", "manifest", "trajectory"):
+        _artifact_equal(normalized_bindings[artifact_name], shared[artifact_name], f"{name}.exit_attestation.artifact_bindings.{artifact_name}")
+    _artifact_equal(normalized_bindings["evaluation_artifact"], evaluation, f"{name}.exit_attestation.artifact_bindings.evaluation_artifact")
+    bindings_digest = _digest(normalized_bindings)
+    _check_exact(attestation, "artifact_bindings_sha256", bindings_digest, f"{name}.exit_attestation")
+    normalized_attestation_core = {
+        "schema": PROCESS_ATTESTATION_SCHEMA,
+        "status": "exited_successfully",
+        "source_bound": True,
+        "synthetic_only": False,
+        "natural_exit": True,
+        "observed_after_exit": True,
+        "producer_digest": producer_digest,
+        "evaluator": evaluator,
+        "launcher": launcher,
+        "artifact_bindings": normalized_bindings,
+        "artifact_bindings_sha256": bindings_digest,
+    }
+    attestation_digest = _digest(normalized_attestation_core)
+    _check_exact(attestation, "digest", attestation_digest, f"{name}.exit_attestation")
+    normalized_attestation = {**normalized_attestation_core, "digest": attestation_digest}
+    normalized = {
+        **dict(value),
+        **shared,
+        "evaluation_artifact": evaluation,
+        "producer": normalized_producer,
+        "exit_attestation": normalized_attestation,
+        "evaluator_alive": False,
+        "launcher_alive": False,
+        "evaluator_returncode": 0,
+        "launcher_returncode": 0,
+        "returncode": 0,
+    }
+    # Keep these names live in the normalized shape so command identity cannot
+    # be silently dropped when the envelope is embedded in a report.
+    _check_exact(normalized_attestation["evaluator"], "command_sha256", evaluator_command_sha256, f"{name}.exit_attestation.evaluator")
+    _check_exact(normalized_attestation["launcher"], "command_sha256", launcher_command_sha256, f"{name}.exit_attestation.launcher")
+    return normalized
 
 
 def _validate_validator(value: Mapping[str, Any], seed: int, name: str) -> dict[str, Any]:
@@ -761,7 +1091,121 @@ def _validate_validator(value: Mapping[str, Any], seed: int, name: str) -> dict[
     _check_exact(value, "validator_schema", VALIDATOR_SCHEMA, name)
     for key, expected in (("passed", True), ("complete", True), ("expected_transitions", TRANSITIONS), ("frames_executed", FRAMES), ("trajectory_transitions", TRANSITIONS), ("trajectory_frames", FRAMES), ("tail_frame_count", 0), ("production_artifacts_touched", False), ("actual_future_state_inputs", False), ("synthetic_only", False)):
         _check_exact(value, key, expected, name)
-    return shared
+    return {**dict(value), **shared}
+
+
+def _validate_training_evidence(value: Mapping[str, Any], seed: int, name: str) -> dict[str, Any]:
+    allowed = frozenset({
+        "schema", "evidence_status", "model_kind", "seed", "hidden", "updates", "run_id",
+        "formal_eligible", "qualification_credit", "manifest_sha256", "manifest", "training_receipt", "checkpoint",
+    })
+    _reject_aliases(value, name)
+    _reject_unknown(value, allowed, name)
+    for key, expected in (
+        ("schema", "core.training.v1"),
+        ("evidence_status", "complete"),
+        ("model_kind", MODEL_KIND),
+        ("seed", seed),
+        ("hidden", HIDDEN),
+        ("updates", UPDATES),
+        ("run_id", _run_id(seed)),
+        ("formal_eligible", False),
+        ("qualification_credit", 0),
+    ):
+        _check_exact(value, key, expected, name)
+    manifest_sha = _sha256(value.get("manifest_sha256"), f"{name}.manifest_sha256")
+    manifest_value = _mapping(value.get("manifest"), f"{name}.manifest")
+    _reject_unknown(manifest_value, frozenset({"path", "sha256"}), f"{name}.manifest")
+    manifest_path = _declared_path(manifest_value.get("path"), f"{name}.manifest.path", ".json")
+    if manifest_path != _canonical_manifest_path():
+        _fail(f"{name}.manifest.path is not the fixed manifest identity path")
+    manifest = {"path": manifest_path, "sha256": _sha256(manifest_value.get("sha256"), f"{name}.manifest.sha256")}
+    if manifest["sha256"] != manifest_sha:
+        _fail(f"{name}.manifest.sha256 drifts from manifest_sha256")
+    training = _source_claim(value.get("training_receipt"), f"{name}.training_receipt")
+    if training["path"] != _canonical_training_path(seed):
+        _fail(f"{name}.training_receipt.path is not the fixed training identity path")
+    checkpoint = _mapping(value.get("checkpoint"), f"{name}.checkpoint")
+    _reject_unknown(checkpoint, frozenset({"path", "sha256"}), f"{name}.checkpoint")
+    checkpoint_path = _declared_path(checkpoint.get("path"), f"{name}.checkpoint.path", ".pt")
+    if checkpoint_path != _canonical_checkpoint_path(seed):
+        _fail(f"{name}.checkpoint.path is not the fixed checkpoint identity path")
+    normalized = {
+        "schema": "core.training.v1",
+        "evidence_status": "complete",
+        "model_kind": MODEL_KIND,
+        "seed": seed,
+        "hidden": HIDDEN,
+        "updates": UPDATES,
+        "run_id": _run_id(seed),
+        "formal_eligible": False,
+        "qualification_credit": 0,
+        "manifest_sha256": manifest_sha,
+        "manifest": manifest,
+        "training_receipt": training,
+        "checkpoint": {"path": checkpoint_path, "sha256": _sha256(checkpoint.get("sha256"), f"{name}.checkpoint.sha256")},
+    }
+    return normalized
+
+
+def _validate_terminal_evidence(value: Mapping[str, Any], seed: int, name: str) -> dict[str, Any]:
+    allowed = frozenset({
+        "schema", "status", "seed", "run_id", "model_kind", "hidden", "updates", "case_id", "split", "transitions", "frames",
+        "namespace", "namespace_nonce", "checkpoint", "training_receipt", "manifest", "evaluation_artifact", "trajectory",
+        "terminal_markers", "validator",
+    })
+    _reject_aliases(value, name)
+    _reject_unknown(value, allowed, name)
+    for key, expected in (
+        ("schema", f"core.f3.graph_raw.hidden16.seed{seed}.terminal_matrix_evidence.v1"),
+        ("status", "bound_terminal_diagnostic"),
+        ("seed", seed),
+        ("run_id", _run_id(seed)),
+        ("model_kind", MODEL_KIND),
+        ("hidden", HIDDEN),
+        ("updates", UPDATES),
+        ("case_id", CASE_ID),
+        ("split", SPLIT),
+        ("transitions", TRANSITIONS),
+        ("frames", FRAMES),
+    ):
+        _check_exact(value, key, expected, name)
+    namespace, nonce = _namespace(seed, value, name)
+    checkpoint = _fixed_artifact(value.get("checkpoint"), f"{name}.checkpoint", _canonical_checkpoint_path(seed), suffix=".pt")
+    training = _fixed_artifact(value.get("training_receipt"), f"{name}.training_receipt", _canonical_training_path(seed), suffix=".json")
+    manifest = _fixed_artifact(value.get("manifest"), f"{name}.manifest", _canonical_manifest_path(), suffix=".json")
+    evaluation = _fixed_artifact(value.get("evaluation_artifact"), f"{name}.evaluation_artifact", namespace + "-evaluation.json", suffix=".json")
+    trajectory = _fixed_artifact(value.get("trajectory"), f"{name}.trajectory", namespace + "-trajectory.h5", suffix=".h5")
+    markers = _mapping(value.get("terminal_markers"), f"{name}.terminal_markers")
+    _reject_unknown(markers, frozenset({"terminal", "execution_complete", "finite_rollout_complete", "terminal_status"}), f"{name}.terminal_markers")
+    for key, expected in (("terminal", True), ("execution_complete", True), ("finite_rollout_complete", True), ("terminal_status", "completed")):
+        _check_exact(markers, key, expected, f"{name}.terminal_markers")
+    validator = _mapping(value.get("validator"), f"{name}.validator")
+    _reject_unknown(validator, frozenset({"passed", "complete", "trajectory_transitions", "trajectory_frames"}), f"{name}.validator")
+    for key, expected in (("passed", True), ("complete", True), ("trajectory_transitions", TRANSITIONS), ("trajectory_frames", FRAMES)):
+        _check_exact(validator, key, expected, f"{name}.validator")
+    return {
+        "schema": f"core.f3.graph_raw.hidden16.seed{seed}.terminal_matrix_evidence.v1",
+        "status": "bound_terminal_diagnostic",
+        "seed": seed,
+        "run_id": _run_id(seed),
+        "model_kind": MODEL_KIND,
+        "hidden": HIDDEN,
+        "updates": UPDATES,
+        "case_id": CASE_ID,
+        "split": SPLIT,
+        "transitions": TRANSITIONS,
+        "frames": FRAMES,
+        "namespace": namespace,
+        "namespace_nonce": nonce,
+        "checkpoint": checkpoint,
+        "training_receipt": training,
+        "manifest": manifest,
+        "evaluation_artifact": evaluation,
+        "trajectory": trajectory,
+        "terminal_markers": {"terminal": True, "execution_complete": True, "finite_rollout_complete": True, "terminal_status": "completed"},
+        "validator": {"passed": True, "complete": True, "trajectory_transitions": TRANSITIONS, "trajectory_frames": FRAMES},
+    }
 
 
 def _artifact_equal(left: Mapping[str, Any], right: Mapping[str, Any], name: str, *, allow_missing_sha: bool = False) -> None:
@@ -784,16 +1228,99 @@ def _cross_bind(seed: int, training: Mapping[str, Any], terminal: Mapping[str, A
         _fail(f"{name}: checkpoint path/SHA drifts from training matrix")
     if terminal["training_receipt"]["path"] != training["training_receipt"]["path"] or terminal["training_receipt"]["sha256"] != training["training_receipt"]["sha256"] or terminal["training_receipt"]["bytes"] != training["training_receipt"]["bytes"]:
         _fail(f"{name}: training receipt path/SHA/bytes drifts from training matrix")
+    if terminal["manifest"]["path"] != training["manifest"]["path"] or terminal["manifest"]["sha256"] != training["manifest"]["sha256"]:
+        _fail(f"{name}: manifest path/SHA drifts from training matrix")
     if terminal["checkpoint"]["path"] != rollout["checkpoint"]["path"]:
         _fail(f"{name}: terminal checkpoint path differs from rollout identity")
     for source_name, source in (("rollout", rollout), ("process", process), ("validator", validator)):
         for artifact_name in ("checkpoint", "training_receipt", "manifest", "trajectory"):
             _artifact_equal(source[artifact_name], rollout[artifact_name], f"{name}.{source_name}.{artifact_name}")
     _artifact_equal(terminal["checkpoint"], rollout["checkpoint"], f"{name}.terminal.checkpoint")
+    _artifact_equal(terminal["manifest"], rollout["manifest"], f"{name}.terminal.manifest")
     _artifact_equal(terminal["trajectory"], rollout["trajectory"], f"{name}.terminal.trajectory", allow_missing_sha=True)
     _artifact_equal(terminal["evaluation_artifact"], rollout["evaluation_artifact"], f"{name}.evaluation_artifact")
-    if rollout["manifest"]["sha256"] != training["manifest_sha256"]:
-        _fail(f"{name}: manifest SHA drifts from training matrix")
+    _artifact_equal(process["evaluation_artifact"], rollout["evaluation_artifact"], f"{name}.process.evaluation_artifact")
+    if rollout["manifest"]["sha256"] != training["manifest_sha256"] or rollout["manifest"]["path"] != training["manifest"]["path"]:
+        _fail(f"{name}: manifest path/SHA drifts from training matrix")
+
+
+def _evaluation_identity_from_rollout(rollout: Mapping[str, Any], seed: int) -> dict[str, Any]:
+    core = {
+        "schema": EVALUATION_IDENTITY_SCHEMA,
+        "status": "completed_diagnostic",
+        "source_bound": True,
+        "diagnostic_only": True,
+        "formal": False,
+        "formal_eligible": False,
+        "T1_numerical": False,
+        "T2_macro": False,
+        "T2_path": False,
+        "qualification": False,
+        "qualification_credit": 0,
+        "credit": 0,
+        "seed": seed,
+        "run_id": _run_id(seed),
+        "namespace": rollout["namespace"],
+        "namespace_nonce": rollout["namespace_nonce"],
+        "model_kind": MODEL_KIND,
+        "hidden": HIDDEN,
+        "updates": UPDATES,
+        "case_id": CASE_ID,
+        "split": SPLIT,
+        "transitions": TRANSITIONS,
+        "frames": FRAMES,
+        "evaluation_artifact": rollout["evaluation_artifact"],
+        "terminal_markers": rollout["terminal_markers"],
+    }
+    return _validate_evaluation_identity({**core, "digest": _digest(core)}, seed, f"seed{seed} evaluation_identity")
+
+
+REPORT_EVIDENCE_KEYS = frozenset({
+    "source_metadata", "training_matrix", "terminal_matrix", "rollout_identity", "process_exit_proof",
+    "evaluation_identity", "validator_receipt",
+})
+
+
+def _validate_report_seed_evidence(value: Mapping[str, Any], seed: int, name: str) -> dict[str, Any]:
+    _reject_unknown(value, REPORT_EVIDENCE_KEYS, name)
+    source_metadata = _mapping(value.get("source_metadata"), f"{name}.source_metadata")
+    source_names = frozenset({"training_matrix", "terminal_matrix", "rollout_identity", "process_exit_proof", "validator_receipt"})
+    _reject_unknown(source_metadata, source_names, f"{name}.source_metadata")
+    expected_schemas = {
+        "training_matrix": TRAINING_MATRIX_SCHEMA,
+        "terminal_matrix": TERMINAL_MATRIX_SCHEMA,
+        "rollout_identity": f"core.f3.graph_raw.hidden16.seed{seed}.rollout_identity.v1",
+        "process_exit_proof": f"core.f3.graph_raw.hidden16.seed{seed}.process_exit_proof.v1",
+        "validator_receipt": f"core.f3.graph_raw.hidden16.seed{seed}.hdf5_validator_receipt.v1",
+    }
+    for source_name in source_names:
+        metadata = _mapping(source_metadata.get(source_name), f"{name}.source_metadata.{source_name}")
+        _validate_source_metadata(metadata, f"{name}.source_metadata.{source_name}", require_opened=True)
+        if metadata.get("schema") != expected_schemas[source_name]:
+            _fail(f"{name}.source_metadata.{source_name}.schema is not the expected evidence schema")
+
+    training = _validate_training_evidence(_mapping(value.get("training_matrix"), f"{name}.training_matrix"), seed, f"{name}.training_matrix")
+    terminal = _validate_terminal_evidence(_mapping(value.get("terminal_matrix"), f"{name}.terminal_matrix"), seed, f"{name}.terminal_matrix")
+    rollout = _validate_rollout(_mapping(value.get("rollout_identity"), f"{name}.rollout_identity"), seed, f"{name}.rollout_identity")
+    process = _validate_process(_mapping(value.get("process_exit_proof"), f"{name}.process_exit_proof"), seed, f"{name}.process_exit_proof")
+    evaluation = _validate_evaluation_identity(_mapping(value.get("evaluation_identity"), f"{name}.evaluation_identity"), seed, f"{name}.evaluation_identity")
+    validator = _validate_validator(_mapping(value.get("validator_receipt"), f"{name}.validator_receipt"), seed, f"{name}.validator_receipt")
+    _cross_bind(seed, training, terminal, rollout, process, validator)
+    if evaluation["seed"] != seed or evaluation["run_id"] != _run_id(seed):
+        _fail(f"{name}.evaluation_identity seed/run identity drifts")
+    if evaluation["namespace"] != rollout["namespace"] or evaluation["namespace_nonce"] != rollout["namespace_nonce"]:
+        _fail(f"{name}.evaluation_identity namespace/nonce drifts")
+    _artifact_equal(evaluation["evaluation_artifact"], rollout["evaluation_artifact"], f"{name}.evaluation_identity.evaluation_artifact")
+    _artifact_equal(evaluation["evaluation_artifact"], terminal["evaluation_artifact"], f"{name}.evaluation_identity.terminal.evaluation_artifact")
+    return {
+        "source_metadata": {source_name: dict(source_metadata[source_name]) for source_name in source_names},
+        "training_matrix": training,
+        "terminal_matrix": terminal,
+        "rollout_identity": rollout,
+        "process_exit_proof": process,
+        "evaluation_identity": evaluation,
+        "validator_receipt": validator,
+    }
 
 
 def _check(name: str, passed: bool, reason: str, observed: Any = None, expected: Any = None) -> dict[str, Any]:
@@ -906,13 +1433,28 @@ def _evaluate(
             process = _validate_process(process_payloads[seed], seed, f"seed{seed} process_exit_proof")
             validator = _validate_validator(validator_payloads[seed], seed, f"seed{seed} validator_receipt")
             _cross_bind(seed, training_rows[seed], terminal_rows[seed], rollout, process, validator)
+            evaluation_identity = _evaluation_identity_from_rollout(rollout, seed)
         except KeyError as error:
             row["blocked_reasons"].append(f"seed{seed} missing required evidence envelope: {error}")
         except (VerifierError, TypeError, RecursionError) as error:
             row["blocked_reasons"].append(str(error))
         else:
             row["status"] = "independently_verified"
-            row["evidence"] = {"rollout_identity": rollout, "process_exit_proof": process, "validator_receipt": validator}
+            row["evidence"] = {
+                "source_metadata": {
+                    "training_matrix": dict(training_source),
+                    "terminal_matrix": dict(terminal_source),
+                    "rollout_identity": dict(rollout_sources[seed]),
+                    "process_exit_proof": dict(process_sources[seed]),
+                    "validator_receipt": dict(validator_sources[seed]),
+                },
+                "training_matrix": training_rows[seed],
+                "terminal_matrix": terminal_rows[seed],
+                "rollout_identity": rollout,
+                "process_exit_proof": process,
+                "evaluation_identity": evaluation_identity,
+                "validator_receipt": validator,
+            }
     all_verified = all(row["status"] == "independently_verified" for row in rows)
     if not training_bound:
         errors.append("three-seed training evidence matrix is missing, invalid, or not source-bound")
@@ -1057,12 +1599,17 @@ REPORT_TOP_LEVEL_KEYS = frozenset(
 )
 
 
-def _validate_source_metadata(value: Any, name: str) -> None:
+def _validate_source_metadata(value: Any, name: str, *, require_opened: bool = False) -> None:
     item = _mapping(value, name)
     _reject_unknown(item, SOURCE_KEYS, name)
     _string(item.get("path"), f"{name}.path") if item.get("path") is not None else None
     if type(item.get("exists")) is not bool or type(item.get("opened")) is not bool:
         _fail(f"{name}.exists/opened must be booleans")
+    if require_opened:
+        _check_exact(item, "exists", True, name)
+        _check_exact(item, "opened", True, name)
+        _strict_int(item.get("bytes"), f"{name}.bytes", 1)
+        _sha256(item.get("sha256"), f"{name}.sha256")
     if item.get("bytes") is not None:
         _strict_int(item.get("bytes"), f"{name}.bytes", 0)
     if item.get("sha256") is not None:
@@ -1096,51 +1643,73 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
         source_bound = report.get("source_bound")
         if type(source_bound) is not bool:
             _fail("report.source_bound must be boolean")
-        for key, expected in (("diagnostic_only", True), ("formal", False), ("formal_eligible", False), ("T1_numerical", False), ("T2_macro", False), ("T2_path", False), ("qualification", False), ("qualification_credit", 0), ("credit", 0), ("fail_closed", not source_bound), ("independently_terminal_verified", source_bound), ("receipt_bound", report.get("receipt_bound"))):
-            if key == "receipt_bound":
-                if type(report.get(key)) is not bool:
-                    _fail("report.receipt_bound must be boolean")
-            else:
-                _check_exact(report, key, expected, "report")
+        for key, expected in (("diagnostic_only", True), ("formal", False), ("formal_eligible", False), ("T1_numerical", False), ("T2_macro", False), ("T2_path", False), ("qualification", False), ("qualification_credit", 0), ("credit", 0), ("fail_closed", not source_bound), ("independently_terminal_verified", source_bound)):
+            _check_exact(report, key, expected, "report")
+        if type(report.get("receipt_bound")) is not bool:
+            _fail("report.receipt_bound must be boolean")
         _check_exact(report, "status", "independently_terminal_verified" if source_bound else "blocked_fail_closed", "report")
         contract = _mapping(report.get("expected_contract"), "report.expected_contract")
         for key, expected in (("model_kind", MODEL_KIND), ("hidden", HIDDEN), ("updates", UPDATES), ("seeds", list(SEEDS)), ("case_id", CASE_ID), ("split", SPLIT), ("transitions", TRANSITIONS), ("frames", FRAMES), ("fresh_32_hex_nonce", True), ("declared_artifacts_are_not_opened", True), ("zero_credit_only", True)):
             _check_exact(contract, key, expected, "report.expected_contract")
-        _validate_source_metadata(report.get("training_matrix_source"), "report.training_matrix_source")
-        _validate_source_metadata(report.get("terminal_matrix_source"), "report.terminal_matrix_source")
+        _validate_source_metadata(report.get("training_matrix_source"), "report.training_matrix_source", require_opened=source_bound)
+        _validate_source_metadata(report.get("terminal_matrix_source"), "report.terminal_matrix_source", require_opened=source_bound)
         rows = report.get("seed_matrix")
-        if not isinstance(rows, list) or [row.get("seed") for row in rows if isinstance(row, Mapping)] != list(SEEDS):
+        if not isinstance(rows, list) or len(rows) != len(SEEDS) or [row.get("seed") for row in rows if isinstance(row, Mapping)] != list(SEEDS):
             _fail("report.seed_matrix must contain seeds 17, 29, and 43 in order")
         row_keys = frozenset({"seed", "status", "blocked_reasons", "sources", "evidence"})
         source_names = frozenset({"rollout_identity", "process_exit_proof", "validator_receipt"})
+        all_verified = True
         for row_value in rows:
             row = _mapping(row_value, "report.seed_matrix row")
             _reject_unknown(row, row_keys, "report.seed_matrix row")
             if row.get("status") not in {"missing", "independently_verified"}:
                 _fail("report.seed_matrix row has an invalid status")
             reasons = row.get("blocked_reasons")
-            if not isinstance(reasons, list) or (row.get("status") == "missing" and not reasons):
+            if not isinstance(reasons, list) or any(not isinstance(reason, str) or not reason for reason in reasons):
                 _fail("report.seed_matrix row blocker shape is invalid")
             sources = _mapping(row.get("sources"), "report.seed_matrix.sources")
             _reject_unknown(sources, source_names, "report.seed_matrix.sources")
             for source_name in source_names:
-                _validate_source_metadata(sources.get(source_name), f"report.seed_matrix.sources.{source_name}")
+                _validate_source_metadata(sources.get(source_name), f"report.seed_matrix.sources.{source_name}", require_opened=row.get("status") == "independently_verified")
             if row.get("status") == "independently_verified":
+                if reasons:
+                    _fail("verified seed row must not carry blocked reasons")
                 evidence = _mapping(row.get("evidence"), "report.seed_matrix.evidence")
-                _reject_unknown(evidence, source_names, "report.seed_matrix.evidence")
-            elif row.get("evidence") is not None:
-                _fail("blocked row must not carry evidence")
+                normalized = _validate_report_seed_evidence(evidence, int(row["seed"]), "report.seed_matrix.evidence")
+                nested_sources = normalized["source_metadata"]
+                for source_name in source_names:
+                    if dict(sources[source_name]) != dict(nested_sources[source_name]):
+                        _fail(f"report.seed_matrix.sources.{source_name} drifts from nested evidence source metadata")
+                if dict(report["training_matrix_source"]) != dict(nested_sources["training_matrix"]):
+                    _fail("report.training_matrix_source drifts from nested evidence source metadata")
+                if dict(report["terminal_matrix_source"]) != dict(nested_sources["terminal_matrix"]):
+                    _fail("report.terminal_matrix_source drifts from nested evidence source metadata")
+            else:
+                all_verified = False
+                if not reasons:
+                    _fail("missing seed row must carry blocked reasons")
+                if row.get("evidence") is not None:
+                    _fail("blocked row must not carry evidence")
+        if source_bound != all_verified:
+            _fail("report.source_bound does not match the deeply validated three-seed evidence chain")
         checks = report.get("checks")
         expected_checks = ["three_seed_training_matrix", "full835_terminal_completion_matrix", "rollout_identity_envelopes", "process_exit_proofs", "independent_hdf5_validator_receipts", "cross_file_path_sha_bytes_identity", "terminal_835_transitions_836_frames", "terminal_zero_credit_boundary"]
-        if not isinstance(checks, list) or [item.get("check") for item in checks if isinstance(item, Mapping)] != expected_checks:
+        if not isinstance(checks, list) or len(checks) != len(expected_checks) or [item.get("check") for item in checks if isinstance(item, Mapping)] != expected_checks:
             _fail("report.checks have an unexpected identity")
-        if any(not isinstance(item, Mapping) or type(item.get("passed")) is not bool for item in checks):
-            _fail("report.checks must contain boolean pass flags")
+        for item in checks:
+            check = _mapping(item, "report.check")
+            _reject_unknown(check, frozenset({"check", "passed", "reason", "observed", "expected"}), "report.check")
+            if type(check.get("passed")) is not bool:
+                _fail("report.checks must contain boolean pass flags")
         if source_bound and any(item.get("passed") is not True for item in checks):
-            _fail("verified report checks must all pass")
+            _fail("verified report checks must all pass after evidence revalidation")
         blocked = report.get("blocked_reasons")
-        if not isinstance(blocked, list) or (not source_bound and not blocked):
-            _fail("report.blocked_reasons must be a non-empty list when blocked")
+        if not isinstance(blocked, list) or any(not isinstance(reason, str) or not reason for reason in blocked):
+            _fail("report.blocked_reasons must be a list of non-empty strings")
+        if source_bound and blocked:
+            _fail("verified report must not carry blocked reasons")
+        if not source_bound and not blocked:
+            _fail("report.blocked_reasons must be non-empty when blocked")
         _validate_side_effects(report.get("side_effects"))
         _validate_input_boundary(report.get("input_boundary"))
         _string(report.get("observed_at_utc"), "report.observed_at_utc")

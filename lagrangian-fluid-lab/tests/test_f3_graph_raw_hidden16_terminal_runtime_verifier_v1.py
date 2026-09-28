@@ -71,6 +71,11 @@ def _terminal_matrix(training: dict[str, object]) -> dict[str, object]:
                 "bytes": 152000 + seed,
                 "update": verifier.UPDATES,
             },
+            "manifest": {
+                "path": verifier._canonical_manifest_path(),
+                "sha256": training_row["evidence"]["manifest_sha256"],
+                "bytes": 4096,
+            },
             "training": {
                 "path": training_path,
                 "sha256": training_sha,
@@ -178,6 +183,68 @@ def _envelopes(training: dict[str, object], terminal: dict[str, object]) -> dict
             "checkpoint": {key: projection["checkpoint"][key] for key in ("path", "sha256", "bytes")},
             "trajectory": {key: projection["trajectory"][key] for key in ("path", "sha256", "bytes")},
         }
+        evaluator_command = [
+            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+            "core_learning.py",
+            "evaluate",
+            "--manifest", "campaigns/core-v1/f3-dataset-v2.json",
+            "--case-id", verifier.CASE_ID,
+            "--split", verifier.SPLIT,
+            "--maximum-steps", str(verifier.TRANSITIONS),
+            "--checkpoint", projection["checkpoint"]["path"],
+            "--trajectory-output", projection["trajectory"]["path"],
+            "--progress-output", projection["output_namespace"] + "-evaluation-progress.json",
+            "--output", projection["evaluation"]["path"],
+            "--diagnostic",
+        ]
+        launcher_command = ["diagnostic-rollout-launcher-v1", *evaluator_command]
+        evaluator = {
+            "alive": False,
+            "returncode": 0,
+            "reaped": True,
+            "command": evaluator_command,
+            "command_sha256": verifier._command_sha256(evaluator_command),
+        }
+        launcher = {
+            "alive": False,
+            "returncode": 0,
+            "reaped": True,
+            "command": launcher_command,
+            "command_sha256": verifier._command_sha256(launcher_command),
+        }
+        bindings = {
+            "seed": seed,
+            "run_id": verifier._run_id(seed),
+            "namespace": projection["output_namespace"],
+            "namespace_nonce": f"{seed:032x}",
+            "checkpoint": common["checkpoint"],
+            "training_receipt": common["training_receipt"],
+            "manifest": common["manifest"],
+            "evaluation_artifact": {key: projection["evaluation"][key] for key in ("path", "sha256", "bytes")},
+            "trajectory": common["trajectory"],
+        }
+        producer_core = {
+            "schema": verifier.PROCESS_PRODUCER_SCHEMA,
+            "id": verifier.PROCESS_PRODUCER_ID,
+            "version": 1,
+            "source_bound": True,
+            "synthetic_only": False,
+        }
+        producer = {**producer_core, "digest": verifier._digest(producer_core)}
+        attestation_core = {
+            "schema": verifier.PROCESS_ATTESTATION_SCHEMA,
+            "status": "exited_successfully",
+            "source_bound": True,
+            "synthetic_only": False,
+            "natural_exit": True,
+            "observed_after_exit": True,
+            "producer_digest": producer["digest"],
+            "evaluator": evaluator,
+            "launcher": launcher,
+            "artifact_bindings": bindings,
+            "artifact_bindings_sha256": verifier._digest(bindings),
+        }
+        attestation = {**attestation_core, "digest": verifier._digest(attestation_core)}
         rollout = {
             **common,
             "schema": f"core.f3.graph_raw.hidden16.seed{seed}.rollout_identity.v1",
@@ -196,6 +263,9 @@ def _envelopes(training: dict[str, object], terminal: dict[str, object]) -> dict
             "evaluator_returncode": 0,
             "launcher_returncode": 0,
             "returncode": 0,
+            "evaluation_artifact": {key: projection["evaluation"][key] for key in ("path", "sha256", "bytes")},
+            "producer": producer,
+            "exit_attestation": attestation,
         }
         validator = {
             **common,
@@ -375,3 +445,87 @@ def test_report_validation_rejects_unknown_top_level_alias(tmp_path: Path) -> No
     errors = verifier.validate_report(report)
     assert errors
     assert any("formal_status" in reason for reason in errors)
+
+
+def test_report_validation_rejects_empty_nested_evidence_and_forged_positive(tmp_path: Path) -> None:
+    report, _paths, _payloads = _build_complete(tmp_path)
+    report["seed_matrix"][0]["evidence"] = {}
+    assert verifier.validate_report(report)
+
+    blocked = verifier.build_report(tmp_path / "blocked")
+    blocked["source_bound"] = True
+    blocked["fail_closed"] = False
+    blocked["independently_terminal_verified"] = True
+    blocked["status"] = "independently_terminal_verified"
+    assert verifier.validate_report(blocked)
+
+
+def test_report_validation_rejects_forged_check_and_source_metadata(tmp_path: Path) -> None:
+    report, _paths, _payloads = _build_complete(tmp_path)
+    report["checks"][0]["passed"] = False
+    assert verifier.validate_report(report)
+
+    report, _paths, _payloads = _build_complete(tmp_path / "source")
+    report["seed_matrix"][0]["sources"]["process_exit_proof"]["sha256"] = _sha("tampered-source")
+    assert verifier.validate_report(report)
+
+
+def test_write_report_revalidates_nested_evidence_before_publication(tmp_path: Path) -> None:
+    report, _paths, _payloads = _build_complete(tmp_path)
+    report["seed_matrix"][0]["evidence"]["process_exit_proof"]["exit_attestation"]["digest"] = _sha("tampered-attestation")
+    assert verifier.validate_report(report)
+    (tmp_path / "reports").mkdir()
+    with pytest.raises(verifier.VerifierError, match="refusing to write invalid report"):
+        verifier.write_report(report, tmp_path / "reports" / verifier.REPORT_JSON_FILENAME, root=tmp_path)
+
+
+def test_process_attestation_digest_command_and_artifact_binding_fail_closed(tmp_path: Path) -> None:
+    _report, paths, payloads = _build_complete(tmp_path)
+    process = json.loads(paths["process"][17].read_text(encoding="utf-8"))
+    process["exit_attestation"]["artifact_bindings_sha256"] = _sha("tampered-bindings")
+    _write_json(paths["process"][17], process)
+    report = verifier.build_report(tmp_path, training_matrix_path=payloads["training_path"], terminal_matrix_path=payloads["terminal_path"], rollout_paths=paths["rollout"], process_paths=paths["process"], validator_paths=paths["validator"])
+    assert report["source_bound"] is False
+    assert any("artifact_bindings" in reason or "exit_attestation" in reason for reason in report["blocked_reasons"])
+
+    _report, paths, payloads = _build_complete(tmp_path / "command")
+    process = json.loads(paths["process"][17].read_text(encoding="utf-8"))
+    process["exit_attestation"]["evaluator"]["command"][2] = "inspect"
+    _write_json(paths["process"][17], process)
+    report = verifier.build_report(paths["process"][17].parents[1], training_matrix_path=payloads["training_path"], terminal_matrix_path=payloads["terminal_path"], rollout_paths=paths["rollout"], process_paths=paths["process"], validator_paths=paths["validator"])
+    assert report["source_bound"] is False
+    assert any("command_sha256" in reason or "evaluate" in reason for reason in report["blocked_reasons"])
+
+
+def test_process_attestation_rejects_synthetic_or_missing_producer_chain(tmp_path: Path) -> None:
+    _report, paths, payloads = _build_complete(tmp_path)
+    process = json.loads(paths["process"][17].read_text(encoding="utf-8"))
+    process["exit_attestation"]["synthetic_only"] = True
+    _write_json(paths["process"][17], process)
+    report = verifier.build_report(tmp_path, training_matrix_path=payloads["training_path"], terminal_matrix_path=payloads["terminal_path"], rollout_paths=paths["rollout"], process_paths=paths["process"], validator_paths=paths["validator"])
+    assert report["source_bound"] is False
+    assert any("synthetic_only" in reason or "digest" in reason for reason in report["blocked_reasons"])
+
+    _report, paths, payloads = _build_complete(tmp_path / "missing")
+    process = json.loads(paths["process"][17].read_text(encoding="utf-8"))
+    process.pop("producer")
+    _write_json(paths["process"][17], process)
+    report = verifier.build_report(paths["process"][17].parents[1], training_matrix_path=payloads["training_path"], terminal_matrix_path=payloads["terminal_path"], rollout_paths=paths["rollout"], process_paths=paths["process"], validator_paths=paths["validator"])
+    assert report["source_bound"] is False
+    assert any("producer" in reason for reason in report["blocked_reasons"])
+
+
+@pytest.mark.parametrize("artifact", ["manifest", "checkpoint"])
+def test_manifest_and_checkpoint_path_drift_fail_closed(tmp_path: Path, artifact: str) -> None:
+    _report, paths, payloads = _build_complete(tmp_path)
+    value = json.loads(paths["rollout"][17].read_text(encoding="utf-8"))
+    value[artifact]["path"] = f"/var/tmp/{Path(value[artifact]['path']).name}"
+    _write_json(paths["rollout"][17], value)
+    report = verifier.build_report(tmp_path, training_matrix_path=payloads["training_path"], terminal_matrix_path=payloads["terminal_path"], rollout_paths=paths["rollout"], process_paths=paths["process"], validator_paths=paths["validator"])
+    assert report["source_bound"] is False
+    assert any(artifact in reason for reason in report["blocked_reasons"])
+
+
+def test_walk_json_rejects_oversized_arrays() -> None:
+    with pytest.raises(verifier.VerifierError, match="maximum JSON array length"):
+        verifier._walk_json([None] * (verifier.MAX_JSON_ARRAY_ITEMS + 1))
