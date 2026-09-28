@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from copy import deepcopy
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 
@@ -307,3 +310,37 @@ def test_committed_machine_and_chinese_reports_are_fail_closed() -> None:
     assert value["authorization"]["T2_credit"] == 0
     assert value["authorization"]["qualification_credit"] == 0
     assert ZH_REPORT.read_text(encoding="utf-8").startswith("# F3 coarse material")
+
+
+def test_direct_cli_loads_host_validator_without_false_module_failure(tmp_path: Path) -> None:
+    output = tmp_path / "intake.json"
+    zh_output = tmp_path / "intake.zh-CN.md"
+    environment = {key: value for key, value in os.environ.items() if key != "PYTHONPATH"}
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/f3_material_coarse_root_scheduler_intake_v1.py"),
+            "--root",
+            str(ROOT),
+            "--output",
+            str(output),
+            "--zh-cn-output",
+            str(zh_output),
+        ],
+        cwd=ROOT,
+        env=environment,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode == 2
+    assert "ModuleNotFoundError" not in completed.stdout
+    assert "ModuleNotFoundError" not in completed.stderr
+    assert json.loads(completed.stdout)["status"] == intake.STATUS_MISSING
+    value = json.loads(output.read_text(encoding="utf-8"))
+    assert value["validation"]["checks"]["host_io_admission_contract_valid"] is True
+    assert value["execution_controls"]["source_hdf5_read"] is False
+    assert value["execution_controls"]["worker_started"] is False
+    assert value["execution_controls"]["solver_started"] is False
+    assert value["execution_controls"]["gpu_started"] is False

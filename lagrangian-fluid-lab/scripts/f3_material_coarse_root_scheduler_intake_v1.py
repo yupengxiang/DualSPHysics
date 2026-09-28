@@ -391,6 +391,16 @@ def _mapping(value: Any) -> Mapping[str, Any]:
     return value if isinstance(value, Mapping) else {}
 
 
+def _load_host_io_admission_validator() -> Any:
+    """Load the validator from either supported CLI/module entry point."""
+
+    if __package__:
+        from scripts import f3_material_coarse_host_io_admission_v1 as host_adapter
+    else:
+        import f3_material_coarse_host_io_admission_v1 as host_adapter
+    return host_adapter
+
+
 def _expected_candidate() -> dict[str, Any]:
     return {
         "configuration_id": CANDIDATE_ID,
@@ -597,8 +607,7 @@ def _proposal_and_host_checks(
     host_validator_errors: list[str] = []
     if host:
         try:
-            from scripts import f3_material_coarse_host_io_admission_v1 as host_adapter
-
+            host_adapter = _load_host_io_admission_validator()
             host_validator_errors = list(host_adapter.validate_admission(host))
         except (ImportError, AttributeError, TypeError, ValueError) as error:
             host_validator_errors = [f"validator_error:{type(error).__name__}"]
