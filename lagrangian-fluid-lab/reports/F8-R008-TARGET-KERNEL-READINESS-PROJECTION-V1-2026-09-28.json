@@ -1,0 +1,211 @@
+{
+  "authorization": {
+    "T1_numerical": false,
+    "capability_minted": false,
+    "diagnostic_only": true,
+    "execution_authority": false,
+    "formal_admission": false,
+    "qualification_credit": 0,
+    "readiness_pass": false
+  },
+  "blocking_gaps": [
+    {
+      "code": "external_target_evidence_missing",
+      "detail": "The intake report does not prove a complete external target source/UAPI/config/build evidence set; static intake cannot substitute for the missing external evidence.",
+      "severity": "high"
+    },
+    {
+      "code": "target_kernel_identity_pins_incomplete",
+      "detail": "At least one required kernel release/source/UAPI/config/build identity pin is absent.",
+      "severity": "high"
+    },
+    {
+      "code": "causal_witness_static_only_untrusted",
+      "detail": "The causal witness is a static contract projection with runtime_source_authenticated=false and trusted_authority_present=false.",
+      "severity": "high"
+    },
+    {
+      "code": "untrusted_authority_runtime_identity",
+      "detail": "The trusted authority/worker/runtime contracts are synthetic-only; production authority and loaded runtime identity are not authenticated or measured.",
+      "severity": "high"
+    },
+    {
+      "code": "target_abi_conformance_missing",
+      "detail": "No target-kernel ABI evidence proves the deployed audit ABI, fanotify/FID/PIDFD behavior, or selector semantics on the target kernel.",
+      "severity": "high"
+    },
+    {
+      "code": "source_callgraph_conformance_missing",
+      "detail": "No independently trusted target source/build callgraph evidence proves the required close/final-fput/observer path for the deployed runtime.",
+      "severity": "high"
+    },
+    {
+      "code": "target_kernel_runtime_conformance_missing",
+      "detail": "The intake pins are static metadata only; target-kernel runtime conformance and terminal fanotify/final-fput behavior remain unevaluated.",
+      "severity": "high"
+    }
+  ],
+  "causal_witness": {
+    "edge_count": 12,
+    "report_sha256": "60aebabcb7dc2294ab2f37b0d30f674ec0f08dbd2e0f93c406a53ee293faeed5",
+    "runtime_source_authenticated": false,
+    "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+    "static_bindings": {
+      "fanotify_profile_manifest": {
+        "path": "reports/F8-R008-TERMINAL-FANOTIFY-PROFILES-V1-2026-09-27.json",
+        "sha256": "107111fd2ab5d68645951ef9ff2885825e53f49ebe12d7bf6cdb7358ca95c059"
+      },
+      "fanotify_profile_verifier": {
+        "path": "scripts/f8_r008_terminal_fanotify_profile_verifier_v1.py",
+        "sha256": "216260acb8fe5714c3db1cbba157aa824eb951b33763906380e688325d1d2d73"
+      },
+      "fanotify_raw_parser": {
+        "path": "scripts/f8_r008_fanotify_raw_parser_v1.py",
+        "sha256": "189aa4e7e4590de5e8b4a68d0791ea55a61cff428213ad02e18222bdfcfa1308"
+      },
+      "final_fput_reducer_v1": {
+        "path": "scripts/f8_r008_final_fput_join_reducer_v1.py",
+        "sha256": "c0dd05a3b66d8e0e502e7812f6dd560dae0ca108677f22cb0525ec572cafb7fd"
+      },
+      "final_fput_reducer_v3": {
+        "path": "scripts/f8_r008_final_fput_join_reducer_v3.py",
+        "sha256": "80daf381e8f8cb9da095b6967841e1f9b33b150a4b19a4db0b3a930cfc247338"
+      },
+      "readiness_gap_audit": {
+        "path": "reports/F8-R008-READINESS-GAP-AUDIT-2026-09-28.json",
+        "sha256": "659e6b7fd340467cd0738fe3f6a18e8db74fd004f6c0560e23b29b362924a514"
+      },
+      "source_audit": {
+        "path": "reports/F8-R008-FINAL-FPUT-LINUX-V6.8-SOURCE-AUDIT-V1.json",
+        "sha256": "54108309dbc78cbbda306439b498321ea295769b56bf3003e99439d55e13e5f9"
+      },
+      "supervisor_session_claims": {
+        "path": "scripts/f8_r008_supervisor_session_claims_v1.py",
+        "sha256": "c89ab1ce049ca8ff7faf4f2de231c2d91f33637845caccee18583e71be30c8f3"
+      },
+      "v17": {
+        "path": "reports/F8-R008-TERMINAL-COMPLETION-EVIDENCE-CONTRACT-V17-2026-09-26.zh-CN.md",
+        "sha256": "5cf9e082765081582163e4d7f88b7900657c9436c3263b6552be6f4bcf5a6111"
+      },
+      "v18": {
+        "path": "reports/F8-R008-TERMINAL-COMPLETION-EVIDENCE-CONTRACT-V18-2026-09-26.zh-CN.md",
+        "sha256": "7d479bb012c3846eee51e29ed7bd822cde14ff34e225e445d65dd1e62b99c87f"
+      }
+    },
+    "status": "synthetic_only_static_non_authorizing_contract",
+    "target_kernel_conformance": false,
+    "trusted_authority_present": false
+  },
+  "inputs": {
+    "causal_witness": {
+      "bytes": 5499,
+      "path": "reports/F8-R008-TERMINAL-CONFORMANCE-CAUSAL-WITNESS-V1.json",
+      "record_id": "f8-r008-terminal-conformance-causal-witness-report-v1",
+      "schema": "core.cfd.f8.r008_terminal_conformance_causal_witness_report.v1",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "sha256": "60aebabcb7dc2294ab2f37b0d30f674ec0f08dbd2e0f93c406a53ee293faeed5",
+      "status": "synthetic_only_static_non_authorizing_contract"
+    },
+    "readiness_audit_v8": {
+      "bytes": 20998,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-execution-readiness-audit-v8/receipt.json",
+      "record_id": "f8-r008-execution-readiness-audit-v8",
+      "schema": "core.cfd.f8.r008_execution_readiness_audit.v8",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "sha256": "80b6df23bf8e118e60608dae9f64dd6967e2e9978e64f554ac5087651bee894c",
+      "status": "static_selector_domain_bound_full_runtime_readiness_blocked"
+    },
+    "target_kernel_evidence_intake": {
+      "bytes": 2345,
+      "path": "reports/F8-R008-TARGET-KERNEL-EVIDENCE-INTAKE-V1.json",
+      "record_id": "f8-r008-target-kernel-evidence-intake-report-v1",
+      "schema": "core.cfd.f8.r008.target_kernel_evidence_intake_report.v1",
+      "scope_id": null,
+      "sha256": "a170e911f42a5544bdb2adea30ed96fd29f3f83b1e36a7e2481dec03a8d81f8c",
+      "status": "blocked_missing_external_target_evidence"
+    },
+    "trusted_identity_contract": {
+      "bytes": 2167,
+      "path": "reports/F8-R008-TRUSTED-AUTHORITY-WORKER-RUNTIME-IDENTITY-CONTRACT-V1.json",
+      "record_id": "f8-r008-trusted-identity-contract-report-v1",
+      "schema": "core.cfd.f8.r008_trusted_authority_worker_runtime_identity_contract.v1",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "sha256": "8f7188e0dea2d90b4a6eed6c1a8254eae6bc012dd6483e867717c2cb9070f89f",
+      "status": "synthetic_only_non_authorizing_contract_design"
+    },
+    "trusted_worker_runtime_handoff": {
+      "bytes": 2457,
+      "path": "reports/F8-R008-TRUSTED-WORKER-RUNTIME-HANDOFF-CONTRACT-V1.json",
+      "record_id": "f8-r008-trusted-worker-runtime-handoff-report-v1",
+      "schema": "core.cfd.f8.r008_trusted_worker_runtime_handoff_contract.v1",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "sha256": "8a2c3535b403eeb0aae35579b2c5882eadb7c00b9cde0a047b7cc5c95120bca3",
+      "status": "synthetic_only_non_authorizing_handoff_contract_design"
+    }
+  },
+  "record_id": "f8-r008-target-kernel-readiness-projection-v1",
+  "schema": "core.cfd.f8.r008.target_kernel_readiness_projection_report.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "side_effects": {
+    "completion_mutation": 0,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "kernel_started": false,
+    "ledger_mutation": 0,
+    "native_started": false,
+    "plan_mutation": 0,
+    "privileged_probe_started": false,
+    "queue_started": false,
+    "registry_mutation": 0,
+    "worker_started": false
+  },
+  "status": "diagnostic_only_target_kernel_readiness_blocked",
+  "target_kernel": {
+    "all_pins_complete": false,
+    "build_id": null,
+    "config_sha256": null,
+    "external_evidence_complete": false,
+    "kernel_release": null,
+    "pins": {
+      "build_id_pinned": false,
+      "config_pinned": false,
+      "kernel_release_pinned": false,
+      "source_commit_pinned": false,
+      "source_tree_pinned": false,
+      "uapi_pinned": false
+    },
+    "source_commit": null,
+    "source_tree_sha256": null,
+    "uapi_sha256": null
+  },
+  "trusted_runtime": {
+    "execution_authority": false,
+    "handoff_contract_report_sha256": "8a2c3535b403eeb0aae35579b2c5882eadb7c00b9cde0a047b7cc5c95120bca3",
+    "identity_contract_report_sha256": "8f7188e0dea2d90b4a6eed6c1a8254eae6bc012dd6483e867717c2cb9070f89f",
+    "production_authority_authenticated": false,
+    "production_runtime_identity_authenticated": false,
+    "runtime_measured": false
+  },
+  "validation": {
+    "blockers": [
+      "external_target_evidence_missing",
+      "target_kernel_identity_pins_incomplete",
+      "causal_witness_static_only_untrusted",
+      "untrusted_authority_runtime_identity",
+      "target_abi_conformance_missing",
+      "source_callgraph_conformance_missing",
+      "target_kernel_runtime_conformance_missing"
+    ],
+    "causal_witness_refs_bound": true,
+    "external_target_evidence_complete": false,
+    "intake_report_digest_bound": true,
+    "intake_report_schema_valid": true,
+    "r008_scope_bound": true,
+    "readiness_v8_zero_credit_preserved": true,
+    "source_callgraph_conformance": false,
+    "target_abi_conformance": false,
+    "target_kernel_pin_set_complete": false,
+    "target_kernel_runtime_conformance": false,
+    "trusted_authority_runtime_identity_verified": false
+  }
+}
