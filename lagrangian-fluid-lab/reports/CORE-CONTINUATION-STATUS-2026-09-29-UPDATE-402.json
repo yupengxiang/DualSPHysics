@@ -1,0 +1,112 @@
+{
+  "schema": "core.continuation.status.v1",
+  "report_id": "core-continuation-status-2026-09-29-update-402",
+  "observed_at": "2026-09-29T07:48:33+08:00",
+  "status": "continuing_fail_closed",
+  "policy": {
+    "subagent_model": "gpt-5.6-luna",
+    "reasoning_effort": "max",
+    "parallel_delegation": true,
+    "coarse_to_fine_execution": true,
+    "historical_records_rewritten": false
+  },
+  "commits": [
+    "95d79a26",
+    "8af0b68d",
+    "9e4d09a7",
+    "dae6b8ee",
+    "f69206f1",
+    "1d726119",
+    "8900e148",
+    "6eac3b1e"
+  ],
+  "security_audit": {
+    "audit_commit": "95d79a26",
+    "findings": {"P1": 4, "P2": 1},
+    "findings_scope": [
+      "TOCTOU/path reopen",
+      "HDF5 external/soft/VDS links",
+      "self-declared process command and missing plan identity binding",
+      "residual capability token/injectable Popen bypass",
+      "inconsistent unknown-field rejection"
+    ],
+    "active_path_hardening": {
+      "common_hdf5": {"commit": "8af0b68d", "synthetic_adversarial_tests": 18},
+      "graph_raw": {"commit": "9e4d09a7", "related_tests": 75},
+      "graph_residual": {"commit": "dae6b8ee", "related_tests": 43},
+      "audit_test_alignment": {"commit": "f69206f1", "tests": 50}
+    },
+    "production_capability_status": "not_admitted",
+    "unadmitted_production_proof_cannot_authorize": true
+  },
+  "completed_units": {
+    "production_validator_admission": {
+      "commit": "1d726119",
+      "status": "source_bound_but_admission_denied",
+      "admission_granted": false,
+      "launch_allowed": false,
+      "credit": 0,
+      "missing": [
+        "independent real Popen/wait proof",
+        "production HDF5 artifact receipt",
+        "one-time external namespace reservation proof"
+      ]
+    },
+    "production_validator_capability": {
+      "commit": "8900e148",
+      "specialized_tests": 15,
+      "capability_admitted": false,
+      "launch_allowed": false,
+      "credit": 0
+    },
+    "evaluator_artifact_readiness": {
+      "commit": "6eac3b1e",
+      "specialized_tests": 13,
+      "fresh_diagnostic_envelopes": 6,
+      "natural_exit_proofs": "0/6",
+      "readiness_pass": false,
+      "launch_allowed": false,
+      "credit": 0
+    }
+  },
+  "verification": {
+    "combined_relevant_tests_passed": 388,
+    "py_compile": true,
+    "report_cli_verify": true,
+    "git_diff_check": true,
+    "real_workloads_started": 0,
+    "popen_attempts": 0,
+    "production_data_read": false,
+    "solver_worker_native_gpu_queue_started": false,
+    "processes_stopped": 0,
+    "processes_restarted": 0,
+    "registry_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "completion_mutations": 0
+  },
+  "core_formal_gates": {
+    "can_finalize": false,
+    "t1_families": ["F3", "F4"],
+    "macro_t2_families": [],
+    "formal_training_runs": [],
+    "missing_training_runs": [
+      "graph_raw-seed17",
+      "graph_raw-seed29",
+      "graph_raw-seed43",
+      "graph_residual-seed17",
+      "graph_residual-seed29",
+      "graph_residual-seed43",
+      "mlp-seed17",
+      "mlp-seed29",
+      "mlp-seed43"
+    ],
+    "missing_t1_case_runs": 288,
+    "missing_material_case_runs": 288,
+    "missing_target_t1_case_runs": 432,
+    "missing_target_material_case_runs": 288,
+    "independent_reproduction": false,
+    "credit": 0
+  }
+}
