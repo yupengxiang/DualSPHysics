@@ -1,0 +1,71 @@
+{
+  "bindings": {
+    "external_host_attested": false,
+    "package_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "reproduction_data_root": "/synthetic/core/reproduction-root",
+    "reproduction_host_id": "synthetic-reproduction-host",
+    "reproduction_identity_sha256": "ff1057cb2e1ccfab8ce56a774b4f76bcdf7f5f7b61840f7130da5964140ecd66",
+    "reproduction_manifest_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "source_data_root": "/synthetic/core/source-root",
+    "source_host_id": "synthetic-source-host",
+    "source_identity_sha256": "ee6d3ccc2560844983b99ec88508a110ca1239ae3dcac10dd1fad6ba036925de",
+    "source_manifest_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "trusted_root_authenticated": false
+  },
+  "blockers": [
+    "trusted_root_review_missing_or_unauthenticated",
+    "external_host_attestation_missing",
+    "non_diagnostic_full_product_reproduction_missing"
+  ],
+  "checks": {
+    "data_root_identity_binding": true,
+    "external_host_attestation": false,
+    "non_diagnostic_full_product_evidence": false,
+    "trusted_root_review": false,
+    "typed_preflight_projection": true
+  },
+  "credit": 0,
+  "diagnostic_only": true,
+  "errors": [],
+  "execution_constraints": {
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "external_host_receipt_opened": false,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "native_started": false,
+    "production_artifacts_read": false,
+    "queue_mutation": 0,
+    "read_only": true,
+    "registry_mutation": 0,
+    "solver_started": false,
+    "synthetic_projection_only": true,
+    "trusted_root_authenticated": false,
+    "worker_started": false
+  },
+  "formal_admission": false,
+  "formal_training": false,
+  "full_product_reproduction": false,
+  "independent_reproduction": false,
+  "interpretation": "Synthetic bounded readiness contract only; it cannot authenticate a trusted root, mint external-host evidence, admit independent reproduction, or issue credit.",
+  "mutations": {
+    "completion": 0,
+    "denominator": 0,
+    "gate": 0,
+    "ledger": 0,
+    "registry": 0
+  },
+  "next_required": [
+    "obtain a real independently trusted root review receipt",
+    "obtain a real external-host attestation bound to the reproduction host and root",
+    "obtain non-diagnostic full-product evidence on another physical machine",
+    "re-run the Core independent_reproduction gate verifier"
+  ],
+  "passed": true,
+  "qualification_credit": 0,
+  "readiness_pass": false,
+  "schema": "core.reproduction.a8_independent_readiness_report.v1",
+  "status": "blocked_missing_trusted_root_and_external_host_attestation",
+  "structural_contract_passed": true
+}
