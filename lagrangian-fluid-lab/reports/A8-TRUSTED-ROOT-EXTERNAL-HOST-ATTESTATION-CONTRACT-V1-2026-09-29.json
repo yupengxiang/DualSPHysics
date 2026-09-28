@@ -1,0 +1,79 @@
+{
+  "bindings": {
+    "cross_binding_sha256": "ac73ee1e0207c53464ffcea424733f3e93b8f8cba909f08d7c19488a9703b825",
+    "external_host_attestation_id": "synthetic-external-host-attestation-missing-v2",
+    "external_host_attested": false,
+    "full_product_receipt_id": "synthetic-full-product-receipt-missing-v2",
+    "full_product_receipt_present": false,
+    "reproduction_data_root": "/synthetic/core/reproduction-root",
+    "reproduction_host_id": "synthetic-reproduction-host",
+    "reproduction_identity_sha256": "547851db3ca568502c02d24d6859425ea40b7df77845e743d8d69fc79e300ed5",
+    "root_id": "synthetic-root-not-authority-v2",
+    "source_data_root": "/synthetic/core/source-root",
+    "source_host_id": "synthetic-source-host",
+    "source_identity_sha256": "45a053ef26f93d078cda2113b2e2bc6c6dd18a31b760f1f5114777412728af78",
+    "trusted_root_authenticated": false,
+    "trusted_root_review_id": "synthetic-trusted-root-review-missing-v2"
+  },
+  "blockers": [
+    "trusted_root_review_not_attested",
+    "external_host_attestation_not_attested",
+    "non_diagnostic_full_product_receipt_missing",
+    "synthetic_cross_binding_is_identity_only_not_evidence"
+  ],
+  "checks": {
+    "cross_binding_identity": true,
+    "distinct_data_root_identity": true,
+    "external_host_attestation": false,
+    "external_host_attestation_cross_binding": true,
+    "non_diagnostic_full_product_receipt": false,
+    "non_diagnostic_full_product_receipt_cross_binding": true,
+    "trusted_root_review": false,
+    "trusted_root_review_cross_binding": true
+  },
+  "credit": 0,
+  "diagnostic_only": true,
+  "errors": [],
+  "execution_constraints": {
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "external_host_attested": false,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "host_probe_performed": false,
+    "ledger_mutation": 0,
+    "native_started": false,
+    "production_data_opened": false,
+    "queue_mutation": 0,
+    "read_only": true,
+    "registry_mutation": 0,
+    "solver_started": false,
+    "synthetic_projection_only": true,
+    "trusted_root_authenticated": false,
+    "worker_started": false
+  },
+  "formal_admission": false,
+  "formal_training": false,
+  "full_product_reproduction": false,
+  "independent_reproduction": false,
+  "interpretation": "Synthetic bounded cross-binding contract only; identity binding is not trusted attestation and cannot admit independent reproduction or issue credit.",
+  "mutations": {
+    "completion": 0,
+    "denominator": 0,
+    "gate": 0,
+    "ledger": 0,
+    "registry": 0
+  },
+  "next_required": [
+    "obtain a real independently trusted root review receipt",
+    "obtain a real external-host attestation bound to the reproduction host and root",
+    "obtain a real non-diagnostic full-product receipt bound to both attestations",
+    "re-run the Core independent_reproduction gate verifier"
+  ],
+  "passed": true,
+  "qualification_credit": 0,
+  "readiness_pass": false,
+  "schema": "core.reproduction.a8_trusted_root_external_host_attestation_report.v1",
+  "status": "blocked_missing_trusted_root_external_host_and_non_diagnostic_full_product_receipt",
+  "structural_contract_passed": true
+}
