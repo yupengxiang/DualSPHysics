@@ -1,0 +1,417 @@
+{
+  "schema": "core.f3.graph_raw.hidden16.seed17.full835.rollout_diagnostic.summary.v1",
+  "report_id": "F3-GRAPH-RAW-HIDDEN16-SEED17-FULL835-ROLLOUT-DIAGNOSTIC-2026-09-28",
+  "date": "2026-09-28",
+  "status": "completed_diagnostic",
+  "diagnostic_only": true,
+  "non_formal_diagnostic": true,
+  "formal_eligible": false,
+  "qualification": {
+    "formal_training": false,
+    "formal_eligible": false,
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "qualification_credit": 0,
+    "interpretation": "完整 diagnostic rollout evidence，不得外推为 formal/T1/T2/qualification 或 credit。"
+  },
+  "qualification_credit": 0,
+  "future_state_inputs": false,
+  "source": {
+    "repository": "lagrangian-fluid-lab",
+    "baseline_git_commit": "c083d5bc52cfd2f2e187e811bcea7c9958b0e3f5",
+    "baseline_git_commit_semantics": "report-authoring HEAD; evaluator/source binding is recorded by artifact and source-script SHA-256 values",
+    "manifest": {
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "data_root": ".",
+      "file_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "declared_source_manifest_sha256": "86e27740d764f9769e3255a82a599013a282f1bc4385ad3c29a657a56d9c5bea",
+      "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "formal_release": false
+    },
+    "case": {
+      "case_id": "F3_DEV_00_a0p903125",
+      "family": "F3",
+      "split": "test",
+      "evaluation_role": "development_extrapolation",
+      "hdf5_path": "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5",
+      "particles": 34560,
+      "registered_transitions": 835,
+      "registered_source_frames": 836,
+      "case_hdf5_bytes": 899562494,
+      "case_hdf5_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+      "known_inputs_sha256": "089573de6d2c7633b5192bf626fa98eb941f79500f1c1a04b632af68b6ca3bc9",
+      "control_input_sha256": "f6852502c7ae5ad7da14faa2dddf3da04e5f02757528e38f3e8c140c00f6389e",
+      "geometry_input_sha256": "d7ccdc43108fde81c71f1ef648325e8e6b0fa2a3bc9561df063b87a580bc55d70",
+      "provenance_audit_sha256": "5c6c8bc8110256d89ba053a305558f04aad8e22f9172d46bdac9c8f8ced8c061",
+      "provenance_control_sha256": "387d9a3380959a719182ae8e041d83de6e2fcd51e61521d5e3ac150a240baeb9",
+      "provenance_prepared_sha256": "9d6af616764163a7796763f061d3f2c7468640eb3b0924ee768f26aa9c7969b9",
+      "qualification_case": false
+    },
+    "source_script_sha256": {
+      "scripts/core_learning.py": "3eefe1441dabb350182090c3625f24a8209543a4a31d02521f283074c996c27b",
+      "scripts/core_models.py": "20e635ebd25cd511eeff6f84478678d3364608fd86a5d4b67e2aa53a0d88295d",
+      "scripts/core_dataset.py": "65f583b8fcb1c46e56d10506e22aa1e5fa32c7b2631017de85c88b1f6d53f88f",
+      "scripts/core_contract.py": "1866b35259f407e8c0d8b399eb4034eb18cc8b59f4addc1156f20d6777a326bc"
+    }
+  },
+  "protocol": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "data_root": ".",
+    "case_id": "F3_DEV_00_a0p903125",
+    "split": "test",
+    "model_kind": "graph_raw",
+    "seed": 17,
+    "updates": 500,
+    "centers_per_update": 256,
+    "hidden": 16,
+    "parameter_count": 6086,
+    "learning_rate": 0.001,
+    "optimizer": "Adam",
+    "normalization_transitions": 16,
+    "normalization_source_split": "train",
+    "target_normalization": "raw_dual_increment_train_shared",
+    "max_neighbors": 192,
+    "chunk_size": 34560,
+    "maximum_steps": 835,
+    "diagnostic": true,
+    "autonomous": true,
+    "future_state_inputs": false,
+    "physical_gpu_index": 0,
+    "physical_gpu_source": "orchestration allocation for the existing seed17 rollout; the Core receipt records process device cuda:0",
+    "process_device": "cuda:0",
+    "training_started_for_this_rollout": false
+  },
+  "commands": {
+    "evaluate": "env PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES=0 .venv/bin/python -u scripts/core_learning.py evaluate --manifest campaigns/core-v1/f3-dataset-v2.json --data-root . --checkpoint /tmp/f3-graph-raw500-hidden16-seed17-20260928-checkpoint.pt --case-id F3_DEV_00_a0p903125 --split test --maximum-steps 835 --chunk-size 34560 --device cuda:0 --progress-every 25 --trajectory-output /tmp/f3-graph-raw500-hidden16-seed17-full835-20260928-trajectory.h5 --progress-output /tmp/f3-graph-raw500-hidden16-seed17-full835-20260928-evaluation-progress.json --output /tmp/f3-graph-raw500-hidden16-seed17-full835-20260928-evaluation.json --diagnostic",
+    "hdf5_validator": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/f3_full_rollout_receipt_hdf5_validator_v1.py /tmp/f3-graph-raw500-hidden16-seed17-full835-20260928-evaluation.json --trajectory /tmp/f3-graph-raw500-hidden16-seed17-full835-20260928-trajectory.h5 --case-id F3_DEV_00_a0p903125 --expected-transitions 835",
+    "metric_summarizer": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/f3_rollout_metric_summarizer_v1.py /tmp/f3-graph-raw500-hidden16-seed17-full835-20260928-evaluation.json --family F3 --output /tmp/f3-graph-raw500-hidden16-seed17-full835-20260928-metric-summary.json"
+  },
+  "bindings": {
+    "training_receipt": {
+      "path": "/tmp/f3-graph-raw500-hidden16-seed17-20260928-training.json",
+      "bytes": 10663,
+      "sha256": "1a05199e113bdecff0c72dc8987e4457dc69a96b3c7d6c20d6a7fadc2e74d567"
+    },
+    "training_progress": {
+      "path": "/tmp/f3-graph-raw500-hidden16-seed17-20260928-training-progress.json",
+      "bytes": 475,
+      "sha256": "933c493142cddf42f70f769ef9308aff0b34061ad1747717b664f40ab57125ce"
+    },
+    "checkpoint": {
+      "path": "/tmp/f3-graph-raw500-hidden16-seed17-20260928-checkpoint.pt",
+      "bytes": 152145,
+      "sha256": "19cf88df48e369ce061a7dcd11b28d5e30864f30075deaa8d245ddc6184293ca",
+      "schema": "core.checkpoint.v1",
+      "update": 500,
+      "model_kind": "graph_raw",
+      "hidden": 16,
+      "seed": 17,
+      "parameter_count": 6086
+    },
+    "checkpoint_verified": true,
+    "checkpoint_hash_matches_training_receipt": true,
+    "evaluation_checkpoint_path_matches_training": true,
+    "training_protocol_binding_exact": true,
+    "binding_method": "exact path, SHA-256, schema, update, model_kind, hidden, seed, parameter_count, and training configuration comparison"
+  },
+  "training": {
+    "schema": "core.training.v1",
+    "status": "completed",
+    "evidence_status": "complete",
+    "completed_updates": 500,
+    "checkpoint_verified": true,
+    "model_kind": "graph_raw",
+    "seed": 17,
+    "hidden": 16,
+    "parameter_count": 6086,
+    "final_loss_mse": 0.07728372514247894,
+    "validation_rmse": 0.7626094110349643,
+    "neighbor_truncation_fraction": 0.0,
+    "normalization": {
+      "source_split": "train",
+      "requested_transition_count": 16,
+      "selected_transition_count": 16,
+      "available_transition_count": 13360,
+      "selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+      "target_reference": "raw_dual_increment_train_shared"
+    },
+    "initialization_parameter_digest": "ce74cb93b1144cf872fce13810c07e9cb14101ca1fe807b458ee1317bca53e89",
+    "residual_prior_enabled": false,
+    "wall_seconds": 2204.823413559003,
+    "peak_gpu_memory_bytes": 2731527680,
+    "peak_rss_mib": 2995.15625
+  },
+  "evaluation": {
+    "schema": "core.evaluation.v1",
+    "status": "completed",
+    "mode": "diagnostic",
+    "diagnostic": true,
+    "formal_eligible": false,
+    "split": "test",
+    "requested_steps": 835,
+    "frames_executed": 835,
+    "trajectory_frames_including_initial": 836,
+    "requested_window_complete": true,
+    "finite_rollout_complete_for_requested_window": true,
+    "expected_full_case_transitions": 835,
+    "expected_full_case_frames": 836,
+    "full_registered_denominator_complete": true,
+    "failure_category": null,
+    "first_failure_frame": null,
+    "scientific_status": "not_assessed",
+    "scientific_failure_category": null,
+    "raw_error_coverage": {
+      "numerator_transitions": 835,
+      "denominator_transitions": 835,
+      "fraction": 1.0
+    },
+    "future_state_inputs": false,
+    "receipt": {
+      "path": "/tmp/f3-graph-raw500-hidden16-seed17-full835-20260928-evaluation.json",
+      "bytes": 6399975,
+      "sha256": "2ae71f675f07564682d34b687bedcf91178a15807428e05c930cce879d1675b9"
+    },
+    "progress": {
+      "path": "/tmp/f3-graph-raw500-hidden16-seed17-full835-20260928-evaluation-progress.json",
+      "bytes": 660,
+      "sha256": "c1777b5af9c369f7fc7e848de91e94dea1a97561d49b1b990e0cc7f4b319b226",
+      "status": "completed",
+      "frames_executed": 835,
+      "expected_frames": 835,
+      "elapsed_seconds": 11251.331096087117,
+      "time_s": 8.350012828223477,
+      "future_state_inputs": false
+    },
+    "hdf5_validation": {
+      "path": "/tmp/f3-graph-raw500-hidden16-seed17-full835-20260928-hdf5-validation.json",
+      "bytes": 1437,
+      "sha256": "19bf71e4bb113f482222f40bd0ea421be6743378f8156880e933d380fe219ba7",
+      "schema": "core.f3.full_rollout_receipt_hdf5_validation.v1",
+      "passed": true,
+      "complete": true,
+      "trajectory_frames": 836,
+      "trajectory_transitions": 835,
+      "executed_frame_count": 836,
+      "tail_frame_count": 0,
+      "production_artifacts_touched": false,
+      "qualification_credit": 0,
+      "synthetic_only": false,
+      "all_contract_checks_passed": false
+    },
+    "metric_summary": {
+      "path": "/tmp/f3-graph-raw500-hidden16-seed17-full835-20260928-metric-summary.json",
+      "bytes": 137105,
+      "sha256": "1f6768cd1edfb1d9967818ea4470d7f9027f05ec8adda88ef51b236679439fc1",
+      "schema": "core.f3.rollout_metric_summary.v1"
+    }
+  },
+  "trajectory": {
+    "path": "/tmp/f3-graph-raw500-hidden16-seed17-full835-20260928-trajectory.h5",
+    "bytes": 723148320,
+    "sha256": "20c82d33b989744f7d2b9acc5009f6908a51356d2f59c338b40e79c786603084",
+    "shapes": {
+      "mass": [
+        34560
+      ],
+      "particle_id": [
+        34560
+      ],
+      "particle_zone": [
+        34560
+      ],
+      "position": [
+        836,
+        34560,
+        3
+      ],
+      "time": [
+        836
+      ],
+      "valid": [
+        836,
+        34560
+      ],
+      "velocity": [
+        836,
+        34560,
+        3
+      ]
+    },
+    "dtypes": {
+      "mass": "float64",
+      "particle_id": "int64",
+      "particle_zone": "int64",
+      "position": "float32",
+      "time": "float64",
+      "valid": "bool",
+      "velocity": "float32"
+    },
+    "time_start_s": 0.0,
+    "time_end_s": 8.350012828223477,
+    "position_finite": true,
+    "velocity_finite": true,
+    "mass_finite": true,
+    "mass_positive": true,
+    "mass_static": true,
+    "valid_all_true": true,
+    "valid_true_count": 28892160,
+    "valid_false_count": 0,
+    "mass_total_kg": 14.580000378191471,
+    "hdf5_attrs": {
+      "autonomous_prediction": true,
+      "future_state_inputs": false,
+      "identity_semantics": "particle_zone,particle_id",
+      "schema_version": 1,
+      "state_schema": "core.state.native_velocity.v1",
+      "velocity_semantics": "native saved numerical velocity"
+    }
+  },
+  "selection": {
+    "selection_score": 0.5774038900773645,
+    "score_semantics": "registered selection penalty; lower is better, not a qualification decision",
+    "complete": true,
+    "finite_prefix_frames": 835,
+    "raw_error_coverage": 1.0,
+    "raw_position_rmse_frame_mean_m": 36.990732574509806,
+    "raw_velocity_rmse_frame_mean_mps": 69.38583685341698
+  },
+  "physics": {
+    "completed_frames": 835,
+    "mass_error_abs_max_kg": 0.0,
+    "changed_particle_mass_frames": 0,
+    "validity_mismatch_frames": 0,
+    "kinetic_energy_error_abs_max_j": 19261594.803977635,
+    "wall_chord": {
+      "status": "checked_static_saved_chords",
+      "particle_count": 34921,
+      "mass_kg": 14.732297257141909,
+      "semantics": "finite surface intersections of saved chords; no exact continuous-path claim"
+    }
+  },
+  "metrics": {
+    "raw_evaluation_per_step_rows": 835,
+    "step_50": {
+      "position_ade_m": 0.0179227267060898,
+      "position_rmse_m": 0.011604879613374489,
+      "velocity_ade_mps": 0.08367056074295147,
+      "velocity_rmse_mps": 0.051947402727045934
+    },
+    "step_835": {
+      "position_ade_m": 534.2122633163491,
+      "position_rmse_m": 453.10199105793794,
+      "velocity_ade_mps": 1093.8140975752535,
+      "velocity_rmse_mps": 938.5552059785597,
+      "position_fde_m": 534.2122633163491,
+      "velocity_fde_mps": 1093.8140975752535
+    },
+    "audit_horizons": [
+      {
+        "position_ade_m": 0.0003424582581001611,
+        "position_rmse_m": 0.00023158026137009321,
+        "velocity_ade_mps": 0.0017556166154571663,
+        "velocity_rmse_mps": 0.0013297703906640834,
+        "step": 1
+      },
+      {
+        "position_ade_m": 0.0030667119824534924,
+        "position_rmse_m": 0.0021386975604253794,
+        "velocity_ade_mps": 0.010190714830966114,
+        "velocity_rmse_mps": 0.006339813839870371,
+        "step": 10
+      },
+      {
+        "position_ade_m": 0.0179227267060898,
+        "position_rmse_m": 0.011604879613374489,
+        "velocity_ade_mps": 0.08367056074295147,
+        "velocity_rmse_mps": 0.051947402727045934,
+        "step": 50
+      },
+      {
+        "position_ade_m": 0.049726332833618755,
+        "position_rmse_m": 0.03163042367023891,
+        "velocity_ade_mps": 0.07070375764790764,
+        "velocity_rmse_mps": 0.04601477748926135,
+        "step": 100
+      },
+      {
+        "position_ade_m": 0.17241766437435874,
+        "position_rmse_m": 0.11164386454563976,
+        "velocity_ade_mps": 0.20553256293447716,
+        "velocity_rmse_mps": 0.13326296781156166,
+        "step": 200
+      },
+      {
+        "position_ade_m": 1.2397777664127725,
+        "position_rmse_m": 0.8131583062289689,
+        "velocity_ade_mps": 1.3645689915331014,
+        "velocity_rmse_mps": 0.9313205611702353,
+        "step": 400
+      },
+      {
+        "position_ade_m": 18.47975045025494,
+        "position_rmse_m": 15.131559929210397,
+        "velocity_ade_mps": 23.045471323950913,
+        "velocity_rmse_mps": 19.20690302649759,
+        "step": 600
+      },
+      {
+        "position_ade_m": 72.32086773519794,
+        "position_rmse_m": 60.18406919131819,
+        "velocity_ade_mps": 114.30789045168866,
+        "velocity_rmse_mps": 97.3713850665137,
+        "step": 700
+      },
+      {
+        "position_ade_m": 320.25904969902996,
+        "position_rmse_m": 270.55155914864633,
+        "velocity_ade_mps": 628.8191251514767,
+        "velocity_rmse_mps": 539.275311845305,
+        "step": 800
+      },
+      {
+        "position_ade_m": 534.2122633163491,
+        "position_rmse_m": 453.10199105793794,
+        "velocity_ade_mps": 1093.8140975752535,
+        "velocity_rmse_mps": 938.5552059785597,
+        "step": 835
+      }
+    ]
+  },
+  "side_effects": {
+    "rollout_inputs_read_only": true,
+    "source_modified_by_rollout": false,
+    "production_hdf5_modified": false,
+    "manifest_modified": false,
+    "registry_mutation": false,
+    "completion_mutation": false,
+    "ledger_mutation": false,
+    "denominator_mutation": false,
+    "gate_mutation": false,
+    "formal_training_counted": false,
+    "diagnostic_counted_as_T1_or_T2": false,
+    "future_state_inputs": false
+  },
+  "artifacts": {
+    "training_receipt_sha256": "1a05199e113bdecff0c72dc8987e4457dc69a96b3c7d6c20d6a7fadc2e74d567",
+    "training_progress_sha256": "933c493142cddf42f70f769ef9308aff0b34061ad1747717b664f40ab57125ce",
+    "checkpoint_sha256": "19cf88df48e369ce061a7dcd11b28d5e30864f30075deaa8d245ddc6184293ca",
+    "evaluation_sha256": "2ae71f675f07564682d34b687bedcf91178a15807428e05c930cce879d1675b9",
+    "evaluation_progress_sha256": "c1777b5af9c369f7fc7e848de91e94dea1a97561d49b1b990e0cc7f4b319b226",
+    "trajectory_sha256": "20c82d33b989744f7d2b9acc5009f6908a51356d2f59c338b40e79c786603084",
+    "hdf5_validation_sha256": "19bf71e4bb113f482222f40bd0ea421be6743378f8156880e933d380fe219ba7",
+    "metric_summary_sha256": "1f6768cd1edfb1d9967818ea4470d7f9027f05ec8adda88ef51b236679439fc1"
+  },
+  "plan": {
+    "next_unique_update": 316,
+    "plan_entry_scope": "completed F3 graph_raw hidden16 seed17 full835 diagnostic rollout evidence only"
+  },
+  "analysis": {
+    "key_findings": [
+      "835/835 transitions and 836 frames complete",
+      "HDF5/JSON/hash/finite/future-input/full-denominator checks pass",
+      "long-horizon error diverges materially"
+    ],
+    "interpretation": "The rollout is retained as diagnostic evidence only; the long-horizon error is negative evidence for qualification and must not be extrapolated as a formal result."
+  }
+}
