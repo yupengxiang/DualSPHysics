@@ -1,0 +1,306 @@
+{
+  "schema": "core.material.f4.tallwall120.t2_readiness_audit.v1",
+  "audit_id": "f4-tallwall120-t2-readiness-audit-2026-09-28",
+  "observed_date": "2026-09-28",
+  "mode": "read_only",
+  "scope": {
+    "family": "F4",
+    "case": "Tallwall120",
+    "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+    "excluded_from_scope": [
+      "F3 rollout",
+      "Nash F1/F2 fallback audit",
+      "completed F4 reader CLI implementation"
+    ],
+    "plan_path": "PLAN.md",
+    "plan_modified": false
+  },
+  "decision": {
+    "readiness_status": "blocked_fail_closed",
+    "coarse_material_path_legally_launchable": false,
+    "formal_T2_macro": false,
+    "formal_T2_path": false,
+    "qualification_claim": "none",
+    "qualification_credit": 0,
+    "material_labels_created_by_audit": false,
+    "basis": "The current bridge and sidecar preflight are blocked; every inspected material launch candidate remains proposal/preflight-only; no current namespace, root authorization, or accepted material receipt exists."
+  },
+  "plan_contract": {
+    "two_macro_material_T2_families_required": true,
+    "accepted_32_case_sidecars_required": true,
+    "exact_material_path_is_independent": true,
+    "F4_full_event_window_required": true,
+    "old_short_window_is_diagnostic_only": true
+  },
+  "current_acceptance_bridge": {
+    "module": "scripts/f4_tallwall120_t2_acceptance_bridge_v4.py",
+    "evidence_path": "campaigns/core-v1/material/evidence/f4-tallwall120-t2-acceptance-bridge-v1-20260923-v6.json",
+    "evidence_sha256": "27c6a786ebeae7f26f8f6c776e35ae5cc7d332ca2d8f803733cc3855a10f5997",
+    "schema": "core.material.f4.tallwall120.t2_acceptance_bridge.v4",
+    "formal_receipt_schema": "core.material.f4.tallwall120.scientific_acceptance_receipt.v4",
+    "verifier_status": "blocked",
+    "input_binding_count": 27,
+    "formal_credit": 0,
+    "T2_macro": false,
+    "T2_path": false,
+    "current_namespace": {
+      "binding_present": false,
+      "launch_authorization_present": false,
+      "interpretation": "The current namespace is acceptance/readiness evidence wiring, not a launch namespace or runtime authorization."
+    },
+    "execution_constraints_observed": {
+      "source_h5_opened": false,
+      "terminal_h5_opened": false,
+      "solver_started": false,
+      "gpu_started": false,
+      "queue_started": false,
+      "central_ledger_mutation": 0,
+      "registry_mutation": 0,
+      "matrix_mutation": 0,
+      "queue_mutation": 0
+    }
+  },
+  "macro_sidecar_preflight": {
+    "module": "scripts/f4_macro_t2_sidecar_preflight_v2.py",
+    "evidence_path": "campaigns/core-v1/material/evidence/f4-macro-t2-sidecar-preflight-v2-20260923.json",
+    "evidence_sha256": "e098e26cc6db8186789b6b8165b6f6a6686bd374a02f0f5d18b4b59d2608d078",
+    "schema": "core.material.f4.macro_t2_sidecar_preflight.v2",
+    "status": "blocked_for_qualification",
+    "T2_macro": false,
+    "T2_path": false,
+    "qualification_claim": "none",
+    "registered_case_count": 6,
+    "validator_invocation_count": 6,
+    "blocked_case_count": 6,
+    "passed_case_count": 0,
+    "formal_acceptance_receipt_count": 0,
+    "gate_summary": {
+      "all_mass_closed": true,
+      "cdf_gate_pass": false,
+      "event_window_pass": false,
+      "f4_calibration_pass": false,
+      "material_matrix_ready": false,
+      "sidecar_independent_cfd_pass": false,
+      "static_cfd_matrix_complete": false,
+      "unknown_mass_pass": false,
+      "sidecar_provenance_pass": true
+    },
+    "execution_constraints_observed": {
+      "read_only": true,
+      "cpu_only": true,
+      "active_h5_opened": false,
+      "new_job_submitted": false,
+      "solver_started": false,
+      "gpu_started": false,
+      "json_validator_mutations": 0,
+      "registry_mutation": 0,
+      "ledger_mutation": 0,
+      "thresholds_changed": false,
+      "historical_scores_modified": false
+    }
+  },
+  "core_material_entry": {
+    "job_path": "campaigns/core-v1/material/jobs/core-f4-tallwall120-material-full434-s2-v1.json",
+    "job_sha256": "80d50e1cb9c11ee1f0d058ee2edde2a842b8a9da775f26aa0767a0f4f354f27b",
+    "schema": "core.material.job.v2",
+    "launch_status": "proposal_only_root_review_required",
+    "qualification_claim": "none",
+    "qualification_only": true,
+    "material_reliability_status": "uncalibrated",
+    "backend": {
+      "name": "f3_ckdtree_visible_shepard_distance_v1",
+      "neighbours": 24,
+      "unknown_gate_fraction_max": 0.01,
+      "material_reliability_calibrated": false
+    },
+    "source": {
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-archives-v2/f4-tallwall120-qualification-cell-04/product/trajectory.h5",
+      "sha256": "78631cec15acdd5abcd5c43f326c2dd7c215b3248fd99ec544718bca72a74cad",
+      "role": "qualification-cell-04 source",
+      "frames": 218,
+      "window_s": 4.34,
+      "not_the_32_case_production_collection": true
+    },
+    "event_window": {
+      "requested_native_intervals": 217,
+      "requested_window_s": 4.34,
+      "extension_requires_new_native_source": true,
+      "full_canary_extension_available": false
+    },
+    "resource_plan": {
+      "cpu_cores": 2,
+      "ram_mib": 8192,
+      "gpu_peak_mib": 0,
+      "io_read_bytes_budget": 2274968640,
+      "wall_seconds_budget": 2651,
+      "estimate_status": "planning estimate; no run started"
+    }
+  },
+  "authorization_and_namespace": {
+    "candidate_card": {
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/candidate-card-v3.json",
+      "sha256": "0b47e4690633e0d531414873eb1a54afece77c367ecf023ada3a80fd9ced7c92",
+      "status": "proposal_only_root_review_required",
+      "authorized_one_cpu_only": false,
+      "runtime_authorized": false,
+      "qualification_claim": "none"
+    },
+    "root_review_receipt": {
+      "path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/root-review-receipt-v1.json",
+      "sha256": "0b5b734434d2cdad5f79a3d3a106a2f8d7f6abcc9459e73aecc345f7f83efed8",
+      "status": "proposal_only_root_review_required",
+      "authorized_one_cpu_only": false,
+      "runtime_authorized": false
+    },
+    "one_shot_preflight_contract": {
+      "authorization_path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/cpu-native-canary-preflight-r002-v1/authorization.json",
+      "authorization_sha256": "87dcf7c169f7dde7daa08f901e1ff593a52c69301f5ad76c018d0a2526fe53a3",
+      "authorization_status": "authorized_one_cpu_native_canary_preflight_runtime_not_authorized",
+      "preflight_path": "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/cpu-native-canary-preflight-r002-v1/preflight-receipt.json",
+      "preflight_sha256": "372e5378b7cff327ff8a41b1120ebe840b7003a5fa5fbd91b15df1c0f1088a1b",
+      "preflight_status": "preflight_passed_runtime_not_authorized",
+      "consumed_by_this_audit": false,
+      "runtime_authorized": false
+    }
+  },
+  "registry_ledger_and_runtime": {
+    "registry_path": "campaigns/core-v1/registry.json",
+    "registry_sha256": "1ddfeda5b2d3eb142f94be4bb2cbc6f1b65271d6b77efc8b65c829b94e66b38d",
+    "F4_scope_registered": true,
+    "F4_scope_case_count": 32,
+    "F4_material_qualification_entry_present": false,
+    "F4_case_material_audit_entries": 0,
+    "completion_path": "campaigns/core-v1/completion.json",
+    "completion_sha256": "51aa36d360f7f9a6c8387726ad9bf124fee87bc9c5b34a2c8081e82b4e515647",
+    "can_finalize": false,
+    "t1_families": ["F3", "F4"],
+    "macro_t2_families": [],
+    "observed_material_case_runs": 0,
+    "required_material_case_runs": 0,
+    "missing_material_case_runs": 288,
+    "missing_target_material_case_runs": 288,
+    "unregistered_material_case_runs": 288,
+    "runtime_status_path": "campaigns/core-v1/runtime/status.json",
+    "runtime_status_sha256": "508e0c687f6173d540ec6d8a541eea6e097098342a413a7b1cced3c50f8c4f49",
+    "runtime_counts": {
+      "attention": 0,
+      "cancelled": 13,
+      "failed": 19,
+      "launching": 0,
+      "queued": 0,
+      "reserved": 0,
+      "running": 0,
+      "succeeded": 292
+    },
+    "scientific_completion": "not_inferred_from_queue",
+    "resource_ledger_path": "campaigns/l1-resume/continuation/RESOURCE-LEDGER.json",
+    "resource_ledger_sha256": "3601f948928ec9760bcf562b56d4b5511d35025f98992c98ed2c45e07909294e",
+    "resource_ledger_conservative_expiry_utc": "2026-09-16T00:00:00+00:00",
+    "resource_ledger_current": false,
+    "mutations_by_this_audit": 0
+  },
+  "source_and_trajectory_evidence": {
+    "completed_reader_smoke": {
+      "path": "reports/F4-TALLWALL120-CORE-READER-SMOKE-2026-09-28.json",
+      "sha256": "db30187225f8a2915f43d18622d54ec537fe3efc2265837d5273f3dfeed2ac5d",
+      "manifest": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
+      "manifest_sha256": "86100523e66202f567ee29da6e178702f0e3ab19c63bd0cf861ff8a5fa0f86b4",
+      "cases_opened": "32/32",
+      "source_hashes_verified": "32/32",
+      "frames_per_case": 218,
+      "transitions_per_case": 217,
+      "time_window_s": [0.0, 4.340002980805959],
+      "reader_formal_eligible": false,
+      "diagnostic_only": true,
+      "qualification_credit": 0
+    },
+    "dev07_source_bound_diagnostic": {
+      "path": "reports/F4-TALLWALL120-DEV07-MATERIAL-BASELINE24-DIAGNOSTIC-2026-09-28.json",
+      "sha256": "edbd46f4723c067c3fcca00bd148d10e8ac06016b50a04328e1302410a2dc900",
+      "source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+      "source_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+      "trace_frames": 218,
+      "trace_transitions": 217,
+      "mass_closed": true,
+      "event_window_complete": false,
+      "event_window_status": "right_censored_or_unresolved",
+      "unknown_fraction_max": 1.0,
+      "common_reliable_path_coverage": 0.0,
+      "unknown_gate_pass": false,
+      "T1": false,
+      "T2": false,
+      "credit": 0,
+      "classification": "diagnostic_negative"
+    },
+    "historical_cross_case_binding": {
+      "path": "reports/F4-TALLWALL120-MATERIAL-BINDING-AUDIT-2026-09-28.json",
+      "sha256": "17137dbc3a8a43a9383e18c2992b532948ae40a3b42a48267e8d2c8403681905",
+      "historical_trace_source_sha256": "91846866c177e4c3036b7ef92c33a4e0bde7d9e8993efb01dde300811b7c096e",
+      "historical_trace_source_role": "qualification-cell-14 native source",
+      "historical_trace_committed_frames": 101,
+      "historical_trace_declared_native_frames": 1086,
+      "target_dev07_source_match": false,
+      "interpretation": "The historical cell-14 trace cannot be relabeled as DEV_07 evidence; source hash/path mismatch and partial event window were correctly rejected."
+    },
+    "existing_gap_audit": {
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-t2-admission-acceptance-gap-audit-20260923-v5.json",
+      "sha256": "a7034883b1fa4ba27a21ade3724e7482dea5e3f6b1c19f98d984e6d5038cbeb5",
+      "T2_macro": false,
+      "T2_path": false,
+      "formal_acceptance_receipts": 0,
+      "unknown_gate_limit": 0.01,
+      "matrix_ready": false,
+      "authorized_one_cpu_only": false
+    }
+  },
+  "reader_reuse_boundary": {
+    "completed_reader_reusable_for": [
+      "32-case manifest and split identity",
+      "exact source SHA/path verification",
+      "time-axis and known-input access",
+      "state-reader/data-path integration for a future material adapter"
+    ],
+    "completed_reader_not_sufficient_for": [
+      "material trajectory generation",
+      "material labels or sidecar acceptance",
+      "formal material reader/runtime eligibility",
+      "formal T2 macro/path credit"
+    ],
+    "large_hdf5_reread_by_this_audit": false,
+    "reader_manifest_declaration_does_not_override_trusted_reader_gate": true
+  },
+  "minimum_next_step": [
+    "Select one exact F4 production case and create a fresh source-bound material proposal whose path and SHA are the chosen production trajectory, not the historical cell-04/cell-14 evidence by implication.",
+    "Obtain a current root/scheduler/resource admission and a fresh output namespace; do not reuse the stale resource ledger or consume the one-shot preflight contract.",
+    "Only after that authorization exists, run the unchanged material path for the complete event window and emit source-bound formal per-case receipts; the current DEV_07 baseline24 result is a negative diagnostic and cannot be promoted.",
+    "Scale from the first closed coarse path to the required 32-case sidecar/matrix only through the authorized producer; no manual registry, completion, ledger, denominator, gate, label, or credit edit is valid."
+  ],
+  "execution_controls": {
+    "hdf5_reopened_by_this_audit": false,
+    "solver_started": false,
+    "worker_started": false,
+    "native_started": false,
+    "gencase_started": false,
+    "gpu_started": false,
+    "queue_started": false,
+    "queue_mutations": 0,
+    "registry_mutations": 0,
+    "completion_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "one_shot_authorization_consumed": false,
+    "material_labels_created": false,
+    "T2_credit_written": 0,
+    "plan_modified": false
+  },
+  "validation": {
+    "json_parse": "passed: post-write python JSON parse",
+    "diff_check": "passed: git diff --check",
+    "targeted_tests": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q tests/test_f4_tallwall120_t2_current_namespace_v3.py tests/test_f4_macro_t2_sidecar_preflight_v2.py",
+      "result": "5 passed"
+    },
+    "report_scope": "Only the two new report files are included in the independent commit."
+  }
+}
