@@ -75,6 +75,34 @@ physical lineages must remain outside all fitting and model-selection sets.
 middle and final transitions. `--full-scan` checks every transition. Reader/oracle
 reproduction is explicitly separate from final GPU-model product reproduction.
 
+### Independent-reproduction typed-evidence preflight
+
+The additive, read-only `scripts/core_independent_reproduction_preflight.py`
+assembles five typed evidence categories (six artifact roles): the
+`source_host`/`reproduction_host` pair, `data_roots` (including two hash-bound
+package manifests), and relocated `reader`, autonomous `prediction`, and
+`scoring` component evidence. All input paths must be inside one supplied
+`--data-root`; nested references are hash and path checked. A pass means only
+that this structure is internally consistent.
+
+```sh
+.venv/bin/python scripts/core_independent_reproduction_preflight.py \
+  --data-root /absolute/evidence-root \
+  --source-host /absolute/evidence-root/source-host.json \
+  --reproduction-host /absolute/evidence-root/reproduction-host.json \
+  --data-roots /absolute/evidence-root/data-roots.json \
+  --reader /absolute/evidence-root/reader-evidence.json \
+  --prediction /absolute/evidence-root/prediction-evidence.json \
+  --scoring /absolute/evidence-root/scoring-evidence.json \
+  --output /absolute/new/preflight.json
+```
+
+The result has its own diagnostic schema and always declares
+`capability_minted=false`, `formal_admission=false`, and zero qualification
+credit. It does not write registry, ledger, denominator, or gate state; a
+successful preflight is not a substitute for the trusted root review and the
+final `core_campaign.py` independent-reproduction verifier.
+
 ## Current evidence interpretation
 
 - F3 remains the previously registered numerical recipe; importing it does not
