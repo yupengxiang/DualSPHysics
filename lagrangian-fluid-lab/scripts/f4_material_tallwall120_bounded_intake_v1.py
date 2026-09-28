@@ -228,11 +228,17 @@ def _safe_relative(value: str | Path, *, field: str) -> str:
     return path.as_posix()
 
 
-def _resolve_report(root: Path, value: str | Path, *, field: str) -> Path:
+def _resolve_report(
+    root: Path,
+    value: str | Path,
+    *,
+    field: str,
+    allowed_suffixes: frozenset[str] = frozenset({".json"}),
+) -> Path:
     relative = _safe_relative(value, field=field)
     if not relative.startswith(f"{REPORTS_ROOT.as_posix()}/"):
         raise F4MaterialBoundedIntakeError(f"{field}:not_under_reports")
-    if Path(relative).suffix.lower() != ".json":
+    if Path(relative).suffix.lower() not in allowed_suffixes:
         raise F4MaterialBoundedIntakeError(f"{field}:non_json_input")
     root = Path(root).resolve()
     candidate = root / relative
@@ -1029,7 +1035,7 @@ def write_markdown(report: Mapping[str, Any], output: str | Path, root: str | Pa
     if errors:
         raise F4MaterialBoundedIntakeError("invalid report: " + ", ".join(errors))
     root = Path(root).resolve()
-    path = _resolve_report(root, output, field="output")
+    path = _resolve_report(root, output, field="markdown_output", allowed_suffixes=frozenset({".md"}))
     _write_new(path, (render_markdown(report) + "\n").encode("utf-8"))
     return path
 
