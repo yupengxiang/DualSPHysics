@@ -1,0 +1,46 @@
+{
+  "schema": "core.f3.vram_batch_plan.v1",
+  "status": "synthetic_contract_pass",
+  "observed_gpu_snapshot": [
+    {"index": 0, "memory_used_mib": 12143, "memory_free_mib": 36368, "memory_total_mib": 49140, "utilization_gpu_pct": 0},
+    {"index": 1, "memory_used_mib": 19822, "memory_free_mib": 28690, "memory_total_mib": 49140, "utilization_gpu_pct": 0},
+    {"index": 2, "memory_used_mib": 12143, "memory_free_mib": 36368, "memory_total_mib": 49140, "utilization_gpu_pct": 0},
+    {"index": 3, "memory_used_mib": 26527, "memory_free_mib": 21985, "memory_total_mib": 49140, "utilization_gpu_pct": 0},
+    {"index": 4, "memory_used_mib": 9112, "memory_free_mib": 39400, "memory_total_mib": 49140, "utilization_gpu_pct": 0},
+    {"index": 5, "memory_used_mib": 23495, "memory_free_mib": 25016, "memory_total_mib": 49140, "utilization_gpu_pct": 0},
+    {"index": 6, "memory_used_mib": 12143, "memory_free_mib": 36368, "memory_total_mib": 49140, "utilization_gpu_pct": 0},
+    {"index": 7, "memory_used_mib": 26527, "memory_free_mib": 21985, "memory_total_mib": 49140, "utilization_gpu_pct": 0}
+  ],
+  "policy": {
+    "min_free_mib": 8192,
+    "gpu_is_shareable": true,
+    "admission_basis": "free_vram_after_declared_job_reservation",
+    "default_mode": "dry_run",
+    "required_argv_contract": ["--maximum-steps", "835", "--diagnostic"],
+    "output_namespace": "fresh_and_non_overwriting"
+  },
+  "synthetic_fixture": {
+    "jobs": 3,
+    "planned": 3,
+    "blocked": 0,
+    "reserved_vram_mib_by_gpu": {"0": 8192, "1": 4096},
+    "reserved_cpu_slots": 12,
+    "source_hash_binding": true,
+    "duplicate_case_and_output_rejection": true
+  },
+  "verification": {
+    "pytest": "10 passed",
+    "py_compile": true,
+    "git_diff_check": true,
+    "real_launches": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "gate_mutation": 0
+  },
+  "diagnostic_only": true,
+  "formal_eligible": false,
+  "formal": false,
+  "qualification": false,
+  "qualification_credit": 0,
+  "credit": 0
+}
