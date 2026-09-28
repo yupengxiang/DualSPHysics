@@ -15,11 +15,17 @@ import argparse
 import base64
 import hashlib
 import json
+from pathlib import Path
 import re
+import sys
 from typing import Any
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+
+LAB = Path(__file__).resolve().parents[1]
+if str(LAB) not in sys.path:
+    sys.path.insert(0, str(LAB))
 
 from scripts.core_strict_json import strict_json_object
 from scripts import f8_r008_attempt_ledger_v1 as ledger_v1
