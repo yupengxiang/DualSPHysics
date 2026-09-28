@@ -53,6 +53,7 @@ IDENTITY_SCHEMA_SUFFIX = ".evaluator_artifact_identity.v1"
 PROCESS_SCHEMA_PREFIX = "core.f3.mlp.hidden16.seed"
 PROCESS_SCHEMA_SUFFIX = ".process_exit_proof.v1"
 MAX_JSON_BYTES = 1 * 1024 * 1024
+MAX_PROCESS_METADATA_BYTES = 2 * MAX_JSON_BYTES
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 NONCE_RE = re.compile(r"^[0-9a-f]{32}$")
 RUN_ID_RE = re.compile(r"^f3-mlp500-hidden16-seed(?:17|29|43)-20260928$")
@@ -808,6 +809,161 @@ def _proc_fd_path(fd: int) -> str:
     return str(proc_fd)
 
 
+def _read_process_metadata(pid: int, leaf: str, name: str) -> bytes:
+    """Read one bounded procfs process-binding record while the child lives."""
+
+    if type(pid) is not int or pid < 1:
+        _fail(f"{name} PID is invalid")
+    if leaf not in {"cmdline", "environ"}:
+        _fail(f"unsupported process metadata leaf: {leaf}")
+    path = f"/proc/{pid}/{leaf}"
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        fd = os.open(path, flags)
+    except OSError as error:
+        _fail(f"cannot read live {name}: {error}")
+    try:
+        chunks: list[bytes] = []
+        total = 0
+        while total <= MAX_PROCESS_METADATA_BYTES:
+            chunk = os.read(
+                fd,
+                min(65536, MAX_PROCESS_METADATA_BYTES + 1 - total),
+            )
+            if not chunk:
+                break
+            chunks.append(chunk)
+            total += len(chunk)
+        if total > MAX_PROCESS_METADATA_BYTES:
+            _fail(f"{name} exceeds bounded procfs metadata size")
+        return b"".join(chunks)
+    except OSError as error:
+        _fail(f"cannot read live {name}: {error}")
+    finally:
+        os.close(fd)
+
+
+def _expected_environment_bytes(environment: Mapping[str, str]) -> frozenset[bytes]:
+    entries: list[bytes] = []
+    for key, value in environment.items():
+        if not isinstance(key, str) or not isinstance(value, str):
+            _fail("Popen environment must contain only string keys and values")
+        if not key or "=" in key or "\x00" in key or "\x00" in value:
+            _fail("Popen environment contains an invalid key or value")
+        entries.append(os.fsencode(f"{key}={value}"))
+    if len(set(entries)) != len(entries):
+        _fail("Popen environment contains duplicate entries")
+    return frozenset(entries)
+
+
+def _validate_live_process_binding(
+    process: Any,
+    *,
+    plan: RolloutPlan,
+    stable_command: Sequence[str],
+    stable_cwd: str,
+    environment: Mapping[str, str],
+    root_fd: int,
+    evaluator_start_identity: Mapping[str, Any],
+    input_fds: Mapping[str, int],
+) -> tuple[tuple[str, ...], dict[str, int], str]:
+    """Prove that the returned real Popen is the exact requested child.
+
+    ``subprocess.Popen`` exposes ``args`` but not its effective cwd or env.
+    The latter two are therefore checked both at the factory boundary and in
+    the live child through procfs.  This function runs before ``wait()`` so a
+    successful proof can never be minted from a factory that launched a
+    different command and merely returned a successful Popen object.
+    """
+
+    if type(process) is not subprocess.Popen:
+        _fail("popen_factory did not return the real subprocess.Popen object")
+    expected_args = tuple(stable_command)
+    process_args = getattr(process, "args", None)
+    if not isinstance(process_args, (list, tuple)) or any(
+        type(argument) is not str for argument in process_args
+    ):
+        _fail("returned Popen.args is not a concrete string argv")
+    observed_args = tuple(process_args)
+    if observed_args != expected_args:
+        _fail("returned Popen.args differs from the exact stable command")
+
+    evaluator_pid = _strict_int(getattr(process, "pid", None), "evaluator_pid", 1)
+    expected_starttime = evaluator_start_identity.get("proc_starttime_ticks")
+    actual_starttime = _proc_starttime_ticks(evaluator_pid)
+    if type(expected_starttime) is not int or actual_starttime != expected_starttime:
+        _fail("returned Popen PID is not the same live process observed at launch")
+
+    expected_cmdline = b"\x00".join(os.fsencode(argument) for argument in expected_args) + b"\x00"
+    actual_cmdline = _read_process_metadata(evaluator_pid, "cmdline", "evaluator cmdline")
+    if actual_cmdline != expected_cmdline:
+        _fail("live evaluator cmdline differs from the exact stable command")
+
+    try:
+        actual_cwd_info = os.stat(f"/proc/{evaluator_pid}/cwd")
+    except OSError as error:
+        _fail(f"cannot inspect live evaluator cwd: {error}")
+    expected_cwd_info = os.fstat(root_fd)
+    if _directory_identity(actual_cwd_info) != _directory_identity(expected_cwd_info):
+        _fail("live evaluator cwd differs from the stable rollout root")
+
+    actual_environment = _read_process_metadata(evaluator_pid, "environ", "evaluator environment")
+    if not actual_environment.endswith(b"\x00"):
+        _fail("live evaluator environment is not NUL terminated")
+    actual_entries = actual_environment[:-1].split(b"\x00") if actual_environment[:-1] else []
+    if len(set(actual_entries)) != len(actual_entries):
+        _fail("live evaluator environment contains duplicate entries")
+    if frozenset(actual_entries) != _expected_environment_bytes(environment):
+        _fail("live evaluator environment differs from the exact Popen environment")
+
+    logical_command = _logical_execution_command(
+        plan,
+        observed_args,
+        input_fds=input_fds,
+        root_fd=root_fd,
+    )
+    command_sha256 = _canonical_digest(
+        {
+            "argv": list(logical_command),
+            "cwd": str(plan.root),
+            "env_overrides": dict(plan.env),
+        }
+    )
+    if command_sha256 != plan.command_sha256:
+        _fail("live evaluator command digest differs from the dry-run plan")
+    cwd_identity = _directory_identity(expected_cwd_info)
+    environment_sha256 = _canonical_digest(
+        {"environment": dict(sorted(environment.items()))}
+    )
+    runtime_binding_sha256 = _canonical_digest(
+        {
+            "stable_argv": list(observed_args),
+            "stable_cwd": stable_cwd,
+            "cwd_identity": cwd_identity,
+            "environment_sha256": environment_sha256,
+            "command_sha256": command_sha256,
+        }
+    )
+    return observed_args, cwd_identity, runtime_binding_sha256
+
+
+def _logical_execution_command(
+    plan: RolloutPlan,
+    stable_command: Sequence[str],
+    *,
+    input_fds: Mapping[str, int],
+    root_fd: int,
+) -> tuple[str, ...]:
+    replacements = {
+        str(plan.input_snapshots["interpreter"]["path"]): _proc_fd_path(input_fds["interpreter"]),
+        str(plan.input_snapshots["core_learning"]["path"]): _proc_fd_path(input_fds["core_learning"]),
+        str(plan.input_snapshots["manifest"]["path"]): _proc_fd_path(input_fds["manifest"]),
+        str(plan.input_snapshots["checkpoint"]["path"]): _proc_fd_path(input_fds["checkpoint"]),
+        str(plan.root): _proc_fd_path(root_fd),
+    }
+    return tuple(replacements_inverse(argument, replacements) for argument in stable_command)
+
+
 def _stable_execution_command(
     plan: RolloutPlan,
     input_fds: Mapping[str, int],
@@ -821,7 +977,12 @@ def _stable_execution_command(
         str(plan.root): _proc_fd_path(root_fd),
     }
     result = tuple(replacements.get(argument, argument) for argument in plan.command)
-    logical = tuple(replacements_inverse(argument, replacements) for argument in result)
+    logical = _logical_execution_command(
+        plan,
+        result,
+        input_fds=input_fds,
+        root_fd=root_fd,
+    )
     command_sha = _canonical_digest({
         "argv": list(logical),
         "cwd": str(plan.root),
@@ -1054,7 +1215,7 @@ def _define_execution_record_type() -> tuple[type[Any], Callable[..., Any], Call
             "_evaluator_reaped", "_launcher_pid", "_launcher_returncode", "_launcher_reaped",
             "_command_sha256", "_evaluator_start_identity", "_evaluator_end_identity",
             "_launcher_start_identity", "_launcher_end_identity", "_wait_observed", "_poll_returncode",
-            "_consumed",
+            "_process_args", "_cwd_identity", "_runtime_binding_sha256", "_consumed",
         )
 
         def __init__(self, *, _seal: object, **values: Any) -> None:
@@ -1090,7 +1251,7 @@ def _validate_execution_record(plan: RolloutPlan, value: Any) -> Any:
         _fail("execution_record must be minted by the actual execute_plan Popen/wait path")
     if value._plan is not plan:
         _fail("execution_record is not bound to this RolloutPlan")
-    if value._process is None or not isinstance(value._process, subprocess.Popen) or not value._wait_observed:
+    if value._process is None or type(value._process) is not subprocess.Popen or not value._wait_observed:
         _fail("execution_record lacks an observed Popen/wait lifecycle")
     if value._evaluator_reaped is not True or value._launcher_reaped is not True:
         _fail("execution_record is not fully reaped")
@@ -1104,6 +1265,17 @@ def _validate_execution_record(plan: RolloutPlan, value: Any) -> Any:
         _fail("execution_record does not prove zero return codes")
     if value._command_sha256 != plan.command_sha256:
         _fail("execution_record command digest drifts from the dry-run plan")
+    if (
+        not isinstance(value._process_args, tuple)
+        or any(type(argument) is not str for argument in value._process_args)
+        or tuple(value._process.args) != value._process_args
+    ):
+        _fail("execution_record Popen args drifted from the verified stable command")
+    expected_cwd_identity = dict(plan.root_identity[-1]["identity"])
+    if value._cwd_identity != expected_cwd_identity:
+        _fail("execution_record cwd identity drifts from the rollout root")
+    if not isinstance(value._runtime_binding_sha256, str) or SHA256_RE.fullmatch(value._runtime_binding_sha256) is None:
+        _fail("execution_record runtime binding digest is invalid")
     for name, identity in (
         ("evaluator_start_identity", value._evaluator_start_identity),
         ("evaluator_end_identity", value._evaluator_end_identity),
@@ -1255,6 +1427,9 @@ def execute_plan(
     process: Any = None
     wait_observed = False
     stable_command: tuple[str, ...] | None = None
+    verified_process_args: tuple[str, ...] | None = None
+    verified_cwd_identity: dict[str, int] | None = None
+    verified_runtime_binding_sha256: str | None = None
     log_path = plan.outputs["log"]
     try:
         root_fd = _open_stable_root(plan)
@@ -1272,11 +1447,14 @@ def execute_plan(
         log_handle = os.fdopen(log_fd, "wb", closefd=True)
         environment = os.environ.copy()
         environment.update(plan.env)
+        expected_environment = dict(environment)
+        expected_stable_command = tuple(stable_command)
+        expected_stable_cwd = _proc_fd_path(root_fd)
         pass_fds = (root_fd, *tuple(input_fds.values()))
         process = popen_factory(
-            list(stable_command),
-            cwd=_proc_fd_path(root_fd),
-            env=environment,
+            list(expected_stable_command),
+            cwd=expected_stable_cwd,
+            env=expected_environment,
             stdout=log_handle,
             stderr=subprocess.STDOUT,
             start_new_session=True,
@@ -1284,8 +1462,29 @@ def execute_plan(
         )
         if not isinstance(process, subprocess.Popen):
             _fail("popen_factory did not return the actual subprocess.Popen object")
+        process_args = getattr(process, "args", None)
+        if not isinstance(process_args, (list, tuple)) or tuple(process_args) != expected_stable_command:
+            _fail("popen_factory returned a process for a different command")
+        if expected_environment != environment:
+            _fail("popen_factory mutated the exact Popen environment")
         evaluator_pid = _strict_int(getattr(process, "pid", None), "evaluator_pid", 1)
         evaluator_start_identity = _process_identity(evaluator_pid, "start")
+        if evaluator_start_identity.get("proc_starttime_ticks") is None:
+            _fail("evaluator process exited before exact command binding")
+        (
+            verified_process_args,
+            verified_cwd_identity,
+            verified_runtime_binding_sha256,
+        ) = _validate_live_process_binding(
+            process,
+            plan=plan,
+            stable_command=expected_stable_command,
+            stable_cwd=expected_stable_cwd,
+            environment=expected_environment,
+            root_fd=root_fd,
+            evaluator_start_identity=evaluator_start_identity,
+            input_fds=input_fds,
+        )
         evaluator_returncode = process.wait()
         wait_observed = True
         if type(evaluator_returncode) is not int:
@@ -1321,6 +1520,9 @@ def execute_plan(
     assert evaluator_start_identity is not None
     assert evaluator_end_identity is not None
     assert launcher_end_identity is not None
+    assert verified_process_args is not None
+    assert verified_cwd_identity is not None
+    assert verified_runtime_binding_sha256 is not None
     if evaluator_returncode != 0:
         return {
             "schema": PLAN_SCHEMA,
@@ -1352,6 +1554,9 @@ def execute_plan(
         _launcher_end_identity=dict(launcher_end_identity),
         _wait_observed=wait_observed,
         _poll_returncode=evaluator_poll_returncode,
+        _process_args=verified_process_args,
+        _cwd_identity=verified_cwd_identity,
+        _runtime_binding_sha256=verified_runtime_binding_sha256,
         _consumed=False,
     )
     identity = load_artifact_identity(plan, artifact_identity_path)

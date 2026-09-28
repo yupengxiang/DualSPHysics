@@ -6,6 +6,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
 
 import pytest
@@ -469,7 +470,13 @@ def test_execute_with_real_popen_natural_exit_writes_zero_credit_proof(tmp_path:
         assert kwargs["start_new_session"] is True
         assert kwargs["pass_fds"]
         assert kwargs["cwd"].startswith("/proc/self/fd/")
-        return real_popen(command, **kwargs)
+        expected_environment = os.environ.copy()
+        expected_environment.update(plan.env)
+        assert kwargs["env"] == expected_environment
+        process = real_popen(command, **kwargs)
+        assert tuple(process.args) == tuple(command)
+        assert os.stat(f"/proc/{process.pid}/cwd").st_ino == plan.root.stat().st_ino
+        return process
 
     try:
         result = launcher.execute_plan(plan, popen_factory=recording_popen)
@@ -497,9 +504,10 @@ def test_nonzero_evaluator_never_mints_success_proof(tmp_path: Path) -> None:
     plan = _plan(fixture, tmp_path, 43)
 
     real_popen = launcher.subprocess.Popen
+    processes: list[subprocess.Popen] = []
 
     def failed_popen(command, **kwargs):
-        return real_popen(
+        process = real_popen(
             [sys.executable, "-c", "raise SystemExit(7)"],
             cwd=kwargs["cwd"],
             env=kwargs["env"],
@@ -508,14 +516,42 @@ def test_nonzero_evaluator_never_mints_success_proof(tmp_path: Path) -> None:
             start_new_session=kwargs["start_new_session"],
             pass_fds=kwargs["pass_fds"],
         )
+        processes.append(process)
+        return process
 
     try:
-        result = launcher.execute_plan(
-            plan,
-            popen_factory=failed_popen,
+        with pytest.raises(launcher.LauncherError, match="different command"):
+            launcher.execute_plan(plan, popen_factory=failed_popen)
+        assert processes and processes[0].wait() == 7
+        assert not plan.proof_output.exists()
+    finally:
+        _cleanup_external_outputs(plan)
+
+
+def test_factory_successful_different_command_is_rejected_before_proof(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    plan = _plan(fixture, tmp_path, 17)
+
+    real_popen = launcher.subprocess.Popen
+    processes: list[subprocess.Popen] = []
+
+    def successful_different_popen(command, **kwargs):
+        process = real_popen(
+            [sys.executable, "-c", "import time; time.sleep(0.05); raise SystemExit(0)"],
+            cwd=kwargs["cwd"],
+            env=kwargs["env"],
+            stdout=kwargs["stdout"],
+            stderr=kwargs["stderr"],
+            start_new_session=kwargs["start_new_session"],
+            pass_fds=kwargs["pass_fds"],
         )
-        assert result["status"] == "blocked_evaluator_returncode"
-        assert result["proof_written"] is False
+        processes.append(process)
+        return process
+
+    try:
+        with pytest.raises(launcher.LauncherError, match="different command"):
+            launcher.execute_plan(plan, popen_factory=successful_different_popen)
+        assert processes and processes[0].wait() == 0
         assert not plan.proof_output.exists()
     finally:
         _cleanup_external_outputs(plan)
