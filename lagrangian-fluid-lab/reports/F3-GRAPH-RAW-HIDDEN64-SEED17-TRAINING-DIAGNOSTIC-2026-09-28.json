@@ -1,0 +1,182 @@
+{
+  "schema": "core.f3.graph_raw.hidden64.training_diagnostic.v1",
+  "report_id": "F3-GRAPH-RAW-HIDDEN64-SEED17-TRAINING-DIAGNOSTIC-2026-09-28",
+  "date": "2026-09-28",
+  "status": "completed",
+  "diagnostic_only": true,
+  "non_formal_diagnostic": true,
+  "formal_eligible": false,
+  "qualification": false,
+  "qualification_credit": 0,
+  "t1_numerical": false,
+  "t2_macro": false,
+  "t2_path": false,
+  "rollout_included": false,
+  "source": {
+    "repository": "DualSPHysics/lagrangian-fluid-lab",
+    "baseline_git_commit": "69f62e170666c650a531086808e5f0e1846abf1f",
+    "baseline_git_commit_semantics": "report-authoring HEAD before this training-only commit",
+    "manifest": {
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "file_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "formal_release": false,
+      "family": "F3",
+      "case_count": 32,
+      "train_case_count": 16,
+      "validation_case_count": 4,
+      "test_case_count": 12
+    },
+    "case_binding": {
+      "evaluation_case_reserved_for_followup": "F3_DEV_00_a0p903125",
+      "case_hdf5": "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5",
+      "case_hdf5_sha256_before_and_after_training": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4"
+    },
+    "source_script_sha256": {
+      "scripts/core_learning.py": "3eefe1441dabb350182090c3625f24a8209543a4a31d02521f283074c996c27b",
+      "scripts/core_models.py": "20e635ebd25cd511eeff6f84478678d3364608fd86a5d4b67e2aa53a0d88295d",
+      "scripts/core_dataset.py": "65f583b8fcb1c46e56d10506e22aa1e5fa32c7b2631017de85c88b1f6d53f88f",
+      "scripts/core_contract.py": "1866b35259f407e8c0d8b399eb4034eb18cc8b59f4addc1156f20d6777a326bc"
+    }
+  },
+  "protocol": {
+    "model_kind": "graph_raw",
+    "seed": 17,
+    "updates": 500,
+    "centers_per_update": 256,
+    "hidden": 64,
+    "learning_rate": 0.001,
+    "normalization_transitions": 16,
+    "max_neighbors": 192,
+    "optimizer": "Adam",
+    "radius_over_h": 2.0,
+    "history_states": 1,
+    "normalization_source_split": "train",
+    "target_normalization": "raw_dual_increment_train_shared",
+    "cuda_visible_devices": "3",
+    "physical_gpu_index": 3,
+    "process_device": "cuda:0",
+    "device_binding_semantics": "CUDA_VISIBLE_DEVICES=3 remaps physical GPU3 to process-local cuda:0",
+    "manifest_formal_release": false,
+    "diagnostic": true,
+    "autonomous_rollout": "not_run_in_training_commit"
+  },
+  "commands": {
+    "train": "CUDA_VISIBLE_DEVICES=3 PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 /usr/bin/time -v -o /tmp/f3-graph-raw500-hidden64-seed17-20260928-gpu3-retry1-training-time.txt ./.venv/bin/python -u scripts/core_learning.py train --manifest campaigns/core-v1/f3-dataset-v2.json --data-root . --model graph_raw --seed 17 --updates 500 --centers 256 --hidden 64 --learning-rate 0.001 --normalization-transitions 16 --max-neighbors 192 --checkpoint /tmp/f3-graph-raw500-hidden64-seed17-20260928-gpu3-retry1-checkpoint.pt --run-id f3-graph-raw500-hidden64-seed17-20260928-gpu3-retry1 --checkpoint-every 500 --log-every 100 --validation-every 0 --no-evaluate-milestones --progress-output /tmp/f3-graph-raw500-hidden64-seed17-20260928-gpu3-retry1-training-progress.json --device cuda:0 --output /tmp/f3-graph-raw500-hidden64-seed17-20260928-gpu3-retry1-training.json",
+    "pytest": "PYTHONDONTWRITEBYTECODE=1 ./.venv/bin/python -m pytest -q tests/test_core_learning.py tests/test_core_models.py tests/test_core_dataset_compact.py tests/test_core_contract.py",
+    "py_compile": "PYTHONDONTWRITEBYTECODE=1 ./.venv/bin/python -m py_compile scripts/core_learning.py scripts/core_models.py scripts/core_dataset.py scripts/core_contract.py scripts/f3_full_rollout_receipt_hdf5_validator_v1.py scripts/f3_rollout_metric_summarizer_v1.py"
+  },
+  "training": {
+    "status": "completed",
+    "evidence_status": "complete",
+    "run_id": "f3-graph-raw500-hidden64-seed17-20260928-gpu3-retry1",
+    "receipt_path": "/tmp/f3-graph-raw500-hidden64-seed17-20260928-gpu3-retry1-training.json",
+    "receipt_sha256": "dbf6f40fbc1f278fd132b2fed06fcc74bd976401a3afbbb7850e452d029b6fcf",
+    "receipt_bytes": 10114,
+    "progress_path": "/tmp/f3-graph-raw500-hidden64-seed17-20260928-gpu3-retry1-training-progress.json",
+    "progress_sha256": "a299b8a9fa9b52783f08461afdc6a4a881bf051f3e0436ebc2cfedd51631e07e",
+    "progress_status": "completed",
+    "completed_updates": 500,
+    "parameter_count": 85766,
+    "final_logged_loss_mse": 0.03902001678943634,
+    "neighbor_truncation_fraction_logged": 0.0,
+    "checkpoint_verified": true,
+    "checkpoint": {
+      "path": "/tmp/f3-graph-raw500-hidden64-seed17-20260928-gpu3-retry1-checkpoint.pt",
+      "sha256": "2863fb8737a54b75397b3bb2a74c2bfe61dccccc7e885cbd35a113d50907ca24",
+      "bytes": 1119037,
+      "schema": "core.checkpoint.v1",
+      "update": 500
+    },
+    "wall_seconds_receipt": 2199.7713292408735,
+    "peak_gpu_memory_bytes_receipt": 9713391616,
+    "peak_rss_mib_receipt": 2696.68359375,
+    "external_resource_timer": {
+      "path": "/tmp/f3-graph-raw500-hidden64-seed17-20260928-gpu3-retry1-training-time.txt",
+      "sha256": "b6c361e88d152e7e44a3bc6a7368364d9d2517c6db0a6bd5fab94bbc67b02ff3",
+      "wall_clock": "37:20.67",
+      "user_seconds": 3441.44,
+      "system_seconds": 73.05,
+      "maximum_resident_set_kib": 2761404,
+      "exit_status": 0
+    },
+    "log": {
+      "path": "/tmp/f3-graph-raw500-hidden64-seed17-20260928-gpu3-retry1-training.log",
+      "sha256": "d600f1195cb23666f660a41ca611851a60707541409aaec40aa292679947b2f2",
+      "bytes": 8760
+    },
+    "history": [
+      {"update": 1, "case_id": "F3_DEV_20_a1p028125", "frame": 714, "loss_mse": 1.1827504634857178, "neighbor_truncation_fraction": 0.0},
+      {"update": 100, "case_id": "F3_DEV_16_a1p003125", "frame": 609, "loss_mse": 0.6760768890380859, "neighbor_truncation_fraction": 0.0},
+      {"update": 200, "case_id": "F3_DEV_09_a0p959375", "frame": 581, "loss_mse": 0.5344907641410828, "neighbor_truncation_fraction": 0.0},
+      {"update": 300, "case_id": "F3_DEV_09_a0p959375", "frame": 45, "loss_mse": 0.014628834091126919, "neighbor_truncation_fraction": 0.0},
+      {"update": 400, "case_id": "F3_DEV_24_a1p053125", "frame": 214, "loss_mse": 0.3247678875923157, "neighbor_truncation_fraction": 0.0},
+      {"update": 500, "case_id": "F3_DEV_16_a1p003125", "frame": 112, "loss_mse": 0.03902001678943634, "neighbor_truncation_fraction": 0.0}
+    ],
+    "sampler": {
+      "train_case_count": 16,
+      "train_transition_count": 13360,
+      "centers_per_update": 256,
+      "draws": 500
+    },
+    "normalization": {
+      "source_split": "train",
+      "available_transition_count": 13360,
+      "requested_maximum_transitions": 16,
+      "selected_transition_count": 16,
+      "selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+      "target_reference": "raw_dual_increment_train_shared",
+      "selection_seed": 17,
+      "selected_case_ids": [
+        "F3_DEV_06_a0p940625", "F3_DEV_07_a0p946875", "F3_DEV_09_a0p959375", "F3_DEV_10_a0p965625",
+        "F3_DEV_11_a0p971875", "F3_DEV_12_a0p978125", "F3_DEV_14_a0p990625", "F3_DEV_15_a0p996875",
+        "F3_DEV_16_a1p003125", "F3_DEV_17_a1p009375", "F3_DEV_19_a1p021875", "F3_DEV_20_a1p028125",
+        "F3_DEV_21_a1p034375", "F3_DEV_22_a1p040625", "F3_DEV_24_a1p053125", "F3_DEV_25_a1p059375"
+      ]
+    },
+    "validation": {
+      "validation_every": 0,
+      "validation_history_rows": 0,
+      "validation_formal_eligible": false,
+      "milestone_evaluations": 0
+    }
+  },
+  "gpu_audit": {
+    "physical_gpu_index": 3,
+    "gpu_name": "NVIDIA RTX 6000 Ada Generation",
+    "preflight_memory_used_mib": 15,
+    "post_training_memory_used_mib": 15,
+    "sampled_peak_memory_used_mib": 28917,
+    "sampled_peak_semantics": "nvidia-smi sample during the run; torch receipt peak allocation is recorded separately",
+    "other_gpu_processes_allowed": true,
+    "binding_verified": true
+  },
+  "integrity": {
+    "registry_completion_ledger_gate_mutation": false,
+    "production_hdf5_mutation": false,
+    "historical_receipt_mutation": false,
+    "protected_artifacts_sha256_after_training": {
+      "campaigns/core-v1/registry.json": "1ddfeda5b2d3eb142f94be4bb2cbc6f1b65271d6b77efc8b65c829b94e66b38d",
+      "campaigns/core-v1/completion.json": "51aa36d360f7f9a6c8387726ad9bf124fee87bc9c5b34a2c8081e82b4e515647",
+      "completion.json": "ca99794bb9f6e314d079dd6747c6056e1dfe18b264abefa9a479f08665c43ff2",
+      "campaigns/l2-multifamily/ledger.json": "d34dafd0772d5a6b596bf1fbdc02bf3bb394c60ed86e7384f0ddee9a696747f1",
+      "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4"
+    }
+  },
+  "verification": {
+    "pytest": {
+      "tests": "tests/test_core_learning.py tests/test_core_models.py tests/test_core_dataset_compact.py tests/test_core_contract.py",
+      "passed": 116,
+      "failed": 0,
+      "exit_code": 0,
+      "log_sha256": "b31c7d31654cf62c8047df9e0e7dafc8585aa8a5b367cf1c1c7f1ea9f5d7840b"
+    },
+    "py_compile": {"passed": true, "exit_code": 0},
+    "git_diff_check": {"passed": true, "exit_code": 0}
+  },
+  "launch_notes": {
+    "excluded_attempt": "The first bare-tee wrapper was terminated at update 1 before a checkpoint or training receipt existed; its partial temporary progress/time files are not evidence and are not referenced by this report.",
+    "accepted_attempt": "retry1 is the sole accepted training evidence and completed with exit code 0.",
+    "formal_claim": "No formal, T1, T2, registry, ledger, completion, gate, or credit claim is made."
+  }
+}
