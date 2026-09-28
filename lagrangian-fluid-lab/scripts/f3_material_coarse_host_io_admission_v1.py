@@ -402,6 +402,24 @@ def _proposal_checks(
     )
     _record(checks, reasons, "job_spec_fields", job_fields_ok, "job_spec candidate/resources")
 
+    resource_policy_ok = (
+        proposal_resources.get("status") == "not_measured_proposal_only"
+        and proposal_resources.get("measured_admission_required") is True
+        and proposal_resources.get("cpu_only") is True
+        and proposal_resources.get("gpu_forbidden") is True
+        and proposal_resources.get("gpu_vram_headroom_is_not_admission") is True
+        and proposal_resources.get("snapshot_collected_by_proposal") is False
+        and isinstance(proposal_resources.get("resource_request"), Mapping)
+        and proposal_resources["resource_request"].get("gpu_peak_mib") == 0
+    )
+    _record(
+        checks,
+        reasons,
+        "proposal_resource_policy",
+        resource_policy_ok,
+        "proposal.resource_admission policy",
+    )
+
     proposal_valid = all(
         checks.get(name, False)
         for name in (
@@ -416,6 +434,7 @@ def _proposal_checks(
             "normalized_argv",
             "launch_cwd",
             "job_spec_fields",
+            "proposal_resource_policy",
         )
     )
     _record(checks, reasons, "proposal_contract_valid", proposal_valid, "proposal contract")
@@ -513,6 +532,14 @@ def _host_checks(
         "probe_diagnostic_status",
         receipt.get("status") == "diagnostic_pass",
         "host_io_receipt.status",
+    )
+    family_scope = request.get("family_scope")
+    _record(
+        checks,
+        reasons,
+        "host_family_scope",
+        isinstance(family_scope, list) and "F3" in family_scope,
+        "host_io_receipt.request.family_scope must include F3",
     )
     _record(
         checks,

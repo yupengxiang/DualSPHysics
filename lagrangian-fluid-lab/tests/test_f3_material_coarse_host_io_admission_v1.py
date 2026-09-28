@@ -104,6 +104,32 @@ def test_measurement_incomplete_receipt_is_rejected(tmp_path: Path) -> None:
     assert report["worker_launch_authorized"] is False
 
 
+def test_resource_policy_drift_is_rejected(tmp_path: Path) -> None:
+    proposal = json.loads(PROPOSAL.read_text(encoding="utf-8"))
+    proposal["resource_admission"]["gpu_forbidden"] = False
+    mutated = _write_json(tmp_path / "resource-policy-drift.json", proposal)
+    report = adapter.build_admission(
+        ROOT, proposal_path=mutated, source_h5_path=_tiny_source(tmp_path)
+    )
+
+    assert report["status"] == "failed_closed"
+    assert report["checks"]["proposal_resource_policy"] is False
+    assert report["launch_admitted"] is False
+
+
+def test_host_family_scope_drift_is_rejected(tmp_path: Path) -> None:
+    receipt = json.loads(HOST_IO.read_text(encoding="utf-8"))
+    receipt["request"]["family_scope"] = ["F4"]
+    mutated = _write_json(tmp_path / "family-scope-drift.json", receipt)
+    report = adapter.build_admission(
+        ROOT, host_io_receipt_path=mutated, source_h5_path=_tiny_source(tmp_path)
+    )
+
+    assert report["status"] == "failed_closed"
+    assert report["checks"]["host_family_scope"] is False
+    assert report["worker_launch_authorized"] is False
+
+
 def test_claimed_authorization_cannot_become_an_admission(tmp_path: Path) -> None:
     proposal = json.loads(PROPOSAL.read_text(encoding="utf-8"))
     proposal["authorization"]["status"] = "granted"
