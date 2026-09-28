@@ -1,0 +1,56 @@
+{
+  "schema": "core.material.t2.bounded_candidate_audit.v1",
+  "audit_id": "core-material-t2-bounded-candidate-audit-2026-09-28",
+  "status": "blocked_negative_no_repo_change",
+  "source_receipts": {
+    "json_path": "/tmp/core-material-t2-bounded-candidate-audit-2026-09-28.json",
+    "json_sha256": "c27a1ee7eb1c9388e880defe6f4d8d2f7eb4286e865d823e925abedb2c1da99c",
+    "markdown_sha256": "63438a08cc6e2dcc84ebbaffa0778de496f19e6c7a242a8a08dfd3cafd5a1678"
+  },
+  "scope": {
+    "families": ["F3", "F4"],
+    "read_only": true,
+    "excluded_replays": [
+      "F4 tallwall120 DEV_07 baseline24",
+      "F3 native-volume MLS high8192 canary",
+      "F3 graph rollout",
+      "F8 syscall contract/runtime work"
+    ]
+  },
+  "candidate_findings": {
+    "F3_complete_traces": [
+      {"candidate": "baseline24", "frames": 836, "transitions": 835, "unknown": {"0": 0.0390625, "1": 0.03125}, "t2": false},
+      {"candidate": "h2_k48", "frames": 836, "transitions": 835, "unknown": {"0": 0.0546875, "1": 0.03125}, "t2": false},
+      {"candidate": "h1_affine_bound", "frames": 836, "transitions": 835, "unknown": {"0": 0.0859375, "1": 0.09375}, "t2": false},
+      {"candidate": "native_volume_mls_v2_current_frame", "frames": 836, "transitions": 835, "unknown": {"0": 0.0, "1": 0.0}, "original_gate_pass": false, "original_gate_false_samples": 441, "t2": false}
+    ],
+    "F4": [
+      {"candidate": "tallwall120 DEV_07 baseline24", "frames": 218, "transitions": 217, "unknown_fraction_max": 1.0, "coverage": 0.0, "event_window_complete": false, "t2": false},
+      {"candidate": "native004 cell-14 historical trace", "target_bound": false, "trace_frames": 101, "declared_native_frames": 1086, "t2": false}
+    ],
+    "high_seed_canary": {"frames": 5, "transitions": 4, "end_time_s": 0.04001995862593706, "full_window": false, "t2": false}
+  },
+  "verification": {
+    "bridge_decision_synthetic_tests": "19 passed",
+    "material_contract_synthetic_tests": "24 passed",
+    "historical_hash_closure_probe": "24 passed, 1 failed",
+    "hash_closure_failure": "historical receipt has stale source byte counts; not positive T2 evidence",
+    "solver_started": false,
+    "worker_started": false,
+    "queue_started": false,
+    "native_or_privileged_workload_started": false,
+    "thresholds_changed": false,
+    "registry_changed": false,
+    "ledger_changed": false,
+    "denominator_changed": false,
+    "gate_changed": false
+  },
+  "conclusion": {
+    "f3_t2": false,
+    "f4_t2": false,
+    "macro_t2_families": [],
+    "credit": 0,
+    "safe_scientific_workload_without_new_authority": false,
+    "next_step": "Keep T2 blocked until an explicitly authorized, exact-source-bound formal overlay and acceptance receipt path exists."
+  }
+}
