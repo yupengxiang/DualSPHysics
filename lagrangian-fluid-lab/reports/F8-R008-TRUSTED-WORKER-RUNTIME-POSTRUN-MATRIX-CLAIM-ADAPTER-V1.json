@@ -1,0 +1,65 @@
+{
+  "case_claim_requirements": [
+    "exact frozen matrix case_id and deterministic synthetic attempt-case projection",
+    "same F8/R008 scope across claim, handoff, and replay projections",
+    "handoff SHA-256, attempt ID, attempt case ID, and nonce exact equality",
+    "trusted handoff issuer and worker/runtime subject projection exact equality",
+    "replay ledger/entry identity, generation pair, consumed epoch, and consumption ID exact equality"
+  ],
+  "case_claim_schema": "core.cfd.f8.r008.synthetic_postrun_case_claim.v1",
+  "contract_schema": "core.cfd.f8.r008_trusted_worker_runtime_postrun_matrix_claim_adapter.v1",
+  "delegated_verifiers": {
+    "update_308": {
+      "contract": "core.cfd.f8.r008_trusted_worker_runtime_handoff_contract.v1",
+      "delegated_by": "UPDATE-309 replay verifier",
+      "field_validation_reimplemented": false
+    },
+    "update_309": {
+      "contract": "core.cfd.f8.r008_trusted_worker_runtime_replay_ledger_binding_contract.v1",
+      "field_validation_reimplemented": false,
+      "used_for": "one in-memory synthetic replay transition per frozen case"
+    }
+  },
+  "matrix_contract": {
+    "case_count": 15,
+    "case_ids_source": "frozen R008 matrix-v5 case IDs only",
+    "missing_or_extra_rows": "reject",
+    "postrun_case_worker_called": false,
+    "postrun_matrix_worker_called": false,
+    "production_bundle_read": false,
+    "required_input": "exactly 15 unique in-memory case fixture rows"
+  },
+  "matrix_rejection_rules": [
+    "reject missing, extra, or duplicate frozen case rows",
+    "reject cross-case handoff digest, attempt, nonce, or replay consumption reuse",
+    "reject cross-case replay ledger/entry or generation-transition reuse",
+    "reject claim digest, nonce, scope, issuer/subject, or generation mismatch",
+    "reject any delegated UPDATE-308/309 result that is not synthetic and non-authorizing"
+  ],
+  "non_authorizing_boundary": {
+    "T1_numerical": false,
+    "capability_minted": false,
+    "diagnostic_only": true,
+    "execution_authority": false,
+    "formal": false,
+    "formal_eligible": false,
+    "gate_mutation": 0,
+    "qualification_credit": 0,
+    "readiness_pass": false,
+    "real_ledger_mutation": 0,
+    "registry_mutation": 0
+  },
+  "prohibited_operations": [
+    "postrun_case_worker_invocation",
+    "postrun_matrix_worker_invocation",
+    "production_bundle_read",
+    "production_ledger_read_or_write",
+    "registry_or_gate_mutation",
+    "solver_or_native_execution",
+    "worker_gpu_or_queue"
+  ],
+  "record_id": "f8-r008-trusted-worker-runtime-postrun-matrix-claim-report-v1",
+  "schema": "core.cfd.f8.r008_trusted_worker_runtime_postrun_matrix_claim_report.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "synthetic_only_non_authorizing_postrun_matrix_claim_binding_design"
+}
