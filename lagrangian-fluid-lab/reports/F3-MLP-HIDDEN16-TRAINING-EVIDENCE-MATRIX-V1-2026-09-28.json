@@ -1,0 +1,800 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "authorization": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "formal": false,
+    "formal_eligible": false,
+    "qualification": false,
+    "qualification_credit": 0
+  },
+  "checks": [
+    {
+      "check": "exact_seed_set",
+      "expected": [
+        17,
+        29,
+        43
+      ],
+      "observed": [
+        17,
+        29,
+        43
+      ],
+      "passed": true,
+      "reason": "training receipts must contain exactly seeds 17, 29, and 43"
+    },
+    {
+      "check": "exact_source_seed_set",
+      "expected": [
+        17,
+        29,
+        43
+      ],
+      "observed": [
+        17,
+        29,
+        43
+      ],
+      "passed": true,
+      "reason": "training source metadata must contain exactly seeds 17, 29, and 43"
+    },
+    {
+      "check": "reference_training_matrix_schema",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "independent MLP hidden16 training matrix identity is valid"
+    },
+    {
+      "check": "training_source_metadata",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "all training source references are complete bounded JSON metadata"
+    },
+    {
+      "check": "reference_source_metadata",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "reference source is complete bounded JSON metadata"
+    },
+    {
+      "check": "common_config",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "all three receipts share one MLP hidden16 protocol configuration"
+    },
+    {
+      "check": "common_manifest_identity",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "all three receipts bind one manifest identity"
+    },
+    {
+      "check": "checkpoint_path_sha_unique",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "declared checkpoint path/SHA pairs are distinct per seed"
+    }
+  ],
+  "credit": 0,
+  "diagnostic_only": true,
+  "errors": [],
+  "expected_contract": {
+    "checkpoint_content_opened": false,
+    "evidence_status": "complete",
+    "hdf5_content_opened": false,
+    "hidden": 16,
+    "manifest_identity_bound": true,
+    "model_kind": "mlp",
+    "normalization_transitions": 16,
+    "parameter_count": 1574,
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "shared_config": {
+      "centers_per_update": 256,
+      "checkpoint_every": 500,
+      "gradient_clipping": null,
+      "hidden": 16,
+      "history_states": 1,
+      "initialization": "core.paired_initialization.common_encoder_head.v1",
+      "learning_rate": 0.001,
+      "log_every": 100,
+      "manifest_formal_release": false,
+      "max_neighbors": 192,
+      "model_kind": "mlp",
+      "normalization_source_split": "train",
+      "optimizer": "Adam",
+      "radius_over_h": 2.0,
+      "target_normalization": "raw_dual_increment_train_shared",
+      "updates": 500,
+      "validation_case_count": 4,
+      "validation_centers": 256,
+      "validation_family_counts": {
+        "F3": 4
+      },
+      "validation_formal_eligible": false,
+      "validation_transition_count": 4
+    },
+    "updates": 500
+  },
+  "fail_closed": false,
+  "formal": false,
+  "formal_eligible": false,
+  "formal_training_runs_counted": 0,
+  "formal_training_runs_expected": 9,
+  "input_boundary": {
+    "bounded_json_only": true,
+    "case_hdf5_opened": false,
+    "checkpoint_content_opened": false,
+    "checkpoint_opened": false,
+    "gpu_started": false,
+    "manifest_opened": false,
+    "max_json_bytes": 1048576,
+    "progress_opened": false,
+    "solver_started": false,
+    "trajectory_hdf5_opened": false
+  },
+  "observed_at_utc": "2026-09-28T00:00:00Z",
+  "qualification": false,
+  "qualification_credit": 0,
+  "reference_training_matrix": {
+    "opened": true,
+    "schema": "core.f3.mlp.hidden16.training_matrix.v1",
+    "source": {
+      "bytes": 4127,
+      "exists": true,
+      "opened": true,
+      "path": "reports/F3-MLP-HIDDEN16-SEEDS17-29-43-TRAINING-2026-09-28.json",
+      "schema": "core.f3.mlp.hidden16.training_matrix.v1",
+      "sha256": "ee59d5d1588fba606c4273748d1283fe8f0bbc1ea3cc99b65a519782e5d1a2ae"
+    }
+  },
+  "report_id": "f3-mlp-hidden16-training-evidence-matrix-v1",
+  "runs": [
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "checkpoint": {
+          "path": "/tmp/f3-mlp500-hidden16-seed17-20260928-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "8cd8304c2b8ebda145ec99b1faf1623a0fb222d582eaaabfa7cf00600fb9ceac",
+          "update": 500
+        },
+        "config_identity_sha256": "c3cc151f4dbe3d24285dcd4a6fa3b68dd8f49c6b05da04ea0f5a1ff75f746355",
+        "evidence_status": "complete",
+        "formal_eligible": false,
+        "hidden": 16,
+        "initialization": {
+          "parameter_count": 1574,
+          "parameter_digest": "ad6043377d15dcbd7d3d22c4f4c1a07549aa392db165dffca7039f9aee2f147c",
+          "schema": "core.training.initialization_evidence.v1",
+          "status": "captured"
+        },
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model_kind": "mlp",
+        "normalization": {
+          "available_transition_count": 13360,
+          "requested_maximum_transitions": 16,
+          "schema": "core.training.normalization_evidence.v1",
+          "selected_case_ids": [
+            "F3_DEV_06_a0p940625",
+            "F3_DEV_07_a0p946875",
+            "F3_DEV_09_a0p959375",
+            "F3_DEV_10_a0p965625",
+            "F3_DEV_11_a0p971875",
+            "F3_DEV_12_a0p978125",
+            "F3_DEV_14_a0p990625",
+            "F3_DEV_15_a0p996875",
+            "F3_DEV_16_a1p003125",
+            "F3_DEV_17_a1p009375",
+            "F3_DEV_19_a1p021875",
+            "F3_DEV_20_a1p028125",
+            "F3_DEV_21_a1p034375",
+            "F3_DEV_22_a1p040625",
+            "F3_DEV_24_a1p053125",
+            "F3_DEV_25_a1p059375"
+          ],
+          "selected_transition_bindings": [
+            {
+              "case_id": "F3_DEV_06_a0p940625",
+              "frame": 0
+            },
+            {
+              "case_id": "F3_DEV_07_a0p946875",
+              "frame": 56
+            },
+            {
+              "case_id": "F3_DEV_09_a0p959375",
+              "frame": 111
+            },
+            {
+              "case_id": "F3_DEV_10_a0p965625",
+              "frame": 167
+            },
+            {
+              "case_id": "F3_DEV_11_a0p971875",
+              "frame": 222
+            },
+            {
+              "case_id": "F3_DEV_12_a0p978125",
+              "frame": 278
+            },
+            {
+              "case_id": "F3_DEV_14_a0p990625",
+              "frame": 334
+            },
+            {
+              "case_id": "F3_DEV_15_a0p996875",
+              "frame": 389
+            },
+            {
+              "case_id": "F3_DEV_16_a1p003125",
+              "frame": 445
+            },
+            {
+              "case_id": "F3_DEV_17_a1p009375",
+              "frame": 500
+            },
+            {
+              "case_id": "F3_DEV_19_a1p021875",
+              "frame": 556
+            },
+            {
+              "case_id": "F3_DEV_20_a1p028125",
+              "frame": 612
+            },
+            {
+              "case_id": "F3_DEV_21_a1p034375",
+              "frame": 667
+            },
+            {
+              "case_id": "F3_DEV_22_a1p040625",
+              "frame": 723
+            },
+            {
+              "case_id": "F3_DEV_24_a1p053125",
+              "frame": 778
+            },
+            {
+              "case_id": "F3_DEV_25_a1p059375",
+              "frame": 834
+            }
+          ],
+          "selected_transition_count": 16,
+          "selected_transition_counts": {
+            "F3_DEV_06_a0p940625": 1,
+            "F3_DEV_07_a0p946875": 1,
+            "F3_DEV_09_a0p959375": 1,
+            "F3_DEV_10_a0p965625": 1,
+            "F3_DEV_11_a0p971875": 1,
+            "F3_DEV_12_a0p978125": 1,
+            "F3_DEV_14_a0p990625": 1,
+            "F3_DEV_15_a0p996875": 1,
+            "F3_DEV_16_a1p003125": 1,
+            "F3_DEV_17_a1p009375": 1,
+            "F3_DEV_19_a1p021875": 1,
+            "F3_DEV_20_a1p028125": 1,
+            "F3_DEV_21_a1p034375": 1,
+            "F3_DEV_22_a1p040625": 1,
+            "F3_DEV_24_a1p053125": 1,
+            "F3_DEV_25_a1p059375": 1
+          },
+          "selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "selection_seed": 17,
+          "source_split": "train",
+          "target_reference": "raw_dual_increment_train_shared",
+          "train_case_ids": [
+            "F3_DEV_06_a0p940625",
+            "F3_DEV_07_a0p946875",
+            "F3_DEV_09_a0p959375",
+            "F3_DEV_10_a0p965625",
+            "F3_DEV_11_a0p971875",
+            "F3_DEV_12_a0p978125",
+            "F3_DEV_14_a0p990625",
+            "F3_DEV_15_a0p996875",
+            "F3_DEV_16_a1p003125",
+            "F3_DEV_17_a1p009375",
+            "F3_DEV_19_a1p021875",
+            "F3_DEV_20_a1p028125",
+            "F3_DEV_21_a1p034375",
+            "F3_DEV_22_a1p040625",
+            "F3_DEV_24_a1p053125",
+            "F3_DEV_25_a1p059375"
+          ]
+        },
+        "normalization_identity_sha256": "f41dde62eec50c7353cf3863add3576fb4e6c2a2551d7d6a7e61fa1e2e3af61c",
+        "parameter_count": 1574,
+        "qualification_credit": 0,
+        "run_id": "f3-mlp500-hidden16-seed17-20260928",
+        "schema": "core.training.v1",
+        "seed": 17,
+        "shared_config": {
+          "centers_per_update": 256,
+          "checkpoint_every": 500,
+          "gradient_clipping": null,
+          "hidden": 16,
+          "history_states": 1,
+          "initialization": "core.paired_initialization.common_encoder_head.v1",
+          "learning_rate": 0.001,
+          "log_every": 100,
+          "manifest_formal_release": false,
+          "max_neighbors": 192,
+          "model_kind": "mlp",
+          "normalization_source_split": "train",
+          "optimizer": "Adam",
+          "radius_over_h": 2.0,
+          "target_normalization": "raw_dual_increment_train_shared",
+          "updates": 500,
+          "validation_case_count": 4,
+          "validation_centers": 256,
+          "validation_family_counts": {
+            "F3": 4
+          },
+          "validation_formal_eligible": false,
+          "validation_transition_count": 4
+        },
+        "updates": 500
+      },
+      "seed": 17,
+      "source": {
+        "bytes": 9985,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-mlp500-hidden16-seed17-20260928-training.json",
+        "schema": "core.training.v1",
+        "sha256": "be78c0286d8d6a681bb6323c6887f3351710947e13aab8b98ae3b4aadaffd245"
+      },
+      "status": "bound_complete"
+    },
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "checkpoint": {
+          "path": "/tmp/f3-mlp500-hidden16-seed29-20260928-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "2be97da01924b0998b3605018da368cb9dca08b2dc0c638dfede77e329510e31",
+          "update": 500
+        },
+        "config_identity_sha256": "53de89cc1a7e24a4827f1305f83098e3cc4d4cd741cf8a931d2e8dec29c4d056",
+        "evidence_status": "complete",
+        "formal_eligible": false,
+        "hidden": 16,
+        "initialization": {
+          "parameter_count": 1574,
+          "parameter_digest": "45a5c8ee7bc4271ba4a9137f20800a34b63246855d5b704c7d6ef31b4af3b256",
+          "schema": "core.training.initialization_evidence.v1",
+          "status": "captured"
+        },
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model_kind": "mlp",
+        "normalization": {
+          "available_transition_count": 13360,
+          "requested_maximum_transitions": 16,
+          "schema": "core.training.normalization_evidence.v1",
+          "selected_case_ids": [
+            "F3_DEV_06_a0p940625",
+            "F3_DEV_07_a0p946875",
+            "F3_DEV_09_a0p959375",
+            "F3_DEV_10_a0p965625",
+            "F3_DEV_11_a0p971875",
+            "F3_DEV_12_a0p978125",
+            "F3_DEV_14_a0p990625",
+            "F3_DEV_15_a0p996875",
+            "F3_DEV_16_a1p003125",
+            "F3_DEV_17_a1p009375",
+            "F3_DEV_19_a1p021875",
+            "F3_DEV_20_a1p028125",
+            "F3_DEV_21_a1p034375",
+            "F3_DEV_22_a1p040625",
+            "F3_DEV_24_a1p053125",
+            "F3_DEV_25_a1p059375"
+          ],
+          "selected_transition_bindings": [
+            {
+              "case_id": "F3_DEV_06_a0p940625",
+              "frame": 0
+            },
+            {
+              "case_id": "F3_DEV_07_a0p946875",
+              "frame": 56
+            },
+            {
+              "case_id": "F3_DEV_09_a0p959375",
+              "frame": 111
+            },
+            {
+              "case_id": "F3_DEV_10_a0p965625",
+              "frame": 167
+            },
+            {
+              "case_id": "F3_DEV_11_a0p971875",
+              "frame": 222
+            },
+            {
+              "case_id": "F3_DEV_12_a0p978125",
+              "frame": 278
+            },
+            {
+              "case_id": "F3_DEV_14_a0p990625",
+              "frame": 334
+            },
+            {
+              "case_id": "F3_DEV_15_a0p996875",
+              "frame": 389
+            },
+            {
+              "case_id": "F3_DEV_16_a1p003125",
+              "frame": 445
+            },
+            {
+              "case_id": "F3_DEV_17_a1p009375",
+              "frame": 500
+            },
+            {
+              "case_id": "F3_DEV_19_a1p021875",
+              "frame": 556
+            },
+            {
+              "case_id": "F3_DEV_20_a1p028125",
+              "frame": 612
+            },
+            {
+              "case_id": "F3_DEV_21_a1p034375",
+              "frame": 667
+            },
+            {
+              "case_id": "F3_DEV_22_a1p040625",
+              "frame": 723
+            },
+            {
+              "case_id": "F3_DEV_24_a1p053125",
+              "frame": 778
+            },
+            {
+              "case_id": "F3_DEV_25_a1p059375",
+              "frame": 834
+            }
+          ],
+          "selected_transition_count": 16,
+          "selected_transition_counts": {
+            "F3_DEV_06_a0p940625": 1,
+            "F3_DEV_07_a0p946875": 1,
+            "F3_DEV_09_a0p959375": 1,
+            "F3_DEV_10_a0p965625": 1,
+            "F3_DEV_11_a0p971875": 1,
+            "F3_DEV_12_a0p978125": 1,
+            "F3_DEV_14_a0p990625": 1,
+            "F3_DEV_15_a0p996875": 1,
+            "F3_DEV_16_a1p003125": 1,
+            "F3_DEV_17_a1p009375": 1,
+            "F3_DEV_19_a1p021875": 1,
+            "F3_DEV_20_a1p028125": 1,
+            "F3_DEV_21_a1p034375": 1,
+            "F3_DEV_22_a1p040625": 1,
+            "F3_DEV_24_a1p053125": 1,
+            "F3_DEV_25_a1p059375": 1
+          },
+          "selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "selection_seed": 29,
+          "source_split": "train",
+          "target_reference": "raw_dual_increment_train_shared",
+          "train_case_ids": [
+            "F3_DEV_06_a0p940625",
+            "F3_DEV_07_a0p946875",
+            "F3_DEV_09_a0p959375",
+            "F3_DEV_10_a0p965625",
+            "F3_DEV_11_a0p971875",
+            "F3_DEV_12_a0p978125",
+            "F3_DEV_14_a0p990625",
+            "F3_DEV_15_a0p996875",
+            "F3_DEV_16_a1p003125",
+            "F3_DEV_17_a1p009375",
+            "F3_DEV_19_a1p021875",
+            "F3_DEV_20_a1p028125",
+            "F3_DEV_21_a1p034375",
+            "F3_DEV_22_a1p040625",
+            "F3_DEV_24_a1p053125",
+            "F3_DEV_25_a1p059375"
+          ]
+        },
+        "normalization_identity_sha256": "072e54c2915dbbe319c4909e3451894d1f0e816ed0ebef4222489937ca64afff",
+        "parameter_count": 1574,
+        "qualification_credit": 0,
+        "run_id": "f3-mlp500-hidden16-seed29-20260928",
+        "schema": "core.training.v1",
+        "seed": 29,
+        "shared_config": {
+          "centers_per_update": 256,
+          "checkpoint_every": 500,
+          "gradient_clipping": null,
+          "hidden": 16,
+          "history_states": 1,
+          "initialization": "core.paired_initialization.common_encoder_head.v1",
+          "learning_rate": 0.001,
+          "log_every": 100,
+          "manifest_formal_release": false,
+          "max_neighbors": 192,
+          "model_kind": "mlp",
+          "normalization_source_split": "train",
+          "optimizer": "Adam",
+          "radius_over_h": 2.0,
+          "target_normalization": "raw_dual_increment_train_shared",
+          "updates": 500,
+          "validation_case_count": 4,
+          "validation_centers": 256,
+          "validation_family_counts": {
+            "F3": 4
+          },
+          "validation_formal_eligible": false,
+          "validation_transition_count": 4
+        },
+        "updates": 500
+      },
+      "seed": 29,
+      "source": {
+        "bytes": 10642,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-mlp500-hidden16-seed29-20260928-training.json",
+        "schema": "core.training.v1",
+        "sha256": "24533b01a751cf41be573371c434dc808603716dccea407188a4534b4dd3dbb7"
+      },
+      "status": "bound_complete"
+    },
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "checkpoint": {
+          "path": "/tmp/f3-mlp500-hidden16-seed43-20260928-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "68ba0d2c7966fa07bbd86106dceef7e1f5f00d7e4bca4aa5b1e42cb6133c0817",
+          "update": 500
+        },
+        "config_identity_sha256": "db20834f752c65c710396f0446f48fe391b54dad5517ee8b35fda21f6db731cb",
+        "evidence_status": "complete",
+        "formal_eligible": false,
+        "hidden": 16,
+        "initialization": {
+          "parameter_count": 1574,
+          "parameter_digest": "b11c0467559a6065781a1876f79be96a9feb64023a98e107c17f919b03a4edb9",
+          "schema": "core.training.initialization_evidence.v1",
+          "status": "captured"
+        },
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model_kind": "mlp",
+        "normalization": {
+          "available_transition_count": 13360,
+          "requested_maximum_transitions": 16,
+          "schema": "core.training.normalization_evidence.v1",
+          "selected_case_ids": [
+            "F3_DEV_06_a0p940625",
+            "F3_DEV_07_a0p946875",
+            "F3_DEV_09_a0p959375",
+            "F3_DEV_10_a0p965625",
+            "F3_DEV_11_a0p971875",
+            "F3_DEV_12_a0p978125",
+            "F3_DEV_14_a0p990625",
+            "F3_DEV_15_a0p996875",
+            "F3_DEV_16_a1p003125",
+            "F3_DEV_17_a1p009375",
+            "F3_DEV_19_a1p021875",
+            "F3_DEV_20_a1p028125",
+            "F3_DEV_21_a1p034375",
+            "F3_DEV_22_a1p040625",
+            "F3_DEV_24_a1p053125",
+            "F3_DEV_25_a1p059375"
+          ],
+          "selected_transition_bindings": [
+            {
+              "case_id": "F3_DEV_06_a0p940625",
+              "frame": 0
+            },
+            {
+              "case_id": "F3_DEV_07_a0p946875",
+              "frame": 56
+            },
+            {
+              "case_id": "F3_DEV_09_a0p959375",
+              "frame": 111
+            },
+            {
+              "case_id": "F3_DEV_10_a0p965625",
+              "frame": 167
+            },
+            {
+              "case_id": "F3_DEV_11_a0p971875",
+              "frame": 222
+            },
+            {
+              "case_id": "F3_DEV_12_a0p978125",
+              "frame": 278
+            },
+            {
+              "case_id": "F3_DEV_14_a0p990625",
+              "frame": 334
+            },
+            {
+              "case_id": "F3_DEV_15_a0p996875",
+              "frame": 389
+            },
+            {
+              "case_id": "F3_DEV_16_a1p003125",
+              "frame": 445
+            },
+            {
+              "case_id": "F3_DEV_17_a1p009375",
+              "frame": 500
+            },
+            {
+              "case_id": "F3_DEV_19_a1p021875",
+              "frame": 556
+            },
+            {
+              "case_id": "F3_DEV_20_a1p028125",
+              "frame": 612
+            },
+            {
+              "case_id": "F3_DEV_21_a1p034375",
+              "frame": 667
+            },
+            {
+              "case_id": "F3_DEV_22_a1p040625",
+              "frame": 723
+            },
+            {
+              "case_id": "F3_DEV_24_a1p053125",
+              "frame": 778
+            },
+            {
+              "case_id": "F3_DEV_25_a1p059375",
+              "frame": 834
+            }
+          ],
+          "selected_transition_count": 16,
+          "selected_transition_counts": {
+            "F3_DEV_06_a0p940625": 1,
+            "F3_DEV_07_a0p946875": 1,
+            "F3_DEV_09_a0p959375": 1,
+            "F3_DEV_10_a0p965625": 1,
+            "F3_DEV_11_a0p971875": 1,
+            "F3_DEV_12_a0p978125": 1,
+            "F3_DEV_14_a0p990625": 1,
+            "F3_DEV_15_a0p996875": 1,
+            "F3_DEV_16_a1p003125": 1,
+            "F3_DEV_17_a1p009375": 1,
+            "F3_DEV_19_a1p021875": 1,
+            "F3_DEV_20_a1p028125": 1,
+            "F3_DEV_21_a1p034375": 1,
+            "F3_DEV_22_a1p040625": 1,
+            "F3_DEV_24_a1p053125": 1,
+            "F3_DEV_25_a1p059375": 1
+          },
+          "selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "selection_seed": 43,
+          "source_split": "train",
+          "target_reference": "raw_dual_increment_train_shared",
+          "train_case_ids": [
+            "F3_DEV_06_a0p940625",
+            "F3_DEV_07_a0p946875",
+            "F3_DEV_09_a0p959375",
+            "F3_DEV_10_a0p965625",
+            "F3_DEV_11_a0p971875",
+            "F3_DEV_12_a0p978125",
+            "F3_DEV_14_a0p990625",
+            "F3_DEV_15_a0p996875",
+            "F3_DEV_16_a1p003125",
+            "F3_DEV_17_a1p009375",
+            "F3_DEV_19_a1p021875",
+            "F3_DEV_20_a1p028125",
+            "F3_DEV_21_a1p034375",
+            "F3_DEV_22_a1p040625",
+            "F3_DEV_24_a1p053125",
+            "F3_DEV_25_a1p059375"
+          ]
+        },
+        "normalization_identity_sha256": "62456e7bfd078f8491574a623cb68dae54c76710e433f2a3b78cf7972bf844cd",
+        "parameter_count": 1574,
+        "qualification_credit": 0,
+        "run_id": "f3-mlp500-hidden16-seed43-20260928",
+        "schema": "core.training.v1",
+        "seed": 43,
+        "shared_config": {
+          "centers_per_update": 256,
+          "checkpoint_every": 500,
+          "gradient_clipping": null,
+          "hidden": 16,
+          "history_states": 1,
+          "initialization": "core.paired_initialization.common_encoder_head.v1",
+          "learning_rate": 0.001,
+          "log_every": 100,
+          "manifest_formal_release": false,
+          "max_neighbors": 192,
+          "model_kind": "mlp",
+          "normalization_source_split": "train",
+          "optimizer": "Adam",
+          "radius_over_h": 2.0,
+          "target_normalization": "raw_dual_increment_train_shared",
+          "updates": 500,
+          "validation_case_count": 4,
+          "validation_centers": 256,
+          "validation_family_counts": {
+            "F3": 4
+          },
+          "validation_formal_eligible": false,
+          "validation_transition_count": 4
+        },
+        "updates": 500
+      },
+      "seed": 43,
+      "source": {
+        "bytes": 10642,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-mlp500-hidden16-seed43-20260928-training.json",
+        "schema": "core.training.v1",
+        "sha256": "3a4f3c6104c91ffc9eae40ff0e396d4d81b527063361c1c78e29a2b4f5070710"
+      },
+      "status": "bound_complete"
+    }
+  ],
+  "schema": "core.f3.mlp.hidden16.training_evidence_matrix.v1",
+  "scope_note": "bounded JSON receipt/schema/hash metadata only; independent MLP diagnostic and non-authorizing",
+  "shared_config": {
+    "centers_per_update": 256,
+    "checkpoint_every": 500,
+    "gradient_clipping": null,
+    "hidden": 16,
+    "history_states": 1,
+    "initialization": "core.paired_initialization.common_encoder_head.v1",
+    "learning_rate": 0.001,
+    "log_every": 100,
+    "manifest_formal_release": false,
+    "max_neighbors": 192,
+    "model_kind": "mlp",
+    "normalization_source_split": "train",
+    "optimizer": "Adam",
+    "radius_over_h": 2.0,
+    "target_normalization": "raw_dual_increment_train_shared",
+    "updates": 500,
+    "validation_case_count": 4,
+    "validation_centers": 256,
+    "validation_family_counts": {
+      "F3": 4
+    },
+    "validation_formal_eligible": false,
+    "validation_transition_count": 4
+  },
+  "side_effects": {
+    "checkpoint_opened": false,
+    "completion_mutation": false,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "hdf5_opened": false,
+    "ledger_mutation": 0,
+    "manifest_opened": false,
+    "progress_opened": false,
+    "registry_mutation": 0,
+    "runtime_restarted": false,
+    "runtime_started": false,
+    "runtime_stopped": false,
+    "trajectory_opened": false
+  },
+  "source_bound": true,
+  "status": "training_evidence_bound_diagnostic_only",
+  "t1_case_runs_counted": 0,
+  "t2_macro_families_counted": 0,
+  "training_evidence_counted_as_formal_runs": 0
+}
