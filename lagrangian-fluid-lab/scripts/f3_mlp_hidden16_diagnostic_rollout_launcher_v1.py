@@ -69,6 +69,56 @@ PROCESS_PROOF_FILENAME = (
     "F3-MLP-HIDDEN16-SEED{seed}-PROCESS-EXIT-PROOF-V1-2026-09-28.json"
 )
 
+VALIDATOR_KEYS = frozenset(
+    {
+        "schema",
+        "passed",
+        "fail_closed",
+        "diagnostic_only",
+        "synthetic_only",
+        "production_artifacts_touched",
+        "qualification_credit",
+        "case_id",
+        "evaluation_json",
+        "trajectory_hdf5",
+        "expected_transitions",
+        "frames_executed",
+        "complete",
+        "incomplete",
+        "failure_category",
+        "checks",
+        "row_fields_checked",
+    }
+)
+VALIDATOR_CHECK_KEYS = frozenset(
+    {
+        "case_binding",
+        "shape",
+        "time",
+        "valid",
+        "future_state_inputs",
+        "completion_semantics",
+        "trajectory_frames",
+        "trajectory_transitions",
+        "executed_frame_count",
+        "tail_frame_count",
+        "particle_count",
+        "time_start",
+        "time_end",
+    }
+)
+FORBIDDEN_AUTHORITY_ALIASES = frozenset(
+    {
+        "formal",
+        "formal_eligible",
+        "qualification",
+        "credit",
+        "T1_numerical",
+        "T2_macro",
+        "T2_path",
+    }
+)
+
 ZERO_CREDIT_FIELDS = {
     "formal": False,
     "formal_eligible": False,
@@ -414,6 +464,78 @@ def _bounded_json(path: Path, root: Path, name: str, *, allow_tmp: bool = False)
     return payload, hashlib.sha256(raw).hexdigest(), len(raw)
 
 
+def _validate_completed_validator_receipt(
+    payload: Mapping[str, Any],
+    plan: "RolloutPlan",
+    name: str,
+) -> None:
+    """Check the independent validator's bounded terminal receipt.
+
+    This is intentionally a receipt-only check.  The launcher never opens the
+    evaluation JSON or trajectory HDF5, but it must establish the validator's
+    completion contract before granting a sidecar producer capability.
+    """
+
+    extra = sorted(set(payload) - VALIDATOR_KEYS)
+    if extra:
+        _fail(f"{name} contains unknown fields: {extra}")
+    aliases = sorted(FORBIDDEN_AUTHORITY_ALIASES.intersection(payload))
+    if aliases:
+        _fail(f"{name} contains forbidden authority aliases: {aliases}")
+    _exact(payload, "schema", VALIDATOR_SCHEMA, name)
+    for key, expected in (
+        ("passed", True),
+        ("fail_closed", False),
+        ("diagnostic_only", True),
+        ("synthetic_only", False),
+        ("production_artifacts_touched", False),
+        ("qualification_credit", 0),
+        ("case_id", CASE_ID),
+        ("expected_transitions", TRANSITIONS),
+        ("frames_executed", TRANSITIONS),
+        ("complete", True),
+        ("incomplete", False),
+        ("failure_category", None),
+    ):
+        _exact(payload, key, expected, name)
+    evaluation_path = _absolute_text(
+        _string(payload.get("evaluation_json"), f"{name}.evaluation_json"),
+        f"{name}.evaluation_json",
+    )
+    trajectory_path = _absolute_text(
+        _string(payload.get("trajectory_hdf5"), f"{name}.trajectory_hdf5"),
+        f"{name}.trajectory_hdf5",
+    )
+    if evaluation_path != plan.outputs["evaluation"]:
+        _fail(f"{name}.evaluation_json drifts from the fresh namespace")
+    if trajectory_path != plan.outputs["trajectory"]:
+        _fail(f"{name}.trajectory_hdf5 drifts from the fresh namespace")
+    checks = _mapping(payload.get("checks"), f"{name}.checks")
+    check_extra = sorted(set(checks) - VALIDATOR_CHECK_KEYS)
+    if check_extra:
+        _fail(f"{name}.checks contains unknown fields: {check_extra}")
+    for key, expected in (
+        ("case_binding", True),
+        ("shape", True),
+        ("time", True),
+        ("valid", True),
+        ("future_state_inputs", True),
+        ("completion_semantics", True),
+        ("trajectory_frames", FRAMES),
+        ("trajectory_transitions", TRANSITIONS),
+        ("executed_frame_count", FRAMES),
+        ("tail_frame_count", 0),
+    ):
+        _exact(checks, key, expected, f"{name}.checks")
+    rows = payload.get("row_fields_checked")
+    if (
+        not isinstance(rows, list)
+        or not rows
+        or any(not isinstance(item, str) or not item for item in rows)
+    ):
+        _fail(f"{name}.row_fields_checked must be a non-empty string list")
+
+
 def _artifact(value: Any, name: str, *, suffix: str | None = None) -> dict[str, Any]:
     item = _mapping(value, name)
     allowed = {"path", "sha256", "bytes"}
@@ -615,6 +737,20 @@ def _validate_output_paths(paths: Mapping[str, Path], root: Path) -> None:
         else:
             _absolute_text(str(path), f"output.{name}")
         _collision(path, f"output.{name}")
+
+
+def _validate_plan_output_contract(plan: "RolloutPlan") -> None:
+    """Reject a mutable-plan output map that no longer matches its namespace."""
+
+    expected = _output_paths(plan.namespace, plan.root, plan.seed)
+    if set(plan.outputs) != set(expected):
+        _fail("rollout output map has drifted from the canonical namespace")
+    for key, expected_path in expected.items():
+        actual_path = plan.outputs.get(key)
+        if not isinstance(actual_path, Path) or actual_path != expected_path:
+            _fail(f"output.{key} path drifted from the canonical namespace")
+    if plan.proof_output != expected["process_proof"]:
+        _fail("process proof path drifted from the fixed report destination")
 
 
 @dataclass(frozen=True)
@@ -856,6 +992,31 @@ def _expected_environment_bytes(environment: Mapping[str, str]) -> frozenset[byt
     return frozenset(entries)
 
 
+def _wait_for_exact_process_cmdline(
+    pid: int,
+    expected: bytes,
+    expected_starttime: int,
+    name: str,
+) -> None:
+    """Boundedly wait through the kernel exec observation boundary.
+
+    ``Popen`` can return while procfs is still exposing the child's transient
+    exec image.  Retry only while the PID's starttime remains identical; a
+    different command, PID reuse, or timeout remains fail-closed.
+    """
+
+    deadline = time.monotonic() + 2.0
+    while True:
+        actual = _read_process_metadata(pid, "cmdline", name)
+        if actual == expected:
+            return
+        if _proc_starttime_ticks(pid) != expected_starttime:
+            _fail(f"{name} PID identity changed while binding cmdline")
+        if time.monotonic() >= deadline:
+            _fail(f"{name} cmdline differs from the exact stable command")
+        time.sleep(0.001)
+
+
 def _validate_live_process_binding(
     process: Any,
     *,
@@ -895,9 +1056,12 @@ def _validate_live_process_binding(
         _fail("returned Popen PID is not the same live process observed at launch")
 
     expected_cmdline = b"\x00".join(os.fsencode(argument) for argument in expected_args) + b"\x00"
-    actual_cmdline = _read_process_metadata(evaluator_pid, "cmdline", "evaluator cmdline")
-    if actual_cmdline != expected_cmdline:
-        _fail("live evaluator cmdline differs from the exact stable command")
+    _wait_for_exact_process_cmdline(
+        evaluator_pid,
+        expected_cmdline,
+        int(expected_starttime),
+        "live evaluator",
+    )
 
     try:
         actual_cwd_info = os.stat(f"/proc/{evaluator_pid}/cwd")
@@ -1297,6 +1461,158 @@ def _validate_execution_record(plan: RolloutPlan, value: Any) -> Any:
     return value
 
 
+def _define_artifact_identity_producer_capability() -> tuple[type[Any], Callable[..., Any], Callable[[Any], None]]:
+    """Create an opaque, one-shot post-terminal producer capability.
+
+    The callback receives only canonical paths and run identity.  It cannot
+    receive the plan, Popen object, execution record, or a caller-supplied
+    artifact mapping.  The launcher still reloads the canonical sidecar and
+    applies all identity/zero-credit checks after the callback returns.
+    """
+
+    seal = object()
+
+    class ArtifactIdentityProducerCapability:
+        __slots__ = (
+            "_seal", "_root", "_seed", "_nonce", "_checkpoint",
+            "_evaluation_json", "_trajectory_hdf5", "_validator_receipt",
+            "_sidecar", "_consumed",
+        )
+
+        def __init__(self, *, _seal: object, **values: Any) -> None:
+            if _seal is not seal:
+                raise TypeError("artifact producer capabilities can only be minted by execute_plan")
+            self._seal = _seal
+            for key in self.__slots__:
+                if key == "_seal":
+                    continue
+                if key not in values:
+                    raise TypeError(f"missing artifact producer capability field: {key}")
+                setattr(self, key, values[key])
+
+        def _assert_live(self) -> None:
+            if self._consumed:
+                _fail("artifact identity producer capability has already been consumed")
+
+        @property
+        def root(self) -> Path:
+            self._assert_live()
+            return self._root
+
+        @property
+        def seed(self) -> int:
+            self._assert_live()
+            return self._seed
+
+        @property
+        def nonce(self) -> str:
+            self._assert_live()
+            return self._nonce
+
+        @property
+        def checkpoint(self) -> Path:
+            self._assert_live()
+            return self._checkpoint
+
+        @property
+        def evaluation_json(self) -> Path:
+            self._assert_live()
+            return self._evaluation_json
+
+        @property
+        def trajectory_hdf5(self) -> Path:
+            self._assert_live()
+            return self._trajectory_hdf5
+
+        @property
+        def validator_receipt(self) -> Path:
+            self._assert_live()
+            return self._validator_receipt
+
+        @property
+        def sidecar(self) -> Path:
+            self._assert_live()
+            return self._sidecar
+
+    def mint(plan: RolloutPlan) -> Any:
+        return ArtifactIdentityProducerCapability(
+            _seal=seal,
+            _root=plan.root,
+            _seed=plan.seed,
+            _nonce=plan.nonce,
+            _checkpoint=Path(plan.checkpoint["path"]),
+            _evaluation_json=plan.outputs["evaluation"],
+            _trajectory_hdf5=plan.outputs["trajectory"],
+            _validator_receipt=plan.outputs["validator"],
+            _sidecar=plan.outputs["artifact_identity"],
+            _consumed=False,
+        )
+
+    def close(value: Any) -> None:
+        if type(value) is not ArtifactIdentityProducerCapability or getattr(value, "_seal", None) is not seal:
+            _fail("invalid artifact identity producer capability")
+        if value._consumed:
+            _fail("artifact identity producer capability has already been consumed")
+        value._consumed = True
+
+    return ArtifactIdentityProducerCapability, mint, close
+
+
+_ArtifactIdentityProducerCapability, _mint_artifact_identity_capability, _close_artifact_identity_capability = _define_artifact_identity_producer_capability()
+
+
+def _validate_post_terminal_artifacts(plan: RolloutPlan) -> dict[str, dict[str, int]]:
+    """Establish terminal artifact readiness before invoking the producer."""
+
+    _validate_plan_output_contract(plan)
+    identities: dict[str, dict[str, int]] = {}
+    for key, suffix in (
+        ("evaluation", "-evaluation.json"),
+        ("trajectory", "-trajectory.h5"),
+        ("validator", "-hdf5-validation.json"),
+    ):
+        path = plan.outputs[key]
+        if not str(path).endswith(suffix):
+            _fail(f"post-terminal {key} path is not canonical")
+        info = _regular_single_link(path, f"post-terminal {key}")
+        assert info is not None
+        if info.st_size < 1:
+            _fail(f"post-terminal {key} is empty")
+        identities[key] = _file_identity(info)
+
+    validator_payload, _validator_sha, _validator_bytes = _bounded_json(
+        plan.outputs["validator"],
+        plan.root,
+        "post-terminal validator",
+        allow_tmp=True,
+    )
+    _validate_completed_validator_receipt(
+        validator_payload,
+        plan,
+        "post-terminal validator",
+    )
+
+    sidecar = plan.outputs["artifact_identity"]
+    _assert_no_symlink_components(sidecar, "post-terminal artifact_identity", allow_missing_leaf=True)
+    if os.path.lexists(sidecar):
+        _fail("artifact_identity sidecar already exists before its execute-only producer")
+    return identities
+
+
+def _revalidate_post_terminal_artifacts(
+    plan: RolloutPlan,
+    expected: Mapping[str, Mapping[str, int]],
+) -> None:
+    """Ensure the producer did not mutate the three completed artifacts."""
+
+    _validate_plan_output_contract(plan)
+    for key in ("evaluation", "trajectory", "validator"):
+        info = _regular_single_link(plan.outputs[key], f"post-terminal {key} after producer")
+        assert info is not None
+        if _file_identity(info) != dict(expected[key]):
+            _fail(f"post-terminal {key} identity drifted while producer ran")
+
+
 def _proof_without_digest(proof: Mapping[str, Any]) -> dict[str, Any]:
     value = dict(proof)
     value.pop("exit_proof_sha256", None)
@@ -1389,14 +1705,33 @@ def execute_plan(
     plan: RolloutPlan,
     *,
     artifact_identity_path: Path | str | None = None,
+    artifact_identity_producer: Callable[[Any], Any] | None = None,
+    artifact_identity_builder: Callable[[Any], Any] | None = None,
     popen_factory: Callable[..., Any] = subprocess.Popen,
     launcher_pid: int | None = None,
 ) -> dict[str, Any]:
-    """Opt-in execution path; never kills/restarts and only proofs natural exit."""
+    """Opt-in execution path; never kills/restarts and only proofs natural exit.
+
+    A successful execution requires an explicit post-terminal producer.  The
+    producer is never defaulted or called during dry-run; it receives an
+    execute-only capability only after the real child has been verified,
+    waited, and its evaluation/trajectory/validator terminal contract has
+    passed.  Its return value is not evidence: the canonical sidecar must be
+    written and is loaded and revalidated below.
+    """
+
+    if artifact_identity_producer is not None and artifact_identity_builder is not None:
+        _fail("artifact identity producer and builder capabilities are mutually exclusive")
+    producer = artifact_identity_producer if artifact_identity_producer is not None else artifact_identity_builder
+    if producer is None:
+        _fail("explicit artifact_identity_producer capability is required for execute")
+    if not callable(producer):
+        _fail("artifact_identity_producer capability must be callable")
 
     # Re-check all fresh targets and all four execution inputs immediately
     # before Popen.  The input files are then passed through inherited stable
     # FDs, so a post-check pathname replacement cannot change what executes.
+    _validate_plan_output_contract(plan)
     _validate_output_paths(plan.outputs, plan.root)
     actual_launcher_pid = os.getpid()
     if launcher_pid is not None and launcher_pid != actual_launcher_pid:
@@ -1559,6 +1894,25 @@ def execute_plan(
         _runtime_binding_sha256=verified_runtime_binding_sha256,
         _consumed=False,
     )
+    # Re-validate the sealed lifecycle before granting any post-terminal
+    # capability.  This is deliberately separate from proof construction so a
+    # producer can never turn a partial/fake process record into evidence.
+    _validate_execution_record(plan, execution_record)
+    terminal_artifact_identities = _validate_post_terminal_artifacts(plan)
+    capability = _mint_artifact_identity_capability(plan)
+    try:
+        try:
+            producer(capability)
+        except LauncherError:
+            raise
+        except Exception as error:
+            _fail(
+                "artifact_identity_producer failed closed: "
+                f"{type(error).__name__}: {error}"
+            )
+    finally:
+        _close_artifact_identity_capability(capability)
+    _revalidate_post_terminal_artifacts(plan, terminal_artifact_identities)
     identity = load_artifact_identity(plan, artifact_identity_path)
     proof = build_process_exit_proof(
         plan,

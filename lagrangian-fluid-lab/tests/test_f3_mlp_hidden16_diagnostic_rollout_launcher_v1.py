@@ -11,6 +11,8 @@ import sys
 
 import pytest
 
+from scripts import f3_mlp_hidden16_artifact_identity_sidecar_v1 as sidecar
+
 
 SCRIPT = (
     Path(__file__).resolve().parents[1]
@@ -56,8 +58,7 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
     (root / "campaigns" / "core-v1").mkdir(parents=True)
     (root / ".venv" / "bin" / "python").write_text("placeholder", encoding="utf-8")
     (root / "scripts" / "core_learning.py").write_text(
-        """import hashlib
-import json
+        """import json
 import re
 import sys
 import time
@@ -70,44 +71,50 @@ def argument(flag: str) -> Path:
 
 evaluation = argument("--output")
 trajectory = argument("--trajectory-output")
+data_root = argument("--data-root")
 prefix = str(evaluation)[:-len("-evaluation.json")]
 validator = Path(prefix + "-hdf5-validation.json")
-identity_path = Path(prefix + "-artifact-identity.json")
 checkpoint = argument("--checkpoint").resolve()
-seed = int(re.search(r"seed(17|29|43)", checkpoint.name).group(1))
 evaluation.write_bytes(b"evaluation")
 trajectory.write_bytes(b"trajectory")
-validator.write_bytes(b"validator")
-identity = {
-    "schema": f"core.f3.mlp.hidden16.seed{seed}.evaluator_artifact_identity.v1",
-    "status": "completed_diagnostic",
-    "seed": seed,
-    "run_id": f"f3-mlp500-hidden16-seed{seed}-20260928",
-    "namespace": prefix,
-    "namespace_nonce": prefix.rsplit("nonce", 1)[1],
-    "manifest_sha256": "2" * 64,
-    "training_manifest_sha256": "1" * 64,
-    "training_receipt_sha256": hashlib.sha256(f"training-{seed}".encode()).hexdigest(),
+seed = int(re.search(r"seed(17|29|43)", checkpoint.name).group(1))
+validator_payload = {
+    "schema": "core.f3.full_rollout_receipt_hdf5_validation.v1",
+    "passed": True,
+    "fail_closed": False,
     "diagnostic_only": True,
-    "formal": False,
-    "formal_eligible": False,
-    "T1_numerical": False,
-    "T2_macro": False,
-    "T2_path": False,
-    "qualification": False,
+    "synthetic_only": False,
+    "production_artifacts_touched": False,
     "qualification_credit": 0,
-    "credit": 0,
-    "checkpoint": {
-        "path": str(checkpoint),
-        "sha256": hashlib.sha256(f"checkpoint-{seed}".encode()).hexdigest(),
-        "bytes": checkpoint.stat().st_size,
+    "case_id": "F3_DEV_00_a0p903125",
+    "evaluation_json": str(evaluation),
+    "trajectory_hdf5": str(trajectory),
+    "expected_transitions": 835,
+    "frames_executed": 835,
+    "complete": True,
+    "incomplete": False,
+    "failure_category": None,
+    "checks": {
+        "case_binding": True,
+        "shape": True,
+        "time": True,
+        "valid": True,
+        "future_state_inputs": True,
+        "completion_semantics": True,
+        "trajectory_frames": 836,
+        "trajectory_transitions": 835,
+        "executed_frame_count": 836,
+        "tail_frame_count": 0,
     },
-    "evaluation": {"path": str(evaluation), "sha256": "3" * 64, "bytes": evaluation.stat().st_size},
-    "trajectory": {"path": str(trajectory), "sha256": "4" * 64, "bytes": trajectory.stat().st_size},
-    "validator": {"path": str(validator), "sha256": "5" * 64, "bytes": validator.stat().st_size},
+    "row_fields_checked": ["case_id", "frames_executed"],
 }
-identity_path.write_text(json.dumps(identity, sort_keys=True), encoding="utf-8")
-time.sleep(2.0)
+validator_incomplete = (data_root / "validator-incomplete").exists()
+if validator_incomplete:
+    validator_payload["complete"] = False
+    validator_payload["incomplete"] = True
+    validator_payload["passed"] = False
+validator.write_text(json.dumps(validator_payload, sort_keys=True), encoding="utf-8")
+time.sleep(5.0)
 """,
         encoding="utf-8",
     )
@@ -141,6 +148,7 @@ time.sleep(2.0)
                     "updates": 500,
                     "run_id": launcher._expected_run_id(seed),
                     "evidence_status": "complete",
+                    "formal_eligible": False,
                     "manifest_sha256": "1" * 64,
                     "checkpoint": checkpoint,
                 },
@@ -436,12 +444,21 @@ def test_process_exit_proof_rejects_unsealed_record(tmp_path: Path) -> None:
 def test_artifact_identity_pseudo_authority_field_is_rejected_on_execute(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     _install_real_fixture_interpreter(fixture)
-    core_path = fixture["root"] / "scripts" / "core_learning.py"
-    core_path.write_text(core_path.read_text(encoding="utf-8").replace('"formal": False', '"formal": True'), encoding="utf-8")
     plan = _plan(fixture, tmp_path, 17)
+
+    def forged_producer(capability) -> None:
+        identity = _identity(
+            plan,
+            evaluation_bytes=capability.evaluation_json.stat().st_size,
+            trajectory_bytes=capability.trajectory_hdf5.stat().st_size,
+            validator_bytes=capability.validator_receipt.stat().st_size,
+        )
+        identity["formal"] = True
+        _write_json(capability.sidecar, identity)
+
     try:
         with pytest.raises(launcher.LauncherError, match="(?:formal|cmdline)"):
-            launcher.execute_plan(plan)
+            launcher.execute_plan(plan, artifact_identity_producer=forged_producer)
     finally:
         _cleanup_external_outputs(plan)
 
@@ -452,19 +469,10 @@ def test_execute_with_real_popen_natural_exit_writes_zero_credit_proof(tmp_path:
     plan = _plan(fixture, tmp_path, 29)
     proof_path = fixture["root"] / "reports" / launcher.PROCESS_PROOF_FILENAME.format(seed=29)
     plan = replace(plan, proof_output=proof_path, outputs={**plan.outputs, "process_proof": proof_path})
-    sizes = {
-        "evaluation": len(b"evaluation"),
-        "trajectory": len(b"trajectory"),
-        "validator": len(b"validator"),
-    }
-    identity = _identity(
-        plan,
-        evaluation_bytes=sizes["evaluation"],
-        trajectory_bytes=sizes["trajectory"],
-        validator_bytes=sizes["validator"],
-    )
 
     calls: list[list[str]] = []
+    producer_calls: list[dict[str, object]] = []
+    capability_refs: list[object] = []
     real_popen = launcher.subprocess.Popen
 
     def recording_popen(command, **kwargs):
@@ -480,10 +488,52 @@ def test_execute_with_real_popen_natural_exit_writes_zero_credit_proof(tmp_path:
         assert os.stat(f"/proc/{process.pid}/cwd").st_ino == plan.root.stat().st_ino
         return process
 
+    def sidecar_producer(capability) -> Path:
+        capability_refs.append(capability)
+        producer_calls.append(
+            {
+                "sidecar": capability.sidecar,
+                "evaluation": capability.evaluation_json,
+                "trajectory": capability.trajectory_hdf5,
+                "validator": capability.validator_receipt,
+            }
+        )
+        assert capability.root == plan.root
+        assert capability.seed == plan.seed
+        assert capability.nonce == plan.nonce
+        assert capability.sidecar == plan.outputs["artifact_identity"]
+        assert not capability.sidecar.exists()
+        assert capability.evaluation_json.exists()
+        assert capability.trajectory_hdf5.exists()
+        assert capability.validator_receipt.exists()
+        identity = sidecar.build_identity(
+            capability.root,
+            seed=capability.seed,
+            nonce=capability.nonce,
+            evaluation_json=capability.evaluation_json,
+            trajectory_hdf5=capability.trajectory_hdf5,
+            validator_receipt=capability.validator_receipt,
+        )
+        return sidecar.write_identity(
+            identity,
+            root=capability.root,
+            seed=capability.seed,
+            nonce=capability.nonce,
+            output=capability.sidecar,
+        )
+
     try:
-        result = launcher.execute_plan(plan, popen_factory=recording_popen)
+        result = launcher.execute_plan(
+            plan,
+            popen_factory=recording_popen,
+            artifact_identity_producer=sidecar_producer,
+        )
         assert result["status"] == "exited_successfully"
         assert result["proof_written"] is True
+        assert len(producer_calls) == 1
+        assert producer_calls[0]["sidecar"] == plan.outputs["artifact_identity"]
+        with pytest.raises(launcher.LauncherError, match="already been consumed"):
+            _ = capability_refs[0].sidecar
         assert calls and calls[0] != list(plan.command)
         assert calls[0][0].startswith("/proc/self/fd/")
         proof = json.loads(proof_path.read_text(encoding="utf-8"))
@@ -501,12 +551,87 @@ def test_execute_with_real_popen_natural_exit_writes_zero_credit_proof(tmp_path:
         _cleanup_external_outputs(plan)
 
 
+def test_execute_requires_explicit_producer_before_starting_any_process(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    plan = _plan(fixture, tmp_path, 17)
+    calls = 0
+
+    def forbidden_popen(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        raise AssertionError("execute without a producer must not start a process")
+
+    with pytest.raises(launcher.LauncherError, match="explicit artifact_identity_producer"):
+        launcher.execute_plan(plan, popen_factory=forbidden_popen)
+    assert calls == 0
+
+
+def test_incomplete_independent_validator_never_grants_producer_capability(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    _install_real_fixture_interpreter(fixture)
+    plan = _plan(fixture, tmp_path, 17)
+    (fixture["root"] / "validator-incomplete").write_text("marker", encoding="utf-8")
+    producer_calls = 0
+
+    def forbidden_producer(capability) -> None:
+        nonlocal producer_calls
+        producer_calls += 1
+
+    try:
+        with pytest.raises(launcher.LauncherError, match="post-terminal validator"):
+            launcher.execute_plan(plan, artifact_identity_producer=forbidden_producer)
+        assert producer_calls == 0
+        assert not plan.proof_output.exists()
+    finally:
+        _cleanup_external_outputs(plan)
+
+
+def test_sidecar_path_drift_is_rejected_after_producer_and_before_proof(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    _install_real_fixture_interpreter(fixture)
+    plan = _plan(fixture, tmp_path, 29)
+
+    def drifted_producer(capability) -> None:
+        identity = _identity(
+            plan,
+            evaluation_bytes=capability.evaluation_json.stat().st_size,
+            trajectory_bytes=capability.trajectory_hdf5.stat().st_size,
+            validator_bytes=capability.validator_receipt.stat().st_size,
+        )
+        identity["evaluation"]["path"] = str(tmp_path / "drifted-evaluation.json")
+        _write_json(capability.sidecar, identity)
+
+    try:
+        with pytest.raises(launcher.LauncherError, match="canonical fresh-namespace path"):
+            launcher.execute_plan(plan, artifact_identity_producer=drifted_producer)
+        assert not plan.proof_output.exists()
+    finally:
+        _cleanup_external_outputs(plan)
+
+
+def test_producer_artifact_identity_drift_is_rejected_before_proof(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    _install_real_fixture_interpreter(fixture)
+    plan = _plan(fixture, tmp_path, 43)
+
+    def mutating_producer(capability) -> None:
+        capability.evaluation_json.write_bytes(b"mutated-after-terminal-check")
+
+    try:
+        with pytest.raises(launcher.LauncherError, match="identity drifted while producer ran"):
+            launcher.execute_plan(plan, artifact_identity_producer=mutating_producer)
+        assert not plan.proof_output.exists()
+    finally:
+        _cleanup_external_outputs(plan)
+
+
 def test_nonzero_evaluator_never_mints_success_proof(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     plan = _plan(fixture, tmp_path, 43)
 
     real_popen = launcher.subprocess.Popen
     processes: list[subprocess.Popen] = []
+    producer_calls = 0
 
     def failed_popen(command, **kwargs):
         process = real_popen(
@@ -521,10 +646,19 @@ def test_nonzero_evaluator_never_mints_success_proof(tmp_path: Path) -> None:
         processes.append(process)
         return process
 
+    def forbidden_producer(capability) -> None:
+        nonlocal producer_calls
+        producer_calls += 1
+
     try:
         with pytest.raises(launcher.LauncherError, match="different command"):
-            launcher.execute_plan(plan, popen_factory=failed_popen)
+            launcher.execute_plan(
+                plan,
+                popen_factory=failed_popen,
+                artifact_identity_producer=forbidden_producer,
+            )
         assert processes and processes[0].wait() == 7
+        assert producer_calls == 0
         assert not plan.proof_output.exists()
     finally:
         _cleanup_external_outputs(plan)
@@ -536,6 +670,7 @@ def test_factory_successful_different_command_is_rejected_before_proof(tmp_path:
 
     real_popen = launcher.subprocess.Popen
     processes: list[subprocess.Popen] = []
+    producer_calls = 0
 
     def successful_different_popen(command, **kwargs):
         process = real_popen(
@@ -550,10 +685,19 @@ def test_factory_successful_different_command_is_rejected_before_proof(tmp_path:
         processes.append(process)
         return process
 
+    def forbidden_producer(capability) -> None:
+        nonlocal producer_calls
+        producer_calls += 1
+
     try:
         with pytest.raises(launcher.LauncherError, match="different command"):
-            launcher.execute_plan(plan, popen_factory=successful_different_popen)
+            launcher.execute_plan(
+                plan,
+                popen_factory=successful_different_popen,
+                artifact_identity_producer=forbidden_producer,
+            )
         assert processes and processes[0].wait() == 0
+        assert producer_calls == 0
         assert not plan.proof_output.exists()
     finally:
         _cleanup_external_outputs(plan)
@@ -573,7 +717,11 @@ def test_execute_rejects_input_identity_drift_before_popen(tmp_path: Path, input
         raise AssertionError("identity drift must be rejected before Popen")
 
     with pytest.raises(launcher.LauncherError, match="identity drift"):
-        launcher.execute_plan(plan, popen_factory=forbidden_popen)
+        launcher.execute_plan(
+            plan,
+            popen_factory=forbidden_popen,
+            artifact_identity_producer=lambda capability: None,
+        )
     assert calls == 0
 
 
@@ -581,7 +729,12 @@ def test_execute_rejects_spoofed_launcher_pid(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     plan = _plan(fixture, tmp_path, 17)
     with pytest.raises(launcher.LauncherError, match="launcher_pid overrides"):
-        launcher.execute_plan(plan, popen_factory=lambda *args, **kwargs: None, launcher_pid=os.getpid() + 1)
+        launcher.execute_plan(
+            plan,
+            popen_factory=lambda *args, **kwargs: None,
+            launcher_pid=os.getpid() + 1,
+            artifact_identity_producer=lambda capability: None,
+        )
 
 
 def test_execute_rejects_non_popen_factory_result(tmp_path: Path) -> None:
@@ -593,6 +746,10 @@ def test_execute_rejects_non_popen_factory_result(tmp_path: Path) -> None:
 
     try:
         with pytest.raises(launcher.LauncherError, match="actual subprocess.Popen"):
-            launcher.execute_plan(plan, popen_factory=lambda *args, **kwargs: SyntheticProcess())
+            launcher.execute_plan(
+                plan,
+                popen_factory=lambda *args, **kwargs: SyntheticProcess(),
+                artifact_identity_producer=lambda capability: None,
+            )
     finally:
         _cleanup_external_outputs(plan)
