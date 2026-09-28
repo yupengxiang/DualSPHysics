@@ -27,6 +27,10 @@ projection 的 `input_origin` 是 `historical_receipt_projection`。它绑定了
 A8 reader preflight、model reproduction report 和 score report 的路径、字节数与
 SHA-256；新的 typed wrapper 不改写这些历史文件。
 
+其中 source/reproduction host pair 也是已有 diagnostic pair 的 typed projection，
+不是本次预检凭空建立的可信 host attestation；它不能消除历史 relocated receipt
+的 same-host 限制。
+
 reader、prediction、scoring 的输出 wrapper 分别绑定 reproduction host、relocated
 data root 以及前一阶段的 artifact hash。data-roots wrapper 同时绑定 source 与
 reproduction package manifest；manifest 再绑定实际 package artifact 的 SHA-256。
