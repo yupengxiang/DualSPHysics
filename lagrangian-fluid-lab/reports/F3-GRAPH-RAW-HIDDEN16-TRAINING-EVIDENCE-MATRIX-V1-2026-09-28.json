@@ -1,0 +1,406 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "authorization": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "credit": 0,
+    "formal": false,
+    "formal_eligible": false,
+    "qualification": false,
+    "qualification_credit": 0
+  },
+  "checks": [
+    {
+      "check": "exact_seed_set",
+      "expected": [
+        17,
+        29,
+        43
+      ],
+      "observed": [
+        17,
+        29,
+        43
+      ],
+      "passed": true,
+      "reason": "training receipts must contain exactly seeds 17, 29, and 43"
+    },
+    {
+      "check": "reference_training_matrix_schema",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "existing compact training matrix schema/hash metadata is valid"
+    },
+    {
+      "check": "common_config",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "all three receipts share one graph_raw hidden16 configuration"
+    },
+    {
+      "check": "checkpoint_path_sha_unique",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "declared checkpoint path/SHA pairs are distinct per seed"
+    }
+  ],
+  "credit": 0,
+  "diagnostic_only": true,
+  "errors": [],
+  "expected_contract": {
+    "checkpoint_content_opened": false,
+    "evidence_status": "complete",
+    "hidden": 16,
+    "model_kind": "graph_raw",
+    "normalization_transitions": 16,
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "shared_config": {
+      "centers_per_update": 256,
+      "checkpoint_every": 500,
+      "evaluate_milestones": true,
+      "gradient_clipping": null,
+      "hidden": 16,
+      "history_states": 1,
+      "initialization": "core.paired_initialization.common_encoder_head.v1",
+      "learning_rate": 0.001,
+      "log_every": 100,
+      "manifest_formal_release": false,
+      "max_neighbors": 192,
+      "milestone_evaluation_mode": "in_process",
+      "model_kind": "graph_raw",
+      "normalization_source_split": "train",
+      "optimizer": "Adam",
+      "radius_over_h": 2.0,
+      "target_normalization": "raw_dual_increment_train_shared",
+      "updates": 500,
+      "validation_case_count": 4,
+      "validation_centers": 256,
+      "validation_every": 500,
+      "validation_family_counts": {
+        "F3": 4
+      },
+      "validation_formal_eligible": false,
+      "validation_transition_count": 4
+    },
+    "updates": 500
+  },
+  "fail_closed": false,
+  "formal": false,
+  "formal_eligible": false,
+  "formal_training_runs_counted": 0,
+  "formal_training_runs_expected": 9,
+  "observed_at_utc": "2026-09-28T00:00:00Z",
+  "qualification": false,
+  "qualification_credit": 0,
+  "reference_training_matrix": {
+    "opened": true,
+    "schema": "core.f3.graph_raw.hidden16.training_matrix.v1",
+    "source": {
+      "bytes": 3265,
+      "exists": true,
+      "opened": true,
+      "path": "reports/F3-GRAPH-RAW-HIDDEN16-SEEDS17-29-43-TRAINING-2026-09-28.json",
+      "schema": "core.f3.graph_raw.hidden16.training_matrix.v1",
+      "sha256": "5f01eda5d25b4d13f59431bd6734119bdbdb18950f28c8d11639423edf21498b"
+    }
+  },
+  "report_id": "f3-graph-raw-hidden16-training-evidence-matrix-v1",
+  "runs": [
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "checkpoint": {
+          "path": "/tmp/f3-graph-raw500-hidden16-seed17-20260928-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "19cf88df48e369ce061a7dcd11b28d5e30864f30075deaa8d245ddc6184293ca",
+          "update": 500
+        },
+        "evidence_status": "complete",
+        "formal_eligible": false,
+        "hidden": 16,
+        "initialization": {
+          "parameter_count": 6086,
+          "parameter_digest": "ce74cb93b1144cf872fce13810c07e9cb14101ca1fe807b458ee1317bca53e89",
+          "schema": "core.training.initialization_evidence.v1",
+          "status": "captured"
+        },
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model_kind": "graph_raw",
+        "normalization": {
+          "requested_maximum_transitions": 16,
+          "schema": "core.training.normalization_evidence.v1",
+          "selected_transition_count": 16,
+          "selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "selection_seed": 17,
+          "source_split": "train",
+          "target_reference": "raw_dual_increment_train_shared"
+        },
+        "parameter_count": 6086,
+        "qualification_credit": 0,
+        "run_id": "graph_raw-hidden16-seed17",
+        "schema": "core.training.v1",
+        "seed": 17,
+        "shared_config": {
+          "centers_per_update": 256,
+          "checkpoint_every": 500,
+          "evaluate_milestones": true,
+          "gradient_clipping": null,
+          "hidden": 16,
+          "history_states": 1,
+          "initialization": "core.paired_initialization.common_encoder_head.v1",
+          "learning_rate": 0.001,
+          "log_every": 100,
+          "manifest_formal_release": false,
+          "max_neighbors": 192,
+          "milestone_evaluation_mode": "in_process",
+          "model_kind": "graph_raw",
+          "normalization_selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "normalization_source_split": "train",
+          "normalization_target_reference": "raw_dual_increment_train_shared",
+          "normalization_transitions": 16,
+          "optimizer": "Adam",
+          "radius_over_h": 2.0,
+          "target_normalization": "raw_dual_increment_train_shared",
+          "updates": 500,
+          "validation_case_count": 4,
+          "validation_centers": 256,
+          "validation_every": 500,
+          "validation_family_counts": {
+            "F3": 4
+          },
+          "validation_formal_eligible": false,
+          "validation_transition_count": 4
+        },
+        "updates": 500
+      },
+      "seed": 17,
+      "source": {
+        "bytes": 10663,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-graph-raw500-hidden16-seed17-20260928-training.json",
+        "schema": "core.training.v1",
+        "sha256": "1a05199e113bdecff0c72dc8987e4457dc69a96b3c7d6c20d6a7fadc2e74d567"
+      },
+      "status": "bound_complete"
+    },
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "checkpoint": {
+          "path": "/tmp/f3-graph-raw500-hidden16-seed29-20260928-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "4cd9dc78230a11cd14354e48d073fb7cfd2f7dfd2515d57b7a65cfe5c1edf215",
+          "update": 500
+        },
+        "evidence_status": "complete",
+        "formal_eligible": false,
+        "hidden": 16,
+        "initialization": {
+          "parameter_count": 6086,
+          "parameter_digest": "4f4f2555e47bd7b61843d4925eba9853c2f5c667c76f56846247c378d42830e3",
+          "schema": "core.training.initialization_evidence.v1",
+          "status": "captured"
+        },
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model_kind": "graph_raw",
+        "normalization": {
+          "requested_maximum_transitions": 16,
+          "schema": "core.training.normalization_evidence.v1",
+          "selected_transition_count": 16,
+          "selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "selection_seed": 29,
+          "source_split": "train",
+          "target_reference": "raw_dual_increment_train_shared"
+        },
+        "parameter_count": 6086,
+        "qualification_credit": 0,
+        "run_id": "graph_raw-hidden16-seed29",
+        "schema": "core.training.v1",
+        "seed": 29,
+        "shared_config": {
+          "centers_per_update": 256,
+          "checkpoint_every": 500,
+          "evaluate_milestones": true,
+          "gradient_clipping": null,
+          "hidden": 16,
+          "history_states": 1,
+          "initialization": "core.paired_initialization.common_encoder_head.v1",
+          "learning_rate": 0.001,
+          "log_every": 100,
+          "manifest_formal_release": false,
+          "max_neighbors": 192,
+          "milestone_evaluation_mode": "in_process",
+          "model_kind": "graph_raw",
+          "normalization_selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "normalization_source_split": "train",
+          "normalization_target_reference": "raw_dual_increment_train_shared",
+          "normalization_transitions": 16,
+          "optimizer": "Adam",
+          "radius_over_h": 2.0,
+          "target_normalization": "raw_dual_increment_train_shared",
+          "updates": 500,
+          "validation_case_count": 4,
+          "validation_centers": 256,
+          "validation_every": 500,
+          "validation_family_counts": {
+            "F3": 4
+          },
+          "validation_formal_eligible": false,
+          "validation_transition_count": 4
+        },
+        "updates": 500
+      },
+      "seed": 29,
+      "source": {
+        "bytes": 10665,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-graph-raw500-hidden16-seed29-20260928-training.json",
+        "schema": "core.training.v1",
+        "sha256": "900aa4d8d9a3dc634f8c0809124aa744ae96e10350d601b62211ac6fe9da3f40"
+      },
+      "status": "bound_complete"
+    },
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "checkpoint": {
+          "path": "/tmp/f3-graph-raw500-hidden16-seed43-20260928-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "c979614f7ae8e5d6e8924a9624d023c1633eb88a9fd28e5c04ad8d20ccddf2db",
+          "update": 500
+        },
+        "evidence_status": "complete",
+        "formal_eligible": false,
+        "hidden": 16,
+        "initialization": {
+          "parameter_count": 6086,
+          "parameter_digest": "8bc6b9b9b11df237be1fb8c203941d659ced805a30fd0dd1c6eb81258c8e5368",
+          "schema": "core.training.initialization_evidence.v1",
+          "status": "captured"
+        },
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model_kind": "graph_raw",
+        "normalization": {
+          "requested_maximum_transitions": 16,
+          "schema": "core.training.normalization_evidence.v1",
+          "selected_transition_count": 16,
+          "selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "selection_seed": 43,
+          "source_split": "train",
+          "target_reference": "raw_dual_increment_train_shared"
+        },
+        "parameter_count": 6086,
+        "qualification_credit": 0,
+        "run_id": "graph_raw-hidden16-seed43",
+        "schema": "core.training.v1",
+        "seed": 43,
+        "shared_config": {
+          "centers_per_update": 256,
+          "checkpoint_every": 500,
+          "evaluate_milestones": true,
+          "gradient_clipping": null,
+          "hidden": 16,
+          "history_states": 1,
+          "initialization": "core.paired_initialization.common_encoder_head.v1",
+          "learning_rate": 0.001,
+          "log_every": 100,
+          "manifest_formal_release": false,
+          "max_neighbors": 192,
+          "milestone_evaluation_mode": "in_process",
+          "model_kind": "graph_raw",
+          "normalization_selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "normalization_source_split": "train",
+          "normalization_target_reference": "raw_dual_increment_train_shared",
+          "normalization_transitions": 16,
+          "optimizer": "Adam",
+          "radius_over_h": 2.0,
+          "target_normalization": "raw_dual_increment_train_shared",
+          "updates": 500,
+          "validation_case_count": 4,
+          "validation_centers": 256,
+          "validation_every": 500,
+          "validation_family_counts": {
+            "F3": 4
+          },
+          "validation_formal_eligible": false,
+          "validation_transition_count": 4
+        },
+        "updates": 500
+      },
+      "seed": 43,
+      "source": {
+        "bytes": 10662,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-graph-raw500-hidden16-seed43-20260928-training.json",
+        "schema": "core.training.v1",
+        "sha256": "5ac2479a3f9be648c28cca330da0ceb18aa5bccf7f94f8f8975c8169e98c9c20"
+      },
+      "status": "bound_complete"
+    }
+  ],
+  "schema": "core.f3.graph_raw.hidden16.training_evidence_matrix.v1",
+  "scope_note": "bounded JSON receipt/schema/hash metadata only; diagnostic and non-authorizing",
+  "shared_config": {
+    "centers_per_update": 256,
+    "checkpoint_every": 500,
+    "evaluate_milestones": true,
+    "gradient_clipping": null,
+    "hidden": 16,
+    "history_states": 1,
+    "initialization": "core.paired_initialization.common_encoder_head.v1",
+    "learning_rate": 0.001,
+    "log_every": 100,
+    "manifest_formal_release": false,
+    "max_neighbors": 192,
+    "milestone_evaluation_mode": "in_process",
+    "model_kind": "graph_raw",
+    "normalization_selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+    "normalization_source_split": "train",
+    "normalization_target_reference": "raw_dual_increment_train_shared",
+    "normalization_transitions": 16,
+    "optimizer": "Adam",
+    "radius_over_h": 2.0,
+    "target_normalization": "raw_dual_increment_train_shared",
+    "updates": 500,
+    "validation_case_count": 4,
+    "validation_centers": 256,
+    "validation_every": 500,
+    "validation_family_counts": {
+      "F3": 4
+    },
+    "validation_formal_eligible": false,
+    "validation_transition_count": 4
+  },
+  "side_effects": {
+    "checkpoint_opened": false,
+    "completion_mutation": false,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "hdf5_opened": false,
+    "ledger_mutation": 0,
+    "manifest_opened": false,
+    "progress_opened": false,
+    "registry_mutation": 0,
+    "runtime_restarted": false,
+    "runtime_started": false,
+    "runtime_stopped": false,
+    "trajectory_opened": false
+  },
+  "source_bound": true,
+  "status": "training_evidence_bound_diagnostic_only",
+  "t1_case_runs_counted": 0,
+  "t2_macro_families_counted": 0,
+  "training_evidence_counted_as_formal_runs": 0
+}
