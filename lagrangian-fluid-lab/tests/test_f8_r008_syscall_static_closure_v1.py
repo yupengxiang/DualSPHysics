@@ -95,3 +95,11 @@ def test_report_roundtrip_in_memory_is_strict() -> None:
     report = closure.build_report()
     payload = json.dumps(report, sort_keys=True, allow_nan=False)
     assert closure.validate_report(json.loads(payload))["record_id"] == closure.RECORD_ID
+
+
+def test_checked_in_report_recomputes_from_bounded_dependencies() -> None:
+    checked = closure.verify_output()
+    assert checked["record_id"] == closure.RECORD_ID
+    assert checked["static_policy"]["native_row_count"] == 462
+    assert checked["validation"]["target_kernel_pin_complete"] is False
+    assert checked["authorization"]["qualification_credit"] == 0
