@@ -9,6 +9,7 @@ validation/test states are read only by the rollout/evaluation commands.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 from collections import Counter
 from collections.abc import Mapping
 import hashlib
@@ -19,6 +20,8 @@ from pathlib import Path
 import platform
 import random
 import resource
+import secrets
+import stat
 import subprocess
 import sys
 import tempfile
@@ -421,12 +424,119 @@ def _known_inputs_for_learning(known):
     return known if callable(getattr(known, "geometry_at", None)) else _LegacyKnownInputsProxy(known)
 
 
-def atomic_json(path, value):
+def _open_anonymous_output(path):
+    """Open an unpublished regular inode beneath the output directory.
+
+    The final output name is never opened with ``w``.  Linux ``O_TMPFILE``
+    gives us an inode with no attacker-replaceable staging pathname; the
+    descriptor is linked into the output directory only after the producer
+    has flushed it.  The final link operation is exclusive when requested,
+    so an existing regular file, symlink, or hardlink is left untouched.
+    """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(path.name + ".tmp")
-    temporary.write_text(json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n")
-    os.replace(temporary, path)
+    nofollow = getattr(os, "O_NOFOLLOW", None)
+    directory = getattr(os, "O_DIRECTORY", None)
+    tmpfile = getattr(os, "O_TMPFILE", None)
+    if nofollow is None or directory is None or tmpfile is None:
+        raise OSError("secure output publication requires O_NOFOLLOW/O_DIRECTORY/O_TMPFILE")
+    parent_flags = os.O_RDONLY | nofollow | directory | getattr(os, "O_CLOEXEC", 0)
+    parent_fd = os.open(path.parent, parent_flags)
+    try:
+        flags = os.O_RDWR | tmpfile | getattr(os, "O_CLOEXEC", 0)
+        descriptor = os.open(".", flags, 0o600, dir_fd=parent_fd)
+    except BaseException:
+        os.close(parent_fd)
+        raise
+    try:
+        identity = os.fstat(descriptor)
+        if not stat.S_ISREG(identity.st_mode) or identity.st_nlink != 0:
+            raise OSError("anonymous output staging inode is not an unlinked regular file")
+    except BaseException:
+        os.close(descriptor)
+        os.close(parent_fd)
+        raise
+    return path, parent_fd, descriptor
+
+
+def _publish_anonymous_output(path, parent_fd, descriptor, *, exclusive):
+    """Publish a flushed descriptor without following or overwriting a leaf."""
+    path = Path(path)
+    proc_fd = f"/proc/self/fd/{descriptor}"
+    if exclusive:
+        try:
+            # follow_symlinks applies to the proc-fd source only.  linkat does
+            # not follow the destination leaf, and therefore EEXIST protects
+            # existing regular files, symlinks, and hardlinks alike.
+            os.link(proc_fd, path.name, dst_dir_fd=parent_fd, follow_symlinks=True)
+        except FileExistsError as error:
+            raise FileExistsError(f"refusing to overwrite output: {path}") from error
+    else:
+        temporary_name = None
+        for _ in range(32):
+            candidate = f".{path.name}.{secrets.token_hex(16)}.tmp"
+            try:
+                os.link(proc_fd, candidate, dst_dir_fd=parent_fd, follow_symlinks=True)
+            except FileExistsError:
+                continue
+            temporary_name = candidate
+            break
+        if temporary_name is None:
+            raise FileExistsError(f"could not reserve a staging name beside output: {path}")
+        try:
+            # renameat does not follow the destination leaf.  It preserves
+            # atomic replacement for live progress updates while the data was
+            # produced solely through the stable descriptor above.
+            os.replace(temporary_name, path.name,
+                       src_dir_fd=parent_fd, dst_dir_fd=parent_fd)
+        finally:
+            try:
+                os.unlink(temporary_name, dir_fd=parent_fd)
+            except FileNotFoundError:
+                pass
+    os.fsync(parent_fd)
+
+
+@contextmanager
+def _secure_output_stream(path, *, exclusive):
+    """Yield a binary stream and publish it atomically on clean exit."""
+    path, parent_fd, descriptor = _open_anonymous_output(path)
+    try:
+        stream = os.fdopen(descriptor, "w+b", closefd=False)
+    except BaseException:
+        os.close(descriptor)
+        os.close(parent_fd)
+        raise
+    try:
+        yield stream
+        stream.flush()
+        os.fsync(descriptor)
+        _publish_anonymous_output(path, parent_fd, descriptor, exclusive=exclusive)
+    finally:
+        stream.close()
+        os.close(descriptor)
+        os.close(parent_fd)
+
+
+@contextmanager
+def _atomic_hdf5_output(path):
+    """Create one HDF5 trajectory and publish it only after close/flush."""
+    with _secure_output_stream(path, exclusive=False) as stream:
+        with h5py.File(stream, "w") as trajectory:
+            yield trajectory
+
+
+def atomic_json(path, value, *, exclusive=False):
+    """Write JSON atomically without opening any pathname with ``w``.
+
+    ``exclusive=False`` retains the existing replace-on-update behavior used
+    by progress sidecars.  Final evaluation/rollout receipts opt into an
+    exclusive destination so a stale or attacker-owned output cannot be
+    silently replaced.
+    """
+    payload = (json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
+    with _secure_output_stream(path, exclusive=exclusive) as stream:
+        stream.write(payload)
 
 
 def _default_progress_path(output):
@@ -1560,33 +1670,41 @@ def rollout_case(dataset, case_id, predictor, *, maximum_steps=None, trajectory_
     first_failure_frame = None
     physics_frames = [None] * total_steps
     trajectory = None
-    publish_progress("running")
+    trajectory_context = None
     if trajectory_output is not None:
         trajectory_path = Path(trajectory_output)
-        trajectory_path.parent.mkdir(parents=True, exist_ok=True)
-        trajectory = h5py.File(trajectory_path, "w")
-        trajectory.attrs.update(
-            schema_version=1, state_schema="core.state.native_velocity.v1",
-            velocity_semantics="native saved numerical velocity",
-            future_state_inputs=False, autonomous_prediction=True,
-            identity_semantics="particle_zone,particle_id",
-        )
-        trajectory.create_dataset("time", data=times[: total_steps + 1])
-        # Unexecuted frames stay NaN/invalid after a failure.  They are never
-        # silently mistaken for a predicted zero state by downstream material
-        # or physics readers.
-        trajectory.create_dataset("position", shape=(total_steps + 1, current.count, 3),
-                                  dtype="f4", fillvalue=np.nan)
-        trajectory.create_dataset("velocity", shape=(total_steps + 1, current.count, 3),
-                                  dtype="f4", fillvalue=np.nan)
-        trajectory.create_dataset("particle_id", data=current.particle_id)
-        trajectory.create_dataset("particle_zone", data=current.particle_zone)
-        trajectory.create_dataset("mass", data=current.mass)
-        trajectory.create_dataset("valid", shape=(total_steps + 1, current.count),
-                                  dtype="bool", fillvalue=False)
-        trajectory["position"][0] = current.position
-        trajectory["velocity"][0] = current.velocity
-        trajectory["valid"][0] = current.valid
+        trajectory_context = _atomic_hdf5_output(trajectory_path)
+        trajectory = trajectory_context.__enter__()
+    try:
+        if trajectory is not None:
+            trajectory.attrs.update(
+                schema_version=1, state_schema="core.state.native_velocity.v1",
+                velocity_semantics="native saved numerical velocity",
+                future_state_inputs=False, autonomous_prediction=True,
+                identity_semantics="particle_zone,particle_id",
+            )
+            trajectory.create_dataset("time", data=times[: total_steps + 1])
+            # Unexecuted frames stay NaN/invalid after a failure.  They are never
+            # silently mistaken for a predicted zero state by downstream material
+            # or physics readers.
+            trajectory.create_dataset("position", shape=(total_steps + 1, current.count, 3),
+                                      dtype="f4", fillvalue=np.nan)
+            trajectory.create_dataset("velocity", shape=(total_steps + 1, current.count, 3),
+                                      dtype="f4", fillvalue=np.nan)
+            trajectory.create_dataset("particle_id", data=current.particle_id)
+            trajectory.create_dataset("particle_zone", data=current.particle_zone)
+            trajectory.create_dataset("mass", data=current.mass)
+            trajectory.create_dataset("valid", shape=(total_steps + 1, current.count),
+                                      dtype="bool", fillvalue=False)
+            trajectory["position"][0] = current.position
+            trajectory["velocity"][0] = current.velocity
+            trajectory["valid"][0] = current.valid
+        publish_progress("running")
+    except BaseException:
+        error_info = sys.exc_info()
+        if trajectory_context is not None:
+            trajectory_context.__exit__(*error_info)
+        raise
     try:
         for step in range(total_steps):
             attempted = True
@@ -1661,9 +1779,14 @@ def rollout_case(dataset, case_id, predictor, *, maximum_steps=None, trajectory_
                 trajectory["valid"][step + 1] = current.valid
             if executed % progress_every == 0:
                 publish_progress("running")
-    finally:
-        if trajectory is not None:
-            trajectory.close()
+    except BaseException:
+        error_info = sys.exc_info()
+        if trajectory_context is not None:
+            trajectory_context.__exit__(*error_info)
+        raise
+    else:
+        if trajectory_context is not None:
+            trajectory_context.__exit__(None, None, None)
     if executed == total_steps:
         failure_category = None
         first_failure_frame = None
@@ -2694,7 +2817,7 @@ def main(argv=None):
             result = evaluate_checkpoints(dataset, refs, device=args.device,
                                           chunk_size=args.chunk_size, run_id=args.run_id,
                                           qualification_only=args.qualification_only)
-        atomic_json(args.output, result)
+        atomic_json(args.output, result, exclusive=True)
     else:
         with _dataset(args) as dataset:
             if args.checkpoint is not None:
@@ -2754,7 +2877,7 @@ def main(argv=None):
                           "case_count": len(results), "cases": results,
                           "execution_summary": _execution_summary(results),
                           "autonomous": True, "future_state_inputs": False}
-        atomic_json(args.output, result)
+        atomic_json(args.output, result, exclusive=True)
     print(json.dumps({key: value for key, value in result.items()
                       if key not in ("cases", "history", "checkpoints")}, indent=2))
     if args.command == "evaluate-checkpoints" and result.get("selection") is None:

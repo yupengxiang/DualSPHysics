@@ -492,6 +492,77 @@ def test_rollout_failure_marks_unexecuted_public_state_invalid(tmp_path):
     assert progress_payload["scientific_status"] == "not_assessed"
 
 
+@pytest.mark.parametrize("link_kind", ["symlink", "hardlink"])
+def test_trajectory_output_atomically_replaces_leaf_without_following_links(tmp_path, link_kind):
+    manifest = tiny_manifest(tmp_path)
+    protected = tmp_path / "protected.bin"
+    protected.write_bytes(b"must-not-be-overwritten")
+    output = tmp_path / "trajectory.h5"
+    if link_kind == "symlink":
+        output.symlink_to(protected)
+    else:
+        os.link(protected, output)
+
+    with CoreDataset(manifest, tmp_path) as data:
+        predictor, _ = learning._build_predictor_from_baseline("constant_velocity")
+        result = rollout_case(data, "tiny", predictor, maximum_steps=1,
+                              trajectory_output=output)
+
+    assert protected.read_bytes() == b"must-not-be-overwritten"
+    assert result["execution_complete"] is True
+    assert output.is_file() and not output.is_symlink()
+    assert os.stat(output).st_ino != os.stat(protected).st_ino
+    with h5py.File(output, "r") as trajectory:
+        assert trajectory["valid"].shape == (2, 2)
+
+
+@pytest.mark.parametrize("link_kind", ["symlink", "hardlink"])
+def test_exclusive_evaluation_json_refuses_leaf_symlink_and_hardlink(tmp_path, link_kind):
+    protected = tmp_path / "protected.json"
+    protected.write_bytes(b"must-not-be-overwritten")
+    output = tmp_path / "evaluation.json"
+    if link_kind == "symlink":
+        output.symlink_to(protected)
+    else:
+        os.link(protected, output)
+
+    with pytest.raises(FileExistsError, match="refusing to overwrite output"):
+        learning.atomic_json(output, {"schema": "test"}, exclusive=True)
+
+    assert protected.read_bytes() == b"must-not-be-overwritten"
+    if link_kind == "symlink":
+        assert output.is_symlink()
+    else:
+        assert os.stat(output).st_ino == os.stat(protected).st_ino
+
+
+def test_atomic_json_replacement_keeps_progress_sidecar_semantics(tmp_path):
+    output = tmp_path / "progress.json"
+    learning.atomic_json(output, {"status": "running"})
+    learning.atomic_json(output, {"status": "completed"})
+    assert json.loads(output.read_text()) == {"status": "completed"}
+    assert sorted(path.name for path in tmp_path.iterdir()) == ["progress.json"]
+
+
+def test_cli_evaluation_output_uses_exclusive_publication(tmp_path):
+    manifest = tiny_manifest(tmp_path)
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest))
+    protected = tmp_path / "protected.json"
+    protected.write_bytes(b"must-not-be-overwritten")
+    output = tmp_path / "evaluation.json"
+    output.symlink_to(protected)
+
+    with pytest.raises(FileExistsError, match="refusing to overwrite output"):
+        main([
+            "evaluate", "--manifest", str(manifest_path), "--data-root", str(tmp_path),
+            "--baseline", "constant_velocity", "--case-id", "tiny", "--max-steps", "1",
+            "--output", str(output),
+        ])
+    assert protected.read_bytes() == b"must-not-be-overwritten"
+    assert output.is_symlink()
+
+
 def test_completion_semantics_separate_finite_execution_from_science():
     complete = rollout_completion_semantics(
         expected_frames=3, frames_executed=3, failure_category=None,
