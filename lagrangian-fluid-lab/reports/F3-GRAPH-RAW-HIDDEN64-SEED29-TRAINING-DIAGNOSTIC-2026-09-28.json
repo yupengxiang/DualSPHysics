@@ -1,0 +1,237 @@
+{
+  "schema": "core.f3.graph_raw.hidden64.training_diagnostic.summary.v1",
+  "report_id": "F3-GRAPH-RAW-HIDDEN64-SEED29-TRAINING-DIAGNOSTIC-2026-09-28",
+  "date": "2026-09-28",
+  "status": "completed",
+  "diagnostic_only": true,
+  "non_formal_diagnostic": true,
+  "formal_eligible": false,
+  "qualification": false,
+  "qualification_credit": 0,
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "future_state_inputs": false,
+  "scope": {
+    "family": "F3",
+    "training_split": "train",
+    "training_case_count": 16,
+    "available_training_transitions": 13360,
+    "registered_full_case_transitions": 835,
+    "registered_full_case_frames": 836,
+    "evaluation_not_run_in_this_report": true
+  },
+  "source": {
+    "repository": "lagrangian-fluid-lab",
+    "baseline_git_commit": "69f62e170666c650a531086808e5f0e1846abf1f",
+    "manifest": {
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "data_root": ".",
+      "file_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "declared_source_manifest_sha256": "86e27740d764f9769e3255a82a599013a282f1bc4385ad3c29a657a56d9c5bea",
+      "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "formal_release": false,
+      "split_counts": {
+        "train": 16,
+        "validation": 4,
+        "test": 12
+      }
+    },
+    "source_script_sha256": {
+      "scripts/core_learning.py": "3eefe1441dabb350182090c3625f24a8209543a4a31d02521f283074c996c27b",
+      "scripts/core_models.py": "20e635ebd25cd511eeff6f84478678d3364608fd86a5d4b67e2aa53a0d88295d",
+      "scripts/core_dataset.py": "65f583b8fcb1c46e56d10506e22aa1e5fa32c7b2631017de85c88b1f6d53f88f",
+      "scripts/core_contract.py": "1866b35259f407e8c0d8b399eb4034eb18cc8b59f4addc1156f20d6777a326bc"
+    }
+  },
+  "protocol": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "data_root": ".",
+    "model_kind": "graph_raw",
+    "seed": 29,
+    "updates": 500,
+    "centers_per_update": 256,
+    "hidden": 64,
+    "parameter_count": 85766,
+    "learning_rate": 0.001,
+    "optimizer": "Adam",
+    "normalization_transitions": 16,
+    "normalization_source_split": "train",
+    "target_normalization": "raw_dual_increment_train_shared",
+    "max_neighbors": 192,
+    "gradient_clipping": null,
+    "evaluate_milestones": false,
+    "validation_every": 0,
+    "diagnostic": true,
+    "cuda_visible_devices": "5",
+    "physical_gpu_index": 5,
+    "process_device": "cuda:0",
+    "training_started_for_this_report": true,
+    "rollout_started_for_this_report": false,
+    "future_state_inputs": false
+  },
+  "command": "env PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES=5 .venv/bin/python -u scripts/core_learning.py train --manifest campaigns/core-v1/f3-dataset-v2.json --data-root . --model graph_raw --seed 29 --updates 500 --centers 256 --hidden 64 --learning-rate 0.001 --normalization-transitions 16 --max-neighbors 192 --checkpoint /tmp/f3-graph-raw500-hidden64-seed29-20260928-checkpoint.pt --progress-output /tmp/f3-graph-raw500-hidden64-seed29-20260928-training-progress.json --run-id f3-graph-raw500-hidden64-seed29-20260928 --checkpoint-every 500 --log-every 100 --validation-every 0 --no-evaluate-milestones --device cuda:0 --output /tmp/f3-graph-raw500-hidden64-seed29-20260928-training.json",
+  "training": {
+    "status": "completed",
+    "receipt_schema": "core.training.v1",
+    "receipt_path": "/tmp/f3-graph-raw500-hidden64-seed29-20260928-training.json",
+    "receipt_sha256": "b9f9d29d00fc748707386bb8d7067285c09d8f8123e24c838f49399fe44db5c0",
+    "receipt_bytes": 10052,
+    "run_id": "f3-graph-raw500-hidden64-seed29-20260928",
+    "model_kind": "graph_raw",
+    "seed": 29,
+    "device": "cuda:0",
+    "torch_version": "2.11.0+cu128",
+    "host": "user-SYS-421GE-TNRT",
+    "completed_updates": 500,
+    "checkpoint_verified": true,
+    "evidence_status": "complete",
+    "checkpoint": {
+      "path": "/tmp/f3-graph-raw500-hidden64-seed29-20260928-checkpoint.pt",
+      "sha256": "6e846dcabf01147796e6004a0f880dc0036a8a7365f35ee046ec8428abde8189",
+      "bytes": 1107921,
+      "update": 500,
+      "schema": "core.checkpoint.v1"
+    },
+    "progress": {
+      "path": "/tmp/f3-graph-raw500-hidden64-seed29-20260928-training-progress.json",
+      "sha256": "0c7cbafeda2d597306e60905f645768a430930a4e08a6aa22572b98f0ccc223f",
+      "bytes": 489,
+      "status": "completed",
+      "update": 500,
+      "last_loss_mse": 0.1691545844078064,
+      "neighbor_truncation_fraction": 0.0,
+      "last_case_id": "F3_DEV_07_a0p946875",
+      "last_frame": 172
+    },
+    "normalization": {
+      "source_split": "train",
+      "requested_maximum_transitions": 16,
+      "selected_transition_count": 16,
+      "available_transition_count": 13360,
+      "selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+      "selection_seed": 29,
+      "target_reference": "raw_dual_increment_train_shared",
+      "validation_and_test_state_used_for_normalization": false
+    },
+    "sampler": {
+      "case_count": 16,
+      "transition_count": 13360,
+      "centers_per_update": 256,
+      "draws": 500
+    },
+    "history": [
+      {
+        "update": 1,
+        "loss_mse": 1.2417172193527222,
+        "case_id": "F3_DEV_24_a1p053125",
+        "frame": 796,
+        "neighbor_truncation_fraction": 0.0
+      },
+      {
+        "update": 100,
+        "loss_mse": 0.6548047065734863,
+        "case_id": "F3_DEV_25_a1p059375",
+        "frame": 527,
+        "neighbor_truncation_fraction": 0.0
+      },
+      {
+        "update": 200,
+        "loss_mse": 0.4787161350250244,
+        "case_id": "F3_DEV_24_a1p053125",
+        "frame": 528,
+        "neighbor_truncation_fraction": 0.0
+      },
+      {
+        "update": 300,
+        "loss_mse": 0.008803218603134155,
+        "case_id": "F3_DEV_15_a0p996875",
+        "frame": 6,
+        "neighbor_truncation_fraction": 0.0
+      },
+      {
+        "update": 400,
+        "loss_mse": 0.25348252058029175,
+        "case_id": "F3_DEV_07_a0p946875",
+        "frame": 612,
+        "neighbor_truncation_fraction": 0.0
+      },
+      {
+        "update": 500,
+        "loss_mse": 0.1691545844078064,
+        "case_id": "F3_DEV_07_a0p946875",
+        "frame": 172,
+        "neighbor_truncation_fraction": 0.0
+      }
+    ],
+    "wall_seconds": 2174.996464936994,
+    "peak_gpu_memory_bytes": 9914864640,
+    "peak_rss_mib": 2689.62109375,
+    "initialization_evidence": {
+      "status": "captured",
+      "parameter_digest": "2b0bdf881196fdc414288dfa95f6872b27e99beaf269fa0c9a2ab073c8d53e0f",
+      "constructed_before_first_update": true,
+      "construction_update": 0
+    }
+  },
+  "resources": {
+    "gpu_name": "NVIDIA RTX 6000 Ada Generation",
+    "physical_gpu_index": 5,
+    "cuda_visible_devices": "5",
+    "process_device": "cuda:0",
+    "live_nvidia_smi_peak_observed_memory_mib": 31159,
+    "live_memory_note": "live nvidia-smi samples include the CUDA process allocation/cache; process-reported torch peak allocator is recorded separately",
+    "other_gpu_processes_touched": false
+  },
+  "qualification_details": {
+    "diagnostic_only": true,
+    "formal_eligible": false,
+    "qualification": false,
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "qualification_credit": 0,
+    "interpretation": "completed real F3 training diagnostic only; no formal training, rollout, qualification, T1/T2 claim, or gate credit"
+  },
+  "side_effects": {
+    "source_code_modified": false,
+    "production_algorithm_modified": false,
+    "production_hdf5_modified": false,
+    "manifest_modified": false,
+    "registry_mutation": 0,
+    "completion_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "plan_modified": false,
+    "solver_started": false,
+    "worker_started": false,
+    "rollout_started": false,
+    "future_state_inputs": false,
+    "other_processes_terminated": false,
+    "historical_receipts_overwritten": false
+  },
+  "artifacts": {
+    "training_receipt_sha256": "b9f9d29d00fc748707386bb8d7067285c09d8f8123e24c838f49399fe44db5c0",
+    "training_progress_sha256": "0c7cbafeda2d597306e60905f645768a430930a4e08a6aa22572b98f0ccc223f",
+    "checkpoint_sha256": "6e846dcabf01147796e6004a0f880dc0036a8a7365f35ee046ec8428abde8189",
+    "training_log_sha256": "514e59a0c9af63c0e66ff2a32459bb7594a94701883dd719c64dbd686bdfcb9a",
+    "bytes": {
+      "training_receipt": 10052,
+      "training_progress": 489,
+      "checkpoint": 1107921,
+      "training_log": 8711
+    }
+  },
+  "analysis": {
+    "key_findings": [
+      "The requested real F3 graph_raw training completed all 500 updates with hidden=64, seed=29, max_neighbors=192, and zero observed neighbor truncation.",
+      "Initialization and train-only normalization evidence are complete; no validation or test state was used for normalization and no milestone rollout was run.",
+      "The process was bound to physical GPU5 through CUDA_VISIBLE_DEVICES=5 and used process-local cuda:0; the report records no other GPU or production artifact mutation.",
+      "This receipt is an input artifact for a later independent diagnostic full835 rollout only; it is not a formal training receipt, qualification result, T1/T2 result, or gate credit."
+    ],
+    "interpretation": "hidden64 seed29 graph_raw training completed as isolated diagnostic evidence. Full835 rollout evidence is intentionally absent from this training report and will be reported and committed separately.",
+    "rollout_report_required_separately": true
+  }
+}

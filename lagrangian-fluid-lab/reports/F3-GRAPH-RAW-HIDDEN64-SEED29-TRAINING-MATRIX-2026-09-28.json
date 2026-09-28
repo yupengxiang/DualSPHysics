@@ -1,0 +1,105 @@
+{
+  "schema": "core.f3.training_matrix.diagnostic.v1",
+  "report_id": "F3-GRAPH-RAW-HIDDEN64-SEED29-TRAINING-MATRIX-2026-09-28",
+  "date": "2026-09-28",
+  "status": "completed",
+  "diagnostic_only": true,
+  "formal_eligible": false,
+  "qualification": false,
+  "qualification_credit": 0,
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "future_state_inputs": false,
+  "matrix_scope": {
+    "family": "F3",
+    "purpose": "training-only diagnostic matrix row for the requested hidden64 graph_raw run",
+    "row_count": 1,
+    "training_split": "train",
+    "available_training_transitions": 13360,
+    "rollout_included": false,
+    "formal_training_included": false
+  },
+  "source": {
+    "repository": "lagrangian-fluid-lab",
+    "baseline_git_commit": "69f62e170666c650a531086808e5f0e1846abf1f",
+    "manifest_path": "campaigns/core-v1/f3-dataset-v2.json",
+    "manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "detail_report": "reports/F3-GRAPH-RAW-HIDDEN64-SEED29-TRAINING-DIAGNOSTIC-2026-09-28.json",
+    "detail_report_role": "independent row-level training evidence; this matrix does not mint formal status"
+  },
+  "rows": [
+    {
+      "row_id": "F3_graph_raw_hidden64_seed29_gpu5",
+      "family": "F3",
+      "model_kind": "graph_raw",
+      "seed": 29,
+      "hidden": 64,
+      "parameter_count": 85766,
+      "updates_requested": 500,
+      "updates_completed": 500,
+      "centers_per_update": 256,
+      "learning_rate": 0.001,
+      "optimizer": "Adam",
+      "normalization_transitions": 16,
+      "normalization_source_split": "train",
+      "target_normalization": "raw_dual_increment_train_shared",
+      "max_neighbors": 192,
+      "neighbor_truncation_fraction": 0.0,
+      "evidence_status": "complete",
+      "checkpoint_verified": true,
+      "device": {
+        "gpu_name": "NVIDIA RTX 6000 Ada Generation",
+        "physical_gpu_index": 5,
+        "cuda_visible_devices": "5",
+        "process_device": "cuda:0"
+      },
+      "metrics": {
+        "final_loss_mse": 0.1691545844078064,
+        "wall_seconds": 2174.996464936994,
+        "peak_gpu_memory_bytes": 9914864640,
+        "peak_rss_mib": 2689.62109375
+      },
+      "artifacts": {
+        "training_receipt": {
+          "path": "/tmp/f3-graph-raw500-hidden64-seed29-20260928-training.json",
+          "sha256": "b9f9d29d00fc748707386bb8d7067285c09d8f8123e24c838f49399fe44db5c0",
+          "bytes": 10052
+        },
+        "training_progress": {
+          "path": "/tmp/f3-graph-raw500-hidden64-seed29-20260928-training-progress.json",
+          "sha256": "0c7cbafeda2d597306e60905f645768a430930a4e08a6aa22572b98f0ccc223f",
+          "bytes": 489
+        },
+        "checkpoint": {
+          "path": "/tmp/f3-graph-raw500-hidden64-seed29-20260928-checkpoint.pt",
+          "sha256": "6e846dcabf01147796e6004a0f880dc0036a8a7365f35ee046ec8428abde8189",
+          "bytes": 1107921
+        },
+        "training_log": {
+          "path": "/tmp/f3-graph-raw500-hidden64-seed29-20260928-training.log",
+          "sha256": "514e59a0c9af63c0e66ff2a32459bb7594a94701883dd719c64dbd686bdfcb9a",
+          "bytes": 8711
+        }
+      },
+      "governance": {
+        "diagnostic_only": true,
+        "formal_eligible": false,
+        "qualification": false,
+        "T1_numerical": false,
+        "T2_macro": false,
+        "T2_path": false,
+        "qualification_credit": 0,
+        "registry_mutation": 0,
+        "completion_mutation": 0,
+        "ledger_mutation": 0,
+        "denominator_mutation": 0,
+        "gate_mutation": 0,
+        "production_hdf5_modified": false,
+        "rollout_started": false
+      }
+    }
+  ],
+  "matrix_interpretation": "The single row records a completed real diagnostic training run. It is an auditable input candidate for a separately reported full835 autonomous rollout, not a formal training, T1/T2, qualification, or gate result."
+}
