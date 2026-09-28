@@ -1,0 +1,69 @@
+{
+  "schema": "core.f4.t1.denominator.bounded_audit.v1",
+  "audit_id": "f4-tallwall120-t1-denominator-bounded-audit-2026-09-28",
+  "authorization": "none",
+  "diagnostic_only": true,
+  "source_receipt": {
+    "path": "/tmp/f4-tallwall120-t1-denominator-bounded-audit-2026-09-28.json",
+    "sha256": "66108f1ad1c53bf8a10ceb7c4efbeb273bb79fe2f20a67d857545b420fef71f2"
+  },
+  "scope": {
+    "family": "F4",
+    "qualified_scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+    "production_qualification_cases": 32,
+    "evaluation_case_count": 16,
+    "evaluation_case_ids": [
+      "DEV_00", "DEV_01", "DEV_02", "DEV_05", "DEV_08", "DEV_09", "DEV_13", "DEV_14",
+      "DEV_17", "DEV_18", "DEV_22", "DEV_23", "DEV_26", "DEV_29", "DEV_30", "DEV_31"
+    ],
+    "evaluation_split": "ood_test_and_id_test"
+  },
+  "audit_result": {
+    "trajectory_cases_present": 16,
+    "evidence_cases_present": 16,
+    "registry_cases_present": 16,
+    "identity_matches": 16,
+    "hdf5_metadata_checks_passed": 16,
+    "state_frames_read": 0,
+    "time_endpoint_scalars_read_per_case": 2,
+    "frame_count_per_case": 218,
+    "time_start_s": 0.0,
+    "time_end_s": 4.340002980805959,
+    "collection_execution_complete": 16,
+    "collection_denominator_included": 16,
+    "model_case_run_receipts_observed": 0,
+    "formal_denominator_credit": 0
+  },
+  "core_gap_accounting": {
+    "formal_model_seed_runs": 9,
+    "f4_evaluation_cases_per_run": 16,
+    "f4_model_case_run_gap": 144,
+    "registered_t1_case_run_gap": 288,
+    "target_t1_case_run_gap": 432,
+    "unregistered_t1_case_runs": 144,
+    "interpretation": "The 144 unregistered rows are the third T1 family's target capacity, not missing Tallwall120 CFD trajectories."
+  },
+  "execution_controls": {
+    "gpu_started": false,
+    "solver_started": false,
+    "worker_started": false,
+    "training_started": false,
+    "rollout_started": false,
+    "registry_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "historical_receipt_mutations": 0
+  },
+  "formal_blockers": [
+    "The available F4 diagnostic profile binds only one train case and two validation cases.",
+    "The diagnostic profile is not a formal denominator producer.",
+    "Core formal reader capability remains fail-closed pending the V13 trusted-reader contract."
+  ],
+  "qualification": {
+    "formal_eligible": false,
+    "t1": false,
+    "t2": false,
+    "credit": 0
+  }
+}
