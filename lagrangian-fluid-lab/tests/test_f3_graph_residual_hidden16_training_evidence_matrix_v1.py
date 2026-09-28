@@ -52,7 +52,7 @@ def _receipt(seed: int) -> dict:
         {
             "manifest_sha256": _sha("a"),
             "paired_seed": seed,
-            "run_id": f"graph_residual-hidden16-seed{seed}",
+            "run_id": f"f3-graph-residual500-hidden16-seed{seed}-20260928",
             "sampler_seed": seed,
             "seed": seed,
         }
@@ -63,7 +63,7 @@ def _receipt(seed: int) -> dict:
         "status": "completed",
         "model_kind": "graph_residual",
         "seed": seed,
-        "run_id": f"graph_residual-hidden16-seed{seed}",
+        "run_id": f"f3-graph-residual500-hidden16-seed{seed}-20260928",
         "completed_updates": 500,
         "parameter_count": matrix.PARAMETER_COUNT,
         "checkpoint_verified": True,
@@ -106,7 +106,7 @@ def _reference(receipts: dict[int, dict], source_shas: dict[int, str]) -> dict:
         "runs": [
             {
                 "seed": seed,
-                "run_id": f"graph_residual-hidden16-seed{seed}",
+                "run_id": f"f3-graph-residual500-hidden16-seed{seed}-20260928",
                 "completed_updates": 500,
                 "parameter_count": matrix.PARAMETER_COUNT,
                 "checkpoint_verified": True,
@@ -180,6 +180,38 @@ def test_complete_matrix_binds_all_identity_components_without_authority():
     assert all(row["status"] == "bound_complete" for row in report["runs"])
     assert all(row["evidence"]["residual_prior"]["enabled"] is True for row in report["runs"])
     assert matrix.validate_report(report) == []
+
+
+def test_real_training_run_id_binds_receipt_reference_and_projection():
+    report = _evaluate()
+    expected = {
+        seed: f"f3-graph-residual500-hidden16-seed{seed}-20260928"
+        for seed in matrix.SEEDS
+    }
+    assert {row["seed"]: row["evidence"]["run_id"] for row in report["runs"]} == expected
+    assert matrix.validate_report(report) == []
+
+
+@pytest.mark.parametrize("location", ("receipt", "reference", "projection"))
+def test_legacy_training_run_id_is_rejected(location):
+    receipts, sources, reference = _payloads()
+    legacy = "graph_residual-hidden16-seed17"
+
+    if location == "receipt":
+        receipts[17]["run_id"] = legacy
+        receipts[17]["config"]["run_id"] = legacy
+        report = _evaluate(receipts, sources, reference)
+        assert report["source_bound"] is False
+        assert any("seed17" in error and "run_id" in error for error in report["errors"])
+    elif location == "reference":
+        reference["runs"][0]["run_id"] = legacy
+        report = _evaluate(receipts, sources, reference)
+        assert report["source_bound"] is False
+        assert any("reference run 17 identity drifts" in error for error in report["errors"])
+    else:
+        report = _evaluate()
+        report["runs"][0]["evidence"]["run_id"] = legacy
+        assert any("seed/run identity drifts" in error for error in matrix.validate_report(report))
 
 
 def test_exact_seed_set_is_required():

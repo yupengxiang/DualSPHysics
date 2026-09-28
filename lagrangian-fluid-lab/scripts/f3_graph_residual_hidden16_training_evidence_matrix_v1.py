@@ -147,6 +147,12 @@ class MatrixError(ValueError):
     """A malformed, incomplete, drifting, or unsafe evidence input."""
 
 
+def _expected_run_id(seed: int) -> str:
+    """Return the exact run-id emitted by the hidden16 residual trainer."""
+
+    return f"f3-graph-residual500-hidden16-seed{seed}-20260928"
+
+
 def _fail(message: str) -> None:
     raise MatrixError(f"fail-closed: {message}")
 
@@ -592,7 +598,7 @@ def _validate_training_receipt(receipt: Mapping[str, Any], seed: int) -> dict[st
             _fail(f"{name}.config.{key} drifts")
     if config["seed"] != seed or config["paired_seed"] != seed or config["sampler_seed"] != seed:
         _fail(f"{name}.config seed bindings drift")
-    run_id = f"graph_residual-hidden16-seed{seed}"
+    run_id = _expected_run_id(seed)
     if config.get("run_id") != run_id or receipt.get("run_id") != run_id:
         _fail(f"{name}.run_id drifts")
     manifest_sha = _sha256(config.get("manifest_sha256"), f"{name}.config.manifest_sha256")
@@ -725,7 +731,7 @@ def _validate_reference_matrix(value: Mapping[str, Any]) -> tuple[str, dict[int,
         seed = _strict_int(item.get("seed"), "reference.run.seed")
         if seed in result or seed not in SEEDS:
             _fail("reference matrix seed set is not exactly 17, 29, 43")
-        if item.get("run_id") != f"graph_residual-hidden16-seed{seed}" or _strict_int(
+        if item.get("run_id") != _expected_run_id(seed) or _strict_int(
             item.get("completed_updates"), f"reference.run[{seed}].completed_updates"
         ) != UPDATES:
             _fail(f"reference run {seed} identity drifts")
@@ -1149,7 +1155,7 @@ def _validate_report_projection(value: Any, name: str) -> list[str]:
         if set(projection) != expected_keys:
             _fail(f"{name} keys drift")
         seed = _strict_int(projection.get("seed"), f"{name}.seed")
-        if seed not in SEEDS or projection.get("run_id") != f"graph_residual-hidden16-seed{seed}":
+        if seed not in SEEDS or projection.get("run_id") != _expected_run_id(seed):
             _fail(f"{name} seed/run identity drifts")
         if projection.get("schema") != TRAINING_SCHEMA or projection.get("model_kind") != MODEL_KIND:
             _fail(f"{name} schema/model identity drifts")
