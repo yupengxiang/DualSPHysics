@@ -1,0 +1,295 @@
+{
+  "authorization": {
+    "T1_numerical": false,
+    "capability_minted": false,
+    "diagnostic_only": true,
+    "execution_authority": false,
+    "formal_admission": false,
+    "qualification_credit": 0,
+    "readiness_pass": false
+  },
+  "blockers": [
+    {
+      "code": "target_kernel_identity_pin_incomplete",
+      "component": "target_kernel_source_build",
+      "field": "kernel_release"
+    },
+    {
+      "code": "target_source_identity_pin_incomplete",
+      "component": "target_kernel_source_build",
+      "field": "source_commit"
+    },
+    {
+      "code": "target_source_tree_pin_incomplete",
+      "component": "target_kernel_source_build",
+      "field": "source_tree_sha256"
+    },
+    {
+      "code": "target_uapi_pin_incomplete",
+      "component": "target_kernel_source_build",
+      "field": "uapi_sha256"
+    },
+    {
+      "code": "target_config_pin_incomplete",
+      "component": "target_kernel_source_build",
+      "field": "config_sha256"
+    },
+    {
+      "code": "target_build_identity_pin_incomplete",
+      "component": "target_kernel_source_build",
+      "field": "build_id"
+    },
+    {
+      "code": "trusted_authority_identity_unverified",
+      "component": "trusted_runtime",
+      "field": "authority_issuer_identity"
+    },
+    {
+      "code": "trusted_worker_supervisor_identity_unverified",
+      "component": "trusted_runtime",
+      "field": "worker_supervisor_identity"
+    },
+    {
+      "code": "loaded_runtime_identity_unverified",
+      "component": "trusted_runtime",
+      "field": "loaded_module_runtime_identity"
+    },
+    {
+      "code": "source_build_callgraph_conformance_missing",
+      "component": "trusted_runtime",
+      "field": "source_build_callgraph_conformance"
+    },
+    {
+      "code": "target_abi_conformance_missing",
+      "component": "trusted_runtime",
+      "field": "target_abi_conformance"
+    },
+    {
+      "code": "target_kernel_runtime_conformance_missing",
+      "component": "trusted_runtime",
+      "field": "target_kernel_runtime_conformance"
+    }
+  ],
+  "inventory_mode": "bounded_synthetic_current_blocker_shape",
+  "next_step": "collect separately authorized external target pin evidence and trusted runtime attestations, then re-run a future non-authorizing reconciliation",
+  "prohibited_operations": [
+    "production_source_build_or_kernel_path_read",
+    "production_runtime_or_loaded_module_probe",
+    "privileged_probe_or_root_escalation",
+    "native_or_solver",
+    "worker_gpu_or_queue",
+    "registry_ledger_gate_completion_mutation"
+  ],
+  "record_id": "f8-r008-untrusted-pin-blocker-inventory-report-v1",
+  "schema": "core.cfd.f8.r008.untrusted_pin_blocker_inventory_report.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "side_effects": {
+    "completion_mutation": 0,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "kernel_state_read": false,
+    "ledger_mutation": 0,
+    "native_started": false,
+    "privileged_probe_started": false,
+    "production_paths_read": false,
+    "queue_started": false,
+    "registry_mutation": 0,
+    "runtime_probe_started": false,
+    "solver_started": false,
+    "target_build_read": false,
+    "target_source_read": false,
+    "worker_started": false
+  },
+  "source_and_runtime_claims": {
+    "all_claims_untrusted": true,
+    "external_evidence_consumed": false,
+    "promotion_surface": "none",
+    "runtime_evidence_consumed": false,
+    "synthetic_fixture_only": true
+  },
+  "status": "synthetic_only_untrusted_pin_blocker_inventory",
+  "target_kernel_source_build": {
+    "closed_count": 0,
+    "open_count": 6,
+    "required_fields": [
+      "kernel_release",
+      "source_commit",
+      "source_tree_sha256",
+      "uapi_sha256",
+      "config_sha256",
+      "build_id"
+    ],
+    "rows": [
+      {
+        "blocker_code": "target_kernel_identity_pin_incomplete",
+        "claim_origin": "synthetic_fixture",
+        "claim_state": "missing_external_evidence",
+        "closed": false,
+        "component": "target_kernel_source_build",
+        "declared_value": null,
+        "external_evidence_present": false,
+        "field": "kernel_release",
+        "required_evidence": "separately authorized target evidence must bind the deployed kernel release",
+        "runtime_verified": false,
+        "trust": "untrusted"
+      },
+      {
+        "blocker_code": "target_source_identity_pin_incomplete",
+        "claim_origin": "synthetic_fixture",
+        "claim_state": "missing_external_evidence",
+        "closed": false,
+        "component": "target_kernel_source_build",
+        "declared_value": null,
+        "external_evidence_present": false,
+        "field": "source_commit",
+        "required_evidence": "separately authorized target evidence must bind the exact source commit",
+        "runtime_verified": false,
+        "trust": "untrusted"
+      },
+      {
+        "blocker_code": "target_source_tree_pin_incomplete",
+        "claim_origin": "synthetic_fixture",
+        "claim_state": "missing_external_evidence",
+        "closed": false,
+        "component": "target_kernel_source_build",
+        "declared_value": null,
+        "external_evidence_present": false,
+        "field": "source_tree_sha256",
+        "required_evidence": "separately authorized target evidence must bind the complete source-tree digest",
+        "runtime_verified": false,
+        "trust": "untrusted"
+      },
+      {
+        "blocker_code": "target_uapi_pin_incomplete",
+        "claim_origin": "synthetic_fixture",
+        "claim_state": "missing_external_evidence",
+        "closed": false,
+        "component": "target_kernel_source_build",
+        "declared_value": null,
+        "external_evidence_present": false,
+        "field": "uapi_sha256",
+        "required_evidence": "separately authorized target evidence must bind the deployed UAPI digest",
+        "runtime_verified": false,
+        "trust": "untrusted"
+      },
+      {
+        "blocker_code": "target_config_pin_incomplete",
+        "claim_origin": "synthetic_fixture",
+        "claim_state": "missing_external_evidence",
+        "closed": false,
+        "component": "target_kernel_source_build",
+        "declared_value": null,
+        "external_evidence_present": false,
+        "field": "config_sha256",
+        "required_evidence": "separately authorized target evidence must bind the deployed kernel config digest",
+        "runtime_verified": false,
+        "trust": "untrusted"
+      },
+      {
+        "blocker_code": "target_build_identity_pin_incomplete",
+        "claim_origin": "synthetic_fixture",
+        "claim_state": "missing_external_evidence",
+        "closed": false,
+        "component": "target_kernel_source_build",
+        "declared_value": null,
+        "external_evidence_present": false,
+        "field": "build_id",
+        "required_evidence": "separately authorized target evidence must bind the exact build identity",
+        "runtime_verified": false,
+        "trust": "untrusted"
+      }
+    ]
+  },
+  "trusted_runtime": {
+    "closed_count": 0,
+    "open_count": 6,
+    "required_fields": [
+      "authority_issuer_identity",
+      "worker_supervisor_identity",
+      "loaded_module_runtime_identity",
+      "source_build_callgraph_conformance",
+      "target_abi_conformance",
+      "target_kernel_runtime_conformance"
+    ],
+    "rows": [
+      {
+        "blocker_code": "trusted_authority_identity_unverified",
+        "claim_origin": "synthetic_fixture",
+        "claim_state": "synthetic_contract_only",
+        "closed": false,
+        "component": "trusted_runtime",
+        "declared_value": null,
+        "external_evidence_present": false,
+        "field": "authority_issuer_identity",
+        "required_evidence": "a separately trusted production root must authenticate the authority issuer",
+        "runtime_verified": false,
+        "trust": "untrusted"
+      },
+      {
+        "blocker_code": "trusted_worker_supervisor_identity_unverified",
+        "claim_origin": "synthetic_fixture",
+        "claim_state": "synthetic_contract_only",
+        "closed": false,
+        "component": "trusted_runtime",
+        "declared_value": null,
+        "external_evidence_present": false,
+        "field": "worker_supervisor_identity",
+        "required_evidence": "a trusted supervisor witness must bind the worker identity and execution attempt",
+        "runtime_verified": false,
+        "trust": "untrusted"
+      },
+      {
+        "blocker_code": "loaded_runtime_identity_unverified",
+        "claim_origin": "synthetic_fixture",
+        "claim_state": "synthetic_contract_only",
+        "closed": false,
+        "component": "trusted_runtime",
+        "declared_value": null,
+        "external_evidence_present": false,
+        "field": "loaded_module_runtime_identity",
+        "required_evidence": "the loaded runtime/module identity must be measured and bound to the target execution",
+        "runtime_verified": false,
+        "trust": "untrusted"
+      },
+      {
+        "blocker_code": "source_build_callgraph_conformance_missing",
+        "claim_origin": "synthetic_fixture",
+        "claim_state": "synthetic_contract_only",
+        "closed": false,
+        "component": "trusted_runtime",
+        "declared_value": null,
+        "external_evidence_present": false,
+        "field": "source_build_callgraph_conformance",
+        "required_evidence": "independently trusted target source/build evidence must prove the required callgraph",
+        "runtime_verified": false,
+        "trust": "untrusted"
+      },
+      {
+        "blocker_code": "target_abi_conformance_missing",
+        "claim_origin": "synthetic_fixture",
+        "claim_state": "synthetic_contract_only",
+        "closed": false,
+        "component": "trusted_runtime",
+        "declared_value": null,
+        "external_evidence_present": false,
+        "field": "target_abi_conformance",
+        "required_evidence": "target-kernel ABI evidence must prove the deployed selector and fanotify/FID/PIDFD semantics",
+        "runtime_verified": false,
+        "trust": "untrusted"
+      },
+      {
+        "blocker_code": "target_kernel_runtime_conformance_missing",
+        "claim_origin": "synthetic_fixture",
+        "claim_state": "synthetic_contract_only",
+        "closed": false,
+        "component": "trusted_runtime",
+        "declared_value": null,
+        "external_evidence_present": false,
+        "field": "target_kernel_runtime_conformance",
+        "required_evidence": "terminal target-runtime evidence must prove the deployed kernel behavior",
+        "runtime_verified": false,
+        "trust": "untrusted"
+      }
+    ]
+  }
+}
