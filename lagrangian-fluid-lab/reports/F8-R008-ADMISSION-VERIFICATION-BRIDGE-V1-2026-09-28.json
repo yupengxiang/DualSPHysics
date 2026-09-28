@@ -1,0 +1,671 @@
+{
+  "admission": {
+    "native_integrity_verified": false,
+    "next_step": "collect separately authorized target/runtime/native/terminal evidence, then re-run this bridge before any T1 adjudication",
+    "source_callgraph_conformance": false,
+    "source_contracts_bound": true,
+    "static_dependency_chain_bound": true,
+    "t1_execution_chain_ready": false,
+    "target_kernel_source_integrity_verified": false,
+    "target_kernel_static_pin_complete": false,
+    "terminal_matrix_complete": false,
+    "trusted_runtime_identity_verified": false
+  },
+  "authorization": {
+    "T1_numerical": false,
+    "capability_minted": false,
+    "diagnostic_only": true,
+    "execution_authority": false,
+    "formal": false,
+    "formal_eligible": false,
+    "qualification_credit": 0,
+    "readiness_pass": false
+  },
+  "blockers": [
+    {
+      "code": "target_kernel_external_evidence_incomplete",
+      "detail": "The external target-kernel evidence intake remains blocked and no complete external source/UAPI/config/build identity set is bound.",
+      "evidence": [
+        "reports/F8-R008-TARGET-KERNEL-EVIDENCE-INTAKE-V1.json",
+        "reports/F8-R008-TARGET-KERNEL-READINESS-PROJECTION-V1-2026-09-28.json"
+      ],
+      "severity": "high"
+    },
+    {
+      "code": "target_kernel_source_build_identity_unproven",
+      "detail": "The local inventory proves only the running release/config and bounded UAPI sample; source commit/tree and build identity remain unproven.",
+      "evidence": [
+        "reports/F8-R008-TARGET-KERNEL-LOCAL-INVENTORY-V1-2026-09-28.json"
+      ],
+      "severity": "high"
+    },
+    {
+      "code": "trusted_runtime_identity_and_source_callgraph_unverified",
+      "detail": "The trusted authority/worker/runtime artifacts are synthetic-only and source-callgraph/target-kernel runtime conformance are still false.",
+      "evidence": [
+        "reports/F8-R008-TRUSTED-AUTHORITY-WORKER-RUNTIME-IDENTITY-CONTRACT-V1.json",
+        "reports/F8-R008-TRUSTED-WORKER-RUNTIME-HANDOFF-CONTRACT-V1.json",
+        "reports/F8-R008-TARGET-KERNEL-READINESS-PROJECTION-V1-2026-09-28.json"
+      ],
+      "severity": "high"
+    },
+    {
+      "code": "native_integrity_15_by_8_cells_unverified",
+      "detail": "The native registry fixes 15×8=120 cells but only defines the aggregation contract; no bound native-integrity evidence evaluates those cells.",
+      "evidence": [
+        "scripts/f8_r008_native_integrity_registry_v1.py",
+        "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-scope-design-v1/receipt.json",
+        "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/definition-control-pack-v1/receipt.json"
+      ],
+      "severity": "high"
+    },
+    {
+      "code": "r008_15_case_t1_terminal_evidence_missing",
+      "detail": "All 15 terminal rows remain missing: no trusted B/C/D attempt projection, nonce markers, terminal supervisor/final-fput evidence, or real T1 result exists.",
+      "evidence": [
+        "reports/F8-R008-TERMINAL-EVIDENCE-MATRIX-INTAKE-V1-2026-09-28.json",
+        "reports/F8-R008-TERMINAL-MATRIX-READINESS-CONSISTENCY-V1-2026-09-28.json"
+      ],
+      "severity": "high"
+    }
+  ],
+  "dependencies": {
+    "metric_matrix_review": {
+      "bytes": 9586,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/native-fluid-table-schema-v2/metric-matrix-review-v3/receipt.json",
+      "record_id": "f8-r008-t1-metric-matrix-implementation-review-v3",
+      "schema": "core.cfd.f8.r008_t1_metric_matrix_implementation_review.v3",
+      "scope_id": null,
+      "sha256": "70628d67f1c94da9309131b07284d9e24d40ca097949e8f1b6a6bebc7e4d0c17",
+      "status": "static_implementation_review_passed_no_execution_or_t1_credit"
+    },
+    "native_table_metric_review": {
+      "bytes": 5483,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/native-fluid-table-schema-v2/metric-review-v2/receipt.json",
+      "record_id": "f8-r008-native-fluid-table-metric-implementation-review-v2",
+      "schema": "core.cfd.f8.r008_native_fluid_table_metric_implementation_review.v2",
+      "scope_id": null,
+      "sha256": "701a9b5a67b35a52a5bba95b5cb9743199a6fb66775431232f311c2101d62a03",
+      "status": "static_metric_implementation_review_passed_no_execution_or_t1_credit"
+    },
+    "readiness_v8": {
+      "bytes": 20998,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-execution-readiness-audit-v8/receipt.json",
+      "record_id": "f8-r008-execution-readiness-audit-v8",
+      "schema": "core.cfd.f8.r008_execution_readiness_audit.v8",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "sha256": "80b6df23bf8e118e60608dae9f64dd6967e2e9978e64f554ac5087651bee894c",
+      "status": "static_selector_domain_bound_full_runtime_readiness_blocked"
+    },
+    "safe_bi4_review": {
+      "bytes": 8166,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/safe-bi4-decoder-review-v1/receipt.json",
+      "record_id": "f8-r008-safe-bi4-decoder-review-v1",
+      "schema": "core.cfd.f8.r008_safe_bi4_decoder_review.v1",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "sha256": "39b24eb4075751dbb55591716409b57ba0019e5893f2579f2d30db752be71344",
+      "status": "static_safe_decoder_review_passed_no_native_execution"
+    },
+    "target_kernel_evidence_intake": {
+      "bytes": 2345,
+      "path": "reports/F8-R008-TARGET-KERNEL-EVIDENCE-INTAKE-V1.json",
+      "record_id": "f8-r008-target-kernel-evidence-intake-report-v1",
+      "schema": "core.cfd.f8.r008.target_kernel_evidence_intake_report.v1",
+      "scope_id": null,
+      "sha256": "a170e911f42a5544bdb2adea30ed96fd29f3f83b1e36a7e2481dec03a8d81f8c",
+      "status": "blocked_missing_external_target_evidence"
+    },
+    "target_kernel_local_inventory": {
+      "bytes": 12781,
+      "path": "reports/F8-R008-TARGET-KERNEL-LOCAL-INVENTORY-V1-2026-09-28.json",
+      "record_id": "f8-r008-target-kernel-local-inventory-v1",
+      "schema": "core.cfd.f8.r008.target_kernel_local_inventory_report.v1",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "sha256": "a7c511a5be9ed0ae7efa4b546eeea5f2e72e43e2ac3c8743b2ff1972927d3976",
+      "status": "diagnostic_only_local_target_kernel_inventory_incomplete"
+    },
+    "target_kernel_readiness_projection": {
+      "bytes": 9287,
+      "path": "reports/F8-R008-TARGET-KERNEL-READINESS-PROJECTION-V1-2026-09-28.json",
+      "record_id": "f8-r008-target-kernel-readiness-projection-v1",
+      "schema": "core.cfd.f8.r008.target_kernel_readiness_projection_report.v1",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "sha256": "ac591437c4faa9397b7986659c3a21aa75a906e72a9d810af21ecff1d0716af1",
+      "status": "diagnostic_only_target_kernel_readiness_blocked"
+    },
+    "terminal_matrix": {
+      "bytes": 82744,
+      "path": "reports/F8-R008-TERMINAL-EVIDENCE-MATRIX-INTAKE-V1-2026-09-28.json",
+      "record_id": "f8-r008-terminal-evidence-matrix-intake-v1",
+      "schema": "core.cfd.f8.r008_terminal_evidence_matrix_intake_report.v1",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "sha256": "a3aab591bb0b2fc88245296d91e13a3741b1f7b9d52b918e2c25fadb4a5e47e5",
+      "status": "diagnostic_only_terminal_evidence_matrix_blocked"
+    },
+    "terminal_matrix_consistency": {
+      "bytes": 17545,
+      "path": "reports/F8-R008-TERMINAL-MATRIX-READINESS-CONSISTENCY-V1-2026-09-28.json",
+      "record_id": "f8-r008-terminal-matrix-readiness-consistency-v1",
+      "schema": "core.cfd.f8.r008_terminal_matrix_readiness_consistency_report.v1",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "sha256": "74b71a4ee7b33f8fd34a19043a85f2bb30fce1d5b38c5f3cc7097580c51a98db",
+      "status": "diagnostic_only_terminal_matrix_readiness_consistency_blocked"
+    },
+    "trusted_handoff": {
+      "bytes": 2457,
+      "path": "reports/F8-R008-TRUSTED-WORKER-RUNTIME-HANDOFF-CONTRACT-V1.json",
+      "record_id": "f8-r008-trusted-worker-runtime-handoff-report-v1",
+      "schema": "core.cfd.f8.r008_trusted_worker_runtime_handoff_report.v1",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "sha256": "8a2c3535b403eeb0aae35579b2c5882eadb7c00b9cde0a047b7cc5c95120bca3",
+      "status": "synthetic_only_non_authorizing_handoff_contract_design"
+    },
+    "trusted_identity": {
+      "bytes": 2167,
+      "path": "reports/F8-R008-TRUSTED-AUTHORITY-WORKER-RUNTIME-IDENTITY-CONTRACT-V1.json",
+      "record_id": "f8-r008-trusted-identity-contract-report-v1",
+      "schema": "core.cfd.f8.r008_trusted_identity_contract_report.v1",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "sha256": "8f7188e0dea2d90b4a6eed6c1a8254eae6bc012dd6483e867717c2cb9070f89f",
+      "status": "synthetic_only_non_authorizing_contract_design"
+    },
+    "trusted_postrun": {
+      "bytes": 2825,
+      "path": "reports/F8-R008-TRUSTED-WORKER-RUNTIME-POSTRUN-MATRIX-CLAIM-ADAPTER-V1.json",
+      "record_id": "f8-r008-trusted-worker-runtime-postrun-matrix-claim-report-v1",
+      "schema": "core.cfd.f8.r008_trusted_worker_runtime_postrun_matrix_claim_report.v1",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "sha256": "ba989a8d950d88d9436fc516997cdf6501e50da02552a85e0f50e1625140e582",
+      "status": "synthetic_only_non_authorizing_postrun_matrix_claim_binding_design"
+    }
+  },
+  "mutations": {
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "ledger_mutation": 0,
+    "plan_mutation": 0,
+    "registry_mutation": 0
+  },
+  "native_integrity": {
+    "T1_numerical": false,
+    "aggregation_only": true,
+    "case_count": 15,
+    "case_ids": [
+      "space-q0-dp0p0090",
+      "space-q0-dp0p0075",
+      "space-q0-dp0p0060",
+      "space-q0p5-dp0p0090",
+      "space-q0p5-dp0p0075",
+      "space-q0p5-dp0p0060",
+      "space-q1-dp0p0090",
+      "space-q1-dp0p0075",
+      "space-q1-dp0p0060",
+      "internal-q0p25-dp0p0075",
+      "internal-q0p25-dp0p0060",
+      "internal-q0p75-dp0p0075",
+      "internal-q0p75-dp0p0060",
+      "time-q0p5-dp0p0075-cfl0p1",
+      "cadence-q0p5-dp0p0075-output128"
+    ],
+    "denominator_cells": 120,
+    "evidence_bindings_verified": false,
+    "gate_count": 8,
+    "gate_ids": [
+      "native_state_finite",
+      "density_range",
+      "mach_limit",
+      "wall_penetration_limit",
+      "excluded_fluid_particles_zero",
+      "particle_overlap_absent",
+      "inclusive_three_period_window_complete",
+      "control_no_extrapolation"
+    ],
+    "gate_registry_sha256": "68e88b9524e1a52cfe1f2a91322d62fa394a690f636afd47b2199a6ea2e650f5",
+    "native_integrity_evaluated": false,
+    "next_step": "supply one independently bound gate result for every case/gate cell, preserving all 120 cells",
+    "open_gate_ids": [
+      "native_state_finite",
+      "wall_penetration_limit",
+      "excluded_fluid_particles_zero",
+      "particle_overlap_absent"
+    ],
+    "qualification_credit": 0,
+    "readiness_pass": false,
+    "schema": "core.cfd.f8.r008_native_integrity_registry.v1"
+  },
+  "prohibited_operations": [
+    "production_bi4_hdf5_or_solver_frame_read",
+    "privileged_probe",
+    "fanotify_or_kernel_probe",
+    "native_or_solver",
+    "worker_gpu_or_queue",
+    "registry_ledger_gate_completion_mutation"
+  ],
+  "read_policy": {
+    "bounded_canonical_json_and_source_reads_only": true,
+    "fanotify_or_kernel_probe": false,
+    "native_or_solver": false,
+    "privileged_probe": false,
+    "production_bi4_hdf5_or_solver_frame_read": false,
+    "registry_ledger_gate_completion_write": false,
+    "small_file_metadata_only": true,
+    "worker_gpu_or_queue": false
+  },
+  "record_id": "f8-r008-admission-verification-bridge-report-v1",
+  "runtime_and_terminal": {
+    "production_authority_authenticated": false,
+    "production_runtime_identity_authenticated": false,
+    "runtime_measured": false,
+    "source_callgraph_conformance": false,
+    "target_kernel_runtime_conformance": false,
+    "terminal_attempt_projection_present": false,
+    "terminal_causal_witness_authenticated": false,
+    "terminal_markers_bound": false,
+    "terminal_rows_missing": 15
+  },
+  "schema": "core.cfd.f8.r008_admission_verification_bridge_report.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "side_effects": {
+    "completion_mutation": 0,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "kernel_started": false,
+    "ledger_mutation": 0,
+    "native_started": false,
+    "plan_mutation": 0,
+    "privileged_probe_started": false,
+    "queue_started": false,
+    "registry_mutation": 0,
+    "solver_started": false,
+    "system_write": 0,
+    "worker_started": false
+  },
+  "source_contracts": {
+    "components": {
+      "bridge": {
+        "bytes": 45627,
+        "path": "scripts/f8_r008_admission_verification_bridge_v1.py",
+        "sha256": "0ed46b184cc13ada584ef851b54900e07e8c221da9e3c57def411ac98220723b"
+      },
+      "metric_matrix_adapter_v5": {
+        "bytes": 32401,
+        "path": "scripts/f8_r008_t1_metric_matrix_adapter_v5.py",
+        "sha256": "70090188594d2903f754ec51e1747fc36bfe17533d7f33a0512c53b599030f3e"
+      },
+      "native_integrity_registry": {
+        "bytes": 11552,
+        "path": "scripts/f8_r008_native_integrity_registry_v1.py",
+        "sha256": "5b3cbb49262d9d4bf7a528d627d16f63a377b221b7a779652bd5c92a9998c788"
+      },
+      "native_table_metric_bundle_verifier": {
+        "bytes": 27886,
+        "path": "scripts/f8_r008_native_fluid_table_metric_bundle_verifier_v2.py",
+        "sha256": "175ee27d470e05f5fdb6e86a65cf2d6f96b7870bd9a9dae0886928e6486707a9"
+      },
+      "safe_bi4_decoder": {
+        "bytes": 32315,
+        "path": "scripts/f8_r008_safe_bi4_decoder_v1.py",
+        "sha256": "affbbb6c04a4d21d03037e74d0023112c60c7d8e5972cc6dfc882e1c7c5dc319"
+      },
+      "safe_bi4_metadata_binding": {
+        "bytes": 6660,
+        "path": "scripts/f8_r008_safe_bi4_metadata_binding_v1.py",
+        "sha256": "2ef65401df395e4d16fc6757304b658f7b4494d308730581bcc11e9008382096"
+      },
+      "target_kernel_evidence_intake": {
+        "bytes": 32892,
+        "path": "scripts/f8_r008_target_kernel_evidence_intake_v1.py",
+        "sha256": "8a2eacc0a9414e88a551e8d7632f488bc89db5c3fa28e97243845db21cd03d2b"
+      },
+      "target_kernel_local_inventory": {
+        "bytes": 36327,
+        "path": "scripts/f8_r008_target_kernel_local_inventory_v1.py",
+        "sha256": "28d3fb522943d4615faa269fe58c88da7fb70d27e864cd7e0746cad4adc014f8"
+      },
+      "target_kernel_readiness_projection": {
+        "bytes": 43802,
+        "path": "scripts/f8_r008_target_kernel_readiness_projection_v1.py",
+        "sha256": "ea30eddf449e164b3b63c64a72e9217c6cda78d4fe00f3c32a0a47ef23e0a684"
+      },
+      "terminal_matrix_consistency": {
+        "bytes": 70457,
+        "path": "scripts/f8_r008_terminal_matrix_readiness_consistency_v1.py",
+        "sha256": "35f7aefad50fd7e8b3ba58543478d3497588bb855fd28b1010c3722a10830efe"
+      },
+      "terminal_matrix_intake": {
+        "bytes": 52753,
+        "path": "scripts/f8_r008_terminal_evidence_matrix_intake_v1.py",
+        "sha256": "75a131b676f519da555047a493e893f494420e883741ab63790bbb0f9f2c2a43"
+      }
+    },
+    "reviewed_static_components": {
+      "metric_matrix_review": {
+        "execution_boundary_zero": true,
+        "matched_paths": [
+          {
+            "bytes": 28274,
+            "path": "scripts/f8_r008_t1_metric_matrix_adapter_v2.py",
+            "sha256": "13c47d1f87ae1196d87e4435a260481ba8b7a4237a2a7cb616eed9b8b0532a06"
+          },
+          {
+            "bytes": 27886,
+            "path": "scripts/f8_r008_native_fluid_table_metric_bundle_verifier_v2.py",
+            "sha256": "175ee27d470e05f5fdb6e86a65cf2d6f96b7870bd9a9dae0886928e6486707a9"
+          },
+          {
+            "bytes": 18236,
+            "path": "scripts/f8_r008_t1_metric_adapter_v2.py",
+            "sha256": "a71c1000388207177cd4d163c7ad9cbe8e7b4686f481cb4f332b2b24848f2485"
+          }
+        ],
+        "review_status": "static_implementation_review_passed_no_execution_or_t1_credit",
+        "source_bindings_match": true
+      },
+      "native_table_metric_review": {
+        "execution_boundary_zero": true,
+        "matched_paths": [
+          {
+            "bytes": 27886,
+            "path": "scripts/f8_r008_native_fluid_table_metric_bundle_verifier_v2.py",
+            "sha256": "175ee27d470e05f5fdb6e86a65cf2d6f96b7870bd9a9dae0886928e6486707a9"
+          },
+          {
+            "bytes": 18236,
+            "path": "scripts/f8_r008_t1_metric_adapter_v2.py",
+            "sha256": "a71c1000388207177cd4d163c7ad9cbe8e7b4686f481cb4f332b2b24848f2485"
+          },
+          {
+            "bytes": 65100,
+            "path": "scripts/f8_r008_t1_metric_adapter_v1.py",
+            "sha256": "f51940c775bdf6bc80dd410bbb4c080dfe6331d09299145d11f6124cba5ae650"
+          }
+        ],
+        "review_status": "static_metric_implementation_review_passed_no_execution_or_t1_credit",
+        "source_bindings_match": true
+      },
+      "safe_bi4_review": {
+        "execution_boundary_zero": true,
+        "matched_paths": [
+          {
+            "bytes": 32315,
+            "path": "scripts/f8_r008_safe_bi4_decoder_v1.py",
+            "sha256": "affbbb6c04a4d21d03037e74d0023112c60c7d8e5972cc6dfc882e1c7c5dc319"
+          },
+          {
+            "bytes": 7334,
+            "path": "scripts/f8_r008_bi4_format_static_audit_v3.py",
+            "sha256": "03817dbf3dca869422ebd9ee07c5c1a28eebce93f0a24bfdf91a0348cf27af8a"
+          }
+        ],
+        "review_status": "static_safe_decoder_review_passed_no_native_execution",
+        "source_bindings_match": true
+      }
+    },
+    "runtime_loaded_identity_proven": false,
+    "status": "repository_static_sources_bound_target_source_not_proven",
+    "target_source_commit_proven": false,
+    "target_source_tree_proven": false
+  },
+  "status": "diagnostic_only_admission_verification_blocked",
+  "t1_execution_chain": {
+    "T1_numerical": false,
+    "case_count": 15,
+    "case_ids": [
+      "space-q0-dp0p0090",
+      "space-q0-dp0p0075",
+      "space-q0-dp0p0060",
+      "space-q0p5-dp0p0090",
+      "space-q0p5-dp0p0075",
+      "space-q0p5-dp0p0060",
+      "space-q1-dp0p0090",
+      "space-q1-dp0p0075",
+      "space-q1-dp0p0060",
+      "internal-q0p25-dp0p0075",
+      "internal-q0p25-dp0p0060",
+      "internal-q0p75-dp0p0075",
+      "internal-q0p75-dp0p0060",
+      "time-q0p5-dp0p0075-cfl0p1",
+      "cadence-q0p5-dp0p0075-output128"
+    ],
+    "execution_authority_granted": false,
+    "ordering": "B_then_C_then_D_then_terminal_then_T1_adjudication",
+    "qualification_credit": 0,
+    "rows": [
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "space-q0-dp0p0090",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 0.0,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      },
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "space-q0-dp0p0075",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 0.0,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      },
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "space-q0-dp0p0060",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 0.0,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      },
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "space-q0p5-dp0p0090",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 0.5,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      },
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "space-q0p5-dp0p0075",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 0.5,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      },
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "space-q0p5-dp0p0060",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 0.5,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      },
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "space-q1-dp0p0090",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 1.0,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      },
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "space-q1-dp0p0075",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 1.0,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      },
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "space-q1-dp0p0060",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 1.0,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      },
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "internal-q0p25-dp0p0075",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 0.25,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      },
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "internal-q0p25-dp0p0060",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 0.25,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      },
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "internal-q0p75-dp0p0075",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 0.75,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      },
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "internal-q0p75-dp0p0060",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 0.75,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      },
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "time-q0p5-dp0p0075-cfl0p1",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 0.5,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      },
+      {
+        "B": "not_verified",
+        "C": "not_verified",
+        "D": "not_verified",
+        "case_id": "cadence-q0p5-dp0p0075-output128",
+        "current_status": "blocked_missing_execution_evidence",
+        "native_integrity_gate_cells": 8,
+        "next_action": "obtain an independently authorized B→C→D attempt bundle and terminal receipt for this exact case id",
+        "q": 0.5,
+        "qualification_credit": 0,
+        "terminal": "missing"
+      }
+    ],
+    "stages": [
+      {
+        "current_status": "not_verified",
+        "name": "materialization",
+        "required_evidence": "trusted B receipt plus output manifest bound to the frozen Definition/control inputs",
+        "stage": "B"
+      },
+      {
+        "current_status": "not_verified",
+        "name": "solver_execution",
+        "required_evidence": "trusted C receipt, process journal, runtime configuration, complete solver frame manifest, and normal completion",
+        "stage": "C"
+      },
+      {
+        "current_status": "not_verified",
+        "name": "native_table_and_metric_verification",
+        "required_evidence": "safe BI4/native table provenance, source/runtime identity, timestep adjudication, and reviewed metric result",
+        "stage": "D"
+      },
+      {
+        "current_status": "not_verified",
+        "name": "terminal_and_final_fput_verification",
+        "required_evidence": "trusted attempt/nonce markers, terminal supervisor evidence, fanotify/final-fput causal witness, and terminal matrix binding",
+        "stage": "terminal"
+      }
+    ]
+  },
+  "target_kernel": {
+    "all_required_pins_complete": false,
+    "build_id_proven": false,
+    "external_intake_status": "blocked_missing_external_target_evidence",
+    "kernel_release_observed": true,
+    "local_inventory_status": "diagnostic_only_local_target_kernel_inventory_incomplete",
+    "matching_config_observed": true,
+    "readiness_projection_status": "diagnostic_only_target_kernel_readiness_blocked",
+    "runtime_conformance": false,
+    "source_commit_proven": false,
+    "source_tree_proven": false,
+    "uapi_sample_complete": true
+  },
+  "verification": {
+    "T1_numerical": false,
+    "case_count": 15,
+    "dependency_count": 12,
+    "dependency_digests_recomputed": true,
+    "frozen_denominator_rechecked": true,
+    "native_cell_count": 120,
+    "native_gate_count": 8,
+    "qualification_credit": 0,
+    "reviewed_source_digests_rechecked": true,
+    "runtime_verification_passed": false,
+    "static_consistency_passed": true,
+    "terminal_rows_bound": 15,
+    "terminal_rows_with_markers": 0
+  }
+}
