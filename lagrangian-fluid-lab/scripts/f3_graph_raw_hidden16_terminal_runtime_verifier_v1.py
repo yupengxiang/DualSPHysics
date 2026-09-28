@@ -72,6 +72,23 @@ MAX_DECLARED_BYTES = 1 << 50
 CHECKPOINT_SUFFIXES = frozenset({".pt", ".pth", ".ckpt"})
 
 
+# This is the one evaluator argv contract accepted by the graph_raw diagnostic
+# evidence chain.  The verifier never resolves or executes these tokens; the
+# exact comparison is intentional.  Checking only a basename (for example,
+# ``core_learning.py``) would allow a different interpreter or script to be
+# presented with a self-consistent digest.
+CANONICAL_INTERPRETER = "./.venv/bin/python"
+CANONICAL_CORE_LEARNING = "scripts/core_learning.py"
+CANONICAL_ACTION = "evaluate"
+CANONICAL_MANIFEST = "campaigns/core-v1/f3-dataset-v2.json"
+CANONICAL_DATA_ROOT = "."
+CANONICAL_CHUNK_SIZE = "34560"
+CANONICAL_DEVICE = "cuda:0"
+CANONICAL_PROGRESS_EVERY = "25"
+CANONICAL_ENV = "/usr/bin/env"
+CANONICAL_ENV_ASSIGNMENT = "PYTHONDONTWRITEBYTECODE=1"
+
+
 def _canonical_manifest_path() -> str:
     return "/tmp/f3-graph-raw500-hidden16-20260928-manifest.json"
 
@@ -842,6 +859,47 @@ def _option(argv: Sequence[str], option: str, name: str) -> str:
     return argv[index + 1]
 
 
+def _expected_evaluator_command(
+    *,
+    checkpoint: str,
+    trajectory: str,
+    evaluation: str,
+    namespace: str,
+) -> list[str]:
+    """Build the complete canonical evaluator argv for one nonce namespace."""
+
+    return [
+        CANONICAL_INTERPRETER,
+        CANONICAL_CORE_LEARNING,
+        CANONICAL_ACTION,
+        "--manifest",
+        CANONICAL_MANIFEST,
+        "--data-root",
+        CANONICAL_DATA_ROOT,
+        "--checkpoint",
+        checkpoint,
+        "--case-id",
+        CASE_ID,
+        "--split",
+        SPLIT,
+        "--maximum-steps",
+        str(TRANSITIONS),
+        "--chunk-size",
+        CANONICAL_CHUNK_SIZE,
+        "--device",
+        CANONICAL_DEVICE,
+        "--progress-every",
+        CANONICAL_PROGRESS_EVERY,
+        "--trajectory-output",
+        trajectory,
+        "--progress-output",
+        namespace + "-evaluation-progress.json",
+        "--output",
+        evaluation,
+        "--diagnostic",
+    ]
+
+
 def _validate_evaluator_command(
     argv: Sequence[str],
     *,
@@ -850,27 +908,43 @@ def _validate_evaluator_command(
     evaluation: str,
     namespace: str,
     name: str,
-) -> None:
-    if sum(item == "evaluate" for item in argv) != 1:
-        _fail(f"{name} must contain exactly one evaluate action")
-    if sum(Path(item).name == "core_learning.py" for item in argv) != 1:
-        _fail(f"{name} must invoke core_learning.py")
-    expected_options = {
-        "--manifest": "campaigns/core-v1/f3-dataset-v2.json",
-        "--case-id": CASE_ID,
-        "--split": SPLIT,
-        "--maximum-steps": str(TRANSITIONS),
-        "--checkpoint": checkpoint,
-        "--trajectory-output": trajectory,
-        "--progress-output": namespace + "-evaluation-progress.json",
-        "--output": evaluation,
-    }
-    for option, expected in expected_options.items():
-        observed = _option(argv, option, name)
-        if observed != expected:
-            _fail(f"{name}.{option} must be {expected!r}; observed {observed!r}")
-    if sum(item == "--diagnostic" for item in argv) != 1:
-        _fail(f"{name} must contain exactly one --diagnostic flag")
+) -> tuple[list[str], str]:
+    expected = _expected_evaluator_command(
+        checkpoint=checkpoint,
+        trajectory=trajectory,
+        evaluation=evaluation,
+        namespace=namespace,
+    )
+    observed = list(argv)
+    if observed != expected:
+        _fail(f"{name} must equal the complete canonical evaluator argv; token/flag/path drift detected")
+    return expected, _command_sha256(expected)
+
+
+def _validate_launcher_command(
+    argv: Sequence[str],
+    *,
+    evaluator: Sequence[str],
+    name: str,
+) -> tuple[list[str], str]:
+    """Accept only the direct evaluator or the fixed no-shell env wrapper."""
+
+    evaluator_argv = list(evaluator)
+    allowed = [evaluator_argv]
+    allowed.append([CANONICAL_ENV, CANONICAL_ENV_ASSIGNMENT, *evaluator_argv])
+    for device_index in range(8):
+        allowed.append(
+            [
+                CANONICAL_ENV,
+                CANONICAL_ENV_ASSIGNMENT,
+                f"CUDA_VISIBLE_DEVICES={device_index}",
+                *evaluator_argv,
+            ]
+        )
+    observed = list(argv)
+    if observed not in allowed:
+        _fail(f"{name} must be the evaluator or the fixed /usr/bin/env wrapper; launcher drift detected")
+    return observed, _command_sha256(observed)
 
 
 PROCESS_PRODUCER_KEYS = frozenset({"schema", "id", "version", "source_bound", "synthetic_only", "digest"})
@@ -1016,7 +1090,7 @@ def _validate_process(value: Mapping[str, Any], seed: int, name: str) -> dict[st
         _check_exact(attestation, key, expected, f"{name}.exit_attestation")
     evaluator, evaluator_command, evaluator_command_sha256 = _validate_process_component(attestation.get("evaluator"), f"{name}.exit_attestation.evaluator")
     launcher, launcher_command, launcher_command_sha256 = _validate_process_component(attestation.get("launcher"), f"{name}.exit_attestation.launcher")
-    _validate_evaluator_command(
+    canonical_evaluator, canonical_evaluator_sha256 = _validate_evaluator_command(
         evaluator_command,
         checkpoint=shared["checkpoint"]["path"],
         trajectory=shared["trajectory"]["path"],
@@ -1024,8 +1098,25 @@ def _validate_process(value: Mapping[str, Any], seed: int, name: str) -> dict[st
         namespace=shared["namespace"],
         name=f"{name}.exit_attestation.evaluator.command",
     )
-    if len(launcher_command) < len(evaluator_command) or launcher_command[-len(evaluator_command):] != evaluator_command:
-        _fail(f"{name}.exit_attestation.launcher.command must end with the evaluator argv")
+    if evaluator_command_sha256 != canonical_evaluator_sha256:
+        _fail(f"{name}.exit_attestation.evaluator.command_sha256 is not the canonical argv digest")
+    canonical_launcher, canonical_launcher_sha256 = _validate_launcher_command(
+        launcher_command,
+        evaluator=canonical_evaluator,
+        name=f"{name}.exit_attestation.launcher.command",
+    )
+    if launcher_command_sha256 != canonical_launcher_sha256:
+        _fail(f"{name}.exit_attestation.launcher.command_sha256 is not the canonical argv digest")
+    evaluator = {
+        **evaluator,
+        "command": canonical_evaluator,
+        "command_sha256": canonical_evaluator_sha256,
+    }
+    launcher = {
+        **launcher,
+        "command": canonical_launcher,
+        "command_sha256": canonical_launcher_sha256,
+    }
 
     bindings = _mapping(attestation.get("artifact_bindings"), f"{name}.exit_attestation.artifact_bindings")
     _reject_unknown(bindings, PROCESS_ARTIFACT_BINDING_KEYS, f"{name}.exit_attestation.artifact_bindings")

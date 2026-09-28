@@ -184,20 +184,24 @@ def _envelopes(training: dict[str, object], terminal: dict[str, object]) -> dict
             "trajectory": {key: projection["trajectory"][key] for key in ("path", "sha256", "bytes")},
         }
         evaluator_command = [
-            "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
-            "core_learning.py",
+            verifier.CANONICAL_INTERPRETER,
+            verifier.CANONICAL_CORE_LEARNING,
             "evaluate",
-            "--manifest", "campaigns/core-v1/f3-dataset-v2.json",
+            "--manifest", verifier.CANONICAL_MANIFEST,
+            "--data-root", verifier.CANONICAL_DATA_ROOT,
+            "--checkpoint", projection["checkpoint"]["path"],
             "--case-id", verifier.CASE_ID,
             "--split", verifier.SPLIT,
             "--maximum-steps", str(verifier.TRANSITIONS),
-            "--checkpoint", projection["checkpoint"]["path"],
+            "--chunk-size", verifier.CANONICAL_CHUNK_SIZE,
+            "--device", verifier.CANONICAL_DEVICE,
+            "--progress-every", verifier.CANONICAL_PROGRESS_EVERY,
             "--trajectory-output", projection["trajectory"]["path"],
             "--progress-output", projection["output_namespace"] + "-evaluation-progress.json",
             "--output", projection["evaluation"]["path"],
             "--diagnostic",
         ]
-        launcher_command = ["diagnostic-rollout-launcher-v1", *evaluator_command]
+        launcher_command = [verifier.CANONICAL_ENV, verifier.CANONICAL_ENV_ASSIGNMENT, *evaluator_command]
         evaluator = {
             "alive": False,
             "returncode": 0,
@@ -495,6 +499,44 @@ def test_process_attestation_digest_command_and_artifact_binding_fail_closed(tmp
     report = verifier.build_report(paths["process"][17].parents[1], training_matrix_path=payloads["training_path"], terminal_matrix_path=payloads["terminal_path"], rollout_paths=paths["rollout"], process_paths=paths["process"], validator_paths=paths["validator"])
     assert report["source_bound"] is False
     assert any("command_sha256" in reason or "evaluate" in reason for reason in report["blocked_reasons"])
+
+
+@pytest.mark.parametrize("mutation", ["arbitrary_script_path", "different_chunk_size"])
+def test_process_rejects_self_consistent_noncanonical_complete_argv(tmp_path: Path, mutation: str) -> None:
+    _report, paths, payloads = _build_complete(tmp_path)
+    process = json.loads(paths["process"][17].read_text(encoding="utf-8"))
+    attestation = process["exit_attestation"]
+    evaluator = attestation["evaluator"]
+    original_evaluator = list(evaluator["command"])
+    mutated_evaluator = list(original_evaluator)
+    if mutation == "arbitrary_script_path":
+        mutated_evaluator[1] = "/tmp/attacker/core_learning.py"
+    else:
+        chunk_index = mutated_evaluator.index("--chunk-size") + 1
+        mutated_evaluator[chunk_index] = "1"
+    evaluator["command"] = mutated_evaluator
+    evaluator["command_sha256"] = verifier._command_sha256(mutated_evaluator)
+
+    launcher = attestation["launcher"]
+    original_launcher = list(launcher["command"])
+    prefix = original_launcher[: -len(original_evaluator)]
+    mutated_launcher = [*prefix, *mutated_evaluator]
+    launcher["command"] = mutated_launcher
+    launcher["command_sha256"] = verifier._command_sha256(mutated_launcher)
+    attestation_core = {key: value for key, value in attestation.items() if key != "digest"}
+    attestation["digest"] = verifier._digest(attestation_core)
+    _write_json(paths["process"][17], process)
+
+    report = verifier.build_report(
+        tmp_path,
+        training_matrix_path=payloads["training_path"],
+        terminal_matrix_path=payloads["terminal_path"],
+        rollout_paths=paths["rollout"],
+        process_paths=paths["process"],
+        validator_paths=paths["validator"],
+    )
+    assert report["source_bound"] is False
+    assert any("canonical evaluator argv" in reason for reason in report["blocked_reasons"])
 
 
 def test_process_attestation_rejects_synthetic_or_missing_producer_chain(tmp_path: Path) -> None:
