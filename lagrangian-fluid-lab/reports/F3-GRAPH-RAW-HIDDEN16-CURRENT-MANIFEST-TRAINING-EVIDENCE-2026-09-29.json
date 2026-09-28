@@ -1,0 +1,194 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "authorization": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "formal": false,
+    "formal_eligible": false,
+    "qualification": false,
+    "qualification_credit": 0
+  },
+  "checks": [
+    {
+      "check": "exact_seed_set",
+      "expected": [
+        17,
+        29,
+        43
+      ],
+      "observed": [
+        17,
+        29,
+        43
+      ],
+      "passed": true,
+      "reason": "receipt slots must contain exactly seeds 17, 29, and 43"
+    },
+    {
+      "check": "manifest_raw_identity",
+      "expected": "actual manifest file SHA-256",
+      "observed": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "passed": true,
+      "reason": "raw manifest bytes were hashed from the explicit path"
+    },
+    {
+      "check": "manifest_canonical_identity",
+      "expected": "canonical manifest SHA-256",
+      "observed": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "passed": true,
+      "reason": "canonical manifest payload identity was computed without opening dataset content"
+    },
+    {
+      "check": "manifest_canonical_and_raw_cross_binding",
+      "expected": {
+        "bytes": 93710,
+        "canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "raw_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+      },
+      "observed": [],
+      "passed": false,
+      "reason": "every accepted run carries the actual manifest raw and canonical identities"
+    },
+    {
+      "check": "unique_run_receipt_checkpoint_identity",
+      "expected": "three independent seed identities",
+      "observed": {
+        "checkpoint_path_sha256": [],
+        "receipt_sha256": [],
+        "run_ids": []
+      },
+      "passed": false,
+      "reason": "run_id, receipt-file, and declared checkpoint identities are unique"
+    },
+    {
+      "check": "graph_raw_hidden16_completed_protocol",
+      "expected": {
+        "completed": true,
+        "hidden": 16,
+        "model": "graph_raw",
+        "updates": 500
+      },
+      "observed": [],
+      "passed": false,
+      "reason": "all accepted receipts declare completed graph_raw hidden16 500-update training"
+    },
+    {
+      "check": "zero_credit_non_authorizing",
+      "expected": true,
+      "observed": false,
+      "passed": false,
+      "reason": "all accepted receipt metadata remains diagnostic-only and zero-credit"
+    }
+  ],
+  "credit": 0,
+  "diagnostic_only": true,
+  "errors": [
+    "seed17: fail-closed: training receipt seed17 cannot be opened: [Errno 2] No such file or directory: '/tmp/f3-graph_raw500-hidden16-currentmanifest-seed17-20260929-v3-training.json'",
+    "seed29: fail-closed: training receipt seed29 cannot be opened: [Errno 2] No such file or directory: '/tmp/f3-graph_raw500-hidden16-currentmanifest-seed29-20260929-v3-training.json'",
+    "seed43: fail-closed: training receipt seed43 cannot be opened: [Errno 2] No such file or directory: '/tmp/f3-graph_raw500-hidden16-currentmanifest-seed43-20260929-v3-training.json'",
+    "fail-closed: receipt identities do not cross-bind to the current manifest canonical and raw identity",
+    "fail-closed: run, receipt, or declared checkpoint identity is duplicated or incomplete",
+    "fail-closed: receipt zero-credit contract is incomplete"
+  ],
+  "fail_closed": true,
+  "formal": false,
+  "formal_eligible": false,
+  "formal_training_runs_counted": 0,
+  "hidden": 16,
+  "input_boundary": {
+    "bounded_json_only": true,
+    "bounded_manifest_json_opened": true,
+    "bounded_training_receipts_json_opened": 0,
+    "checkpoint_content_opened": false,
+    "checkpoint_lstat_performed": false,
+    "gpu_started": false,
+    "hdf5_content_opened": false,
+    "ledger_read": false,
+    "progress_content_opened": false,
+    "registry_read": false,
+    "solver_started": false,
+    "trajectory_content_opened": false
+  },
+  "manifest": {
+    "bytes": 93710,
+    "canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "dataset_id": "F3_registered32_core_native_v2",
+    "opened": true,
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "schema": "core.dataset.v2",
+    "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+  },
+  "model": "graph_raw",
+  "observed_at_utc": "2026-09-28T22:00:16.377010+00:00",
+  "qualification": false,
+  "qualification_credit": 0,
+  "report_id": "f3-graph-raw-hidden16-current-manifest-training-evidence-v1",
+  "runs": [
+    {
+      "blocked_reasons": [
+        "fail-closed: training receipt seed17 cannot be opened: [Errno 2] No such file or directory: '/tmp/f3-graph_raw500-hidden16-currentmanifest-seed17-20260929-v3-training.json'"
+      ],
+      "seed": 17,
+      "source": {
+        "bytes": null,
+        "opened": false,
+        "path": "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed17-20260929-v3-training.json",
+        "sha256": null
+      },
+      "status": "missing"
+    },
+    {
+      "blocked_reasons": [
+        "fail-closed: training receipt seed29 cannot be opened: [Errno 2] No such file or directory: '/tmp/f3-graph_raw500-hidden16-currentmanifest-seed29-20260929-v3-training.json'"
+      ],
+      "seed": 29,
+      "source": {
+        "bytes": null,
+        "opened": false,
+        "path": "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed29-20260929-v3-training.json",
+        "sha256": null
+      },
+      "status": "missing"
+    },
+    {
+      "blocked_reasons": [
+        "fail-closed: training receipt seed43 cannot be opened: [Errno 2] No such file or directory: '/tmp/f3-graph_raw500-hidden16-currentmanifest-seed43-20260929-v3-training.json'"
+      ],
+      "seed": 43,
+      "source": {
+        "bytes": null,
+        "opened": false,
+        "path": "/tmp/f3-graph_raw500-hidden16-currentmanifest-seed43-20260929-v3-training.json",
+        "sha256": null
+      },
+      "status": "missing"
+    }
+  ],
+  "schema": "core.f3.graph_raw.hidden16.current_manifest_training_evidence.v1",
+  "scope_note": "additive bounded graph_raw current-manifest training-evidence intake; no formal/T1/T2/credit authority",
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "side_effects": {
+    "checkpoint_opened": false,
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "hdf5_opened": false,
+    "ledger_mutation": 0,
+    "progress_opened": false,
+    "registry_mutation": 0,
+    "runtime_started": false
+  },
+  "source_bound": false,
+  "status": "blocked_fail_closed",
+  "t1_case_runs_counted": 0,
+  "t2_macro_families_counted": 0,
+  "updates": 500
+}
