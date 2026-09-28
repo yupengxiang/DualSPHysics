@@ -1,0 +1,589 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "blocked_reasons": [],
+  "checks": [
+    {
+      "check": "manifest_identity_bound",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "current-manifest raw/canonical identity is bound"
+    },
+    {
+      "check": "training_evidence_bound",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "all three current-manifest training rows are bound"
+    },
+    {
+      "check": "exact_seed_set",
+      "expected": [
+        17,
+        29,
+        43
+      ],
+      "observed": [
+        17,
+        29,
+        43
+      ],
+      "passed": true,
+      "reason": "exact seed set is 17, 29, 43"
+    },
+    {
+      "check": "terminal_projection_set",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "every seed has six terminal projections"
+    },
+    {
+      "check": "cross_seed_identity_unique",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "run, nonce, checkpoint, receipt, and output identities are unique"
+    },
+    {
+      "check": "zero_credit",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "all accepted evidence remains diagnostic-only and zero-credit"
+    },
+    {
+      "check": "content_boundary",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "only bounded projection JSON and lstat metadata are used"
+    }
+  ],
+  "credit": 0,
+  "diagnostic_only": true,
+  "expected_contract": {
+    "bounded_json_only": true,
+    "case_id": "F3_DEV_00_a0p903125",
+    "frames": 836,
+    "hidden": 16,
+    "model": "mlp",
+    "required_projections": [
+      "manifest_identity",
+      "training_evidence",
+      "rollout_plan",
+      "process_exit_proof",
+      "evaluation_identity",
+      "trajectory_metadata",
+      "hdf5_validator",
+      "artifact_identity"
+    ],
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "split": "test",
+    "transitions": 835,
+    "updates": 500,
+    "zero_credit_only": true
+  },
+  "fail_closed": false,
+  "formal": false,
+  "formal_eligible": false,
+  "hidden": 16,
+  "input_boundary": {
+    "artifact_content_opened": false,
+    "bounded_json_only": true,
+    "checkpoint_content_opened": false,
+    "denominator_read": false,
+    "evaluation_content_opened": false,
+    "gate_read": false,
+    "ledger_read": false,
+    "manifest_content_opened": false,
+    "matrix_read": false,
+    "plan_read": false,
+    "projection_json_opened": true,
+    "registry_read": false,
+    "runtime_restarted": false,
+    "runtime_started": false,
+    "runtime_stopped": false,
+    "trajectory_hdf5_opened": false
+  },
+  "interpretation": "This independent intake consumes explicit bounded JSON projections and lstat metadata only. It never opens checkpoint, evaluation, trajectory, or HDF5 content and never grants formal/T1/T2/qualification credit.",
+  "manifest_identity": {
+    "binding": {
+      "canonical": {
+        "sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768"
+      },
+      "raw": {
+        "bytes": 93710,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+        "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+      }
+    },
+    "source": {
+      "bytes": 696,
+      "lstat": {
+        "bytes": 696,
+        "device": 2081,
+        "inode": 318714064,
+        "mode": 32768,
+        "nlink": 1
+      },
+      "opened": true,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-IDENTITY-2026-09-29.json",
+      "schema": "core.f3.mlp.hidden16.current_manifest.identity_projection.v1",
+      "sha256": "59bfd8861720d579028d3f6426c0afbeeb0cd76ee5092ff79bd487fcf8beb0c2"
+    }
+  },
+  "model": "mlp",
+  "observed_at_utc": "2026-09-28T21:00:56.268488+00:00",
+  "qualification": false,
+  "qualification_credit": 0,
+  "report_id": "f3-mlp-hidden16-current-manifest-terminal-evidence-v1",
+  "schema": "core.f3.mlp.hidden16.current_manifest_terminal_evidence.v1",
+  "seed_matrix": [
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "artifact_identity": {
+          "bytes": 1831,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-full835-20260929-f17a9c4e2d6b8f1035c7e1a9d4b6c802-artifact-identity.json",
+          "sha256": "58c69e4bd7b87ed5796bb61476da088d18416eb6e22cdb8ff8f877439a6ca1ec"
+        },
+        "checkpoint": {
+          "bytes": 64380,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-20260929-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "c1e41d29900e02e50fcf0a0435f8c3427e41761d8114858235c82a8847cf8897",
+          "update": 500
+        },
+        "evaluation": {
+          "bytes": 6405637,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-full835-20260929-f17a9c4e2d6b8f1035c7e1a9d4b6c802-evaluation.json",
+          "sha256": "48845d428c9d2c681a926cf2948c19a89b701dd5b37b3d410f56254ba268e204"
+        },
+        "namespace": "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-full835-20260929-f17a9c4e2d6b8f1035c7e1a9d4b6c802",
+        "namespace_nonce": "f17a9c4e2d6b8f1035c7e1a9d4b6c802",
+        "process_proof": {
+          "bytes": 3107,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-f556af302f8e9555a87852f70b31a019-PROCESS-EXIT-PROOF-V1.json",
+          "sha256": "d0482effa59cbb16b3703444cfc2d57b126397cdc2c2b1d183864a9130d6216e"
+        },
+        "run_id": "f3-mlp500-hidden16-currentmanifest-seed17-20260929",
+        "seed": 17,
+        "training_receipt": {
+          "bytes": 10075,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-20260929-training.json",
+          "sha256": "e5a90ab6784e57dcc4d573ba5e3608ed81c6f67d77fc3d39e285b201c63352a3"
+        },
+        "trajectory": {
+          "bytes": 723147992,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-full835-20260929-f17a9c4e2d6b8f1035c7e1a9d4b6c802-trajectory.h5",
+          "sha256": "9426b3eee4b9707def437f5befe5bf78d90a683d67bd2033ba62e6f78f669dcb"
+        },
+        "validator": {
+          "bytes": 1851,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-full835-20260929-f17a9c4e2d6b8f1035c7e1a9d4b6c802-hdf5-validation.json",
+          "sha256": "b552a9e4bd781ebde215d4fab29703dd40d06f697e51c5557436de57a67eba21"
+        }
+      },
+      "seed": 17,
+      "sources": {
+        "artifact_identity": {
+          "bytes": 1831,
+          "lstat": {
+            "bytes": 1831,
+            "device": 66306,
+            "inode": 60574909,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-full835-20260929-f17a9c4e2d6b8f1035c7e1a9d4b6c802-artifact-identity.json",
+          "schema": "core.f3.mlp.hidden16.seed17.evaluator_artifact_identity.v1",
+          "sha256": "58c69e4bd7b87ed5796bb61476da088d18416eb6e22cdb8ff8f877439a6ca1ec"
+        },
+        "evaluation_identity": {
+          "bytes": 1826,
+          "lstat": {
+            "bytes": 1826,
+            "device": 2081,
+            "inode": 318714068,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-SEED17-EVALUATION-IDENTITY-V1.json",
+          "schema": "core.f3.mlp.hidden16.seed17.evaluation_identity.v1",
+          "sha256": "a46b31f86ea46d1fdf362a8e8651583e9b100a63127b0ccab35af64e448ee462"
+        },
+        "hdf5_validator": {
+          "bytes": 1851,
+          "lstat": {
+            "bytes": 1851,
+            "device": 66306,
+            "inode": 60574907,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-full835-20260929-f17a9c4e2d6b8f1035c7e1a9d4b6c802-hdf5-validation.json",
+          "schema": "core.f3.full_rollout_receipt_hdf5_validation.v1",
+          "sha256": "b552a9e4bd781ebde215d4fab29703dd40d06f697e51c5557436de57a67eba21"
+        },
+        "process_exit_proof": {
+          "bytes": 3107,
+          "lstat": {
+            "bytes": 3107,
+            "device": 2081,
+            "inode": 318714065,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-f556af302f8e9555a87852f70b31a019-PROCESS-EXIT-PROOF-V1.json",
+          "schema": "core.f3.mlp.hidden16.seed17.process_exit_proof.v1",
+          "sha256": "d0482effa59cbb16b3703444cfc2d57b126397cdc2c2b1d183864a9130d6216e"
+        },
+        "rollout_plan": {
+          "bytes": 5001,
+          "lstat": {
+            "bytes": 5001,
+            "device": 2081,
+            "inode": 318714067,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-SEED17-ROLLOUT-PLAN-V1.json",
+          "schema": "core.f3.mlp.hidden16.current_manifest_rollout_launcher_plan.v1",
+          "sha256": "3901ff07c81ab20cdf846dadf628d6cd4a0929045d67e39cf362590c5f4cf63f"
+        },
+        "trajectory_metadata": {
+          "bytes": 1153,
+          "lstat": {
+            "bytes": 1153,
+            "device": 66306,
+            "inode": 60574908,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed17-full835-20260929-f17a9c4e2d6b8f1035c7e1a9d4b6c802-trajectory-metadata.json",
+          "schema": "core.f3.mlp.hidden16.current_manifest.trajectory_metadata.v1",
+          "sha256": "8d442c7fa0a4dc72ecc2ade79193b407fb6a94fb3b109b6c0596b6c5b7e904c5"
+        }
+      },
+      "status": "terminal_verified"
+    },
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "artifact_identity": {
+          "bytes": 1831,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed29-full835-20260929-a29d6f3c8e1b5a7042c9f6d1b8e3a507-artifact-identity.json",
+          "sha256": "ad541feadfc5ddca2097f5dee11e4fd426b98571265619e4b29147d76be12f7e"
+        },
+        "checkpoint": {
+          "bytes": 64380,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed29-20260929-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "be4a789a3d769f97fb6fb535afa09c5d3df545ee5ffde6d533732008caf93a04",
+          "update": 500
+        },
+        "evaluation": {
+          "bytes": 6409993,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed29-full835-20260929-a29d6f3c8e1b5a7042c9f6d1b8e3a507-evaluation.json",
+          "sha256": "bf5e4d644f192be4313280689f2f20e12a58a1853cd88f85d0e541ad88ada8b4"
+        },
+        "namespace": "/tmp/f3-mlp500-hidden16-currentmanifest-seed29-full835-20260929-a29d6f3c8e1b5a7042c9f6d1b8e3a507",
+        "namespace_nonce": "a29d6f3c8e1b5a7042c9f6d1b8e3a507",
+        "process_proof": {
+          "bytes": 3107,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-50b1f6e0cc80879d9a2d175061737b4b-PROCESS-EXIT-PROOF-V1.json",
+          "sha256": "693740cc7484e78e774089198b7162e8a4bb9d8bd6cc1da0abfd4e1b848f1f0a"
+        },
+        "run_id": "f3-mlp500-hidden16-currentmanifest-seed29-20260929",
+        "seed": 29,
+        "training_receipt": {
+          "bytes": 10076,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed29-20260929-training.json",
+          "sha256": "1f112bbfb52f7649417f749a5216c5ad57c386f2f7506c3d08a0a5cc14122b3a"
+        },
+        "trajectory": {
+          "bytes": 723147992,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed29-full835-20260929-a29d6f3c8e1b5a7042c9f6d1b8e3a507-trajectory.h5",
+          "sha256": "4ee1bcd68a882cfce4fda93b3bc7c1b8497d1c299df89f41ecff00947c1c3d5c"
+        },
+        "validator": {
+          "bytes": 1851,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed29-full835-20260929-a29d6f3c8e1b5a7042c9f6d1b8e3a507-hdf5-validation.json",
+          "sha256": "7cdb88c38963a63210b3991e2f655ea6571ae0d581f63f8c7e62cdaa59d4b34c"
+        }
+      },
+      "seed": 29,
+      "sources": {
+        "artifact_identity": {
+          "bytes": 1831,
+          "lstat": {
+            "bytes": 1831,
+            "device": 66306,
+            "inode": 60574913,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed29-full835-20260929-a29d6f3c8e1b5a7042c9f6d1b8e3a507-artifact-identity.json",
+          "schema": "core.f3.mlp.hidden16.seed29.evaluator_artifact_identity.v1",
+          "sha256": "ad541feadfc5ddca2097f5dee11e4fd426b98571265619e4b29147d76be12f7e"
+        },
+        "evaluation_identity": {
+          "bytes": 1826,
+          "lstat": {
+            "bytes": 1826,
+            "device": 2081,
+            "inode": 318714795,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-SEED29-EVALUATION-IDENTITY-V1.json",
+          "schema": "core.f3.mlp.hidden16.seed29.evaluation_identity.v1",
+          "sha256": "be63a575974bfa71063009502542b775926e99c089b7d6105de54d67b9d1f2b8"
+        },
+        "hdf5_validator": {
+          "bytes": 1851,
+          "lstat": {
+            "bytes": 1851,
+            "device": 66306,
+            "inode": 60574911,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed29-full835-20260929-a29d6f3c8e1b5a7042c9f6d1b8e3a507-hdf5-validation.json",
+          "schema": "core.f3.full_rollout_receipt_hdf5_validation.v1",
+          "sha256": "7cdb88c38963a63210b3991e2f655ea6571ae0d581f63f8c7e62cdaa59d4b34c"
+        },
+        "process_exit_proof": {
+          "bytes": 3107,
+          "lstat": {
+            "bytes": 3107,
+            "device": 2081,
+            "inode": 318714066,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-50b1f6e0cc80879d9a2d175061737b4b-PROCESS-EXIT-PROOF-V1.json",
+          "schema": "core.f3.mlp.hidden16.seed29.process_exit_proof.v1",
+          "sha256": "693740cc7484e78e774089198b7162e8a4bb9d8bd6cc1da0abfd4e1b848f1f0a"
+        },
+        "rollout_plan": {
+          "bytes": 5001,
+          "lstat": {
+            "bytes": 5001,
+            "device": 2081,
+            "inode": 318714069,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-SEED29-ROLLOUT-PLAN-V1.json",
+          "schema": "core.f3.mlp.hidden16.current_manifest_rollout_launcher_plan.v1",
+          "sha256": "61953a0cd2617632902eead8dbd7528134b1a8d428c31b71523776f430ff3e9f"
+        },
+        "trajectory_metadata": {
+          "bytes": 1153,
+          "lstat": {
+            "bytes": 1153,
+            "device": 66306,
+            "inode": 60574912,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed29-full835-20260929-a29d6f3c8e1b5a7042c9f6d1b8e3a507-trajectory-metadata.json",
+          "schema": "core.f3.mlp.hidden16.current_manifest.trajectory_metadata.v1",
+          "sha256": "2c7023bc5c18bbf2020784136693e83eb03ec2c4d64d98dbf5c760e1ec83d41f"
+        }
+      },
+      "status": "terminal_verified"
+    },
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "artifact_identity": {
+          "bytes": 1831,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed43-full835-20260929-c43e7a1d9b6f2c8054a8e3d7b1f9062c-artifact-identity.json",
+          "sha256": "2ab447ad2a70a13b7fc83fe45207dd0966d78d3db8dbcb2d5d5809aead69ba95"
+        },
+        "checkpoint": {
+          "bytes": 64316,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed43-20260929-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "8916c6a710f0e567767df986ed9e810d6df8503e4a46b8a1970ea1fcadb202ac",
+          "update": 500
+        },
+        "evaluation": {
+          "bytes": 6386291,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed43-full835-20260929-c43e7a1d9b6f2c8054a8e3d7b1f9062c-evaluation.json",
+          "sha256": "e1e9c5a02b127176e9d91b8ae51b00454f56f6d8946fe23c2d40d04b9cb7944d"
+        },
+        "namespace": "/tmp/f3-mlp500-hidden16-currentmanifest-seed43-full835-20260929-c43e7a1d9b6f2c8054a8e3d7b1f9062c",
+        "namespace_nonce": "c43e7a1d9b6f2c8054a8e3d7b1f9062c",
+        "process_proof": {
+          "bytes": 3107,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-0e2e1fb90f413900acfb4dc3ff664012-PROCESS-EXIT-PROOF-V1.json",
+          "sha256": "c2612ea6d2ef57c37e44f99775f8de82c1ec4c07d1d35dd7a5567edca4fe5d59"
+        },
+        "run_id": "f3-mlp500-hidden16-currentmanifest-seed43-20260929",
+        "seed": 43,
+        "training_receipt": {
+          "bytes": 10079,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed43-20260929-training.json",
+          "sha256": "758a56942b57ddcb6dd23f44b586f6c5d7f5afc61b97c5b94bb75f9a534aa4c3"
+        },
+        "trajectory": {
+          "bytes": 723147992,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed43-full835-20260929-c43e7a1d9b6f2c8054a8e3d7b1f9062c-trajectory.h5",
+          "sha256": "4d17530ecaa7e8badd6670901db145572f9f8af0c44e54cf793fc814b7578bbe"
+        },
+        "validator": {
+          "bytes": 1851,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed43-full835-20260929-c43e7a1d9b6f2c8054a8e3d7b1f9062c-hdf5-validation.json",
+          "sha256": "3081b3c494f41902a6895a01b51926061cae4e6bcbef5f4634ed90ba395b4b31"
+        }
+      },
+      "seed": 43,
+      "sources": {
+        "artifact_identity": {
+          "bytes": 1831,
+          "lstat": {
+            "bytes": 1831,
+            "device": 66306,
+            "inode": 60574904,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed43-full835-20260929-c43e7a1d9b6f2c8054a8e3d7b1f9062c-artifact-identity.json",
+          "schema": "core.f3.mlp.hidden16.seed43.evaluator_artifact_identity.v1",
+          "sha256": "2ab447ad2a70a13b7fc83fe45207dd0966d78d3db8dbcb2d5d5809aead69ba95"
+        },
+        "evaluation_identity": {
+          "bytes": 1826,
+          "lstat": {
+            "bytes": 1826,
+            "device": 2081,
+            "inode": 318714797,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-SEED43-EVALUATION-IDENTITY-V1.json",
+          "schema": "core.f3.mlp.hidden16.seed43.evaluation_identity.v1",
+          "sha256": "d7bf8046ce2b7b4909c863bc7d5e50ee3b1352359b626b21b46e34fcbfaeaffb"
+        },
+        "hdf5_validator": {
+          "bytes": 1851,
+          "lstat": {
+            "bytes": 1851,
+            "device": 66306,
+            "inode": 60574902,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed43-full835-20260929-c43e7a1d9b6f2c8054a8e3d7b1f9062c-hdf5-validation.json",
+          "schema": "core.f3.full_rollout_receipt_hdf5_validation.v1",
+          "sha256": "3081b3c494f41902a6895a01b51926061cae4e6bcbef5f4634ed90ba395b4b31"
+        },
+        "process_exit_proof": {
+          "bytes": 3107,
+          "lstat": {
+            "bytes": 3107,
+            "device": 2081,
+            "inode": 318714063,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-0e2e1fb90f413900acfb4dc3ff664012-PROCESS-EXIT-PROOF-V1.json",
+          "schema": "core.f3.mlp.hidden16.seed43.process_exit_proof.v1",
+          "sha256": "c2612ea6d2ef57c37e44f99775f8de82c1ec4c07d1d35dd7a5567edca4fe5d59"
+        },
+        "rollout_plan": {
+          "bytes": 5003,
+          "lstat": {
+            "bytes": 5003,
+            "device": 2081,
+            "inode": 318714796,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-SEED43-ROLLOUT-PLAN-V1.json",
+          "schema": "core.f3.mlp.hidden16.current_manifest_rollout_launcher_plan.v1",
+          "sha256": "6e28a88fcde3ab416b2c86f8e99fcc39e3145e39a9916749cbbf7cc478a964c8"
+        },
+        "trajectory_metadata": {
+          "bytes": 1153,
+          "lstat": {
+            "bytes": 1153,
+            "device": 66306,
+            "inode": 60574903,
+            "mode": 32768,
+            "nlink": 1
+          },
+          "opened": true,
+          "path": "/tmp/f3-mlp500-hidden16-currentmanifest-seed43-full835-20260929-c43e7a1d9b6f2c8054a8e3d7b1f9062c-trajectory-metadata.json",
+          "schema": "core.f3.mlp.hidden16.current_manifest.trajectory_metadata.v1",
+          "sha256": "13fe95ea595ed4004d5cd3ef73847ea595ef236c1663182d3c915fc2a9b309ae"
+        }
+      },
+      "status": "terminal_verified"
+    }
+  ],
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "side_effects": {
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "ledger_mutations": 0,
+    "matrix_mutations": 0,
+    "plan_mutations": 0,
+    "processes_restarted": 0,
+    "processes_started": 0,
+    "processes_stopped": 0,
+    "registry_mutations": 0
+  },
+  "source_bound": true,
+  "status": "terminal_diagnostic_verified",
+  "terminal_evidence_verified": true,
+  "training_evidence": {
+    "binding": true,
+    "source": {
+      "bytes": 10172,
+      "lstat": {
+        "bytes": 10172,
+        "device": 2081,
+        "inode": 318714059,
+        "mode": 32768,
+        "nlink": 1
+      },
+      "opened": true,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN1.json",
+      "schema": "core.f3.mlp.hidden16.current_manifest_training_evidence.v1",
+      "sha256": "aa5561dc69148a38a14d6b21c501d9214aba242707be782eeb512ba45e6300ef"
+    }
+  },
+  "updates": 500
+}
