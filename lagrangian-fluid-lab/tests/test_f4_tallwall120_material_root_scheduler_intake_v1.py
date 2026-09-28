@@ -36,7 +36,7 @@ def _valid_receipts(tmp_path: Path) -> tuple[Path, Path]:
     base = intake.build_report(ROOT)
     input_names = (
         "proposal", "host_io_projection", "case_sidecar_intake", "collection", "reader",
-        "archive", "consistency", "job_spec", "runtime_status", "material",
+        "archive_v1", "archive", "archive_reader_reconciliation", "consistency", "job_spec", "runtime_status", "material",
         "material_diagnosis", "collector", "runtime", "cfd_runner",
     )
     binding = {
@@ -164,6 +164,7 @@ def test_source_hdf5_is_metadata_only_and_current_identity_drift_is_visible() ->
     assert source_identity["collection"]["path_exact"] is False
     assert source_identity["reader"]["manifest_sha_exact"] is False
     assert value["validation"]["checks"]["source_identity_contract_valid"] is False
+    assert value["validation"]["checks"]["archive_reader_reconciliation_bound"] is True
 
 
 def test_source_hdf5_never_reaches_bounded_reader(monkeypatch: pytest.MonkeyPatch) -> None:

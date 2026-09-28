@@ -26,10 +26,13 @@ import os
 from pathlib import Path
 import stat
 import re
+import sys
 from typing import Any, Mapping, Sequence
 
 
 LAB_ROOT = Path(__file__).resolve().parents[1]
+if str(LAB_ROOT) not in sys.path:
+    sys.path.insert(0, str(LAB_ROOT))
 CREATED_AT = "2026-09-28"
 
 SCHEMA = "core.material.f4.tallwall120.root_scheduler_intake.v1"
@@ -63,8 +66,15 @@ COLLECTION = Path(
     "collection-refresh-terminal32-formal-v1.json"
 )
 READER = Path("reports/F4-TALLWALL120-CORE-READER-SMOKE-2026-09-28.json")
+ARCHIVE_READER_RECONCILIATION = Path(
+    "reports/F4-TALLWALL120-MATERIAL-ARCHIVE-READER-RECONCILIATION-V1-2026-09-29.json"
+)
 SOURCE_ARCHIVE = Path(
     "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/"
+    "f4-tallwall120-production-dev-07/archive.json"
+)
+SOURCE_ARCHIVE_V1 = Path(
+    "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/"
     "f4-tallwall120-production-dev-07/archive.json"
 )
 CONSISTENCY = Path(
@@ -128,6 +138,8 @@ HASH_KEYS = (
     "case_sidecar_intake_sha256",
     "collection_manifest_sha256",
     "reader_smoke_sha256",
+    "archive_reader_reconciliation_sha256",
+    "source_archive_v1_sha256",
     "source_archive_sha256",
     "consistency_audit_sha256",
     "job_spec_sha256",
@@ -146,6 +158,7 @@ CHECK_NAMES = (
     "collection_identity_bound",
     "reader_identity_bound",
     "archive_identity_bound",
+    "archive_reader_reconciliation_bound",
     "consistency_identity_bound",
     "source_hdf5_metadata_only_valid",
     "source_identity_contract_valid",
@@ -895,6 +908,95 @@ def _source_observation(collection: Mapping[str, Any], reader: Mapping[str, Any]
     }
 
 
+def _archive_reader_reconciliation_observation(
+    report: Mapping[str, Any] | None,
+    report_ref: Mapping[str, Any],
+    refs: Mapping[str, Mapping[str, Any]],
+    errors: list[str],
+) -> tuple[bool, dict[str, Any]]:
+    """Bind the checked-in archive/reader reconciliation to current refs.
+
+    The reconciliation report is itself diagnostic evidence.  This observer
+    accepts it only when its bounded input references and fail-closed markers
+    match the current root intake inputs; it never turns that report into
+    launch authority.
+    """
+
+    from scripts import f4_tallwall120_material_archive_reader_reconciliation_v1 as contract
+
+    observed_errors: list[str] = []
+    if not isinstance(report, Mapping):
+        observed_errors.append("report_missing_or_not_object")
+    else:
+        observed_errors.extend(contract.validate_report(report))
+    report_inputs = _mapping(report.get("inputs")) if isinstance(report, Mapping) else {}
+    expected_inputs = {
+        "proposal": refs.get("proposal", {}),
+        "archive_v1": refs.get("archive_v1", {}),
+        "archive_v2": refs.get("archive", {}),
+        "collection": refs.get("collection", {}),
+        "reader": refs.get("reader", {}),
+    }
+    input_bindings: dict[str, dict[str, Any]] = {}
+    for name, expected in expected_inputs.items():
+        observed = _mapping(report_inputs.get(name))
+        input_bindings[name] = {
+            "path": observed.get("path"),
+            "sha256": observed.get("sha256"),
+            "expected_path": expected.get("path"),
+            "expected_sha256": expected.get("sha256"),
+            "exact": observed.get("path") == expected.get("path") and observed.get("sha256") == expected.get("sha256"),
+        }
+        if not input_bindings[name]["exact"]:
+            observed_errors.append(f"input_binding_{name}_drift")
+
+    checks = _mapping(report.get("checks")) if isinstance(report, Mapping) else {}
+    required_true = (
+        "proposal_target_exact",
+        "proposal_direct_archive_v2_exact",
+        "archive_v1_manifest_contract_valid",
+        "archive_v2_manifest_contract_valid",
+        "archive_v1_v2_artifact_identity_exact",
+        "collection_manifest_current_sha_bound",
+        "collection_case_unique",
+        "collection_case_source_sha_exact",
+        "reader_manifest_path_exact",
+        "reader_formal_gate_closed",
+    )
+    required_false = ("collection_case_source_path_exact", "reader_manifest_sha_exact")
+    for name in required_true:
+        if checks.get(name) is not True:
+            observed_errors.append(f"check_{name}_false")
+    for name in required_false:
+        if checks.get(name) is not False:
+            observed_errors.append(f"check_{name}_not_blocking")
+    source_reconciliation = _mapping(report.get("source_reconciliation")) if isinstance(report, Mapping) else {}
+    authority = _mapping(report.get("authority")) if isinstance(report, Mapping) else {}
+    if source_reconciliation.get("ready") is not False:
+        observed_errors.append("source_reconciliation_must_remain_blocked")
+    if authority.get("launch_allowed") is not False or authority.get("worker_launch_authorized") is not False or authority.get("credit") != 0:
+        observed_errors.append("archive_reader_authority_promoted")
+
+    if observed_errors:
+        errors.extend(f"archive_reader_reconciliation:{item}" for item in observed_errors)
+    return not observed_errors, {
+        "path": report_ref.get("path"),
+        "sha256": report_ref.get("sha256"),
+        "schema": report.get("schema") if isinstance(report, Mapping) else None,
+        "record_id": report.get("record_id") if isinstance(report, Mapping) else None,
+        "status": report.get("status") if isinstance(report, Mapping) else None,
+        "source_reconciliation_ready": source_reconciliation.get("ready"),
+        "authority": {
+            "launch_allowed": authority.get("launch_allowed"),
+            "worker_launch_authorized": authority.get("worker_launch_authorized"),
+            "credit": authority.get("credit"),
+        },
+        "input_bindings": input_bindings,
+        "contract_errors": observed_errors,
+        "identity_bound": not observed_errors,
+    }
+
+
 def _job_runtime_observation(root: Path, job: Mapping[str, Any], runtime_status: Mapping[str, Any], errors: list[str]) -> tuple[bool, dict[str, Any]]:
     resources = _expected_resources(job)
     normalized = _normalize_job_argv(root, job.get("argv"))
@@ -1138,7 +1240,7 @@ def _execution_controls() -> dict[str, Any]:
 
 
 def _input_ref_map(refs: Mapping[str, Mapping[str, Any]]) -> dict[str, dict[str, Any]]:
-    return {name: _ref_pair(refs[name]) for name in ("proposal", "host_io_projection", "case_sidecar_intake", "collection", "reader", "archive", "consistency", "job_spec", "runtime_status", "material", "material_diagnosis", "collector", "runtime", "cfd_runner")}
+    return {name: _ref_pair(refs[name]) for name in ("proposal", "host_io_projection", "case_sidecar_intake", "collection", "reader", "archive_v1", "archive", "archive_reader_reconciliation", "consistency", "job_spec", "runtime_status", "material", "material_diagnosis", "collector", "runtime", "cfd_runner")}
 
 
 def build_report(
@@ -1151,6 +1253,8 @@ def build_report(
     sidecar_intake_path: str | Path | None = None,
     collection_path: str | Path | None = None,
     reader_path: str | Path | None = None,
+    archive_reader_reconciliation_path: str | Path | None = None,
+    source_archive_v1_path: str | Path | None = None,
     source_archive_path: str | Path | None = None,
     consistency_path: str | Path | None = None,
     job_spec_path: str | Path | None = None,
@@ -1164,6 +1268,8 @@ def build_report(
     sidecar_file = _resolve(root, case_sidecar_intake_path or sidecar_intake_path or CASE_SIDECAR_INTAKE)
     collection_file = _resolve(root, collection_path or COLLECTION)
     reader_file = _resolve(root, reader_path or READER)
+    archive_reader_file = _resolve(root, archive_reader_reconciliation_path or ARCHIVE_READER_RECONCILIATION)
+    archive_v1_file = _resolve(root, source_archive_v1_path or SOURCE_ARCHIVE_V1)
     archive_file = _resolve(root, source_archive_path or SOURCE_ARCHIVE)
     consistency_file = _resolve(root, consistency_path or CONSISTENCY)
     job_file = _resolve(root, job_spec_path or JOB_SPEC)
@@ -1176,6 +1282,8 @@ def build_report(
     sidecar, sidecar_ref, sidecar_error = _read_json_document(root, sidecar_file, role="F4 material case-sidecar intake")
     collection, collection_ref, collection_error = _read_json_document(root, collection_file, role="F4 collection manifest")
     reader, reader_ref, reader_error = _read_json_document(root, reader_file, role="F4 reader smoke")
+    archive_reader, archive_reader_ref, archive_reader_error = _read_json_document(root, archive_reader_file, role="F4 archive/reader reconciliation")
+    archive_v1, archive_v1_ref, archive_v1_error = _read_json_document(root, archive_v1_file, role="F4 archives-v1 source archive manifest")
     archive, archive_ref, archive_error = _read_json_document(root, archive_file, role="F4 source archive manifest")
     consistency, consistency_ref, consistency_error = _read_json_document(root, consistency_file, role="F4 receipt consistency audit")
     job, job_ref, job_error = _read_json_document(root, job_file, role="F4 DEV_07 job specification")
@@ -1192,7 +1300,7 @@ def build_report(
             input_errors.append(f"{name}:{error}")
     for label, error in (
         ("proposal", proposal_error), ("host_io_projection", host_error), ("case_sidecar_intake", sidecar_error),
-        ("collection", collection_error), ("reader", reader_error), ("archive", archive_error),
+        ("collection", collection_error), ("reader", reader_error), ("archive_reader_reconciliation", archive_reader_error), ("archive_v1", archive_v1_error), ("archive", archive_error),
         ("consistency", consistency_error), ("job_spec", job_error), ("runtime_status", runtime_status_error),
         ("root_receipt", root_error), ("scheduler_receipt", scheduler_error),
     ):
@@ -1204,6 +1312,8 @@ def build_report(
     sidecar = sidecar if isinstance(sidecar, Mapping) else {}
     collection = collection if isinstance(collection, Mapping) else {}
     reader = reader if isinstance(reader, Mapping) else {}
+    archive_reader = archive_reader if isinstance(archive_reader, Mapping) else {}
+    archive_v1 = archive_v1 if isinstance(archive_v1, Mapping) else {}
     archive = archive if isinstance(archive, Mapping) else {}
     consistency = consistency if isinstance(consistency, Mapping) else {}
     job = job if isinstance(job, Mapping) else {}
@@ -1226,6 +1336,12 @@ def build_report(
     }
     sidecar_valid, sidecar_observation = _sidecar_observation(sidecar, sidecar_ref, refs_for_sidecar, errors)
     source_checks, source_observation = _source_observation(collection, reader, archive, consistency, {"collection": collection_ref, "reader": reader_ref, "archive": archive_ref, "consistency": consistency_ref}, source_ref, errors)
+    archive_reader_valid, archive_reader_observation = _archive_reader_reconciliation_observation(
+        archive_reader,
+        archive_reader_ref,
+        {"proposal": proposal_ref, "archive_v1": archive_v1_ref, "archive": archive_ref, "collection": collection_ref, "reader": reader_ref},
+        errors,
+    )
     job_runtime_valid, job_runtime_observation = _job_runtime_observation(root, job, runtime_status, errors)
 
     all_refs: dict[str, dict[str, Any]] = {
@@ -1234,7 +1350,9 @@ def build_report(
         "case_sidecar_intake": sidecar_ref,
         "collection": collection_ref,
         "reader": reader_ref,
+        "archive_v1": archive_v1_ref,
         "archive": archive_ref,
+        "archive_reader_reconciliation": archive_reader_ref,
         "consistency": consistency_ref,
         "job_spec": job_ref,
         "runtime_status": runtime_status_ref,
@@ -1252,6 +1370,8 @@ def build_report(
         "case_sidecar_intake_sha256": sidecar_ref.get("sha256"),
         "collection_manifest_sha256": collection_ref.get("sha256"),
         "reader_smoke_sha256": reader_ref.get("sha256"),
+        "archive_reader_reconciliation_sha256": archive_reader_ref.get("sha256"),
+        "source_archive_v1_sha256": archive_v1_ref.get("sha256"),
         "source_archive_sha256": archive_ref.get("sha256"),
         "consistency_audit_sha256": consistency_ref.get("sha256"),
         "job_spec_sha256": job_ref.get("sha256"),
@@ -1291,7 +1411,8 @@ def build_report(
     if not namespace_valid:
         errors.append("fresh_output_namespace_invalid")
 
-    source_identity = source_observation
+    source_identity = dict(source_observation)
+    source_identity["archive_reader_reconciliation"] = archive_reader_observation
     job_runtime_valid = job_runtime_valid and current_code_valid
     binding_expected = {
         "input_refs": input_refs,
@@ -1325,6 +1446,7 @@ def build_report(
         "host_io_projection_contract_valid": host_valid,
         "case_sidecar_intake_contract_valid": sidecar_valid,
         **source_checks,
+        "archive_reader_reconciliation_bound": archive_reader_valid,
         "job_runtime_contract_valid": job_runtime_valid,
         "current_code_hashes_valid": current_code_valid,
         "normalized_argv_cwd_valid": normalized_valid,
@@ -1466,7 +1588,7 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
         if report.get(key) != expected:
             errors.append(key)
     bindings = _mapping(report.get("input_bindings"))
-    expected_binding_names = set(CURRENT_CODE) | {"proposal", "host_io_projection", "case_sidecar_intake", "collection", "reader", "archive", "consistency", "job_spec", "runtime_status", "source_hdf5", "fresh_root_receipt", "scheduler_host_io_reservation"}
+    expected_binding_names = set(CURRENT_CODE) | {"proposal", "host_io_projection", "case_sidecar_intake", "collection", "reader", "archive_v1", "archive", "archive_reader_reconciliation", "consistency", "job_spec", "runtime_status", "source_hdf5", "fresh_root_receipt", "scheduler_host_io_reservation"}
     if set(bindings) != expected_binding_names:
         errors.append("input_bindings.fields")
     for name in expected_binding_names - {"source_hdf5", "fresh_root_receipt", "scheduler_host_io_reservation"}:
@@ -1574,12 +1696,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--proposal", type=Path, default=None)
     parser.add_argument("--host-io-projection", type=Path, default=None)
     parser.add_argument("--case-sidecar-intake", type=Path, default=None)
+    parser.add_argument("--archive-reader-reconciliation", type=Path, default=None)
+    parser.add_argument("--source-archive-v1", type=Path, default=None)
     parser.add_argument("--root-receipt", type=Path, default=None)
     parser.add_argument("--scheduler-receipt", type=Path, default=None)
     parser.add_argument("--output", type=Path, default=DEFAULT_REPORT)
     parser.add_argument("--zh-cn-output", type=Path, default=DEFAULT_ZH_REPORT)
     args = parser.parse_args(argv)
-    report = build_report(args.root, proposal_path=args.proposal, host_io_projection_path=args.host_io_projection, case_sidecar_intake_path=args.case_sidecar_intake, root_receipt_path=args.root_receipt, scheduler_receipt_path=args.scheduler_receipt)
+    report = build_report(args.root, proposal_path=args.proposal, host_io_projection_path=args.host_io_projection, case_sidecar_intake_path=args.case_sidecar_intake, archive_reader_reconciliation_path=args.archive_reader_reconciliation, source_archive_v1_path=args.source_archive_v1, root_receipt_path=args.root_receipt, scheduler_receipt_path=args.scheduler_receipt)
     write_report(report, args.output)
     write_zh_cn(report, args.zh_cn_output)
     print(json.dumps({"status": report["status"], "report": str(args.output)}, sort_keys=True))
