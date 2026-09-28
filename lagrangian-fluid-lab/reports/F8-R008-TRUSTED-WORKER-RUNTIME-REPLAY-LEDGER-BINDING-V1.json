@@ -1,0 +1,73 @@
+{
+  "contract_schema": "core.cfd.f8.r008_trusted_worker_runtime_replay_ledger_binding_contract.v1",
+  "exact_bindings": [
+    "canonical_handoff_raw_sha256",
+    "scope_attempt_case_nonce_projection",
+    "issued_and_expiry_epoch_projection",
+    "handoff_issuer_active_key_and_authority_binding",
+    "handoff_worker_and_runtime_subject_bindings",
+    "trusted_ledger_issuer_and_explicit_public_key",
+    "ledger_id_entry_id_generation_and_consumed_state",
+    "single_use_consumption_id_over_the_exact_transition"
+  ],
+  "input_boundary": {
+    "handoff_contract_reused": true,
+    "input_origin": "synthetic_fixture",
+    "mode": "bounded_in_memory_canonical_json",
+    "production_paths_read": false,
+    "real_ledger_read": false,
+    "synthetic_only": true
+  },
+  "integration_boundary": {
+    "15_case_matrix_and_attempt_attestation": "not consumed or credited",
+    "production_bundle_kernel_solver_worker_gpu_queue": "never accessed",
+    "production_registry_and_ledger": "not read or modified",
+    "trusted_identity_authority_worker_runtime": "not replaced",
+    "trusted_worker_runtime_handoff": "delegated; identity and handoff fields are not reimplemented"
+  },
+  "non_authorizing_boundary": {
+    "T1_numerical": false,
+    "capability_minted": false,
+    "denominator_mutation": 0,
+    "diagnostic_only": true,
+    "execution_authority": false,
+    "formal_admission": false,
+    "formal_eligible": false,
+    "gate_mutation": 0,
+    "ledger_mutation": 0,
+    "qualification_credit": 0,
+    "readiness_pass": false,
+    "real_ledger_mutation": 0,
+    "registry_mutation": 0
+  },
+  "prohibited_operations": [
+    "production_bundle_read",
+    "production_ledger_read_or_write",
+    "registry_or_gate_mutation",
+    "root_or_sudo",
+    "kernel_or_solver_access",
+    "worker_gpu_or_queue"
+  ],
+  "record_id": "f8-r008-trusted-worker-runtime-replay-ledger-binding-report-v1",
+  "rejection_rules": [
+    "reject a replayed consumed pre-state",
+    "reject cross-scope/case/nonce or handoff-digest rebinding",
+    "reject issuer/subject rebinding",
+    "reject generation rollback, skip, or non-advancing transition",
+    "reject consumed epochs outside the bounded issued/expiry window",
+    "reject caller self-claimed or missing trusted ledger witness"
+  ],
+  "schema": "core.cfd.f8.r008_trusted_worker_runtime_replay_ledger_binding_report.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "synthetic_only_non_authorizing_replay_ledger_contract_design",
+  "trusted_witness_contract": {
+    "algorithm": "ed25519",
+    "anchor": "explicit_ledger_key_argument_only",
+    "caller_self_claim": "reject_handoff_identity_reuse_and_missing_anchor",
+    "default_trust": "deny",
+    "domain": "CORE-F8-R008-TRUSTED-WORKER-RUNTIME-REPLAY-LEDGER-WITNESS-V1",
+    "generation_rule": "post_generation=pre_generation+1",
+    "postcondition": "consumed=true",
+    "precondition": "consumed=false"
+  }
+}
