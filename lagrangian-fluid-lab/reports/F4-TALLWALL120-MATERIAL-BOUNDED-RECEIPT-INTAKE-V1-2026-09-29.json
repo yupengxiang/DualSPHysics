@@ -1,0 +1,1342 @@
+{
+  "authority_blockers": {
+    "dev07_case_sidecar": {
+      "complete": false,
+      "hdf5_content_read": false,
+      "present": false,
+      "source_path_exact": true,
+      "source_sha256_exact": true
+    },
+    "root_scheduler": {
+      "fresh_root_receipt_present": false,
+      "fresh_root_receipt_valid": false,
+      "pair_cross_binding_valid": false,
+      "reader_identity_bound": false,
+      "scheduler_owned_host_io_valid": false,
+      "scheduler_receipt_present": false,
+      "scheduler_receipt_valid": false,
+      "source_identity_contract_valid": false
+    },
+    "terminal": {
+      "event_window_complete": false,
+      "fresh_terminal_present": false,
+      "intake_complete": false,
+      "mass_closure": false,
+      "reliable_coverage": false,
+      "right_censor_clear": false,
+      "unknown_gate": false
+    },
+    "upstream_receipts": {
+      "case_sidecar_intake": {
+        "blockers": [
+          "archives_v1_v2_path_drift",
+          "collection_dev07_source_identity",
+          "missing_material_case_sidecar",
+          "reader_identity_and_non_t2",
+          "reader_manifest_sha_drift",
+          "sidecar_terminal_intake"
+        ],
+        "status": "blocked_fail_closed"
+      },
+      "readiness_projection": {
+        "blockers": [
+          "collection_source_path_archives_v1_vs_archives_v2_drift",
+          "diagnostic_event_window_incomplete_or_right_censored",
+          "diagnostic_material_parameter_drift",
+          "diagnostic_unknown_gate_failed",
+          "material_sidecar_matrix_zero_of_32",
+          "missing_fresh_root_authorization",
+          "missing_fresh_terminal_evidence",
+          "missing_scheduler_owned_host_io_reservation",
+          "reader_manifest_sha_stale",
+          "t2_readiness_blocked"
+        ],
+        "status": "blocked_fail_closed"
+      },
+      "receipt_consistency": {
+        "blockers": [
+          "archives_v1_v2_path_exact",
+          "planner_blocker_projection_exact",
+          "planner_raw_report_shape_matches_committed_receipt",
+          "reader_smoke_manifest_sha_matches_current"
+        ],
+        "status": "blocked_fail_closed"
+      },
+      "root_scheduler": {
+        "blockers": [
+          "fresh_output_namespace_receipt_cross_binding_invalid",
+          "reader_identity_bound_false",
+          "root_receipt.missing_or_not_object",
+          "root_receipt:future F4 fresh root receipt is missing",
+          "root_receipt:root_receipt.missing_or_not_object",
+          "root_scheduler_pair_cross_binding_invalid",
+          "scheduler_owned_host_io_reservation_missing_or_mismatched",
+          "scheduler_receipt.missing_or_not_object",
+          "scheduler_receipt:future F4 scheduler host-I/O receipt is missing",
+          "scheduler_receipt:scheduler_receipt.missing_or_not_object",
+          "source_identity_contract_valid_false"
+        ],
+        "status": "blocked_missing_fresh_root_scheduler_receipts"
+      },
+      "sidecar_matrix": {
+        "blockers": [
+          "archives_v1_v2_receipt_drift",
+          "archives_v1_v2_source_drift",
+          "dev07_wrong_source",
+          "missing_material_sidecar",
+          "missing_or_incomplete_material_sidecars",
+          "missing_required_material_markers",
+          "reader_manifest_sha_drift",
+          "wrong_or_drifted_source"
+        ],
+        "status": "blocked_fail_closed"
+      },
+      "source_drift": {
+        "blockers": [
+          "collection_manifest_archives_v1_vs_target_archives_v2_mismatch",
+          "fresh_root_and_scheduler_authority_missing",
+          "reader_smoke_manifest_sha_stale"
+        ],
+        "status": "blocked_fail_closed"
+      },
+      "terminal_evidence": {
+        "blockers": [
+          "collection_case_archives_v1_path_does_not_match_archives_v2_target",
+          "collection_case_source_path_exact",
+          "collection_manifest_archives_v1_vs_proposal_archives_v2_path_drift",
+          "current_dev07_material_diagnostic_common_reliable_path_coverage_is_0.0",
+          "current_dev07_material_diagnostic_is_right_censored_or_unresolved",
+          "current_dev07_material_diagnostic_unknown_fraction_is_1.0",
+          "diagnostic_material_config_matches_proposal",
+          "fresh_root_resource_runtime_authorization_is_absent",
+          "fresh_terminal_evidence_missing_at_planned_output_namespace",
+          "historical_diagnostic_material_config_drifts_from_fresh_proposal",
+          "historical_material_diagnostic_is_not_a_fresh_attempt_and_must_not_be_reused",
+          "known_material_diagnostic_event_window_is_incomplete",
+          "missing_fresh_terminal_evidence",
+          "reader_ref_manifest_sha_current",
+          "reader_smoke_manifest_sha_does_not_match_current_collection",
+          "reader_smoke_manifest_sha_is_stale_against_current_collection",
+          "reader_trusted_formal_gate_is_closed",
+          "terminal_evidence_intake_is_not_an_execution_authorization"
+        ],
+        "status": "blocked_fail_closed"
+      }
+    }
+  },
+  "authorization": {
+    "T1": false,
+    "T2": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "actual_sidecar_execution_allowed": false,
+    "credit": 0,
+    "formal": false,
+    "formal_eligible": false,
+    "launch_admitted": false,
+    "qualification": false,
+    "qualification_credit": 0,
+    "structural_intake_ready": false,
+    "worker_launch_authorized": false
+  },
+  "blockers": [
+    "dev07_case_sidecar_not_bound",
+    "missing_or_incomplete_32_case_sidecars",
+    "missing_or_incomplete_terminal_evidence",
+    "missing_or_invalid_root_scheduler_receipts",
+    "missing_required_material_markers",
+    "reader_manifest_sha_stale",
+    "receipt_consistency_archives_path_drift",
+    "source_collection_archives_v1_vs_archives_v2_drift",
+    "source_drift_reconciliation_blocked"
+  ],
+  "case_matrix": {
+    "case_rows": [
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_00",
+        "credit": 0,
+        "matrix_index": 0,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-00/product/trajectory.h5",
+          "expected_sha256": "cec2c75ef713660c085207c0b6a6ffe2eb3c77ca257d8fd9fb2bb708256ad94d",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-00/product/trajectory.h5",
+          "observed_sha256": "cec2c75ef713660c085207c0b6a6ffe2eb3c77ca257d8fd9fb2bb708256ad94d",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "ood_test",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_01",
+        "credit": 0,
+        "matrix_index": 1,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-01/product/trajectory.h5",
+          "expected_sha256": "b6b36317c6c2097b5ec4137ef1621a76fe3aa29ecd4924996d75842b20317da8",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-01/product/trajectory.h5",
+          "observed_sha256": "b6b36317c6c2097b5ec4137ef1621a76fe3aa29ecd4924996d75842b20317da8",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "ood_test",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_02",
+        "credit": 0,
+        "matrix_index": 2,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-02/product/trajectory.h5",
+          "expected_sha256": "19e66f4e567e1e403359ead4d511e9d9203986fe58f0c99a219342994cb4ae1f",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-02/product/trajectory.h5",
+          "observed_sha256": "19e66f4e567e1e403359ead4d511e9d9203986fe58f0c99a219342994cb4ae1f",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "ood_test",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_03",
+        "credit": 0,
+        "matrix_index": 3,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-03/product/trajectory.h5",
+          "expected_sha256": "0269edfa627e35981fe241d17a798f217fbf62442f0a2287c194b677578b05d7",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-03/product/trajectory.h5",
+          "observed_sha256": "0269edfa627e35981fe241d17a798f217fbf62442f0a2287c194b677578b05d7",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04",
+        "credit": 0,
+        "matrix_index": 4,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-04/product/trajectory.h5",
+          "expected_sha256": "f53e39b35fd0b52ceb5393fb054bced65ab7947f835194aa4fc8f813a546490d",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-04/product/trajectory.h5",
+          "observed_sha256": "f53e39b35fd0b52ceb5393fb054bced65ab7947f835194aa4fc8f813a546490d",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_05",
+        "credit": 0,
+        "matrix_index": 5,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-05/product/trajectory.h5",
+          "expected_sha256": "1d383dda466efe520c9c7843cd74b330307888075d2aadbfa61573a95ad5ac55",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-05/product/trajectory.h5",
+          "observed_sha256": "1d383dda466efe520c9c7843cd74b330307888075d2aadbfa61573a95ad5ac55",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "id_test",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_06",
+        "credit": 0,
+        "matrix_index": 6,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-06/product/trajectory.h5",
+          "expected_sha256": "c6c3da203dd926f6b339cbf749af492836537efcf6c805d9a3a15401b4892470",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-06/product/trajectory.h5",
+          "observed_sha256": "c6c3da203dd926f6b339cbf749af492836537efcf6c805d9a3a15401b4892470",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+        "credit": 0,
+        "matrix_index": 7,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+          "expected_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-07/product/trajectory.h5",
+          "observed_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_08",
+        "credit": 0,
+        "matrix_index": 8,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-08/product/trajectory.h5",
+          "expected_sha256": "7ff813f0ed0cab28f9dff009bfe882baf3bf665723a4d027369965847c878994",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-08/product/trajectory.h5",
+          "observed_sha256": "7ff813f0ed0cab28f9dff009bfe882baf3bf665723a4d027369965847c878994",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "validation",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_09",
+        "credit": 0,
+        "matrix_index": 9,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-09/product/trajectory.h5",
+          "expected_sha256": "9379e88608587a54b7b4f0bb375ac5340952f7f7a2f22cdbeec7ce299140c8b8",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-09/product/trajectory.h5",
+          "observed_sha256": "9379e88608587a54b7b4f0bb375ac5340952f7f7a2f22cdbeec7ce299140c8b8",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "id_test",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_10",
+        "credit": 0,
+        "matrix_index": 10,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-10/product/trajectory.h5",
+          "expected_sha256": "01b5a3a85e46533ba2d575d91493870a268cb7df83875fc1d64a4fc5a1fbeda5",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-10/product/trajectory.h5",
+          "observed_sha256": "01b5a3a85e46533ba2d575d91493870a268cb7df83875fc1d64a4fc5a1fbeda5",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_11",
+        "credit": 0,
+        "matrix_index": 11,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-11/product/trajectory.h5",
+          "expected_sha256": "72ba7acf46d592208ffa6c1093710e4513625c75fc9f2792289b9e701f769e6f",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-11/product/trajectory.h5",
+          "observed_sha256": "72ba7acf46d592208ffa6c1093710e4513625c75fc9f2792289b9e701f769e6f",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_12",
+        "credit": 0,
+        "matrix_index": 12,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-12/product/trajectory.h5",
+          "expected_sha256": "d89f576411b4d0447e4d72b9c251cfa69ac3a3bddaaf493f1b97b9f8710a41ee",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-12/product/trajectory.h5",
+          "observed_sha256": "d89f576411b4d0447e4d72b9c251cfa69ac3a3bddaaf493f1b97b9f8710a41ee",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_13",
+        "credit": 0,
+        "matrix_index": 13,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-13/product/trajectory.h5",
+          "expected_sha256": "f894d9e1ccc2d9bda28ea44e9364a418a563fbe38dc077f9e8767406de52dedd",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-13/product/trajectory.h5",
+          "observed_sha256": "f894d9e1ccc2d9bda28ea44e9364a418a563fbe38dc077f9e8767406de52dedd",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "validation",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_14",
+        "credit": 0,
+        "matrix_index": 14,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-14/product/trajectory.h5",
+          "expected_sha256": "1130c8a0c6ebca9d73551aa8158e9c757f2dda9a3de85de743fd0afc1c84724e",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-14/product/trajectory.h5",
+          "observed_sha256": "1130c8a0c6ebca9d73551aa8158e9c757f2dda9a3de85de743fd0afc1c84724e",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "id_test",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_15",
+        "credit": 0,
+        "matrix_index": 15,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-15/product/trajectory.h5",
+          "expected_sha256": "2d0fd94f006e79ab54aaede51f70473f76075813456a091396d59eeacecba900",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-15/product/trajectory.h5",
+          "observed_sha256": "2d0fd94f006e79ab54aaede51f70473f76075813456a091396d59eeacecba900",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_16",
+        "credit": 0,
+        "matrix_index": 16,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-16/product/trajectory.h5",
+          "expected_sha256": "050302a955bbaff0eade8198395837fa83d66727f21b614c6f6fdd71f1e949c8",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-16/product/trajectory.h5",
+          "observed_sha256": "050302a955bbaff0eade8198395837fa83d66727f21b614c6f6fdd71f1e949c8",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_17",
+        "credit": 0,
+        "matrix_index": 17,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-17/product/trajectory.h5",
+          "expected_sha256": "f5d3d491bb01629ac83797f5e4f1fb4ac58b1223bd6319c775fffccbeda74765",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-17/product/trajectory.h5",
+          "observed_sha256": "f5d3d491bb01629ac83797f5e4f1fb4ac58b1223bd6319c775fffccbeda74765",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "id_test",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_18",
+        "credit": 0,
+        "matrix_index": 18,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-18/product/trajectory.h5",
+          "expected_sha256": "0eedd0aa48635a6af482964e9081c6db3b4756aa800dadd2bce645d3a03833d9",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-18/product/trajectory.h5",
+          "observed_sha256": "0eedd0aa48635a6af482964e9081c6db3b4756aa800dadd2bce645d3a03833d9",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "validation",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_19",
+        "credit": 0,
+        "matrix_index": 19,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-19/product/trajectory.h5",
+          "expected_sha256": "ce1a8d135f4d664381645b2b66539ccd4a5249c3e963ed97059ee373e6f420ee",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-19/product/trajectory.h5",
+          "observed_sha256": "ce1a8d135f4d664381645b2b66539ccd4a5249c3e963ed97059ee373e6f420ee",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_20",
+        "credit": 0,
+        "matrix_index": 20,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-20/product/trajectory.h5",
+          "expected_sha256": "1bb0b242136f6e0c11c4db0a8d218c19bafbf9ed2ed349210a6d80558aab0786",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-20/product/trajectory.h5",
+          "observed_sha256": "1bb0b242136f6e0c11c4db0a8d218c19bafbf9ed2ed349210a6d80558aab0786",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_21",
+        "credit": 0,
+        "matrix_index": 21,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-21/product/trajectory.h5",
+          "expected_sha256": "f57d81ef5910179a24c21f6c9316aa61a538b9859f713171e8cd830389a60ead",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-21/product/trajectory.h5",
+          "observed_sha256": "f57d81ef5910179a24c21f6c9316aa61a538b9859f713171e8cd830389a60ead",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_22",
+        "credit": 0,
+        "matrix_index": 22,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-22/product/trajectory.h5",
+          "expected_sha256": "2484b4a2e29c5e87369a0bc71c3f87f35f1d5a38431927dd6ad121931c8286dd",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-22/product/trajectory.h5",
+          "observed_sha256": "2484b4a2e29c5e87369a0bc71c3f87f35f1d5a38431927dd6ad121931c8286dd",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "id_test",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_23",
+        "credit": 0,
+        "matrix_index": 23,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-23/product/trajectory.h5",
+          "expected_sha256": "08d4b2ef8b0332758ee0cfa45780f5a00e70f9dd0152b651e5e7fbcfb8aaccc9",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-23/product/trajectory.h5",
+          "observed_sha256": "08d4b2ef8b0332758ee0cfa45780f5a00e70f9dd0152b651e5e7fbcfb8aaccc9",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "validation",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_24",
+        "credit": 0,
+        "matrix_index": 24,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-24/product/trajectory.h5",
+          "expected_sha256": "b9b717324c9913f50eea06e100afef044e40ea61c0985655def08fa9902f218d",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-24/product/trajectory.h5",
+          "observed_sha256": "b9b717324c9913f50eea06e100afef044e40ea61c0985655def08fa9902f218d",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_25",
+        "credit": 0,
+        "matrix_index": 25,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-25/product/trajectory.h5",
+          "expected_sha256": "e4a0078f506ba50b6769862418df29d8212a691d56cd75117b370ae37aca3944",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-25/product/trajectory.h5",
+          "observed_sha256": "e4a0078f506ba50b6769862418df29d8212a691d56cd75117b370ae37aca3944",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_26",
+        "credit": 0,
+        "matrix_index": 26,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-26/product/trajectory.h5",
+          "expected_sha256": "b28e82541732d2dcc8c324f091d4c43bb042d2534a477ff67e02a90189f317d0",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-26/product/trajectory.h5",
+          "observed_sha256": "b28e82541732d2dcc8c324f091d4c43bb042d2534a477ff67e02a90189f317d0",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "id_test",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_27",
+        "credit": 0,
+        "matrix_index": 27,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-27/product/trajectory.h5",
+          "expected_sha256": "dbd386f9d8b83aba77945db7ff0d1db5eff564017289a58658ab5fcc4ddcedf4",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-27/product/trajectory.h5",
+          "observed_sha256": "dbd386f9d8b83aba77945db7ff0d1db5eff564017289a58658ab5fcc4ddcedf4",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_28",
+        "credit": 0,
+        "matrix_index": 28,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-28/product/trajectory.h5",
+          "expected_sha256": "2970f128c0fa90e8906b3fa0f0f3865bf9babca191bd2864d255204952059e95",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-28/product/trajectory.h5",
+          "observed_sha256": "2970f128c0fa90e8906b3fa0f0f3865bf9babca191bd2864d255204952059e95",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "train",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_29",
+        "credit": 0,
+        "matrix_index": 29,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-29/product/trajectory.h5",
+          "expected_sha256": "95f10da85a8468ccfb8bcbcd8199d0f890f45c9d51bd73b54b8d6c1766aedcb8",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-29/product/trajectory.h5",
+          "observed_sha256": "95f10da85a8468ccfb8bcbcd8199d0f890f45c9d51bd73b54b8d6c1766aedcb8",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "ood_test",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_30",
+        "credit": 0,
+        "matrix_index": 30,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-30/product/trajectory.h5",
+          "expected_sha256": "81491681d7130c383636020d82927bcf73a5d4a3ae33910fb9faefba41540cc7",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-30/product/trajectory.h5",
+          "observed_sha256": "81491681d7130c383636020d82927bcf73a5d4a3ae33910fb9faefba41540cc7",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "ood_test",
+        "status": "blocked",
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_or_incomplete_material_sidecar",
+          "missing_required_material_markers",
+          "source_path_drift"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_31",
+        "credit": 0,
+        "matrix_index": 31,
+        "sidecar_status": "missing",
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-31/product/trajectory.h5",
+          "expected_sha256": "797718af9e4af9a5fec61120209bd58602899ad0aee8006ba5717d2d314541c3",
+          "observed_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-31/product/trajectory.h5",
+          "observed_sha256": "797718af9e4af9a5fec61120209bd58602899ad0aee8006ba5717d2d314541c3",
+          "path_exact": false,
+          "sha256_exact": true
+        },
+        "split": "ood_test",
+        "status": "blocked",
+        "terminal_status": "missing"
+      }
+    ],
+    "complete_sidecar_count": 0,
+    "expected_case_count": 32,
+    "expected_split_counts": {
+      "id_test": 6,
+      "ood_test": 6,
+      "train": 16,
+      "validation": 4
+    },
+    "inventory": {
+      "case_projection_count": 32,
+      "duplicate_case_ids": [],
+      "extra_case_ids": [],
+      "missing_case_projection_ids": [],
+      "missing_source_matrix_ids": [],
+      "source_matrix_count": 32
+    },
+    "missing_case_ids": [
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_00",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_01",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_02",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_03",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_05",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_06",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_08",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_09",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_10",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_11",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_12",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_13",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_14",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_15",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_16",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_17",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_18",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_19",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_20",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_21",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_22",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_23",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_24",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_25",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_26",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_27",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_28",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_29",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_30",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_31"
+    ],
+    "observed_sidecar_count": 0
+  },
+  "decision": "diagnostic_only_bounded_receipt_intake",
+  "input_boundary": {
+    "bounded_json_only": true,
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "input_errors": [],
+    "ledger_mutation": 0,
+    "max_json_bytes": 8388608,
+    "max_json_depth": 64,
+    "native_started": false,
+    "production_hdf5_content_read": false,
+    "production_hdf5_hash_recomputed": false,
+    "production_hdf5_opened": false,
+    "queue_started": false,
+    "registry_mutation": 0,
+    "solver_started": false,
+    "worker_started": false
+  },
+  "input_refs": {
+    "case_sidecar_intake": {
+      "bytes": 15484,
+      "content_hash_recomputed": true,
+      "content_read": true,
+      "exists": true,
+      "expected_schema": "core.material.f4.tallwall120.case_sidecar_intake.v1",
+      "path": "reports/F4-TALLWALL120-MATERIAL-CASE-SIDECAR-INTAKE-V1-2026-09-28.json",
+      "role": "case_sidecar_intake",
+      "schema": "core.material.f4.tallwall120.case_sidecar_intake.v1",
+      "sha256": "3f0acf64bae783ae9f0c5ab9968cd6b7758a1f79e6add5809d82387744cf90b4"
+    },
+    "readiness_projection": {
+      "bytes": 12386,
+      "content_hash_recomputed": true,
+      "content_read": true,
+      "exists": true,
+      "expected_schema": "core.material.f4.tallwall120.material_readiness_projection.v1",
+      "path": "reports/F4-TALLWALL120-MATERIAL-READINESS-PROJECTION-V1-2026-09-28.json",
+      "role": "readiness_projection",
+      "schema": "core.material.f4.tallwall120.material_readiness_projection.v1",
+      "sha256": "7fe838bc356b0453b3fdaf25826afd06b712420f747203b7bd9fef2cf8506e0e"
+    },
+    "receipt_consistency": {
+      "bytes": 42333,
+      "content_hash_recomputed": true,
+      "content_read": true,
+      "exists": true,
+      "expected_schema": "core.material.f4.tallwall120.receipt_consistency_audit.v1",
+      "path": "reports/F4-TALLWALL120-MATERIAL-RECEIPT-CONSISTENCY-AUDIT-2026-09-28.json",
+      "role": "receipt_consistency",
+      "schema": "core.material.f4.tallwall120.receipt_consistency_audit.v1",
+      "sha256": "936bc54c8ad2ccd8ef23c7b016ba6ef61c749fdf9f9a45f36c13001cb1bb1a99"
+    },
+    "root_scheduler": {
+      "bytes": 34815,
+      "content_hash_recomputed": true,
+      "content_read": true,
+      "exists": true,
+      "expected_schema": "core.material.f4.tallwall120.root_scheduler_intake.v1",
+      "path": "reports/F4-TALLWALL120-MATERIAL-ROOT-SCHEDULER-INTAKE-V1-2026-09-28.json",
+      "role": "root_scheduler",
+      "schema": "core.material.f4.tallwall120.root_scheduler_intake.v1",
+      "sha256": "e0b4349d2c966e4da72fb2a57eeb0a0a9aea1e21d302b24a165dde0af31be28f"
+    },
+    "sidecar_matrix": {
+      "bytes": 104350,
+      "content_hash_recomputed": true,
+      "content_read": true,
+      "exists": true,
+      "expected_schema": "core.material.f4.tallwall120.sidecar_matrix_contract.v1",
+      "path": "reports/F4-TALLWALL120-MATERIAL-SIDECAR-MATRIX-CONTRACT-V1-2026-09-28.json",
+      "role": "sidecar_matrix",
+      "schema": "core.material.f4.tallwall120.sidecar_matrix_contract.v1",
+      "sha256": "cfac3968a19f9b08a469a8a4d9df9f516de7d116bb09ad512598acf248b7456d"
+    },
+    "source_drift": {
+      "bytes": 19751,
+      "content_hash_recomputed": true,
+      "content_read": true,
+      "exists": true,
+      "expected_schema": "core.material.f4.tallwall120.source_drift_reconciliation.v1",
+      "path": "reports/F4-TALLWALL120-MATERIAL-SOURCE-DRIFT-RECONCILIATION-V1-2026-09-28.json",
+      "role": "source_drift",
+      "schema": "core.material.f4.tallwall120.source_drift_reconciliation.v1",
+      "sha256": "3cfad7901c27c94284ab57a9dcae8b83f7efb3242fbe73e1f336513790a73ab1"
+    },
+    "terminal_evidence": {
+      "bytes": 16444,
+      "content_hash_recomputed": true,
+      "content_read": true,
+      "exists": true,
+      "expected_schema": "core.material.f4.tallwall120.terminal_evidence_intake.v1",
+      "path": "reports/F4-TALLWALL120-MATERIAL-TERMINAL-EVIDENCE-INTAKE-V1-2026-09-28.json",
+      "role": "terminal_evidence",
+      "schema": "core.material.f4.tallwall120.terminal_evidence_intake.v1",
+      "sha256": "3f4842b417a7200f3d6d46b621693cdd89bbc3f104b348854c540f898ad524ff"
+    }
+  },
+  "observed_at_utc": "2026-09-29T00:00:00Z",
+  "record_id": "f4-tallwall120-material-bounded-receipt-intake-v1-2026-09-29",
+  "required_external_receipts": [
+    {
+      "id": "corrected_archives_v2_collection_and_reader_binding",
+      "present": false,
+      "reason": "all 32 collection rows and the reader receipt must bind the current archives-v2 path and manifest SHA"
+    },
+    {
+      "id": "fresh_root_receipt",
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-material-root-scheduler-intake-v1/fresh-root-receipt.json",
+      "present": false
+    },
+    {
+      "id": "scheduler_owned_host_io_reservation",
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-material-root-scheduler-intake-v1/scheduler-host-io-reservation.json",
+      "present": false
+    },
+    {
+      "id": "fresh_dev07_terminal_evidence",
+      "present": false,
+      "reason": "a fresh full 8.68 s terminal sidecar is required; the 4.34 s native diagnostic is not imputed"
+    },
+    {
+      "id": "all_32_material_sidecars",
+      "present": false,
+      "reason": "one source-bound, terminal, marker-complete sidecar per fixed case is required"
+    }
+  ],
+  "schema": "core.material.f4.tallwall120.bounded_receipt_intake.v1",
+  "scope": {
+    "case_count": 32,
+    "family": "F4",
+    "focus": "F4 Tallwall120 material source/root/scheduler/terminal/32-case sidecar binding",
+    "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1"
+  },
+  "source": {
+    "archive_variant_required": "archives-v2",
+    "checks": {
+      "archives_receipt_path_exact": false,
+      "archives_receipt_sha_exact": true,
+      "collection_paths_exact": false,
+      "dev07_path_exact": false,
+      "dev07_sha_exact": true,
+      "expected_archives_v2_paths": true,
+      "fixed_source_matrix_present": true,
+      "reader_manifest_path_exact": true,
+      "reader_manifest_sha_exact": false,
+      "source_reconciliation_ready": false
+    },
+    "target_case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+    "target_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+    "target_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae"
+  },
+  "status": "blocked_fail_closed",
+  "structural_intake": {
+    "blocked_reasons": [
+      "dev07_case_sidecar_not_bound",
+      "missing_or_incomplete_32_case_sidecars",
+      "missing_or_incomplete_terminal_evidence",
+      "missing_or_invalid_root_scheduler_receipts",
+      "missing_required_material_markers",
+      "reader_manifest_sha_stale",
+      "receipt_consistency_archives_path_drift",
+      "source_collection_archives_v1_vs_archives_v2_drift",
+      "source_drift_reconciliation_blocked"
+    ],
+    "checks": [
+      {
+        "blocker": "fixed_32_case_identity_drift",
+        "check": "fixed_32_case_denominator",
+        "expected": {
+          "case_count": 32,
+          "split_counts": {
+            "id_test": 6,
+            "ood_test": 6,
+            "train": 16,
+            "validation": 4
+          }
+        },
+        "observed": {
+          "case_count": 32,
+          "case_ids_exact": true
+        },
+        "passed": true
+      },
+      {
+        "blocker": "fixed_split_matrix_drift",
+        "check": "fixed_split_counts",
+        "expected": {
+          "id_test": 6,
+          "ood_test": 6,
+          "train": 16,
+          "validation": 4
+        },
+        "observed": {
+          "id_test": 6,
+          "ood_test": 6,
+          "train": 16,
+          "validation": 4
+        },
+        "passed": true
+      },
+      {
+        "blocker": "case_projection_inventory_drift",
+        "check": "case_projection_inventory",
+        "expected": {
+          "case_projection_count": 32,
+          "duplicates": [],
+          "extras": [],
+          "missing": []
+        },
+        "observed": {
+          "case_projection_count": 32,
+          "duplicate_case_ids": [],
+          "extra_case_ids": [],
+          "missing_case_projection_ids": [],
+          "missing_source_matrix_ids": [],
+          "source_matrix_count": 32
+        },
+        "passed": true
+      },
+      {
+        "blocker": "source_collection_archives_v1_vs_archives_v2_drift",
+        "check": "source_matrix_binding",
+        "expected": {
+          "archive_variant": "archives-v2",
+          "case_count": 32,
+          "source_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae"
+        },
+        "observed": {
+          "archives_receipt_path_exact": false,
+          "archives_receipt_sha_exact": true,
+          "collection_paths_exact": false,
+          "dev07_path_exact": false,
+          "dev07_sha_exact": true,
+          "expected_archives_v2_paths": true,
+          "fixed_source_matrix_present": true,
+          "reader_manifest_path_exact": true,
+          "reader_manifest_sha_exact": false,
+          "source_reconciliation_ready": false
+        },
+        "passed": false
+      },
+      {
+        "blocker": "reader_manifest_sha_stale",
+        "check": "reader_manifest_binding",
+        "expected": {
+          "path_exact": true,
+          "sha256_exact": true
+        },
+        "observed": {
+          "reader_manifest_path_exact": true,
+          "reader_manifest_sha_exact": false
+        },
+        "passed": false
+      },
+      {
+        "blocker": "receipt_consistency_archives_path_drift",
+        "check": "receipt_consistency_binding",
+        "expected": {
+          "path_exact": true,
+          "source_sha256_match": true
+        },
+        "observed": {
+          "archives_receipt_path_exact": false,
+          "archives_receipt_sha_exact": true
+        },
+        "passed": false
+      },
+      {
+        "blocker": "source_drift_reconciliation_blocked",
+        "check": "source_reconciliation_ready",
+        "expected": true,
+        "observed": false,
+        "passed": false
+      },
+      {
+        "blocker": "missing_or_incomplete_32_case_sidecars",
+        "check": "sidecar_matrix_complete",
+        "expected": {
+          "complete_sidecar_count": 32,
+          "observed_sidecar_count": 32
+        },
+        "observed": {
+          "case_statuses": [
+            "blocked"
+          ],
+          "complete_sidecar_count": 0,
+          "observed_sidecar_count": 0
+        },
+        "passed": false
+      },
+      {
+        "blocker": "missing_required_material_markers",
+        "check": "sidecar_material_markers_complete",
+        "expected": {
+          "all_counts": 32
+        },
+        "observed": {
+          "full_event_window_complete_count": 0,
+          "mass_closed_count": 0,
+          "reliable_coverage_pass_count": 0,
+          "right_censor_clear_count": 0,
+          "unknown_fraction_pass_count": 0
+        },
+        "passed": false
+      },
+      {
+        "blocker": "missing_or_invalid_root_scheduler_receipts",
+        "check": "root_scheduler_receipt_binding",
+        "expected": {
+          "fresh_root_receipt_present": true,
+          "fresh_root_receipt_valid": true,
+          "pair_cross_binding_valid": true,
+          "reader_identity_bound": true,
+          "scheduler_owned_host_io_valid": true,
+          "scheduler_receipt_present": true,
+          "scheduler_receipt_valid": true,
+          "source_identity_contract_valid": true
+        },
+        "observed": {
+          "fresh_root_receipt_present": false,
+          "fresh_root_receipt_valid": false,
+          "pair_cross_binding_valid": false,
+          "reader_identity_bound": false,
+          "scheduler_owned_host_io_valid": false,
+          "scheduler_receipt_present": false,
+          "scheduler_receipt_valid": false,
+          "source_identity_contract_valid": false
+        },
+        "passed": false
+      },
+      {
+        "blocker": "missing_or_incomplete_terminal_evidence",
+        "check": "terminal_evidence_binding",
+        "expected": {
+          "event_window_complete": true,
+          "fresh_terminal_present": true,
+          "intake_complete": true,
+          "mass_closure": true,
+          "reliable_coverage": true,
+          "right_censor_clear": true,
+          "unknown_gate": true
+        },
+        "observed": {
+          "event_window_complete": false,
+          "fresh_terminal_present": false,
+          "intake_complete": false,
+          "mass_closure": false,
+          "reliable_coverage": false,
+          "right_censor_clear": false,
+          "unknown_gate": false
+        },
+        "passed": false
+      },
+      {
+        "blocker": "dev07_case_sidecar_not_bound",
+        "check": "dev07_case_sidecar_binding",
+        "expected": {
+          "complete": true,
+          "present": true,
+          "source_path_exact": true,
+          "source_sha256_exact": true
+        },
+        "observed": {
+          "complete": false,
+          "hdf5_content_read": false,
+          "present": false,
+          "source_path_exact": true,
+          "source_sha256_exact": true
+        },
+        "passed": false
+      },
+      {
+        "blocker": "readiness_projection_drift",
+        "check": "readiness_projection_binding",
+        "expected": {
+          "credit_zero": true,
+          "formal_t2_macro_false": true,
+          "formal_t2_path_false": true,
+          "launch_false": true,
+          "matrix_count_32": true,
+          "matrix_missing_count_reported": true,
+          "scope_exact": true,
+          "status_known": true
+        },
+        "observed": {
+          "credit_zero": true,
+          "formal_t2_macro_false": true,
+          "formal_t2_path_false": true,
+          "launch_false": true,
+          "matrix_count_32": true,
+          "matrix_missing_count_reported": true,
+          "scope_exact": true,
+          "status_known": true
+        },
+        "passed": true
+      },
+      {
+        "blocker": "forbidden_effect_or_credit_observed",
+        "check": "bounded_input_and_effect_boundary",
+        "expected": {
+          "forbidden_effects": {},
+          "promotion_or_credit": {}
+        },
+        "observed": {
+          "forbidden_effects": {
+            "case_sidecar_intake": [],
+            "readiness_projection": [],
+            "receipt_consistency": [],
+            "root_scheduler": [],
+            "sidecar_matrix": [],
+            "source_drift": [],
+            "terminal_evidence": []
+          },
+          "promotion_or_credit": {
+            "case_sidecar_intake": [],
+            "readiness_projection": [],
+            "receipt_consistency": [],
+            "root_scheduler": [],
+            "sidecar_matrix": [],
+            "source_drift": [],
+            "terminal_evidence": []
+          }
+        },
+        "passed": true
+      }
+    ],
+    "structural_intake_ready": false
+  }
+}
