@@ -81,6 +81,11 @@ def test_report_validator_rejects_promoted_local_pin() -> None:
     with pytest.raises(closure.StaticClosureError, match="local candidate"):
         closure.validate_report(report)
 
+    report = copy.deepcopy(closure.build_report())
+    report["target_kernel_pin"]["slots"]["kernel_release"]["target_value"] = "6.8.0-fabricated"
+    with pytest.raises(closure.StaticClosureError, match="retained a value"):
+        closure.validate_report(report)
+
 
 def test_bounded_json_reader_rejects_duplicate_keys_and_traversal(tmp_path: Path) -> None:
     del tmp_path

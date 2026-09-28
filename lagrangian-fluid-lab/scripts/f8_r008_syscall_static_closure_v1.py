@@ -620,6 +620,7 @@ def _validate_report_shape(value: Any, deps: Mapping[str, Any]) -> None:
 
     _require(value["selector_conditions"] == _selector_conditions(), "selector condition contract drift")
     _validate_target_pins(value["target_kernel_pin"])
+    _require(value["target_kernel_pin"] == _target_pin_projection(deps), "target pin projection is not bound to the intake and local inventory")
     expected_refs = _dependency_refs(deps)
     _require(value["dependencies"] == expected_refs, "dependency identity binding drift")
 
