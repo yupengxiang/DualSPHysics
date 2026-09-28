@@ -1037,6 +1037,47 @@ def _wait_for_exact_process_cmdline(
         time.sleep(0.001)
 
 
+def _validate_child_fd_bindings(
+    pid: int,
+    plan: RolloutPlan,
+    input_fds: Mapping[str, int],
+    root_fd: int,
+) -> dict[str, dict[str, int]]:
+    """Bind inherited child descriptors to the parent's planned identities."""
+
+    bindings: dict[str, dict[str, int]] = {}
+    for key, fd in input_fds.items():
+        if key not in plan.input_snapshots:
+            _fail(f"child FD binding has an unknown input: {key}")
+        if type(fd) is not int or fd < 0:
+            _fail(f"child FD binding for {key} is invalid")
+        expected = plan.input_snapshots[key].get("resolved_identity")
+        if not isinstance(expected, Mapping):
+            _fail(f"{key} snapshot lacks resolved identity")
+        path = f"/proc/{pid}/fd/{fd}"
+        try:
+            observed_info = os.stat(path)
+        except OSError as error:
+            _fail(f"cannot inspect child {key} FD binding: {error}")
+        observed = _file_identity(observed_info)
+        if observed != dict(expected):
+            _fail(f"child {key} FD binding drifts from the planned input")
+        bindings[key] = observed
+
+    if type(root_fd) is not int or root_fd < 0:
+        _fail("child root FD binding is invalid")
+    try:
+        root_info = os.stat(f"/proc/{pid}/fd/{root_fd}")
+    except OSError as error:
+        _fail(f"cannot inspect child root FD binding: {error}")
+    observed_root = _directory_identity(root_info)
+    expected_root = dict(plan.root_identity[-1]["identity"])
+    if observed_root != expected_root:
+        _fail("child root FD binding drifts from the planned rollout root")
+    bindings["root"] = observed_root
+    return bindings
+
+
 def _validate_live_process_binding(
     process: Any,
     *,
@@ -1083,6 +1124,10 @@ def _validate_live_process_binding(
         "live evaluator",
     )
 
+    child_fd_bindings = _validate_child_fd_bindings(
+        evaluator_pid, plan, input_fds, root_fd
+    )
+
     try:
         actual_cwd_info = os.stat(f"/proc/{evaluator_pid}/cwd")
     except OSError as error:
@@ -1126,6 +1171,7 @@ def _validate_live_process_binding(
             "cwd_identity": cwd_identity,
             "environment_sha256": environment_sha256,
             "command_sha256": command_sha256,
+            "child_fd_bindings": child_fd_bindings,
         }
     )
     return observed_args, cwd_identity, runtime_binding_sha256
@@ -1267,12 +1313,11 @@ def build_plan(
     env = {"CUDA_VISIBLE_DEVICES": str(gpu_index), "PYTHONDONTWRITEBYTECODE": "1"}
     site_packages = _venv_site_packages(python)
     if site_packages is not None:
-        inherited_pythonpath = os.environ.get("PYTHONPATH")
-        env["PYTHONPATH"] = (
-            site_packages
-            if not inherited_pythonpath
-            else os.pathsep.join((site_packages, inherited_pythonpath))
-        )
+        # Do not inherit caller-controlled module search paths.  The explicit
+        # venv path is both deterministic for the builder's command digest and
+        # sufficient for the stable /proc/self/fd interpreter to import the
+        # same NumPy/h5py/Torch stack as the dry-run launcher.
+        env["PYTHONPATH"] = site_packages
     command_sha = _canonical_digest({"argv": list(command), "cwd": str(root), "env_overrides": env})
     return RolloutPlan(
         root=root,
