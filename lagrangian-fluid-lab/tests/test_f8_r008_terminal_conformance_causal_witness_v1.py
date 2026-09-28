@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -283,6 +284,14 @@ def test_report_is_static_and_records_the_non_overlap_boundary() -> None:
     assert report["trust_boundary"]["trusted_authority_present"] is False
     assert report["non_authorizing_boundary"]["readiness_pass"] is False
     assert report["non_overlap"]["raw_parser"].startswith("not reimplemented")
+
+
+def test_checked_in_json_report_matches_the_deterministic_contract_report() -> None:
+    report_path = Path(__file__).parents[1] / "reports" / (
+        "F8-R008-TERMINAL-CONFORMANCE-CAUSAL-WITNESS-V1.json"
+    )
+    checked_in = json.loads(report_path.read_text(encoding="utf-8"))
+    assert checked_in == contract.build_report()
 
 
 def test_canonical_fixture_has_no_nonfinite_json_values() -> None:
