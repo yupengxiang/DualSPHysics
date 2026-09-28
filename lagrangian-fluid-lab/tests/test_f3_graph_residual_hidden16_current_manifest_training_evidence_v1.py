@@ -131,6 +131,41 @@ def test_matching_current_manifest_binds_residual_training_only(tmp_path: Path) 
     assert intake.validate_report(report) == []
 
 
+def test_known_core_learning_producer_metadata_is_non_authoritative_but_accepted(tmp_path: Path) -> None:
+    manifest, manifest_sha256 = _manifest(tmp_path)
+    receipts = _paths(tmp_path, manifest_sha256)
+    payload = json.loads(receipts[17].read_text(encoding="utf-8"))
+    payload.update(
+        {
+            "checkpoints": [deepcopy(payload["checkpoint"])],
+            "device": "cuda:0",
+            "history": [],
+            "host": {"hostname": "fixture"},
+            "milestone_evaluations": [],
+            "normalization": {},
+            "peak_gpu_memory_bytes": 123,
+            "peak_rss_mib": 456,
+            "progress_path": "/tmp/fixture-progress.json",
+            "sampler": {"kind": "fixture"},
+            "torch_version": "fixture",
+            "validation_history": [],
+            "wall_seconds": 1.0,
+        }
+    )
+    payload["evidence"]["resume_semantics"] = {
+        "construction_digest_preserved_across_resume": True,
+        "loaded_weights_are_not_initial": True,
+    }
+    _write_json(receipts[17], payload)
+
+    report = intake.build_report(manifest, receipts, root=tmp_path)
+
+    assert report["status"] == "diagnostic_bound"
+    assert report["source_bound"] is True
+    assert report["credit"] == 0
+    assert intake.validate_report(report) == []
+
+
 def test_without_receipt_paths_defaults_fail_closed(tmp_path: Path) -> None:
     manifest, _ = _manifest(tmp_path)
 

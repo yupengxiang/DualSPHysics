@@ -77,13 +77,29 @@ TOP_LEVEL_KEYS = frozenset(
     {
         "checkpoint",
         "checkpoint_verified",
+        "checkpoints",
         "completed_updates",
         "config",
+        "device",
         "evidence",
         "evidence_status",
+        "history",
+        "host",
+        "milestone_checkpoints",
+        "milestone_evaluation_plan",
+        "milestone_evaluations",
+        "milestone_selection",
+        "milestone_selection_error",
+        "milestone_updates",
+        "model",
         "model_kind",
+        "normalization",
         "parameter_count",
+        "peak_gpu_memory_bytes",
+        "peak_rss_mib",
+        "progress_path",
         "run_id",
+        "sampler",
         "schema",
         "seed",
         "status",
@@ -96,6 +112,9 @@ TOP_LEVEL_KEYS = frozenset(
         "T2_path",
         "credit",
         "qualification_credit",
+        "torch_version",
+        "validation_history",
+        "wall_seconds",
     }
 )
 CONFIG_KEYS = frozenset(matrix.STATIC_CONFIG) | {
@@ -105,7 +124,7 @@ CONFIG_KEYS = frozenset(matrix.STATIC_CONFIG) | {
     "sampler_seed",
     "seed",
 }
-EVIDENCE_KEYS = frozenset({"initialization", "normalization", "residual_prior", "schema", "status"})
+EVIDENCE_KEYS = frozenset({"initialization", "normalization", "residual_prior", "resume_semantics", "schema", "status"})
 INITIALIZATION_KEYS = frozenset(
     {
         "constructed_before_first_update",
@@ -124,11 +143,15 @@ NORMALIZATION_KEYS = frozenset(
         "available_transition_count",
         "requested_maximum_transitions",
         "schema",
+        "selected_case_ids",
+        "selected_transition_bindings",
         "selected_transition_count",
+        "selected_transition_counts",
         "selection_policy",
         "selection_seed",
         "source_split",
         "target_reference",
+        "train_case_ids",
     }
 )
 PRIOR_KEYS = frozenset(
@@ -325,7 +348,12 @@ def _validate_receipt(
         plan_date=plan_date,
     )
     try:
-        identity = matrix._validate_training_receipt(payload, source, plan=plan)
+        # core_learning's terminal producer uses evidence_status/completed_updates
+        # as its terminal markers and omits the optional top-level status field;
+        # keep that producer contract bounded without mutating the input payload.
+        matrix_payload = dict(payload)
+        matrix_payload.setdefault("status", "completed")
+        identity = matrix._validate_training_receipt(matrix_payload, source, plan=plan)
     except matrix.MatrixError as error:
         _fail(str(error))
     if identity["run_id"] != _expected_run_id(seed, plan_date):
