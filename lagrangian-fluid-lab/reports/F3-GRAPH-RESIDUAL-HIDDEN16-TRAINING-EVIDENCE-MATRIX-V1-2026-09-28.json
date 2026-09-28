@@ -1,0 +1,560 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "authorization": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "formal": false,
+    "formal_eligible": false,
+    "qualification": false,
+    "qualification_credit": 0
+  },
+  "checks": [
+    {
+      "check": "exact_seed_set",
+      "expected": [
+        17,
+        29,
+        43
+      ],
+      "observed": [
+        17,
+        29,
+        43
+      ],
+      "passed": true,
+      "reason": "training receipts must contain exactly seeds 17, 29, and 43"
+    },
+    {
+      "check": "exact_source_seed_set",
+      "expected": [
+        17,
+        29,
+        43
+      ],
+      "observed": [
+        17,
+        29,
+        43
+      ],
+      "passed": true,
+      "reason": "training source metadata must contain exactly seeds 17, 29, and 43"
+    },
+    {
+      "check": "reference_training_matrix_schema",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "compact residual training matrix schema and identity metadata are valid"
+    },
+    {
+      "check": "training_source_metadata",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "all training source references are complete bounded JSON metadata"
+    },
+    {
+      "check": "reference_source_metadata",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "reference source is complete bounded JSON metadata"
+    },
+    {
+      "check": "common_config",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "all three receipts share one graph_residual hidden16 configuration"
+    },
+    {
+      "check": "common_manifest_identity",
+      "expected": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "observed": [
+        "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768"
+      ],
+      "passed": true,
+      "reason": "all three receipts bind one reference manifest identity"
+    },
+    {
+      "check": "identity_components_complete",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "training receipt, checkpoint, initialization, normalization, and residual-prior identities are present"
+    },
+    {
+      "check": "identity_unique_per_seed",
+      "expected": null,
+      "observed": null,
+      "passed": true,
+      "reason": "declared training/checkpoint/init/normalization identities are distinct per seed"
+    }
+  ],
+  "credit": 0,
+  "diagnostic_only": true,
+  "errors": [],
+  "expected_contract": {
+    "checkpoint_content_opened": false,
+    "evidence_status": "complete",
+    "hidden": 16,
+    "manifest_identity_bound": true,
+    "model_kind": "graph_residual",
+    "normalization_transitions": 16,
+    "parameter_count": 6086,
+    "prior_schema": "core.training.prior_evidence.v1",
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "shared_config": {
+      "centers_per_update": 256,
+      "checkpoint_every": 500,
+      "evaluate_milestones": true,
+      "gradient_clipping": null,
+      "hidden": 16,
+      "history_states": 1,
+      "initialization": "core.paired_initialization.common_encoder_head.v1",
+      "learning_rate": 0.001,
+      "log_every": 100,
+      "manifest_formal_release": false,
+      "max_neighbors": 192,
+      "milestone_evaluation_mode": "in_process",
+      "model_kind": "graph_residual",
+      "normalization_selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+      "normalization_source_split": "train",
+      "normalization_target_reference": "raw_dual_increment_train_shared",
+      "normalization_transitions": 16,
+      "optimizer": "Adam",
+      "radius_over_h": 2.0,
+      "target_normalization": "raw_dual_increment_train_shared",
+      "updates": 500,
+      "validation_case_count": 4,
+      "validation_centers": 256,
+      "validation_every": 1000,
+      "validation_family_counts": {
+        "F3": 4
+      },
+      "validation_formal_eligible": false,
+      "validation_transition_count": 4
+    },
+    "updates": 500
+  },
+  "fail_closed": false,
+  "formal": false,
+  "formal_eligible": false,
+  "formal_training_runs_counted": 0,
+  "formal_training_runs_expected": 9,
+  "input_boundary": {
+    "bounded_json_only": true,
+    "case_hdf5_opened": false,
+    "checkpoint_content_opened": false,
+    "checkpoint_opened": false,
+    "gpu_started": false,
+    "manifest_opened": false,
+    "max_json_bytes": 1048576,
+    "progress_opened": false,
+    "solver_started": false,
+    "trajectory_hdf5_opened": false
+  },
+  "observed_at_utc": "2026-09-28T00:00:00Z",
+  "qualification": false,
+  "qualification_credit": 0,
+  "reference_training_matrix": {
+    "opened": true,
+    "schema": "core.f3.graph_residual.hidden16.training_matrix.v1",
+    "source": {
+      "bytes": 3860,
+      "exists": true,
+      "opened": true,
+      "path": "reports/F3-GRAPH-RESIDUAL-HIDDEN16-SEEDS17-29-43-TRAINING-2026-09-28.json",
+      "schema": "core.f3.graph_residual.hidden16.training_matrix.v1",
+      "sha256": "694c7b4d550136dd3591c2a2f27006bbf9eee028e185c48f06698a7b359a489c"
+    }
+  },
+  "report_id": "f3-graph-residual-hidden16-training-evidence-matrix-v1",
+  "runs": [
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "checkpoint": {
+          "path": "/tmp/f3-graph-residual500-hidden16-seed17-20260928-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "21dc97a619aa03f6ed9ea203a3d1a47e49c074bb65c5ae12ded66d0a022e16ac",
+          "update": 500
+        },
+        "evidence_status": "complete",
+        "formal_eligible": false,
+        "hidden": 16,
+        "identity": {
+          "checkpoint_sha256": "21dc97a619aa03f6ed9ea203a3d1a47e49c074bb65c5ae12ded66d0a022e16ac",
+          "initialization_parameter_digest": "ce74cb93b1144cf872fce13810c07e9cb14101ca1fe807b458ee1317bca53e89",
+          "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+          "normalization_identity_sha256": "4c7a988bbda1eb9f0597808c879ddf986446b461ecc653d1ac884aa8891cec1d",
+          "residual_prior_identity_sha256": "0056a78a6baef20a050b15ff0ef11312a14e84850fb5945743f21d31ce7f944f",
+          "training_receipt_sha256": "20369bf7850ecf1088f490272fbb3d9a0d50849d0f81fd385cff2469e15897a7"
+        },
+        "initialization": {
+          "parameter_count": 6086,
+          "parameter_digest": "ce74cb93b1144cf872fce13810c07e9cb14101ca1fe807b458ee1317bca53e89",
+          "schema": "core.training.initialization_evidence.v1",
+          "status": "captured"
+        },
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model_kind": "graph_residual",
+        "normalization": {
+          "available_transition_count": 13360,
+          "requested_maximum_transitions": 16,
+          "schema": "core.training.normalization_evidence.v1",
+          "selected_transition_count": 16,
+          "selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "selection_seed": 17,
+          "source_split": "train",
+          "target_reference": "raw_dual_increment_train_shared"
+        },
+        "parameter_count": 6086,
+        "qualification_credit": 0,
+        "residual_prior": {
+          "dv_abs_max_mps": 0.10851999372243881,
+          "dv_abs_sum_mps": 1770162.4948730469,
+          "dx_abs_max_m": 0.008722631260752678,
+          "dx_abs_sum_m": 42098.69149971008,
+          "enabled": true,
+          "execution_calls": 500,
+          "finite": true,
+          "history_complete": true,
+          "last_update": {
+            "case_id": "F3_DEV_16_a1p003125",
+            "frame": 112,
+            "update": 500
+          },
+          "rows": 17280000,
+          "schema": "core.training.prior_evidence.v1",
+          "semantic": "graph_residual subtracts this SI prior before shared raw-target normalization; predictor adds it back",
+          "units": {
+            "delta_velocity": "m/s",
+            "displacement": "m"
+          }
+        },
+        "run_id": "f3-graph-residual500-hidden16-seed17-20260928",
+        "schema": "core.training.v1",
+        "seed": 17,
+        "shared_config": {
+          "centers_per_update": 256,
+          "checkpoint_every": 500,
+          "evaluate_milestones": true,
+          "gradient_clipping": null,
+          "hidden": 16,
+          "history_states": 1,
+          "initialization": "core.paired_initialization.common_encoder_head.v1",
+          "learning_rate": 0.001,
+          "log_every": 100,
+          "manifest_formal_release": false,
+          "max_neighbors": 192,
+          "milestone_evaluation_mode": "in_process",
+          "model_kind": "graph_residual",
+          "normalization_selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "normalization_source_split": "train",
+          "normalization_target_reference": "raw_dual_increment_train_shared",
+          "normalization_transitions": 16,
+          "optimizer": "Adam",
+          "radius_over_h": 2.0,
+          "target_normalization": "raw_dual_increment_train_shared",
+          "updates": 500,
+          "validation_case_count": 4,
+          "validation_centers": 256,
+          "validation_every": 1000,
+          "validation_family_counts": {
+            "F3": 4
+          },
+          "validation_formal_eligible": false,
+          "validation_transition_count": 4
+        },
+        "updates": 500
+      },
+      "seed": 17,
+      "source": {
+        "bytes": 10891,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-graph-residual500-hidden16-seed17-20260928-training.json",
+        "schema": "core.training.v1",
+        "sha256": "20369bf7850ecf1088f490272fbb3d9a0d50849d0f81fd385cff2469e15897a7"
+      },
+      "status": "bound_complete"
+    },
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "checkpoint": {
+          "path": "/tmp/f3-graph-residual500-hidden16-seed29-20260928-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "c5bc04436f12f5cba0de7ca3332e61634bfe87f2e78ac348516f8b6c4277731f",
+          "update": 500
+        },
+        "evidence_status": "complete",
+        "formal_eligible": false,
+        "hidden": 16,
+        "identity": {
+          "checkpoint_sha256": "c5bc04436f12f5cba0de7ca3332e61634bfe87f2e78ac348516f8b6c4277731f",
+          "initialization_parameter_digest": "4f4f2555e47bd7b61843d4925eba9853c2f5c667c76f56846247c378d42830e3",
+          "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+          "normalization_identity_sha256": "4f2234df32a1670c8b1683704cff72bcc038bf3878bb73b2b5349bb1f1de7a34",
+          "residual_prior_identity_sha256": "1d3920be34d055d43c43f2a9cff7f3255a7d98c5a4f28d27699481a0512de146",
+          "training_receipt_sha256": "2bee7ce9724e22840725cf4e172e30541abca7f67610380dd4cf8dbf679e8c49"
+        },
+        "initialization": {
+          "parameter_count": 6086,
+          "parameter_digest": "4f4f2555e47bd7b61843d4925eba9853c2f5c667c76f56846247c378d42830e3",
+          "schema": "core.training.initialization_evidence.v1",
+          "status": "captured"
+        },
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model_kind": "graph_residual",
+        "normalization": {
+          "available_transition_count": 13360,
+          "requested_maximum_transitions": 16,
+          "schema": "core.training.normalization_evidence.v1",
+          "selected_transition_count": 16,
+          "selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "selection_seed": 29,
+          "source_split": "train",
+          "target_reference": "raw_dual_increment_train_shared"
+        },
+        "parameter_count": 6086,
+        "qualification_credit": 0,
+        "residual_prior": {
+          "dv_abs_max_mps": 0.10892047733068466,
+          "dv_abs_sum_mps": 1763174.9611816406,
+          "dx_abs_max_m": 0.008705995976924896,
+          "dx_abs_sum_m": 41237.74548912048,
+          "enabled": true,
+          "execution_calls": 500,
+          "finite": true,
+          "history_complete": true,
+          "last_update": {
+            "case_id": "F3_DEV_07_a0p946875",
+            "frame": 172,
+            "update": 500
+          },
+          "rows": 17280000,
+          "schema": "core.training.prior_evidence.v1",
+          "semantic": "graph_residual subtracts this SI prior before shared raw-target normalization; predictor adds it back",
+          "units": {
+            "delta_velocity": "m/s",
+            "displacement": "m"
+          }
+        },
+        "run_id": "f3-graph-residual500-hidden16-seed29-20260928",
+        "schema": "core.training.v1",
+        "seed": 29,
+        "shared_config": {
+          "centers_per_update": 256,
+          "checkpoint_every": 500,
+          "evaluate_milestones": true,
+          "gradient_clipping": null,
+          "hidden": 16,
+          "history_states": 1,
+          "initialization": "core.paired_initialization.common_encoder_head.v1",
+          "learning_rate": 0.001,
+          "log_every": 100,
+          "manifest_formal_release": false,
+          "max_neighbors": 192,
+          "milestone_evaluation_mode": "in_process",
+          "model_kind": "graph_residual",
+          "normalization_selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "normalization_source_split": "train",
+          "normalization_target_reference": "raw_dual_increment_train_shared",
+          "normalization_transitions": 16,
+          "optimizer": "Adam",
+          "radius_over_h": 2.0,
+          "target_normalization": "raw_dual_increment_train_shared",
+          "updates": 500,
+          "validation_case_count": 4,
+          "validation_centers": 256,
+          "validation_every": 1000,
+          "validation_family_counts": {
+            "F3": 4
+          },
+          "validation_formal_eligible": false,
+          "validation_transition_count": 4
+        },
+        "updates": 500
+      },
+      "seed": 29,
+      "source": {
+        "bytes": 10894,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-graph-residual500-hidden16-seed29-20260928-training.json",
+        "schema": "core.training.v1",
+        "sha256": "2bee7ce9724e22840725cf4e172e30541abca7f67610380dd4cf8dbf679e8c49"
+      },
+      "status": "bound_complete"
+    },
+    {
+      "blocked_reasons": [],
+      "evidence": {
+        "checkpoint": {
+          "path": "/tmp/f3-graph-residual500-hidden16-seed43-20260928-checkpoint.pt",
+          "schema": "core.checkpoint.v1",
+          "sha256": "81d51fd5a5c590fa84f02e20b7f9cffb31fc381453ddfd55e8632dbe108a108e",
+          "update": 500
+        },
+        "evidence_status": "complete",
+        "formal_eligible": false,
+        "hidden": 16,
+        "identity": {
+          "checkpoint_sha256": "81d51fd5a5c590fa84f02e20b7f9cffb31fc381453ddfd55e8632dbe108a108e",
+          "initialization_parameter_digest": "8bc6b9b9b11df237be1fb8c203941d659ced805a30fd0dd1c6eb81258c8e5368",
+          "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+          "normalization_identity_sha256": "7b3fdc679418cf3cd1e39615665fe349306152f3aad4ce7f2fb2d2bbb3cf0213",
+          "residual_prior_identity_sha256": "2fc55c2be287e32b89eb702bf622d1ce3a8284825b6c150f1db00c35d2abd735",
+          "training_receipt_sha256": "e80720ae2854507cc0464f93550b8de1c389ddd221159fe085a5c5e5f5c5acce"
+        },
+        "initialization": {
+          "parameter_count": 6086,
+          "parameter_digest": "8bc6b9b9b11df237be1fb8c203941d659ced805a30fd0dd1c6eb81258c8e5368",
+          "schema": "core.training.initialization_evidence.v1",
+          "status": "captured"
+        },
+        "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "model_kind": "graph_residual",
+        "normalization": {
+          "available_transition_count": 13360,
+          "requested_maximum_transitions": 16,
+          "schema": "core.training.normalization_evidence.v1",
+          "selected_transition_count": 16,
+          "selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "selection_seed": 43,
+          "source_split": "train",
+          "target_reference": "raw_dual_increment_train_shared"
+        },
+        "parameter_count": 6086,
+        "qualification_credit": 0,
+        "residual_prior": {
+          "dv_abs_max_mps": 0.108108289539814,
+          "dv_abs_sum_mps": 1764342.7231445312,
+          "dx_abs_max_m": 0.009483016096055508,
+          "dx_abs_sum_m": 41977.657106399536,
+          "enabled": true,
+          "execution_calls": 500,
+          "finite": true,
+          "history_complete": true,
+          "last_update": {
+            "case_id": "F3_DEV_24_a1p053125",
+            "frame": 156,
+            "update": 500
+          },
+          "rows": 17280000,
+          "schema": "core.training.prior_evidence.v1",
+          "semantic": "graph_residual subtracts this SI prior before shared raw-target normalization; predictor adds it back",
+          "units": {
+            "delta_velocity": "m/s",
+            "displacement": "m"
+          }
+        },
+        "run_id": "f3-graph-residual500-hidden16-seed43-20260928",
+        "schema": "core.training.v1",
+        "seed": 43,
+        "shared_config": {
+          "centers_per_update": 256,
+          "checkpoint_every": 500,
+          "evaluate_milestones": true,
+          "gradient_clipping": null,
+          "hidden": 16,
+          "history_states": 1,
+          "initialization": "core.paired_initialization.common_encoder_head.v1",
+          "learning_rate": 0.001,
+          "log_every": 100,
+          "manifest_formal_release": false,
+          "max_neighbors": 192,
+          "milestone_evaluation_mode": "in_process",
+          "model_kind": "graph_residual",
+          "normalization_selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+          "normalization_source_split": "train",
+          "normalization_target_reference": "raw_dual_increment_train_shared",
+          "normalization_transitions": 16,
+          "optimizer": "Adam",
+          "radius_over_h": 2.0,
+          "target_normalization": "raw_dual_increment_train_shared",
+          "updates": 500,
+          "validation_case_count": 4,
+          "validation_centers": 256,
+          "validation_every": 1000,
+          "validation_family_counts": {
+            "F3": 4
+          },
+          "validation_formal_eligible": false,
+          "validation_transition_count": 4
+        },
+        "updates": 500
+      },
+      "seed": 43,
+      "source": {
+        "bytes": 10889,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-graph-residual500-hidden16-seed43-20260928-training.json",
+        "schema": "core.training.v1",
+        "sha256": "e80720ae2854507cc0464f93550b8de1c389ddd221159fe085a5c5e5f5c5acce"
+      },
+      "status": "bound_complete"
+    }
+  ],
+  "schema": "core.f3.graph_residual.hidden16.training_evidence_matrix.v1",
+  "scope_note": "bounded JSON receipt/schema/hash metadata only; diagnostic and non-authorizing",
+  "shared_config": {
+    "centers_per_update": 256,
+    "checkpoint_every": 500,
+    "evaluate_milestones": true,
+    "gradient_clipping": null,
+    "hidden": 16,
+    "history_states": 1,
+    "initialization": "core.paired_initialization.common_encoder_head.v1",
+    "learning_rate": 0.001,
+    "log_every": 100,
+    "manifest_formal_release": false,
+    "max_neighbors": 192,
+    "milestone_evaluation_mode": "in_process",
+    "model_kind": "graph_residual",
+    "normalization_selection_policy": "deterministic_evenly_spaced_train_transitions_v1",
+    "normalization_source_split": "train",
+    "normalization_target_reference": "raw_dual_increment_train_shared",
+    "normalization_transitions": 16,
+    "optimizer": "Adam",
+    "radius_over_h": 2.0,
+    "target_normalization": "raw_dual_increment_train_shared",
+    "updates": 500,
+    "validation_case_count": 4,
+    "validation_centers": 256,
+    "validation_every": 1000,
+    "validation_family_counts": {
+      "F3": 4
+    },
+    "validation_formal_eligible": false,
+    "validation_transition_count": 4
+  },
+  "side_effects": {
+    "completion_mutation": false,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "ledger_mutation": 0,
+    "registry_mutation": 0,
+    "runtime_restarted": false,
+    "runtime_started": false,
+    "runtime_stopped": false
+  },
+  "source_bound": true,
+  "status": "training_evidence_bound_diagnostic_only",
+  "t1_case_runs_counted": 0,
+  "t2_macro_families_counted": 0,
+  "training_evidence_counted_as_formal_runs": 0
+}
