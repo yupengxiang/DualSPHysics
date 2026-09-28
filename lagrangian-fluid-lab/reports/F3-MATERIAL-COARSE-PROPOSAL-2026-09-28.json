@@ -1,0 +1,377 @@
+{
+  "schema": "core.material.f3.coarse.proposal.v1",
+  "created_at": "2026-09-28",
+  "status": "proposal_only_fail_closed",
+  "candidate": {
+    "configuration_id": "CORE-F3-MATERIAL-COARSE-s2",
+    "job_id": "core-f3-material-coarse-s2",
+    "family": "F3",
+    "source_role": "coarse",
+    "substeps": 2,
+    "seeds": 512,
+    "neighbour_variant": "baseline24"
+  },
+  "proposal_state": {
+    "proposal_only": true,
+    "diagnostic_only": true,
+    "formal": false,
+    "formal_eligible": false,
+    "qualification_claim": "none",
+    "qualification_credit": 0,
+    "T2_credit": 0,
+    "T2_macro": false,
+    "T2_path": false,
+    "launch_admitted": false
+  },
+  "input_bindings": {
+    "core_material": {
+      "path": "scripts/core_material.py",
+      "role": "current core material module",
+      "sha256": "9e294e64c431c725717caf86eb001dc3a3505a312e279386796b6a472b5ee94e"
+    },
+    "source_h5": {
+      "path": "campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+      "role": "read-only coarse native source; byte hash only",
+      "sha256": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575",
+      "hash_only": true,
+      "opened_as_hdf5": false
+    },
+    "job_spec": {
+      "path": "campaigns/core-v1/material/jobs/core-f3-material-coarse-s2.json",
+      "role": "historical coarse job specification binding",
+      "sha256": "1f1080e497feab414863e3e02dd31dbec91c0d09e4ef9ac855e0cdbbda070628"
+    },
+    "source_audit_manifest": {
+      "path": "campaigns/l1-resume/continuation/R0081818-NOMINAL-AUDIT.json",
+      "sha256": "eff6e351eaeb6ec270a2ec9883a15d0fbea1c04bd57c213e94db4cd0c90d6c11"
+    },
+    "source_prepared_manifest": {
+      "path": "campaigns/l1-resume/continuation/R0081818-NOMINAL-PREPARED.json",
+      "sha256": "043febcc4e2deb9c515ed32fe99b8ed7241c68fa8dbf72b9ad8d1f7e5ef6684f"
+    },
+    "revision_manifest": {
+      "path": "diagnostics/f3-audit/F3-075-REF0081818-MANIFEST.json",
+      "sha256": "0d4cbd7d22daaff864bccb82e57348631e0a057a3465490a6bbc19e67c0aa078"
+    },
+    "runtime_spec": {
+      "path": "campaigns/core-v1/material/evidence/f3-qualification-diagnostic-runtime-spec-2026-09-19.json",
+      "sha256": "06c2d549d971d679f48b0d46480a7decc64d1ab58a3e35ece8cb5a61a04a1aa9"
+    },
+    "queue_registration": {
+      "path": "campaigns/core-v1/material/evidence/diagnostic-queue-registration.json",
+      "sha256": "71ce17d5421d27dde2f849f7d1b3a226bfa0e6b275440f10f45eb0ec9a9da2cc"
+    },
+    "current_frozen_worker": {
+      "path": "scripts/core_runtime.py",
+      "sha256": "de2f1c353647e8baa0aa427873b8c0689f22d53b3f8ce63aeefe0fd9ea9f2dc0"
+    },
+    "current_neighbour_code": {
+      "path": "scripts/f3_material_neighbors.py",
+      "sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752"
+    },
+    "current_passive_tracer_code": {
+      "path": "scripts/passive_tracers.py",
+      "sha256": "3c12744133176a20ca955e1b76e0a9b7c0f5e2ddda4fef75d77574fc201f9024"
+    }
+  },
+  "source_manifest_contract": {
+    "source_role": "coarse",
+    "case_id": "R0081818-NOMINAL",
+    "audit_status": "pass_diagnostic",
+    "acceptance_status": "diagnostic_only_pending_reference_gate",
+    "formal_release": false,
+    "qualified": false,
+    "launch_allowed": false,
+    "required_before_launch": [
+      "owner approval of this prospective branch",
+      "new authorization record bound to this manifest and preparation summary",
+      "R0081818-NOMINAL hard-audit canary before endpoint launches"
+    ],
+    "window": {
+      "native_frame_count": 836,
+      "first_frame": 0,
+      "last_frame": 835,
+      "time_start_s": 0.0,
+      "time_end_s": 8.350015121408111,
+      "source_h5_hash_matches_audit": true,
+      "hdf5_structure_opened_by_proposal": false
+    },
+    "metadata_only": true
+  },
+  "cli_contract": {
+    "module": "scripts.core_material",
+    "python": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "main_guard": true,
+    "required_flags": [
+      "--source",
+      "--output",
+      "--seeds",
+      "--substeps",
+      "--neighbour-variant",
+      "--resume"
+    ],
+    "checkpoint_schema": "core.material.checkpoint.v1",
+    "observed_bound_job_spec_argv_uses_raw_script_path": true,
+    "raw_script_path_accepted": false,
+    "normalization_required": true
+  },
+  "normalized_launch": {
+    "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "argv": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "-m",
+      "scripts.core_material",
+      "--source",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+      "--output",
+      "{attempt_dir}/material.h5",
+      "--seeds",
+      "512",
+      "--substeps",
+      "2",
+      "--neighbour-variant",
+      "baseline24"
+    ],
+    "resume_argv_same_attempt": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "-m",
+      "scripts.core_material",
+      "--source",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+      "--output",
+      "{attempt_dir}/material.h5",
+      "--seeds",
+      "512",
+      "--substeps",
+      "2",
+      "--neighbour-variant",
+      "baseline24",
+      "--resume"
+    ],
+    "full_native_window": true,
+    "stop_after": null,
+    "output": "{attempt_dir}/material.h5"
+  },
+  "frozen_worker_runtime_contract": {
+    "runtime_spec_status": "ready_for_root_queue",
+    "module": "scripts.core_material",
+    "working_directory": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "cpu_only": true,
+    "gpu_forbidden": true,
+    "scheduler_owned_resources": true,
+    "source_snapshot_required": true,
+    "source_snapshot_created_by_proposal": false,
+    "submission_surface": "scheduler-owned core_runtime coordinator; no direct child launch",
+    "required_surface": [
+      "freeze_job",
+      "worker",
+      "launch_detached",
+      "Coordinator",
+      "probe",
+      "choose_resources"
+    ],
+    "runtime_sha256": "de2f1c353647e8baa0aa427873b8c0689f22d53b3f8ce63aeefe0fd9ea9f2dc0",
+    "runtime_spec_sha256": "06c2d549d971d679f48b0d46480a7decc64d1ab58a3e35ece8cb5a61a04a1aa9",
+    "implementation_binding": {
+      "historical_runtime_spec_core_material_sha256": "1880c02a50168ae3325c39993a55103a1ebba06adcc48a486b7f6f4825d94b7e",
+      "current_core_material_sha256": "9e294e64c431c725717caf86eb001dc3a3505a312e279386796b6a472b5ee94e",
+      "historical_core_material_matches_current": false,
+      "refresh_required_before_launch": true
+    },
+    "required_execution_receipt_fields": [
+      "exact argv",
+      "input HDF5 sha256",
+      "scripts/core_material.py sha256",
+      "scripts/f3_material_neighbors.py sha256",
+      "scripts/passive_tracers.py sha256",
+      "output and checkpoint hashes",
+      "wall_seconds",
+      "cpu_seconds",
+      "max_rss",
+      "committed_frame",
+      "native_frame_count",
+      "status"
+    ],
+    "resume_policy": "If a worker is killed, resume the same attempt with --resume from its atomic checkpoint sidecar; do not restart under a new scientific configuration."
+  },
+  "resource_admission": {
+    "status": "not_measured_proposal_only",
+    "measured_admission_required": true,
+    "probe_surface": "scripts/core_runtime.py::probe plus scheduler-owned choose_resources",
+    "resource_request": {
+      "cpu_cores": 2,
+      "ram_mib": 4096,
+      "gpu_peak_mib": 0,
+      "io_weight": 0.1
+    },
+    "cpu_only": true,
+    "gpu_forbidden": true,
+    "required_snapshot_fields": [
+      "cpu_count",
+      "load1",
+      "ram_total_mib",
+      "ram_available_mib",
+      "disk_free_bytes",
+      "io_capacity"
+    ],
+    "admission_conditions": [
+      "cpu_reserved + request.cpu_cores <= floor(cpu_count * 0.8)",
+      "ram_reserved + request.ram_mib <= ram_available_mib + owned_rss_mib - 0.15 * ram_total_mib",
+      "owned_io_weight + request.io_weight <= measured io_capacity",
+      "io_capacity is finite and > 0",
+      "disk_free_bytes >= 20 GiB unless an explicit bounded spec overrides it"
+    ],
+    "gpu_vram_headroom_is_not_admission": true,
+    "snapshot_collected_by_proposal": false
+  },
+  "fresh_attempt_namespace": {
+    "created": false,
+    "attempt_root": "campaigns/core-v1/runtime/attempts/core-f3-material-coarse-s2",
+    "namespace_template": "campaigns/core-v1/runtime/attempts/core-f3-material-coarse-s2/<fresh-attempt-id>",
+    "attempt_id_policy": "new scheduler-generated identity; never reuse a historical attempt directory",
+    "same_attempt_resume_only": true,
+    "historical_attempt_reuse_forbidden": true,
+    "proposal_created_path": null
+  },
+  "required_output_contract": {
+    "outputs": [
+      "material.h5",
+      "material.json",
+      "material.h5.checkpoint.npz",
+      "material.h5.checkpoint.json"
+    ],
+    "native_window": {
+      "native_frame_count": 836,
+      "first_frame": 0,
+      "last_committed_frame": 835,
+      "partial_stop_forbidden": true
+    },
+    "atomic_checkpoint": {
+      "schema": "core.material.checkpoint.v1",
+      "fields": [
+        "position",
+        "reliable",
+        "first_passage",
+        "return_time",
+        "residence",
+        "residence_left",
+        "residence_right",
+        "returned"
+      ],
+      "sidecar_state": "material.h5.checkpoint.npz",
+      "sidecar_manifest": "material.h5.checkpoint.json",
+      "publish_state_before_hdf5_row": true,
+      "binding_hash_required": true
+    },
+    "resume": {
+      "same_attempt_only": true,
+      "resume_flag": "--resume",
+      "checkpoint_is_authoritative": true,
+      "new_scientific_configuration_forbidden": true,
+      "new_attempt_after_partial_failure_forbidden": true
+    },
+    "metrics": {
+      "material_json": [
+        "status",
+        "qualification_claim",
+        "material_reliability",
+        "qualified_T2_macro",
+        "qualified_T2_path",
+        "by_source",
+        "mass_closed",
+        "unknown_gate_pass",
+        "unknown_fraction_monotone",
+        "common_reliable_path_coverage",
+        "committed_frame",
+        "native_frame_count",
+        "binding",
+        "checkpoint_manifest"
+      ],
+      "per_source": [
+        "unknown_fraction_max",
+        "first_unreliable_frame",
+        "first_unreliable_time_s",
+        "mass_closure_error",
+        "first_passage_cdf",
+        "first_passage_cdf_bounds",
+        "return_cdf",
+        "return_cdf_bounds",
+        "residence_opposite_s",
+        "residence_left_s",
+        "residence_right_s",
+        "residence_cdf_bounds",
+        "residence_right_censored_unknown_mass_fraction"
+      ],
+      "unknown_fraction_limit": 0.01,
+      "mass_closure_error_limit": 1e-12,
+      "right_censored_mass_must_be_retained": true
+    }
+  },
+  "forbidden": {
+    "raw_script_path": [
+      "scripts/core_material.py",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_material.py",
+      "python scripts/core_material.py ..."
+    ],
+    "gpu": [
+      "--gpu",
+      "--cuda",
+      "non-empty CUDA_VISIBLE_DEVICES",
+      "resources.gpu_peak_mib > 0",
+      "using GPU VRAM headroom as CPU/I/O admission"
+    ],
+    "partial_or_test_hooks": [
+      "--stop-after",
+      "--kill-after"
+    ],
+    "row30_retry": [
+      "row30",
+      "--retry-row30",
+      "--force-retry",
+      "f3-material-30-canonical-s4-r003"
+    ],
+    "scope_mutations": [
+      "core_runtime submit/worker execution during proposal",
+      "solver/native/GenCase/queue start",
+      "material trace read or generation",
+      "registry/completion/ledger/denominator/gate/PLAN mutation"
+    ]
+  },
+  "execution_controls": {
+    "core_runtime_job_started": false,
+    "cpu_material_worker_started": false,
+    "gpu_started": false,
+    "solver_started": false,
+    "native_started": false,
+    "gencase_started": false,
+    "queue_mutations": 0,
+    "material_trace_read": false,
+    "material_trace_created": false,
+    "source_hdf5_hash_only": true,
+    "source_hdf5_opened_as_hdf5": false,
+    "material_metrics_created": false,
+    "registry_mutations": 0,
+    "completion_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0
+  },
+  "authorization": {
+    "status": "not_granted",
+    "fresh_root_authorization_required": true,
+    "source_manifest_launch_allowed": false,
+    "prepared_source_launch_allowed": false,
+    "runtime_spec_ready_for_root_queue_is_not_authorization": true,
+    "measured_host_io_receipt_required": true,
+    "historical_outputs_reuse_forbidden": true
+  },
+  "blocking_reasons": [
+    "fresh_root_or_scheduler_authorization_missing",
+    "measured_host_io_admission_missing",
+    "source_preparation_manifest_launch_forbidden",
+    "historical_job_spec_uses_forbidden_raw_script_path; use normalized module argv",
+    "runtime_spec_core_material_binding_stale_against_current_code"
+  ],
+  "next_safe_action": "Obtain a fresh root/scheduler admission receipt bound to the current code SHA, exact source SHA, normalized module argv/cwd, a fresh attempt namespace, and a measured host-I/O snapshot; only then may the frozen worker be considered for one CPU-only diagnostic attempt."
+}
