@@ -1,0 +1,575 @@
+{
+  "authorization": {
+    "T1": false,
+    "T2": false,
+    "T2_credit": 0,
+    "T2_macro": false,
+    "credit": 0,
+    "diagnostic_only": true,
+    "execution_authorized": false,
+    "formal": false,
+    "formal_eligible": false,
+    "formal_run_ready": false,
+    "qualification": false,
+    "qualification_credit": 0,
+    "readiness_projection_only": true,
+    "registry_eligible": false
+  },
+  "blockers": [
+    {
+      "code": "static_scope_not_core_third_family",
+      "detail": "scope review keeps fixed zero-motion resting-fill as prerequisite_only; it is not admitted as the Core third T1 family.",
+      "severity": "high"
+    },
+    {
+      "code": "future_formal_runtime_admission_missing",
+      "detail": "the qualification admission and root review allow preparation/decode only; the historical runtime review is smoke-only for cell 0 and does not authorize a 15-cell formal run.",
+      "severity": "high"
+    },
+    {
+      "code": "cell_00_historical_hard_failure",
+      "detail": "cell 0 is retained as failed_static_gate with cup closed-face endpoint, saved-chord, open-cup escape, and spatial-comparison failures.",
+      "severity": "high"
+    },
+    {
+      "code": "fourteen_runtime_rows_missing",
+      "detail": "the fixed 15-row denominator retains 14 missing runtime products; prepared inputs do not fill those rows.",
+      "severity": "high"
+    },
+    {
+      "code": "core_formal_interface_not_released",
+      "detail": "the existing Core interface is a one-case formal_release=false metadata interface, not a formal 15-cell F2 release.",
+      "severity": "high"
+    },
+    {
+      "code": "t1_runtime_evidence_incomplete",
+      "detail": "no complete 15-cell runtime/observer/temporal/held-out evidence chain is bound; T1 remains false and credit remains zero.",
+      "severity": "high"
+    },
+    {
+      "code": "t2_material_evidence_absent",
+      "detail": "no independent F2 material-sidecar/training/reproduction evidence is bound; preparation and historical failure are not T2 evidence.",
+      "severity": "high"
+    }
+  ],
+  "checks": {
+    "candidate_contract_bound": true,
+    "core_formal_interface_released": false,
+    "fifteen_prepared_input_rows_bound": true,
+    "fixed_fifteen_row_denominator_bound": true,
+    "fourteen_runtime_rows_missing": true,
+    "future_formal_runtime_admission": false,
+    "historical_anchor_excluded_from_numerator": true,
+    "historical_cell_00_failure_bound": true,
+    "preparation_is_not_runtime": true,
+    "static_scope_is_core_third_family": false,
+    "t1_runtime_evidence_complete": false,
+    "t2_material_evidence_present": false
+  },
+  "created_at": "2026-09-28T00:00:00Z",
+  "decision": "bounded_f2_resting_fill_formal_run_readiness_projection",
+  "dependencies": {
+    "candidate_card": {
+      "bytes": 16996,
+      "content_opened": true,
+      "expected_schema": "core.f2.static_full_cup_volume_candidate.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-volume-hold-candidate-v1.json",
+      "role": "15-cell static candidate contract",
+      "sha256": "fcbaa77fe28c2ec43a4fd7eb28023555d15a520439f31b01151600cc0342c26f"
+    },
+    "core_interface": {
+      "bytes": 12393,
+      "content_opened": true,
+      "expected_schema": "core.dataset.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-real-qualification-interface.json",
+      "role": "existing non-formal Core interface metadata",
+      "sha256": "16622e7cf33f2752d2ad89d89e646e66b2d871e711159111e7cf61912103bb01"
+    },
+    "matrix_preparation": {
+      "bytes": 41677,
+      "content_opened": true,
+      "expected_schema": "core.f2.static_full_cup.matrix_preparation.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-matrix-prepared-v4/matrix-preparation.json",
+      "role": "v4 CPU/native preparation aggregate",
+      "sha256": "f5bfacfc38b700aa43f7bc9b2db3cacfbd126666419b3eaa8422d45ff2056746"
+    },
+    "preparation_audit": {
+      "bytes": 15198,
+      "content_opened": true,
+      "expected_schema": "core.f2.static_full_cup.matrix_preparation_audit.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-matrix-prepared-v4/matrix-preparation-audit.json",
+      "role": "v4 preparation audit",
+      "sha256": "bc44fbf64aff429eb9ddb5e71117548413e7db047ceabbee627a6fe0312ecc25"
+    },
+    "qualification_admission": {
+      "bytes": 3122,
+      "content_opened": true,
+      "expected_schema": "core.f2.static_full_cup.qualification_admission.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-qualification-admission-v1.json",
+      "role": "formal runtime product/admission contract",
+      "sha256": "bbeac0f554fd2975f9c3bc12a3bd60f5a48ade50ba4c64cc73b240181a8f7f2d"
+    },
+    "qualification_receipt": {
+      "bytes": 37650,
+      "content_opened": true,
+      "expected_schema": "core.f2.static_full_cup.qualification_receipt.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-qualification-receipt-smoke-cell-00-v1.json",
+      "role": "15-row historical qualification receipt",
+      "sha256": "73c0bcbb13b9bc2ad624882cbdb410493cbe1507787a090706d4508d89906f40"
+    },
+    "root_review": {
+      "bytes": 11029,
+      "content_opened": true,
+      "expected_schema": "core.f2.static_full_cup.root_review.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-root-review-v1.json",
+      "role": "CPU-only preparation/decode root review",
+      "sha256": "742a3aa1b659bda38a7470c8bed06bd4e553df871bdbf1e2f53f994ec31b490c"
+    },
+    "runtime_smoke_review": {
+      "bytes": 3160,
+      "content_opened": true,
+      "expected_schema": "core.root_review.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-runtime-root-review-smoke-v1.json",
+      "role": "historical one-cell runtime-smoke review",
+      "sha256": "236df01708f694a26b9460c8b5a3e51cbb98f38d027d45fba4d6eed72e426eaf"
+    },
+    "scope_review": {
+      "bytes": 618,
+      "content_opened": true,
+      "expected_schema": "core.scope_review.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-static-full-cup-root-scope-review-v1.json",
+      "role": "Core third-family scope decision",
+      "sha256": "664f9756aef1cb9906128af7a72de5636ce9c15ba6e949b156966fa1109e1fd7"
+    },
+    "static_anchor": {
+      "bytes": 1312,
+      "content_opened": true,
+      "expected_schema": "core.f2.static_hold_root_integration.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-full-cup-v3-static-hold-root-integration-v1.json",
+      "role": "static nominal anchor receipt",
+      "sha256": "5d8cc041fa63f80401105e1d6884a0c77004326f6c85f6309e9bd82df0dfc589"
+    }
+  },
+  "evidence": {
+    "candidate": {
+      "candidate_id": "F2_static_full_cup_volume_hold",
+      "qualification_claim": "none; independent static scene candidate, not yet range qualified",
+      "qualification_only": true,
+      "qualified": false,
+      "scope_id": "F2_static_full_cup_volume_hold_x_v1"
+    },
+    "core_interface": {
+      "case_count": 1,
+      "formal_release": false,
+      "schema": "core.dataset.v1"
+    },
+    "preparation": {
+      "evidence_class": "preparation_only_not_T1_or_T2",
+      "failed_preparation_cells": 0,
+      "gpu_invoked": false,
+      "jobs_materialized": false,
+      "prepared_cells": 15,
+      "registered_cells": 15,
+      "solver_invoked": false,
+      "unattempted_cells": 0
+    },
+    "runtime": {
+      "formal_evidence_complete": false,
+      "historical_failed_rows": 1,
+      "historical_runtime_pass_rows": 0,
+      "missing_runtime_rows": 14,
+      "registered_rows": 15,
+      "rows": [
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q0p00000000_dp0p010000000000_spatial",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.01,
+          "formal_run_readiness": "blocked_by_historical_failure",
+          "historical_failure_categories": [
+            "cup_closed_face_endpoint",
+            "cup_saved_chord_crossing",
+            "open_cup_escape",
+            "spatial_comparison_failed"
+          ],
+          "historical_runtime_status": "failed_static_gate",
+          "index": 0,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 0.0,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q0p00000000_dp0p007500000000_spatial",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.0075,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "historical_failure_categories": [
+            "missing_runtime_product",
+            "spatial_comparison_failed"
+          ],
+          "historical_runtime_status": "missing_runtime_product",
+          "index": 1,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 0.0,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q0p00000000_dp0p005000000000_spatial",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.005,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "historical_failure_categories": [
+            "missing_runtime_product",
+            "spatial_comparison_failed"
+          ],
+          "historical_runtime_status": "missing_runtime_product",
+          "index": 2,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 0.0,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q0p50000000_dp0p010000000000_spatial",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.01,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "historical_failure_categories": [
+            "missing_runtime_product",
+            "spatial_comparison_failed"
+          ],
+          "historical_runtime_status": "missing_runtime_product",
+          "index": 3,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 0.5,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q0p50000000_dp0p007500000000_spatial",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.0075,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "historical_failure_categories": [
+            "missing_runtime_product",
+            "spatial_comparison_failed",
+            "temporal_comparison_failed"
+          ],
+          "historical_runtime_status": "missing_runtime_product",
+          "index": 4,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 0.5,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q0p50000000_dp0p005000000000_spatial",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.005,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "historical_failure_categories": [
+            "missing_runtime_product",
+            "spatial_comparison_failed"
+          ],
+          "historical_runtime_status": "missing_runtime_product",
+          "index": 5,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 0.5,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q1p00000000_dp0p010000000000_spatial",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.01,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "historical_failure_categories": [
+            "missing_runtime_product",
+            "spatial_comparison_failed"
+          ],
+          "historical_runtime_status": "missing_runtime_product",
+          "index": 6,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 1.0,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q1p00000000_dp0p007500000000_spatial",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.0075,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "historical_failure_categories": [
+            "missing_runtime_product",
+            "spatial_comparison_failed"
+          ],
+          "historical_runtime_status": "missing_runtime_product",
+          "index": 7,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 1.0,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q1p00000000_dp0p005000000000_spatial",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.005,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "historical_failure_categories": [
+            "missing_runtime_product",
+            "spatial_comparison_failed"
+          ],
+          "historical_runtime_status": "missing_runtime_product",
+          "index": 8,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 1.0,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q0p25000000_dp0p007500000000_spatial_held_out",
+          "credit": 0,
+          "design_cell": "spatial_held_out",
+          "dp_m": 0.0075,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "historical_failure_categories": [
+            "missing_runtime_product",
+            "spatial_comparison_failed"
+          ],
+          "historical_runtime_status": "missing_runtime_product",
+          "index": 9,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 0.25,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q0p25000000_dp0p005000000000_spatial_held_out",
+          "credit": 0,
+          "design_cell": "spatial_held_out",
+          "dp_m": 0.005,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "historical_failure_categories": [
+            "missing_runtime_product",
+            "spatial_comparison_failed"
+          ],
+          "historical_runtime_status": "missing_runtime_product",
+          "index": 10,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 0.25,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q0p75000000_dp0p007500000000_spatial_held_out",
+          "credit": 0,
+          "design_cell": "spatial_held_out",
+          "dp_m": 0.0075,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "historical_failure_categories": [
+            "missing_runtime_product",
+            "spatial_comparison_failed"
+          ],
+          "historical_runtime_status": "missing_runtime_product",
+          "index": 11,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 0.75,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q0p75000000_dp0p005000000000_spatial_held_out",
+          "credit": 0,
+          "design_cell": "spatial_held_out",
+          "dp_m": 0.005,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "historical_failure_categories": [
+            "missing_runtime_product",
+            "spatial_comparison_failed"
+          ],
+          "historical_runtime_status": "missing_runtime_product",
+          "index": 12,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 0.75,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q0p50000000_dp0p007500000000_internal_time",
+          "credit": 0,
+          "design_cell": "internal_time",
+          "dp_m": 0.0075,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "historical_failure_categories": [
+            "missing_runtime_product",
+            "temporal_comparison_failed",
+            "temporal_control_evidence_missing"
+          ],
+          "historical_runtime_status": "missing_runtime_product",
+          "index": 13,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 0.5,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F2_static_full_cup_volume_q0p50000000_dp0p007500000000_native_output",
+          "credit": 0,
+          "design_cell": "native_output",
+          "dp_m": 0.0075,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "historical_failure_categories": [
+            "missing_runtime_product",
+            "temporal_comparison_failed"
+          ],
+          "historical_runtime_status": "missing_runtime_product",
+          "index": 14,
+          "preparation_evidence": "prepared_input_only_not_T1",
+          "q": 0.5,
+          "qualification_credit": 0,
+          "trajectory_content_opened_by_bridge": false
+        }
+      ]
+    },
+    "scope_review": {
+      "core_third_family_admitted": false,
+      "decision": "prerequisite_only",
+      "static_matrix_launch_admitted": false
+    },
+    "static_anchor": {
+      "claim": "static nominal canary only; no moving cup or T1 range qualification",
+      "event_window_complete": true,
+      "hard_integrity_pass": true,
+      "numerator_eligible": false,
+      "qualification_credit": 0,
+      "static_settled": true
+    }
+  },
+  "mutations": {
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "job_spec_mutation": 0,
+    "ledger_mutation": 0,
+    "plan_mutation": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0
+  },
+  "next_safe_action": "先由独立 root review 重新确认一个不继承 cell-00 失败边界的 F2 Definition/物理 scope，再取得 fresh 15-cell runtime admission；每个 cell 必须绑定 prepared hash、case_id、native identity、trajectory/observer/temporal evidence，并重新运行本 bridge。在此之前不得启动 solver、worker、native、GPU 或 queue，也不得把 preparation/历史失败计作 T1/T2。",
+  "prohibited_operations": [
+    "production_hdf5_bi4_trajectory_read_or_hash",
+    "xml_native_or_solver_input_execution",
+    "solver_worker_native_gpu_queue_start",
+    "registry_ledger_denominator_gate_plan_mutation",
+    "preparation_or_historical_failure_promoted_to_T1_or_T2"
+  ],
+  "read_policy": {
+    "bounded_json_allowlist_only": true,
+    "max_json_bytes": 262144,
+    "nested_artifact_paths_followed": false,
+    "production_hdf5_bi4_trajectory_opened": false,
+    "production_hdf5_bi4_trajectory_stat_or_hash": false,
+    "registry_ledger_denominator_gate_plan_write": false,
+    "solver_worker_native_gpu_queue": false,
+    "xml_or_native_input_opened": false
+  },
+  "readiness": {
+    "formal_qualification": {
+      "T1_numerical": false,
+      "T2": false,
+      "credit": 0,
+      "qualification_credit": 0
+    },
+    "future_formal_run": {
+      "admission_ready": false,
+      "formal_run_ready": false,
+      "reason": "new scope/root authorization and a fresh, complete 15-cell runtime evidence chain are required",
+      "runtime_evidence_ready": false
+    },
+    "preparation": {
+      "pass": true,
+      "prepared_cells": 15,
+      "required_cells": 15
+    }
+  },
+  "record_id": "f2-resting-fill-formal-run-readiness-bridge-v1",
+  "schema": "core.f2.resting_fill.formal_run_readiness_bridge_report.v1",
+  "scope_id": "F2_static_full_cup_volume_hold_x_v1",
+  "side_effects": {
+    "bounded_json_inputs_opened": true,
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "job_spec_mutation": 0,
+    "ledger_mutation": 0,
+    "native_started": false,
+    "plan_mutation": 0,
+    "production_artifact_stat_or_hash": false,
+    "production_bi4_opened": false,
+    "production_hdf5_opened": false,
+    "production_trajectory_opened": false,
+    "queue_started": false,
+    "registry_mutation": 0,
+    "solver_started": false,
+    "worker_started": false
+  },
+  "status": "blocked_fail_closed",
+  "validation": {
+    "blocked": true,
+    "blockers_nonempty": true,
+    "contract_valid": true,
+    "historical_failure_not_promoted": true,
+    "preparation_not_promoted": true
+  }
+}
