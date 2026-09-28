@@ -869,6 +869,20 @@ def _validate_scheduler_receipt(
             host_io = _mapping(host_io)
             if host_io.get("io_weight") != expected_resources.get("io_weight"):
                 errors.append("scheduler_receipt.host_io_reservation.io_weight")
+            expected_io_weight = expected_resources.get("io_weight")
+            owned_io_weight = host_io.get("owned_io_weight")
+            if (
+                isinstance(expected_io_weight, (int, float))
+                and not isinstance(expected_io_weight, bool)
+                and math.isfinite(float(expected_io_weight))
+                and (
+                    not isinstance(owned_io_weight, (int, float))
+                    or isinstance(owned_io_weight, bool)
+                    or not math.isfinite(float(owned_io_weight))
+                    or float(owned_io_weight) < float(expected_io_weight)
+                )
+            ):
+                errors.append("scheduler_receipt.host_io_reservation.owned_io_weight")
             if not all(
                 isinstance(host_io.get(key), (int, float))
                 and not isinstance(host_io.get(key), bool)

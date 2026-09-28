@@ -226,6 +226,28 @@ def test_scheduler_resource_drift_is_rejected(tmp_path: Path) -> None:
     assert report["authorization"]["worker_launch_authorized"] is False
 
 
+def test_scheduler_owned_io_must_cover_requested_weight(tmp_path: Path) -> None:
+    root_receipt, scheduler_receipt = _valid_receipts(tmp_path)
+    value = json.loads(scheduler_receipt.read_text(encoding="utf-8"))
+    value["scheduler_reservation"]["host_io_reservation"]["owned_io_weight"] = 0.0
+    scheduler_receipt.write_text(json.dumps(value, sort_keys=True) + "\n", encoding="utf-8")
+
+    report = intake.build_report(
+        ROOT,
+        root_receipt_path=root_receipt,
+        scheduler_receipt_path=scheduler_receipt,
+    )
+
+    assert report["status"] == intake.STATUS_INVALID
+    assert report["validation"]["checks"]["future_scheduler_receipt_valid"] is False
+    assert report["validation"]["checks"]["scheduler_owned_host_io_reservation_valid"] is False
+    assert "scheduler_receipt.host_io_reservation.owned_io_weight" in report[
+        "validation"
+    ]["scheduler_receipt_errors"]
+    assert report["authorization"]["launch_admitted"] is False
+    assert report["credit"] == 0
+
+
 def test_existing_host_admission_normalized_launch_drift_is_rejected(tmp_path: Path) -> None:
     root_receipt, scheduler_receipt = _valid_receipts(tmp_path)
     host = json.loads((ROOT / intake.HOST_IO_ADMISSION).read_text(encoding="utf-8"))
