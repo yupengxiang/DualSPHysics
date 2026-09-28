@@ -649,6 +649,8 @@ def _namespace(value: Mapping[str, Any], seed: int, name: str) -> tuple[str, str
     nonce = _string(value.get("namespace_nonce"), f"{name}.namespace_nonce")
     if NONCE_RE.fullmatch(nonce) is None:
         _fail(f"{name}.namespace_nonce must be a 32-character lowercase nonce")
+    if nonce == "0" * 32:
+        _fail(f"{name}.namespace_nonce must be non-zero")
     expected_name = f"f3-graph-residual500-hidden16-seed{seed}-full835-nonce{nonce}"
     if Path(namespace).name != expected_name:
         _fail(f"{name}.namespace does not match the fixed seed/full835/nonce contract")

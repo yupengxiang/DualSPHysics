@@ -233,6 +233,12 @@ def test_nonterminal_or_nonzero_process_observations_fail_closed(tmp_path: Path,
         builder.build_envelope(payload)
 
 
+def test_all_zero_namespace_nonce_is_rejected(tmp_path: Path) -> None:
+    payload = _observation(tmp_path, nonce="0" * 32)
+    with pytest.raises(builder.BuilderError, match="namespace_nonce must be non-zero"):
+        builder.build_envelope(payload)
+
+
 def test_command_identity_and_fixed_contract_are_checked(tmp_path: Path) -> None:
     payload = _observation(tmp_path)
     payload["process"]["evaluator"]["command"][payload["process"]["evaluator"]["command"].index("835")] = "834"  # type: ignore[index]
