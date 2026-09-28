@@ -1,0 +1,304 @@
+{
+  "authorization": {
+    "T1": false,
+    "T2": false,
+    "T2_credit": 0,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "diagnostic_only": true,
+    "formal": false,
+    "formal_eligible": false,
+    "launch_admitted": false,
+    "proposal_only": true,
+    "qualification": false,
+    "qualification_credit": 0,
+    "worker_launch_authorized": false
+  },
+  "blockers": [
+    "collection_source_path_drift",
+    "reader_manifest_sha_drift",
+    "missing_or_invalid_fresh_root_receipt",
+    "missing_or_invalid_scheduler_host_io_receipt",
+    "scheduler_owned_host_io_not_verified",
+    "existing_diagnostic_parameter_drift",
+    "diagnostic_event_window_incomplete_or_right_censored",
+    "diagnostic_unknown_gate_failed",
+    "diagnostic_reliable_coverage_failed",
+    "reader_identity_bound_false",
+    "source_identity_contract_valid_false",
+    "root_scheduler_pair_cross_binding_invalid",
+    "fresh_output_namespace_receipt_cross_binding_invalid",
+    "scheduler_owned_host_io_reservation_missing_or_mismatched",
+    "root_receipt:future F4 fresh root receipt is missing",
+    "scheduler_receipt:future F4 scheduler host-I/O receipt is missing",
+    "root_receipt:root_receipt.missing_or_not_object",
+    "scheduler_receipt:scheduler_receipt.missing_or_not_object"
+  ],
+  "checks": {
+    "collection_source_path_exact": false,
+    "diagnostic_full_event_window": false,
+    "diagnostic_parameter_binding": false,
+    "diagnostic_reliable_coverage": false,
+    "diagnostic_source_identity": true,
+    "diagnostic_unknown_gate": false,
+    "disk_headroom": true,
+    "fresh_namespace_absent": true,
+    "gpu_vram_headroom": true,
+    "ram_headroom": true,
+    "reader_manifest_sha_exact": false,
+    "resource_snapshot_complete": true,
+    "root_scheduler_intake_closed": true
+  },
+  "created_at": "2026-09-28",
+  "decision": "diagnostic_only_bounded_candidate_runner_receipt_bridge",
+  "execution_controls": {
+    "completion_mutations": 0,
+    "denominator_mutations": 0,
+    "fresh_namespace_created": false,
+    "gate_mutations": 0,
+    "gpu_initialized": false,
+    "ledger_mutations": 0,
+    "native_started": false,
+    "plan_mutations": 0,
+    "queue_or_scheduler_started": false,
+    "registry_mutations": 0,
+    "runner_invoked_diagnosis": false,
+    "runner_invoked_material_trace": false,
+    "sidecar_written": false,
+    "solver_started": false,
+    "source_hdf5_hash_recomputed": false,
+    "source_hdf5_opened": false,
+    "source_hdf5_read": false,
+    "worker_started": false
+  },
+  "next_safe_action": "修正 collection/reader source identity drift，取得绑定当前 hashes、normalized argv/cwd、fresh namespace nonce 的 root receipt 与 scheduler-owned host-I/O receipt；随后重新运行本 bridge。在 trusted execution authorization 与完整 8.68 s 输入仍未闭合前，不得启动 material trace 或写 material sidecar。",
+  "observations": {
+    "existing_material_diagnostic": {
+      "checks": {
+        "case_identity": true,
+        "diagnostic_only": true,
+        "event_window_complete": false,
+        "formal_admission_closed": true,
+        "parameter_binding": false,
+        "reliable_coverage": false,
+        "report_readable": true,
+        "schema": true,
+        "source_identity": true,
+        "trace_short_window_complete": true,
+        "unknown_gate": false
+      },
+      "error": null,
+      "parameters": {
+        "dp_m": 0.0075,
+        "neighbour_variant": "baseline24",
+        "q": 0.5,
+        "seeds": 512,
+        "substeps": 2
+      },
+      "reference": {
+        "bytes": 6017,
+        "content_hash_recomputed": true,
+        "content_read": true,
+        "exists": true,
+        "path": "reports/F4-TALLWALL120-DEV07-MATERIAL-BASELINE24-DIAGNOSTIC-2026-09-28.json",
+        "role": "existing_DEV_07_material_diagnostic",
+        "sha256": "edbd46f4723c067c3fcca00bd148d10e8ac06016b50a04328e1302410a2dc900"
+      },
+      "schema": "core.f4.tallwall120.material_diagnostic_receipt.v1",
+      "source": {
+        "bytes": 2067911708,
+        "repo_relative_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+        "sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae"
+      },
+      "status": "completed_diagnostic_only",
+      "trace": {
+        "committed_frame": 217,
+        "common_reliable_path_coverage": 0.0,
+        "event_window_complete": false,
+        "event_window_status": "right_censored_or_unresolved",
+        "frame_count": 218,
+        "output_path": "/tmp/f4-dev07-material-baseline24-20260928.h5",
+        "status": "completed",
+        "transition_count": 217,
+        "unknown_fraction_max": 1.0
+      }
+    },
+    "resources": {
+      "capacity_observed": true,
+      "capacity_pass": true,
+      "disk": {
+        "capacity_pass": true,
+        "free_bytes": 8157012279296,
+        "observed": true,
+        "required_free_bytes": 8589934592,
+        "total_bytes": 15873631784960,
+        "used_bytes": 6916557783040
+      },
+      "gpu": {
+        "capacity_pass": true,
+        "command_returncode": 0,
+        "device_count": 8,
+        "devices": [
+          {
+            "index": 0,
+            "memory_free_mib": 39400,
+            "memory_total_mib": 49140,
+            "memory_used_mib": 9112,
+            "name": "NVIDIA RTX 6000 Ada Generation",
+            "utilization_gpu_percent": 0
+          },
+          {
+            "index": 1,
+            "memory_free_mib": 42431,
+            "memory_total_mib": 49140,
+            "memory_used_mib": 6081,
+            "name": "NVIDIA RTX 6000 Ada Generation",
+            "utilization_gpu_percent": 0
+          },
+          {
+            "index": 2,
+            "memory_free_mib": 42431,
+            "memory_total_mib": 49140,
+            "memory_used_mib": 6081,
+            "name": "NVIDIA RTX 6000 Ada Generation",
+            "utilization_gpu_percent": 0
+          },
+          {
+            "index": 3,
+            "memory_free_mib": 31079,
+            "memory_total_mib": 49140,
+            "memory_used_mib": 17433,
+            "name": "NVIDIA RTX 6000 Ada Generation",
+            "utilization_gpu_percent": 100
+          },
+          {
+            "index": 4,
+            "memory_free_mib": 39400,
+            "memory_total_mib": 49140,
+            "memory_used_mib": 9112,
+            "name": "NVIDIA RTX 6000 Ada Generation",
+            "utilization_gpu_percent": 0
+          },
+          {
+            "index": 5,
+            "memory_free_mib": 45462,
+            "memory_total_mib": 49140,
+            "memory_used_mib": 3049,
+            "name": "NVIDIA RTX 6000 Ada Generation",
+            "utilization_gpu_percent": 29
+          },
+          {
+            "index": 6,
+            "memory_free_mib": 42431,
+            "memory_total_mib": 49140,
+            "memory_used_mib": 6081,
+            "name": "NVIDIA RTX 6000 Ada Generation",
+            "utilization_gpu_percent": 0
+          },
+          {
+            "index": 7,
+            "memory_free_mib": 45462,
+            "memory_total_mib": 49140,
+            "memory_used_mib": 3049,
+            "name": "NVIDIA RTX 6000 Ada Generation",
+            "utilization_gpu_percent": 0
+          }
+        ],
+        "max_free_mib": 45462,
+        "observed": true,
+        "required_peak_mib": 6144,
+        "shared_gpu_policy": "existing_gpu_occupancy_is_allowed;_free_vram_is_the_only_capacity_gate",
+        "stderr_present": false
+      },
+      "observed_at_utc": "2026-09-28T08:48:57.016174+00:00",
+      "ram": {
+        "available_bytes": 210311712768,
+        "capacity_pass": true,
+        "observed": true,
+        "required_available_bytes": 25769803776,
+        "total_bytes": 270081437696
+      }
+    },
+    "root_scheduler_intake": {
+      "authorization": {
+        "launch_admitted": false,
+        "root_authorization_present": false,
+        "scheduler_authorization_present": false,
+        "worker_launch_authorized": false
+      },
+      "blockers": [
+        "reader_identity_bound_false",
+        "source_identity_contract_valid_false",
+        "root_scheduler_pair_cross_binding_invalid",
+        "fresh_output_namespace_receipt_cross_binding_invalid",
+        "scheduler_owned_host_io_reservation_missing_or_mismatched",
+        "root_receipt:future F4 fresh root receipt is missing",
+        "scheduler_receipt:future F4 scheduler host-I/O receipt is missing",
+        "root_receipt:root_receipt.missing_or_not_object",
+        "scheduler_receipt:scheduler_receipt.missing_or_not_object"
+      ],
+      "checks": {
+        "collection_path_exact": false,
+        "fresh_namespace_valid": true,
+        "fresh_root_receipt_valid": false,
+        "reader_manifest_sha_exact": false,
+        "scheduler_owned_host_io_valid": false,
+        "scheduler_receipt_valid": false,
+        "source_identity_contract_valid": false
+      },
+      "fresh_namespace": {
+        "must_be_absent": true,
+        "namespace": "campaigns/core-v1/material/proposals/f4-tallwall120-production-dev-07/coarse-baseline24-s2-r001-source-6ae8ca70",
+        "path_exists": false
+      },
+      "intake_contract_valid": false,
+      "reference": {
+        "bytes": 34815,
+        "content_hash_recomputed": true,
+        "content_read": true,
+        "exists": true,
+        "path": "reports/F4-TALLWALL120-MATERIAL-ROOT-SCHEDULER-INTAKE-V1-2026-09-28.json",
+        "role": "existing_root_scheduler_intake_report",
+        "sha256": "e0b4349d2c966e4da72fb2a57eeb0a0a9aea1e21d302b24a165dde0af31be28f"
+      },
+      "source_identity": {
+        "collection_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-07/product/trajectory.h5",
+        "expected_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+        "path_exact": false,
+        "reader_manifest_sha_exact": false
+      },
+      "status": "blocked_missing_fresh_root_scheduler_receipts",
+      "validation_errors": []
+    }
+  },
+  "observed_at_utc": "2026-09-28T08:48:57.016395+00:00",
+  "planned_sidecar": {
+    "namespace": "campaigns/core-v1/material/proposals/f4-tallwall120-production-dev-07/coarse-baseline24-s2-r001-source-6ae8ca70",
+    "path": "campaigns/core-v1/material/proposals/f4-tallwall120-production-dev-07/coarse-baseline24-s2-r001-source-6ae8ca70/product/material_case_sidecar.json",
+    "produced": false,
+    "reason": "candidate runner is blocked before authorized material execution",
+    "schema": "core.material.f4.tallwall120.material_case_sidecar.v1"
+  },
+  "record_id": "f4-tallwall120-material-candidate-runner-receipt-v1",
+  "schema": "core.material.f4.tallwall120.candidate_runner_receipt.v1",
+  "scope": {
+    "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+    "family": "F4",
+    "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+    "split": "train"
+  },
+  "source": {
+    "bytes": 2067911708,
+    "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+    "sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+    "trajectory_access": "lstat_only_via_root_scheduler_intake"
+  },
+  "status": "blocked_fail_closed",
+  "validation": {
+    "blocked": true,
+    "blockers_nonempty": true,
+    "contract_valid": true,
+    "root_scheduler_validate_errors": []
+  }
+}
