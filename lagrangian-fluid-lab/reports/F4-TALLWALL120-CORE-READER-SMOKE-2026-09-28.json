@@ -1,0 +1,106 @@
+{
+  "schema": "local.f4.core_reader_smoke.stdout.v1",
+  "observed_date": "2026-09-28",
+  "family": "F4",
+  "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+  "manifest": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
+  "manifest_sha256": "86100523e66202f567ee29da6e178702f0e3ab19c63bd0cf861ff8a5fa0f86b4",
+  "manifest_declarations": {
+    "case_count": 32,
+    "formal_release": true,
+    "formal_eligible": true,
+    "reader_case_count": 32,
+    "execution_complete_count": 32,
+    "fixed_split_counts": {
+      "train": 16,
+      "validation": 4,
+      "id_test": 6,
+      "ood_test": 6
+    },
+    "central_registry_written": false,
+    "ledger_written": false,
+    "gpu_started": false
+  },
+  "operation": {
+    "read_only": true,
+    "dataset_api": "scripts.core_cfd_dataset.open_dataset",
+    "source_hash_verification": {
+      "passed": 32,
+      "total": 32,
+      "exact_sha256": true
+    },
+    "elapsed_seconds": 411.364753580885,
+    "solver_started": false,
+    "worker_started": false,
+    "queue_mutation": false,
+    "production_artifact_mutation": false
+  },
+  "case_coverage": {
+    "cases_opened": 32,
+    "cases_with_times": 32,
+    "cases_with_known_inputs": 32,
+    "cases_with_state_samples": 32,
+    "case_id_range": [
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_00",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_31"
+    ],
+    "split_counts": {
+      "train": 16,
+      "validation": 4,
+      "id_test": 6,
+      "ood_test": 6
+    }
+  },
+  "trajectory_contract": {
+    "frames_per_case": 218,
+    "transitions_per_case": 217,
+    "time_start_s": 0.0,
+    "time_end_s": 4.340002980805959,
+    "strictly_increasing_time": {
+      "passed": 32,
+      "total": 32
+    },
+    "geometry_triangles_per_case": 10,
+    "geometry_triangle_count_check": {
+      "passed": 32,
+      "total": 32
+    }
+  },
+  "state_sample_contract": {
+    "sample_frames": [0, 109, 217],
+    "finite_positions": {
+      "passed": 32,
+      "total": 32
+    },
+    "finite_velocities": {
+      "passed": 32,
+      "total": 32
+    },
+    "finite_mass": {
+      "passed": 32,
+      "total": 32
+    },
+    "valid_true_equals_particle_count": {
+      "passed": 32,
+      "total": 32
+    },
+    "observed_particle_count_values": [217086, 217485],
+    "observed_mass_total_kg_values": [91.58315862558084, 91.75148675494711]
+  },
+  "reader_result": {
+    "dataset_opened": true,
+    "reader_formal_eligible": false,
+    "formal_credit_granted_by_this_smoke": false,
+    "t1_credit_granted_by_this_smoke": false,
+    "training_credit_granted_by_this_smoke": false,
+    "t2_credit_granted_by_this_smoke": false,
+    "qualification_credit": 0,
+    "diagnostic_only": true
+  },
+  "interpretation": {
+    "status": "core_reader_path_smoke_passed_but_formal_reader_gate_remains_closed",
+    "positive": "All 32 declared F4 cases can be opened through the unified Core reader; exact source hashes, time axes, known-input records, and sampled state contracts were traversed without a read failure.",
+    "limitation": "The reader itself reports formal eligibility false. The manifest declaration formal_release/formal_eligible does not substitute for the trusted reader/runtime gate.",
+    "next_step": "Keep this as integration evidence and resolve the trusted reader/runtime and formal provenance gates before assigning T1, training, T2, or qualification credit."
+  }
+}
