@@ -1,0 +1,399 @@
+{
+  "blocking_reasons": [
+    "collection_dev07_source_identity",
+    "reader_identity_and_non_t2",
+    "sidecar_terminal_intake",
+    "missing_material_case_sidecar",
+    "archives_v1_v2_path_drift",
+    "reader_manifest_sha_drift"
+  ],
+  "case_sidecar_intake": {
+    "blocking_reasons": [
+      "missing_material_case_sidecar"
+    ],
+    "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+    "checks": [
+      {
+        "check": "sidecar_present",
+        "passed": false,
+        "reason": "default material case sidecar is missing; no terminal evidence is inferred"
+      }
+    ],
+    "credit": 0,
+    "failed_checks": [
+      "sidecar_present"
+    ],
+    "gate_projection": {
+      "event_window_complete": false,
+      "mass_closure": false,
+      "reliable_coverage": false,
+      "right_censor_clear": false,
+      "unknown_gate": false
+    },
+    "observed": {},
+    "present": false,
+    "status": "missing"
+  },
+  "checks": [
+    {
+      "check": "proposal_identity",
+      "observed": {
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+        "family": "F4",
+        "schema": "core.material.f4.tallwall120.coarse_proposal.v1",
+        "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+        "source_bytes": 2067911708,
+        "source_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+        "source_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae"
+      },
+      "passed": true,
+      "reason": "coarse proposal must bind the exact DEV_07 source identity"
+    },
+    {
+      "check": "proposal_q_binding",
+      "observed": {
+        "dp_m": 0.0075,
+        "neighbour_variant": "baseline24",
+        "q": 0.23437500000000008,
+        "seeds": 512,
+        "substeps": 2
+      },
+      "passed": true,
+      "reason": "proposal q and material configuration must be exact"
+    },
+    {
+      "check": "proposal_archive_identity",
+      "observed": {
+        "declared_sha256": "49412fb74e488628ccb0fa15ce0aa808c1e723fb8821196e79b646a3121513e5",
+        "observed_sha256": "49412fb74e488628ccb0fa15ce0aa808c1e723fb8821196e79b646a3121513e5",
+        "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/archive.json",
+        "schema": "core.verified_archive.v1"
+      },
+      "passed": true,
+      "reason": "proposal direct source manifest must bind the bounded archives-v2 manifest"
+    },
+    {
+      "check": "collection_manifest_identity",
+      "observed": {
+        "declared_sha256": "808fe201c4df28f2be9b48a514f338689c38bcb96db0b0c0590946b79fb9ad09",
+        "family": "F4",
+        "observed_sha256": "808fe201c4df28f2be9b48a514f338689c38bcb96db0b0c0590946b79fb9ad09",
+        "path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
+        "schema": "core.f4.tallwall120.production_collection.v1",
+        "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1"
+      },
+      "passed": true,
+      "reason": "collection manifest path, schema, scope, and proposal SHA must agree"
+    },
+    {
+      "check": "collection_dev07_source_identity",
+      "observed": {
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+        "family": "F4",
+        "source_hdf5": null,
+        "source_sha256": null,
+        "split": "train"
+      },
+      "passed": false,
+      "reason": "collection DEV_07 row must carry the exact source path and SHA"
+    },
+    {
+      "check": "reader_identity_and_non_t2",
+      "observed": {
+        "current_manifest_sha256": "808fe201c4df28f2be9b48a514f338689c38bcb96db0b0c0590946b79fb9ad09",
+        "manifest": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
+        "manifest_sha256": "86100523e66202f567ee29da6e178702f0e3ab19c63bd0cf861ff8a5fa0f86b4",
+        "reader_result": {
+          "dataset_opened": true,
+          "diagnostic_only": true,
+          "formal_credit_granted_by_this_smoke": false,
+          "qualification_credit": 0,
+          "reader_formal_eligible": false,
+          "t1_credit_granted_by_this_smoke": false,
+          "t2_credit_granted_by_this_smoke": false,
+          "training_credit_granted_by_this_smoke": false
+        },
+        "schema": "local.f4.core_reader_smoke.stdout.v1"
+      },
+      "passed": false,
+      "reason": "reader smoke must bind the current manifest and remain diagnostic/non-T2"
+    },
+    {
+      "check": "archives_manifest_output_identity",
+      "observed": {
+        "execution_status": "succeeded",
+        "job_id": "f4-tallwall120-production-dev-07",
+        "schema": "core.verified_archive.v1",
+        "trajectory": {
+          "bytes": 2067911708,
+          "path": "product/trajectory.h5",
+          "sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae"
+        }
+      },
+      "passed": true,
+      "reason": "archives-v2 manifest output must bind the exact trajectory metadata"
+    },
+    {
+      "check": "archives_consistency_identity",
+      "observed": {
+        "archives_path_binding": {
+          "collection_case_declared_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-07/product/trajectory.h5",
+          "exact_path_match": false,
+          "mismatch_class": "archives-v1_vs_archives-v2",
+          "proposal_target_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+          "source_sha256_match": true
+        },
+        "schema": "core.material.f4.tallwall120.receipt_consistency_audit.v1"
+      },
+      "passed": true,
+      "reason": "receipt consistency must bind the proposal source and preserve SHA identity"
+    },
+    {
+      "check": "fresh_namespace_absent",
+      "observed": {
+        "exists": false,
+        "namespace": "campaigns/core-v1/material/proposals/f4-tallwall120-production-dev-07/coarse-baseline24-s2-r001-source-6ae8ca70"
+      },
+      "passed": true,
+      "reason": "fresh output namespace must be absent before an authorized producer run"
+    },
+    {
+      "check": "source_hdf5_metadata_only",
+      "observed": {
+        "byte_size_match": true,
+        "bytes": 2067911708,
+        "content_hash_recomputed": false,
+        "content_read": false,
+        "declared_bytes": 2067911708,
+        "declared_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+        "exists": true,
+        "metadata_only": true,
+        "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5"
+      },
+      "passed": true,
+      "reason": "trajectory HDF5 may be stat-checked but never opened or rehashed"
+    },
+    {
+      "check": "sidecar_path_under_fresh_namespace",
+      "expected": {
+        "namespace_prefix": "campaigns/core-v1/material/proposals/f4-tallwall120-production-dev-07/coarse-baseline24-s2-r001-source-6ae8ca70/",
+        "suffix": ".json"
+      },
+      "observed": {
+        "path": "campaigns/core-v1/material/proposals/f4-tallwall120-production-dev-07/coarse-baseline24-s2-r001-source-6ae8ca70/product/material_case_sidecar.json"
+      },
+      "passed": true,
+      "reason": "the default intake target is the one fresh namespace-bound JSON sidecar"
+    },
+    {
+      "check": "sidecar_terminal_intake",
+      "observed": {
+        "blocking_reasons": [
+          "missing_material_case_sidecar"
+        ],
+        "present": false,
+        "status": "missing"
+      },
+      "passed": false,
+      "reason": "a complete event-window sidecar is required; missing/partial input fails closed"
+    }
+  ],
+  "decision": "diagnostic_only_single_case_sidecar_intake",
+  "fresh_output_namespace": {
+    "execution_authorized": false,
+    "exists": false,
+    "historical_trace_reuse": false,
+    "namespace": "campaigns/core-v1/material/proposals/f4-tallwall120-production-dev-07/coarse-baseline24-s2-r001-source-6ae8ca70",
+    "overwrite_allowed": false,
+    "sidecar_path": "campaigns/core-v1/material/proposals/f4-tallwall120-production-dev-07/coarse-baseline24-s2-r001-source-6ae8ca70/product/material_case_sidecar.json"
+  },
+  "input_bindings": {
+    "collection_manifest": {
+      "bytes": 765422,
+      "content_hash_recomputed": true,
+      "content_read": true,
+      "exists": true,
+      "expected_sha256": null,
+      "expected_sha256_match": null,
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
+      "role": "collection_manifest",
+      "sha256": "808fe201c4df28f2be9b48a514f338689c38bcb96db0b0c0590946b79fb9ad09"
+    },
+    "consistency_audit": {
+      "bytes": 42333,
+      "content_hash_recomputed": true,
+      "content_read": true,
+      "exists": true,
+      "expected_sha256": null,
+      "expected_sha256_match": null,
+      "path": "reports/F4-TALLWALL120-MATERIAL-RECEIPT-CONSISTENCY-AUDIT-2026-09-28.json",
+      "role": "consistency_audit",
+      "sha256": "936bc54c8ad2ccd8ef23c7b016ba6ef61c749fdf9f9a45f36c13001cb1bb1a99"
+    },
+    "proposal": {
+      "bytes": 12775,
+      "content_hash_recomputed": true,
+      "content_read": true,
+      "exists": true,
+      "expected_sha256": null,
+      "expected_sha256_match": null,
+      "path": "reports/F4-TALLWALL120-MATERIAL-COARSE-PROPOSAL-2026-09-28.json",
+      "role": "proposal",
+      "sha256": "59e8340978b86230b3344193666199adc5c26976b315a672f71074e965dd1267"
+    },
+    "reader_smoke": {
+      "bytes": 3430,
+      "content_hash_recomputed": true,
+      "content_read": true,
+      "exists": true,
+      "expected_sha256": null,
+      "expected_sha256_match": null,
+      "path": "reports/F4-TALLWALL120-CORE-READER-SMOKE-2026-09-28.json",
+      "role": "reader_smoke",
+      "sha256": "db30187225f8a2915f43d18622d54ec537fe3efc2265837d5273f3dfeed2ac5d"
+    },
+    "sidecar": {
+      "bytes": null,
+      "content_hash_recomputed": false,
+      "content_read": false,
+      "error": "missing_file",
+      "exists": false,
+      "path": "campaigns/core-v1/material/proposals/f4-tallwall120-production-dev-07/coarse-baseline24-s2-r001-source-6ae8ca70/product/material_case_sidecar.json",
+      "sha256": null
+    },
+    "source_archive": {
+      "bytes": 1509,
+      "content_hash_recomputed": true,
+      "content_read": true,
+      "exists": true,
+      "expected_sha256": "49412fb74e488628ccb0fa15ce0aa808c1e723fb8821196e79b646a3121513e5",
+      "expected_sha256_match": true,
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/archive.json",
+      "role": "source_archive",
+      "sha256": "49412fb74e488628ccb0fa15ce0aa808c1e723fb8821196e79b646a3121513e5"
+    }
+  },
+  "input_boundary": {
+    "bounded_json_only": true,
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "hdf5_content_read": false,
+    "hdf5_hash_recomputed": false,
+    "hdf5_metadata_only": true,
+    "ledger_mutation": 0,
+    "max_json_bytes": 8388608,
+    "production_hdf5_mutated": false,
+    "queue_started": false,
+    "registry_mutation": 0,
+    "solver_started": false,
+    "worker_started": false
+  },
+  "mutation": 0,
+  "observed_at_utc": "2026-09-28T00:00:00Z",
+  "qualification": {
+    "T1": false,
+    "T2": false,
+    "completion_mutation": 0,
+    "contract_only": true,
+    "credit": 0,
+    "denominator_mutation": 0,
+    "diagnostic_only": true,
+    "formal": false,
+    "formal_eligible": false,
+    "gate_mutation": 0,
+    "ledger_mutation": 0,
+    "qualification": false,
+    "qualification_credit": 0,
+    "registry_mutation": 0
+  },
+  "required_contract": {
+    "dp_m": 0.0075,
+    "event_window_s": 8.68,
+    "mass_closure_error_max": 1e-12,
+    "neighbour_variant": "baseline24",
+    "q": 0.23437500000000008,
+    "reliable_coverage_min": 1.0,
+    "right_censor_status": "not_right_censored",
+    "seeds": 512,
+    "source_bytes": 2067911708,
+    "source_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+    "source_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+    "substeps": 2,
+    "terminal_marker": "material_event_window_terminal_v1",
+    "unknown_fraction_max": 0.01
+  },
+  "schema": "core.material.f4.tallwall120.case_sidecar_intake.v1",
+  "scientific_boundary": {
+    "partial_credit_is_forbidden": true,
+    "proposal_is_not_t2": true,
+    "reader_smoke_is_not_t2": true,
+    "right_censored_event_window_is_not_imputed": true,
+    "single_case_sidecar_is_not_qualification": true
+  },
+  "scope": {
+    "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+    "family": "F4",
+    "focus": "one F4 Tallwall120 material event-window sidecar",
+    "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+    "split": "train"
+  },
+  "source_binding": {
+    "archives": {
+      "consistency_path_match": false,
+      "consistency_source_sha256_match": true,
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/archive.json",
+      "manifest_sha256": "49412fb74e488628ccb0fa15ce0aa808c1e723fb8821196e79b646a3121513e5",
+      "trajectory_output": {
+        "bytes": 2067911708,
+        "path": "product/trajectory.h5",
+        "sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae"
+      }
+    },
+    "collection_case": {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+      "family": "F4",
+      "source_hdf5": null,
+      "source_sha256": null,
+      "split": "train"
+    },
+    "proposal_target": {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+      "family": "F4",
+      "frames": 218,
+      "lineage_group_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+      "particle_count": 217485,
+      "physical_case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+      "recipe_id": "F4_mdbc_laminar_nu1e6_tallwall120_v1",
+      "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+      "source_bytes": 2067911708,
+      "source_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+      "source_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+      "split": "train",
+      "time_end_s": 4.340002980805959,
+      "time_start_s": 0.0,
+      "transitions": 217
+    },
+    "reader": {
+      "current_manifest_sha256": "808fe201c4df28f2be9b48a514f338689c38bcb96db0b0c0590946b79fb9ad09",
+      "diagnostic_only": true,
+      "formal_eligible": false,
+      "manifest": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
+      "manifest_sha256": "86100523e66202f567ee29da6e178702f0e3ab19c63bd0cf861ff8a5fa0f86b4",
+      "t2_credit": false
+    },
+    "trajectory_hdf5": {
+      "byte_size_match": true,
+      "bytes": 2067911708,
+      "content_hash_recomputed": false,
+      "content_read": false,
+      "declared_bytes": 2067911708,
+      "declared_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+      "exists": true,
+      "metadata_only": true,
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5"
+    }
+  },
+  "status": "blocked_fail_closed"
+}
