@@ -496,6 +496,7 @@ class _StreamingJSON:
         return self._scalar()
 
     def _object(self, *, keep: bool = False) -> dict[str, Any] | None:
+        self._ws()
         self._expect(ord('{'))
         self.depth += 1
         if self.depth > MAX_JSON_DEPTH:
@@ -526,6 +527,7 @@ class _StreamingJSON:
                 _fail("evaluation JSON object requires ',' or '}'")
 
     def _array(self, *, keep: bool = False) -> list[Any] | None:
+        self._ws()
         self._expect(ord('['))
         self.depth += 1
         if self.depth > MAX_JSON_DEPTH:
@@ -555,6 +557,7 @@ class _StreamingJSON:
     def _case(self) -> dict[str, Any] | None:
         # The case object is small around the completion fields but contains
         # metric arrays.  Keep only the fields this intake contract needs.
+        self._ws()
         self._expect(ord('{'))
         self.depth += 1
         if self.depth > MAX_JSON_DEPTH:
@@ -595,6 +598,7 @@ class _StreamingJSON:
                 _fail("evaluation case requires ',' or '}'")
 
     def _score(self) -> dict[str, Any]:
+        self._ws()
         self._expect(ord('{'))
         self.depth += 1
         wanted = {
@@ -625,6 +629,7 @@ class _StreamingJSON:
                 _fail("evaluation score requires ',' or '}'")
 
     def _case_map(self) -> dict[str, Any] | None:
+        self._ws()
         self._expect(ord('{'))
         self.depth += 1
         result: dict[str, Any] = {}
@@ -651,6 +656,7 @@ class _StreamingJSON:
                 _fail("evaluation cases requires ',' or '}'")
 
     def _expected_frames(self) -> dict[str, Any] | None:
+        self._ws()
         self._expect(ord('{'))
         self.depth += 1
         result: dict[str, Any] = {}
@@ -686,6 +692,7 @@ class _StreamingJSON:
         return result
 
     def top(self) -> dict[str, Any]:
+        self._ws()
         self._expect(ord('{'))
         self.depth += 1
         result: dict[str, Any] = {}

@@ -32,6 +32,13 @@ def _write_json(path: Path, value: object) -> dict[str, object]:
     return {"sha256": _sha_bytes(raw), "bytes": len(raw)}
 
 
+def _write_pretty_json(path: Path, value: object) -> dict[str, object]:
+    raw = json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False).encode() + b"\n"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(raw)
+    return {"sha256": _sha_bytes(raw), "bytes": len(raw)}
+
+
 def _nonce(tmp_path: Path, seed: int) -> str:
     return _sha_text(f"{tmp_path}:{seed}")[:32]
 
@@ -309,6 +316,18 @@ def test_evaluation_hash_is_streamed_and_path_bytes_are_bound(tmp_path: Path) ->
     assert evaluation["bytes"] == fixture[1][seed].evaluation.stat().st_size
     assert evaluation["sha256"] == _sha_bytes(fixture[1][seed].evaluation.read_bytes())
     assert summaries[seed]["rollout_identity"]["evaluation"] == evaluation
+
+
+def test_pretty_printed_evaluation_json_is_accepted(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path, with_proofs=False)
+    meta, inputs, training = fixture
+    seed = 17
+    evaluation = json.loads(inputs[seed].evaluation.read_text(encoding="utf-8"))
+    _write_pretty_json(inputs[seed].evaluation, evaluation)
+    row = builder.build_summaries(inputs, training_matrix=training, root=meta["root"])[seed]
+    assert row["checks"]["evaluation_terminal"] is True
+    assert row["status"] == "blocked_missing_process_proof"
+    assert row["source_bound"] is False
 
 
 def test_trajectory_stream_hash_or_stat_drift_blocks(tmp_path: Path) -> None:
