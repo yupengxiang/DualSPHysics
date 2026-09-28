@@ -1,0 +1,97 @@
+{
+  "checks": {
+    "bounded_root_relative_path_defined": true,
+    "content_open_forbidden": true,
+    "parent_symlink_rejection_defined": true,
+    "realpath_containment_defined": true,
+    "root_symlink_rejection_defined": true,
+    "single_hardlink_rejection_defined": true,
+    "v1_parent_symlink_gap_reproduced": true
+  },
+  "created_at": "2026-09-29",
+  "execution_constraints": {
+    "completion_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "gpu_started": false,
+    "ledger_mutations": 0,
+    "plan_mutations": 0,
+    "production_paths_read": false,
+    "queue_started": false,
+    "registry_mutations": 0,
+    "solver_started": false,
+    "source_hdf5_hash_recomputed": false,
+    "source_hdf5_opened": false,
+    "source_hdf5_read": false,
+    "synthetic_projection_only": true,
+    "worker_started": false
+  },
+  "input_boundary": {
+    "bounded_in_memory_contract": true,
+    "input_origin": "synthetic_fixture",
+    "max_components": 64,
+    "max_relative_path_bytes": 512,
+    "production_paths_read": false,
+    "source_hdf5_hash_recomputed": false,
+    "source_hdf5_opened": false,
+    "source_hdf5_read": false,
+    "synthetic_only": true
+  },
+  "integration_boundary": {
+    "registry_ledger_denominator_gate_completion_plan": "not read for mutation and never written",
+    "solver_worker_gpu_queue": "not started, stopped, restarted, or queued",
+    "v1_consumer_wiring": "not performed; this additive contract is ready for a future v2 intake",
+    "v1_modified": false
+  },
+  "next_safe_action": "Before any future source-bound F3 material intake can treat the source path as closed, compose audit_source_path with the v1 bounded report and require every provenance check; this synthetic report itself is never launch authority or qualification evidence.",
+  "non_authorizing_boundary": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "capability_minted": false,
+    "credit": 0,
+    "diagnostic_only": true,
+    "formal": false,
+    "formal_eligible": false,
+    "launch_admitted": false,
+    "qualification": false,
+    "qualification_credit": 0,
+    "worker_launch_authorized": false
+  },
+  "record_id": "f3-material-coarse-root-scheduler-intake-v2-synthetic-source-path-provenance",
+  "schema": "core.material.f3.coarse.root_scheduler_intake.v2.synthetic_source_path_provenance_report",
+  "scope": {
+    "candidate": "CORE-F3-MATERIAL-COARSE-s2",
+    "change_scope": "source-path provenance only; additive v2 sidecar",
+    "v1_final_lstat_only": true,
+    "v1_function": "_source_metadata",
+    "v1_module": "scripts/f3_material_coarse_root_scheduler_intake_v1.py",
+    "v1_parent_component_guard": false,
+    "v1_single_hardlink_guard": false
+  },
+  "status": "synthetic_only_non_authorizing_source_path_provenance_contract",
+  "synthetic_cases": [
+    {
+      "case_id": "synthetic_clean_source",
+      "source_path": "data/clean/source.h5",
+      "v1_final_lstat_observation": "regular_non_symlink",
+      "v2_expected": "source_path_provenance_closed_non_authorizing"
+    },
+    {
+      "blocker": "symlink_component",
+      "case_id": "synthetic_parent_symlink",
+      "source_path": "data/alias/source.h5",
+      "v1_final_lstat_observation": "regular_non_symlink_after_parent_alias",
+      "v1_would_not_reject_parent_alias": true,
+      "v2_expected": "blocked_source_path_provenance"
+    },
+    {
+      "blocker": "source_hardlink_or_alias",
+      "case_id": "synthetic_source_hardlink",
+      "source_path": "data/alias/source.h5",
+      "v1_final_lstat_observation": "regular_file_with_multiple_links",
+      "v1_would_not_reject_hardlink": true,
+      "v2_expected": "blocked_source_path_provenance"
+    }
+  ]
+}
