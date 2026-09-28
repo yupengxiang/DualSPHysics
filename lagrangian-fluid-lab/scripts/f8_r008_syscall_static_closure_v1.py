@@ -23,7 +23,13 @@ import os
 from pathlib import Path
 import re
 import stat
+import sys
 from typing import Any, Mapping
+
+
+LAB = Path(__file__).resolve().parents[1]
+if str(LAB) not in sys.path:
+    sys.path.insert(0, str(LAB))
 
 from scripts import f8_r008_syscall_selector_domain_v1 as selector_domain
 from scripts import f8_r008_syscall_universe_baseline_v1 as source_baseline
@@ -31,7 +37,6 @@ from scripts import f8_r008_target_kernel_evidence_intake_v1 as target_intake
 from scripts import f8_r008_target_kernel_local_inventory_v1 as local_inventory
 
 
-LAB = Path(__file__).resolve().parents[1]
 OUTPUT = Path("reports/F8-R008-SYSCALL-STATIC-CLOSURE-V1.json")
 SCHEMA = "core.cfd.f8.r008_syscall_static_closure_report.v1"
 RECORD_ID = "f8-r008-syscall-static-closure-v1"
