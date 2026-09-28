@@ -33,6 +33,7 @@ REPORT_ID = "f3-graph-raw-hidden16-seed43-terminal-completion-receipt-v1"
 SUMMARY_SCHEMA = "core.f3.graph_raw.hidden16.full835.rollout_diagnostic.summary.v1"
 SUMMARY_MAX_BYTES = 256 * 1024
 SHA256_RE = set("0123456789abcdef")
+MODEL_KIND = "graph_raw"
 SEED = 43
 HIDDEN = 16
 UPDATES = 500
@@ -663,6 +664,284 @@ def _require_receipt(condition: bool, message: str) -> None:
         raise ReceiptError(message)
 
 
+def _explicit_report(
+    *,
+    training_path: Path,
+    evaluation_path: Path,
+    validator_path: Path,
+    checkpoint_path: Path,
+    trajectory_path: Path,
+    terminal_summary_path: Path,
+    observed_at_utc: str,
+) -> dict[str, Any]:
+    """Bind explicit bounded receipts used by the seed43 runner/tests."""
+
+    training, training_source = _read_bounded_json(
+        training_path, "training_receipt", 1 * 1024 * 1024
+    )
+    evaluation, evaluation_source = _read_bounded_json(
+        evaluation_path, "evaluation", 16 * 1024 * 1024
+    )
+    validator, validator_source = _read_bounded_json(
+        validator_path, "hdf5_validation_receipt", 1 * 1024 * 1024
+    )
+    terminal_summary, terminal_source = _read_bounded_json(
+        terminal_summary_path, "terminal_summary", SUMMARY_MAX_BYTES
+    )
+
+    training_checkpoint = _mapping(training.get("checkpoint"), "training.checkpoint")
+    checkpoint_bytes = _strict_int(
+        training_checkpoint.get("bytes"), "training.checkpoint.bytes", 1
+    )
+    trajectory_claim = _mapping(terminal_summary.get("trajectory"), "terminal_summary.trajectory")
+    trajectory_bytes = _strict_int(
+        trajectory_claim.get("bytes"), "terminal_summary.trajectory.bytes", 1
+    )
+    checkpoint_stat = _explicit_stat(checkpoint_path, "checkpoint", checkpoint_bytes)
+    trajectory_stat = _explicit_stat(trajectory_path, "trajectory", trajectory_bytes)
+
+    _require_receipt(training.get("schema") == "core.training.v1", "training.schema drift")
+    for key, expected in (
+        ("model_kind", MODEL_KIND),
+        ("seed", SEED),
+        ("completed_updates", UPDATES),
+        ("evidence_status", "complete"),
+    ):
+        _require_receipt(training.get(key) == expected, f"training.{key} drift")
+    _require_receipt(
+        training.get("checkpoint_verified") is True,
+        "training.checkpoint_verified must be true",
+    )
+    training_config = _mapping(training.get("config"), "training.config")
+    for key, expected in (
+        ("model_kind", MODEL_KIND),
+        ("hidden", HIDDEN),
+        ("seed", SEED),
+        ("updates", UPDATES),
+    ):
+        _require_receipt(training_config.get(key) == expected, f"training.config.{key} drift")
+    _require_receipt(
+        _path_equal(training_checkpoint.get("path"), checkpoint_path),
+        "training.checkpoint.path drift",
+    )
+    _require_receipt(training_checkpoint.get("update") == UPDATES, "training.checkpoint.update drift")
+    _sha256(training_checkpoint.get("sha256"), "training.checkpoint.sha256")
+
+    _require_receipt(evaluation.get("schema") == "core.evaluation.v1", "evaluation.schema drift")
+    _require_receipt(evaluation.get("diagnostic") is True, "evaluation.diagnostic must be true")
+    _require_receipt(
+        evaluation.get("formal_eligible") is False,
+        "evaluation.formal_eligible must be false",
+    )
+    _require_receipt(
+        evaluation.get("maximum_steps") == TRANSITIONS,
+        "evaluation.maximum_steps drift",
+    )
+    _require_receipt(
+        evaluation.get("checkpoint") == str(checkpoint_path),
+        "evaluation.checkpoint path drift",
+    )
+    _require_receipt(
+        evaluation.get("selected_case_ids") == [CASE_ID],
+        "evaluation.selected_case_ids drift",
+    )
+    _require_receipt(
+        _mapping(evaluation.get("expected_frames"), "evaluation.expected_frames").get(CASE_ID)
+        == TRANSITIONS,
+        "evaluation.expected_frames drift",
+    )
+    _require_receipt(
+        _mapping(evaluation.get("fixed_denominator"), "evaluation.fixed_denominator")
+        .get(CASE_ID, {})
+        .get("expected_frames")
+        == TRANSITIONS,
+        "evaluation.fixed_denominator drift",
+    )
+    cases = _mapping(evaluation.get("cases"), "evaluation.cases")
+    case = _mapping(cases.get(CASE_ID), "evaluation.case")
+    for key, expected in (
+        ("case_id", CASE_ID),
+        ("executed", True),
+        ("execution_complete", True),
+        ("expected_frames", TRANSITIONS),
+        ("frames_expected", TRANSITIONS),
+        ("frames_executed", TRANSITIONS),
+        ("frames_predicted", TRANSITIONS),
+        ("finite_rollout_complete", True),
+        ("future_state_inputs", False),
+    ):
+        _require_receipt(case.get(key) == expected, f"evaluation.case.{key} drift")
+    _require_receipt(
+        case.get("failure_category") is None,
+        "evaluation.case.failure_category drift",
+    )
+    _require_receipt(
+        case.get("first_failure_frame") is None,
+        "evaluation.case.first_failure_frame drift",
+    )
+    _require_receipt(
+        _path_equal(case.get("trajectory_output"), trajectory_path),
+        "trajectory_output drift",
+    )
+    score = _mapping(case.get("score"), "evaluation.case.score")
+    for key, expected in (
+        ("executed", True),
+        ("complete", True),
+        ("expected_frames", TRANSITIONS),
+        ("finite_prefix_frames", TRANSITIONS),
+        ("raw_error_coverage", 1.0),
+    ):
+        _require_receipt(score.get(key) == expected, f"evaluation.case.score.{key} drift")
+    execution_summary = _mapping(evaluation.get("execution_summary"), "evaluation.execution_summary")
+    for key, expected in (
+        ("registered_case_count", 1),
+        ("executed_case_count", 1),
+        ("execution_complete_case_count", 1),
+        ("finite_rollout_complete_case_count", 1),
+        ("missing_execution_case_count", 0),
+    ):
+        _require_receipt(
+            execution_summary.get(key) == expected,
+            f"evaluation.execution_summary.{key} drift",
+        )
+    _require_receipt(
+        _mapping(evaluation.get("finite_summary"), "evaluation.finite_summary")
+        .get("all_registered_rollouts_finite")
+        is True,
+        "evaluation.finite_summary drift",
+    )
+
+    _require_receipt(
+        validator.get("schema") == "core.f3.full_rollout_receipt_hdf5_validation.v1",
+        "validator.schema drift",
+    )
+    for key, expected in (
+        ("case_id", CASE_ID),
+        ("complete", True),
+        ("passed", True),
+        ("expected_transitions", TRANSITIONS),
+        ("frames_executed", TRANSITIONS),
+        ("production_artifacts_touched", False),
+        ("qualification_credit", 0),
+        ("synthetic_only", False),
+    ):
+        _require_receipt(validator.get(key) == expected, f"validator.{key} drift")
+    _require_receipt(
+        _path_equal(validator.get("evaluation_json"), evaluation_path),
+        "validator.evaluation_json drift",
+    )
+    _require_receipt(
+        _path_equal(validator.get("trajectory_hdf5"), trajectory_path),
+        "validator.trajectory_hdf5 drift",
+    )
+    checks = _mapping(validator.get("checks"), "validator.checks")
+    for key, expected in (
+        ("case_binding", True),
+        ("completion_semantics", True),
+        ("executed_frame_count", FRAMES),
+        ("future_state_inputs", True),
+        ("tail_frame_count", 0),
+        ("trajectory_frames", FRAMES),
+        ("trajectory_transitions", TRANSITIONS),
+    ):
+        _require_receipt(checks.get(key) == expected, f"validator.checks.{key} drift")
+
+    _require_receipt(terminal_summary.get("schema") == SUMMARY_SCHEMA, "terminal_summary.schema drift")
+    _require_receipt(
+        terminal_summary.get("status") == "completed_diagnostic",
+        "terminal_summary.status drift",
+    )
+    _require_receipt(
+        terminal_summary.get("diagnostic_only") is True,
+        "terminal_summary.diagnostic_only must be true",
+    )
+    _require_receipt(
+        terminal_summary.get("formal_eligible") is False,
+        "terminal_summary.formal_eligible must be false",
+    )
+    _require_receipt(
+        terminal_summary.get("future_state_inputs") is False,
+        "terminal_summary.future_state_inputs must be false",
+    )
+    _require_receipt(
+        terminal_summary.get("qualification_credit", 0) == 0,
+        "terminal_summary.qualification_credit drift",
+    )
+    protocol = _mapping(terminal_summary.get("protocol"), "terminal_summary.protocol")
+    for key, expected in (
+        ("model_kind", MODEL_KIND),
+        ("seed", SEED),
+        ("hidden", HIDDEN),
+        ("updates", UPDATES),
+        ("maximum_steps", TRANSITIONS),
+        ("diagnostic", True),
+        ("future_state_inputs", False),
+    ):
+        _require_receipt(protocol.get(key) == expected, f"terminal_summary.protocol.{key} drift")
+
+    return {
+        "schema": REPORT_SCHEMA,
+        "report_id": REPORT_ID,
+        "observed_at_utc": observed_at_utc,
+        "status": "completed_diagnostic_terminal_receipt_bound",
+        "model_kind": MODEL_KIND,
+        "seed": SEED,
+        "hidden": HIDDEN,
+        "updates": UPDATES,
+        "terminal_markers": {"transitions": TRANSITIONS, "frames": FRAMES},
+        "identities": {
+            "training": training_source,
+            "evaluation": evaluation_source,
+            "validator": validator_source,
+            "checkpoint": {
+                "path": str(checkpoint_path),
+                "opened": False,
+                "sha256_recomputed": False,
+                "stat": checkpoint_stat,
+            },
+            "trajectory": {
+                "path": str(trajectory_path),
+                "opened": False,
+                "sha256_recomputed": False,
+                "stat": trajectory_stat,
+            },
+            "terminal_summary": terminal_source,
+        },
+        "new_diagnostic_evaluate_attempted": False,
+        "launch": {
+            "attempted": False,
+            "started": False,
+            "command": None,
+            "output_namespace": None,
+            "reason": "existing complete seed43 terminal summary bound; no duplicate evaluate",
+        },
+        "qualification": {
+            "diagnostic_only": True,
+            "formal_eligible": False,
+            "T1_numerical": False,
+            "T2_macro": False,
+            "T2_path": False,
+            "qualification_credit": 0,
+        },
+        "side_effects": {
+            "existing_live_job_stop_count": 0,
+            "existing_live_job_restart_count": 0,
+            "progress_content_opened": False,
+            "trajectory_content_opened": False,
+            "hdf5_content_opened": False,
+            "manifest_content_opened": False,
+            "checkpoint_content_opened": False,
+            "registry_mutation": 0,
+            "ledger_mutation": 0,
+            "denominator_mutation": 0,
+            "gate_mutation": 0,
+            "solver_started": False,
+            "worker_started": False,
+            "queue_submissions": 0,
+        },
+    }
+
+
 def build_report(
     summary_path: Path = DEFAULT_SUMMARY,
     *,
@@ -697,6 +976,53 @@ def build_report(
             observed_at_utc=observed_at_utc,
         )
     return _build_default_report(summary_path, observed_at_utc=observed_at_utc)
+
+
+def validate_report(report: Mapping[str, Any]) -> list[str]:
+    errors: list[str] = []
+    status = report.get("status")
+    if status not in {
+        "completed_diagnostic_terminal_receipt_bound",
+        "bound_existing_terminal_summary",
+    }:
+        errors.append("status is not a bound diagnostic terminal status")
+    expected_markers: Mapping[str, Any] = {
+        "transitions": TRANSITIONS,
+        "frames": FRAMES,
+    }
+    if status == "bound_existing_terminal_summary":
+        expected_markers = {
+            "case_id": CASE_ID,
+            "model_kind": MODEL_KIND,
+            "seed": SEED,
+            "hidden": HIDDEN,
+            "updates": UPDATES,
+            "transitions": TRANSITIONS,
+            "frames": FRAMES,
+            "parameter_count": 6086,
+            "validator": {
+                "passed": True,
+                "complete": True,
+                "trajectory_frames": FRAMES,
+                "trajectory_transitions": TRANSITIONS,
+                "tail_frame_count": 0,
+            },
+        }
+    if report.get("terminal_markers") != expected_markers:
+        errors.append("terminal markers drift")
+    if report.get("new_diagnostic_evaluate_attempted", False) is not False:
+        errors.append("new diagnostic evaluate was unexpectedly attempted")
+    qualification = report.get("qualification")
+    if isinstance(qualification, Mapping):
+        if qualification.get("formal_eligible") is not False:
+            errors.append("qualification.formal_eligible drift")
+        if qualification.get("qualification_credit") != 0:
+            errors.append("qualification.credit drift")
+    side_effects = report.get("side_effects", report.get("scope", {}))
+    for key in ("registry_mutation", "ledger_mutation", "denominator_mutation", "gate_mutation"):
+        if side_effects.get(key) != 0:
+            errors.append(f"{key} is non-zero")
+    return errors
 
 
 def _render_zh(report: Mapping[str, Any]) -> str:
