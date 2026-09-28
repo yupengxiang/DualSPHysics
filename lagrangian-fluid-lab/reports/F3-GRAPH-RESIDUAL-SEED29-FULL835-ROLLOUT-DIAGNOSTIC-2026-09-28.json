@@ -1,0 +1,176 @@
+{
+  "schema": "core.f3.graph_residual.seed29.full835_rollout_diagnostic.summary.v1",
+  "report_id": "F3-GRAPH-RESIDUAL-SEED29-FULL835-ROLLOUT-DIAGNOSTIC-2026-09-28",
+  "date": "2026-09-28",
+  "status": "completed",
+  "diagnostic_only": true,
+  "independent": true,
+  "formal_eligible": false,
+  "qualification": false,
+  "qualification_credit": 0,
+  "credit": 0,
+  "T1_numerical": false,
+  "T2_macro": false,
+  "future_state_inputs": false,
+  "protocol": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "case_id": "F3_DEV_00_a0p903125",
+    "split": "test",
+    "model_kind": "graph_residual",
+    "seed": 29,
+    "updates": 500,
+    "hidden": 8,
+    "max_neighbors": 192,
+    "chunk_size": 34560,
+    "maximum_steps": 835,
+    "diagnostic": true,
+    "autonomous": true,
+    "cuda_visible_devices": "7",
+    "physical_gpu_index": 7,
+    "gpu_name": "NVIDIA RTX 6000 Ada Generation",
+    "process_device": "cuda:0",
+    "manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "output_prefix": "/tmp/f3-graph-residual500-seed29-full835-20260928-"
+  },
+  "commands": {
+    "evaluate": "PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES=7 ./.venv/bin/python scripts/core_learning.py evaluate --manifest campaigns/core-v1/f3-dataset-v2.json --data-root . --checkpoint /tmp/f3-graph-residual500-seed29-20260928-checkpoint.pt --case-id F3_DEV_00_a0p903125 --split test --maximum-steps 835 --chunk-size 34560 --device cuda:0 --progress-every 25 --trajectory-output /tmp/f3-graph-residual500-seed29-full835-20260928-trajectory.h5 --progress-output /tmp/f3-graph-residual500-seed29-full835-20260928-evaluation-progress.json --output /tmp/f3-graph-residual500-seed29-full835-20260928-evaluation.json --diagnostic",
+    "hdf5_validator": "PYTHONDONTWRITEBYTECODE=1 ./.venv/bin/python scripts/f3_full_rollout_receipt_hdf5_validator_v1.py /tmp/f3-graph-residual500-seed29-full835-20260928-evaluation.json --trajectory /tmp/f3-graph-residual500-seed29-full835-20260928-trajectory.h5 --case-id F3_DEV_00_a0p903125 --expected-transitions 835"
+  },
+  "checkpoint_and_evidence": {
+    "checkpoint": {
+      "path": "/tmp/f3-graph-residual500-seed29-20260928-checkpoint.pt",
+      "bytes": 101613,
+      "sha256": "c037455244ac1ffdd6908908eaf76b3b66e3ec5baaa63d8b9107641248e10287",
+      "update": 500,
+      "schema": "core.checkpoint.v1",
+      "verified_against_seed29_bounded_report": true
+    },
+    "training_evidence": {
+      "bounded_report": "reports/F3-GRAPH-RESIDUAL-SEED29-REAL-50STEP-DIAGNOSTIC-2026-09-28.json",
+      "receipt_path": "/tmp/f3-graph-residual500-seed29-20260928-training.json",
+      "receipt_sha256": "727aacf1845a6dd6e52eb685968063fb4c46ea507f84d75f68d5063e4680009c",
+      "status": "completed",
+      "evidence_status": "complete",
+      "completed_updates": 500,
+      "checkpoint_verified": true,
+      "residual_prior": {
+        "rows": 17280000,
+        "finite": true,
+        "history_complete": true,
+        "neighbor_truncation_fraction": 0.0
+      }
+    }
+  },
+  "rollout": {
+    "evaluation_schema": "core.evaluation.v1",
+    "evaluation_status": "completed",
+    "evaluation_exit_code": 0,
+    "progress_status": "completed",
+    "progress_path": "/tmp/f3-graph-residual500-seed29-full835-20260928-evaluation-progress.json",
+    "progress_sha256": "85cd0a5f1d47dc7c3472535c9e5c5a4bab4ce27d221654d780065e3d8c7d8b32",
+    "elapsed_seconds": 7266.3929549369495,
+    "time_start_s": 0.0,
+    "time_end_s": 8.350012828223477,
+    "particles": 34560,
+    "transitions_executed": 835,
+    "trajectory_frames": 836,
+    "expected_transitions": 835,
+    "expected_frames": 836,
+    "full_registered_denominator_complete": true,
+    "raw_error_coverage": 1.0,
+    "finite_rollout_complete": true,
+    "execution_complete": true,
+    "failure_category": null,
+    "scientific_failure_category": null,
+    "first_failure_frame": null
+  },
+  "hdf5_validation": {
+    "path": "/tmp/f3-graph-residual500-seed29-full835-20260928-hdf5-validation.json",
+    "sha256": "f72e433345abadd17966d7bb151d953088957794961dfe3ebe3c0b83e5f32c88",
+    "schema": "core.f3.full_rollout_receipt_hdf5_validation.v1",
+    "passed": true,
+    "complete": true,
+    "fail_closed": false,
+    "synthetic_only": false,
+    "production_artifacts_touched": false,
+    "trajectory_frames": 836,
+    "trajectory_transitions": 835,
+    "executed_frame_count": 836,
+    "tail_frame_count": 0,
+    "time_start_s": 0.0,
+    "time_end_s": 8.350012828223477,
+    "checks": {
+      "case_binding": true,
+      "completion_semantics": true,
+      "shape": true,
+      "time": true,
+      "valid": true,
+      "future_state_inputs_check": true
+    },
+    "actual_future_state_inputs": false
+  },
+  "metrics": {
+    "selection_score": 0.8109931765474838,
+    "raw_position_rmse_frame_mean_m": 267123337.05506775,
+    "raw_velocity_rmse_frame_mean_mps": 922219095.7834071,
+    "step_50": {
+      "position_rmse_m": 0.011656636805092279,
+      "velocity_rmse_mps": 0.06257107137184988
+    },
+    "step_835": {
+      "position_rmse_m": 7493844929.4207,
+      "velocity_rmse_mps": 25504582423.440575
+    },
+    "position_ade_m": 155111783.85571146,
+    "position_fde_m": 4351486800.072421,
+    "velocity_ade_mps": 535509375.920749,
+    "velocity_fde_mps": 14809867948.895292,
+    "finite_position_and_velocity": true,
+    "mass_error_abs_max_kg": 0.0,
+    "changed_particle_mass_frames": 0,
+    "validity_mismatch_frames": 0,
+    "kinetic_energy_error_abs_max_j": 1.422607942588272e+22,
+    "wall_chord_particle_count": 41602,
+    "wall_chord_mass_kg": 17.55084420525236
+  },
+  "formal_status": {
+    "formal_eligible": false,
+    "T1_numerical": false,
+    "T2_macro": false,
+    "qualification": false,
+    "qualification_credit": 0,
+    "credit": 0,
+    "reason": "This is a non-formal diagnostic rollout on the development manifest; full denominator completion does not confer formal qualification or gate credit."
+  },
+  "artifacts": {
+    "evaluation_json": {
+      "path": "/tmp/f3-graph-residual500-seed29-full835-20260928-evaluation.json",
+      "sha256": "a665468dd46d1596fcf5dc4ffbc07e80db4c83966ad3ee302ee5636a2b915a6f"
+    },
+    "progress_json": {
+      "path": "/tmp/f3-graph-residual500-seed29-full835-20260928-evaluation-progress.json",
+      "sha256": "85cd0a5f1d47dc7c3472535c9e5c5a4bab4ce27d221654d780065e3d8c7d8b32"
+    },
+    "trajectory_hdf5": {
+      "path": "/tmp/f3-graph-residual500-seed29-full835-20260928-trajectory.h5",
+      "sha256": "4358b83f85d265b5ec6bcd538db23bac83e3dd0ed0104a48bcb46d44223f4ca0",
+      "bytes": 723148320
+    },
+    "hdf5_validation_json": {
+      "path": "/tmp/f3-graph-residual500-seed29-full835-20260928-hdf5-validation.json",
+      "sha256": "f72e433345abadd17966d7bb151d953088957794961dfe3ebe3c0b83e5f32c88"
+    }
+  },
+  "side_effects": {
+    "diagnostic_only": true,
+    "production_hdf5_modified": false,
+    "source_modified": false,
+    "manifest_modified": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_modified": false,
+    "gate_modified": false,
+    "qualification_credit": 0
+  },
+  "interpretation": "The seed29 graph_residual checkpoint completed a finite autonomous full-horizon diagnostic with complete artifact coverage and clean mass/validity closure. The short-horizon step-50 error remains small, but the full-horizon position and velocity errors diverge dramatically by step 835; this result is diagnostic-only and is not a qualification candidate."
+}
