@@ -1,0 +1,367 @@
+{
+  "schema": "core.f3.graph_raw.seed43.real_full835_rollout_diagnostic.summary.v1",
+  "report_id": "F3-GRAPH-RAW-SEED43-FULL835-ROLLOUT-DIAGNOSTIC-2026-09-28",
+  "date": "2026-09-28",
+  "status": "completed",
+  "diagnostic_only": true,
+  "non_formal_diagnostic": true,
+  "formal_eligible": false,
+  "qualification": false,
+  "qualification_credit": 0,
+  "source": {
+    "repository": "lagrangian-fluid-lab",
+    "baseline_commit_before_report": "c0c16a4a8936b7f493e466283ce57c51218106e4",
+    "manifest": {
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "data_root": ".",
+      "file_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "reader_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "formal_release": false
+    },
+    "case": {
+      "case_id": "F3_DEV_00_a0p903125",
+      "family": "F3",
+      "split": "test",
+      "evaluation_role": "development_extrapolation",
+      "particles": 34560,
+      "registered_transitions": 835,
+      "registered_source_frames": 836,
+      "hdf5": "campaigns/l1-resume/data/continuation/F3_DEV_00_a0p903125.h5",
+      "case_hdf5_sha256": "8fd78cf3f00fd62b2f0eeaf5092f98f0d2fe235df4d28eaa432f59a609ff06f4",
+      "known_inputs_sha256": "089573de6d2c7633b5192bf626fa98eb941f79500f1c1a04b632af68b6ca3bc9",
+      "qualification_case": false
+    },
+    "source_script_sha256": {
+      "scripts/core_learning.py": "3eefe1441dabb350182090c3625f24a8209543a4a31d02521f283074c996c27b"
+    }
+  },
+  "protocol": {
+    "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "data_root": ".",
+    "case_id": "F3_DEV_00_a0p903125",
+    "split": "test",
+    "model_kind": "graph_raw",
+    "seed": 43,
+    "updates": 500,
+    "centers_per_update": 256,
+    "hidden": 8,
+    "learning_rate": 0.001,
+    "normalization_transitions": 16,
+    "max_neighbors": 192,
+    "checkpoint_every": 500,
+    "validation_every": 500,
+    "chunk_size": 34560,
+    "maximum_steps": 835,
+    "diagnostic": true,
+    "autonomous": true,
+    "future_state_inputs": false,
+    "cuda_visible_devices": "4",
+    "physical_gpu_index": 4,
+    "gpu_model": "NVIDIA RTX 6000 Ada Generation",
+    "process_device": "cuda:0",
+    "training_started_for_this_rollout": true,
+    "independent_checkpoint_rebuild": true,
+    "train_prefix": "/tmp/f3-graph-raw500-seed43-rebuild-20260928",
+    "evaluation_prefix": "/tmp/f3-graph-raw500-seed43-full835-20260928"
+  },
+  "commands": {
+    "train": "PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES=4 .venv/bin/python scripts/core_learning.py train --manifest campaigns/core-v1/f3-dataset-v2.json --data-root . --model graph_raw --seed 43 --updates 500 --centers 256 --hidden 8 --learning-rate 0.001 --normalization-transitions 16 --max-neighbors 192 --device cuda:0 --run-id f3-graph-raw500-seed43-rebuild-20260928 --checkpoint /tmp/f3-graph-raw500-seed43-rebuild-20260928-checkpoint.pt --checkpoint-every 500 --log-every 100 --validation-every 500 --progress-output /tmp/f3-graph-raw500-seed43-rebuild-20260928-training-progress.json --output /tmp/f3-graph-raw500-seed43-rebuild-20260928-training.json",
+    "evaluate": "PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES=4 .venv/bin/python scripts/core_learning.py evaluate --manifest campaigns/core-v1/f3-dataset-v2.json --data-root . --checkpoint /tmp/f3-graph-raw500-seed43-rebuild-20260928-checkpoint.pt --case-id F3_DEV_00_a0p903125 --split test --maximum-steps 835 --chunk-size 34560 --device cuda:0 --trajectory-output /tmp/f3-graph-raw500-seed43-full835-20260928-trajectory.h5 --progress-output /tmp/f3-graph-raw500-seed43-full835-20260928-evaluation-progress.json --progress-every 25 --diagnostic --output /tmp/f3-graph-raw500-seed43-full835-20260928-evaluation.json",
+    "hdf5_validator": "PYTHONDONTWRITEBYTECODE=1 ./.venv/bin/python scripts/f3_full_rollout_receipt_hdf5_validator_v1.py /tmp/f3-graph-raw500-seed43-full835-20260928-evaluation.json --trajectory /tmp/f3-graph-raw500-seed43-full835-20260928-trajectory.h5 --case-id F3_DEV_00_a0p903125 --expected-transitions 835 > /tmp/f3-graph-raw500-seed43-full835-20260928-hdf5-validation.json"
+  },
+  "model_metadata": {
+    "checkpoint": {
+      "path": "/tmp/f3-graph-raw500-seed43-rebuild-20260928-checkpoint.pt",
+      "schema": "core.checkpoint.v1",
+      "sha256": "4c421ac596dc2e597c14d06cdd8b1f0b28c9ddb645c29fd0d050e2fa0c10ed4b",
+      "bytes": 101944,
+      "model_kind": "graph_raw",
+      "hidden": 8,
+      "seed": 43,
+      "update": 500,
+      "evidence_status": "complete",
+      "checkpoint_verified": true
+    },
+    "training_receipt": {
+      "path": "/tmp/f3-graph-raw500-seed43-rebuild-20260928-training.json",
+      "schema": "core.training.v1",
+      "sha256": "1672f7d397304064d1c0a562a224cd6265f7cb38f86c4fdcf1eb77ede906cd47",
+      "bytes": 10688,
+      "model_kind": "graph_raw",
+      "hidden": 8,
+      "seed": 43,
+      "requested_updates": 500,
+      "completed_updates": 500,
+      "parameter_count": 1766,
+      "evidence_status": "complete",
+      "checkpoint_verified": true,
+      "checkpoint_sha256": "4c421ac596dc2e597c14d06cdd8b1f0b28c9ddb645c29fd0d050e2fa0c10ed4b",
+      "neighbor_truncation_fraction_max": 0.0,
+      "normalization_selected_transition_count": 16,
+      "normalization_source_split": "train",
+      "residual_prior": {
+        "enabled": false,
+        "rows": 0,
+        "execution_calls": 0,
+        "finite": true,
+        "history_complete": true
+      },
+      "final_validation": {
+        "update": 500,
+        "transition_count": 4,
+        "mse": 0.8696202337741852,
+        "rmse": 0.9325343070226345
+      }
+    },
+    "training_progress": {
+      "path": "/tmp/f3-graph-raw500-seed43-rebuild-20260928-training-progress.json",
+      "sha256": "8e41290fc03515de02273666a086ecac75fb1376a1c0d204816f9d20241b0103",
+      "bytes": 487,
+      "schema": "core.training.progress.v1",
+      "status": "completed",
+      "update": 500,
+      "requested_updates": 500,
+      "elapsed_seconds": 2141.730746842921
+    },
+    "verification": {
+      "training_updates": "500/500",
+      "checkpoint_verified": true,
+      "evidence_status": "complete",
+      "neighbor_truncation_fraction_max": 0.0,
+      "fields": [
+        "checkpoint schema",
+        "model_kind",
+        "hidden",
+        "seed",
+        "update/completed_updates",
+        "centers_per_update",
+        "learning_rate",
+        "normalization_transitions",
+        "max_neighbors",
+        "trainable parameter_count",
+        "checkpoint SHA-256"
+      ]
+    }
+  },
+  "evaluation": {
+    "status": "completed",
+    "receipt_schema": "core.evaluation.v1",
+    "receipt_path": "/tmp/f3-graph-raw500-seed43-full835-20260928-evaluation.json",
+    "receipt_sha256": "26bf246e141d08e86156ef72d48b3279060ff9bd6cdd4db13a9c7ae429622f86",
+    "receipt_bytes": 6411759,
+    "mode": "diagnostic",
+    "diagnostic": true,
+    "formal_eligible": false,
+    "split": "test",
+    "requested_steps": 835,
+    "frames_executed": 835,
+    "trajectory_frames_including_initial": 836,
+    "requested_window_complete": true,
+    "finite_rollout_complete_for_requested_window": true,
+    "expected_full_case_transitions": 835,
+    "expected_full_case_frames": 836,
+    "full_registered_denominator_complete": true,
+    "failure_category": null,
+    "first_failure_frame": null,
+    "scientific_status": "not_assessed",
+    "scientific_failure_category": null,
+    "raw_error_coverage": 1.0,
+    "future_state_inputs": false,
+    "progress": {
+      "path": "/tmp/f3-graph-raw500-seed43-full835-20260928-evaluation-progress.json",
+      "sha256": "58d4b57c3746e3edb94e2d2bc76cadc409e60f51b9189a70c6029b38bb7c3b1e",
+      "bytes": 651,
+      "schema": "core.rollout.progress.v1",
+      "status": "completed",
+      "frames_executed": 835,
+      "expected_frames": 835,
+      "elapsed_seconds": 18335.077020670054,
+      "time_s": 8.350012828223477,
+      "future_state_inputs": false,
+      "finite_rollout_complete": true
+    },
+    "hdf5_validator": {
+      "path": "/tmp/f3-graph-raw500-seed43-full835-20260928-hdf5-validation.json",
+      "sha256": "33f56ac9c2fb0666f6ace8ec917e983ff9ba99174728ee543f45e5f3c86cff06",
+      "bytes": 1419,
+      "schema": "core.f3.full_rollout_receipt_hdf5_validation.v1",
+      "passed": true,
+      "complete": true,
+      "trajectory_frames": 836,
+      "trajectory_transitions": 835,
+      "executed_frame_count": 836,
+      "tail_frame_count": 0,
+      "future_state_inputs_check_passed": true,
+      "production_artifacts_touched": false,
+      "qualification_credit": 0
+    }
+  },
+  "trajectory": {
+    "path": "/tmp/f3-graph-raw500-seed43-full835-20260928-trajectory.h5",
+    "sha256": "d7b58aac520466f33a336bc4cb5e67d0edda6f9119e91fd0d3bc8c8bf591dc8b",
+    "bytes": 723148320,
+    "shapes": {
+      "position": [836, 34560, 3],
+      "velocity": [836, 34560, 3],
+      "valid": [836, 34560],
+      "time": [836],
+      "mass": [34560],
+      "particle_id": [34560],
+      "particle_zone": [34560]
+    },
+    "dtypes": {
+      "position": "float32",
+      "velocity": "float32",
+      "valid": "bool",
+      "time": "float64",
+      "mass": "float64"
+    },
+    "time_start_s": 0.0,
+    "time_end_s": 8.350012828223477,
+    "time_min_dt_s": 0.00999945898381771,
+    "time_max_dt_s": 0.010021581680887515,
+    "position_finite": true,
+    "velocity_finite": true,
+    "mass_finite": true,
+    "mass_positive": true,
+    "mass_static": true,
+    "mass_total_kg": 14.580000378191471,
+    "valid_all_true": true,
+    "valid_true_count": 28892160,
+    "valid_false_count": 0,
+    "hdf5_attrs": {
+      "autonomous_prediction": true,
+      "future_state_inputs": false,
+      "identity_semantics": "particle_zone,particle_id",
+      "schema_version": 1,
+      "state_schema": "core.state.native_velocity.v1",
+      "velocity_semantics": "native saved numerical velocity"
+    }
+  },
+  "selection": {
+    "selection_score": 0.2817127004975565,
+    "score_semantics": "registered selection penalty; lower is better, not a qualification decision",
+    "case_score": {
+      "complete": true,
+      "executed": true,
+      "expected_transitions": 835,
+      "finite_prefix_transitions": 835,
+      "raw_error_coverage": 1.0,
+      "raw_position_rmse_frame_mean_m": 0.5724223823442722,
+      "raw_velocity_rmse_frame_mean_mps": 0.5584473221960782
+    }
+  },
+  "metrics": {
+    "horizon_units": {
+      "position_rmse": "m",
+      "velocity_rmse": "m/s"
+    },
+    "horizon_metrics": [
+      {
+        "step": 50,
+        "position_rmse_m": 0.006271187203975505,
+        "velocity_rmse_mps": 0.03558410184597668
+      },
+      {
+        "step": 835,
+        "position_rmse_m": 3.61500033969847,
+        "velocity_rmse_mps": 3.256576790802283
+      }
+    ],
+    "position_rmse_m": {
+      "step_50": 0.006271187203975505,
+      "step_835": 3.61500033969847,
+      "frame_mean": 0.5724223823442722,
+      "executed_frame_scalar": 1.024615299125488
+    },
+    "velocity_rmse_mps": {
+      "step_50": 0.03558410184597668,
+      "step_835": 3.256576790802283,
+      "frame_mean": 0.5584473221960782,
+      "executed_frame_scalar": 0.9517826252867833
+    },
+    "position_ade_m": {
+      "step_50": 0.00981469653291758,
+      "step_835": 2.3052588049851934
+    },
+    "velocity_ade_mps": {
+      "step_50": 0.0576069431414888,
+      "step_835": 3.5371024422368293
+    }
+  },
+  "physics": {
+    "expected_transitions": 835,
+    "completed_transitions": 835,
+    "mass_error_abs_max_kg": 0.0,
+    "changed_particle_mass_frames": 0,
+    "validity_mismatch_frames": 0,
+    "kinetic_energy_error_abs_max_j": 236.74228197132754,
+    "wall_chord_statuses": ["checked_static_saved_chords"],
+    "wall_chord_particle_count": 39948,
+    "wall_chord_mass_kg": 16.853062937152572
+  },
+  "resources": {
+    "training_wall_seconds": 2141.7217439890373,
+    "evaluation_wall_seconds": 18335.077020670054,
+    "gpu_visible_index": 4,
+    "gpu_name": "NVIDIA RTX 6000 Ada Generation",
+    "process_device": "cuda:0",
+    "peak_training_gpu_memory_bytes": 1584764928,
+    "peak_training_rss_mib": 3009.60546875,
+    "gpu_measurement_note": "The rollout used physical GPU4 through CUDA_VISIBLE_DEVICES=4; GPU1/GPU3 external jobs were not touched."
+  },
+  "artifacts": {
+    "checkpoint_sha256": "4c421ac596dc2e597c14d06cdd8b1f0b28c9ddb645c29fd0d050e2fa0c10ed4b",
+    "training_receipt_sha256": "1672f7d397304064d1c0a562a224cd6265f7cb38f86c4fdcf1eb77ede906cd47",
+    "training_progress_sha256": "8e41290fc03515de02273666a086ecac75fb1376a1c0d204816f9d20241b0103",
+    "training_run_log_sha256": "4a22aaad31a9aba5a7572e7190aff187f50591a47105fcc6d2639e6d19380895",
+    "evaluation_receipt_sha256": "26bf246e141d08e86156ef72d48b3279060ff9bd6cdd4db13a9c7ae429622f86",
+    "evaluation_progress_sha256": "58d4b57c3746e3edb94e2d2bc76cadc409e60f51b9189a70c6029b38bb7c3b1e",
+    "trajectory_sha256": "d7b58aac520466f33a336bc4cb5e67d0edda6f9119e91fd0d3bc8c8bf591dc8b",
+    "hdf5_validation_sha256": "33f56ac9c2fb0666f6ace8ec917e983ff9ba99174728ee543f45e5f3c86cff06",
+    "evaluation_run_log_sha256": "8fbb2a5ce6e67ac3b5200cae4a2689d3aee2fd0eb804b411c637ed715ab041db"
+  },
+  "analysis": {
+    "key_findings": [
+      "独立 graph_raw seed43 训练完整执行到 500/500；checkpoint 已验证，training evidence complete，neighbor truncation 为 0。",
+      "F3_DEV_00_a0p903125 的 835-transition/836-frame autonomous diagnostic rollout 完整闭合，raw error coverage 为 1.0。",
+      "position/velocity/mass/time 均 finite，mass error 为 0，validity mismatch 为 0，未使用 future state inputs。",
+      "误差由 step50 到 step835 明显累积；该观察仅用于诊断，不改变 formal/T1/T2/qualification 状态。"
+    ],
+    "interpretation": "这是 diagnostic-only 的完整长时域观测；scientific_status=not_assessed，未将长时域误差自动解释为 formal qualification 判定。"
+  },
+  "decision": {
+    "candidate_status": "complete_diagnostic_only_with_long_horizon_error_growth",
+    "retain_as_current_formal_candidate": false,
+    "accepted_for_formal_training": false,
+    "bounded_result_must_not_be_extrapolated": true
+  },
+  "qualification_details": {
+    "formal_eligible": false,
+    "formal_status": "not_eligible_diagnostic_only",
+    "T1_numerical": false,
+    "T1_status": "not_assessed_diagnostic_only",
+    "T2_macro": false,
+    "T2_status": "not_assessed_diagnostic_only",
+    "qualification": false,
+    "qualification_status": "not_eligible_diagnostic_only",
+    "qualification_credit": 0,
+    "interpretation": "manifest formal_release=false、case qualification_case=false，且本次运行明确为 diagnostic；上述 false 表示未进入资格评定，不是一次 formal pass/fail 结论。"
+  },
+  "side_effects": {
+    "source_code_modified": false,
+    "production_algorithm_modified": false,
+    "production_hdf5_modified": false,
+    "manifest_modified": false,
+    "registry_mutation": false,
+    "ledger_mutation": false,
+    "denominator_mutation": false,
+    "gate_mutation": false,
+    "plan_modified": false,
+    "solver_started": false,
+    "worker_started": false,
+    "training_started": true,
+    "future_state_inputs": false,
+    "existing_50step_artifacts_overwritten": false
+  }
+}
