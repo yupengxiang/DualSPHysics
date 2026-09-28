@@ -1,0 +1,200 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "authorization": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "diagnostic_only": true,
+    "formal": false,
+    "formal_eligible": false,
+    "qualification": false,
+    "qualification_credit": 0
+  },
+  "checks": [
+    {
+      "check": "exact_seed_set",
+      "expected": [
+        17,
+        29,
+        43
+      ],
+      "observed": [
+        17,
+        29,
+        43
+      ],
+      "passed": true,
+      "reason": "receipt paths must contain exactly seeds 17, 29, and 43"
+    },
+    {
+      "check": "manifest_raw_identity",
+      "expected": "SHA-256 of the explicit manifest file",
+      "observed": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "passed": true,
+      "reason": "raw manifest bytes were bounded-read and hashed"
+    },
+    {
+      "check": "manifest_canonical_identity",
+      "expected": "SHA-256 of canonical manifest JSON",
+      "observed": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "passed": true,
+      "reason": "canonical manifest payload identity was computed"
+    },
+    {
+      "check": "manifest_canonical_sha_matches_receipts",
+      "expected": [
+        "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768"
+      ],
+      "observed": [],
+      "passed": false,
+      "reason": "each receipt config.manifest_sha256 equals the current canonical manifest identity"
+    },
+    {
+      "check": "common_graph_residual_config",
+      "expected": true,
+      "observed": false,
+      "passed": false,
+      "reason": "all accepted receipts share one graph_residual hidden16 v3 configuration"
+    },
+    {
+      "check": "identity_unique_per_seed",
+      "expected": "three unique seed identities",
+      "observed": {
+        "checkpoint_path_sha256": [],
+        "receipt_sha256": [],
+        "run_ids": []
+      },
+      "passed": false,
+      "reason": "run, receipt, and declared checkpoint identities are unique per seed"
+    },
+    {
+      "check": "zero_credit_non_authorizing",
+      "expected": true,
+      "observed": true,
+      "passed": true,
+      "reason": "all accepted training metadata remains diagnostic-only and zero-credit"
+    }
+  ],
+  "credit": 0,
+  "diagnostic_only": true,
+  "errors": [
+    "seed17: fail-closed: seed17.receipt.initialization.parameter_digest must be a non-placeholder lowercase SHA-256",
+    "seed29: fail-closed: seed29.receipt.initialization.parameter_digest must be a non-placeholder lowercase SHA-256",
+    "seed43: fail-closed: seed43.receipt.initialization.parameter_digest must be a non-placeholder lowercase SHA-256",
+    "fail-closed: receipt canonical manifest identity does not match the current manifest",
+    "fail-closed: accepted receipts do not provide one common graph_residual configuration",
+    "fail-closed: run, receipt, or checkpoint identity is duplicated"
+  ],
+  "expected_contract": {
+    "bounded_manifest_and_receipt_json_only": true,
+    "checkpoint_declared_identity_only": true,
+    "hidden": 16,
+    "model_kind": "graph_residual",
+    "parameter_count": 6086,
+    "plan_date": "20260929",
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "updates": 500,
+    "v3_run_id_suffix": "-v3",
+    "zero_credit_only": true
+  },
+  "fail_closed": true,
+  "formal": false,
+  "formal_eligible": false,
+  "formal_training_runs_counted": 0,
+  "input_boundary": {
+    "bounded_manifest_json_opened": true,
+    "bounded_training_receipt_json_opened": 3,
+    "checkpoint_content_opened": false,
+    "checkpoint_lstat_performed": false,
+    "evaluation_content_opened": false,
+    "gpu_started": false,
+    "hdf5_content_opened": false,
+    "progress_content_opened": false,
+    "queue_started": false,
+    "runtime_started": false,
+    "trajectory_content_opened": false
+  },
+  "manifest": {
+    "bytes": 93710,
+    "canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "formal_release": false,
+    "opened": true,
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "raw_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "schema": "core.dataset.v2"
+  },
+  "observed_at_utc": "2026-09-28T22:00:33.988837+00:00",
+  "qualification": false,
+  "qualification_credit": 0,
+  "report_id": "f3-graph-residual-hidden16-current-manifest-training-evidence-v1",
+  "runs": [
+    {
+      "blocked_reasons": [
+        "fail-closed: seed17.receipt.initialization.parameter_digest must be a non-placeholder lowercase SHA-256"
+      ],
+      "seed": 17,
+      "source": {
+        "bytes": 2777,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed17-20260929-v3-training.json",
+        "schema": "core.training.v1",
+        "sha256": "42d129e75ef2e117ca18af1ed02cc806186a9032be1bd483dae6590f6785d2aa"
+      },
+      "status": "rejected"
+    },
+    {
+      "blocked_reasons": [
+        "fail-closed: seed29.receipt.initialization.parameter_digest must be a non-placeholder lowercase SHA-256"
+      ],
+      "seed": 29,
+      "source": {
+        "bytes": 2777,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed29-20260929-v3-training.json",
+        "schema": "core.training.v1",
+        "sha256": "5ea837863f1f0570df35638c96fef358b77ecb91f4de8f429ec5509be6da9b4a"
+      },
+      "status": "rejected"
+    },
+    {
+      "blocked_reasons": [
+        "fail-closed: seed43.receipt.initialization.parameter_digest must be a non-placeholder lowercase SHA-256"
+      ],
+      "seed": 43,
+      "source": {
+        "bytes": 2791,
+        "exists": true,
+        "opened": true,
+        "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed43-20260929-v3-training.json",
+        "schema": "core.training.v1",
+        "sha256": "d1a275118da7fd9bbbc4398a7e1dceaecb2ec4ebf8d0a2e5a42ef449612a48bd"
+      },
+      "status": "rejected"
+    }
+  ],
+  "schema": "core.f3.graph_residual.hidden16.current_manifest_training_evidence.v1",
+  "scope_note": "bounded current manifest and training receipt metadata only; checkpoint/HDF5/trajectory/progress are never opened; diagnostic-only and zero-credit",
+  "side_effects": {
+    "completion_writes": 0,
+    "denominator_writes": 0,
+    "gate_writes": 0,
+    "ledger_writes": 0,
+    "processes_restarted": 0,
+    "processes_started": 0,
+    "processes_stopped": 0,
+    "registry_writes": 0
+  },
+  "source_bound": false,
+  "status": "blocked_fail_closed",
+  "t1_case_runs_counted": 0,
+  "t2_macro_families_counted": 0
+}
