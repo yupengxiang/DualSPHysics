@@ -127,7 +127,7 @@ STATIC_CONFIG: dict[str, Any] = {
     "updates": UPDATES,
     "validation_case_count": 4,
     "validation_centers": 256,
-    "validation_every": 500,
+    "validation_every": 1000,
     "validation_family_counts": {"F3": 4},
     "validation_formal_eligible": False,
     "validation_transition_count": 4,

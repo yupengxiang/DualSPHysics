@@ -182,6 +182,13 @@ def test_complete_matrix_binds_all_identity_components_without_authority():
     assert matrix.validate_report(report) == []
 
 
+def test_validation_cadence_matches_the_executed_residual_training_contract():
+    # The three diagnostic launches use --validation-every 1000; keep the
+    # bounded matrix contract aligned with the receipts they actually emit.
+    assert matrix.STATIC_CONFIG["validation_every"] == 1000
+    assert matrix.REFERENCE_SHARED_CONFIG["validation_every"] == 1000
+
+
 def test_real_training_run_id_binds_receipt_reference_and_projection():
     report = _evaluate()
     expected = {
