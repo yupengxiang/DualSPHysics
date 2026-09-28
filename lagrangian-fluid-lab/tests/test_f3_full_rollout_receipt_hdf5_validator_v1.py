@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 from pathlib import Path
+from types import SimpleNamespace
 
 import h5py
 import numpy as np
@@ -21,7 +24,12 @@ def _metric_values(executed: int) -> list[float | None]:
             for index in range(EXPECTED)]
 
 
-def _write_fixture(tmp_path: Path, *, maximum_steps: int | None = None) -> tuple[Path, Path]:
+def _write_fixture(
+    tmp_path: Path,
+    *,
+    maximum_steps: int | None = None,
+    unsafe_link: str | None = None,
+) -> tuple[Path, Path]:
     executed = EXPECTED if maximum_steps is None else maximum_steps
     frame_count = executed + 1
     particles = 3
@@ -43,6 +51,20 @@ def _write_fixture(tmp_path: Path, *, maximum_steps: int | None = None) -> tuple
         handle["particle_zone"] = np.array([0, 0, 1], dtype=np.int32)
         handle["mass"] = np.ones(particles, dtype=np.float64)
         handle["valid"] = valid
+        if unsafe_link == "soft":
+            handle["unsafe_soft"] = h5py.SoftLink("/time")
+        elif unsafe_link == "external":
+            handle["unsafe_external"] = h5py.ExternalLink("outside.h5", "/time")
+        elif unsafe_link == "vds":
+            source = tmp_path / "vds-source.h5"
+            with h5py.File(source, "w") as source_handle:
+                source_handle["source"] = np.array([1.0], dtype=np.float64)
+            layout = h5py.VirtualLayout(shape=(1,), dtype=np.float64)
+            source_spec = h5py.VirtualSource(str(source), "source", shape=(1,))
+            layout[:] = source_spec
+            handle.create_virtual_dataset("unsafe_vds", layout)
+        elif unsafe_link is not None:  # pragma: no cover - protects the fixture table.
+            raise AssertionError(unsafe_link)
 
     failure = None if maximum_steps is None else "maximum_steps_limit"
     first_failure = None if failure is None else executed + 1
@@ -108,6 +130,9 @@ def test_complete_835_transition_fixture_passes_read_only_validation(tmp_path):
     assert result["failure_category"] is None
     assert result["checks"]["trajectory_frames"] == EXPECTED + 1
     assert result["checks"]["trajectory_transitions"] == EXPECTED
+    assert result["checks"]["trajectory_file_bytes"] == len(before)
+    assert result["checks"]["trajectory_file_sha256"] == hashlib.sha256(before).hexdigest()
+    assert result["checks"]["trajectory_filesystem_identity_stable"] is True
     assert trajectory.read_bytes() == before
 
 
@@ -135,6 +160,115 @@ def test_complete_receipt_rejects_a_maximum_steps_trajectory_override(tmp_path):
 
     with pytest.raises(validator.ValidationError, match="frame count"):
         validator.validate_receipt(complete_evaluation, bounded_trajectory)
+
+
+@pytest.mark.parametrize("link_kind,pattern", [
+    ("soft", "non-hard.*external/soft"),
+    ("external", "non-hard.*external/soft"),
+    ("vds", "virtual dataset"),
+])
+def test_hdf5_external_soft_and_vds_links_fail_closed_before_dereference(
+    tmp_path, link_kind, pattern
+):
+    evaluation, _ = _write_fixture(tmp_path, unsafe_link=link_kind)
+
+    with pytest.raises(validator.ValidationError, match=pattern):
+        validator.validate_receipt(evaluation)
+
+
+def test_symlinked_trajectory_is_rejected_without_following_the_leaf(tmp_path):
+    evaluation, trajectory = _write_fixture(tmp_path)
+    symlink = tmp_path / "trajectory-symlink.h5"
+    symlink.symlink_to(trajectory)
+    payload = json.loads(evaluation.read_text(encoding="utf-8"))
+    payload["cases"][CASE_ID]["trajectory_output"] = symlink.name
+    evaluation.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(validator.ValidationError, match="regular file|symlinks"):
+        validator.validate_receipt(evaluation)
+
+
+def test_symlinked_parent_directory_is_rejected_before_leaf_open(tmp_path):
+    evaluation, trajectory = _write_fixture(tmp_path)
+    real_dir = tmp_path / "real-parent"
+    real_dir.mkdir()
+    moved_trajectory = real_dir / trajectory.name
+    trajectory.rename(moved_trajectory)
+    symlink_dir = tmp_path / "parent-symlink"
+    symlink_dir.symlink_to(real_dir, target_is_directory=True)
+    payload = json.loads(evaluation.read_text(encoding="utf-8"))
+    payload["cases"][CASE_ID]["trajectory_output"] = str(
+        symlink_dir / moved_trajectory.name
+    )
+    evaluation.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(validator.ValidationError, match="parent component|unsafe"):
+        validator.validate_receipt(evaluation)
+
+
+def test_hardlinked_trajectory_is_rejected_before_hdf5_open(tmp_path):
+    evaluation, trajectory = _write_fixture(tmp_path)
+    hardlink = tmp_path / "trajectory-hardlink.h5"
+    os.link(trajectory, hardlink)
+    payload = json.loads(evaluation.read_text(encoding="utf-8"))
+    payload["cases"][CASE_ID]["trajectory_output"] = hardlink.name
+    evaluation.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(validator.ValidationError, match="hard link"):
+        validator.validate_receipt(evaluation)
+
+
+def test_path_identity_drift_after_descriptor_read_fails_closed(tmp_path, monkeypatch):
+    evaluation, trajectory = _write_fixture(tmp_path)
+    real_lstat = validator.os.lstat
+    calls = 0
+
+    def drifting_lstat(path):
+        nonlocal calls
+        info = real_lstat(path)
+        if Path(path) == trajectory:
+            calls += 1
+            if calls == 2:
+                return SimpleNamespace(
+                    st_dev=info.st_dev,
+                    st_ino=info.st_ino + 1,
+                    st_mode=info.st_mode,
+                    st_nlink=info.st_nlink,
+                    st_size=info.st_size,
+                    st_mtime_ns=info.st_mtime_ns,
+                    st_ctime_ns=info.st_ctime_ns,
+                )
+        return info
+
+    monkeypatch.setattr(validator.os, "lstat", drifting_lstat)
+    with pytest.raises(validator.ValidationError, match="path identity changed"):
+        validator.validate_receipt(evaluation)
+
+
+def test_fd_identity_drift_during_read_fails_closed(tmp_path, monkeypatch):
+    evaluation, _ = _write_fixture(tmp_path)
+    real_fstat = validator.os.fstat
+    calls = 0
+
+    def drifting_fstat(descriptor):
+        nonlocal calls
+        info = real_fstat(descriptor)
+        calls += 1
+        if calls == 2:
+            return SimpleNamespace(
+                st_dev=info.st_dev,
+                st_ino=info.st_ino,
+                st_mode=info.st_mode,
+                st_nlink=info.st_nlink,
+                st_size=info.st_size,
+                st_mtime_ns=info.st_mtime_ns + 1,
+                st_ctime_ns=info.st_ctime_ns,
+            )
+        return info
+
+    monkeypatch.setattr(validator.os, "fstat", drifting_fstat)
+    with pytest.raises(validator.ValidationError, match="fd identity changed"):
+        validator.validate_receipt(evaluation)
 
 
 @pytest.mark.parametrize("mutation,pattern", [
