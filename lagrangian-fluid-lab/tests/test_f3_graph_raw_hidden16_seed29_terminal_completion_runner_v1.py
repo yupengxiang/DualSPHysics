@@ -197,6 +197,66 @@ def test_existing_namespace_collision_never_launches(tmp_path: Path, monkeypatch
     assert launch["attempted"] is False
 
 
+def test_launch_records_pending_pid_without_waiting_for_evaluate(tmp_path: Path, monkeypatch):
+    training_path, _ = _training(tmp_path)
+    root = tmp_path / "lab"
+    (root / ".venv/bin").mkdir(parents=True)
+    (root / ".venv/bin/python").write_bytes(b"python")
+    namespace = tmp_path / "f3-graph-raw500-hidden16-seed29-full835-terminal-closure"
+    monkeypatch.setattr(
+        runner,
+        "_gpu_snapshot",
+        lambda _index: {
+            "available": True,
+            "gpu_index": 7,
+            "selected": {
+                "index": 7,
+                "memory_free_mib": 48000,
+                "memory_total_mib": 49140,
+                "memory_used_mib": 1140,
+                "utilization_gpu_percent": 100,
+            },
+            "all_gpus": [],
+            "returncode": 0,
+        },
+    )
+
+    class FakeProcess:
+        pid = 123456
+
+    popen_calls: list[dict[str, object]] = []
+
+    def fake_popen(command, **kwargs):
+        popen_calls.append({"command": command, "kwargs": kwargs})
+        return FakeProcess()
+
+    monkeypatch.setattr(runner.subprocess, "Popen", fake_popen)
+    launch = runner.launch_diagnostic(
+        root,
+        gpu_index=7,
+        namespace=namespace,
+        training_path=training_path,
+    )
+    assert launch["status"] == "launched_pending"
+    assert launch["attempted"] is True
+    assert launch["pid"] == 123456
+    assert launch["returncode"] is None
+    assert popen_calls[0]["kwargs"]["start_new_session"] is True
+    assert "--maximum-steps" in popen_calls[0]["command"]
+    assert "--diagnostic" in popen_calls[0]["command"]
+
+    report = runner.build_report(
+        root,
+        training_path=training_path,
+        evaluation_path=tmp_path / "missing-evaluation.json",
+        launch=launch,
+        scan_existing=False,
+    )
+    assert report["status"] == "diagnostic_launch_pending"
+    assert report["source_bound"] is False
+    assert runner.validate_report(report) == []
+
+
 def test_outputs_are_bounded_and_canonical(tmp_path: Path):
     training_path, _ = _training(tmp_path)
     report = runner.build_report(

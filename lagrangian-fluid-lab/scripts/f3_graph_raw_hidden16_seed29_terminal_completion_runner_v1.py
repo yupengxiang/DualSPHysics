@@ -702,9 +702,17 @@ def build_report(
         report["blocked_reasons"].append(
             "no bindable hidden16 seed29 full835 evaluation/terminal artifact"
         )
-    report["status"] = (
-        "diagnostic_launch_failed" if launch_info.get("status") == "failed" else "blocked_missing_terminal"
-    )
+    if launch_info.get("status") in {"launched_pending", "running"}:
+        report["status"] = "diagnostic_launch_pending"
+        report["blocked_reasons"].append(
+            "diagnostic evaluate is pending; PID/progress is not terminal completion"
+        )
+    else:
+        report["status"] = (
+            "diagnostic_launch_failed"
+            if launch_info.get("status") == "failed"
+            else "blocked_missing_terminal"
+        )
     return report
 
 
@@ -856,16 +864,15 @@ def launch_diagnostic(
     env = os.environ.copy()
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     env["CUDA_VISIBLE_DEVICES"] = str(gpu_index)
-    started = time.time()
     try:
         with paths["log"].open("wb") as log_handle:
-            result = subprocess.run(
+            process = subprocess.Popen(
                 command,
                 cwd=root,
                 env=env,
                 stdout=log_handle,
                 stderr=subprocess.STDOUT,
-                check=False,
+                start_new_session=True,
             )
     except (OSError, subprocess.SubprocessError) as error:
         return {
@@ -875,19 +882,18 @@ def launch_diagnostic(
             "gpu": gpu,
             "command": command,
             "returncode": None,
-            "elapsed_seconds": time.time() - started,
             "reason": str(error),
         }
     return {
         "attempted": True,
-        "status": "succeeded" if result.returncode == 0 else "failed",
+        "status": "launched_pending",
         "namespace": str(paths["namespace"]),
         "gpu": gpu,
         "command": command,
-        "returncode": result.returncode,
-        "elapsed_seconds": time.time() - started,
+        "pid": process.pid,
+        "returncode": None,
         "log_path": str(paths["log"]),
-        "reason": None if result.returncode == 0 else "diagnostic evaluate returned non-zero",
+        "reason": "diagnostic evaluate launched; refresh after terminal evaluation receipt appears",
     }
 
 
