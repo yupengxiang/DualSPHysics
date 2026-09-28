@@ -56,6 +56,7 @@ TRAINING_MATRIX_SCHEMAS = frozenset(
 )
 PROCESS_SCHEMA_PREFIX = "core.f3.mlp.hidden16.seed"
 PROCESS_SCHEMA_SUFFIX = ".process_exit_proof.v1"
+HISTORY_SCHEMA_LEGACY = "core.f3.mlp.hidden16.full835.rollout_diagnostic.summary.v1"
 
 BOUNDED_JSON_BYTES = 2 * 1024 * 1024
 MAX_EVALUATION_BYTES = 64 * 1024 * 1024
@@ -963,6 +964,13 @@ def _validate_training_matrix(payload: Mapping[str, Any], seed: int, name: str) 
 
 
 def _validate_history(payload: Mapping[str, Any], seed: int, name: str) -> dict[str, Any]:
+    expected_schema = f"core.f3.mlp.hidden16.seed{seed}.full835_rollout_diagnostic.summary.v1"
+    observed_schema = _string(payload.get("schema"), f"{name}.schema")
+    if observed_schema not in {expected_schema, HISTORY_SCHEMA_LEGACY}:
+        _fail(
+            f"{name}.schema must be one of "
+            f"{expected_schema!r}, {HISTORY_SCHEMA_LEGACY!r}"
+        )
     _exact(payload, "status", "completed", name)
     _exact(payload, "diagnostic_only", True, name)
     _validate_zero_claims(payload, name)
@@ -1518,32 +1526,34 @@ def build_seed_summary(
         # divergent history tuple therefore remains fail-closed.
         training_checkpoint = training_row["checkpoint"]
         history_checkpoint = history_row["checkpoint"]
+        identity_ok = True
         if training_checkpoint["bytes"] is None:
             if (
                 training_checkpoint["path"] != history_checkpoint["path"]
                 or training_checkpoint["sha256"] != history_checkpoint["sha256"]
             ):
                 reasons.append("fail-closed: training matrix/history checkpoint identity drift")
-                result["checks"]["training_history_identity"] = False
+                identity_ok = False
             else:
                 training_row = dict(training_row)
                 training_row["checkpoint"] = {
                     **training_checkpoint,
                     "bytes": history_checkpoint["bytes"],
                 }
-        if (
-            training_row["checkpoint"] != history_checkpoint
-            or training_row["manifest_sha256"] != history_row["manifest_sha256"]
-            or (
-                history_row.get("training_receipt") is not None
-                and training_row["training_receipt"] != history_row["training_receipt"]
-            )
-        ):
-            if result["checks"].get("training_history_identity") is not False:
+        if training_row["checkpoint"] != history_checkpoint:
+            if identity_ok:
                 reasons.append("fail-closed: training matrix/history checkpoint identity drift")
-            result["checks"]["training_history_identity"] = False
-        else:
-            result["checks"]["training_history_identity"] = True
+            identity_ok = False
+        if training_row["manifest_sha256"] != history_row["manifest_sha256"]:
+            reasons.append("fail-closed: training matrix/history manifest source drift")
+            identity_ok = False
+        if (
+            history_row.get("training_receipt") is not None
+            and training_row["training_receipt"] != history_row["training_receipt"]
+        ):
+            reasons.append("fail-closed: training matrix/history training receipt identity drift")
+            identity_ok = False
+        result["checks"]["training_history_identity"] = identity_ok
     else:
         result["checks"]["training_history_identity"] = False
 

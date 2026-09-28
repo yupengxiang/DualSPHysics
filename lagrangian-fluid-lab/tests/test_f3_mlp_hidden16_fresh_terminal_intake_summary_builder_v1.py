@@ -461,6 +461,36 @@ def test_validator_path_drift_blocks(tmp_path: Path) -> None:
     assert any("trajectory_hdf5" in reason for reason in row["blocked_reasons"])
 
 
+def test_history_schema_drift_blocks(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    meta, inputs, training = fixture
+    seed = 29
+    history = json.loads(inputs[seed].history_summary.read_text())
+    history["schema"] = "core.f3.mlp.hidden16.forged.summary.v1"
+    _write_json(inputs[seed].history_summary, history)
+
+    row = builder.build_summaries(inputs, training_matrix=training, root=meta["root"])[seed]
+
+    assert row["source_bound"] is False
+    assert any("history_summary.schema" in reason for reason in row["blocked_reasons"])
+
+
+def test_manifest_source_drift_has_distinct_blocker(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    meta, inputs, training = fixture
+    seed = 17
+    matrix = json.loads(training.read_text())
+    for run in matrix["runs"]:
+        if run["seed"] == seed:
+            run["evidence"]["manifest_sha256"] = "f" * 64
+    _write_json(training, matrix)
+
+    row = builder.build_summaries(inputs, training_matrix=training, root=meta["root"])[seed]
+
+    assert row["source_bound"] is False
+    assert any("manifest source drift" in reason for reason in row["blocked_reasons"])
+
+
 def test_validator_required_check_blocks(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path, with_proofs=False)
     meta, inputs, training = fixture

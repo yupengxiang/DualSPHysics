@@ -210,6 +210,17 @@ def test_build_plan_reconciles_legacy_matrix_checkpoint_bytes_from_history(tmp_p
     }
 
 
+def test_build_plan_rejects_forged_history_schema(tmp_path):
+    fixture = _fixture(tmp_path)
+    history_path = fixture["histories"][17]
+    history = json.loads(history_path.read_text(encoding="utf-8"))
+    history["schema"] = "core.f3.mlp.hidden16.forged.summary.v1"
+    _write_json(history_path, history)
+
+    with pytest.raises(launcher.LauncherError, match="history_summary.schema"):
+        _plan(fixture, tmp_path)
+
+
 def _install_real_fixture_interpreter(fixture: dict[str, object]) -> None:
     path = fixture["root"] / ".venv" / "bin" / "python"
     path.unlink()

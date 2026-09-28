@@ -634,6 +634,14 @@ def _manifest_sha(source: Mapping[str, Any], name: str) -> str:
 
 
 def _validate_history(payload: Mapping[str, Any], seed: int, name: str) -> dict[str, Any]:
+    expected_schema = f"core.f3.mlp.hidden16.seed{seed}.full835_rollout_diagnostic.summary.v1"
+    legacy_schema = "core.f3.mlp.hidden16.full835.rollout_diagnostic.summary.v1"
+    observed_schema = _string(payload.get("schema"), f"{name}.schema")
+    if observed_schema not in {expected_schema, legacy_schema}:
+        _fail(
+            f"{name}.schema must be one of "
+            f"{expected_schema!r}, {legacy_schema!r}"
+        )
     _exact(payload, "status", "completed", name)
     _exact(payload, "diagnostic_only", True, name)
     _zero_credit(payload, name)
