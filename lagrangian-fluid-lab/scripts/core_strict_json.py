@@ -54,6 +54,25 @@ def _parse_bounded_json_int(token: str) -> int:
     return int(token)
 
 
+def _current_process_fd(path: str | Path) -> int | None:
+    """Return the FD number for this process's explicit proc-fd path.
+
+    Stable descriptor transport uses ``/proc/self/fd/N`` (which resolves to
+    ``/proc/<pid>/fd/N`` after path normalization).  It is the only symlink
+    form admitted here; ordinary path symlinks remain rejected by the
+    no-follow boundary below.
+    """
+
+    parts = Path(path).parts
+    if len(parts) != 5 or parts[0] != "/" or parts[1] != "proc":
+        return None
+    if parts[2] not in {"self", str(os.getpid())} or parts[3] != "fd":
+        return None
+    if not parts[4].isdigit():
+        return None
+    return int(parts[4])
+
+
 def read_bounded_raw_json(path: str | Path, *, max_bytes: int = MAX_JSON_INPUT_BYTES,
                           label: str = "JSON input") -> bytes:
     """Read one stable regular file without blocking on special files."""
@@ -63,7 +82,20 @@ def read_bounded_raw_json(path: str | Path, *, max_bytes: int = MAX_JSON_INPUT_B
     nonblocking = getattr(os, "O_NONBLOCK", None)
     if nofollow is None or nonblocking is None:
         raise ValueError(f"{label}: platform lacks safe nonblocking no-follow open")
-    flags = os.O_RDONLY | nonblocking | nofollow | getattr(os, "O_CLOEXEC", 0)
+    inherited_fd = _current_process_fd(path)
+    flags = os.O_RDONLY | nonblocking | getattr(os, "O_CLOEXEC", 0)
+    if inherited_fd is None:
+        flags |= nofollow
+    expected_proc_fd_identity = None
+    if inherited_fd is not None:
+        try:
+            expected = os.fstat(inherited_fd)
+        except OSError as error:
+            raise ValueError(f"{label} proc-fd is not an open inherited descriptor") from error
+        expected_proc_fd_identity = (
+            expected.st_dev, expected.st_ino, expected.st_mode,
+            expected.st_nlink, expected.st_size,
+        )
     try:
         descriptor = os.open(path, flags)
     except OSError as error:
@@ -74,6 +106,13 @@ def read_bounded_raw_json(path: str | Path, *, max_bytes: int = MAX_JSON_INPUT_B
         before = os.fstat(stream.fileno())
         if not stat.S_ISREG(before.st_mode):
             raise ValueError(f"{label} is not a regular file")
+        if inherited_fd is not None:
+            opened_identity = (
+                before.st_dev, before.st_ino, before.st_mode,
+                before.st_nlink, before.st_size,
+            )
+            if opened_identity != expected_proc_fd_identity:
+                raise ValueError(f"{label} proc-fd target changed before read")
         if before.st_size > max_bytes:
             raise ValueError(f"{label} exceeds the byte limit")
         raw = stream.read(max_bytes + 1)
@@ -90,6 +129,17 @@ def read_bounded_raw_json(path: str | Path, *, max_bytes: int = MAX_JSON_INPUT_B
         raise ValueError(f"{label} exceeds the byte limit")
     if len(raw) != before.st_size or before_identity != after_identity:
         raise ValueError(f"{label} changed during bounded read")
+    if inherited_fd is not None:
+        try:
+            after_proc_fd = os.fstat(inherited_fd)
+        except OSError as error:
+            raise ValueError(f"{label} proc-fd closed during read") from error
+        after_proc_fd_identity = (
+            after_proc_fd.st_dev, after_proc_fd.st_ino, after_proc_fd.st_mode,
+            after_proc_fd.st_nlink, after_proc_fd.st_size,
+        )
+        if after_proc_fd_identity != expected_proc_fd_identity:
+            raise ValueError(f"{label} proc-fd target changed during read")
     return raw
 
 

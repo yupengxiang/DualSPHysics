@@ -14,6 +14,7 @@ from scripts.core_contract import (DUALSPHYSICS_MVROTFILE_ROTATION_VERSION,
 from scripts.core_dataset import sha256_file
 from scripts.core_f2 import static_config
 from scripts.core_models import node_features
+from scripts.core_strict_json import read_bounded_raw_json
 
 
 def _trajectory(path):
@@ -163,6 +164,26 @@ def test_path_backed_cfd_manifest_rejects_duplicate_json_keys(tmp_path):
         b'{"schema":"core.cfd.dataset.v1","schema":"core.cfd.dataset.v2","cases":[]}')
     with pytest.raises(ValueError, match="duplicate JSON object key"):
         open_dataset(source_path, tmp_path)
+
+
+def test_strict_json_accepts_only_current_inherited_proc_fd(tmp_path):
+    source_path = tmp_path / "proc-fd-source.json"
+    source_path.write_text('{"schema":"core.cfd.dataset.v1","cases":[]}')
+    descriptor = source_path.open("rb")
+    try:
+        proc_path = Path(f"/proc/self/fd/{descriptor.fileno()}")
+        assert read_bounded_raw_json(proc_path, label="proc-fd manifest") == source_path.read_bytes()
+    finally:
+        descriptor.close()
+
+
+def test_strict_json_keeps_ordinary_symlink_rejection(tmp_path):
+    source_path = tmp_path / "source.json"
+    source_path.write_text('{"schema":"core.cfd.dataset.v1","cases":[]}')
+    link = tmp_path / "source-link.json"
+    link.symlink_to(source_path)
+    with pytest.raises(ValueError, match="symlink is forbidden"):
+        read_bounded_raw_json(link, label="ordinary symlink")
 
 
 def test_path_backed_prepared_record_rejects_duplicate_json_keys(tmp_path):
