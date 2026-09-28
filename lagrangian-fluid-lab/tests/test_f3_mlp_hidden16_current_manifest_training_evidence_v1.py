@@ -22,11 +22,13 @@ def _write_json(path: Path, payload: object) -> Path:
 
 
 def _manifest(tmp_path: Path) -> tuple[Path, str]:
+    payload = {"dataset_id": "fixture-current", "schema": "core.dataset.v2"}
     path = _write_json(
         tmp_path / "current-manifest.json",
-        {"dataset_id": "fixture-current", "schema": "core.dataset.v2"},
+        payload,
     )
-    return path, hashlib.sha256(path.read_bytes()).hexdigest()
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    return path, hashlib.sha256(canonical).hexdigest()
 
 
 def _receipt(
@@ -62,6 +64,7 @@ def _receipt(
             "updates": intake.UPDATES,
             "validation_formal_eligible": False,
         },
+        "evidence": {"status": "complete"},
         "evidence_status": "complete",
         "model_kind": intake.MODEL,
         "run_id": run_id,
@@ -84,7 +87,7 @@ def test_matching_current_manifest_binds_without_opening_checkpoint(tmp_path: Pa
 
     assert report["status"] == "diagnostic_bound"
     assert report["source_bound"] is True
-    assert report["manifest"]["sha256"] == manifest_sha256
+    assert report["manifest"]["canonical_sha256"] == manifest_sha256
     assert report["input_boundary"]["checkpoint_content_opened"] is False
     assert report["input_boundary"]["hdf5_content_opened"] is False
     assert all(row["status"] == "bound" for row in report["runs"])
@@ -101,12 +104,27 @@ def test_existing_training_receipts_bind_to_actual_manifest_only(tmp_path: Path)
 
     assert current_sha != old_sha
     assert report["status"] == "blocked_fail_closed"
-    assert report["manifest"]["sha256"] == current_sha
+    assert report["manifest"]["canonical_sha256"] == current_sha
     assert any("config.manifest_sha256" in error or "actual manifest SHA" in error for error in report["errors"])
     assert report["credit"] == 0
     assert report["formal"] is False
     assert report["T1_numerical"] is False
     assert report["T2_macro"] is False
+
+
+def test_canonical_core_training_receipt_without_top_level_status_binds(
+    tmp_path: Path,
+) -> None:
+    manifest, manifest_sha256 = _manifest(tmp_path)
+    receipts = _paths(tmp_path, manifest_sha256)
+    payload = json.loads(receipts[17].read_text(encoding="utf-8"))
+    payload.pop("status")
+    _write_json(receipts[17], payload)
+
+    report = intake.build_report(manifest, receipts, root=tmp_path)
+
+    assert report["status"] == "diagnostic_bound"
+    assert report["source_bound"] is True
 
 
 @pytest.mark.parametrize(

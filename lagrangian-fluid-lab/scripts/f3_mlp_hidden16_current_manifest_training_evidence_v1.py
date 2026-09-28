@@ -3,10 +3,11 @@
 
 This is an additive, non-authorizing intake boundary.  It consumes only three
 bounded JSON training receipts and one explicitly supplied manifest path.  It
-hashes and parses the manifest, validates declared receipt/checkpoint identity
-metadata, and never opens checkpoint or HDF5 content.  It does not import or
-rewrite the historical V1 training matrix, summaries, registry, ledger, or
-formal gates.
+records both the raw manifest-file hash and the canonical payload identity used
+by ``CoreDataset`` for training receipt binding, validates declared
+receipt/checkpoint identity metadata, and never opens checkpoint or HDF5
+content.  It does not import or rewrite the historical V1 training matrix,
+summaries, registry, ledger, or formal gates.
 
 The only successful status is ``diagnostic_bound``.  Every report is
 diagnostic-only and zero-credit; an incomplete or drifting input set is
@@ -306,7 +307,14 @@ def _validate_receipt(
     _walk_json(receipt, f"training receipt {seed}")
     _exact(receipt, "schema", TRAINING_SCHEMA, name)
     _exact(receipt, "evidence_status", "complete", name)
-    _exact(receipt, "status", "completed", name)
+    # ``core_learning.py`` emits the terminal status as completed_updates plus
+    # evidence.status. Older bounded fixtures may also carry a top-level
+    # status; accept it only when it agrees, but do not require a field that
+    # the canonical core.training.v1 receipt does not define.
+    if "status" in receipt:
+        _exact(receipt, "status", "completed", name)
+    evidence = _mapping(receipt.get("evidence"), f"{name}.evidence")
+    _exact(evidence, "status", "complete", f"{name}.evidence")
     receipt_model = receipt.get("model_kind", receipt.get("model"))
     if receipt_model != MODEL:
         _fail(f"{name}.model/model_kind must be {MODEL}")
@@ -406,6 +414,7 @@ def _empty_source(value: Path | str | None) -> dict[str, Any]:
 def _manifest_record(
     source: Mapping[str, Any] | None,
     payload: Mapping[str, Any] | None,
+    canonical_sha256: str | None,
 ) -> dict[str, Any]:
     result = dict(source or {})
     result.setdefault("path", "<missing>")
@@ -413,7 +422,23 @@ def _manifest_record(
     result.setdefault("sha256", None)
     result.setdefault("opened", False)
     result["schema"] = payload.get("schema") if payload is not None else None
+    result["canonical_sha256"] = canonical_sha256
     return result
+
+
+def _canonical_manifest_sha256(payload: Mapping[str, Any]) -> str:
+    """Return the identity emitted by ``CoreDataset.manifest_sha256``."""
+
+    try:
+        encoded = json.dumps(
+            payload,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode("utf-8")
+    except (TypeError, ValueError) as error:
+        _fail(f"manifest cannot be canonically hashed: {error}")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def build_report(
@@ -430,7 +455,8 @@ def build_report(
     checks: list[dict[str, Any]] = []
     manifest_payload: dict[str, Any] | None = None
     manifest_source: dict[str, Any] | None = None
-    manifest_sha256: str | None = None
+    manifest_file_sha256: str | None = None
+    manifest_canonical_sha256: str | None = None
 
     try:
         manifest_payload, manifest_source = read_bounded_json(
@@ -439,14 +465,24 @@ def build_report(
             name="manifest",
             max_bytes=MAX_MANIFEST_BYTES,
         )
-        manifest_sha256 = str(manifest_source["sha256"])
+        manifest_file_sha256 = str(manifest_source["sha256"])
+        manifest_canonical_sha256 = _canonical_manifest_sha256(manifest_payload)
         checks.append(
             _check(
                 "manifest_file_sha256",
                 True,
                 "manifest bytes were hashed from the explicit path",
-                manifest_sha256,
+                manifest_file_sha256,
                 "lowercase SHA-256 of the actual manifest file",
+            )
+        )
+        checks.append(
+            _check(
+                "manifest_canonical_sha256",
+                True,
+                "manifest payload identity matches CoreDataset.manifest_sha256 semantics",
+                manifest_canonical_sha256,
+                "lowercase SHA-256 of canonical manifest JSON",
             )
         )
     except IntakeError as error:
@@ -466,8 +502,16 @@ def build_report(
             )
         )
 
-    manifest_record = _manifest_record(manifest_source, manifest_payload)
-    manifest_ok = manifest_payload is not None and manifest_sha256 is not None
+    manifest_record = _manifest_record(
+        manifest_source,
+        manifest_payload,
+        manifest_canonical_sha256,
+    )
+    manifest_ok = (
+        manifest_payload is not None
+        and manifest_file_sha256 is not None
+        and manifest_canonical_sha256 is not None
+    )
     if manifest_payload is not None and not isinstance(manifest_payload, Mapping):
         manifest_ok = False
         errors.append("fail-closed: manifest must be a JSON object")
@@ -516,13 +560,13 @@ def build_report(
                 max_bytes=MAX_JSON_BYTES,
             )
             row["source"] = source
-            if manifest_sha256 is None:
-                _fail("current manifest SHA is unavailable")
+            if manifest_canonical_sha256 is None:
+                _fail("current manifest canonical SHA is unavailable")
             projection = _validate_receipt(
                 receipt,
                 source,
                 seed=seed,
-                manifest_sha256=manifest_sha256,
+                manifest_sha256=manifest_canonical_sha256,
             )
             projections[seed] = projection
             row["status"] = "bound"
@@ -536,19 +580,26 @@ def build_report(
     receipt_manifest_match = (
         manifest_ok
         and len(projections) == len(SEEDS)
-        and all(item["manifest_sha256"] == manifest_sha256 for item in projections.values())
+        and all(
+            item["manifest_sha256"] == manifest_canonical_sha256
+            for item in projections.values()
+        )
     )
     checks.append(
         _check(
             "manifest_sha_matches_receipts",
             receipt_manifest_match,
-            "each receipt config.manifest_sha256 equals the actual manifest SHA",
+            "each receipt config.manifest_sha256 equals the canonical manifest payload identity",
             sorted({item["manifest_sha256"] for item in projections.values()}),
-            [manifest_sha256] if manifest_sha256 is not None else None,
+            [manifest_canonical_sha256]
+            if manifest_canonical_sha256 is not None
+            else None,
         )
     )
     if not receipt_manifest_match:
-        errors.append("fail-closed: one or more receipt manifest SHA values do not match the actual manifest SHA")
+        errors.append(
+            "fail-closed: one or more receipt manifest SHA values do not match the canonical manifest payload identity"
+        )
 
     run_ids = [projections[seed]["run_id"] for seed in SEEDS if seed in projections]
     receipt_ids = [
@@ -897,7 +948,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             {
                 "status": report["status"],
                 "source_bound": report["source_bound"],
-                "manifest_sha256": report["manifest"].get("sha256"),
+                "manifest_file_sha256": report["manifest"].get("sha256"),
+                "manifest_canonical_sha256": report["manifest"].get("canonical_sha256"),
                 "output": output_text,
             },
             ensure_ascii=False,
