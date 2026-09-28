@@ -1,0 +1,381 @@
+{
+  "blockers": [
+    "legacy_or_unsupported_bundle_schema:'core.reader_bundle.v1':expected='core.reader_bundle.v2'",
+    "portable_package_requires_current_reader_bundle_v2"
+  ],
+  "bundle": {
+    "bundle_index": {
+      "bytes": 32403,
+      "opened": true,
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/a8-full-reproduce-v1/bundle/bundle.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.reader_bundle.v1",
+      "sha256": "00c8d22f9965f6576a7a5a668ba934a2a4109e376dd90abd271310e70a3d81a2"
+    },
+    "case_count": 32,
+    "checkpoint_count": 1,
+    "current_v2_schema": "core.reader_bundle.v2",
+    "dataset_manifest": {
+      "bytes": 93710,
+      "opened": true,
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/a8-full-reproduce-v1/bundle/dataset.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.dataset.v2",
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+    },
+    "full_artifact_integrity_verified": false,
+    "large_asset_hashes_read": false,
+    "registered_artifact_count": 84,
+    "schema": "core.reader_bundle.v1",
+    "v2_index_contract": false,
+    "verification_deferred_reason": "coarse bridge reads bundle/dataset JSON only; production HDF5/NPZ/checkpoint artifacts are not opened or rehashed",
+    "verification_entrypoint": "scripts.core_package.verify_bundle"
+  },
+  "claims": {
+    "T1_numerical": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "formal_training": false,
+    "full_product_reproduction": false,
+    "qualification": false
+  },
+  "coarse_chain_passed": true,
+  "code_closure": [
+    {
+      "bytes": 57169,
+      "path": "lagrangian-fluid-lab/scripts/core_package.py",
+      "read_policy": "bounded_code_closure",
+      "sha256": "3895a2a1ff97e72eec68072c8bdb924f396b8c445494457b93e23f03cff1f0c2"
+    },
+    {
+      "bytes": 58430,
+      "path": "lagrangian-fluid-lab/scripts/core_benchmark.py",
+      "read_policy": "bounded_code_closure",
+      "sha256": "f8e3cb75c4901d652fda02dedb6d761084884e090bd1c6151c513620af61867b"
+    },
+    {
+      "bytes": 49883,
+      "path": "lagrangian-fluid-lab/scripts/core_campaign.py",
+      "read_policy": "bounded_code_closure",
+      "sha256": "a6a0b334c0b7c5a032a567eaead4767b4dd8af8c1e990e8c6bc535e6c3c0f6f8"
+    },
+    {
+      "bytes": 26168,
+      "path": "lagrangian-fluid-lab/scripts/core_independent_reproduction.py",
+      "read_policy": "bounded_code_closure",
+      "sha256": "04d1ac153abf336fa888f20d8f11ce07e0a0d3fe9a0f6c3f1c53f90c618b1ccc"
+    },
+    {
+      "bytes": 5470,
+      "path": "lagrangian-fluid-lab/scripts/core_strict_json.py",
+      "read_policy": "bounded_code_closure",
+      "sha256": "3a618eb59a4f9b142a410c793dc26ab43e3f88ffed12386ca5822cda1ae12115"
+    }
+  ],
+  "diagnostic_only": true,
+  "entrypoints": {
+    "bundle_verifier": "scripts/core_package.py --verify-bundle",
+    "diagnostic_rollout": "scripts/core_product_repro_bridge_v1.py assemble",
+    "reader": "scripts/core_benchmark.py verify",
+    "repro_receipt": "scripts/core_product_repro_bridge_v1.py validate",
+    "score": "scripts/core_product_repro_bridge_v1.py assemble"
+  },
+  "formal_admission": false,
+  "interpretation": "The bridge wires existing Core/F3/F4/F8 diagnostic assets into a portable metadata-first package contract. It does not execute a new rollout, mint a trusted capability, or alter scientific completion state.",
+  "local_package_ready": false,
+  "mutations": {
+    "completion": 0,
+    "denominator": 0,
+    "gate": 0,
+    "ledger": 0,
+    "plan": 0,
+    "registry": 0
+  },
+  "observed_at_utc": "2026-09-28T00:00:00Z",
+  "package_role": "coarse_end_to_end_local_diagnostic",
+  "portable_paths": true,
+  "qualification_credit": 0,
+  "read_boundary": {
+    "bounded_json_only": true,
+    "bundle_dataset_opened": true,
+    "checkpoint_opened": false,
+    "gpu_started": false,
+    "hdf5_opened": false,
+    "large_asset_hashes_read": false,
+    "manifest_files_opened": true,
+    "max_json_bytes": 1048576,
+    "npz_opened": false,
+    "queue_started": false,
+    "reader_receipt_files_opened": true,
+    "solver_started": false,
+    "trajectory_opened": false,
+    "worker_started": false
+  },
+  "reuse_contract": {
+    "benchmark_cli": "scripts.core_benchmark",
+    "bridge_does_not_call_campaign_mutators": true,
+    "campaign_status_reader": "scripts.core_campaign.completion",
+    "independent_reproduction_runner": "scripts.core_independent_reproduction",
+    "reader_bundle_builder": "scripts.core_package.build_bundle",
+    "reader_bundle_verifier": "scripts.core_package.verify_bundle",
+    "reader_manifest_preflight": "scripts.core_package.inspect_reader_manifests"
+  },
+  "schema": "core.product.local_package_manifest.v1",
+  "source_assets": {
+    "bundle_local_check": {
+      "artifact": {
+        "bytes": 1402,
+        "opened": true,
+        "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/a8-full-reproduce-v1/bundle-local-check.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.a8.bundle_local_check.v1",
+        "sha256": "91034b2873bdba90a3799309fa8b6501e755a3b4be83b3c97f55909f7f789106"
+      },
+      "full_package_verify_claim": "deferred to root/host materialization because 65 inherited H5/NPZ records are already published from the verified source bundle; runtime verify_bundle remains required before reproduction",
+      "reader_preflight_passed": true,
+      "schema": "core.a8.bundle_local_check.v1",
+      "source_payload_not_embedded": true
+    },
+    "diagnostic_rollout_score": {
+      "bytes": 6630,
+      "opened": true,
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/a8-cross-host-diagnostic-pair-v1.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.a8.cross_host_diagnostic_pair_audit.v1",
+      "sha256": "c94742d50ac93871a5e37eeeb60c0e82d892f87549036191f1f4cbeadb06bf9b"
+    },
+    "f8_bounded_receipts": [
+      {
+        "artifact": {
+          "bytes": 17545,
+          "opened": true,
+          "path": "lagrangian-fluid-lab/reports/F8-R008-TERMINAL-MATRIX-READINESS-CONSISTENCY-V1-2026-09-28.json",
+          "read_policy": "strict_bounded_json_only",
+          "schema": "core.cfd.f8.r008_terminal_matrix_readiness_consistency_report.v1",
+          "sha256": "74b71a4ee7b33f8fd34a19043a85f2bb30fce1d5b38c5f3cc7097580c51a98db"
+        },
+        "diagnostic_only": true,
+        "qualification_credit": 0,
+        "readiness_pass": false,
+        "schema": "core.cfd.f8.r008_terminal_matrix_readiness_consistency_report.v1",
+        "source_payload_not_embedded": true,
+        "status": "diagnostic_only_terminal_matrix_readiness_consistency_blocked"
+      },
+      {
+        "artifact": {
+          "bytes": 12781,
+          "opened": true,
+          "path": "lagrangian-fluid-lab/reports/F8-R008-TARGET-KERNEL-LOCAL-INVENTORY-V1-2026-09-28.json",
+          "read_policy": "strict_bounded_json_only",
+          "schema": "core.cfd.f8.r008.target_kernel_local_inventory_report.v1",
+          "sha256": "a7c511a5be9ed0ae7efa4b546eeea5f2e72e43e2ac3c8743b2ff1972927d3976"
+        },
+        "diagnostic_only": true,
+        "qualification_credit": 0,
+        "readiness_pass": false,
+        "schema": "core.cfd.f8.r008.target_kernel_local_inventory_report.v1",
+        "source_payload_not_embedded": true,
+        "status": "diagnostic_only_local_target_kernel_inventory_incomplete"
+      }
+    ],
+    "reader_manifests": {
+      "F3": {
+        "bytes": 93710,
+        "opened": true,
+        "path": "lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.dataset.v2",
+        "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+      },
+      "F4": {
+        "bytes": 174513,
+        "opened": true,
+        "path": "lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.dataset.v2",
+        "sha256": "eb417b2774817039776b50d18e12e2500634d8c60f4465c42f5633a033c04a16"
+      }
+    },
+    "reader_receipts": {
+      "F3": {
+        "bytes": 45663,
+        "opened": true,
+        "path": "lagrangian-fluid-lab/reports/F3-READER-VERIFY-2026-09-27.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.verification.v1",
+        "sha256": "0a3b26d73a8362569a0554acf5aab0357659437d92e9620d23f9a237374f121e"
+      },
+      "F4": {
+        "bytes": 3430,
+        "opened": true,
+        "path": "lagrangian-fluid-lab/reports/F4-TALLWALL120-CORE-READER-SMOKE-2026-09-28.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "local.f4.core_reader_smoke.stdout.v1",
+        "sha256": "db30187225f8a2915f43d18622d54ec537fe3efc2265837d5273f3dfeed2ac5d"
+      }
+    }
+  },
+  "source_host": "user-SYS-421GE-TNRT",
+  "stages": {
+    "diagnostic_rollout": {
+      "case_count": 1,
+      "complete_case_count": 1,
+      "distinct_host_evidence": true,
+      "expected_frames_by_case": {
+        "F3_DEV_08_a0p953125": 835
+      },
+      "future_state_inputs_claimed": false,
+      "gpu_started_by_bridge": false,
+      "historical_input": {
+        "bytes": 6630,
+        "opened": true,
+        "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/a8-cross-host-diagnostic-pair-v1.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.a8.cross_host_diagnostic_pair_audit.v1",
+        "sha256": "c94742d50ac93871a5e37eeeb60c0e82d892f87549036191f1f4cbeadb06bf9b"
+      },
+      "model_started_by_bridge": false,
+      "observed_hosts": [
+        "h200",
+        "user-SYS-421GE-TNRT"
+      ],
+      "passed": true,
+      "schema": "core.product.diagnostic_rollout.v1",
+      "scientific_qualification": false,
+      "source_schema": "core.a8.cross_host_diagnostic_pair_audit.v1",
+      "trajectory_receipts_passed": 1
+    },
+    "manifest": {
+      "family_case_counts": {
+        "F3": 32,
+        "F4": 32
+      },
+      "formal_eligibility_claim": false,
+      "formal_eligibility_suppressed_reason": "metadata preflight eligibility is not a trusted reader/runtime gate",
+      "formal_release_observed": false,
+      "future_state_inputs": false,
+      "hold_reasons": [],
+      "passed": true,
+      "schema": "core.reader_manifest_preflight.v1",
+      "schema_versions": [
+        "core.dataset.v2"
+      ],
+      "source_manifests": {
+        "F3": {
+          "bytes": 93710,
+          "opened": true,
+          "path": "lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+          "read_policy": "strict_bounded_json_only",
+          "schema": "core.dataset.v2",
+          "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+        },
+        "F4": {
+          "bytes": 174513,
+          "opened": true,
+          "path": "lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+          "read_policy": "strict_bounded_json_only",
+          "schema": "core.dataset.v2",
+          "sha256": "eb417b2774817039776b50d18e12e2500634d8c60f4465c42f5633a033c04a16"
+        }
+      },
+      "trajectory_files_opened_by_bridge": false
+    },
+    "reader": {
+      "F3": {
+        "artifact": {
+          "bytes": 45663,
+          "opened": true,
+          "path": "lagrangian-fluid-lab/reports/F3-READER-VERIFY-2026-09-27.json",
+          "read_policy": "strict_bounded_json_only",
+          "schema": "core.verification.v1",
+          "sha256": "0a3b26d73a8362569a0554acf5aab0357659437d92e9620d23f9a237374f121e"
+        },
+        "case_count": 32,
+        "diagnostic_only": true,
+        "passed": true,
+        "qualification_credit": 0,
+        "schema": "core.verification.v1",
+        "source_payload_not_embedded": true
+      },
+      "F4": {
+        "artifact": {
+          "bytes": 3430,
+          "opened": true,
+          "path": "lagrangian-fluid-lab/reports/F4-TALLWALL120-CORE-READER-SMOKE-2026-09-28.json",
+          "read_policy": "strict_bounded_json_only",
+          "schema": "local.f4.core_reader_smoke.stdout.v1",
+          "sha256": "db30187225f8a2915f43d18622d54ec537fe3efc2265837d5273f3dfeed2ac5d"
+        },
+        "case_count": null,
+        "diagnostic_only": true,
+        "passed": true,
+        "qualification_credit": 0,
+        "schema": "local.f4.core_reader_smoke.stdout.v1",
+        "source_payload_not_embedded": true
+      },
+      "large_reader_assets_opened_by_bridge": false,
+      "manifest_preflight": {
+        "family_case_counts": {
+          "F3": 32,
+          "F4": 32
+        },
+        "formal_eligibility_claim": false,
+        "formal_eligibility_suppressed_reason": "metadata preflight eligibility is not a trusted reader/runtime gate",
+        "formal_release_observed": false,
+        "future_state_inputs": false,
+        "hold_reasons": [],
+        "passed": true,
+        "schema": "core.reader_manifest_preflight.v1",
+        "schema_versions": [
+          "core.dataset.v2"
+        ],
+        "source_manifests": {
+          "F3": {
+            "bytes": 93710,
+            "opened": true,
+            "path": "lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+            "read_policy": "strict_bounded_json_only",
+            "schema": "core.dataset.v2",
+            "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+          },
+          "F4": {
+            "bytes": 174513,
+            "opened": true,
+            "path": "lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/f4-tallwall120-formal-reader-manifest-v2-compact.json",
+            "read_policy": "strict_bounded_json_only",
+            "schema": "core.dataset.v2",
+            "sha256": "eb417b2774817039776b50d18e12e2500634d8c60f4465c42f5633a033c04a16"
+          }
+        },
+        "trajectory_files_opened_by_bridge": false
+      },
+      "passed": true,
+      "reader_invoked_by_bridge": false,
+      "schema": "core.product.reader_stage.v1"
+    },
+    "score": {
+      "T1_numerical": false,
+      "T2_macro": false,
+      "T2_path": false,
+      "case_count": 1,
+      "complete_case_count": 1,
+      "historical_input": {
+        "bytes": 6630,
+        "opened": true,
+        "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/a8-cross-host-diagnostic-pair-v1.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.a8.cross_host_diagnostic_pair_audit.v1",
+        "sha256": "c94742d50ac93871a5e37eeeb60c0e82d892f87549036191f1f4cbeadb06bf9b"
+      },
+      "maximum_absolute_score_difference": 1.0305430120371994e-11,
+      "passed": true,
+      "qualification_credit": 0,
+      "schema": "core.product.diagnostic_score.v1",
+      "scientific_qualification": false,
+      "score_kind": "cross_host_diagnostic_agreement",
+      "source_schema": "core.model_reproduction.comparison.v1"
+    }
+  },
+  "version": "a8-coarse-local-package-v1"
+}
