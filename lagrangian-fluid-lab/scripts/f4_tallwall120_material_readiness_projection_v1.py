@@ -27,6 +27,7 @@ DEFAULT_INPUT_PATHS: dict[str, Path] = {
     "coarse_proposal": Path("reports/F4-TALLWALL120-MATERIAL-COARSE-PROPOSAL-2026-09-28.json"),
     "root_scheduler": Path("reports/F4-TALLWALL120-MATERIAL-ROOT-SCHEDULER-INTAKE-V1-2026-09-28.json"),
     "source_drift": Path("reports/F4-TALLWALL120-MATERIAL-SOURCE-DRIFT-RECONCILIATION-V1-2026-09-28.json"),
+    "archive_reader_reconciliation": Path("reports/F4-TALLWALL120-MATERIAL-ARCHIVE-READER-RECONCILIATION-V1-2026-09-29.json"),
     "receipt_consistency": Path("reports/F4-TALLWALL120-MATERIAL-RECEIPT-CONSISTENCY-AUDIT-2026-09-28.json"),
     "terminal_evidence": Path("reports/F4-TALLWALL120-MATERIAL-TERMINAL-EVIDENCE-INTAKE-V1-2026-09-28.json"),
     "sidecar_matrix": Path("reports/F4-TALLWALL120-MATERIAL-SIDECAR-MATRIX-CONTRACT-V1-2026-09-28.json"),
@@ -37,6 +38,7 @@ INPUT_RECORD_IDS = {
     "coarse_proposal": "f4-tallwall120-material-coarse-proposal-2026-09-28",
     "root_scheduler": "f4-tallwall120-material-root-scheduler-intake-v1",
     "source_drift": "f4-tallwall120-material-source-drift-reconciliation-v1",
+    "archive_reader_reconciliation": "f4-tallwall120-material-archive-reader-reconciliation-v1-2026-09-29",
     "receipt_consistency": "f4-tallwall120-material-receipt-consistency-audit-2026-09-28",
     "terminal_evidence": "f4-tallwall120-material-terminal-evidence-intake-v1",
     "sidecar_matrix": "f4-tallwall120-material-sidecar-matrix-contract-v1",
@@ -47,6 +49,7 @@ INPUT_SCHEMAS = {
     "coarse_proposal": "core.material.f4.tallwall120.coarse_proposal.v1",
     "root_scheduler": "core.material.f4.tallwall120.root_scheduler_intake.v1",
     "source_drift": "core.material.f4.tallwall120.source_drift_reconciliation.v1",
+    "archive_reader_reconciliation": "core.material.f4.tallwall120.archive_reader_reconciliation.v1",
     "receipt_consistency": "core.material.f4.tallwall120.receipt_consistency_audit.v1",
     "terminal_evidence": "core.material.f4.tallwall120.terminal_evidence_intake.v1",
     "sidecar_matrix": "core.material.f4.tallwall120.sidecar_matrix_contract.v1",
@@ -67,6 +70,7 @@ STATUS = "blocked_fail_closed"
 COARSE_SCHEMA = "core.material.f4.tallwall120.coarse_proposal.v1"
 ROOT_SCHEMA = "core.material.f4.tallwall120.root_scheduler_intake.v1"
 DRIFT_SCHEMA = "core.material.f4.tallwall120.source_drift_reconciliation.v1"
+ARCHIVE_READER_SCHEMA = "core.material.f4.tallwall120.archive_reader_reconciliation.v1"
 CONSISTENCY_SCHEMA = "core.material.f4.tallwall120.receipt_consistency_audit.v1"
 TERMINAL_SCHEMA = "core.material.f4.tallwall120.terminal_evidence_intake.v1"
 MATRIX_SCHEMA = "core.material.f4.tallwall120.sidecar_matrix_contract.v1"
@@ -659,6 +663,8 @@ def _validate_root(value: dict[str, Any]) -> dict[str, Any]:
         "binding_projection.source_identity.archive.trajectory.sha256": SOURCE_SHA256,
         "binding_projection.source_identity.archive.trajectory.bytes": SOURCE_BYTES,
         "binding_projection.source_identity.archive.identity_bound": True,
+        "binding_projection.source_identity.archive_reader_reconciliation.identity_bound": True,
+        "binding_projection.source_identity.archive_reader_reconciliation.source_reconciliation_ready": False,
         "binding_projection.source_identity.collection.identity_bound": True,
         "binding_projection.source_identity.consistency.archives_path_binding.exact_path_match": False,
         "binding_projection.source_identity.consistency.archives_path_binding.source_sha256_match": True,
@@ -748,6 +754,72 @@ def _validate_drift(value: dict[str, Any]) -> dict[str, Any]:
         "diagnostic_event_window_status": "right_censored_or_unresolved",
         "diagnostic_unknown_fraction_max": DIAGNOSTIC_UNKNOWN_FRACTION,
         "diagnostic_reliable_path_coverage": DIAGNOSTIC_RELIABLE_COVERAGE,
+    }
+
+
+def _validate_archive_reader_reconciliation(value: dict[str, Any]) -> dict[str, Any]:
+    """Validate the bounded archive-v1/v2 and reader-manifest intake."""
+
+    _eq(value, "schema", ARCHIVE_READER_SCHEMA, code="schema_drift")
+    _eq(value, "status", "blocked_fail_closed", code="authorization_drift")
+    _eq(value, "decision", "diagnostic_only_archive_reader_reconciliation", code="authorization_drift")
+    for path, expected in {
+        "scope.family": FAMILY,
+        "scope.scope_id": SCOPE_ID,
+        "scope.case_id": CASE_ID,
+        "scope.split": "train",
+        "source_reconciliation.ready": False,
+        "source_reconciliation.archives_v1_v2_artifact_identity_exact": True,
+        "source_reconciliation.collection_path_reconciled": False,
+        "source_reconciliation.reader_manifest_sha_reconciled": False,
+        "checks.proposal_target_exact": True,
+        "checks.proposal_direct_archive_v2_exact": True,
+        "checks.archive_v1_manifest_contract_valid": True,
+        "checks.archive_v2_manifest_contract_valid": True,
+        "checks.archive_v1_v2_artifact_identity_exact": True,
+        "checks.archive_v1_v2_manifest_bytes_distinct": True,
+        "checks.collection_manifest_current_sha_bound": True,
+        "checks.collection_case_unique": True,
+        "checks.collection_case_source_sha_exact": True,
+        "checks.collection_case_source_path_exact": False,
+        "checks.reader_manifest_path_exact": True,
+        "checks.reader_manifest_sha_exact": False,
+        "checks.reader_formal_gate_closed": True,
+        "authority.fresh_root_receipt_credible": False,
+        "authority.scheduler_owned_host_io_receipt_credible": False,
+        "authority.pair_cross_bound": False,
+        "authority.launch_allowed": False,
+        "authority.worker_launch_authorized": False,
+        "authority.formal": False,
+        "authority.T1": False,
+        "authority.T2": False,
+        "authority.credit": 0,
+        "execution_controls.bounded_json_only": True,
+        "execution_controls.archive_hdf5_opened": False,
+        "execution_controls.source_hdf5_opened": False,
+        "execution_controls.source_hdf5_read": False,
+        "execution_controls.source_hdf5_hash_recomputed": False,
+        "execution_controls.solver_started": False,
+        "execution_controls.worker_started": False,
+        "execution_controls.gpu_started": False,
+        "execution_controls.queue_or_scheduler_started": False,
+    }.items():
+        _eq(value, path, expected, code="archive_reader_reconciliation")
+    _eq(value, "inputs.archive_v1.path", "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-07/archive.json", code="archive_reader_reconciliation")
+    _eq(value, "inputs.archive_v2.path", "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/archive.json", code="archive_reader_reconciliation")
+    _eq(value, "inputs.collection.path", COLLECTION_MANIFEST_PATH, code="archive_reader_reconciliation")
+    _eq(value, "inputs.reader.path", "reports/F4-TALLWALL120-CORE-READER-SMOKE-2026-09-28.json", code="archive_reader_reconciliation")
+    for name in ("archive_v1", "archive_v2", "collection", "reader"):
+        _sha(_get(value, f"inputs.{name}.sha256"), f"archive-reader {name} input SHA")
+    blockers = _get(value, "blockers")
+    _require(type(blockers) is list and all(isinstance(item, str) for item in blockers), "archive-reader blockers are malformed", code="archive_reader_reconciliation")
+    return {
+        "status": value["status"],
+        "ready": False,
+        "archives_v1_v2_artifact_identity_exact": True,
+        "collection_path_reconciled": False,
+        "reader_manifest_sha_reconciled": False,
+        "blockers": list(blockers),
     }
 
 
@@ -1041,7 +1113,7 @@ def _validate_t2(value: dict[str, Any]) -> dict[str, Any]:
 
 def _load_and_validate(input_paths: Mapping[str, str | Path] | None) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
     paths = dict(DEFAULT_INPUT_PATHS if input_paths is None else input_paths)
-    _require(set(paths) == set(DEFAULT_INPUT_PATHS), "input path set differs from the seven-file contract", code="input_set")
+    _require(set(paths) == set(DEFAULT_INPUT_PATHS), "input path set differs from the eight-file contract", code="input_set")
     values: dict[str, dict[str, Any]] = {}
     metas: dict[str, dict[str, Any]] = {}
     for name in DEFAULT_INPUT_PATHS:
@@ -1052,6 +1124,7 @@ def _load_and_validate(input_paths: Mapping[str, str | Path] | None) -> tuple[di
     _validate_coarse(values["coarse_proposal"])
     _validate_root(values["root_scheduler"])
     _validate_drift(values["source_drift"])
+    _validate_archive_reader_reconciliation(values["archive_reader_reconciliation"])
     _validate_consistency(values["receipt_consistency"])
     _validate_terminal(values["terminal_evidence"])
     _validate_matrix(values["sidecar_matrix"])
@@ -1095,11 +1168,13 @@ def _build_report_from_loaded(values: Mapping[str, dict[str, Any]], metas: Mappi
     coarse = values["coarse_proposal"]
     root = values["root_scheduler"]
     drift = values["source_drift"]
+    archive_reader = values["archive_reader_reconciliation"]
     consistency = values["receipt_consistency"]
     terminal = values["terminal_evidence"]
     matrix = values["sidecar_matrix"]
     t2 = values["t2_readiness"]
     drift_summary = _validate_drift(drift)
+    archive_reader_summary = _validate_archive_reader_reconciliation(archive_reader)
     consistency_summary = _validate_consistency(consistency)
     terminal_summary = _validate_terminal(terminal)
     matrix_summary = _validate_matrix(matrix)
@@ -1110,6 +1185,7 @@ def _build_report_from_loaded(values: Mapping[str, dict[str, Any]], metas: Mappi
     blockers = [
         "collection_source_path_archives_v1_vs_archives_v2_drift",
         "reader_manifest_sha_stale",
+        "archive_reader_reconciliation_not_ready",
         "diagnostic_material_parameter_drift",
         "missing_fresh_root_authorization",
         "missing_scheduler_owned_host_io_reservation",
@@ -1155,6 +1231,9 @@ def _build_report_from_loaded(values: Mapping[str, dict[str, Any]], metas: Mappi
             "reader_manifest_path_exact": True,
             "reader_manifest_sha256_recorded": consistency_summary["collection_manifest_reader_sha"],
             "reader_manifest_sha256_exact": False,
+            "archive_reader_reconciliation_status": archive_reader_summary["status"],
+            "archive_reader_reconciliation_ready": archive_reader_summary["ready"],
+            "archives_v1_v2_artifact_identity_exact": archive_reader_summary["archives_v1_v2_artifact_identity_exact"],
         },
         "parameters": {
             "q": Q,
@@ -1210,6 +1289,9 @@ def _build_report_from_loaded(values: Mapping[str, dict[str, Any]], metas: Mappi
             "reader_manifest_path_exact": True,
             "reader_manifest_sha256_exact": False,
             "diagnostic_parameter_binding": False,
+            "archive_reader_reconciliation_status": archive_reader_summary["status"],
+            "archive_reader_reconciliation_ready": archive_reader_summary["ready"],
+            "archives_v1_v2_artifact_identity_exact": archive_reader_summary["archives_v1_v2_artifact_identity_exact"],
             "blocking_reasons": source_drift_blockers,
         },
         "t2_readiness": {
@@ -1281,6 +1363,8 @@ def _build_report_from_loaded(values: Mapping[str, dict[str, Any]], metas: Mappi
             "terminal_blocking_reasons": terminal_blockers,
             "matrix_blocking_reasons": matrix_blockers,
             "source_drift_report_status": _get(drift, "status"),
+            "archive_reader_reconciliation_status": _get(archive_reader, "status"),
+            "archive_reader_reconciliation_blockers": archive_reader_summary["blockers"],
             "consistency_audit_status": _get(consistency, "status"),
             "root_scheduler_status": _get(root, "status"),
             "sidecar_matrix_status": _get(matrix, "status"),
@@ -1289,7 +1373,7 @@ def _build_report_from_loaded(values: Mapping[str, dict[str, Any]], metas: Mappi
 
 
 def build_report(input_paths: Mapping[str, str | Path] | None = None) -> dict[str, Any]:
-    """Build the deterministic projection from exactly seven bounded JSON files."""
+    """Build the deterministic projection from exactly eight bounded JSON files."""
 
     values, metas = _load_and_validate(input_paths)
     report = _build_report_from_loaded(values, metas)
@@ -1359,6 +1443,9 @@ def validate_report(value: Any) -> dict[str, Any]:
         "source.collection_manifest_sha256": COLLECTION_MANIFEST_SHA256,
         "source.reader_manifest_path_exact": True,
         "source.reader_manifest_sha256_exact": False,
+        "source.archive_reader_reconciliation_status": "blocked_fail_closed",
+        "source.archive_reader_reconciliation_ready": False,
+        "source.archives_v1_v2_artifact_identity_exact": True,
         "parameters.q": Q,
         "parameters.dp_m": DP_M,
         "parameters.neighbour_variant": NEIGHBOUR_VARIANT,
@@ -1395,6 +1482,9 @@ def validate_report(value: Any) -> dict[str, Any]:
         "source_drift.reader_manifest_path_exact": True,
         "source_drift.reader_manifest_sha256_exact": False,
         "source_drift.diagnostic_parameter_binding": False,
+        "source_drift.archive_reader_reconciliation_status": "blocked_fail_closed",
+        "source_drift.archive_reader_reconciliation_ready": False,
+        "source_drift.archives_v1_v2_artifact_identity_exact": True,
         "t2_readiness.status": "blocked_fail_closed",
         "t2_readiness.formal_T2_macro": False,
         "t2_readiness.formal_T2_path": False,
@@ -1491,6 +1581,8 @@ def validate_report(value: Any) -> dict[str, Any]:
         "hdf5_paths_are_metadata_only": True,
     }), "report contract drift", code="report_schema")
     _require(value["evidence_detail"]["source_drift_report_status"] == "blocked_fail_closed", "source drift status drift", code="report_binding")
+    _require(value["evidence_detail"]["archive_reader_reconciliation_status"] == "blocked_fail_closed", "archive-reader reconciliation status drift", code="report_binding")
+    _require(isinstance(value["evidence_detail"]["archive_reader_reconciliation_blockers"], list) and value["evidence_detail"]["archive_reader_reconciliation_blockers"], "archive-reader reconciliation blockers drift", code="report_binding")
     _require(value["evidence_detail"]["consistency_audit_status"] == "blocked_fail_closed", "consistency status drift", code="report_binding")
     _require(value["evidence_detail"]["root_scheduler_status"] == "blocked_missing_fresh_root_scheduler_receipts", "root status drift", code="report_binding")
     _require(value["evidence_detail"]["sidecar_matrix_status"] == "blocked_fail_closed", "matrix status drift", code="report_binding")
@@ -1502,7 +1594,7 @@ def verify_report(
     *,
     input_paths: Mapping[str, str | Path] | None = None,
 ) -> dict[str, Any]:
-    """Verify a report against a fresh bounded read of its seven inputs."""
+    """Verify a report against a fresh bounded read of its eight inputs."""
 
     value, _ = _read_bounded_json(
         report_path,
@@ -1524,7 +1616,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
         [
             "# F4 Tallwall120 material readiness projection v1",
             "",
-            "本报告只消费七份 bounded JSON receipt；不打开或读取 HDF5，也不授予任何运行权、正式资格或 credit。",
+            "本报告只消费八份 bounded JSON receipt；不打开或读取 HDF5，也不授予任何运行权、正式资格或 credit。",
             "",
             f"- 状态：`{report['status']}`",
             "- `diagnostic_only=true`，`launch_admitted=false`，`formal=false`，`T1=false`，`T2=false`，`qualification=false`。",
@@ -1545,7 +1637,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             "",
             "## 安全边界",
             "",
-            "输入读取拒绝 duplicate key、非 finite 数值、越界大小、路径 traversal、symlink 和读时 TOCTOU 变化；报告验证会重新从七份输入构建并逐字节绑定 SHA。",
+            "输入读取拒绝 duplicate key、非 finite 数值、越界大小、路径 traversal、symlink 和读时 TOCTOU 变化；报告验证会重新从八份输入构建并逐字节绑定 SHA。",
             "",
             "该 projection 是 readiness 记录，不是实际 material trace、terminal evidence、T2 acceptance 或 launch authorization。",
             "",
@@ -1591,7 +1683,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--write", action="store_true", help="write the JSON and Chinese reports")
-    group.add_argument("--verify", action="store_true", help="verify the JSON report against all seven inputs")
+    group.add_argument("--verify", action="store_true", help="verify the JSON report against all eight inputs")
     parser.add_argument("--report", default=str(DEFAULT_REPORT), help="JSON report path")
     parser.add_argument("--markdown", default=str(DEFAULT_MARKDOWN), help="Chinese report path for --write")
     parser.add_argument("--input", action="append", default=[], metavar="NAME=PATH", help="override one bounded JSON input")

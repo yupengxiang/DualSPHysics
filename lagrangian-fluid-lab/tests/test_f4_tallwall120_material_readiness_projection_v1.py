@@ -87,6 +87,30 @@ def test_source_drift_mutation_is_rejected(tmp_path: Path, monkeypatch: pytest.M
     assert raised.value.code == "source_drift"
 
 
+def test_archive_reader_reconciliation_is_bound_and_fail_closed() -> None:
+    report = module.build_report()
+
+    assert "archive_reader_reconciliation" in report["input_refs"]
+    assert report["source"]["archive_reader_reconciliation_status"] == "blocked_fail_closed"
+    assert report["source"]["archive_reader_reconciliation_ready"] is False
+    assert report["source"]["archives_v1_v2_artifact_identity_exact"] is True
+    assert report["source_drift"]["archive_reader_reconciliation_ready"] is False
+    assert "archive_reader_reconciliation_not_ready" in report["blockers"]
+    assert report["evidence_detail"]["archive_reader_reconciliation_status"] == "blocked_fail_closed"
+
+
+def test_archive_reader_reconciliation_promotion_is_rejected(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    inputs = _fixture_inputs(tmp_path, monkeypatch)
+    _rewrite(inputs["archive_reader_reconciliation"], lambda value: value["source_reconciliation"].update(ready=True))
+
+    with pytest.raises(module.F4MaterialReadinessProjectionError) as raised:
+        module.build_report(inputs)
+
+    assert raised.value.code == "archive_reader_reconciliation"
+
+
 @pytest.mark.parametrize(
     ("input_name", "mutate", "expected_code"),
     [

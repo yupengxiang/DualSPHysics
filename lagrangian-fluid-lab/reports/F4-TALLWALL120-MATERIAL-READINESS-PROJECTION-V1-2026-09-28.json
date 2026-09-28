@@ -4,6 +4,7 @@
   "blockers": [
     "collection_source_path_archives_v1_vs_archives_v2_drift",
     "reader_manifest_sha_stale",
+    "archive_reader_reconciliation_not_ready",
     "diagnostic_material_parameter_drift",
     "missing_fresh_root_authorization",
     "missing_scheduler_owned_host_io_reservation",
@@ -29,6 +30,13 @@
     "time_start_s": 0.0
   },
   "evidence_detail": {
+    "archive_reader_reconciliation_blockers": [
+      "collection_manifest_archives_v1_vs_archives_v2_path_drift",
+      "reader_manifest_sha_stale",
+      "fresh_root_receipt_missing",
+      "scheduler_host_io_reservation_missing"
+    ],
+    "archive_reader_reconciliation_status": "blocked_fail_closed",
     "consistency_audit_status": "blocked_fail_closed",
     "matrix_blocking_reasons": [
       "archives_v1_v2_receipt_drift",
@@ -78,28 +86,35 @@
   "formal": false,
   "input_boundary": {
     "bounded_json_only": true,
-    "max_json_bytes": 8388608,
-    "max_json_depth": 64,
     "duplicate_keys_rejected": true,
-    "nonfinite_numbers_rejected": true,
-    "missing_inputs_fail_closed": true,
-    "path_traversal_rejected": true,
-    "lab_root_scope_restricted": true,
-    "reports_output_scope_restricted": true,
-    "read_toctou_rechecked": true,
-    "read_inode_rechecked": true,
-    "read_hash_rechecked": true,
-    "output_inode_rechecked": true,
-    "record_ids_exact": true,
-    "schemas_exact": true,
-    "symlink_paths_rejected": true,
     "hardlink_paths_rejected": true,
-    "held_directory_fd_no_follow": true,
     "hdf5_content_read": false,
     "hdf5_hash_recomputed": false,
-    "hdf5_opened": false
+    "hdf5_opened": false,
+    "held_directory_fd_no_follow": true,
+    "lab_root_scope_restricted": true,
+    "max_json_bytes": 8388608,
+    "max_json_depth": 64,
+    "missing_inputs_fail_closed": true,
+    "nonfinite_numbers_rejected": true,
+    "output_inode_rechecked": true,
+    "path_traversal_rejected": true,
+    "read_hash_rechecked": true,
+    "read_inode_rechecked": true,
+    "read_toctou_rechecked": true,
+    "record_ids_exact": true,
+    "reports_output_scope_restricted": true,
+    "schemas_exact": true,
+    "symlink_paths_rejected": true
   },
   "input_refs": {
+    "archive_reader_reconciliation": {
+      "bytes": 11071,
+      "path": "reports/F4-TALLWALL120-MATERIAL-ARCHIVE-READER-RECONCILIATION-V1-2026-09-29.json",
+      "record_id": "f4-tallwall120-material-archive-reader-reconciliation-v1-2026-09-29",
+      "schema": "core.material.f4.tallwall120.archive_reader_reconciliation.v1",
+      "sha256": "fa42d070c2f0829d9bd92548da035c322d1ebda5240c031eb8a64d5c3c318f44"
+    },
     "coarse_proposal": {
       "bytes": 12775,
       "path": "reports/F4-TALLWALL120-MATERIAL-COARSE-PROPOSAL-2026-09-28.json",
@@ -115,11 +130,11 @@
       "sha256": "936bc54c8ad2ccd8ef23c7b016ba6ef61c749fdf9f9a45f36c13001cb1bb1a99"
     },
     "root_scheduler": {
-      "bytes": 34815,
+      "bytes": 39084,
       "path": "reports/F4-TALLWALL120-MATERIAL-ROOT-SCHEDULER-INTAKE-V1-2026-09-28.json",
       "record_id": "f4-tallwall120-material-root-scheduler-intake-v1",
       "schema": "core.material.f4.tallwall120.root_scheduler_intake.v1",
-      "sha256": "e0b4349d2c966e4da72fb2a57eeb0a0a9aea1e21d302b24a165dde0af31be28f"
+      "sha256": "40ac02893d858abbfd8a91456d8aa35d40f3f424dbf7dde1bc8266460348d00d"
     },
     "sidecar_matrix": {
       "bytes": 104350,
@@ -133,7 +148,7 @@
       "path": "reports/F4-TALLWALL120-MATERIAL-SOURCE-DRIFT-RECONCILIATION-V1-2026-09-28.json",
       "record_id": "f4-tallwall120-material-source-drift-reconciliation-v1",
       "schema": "core.material.f4.tallwall120.source_drift_reconciliation.v1",
-      "sha256": "3cfad7901c27c94284ab57a9dcae8b83f7efb3242fbe73e1f336513790a73ab1"
+      "sha256": "26bf784e0c1ee04427b2255d8e6d0a1b804208d9c03390ddb29cebe579554e05"
     },
     "t2_readiness": {
       "bytes": 13693,
@@ -178,6 +193,7 @@
       "coarse_proposal",
       "root_scheduler",
       "source_drift",
+      "archive_reader_reconciliation",
       "receipt_consistency",
       "terminal_evidence",
       "sidecar_matrix",
@@ -248,6 +264,9 @@
     "sidecar_count_supplied": 0
   },
   "source": {
+    "archive_reader_reconciliation_ready": false,
+    "archive_reader_reconciliation_status": "blocked_fail_closed",
+    "archives_v1_v2_artifact_identity_exact": true,
     "collection_declared_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-07/product/trajectory.h5",
     "collection_declared_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
     "collection_manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
@@ -262,6 +281,9 @@
     "target_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae"
   },
   "source_drift": {
+    "archive_reader_reconciliation_ready": false,
+    "archive_reader_reconciliation_status": "blocked_fail_closed",
+    "archives_v1_v2_artifact_identity_exact": true,
     "blocking_reasons": [
       "collection_manifest_archives_v1_vs_target_archives_v2_mismatch",
       "reader_smoke_manifest_sha_stale",
