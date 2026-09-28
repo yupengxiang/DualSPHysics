@@ -1,0 +1,2123 @@
+{
+  "blocking_reasons": [
+    "archives_v1_v2_receipt_drift",
+    "archives_v1_v2_source_drift",
+    "dev07_wrong_source",
+    "missing_material_sidecar",
+    "missing_or_incomplete_material_sidecars",
+    "missing_required_material_markers",
+    "reader_manifest_sha_drift",
+    "wrong_or_drifted_source"
+  ],
+  "checks": [
+    {
+      "check": "fixed_32_case_denominator",
+      "expected": {
+        "case_count": 32,
+        "case_ids": [
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_00",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_01",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_02",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_03",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_05",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_06",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_08",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_09",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_10",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_11",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_12",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_13",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_14",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_15",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_16",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_17",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_18",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_19",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_20",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_21",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_22",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_23",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_24",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_25",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_26",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_27",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_28",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_29",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_30",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_31"
+        ]
+      },
+      "observed": {
+        "duplicate_case_ids": [],
+        "extra_case_ids": [],
+        "missing_case_ids": [],
+        "row_count": 32
+      },
+      "passed": true,
+      "reason": "collection case IDs must be exactly the fixed 32-case matrix"
+    },
+    {
+      "check": "fixed_split_matrix",
+      "expected": {
+        "id_test": 6,
+        "ood_test": 6,
+        "train": 16,
+        "validation": 4
+      },
+      "observed": {
+        "counts": {
+          "id_test": 6,
+          "ood_test": 6,
+          "train": 16,
+          "validation": 4
+        },
+        "drift": []
+      },
+      "passed": true,
+      "reason": "case splits must match the fixed train/validation/id_test/ood_test matrix"
+    },
+    {
+      "check": "f4_scope_binding",
+      "expected": {
+        "family": "F4",
+        "schema": "core.f4.tallwall120.production_collection.v1",
+        "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1"
+      },
+      "observed": {
+        "family": "F4",
+        "family_drift": [],
+        "schema": "core.f4.tallwall120.production_collection.v1",
+        "scope_drift": [],
+        "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1"
+      },
+      "passed": true,
+      "reason": "collection schema, family, scope, and case rows must bind F4 Tallwall120"
+    },
+    {
+      "check": "collection_denominator_flags",
+      "expected": [],
+      "observed": [],
+      "passed": true,
+      "reason": "every fixed case must remain in the declared collection denominator"
+    },
+    {
+      "check": "archives_v2_source_matrix",
+      "expected": {
+        "archive_variant": "archives-v2",
+        "case_count": 32
+      },
+      "observed": {
+        "collection_archive_variants": {
+          "archives-v1": 32
+        },
+        "source_drift_case_count": 32
+      },
+      "passed": false,
+      "reason": "material sidecars must bind archives-v2 paths and source SHA values"
+    },
+    {
+      "check": "dev07_proposal_source_binding",
+      "expected": {
+        "archive_variant": "archives-v2",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+        "family": "F4",
+        "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1"
+      },
+      "observed": {
+        "collection": {
+          "source_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-07/product/trajectory.h5",
+          "source_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae"
+        },
+        "proposal": {
+          "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+          "family": "F4",
+          "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+          "source_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+          "source_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae"
+        }
+      },
+      "passed": false,
+      "reason": "DEV_07 proposal source, collection source, scope, and SHA must agree"
+    },
+    {
+      "check": "reader_manifest_path_binding",
+      "expected": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
+      "observed": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
+      "passed": true,
+      "reason": "reader smoke must name the frozen collection manifest path"
+    },
+    {
+      "check": "reader_manifest_sha_binding",
+      "expected": "808fe201c4df28f2be9b48a514f338689c38bcb96db0b0c0590946b79fb9ad09",
+      "observed": "86100523e66202f567ee29da6e178702f0e3ab19c63bd0cf861ff8a5fa0f86b4",
+      "passed": false,
+      "reason": "reader smoke manifest SHA must match the current manifest"
+    },
+    {
+      "check": "archives_path_consistency_audit",
+      "expected": {
+        "exact_path_match": true,
+        "source_sha256_match": true
+      },
+      "observed": {
+        "exact_path_match": false,
+        "mismatch_class": "archives-v1_vs_archives-v2",
+        "source_sha256_match": true
+      },
+      "passed": false,
+      "reason": "receipt consistency must not report archives-v1/v2 or source drift"
+    },
+    {
+      "check": "fresh_matrix_namespace",
+      "expected": {
+        "exists": false
+      },
+      "observed": {
+        "exists": false,
+        "namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928"
+      },
+      "passed": true,
+      "reason": "the matrix namespace is proposal-only and must be fresh before execution"
+    },
+    {
+      "check": "complete_material_sidecar_matrix",
+      "expected": {
+        "complete_sidecar_count": 32
+      },
+      "observed": {
+        "complete_sidecar_count": 0,
+        "duplicate_case_ids": [],
+        "extra_case_ids": [],
+        "malformed_sidecars": [],
+        "missing_case_ids": [
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_00",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_01",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_02",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_03",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_05",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_06",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_08",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_09",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_10",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_11",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_12",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_13",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_14",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_15",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_16",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_17",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_18",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_19",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_20",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_21",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_22",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_23",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_24",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_25",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_26",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_27",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_28",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_29",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_30",
+          "F4_resting_pool_laminar_tallwall120_x_v1_DEV_31"
+        ]
+      },
+      "passed": false,
+      "reason": "all 32 cases require one complete material sidecar before any promotion"
+    },
+    {
+      "check": "full_event_window_markers",
+      "expected": {
+        "case_count": 32
+      },
+      "observed": {
+        "full_event_window_count": 0,
+        "mass_closed_count": 0,
+        "reliable_coverage_pass_count": 0,
+        "right_censor_pass_count": 0,
+        "unknown_pass_count": 0
+      },
+      "passed": false,
+      "reason": "every sidecar must carry full event-window material markers"
+    }
+  ],
+  "decision": "diagnostic_proposal_contract_only",
+  "dev07_refs": {
+    "proposal": {
+      "path": "reports/F4-TALLWALL120-MATERIAL-COARSE-PROPOSAL-2026-09-28.json",
+      "schema": "core.material.f4.tallwall120.coarse_proposal.v1",
+      "status": "blocked_fail_closed"
+    },
+    "reader": {
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
+      "manifest_sha256": "86100523e66202f567ee29da6e178702f0e3ab19c63bd0cf861ff8a5fa0f86b4",
+      "path": "reports/F4-TALLWALL120-CORE-READER-SMOKE-2026-09-28.json"
+    },
+    "source": {
+      "collection_hdf5_metadata": {
+        "bytes": 2067911708,
+        "content_hash_recomputed": false,
+        "content_read": false,
+        "declared_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+        "exists": true,
+        "metadata_only": true,
+        "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-07/product/trajectory.h5"
+      },
+      "collection_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+      "collection_trajectory": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-07/product/trajectory.h5",
+      "hdf5_content_read": false,
+      "hdf5_hash_recomputed": false,
+      "proposal_hdf5_metadata": {
+        "bytes": 2067911708,
+        "content_hash_recomputed": false,
+        "content_read": false,
+        "declared_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+        "exists": true,
+        "metadata_only": true,
+        "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5"
+      },
+      "proposal_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+      "proposal_target": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5"
+    },
+    "terminal_intake": {
+      "fresh_terminal_present": false,
+      "path": "reports/F4-TALLWALL120-MATERIAL-TERMINAL-EVIDENCE-INTAKE-V1-2026-09-28.json",
+      "status": "blocked_fail_closed"
+    }
+  },
+  "execution_controls": {
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "production_hdf5_content_read": false,
+    "production_hdf5_hash_recomputed": false,
+    "production_hdf5_opened": false,
+    "queue_mutation": 0,
+    "queue_started": false,
+    "registry_mutation": 0,
+    "solver_started": false,
+    "static_only": true,
+    "worker_started": false
+  },
+  "fixed_matrix": {
+    "archive_variant_required": "archives-v2",
+    "case_count": 32,
+    "case_ids": [
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_00",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_01",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_02",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_03",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_05",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_06",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_08",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_09",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_10",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_11",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_12",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_13",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_14",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_15",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_16",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_17",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_18",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_19",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_20",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_21",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_22",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_23",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_24",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_25",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_26",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_27",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_28",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_29",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_30",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_31"
+    ],
+    "case_splits": {
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_00": "ood_test",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_01": "ood_test",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_02": "ood_test",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_03": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_05": "id_test",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_06": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_08": "validation",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_09": "id_test",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_10": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_11": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_12": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_13": "validation",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_14": "id_test",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_15": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_16": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_17": "id_test",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_18": "validation",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_19": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_20": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_21": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_22": "id_test",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_23": "validation",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_24": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_25": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_26": "id_test",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_27": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_28": "train",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_29": "ood_test",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_30": "ood_test",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_31": "ood_test"
+    },
+    "sidecar_schema": "core.material.f4.tallwall120.material_sidecar.v1",
+    "split_counts": {
+      "id_test": 6,
+      "ood_test": 6,
+      "train": 16,
+      "validation": 4
+    }
+  },
+  "fresh_output_namespace": {
+    "case_namespaces": [
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_00",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_01",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_02",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_03",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_04",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_05",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_06",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_08",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_09",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_10",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_11",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_12",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_13",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_14",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_15",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_16",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_17",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_18",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_19",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_20",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_21",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_22",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_23",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_24",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_25",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_26",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_27",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_28",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_29",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_30",
+      "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_31"
+    ],
+    "execution_authorized": false,
+    "exists": false,
+    "historical_trace_reuse": false,
+    "namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928",
+    "overwrite_allowed": false,
+    "solver_worker_gpu_queue_started": false
+  },
+  "input_bindings": {
+    "collection_manifest": {
+      "bounded_small_file_read": true,
+      "bytes": 765422,
+      "exists": true,
+      "hdf5_metadata_only": false,
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
+      "role": "collection manifest",
+      "sha256": "808fe201c4df28f2be9b48a514f338689c38bcb96db0b0c0590946b79fb9ad09"
+    },
+    "dev07_proposal": {
+      "bounded_small_file_read": true,
+      "bytes": 12775,
+      "exists": true,
+      "hdf5_metadata_only": false,
+      "path": "reports/F4-TALLWALL120-MATERIAL-COARSE-PROPOSAL-2026-09-28.json",
+      "role": "dev07 proposal",
+      "sha256": "59e8340978b86230b3344193666199adc5c26976b315a672f71074e965dd1267"
+    },
+    "reader_smoke": {
+      "bounded_small_file_read": true,
+      "bytes": 3430,
+      "exists": true,
+      "hdf5_metadata_only": false,
+      "path": "reports/F4-TALLWALL120-CORE-READER-SMOKE-2026-09-28.json",
+      "role": "reader smoke",
+      "sha256": "db30187225f8a2915f43d18622d54ec537fe3efc2265837d5273f3dfeed2ac5d"
+    },
+    "receipt_consistency_audit": {
+      "bounded_small_file_read": true,
+      "bytes": 42333,
+      "exists": true,
+      "hdf5_metadata_only": false,
+      "path": "reports/F4-TALLWALL120-MATERIAL-RECEIPT-CONSISTENCY-AUDIT-2026-09-28.json",
+      "role": "receipt consistency audit",
+      "sha256": "936bc54c8ad2ccd8ef23c7b016ba6ef61c749fdf9f9a45f36c13001cb1bb1a99"
+    },
+    "t2_acceptance_bridge": {
+      "bounded_small_file_read": true,
+      "bytes": 84827,
+      "exists": true,
+      "hdf5_metadata_only": false,
+      "path": "campaigns/core-v1/material/evidence/f4-tallwall120-t2-acceptance-bridge-v1-20260922-v3.json",
+      "role": "t2 acceptance bridge",
+      "sha256": "4f6ad3f7ee1c2fb886e41d0a42183d864518f4a11d46dbde5626f6f4fb37956a"
+    },
+    "terminal_evidence_intake": {
+      "bounded_small_file_read": true,
+      "bytes": 16444,
+      "exists": true,
+      "hdf5_metadata_only": false,
+      "path": "reports/F4-TALLWALL120-MATERIAL-TERMINAL-EVIDENCE-INTAKE-V1-2026-09-28.json",
+      "role": "terminal evidence intake",
+      "sha256": "3f4842b417a7200f3d6d46b621693cdd89bbc3f104b348854c540f898ad524ff"
+    }
+  },
+  "input_boundary": {
+    "bounded_json_only": true,
+    "max_json_bytes": 8388608,
+    "production_hdf5_content_read": false,
+    "production_hdf5_hash_recomputed": false,
+    "production_hdf5_metadata_only": true,
+    "production_hdf5_opened": false,
+    "small_file_metadata_only": true,
+    "solver_worker_gpu_queue_started": false
+  },
+  "material_sidecars": {
+    "cases": [
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_00",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_00",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 0,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-00/product/trajectory.h5",
+          "expected_sha256": "cec2c75ef713660c085207c0b6a6ffe2eb3c77ca257d8fd9fb2bb708256ad94d",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-00/product/trajectory.h5",
+          "sha256": "cec2c75ef713660c085207c0b6a6ffe2eb3c77ca257d8fd9fb2bb708256ad94d"
+        },
+        "split": "ood_test",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_01",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_01",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 1,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-01/product/trajectory.h5",
+          "expected_sha256": "b6b36317c6c2097b5ec4137ef1621a76fe3aa29ecd4924996d75842b20317da8",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-01/product/trajectory.h5",
+          "sha256": "b6b36317c6c2097b5ec4137ef1621a76fe3aa29ecd4924996d75842b20317da8"
+        },
+        "split": "ood_test",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_02",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_02",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 2,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-02/product/trajectory.h5",
+          "expected_sha256": "19e66f4e567e1e403359ead4d511e9d9203986fe58f0c99a219342994cb4ae1f",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-02/product/trajectory.h5",
+          "sha256": "19e66f4e567e1e403359ead4d511e9d9203986fe58f0c99a219342994cb4ae1f"
+        },
+        "split": "ood_test",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_03",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_03",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 3,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-03/product/trajectory.h5",
+          "expected_sha256": "0269edfa627e35981fe241d17a798f217fbf62442f0a2287c194b677578b05d7",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-03/product/trajectory.h5",
+          "sha256": "0269edfa627e35981fe241d17a798f217fbf62442f0a2287c194b677578b05d7"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_04",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 4,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-04/product/trajectory.h5",
+          "expected_sha256": "f53e39b35fd0b52ceb5393fb054bced65ab7947f835194aa4fc8f813a546490d",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-04/product/trajectory.h5",
+          "sha256": "f53e39b35fd0b52ceb5393fb054bced65ab7947f835194aa4fc8f813a546490d"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_05",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_05",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 5,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-05/product/trajectory.h5",
+          "expected_sha256": "1d383dda466efe520c9c7843cd74b330307888075d2aadbfa61573a95ad5ac55",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-05/product/trajectory.h5",
+          "sha256": "1d383dda466efe520c9c7843cd74b330307888075d2aadbfa61573a95ad5ac55"
+        },
+        "split": "id_test",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_06",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_06",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 6,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-06/product/trajectory.h5",
+          "expected_sha256": "c6c3da203dd926f6b339cbf749af492836537efcf6c805d9a3a15401b4892470",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-06/product/trajectory.h5",
+          "sha256": "c6c3da203dd926f6b339cbf749af492836537efcf6c805d9a3a15401b4892470"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 7,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+          "expected_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-07/product/trajectory.h5",
+          "sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_08",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_08",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 8,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-08/product/trajectory.h5",
+          "expected_sha256": "7ff813f0ed0cab28f9dff009bfe882baf3bf665723a4d027369965847c878994",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-08/product/trajectory.h5",
+          "sha256": "7ff813f0ed0cab28f9dff009bfe882baf3bf665723a4d027369965847c878994"
+        },
+        "split": "validation",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_09",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_09",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 9,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-09/product/trajectory.h5",
+          "expected_sha256": "9379e88608587a54b7b4f0bb375ac5340952f7f7a2f22cdbeec7ce299140c8b8",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-09/product/trajectory.h5",
+          "sha256": "9379e88608587a54b7b4f0bb375ac5340952f7f7a2f22cdbeec7ce299140c8b8"
+        },
+        "split": "id_test",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_10",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_10",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 10,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-10/product/trajectory.h5",
+          "expected_sha256": "01b5a3a85e46533ba2d575d91493870a268cb7df83875fc1d64a4fc5a1fbeda5",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-10/product/trajectory.h5",
+          "sha256": "01b5a3a85e46533ba2d575d91493870a268cb7df83875fc1d64a4fc5a1fbeda5"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_11",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_11",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 11,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-11/product/trajectory.h5",
+          "expected_sha256": "72ba7acf46d592208ffa6c1093710e4513625c75fc9f2792289b9e701f769e6f",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-11/product/trajectory.h5",
+          "sha256": "72ba7acf46d592208ffa6c1093710e4513625c75fc9f2792289b9e701f769e6f"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_12",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_12",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 12,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-12/product/trajectory.h5",
+          "expected_sha256": "d89f576411b4d0447e4d72b9c251cfa69ac3a3bddaaf493f1b97b9f8710a41ee",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-12/product/trajectory.h5",
+          "sha256": "d89f576411b4d0447e4d72b9c251cfa69ac3a3bddaaf493f1b97b9f8710a41ee"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_13",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_13",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 13,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-13/product/trajectory.h5",
+          "expected_sha256": "f894d9e1ccc2d9bda28ea44e9364a418a563fbe38dc077f9e8767406de52dedd",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-13/product/trajectory.h5",
+          "sha256": "f894d9e1ccc2d9bda28ea44e9364a418a563fbe38dc077f9e8767406de52dedd"
+        },
+        "split": "validation",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_14",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_14",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 14,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-14/product/trajectory.h5",
+          "expected_sha256": "1130c8a0c6ebca9d73551aa8158e9c757f2dda9a3de85de743fd0afc1c84724e",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-14/product/trajectory.h5",
+          "sha256": "1130c8a0c6ebca9d73551aa8158e9c757f2dda9a3de85de743fd0afc1c84724e"
+        },
+        "split": "id_test",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_15",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_15",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 15,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-15/product/trajectory.h5",
+          "expected_sha256": "2d0fd94f006e79ab54aaede51f70473f76075813456a091396d59eeacecba900",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-15/product/trajectory.h5",
+          "sha256": "2d0fd94f006e79ab54aaede51f70473f76075813456a091396d59eeacecba900"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_16",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_16",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 16,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-16/product/trajectory.h5",
+          "expected_sha256": "050302a955bbaff0eade8198395837fa83d66727f21b614c6f6fdd71f1e949c8",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-16/product/trajectory.h5",
+          "sha256": "050302a955bbaff0eade8198395837fa83d66727f21b614c6f6fdd71f1e949c8"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_17",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_17",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 17,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-17/product/trajectory.h5",
+          "expected_sha256": "f5d3d491bb01629ac83797f5e4f1fb4ac58b1223bd6319c775fffccbeda74765",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-17/product/trajectory.h5",
+          "sha256": "f5d3d491bb01629ac83797f5e4f1fb4ac58b1223bd6319c775fffccbeda74765"
+        },
+        "split": "id_test",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_18",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_18",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 18,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-18/product/trajectory.h5",
+          "expected_sha256": "0eedd0aa48635a6af482964e9081c6db3b4756aa800dadd2bce645d3a03833d9",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-18/product/trajectory.h5",
+          "sha256": "0eedd0aa48635a6af482964e9081c6db3b4756aa800dadd2bce645d3a03833d9"
+        },
+        "split": "validation",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_19",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_19",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 19,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-19/product/trajectory.h5",
+          "expected_sha256": "ce1a8d135f4d664381645b2b66539ccd4a5249c3e963ed97059ee373e6f420ee",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-19/product/trajectory.h5",
+          "sha256": "ce1a8d135f4d664381645b2b66539ccd4a5249c3e963ed97059ee373e6f420ee"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_20",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_20",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 20,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-20/product/trajectory.h5",
+          "expected_sha256": "1bb0b242136f6e0c11c4db0a8d218c19bafbf9ed2ed349210a6d80558aab0786",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-20/product/trajectory.h5",
+          "sha256": "1bb0b242136f6e0c11c4db0a8d218c19bafbf9ed2ed349210a6d80558aab0786"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_21",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_21",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 21,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-21/product/trajectory.h5",
+          "expected_sha256": "f57d81ef5910179a24c21f6c9316aa61a538b9859f713171e8cd830389a60ead",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-21/product/trajectory.h5",
+          "sha256": "f57d81ef5910179a24c21f6c9316aa61a538b9859f713171e8cd830389a60ead"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_22",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_22",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 22,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-22/product/trajectory.h5",
+          "expected_sha256": "2484b4a2e29c5e87369a0bc71c3f87f35f1d5a38431927dd6ad121931c8286dd",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-22/product/trajectory.h5",
+          "sha256": "2484b4a2e29c5e87369a0bc71c3f87f35f1d5a38431927dd6ad121931c8286dd"
+        },
+        "split": "id_test",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_23",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_23",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 23,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-23/product/trajectory.h5",
+          "expected_sha256": "08d4b2ef8b0332758ee0cfa45780f5a00e70f9dd0152b651e5e7fbcfb8aaccc9",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-23/product/trajectory.h5",
+          "sha256": "08d4b2ef8b0332758ee0cfa45780f5a00e70f9dd0152b651e5e7fbcfb8aaccc9"
+        },
+        "split": "validation",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_24",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_24",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 24,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-24/product/trajectory.h5",
+          "expected_sha256": "b9b717324c9913f50eea06e100afef044e40ea61c0985655def08fa9902f218d",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-24/product/trajectory.h5",
+          "sha256": "b9b717324c9913f50eea06e100afef044e40ea61c0985655def08fa9902f218d"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_25",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_25",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 25,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-25/product/trajectory.h5",
+          "expected_sha256": "e4a0078f506ba50b6769862418df29d8212a691d56cd75117b370ae37aca3944",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-25/product/trajectory.h5",
+          "sha256": "e4a0078f506ba50b6769862418df29d8212a691d56cd75117b370ae37aca3944"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_26",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_26",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 26,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-26/product/trajectory.h5",
+          "expected_sha256": "b28e82541732d2dcc8c324f091d4c43bb042d2534a477ff67e02a90189f317d0",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-26/product/trajectory.h5",
+          "sha256": "b28e82541732d2dcc8c324f091d4c43bb042d2534a477ff67e02a90189f317d0"
+        },
+        "split": "id_test",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_27",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_27",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 27,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-27/product/trajectory.h5",
+          "expected_sha256": "dbd386f9d8b83aba77945db7ff0d1db5eff564017289a58658ab5fcc4ddcedf4",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-27/product/trajectory.h5",
+          "sha256": "dbd386f9d8b83aba77945db7ff0d1db5eff564017289a58658ab5fcc4ddcedf4"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_28",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_28",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 28,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-28/product/trajectory.h5",
+          "expected_sha256": "2970f128c0fa90e8906b3fa0f0f3865bf9babca191bd2864d255204952059e95",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-28/product/trajectory.h5",
+          "sha256": "2970f128c0fa90e8906b3fa0f0f3865bf9babca191bd2864d255204952059e95"
+        },
+        "split": "train",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_29",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_29",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 29,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-29/product/trajectory.h5",
+          "expected_sha256": "95f10da85a8468ccfb8bcbcd8199d0f890f45c9d51bd73b54b8d6c1766aedcb8",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-29/product/trajectory.h5",
+          "sha256": "95f10da85a8468ccfb8bcbcd8199d0f890f45c9d51bd73b54b8d6c1766aedcb8"
+        },
+        "split": "ood_test",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_30",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_30",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 30,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-30/product/trajectory.h5",
+          "expected_sha256": "81491681d7130c383636020d82927bcf73a5d4a3ae33910fb9faefba41540cc7",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-30/product/trajectory.h5",
+          "sha256": "81491681d7130c383636020d82927bcf73a5d4a3ae33910fb9faefba41540cc7"
+        },
+        "split": "ood_test",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      },
+      {
+        "blocking_reasons": [
+          "missing_material_sidecar",
+          "wrong_or_drifted_source"
+        ],
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_31",
+        "checks": [],
+        "credit": 0,
+        "event_window_complete": false,
+        "formal_or_credit_claims": {},
+        "fresh_output_namespace": "campaigns/core-v1/material/sidecars/f4-tallwall120-sidecar-matrix-v1-20260928/F4_resting_pool_laminar_tallwall120_x_v1_DEV_31",
+        "material_markers": {
+          "mass_closure_error": null,
+          "mass_closure_pass": false,
+          "reliable_coverage": null,
+          "reliable_coverage_pass": false,
+          "right_censor_pass": false,
+          "right_censor_status": "unknown",
+          "unknown_fraction_max": null,
+          "unknown_fraction_pass": false
+        },
+        "matrix_index": 31,
+        "source": {
+          "expected_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-31/product/trajectory.h5",
+          "expected_sha256": "797718af9e4af9a5fec61120209bd58602899ad0aee8006ba5717d2d314541c3",
+          "hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-31/product/trajectory.h5",
+          "sha256": "797718af9e4af9a5fec61120209bd58602899ad0aee8006ba5717d2d314541c3"
+        },
+        "split": "ood_test",
+        "status": "missing",
+        "terminal_complete": false,
+        "terminal_status": "missing"
+      }
+    ],
+    "duplicate_case_ids": [],
+    "extra_case_ids": [],
+    "malformed_sidecars": [],
+    "missing_case_ids": [
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_00",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_01",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_02",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_03",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_05",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_06",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_08",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_09",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_10",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_11",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_12",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_13",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_14",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_15",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_16",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_17",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_18",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_19",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_20",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_21",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_22",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_23",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_24",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_25",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_26",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_27",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_28",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_29",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_30",
+      "F4_resting_pool_laminar_tallwall120_x_v1_DEV_31"
+    ],
+    "sidecar_count_supplied": 0
+  },
+  "matrix_summary": {
+    "complete_sidecar_count": 0,
+    "denominator_complete": true,
+    "expected_case_count": 32,
+    "formal_acceptance_receipt_count": 0,
+    "full_event_window_complete_count": 0,
+    "mass_closed_count": 0,
+    "matrix_ready": false,
+    "observed_collection_case_count": 32,
+    "observed_sidecar_count": 0,
+    "qualification_credit": 0,
+    "reliable_coverage_pass_count": 0,
+    "right_censor_clear_count": 0,
+    "split_counts_expected": {
+      "id_test": 6,
+      "ood_test": 6,
+      "train": 16,
+      "validation": 4
+    },
+    "split_counts_observed": {
+      "id_test": 6,
+      "ood_test": 6,
+      "train": 16,
+      "validation": 4
+    },
+    "unknown_fraction_pass_count": 0
+  },
+  "observed_at_utc": "2026-09-28T00:00:00Z",
+  "qualification": {
+    "T1": false,
+    "T2": false,
+    "T2_macro": false,
+    "T2_path": false,
+    "completion_mutation": 0,
+    "contract_only": true,
+    "credit": 0,
+    "denominator_mutation": 0,
+    "diagnostic_only": true,
+    "formal": false,
+    "formal_eligible": false,
+    "gate_mutation": 0,
+    "ledger_mutation": 0,
+    "proposal_only": true,
+    "qualification": false,
+    "qualification_credit": 0,
+    "registry_mutation": 0
+  },
+  "report_contract": {
+    "builder": "scripts/f4_tallwall120_material_sidecar_matrix_contract_v1.py",
+    "exact_build_report_binding_required": true,
+    "report_is_recomputed_from_bounded_json": true,
+    "report_self_binding": false
+  },
+  "required_material_markers": {
+    "full_event_window_s": 8.68,
+    "mass_closure_error_max": 1e-12,
+    "no_event_imputation_or_partial_credit": true,
+    "partial_terminal_is_acceptance_failure": true,
+    "reliable_coverage_min": 1.0,
+    "right_censor_status_required": "not_right_censored",
+    "right_censored_or_unresolved_is_acceptance_failure": true,
+    "unknown_fraction_max": 0.01
+  },
+  "schema": "core.material.f4.tallwall120.sidecar_matrix_contract.v1",
+  "scope": {
+    "case_count": 32,
+    "collection_schema": "core.f4.tallwall120.production_collection.v1",
+    "family": "F4",
+    "focus": "F4 Tallwall120 material sidecar matrix coarse-to-fine interface",
+    "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1"
+  },
+  "source_binding": {
+    "collection_archive_variants": {
+      "archives-v1": 32
+    },
+    "collection_manifest": {
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
+      "schema": "core.f4.tallwall120.production_collection.v1",
+      "sha256": "808fe201c4df28f2be9b48a514f338689c38bcb96db0b0c0590946b79fb9ad09"
+    },
+    "dev07": {
+      "archives_v1_v2_drift": true,
+      "collection_source_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-07/product/trajectory.h5",
+      "collection_source_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+      "proposal_archive_variant": "archives-v2",
+      "proposal_source_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+      "proposal_source_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+      "source_sha256_match": true
+    },
+    "reader": {
+      "current_manifest_sha256": "808fe201c4df28f2be9b48a514f338689c38bcb96db0b0c0590946b79fb9ad09",
+      "manifest_path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
+      "path_exact": true,
+      "recorded_manifest_sha256": "86100523e66202f567ee29da6e178702f0e3ab19c63bd0cf861ff8a5fa0f86b4",
+      "sha256_exact": false,
+      "trusted_formal_eligible": null
+    },
+    "receipt_consistency": {
+      "archives_path_exact": false,
+      "mismatch_class": "archives-v1_vs_archives-v2",
+      "source_sha256_exact": true
+    },
+    "source_matrix": [
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_00",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-00/product/trajectory.h5",
+        "collection_source_sha256": "cec2c75ef713660c085207c0b6a6ffe2eb3c77ca257d8fd9fb2bb708256ad94d",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-00/product/trajectory.h5",
+        "expected_source_sha256": "cec2c75ef713660c085207c0b6a6ffe2eb3c77ca257d8fd9fb2bb708256ad94d",
+        "expected_split": "ood_test",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_01",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-01/product/trajectory.h5",
+        "collection_source_sha256": "b6b36317c6c2097b5ec4137ef1621a76fe3aa29ecd4924996d75842b20317da8",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-01/product/trajectory.h5",
+        "expected_source_sha256": "b6b36317c6c2097b5ec4137ef1621a76fe3aa29ecd4924996d75842b20317da8",
+        "expected_split": "ood_test",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_02",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-02/product/trajectory.h5",
+        "collection_source_sha256": "19e66f4e567e1e403359ead4d511e9d9203986fe58f0c99a219342994cb4ae1f",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-02/product/trajectory.h5",
+        "expected_source_sha256": "19e66f4e567e1e403359ead4d511e9d9203986fe58f0c99a219342994cb4ae1f",
+        "expected_split": "ood_test",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_03",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-03/product/trajectory.h5",
+        "collection_source_sha256": "0269edfa627e35981fe241d17a798f217fbf62442f0a2287c194b677578b05d7",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-03/product/trajectory.h5",
+        "expected_source_sha256": "0269edfa627e35981fe241d17a798f217fbf62442f0a2287c194b677578b05d7",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_04",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-04/product/trajectory.h5",
+        "collection_source_sha256": "f53e39b35fd0b52ceb5393fb054bced65ab7947f835194aa4fc8f813a546490d",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-04/product/trajectory.h5",
+        "expected_source_sha256": "f53e39b35fd0b52ceb5393fb054bced65ab7947f835194aa4fc8f813a546490d",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_05",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-05/product/trajectory.h5",
+        "collection_source_sha256": "1d383dda466efe520c9c7843cd74b330307888075d2aadbfa61573a95ad5ac55",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-05/product/trajectory.h5",
+        "expected_source_sha256": "1d383dda466efe520c9c7843cd74b330307888075d2aadbfa61573a95ad5ac55",
+        "expected_split": "id_test",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_06",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-06/product/trajectory.h5",
+        "collection_source_sha256": "c6c3da203dd926f6b339cbf749af492836537efcf6c805d9a3a15401b4892470",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-06/product/trajectory.h5",
+        "expected_source_sha256": "c6c3da203dd926f6b339cbf749af492836537efcf6c805d9a3a15401b4892470",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-07/product/trajectory.h5",
+        "collection_source_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+        "expected_source_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_08",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-08/product/trajectory.h5",
+        "collection_source_sha256": "7ff813f0ed0cab28f9dff009bfe882baf3bf665723a4d027369965847c878994",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-08/product/trajectory.h5",
+        "expected_source_sha256": "7ff813f0ed0cab28f9dff009bfe882baf3bf665723a4d027369965847c878994",
+        "expected_split": "validation",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_09",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-09/product/trajectory.h5",
+        "collection_source_sha256": "9379e88608587a54b7b4f0bb375ac5340952f7f7a2f22cdbeec7ce299140c8b8",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-09/product/trajectory.h5",
+        "expected_source_sha256": "9379e88608587a54b7b4f0bb375ac5340952f7f7a2f22cdbeec7ce299140c8b8",
+        "expected_split": "id_test",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_10",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-10/product/trajectory.h5",
+        "collection_source_sha256": "01b5a3a85e46533ba2d575d91493870a268cb7df83875fc1d64a4fc5a1fbeda5",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-10/product/trajectory.h5",
+        "expected_source_sha256": "01b5a3a85e46533ba2d575d91493870a268cb7df83875fc1d64a4fc5a1fbeda5",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_11",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-11/product/trajectory.h5",
+        "collection_source_sha256": "72ba7acf46d592208ffa6c1093710e4513625c75fc9f2792289b9e701f769e6f",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-11/product/trajectory.h5",
+        "expected_source_sha256": "72ba7acf46d592208ffa6c1093710e4513625c75fc9f2792289b9e701f769e6f",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_12",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-12/product/trajectory.h5",
+        "collection_source_sha256": "d89f576411b4d0447e4d72b9c251cfa69ac3a3bddaaf493f1b97b9f8710a41ee",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-12/product/trajectory.h5",
+        "expected_source_sha256": "d89f576411b4d0447e4d72b9c251cfa69ac3a3bddaaf493f1b97b9f8710a41ee",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_13",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-13/product/trajectory.h5",
+        "collection_source_sha256": "f894d9e1ccc2d9bda28ea44e9364a418a563fbe38dc077f9e8767406de52dedd",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-13/product/trajectory.h5",
+        "expected_source_sha256": "f894d9e1ccc2d9bda28ea44e9364a418a563fbe38dc077f9e8767406de52dedd",
+        "expected_split": "validation",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_14",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-14/product/trajectory.h5",
+        "collection_source_sha256": "1130c8a0c6ebca9d73551aa8158e9c757f2dda9a3de85de743fd0afc1c84724e",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-14/product/trajectory.h5",
+        "expected_source_sha256": "1130c8a0c6ebca9d73551aa8158e9c757f2dda9a3de85de743fd0afc1c84724e",
+        "expected_split": "id_test",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_15",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-15/product/trajectory.h5",
+        "collection_source_sha256": "2d0fd94f006e79ab54aaede51f70473f76075813456a091396d59eeacecba900",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-15/product/trajectory.h5",
+        "expected_source_sha256": "2d0fd94f006e79ab54aaede51f70473f76075813456a091396d59eeacecba900",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_16",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-16/product/trajectory.h5",
+        "collection_source_sha256": "050302a955bbaff0eade8198395837fa83d66727f21b614c6f6fdd71f1e949c8",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-16/product/trajectory.h5",
+        "expected_source_sha256": "050302a955bbaff0eade8198395837fa83d66727f21b614c6f6fdd71f1e949c8",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_17",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-17/product/trajectory.h5",
+        "collection_source_sha256": "f5d3d491bb01629ac83797f5e4f1fb4ac58b1223bd6319c775fffccbeda74765",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-17/product/trajectory.h5",
+        "expected_source_sha256": "f5d3d491bb01629ac83797f5e4f1fb4ac58b1223bd6319c775fffccbeda74765",
+        "expected_split": "id_test",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_18",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-18/product/trajectory.h5",
+        "collection_source_sha256": "0eedd0aa48635a6af482964e9081c6db3b4756aa800dadd2bce645d3a03833d9",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-18/product/trajectory.h5",
+        "expected_source_sha256": "0eedd0aa48635a6af482964e9081c6db3b4756aa800dadd2bce645d3a03833d9",
+        "expected_split": "validation",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_19",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-19/product/trajectory.h5",
+        "collection_source_sha256": "ce1a8d135f4d664381645b2b66539ccd4a5249c3e963ed97059ee373e6f420ee",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-19/product/trajectory.h5",
+        "expected_source_sha256": "ce1a8d135f4d664381645b2b66539ccd4a5249c3e963ed97059ee373e6f420ee",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_20",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-20/product/trajectory.h5",
+        "collection_source_sha256": "1bb0b242136f6e0c11c4db0a8d218c19bafbf9ed2ed349210a6d80558aab0786",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-20/product/trajectory.h5",
+        "expected_source_sha256": "1bb0b242136f6e0c11c4db0a8d218c19bafbf9ed2ed349210a6d80558aab0786",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_21",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-21/product/trajectory.h5",
+        "collection_source_sha256": "f57d81ef5910179a24c21f6c9316aa61a538b9859f713171e8cd830389a60ead",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-21/product/trajectory.h5",
+        "expected_source_sha256": "f57d81ef5910179a24c21f6c9316aa61a538b9859f713171e8cd830389a60ead",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_22",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-22/product/trajectory.h5",
+        "collection_source_sha256": "2484b4a2e29c5e87369a0bc71c3f87f35f1d5a38431927dd6ad121931c8286dd",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-22/product/trajectory.h5",
+        "expected_source_sha256": "2484b4a2e29c5e87369a0bc71c3f87f35f1d5a38431927dd6ad121931c8286dd",
+        "expected_split": "id_test",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_23",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-23/product/trajectory.h5",
+        "collection_source_sha256": "08d4b2ef8b0332758ee0cfa45780f5a00e70f9dd0152b651e5e7fbcfb8aaccc9",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-23/product/trajectory.h5",
+        "expected_source_sha256": "08d4b2ef8b0332758ee0cfa45780f5a00e70f9dd0152b651e5e7fbcfb8aaccc9",
+        "expected_split": "validation",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_24",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-24/product/trajectory.h5",
+        "collection_source_sha256": "b9b717324c9913f50eea06e100afef044e40ea61c0985655def08fa9902f218d",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-24/product/trajectory.h5",
+        "expected_source_sha256": "b9b717324c9913f50eea06e100afef044e40ea61c0985655def08fa9902f218d",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_25",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-25/product/trajectory.h5",
+        "collection_source_sha256": "e4a0078f506ba50b6769862418df29d8212a691d56cd75117b370ae37aca3944",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-25/product/trajectory.h5",
+        "expected_source_sha256": "e4a0078f506ba50b6769862418df29d8212a691d56cd75117b370ae37aca3944",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_26",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-26/product/trajectory.h5",
+        "collection_source_sha256": "b28e82541732d2dcc8c324f091d4c43bb042d2534a477ff67e02a90189f317d0",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-26/product/trajectory.h5",
+        "expected_source_sha256": "b28e82541732d2dcc8c324f091d4c43bb042d2534a477ff67e02a90189f317d0",
+        "expected_split": "id_test",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_27",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-27/product/trajectory.h5",
+        "collection_source_sha256": "dbd386f9d8b83aba77945db7ff0d1db5eff564017289a58658ab5fcc4ddcedf4",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-27/product/trajectory.h5",
+        "expected_source_sha256": "dbd386f9d8b83aba77945db7ff0d1db5eff564017289a58658ab5fcc4ddcedf4",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_28",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-28/product/trajectory.h5",
+        "collection_source_sha256": "2970f128c0fa90e8906b3fa0f0f3865bf9babca191bd2864d255204952059e95",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-28/product/trajectory.h5",
+        "expected_source_sha256": "2970f128c0fa90e8906b3fa0f0f3865bf9babca191bd2864d255204952059e95",
+        "expected_split": "train",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_29",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-29/product/trajectory.h5",
+        "collection_source_sha256": "95f10da85a8468ccfb8bcbcd8199d0f890f45c9d51bd73b54b8d6c1766aedcb8",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-29/product/trajectory.h5",
+        "expected_source_sha256": "95f10da85a8468ccfb8bcbcd8199d0f890f45c9d51bd73b54b8d6c1766aedcb8",
+        "expected_split": "ood_test",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_30",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-30/product/trajectory.h5",
+        "collection_source_sha256": "81491681d7130c383636020d82927bcf73a5d4a3ae33910fb9faefba41540cc7",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-30/product/trajectory.h5",
+        "expected_source_sha256": "81491681d7130c383636020d82927bcf73a5d4a3ae33910fb9faefba41540cc7",
+        "expected_split": "ood_test",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      },
+      {
+        "archive_variant": "archives-v1",
+        "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_31",
+        "collection_row_present": true,
+        "collection_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v1/f4-tallwall120-production-dev-31/product/trajectory.h5",
+        "collection_source_sha256": "797718af9e4af9a5fec61120209bd58602899ad0aee8006ba5717d2d314541c3",
+        "expected_source_path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-31/product/trajectory.h5",
+        "expected_source_sha256": "797718af9e4af9a5fec61120209bd58602899ad0aee8006ba5717d2d314541c3",
+        "expected_split": "ood_test",
+        "source_exact": false,
+        "source_path_exact": false,
+        "source_sha256_exact": true
+      }
+    ]
+  },
+  "status": "blocked_fail_closed",
+  "upstream_acceptance_bridge_projection": {
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "formal_acceptance_receipt_count": 0,
+    "material_matrix_ready": false,
+    "status": "blocked"
+  }
+}
