@@ -43,7 +43,12 @@ def _nonce(tmp_path: Path, seed: int) -> str:
     return _sha_text(f"{tmp_path}:{seed}")[:32]
 
 
-def _fixture(tmp_path: Path, *, with_proofs: bool = True) -> tuple[dict, dict[int, builder.SeedInputs], Path]:
+def _fixture(
+    tmp_path: Path,
+    *,
+    with_proofs: bool = True,
+    trusted_proofs: bool = False,
+) -> tuple[dict, dict[int, builder.SeedInputs], Path]:
     reports = tmp_path / "reports"
     reports.mkdir()
     training_runs = []
@@ -60,13 +65,29 @@ def _fixture(tmp_path: Path, *, with_proofs: bool = True) -> tuple[dict, dict[in
         training_runs.append({
             "seed": seed,
             "status": "bound_complete",
-            "model_kind": "mlp",
-            "hidden": 16,
-            "completed_updates": 500,
-            "run_id": builder._expected_run_id(seed),
-            "checkpoint_path": checkpoint_path.name,
-            "checkpoint_sha256": checkpoint_sha,
-            "checkpoint_verified": True,
+            "source": {
+                "path": str(builder._expected_training_path(seed)),
+                "sha256": "4" * 64,
+                "bytes": 10000 + seed,
+                "exists": True,
+                "opened": True,
+                "schema": "core.training.v1",
+            },
+            "evidence": {
+                "schema": "core.training.v1",
+                "model_kind": "mlp",
+                "hidden": 16,
+                "updates": 500,
+                "run_id": builder._expected_run_id(seed),
+                "evidence_status": "complete",
+                "manifest_sha256": "5" * 64,
+                "checkpoint": {
+                    "path": str(checkpoint_path),
+                    "schema": "core.checkpoint.v1",
+                    "sha256": checkpoint_sha,
+                    "update": 500,
+                },
+            },
         })
 
         nonce = _nonce(tmp_path, seed)
@@ -156,7 +177,22 @@ def _fixture(tmp_path: Path, *, with_proofs: bool = True) -> tuple[dict, dict[in
             "failure_category": None,
             "evaluation_json": str(evaluation_path),
             "trajectory_hdf5": str(trajectory_path),
-            "checks": {"trajectory_frames": 836, "trajectory_transitions": 835, "executed_frame_count": 836, "tail_frame_count": 0, "future_state_inputs": False},
+            "checks": {
+                "case_binding": True,
+                "shape": True,
+                "time": True,
+                "valid": True,
+                "future_state_inputs": True,
+                "completion_semantics": True,
+                "trajectory_frames": 836,
+                "trajectory_transitions": 835,
+                "executed_frame_count": 836,
+                "tail_frame_count": 0,
+                "particle_count": 34560,
+                "time_start": 0.0,
+                "time_end": 8.35,
+            },
+            "row_fields_checked": ["case_id", "frames_executed", "future_state_inputs"],
         }
         validator_meta = _write_json(validator_path, validator)
         history = {
@@ -173,13 +209,23 @@ def _fixture(tmp_path: Path, *, with_proofs: bool = True) -> tuple[dict, dict[in
             "credit": 0,
             "protocol": {"model": "mlp", "seed": seed, "training_updates": 500, "hidden": 16, "case_id": builder.CASE_ID, "split": "test", "maximum_steps": 835, "diagnostic": True, "autonomous": True, "future_state_inputs": False},
             "evaluation": {"status": "completed", "transitions_executed": 835, "trajectory_frames_including_initial": 836, "finite_rollout_complete": True, "future_state_inputs": False},
-            "checkpoint": {"path": str(checkpoint_path), "sha256": checkpoint_sha, "bytes": checkpoint_bytes},
+            "source": {"manifest": {"sha256": "5" * 64}},
+            "checkpoint": {
+                "path": str(checkpoint_path),
+                "sha256": checkpoint_sha,
+                "bytes": checkpoint_bytes,
+                "training_receipt": {
+                    "path": str(builder._expected_training_path(seed)),
+                    "sha256": "4" * 64,
+                    "bytes": 10000 + seed,
+                },
+            },
         }
         _write_json(history_path, history)
         if with_proofs:
             proof = {
                 "schema": f"{builder.PROCESS_SCHEMA_PREFIX}{seed}{builder.PROCESS_SCHEMA_SUFFIX}",
-                "report_id": f"proof-{seed}",
+                "report_id": f"f3-mlp-hidden16-seed{seed}-process-exit-proof-v1-{nonce}",
                 "status": "exited_successfully",
                 "source_bound": True,
                 "diagnostic_only": True,
@@ -204,13 +250,34 @@ def _fixture(tmp_path: Path, *, with_proofs: bool = True) -> tuple[dict, dict[in
                 "launcher_pid_observed": 2000 + seed,
                 "evaluator_reaped": True,
                 "launcher_reaped": True,
-                "command_sha256": "1" * 64,
-                "evaluator_start_identity": {"proc_starttime_ticks": 100 + seed},
-                "evaluator_end_identity": {"proc_starttime_ticks": 100 + seed},
-                "launcher_start_identity": {"proc_starttime_ticks": 200 + seed},
-                "launcher_end_identity": {"proc_starttime_ticks": 200 + seed},
-                "manifest_sha256": "2" * 64,
-                "training_manifest_sha256": "3" * 64,
+                "command_sha256": next(iter(builder._canonical_command_digests(
+                    tmp_path,
+                    seed,
+                    namespace,
+                    {"path": str(checkpoint_path)},
+                ))),
+                "evaluator_start_identity": {
+                    "pid": 1000 + seed,
+                    "proc_starttime_ticks": 100 + seed,
+                    "observed_monotonic_ns": 100000,
+                },
+                "evaluator_end_identity": {
+                    "pid": 1000 + seed,
+                    "proc_starttime_ticks": 100 + seed,
+                    "observed_monotonic_ns": 200000,
+                },
+                "launcher_start_identity": {
+                    "pid": 2000 + seed,
+                    "proc_starttime_ticks": 200 + seed,
+                    "observed_monotonic_ns": 300000,
+                },
+                "launcher_end_identity": {
+                    "pid": 2000 + seed,
+                    "proc_starttime_ticks": 200 + seed,
+                    "observed_monotonic_ns": 400000,
+                },
+                "manifest_sha256": "5" * 64,
+                "training_manifest_sha256": "5" * 64,
                 "training_receipt_sha256": "4" * 64,
                 "checkpoint": {"path": str(checkpoint_path), "sha256": checkpoint_sha, "bytes": checkpoint_bytes},
                 "evaluation": {"path": str(evaluation_path), "sha256": "0" * 64, "bytes": evaluation_path.stat().st_size},
@@ -219,14 +286,21 @@ def _fixture(tmp_path: Path, *, with_proofs: bool = True) -> tuple[dict, dict[in
             }
             proof["evaluation"]["sha256"] = _sha_bytes(evaluation_path.read_bytes())
             proof["exit_proof_sha256"] = builder._canonical_digest(proof)
-            proof_path = reports / f"process-proof-{seed}.json"
-            _write_json(proof_path, proof)
+            proof_path = reports / builder.PROCESS_PROOF_FILENAME.format(seed=seed)
+            proof_meta = _write_json(proof_path, proof)
             proof_payloads[seed] = proof_path
 
-        inputs[seed] = builder.SeedInputs(evaluation_path, metadata_path, validator_path, history_path, proof_payloads.get(seed))
+        inputs[seed] = builder.SeedInputs(
+            evaluation_path,
+            metadata_path,
+            validator_path,
+            history_path,
+            proof_payloads.get(seed),
+            str(proof_meta["sha256"]) if with_proofs and trusted_proofs else None,
+        )
 
     training = {
-        "schema": "core.f3.mlp.hidden16.training_matrix.v1",
+        "schema": "core.f3.mlp.hidden16.training_evidence_matrix.v1",
         "model": "mlp",
         "diagnostic_only": True,
         "formal_eligible": False,
@@ -260,15 +334,28 @@ def test_complete_fixture_binds_each_identity_without_opening_hdf5(tmp_path: Pat
     fixture = _fixture(tmp_path)
     summaries = _build(fixture)
     for seed, row in summaries.items():
-        assert row["status"] == "fresh_terminal_identity_bound"
-        assert row["source_bound"] is True
+        assert row["status"] == "blocked_untrusted_process_proof"
+        assert row["source_bound"] is False
         assert row["credit"] == 0
-        assert row["rollout_identity"]["namespace"].endswith(f"seed{seed}-full835-nonce{row['namespace_nonce']}")
+        assert row["rollout_identity"] is None
+        assert row["namespace"].endswith(f"seed{seed}-full835-nonce{row['namespace_nonce']}")
         assert row["input_boundary"]["trajectory_hdf5_opened"] is False
         assert row["input_boundary"]["trajectory_hdf5_hashed"] is False
         assert row["input_boundary"]["evaluation_full_object_loaded"] is False
         assert row["sources"]["training_matrix"]["opened"] is True
         assert row["sources"]["history_summary"]["opened"] is True
+        assert any("out-of-band" in reason or "self-signed" in reason for reason in row["blocked_reasons"])
+
+
+def test_out_of_band_process_digest_enables_source_binding(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path, trusted_proofs=True)
+    summaries = _build(fixture)
+    for row in summaries.values():
+        assert row["status"] == "fresh_terminal_identity_bound"
+        assert row["source_bound"] is True
+        assert row["credit"] == 0
+        assert row["checks"]["process_proof_trusted"] is True
+        assert row["rollout_identity"]["checkpoint"]["bytes"] > 0
 
 
 def test_progress_file_cannot_substitute_for_process_proof(tmp_path: Path) -> None:
@@ -279,7 +366,7 @@ def test_progress_file_cannot_substitute_for_process_proof(tmp_path: Path) -> No
     _write_json(progress, {"status": "completed", "transitions_executed": 835, "pid": 1234})
     inputs[seed] = builder.SeedInputs(inputs[seed].evaluation, inputs[seed].trajectory_metadata, inputs[seed].validator, inputs[seed].history_summary, progress)
     row = _build(fixture)[seed]
-    assert row["status"] == "blocked_fail_closed"
+    assert row["status"] == "blocked_untrusted_process_proof"
     assert row["source_bound"] is False
     assert any("process_exit_proof" in reason or "process proof" in reason for reason in row["blocked_reasons"])
 
@@ -315,7 +402,27 @@ def test_evaluation_hash_is_streamed_and_path_bytes_are_bound(tmp_path: Path) ->
     evaluation = summaries[seed]["sources"]["evaluation"]
     assert evaluation["bytes"] == fixture[1][seed].evaluation.stat().st_size
     assert evaluation["sha256"] == _sha_bytes(fixture[1][seed].evaluation.read_bytes())
-    assert summaries[seed]["rollout_identity"]["evaluation"] == evaluation
+    assert summaries[seed]["rollout_identity"] is None
+    assert summaries[seed]["status"] == "blocked_untrusted_process_proof"
+
+
+def test_trusted_process_digest_mismatch_blocks(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    meta, inputs, training = fixture
+    seed = 17
+    source = inputs[seed]
+    inputs[seed] = builder.SeedInputs(
+        source.evaluation,
+        source.trajectory_metadata,
+        source.validator,
+        source.history_summary,
+        source.process_exit_proof,
+        "0" * 64,
+    )
+    row = builder.build_summaries(inputs, training_matrix=training, root=meta["root"])[seed]
+    assert row["status"] == "blocked_fail_closed"
+    assert row["source_bound"] is False
+    assert any("attestation digest" in reason for reason in row["blocked_reasons"])
 
 
 def test_pretty_printed_evaluation_json_is_accepted(tmp_path: Path) -> None:
@@ -354,6 +461,42 @@ def test_validator_path_drift_blocks(tmp_path: Path) -> None:
     assert any("trajectory_hdf5" in reason for reason in row["blocked_reasons"])
 
 
+def test_validator_required_check_blocks(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path, with_proofs=False)
+    meta, inputs, training = fixture
+    seed = 17
+    validator = json.loads(inputs[seed].validator.read_text())
+    del validator["checks"]["tail_frame_count"]
+    _write_json(inputs[seed].validator, validator)
+    row = builder.build_summaries(inputs, training_matrix=training, root=meta["root"])[seed]
+    assert row["source_bound"] is False
+    assert any("checks.tail_frame_count is missing" in reason for reason in row["blocked_reasons"])
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "reason_fragment"),
+    [
+        ("path", "/tmp/another-checkpoint.pt", "canonical checkpoint path"),
+        ("bytes", builder.MAX_CHECKPOINT_BYTES + 1, "checkpoint bound"),
+    ],
+)
+def test_checkpoint_path_and_bytes_bounds_block(
+    tmp_path: Path,
+    field: str,
+    value: object,
+    reason_fragment: str,
+) -> None:
+    fixture = _fixture(tmp_path, with_proofs=False)
+    meta, inputs, training = fixture
+    seed = 29
+    history = json.loads(inputs[seed].history_summary.read_text())
+    history["checkpoint"][field] = value
+    _write_json(inputs[seed].history_summary, history)
+    row = builder.build_summaries(inputs, training_matrix=training, root=meta["root"])[seed]
+    assert row["source_bound"] is False
+    assert any(reason_fragment in reason for reason in row["blocked_reasons"])
+
+
 def test_training_history_checkpoint_sha_drift_blocks(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     meta, inputs, training = fixture
@@ -376,6 +519,37 @@ def test_forged_process_digest_blocks(tmp_path: Path) -> None:
     row = builder.build_summaries(inputs, training_matrix=training, root=meta["root"])[seed]
     assert row["source_bound"] is False
     assert any("returncode" in reason or "exit_proof_sha256" in reason for reason in row["blocked_reasons"])
+
+
+def test_deep_process_proof_json_is_fail_closed(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    meta, inputs, training = fixture
+    seed = 17
+    proof_path = inputs[seed].process_exit_proof
+    assert proof_path is not None
+    proof_path.write_bytes((b'{"x":' * 1000) + b"null" + (b"}" * 1000))
+    row = builder.build_summaries(inputs, training_matrix=training, root=meta["root"])[seed]
+    assert row["source_bound"] is False
+    assert row["status"] == "blocked_untrusted_process_proof"
+    assert any("invalid JSON" in reason or "maximum JSON depth" in reason for reason in row["blocked_reasons"])
+
+
+def test_bounded_json_read_race_is_fail_closed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    path = tmp_path / "race.json"
+    path.write_text("{}", encoding="utf-8")
+    real_lstat = builder.os.lstat
+    calls = 0
+
+    def racing_lstat(candidate: object) -> object:
+        nonlocal calls
+        calls += 1
+        if calls == 6:
+            raise OSError("race")
+        return real_lstat(candidate)
+
+    monkeypatch.setattr(builder.os, "lstat", racing_lstat)
+    with pytest.raises(builder.IntakeError, match="race|changed|cannot inspect"):
+        builder._bounded_json(path, root=tmp_path, name="race")
 
 
 def test_symlink_input_is_rejected(tmp_path: Path) -> None:
@@ -415,3 +589,30 @@ def test_cli_returns_blocked_batch_without_process_proof(tmp_path: Path, capsys:
     output = json.loads(capsys.readouterr().out)
     assert output["status"] == "blocked_fail_closed"
     assert [row["status"] for row in output["seeds"]] == ["blocked_missing_process_proof"] * 3
+
+
+def test_cli_trusted_process_digest_is_forwarded_to_seed_inputs(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    fixture = _fixture(tmp_path, trusted_proofs=True)
+    meta, inputs, training = fixture
+    argv = ["--root", str(meta["root"]), "--training-matrix", str(training)]
+    for seed in builder.SEEDS:
+        source = inputs[seed]
+        assert source.process_exit_proof is not None
+        assert source.trusted_process_proof_sha256 is not None
+        argv.extend(["--evaluation", f"{seed}={source.evaluation}"])
+        argv.extend(["--trajectory-metadata", f"{seed}={source.trajectory_metadata}"])
+        argv.extend(["--validator", f"{seed}={source.validator}"])
+        argv.extend(["--history-summary", f"{seed}={source.history_summary}"])
+        argv.extend(["--process-exit-proof", f"{seed}={source.process_exit_proof}"])
+        argv.extend([
+            "--trusted-process-proof-sha256",
+            f"{seed}={source.trusted_process_proof_sha256}",
+        ])
+    assert builder.main(argv) == 0
+    output = json.loads(capsys.readouterr().out)
+    assert output["status"] == "source_bound"
+    assert output["source_bound"] is True
+    assert [row["status"] for row in output["seeds"]] == ["fresh_terminal_identity_bound"] * 3

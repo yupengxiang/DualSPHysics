@@ -40,6 +40,10 @@ CASE_ID = "F3_DEV_00_a0p903125"
 SPLIT = "test"
 TRANSITIONS = 835
 FRAMES = 836
+GPU_COUNT = 8
+PARTICLES = 34560
+CHUNK_SIZE = 34560
+PROGRESS_EVERY = 25
 
 SUMMARY_SCHEMA = "core.f3.mlp.hidden16.fresh_terminal_intake_summary.v1"
 TRAJECTORY_METADATA_SCHEMA = "core.f3.mlp.hidden16.fresh_terminal.trajectory_metadata.v1"
@@ -58,9 +62,12 @@ MAX_EVALUATION_BYTES = 64 * 1024 * 1024
 MAX_JSON_DEPTH = 64
 MAX_ARRAY_ITEMS = 4096
 MAX_STRING_BYTES = 2 * 1024 * 1024
+MAX_DECLARED_ARTIFACT_BYTES = 1 << 50
+MAX_CHECKPOINT_BYTES = 1 << 30
 SHA_RE = re.compile(r"^[0-9a-f]{64}$")
 NONCE_RE = re.compile(r"^[0-9a-f]{32}$")
 RUN_ID_RE = re.compile(r"^f3-mlp500-hidden16-seed(?:17|29|43)-20260928$")
+PROCESS_PROOF_FILENAME = "F3-MLP-HIDDEN16-SEED{seed}-PROCESS-EXIT-PROOF-V1-2026-09-28.json"
 
 
 class IntakeError(ValueError):
@@ -134,6 +141,15 @@ def _int(value: Any, name: str, minimum: int = 0) -> int:
     if type(value) is not int or value < minimum:
         _fail(f"{name} must be an integer >= {minimum}")
     return value
+
+
+def _number(value: Any, name: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        _fail(f"{name} must be numeric")
+    result = float(value)
+    if not math.isfinite(result):
+        _fail(f"{name} must be finite")
+    return result
 
 
 def _sha(value: Any, name: str) -> str:
@@ -210,6 +226,10 @@ def _absolute_path(value: Any, name: str) -> Path:
     return path
 
 
+def _stat_identity(info: os.stat_result) -> tuple[int, int, int, int]:
+    return (info.st_dev, info.st_ino, info.st_nlink, info.st_size)
+
+
 def _allowed_path(path: Path, root: Path, name: str) -> None:
     roots = (Path(os.path.abspath(root)), Path("/tmp"))
     candidate = Path(os.path.abspath(path))
@@ -260,9 +280,7 @@ def _bounded_json(path: Path | str, *, root: Path, name: str) -> tuple[Mapping[s
         _fail(f"{name} cannot be opened safely: {error}")
     try:
         opened = os.fstat(fd)
-        if (opened.st_dev, opened.st_ino, opened.st_nlink, opened.st_size) != (
-            before.st_dev, before.st_ino, before.st_nlink, before.st_size
-        ):
+        if _stat_identity(opened) != _stat_identity(before):
             _fail(f"{name} changed during open")
         chunks: list[bytes] = []
         total = 0
@@ -275,18 +293,20 @@ def _bounded_json(path: Path | str, *, root: Path, name: str) -> tuple[Mapping[s
         if total > BOUNDED_JSON_BYTES:
             _fail(f"{name} exceeds bounded JSON size")
         closed = os.fstat(fd)
-        if (closed.st_dev, closed.st_ino, closed.st_nlink, closed.st_size) != (
-            before.st_dev, before.st_ino, before.st_nlink, before.st_size
-        ):
+        if _stat_identity(closed) != _stat_identity(before):
             _fail(f"{name} changed while being read")
     except OSError as error:
         _fail(f"{name} cannot be read safely: {error}")
     finally:
-        os.close(fd)
-    after = os.lstat(candidate)
-    if (after.st_dev, after.st_ino, after.st_nlink, after.st_size) != (
-        before.st_dev, before.st_ino, before.st_nlink, before.st_size
-    ):
+        try:
+            os.close(fd)
+        except OSError as error:
+            _fail(f"{name} cannot be closed safely: {error}")
+    try:
+        after = os.lstat(candidate)
+    except OSError as error:
+        _fail(f"{name} changed or disappeared after read: {error}")
+    if _stat_identity(after) != _stat_identity(before):
         _fail(f"{name} changed after read")
     raw = b"".join(chunks)
     try:
@@ -295,10 +315,13 @@ def _bounded_json(path: Path | str, *, root: Path, name: str) -> tuple[Mapping[s
             object_pairs_hook=_no_duplicates,
             parse_constant=_reject_constant,
         )
-    except (UnicodeError, json.JSONDecodeError, IntakeError) as error:
+    except (UnicodeError, json.JSONDecodeError, IntakeError, RecursionError) as error:
         _fail(f"{name} is invalid JSON: {error}")
     payload = _mapping(payload, name)
-    _walk(payload, name)
+    try:
+        _walk(payload, name)
+    except RecursionError as error:
+        _fail(f"{name} exceeds bounded JSON depth: {error}")
     return payload, {"path": str(candidate), "exists": True, "opened": True,
                      "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw),
                      "schema": payload.get("schema")}
@@ -311,12 +334,18 @@ def _artifact(value: Any, name: str, *, suffix: str | None = None) -> dict[str, 
     if suffix is not None and not str(path).endswith(suffix):
         _fail(f"{name}.path must end with {suffix}")
     size = _int(item.get("bytes"), f"{name}.bytes", 1)
-    if size > (1 << 50):
+    if size > MAX_DECLARED_ARTIFACT_BYTES:
         _fail(f"{name}.bytes exceeds the declared bound")
     return {"path": str(path), "sha256": _sha(item.get("sha256"), f"{name}.sha256"), "bytes": size}
 
 
-def _receipt_artifact(value: Any, name: str, *, suffix: str | None = None) -> dict[str, Any]:
+def _receipt_artifact(
+    value: Any,
+    name: str,
+    *,
+    suffix: str | None = None,
+    maximum_bytes: int = MAX_DECLARED_ARTIFACT_BYTES,
+) -> dict[str, Any]:
     """Extract identity fields from a historical receipt with extra metadata."""
 
     item = _mapping(value, name)
@@ -324,6 +353,8 @@ def _receipt_artifact(value: Any, name: str, *, suffix: str | None = None) -> di
     if suffix is not None and not str(path).endswith(suffix):
         _fail(f"{name}.path must end with {suffix}")
     size = _int(item.get("bytes"), f"{name}.bytes", 1)
+    if size > maximum_bytes:
+        _fail(f"{name}.bytes exceeds the declared bound")
     return {"path": str(path), "sha256": _sha(item.get("sha256"), f"{name}.sha256"), "bytes": size}
 
 
@@ -333,6 +364,46 @@ def _expected_run_id(seed: int) -> str:
 
 def _expected_checkpoint_name(seed: int) -> str:
     return f"f3-mlp500-hidden16-seed{seed}-20260928-checkpoint.pt"
+
+
+def _expected_checkpoint_path(seed: int) -> Path:
+    return Path("/tmp") / _expected_checkpoint_name(seed)
+
+
+def _expected_training_path(seed: int) -> Path:
+    return Path("/tmp") / f"f3-mlp500-hidden16-seed{seed}-20260928-training.json"
+
+
+def _expected_process_proof_path(root: Path, seed: int) -> Path:
+    return root / "reports" / PROCESS_PROOF_FILENAME.format(seed=seed)
+
+
+def _checkpoint_artifact(
+    value: Any,
+    seed: int,
+    name: str,
+    *,
+    allow_missing_bytes: bool = False,
+) -> dict[str, Any]:
+    item = _mapping(value, name)
+    path = _absolute_path(item.get("path"), f"{name}.path")
+    if not str(path).endswith(".pt"):
+        _fail(f"{name}.path must end with .pt")
+    if "bytes" not in item and allow_missing_bytes:
+        size: int | None = None
+    else:
+        size = _int(item.get("bytes"), f"{name}.bytes", 1)
+        if size > MAX_CHECKPOINT_BYTES:
+            _fail(f"{name}.bytes exceeds the checkpoint bound")
+    checkpoint = {
+        "path": str(path),
+        "sha256": _sha(item.get("sha256"), f"{name}.sha256"),
+        "bytes": size,
+    }
+    expected_path = _expected_checkpoint_path(seed)
+    if Path(checkpoint["path"]) != expected_path:
+        _fail(f"{name}.path is not the canonical checkpoint path: {expected_path}")
+    return checkpoint
 
 
 def _expected_namespace(seed: int, nonce: str, namespace_root: Path = Path("/tmp")) -> Path:
@@ -752,9 +823,7 @@ def _stream_evaluation(path: Path, *, root: Path, name: str) -> tuple[dict[str, 
         _fail(f"{name} cannot be opened safely: {error}")
     try:
         opened = os.fstat(fd)
-        if (opened.st_dev, opened.st_ino, opened.st_nlink, opened.st_size) != (
-            before.st_dev, before.st_ino, before.st_nlink, before.st_size
-        ):
+        if _stat_identity(opened) != _stat_identity(before):
             _fail(f"{name} changed during open")
         with os.fdopen(fd, "rb", closefd=True) as handle:
             fd = -1
@@ -763,15 +832,19 @@ def _stream_evaluation(path: Path, *, root: Path, name: str) -> tuple[dict[str, 
             if stream.total != before.st_size:
                 _fail(f"{name} changed size while being streamed")
             receipt = {"path": str(path), "sha256": stream.digest.hexdigest(), "bytes": stream.total}
-    except OSError as error:
+    except (OSError, RecursionError) as error:
         _fail(f"{name} cannot be streamed safely: {error}")
     finally:
         if fd != -1:
-            os.close(fd)
-    after = os.lstat(path)
-    if (after.st_dev, after.st_ino, after.st_nlink, after.st_size) != (
-        before.st_dev, before.st_ino, before.st_nlink, before.st_size
-    ):
+            try:
+                os.close(fd)
+            except OSError as error:
+                _fail(f"{name} cannot be closed safely: {error}")
+    try:
+        after = os.lstat(path)
+    except OSError as error:
+        _fail(f"{name} changed or disappeared after streaming: {error}")
+    if _stat_identity(after) != _stat_identity(before):
         _fail(f"{name} changed after streaming")
     return payload, receipt
 
@@ -830,26 +903,60 @@ def _validate_training_matrix(payload: Mapping[str, Any], seed: int, name: str) 
             checkpoint_value = evidence.get("checkpoint")
             if not isinstance(checkpoint_value, Mapping):
                 _fail(f"{name}.seed{row_seed}.evidence.checkpoint is missing")
-            checkpoint = _receipt_artifact(checkpoint_value, f"{name}.seed{row_seed}.checkpoint", suffix=".pt")
+            checkpoint = _checkpoint_artifact(
+                checkpoint_value,
+                row_seed,
+                f"{name}.seed{row_seed}.checkpoint",
+                allow_missing_bytes=True,
+            )
             if "update" in checkpoint_value:
                 _exact(checkpoint_value, "update", UPDATES, f"{name}.seed{row_seed}.checkpoint")
+            manifest_sha = _sha(
+                evidence.get("manifest_sha256"),
+                f"{name}.seed{row_seed}.evidence.manifest_sha256",
+            )
         else:
             _exact(row, "run_id", _expected_run_id(row_seed), f"{name}.seed{row_seed}")
             _exact(row, "model_kind", MODEL, f"{name}.seed{row_seed}")
             _exact(row, "hidden", HIDDEN, f"{name}.seed{row_seed}")
             _exact(row, "completed_updates", UPDATES, f"{name}.seed{row_seed}")
-            checkpoint = {
-                "path": _string(row.get("checkpoint_path"), f"{name}.seed{row_seed}.checkpoint_path"),
-                "sha256": _sha(row.get("checkpoint_sha256"), f"{name}.seed{row_seed}.checkpoint_sha256"),
-                "bytes": None,
-            }
-            if not checkpoint["path"].endswith(".pt"):
-                _fail(f"{name}.seed{row_seed}.checkpoint_path must be a checkpoint")
+            checkpoint = _checkpoint_artifact(
+                {
+                    "path": row.get("checkpoint_path"),
+                    "sha256": row.get("checkpoint_sha256"),
+                    "bytes": row.get("checkpoint_bytes"),
+                },
+                row_seed,
+                f"{name}.seed{row_seed}.checkpoint",
+                allow_missing_bytes=True,
+            )
             if row.get("checkpoint_verified") is not True:
                 _fail(f"{name}.seed{row_seed}.checkpoint_verified must be true")
-        if Path(checkpoint["path"]).name != _expected_checkpoint_name(row_seed):
-            _fail(f"{name}.seed{row_seed}.checkpoint path is not canonical")
-        selected[row_seed] = {"run_id": _expected_run_id(row_seed), "checkpoint": checkpoint}
+            manifest_sha = _sha(
+                row.get("manifest_sha256", payload.get("manifest_sha256")),
+                f"{name}.seed{row_seed}.manifest_sha256",
+            )
+
+        source_value = row.get("source")
+        if source_value is None and isinstance(evidence, Mapping):
+            source_value = evidence.get("training_receipt")
+        if source_value is None:
+            source_value = row.get("training_receipt")
+        training_receipt = _receipt_artifact(
+            source_value,
+            f"{name}.seed{row_seed}.training_receipt",
+            suffix=".json",
+        )
+        if Path(training_receipt["path"]) != _expected_training_path(row_seed):
+            _fail(
+                f"{name}.seed{row_seed}.training_receipt.path is not the canonical training path"
+            )
+        selected[row_seed] = {
+            "run_id": _expected_run_id(row_seed),
+            "manifest_sha256": manifest_sha,
+            "training_receipt": training_receipt,
+            "checkpoint": checkpoint,
+        }
     if sorted(selected) != list(SEEDS):
         _fail(f"{name} does not contain exactly seeds {SEEDS}")
     return dict(selected[seed])
@@ -877,22 +984,44 @@ def _validate_history(payload: Mapping[str, Any], seed: int, name: str) -> dict[
         ("finite_rollout_complete", True), ("future_state_inputs", False),
     ):
         _exact(evaluation, key, expected, f"{name}.evaluation")
+    source = _mapping(payload.get("source"), f"{name}.source")
+    manifest = source.get("manifest")
+    if isinstance(manifest, Mapping):
+        manifest_sha = _sha(manifest.get("sha256"), f"{name}.source.manifest.sha256")
+    else:
+        manifest_sha = _sha(source.get("manifest_sha256"), f"{name}.source.manifest_sha256")
     checkpoint_payload = payload.get("checkpoint")
     if isinstance(checkpoint_payload, Mapping):
-        checkpoint = _receipt_artifact(checkpoint_payload, f"{name}.checkpoint", suffix=".pt")
+        checkpoint = _checkpoint_artifact(checkpoint_payload, seed, f"{name}.checkpoint")
     else:
         training = _mapping(payload.get("training"), f"{name}.training")
         _exact(training, "evidence_status", "complete", f"{name}.training")
         _exact(training, "completed_updates", UPDATES, f"{name}.training")
         _exact(training, "checkpoint_verified", True, f"{name}.training")
-        checkpoint = {
-            "path": f"/tmp/{_expected_checkpoint_name(seed)}",
-            "sha256": _sha(training.get("checkpoint_sha256"), f"{name}.training.checkpoint_sha256"),
-            "bytes": _int(training.get("checkpoint_bytes"), f"{name}.training.checkpoint_bytes", 1),
-        }
-    if Path(checkpoint["path"]).name != _expected_checkpoint_name(seed):
-        _fail(f"{name}.checkpoint.path is not canonical")
-    return {"run_id": _expected_run_id(seed), "checkpoint": checkpoint}
+        checkpoint = _checkpoint_artifact(
+            {
+                "path": _expected_checkpoint_path(seed),
+                "sha256": training.get("checkpoint_sha256"),
+                "bytes": training.get("checkpoint_bytes"),
+            },
+            seed,
+            f"{name}.checkpoint",
+        )
+    history_training_receipt = None
+    if isinstance(checkpoint_payload, Mapping) and checkpoint_payload.get("training_receipt") is not None:
+        history_training_receipt = _receipt_artifact(
+            checkpoint_payload.get("training_receipt"),
+            f"{name}.checkpoint.training_receipt",
+            suffix=".json",
+        )
+        if Path(history_training_receipt["path"]) != _expected_training_path(seed):
+            _fail(f"{name}.checkpoint.training_receipt.path is not canonical")
+    return {
+        "run_id": _expected_run_id(seed),
+        "manifest_sha256": manifest_sha,
+        "training_receipt": history_training_receipt,
+        "checkpoint": checkpoint,
+    }
 
 
 def _validate_evaluation(payload: Mapping[str, Any], seed: int, name: str) -> dict[str, Any]:
@@ -963,40 +1092,130 @@ def _validate_trajectory_metadata(payload: Mapping[str, Any], seed: int, namespa
     return trajectory
 
 
-def _validate_validator(payload: Mapping[str, Any], seed: int, namespace: Path, trajectory: Mapping[str, Any], evaluation: Mapping[str, Any], name: str) -> None:
-    _exact(payload, "schema", VALIDATOR_SCHEMA, name)
-    _exact(payload, "passed", True, name)
-    _exact(payload, "complete", True, name)
-    if "incomplete" in payload:
-        _exact(payload, "incomplete", False, name)
-    if "diagnostic_only" in payload:
-        _exact(payload, "diagnostic_only", True, name)
-    if "synthetic_only" in payload:
-        _exact(payload, "synthetic_only", False, name)
-    if "fail_closed" in payload:
-        _exact(payload, "fail_closed", False, name)
-    if "production_artifacts_touched" in payload:
-        _exact(payload, "production_artifacts_touched", False, name)
-    if "qualification_credit" in payload:
-        _exact(payload, "qualification_credit", 0, name)
-    _exact(payload, "case_id", CASE_ID, name)
-    _exact(payload, "expected_transitions", TRANSITIONS, name)
-    _exact(payload, "frames_executed", TRANSITIONS, name)
-    _exact(payload, "failure_category", None, name)
-    _exact(payload, "evaluation_json", evaluation["path"], name)
-    _exact(payload, "trajectory_hdf5", trajectory["path"], name)
-    checks = _mapping(payload.get("checks"), f"{name}.checks")
+def _validate_validator(
+    payload: Mapping[str, Any],
+    seed: int,
+    namespace: Path,
+    trajectory: Mapping[str, Any],
+    evaluation: Mapping[str, Any],
+    name: str,
+) -> None:
+    allowed = frozenset(
+        {
+            "schema", "passed", "fail_closed", "diagnostic_only", "synthetic_only",
+            "production_artifacts_touched", "qualification_credit", "case_id",
+            "evaluation_json", "trajectory_hdf5", "expected_transitions", "frames_executed",
+            "complete", "incomplete", "failure_category", "checks", "row_fields_checked",
+        }
+    )
+    _unknown(payload, allowed, name)
     for key, expected in (
-        ("trajectory_frames", FRAMES), ("trajectory_transitions", TRANSITIONS),
-        ("executed_frame_count", FRAMES), ("tail_frame_count", 0),
+        ("schema", VALIDATOR_SCHEMA),
+        ("passed", True),
+        ("fail_closed", False),
+        ("diagnostic_only", True),
+        ("synthetic_only", False),
+        ("production_artifacts_touched", False),
+        ("qualification_credit", 0),
+        ("case_id", CASE_ID),
+        ("expected_transitions", TRANSITIONS),
+        ("frames_executed", TRANSITIONS),
+        ("complete", True),
+        ("incomplete", False),
+        ("failure_category", None),
+        ("evaluation_json", evaluation["path"]),
+        ("trajectory_hdf5", trajectory["path"]),
     ):
-        if key in checks:
-            _exact(checks, key, expected, f"{name}.checks")
-    if "future_state_inputs" in checks:
-        _bool(checks["future_state_inputs"], f"{name}.checks.future_state_inputs")
+        _exact(payload, key, expected, name)
+    checks = _mapping(payload.get("checks"), f"{name}.checks")
+    check_allowed = frozenset(
+        {
+            "case_binding", "shape", "time", "valid", "future_state_inputs",
+            "completion_semantics", "trajectory_frames", "trajectory_transitions",
+            "executed_frame_count", "tail_frame_count", "particle_count",
+            "time_start", "time_end",
+        }
+    )
+    _unknown(checks, check_allowed, f"{name}.checks")
+    for key, expected in (
+        ("case_binding", True),
+        ("shape", True),
+        ("time", True),
+        ("valid", True),
+        ("future_state_inputs", True),
+        ("completion_semantics", True),
+        ("trajectory_frames", FRAMES),
+        ("trajectory_transitions", TRANSITIONS),
+        ("executed_frame_count", FRAMES),
+        ("tail_frame_count", 0),
+        ("particle_count", PARTICLES),
+        ("time_start", 0.0),
+    ):
+        _exact(checks, key, expected, f"{name}.checks")
+    if type(checks.get("time_start")) is not float:
+        _fail(f"{name}.checks.time_start must be a JSON float")
+    _number(checks.get("time_start"), f"{name}.checks.time_start")
+    time_end = _number(checks.get("time_end"), f"{name}.checks.time_end")
+    if time_end <= 0.0:
+        _fail(f"{name}.checks.time_end must be positive")
+    rows = payload.get("row_fields_checked")
+    if (
+        not isinstance(rows, list)
+        or not rows
+        or any(not isinstance(item, str) or not item for item in rows)
+    ):
+        _fail(f"{name}.row_fields_checked must be a non-empty string list")
     expected_path = Path(str(namespace) + "-hdf5-validation.json")
     if Path(name) != expected_path:
         _fail(f"{name} is not the canonical validator path: {expected_path}")
+
+
+def _canonical_command_digests(
+    root: Path,
+    seed: int,
+    namespace: Path,
+    checkpoint: Mapping[str, Any],
+) -> frozenset[str]:
+    """Return the exact launcher command digests admitted for eight GPUs.
+
+    The launcher records only ``command_sha256`` in its current process proof.
+    Recomputing the digest here prevents a proof from choosing an arbitrary
+    executable, manifest, data root, checkpoint, or rollout output while still
+    keeping the intake read-only.  GPU selection is the only allowed variant.
+    """
+
+    python = root / ".venv" / "bin" / "python"
+    core_learning = root / "scripts" / "core_learning.py"
+    manifest = root / "campaigns" / "core-v1" / "f3-dataset-v2.json"
+    outputs = {
+        "evaluation": Path(str(namespace) + "-evaluation.json"),
+        "trajectory": Path(str(namespace) + "-trajectory.h5"),
+        "progress": Path(str(namespace) + "-evaluation-progress.json"),
+    }
+    command = (
+        str(python), "-u", str(core_learning), "evaluate",
+        "--manifest", str(manifest), "--data-root", str(root),
+        "--checkpoint", str(checkpoint["path"]), "--case-id", CASE_ID,
+        "--split", SPLIT, "--maximum-steps", str(TRANSITIONS),
+        "--chunk-size", str(CHUNK_SIZE), "--device", "cuda:0",
+        "--progress-every", str(PROGRESS_EVERY),
+        "--trajectory-output", str(outputs["trajectory"]),
+        "--progress-output", str(outputs["progress"]),
+        "--output", str(outputs["evaluation"]), "--diagnostic",
+    )
+    return frozenset(
+        _canonical_digest(
+            {
+                "argv": list(command),
+                "cwd": str(root),
+                "env_overrides": {
+                    "CUDA_VISIBLE_DEVICES": str(gpu_index),
+                    "PYTHONDONTWRITEBYTECODE": "1",
+                },
+            }
+        )
+        for gpu_index in range(GPU_COUNT)
+    )
 
 
 def _validate_process(
@@ -1004,10 +1223,15 @@ def _validate_process(
     seed: int,
     namespace: Path,
     nonce: str,
+    root: Path,
+    training_row: Mapping[str, Any],
+    history_row: Mapping[str, Any],
     checkpoint: Mapping[str, Any],
     evaluation: Mapping[str, Any],
     trajectory: Mapping[str, Any],
     validator_source: Mapping[str, Any],
+    process_source: Mapping[str, Any],
+    trusted_process_proof_sha256: str | None,
     name: str,
 ) -> None:
     allowed = frozenset({
@@ -1023,6 +1247,7 @@ def _validate_process(
     })
     _unknown(payload, allowed, name)
     _exact(payload, "schema", f"{PROCESS_SCHEMA_PREFIX}{seed}{PROCESS_SCHEMA_SUFFIX}", name)
+    _exact(payload, "report_id", f"f3-mlp-hidden16-seed{seed}-process-exit-proof-v1-{nonce}", name)
     _exact(payload, "status", "exited_successfully", name)
     _zero_credit(payload, name)
     _exact(payload, "source_bound", True, name)
@@ -1030,13 +1255,28 @@ def _validate_process(
         _exact(payload, key, expected, name)
     for key, expected in (("evaluator_alive", False), ("launcher_alive", False), ("evaluator_returncode", 0), ("launcher_returncode", 0), ("returncode", 0), ("evaluator_reaped", True), ("launcher_reaped", True)):
         _exact(payload, key, expected, name)
-    _sha(payload.get("command_sha256"), f"{name}.command_sha256")
+    command_sha = _sha(payload.get("command_sha256"), f"{name}.command_sha256")
+    if command_sha not in _canonical_command_digests(root, seed, namespace, checkpoint):
+        _fail(f"{name}.command_sha256 is not the canonical launcher command digest")
+    identities: dict[str, Mapping[str, Any]] = {}
     for key in ("evaluator_start_identity", "evaluator_end_identity", "launcher_start_identity", "launcher_end_identity"):
         identity = _mapping(payload.get(key), f"{name}.{key}")
-        if "proc_starttime_ticks" not in identity:
-            _fail(f"{name}.{key}.proc_starttime_ticks is missing")
-        _int(identity["proc_starttime_ticks"], f"{name}.{key}.proc_starttime_ticks", 0)
-    proof_checkpoint = _receipt_artifact(payload.get("checkpoint"), f"{name}.checkpoint", suffix=".pt")
+        _int(identity.get("pid"), f"{name}.{key}.pid", 1)
+        _int(identity.get("proc_starttime_ticks"), f"{name}.{key}.proc_starttime_ticks", 0)
+        _int(identity.get("observed_monotonic_ns"), f"{name}.{key}.observed_monotonic_ns", 1)
+        identities[key] = identity
+    if identities["evaluator_start_identity"]["pid"] != identities["evaluator_end_identity"]["pid"]:
+        _fail(f"{name}.evaluator process identity PID drifted")
+    if identities["evaluator_start_identity"]["proc_starttime_ticks"] != identities["evaluator_end_identity"]["proc_starttime_ticks"]:
+        _fail(f"{name}.evaluator process identity starttime drifted")
+    if identities["launcher_start_identity"]["pid"] != identities["launcher_end_identity"]["pid"]:
+        _fail(f"{name}.launcher process identity PID drifted")
+    if identities["launcher_start_identity"]["proc_starttime_ticks"] != identities["launcher_end_identity"]["proc_starttime_ticks"]:
+        _fail(f"{name}.launcher process identity starttime drifted")
+    _exact(payload, "manifest_sha256", history_row["manifest_sha256"], name)
+    _exact(payload, "training_manifest_sha256", training_row["manifest_sha256"], name)
+    _exact(payload, "training_receipt_sha256", training_row["training_receipt"]["sha256"], name)
+    proof_checkpoint = _checkpoint_artifact(payload.get("checkpoint"), seed, f"{name}.checkpoint")
     if proof_checkpoint != dict(checkpoint):
         _fail(f"{name}.checkpoint identity drifts from training/history")
     for key, expected in (("evaluation", evaluation), ("trajectory", trajectory)):
@@ -1051,6 +1291,14 @@ def _validate_process(
     without_digest.pop("exit_proof_sha256", None)
     if _canonical_digest(without_digest) != proof_digest:
         _fail(f"{name}.exit_proof_sha256 does not cover the process proof")
+    if trusted_process_proof_sha256 is None:
+        _fail(
+            f"{name} has no out-of-band trusted launcher producer attestation; "
+            "a self-signed exit_proof_sha256 is not source evidence"
+        )
+    trusted_digest = _sha(trusted_process_proof_sha256, f"{name}.trusted_process_proof_sha256")
+    if trusted_digest != process_source["sha256"]:
+        _fail(f"{name}.trusted launcher attestation digest does not match the proof bytes")
 
 
 @dataclass(frozen=True)
@@ -1060,12 +1308,22 @@ class SeedInputs:
     validator: Path
     history_summary: Path
     process_exit_proof: Path | None = None
+    # This digest must arrive from an out-of-band trusted launcher/receipt
+    # channel.  It is deliberately not read from the process-proof JSON, so a
+    # proof cannot self-attest its own provenance by recomputing a digest.
+    trusted_process_proof_sha256: str | None = None
 
 
 def _source_missing(path: Path | None, name: str) -> dict[str, Any]:
     if path is None:
         return {"path": None, "exists": False, "opened": False, "sha256": None, "bytes": None, "schema": None, "name": name}
     return {"path": str(path), "exists": False, "opened": False, "sha256": None, "bytes": None, "schema": None, "name": name}
+
+
+def _failure_text(name: str, error: BaseException) -> str:
+    if isinstance(error, IntakeError):
+        return str(error)
+    return f"fail-closed: {name} could not be read or validated safely: {type(error).__name__}: {error}"
 
 
 def _summary_base(seed: int, namespace: Path | None, nonce: str | None) -> dict[str, Any]:
@@ -1156,6 +1414,7 @@ def build_seed_summary(
     else:
         sources["training_matrix"] = _source_missing(None, "training_matrix")
     process_missing = inputs.process_exit_proof is None
+    process_untrusted = False
     if inputs.process_exit_proof is not None:
         try:
             process_info = os.lstat(inputs.process_exit_proof)
@@ -1167,6 +1426,7 @@ def build_seed_summary(
             process_missing = True
         except OSError:
             process_missing = False
+        process_untrusted = inputs.trusted_process_proof_sha256 is None
     if inputs.process_exit_proof is not None:
         sources["process_exit_proof"] = _source_missing(inputs.process_exit_proof, "process_exit_proof")
     else:
@@ -1183,8 +1443,8 @@ def build_seed_summary(
     try:
         training_row = _validate_training_matrix(training_payload, seed, "training_matrix")
         result["checks"]["training_matrix"] = True
-    except IntakeError as error:
-        reasons.append(str(error))
+    except (IntakeError, OSError, RecursionError) as error:
+        reasons.append(_failure_text("training_matrix", error))
         result["checks"]["training_matrix"] = False
 
     try:
@@ -1192,8 +1452,8 @@ def build_seed_summary(
         sources["history_summary"] = history_source
         history_row = _validate_history(history_payload, seed, "history_summary")
         result["checks"]["history_summary"] = True
-    except IntakeError as error:
-        reasons.append(str(error))
+    except (IntakeError, OSError, RecursionError) as error:
+        reasons.append(_failure_text("history_summary", error))
         sources.setdefault("history_summary", _source_missing(inputs.history_summary, "history_summary"))
         result["checks"]["history_summary"] = False
 
@@ -1207,8 +1467,8 @@ def build_seed_summary(
         _validate_evaluation(evaluation_payload, seed, "evaluation")
         evaluation_identity = dict(evaluation_source)
         result["checks"]["evaluation_terminal"] = True
-    except IntakeError as error:
-        reasons.append(str(error))
+    except (IntakeError, OSError, RecursionError) as error:
+        reasons.append(_failure_text("evaluation", error))
         sources.setdefault("evaluation", _source_missing(inputs.evaluation, "evaluation"))
         result["checks"]["evaluation_terminal"] = False
 
@@ -1219,8 +1479,8 @@ def build_seed_summary(
         sources["trajectory_metadata"] = trajectory_source
         trajectory_identity = _validate_trajectory_metadata(trajectory_payload, seed, namespace, nonce, root=root)
         result["checks"]["trajectory_metadata"] = True
-    except IntakeError as error:
-        reasons.append(str(error))
+    except (IntakeError, OSError, RecursionError) as error:
+        reasons.append(_failure_text("trajectory_metadata", error))
         sources.setdefault("trajectory_metadata", _source_missing(inputs.trajectory_metadata, "trajectory_metadata"))
         result["checks"]["trajectory_metadata"] = False
 
@@ -1235,14 +1495,42 @@ def build_seed_summary(
         sources["validator"] = validator_source
         _validate_validator(validator_payload, seed, namespace, trajectory_identity, evaluation_identity, str(validator_path))
         result["checks"]["validator"] = True
-    except IntakeError as error:
-        reasons.append(str(error))
+    except (IntakeError, OSError, RecursionError) as error:
+        reasons.append(_failure_text("validator", error))
         sources.setdefault("validator", _source_missing(inputs.validator, "validator"))
         result["checks"]["validator"] = False
 
     if training_row is not None and history_row is not None:
-        if training_row["checkpoint"]["sha256"] != history_row["checkpoint"]["sha256"] or Path(training_row["checkpoint"]["path"]).name != Path(history_row["checkpoint"]["path"]).name:
-            reasons.append("fail-closed: training matrix/history checkpoint identity drift")
+        # The real training-evidence matrix v1 records checkpoint path/schema/
+        # sha256/update but omits checkpoint bytes.  Complete that intermediate
+        # identity only from the independently supplied history checkpoint after
+        # its canonical path and SHA have already been validated.  A missing or
+        # divergent history tuple therefore remains fail-closed.
+        training_checkpoint = training_row["checkpoint"]
+        history_checkpoint = history_row["checkpoint"]
+        if training_checkpoint["bytes"] is None:
+            if (
+                training_checkpoint["path"] != history_checkpoint["path"]
+                or training_checkpoint["sha256"] != history_checkpoint["sha256"]
+            ):
+                reasons.append("fail-closed: training matrix/history checkpoint identity drift")
+                result["checks"]["training_history_identity"] = False
+            else:
+                training_row = dict(training_row)
+                training_row["checkpoint"] = {
+                    **training_checkpoint,
+                    "bytes": history_checkpoint["bytes"],
+                }
+        if (
+            training_row["checkpoint"] != history_checkpoint
+            or training_row["manifest_sha256"] != history_row["manifest_sha256"]
+            or (
+                history_row.get("training_receipt") is not None
+                and training_row["training_receipt"] != history_row["training_receipt"]
+            )
+        ):
+            if result["checks"].get("training_history_identity") is not False:
+                reasons.append("fail-closed: training matrix/history checkpoint identity drift")
             result["checks"]["training_history_identity"] = False
         else:
             result["checks"]["training_history_identity"] = True
@@ -1251,7 +1539,11 @@ def build_seed_summary(
 
     if inputs.process_exit_proof is not None:
         try:
-            process_payload, process_source = _bounded_json(inputs.process_exit_proof, root=root, name="process_exit_proof")
+            proof_path = _absolute_path(inputs.process_exit_proof, "process_exit_proof")
+            expected_proof = _expected_process_proof_path(Path(os.path.abspath(root)), seed)
+            if proof_path != expected_proof:
+                _fail("process proof path is not the canonical launcher report destination")
+            process_payload, process_source = _bounded_json(proof_path, root=root, name="process_exit_proof")
             sources["process_exit_proof"] = process_source
             if training_row is None or history_row is None or evaluation_identity is None or trajectory_identity is None or validator_source is None or namespace is None or nonce is None:
                 _fail("process proof cannot be bound until all identity inputs validate")
@@ -1260,22 +1552,32 @@ def build_seed_summary(
                 seed,
                 namespace,
                 nonce,
+                Path(os.path.abspath(root)),
+                training_row,
+                history_row,
                 history_row["checkpoint"],
                 evaluation_identity,
                 trajectory_identity,
                 validator_source,
+                process_source,
+                inputs.trusted_process_proof_sha256,
                 "process_exit_proof",
             )
             result["checks"]["process_exit_proof"] = True
-        except IntakeError as error:
-            reasons.append(str(error))
+            result["checks"]["process_proof_trusted"] = True
+        except (IntakeError, OSError, RecursionError) as error:
+            reasons.append(_failure_text("process_exit_proof", error))
             result["checks"]["process_exit_proof"] = False
+            result["checks"]["process_proof_trusted"] = False
     else:
         result["checks"]["process_exit_proof"] = False
+        result["checks"]["process_proof_trusted"] = False
         reasons.append("fail-closed: process-exit proof is missing; progress/PID is not terminal evidence")
 
     if process_missing:
         status = "blocked_missing_process_proof"
+    elif process_untrusted:
+        status = "blocked_untrusted_process_proof"
     elif reasons:
         status = "blocked_fail_closed"
     else:
@@ -1344,6 +1646,28 @@ def _parse_seed_path(values: list[str], name: str, *, optional: bool = False) ->
     return result
 
 
+def _parse_seed_digest(values: list[str], name: str) -> dict[int, str | None]:
+    """Parse optional out-of-band proof digests without accepting ambiguity."""
+
+    result: dict[int, str | None] = {seed: None for seed in SEEDS}
+    for text in values:
+        if "=" not in text:
+            raise argparse.ArgumentTypeError(f"{name} must use SEED=HEX")
+        seed_text, digest = text.split("=", 1)
+        try:
+            seed = int(seed_text)
+        except ValueError as error:
+            raise argparse.ArgumentTypeError(f"{name} seed is invalid") from error
+        if seed not in SEEDS or result[seed] is not None:
+            raise argparse.ArgumentTypeError(f"{name} contains an invalid or duplicate seed")
+        if SHA_RE.fullmatch(digest) is None:
+            raise argparse.ArgumentTypeError(
+                f"{name} seed{seed} must be a lowercase 64-character SHA-256 digest"
+            )
+        result[seed] = digest
+    return result
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=LAB_ROOT)
@@ -1354,6 +1678,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--validator", action="append", default=[], metavar="SEED=PATH")
     parser.add_argument("--history-summary", action="append", default=[], metavar="SEED=PATH")
     parser.add_argument("--process-exit-proof", action="append", default=[], metavar="SEED=PATH")
+    parser.add_argument(
+        "--trusted-process-proof-sha256",
+        action="append",
+        default=[],
+        metavar="SEED=HEX",
+        help="out-of-band trusted SHA-256 of the canonical launcher process-proof bytes",
+    )
     args = parser.parse_args(argv)
     try:
         evaluations = _parse_seed_path(args.evaluation, "--evaluation")
@@ -1361,6 +1692,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         validators = _parse_seed_path(args.validator, "--validator")
         histories = _parse_seed_path(args.history_summary, "--history-summary")
         proofs = _parse_seed_path(args.process_exit_proof, "--process-exit-proof", optional=True)
+        trusted_proofs = _parse_seed_digest(
+            args.trusted_process_proof_sha256,
+            "--trusted-process-proof-sha256",
+        )
         inputs = {
             seed: SeedInputs(
                 evaluation=evaluations[seed],  # type: ignore[arg-type]
@@ -1368,6 +1703,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 validator=validators[seed],  # type: ignore[arg-type]
                 history_summary=histories[seed],  # type: ignore[arg-type]
                 process_exit_proof=proofs[seed],
+                trusted_process_proof_sha256=trusted_proofs[seed],
             )
             for seed in SEEDS
         }
@@ -1390,7 +1726,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         }
         print(json.dumps(output, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False))
         return 0 if output["source_bound"] else 1
-    except IntakeError as error:
+    except (IntakeError, OSError, RecursionError) as error:
         print(json.dumps({"schema": "core.f3.mlp.hidden16.fresh_terminal_intake_batch.v1", "status": "blocked_fail_closed", "source_bound": False, "diagnostic_only": True, "formal": False, "formal_eligible": False, "credit": 0, "error": str(error)}, ensure_ascii=False, sort_keys=True))
         return 2
 
