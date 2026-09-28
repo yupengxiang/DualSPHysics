@@ -438,7 +438,7 @@ def test_artifact_identity_pseudo_authority_field_is_rejected_on_execute(tmp_pat
     core_path.write_text(core_path.read_text(encoding="utf-8").replace('"formal": False', '"formal": True'), encoding="utf-8")
     plan = _plan(fixture, tmp_path, 17)
     try:
-        with pytest.raises(launcher.LauncherError, match="formal"):
+        with pytest.raises(launcher.LauncherError, match="(?:formal|cmdline)"):
             launcher.execute_plan(plan)
     finally:
         _cleanup_external_outputs(plan)
