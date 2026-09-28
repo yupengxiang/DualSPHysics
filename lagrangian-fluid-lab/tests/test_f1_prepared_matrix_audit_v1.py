@@ -100,6 +100,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path]:
         "schema": audit.MATRIX_SCHEMA,
         "revision_id": "F1_H1_geometry_observer_qualification_v1",
         "complete": True,
+        "design_sha256": "d" * 64,
         "qualification_claim": "none",
         "cells": rows,
     }, sort_keys=True))
@@ -107,6 +108,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path]:
     jobs_path.write_text(json.dumps({
         "schema": "core.cfd.jobs.v1",
         "revision_id": "F1_H1_geometry_observer_qualification_v1",
+        "design_sha256": "d" * 64,
         "matrix_sha256": _digest(matrix_path),
         "job_count": audit.EXPECTED_CELLS,
         "execution_status": "prepared_only; canary gate required before qualification",
@@ -168,9 +170,124 @@ def test_denominator_reordering_fails_closed(tmp_path: Path) -> None:
         audit.audit_matrix(matrix_path, jobs_path)
 
 
+def test_denominator_metadata_must_be_exactly_fifteen(tmp_path: Path) -> None:
+    matrix_path, _ = _fixture(tmp_path)
+    matrix = json.loads(matrix_path.read_text())
+    matrix["cell_count"] = None
+
+    with pytest.raises(audit.AuditError, match="cell count drift"):
+        audit._validate_matrix(matrix)
+
+
+def test_duplicate_case_id_fails_closed(tmp_path: Path) -> None:
+    matrix_path, _ = _fixture(tmp_path)
+    matrix = json.loads(matrix_path.read_text())
+    matrix["cells"][1]["case_id"] = matrix["cells"][0]["case_id"]
+
+    with pytest.raises(audit.AuditError, match="duplicate case id"):
+        audit._validate_matrix(matrix)
+
+
+def test_missing_q_fails_closed(tmp_path: Path) -> None:
+    matrix_path, _ = _fixture(tmp_path)
+    matrix = json.loads(matrix_path.read_text())
+    matrix["cells"][0].pop("q")
+
+    with pytest.raises(audit.AuditError, match="q missing"):
+        audit._validate_matrix(matrix)
+
+
+def test_design_hash_binding_fails_closed(tmp_path: Path) -> None:
+    matrix_path, jobs_path = _fixture(tmp_path)
+    jobs = json.loads(jobs_path.read_text())
+    jobs["design_sha256"] = "e" * 64
+    jobs_path.write_text(json.dumps(jobs, sort_keys=True))
+
+    with pytest.raises(audit.AuditError, match="design hash binding drift"):
+        audit.audit_matrix(matrix_path, jobs_path)
+
+
+def test_duplicate_prepared_path_fails_closed(tmp_path: Path) -> None:
+    matrix_path, jobs_path = _fixture(tmp_path)
+    matrix = json.loads(matrix_path.read_text())
+    matrix["cells"][1]["prepared"] = matrix["cells"][0]["prepared"]
+    matrix_path.write_text(json.dumps(matrix, sort_keys=True))
+    jobs = json.loads(jobs_path.read_text())
+    jobs["matrix_sha256"] = _digest(matrix_path)
+    jobs["jobs"][1]["prepared"] = matrix["cells"][0]["prepared"]
+    jobs_path.write_text(json.dumps(jobs, sort_keys=True))
+
+    with pytest.raises(audit.AuditError, match="prepared path is duplicated"):
+        audit.audit_matrix(matrix_path, jobs_path)
+
+
+def test_duplicate_job_path_fails_closed(tmp_path: Path) -> None:
+    matrix_path, jobs_path = _fixture(tmp_path)
+    jobs = json.loads(jobs_path.read_text())
+    jobs["jobs"][1]["path"] = jobs["jobs"][0]["path"]
+    jobs_path.write_text(json.dumps(jobs, sort_keys=True))
+
+    with pytest.raises(audit.AuditError, match="job path is duplicated"):
+        audit.audit_matrix(matrix_path, jobs_path)
+
+
+def test_duplicate_json_key_fails_closed(tmp_path: Path) -> None:
+    matrix_path, jobs_path = _fixture(tmp_path)
+    raw = matrix_path.read_text()
+    raw = raw.replace(
+        '{"cells": [',
+        '{"schema": "core.f1.qualification.v1", "schema": "core.f1.qualification.v1", "cells": [',
+        1,
+    )
+    matrix_path.write_text(raw)
+
+    with pytest.raises(audit.AuditError, match="duplicate JSON object key"):
+        audit.audit_matrix(matrix_path, jobs_path)
+
+
+def test_nonfinite_json_number_fails_closed(tmp_path: Path) -> None:
+    matrix_path, jobs_path = _fixture(tmp_path)
+    raw = matrix_path.read_text().replace('"q": 0.0,', '"q": NaN,', 1)
+    matrix_path.write_text(raw)
+
+    with pytest.raises(audit.AuditError, match="non-standard JSON constant"):
+        audit.audit_matrix(matrix_path, jobs_path)
+
+
+def test_symlink_component_fails_closed(tmp_path: Path) -> None:
+    matrix_path, jobs_path = _fixture(tmp_path)
+    alias = tmp_path / "matrix-alias"
+    alias.symlink_to(matrix_path.parent, target_is_directory=True)
+
+    with pytest.raises(audit.AuditError, match="symlink component rejected"):
+        audit.audit_matrix(alias / matrix_path.name, jobs_path)
+
+
+def test_leading_parent_path_fails_closed() -> None:
+    with pytest.raises(audit.AuditError, match="non-canonical"):
+        audit._safe_json_path(Path("/tmp/f1-audit"), "../outside.json", role="test")
+
+
+def test_nonzero_runtime_or_credit_claim_fails_closed(tmp_path: Path) -> None:
+    matrix_path, _ = _fixture(tmp_path)
+    matrix = json.loads(matrix_path.read_text())
+    matrix["credit"] = 1
+
+    with pytest.raises(audit.AuditError, match="claims execution"):
+        audit._validate_matrix(matrix)
+
+
+def test_oversized_json_fails_closed(tmp_path: Path) -> None:
+    matrix_path, jobs_path = _fixture(tmp_path)
+    matrix_path.write_bytes(b"{" + b" " * audit.MAX_JSON_BYTES + b"}")
+
+    with pytest.raises(audit.AuditError, match="exceeds bounded JSON limit"):
+        audit.audit_matrix(matrix_path, jobs_path)
+
+
 def test_audit_output_is_immutable(tmp_path: Path) -> None:
     matrix_path, jobs_path = _fixture(tmp_path)
-    output = tmp_path / "audit.json"
+    output = tmp_path / "nested" / "audit.json"
 
     report = audit.audit_matrix(matrix_path, jobs_path, output)
 

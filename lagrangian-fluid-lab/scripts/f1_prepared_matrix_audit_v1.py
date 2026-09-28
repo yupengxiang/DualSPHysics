@@ -98,7 +98,8 @@ def _assert_no_symlink_components(path: Path) -> None:
 
 def _safe_json_path(base: Path, value: str | Path, *, role: str) -> Path:
     raw = Path(value)
-    if any(part in {"", ".", ".."} for part in raw.parts[1:]):
+    raw_parts = raw.parts[1:] if raw.is_absolute() else raw.parts
+    if any(part in {"", ".", ".."} for part in raw_parts):
         _fail(f"non-canonical {role} path: {value}")
     path = raw if raw.is_absolute() else base / raw
     path = Path(os.path.abspath(os.fspath(path)))
@@ -119,11 +120,85 @@ def _under(path: Path, root: Path, *, role: str) -> Path:
     return path
 
 
+def _safe_open_capabilities() -> tuple[int, int]:
+    open_supports_dir_fd = os.open in getattr(os, "supports_dir_fd", set())
+    if (
+        getattr(os, "O_DIRECTORY", None) is None
+        or getattr(os, "O_NOFOLLOW", None) is None
+        or not open_supports_dir_fd
+    ):
+        _fail("safe descriptor path traversal is unavailable")
+    directory_flags = (
+        os.O_RDONLY
+        | os.O_DIRECTORY
+        | os.O_NOFOLLOW
+        | getattr(os, "O_CLOEXEC", 0)
+    )
+    return directory_flags, os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0)
+
+
+def _open_directory_nofollow(path: Path, *, create: bool = False) -> int:
+    """Open a directory chain without following components or races."""
+
+    if not path.is_absolute():
+        path = Path(os.path.abspath(os.fspath(path)))
+    directory_flags, _ = _safe_open_capabilities()
+    if create and os.mkdir not in getattr(os, "supports_dir_fd", set()):
+        _fail("safe descriptor directory creation is unavailable")
+
+    parent_descriptor: int | None = None
+    try:
+        parent_descriptor = os.open(os.fspath(path.anchor), directory_flags)
+        for component in path.parts[1:]:
+            try:
+                next_descriptor = os.open(
+                    component,
+                    directory_flags,
+                    dir_fd=parent_descriptor,
+                )
+            except FileNotFoundError:
+                if not create:
+                    raise
+                try:
+                    os.mkdir(component, 0o755, dir_fd=parent_descriptor)
+                except FileExistsError:
+                    pass
+                next_descriptor = os.open(
+                    component,
+                    directory_flags,
+                    dir_fd=parent_descriptor,
+                )
+            os.close(parent_descriptor)
+            parent_descriptor = next_descriptor
+        return parent_descriptor
+    except BaseException:
+        if parent_descriptor is not None:
+            os.close(parent_descriptor)
+        raise
+
+
+def _open_regular_nofollow(path: Path) -> int:
+    """Open a regular file through directory descriptors without path races."""
+
+    if not path.is_absolute():
+        path = Path(os.path.abspath(os.fspath(path)))
+    _, file_security_flags = _safe_open_capabilities()
+    file_flags = (
+        os.O_RDONLY
+        | file_security_flags
+        | getattr(os, "O_NONBLOCK", 0)
+    )
+    parent_descriptor = _open_directory_nofollow(path.parent)
+    try:
+        return os.open(path.name, file_flags, dir_fd=parent_descriptor)
+    finally:
+        os.close(parent_descriptor)
+
+
 def _read_bounded_json(path: Path, *, role: str) -> tuple[dict[str, Any], dict[str, Any]]:
     _assert_no_symlink_components(path)
-    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0)
     try:
-        descriptor = os.open(os.fspath(path), flags)
+        descriptor = _open_regular_nofollow(path)
     except (FileNotFoundError, OSError) as error:
         raise AuditError(f"fail-closed: {role} is unavailable: {path}") from error
 
@@ -158,11 +233,16 @@ def _read_bounded_json(path: Path, *, role: str) -> tuple[dict[str, Any], dict[s
             object_pairs_hook=_reject_duplicate_keys,
             parse_constant=_reject_constant,
         )
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+    except AuditError:
+        raise
+    except (UnicodeDecodeError, json.JSONDecodeError, RecursionError, ValueError) as error:
         raise AuditError(f"fail-closed: invalid JSON in {role}: {path}") from error
     if type(value) is not dict:
         _fail(f"{role} must be a JSON object: {path}")
-    _check_finite(value, role)
+    try:
+        _check_finite(value, role)
+    except RecursionError as error:
+        raise AuditError(f"fail-closed: JSON nesting is too deep in {role}: {path}") from error
     return value, {
         "path": str(path),
         "sha256": hashlib.sha256(raw).hexdigest(),
@@ -204,23 +284,37 @@ def _validate_matrix(matrix: Mapping[str, Any]) -> list[Mapping[str, Any]]:
     _require(matrix.get("revision_id") == "F1_H1_geometry_observer_qualification_v1", "F1 matrix revision drift")
     _require(matrix.get("complete") is True, "F1 matrix is not complete")
     _require(matrix.get("qualification_claim") == "none", "F1 matrix qualification claim drift")
-    _require(matrix.get("cell_count", EXPECTED_CELLS) in {EXPECTED_CELLS, None}, "F1 matrix cell count drift")
+    if "cell_count" in matrix:
+        _require(
+            type(matrix["cell_count"]) is int and matrix["cell_count"] == EXPECTED_CELLS,
+            "F1 matrix cell count drift",
+        )
     rows = matrix.get("cells")
     _require(type(rows) is list and len(rows) == EXPECTED_CELLS, "F1 matrix does not close 15 cells")
+    case_ids: set[str] = set()
     for index, row in enumerate(rows):
         _require(type(row) is dict, f"F1 matrix row {index} is not an object")
         _require(row.get("index") == index, f"F1 matrix row index drift at {index}")
         _require(type(row.get("case_id")) is str and row["case_id"], f"F1 matrix case id missing at {index}")
+        _require(row["case_id"] not in case_ids, f"F1 matrix duplicate case id at {index}")
+        case_ids.add(row["case_id"])
         _require(row.get("preflight_pass") is True, f"F1 matrix preflight drift at {index}")
         _require(row.get("static_quality_pass") is True, f"F1 matrix static-quality drift at {index}")
         _require(row.get("mass_gate_pass") is True, f"F1 matrix mass gate drift at {index}")
         _require(type(row.get("design_cell")) is str and row["design_cell"], f"F1 matrix design cell missing at {index}")
+        _require(type(row.get("q")) in {int, float} and type(row.get("q")) is not bool, f"F1 matrix q missing at {index}")
         _require(type(row.get("dp_m")) in {int, float} and type(row.get("dp_m")) is not bool, f"F1 matrix dp missing at {index}")
         _require(type(row.get("prepared")) is str and Path(row["prepared"]).suffix.lower() == ".json", f"F1 matrix prepared path missing at {index}")
+    _require_sha256(matrix.get("design_sha256"), "F1 matrix design_sha256")
     for key in ("solver_invoked", "worker_started", "native_started", "gpu_invoked"):
         _require_false_or_zero(matrix, key, label="F1 matrix")
     for key in ("queue_mutation", "registry_mutation", "ledger_mutation", "denominator_mutation", "gate_mutation"):
         _require_false_or_zero(matrix, key, label="F1 matrix")
+    for key in ("formal_runtime_rows", "qualification_credit", "credit"):
+        _require_false_or_zero(matrix, key, label="F1 matrix")
+    for key in ("T1_numerical", "T2_macro", "T2_path", "T2", "scientific_results_present"):
+        if key in matrix:
+            _require(matrix[key] is False, f"F1 matrix {key} claims science")
     return rows
 
 
@@ -256,6 +350,11 @@ def _validate_prepared_payload(
     # The inventory is intentionally metadata-only.  Do not follow any of its paths.
     for key in ("solver_binary", "decoder", "generated_prefix", "source_template"):
         _require(type(prepared.get(key)) is str and prepared[key], f"prepared {key} metadata missing at {index}")
+    for key in ("formal_runtime_rows", "qualification_credit", "credit"):
+        _require_false_or_zero(prepared, key, label=f"prepared {index}")
+    for key in ("T1_numerical", "T2_macro", "T2_path", "T2", "scientific_results_present"):
+        if key in prepared:
+            _require(prepared[key] is False, f"prepared {index}.{key} claims science")
 
 
 def _validate_job_contract(
@@ -290,19 +389,26 @@ def _validate_job_contract(
         _require_false_or_zero(job, key, label=f"job {index}")
     for key in ("queue_mutation", "registry_mutation", "ledger_mutation", "denominator_mutation", "gate_mutation"):
         _require_false_or_zero(job, key, label=f"job {index}")
+    for key in ("formal_runtime_rows", "qualification_credit", "credit"):
+        _require_false_or_zero(job, key, label=f"job {index}")
+    for key in ("T1_numerical", "T2_macro", "T2_path", "T2", "scientific_results_present"):
+        if key in job:
+            _require(job[key] is False, f"job {index}.{key} claims science")
 
 
 def _write_immutable(path: str | Path, payload: bytes) -> Path:
-    target = Path(path).absolute()
-    if target.suffix.lower() != ".json":
-        _fail(f"non-JSON output rejected: {path}")
-    _assert_no_symlink_components(target.parent)
-    target.parent.mkdir(parents=True, exist_ok=True)
+    target = _safe_json_path(Path.cwd(), path, role="audit output")
+    try:
+        parent_descriptor = _open_directory_nofollow(target.parent, create=True)
+    except AuditError:
+        raise
+    except (FileNotFoundError, OSError, ValueError) as error:
+        raise AuditError(f"fail-closed: audit output parent is unavailable: {target.parent}") from error
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0)
     try:
-        descriptor = os.open(os.fspath(target), flags, 0o644)
-    except FileExistsError:
-        raise
+        descriptor = os.open(target.name, flags, 0o644, dir_fd=parent_descriptor)
+    finally:
+        os.close(parent_descriptor)
     try:
         view = memoryview(payload)
         while view:
@@ -389,16 +495,25 @@ def audit_matrix(
     _require(jobs_manifest.get("qualification_claim") == "none", "F1 jobs qualification claim drift")
     _require(jobs_manifest.get("canary_dependency") == "f1-h1-reference-fullwindow-canary-001", "F1 canary dependency drift")
     _require(jobs_manifest.get("matrix_sha256") == matrix_ref["sha256"], "F1 jobs matrix hash drift")
+    _require_sha256(jobs_manifest.get("design_sha256"), "F1 jobs design_sha256")
+    _require(jobs_manifest["design_sha256"] == matrix["design_sha256"], "F1 design hash binding drift")
     job_rows = jobs_manifest.get("jobs")
     _require(type(job_rows) is list and len(job_rows) == EXPECTED_CELLS, "F1 jobs do not close 15 rows")
 
     checked_cells: list[dict[str, Any]] = []
+    seen_prepared: set[Path] = set()
+    seen_jobs: set[Path] = set()
     for index, (row, job_row) in enumerate(zip(rows, job_rows)):
         _require(type(job_row) is dict and job_row.get("index") == index, f"F1 job manifest row drift at {index}")
+        _require(job_row.get("job_id") == f"f1-h1-qualification-cell-{index:02d}", f"F1 job manifest id drift at {index}")
         prepared_path = _prepared_path(matrix_root, row.get("prepared"), label=f"matrix row {index}")
         summary_prepared = _prepared_path(matrix_root, job_row.get("prepared"), label=f"job manifest row {index}")
         _require(summary_prepared == prepared_path, f"F1 prepared path binding drift at {index}")
+        _require(prepared_path not in seen_prepared, f"F1 prepared path is duplicated at {index}")
+        seen_prepared.add(prepared_path)
         job_path = _job_path(jobs_root, job_row.get("path"), label=f"job manifest row {index}")
+        _require(job_path not in seen_jobs, f"F1 job path is duplicated at {index}")
+        seen_jobs.add(job_path)
         prepared, prepared_ref = _read_bounded_json(prepared_path, role=f"F1 prepared cell {index}")
         _validate_prepared_payload(prepared, row, index=index)
         job, job_ref = _read_bounded_json(job_path, role=f"F1 job contract {index}")
