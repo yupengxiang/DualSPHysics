@@ -7,11 +7,12 @@ graph_residual/hidden16/full835 contract, validates command bindings, and
 performs metadata-only ``lstat`` checks for declared artifacts.  It never
 opens an artifact file and never starts, stops, or inspects a process.
 
-The returned object is the exact process-exit-proof envelope accepted by
-``f3_graph_residual_hidden16_terminal_runtime_verifier_v1.py``.  Commands are
-input evidence: the existing verifier's process schema intentionally has no
-command field, so command metadata is validated and then omitted from the
-strict normalized envelope rather than being smuggled in as an unknown field.
+The returned object contains the bounded command and artifact digest-binding
+extensions required by this builder.  The legacy runtime verifier still has a
+v1 process schema without those extensions, so validation below first checks
+the extensions and then passes a deliberately stripped compatibility projection
+to that verifier.  The projection is not the normalized proof and cannot
+silently discard a command or attestation mismatch.
 
 With no input, the CLI emits a blocked sample.  A positive envelope may be
 printed or written outside ``reports``; the only report file this utility can
@@ -65,6 +66,27 @@ RUN_ID_RE = re.compile(r"^f3-graph-residual500-hidden16-seed(?:17|29|43)-2026092
 CONTROL_RE = re.compile(r"[\x00-\x1f\x7f]")
 CHECKPOINT_SUFFIXES = frozenset({".pt", ".pth", ".ckpt"})
 
+# This is the one evaluator argv contract used by the residual diagnostic
+# rollouts.  Keeping the interpreter and script as exact tokens is deliberate:
+# basename matching would allow an unrelated launcher or script to masquerade
+# as core_learning.py.  The relative interpreter is canonical because the
+# evaluator is launched from the lab root (the same cwd implied by --data-root
+# .).  No command token is resolved or executed by this module.
+CANONICAL_INTERPRETER = "./.venv/bin/python"
+CANONICAL_CORE_LEARNING = "scripts/core_learning.py"
+CANONICAL_MANIFEST = "campaigns/core-v1/f3-dataset-v2.json"
+CANONICAL_DATA_ROOT = "."
+CANONICAL_ACTION = "evaluate"
+CANONICAL_CHUNK_SIZE = "34560"
+CANONICAL_DEVICE = "cuda:0"
+CANONICAL_PROGRESS_EVERY = "25"
+CANONICAL_ENV = "/usr/bin/env"
+CANONICAL_ENV_ASSIGNMENT = "PYTHONDONTWRITEBYTECODE=1"
+
+COMMAND_BINDING_SCHEMA = "core.f3.graph_residual.hidden16.command_digest_binding.v1"
+ARTIFACT_ATTESTATION_SCHEMA = "core.f3.graph_residual.hidden16.artifact_digest_attestation.v1"
+ARTIFACT_ATTESTATION_MODE = "producer_and_independent_validator_digest_binding"
+
 DEFAULT_BLOCKED_FILENAME = "F3-GRAPH-RESIDUAL-HIDDEN16-PROCESS-EXIT-PROOF-BUILDER-V1-2026-09-28.json"
 DEFAULT_BLOCKED_MARKDOWN_FILENAME = DEFAULT_BLOCKED_FILENAME.removesuffix(".json") + ".zh-CN.md"
 DEFAULT_REPORT_FILENAMES = frozenset({DEFAULT_BLOCKED_FILENAME, DEFAULT_BLOCKED_MARKDOWN_FILENAME})
@@ -96,8 +118,50 @@ INPUT_KEYS = frozenset(
 )
 PROCESS_KEYS = frozenset({"evaluator", "launcher"})
 PROCESS_COMPONENT_KEYS = frozenset({"alive", "returncode", "reaped", "command", "command_sha256"})
-ARTIFACT_KEYS = frozenset({"path", "sha256", "bytes", "content_opened", "stat_only"})
+ARTIFACT_KEYS = frozenset({"path", "sha256", "bytes", "content_opened", "stat_only", "attestation"})
+ATTESTATION_KEYS = frozenset(
+    {
+        "schema",
+        "mode",
+        "artifact_path",
+        "artifact_sha256",
+        "artifact_bytes",
+        "producer",
+        "validator",
+        "producer_binding_sha256",
+        "validator_binding_sha256",
+        "binding_sha256",
+    }
+)
+ATTESTOR_KEYS = frozenset(
+    {
+        "role",
+        "identity",
+        "source",
+        "independent",
+        "artifact_path",
+        "artifact_sha256",
+        "artifact_bytes",
+        "binding_sha256",
+    }
+)
+COMMAND_BINDING_KEYS = frozenset({"schema", "evaluator", "launcher", "manifest", "binding_sha256"})
+COMMAND_RECORD_KEYS = frozenset({"argv", "sha256"})
+MANIFEST_BINDING_KEYS = frozenset({"path", "sha256"})
 EXIT_OBSERVATION_KEYS = frozenset({"natural_exit", "observed_after_exit"})
+
+# These fields are intentionally not part of the old verifier's v1 envelope.
+# They are validated by this builder and removed only in the explicit legacy
+# projection passed to verifier._validate_process().
+NORMALIZED_EXTENSION_KEYS = frozenset(
+    {
+        "command_binding",
+        "command_sha256",
+        "launcher_command_sha256",
+        "training_receipt",
+        "evaluation_artifact",
+    }
+)
 
 BLOCKED_REPORT_KEYS = frozenset(
     {
@@ -141,6 +205,10 @@ def canonical_json(value: Any) -> str:
         separators=(",", ":"),
         allow_nan=False,
     )
+
+
+def _canonical_digest(value: Any) -> str:
+    return hashlib.sha256(canonical_json(value).encode("utf-8")).hexdigest()
 
 
 def _reject_json_constant(token: str) -> None:
@@ -423,7 +491,7 @@ def _open_absolute_parent(path: str, name: str) -> tuple[int, list[int]]:
 
 
 def _stat_regular_single_link(path: str, expected_bytes: int, name: str) -> None:
-    """Check only inode metadata; never open the declared artifact."""
+    """Check only inode metadata; never treat it as content authenticity."""
 
     parent_fd, opened = _open_absolute_parent(path, name)
     try:
@@ -445,6 +513,88 @@ def _stat_regular_single_link(path: str, expected_bytes: int, name: str) -> None
                 os.close(descriptor)
             except OSError:
                 pass
+
+
+def _validate_artifact_attestation(
+    value: Any,
+    name: str,
+    *,
+    artifact_path: str,
+    artifact_sha256: str,
+    artifact_bytes: int,
+) -> dict[str, Any]:
+    """Validate a producer/independent-validator digest binding.
+
+    The builder intentionally does not open large artifacts, so ``lstat``
+    bytes only establish a safe inode/size observation.  Content identity is
+    accepted only when a separate producer record and an independent-validator
+    record both bind the same path, digest, and byte count, with their binding
+    digests recomputed from canonical JSON.  This is a provenance boundary,
+    not a claim that this bounded normalizer independently hashes the artifact.
+    """
+
+    attestation = _mapping(value, name)
+    _reject_unknown(attestation, ATTESTATION_KEYS, name)
+    _check_exact(attestation, "schema", ARTIFACT_ATTESTATION_SCHEMA, name)
+    _check_exact(attestation, "mode", ARTIFACT_ATTESTATION_MODE, name)
+    _check_exact(attestation, "artifact_path", artifact_path, name)
+    _check_exact(attestation, "artifact_sha256", artifact_sha256, name)
+    _check_exact(attestation, "artifact_bytes", artifact_bytes, name)
+
+    normalized_roles: dict[str, dict[str, Any]] = {}
+    identities: set[str] = set()
+    role_contracts = (
+        ("producer", "producer_receipt", False),
+        ("validator", "independent_validator_receipt", True),
+    )
+    for role, expected_source, expected_independent in role_contracts:
+        role_name = f"{name}.{role}"
+        record = _mapping(attestation.get(role), role_name)
+        _reject_unknown(record, ATTESTOR_KEYS, role_name)
+        _check_exact(record, "role", role, role_name)
+        _check_exact(record, "source", expected_source, role_name)
+        _check_exact(record, "independent", expected_independent, role_name)
+        identity = _string(record.get("identity"), f"{role_name}.identity")
+        if CONTROL_RE.search(identity):
+            _fail(f"{role_name}.identity contains control characters")
+        if identity in identities:
+            _fail(f"{name} producer and validator identities must be distinct")
+        identities.add(identity)
+        _check_exact(record, "artifact_path", artifact_path, role_name)
+        _check_exact(record, "artifact_sha256", artifact_sha256, role_name)
+        _check_exact(record, "artifact_bytes", artifact_bytes, role_name)
+        binding_payload = {
+            "role": role,
+            "identity": identity,
+            "source": expected_source,
+            "independent": expected_independent,
+            "artifact_path": artifact_path,
+            "artifact_sha256": artifact_sha256,
+            "artifact_bytes": artifact_bytes,
+        }
+        binding_sha = _strict_sha(record.get("binding_sha256"), f"{role_name}.binding_sha256")
+        if binding_sha != _canonical_digest(binding_payload):
+            _fail(f"{role_name}.binding_sha256 does not match its canonical digest binding")
+        normalized_roles[role] = {**binding_payload, "binding_sha256": binding_sha}
+
+    binding_payload = {
+        "schema": ARTIFACT_ATTESTATION_SCHEMA,
+        "mode": ARTIFACT_ATTESTATION_MODE,
+        "artifact_path": artifact_path,
+        "artifact_sha256": artifact_sha256,
+        "artifact_bytes": artifact_bytes,
+        "producer_binding_sha256": normalized_roles["producer"]["binding_sha256"],
+        "validator_binding_sha256": normalized_roles["validator"]["binding_sha256"],
+    }
+    binding_sha = _strict_sha(attestation.get("binding_sha256"), f"{name}.binding_sha256")
+    if binding_sha != _canonical_digest(binding_payload):
+        _fail(f"{name}.binding_sha256 does not match its producer/validator binding")
+    return {
+        **binding_payload,
+        "producer": normalized_roles["producer"],
+        "validator": normalized_roles["validator"],
+        "binding_sha256": binding_sha,
+    }
 
 
 def _artifact(
@@ -469,8 +619,22 @@ def _artifact(
     _strict_bool(item.get("stat_only"), f"{name}.stat_only")
     _check_exact(item, "stat_only", True, name)
     digest = _strict_sha(item.get("sha256"), f"{name}.sha256")
+    attestation = _validate_artifact_attestation(
+        item.get("attestation"),
+        f"{name}.attestation",
+        artifact_path=path,
+        artifact_sha256=digest,
+        artifact_bytes=byte_count,
+    )
     _stat_regular_single_link(path, byte_count, name)
-    return {"path": path, "sha256": digest, "bytes": byte_count}
+    return {
+        "path": path,
+        "sha256": digest,
+        "bytes": byte_count,
+        "content_opened": False,
+        "stat_only": True,
+        "attestation": attestation,
+    }
 
 
 def _run_id(seed: int) -> str:
@@ -539,6 +703,45 @@ def _option(argv: Sequence[str], option: str, name: str) -> str:
     return argv[index + 1]
 
 
+def _expected_evaluator_command(
+    *,
+    checkpoint: str,
+    trajectory: str,
+    evaluation: str,
+    namespace: str,
+) -> list[str]:
+    return [
+        CANONICAL_INTERPRETER,
+        CANONICAL_CORE_LEARNING,
+        CANONICAL_ACTION,
+        "--manifest",
+        CANONICAL_MANIFEST,
+        "--data-root",
+        CANONICAL_DATA_ROOT,
+        "--checkpoint",
+        checkpoint,
+        "--case-id",
+        CASE_ID,
+        "--split",
+        SPLIT,
+        "--maximum-steps",
+        str(TRANSITIONS),
+        "--chunk-size",
+        CANONICAL_CHUNK_SIZE,
+        "--device",
+        CANONICAL_DEVICE,
+        "--progress-every",
+        CANONICAL_PROGRESS_EVERY,
+        "--trajectory-output",
+        trajectory,
+        "--progress-output",
+        namespace + "-evaluation-progress.json",
+        "--output",
+        evaluation,
+        "--diagnostic",
+    ]
+
+
 def _validate_evaluator_command(
     argv: Sequence[str],
     *,
@@ -547,27 +750,118 @@ def _validate_evaluator_command(
     evaluation: str,
     namespace: str,
     name: str,
-) -> None:
-    if sum(item == "evaluate" for item in argv) != 1:
-        _fail(f"{name} must contain exactly one evaluate action")
-    if not any(Path(item).name == "core_learning.py" for item in argv):
-        _fail(f"{name} must invoke core_learning.py")
-    expected_options = {
-        "--manifest": "campaigns/core-v1/f3-dataset-v2.json",
-        "--case-id": CASE_ID,
-        "--split": SPLIT,
-        "--maximum-steps": str(TRANSITIONS),
-        "--checkpoint": checkpoint,
-        "--trajectory-output": trajectory,
-        "--progress-output": namespace + "-evaluation-progress.json",
-        "--output": evaluation,
+) -> tuple[list[str], str]:
+    expected = _expected_evaluator_command(
+        checkpoint=checkpoint,
+        trajectory=trajectory,
+        evaluation=evaluation,
+        namespace=namespace,
+    )
+    observed = list(argv)
+    if observed != expected:
+        _fail(f"{name} must equal the canonical evaluator argv; command token/flag/path drift detected")
+    return expected, _command_sha256(expected)
+
+
+def _validate_launcher_command(
+    argv: Sequence[str],
+    *,
+    evaluator: Sequence[str],
+    name: str,
+) -> tuple[list[str], str]:
+    """Accept only a direct evaluator or the fixed no-shell env wrapper."""
+
+    evaluator_argv = list(evaluator)
+    allowed = [evaluator_argv]
+    allowed.append([CANONICAL_ENV, CANONICAL_ENV_ASSIGNMENT, *evaluator_argv])
+    for device_index in range(8):
+        allowed.append(
+            [
+                CANONICAL_ENV,
+                CANONICAL_ENV_ASSIGNMENT,
+                f"CUDA_VISIBLE_DEVICES={device_index}",
+                *evaluator_argv,
+            ]
+        )
+    observed = list(argv)
+    if observed not in allowed:
+        _fail(f"{name} must be the evaluator or the fixed /usr/bin/env wrapper; suspicious launcher drift detected")
+    return observed, _command_sha256(observed)
+
+
+def _command_binding(
+    *,
+    evaluator: Sequence[str],
+    evaluator_sha256: str,
+    launcher: Sequence[str],
+    launcher_sha256: str,
+    manifest_sha256: str,
+) -> dict[str, Any]:
+    binding = {
+        "schema": COMMAND_BINDING_SCHEMA,
+        "evaluator": {"argv": list(evaluator), "sha256": evaluator_sha256},
+        "launcher": {"argv": list(launcher), "sha256": launcher_sha256},
+        "manifest": {"path": CANONICAL_MANIFEST, "sha256": manifest_sha256},
     }
-    for option, expected in expected_options.items():
-        observed = _option(argv, option, name)
-        if observed != expected:
-            _fail(f"{name}.{option} must be {expected!r}; observed {observed!r}")
-    if sum(item == "--diagnostic" for item in argv) != 1:
-        _fail(f"{name} must contain exactly one --diagnostic flag")
+    return {**binding, "binding_sha256": _canonical_digest(binding)}
+
+
+def _validate_command_binding(
+    value: Any,
+    name: str,
+    *,
+    checkpoint: str,
+    trajectory: str,
+    evaluation: str,
+    namespace: str,
+    manifest_sha256: str,
+) -> dict[str, Any]:
+    """Recompute command canonicalization and every command digest."""
+
+    binding = _mapping(value, name)
+    _reject_unknown(binding, COMMAND_BINDING_KEYS, name)
+    _check_exact(binding, "schema", COMMAND_BINDING_SCHEMA, name)
+    manifest = _mapping(binding.get("manifest"), f"{name}.manifest")
+    _reject_unknown(manifest, MANIFEST_BINDING_KEYS, f"{name}.manifest")
+    _check_exact(manifest, "path", CANONICAL_MANIFEST, f"{name}.manifest")
+    _check_exact(manifest, "sha256", manifest_sha256, f"{name}.manifest")
+
+    evaluator_record = _mapping(binding.get("evaluator"), f"{name}.evaluator")
+    _reject_unknown(evaluator_record, COMMAND_RECORD_KEYS, f"{name}.evaluator")
+    evaluator_argv, evaluator_sha = _command(evaluator_record.get("argv"), f"{name}.evaluator.argv")
+    _check_exact(evaluator_record, "sha256", evaluator_sha, f"{name}.evaluator")
+    canonical_evaluator, canonical_evaluator_sha = _validate_evaluator_command(
+        evaluator_argv,
+        checkpoint=checkpoint,
+        trajectory=trajectory,
+        evaluation=evaluation,
+        namespace=namespace,
+        name=f"{name}.evaluator.argv",
+    )
+    if evaluator_sha != canonical_evaluator_sha:
+        _fail(f"{name}.evaluator.sha256 is not the canonical evaluator digest")
+
+    launcher_record = _mapping(binding.get("launcher"), f"{name}.launcher")
+    _reject_unknown(launcher_record, COMMAND_RECORD_KEYS, f"{name}.launcher")
+    launcher_argv, launcher_sha = _command(launcher_record.get("argv"), f"{name}.launcher.argv")
+    _check_exact(launcher_record, "sha256", launcher_sha, f"{name}.launcher")
+    canonical_launcher, canonical_launcher_sha = _validate_launcher_command(
+        launcher_argv,
+        evaluator=canonical_evaluator,
+        name=f"{name}.launcher.argv",
+    )
+    if launcher_sha != canonical_launcher_sha:
+        _fail(f"{name}.launcher.sha256 is not the canonical launcher digest")
+
+    canonical = _command_binding(
+        evaluator=canonical_evaluator,
+        evaluator_sha256=canonical_evaluator_sha,
+        launcher=canonical_launcher,
+        launcher_sha256=canonical_launcher_sha,
+        manifest_sha256=manifest_sha256,
+    )
+    _check_exact(binding, "binding_sha256", canonical["binding_sha256"], name)
+    return canonical
 
 
 def _process_component(value: Any, name: str) -> tuple[list[str], str]:
@@ -623,7 +917,7 @@ def _validate_input(payload: Mapping[str, Any]) -> dict[str, Any]:
     _reject_unknown(process, PROCESS_KEYS, "observation.process")
     evaluator_argv, evaluator_digest = _process_component(process.get("evaluator"), "observation.process.evaluator")
     launcher_argv, launcher_digest = _process_component(process.get("launcher"), "observation.process.launcher")
-    _validate_evaluator_command(
+    canonical_evaluator, canonical_evaluator_digest = _validate_evaluator_command(
         evaluator_argv,
         checkpoint=checkpoint["path"],
         trajectory=trajectory["path"],
@@ -631,8 +925,22 @@ def _validate_input(payload: Mapping[str, Any]) -> dict[str, Any]:
         namespace=namespace,
         name="observation.process.evaluator.command",
     )
-    if len(launcher_argv) < len(evaluator_argv) or launcher_argv[-len(evaluator_argv) :] != evaluator_argv:
-        _fail("observation.process.launcher.command must end with the evaluator argv")
+    if evaluator_digest != canonical_evaluator_digest:
+        _fail("observation.process.evaluator.command_sha256 is not the canonical evaluator digest")
+    canonical_launcher, canonical_launcher_digest = _validate_launcher_command(
+        launcher_argv,
+        evaluator=canonical_evaluator,
+        name="observation.process.launcher.command",
+    )
+    if launcher_digest != canonical_launcher_digest:
+        _fail("observation.process.launcher.command_sha256 is not the canonical launcher digest")
+    command_binding = _command_binding(
+        evaluator=canonical_evaluator,
+        evaluator_sha256=canonical_evaluator_digest,
+        launcher=canonical_launcher,
+        launcher_sha256=canonical_launcher_digest,
+        manifest_sha256=manifest_sha,
+    )
 
     return {
         "seed": seed,
@@ -641,15 +949,16 @@ def _validate_input(payload: Mapping[str, Any]) -> dict[str, Any]:
         "namespace_nonce": nonce,
         "manifest_sha256": manifest_sha,
         "training_receipt_sha256": training["sha256"],
+        "training_receipt": training,
         "checkpoint": checkpoint,
         "trajectory": trajectory,
-        "command_sha256": evaluator_digest,
-        "launcher_command_sha256": launcher_digest,
+        "evaluation_artifact": evaluation,
+        "command_binding": command_binding,
     }
 
 
 def build_envelope(payload: Mapping[str, Any]) -> dict[str, Any]:
-    """Return one verifier-compatible process proof or fail closed."""
+    """Return one command- and attestation-bound process proof."""
 
     normalized = _validate_input(payload)
     seed = normalized["seed"]
@@ -680,8 +989,13 @@ def build_envelope(payload: Mapping[str, Any]) -> dict[str, Any]:
         "frames": FRAMES,
         "manifest_sha256": normalized["manifest_sha256"],
         "training_receipt_sha256": normalized["training_receipt_sha256"],
+        "training_receipt": normalized["training_receipt"],
         "checkpoint": normalized["checkpoint"],
         "trajectory": normalized["trajectory"],
+        "evaluation_artifact": normalized["evaluation_artifact"],
+        "command_binding": normalized["command_binding"],
+        "command_sha256": normalized["command_binding"]["evaluator"]["sha256"],
+        "launcher_command_sha256": normalized["command_binding"]["launcher"]["sha256"],
         "evaluator_alive": False,
         "launcher_alive": False,
         "evaluator_returncode": 0,
@@ -690,22 +1004,104 @@ def build_envelope(payload: Mapping[str, Any]) -> dict[str, Any]:
     }
     errors = validate_envelope(envelope)
     if errors:
-        _fail("normalized envelope is not accepted by the residual verifier: " + "; ".join(errors))
+        _fail("normalized envelope failed builder and legacy-verifier validation: " + "; ".join(errors))
     return envelope
 
 
+def _legacy_verifier_projection(envelope: Mapping[str, Any]) -> dict[str, Any]:
+    """Strip only already-validated v1 extensions for the old verifier API."""
+
+    projection = dict(envelope)
+    for key in NORMALIZED_EXTENSION_KEYS:
+        projection.pop(key, None)
+    for key in ("checkpoint", "trajectory"):
+        artifact = _mapping(envelope.get(key), f"process_exit_proof.{key}")
+        projection[key] = {field: artifact[field] for field in ("path", "sha256", "bytes")}
+    return projection
+
+
 def validate_envelope(envelope: Mapping[str, Any]) -> list[str]:
-    """Validate a normalized envelope before any optional publication."""
+    """Revalidate extensions, then validate the explicit v1 compatibility view."""
 
     errors: list[str] = []
     try:
         _walk_json(envelope, "process_exit_proof")
         _reject_aliases(envelope, "process_exit_proof", allow_contract_fields=True)
+        _reject_unknown(
+            envelope,
+            frozenset(verifier.EVIDENCE_TOP_LEVEL_KEYS) | NORMALIZED_EXTENSION_KEYS,
+            "process_exit_proof",
+        )
         seed = _strict_int(envelope.get("seed"), "process_exit_proof.seed", 0)
         if seed not in SEEDS:
             _fail(f"process_exit_proof.seed must be one of {SEEDS}")
-        verifier._validate_process(envelope, seed, "process_exit_proof")
-    except (BuilderError, verifier.VerifierError, KeyError, TypeError, RecursionError) as error:
+        run_id, namespace = _namespace(envelope, seed, "process_exit_proof")
+        if run_id != envelope.get("run_id"):
+            _fail("process_exit_proof.run_id is not canonical")
+        training_path = f"{Path(namespace).parent / (run_id + '-training.json')}"
+        checkpoint_path = f"{Path(namespace).parent / (run_id + '-checkpoint.pt')}"
+        trajectory_path = namespace + "-trajectory.h5"
+        evaluation_path = namespace + "-evaluation.json"
+        training = _artifact(
+            envelope.get("training_receipt"),
+            "process_exit_proof.training_receipt",
+            expected_path=training_path,
+            suffix=".json",
+        )
+        checkpoint = _artifact(
+            envelope.get("checkpoint"),
+            "process_exit_proof.checkpoint",
+            expected_path=checkpoint_path,
+            suffix=".pt",
+        )
+        trajectory = _artifact(
+            envelope.get("trajectory"),
+            "process_exit_proof.trajectory",
+            expected_path=trajectory_path,
+            suffix=".h5",
+        )
+        evaluation = _artifact(
+            envelope.get("evaluation_artifact"),
+            "process_exit_proof.evaluation_artifact",
+            expected_path=evaluation_path,
+            suffix=".json",
+        )
+        _check_exact(
+            envelope,
+            "training_receipt_sha256",
+            training["sha256"],
+            "process_exit_proof",
+        )
+        command_binding = _validate_command_binding(
+            envelope.get("command_binding"),
+            "process_exit_proof.command_binding",
+            checkpoint=checkpoint["path"],
+            trajectory=trajectory["path"],
+            evaluation=evaluation["path"],
+            namespace=namespace,
+            manifest_sha256=_strict_sha(
+                envelope.get("manifest_sha256"),
+                "process_exit_proof.manifest_sha256",
+            ),
+        )
+        _check_exact(
+            envelope,
+            "command_sha256",
+            command_binding["evaluator"]["sha256"],
+            "process_exit_proof",
+        )
+        _check_exact(
+            envelope,
+            "launcher_command_sha256",
+            command_binding["launcher"]["sha256"],
+            "process_exit_proof",
+        )
+        verifier._validate_process(
+            _legacy_verifier_projection(envelope),
+            seed,
+            "process_exit_proof",
+        )
+    except (BuilderError, verifier.VerifierError, KeyError, TypeError, RecursionError, OSError) as error:
         errors.append(str(error))
     return list(dict.fromkeys(errors))
 

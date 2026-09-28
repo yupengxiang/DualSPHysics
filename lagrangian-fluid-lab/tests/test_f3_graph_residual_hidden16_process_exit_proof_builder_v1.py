@@ -21,9 +21,65 @@ def _write_json(path: Path, value: object) -> None:
     path.write_bytes((builder.canonical_json(value) + "\n").encode("utf-8"))
 
 
+def _attestation(path: Path, digest: str, byte_count: int) -> dict[str, object]:
+    producer = {
+        "role": "producer",
+        "identity": f"producer:{path.name}",
+        "source": "producer_receipt",
+        "independent": False,
+        "artifact_path": str(path),
+        "artifact_sha256": digest,
+        "artifact_bytes": byte_count,
+    }
+    producer["binding_sha256"] = builder._canonical_digest(producer)
+    validator = {
+        "role": "validator",
+        "identity": f"validator:{path.name}",
+        "source": "independent_validator_receipt",
+        "independent": True,
+        "artifact_path": str(path),
+        "artifact_sha256": digest,
+        "artifact_bytes": byte_count,
+    }
+    validator["binding_sha256"] = builder._canonical_digest(validator)
+    binding = {
+        "schema": builder.ARTIFACT_ATTESTATION_SCHEMA,
+        "mode": builder.ARTIFACT_ATTESTATION_MODE,
+        "artifact_path": str(path),
+        "artifact_sha256": digest,
+        "artifact_bytes": byte_count,
+        "producer_binding_sha256": producer["binding_sha256"],
+        "validator_binding_sha256": validator["binding_sha256"],
+        "producer": producer,
+        "validator": validator,
+    }
+    # The builder's outer digest excludes the full role records and binds only
+    # their independently recomputed binding digests.
+    binding["binding_sha256"] = builder._canonical_digest(
+        {
+            "schema": builder.ARTIFACT_ATTESTATION_SCHEMA,
+            "mode": builder.ARTIFACT_ATTESTATION_MODE,
+            "artifact_path": str(path),
+            "artifact_sha256": digest,
+            "artifact_bytes": byte_count,
+            "producer_binding_sha256": producer["binding_sha256"],
+            "validator_binding_sha256": validator["binding_sha256"],
+        }
+    )
+    return binding
+
+
 def _write_artifact(path: Path, content: bytes) -> dict[str, object]:
     path.write_bytes(content)
-    return {"path": str(path), "sha256": hashlib.sha256(content).hexdigest(), "bytes": len(content), "content_opened": False, "stat_only": True}
+    digest = hashlib.sha256(content).hexdigest()
+    return {
+        "path": str(path),
+        "sha256": digest,
+        "bytes": len(content),
+        "content_opened": False,
+        "stat_only": True,
+        "attestation": _attestation(path, digest, len(content)),
+    }
 
 
 def _observation(root: Path, *, seed: int = 17, nonce: str = "17" * 16) -> dict[str, object]:
@@ -36,8 +92,8 @@ def _observation(root: Path, *, seed: int = 17, nonce: str = "17" * 16) -> dict[
     trajectory = _write_artifact(Path(str(namespace) + "-trajectory.h5"), b"trajectory")
     evaluation = _write_artifact(Path(str(namespace) + "-evaluation.json"), b"evaluation")
     evaluator_command = [
-        "/lab/.venv/bin/python",
-        "scripts/core_learning.py",
+        builder.CANONICAL_INTERPRETER,
+        builder.CANONICAL_CORE_LEARNING,
         "evaluate",
         "--manifest",
         "campaigns/core-v1/f3-dataset-v2.json",
@@ -113,9 +169,17 @@ def test_positive_normalization_matches_the_existing_strict_verifier(tmp_path: P
     assert envelope["schema"] == "core.f3.graph_residual.hidden16.seed17.process_exit_proof.v1"
     assert envelope["status"] == "exited_successfully"
     assert envelope["credit"] == 0
-    assert "command" not in envelope
+    assert envelope["command_binding"]["evaluator"]["argv"] == payload["process"]["evaluator"]["command"]  # type: ignore[index]
+    assert envelope["command_binding"]["evaluator"]["sha256"] == builder._command_sha256(envelope["command_binding"]["evaluator"]["argv"])
+    assert envelope["command_sha256"] == envelope["command_binding"]["evaluator"]["sha256"]
+    assert envelope["launcher_command_sha256"] == envelope["command_binding"]["launcher"]["sha256"]
+    assert builder.validate_envelope(envelope) == []
     assert "pid" not in builder.canonical_json(envelope).lower()
-    assert verifier._validate_process(envelope, 17, "synthetic normalized proof")["returncode"] == 0
+    assert verifier._validate_process(
+        builder._legacy_verifier_projection(envelope),
+        17,
+        "synthetic normalized proof",
+    )["returncode"] == 0
 
 
 def test_default_is_blocked_and_reports_writer_only_publishes_that_sample(tmp_path: Path) -> None:
@@ -173,7 +237,7 @@ def test_command_identity_and_fixed_contract_are_checked(tmp_path: Path) -> None
     payload = _observation(tmp_path)
     payload["process"]["evaluator"]["command"][payload["process"]["evaluator"]["command"].index("835")] = "834"  # type: ignore[index]
     payload["process"]["evaluator"]["command_sha256"] = builder._command_sha256(payload["process"]["evaluator"]["command"])  # type: ignore[index]
-    with pytest.raises(builder.BuilderError, match="maximum-steps"):
+    with pytest.raises(builder.BuilderError, match="canonical evaluator argv|token/flag/path drift"):
         builder.build_envelope(payload)
 
     payload = _observation(tmp_path / "second")
@@ -272,3 +336,53 @@ def test_writer_refuses_symlink_and_hardlink_outputs(tmp_path: Path) -> None:
     os.link(target, output)
     with pytest.raises(builder.BuilderError, match="hard-linked"):
         builder.write_normalized_envelope(root, output, envelope)
+
+
+@pytest.mark.parametrize(
+    "mutator",
+    [
+        lambda payload: payload["process"]["evaluator"]["command"].__setitem__(0, "/tmp/python"),
+        lambda payload: payload["process"]["evaluator"]["command"].__setitem__(1, "/tmp/else/core_learning.py"),
+        lambda payload: payload["process"]["evaluator"]["command"].__setitem__(4, "wrong-manifest.json"),
+        lambda payload: payload["process"]["evaluator"]["command"].__setitem__(14, "834"),
+        lambda payload: payload["process"]["evaluator"]["command"].__setitem__(16, "34561"),
+        lambda payload: payload["process"]["evaluator"]["command"].__setitem__(26, "/tmp/other-evaluation.json"),
+    ],
+)
+def test_canonical_evaluator_rejects_interpreter_script_flag_and_path_drift(tmp_path: Path, mutator) -> None:
+    payload = _observation(tmp_path)
+    mutator(payload)
+    payload["process"]["evaluator"]["command_sha256"] = builder._command_sha256(payload["process"]["evaluator"]["command"])  # type: ignore[index]
+    with pytest.raises(builder.BuilderError, match="canonical evaluator argv|token/flag/path drift"):
+        builder.build_envelope(payload)
+
+
+def test_suspicious_launcher_is_rejected_even_when_it_has_the_evaluator_as_a_suffix(tmp_path: Path) -> None:
+    payload = _observation(tmp_path)
+    evaluator = payload["process"]["evaluator"]["command"]  # type: ignore[index]
+    launcher = ["/bin/sh", "-c", "exec", *evaluator]
+    payload["process"]["launcher"]["command"] = launcher  # type: ignore[index]
+    payload["process"]["launcher"]["command_sha256"] = builder._command_sha256(launcher)  # type: ignore[index]
+    with pytest.raises(builder.BuilderError, match="suspicious launcher"):
+        builder.build_envelope(payload)
+
+
+def test_command_binding_is_revalidated_after_normalization(tmp_path: Path) -> None:
+    envelope = builder.build_envelope(_observation(tmp_path))
+    envelope["command_binding"]["evaluator"]["argv"][-1] = "--not-diagnostic"  # type: ignore[index]
+    assert builder.validate_envelope(envelope)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        lambda artifact: artifact.pop("attestation"),
+        lambda artifact: artifact["attestation"]["validator"].__setitem__("artifact_sha256", "0" * 64),
+        lambda artifact: artifact["attestation"].__setitem__("binding_sha256", "0" * 64),
+    ],
+)
+def test_missing_or_inconsistent_artifact_attestation_fails_closed(tmp_path: Path, mutation) -> None:
+    payload = _observation(tmp_path)
+    mutation(payload["checkpoint"])  # type: ignore[index]
+    with pytest.raises(builder.BuilderError, match="attestation|binding"):
+        builder.build_envelope(payload)
