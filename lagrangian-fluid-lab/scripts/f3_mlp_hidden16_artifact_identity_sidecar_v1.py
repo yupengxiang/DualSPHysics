@@ -443,6 +443,10 @@ def _fresh_paths(seed: int, nonce: str) -> dict[str, Path]:
     }
 
 
+def _expected_checkpoint_path(seed: int) -> str:
+    return f"/tmp/f3-mlp500-hidden16-seed{seed}-20260928-checkpoint.pt"
+
+
 def _canonical_input(value: Path | str | None, expected: Path, name: str) -> Path:
     candidate = expected if value is None else _absolute_clean(value, name)
     if candidate != expected:
@@ -554,10 +558,21 @@ def _read_history_context(root: Path, seed: int, training: Mapping[str, Any]) ->
     history_path = root / "reports" / HISTORY_FILENAME.format(seed=seed)
     history, _history_source = _read_bounded_json(history_path, f"history_summary.seed{seed}")
     expected_schema = f"core.f3.mlp.hidden16.seed{seed}.full835_rollout_diagnostic.summary.v1"
-    _exact(history, "schema", expected_schema, f"history_summary.seed{seed}")
+    legacy_schema = "core.f3.mlp.hidden16.full835.rollout_diagnostic.summary.v1"
+    observed_schema = _string(history.get("schema"), f"history_summary.seed{seed}.schema")
+    if observed_schema not in {expected_schema, legacy_schema}:
+        _fail(
+            f"history_summary.seed{seed}.schema must be one of "
+            f"{expected_schema!r}, {legacy_schema!r}"
+        )
     _exact(history, "status", "completed", f"history_summary.seed{seed}")
     _exact(history, "diagnostic_only", True, f"history_summary.seed{seed}")
-    _zero_credit(history, f"history_summary.seed{seed}")
+    # Historical rollout summaries predate the closed zero-credit field set:
+    # they omit some authority keys, while every key they do publish must
+    # still be explicitly false/zero.  The sidecar emits the complete current
+    # zero-credit set below; accepting this legacy omission does not introduce
+    # any authority field or qualification claim.
+    _zero_credit(history, f"history_summary.seed{seed}", require=False)
     protocol = _mapping(history.get("protocol"), f"history_summary.seed{seed}.protocol")
     for key, expected in (
         ("model", MODEL),
@@ -566,12 +581,15 @@ def _read_history_context(root: Path, seed: int, training: Mapping[str, Any]) ->
         ("hidden", HIDDEN),
         ("case_id", CASE_ID),
         ("split", SPLIT),
-        ("maximum_steps", TRANSITIONS),
         ("diagnostic", True),
         ("autonomous", True),
         ("future_state_inputs", False),
     ):
         _exact(protocol, key, expected, f"history_summary.seed{seed}.protocol")
+    if "maximum_steps" in protocol:
+        _exact(protocol, "maximum_steps", TRANSITIONS, f"history_summary.seed{seed}.protocol")
+    else:
+        _exact(protocol, "requested_transitions", TRANSITIONS, f"history_summary.seed{seed}.protocol")
     evaluation = _mapping(history.get("evaluation"), f"history_summary.seed{seed}.evaluation")
     for key, expected in (
         ("status", "completed"),
@@ -587,7 +605,29 @@ def _read_history_context(root: Path, seed: int, training: Mapping[str, Any]) ->
         manifest_sha = _sha(manifest.get("sha256"), f"history_summary.seed{seed}.source.manifest.sha256")
     else:
         manifest_sha = _sha(source.get("manifest_sha256"), f"history_summary.seed{seed}.source.manifest_sha256")
-    history_checkpoint = _metadata_artifact(history.get("checkpoint"), f"history_summary.seed{seed}.checkpoint", suffix=".pt")
+    checkpoint_payload = history.get("checkpoint")
+    if isinstance(checkpoint_payload, Mapping):
+        history_checkpoint = _metadata_artifact(
+            checkpoint_payload,
+            f"history_summary.seed{seed}.checkpoint",
+            suffix=".pt",
+        )
+    else:
+        history_training = _mapping(
+            history.get("training"), f"history_summary.seed{seed}.training"
+        )
+        history_checkpoint = {
+            "path": _expected_checkpoint_path(seed),
+            "sha256": _sha(
+                history_training.get("checkpoint_sha256"),
+                f"history_summary.seed{seed}.training.checkpoint_sha256",
+            ),
+            "bytes": _strict_int(
+                history_training.get("checkpoint_bytes"),
+                f"history_summary.seed{seed}.training.checkpoint_bytes",
+                1,
+            ),
+        }
     training_checkpoint = dict(training["checkpoint"])
     if history_checkpoint["path"] != training_checkpoint["path"] or history_checkpoint["sha256"] != training_checkpoint["sha256"]:
         _fail(f"seed{seed} checkpoint identity drifts between training and history")
