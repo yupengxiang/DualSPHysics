@@ -1,0 +1,85 @@
+{
+  "blocking_gaps": [
+    {
+      "code": "scheduler_identity_not_authenticated",
+      "detail": "The dispatch projection is synthetic and digest-bound only; a production scheduler signature/runtime identity is absent."
+    },
+    {
+      "code": "core_trajectory_artifact_content_unverified",
+      "detail": "Only a bounded manifest is checked. The referenced trajectory bytes are deliberately not opened or read."
+    },
+    {
+      "code": "terminal_execution_evidence_missing",
+      "detail": "No worker terminal receipt, supervisor witness, final-fput witness, or native-integrity cell is consumed."
+    },
+    {
+      "code": "target_kernel_source_build_runtime_identity_unproven",
+      "detail": "This bridge does not resolve or promote the separate target-kernel/source/build/runtime readiness blockers."
+    }
+  ],
+  "contract_schema": "core.cfd.f8.r008_core_trajectory_provenance_identity_contract.v1",
+  "input_boundary": {
+    "input_origin": "synthetic_fixture",
+    "max_json_bytes": 131072,
+    "mode": "bounded_in_memory_canonical_json",
+    "production_paths_read": false,
+    "synthetic_only": true,
+    "trajectory_hdf5_bi4_solver_frames_read": false
+  },
+  "integration_boundary": {
+    "core_trajectory_materializer": "not invoked; no artifact is opened",
+    "ledger_registry_and_completion": "not read for mutation and never written",
+    "readiness_and_T1": "not promoted or credited",
+    "scheduler_or_worker": "not started, stopped, or queued",
+    "trusted_worker_runtime_handoff": "delegated and not replaced"
+  },
+  "non_authorizing_boundary": {
+    "T1_numerical": false,
+    "artifact_content_verified": false,
+    "capability_minted": false,
+    "denominator_mutation": 0,
+    "diagnostic_only": true,
+    "execution_authority": false,
+    "formal_admission": false,
+    "formal_eligible": false,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "production_identity_authenticated": false,
+    "qualification_credit": 0,
+    "queue_started": false,
+    "readiness_pass": false,
+    "registry_mutation": 0,
+    "scheduler_identity_authenticated": false,
+    "solver_started": false,
+    "terminal_evidence_verified": false,
+    "worker_started": false
+  },
+  "not_verified": [
+    "production_scheduler_identity_or_runtime_authenticity",
+    "trajectory_artifact_presence_or_content",
+    "terminal_supervisor_final_fput_or_fanotify_evidence",
+    "target_kernel_source_build_runtime_identity",
+    "native_integrity_15_by_8_cells",
+    "15_case_T1_adjudication"
+  ],
+  "prohibited_operations": [
+    "production_trajectory_hdf5_bi4_solver_frame_read",
+    "native_or_solver",
+    "worker_gpu_or_queue",
+    "scheduler_start_stop_or_restart",
+    "production_identity_authentication_claim",
+    "registry_ledger_completion_gate_mutation"
+  ],
+  "record_id": "f8-r008-core-trajectory-provenance-identity-report-v1",
+  "schema": "core.cfd.f8.r008_core_trajectory_provenance_identity_report.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "synthetic_only_non_authorizing_core_trajectory_provenance_contract_design",
+  "verified_chain": [
+    "existing_signed_worker_runtime_handoff_is_verified_first",
+    "scheduler_dispatch_exactly_binds_handoff_digest_and_attempt_identity",
+    "scheduler_dispatch_binds_source_runtime_input_and_output_pins",
+    "Core_trajectory_manifest_exactly_binds_dispatch_and_case_identity",
+    "canonical_chain_digest_covers_handoff_dispatch_and_Core_manifest"
+  ]
+}
