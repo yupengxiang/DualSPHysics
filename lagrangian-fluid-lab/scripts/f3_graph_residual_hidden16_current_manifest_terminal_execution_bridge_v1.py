@@ -374,22 +374,7 @@ def build_bridge_plan(
         gpu_index=gpu_index,
         admission=admission,
     )
-    digest = canonical_digest(
-        {
-            "schema": PLAN_SCHEMA,
-            "seed": audited.seed,
-            "run_id": audited.base.run_id,
-            "manifest_sha256": audited.base.manifest_binding["canonical_sha256"],
-            "training_receipt_sha256": audited.base.training_binding["sha256"],
-            "checkpoint": dict(audited.base.checkpoint),
-            "namespace": str(audited.namespace),
-            "namespace_nonce": audited.nonce,
-            "command": list(audited.base.command),
-            "command_sha256": audited.base.command_sha256,
-            "gpu_index": audited.gpu_index,
-            "admission": dict(audited.admission),
-        }
-    )
+    digest = identity._plan_digest(audited.base, audited.gpu_index, audited.admission)
     return BridgePlan(audited=audited, plan_digest=digest, contract_review=review)
 
 
@@ -458,16 +443,9 @@ def execute_bridge(
     plan: BridgePlan,
     *,
     execution_requested: bool = False,
-    popen_factory: Any | None = None,
 ) -> dict[str, Any]:
-    """Enforce the execute boundary; this revision never reaches Popen.
+    """Enforce the execute boundary; this revision has no Popen seam."""
 
-    ``popen_factory`` is accepted only so callers/tests can prove that the
-    boundary ignores even a supplied launcher.  It is deliberately never
-    called.  The parameter is not an execution escape hatch.
-    """
-
-    del popen_factory
     boundary = build_execution_boundary(plan, execution_requested=execution_requested)
     if execution_requested:
         _fail(
@@ -565,9 +543,16 @@ def validate_terminal_execution_receipt(
                 "popen_called",
                 "wait_observed",
                 "wait_returncode",
+                "plan_digest",
+                "manifest_sha256",
+                "training_receipt_sha256",
+                "checkpoint",
+                "namespace",
+                "namespace_nonce",
                 "command_sha256",
                 "argv",
                 "cwd",
+                "env",
                 "independent_validator_passed",
                 "validator_returncode",
                 "transitions",
@@ -582,9 +567,35 @@ def validate_terminal_execution_receipt(
     _exact(observation, "popen_called", True, "execution_observation")
     _exact(observation, "wait_observed", True, "execution_observation")
     _exact(observation, "wait_returncode", 0, "execution_observation")
+    _exact(observation, "plan_digest", plan.plan_digest, "execution_observation")
+    _exact(
+        observation,
+        "manifest_sha256",
+        plan.audited.base.manifest_binding["canonical_sha256"],
+        "execution_observation",
+    )
+    _exact(
+        observation,
+        "training_receipt_sha256",
+        plan.audited.base.training_binding["sha256"],
+        "execution_observation",
+    )
+    _exact(observation, "namespace", str(plan.namespace), "execution_observation")
+    _exact(observation, "namespace_nonce", plan.nonce, "execution_observation")
+    checkpoint = _mapping(observation.get("checkpoint"), "execution_observation.checkpoint")
+    _unknown(checkpoint, frozenset({"path", "sha256", "bytes"}), "execution_observation.checkpoint")
+    expected_checkpoint = {
+        key: plan.audited.base.checkpoint[key] for key in ("path", "sha256", "bytes")
+    }
+    if dict(checkpoint) != expected_checkpoint:
+        _fail("execution_observation.checkpoint drifted from the audited training identity")
     _exact(observation, "command_sha256", plan.audited.base.command_sha256, "execution_observation")
     _exact(observation, "argv", list(plan.audited.base.command), "execution_observation")
     _exact(observation, "cwd", str(plan.audited.base.cwd), "execution_observation")
+    environment = _mapping(observation.get("env"), "execution_observation.env")
+    _unknown(environment, frozenset(plan.audited.base.env), "execution_observation.env")
+    if dict(environment) != dict(plan.audited.base.env):
+        _fail("execution_observation.env drifted from the audited launch environment")
     _exact(observation, "independent_validator_passed", True, "execution_observation")
     _exact(observation, "validator_returncode", 0, "execution_observation")
     _exact(observation, "transitions", TRANSITIONS, "execution_observation")

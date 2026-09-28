@@ -27,6 +27,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import hashlib
+import io
 import json
 import math
 import os
@@ -37,7 +38,9 @@ import shutil
 import stat
 import subprocess
 import sys
-from typing import Any, Callable
+from typing import Any
+
+import h5py
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -63,10 +66,13 @@ SCHEMA = "core.f3.graph_residual.hidden16.current_manifest.terminal_artifact_ide
 PLAN_SCHEMA = "core.f3.graph_residual.hidden16.current_manifest.audited_terminal_plan.v1"
 REPORT_SCHEMA = "core.f3.graph_residual.hidden16.current_manifest.terminal_artifact_identity_report.v1"
 REPORT_ID = "f3-graph-residual-hidden16-current-manifest-terminal-artifact-identity-v1"
-PROCESS_PROOF_SCHEMA = "core.f3.graph_residual.hidden16.current_manifest.process_proof.v1"
+PROCESS_PROOF_SCHEMA = "core.f3.graph_residual.hidden16.current_manifest.process_proof.v2"
 HDF5_VALIDATOR_SCHEMA = launcher.VALIDATOR_SCHEMA
 TERMINAL_CAPABILITY_SCHEMA = (
     "core.f3.graph_residual.hidden16.current_manifest.terminal_hdf5_artifact_capability.v1"
+)
+SEALED_LIFECYCLE_SCHEMA = (
+    "core.f3.graph_residual.hidden16.current_manifest.sealed_popen_wait_lifecycle.v1"
 )
 
 DEFAULT_MANIFEST = LAB_ROOT / "campaigns" / "core-v1" / "f3-dataset-v2.json"
@@ -95,6 +101,8 @@ MAX_ARRAY_ITEMS = 4096
 MAX_STRING_BYTES = 2 * 1024 * 1024
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 NONCE_RE = re.compile(r"^[0-9a-f]{32}$")
+MAX_ARTIFACT_BYTES = 1 << 50
+MAX_HDF5_LINKS = 8192
 
 MIN_GPU_FREE_MIB = 8 * 1024
 MIN_CPU_COUNT = 4
@@ -238,6 +246,210 @@ def _absolute_path(value: Path | str, name: str) -> Path:
     if candidate != normalized or any(part in {".", ".."} for part in candidate.parts):
         _fail(f"{name} contains a lexical path alias")
     return normalized
+
+
+def _filesystem_identity(info: os.stat_result) -> tuple[int, int, int, int, int, int, int]:
+    """Return the immutable-ish identity fields used around one safe read."""
+
+    return (
+        int(info.st_dev),
+        int(info.st_ino),
+        int(info.st_mode),
+        int(info.st_nlink),
+        int(info.st_size),
+        int(info.st_mtime_ns),
+        int(info.st_ctime_ns),
+    )
+
+
+def _directory_flags() -> int:
+    required = getattr(os, "O_DIRECTORY", 0)
+    if required == 0:
+        _fail("platform does not expose O_DIRECTORY")
+    return os.O_RDONLY | required | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+
+
+def _open_artifact_parent(path: Path, name: str) -> tuple[int, list[int]]:
+    """Open every parent component without following a directory symlink."""
+
+    flags = _directory_flags()
+    opened: list[int] = []
+    try:
+        current = os.open(os.sep, flags)
+        opened.append(current)
+        for component in path.parts[1:-1]:
+            next_fd = os.open(component, flags, dir_fd=current)
+            opened.append(next_fd)
+            current = next_fd
+        return current, opened
+    except OSError as error:
+        for descriptor in reversed(opened):
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+        _fail(f"{name} parent contains a symlink or unsafe directory: {error}")
+
+
+def _reject_unsafe_hdf5_links(handle: h5py.File) -> int:
+    """Reject external/soft links, external storage, and virtual datasets."""
+
+    pending: list[h5py.Group] = [handle]
+    visited_groups: set[int] = set()
+    visited_links = 0
+    while pending:
+        group = pending.pop()
+        group_id = int(group.id.id)
+        if group_id in visited_groups:
+            continue
+        visited_groups.add(group_id)
+        for member in group.keys():
+            visited_links += 1
+            if visited_links > MAX_HDF5_LINKS:
+                _fail("HDF5 link count exceeds the bounded limit")
+            link = group.get(member, getlink=True)
+            if not isinstance(link, h5py.HardLink):
+                _fail(f"HDF5 contains a non-hard link at {member!r}")
+            obj = group.get(member)
+            if isinstance(obj, h5py.Group):
+                pending.append(obj)
+            elif isinstance(obj, h5py.Dataset):
+                if bool(getattr(obj, "is_virtual", False)):
+                    _fail(f"HDF5 contains a virtual dataset at {member!r}")
+                external_storage = getattr(obj, "external", None)
+                if external_storage:
+                    _fail(f"HDF5 contains externally stored dataset at {member!r}")
+            else:
+                _fail(f"HDF5 contains an unsupported object at {member!r}")
+    return visited_links
+
+
+def _inspect_hdf5_descriptor(fd: int, name: str) -> dict[str, Any]:
+    """Inspect HDF5 from the already-open descriptor, never from its path."""
+
+    try:
+        os.lseek(fd, 0, os.SEEK_SET)
+        stream = os.fdopen(os.dup(fd), "rb", closefd=True)
+        with stream:
+            with h5py.File(stream, "r") as handle:
+                links = _reject_unsafe_hdf5_links(handle)
+    except (OSError, ValueError, RuntimeError) as error:
+        _fail(f"{name} is not a safe physical-link HDF5 snapshot: {error}")
+    return {
+        "physical_hdf5": True,
+        "hard_link_count": links,
+        "external_links_rejected": True,
+        "soft_links_rejected": True,
+        "external_storage_rejected": True,
+        "virtual_datasets_rejected": True,
+    }
+
+
+def read_bound_artifact(
+    path: Path | str,
+    *,
+    expected_sha256: str,
+    expected_bytes: int,
+    name: str = "artifact",
+    hdf5: bool = False,
+) -> dict[str, Any]:
+    """Read/hash one stable single-link artifact through descriptor handles.
+
+    The digest and byte count come from the same descriptor used for the
+    optional HDF5 inspection.  Parent/leaf symlinks, hard links, descriptor
+    replacement, and pathname drift are all fail-closed.  HDF5 is inspected
+    only through the bound descriptor, and every link must be a physical hard
+    link with no external storage or VDS.
+    """
+
+    candidate = _absolute_path(path, f"{name}.path")
+    expected_sha256 = _sha(expected_sha256, f"{name}.sha256")
+    expected_bytes = _int(expected_bytes, f"{name}.bytes", 1)
+    if expected_bytes > MAX_ARTIFACT_BYTES:
+        _fail(f"{name}.bytes exceeds the bounded artifact limit")
+    parent_fd, opened = _open_artifact_parent(candidate, name)
+    leaf_fd: int | None = None
+    before: os.stat_result | None = None
+    digest = hashlib.sha256()
+    total = 0
+    hdf5_identity: dict[str, Any] | None = None
+    try:
+        try:
+            leaf_fd = os.open(
+                candidate.name,
+                os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0),
+                dir_fd=parent_fd,
+            )
+        except OSError as error:
+            _fail(f"{name} cannot be opened without following links: {error}")
+        before = os.fstat(leaf_fd)
+        if not stat.S_ISREG(before.st_mode):
+            _fail(f"{name} must be a regular file")
+        if before.st_nlink != 1:
+            _fail(f"{name} must have exactly one hard link")
+        if before.st_size != expected_bytes:
+            _fail(f"{name}.bytes disagrees with the bound descriptor")
+        if before.st_size < 1 or before.st_size > MAX_ARTIFACT_BYTES:
+            _fail(f"{name} is outside the bounded artifact size")
+
+        while True:
+            block = os.read(leaf_fd, min(1024 * 1024, MAX_ARTIFACT_BYTES - total))
+            if not block:
+                break
+            digest.update(block)
+            total += len(block)
+            if total > MAX_ARTIFACT_BYTES:
+                _fail(f"{name} exceeds the bounded artifact limit")
+        if total != before.st_size:
+            _fail(f"{name} changed while it was being read")
+        if hdf5:
+            hdf5_identity = _inspect_hdf5_descriptor(leaf_fd, name)
+        after_fd = os.fstat(leaf_fd)
+        if _filesystem_identity(after_fd) != _filesystem_identity(before):
+            _fail(f"{name} descriptor identity changed during validation")
+    except OSError as error:
+        _fail(f"{name} cannot be read safely: {error}")
+    finally:
+        if leaf_fd is not None:
+            try:
+                os.close(leaf_fd)
+            except OSError:
+                pass
+        for descriptor in reversed(opened):
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+
+    try:
+        after_path = os.lstat(candidate)
+    except OSError as error:
+        _fail(f"{name} path changed after descriptor validation: {error}")
+    if (
+        before is None
+        or not stat.S_ISREG(after_path.st_mode)
+        or after_path.st_nlink != 1
+        or _filesystem_identity(after_path) != _filesystem_identity(before)
+    ):
+        _fail(f"{name} path identity drifted after descriptor validation")
+    observed_sha256 = digest.hexdigest()
+    if observed_sha256 != expected_sha256:
+        _fail(f"{name}.sha256 disagrees with the bound descriptor")
+    return {
+        "path": str(candidate),
+        "sha256": observed_sha256,
+        "bytes": total,
+        "identity": {
+            "st_dev": int(before.st_dev),
+            "st_ino": int(before.st_ino),
+            "st_mode": int(before.st_mode),
+            "st_nlink": int(before.st_nlink),
+            "st_size": int(before.st_size),
+            "st_mtime_ns": int(before.st_mtime_ns),
+            "st_ctime_ns": int(before.st_ctime_ns),
+        },
+        "hdf5": hdf5_identity,
+    }
 
 
 def _read_bounded_json(path: Path | str, *, name: str) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -497,12 +709,18 @@ class AuditedPlan:
 def _plan_digest(base: Any, gpu_index: int, admission: Mapping[str, Any]) -> str:
     return canonical_digest(
         {
+            "schema": PLAN_SCHEMA,
             "run_id": base.run_id,
             "seed": base.seed,
             "nonce": base.nonce,
             "namespace": str(base.output_namespace),
+            "manifest_sha256": base.manifest_binding["canonical_sha256"],
+            "training_receipt_sha256": base.training_binding["sha256"],
+            "checkpoint": dict(base.checkpoint),
             "command": list(base.command),
             "command_sha256": base.command_sha256,
+            "cwd": str(base.cwd),
+            "env": dict(base.env),
             "gpu_index": gpu_index,
             "admission": dict(admission),
         }
@@ -754,119 +972,20 @@ def _build_current_manifest_plan(
     )
 
 
-def _revalidate_for_execution(
-    plan: AuditedPlan,
-    *,
-    admission_probe: Callable[[int], Mapping[str, Any]],
-) -> None:
-    current = admission_probe(plan.gpu_index)
-    if not bool(current.get("admitted")):
-        _fail("resource admission changed before execution")
-    if os.path.lexists(plan.namespace):
-        _fail("fresh output namespace was created or reused before execution")
-    for name, path in plan.outputs.items():
-        if os.path.lexists(path):
-            _fail(f"output.{name} is no longer fresh")
+def execute_plan(plan: AuditedPlan) -> dict[str, Any]:
+    """Reject every execution request without an injectable authority seam.
 
+    This diagnostic module intentionally has no capability object, no
+    ``popen_factory`` parameter, and no subprocess execution path.  A future
+    trusted runtime may produce a sealed witness in a separate integration;
+    a caller cannot manufacture one by importing this module.
+    """
 
-_TERMINAL_CAPABILITY_TOKEN = object()
-
-
-@dataclass(frozen=True)
-class _ExecutionRecord:
-    capability_token: object
-    command: tuple[str, ...]
-    cwd: str
-    pid: int
-    wait_observed: bool
-    wait_returncode: int
-    real_popen: bool
-
-
-def _run_popen_wait(
-    plan: AuditedPlan,
-    *,
-    terminal_capability: object,
-    popen_factory: Callable[..., Any] = subprocess.Popen,
-    admission_probe: Callable[[int], Mapping[str, Any]],
-) -> _ExecutionRecord:
-    if terminal_capability is not _TERMINAL_CAPABILITY_TOKEN:
-        _fail("terminal capability token is not admitted")
-    _revalidate_for_execution(plan, admission_probe=admission_probe)
-    process = popen_factory(
-        list(plan.base.command),
-        cwd=str(plan.base.cwd),
-        env={**os.environ, **dict(plan.base.env)},
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        start_new_session=True,
+    del plan
+    _fail(
+        f"{TERMINAL_CAPABILITY_SCHEMA} is not implemented/admitted; "
+        "no evaluator was started and no Popen/wait witness can be minted here"
     )
-    if not isinstance(process, subprocess.Popen):
-        _fail("process proof requires a real subprocess.Popen instance")
-    pid = _int(process.pid, "process.pid", 1)
-    returncode = process.wait()
-    if type(returncode) is not int:
-        _fail("real subprocess.Popen.wait() must return an integer")
-    return _ExecutionRecord(
-        capability_token=terminal_capability,
-        command=tuple(plan.base.command),
-        cwd=str(plan.base.cwd),
-        pid=pid,
-        wait_observed=True,
-        wait_returncode=returncode,
-        real_popen=True,
-    )
-
-
-def build_process_proof(plan: AuditedPlan, record: _ExecutionRecord) -> dict[str, Any]:
-    if record.capability_token is not _TERMINAL_CAPABILITY_TOKEN or not record.real_popen:
-        _fail("process proof requires the real Popen capability path")
-    if not record.wait_observed:
-        _fail("process proof requires an observed wait")
-    if record.wait_returncode != 0:
-        _fail("non-zero evaluator return code cannot produce a successful process proof")
-    if tuple(record.command) != tuple(plan.base.command) or record.cwd != str(plan.base.cwd):
-        _fail("process proof command/cwd drifted from the audited plan")
-    return {
-        "schema": PROCESS_PROOF_SCHEMA,
-        "producer": "subprocess.Popen",
-        "evidence_kind": "runtime_process_observation",
-        "synthetic": False,
-        "popen_called": True,
-        "pid_observed": True,
-        "pid": record.pid,
-        "wait_called": True,
-        "wait_returncode": 0,
-        "exit_status_verified": True,
-        "command_sha256": plan.base.command_sha256,
-        "cwd": record.cwd,
-        "argv": list(record.command),
-    }
-
-
-def execute_plan(
-    plan: AuditedPlan,
-    *,
-    terminal_capability: object | None = None,
-    popen_factory: Callable[..., Any] = subprocess.Popen,
-    admission_probe: Callable[[int], Mapping[str, Any]],
-) -> dict[str, Any]:
-    """Fail closed until an independently reviewed terminal capability exists."""
-
-    _revalidate_for_execution(plan, admission_probe=admission_probe)
-    if terminal_capability is not _TERMINAL_CAPABILITY_TOKEN:
-        _fail(
-            f"{TERMINAL_CAPABILITY_SCHEMA} is not implemented/admitted; "
-            "no evaluator was started"
-        )
-    record = _run_popen_wait(
-        plan,
-        terminal_capability=terminal_capability,
-        popen_factory=popen_factory,
-        admission_probe=admission_probe,
-    )
-    return {"process_proof": build_process_proof(plan, record), **ZERO_CREDIT}
 
 
 ARTIFACT_KEYS = frozenset({"path", "sha256", "bytes"})
@@ -877,14 +996,36 @@ PROCESS_KEYS = frozenset(
         "evidence_kind",
         "synthetic",
         "popen_called",
-        "pid_observed",
-        "pid",
         "wait_called",
         "wait_returncode",
         "exit_status_verified",
+        "plan_digest",
+        "manifest_sha256",
+        "training_receipt_sha256",
+        "checkpoint",
+        "namespace",
+        "namespace_nonce",
         "command_sha256",
         "cwd",
+        "env",
         "argv",
+        "sealed_lifecycle",
+    }
+)
+SEALED_LIFECYCLE_KEYS = frozenset(
+    {
+        "schema",
+        "producer",
+        "sealed",
+        "popen_called",
+        "wait_called",
+        "wait_returncode",
+        "reaped",
+        "natural_exit",
+        "argv",
+        "cwd",
+        "env",
+        "binding_sha256",
     }
 )
 VALIDATOR_KEYS = frozenset(
@@ -923,6 +1064,7 @@ EVIDENCE_KEYS = frozenset(
         "split",
         "transitions",
         "frames",
+        "plan_digest",
         "manifest_sha256",
         "training_receipt_sha256",
         "checkpoint",
@@ -935,17 +1077,56 @@ EVIDENCE_KEYS = frozenset(
 )
 
 
-def _artifact(value: Any, *, expected_path: Path, name: str) -> dict[str, Any]:
+def _artifact(
+    value: Any,
+    *,
+    expected_path: Path,
+    name: str,
+    verify_snapshot: bool = False,
+    hdf5: bool = False,
+) -> dict[str, Any]:
     item = _mapping(value, name)
     _unknown(item, ARTIFACT_KEYS, name)
     path = _absolute_path(item.get("path"), f"{name}.path")
     if path != expected_path:
         _fail(f"{name}.path is not bound to the fresh audited plan")
-    return {
+    result = {
         "path": str(path),
         "sha256": _sha(item.get("sha256"), f"{name}.sha256"),
         "bytes": _int(item.get("bytes"), f"{name}.bytes", 1),
     }
+    if verify_snapshot:
+        read_bound_artifact(
+            path,
+            expected_sha256=result["sha256"],
+            expected_bytes=result["bytes"],
+            name=name,
+            hdf5=hdf5,
+        )
+    return result
+
+
+def _validate_plan_input_snapshots(plan: AuditedPlan) -> None:
+    """Re-bind all plan source files before any terminal identity is considered."""
+
+    read_bound_artifact(
+        plan.base.manifest,
+        expected_sha256=plan.base.manifest_binding["raw_sha256"],
+        expected_bytes=plan.base.manifest_binding["bytes"],
+        name="audited_plan.manifest",
+    )
+    read_bound_artifact(
+        plan.base.training_receipt,
+        expected_sha256=plan.base.training_binding["sha256"],
+        expected_bytes=plan.base.training_binding["bytes"],
+        name="audited_plan.training_receipt",
+    )
+    read_bound_artifact(
+        plan.base.checkpoint["path"],
+        expected_sha256=plan.base.checkpoint["sha256"],
+        expected_bytes=plan.base.checkpoint["bytes"],
+        name="audited_plan.checkpoint",
+    )
 
 
 def _validate_process_proof(value: Any, plan: AuditedPlan) -> dict[str, Any]:
@@ -956,16 +1137,82 @@ def _validate_process_proof(value: Any, plan: AuditedPlan) -> dict[str, Any]:
     _exact(proof, "evidence_kind", "runtime_process_observation", "process_proof")
     _exact(proof, "synthetic", False, "process_proof")
     _exact(proof, "popen_called", True, "process_proof")
-    _exact(proof, "pid_observed", True, "process_proof")
-    _int(proof.get("pid"), "process_proof.pid", 1)
     _exact(proof, "wait_called", True, "process_proof")
     _exact(proof, "wait_returncode", 0, "process_proof")
     _exact(proof, "exit_status_verified", True, "process_proof")
+    _exact(proof, "plan_digest", plan.plan_digest, "process_proof")
+    _exact(
+        proof,
+        "manifest_sha256",
+        plan.base.manifest_binding["canonical_sha256"],
+        "process_proof",
+    )
+    _exact(proof, "training_receipt_sha256", plan.base.training_binding["sha256"], "process_proof")
+    _exact(proof, "namespace", str(plan.namespace), "process_proof")
+    _exact(proof, "namespace_nonce", plan.nonce, "process_proof")
     _exact(proof, "command_sha256", plan.base.command_sha256, "process_proof")
     _exact(proof, "cwd", str(plan.base.cwd), "process_proof")
+    environment = _mapping(proof.get("env"), "process_proof.env")
+    _unknown(environment, frozenset(plan.base.env), "process_proof.env")
+    if dict(environment) != dict(plan.base.env):
+        _fail("process_proof.env drifted from the audited launch environment")
+    checkpoint = _artifact(
+        proof.get("checkpoint"),
+        expected_path=Path(plan.base.checkpoint["path"]),
+        name="process_proof.checkpoint",
+    )
+    if checkpoint != {
+        key: plan.base.checkpoint[key] for key in ("path", "sha256", "bytes")
+    }:
+        _fail("process_proof.checkpoint drifted from the audited training identity")
     if list(proof.get("argv", [])) != list(plan.base.command):
         _fail("process_proof.argv drifted from the exact audited command")
-    return dict(proof)
+    lifecycle = _mapping(proof.get("sealed_lifecycle"), "process_proof.sealed_lifecycle")
+    _unknown(lifecycle, SEALED_LIFECYCLE_KEYS, "process_proof.sealed_lifecycle")
+    _exact(lifecycle, "schema", SEALED_LIFECYCLE_SCHEMA, "process_proof.sealed_lifecycle")
+    _exact(lifecycle, "producer", "audited_runtime_sealed_witness", "process_proof.sealed_lifecycle")
+    _exact(lifecycle, "sealed", True, "process_proof.sealed_lifecycle")
+    _exact(lifecycle, "popen_called", True, "process_proof.sealed_lifecycle")
+    _exact(lifecycle, "wait_called", True, "process_proof.sealed_lifecycle")
+    _exact(lifecycle, "wait_returncode", 0, "process_proof.sealed_lifecycle")
+    _exact(lifecycle, "reaped", True, "process_proof.sealed_lifecycle")
+    _exact(lifecycle, "natural_exit", True, "process_proof.sealed_lifecycle")
+    if list(lifecycle.get("argv", [])) != list(plan.base.command):
+        _fail("process_proof.sealed_lifecycle.argv drifted from the audited command")
+    _exact(lifecycle, "cwd", str(plan.base.cwd), "process_proof.sealed_lifecycle")
+    lifecycle_env = _mapping(lifecycle.get("env"), "process_proof.sealed_lifecycle.env")
+    _unknown(lifecycle_env, frozenset(plan.base.env), "process_proof.sealed_lifecycle.env")
+    if dict(lifecycle_env) != dict(plan.base.env):
+        _fail("process_proof.sealed_lifecycle.env drifted from the audited environment")
+    lifecycle_binding = {
+        "schema": SEALED_LIFECYCLE_SCHEMA,
+        "producer": "audited_runtime_sealed_witness",
+        "sealed": True,
+        "popen_called": True,
+        "wait_called": True,
+        "wait_returncode": 0,
+        "reaped": True,
+        "natural_exit": True,
+        "argv": list(plan.base.command),
+        "cwd": str(plan.base.cwd),
+        "env": dict(plan.base.env),
+        "plan_digest": plan.plan_digest,
+        "manifest_sha256": plan.base.manifest_binding["canonical_sha256"],
+        "training_receipt_sha256": plan.base.training_binding["sha256"],
+        "checkpoint": checkpoint,
+        "namespace": str(plan.namespace),
+        "namespace_nonce": plan.nonce,
+    }
+    _exact(
+        lifecycle,
+        "binding_sha256",
+        canonical_digest(lifecycle_binding),
+        "process_proof.sealed_lifecycle",
+    )
+    _fail(
+        "process proof is declaration-only; no in-memory sealed real Popen/wait "
+        "witness is admitted by the residual identity boundary"
+    )
 
 
 def _validate_hdf5_validator(value: Any, plan: AuditedPlan, trajectory: Mapping[str, Any], evaluation: Mapping[str, Any]) -> dict[str, Any]:
@@ -1006,7 +1253,7 @@ def validate_terminal_artifact_identity(
     evidence: Mapping[str, Any],
     plan: AuditedPlan,
 ) -> dict[str, Any]:
-    """Validate one future terminal envelope without opening HDF5 content."""
+    """Validate one future terminal envelope behind a sealed-runtime gate."""
 
     _walk_json(evidence, "terminal_evidence")
     _unknown(evidence, EVIDENCE_KEYS, "terminal_evidence")
@@ -1024,9 +1271,11 @@ def validate_terminal_artifact_identity(
     _exact(evidence, "split", SPLIT, "terminal_evidence")
     _exact(evidence, "transitions", TRANSITIONS, "terminal_evidence")
     _exact(evidence, "frames", FRAMES, "terminal_evidence")
+    _exact(evidence, "plan_digest", plan.plan_digest, "terminal_evidence")
     _exact(evidence, "manifest_sha256", plan.base.manifest_binding["canonical_sha256"], "terminal_evidence")
     _exact(evidence, "training_receipt_sha256", plan.base.training_binding["sha256"], "terminal_evidence")
     _exact(evidence, "command_sha256", plan.base.command_sha256, "terminal_evidence")
+    _validate_plan_input_snapshots(plan)
     checkpoint = _mapping(evidence.get("checkpoint"), "terminal_evidence.checkpoint")
     _unknown(checkpoint, ARTIFACT_KEYS | frozenset({"schema", "update"}), "terminal_evidence.checkpoint")
     _exact(checkpoint, "schema", launcher.CHECKPOINT_SCHEMA, "terminal_evidence.checkpoint")
@@ -1040,20 +1289,29 @@ def validate_terminal_artifact_identity(
     for key in ("sha256", "bytes"):
         if checkpoint_identity[key] != expected_checkpoint[key]:
             _fail(f"terminal_evidence.checkpoint.{key} differs from training identity")
-    process = _validate_process_proof(evidence.get("process_proof"), plan)
+    read_bound_artifact(
+        checkpoint_identity["path"],
+        expected_sha256=checkpoint_identity["sha256"],
+        expected_bytes=checkpoint_identity["bytes"],
+        name="terminal_evidence.checkpoint",
+    )
     evaluation = _artifact(
         evidence.get("evaluation_artifact"),
         expected_path=plan.outputs["evaluation"],
         name="terminal_evidence.evaluation_artifact",
+        verify_snapshot=True,
     )
     trajectory = _artifact(
         evidence.get("trajectory_artifact"),
         expected_path=plan.outputs["trajectory"],
         name="terminal_evidence.trajectory_artifact",
+        verify_snapshot=True,
+        hdf5=True,
     )
     validator = _validate_hdf5_validator(
         evidence.get("hdf5_validator"), plan, trajectory, evaluation
     )
+    process = _validate_process_proof(evidence.get("process_proof"), plan)
     return {
         "schema": SCHEMA,
         "seed": plan.seed,

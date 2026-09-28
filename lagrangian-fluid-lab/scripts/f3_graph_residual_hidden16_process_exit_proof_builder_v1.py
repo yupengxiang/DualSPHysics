@@ -39,6 +39,7 @@ from typing import Any
 
 if str(Path(__file__).resolve().parents[1]) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from scripts import f3_graph_residual_hidden16_current_manifest_terminal_artifact_identity_v1 as residual_identity
 from scripts import f3_graph_residual_hidden16_terminal_runtime_verifier_v1 as verifier
 
 
@@ -86,6 +87,10 @@ CANONICAL_ENV_ASSIGNMENT = "PYTHONDONTWRITEBYTECODE=1"
 COMMAND_BINDING_SCHEMA = "core.f3.graph_residual.hidden16.command_digest_binding.v1"
 ARTIFACT_ATTESTATION_SCHEMA = "core.f3.graph_residual.hidden16.artifact_digest_attestation.v1"
 ARTIFACT_ATTESTATION_MODE = "producer_and_independent_validator_digest_binding"
+SEALED_LIFECYCLE_SCHEMA = residual_identity.SEALED_LIFECYCLE_SCHEMA
+PROCESS_PLAN_BINDING_SCHEMA = "core.f3.graph_residual.hidden16.process_plan_binding.v2"
+EXPECTED_CWD = str(LAB_ROOT)
+EXPECTED_ENV = {"PYTHONDONTWRITEBYTECODE": "1"}
 
 DEFAULT_BLOCKED_FILENAME = "F3-GRAPH-RESIDUAL-HIDDEN16-PROCESS-EXIT-PROOF-BUILDER-V1-2026-09-28.json"
 DEFAULT_BLOCKED_MARKDOWN_FILENAME = DEFAULT_BLOCKED_FILENAME.removesuffix(".json") + ".zh-CN.md"
@@ -116,9 +121,47 @@ INPUT_KEYS = frozenset(
         "exit_observation",
     }
 )
-PROCESS_KEYS = frozenset({"evaluator", "launcher"})
-PROCESS_COMPONENT_KEYS = frozenset({"alive", "returncode", "reaped", "command", "command_sha256"})
-ARTIFACT_KEYS = frozenset({"path", "sha256", "bytes", "content_opened", "stat_only", "attestation"})
+PROCESS_KEYS = frozenset({"binding", "evaluator", "launcher", "sealed_lifecycle"})
+PROCESS_COMPONENT_KEYS = frozenset(
+    {"alive", "returncode", "reaped", "command", "command_sha256", "cwd", "env"}
+)
+PROCESS_BINDING_KEYS = frozenset(
+    {
+        "schema",
+        "seed",
+        "run_id",
+        "plan_digest",
+        "manifest_sha256",
+        "training_receipt_sha256",
+        "checkpoint",
+        "namespace",
+        "namespace_nonce",
+        "cwd",
+        "env",
+        "command_binding",
+        "evaluator_command_sha256",
+        "launcher_command_sha256",
+        "binding_sha256",
+    }
+)
+SEALED_LIFECYCLE_KEYS = frozenset(
+    {
+        "schema",
+        "producer",
+        "sealed",
+        "evaluator_popen_called",
+        "evaluator_wait_called",
+        "launcher_popen_called",
+        "launcher_wait_called",
+        "evaluator_returncode",
+        "launcher_returncode",
+        "natural_exit",
+        "binding_sha256",
+    }
+)
+ARTIFACT_KEYS = frozenset(
+    {"path", "sha256", "bytes", "content_opened", "stat_only", "attestation", "snapshot_verified"}
+)
 ATTESTATION_KEYS = frozenset(
     {
         "schema",
@@ -160,6 +203,9 @@ NORMALIZED_EXTENSION_KEYS = frozenset(
         "launcher_command_sha256",
         "training_receipt",
         "evaluation_artifact",
+        "audited_plan_digest",
+        "process_cwd",
+        "process_env",
     }
 )
 
@@ -626,7 +672,18 @@ def _artifact(
         artifact_sha256=digest,
         artifact_bytes=byte_count,
     )
-    _stat_regular_single_link(path, byte_count, name)
+    if "snapshot_verified" in item:
+        _check_exact(item, "snapshot_verified", True, name)
+    try:
+        residual_identity.read_bound_artifact(
+            path,
+            expected_sha256=digest,
+            expected_bytes=byte_count,
+            name=name,
+            hdf5=Path(path).suffix.lower() == ".h5",
+        )
+    except residual_identity.IdentityError as error:
+        _fail(str(error))
     return {
         "path": path,
         "sha256": digest,
@@ -634,6 +691,7 @@ def _artifact(
         "content_opened": False,
         "stat_only": True,
         "attestation": attestation,
+        "snapshot_verified": True,
     }
 
 
@@ -872,6 +930,11 @@ def _process_component(value: Any, name: str) -> tuple[list[str], str]:
     _check_exact(component, "alive", False, name)
     _check_exact(component, "returncode", 0, name)
     _check_exact(component, "reaped", True, name)
+    _check_exact(component, "cwd", EXPECTED_CWD, name)
+    environment = _mapping(component.get("env"), f"{name}.env")
+    _reject_unknown(environment, frozenset(EXPECTED_ENV), f"{name}.env")
+    if dict(environment) != EXPECTED_ENV:
+        _fail(f"{name}.env drifted from the audited environment")
     argv, digest = _command(component.get("command"), f"{name}.command")
     _check_exact(component, "command_sha256", digest, name)
     return argv, digest
@@ -944,6 +1007,85 @@ def _validate_input(payload: Mapping[str, Any]) -> dict[str, Any]:
         manifest_sha256=manifest_sha,
     )
 
+    plan_binding = {
+        "schema": PROCESS_PLAN_BINDING_SCHEMA,
+        "seed": seed,
+        "run_id": run_id,
+        "namespace": namespace,
+        "namespace_nonce": nonce,
+        "manifest_sha256": manifest_sha,
+        "training_receipt_sha256": training["sha256"],
+        "checkpoint": checkpoint,
+        "command_binding": command_binding,
+        "cwd": EXPECTED_CWD,
+        "env": dict(EXPECTED_ENV),
+    }
+    plan_digest = _canonical_digest(plan_binding)
+    process_binding = _mapping(process.get("binding"), "observation.process.binding")
+    _reject_unknown(process_binding, PROCESS_BINDING_KEYS, "observation.process.binding")
+    for key, expected in plan_binding.items():
+        _check_exact(process_binding, key, expected, "observation.process.binding")
+    _check_exact(
+        process_binding,
+        "evaluator_command_sha256",
+        canonical_evaluator_digest,
+        "observation.process.binding",
+    )
+    _check_exact(
+        process_binding,
+        "launcher_command_sha256",
+        canonical_launcher_digest,
+        "observation.process.binding",
+    )
+    process_binding_payload = {
+        **plan_binding,
+        "evaluator_command_sha256": canonical_evaluator_digest,
+        "launcher_command_sha256": canonical_launcher_digest,
+    }
+    _check_exact(
+        process_binding,
+        "binding_sha256",
+        _canonical_digest(process_binding_payload),
+        "observation.process.binding",
+    )
+
+    lifecycle = _mapping(process.get("sealed_lifecycle"), "observation.process.sealed_lifecycle")
+    _reject_unknown(lifecycle, SEALED_LIFECYCLE_KEYS, "observation.process.sealed_lifecycle")
+    lifecycle_payload = {
+        "schema": SEALED_LIFECYCLE_SCHEMA,
+        "producer": "audited_runtime_sealed_witness",
+        "sealed": True,
+        "evaluator_popen_called": True,
+        "evaluator_wait_called": True,
+        "launcher_popen_called": True,
+        "launcher_wait_called": True,
+        "evaluator_returncode": 0,
+        "launcher_returncode": 0,
+        "natural_exit": True,
+        "plan_digest": plan_digest,
+        "manifest_sha256": manifest_sha,
+        "training_receipt_sha256": training["sha256"],
+        "checkpoint": checkpoint,
+        "namespace": namespace,
+        "namespace_nonce": nonce,
+        "evaluator_command_sha256": canonical_evaluator_digest,
+        "launcher_command_sha256": canonical_launcher_digest,
+        "cwd": EXPECTED_CWD,
+        "env": dict(EXPECTED_ENV),
+    }
+    for key in SEALED_LIFECYCLE_KEYS - {"binding_sha256"}:
+        _check_exact(lifecycle, key, lifecycle_payload[key], "observation.process.sealed_lifecycle")
+    _check_exact(
+        lifecycle,
+        "binding_sha256",
+        _canonical_digest(lifecycle_payload),
+        "observation.process.sealed_lifecycle",
+    )
+    _fail(
+        "process proof is declaration-only; a JSON observation cannot mint a "
+        "sealed real Popen/wait lifecycle witness"
+    )
+
     return {
         "seed": seed,
         "run_id": run_id,
@@ -956,6 +1098,7 @@ def _validate_input(payload: Mapping[str, Any]) -> dict[str, Any]:
         "trajectory": trajectory,
         "evaluation_artifact": evaluation,
         "command_binding": command_binding,
+        "plan_digest": plan_digest,
     }
 
 
@@ -998,6 +1141,9 @@ def build_envelope(payload: Mapping[str, Any]) -> dict[str, Any]:
         "command_binding": normalized["command_binding"],
         "command_sha256": normalized["command_binding"]["evaluator"]["sha256"],
         "launcher_command_sha256": normalized["command_binding"]["launcher"]["sha256"],
+        "audited_plan_digest": normalized["plan_digest"],
+        "process_cwd": EXPECTED_CWD,
+        "process_env": dict(EXPECTED_ENV),
         "evaluator_alive": False,
         "launcher_alive": False,
         "evaluator_returncode": 0,
@@ -1096,6 +1242,30 @@ def validate_envelope(envelope: Mapping[str, Any]) -> list[str]:
             envelope,
             "launcher_command_sha256",
             command_binding["launcher"]["sha256"],
+            "process_exit_proof",
+        )
+        _check_exact(envelope, "process_cwd", EXPECTED_CWD, "process_exit_proof")
+        process_env = _mapping(envelope.get("process_env"), "process_exit_proof.process_env")
+        _reject_unknown(process_env, frozenset(EXPECTED_ENV), "process_exit_proof.process_env")
+        if dict(process_env) != EXPECTED_ENV:
+            _fail("process_exit_proof.process_env drifted from the audited environment")
+        expected_plan_binding = {
+            "schema": PROCESS_PLAN_BINDING_SCHEMA,
+            "seed": seed,
+            "run_id": run_id,
+            "namespace": namespace,
+            "namespace_nonce": envelope["namespace_nonce"],
+            "manifest_sha256": envelope["manifest_sha256"],
+            "training_receipt_sha256": training["sha256"],
+            "checkpoint": checkpoint,
+            "command_binding": command_binding,
+            "cwd": EXPECTED_CWD,
+            "env": dict(EXPECTED_ENV),
+        }
+        _check_exact(
+            envelope,
+            "audited_plan_digest",
+            _canonical_digest(expected_plan_binding),
             "process_exit_proof",
         )
         verifier._validate_process(
