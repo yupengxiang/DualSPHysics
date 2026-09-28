@@ -1461,6 +1461,99 @@ def _validate_execution_record(plan: RolloutPlan, value: Any) -> Any:
     return value
 
 
+def _define_terminal_validator_capability() -> tuple[type[Any], Callable[..., Any], Callable[[Any], None]]:
+    """Create a narrow, one-shot capability for the terminal validator.
+
+    The callback receives only the canonical output namespace and the three
+    paths it is allowed to inspect/create.  In particular, this object does
+    not carry the rollout plan, a Popen object, an execution record, a PID, a
+    checkpoint, or the later artifact-identity sidecar path.
+    """
+
+    seal = object()
+
+    class TerminalValidatorCapability:
+        __slots__ = (
+            "_seal",
+            "_root",
+            "_seed",
+            "_nonce",
+            "_evaluation",
+            "_trajectory",
+            "_validator",
+            "_consumed",
+        )
+
+        def __init__(self, *, _seal: object, **values: Any) -> None:
+            if _seal is not seal:
+                raise TypeError("terminal validator capabilities can only be minted by execute_plan")
+            self._seal = _seal
+            for key in self.__slots__:
+                if key == "_seal":
+                    continue
+                if key not in values:
+                    raise TypeError(f"missing terminal validator capability field: {key}")
+                setattr(self, key, values[key])
+
+        def _assert_live(self) -> None:
+            if self._consumed:
+                _fail("terminal validator capability has already been consumed")
+
+        @property
+        def root(self) -> Path:
+            self._assert_live()
+            return self._root
+
+        @property
+        def seed(self) -> int:
+            self._assert_live()
+            return self._seed
+
+        @property
+        def nonce(self) -> str:
+            self._assert_live()
+            return self._nonce
+
+        @property
+        def evaluation(self) -> Path:
+            self._assert_live()
+            return self._evaluation
+
+        @property
+        def trajectory(self) -> Path:
+            self._assert_live()
+            return self._trajectory
+
+        @property
+        def validator(self) -> Path:
+            self._assert_live()
+            return self._validator
+
+    def mint(plan: RolloutPlan) -> Any:
+        return TerminalValidatorCapability(
+            _seal=seal,
+            _root=plan.root,
+            _seed=plan.seed,
+            _nonce=plan.nonce,
+            _evaluation=plan.outputs["evaluation"],
+            _trajectory=plan.outputs["trajectory"],
+            _validator=plan.outputs["validator"],
+            _consumed=False,
+        )
+
+    def close(value: Any) -> None:
+        if type(value) is not TerminalValidatorCapability or getattr(value, "_seal", None) is not seal:
+            _fail("invalid terminal validator capability")
+        if value._consumed:
+            _fail("terminal validator capability has already been consumed")
+        value._consumed = True
+
+    return TerminalValidatorCapability, mint, close
+
+
+_TerminalValidatorCapability, _mint_terminal_validator_capability, _close_terminal_validator_capability = _define_terminal_validator_capability()
+
+
 def _define_artifact_identity_producer_capability() -> tuple[type[Any], Callable[..., Any], Callable[[Any], None]]:
     """Create an opaque, one-shot post-terminal producer capability.
 
@@ -1561,16 +1654,16 @@ def _define_artifact_identity_producer_capability() -> tuple[type[Any], Callable
 _ArtifactIdentityProducerCapability, _mint_artifact_identity_capability, _close_artifact_identity_capability = _define_artifact_identity_producer_capability()
 
 
-def _validate_post_terminal_artifacts(plan: RolloutPlan) -> dict[str, dict[str, int]]:
-    """Establish terminal artifact readiness before invoking the producer."""
+def _validate_post_terminal_artifacts(
+    plan: RolloutPlan,
+    *,
+    require_validator: bool,
+) -> dict[str, dict[str, int]]:
+    """Establish terminal artifact readiness before invoking a capability."""
 
     _validate_plan_output_contract(plan)
     identities: dict[str, dict[str, int]] = {}
-    for key, suffix in (
-        ("evaluation", "-evaluation.json"),
-        ("trajectory", "-trajectory.h5"),
-        ("validator", "-hdf5-validation.json"),
-    ):
+    for key, suffix in (("evaluation", "-evaluation.json"), ("trajectory", "-trajectory.h5")):
         path = plan.outputs[key]
         if not str(path).endswith(suffix):
             _fail(f"post-terminal {key} path is not canonical")
@@ -1580,17 +1673,32 @@ def _validate_post_terminal_artifacts(plan: RolloutPlan) -> dict[str, dict[str, 
             _fail(f"post-terminal {key} is empty")
         identities[key] = _file_identity(info)
 
-    validator_payload, _validator_sha, _validator_bytes = _bounded_json(
-        plan.outputs["validator"],
-        plan.root,
+    validator_path = plan.outputs["validator"]
+    if not str(validator_path).endswith("-hdf5-validation.json"):
+        _fail("post-terminal validator path is not canonical")
+    validator_info = _regular_single_link(
+        validator_path,
         "post-terminal validator",
-        allow_tmp=True,
+        allow_missing=not require_validator,
     )
-    _validate_completed_validator_receipt(
-        validator_payload,
-        plan,
-        "post-terminal validator",
-    )
+    if require_validator:
+        assert validator_info is not None
+        if validator_info.st_size < 1:
+            _fail("post-terminal validator is empty")
+        identities["validator"] = _file_identity(validator_info)
+        validator_payload, _validator_sha, _validator_bytes = _bounded_json(
+            validator_path,
+            plan.root,
+            "post-terminal validator",
+            allow_tmp=True,
+        )
+        _validate_completed_validator_receipt(
+            validator_payload,
+            plan,
+            "post-terminal validator",
+        )
+    elif validator_info is not None:
+        _fail("post-terminal validator already exists before terminal validator callback")
 
     sidecar = plan.outputs["artifact_identity"]
     _assert_no_symlink_components(sidecar, "post-terminal artifact_identity", allow_missing_leaf=True)
@@ -1707,6 +1815,7 @@ def execute_plan(
     artifact_identity_path: Path | str | None = None,
     artifact_identity_producer: Callable[[Any], Any] | None = None,
     artifact_identity_builder: Callable[[Any], Any] | None = None,
+    terminal_validator: Callable[[Any], Any] | None = None,
     popen_factory: Callable[..., Any] = subprocess.Popen,
     launcher_pid: int | None = None,
 ) -> dict[str, Any]:
@@ -1716,8 +1825,10 @@ def execute_plan(
     producer is never defaulted or called during dry-run; it receives an
     execute-only capability only after the real child has been verified,
     waited, and its evaluation/trajectory/validator terminal contract has
-    passed.  Its return value is not evidence: the canonical sidecar must be
-    written and is loaded and revalidated below.
+    passed.  When supplied, ``terminal_validator`` receives a narrower
+    one-shot capability after the sealed execution record is bound and before
+    the producer capability is minted.  Neither callback return value is
+    evidence: canonical artifacts are re-lstatted and revalidated below.
     """
 
     if artifact_identity_producer is not None and artifact_identity_builder is not None:
@@ -1727,6 +1838,8 @@ def execute_plan(
         _fail("explicit artifact_identity_producer capability is required for execute")
     if not callable(producer):
         _fail("artifact_identity_producer capability must be callable")
+    if terminal_validator is not None and not callable(terminal_validator):
+        _fail("terminal_validator capability must be callable")
 
     # Re-check all fresh targets and all four execution inputs immediately
     # before Popen.  The input files are then passed through inherited stable
@@ -1896,9 +2009,44 @@ def execute_plan(
     )
     # Re-validate the sealed lifecycle before granting any post-terminal
     # capability.  This is deliberately separate from proof construction so a
-    # producer can never turn a partial/fake process record into evidence.
+    # callback can never turn a partial/fake process record into evidence.
     _validate_execution_record(plan, execution_record)
-    terminal_artifact_identities = _validate_post_terminal_artifacts(plan)
+    if terminal_validator is None:
+        # Preserve the historical fail-closed contract: without an explicit
+        # validator callback, a canonical completed validator must already be
+        # present before the artifact producer can run.
+        terminal_artifact_identities = _validate_post_terminal_artifacts(
+            plan,
+            require_validator=True,
+        )
+    else:
+        # The evaluator owns only evaluation/trajectory.  Pin those two
+        # outputs before handing a narrow capability to the validator; the
+        # callback must create the canonical validator itself.
+        pre_validator_identities = _validate_post_terminal_artifacts(
+            plan,
+            require_validator=False,
+        )
+        terminal_capability = _mint_terminal_validator_capability(plan)
+        try:
+            try:
+                terminal_validator(terminal_capability)
+            except LauncherError:
+                raise
+            except Exception as error:
+                _fail(
+                    "terminal_validator failed closed: "
+                    f"{type(error).__name__}: {error}"
+                )
+        finally:
+            _close_terminal_validator_capability(terminal_capability)
+        terminal_artifact_identities = _validate_post_terminal_artifacts(
+            plan,
+            require_validator=True,
+        )
+        for key in ("evaluation", "trajectory"):
+            if terminal_artifact_identities[key] != pre_validator_identities[key]:
+                _fail(f"post-terminal {key} identity drifted while terminal validator ran")
     capability = _mint_artifact_identity_capability(plan)
     try:
         try:

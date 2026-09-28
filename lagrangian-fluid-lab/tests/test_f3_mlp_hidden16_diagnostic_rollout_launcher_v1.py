@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+from typing import Any
 
 import pytest
 
@@ -71,49 +72,8 @@ def argument(flag: str) -> Path:
 
 evaluation = argument("--output")
 trajectory = argument("--trajectory-output")
-data_root = argument("--data-root")
-prefix = str(evaluation)[:-len("-evaluation.json")]
-validator = Path(prefix + "-hdf5-validation.json")
-checkpoint = argument("--checkpoint").resolve()
 evaluation.write_bytes(b"evaluation")
 trajectory.write_bytes(b"trajectory")
-seed = int(re.search(r"seed(17|29|43)", checkpoint.name).group(1))
-validator_payload = {
-    "schema": "core.f3.full_rollout_receipt_hdf5_validation.v1",
-    "passed": True,
-    "fail_closed": False,
-    "diagnostic_only": True,
-    "synthetic_only": False,
-    "production_artifacts_touched": False,
-    "qualification_credit": 0,
-    "case_id": "F3_DEV_00_a0p903125",
-    "evaluation_json": str(evaluation),
-    "trajectory_hdf5": str(trajectory),
-    "expected_transitions": 835,
-    "frames_executed": 835,
-    "complete": True,
-    "incomplete": False,
-    "failure_category": None,
-    "checks": {
-        "case_binding": True,
-        "shape": True,
-        "time": True,
-        "valid": True,
-        "future_state_inputs": True,
-        "completion_semantics": True,
-        "trajectory_frames": 836,
-        "trajectory_transitions": 835,
-        "executed_frame_count": 836,
-        "tail_frame_count": 0,
-    },
-    "row_fields_checked": ["case_id", "frames_executed"],
-}
-validator_incomplete = (data_root / "validator-incomplete").exists()
-if validator_incomplete:
-    validator_payload["complete"] = False
-    validator_payload["incomplete"] = True
-    validator_payload["passed"] = False
-validator.write_text(json.dumps(validator_payload, sort_keys=True), encoding="utf-8")
 time.sleep(5.0)
 """,
         encoding="utf-8",
@@ -269,6 +229,66 @@ def _identity(plan, *, evaluation_bytes: int, trajectory_bytes: int, validator_b
             "bytes": validator_bytes,
         },
     }
+
+
+def _validator_payload(
+    capability: Any,
+    *,
+    evaluation_path: Path | None = None,
+    trajectory_path: Path | None = None,
+    complete: bool = True,
+    passed: bool = True,
+) -> dict[str, object]:
+    return {
+        "schema": launcher.VALIDATOR_SCHEMA,
+        "passed": passed,
+        "fail_closed": False,
+        "diagnostic_only": True,
+        "synthetic_only": False,
+        "production_artifacts_touched": False,
+        "qualification_credit": 0,
+        "case_id": launcher.CASE_ID,
+        "evaluation_json": str(evaluation_path or capability.evaluation),
+        "trajectory_hdf5": str(trajectory_path or capability.trajectory),
+        "expected_transitions": launcher.TRANSITIONS,
+        "frames_executed": launcher.TRANSITIONS,
+        "complete": complete,
+        "incomplete": not complete,
+        "failure_category": None,
+        "checks": {
+            "case_binding": True,
+            "shape": True,
+            "time": True,
+            "valid": True,
+            "future_state_inputs": True,
+            "completion_semantics": True,
+            "trajectory_frames": launcher.FRAMES,
+            "trajectory_transitions": launcher.TRANSITIONS,
+            "executed_frame_count": launcher.FRAMES,
+            "tail_frame_count": 0,
+        },
+        "row_fields_checked": ["case_id", "frames_executed"],
+    }
+
+
+def _write_terminal_validator(
+    capability: Any,
+    *,
+    evaluation_path: Path | None = None,
+    trajectory_path: Path | None = None,
+    complete: bool = True,
+    passed: bool = True,
+) -> None:
+    _write_json(
+        capability.validator,
+        _validator_payload(
+            capability,
+            evaluation_path=evaluation_path,
+            trajectory_path=trajectory_path,
+            complete=complete,
+            passed=passed,
+        ),
+    )
 
 
 def _cleanup_external_outputs(plan) -> None:
@@ -456,9 +476,16 @@ def test_artifact_identity_pseudo_authority_field_is_rejected_on_execute(tmp_pat
         identity["formal"] = True
         _write_json(capability.sidecar, identity)
 
+    def terminal_validator(capability) -> None:
+        _write_terminal_validator(capability)
+
     try:
         with pytest.raises(launcher.LauncherError, match="(?:formal|cmdline)"):
-            launcher.execute_plan(plan, artifact_identity_producer=forged_producer)
+            launcher.execute_plan(
+                plan,
+                terminal_validator=terminal_validator,
+                artifact_identity_producer=forged_producer,
+            )
     finally:
         _cleanup_external_outputs(plan)
 
@@ -471,7 +498,9 @@ def test_execute_with_real_popen_natural_exit_writes_zero_credit_proof(tmp_path:
     plan = replace(plan, proof_output=proof_path, outputs={**plan.outputs, "process_proof": proof_path})
 
     calls: list[list[str]] = []
+    terminal_calls: list[object] = []
     producer_calls: list[dict[str, object]] = []
+    terminal_capability_refs: list[object] = []
     capability_refs: list[object] = []
     real_popen = launcher.subprocess.Popen
 
@@ -487,6 +516,35 @@ def test_execute_with_real_popen_natural_exit_writes_zero_credit_proof(tmp_path:
         assert tuple(process.args) == tuple(command)
         assert os.stat(f"/proc/{process.pid}/cwd").st_ino == plan.root.stat().st_ino
         return process
+
+    def terminal_validator(capability) -> dict[str, object]:
+        terminal_capability_refs.append(capability)
+        terminal_calls.append(
+            {
+                "root": capability.root,
+                "seed": capability.seed,
+                "nonce": capability.nonce,
+                "evaluation": capability.evaluation,
+                "trajectory": capability.trajectory,
+                "validator": capability.validator,
+            }
+        )
+        assert not hasattr(capability, "plan")
+        assert not hasattr(capability, "process")
+        assert not hasattr(capability, "pid")
+        assert not hasattr(capability, "checkpoint")
+        assert not hasattr(capability, "sidecar")
+        assert capability.root == plan.root
+        assert capability.seed == plan.seed
+        assert capability.nonce == plan.nonce
+        assert capability.evaluation == plan.outputs["evaluation"]
+        assert capability.trajectory == plan.outputs["trajectory"]
+        assert capability.validator == plan.outputs["validator"]
+        assert capability.evaluation.exists()
+        assert capability.trajectory.exists()
+        assert not capability.validator.exists()
+        _write_terminal_validator(capability)
+        return {"must_not_be_treated_as_evidence": True}
 
     def sidecar_producer(capability) -> Path:
         capability_refs.append(capability)
@@ -526,11 +584,15 @@ def test_execute_with_real_popen_natural_exit_writes_zero_credit_proof(tmp_path:
         result = launcher.execute_plan(
             plan,
             popen_factory=recording_popen,
+            terminal_validator=terminal_validator,
             artifact_identity_producer=sidecar_producer,
         )
         assert result["status"] == "exited_successfully"
         assert result["proof_written"] is True
+        assert len(terminal_calls) == 1
         assert len(producer_calls) == 1
+        with pytest.raises(launcher.LauncherError, match="already been consumed"):
+            _ = terminal_capability_refs[0].validator
         assert producer_calls[0]["sidecar"] == plan.outputs["artifact_identity"]
         with pytest.raises(launcher.LauncherError, match="already been consumed"):
             _ = capability_refs[0].sidecar
@@ -566,20 +628,136 @@ def test_execute_requires_explicit_producer_before_starting_any_process(tmp_path
     assert calls == 0
 
 
+def test_execute_without_terminal_validator_preserves_missing_validator_fail_closed(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    _install_real_fixture_interpreter(fixture)
+    plan = _plan(fixture, tmp_path, 17)
+    producer_calls = 0
+
+    def producer(capability) -> None:
+        nonlocal producer_calls
+        producer_calls += 1
+
+    try:
+        with pytest.raises(launcher.LauncherError, match="post-terminal validator"):
+            launcher.execute_plan(plan, artifact_identity_producer=producer)
+        assert producer_calls == 0
+        assert not plan.outputs["validator"].exists()
+        assert not plan.proof_output.exists()
+    finally:
+        _cleanup_external_outputs(plan)
+
+
+def test_terminal_validator_capability_cannot_be_forged_or_returned_as_evidence(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    _install_real_fixture_interpreter(fixture)
+    plan = _plan(fixture, tmp_path, 17)
+    producer_calls = 0
+    retained: list[object] = []
+
+    def forged_terminal_validator(capability) -> dict[str, object]:
+        retained.append(capability)
+        return {
+            "schema": launcher.VALIDATOR_SCHEMA,
+            "passed": True,
+            "complete": True,
+        }
+
+    def producer(capability) -> None:
+        nonlocal producer_calls
+        producer_calls += 1
+
+    try:
+        with pytest.raises(launcher.LauncherError, match="post-terminal validator"):
+            launcher.execute_plan(
+                plan,
+                terminal_validator=forged_terminal_validator,
+                artifact_identity_producer=producer,
+            )
+        assert producer_calls == 0
+        with pytest.raises(launcher.LauncherError, match="already been consumed"):
+            _ = retained[0].validator
+        with pytest.raises(TypeError, match="only be minted by execute_plan"):
+            launcher._TerminalValidatorCapability(_seal=object())
+    finally:
+        _cleanup_external_outputs(plan)
+
+
+def test_terminal_validator_path_drift_is_rejected_before_artifact_producer(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    _install_real_fixture_interpreter(fixture)
+    plan = _plan(fixture, tmp_path, 29)
+    producer_calls = 0
+
+    def drifted_terminal_validator(capability) -> None:
+        _write_terminal_validator(
+            capability,
+            evaluation_path=tmp_path / "drifted-evaluation.json",
+        )
+
+    def producer(capability) -> None:
+        nonlocal producer_calls
+        producer_calls += 1
+
+    try:
+        with pytest.raises(launcher.LauncherError, match="drifts from the fresh namespace"):
+            launcher.execute_plan(
+                plan,
+                terminal_validator=drifted_terminal_validator,
+                artifact_identity_producer=producer,
+            )
+        assert producer_calls == 0
+        assert not plan.proof_output.exists()
+    finally:
+        _cleanup_external_outputs(plan)
+
+
+def test_terminal_validator_incomplete_receipt_never_grants_artifact_capability(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    _install_real_fixture_interpreter(fixture)
+    plan = _plan(fixture, tmp_path, 43)
+    producer_calls = 0
+
+    def incomplete_terminal_validator(capability) -> None:
+        _write_terminal_validator(capability, complete=False, passed=False)
+
+    def producer(capability) -> None:
+        nonlocal producer_calls
+        producer_calls += 1
+
+    try:
+        with pytest.raises(launcher.LauncherError, match="post-terminal validator"):
+            launcher.execute_plan(
+                plan,
+                terminal_validator=incomplete_terminal_validator,
+                artifact_identity_producer=producer,
+            )
+        assert producer_calls == 0
+        assert not plan.proof_output.exists()
+    finally:
+        _cleanup_external_outputs(plan)
+
+
 def test_incomplete_independent_validator_never_grants_producer_capability(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     _install_real_fixture_interpreter(fixture)
     plan = _plan(fixture, tmp_path, 17)
-    (fixture["root"] / "validator-incomplete").write_text("marker", encoding="utf-8")
     producer_calls = 0
 
     def forbidden_producer(capability) -> None:
         nonlocal producer_calls
         producer_calls += 1
 
+    def incomplete_terminal_validator(capability) -> None:
+        _write_terminal_validator(capability, complete=False, passed=False)
+
     try:
         with pytest.raises(launcher.LauncherError, match="post-terminal validator"):
-            launcher.execute_plan(plan, artifact_identity_producer=forbidden_producer)
+            launcher.execute_plan(
+                plan,
+                terminal_validator=incomplete_terminal_validator,
+                artifact_identity_producer=forbidden_producer,
+            )
         assert producer_calls == 0
         assert not plan.proof_output.exists()
     finally:
@@ -601,9 +779,16 @@ def test_sidecar_path_drift_is_rejected_after_producer_and_before_proof(tmp_path
         identity["evaluation"]["path"] = str(tmp_path / "drifted-evaluation.json")
         _write_json(capability.sidecar, identity)
 
+    def terminal_validator(capability) -> None:
+        _write_terminal_validator(capability)
+
     try:
         with pytest.raises(launcher.LauncherError, match="canonical fresh-namespace path"):
-            launcher.execute_plan(plan, artifact_identity_producer=drifted_producer)
+            launcher.execute_plan(
+                plan,
+                terminal_validator=terminal_validator,
+                artifact_identity_producer=drifted_producer,
+            )
         assert not plan.proof_output.exists()
     finally:
         _cleanup_external_outputs(plan)
@@ -617,9 +802,16 @@ def test_producer_artifact_identity_drift_is_rejected_before_proof(tmp_path: Pat
     def mutating_producer(capability) -> None:
         capability.evaluation_json.write_bytes(b"mutated-after-terminal-check")
 
+    def terminal_validator(capability) -> None:
+        _write_terminal_validator(capability)
+
     try:
         with pytest.raises(launcher.LauncherError, match="identity drifted while producer ran"):
-            launcher.execute_plan(plan, artifact_identity_producer=mutating_producer)
+            launcher.execute_plan(
+                plan,
+                terminal_validator=terminal_validator,
+                artifact_identity_producer=mutating_producer,
+            )
         assert not plan.proof_output.exists()
     finally:
         _cleanup_external_outputs(plan)
