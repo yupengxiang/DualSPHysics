@@ -64,7 +64,7 @@ SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 NAMESPACE_RE = re.compile(
     r"^(?P<directory>/.*?/)?"
     r"f3-graph-residual500-hidden16-seed(?P<seed>17|29|43)-full835-"
-    r"(?P<tag>[A-Za-z0-9][A-Za-z0-9._-]{0,95})$"
+    r"nonce(?P<nonce>[0-9a-f]{32})$"
 )
 FORBIDDEN_ARTIFACT_WORDS = (
     "evaluation",
@@ -78,17 +78,77 @@ FORBIDDEN_ARTIFACT_WORDS = (
     "pending",
     "legacy",
 )
-FORBIDDEN_NAMESPACE_WORDS = {
-    "evaluation",
-    "progress",
-    "trajectory",
-    "running",
-    "partial",
-    "pending",
-    "legacy",
-    "old",
-}
 CHECKPOINT_SUFFIXES = frozenset({".pt", ".pth", ".ckpt"})
+REPORT_JSON_SUFFIX = ".json"
+REPORT_MARKDOWN_SUFFIX = ".zh-CN.md"
+REPORT_JSON_FILENAME = (
+    "F3-GRAPH-RESIDUAL-HIDDEN16-TERMINAL-COMPLETION-"
+    "RECEIPT-MATRIX-V1-2026-09-28.json"
+)
+REPORT_MARKDOWN_FILENAME = REPORT_JSON_FILENAME.removesuffix(REPORT_JSON_SUFFIX) + REPORT_MARKDOWN_SUFFIX
+REPORT_OUTPUT_FILENAMES = frozenset({REPORT_JSON_FILENAME, REPORT_MARKDOWN_FILENAME})
+
+RECEIPT_TOP_LEVEL_KEYS = frozenset(
+    {
+        "schema",
+        "report_id",
+        "status",
+        "source_bound",
+        "diagnostic_only",
+        "formal",
+        "formal_eligible",
+        "T1_numerical",
+        "T2_macro",
+        "T2_path",
+        "qualification",
+        "qualification_credit",
+        "credit",
+        "seed",
+        "model_kind",
+        "hidden",
+        "updates",
+        "case_id",
+        "split",
+        "transitions",
+        "frames",
+        "terminal_markers",
+        "checkpoint",
+        "training_receipt",
+        "evaluation",
+        "trajectory",
+        "progress",
+        "hdf5_validator",
+        "side_effects",
+        "input_boundary",
+    }
+)
+REPORT_TOP_LEVEL_KEYS = frozenset(
+    {
+        "schema",
+        "report_id",
+        "status",
+        "fail_closed",
+        "diagnostic_only",
+        "formal",
+        "formal_eligible",
+        "T1_numerical",
+        "T2_macro",
+        "T2_path",
+        "qualification",
+        "qualification_credit",
+        "credit",
+        "expected_contract",
+        "seed_matrix",
+        "checks",
+        "blocked_reasons",
+        "terminal_sources",
+        "side_effects",
+        "input_boundary",
+        "interpretation",
+        "observed_at_utc",
+        "source_bound",
+    }
+)
 
 DEFAULT_OBSERVED_AT_UTC = "2026-09-28T00:00:00Z"
 DEFAULT_TERMINAL_PATHS: dict[int, Path] = {
@@ -253,6 +313,21 @@ def _relative_components(root: Path, value: Path | str, name: str) -> tuple[Path
     components = relative.parts
     if not components or any(component in {"", ".", ".."} for component in components):
         _fail(f"{name} has unsafe path components")
+    return candidate, components
+
+
+def _report_output_components(
+    root: Path,
+    value: Path | str,
+    name: str,
+) -> tuple[Path, tuple[str, ...]]:
+    """Allow only the two checked-in report destinations below ``reports``."""
+
+    candidate, components = _relative_components(root, value, name)
+    if len(components) != 2 or components[0] != "reports":
+        _fail(f"{name} must be a direct file below lab_root/reports")
+    if candidate.name not in REPORT_OUTPUT_FILENAMES:
+        _fail(f"{name} must use one of the fixed report filenames {sorted(REPORT_OUTPUT_FILENAMES)!r}")
     return candidate, components
 
 
@@ -454,7 +529,7 @@ def _declared_training(value: Any, seed: int, checkpoint: Mapping[str, Any], nam
     return {**result, "schema": TRAINING_SCHEMA, "model_kind": MODEL_KIND, "seed": seed, "hidden": HIDDEN, "completed_updates": UPDATES, "checkpoint_sha256": checkpoint["sha256"]}
 
 
-def _namespace_from_evaluation(value: Any, seed: int, name: str) -> tuple[dict[str, Any], str]:
+def _namespace_from_evaluation(value: Any, seed: int, name: str) -> tuple[dict[str, Any], str, str]:
     evaluation = _mapping(value, name)
     result = _declared_artifact(evaluation, name, suffix=".json")
     path = result["path"]
@@ -464,9 +539,12 @@ def _namespace_from_evaluation(value: Any, seed: int, name: str) -> tuple[dict[s
     match = NAMESPACE_RE.fullmatch(prefix)
     if match is None or int(match.group("seed")) != seed:
         _fail(f"{name}.path is not a fresh seed{seed} full835 namespace")
-    tag = match.group("tag").lower()
-    if any(word in tag for word in FORBIDDEN_NAMESPACE_WORDS):
-        _fail(f"{name}.path contains a legacy/partial/running namespace marker")
+    nonce = match.group("nonce")
+    if not re.fullmatch(r"[0-9a-f]{32}", nonce):
+        _fail(f"{name}.path does not contain a fixed-format namespace nonce")
+    _check_exact(evaluation, "namespace", prefix, name)
+    _check_exact(evaluation, "namespace_fresh", True, name)
+    _check_exact(evaluation, "namespace_nonce", nonce, name)
     for key, expected in (
         ("schema", EVALUATION_SCHEMA),
         ("model_kind", MODEL_KIND),
@@ -505,7 +583,10 @@ def _namespace_from_evaluation(value: Any, seed: int, name: str) -> tuple[dict[s
         "execution_complete": True,
         "finite_rollout_complete": True,
         "future_state_inputs": False,
-    }, prefix
+        "namespace": prefix,
+        "namespace_fresh": True,
+        "namespace_nonce": nonce,
+    }, prefix, nonce
 
 
 def _namespace_artifact(value: Any, expected_path: str, name: str, suffix: str) -> dict[str, Any]:
@@ -624,7 +705,10 @@ def _validate_input_boundary(value: Any, name: str) -> dict[str, Any]:
 def _validate_receipt(value: Mapping[str, Any], seed: int, name: str) -> dict[str, Any]:
     """Validate and normalize one canonical terminal receipt."""
 
-    _mapping(value, name)
+    receipt = _mapping(value, name)
+    unknown = sorted(set(receipt) - set(RECEIPT_TOP_LEVEL_KEYS))
+    if unknown:
+        _fail(f"{name} contains unknown or alias top-level field(s): {unknown}")
     expected_schema = (
         f"core.f3.graph_residual.hidden16.seed{seed}."
         "full835.terminal_completion_receipt.v1"
@@ -671,7 +755,7 @@ def _validate_receipt(value: Mapping[str, Any], seed: int, name: str) -> dict[st
     training = _declared_training(
         value.get("training_receipt"), seed, checkpoint, f"{name}.training_receipt"
     )
-    evaluation, prefix = _namespace_from_evaluation(
+    evaluation, prefix, namespace_nonce = _namespace_from_evaluation(
         value.get("evaluation"), seed, f"{name}.evaluation"
     )
     trajectory = _namespace_artifact(
@@ -727,6 +811,7 @@ def _validate_receipt(value: Mapping[str, Any], seed: int, name: str) -> dict[st
         "side_effects": effects,
         "input_boundary": boundary,
         "output_namespace": prefix,
+        "namespace_nonce": namespace_nonce,
     }
 
 
@@ -842,22 +927,24 @@ def evaluate_payloads(
     if not shared_config:
         _append_error(errors, "seed receipts do not share the exact graph_residual hidden16 configuration")
 
-    identity_pairs: set[tuple[str, str]] = set()
-    training_pairs: set[tuple[str, str]] = set()
+    checkpoint_paths: set[str] = set()
+    checkpoint_shas: set[str] = set()
+    training_paths: set[str] = set()
+    training_shas: set[str] = set()
     identity_ok = bool(valid)
     for seed, projection in valid.items():
         checkpoint = projection["checkpoint"]
         training = projection["training_receipt"]
-        pair = (checkpoint["path"], checkpoint["sha256"])
-        training_pair = (training["path"], training["sha256"])
-        if pair in identity_pairs:
+        if checkpoint["path"] in checkpoint_paths or checkpoint["sha256"] in checkpoint_shas:
             identity_ok = False
-            _append_error(errors, f"seed{seed} reuses another seed's checkpoint identity")
-        identity_pairs.add(pair)
-        if training_pair in training_pairs:
+            _append_error(errors, f"seed{seed} reuses another seed's checkpoint path or SHA identity")
+        if training["path"] in training_paths or training["sha256"] in training_shas:
             identity_ok = False
-            _append_error(errors, f"seed{seed} reuses another seed's training receipt identity")
-        training_pairs.add(training_pair)
+            _append_error(errors, f"seed{seed} reuses another seed's training path or SHA identity")
+        checkpoint_paths.add(checkpoint["path"])
+        checkpoint_shas.add(checkpoint["sha256"])
+        training_paths.add(training["path"])
+        training_shas.add(training["sha256"])
         if training["checkpoint_sha256"] != checkpoint["sha256"]:
             identity_ok = False
             _append_error(errors, f"seed{seed} training/checkpoint SHA identity is inconsistent")
@@ -867,7 +954,13 @@ def evaluate_payloads(
         _append_error(errors, "training receipt/checkpoint identities are incomplete or reused")
 
     namespaces = [projection["output_namespace"] for projection in valid.values()]
-    namespace_ok = exact_seeds and len(namespaces) == len(set(namespaces))
+    nonces = [projection["namespace_nonce"] for projection in valid.values()]
+    namespace_ok = (
+        exact_seeds
+        and len(namespaces) == len(set(namespaces))
+        and len(nonces) == len(set(nonces))
+        and all(projection["evaluation"]["namespace_fresh"] is True for projection in valid.values())
+    )
     if not namespace_ok:
         _append_error(errors, "full835 diagnostic output namespaces are missing or reused")
 
@@ -957,7 +1050,7 @@ def evaluate_payloads(
             _check("shared_model_configuration", shared_config, "all seeds use graph_residual hidden16 update-500 on the fixed F3 case", observed=observed_signatures, expected=signature),
             _check("training_checkpoint_identity", identity_ok, "training receipt and checkpoint path/SHA identities are seed-bound and unique"),
             _check("terminal_835_transitions_836_frames", terminal_ok, "every seed is terminal at 835 transitions and 836 frames"),
-            _check("unique_full835_diagnostic_namespace", namespace_ok, "every seed has a distinct fresh full835 diagnostic namespace", observed=sorted(namespaces), expected="three distinct namespaces"),
+            _check("unique_full835_diagnostic_namespace", namespace_ok, "every seed has a distinct explicit-fresh full835 diagnostic namespace", observed=sorted(namespaces), expected="three distinct namespaces and nonces"),
             _check("optional_hdf5_validator_receipt", validator_ok, "validator receipt is absent or independently bound, complete, and zero-credit"),
             _check("diagnostic_zero_credit", zero_credit, "formal/T1/T2/qualification are false and all credit is zero"),
         ],
@@ -1045,6 +1138,10 @@ def _validate_projection_for_report(value: Any, seed: int, name: str) -> None:
     _reject_nonzero_credit_or_formal_claim(projection, name)
     if not isinstance(projection.get("output_namespace"), str):
         _fail(f"{name}.output_namespace is missing")
+    evaluation = _mapping(projection.get("evaluation"), f"{name}.evaluation")
+    _check_exact(evaluation, "namespace", projection["output_namespace"], f"{name}.evaluation")
+    _check_exact(evaluation, "namespace_fresh", True, f"{name}.evaluation")
+    _check_exact(evaluation, "namespace_nonce", projection.get("namespace_nonce"), f"{name}.evaluation")
 
 
 def validate_report(report: Mapping[str, Any]) -> list[str]:
@@ -1053,6 +1150,10 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
     errors: list[str] = []
     try:
         _walk_json(report, "report")
+        report_map = _mapping(report, "report")
+        unknown = sorted(set(report_map) - set(REPORT_TOP_LEVEL_KEYS))
+        if unknown:
+            _fail(f"report contains unknown or alias top-level field(s): {unknown}")
         _check_exact(report, "schema", REPORT_SCHEMA, "report")
         _check_exact(report, "report_id", REPORT_ID, "report")
         source_bound = report.get("source_bound")
@@ -1123,7 +1224,7 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
 
 
 def _open_parent_for_write(root: Path, output: Path | str, name: str) -> tuple[int, str]:
-    _candidate, components = _relative_components(root, output, name)
+    _candidate, components = _report_output_components(root, output, name)
     if len(components) < 1:
         _fail(f"{name} has no filename")
     parent_fd, opened = _open_directory_chain(root, components[:-1], name)
@@ -1137,8 +1238,75 @@ def _open_parent_for_write(root: Path, output: Path | str, name: str) -> tuple[i
     return parent_fd, components[-1]
 
 
+def _validate_existing_report_destination(parent_fd: int, filename: str) -> None:
+    """Accept only a previously generated report at an existing destination."""
+
+    file_fd = -1
+    try:
+        try:
+            file_fd = os.open(
+                filename,
+                os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0),
+                dir_fd=parent_fd,
+            )
+        except OSError as error:
+            _fail(f"report output cannot be reopened safely: {error}")
+        before = os.fstat(file_fd)
+        if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
+            _fail("report output is not a single-link regular file")
+        if before.st_size > MAX_JSON_BYTES:
+            _fail("existing report output exceeds bounded size")
+        chunks: list[bytes] = []
+        total = 0
+        while True:
+            chunk = os.read(file_fd, min(64 * 1024, MAX_JSON_BYTES + 1 - total))
+            if not chunk:
+                break
+            chunks.append(chunk)
+            total += len(chunk)
+            if total > MAX_JSON_BYTES:
+                _fail("existing report output exceeds bounded size")
+        after = os.fstat(file_fd)
+        identity_fields = ("st_dev", "st_ino", "st_mode", "st_nlink", "st_size", "st_mtime_ns", "st_ctime_ns")
+        if any(getattr(before, field) != getattr(after, field) for field in identity_fields):
+            _fail("existing report output changed while it was being read (TOCTOU)")
+        raw = b"".join(chunks)
+        if len(raw) != after.st_size:
+            _fail("existing report output size changed while it was being read")
+        if filename.endswith(REPORT_JSON_SUFFIX):
+            try:
+                previous = json.loads(
+                    raw.decode("utf-8"),
+                    parse_constant=_reject_json_constant,
+                    object_pairs_hook=_reject_duplicate_keys,
+                )
+            except MatrixError:
+                raise
+            except (UnicodeError, json.JSONDecodeError) as error:
+                _fail(f"existing report output is not an expected validated report: {error}")
+            _walk_json(previous, "existing report output")
+            previous_map = _mapping(previous, "existing report output")
+            if validate_report(previous_map):
+                _fail("existing report output is not an expected validated report")
+        else:
+            prefix = b"# F3 graph_residual hidden16 full835 "
+            if not raw.startswith(prefix) or b"```json\n" not in raw or not raw.rstrip().endswith(b"```"):
+                _fail("existing report output is not an expected Markdown report")
+    finally:
+        if file_fd >= 0:
+            try:
+                os.close(file_fd)
+            except OSError:
+                pass
+
+
 def write_report(report: Mapping[str, Any], output: Path | str, *, root: Path | str = LAB_ROOT) -> None:
-    """Atomically write a report below ``root`` without following symlinks."""
+    """Atomically write one fixed report below ``root/reports``.
+
+    The destination is restricted to the two checked-in report names.  An
+    existing destination must be a regular file with exactly one hard link;
+    symlinks, directories, devices, and hard-linked files are never replaced.
+    """
 
     errors = validate_report(report)
     if errors:
@@ -1153,9 +1321,23 @@ def write_report(report: Mapping[str, Any], output: Path | str, *, root: Path | 
             existing = os.stat(filename, dir_fd=parent_fd, follow_symlinks=False)
         except FileNotFoundError:
             pass
-        if existing is not None and stat.S_ISLNK(existing.st_mode):
-            _fail("report output is an existing symlink")
-        raw = (canonical_json(report) + "\n").encode("utf-8")
+        if existing is not None:
+            if stat.S_ISLNK(existing.st_mode):
+                _fail("report output is an existing symlink")
+            if not stat.S_ISREG(existing.st_mode):
+                _fail("report output is not an existing regular file")
+            if existing.st_nlink != 1:
+                _fail("report output is an existing hard-linked file")
+            _validate_existing_report_destination(parent_fd, filename)
+        if filename.endswith(REPORT_MARKDOWN_SUFFIX):
+            raw = (
+                "# F3 graph_residual hidden16 full835 终态回执矩阵 V1\n\n"
+                "```json\n"
+                + canonical_json(report)
+                + "\n```\n"
+            ).encode("utf-8")
+        else:
+            raw = (canonical_json(report) + "\n").encode("utf-8")
         if len(raw) > MAX_JSON_BYTES:
             _fail("report output exceeds bounded JSON limit")
         for _ in range(16):
@@ -1217,6 +1399,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--root", type=Path, default=LAB_ROOT)
     parser.add_argument("--receipt", action="append", default=[], metavar="SEED=PATH")
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument("--markdown-output", type=Path, default=None)
     parser.add_argument("--observed-at-utc", default=DEFAULT_OBSERVED_AT_UTC)
     args = parser.parse_args(argv)
     paths: dict[int, Path | str | None] = dict(DEFAULT_TERMINAL_PATHS)
@@ -1227,6 +1410,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         raise SystemExit("report validation failed: " + "; ".join(errors))
     if args.output is not None:
         write_report(report, args.output, root=args.root)
+    if args.markdown_output is not None:
+        write_report(report, args.markdown_output, root=args.root)
     print(canonical_json(report))
     return 0 if report["source_bound"] else 2
 

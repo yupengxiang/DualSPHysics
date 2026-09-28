@@ -27,7 +27,8 @@ def _artifact(path: str, label: str, *, suffix: str | None = None) -> dict[str, 
 def _receipt(seed: int, *, validator: bool = False) -> dict[str, object]:
     checkpoint_path = f"/opaque/f3-graph-residual500-hidden16-seed{seed}-checkpoint.pt"
     training_path = f"/opaque/f3-graph-residual500-hidden16-seed{seed}-training.json"
-    prefix = f"/opaque/f3-graph-residual500-hidden16-seed{seed}-full835-terminal-seed{seed}"
+    nonce = f"{seed:032x}"
+    prefix = f"/opaque/f3-graph-residual500-hidden16-seed{seed}-full835-nonce{nonce}"
     checkpoint_sha = _sha(f"checkpoint-{seed}")
     payload: dict[str, object] = {
         "schema": (
@@ -102,6 +103,9 @@ def _receipt(seed: int, *, validator: bool = False) -> dict[str, object]:
             "finite_rollout_complete": True,
             "future_state_inputs": False,
             "status": "completed",
+            "namespace": prefix,
+            "namespace_fresh": True,
+            "namespace_nonce": nonce,
         },
         "trajectory": {
             **_artifact(prefix + "-trajectory.h5", f"trajectory-{seed}", suffix=".h5"),
@@ -214,6 +218,131 @@ def test_wrong_nested_configuration_fails_closed(tmp_path: Path) -> None:
     assert any("maximum_steps" in reason for reason in report["blocked_reasons"])
 
 
+@pytest.mark.parametrize(
+    "alias",
+    [
+        "formal_claim",
+        "formal_status",
+        "pid",
+        "process_id",
+        "evaluator_pid",
+        "credit_points",
+        "credit_delta",
+    ],
+)
+def test_unknown_top_level_promotion_aliases_fail_closed(
+    tmp_path: Path, alias: str
+) -> None:
+    receipts = {seed: _receipt(seed) for seed in matrix.SEEDS}
+    receipts[17][alias] = False if "formal" in alias else 0
+    report = _report(tmp_path, receipts)
+    assert report["source_bound"] is False
+    assert any(alias in reason for reason in report["blocked_reasons"])
+
+
+def test_checkpoint_path_and_sha_are_independently_unique(tmp_path: Path) -> None:
+    receipts = {seed: _receipt(seed) for seed in matrix.SEEDS}
+    receipts[29]["checkpoint"] = copy.deepcopy(receipts[29]["checkpoint"])
+    shared_checkpoint_path = "/opaque/f3-graph-residual500-hidden16-seed17-seed29-checkpoint.pt"
+    receipts[17]["checkpoint"] = copy.deepcopy(receipts[17]["checkpoint"])
+    receipts[17]["checkpoint"]["path"] = shared_checkpoint_path  # type: ignore[index]
+    receipts[29]["checkpoint"]["path"] = shared_checkpoint_path  # type: ignore[index]
+    report = _report(tmp_path, receipts)
+    assert report["source_bound"] is False
+    assert any("checkpoint path or SHA identity" in reason for reason in report["blocked_reasons"])
+
+    receipts = {seed: _receipt(seed) for seed in matrix.SEEDS}
+    receipts[29]["training_receipt"] = copy.deepcopy(receipts[29]["training_receipt"])
+    receipts[29]["training_receipt"]["sha256"] = receipts[17]["training_receipt"]["sha256"]  # type: ignore[index]
+    report = _report(tmp_path, receipts)
+    assert report["source_bound"] is False
+    assert any("training path or SHA identity" in reason for reason in report["blocked_reasons"])
+
+
+def test_namespace_requires_explicit_fresh_marker(tmp_path: Path) -> None:
+    receipts = {seed: _receipt(seed) for seed in matrix.SEEDS}
+    receipts[17]["evaluation"] = copy.deepcopy(receipts[17]["evaluation"])
+    receipts[17]["evaluation"].pop("namespace_fresh")  # type: ignore[index]
+    report = _report(tmp_path, receipts)
+    assert report["source_bound"] is False
+    assert any("namespace_fresh" in reason for reason in report["blocked_reasons"])
+
+
+def _blocked_report(tmp_path: Path) -> dict:
+    return matrix.build_report(
+        tmp_path,
+        terminal_paths={
+            seed: tmp_path / f"future-seed{seed}-terminal-receipt.json"
+            for seed in matrix.SEEDS
+        },
+    )
+
+
+@pytest.mark.parametrize("alias", ["formal_claim", "pid", "credit_points"])
+def test_unknown_top_level_report_aliases_fail_validation(tmp_path: Path, alias: str) -> None:
+    report = _blocked_report(tmp_path)
+    report[alias] = False if "formal" in alias else 0
+    errors = matrix.validate_report(report)
+    assert errors
+    assert any(alias in reason for reason in errors)
+
+
+def test_report_output_is_confined_to_fixed_reports_destinations(tmp_path: Path) -> None:
+    (tmp_path / "reports").mkdir()
+    report = _blocked_report(tmp_path)
+    with pytest.raises(matrix.MatrixError, match="fixed report filenames"):
+        matrix.write_report(report, tmp_path / "reports" / "unexpected.json", root=tmp_path)
+    with pytest.raises(matrix.MatrixError, match="reports"):
+        matrix.write_report(report, tmp_path / "outside.json", root=tmp_path)
+    with pytest.raises(matrix.MatrixError, match="fixed report filenames"):
+        matrix.write_report(report, tmp_path / "reports" / "unexpected.txt", root=tmp_path)
+
+
+def test_report_output_rejects_symlink_and_hardlink_destinations(tmp_path: Path) -> None:
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    report = _blocked_report(tmp_path)
+    output = reports / matrix.REPORT_JSON_FILENAME
+
+    symlink_target = tmp_path / "symlink-target.json"
+    symlink_target.write_text("sentinel", encoding="utf-8")
+    output.symlink_to(symlink_target)
+    with pytest.raises(matrix.MatrixError, match="symlink"):
+        matrix.write_report(report, output, root=tmp_path)
+    assert symlink_target.read_text(encoding="utf-8") == "sentinel"
+
+    output.unlink()
+    hardlink_target = tmp_path / "hardlink-target.json"
+    hardlink_target.write_text("sentinel", encoding="utf-8")
+    os.link(hardlink_target, output)
+    with pytest.raises(matrix.MatrixError, match="hard-linked"):
+        matrix.write_report(report, output, root=tmp_path)
+    assert hardlink_target.read_text(encoding="utf-8") == "sentinel"
+
+
+def test_report_output_does_not_overwrite_unexpected_regular_file(tmp_path: Path) -> None:
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    report = _blocked_report(tmp_path)
+    output = reports / matrix.REPORT_JSON_FILENAME
+    output.write_text("unexpected", encoding="utf-8")
+    with pytest.raises(matrix.MatrixError, match="expected validated report"):
+        matrix.write_report(report, output, root=tmp_path)
+    assert output.read_text(encoding="utf-8") == "unexpected"
+
+
+def test_report_output_writes_json_and_markdown_only_at_fixed_paths(tmp_path: Path) -> None:
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    report = _blocked_report(tmp_path)
+    json_output = reports / matrix.REPORT_JSON_FILENAME
+    markdown_output = reports / matrix.REPORT_MARKDOWN_FILENAME
+    matrix.write_report(report, json_output, root=tmp_path)
+    matrix.write_report(report, markdown_output, root=tmp_path)
+    assert json.loads(json_output.read_text(encoding="utf-8"))["status"] == "blocked_fail_closed"
+    assert markdown_output.read_text(encoding="utf-8").startswith("# F3 graph_residual")
+
+
 def test_duplicate_json_is_rejected(tmp_path: Path) -> None:
     receipts = {seed: _receipt(seed) for seed in matrix.SEEDS}
     paths = _write_receipts(tmp_path, receipts)
@@ -294,7 +423,8 @@ def test_descriptor_identity_change_is_rejected_as_toctou(tmp_path: Path, monkey
 
 
 def test_cli_default_writes_blocked_report(tmp_path: Path) -> None:
-    output = tmp_path / "matrix.json"
+    (tmp_path / "reports").mkdir()
+    output = tmp_path / "reports" / matrix.REPORT_JSON_FILENAME
     report = matrix.build_report(
         tmp_path,
         terminal_paths={seed: tmp_path / f"future-seed{seed}-terminal-receipt.json" for seed in matrix.SEEDS},
