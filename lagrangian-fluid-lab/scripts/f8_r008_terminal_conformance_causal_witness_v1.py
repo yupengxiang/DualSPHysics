@@ -486,14 +486,14 @@ def _validate_dispositions(value: Any) -> tuple[dict[str, Any], ...]:
 
 def _validate_trust_boundary(value: Any) -> dict[str, Any]:
     boundary = _exact_object(value, set(TRUST_BOUNDARY), "trust_boundary")
-    _require(boundary == TRUST_BOUNDARY,
-             "runtime/trust boundary is not the fixed deny-without-authority boundary")
     _require(boundary["trusted_authority_present"] is False
              and boundary["trusted_authority_ref"] is None
              and boundary["candidate_claims_accepted_as_runtime"] is False,
              "runtime claims cannot be accepted without an external trusted authority")
     _require(all(flag is False for flag in boundary["runtime_claims"].values()),
              "runtime claim is asserted without a trusted authority")
+    _require(boundary == TRUST_BOUNDARY,
+             "runtime/trust boundary is not the fixed deny-without-authority boundary")
     return boundary
 
 
@@ -654,6 +654,11 @@ def _validate_causal_witness(
             )
             _require(row["group_seq"] == expected_group,
                      f"causal witness {kind} watermark does not bind the final-fput projection")
+        elif kind == "fanotify_close_write":
+            # The event row was checked against the close-write group sequence
+            # above; unlike lifecycle rows it necessarily carries that group
+            # sequence.
+            pass
         else:
             _require(row["group_seq"] is None,
                      f"causal witness {kind} unexpectedly carries a group sequence")
