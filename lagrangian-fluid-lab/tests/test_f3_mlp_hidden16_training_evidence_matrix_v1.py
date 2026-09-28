@@ -135,7 +135,14 @@ def _reference(receipts: dict[int, dict]) -> dict:
 def _payloads():
     receipts = {seed: _receipt(seed) for seed in matrix.SEEDS}
     sources = {
-        seed: {"path": f"synthetic://mlp-seed{seed}.json", "sha256": _sha("7"), "opened": False}
+        seed: {
+            "path": f"/tmp/f3-mlp500-hidden16-seed{seed}-20260928-training.json",
+            "exists": True,
+            "opened": True,
+            "bytes": 1000 + seed,
+            "sha256": _sha("7"),
+            "schema": matrix.TRAINING_SCHEMA,
+        }
         for seed in matrix.SEEDS
     }
     return receipts, sources, _reference(receipts)
@@ -147,7 +154,14 @@ def _evaluate(receipts=None, reference=None, sources=None):
         base_receipts if receipts is None else receipts,
         base_sources if sources is None else sources,
         base_reference if reference is None else reference,
-        {"path": "synthetic://mlp-reference.json", "schema": matrix.REFERENCE_SCHEMA},
+        {
+            "path": "/tmp/f3-mlp-hidden16-reference.json",
+            "exists": True,
+            "opened": True,
+            "bytes": 2000,
+            "sha256": _sha("6"),
+            "schema": matrix.REFERENCE_SCHEMA,
+        },
     )
 
 
@@ -276,7 +290,8 @@ def test_report_tampering_breaks_zero_credit_envelope():
     assert any("credit must be zero" in error for error in matrix.validate_report(tampered))
 
 
-def test_cli_returns_blocked_status_for_missing_reference(tmp_path: Path):
+def test_cli_returns_blocked_status_for_missing_reference(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
     output = tmp_path / "matrix.json"
     markdown = tmp_path / "matrix.md"
     status = matrix.main(
@@ -284,9 +299,9 @@ def test_cli_returns_blocked_status_for_missing_reference(tmp_path: Path):
             "--reference-matrix",
             str(tmp_path / "missing-reference.json"),
             "--output",
-            str(output),
+            "matrix.json",
             "--markdown-output",
-            str(markdown),
+            "matrix.md",
         ]
     )
     assert status == 2
@@ -295,3 +310,61 @@ def test_cli_returns_blocked_status_for_missing_reference(tmp_path: Path):
     report = json.loads(output.read_text(encoding="utf-8"))
     assert report["status"] == "blocked_fail_closed"
     assert matrix.validate_report(report) == []
+
+
+def test_source_metadata_and_exact_source_seed_set_are_required():
+    receipts, sources, reference = _payloads()
+    del sources[17]["schema"]
+    report = _evaluate(receipts, reference, sources)
+    assert report["source_bound"] is False
+    assert any("source metadata" in error for error in report["errors"])
+
+    receipts, sources, reference = _payloads()
+    sources[99] = copy.deepcopy(sources[17])
+    report = _evaluate(receipts, reference, sources)
+    assert report["source_bound"] is False
+    assert any("source seed set" in error for error in report["errors"])
+
+    receipts, sources, reference = _payloads()
+    report = matrix.evaluate_payloads(receipts, sources, reference, None)
+    assert report["source_bound"] is False
+    assert any("reference source" in error for error in report["errors"])
+
+
+def test_strict_numeric_identity_fails_closed():
+    receipts, sources, reference = _payloads()
+    receipts[29]["config"]["hidden"] = 16.0
+    report = _evaluate(receipts, reference, sources)
+    assert report["source_bound"] is False
+    assert any("config.hidden" in error for error in report["errors"])
+
+
+def test_report_run_schema_tampering_is_rejected():
+    report = _evaluate()
+    report["runs"] = [{"seed": seed} for seed in matrix.SEEDS]
+    assert matrix.validate_report(report)
+
+    report = _evaluate()
+    report["unexpected"] = True
+    assert any("envelope keys" in error for error in matrix.validate_report(report))
+
+
+def test_symlink_input_and_unsafe_output_are_rejected(tmp_path: Path, monkeypatch):
+    target = tmp_path / "target.json"
+    target.write_text("{}\n", encoding="utf-8")
+    link = tmp_path / "link.json"
+    link.symlink_to(target)
+    with pytest.raises(matrix.MatrixError, match="symlink"):
+        matrix.read_bounded_json(tmp_path, link)
+
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(matrix.MatrixError, match="protected artifact"):
+        matrix.write_report(_evaluate(), "checkpoint.json")
+    with pytest.raises(matrix.MatrixError, match="parent traversal"):
+        matrix.write_report(_evaluate(), "../matrix.json")
+    output_target = tmp_path / "output-target.json"
+    output_target.write_text("old\n", encoding="utf-8")
+    output_link = tmp_path / "output.json"
+    output_link.symlink_to(output_target)
+    with pytest.raises(matrix.MatrixError, match="symlink"):
+        matrix.write_report(_evaluate(), output_link)

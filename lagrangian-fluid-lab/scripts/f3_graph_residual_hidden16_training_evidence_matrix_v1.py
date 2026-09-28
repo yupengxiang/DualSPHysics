@@ -15,8 +15,11 @@ import copy
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import re
+import stat
+import tempfile
 from typing import Any, Mapping, Sequence
 
 
@@ -39,6 +42,53 @@ NORMALIZATION_TRANSITIONS = 16
 PRIOR_ROWS = 17_280_000
 MAX_JSON_BYTES = 1 * 1024 * 1024
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+SOURCE_METADATA_KEYS = frozenset({"path", "exists", "opened", "bytes", "sha256", "schema"})
+DANGEROUS_OUTPUT_SUFFIXES = frozenset({".bin", ".ckpt", ".h5", ".hdf5", ".npy", ".npz", ".pt", ".pth"})
+DANGEROUS_OUTPUT_TOKENS = (
+    "checkpoint",
+    "trajectory",
+    "progress",
+    "manifest",
+    "ledger",
+    "registry",
+    "gate",
+    "receipt",
+)
+REPORT_ENVELOPE_KEYS = frozenset(
+    {
+        "schema",
+        "report_id",
+        "observed_at_utc",
+        "status",
+        "fail_closed",
+        "source_bound",
+        "diagnostic_only",
+        "formal",
+        "formal_eligible",
+        "qualification",
+        "T1_numerical",
+        "T2_macro",
+        "T2_path",
+        "qualification_credit",
+        "credit",
+        "formal_training_runs_expected",
+        "formal_training_runs_counted",
+        "training_evidence_counted_as_formal_runs",
+        "t1_case_runs_counted",
+        "t2_macro_families_counted",
+        "expected_contract",
+        "reference_training_matrix",
+        "runs",
+        "shared_config",
+        "checks",
+        "errors",
+        "authorization",
+        "input_boundary",
+        "side_effects",
+        "scope_note",
+    }
+)
+SCOPE_NOTE = "bounded JSON receipt/schema/hash metadata only; diagnostic and non-authorizing"
 PLACEHOLDER_WORDS = (
     "placeholder",
     "dummy",
@@ -198,13 +248,68 @@ def identity_sha256(value: Any) -> str:
 
 
 def _resolve_path(root: Path, value: Path | str) -> Path:
+    if not isinstance(value, (Path, str)):
+        _fail(f"input path must be a path string: {value!r}")
     path = Path(value).expanduser()
     if ".." in path.parts:
         _fail(f"input path must not contain parent traversal: {path}")
-    return (path if path.is_absolute() else root / path).resolve()
+    return path if path.is_absolute() else Path(root) / path
+
+
+def _reject_symlink_components(path: Path) -> None:
+    """Reject symlinks before opening a path, including parent components."""
+
+    absolute = Path(os.path.abspath(path))
+    current = Path(absolute.anchor or os.curdir)
+    for component in absolute.parts[1:] if absolute.is_absolute() else absolute.parts:
+        current /= component
+        try:
+            info = os.lstat(current)
+        except FileNotFoundError:
+            break
+        except OSError as error:
+            _fail(f"cannot inspect input path component {current}: {error}")
+        if stat.S_ISLNK(info.st_mode):
+            _fail(f"symlink path component is not accepted: {current}")
+
+
+def _read_bounded_bytes(path: Path) -> bytes:
+    """Read at most MAX_JSON_BYTES from a regular, no-follow file."""
+
+    _reject_symlink_components(path)
+    if not hasattr(os, "O_NOFOLLOW"):
+        _fail("platform does not provide O_NOFOLLOW")
+    flags = os.O_RDONLY | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0)
+    try:
+        descriptor = os.open(path, flags)
+    except OSError as error:
+        _fail(f"cannot open bounded JSON input {path}: {error}")
+    try:
+        info = os.fstat(descriptor)
+        if not stat.S_ISREG(info.st_mode):
+            _fail(f"bounded JSON input must be a regular file: {path}")
+        if info.st_size > MAX_JSON_BYTES:
+            _fail(f"JSON input exceeds {MAX_JSON_BYTES} bytes: {path}")
+        chunks: list[bytes] = []
+        total = 0
+        while total <= MAX_JSON_BYTES:
+            chunk = os.read(descriptor, min(64 * 1024, MAX_JSON_BYTES + 1 - total))
+            if not chunk:
+                break
+            chunks.append(chunk)
+            total += len(chunk)
+            if total > MAX_JSON_BYTES:
+                _fail(f"JSON input exceeds {MAX_JSON_BYTES} bytes while reading: {path}")
+        return b"".join(chunks)
+    except OSError as error:
+        _fail(f"cannot read bounded JSON input {path}: {error}")
+    finally:
+        os.close(descriptor)
 
 
 def _display_path(root: Path, path: Path) -> str:
+    root = Path(os.path.abspath(root))
+    path = Path(os.path.abspath(path))
     try:
         return path.relative_to(root).as_posix()
     except ValueError:
@@ -220,21 +325,26 @@ def _source_ref(
 ) -> dict[str, Any]:
     ref: dict[str, Any] = {
         "path": _display_path(root, path),
-        "exists": path.is_file(),
+        "exists": False,
         "opened": opened,
         "bytes": None,
         "sha256": None,
         "schema": None,
     }
-    if path.is_file():
-        try:
-            ref["bytes"] = path.stat().st_size
+    try:
+        _reject_symlink_components(path)
+        info = os.lstat(path)
+        if stat.S_ISREG(info.st_mode):
+            ref["exists"] = True
+            ref["bytes"] = info.st_size
             # Only small JSON receipts are opened.  Declared checkpoint/HDF5
             # paths remain metadata-only even when a caller supplies them.
-            if path.suffix.lower() == ".json" and path.stat().st_size <= MAX_JSON_BYTES:
-                ref["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
-        except OSError:
-            pass
+            if path.suffix.lower() == ".json" and info.st_size <= MAX_JSON_BYTES:
+                raw = _read_bounded_bytes(path)
+                ref["bytes"] = len(raw)
+                ref["sha256"] = hashlib.sha256(raw).hexdigest()
+    except (OSError, MatrixError):
+        pass
     if error:
         ref["error"] = error
     return ref
@@ -246,14 +356,9 @@ def read_bounded_json(root: Path, value: Path | str) -> tuple[dict[str, Any], di
     path = _resolve_path(root, value)
     if path.suffix.lower() != ".json":
         _fail(f"only .json inputs are accepted: {path}")
-    if path.is_symlink():
-        _fail(f"symlink input is not accepted: {path}")
-    if not path.is_file():
-        _fail(f"missing JSON input: {path}")
-    size = path.stat().st_size
-    if size > MAX_JSON_BYTES:
-        _fail(f"JSON input exceeds {MAX_JSON_BYTES} bytes: {path}")
-    raw = path.read_bytes()
+    raw = _read_bounded_bytes(path)
+    if not raw:
+        _fail(f"empty JSON input: {path}")
     try:
         value_obj = json.loads(
             raw.decode("utf-8"),
@@ -274,6 +379,51 @@ def read_bounded_json(root: Path, value: Path | str) -> tuple[dict[str, Any], di
         "sha256": hashlib.sha256(raw).hexdigest(),
         "schema": payload.get("schema"),
     }
+
+
+def _validate_source_metadata(
+    value: Any,
+    expected_schema: str,
+    name: str,
+    *,
+    allow_error: bool = False,
+) -> bool:
+    """Validate provenance emitted by read_bounded_json, without opening files."""
+
+    source = _mapping(value, name)
+    keys = set(source)
+    if "error" in source:
+        if not allow_error or keys != SOURCE_METADATA_KEYS | {"error"}:
+            _fail(f"{name} error metadata is not allowed for a bound source")
+        _string(source.get("error"), f"{name}.error")
+        path = _string(source.get("path"), f"{name}.path")
+        if path.lower().endswith(".json") is False or "://" in path or ".." in Path(path).parts:
+            _fail(f"{name}.path is not a safe JSON path")
+        if type(source.get("exists")) is not bool or source.get("opened") is not False:
+            _fail(f"{name}.error metadata exists/opened markers drift")
+        if source.get("bytes") is not None:
+            _strict_int(source.get("bytes"), f"{name}.bytes")
+            if source["bytes"] > MAX_JSON_BYTES:
+                _fail(f"{name}.bytes exceeds bounded JSON limit")
+        if source.get("sha256") is not None:
+            _sha256(source.get("sha256"), f"{name}.sha256")
+        if source.get("schema") is not None:
+            _string(source.get("schema"), f"{name}.schema")
+        return False
+    if keys != SOURCE_METADATA_KEYS:
+        _fail(f"{name} metadata keys are incomplete or unexpected")
+    path = _string(source.get("path"), f"{name}.path")
+    if path.lower().endswith(".json") is False or "://" in path or ".." in Path(path).parts:
+        _fail(f"{name}.path is not a safe bounded JSON path")
+    if source.get("exists") is not True or source.get("opened") is not True:
+        _fail(f"{name}.exists/opened must be true for bound JSON")
+    size = _strict_int(source.get("bytes"), f"{name}.bytes", 1)
+    if size > MAX_JSON_BYTES:
+        _fail(f"{name}.bytes exceeds bounded JSON limit")
+    _sha256(source.get("sha256"), f"{name}.sha256")
+    if source.get("schema") != expected_schema:
+        _fail(f"{name}.schema must be {expected_schema}")
+    return True
 
 
 def _require_false(value: Mapping[str, Any], key: str, name: str) -> None:
@@ -321,26 +471,42 @@ def _prior_identity(prior: Mapping[str, Any]) -> dict[str, Any]:
         "rows": prior["rows"],
         "finite": prior["finite"],
         "semantic": prior["semantic"],
+        "dx_abs_max_m": prior["dx_abs_max_m"],
+        "dv_abs_max_mps": prior["dv_abs_max_mps"],
+        "dx_abs_sum_m": prior["dx_abs_sum_m"],
+        "dv_abs_sum_mps": prior["dv_abs_sum_mps"],
+        "last_update": copy.deepcopy(prior["last_update"]),
     }
 
 
 def _validate_normalization(normalization: Mapping[str, Any], seed: int, name: str) -> dict[str, Any]:
     if normalization.get("schema") != NORMALIZATION_SCHEMA:
         _fail(f"{name}.normalization schema drifts")
-    if (
-        normalization.get("requested_maximum_transitions") != NORMALIZATION_TRANSITIONS
-        or normalization.get("selected_transition_count") != NORMALIZATION_TRANSITIONS
-        or normalization.get("selection_policy") != "deterministic_evenly_spaced_train_transitions_v1"
-        or normalization.get("selection_seed") != seed
-        or normalization.get("source_split") != "train"
-        or normalization.get("target_reference") != "raw_dual_increment_train_shared"
-    ):
-        _fail(f"{name}.normalization identity drifts")
     _strict_int(
         normalization.get("available_transition_count"),
         f"{name}.normalization.available_transition_count",
         NORMALIZATION_TRANSITIONS,
     )
+    requested = _strict_int(
+        normalization.get("requested_maximum_transitions"),
+        f"{name}.normalization.requested_maximum_transitions",
+        NORMALIZATION_TRANSITIONS,
+    )
+    selected = _strict_int(
+        normalization.get("selected_transition_count"),
+        f"{name}.normalization.selected_transition_count",
+        NORMALIZATION_TRANSITIONS,
+    )
+    selection_seed = _strict_int(normalization.get("selection_seed"), f"{name}.normalization.selection_seed")
+    if (
+        requested != NORMALIZATION_TRANSITIONS
+        or selected != NORMALIZATION_TRANSITIONS
+        or normalization.get("selection_policy") != "deterministic_evenly_spaced_train_transitions_v1"
+        or selection_seed != seed
+        or normalization.get("source_split") != "train"
+        or normalization.get("target_reference") != "raw_dual_increment_train_shared"
+    ):
+        _fail(f"{name}.normalization identity drifts")
     identity = _normalization_identity(normalization)
     return {"identity": identity, "identity_sha256": identity_sha256(identity)}
 
@@ -348,13 +514,17 @@ def _validate_normalization(normalization: Mapping[str, Any], seed: int, name: s
 def _validate_prior(prior: Mapping[str, Any], name: str) -> dict[str, Any]:
     if prior.get("schema") != PRIOR_SCHEMA:
         _fail(f"{name}.residual_prior schema drifts")
-    if prior.get("enabled") is not True or prior.get("history_complete") is not True:
+    if type(prior.get("enabled")) is not bool or prior.get("enabled") is not True:
+        _fail(f"{name}.residual_prior must be enabled with complete history")
+    if type(prior.get("history_complete")) is not bool or prior.get("history_complete") is not True:
         _fail(f"{name}.residual_prior must be enabled with complete history")
     if prior.get("units") != {"displacement": "m", "delta_velocity": "m/s"}:
         _fail(f"{name}.residual_prior units drift")
-    if prior.get("execution_calls") != UPDATES or prior.get("rows") != PRIOR_ROWS:
+    execution_calls = _strict_int(prior.get("execution_calls"), f"{name}.residual_prior.execution_calls")
+    rows = _strict_int(prior.get("rows"), f"{name}.residual_prior.rows")
+    if execution_calls != UPDATES or rows != PRIOR_ROWS:
         _fail(f"{name}.residual_prior execution/row identity drifts")
-    if prior.get("finite") is not True:
+    if type(prior.get("finite")) is not bool or prior.get("finite") is not True:
         _fail(f"{name}.residual_prior.finite must be true")
     if prior.get("semantic") != (
         "graph_residual subtracts this SI prior before shared raw-target normalization; "
@@ -362,7 +532,7 @@ def _validate_prior(prior: Mapping[str, Any], name: str) -> dict[str, Any]:
     ):
         _fail(f"{name}.residual_prior.semantic drifts")
     last_update = _mapping(prior.get("last_update"), f"{name}.residual_prior.last_update")
-    if last_update.get("update") != UPDATES:
+    if _strict_int(last_update.get("update"), f"{name}.residual_prior.last_update.update") != UPDATES:
         _fail(f"{name}.residual_prior.last_update.update drifts")
     _not_placeholder(_string(last_update.get("case_id"), f"{name}.residual_prior.last_update.case_id"),
                      f"{name}.residual_prior.last_update.case_id")
@@ -384,9 +554,11 @@ def _validate_training_receipt(receipt: Mapping[str, Any], seed: int) -> dict[st
         _fail(f"{name}.status must be completed when present")
     if receipt.get("model_kind") != MODEL_KIND:
         _fail(f"{name}.model_kind must be {MODEL_KIND}")
-    if receipt.get("seed") != seed or receipt.get("completed_updates") != UPDATES:
+    receipt_seed = _strict_int(receipt.get("seed"), f"{name}.seed")
+    completed_updates = _strict_int(receipt.get("completed_updates"), f"{name}.completed_updates")
+    if receipt_seed != seed or completed_updates != UPDATES:
         _fail(f"{name} seed/updates drift")
-    if "requested_updates" in receipt and receipt["requested_updates"] != UPDATES:
+    if "requested_updates" in receipt and _strict_int(receipt["requested_updates"], f"{name}.requested_updates") != UPDATES:
         _fail(f"{name}.requested_updates drifts")
     parameter_count = _strict_int(receipt.get("parameter_count"), f"{name}.parameter_count", 1)
     if parameter_count != PARAMETER_COUNT:
@@ -398,10 +570,27 @@ def _validate_training_receipt(receipt: Mapping[str, Any], seed: int) -> dict[st
     expected_keys = set(STATIC_CONFIG) | DYNAMIC_CONFIG_KEYS
     if set(config) != expected_keys:
         _fail(f"{name}.config keys drift")
+    for key in (
+        "centers_per_update",
+        "checkpoint_every",
+        "hidden",
+        "history_states",
+        "log_every",
+        "max_neighbors",
+        "updates",
+        "validation_case_count",
+        "validation_centers",
+        "validation_every",
+        "validation_transition_count",
+        "paired_seed",
+        "sampler_seed",
+        "seed",
+    ):
+        _strict_int(config.get(key), f"{name}.config.{key}")
     for key, expected in STATIC_CONFIG.items():
         if config.get(key) != expected:
             _fail(f"{name}.config.{key} drifts")
-    if config.get("seed") != seed or config.get("paired_seed") != seed or config.get("sampler_seed") != seed:
+    if config["seed"] != seed or config["paired_seed"] != seed or config["sampler_seed"] != seed:
         _fail(f"{name}.config seed bindings drift")
     run_id = f"graph_residual-hidden16-seed{seed}"
     if config.get("run_id") != run_id or receipt.get("run_id") != run_id:
@@ -416,13 +605,17 @@ def _validate_training_receipt(receipt: Mapping[str, Any], seed: int) -> dict[st
         _fail(f"{name}.initialization evidence is incomplete")
     if (
         initialization.get("model_kind") != MODEL_KIND
-        or initialization.get("seed") != seed
-        or initialization.get("hidden") != HIDDEN
-        or initialization.get("parameter_count") != parameter_count
         or initialization.get("constructed_before_first_update") is not True
-        or initialization.get("construction_update") != 0
     ):
         _fail(f"{name}.initialization evidence drifts")
+    if _strict_int(initialization.get("seed"), f"{name}.initialization.seed") != seed:
+        _fail(f"{name}.initialization evidence seed drifts")
+    if _strict_int(initialization.get("hidden"), f"{name}.initialization.hidden") != HIDDEN:
+        _fail(f"{name}.initialization evidence hidden drifts")
+    if _strict_int(initialization.get("parameter_count"), f"{name}.initialization.parameter_count") != parameter_count:
+        _fail(f"{name}.initialization evidence parameter count drifts")
+    if _strict_int(initialization.get("construction_update"), f"{name}.initialization.construction_update") != 0:
+        _fail(f"{name}.initialization construction update drifts")
     parameter_digest = _sha256(
         initialization.get("parameter_digest"),
         f"{name}.initialization.parameter_digest",
@@ -434,7 +627,7 @@ def _validate_training_receipt(receipt: Mapping[str, Any], seed: int) -> dict[st
     prior_projection = _validate_prior(prior, name)
 
     checkpoint = _mapping(receipt.get("checkpoint"), f"{name}.checkpoint")
-    if checkpoint.get("schema") != CHECKPOINT_SCHEMA or checkpoint.get("update") != UPDATES:
+    if checkpoint.get("schema") != CHECKPOINT_SCHEMA or _strict_int(checkpoint.get("update"), f"{name}.checkpoint.update") != UPDATES:
         _fail(f"{name}.checkpoint schema/update drifts")
     checkpoint_path = _not_placeholder(
         _string(checkpoint.get("path"), f"{name}.checkpoint.path"),
@@ -486,6 +679,7 @@ def _validate_training_receipt(receipt: Mapping[str, Any], seed: int) -> dict[st
         "residual_prior": prior_projection["identity"],
         "shared_config": shared_config,
         "identity": {
+            "manifest_sha256": manifest_sha,
             "checkpoint_sha256": checkpoint_sha,
             "initialization_parameter_digest": parameter_digest,
             "normalization_identity_sha256": normalization_projection["identity_sha256"],
@@ -496,7 +690,7 @@ def _validate_training_receipt(receipt: Mapping[str, Any], seed: int) -> dict[st
     }
 
 
-def _validate_reference_matrix(value: Mapping[str, Any]) -> dict[int, Mapping[str, Any]]:
+def _validate_reference_matrix(value: Mapping[str, Any]) -> tuple[str, dict[int, Mapping[str, Any]]]:
     _walk_json(value, "reference")
     if value.get("schema") != REFERENCE_SCHEMA:
         _fail(f"reference matrix schema must be {REFERENCE_SCHEMA}")
@@ -521,18 +715,23 @@ def _validate_reference_matrix(value: Mapping[str, Any]) -> dict[int, Mapping[st
         or qualification.get("credit") != 0
     ):
         _fail("reference matrix qualification markers drift")
+    manifest_sha = _sha256(value.get("manifest_sha256"), "reference.manifest_sha256")
     runs = value.get("runs")
     if not isinstance(runs, list) or len(runs) != len(SEEDS):
         _fail("reference matrix must contain exactly three runs")
     result: dict[int, Mapping[str, Any]] = {}
     for row in runs:
         item = _mapping(row, "reference.run")
-        seed = item.get("seed")
+        seed = _strict_int(item.get("seed"), "reference.run.seed")
         if seed in result or seed not in SEEDS:
             _fail("reference matrix seed set is not exactly 17, 29, 43")
-        if item.get("run_id") != f"graph_residual-hidden16-seed{seed}" or item.get("completed_updates") != UPDATES:
+        if item.get("run_id") != f"graph_residual-hidden16-seed{seed}" or _strict_int(
+            item.get("completed_updates"), f"reference.run[{seed}].completed_updates"
+        ) != UPDATES:
             _fail(f"reference run {seed} identity drifts")
-        if item.get("checkpoint_verified") is not True or item.get("parameter_count") != PARAMETER_COUNT:
+        if item.get("checkpoint_verified") is not True or _strict_int(
+            item.get("parameter_count"), f"reference.run[{seed}].parameter_count"
+        ) != PARAMETER_COUNT:
             _fail(f"reference run {seed} checkpoint/parameter metadata drifts")
         for key in (
             "checkpoint_sha256",
@@ -547,7 +746,7 @@ def _validate_reference_matrix(value: Mapping[str, Any]) -> dict[int, Mapping[st
         result[seed] = item
     if set(result) != set(SEEDS):
         _fail("reference matrix seed set is incomplete")
-    return result
+    return manifest_sha, result
 
 
 def _check(
@@ -608,13 +807,14 @@ def evaluate_payloads(
         errors.append(f"training source seed set drift: observed {sorted(source_set)} expected {list(SEEDS)}")
 
     reference_rows: dict[int, Mapping[str, Any]] = {}
+    reference_manifest_sha: str | None = None
     reference_ok = True
     if reference_matrix is None:
         reference_ok = False
         errors.append("missing reference training matrix")
     else:
         try:
-            reference_rows = _validate_reference_matrix(reference_matrix)
+            reference_manifest_sha, reference_rows = _validate_reference_matrix(reference_matrix)
         except MatrixError as error:
             reference_ok = False
             errors.append(f"reference matrix: {error}")
@@ -623,6 +823,48 @@ def evaluate_payloads(
             "reference_training_matrix_schema",
             reference_ok,
             "compact residual training matrix schema and identity metadata are valid",
+        )
+    )
+
+    source_metadata_ok = exact_source_set
+    for seed, source in training_sources.items():
+        if seed not in expected_set:
+            continue
+        try:
+            _validate_source_metadata(
+                source,
+                TRAINING_SCHEMA,
+                f"training source[{seed}]",
+                allow_error=seed not in training_receipts,
+            )
+        except (KeyError, MatrixError) as error:
+            source_metadata_ok = False
+            errors.append(f"training source[{seed}]: {error}")
+    if not source_metadata_ok:
+        errors.append("training source metadata contract is incomplete")
+    checks.append(
+        _check(
+            "training_source_metadata",
+            source_metadata_ok,
+            "all training source references are complete bounded JSON metadata",
+        )
+    )
+
+    reference_source_ok = False
+    if reference_matrix is not None:
+        try:
+            reference_source_ok = _validate_source_metadata(
+                reference_source,
+                REFERENCE_SCHEMA,
+                "reference source",
+            )
+        except (KeyError, MatrixError) as error:
+            errors.append(f"reference source: {error}")
+    checks.append(
+        _check(
+            "reference_source_metadata",
+            reference_source_ok,
+            "reference source is complete bounded JSON metadata",
         )
     )
 
@@ -644,7 +886,7 @@ def evaluate_payloads(
                 projection = _validate_training_receipt(receipt, seed)
                 source = training_sources.get(seed)
                 source_sha = _sha256(
-                    (source or {}).get("sha256"),
+                    source.get("sha256") if isinstance(source, Mapping) else None,
                     f"training source[{seed}].sha256",
                 )
                 projection["identity"]["training_receipt_sha256"] = source_sha
@@ -654,6 +896,8 @@ def evaluate_payloads(
                         _fail(f"seed{seed} training receipt SHA drifts from reference matrix")
                     if projection["checkpoint"]["sha256"] != reference["checkpoint_sha256"]:
                         _fail(f"seed{seed} checkpoint SHA drifts from reference matrix")
+                    if projection["manifest_sha256"] != reference_manifest_sha:
+                        _fail(f"seed{seed} manifest SHA drifts from reference matrix")
                     if projection["initialization"]["parameter_digest"] != reference["initialization_parameter_digest"]:
                         _fail(f"seed{seed} initialization digest drifts from reference matrix")
                     if projection["identity"]["normalization_identity_sha256"] != reference["normalization_identity_sha256"]:
@@ -683,9 +927,29 @@ def evaluate_payloads(
     if not shared_config_ok:
         errors.append("training receipts do not provide one common configuration")
 
+    manifest_shas = [projections[seed]["manifest_sha256"] for seed in SEEDS if seed in projections]
+    common_manifest_ok = (
+        len(manifest_shas) == len(SEEDS)
+        and len(set(manifest_shas)) == 1
+        and reference_manifest_sha is not None
+        and manifest_shas[0] == reference_manifest_sha
+    )
+    checks.append(
+        _check(
+            "common_manifest_identity",
+            common_manifest_ok,
+            "all three receipts bind one reference manifest identity",
+            manifest_shas,
+            reference_manifest_sha,
+        )
+    )
+    if not common_manifest_ok:
+        errors.append("training receipts do not provide one common manifest identity")
+
     identity_rows = [projections[seed]["identity"] for seed in SEEDS if seed in projections]
     identity_complete = len(identity_rows) == len(SEEDS) and all(
         set(row) == {
+            "manifest_sha256",
             "training_receipt_sha256",
             "checkpoint_sha256",
             "initialization_parameter_digest",
@@ -707,6 +971,7 @@ def evaluate_payloads(
     checkpoint_paths = [projections[seed]["checkpoint"]["path"] for seed in SEEDS if seed in projections]
     identity_values = [
         (
+            projections[seed]["identity"]["manifest_sha256"],
             projections[seed]["identity"]["training_receipt_sha256"],
             projections[seed]["identity"]["checkpoint_sha256"],
             projections[seed]["identity"]["initialization_parameter_digest"],
@@ -733,9 +998,12 @@ def evaluate_payloads(
         not errors
         and exact_seed_set
         and exact_source_set
+        and source_metadata_ok
         and reference_ok
+        and reference_source_ok
         and len(projections) == len(SEEDS)
         and shared_config_ok
+        and common_manifest_ok
         and identity_complete
         and identity_unique
     )
@@ -775,6 +1043,7 @@ def evaluate_payloads(
             "shared_config": REFERENCE_SHARED_CONFIG,
             "normalization_transitions": NORMALIZATION_TRANSITIONS,
             "prior_schema": PRIOR_SCHEMA,
+            "manifest_identity_bound": True,
             "checkpoint_content_opened": False,
         },
         "reference_training_matrix": {
@@ -818,7 +1087,7 @@ def evaluate_payloads(
             "runtime_stopped": False,
             "runtime_restarted": False,
         },
-        "scope_note": "bounded JSON receipt/schema/hash metadata only; diagnostic and non-authorizing",
+        "scope_note": SCOPE_NOTE,
     }
     return report
 
@@ -868,14 +1137,137 @@ def build_report(
     )
 
 
+def _validate_report_projection(value: Any, name: str) -> list[str]:
+    errors: list[str] = []
+    try:
+        projection = _mapping(value, name)
+        expected_keys = {
+            "seed", "run_id", "schema", "model_kind", "hidden", "updates", "evidence_status",
+            "parameter_count", "manifest_sha256", "checkpoint", "initialization", "normalization",
+            "residual_prior", "shared_config", "identity", "formal_eligible", "qualification_credit",
+        }
+        if set(projection) != expected_keys:
+            _fail(f"{name} keys drift")
+        seed = _strict_int(projection.get("seed"), f"{name}.seed")
+        if seed not in SEEDS or projection.get("run_id") != f"graph_residual-hidden16-seed{seed}":
+            _fail(f"{name} seed/run identity drifts")
+        if projection.get("schema") != TRAINING_SCHEMA or projection.get("model_kind") != MODEL_KIND:
+            _fail(f"{name} schema/model identity drifts")
+        if _strict_int(projection.get("hidden"), f"{name}.hidden") != HIDDEN:
+            _fail(f"{name}.hidden drifts")
+        if _strict_int(projection.get("updates"), f"{name}.updates") != UPDATES:
+            _fail(f"{name}.updates drifts")
+        if projection.get("evidence_status") != "complete":
+            _fail(f"{name}.evidence_status drifts")
+        if _strict_int(projection.get("parameter_count"), f"{name}.parameter_count") != PARAMETER_COUNT:
+            _fail(f"{name}.parameter_count drifts")
+        _sha256(projection.get("manifest_sha256"), f"{name}.manifest_sha256")
+        if projection.get("formal_eligible") is not False or type(projection.get("qualification_credit")) is not int or projection.get("qualification_credit") != 0:
+            _fail(f"{name} authorization markers drift")
+
+        checkpoint = _mapping(projection.get("checkpoint"), f"{name}.checkpoint")
+        if set(checkpoint) != {"schema", "path", "sha256", "update"}:
+            _fail(f"{name}.checkpoint keys drift")
+        if checkpoint.get("schema") != CHECKPOINT_SCHEMA or _strict_int(checkpoint.get("update"), f"{name}.checkpoint.update") != UPDATES:
+            _fail(f"{name}.checkpoint identity drifts")
+        checkpoint_path = _not_placeholder(_string(checkpoint.get("path"), f"{name}.checkpoint.path"), f"{name}.checkpoint.path")
+        if not checkpoint_path.startswith("/") or ".." in Path(checkpoint_path).parts or not checkpoint_path.endswith("-checkpoint.pt"):
+            _fail(f"{name}.checkpoint.path is unsafe")
+        _sha256(checkpoint.get("sha256"), f"{name}.checkpoint.sha256")
+
+        initialization = _mapping(projection.get("initialization"), f"{name}.initialization")
+        if set(initialization) != {"schema", "status", "parameter_count", "parameter_digest"}:
+            _fail(f"{name}.initialization keys drift")
+        if initialization.get("schema") != INITIALIZATION_SCHEMA or initialization.get("status") != "captured":
+            _fail(f"{name}.initialization schema/status drifts")
+        if _strict_int(initialization.get("parameter_count"), f"{name}.initialization.parameter_count") != PARAMETER_COUNT:
+            _fail(f"{name}.initialization parameter count drifts")
+        _sha256(initialization.get("parameter_digest"), f"{name}.initialization.parameter_digest")
+
+        normalization = _mapping(projection.get("normalization"), f"{name}.normalization")
+        if set(normalization) != {"schema", "available_transition_count", "requested_maximum_transitions", "selected_transition_count", "selection_policy", "selection_seed", "source_split", "target_reference"}:
+            _fail(f"{name}.normalization keys drift")
+        _validate_normalization(normalization, seed, name)
+
+        prior = _mapping(projection.get("residual_prior"), f"{name}.residual_prior")
+        if set(prior) != {"schema", "enabled", "history_complete", "units", "execution_calls", "rows", "finite", "semantic", "dx_abs_max_m", "dv_abs_max_mps", "dx_abs_sum_m", "dv_abs_sum_mps", "last_update"}:
+            _fail(f"{name}.residual_prior keys drift")
+        _validate_prior(prior, name)
+        if dict(_mapping(projection.get("shared_config"), f"{name}.shared_config")) != REFERENCE_SHARED_CONFIG:
+            _fail(f"{name}.shared_config drifts")
+        identity = _mapping(projection.get("identity"), f"{name}.identity")
+        if set(identity) != {"manifest_sha256", "training_receipt_sha256", "checkpoint_sha256", "initialization_parameter_digest", "normalization_identity_sha256", "residual_prior_identity_sha256"}:
+            _fail(f"{name}.identity keys drift")
+        for key in identity:
+            _sha256(identity[key], f"{name}.identity.{key}")
+        if identity["manifest_sha256"] != projection["manifest_sha256"]:
+            _fail(f"{name}.identity manifest binding drifts")
+        if identity["checkpoint_sha256"] != checkpoint["sha256"]:
+            _fail(f"{name}.identity checkpoint binding drifts")
+        if identity["initialization_parameter_digest"] != initialization["parameter_digest"]:
+            _fail(f"{name}.identity initialization binding drifts")
+        if identity["normalization_identity_sha256"] != identity_sha256(normalization):
+            _fail(f"{name}.identity normalization binding drifts")
+        if identity["residual_prior_identity_sha256"] != identity_sha256(prior):
+            _fail(f"{name}.identity residual-prior binding drifts")
+    except (KeyError, MatrixError) as error:
+        errors.append(str(error))
+    return errors
+
+
+def _validate_report_checks(
+    value: Any,
+    required: set[str],
+    *,
+    require_all_passed: bool = False,
+) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(value, list):
+        return ["checks must be an array"]
+    names: set[str] = set()
+    for index, item in enumerate(value):
+        try:
+            check = _mapping(item, f"checks[{index}]")
+            if set(check) != {"check", "passed", "reason", "observed", "expected"}:
+                _fail(f"checks[{index}] keys drift")
+            name = _string(check.get("check"), f"checks[{index}].check")
+            if name in names:
+                _fail(f"duplicate check name: {name}")
+            names.add(name)
+            if type(check.get("passed")) is not bool:
+                _fail(f"checks[{index}].passed must be boolean")
+            if require_all_passed and check.get("passed") is not True:
+                _fail(f"checks[{index}].passed must be true for a bound report")
+            _string(check.get("reason"), f"checks[{index}].reason")
+        except (KeyError, MatrixError) as error:
+            errors.append(str(error))
+    if names != required:
+        errors.append(f"check set drift: observed {sorted(names)} expected {sorted(required)}")
+    return errors
+
+
 def validate_report(report: Mapping[str, Any]) -> list[str]:
     """Validate the report envelope without opening any source artifact."""
 
     errors: list[str] = []
+    if not isinstance(report, Mapping):
+        return ["report must be an object"]
+    try:
+        _walk_json(report, "report")
+    except MatrixError as error:
+        errors.append(str(error))
+    if set(report) != REPORT_ENVELOPE_KEYS:
+        errors.append("report envelope keys drift")
     if report.get("schema") != SCHEMA:
         errors.append("report schema drift")
     if report.get("report_id") != REPORT_ID:
         errors.append("report id drift")
+    try:
+        _string(report.get("observed_at_utc"), "observed_at_utc")
+    except MatrixError as error:
+        errors.append(str(error))
+    if type(report.get("source_bound")) is not bool:
+        errors.append("source_bound must be boolean")
     source_bound = report.get("source_bound") is True
     expected_status = "training_evidence_bound_diagnostic_only" if source_bound else "blocked_fail_closed"
     if report.get("status") != expected_status:
@@ -887,77 +1279,201 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
     for key in ("formal", "formal_eligible", "qualification", "T1_numerical", "T2_macro", "T2_path"):
         if report.get(key) is not False:
             errors.append(f"{key} must be false")
-    for key in (
-        "qualification_credit",
-        "credit",
-        "formal_training_runs_counted",
-        "training_evidence_counted_as_formal_runs",
-        "t1_case_runs_counted",
-        "t2_macro_families_counted",
-    ):
-        if report.get(key) != 0:
-            errors.append(f"{key} must be zero")
+    try:
+        if _strict_int(report.get("formal_training_runs_expected"), "formal_training_runs_expected") != 9:
+            errors.append("formal_training_runs_expected must be 9")
+    except MatrixError as error:
+        errors.append(str(error))
+    if report.get("scope_note") != SCOPE_NOTE:
+        errors.append("scope_note drift")
+    for key in ("qualification_credit", "credit", "formal_training_runs_counted", "training_evidence_counted_as_formal_runs", "t1_case_runs_counted", "t2_macro_families_counted"):
+        if type(report.get(key)) is not int or report.get(key) != 0:
+            errors.append(f"{key} must be zero integer")
+
     expected = report.get("expected_contract")
-    if not isinstance(expected, Mapping):
-        errors.append("expected_contract must be an object")
+    expected_keys = {"model_kind", "hidden", "updates", "seeds", "parameter_count", "evidence_status", "shared_config", "normalization_transitions", "prior_schema", "manifest_identity_bound", "checkpoint_content_opened"}
+    if not isinstance(expected, Mapping) or set(expected) != expected_keys:
+        errors.append("expected_contract keys drift")
     else:
-        if expected.get("model_kind") != MODEL_KIND or expected.get("hidden") != HIDDEN or expected.get("updates") != UPDATES:
-            errors.append("expected_contract model/hidden/updates drift")
-        if expected.get("seeds") != list(SEEDS) or expected.get("parameter_count") != PARAMETER_COUNT:
-            errors.append("expected_contract seed/parameter identity drift")
-        if expected.get("checkpoint_content_opened") is not False:
-            errors.append("expected_contract checkpoint content must remain unopened")
+        if expected.get("model_kind") != MODEL_KIND or expected.get("evidence_status") != "complete" or expected.get("prior_schema") != PRIOR_SCHEMA:
+            errors.append("expected_contract model/evidence drift")
+        try:
+            if _strict_int(expected.get("hidden"), "expected_contract.hidden") != HIDDEN or _strict_int(expected.get("updates"), "expected_contract.updates") != UPDATES or _strict_int(expected.get("parameter_count"), "expected_contract.parameter_count") != PARAMETER_COUNT or _strict_int(expected.get("normalization_transitions"), "expected_contract.normalization_transitions") != NORMALIZATION_TRANSITIONS:
+                errors.append("expected_contract numeric identity drift")
+        except MatrixError as error:
+            errors.append(str(error))
+        if expected.get("seeds") != list(SEEDS) or expected.get("shared_config") != REFERENCE_SHARED_CONFIG or expected.get("manifest_identity_bound") is not True or expected.get("checkpoint_content_opened") is not False:
+            errors.append("expected_contract identity/boundary drift")
+
     authorization = report.get("authorization")
-    if not isinstance(authorization, Mapping):
-        errors.append("authorization must be an object")
+    if not isinstance(authorization, Mapping) or set(authorization) != {"formal", "formal_eligible", "T1_numerical", "T2_macro", "T2_path", "qualification", "qualification_credit", "credit"}:
+        errors.append("authorization keys drift")
     else:
         for key in ("formal", "formal_eligible", "T1_numerical", "T2_macro", "T2_path", "qualification"):
             if authorization.get(key) is not False:
                 errors.append(f"authorization.{key} must be false")
-        if authorization.get("qualification_credit") != 0 or authorization.get("credit") != 0:
-            errors.append("authorization credit must be zero")
-    runs = report.get("runs")
-    if (
-        not isinstance(runs, list)
-        or len(runs) != len(SEEDS)
-        or {row.get("seed") for row in runs if isinstance(row, Mapping)} != set(SEEDS)
-    ):
-        errors.append("report run seed set drift")
-    boundary = report.get("input_boundary")
-    if not isinstance(boundary, Mapping):
-        errors.append("input_boundary must be an object")
+        for key in ("qualification_credit", "credit"):
+            if type(authorization.get(key)) is not int or authorization.get(key) != 0:
+                errors.append(f"authorization.{key} must be zero integer")
+
+    reference = report.get("reference_training_matrix")
+    if not isinstance(reference, Mapping) or set(reference) != {"source", "schema", "opened"}:
+        errors.append("reference_training_matrix keys drift")
     else:
-        if boundary.get("bounded_json_only") is not True or boundary.get("max_json_bytes") != MAX_JSON_BYTES:
+        if reference.get("schema") != REFERENCE_SCHEMA or type(reference.get("opened")) is not bool:
+            errors.append("reference_training_matrix identity drift")
+        try:
+            opened = _validate_source_metadata(reference.get("source"), REFERENCE_SCHEMA, "report.reference source", allow_error=not source_bound)
+            if reference.get("opened") is not opened:
+                errors.append("reference_training_matrix.opened/source mismatch")
+        except (KeyError, MatrixError) as error:
+            errors.append(str(error))
+
+    runs = report.get("runs")
+    required_run_keys = {"seed", "status", "source", "blocked_reasons"}
+    observed_seeds: set[int] = set()
+    validated_projections: dict[int, Mapping[str, Any]] = {}
+    if not isinstance(runs, list) or len(runs) != len(SEEDS):
+        errors.append("report runs must contain exactly three rows")
+    else:
+        for index, row in enumerate(runs):
+            try:
+                item = _mapping(row, f"runs[{index}]")
+                seed = _strict_int(item.get("seed"), f"runs[{index}].seed")
+                if seed not in SEEDS or seed in observed_seeds:
+                    _fail(f"runs[{index}].seed set drifts")
+                observed_seeds.add(seed)
+                status = item.get("status")
+                if status not in {"missing", "rejected", "blocked", "bound_complete"}:
+                    _fail(f"runs[{index}].status drifts")
+                blocked_reasons = item.get("blocked_reasons")
+                if not isinstance(blocked_reasons, list) or any(not isinstance(reason, str) for reason in blocked_reasons):
+                    _fail(f"runs[{index}].blocked_reasons drifts")
+                source_complete = _validate_source_metadata(item.get("source"), TRAINING_SCHEMA, f"runs[{index}].source", allow_error=not source_bound)
+                if source_bound and not source_complete:
+                    _fail(f"runs[{index}].source must be complete when source_bound")
+                has_evidence = "evidence" in item
+                expected_row_keys = required_run_keys | ({"evidence"} if has_evidence else set())
+                if set(item) != expected_row_keys:
+                    _fail(f"runs[{index}] keys drift")
+                if status == "bound_complete" and not has_evidence:
+                    _fail(f"runs[{index}] bound row is missing evidence")
+                if source_bound and status != "bound_complete":
+                    _fail(f"runs[{index}] bound matrix has non-complete row")
+                if status in {"bound_complete", "blocked"} and not source_complete:
+                    _fail(f"runs[{index}] complete evidence row has incomplete source metadata")
+                if status in {"missing", "rejected"} and has_evidence:
+                    _fail(f"runs[{index}] rejected row must not contain evidence")
+                if status == "bound_complete" and blocked_reasons:
+                    _fail(f"runs[{index}] complete row must not be blocked")
+                if status in {"missing", "rejected", "blocked"} and not blocked_reasons:
+                    _fail(f"runs[{index}] blocked row must include a reason")
+                if has_evidence:
+                    projection_errors = _validate_report_projection(item["evidence"], f"runs[{index}].evidence")
+                    errors.extend(projection_errors)
+                    if not projection_errors:
+                        validated_projections[seed] = item["evidence"]
+            except (KeyError, MatrixError) as error:
+                errors.append(str(error))
+    if observed_seeds != set(SEEDS):
+        errors.append("report run seed set drift")
+
+    if source_bound and len(validated_projections) == len(SEEDS):
+        manifests = [validated_projections[seed]["manifest_sha256"] for seed in SEEDS]
+        if len(set(manifests)) != 1:
+            errors.append("bound report manifest identity is not common across seeds")
+        configs = [validated_projections[seed]["shared_config"] for seed in SEEDS]
+        if any(dict(config) != dict(configs[0]) for config in configs[1:]):
+            errors.append("bound report shared configuration is not common across seeds")
+    errors.extend(
+        _validate_report_checks(
+            report.get("checks"),
+            {"exact_seed_set", "exact_source_seed_set", "reference_training_matrix_schema", "training_source_metadata", "reference_source_metadata", "common_config", "common_manifest_identity", "identity_components_complete", "identity_unique_per_seed"},
+            require_all_passed=source_bound,
+        )
+    )
+    report_errors = report.get("errors")
+    if not isinstance(report_errors, list) or any(not isinstance(item, str) for item in report_errors):
+        errors.append("report.errors must be an array of strings")
+    elif source_bound and report_errors:
+        errors.append("bound report.errors must be empty")
+    elif not source_bound and not report_errors:
+        errors.append("blocked report.errors must not be empty")
+    shared_config = report.get("shared_config")
+    if shared_config is not None and (not isinstance(shared_config, Mapping) or dict(shared_config) != REFERENCE_SHARED_CONFIG):
+        errors.append("report.shared_config drifts")
+    if source_bound and shared_config is None:
+        errors.append("bound report.shared_config is missing")
+
+    boundary = report.get("input_boundary")
+    boundary_keys = {"bounded_json_only", "max_json_bytes", "manifest_opened", "checkpoint_opened", "checkpoint_content_opened", "case_hdf5_opened", "trajectory_hdf5_opened", "progress_opened", "gpu_started", "solver_started"}
+    if not isinstance(boundary, Mapping) or set(boundary) != boundary_keys:
+        errors.append("input_boundary keys drift")
+    else:
+        if boundary.get("bounded_json_only") is not True or type(boundary.get("max_json_bytes")) is not int or boundary.get("max_json_bytes") != MAX_JSON_BYTES:
             errors.append("input_boundary bounded JSON contract drifts")
-        for key in (
-            "manifest_opened",
-            "checkpoint_opened",
-            "checkpoint_content_opened",
-            "case_hdf5_opened",
-            "trajectory_hdf5_opened",
-            "progress_opened",
-            "gpu_started",
-            "solver_started",
-        ):
+        for key in boundary_keys - {"bounded_json_only", "max_json_bytes"}:
             if boundary.get(key) is not False:
                 errors.append(f"input_boundary.{key} must be false")
+
     side_effects = report.get("side_effects")
-    if not isinstance(side_effects, Mapping):
-        errors.append("side_effects must be an object")
+    side_effect_keys = {"registry_mutation", "ledger_mutation", "denominator_mutation", "gate_mutation", "completion_mutation", "runtime_started", "runtime_stopped", "runtime_restarted"}
+    if not isinstance(side_effects, Mapping) or set(side_effects) != side_effect_keys:
+        errors.append("side_effects keys drift")
     else:
         for key in ("registry_mutation", "ledger_mutation", "denominator_mutation", "gate_mutation"):
-            if side_effects.get(key) != 0:
-                errors.append(f"side_effects.{key} must be zero")
+            if type(side_effects.get(key)) is not int or side_effects.get(key) != 0:
+                errors.append(f"side_effects.{key} must be zero integer")
         for key in ("completion_mutation", "runtime_started", "runtime_stopped", "runtime_restarted"):
             if side_effects.get(key) is not False:
                 errors.append(f"side_effects.{key} must be false")
     return errors
 
 
-def write_report(report: Mapping[str, Any], output: Path | str) -> None:
-    path = Path(output)
+def _safe_output_path(output: Path | str, suffix: str) -> Path:
+    if not isinstance(output, (Path, str)):
+        _fail(f"output path must be a path string: {output!r}")
+    raw = Path(output).expanduser()
+    if ".." in raw.parts:
+        _fail(f"output path must not contain parent traversal: {raw}")
+    if raw.suffix.lower() in DANGEROUS_OUTPUT_SUFFIXES or raw.suffix.lower() != suffix:
+        _fail(f"output path must use the safe {suffix} suffix: {raw}")
+    lowered_name = raw.name.lower()
+    if any(token in lowered_name for token in DANGEROUS_OUTPUT_TOKENS):
+        _fail(f"output path names a protected artifact: {raw}")
+    base = Path(os.path.abspath(Path.cwd()))
+    candidate = Path(os.path.abspath(raw if raw.is_absolute() else base / raw))
+    try:
+        candidate.relative_to(base)
+    except ValueError:
+        _fail(f"output path escapes the current working directory: {raw}")
+    _reject_symlink_components(candidate)
+    if candidate.exists() and not stat.S_ISREG(os.lstat(candidate).st_mode):
+        _fail(f"output path is not a regular file: {candidate}")
+    return candidate
+
+
+def _write_text_safely(text: str, output: Path | str, suffix: str) -> None:
+    path = _safe_output_path(output, suffix)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _reject_symlink_components(path)
+    descriptor, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=str(path.parent), text=True)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(text)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary_name, path)
+    except Exception:
+        try:
+            os.unlink(temporary_name)
+        except FileNotFoundError:
+            pass
+        raise
+
+
+def write_report(report: Mapping[str, Any], output: Path | str) -> None:
+    _write_text_safely(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", output, ".json")
 
 
 def render_zh_cn(report: Mapping[str, Any]) -> str:
@@ -996,9 +1512,7 @@ def render_zh_cn(report: Mapping[str, Any]) -> str:
 
 
 def write_markdown(report: Mapping[str, Any], output: Path | str) -> None:
-    path = Path(output)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(render_zh_cn(report), encoding="utf-8")
+    _write_text_safely(render_zh_cn(report), output, ".md")
 
 
 def _parse_seed_receipts(values: Sequence[str]) -> dict[int, Path | str]:

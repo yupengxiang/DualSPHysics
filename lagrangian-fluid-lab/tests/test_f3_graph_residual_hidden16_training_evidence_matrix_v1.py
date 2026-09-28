@@ -101,6 +101,7 @@ def _reference(receipts: dict[int, dict], source_shas: dict[int, str]) -> dict:
         "diagnostic_only": True,
         "formal_eligible": False,
         "model": "graph_residual",
+        "manifest_sha256": _sha("a"),
         "shared_config": copy.deepcopy(matrix.REFERENCE_SHARED_CONFIG),
         "runs": [
             {
@@ -137,7 +138,14 @@ def _payloads():
     receipts = {seed: _receipt(seed) for seed in matrix.SEEDS}
     source_shas = {seed: _sha("7" if seed == 17 else "8" if seed == 29 else "9") for seed in matrix.SEEDS}
     sources = {
-        seed: {"path": f"synthetic://seed{seed}.json", "sha256": source_shas[seed], "opened": False}
+        seed: {
+            "path": f"/tmp/f3-graph-residual500-hidden16-seed{seed}-20260928-training.json",
+            "exists": True,
+            "opened": True,
+            "bytes": 1000 + seed,
+            "sha256": source_shas[seed],
+            "schema": matrix.TRAINING_SCHEMA,
+        }
         for seed in matrix.SEEDS
     }
     return receipts, sources, _reference(receipts, source_shas)
@@ -149,7 +157,14 @@ def _evaluate(receipts=None, sources=None, reference=None):
         base_receipts if receipts is None else receipts,
         base_sources if sources is None else sources,
         base_reference if reference is None else reference,
-        {"path": "synthetic://reference.json", "schema": matrix.REFERENCE_SCHEMA},
+        {
+            "path": "/tmp/f3-graph-residual-hidden16-reference.json",
+            "exists": True,
+            "opened": True,
+            "bytes": 2000,
+            "sha256": _sha("6"),
+            "schema": matrix.REFERENCE_SCHEMA,
+        },
     )
 
 
@@ -294,3 +309,69 @@ def test_path_namespace_and_duplicate_identity_fail_closed():
     report = _evaluate(receipts, sources, reference)
     assert report["source_bound"] is False
     assert any("identity is duplicated" in error for error in report["errors"])
+
+
+def test_manifest_identity_drift_fails_closed():
+    receipts, sources, reference = _payloads()
+    receipts[17]["config"]["manifest_sha256"] = _sha("c")
+    report = _evaluate(receipts, sources, reference)
+    assert report["source_bound"] is False
+    assert any("manifest" in error for error in report["errors"])
+
+
+def test_source_and_reference_metadata_are_complete():
+    receipts, sources, reference = _payloads()
+    del sources[17]["opened"]
+    report = _evaluate(receipts, sources, reference)
+    assert report["source_bound"] is False
+    assert any("source metadata" in error for error in report["errors"])
+
+    receipts, sources, reference = _payloads()
+    report = matrix.evaluate_payloads(receipts, sources, reference, None)
+    assert report["source_bound"] is False
+    assert any("reference source" in error for error in report["errors"])
+
+
+def test_strict_numeric_identity_and_prior_semantics_fail_closed():
+    receipts, sources, reference = _payloads()
+    receipts[29]["seed"] = 29.0
+    report = _evaluate(receipts, sources, reference)
+    assert report["source_bound"] is False
+    assert any("seed" in error for error in report["errors"])
+
+    receipts, sources, reference = _payloads()
+    receipts[43]["evidence"]["residual_prior"]["dx_abs_max_m"] += 1.0
+    report = _evaluate(receipts, sources, reference)
+    assert report["source_bound"] is False
+    assert any("residual-prior identity" in error for error in report["errors"])
+
+
+def test_report_run_schema_tampering_is_rejected():
+    report = _evaluate()
+    report["runs"] = [{"seed": seed} for seed in matrix.SEEDS]
+    assert matrix.validate_report(report)
+
+    report = _evaluate()
+    report["unexpected"] = True
+    assert any("envelope keys" in error for error in matrix.validate_report(report))
+
+
+def test_symlink_input_and_unsafe_output_are_rejected(tmp_path: Path, monkeypatch):
+    target = tmp_path / "target.json"
+    target.write_text("{}\n", encoding="utf-8")
+    link = tmp_path / "link.json"
+    link.symlink_to(target)
+    with pytest.raises(matrix.MatrixError, match="symlink"):
+        matrix.read_bounded_json(tmp_path, link)
+
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(matrix.MatrixError, match="protected artifact"):
+        matrix.write_report(_evaluate(), "checkpoint.json")
+    with pytest.raises(matrix.MatrixError, match="parent traversal"):
+        matrix.write_report(_evaluate(), "../matrix.json")
+    output_target = tmp_path / "output-target.json"
+    output_target.write_text("old\n", encoding="utf-8")
+    output_link = tmp_path / "output.json"
+    output_link.symlink_to(output_target)
+    with pytest.raises(matrix.MatrixError, match="symlink"):
+        matrix.write_report(_evaluate(), output_link)
