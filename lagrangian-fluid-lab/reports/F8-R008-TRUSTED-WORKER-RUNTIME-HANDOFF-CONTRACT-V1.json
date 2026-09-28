@@ -1,0 +1,64 @@
+{
+  "contract_schema": "core.cfd.f8.r008_trusted_worker_runtime_handoff_contract.v1",
+  "fail_closed_constraints": {
+    "algorithm": "ed25519",
+    "default_trust": "deny",
+    "domain": "CORE-F8-R008-TRUSTED-WORKER-RUNTIME-HANDOFF-V1",
+    "production_identity": "not_authenticated",
+    "replay": "single_use_claim_only_no_consumer",
+    "runtime": "not_measured"
+  },
+  "handoff_bindings": [
+    "explicit_identity_bundle_sha256_and_active_key_id",
+    "authority_binding_to_worker_and_runtime_subject",
+    "synthetic_scope_attempt_case_nonce_and_bounded_epoch_window",
+    "worker_and_runtime_code_identity_claims",
+    "source_and_runtime_manifest_hash_claims",
+    "definition_control_initial_state_and_configuration_hashes",
+    "declared_output_manifest_schema_and_artifact_names",
+    "active_key_signature_over_the_exact_handoff_payload"
+  ],
+  "input_boundary": {
+    "identity_contract_reused": true,
+    "input_origin": "synthetic_fixture",
+    "mode": "bounded_in_memory_canonical_json",
+    "production_paths_read": false,
+    "synthetic_only": true
+  },
+  "integration_boundary": {
+    "15_case_matrix": "not evaluated or credited",
+    "attempt_ledger_and_attestation": "not consumed or mutated",
+    "execution_readiness_v8": "not rewritten or promoted",
+    "final_fput_and_reducers": "not read, joined, or modified",
+    "registry_ledger_gate": "never written",
+    "supervisor_session_claims": "not consumed or upgraded from candidate-key consistency",
+    "trusted_identity_contract": "reused as an input verifier; not replaced"
+  },
+  "non_authorizing_boundary": {
+    "T1_numerical": false,
+    "capability_minted": false,
+    "denominator_mutation": 0,
+    "diagnostic_only": true,
+    "execution_authority": false,
+    "formal_admission": false,
+    "formal_eligible": false,
+    "gate_mutation": 0,
+    "ledger_mutation": 0,
+    "qualification_credit": 0,
+    "readiness_pass": false,
+    "registry_mutation": 0
+  },
+  "prohibited_operations": [
+    "production_identity_authentication",
+    "replay_ledger_consumption",
+    "root_or_sudo",
+    "ptrace_or_seccomp",
+    "fanotify_or_kernel_probe",
+    "native_or_solver",
+    "worker_gpu_or_queue"
+  ],
+  "record_id": "f8-r008-trusted-worker-runtime-handoff-report-v1",
+  "schema": "core.cfd.f8.r008_trusted_worker_runtime_handoff_report.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "synthetic_only_non_authorizing_handoff_contract_design"
+}
