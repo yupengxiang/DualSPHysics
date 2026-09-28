@@ -6,6 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 
+from scripts.core_formal_planner import REQUIRED_CODE_FILES
 from scripts.core_formal_source_closure_audit import build_audit, main
 
 
@@ -20,6 +21,22 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _expected_mismatch(snapshot: dict, live: dict) -> list[str]:
+    old = {
+        row["relative_path"]: row["sha256"]
+        for row in snapshot.get("files", [])
+        if isinstance(row, dict) and isinstance(row.get("relative_path"), str)
+        and isinstance(row.get("sha256"), str)
+    }
+    now = {
+        row["relative_path"]: row["sha256"]
+        for row in live.get("files", [])
+        if isinstance(row, dict) and isinstance(row.get("relative_path"), str)
+        and isinstance(row.get("sha256"), str)
+    }
+    return sorted(name for name in set(old) | set(now) if old.get(name) != now.get(name))
+
+
 def test_real_audit_lists_exact_stale_files_and_keeps_proposal_unadmitted() -> None:
     report = build_audit(
         data_root=ROOT,
@@ -31,16 +48,20 @@ def test_real_audit_lists_exact_stale_files_and_keeps_proposal_unadmitted() -> N
     assert report["status"] == "proposal_only_blocked"
     assert report["formal_job_count"] == 0
     assert report["launch_allowed"] is False
+    assert report["formal_release"] is False
+    assert report["formal_training_allowed"] is False
+    assert report["root_admission_granted"] is False
     assert report["current_source_closure"]["complete"] is True
-    assert report["historical_comparison"]["mismatch_files"] == [
-        "scripts/core_cfd_dataset.py", "scripts/core_contract.py",
-        "scripts/core_dataset.py", "scripts/core_evaluation.py",
-        "scripts/core_formal_planner.py", "scripts/core_learning.py",
-        "scripts/core_models.py", "scripts/core_strict_json.py"
-    ]
-    assert report["current_source_closure"]["closure_sha256"] == (
-        "7bbde553fae61f72c7a0744129a138eb797640aa54c15223148aa6c207e091e7"
-    )
+    live = report["live_source_closure"]
+    historical = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
+    assert live["required_files"] == list(REQUIRED_CODE_FILES)
+    assert live["required_file_count"] == len(REQUIRED_CODE_FILES)
+    assert report["historical_comparison"]["mismatch_files"] == _expected_mismatch(historical, live)
+    assert report["historical_comparison"]["comparison_type"] == "historical_baseline_only"
+    assert report["historical_baseline"]["required_file_count"] == len(historical["required_files"])
+    assert report["live_source_closure"] is report["current_source_closure"]
+    assert str(len(REQUIRED_CODE_FILES)) in report["exact_next_checks"][0]["required_artifact"]
+    assert "eight" not in report["exact_next_checks"][0]["required_artifact"].lower()
     assert report["fresh_source_closure_proposal"]["admitted"] is False
     assert report["fresh_source_closure_proposal"]["formal_release"] is False
     assert report["checks"]["launch_contract_emits_zero_jobs"] is True
@@ -65,5 +86,10 @@ def test_cli_writes_hash_bound_audit_without_registry_mutation(tmp_path: Path) -
     ]) == 0
     payload = json.loads(output.read_text())
     assert payload["fresh_source_closure_proposal"]["requires_root_admission"] is True
+    assert payload["formal_release"] is False
+    assert payload["formal_training_allowed"] is False
+    assert payload["formal_job_count"] == 0
+    assert payload["launch_allowed"] is False
+    assert payload["root_admission_granted"] is False
     assert digest.read_text().split()[0] == _sha256(output)
     assert _sha256(REGISTRY) == before

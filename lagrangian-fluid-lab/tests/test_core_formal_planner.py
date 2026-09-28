@@ -9,9 +9,22 @@ import sys
 import pytest
 import scripts.core_formal_planner as formal_planner
 
-from scripts.core_formal_planner import (CASES_PER_FAMILY, MODELS, REQUIRED_CODE_FILES,
-                                         SEEDS, _build_job, _qualification_marker, build_plan, inspect_inputs,
-                                         main, sha256_bytes, sha256_file)
+from scripts.core_formal_planner import (
+    CASES_PER_FAMILY,
+    FORMAL_RUNTIME_SOURCE_FILES,
+    MODELS,
+    REQUIRED_CODE_FILES,
+    SEEDS,
+    _build_job,
+    _qualification_marker,
+    build_plan,
+    inspect_inputs,
+    main,
+    materialize_formal_source_closure,
+    required_code_files,
+    sha256_bytes,
+    sha256_file,
+)
 
 
 def _manifest(tmp_path, *, family_count=3):
@@ -52,6 +65,26 @@ def _ready_plan(tmp_path):
     return build_plan(manifest_path, profile=_profile(), environment=_environment(),
                       data_root=tmp_path, code_root=Path(__file__).parents[1],
                       output_dir=tmp_path / "specs")
+
+
+def test_formal_runtime_source_list_is_single_and_canonical():
+    assert tuple(required_code_files()) == FORMAL_RUNTIME_SOURCE_FILES
+    assert tuple(REQUIRED_CODE_FILES) == FORMAL_RUNTIME_SOURCE_FILES
+    assert len(REQUIRED_CODE_FILES) == len(set(REQUIRED_CODE_FILES))
+    assert {
+        "scripts/core_fsverity.py",
+        "scripts/f3_control.py",
+        "scripts/passive_tracers.py",
+        "scripts/f7_pump_geometry_adapter_v1.py",
+    }.issubset(REQUIRED_CODE_FILES)
+
+
+def test_live_source_closure_reports_dynamic_file_count_and_hashes():
+    closure = materialize_formal_source_closure(Path(__file__).parents[1])
+    assert closure["required_files"] == list(required_code_files())
+    assert closure["required_file_count"] == len(required_code_files())
+    assert closure["complete"] is True
+    assert [row["relative_path"] for row in closure["files"]] == closure["required_files"]
 
 
 def test_complete_metadata_manifest_cannot_authorize_nine_formal_jobs(tmp_path):

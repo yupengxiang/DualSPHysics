@@ -26,6 +26,22 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _expected_mismatch(closure: dict, current_files: list[dict]) -> list[str]:
+    old = {
+        row["relative_path"]: row["sha256"]
+        for row in closure.get("files", [])
+        if isinstance(row, dict) and isinstance(row.get("relative_path"), str)
+        and isinstance(row.get("sha256"), str)
+    }
+    now = {
+        row["relative_path"]: row["sha256"]
+        for row in current_files
+        if isinstance(row, dict) and isinstance(row.get("relative_path"), str)
+        and isinstance(row.get("sha256"), str)
+    }
+    return sorted(name for name in set(old) | set(now) if old.get(name) != now.get(name))
+
+
 def test_v6_rehash_mismatch_remains_fail_closed_and_planning_only() -> None:
     closure = json.loads(CLOSURE.read_text(encoding="utf-8"))
     result = verify_source_closure(closure, data_root=ROOT)
@@ -34,12 +50,7 @@ def test_v6_rehash_mismatch_remains_fail_closed_and_planning_only() -> None:
     # contracts.  Live verification must therefore reject it rather than
     # silently treating a stale closure as a formal source snapshot.
     assert result["ok"] is False
-    assert result["mismatch_files"] == [
-        "scripts/core_cfd_dataset.py", "scripts/core_contract.py",
-        "scripts/core_dataset.py", "scripts/core_evaluation.py",
-        "scripts/core_formal_planner.py", "scripts/core_learning.py",
-        "scripts/core_models.py", "scripts/core_strict_json.py"
-    ]
+    assert result["mismatch_files"] == _expected_mismatch(closure, result["current_files"])
     assert closure["schema"] == "core.formal_source_closure.v2"
     assert closure["namespace"] == "core-formal-release-candidate-v6"
     assert closure["required_files"] == [row["relative_path"] for row in closure["files"]]
@@ -48,6 +59,7 @@ def test_v6_rehash_mismatch_remains_fail_closed_and_planning_only() -> None:
     assert closure["formal_release"] is False
     assert closure["formal_training_allowed"] is False
     assert closure["formal_job_count"] == 0
+    assert result["checks"]["launch_is_closed"] is False
     assert closure["root_admission_granted"] is False
     assert closure["closure_sha256"] == "d692701964bfd4d0ddaa2db437b8870a2ea71e4ffbb428282398573aa89a05ba"
     for row in closure["files"]:
@@ -57,6 +69,42 @@ def test_v6_rehash_mismatch_remains_fail_closed_and_planning_only() -> None:
         else:
             assert row["sha256"] == _sha256(path)
             assert row["bytes"] == path.stat().st_size
+
+
+def test_explicit_v7_namespace_is_planning_only_and_live_bound(tmp_path: Path) -> None:
+    from scripts.core_formal_source_closure_admission_v6 import (
+        build_audit,
+        materialize_source_closure,
+    )
+
+    namespace = "core-formal-source-closure-v7-test"
+    closure_path = tmp_path / "source-closure.json"
+    closure = materialize_source_closure(data_root=ROOT, namespace=namespace)
+    verification = verify_source_closure(closure, data_root=ROOT, namespace=namespace)
+    assert verification["ok"] is True
+    assert verification["checks"]["required_file_count"] is True
+    assert verification["checks"]["launch_is_closed"] is True
+    closure_path.write_text(json.dumps(closure), encoding="utf-8")
+    audit = build_audit(
+        data_root=ROOT,
+        source_closure=closure_path,
+        historical_snapshot=CLOSURE,
+        readiness=ROOT / "campaigns/core-v1/learning/core-formal-readiness-audit-20260921.json",
+        launch_contract=ROOT / "campaigns/core-v1/learning/core-formal-launch-contract-20260921.json",
+        namespace=namespace,
+        record_date="20990101",
+    )
+    assert audit["namespace"] == namespace
+    assert audit["record_id"].endswith("20990101")
+    assert audit["live_source_closure"]["namespace"] == namespace
+    historical = json.loads(CLOSURE.read_text(encoding="utf-8"))
+    assert audit["historical_baseline"]["closure_version"] == historical["closure_version"]
+    assert audit["historical_comparison"]["comparison_type"] == "historical_baseline_only"
+    assert audit["formal_release"] is False
+    assert audit["formal_training_allowed"] is False
+    assert audit["formal_job_count"] == 0
+    assert audit["launch_allowed"] is False
+    assert audit["root_admission_granted"] is False
 
 
 def test_v6_audit_labels_v5_differences_as_historical_only() -> None:

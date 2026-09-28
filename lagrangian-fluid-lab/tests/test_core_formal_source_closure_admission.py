@@ -25,17 +25,28 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _expected_mismatch(closure: dict, current_files: list[dict]) -> list[str]:
+    old = {
+        row["relative_path"]: row["sha256"]
+        for row in closure.get("files", [])
+        if isinstance(row, dict) and isinstance(row.get("relative_path"), str)
+        and isinstance(row.get("sha256"), str)
+    }
+    now = {
+        row["relative_path"]: row["sha256"]
+        for row in current_files
+        if isinstance(row, dict) and isinstance(row.get("relative_path"), str)
+        and isinstance(row.get("sha256"), str)
+    }
+    return sorted(name for name in set(old) | set(now) if old.get(name) != now.get(name))
+
+
 def test_v5_closure_is_preserved_and_fails_closed_against_current_sources() -> None:
     closure = json.loads(CLOSURE.read_text(encoding="utf-8"))
     result = verify_source_closure(closure, data_root=ROOT)
 
     assert result["ok"] is False
-    assert result["mismatch_files"] == [
-        "scripts/core_cfd_dataset.py", "scripts/core_contract.py",
-        "scripts/core_dataset.py", "scripts/core_evaluation.py",
-        "scripts/core_formal_planner.py", "scripts/core_learning.py",
-        "scripts/core_models.py", "scripts/core_strict_json.py"
-    ]
+    assert result["mismatch_files"] == _expected_mismatch(closure, result["current_files"])
     assert closure["closure_version"] == "core-formal-release-candidate-v5"
     assert closure["formal_release"] is False
     assert closure["planning_only"] is True

@@ -55,9 +55,10 @@ VALIDATION_PER_FAMILY = 4
 MAX_PLANNER_JSON_BYTES = 67_108_864
 
 # The source snapshot warning that motivated this module is easy to re-create
-# when a job copies a previous profile's argv.  These are the files whose
-# hashes form the fresh source closure for every formal job.
-REQUIRED_CODE_FILES = (
+# when a job copies a previous profile's argv.  Keep the formal runtime closure
+# in one declarative list.  The last four entries are imported lazily by the
+# reader/runtime path, so a top-level import scan alone would miss them.
+FORMAL_RUNTIME_SOURCE_FILES = (
     "scripts/core_learning.py",
     "scripts/core_contract.py",
     "scripts/core_dataset.py",
@@ -67,7 +68,24 @@ REQUIRED_CODE_FILES = (
     "scripts/core_evaluation.py",
     "scripts/core_physics.py",
     "scripts/core_formal_planner.py",
+    "scripts/core_fsverity.py",
+    "scripts/f3_control.py",
+    "scripts/passive_tracers.py",
+    "scripts/f7_pump_geometry_adapter_v1.py",
 )
+# Backwards-compatible public name used by historical planner/closure callers.
+# It aliases the one canonical list; no second file list is maintained.
+REQUIRED_CODE_FILES = FORMAL_RUNTIME_SOURCE_FILES
+
+
+def required_code_files() -> tuple[str, ...]:
+    """Return the canonical formal runtime file list with structural checks."""
+    files = tuple(FORMAL_RUNTIME_SOURCE_FILES)
+    if len(files) != len(set(files)):
+        raise RuntimeError("formal runtime source closure contains duplicate files")
+    if any(not name.startswith("scripts/") or name.endswith("/") for name in files):
+        raise RuntimeError("formal runtime source closure contains an invalid path")
+    return files
 
 _QUALIFICATION_KEYS = (
     "qualification_only", "qualification_case", "is_qualification",
@@ -504,9 +522,10 @@ def _environment_binding(environment: Any, *, data_root: Path | None,
     return result, source_ref
 
 
-def _code_bundle(code_root: Path) -> tuple[list[dict[str, Any]], list[str]]:
+def _code_bundle(code_root: Path, *, required: Sequence[str] | None = None
+                 ) -> tuple[list[dict[str, Any]], list[str]]:
     files, missing = [], []
-    for relative in REQUIRED_CODE_FILES:
+    for relative in tuple(required) if required is not None else required_code_files():
         path = (code_root / relative).resolve()
         if not path.is_file():
             missing.append(relative)
@@ -514,6 +533,30 @@ def _code_bundle(code_root: Path) -> tuple[list[dict[str, Any]], list[str]]:
         files.append({"path": str(path), "relative_path": relative,
                       "sha256": sha256_file(path), "bytes": path.stat().st_size})
     return files, missing
+
+
+def materialize_formal_source_closure(code_root: str | Path) -> dict[str, Any]:
+    """Re-hash the live formal runtime closure from the canonical file list.
+
+    This is a planning/audit helper only.  It does not admit a source
+    snapshot, create a job, or grant execution authority.
+    """
+    root = Path(code_root).expanduser().resolve()
+    required = required_code_files()
+    files, missing = _code_bundle(root, required=required)
+    closure_sha256 = sha256_bytes(canonical([
+        {"relative_path": item["relative_path"], "sha256": item["sha256"]}
+        for item in files
+    ]).encode())
+    return {
+        "required_files": list(required),
+        "required_file_count": len(required),
+        "files": files,
+        "missing_files": missing,
+        "closure_sha256": closure_sha256,
+        "complete": not missing,
+        "source_snapshot_policy": "fresh_code_closure_at_formal_admission",
+    }
 
 
 def _snapshot_check(snapshot: Any, *, code_root: Path, required: Sequence[str]) -> tuple[dict[str, Any] | None, list[str]]:
@@ -1066,11 +1109,12 @@ def build_plan(manifest: Any, *, evidence: Sequence[Any] | Any | None = None,
         # environment record or an absent executable declaration still holds.
         environment_payload["python_verification"] = "deferred_to_declared_host"
 
-    code_files, missing_code = _code_bundle(code)
+    required_files = required_code_files()
+    code_files, missing_code = _code_bundle(code, required=required_files)
     if missing_code:
         hold_reasons.append("code closure is missing: " + ", ".join(missing_code))
     snapshot_info, snapshot_errors = _snapshot_check(source_snapshot, code_root=code,
-                                                     required=REQUIRED_CODE_FILES)
+                                                     required=required_files)
     hold_reasons.extend(snapshot_errors)
     if profile_payload:
         for model in MODELS:

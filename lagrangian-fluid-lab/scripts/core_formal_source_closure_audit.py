@@ -20,12 +20,8 @@ LAB_ROOT = Path(__file__).resolve().parents[1]
 if str(LAB_ROOT) not in sys.path:
     sys.path.insert(0, str(LAB_ROOT))
 
-from scripts.core_formal_launch_contract import (
-    _code_closure,
-    _load_json,
-    _reference,
-    _snapshot_comparison,
-)
+from scripts.core_formal_planner import materialize_formal_source_closure
+from scripts.core_formal_launch_contract import _load_json, _reference
 
 
 SCHEMA = "core.formal_source_closure_audit.v1"
@@ -52,6 +48,71 @@ def _current_source_reference(root: Path) -> dict[str, Any]:
     return _reference(path, root)
 
 
+def _historical_rows(snapshot: Mapping[str, Any]) -> list[dict[str, Any]]:
+    rows = snapshot.get("files")
+    if not isinstance(rows, list):
+        rows = []
+    return [dict(row) for row in rows if isinstance(row, Mapping)]
+
+
+def _snapshot_comparison(current: Mapping[str, Any], snapshot: Mapping[str, Any],
+                         reference: Mapping[str, Any]) -> dict[str, Any]:
+    """Compare live closure data with a named historical baseline only."""
+    historical_rows = _historical_rows(snapshot)
+    historical_by_name = {
+        row["relative_path"]: row["sha256"]
+        for row in historical_rows
+        if isinstance(row.get("relative_path"), str)
+        and isinstance(row.get("sha256"), str)
+    }
+    live_rows = [dict(row) for row in current.get("files", ())
+                 if isinstance(row, Mapping)]
+    live_by_name = {
+        row["relative_path"]: row["sha256"]
+        for row in live_rows
+        if isinstance(row.get("relative_path"), str)
+        and isinstance(row.get("sha256"), str)
+    }
+    mismatch = sorted(
+        name for name in set(historical_by_name) | set(live_by_name)
+        if historical_by_name.get(name) != live_by_name.get(name)
+    )
+    historical_required = snapshot.get("required_files")
+    if not isinstance(historical_required, list):
+        historical_required = [row["relative_path"] for row in historical_rows
+                               if isinstance(row.get("relative_path"), str)]
+    historical_baseline = {
+        "reference": dict(reference),
+        "schema": snapshot.get("schema"),
+        "closure_version": snapshot.get("closure_version"),
+        "closure_sha256": snapshot.get("closure_sha256"),
+        "required_files": list(historical_required),
+        "required_file_count": len(historical_required),
+        "files": historical_rows,
+    }
+    return {
+        "snapshot": dict(reference),
+        "snapshot_version": snapshot.get("closure_version"),
+        "snapshot_closure_sha256": snapshot.get("closure_sha256"),
+        "current_closure_sha256": current.get("closure_sha256"),
+        "live_required_files": list(current.get("required_files", ())),
+        "live_required_file_count": int(current.get("required_file_count", 0)),
+        "historical_required_files": list(historical_required),
+        "historical_required_file_count": len(historical_required),
+        "mismatch_files": mismatch,
+        "matches_current": bool(historical_by_name) and not mismatch
+        and set(historical_by_name) == set(live_by_name),
+        "fresh_snapshot_required": bool(mismatch),
+        "comparison_type": "historical_baseline_only",
+        "mismatch_semantics": (
+            "mismatch_files compare the named historical baseline with the live workspace; "
+            "they are not a failure of the freshly rehashed live file set"
+        ),
+        "historical_baseline": historical_baseline,
+        "live_closure_is_not_historical_baseline": True,
+    }
+
+
 def build_audit(*, data_root: str | Path, historical_snapshot: str | Path,
                 readiness: str | Path, launch_contract: str | Path) -> dict[str, Any]:
     root = Path(data_root).expanduser().resolve()
@@ -61,7 +122,7 @@ def build_audit(*, data_root: str | Path, historical_snapshot: str | Path,
         readiness, root=root, role="formal readiness")
     launch_payload, _, launch_ref = _load_json(
         launch_contract, root=root, role="formal launch contract")
-    closure = _code_closure(root, root)
+    closure = materialize_formal_source_closure(root)
     comparison = _snapshot_comparison(closure, snapshot_payload, snapshot_ref)
     mismatch_files = list(comparison["mismatch_files"])
     readiness_blockers = list(readiness_payload.get("upstream_admission_blockers", ()))
@@ -73,7 +134,10 @@ def build_audit(*, data_root: str | Path, historical_snapshot: str | Path,
     exact_next_checks = [
         {
             "check": "materialize_fresh_source_closure",
-            "required_artifact": "a new source-closure JSON containing all eight current file hashes and closure_sha256",
+            "required_artifact": (
+                "a new source-closure JSON containing all "
+                f"{closure['required_file_count']} current required file hashes and closure_sha256"
+            ),
             "observed": False,
             "why": "the current audit is a proposal and must not silently become the admitted planner snapshot",
         },
@@ -155,14 +219,19 @@ def build_audit(*, data_root: str | Path, historical_snapshot: str | Path,
         "record_id": "core-formal-source-closure-audit-20260921",
         "status": "proposal_only_blocked",
         "proposal_only": True,
+        "formal_release": False,
+        "formal_training_allowed": False,
         "formal_job_count": 0,
         "launch_allowed": False,
+        "root_admission_granted": False,
         "inputs": {
             "historical_snapshot": snapshot_ref,
             "formal_readiness": readiness_ref,
             "formal_launch_contract": launch_ref,
         },
+        "live_source_closure": closure,
         "current_source_closure": closure,
+        "historical_baseline": comparison["historical_baseline"],
         "historical_comparison": comparison,
         "fresh_source_closure_proposal": {
             "schema": PROPOSAL_SCHEMA,

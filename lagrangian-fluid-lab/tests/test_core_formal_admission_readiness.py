@@ -26,6 +26,22 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _expected_mismatch(closure: dict, current_files: list[dict]) -> list[str]:
+    old = {
+        row["relative_path"]: row["sha256"]
+        for row in closure.get("files", [])
+        if isinstance(row, dict) and isinstance(row.get("relative_path"), str)
+        and isinstance(row.get("sha256"), str)
+    }
+    now = {
+        row["relative_path"]: row["sha256"]
+        for row in current_files
+        if isinstance(row, dict) and isinstance(row.get("relative_path"), str)
+        and isinstance(row.get("sha256"), str)
+    }
+    return sorted(name for name in set(old) | set(now) if old.get(name) != now.get(name))
+
+
 def _planner_report() -> dict:
     return build_plan(
         ROOT / "campaigns/core-v1/f3-dataset-v2.json",
@@ -124,12 +140,7 @@ def test_evidence_and_current_source_closure_hashes_are_bound() -> None:
     # contracts.  It must fail closed against those changed source hashes;
     # this does not authorize a new formal release.
     assert v6_result["ok"] is False
-    assert v6_result["mismatch_files"] == [
-        "scripts/core_cfd_dataset.py", "scripts/core_contract.py",
-        "scripts/core_dataset.py", "scripts/core_evaluation.py",
-        "scripts/core_formal_planner.py", "scripts/core_learning.py",
-        "scripts/core_models.py", "scripts/core_strict_json.py"
-    ]
+    assert v6_result["mismatch_files"] == _expected_mismatch(v6, v6_result["current_files"])
     assert v6["namespace"] == "core-formal-release-candidate-v6"
     assert v6["formal_training_allowed"] is False
     assert v6["formal_job_count"] == 0

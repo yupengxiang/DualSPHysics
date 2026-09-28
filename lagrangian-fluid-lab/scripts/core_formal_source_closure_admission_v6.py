@@ -21,8 +21,11 @@ LAB_ROOT = Path(__file__).resolve().parents[1]
 if str(LAB_ROOT) not in sys.path:
     sys.path.insert(0, str(LAB_ROOT))
 
-from scripts.core_formal_planner import REQUIRED_CODE_FILES
-from scripts.core_formal_source_closure_audit import build_audit as build_historical_audit
+from scripts.core_formal_planner import (
+    REQUIRED_CODE_FILES,
+    materialize_formal_source_closure,
+    required_code_files,
+)
 from scripts.core_strict_json import (
     absolute_path_without_following_leaf,
     read_bounded_raw_json,
@@ -90,49 +93,35 @@ def _load_json(value: str | Path, *, root: Path, role: str) -> tuple[dict[str, A
     )
 
 
-def _source_rows(code_root: Path) -> tuple[list[dict[str, Any]], list[str]]:
-    files: list[dict[str, Any]] = []
-    missing: list[str] = []
-    for relative in REQUIRED_CODE_FILES:
-        path = (code_root / relative).resolve()
-        if not path.is_file():
-            missing.append(relative)
-            continue
-        files.append({
-            "relative_path": relative,
-            "sha256": sha256_file(path),
-            "bytes": path.stat().st_size,
-        })
-    return files, missing
-
-
 def materialize_source_closure(*, data_root: str | Path,
-                               code_root: str | Path | None = None) -> dict[str, Any]:
-    """Re-hash the current required code files into a strict v6 closure."""
+                               code_root: str | Path | None = None,
+                               namespace: str = V6_NAMESPACE) -> dict[str, Any]:
+    """Re-hash the current canonical runtime closure into a planning snapshot."""
     root = Path(data_root).expanduser().resolve()
     code = Path(code_root).expanduser().resolve() if code_root is not None else root
-    files, missing = _source_rows(code)
-    closure_sha256 = sha256_bytes(canonical([
-        {"relative_path": row["relative_path"], "sha256": row["sha256"]}
-        for row in files
-    ]).encode())
+    if not isinstance(namespace, str) or not namespace.strip():
+        raise ValueError("source closure namespace must be a non-empty string")
+    current = materialize_formal_source_closure(code)
+    required = required_code_files()
     return {
         "schema": CLOSURE_SCHEMA,
-        "namespace": V6_NAMESPACE,
-        "closure_version": V6_NAMESPACE,
+        "namespace": namespace,
+        "closure_version": namespace,
         "hash_algorithm": "sha256",
-        "required_files": list(REQUIRED_CODE_FILES),
-        "files": files,
-        "missing_files": missing,
-        "closure_sha256": closure_sha256,
-        "complete": not missing,
-        "source_snapshot_policy": "fresh_code_closure_at_formal_admission",
+        "required_files": list(required),
+        "required_file_count": len(required),
+        "files": current["files"],
+        "missing_files": current["missing_files"],
+        "closure_sha256": current["closure_sha256"],
+        "complete": current["complete"],
+        "source_snapshot_policy": current["source_snapshot_policy"],
         "formal_release": False,
         "formal_training_ready": False,
         "planning_only": True,
         "planning_allowed": True,
         "formal_training_allowed": False,
         "formal_job_count": 0,
+        "launch_allowed": False,
         "root_admission_granted": False,
         "read_only_verification_supported": True,
         "generator": _reference(Path(__file__).resolve(), root),
@@ -147,9 +136,11 @@ def _declared_rows(payload: Mapping[str, Any]) -> list[Mapping[str, Any]]:
 
 
 def verify_source_closure(payload: Mapping[str, Any], *, data_root: str | Path,
-                          code_root: str | Path | None = None) -> dict[str, Any]:
-    """Verify v6 metadata and every file hash against the live workspace."""
-    current = materialize_source_closure(data_root=data_root, code_root=code_root)
+                          code_root: str | Path | None = None,
+                          namespace: str = V6_NAMESPACE) -> dict[str, Any]:
+    """Verify metadata and every declared hash against the live workspace."""
+    current = materialize_source_closure(
+        data_root=data_root, code_root=code_root, namespace=namespace)
     declared = _declared_rows(payload)
     declared_by_name = {
         row.get("relative_path"): dict(row)
@@ -165,10 +156,11 @@ def verify_source_closure(payload: Mapping[str, Any], *, data_root: str | Path,
     declared_names = [row.get("relative_path") for row in declared]
     checks = {
         "schema": payload.get("schema") == CLOSURE_SCHEMA,
-        "namespace": payload.get("namespace") == V6_NAMESPACE,
-        "closure_version": payload.get("closure_version") == V6_NAMESPACE,
-        "required_file_set": payload.get("required_files") == list(REQUIRED_CODE_FILES),
-        "declared_order_and_set": declared_names == list(REQUIRED_CODE_FILES),
+        "namespace": payload.get("namespace") == namespace,
+        "closure_version": payload.get("closure_version") == namespace,
+        "required_file_set": payload.get("required_files") == list(current["required_files"]),
+        "required_file_count": payload.get("required_file_count") == len(current["required_files"]),
+        "declared_order_and_set": declared_names == list(current["required_files"]),
         "complete": payload.get("complete") is True and not payload.get("missing_files"),
         "all_workspace_hashes_match": not mismatch_files and declared_by_name == current_by_name,
         "closure_hash_matches": payload.get("closure_sha256") == current["closure_sha256"],
@@ -177,6 +169,7 @@ def verify_source_closure(payload: Mapping[str, Any], *, data_root: str | Path,
         and payload.get("planning_allowed") is True,
         "formal_training_is_closed": payload.get("formal_training_allowed") is False,
         "no_formal_jobs": payload.get("formal_job_count") == 0,
+        "launch_is_closed": payload.get("launch_allowed") is False,
         "root_admission_is_closed": payload.get("root_admission_granted") is False,
     }
     return {
@@ -206,11 +199,28 @@ def _snapshot_comparison(current: Mapping[str, Any], snapshot: Mapping[str, Any]
         if isinstance(row, Mapping)
     }
     mismatch = sorted(name for name in set(old) | set(now) if old.get(name) != now.get(name))
+    historical_required = snapshot.get("required_files")
+    if not isinstance(historical_required, list):
+        historical_required = sorted(old)
+    historical_baseline = {
+        "reference": dict(reference),
+        "schema": snapshot.get("schema"),
+        "closure_version": snapshot.get("closure_version"),
+        "closure_sha256": snapshot.get("closure_sha256"),
+        "required_files": list(historical_required),
+        "required_file_count": len(historical_required),
+        "files": [dict(row) for row in rows if isinstance(row, Mapping)]
+        if isinstance(rows, list) else [],
+    }
     return {
         "snapshot": dict(reference),
         "snapshot_version": snapshot.get("closure_version"),
         "snapshot_closure_sha256": snapshot.get("closure_sha256"),
         "current_closure_sha256": current.get("closure_sha256"),
+        "live_required_files": list(current.get("required_files", ())),
+        "live_required_file_count": int(current.get("required_file_count", 0)),
+        "historical_required_files": list(historical_required),
+        "historical_required_file_count": len(historical_required),
         "mismatch_files": mismatch,
         "matches_current": bool(old) and not mismatch and set(old) == set(now),
         "fresh_snapshot_required": bool(mismatch),
@@ -219,6 +229,7 @@ def _snapshot_comparison(current: Mapping[str, Any], snapshot: Mapping[str, Any]
             "mismatch_files compare the named historical baseline with the live workspace; "
             "they are not a failure of the freshly rehashed v6 file set"
         ),
+        "historical_baseline": historical_baseline,
         "v6_current_closure_is_not_historical_baseline": True,
     }
 
@@ -250,8 +261,9 @@ def _resource_frontier_proven(readiness: Mapping[str, Any], upstream: set[str]) 
 
 def build_audit(*, data_root: str | Path, source_closure: str | Path,
                 historical_snapshot: str | Path, readiness: str | Path,
-                launch_contract: str | Path) -> dict[str, Any]:
-    """Create a v6 audit report with an explicitly historical comparison."""
+                launch_contract: str | Path, namespace: str = V6_NAMESPACE,
+                record_date: str = V6_DATE) -> dict[str, Any]:
+    """Create a planning audit with explicit live/baseline identity."""
     root = Path(data_root).expanduser().resolve()
     closure_payload, closure_path, closure_ref = _load_json(
         source_closure, root=root, role="v6 source closure")
@@ -261,8 +273,9 @@ def build_audit(*, data_root: str | Path, source_closure: str | Path,
         readiness, root=root, role="formal readiness")
     launch_payload, _, launch_ref = _load_json(
         launch_contract, root=root, role="formal launch contract")
-    closure = materialize_source_closure(data_root=root)
-    closure_check = verify_source_closure(closure_payload, data_root=root)
+    closure = materialize_source_closure(data_root=root, namespace=namespace)
+    closure_check = verify_source_closure(
+        closure_payload, data_root=root, namespace=namespace)
     comparison = _snapshot_comparison(closure, historical_payload, historical_ref)
     readiness_blockers = sorted({
         str(item)
@@ -303,21 +316,23 @@ def build_audit(*, data_root: str | Path, source_closure: str | Path,
     })
     return {
         "schema": AUDIT_SCHEMA,
-        "namespace": V6_NAMESPACE,
-        "audit_version": V6_NAMESPACE,
-        "record_id": f"core-formal-source-closure-audit-v6-{V6_DATE}",
+        "namespace": namespace,
+        "audit_version": namespace,
+        "record_id": f"core-formal-source-closure-audit-{record_date}",
         "status": "proposal_only_blocked",
         "proposal_only": True,
         "formal_release": False,
         "formal_training_allowed": False,
         "formal_job_count": 0,
         "launch_allowed": False,
+        "root_admission_granted": False,
         "inputs": {
             "v6_source_closure": closure_ref,
             "historical_snapshot": historical_ref,
             "formal_readiness": readiness_ref,
             "formal_launch_contract": launch_ref,
         },
+        "live_source_closure": closure,
         "current_source_closure": closure,
         "v6_source_closure": {
             "path": closure_ref["path"],
@@ -326,12 +341,13 @@ def build_audit(*, data_root: str | Path, source_closure: str | Path,
             "verification": closure_check,
         },
         "historical_comparison": comparison,
+        "historical_baseline": comparison["historical_baseline"],
         "historical_audit_semantics": {
             "baseline": comparison["snapshot"],
             "baseline_version": comparison["snapshot_version"],
             "mismatch_files_are_historical_only": True,
             "mismatch_files_do_not_replace_v6_hashes": True,
-            "current_v6_hash_source": "live REQUIRED_CODE_FILES re-hash",
+            "current_v6_hash_source": "live canonical formal runtime file-list re-hash",
         },
         "checks": {
             "v6_source_closure_complete": closure["complete"],
@@ -445,7 +461,8 @@ def _readiness_gates(readiness: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
 
 def build_receipt(*, data_root: str | Path, source_closure: str | Path,
                   source_audit: str | Path, readiness: str | Path,
-                  launch_contract: str | Path) -> dict[str, Any]:
+                  launch_contract: str | Path, namespace: str = V6_NAMESPACE,
+                  record_date: str = V6_DATE) -> dict[str, Any]:
     """Bind the v6 closure to current blocked readiness/launch/audit inputs."""
     root = Path(data_root).expanduser().resolve()
     closure_payload, closure_path, closure_ref = _load_json(
@@ -456,14 +473,19 @@ def build_receipt(*, data_root: str | Path, source_closure: str | Path,
         readiness, root=root, role="formal readiness")
     launch_payload, _, launch_ref = _load_json(
         launch_contract, root=root, role="formal launch contract")
-    closure_check = verify_source_closure(closure_payload, data_root=root)
+    closure_check = verify_source_closure(
+        closure_payload, data_root=root, namespace=namespace)
     gates = _readiness_gates(readiness_payload)
     gates.update({
         "v6_source_audit_rebound": _gate(
             "V6_SOURCE_AUDIT_REBOUND",
-            observed=(audit_payload.get("namespace") == V6_NAMESPACE
-                      and audit_payload.get("current_source_closure", {}).get("closure_sha256")
-                      == closure_payload.get("closure_sha256")),
+            observed=(
+                audit_payload.get("namespace") == namespace
+                and audit_payload.get(
+                    "live_source_closure",
+                    audit_payload.get("current_source_closure", {}),
+                ).get("closure_sha256") == closure_payload.get("closure_sha256")
+            ),
             required=True,
             message="v6 audit must bind the freshly rehashed v6 closure",
         ),
@@ -498,9 +520,9 @@ def build_receipt(*, data_root: str | Path, source_closure: str | Path,
                        if isinstance(row, Mapping) and row.get("passed") is not True]
     return {
         "schema": RECEIPT_SCHEMA,
-        "namespace": V6_NAMESPACE,
-        "receipt_version": V6_NAMESPACE,
-        "record_id": f"core-formal-source-closure-root-admission-v6-{V6_DATE}",
+        "namespace": namespace,
+        "receipt_version": namespace,
+        "record_id": f"core-formal-source-closure-root-admission-{record_date}",
         "status": "planning_only_blocked",
         "proposal_only": True,
         "formal_release": False,
@@ -540,7 +562,10 @@ def build_receipt(*, data_root: str | Path, source_closure: str | Path,
                 "status": audit_payload.get("status"),
                 "formal_job_count": audit_payload.get("formal_job_count"),
                 "launch_allowed": audit_payload.get("launch_allowed"),
-                "current_closure_sha256": audit_payload.get("current_source_closure", {}).get("closure_sha256"),
+                "current_closure_sha256": audit_payload.get(
+                    "live_source_closure",
+                    audit_payload.get("current_source_closure", {}),
+                ).get("closure_sha256"),
                 "historical_mismatch_files": historical.get("mismatch_files", []),
                 "historical_mismatch_semantics": historical.get("mismatch_semantics"),
             },
@@ -592,14 +617,15 @@ def _reference_matches(reference: Mapping[str, Any], actual: Mapping[str, Any]) 
 
 
 def verify_admission(*, data_root: str | Path, source_closure: str | Path,
-                     receipt: str | Path) -> dict[str, Any]:
+                     receipt: str | Path, namespace: str = V6_NAMESPACE) -> dict[str, Any]:
     """Verify v6 closure, receipt, and all hash-bound current inputs read-only."""
     root = Path(data_root).expanduser().resolve()
     closure_payload, closure_path, closure_ref = _load_json(
         source_closure, root=root, role="v6 source closure")
     receipt_payload, receipt_path, receipt_actual_ref = _load_json(
         receipt, root=root, role="v6 root-admission receipt")
-    closure_check = verify_source_closure(closure_payload, data_root=root)
+    closure_check = verify_source_closure(
+        closure_payload, data_root=root, namespace=namespace)
     receipt_source = receipt_payload.get("source_closure")
     receipt_source = receipt_source if isinstance(receipt_source, Mapping) else {}
     inputs = receipt_payload.get("inputs")
@@ -624,9 +650,10 @@ def verify_admission(*, data_root: str | Path, source_closure: str | Path,
     audit = bound.get("source_closure_audit", ({}, Path(), {}, False))[0]
     audit_inputs = audit.get("inputs") if isinstance(audit.get("inputs"), Mapping) else {}
     audit_rebound = (
-        audit.get("namespace") == V6_NAMESPACE
-        and audit.get("current_source_closure", {}).get("closure_sha256")
-        == closure_payload.get("closure_sha256")
+        audit.get("namespace") == namespace
+        and audit.get(
+            "live_source_closure", audit.get("current_source_closure", {})
+        ).get("closure_sha256") == closure_payload.get("closure_sha256")
         and _reference_matches(inputs.get("formal_readiness", {}), audit_inputs.get("formal_readiness", {}))
         and _reference_matches(inputs.get("formal_launch_contract", {}), audit_inputs.get("formal_launch_contract", {}))
     )
@@ -635,8 +662,8 @@ def verify_admission(*, data_root: str | Path, source_closure: str | Path,
     checks = {
         "closure_verification": closure_check["ok"],
         "receipt_schema": receipt_payload.get("schema") == RECEIPT_SCHEMA,
-        "receipt_namespace": receipt_payload.get("namespace") == V6_NAMESPACE,
-        "receipt_version": receipt_payload.get("receipt_version") == V6_NAMESPACE,
+        "receipt_namespace": receipt_payload.get("namespace") == namespace,
+        "receipt_version": receipt_payload.get("receipt_version") == namespace,
         "receipt_path_matches": receipt_source.get("path") == _relative(closure_path, root),
         "receipt_file_hash_matches": receipt_source.get("sha256") == closure_ref["sha256"],
         "receipt_closure_hash_matches": receipt_source.get("closure_sha256") == closure_payload.get("closure_sha256"),
@@ -717,6 +744,8 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--source-closure-sha256-output", type=Path)
     parser.add_argument("--source-audit-sha256-output", type=Path)
     parser.add_argument("--receipt-sha256-output", type=Path)
+    parser.add_argument("--namespace", default=V6_NAMESPACE)
+    parser.add_argument("--date", default=V6_DATE)
     parser.add_argument("--verify", action="store_true",
                         help="verify the existing v6 artifacts without writing")
     return parser
@@ -727,14 +756,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     root = Path(args.data_root).expanduser().resolve()
     if args.verify:
         result = verify_admission(
-            data_root=root, source_closure=args.source_closure, receipt=args.receipt)
+            data_root=root, source_closure=args.source_closure, receipt=args.receipt,
+            namespace=args.namespace)
         print(json.dumps(result, sort_keys=True))
         return 0 if result["ok"] else 1
     if args.historical_snapshot is None or args.readiness is None or args.launch_contract is None:
         raise SystemExit(
             "--historical-snapshot, --readiness, and --launch-contract are required when creating"
         )
-    closure = materialize_source_closure(data_root=root)
+    closure = materialize_source_closure(data_root=root, namespace=args.namespace)
     write_json(args.source_closure, closure, immutable=True)
     audit = build_audit(
         data_root=root,
@@ -742,6 +772,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         historical_snapshot=args.historical_snapshot,
         readiness=args.readiness,
         launch_contract=args.launch_contract,
+        namespace=args.namespace,
+        record_date=args.date,
     )
     write_json(args.source_audit, audit, immutable=True)
     receipt = build_receipt(
@@ -750,6 +782,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         source_audit=args.source_audit,
         readiness=args.readiness,
         launch_contract=args.launch_contract,
+        namespace=args.namespace,
+        record_date=args.date,
     )
     write_json(args.receipt, receipt, immutable=True)
     if args.source_closure_sha256_output is not None:
