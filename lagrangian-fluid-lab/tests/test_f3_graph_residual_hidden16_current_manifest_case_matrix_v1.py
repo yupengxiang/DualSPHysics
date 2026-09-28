@@ -241,6 +241,28 @@ def test_complete_v3_receipts_bind_current_manifest_config_and_case_matrix(tmp_p
     matrix.validate_report(report)
 
 
+def test_core_learning_terminal_receipts_may_omit_optional_top_level_status(tmp_path: Path) -> None:
+    paths = _v3_paths(tmp_path)
+    running = _build(tmp_path, paths=paths)
+    _write_receipts(running, paths)
+    for path in paths.values():
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload.pop("status", None)
+        path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+
+    report = _build(
+        tmp_path,
+        paths=paths,
+        statuses={seed: "terminal" for seed in matrix.SEEDS},
+    )
+
+    assert report["status"] == "dry_run_matrix_ready"
+    assert report["source_bound"] is True
+    assert report["training_receipts"]["observed_count"] == 3
+    assert all(plan["status"] == "dry_run_ready" for plan in report["plans"])
+    matrix.validate_report(report)
+
+
 def test_receipt_config_drift_is_rejected_and_remains_zero_credit(tmp_path: Path) -> None:
     paths = _v3_paths(tmp_path)
     report = _build(tmp_path, paths=paths)

@@ -736,7 +736,8 @@ def _validate_training_receipt(
     _walk_json(payload, name)
     _exact(payload, "schema", TRAINING_SCHEMA, name)
     _exact(payload, "evidence_status", "complete", name)
-    _exact(payload, "status", "completed", name)
+    if "status" in payload:
+        _exact(payload, "status", "completed", name)
     _exact(payload, "model_kind", MODEL, name)
     _exact(payload, "seed", seed, name)
     _exact(payload, "completed_updates", UPDATES, name)
