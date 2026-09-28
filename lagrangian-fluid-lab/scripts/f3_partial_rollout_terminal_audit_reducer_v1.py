@@ -27,6 +27,7 @@ import argparse
 from collections.abc import Mapping, Sequence
 from datetime import datetime, timezone
 import errno
+import hashlib
 import json
 import math
 import os
@@ -57,6 +58,7 @@ MAX_JSON_BYTES = 256 * 1024
 MAX_JSON_DEPTH = 48
 MAX_JSON_ARRAY_ITEMS = 1024
 NONCE_RE = re.compile(r"^[0-9a-f]{32}$")
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 SEED_RE = re.compile(r"17|29|43")
 FORBIDDEN_NAMESPACE_WORDS = ("partial", "legacy", "unknown")
 PROGRESS_SUFFIX = "-evaluation-progress.json"
@@ -185,8 +187,14 @@ def _safe_absolute_path(value: Any, name: str) -> Path:
     path = Path(text)
     if not path.is_absolute():
         _fail(f"{name} must be absolute")
-    if ".." in path.parts:
-        _fail(f"{name} must not contain parent traversal")
+    if text != os.path.normpath(text):
+        _fail(f"{name} must use a normalized lexical path")
+    if text != os.path.abspath(text):
+        _fail(f"{name} must use a canonical absolute path")
+    if text != os.path.sep and text.endswith(os.path.sep):
+        _fail(f"{name} must not have a trailing separator")
+    if any(part in {".", ".."} for part in path.parts):
+        _fail(f"{name} must not contain path traversal or alias components")
     return path
 
 
@@ -228,6 +236,46 @@ def _derived_path(namespace: Path, suffix: str) -> Path:
     return namespace.with_name(namespace.name + suffix)
 
 
+def _stat_identity(info: os.stat_result) -> tuple[int, ...]:
+    return (
+        int(info.st_dev),
+        int(info.st_ino),
+        int(info.st_mode),
+        int(info.st_nlink),
+        int(info.st_size),
+        int(info.st_mtime_ns),
+        int(info.st_ctime_ns),
+    )
+
+
+def _component_snapshot(
+    path: Path, name: str, *, allow_missing_leaf: bool = False
+) -> tuple[tuple[str, tuple[int, ...]], ...]:
+    """Snapshot every existing path component without following symlinks."""
+    if not path.is_absolute():
+        _fail(f"{name} must be absolute")
+    parts = path.parts[1:]
+    current = Path(path.anchor or os.path.sep)
+    snapshot: list[tuple[str, tuple[int, ...]]] = []
+    for index, part in enumerate(parts):
+        current /= part
+        is_leaf = index == len(parts) - 1
+        try:
+            info = os.lstat(current)
+        except FileNotFoundError:
+            if allow_missing_leaf and is_leaf:
+                return tuple(snapshot)
+            _fail(f"{name} has a missing path component: {current}")
+        except OSError as error:
+            _fail(f"{name} component inspection failed: {error}")
+        if stat.S_ISLNK(info.st_mode):
+            _fail(f"{name} contains a symlink path component: {current}")
+        if not is_leaf and not stat.S_ISDIR(info.st_mode):
+            _fail(f"{name} has a non-directory parent component: {current}")
+        snapshot.append((str(current), _stat_identity(info)))
+    return tuple(snapshot)
+
+
 def _same_lstat(before: os.stat_result, after: os.stat_result) -> bool:
     return (
         before.st_dev == after.st_dev
@@ -236,6 +284,7 @@ def _same_lstat(before: os.stat_result, after: os.stat_result) -> bool:
         and before.st_nlink == after.st_nlink
         and before.st_size == after.st_size
         and before.st_mtime_ns == after.st_mtime_ns
+        and before.st_ctime_ns == after.st_ctime_ns
     )
 
 
@@ -273,6 +322,7 @@ def _lstat_metadata(path: Path, name: str) -> dict[str, Any]:
 
 def _read_bounded_json(path: Path, name: str) -> tuple[dict[str, Any], dict[str, Any]]:
     """Read only a small JSON sidecar with a no-follow, identity-stable fd."""
+    components_before = _component_snapshot(path, name, allow_missing_leaf=True)
     try:
         before = os.lstat(path)
     except FileNotFoundError:
@@ -311,7 +361,17 @@ def _read_bounded_json(path: Path, name: str) -> tuple[dict[str, Any], dict[str,
     finally:
         os.close(fd)
     try:
-        text = b"".join(chunks).decode("utf-8")
+        after_path = os.lstat(path)
+    except OSError as error:
+        _fail(f"{name} could not be re-stated safely: {error}")
+    if not _same_lstat(opened, after_path):
+        _fail(f"{name} changed after bounded read")
+    components_after = _component_snapshot(path, name)
+    if components_before != components_after:
+        _fail(f"{name} parent path changed during bounded read")
+    raw = b"".join(chunks)
+    try:
+        text = raw.decode("utf-8")
     except UnicodeDecodeError as error:
         _fail(f"{name} is not UTF-8 JSON: {error}")
     try:
@@ -320,14 +380,20 @@ def _read_bounded_json(path: Path, name: str) -> tuple[dict[str, Any], dict[str,
             object_pairs_hook=_reject_duplicate_keys,
             parse_constant=_reject_json_constant,
         )
+    except RecursionError as error:
+        _fail(f"{name} exceeds bounded JSON nesting depth: {error}")
     except json.JSONDecodeError as error:
         _fail(f"{name} is not valid JSON: {error}")
-    _walk_json(value, name)
+    try:
+        _walk_json(value, name)
+    except RecursionError as error:
+        _fail(f"{name} exceeds bounded JSON nesting depth: {error}")
     payload = _mapping(value, name)
     return dict(payload), {
         "path": str(path),
         "exists": True,
-        "bytes": len(text.encode("utf-8")),
+        "bytes": len(raw),
+        "sha256": hashlib.sha256(raw).hexdigest(),
         "opened": True,
         "lstat_only": False,
         "symlink": False,
@@ -705,6 +771,75 @@ def build_report(
     return report
 
 
+ROW_REQUIRED_KEYS = frozenset(
+    {
+        "model_kind",
+        "seed",
+        "status",
+        "terminal_status",
+        "terminal_promotion",
+        "diagnostic_only",
+        "formal",
+        "formal_eligible",
+        "T1_numerical",
+        "T2_macro",
+        "T2_path",
+        "qualification",
+        "qualification_credit",
+        "credit",
+        "hidden",
+        "updates",
+        "case_id",
+        "split",
+        "transitions",
+        "frames",
+        "observed_completed_frames",
+        "execution_complete",
+        "finite_rollout_complete",
+        "evaluation_missing",
+        "process_proof_missing",
+        "progress",
+        "trajectory",
+        "evaluation",
+        "process_proof",
+        "blocked_reasons",
+        "side_effects",
+        "input_boundary",
+    }
+)
+ROW_ALLOWED_KEYS = ROW_REQUIRED_KEYS | frozenset(
+    {"progress_path", "trajectory_path", "evaluation_path", "namespace", "namespace_nonce"}
+)
+ROW_EXACT_FIELDS: tuple[tuple[str, Any], ...] = (
+    ("status", STATUS),
+    ("terminal_status", "not_terminal"),
+    ("terminal_promotion", False),
+    ("diagnostic_only", True),
+    ("formal", False),
+    ("formal_eligible", False),
+    ("T1_numerical", False),
+    ("T2_macro", False),
+    ("T2_path", False),
+    ("qualification", False),
+    ("qualification_credit", 0),
+    ("credit", 0),
+    ("hidden", HIDDEN),
+    ("updates", UPDATES),
+    ("case_id", CASE_ID),
+    ("split", SPLIT),
+    ("transitions", TRANSITIONS),
+    ("frames", FRAMES),
+    ("execution_complete", False),
+    ("finite_rollout_complete", False),
+    ("process_proof_missing", True),
+)
+
+
+def _exact_value_matches(observed: Any, expected: Any) -> bool:
+    """Match both value and scalar type so ``False`` cannot stand in for ``0``."""
+    return type(observed) is type(expected) and observed == expected
+
+
 def validate_report(report: Any) -> list[str]:
     """Validate that an untrusted report remains a blocked zero-credit audit."""
     errors: list[str] = []
@@ -727,7 +862,7 @@ def validate_report(report: Any) -> list[str]:
         ("qualification_credit", 0),
         ("credit", 0),
     ):
-        if report.get(key) != expected:
+        if not _exact_value_matches(report.get(key), expected):
             errors.append(f"{key} must be {expected!r}")
     rows = report.get("seed_matrix")
     if not isinstance(rows, list) or len(rows) != len(_expected_keys()):
@@ -739,36 +874,76 @@ def validate_report(report: Any) -> list[str]:
         if not isinstance(row, Mapping):
             errors.append(f"seed_matrix[{index}] must be an object")
             continue
+        unknown_fields = [
+            key for key in row if not isinstance(key, str) or key not in ROW_ALLOWED_KEYS
+        ]
+        if unknown_fields:
+            errors.append(f"seed_matrix[{index}] has unknown fields: {unknown_fields!r}")
+        missing_fields = [key for key in sorted(ROW_REQUIRED_KEYS) if key not in row]
+        if missing_fields:
+            errors.append(f"seed_matrix[{index}] is missing fields: {missing_fields!r}")
         key = (row.get("model_kind"), row.get("seed"))
         if key in seen:
             errors.append(f"seed_matrix[{index}] duplicates model/seed")
         seen.add(key)
         if key not in expected_set:
             errors.append(f"seed_matrix[{index}] has unknown model/seed")
-        for field, expected in (
-            ("status", STATUS),
-            ("terminal_status", "not_terminal"),
-            ("terminal_promotion", False),
-            ("execution_complete", False),
-            ("finite_rollout_complete", False),
-            ("process_proof_missing", True),
-            ("diagnostic_only", True),
-            ("formal", False),
-            ("formal_eligible", False),
-            ("qualification", False),
-            ("qualification_credit", 0),
-            ("credit", 0),
-        ):
-            if row.get(field) != expected:
+        for field, expected in (("model_kind", key[0]), ("seed", key[1])) + ROW_EXACT_FIELDS:
+            if field not in row:
+                continue
+            if not _exact_value_matches(row[field], expected):
                 errors.append(f"seed_matrix[{index}].{field} must be {expected!r}")
-        if type(row.get("evaluation_missing")) is not bool:
+        if "evaluation_missing" in row and type(row.get("evaluation_missing")) is not bool:
             errors.append(f"seed_matrix[{index}].evaluation_missing must be boolean")
         observed = row.get("observed_completed_frames")
         if observed is not None and (type(observed) is not int or not 0 <= observed <= TRANSITIONS):
             errors.append(f"seed_matrix[{index}].observed_completed_frames is invalid")
+        if "blocked_reasons" in row and not isinstance(row.get("blocked_reasons"), list):
+            errors.append(f"seed_matrix[{index}].blocked_reasons must be an array")
+        if "process_proof" in row and not isinstance(row.get("process_proof"), Mapping):
+            errors.append(f"seed_matrix[{index}].process_proof must be an object")
+        progress = row.get("progress")
+        if progress is not None:
+            if not isinstance(progress, Mapping):
+                errors.append(f"seed_matrix[{index}].progress must be null or an object")
+            else:
+                digest = progress.get("sha256")
+                if not isinstance(digest, str) or SHA256_RE.fullmatch(digest) is None:
+                    errors.append(f"seed_matrix[{index}].progress.sha256 must be a SHA-256 digest")
+                if not _exact_value_matches(progress.get("opened"), True):
+                    errors.append(f"seed_matrix[{index}].progress.opened must be true")
         boundary = row.get("input_boundary")
-        if not isinstance(boundary, Mapping) or boundary.get("terminal_promotion") is not False:
-            errors.append(f"seed_matrix[{index}] has an unsafe input boundary")
+        if not isinstance(boundary, Mapping):
+            errors.append(f"seed_matrix[{index}] has a missing input boundary")
+        else:
+            for field, expected in _input_boundary().items():
+                if field not in boundary:
+                    errors.append(f"seed_matrix[{index}].input_boundary is missing {field}")
+                elif not _exact_value_matches(boundary[field], expected):
+                    errors.append(
+                        f"seed_matrix[{index}].input_boundary.{field} must be {expected!r}"
+                    )
+            unknown_boundary = [key for key in boundary if key not in _input_boundary()]
+            if unknown_boundary:
+                errors.append(
+                    f"seed_matrix[{index}].input_boundary has unknown fields: {unknown_boundary!r}"
+                )
+        row_effects = row.get("side_effects")
+        if not isinstance(row_effects, Mapping):
+            errors.append(f"seed_matrix[{index}] has missing side_effects")
+        else:
+            for field, expected in _empty_side_effects().items():
+                if field not in row_effects:
+                    errors.append(f"seed_matrix[{index}].side_effects is missing {field}")
+                elif not _exact_value_matches(row_effects[field], expected):
+                    errors.append(
+                        f"seed_matrix[{index}].side_effects.{field} must be {expected!r}"
+                    )
+            unknown_effects = [key for key in row_effects if key not in _empty_side_effects()]
+            if unknown_effects:
+                errors.append(
+                    f"seed_matrix[{index}].side_effects has unknown fields: {unknown_effects!r}"
+                )
     if seen != expected_set:
         errors.append("seed_matrix does not cover exactly residual/raw seeds 17/29/43")
     side_effects = report.get("side_effects")

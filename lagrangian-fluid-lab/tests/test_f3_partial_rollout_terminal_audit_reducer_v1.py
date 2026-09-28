@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 
@@ -113,6 +114,8 @@ def test_six_partial_fresh_namespaces_reduce_to_blocked_zero_credit(tmp_path: Pa
         assert row["trajectory"]["opened"] is False  # type: ignore[index]
         assert row["evaluation"]["opened"] is False  # type: ignore[index]
         assert "evaluation_missing" in row["blocked_reasons"]  # type: ignore[operator]
+        progress_path = Path(row["progress_path"])  # type: ignore[arg-type]
+        assert row["progress"]["sha256"] == hashlib.sha256(progress_path.read_bytes()).hexdigest()  # type: ignore[index]
 
 
 def test_default_contract_has_fixed_models_seeds_and_no_runtime_side_effects() -> None:
@@ -258,6 +261,52 @@ def test_nonfinite_progress_fails_closed(tmp_path: Path) -> None:
     assert "non-finite JSON constant" in row["blocked_reasons"][0]  # type: ignore[index]
 
 
+def test_deeply_nested_progress_is_blocked_without_recursion_error(tmp_path: Path) -> None:
+    observations, _ = _fixture(tmp_path)
+    candidate = copy.deepcopy(observations[0])
+    progress_path = Path(candidate["progress_path"])
+    depth = 1500
+    progress_path.write_text(
+        ("{\"nested\":" * depth) + "null" + ("}" * depth), encoding="utf-8"
+    )
+    report = reducer.build_report([candidate] + observations[1:])
+    row = _rows(report)[("graph_residual", 17)]
+    assert row["status"] == reducer.STATUS
+    assert row["observed_completed_frames"] is None
+    assert row["formal"] is False
+    assert row["credit"] == 0
+    assert any("nesting depth" in reason.lower() for reason in row["blocked_reasons"])
+
+
+def test_progress_parent_symlink_is_rejected_without_following_it(tmp_path: Path) -> None:
+    observations, _ = _fixture(tmp_path)
+    candidate = copy.deepcopy(observations[0])
+    source_root = tmp_path / "fresh-runs"
+    symlink_root = tmp_path / "fresh-runs-alias"
+    symlink_root.symlink_to(source_root, target_is_directory=True)
+    for field in ("progress_path", "trajectory_path", "evaluation_path"):
+        candidate[field] = str(symlink_root / Path(candidate[field]).name)
+    report = reducer.build_report([candidate] + observations[1:])
+    row = _rows(report)[("graph_residual", 17)]
+    assert row["status"] == reducer.STATUS
+    assert row["observed_completed_frames"] is None
+    assert any("symlink path component" in reason for reason in row["blocked_reasons"])
+
+
+def test_lexical_out_of_bounds_progress_path_is_rejected(tmp_path: Path) -> None:
+    observations, _ = _fixture(tmp_path)
+    candidate = copy.deepcopy(observations[0])
+    progress_path = Path(candidate["progress_path"])
+    candidate["progress_path"] = str(
+        progress_path.parent / "nested" / ".." / progress_path.name
+    )
+    report = reducer.build_report([candidate] + observations[1:])
+    row = _rows(report)[("graph_residual", 17)]
+    assert row["status"] == reducer.STATUS
+    assert row["observed_completed_frames"] is None
+    assert any("normalized lexical path" in reason for reason in row["blocked_reasons"])
+
+
 def test_missing_observation_and_unknown_record_do_not_change_fixed_matrix(tmp_path: Path) -> None:
     observations, _ = _fixture(tmp_path)
     report = reducer.build_report(observations[:2] + [{"model_kind": "unknown", "seed": 99}])
@@ -281,6 +330,45 @@ def test_validate_report_rejects_forged_completed_row(tmp_path: Path) -> None:
     row["execution_complete"] = True
     row["finite_rollout_complete"] = True
     assert reducer.validate_report(forged)
+
+
+@pytest.mark.parametrize(
+    ("field", "forged_value"),
+    [
+        ("formal", True),
+        ("formal_eligible", True),
+        ("T1_numerical", True),
+        ("T2_macro", True),
+        ("T2_path", True),
+        ("qualification", True),
+        ("qualification_credit", 1),
+        ("credit", 1),
+    ],
+)
+def test_validate_report_rejects_forged_row_authority_fields(
+    tmp_path: Path, field: str, forged_value: object
+) -> None:
+    observations, _ = _fixture(tmp_path)
+    report = reducer.build_report(observations)
+    forged = copy.deepcopy(report)
+    forged["seed_matrix"][0][field] = forged_value  # type: ignore[index]
+    errors = reducer.validate_report(forged)
+    assert any(f"seed_matrix[0].{field}" in error for error in errors)
+
+
+def test_validate_report_rejects_missing_and_unknown_row_fields(tmp_path: Path) -> None:
+    observations, _ = _fixture(tmp_path)
+    report = reducer.build_report(observations)
+
+    missing = copy.deepcopy(report)
+    del missing["seed_matrix"][0]["T1_numerical"]  # type: ignore[index]
+    missing_errors = reducer.validate_report(missing)
+    assert any("seed_matrix[0] is missing fields" in error for error in missing_errors)
+
+    unknown = copy.deepcopy(report)
+    unknown["seed_matrix"][0]["untrusted_permission_alias"] = True  # type: ignore[index]
+    unknown_errors = reducer.validate_report(unknown)
+    assert any("unknown fields" in error for error in unknown_errors)
 
 
 def test_input_bundle_and_cli_write_only_a_new_small_report(tmp_path: Path) -> None:
