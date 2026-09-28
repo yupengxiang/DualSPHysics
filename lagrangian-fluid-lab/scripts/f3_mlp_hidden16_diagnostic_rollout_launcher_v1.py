@@ -572,19 +572,28 @@ def _artifact(value: Any, name: str, *, suffix: str | None = None) -> dict[str, 
     }
 
 
-def _receipt_artifact(value: Any, name: str, *, suffix: str | None = None) -> dict[str, Any]:
+def _receipt_artifact(
+    value: Any,
+    name: str,
+    *,
+    suffix: str | None = None,
+    require_bytes: bool = True,
+) -> dict[str, Any]:
     """Extract identity from a historical receipt without imposing its extra fields."""
 
     item = _mapping(value, name)
     path = _absolute_text(_string(item.get("path"), f"{name}.path"), f"{name}.path")
     if suffix is not None and not str(path).endswith(suffix):
         _fail(f"{name}.path must end with {suffix}")
-    declared_bytes = item.get("bytes", 1)
-    return {
+    result = {
         "path": str(path),
         "sha256": _sha(item.get("sha256"), f"{name}.sha256"),
-        "bytes": _strict_int(declared_bytes, f"{name}.bytes", 1),
     }
+    if "bytes" in item:
+        result["bytes"] = _strict_int(item["bytes"], f"{name}.bytes", 1)
+    elif require_bytes:
+        _fail(f"{name}.bytes is missing")
+    return result
 
 
 def _expected_run_id(seed: int) -> str:
@@ -703,7 +712,16 @@ def _validate_training_matrix(payload: Mapping[str, Any], seed: int, name: str) 
             ("run_id", _expected_run_id(row_seed)), ("evidence_status", "complete"),
         ):
             _exact(evidence, key, expected, f"{name}.seed{row_seed}.evidence")
-        checkpoint = _receipt_artifact(evidence.get("checkpoint"), f"{name}.seed{row_seed}.checkpoint", suffix=".pt")
+        checkpoint = _receipt_artifact(
+            evidence.get("checkpoint"),
+            f"{name}.seed{row_seed}.checkpoint",
+            suffix=".pt",
+            # The training evidence matrix predates the byte-complete
+            # checkpoint identity contract.  Its path and SHA remain the
+            # source-bound fields; build_plan reconciles the omitted byte
+            # count against the independently supplied historical receipt.
+            require_bytes=False,
+        )
         checkpoint_name = Path(checkpoint["path"]).name
         if (
             f"seed{row_seed}" not in checkpoint_name
@@ -1285,6 +1303,13 @@ def build_plan(
         _fail("history and training run IDs drift")
     if history["checkpoint"]["path"] != training["checkpoint"]["path"] or history["checkpoint"]["sha256"] != training["checkpoint"]["sha256"]:
         _fail("history and training checkpoint identities drift")
+    if "bytes" not in training["checkpoint"]:
+        training["checkpoint"] = {
+            **training["checkpoint"],
+            "bytes": history["checkpoint"]["bytes"],
+        }
+    elif training["checkpoint"]["bytes"] != history["checkpoint"]["bytes"]:
+        _fail("history and training checkpoint byte identities drift")
 
     checkpoint_path = Path(training["checkpoint"]["path"])
     python = root / ".venv" / "bin" / "python"

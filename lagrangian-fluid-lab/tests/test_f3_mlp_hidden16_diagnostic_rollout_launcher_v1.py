@@ -192,6 +192,24 @@ def _plan(fixture: dict[str, object], tmp_path: Path, seed: int = 17):
     )
 
 
+def test_build_plan_reconciles_legacy_matrix_checkpoint_bytes_from_history(tmp_path):
+    fixture = _fixture(tmp_path)
+    matrix_path = fixture["matrix"]
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    for row in matrix["runs"]:
+        row["evidence"]["checkpoint"].pop("bytes", None)
+    _write_json(matrix_path, matrix)
+
+    plan = _plan(fixture, tmp_path)
+
+    checkpoint_path = fixture["checkpoints"][17]
+    assert plan.checkpoint == {
+        "path": str(checkpoint_path),
+        "sha256": _sha("checkpoint-17"),
+        "bytes": checkpoint_path.stat().st_size,
+    }
+
+
 def _install_real_fixture_interpreter(fixture: dict[str, object]) -> None:
     path = fixture["root"] / ".venv" / "bin" / "python"
     path.unlink()
