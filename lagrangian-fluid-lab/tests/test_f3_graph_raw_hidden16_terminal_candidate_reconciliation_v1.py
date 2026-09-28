@@ -180,6 +180,20 @@ def test_sha_binding_drift_rejects_seed(tmp_path: Path):
     assert report["credit"] == 0
 
 
+def test_training_and_evaluation_sha_binding_drift_rejects_seed(tmp_path: Path):
+    _, candidate_root, paths = _make_complete_matrix(tmp_path)
+    for seed, binding, digest in ((17, "training", _sha("e")), (29, "evaluation", _sha("f"))):
+        terminal_path = paths[seed]["terminal"]
+        payload = json.loads(terminal_path.read_text())
+        payload["bindings"][binding]["sha256"] = digest
+        _write_json(terminal_path, payload)
+    report = _report(tmp_path, candidate_root)
+    row17 = next(item for item in report["seed_matrix"] if item["seed"] == 17)
+    row29 = next(item for item in report["seed_matrix"] if item["seed"] == 29)
+    assert "training_sha256_binding_drift" in row17["reasons"]
+    assert "evaluation_sha256_binding_drift" in row29["reasons"]
+
+
 def test_model_hidden_seed_updates_and_horizon_are_strict(tmp_path: Path):
     _, candidate_root, paths = _make_complete_matrix(tmp_path)
     terminal_path = paths[17]["terminal"]

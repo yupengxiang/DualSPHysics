@@ -38,6 +38,9 @@ SEED_RE = re.compile(r"(?:^|[-_])seed(?:[-_]?)(17|29|43)(?:$|[-_.])", re.IGNOREC
 JSON_SUFFIXES = {".json"}
 EXCLUDED_NAME_PARTS = (
     "progress",
+    "manifest",
+    "checkpoint",
+    "trajectory",
     "hdf5-validation",
     "metric-summary",
     "evidence-pack",
