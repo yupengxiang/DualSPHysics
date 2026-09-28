@@ -304,14 +304,23 @@ _SECURITY_FALSE_ALIAS_GROUPS: tuple[tuple[str, ...], ...] = (
     ("trajectory_hdf5_opened", "trajectory_content_opened", "hdf5_content_opened"),
     ("progress_opened", "progress_content_opened"),
 )
+# The runner predates the *_content_opened spelling.  Its canonical spelling
+# is admitted only after the strict seed29 outer/nested shape is established
+# (or for the separately trusted bridge schema); ordinary projections must
+# carry the content-opened aliases.
 
 
 def _require_false_alias_group(
-    effects: Mapping[str, Any], aliases: Sequence[str], name: str
+    effects: Mapping[str, Any],
+    aliases: Sequence[str],
+    name: str,
+    *,
+    allow_canonical: bool = False,
 ) -> None:
-    present = [key for key in aliases if key in effects]
+    accepted_aliases = aliases if allow_canonical else aliases[1:]
+    present = [key for key in accepted_aliases if key in effects]
     if not present:
-        _fail(f"{name} is missing one of: {', '.join(aliases)}")
+        _fail(f"{name} is missing one of: {', '.join(accepted_aliases)}")
     for key in present:
         _strict_bool(effects[key], f"{name}.{key}")
         if effects[key] is not False:
@@ -323,6 +332,7 @@ def _validate_side_effects(
     name: str,
     *,
     require_security_fields: bool = False,
+    allow_canonical_security_fields: bool = False,
 ) -> None:
     effects = _mapping(value, name)
     false_fields = {
@@ -386,7 +396,12 @@ def _validate_side_effects(
             _strict_bool(item, f"{name}.{key}")
     if require_security_fields:
         for aliases in _SECURITY_FALSE_ALIAS_GROUPS:
-            _require_false_alias_group(effects, aliases, name)
+            _require_false_alias_group(
+                effects,
+                aliases,
+                name,
+                allow_canonical=allow_canonical_security_fields,
+            )
 
 
 def _validate_input_boundary(
@@ -394,6 +409,7 @@ def _validate_input_boundary(
     name: str,
     *,
     require_security_fields: bool = True,
+    allow_canonical_security_fields: bool = False,
 ) -> None:
     boundary = _mapping(value, name)
     false_fields = {
@@ -413,7 +429,12 @@ def _validate_input_boundary(
                 _fail(f"{name}.{key} must be false")
     if require_security_fields:
         for aliases in _SECURITY_FALSE_ALIAS_GROUPS:
-            _require_false_alias_group(boundary, aliases, name)
+            _require_false_alias_group(
+                boundary,
+                aliases,
+                name,
+                allow_canonical=allow_canonical_security_fields,
+            )
     if "queue_submissions" in boundary:
         _check_exact(boundary, "queue_submissions", 0, name)
 
@@ -542,24 +563,33 @@ def _resolve_checkpoint_update(
     _fail(f"{name}.update is missing; no schema-scoped compatibility applies")
 
 
+def _is_seed29_runner_training_shape(value: Mapping[str, Any], seed: int) -> bool:
+    training = value.get("training_binding")
+    return (
+        seed == 29
+        and isinstance(training, Mapping)
+        and "schema" not in value
+        and "status" not in value
+        and "case" not in value
+        and "checkpoint" not in value
+        and isinstance(training.get("checkpoint"), Mapping)
+        and "path" not in training
+    )
+
+
 def _validate_nested_terminal_receipt(
     value: Mapping[str, Any],
     seed: int,
     *,
     source_kind: str,
     training_source: Mapping[str, Any] | None = None,
+    allow_canonical_security_fields: bool = False,
 ) -> dict[str, Any]:
     name = f"terminal_receipt[{seed}]"
     expected_schema = (
         f"core.f3.graph_raw.hidden16.seed{seed}.full835.terminal_evidence.receipt.v1"
     )
-    training_hint = value.get("training_binding")
-    runner_training_shape_hint = (
-        isinstance(training_hint, Mapping)
-        and "checkpoint" not in value
-        and "checkpoint" in training_hint
-        and "path" not in training_hint
-    )
+    runner_training_shape_hint = _is_seed29_runner_training_shape(value, seed)
     if value.get("schema") != expected_schema:
         # The current seed29 runner's nested terminal projection is carried by
         # a schema-bound completion report but predates a nested schema field.
@@ -583,11 +613,7 @@ def _validate_nested_terminal_receipt(
     ):
         _check_exact(value, key, expected, name)
     training_value = _mapping(value.get("training_binding"), f"{name}.training_binding")
-    runner_training_shape = (
-        "checkpoint" not in value
-        and "checkpoint" in training_value
-        and "path" not in training_value
-    )
+    runner_training_shape = _is_seed29_runner_training_shape(value, seed)
     if "status" in value:
         _check_exact(value, "status", "completed_diagnostic", name)
     elif not runner_training_shape:
@@ -851,12 +877,14 @@ def _validate_nested_terminal_receipt(
         side_effects,
         f"{name}.side_effects",
         require_security_fields=True,
+        allow_canonical_security_fields=allow_canonical_security_fields,
     )
     if "input_boundary" in value:
         _validate_input_boundary(
             value["input_boundary"],
             f"{name}.input_boundary",
             require_security_fields=source_kind != "terminal_evidence_bridge_receipt",
+            allow_canonical_security_fields=allow_canonical_security_fields,
         )
 
     return {
@@ -920,7 +948,12 @@ def _validate_nested_terminal_receipt(
     }
 
 
-def _validate_projection_scope(value: Mapping[str, Any], name: str) -> None:
+def _validate_projection_scope(
+    value: Mapping[str, Any],
+    name: str,
+    *,
+    allow_canonical_security_fields: bool = False,
+) -> None:
     _validate_zero_formal_markers(value, name)
     scope = value.get("scope")
     side_effects = value.get("side_effects")
@@ -931,12 +964,14 @@ def _validate_projection_scope(value: Mapping[str, Any], name: str) -> None:
             scope,
             f"{name}.scope",
             require_security_fields=True,
+            allow_canonical_security_fields=allow_canonical_security_fields,
         )
     if side_effects is not None:
         _validate_side_effects(
             side_effects,
             f"{name}.side_effects",
             require_security_fields=True,
+            allow_canonical_security_fields=allow_canonical_security_fields,
         )
     boundary = value.get("input_boundary")
     if boundary is not None:
@@ -944,6 +979,7 @@ def _validate_projection_scope(value: Mapping[str, Any], name: str) -> None:
             boundary,
             f"{name}.input_boundary",
             require_security_fields=value.get("schema") != BRIDGE_SCHEMA,
+            allow_canonical_security_fields=allow_canonical_security_fields,
         )
 
 
@@ -1046,13 +1082,27 @@ def _validate_direct_completion_report(
     match = COMPLETION_SCHEMA_RE.fullmatch(str(value.get("schema")))
     if match is None or int(match.group("seed")) != seed:
         _fail(f"{name}.schema seed mismatch")
-    nested = value.get("seed29_terminal_receipt", value.get("terminal_receipt"))
+    if "terminal_receipt" in value:
+        _fail(
+            f"{name}.terminal_receipt is not an accepted alias; use "
+            "seed29_terminal_receipt"
+        )
+    nested = value.get("seed29_terminal_receipt")
+    runner_nested_shape = isinstance(nested, Mapping) and _is_seed29_runner_training_shape(
+        nested, seed
+    )
     runner_outer_shape = (
         seed == 29
         and isinstance(nested, Mapping)
+        and runner_nested_shape
         and isinstance(value.get("target_contract"), Mapping)
         and "seed" not in value
     )
+    if runner_nested_shape and not runner_outer_shape:
+        _fail(
+            f"{name} runner-shaped seed29_terminal_receipt requires the bound "
+            "seed29 outer target_contract shape"
+        )
     if runner_outer_shape:
         target_contract = _mapping(value["target_contract"], f"{name}.target_contract")
         for key, expected in (
@@ -1095,7 +1145,11 @@ def _validate_direct_completion_report(
         "completed_diagnostic_terminal_receipt_bound",
     }:
         _fail(f"{name} is not a terminal bound status")
-    _validate_projection_scope(value, name)
+    _validate_projection_scope(
+        value,
+        name,
+        allow_canonical_security_fields=runner_outer_shape,
+    )
 
     if isinstance(nested, Mapping):
         training_source = value.get("training_source")
@@ -1106,6 +1160,7 @@ def _validate_direct_completion_report(
             seed,
             source_kind="completion_report_nested_receipt",
             training_source=training_source,
+            allow_canonical_security_fields=runner_outer_shape,
         )
     if nested is not None:
         _fail(f"{name}.terminal receipt must be an object")
@@ -1258,7 +1313,11 @@ def _validate_direct_completion_report(
 def _validate_bridge_report(value: Mapping[str, Any], seed: int) -> dict[str, Any]:
     name = f"bridge_report[{seed}]"
     _check_exact(value, "schema", BRIDGE_SCHEMA, name)
-    _validate_projection_scope(value, name)
+    _validate_projection_scope(
+        value,
+        name,
+        allow_canonical_security_fields=True,
+    )
     if value.get("source_bound") is not True:
         _fail(f"{name}.source_bound must be true for a bound bridge projection")
     rows = value.get("seed_matrix")
@@ -1284,7 +1343,10 @@ def _validate_bridge_report(value: Mapping[str, Any], seed: int) -> dict[str, An
         row.get("terminal_receipt"), f"{name}.seed_matrix[{seed}].terminal_receipt"
     )
     return _validate_nested_terminal_receipt(
-        receipt, seed, source_kind="terminal_evidence_bridge_receipt"
+        receipt,
+        seed,
+        source_kind="terminal_evidence_bridge_receipt",
+        allow_canonical_security_fields=True,
     )
 
 
@@ -1420,10 +1482,15 @@ def _check(
 def _empty_side_effects() -> dict[str, Any]:
     return {
         "manifest_opened": False,
+        "manifest_content_opened": False,
         "case_hdf5_opened": False,
+        "case_hdf5_content_opened": False,
         "checkpoint_opened": False,
+        "checkpoint_content_opened": False,
         "trajectory_hdf5_opened": False,
+        "trajectory_content_opened": False,
         "progress_opened": False,
+        "progress_content_opened": False,
         "runtime_started": False,
         "solver_started": False,
         "worker_started": False,
@@ -1441,10 +1508,15 @@ def _empty_input_boundary() -> dict[str, Any]:
         "bounded_json_only": True,
         "max_json_bytes": MAX_JSON_BYTES,
         "manifest_opened": False,
+        "manifest_content_opened": False,
         "case_hdf5_opened": False,
+        "case_hdf5_content_opened": False,
         "checkpoint_opened": False,
+        "checkpoint_content_opened": False,
         "trajectory_hdf5_opened": False,
+        "trajectory_content_opened": False,
         "progress_opened": False,
+        "progress_content_opened": False,
         "runtime_started": False,
         "solver_started": False,
         "worker_started": False,

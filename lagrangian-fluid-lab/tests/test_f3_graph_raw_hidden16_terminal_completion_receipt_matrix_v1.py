@@ -279,6 +279,58 @@ def _completion_report(seed: int, *, nested: bool = True) -> dict:
                 training.pop(key, None)
             terminal["evaluation_binding"]["evaluation_mode"] = terminal["evaluation_binding"].pop("mode")
             terminal["trajectory_binding"].pop("hdf5_validator")
+            report["target_contract"] = {
+                "model_kind": matrix.MODEL_KIND,
+                "seed": seed,
+                "hidden": matrix.HIDDEN,
+                "updates": matrix.UPDATES,
+                "case_id": matrix.CASE_ID,
+                "split": matrix.SPLIT,
+                "transitions": matrix.TRANSITIONS,
+                "frames": matrix.FRAMES,
+                "terminal_status": "completed",
+                "progress_or_pid_is_not_completion": True,
+            }
+            report["input_boundary"] = {
+                "bounded_training_json_opened": True,
+                "evaluation_json_opened": True,
+                "manifest_opened": False,
+                "case_hdf5_opened": False,
+                "checkpoint_opened": False,
+                "trajectory_hdf5_opened": False,
+                "progress_opened": False,
+                "runtime_started": False,
+                "solver_started": False,
+                "worker_started": False,
+                "gpu_started": False,
+                "queue_submissions": 0,
+            }
+            terminal["input_boundary"] = {
+                "manifest_opened": False,
+                "case_hdf5_opened": False,
+                "checkpoint_opened": False,
+                "trajectory_hdf5_opened": False,
+                "progress_opened": False,
+                "runtime_started": False,
+                "solver_started": False,
+                "worker_started": False,
+                "gpu_started": False,
+            }
+            for key in (
+                "seed",
+                "model_kind",
+                "hidden",
+                "updates",
+            ):
+                report.pop(key, None)
+            for key in (
+                "manifest_content_opened",
+                "case_hdf5_content_opened",
+                "checkpoint_content_opened",
+                "trajectory_content_opened",
+                "progress_content_opened",
+            ):
+                report["side_effects"].pop(key, None)
         return report
 
     prefix = (
@@ -502,6 +554,7 @@ def _real_seed29_runner_reports(tmp_path: Path) -> tuple[dict, dict]:
     )
     assert bound["status"] == "bound_terminal_diagnostic"
     assert pending["status"] == "diagnostic_launch_pending"
+    assert pending["seed29_terminal_receipt"] is None
     return bound, pending
 
 
@@ -667,6 +720,85 @@ def test_actual_seed29_runner_pending_and_bound_shapes_are_compatible(tmp_path: 
     assert seed29["status"] == "rejected"
     assert any("terminal" in reason or "status" in reason for reason in seed29["blocked_reasons"])
     assert matrix.validate_report(pending_matrix) == []
+
+
+def test_synthetic_bound_runner_shape_accepts_canonical_security_fields(
+    tmp_path: Path,
+) -> None:
+    paths = _write_sources(tmp_path)
+    runner_payload = json.loads(paths[29].read_text(encoding="utf-8"))
+    assert "manifest_content_opened" not in runner_payload["side_effects"]
+    assert "manifest_content_opened" not in runner_payload["input_boundary"]
+    assert "manifest_content_opened" not in runner_payload["seed29_terminal_receipt"]["side_effects"]
+
+    report = matrix.build_report(tmp_path, terminal_paths=paths)
+
+    assert report["source_bound"] is True
+    assert matrix.validate_report(report) == []
+
+
+@pytest.mark.parametrize("mutation", ["missing_target_contract", "wrong_nested_key"])
+def test_synthetic_runner_shape_requires_strict_outer_binding(
+    tmp_path: Path, mutation: str
+) -> None:
+    paths = _write_sources(tmp_path)
+    payload = json.loads(paths[29].read_text(encoding="utf-8"))
+    if mutation == "missing_target_contract":
+        payload.pop("target_contract")
+    else:
+        payload["terminal_receipt"] = payload.pop("seed29_terminal_receipt")
+    _write_json(paths[29], payload)
+
+    report = matrix.build_report(tmp_path, terminal_paths=paths)
+
+    assert report["source_bound"] is False
+    row = next(row for row in report["seed_matrix"] if row["seed"] == 29)
+    assert row["status"] == "rejected"
+    assert any(
+        "target_contract" in reason or "terminal_receipt" in reason
+        for reason in row["blocked_reasons"]
+    )
+
+
+@pytest.mark.parametrize("section", ["side_effects", "input_boundary"])
+def test_runner_nested_security_fields_remain_required(
+    tmp_path: Path, section: str
+) -> None:
+    paths = _write_sources(tmp_path)
+    payload = json.loads(paths[29].read_text(encoding="utf-8"))
+    payload["seed29_terminal_receipt"][section].pop("checkpoint_opened")
+    _write_json(paths[29], payload)
+
+    report = matrix.build_report(tmp_path, terminal_paths=paths)
+
+    assert report["source_bound"] is False
+    row = next(row for row in report["seed_matrix"] if row["seed"] == 29)
+    assert row["status"] == "rejected"
+    assert any(section in reason for reason in row["blocked_reasons"])
+
+
+def test_non_runner_completion_cannot_use_runner_canonical_security_fields(
+    tmp_path: Path,
+) -> None:
+    paths = _write_sources(tmp_path)
+    payload = json.loads(paths[43].read_text(encoding="utf-8"))
+    scope = payload["scope"]
+    for canonical, alias in (
+        ("manifest_opened", "manifest_content_opened"),
+        ("checkpoint_opened", "checkpoint_content_opened"),
+        ("progress_opened", "progress_content_opened"),
+    ):
+        scope[canonical] = scope.pop(alias)
+    scope["case_hdf5_opened"] = scope.pop("hdf5_content_opened")
+    scope["trajectory_hdf5_opened"] = False
+    _write_json(paths[43], payload)
+
+    report = matrix.build_report(tmp_path, terminal_paths=paths)
+
+    assert report["source_bound"] is False
+    row = next(row for row in report["seed_matrix"] if row["seed"] == 43)
+    assert row["status"] == "rejected"
+    assert any("manifest_content_opened" in reason for reason in row["blocked_reasons"])
 
 
 def test_seed29_runner_missing_checkpoint_update_is_schema_scoped(tmp_path: Path) -> None:
