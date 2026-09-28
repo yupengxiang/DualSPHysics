@@ -16,17 +16,36 @@ def _sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def test_receipts_are_hash_bound_and_current() -> None:
+def test_receipts_are_hash_bound_and_historical_immutable() -> None:
     card = audit.verify()
     assert card["schema"] == "core.third_t1.f1_f2_route_closed.candidate_card.v2"
+    assert card["version"] == "v2"
     assert card["status"] == "route_closed_no_new_hypothesis"
+    historical_completion = card["evidence"]["core_completion"]
+    current_completion = audit.LAB / "campaigns/core-v1/completion.json"
+    assert historical_completion["sha256"] == audit.V2_HISTORICAL_COMPLETION_SHA256
+    assert historical_completion["bytes"] == audit.V2_HISTORICAL_COMPLETION_BYTES
+    assert historical_completion["sha256"] != _sha256(current_completion)
+    historical_implementation = card["evidence"]["implementation"]
+    current_implementation = audit.LAB / historical_implementation["path"]
+    assert (
+        historical_implementation["sha256"]
+        == audit.V2_HISTORICAL_IMPLEMENTATION_SHA256
+    )
+    assert (
+        historical_implementation["bytes"]
+        == audit.V2_HISTORICAL_IMPLEMENTATION_BYTES
+    )
+    assert historical_implementation["sha256"] != _sha256(current_implementation)
     receipt = _load(audit.RECEIPT_OUTPUT)
     assert receipt["candidate_card"]["path"] == str(
         audit.CARD_OUTPUT.relative_to(audit.LAB)
     )
     assert receipt["candidate_card"]["bytes"] == audit.CARD_OUTPUT.stat().st_size
     assert receipt["candidate_card"]["sha256"] == _sha256(audit.CARD_OUTPUT)
-    for item in card["evidence"].values():
+    for key, item in card["evidence"].items():
+        if key in {"core_completion", "implementation"}:
+            continue
         path = audit.LAB / item["path"]
         assert path.is_file()
         assert path.stat().st_size == item["bytes"]

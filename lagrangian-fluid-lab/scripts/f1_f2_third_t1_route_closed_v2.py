@@ -22,6 +22,14 @@ CARD_OUTPUT = LAB / "campaigns/core-v1/cfd/f1-f2-third-t1-route-closed-v2.json"
 RECEIPT_OUTPUT = LAB / (
     "campaigns/core-v1/evidence/f1-f2-third-t1-route-decision-receipt-v2.json"
 )
+V2_HISTORICAL_COMPLETION_SHA256 = (
+    "c081c4e1f75fe2c04b2261ac8c07f1ab2a6d4ca4b2ef749578594117d88c5aa9"
+)
+V2_HISTORICAL_COMPLETION_BYTES = 2359
+V2_HISTORICAL_IMPLEMENTATION_SHA256 = (
+    "4254787df11d90a5daff6816980db862127717602760b76cab60be5150355954"
+)
+V2_HISTORICAL_IMPLEMENTATION_BYTES = 18426
 
 
 def sha256(path: Path) -> str:
@@ -438,10 +446,30 @@ def _write_json(path: Path, value: dict[str, Any]) -> None:
 
 
 def verify() -> dict[str, Any]:
+    """Verify the immutable v2 receipt without rebasing it onto current state."""
+
     card = json.loads(CARD_OUTPUT.read_text(encoding="utf-8"))
     receipt = json.loads(RECEIPT_OUTPUT.read_text(encoding="utf-8"))
-    expected = build_card()
-    assert card == expected
+    historical_completion = card["evidence"]["core_completion"]
+    current_completion = local("campaigns/core-v1/completion.json")
+    assert historical_completion["sha256"] == V2_HISTORICAL_COMPLETION_SHA256
+    assert historical_completion["bytes"] == V2_HISTORICAL_COMPLETION_BYTES
+    assert historical_completion["sha256"] != sha256(current_completion)
+    historical_implementation = card["evidence"]["implementation"]
+    assert historical_implementation["sha256"] == V2_HISTORICAL_IMPLEMENTATION_SHA256
+    assert historical_implementation["bytes"] == V2_HISTORICAL_IMPLEMENTATION_BYTES
+    assert historical_implementation["sha256"] != sha256(Path(__file__))
+
+    assert card["schema"] == "core.third_t1.f1_f2_route_closed.candidate_card.v2"
+    assert card["version"] == "v2"
+    assert card["status"] == "route_closed_no_new_hypothesis"
+    for key, item in card["evidence"].items():
+        if key in {"core_completion", "implementation"}:
+            continue
+        path = local(item["path"])
+        assert path.stat().st_size == item["bytes"]
+        assert sha256(path) == item["sha256"]
+
     expected_receipt = build_receipt(card)
     assert receipt == expected_receipt
     return card
