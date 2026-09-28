@@ -693,7 +693,7 @@ def evaluate_receipts(payloads: Mapping[str, Mapping[str, Any]], input_errors: S
             observed={
                 "observed_sidecar_count": sidecar_summary.get("observed_sidecar_count"),
                 "complete_sidecar_count": sidecar_summary.get("complete_sidecar_count"),
-                "case_statuses": {row["status"] for row in case_rows},
+                "case_statuses": sorted({row["status"] for row in case_rows}),
             },
             expected={"observed_sidecar_count": CASE_COUNT, "complete_sidecar_count": CASE_COUNT},
             blocker="missing_or_incomplete_32_case_sidecars",
