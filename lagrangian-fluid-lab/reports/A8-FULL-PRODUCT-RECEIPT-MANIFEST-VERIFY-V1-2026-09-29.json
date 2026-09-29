@@ -1,0 +1,80 @@
+{
+  "schema": "core.a8.full_product_receipt_manifest_verify_report.v1",
+  "version": "a8-full-product-receipt-manifest-verify-v1",
+  "report_id": "a8-full-product-receipt-manifest-verify-2026-09-29",
+  "status": "verified_diagnostic_only",
+  "input_origin": "synthetic_fixture",
+  "scope": "Package-level exact binding of a full-product receipt to manifest, reader, prediction, and scoring artifacts.",
+  "verification": {
+    "manifest_receipt_exact": true,
+    "reader_exact": true,
+    "prediction_exact": true,
+    "scoring_exact": true,
+    "reader_prediction_scoring_chain_complete": true,
+    "host_identity_distinct": true,
+    "data_root_distinct": true,
+    "dedicated_pytest": {
+      "test_file": "tests/test_a8_full_product_receipt_manifest_verify_v1.py",
+      "passed": 14
+    },
+    "py_compile": true,
+    "json_verify": true,
+    "git_diff_check": true
+  },
+  "rejection_coverage": [
+    "receipt artifact map drift",
+    "reader/prediction/scoring chain digest drift",
+    "full-product authority mutation",
+    "independent-reproduction authority mutation",
+    "checkpoint mutation",
+    "credit mutation",
+    "unknown caller self-claim",
+    "duplicate host identity",
+    "duplicate physical-host identity",
+    "duplicate data-root identity",
+    "artifact digest/byte drift",
+    "artifact host/data-root drift",
+    "missing scoring role"
+  ],
+  "non_authorizing_boundary": {
+    "diagnostic_only": true,
+    "full_product_reproduction": false,
+    "independent_reproduction": false,
+    "checkpoint": 0,
+    "credit": 0,
+    "formal_admission": false,
+    "qualification_credit": 0,
+    "trusted_root_authenticated": false,
+    "external_host_attested": false
+  },
+  "execution_constraints": {
+    "read_only": true,
+    "synthetic_fixture_only": true,
+    "production_bundle_read": false,
+    "large_asset_read": false,
+    "workload_started": false,
+    "solver_started": false,
+    "worker_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "root_or_privileged_execution": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "completion_mutation": 0
+  },
+  "remaining_external_blockers": [
+    "trusted root attestation is still absent",
+    "independently attested external reproduction host is still absent",
+    "real full-product terminal receipt is still absent",
+    "formal checkpoint provenance and qualification evidence are still absent"
+  ],
+  "historical_preservation": {
+    "projection_hardening_commits_rewritten": false,
+    "historical_receipts_rewritten": false,
+    "existing_bridge_or_preflight_modified": false,
+    "plan_modified": false
+  },
+  "interpretation": "This verifies only a synthetic package-level manifest/receipt/artifact boundary. It does not verify a production bundle, run a workload, prove independent reproduction, or mint Core credit."
+}

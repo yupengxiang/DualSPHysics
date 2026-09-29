@@ -1,0 +1,110 @@
+{
+  "schema": "core.a8.full_product_receipt_manifest_verify_campaign.v1",
+  "version": 1,
+  "campaign_id": "a8-full-product-receipt-manifest-verify-v1",
+  "input_origin": "synthetic_fixture",
+  "objective": "Bind one full-product receipt exactly to a package manifest and reader/prediction/scoring artifacts.",
+  "verifier": {
+    "script": "scripts/a8_full_product_receipt_manifest_verify_v1.py",
+    "schema": "core.a8.full_product_receipt_manifest_verify.v1",
+    "report_schema": "core.a8.full_product_receipt_manifest_verify_report.v1",
+    "bounded_json_bytes": 262144,
+    "production_bundle_read": false,
+    "large_asset_hashes_read": false
+  },
+  "package_contract": {
+    "manifest_schema": "core.a8.full_product_package_manifest.v1",
+    "receipt_schema": "core.a8.full_product_receipt.v1",
+    "roles": ["reader", "prediction", "scoring"],
+    "exact_run_binding": [
+      "package_id",
+      "case_id",
+      "attempt_id",
+      "nonce",
+      "package_sha256"
+    ],
+    "exact_identity_binding": [
+      "host_id",
+      "physical_host_id",
+      "data_root"
+    ],
+    "exact_artifact_binding": [
+      "role",
+      "path",
+      "sha256",
+      "bytes",
+      "schema",
+      "package_id",
+      "case_id",
+      "attempt_id",
+      "nonce",
+      "host_id",
+      "physical_host_id",
+      "data_root",
+      "package_sha256"
+    ],
+    "chain": [
+      "reader_artifact_sha256",
+      "prediction_reader_input_sha256",
+      "prediction_artifact_sha256",
+      "scoring_reader_input_sha256",
+      "scoring_prediction_input_sha256",
+      "scoring_artifact_sha256"
+    ]
+  },
+  "fail_closed_policy": {
+    "input_origin": "synthetic_fixture",
+    "diagnostic_only": true,
+    "full_product_reproduction": false,
+    "independent_reproduction": false,
+    "checkpoint": 0,
+    "credit": 0,
+    "unknown_fields": "reject",
+    "caller_self_claims": "reject",
+    "authority_mutation": "reject",
+    "duplicate_host_identity": "reject",
+    "duplicate_physical_host_identity": "reject",
+    "duplicate_data_root": "reject",
+    "duplicate_artifact_path_or_digest": "reject",
+    "manifest_receipt_map_drift": "reject",
+    "reader_prediction_scoring_chain_drift": "reject"
+  },
+  "synthetic_fixture": {
+    "fixture_is_created_under_pytest_tmp_path": true,
+    "logical_source_host_id": "source-host-001",
+    "logical_reproduction_host_id": "reproduction-host-001",
+    "logical_source_data_root": "/synthetic/source-001",
+    "logical_reproduction_data_root": "/synthetic/reproduction-001",
+    "artifact_roles": ["reader", "prediction", "scoring"],
+    "persistent_production_paths": false
+  },
+  "execution_constraints": {
+    "read_only": true,
+    "workload_started": false,
+    "solver_started": false,
+    "worker_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "root_or_privileged_execution": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "completion_mutation": 0
+  },
+  "expected_result": {
+    "structural_package_binding": true,
+    "formal_training": false,
+    "formal_admission": false,
+    "full_product_reproduction": false,
+    "independent_reproduction": false,
+    "credit": 0
+  },
+  "allowed_write_set": [
+    "scripts/a8_full_product_receipt_manifest_verify_v1.py",
+    "tests/test_a8_full_product_receipt_manifest_verify_v1.py",
+    "campaigns/core-v1/reproduction/a8-full-product-receipt-manifest-verify-v1.json",
+    "reports/A8-FULL-PRODUCT-RECEIPT-MANIFEST-VERIFY-V1-2026-09-29.json",
+    "reports/A8-FULL-PRODUCT-RECEIPT-MANIFEST-VERIFY-V1-2026-09-29.zh-CN.md"
+  ]
+}
