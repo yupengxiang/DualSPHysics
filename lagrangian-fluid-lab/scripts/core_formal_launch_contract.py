@@ -121,28 +121,113 @@ def _code_closure(root: Path, code_root: Path) -> dict[str, Any]:
     }
 
 
+def _valid_sha256(value: Any) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(char in "0123456789abcdefABCDEF" for char in value)
+    )
+
+
+def _closure_digest(rows: Sequence[Mapping[str, Any]]) -> str:
+    return sha256_bytes(canonical([
+        {"relative_path": row["relative_path"], "sha256": row["sha256"]}
+        for row in rows
+    ]).encode())
+
+
+def _normalized_closure_rows(payload: Mapping[str, Any], required: Sequence[str], *,
+                             snapshot: bool) -> tuple[list[dict[str, Any]], list[str]]:
+    expected = list(required)
+    errors: list[str] = []
+    if payload.get("required_files") != expected:
+        errors.append("required_files")
+    if snapshot:
+        if not isinstance(payload.get("schema"), str) or not payload["schema"].startswith(
+                "core.formal_source_closure."):
+            errors.append("schema")
+        if not isinstance(payload.get("closure_version"), str) or not payload["closure_version"]:
+            errors.append("closure_version")
+        if payload.get("hash_algorithm") != "sha256":
+            errors.append("hash_algorithm")
+        if payload.get("complete") is not True:
+            errors.append("complete")
+        if payload.get("missing_files") != []:
+            errors.append("missing_files")
+        if "required_file_count" in payload and payload.get("required_file_count") != len(expected):
+            errors.append("required_file_count")
+    rows = payload.get("files")
+    normalized: list[dict[str, Any]] = []
+    if not isinstance(rows, list):
+        errors.append("files")
+        return normalized, errors
+    if len(rows) != len(expected):
+        errors.append("file_count")
+    for index, expected_name in enumerate(expected):
+        if index >= len(rows):
+            break
+        row = rows[index]
+        if not isinstance(row, Mapping):
+            errors.append(f"files[{index}]")
+            continue
+        if row.get("relative_path") != expected_name:
+            errors.append(f"files[{index}].relative_path")
+        sha256 = row.get("sha256")
+        byte_count = row.get("bytes")
+        if not _valid_sha256(sha256):
+            errors.append(f"files[{index}].sha256")
+        if type(byte_count) is not int or byte_count < 0:
+            errors.append(f"files[{index}].bytes")
+        normalized.append({
+            "relative_path": row.get("relative_path"),
+            "sha256": sha256.lower() if isinstance(sha256, str) else sha256,
+            "bytes": byte_count,
+        })
+    if snapshot:
+        declared_closure = payload.get("closure_sha256")
+        if not _valid_sha256(declared_closure):
+            errors.append("closure_sha256")
+        elif not errors and declared_closure.lower() != _closure_digest(normalized):
+            errors.append("closure_sha256")
+    return normalized, errors
+
+
 def _snapshot_comparison(current: Mapping[str, Any], snapshot: Mapping[str, Any],
                          reference: Mapping[str, Any]) -> dict[str, Any]:
-    rows = snapshot.get("files")
-    if not isinstance(rows, list):
-        rows = snapshot.get("required_files", [])
-    old = {}
-    if isinstance(rows, list):
-        for row in rows:
-            if isinstance(row, Mapping):
-                name = row.get("relative_path", row.get("path"))
-                digest = row.get("sha256")
-                if isinstance(name, str) and isinstance(digest, str):
-                    old[name] = digest
-    now = {item["relative_path"]: item["sha256"] for item in current.get("files", ())}
-    mismatch = sorted(name for name in set(old) | set(now) if old.get(name) != now.get(name))
+    required = current.get("required_files")
+    required = list(required) if isinstance(required, list) else []
+    current_rows, current_errors = _normalized_closure_rows(current, required, snapshot=False)
+    snapshot_required = snapshot.get("required_files")
+    snapshot_required = list(snapshot_required) if isinstance(snapshot_required, list) else []
+    snapshot_rows, snapshot_errors = _normalized_closure_rows(
+        snapshot, snapshot_required, snapshot=True
+    )
+    old = {row["relative_path"]: row["sha256"] for row in snapshot_rows
+           if isinstance(row.get("relative_path"), str)}
+    now = {row["relative_path"]: row["sha256"] for row in current_rows
+           if isinstance(row.get("relative_path"), str)}
+    mismatch = sorted(name for name in set(old) | set(now)
+                      if old.get(name) != now.get(name))
+    snapshot_closure = snapshot.get("closure_sha256")
+    current_closure = current.get("closure_sha256")
+    matches_current = (
+        not current_errors
+        and not snapshot_errors
+        and snapshot_required == required
+        and snapshot_rows == current_rows
+        and isinstance(snapshot_closure, str)
+        and isinstance(current_closure, str)
+        and snapshot_closure.lower() == current_closure.lower()
+    )
     return {
         "snapshot": dict(reference),
         "snapshot_closure_sha256": snapshot.get("closure_sha256"),
         "current_closure_sha256": current.get("closure_sha256"),
         "mismatch_files": mismatch,
-        "matches_current": bool(old) and not mismatch and set(old) == set(now),
-        "fresh_snapshot_required": bool(mismatch),
+        "snapshot_integrity_valid": not snapshot_errors,
+        "snapshot_integrity_errors": snapshot_errors,
+        "matches_current": matches_current,
+        "fresh_snapshot_required": not matches_current,
     }
 
 

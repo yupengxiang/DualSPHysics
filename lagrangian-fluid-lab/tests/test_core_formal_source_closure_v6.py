@@ -5,9 +5,11 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import pytest
 
 from scripts.core_formal_source_closure_admission_v6 import (
     REQUIRED_CODE_FILES,
+    _snapshot_comparison,
     _readiness_gates,
     verify_admission,
     verify_source_closure,
@@ -184,3 +186,44 @@ def test_v6_resource_frontier_requires_explicit_capacity_evidence() -> None:
     }
     gates = _readiness_gates(readiness)
     assert gates["resource_frontier"]["passed"] is True
+
+
+@pytest.mark.parametrize("mutation, expected_error", [
+    (lambda snapshot: snapshot.update(
+        files=[snapshot["files"][0], snapshot["files"][0], snapshot["files"][1]]
+    ), "file_count"),
+    (lambda snapshot: snapshot.update(closure_sha256="0" * 64), "closure_sha256"),
+])
+def test_v6_historical_snapshot_integrity_rejects_duplicate_rows_and_bad_closure(
+        mutation, expected_error) -> None:
+    rows = [
+        {"relative_path": "scripts/a.py", "sha256": "a" * 64, "bytes": 1},
+        {"relative_path": "scripts/b.py", "sha256": "b" * 64, "bytes": 2},
+    ]
+    closure_sha256 = hashlib.sha256(json.dumps([
+        {"relative_path": row["relative_path"], "sha256": row["sha256"]}
+        for row in rows
+    ], sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+    current = {
+        "required_files": [row["relative_path"] for row in rows],
+        "files": rows,
+        "closure_sha256": closure_sha256,
+    }
+    snapshot = {
+        "schema": "core.formal_source_closure.v1",
+        "closure_version": "test",
+        "hash_algorithm": "sha256",
+        "required_files": list(current["required_files"]),
+        "files": [dict(row) for row in rows],
+        "missing_files": [],
+        "complete": True,
+        "closure_sha256": closure_sha256,
+    }
+    mutation(snapshot)
+
+    comparison = _snapshot_comparison(current, snapshot, {"path": "snapshot.json"})
+
+    assert comparison["matches_current"] is False
+    assert comparison["fresh_snapshot_required"] is True
+    assert comparison["snapshot_integrity_valid"] is False
+    assert expected_error in comparison["snapshot_integrity_errors"]

@@ -7,7 +7,14 @@ import json
 from pathlib import Path
 import pytest
 
-from scripts.core_formal_launch_contract import _load_json, build_contract, main
+from scripts.core_formal_launch_contract import (
+    _load_json,
+    _snapshot_comparison,
+    build_contract,
+    canonical,
+    main,
+    sha256_bytes,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -117,3 +124,45 @@ def test_contract_without_source_closure_stays_blocked() -> None:
     assert contract["gate_evaluation"]["fresh_source_closure"] is False
     assert any("source closure" in blocker for blocker in contract["blockers"])
     assert contract["launch_allowed"] is False
+
+
+@pytest.mark.parametrize("mutation, expected_error", [
+    (lambda snapshot: snapshot.update(
+        files=[snapshot["files"][0], snapshot["files"][0], snapshot["files"][1]]
+    ), "file_count"),
+    (lambda snapshot: snapshot.update(closure_sha256="0" * 64), "closure_sha256"),
+])
+def test_snapshot_comparison_rejects_duplicate_rows_and_bad_closure_hash(
+        mutation, expected_error) -> None:
+    rows = [
+        {"relative_path": "scripts/a.py", "sha256": "a" * 64, "bytes": 1},
+        {"relative_path": "scripts/b.py", "sha256": "b" * 64, "bytes": 2},
+    ]
+    current = {
+        "required_files": [row["relative_path"] for row in rows],
+        "files": rows,
+        "missing_files": [],
+        "complete": True,
+        "closure_sha256": sha256_bytes(canonical([
+            {"relative_path": row["relative_path"], "sha256": row["sha256"]}
+            for row in rows
+        ]).encode()),
+    }
+    snapshot = {
+        "schema": "core.formal_source_closure.v1",
+        "closure_version": "test",
+        "hash_algorithm": "sha256",
+        "required_files": list(current["required_files"]),
+        "files": [dict(row) for row in rows],
+        "missing_files": [],
+        "complete": True,
+        "closure_sha256": current["closure_sha256"],
+    }
+    mutation(snapshot)
+
+    comparison = _snapshot_comparison(current, snapshot, {"path": "snapshot.json"})
+
+    assert comparison["matches_current"] is False
+    assert comparison["fresh_snapshot_required"] is True
+    assert comparison["snapshot_integrity_valid"] is False
+    assert expected_error in comparison["snapshot_integrity_errors"]
