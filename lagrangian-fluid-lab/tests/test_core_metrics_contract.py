@@ -12,6 +12,8 @@ from scripts.core_metrics_contract import (
     DEFAULT_CONTRACT,
     DEFAULT_RECEIPT,
     FIXTURE_SCHEMA,
+    HISTORICAL_CONTRACT,
+    HISTORICAL_RECEIPT,
     METRIC_DEFINITIONS,
     _synthetic_fixture,
     evaluate_fixture,
@@ -40,6 +42,14 @@ def test_committed_planning_receipt_is_hash_bound_and_zero_credit() -> None:
     assert receipt["credit"] == 0
     assert receipt["synthetic_report"]["status"] == "evaluated"
     assert receipt["synthetic_report"]["negative_result"] is True
+
+
+def test_historical_planning_bundle_is_preserved_but_stale_against_current_source() -> None:
+    assert HISTORICAL_CONTRACT.is_file()
+    assert HISTORICAL_RECEIPT.is_file()
+    report = verify_receipt(HISTORICAL_RECEIPT, root=ROOT, contract_path=HISTORICAL_CONTRACT)
+    assert report["ok"] is False
+    assert any(item.startswith("contract.source_closure.source_bindings[") for item in report["mismatches"])
 
 
 def test_synthetic_fixture_uses_fixed_denominators_and_no_renormalization() -> None:
