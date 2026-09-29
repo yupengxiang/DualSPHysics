@@ -1,0 +1,200 @@
+{
+  "schema": "ds-data-01.d07.evaluator-contract.v1",
+  "task": "D07",
+  "title": "model-free benchmark interface contract",
+  "status": "contract_only",
+  "scope": {
+    "purpose": "Define a read-only interface for aligning and comparing native HDF5 or CSV particle trajectories without a model, optimizer, checkpoint, solver, or GPU.",
+    "reference_is_not_external_ground_truth": true,
+    "scientific_acceptance_default": "not_assessed",
+    "scientific_acceptance_reason": "A numerical reference trajectory or a D03 internal mechanism card does not constitute an external measurement or independently authenticated ground truth.",
+    "allowed_operations": [
+      "read HDF5 trajectory datasets and metadata",
+      "read DualSPHysics PartVTK frame CSV files or long-form trajectory CSV",
+      "align common identities and saved times",
+      "apply valid lifecycle masks",
+      "compute native trajectory observables and reference-agreement diagnostics",
+      "run synthetic/unit tests in a temporary directory"
+    ],
+    "forbidden_operations": [
+      "training",
+      "inference or rollout",
+      "checkpoint loading or replay",
+      "DualSPHysics, GenCase, PartVTK, or solver launch",
+      "GPU allocation",
+      "external ground-truth qualification",
+      "writing benchmark artifacts unless an explicit caller output path is supplied"
+    ]
+  },
+  "source_alignment": {
+    "core_benchmark": {
+      "path": "lagrangian-fluid-lab/scripts/core_benchmark.py",
+      "adopted_contracts": [
+        "read-only inspection and verification are distinct from learning phases",
+        "registered time axes are explicit and missing frames are not silently removed",
+        "particle identity and valid lifecycle state are part of the trajectory contract",
+        "source inspection does not imply scientific qualification"
+      ],
+      "not_called_by_d07": ["train", "rollout", "evaluate", "reproduce"]
+    },
+    "trajectory_protocol": {
+      "path": "lagrangian-fluid-lab/protocol/trajectory-v0.1.md",
+      "adopted_contracts": [
+        "SI-valued time, position, velocity, density, pressure, mass, type, and mk fields when present",
+        "strictly increasing finite time axis",
+        "(particle_zone, particle_id) numerical identity",
+        "explicit valid[T,N] mask; invalid values are never interpreted as physical zero",
+        "open lifecycle and numerical loss remain observable rather than normalized away"
+      ]
+    },
+    "d03_reference_cards": {
+      "path": "lagrangian-fluid-lab/campaigns/ds-data-01/D03_REFERENCE_CARDS.json",
+      "read_only_context": true,
+      "accepted_fields": ["case_id", "family", "scope_decision", "mechanism_observables", "q_e_status", "scientific_acceptance"],
+      "scope_effect": "A card with diagnostic_open_lifecycle selects open-lifecycle reporting; exclude_from_core and calibration_only remain diagnostic labels. The card never upgrades scientific acceptance."
+    }
+  },
+  "trajectory_input": {
+    "api": "load_trajectory(source)",
+    "source_forms": [
+      "HDF5 file (.h5 or .hdf5)",
+      "directory containing PartVTK frame CSV files named Particles_*.csv",
+      "directory or file containing long-form trajectory CSV with time and particle identity columns"
+    ],
+    "hdf5": {
+      "required_datasets": {
+        "time": "[T] finite and strictly increasing",
+        "particle_id": "[N] integer identity axis",
+        "particle_zone": "[N] integer zone axis; zero is allowed",
+        "valid": "[T,N] binary lifecycle mask",
+        "position": "[T,N,3] SI position",
+        "velocity": "[T,N,3] SI native velocity"
+      },
+      "optional_native_datasets": {
+        "density": "[T,N]",
+        "pressure": "[T,N]",
+        "mass": "[N] or [T,N]",
+        "type": "[N] or [T,N]",
+        "mk": "[N] or [T,N]"
+      },
+      "identity": "Use (particle_zone, particle_id) internally even when identity_key declares particle_id; duplicate tuples are invalid.",
+      "invalid_payload": "Values under valid=false may be NaN or fill values and are ignored. Values under valid=true must be finite for required numeric fields."
+    },
+    "csv": {
+      "partvtk_frame": {
+        "layout": "three-line header followed by particle rows",
+        "time": "first numeric value on the summary row before the particle header",
+        "required_columns": ["Pos.x [m]", "Pos.y [m]", "Pos.z [m]", "Idp", "Vel.x [m/s]", "Vel.y [m/s]", "Vel.z [m/s]"],
+        "optional_columns": ["Zone", "Rhop [kg/m^3]", "Mass [kg]", "Press [Pa]", "Type", "Mk"],
+        "default_zone": 0,
+        "default_valid": true
+      },
+      "long_form": {
+        "required_columns": ["time", "particle_id", "position_x", "position_y", "position_z", "velocity_x", "velocity_y", "velocity_z"],
+        "accepted_aliases": "The evaluator accepts the equivalent PartVTK names and common snake_case names.",
+        "optional_columns": ["particle_zone", "valid", "density", "pressure", "mass", "type", "mk"],
+        "grouping": "Rows are grouped by finite time; identity rows may be absent at a frame and become valid=false."
+      },
+      "time_axis": "All parsed CSV frames are sorted by time only after checking that times are finite and unique; the resulting axis must be strictly increasing."
+    },
+    "metadata": {
+      "preserved_root_attributes": true,
+      "missing_protocol_attributes": "Reported as metadata warnings; they do not change a trajectory into scientific ground truth.",
+      "case_id": "Read from HDF5 case_id when present; otherwise source stem.",
+      "family": "Read from HDF5 family or D03 card when present; otherwise null."
+    }
+  },
+  "alignment": {
+    "api": "align_trajectories(reference, candidate, time_tolerance_s=1e-6)",
+    "identity": {
+      "key": "(particle_zone, particle_id)",
+      "operation": "Set intersection; report reference-only and candidate-only identities separately.",
+      "no_relabeling": true,
+      "no_set_matching": "Spatial proximity or unordered point-set matching cannot create identity matches."
+    },
+    "time": {
+      "operation": "One-to-one nearest saved-time matching within an absolute tolerance.",
+      "default_tolerance_s": 1e-6,
+      "interpolation": false,
+      "dropped_frames": "Explicitly reported on both sides; no denominator is silently shrunk after an unmatched frame."
+    },
+    "lifecycle": {
+      "mask_name": "valid",
+      "state_metric_mask": "reference.valid[frame, common_id] AND candidate.valid[frame, common_id]",
+      "invalid_values": "Never scored, imputed, or interpreted as zero.",
+      "open_lifecycle": "Reference-only, candidate-only, common-active, active-count, active-mass, and mask-disagreement summaries are reported separately.",
+      "closed_lifecycle": "A caller may require identical complete masks, but the default evaluator remains diagnostic and still reports the intersection if masks differ.",
+      "mass_policy": "Use native mass values on active identities; do not renormalize surviving mass to one."
+    },
+    "output": [
+      "frame_pairs",
+      "common_identity_count",
+      "reference_only_identity_count",
+      "candidate_only_identity_count",
+      "common_active_count_by_frame",
+      "reference_only_active_count_by_frame",
+      "candidate_only_active_count_by_frame",
+      "dropped_reference_frames",
+      "dropped_candidate_frames"
+    ]
+  },
+  "native_observables": {
+    "api": "native_observables(trajectory)",
+    "principle": "Observables are derived only from fields present in the native trajectory; absence is null/diagnostic rather than fabricated.",
+    "registry": {
+      "active_particle_count": {"source": "valid", "aggregation": "count(valid)"},
+      "active_mass": {"source": "mass + valid", "aggregation": "sum(mass[valid])", "requires": ["mass"]},
+      "centroid": {"source": "position + valid + mass when available", "aggregation": "mass-weighted centroid; arithmetic fallback is disclosed", "requires": ["position"]},
+      "max_speed": {"source": "velocity + valid", "aggregation": "max(norm(velocity))"},
+      "density_range": {"source": "density + valid", "aggregation": "min/max", "requires": ["density"]},
+      "pressure_range": {"source": "pressure + valid", "aggregation": "min/max", "requires": ["pressure"]}
+    },
+    "comparison": "For aligned frames, emit per-observable count, MAE, RMSE, maximum absolute error, and per-frame values. These are reference-agreement diagnostics, not scientific acceptance."
+  },
+  "score_interface": {
+    "api": "score_trajectories(reference, candidate, time_tolerance_s=1e-6, dp=None, reference_card=None)",
+    "metrics": {
+      "particle_state": ["position_rmse_m", "position_mae_m", "velocity_rmse_m_per_s", "velocity_mae_m_per_s"],
+      "normalization": "position_rmse_over_dp is emitted only when dp is explicitly supplied; no inferred dp is used.",
+      "lifecycle": ["mask_disagreement_fraction", "active_count_mae", "active_mass_mae_kg", "identity_overlap_fraction"],
+      "native_observable_agreement": "Per-observable scalar/vector error summaries from the registry."
+    },
+    "missingness": "A metric with no comparable finite samples is null with status insufficient_common_active; it is not zero.",
+    "scientific_acceptance": {
+      "status": "not_assessed",
+      "emitted": false,
+      "required_external_inputs_for_future_assessment": ["independent measurement or authenticated external ground truth", "declared validation_scope", "units and uncertainty", "case-level acceptance rule"],
+      "current_reason_code": "NO_EXTERNAL_GROUND_TRUTH"
+    },
+    "execution_guards": {
+      "training_started": false,
+      "inference_started": false,
+      "checkpoint_read": false,
+      "solver_started": false,
+      "gpu_started": false
+    }
+  },
+  "cli": {
+    "script": "lagrangian-fluid-lab/scripts/ds_data01_d07_evaluator.py",
+    "commands": {
+      "contract": "--contract",
+      "inspect": "inspect --input PATH [--reference-cards PATH]",
+      "score": "score --reference PATH --candidate PATH [--time-tolerance-s FLOAT] [--dp FLOAT] [--reference-cards PATH]",
+      "synthetic_test": "synthetic-test"
+    },
+    "stdout": "JSON metadata or diagnostic result; errors are nonzero and written to stderr.",
+    "default_write_behavior": "No repository output is written. An explicit caller-owned output option may be added later without changing the read/align/score semantics."
+  },
+  "verification": {
+    "static": "python -m py_compile lagrangian-fluid-lab/scripts/ds_data01_d07_evaluator.py",
+    "synthetic": "lagrangian-fluid-lab/.venv/bin/python lagrangian-fluid-lab/scripts/ds_data01_d07_evaluator.py synthetic-test",
+    "synthetic_assertions": [
+      "cross-format HDF5 reference and PartVTK CSV candidate load successfully",
+      "common identity and one-to-one time alignment are explicit",
+      "open lifecycle masks exclude invalid payloads and expose mask disagreement",
+      "native observables are present when source fields are present",
+      "scientific_acceptance.status remains not_assessed without external ground truth",
+      "no solver, GPU, training, inference, or checkpoint path is called"
+    ]
+  }
+}
