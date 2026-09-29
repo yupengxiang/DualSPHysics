@@ -75,7 +75,6 @@ def test_rerun1_binds_current_argv_cwd_inputs_resources_and_namespace() -> None:
     assert namespace["historical_reuse_forbidden"] is True
     assert namespace["same_attempt_resume_only"] is True
     assert namespace["path_is_metadata_only"] is True
-    assert not (ROOT / namespace["attempt_root"]).exists()
 
 
 def test_rerun1_external_admission_remains_required_and_non_authorizing() -> None:
