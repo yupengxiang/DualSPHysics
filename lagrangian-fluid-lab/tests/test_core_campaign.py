@@ -768,6 +768,24 @@ def test_changed_evidence_rejected(tmp_path):
         load_evidence({"path": "report.json", "irrelevant": 1}, tmp_path)
 
 
+def test_evidence_hash_and_parse_use_the_same_bytes(tmp_path, monkeypatch):
+    path = tmp_path / "report.json"
+    original = {"passed": True}
+    replacement = {"passed": False}
+    atomic_json(path, original)
+    reference = {"path": path.name, "sha256": digest(path)}
+
+    original_digest = campaign.digest
+
+    def digest_then_replace(candidate):
+        observed = original_digest(candidate)
+        path.write_text(json.dumps(replacement), encoding="utf-8")
+        return observed
+
+    monkeypatch.setattr(campaign, "digest", digest_then_replace)
+    assert load_evidence(reference, tmp_path) == original
+
+
 def test_small_training_attempt_cannot_count_as_formal_training(tmp_path):
     path = tmp_path / "run.json"
     atomic_json(path, {"schema": "core.training.v1", "run_id": "graph_raw-seed17",

@@ -18,9 +18,11 @@ import subprocess
 try:
     from scripts.core_runtime import atomic_json, canonical, digest
     from scripts.core_material_acceptance import validate_source_coverage
+    from scripts.core_strict_json import read_bounded_json_object
 except ModuleNotFoundError:
     from core_runtime import atomic_json, canonical, digest
     from core_material_acceptance import validate_source_coverage
+    from core_strict_json import read_bounded_json_object
 
 LAB = Path(__file__).resolve().parents[1]
 ROOT = LAB / "campaigns/core-v1"
@@ -134,9 +136,10 @@ def load_evidence(reference, data_root):
             or not isinstance(reference["sha256"], str)):
         raise ValueError("a hashed evidence reference is required")
     path = _rooted_path(reference["path"], data_root, "evidence")
-    if digest(path) != reference["sha256"]:
+    payload, _, observed_sha256 = read_bounded_json_object(path, label="evidence")
+    if observed_sha256.lower() != reference["sha256"].lower():
         raise ValueError("evidence hash mismatch: " + str(Path(reference["path"])))
-    return json.loads(path.read_text())
+    return payload
 
 
 def _contract_evidence_reference(name, registry, data_root):
