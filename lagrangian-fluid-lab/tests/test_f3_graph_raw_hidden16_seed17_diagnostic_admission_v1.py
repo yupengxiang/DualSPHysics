@@ -214,9 +214,9 @@ def test_report_is_receipt_bound_but_never_formal(tmp_path: Path) -> None:
         resource_admission=fixture["resource"],
     )
     assert admission.validate_report(report) == []
-    assert report["status"] == "receipt_bound_admission_ready"
-    assert report["admission_granted"] is True
-    assert report["receipt_bound_capability_issued"] is True
+    assert report["status"] == "blocked_fail_closed"
+    assert report["admission_granted"] is False
+    assert report["receipt_bound_capability_issued"] is False
     assert report["diagnostic_execute_only"] is True
     assert report["diagnostic_execute_allowed"] is False
     assert report["execution_capability_admitted"] is False
@@ -224,6 +224,7 @@ def test_report_is_receipt_bound_but_never_formal(tmp_path: Path) -> None:
     assert report["credit"] == 0
     assert report["formal_state_touched"] is False
     assert report["popen_attempted"] is False
+    assert len(report["blocked_reasons"]) == 3
 
 
 def test_gpu_mapping_environment_and_executable_snapshot_are_bound(tmp_path: Path) -> None:

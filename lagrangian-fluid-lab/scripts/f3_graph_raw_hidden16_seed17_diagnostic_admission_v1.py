@@ -1519,9 +1519,9 @@ def build_report(
         report = {
             "schema": REPORT_SCHEMA,
             "report_id": REPORT_ID,
-            "status": "receipt_bound_admission_ready",
-            "admission_granted": True,
-            "receipt_bound_capability_issued": True,
+            "status": "blocked_fail_closed",
+            "admission_granted": False,
+            "receipt_bound_capability_issued": False,
             "diagnostic_execute_only": True,
             "diagnostic_execute_allowed": False,
             "execution_capability_admitted": False,
@@ -1546,7 +1546,11 @@ def build_report(
             "gate_writes": 0,
             "completion_writes": 0,
             "plan_writes": 0,
-            "blocked_reasons": [],
+            "blocked_reasons": [
+                "terminal Popen/wait and artifact proof are not admitted",
+                "production HDF5 link inventory and validator proof are not admitted",
+                "formal/credit promotion requires an external Core gate and ledger",
+            ],
             **ZERO_CREDIT,
         }
         return report
