@@ -5,26 +5,26 @@
   "audit_mode": "independent_read_only_static_ast_security_reaudit",
   "audited_files": [
     {
-      "bytes": 75877,
+      "bytes": 104261,
       "content_opened": true,
       "dev": 2081,
       "ino": 318714907,
-      "mtime_ns": 1790641797656516680,
+      "mtime_ns": 1790643235018776472,
       "nlink": 1,
       "path": "scripts/f3_graph_raw_hidden16_seed17_diagnostic_admission_v1.py",
       "role": "admission_v1_after_p1_fixes",
-      "sha256": "d7c9260bb969854170d5c0f1674f7c9b893750c0f07cdbcb392f91b1897f1240"
+      "sha256": "af902813a127129788ad035d6b2feff90ef2260a4d9e1ccd40921fc07c09f13a"
     },
     {
-      "bytes": 70485,
+      "bytes": 91779,
       "content_opened": true,
       "dev": 2081,
       "ino": 318714909,
-      "mtime_ns": 1790641805935269687,
+      "mtime_ns": 1790643103084135299,
       "nlink": 1,
       "path": "scripts/f3_graph_raw_hidden16_seed17_diagnostic_runner_v2.py",
       "role": "runner_v2_after_p1_fixes",
-      "sha256": "e4d19e9392ed01183d7d0fe1bdc79d4ff7c3b52f469bebbfb611502cb31c4c18"
+      "sha256": "86d86019decfb0f66c42d71766046b1ecedfba353e2d65d8ce2a9a4aeb20576e"
     },
     {
       "bytes": 60092,
@@ -61,11 +61,11 @@
     }
   ],
   "blocked_reasons": [
-    "external one-shot replay consumption is not attested by a scheduler-owned authority",
-    "owner/inode/nonce and GPU identity fields remain caller-shaped without an external attestation token",
-    "launcher preflight and evaluator output publication are not one descriptor-reserved path boundary",
-    "live GPU UUID/PCI and child logical-device identity are not observed",
-    "terminal proof remains external and was intentionally not executed by this audit"
+    "signed external scheduler authority and local one-shot claim protocol are source-present, but no production scheduler-owned trust anchor/consume witness was supplied",
+    "launcher preflight uses bounded stable reads, but the exact RolloutPlan file digests are not compared with the later admission reread",
+    "evaluator outputs are O_EXCL-reserved, but the pathname-only core child lacks descriptor-bound publication and is therefore blocked before Popen",
+    "GPU UUID/PCI live-probe and child-attestation controls are source-present but no runtime observation was performed by this read-only audit",
+    "terminal receipt report binding remains incomplete and independent terminal proof was intentionally not executed"
   ],
   "contract_date": "2026-09-29",
   "control_matrix": {
@@ -81,25 +81,30 @@
     },
     "full_path_toc_tou": {
       "admission_stable_fd_read": true,
-      "evaluator_outputs_reserved_before_popen": false,
-      "launcher_preflight_stable": false,
+      "descriptor_bound_child_output_publication": false,
+      "evaluator_outputs_reserved_before_popen": true,
+      "launcher_preflight_stable": true,
       "launcher_snapshot_cross_bound": false,
       "verdict": "P1_blocked"
     },
     "gpu_uuid_pci_logical_mapping": {
-      "child_runtime_identity": false,
-      "live_probe_identity": false,
+      "child_runtime_identity": true,
+      "live_probe_identity": true,
       "receipt_shape_bound": true,
-      "verdict": "P1_blocked"
+      "runtime_observed_by_this_audit": false,
+      "verdict": "closed_non_authorizing_pending_terminal_proof"
     },
     "owner_inode_nonce": {
-      "external_owner_attestation": false,
+      "external_owner_attestation": true,
       "local_shape_and_cross_binding": true,
+      "production_scheduler_trust_anchor": false,
       "verdict": "P1_blocked"
     },
     "replay_one_shot_consumption": {
-      "external_replay_closed": false,
+      "external_claim_one_shot_protocol": true,
       "local_lock_marker_closed": true,
+      "production_scheduler_attestation": false,
+      "signed_external_authority_protocol": true,
       "verdict": "P1_blocked"
     },
     "sealed_real_popen_wait": {
@@ -109,16 +114,18 @@
       "verdict": "closed_non_authorizing_pending_external_terminal_proof"
     },
     "stable_fd_artifact_validation": {
+      "output_reservation": true,
       "path_reopen_flag_false": true,
       "stable_fd": true,
-      "verdict": "closed_for_reads_pending_output_reservation"
+      "verdict": "closed_for_reads_pending_descriptor_bound_child_publication"
     },
     "symlink_hardlink_external_vds": {
       "artifact_stable_fd_and_single_link": true,
-      "hdf5_external_storage_rejected": false,
+      "hdf5_external_storage_rejected": true,
       "hdf5_nonhard_and_vds_rejected": true,
       "input_stable_fd_and_single_link": true,
-      "verdict": "P1_blocked"
+      "terminal_inventory_bound": true,
+      "verdict": "closed_locally_pending_terminal_proof"
     }
   },
   "credit": 0,
@@ -126,64 +133,43 @@
   "findings": [
     {
       "affected": [
+        "admission_v1._validate_external_authority",
         "admission_v1.consume_receipt",
-        "admission_v1.validate_receipt",
-        "runner_v2._verify_consumed_capability"
+        "admission_v1._validate_external_claim"
       ],
       "blocking_for_readiness": true,
       "current_status": "blocked_fail_closed",
       "evidence": {
-        "external_replay_authority": false,
+        "external_claim_one_shot_protocol": true,
+        "external_owner_signature_binding": true,
         "local_atomic_lock_and_marker": true,
         "locations": {
+          "_write_exclusive(external_claim_path": [
+            2012
+          ],
           "def _validate_consumed_marker": [
-            1217
+            1696
+          ],
+          "def _validate_external_authority": [
+            828,
+            1286
           ],
           "def consume_receipt": [
-            1381
+            1970
           ],
           "os.O_EXCL": [
-            405
+            422
           ]
         },
-        "owner_controlled_namespace": "/tmp/<nonce namespace>"
+        "production_external_scheduler_attestation": false,
+        "signed_external_authority_protocol": true,
+        "synthetic_fixture_is_not_production_evidence": true
       },
       "id": "F3-DAV3-SA-001",
-      "required_fix": "Bind consumption to an owner-controlled external scheduler ledger or signed one-time reservation that survives namespace deletion/recreation; require the execution boundary to consume that authority exactly once.",
-      "risk": "A same-owner process can delete/recreate the local namespace or replay a copied receipt; inode and nonce fields do not survive an owner-controlled namespace reset as an external consume-once fact.",
+      "required_fix": "Deploy the public-key trust anchor and scheduler-owned ledger/consume operation outside the lab and /tmp trees; provide a real authority plus one-time consume receipt bound to owner, namespace inode, nonce, plan, resource, and GPU identity before any execution promotion.",
+      "risk": "The submitted code now verifies a signed authority and writes a durable external claim, but this read-only audit has no independently deployed scheduler trust anchor, scheduler-owned CAS/consume witness, or real authority/claim pair. A local synthetic claim must not be promoted to a production one-shot fact.",
       "severity": "P1",
-      "title": "One-shot consumption is atomic locally but not externally replay-resistant"
-    },
-    {
-      "affected": [
-        "admission_v1.mint_admission",
-        "admission_v1._validate_resource",
-        "admission_v1._validate_owner"
-      ],
-      "blocking_for_readiness": true,
-      "current_status": "blocked_fail_closed",
-      "evidence": {
-        "caller_supplied_resource_snapshot": true,
-        "external_owner_attestation": false,
-        "locations": {
-          "\"identity_attested\"": [
-            548,
-            558
-          ],
-          "def _gpu_identity": [
-            498
-          ],
-          "def _validate_owner": [
-            487
-          ]
-        },
-        "owner_inode_nonce_shape_checks": true
-      },
-      "id": "F3-DAV3-SA-002",
-      "required_fix": "Accept only a scheduler-issued, cryptographically or kernel-protected attestation bound to uid/gid/host, namespace inode, nonce, plan digest, and GPU identity; do not treat caller-provided booleans as authority.",
-      "risk": "The strings scheduler_owned_snapshot and identity_attested are ordinary receipt fields. A caller can construct the mapping unless a scheduler-owned signature, descriptor, or protected capability is required outside this process.",
-      "severity": "P1",
-      "title": "Owner/inode/nonce and scheduler-owned GPU claims remain self-attested at the Python API boundary"
+      "title": "Signed scheduler authority exists, but production consume-once authority is not independently attested"
     },
     {
       "affected": [
@@ -195,28 +181,36 @@
       "evidence": {
         "admission_cross_binds_launcher_training_file_digest": false,
         "admission_stable_fd_reread": true,
-        "launcher_path_based_preflight_reader": true,
+        "launcher_path_based_preflight_reader": false,
+        "launcher_stable_fd_preflight_reader": true,
         "locations": {
           "admission": {
             "def _open_parent_directory": [
-              252
+              269
             ],
             "def _read_file": [
-              303
+              320
             ],
             "dir_fd=parent_fd": [
-              309,
-              314,
-              330,
-              372,
-              373,
-              411,
-              417
+              326,
+              331,
+              347,
+              389,
+              390,
+              428,
+              434,
+              510
             ]
           },
           "launcher": {
+            "closed = os.fstat(fd)": [
+              350
+            ],
             "def _read_bounded_json": [
               321
+            ],
+            "opened = os.fstat(fd)": [
+              339
             ],
             "os.lstat(candidate)": [
               325,
@@ -229,10 +223,10 @@
         }
       },
       "id": "F3-DAV3-SA-003",
-      "required_fix": "Use one descriptor-anchored reader for the launcher preflight and admission identity, or compare every launcher snapshot descriptor and canonical payload digest with the stable reread before creating any namespace state.",
-      "risk": "A parent replacement or input change between the launcher read and admission's second read can make command construction and the final receipt describe different training/manifests; later fail-closed validation is not a single-snapshot admission boundary.",
+      "required_fix": "Compare both later stable file descriptors and canonical manifest digest with the exact RolloutPlan snapshot before accepting the external authority or creating namespace state; reject any mismatch.",
+      "risk": "The launcher reader itself is bounded and stable, but a file can change after its plan is returned and before mint_admission's later reread. Without exact equality checks against RolloutPlan.manifest_file_sha256 and training_receipt_sha256, the signed command plan and final receipt can describe different bytes.",
       "severity": "P1",
-      "title": "The launcher preflight still has a pathname-read window before admission's stable reread"
+      "title": "Launcher stable reads are not cross-bound to the final admission snapshot"
     },
     {
       "affected": [
@@ -243,41 +237,32 @@
       "blocking_for_readiness": true,
       "current_status": "blocked_fail_closed",
       "evidence": {
+        "descriptor_bound_child_output_publication": false,
         "locations": {
-          "def _revalidate_before_popen": [
-            852
+          "def _require_descriptor_bound_outputs": [
+            679
           ],
-          "os.path.lexists(output)": [
-            772,
-            857
+          "def _reserve_evaluator_outputs": [
+            547
+          ],
+          "def _revalidate_before_popen": [
+            1106
+          ],
+          "pathname-only": [
+            550,
+            680,
+            688
           ]
         },
-        "output_atomic_reservation_before_popen": false,
+        "output_atomic_reservation_before_popen": true,
+        "path_only_child_is_explicitly_blocked": true,
         "stable_fd_read_after_exit": true
       },
       "id": "F3-DAV3-SA-004",
-      "required_fix": "Reserve every evaluator output with owner-checked O_EXCL descriptors before Popen, pass only reserved paths/handles to the child, and retain a parent-directory/inode commitment through publication.",
-      "risk": "A concurrent same-owner process can create a symlink or hardlink at evaluation/trajectory/progress between the lexists check and the child open. Post-exit stable validation can reject the artifact but cannot undo an out-of-scope write.",
+      "required_fix": "Add a core evaluator contract that consumes the reserved descriptors or a sealed pass_fds/inode publication protocol, binds every published artifact to those descriptors, and only then remove the explicit fail-closed gate.",
+      "risk": "The runner now reserves evaluator leaves with O_EXCL descriptors and checks their identities, but core_learning still publishes through pathname arguments and its own staging files. The runner therefore rejects before Popen; allowing execution without a descriptor-bound child/publication witness would reopen the output TOCTOU boundary.",
       "severity": "P1",
-      "title": "Evaluator output paths are checked for freshness but not atomically reserved before Popen"
-    },
-    {
-      "affected": [
-        "hdf5_hardening_dependency.inspect_hdf5_snapshot",
-        "runner_v2._terminal_hdf5_receipt"
-      ],
-      "blocking_for_readiness": true,
-      "current_status": "blocked_fail_closed",
-      "evidence": {
-        "external_storage_rejection": false,
-        "nonhard_link_and_vds_rejection": true,
-        "path_reopen": false
-      },
-      "id": "F3-DAV3-SA-005",
-      "required_fix": "Inspect every dataset's external-storage metadata and reject non-empty external mappings before any dataset dereference; bind the complete link/storage inventory to the terminal receipt.",
-      "risk": "An HDF5 dataset with external storage can remain a physical dataset while its data lives outside the bound trajectory bytes. A later consumer that reads it can escape the artifact identity boundary.",
-      "severity": "P1",
-      "title": "The in-memory HDF5 hardening rejects non-hard links/VDS but does not reject external-storage datasets"
+      "title": "Evaluator outputs are reserved, but the pathname-only child lacks descriptor-bound publication"
     },
     {
       "affected": [
@@ -288,28 +273,30 @@
       "blocking_for_readiness": true,
       "current_status": "blocked_fail_closed",
       "evidence": {
-        "child_runtime_gpu_attestation": false,
-        "gpu_probe_emits_uuid_pci_identity": false,
+        "child_runtime_gpu_attestation": true,
+        "gpu_probe_emits_uuid_pci_identity": true,
+        "gpu_runtime_identity_observed": false,
         "locations": {
           "\"identity_attested\"": [
-            548,
-            558
+            614,
+            624
           ],
           "def _gpu_identity": [
-            498
+            564
           ],
           "def _validate_owner": [
-            487
+            553
           ]
         },
         "receipt_shape_binding": true,
-        "shared_occupancy_policy": "allowed when independently attested VRAM remains sufficient"
+        "shared_occupancy_policy": "allowed when independently attested VRAM remains sufficient",
+        "source_controls_are_not_runtime_evidence": true
       },
       "id": "F3-DAV3-SA-006",
-      "required_fix": "Have the scheduler emit UUID/PCI plus a fresh VRAM budget and require a sealed child-side device identity attestation before any terminal proof or launch promotion.",
-      "risk": "Physical GPU2 can differ from a caller-supplied UUID/PCI mapping or from the child CUDA device; numeric memory probing alone cannot prove the logical cuda:0 process landed on the attested device.",
+      "required_fix": "Provide a real scheduler-bound GPU reservation and execute the sealed live UUID/PCI plus child PID-to-UUID attestation; keep launch and credit blocked until that runtime evidence is independently recorded.",
+      "risk": "The source contains the signed snapshot, live probe, and child PID-to-UUID checks, but this read-only audit observed no real GPU or child process. Static presence cannot prove that physical GPU2 and logical cuda:0 matched for a production terminal receipt.",
       "severity": "P1",
-      "title": "GPU UUID/PCI/logical mapping is receipt-shaped but lacks live probe and child-runtime attestation"
+      "title": "GPU UUID/PCI/logical mapping is not independently attested for promotion"
     },
     {
       "affected": [
@@ -320,16 +307,16 @@
       "evidence": {
         "locations": {
           "\"diagnostic_terminal_verified\"": [
-            1230,
-            1454,
-            1463,
-            1539
+            1717,
+            1941,
+            1950,
+            2026
           ],
           "def validate_report": [
-            1438
+            1925
           ],
           "report.terminal_receipt": [
-            1468
+            1955
           ]
         },
         "terminal_receipt_identity_bound": false,
@@ -360,9 +347,8 @@
   "schema": "core.f3.graph_raw.hidden16.diagnostic_admission_v3.security_reaudit.report.v1",
   "scope": {
     "audited_commits": [
-      "a3fe77d3",
-      "6e1ceb33",
-      "d0e5fbd8"
+      "8758be98",
+      "d88c1118"
     ],
     "no_audited_module_import": true,
     "no_gpu_or_nvidia_smi": true,
@@ -372,6 +358,7 @@
     "no_workload_execution": true,
     "primary_admission": "f3_graph_raw_hidden16_seed17_diagnostic_admission_v1.py",
     "primary_runner": "f3_graph_raw_hidden16_seed17_diagnostic_runner_v2.py",
+    "synthetic_scheduler_fixture_not_evidence": true,
     "transitive_dependencies_read_only": true
   },
   "side_effects": {
@@ -399,7 +386,7 @@
     "admission_stable_fd_reads": true,
     "allowlisted_environment_digest": true,
     "caller_supplied_resource_snapshot": true,
-    "child_runtime_gpu_attestation": false,
+    "child_runtime_gpu_attestation": true,
     "dangerous_process_control_calls": {
       "admission_v1_after_p1_fixes": [],
       "hdf5_hardening_dependency": [],
@@ -407,61 +394,80 @@
       "rollout_launcher_dependency": [],
       "runner_v2_after_p1_fixes": []
     },
+    "descriptor_bound_child_output_publication": false,
     "executable_content_and_runtime_identity": true,
-    "external_owner_attestation": false,
-    "external_replay_authority": false,
+    "external_claim_one_shot": true,
+    "external_owner_attestation": true,
+    "external_replay_authority": true,
     "formal_credit_isolation": true,
-    "gpu_probe_emits_uuid_pci_identity": false,
+    "gpu_probe_emits_uuid_pci_identity": true,
+    "gpu_runtime_identity_observed": false,
     "gpu_uuid_pci_logical_shape_bound": true,
-    "hdf5_external_soft_vds_external_storage_rejection": false,
-    "hdf5_external_storage_rejection": false,
+    "hdf5_external_soft_vds_external_storage_rejection": true,
+    "hdf5_external_storage_rejection": true,
     "hdf5_nonhard_and_vds_rejection": true,
-    "launcher_path_based_preflight_reader": true,
+    "hdf5_terminal_inventory_binding": true,
+    "launcher_path_based_preflight_reader": false,
+    "launcher_stable_fd_preflight_reader": true,
     "local_atomic_one_shot": true,
     "locations": {
       "admission_consumption": {
+        "_write_exclusive(external_claim_path": [
+          2012
+        ],
         "def _validate_consumed_marker": [
-          1217
+          1696
+        ],
+        "def _validate_external_authority": [
+          828,
+          1286
         ],
         "def consume_receipt": [
-          1381
+          1970
         ],
         "os.O_EXCL": [
-          405
+          422
         ]
       },
       "admission_owner_gpu": {
         "\"identity_attested\"": [
-          548,
-          558
+          614,
+          624
         ],
         "def _gpu_identity": [
-          498
+          564
         ],
         "def _validate_owner": [
-          487
+          553
         ]
       },
       "admission_read": {
         "def _open_parent_directory": [
-          252
+          269
         ],
         "def _read_file": [
-          303
+          320
         ],
         "dir_fd=parent_fd": [
-          309,
-          314,
-          330,
-          372,
-          373,
-          411,
-          417
+          326,
+          331,
+          347,
+          389,
+          390,
+          428,
+          434,
+          510
         ]
       },
       "launcher_reader": {
+        "closed = os.fstat(fd)": [
+          350
+        ],
         "def _read_bounded_json": [
           321
+        ],
+        "opened = os.fstat(fd)": [
+          339
         ],
         "os.lstat(candidate)": [
           325,
@@ -472,54 +478,63 @@
         ]
       },
       "runner_output_gate": {
-        "def _revalidate_before_popen": [
-          852
+        "def _require_descriptor_bound_outputs": [
+          679
         ],
-        "os.path.lexists(output)": [
-          772,
-          857
+        "def _reserve_evaluator_outputs": [
+          547
+        ],
+        "def _revalidate_before_popen": [
+          1106
+        ],
+        "pathname-only": [
+          550,
+          680,
+          688
         ]
       },
       "runner_popen": {
         "_DIAGNOSTIC_EXECUTION_CAPABILITY: object | None = None": [
-          87
+          105
         ],
         "def _run_real_popen_wait": [
-          1059
+          1469
         ]
       },
       "runner_report": {
         "\"diagnostic_terminal_verified\"": [
-          1230,
-          1454,
-          1463,
-          1539
+          1717,
+          1941,
+          1950,
+          2026
         ],
         "def validate_report": [
-          1438
+          1925
         ],
         "report.terminal_receipt": [
-          1468
+          1955
         ]
       },
       "runner_stable_artifact": {
         "\"path_reopened\": False": [
-          353,
-          458,
-          608,
-          1145
+          371,
+          476,
+          611,
+          816,
+          1632
         ],
         "def _stable_artifact": [
-          228
+          246
         ],
         "os.fstat(leaf_fd)": [
-          286,
-          304
+          304,
+          322
         ]
       }
     },
     "owner_inode_nonce_binding": true,
-    "runner_output_atomic_reservation_before_popen": false,
+    "production_external_scheduler_attestation": false,
+    "runner_output_atomic_reservation_before_popen": true,
     "runner_stable_fd_artifact_reads": true,
     "sealed_real_popen_wait_witness": true,
     "terminal_report_receipt_identity_bound": false

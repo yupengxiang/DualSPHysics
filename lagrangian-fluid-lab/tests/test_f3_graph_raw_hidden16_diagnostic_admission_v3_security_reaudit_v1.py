@@ -32,12 +32,13 @@ def test_reaudit_is_source_bound_blocked_and_zero_credit() -> None:
     assert report["formal"] is False
 
 
-def test_scope_is_locked_to_requested_p1_fix_commits_and_no_import_execution() -> None:
+def test_scope_is_locked_to_submitted_p1_fix_commits_and_no_import_execution() -> None:
     report = audit.build_audit_report()
     assert tuple(report["scope"]["audited_commits"]) == audit.AUDITED_COMMITS
     assert report["scope"]["no_audited_module_import"] is True
     assert report["scope"]["no_popen_or_wait"] is True
     assert report["scope"]["no_gpu_or_nvidia_smi"] is True
+    assert report["scope"]["synthetic_scheduler_fixture_not_evidence"] is True
     assert "subprocess" not in audit.__dict__
 
 
@@ -52,23 +53,27 @@ def test_source_inventory_is_regular_single_link_and_hash_bound() -> None:
         assert ".." not in Path(item["path"]).parts
 
 
-def test_replay_owner_and_nonce_controls_are_local_but_external_authority_is_missing() -> None:
+def test_scheduler_authority_protocol_is_present_but_production_attestation_is_missing() -> None:
     checks = audit.build_audit_report()["static_checks"]
     assert checks["local_atomic_one_shot"] is True
     assert checks["owner_inode_nonce_binding"] is True
-    assert checks["external_replay_authority"] is False
-    assert checks["external_owner_attestation"] is False
+    assert checks["external_replay_authority"] is True
+    assert checks["external_owner_attestation"] is True
+    assert checks["external_claim_one_shot"] is True
+    assert checks["production_external_scheduler_attestation"] is False
     assert checks["caller_supplied_resource_snapshot"] is True
 
 
-def test_path_hardening_distinguishes_stable_reads_from_remaining_toc_tou_gaps() -> None:
+def test_path_hardening_distinguishes_closed_reads_from_remaining_binding_gaps() -> None:
     report = audit.build_audit_report()
     checks = report["static_checks"]
     assert checks["admission_stable_fd_reads"] is True
     assert checks["runner_stable_fd_artifact_reads"] is True
-    assert checks["launcher_path_based_preflight_reader"] is True
+    assert checks["launcher_stable_fd_preflight_reader"] is True
+    assert checks["launcher_path_based_preflight_reader"] is False
     assert checks["admission_cross_binds_launcher_training_file_digest"] is False
-    assert checks["runner_output_atomic_reservation_before_popen"] is False
+    assert checks["runner_output_atomic_reservation_before_popen"] is True
+    assert checks["descriptor_bound_child_output_publication"] is False
     assert report["control_matrix"]["full_path_toc_tou"]["verdict"] == "P1_blocked"
 
 
@@ -78,19 +83,24 @@ def test_symlink_hardlink_and_hdf5_link_controls_are_present() -> None:
     assert checks["admission_stable_fd_reads"] is True
     assert checks["runner_stable_fd_artifact_reads"] is True
     assert checks["hdf5_nonhard_and_vds_rejection"] is True
-    assert checks["hdf5_external_storage_rejection"] is False
+    assert checks["hdf5_external_storage_rejection"] is True
+    assert checks["hdf5_terminal_inventory_binding"] is True
     matrix = report["control_matrix"]["symlink_hardlink_external_vds"]
     assert matrix["hdf5_nonhard_and_vds_rejected"] is True
-    assert matrix["hdf5_external_storage_rejected"] is False
+    assert matrix["hdf5_external_storage_rejected"] is True
+    assert matrix["terminal_inventory_bound"] is True
+    assert matrix["verdict"] == "closed_locally_pending_terminal_proof"
 
 
-def test_gpu_mapping_shape_is_bound_but_live_and_child_attestation_are_absent() -> None:
+def test_gpu_mapping_live_probe_and_child_attestation_controls_are_source_bound_only() -> None:
     report = audit.build_audit_report()
     checks = report["static_checks"]
     assert checks["gpu_uuid_pci_logical_shape_bound"] is True
-    assert checks["gpu_probe_emits_uuid_pci_identity"] is False
-    assert checks["child_runtime_gpu_attestation"] is False
-    assert report["control_matrix"]["gpu_uuid_pci_logical_mapping"]["verdict"] == "P1_blocked"
+    assert checks["gpu_probe_emits_uuid_pci_identity"] is True
+    assert checks["child_runtime_gpu_attestation"] is True
+    matrix = report["control_matrix"]["gpu_uuid_pci_logical_mapping"]
+    assert matrix["runtime_observed_by_this_audit"] is False
+    assert matrix["verdict"] == "closed_non_authorizing_pending_terminal_proof"
 
 
 def test_environment_executable_and_sealed_witness_controls_are_non_authorizing() -> None:
@@ -111,7 +121,7 @@ def test_formal_credit_isolation_remains_zero_but_report_binding_has_p2() -> Non
     assert checks["formal_credit_isolation"] is True
     assert checks["terminal_report_receipt_identity_bound"] is False
     ids = {item["id"] for item in report["findings"]}
-    assert "F3-DAV3-SA-006" in ids
+    assert "F3-DAV3-SA-007" in ids
     assert report["control_matrix"]["formal_credit_isolation"]["verdict"] == "P2_report_binding_gap"
 
 
@@ -120,15 +130,13 @@ def test_expected_p1_p2_findings_are_explicit() -> None:
     findings = {item["id"]: item for item in report["findings"]}
     assert set(findings) == {
         "F3-DAV3-SA-001",
-        "F3-DAV3-SA-002",
         "F3-DAV3-SA-003",
         "F3-DAV3-SA-004",
-        "F3-DAV3-SA-005",
         "F3-DAV3-SA-006",
         "F3-DAV3-SA-007",
     }
     assert all(item["current_status"] == "blocked_fail_closed" for item in findings.values())
-    assert sum(item["severity"] == "P1" for item in findings.values()) == 6
+    assert sum(item["severity"] == "P1" for item in findings.values()) == 4
     assert sum(item["severity"] == "P2" for item in findings.values()) == 1
 
 

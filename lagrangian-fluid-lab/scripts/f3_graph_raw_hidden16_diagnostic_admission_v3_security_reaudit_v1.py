@@ -8,9 +8,10 @@ execution paths.  The only permitted write is an explicitly requested,
 exclusive JSON audit report.
 
 This is a non-authorizing review.  It records the controls closed by
-``a3fe77d3``/``6e1ceb33``/``d0e5fbd8`` and keeps ``launch_allowed`` and all
-formal credit fields false/zero.  A local filesystem marker is not treated as
-an external scheduler authority, and a static source review is not terminal
+``8758be98``/``d88c1118`` and keeps ``launch_allowed`` and all formal credit
+fields false/zero.  The signed scheduler-authority protocol and runner
+hardening are source controls, not production scheduler evidence; a synthetic
+test fixture is never treated as a deployed trust anchor or terminal
 execution proof.
 """
 
@@ -34,7 +35,7 @@ REPORT_SCHEMA = (
     "core.f3.graph_raw.hidden16.diagnostic_admission_v3.security_reaudit.report.v1"
 )
 REPORT_ID = "f3-graph-raw-hidden16-diagnostic-admission-v3-security-reaudit-v1"
-AUDITED_COMMITS = ("a3fe77d3", "6e1ceb33", "d0e5fbd8")
+AUDITED_COMMITS = ("8758be98", "d88c1118")
 MAX_SOURCE_BYTES = 8 * 1024 * 1024
 SHA256_HEX = 64
 
@@ -282,6 +283,12 @@ def _static_checks(
     admission_consume = _function_segment(
         trees["admission_v1_after_p1_fixes"], admission, "consume_receipt"
     )
+    admission_authority = _function_segment(
+        trees["admission_v1_after_p1_fixes"], admission, "_validate_external_authority"
+    )
+    admission_claim = _function_segment(
+        trees["admission_v1_after_p1_fixes"], admission, "_validate_external_claim"
+    )
     admission_mint = _function_segment(
         trees["admission_v1_after_p1_fixes"], admission, "mint_admission"
     )
@@ -299,6 +306,21 @@ def _static_checks(
     )
     runner_process_capture = _function_segment(
         trees["runner_v2_after_p1_fixes"], runner, "_capture_runtime_identity"
+    )
+    runner_output_reservation = _function_segment(
+        trees["runner_v2_after_p1_fixes"], runner, "_reserve_evaluator_outputs"
+    )
+    runner_output_contract = _function_segment(
+        trees["runner_v2_after_p1_fixes"], runner, "_require_descriptor_bound_outputs"
+    )
+    runner_hdf5 = _function_segment(
+        trees["runner_v2_after_p1_fixes"], runner, "_inspect_hdf5_snapshot"
+    )
+    runner_gpu_probe = _function_segment(
+        trees["runner_v2_after_p1_fixes"], runner, "_probe_live_gpu_identity"
+    )
+    runner_child_gpu_attestation = _function_segment(
+        trees["runner_v2_after_p1_fixes"], runner, "_validate_child_gpu_attestation"
     )
     runner_report_validator = _function_segment(
         trees["runner_v2_after_p1_fixes"], runner, "validate_report"
@@ -350,51 +372,104 @@ def _static_checks(
             '"uid", "gid", "host"',
         )
     )
-    external_replay_authority = any(
-        needle in admission.lower()
+    external_replay_authority = all(
+        needle in admission
         for needle in (
-            "replay_ledger",
-            "scheduler_consume_token",
-            "signed_consumption",
-            "external_consumption_receipt",
+            "EXTERNAL_AUTHORITY_SCHEMA",
+            "EXTERNAL_CLAIM_SCHEMA",
+            "def _validate_external_authority",
+            "def _validate_external_claim",
+            "Ed25519PublicKey.from_public_bytes",
+            "_write_exclusive(external_claim_path",
         )
     )
-    external_owner_attestation = any(
-        needle in (admission + resource).lower()
+    external_owner_attestation = all(
+        needle in admission_authority
         for needle in (
-            "ed25519",
-            "signature",
-            "scheduler_attestation_token",
-            "signed_scheduler",
-            "trusted_scheduler_api",
+            "signature_base64",
+            "signature_algorithm",
+            "Ed25519PublicKey.from_public_bytes",
+            ".verify(",
+            "namespace_descriptor",
+            "plan_sha256",
+            "resource_snapshot_sha256",
+            "gpu_identity_sha256",
         )
     )
+    external_claim_one_shot = all(
+        needle in admission_consume
+        for needle in (
+            "_validate_external_authority(",
+            "_write_exclusive(external_claim_path",
+            "external scheduler authority has already been consumed",
+            "CONSUMPTION_LOCK_NAME",
+            "CONSUMED_NAME",
+        )
+    ) and all(
+        needle in admission_claim
+        for needle in (
+            "EXTERNAL_CLAIM_SCHEMA",
+            "authority_document_sha256",
+            "claim_path",
+            "receipt_sha256",
+        )
+    )
+    # No external scheduler receipt, protected ledger/CAS witness, or
+    # deployment trust-anchor attestation is supplied to this read-only
+    # source audit.  The synthetic pytest fixture is deliberately not
+    # promoted to production evidence.
+    production_external_scheduler_attestation = False
     caller_supplied_resource = (
         "resource_admission: Mapping[str, Any] | None = None" in admission_mint
         and '"identity_attested"' in admission_resource
         and '"scheduler_owned_snapshot"' in admission_resource
     )
-    launcher_path_reopen = (
-        "os.lstat(candidate)" in launcher_reader
-        and "os.open(candidate, flags)" in launcher_reader
-        and "dir_fd" not in launcher_reader
-    )
-    admission_cross_binds_launcher_receipt = all(
-        needle in admission
+    launcher_stable_preflight = all(
+        needle in launcher_reader
         for needle in (
-            "plan.manifest_sha256",
-            "checkpoint_descriptor[\"sha256\"]",
-            "training_descriptor",
+            "os.open(candidate, flags)",
+            "opened = os.fstat(fd)",
+            "closed = os.fstat(fd)",
+            "after = os.lstat(candidate)",
+            "changed during bounded read",
         )
-    ) and "plan.training_receipt_sha256" in admission
-    output_check_only = (
-        "os.path.lexists(output)" in runner_revalidate
-        and "_reserve_output" not in runner
-        and "_reserve_artifact" not in runner
     )
-    output_atomic_reservation = not output_check_only
+    launcher_path_reopen = not launcher_stable_preflight
+    # The launcher snapshot is read safely, but the admission mint currently
+    # does not compare the later stable descriptors with the exact file
+    # digests captured in RolloutPlan before it accepts the signed plan.
+    admission_cross_binds_launcher_receipt = all(
+        needle in admission_mint
+        for needle in (
+            'manifest_descriptor["sha256"]',
+            "plan.manifest_file_sha256",
+            'training_descriptor["sha256"]',
+            "plan.training_receipt_sha256",
+        )
+    )
+    output_atomic_reservation = all(
+        needle in runner_revalidate
+        for needle in (
+            "reservations = _reserve_evaluator_outputs(plan)",
+            "_require_descriptor_bound_outputs(plan, reservations)",
+            "return current, reservations",
+        )
+    ) and all(
+        needle in runner_output_reservation
+        for needle in (
+            "os.O_EXCL",
+            "O_NOFOLLOW",
+            "os.fstat(fd)",
+            "_ReservedOutput",
+        )
+    )
+    descriptor_bound_child_output = (
+        "pass_fds=reservations.pass_fds" in runner_popen
+        and "pathname-only" not in runner_output_contract
+        and "_fail(" not in runner_output_contract
+    )
     hdf5_nonhard_and_vds_closed = all(
-        needle in hardening
+        needle in runner_hdf5
         for needle in (
             "h5py.HardLink",
             "getlink=True",
@@ -402,12 +477,20 @@ def _static_checks(
             "with h5py.File(io.BytesIO(raw), \"r\")",
         )
     ) and "hardening.inspect_hdf5_snapshot" in runner
-    hdf5_external_storage_closed = any(
-        needle in hardening
+    hdf5_external_storage_closed = all(
+        needle in runner_hdf5
         for needle in (
-            "dataset.external",
-            'getattr(dataset, "external"',
+            "get_external_count()",
+            "external storage",
             "external_storage_rejected",
+        )
+    )
+    hdf5_terminal_inventory_bound = all(
+        needle in runner
+        for needle in (
+            "link_inventory_sha256",
+            '"external_storage_rejected": True',
+            '"virtual_datasets_rejected": True',
         )
     )
     gpu_shape_bound = all(
@@ -422,20 +505,30 @@ def _static_checks(
             '"identity_sha256"',
         )
     )
-    gpu_probe_identity = any(
-        needle in gpu_probe.lower()
-        for needle in ("uuid", "pci.bus", "pci_bus_id", "serial")
-    )
-    child_gpu_attestation = any(
-        needle in runner_process_capture.lower()
+    gpu_probe_identity = all(
+        needle in runner_gpu_probe
         for needle in (
-            "cuda.get_device_properties",
-            "cuda device properties",
+            "_parse_nvidia_smi_gpu_rows",
+            "uuid",
             "pci_bus_id",
-            "gpu_uuid",
-            "nvidia-smi",
+            '"live_probe": True',
+            "child_pid",
         )
     )
+    child_gpu_attestation = all(
+        needle in (runner_process_capture + runner_child_gpu_attestation)
+        for needle in (
+            "_probe_live_gpu_identity",
+            "child_pid=pid",
+            '"child_runtime_gpu_attestation": True',
+            '"live_probe", True',
+            '"child_runtime_attested", True',
+        )
+    )
+    # This audit is intentionally static/read-only and never calls nvidia-smi,
+    # starts a child, or observes a CUDA process.  A source control is not a
+    # runtime attestation and cannot authorize launch or credit.
+    gpu_runtime_identity_observed = False
     environment_closed = all(
         needle in runner
         for needle in (
@@ -499,18 +592,24 @@ def _static_checks(
         "owner_inode_nonce_binding": owner_inode_nonce,
         "external_replay_authority": external_replay_authority,
         "external_owner_attestation": external_owner_attestation,
+        "external_claim_one_shot": external_claim_one_shot,
+        "production_external_scheduler_attestation": production_external_scheduler_attestation,
         "caller_supplied_resource_snapshot": caller_supplied_resource,
         "admission_stable_fd_reads": stable_read,
+        "launcher_stable_fd_preflight_reader": launcher_stable_preflight,
         "launcher_path_based_preflight_reader": launcher_path_reopen,
         "admission_cross_binds_launcher_training_file_digest": admission_cross_binds_launcher_receipt,
         "runner_stable_fd_artifact_reads": stable_artifact_read,
         "runner_output_atomic_reservation_before_popen": output_atomic_reservation,
+        "descriptor_bound_child_output_publication": descriptor_bound_child_output,
         "hdf5_nonhard_and_vds_rejection": hdf5_nonhard_and_vds_closed,
         "hdf5_external_storage_rejection": hdf5_external_storage_closed,
         "hdf5_external_soft_vds_external_storage_rejection": hdf5_nonhard_and_vds_closed and hdf5_external_storage_closed,
+        "hdf5_terminal_inventory_binding": hdf5_terminal_inventory_bound,
         "gpu_uuid_pci_logical_shape_bound": gpu_shape_bound,
         "gpu_probe_emits_uuid_pci_identity": gpu_probe_identity,
         "child_runtime_gpu_attestation": child_gpu_attestation,
+        "gpu_runtime_identity_observed": gpu_runtime_identity_observed,
         "allowlisted_environment_digest": environment_closed,
         "executable_content_and_runtime_identity": executable_closed,
         "sealed_real_popen_wait_witness": sealed_witness_closed,
@@ -522,6 +621,8 @@ def _static_checks(
                 admission,
                 [
                     "def consume_receipt",
+                    "def _validate_external_authority",
+                    "_write_exclusive(external_claim_path",
                     "os.O_EXCL",
                     "def _validate_consumed_marker",
                 ],
@@ -540,11 +641,22 @@ def _static_checks(
             ),
             "launcher_reader": _locations(
                 launcher,
-                ["def _read_bounded_json", "os.lstat(candidate)", "os.open(candidate, flags)"],
+                [
+                    "def _read_bounded_json",
+                    "os.lstat(candidate)",
+                    "os.open(candidate, flags)",
+                    "opened = os.fstat(fd)",
+                    "closed = os.fstat(fd)",
+                ],
             ),
             "runner_output_gate": _locations(
                 runner,
-                ["def _revalidate_before_popen", "os.path.lexists(output)"],
+                [
+                    "def _revalidate_before_popen",
+                    "def _reserve_evaluator_outputs",
+                    "def _require_descriptor_bound_outputs",
+                    "pathname-only",
+                ],
             ),
             "runner_stable_artifact": _locations(
                 runner,
@@ -588,25 +700,32 @@ def _finding(
 def _build_findings(checks: Mapping[str, Any]) -> list[dict[str, Any]]:
     locations = checks["locations"]
     findings: list[dict[str, Any]] = []
-    if not checks["external_replay_authority"]:
+    if not checks["external_claim_one_shot"] or not checks[
+        "production_external_scheduler_attestation"
+    ]:
         findings.append(
             _finding(
                 finding_id="F3-DAV3-SA-001",
                 severity="P1",
-                title="One-shot consumption is atomic locally but not externally replay-resistant",
+                title="Signed scheduler authority exists, but production consume-once authority is not independently attested",
                 affected=[
+                    "admission_v1._validate_external_authority",
                     "admission_v1.consume_receipt",
-                    "admission_v1.validate_receipt",
-                    "runner_v2._verify_consumed_capability",
+                    "admission_v1._validate_external_claim",
                 ],
                 evidence={
                     "local_atomic_lock_and_marker": checks["local_atomic_one_shot"],
-                    "owner_controlled_namespace": "/tmp/<nonce namespace>",
-                    "external_replay_authority": checks["external_replay_authority"],
+                    "signed_external_authority_protocol": checks["external_replay_authority"],
+                    "external_owner_signature_binding": checks["external_owner_attestation"],
+                    "external_claim_one_shot_protocol": checks["external_claim_one_shot"],
+                    "production_external_scheduler_attestation": checks[
+                        "production_external_scheduler_attestation"
+                    ],
+                    "synthetic_fixture_is_not_production_evidence": True,
                     "locations": locations["admission_consumption"],
                 },
-                risk="A same-owner process can delete/recreate the local namespace or replay a copied receipt; inode and nonce fields do not survive an owner-controlled namespace reset as an external consume-once fact.",
-                required_fix="Bind consumption to an owner-controlled external scheduler ledger or signed one-time reservation that survives namespace deletion/recreation; require the execution boundary to consume that authority exactly once.",
+                risk="The submitted code now verifies a signed authority and writes a durable external claim, but this read-only audit has no independently deployed scheduler trust anchor, scheduler-owned CAS/consume witness, or real authority/claim pair. A local synthetic claim must not be promoted to a production one-shot fact.",
+                required_fix="Deploy the public-key trust anchor and scheduler-owned ledger/consume operation outside the lab and /tmp trees; provide a real authority plus one-time consume receipt bound to owner, namespace inode, nonce, plan, resource, and GPU identity before any execution promotion.",
             )
         )
     if checks["caller_supplied_resource_snapshot"] and not checks["external_owner_attestation"]:
@@ -630,20 +749,25 @@ def _build_findings(checks: Mapping[str, Any]) -> list[dict[str, Any]]:
                 required_fix="Accept only a scheduler-issued, cryptographically or kernel-protected attestation bound to uid/gid/host, namespace inode, nonce, plan digest, and GPU identity; do not treat caller-provided booleans as authority.",
             )
         )
-    if checks["launcher_path_based_preflight_reader"] or not checks[
+    if not checks["launcher_stable_fd_preflight_reader"] or not checks[
         "admission_cross_binds_launcher_training_file_digest"
     ]:
         findings.append(
             _finding(
                 finding_id="F3-DAV3-SA-003",
                 severity="P1",
-                title="The launcher preflight still has a pathname-read window before admission's stable reread",
+                title="Launcher stable reads are not cross-bound to the final admission snapshot",
                 affected=[
                     "rollout_launcher_v1._read_bounded_json",
                     "admission_v1.mint_admission",
                 ],
                 evidence={
-                    "launcher_path_based_preflight_reader": checks["launcher_path_based_preflight_reader"],
+                    "launcher_stable_fd_preflight_reader": checks[
+                        "launcher_stable_fd_preflight_reader"
+                    ],
+                    "launcher_path_based_preflight_reader": checks[
+                        "launcher_path_based_preflight_reader"
+                    ],
                     "admission_stable_fd_reread": checks["admission_stable_fd_reads"],
                     "admission_cross_binds_launcher_training_file_digest": checks[
                         "admission_cross_binds_launcher_training_file_digest"
@@ -653,16 +777,16 @@ def _build_findings(checks: Mapping[str, Any]) -> list[dict[str, Any]]:
                         "admission": locations["admission_read"],
                     },
                 },
-                risk="A parent replacement or input change between the launcher read and admission's second read can make command construction and the final receipt describe different training/manifests; later fail-closed validation is not a single-snapshot admission boundary.",
-                required_fix="Use one descriptor-anchored reader for the launcher preflight and admission identity, or compare every launcher snapshot descriptor and canonical payload digest with the stable reread before creating any namespace state.",
+                risk="The launcher reader itself is bounded and stable, but a file can change after its plan is returned and before mint_admission's later reread. Without exact equality checks against RolloutPlan.manifest_file_sha256 and training_receipt_sha256, the signed command plan and final receipt can describe different bytes.",
+                required_fix="Compare both later stable file descriptors and canonical manifest digest with the exact RolloutPlan snapshot before accepting the external authority or creating namespace state; reject any mismatch.",
             )
         )
-    if not checks["runner_output_atomic_reservation_before_popen"]:
+    if not checks["descriptor_bound_child_output_publication"]:
         findings.append(
             _finding(
                 finding_id="F3-DAV3-SA-004",
                 severity="P1",
-                title="Evaluator output paths are checked for freshness but not atomically reserved before Popen",
+                title="Evaluator outputs are reserved, but the pathname-only child lacks descriptor-bound publication",
                 affected=[
                     "runner_v2._revalidate_before_popen",
                     "runner_v2._run_real_popen_wait",
@@ -670,19 +794,25 @@ def _build_findings(checks: Mapping[str, Any]) -> list[dict[str, Any]]:
                 ],
                 evidence={
                     "output_atomic_reservation_before_popen": checks["runner_output_atomic_reservation_before_popen"],
+                    "descriptor_bound_child_output_publication": checks[
+                        "descriptor_bound_child_output_publication"
+                    ],
+                    "path_only_child_is_explicitly_blocked": True,
                     "stable_fd_read_after_exit": checks["runner_stable_fd_artifact_reads"],
                     "locations": locations["runner_output_gate"],
                 },
-                risk="A concurrent same-owner process can create a symlink or hardlink at evaluation/trajectory/progress between the lexists check and the child open. Post-exit stable validation can reject the artifact but cannot undo an out-of-scope write.",
-                required_fix="Reserve every evaluator output with owner-checked O_EXCL descriptors before Popen, pass only reserved paths/handles to the child, and retain a parent-directory/inode commitment through publication.",
+                risk="The runner now reserves evaluator leaves with O_EXCL descriptors and checks their identities, but core_learning still publishes through pathname arguments and its own staging files. The runner therefore rejects before Popen; allowing execution without a descriptor-bound child/publication witness would reopen the output TOCTOU boundary.",
+                required_fix="Add a core evaluator contract that consumes the reserved descriptors or a sealed pass_fds/inode publication protocol, binds every published artifact to those descriptors, and only then remove the explicit fail-closed gate.",
             )
         )
-    if not checks["hdf5_external_storage_rejection"]:
+    if not checks["hdf5_external_storage_rejection"] or not checks[
+        "hdf5_terminal_inventory_binding"
+    ]:
         findings.append(
             _finding(
                 finding_id="F3-DAV3-SA-005",
                 severity="P1",
-                title="The in-memory HDF5 hardening rejects non-hard links/VDS but does not reject external-storage datasets",
+                title="HDF5 link/storage rejection or terminal inventory binding is incomplete",
                 affected=[
                     "hdf5_hardening_dependency.inspect_hdf5_snapshot",
                     "runner_v2._terminal_hdf5_receipt",
@@ -690,21 +820,23 @@ def _build_findings(checks: Mapping[str, Any]) -> list[dict[str, Any]]:
                 evidence={
                     "nonhard_link_and_vds_rejection": checks["hdf5_nonhard_and_vds_rejection"],
                     "external_storage_rejection": checks["hdf5_external_storage_rejection"],
-                    "path_reopen": False,
+                    "terminal_inventory_binding": checks["hdf5_terminal_inventory_binding"],
+                    "path_reopen": checks["runner_stable_fd_artifact_reads"] is False,
                 },
-                risk="An HDF5 dataset with external storage can remain a physical dataset while its data lives outside the bound trajectory bytes. A later consumer that reads it can escape the artifact identity boundary.",
-                required_fix="Inspect every dataset's external-storage metadata and reject non-empty external mappings before any dataset dereference; bind the complete link/storage inventory to the terminal receipt.",
+                risk="A missing external-storage/link inventory check would permit a trajectory receipt to describe bytes whose dataset data or links resolve outside the stable artifact.",
+                required_fix="Reject external storage, soft/external links, and VDS before dereference and bind the complete inventory digest into the terminal receipt.",
             )
         )
     if checks["gpu_uuid_pci_logical_shape_bound"] and (
         not checks["gpu_probe_emits_uuid_pci_identity"]
         or not checks["child_runtime_gpu_attestation"]
+        or not checks["gpu_runtime_identity_observed"]
     ):
         findings.append(
             _finding(
                 finding_id="F3-DAV3-SA-006",
                 severity="P1",
-                title="GPU UUID/PCI/logical mapping is receipt-shaped but lacks live probe and child-runtime attestation",
+                title="GPU UUID/PCI/logical mapping is not independently attested for promotion",
                 affected=[
                     "admission_v1._gpu_identity",
                     "resource_admission_dependency._query_gpu_rows",
@@ -714,11 +846,13 @@ def _build_findings(checks: Mapping[str, Any]) -> list[dict[str, Any]]:
                     "receipt_shape_binding": checks["gpu_uuid_pci_logical_shape_bound"],
                     "gpu_probe_emits_uuid_pci_identity": checks["gpu_probe_emits_uuid_pci_identity"],
                     "child_runtime_gpu_attestation": checks["child_runtime_gpu_attestation"],
+                    "gpu_runtime_identity_observed": checks["gpu_runtime_identity_observed"],
+                    "source_controls_are_not_runtime_evidence": True,
                     "shared_occupancy_policy": "allowed when independently attested VRAM remains sufficient",
                     "locations": locations["admission_owner_gpu"],
                 },
-                risk="Physical GPU2 can differ from a caller-supplied UUID/PCI mapping or from the child CUDA device; numeric memory probing alone cannot prove the logical cuda:0 process landed on the attested device.",
-                required_fix="Have the scheduler emit UUID/PCI plus a fresh VRAM budget and require a sealed child-side device identity attestation before any terminal proof or launch promotion.",
+                risk="The source contains the signed snapshot, live probe, and child PID-to-UUID checks, but this read-only audit observed no real GPU or child process. Static presence cannot prove that physical GPU2 and logical cuda:0 matched for a production terminal receipt.",
+                required_fix="Provide a real scheduler-bound GPU reservation and execute the sealed live UUID/PCI plus child PID-to-UUID attestation; keep launch and credit blocked until that runtime evidence is independently recorded.",
             )
         )
     if not checks["terminal_report_receipt_identity_bound"]:
@@ -744,33 +878,71 @@ def _control_matrix(checks: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "replay_one_shot_consumption": {
             "local_lock_marker_closed": checks["local_atomic_one_shot"],
-            "external_replay_closed": checks["external_replay_authority"],
-            "verdict": "P1_blocked" if not checks["external_replay_authority"] else "closed_pending_terminal_proof",
+            "signed_external_authority_protocol": checks["external_replay_authority"],
+            "external_claim_one_shot_protocol": checks["external_claim_one_shot"],
+            "production_scheduler_attestation": checks[
+                "production_external_scheduler_attestation"
+            ],
+            "verdict": (
+                "P1_blocked"
+                if not checks["external_claim_one_shot"]
+                or not checks["production_external_scheduler_attestation"]
+                else "closed_pending_terminal_proof"
+            ),
         },
         "owner_inode_nonce": {
             "local_shape_and_cross_binding": checks["owner_inode_nonce_binding"],
             "external_owner_attestation": checks["external_owner_attestation"],
-            "verdict": "P1_blocked" if not checks["external_owner_attestation"] else "closed_pending_terminal_proof",
+            "production_scheduler_trust_anchor": checks[
+                "production_external_scheduler_attestation"
+            ],
+            "verdict": (
+                "P1_blocked"
+                if not checks["external_owner_attestation"]
+                or not checks["production_external_scheduler_attestation"]
+                else "closed_pending_terminal_proof"
+            ),
         },
         "full_path_toc_tou": {
             "admission_stable_fd_read": checks["admission_stable_fd_reads"],
-            "launcher_preflight_stable": not checks["launcher_path_based_preflight_reader"],
+            "launcher_preflight_stable": checks["launcher_stable_fd_preflight_reader"],
             "launcher_snapshot_cross_bound": checks["admission_cross_binds_launcher_training_file_digest"],
             "evaluator_outputs_reserved_before_popen": checks["runner_output_atomic_reservation_before_popen"],
-            "verdict": "P1_blocked",
+            "descriptor_bound_child_output_publication": checks[
+                "descriptor_bound_child_output_publication"
+            ],
+            "verdict": (
+                "P1_blocked"
+                if not checks["admission_cross_binds_launcher_training_file_digest"]
+                or not checks["descriptor_bound_child_output_publication"]
+                else "closed_pending_terminal_proof"
+            ),
         },
         "symlink_hardlink_external_vds": {
             "input_stable_fd_and_single_link": checks["admission_stable_fd_reads"],
             "artifact_stable_fd_and_single_link": checks["runner_stable_fd_artifact_reads"],
             "hdf5_nonhard_and_vds_rejected": checks["hdf5_nonhard_and_vds_rejection"],
             "hdf5_external_storage_rejected": checks["hdf5_external_storage_rejection"],
-            "verdict": "P1_blocked" if not checks["hdf5_external_storage_rejection"] else "closed_locally_pending_reserved_output_boundary",
+            "terminal_inventory_bound": checks["hdf5_terminal_inventory_binding"],
+            "verdict": (
+                "P1_blocked"
+                if not checks["hdf5_external_storage_rejection"]
+                or not checks["hdf5_terminal_inventory_binding"]
+                else "closed_locally_pending_terminal_proof"
+            ),
         },
         "gpu_uuid_pci_logical_mapping": {
             "receipt_shape_bound": checks["gpu_uuid_pci_logical_shape_bound"],
             "live_probe_identity": checks["gpu_probe_emits_uuid_pci_identity"],
             "child_runtime_identity": checks["child_runtime_gpu_attestation"],
-            "verdict": "P1_blocked",
+            "runtime_observed_by_this_audit": checks["gpu_runtime_identity_observed"],
+            "verdict": (
+                "P1_blocked"
+                if not checks["gpu_uuid_pci_logical_shape_bound"]
+                or not checks["gpu_probe_emits_uuid_pci_identity"]
+                or not checks["child_runtime_gpu_attestation"]
+                else "closed_non_authorizing_pending_terminal_proof"
+            ),
         },
         "environment_executable_identity": {
             "allowlisted_environment_digest": checks["allowlisted_environment_digest"],
@@ -788,7 +960,8 @@ def _control_matrix(checks: Mapping[str, Any]) -> dict[str, Any]:
         "stable_fd_artifact_validation": {
             "stable_fd": checks["runner_stable_fd_artifact_reads"],
             "path_reopen_flag_false": checks["runner_stable_fd_artifact_reads"],
-            "verdict": "closed_for_reads_pending_output_reservation",
+            "output_reservation": checks["runner_output_atomic_reservation_before_popen"],
+            "verdict": "closed_for_reads_pending_descriptor_bound_child_publication",
         },
         "formal_credit_isolation": {
             "zero_credit_and_launch_false": checks["formal_credit_isolation"],
@@ -819,6 +992,7 @@ def build_audit_report() -> dict[str, Any]:
             "no_popen_or_wait": True,
             "no_gpu_or_nvidia_smi": True,
             "no_production_artifact_open": True,
+            "synthetic_scheduler_fixture_not_evidence": True,
             "no_registry_ledger_gate_completion_plan_write": True,
         },
         "source_bound": True,
@@ -856,11 +1030,11 @@ def build_audit_report() -> dict[str, Any]:
             "plan_writes": 0,
         },
         "blocked_reasons": [
-            "external one-shot replay consumption is not attested by a scheduler-owned authority",
-            "owner/inode/nonce and GPU identity fields remain caller-shaped without an external attestation token",
-            "launcher preflight and evaluator output publication are not one descriptor-reserved path boundary",
-            "live GPU UUID/PCI and child logical-device identity are not observed",
-            "terminal proof remains external and was intentionally not executed by this audit",
+            "signed external scheduler authority and local one-shot claim protocol are source-present, but no production scheduler-owned trust anchor/consume witness was supplied",
+            "launcher preflight uses bounded stable reads, but the exact RolloutPlan file digests are not compared with the later admission reread",
+            "evaluator outputs are O_EXCL-reserved, but the pathname-only core child lacks descriptor-bound publication and is therefore blocked before Popen",
+            "GPU UUID/PCI live-probe and child-attestation controls are source-present but no runtime observation was performed by this read-only audit",
+            "terminal receipt report binding remains incomplete and independent terminal proof was intentionally not executed",
         ],
         **ZERO_CREDIT,
     }
