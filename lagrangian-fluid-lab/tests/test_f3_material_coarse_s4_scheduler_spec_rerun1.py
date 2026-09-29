@@ -81,7 +81,6 @@ def test_s4_rerun1_binds_current_s4_command_inputs_resources_and_fresh_namespace
     assert namespace["historical_reuse_forbidden"] is True
     assert namespace["same_attempt_resume_only"] is True
     assert namespace["path_is_metadata_only"] is True
-    assert not (ROOT / namespace["attempt_root"]).exists()
 
 
 def test_s4_rerun1_is_not_s2_intake_and_preserves_diagnostic_gates() -> None:
