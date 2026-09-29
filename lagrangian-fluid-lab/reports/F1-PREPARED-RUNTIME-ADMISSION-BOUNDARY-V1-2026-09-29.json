@@ -1,0 +1,446 @@
+{
+  "admission": {
+    "T1_numerical": false,
+    "credit": 0,
+    "execution_authorized": false,
+    "formal": false,
+    "fresh_root_review": false,
+    "launch_admitted": false,
+    "prepared_rows_bound": 0,
+    "request_contract_valid": false,
+    "request_present": false,
+    "request_schema": "core.f1.prepared_runtime_admission_request.v1",
+    "runtime_observer_instance_attested": false,
+    "source_identity_attested": false,
+    "terminal_evidence_present": false
+  },
+  "authorization": {
+    "T1_numerical": false,
+    "T2": false,
+    "credit": 0,
+    "diagnostic_only": true,
+    "execution_authorized": false,
+    "formal": false,
+    "formal_eligible": false,
+    "launch_admitted": false,
+    "prepared_to_runtime_admitted": false,
+    "qualification": false,
+    "qualification_credit": 0,
+    "registry_eligible": false
+  },
+  "blockers": [
+    {
+      "code": "admission_envelope_absent",
+      "detail": "no future prepared-to-runtime admission envelope is present; the verifier has no request to authorize",
+      "severity": "high"
+    },
+    {
+      "code": "prepared_rows_have_no_runtime_admission_receipt",
+      "detail": "the 15 prepared row bindings declare required runtime products only as metadata; no runtime admission receipt is available",
+      "severity": "high"
+    },
+    {
+      "code": "external_source_identity_attestation_absent",
+      "detail": "Core manifest, known_inputs, solver binary, runtime identity, and per-cell source hashes have no independently trusted root attestation",
+      "severity": "high"
+    },
+    {
+      "code": "runtime_observer_instance_unattested",
+      "detail": "manufactured observer calibration is not a runtime observer instance binding and cannot authorize a worker",
+      "severity": "high"
+    },
+    {
+      "code": "terminal_output_contract_not_closed",
+      "detail": "result/audit/observations/trajectory terminal evidence is not present at this pre-run boundary; missing output must remain fail-closed",
+      "severity": "high"
+    },
+    {
+      "code": "fresh_root_execution_authority_absent",
+      "detail": "fresh root review and execution authorization are intentionally absent; caller JSON cannot mint either authority",
+      "severity": "high"
+    }
+  ],
+  "boundary": {
+    "admission_contract_valid": false,
+    "admission_envelope_present": false,
+    "boundary_id": "F1_H1_prepared_to_runtime_admission_v1",
+    "input_class": "prepared_metadata_only",
+    "nested_artifact_paths_followed": false,
+    "prepared_row_bindings_derived": true,
+    "prepared_rows": 15,
+    "runtime_receipts_present": false,
+    "runtime_rows_admitted": 0
+  },
+  "checks": {
+    "T1_numerical": false,
+    "admission_envelope_present": false,
+    "definition_observer_revision_bound": true,
+    "execution_authorized": false,
+    "formal": false,
+    "fresh_root_review": false,
+    "jobs_manifest_contract_bound": true,
+    "matrix_job_row_bindings_exact": true,
+    "observer_calibration_not_promoted": true,
+    "prepared_cell_json_not_opened": true,
+    "prepared_matrix_contract_bound": true,
+    "qualification_credit_added": false,
+    "required_runtime_outputs_declared": true,
+    "runtime_artifacts_not_opened": true,
+    "runtime_observer_instance_attested": false,
+    "source_identity_attested": false,
+    "terminal_evidence_present": false
+  },
+  "created_at": "2026-09-29T00:00:00Z",
+  "decision": "bounded_f1_prepared_to_runtime_admission_boundary_projection",
+  "dependencies": {
+    "jobs_manifest": {
+      "bytes": 10859,
+      "content_opened": true,
+      "expected_schema": "core.cfd.jobs.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f1-reference-qualification-jobs.json",
+      "role": "current F1 prepared-only job manifest",
+      "sha256": "7e44ed371b5bb51eb432471fa2a8ab172930b939d4c0547961cfcea79d758ce0"
+    },
+    "observer_calibration": {
+      "bytes": 1528,
+      "content_opened": true,
+      "expected_schema": "core.f1.observer.calibration.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f1-observer-calibration.json",
+      "role": "current manufactured observer calibration metadata",
+      "sha256": "5951679cb44bca3906d7919be91abe3746cec04fd2c445ec9850b458912d0235"
+    },
+    "prepared_matrix": {
+      "bytes": 8609,
+      "content_opened": true,
+      "expected_schema": "core.f1.qualification.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/prepared-matrix.json",
+      "role": "current F1 prepared matrix metadata",
+      "sha256": "9d1552e368eb17881a5fa67a1a8035d1d026bf3382068dafed2e70fb381c5f56"
+    },
+    "qualification_design": {
+      "bytes": 84803,
+      "content_opened": true,
+      "expected_schema": "core.f1.qualification.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f1-reference-qualification-design.json",
+      "role": "current F1 Definition and observer metadata",
+      "sha256": "4e4dd82b35a674342a48f56c0080b5aee280ac58e59be633f3464f58571671d3"
+    }
+  },
+  "mutations": {
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "ledger_mutation": 0,
+    "plan_mutation": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0
+  },
+  "next_safe_action": "先由独立 trusted root 发布与当前 Definition/observer/source closure 绑定的非授权 admission envelope；再由外部 authority verifier 认证 source/runtime identity 和 fresh namespace。此边界本身只能检查prepared row binding 与 output contract，不能把 caller JSON 转成 execution authorization，也不能启动任何 workload。",
+  "prepared_context": {
+    "design_sha256": "4e4dd82b35a674342a48f56c0080b5aee280ac58e59be633f3464f58571671d3",
+    "matrix_sha256": "9d1552e368eb17881a5fa67a1a8035d1d026bf3382068dafed2e70fb381c5f56",
+    "observable_names_sha256": "1f3d3541cbabde5ddf6b7ea61f25ca5e5e1e96a40ab93150aa462c46c5358739",
+    "observer_code_sha256": "81b877526456694ecf301694e1f766c17c209ccf93f59ad5d53292be722c125e",
+    "observer_revision": "F1_H1_geometry_observer_qualification_v1",
+    "prepared_revision": "F1_H1_geometry_observer_qualification_v1",
+    "prepared_rows": 15,
+    "rows": [
+      {
+        "case_id": "CORE_F1_H1_obstacle_q0p00000000_h0p40000000_dp0p010000000000_qualification",
+        "index": 0,
+        "job_id": "f1-h1-qualification-cell-00",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-00/prepared.json",
+        "prepared_row_sha256": "6f993202fbdfe54b46a3245544e0e2b1275607c7dd1465e97d0e074902b597d5",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      },
+      {
+        "case_id": "CORE_F1_H1_obstacle_q0p00000000_h0p40000000_dp0p007500000000_qualification",
+        "index": 1,
+        "job_id": "f1-h1-qualification-cell-01",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-01/prepared.json",
+        "prepared_row_sha256": "87eae34f9e77fd05838c893a9636f9556d351f75818ef95609f468d81ad9e7d0",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      },
+      {
+        "case_id": "CORE_F1_H1_obstacle_q0p00000000_h0p40000000_dp0p005000000000_qualification",
+        "index": 2,
+        "job_id": "f1-h1-qualification-cell-02",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-02/prepared.json",
+        "prepared_row_sha256": "f8f31f54fb86ad508991f1690fc114c5676426d160b8b45f8c8be9743db9aa51",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      },
+      {
+        "case_id": "CORE_F1_H1_obstacle_q0p50000000_h0p46000000_dp0p010000000000_qualification",
+        "index": 3,
+        "job_id": "f1-h1-qualification-cell-03",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-03/prepared.json",
+        "prepared_row_sha256": "5641b7cb78395bae050780886bd80e84cb93042850c0db8bba6012eaf99e2805",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      },
+      {
+        "case_id": "CORE_F1_H1_obstacle_q0p50000000_h0p46000000_dp0p007500000000_qualification",
+        "index": 4,
+        "job_id": "f1-h1-qualification-cell-04",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-04/prepared.json",
+        "prepared_row_sha256": "80b8a7138e6194432be20f162c0c04a6e58339df7bb7fdf93f627989bcf86433",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      },
+      {
+        "case_id": "CORE_F1_H1_obstacle_q0p50000000_h0p46000000_dp0p005000000000_qualification",
+        "index": 5,
+        "job_id": "f1-h1-qualification-cell-05",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-05/prepared.json",
+        "prepared_row_sha256": "b6d0622fec493eec1084d3e1476fb69156d7c6cb62bb42c348e0cec7df81912e",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      },
+      {
+        "case_id": "CORE_F1_H1_obstacle_q1p00000000_h0p52000000_dp0p010000000000_qualification",
+        "index": 6,
+        "job_id": "f1-h1-qualification-cell-06",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-06/prepared.json",
+        "prepared_row_sha256": "40d4d70063dc7cc5855a268311b68c9eddf89e86c5064e49a04e2c5f83db2ec7",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      },
+      {
+        "case_id": "CORE_F1_H1_obstacle_q1p00000000_h0p52000000_dp0p007500000000_qualification",
+        "index": 7,
+        "job_id": "f1-h1-qualification-cell-07",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-07/prepared.json",
+        "prepared_row_sha256": "aa37df70bd570ab157de8f807a01f4cfd99f36d09083c5474c7d4ca39bb8567b",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      },
+      {
+        "case_id": "CORE_F1_H1_obstacle_q1p00000000_h0p52000000_dp0p005000000000_qualification",
+        "index": 8,
+        "job_id": "f1-h1-qualification-cell-08",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-08/prepared.json",
+        "prepared_row_sha256": "c60dcccddfae0ffd5499b0f74bfea569529f288b9ab9d019519e55b584f4d441",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      },
+      {
+        "case_id": "CORE_F1_H1_obstacle_q0p25000000_h0p43000000_dp0p007500000000_qualification",
+        "index": 9,
+        "job_id": "f1-h1-qualification-cell-09",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-09/prepared.json",
+        "prepared_row_sha256": "240986faf3bd384ffc2d6e4722fab20148999e77c12bb2a98754f7999ddec2f9",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      },
+      {
+        "case_id": "CORE_F1_H1_obstacle_q0p25000000_h0p43000000_dp0p005000000000_qualification",
+        "index": 10,
+        "job_id": "f1-h1-qualification-cell-10",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-10/prepared.json",
+        "prepared_row_sha256": "6eed544ae0e7e48a4eaad9ca82191d14469e5a56e299b92517842be9eae00deb",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      },
+      {
+        "case_id": "CORE_F1_H1_obstacle_q0p75000000_h0p49000000_dp0p007500000000_qualification",
+        "index": 11,
+        "job_id": "f1-h1-qualification-cell-11",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-11/prepared.json",
+        "prepared_row_sha256": "57d158e2919e1fdf47401d9e9992627842814e5a3dcf09c8904799b73a0a93c4",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      },
+      {
+        "case_id": "CORE_F1_H1_obstacle_q0p75000000_h0p49000000_dp0p005000000000_qualification",
+        "index": 12,
+        "job_id": "f1-h1-qualification-cell-12",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-12/prepared.json",
+        "prepared_row_sha256": "f3328f54eda221d84be8edac7cd92ca05866db001dc3863bd98feabc3d24b045",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      },
+      {
+        "case_id": "CORE_F1_H1_obstacle_q0p50000000_h0p46000000_dp0p007500000000_qualification_internal_time",
+        "index": 13,
+        "job_id": "f1-h1-qualification-cell-13",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-13/prepared.json",
+        "prepared_row_sha256": "0d7753bcfec0eb869c4a155b6b4494e3ad8433be8dd372ba0ee41b0564be22cf",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      },
+      {
+        "case_id": "CORE_F1_H1_obstacle_q0p50000000_h0p46000000_dp0p007500000000_qualification_native_output",
+        "index": 14,
+        "job_id": "f1-h1-qualification-cell-14",
+        "prepared_cell_json_opened": false,
+        "prepared_path_metadata": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/cell-14/prepared.json",
+        "prepared_row_sha256": "eb06c22225b65180b0399dc265d5df6b5cb9b4137ae456dfa586e41e257e5a4b",
+        "required_outputs": [
+          "product/result.json",
+          "product/trajectory.h5",
+          "product/audit.json",
+          "product/observations.json"
+        ],
+        "runtime_artifacts_opened": false,
+        "runtime_receipt_required": true
+      }
+    ],
+    "scope_id": "F1_single_obstacle_height_range_v1"
+  },
+  "prohibited_operations": [
+    "nested_prepared_or_runtime_artifact_path_follow_or_open",
+    "production_hdf5_bi4_trajectory_read_or_hash",
+    "xml_native_or_solver_input_execution",
+    "solver_worker_native_gpu_queue_start",
+    "caller_claim_promoted_to_trusted_root_or_execution_authority",
+    "registry_ledger_denominator_gate_plan_completion_mutation",
+    "preparation_promoted_to_formal_T1_T2_or_credit"
+  ],
+  "read_policy": {
+    "bounded_json_allowlist_only": true,
+    "max_json_bytes": 262144,
+    "nested_artifact_paths_followed": false,
+    "prepared_cell_json_opened": false,
+    "registry_ledger_denominator_gate_plan_write": false,
+    "runtime_result_audit_observation_trajectory_opened": false,
+    "solver_worker_native_gpu_queue": false,
+    "xml_or_native_input_opened": false
+  },
+  "record_id": "f1-prepared-runtime-admission-boundary-v1",
+  "schema": "core.f1.prepared_runtime_admission_boundary_report.v1",
+  "scope_id": "F1_single_obstacle_height_range_v1",
+  "side_effects": {
+    "bounded_json_inputs_opened": true,
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "native_started": false,
+    "plan_mutation": 0,
+    "prepared_cell_json_opened": false,
+    "production_bi4_opened": false,
+    "production_hdf5_opened": false,
+    "queue_started": false,
+    "registry_mutation": 0,
+    "runtime_artifacts_opened": false,
+    "solver_started": false,
+    "worker_started": false
+  },
+  "status": "blocked_fail_closed",
+  "validation": {
+    "blocked": true,
+    "blockers_nonempty": true,
+    "caller_cannot_mint_authority": true,
+    "contract_valid": true,
+    "credit_zero": true,
+    "formal_not_promoted": true,
+    "observer_calibration_not_promoted": true,
+    "prepared_not_promoted": true
+  }
+}

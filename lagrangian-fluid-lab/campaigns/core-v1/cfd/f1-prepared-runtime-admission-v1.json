@@ -1,0 +1,50 @@
+{
+  "schema": "core.f1.prepared_runtime_admission_campaign.v1",
+  "campaign_id": "f1-prepared-runtime-admission-v1",
+  "family": "F1",
+  "scope_id": "F1_single_obstacle_height_range_v1",
+  "boundary_id": "F1_H1_prepared_to_runtime_admission_v1",
+  "status": "contract_only_blocked",
+  "purpose": "bounded prepared-to-runtime admission interface; not a solver launch or qualification gate",
+  "inputs": {
+    "prepared_matrix": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/prepared-matrix.json",
+    "jobs_manifest": "campaigns/core-v1/cfd/f1-reference-qualification-jobs.json",
+    "qualification_design": "campaigns/core-v1/cfd/f1-reference-qualification-design.json",
+    "observer_calibration": "campaigns/core-v1/cfd/f1-observer-calibration.json"
+  },
+  "contract": {
+    "request_schema": "core.f1.prepared_runtime_admission_request.v1",
+    "fixed_rows": 15,
+    "row_binding": "prepared_row_sha256 plus exact case_id/job_id/output contract",
+    "source_identity": "definition/core_manifest/known_inputs/solver/runtime/per-cell hashes require external trusted root",
+    "observer_identity": "revision/code/layout metadata plus independently attested runtime observer instance",
+    "terminal_policy": "missing result/audit/observations/trajectory evidence is fail-closed; no survivor renormalization"
+  },
+  "execution": {
+    "launch_allowed": false,
+    "gencase": false,
+    "native": false,
+    "solver": false,
+    "worker": false,
+    "gpu": false,
+    "queue": false,
+    "production_artifacts_opened": false
+  },
+  "authorization": {
+    "diagnostic_only": true,
+    "formal": false,
+    "T1_numerical": false,
+    "T2": false,
+    "credit": 0,
+    "registry_eligible": false
+  },
+  "mutations": {
+    "plan": 0,
+    "registry": 0,
+    "ledger": 0,
+    "denominator": 0,
+    "gate": 0,
+    "completion": 0
+  },
+  "next_safe_action": "obtain an independently trusted non-authorizing envelope and external authority verification; do not launch from this campaign"
+}
