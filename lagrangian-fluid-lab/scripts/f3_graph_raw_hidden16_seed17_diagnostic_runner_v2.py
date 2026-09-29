@@ -65,6 +65,16 @@ MAX_READ_CHUNK = 1024 * 1024
 MAX_HDF5_LINKS = 8192
 ARTIFACT_ROOT = Path(tempfile.gettempdir()).resolve()
 EVALUATOR_OUTPUT_NAMES = ("evaluation", "trajectory", "progress", "log")
+DESCRIPTOR_PUBLICATION_SCHEMA = f"{SCHEMA}.descriptor_publication.v1"
+DESCRIPTOR_PUBLICATION_PROTOCOL = "sealed_pass_fds_inode_publication_v1"
+DESCRIPTOR_PUBLICATION_ARGUMENT = "--descriptor-publication-contract"
+DESCRIPTOR_PUBLICATION_FD_ARGUMENTS = {
+    "evaluation": "--evaluation-fd",
+    "trajectory": "--trajectory-fd",
+    "progress": "--progress-fd",
+    "log": "--log-fd",
+}
+TERMINAL_PROCESS_IDENTITY_SCHEMA = f"{TERMINAL_RECEIPT_SCHEMA}.process_identity"
 NVIDIA_SMI_COMMAND = (
     "nvidia-smi",
     "--query-gpu=index,uuid,pci.bus_id,memory.total,memory.used,memory.free",
@@ -143,6 +153,12 @@ def _reject_unknown(value: Mapping[str, Any], allowed: set[str] | frozenset[str]
     unknown = sorted(set(value) - set(allowed))
     if unknown:
         _fail(f"{name} contains unknown fields: {unknown}")
+
+
+def _sha256_hex(value: Any, name: str) -> str:
+    if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+        _fail(f"{name} must be a lowercase SHA-256")
+    return value
 
 
 def _absolute(value: Path | str, name: str) -> Path:
@@ -511,10 +527,237 @@ class _ReservedOutput:
 class _OutputReservations:
     parent_fd: int
     outputs: Mapping[str, _ReservedOutput]
+    publication_contract: Mapping[str, Any]
 
     @property
     def pass_fds(self) -> tuple[int, ...]:
         return tuple(item.fd for item in self.outputs.values())
+
+
+def _publication_fd_identity(
+    item: _ReservedOutput,
+    parent_info: os.stat_result,
+    name: str,
+) -> dict[str, Any]:
+    """Return the immutable identity that a child is allowed to publish to."""
+
+    try:
+        info = os.fstat(item.fd)
+    except OSError as error:
+        _fail(f"cannot inspect reserved {name} descriptor: {error}")
+    if (
+        not stat.S_ISREG(info.st_mode)
+        or info.st_nlink != 1
+        or info.st_uid != os.getuid()
+        or info.st_gid != os.getgid()
+    ):
+        _fail(f"reserved {name} descriptor is not an owner-only regular inode")
+    return {
+        "path": str(item.path),
+        "fd": int(item.fd),
+        "dev": int(info.st_dev),
+        "ino": int(info.st_ino),
+        "mode": int(stat.S_IMODE(info.st_mode)),
+        "uid": int(info.st_uid),
+        "gid": int(info.st_gid),
+        "nlink": int(info.st_nlink),
+        "parent_dev": int(parent_info.st_dev),
+        "parent_ino": int(parent_info.st_ino),
+        "stable_fd": True,
+        "fd_identity_stable": True,
+        "path_reopened": False,
+        "publication": "inherited_fd_write_no_replace",
+    }
+
+
+def _plan_receipt_field(plan: Any, key: str) -> str:
+    receipt = getattr(plan, "receipt", None)
+    if isinstance(receipt, Mapping) and key in receipt:
+        return str(receipt[key])
+    # The isolated reservation tests intentionally use a minimal plan object;
+    # this sentinel can never authorize a real launch because the child support
+    # contract remains explicitly absent.
+    return "0" * 64
+
+
+def _plan_binding_value(plan: Any) -> str:
+    value = getattr(plan, "binding_sha256", None)
+    return str(value) if isinstance(value, str) else "0" * 64
+
+
+def _descriptor_publication_contract(
+    plan: DiagnosticPlan,
+    reservations: _OutputReservations,
+) -> dict[str, Any]:
+    """Build the explicit child-side FD/inode publication contract.
+
+    The contract is deliberately separate from the pathname arguments accepted
+    by ``core_learning``.  A supporting child must receive the exact inherited
+    descriptors, write the final bytes to those descriptors, and never unlink,
+    replace, or reopen the bound output path.  The current core child does not
+    advertise these arguments, so the contract is present for verification but
+    remains non-authorizing and is rejected before Popen.
+    """
+
+    _validate_output_reservations(reservations)
+    try:
+        parent_info = os.fstat(reservations.parent_fd)
+    except OSError as error:
+        _fail(f"cannot inspect descriptor publication parent: {error}")
+    if not stat.S_ISDIR(parent_info.st_mode):
+        _fail("descriptor publication parent is not a directory")
+    outputs: dict[str, Any] = {}
+    for name in EVALUATOR_OUTPUT_NAMES:
+        item = reservations.outputs.get(name)
+        if item is None:
+            _fail(f"descriptor publication output {name!r} is missing")
+        outputs[name] = _publication_fd_identity(item, parent_info, name)
+    core = {
+        "schema": DESCRIPTOR_PUBLICATION_SCHEMA,
+        "protocol": DESCRIPTOR_PUBLICATION_PROTOCOL,
+        "namespace": str(plan.namespace),
+        "namespace_parent": {
+            "dev": int(parent_info.st_dev),
+            "ino": int(parent_info.st_ino),
+        },
+        "receipt_sha256": _plan_receipt_field(plan, "receipt_sha256"),
+        "identity_sha256": _plan_receipt_field(plan, "identity_sha256"),
+        "binding_sha256": _plan_binding_value(plan),
+        "outputs": outputs,
+        "pass_fds": list(reservations.pass_fds),
+        "publication_rule": "child_must_write_inherited_fd_without_path_reopen_or_replace",
+    }
+    contract_sha256 = canonical_digest(core)
+    required_suffix: list[str] = [DESCRIPTOR_PUBLICATION_ARGUMENT, contract_sha256]
+    for name in EVALUATOR_OUTPUT_NAMES:
+        required_suffix.extend(
+            [DESCRIPTOR_PUBLICATION_FD_ARGUMENTS[name], str(outputs[name]["fd"])]
+        )
+    command = tuple(getattr(plan, "command", ()))
+    supported = len(command) >= len(required_suffix) and tuple(command[-len(required_suffix):]) == tuple(required_suffix)
+    return {
+        **core,
+        "contract_sha256": contract_sha256,
+        "required_argv_suffix": required_suffix,
+        "child_contract_supported": bool(supported),
+    }
+
+
+def _validate_descriptor_publication_contract(
+    plan: DiagnosticPlan,
+    reservations: _OutputReservations,
+    contract: Mapping[str, Any],
+    *,
+    child_pid: int | None = None,
+) -> dict[str, Any]:
+    """Verify the contract and, when a child is live, its inherited FD map."""
+
+    contract = _mapping(contract, "descriptor publication contract")
+    _validate_output_reservations(reservations)
+    allowed = {
+        "schema", "protocol", "namespace", "namespace_parent", "receipt_sha256",
+        "identity_sha256", "binding_sha256", "outputs", "pass_fds",
+        "publication_rule", "contract_sha256", "required_argv_suffix",
+        "child_contract_supported",
+    }
+    _reject_unknown(contract, allowed, "descriptor publication contract")
+    _exact(contract, "schema", DESCRIPTOR_PUBLICATION_SCHEMA, "descriptor publication contract")
+    _exact(contract, "protocol", DESCRIPTOR_PUBLICATION_PROTOCOL, "descriptor publication contract")
+    _exact(contract, "namespace", str(plan.namespace), "descriptor publication contract")
+    _exact(contract, "receipt_sha256", _plan_receipt_field(plan, "receipt_sha256"), "descriptor publication contract")
+    _exact(contract, "identity_sha256", _plan_receipt_field(plan, "identity_sha256"), "descriptor publication contract")
+    _exact(contract, "binding_sha256", _plan_binding_value(plan), "descriptor publication contract")
+    _exact(contract, "publication_rule", "child_must_write_inherited_fd_without_path_reopen_or_replace", "descriptor publication contract")
+    _sha256_hex(contract.get("contract_sha256"), "descriptor publication contract.contract_sha256")
+    parent = _mapping(contract.get("namespace_parent"), "descriptor publication contract.namespace_parent")
+    _reject_unknown(parent, {"dev", "ino"}, "descriptor publication contract.namespace_parent")
+    if type(parent.get("dev")) is not int or type(parent.get("ino")) is not int:
+        _fail("descriptor publication parent identity must be integer-valued")
+    outputs = _mapping(contract.get("outputs"), "descriptor publication contract.outputs")
+    if set(outputs) != set(EVALUATOR_OUTPUT_NAMES):
+        _fail("descriptor publication contract.outputs must cover every evaluator output")
+    pass_fds = contract.get("pass_fds")
+    if not isinstance(pass_fds, list) or pass_fds != list(reservations.pass_fds):
+        _fail("descriptor publication pass_fds drifted")
+    for name in EVALUATOR_OUTPUT_NAMES:
+        observed = _mapping(outputs.get(name), f"descriptor publication contract.outputs.{name}")
+        _reject_unknown(
+            observed,
+            {
+                "path", "fd", "dev", "ino", "mode", "uid", "gid", "nlink",
+                "parent_dev", "parent_ino", "stable_fd", "fd_identity_stable",
+                "path_reopened", "publication",
+            },
+            f"descriptor publication contract.outputs.{name}",
+        )
+        item = reservations.outputs[name]
+        expected = dict(_publication_fd_identity(item, os.fstat(reservations.parent_fd), name))
+        if dict(observed) != expected:
+            _fail(f"descriptor publication contract output {name!r} drifted")
+    core = {key: contract[key] for key in (
+        "schema", "protocol", "namespace", "namespace_parent", "receipt_sha256",
+        "identity_sha256", "binding_sha256", "outputs", "pass_fds", "publication_rule",
+    )}
+    if contract.get("contract_sha256") != canonical_digest(core):
+        _fail("descriptor publication contract digest drifted")
+    required_suffix = contract.get("required_argv_suffix")
+    if not isinstance(required_suffix, list) or any(not isinstance(item, str) for item in required_suffix):
+        _fail("descriptor publication contract required_argv_suffix is malformed")
+    expected_suffix = [DESCRIPTOR_PUBLICATION_ARGUMENT, str(contract["contract_sha256"])]
+    for name in EVALUATOR_OUTPUT_NAMES:
+        expected_suffix.extend([DESCRIPTOR_PUBLICATION_FD_ARGUMENTS[name], str(reservations.outputs[name].fd)])
+    if required_suffix != expected_suffix:
+        _fail("descriptor publication contract argv suffix drifted")
+    command = tuple(getattr(plan, "command", ()))
+    supported = tuple(command[-len(expected_suffix):]) == tuple(expected_suffix)
+    if contract.get("child_contract_supported") is not supported:
+        _fail("descriptor publication child support attestation drifted")
+    result = {
+        "schema": DESCRIPTOR_PUBLICATION_SCHEMA,
+        "protocol": DESCRIPTOR_PUBLICATION_PROTOCOL,
+        "contract_sha256": str(contract["contract_sha256"]),
+        "contract": dict(contract),
+        "child_pid": child_pid,
+        "publication_attested": False,
+        "fd_bindings": {},
+    }
+    if child_pid is not None:
+        if type(child_pid) is not int or child_pid <= 0:
+            _fail("descriptor publication child PID must be positive")
+        for name in EVALUATOR_OUTPUT_NAMES:
+            item = reservations.outputs[name]
+            proc_fd = Path(f"/proc/{child_pid}/fd/{item.fd}")
+            try:
+                target = os.readlink(proc_fd)
+                info = os.stat(proc_fd)
+            except OSError as error:
+                _fail(f"child descriptor publication for {name!r} is unavailable: {error}")
+            expected = _mapping(outputs[name], f"descriptor publication contract.outputs.{name}")
+            if target != str(item.path):
+                _fail(f"child descriptor publication for {name!r} reopened or replaced the path")
+            observed_identity = {
+                "dev": int(info.st_dev),
+                "ino": int(info.st_ino),
+                "mode": int(stat.S_IMODE(info.st_mode)),
+                "uid": int(info.st_uid),
+                "gid": int(info.st_gid),
+                "nlink": int(info.st_nlink),
+            }
+            for key, observed_value in observed_identity.items():
+                if observed_value != int(expected[key]):
+                    _fail(f"child descriptor publication for {name!r} drifted at {key}")
+            result["fd_bindings"][name] = {
+                "fd": int(item.fd),
+                "path": target,
+                **observed_identity,
+            }
+        result["publication_attested"] = True
+    return result
+
+
+def _reject_unsupported_descriptor_publication(contract: Mapping[str, Any]) -> None:
+    del contract
+    _fail("evaluator output publication is pathname-only; descriptor-bound child attestation is absent")
 
 
 def _assert_path_absent(parent_fd: int, path: Path, name: str) -> None:
@@ -611,7 +854,17 @@ def _reserve_evaluator_outputs(plan: DiagnosticPlan) -> _OutputReservations:
                     "path_reopened": False,
                 },
             )
-        return _OutputReservations(parent_fd=parent_fd, outputs=dict(opened))
+        provisional = _OutputReservations(
+            parent_fd=parent_fd,
+            outputs=dict(opened),
+            publication_contract={},
+        )
+        contract = _descriptor_publication_contract(plan, provisional)
+        return _OutputReservations(
+            parent_fd=parent_fd,
+            outputs=dict(opened),
+            publication_contract=contract,
+        )
     except BaseException:
         for item in opened.values():
             try:
@@ -676,16 +929,22 @@ def _release_output_reservations(reservations: _OutputReservations, *, remove_un
         pass
 
 
-def _require_descriptor_bound_outputs(plan: DiagnosticPlan, reservations: _OutputReservations) -> None:
-    """Do not let a pathname-only evaluator consume a pre-Popen reservation."""
+def _require_descriptor_bound_outputs(
+    plan: DiagnosticPlan,
+    reservations: _OutputReservations,
+) -> Mapping[str, Any]:
+    """Require an explicit inherited-FD/inode contract before Popen."""
 
     _validate_output_reservations(reservations)
-    # The current core evaluator accepts --output/--trajectory-output/
-    # --progress-output pathnames and creates its own anonymous staging files.
-    # It has no receipt-bound fd publication protocol.  A reserved pathname is
-    # therefore not a child-side attestation and cannot authorize Popen.
-    del plan
-    _fail("evaluator output publication is pathname-only; descriptor-bound child attestation is absent")
+    contract = _validate_descriptor_publication_contract(
+        plan,
+        reservations,
+        reservations.publication_contract,
+    )
+    if contract["publication_attested"] or bool(reservations.publication_contract.get("child_contract_supported")):
+        return reservations.publication_contract
+    _reject_unsupported_descriptor_publication(reservations.publication_contract)
+    return reservations.publication_contract
 
 
 def _validate_command(identity: Mapping[str, Any], outputs: Mapping[str, Path]) -> tuple[tuple[str, ...], dict[str, str]]:
@@ -765,7 +1024,19 @@ def _validate_command(identity: Mapping[str, Any], outputs: Mapping[str, Path]) 
         "--diagnostic",
     )
     if argv != expected_argv:
-        _fail("identity command is not the exact current-manifest evaluator argv")
+        # A future descriptor-aware child may append only this fixed contract
+        # suffix.  The current core child has no such suffix and is therefore
+        # still rejected by _require_descriptor_bound_outputs after planning.
+        suffix = argv[len(expected_argv):] if argv[:len(expected_argv)] == expected_argv else ()
+        expected_suffix_length = 2 + 2 * len(EVALUATOR_OUTPUT_NAMES)
+        if len(suffix) != expected_suffix_length or suffix[0] != DESCRIPTOR_PUBLICATION_ARGUMENT:
+            _fail("identity command is not the exact current-manifest evaluator argv")
+        _sha256_hex(suffix[1], "identity command descriptor contract digest")
+        for offset, name in enumerate(EVALUATOR_OUTPUT_NAMES):
+            flag = suffix[2 + 2 * offset]
+            raw_fd = suffix[3 + 2 * offset]
+            if flag != DESCRIPTOR_PUBLICATION_FD_ARGUMENTS[name] or not raw_fd.isdigit() or int(raw_fd) < 0:
+                _fail("identity command descriptor publication FD mapping drifted")
     return argv, env
 
 
@@ -1334,6 +1605,7 @@ def _capture_runtime_identity(
     process: subprocess.Popen[Any],
     plan: DiagnosticPlan,
     environment: Mapping[str, str],
+    reservations: _OutputReservations,
 ) -> tuple[int, str, dict[str, Any]]:
     if type(process) is not _SEALED_POPEN:
         _fail("Popen did not return the captured real subprocess.Popen type")
@@ -1366,6 +1638,12 @@ def _capture_runtime_identity(
         raise
     except (OSError, UnicodeError) as error:
         _fail(f"cannot capture sealed process identity: {error}")
+    publication = _validate_descriptor_publication_contract(
+        plan,
+        reservations,
+        reservations.publication_contract,
+        child_pid=pid,
+    )
     child_gpu = _probe_live_gpu_identity(plan.gpu_identity, child_pid=pid)
     return pid, starttime, {
         "cmdline_sha256": hashlib.sha256(b"\0".join(cmdline)).hexdigest(),
@@ -1376,6 +1654,7 @@ def _capture_runtime_identity(
         "procfs_starttime": starttime,
         "gpu": child_gpu,
         "child_runtime_gpu_attestation": True,
+        "descriptor_publication": publication,
     }
 
 
@@ -1425,6 +1704,73 @@ def _new_sealed_witness(
     return witness
 
 
+def _validate_recorded_descriptor_publication(
+    plan: DiagnosticPlan,
+    runtime_identity: Mapping[str, Any],
+    pid: int,
+) -> Mapping[str, Any]:
+    """Validate the serialized child FD publication witness after wait."""
+
+    publication = _mapping(runtime_identity.get("descriptor_publication"), "runtime_identity.descriptor_publication")
+    _reject_unknown(
+        publication,
+        {"schema", "protocol", "contract_sha256", "contract", "child_pid", "publication_attested", "fd_bindings"},
+        "runtime_identity.descriptor_publication",
+    )
+    _exact(publication, "schema", DESCRIPTOR_PUBLICATION_SCHEMA, "runtime_identity.descriptor_publication")
+    _exact(publication, "protocol", DESCRIPTOR_PUBLICATION_PROTOCOL, "runtime_identity.descriptor_publication")
+    _exact(publication, "contract_sha256", _mapping(publication.get("contract"), "runtime_identity.descriptor_publication.contract").get("contract_sha256"), "runtime_identity.descriptor_publication")
+    _exact(publication, "child_pid", pid, "runtime_identity.descriptor_publication")
+    _exact(publication, "publication_attested", True, "runtime_identity.descriptor_publication")
+    contract = _mapping(publication.get("contract"), "runtime_identity.descriptor_publication.contract")
+    allowed_contract = {
+        "schema", "protocol", "namespace", "namespace_parent", "receipt_sha256",
+        "identity_sha256", "binding_sha256", "outputs", "pass_fds",
+        "publication_rule", "contract_sha256", "required_argv_suffix",
+        "child_contract_supported",
+    }
+    _reject_unknown(contract, allowed_contract, "runtime_identity.descriptor_publication.contract")
+    _exact(contract, "schema", DESCRIPTOR_PUBLICATION_SCHEMA, "runtime_identity.descriptor_publication.contract")
+    _exact(contract, "protocol", DESCRIPTOR_PUBLICATION_PROTOCOL, "runtime_identity.descriptor_publication.contract")
+    _exact(contract, "namespace", str(plan.namespace), "runtime_identity.descriptor_publication.contract")
+    _exact(contract, "receipt_sha256", plan.receipt["receipt_sha256"], "runtime_identity.descriptor_publication.contract")
+    _exact(contract, "identity_sha256", plan.receipt["identity_sha256"], "runtime_identity.descriptor_publication.contract")
+    _exact(contract, "binding_sha256", plan.binding_sha256, "runtime_identity.descriptor_publication.contract")
+    _exact(contract, "publication_rule", "child_must_write_inherited_fd_without_path_reopen_or_replace", "runtime_identity.descriptor_publication.contract")
+    _exact(contract, "child_contract_supported", True, "runtime_identity.descriptor_publication.contract")
+    _sha256_hex(contract.get("contract_sha256"), "runtime_identity.descriptor_publication.contract.contract_sha256")
+    core = {key: contract[key] for key in (
+        "schema", "protocol", "namespace", "namespace_parent", "receipt_sha256",
+        "identity_sha256", "binding_sha256", "outputs", "pass_fds", "publication_rule",
+    )}
+    if contract["contract_sha256"] != canonical_digest(core):
+        _fail("serialized descriptor publication contract digest drifted")
+    if publication["contract_sha256"] != contract["contract_sha256"]:
+        _fail("serialized descriptor publication contract reference drifted")
+    outputs = _mapping(contract.get("outputs"), "runtime_identity.descriptor_publication.contract.outputs")
+    if set(outputs) != set(EVALUATOR_OUTPUT_NAMES):
+        _fail("serialized descriptor publication contract does not cover every output")
+    pass_fds = contract.get("pass_fds")
+    if not isinstance(pass_fds, list) or any(type(fd) is not int or fd < 0 for fd in pass_fds):
+        _fail("serialized descriptor publication pass_fds is malformed")
+    required_suffix = contract.get("required_argv_suffix")
+    expected_suffix = [DESCRIPTOR_PUBLICATION_ARGUMENT, str(contract["contract_sha256"])]
+    for name in EVALUATOR_OUTPUT_NAMES:
+        expected_suffix.extend([DESCRIPTOR_PUBLICATION_FD_ARGUMENTS[name], str(_mapping(outputs[name], f"output {name}")["fd"])])
+    if required_suffix != expected_suffix or tuple(plan.command[-len(expected_suffix):]) != tuple(expected_suffix):
+        _fail("serialized descriptor publication command binding drifted")
+    bindings = _mapping(publication.get("fd_bindings"), "runtime_identity.descriptor_publication.fd_bindings")
+    if set(bindings) != set(EVALUATOR_OUTPUT_NAMES):
+        _fail("serialized descriptor publication fd_bindings are incomplete")
+    for name in EVALUATOR_OUTPUT_NAMES:
+        expected = _mapping(outputs[name], f"runtime contract output {name}")
+        observed = _mapping(bindings[name], f"runtime descriptor publication {name}")
+        _reject_unknown(observed, {"fd", "path", "dev", "ino", "mode", "uid", "gid", "nlink"}, f"runtime descriptor publication {name}")
+        for key in ("fd", "path", "dev", "ino", "mode", "uid", "gid", "nlink"):
+            _exact(observed, key, expected[key], f"runtime descriptor publication {name}")
+    return publication
+
+
 def _validate_process_witness(plan: DiagnosticPlan, witness: Any) -> _SealedProcessWitness:
     if type(witness) is not _SealedProcessWitness:
         _fail("process evidence requires an internal sealed real Popen/wait witness")
@@ -1463,6 +1809,7 @@ def _validate_process_witness(plan: DiagnosticPlan, witness: Any) -> _SealedProc
     _validate_child_gpu_attestation(plan, witness.runtime_identity, witness.pid)
     if witness.runtime_identity.get("child_runtime_gpu_attestation") is not True:
         _fail("process evidence lacks a sealed child GPU runtime attestation")
+    _validate_recorded_descriptor_publication(plan, witness.runtime_identity, witness.pid)
     return witness
 
 
@@ -1497,8 +1844,18 @@ def _run_real_popen_wait(
             stdin=subprocess.DEVNULL, stdout=log_file, stderr=subprocess.STDOUT,
             close_fds=True, pass_fds=reservations.pass_fds, start_new_session=True,
         )
-        pid, starttime, runtime_identity = _capture_runtime_identity(process, plan, environment)
+        pid, starttime, runtime_identity = _capture_runtime_identity(
+            process,
+            plan,
+            environment,
+            reservations,
+        )
         wait_returncode = _SEALED_POPEN.wait(process)
+        _validate_descriptor_publication_contract(
+            plan,
+            reservations,
+            reservations.publication_contract,
+        )
         witness = _new_sealed_witness(plan, process, wait_returncode, environment, pid, starttime, runtime_identity)
         return _validate_process_witness(plan, witness)
     finally:
@@ -1704,6 +2061,23 @@ def _validate_terminal_artifacts(plan: DiagnosticPlan) -> dict[str, Any]:
     }
 
 
+def _terminal_process_identity_core(process: Mapping[str, Any]) -> dict[str, Any]:
+    """Return the portable process identity covered by the terminal seal."""
+
+    return {
+        key: process[key]
+        for key in (
+            "schema", "real_popen_wait", "sealed_witness", "process_type", "pid",
+            "pid_starttime", "wait_observed", "returncode", "wait_returncode",
+            "runtime_identity",
+        )
+    }
+
+
+def _terminal_process_identity_sha256(process: Mapping[str, Any]) -> str:
+    return canonical_digest(_terminal_process_identity_core(process))
+
+
 def _terminal_receipt(
     plan: DiagnosticPlan,
     witness: _SealedProcessWitness,
@@ -1741,6 +2115,7 @@ def _terminal_receipt(
         "effective_env_sha256": plan.effective_env_sha256,
         "resource_snapshot": dict(resource_snapshot),
         "process": {
+            "schema": TERMINAL_PROCESS_IDENTITY_SCHEMA,
             "real_popen_wait": True,
             "sealed_witness": True,
             "process_type": f"{type(witness.process).__module__}.{type(witness.process).__qualname__}",
@@ -1771,6 +2146,12 @@ def _terminal_receipt(
         },
         **ZERO_CREDIT,
     }
+    process = receipt_core["process"]
+    process["process_identity_sha256"] = _terminal_process_identity_sha256(process)
+    process["witness_seal"] = str(witness._seal)
+    process["witness_seal_sha256"] = hashlib.sha256(
+        str(witness._seal).encode("utf-8")
+    ).hexdigest()
     receipt_core["terminal_receipt_sha256"] = canonical_digest(receipt_core)
     return receipt_core
 
@@ -1922,6 +2303,346 @@ def build_report(receipt_path: Path | str | None, *, execute_requested: bool = F
         }
 
 
+def _validate_terminal_artifact_descriptor(
+    value: Any,
+    name: str,
+    expected_path: str,
+) -> dict[str, Any]:
+    descriptor = dict(_mapping(value, name))
+    _reject_unknown(
+        descriptor,
+        {
+            "path", "resolved_path", "dev", "ino", "bytes", "mode", "uid", "gid",
+            "nlink", "mtime_ns", "parent_dev", "parent_ino", "sha256",
+            "leaf_symlink", "stable_fd", "fd_identity_stable", "path_reopened",
+            "content_opened",
+        },
+        name,
+    )
+    _exact(descriptor, "path", expected_path, name)
+    _absolute(descriptor.get("path"), f"{name}.path")
+    for key in ("dev", "ino", "bytes", "mode", "uid", "gid", "nlink", "mtime_ns"):
+        if type(descriptor.get(key)) is not int:
+            _fail(f"{name}.{key} must be an integer")
+    if descriptor["bytes"] < 1 or descriptor["dev"] < 0 or descriptor["ino"] <= 0:
+        _fail(f"{name} has an invalid file identity")
+    _exact(descriptor, "mode", 0o600, name)
+    _exact(descriptor, "uid", os.getuid(), name)
+    _exact(descriptor, "gid", os.getgid(), name)
+    _exact(descriptor, "nlink", 1, name)
+    _sha256_hex(descriptor.get("sha256"), f"{name}.sha256")
+    _exact(descriptor, "stable_fd", True, name)
+    _exact(descriptor, "fd_identity_stable", True, name)
+    _exact(descriptor, "path_reopened", False, name)
+    if "resolved_path" in descriptor:
+        _exact(descriptor, "resolved_path", expected_path, name)
+    if "parent_dev" in descriptor and type(descriptor["parent_dev"]) is not int:
+        _fail(f"{name}.parent_dev must be an integer")
+    if "parent_ino" in descriptor and type(descriptor["parent_ino"]) is not int:
+        _fail(f"{name}.parent_ino must be an integer")
+    if "leaf_symlink" in descriptor:
+        _exact(descriptor, "leaf_symlink", False, name)
+    if "content_opened" in descriptor:
+        _exact(descriptor, "content_opened", True, name)
+    return descriptor
+
+
+def _validate_terminal_hdf5_report_receipt(
+    value: Any,
+    trajectory_descriptor: Mapping[str, Any],
+) -> dict[str, Any]:
+    receipt = dict(_mapping(value, "terminal_receipt.terminal_hdf5_receipt"))
+    allowed = set(ZERO_CREDIT) | {
+        "schema", "status", "producer", "synthetic_only", "path", "descriptor",
+        "sha256", "bytes", "case_id", "transitions", "frames", "required_datasets",
+        "hard_link_count", "link_inventory", "link_inventory_sha256",
+        "external_storage_count", "external_storage_rejected", "external_links_rejected",
+        "soft_links_rejected", "virtual_datasets_rejected", "stable_fd", "path_reopened",
+        "receipt_sha256",
+    }
+    _reject_unknown(receipt, allowed, "terminal_receipt.terminal_hdf5_receipt")
+    _exact(receipt, "schema", f"{TERMINAL_RECEIPT_SCHEMA}.hdf5", "terminal HDF5 receipt")
+    _exact(receipt, "status", "bounded_hdf5_terminal_receipt", "terminal HDF5 receipt")
+    _exact(receipt, "producer", "sealed_real_popen_wait_only", "terminal HDF5 receipt")
+    _exact(receipt, "synthetic_only", False, "terminal HDF5 receipt")
+    _exact(receipt, "path", trajectory_descriptor["path"], "terminal HDF5 receipt")
+    if dict(_mapping(receipt.get("descriptor"), "terminal HDF5 receipt.descriptor")) != dict(trajectory_descriptor):
+        _fail("terminal HDF5 descriptor is not the bound trajectory descriptor")
+    _exact(receipt, "sha256", trajectory_descriptor["sha256"], "terminal HDF5 receipt")
+    _exact(receipt, "bytes", trajectory_descriptor["bytes"], "terminal HDF5 receipt")
+    _exact(receipt, "case_id", CASE_ID, "terminal HDF5 receipt")
+    _exact(receipt, "transitions", TRANSITIONS, "terminal HDF5 receipt")
+    _exact(receipt, "frames", FRAMES, "terminal HDF5 receipt")
+    _exact(
+        receipt,
+        "required_datasets",
+        ["time", "position", "velocity", "particle_id", "particle_zone", "valid", "mass"],
+        "terminal HDF5 receipt",
+    )
+    inventory = receipt.get("link_inventory")
+    if not isinstance(inventory, list) or any(not isinstance(item, Mapping) for item in inventory):
+        _fail("terminal HDF5 link_inventory must be a mapping list")
+    if type(receipt.get("hard_link_count")) is not int or receipt["hard_link_count"] != len(inventory):
+        _fail("terminal HDF5 hard_link_count is not bound to link_inventory")
+    for index, item in enumerate(inventory):
+        link = dict(item)
+        _reject_unknown(link, {"path", "link_type", "object_type", "external_count", "virtual"}, f"terminal HDF5 link_inventory[{index}]")
+        if not isinstance(link.get("path"), str) or not link["path"] or "\x00" in link["path"]:
+            _fail(f"terminal HDF5 link_inventory[{index}].path is invalid")
+        _exact(link, "link_type", "hard", f"terminal HDF5 link_inventory[{index}]")
+        if link.get("object_type") not in {"group", "dataset"}:
+            _fail(f"terminal HDF5 link_inventory[{index}].object_type is invalid")
+        _exact(link, "external_count", 0, f"terminal HDF5 link_inventory[{index}]")
+        _exact(link, "virtual", False, f"terminal HDF5 link_inventory[{index}]")
+    _exact(receipt, "link_inventory_sha256", canonical_digest(inventory), "terminal HDF5 receipt")
+    _exact(receipt, "external_storage_count", 0, "terminal HDF5 receipt")
+    for key in ("external_storage_rejected", "external_links_rejected", "soft_links_rejected", "virtual_datasets_rejected", "stable_fd"):
+        _exact(receipt, key, True, "terminal HDF5 receipt")
+    _exact(receipt, "path_reopened", False, "terminal HDF5 receipt")
+    for key, expected in ZERO_CREDIT.items():
+        _exact(receipt, key, expected, "terminal HDF5 receipt")
+    _sha256_hex(receipt.get("receipt_sha256"), "terminal HDF5 receipt.receipt_sha256")
+    expected_digest = canonical_digest({key: value for key, value in receipt.items() if key != "receipt_sha256"})
+    _exact(receipt, "receipt_sha256", expected_digest, "terminal HDF5 receipt")
+    return receipt
+
+
+def _validate_report_descriptor_publication(
+    report: Mapping[str, Any],
+    publication: Any,
+    pid: int,
+) -> Mapping[str, Any]:
+    """Validate the descriptor publication witness carried by a terminal report."""
+
+    publication = _mapping(publication, "terminal process descriptor_publication")
+    _reject_unknown(
+        publication,
+        {"schema", "protocol", "contract_sha256", "contract", "child_pid", "publication_attested", "fd_bindings"},
+        "terminal process descriptor_publication",
+    )
+    _exact(publication, "schema", DESCRIPTOR_PUBLICATION_SCHEMA, "terminal process descriptor_publication")
+    _exact(publication, "protocol", DESCRIPTOR_PUBLICATION_PROTOCOL, "terminal process descriptor_publication")
+    _exact(publication, "child_pid", pid, "terminal process descriptor_publication")
+    _exact(publication, "publication_attested", True, "terminal process descriptor_publication")
+    contract = _mapping(publication.get("contract"), "terminal process descriptor_publication.contract")
+    _reject_unknown(
+        contract,
+        {
+            "schema", "protocol", "namespace", "namespace_parent", "receipt_sha256",
+            "identity_sha256", "binding_sha256", "outputs", "pass_fds",
+            "publication_rule", "contract_sha256", "required_argv_suffix",
+            "child_contract_supported",
+        },
+        "terminal process descriptor_publication.contract",
+    )
+    _exact(contract, "schema", DESCRIPTOR_PUBLICATION_SCHEMA, "terminal descriptor publication contract")
+    _exact(contract, "protocol", DESCRIPTOR_PUBLICATION_PROTOCOL, "terminal descriptor publication contract")
+    _exact(contract, "namespace", report["namespace"], "terminal descriptor publication contract")
+    _exact(contract, "receipt_sha256", report["receipt_sha256"], "terminal descriptor publication contract")
+    _exact(contract, "identity_sha256", report["identity_sha256"], "terminal descriptor publication contract")
+    _exact(contract, "binding_sha256", report["binding_sha256"], "terminal descriptor publication contract")
+    _exact(contract, "publication_rule", "child_must_write_inherited_fd_without_path_reopen_or_replace", "terminal descriptor publication contract")
+    _exact(contract, "child_contract_supported", True, "terminal descriptor publication contract")
+    _sha256_hex(contract.get("contract_sha256"), "terminal descriptor publication contract.contract_sha256")
+    _exact(publication, "contract_sha256", contract["contract_sha256"], "terminal process descriptor_publication")
+    core = {key: contract[key] for key in (
+        "schema", "protocol", "namespace", "namespace_parent", "receipt_sha256",
+        "identity_sha256", "binding_sha256", "outputs", "pass_fds", "publication_rule",
+    )}
+    _exact(contract, "contract_sha256", canonical_digest(core), "terminal descriptor publication contract")
+    parent = _mapping(contract.get("namespace_parent"), "terminal descriptor publication contract.namespace_parent")
+    _reject_unknown(parent, {"dev", "ino"}, "terminal descriptor publication contract.namespace_parent")
+    if type(parent.get("dev")) is not int or type(parent.get("ino")) is not int:
+        _fail("terminal descriptor publication parent identity is malformed")
+    outputs = _mapping(contract.get("outputs"), "terminal descriptor publication contract.outputs")
+    expected_output_paths = _mapping(report.get("artifacts"), "report.artifacts")
+    if set(outputs) != set(EVALUATOR_OUTPUT_NAMES):
+        _fail("terminal descriptor publication contract output set is incomplete")
+    pass_fds = contract.get("pass_fds")
+    if not isinstance(pass_fds, list) or any(type(fd) is not int or fd < 0 for fd in pass_fds):
+        _fail("terminal descriptor publication pass_fds is malformed")
+    for name in EVALUATOR_OUTPUT_NAMES:
+        output = _mapping(outputs[name], f"terminal descriptor publication output {name}")
+        _reject_unknown(
+            output,
+            {
+                "path", "fd", "dev", "ino", "mode", "uid", "gid", "nlink",
+                "parent_dev", "parent_ino", "stable_fd", "fd_identity_stable",
+                "path_reopened", "publication",
+            },
+            f"terminal descriptor publication output {name}",
+        )
+        _exact(output, "path", expected_output_paths[name], f"terminal descriptor publication output {name}")
+        if type(output.get("fd")) is not int or output["fd"] < 0:
+            _fail(f"terminal descriptor publication output {name}.fd is invalid")
+        for key in ("dev", "ino", "mode", "uid", "gid", "nlink", "parent_dev", "parent_ino"):
+            if type(output.get(key)) is not int:
+                _fail(f"terminal descriptor publication output {name}.{key} is invalid")
+        _exact(output, "mode", 0o600, f"terminal descriptor publication output {name}")
+        _exact(output, "uid", os.getuid(), f"terminal descriptor publication output {name}")
+        _exact(output, "gid", os.getgid(), f"terminal descriptor publication output {name}")
+        _exact(output, "nlink", 1, f"terminal descriptor publication output {name}")
+        _exact(output, "stable_fd", True, f"terminal descriptor publication output {name}")
+        _exact(output, "fd_identity_stable", True, f"terminal descriptor publication output {name}")
+        _exact(output, "path_reopened", False, f"terminal descriptor publication output {name}")
+        _exact(output, "publication", "inherited_fd_write_no_replace", f"terminal descriptor publication output {name}")
+    if pass_fds != [outputs[name]["fd"] for name in EVALUATOR_OUTPUT_NAMES]:
+        _fail("terminal descriptor publication pass_fds does not match output descriptors")
+    required_suffix = contract.get("required_argv_suffix")
+    expected_suffix = [DESCRIPTOR_PUBLICATION_ARGUMENT, str(contract["contract_sha256"])]
+    for name in EVALUATOR_OUTPUT_NAMES:
+        expected_suffix.extend([DESCRIPTOR_PUBLICATION_FD_ARGUMENTS[name], str(outputs[name]["fd"])])
+    if required_suffix != expected_suffix or tuple(report["command"][-len(expected_suffix):]) != tuple(expected_suffix):
+        _fail("terminal descriptor publication command suffix is not bound")
+    bindings = _mapping(publication.get("fd_bindings"), "terminal process descriptor_publication.fd_bindings")
+    if set(bindings) != set(EVALUATOR_OUTPUT_NAMES):
+        _fail("terminal process descriptor_publication.fd_bindings is incomplete")
+    for name in EVALUATOR_OUTPUT_NAMES:
+        observed = _mapping(bindings[name], f"terminal process descriptor publication {name}")
+        _reject_unknown(observed, {"fd", "path", "dev", "ino", "mode", "uid", "gid", "nlink"}, f"terminal process descriptor publication {name}")
+        expected = outputs[name]
+        for key in ("fd", "path", "dev", "ino", "mode", "uid", "gid", "nlink"):
+            _exact(observed, key, expected[key], f"terminal process descriptor publication {name}")
+    return publication
+
+
+def _validate_terminal_receipt_binding(report: Mapping[str, Any], value: Any) -> None:
+    """Reject any terminal claim that is not a complete bound projection."""
+
+    receipt = dict(_mapping(value, "report.terminal_receipt"))
+    allowed = set(ZERO_CREDIT) | {
+        "schema", "status", "report_id", "seed", "model_kind", "hidden", "updates",
+        "case_id", "split", "transitions", "frames", "receipt_sha256", "identity_sha256",
+        "namespace", "nonce", "binding_sha256", "manifest", "training_receipt", "checkpoint",
+        "executable", "cwd", "cwd_descriptor", "command", "command_sha256",
+        "env_overrides", "effective_env_sha256", "resource_snapshot", "process", "artifacts",
+        "artifact_identity_sha256", "terminal_hdf5_receipt", "side_effects",
+        "terminal_receipt_sha256", "terminal_receipt_file",
+    }
+    _reject_unknown(receipt, allowed, "report.terminal_receipt")
+    _exact(receipt, "schema", TERMINAL_RECEIPT_SCHEMA, "terminal receipt")
+    _exact(receipt, "status", "diagnostic_terminal_verified", "terminal receipt")
+    _exact(receipt, "report_id", REPORT_ID, "terminal receipt")
+    for field in ("seed", "model_kind", "hidden", "updates", "case_id", "split", "transitions", "frames", "receipt_sha256", "identity_sha256", "namespace", "nonce", "binding_sha256", "command_sha256", "effective_env_sha256"):
+        _exact(receipt, field, report[field] if field in report else receipt[field], "terminal receipt")
+    for field in ("seed", "model_kind", "hidden", "updates", "case_id", "split", "transitions", "frames", "receipt_sha256", "identity_sha256", "namespace", "binding_sha256", "command_sha256", "effective_env_sha256"):
+        _exact(receipt, field, report[field], "terminal receipt")
+    _exact(receipt, "nonce", report["namespace_nonce"], "terminal receipt")
+    _absolute(receipt["namespace"], "terminal receipt.namespace")
+    if list(receipt.get("command", [])) != list(report["command"]):
+        _fail("terminal receipt command is not report-bound")
+    _exact(receipt, "cwd", report["cwd"], "terminal receipt")
+    if dict(_mapping(receipt.get("cwd_descriptor"), "terminal receipt.cwd_descriptor")) != dict(report["cwd_descriptor"]):
+        _fail("terminal receipt cwd descriptor is not report-bound")
+    if dict(_mapping(receipt.get("executable"), "terminal receipt.executable")) != dict(report["executable_descriptor"]):
+        _fail("terminal receipt executable descriptor is not report-bound")
+    if dict(_mapping(receipt.get("env_overrides"), "terminal receipt.env_overrides")) != dict(report["env_overrides"]):
+        _fail("terminal receipt environment is not report-bound")
+    _exact(receipt, "effective_env_sha256", report["effective_env_sha256"], "terminal receipt")
+    if dict(_mapping(receipt.get("resource_snapshot"), "terminal receipt.resource_snapshot")) != dict(report["resource_snapshot"]):
+        _fail("terminal receipt resource snapshot is not report-bound")
+    input_descriptors = _mapping(report.get("input_descriptors"), "report.input_descriptors")
+    for identity_key, descriptor_key in (("manifest", "manifest"), ("training_receipt", "training_receipt"), ("checkpoint", "checkpoint")):
+        identity_record = _mapping(receipt.get(identity_key), f"terminal receipt.{identity_key}")
+        file_descriptor = _mapping(identity_record.get("file"), f"terminal receipt.{identity_key}.file")
+        expected_descriptor = _mapping(input_descriptors.get(descriptor_key), f"report.input_descriptors.{descriptor_key}")
+        for key in ("path", "dev", "ino", "bytes", "mode", "uid", "gid", "nlink", "mtime_ns", "sha256"):
+            _exact(file_descriptor, key, expected_descriptor[key], f"terminal receipt.{identity_key}.file")
+    _validate_terminal_artifact_descriptor(
+        receipt["artifacts"]["evaluation"],
+        "terminal receipt.artifacts.evaluation",
+        report["artifacts"]["evaluation"],
+    )
+    _validate_terminal_artifact_descriptor(
+        receipt["artifacts"]["trajectory"],
+        "terminal receipt.artifacts.trajectory",
+        report["artifacts"]["trajectory"],
+    )
+    _validate_terminal_artifact_descriptor(
+        receipt["artifacts"]["progress"],
+        "terminal receipt.artifacts.progress",
+        report["artifacts"]["progress"],
+    )
+    _validate_terminal_artifact_descriptor(
+        receipt["artifacts"]["validator"],
+        "terminal receipt.artifacts.validator",
+        report["artifacts"]["validator"],
+    )
+    artifacts = _mapping(receipt.get("artifacts"), "terminal receipt.artifacts")
+    if set(artifacts) != {"evaluation", "trajectory", "progress", "validator"}:
+        _fail("terminal receipt.artifacts must contain exactly the validated outputs")
+    hdf5 = _validate_terminal_hdf5_report_receipt(
+        receipt.get("terminal_hdf5_receipt"),
+        _mapping(artifacts["trajectory"], "terminal receipt.artifacts.trajectory"),
+    )
+    expected_artifact_identity = canonical_digest({
+        "evaluation": artifacts["evaluation"],
+        "trajectory": artifacts["trajectory"],
+        "progress": artifacts["progress"],
+        "validator": artifacts["validator"],
+        "terminal_hdf5_receipt": hdf5,
+    })
+    _exact(receipt, "artifact_identity_sha256", expected_artifact_identity, "terminal receipt")
+    process = dict(_mapping(receipt.get("process"), "terminal receipt.process"))
+    _reject_unknown(
+        process,
+        {
+            "schema", "real_popen_wait", "sealed_witness", "process_type", "pid",
+            "pid_starttime", "wait_observed", "returncode", "wait_returncode",
+            "runtime_identity", "process_identity_sha256", "witness_seal", "witness_seal_sha256",
+        },
+        "terminal receipt.process",
+    )
+    _exact(process, "schema", TERMINAL_PROCESS_IDENTITY_SCHEMA, "terminal receipt.process")
+    for key in ("real_popen_wait", "sealed_witness", "wait_observed"):
+        _exact(process, key, True, "terminal receipt.process")
+    _exact(process, "process_type", "subprocess.Popen", "terminal receipt.process")
+    if type(process.get("pid")) is not int or process["pid"] <= 0:
+        _fail("terminal receipt.process.pid is invalid")
+    if not isinstance(process.get("pid_starttime"), str) or not process["pid_starttime"].isdigit():
+        _fail("terminal receipt.process.pid_starttime is invalid")
+    _exact(process, "returncode", 0, "terminal receipt.process")
+    _exact(process, "wait_returncode", 0, "terminal receipt.process")
+    runtime = dict(_mapping(process.get("runtime_identity"), "terminal receipt.process.runtime_identity"))
+    _reject_unknown(
+        runtime,
+        {"cmdline_sha256", "executable", "cwd", "environment_sha256", "session_leader", "procfs_starttime", "gpu", "child_runtime_gpu_attestation", "descriptor_publication"},
+        "terminal receipt.process.runtime_identity",
+    )
+    _sha256_hex(runtime.get("cmdline_sha256"), "terminal receipt.process.runtime_identity.cmdline_sha256")
+    _exact(runtime, "executable", _mapping(receipt["executable"], "terminal receipt.executable")["resolved_path"], "terminal receipt.process.runtime_identity")
+    _exact(runtime, "cwd", receipt["cwd"], "terminal receipt.process.runtime_identity")
+    _exact(runtime, "environment_sha256", receipt["effective_env_sha256"], "terminal receipt.process.runtime_identity")
+    _exact(runtime, "session_leader", True, "terminal receipt.process.runtime_identity")
+    _exact(runtime, "procfs_starttime", process["pid_starttime"], "terminal receipt.process.runtime_identity")
+    _exact(runtime, "child_runtime_gpu_attestation", True, "terminal receipt.process.runtime_identity")
+    gpu = _mapping(runtime.get("gpu"), "terminal receipt.process.runtime_identity.gpu")
+    expected_gpu = _validate_gpu_identity(_mapping(_mapping(receipt["resource_snapshot"], "terminal receipt.resource_snapshot")["gpu"], "terminal receipt.resource_snapshot.gpu"))
+    for key, expected in expected_gpu.items():
+        _exact(gpu, key, expected, "terminal receipt.process.runtime_identity.gpu")
+    for key, expected in (("live_probe", True), ("child_runtime_attested", True), ("child_pid", process["pid"]), ("probe_tool", "nvidia-smi"), ("process_query_required", True)):
+        _exact(gpu, key, expected, "terminal receipt.process.runtime_identity.gpu")
+    _validate_report_descriptor_publication(report, runtime.get("descriptor_publication"), process["pid"])
+    _sha256_hex(process.get("witness_seal"), "terminal receipt.process.witness_seal")
+    _exact(process, "witness_seal_sha256", hashlib.sha256(process["witness_seal"].encode("utf-8")).hexdigest(), "terminal receipt.process")
+    _exact(process, "process_identity_sha256", _terminal_process_identity_sha256(process), "terminal receipt.process")
+    side_effects = _mapping(receipt.get("side_effects"), "terminal receipt.side_effects")
+    if dict(side_effects) != dict(report["side_effects"]):
+        _fail("terminal receipt side effects are not report-bound")
+    for key, expected in ZERO_CREDIT.items():
+        _exact(receipt, key, expected, "terminal receipt")
+    if "terminal_receipt_file" not in receipt:
+        _fail("terminal receipt file descriptor is missing")
+    _validate_terminal_artifact_descriptor(
+        receipt["terminal_receipt_file"],
+        "terminal receipt.terminal_receipt_file",
+        report["artifacts"]["terminal_receipt"],
+    )
+    _sha256_hex(receipt.get("terminal_receipt_sha256"), "terminal receipt.terminal_receipt_sha256")
+    expected_receipt_digest = canonical_digest({key: value for key, value in receipt.items() if key != "terminal_receipt_sha256" and key != "terminal_receipt_file"})
+    _exact(receipt, "terminal_receipt_sha256", expected_receipt_digest, "terminal receipt")
+
+
 def validate_report(report: Mapping[str, Any]) -> list[str]:
     errors: list[str] = []
     try:
@@ -1952,7 +2673,11 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
             _exact(report, "popen_attempted", True, "report")
             _exact(report, "wait_attempted", True, "report")
             _exact(report, "real_workload_started", 1, "report")
-            _mapping(report.get("terminal_receipt"), "report.terminal_receipt")
+            terminal = _mapping(report.get("terminal_receipt"), "report.terminal_receipt")
+            _exact(terminal, "schema", TERMINAL_RECEIPT_SCHEMA, "report.terminal_receipt")
+            if "terminal_receipt_sha256" not in terminal:
+                _fail("report.terminal_receipt.terminal_receipt_sha256 is missing")
+            _validate_terminal_receipt_binding(report, terminal)
         if status == "blocked_fail_closed":
             reasons = report.get("blocked_reasons")
             if not isinstance(reasons, list) or not reasons or any(not isinstance(item, str) for item in reasons):

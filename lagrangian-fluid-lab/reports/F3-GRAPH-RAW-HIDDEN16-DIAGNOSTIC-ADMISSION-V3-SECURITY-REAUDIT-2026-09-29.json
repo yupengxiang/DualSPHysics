@@ -5,37 +5,37 @@
   "audit_mode": "independent_read_only_static_ast_security_reaudit",
   "audited_files": [
     {
-      "bytes": 104261,
+      "bytes": 110439,
       "content_opened": true,
       "dev": 2081,
       "ino": 318714907,
-      "mtime_ns": 1790643235018776472,
+      "mtime_ns": 1790644703625993667,
       "nlink": 1,
       "path": "scripts/f3_graph_raw_hidden16_seed17_diagnostic_admission_v1.py",
       "role": "admission_v1_after_p1_fixes",
-      "sha256": "af902813a127129788ad035d6b2feff90ef2260a4d9e1ccd40921fc07c09f13a"
+      "sha256": "197181326050474f78393b14689e9e7a18a283bcadf8abfc4dc98cc6a7da5f3c"
     },
     {
-      "bytes": 91779,
+      "bytes": 133778,
       "content_opened": true,
       "dev": 2081,
       "ino": 318714909,
-      "mtime_ns": 1790643103084135299,
+      "mtime_ns": 1790644811717021726,
       "nlink": 1,
       "path": "scripts/f3_graph_raw_hidden16_seed17_diagnostic_runner_v2.py",
       "role": "runner_v2_after_p1_fixes",
-      "sha256": "86d86019decfb0f66c42d71766046b1ecedfba353e2d65d8ce2a9a4aeb20576e"
+      "sha256": "66f4b813b6f3b5f43730b7e973c0fbe0aca552557fe675135f30000ea3289407"
     },
     {
-      "bytes": 60092,
+      "bytes": 75759,
       "content_opened": true,
       "dev": 2081,
       "ino": 318714831,
-      "mtime_ns": 1790633608676292239,
+      "mtime_ns": 1790644581134347563,
       "nlink": 1,
       "path": "scripts/f3_graph_raw_hidden16_current_manifest_rollout_launcher_v1.py",
       "role": "rollout_launcher_dependency",
-      "sha256": "d8156c34910cfe67f2e78af236c0ab80f666ab2fbfd69c62ecf3068cc5145c43"
+      "sha256": "9447bc4a97027a8058fad99201c318a93083d2eb9279a6a3e94bf72982731d77"
     },
     {
       "bytes": 55608,
@@ -75,13 +75,13 @@
       "verdict": "closed_locally_pending_external_trust_anchor"
     },
     "formal_credit_isolation": {
-      "terminal_report_identity_bound": false,
-      "verdict": "P2_report_binding_gap",
+      "terminal_report_identity_bound": true,
+      "verdict": "closed_zero_credit_only",
       "zero_credit_and_launch_false": true
     },
     "full_path_toc_tou": {
       "admission_stable_fd_read": true,
-      "descriptor_bound_child_output_publication": false,
+      "descriptor_bound_child_output_publication": true,
       "evaluator_outputs_reserved_before_popen": true,
       "launcher_preflight_stable": true,
       "launcher_snapshot_cross_bound": false,
@@ -145,17 +145,17 @@
         "local_atomic_lock_and_marker": true,
         "locations": {
           "_write_exclusive(external_claim_path": [
-            2012
+            2159
           ],
           "def _validate_consumed_marker": [
-            1696
+            1843
           ],
           "def _validate_external_authority": [
-            828,
-            1286
+            831,
+            1384
           ],
           "def consume_receipt": [
-            1970
+            2117
           ],
           "os.O_EXCL": [
             422
@@ -204,20 +204,20 @@
           },
           "launcher": {
             "closed = os.fstat(fd)": [
-              350
+              356
             ],
             "def _read_bounded_json": [
-              321
+              327
             ],
             "opened = os.fstat(fd)": [
-              339
+              345
             ],
             "os.lstat(candidate)": [
-              325,
-              358
+              331,
+              364
             ],
             "os.open(candidate, flags)": [
-              334
+              340
             ]
           }
         }
@@ -227,42 +227,6 @@
       "risk": "The launcher reader itself is bounded and stable, but a file can change after its plan is returned and before mint_admission's later reread. Without exact equality checks against RolloutPlan.manifest_file_sha256 and training_receipt_sha256, the signed command plan and final receipt can describe different bytes.",
       "severity": "P1",
       "title": "Launcher stable reads are not cross-bound to the final admission snapshot"
-    },
-    {
-      "affected": [
-        "runner_v2._revalidate_before_popen",
-        "runner_v2._run_real_popen_wait",
-        "core_learning evaluator output paths"
-      ],
-      "blocking_for_readiness": true,
-      "current_status": "blocked_fail_closed",
-      "evidence": {
-        "descriptor_bound_child_output_publication": false,
-        "locations": {
-          "def _require_descriptor_bound_outputs": [
-            679
-          ],
-          "def _reserve_evaluator_outputs": [
-            547
-          ],
-          "def _revalidate_before_popen": [
-            1106
-          ],
-          "pathname-only": [
-            550,
-            680,
-            688
-          ]
-        },
-        "output_atomic_reservation_before_popen": true,
-        "path_only_child_is_explicitly_blocked": true,
-        "stable_fd_read_after_exit": true
-      },
-      "id": "F3-DAV3-SA-004",
-      "required_fix": "Add a core evaluator contract that consumes the reserved descriptors or a sealed pass_fds/inode publication protocol, binds every published artifact to those descriptors, and only then remove the explicit fail-closed gate.",
-      "risk": "The runner now reserves evaluator leaves with O_EXCL descriptors and checks their identities, but core_learning still publishes through pathname arguments and its own staging files. The runner therefore rejects before Popen; allowing execution without a descriptor-bound child/publication witness would reopen the output TOCTOU boundary.",
-      "severity": "P1",
-      "title": "Evaluator outputs are reserved, but the pathname-only child lacks descriptor-bound publication"
     },
     {
       "affected": [
@@ -297,36 +261,6 @@
       "risk": "The source contains the signed snapshot, live probe, and child PID-to-UUID checks, but this read-only audit observed no real GPU or child process. Static presence cannot prove that physical GPU2 and logical cuda:0 matched for a production terminal receipt.",
       "severity": "P1",
       "title": "GPU UUID/PCI/logical mapping is not independently attested for promotion"
-    },
-    {
-      "affected": [
-        "runner_v2.validate_report"
-      ],
-      "blocking_for_readiness": true,
-      "current_status": "blocked_fail_closed",
-      "evidence": {
-        "locations": {
-          "\"diagnostic_terminal_verified\"": [
-            1717,
-            1941,
-            1950,
-            2026
-          ],
-          "def validate_report": [
-            1925
-          ],
-          "report.terminal_receipt": [
-            1955
-          ]
-        },
-        "terminal_receipt_identity_bound": false,
-        "terminal_status_shape_checked": true
-      },
-      "id": "F3-DAV3-SA-007",
-      "required_fix": "Validate the terminal receipt schema, receipt/identity/binding digests, process witness seal, artifact descriptors, HDF5 receipt, and zero-credit fields before accepting diagnostic_terminal_verified; keep the execution capability absent until an external terminal proof is present.",
-      "risk": "A caller can forge a diagnostic_terminal_verified report with arbitrary terminal_receipt content. This does not create formal credit today, but it weakens diagnostic evidence integrity and could become dangerous if a future gate trusts the report shape.",
-      "severity": "P2",
-      "title": "Runner report validation accepts an unbound terminal-receipt mapping"
     }
   ],
   "formal": false,
@@ -394,7 +328,7 @@
       "rollout_launcher_dependency": [],
       "runner_v2_after_p1_fixes": []
     },
-    "descriptor_bound_child_output_publication": false,
+    "descriptor_bound_child_output_publication": true,
     "executable_content_and_runtime_identity": true,
     "external_claim_one_shot": true,
     "external_owner_attestation": true,
@@ -413,17 +347,17 @@
     "locations": {
       "admission_consumption": {
         "_write_exclusive(external_claim_path": [
-          2012
+          2159
         ],
         "def _validate_consumed_marker": [
-          1696
+          1843
         ],
         "def _validate_external_authority": [
-          828,
-          1286
+          831,
+          1384
         ],
         "def consume_receipt": [
-          1970
+          2117
         ],
         "os.O_EXCL": [
           422
@@ -461,74 +395,79 @@
       },
       "launcher_reader": {
         "closed = os.fstat(fd)": [
-          350
+          356
         ],
         "def _read_bounded_json": [
-          321
+          327
         ],
         "opened = os.fstat(fd)": [
-          339
+          345
         ],
         "os.lstat(candidate)": [
-          325,
-          358
+          331,
+          364
         ],
         "os.open(candidate, flags)": [
-          334
+          340
         ]
       },
       "runner_output_gate": {
         "def _require_descriptor_bound_outputs": [
-          679
+          932
         ],
         "def _reserve_evaluator_outputs": [
-          547
+          790
         ],
         "def _revalidate_before_popen": [
-          1106
+          1377
         ],
         "pathname-only": [
-          550,
-          680,
-          688
+          760,
+          793
         ]
       },
       "runner_popen": {
         "_DIAGNOSTIC_EXECUTION_CAPABILITY: object | None = None": [
-          105
+          115
         ],
         "def _run_real_popen_wait": [
-          1469
+          1816
         ]
       },
       "runner_report": {
         "\"diagnostic_terminal_verified\"": [
-          1717,
-          1941,
-          1950,
-          2026
+          2091,
+          2524,
+          2662,
+          2671,
+          2751
         ],
         "def validate_report": [
-          1925
+          2646
         ],
         "report.terminal_receipt": [
-          1955
+          2512,
+          2522,
+          2676,
+          2677,
+          2679
         ]
       },
       "runner_stable_artifact": {
         "\"path_reopened\": False": [
-          371,
-          476,
-          611,
-          816,
-          1632
+          387,
+          492,
+          568,
+          854,
+          1087,
+          1989
         ],
         "def _stable_artifact": [
-          246
+          262
         ],
         "os.fstat(leaf_fd)": [
-          304,
-          322
+          320,
+          338
         ]
       }
     },
@@ -537,7 +476,7 @@
     "runner_output_atomic_reservation_before_popen": true,
     "runner_stable_fd_artifact_reads": true,
     "sealed_real_popen_wait_witness": true,
-    "terminal_report_receipt_identity_bound": false
+    "terminal_report_receipt_identity_bound": true
   },
   "status": "blocked_fail_closed"
 }
