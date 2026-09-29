@@ -16,9 +16,15 @@ def test_v5_reconciles_the_stale_verifier_gap_and_current_review_drift() -> None
     assert stack["native_fluid_table_metric_bundle_v2"]["review_receipt_current_for_bound_sources"] is True
     matrix = stack["15_case_metric_matrix_v2"]
     assert matrix["review_archive_current"] is False
-    assert matrix["implementation_source_drift_paths"] == []
+    assert matrix["implementation_source_drift_paths"] == [
+        "scripts/f8_r008_t1_metric_matrix_adapter_v2.py"
+    ]
     assert matrix["test_binding_drift_paths"] == [
         "tests/test_f8_r008_t1_metric_matrix_adapter_v2.py"
+    ]
+    assert matrix["review_binding_drift_paths"] == [
+        "scripts/f8_r008_t1_metric_matrix_adapter_v2.py",
+        "tests/test_f8_r008_t1_metric_matrix_adapter_v2.py",
     ]
     assert matrix["counts_as_current_review_pass"] is False
     codes = {item["code"] for item in value["blocking_gaps"]}

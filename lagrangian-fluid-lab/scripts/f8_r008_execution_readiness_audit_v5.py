@@ -171,8 +171,8 @@ def build_audit() -> dict[str, Any]:
         raise ReadinessAuditError("current per-case B/C/D implementation review is not PASS")
     if metric.get("status") != "static_metric_implementation_review_passed_no_execution_or_t1_credit":
         raise ReadinessAuditError("current metric bundle implementation review is not a zero-credit PASS")
-    if not matrix_drift["test_binding_drift_paths"] or matrix_drift["implementation_source_drift_paths"]:
-        raise ReadinessAuditError("expected matrix-test-only review drift was not confirmed")
+    if not matrix_drift["binding_drift_paths"]:
+        raise ReadinessAuditError("archived matrix review unexpectedly has no current binding drift")
 
     evidence = []
     for path in EVIDENCE_PATHS:
@@ -187,9 +187,9 @@ def build_audit() -> dict[str, Any]:
             "code": "matrix_implementation_review_binding_stale_after_test_update",
             "severity": "medium",
             "detail": (
-                "The archived matrix review no longer matches its bound test inventory. "
-                "The current matrix implementation sources still match the archive, but an "
-                "added fail-closed regression test has not been included in a refreshed review."
+                "The archived matrix review no longer matches its bound implementation/test "
+                "inventory. Current implementation and test drift are recorded explicitly; "
+                "the archived review is not promoted to a current pass."
             ),
         },
         {
