@@ -39,6 +39,7 @@ if __package__ in {None, ""}:
     sys.dont_write_bytecode = True
 
 from scripts import f3_graph_raw_hidden16_seed17_diagnostic_admission_v1 as admission
+from scripts import f3_graph_raw_hidden16_seed17_authority_projection_v1 as authority_projection
 from scripts import f3_graph_terminal_validator_security_hardening_v1 as hardening
 
 
@@ -2280,6 +2281,26 @@ def build_report(receipt_path: Path | str | None, *, execute_requested: bool = F
             blocked=EXECUTION_BLOCKERS,
         )
     except (RunnerError, admission.AdmissionError, OSError, ValueError) as error:
+        blocked_reasons = [str(error)]
+        # A legacy receipt can fail before the runner reaches its normal
+        # admission report because the current admission schema requires the
+        # top-level non-authorizing envelope.  Add only a read-only projection
+        # diagnosis here; the adapter never supplies authority to this runner
+        # and never changes the receipt or opens the Popen path.
+        if receipt_path is not None:
+            try:
+                gap = authority_projection.describe_receipt_gap(receipt_path)
+            except (authority_projection.ProjectionError, OSError, TypeError, ValueError):
+                gap = None
+            if gap is not None and (
+                gap.get("projectable_missing_fields")
+                or gap.get("non_projectable_missing_fields")
+            ):
+                missing = ", ".join(str(item) for item in gap.get("missing_fields", ()))
+                blocked_reasons.append(
+                    "projection-gap: current receipt requires an external-authority-bound "
+                    f"reissue; missing fields: {missing}"
+                )
         return {
             "schema": REPORT_SCHEMA,
             "report_id": REPORT_ID,
@@ -2297,7 +2318,7 @@ def build_report(receipt_path: Path | str | None, *, execute_requested: bool = F
             "wait_attempted": False,
             "real_workload_started": 0,
             "terminal_receipt": None,
-            "blocked_reasons": [str(error)],
+            "blocked_reasons": blocked_reasons,
             "side_effects": {"evaluator_started": False, "processes_started": 0, "processes_stopped": 0, "processes_restarted": 0, "solver_started": False, "worker_started": False, "queue_submissions": 0, "registry_writes": 0, "ledger_writes": 0, "denominator_writes": 0, "gate_writes": 0, "completion_writes": 0, "plan_writes": 0},
             **ZERO_CREDIT,
         }
