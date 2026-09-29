@@ -19,19 +19,21 @@ import argparse
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import hashlib
+import hmac
 import json
 import os
 from pathlib import Path
 import stat
 import subprocess
 import sys
+import tempfile
+import secrets
 from typing import Any
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     sys.dont_write_bytecode = True
 
-from scripts import f3_full_rollout_receipt_hdf5_validator_v1 as hdf5_validator
 from scripts import f3_graph_raw_hidden16_seed17_diagnostic_admission_v1 as admission
 from scripts import f3_graph_terminal_validator_security_hardening_v1 as hardening
 
@@ -54,6 +56,9 @@ DEFAULT_REPORT = LAB_ROOT / "reports" / "F3-GRAPH-RAW-HIDDEN16-SEED17-DIAGNOSTIC
 DEFAULT_MARKDOWN = DEFAULT_REPORT.with_suffix(".zh-CN.md")
 MAX_JSON_BYTES = 16 * 1024 * 1024
 MAX_HDF5_BYTES = 2 * 1024 * 1024 * 1024
+MAX_EXECUTABLE_BYTES = 512 * 1024 * 1024
+MAX_READ_CHUNK = 1024 * 1024
+ARTIFACT_ROOT = Path(tempfile.gettempdir()).resolve()
 
 ZERO_CREDIT: dict[str, Any] = dict(admission.ZERO_CREDIT)
 
@@ -68,8 +73,18 @@ EXECUTION_BLOCKERS = (
     "P1 terminal artifact identity closure is not authorized for a production execution",
 )
 
-# Capture the class once.  The runner has no injectable Popen seam.
+# Capture the class and the witness secret once.  The runner has no injectable
+# Popen seam.  ``_REAL_POPEN`` is retained as a compatibility-visible name for
+# the older negative tests; the future path below uses ``_SEALED_POPEN`` so a
+# caller cannot replace the module attribute and turn it into an injection
+# point.
 _REAL_POPEN = subprocess.Popen
+_SEALED_POPEN = _REAL_POPEN
+_PROCESS_WITNESS_SECRET = secrets.token_bytes(32)
+
+# Deliberately absent.  Installing a capability is outside this change and
+# cannot be done by a JSON field, a caller object, or a callback argument.
+_DIAGNOSTIC_EXECUTION_CAPABILITY: object | None = None
 
 
 class RunnerError(ValueError):
@@ -128,6 +143,228 @@ def _under(path: Path, root: Path) -> bool:
     return path == root or root in path.parents
 
 
+def _reject_symlink_components(path: Path, name: str) -> None:
+    """Reject every existing component of an absolute path that is a link."""
+
+    current = Path(path.anchor or os.sep)
+    parts = path.parts[1:] if path.is_absolute() else path.parts
+    for part in parts:
+        current /= part
+        try:
+            info = os.lstat(current)
+        except FileNotFoundError:
+            _fail(f"{name} has a missing component: {current}")
+        except OSError as error:
+            _fail(f"cannot inspect {name}: {error}")
+        if stat.S_ISLNK(info.st_mode):
+            _fail(f"{name} contains a symlink component: {current}")
+
+
+def _fd_identity(info: os.stat_result) -> tuple[int, int, int, int, int, int]:
+    return (
+        int(info.st_dev),
+        int(info.st_ino),
+        int(info.st_mode),
+        int(info.st_nlink),
+        int(info.st_size),
+        int(info.st_mtime_ns),
+    )
+
+
+def _directory_flags() -> int:
+    required = getattr(os, "O_DIRECTORY", 0)
+    nofollow = getattr(os, "O_NOFOLLOW", 0)
+    if required == 0 or nofollow == 0:
+        _fail("platform lacks O_DIRECTORY/O_NOFOLLOW for stable directory binding")
+    return os.O_RDONLY | required | nofollow | getattr(os, "O_CLOEXEC", 0)
+
+
+def _read_flags() -> int:
+    nofollow = getattr(os, "O_NOFOLLOW", 0)
+    if nofollow == 0:
+        _fail("platform lacks O_NOFOLLOW for stable artifact binding")
+    return os.O_RDONLY | nofollow | getattr(os, "O_CLOEXEC", 0)
+
+
+def _open_directory(path: Path, name: str) -> int:
+    """Open a directory chain without following any component symlink."""
+
+    candidate = _absolute(path, name)
+    flags = _directory_flags()
+    try:
+        current = os.open(os.sep, flags)
+    except OSError as error:
+        _fail(f"cannot open filesystem root for {name}: {error}")
+    try:
+        for component in candidate.parts[1:]:
+            try:
+                child = os.open(component, flags, dir_fd=current)
+            except OSError as error:
+                _fail(f"cannot open {name} directory component {component!r}: {error}")
+            os.close(current)
+            current = child
+        info = os.fstat(current)
+        if not stat.S_ISDIR(info.st_mode) or info.st_nlink < 1:
+            _fail(f"{name} is not a stable directory")
+        return current
+    except BaseException:
+        try:
+            os.close(current)
+        except OSError:
+            pass
+        raise
+
+
+def _artifact_root(path: Path, root: Path, name: str) -> tuple[Path, Path]:
+    candidate = _absolute(path, name)
+    scope = _absolute(root, f"{name} root")
+    if candidate == scope or not _under(candidate, scope):
+        _fail(f"{name} escapes its bound root")
+    _reject_symlink_components(scope, f"{name} root")
+    _reject_symlink_components(candidate.parent, f"{name} parent")
+    return candidate, scope
+
+
+def _stable_artifact(
+    path: Path | str,
+    root: Path | str,
+    name: str,
+    *,
+    max_bytes: int,
+    allow_leaf_symlink: bool = False,
+    read_content: bool = True,
+) -> tuple[dict[str, Any], bytes]:
+    """Read/hash one regular file from one held descriptor, exactly once.
+
+    The content parser receives the bytes read from this descriptor.  It never
+    reopens the pathname.  The final identity check uses ``fstat`` and a
+    ``stat(..., dir_fd=...)`` on the already-held parent directory; it does not
+    perform a second content open.  Output artifacts reject leaf symlinks and
+    hardlinks, and callers that allow an executable symlink bind both the link
+    spelling and its resolved regular target.
+    """
+
+    candidate, scope = _artifact_root(Path(path), Path(root), name)
+    if type(max_bytes) is not int or max_bytes < 1:
+        _fail(f"{name} max_bytes must be positive")
+    resolved = candidate
+    leaf_info = os.lstat(candidate)
+    leaf_symlink = stat.S_ISLNK(leaf_info.st_mode)
+    if leaf_symlink:
+        if not allow_leaf_symlink:
+            _fail(f"{name} is a symlink")
+        try:
+            resolved = _absolute(candidate.resolve(strict=True), f"{name} resolved target")
+        except OSError as error:
+            _fail(f"cannot resolve {name}: {error}")
+        if not _under(resolved, scope):
+            _fail(f"{name} resolved target escapes its bound root")
+        _reject_symlink_components(resolved.parent, f"{name} resolved parent")
+    elif not stat.S_ISREG(leaf_info.st_mode):
+        _fail(f"{name} must be a regular file")
+
+    relative = resolved.relative_to(scope)
+    parent_fd = _open_directory(scope, f"{name} root")
+    leaf_fd: int | None = None
+    chunks: list[bytes] = []
+    hasher = hashlib.sha256()
+    total = 0
+    before: os.stat_result | None = None
+    parent_info: os.stat_result | None = None
+    try:
+        for component in relative.parts[:-1]:
+            try:
+                child = os.open(component, _directory_flags(), dir_fd=parent_fd)
+            except OSError as error:
+                _fail(f"{name} parent component {component!r} is unsafe: {error}")
+            os.close(parent_fd)
+            parent_fd = child
+        try:
+            leaf_fd = os.open(relative.parts[-1], _read_flags(), dir_fd=parent_fd)
+        except OSError as error:
+            _fail(f"cannot open {name} without following a link: {error}")
+        before = os.fstat(leaf_fd)
+        if not stat.S_ISREG(before.st_mode):
+            _fail(f"{name} must be a regular file")
+        if before.st_nlink != 1:
+            _fail(f"{name} must have exactly one hard link")
+        if before.st_size < 1 or before.st_size > max_bytes:
+            _fail(f"{name} is outside the bounded size")
+        expected_identity = _fd_identity(before)
+        while total <= max_bytes:
+            block = os.read(leaf_fd, min(MAX_READ_CHUNK, max_bytes + 1 - total))
+            if not block:
+                break
+            total += len(block)
+            hasher.update(block)
+            if read_content:
+                chunks.append(block)
+            if total > max_bytes:
+                _fail(f"{name} exceeds the bounded read size")
+        after = os.fstat(leaf_fd)
+        if _fd_identity(after) != expected_identity or total != before.st_size:
+            _fail(f"{name} changed during stable descriptor read")
+        # This is a metadata check through the held parent fd, never a content
+        # reopen.  It catches replacement by a symlink/hardlink while reading.
+        path_identity = os.stat(relative.parts[-1], dir_fd=parent_fd, follow_symlinks=False)
+        if _fd_identity(path_identity) != expected_identity:
+            _fail(f"{name} path identity changed during stable descriptor read")
+        parent_info = os.fstat(parent_fd)
+        if leaf_symlink:
+            try:
+                if candidate.resolve(strict=True) != resolved:
+                    _fail(f"{name} symlink target changed during stable descriptor read")
+            except OSError as error:
+                _fail(f"cannot revalidate {name} symlink target: {error}")
+    except OSError as error:
+        _fail(f"cannot read {name} from stable descriptor: {error}")
+    finally:
+        if leaf_fd is not None:
+            try:
+                os.close(leaf_fd)
+            except OSError:
+                pass
+        try:
+            os.close(parent_fd)
+        except OSError:
+            pass
+    if before is None:
+        _fail(f"{name} did not produce a descriptor")
+    if parent_info is None:
+        _fail(f"{name} did not produce a parent descriptor")
+    raw = b"".join(chunks) if read_content else b""
+    descriptor = {
+        "path": str(candidate),
+        "resolved_path": str(resolved),
+        "dev": int(before.st_dev),
+        "ino": int(before.st_ino),
+        "bytes": int(total),
+        "mode": int(stat.S_IMODE(before.st_mode)),
+        "uid": int(before.st_uid),
+        "gid": int(before.st_gid),
+        "nlink": int(before.st_nlink),
+        "mtime_ns": int(before.st_mtime_ns),
+        "parent_dev": int(parent_info.st_dev),
+        "parent_ino": int(parent_info.st_ino),
+        "sha256": hasher.hexdigest(),
+        "leaf_symlink": bool(leaf_symlink),
+        "stable_fd": True,
+        "fd_identity_stable": True,
+        "path_reopened": False,
+        "content_opened": bool(read_content),
+    }
+    return descriptor, raw
+
+
+def _descriptor_matches(observed: Mapping[str, Any], expected: Mapping[str, Any], name: str) -> None:
+    keys = ("path", "dev", "ino", "bytes", "mode", "uid", "gid", "nlink", "mtime_ns", "sha256")
+    if "parent_dev" in expected:
+        keys += ("parent_dev", "parent_ino")
+    for key in keys:
+        if observed.get(key) != expected.get(key):
+            _fail(f"{name} descriptor field {key} drifted")
+
+
 def _walk_json(value: Any, name: str = "value", depth: int = 0) -> None:
     if depth > admission.MAX_JSON_DEPTH:
         _fail(f"{name} exceeds maximum JSON depth")
@@ -161,47 +398,50 @@ def _read_json(path: Path, name: str) -> dict[str, Any]:
 
 
 def _secure_artifact(path: Path, root: Path, name: str, *, max_bytes: int) -> tuple[dict[str, Any], bytes]:
-    if not _under(path, root) or path == root:
-        _fail(f"{name} escapes the diagnostic namespace")
-    try:
-        raw = hardening.secure_read_regular_file(path, root_value=root, max_bytes=max_bytes)
-        info = os.lstat(path)
-    except Exception as error:
-        _fail(f"hardened artifact read failed for {name}: {error}")
-    if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
-        _fail(f"{name} is not a regular single-link file")
-    descriptor = {
-        "path": str(path),
-        "dev": int(info.st_dev),
-        "ino": int(info.st_ino),
-        "bytes": int(len(raw)),
-        "mode": int(stat.S_IMODE(info.st_mode)),
-        "uid": int(info.st_uid),
-        "gid": int(info.st_gid),
-        "nlink": int(info.st_nlink),
-        "mtime_ns": int(info.st_mtime_ns),
-        "sha256": hashlib.sha256(raw).hexdigest(),
-        "content_opened": True,
-    }
-    return descriptor, raw
+    # ``root`` is the namespace parent because the launcher deliberately
+    # places the output files beside the reserved namespace directory.  The
+    # local reader is used instead of the common validator's pathname API so
+    # HDF5/JSON consumers receive the bytes from one stable FD only.
+    return _stable_artifact(path, root, name, max_bytes=max_bytes)
 
 
 def _write_exclusive(path: Path, raw: bytes, mode: int = 0o600) -> dict[str, Any]:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    path = _absolute(path, "exclusive output")
+    _reject_symlink_components(path.parent, "exclusive output parent")
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    parent_fd = _open_directory(path.parent, "exclusive output parent")
+    fd: int | None = None
     try:
-        fd = os.open(path, flags, mode)
+        fd = os.open(path.name, flags, mode, dir_fd=parent_fd)
         with os.fdopen(fd, "wb", closefd=True) as handle:
             handle.write(raw)
             handle.flush()
             os.fsync(handle.fileno())
+            info = os.fstat(handle.fileno())
+            if stat.S_IMODE(info.st_mode) != mode or info.st_nlink != 1:
+                _fail(f"exclusive output identity drifted before close: {path}")
+        fd = None
     except FileExistsError:
         _fail(f"refusing to reuse existing output: {path}")
     except OSError as error:
         _fail(f"cannot write exclusive output {path}: {error}")
-    info = os.lstat(path)
-    if stat.S_IMODE(info.st_mode) != mode or info.st_uid != os.getuid() or info.st_gid != os.getgid():
-        _fail(f"output owner/mode drifted: {path}")
+    finally:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+        try:
+            os.close(parent_fd)
+        except OSError:
+            pass
+    # ``info`` came from the same write FD.  Do not reopen the output in order
+    # to manufacture its descriptor; only metadata is checked through the
+    # held parent directory fd before it is closed above.
+    if "info" not in locals():
+        _fail(f"exclusive output descriptor was not captured: {path}")
+    if info.st_uid != os.getuid() or info.st_gid != os.getgid():
+        _fail(f"output owner drifted: {path}")
     return {
         "path": str(path),
         "dev": int(info.st_dev),
@@ -213,6 +453,10 @@ def _write_exclusive(path: Path, raw: bytes, mode: int = 0o600) -> dict[str, Any
         "nlink": int(info.st_nlink),
         "mtime_ns": int(info.st_mtime_ns),
         "sha256": hashlib.sha256(raw).hexdigest(),
+        "stable_fd": True,
+        "fd_identity_stable": True,
+        "path_reopened": False,
+        "content_opened": True,
     }
 
 
@@ -243,9 +487,27 @@ def _validate_command(identity: Mapping[str, Any], outputs: Mapping[str, Path]) 
     if not isinstance(argv_value, list) or not argv_value or any(not isinstance(item, str) for item in argv_value):
         _fail("identity.command.argv must be a non-empty string list")
     argv = tuple(argv_value)
+    if any(not item or "\x00" in item for item in argv):
+        _fail("identity.command.argv contains an empty or NUL-containing argument")
+    root = _absolute(identity.get("root"), "identity.root")
+    if _absolute(command.get("cwd"), "identity.command.cwd") != root:
+        _fail("identity command cwd is not the bound lab root")
     env = dict(_mapping(command.get("env_overrides"), "identity.command.env_overrides"))
-    if env != {"CUDA_VISIBLE_DEVICES": str(GPU_INDEX), "PYTHONDONTWRITEBYTECODE": "1"}:
+    expected_env = {
+        "CUDA_VISIBLE_DEVICES": str(GPU_INDEX),
+        "CUDA_DEVICE_ORDER": str(getattr(admission, "CUDA_DEVICE_ORDER", "PCI_BUS_ID")),
+        "PYTHONDONTWRITEBYTECODE": "1",
+    }
+    if env != expected_env:
         _fail("identity command environment drifted")
+    environment_record = _mapping(identity.get("environment"), "identity.environment")
+    _exact(environment_record, "policy", "allowlist_only_no_ambient_inheritance", "identity.environment")
+    _exact(environment_record, "inherit", False, "identity.environment")
+    if dict(_mapping(environment_record.get("variables"), "identity.environment.variables")) != env:
+        _fail("identity environment allowlist differs from command environment")
+    environment_core = {key: value for key, value in environment_record.items() if key != "sha256"}
+    if environment_record.get("sha256") != canonical_digest(environment_core):
+        _fail("identity environment digest drifted")
     if command.get("sha256") != admission._command_digest(argv, str(command.get("cwd")), env):
         _fail("identity command digest drifted")
     expected_options = {
@@ -264,8 +526,39 @@ def _validate_command(identity: Mapping[str, Any], outputs: Mapping[str, Path]) 
         positions = [i for i, item in enumerate(argv) if item == option]
         if len(positions) != 1 or positions[0] + 1 >= len(argv) or argv[positions[0] + 1] != expected:
             _fail(f"exact command is not bound to {option}={expected}")
-    if argv[-1] != "--diagnostic" or "--diagnostic" in argv[:-1]:
-        _fail("exact command must end with exactly one --diagnostic")
+    expected_argv = (
+        argv[0],
+        "-u",
+        str(root / "scripts" / "core_learning.py"),
+        "evaluate",
+        "--manifest",
+        str(_mapping(identity["manifest"], "identity.manifest")["path"]),
+        "--data-root",
+        str(root),
+        "--checkpoint",
+        str(_mapping(identity["checkpoint"], "identity.checkpoint")["path"]),
+        "--case-id",
+        CASE_ID,
+        "--split",
+        SPLIT,
+        "--maximum-steps",
+        str(TRANSITIONS),
+        "--chunk-size",
+        str(admission.launcher.CHUNK_SIZE),
+        "--device",
+        "cuda:0",
+        "--progress-every",
+        str(admission.launcher.PROGRESS_EVERY),
+        "--trajectory-output",
+        str(outputs["trajectory"]),
+        "--progress-output",
+        str(outputs["progress"]),
+        "--output",
+        str(outputs["evaluation"]),
+        "--diagnostic",
+    )
+    if argv != expected_argv:
+        _fail("identity command is not the exact current-manifest evaluator argv")
     return argv, env
 
 
@@ -279,10 +572,191 @@ class DiagnosticPlan:
     env: Mapping[str, str]
     root: Path
     static_validation: Mapping[str, Any]
+    input_descriptors: Mapping[str, Mapping[str, Any]]
+    executable_descriptor: Mapping[str, Any]
+    cwd_descriptor: Mapping[str, Any]
+    effective_env_sha256: str
+    effective_env_keys: tuple[str, ...]
+    binding_sha256: str
 
     @property
     def identity(self) -> Mapping[str, Any]:
         return _mapping(self.receipt["identity"], "identity")
+
+
+def _directory_descriptor(path: Path, name: str) -> dict[str, Any]:
+    fd = _open_directory(path, name)
+    parent_fd = _open_directory(path.parent, f"{name} parent")
+    try:
+        info = os.fstat(fd)
+        parent_info = os.fstat(parent_fd)
+        if not stat.S_ISDIR(info.st_mode):
+            _fail(f"{name} is not a directory")
+        return {
+            "path": str(_absolute(path, name)),
+            "dev": int(info.st_dev),
+            "ino": int(info.st_ino),
+            "mode": int(stat.S_IMODE(info.st_mode)),
+            "uid": int(info.st_uid),
+            "gid": int(info.st_gid),
+            "nlink": int(info.st_nlink),
+            "mtime_ns": int(info.st_mtime_ns),
+            "parent_dev": int(parent_info.st_dev),
+            "parent_ino": int(parent_info.st_ino),
+            "stable_fd": True,
+            "fd_identity_stable": True,
+            "path_reopened": False,
+        }
+    finally:
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+        try:
+            os.close(parent_fd)
+        except OSError:
+            pass
+
+
+def _bounded_scope(path: Path, root: Path, name: str) -> Path:
+    if _under(path, root):
+        return root
+    tmp_root = ARTIFACT_ROOT
+    if _under(path, tmp_root):
+        return tmp_root
+    _fail(f"{name} escapes the lab and /tmp roots")
+
+
+def _effective_environment(overrides: Mapping[str, str]) -> dict[str, str]:
+    if any(not isinstance(key, str) or not isinstance(value, str) for key, value in overrides.items()):
+        _fail("command environment overrides must be string-to-string")
+    # The admission contract is an allowlist-only environment.  Inheriting
+    # ambient variables would make the Popen identity incomplete.
+    environment = {str(key): str(value) for key, value in overrides.items()}
+    if any("\x00" in key or "\x00" in value or "=" in key for key, value in environment.items()):
+        _fail("effective environment contains an invalid NUL or key")
+    return environment
+
+
+def _environment_digest(environment: Mapping[str, str]) -> str:
+    return canonical_digest({"entries": [[key, environment[key]] for key in sorted(environment)]})
+
+
+def _snapshot_bound_inputs(
+    root: Path,
+    identity: Mapping[str, Any],
+) -> tuple[dict[str, dict[str, Any]], dict[str, Any], dict[str, Any], str, tuple[str, ...], dict[str, Any]]:
+    manifest_record = _mapping(identity["manifest"], "identity.manifest")
+    training_record = _mapping(identity["training_receipt"], "identity.training_receipt")
+    checkpoint_record = _mapping(identity["checkpoint"], "identity.checkpoint")
+    manifest = _absolute(manifest_record["path"], "manifest")
+    training = _absolute(training_record["path"], "training receipt")
+    checkpoint = _absolute(checkpoint_record["path"], "checkpoint")
+
+    manifest_desc, manifest_raw = _stable_artifact(
+        manifest,
+        _bounded_scope(manifest, root, "manifest"),
+        "manifest",
+        max_bytes=MAX_JSON_BYTES,
+    )
+    training_desc, training_raw = _stable_artifact(
+        training,
+        _bounded_scope(training, root, "training receipt"),
+        "training receipt",
+        max_bytes=MAX_JSON_BYTES,
+    )
+    checkpoint_desc, _checkpoint_raw = _stable_artifact(
+        checkpoint,
+        _bounded_scope(checkpoint, root, "checkpoint"),
+        "checkpoint",
+        max_bytes=admission.MAX_CHECKPOINT_BYTES,
+        read_content=False,
+    )
+    _descriptor_matches(manifest_desc, _mapping(manifest_record["file"], "identity.manifest.file"), "manifest")
+    _descriptor_matches(training_desc, _mapping(training_record["file"], "identity.training_receipt.file"), "training receipt")
+    _descriptor_matches(checkpoint_desc, _mapping(checkpoint_record["file"], "identity.checkpoint.file"), "checkpoint")
+    if checkpoint_desc["sha256"] != checkpoint_record["sha256"] or checkpoint_desc["bytes"] != checkpoint_record["bytes"]:
+        _fail("checkpoint content identity differs from the admission receipt")
+
+    manifest_payload = _json_bytes(manifest_raw, "manifest")
+    training_payload = _json_bytes(training_raw, "training receipt")
+    _exact(manifest_payload, "schema", admission.MANIFEST_SCHEMA, "manifest")
+    _exact(training_payload, "schema", admission.TRAINING_SCHEMA, "training receipt")
+    manifest_canonical = canonical_digest(manifest_payload)
+    if manifest_canonical != manifest_record["canonical_sha256"]:
+        _fail("manifest canonical content SHA differs from the admission receipt")
+
+    sources = _mapping(identity["source_sha256"], "identity.source_sha256")
+    executable = _absolute(_mapping(identity["command"], "identity.command")["argv"][0], "executable")
+    core_learning = root / "scripts" / "core_learning.py"
+    executable_desc, _ = _stable_artifact(
+        executable,
+        root,
+        "executable",
+        max_bytes=MAX_EXECUTABLE_BYTES,
+        allow_leaf_symlink=True,
+        read_content=False,
+    )
+    executable_record = identity.get("executable")
+    if isinstance(executable_record, Mapping):
+        _descriptor_matches(executable_desc, _mapping(executable_record.get("file"), "identity.executable.file"), "executable")
+        _exact(executable_record, "path", str(executable), "identity.executable")
+        _exact(executable_record, "sha256", executable_desc["sha256"], "identity.executable")
+    core_desc, _ = _stable_artifact(
+        core_learning,
+        root,
+        "core_learning executable script",
+        max_bytes=admission.MAX_SOURCE_BYTES,
+        read_content=False,
+    )
+    _descriptor_matches(core_desc, _mapping(sources["core_learning"], "identity.source_sha256.core_learning"), "core_learning")
+
+    namespace_path = _absolute(identity["namespace"], "identity.namespace")
+    namespace_desc = _directory_descriptor(namespace_path, "namespace")
+    namespace_record = identity.get("namespace_descriptor")
+    if isinstance(namespace_record, Mapping):
+        for key in ("path", "dev", "ino", "mode", "uid", "gid", "nlink", "parent_dev", "parent_ino"):
+            if namespace_desc.get(key) != namespace_record.get(key):
+                _fail(f"namespace descriptor field {key} drifted")
+    input_descriptors = {
+        "manifest": manifest_desc,
+        "training_receipt": training_desc,
+        "checkpoint": checkpoint_desc,
+        "core_learning": core_desc,
+        "namespace": namespace_desc,
+    }
+    environment = _effective_environment(_mapping(identity["command"], "identity.command")["env_overrides"])
+    environment_sha256 = _environment_digest(environment)
+    cwd_desc = _directory_descriptor(root, "command cwd")
+    binding_core = {
+        "receipt_sha256": identity.get("receipt_sha256"),
+        "identity_sha256": identity.get("identity_sha256"),
+        "root": str(root),
+        "namespace": str(identity["namespace"]),
+        "nonce": identity["nonce"],
+        "command": dict(identity["command"]),
+        "input_descriptors": input_descriptors,
+        "executable": executable_desc,
+        "cwd": cwd_desc,
+        "effective_env_sha256": environment_sha256,
+    }
+    return input_descriptors, executable_desc, cwd_desc, environment_sha256, tuple(sorted(environment)), binding_core
+
+
+def _binding_digest(plan: DiagnosticPlan) -> str:
+    return canonical_digest({
+        "receipt_sha256": plan.receipt["receipt_sha256"],
+        "identity_sha256": plan.receipt["identity_sha256"],
+        "input_descriptors": dict(plan.input_descriptors),
+        "executable_descriptor": dict(plan.executable_descriptor),
+        "cwd_descriptor": dict(plan.cwd_descriptor),
+        "effective_env_sha256": plan.effective_env_sha256,
+        "command": list(plan.command),
+        "env_overrides": dict(plan.env),
+        "root": str(plan.root),
+        "namespace": str(plan.namespace),
+        "nonce": plan.identity["nonce"],
+    })
 
 
 def build_plan(receipt_path: Path | str, *, resource_admission: Mapping[str, Any] | None = None) -> DiagnosticPlan:
@@ -291,18 +765,16 @@ def build_plan(receipt_path: Path | str, *, resource_admission: Mapping[str, Any
     identity = _mapping(receipt["identity"], "identity")
     root = _absolute(identity["root"], "identity.root")
     namespace = _absolute(identity["namespace"], "identity.namespace")
-    if not namespace.is_dir():
-        _fail("receipt namespace is not a directory")
+    _directory_descriptor(namespace, "receipt namespace")
     outputs = _outputs(namespace)
     command, env = _validate_command(identity, outputs)
     for name, output in outputs.items():
-        if name in {"validator", "terminal_receipt"}:
-            continue
         if os.path.lexists(output):
             _fail(f"fresh diagnostic output already exists: {output}")
     static_resource = resource_admission if resource_admission is not None else identity["resource_snapshot"]
     revalidated = admission.revalidate_receipt(receipt, resource_admission=static_resource, check_files=True)
-    return DiagnosticPlan(
+    input_descriptors, executable_descriptor, cwd_descriptor, env_sha256, env_keys, _binding_core = _snapshot_bound_inputs(root, identity)
+    provisional = DiagnosticPlan(
         receipt_path=path,
         receipt=receipt,
         namespace=namespace,
@@ -311,6 +783,15 @@ def build_plan(receipt_path: Path | str, *, resource_admission: Mapping[str, Any
         env=env,
         root=root,
         static_validation=revalidated,
+        input_descriptors=input_descriptors,
+        executable_descriptor=executable_descriptor,
+        cwd_descriptor=cwd_descriptor,
+        effective_env_sha256=env_sha256,
+        effective_env_keys=env_keys,
+        binding_sha256="",
+    )
+    return DiagnosticPlan(
+        **{**provisional.__dict__, "binding_sha256": _binding_digest(provisional)},
     )
 
 
@@ -322,14 +803,10 @@ def _verify_consumed_capability(plan: DiagnosticPlan, capability: admission.Admi
     consumed = capability.consumed_marker
     if consumed != Path(_mapping(plan.receipt["consumption"], "consumption")["consumed_marker"]):
         _fail("capability consumed marker drifted")
-    if not consumed.is_file():
-        _fail("one-shot consumed marker is missing")
-    info = os.lstat(consumed)
-    if stat.S_IMODE(info.st_mode) != 0o600 or info.st_uid != os.getuid() or info.st_gid != os.getgid() or info.st_nlink != 1:
-        _fail("one-shot consumed marker owner/mode/link identity drifted")
-    _raw, _descriptor, payload = admission._read_file(consumed, "consumed marker", max_bytes=64 * 1024, parse_json=True)
-    if payload is None:
-        _fail("consumed marker payload is absent")
+    descriptor, raw = _stable_artifact(consumed, plan.namespace, "consumed marker", max_bytes=64 * 1024)
+    if descriptor["mode"] != 0o600 or descriptor["uid"] != os.getuid() or descriptor["gid"] != os.getgid():
+        _fail("one-shot consumed marker owner/mode identity drifted")
+    payload = _json_bytes(raw, "consumed marker")
     _exact(payload, "schema", admission.CONSUMED_SCHEMA, "consumed marker")
     _exact(payload, "receipt_sha256", plan.receipt["receipt_sha256"], "consumed marker")
     _exact(payload, "receipt_path", str(plan.receipt_path), "consumed marker")
@@ -339,94 +816,353 @@ def _verify_consumed_capability(plan: DiagnosticPlan, capability: admission.Admi
     _exact(payload, "credit", 0, "consumed marker")
     expected_seal = admission._capability_seal(plan.receipt, {
         "path": str(consumed),
-        "dev": int(info.st_dev),
-        "ino": int(info.st_ino),
-        "bytes": int(info.st_size),
-        "mode": int(stat.S_IMODE(info.st_mode)),
-        "uid": int(info.st_uid),
-        "gid": int(info.st_gid),
-        "nlink": int(info.st_nlink),
-        "mtime_ns": int(info.st_mtime_ns),
-        "sha256": hashlib.sha256(consumed.read_bytes()).hexdigest(),
+        "dev": int(descriptor["dev"]),
+        "ino": int(descriptor["ino"]),
+        "bytes": int(descriptor["bytes"]),
+        "mode": int(descriptor["mode"]),
+        "uid": int(descriptor["uid"]),
+        "gid": int(descriptor["gid"]),
+        "nlink": int(descriptor["nlink"]),
+        "mtime_ns": int(descriptor["mtime_ns"]),
+        "sha256": str(descriptor["sha256"]),
     })
     if capability.seal != expected_seal:
         _fail("receipt-bound capability seal drifted")
 
 
-def _revalidate_before_popen(plan: DiagnosticPlan) -> Mapping[str, Any]:
+def _revalidate_bound_identity(plan: DiagnosticPlan, resource_snapshot: Mapping[str, Any]) -> None:
+    current = admission.revalidate_receipt(plan.receipt, resource_admission=resource_snapshot, check_files=True)
+    del current
+    identity = plan.identity
+    inputs, executable, cwd, environment_sha256, environment_keys, _binding_core = _snapshot_bound_inputs(plan.root, identity)
+    for name, expected in plan.input_descriptors.items():
+        observed = inputs.get(name)
+        if observed is None or dict(observed) != dict(expected):
+            _fail(f"bound input descriptor changed: {name}")
+    if dict(executable) != dict(plan.executable_descriptor):
+        _fail("bound executable descriptor changed")
+    if dict(cwd) != dict(plan.cwd_descriptor):
+        _fail("bound cwd descriptor changed")
+    if environment_sha256 != plan.effective_env_sha256 or environment_keys != plan.effective_env_keys:
+        _fail("complete effective environment identity changed")
+    if _binding_digest(plan) != plan.binding_sha256:
+        _fail("complete execution identity binding digest drifted")
+
+
+def _revalidate_before_popen(plan: DiagnosticPlan, capability: admission.AdmissionCapability) -> Mapping[str, Any]:
     current = admission.resource.probe_resource_admission(GPU_INDEX, root=plan.root)
-    admission.revalidate_receipt(plan.receipt, resource_admission=current, check_files=True)
-    _verify_consumed_capability(plan, _CURRENT_CAPABILITY)
+    _revalidate_bound_identity(plan, current)
+    _verify_consumed_capability(plan, capability)
     for name, output in plan.outputs.items():
-        if name in {"validator", "terminal_receipt"}:
-            continue
         if os.path.lexists(output):
             _fail(f"diagnostic output was reused before Popen: {output}")
     return current
 
 
-_CURRENT_CAPABILITY: admission.AdmissionCapability
+class _SealedProcessWitness:
+    """An immutable witness minted only after the captured real lifecycle."""
+
+    __slots__ = (
+        "process", "pid", "pid_starttime", "returncode", "wait_returncode",
+        "wait_observed", "command", "command_sha256", "cwd", "cwd_descriptor",
+        "env_overrides", "effective_env_sha256", "executable_descriptor",
+        "input_descriptors", "binding_sha256", "receipt_sha256", "identity_sha256",
+        "namespace", "nonce", "runtime_identity", "_seal",
+    )
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        raise TypeError("_SealedProcessWitness is an internal real-Popen witness")
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        raise AttributeError("_SealedProcessWitness is immutable")
 
 
-def _run_real_popen_wait(plan: DiagnosticPlan, capability: admission.AdmissionCapability) -> dict[str, Any]:
-    _fail("diagnostic execute capability is not admitted; audited Popen path is unreachable")
-    global _CURRENT_CAPABILITY
-    _CURRENT_CAPABILITY = capability
-    current = _revalidate_before_popen(plan)
-    log_path = plan.outputs["log"]
-    log_fd = os.open(log_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0), 0o600)
-    environment = os.environ.copy()
-    environment.update(plan.env)
-    log_file = os.fdopen(log_fd, "wb", closefd=True)
+def _runtime_payload(witness: _SealedProcessWitness) -> dict[str, Any]:
+    return {
+        "process_object_id": id(witness.process),
+        "process_type": f"{type(witness.process).__module__}.{type(witness.process).__qualname__}",
+        "pid": witness.pid,
+        "pid_starttime": witness.pid_starttime,
+        "returncode": witness.returncode,
+        "wait_returncode": witness.wait_returncode,
+        "wait_observed": witness.wait_observed,
+        "command": list(witness.command),
+        "command_sha256": witness.command_sha256,
+        "cwd": witness.cwd,
+        "cwd_descriptor": dict(witness.cwd_descriptor),
+        "env_overrides": dict(witness.env_overrides),
+        "effective_env_sha256": witness.effective_env_sha256,
+        "executable_descriptor": dict(witness.executable_descriptor),
+        "input_descriptors": {key: dict(value) for key, value in witness.input_descriptors.items()},
+        "binding_sha256": witness.binding_sha256,
+        "receipt_sha256": witness.receipt_sha256,
+        "identity_sha256": witness.identity_sha256,
+        "namespace": witness.namespace,
+        "nonce": witness.nonce,
+        "runtime_identity": dict(witness.runtime_identity),
+    }
+
+
+def _witness_seal(payload: Mapping[str, Any]) -> str:
+    return hmac.new(
+        _PROCESS_WITNESS_SECRET,
+        canonical_json(dict(payload)).encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def _proc_starttime(pid: int) -> str:
+    stat_path = Path("/proc") / str(pid) / "stat"
     try:
-        process = _REAL_POPEN(
+        raw = stat_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as error:
+        _fail(f"cannot read sealed process starttime: {error}")
+    closing = raw.rfind(")")
+    if closing < 0:
+        _fail("sealed process stat record is malformed")
+    fields = raw[closing + 2 :].split()
+    # The suffix starts at stat field 3; starttime is field 22.
+    if len(fields) <= 19:
+        _fail("sealed process stat record lacks starttime")
+    return fields[19]
+
+
+def _capture_runtime_identity(
+    process: subprocess.Popen[Any],
+    plan: DiagnosticPlan,
+    environment: Mapping[str, str],
+) -> tuple[int, str, dict[str, Any]]:
+    if type(process) is not _SEALED_POPEN:
+        _fail("Popen did not return the captured real subprocess.Popen type")
+    if process.args != list(plan.command):
+        _fail("real Popen args differ from the exact receipt-bound command")
+    pid = process.pid
+    if type(pid) is not int or pid <= 0 or pid == os.getpid():
+        _fail("real Popen returned an invalid or caller PID")
+    proc_root = Path("/proc") / str(pid)
+    try:
+        cmdline = (proc_root / "cmdline").read_bytes().rstrip(b"\0").split(b"\0")
+        expected_cmdline = [os.fsencode(item) for item in plan.command]
+        if cmdline != expected_cmdline:
+            _fail("sealed process command line differs from the exact command")
+        executable = os.path.realpath(os.readlink(proc_root / "exe"))
+        expected_executable = os.path.realpath(str(plan.executable_descriptor["resolved_path"]))
+        if executable != expected_executable:
+            _fail("sealed process executable differs from the bound executable")
+        cwd = os.path.realpath(os.readlink(proc_root / "cwd"))
+        if cwd != os.path.realpath(str(plan.root)):
+            _fail("sealed process cwd differs from the bound cwd")
+        raw_env = (proc_root / "environ").read_bytes().rstrip(b"\0").split(b"\0")
+        expected_env = {os.fsencode(f"{key}={value}") for key, value in environment.items()}
+        if set(raw_env) != expected_env:
+            _fail("sealed process environment differs from the complete bound environment")
+        if os.getsid(pid) != pid:
+            _fail("sealed process was not created in its own session")
+        starttime = _proc_starttime(pid)
+    except RunnerError:
+        raise
+    except (OSError, UnicodeError) as error:
+        _fail(f"cannot capture sealed process identity: {error}")
+    return pid, starttime, {
+        "cmdline_sha256": hashlib.sha256(b"\0".join(cmdline)).hexdigest(),
+        "executable": executable,
+        "cwd": cwd,
+        "environment_sha256": _environment_digest(environment),
+        "session_leader": True,
+        "procfs_starttime": starttime,
+    }
+
+
+def _new_sealed_witness(
+    plan: DiagnosticPlan,
+    process: subprocess.Popen[Any],
+    wait_returncode: int,
+    environment: Mapping[str, str],
+    pid: int,
+    pid_starttime: str,
+    runtime_identity: Mapping[str, Any],
+) -> _SealedProcessWitness:
+    if type(process) is not _SEALED_POPEN:
+        _fail("only the captured real subprocess.Popen type can mint a witness")
+    if type(wait_returncode) is not int or wait_returncode != 0:
+        _fail("only a natural returncode-zero wait can mint a witness")
+    returncode = _SEALED_POPEN.poll(process)
+    if type(returncode) is not int or returncode != wait_returncode:
+        _fail("Popen.poll differs from the observed wait return code")
+    witness = object.__new__(_SealedProcessWitness)
+    values = {
+        "process": process,
+        "pid": int(pid),
+        "pid_starttime": str(pid_starttime),
+        "returncode": int(returncode),
+        "wait_returncode": int(wait_returncode),
+        "wait_observed": True,
+        "command": tuple(plan.command),
+        "command_sha256": str(plan.identity["command"]["sha256"]),
+        "cwd": str(plan.root),
+        "cwd_descriptor": dict(plan.cwd_descriptor),
+        "env_overrides": dict(plan.env),
+        "effective_env_sha256": _environment_digest(environment),
+        "executable_descriptor": dict(plan.executable_descriptor),
+        "input_descriptors": {key: dict(value) for key, value in plan.input_descriptors.items()},
+        "binding_sha256": plan.binding_sha256,
+        "receipt_sha256": plan.receipt["receipt_sha256"],
+        "identity_sha256": plan.receipt["identity_sha256"],
+        "namespace": str(plan.namespace),
+        "nonce": str(plan.identity["nonce"]),
+        "runtime_identity": dict(runtime_identity),
+    }
+    for name, value in values.items():
+        object.__setattr__(witness, name, value)
+    object.__setattr__(witness, "_seal", _witness_seal(_runtime_payload(witness)))
+    return witness
+
+
+def _validate_process_witness(plan: DiagnosticPlan, witness: Any) -> _SealedProcessWitness:
+    if type(witness) is not _SealedProcessWitness:
+        _fail("process evidence requires an internal sealed real Popen/wait witness")
+    try:
+        if not hmac.compare_digest(witness._seal, _witness_seal(_runtime_payload(witness))):
+            _fail("sealed real Popen/wait witness integrity check failed")
+    except (AttributeError, KeyError, TypeError, ValueError):
+        _fail("sealed real Popen/wait witness is malformed")
+    if type(witness.process) is not _SEALED_POPEN:
+        _fail("process evidence process is not the captured real subprocess.Popen type")
+    if witness.process.args != list(plan.command) or witness.process.pid != witness.pid:
+        _fail("process evidence command or PID is not bound to the receipt")
+    if _SEALED_POPEN.poll(witness.process) != witness.returncode:
+        _fail("process evidence PID does not report the sealed return code")
+    expected = {
+        "command": tuple(plan.command),
+        "command_sha256": plan.identity["command"]["sha256"],
+        "cwd": str(plan.root),
+        "cwd_descriptor": dict(plan.cwd_descriptor),
+        "env_overrides": dict(plan.env),
+        "effective_env_sha256": plan.effective_env_sha256,
+        "executable_descriptor": dict(plan.executable_descriptor),
+        "input_descriptors": {key: dict(value) for key, value in plan.input_descriptors.items()},
+        "binding_sha256": plan.binding_sha256,
+        "receipt_sha256": plan.receipt["receipt_sha256"],
+        "identity_sha256": plan.receipt["identity_sha256"],
+        "namespace": str(plan.namespace),
+        "nonce": str(plan.identity["nonce"]),
+        "returncode": 0,
+        "wait_returncode": 0,
+        "wait_observed": True,
+    }
+    for field, expected_value in expected.items():
+        if getattr(witness, field) != expected_value:
+            _fail(f"process evidence {field} drifted from the complete execution identity")
+    return witness
+
+
+def _run_real_popen_wait(plan: DiagnosticPlan, capability: admission.AdmissionCapability) -> _SealedProcessWitness:
+    _fail("diagnostic execute capability is not admitted; audited Popen path is unreachable")
+    # The code below is intentionally unreachable in the current checkout.
+    # It is nevertheless the only permitted future lifecycle: a captured
+    # real Popen class, exact receipt-bound argv/env/cwd, a direct wait, and an
+    # internal sealed witness.  No caller factory, PID, return code, or JSON
+    # proof can enter this path.
+    current = _revalidate_before_popen(plan, capability)
+    del current
+    environment = _effective_environment(plan.env)
+    if _environment_digest(environment) != plan.effective_env_sha256:
+        _fail("effective environment changed before Popen")
+    log_path = plan.outputs["log"]
+    parent_fd = _open_directory(log_path.parent, "evaluator log parent")
+    log_fd: int | None = None
+    log_file = None
+    try:
+        log_fd = os.open(
+            log_path.name,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0),
+            0o600,
+            dir_fd=parent_fd,
+        )
+        log_file = os.fdopen(log_fd, "wb", closefd=True)
+        log_fd = None
+        process = _SEALED_POPEN(
             list(plan.command), cwd=str(plan.root), env=environment,
             stdin=subprocess.DEVNULL, stdout=log_file, stderr=subprocess.STDOUT,
             close_fds=True, start_new_session=True,
         )
     finally:
-        log_file.close()
-    if type(process) is not _REAL_POPEN:
-        _fail("Popen did not return the captured real subprocess.Popen type")
-    if process.args != list(plan.command) or type(process.pid) is not int or process.pid <= 0:
-        _fail("real Popen identity differs from the exact command")
-    wait_returncode = process.wait()
-    if type(wait_returncode) is not int or type(process.returncode) is not int:
-        _fail("Popen/wait did not produce integer return codes")
-    if process.returncode != wait_returncode:
-        _fail("Popen returncode differs from wait returncode")
-    if wait_returncode != 0:
-        _fail(f"diagnostic evaluator exited non-zero: {wait_returncode}")
-    terminal = _validate_terminal_artifacts(plan)
-    terminal["resource_snapshot"] = dict(current)
-    terminal["process"] = {
-        "real_popen_wait": True,
-        "popen_type": f"{type(process).__module__}.{type(process).__qualname__}",
-        "pid": int(process.pid),
-        "returncode": int(process.returncode),
-        "wait_returncode": int(wait_returncode),
-        "wait_observed": True,
-        "command": list(plan.command),
-        "command_sha256": plan.identity["command"]["sha256"],
-        "cwd": str(plan.root),
-        "env_overrides": dict(plan.env),
+        if log_file is not None:
+            log_file.close()
+        if log_fd is not None:
+            try:
+                os.close(log_fd)
+            except OSError:
+                pass
+        try:
+            os.close(parent_fd)
+        except OSError:
+            pass
+    pid, starttime, runtime_identity = _capture_runtime_identity(process, plan, environment)
+    wait_returncode = _SEALED_POPEN.wait(process)
+    witness = _new_sealed_witness(plan, process, wait_returncode, environment, pid, starttime, runtime_identity)
+    return _validate_process_witness(plan, witness)
+
+
+def _validate_output_shape(plan: DiagnosticPlan, path: Path, name: str) -> None:
+    if path.parent != plan.namespace.parent:
+        _fail(f"{name} is not beside the bound namespace")
+    if not path.name.startswith(plan.namespace.name + "-"):
+        _fail(f"{name} is not namespace-prefixed")
+
+
+def _terminal_hdf5_receipt(
+    plan: DiagnosticPlan,
+    trajectory_path: Path,
+    trajectory_descriptor: Mapping[str, Any],
+    trajectory_raw: bytes,
+) -> dict[str, Any]:
+    hardened = hardening.inspect_hdf5_snapshot(
+        trajectory_raw,
+        required_datasets=("time", "position", "velocity", "particle_id", "particle_zone", "valid", "mass"),
+        max_bytes=MAX_HDF5_BYTES,
+    )
+    if hardened.get("sha256") != trajectory_descriptor.get("sha256") or hardened.get("bytes") != trajectory_descriptor.get("bytes"):
+        _fail("terminal HDF5 receipt disagrees with the stable trajectory descriptor")
+    receipt = {
+        "schema": f"{TERMINAL_RECEIPT_SCHEMA}.hdf5",
+        "status": "bounded_hdf5_terminal_receipt",
+        "producer": "sealed_real_popen_wait_only",
+        "synthetic_only": False,
+        "path": str(trajectory_path),
+        "descriptor": dict(trajectory_descriptor),
+        "sha256": str(trajectory_descriptor["sha256"]),
+        "bytes": int(trajectory_descriptor["bytes"]),
+        "case_id": CASE_ID,
+        "transitions": TRANSITIONS,
+        "frames": FRAMES,
+        "required_datasets": list(hardened["required_datasets"]),
+        "hard_link_count": int(hardened["hard_link_count"]),
+        "external_links_rejected": True,
+        "soft_links_rejected": True,
+        "virtual_datasets_rejected": True,
+        "stable_fd": True,
+        "path_reopened": False,
+        **ZERO_CREDIT,
     }
-    terminal["receipt_sha256"] = plan.receipt["receipt_sha256"]
-    terminal["identity_sha256"] = plan.receipt["identity_sha256"]
-    terminal["schema"] = TERMINAL_RECEIPT_SCHEMA
-    terminal["diagnostic_only"] = True
-    terminal["credit"] = 0
-    terminal_raw = (canonical_json(terminal) + "\n").encode()
-    terminal_descriptor = _write_exclusive(plan.outputs["terminal_receipt"], terminal_raw, 0o600)
-    terminal["terminal_receipt_file"] = terminal_descriptor
-    return terminal
+    receipt["receipt_sha256"] = canonical_digest({key: value for key, value in receipt.items() if key != "receipt_sha256"})
+    return receipt
+
+
+def _validate_zero_credit_payload(value: Mapping[str, Any], name: str) -> None:
+    for key, expected in ZERO_CREDIT.items():
+        if key in value:
+            _exact(value, key, expected, name)
 
 
 def _validate_terminal_artifacts(plan: DiagnosticPlan) -> dict[str, Any]:
     outputs = plan.outputs
-    evaluation_descriptor, evaluation_raw = _secure_artifact(outputs["evaluation"], plan.namespace, "evaluation", max_bytes=MAX_JSON_BYTES)
-    trajectory_descriptor, trajectory_raw = _secure_artifact(outputs["trajectory"], plan.namespace, "trajectory", max_bytes=MAX_HDF5_BYTES)
-    progress_descriptor, progress_raw = _secure_artifact(outputs["progress"], plan.namespace, "progress", max_bytes=MAX_JSON_BYTES)
+    for name in ("evaluation", "trajectory", "progress", "log", "validator", "terminal_receipt"):
+        _validate_output_shape(plan, outputs[name], f"output.{name}")
+    artifact_root = plan.namespace.parent
+    evaluation_descriptor, evaluation_raw = _secure_artifact(outputs["evaluation"], artifact_root, "evaluation", max_bytes=MAX_JSON_BYTES)
+    trajectory_descriptor, trajectory_raw = _secure_artifact(outputs["trajectory"], artifact_root, "trajectory", max_bytes=MAX_HDF5_BYTES)
+    progress_descriptor, progress_raw = _secure_artifact(outputs["progress"], artifact_root, "progress", max_bytes=MAX_JSON_BYTES)
     evaluation = _json_bytes(evaluation_raw, "evaluation")
     progress = _json_bytes(progress_raw, "progress")
     _exact(evaluation, "schema", "core.evaluation.v1", "evaluation")
@@ -436,29 +1172,20 @@ def _validate_terminal_artifacts(plan: DiagnosticPlan) -> dict[str, Any]:
     _exact(evaluation, "model_kind", MODEL, "evaluation")
     _exact(evaluation, "requested_split", SPLIT, "evaluation")
     _exact(evaluation, "maximum_steps", TRANSITIONS, "evaluation")
+    _exact(evaluation, "checkpoint", str(_mapping(plan.identity["checkpoint"], "identity.checkpoint")["path"]), "evaluation")
+    _exact(evaluation, "trajectory_output", str(outputs["trajectory"]), "evaluation")
+    _exact(evaluation, "progress_output", str(outputs["progress"]), "evaluation")
+    _validate_zero_credit_payload(evaluation, "evaluation")
     _exact(progress, "schema", "core.rollout.progress.v1", "progress")
     _exact(progress, "case_id", CASE_ID, "progress")
     _exact(progress, "status", "completed", "progress")
     _exact(progress, "execution_complete", True, "progress")
     _exact(progress, "finite_rollout_complete", True, "progress")
+    _exact(progress, "trajectory_output", str(outputs["trajectory"]), "progress")
+    _validate_zero_credit_payload(progress, "progress")
     for key in ("completed_frames", "expected_frames", "frames_expected", "frames_executed"):
         _exact(progress, key, TRANSITIONS, "progress")
-    hardened = hardening.inspect_hdf5_snapshot(
-        trajectory_raw,
-        required_datasets=("time", "position", "velocity", "particle_id", "particle_zone", "valid", "mass"),
-        max_bytes=MAX_HDF5_BYTES,
-    )
-    independent = hdf5_validator.validate_receipt(
-        outputs["evaluation"], outputs["trajectory"], case_id=CASE_ID, expected_transitions=TRANSITIONS
-    )
-    if independent.get("passed") is not True or independent.get("synthetic_only") is not False:
-        _fail("independent HDF5 validator did not pass as a real diagnostic artifact")
-    checks = _mapping(independent.get("checks"), "independent.checks")
-    if checks.get("trajectory_frames") != FRAMES or checks.get("trajectory_transitions") != TRANSITIONS:
-        _fail("independent HDF5 validator frame/transition identity drifted")
-    trajectory_after, trajectory_after_raw = _secure_artifact(outputs["trajectory"], plan.namespace, "trajectory after validator", max_bytes=MAX_HDF5_BYTES)
-    if trajectory_descriptor != trajectory_after or trajectory_raw != trajectory_after_raw:
-        _fail("trajectory changed across hardened and independent validation")
+    terminal_hdf5 = _terminal_hdf5_receipt(plan, outputs["trajectory"], trajectory_descriptor, trajectory_raw)
     validator_core: dict[str, Any] = {
         "schema": f"{SCHEMA}.artifact_identity",
         "status": "validated",
@@ -472,34 +1199,109 @@ def _validate_terminal_artifacts(plan: DiagnosticPlan) -> dict[str, Any]:
         "frames": FRAMES,
         "artifacts": {
             "evaluation": evaluation_descriptor,
-            "trajectory": trajectory_after,
+            "trajectory": trajectory_descriptor,
             "progress": progress_descriptor,
         },
-        "hardened_hdf5": dict(hardened),
-        "independent_validator": dict(independent),
+        "terminal_hdf5_receipt": terminal_hdf5,
         **ZERO_CREDIT,
     }
-    validator_core["artifact_identity_sha256"] = canonical_digest({key: validator_core[key] for key in ("schema", "receipt_sha256", "identity_sha256", "artifacts", "hardened_hdf5", "independent_validator")})
+    validator_core["artifact_identity_sha256"] = canonical_digest({key: validator_core[key] for key in ("schema", "receipt_sha256", "identity_sha256", "artifacts", "terminal_hdf5_receipt")})
     validator_raw = (canonical_json(validator_core) + "\n").encode()
     validator_descriptor = _write_exclusive(outputs["validator"], validator_raw, 0o600)
-    checked_validator, checked_raw = _secure_artifact(outputs["validator"], plan.namespace, "validator artifact", max_bytes=MAX_JSON_BYTES)
-    if checked_raw != validator_raw or checked_validator["sha256"] != validator_descriptor["sha256"]:
-        _fail("validator artifact identity changed after exclusive write")
     return {
         "status": "terminal_artifacts_validated",
-        "artifacts": {"evaluation": evaluation_descriptor, "trajectory": trajectory_after, "progress": progress_descriptor, "validator": checked_validator},
-        "hardened_hdf5": dict(hardened),
-        "independent_validator": dict(independent),
-        "artifact_identity_sha256": canonical_digest({"evaluation": evaluation_descriptor, "trajectory": trajectory_after, "progress": progress_descriptor, "validator": checked_validator}),
+        "artifacts": {"evaluation": evaluation_descriptor, "trajectory": trajectory_descriptor, "progress": progress_descriptor, "validator": validator_descriptor},
+        "terminal_hdf5_receipt": terminal_hdf5,
+        "artifact_identity_sha256": canonical_digest({"evaluation": evaluation_descriptor, "trajectory": trajectory_descriptor, "progress": progress_descriptor, "validator": validator_descriptor, "terminal_hdf5_receipt": terminal_hdf5}),
         **ZERO_CREDIT,
     }
+
+
+def _terminal_receipt(
+    plan: DiagnosticPlan,
+    witness: _SealedProcessWitness,
+    terminal: Mapping[str, Any],
+    resource_snapshot: Mapping[str, Any],
+) -> dict[str, Any]:
+    witness = _validate_process_witness(plan, witness)
+    terminal_hdf5 = _mapping(terminal.get("terminal_hdf5_receipt"), "terminal.terminal_hdf5_receipt")
+    receipt_core: dict[str, Any] = {
+        "schema": TERMINAL_RECEIPT_SCHEMA,
+        "status": "diagnostic_terminal_verified",
+        "report_id": REPORT_ID,
+        "seed": SEED,
+        "model_kind": MODEL,
+        "hidden": HIDDEN,
+        "updates": UPDATES,
+        "case_id": CASE_ID,
+        "split": SPLIT,
+        "transitions": TRANSITIONS,
+        "frames": FRAMES,
+        "receipt_sha256": plan.receipt["receipt_sha256"],
+        "identity_sha256": plan.receipt["identity_sha256"],
+        "namespace": str(plan.namespace),
+        "nonce": str(plan.identity["nonce"]),
+        "binding_sha256": plan.binding_sha256,
+        "manifest": dict(_mapping(plan.identity["manifest"], "identity.manifest")),
+        "training_receipt": dict(_mapping(plan.identity["training_receipt"], "identity.training_receipt")),
+        "checkpoint": dict(_mapping(plan.identity["checkpoint"], "identity.checkpoint")),
+        "executable": dict(plan.executable_descriptor),
+        "cwd": str(plan.root),
+        "cwd_descriptor": dict(plan.cwd_descriptor),
+        "command": list(plan.command),
+        "command_sha256": plan.identity["command"]["sha256"],
+        "env_overrides": dict(plan.env),
+        "effective_env_sha256": plan.effective_env_sha256,
+        "resource_snapshot": dict(resource_snapshot),
+        "process": {
+            "real_popen_wait": True,
+            "sealed_witness": True,
+            "process_type": f"{type(witness.process).__module__}.{type(witness.process).__qualname__}",
+            "pid": witness.pid,
+            "pid_starttime": witness.pid_starttime,
+            "wait_observed": True,
+            "returncode": 0,
+            "wait_returncode": 0,
+            "runtime_identity": dict(witness.runtime_identity),
+        },
+        "artifacts": dict(terminal["artifacts"]),
+        "artifact_identity_sha256": terminal["artifact_identity_sha256"],
+        "terminal_hdf5_receipt": dict(terminal_hdf5),
+        "side_effects": {
+            "evaluator_started": True,
+            "processes_started": 1,
+            "processes_stopped": 0,
+            "processes_restarted": 0,
+            "solver_started": False,
+            "worker_started": False,
+            "queue_submissions": 0,
+            "registry_writes": 0,
+            "ledger_writes": 0,
+            "denominator_writes": 0,
+            "gate_writes": 0,
+            "completion_writes": 0,
+            "plan_writes": 0,
+        },
+        **ZERO_CREDIT,
+    }
+    receipt_core["terminal_receipt_sha256"] = canonical_digest(receipt_core)
+    return receipt_core
 
 
 def execute_diagnostic(plan: DiagnosticPlan, capability: admission.AdmissionCapability) -> dict[str, Any]:
-    """Fail closed until the eight P1 execution blockers are independently closed."""
+    """Remain denied; the sealed lifecycle is a reviewed future-only path."""
 
-    del plan, capability
-    _fail("diagnostic execute is not admitted: " + "; ".join(EXECUTION_BLOCKERS))
+    if _DIAGNOSTIC_EXECUTION_CAPABILITY is None:
+        _fail("diagnostic execute capability is not admitted; Popen was not attempted")
+    if capability is not _DIAGNOSTIC_EXECUTION_CAPABILITY:
+        _fail("caller-supplied capability cannot authorize sealed real Popen/wait")
+    current = _revalidate_before_popen(plan, capability)
+    witness = _run_real_popen_wait(plan, capability)
+    terminal = _validate_terminal_artifacts(plan)
+    receipt = _terminal_receipt(plan, witness, terminal, current)
+    raw = (canonical_json(receipt) + "\n").encode("utf-8")
+    descriptor = _write_exclusive(plan.outputs["terminal_receipt"], raw, 0o600)
+    return {**receipt, "terminal_receipt_file": descriptor}
 
 
 def _base_report(plan: DiagnosticPlan, *, execute_requested: bool, status: str, blocked: Sequence[str] = (), terminal: Mapping[str, Any] | None = None) -> dict[str, Any]:
@@ -534,7 +1336,13 @@ def _base_report(plan: DiagnosticPlan, *, execute_requested: bool, status: str, 
         "resource_snapshot": identity["resource_snapshot"],
         "command": list(plan.command),
         "env_overrides": dict(plan.env),
+        "effective_env_sha256": plan.effective_env_sha256,
+        "effective_env_keys": list(plan.effective_env_keys),
         "cwd": str(plan.root),
+        "cwd_descriptor": dict(plan.cwd_descriptor),
+        "executable_descriptor": dict(plan.executable_descriptor),
+        "input_descriptors": {key: dict(value) for key, value in plan.input_descriptors.items()},
+        "binding_sha256": plan.binding_sha256,
         "command_sha256": identity["command"]["sha256"],
         "artifacts": {key: str(value) for key, value in plan.outputs.items()},
         "popen_attempted": bool(terminal is not None),
@@ -631,7 +1439,7 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
     errors: list[str] = []
     try:
         _walk_json(report, "report")
-        allowed = set(ZERO_CREDIT) | {"schema", "report_id", "status", "mode", "diagnostic_execute_only", "execute_requested", "source_bound", "admission_receipt_valid", "diagnostic_execute_allowed", "execution_capability_admitted", "popen_capability_admitted", "launch_allowed", "seed", "model_kind", "hidden", "updates", "case_id", "split", "transitions", "frames", "gpu_index", "receipt_path", "receipt_sha256", "identity_sha256", "namespace", "namespace_nonce", "resource_snapshot", "command", "env_overrides", "cwd", "command_sha256", "artifacts", "popen_attempted", "wait_attempted", "real_workload_started", "terminal_receipt", "blocked_reasons", "side_effects"}
+        allowed = set(ZERO_CREDIT) | {"schema", "report_id", "status", "mode", "diagnostic_execute_only", "execute_requested", "source_bound", "admission_receipt_valid", "diagnostic_execute_allowed", "execution_capability_admitted", "popen_capability_admitted", "launch_allowed", "seed", "model_kind", "hidden", "updates", "case_id", "split", "transitions", "frames", "gpu_index", "receipt_path", "receipt_sha256", "identity_sha256", "namespace", "namespace_nonce", "resource_snapshot", "command", "env_overrides", "effective_env_sha256", "effective_env_keys", "cwd", "cwd_descriptor", "executable_descriptor", "input_descriptors", "binding_sha256", "command_sha256", "artifacts", "popen_attempted", "wait_attempted", "real_workload_started", "terminal_receipt", "blocked_reasons", "side_effects"}
         _reject_unknown(report, allowed, "report")
         _exact(report, "schema", REPORT_SCHEMA, "report")
         _exact(report, "report_id", REPORT_ID, "report")
@@ -662,6 +1470,20 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
             reasons = report.get("blocked_reasons")
             if not isinstance(reasons, list) or not reasons or any(not isinstance(item, str) for item in reasons):
                 _fail("blocked report requires non-empty string reasons")
+        # Historical v2 reports predate the P1 binding projection and are
+        # intentionally left immutable.  New source-bound reports must carry
+        # the complete projection; old reports remain verifiable as history.
+        if report.get("source_bound") is True and "binding_sha256" in report:
+            for key in ("effective_env_sha256", "binding_sha256"):
+                value = report.get(key)
+                if not isinstance(value, str) or len(value) != 64:
+                    _fail(f"report.{key} must be a bound SHA-256")
+            keys = report.get("effective_env_keys")
+            if not isinstance(keys, list) or any(not isinstance(item, str) for item in keys):
+                _fail("report.effective_env_keys must be a string list")
+            for field in ("cwd_descriptor", "executable_descriptor", "input_descriptors"):
+                if not isinstance(report.get(field), Mapping):
+                    _fail(f"report.{field} must be an identity object")
         side_effects = _mapping(report.get("side_effects"), "report.side_effects")
         for key in ("registry_writes", "ledger_writes", "denominator_writes", "gate_writes", "completion_writes", "plan_writes", "processes_stopped", "processes_restarted"):
             if side_effects.get(key) not in (False, 0):

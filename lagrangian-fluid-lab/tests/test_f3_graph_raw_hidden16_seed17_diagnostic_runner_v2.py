@@ -5,10 +5,12 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import os
 from pathlib import Path
 import stat
 import sys
 
+import h5py
 import pytest
 
 from scripts import f3_graph_raw_hidden16_seed17_diagnostic_admission_v1 as admission
@@ -85,6 +87,26 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
         tmp_free_bytes=16 * 1024**3,
         root_free_bytes=16 * 1024**3,
     )
+    gpu = resource_snapshot["gpu"]
+    gpu.update({
+        "physical_index": 2,
+        "uuid": "GPU-12345678-90ab-cdef-1234-567890abcdef",
+        "pci_bus_id": "0000:65:00.0",
+        "logical_index": 0,
+        "cuda_visible_devices": "2",
+        "cuda_device": "cuda:0",
+        "cuda_device_order": "PCI_BUS_ID",
+        "identity_source": "scheduler_owned_snapshot",
+        "identity_attested": True,
+    })
+    gpu["identity_sha256"] = admission.canonical_digest(admission._gpu_identity(gpu))
+    resource_snapshot["owner"] = {
+        "uid": os.getuid(),
+        "gid": os.getgid(),
+        "host": admission.CURRENT_HOST,
+        "scope": "scheduler_owned_diagnostic_snapshot",
+        "snapshot_nonce": "b" * 32,
+    }
     (tmp_path / "output").mkdir()
     receipt = admission.mint_admission(
         root,
@@ -172,3 +194,103 @@ def test_report_verify_cli_accepts_blocked_contract(tmp_path: Path) -> None:
     report_path = tmp_path / "runner-v2-report.json"
     report_path.write_text(json.dumps(report, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
     assert runner.main(["--verify-report", str(report_path)]) == 0
+
+
+def test_plan_binds_complete_allowlist_environment_and_stable_inputs(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    plan = runner.build_plan(fixture["receipt"], resource_admission=fixture["resource"])
+    assert plan.effective_env_sha256 == runner._environment_digest(dict(plan.env))
+    assert set(plan.effective_env_keys) == {
+        "CUDA_VISIBLE_DEVICES",
+        "CUDA_DEVICE_ORDER",
+        "PYTHONDONTWRITEBYTECODE",
+    }
+    assert plan.binding_sha256 == runner._binding_digest(plan)
+    for descriptor in (*plan.input_descriptors.values(), plan.executable_descriptor, plan.cwd_descriptor):
+        assert descriptor["stable_fd"] is True
+        assert descriptor["fd_identity_stable"] is True
+        assert descriptor["path_reopened"] is False
+
+
+def test_future_real_popen_path_is_still_unreachable_without_calling_popen(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    fixture = _fixture(tmp_path)
+    plan = runner.build_plan(fixture["receipt"], resource_admission=fixture["resource"])
+    calls: list[object] = []
+
+    def forbidden(*args: object, **kwargs: object) -> None:
+        calls.append((args, kwargs))
+        raise AssertionError("bounded runner must not call Popen")
+
+    monkeypatch.setattr(runner, "_SEALED_POPEN", forbidden)
+    with pytest.raises(runner.RunnerError, match="not admitted"):
+        runner._run_real_popen_wait(plan, object())
+    assert calls == []
+
+
+def test_external_process_witness_and_caller_constructor_are_rejected(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    plan = runner.build_plan(fixture["receipt"], resource_admission=fixture["resource"])
+    with pytest.raises(TypeError, match="internal real-Popen witness"):
+        runner._SealedProcessWitness(object())
+    with pytest.raises(runner.RunnerError, match="internal sealed real Popen/wait witness"):
+        runner._validate_process_witness(plan, {"pid": 1, "returncode": 0})
+
+
+@pytest.mark.parametrize("kind", ["symlink", "hardlink"])
+def test_stable_artifact_rejects_symlink_and_hardlink(tmp_path: Path, kind: str) -> None:
+    root = tmp_path / "artifacts"
+    root.mkdir()
+    source = root / "source.bin"
+    source.write_bytes(b"stable artifact")
+    candidate = root / f"{kind}.bin"
+    if kind == "symlink":
+        candidate.symlink_to(source)
+    else:
+        os.link(source, candidate)
+    with pytest.raises(runner.RunnerError, match="symlink|hard link"):
+        runner._stable_artifact(candidate, root, kind, max_bytes=1024)
+
+
+def _write_minimal_trajectory(path: Path, *, unsafe_link: bool = False) -> None:
+    with h5py.File(path, "w") as handle:
+        for name in ("time", "position", "velocity", "particle_id", "particle_zone", "valid", "mass"):
+            handle.create_dataset(name, data=[0])
+        if unsafe_link:
+            handle["unsafe"] = h5py.SoftLink("time")
+
+
+def test_terminal_hdf5_receipt_is_snapshot_bound_and_zero_credit(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    plan = runner.build_plan(fixture["receipt"], resource_admission=fixture["resource"])
+    trajectory = plan.outputs["trajectory"]
+    _write_minimal_trajectory(trajectory)
+    descriptor, raw = runner._secure_artifact(trajectory, plan.namespace.parent, "trajectory", max_bytes=runner.MAX_HDF5_BYTES)
+    receipt = runner._terminal_hdf5_receipt(plan, trajectory, descriptor, raw)
+    assert receipt["synthetic_only"] is False
+    assert receipt["stable_fd"] is True
+    assert receipt["path_reopened"] is False
+    assert receipt["sha256"] == descriptor["sha256"]
+    for key, expected in runner.ZERO_CREDIT.items():
+        assert receipt[key] == expected
+
+
+def test_terminal_hdf5_receipt_rejects_unsafe_hdf5_links(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    plan = runner.build_plan(fixture["receipt"], resource_admission=fixture["resource"])
+    trajectory = plan.outputs["trajectory"]
+    _write_minimal_trajectory(trajectory, unsafe_link=True)
+    descriptor, raw = runner._secure_artifact(trajectory, plan.namespace.parent, "trajectory", max_bytes=runner.MAX_HDF5_BYTES)
+    with pytest.raises((runner.RunnerError, ValueError), match="link|HDF5"):
+        runner._terminal_hdf5_receipt(plan, trajectory, descriptor, raw)
+
+
+def test_report_keeps_formal_and_credit_isolation(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    report = runner.build_report(fixture["receipt"], execute_requested=True)
+    assert report["status"] == "blocked_fail_closed"
+    assert runner.validate_report(report) == []
+    for key, expected in runner.ZERO_CREDIT.items():
+        assert report[key] == expected
+    forged = copy.deepcopy(report)
+    forged["credit"] = 1
+    assert runner.validate_report(forged)
