@@ -52,6 +52,10 @@ HISTORY_FILENAME = "F3-MLP-HIDDEN16-SEED{seed}-FULL835-ROLLOUT-DIAGNOSTIC-2026-0
 MAX_BOUNDED_JSON_BYTES = 1 * 1024 * 1024
 MAX_JSON_DEPTH = 64
 MAX_ARRAY_ITEMS = 4096
+# Keep the post-terminal sidecar contract aligned with the read-only HDF5
+# validator while validating only bounded receipt scalars here.
+MAX_HDF5_BYTES = 1 * 1024 * 1024 * 1024
+MAX_HDF5_LINKS = 8192
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 NONCE_RE = re.compile(r"^[0-9a-f]{32}$")
 RUN_ID_RE = re.compile(r"^f3-mlp500-hidden16-seed(?:17|29|43)-20260928$")
@@ -109,6 +113,14 @@ VALIDATOR_KEYS = frozenset(
         "row_fields_checked",
     }
 )
+VALIDATOR_SECURITY_CHECK_KEYS = frozenset(
+    {
+        "trajectory_file_bytes",
+        "trajectory_file_sha256",
+        "trajectory_filesystem_identity_stable",
+        "hdf5_link_count",
+    }
+)
 VALIDATOR_CHECK_KEYS = frozenset(
     {
         "case_binding",
@@ -125,7 +137,7 @@ VALIDATOR_CHECK_KEYS = frozenset(
         "time_start",
         "time_end",
     }
-)
+) | VALIDATOR_SECURITY_CHECK_KEYS
 FORBIDDEN_AUTHORITY_ALIASES = frozenset(
     {
         "formal",
@@ -676,6 +688,41 @@ def _validate_validator_receipt(payload: Mapping[str, Any], expected: Mapping[st
         ("tail_frame_count", 0),
     ):
         _exact(checks, key, expected_value, f"{name}.checks")
+    for key in (
+        "trajectory_file_bytes",
+        "trajectory_file_sha256",
+        "trajectory_filesystem_identity_stable",
+        "hdf5_link_count",
+    ):
+        if key not in checks:
+            _fail(f"{name}.checks.{key} is missing")
+    trajectory_file_bytes = _strict_int(
+        checks["trajectory_file_bytes"],
+        f"{name}.checks.trajectory_file_bytes",
+        minimum=1,
+    )
+    if trajectory_file_bytes > MAX_HDF5_BYTES:
+        _fail(
+            f"{name}.checks.trajectory_file_bytes exceeds bounded size "
+            f"{MAX_HDF5_BYTES}"
+        )
+    _sha(checks["trajectory_file_sha256"], f"{name}.checks.trajectory_file_sha256")
+    _exact(
+        checks,
+        "trajectory_filesystem_identity_stable",
+        True,
+        f"{name}.checks",
+    )
+    hdf5_link_count = _strict_int(
+        checks["hdf5_link_count"],
+        f"{name}.checks.hdf5_link_count",
+        minimum=1,
+    )
+    if hdf5_link_count > MAX_HDF5_LINKS:
+        _fail(
+            f"{name}.checks.hdf5_link_count exceeds bounded limit "
+            f"{MAX_HDF5_LINKS}"
+        )
     rows = payload.get("row_fields_checked")
     if not isinstance(rows, list) or any(not isinstance(item, str) or not item for item in rows):
         _fail(f"{name}.row_fields_checked must be a string list")

@@ -295,6 +295,10 @@ def _validator_payload(
             "trajectory_transitions": launcher.TRANSITIONS,
             "executed_frame_count": launcher.FRAMES,
             "tail_frame_count": 0,
+            "trajectory_file_bytes": 1,
+            "trajectory_file_sha256": "6" * 64,
+            "trajectory_filesystem_identity_stable": True,
+            "hdf5_link_count": 7,
         },
         "row_fields_checked": ["case_id", "frames_executed"],
     }
@@ -318,6 +322,130 @@ def _write_terminal_validator(
             passed=passed,
         ),
     )
+
+
+def test_post_terminal_validator_accepts_bounded_security_extensions(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    plan = _plan(fixture, tmp_path, 17)
+    capability = type(
+        "Capability",
+        (),
+        {
+            "evaluation": plan.outputs["evaluation"],
+            "trajectory": plan.outputs["trajectory"],
+        },
+    )()
+
+    launcher._validate_completed_validator_receipt(
+        _validator_payload(capability),
+        plan,
+        "synthetic post-terminal validator",
+    )
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "pattern"),
+    [
+        ("trajectory_file_bytes", 0, "trajectory_file_bytes"),
+        ("trajectory_file_bytes", True, "trajectory_file_bytes"),
+        ("trajectory_file_sha256", "not-a-sha", "trajectory_file_sha256"),
+        ("trajectory_file_sha256", 123, "trajectory_file_sha256"),
+        (
+            "trajectory_filesystem_identity_stable",
+            False,
+            "trajectory_filesystem_identity_stable",
+        ),
+        (
+            "trajectory_filesystem_identity_stable",
+            "true",
+            "trajectory_filesystem_identity_stable",
+        ),
+        ("hdf5_link_count", 0, "hdf5_link_count"),
+        ("hdf5_link_count", True, "hdf5_link_count"),
+        ("hdf5_link_count", launcher.MAX_HDF5_LINKS + 1, "hdf5_link_count"),
+    ],
+)
+def test_post_terminal_validator_rejects_forged_or_typed_security_extensions(
+    tmp_path: Path,
+    field: str,
+    value: object,
+    pattern: str,
+) -> None:
+    fixture = _fixture(tmp_path)
+    plan = _plan(fixture, tmp_path, 17)
+    capability = type(
+        "Capability",
+        (),
+        {
+            "evaluation": plan.outputs["evaluation"],
+            "trajectory": plan.outputs["trajectory"],
+        },
+    )()
+    payload = _validator_payload(capability)
+    payload["checks"][field] = value
+
+    with pytest.raises(launcher.LauncherError, match=pattern):
+        launcher._validate_completed_validator_receipt(
+            payload,
+            plan,
+            "synthetic post-terminal validator",
+        )
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "trajectory_file_bytes",
+        "trajectory_file_sha256",
+        "trajectory_filesystem_identity_stable",
+        "hdf5_link_count",
+    ],
+)
+def test_post_terminal_validator_rejects_missing_security_extensions(
+    tmp_path: Path,
+    field: str,
+) -> None:
+    fixture = _fixture(tmp_path)
+    plan = _plan(fixture, tmp_path, 17)
+    capability = type(
+        "Capability",
+        (),
+        {
+            "evaluation": plan.outputs["evaluation"],
+            "trajectory": plan.outputs["trajectory"],
+        },
+    )()
+    payload = _validator_payload(capability)
+    del payload["checks"][field]
+
+    with pytest.raises(launcher.LauncherError, match=field):
+        launcher._validate_completed_validator_receipt(
+            payload,
+            plan,
+            "synthetic post-terminal validator",
+        )
+
+
+def test_post_terminal_validator_still_rejects_unknown_security_bypass_field(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    plan = _plan(fixture, tmp_path, 17)
+    capability = type(
+        "Capability",
+        (),
+        {
+            "evaluation": plan.outputs["evaluation"],
+            "trajectory": plan.outputs["trajectory"],
+        },
+    )()
+    payload = _validator_payload(capability)
+    payload["checks"]["forged_security_result"] = True
+
+    with pytest.raises(launcher.LauncherError, match="unknown fields"):
+        launcher._validate_completed_validator_receipt(
+            payload,
+            plan,
+            "synthetic post-terminal validator",
+        )
 
 
 def _cleanup_external_outputs(plan) -> None:

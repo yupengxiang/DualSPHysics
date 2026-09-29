@@ -43,6 +43,10 @@ def _validator_payload(paths: dict[str, Path], *, mutation: str | None = None) -
         "trajectory_transitions": 835,
         "executed_frame_count": 836,
         "tail_frame_count": 0,
+        "trajectory_file_bytes": 1,
+        "trajectory_file_sha256": "6" * 64,
+        "trajectory_filesystem_identity_stable": True,
+        "hdf5_link_count": 7,
     }
     payload: dict[str, object] = {
         "schema": sidecar.VALIDATOR_SCHEMA,
@@ -71,6 +75,20 @@ def _validator_payload(paths: dict[str, Path], *, mutation: str | None = None) -
         payload["expected_transitions"] = 834
     elif mutation == "frames":
         checks["trajectory_frames"] = 835
+    elif mutation == "security_bytes":
+        checks["trajectory_file_bytes"] = 0
+    elif mutation == "security_sha":
+        checks["trajectory_file_sha256"] = "not-a-sha"
+    elif mutation == "security_filesystem":
+        checks["trajectory_filesystem_identity_stable"] = False
+    elif mutation == "security_links":
+        checks["hdf5_link_count"] = sidecar.MAX_HDF5_LINKS + 1
+    elif mutation == "security_type":
+        checks["hdf5_link_count"] = True
+    elif mutation == "security_missing":
+        del checks["trajectory_file_sha256"]
+    elif mutation == "security_unknown":
+        checks["forged_security_result"] = True
     elif mutation == "alias":
         payload["credit"] = 0
     elif mutation == "path":
@@ -276,6 +294,13 @@ def test_zero_or_noncanonical_nonce_is_blocked(tmp_path: Path, nonce: str):
     ("complete", "complete"),
     ("transitions", "expected_transitions"),
     ("frames", "trajectory_frames"),
+    ("security_bytes", "trajectory_file_bytes"),
+    ("security_sha", "trajectory_file_sha256"),
+    ("security_filesystem", "trajectory_filesystem_identity_stable"),
+    ("security_links", "hdf5_link_count"),
+    ("security_type", "hdf5_link_count"),
+    ("security_missing", "trajectory_file_sha256"),
+    ("security_unknown", "unknown fields"),
     ("alias", "unknown fields|authority aliases"),
     ("path", "drifts from fresh namespace"),
 ])
