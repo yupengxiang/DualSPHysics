@@ -668,19 +668,15 @@ def completion(registry, data_root):
                     raise ValueError(
                         f"physical case id is registered in multiple scopes: {physical_case_id}"
                     )
-                registered_case_owners[case_id] = sid
-                registered_physical_case_owners[physical_case_id] = sid
                 audit = load_evidence(c["audit"], data_root)
                 _reject_nonformal_or_nonroot(audit, "case audit")
                 if (audit.get("schema") != "core.case_audit.v1"
                         or audit.get("hard_integrity_pass") is not True
                         or audit.get("case_id") != c["case_id"]):
                     raise ValueError("case hard audit mismatch")
-            families.setdefault(family, set()).update(ids)
             evaluation = {c["case_id"] for c in accepted if c["split"] in ("validation", "test", "id_test", "ood_test")}
             if len(evaluation) < 16:
                 raise ValueError("fewer than 16 validation/evaluation cases")
-            eval_ids.update(evaluation)
             if scope.get("material_qualification"):
                 m = load_evidence(scope["material_qualification"], data_root)
                 _reject_nonformal_or_nonroot(m, "material qualification")
@@ -712,6 +708,16 @@ def completion(registry, data_root):
                     validate_source_coverage(sidecar.get("source_coverage"),
                                              m.get("required_source_ids"),
                                              m.get("maximum_source_unknown_fraction", .01))
+            # Commit this scope's case ownership only after every optional
+            # material qualification and sidecar has passed.  Otherwise a
+            # later material failure would leave an invalid scope contributing
+            # to the T1 family and validation denominators.
+            for c in accepted:
+                registered_case_owners[c["case_id"]] = sid
+                registered_physical_case_owners[c["physical_case_id"]] = sid
+            families.setdefault(family, set()).update(ids)
+            eval_ids.update(evaluation)
+            if scope.get("material_qualification"):
                 material.setdefault(family, set()).update(ids)
                 material_eval_ids.update(evaluation)
         except (KeyError, ValueError, OSError, TypeError) as exc:

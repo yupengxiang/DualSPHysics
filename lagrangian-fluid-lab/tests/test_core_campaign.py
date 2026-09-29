@@ -513,6 +513,11 @@ def test_material_scope_without_formal_acceptance_receipt_is_not_qualified(tmp_p
 
     result = completion(registry, tmp_path)
 
+    # A failed material contract invalidates the whole scope.  Its already
+    # inspected T1 rows must not leak into the completion denominator.
+    assert result["t1_families"] == []
+    assert result["required_t1_case_runs"] == 0
+    assert result["missing_target_t1_case_runs"] == 432
     assert not result["macro_t2_families"]
     assert result["required_material_case_runs"] == 0
     assert result["unregistered_material_case_runs"] == 288
