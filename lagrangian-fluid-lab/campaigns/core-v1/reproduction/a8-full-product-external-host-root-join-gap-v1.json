@@ -1,0 +1,129 @@
+{
+  "schema": "core.reproduction.a8_full_product_external_host_root_join_gap_campaign.v1",
+  "version": 1,
+  "campaign_id": "a8-full-product-external-host-root-join-gap-v1",
+  "input_origin": "synthetic_fixture",
+  "objective": "Join the bounded A8 reader/prediction/scoring package boundary to distinct data roots, trusted-root and external-host projections without promoting authority.",
+  "upstream_boundaries": {
+    "package_verifier": "scripts/a8_full_product_receipt_manifest_verify_v1.py",
+    "package_report_schema": "core.a8.full_product_receipt_manifest_verify_report.v1",
+    "attestation_contract": "scripts/a8_trusted_root_external_host_attestation_contract_v1.py",
+    "attestation_report_schema": "core.reproduction.a8_trusted_root_external_host_attestation_report.v1"
+  },
+  "verifier": {
+    "script": "scripts/a8_full_product_external_host_root_join_gap_v1.py",
+    "schema": "core.reproduction.a8_full_product_external_host_root_join_gap_input.v1",
+    "report_schema": "core.reproduction.a8_full_product_external_host_root_join_gap_report.v1",
+    "bounded_json_bytes": 131072,
+    "production_payload_opened": false,
+    "large_asset_read": false
+  },
+  "join_contract": {
+    "shared_run_identity": [
+      "package_id",
+      "case_id",
+      "attempt_id",
+      "nonce",
+      "package_sha256"
+    ],
+    "shared_package_receipts": [
+      "manifest_sha256",
+      "receipt_sha256",
+      "artifact_chain_sha256"
+    ],
+    "artifact_roles": ["reader", "prediction", "scoring"],
+    "distinct_identity": [
+      "source_host_id",
+      "source_physical_host_id",
+      "source_data_root",
+      "source_manifest_sha256",
+      "reproduction_host_id",
+      "reproduction_physical_host_id",
+      "reproduction_data_root",
+      "reproduction_manifest_sha256"
+    ],
+    "canonical_join_fields": [
+      "package_run_identity",
+      "package_receipt_digests",
+      "data_root_identity",
+      "trusted_root_review_id",
+      "external_host_attestation_id",
+      "join_id"
+    ]
+  },
+  "fail_closed_policy": {
+    "input_origin": "synthetic_fixture",
+    "diagnostic_only": true,
+    "full_product_reproduction": false,
+    "independent_reproduction": false,
+    "terminal_receipt_present": false,
+    "checkpoint": 0,
+    "credit": 0,
+    "unknown_fields": "reject",
+    "caller_authority_claims": "reject",
+    "package_run_drift": "reject",
+    "artifact_chain_drift": "reject",
+    "trusted_root_drift": "reject",
+    "external_host_drift": "reject",
+    "duplicate_physical_host": "reject",
+    "duplicate_data_root": "reject",
+    "cross_binding_hash_drift": "reject"
+  },
+  "synthetic_mutation_coverage": {
+    "focused_test_file": "tests/test_a8_full_product_external_host_root_join_gap_v1.py",
+    "expected_tests": 16,
+    "mutation_classes": [
+      "external-host artifact-chain drift",
+      "trusted-root source-manifest drift",
+      "full-product join artifact-chain drift",
+      "package run identity drift",
+      "full-product authority claim",
+      "duplicate data root",
+      "duplicate physical host",
+      "cross-binding digest drift",
+      "unknown caller authority field",
+      "terminal receipt claim",
+      "report claim drift",
+      "symlinked projection",
+      "symlinked report",
+      "operational import scan"
+    ]
+  },
+  "execution_constraints": {
+    "read_only": true,
+    "synthetic_projection_only": true,
+    "production_payload_opened": false,
+    "large_asset_read": false,
+    "host_probe_performed": false,
+    "trusted_root_authenticated": false,
+    "external_host_attested": false,
+    "terminal_receipt_read": false,
+    "native_started": false,
+    "solver_started": false,
+    "worker_started": false,
+    "gpu_started": false,
+    "queue_mutation": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "completion_mutation": 0
+  },
+  "expected_result": {
+    "structural_join": true,
+    "trusted_root_authenticated": false,
+    "external_host_attested": false,
+    "full_product_terminal_receipt": false,
+    "formal_training": false,
+    "formal_admission": false,
+    "independent_reproduction": false,
+    "credit": 0
+  },
+  "allowed_write_set": [
+    "scripts/a8_full_product_external_host_root_join_gap_v1.py",
+    "tests/test_a8_full_product_external_host_root_join_gap_v1.py",
+    "campaigns/core-v1/reproduction/a8-full-product-external-host-root-join-gap-v1.json",
+    "reports/A8-FULL-PRODUCT-EXTERNAL-HOST-ROOT-JOIN-GAP-V1-2026-09-29.json",
+    "reports/A8-FULL-PRODUCT-EXTERNAL-HOST-ROOT-JOIN-GAP-V1-2026-09-29.zh-CN.md"
+  ]
+}
