@@ -1,0 +1,430 @@
+{
+  "T1": false,
+  "T2": false,
+  "anchor": {
+    "bounded": true,
+    "bytes": 39084,
+    "content_read": true,
+    "error": null,
+    "exists": true,
+    "external_path": false,
+    "identity": {
+      "ctime_ns": 1790635062410566078,
+      "device": 2081,
+      "inode": 318713949,
+      "kind": "file",
+      "mode": 33204,
+      "mtime_ns": 1790635055540709970,
+      "nlink": 1,
+      "owner_name": "jade",
+      "owner_uid": 1001,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F4-TALLWALL120-MATERIAL-ROOT-SCHEDULER-INTAKE-V1-2026-09-28.json",
+      "size": 39084
+    },
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F4-TALLWALL120-MATERIAL-ROOT-SCHEDULER-INTAKE-V1-2026-09-28.json",
+    "role": "F4 v1 root/scheduler anchor report",
+    "sha256": "40ac02893d858abbfd8a91456d8aa35d40f3f424dbf7dde1bc8266460348d00d"
+  },
+  "authorization": {
+    "T1": false,
+    "T2": false,
+    "credit": 0,
+    "diagnostic_only": true,
+    "external_receipts_verified": false,
+    "formal": false,
+    "formal_eligible": false,
+    "gpu_authorized": false,
+    "launch_allowed": false,
+    "native_authorized": false,
+    "non_authorizing": true,
+    "qualification_credit": 0,
+    "queue_authorized": false,
+    "solver_authorized": false,
+    "worker_launch_authorized": false
+  },
+  "binding_contract": {
+    "attempt_id": "f4-tallwall120-production-dev-07-coarse-baseline24-s2-r001",
+    "attempt_namespace": "campaigns/core-v1/material/proposals/f4-tallwall120-production-dev-07/coarse-baseline24-s2-r001-source-6ae8ca70",
+    "attempt_namespace_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/material/proposals/f4-tallwall120-production-dev-07/coarse-baseline24-s2-r001-source-6ae8ca70",
+    "code_hashes": {
+      "cfd_runner": {
+        "bytes": 53931,
+        "path": "scripts/core_cfd.py",
+        "sha256": "fd6e56ab6c8f42e55c15c0e9d742c9289fca0a4214e5e203a3b357a23040adfb"
+      },
+      "collector": {
+        "bytes": 60714,
+        "path": "scripts/core_f4_tallwall120_production_collector.py",
+        "sha256": "9294bc46c097e5575f9b6dd212cfb72457aa52eaeb85303cd413b2968a765153"
+      },
+      "material": {
+        "bytes": 24647,
+        "path": "scripts/f4_tallwall120_material.py",
+        "sha256": "dc3c06e5b689eb64b7c3c7ee87b022699cfed19483d38662031570ea24b66f26"
+      },
+      "material_diagnosis": {
+        "bytes": 13603,
+        "path": "scripts/f4_tallwall120_material_diagnosis.py",
+        "sha256": "8842af88de6e8ec2f051c60a53266fba8e3e7bbd1c0c30a5d5a1e40f93d809bd"
+      },
+      "runtime": {
+        "bytes": 63098,
+        "path": "scripts/core_runtime.py",
+        "sha256": "de2f1c353647e8baa0aa427873b8c0689f22d53b3f8ce63aeefe0fd9ea9f2dc0"
+      }
+    },
+    "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+    "manifest": {
+      "bytes": 765422,
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
+      "sha256": "808fe201c4df28f2be9b48a514f338689c38bcb96db0b0c0590946b79fb9ad09"
+    },
+    "normalized_launch": {
+      "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+      "diagnosis": [
+        "{lab_root}/.venv/bin/python",
+        "{lab_root}/scripts/f4_tallwall120_material_diagnosis.py",
+        "--source",
+        "{lab_root}/campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+        "--trace",
+        "{fresh_output_namespace}/product/tallwall120_material.h5",
+        "--output",
+        "{fresh_output_namespace}/product/tallwall120_material_diagnosis.json",
+        "--q",
+        "0.23437500000000008",
+        "--dp-m",
+        "0.0075",
+        "--substeps",
+        "2"
+      ],
+      "execution_order": [
+        "material_trace",
+        "diagnosis"
+      ],
+      "material_trace": [
+        "{lab_root}/.venv/bin/python",
+        "{lab_root}/scripts/f4_tallwall120_material.py",
+        "--source",
+        "{lab_root}/campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+        "--output",
+        "{fresh_output_namespace}/product/tallwall120_material.h5",
+        "--q",
+        "0.23437500000000008",
+        "--dp-m",
+        "0.0075",
+        "--seeds",
+        "512",
+        "--substeps",
+        "2",
+        "--neighbour-variant",
+        "baseline24",
+        "--stop-after",
+        "217"
+      ],
+      "output_namespace": "campaigns/core-v1/material/proposals/f4-tallwall120-production-dev-07/coarse-baseline24-s2-r001-source-6ae8ca70",
+      "production_job": [
+        "{lab_root}/.venv/bin/python",
+        "{lab_root}/scripts/core_cfd.py",
+        "--lab-root",
+        "{lab_root}",
+        "run",
+        "--prepared",
+        "{lab_root}/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/remaining-24/case-07/prepared.json",
+        "--output",
+        "{attempt_dir}/product"
+      ],
+      "resume_allowed": false,
+      "shell": false
+    },
+    "normalized_launch_sha256": "9f748422db97313d39672fbd4622d09bd9edd0f463681c8b4bc92fc1c4a566eb",
+    "resource_request": {
+      "cpu_cores": 2,
+      "gpu_peak_mib": 6144,
+      "io_weight": 2,
+      "ram_mib": 24576
+    },
+    "scope": {
+      "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+      "family": "F4",
+      "job_id": "f4-tallwall120-production-dev-07",
+      "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1"
+    },
+    "source": {
+      "bytes": 2067911708,
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+      "sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae"
+    }
+  },
+  "created_at": "2026-09-29",
+  "credit": 0,
+  "current_input_observation": {
+    "code": {
+      "cfd_runner": {
+        "actual_bytes": 53931,
+        "actual_sha256": "fd6e56ab6c8f42e55c15c0e9d742c9289fca0a4214e5e203a3b357a23040adfb",
+        "error": null,
+        "expected_bytes": 53931,
+        "expected_sha256": "fd6e56ab6c8f42e55c15c0e9d742c9289fca0a4214e5e203a3b357a23040adfb",
+        "identity": {
+          "ctime_ns": 1789836298162239791,
+          "device": 2081,
+          "inode": 318710550,
+          "kind": "file",
+          "mode": 33204,
+          "mtime_ns": 1789836298162239791,
+          "nlink": 1,
+          "owner_name": "jade",
+          "owner_uid": 1001,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_cfd.py",
+          "size": 53931
+        },
+        "path": "scripts/core_cfd.py"
+      },
+      "collector": {
+        "actual_bytes": 60714,
+        "actual_sha256": "9294bc46c097e5575f9b6dd212cfb72457aa52eaeb85303cd413b2968a765153",
+        "error": null,
+        "expected_bytes": 60714,
+        "expected_sha256": "9294bc46c097e5575f9b6dd212cfb72457aa52eaeb85303cd413b2968a765153",
+        "identity": {
+          "ctime_ns": 1790334375948503687,
+          "device": 2081,
+          "inode": 318713302,
+          "kind": "file",
+          "mode": 33204,
+          "mtime_ns": 1790334375948503687,
+          "nlink": 1,
+          "owner_name": "jade",
+          "owner_uid": 1001,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_f4_tallwall120_production_collector.py",
+          "size": 60714
+        },
+        "path": "scripts/core_f4_tallwall120_production_collector.py"
+      },
+      "material": {
+        "actual_bytes": 24647,
+        "actual_sha256": "dc3c06e5b689eb64b7c3c7ee87b022699cfed19483d38662031570ea24b66f26",
+        "error": null,
+        "expected_bytes": 24647,
+        "expected_sha256": "dc3c06e5b689eb64b7c3c7ee87b022699cfed19483d38662031570ea24b66f26",
+        "identity": {
+          "ctime_ns": 1790130900407540180,
+          "device": 2081,
+          "inode": 318713299,
+          "kind": "file",
+          "mode": 33204,
+          "mtime_ns": 1790130900407540180,
+          "nlink": 1,
+          "owner_name": "jade",
+          "owner_uid": 1001,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_tallwall120_material.py",
+          "size": 24647
+        },
+        "path": "scripts/f4_tallwall120_material.py"
+      },
+      "material_diagnosis": {
+        "actual_bytes": 13603,
+        "actual_sha256": "8842af88de6e8ec2f051c60a53266fba8e3e7bbd1c0c30a5d5a1e40f93d809bd",
+        "error": null,
+        "expected_bytes": 13603,
+        "expected_sha256": "8842af88de6e8ec2f051c60a53266fba8e3e7bbd1c0c30a5d5a1e40f93d809bd",
+        "identity": {
+          "ctime_ns": 1789904071183552817,
+          "device": 2081,
+          "inode": 318713301,
+          "kind": "file",
+          "mode": 33204,
+          "mtime_ns": 1789904071183552817,
+          "nlink": 1,
+          "owner_name": "jade",
+          "owner_uid": 1001,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f4_tallwall120_material_diagnosis.py",
+          "size": 13603
+        },
+        "path": "scripts/f4_tallwall120_material_diagnosis.py"
+      },
+      "runtime": {
+        "actual_bytes": 63098,
+        "actual_sha256": "de2f1c353647e8baa0aa427873b8c0689f22d53b3f8ce63aeefe0fd9ea9f2dc0",
+        "error": null,
+        "expected_bytes": 63098,
+        "expected_sha256": "de2f1c353647e8baa0aa427873b8c0689f22d53b3f8ce63aeefe0fd9ea9f2dc0",
+        "identity": {
+          "ctime_ns": 1790198601206372015,
+          "device": 2081,
+          "inode": 318707760,
+          "kind": "file",
+          "mode": 33204,
+          "mtime_ns": 1790198601206372015,
+          "nlink": 1,
+          "owner_name": "jade",
+          "owner_uid": 1001,
+          "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/core_runtime.py",
+          "size": 63098
+        },
+        "path": "scripts/core_runtime.py"
+      }
+    },
+    "manifest": {
+      "actual_bytes": 765422,
+      "actual_sha256": "808fe201c4df28f2be9b48a514f338689c38bcb96db0b0c0590946b79fb9ad09",
+      "error": null,
+      "expected_bytes": 765422,
+      "expected_sha256": "808fe201c4df28f2be9b48a514f338689c38bcb96db0b0c0590946b79fb9ad09",
+      "identity": {
+        "ctime_ns": 1789878536672557007,
+        "device": 2081,
+        "inode": 331548784,
+        "kind": "file",
+        "mode": 33204,
+        "mtime_ns": 1789878536672557007,
+        "nlink": 1,
+        "owner_name": "jade",
+        "owner_uid": 1001,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json",
+        "size": 765422
+      },
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-production-root-v1/collection-refresh-terminal32-formal-v1.json"
+    },
+    "source": {
+      "actual_bytes": 2067911708,
+      "declared_bytes": 2067911708,
+      "declared_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+      "error": null,
+      "exists": true,
+      "hash_recomputed": false,
+      "mode": "lstat_metadata_only",
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+      "read": false,
+      "regular_file": true,
+      "symlink": false
+    }
+  },
+  "diagnostic_only": true,
+  "execution_controls": {
+    "bounded_json_only": true,
+    "completion_mutations": 0,
+    "denominator_mutations": 0,
+    "fresh_namespace_created": false,
+    "gate_mutations": 0,
+    "gpu_started": false,
+    "ledger_mutations": 0,
+    "native_started": false,
+    "plan_mutations": 0,
+    "queue_started": false,
+    "receipt_files_written": false,
+    "registry_mutations": 0,
+    "replay_guard_consumed": false,
+    "scheduler_reservation_created": false,
+    "solver_started": false,
+    "worker_started": false
+  },
+  "next_safe_action": "Keep execution blocked. Obtain producer-signed external root/scheduler receipts, one-use replay guards, trusted public keys, and a scheduler host/resource snapshot; then re-run this read-only intake. Do not hand-edit, reuse, or synthesize receipts.",
+  "non_authorizing": true,
+  "observed_at": "2026-09-29T00:00:00Z",
+  "qualification_credit": 0,
+  "readiness_pass": false,
+  "receipt_projection": {
+    "fresh_root": {
+      "identity": null,
+      "valid": false
+    },
+    "scheduler_host_io": {
+      "identity": null,
+      "valid": false
+    }
+  },
+  "receipts": {
+    "fresh_root": {
+      "bounded": true,
+      "bytes": null,
+      "content_read": false,
+      "error": "missing",
+      "exists": false,
+      "external_path": true,
+      "identity": null,
+      "path": "/run/f4/tallwall120/material/dev-07/fresh-root-receipt.json",
+      "role": "F4 external fresh-root receipt",
+      "sha256": null
+    },
+    "scheduler_host_io": {
+      "bounded": true,
+      "bytes": null,
+      "content_read": false,
+      "error": "missing",
+      "exists": false,
+      "external_path": true,
+      "identity": null,
+      "path": "/run/f4/tallwall120/material/dev-07/scheduler-host-io-receipt.json",
+      "role": "F4 external scheduler receipt",
+      "sha256": null
+    }
+  },
+  "record_id": "f4-tallwall120-material-external-receipt-intake-v1",
+  "schema": "core.material.f4.tallwall120.external_receipt_intake.v1",
+  "status": "blocked_missing_external_receipts",
+  "trusted_key_observation": {
+    "root": {
+      "configured": false,
+      "error": "not_configured",
+      "exists": false,
+      "path": null,
+      "sha256": null
+    },
+    "scheduler": {
+      "configured": false,
+      "error": "not_configured",
+      "exists": false,
+      "path": null,
+      "sha256": null
+    }
+  },
+  "validation": {
+    "anchor_errors": [],
+    "blockers": [
+      "root.missing_or_not_object",
+      "scheduler.missing_or_not_object",
+      "pair.pair_id_equal",
+      "pair.attempt_id_equal",
+      "pair.nonce_equal",
+      "pair.binding_sha_equal",
+      "pair.pair_commitment_equal",
+      "pair.counterparty_cross_bound",
+      "pair.pair_commitment_recomputed",
+      "root_receipt:missing",
+      "scheduler_receipt:missing"
+    ],
+    "checks": {
+      "anchor_contract_valid": true,
+      "argv_sha_bound": true,
+      "attempt_id_equal": false,
+      "attempt_namespace_template_bound": true,
+      "binding_sha_equal": false,
+      "counterparty_cross_bound": false,
+      "current_code_hashes_valid": true,
+      "cwd_bound": true,
+      "external_intake_valid": false,
+      "host_resource_snapshot_valid": false,
+      "manifest_sha_valid": true,
+      "nonce_equal": false,
+      "pair_commitment_equal": false,
+      "pair_commitment_recomputed": false,
+      "pair_id_equal": false,
+      "resource_capacity_sufficient": false,
+      "root_namespace_owner_inode_bound": false,
+      "root_producer_authenticated": false,
+      "root_receipt_contract_valid": false,
+      "root_receipt_external_path": true,
+      "root_receipt_present": false,
+      "root_replay_guard_valid": false,
+      "scheduler_producer_authenticated": false,
+      "scheduler_receipt_contract_valid": false,
+      "scheduler_receipt_external_path": true,
+      "scheduler_receipt_present": false,
+      "scheduler_replay_guard_valid": false,
+      "scheduler_reservation_owner_inode_bound": false,
+      "source_claim_bound": true,
+      "source_metadata_valid": true
+    }
+  }
+}
