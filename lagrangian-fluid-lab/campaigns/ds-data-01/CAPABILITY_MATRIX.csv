@@ -7,8 +7,9 @@ existing_f3,F3 reliable numerical assets,available,campaigns/core-v1 and archive
 converter_pipeline,BI4/CSV/HDF5 conversion,complete for D02 canaries,lagrangian-fluid-lab/scripts/ds_data01_convert_canary.py and d02/canaries/conversion-summary.json,scope-specific physical checks still required,audit in D03
 quality_evidence,structural/numerical checks,partial,existing core quality tests plus D02_MECHANISM_ATLAS.json,old core gates include obsolete learning dependencies; physical scope checks remain,adapt per-scope checks in D03
 official_reproduction,official raw-case replay,partial,5 selected official cases reproduced in d02/canaries,coarse canaries are not production qualification,scope-audit selected cases in D03
-split_contract,leakage-safe split roles,partial,protocol/benchmark-tasks.json and prior manifests,old splits are not automatically valid for new families,freeze in D04
+split_contract,leakage-safe split roles,complete,D04_SPLIT_SPEC.json and D04_LINEAGE_REGISTRY.json,assignments intentionally remain empty while production gate is closed,materialize only after explicit acceptance
 model_free_evaluator,model-free read/align/score interface,available,core_benchmark.py and protocol files,requires DS-DATA-01 contract binding,adapt in D07
-material_tracer,independent material reference,diagnostic_only,existing tracer evidence,not a core production prerequisite,attach only to qualified subset
+native_labels,native trajectory labels and scope boundaries,complete,D06_LABEL_SCHEMA.json and ds_data01_d06_labels.py,labels encode numerical/scope meaning and do not establish Q-E,carry into D05/D08 package
+material_tracer,independent material reference,diagnostic_only,D06_TRACER_SUBSET_SPEC.json,not a core production prerequisite; missing/failed tracer cannot invalidate native data,attach only to qualified subset
 learning_tasks,training/inference/replay,disabled,SCOPE_OVERRIDE.md,legacy receipts remain historical,no new learning process
 resource_control,actual resource ledger,partial,core runtime receipts and live GPU snapshot,old queue is not DS-DATA-01 accounting,create per-attempt ledger
