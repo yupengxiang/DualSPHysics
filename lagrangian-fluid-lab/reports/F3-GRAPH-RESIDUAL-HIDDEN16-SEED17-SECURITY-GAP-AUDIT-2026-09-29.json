@@ -1,0 +1,109 @@
+{
+  "schema": "core.f3.graph_residual.hidden16.seed17.security_gap_audit.v1",
+  "report_id": "f3-graph-residual-hidden16-seed17-security-gap-audit-2026-09-29",
+  "status": "closed_minimal_fail_closed",
+  "scope": {
+    "model_kind": "graph_residual",
+    "hidden": 16,
+    "seed": 17,
+    "run_id": "f3-graph_residual500-hidden16-currentmanifest-seed17-20260929-v3",
+    "case_id": "F3_DEV_00_a0p903125",
+    "split": "test",
+    "transitions": 835,
+    "frames": 836,
+    "excluded_scopes": [
+      "residual seed29",
+      "residual seed43",
+      "raw variants",
+      "MLP variants",
+      "Core registry/ledger/denominator/gates/completion/PLAN"
+    ]
+  },
+  "baseline_findings_closed": [
+    "caller-supplied resource_admission was previously treated as scheduler-owned GPU identity",
+    "namespace creation and one-shot consumption were local rather than externally authorized",
+    "stable descriptor flags and report process-side-effect fields were not fully enforced"
+  ],
+  "data_flow_controls": {
+    "receipt_consumption": {
+      "external_claim_required": true,
+      "external_claim_written_before_local_consumed_marker": true,
+      "local_replay_rejected": true,
+      "runner_build_and_blocked_execute_consume_receipt": false,
+      "credit": 0
+    },
+    "external_authority": {
+      "ed25519_signature_required": true,
+      "trusted_key_path_bound": true,
+      "authority_binds_plan_namespace_resource_and_gpu_digest": true,
+      "synthetic_test_authority_is_not_production_evidence": true
+    },
+    "stable_fd_path_identity": {
+      "nofollow_parent_and_file_open": true,
+      "descriptor_identity_rechecked": true,
+      "stable_fd_required": true,
+      "fd_identity_stable_required": true,
+      "path_reopened_must_be_false": true,
+      "content_opened_required": true
+    },
+    "descriptor_bound_output": {
+      "output_namespace_bound_to_receipt_root_and_namespace_inode": true,
+      "preexisting_output_rejected": true,
+      "terminal_artifacts_rechecked_via_bound_identity_reader": true,
+      "child_publication_capability_installed": false
+    },
+    "terminal_identity": {
+      "receipt_identity_and_binding_exactly_checked": true,
+      "process_and_hdf5_validator_envelope_exactly_checked": true,
+      "terminal_receipt_minted_by_runner": false,
+      "formal_credit": 0
+    },
+    "gpu_popen_fail_closed": {
+      "gpu_runtime_started": false,
+      "gpu_identity_is_only_external_scheduler_snapshot": true,
+      "popen_capability_admitted": false,
+      "wait_observed": false,
+      "solver_started": false,
+      "validator_started": false
+    }
+  },
+  "modified_scope": [
+    "scripts/f3_graph_residual_hidden16_seed17_diagnostic_admission_v1.py",
+    "scripts/f3_graph_residual_hidden16_seed17_diagnostic_runner_v2.py",
+    "tests/test_f3_graph_residual_hidden16_seed17_diagnostic_admission_v1.py",
+    "tests/test_f3_graph_residual_hidden16_seed17_diagnostic_runner_v2.py",
+    "reports/F3-GRAPH-RESIDUAL-HIDDEN16-SEED17-SECURITY-GAP-AUDIT-2026-09-29.json",
+    "reports/F3-GRAPH-RESIDUAL-HIDDEN16-SEED17-SECURITY-GAP-AUDIT-2026-09-29.zh-CN.md"
+  ],
+  "verification": {
+    "command": ".venv/bin/python -m pytest -q tests/test_f3_graph_residual_hidden16_*.py",
+    "seed17_specialized_tests": 10,
+    "related_residual_tests": 187,
+    "all_passed": true,
+    "gpu_popen_solver_started": false,
+    "formal_state_writes": 0
+  },
+  "unclosed_blockers": [
+    {
+      "id": "B1",
+      "severity": "P1",
+      "blocker": "production scheduler trust anchor and externally coordinated CAS claim",
+      "local_static_evidence": "only isolated synthetic Ed25519 key, authority document and claim ledger are available in tests",
+      "required_external_evidence": "deployment-owned public key, scheduler-issued reservation and an observed atomic one-shot claim"
+    },
+    {
+      "id": "B2",
+      "severity": "P1",
+      "blocker": "live GPU UUID/PCI identity and child-process resource observation",
+      "local_static_evidence": "the receipt binds an external snapshot and the runner rejects implicit probing",
+      "required_external_evidence": "scheduler/GPU runtime attestation for the exact child launch"
+    },
+    {
+      "id": "B3",
+      "severity": "P1",
+      "blocker": "real sealed Popen/wait witness, descriptor-bound child publication and independent terminal HDF5 validator",
+      "local_static_evidence": "the execution capability is absent and all launch/validator paths fail closed",
+      "required_external_evidence": "a permitted sandboxed runtime witness with stable output publication and validator evidence"
+    }
+  ]
+}
