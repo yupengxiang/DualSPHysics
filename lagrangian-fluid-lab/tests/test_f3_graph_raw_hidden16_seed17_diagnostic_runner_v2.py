@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import base64
 import hashlib
 import io
 import json
@@ -14,14 +15,112 @@ from types import SimpleNamespace
 
 import h5py
 import pytest
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from scripts import f3_graph_raw_hidden16_seed17_diagnostic_admission_v1 as admission
 from scripts import f3_graph_raw_hidden16_seed17_diagnostic_runner_v2 as runner
 
 
+_TEST_SCHEDULER_KEY: Ed25519PrivateKey | None = None
+
+
+@pytest.fixture(autouse=True)
+def _synthetic_scheduler_trust_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Install a per-test trust root; it is never a production authority."""
+
+    global _TEST_SCHEDULER_KEY
+    scheduler_root = tmp_path / "scheduler-ledger"
+    scheduler_root.mkdir(mode=0o700)
+    key_root = tmp_path / "scheduler-trust"
+    key_root.mkdir(mode=0o700)
+    key_path = key_root / "scheduler-ed25519-public.key"
+    _TEST_SCHEDULER_KEY = Ed25519PrivateKey.generate()
+    key_path.write_bytes(
+        _TEST_SCHEDULER_KEY.public_key().public_bytes(
+            serialization.Encoding.Raw,
+            serialization.PublicFormat.Raw,
+        )
+    )
+    key_path.chmod(0o600)
+    monkeypatch.setattr(admission, "EXTERNAL_SCHEDULER_ROOT", scheduler_root)
+    monkeypatch.setattr(admission, "TRUSTED_SCHEDULER_PUBLIC_KEY_PATH", key_path)
+    yield
+    _TEST_SCHEDULER_KEY = None
+
+
 def _write_json(path: Path, payload: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+
+
+def _write_external_authority(fixture: dict[str, object], nonce: str) -> Path:
+    """Create only the signed synthetic authority needed by this test fixture."""
+
+    key = _TEST_SCHEDULER_KEY
+    assert key is not None
+    output_root = Path(fixture["output_root"])
+    namespace = output_root / (
+        f"f3-graph_raw500-hidden16-currentmanifest-seed{admission.SEED}"
+        f"-full835-nonce{nonce}"
+    )
+    namespace.mkdir(mode=0o700)
+    plan = admission._build_reserved_plan(
+        fixture["root"],
+        manifest=fixture["manifest"],
+        training_receipt=fixture["training"],
+        checkpoint=fixture["checkpoint"],
+        nonce=nonce,
+        namespace=namespace,
+        gpu_index=admission.GPU_INDEX,
+    )
+    namespace_descriptor = admission._existing_namespace_descriptor(namespace)
+    authority_id = hashlib.sha256(
+        f"synthetic-test-authority:{namespace}".encode()
+    ).hexdigest()
+    scheduler_root = Path(admission.EXTERNAL_SCHEDULER_ROOT)
+    authority_path = scheduler_root / f"{authority_id}.authority.json"
+    consume_path = scheduler_root / f"{authority_id}.claim.json"
+    public_key = key.public_key().public_bytes(
+        serialization.Encoding.Raw,
+        serialization.PublicFormat.Raw,
+    )
+    gpu = admission._gpu_identity(fixture["resource"]["gpu"])
+    unsigned = {
+        "schema": admission.EXTERNAL_AUTHORITY_SCHEMA,
+        "authority_id": authority_id,
+        "state": "issued",
+        "one_shot": True,
+        "owner": {
+            "uid": os.getuid(),
+            "gid": os.getgid(),
+            "host": admission.CURRENT_HOST,
+        },
+        "scheduler": {
+            "uid": os.getuid(),
+            "gid": os.getgid(),
+            "host": admission.CURRENT_HOST,
+            "role": "external_scheduler",
+        },
+        "namespace": namespace_descriptor,
+        "nonce": nonce,
+        "plan_sha256": admission._plan_binding_digest(plan),
+        "resource_snapshot_sha256": admission.canonical_digest(fixture["resource"]),
+        "gpu": gpu,
+        "gpu_identity_sha256": admission.canonical_digest(gpu),
+        "consume_path": str(consume_path),
+        "key_id": hashlib.sha256(public_key).hexdigest(),
+        "signature_algorithm": "ed25519",
+    }
+    document = {
+        **unsigned,
+        "signature_base64": base64.b64encode(
+            key.sign(admission._authority_signing_message(unsigned))
+        ).decode("ascii"),
+    }
+    _write_json(authority_path, document)
+    authority_path.chmod(0o600)
+    return authority_path
 
 
 def _fixture(tmp_path: Path) -> dict[str, object]:
@@ -109,15 +208,26 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
         "scope": "scheduler_owned_diagnostic_snapshot",
         "snapshot_nonce": "b" * 32,
     }
-    (tmp_path / "output").mkdir()
+    output_root = tmp_path / "output"
+    output_root.mkdir()
+    fixture = {
+        "root": root,
+        "output_root": output_root,
+        "manifest": manifest,
+        "training": training,
+        "checkpoint": checkpoint,
+        "resource": resource_snapshot,
+    }
+    authority_path = _write_external_authority(fixture, "a" * 32)
     receipt = admission.mint_admission(
         root,
         manifest=manifest,
         training_receipt=training,
         checkpoint=checkpoint,
         nonce="a" * 32,
-        output_root=tmp_path / "output",
+        output_root=output_root,
         resource_admission=resource_snapshot,
+        external_authority=authority_path,
     )
     return {"root": root, "receipt": Path(receipt["receipt_path"]), "resource": resource_snapshot}
 
