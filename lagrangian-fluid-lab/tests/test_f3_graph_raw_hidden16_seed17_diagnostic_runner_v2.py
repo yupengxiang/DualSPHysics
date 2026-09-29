@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
 import stat
 import sys
+from types import SimpleNamespace
 
 import h5py
 import pytest
@@ -270,6 +272,9 @@ def test_terminal_hdf5_receipt_is_snapshot_bound_and_zero_credit(tmp_path: Path)
     assert receipt["stable_fd"] is True
     assert receipt["path_reopened"] is False
     assert receipt["sha256"] == descriptor["sha256"]
+    assert receipt["external_storage_count"] == 0
+    assert receipt["external_storage_rejected"] is True
+    assert receipt["link_inventory_sha256"] == runner.canonical_digest(receipt["link_inventory"])
     for key, expected in runner.ZERO_CREDIT.items():
         assert receipt[key] == expected
 
@@ -282,6 +287,133 @@ def test_terminal_hdf5_receipt_rejects_unsafe_hdf5_links(tmp_path: Path) -> None
     descriptor, raw = runner._secure_artifact(trajectory, plan.namespace.parent, "trajectory", max_bytes=runner.MAX_HDF5_BYTES)
     with pytest.raises((runner.RunnerError, ValueError), match="link|HDF5"):
         runner._terminal_hdf5_receipt(plan, trajectory, descriptor, raw)
+
+
+def _hdf5_snapshot_with_required_datasets(*, external: bool = False, virtual: bool = False, tmp_path: Path | None = None) -> bytes:
+    raw = io.BytesIO()
+    with h5py.File(raw, "w") as handle:
+        for name in ("time", "position", "velocity", "particle_id", "particle_zone", "valid", "mass"):
+            handle.create_dataset(name, data=[0])
+        if external:
+            handle.create_dataset("external", shape=(1,), dtype="i", external=[("outside.raw", 0, 4)])
+        if virtual:
+            if tmp_path is None:
+                raise AssertionError("virtual fixture requires tmp_path")
+            source = tmp_path / "virtual-source.h5"
+            with h5py.File(source, "w") as source_handle:
+                source_handle.create_dataset("time", data=[0])
+            layout = h5py.VirtualLayout(shape=(1,), dtype="i")
+            layout[:] = h5py.VirtualSource(str(source), "time", shape=(1,))
+            handle.create_virtual_dataset("virtual", layout)
+    return raw.getvalue()
+
+
+def test_runner_hdf5_boundary_rejects_external_storage_before_dataset_read() -> None:
+    raw = _hdf5_snapshot_with_required_datasets(external=True)
+    with pytest.raises(runner.RunnerError, match="external storage"):
+        runner._inspect_hdf5_snapshot(
+            raw,
+            required_datasets=("time", "position", "velocity", "particle_id", "particle_zone", "valid", "mass"),
+        )
+
+
+def test_runner_hdf5_boundary_rejects_virtual_dataset_and_binds_inventory(tmp_path: Path) -> None:
+    raw = _hdf5_snapshot_with_required_datasets(virtual=True, tmp_path=tmp_path)
+    with pytest.raises(runner.RunnerError, match="virtual"):
+        runner._inspect_hdf5_snapshot(
+            raw,
+            required_datasets=("time", "position", "velocity", "particle_id", "particle_zone", "valid", "mass"),
+        )
+    safe = _hdf5_snapshot_with_required_datasets()
+    inspected = runner._inspect_hdf5_snapshot(
+        safe,
+        required_datasets=("time", "position", "velocity", "particle_id", "particle_zone", "valid", "mass"),
+    )
+    assert inspected["external_storage_rejected"] is True
+    assert inspected["external_storage_count"] == 0
+    assert inspected["link_inventory_sha256"] == runner.canonical_digest(inspected["link_inventory"])
+
+
+def _reservation_plan(tmp_path: Path) -> SimpleNamespace:
+    namespace = tmp_path / ("f3-graph_raw500-hidden16-currentmanifest-seed17-full835-nonce" + "a" * 32)
+    namespace.mkdir()
+    return SimpleNamespace(
+        namespace=namespace,
+        outputs=runner._outputs(namespace),
+    )
+
+
+def test_evaluator_outputs_are_exclusively_reserved_and_path_only_child_is_blocked(tmp_path: Path) -> None:
+    plan = _reservation_plan(tmp_path)
+    reservations = runner._reserve_evaluator_outputs(plan)
+    try:
+        assert set(reservations.outputs) == set(runner.EVALUATOR_OUTPUT_NAMES)
+        assert all(item.descriptor["stable_fd"] is True for item in reservations.outputs.values())
+        assert all(item.path.is_file() for item in reservations.outputs.values())
+        with pytest.raises(runner.RunnerError, match="pathname-only"):
+            runner._require_descriptor_bound_outputs(plan, reservations)
+    finally:
+        runner._release_output_reservations(reservations, remove_unpublished=True)
+    assert all(not path.exists() for path in plan.outputs.values())
+
+
+def test_evaluator_output_reservation_detects_leaf_replacement(tmp_path: Path) -> None:
+    plan = _reservation_plan(tmp_path)
+    reservations = runner._reserve_evaluator_outputs(plan)
+    replaced = reservations.outputs["trajectory"].path
+    try:
+        replaced.unlink()
+        replaced.symlink_to(tmp_path / "outside.h5")
+        with pytest.raises(runner.RunnerError, match="identity drifted"):
+            runner._validate_output_reservations(reservations)
+    finally:
+        if replaced.is_symlink():
+            replaced.unlink()
+        runner._release_output_reservations(reservations, remove_unpublished=True)
+
+
+def test_gpu_probe_parsers_and_child_attestation_are_fail_closed() -> None:
+    gpu_uuid = "GPU-12345678-90ab-cdef-1234-567890abcdef"
+    gpu_rows = runner._parse_nvidia_smi_gpu_rows(
+        f"2, {gpu_uuid}, 0000:65:00.0, 49152, 1024, 48128\n"
+    )
+    assert gpu_rows[2]["uuid"] == gpu_uuid
+    assert gpu_rows[2]["pci_bus_id"] == "0000:65:00.0"
+    process_rows = runner._parse_nvidia_smi_process_rows(f"12345, {gpu_uuid}\n")
+    assert process_rows == [{"pid": 12345, "gpu_uuid": gpu_uuid}]
+    expected = {
+        "physical_index": 2,
+        "uuid": gpu_uuid,
+        "pci_bus_id": "0000:65:00.0",
+        "logical_index": 0,
+        "cuda_visible_devices": "2",
+        "cuda_device": "cuda:0",
+        "cuda_device_order": "PCI_BUS_ID",
+        "identity_source": "scheduler_owned_snapshot",
+        "identity_attested": True,
+        "identity_sha256": admission.canonical_digest({
+            "physical_index": 2,
+            "uuid": gpu_uuid,
+            "pci_bus_id": "0000:65:00.0",
+            "logical_index": 0,
+            "cuda_visible_devices": "2",
+            "cuda_device": "cuda:0",
+            "cuda_device_order": "PCI_BUS_ID",
+        }),
+    }
+    runtime = {
+        **expected,
+        "live_probe": True,
+        "child_runtime_attested": True,
+        "child_pid": 12345,
+        "probe_tool": "nvidia-smi",
+    }
+    plan = SimpleNamespace(gpu_identity=expected)
+    runner._validate_child_gpu_attestation(plan, {"gpu": runtime}, 12345)
+    forged = dict(runtime)
+    forged["pci_bus_id"] = "0000:66:00.0"
+    with pytest.raises(runner.RunnerError, match="pci_bus_id"):
+        runner._validate_child_gpu_attestation(plan, {"gpu": forged}, 12345)
 
 
 def test_report_keeps_formal_and_credit_isolation(tmp_path: Path) -> None:

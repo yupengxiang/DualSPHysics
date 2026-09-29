@@ -20,15 +20,19 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import hashlib
 import hmac
+import io
 import json
 import os
 from pathlib import Path
+import re
 import stat
 import subprocess
 import sys
 import tempfile
 import secrets
 from typing import Any
+
+import h5py
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -58,7 +62,21 @@ MAX_JSON_BYTES = 16 * 1024 * 1024
 MAX_HDF5_BYTES = 2 * 1024 * 1024 * 1024
 MAX_EXECUTABLE_BYTES = 512 * 1024 * 1024
 MAX_READ_CHUNK = 1024 * 1024
+MAX_HDF5_LINKS = 8192
 ARTIFACT_ROOT = Path(tempfile.gettempdir()).resolve()
+EVALUATOR_OUTPUT_NAMES = ("evaluation", "trajectory", "progress", "log")
+NVIDIA_SMI_COMMAND = (
+    "nvidia-smi",
+    "--query-gpu=index,uuid,pci.bus_id,memory.total,memory.used,memory.free",
+    "--format=csv,noheader,nounits",
+)
+NVIDIA_SMI_PROCESS_COMMAND = (
+    "nvidia-smi",
+    "--query-compute-apps=pid,gpu_uuid",
+    "--format=csv,noheader,nounits",
+)
+GPU_UUID_RE = re.compile(r"^GPU-[0-9A-Fa-f-]{8,}$")
+PCI_BUS_RE = re.compile(r"^[0-9A-Fa-f]{4}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}\.[0-7]$")
 
 ZERO_CREDIT: dict[str, Any] = dict(admission.ZERO_CREDIT)
 
@@ -481,6 +499,195 @@ def _outputs(namespace: Path) -> dict[str, Path]:
     }
 
 
+@dataclass(frozen=True)
+class _ReservedOutput:
+    name: str
+    path: Path
+    fd: int
+    descriptor: Mapping[str, Any]
+
+
+@dataclass(frozen=True)
+class _OutputReservations:
+    parent_fd: int
+    outputs: Mapping[str, _ReservedOutput]
+
+    @property
+    def pass_fds(self) -> tuple[int, ...]:
+        return tuple(item.fd for item in self.outputs.values())
+
+
+def _assert_path_absent(parent_fd: int, path: Path, name: str) -> None:
+    """Check one output leaf through its already-open parent directory."""
+
+    try:
+        os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+    except FileNotFoundError:
+        return
+    except OSError as error:
+        _fail(f"cannot inspect fresh {name} output: {error}")
+    _fail(f"fresh {name} output already exists: {path}")
+
+
+def _assert_outputs_absent(namespace: Path, outputs: Mapping[str, Path]) -> None:
+    for name, path in outputs.items():
+        if path.parent != namespace.parent or not path.name.startswith(namespace.name + "-"):
+            _fail(f"output.{name} is not beside the bound namespace")
+    parent_fd = _open_directory(namespace.parent, "diagnostic output parent")
+    try:
+        for name, path in outputs.items():
+            _assert_path_absent(parent_fd, path, name)
+    finally:
+        try:
+            os.close(parent_fd)
+        except OSError:
+            pass
+
+
+def _reserve_evaluator_outputs(plan: DiagnosticPlan) -> _OutputReservations:
+    """Reserve evaluator leaves before Popen and retain their descriptors.
+
+    A pathname-only child cannot consume this reservation safely: it can
+    unlink/replace the leaf before opening it, and the current core evaluator
+    publishes through its own pathname-based atomic publisher.  The caller
+    must therefore pass these descriptors to an explicitly descriptor-bound
+    child contract; otherwise ``_require_descriptor_bound_outputs`` rejects
+    the launch before Popen.
+    """
+
+    for name in EVALUATOR_OUTPUT_NAMES:
+        if name not in plan.outputs:
+            _fail(f"evaluator output {name!r} is absent from the plan")
+    for name, path in plan.outputs.items():
+        _validate_output_shape(plan, path, f"output.{name}")
+    parent_fd = _open_directory(plan.namespace.parent, "diagnostic output reservation parent")
+    flags = (
+        os.O_RDWR
+        | os.O_CREAT
+        | os.O_EXCL
+        | getattr(os, "O_CLOEXEC", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+    )
+    opened: dict[str, _ReservedOutput] = {}
+    try:
+        for name in EVALUATOR_OUTPUT_NAMES:
+            path = plan.outputs[name]
+            try:
+                fd = os.open(path.name, flags, 0o600, dir_fd=parent_fd)
+            except FileExistsError:
+                _fail(f"refusing to reserve reused evaluator output: {path}")
+            except OSError as error:
+                _fail(f"cannot reserve evaluator output {path}: {error}")
+            info = os.fstat(fd)
+            if (
+                not stat.S_ISREG(info.st_mode)
+                or info.st_nlink != 1
+                or stat.S_IMODE(info.st_mode) != 0o600
+                or info.st_uid != os.getuid()
+                or info.st_gid != os.getgid()
+            ):
+                os.close(fd)
+                _fail(f"reserved evaluator output identity is unsafe: {path}")
+            path_info = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+            if _fd_identity(path_info) != _fd_identity(info):
+                os.close(fd)
+                _fail(f"reserved evaluator output path changed: {path}")
+            opened[name] = _ReservedOutput(
+                name=name,
+                path=path,
+                fd=fd,
+                descriptor={
+                    "path": str(path),
+                    "dev": int(info.st_dev),
+                    "ino": int(info.st_ino),
+                    "bytes": int(info.st_size),
+                    "mode": int(stat.S_IMODE(info.st_mode)),
+                    "uid": int(info.st_uid),
+                    "gid": int(info.st_gid),
+                    "nlink": int(info.st_nlink),
+                    "mtime_ns": int(info.st_mtime_ns),
+                    "stable_fd": True,
+                    "fd_identity_stable": True,
+                    "path_reopened": False,
+                },
+            )
+        return _OutputReservations(parent_fd=parent_fd, outputs=dict(opened))
+    except BaseException:
+        for item in opened.values():
+            try:
+                os.close(item.fd)
+            except OSError:
+                pass
+            try:
+                current = os.stat(item.path.name, dir_fd=parent_fd, follow_symlinks=False)
+                if _fd_identity(current) == (
+                    item.descriptor["dev"], item.descriptor["ino"],
+                    item.descriptor["mode"], item.descriptor["nlink"],
+                    item.descriptor["bytes"], item.descriptor["mtime_ns"],
+                ):
+                    os.unlink(item.path.name, dir_fd=parent_fd)
+            except (FileNotFoundError, OSError):
+                pass
+        try:
+            os.close(parent_fd)
+        except OSError:
+            pass
+        raise
+
+
+def _validate_output_reservations(reservations: _OutputReservations) -> None:
+    for name in EVALUATOR_OUTPUT_NAMES:
+        item = reservations.outputs.get(name)
+        if item is None:
+            _fail(f"evaluator output reservation {name!r} is missing")
+        info = os.fstat(item.fd)
+        if (
+            not stat.S_ISREG(info.st_mode)
+            or info.st_nlink != 1
+            or info.st_uid != os.getuid()
+            or info.st_gid != os.getgid()
+        ):
+            _fail(f"evaluator output reservation {name!r} identity drifted")
+        path_info = os.stat(item.path.name, dir_fd=reservations.parent_fd, follow_symlinks=False)
+        if _fd_identity(path_info) != _fd_identity(info):
+            _fail(f"evaluator output reservation {name!r} path identity drifted")
+
+
+def _release_output_reservations(reservations: _OutputReservations, *, remove_unpublished: bool) -> None:
+    """Close reservation descriptors; remove only an unchanged unpublished leaf."""
+
+    if remove_unpublished:
+        for item in reservations.outputs.values():
+            try:
+                path_info = os.stat(item.path.name, dir_fd=reservations.parent_fd, follow_symlinks=False)
+                info = os.fstat(item.fd)
+                if _fd_identity(path_info) == _fd_identity(info):
+                    os.unlink(item.path.name, dir_fd=reservations.parent_fd)
+            except (FileNotFoundError, OSError):
+                pass
+    for item in reservations.outputs.values():
+        try:
+            os.close(item.fd)
+        except OSError:
+            pass
+    try:
+        os.close(reservations.parent_fd)
+    except OSError:
+        pass
+
+
+def _require_descriptor_bound_outputs(plan: DiagnosticPlan, reservations: _OutputReservations) -> None:
+    """Do not let a pathname-only evaluator consume a pre-Popen reservation."""
+
+    _validate_output_reservations(reservations)
+    # The current core evaluator accepts --output/--trajectory-output/
+    # --progress-output pathnames and creates its own anonymous staging files.
+    # It has no receipt-bound fd publication protocol.  A reserved pathname is
+    # therefore not a child-side attestation and cannot authorize Popen.
+    del plan
+    _fail("evaluator output publication is pathname-only; descriptor-bound child attestation is absent")
+
+
 def _validate_command(identity: Mapping[str, Any], outputs: Mapping[str, Path]) -> tuple[tuple[str, ...], dict[str, str]]:
     command = _mapping(identity.get("command"), "identity.command")
     argv_value = command.get("argv")
@@ -575,6 +782,7 @@ class DiagnosticPlan:
     input_descriptors: Mapping[str, Mapping[str, Any]]
     executable_descriptor: Mapping[str, Any]
     cwd_descriptor: Mapping[str, Any]
+    gpu_identity: Mapping[str, Any]
     effective_env_sha256: str
     effective_env_keys: tuple[str, ...]
     binding_sha256: str
@@ -640,6 +848,45 @@ def _effective_environment(overrides: Mapping[str, str]) -> dict[str, str]:
 
 def _environment_digest(environment: Mapping[str, str]) -> str:
     return canonical_digest({"entries": [[key, environment[key]] for key in sorted(environment)]})
+
+
+def _validate_gpu_identity(value: Mapping[str, Any], name: str = "resource_admission.gpu") -> dict[str, Any]:
+    """Validate the physical/logical GPU mapping without treating it as live proof."""
+
+    gpu = dict(_mapping(value, name))
+    required = (
+        "physical_index", "uuid", "pci_bus_id", "logical_index",
+        "cuda_visible_devices", "cuda_device", "cuda_device_order",
+        "identity_source", "identity_attested", "identity_sha256",
+    )
+    for key in required:
+        if key not in gpu:
+            _fail(f"{name}.{key} is missing")
+    if type(gpu["physical_index"]) is not int or gpu["physical_index"] != GPU_INDEX:
+        _fail(f"{name}.physical_index is not bound to GPU{GPU_INDEX}")
+    uuid = gpu["uuid"]
+    if not isinstance(uuid, str) or GPU_UUID_RE.fullmatch(uuid) is None:
+        _fail(f"{name}.uuid is not a canonical GPU UUID")
+    pci = gpu["pci_bus_id"]
+    if not isinstance(pci, str) or PCI_BUS_RE.fullmatch(pci) is None:
+        _fail(f"{name}.pci_bus_id is not canonical")
+    if type(gpu["logical_index"]) is not int or gpu["logical_index"] != 0:
+        _fail(f"{name}.logical_index is not cuda:0")
+    _exact(gpu, "cuda_visible_devices", str(GPU_INDEX), name)
+    _exact(gpu, "cuda_device", "cuda:0", name)
+    _exact(gpu, "cuda_device_order", getattr(admission, "CUDA_DEVICE_ORDER", "PCI_BUS_ID"), name)
+    _exact(gpu, "identity_source", "scheduler_owned_snapshot", name)
+    _exact(gpu, "identity_attested", True, name)
+    expected_digest = admission.canonical_digest(admission._gpu_identity(gpu))
+    _exact(gpu, "identity_sha256", expected_digest, name)
+    return {
+        key: gpu[key]
+        for key in (
+            "physical_index", "uuid", "pci_bus_id", "logical_index",
+            "cuda_visible_devices", "cuda_device", "cuda_device_order",
+            "identity_source", "identity_attested", "identity_sha256",
+        )
+    }
 
 
 def _snapshot_bound_inputs(
@@ -750,6 +997,7 @@ def _binding_digest(plan: DiagnosticPlan) -> str:
         "input_descriptors": dict(plan.input_descriptors),
         "executable_descriptor": dict(plan.executable_descriptor),
         "cwd_descriptor": dict(plan.cwd_descriptor),
+        "gpu_identity": dict(plan.gpu_identity),
         "effective_env_sha256": plan.effective_env_sha256,
         "command": list(plan.command),
         "env_overrides": dict(plan.env),
@@ -768,11 +1016,11 @@ def build_plan(receipt_path: Path | str, *, resource_admission: Mapping[str, Any
     _directory_descriptor(namespace, "receipt namespace")
     outputs = _outputs(namespace)
     command, env = _validate_command(identity, outputs)
-    for name, output in outputs.items():
-        if os.path.lexists(output):
-            _fail(f"fresh diagnostic output already exists: {output}")
+    _assert_outputs_absent(namespace, outputs)
     static_resource = resource_admission if resource_admission is not None else identity["resource_snapshot"]
     revalidated = admission.revalidate_receipt(receipt, resource_admission=static_resource, check_files=True)
+    revalidated_resource = _mapping(revalidated.get("resource_snapshot"), "revalidated.resource_snapshot")
+    gpu_identity = _validate_gpu_identity(_mapping(revalidated_resource.get("gpu"), "revalidated.resource_snapshot.gpu"))
     input_descriptors, executable_descriptor, cwd_descriptor, env_sha256, env_keys, _binding_core = _snapshot_bound_inputs(root, identity)
     provisional = DiagnosticPlan(
         receipt_path=path,
@@ -786,6 +1034,7 @@ def build_plan(receipt_path: Path | str, *, resource_admission: Mapping[str, Any
         input_descriptors=input_descriptors,
         executable_descriptor=executable_descriptor,
         cwd_descriptor=cwd_descriptor,
+        gpu_identity=gpu_identity,
         effective_env_sha256=env_sha256,
         effective_env_keys=env_keys,
         binding_sha256="",
@@ -833,6 +1082,11 @@ def _verify_consumed_capability(plan: DiagnosticPlan, capability: admission.Admi
 def _revalidate_bound_identity(plan: DiagnosticPlan, resource_snapshot: Mapping[str, Any]) -> None:
     current = admission.revalidate_receipt(plan.receipt, resource_admission=resource_snapshot, check_files=True)
     del current
+    observed_gpu = _validate_gpu_identity(
+        _mapping(_mapping(resource_snapshot, "resource_snapshot").get("gpu"), "resource_snapshot.gpu")
+    )
+    if observed_gpu != dict(plan.gpu_identity):
+        _fail("live GPU UUID/PCI identity differs from the receipt-bound GPU identity")
     identity = plan.identity
     inputs, executable, cwd, environment_sha256, environment_keys, _binding_core = _snapshot_bound_inputs(plan.root, identity)
     for name, expected in plan.input_descriptors.items():
@@ -849,14 +1103,21 @@ def _revalidate_bound_identity(plan: DiagnosticPlan, resource_snapshot: Mapping[
         _fail("complete execution identity binding digest drifted")
 
 
-def _revalidate_before_popen(plan: DiagnosticPlan, capability: admission.AdmissionCapability) -> Mapping[str, Any]:
-    current = admission.resource.probe_resource_admission(GPU_INDEX, root=plan.root)
+def _revalidate_before_popen(
+    plan: DiagnosticPlan,
+    capability: admission.AdmissionCapability,
+) -> tuple[Mapping[str, Any], _OutputReservations]:
+    probed = admission.resource.probe_resource_admission(GPU_INDEX, root=plan.root)
+    current, _live_gpu = _resource_with_live_gpu_identity(probed, plan.gpu_identity)
     _revalidate_bound_identity(plan, current)
     _verify_consumed_capability(plan, capability)
-    for name, output in plan.outputs.items():
-        if os.path.lexists(output):
-            _fail(f"diagnostic output was reused before Popen: {output}")
-    return current
+    reservations = _reserve_evaluator_outputs(plan)
+    try:
+        _require_descriptor_bound_outputs(plan, reservations)
+    except BaseException:
+        _release_output_reservations(reservations, remove_unpublished=True)
+        raise
+    return current, reservations
 
 
 class _SealedProcessWitness:
@@ -927,6 +1188,148 @@ def _proc_starttime(pid: int) -> str:
     return fields[19]
 
 
+def _parse_nvidia_smi_gpu_rows(stdout: str) -> dict[int, dict[str, Any]]:
+    if not isinstance(stdout, str):
+        _fail("nvidia-smi GPU probe did not return text")
+    rows: dict[int, dict[str, Any]] = {}
+    for line in stdout.splitlines():
+        if not line.strip():
+            continue
+        fields = [item.strip() for item in line.split(",")]
+        if len(fields) != 6:
+            _fail("nvidia-smi GPU probe returned a malformed row")
+        try:
+            index, total, used, free = (int(fields[item]) for item in (0, 3, 4, 5))
+        except (TypeError, ValueError):
+            _fail("nvidia-smi GPU probe returned a non-integer row")
+        uuid = fields[1]
+        pci = fields[2]
+        if index < 0 or min(total, used, free) < 0 or used + free > total:
+            _fail(f"nvidia-smi GPU probe returned invalid VRAM for index {index}")
+        if GPU_UUID_RE.fullmatch(uuid) is None or PCI_BUS_RE.fullmatch(pci) is None:
+            _fail(f"nvidia-smi GPU probe returned invalid identity for index {index}")
+        if index in rows:
+            _fail(f"nvidia-smi GPU probe returned duplicate index {index}")
+        rows[index] = {
+            "physical_index": index,
+            "uuid": uuid,
+            "pci_bus_id": pci,
+            "total_mib": total,
+            "used_mib": used,
+            "free_mib": free,
+        }
+    if not rows:
+        _fail("nvidia-smi GPU probe returned no usable rows")
+    return rows
+
+
+def _parse_nvidia_smi_process_rows(stdout: str) -> list[dict[str, Any]]:
+    if not isinstance(stdout, str):
+        _fail("nvidia-smi process probe did not return text")
+    rows: list[dict[str, Any]] = []
+    for line in stdout.splitlines():
+        if not line.strip():
+            continue
+        fields = [item.strip() for item in line.split(",")]
+        if len(fields) != 2:
+            _fail("nvidia-smi process probe returned a malformed row")
+        try:
+            pid = int(fields[0])
+        except (TypeError, ValueError):
+            _fail("nvidia-smi process probe returned a non-integer PID")
+        uuid = fields[1]
+        if pid <= 0 or GPU_UUID_RE.fullmatch(uuid) is None:
+            _fail("nvidia-smi process probe returned an invalid process identity")
+        rows.append({"pid": pid, "gpu_uuid": uuid})
+    return rows
+
+
+def _nvidia_smi_query(command: Sequence[str], name: str) -> str:
+    if tuple(command[:1]) != ("nvidia-smi",):
+        _fail(f"{name} executable is not the fixed nvidia-smi command")
+    try:
+        result = subprocess.run(
+            tuple(command),
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            close_fds=True,
+            env={"LC_ALL": "C", "LANG": "C"},
+        )
+    except (OSError, subprocess.SubprocessError) as error:
+        _fail(f"{name} failed: {error}")
+    if type(result.returncode) is not int or result.returncode != 0:
+        _fail(f"{name} returned non-zero status {getattr(result, 'returncode', None)!r}")
+    return result.stdout
+
+
+def _probe_live_gpu_identity(
+    expected: Mapping[str, Any],
+    *,
+    child_pid: int | None = None,
+) -> dict[str, Any]:
+    """Observe physical UUID/PCI and optionally bind a live child PID to it."""
+
+    expected_identity = _validate_gpu_identity(expected, "expected GPU identity")
+    gpu_rows = _parse_nvidia_smi_gpu_rows(
+        _nvidia_smi_query(NVIDIA_SMI_COMMAND, "nvidia-smi GPU identity probe")
+    )
+    row = gpu_rows.get(int(expected_identity["physical_index"]))
+    if row is None:
+        _fail("live nvidia-smi probe did not expose the receipt-bound physical GPU")
+    for key in ("uuid", "pci_bus_id"):
+        if row[key] != expected_identity[key]:
+            _fail(f"live GPU {key} differs from the receipt-bound identity")
+    if child_pid is not None:
+        if type(child_pid) is not int or child_pid <= 0:
+            _fail("child GPU attestation requires a positive PID")
+        process_rows = _parse_nvidia_smi_process_rows(
+            _nvidia_smi_query(NVIDIA_SMI_PROCESS_COMMAND, "nvidia-smi child GPU probe")
+        )
+        matches = [item for item in process_rows if item["pid"] == child_pid]
+        if len(matches) != 1 or matches[0]["gpu_uuid"] != expected_identity["uuid"]:
+            _fail("child PID is not live on the receipt-bound GPU UUID")
+    return {
+        **row,
+        **expected_identity,
+        "live_probe": True,
+        "child_runtime_attested": child_pid is not None,
+        "child_pid": child_pid,
+        "probe_tool": "nvidia-smi",
+        "process_query_required": child_pid is not None,
+    }
+
+
+def _resource_with_live_gpu_identity(
+    resource_snapshot: Mapping[str, Any],
+    expected: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Merge a live UUID/PCI/VRAM observation into the admission shape."""
+
+    live = _probe_live_gpu_identity(expected)
+    current = dict(resource_snapshot)
+    gpu = dict(_mapping(current.get("gpu"), "resource_snapshot.gpu"))
+    gpu.update({key: live[key] for key in ("total_mib", "used_mib", "free_mib")})
+    gpu.update(_validate_gpu_identity(expected, "expected GPU identity"))
+    current["gpu"] = gpu
+    return current, live
+
+
+def _validate_child_gpu_attestation(
+    plan: DiagnosticPlan,
+    runtime_identity: Mapping[str, Any],
+    pid: int,
+) -> None:
+    attestation = _mapping(runtime_identity.get("gpu"), "runtime_identity.gpu")
+    _exact(attestation, "live_probe", True, "runtime_identity.gpu")
+    _exact(attestation, "child_runtime_attested", True, "runtime_identity.gpu")
+    _exact(attestation, "child_pid", pid, "runtime_identity.gpu")
+    _exact(attestation, "probe_tool", "nvidia-smi", "runtime_identity.gpu")
+    for key, expected in plan.gpu_identity.items():
+        _exact(attestation, key, expected, "runtime_identity.gpu")
+
+
 def _capture_runtime_identity(
     process: subprocess.Popen[Any],
     plan: DiagnosticPlan,
@@ -963,6 +1366,7 @@ def _capture_runtime_identity(
         raise
     except (OSError, UnicodeError) as error:
         _fail(f"cannot capture sealed process identity: {error}")
+    child_gpu = _probe_live_gpu_identity(plan.gpu_identity, child_pid=pid)
     return pid, starttime, {
         "cmdline_sha256": hashlib.sha256(b"\0".join(cmdline)).hexdigest(),
         "executable": executable,
@@ -970,6 +1374,8 @@ def _capture_runtime_identity(
         "environment_sha256": _environment_digest(environment),
         "session_leader": True,
         "procfs_starttime": starttime,
+        "gpu": child_gpu,
+        "child_runtime_gpu_attestation": True,
     }
 
 
@@ -986,6 +1392,7 @@ def _new_sealed_witness(
         _fail("only the captured real subprocess.Popen type can mint a witness")
     if type(wait_returncode) is not int or wait_returncode != 0:
         _fail("only a natural returncode-zero wait can mint a witness")
+    _validate_child_gpu_attestation(plan, runtime_identity, pid)
     returncode = _SEALED_POPEN.poll(process)
     if type(returncode) is not int or returncode != wait_returncode:
         _fail("Popen.poll differs from the observed wait return code")
@@ -1053,55 +1460,51 @@ def _validate_process_witness(plan: DiagnosticPlan, witness: Any) -> _SealedProc
     for field, expected_value in expected.items():
         if getattr(witness, field) != expected_value:
             _fail(f"process evidence {field} drifted from the complete execution identity")
+    _validate_child_gpu_attestation(plan, witness.runtime_identity, witness.pid)
+    if witness.runtime_identity.get("child_runtime_gpu_attestation") is not True:
+        _fail("process evidence lacks a sealed child GPU runtime attestation")
     return witness
 
 
-def _run_real_popen_wait(plan: DiagnosticPlan, capability: admission.AdmissionCapability) -> _SealedProcessWitness:
+def _run_real_popen_wait(
+    plan: DiagnosticPlan,
+    capability: admission.AdmissionCapability,
+    *,
+    prevalidated: tuple[Mapping[str, Any], _OutputReservations] | None = None,
+) -> _SealedProcessWitness:
     _fail("diagnostic execute capability is not admitted; audited Popen path is unreachable")
     # The code below is intentionally unreachable in the current checkout.
     # It is nevertheless the only permitted future lifecycle: a captured
     # real Popen class, exact receipt-bound argv/env/cwd, a direct wait, and an
     # internal sealed witness.  No caller factory, PID, return code, or JSON
     # proof can enter this path.
-    current = _revalidate_before_popen(plan, capability)
+    current, reservations = (
+        _revalidate_before_popen(plan, capability)
+        if prevalidated is None
+        else prevalidated
+    )
     del current
     environment = _effective_environment(plan.env)
     if _environment_digest(environment) != plan.effective_env_sha256:
+        _release_output_reservations(reservations, remove_unpublished=True)
         _fail("effective environment changed before Popen")
-    log_path = plan.outputs["log"]
-    parent_fd = _open_directory(log_path.parent, "evaluator log parent")
-    log_fd: int | None = None
     log_file = None
     try:
-        log_fd = os.open(
-            log_path.name,
-            os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0),
-            0o600,
-            dir_fd=parent_fd,
-        )
-        log_file = os.fdopen(log_fd, "wb", closefd=True)
-        log_fd = None
+        _validate_output_reservations(reservations)
+        log_file = os.fdopen(os.dup(reservations.outputs["log"].fd), "wb", closefd=True)
         process = _SEALED_POPEN(
             list(plan.command), cwd=str(plan.root), env=environment,
             stdin=subprocess.DEVNULL, stdout=log_file, stderr=subprocess.STDOUT,
-            close_fds=True, start_new_session=True,
+            close_fds=True, pass_fds=reservations.pass_fds, start_new_session=True,
         )
+        pid, starttime, runtime_identity = _capture_runtime_identity(process, plan, environment)
+        wait_returncode = _SEALED_POPEN.wait(process)
+        witness = _new_sealed_witness(plan, process, wait_returncode, environment, pid, starttime, runtime_identity)
+        return _validate_process_witness(plan, witness)
     finally:
         if log_file is not None:
             log_file.close()
-        if log_fd is not None:
-            try:
-                os.close(log_fd)
-            except OSError:
-                pass
-        try:
-            os.close(parent_fd)
-        except OSError:
-            pass
-    pid, starttime, runtime_identity = _capture_runtime_identity(process, plan, environment)
-    wait_returncode = _SEALED_POPEN.wait(process)
-    witness = _new_sealed_witness(plan, process, wait_returncode, environment, pid, starttime, runtime_identity)
-    return _validate_process_witness(plan, witness)
+        _release_output_reservations(reservations, remove_unpublished=False)
 
 
 def _validate_output_shape(plan: DiagnosticPlan, path: Path, name: str) -> None:
@@ -1109,6 +1512,82 @@ def _validate_output_shape(plan: DiagnosticPlan, path: Path, name: str) -> None:
         _fail(f"{name} is not beside the bound namespace")
     if not path.name.startswith(plan.namespace.name + "-"):
         _fail(f"{name} is not namespace-prefixed")
+
+
+def _inspect_hdf5_snapshot(raw: bytes, *, required_datasets: Sequence[str]) -> dict[str, Any]:
+    """Inspect HDF5 link and storage metadata without reading dataset values."""
+
+    if type(raw) is not bytes or not 1 <= len(raw) <= MAX_HDF5_BYTES:
+        _fail("HDF5 snapshot is outside the bounded byte contract")
+    if any(not isinstance(name, str) or not name or "\x00" in name for name in required_datasets):
+        _fail("required HDF5 dataset names must be non-empty strings")
+    inventory: list[dict[str, Any]] = []
+    pending: list[tuple[str, h5py.Group]] = []
+    try:
+        with h5py.File(io.BytesIO(raw), "r") as handle:
+            pending.append(("", handle))
+            while pending:
+                prefix, group = pending.pop()
+                for name in group.keys():
+                    if not isinstance(name, str) or not name or "\x00" in name:
+                        _fail("HDF5 contains an invalid link name")
+                    path = f"{prefix}/{name}" if prefix else name
+                    link = group.get(name, getlink=True)
+                    if not isinstance(link, h5py.HardLink):
+                        _fail(f"HDF5 contains a non-hard link at {path!r}")
+                    obj = group.get(name)
+                    if isinstance(obj, h5py.Group):
+                        inventory.append({
+                            "path": path,
+                            "link_type": "hard",
+                            "object_type": "group",
+                            "external_count": 0,
+                            "virtual": False,
+                        })
+                        pending.append((path, obj))
+                        if len(inventory) > MAX_HDF5_LINKS:
+                            _fail("HDF5 link inventory exceeds the bounded limit")
+                        continue
+                    if not isinstance(obj, h5py.Dataset):
+                        _fail(f"HDF5 contains an unsupported object at {path!r}")
+                    if bool(getattr(obj, "is_virtual", False)):
+                        _fail(f"HDF5 contains a virtual dataset at {path!r}")
+                    try:
+                        external_count = int(obj.id.get_create_plist().get_external_count())
+                    except (AttributeError, OSError, RuntimeError, ValueError) as error:
+                        _fail(f"cannot inspect HDF5 external-storage metadata at {path!r}: {error}")
+                    if external_count != 0:
+                        _fail(f"HDF5 dataset uses external storage at {path!r}")
+                    inventory.append({
+                        "path": path,
+                        "link_type": "hard",
+                        "object_type": "dataset",
+                        "external_count": external_count,
+                        "virtual": False,
+                    })
+                    if len(inventory) > MAX_HDF5_LINKS:
+                        _fail("HDF5 link inventory exceeds the bounded limit")
+            inventory_by_path = {item["path"]: item for item in inventory}
+            for name in required_datasets:
+                item = inventory_by_path.get(name)
+                if item is None or item["object_type"] != "dataset":
+                    _fail(f"required HDF5 dataset is missing or non-physical: {name}")
+            inventory_sha256 = canonical_digest(inventory)
+            return {
+                "required_datasets": list(required_datasets),
+                "hard_link_count": len(inventory),
+                "link_inventory": inventory,
+                "link_inventory_sha256": inventory_sha256,
+                "external_storage_count": 0,
+                "external_storage_rejected": True,
+                "external_links_rejected": True,
+                "soft_links_rejected": True,
+                "virtual_datasets_rejected": True,
+            }
+    except RunnerError:
+        raise
+    except (OSError, KeyError, RuntimeError, ValueError) as error:
+        _fail(f"cannot inspect bounded HDF5 link/storage metadata: {error}")
 
 
 def _terminal_hdf5_receipt(
@@ -1124,6 +1603,10 @@ def _terminal_hdf5_receipt(
     )
     if hardened.get("sha256") != trajectory_descriptor.get("sha256") or hardened.get("bytes") != trajectory_descriptor.get("bytes"):
         _fail("terminal HDF5 receipt disagrees with the stable trajectory descriptor")
+    local_hdf5 = _inspect_hdf5_snapshot(
+        trajectory_raw,
+        required_datasets=("time", "position", "velocity", "particle_id", "particle_zone", "valid", "mass"),
+    )
     receipt = {
         "schema": f"{TERMINAL_RECEIPT_SCHEMA}.hdf5",
         "status": "bounded_hdf5_terminal_receipt",
@@ -1136,8 +1619,12 @@ def _terminal_hdf5_receipt(
         "case_id": CASE_ID,
         "transitions": TRANSITIONS,
         "frames": FRAMES,
-        "required_datasets": list(hardened["required_datasets"]),
-        "hard_link_count": int(hardened["hard_link_count"]),
+        "required_datasets": list(local_hdf5["required_datasets"]),
+        "hard_link_count": int(local_hdf5["hard_link_count"]),
+        "link_inventory": list(local_hdf5["link_inventory"]),
+        "link_inventory_sha256": str(local_hdf5["link_inventory_sha256"]),
+        "external_storage_count": int(local_hdf5["external_storage_count"]),
+        "external_storage_rejected": True,
         "external_links_rejected": True,
         "soft_links_rejected": True,
         "virtual_datasets_rejected": True,
@@ -1296,9 +1783,9 @@ def execute_diagnostic(plan: DiagnosticPlan, capability: admission.AdmissionCapa
     if capability is not _DIAGNOSTIC_EXECUTION_CAPABILITY:
         _fail("caller-supplied capability cannot authorize sealed real Popen/wait")
     current = _revalidate_before_popen(plan, capability)
-    witness = _run_real_popen_wait(plan, capability)
+    witness = _run_real_popen_wait(plan, capability, prevalidated=current)
     terminal = _validate_terminal_artifacts(plan)
-    receipt = _terminal_receipt(plan, witness, terminal, current)
+    receipt = _terminal_receipt(plan, witness, terminal, current[0])
     raw = (canonical_json(receipt) + "\n").encode("utf-8")
     descriptor = _write_exclusive(plan.outputs["terminal_receipt"], raw, 0o600)
     return {**receipt, "terminal_receipt_file": descriptor}
