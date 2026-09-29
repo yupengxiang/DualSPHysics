@@ -109,7 +109,7 @@ def test_default_runner_is_dry_run_and_never_reaches_popen(tmp_path: Path, monke
     monkeypatch.setattr(runner, "_REAL_POPEN", forbidden)
     report = runner.build_report(fixture["receipt"])
     assert runner.validate_report(report) == []
-    assert report["status"] == "dry_run_ready"
+    assert report["status"] == "blocked_fail_closed"
     assert report["popen_attempted"] is False
     assert report["wait_attempted"] is False
     assert report["real_workload_started"] == 0

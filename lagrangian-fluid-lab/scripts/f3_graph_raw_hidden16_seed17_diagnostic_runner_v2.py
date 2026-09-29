@@ -587,7 +587,12 @@ def build_report(receipt_path: Path | str | None, *, execute_requested: bool = F
     try:
         plan = build_plan(receipt_path)
         if not execute_requested:
-            return _base_report(plan, execute_requested=False, status="dry_run_ready", blocked=("real Popen/wait is reachable only through --diagnostic-execute",))
+            return _base_report(
+                plan,
+                execute_requested=False,
+                status="blocked_fail_closed",
+                blocked=("default dry-run performs no execution", *EXECUTION_BLOCKERS),
+            )
         # The flag is parsed and reported, but execution remains deliberately
         # unavailable.  In particular, do not consume the receipt: an
         # unavailable capability must not burn a one-shot token or create any
