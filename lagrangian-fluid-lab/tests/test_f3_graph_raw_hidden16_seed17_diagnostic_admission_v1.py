@@ -189,7 +189,10 @@ def test_report_is_receipt_bound_but_never_formal(tmp_path: Path) -> None:
     assert admission.validate_report(report) == []
     assert report["status"] == "receipt_bound_admission_ready"
     assert report["admission_granted"] is True
+    assert report["receipt_bound_capability_issued"] is True
     assert report["diagnostic_execute_only"] is True
+    assert report["diagnostic_execute_allowed"] is False
+    assert report["execution_capability_admitted"] is False
     assert report["launch_allowed"] is False
     assert report["credit"] == 0
     assert report["formal_state_touched"] is False

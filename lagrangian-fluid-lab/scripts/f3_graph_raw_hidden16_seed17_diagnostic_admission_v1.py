@@ -820,8 +820,10 @@ def build_report(
             "report_id": REPORT_ID,
             "status": "receipt_bound_admission_ready",
             "admission_granted": True,
+            "receipt_bound_capability_issued": True,
             "diagnostic_execute_only": True,
-            "diagnostic_execute_allowed": True,
+            "diagnostic_execute_allowed": False,
+            "execution_capability_admitted": False,
             "launch_allowed": False,
             "source_bound": True,
             "receipt_path": receipt["receipt_path"],
@@ -853,8 +855,10 @@ def build_report(
             "report_id": REPORT_ID,
             "status": "blocked_fail_closed",
             "admission_granted": False,
+            "receipt_bound_capability_issued": False,
             "diagnostic_execute_only": True,
             "diagnostic_execute_allowed": False,
+            "execution_capability_admitted": False,
             "launch_allowed": False,
             "source_bound": False,
             "popen_attempted": False,
@@ -876,8 +880,9 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
     try:
         _walk_json(report, "report")
         allowed = set(ZERO_CREDIT) | {
-            "schema", "report_id", "status", "admission_granted", "diagnostic_execute_only",
-            "diagnostic_execute_allowed", "launch_allowed", "source_bound", "receipt_path",
+            "schema", "report_id", "status", "admission_granted", "receipt_bound_capability_issued",
+            "diagnostic_execute_only", "diagnostic_execute_allowed", "execution_capability_admitted",
+            "launch_allowed", "source_bound", "receipt_path",
             "receipt_sha256", "namespace", "namespace_nonce", "namespace_marker", "resource_snapshot",
             "identity", "single_use", "receipt_mode", "namespace_mode", "popen_attempted",
             "processes_started", "formal_state_touched", "registry_writes", "ledger_writes",
@@ -893,6 +898,8 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
             _exact(report, key, expected, "report")
         for key in ("diagnostic_execute_only", "launch_allowed", "formal_state_touched"):
             _exact(report, key, True if key == "diagnostic_execute_only" else False, "report")
+        _exact(report, "diagnostic_execute_allowed", False, "report")
+        _exact(report, "execution_capability_admitted", False, "report")
         _exact(report, "popen_attempted", False, "report")
         _exact(report, "processes_started", 0, "report")
         for key in ("registry_writes", "ledger_writes", "denominator_writes", "gate_writes", "completion_writes", "plan_writes"):
@@ -902,7 +909,8 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
             _fail("report.blocked_reasons must be a string list")
         if status == "receipt_bound_admission_ready":
             _exact(report, "admission_granted", True, "report")
-            _exact(report, "diagnostic_execute_allowed", True, "report")
+            _exact(report, "receipt_bound_capability_issued", True, "report")
+            _exact(report, "diagnostic_execute_allowed", False, "report")
             _exact(report, "source_bound", True, "report")
             _exact(report, "single_use", True, "report")
             _exact(report, "receipt_mode", 0o600, "report")
@@ -927,7 +935,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
         "- identity: graph_raw / hidden16 / seed17 / test / 835 transitions / 836 frames",
         "- GPU: physical GPU2 exposed as logical cuda:0; exact resource snapshot bound",
         "- source pins: manifest, training receipt, checkpoint, core_learning, validators",
-        "- one-shot mode: receipt and markers use 0600; namespace uses 0700",
+        "- one-shot mode: receipt-bound token issued; execution capability not admitted; receipt/markers use 0600; namespace uses 0700",
         "- subprocess/Popen: not attempted; formal/registry/ledger/gate/completion/PLAN: untouched",
         "- credit: `0`",
         "",
