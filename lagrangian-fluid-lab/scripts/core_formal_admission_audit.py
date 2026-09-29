@@ -379,8 +379,12 @@ def _validate_manifest(payload: Mapping[str, Any]) -> list[str]:
         physical_id = _physical(row)
         lineage_id = _lineage(row)
         if physical_id:
-            prior = physical.setdefault(physical_id, split)
-            if prior != split:
+            prior = physical.get(physical_id)
+            if prior is None:
+                physical[physical_id] = split
+            elif prior == split:
+                errors.append(f"duplicate physical_case_id: {physical_id}")
+            else:
                 errors.append(f"physical case crosses splits: {physical_id}")
         if lineage_id:
             prior = lineages.setdefault(lineage_id, split)
@@ -795,7 +799,9 @@ def audit_admission(
     physical_owner: dict[str, tuple[str, str]] = {}
     lineage_owner: dict[str, tuple[str, str]] = {}
     duplicate_physical: list[str] = []
+    physical_split_violations: list[str] = []
     duplicate_lineage: list[str] = []
+    lineage_split_violations: list[str] = []
     family_summaries: dict[str, dict[str, Any]] = {}
     case_observations: list[dict[str, Any]] = []
 
@@ -815,14 +821,16 @@ def audit_admission(
         if physical_id is not None:
             prior = physical_owner.get(physical_id)
             owner = (family, split)
-            if prior is not None and prior != owner:
+            if prior is not None:
                 duplicate_physical.append(physical_id)
+            if prior is not None and prior != owner:
+                physical_split_violations.append(physical_id)
             physical_owner[physical_id] = owner
         if lineage_id is not None:
             prior = lineage_owner.get(lineage_id)
             owner = (family, split)
             if prior is not None and prior != owner:
-                duplicate_lineage.append(lineage_id)
+                lineage_split_violations.append(lineage_id)
             lineage_owner[lineage_id] = owner
 
         direct_payload: Mapping[str, Any] | None = None
@@ -984,6 +992,13 @@ def audit_admission(
             "the formal production denominator requires each case_id exactly once across all source manifests",
             observed=duplicate_case_ids,
             required="unique case_id across the complete manifest set",
+            scope="manifest"))
+    if duplicate_physical:
+        blockers.append(_blocker(
+            "MANIFEST_DUPLICATE_PHYSICAL_CASE_ID",
+            "the formal production denominator requires each physical_case_id exactly once across all source manifests",
+            observed=sorted(set(duplicate_physical)),
+            required="unique physical_case_id across the complete manifest set",
             scope="manifest"))
     t1_family_count = sum(value is True for value in t1_families.values())
     if t1_family_count < REQUIRED_FAMILIES:
@@ -1158,8 +1173,9 @@ def audit_admission(
             "formal_specs_written": False,
         },
         "duplicate_case_ids": duplicate_case_ids,
-        "physical_split_violations": sorted(set(duplicate_physical)),
-        "lineage_split_violations": sorted(set(duplicate_lineage)),
+        "physical_split_violations": sorted(set(physical_split_violations)),
+        "lineage_split_violations": sorted(set(lineage_split_violations)),
+        "duplicate_physical_case_ids": sorted(set(duplicate_physical)),
         "admission_next_dependency": (
             "release a third independently qualified T1 family, publish formal_release=true for every source, "
             "regenerate stale diagnostic preprofile evidence under the current source closure, and produce "

@@ -428,6 +428,60 @@ def test_cross_manifest_duplicate_case_id_cannot_pass_a_complete_denominator(
     }
 
 
+def test_duplicate_physical_case_id_is_blocked_in_same_and_cross_manifest_rows(
+    tmp_path: Path,
+) -> None:
+    def row(case_id: str, family: str, physical_case_id: str) -> dict:
+        return {
+            "case_id": case_id,
+            "physical_case_id": physical_case_id,
+            "lineage_group_id": f"lineage-{case_id}",
+            "family": family,
+            "scope_id": f"scope-{family}",
+            "split": "train",
+            "hdf5": f"assets/{case_id}.h5",
+            "known_inputs_ref": {
+                "geometry": {"path": f"assets/{case_id}-geometry.npz"},
+                "control": {"path": f"assets/{case_id}-control.npz"},
+            },
+        }
+
+    same_manifest = {
+        "schema": "core.dataset.v2",
+        "dataset_id": "duplicate-physical-within-manifest",
+        "formal_release": True,
+        "cases": [
+            row("F3-train-00", "F3", "physical-shared"),
+            row("F3-train-01", "F3", "physical-shared"),
+        ],
+    }
+    within = audit_admission([same_manifest], data_root=tmp_path)
+    within_errors = " ".join(
+        str(item.get("observed")) for item in within["blockers"]
+        if item["code"] == "MANIFEST_CONTRACT_INVALID"
+    )
+    assert "duplicate physical_case_id: physical-shared" in within_errors
+
+    cross_manifest = {
+        "schema": "core.dataset.v2",
+        "dataset_id": "duplicate-physical-across-manifests",
+        "formal_release": True,
+        "cases": [row("F4-train-00", "F4", "physical-shared")],
+    }
+    across = audit_admission(
+        [
+            {**same_manifest, "cases": [same_manifest["cases"][0]]},
+            cross_manifest,
+        ],
+        data_root=tmp_path,
+    )
+    assert across["formal_admission"] is False
+    assert "MANIFEST_DUPLICATE_PHYSICAL_CASE_ID" in {
+        item["code"] for item in across["blockers"]
+    }
+    assert across["duplicate_physical_case_ids"] == ["physical-shared"]
+
+
 def test_explanatory_none_claim_remains_in_the_production_denominator() -> None:
     assert _is_qualification({
         "stage": "production",
