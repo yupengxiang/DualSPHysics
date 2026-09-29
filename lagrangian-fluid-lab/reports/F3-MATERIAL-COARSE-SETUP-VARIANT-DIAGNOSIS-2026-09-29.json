@@ -1,0 +1,159 @@
+{
+  "schema": "core.material.f3.coarse.setup_variant_diagnosis.v1",
+  "record_id": "f3-material-coarse-setup-variant-diagnosis-2026-09-29",
+  "created_at": "2026-09-29",
+  "status": "blocked_fail_closed_no_safe_variant",
+  "scope": {
+    "family": "F3",
+    "direction": "material",
+    "source_role": "coarse",
+    "comparison": "real scheduler-sidecar terminal s2 versus s4",
+    "qualification_claim": "none",
+    "credit": 0
+  },
+  "diagnosis": {
+    "common_unknown_origin": "monotone_support_reliability_predicate",
+    "confidence": "bounded_static_and_terminal_evidence",
+    "supported_conclusion": "The two full-window attempts share the same source, seed geometry, visible-neighbour backend, regularization, support-distance limit, and support gate. Their per-source first-unreliable frames and terminal fractions are identical across substeps=2 and substeps=4. The common source is therefore the worker's irreversible support/reconstruction/visibility reliability transition, not scheduler admission, GPU allocation, or tracer substep cadence.",
+    "exact_component_status": "not_attributable_from_existing_terminal_receipts",
+    "not_proven": [
+      "The tracked terminal material JSON does not retain a per-seed failure-component mask, so it cannot distinguish g0/g1 support-gate failure from swept-wall blocking or the support-distance predicate for the first failed seed.",
+      "No new parameter combination is safe to promote from the existing evidence without a read-only component-attribution artifact or a fresh diagnostic execution."
+    ],
+    "worker_code_path": {
+      "initial_state": "scripts/core_material.py::_initial_state",
+      "advance_state": "scripts/core_material.py::_advance_state",
+      "reliability_predicate": "active & g0 & g1 & ~blocked & finite(v0,v1) & max(d0,d1) <= MAXIMUM_SUPPORT_DISTANCE_M",
+      "irreversible_assignment": "state['reliable'] = usable",
+      "neighbor_backend": "scripts/f3_material_neighbors.py::_visible_support and CurrentField.sample support diagnostics",
+      "unsupported_query_behavior": "unsupported query remains in the output with NaN velocity"
+    },
+    "engineering_script_alignment": {
+      "path": "scripts/f3_material_engineering.py",
+      "role": "short-canary engineering path, not the scheduler worker",
+      "shared_fixed_parameters": {
+        "neighbours": 24,
+        "regularization_m": 0.004,
+        "maximum_support_distance_m": 0.03,
+        "minimum_effective_sample_size": 4.0,
+        "minimum_geometry_rank": 3,
+        "minimum_anisotropy": 0.005
+      },
+      "reliability_semantics": "terminal labels preserve unknown mass and do not survivor-renormalize"
+    }
+  },
+  "terminal_comparison": {
+    "shared": {
+      "source_sha256": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575",
+      "source_count": 2,
+      "seed_count": 512,
+      "initial_sha256": "96a44af3d1a749ed20a196bf8802bf443fef9d1405e9f33cd3fd66b87bc794ec",
+      "neighbour_variant": "baseline24",
+      "neighbours": 24,
+      "regularization_m": 0.004,
+      "maximum_support_distance_m": 0.03,
+      "support_gate": {
+        "minimum_effective_sample_size": 4.0,
+        "minimum_geometry_rank": 3,
+        "minimum_anisotropy": 0.005,
+        "maximum_reconstruction_error_mps": 0.04698137929009748
+      },
+      "native_frame_count": 836,
+      "transition_count": 835,
+      "committed_frame": 835,
+      "mass_closed": true,
+      "unknown_fraction_monotone": true,
+      "common_reliable_path_coverage": 0.947265625,
+      "unknown_fraction_max": 0.0625,
+      "unknown_fraction_limit": 0.01,
+      "unknown_gate_pass": false
+    },
+    "s2": {
+      "job_id": "core-f3-material-coarse-s2-rerun1",
+      "attempt_id": "20260929T122016-16ac698caed1",
+      "substeps": 2,
+      "source_rows": [
+        {"source": 0, "first_unreliable_frame": 245, "first_unreliable_time_s": 2.450005017268429, "unknown_fraction_max": 0.0625, "reliable_path_coverage": 0.9375},
+        {"source": 1, "first_unreliable_frame": 335, "first_unreliable_time_s": 3.350014773551055, "unknown_fraction_max": 0.04296875, "reliable_path_coverage": 0.95703125}
+      ],
+      "status": "negative_diagnostic"
+    },
+    "s4": {
+      "job_id": "core-f3-material-coarse-s4-rerun1",
+      "attempt_id": "20260929T122756-ab18fca003d8",
+      "substeps": 4,
+      "source_rows": [
+        {"source": 0, "first_unreliable_frame": 245, "first_unreliable_time_s": 2.450005017268429, "unknown_fraction_max": 0.0625, "reliable_path_coverage": 0.9375},
+        {"source": 1, "first_unreliable_frame": 335, "first_unreliable_time_s": 3.350014773551055, "unknown_fraction_max": 0.04296875, "reliable_path_coverage": 0.95703125}
+      ],
+      "status": "negative_diagnostic"
+    },
+    "invariants": [
+      "source 0 first-unreliable frame is 245 for both runs",
+      "source 1 first-unreliable frame is 335 for both runs",
+      "both runs close mass and preserve monotone unknown accumulation",
+      "both runs fail the unchanged per-source 1% unknown gate"
+    ]
+  },
+  "candidate_review": {
+    "h2_k48": {
+      "already_registered": true,
+      "backend": "f3_ckdtree_visible_shepard_distance_k48_v1",
+      "neighbours": 48,
+      "same_source_substeps2_unknown_fraction_max": 0.046875,
+      "same_source_substeps2_common_reliable_path_coverage": 0.9765625,
+      "first_failure_seed_count": 12,
+      "unknown_gate_pass": false,
+      "historical_conclusion": "rejected_as_repair; did not recover any first-failed seed",
+      "safe_new_spec": false
+    },
+    "h1_affine_bound": {
+      "already_registered": true,
+      "backend": "f3_ckdtree_visible_shepard_query_error_bound_v1",
+      "neighbours": 24,
+      "same_source_substeps2_unknown_fraction_max": 0.06640625,
+      "same_source_substeps2_common_reliable_path_coverage": 0.962890625,
+      "first_failure_seed_count": 19,
+      "unknown_gate_pass": false,
+      "historical_conclusion": "conservative diagnostic; fails the fixed 1% gate",
+      "safe_new_spec": false
+    },
+    "decision": "no_new_scheduler_spec",
+    "reason": "Existing registered support-cap and affine-error candidates are already negative on the same nominal source. The exact current failure component is not retained in the terminal receipt, so inventing another scheduler setup would be an unsupported parameter sweep."
+  },
+  "input_bindings": {
+    "current_source": {"path": "campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5", "role": "read_only_coarse_native_source", "sha256": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575"},
+    "current_runtime_contract": {"path": "campaigns/core-v1/material/evidence/f3-qualification-diagnostic-runtime-spec-2026-09-19.json", "role": "current_input_runtime_contract", "sha256": "06c2d549d971d679f48b0d46480a7decc64d1ab58a3e35ece8cb5a61a04a1aa9"},
+    "current_worker": {"path": "scripts/core_material.py", "role": "current_material_worker", "sha256": "9e294e64c431c725717caf86eb001dc3a3505a312e279386796b6a472b5ee94e"},
+    "current_neighbor_backend": {"path": "scripts/f3_material_neighbors.py", "role": "current_worker_dependency", "sha256": "fbb454be22cf6c29b49dca8ae8341b27be120f62f45805e85e7907baca8e8752"},
+    "current_worker_helper": {"path": "scripts/passive_tracers.py", "role": "current_worker_dependency", "sha256": "3c12744133176a20ca955e1b76e0a9b7c0f5e2ddda4fef75d77574fc201f9024"},
+    "current_scheduler": {"path": "scripts/core_runtime.py", "role": "current_scheduler_runtime", "sha256": "a4c6e03a13cb1ff80c0da7f7f9bd442e5e2de4d64e23551bf92a0220c6afa8c4"},
+    "current_engineering_path": {"path": "scripts/f3_material_engineering.py", "role": "read_only_diagnosis_target", "sha256": "06d40a27e2d9be4d313eeb2e91c326b80576f54d7cbf39221475bc536ef3cf09"},
+    "s2_terminal_intake": {"path": "reports/F3-MATERIAL-COARSE-TERMINAL-RESULT-INTAKE-2026-09-29-RERUN1.json", "role": "tracked_scheduler_terminal_summary", "sha256": "0dcd7e9cbac08b1ed4959770cee57415f5dfd61d07b3c1ce947627f9b4f0f8fc"},
+    "s4_terminal_intake": {"path": "reports/F3-MATERIAL-COARSE-S4-TERMINAL-RESULT-INTAKE-2026-09-29-RERUN1.json", "role": "tracked_scheduler_terminal_summary", "sha256": "0d84b1519a599cfdec4ba18c869302a8db8c59a40e8dc6e1275954083cd2dc1e"},
+    "h2_h1_study": {"path": "campaigns/core-v1/material/evidence/material-h2-h1-study-2026-09-19.json", "role": "historical_registered_variant_study", "sha256": "967ca4d34240b6a4ac72fcf5e6c5806c0e38a6a9bfad578fd62a129be28c284a"},
+    "historical_s2_spec": {"path": "campaigns/core-v1/material/jobs/core-f3-material-coarse-s2.json", "role": "immutable_historical_lineage", "sha256": "1f1080e497feab414863e3e02dd31dbec91c0d09e4ef9ac855e0cdbbda070628"},
+    "historical_s4_spec": {"path": "campaigns/core-v1/material/jobs/core-f3-material-coarse-s4.json", "role": "immutable_historical_lineage", "sha256": "89a376b36c3d8c31c8b050b6bbd5a3aa6014d1877c7d7d918ed7cb4eeb889c1b"}
+  },
+  "external_admission": {
+    "fresh_root_receipt_required": true,
+    "scheduler_host_io_receipt_required": true,
+    "cross_bind_current_source_and_inputs": true,
+    "one_shot_namespace_required": true,
+    "launch_authority_minted_by_diagnosis": false,
+    "fresh_namespace_created": false,
+    "submit_called": false,
+    "workload_started": false,
+    "gpu_started": false
+  },
+  "side_effects": {
+    "queue_mutations": 0,
+    "registry_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "completion_mutations": 0,
+    "plan_mutations": 0
+  },
+  "proposed_scheduler_spec": null
+}
