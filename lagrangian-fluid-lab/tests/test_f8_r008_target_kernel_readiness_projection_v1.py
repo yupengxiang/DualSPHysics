@@ -73,20 +73,14 @@ def test_intake_digest_drift_is_rejected_when_previous_digest_is_pinned(tmp_path
         )
 
 
-def test_partial_pin_set_never_promotes_target_readiness(tmp_path: Path) -> None:
+def test_inconsistent_partial_pin_report_fails_closed(tmp_path: Path) -> None:
     value = _load("reports/F8-R008-TARGET-KERNEL-EVIDENCE-INTAKE-V1.json")
     value["pins"]["kernel_release_pinned"] = True
     path = tmp_path / "intake.json"
     _write_json(path, value)
 
-    report = projection.build_projection(intake_report_path=path)
-
-    assert report["target_kernel"]["pins"]["kernel_release_pinned"] is True
-    assert report["target_kernel"]["all_pins_complete"] is False
-    assert "partial_target_kernel_pin_set" in report["validation"]["blockers"]
-    assert report["authorization"]["readiness_pass"] is False
-    assert report["authorization"]["T1_numerical"] is False
-    assert report["authorization"]["qualification_credit"] == 0
+    with pytest.raises(projection.TargetKernelReadinessProjectionError, match="without kernel_release"):
+        projection.build_projection(intake_report_path=path)
 
 
 def test_causal_witness_scope_drift_is_not_projected(tmp_path: Path) -> None:

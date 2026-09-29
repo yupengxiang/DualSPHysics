@@ -122,6 +122,19 @@ PIN_REPORT_FIELDS = {
     "config": "config_pinned",
     "build_id": "build_id_pinned",
 }
+PIN_TARGET_FIELDS = {
+    "kernel_release": "kernel_release",
+    "source_commit": "source_commit",
+    "source_tree": "source_tree_sha256",
+    "uapi": "uapi_sha256",
+    "config": "config_sha256",
+    "build_id": "build_id",
+}
+ARTIFACT_TARGET_FIELDS = {
+    "source": "source_tree_sha256",
+    "uapi": "uapi_sha256",
+    "config": "config_sha256",
+}
 PIN_BLOCKERS = {
     "kernel_release": "external_kernel_release_pin_missing",
     "source_commit": "external_source_commit_pin_missing",
@@ -411,10 +424,23 @@ def _validate_target_intake(value: dict[str, Any]) -> dict[str, Any]:
     }, "target intake pin set differs")
     _require(all(type(item) is bool for item in pins.values()), "target intake pins are malformed")
     _require(isinstance(target, dict), "target intake declared_target is missing")
+    _require(set(target) == {
+        "kernel_release", "source_commit", "source_tree_sha256", "uapi_sha256",
+        "build_id", "config_sha256", "required_options",
+    }, "target intake declared_target fields differ")
     _require(isinstance(artifacts, dict) and set(artifacts) == {"source", "uapi", "config", "build"}, "target intake artifacts differ")
     _require(isinstance(manifest, dict), "target intake manifest is missing")
+    _require(set(manifest) == {"path", "exists", "bytes", "sha256"}, "target intake manifest fields differ")
+    _require(type(manifest.get("exists")) is bool, "target intake manifest.exists is malformed")
     for field in ("manifest_present", "manifest_valid", "artifact_files_verified", "external_target_evidence_complete"):
         _require(type(validation.get(field)) is bool, f"target intake validation.{field} is malformed")
+    _require(validation["manifest_present"] == manifest["exists"],
+             "target intake manifest presence is not bound to its reference", code="pin_drift")
+    for pin_name, target_field in PIN_TARGET_FIELDS.items():
+        if pins[PIN_REPORT_FIELDS[pin_name]]:
+            _require(target.get(target_field) is not None,
+                     f"target intake {pin_name} pin is true without {target_field}",
+                     code="pin_drift")
     for role, item in artifacts.items():
         _require(isinstance(item, dict), f"target intake artifact {role} is malformed")
         _require(type(item.get("verified")) is bool, f"target intake artifact {role}.verified is malformed")
@@ -437,8 +463,25 @@ def _validate_target_intake(value: dict[str, Any]) -> dict[str, Any]:
         and validation["external_target_evidence_complete"]
         and all(pins.values())
     )
-    if not complete:
-        _require(not validation["external_target_evidence_complete"] or all(pins.values()), "target intake completeness/pins disagree", code="pin_drift")
+    _require(
+        validation["external_target_evidence_complete"] == complete,
+        "target intake completeness flag is not bound to status, validation, and pins",
+        code="pin_drift",
+    )
+    if all(pins.values()) and not complete:
+        _require(False, "target intake all pin flags are true without complete external evidence", code="pin_drift")
+    if complete:
+        _require(not validation.get("blockers"),
+                 "complete target intake retains blockers", code="pin_drift")
+        for role in ("source", "uapi", "config", "build"):
+            _require(artifacts[role]["verified"],
+                     f"complete target intake artifact {role} is not verified", code="pin_drift")
+        for role, target_field in ARTIFACT_TARGET_FIELDS.items():
+            _require(
+                target[target_field] == artifacts[role]["observed_sha256"],
+                f"complete target intake artifact {role} is not bound to {target_field}",
+                code="pin_drift",
+            )
     return {
         "complete": complete,
         "manifest": manifest,

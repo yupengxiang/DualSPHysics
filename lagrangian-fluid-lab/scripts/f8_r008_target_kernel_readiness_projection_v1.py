@@ -53,6 +53,10 @@ R008_SCOPE_ID = "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008"
 INTAKE_SCHEMA = "core.cfd.f8.r008.target_kernel_evidence_intake_report.v1"
 INTAKE_RECORD_ID = "f8-r008-target-kernel-evidence-intake-report-v1"
 INTAKE_VALID_STATUS = "external_target_evidence_intake_valid_non_authorizing"
+INTAKE_BLOCKED_STATUSES = frozenset({
+    "blocked_missing_external_target_evidence",
+    "blocked_invalid_external_target_evidence",
+})
 
 CAUSAL_SCHEMA = "core.cfd.f8.r008_terminal_conformance_causal_witness_report.v1"
 CAUSAL_RECORD_ID = "f8-r008-terminal-conformance-causal-witness-report-v1"
@@ -89,6 +93,20 @@ PIN_FIELDS = (
     "uapi_pinned",
 )
 ARTIFACT_ROLES = ("build", "config", "source", "uapi")
+PIN_TARGET_FIELDS = {
+    "build_id_pinned": "build_id",
+    "config_pinned": "config_sha256",
+    "kernel_release_pinned": "kernel_release",
+    "source_commit_pinned": "source_commit",
+    "source_tree_pinned": "source_tree_sha256",
+    "uapi_pinned": "uapi_sha256",
+}
+ARTIFACT_TARGET_FIELDS = {
+    "build": "build_id",
+    "config": "config_sha256",
+    "source": "source_tree_sha256",
+    "uapi": "uapi_sha256",
+}
 
 # These are the immutable checked-in dependency digests used by the default
 # projection.  A caller supplying fixture paths may provide an explicit
@@ -329,6 +347,8 @@ def _validate_intake(value: dict[str, Any]) -> dict[str, Any]:
     _require(value["schema"] == INTAKE_SCHEMA, "target-kernel intake report schema drift", code="schema_drift")
     _require(value["record_id"] == INTAKE_RECORD_ID, "target-kernel intake report record drift", code="schema_drift")
     _require(isinstance(value["status"], str), "target-kernel intake status is malformed")
+    _require(value["status"] in INTAKE_BLOCKED_STATUSES | {INTAKE_VALID_STATUS},
+             "target-kernel intake status is unsupported", code="status_drift")
 
     _require_keys(value["manifest"], {"path", "exists", "bytes", "sha256"}, "intake manifest")
     _require(isinstance(value["manifest"]["path"], str) and value["manifest"]["path"], "intake manifest path is malformed")
@@ -360,12 +380,21 @@ def _validate_intake(value: dict[str, Any]) -> dict[str, Any]:
 
     _require_keys(value["validation"], {"manifest_present", "manifest_valid", "artifact_files_verified", "external_target_evidence_complete", "blockers"}, "intake validation")
     validation = value["validation"]
+    _require(type(validation) is dict, "projection validation is malformed")
     for field in ("manifest_present", "manifest_valid", "artifact_files_verified", "external_target_evidence_complete"):
         _require(type(validation[field]) is bool, f"intake validation {field} is malformed")
+    _require(validation["manifest_present"] == value["manifest"]["exists"],
+             "intake manifest presence is not bound to its reference", code="pin_drift")
     _require(isinstance(validation["blockers"], list) and all(isinstance(item, str) and item for item in validation["blockers"]), "intake blockers are malformed")
 
     _require_keys(value["pins"], set(PIN_FIELDS), "intake pins")
     _require(all(type(value["pins"][field]) is bool for field in PIN_FIELDS), "intake pins are malformed")
+
+    pins = {field: value["pins"][field] for field in PIN_FIELDS}
+    for pin_field, target_field in PIN_TARGET_FIELDS.items():
+        if pins[pin_field]:
+            _require(target[target_field] is not None,
+                     f"intake {pin_field} is true without {target_field}", code="pin_drift")
 
     expected_authorization = {
         "diagnostic_only": True,
@@ -383,7 +412,6 @@ def _validate_intake(value: dict[str, Any]) -> dict[str, Any]:
     for field in ("kernel_started", "native_started", "worker_started", "gpu_started", "queue_started"):
         _require(value["side_effects"].get(field) is False, f"intake {field} is true", code="side_effect_drift")
 
-    pins = {field: value["pins"][field] for field in PIN_FIELDS}
     target_copy = {field: copy.deepcopy(target[field]) for field in TARGET_FIELDS}
     all_pins = all(pins.values())
     complete = (
@@ -394,6 +422,25 @@ def _validate_intake(value: dict[str, Any]) -> dict[str, Any]:
         and validation["external_target_evidence_complete"]
         and all_pins
     )
+    _require(
+        validation["external_target_evidence_complete"] == complete,
+        "intake completeness flag is not bound to status, validation, and pins",
+        code="pin_drift",
+    )
+    if all_pins and not complete:
+        _fail("intake all pin flags are true without complete external evidence", code="pin_drift")
+    if complete:
+        _require(not validation["blockers"],
+                 "complete intake retains blockers", code="pin_drift")
+        _require(value["manifest"]["exists"],
+                 "complete intake has no manifest reference", code="pin_drift")
+        for role, target_field in ARTIFACT_TARGET_FIELDS.items():
+            item = value["artifacts"][role]
+            _require(item["verified"],
+                     f"complete intake artifact {role} is not verified", code="pin_drift")
+            _require(target[target_field] == item["observed_sha256"],
+                     f"complete intake artifact {role} is not bound to {target_field}",
+                     code="pin_drift")
     return {
         "ref_fields": {
             "schema": value["schema"],
@@ -744,12 +791,27 @@ def _validate_projection(value: Any) -> dict[str, Any]:
         _require(ref["scope_id"] in {None, R008_SCOPE_ID}, f"projection input ref {name} scope drift", code="scope_drift")
         _require(ref["status"] is None or isinstance(ref["status"], str), f"projection input ref {name} status is malformed")
 
+    validation = value["validation"]
     target = value["target_kernel"]
     _require_keys(target, set(TARGET_FIELDS) | {"pins", "all_pins_complete", "external_evidence_complete"}, "projection target kernel")
     _require_keys(target["pins"], set(PIN_FIELDS), "projection target pins")
     _require(all(type(target["pins"][field]) is bool for field in PIN_FIELDS), "projection target pins are malformed")
     _require(type(target["all_pins_complete"]) is bool and target["all_pins_complete"] == all(target["pins"].values()), "projection target pin completeness drift")
     _require(type(target["external_evidence_complete"]) is bool, "projection target evidence flag is malformed")
+    for pin_field, target_field in PIN_TARGET_FIELDS.items():
+        if target["pins"][pin_field]:
+            _require(target[target_field] is not None,
+                     f"projection {pin_field} is true without {target_field}", code="pin_drift")
+    _require(
+        target["all_pins_complete"] == validation["target_kernel_pin_set_complete"],
+        "projection target pin flag is not bound to validation",
+        code="pin_drift",
+    )
+    _require(
+        target["external_evidence_complete"] == validation["external_target_evidence_complete"],
+        "projection target evidence flag is not bound to validation",
+        code="pin_drift",
+    )
     _sha1_or_none(target["source_commit"], "projection source commit")
     for field in ("source_tree_sha256", "uapi_sha256", "config_sha256"):
         _sha256_or_none(target[field], f"projection {field}")
@@ -768,8 +830,6 @@ def _validate_projection(value: Any) -> dict[str, Any]:
     for field in ("production_authority_authenticated", "production_runtime_identity_authenticated", "runtime_measured", "execution_authority"):
         _require(trusted.get(field) is False, f"projection trusted runtime {field} was promoted", code="authorization_drift")
 
-    validation = value["validation"]
-    _require(type(validation) is dict, "projection validation is malformed")
     for field in (
         "intake_report_schema_valid", "intake_report_digest_bound", "r008_scope_bound",
         "external_target_evidence_complete", "target_kernel_pin_set_complete",

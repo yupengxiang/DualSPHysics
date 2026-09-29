@@ -63,6 +63,12 @@ def _anchor(key: Ed25519PrivateKey, *, synthetic: bool = False) -> dict[str, Any
     }
 
 
+def _public_key_bytes(key: Ed25519PrivateKey) -> bytes:
+    return key.public_key().public_bytes(
+        serialization.Encoding.Raw, serialization.PublicFormat.Raw
+    )
+
+
 def _fixture(
     tmp_path: Path,
     *,
@@ -92,11 +98,13 @@ def _fixture(
         "patchset_sha256": _sha_text("external-r008-patchset"),
     }
     build = {
+        "arch": target["arch"],
         "build_id": target["build_id"],
         "build_closure_sha256": _sha_text("external-r008-build-closure"),
         "compiler_identity_sha256": _sha_text("external-r008-compiler"),
         "linker_identity_sha256": _sha_text("external-r008-linker"),
-        "binary_sha256": _sha_text("external-r008-binary"),
+        "binary_sha256": target["kernel_image_sha256"],
+        "config_sha256": target["config_sha256"],
         "build_manifest_sha256": _sha_text("external-r008-build-manifest"),
     }
     host = {
@@ -111,8 +119,9 @@ def _fixture(
         "kernel_release": target["kernel_release"],
         "arch": target["arch"],
         "build_id": target["build_id"],
+        "config_sha256": target["config_sha256"],
         "host_identity_sha256": _sha(host),
-        "runtime_image_sha256": _sha_text("external-runtime-image"),
+        "runtime_image_sha256": target["kernel_image_sha256"],
         "loaded_modules_sha256": _sha_text("external-loaded-modules"),
         "syscall_policy_sha256": target["syscall_policy_sha256"],
         "fanotify_abi_sha256": _sha_text("external-fanotify-abi"),
@@ -134,7 +143,7 @@ def _fixture(
     receipt = {
         "schema": contract.RECEIPT_SCHEMA,
         "record_id": contract.RECEIPT_RECORD_ID,
-        "receipt_id": "r008-pin-receipt-001",
+        "receipt_id": "4f3c2c1a-8b7e-4d91-a2f0-6e5b4c3d2a10",
         "scope_id": contract.SCOPE_ID,
         "pin_set_sha256": "",
         "host_identity_sha256": _sha(host),
@@ -220,9 +229,18 @@ def test_missing_default_attestation_is_blocked_and_zero_credit() -> None:
 
 
 def test_external_candidate_binds_all_domains_but_never_authorizes(tmp_path: Path) -> None:
-    attestation_path, anchor_path, _attestation, _anchor, _key = _fixture(tmp_path)
-    result = contract.intake_paths(attestation_path, anchor_path)["result"]
-    report = contract.build_report(attestation_path, anchor_path)
+    attestation_path, anchor_path, _attestation, _anchor, key = _fixture(tmp_path)
+    public_key = _public_key_bytes(key)
+    result = contract.intake_paths(
+        attestation_path,
+        anchor_path,
+        trust_anchor_public_key=public_key,
+    )["result"]
+    report = contract.build_report(
+        attestation_path,
+        anchor_path,
+        trust_anchor_public_key=public_key,
+    )
 
     assert result["status"] == contract.STATUS_VALID_NON_AUTHORIZING
     assert result["target_kernel_pin_complete"] is True
@@ -246,6 +264,20 @@ def test_external_candidate_binds_all_domains_but_never_authorizes(tmp_path: Pat
     }
 
 
+def test_anchor_requires_independent_public_key_binding(tmp_path: Path) -> None:
+    attestation_path, anchor_path, _attestation, _anchor, key = _fixture(tmp_path)
+    with pytest.raises(contract.TrustedTargetPinIntakeError, match="explicit out-of-band"):
+        contract.intake_paths(attestation_path, anchor_path)
+
+    other_key = Ed25519PrivateKey.generate()
+    with pytest.raises(contract.TrustedTargetPinIntakeError, match="does not match the explicit"):
+        contract.intake_paths(
+            attestation_path,
+            anchor_path,
+            trust_anchor_public_key=_public_key_bytes(other_key),
+        )
+
+
 def test_checked_in_report_matches_deterministic_default_and_verifies() -> None:
     expected = contract.build_report()
     checked_in = _checked_in_report()
@@ -260,13 +292,21 @@ def test_synthetic_attestation_and_anchor_cannot_be_promoted(tmp_path: Path) -> 
     )
     attestation_path.write_bytes(_resign(attestation, key))
     with pytest.raises(contract.TrustedTargetPinIntakeError, match="synthetic"):
-        contract.intake_paths(attestation_path, anchor_path)
+        contract.intake_paths(
+            attestation_path,
+            anchor_path,
+            trust_anchor_public_key=_public_key_bytes(key),
+        )
 
-    attestation_path, anchor_path, _attestation, _anchor, _key = _fixture(
+    attestation_path, anchor_path, _attestation, _anchor, key = _fixture(
         tmp_path, anchor_synthetic=True
     )
     with pytest.raises(contract.TrustedTargetPinIntakeError, match="synthetic"):
-        contract.intake_paths(attestation_path, anchor_path)
+        contract.intake_paths(
+            attestation_path,
+            anchor_path,
+            trust_anchor_public_key=_public_key_bytes(key),
+        )
 
 
 @pytest.mark.parametrize(
@@ -276,6 +316,7 @@ def test_synthetic_attestation_and_anchor_cannot_be_promoted(tmp_path: Path) -> 
         (lambda value: value["runtime_abi"].__setitem__("selector_max", 460), "selector range"),
         (lambda value: value["host_identity"].__setitem__("host_id", "current-host"), "default/local"),
         (lambda value: value["one_shot_receipt"].__setitem__("generation", 2), "first consumed generation"),
+        (lambda value: value["one_shot_receipt"].__setitem__("receipt_id", "r008-pin-receipt-001"), "UUIDv4"),
         (lambda value: value["trust_root_ref"].__setitem__("key_id", "other-key"), "trust_root_ref"),
     ],
 )
@@ -287,7 +328,35 @@ def test_pin_domain_and_one_shot_drift_fail_closed(
     attestation_path.write_bytes(_resign(attestation, key))
 
     with pytest.raises(contract.TrustedTargetPinIntakeError, match=message):
-        contract.intake_paths(attestation_path, anchor_path)
+        contract.intake_paths(
+            attestation_path,
+            anchor_path,
+            trust_anchor_public_key=_public_key_bytes(key),
+        )
+
+
+def test_target_build_runtime_arch_config_and_image_bindings_fail_closed(tmp_path: Path) -> None:
+    cases = (
+        ("build arch", lambda value: value["build"].__setitem__("arch", "aarch64"), "architecture"),
+        ("runtime config", lambda value: value["runtime_abi"].__setitem__("config_sha256", _sha_text("wrong-config")), "config SHA"),
+        ("build image", lambda value: value["build"].__setitem__("binary_sha256", _sha_text("wrong-image")), "kernel image SHA"),
+    )
+    for _label, mutate, message in cases:
+        attestation_path, anchor_path, attestation, _anchor, key = _fixture(tmp_path)
+        mutate(attestation)
+        if _label == "runtime config":
+            attestation["runtime_abi"]["abi_payload_sha256"] = _sha(
+                {field: attestation["runtime_abi"][field]
+                 for field in sorted(contract.RUNTIME_ABI_FIELDS)
+                 if field != "abi_payload_sha256"}
+            )
+        attestation_path.write_bytes(_resign(attestation, key))
+        with pytest.raises(contract.TrustedTargetPinIntakeError, match=message):
+            contract.intake_paths(
+                attestation_path,
+                anchor_path,
+                trust_anchor_public_key=_public_key_bytes(key),
+            )
 
 
 def test_cross_domain_hash_drift_fails_even_with_a_valid_signature(tmp_path: Path) -> None:
@@ -301,7 +370,11 @@ def test_cross_domain_hash_drift_fails_even_with_a_valid_signature(tmp_path: Pat
     attestation_path.write_bytes(_resign(attestation, key))
 
     with pytest.raises(contract.TrustedTargetPinIntakeError, match="runtime host identity"):
-        contract.intake_paths(attestation_path, anchor_path)
+        contract.intake_paths(
+            attestation_path,
+            anchor_path,
+            trust_anchor_public_key=_public_key_bytes(key),
+        )
 
 
 def test_signature_and_trust_anchor_key_binding_fail_closed(tmp_path: Path) -> None:
@@ -311,9 +384,13 @@ def test_signature_and_trust_anchor_key_binding_fail_closed(tmp_path: Path) -> N
     attestation["signature"]["signature_base64"] = base64.b64encode(signature).decode("ascii")
     attestation_path.write_bytes(_canonical(attestation))
     with pytest.raises(contract.TrustedTargetPinIntakeError, match="signature is invalid"):
-        contract.intake_paths(attestation_path, anchor_path)
+        contract.intake_paths(
+            attestation_path,
+            anchor_path,
+            trust_anchor_public_key=_public_key_bytes(key),
+        )
 
-    attestation_path, anchor_path, _attestation, anchor, _key = _fixture(tmp_path)
+    attestation_path, anchor_path, _attestation, anchor, key = _fixture(tmp_path)
     other_key = Ed25519PrivateKey.generate()
     other_public = other_key.public_key().public_bytes(
         serialization.Encoding.Raw, serialization.PublicFormat.Raw
@@ -322,7 +399,11 @@ def test_signature_and_trust_anchor_key_binding_fail_closed(tmp_path: Path) -> N
     anchor["public_key_sha256"] = hashlib.sha256(other_public).hexdigest()
     anchor_path.write_bytes(_canonical(anchor))
     with pytest.raises(contract.TrustedTargetPinIntakeError, match="does not exactly bind"):
-        contract.intake_paths(attestation_path, anchor_path)
+        contract.intake_paths(
+            attestation_path,
+            anchor_path,
+            trust_anchor_public_key=_public_key_bytes(other_key),
+        )
 
 
 def test_canonical_json_duplicate_and_path_boundaries_fail_closed(tmp_path: Path) -> None:

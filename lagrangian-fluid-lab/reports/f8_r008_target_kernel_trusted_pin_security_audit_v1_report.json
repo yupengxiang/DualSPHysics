@@ -1,0 +1,160 @@
+{
+  "schema": "core.cfd.f8.r008.target_kernel_trusted_pin_security_audit_report.v1",
+  "record_id": "f8-r008-target-kernel-trusted-pin-security-audit-report-v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "bounded_security_audit_completed_fail_closed",
+  "audit_scope": {
+    "target_kernel_pin": true,
+    "source_pin": true,
+    "config_pin": true,
+    "build_pin": true,
+    "runtime_pin": true,
+    "uuid_sha_architecture_cross_binding": true,
+    "untrusted_inventory_readiness_promotion": true
+  },
+  "findings": [
+    {
+      "id": "R008-TP-001",
+      "severity": "high",
+      "state": "fixed",
+      "domain": "trust_anchor",
+      "summary": "The supplied anchor document could previously self-establish its signing key; intake now requires an explicit out-of-band raw Ed25519 public key and exact byte equality.",
+      "implementation": "scripts/f8_r008_trusted_target_pin_intake_v1.py",
+      "test": "tests/test_f8_r008_trusted_target_pin_intake_v1.py::test_anchor_requires_independent_public_key_binding"
+    },
+    {
+      "id": "R008-TP-002",
+      "severity": "high",
+      "state": "fixed",
+      "domain": "cross_binding",
+      "summary": "Target, build, and runtime architecture/configuration/image identities are now required to cross-bind before signature acceptance.",
+      "implementation": "scripts/f8_r008_trusted_target_pin_intake_v1.py",
+      "test": "tests/test_f8_r008_trusted_target_pin_intake_v1.py::test_target_build_runtime_arch_config_and_image_bindings_fail_closed"
+    },
+    {
+      "id": "R008-TP-003",
+      "severity": "medium",
+      "state": "fixed",
+      "domain": "receipt_identity",
+      "summary": "The one-shot receipt identifier is now constrained to canonical lowercase UUIDv4 and remains bound through the attestation receipt digest.",
+      "implementation": "scripts/f8_r008_trusted_target_pin_intake_v1.py",
+      "test": "tests/test_f8_r008_trusted_target_pin_intake_v1.py::test_pin_domain_and_one_shot_drift_fail_closed"
+    },
+    {
+      "id": "R008-TP-004",
+      "severity": "high",
+      "state": "fixed",
+      "domain": "readiness_projection_and_locator",
+      "summary": "Crafted intake/projection/locator reports can no longer claim complete pins while omitting target values, verified artifacts, or matching artifact digests.",
+      "implementation": "scripts/f8_r008_target_kernel_readiness_projection_v1.py and scripts/f8_r008_target_kernel_evidence_locator_reconciliation_v1.py",
+      "test": "tests/test_f8_r008_target_kernel_readiness_projection_v1.py::test_inconsistent_partial_pin_report_fails_closed"
+    },
+    {
+      "id": "R008-TP-005",
+      "severity": "pass",
+      "state": "verified",
+      "domain": "untrusted_inventory",
+      "summary": "The bounded inventory remains synthetic-only, untrusted, all-open, zero-credit, and has no readiness projection or locator consumption path that could promote it.",
+      "implementation": "scripts/f8_r008_untrusted_pin_blocker_inventory_v1.py",
+      "test": "tests/test_f8_r008_untrusted_pin_blocker_inventory_v1.py"
+    },
+    {
+      "id": "R008-TP-006",
+      "severity": "blocker",
+      "state": "open",
+      "domain": "external_evidence",
+      "summary": "No real external target-kernel attestation, independently trusted anchor, or runtime measurement is present in the workspace; the default trusted-intake report remains blocked and no target/runtime pin was minted.",
+      "implementation": "reports/F8-R008-TRUSTED-TARGET-PIN-INTAKE-V1.json",
+      "test": "tests/test_f8_r008_trusted_target_pin_intake_v1.py::test_missing_default_attestation_is_blocked_and_zero_credit"
+    },
+    {
+      "id": "R008-TP-007",
+      "severity": "blocker",
+      "state": "open",
+      "domain": "related_regression",
+      "summary": "The admission-bridge checked-in report has a stale source digest for the hardened readiness-projection script; its report is outside the permitted write set and was intentionally not regenerated.",
+      "implementation": "reports/F8-R008-ADMISSION-VERIFICATION-BRIDGE-V1-2026-09-28.json",
+      "test": "tests/test_f8_r008_admission_verification_bridge_v1.py::test_checked_in_machine_report_equals_current_bounded_projection"
+    }
+  ],
+  "cross_binding_matrix": [
+    {
+      "identity": "architecture",
+      "binding": "target_kernel.arch == build.arch == runtime_abi.arch == x86_64",
+      "state": "enforced"
+    },
+    {
+      "identity": "configuration_sha256",
+      "binding": "target_kernel.config_sha256 == build.config_sha256 == runtime_abi.config_sha256",
+      "state": "enforced"
+    },
+    {
+      "identity": "kernel_image_sha256",
+      "binding": "target_kernel.kernel_image_sha256 == build.binary_sha256 == runtime_abi.runtime_image_sha256",
+      "state": "enforced"
+    },
+    {
+      "identity": "source_and_uapi",
+      "binding": "target source_commit/source_tree_sha256/uapi_sha256 == source evidence",
+      "state": "enforced"
+    },
+    {
+      "identity": "receipt",
+      "binding": "canonical UUIDv4 plus pin-set/host/trust-root binding",
+      "state": "enforced"
+    }
+  ],
+  "target_runtime_evidence": {
+    "real_external_attestation_present": false,
+    "real_independent_trust_anchor_present": false,
+    "real_runtime_measurement_present": false,
+    "synthetic_target_or_runtime_pin_created_by_audit": false,
+    "default_trusted_intake_status": "blocked_missing_external_trusted_pin_attestation",
+    "blocker": "external target-kernel/source/config/build/runtime evidence is not supplied"
+  },
+  "authorization_boundary": {
+    "diagnostic_only": true,
+    "capability_minted": false,
+    "execution_authority": false,
+    "formal_admission": false,
+    "readiness_pass": false,
+    "T1_numerical": false,
+    "qualification_credit": 0
+  },
+  "side_effect_boundary": {
+    "privileged_probe_started": false,
+    "native_started": false,
+    "solver_started": false,
+    "worker_started": false,
+    "gpu_started": false,
+    "queue_started": false,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "gate_mutation": 0,
+    "completion_mutation": 0
+  },
+  "non_changes": [
+    "F8 frozen registry",
+    "T1 numerical result",
+    "readiness gate",
+    "qualification credit"
+  ],
+  "prohibited_operations_not_performed": [
+    "privileged probe or native/solver/GPU execution",
+    "target kernel/runtime probing",
+    "source/build artifact production read",
+    "registry/ledger/gate/credit mutation"
+  ],
+  "related_regression_blockers": [
+    {
+      "test": "tests/test_f8_r008_admission_verification_bridge_v1.py",
+      "status": "blocked",
+      "reason": "checked-in bridge source digest is stale after the permitted target-kernel projection hardening; bridge report regeneration is outside this audit write set"
+    },
+    {
+      "test": "tests/test_f8_r008_trusted_worker_runtime_postrun_matrix_claim_adapter_v1.py",
+      "status": "blocked_at_collection",
+      "reason": "environment h5py/numpy ABI mismatch: numpy.dtype size changed; no native, solver, GPU, or privileged probe was run"
+    }
+  ]
+}

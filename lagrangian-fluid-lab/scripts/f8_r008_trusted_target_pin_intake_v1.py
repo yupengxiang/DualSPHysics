@@ -5,7 +5,9 @@ This additive contract is deliberately separate from the existing target-kernel
 evidence intake.  It consumes two explicitly supplied bounded JSON documents:
 an attestation carrying the target-kernel/source/build/runtime-ABI pins and a
 trust-root record carrying the public key that is allowed to sign it.  The
-attestation also carries an externally recorded, consumed one-shot receipt.
+caller must also provide that public key through an independent trust channel;
+the anchor document alone is never allowed to establish its own trust root.
+The attestation also carries an externally recorded, consumed one-shot receipt.
 
 The verifier checks exact schemas, canonical JSON bytes, all cross-domain SHA
 bindings, host identity, Ed25519 trust-root/key binding, and the one-shot
@@ -73,9 +75,16 @@ SHA256_RE = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
 SHA1_RE = re.compile(r"[0-9a-f]{40}\Z", re.ASCII)
 BUILD_ID_RE = re.compile(r"[0-9a-f]{16,128}\Z", re.ASCII)
 NONCE_RE = re.compile(r"[0-9a-f]{32}\Z", re.ASCII)
+UUID4_RE = re.compile(
+    r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\Z",
+    re.ASCII,
+)
+PUBLIC_KEY_HEX_RE = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
 IDENTIFIER_RE = re.compile(r"[a-z0-9][a-z0-9._-]{0,127}\Z", re.ASCII)
 RELEASE_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._+:-]{0,127}\Z", re.ASCII)
 ARCH_RE = re.compile(r"[a-z0-9_+.-]{1,32}\Z", re.ASCII)
+
+TARGET_ARCH = "x86_64"
 
 ATTESTATION_FIELDS = frozenset(
     {
@@ -137,11 +146,13 @@ SOURCE_FIELDS = frozenset(
 )
 BUILD_FIELDS = frozenset(
     {
+        "arch",
         "build_id",
         "build_closure_sha256",
         "compiler_identity_sha256",
         "linker_identity_sha256",
         "binary_sha256",
+        "config_sha256",
         "build_manifest_sha256",
     }
 )
@@ -151,6 +162,7 @@ RUNTIME_ABI_FIELDS = frozenset(
         "kernel_release",
         "arch",
         "build_id",
+        "config_sha256",
         "host_identity_sha256",
         "runtime_image_sha256",
         "loaded_modules_sha256",
@@ -308,6 +320,12 @@ def _build_id(value: Any, label: str) -> str:
     return _digest(value, label, BUILD_ID_RE)
 
 
+def _uuid4(value: Any, label: str) -> str:
+    _require(type(value) is str and UUID4_RE.fullmatch(value) is not None,
+             f"{label} is not a canonical lowercase UUIDv4")
+    return value
+
+
 def _identifier(value: Any, label: str) -> str:
     _require(type(value) is str and IDENTIFIER_RE.fullmatch(value) is not None,
              f"{label} is malformed")
@@ -362,7 +380,10 @@ def _display_path(path: Path) -> str:
 
 def _input_path(value: str | Path) -> Path:
     path = Path(value)
-    if not path.is_absolute():
+    if path.is_absolute():
+        if path.as_posix() != str(path) or any(part in {"", ".", ".."} for part in path.parts):
+            raise _error("input path is not canonical", code="path_traversal")
+    else:
         if any(part in {"", ".", ".."} for part in path.parts):
             raise _error("input path contains traversal components", code="path_traversal")
         path = LAB_ROOT / path
@@ -525,7 +546,11 @@ def signing_message(value: Mapping[str, Any]) -> bytes:
     )
 
 
-def _validate_anchor(value: Any) -> tuple[dict[str, Any], bytes]:
+def _validate_anchor(
+    value: Any,
+    *,
+    explicit_public_key: bytes | None,
+) -> tuple[dict[str, Any], bytes]:
     _require_keys(value, ANCHOR_FIELDS, "trust anchor")
     _require(value["schema"] == ANCHOR_SCHEMA, "trust anchor schema is unsupported")
     _require(value["record_id"] == ANCHOR_RECORD_ID, "trust anchor record_id is unsupported")
@@ -543,6 +568,16 @@ def _validate_anchor(value: Any) -> tuple[dict[str, Any], bytes]:
                                 label="trust anchor public key")
     _require(value["public_key_sha256"] == hashlib.sha256(public_key).hexdigest(),
              "trust anchor public key SHA does not match its bytes")
+    _require(
+        type(explicit_public_key) is bytes and len(explicit_public_key) == 32,
+        "an explicit out-of-band trust-anchor public key is required",
+        code="missing_explicit_trust_anchor",
+    )
+    _require(
+        public_key == explicit_public_key,
+        "trust anchor public key does not match the explicit out-of-band trust anchor",
+        code="trust_anchor_mismatch",
+    )
     _epoch(value["epoch"], "trust anchor epoch")
     _require(value["revoked"] is False, "trust anchor is revoked")
     _require(value["source"] == ANCHOR_SOURCE,
@@ -555,6 +590,8 @@ def _validate_target_kernel(value: Any) -> dict[str, Any]:
     normalized = dict(value)
     _release(normalized["kernel_release"], "target_kernel.kernel_release")
     _arch(normalized["arch"], "target_kernel.arch")
+    _require(normalized["arch"] == TARGET_ARCH,
+             "target_kernel.arch is outside the frozen R008 native ABI")
     _sha1(normalized["source_commit"], "target_kernel.source_commit")
     for field in (
         "source_tree_sha256",
@@ -587,12 +624,14 @@ def _validate_source(value: Any) -> dict[str, Any]:
 def _validate_build(value: Any) -> dict[str, Any]:
     _require_keys(value, BUILD_FIELDS, "build")
     normalized = dict(value)
+    _arch(normalized["arch"], "build.arch")
     _build_id(normalized["build_id"], "build.build_id")
     for field in (
         "build_closure_sha256",
         "compiler_identity_sha256",
         "linker_identity_sha256",
         "binary_sha256",
+        "config_sha256",
         "build_manifest_sha256",
     ):
         _sha256(normalized[field], f"build.{field}")
@@ -619,9 +658,12 @@ def _validate_runtime(value: Any) -> dict[str, Any]:
     _require(normalized["abi_schema"] == ABI_SCHEMA, "runtime_abi schema is unsupported")
     _release(normalized["kernel_release"], "runtime_abi.kernel_release")
     _arch(normalized["arch"], "runtime_abi.arch")
+    _require(normalized["arch"] == TARGET_ARCH,
+             "runtime_abi.arch is outside the frozen R008 native ABI")
     _build_id(normalized["build_id"], "runtime_abi.build_id")
     _sha256(normalized["host_identity_sha256"], "runtime_abi.host_identity_sha256")
     for field in (
+        "config_sha256",
         "runtime_image_sha256",
         "loaded_modules_sha256",
         "syscall_policy_sha256",
@@ -664,7 +706,7 @@ def _validate_receipt(value: Any) -> dict[str, Any]:
     _require(normalized["schema"] == RECEIPT_SCHEMA, "one_shot_receipt schema is unsupported")
     _require(normalized["record_id"] == RECEIPT_RECORD_ID,
              "one_shot_receipt record_id is unsupported")
-    _identifier(normalized["receipt_id"], "one_shot_receipt.receipt_id")
+    _uuid4(normalized["receipt_id"], "one_shot_receipt.receipt_id")
     _require(normalized["scope_id"] == SCOPE_ID, "one_shot_receipt scope differs from F8 R008")
     for field in ("pin_set_sha256", "host_identity_sha256", "consumption_binding_sha256"):
         _sha256(normalized[field], f"one_shot_receipt.{field}")
@@ -720,6 +762,16 @@ def _validate_cross_bindings(
              "source tree SHA is not cross-bound")
     _require(target["uapi_sha256"] == source["uapi_sha256"],
              "UAPI SHA is not cross-bound")
+    _require(target["arch"] == build["arch"] == runtime["arch"],
+             "target/build/runtime architecture is not cross-bound")
+    _require(target["config_sha256"] == build["config_sha256"] == runtime["config_sha256"],
+             "target/build/runtime config SHA is not cross-bound")
+    _require(
+        target["kernel_image_sha256"]
+        == build["binary_sha256"]
+        == runtime["runtime_image_sha256"],
+        "target/build/runtime kernel image SHA is not cross-bound",
+    )
     _require(target["build_id"] == build["build_id"] == runtime["build_id"],
              "build identity is not cross-bound")
     _require(target["kernel_release"] == runtime["kernel_release"],
@@ -739,7 +791,12 @@ def _validate_cross_bindings(
              "one-shot receipt trust-root/key binding differs")
 
 
-def verify_attestation(attestation_raw: bytes, anchor_raw: bytes) -> dict[str, Any]:
+def verify_attestation(
+    attestation_raw: bytes,
+    anchor_raw: bytes,
+    *,
+    trust_anchor_public_key: bytes | None = None,
+) -> dict[str, Any]:
     """Verify one externally supplied attestation without authorizing execution."""
 
     _require(type(attestation_raw) is bytes and 0 < len(attestation_raw) <= MAX_JSON_BYTES,
@@ -757,7 +814,10 @@ def verify_attestation(attestation_raw: bytes, anchor_raw: bytes) -> dict[str, A
              "attestation bytes are not exact canonical JSON", code="noncanonical_json")
     _require(_canonical(anchor, "trusted pin anchor") == anchor_raw,
              "trust anchor bytes are not exact canonical JSON", code="noncanonical_json")
-    anchor, public_key = _validate_anchor(anchor)
+    anchor, public_key = _validate_anchor(
+        anchor,
+        explicit_public_key=trust_anchor_public_key,
+    )
     _require_keys(value, ATTESTATION_FIELDS, "trusted pin attestation")
     _require(value["schema"] == SCHEMA, "trusted pin attestation schema is unsupported")
     _require(value["record_id"] == RECORD_ID, "trusted pin attestation record_id is unsupported")
@@ -807,6 +867,8 @@ def verify_attestation(attestation_raw: bytes, anchor_raw: bytes) -> dict[str, A
         "host_identity_sha256": host_hash,
         "trust_root_id": root_ref["root_id"],
         "trust_key_id": root_ref["key_id"],
+        "arch": target["arch"],
+        "receipt_id": receipt["receipt_id"],
         "kernel_release": target["kernel_release"],
         "build_id": target["build_id"],
         "runtime_abi_sha256": runtime["abi_payload_sha256"],
@@ -892,7 +954,9 @@ def _empty_trust() -> dict[str, Any]:
 def _empty_identity() -> dict[str, Any]:
     return {
         "kernel_release": None,
+        "arch": None,
         "build_id": None,
+        "receipt_id": None,
         "runtime_abi_sha256": None,
         "host_identity_sha256": None,
         "trust_root_id": None,
@@ -993,7 +1057,9 @@ def _valid_report(
         },
         "identity": {
             "kernel_release": result["kernel_release"],
+            "arch": result["arch"],
             "build_id": result["build_id"],
+            "receipt_id": result["receipt_id"],
             "runtime_abi_sha256": result["runtime_abi_sha256"],
             "host_identity_sha256": result["host_identity_sha256"],
             "trust_root_id": result["trust_root_id"],
@@ -1032,6 +1098,8 @@ def _valid_report(
 def intake_paths(
     attestation_path: str | Path,
     anchor_path: str | Path,
+    *,
+    trust_anchor_public_key: bytes | None = None,
 ) -> dict[str, Any]:
     """Read and verify explicit attestation/anchor files without side effects."""
 
@@ -1068,7 +1136,11 @@ def intake_paths(
     # the path digest and signature digest refer to the same bytes.
     del attestation_value, anchor_value
     try:
-        result = verify_attestation(attestation_raw, anchor_raw)
+        result = verify_attestation(
+            attestation_raw,
+            anchor_raw,
+            trust_anchor_public_key=trust_anchor_public_key,
+        )
     except TrustedTargetPinIntakeError as error:
         raise _error(
             str(error),
@@ -1088,6 +1160,8 @@ def intake_paths(
 def build_report(
     attestation_path: str | Path = DEFAULT_ATTESTATION,
     anchor_path: str | Path = DEFAULT_TRUST_ANCHOR,
+    *,
+    trust_anchor_public_key: bytes | None = None,
 ) -> dict[str, Any]:
     """Build a deterministic blocked or non-authorizing intake report."""
 
@@ -1096,7 +1170,11 @@ def build_report(
     attestation_ref: dict[str, Any] | None = None
     anchor_ref: dict[str, Any] | None = None
     try:
-        outcome = intake_paths(attestation, anchor)
+        outcome = intake_paths(
+            attestation,
+            anchor,
+            trust_anchor_public_key=trust_anchor_public_key,
+        )
     except TrustedTargetPinIntakeError as error:
         attestation_ref = error.attestation_ref
         anchor_ref = error.anchor_ref
@@ -1163,8 +1241,8 @@ def _validate_report(value: Any) -> dict[str, Any]:
     _require(all(type(item) is bool for item in value["trust"].values()),
              "report trust values must be booleans")
     identity_fields = frozenset({
-        "kernel_release", "build_id", "runtime_abi_sha256", "host_identity_sha256",
-        "trust_root_id", "trust_key_id", "pin_set_sha256",
+        "kernel_release", "arch", "build_id", "receipt_id", "runtime_abi_sha256",
+        "host_identity_sha256", "trust_root_id", "trust_key_id", "pin_set_sha256",
     })
     _require_keys(value["identity"], identity_fields, "report identity")
     validation_fields = frozenset({
@@ -1207,7 +1285,9 @@ def _validate_report(value: Any) -> dict[str, Any]:
             "synthetic": False,
         }, "valid report trust projection is unsafe")
         _require(value["identity"]["kernel_release"] is not None
-                 and value["identity"]["build_id"] is not None,
+                 and value["identity"]["arch"] == TARGET_ARCH
+                 and value["identity"]["build_id"] is not None
+                 and value["identity"]["receipt_id"] is not None,
                  "valid report identity is incomplete")
         _require(all(value["validation"][field] for field in (
             "attestation_present", "trust_anchor_present", "schema_valid",
@@ -1229,12 +1309,27 @@ def _validate_report(value: Any) -> dict[str, Any]:
     return value
 
 
-def verify_report(path: str | Path = DEFAULT_REPORT) -> dict[str, Any]:
+def verify_report(
+    path: str | Path = DEFAULT_REPORT,
+    *,
+    trust_anchor_public_key: bytes | None = None,
+) -> dict[str, Any]:
     report_path = _input_path(path)
     value, _reference_value, _raw = _read_bounded_json(
         report_path, label="trusted pin intake report", require_canonical=False
     )
-    return _validate_report(value)
+    validated = _validate_report(value)
+    expected = build_report(
+        value["inputs"]["attestation"]["path"],
+        value["inputs"]["trust_anchor"]["path"],
+        trust_anchor_public_key=trust_anchor_public_key,
+    )
+    _require(
+        validated == expected,
+        "trusted pin intake report does not match its current bound inputs",
+        code="report_binding_drift",
+    )
+    return validated
 
 
 def main() -> int:
@@ -1248,15 +1343,32 @@ def main() -> int:
                        metavar="REPORT", help="verify a machine report")
     parser.add_argument("--trust-anchor", metavar="ANCHOR",
                         help="trust-root record used with --intake")
+    parser.add_argument(
+        "--trust-anchor-public-key-hex",
+        metavar="HEX",
+        help="explicit out-of-band raw Ed25519 trust-anchor public key (64 lowercase hex)",
+    )
     args = parser.parse_args()
+    explicit_key = None
+    if args.trust_anchor_public_key_hex is not None:
+        if PUBLIC_KEY_HEX_RE.fullmatch(args.trust_anchor_public_key_hex) is None:
+            parser.error("--trust-anchor-public-key-hex must be exactly 64 lowercase hex characters")
+        explicit_key = bytes.fromhex(args.trust_anchor_public_key_hex)
     if args.print_report:
         value = build_report()
     elif args.intake:
         if not args.trust_anchor:
             parser.error("--intake requires --trust-anchor")
-        value = build_report(args.intake, args.trust_anchor)
+        value = build_report(
+            args.intake,
+            args.trust_anchor,
+            trust_anchor_public_key=explicit_key,
+        )
     else:
-        value = verify_report(args.verify_report)
+        value = verify_report(
+            args.verify_report,
+            trust_anchor_public_key=explicit_key,
+        )
     print(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True, allow_nan=False))
     return 0
 
