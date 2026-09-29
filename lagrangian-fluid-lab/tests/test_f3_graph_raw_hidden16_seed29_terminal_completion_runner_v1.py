@@ -6,6 +6,8 @@ import hashlib
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts import (
     f3_graph_raw_hidden16_seed29_terminal_completion_runner_v1 as runner,
 )
@@ -155,6 +157,8 @@ def test_completed_hidden16_seed29_binds_training_evaluation_and_stat_only_traje
     assert report["side_effects"]["trajectory_hdf5_opened"] is False
     assert report["side_effects"]["progress_opened"] is False
     assert report["qualification_credit"] == 0
+    assert report["security_boundary"]["launch_allowed"] is False
+    assert report["security_boundary"]["popen_attempted"] is False
     assert runner.validate_report(report) == []
 
 
@@ -197,64 +201,42 @@ def test_existing_namespace_collision_never_launches(tmp_path: Path, monkeypatch
     assert launch["attempted"] is False
 
 
-def test_launch_records_pending_pid_without_waiting_for_evaluate(tmp_path: Path, monkeypatch):
+def test_launch_is_fail_closed_without_gpu_probe_or_popen(tmp_path: Path, monkeypatch):
     training_path, _ = _training(tmp_path)
-    root = tmp_path / "lab"
-    (root / ".venv/bin").mkdir(parents=True)
-    (root / ".venv/bin/python").write_bytes(b"python")
     namespace = tmp_path / "f3-graph-raw500-hidden16-seed29-full835-terminal-closure"
     monkeypatch.setattr(
         runner,
         "_gpu_snapshot",
-        lambda _index: {
-            "available": True,
-            "gpu_index": 7,
-            "selected": {
-                "index": 7,
-                "memory_free_mib": 48000,
-                "memory_total_mib": 49140,
-                "memory_used_mib": 1140,
-                "utilization_gpu_percent": 100,
-            },
-            "all_gpus": [],
-            "returncode": 0,
-        },
+        lambda _index: (_ for _ in ()).throw(AssertionError("GPU probe must not run")),
     )
-
-    class FakeProcess:
-        pid = 123456
-
-    popen_calls: list[dict[str, object]] = []
-
-    def fake_popen(command, **kwargs):
-        popen_calls.append({"command": command, "kwargs": kwargs})
-        return FakeProcess()
-
-    monkeypatch.setattr(runner.subprocess, "Popen", fake_popen)
+    monkeypatch.setattr(
+        runner.subprocess,
+        "Popen",
+        lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("Popen must not run")),
+    )
     launch = runner.launch_diagnostic(
-        root,
+        tmp_path,
         gpu_index=7,
         namespace=namespace,
         training_path=training_path,
     )
-    assert launch["status"] == "launched_pending"
-    assert launch["attempted"] is True
-    assert launch["pid"] == 123456
-    assert launch["returncode"] is None
-    assert popen_calls[0]["kwargs"]["start_new_session"] is True
-    assert "--maximum-steps" in popen_calls[0]["command"]
-    assert "--diagnostic" in popen_calls[0]["command"]
+    assert launch["status"] == "blocked_p1_security_boundary"
+    assert launch["attempted"] is False
+    assert launch["security_boundary"]["wait_attempted"] is False
 
-    report = runner.build_report(
-        root,
-        training_path=training_path,
-        evaluation_path=tmp_path / "missing-evaluation.json",
-        launch=launch,
-        scan_existing=False,
-    )
-    assert report["status"] == "diagnostic_launch_pending"
-    assert report["source_bound"] is False
-    assert runner.validate_report(report) == []
+
+def test_bounded_json_rejects_symlink_and_hardlink_aliases(tmp_path: Path):
+    source = tmp_path / "receipt.json"
+    source.write_text('{"schema":"core.training.v1"}\n', encoding="utf-8")
+    symlink = tmp_path / "receipt-symlink.json"
+    symlink.symlink_to(source)
+    with pytest.raises(runner.RunnerError, match="symlink|link"):
+        runner._read_json(symlink, max_bytes=1024, name="seed29 test receipt")
+
+    hardlink = tmp_path / "receipt-hardlink.json"
+    hardlink.hardlink_to(source)
+    with pytest.raises(runner.RunnerError, match="hard link|artifact"):
+        runner._read_json(hardlink, max_bytes=1024, name="seed29 test receipt")
 
 
 def test_outputs_are_bounded_and_canonical(tmp_path: Path):

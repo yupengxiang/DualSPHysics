@@ -26,6 +26,8 @@ import subprocess
 import time
 from typing import Any, Mapping, Sequence
 
+from scripts import f3_graph_terminal_validator_security_hardening_v1 as hardening
+
 
 LAB_ROOT = Path(__file__).resolve().parents[1]
 TMP_ROOT = Path("/tmp")
@@ -46,6 +48,13 @@ MAX_EVALUATION_JSON_BYTES = 32 * 1024 * 1024
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 DEFAULT_GPU_INDEX = 7
 MIN_FREE_VRAM_MIB = 4 * 1024
+
+P1_SECURITY_BLOCKERS = (
+    "real sealed Popen/wait witness is not independently admitted for seed29",
+    "complete source/manifest/checkpoint/environment/executable identity is not sealed",
+    "HDF5 external/soft/VDS rejection is not independently bound to this runner",
+    "one-time output namespace reservation/consumption is not independently sealed",
+)
 
 DEFAULT_TRAINING_RECEIPT = (
     TMP_ROOT / "f3-graph-raw500-hidden16-seed29-20260928-training.json"
@@ -150,42 +159,60 @@ def _check_finite(value: Any, name: str = "value") -> None:
 
 
 def _absolute_path(value: Any, name: str, suffix: str | None = None) -> Path:
-    path = Path(_string(value, name)).expanduser()
-    if not path.is_absolute() or ".." in path.parts:
-        _fail(f"{name} must be absolute and must not contain parent traversal")
+    try:
+        raw = os.fspath(value)
+    except TypeError:
+        _fail(f"{name} must be a path string")
+    if not isinstance(raw, str) or not raw or "\x00" in raw:
+        _fail(f"{name} must be a non-empty path string")
+    path = Path(raw)
+    if (
+        not path.is_absolute()
+        or any(part in {".", ".."} for part in path.parts)
+        or os.path.normpath(raw) != raw
+    ):
+        _fail(f"{name} must be absolute and lexical-alias free")
     if suffix is not None and path.suffix.lower() != suffix.lower():
         _fail(f"{name} must end with {suffix}")
     return path
 
 
 def _path_text(path: Path) -> str:
-    return str(path.expanduser().resolve())
+    return str(path)
 
 
 def _source_ref(path: Path, *, opened: bool, raw: bytes | None = None) -> dict[str, Any]:
-    exists = path.is_file()
+    try:
+        metadata = os.lstat(path)
+    except OSError:
+        metadata = None
+    exists = metadata is not None and os.path.isfile(path) and not path.is_symlink()
     return {
         "path": _path_text(path),
         "exists": exists,
         "opened": opened,
-        "bytes": len(raw) if raw is not None else (path.stat().st_size if exists else None),
+        "bytes": len(raw) if raw is not None else (metadata.st_size if exists else None),
         "sha256": hashlib.sha256(raw).hexdigest() if raw is not None else None,
+        "stable_fd": raw is not None,
+        "path_reopened": False,
+        "symlink": bool(metadata is not None and path.is_symlink()),
+        "hardlinks": int(metadata.st_nlink) if metadata is not None else None,
     }
 
 
 def _read_json(path: Path, *, max_bytes: int, name: str) -> tuple[dict[str, Any], dict[str, Any]]:
-    path = path.expanduser().resolve()
-    if path.is_symlink():
-        _fail(f"{name} symlink is not allowed: {path}")
+    path = _absolute_path(path, name, ".json")
+    try:
+        raw = hardening.secure_read_regular_file(
+            path,
+            root_value=path.parent,
+            max_bytes=max_bytes,
+        )
+    except hardening.SecurityBoundaryError as error:
+        _fail(str(error))
     if path.suffix.lower() != ".json":
         _fail(f"{name} must use a JSON suffix: {path}")
-    if not path.is_file():
-        _fail(f"{name} is missing: {path}")
-    size = path.stat().st_size
-    if size > max_bytes:
-        _fail(f"{name} exceeds bounded limit {max_bytes}: {path}")
     try:
-        raw = path.read_bytes()
         payload = json.loads(
             raw.decode("utf-8"),
             parse_constant=_reject_constant,
@@ -203,12 +230,16 @@ def _read_json(path: Path, *, max_bytes: int, name: str) -> tuple[dict[str, Any]
 
 
 def _stat_only(path: Path, *, expected_bytes: int | None = None, name: str) -> dict[str, Any]:
-    path = path.expanduser().resolve()
-    if path.is_symlink():
-        _fail(f"{name} symlink is not allowed: {path}")
-    if not path.is_file():
-        _fail(f"{name} is missing: {path}")
-    size = path.stat().st_size
+    path = _absolute_path(path, name)
+    try:
+        metadata = os.lstat(path)
+    except OSError as error:
+        _fail(f"{name} is missing: {path}: {error}")
+    if path.is_symlink() or not os.path.isfile(path):
+        _fail(f"{name} must be a regular non-symlink file: {path}")
+    if metadata.st_nlink != 1:
+        _fail(f"{name} must have exactly one hard link: {path}")
+    size = metadata.st_size
     if expected_bytes is not None and size != expected_bytes:
         _fail(f"{name} byte count drift: observed={size} expected={expected_bytes}")
     return {
@@ -218,6 +249,9 @@ def _stat_only(path: Path, *, expected_bytes: int | None = None, name: str) -> d
         "stat_only": True,
         "bytes": size,
         "sha256": None,
+        "stable_fd": False,
+        "path_reopened": False,
+        "hardlinks": int(metadata.st_nlink),
     }
 
 
@@ -265,6 +299,38 @@ def _empty_side_effects() -> dict[str, Any]:
         "formal_training_runs_counted": 0,
         "T1_numerical": False,
         "T2_macro": False,
+    }
+
+
+def _security_boundary() -> dict[str, Any]:
+    """Describe the non-authorizing P1 boundary for this legacy runner.
+
+    The seed29 v1 contract has no scheduler-issued admission capability.  It
+    therefore remains useful as a diagnostic receipt binder, but it must never
+    turn its legacy launch helper into execution authority.  The common
+    hardening module is available for future integration; this runner does not
+    promote a JSON declaration, GPU snapshot, or caller object into a real
+    process witness.
+    """
+
+    return {
+        "status": "blocked_fail_closed",
+        "execution_authorized": False,
+        "launch_allowed": False,
+        "popen_attempted": False,
+        "wait_attempted": False,
+        "controls": {
+            "bounded_json_stable_fd": True,
+            "symlink_hardlink_toctou_for_bounded_json": True,
+            "stat_only_artifact_stable_fd": False,
+            "hdf5_external_soft_vds_rejected": False,
+            "source_manifest_checkpoint_environment_executable_identity": False,
+            "sealed_real_popen_wait": False,
+            "one_time_namespace": False,
+            "formal_credit_isolation": True,
+        },
+        "blockers": list(P1_SECURITY_BLOCKERS),
+        "hardening_boundary": hardening.SCHEMA,
     }
 
 
@@ -356,17 +422,17 @@ def _candidate_inventory() -> dict[str, Any]:
     except OSError as error:
         return {"scan_error": str(error), "files": []}
     for path in paths[:128]:
-        if not path.is_file() or path.is_symlink():
-            continue
         try:
-            stat = path.stat()
+            metadata = os.lstat(path)
         except OSError:
+            continue
+        if path.is_symlink() or not os.path.isfile(path) or metadata.st_nlink != 1:
             continue
         entries.append(
             {
                 "name": path.name,
-                "bytes": stat.st_size,
-                "mtime_ns": stat.st_mtime_ns,
+                "bytes": metadata.st_size,
+                "mtime_ns": metadata.st_mtime_ns,
                 "opened": False,
                 "content_class": (
                     "evaluation_json_candidate"
@@ -393,9 +459,9 @@ def _evaluation_candidates(
 ) -> list[Path]:
     paths: list[Path] = []
     if explicit is not None:
-        paths.append(explicit.expanduser().resolve())
+        paths.append(_absolute_path(explicit, "explicit seed29 evaluation"))
     for name in inventory.get("evaluation_candidates", []):
-        paths.append((TMP_ROOT / str(name)).resolve())
+        paths.append(_absolute_path(TMP_ROOT / str(name), "seed29 inventory evaluation"))
     result: list[Path] = []
     seen: set[str] = set()
     for path in paths:
@@ -520,7 +586,7 @@ def _validate_evaluation(
         },
         "training_binding": training,
         "evaluation_binding": {
-            "path": str(path.resolve()),
+            "path": str(path),
             "schema": payload["schema"],
             "bytes": source["bytes"],
             "sha256": source["sha256"],
@@ -605,6 +671,7 @@ def _base_report(
         "seed29_terminal_receipt": None,
         "blocked_reasons": list(training_errors),
         "launch": dict(launch),
+        "security_boundary": _security_boundary(),
         "side_effects": _empty_side_effects(),
         "input_boundary": {
             "bounded_training_json_opened": bool(training_source.get("opened")),
@@ -650,7 +717,21 @@ def build_report(
         )
     except RunnerError as error:
         training = None
-        training_source = _source_ref(Path(training_path).expanduser().resolve(), opened=False)
+        try:
+            training_source = _source_ref(
+                _absolute_path(training_path, "seed29 training receipt"),
+                opened=False,
+            )
+        except RunnerError:
+            training_source = {
+                "path": str(training_path),
+                "exists": False,
+                "opened": False,
+                "bytes": None,
+                "sha256": None,
+                "stable_fd": False,
+                "path_reopened": False,
+            }
         training_validation = {"valid": False, "reasons": [str(error)]}
     report = _base_report(
         observed_at_utc=observed_at_utc,
@@ -761,11 +842,9 @@ def _gpu_snapshot(gpu_index: int) -> dict[str, Any]:
 
 
 def _fresh_namespace_paths(namespace: Path) -> dict[str, Path]:
-    namespace = _absolute_path(str(namespace), "fresh output namespace")
-    if not str(namespace).startswith("/tmp/"):
+    namespace = _absolute_path(namespace, "fresh output namespace")
+    if namespace == TMP_ROOT or TMP_ROOT not in namespace.parents:
         _fail("fresh output namespace must be under /tmp")
-    if ".." in namespace.parts:
-        _fail("fresh output namespace must not contain parent traversal")
     return {
         "namespace": namespace,
         "evaluation": Path(f"{namespace}-evaluation.json"),
@@ -782,118 +861,34 @@ def launch_diagnostic(
     namespace: Path | str = DEFAULT_NAMESPACE,
     training_path: Path | str = DEFAULT_TRAINING_RECEIPT,
 ) -> dict[str, Any]:
-    root = Path(lab_root).resolve()
+    del lab_root, gpu_index, training_path
     paths = _fresh_namespace_paths(Path(namespace))
-    collisions = [str(path) for path in paths.values() if path.exists() or path.is_symlink()]
+    collisions: list[str] = []
+    for path in paths.values():
+        try:
+            os.lstat(path)
+        except FileNotFoundError:
+            continue
+        except OSError:
+            collisions.append(str(path))
+        else:
+            collisions.append(str(path))
     if collisions:
         return {
             "attempted": False,
             "status": "blocked_namespace_collision",
             "namespace": str(paths["namespace"]),
             "collisions": collisions,
+            "security_boundary": _security_boundary(),
             "reason": "refusing to reuse any existing output path",
         }
-    gpu = _gpu_snapshot(gpu_index)
-    selected = gpu.get("selected") or {}
-    if not gpu.get("available"):
-        return {
-            "attempted": False,
-            "status": "blocked_gpu_probe",
-            "namespace": str(paths["namespace"]),
-            "gpu": gpu,
-            "reason": "requested GPU is not available to nvidia-smi",
-        }
-    if selected.get("memory_free_mib", 0) < MIN_FREE_VRAM_MIB:
-        return {
-            "attempted": False,
-            "status": "blocked_insufficient_vram",
-            "namespace": str(paths["namespace"]),
-            "gpu": gpu,
-            "minimum_free_vram_mib": MIN_FREE_VRAM_MIB,
-        }
-    python = root / ".venv/bin/python"
-    if not python.is_file():
-        return {
-            "attempted": False,
-            "status": "blocked_missing_python",
-            "namespace": str(paths["namespace"]),
-            "gpu": gpu,
-            "reason": str(python),
-        }
-    training, _source, validation = _training_receipt(Path(training_path))
-    if not validation["valid"]:
-        return {
-            "attempted": False,
-            "status": "blocked_training_receipt",
-            "namespace": str(paths["namespace"]),
-            "gpu": gpu,
-            "reason": "; ".join(validation["reasons"]),
-        }
-    checkpoint = Path(str(training["checkpoint"]["path"]))
-    command = [
-        str(python),
-        "-u",
-        "scripts/core_learning.py",
-        "evaluate",
-        "--manifest",
-        "campaigns/core-v1/f3-dataset-v2.json",
-        "--data-root",
-        ".",
-        "--checkpoint",
-        str(checkpoint),
-        "--case-id",
-        CASE_ID,
-        "--split",
-        SPLIT,
-        "--maximum-steps",
-        str(TRANSITIONS),
-        "--chunk-size",
-        "34560",
-        "--device",
-        "cuda:0",
-        "--progress-every",
-        "25",
-        "--trajectory-output",
-        str(paths["trajectory"]),
-        "--progress-output",
-        str(paths["progress"]),
-        "--output",
-        str(paths["evaluation"]),
-        "--diagnostic",
-    ]
-    env = os.environ.copy()
-    env["PYTHONDONTWRITEBYTECODE"] = "1"
-    env["CUDA_VISIBLE_DEVICES"] = str(gpu_index)
-    try:
-        with paths["log"].open("wb") as log_handle:
-            process = subprocess.Popen(
-                command,
-                cwd=root,
-                env=env,
-                stdout=log_handle,
-                stderr=subprocess.STDOUT,
-                start_new_session=True,
-            )
-    except (OSError, subprocess.SubprocessError) as error:
-        return {
-            "attempted": True,
-            "status": "failed",
-            "namespace": str(paths["namespace"]),
-            "gpu": gpu,
-            "command": command,
-            "returncode": None,
-            "reason": str(error),
-        }
     return {
-        "attempted": True,
-        "status": "launched_pending",
+        "attempted": False,
+        "status": "blocked_p1_security_boundary",
         "namespace": str(paths["namespace"]),
-        "gpu": gpu,
-        "command": command,
-        "pid": process.pid,
-        "returncode": None,
-        "log_path": str(paths["log"]),
-        "reason": "diagnostic evaluate launched; refresh after terminal evaluation receipt appears",
+        "collisions": [],
+        "security_boundary": _security_boundary(),
+        "reason": "seed29 v1 has no independently sealed admission; refusing GPU/Popen execution",
     }
 
 
@@ -944,6 +939,22 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
                 errors.append("terminal credit drift")
     elif terminal is not None:
         errors.append("unbound report must not contain terminal receipt")
+    security = report.get("security_boundary")
+    if not isinstance(security, Mapping):
+        errors.append("security_boundary missing")
+    else:
+        if security.get("status") != "blocked_fail_closed":
+            errors.append("security_boundary must remain blocked_fail_closed")
+        for key, expected in (
+            ("execution_authorized", False),
+            ("launch_allowed", False),
+            ("popen_attempted", False),
+            ("wait_attempted", False),
+        ):
+            if security.get(key) is not expected:
+                errors.append(f"security_boundary.{key} must be {expected!r}")
+        if tuple(security.get("blockers", ())) != P1_SECURITY_BLOCKERS:
+            errors.append("security_boundary blockers drift")
     effects = report.get("side_effects")
     if isinstance(effects, Mapping):
         for key in (
@@ -976,6 +987,7 @@ def render_zh_report(report: Mapping[str, Any]) -> str:
         f"- 固定目标：`{MODEL_KIND}`、hidden=`{HIDDEN}`、updates=`{UPDATES}`、`{TRANSITIONS}` transitions / `{FRAMES}` frames、case=`{CASE_ID}`。",
         "- 性质：diagnostic-only；formal/T1/T2/qualification=false，credit=0，所有 campaign mutation=0。",
         "- 安全边界：未打开 progress、trajectory/HDF5、manifest 或 checkpoint 内容；trajectory/checkpoint 只做 stat/receipt identity；PID/progress 不视为完成。",
+        "- P1 执行边界：没有独立 admission、sealed real Popen/wait、一次性 namespace 或完整 source/manifest/checkpoint/environment/executable identity；launch 保持 fail-closed。",
         "",
         "## 结果",
         "",
