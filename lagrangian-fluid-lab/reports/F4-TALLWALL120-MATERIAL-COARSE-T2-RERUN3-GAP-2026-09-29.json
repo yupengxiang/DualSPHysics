@@ -1,0 +1,450 @@
+{
+  "artifact_class": "gap_report",
+  "audit_basis": {
+    "anchor_commit": "676a5286",
+    "anchor_path": "reports/F4-TALLWALL120-MATERIAL-COARSE-T2-READINESS-SECURITY-AUDIT-2026-09-29-RERUN2.json",
+    "bounded_json_only": true,
+    "contracts_read": [
+      "root_scheduler",
+      "fresh_root_scheduler",
+      "external_receipt",
+      "host_io",
+      "archive_reader",
+      "source_drift",
+      "case_sidecar",
+      "sidecar_matrix",
+      "terminal_evidence",
+      "readiness_projection",
+      "t2_readiness",
+      "root_scheduler_contract",
+      "fresh_root_scheduler_contract",
+      "external_receipt_contract",
+      "host_io_contract",
+      "terminal_evidence_contract",
+      "material_sidecar_contract",
+      "sidecar_matrix_contract"
+    ],
+    "trajectory_hdf5_hashed": false,
+    "trajectory_hdf5_opened": false
+  },
+  "blocking_gaps": [
+    {
+      "evidence": "fresh root authorization and scheduler-owned host-I/O reservation are absent",
+      "id": "F4-T2-RERUN3-GAP-ROOT-SCHEDULER-AUTHORITY",
+      "required_next_evidence": "producer-issued, cross-bound, one-use fresh-root and scheduler host-I/O receipts",
+      "status": "blocking"
+    },
+    {
+      "evidence": "fresh terminal evidence and the DEV_07 material case sidecar are missing",
+      "id": "F4-T2-RERUN3-GAP-TERMINAL-SIDECAR",
+      "required_next_evidence": "fresh namespace-bound terminal sidecar with complete event window, then read-only intake",
+      "status": "blocking"
+    },
+    {
+      "evidence": "archive/reader source drift remains unresolved and all 32 material sidecars are absent",
+      "id": "F4-T2-RERUN3-GAP-SOURCE-MATRIX",
+      "required_next_evidence": "authoritative archives-v2 collection/reader refresh and the complete 32-case sidecar matrix",
+      "status": "blocking"
+    }
+  ],
+  "contract_checks": {
+    "anchor_preserves_zero_credit": true,
+    "external_receipt_contract_is_non_authorizing": true,
+    "fresh_root_scheduler_contract_is_non_authorizing": true,
+    "host_io_projection_cannot_authorize_launch": true,
+    "material_sidecar_missing_fails_closed": true,
+    "readiness_projection_remains_blocked": true,
+    "root_scheduler_missing_authority_fails_closed": true,
+    "sidecar_matrix_is_not_qualified": true,
+    "terminal_evidence_missing_fails_closed": true
+  },
+  "contract_snapshot": {
+    "anchor": {
+      "T1": false,
+      "T2": false,
+      "T2_macro": false,
+      "credit": 0,
+      "formal": false,
+      "promotion_allowed": false,
+      "scheduler_spec_created": false,
+      "status": "blocked_fail_closed"
+    },
+    "external_receipt": {
+      "credit": 0,
+      "external_receipts_verified": false,
+      "formal": false,
+      "launch_allowed": false,
+      "receipt_paths": {
+        "fresh_root": {
+          "error": "missing",
+          "exists": false,
+          "path": "/run/f4/tallwall120/material/dev-07/fresh-root-receipt.json"
+        },
+        "scheduler_host_io": {
+          "error": "missing",
+          "exists": false,
+          "path": "/run/f4/tallwall120/material/dev-07/scheduler-host-io-receipt.json"
+        }
+      },
+      "status": "blocked_missing_external_receipts"
+    },
+    "fresh_root_scheduler": {
+      "credit": 0,
+      "formal": false,
+      "fresh_root_exists": false,
+      "launch_allowed": false,
+      "scheduler_host_io_exists": false,
+      "status": "blocked_missing_fresh_root_scheduler_receipts"
+    },
+    "host_io": {
+      "credit": 0,
+      "launch_admitted": false,
+      "probe_is_authorization": false,
+      "root_authorization_present": false,
+      "scheduler_authorization_present": false,
+      "status": "diagnostic_admission_blocked",
+      "worker_launch_authorized": false
+    },
+    "material_sidecar": {
+      "T2": false,
+      "credit": 0,
+      "formal": false,
+      "sidecar_blocking_reasons": [
+        "missing_material_case_sidecar"
+      ],
+      "sidecar_present": false,
+      "sidecar_status": "missing",
+      "status": "blocked_fail_closed"
+    },
+    "readiness": {
+      "T2": false,
+      "credit": 0,
+      "status": "blocked_fail_closed",
+      "terminal_present": false,
+      "terminal_status": "missing"
+    },
+    "root_scheduler": {
+      "credit": 0,
+      "launch_admitted": false,
+      "receipt_paths": {
+        "fresh_root": {
+          "error": null,
+          "exists": false,
+          "path": null
+        },
+        "scheduler": {
+          "error": null,
+          "exists": false,
+          "path": null
+        }
+      },
+      "root_authorization_intake_bound": false,
+      "scheduler_host_io_reservation_bound": false,
+      "status": "blocked_missing_fresh_root_scheduler_receipts",
+      "worker_launch_authorized": false
+    },
+    "sidecar_matrix": {
+      "T2": false,
+      "credit": 0,
+      "expected_case_count": 32,
+      "formal": false,
+      "formal_acceptance_receipt_count": 0,
+      "matrix_ready": false,
+      "missing_case_count": 32,
+      "status": "blocked_fail_closed"
+    },
+    "terminal_evidence": {
+      "blocking_reasons": [
+        "fresh_terminal_evidence_missing_at_planned_output_namespace",
+        "terminal_evidence_intake_is_not_an_execution_authorization",
+        "current_dev07_material_diagnostic_is_right_censored_or_unresolved",
+        "current_dev07_material_diagnostic_unknown_fraction_is_1.0",
+        "current_dev07_material_diagnostic_common_reliable_path_coverage_is_0.0",
+        "historical_material_diagnostic_is_not_a_fresh_attempt_and_must_not_be_reused",
+        "collection_manifest_archives_v1_vs_proposal_archives_v2_path_drift",
+        "reader_smoke_manifest_sha_is_stale_against_current_collection",
+        "reader_trusted_formal_gate_is_closed",
+        "fresh_root_resource_runtime_authorization_is_absent",
+        "known_material_diagnostic_event_window_is_incomplete",
+        "missing_fresh_terminal_evidence",
+        "collection_case_archives_v1_path_does_not_match_archives_v2_target",
+        "reader_smoke_manifest_sha_does_not_match_current_collection",
+        "historical_diagnostic_material_config_drifts_from_fresh_proposal"
+      ],
+      "credit": 0,
+      "event_window_complete": false,
+      "sidecar_exists": false,
+      "sidecar_path": "campaigns/core-v1/material/proposals/f4-tallwall120-production-dev-07/coarse-baseline24-s2-r001-source-6ae8ca70/product/tallwall120_material.json",
+      "sidecar_present": false,
+      "sidecar_status": "missing",
+      "status": "blocked_fail_closed"
+    }
+  },
+  "execution_boundary": {
+    "completion_mutations": 0,
+    "denominator_mutations": 0,
+    "fresh_namespace_created": false,
+    "gate_mutations": 0,
+    "gpu_started": false,
+    "history_rewritten": false,
+    "ledger_mutations": 0,
+    "new_f4_paths_only": true,
+    "new_paths": [
+      "scripts/f4_tallwall120_material_coarse_t2_rerun3_gap_audit_v1.py",
+      "tests/test_f4_tallwall120_material_coarse_t2_rerun3_gap_audit_v1.py",
+      "reports/F4-TALLWALL120-MATERIAL-COARSE-T2-RERUN3-GAP-2026-09-29.json",
+      "reports/F4-TALLWALL120-MATERIAL-COARSE-T2-RERUN3-GAP-2026-09-29.zh-CN.md"
+    ],
+    "plan_mutations": 0,
+    "queue_started": false,
+    "queue_submitted": false,
+    "read_only_audit": true,
+    "receipt_files_created": false,
+    "registry_mutations": 0,
+    "scheduler_spec_created": false,
+    "solver_started": false,
+    "update_411_mutations": 0,
+    "worker_started": false
+  },
+  "finding": {
+    "all_candidate_paths_rejected": true,
+    "candidate_paths_reviewed": [
+      "promote_host_io_projection_to_launch_authority",
+      "promote_historical_or_right_censored_terminal_diagnostic",
+      "accept_sidecar_self_asserted_T1_T2_or_credit",
+      "create_scheduler_spec_without_fresh_root_and_scheduler_receipts"
+    ],
+    "code_mutation": false,
+    "decision": "no_real_fail_closed_admission_vulnerability_found",
+    "real_fail_closed_admission_vulnerability_found": false,
+    "reason": "Every inspected positive surface remains non-authorizing: missing root/scheduler authority, missing terminal evidence, missing case sidecar, source/reader drift, and an incomplete 32-case sidecar matrix all remain explicit blockers. A patch that would create or submit a spec would have to invent authority or alter a formal gate/denominator, so it is not a valid minimum repair.",
+    "repair_applied": false
+  },
+  "input_bindings": {
+    "anchor": {
+      "bytes": 13984,
+      "content_read": true,
+      "credit": 0,
+      "kind": "report",
+      "path": "reports/F4-TALLWALL120-MATERIAL-COARSE-T2-READINESS-SECURITY-AUDIT-2026-09-29-RERUN2.json",
+      "schema": "core.material.f4.tallwall120.coarse_t2.readiness_security_audit.v1",
+      "sha256": "8fc4b2af464ddfa4aa6d1448ba4957bda428627414c8b9654f914a2e3e91a429",
+      "status": "blocked_fail_closed",
+      "symlink": false
+    },
+    "archive_reader": {
+      "bytes": 11071,
+      "content_read": true,
+      "credit": null,
+      "kind": "report",
+      "path": "reports/F4-TALLWALL120-MATERIAL-ARCHIVE-READER-RECONCILIATION-V1-2026-09-29.json",
+      "schema": "core.material.f4.tallwall120.archive_reader_reconciliation.v1",
+      "sha256": "fa42d070c2f0829d9bd92548da035c322d1ebda5240c031eb8a64d5c3c318f44",
+      "status": "blocked_fail_closed",
+      "symlink": false
+    },
+    "case_sidecar": {
+      "bytes": 15484,
+      "content_read": true,
+      "credit": 0,
+      "kind": "report",
+      "path": "reports/F4-TALLWALL120-MATERIAL-CASE-SIDECAR-INTAKE-V1-2026-09-28.json",
+      "schema": "core.material.f4.tallwall120.case_sidecar_intake.v1",
+      "sha256": "3f0acf64bae783ae9f0c5ab9968cd6b7758a1f79e6add5809d82387744cf90b4",
+      "status": "blocked_fail_closed",
+      "symlink": false
+    },
+    "external_receipt": {
+      "bytes": 15351,
+      "content_read": true,
+      "credit": 0,
+      "kind": "report",
+      "path": "reports/F4-TALLWALL120-MATERIAL-EXTERNAL-RECEIPT-INTAKE-V1-2026-09-29-RERUN1.json",
+      "schema": "core.material.f4.tallwall120.external_receipt_intake.v1",
+      "sha256": "a7608d0612bb2294101aeb8169c78049c24659f320d98b0d7628f4c366611d4c",
+      "status": "blocked_missing_external_receipts",
+      "symlink": false
+    },
+    "external_receipt_contract": {
+      "bytes": 79697,
+      "content_read": true,
+      "kind": "source",
+      "path": "scripts/f4_tallwall120_material_external_receipt_intake_v1.py",
+      "sha256": "d23968e96d33fc39c92863f82e494dda70e8e4903b0169ad6c89e4c754b1ebeb",
+      "symlink": false
+    },
+    "fresh_root_scheduler": {
+      "bytes": 10155,
+      "content_read": true,
+      "credit": 0,
+      "kind": "report",
+      "path": "reports/F4-TALLWALL120-MATERIAL-FRESH-ROOT-SCHEDULER-RECEIPT-CONTRACT-V1-2026-09-29-RERUN1.json",
+      "schema": "core.material.f4.tallwall120.fresh_root_scheduler_receipt_contract.v1",
+      "sha256": "a88a1b6e241317b845756945cb863b177ab3b732ed7fdab8e5c9248879ee1806",
+      "status": "blocked_missing_fresh_root_scheduler_receipts",
+      "symlink": false
+    },
+    "fresh_root_scheduler_contract": {
+      "bytes": 52124,
+      "content_read": true,
+      "kind": "source",
+      "path": "scripts/f4_tallwall120_material_fresh_root_scheduler_receipt_contract_v1.py",
+      "sha256": "f66e7d3c974fe87dbdbd2790488b9d4359a79f5bcf67a6e324ef6ffa78a6746e",
+      "symlink": false
+    },
+    "host_io": {
+      "bytes": 16779,
+      "content_read": true,
+      "credit": 0,
+      "kind": "report",
+      "path": "reports/F4-TALLWALL120-COARSE-HOST-IO-ADMISSION-PROJECTION-2026-09-28.json",
+      "schema": "core.material.f4.tallwall120.coarse.host_io_admission_projection.v1",
+      "sha256": "a2b73d19ada0b0387c89782e1770d4902fa7188116f43e682035fd43a9ec9760",
+      "status": "diagnostic_admission_blocked",
+      "symlink": false
+    },
+    "host_io_contract": {
+      "bytes": 47289,
+      "content_read": true,
+      "kind": "source",
+      "path": "scripts/f4_tallwall120_coarse_host_io_admission_v1.py",
+      "sha256": "4390e78de22c7dc765bb68e88edef2bd40a58cf0490ba9605672ba651aedff11",
+      "symlink": false
+    },
+    "material_sidecar_contract": {
+      "bytes": 46220,
+      "content_read": true,
+      "kind": "source",
+      "path": "scripts/f4_tallwall120_material_case_sidecar_intake_v1.py",
+      "sha256": "f59870f339adaec84163bb3b625cfd86dd9753c0391635fdcc35826440330ae6",
+      "symlink": false
+    },
+    "readiness_projection": {
+      "bytes": 13536,
+      "content_read": true,
+      "credit": 0,
+      "kind": "report",
+      "path": "reports/F4-TALLWALL120-MATERIAL-READINESS-PROJECTION-V1-2026-09-28.json",
+      "schema": "core.material.f4.tallwall120.material_readiness_projection.v1",
+      "sha256": "f4bbf0786031ef88536d79f0921ed403083d06c31fbe7439b886aeae545d0138",
+      "status": "blocked_fail_closed",
+      "symlink": false
+    },
+    "root_scheduler": {
+      "bytes": 39084,
+      "content_read": true,
+      "credit": 0,
+      "kind": "report",
+      "path": "reports/F4-TALLWALL120-MATERIAL-ROOT-SCHEDULER-INTAKE-V1-2026-09-29-RERUN1.json",
+      "schema": "core.material.f4.tallwall120.root_scheduler_intake.v1",
+      "sha256": "faf568d43b568c49640a2b95804d29b13e87c7e7799ab6e9533767fe89c0416e",
+      "status": "blocked_missing_fresh_root_scheduler_receipts",
+      "symlink": false
+    },
+    "root_scheduler_contract": {
+      "bytes": 89482,
+      "content_read": true,
+      "kind": "source",
+      "path": "scripts/f4_tallwall120_material_root_scheduler_intake_v1.py",
+      "sha256": "b03a210274ac5b6f74b0f33841a2c42bd78cc53432040511c665577ffe559333",
+      "symlink": false
+    },
+    "sidecar_matrix": {
+      "bytes": 104350,
+      "content_read": true,
+      "credit": 0,
+      "kind": "report",
+      "path": "reports/F4-TALLWALL120-MATERIAL-SIDECAR-MATRIX-CONTRACT-V1-2026-09-28.json",
+      "schema": "core.material.f4.tallwall120.sidecar_matrix_contract.v1",
+      "sha256": "cfac3968a19f9b08a469a8a4d9df9f516de7d116bb09ad512598acf248b7456d",
+      "status": "blocked_fail_closed",
+      "symlink": false
+    },
+    "sidecar_matrix_contract": {
+      "bytes": 52509,
+      "content_read": true,
+      "kind": "source",
+      "path": "scripts/f4_tallwall120_material_sidecar_matrix_contract_v1.py",
+      "sha256": "384b0115badd3e1c053ee8c3a8de49ad05f11701127cb96fbc672d53240b7dfe",
+      "symlink": false
+    },
+    "source_drift": {
+      "bytes": 19751,
+      "content_read": true,
+      "credit": null,
+      "kind": "report",
+      "path": "reports/F4-TALLWALL120-MATERIAL-SOURCE-DRIFT-RECONCILIATION-V1-2026-09-28.json",
+      "schema": "core.material.f4.tallwall120.source_drift_reconciliation.v1",
+      "sha256": "26bf784e0c1ee04427b2255d8e6d0a1b804208d9c03390ddb29cebe579554e05",
+      "status": "blocked_fail_closed",
+      "symlink": false
+    },
+    "t2_readiness": {
+      "bytes": 13693,
+      "content_read": true,
+      "credit": 0,
+      "kind": "report",
+      "path": "reports/F4-TALLWALL120-T2-READINESS-AUDIT-2026-09-28.json",
+      "schema": "core.material.f4.tallwall120.t2_readiness_audit.v1",
+      "sha256": "b7b2063546d9fca7f53b9d68056abcd0f909818c19579a3557ed686f164c7a4e",
+      "status": "blocked_fail_closed",
+      "symlink": false
+    },
+    "terminal_evidence": {
+      "bytes": 16444,
+      "content_read": true,
+      "credit": 0,
+      "kind": "report",
+      "path": "reports/F4-TALLWALL120-MATERIAL-TERMINAL-EVIDENCE-INTAKE-V1-2026-09-28.json",
+      "schema": "core.material.f4.tallwall120.terminal_evidence_intake.v1",
+      "sha256": "3f4842b417a7200f3d6d46b621693cdd89bbc3f104b348854c540f898ad524ff",
+      "status": "blocked_fail_closed",
+      "symlink": false
+    },
+    "terminal_evidence_contract": {
+      "bytes": 44060,
+      "content_read": true,
+      "kind": "source",
+      "path": "scripts/f4_tallwall120_material_terminal_evidence_intake_v1.py",
+      "sha256": "782beb5c9378e077de156a11372f315117b65d35cc1da8959604900cee26a780",
+      "symlink": false
+    }
+  },
+  "observed_at_utc": "2026-09-29T00:00:00Z",
+  "qualification": {
+    "T1": false,
+    "T2": false,
+    "T2_macro": false,
+    "credit": 0,
+    "formal": false,
+    "qualification": false,
+    "readiness_status": "blocked_fail_closed"
+  },
+  "receipt_created": false,
+  "schema": "core.material.f4.tallwall120.coarse_t2.rerun3_gap_audit.v1",
+  "scope": {
+    "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+    "direction": "material_coarse_T2",
+    "excluded_families": [
+      "F3",
+      "A8",
+      "F8"
+    ],
+    "family": "F4",
+    "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+    "source_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+    "source_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae"
+  },
+  "spec_boundary": {
+    "reason": [
+      "root authorization is absent",
+      "scheduler-owned host-I/O reservation is absent",
+      "fresh terminal evidence is absent",
+      "material sidecar is absent",
+      "sidecar matrix is 0/32 and formal acceptance receipts are 0",
+      "source collection/reader drift is unresolved"
+    ],
+    "scheduler_spec_created": false,
+    "submit_allowed": false
+  }
+}
