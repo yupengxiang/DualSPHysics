@@ -1,0 +1,58 @@
+{
+  "schema": "core.f3.graph_residual.hidden16.seed29.authority_projection_gap.contract.v1",
+  "campaign_id": "f3-graph_residual-hidden16-seed29-authority-projection-gap-v1",
+  "status": "blocked_projection_gap",
+  "scope": {
+    "family": "F3",
+    "model_kind": "graph_residual",
+    "hidden": 16,
+    "seed": 29,
+    "split": "test",
+    "updates": 500,
+    "transitions": 835,
+    "frames": 836,
+    "mode": "diagnostic_only"
+  },
+  "adapter": {
+    "script": "scripts/f3_graph_residual_hidden16_seed29_authority_projection_gap_v1.py",
+    "source_admission": "scripts/f3_graph_residual_hidden16_seed29_diagnostic_admission_v1.py",
+    "source_runner": "scripts/f3_graph_residual_hidden16_seed29_diagnostic_runner_v2.py",
+    "projectable_field": "authority",
+    "projection_is_in_memory_only": true,
+    "external_authority_required": true,
+    "signature_algorithm": "ed25519",
+    "bindings_required": [
+      "signed_external_authority",
+      "nonce",
+      "namespace_inode",
+      "plan_sha256",
+      "source_descriptors",
+      "resource_snapshot",
+      "gpu_identity",
+      "independent_consume_path"
+    ],
+    "caller_claim_can_substitute": false,
+    "durable_receipt_write": false,
+    "historical_receipt_rewrite": false,
+    "runner_consumable": false,
+    "formal": false,
+    "credit": 0
+  },
+  "execution_policy": {
+    "popen": false,
+    "solver": false,
+    "worker": false,
+    "gpu": false,
+    "queue": false,
+    "production_large_file_read": false,
+    "registry_ledger_denominator_gate_completion_mutation": false
+  },
+  "next_required_external_evidence": [
+    "producer-issued current-schema residual seed29 admission receipt",
+    "deployment-owned Ed25519 public key",
+    "scheduler-issued one-shot authority document",
+    "matching nonce/namespace/plan/source/resource/GPU bindings",
+    "independent scheduler consume claim"
+  ],
+  "report": "reports/F3-GRAPH-RESIDUAL-HIDDEN16-SEED29-AUTHORITY-PROJECTION-GAP-2026-09-29.json"
+}
