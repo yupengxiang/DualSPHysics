@@ -1,0 +1,357 @@
+{
+  "authorization": {
+    "T2_credit": 0,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "diagnostic_only": true,
+    "formal": false,
+    "formal_eligible": false,
+    "launch_admitted": false,
+    "qualification": false,
+    "qualification_credit": 0,
+    "worker_launch_authorized": false
+  },
+  "base_intake": {
+    "blockers": [
+      "root_receipt:future fresh root admission receipt is missing: campaigns/core-v1/material/evidence/f3-material-coarse-root-scheduler-intake-v1/fresh-root-receipt.json",
+      "scheduler_receipt:future scheduler-owned host-I/O reservation is missing: campaigns/core-v1/material/evidence/f3-material-coarse-root-scheduler-intake-v1/scheduler-host-io-reservation.json",
+      "root_receipt:root_receipt.missing_or_not_object",
+      "scheduler_receipt:scheduler_receipt.missing_or_not_object",
+      "root_scheduler_pair_cross_binding_invalid",
+      "fresh_attempt_namespace_missing_or_cross_receipt_drift",
+      "scheduler_owned_host_io_reservation_missing_or_mismatched"
+    ],
+    "path": "reports/F3-MATERIAL-COARSE-ROOT-SCHEDULER-INTAKE-V1-2026-09-29-RERUN3.json",
+    "status": "blocked_missing_fresh_root_scheduler_receipts",
+    "validation_checks": {
+      "current_hashes_valid": true,
+      "fresh_attempt_namespace_valid": false,
+      "future_root_receipt_present": false,
+      "future_root_receipt_valid": false,
+      "future_scheduler_receipt_present": false,
+      "future_scheduler_receipt_valid": false,
+      "host_io_admission_contract_valid": true,
+      "intake_contract_valid": false,
+      "job_spec_contract_valid": true,
+      "normalized_argv_cwd_valid": true,
+      "proposal_contract_valid": true,
+      "proposal_host_io_binding_valid": true,
+      "receipt_pair_cross_binding_valid": false,
+      "runtime_spec_contract_valid": true,
+      "scheduler_owned_host_io_reservation_valid": false,
+      "source_hash_only_boundary_valid": true
+    }
+  },
+  "candidate": {
+    "family": "F3",
+    "preferred_first_candidate": "CORE-F3-MATERIAL-COARSE-s2",
+    "s2_job_id": "core-f3-material-coarse-s2",
+    "s4_job_id": "core-f3-material-coarse-s4",
+    "source_role": "coarse"
+  },
+  "created_at": "2026-09-29",
+  "execution_controls": {
+    "bounded_metadata_only": true,
+    "completion_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "gpu_started": false,
+    "ledger_mutations": 0,
+    "plan_mutations": 0,
+    "queue_started": false,
+    "registry_mutations": 0,
+    "solver_started": false,
+    "source_hdf5_hash_recomputed": false,
+    "source_hdf5_opened": false,
+    "source_hdf5_read": false,
+    "worker_started": false
+  },
+  "fresh_one_shot_namespace": {
+    "historical_reuse_forbidden": true,
+    "present": false,
+    "proposal_namespace": {
+      "attempt_id_policy": "new scheduler-generated identity; never reuse a historical attempt directory",
+      "attempt_root": "campaigns/core-v1/runtime/attempts/core-f3-material-coarse-s2",
+      "created": false,
+      "historical_attempt_reuse_forbidden": true,
+      "namespace_template": "campaigns/core-v1/runtime/attempts/core-f3-material-coarse-s2/<fresh-attempt-id>",
+      "proposal_created_path": null,
+      "same_attempt_resume_only": true
+    },
+    "receipt_namespace": {},
+    "receipt_namespace_sha256": null,
+    "required": true,
+    "single_use_required": true,
+    "valid": false
+  },
+  "host_io_reservation": {
+    "admission_contract_valid": true,
+    "required": true,
+    "reservation": {},
+    "resource_request": {
+      "cpu_cores": 2,
+      "gpu_peak_mib": 0,
+      "io_weight": 0.1,
+      "ram_mib": 4096
+    },
+    "scheduler_owned_io_verified": false,
+    "scheduler_receipt_path": "campaigns/core-v1/material/evidence/f3-material-coarse-root-scheduler-intake-v1/scheduler-host-io-reservation.json",
+    "scheduler_receipt_present": false,
+    "scheduler_reservation_valid": false
+  },
+  "input_bindings": {
+    "core_material": {
+      "bytes": 116805,
+      "exists": true,
+      "mode": "bounded_small_file",
+      "path": "scripts/core_material.py",
+      "role": "current scripts/core_material.py",
+      "sha256": "9e294e64c431c725717caf86eb001dc3a3505a312e279386796b6a472b5ee94e"
+    },
+    "core_runtime": {
+      "bytes": 80948,
+      "exists": true,
+      "mode": "bounded_small_file",
+      "path": "scripts/core_runtime.py",
+      "role": "current scripts/core_runtime.py",
+      "sha256": "a4c6e03a13cb1ff80c0da7f7f9bd442e5e2de4d64e23551bf92a0220c6afa8c4"
+    },
+    "host_io_admission": {
+      "bytes": 14843,
+      "exists": true,
+      "mode": "bounded_strict_json",
+      "path": "reports/F3-MATERIAL-COARSE-HOST-IO-ADMISSION-2026-09-29-RERUN1.json",
+      "role": "committed F3 coarse host-I/O admission",
+      "sha256": "3a65ca1f22410302be9bb2332faa0a5eb2ac08030070bedaccadba21d00351c3"
+    },
+    "root_scheduler_intake": {
+      "bytes": 9910,
+      "exists": true,
+      "path": "reports/F3-MATERIAL-COARSE-ROOT-SCHEDULER-INTAKE-V1-2026-09-29-RERUN3.json",
+      "sha256": "2b3f25749dff86449a3a1195a024441e57c90b0c6cc5c6e0a174ae7d80fea6dd"
+    },
+    "s2_job_spec": {
+      "bytes": 1616,
+      "exists": true,
+      "mode": "bounded_strict_json",
+      "path": "campaigns/core-v1/material/jobs/core-f3-material-coarse-s2.json",
+      "role": "current F3 coarse s2 job specification",
+      "sha256": "1f1080e497feab414863e3e02dd31dbec91c0d09e4ef9ac855e0cdbbda070628"
+    },
+    "s4_job_spec": {
+      "bytes": 1616,
+      "exists": true,
+      "mode": "bounded_strict_json",
+      "path": "campaigns/core-v1/material/jobs/core-f3-material-coarse-s4.json",
+      "role": "current F3 coarse s4 job specification",
+      "sha256": "89a376b36c3d8c31c8b050b6bbd5a3aa6014d1877c7d7d918ed7cb4eeb889c1b"
+    },
+    "scheduler_host_io_reservation": {
+      "bytes": null,
+      "error": "missing_file",
+      "exists": false,
+      "mode": "bounded_strict_json",
+      "path": "campaigns/core-v1/material/evidence/f3-material-coarse-root-scheduler-intake-v1/scheduler-host-io-reservation.json",
+      "role": "future scheduler-owned host-I/O reservation",
+      "sha256": null
+    },
+    "source_h5": {
+      "bytes": 692839604,
+      "exists": true,
+      "hash_recomputed": false,
+      "mode": "lstat_metadata_only",
+      "opened_as_hdf5": false,
+      "path": "campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+      "read": false,
+      "regular_file": true,
+      "role": "read-only coarse native source; prior hash claim only",
+      "sha256": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575",
+      "symlink": false
+    }
+  },
+  "next_safe_action": "Obtain a real fresh root admission receipt and a scheduler-owned host-I/O reservation, cross-bind both to the current source SHA, s2 argv/cwd, and a new one-shot attempt namespace, then rerun the existing root/scheduler intake before any worker launch.",
+  "record_id": "f3-material-coarse-s2-s4-readiness-v1",
+  "scheduler_entry_contract": {
+    "bytes": 80948,
+    "checks": {
+      "bounded_parse": true,
+      "current_hash_bound": true,
+      "prepare_consumes_one_shot": true,
+      "scheduler_owned_entry_surface": true,
+      "worker_revalidates_runtime_identity": true
+    },
+    "entrypoints": {
+      "choose_resources": true,
+      "consume_scheduler_reservation": true,
+      "launch": true,
+      "prepare_launch": true,
+      "scheduler_binding": true,
+      "validate_scheduler_binding": true
+    },
+    "markers": {
+      "RESERVATION_CONSUME_SCHEMA": true,
+      "SCHEDULER_BINDING_SCHEMA": true,
+      "_host_boot_id": true,
+      "_host_hostname": true,
+      "_reservation_id": true,
+      "check_runtime_identity=True": true,
+      "consume_scheduler_reservation": true
+    },
+    "metadata_sha256": "a4c6e03a13cb1ff80c0da7f7f9bd442e5e2de4d64e23551bf92a0220c6afa8c4",
+    "path": "scripts/core_runtime.py",
+    "read_bounded_source": true,
+    "sha256": "a4c6e03a13cb1ff80c0da7f7f9bd442e5e2de4d64e23551bf92a0220c6afa8c4"
+  },
+  "schema": "core.material.f3.coarse.s2_s4.readiness.v1",
+  "spec_projection": {
+    "checks": {
+      "normalized_s2_argv_cwd_valid": true,
+      "normalized_s4_argv_cwd_valid": true,
+      "s2_s4_coarse_lineage_valid": true,
+      "s2_spec_contract_valid": true,
+      "s4_spec_contract_valid": true,
+      "shared_cwd_valid": true,
+      "shared_source_binding_valid": true
+    },
+    "s2": {
+      "bytes": 1616,
+      "job_id": "core-f3-material-coarse-s2",
+      "logical_id": "CORE-F3-MATERIAL-COARSE-s2",
+      "normalized_launch": {
+        "argv": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "-m",
+          "scripts.core_material",
+          "--source",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+          "--output",
+          "{attempt_dir}/material.h5",
+          "--seeds",
+          "512",
+          "--substeps",
+          "2",
+          "--neighbour-variant",
+          "baseline24"
+        ],
+        "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+        "full_native_window": true,
+        "output": "{attempt_dir}/material.h5",
+        "resume_argv_same_attempt": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "-m",
+          "scripts.core_material",
+          "--source",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+          "--output",
+          "{attempt_dir}/material.h5",
+          "--seeds",
+          "512",
+          "--substeps",
+          "2",
+          "--neighbour-variant",
+          "baseline24",
+          "--resume"
+        ],
+        "stop_after": null,
+        "substeps": 2
+      },
+      "path": "campaigns/core-v1/material/jobs/core-f3-material-coarse-s2.json",
+      "sha256": "1f1080e497feab414863e3e02dd31dbec91c0d09e4ef9ac855e0cdbbda070628",
+      "source": {
+        "hash_recomputed": false,
+        "opened_as_hdf5": false,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+        "read": false,
+        "sha256": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575"
+      }
+    },
+    "s4": {
+      "bytes": 1616,
+      "job_id": "core-f3-material-coarse-s4",
+      "logical_id": "CORE-F3-MATERIAL-COARSE-s4",
+      "normalized_launch": {
+        "argv": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "-m",
+          "scripts.core_material",
+          "--source",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+          "--output",
+          "{attempt_dir}/material.h5",
+          "--seeds",
+          "512",
+          "--substeps",
+          "4",
+          "--neighbour-variant",
+          "baseline24"
+        ],
+        "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+        "full_native_window": true,
+        "output": "{attempt_dir}/material.h5",
+        "resume_argv_same_attempt": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+          "-m",
+          "scripts.core_material",
+          "--source",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+          "--output",
+          "{attempt_dir}/material.h5",
+          "--seeds",
+          "512",
+          "--substeps",
+          "4",
+          "--neighbour-variant",
+          "baseline24",
+          "--resume"
+        ],
+        "stop_after": null,
+        "substeps": 4
+      },
+      "path": "campaigns/core-v1/material/jobs/core-f3-material-coarse-s4.json",
+      "sha256": "89a376b36c3d8c31c8b050b6bbd5a3aa6014d1877c7d7d918ed7cb4eeb889c1b",
+      "source": {
+        "hash_recomputed": false,
+        "opened_as_hdf5": false,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+        "read": false,
+        "sha256": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575"
+      }
+    },
+    "shared_resource_request": {
+      "cpu_cores": 2,
+      "gpu_peak_mib": 0,
+      "io_weight": 0.1,
+      "ram_mib": 4096
+    },
+    "shared_source_sha256": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575"
+  },
+  "status": "blocked_fail_closed",
+  "validation": {
+    "base_intake_errors": [],
+    "blockers": [
+      "base_intake:root_receipt:future fresh root admission receipt is missing: campaigns/core-v1/material/evidence/f3-material-coarse-root-scheduler-intake-v1/fresh-root-receipt.json",
+      "base_intake:scheduler_receipt:future scheduler-owned host-I/O reservation is missing: campaigns/core-v1/material/evidence/f3-material-coarse-root-scheduler-intake-v1/scheduler-host-io-reservation.json",
+      "base_intake:root_receipt:root_receipt.missing_or_not_object",
+      "base_intake:scheduler_receipt:scheduler_receipt.missing_or_not_object",
+      "base_intake:root_scheduler_pair_cross_binding_invalid",
+      "base_intake:fresh_attempt_namespace_missing_or_cross_receipt_drift",
+      "base_intake:scheduler_owned_host_io_reservation_missing_or_mismatched",
+      "fresh_one_shot_namespace_missing_or_unverified",
+      "scheduler_owned_host_io_reservation_missing_or_unverified",
+      "base_root_scheduler_intake_not_bound"
+    ],
+    "checks": {
+      "base_root_scheduler_intake_valid": false,
+      "current_source_sha_bound": true,
+      "fresh_one_shot_namespace_verified": false,
+      "normalized_argv_cwd_bound": true,
+      "readiness_contract_valid": false,
+      "s2_s4_spec_contract_valid": true,
+      "scheduler_entry_contract_valid": true,
+      "scheduler_host_io_reservation_verified": false
+    },
+    "s2_spec_error": null,
+    "s4_spec_error": null
+  }
+}
