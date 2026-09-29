@@ -267,6 +267,32 @@ def test_duplicate_json_and_symlink_receipts_fail_closed(tmp_path: Path) -> None
     assert linked["authorization"]["launch_allowed"] is False
 
 
+def test_nonempty_fresh_namespace_is_rejected(tmp_path: Path) -> None:
+    namespace = tmp_path / "fresh-namespace"
+    namespace.mkdir()
+    (namespace / "unexpected-entry").write_text("occupied\n", encoding="utf-8")
+    identity, error = contract._lstat_identity(namespace, label="test fresh namespace", require_kind={"directory"})
+    assert error is None and identity is not None
+
+    empty, inspection_error = contract._directory_is_empty(
+        namespace,
+        identity,
+        label="test fresh namespace",
+    )
+
+    assert empty is False
+    assert inspection_error is None
+
+
+def test_report_contract_derivation_cannot_be_promoted() -> None:
+    report = contract.build_report(ROOT)
+    report["status"] = contract.STATUS_BOUND
+    report["validation"]["blockers"] = []
+    report["validation"]["checks"]["contract_valid"] = True
+
+    assert "report.validation.checks.contract_derivation" in contract.validate_report(report)
+
+
 def test_report_writer_is_non_overwriting_and_checked_in_report_matches() -> None:
     report = contract.build_report(ROOT)
     assert contract.validate_report(report) == []

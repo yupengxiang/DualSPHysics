@@ -21,6 +21,7 @@ import argparse
 import base64
 import binascii
 from copy import deepcopy
+import errno
 import hashlib
 import json
 import math
@@ -38,6 +39,7 @@ if str(LAB_ROOT) not in sys.path:
     sys.path.insert(0, str(LAB_ROOT))
 
 from scripts import f4_tallwall120_material_fresh_root_scheduler_receipt_contract_v1 as prior_contract  # noqa: E402
+from scripts import f4_tallwall120_material_root_scheduler_intake_v1 as root_intake  # noqa: E402
 from scripts.core_strict_json import strict_json_object  # noqa: E402
 
 
@@ -102,6 +104,8 @@ ISO_UTC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\Z")
 O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
 O_NONBLOCK = getattr(os, "O_NONBLOCK", 0)
 O_CLOEXEC = getattr(os, "O_CLOEXEC", 0)
+O_DIRECTORY = getattr(os, "O_DIRECTORY", 0)
+O_PATH = getattr(os, "O_PATH", 0)
 
 PATH_IDENTITY_FIELDS = {
     "path",
@@ -302,6 +306,39 @@ SIDE_EFFECT_FIELDS = {
     "plan_mutations",
 }
 
+CHECK_NAMES = (
+    "anchor_contract_valid",
+    "source_claim_bound",
+    "source_metadata_valid",
+    "current_code_hashes_valid",
+    "manifest_sha_valid",
+    "argv_sha_bound",
+    "cwd_bound",
+    "attempt_namespace_template_bound",
+    "root_receipt_present",
+    "scheduler_receipt_present",
+    "root_receipt_external_path",
+    "scheduler_receipt_external_path",
+    "root_receipt_contract_valid",
+    "scheduler_receipt_contract_valid",
+    "root_producer_authenticated",
+    "scheduler_producer_authenticated",
+    "root_replay_guard_valid",
+    "scheduler_replay_guard_valid",
+    "root_namespace_owner_inode_bound",
+    "scheduler_reservation_owner_inode_bound",
+    "host_resource_snapshot_valid",
+    "resource_capacity_sufficient",
+    "pair_id_equal",
+    "attempt_id_equal",
+    "nonce_equal",
+    "binding_sha_equal",
+    "pair_commitment_equal",
+    "counterparty_cross_bound",
+    "pair_commitment_recomputed",
+    "external_intake_valid",
+)
+
 
 def _canonical(value: Any) -> bytes:
     return json.dumps(
@@ -352,6 +389,42 @@ def _assert_no_symlink_components(path: Path, label: str) -> None:
             raise ValueError(f"{label} path contains a symlink")
 
 
+def _open_directory_chain(path: Path, label: str) -> int:
+    """Open every directory component without following a pathname alias."""
+
+    if not O_NOFOLLOW or not O_DIRECTORY or not O_CLOEXEC:
+        raise ValueError(f"{label} safe directory open is unavailable")
+    absolute = _absolute(path)
+    flags = os.O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC
+    descriptor: int | None = None
+    try:
+        descriptor = os.open(Path(absolute.anchor or "/"), flags)
+        for component in absolute.parts[1:]:
+            next_descriptor = os.open(component, flags, dir_fd=descriptor)
+            os.close(descriptor)
+            descriptor = next_descriptor
+        return descriptor
+    except BaseException:
+        if descriptor is not None:
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+        raise
+
+
+def _stat_signature(info: os.stat_result) -> tuple[int, ...]:
+    return (
+        int(info.st_dev),
+        int(info.st_ino),
+        int(info.st_mode),
+        int(info.st_nlink),
+        int(info.st_size),
+        int(info.st_mtime_ns),
+        int(info.st_ctime_ns),
+    )
+
+
 def _owner_name(uid: int) -> str:
     try:
         return pwd.getpwuid(uid).pw_name
@@ -391,15 +464,29 @@ def _lstat_identity(
     label: str,
     kinds: set[str] | None = None,
 ) -> tuple[dict[str, Any] | None, str | None]:
+    parent_descriptor: int | None = None
+    descriptor: int | None = None
     try:
         _assert_no_symlink_components(path, label)
-        info = os.lstat(path)
+        if not O_PATH or not O_NOFOLLOW or not O_CLOEXEC or not O_DIRECTORY:
+            return None, "safe_open_unavailable"
+        parent_descriptor = _open_directory_chain(path.parent, f"{label} parent")
+        descriptor = os.open(path.name, O_PATH | O_NOFOLLOW | O_CLOEXEC, dir_fd=parent_descriptor)
+        info = os.fstat(descriptor)
+        named = os.stat(path.name, dir_fd=parent_descriptor, follow_symlinks=False)
+        if _stat_signature(info) != _stat_signature(named):
+            return None, "changed"
     except FileNotFoundError:
         return None, "missing"
     except ValueError:
         return None, "symlink_path"
     except OSError as error:
-        return None, type(error).__name__
+        return None, "symlink_path" if error.errno == errno.ELOOP else type(error).__name__
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+        if parent_descriptor is not None:
+            os.close(parent_descriptor)
     value = _identity(path, info)
     if value["kind"] == "symlink":
         return value, "symlink"
@@ -414,50 +501,96 @@ def _stable_bytes(
     label: str,
     limit: int,
 ) -> tuple[bytes | None, dict[str, Any] | None, str | None]:
-    if not O_NOFOLLOW or not O_NONBLOCK:
+    if not O_NOFOLLOW or not O_NONBLOCK or not O_CLOEXEC or not O_DIRECTORY:
         return None, None, "safe_open_unavailable"
+    parent_descriptor: int | None = None
+    descriptor: int | None = None
     try:
         _assert_no_symlink_components(path, label)
+        parent_descriptor = _open_directory_chain(path.parent, f"{label} parent")
         descriptor = os.open(
-            os.fspath(path), O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC | os.O_RDONLY
+            path.name,
+            O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC | os.O_RDONLY,
+            dir_fd=parent_descriptor,
         )
     except FileNotFoundError:
         return None, None, "missing"
     except ValueError:
         return None, None, "symlink_path"
     except OSError as error:
-        return None, None, type(error).__name__
+        return None, None, "symlink_path" if error.errno == errno.ELOOP else type(error).__name__
     try:
         before = os.fstat(descriptor)
         if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
             return None, None, "not_single_link_regular_file"
         if before.st_size > limit:
             return None, None, "oversize"
-        raw = os.read(descriptor, limit + 1)
+        blocks: list[bytes] = []
+        total = 0
+        while True:
+            block = os.read(descriptor, min(1024 * 1024, limit + 1 - total))
+            if not block:
+                break
+            blocks.append(block)
+            total += len(block)
+            if total > limit:
+                return None, None, "oversize"
         after = os.fstat(descriptor)
+        named = os.stat(path.name, dir_fd=parent_descriptor, follow_symlinks=False)
+    except FileNotFoundError:
+        return None, None, "changed_during_read"
+    except OSError as error:
+        return None, None, type(error).__name__
     finally:
-        os.close(descriptor)
-    before_sig = (
-        before.st_dev,
-        before.st_ino,
-        before.st_mode,
-        before.st_nlink,
-        before.st_size,
-        before.st_mtime_ns,
-        before.st_ctime_ns,
-    )
-    after_sig = (
-        after.st_dev,
-        after.st_ino,
-        after.st_mode,
-        after.st_nlink,
-        after.st_size,
-        after.st_mtime_ns,
-        after.st_ctime_ns,
-    )
-    if len(raw) > limit or len(raw) != before.st_size or before_sig != after_sig:
+        if descriptor is not None:
+            os.close(descriptor)
+        if parent_descriptor is not None:
+            os.close(parent_descriptor)
+    try:
+        raw = b"".join(blocks)
+        if total != before.st_size or _stat_signature(before) != _stat_signature(after) or _stat_signature(after) != _stat_signature(named):
+            return None, None, "changed_during_read"
+        _assert_no_symlink_components(path, label)
+    except FileNotFoundError:
+        return None, None, "changed_during_read"
+    except ValueError:
+        return None, None, "symlink_path"
+    except OSError:
         return None, None, "changed_during_read"
     return raw, _identity(path, after), None
+
+
+def _directory_entry_count(
+    path: Path,
+    expected: Mapping[str, Any],
+    *,
+    label: str,
+) -> tuple[int | None, str | None]:
+    """Count entries through a held directory descriptor and bind its identity."""
+
+    descriptor: int | None = None
+    try:
+        _assert_no_symlink_components(path, label)
+        descriptor = _open_directory_chain(path, label)
+        before = os.fstat(descriptor)
+        named = os.stat(path, follow_symlinks=False)
+        if _stat_signature(before) != _stat_signature(named) or dict(expected) != _identity(path, before):
+            return None, "changed"
+        count = len(os.listdir(descriptor))
+        after = os.fstat(descriptor)
+        if _stat_signature(before) != _stat_signature(after) or dict(expected) != _identity(path, after):
+            return None, "changed"
+        _assert_no_symlink_components(path, label)
+        return count, None
+    except FileNotFoundError:
+        return None, "missing"
+    except ValueError:
+        return None, "symlink_path"
+    except OSError as error:
+        return None, "symlink_path" if error.errno == errno.ELOOP else type(error).__name__
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
 
 
 def _read_json(
@@ -645,14 +778,26 @@ def _load_anchor(
         label="F4 v1 root/scheduler anchor report",
     )
     errors: list[str] = []
+    if anchor_file != _resolve(root, ANCHOR_REPORT):
+        errors.append("anchor.path")
     if error:
         errors.append(f"anchor.read:{error}")
         return {}, ref, {}, {}, errors
-    binding, _, prior_errors = prior_contract._load_anchor(root, anchor_file)
+    binding, _, prior_errors = prior_contract._load_anchor(
+        root,
+        anchor_file,
+        loaded_anchor=payload,
+        loaded_reference=ref,
+    )
     errors.extend(prior_errors)
     current_code: dict[str, Any] = {}
     expected_code: dict[str, Any] = {}
-    for name, item in _mapping(payload.get("current_code_hashes")).items():
+    code_hashes = _mapping(payload.get("current_code_hashes"))
+    expected_code_names = set(root_intake.CURRENT_CODE)
+    if set(code_hashes) != expected_code_names:
+        errors.append("anchor.current_code_hashes.fields")
+    for name in sorted(expected_code_names):
+        item = code_hashes.get(name)
         if not isinstance(item, Mapping):
             errors.append(f"anchor.current_code_hashes.{name}.fields")
             continue
@@ -664,6 +809,10 @@ def _load_anchor(
             "sha256": expected_sha,
             "bytes": expected_bytes,
         }
+        expected_path = root_intake.CURRENT_CODE[name].as_posix()
+        if path_value != expected_path:
+            errors.append(f"anchor.current_code_hashes.{name}.path")
+            continue
         if not isinstance(path_value, str) or not _sha(expected_sha) or type(expected_bytes) is not int:
             errors.append(f"anchor.current_code_hashes.{name}.shape")
             continue
@@ -698,7 +847,10 @@ def _load_anchor(
     manifest_raw: bytes | None = None
     manifest_identity: dict[str, Any] | None = None
     manifest_error: str | None = None
-    if not isinstance(manifest_path_value, str) or not _sha(manifest_sha):
+    expected_manifest_path = root_intake.COLLECTION.as_posix()
+    if manifest_path_value != expected_manifest_path:
+        errors.append("anchor.manifest.path")
+    if not isinstance(manifest_path_value, str) or manifest_path_value != expected_manifest_path or not _sha(manifest_sha):
         errors.append("anchor.manifest.shape")
     else:
         manifest_raw, manifest_identity, manifest_error = _stable_bytes(
@@ -738,7 +890,12 @@ def _load_anchor(
         "mode": "lstat_metadata_only",
         "error": source_error,
     }
-    if source_error or source_identity is None or source_identity.get("size") != source.get("bytes"):
+    if (
+        source_error
+        or source_identity is None
+        or source_identity.get("size") != source.get("bytes")
+        or source_identity.get("nlink") != 1
+    ):
         errors.append("anchor.source.metadata_mismatch")
 
     details = {
@@ -901,10 +1058,12 @@ def _validate_replay_guard(
         expected_owner_uid=producer_uid if isinstance(producer_uid, int) else None,
         errors=errors,
     )
-    raw, _, read_error = _stable_bytes(path, label=f"{role} replay guard", limit=MAX_JSON_BYTES)
+    raw, stable_identity, read_error = _stable_bytes(path, label=f"{role} replay guard", limit=MAX_JSON_BYTES)
     if read_error or raw is None:
         errors.append(f"{role}.replay_guard.read.{read_error or 'failed'}")
         return False, {}
+    if actual is None or stable_identity is None or dict(stable_identity) != dict(actual):
+        errors.append(f"{role}.replay_guard.path_identity_changed_during_read")
     if not _sha(value.get("sha256")) or value.get("sha256") != hashlib.sha256(raw).hexdigest():
         errors.append(f"{role}.replay_guard.sha256")
     try:
@@ -972,10 +1131,12 @@ def _validate_snapshot(
         expected_owner_uid=None,
         errors=errors,
     )
-    raw, _, read_error = _stable_bytes(path, label="scheduler host/resource snapshot", limit=MAX_JSON_BYTES)
+    raw, stable_identity, read_error = _stable_bytes(path, label="scheduler host/resource snapshot", limit=MAX_JSON_BYTES)
     if read_error or raw is None:
         errors.append(f"scheduler.host_resource_snapshot.read.{read_error or 'failed'}")
         return False, {}, {}
+    if actual is None or stable_identity is None or dict(stable_identity) != dict(actual):
+        errors.append("scheduler.host_resource_snapshot.path_identity_changed_during_read")
     digest = hashlib.sha256(raw).hexdigest()
     if value.get("sha256") != digest or not _sha(value.get("sha256")):
         errors.append("scheduler.host_resource_snapshot.sha256")
@@ -1192,11 +1353,14 @@ def _validate_root(
             errors=errors,
         )
         if actual_namespace is not None:
-            try:
-                entry_count = sum(1 for _ in os.scandir(namespace_path))
-            except OSError:
-                entry_count = -1
-            if entry_count != 0:
+            entry_count, entry_error = _directory_entry_count(
+                namespace_path,
+                actual_namespace,
+                label="F4 fresh attempt namespace",
+            )
+            if entry_error:
+                errors.append(f"root.fresh_root.namespace_path.{entry_error}")
+            elif entry_count != 0:
                 errors.append("root.fresh_root.namespace_not_empty")
     core = _receipt_core(value)
     receipt_digest = canonical_digest(core)
@@ -1591,7 +1755,11 @@ def build_report(
         "resource_capacity_sufficient": bool(_mapping(scheduler_projection.get("capacity")).get("pass")),
         **pair_checks,
     }
-    checks["external_intake_valid"] = bool(status == STATUS_VERIFIED and not blockers)
+    checks["external_intake_valid"] = bool(
+        status == STATUS_VERIFIED
+        and not blockers
+        and all(checks[name] for name in CHECK_NAMES[:-1])
+    )
     authorization = _authorization()
     authorization["external_receipts_verified"] = checks["external_intake_valid"]
     report = {
@@ -1715,10 +1883,22 @@ def validate_report(value: Mapping[str, Any]) -> list[str]:
     if not isinstance(validation.get("blockers"), list) or not all(isinstance(item, str) for item in validation.get("blockers", [])):
         errors.append("report.validation.blockers")
     checks = _mapping(validation.get("checks"))
+    if set(checks) != set(CHECK_NAMES) or any(type(checks.get(name)) is not bool for name in CHECK_NAMES):
+        errors.append("report.validation.checks")
+    elif checks.get("external_intake_valid") is not bool(
+        value.get("status") == STATUS_VERIFIED
+        and not validation.get("blockers")
+        and all(checks[name] for name in CHECK_NAMES[:-1])
+    ):
+        errors.append("report.validation.checks.contract_derivation")
     if value.get("status") == STATUS_VERIFIED and checks.get("external_intake_valid") is not True:
         errors.append("report.verified_without_external_intake")
     if checks.get("external_intake_valid") is True and value.get("status") != STATUS_VERIFIED:
         errors.append("report.external_intake_status_mismatch")
+    if value.get("status") != STATUS_VERIFIED and not validation.get("blockers"):
+        errors.append("report.blocked_without_blocker")
+    if value.get("status") == STATUS_VERIFIED and validation.get("blockers"):
+        errors.append("report.verified_with_blockers")
     if authorization.get("launch_allowed") is not False or authorization.get("solver_authorized") is not False or authorization.get("gpu_authorized") is not False:
         errors.append("report.authorization.execution_closed")
     return errors

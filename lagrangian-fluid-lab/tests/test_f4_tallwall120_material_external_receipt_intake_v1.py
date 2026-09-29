@@ -168,6 +168,68 @@ def test_consumed_replay_guard_is_rejected(tmp_path: Path) -> None:
     assert "scheduler.replay_guard.document.binding" in errors
 
 
+def test_replay_guard_raw_bytes_must_match_bound_identity(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    nonce = "ef" * 32
+    pair_id = "f4-identity-pair"
+    guard_path = _write_json(
+        tmp_path / "replay-guard.json",
+        {
+            "schema": intake.REPLAY_GUARD_SCHEMA,
+            "record_id": intake.REPLAY_GUARD_ID,
+            "role": "scheduler",
+            "pair_id": pair_id,
+            "attempt_id": intake.ATTEMPT_ID,
+            "nonce": nonce,
+            "lease_id": "lease-identity",
+            "state": "unconsumed",
+            "single_use": True,
+            "consumed": False,
+            "producer_uid": os.getuid(),
+        },
+    )
+    other_path = _write_json(tmp_path / "other.json", {"different": True})
+    identity, error = intake._lstat_identity(guard_path, label="test replay guard", kinds={"file"})
+    other_identity, other_error = intake._lstat_identity(other_path, label="test other", kinds={"file"})
+    assert error is None and identity is not None
+    assert other_error is None and other_identity is not None
+    raw = guard_path.read_bytes()
+
+    def mismatched_stable_bytes(path: Path, *, label: str, limit: int) -> tuple[bytes, dict[str, object], None]:
+        return raw, other_identity, None
+
+    monkeypatch.setattr(intake, "_stable_bytes", mismatched_stable_bytes)
+    ref = {
+        "schema": intake.REPLAY_GUARD_SCHEMA,
+        "record_id": intake.REPLAY_GUARD_ID,
+        "path": str(guard_path.resolve()),
+        "sha256": hashlib.sha256(raw).hexdigest(),
+        "identity": identity,
+        "role": "scheduler",
+        "pair_id": pair_id,
+        "attempt_id": intake.ATTEMPT_ID,
+        "nonce": nonce,
+        "lease_id": "lease-identity",
+        "state": "unconsumed",
+        "single_use": True,
+        "consumed": False,
+        "producer_uid": os.getuid(),
+    }
+    errors: list[str] = []
+
+    valid, _ = intake._validate_replay_guard(
+        ref,
+        role="scheduler",
+        pair_id=pair_id,
+        attempt_id=intake.ATTEMPT_ID,
+        nonce=nonce,
+        producer_uid=os.getuid(),
+        errors=errors,
+    )
+
+    assert valid is False
+    assert "scheduler.replay_guard.path_identity_changed_during_read" in errors
+
+
 def test_synthetic_host_snapshot_is_rejected(tmp_path: Path) -> None:
     nonce = "cd" * 32
     snapshot_path = _write_json(
@@ -245,3 +307,13 @@ def test_report_writer_and_authorization_are_closed(tmp_path: Path) -> None:
     falsely_verified = json.loads(destination.read_text(encoding="utf-8"))
     falsely_verified["authorization"]["external_receipts_verified"] = True
     assert "report.authorization.external_receipts_verified" in intake.validate_report(falsely_verified)
+
+
+def test_report_contract_derivation_cannot_be_promoted() -> None:
+    report = intake.build_report(ROOT)
+    report["status"] = intake.STATUS_VERIFIED
+    report["validation"]["blockers"] = []
+    report["validation"]["checks"]["external_intake_valid"] = True
+    report["authorization"]["external_receipts_verified"] = True
+
+    assert "report.validation.checks.contract_derivation" in intake.validate_report(report)

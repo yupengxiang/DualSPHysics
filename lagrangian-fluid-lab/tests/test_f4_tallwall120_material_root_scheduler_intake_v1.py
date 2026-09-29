@@ -171,10 +171,10 @@ def test_source_hdf5_never_reaches_bounded_reader(monkeypatch: pytest.MonkeyPatc
     real_open = intake.os.open
     source_path = str((ROOT / intake.SOURCE_HDF5).absolute())
 
-    def guarded_open(path: object, flags: int, *args: object) -> int:
+    def guarded_open(path: object, flags: int, *args: object, **kwargs: object) -> int:
         if str(path) == source_path:
             raise AssertionError("trajectory HDF5 must not be opened")
-        return real_open(path, flags, *args)
+        return real_open(path, flags, *args, **kwargs)
 
     monkeypatch.setattr(intake.os, "open", guarded_open)
     value = intake.build_report(ROOT)
@@ -237,6 +237,51 @@ def test_duplicate_json_receipt_is_rejected(tmp_path: Path) -> None:
     assert value["status"] == intake.STATUS_INVALID
     assert value["input_bindings"]["fresh_root_receipt"]["error"] == "duplicate_json_key"
     assert value["authorization"]["formal"] is False
+
+
+def test_nonfinite_json_number_is_rejected(tmp_path: Path) -> None:
+    document = tmp_path / "nonfinite.json"
+    document.write_text('{"value": 1e999}\n', encoding="utf-8")
+
+    value, reference, error = intake._read_json_document(
+        tmp_path,
+        document,
+        role="test nonfinite JSON",
+    )
+
+    assert value is None
+    assert error is not None
+    assert reference["error"] == "non_strict_json"
+
+
+def test_source_parent_symlink_is_rejected_without_reading_hdf5(tmp_path: Path) -> None:
+    real_parent = tmp_path / "real"
+    real_parent.mkdir()
+    source = real_parent / "trajectory.h5"
+    source.write_bytes(b"metadata-only fixture")
+    alias_parent = tmp_path / "alias"
+    alias_parent.symlink_to(real_parent, target_is_directory=True)
+
+    result, error = intake._source_metadata(
+        tmp_path,
+        alias_parent / source.name,
+        declared_sha256=intake.SOURCE_SHA256,
+        declared_bytes=len(source.read_bytes()),
+    )
+
+    assert result["read"] is False
+    assert result["opened_as_hdf5"] is False
+    assert result["error"] == "symlink_path"
+    assert error is not None
+
+
+def test_report_contract_derivation_cannot_be_promoted() -> None:
+    report = intake.build_report(ROOT)
+    report["status"] = intake.STATUS_BOUND
+    report["validation"]["blockers"] = []
+    report["validation"]["checks"]["intake_contract_valid"] = True
+
+    assert "validation.checks.contract_derivation" in intake.validate_report(report)
 
 
 def test_report_writers_do_not_overwrite(tmp_path: Path) -> None:

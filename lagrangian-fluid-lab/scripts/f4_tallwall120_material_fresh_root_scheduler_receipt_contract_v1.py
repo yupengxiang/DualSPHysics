@@ -91,7 +91,10 @@ SHA256 = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
 NONCE = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
 SAFE_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}\Z", re.ASCII)
 O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
+O_NONBLOCK = getattr(os, "O_NONBLOCK", 0)
 O_CLOEXEC = getattr(os, "O_CLOEXEC", 0)
+O_DIRECTORY = getattr(os, "O_DIRECTORY", 0)
+O_PATH = getattr(os, "O_PATH", 0)
 
 ANCHOR_FIELDS = {
     "scope",
@@ -287,6 +290,42 @@ def _assert_no_symlink_components(path: Path, label: str) -> None:
             raise ValueError(f"{label} path contains a symlink")
 
 
+def _open_directory_chain(path: Path, label: str) -> int:
+    """Open every directory component without following a pathname alias."""
+
+    if not O_NOFOLLOW or not O_DIRECTORY or not O_CLOEXEC:
+        raise ValueError(f"{label} safe directory open is unavailable")
+    absolute = _absolute(path)
+    flags = os.O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC
+    descriptor: int | None = None
+    try:
+        descriptor = os.open(Path(absolute.anchor or "/"), flags)
+        for component in absolute.parts[1:]:
+            next_descriptor = os.open(component, flags, dir_fd=descriptor)
+            os.close(descriptor)
+            descriptor = next_descriptor
+        return descriptor
+    except BaseException:
+        if descriptor is not None:
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+        raise
+
+
+def _stat_signature(info: os.stat_result) -> tuple[int, ...]:
+    return (
+        int(info.st_dev),
+        int(info.st_ino),
+        int(info.st_mode),
+        int(info.st_nlink),
+        int(info.st_size),
+        int(info.st_mtime_ns),
+        int(info.st_ctime_ns),
+    )
+
+
 def _owner_name(uid: int) -> str:
     try:
         return pwd.getpwuid(uid).pw_name
@@ -318,19 +357,83 @@ def _identity_from_stat(path: Path, info: os.stat_result) -> dict[str, Any]:
 
 
 def _lstat_identity(path: Path, *, label: str, require_kind: set[str] | None = None) -> tuple[dict[str, Any] | None, str | None]:
+    parent_descriptor: int | None = None
+    descriptor: int | None = None
     try:
         _assert_no_symlink_components(path, label)
-        info = os.lstat(path)
+        if not O_PATH or not O_NOFOLLOW or not O_CLOEXEC:
+            return None, "safe_open_unavailable"
+        parent_descriptor = _open_directory_chain(path.parent, f"{label} parent")
+        descriptor = os.open(
+            path.name,
+            O_PATH | O_NOFOLLOW | O_CLOEXEC,
+            dir_fd=parent_descriptor,
+        )
+        info = os.fstat(descriptor)
+        named = os.stat(path.name, dir_fd=parent_descriptor, follow_symlinks=False)
+        if _stat_signature(info) != _stat_signature(named):
+            return None, "changed"
     except FileNotFoundError:
         return None, "missing"
+    except ValueError:
+        return None, "symlink_path"
     except OSError as error:
         return None, type(error).__name__
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+        if parent_descriptor is not None:
+            os.close(parent_descriptor)
     identity = _identity_from_stat(path, info)
     if stat.S_ISLNK(info.st_mode):
         return identity, "symlink"
     if require_kind is not None and identity["kind"] not in require_kind:
         return identity, "wrong_kind"
     return identity, None
+
+
+def _read_stable_json_bytes(path: Path, *, label: str) -> tuple[bytes, dict[str, Any]]:
+    """Read and identify one bounded JSON file through the same descriptor."""
+
+    if not O_NOFOLLOW or not O_NONBLOCK or not O_CLOEXEC or not O_DIRECTORY:
+        raise ValueError(f"{label} safe bounded read is unavailable")
+    parent_descriptor: int | None = None
+    descriptor: int | None = None
+    try:
+        _assert_no_symlink_components(path, label)
+        parent_descriptor = _open_directory_chain(path.parent, f"{label} parent")
+        descriptor = os.open(
+            path.name,
+            os.O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC,
+            dir_fd=parent_descriptor,
+        )
+        before = os.fstat(descriptor)
+        if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
+            raise ValueError(f"{label} is not a single-link regular file")
+        if before.st_size > MAX_JSON_BYTES:
+            raise ValueError(f"{label} exceeds the bounded input limit")
+        parts: list[bytes] = []
+        total = 0
+        while True:
+            block = os.read(descriptor, min(1024 * 1024, MAX_JSON_BYTES + 1 - total))
+            if not block:
+                break
+            parts.append(block)
+            total += len(block)
+            if total > MAX_JSON_BYTES:
+                raise ValueError(f"{label} exceeds the bounded input limit")
+        after = os.fstat(descriptor)
+        named = os.stat(path.name, dir_fd=parent_descriptor, follow_symlinks=False)
+        if total != before.st_size or _stat_signature(before) != _stat_signature(after) or _stat_signature(after) != _stat_signature(named):
+            raise ValueError(f"{label} changed while being read")
+        _assert_no_symlink_components(path, label)
+        raw = b"".join(parts)
+        return raw, _identity_from_stat(path, after)
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+        if parent_descriptor is not None:
+            os.close(parent_descriptor)
 
 
 def _read_json(path: Path, *, root: Path, role: str) -> tuple[dict[str, Any], dict[str, Any], str | None]:
@@ -347,10 +450,8 @@ def _read_json(path: Path, *, root: Path, role: str) -> tuple[dict[str, Any], di
         "error": None,
     }
     try:
-        _assert_no_symlink_components(path, role)
-        raw = read_bounded_raw_json(path, max_bytes=MAX_JSON_BYTES, label=role)
+        raw, identity = _read_stable_json_bytes(path, label=role)
         payload = strict_json_object(raw, label=role, max_bytes=MAX_JSON_BYTES)
-        info = os.lstat(path)
     except FileNotFoundError:
         reference["error"] = "missing"
         return {}, reference, "missing"
@@ -363,10 +464,41 @@ def _read_json(path: Path, *, root: Path, role: str) -> tuple[dict[str, Any], di
             "content_read": True,
             "bytes": len(raw),
             "sha256": hashlib.sha256(raw).hexdigest(),
-            "identity": _identity_from_stat(path, info),
+            "identity": identity,
         }
     )
     return payload, reference, None
+
+
+def _directory_is_empty(path: Path, expected: Mapping[str, Any], *, label: str) -> tuple[bool, str | None]:
+    """Check freshness through a held directory descriptor, not a pathname."""
+
+    descriptor: int | None = None
+    try:
+        _assert_no_symlink_components(path, label)
+        descriptor = _open_directory_chain(path, label)
+        before = os.fstat(descriptor)
+        if _stat_signature(before) != _stat_signature(
+            os.stat(path, follow_symlinks=False)
+        ):
+            return False, "changed"
+        if dict(expected) != _identity_from_stat(path, before):
+            return False, "changed"
+        empty = not os.listdir(descriptor)
+        after = os.fstat(descriptor)
+        if _stat_signature(before) != _stat_signature(after):
+            return False, "changed"
+        if dict(expected) != _identity_from_stat(path, after):
+            return False, "changed"
+        _assert_no_symlink_components(path, label)
+        return empty, None
+    except FileNotFoundError:
+        return False, "missing"
+    except (OSError, ValueError):
+        return False, "inspection_failed"
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
 
 
 def _mapping(value: Any) -> Mapping[str, Any]:
@@ -537,8 +669,19 @@ def _anchor_binding(anchor: Mapping[str, Any]) -> tuple[dict[str, Any], list[str
     }, errors
 
 
-def _load_anchor(root: Path, path: Path) -> tuple[dict[str, Any], dict[str, Any], list[str]]:
-    anchor, reference, error = _read_json(path, root=root, role="F4 v1 root/scheduler anchor report")
+def _load_anchor(
+    root: Path,
+    path: Path,
+    *,
+    loaded_anchor: Mapping[str, Any] | None = None,
+    loaded_reference: Mapping[str, Any] | None = None,
+) -> tuple[dict[str, Any], dict[str, Any], list[str]]:
+    if loaded_anchor is None:
+        anchor, reference, error = _read_json(path, root=root, role="F4 v1 root/scheduler anchor report")
+    else:
+        anchor = dict(loaded_anchor)
+        reference = dict(loaded_reference or {})
+        error = reference.get("error")
     errors: list[str] = []
     if error:
         errors.append(f"anchor.read:{error}")
@@ -720,6 +863,16 @@ def _validate_root(
             owner_name="root",
             errors=errors,
         )
+        if namespace_identity is not None and namespace_error is None:
+            empty, empty_error = _directory_is_empty(
+                namespace_path,
+                namespace_identity,
+                label="fresh root namespace",
+            )
+            if empty_error:
+                errors.append(f"root.fresh_root.namespace_path.{empty_error}")
+            elif not empty:
+                errors.append("root.fresh_root.namespace_not_empty")
     capability_ok = _capability_closed(value.get("capability"), role="fresh_root", root_observed=True, scheduler_observed=False, errors=errors)
     _validate_counterparty(
         value.get("counterparty"),
@@ -1104,10 +1257,37 @@ def validate_report(value: Mapping[str, Any]) -> list[str]:
     if not isinstance(validation.get("blockers"), list) or not all(isinstance(item, str) for item in validation.get("blockers", [])):
         errors.append("report.validation.blockers")
     checks = _mapping(validation.get("checks"))
+    expected_checks = {
+        "anchor_contract_valid",
+        "root_receipt_present",
+        "scheduler_receipt_present",
+        "root_receipt_bounded_strict_json",
+        "scheduler_receipt_bounded_strict_json",
+        "root_receipt_contract_valid",
+        "scheduler_receipt_contract_valid",
+        "root_owner_inode_path_bound",
+        "scheduler_owner_inode_path_bound",
+        "argv_hash_bound",
+        "pair_id_equal",
+        "nonce_equal",
+        "binding_sha_equal",
+        "pair_commitment_equal",
+        "pair_commitment_recomputed",
+        "capability_cross_binding",
+        "contract_valid",
+    }
+    if set(checks) != expected_checks or any(type(checks.get(name)) is not bool for name in expected_checks):
+        errors.append("report.validation.checks")
+    else:
+        derived_contract = all(checks[name] for name in expected_checks - {"contract_valid"})
+        if checks["contract_valid"] is not derived_contract:
+            errors.append("report.validation.checks.contract_derivation")
     if checks.get("contract_valid") is not True and value.get("status") == STATUS_BOUND:
         errors.append("report.bound_status_without_contract")
     if checks.get("contract_valid") is True and value.get("status") != STATUS_BOUND:
         errors.append("report.contract_status_mismatch")
+    if value.get("status") != STATUS_BOUND and not validation.get("blockers"):
+        errors.append("report.blocked_without_blocker")
     for key in ("diagnostic_only", "non_authorizing", "readiness_pass", "T1", "T2"):
         if value.get(key) is not ({"diagnostic_only": True, "non_authorizing": True, "readiness_pass": False, "T1": False, "T2": False}[key]):
             errors.append(f"report.closed.{key}")

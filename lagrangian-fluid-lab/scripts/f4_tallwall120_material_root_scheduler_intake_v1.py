@@ -129,7 +129,10 @@ SHA256 = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
 SAFE_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}\Z", re.ASCII)
 NONCE = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
 O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
+O_NONBLOCK = getattr(os, "O_NONBLOCK", 0)
 O_CLOEXEC = getattr(os, "O_CLOEXEC", 0)
+O_DIRECTORY = getattr(os, "O_DIRECTORY", 0)
+O_PATH = getattr(os, "O_PATH", 0)
 
 HASH_KEYS = (
     "source_sha256",
@@ -285,6 +288,20 @@ def _reject_constant(token: str) -> Any:
     raise IntakeError(f"non-standard JSON constant is not permitted: {token}", code="non_strict_json")
 
 
+def _parse_finite_float(token: str) -> float:
+    value = float(token)
+    if not math.isfinite(value):
+        raise IntakeError(f"non-finite JSON number is not permitted: {token}", code="non_strict_json")
+    return value
+
+
+def _parse_bounded_int(token: str) -> int:
+    digits = token.lstrip("-")
+    if len(digits) > 128:
+        raise IntakeError("JSON integer exceeds the bounded precision limit", code="non_strict_json")
+    return int(token)
+
+
 def _absolute(path: Path) -> Path:
     return Path(os.path.abspath(os.fspath(path)))
 
@@ -328,15 +345,59 @@ def _assert_no_symlink_components(path: Path, label: str) -> None:
             raise IntakeError(f"{label} path contains a symlink", code="symlink_path")
 
 
+def _open_directory_chain(path: Path, label: str) -> int:
+    """Open every directory component without following a pathname alias."""
+
+    if not O_NOFOLLOW or not O_DIRECTORY or not O_CLOEXEC:
+        raise IntakeError(f"{label} safe directory open is unavailable", code="safe_open_unavailable")
+    absolute = _absolute(path)
+    flags = os.O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC
+    descriptor: int | None = None
+    try:
+        descriptor = os.open(Path(absolute.anchor or "/"), flags)
+        for component in absolute.parts[1:]:
+            next_descriptor = os.open(component, flags, dir_fd=descriptor)
+            os.close(descriptor)
+            descriptor = next_descriptor
+        return descriptor
+    except BaseException:
+        if descriptor is not None:
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+        raise
+
+
+def _stat_signature(info: os.stat_result) -> tuple[int, ...]:
+    return (
+        int(info.st_dev),
+        int(info.st_ino),
+        int(info.st_mode),
+        int(info.st_nlink),
+        int(info.st_size),
+        int(info.st_mtime_ns),
+        int(info.st_ctime_ns),
+    )
+
+
 def _read_bounded(path: Path, *, label: str, limit: int) -> tuple[bytes, dict[str, Any]]:
     """Read/hash one stable bounded non-HDF5 regular file."""
 
     if path.suffix.lower() in HDF5_SUFFIXES:
         raise IntakeError(f"{label} is HDF5 and outside the JSON boundary", code="hdf5_forbidden")
+    if not O_NOFOLLOW or not O_NONBLOCK or not O_CLOEXEC or not O_DIRECTORY:
+        raise IntakeError(f"{label} safe bounded read is unavailable", code="safe_open_unavailable")
     _assert_no_symlink_components(path, label)
+    parent_descriptor: int | None = None
     descriptor: int | None = None
     try:
-        descriptor = os.open(os.fspath(path), os.O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+        parent_descriptor = _open_directory_chain(path.parent, f"{label} parent")
+        descriptor = os.open(
+            path.name,
+            os.O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC,
+            dir_fd=parent_descriptor,
+        )
     except FileNotFoundError as error:
         raise IntakeError(f"{label} is missing", code="missing_file") from error
     except OSError as error:
@@ -358,18 +419,23 @@ def _read_bounded(path: Path, *, label: str, limit: int) -> tuple[bytes, dict[st
                 raise IntakeError(f"{label} exceeds the bounded input limit", code="oversize")
             blocks.append(block)
         after = os.fstat(descriptor)
-        named = os.stat(path, follow_symlinks=False)
-        if _identity(before) != _identity(after) or _identity(after) != _identity(named) or total != before.st_size:
+        named = os.stat(path.name, dir_fd=parent_descriptor, follow_symlinks=False)
+        if _stat_signature(before) != _stat_signature(after) or _stat_signature(after) != _stat_signature(named) or total != before.st_size:
             raise IntakeError(f"{label} changed while being read", code="drift")
+        _assert_no_symlink_components(path, label)
         payload = b"".join(blocks)
         return payload, {"bytes": total, "sha256": hashlib.sha256(payload).hexdigest()}
     except IntakeError:
         raise
+    except FileNotFoundError as error:
+        raise IntakeError(f"{label} disappeared while being read", code="drift") from error
     except OSError as error:
         raise IntakeError(f"{label} could not be read safely", code="read_failed") from error
     finally:
         if descriptor is not None:
             os.close(descriptor)
+        if parent_descriptor is not None:
+            os.close(parent_descriptor)
 
 
 def _empty_ref(root: Path, path: Path, role: str, mode: str) -> dict[str, Any]:
@@ -397,11 +463,17 @@ def _read_json_document(root: Path, path: Path, *, role: str) -> tuple[dict[str,
     reference.pop("error", None)
     try:
         decoded = raw.decode("utf-8", errors="strict")
-        value = json.loads(decoded, object_pairs_hook=_strict_object, parse_constant=_reject_constant)
+        value = json.loads(
+            decoded,
+            object_pairs_hook=_strict_object,
+            parse_constant=_reject_constant,
+            parse_float=_parse_finite_float,
+            parse_int=_parse_bounded_int,
+        )
     except IntakeError as error:
         reference["error"] = error.code
         return None, reference, str(error)
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+    except (UnicodeDecodeError, json.JSONDecodeError, RecursionError) as error:
         reference["error"] = "invalid_json"
         return None, reference, f"{role} is not strict UTF-8 JSON: {error}"
     if not isinstance(value, dict):
@@ -441,14 +513,35 @@ def _source_metadata(root: Path, path: Path, *, declared_sha256: Any, declared_b
         "opened_as_hdf5": False,
         "read": False,
     }
+    parent_descriptor: int | None = None
+    descriptor: int | None = None
     try:
-        info = os.lstat(path)
+        _assert_no_symlink_components(path, "source HDF5")
+        if not O_PATH or not O_NOFOLLOW or not O_CLOEXEC or not O_DIRECTORY:
+            raise IntakeError("source HDF5 safe metadata inspection is unavailable", code="safe_open_unavailable")
+        parent_descriptor = _open_directory_chain(path.parent, "source HDF5 parent")
+        descriptor = os.open(path.name, O_PATH | O_NOFOLLOW | O_CLOEXEC, dir_fd=parent_descriptor)
+        before = os.fstat(descriptor)
+        named = os.stat(path.name, dir_fd=parent_descriptor, follow_symlinks=False)
+        after = os.fstat(descriptor)
+        if _stat_signature(before) != _stat_signature(named) or _stat_signature(before) != _stat_signature(after):
+            raise IntakeError("source HDF5 path changed during metadata inspection", code="metadata_drift")
+        _assert_no_symlink_components(path, "source HDF5")
+        info = after
     except FileNotFoundError:
         result["error"] = "missing_file"
         return result, "source HDF5 metadata is missing"
+    except IntakeError as error:
+        result["error"] = error.code
+        return result, f"source HDF5 metadata failed: {error}"
     except OSError as error:
         result["error"] = "metadata_failed"
         return result, f"source HDF5 metadata failed: {type(error).__name__}"
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+        if parent_descriptor is not None:
+            os.close(parent_descriptor)
     result.update(
         {
             "exists": True,
@@ -461,6 +554,9 @@ def _source_metadata(root: Path, path: Path, *, declared_sha256: Any, declared_b
     if not result["regular_file"] or result["symlink"]:
         result["error"] = "source_not_regular_file"
         return result, "source HDF5 is not a regular non-symlink file"
+    if info.st_nlink != 1:
+        result["error"] = "source_hardlink"
+        return result, "source HDF5 is not a single-link regular file"
     return result, None
 
 
@@ -1618,6 +1714,8 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
     checks = _mapping(validation.get("checks"))
     if set(checks) != set(CHECK_NAMES) or any(type(checks.get(name)) is not bool for name in CHECK_NAMES):
         errors.append("validation.checks")
+    elif checks.get("intake_contract_valid") is not all(checks[name] for name in CHECK_NAMES[:-1]):
+        errors.append("validation.checks.contract_derivation")
     for key in ("blockers", "input_errors", "root_receipt_errors", "scheduler_receipt_errors"):
         if not isinstance(validation.get(key), list) or any(not isinstance(item, str) for item in validation.get(key, [])):
             errors.append(f"validation.{key}")
