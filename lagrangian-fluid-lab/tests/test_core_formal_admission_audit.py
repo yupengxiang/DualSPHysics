@@ -481,6 +481,36 @@ def test_duplicate_physical_case_id_is_blocked_in_same_and_cross_manifest_rows(
     }
     assert across["duplicate_physical_case_ids"] == ["physical-shared"]
 
+    lineage_f3 = {
+        **same_manifest,
+        "dataset_id": "lineage-f3",
+        "cases": [{
+            **same_manifest["cases"][0],
+            "physical_case_id": "physical-f3-only",
+            "lineage_group_id": "lineage-shared",
+        }],
+    }
+    lineage_f4 = {
+        **cross_manifest,
+        "dataset_id": "lineage-f4",
+        "cases": [{
+            **cross_manifest["cases"][0],
+            "physical_case_id": "physical-f4-only",
+            "lineage_group_id": "lineage-shared",
+        }],
+    }
+    lineage_report = audit_admission(
+        [lineage_f3, lineage_f4],
+        data_root=tmp_path,
+    )
+    assert lineage_report["lineage_split_violations"] == ["lineage-shared"]
+    assert "MANIFEST_DUPLICATE_PHYSICAL_CASE_ID" not in {
+        item["code"] for item in lineage_report["blockers"]
+    }
+    assert "MANIFEST_LINEAGE_SPLIT_ISOLATION" in {
+        item["code"] for item in lineage_report["blockers"]
+    }
+
 
 def test_explanatory_none_claim_remains_in_the_production_denominator() -> None:
     assert _is_qualification({

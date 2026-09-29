@@ -1029,6 +1029,13 @@ def audit_admission(
             observed=sorted(set(duplicate_physical)),
             required="unique physical_case_id across the complete manifest set",
             scope="manifest"))
+    if lineage_split_violations:
+        blockers.append(_blocker(
+            "MANIFEST_LINEAGE_SPLIT_ISOLATION",
+            "the formal production denominator requires each lineage_group_id to stay within one family/split across all source manifests",
+            observed=sorted(set(lineage_split_violations)),
+            required="lineage_group_id must not cross family/split boundaries across the complete manifest set",
+            scope="manifest"))
     t1_family_count = sum(value is True for value in t1_families.values())
     if t1_family_count < REQUIRED_FAMILIES:
         blockers.append(_blocker(

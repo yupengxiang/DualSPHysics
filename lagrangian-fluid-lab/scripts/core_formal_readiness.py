@@ -233,6 +233,8 @@ def _admission_observation(payload: Mapping[str, Any], reference: Mapping[str, A
             "protocol": {},
             "capacity_evidence": {},
             "upstream_blockers": [],
+            "contract_valid": False,
+            "contract_errors": ["admission audit schema is missing or unsupported"],
         }
 
     summary = payload.get("family_summary")
@@ -266,6 +268,76 @@ def _admission_observation(payload: Mapping[str, Any], reference: Mapping[str, A
     protocol = protocol if isinstance(protocol, Mapping) else {}
     capacity_evidence = payload.get("capacity_evidence")
     capacity_evidence = dict(capacity_evidence) if isinstance(capacity_evidence, Mapping) else {}
+    contract_errors: list[str] = []
+    if payload.get("status") not in {"ready", "blocked"}:
+        contract_errors.append("admission audit status is missing or unsupported")
+    if not isinstance(payload.get("formal_admission"), bool):
+        contract_errors.append("admission formal_admission must be boolean")
+    if type(payload.get("formal_job_count")) is not int or payload.get("formal_job_count") != 0:
+        contract_errors.append("admission formal_job_count must be zero")
+    if (type(payload.get("required_formal_job_count")) is not int
+            or payload.get("required_formal_job_count") != REQUIRED_FORMAL_RUNS):
+        contract_errors.append("admission required_formal_job_count is not the fixed denominator")
+    blockers = payload.get("blockers")
+    if not isinstance(blockers, list):
+        contract_errors.append("admission blockers must be a list")
+    else:
+        blocker_codes: set[str] = set()
+        for index, blocker in enumerate(blockers):
+            if not isinstance(blocker, Mapping):
+                contract_errors.append(f"admission blocker {index} is not an object")
+                continue
+            code = blocker.get("code")
+            if not isinstance(code, str) or not code:
+                contract_errors.append(f"admission blocker {index} has no code")
+            elif code in blocker_codes:
+                contract_errors.append(f"admission blocker code is duplicated: {code}")
+            else:
+                blocker_codes.add(code)
+            if not isinstance(blocker.get("scope"), str) or not blocker.get("scope"):
+                contract_errors.append(f"admission blocker {index} has no scope")
+            if not isinstance(blocker.get("message"), str) or not blocker.get("message"):
+                contract_errors.append(f"admission blocker {index} has no message")
+        if payload.get("status") == "ready" and blockers:
+            contract_errors.append("ready admission contains blockers")
+        if payload.get("status") == "blocked" and not blockers:
+            contract_errors.append("blocked admission has no blockers")
+    if payload.get("status") == "ready" and payload.get("formal_admission") is not True:
+        contract_errors.append("ready admission is not formally admitted")
+    if payload.get("status") == "blocked" and payload.get("formal_admission") is not False:
+        contract_errors.append("blocked admission is marked formally admitted")
+    denominator = payload.get("production_denominator")
+    if (not isinstance(denominator, Mapping)
+            or denominator.get("failure_denominator_preserved") is not True):
+        contract_errors.append("admission production denominator is not failure-preserving")
+    source_closure = payload.get("source_closure")
+    if not isinstance(source_closure, Mapping):
+        contract_errors.append("admission source closure is missing")
+    elif (source_closure.get("fresh_admission_closure_complete") is not True
+          or source_closure.get("missing_files") != []):
+        contract_errors.append("admission source closure is incomplete")
+    constraints = payload.get("execution_constraints")
+    required_constraints = {
+        "read_only": True,
+        "formal_runs_started": 0,
+        "gpu_started": False,
+        "solver_started": False,
+        "submitted": False,
+        "central_registry_mutation": 0,
+        "central_ledger_mutation": 0,
+        "manifest_written": False,
+        "formal_specs_written": False,
+    }
+    if not isinstance(constraints, Mapping):
+        contract_errors.append("admission execution constraints are missing")
+    else:
+        for key, expected in required_constraints.items():
+            if constraints.get(key) != expected:
+                contract_errors.append(f"admission execution constraint {key} is not closed")
+    upstream_blockers = [
+        item.get("code") for item in blockers
+        if isinstance(item, Mapping) and item.get("code")
+    ] if isinstance(blockers, list) else []
     return {
         "artifact": dict(reference),
         "schema": schema,
@@ -290,10 +362,9 @@ def _admission_observation(payload: Mapping[str, Any], reference: Mapping[str, A
         # observation so the source-closure/root-admission layers can require
         # evidence rather than infer readiness from a missing blocker code.
         "capacity_evidence": capacity_evidence,
-        "upstream_blockers": [
-            item.get("code") for item in payload.get("blockers", ())
-            if isinstance(item, Mapping) and item.get("code")
-        ],
+        "upstream_blockers": upstream_blockers,
+        "contract_valid": not contract_errors,
+        "contract_errors": contract_errors,
     }
 
 
@@ -378,6 +449,9 @@ def build_readiness(*, data_root: str | Path, phase_plan: str | Path,
     if not admission["schema_valid"]:
         blocker("ADMISSION_SCHEMA", "formal admission audit schema is not accepted",
                 admission["schema"], ADMISSION_SCHEMA, scope="contract")
+    if not admission["contract_valid"]:
+        blocker("ADMISSION_CONTRACT", "formal admission audit contract is incomplete",
+                admission["contract_errors"], True, scope="contract")
     if admission["t1_family_count"] < REQUIRED_T1_FAMILIES:
         blocker("THIRD_T1_FAMILY", "formal admission needs three distinct T1 families",
                 admission["t1_family_count"], REQUIRED_T1_FAMILIES)
@@ -414,7 +488,10 @@ def build_readiness(*, data_root: str | Path, phase_plan: str | Path,
         "formal_run_denominator": len(observed_runs) >= REQUIRED_FORMAL_RUNS,
         "material_case_run_denominator": material_missing == 0,
         "completion_status": core_status.get("can_finalize") is True,
-        "upstream_admission": admission.get("formal_admission") is True,
+        "upstream_admission": (
+            admission.get("contract_valid") is True
+            and admission.get("formal_admission") is True
+        ),
     }
     return {
         "schema": SCHEMA,

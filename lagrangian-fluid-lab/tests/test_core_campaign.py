@@ -539,6 +539,53 @@ def test_material_formal_receipt_without_passed_root_review_is_not_qualified(tmp
                for issue in result["issues"])
 
 
+def test_status_only_material_root_review_is_not_qualified(tmp_path):
+    root_review_path = tmp_path / "root-review.json"
+    atomic_json(root_review_path, {"status": "passed"})
+    registry = {"scopes": [_qualified_scope_fixture(
+        tmp_path,
+        material=True,
+        formal_material_receipt={
+            "status": "accepted",
+            "T2_macro": True,
+            "root_review": {
+                "path": root_review_path.name,
+                "sha256": digest(root_review_path),
+            },
+        },
+    )]}
+
+    result = completion(registry, tmp_path)
+
+    assert not result["macro_t2_families"]
+    assert result["required_material_case_runs"] == 0
+    assert any("root review schema is missing or unsupported" in issue["reason"]
+               for issue in result["issues"])
+
+
+@pytest.mark.parametrize(
+    ("mutation", "reason"),
+    [
+        ("missing", "accepted case identity/split is incomplete"),
+        ("cross_split", "lineage group crosses family/split boundaries"),
+    ],
+)
+def test_completion_requires_bound_lineage_identity_and_split_isolation(
+    tmp_path, mutation, reason,
+):
+    scope = _qualified_scope_fixture(tmp_path)
+    if mutation == "missing":
+        scope["cases"][0].pop("lineage_group_id")
+    else:
+        scope["cases"][0]["lineage_group_id"] = scope["cases"][16]["lineage_group_id"]
+
+    result = completion({"scopes": [scope]}, tmp_path)
+
+    assert result["t1_families"] == []
+    assert result["required_t1_case_runs"] == 0
+    assert any(reason in issue["reason"] for issue in result["issues"])
+
+
 def _formal_training_receipt(tmp_path, run_id, *, include_evidence=True, checkpoint_path=None):
     checkpoint_path = checkpoint_path or (tmp_path / f"{run_id}.pt")
     checkpoint_path.write_bytes(b"temporary checkpoint fixture")

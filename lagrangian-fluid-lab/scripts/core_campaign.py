@@ -427,7 +427,14 @@ def _require_passed_root_review(reference, data_root, label):
     if not isinstance(reference, dict):
         raise ValueError(f"{label} root review is missing")
     receipt = load_evidence(reference, data_root)
-    if not isinstance(receipt, dict) or (
+    schema = receipt.get("schema") if isinstance(receipt, dict) else None
+    if (not isinstance(receipt, dict)
+            or not isinstance(schema, str)
+            or not schema.startswith("core.")
+            or "root_review" not in schema):
+        raise ValueError(f"{label} root review schema is missing or unsupported")
+    _reject_nonformal_or_nonroot(receipt, label + " root review")
+    if (
             receipt.get("status") not in ("pass", "passed", "approved", "accepted")
             and receipt.get("passed") is not True):
         raise ValueError(f"{label} root review is not passed")
@@ -608,6 +615,7 @@ def completion(registry, data_root):
     material_eval_ids = set()
     registered_case_owners = {}
     registered_physical_case_owners = {}
+    registered_lineage_owners = {}
     for scope in entries("scopes"):
         if not isinstance(scope, dict):
             issues.append({"scope_id": None, "reason": "scope entry is not an object"})
@@ -649,15 +657,28 @@ def completion(registry, data_root):
                     or len(ids) != len(accepted)
                     or len(physical_ids) != len(accepted)):
                 raise ValueError("fewer than 32 distinct accepted physical cases")
+            scope_lineage_owners = {}
             for c in accepted:
                 if (not isinstance(c.get("physical_case_id"), str)
                         or not c.get("physical_case_id")
                         or not isinstance(c.get("case_id"), str)
                         or not c.get("case_id")
+                        or not isinstance(c.get("lineage_group_id"), str)
+                        or not c.get("lineage_group_id")
                         or not isinstance(c.get("split"), str)):
                     raise ValueError("accepted case identity/split is incomplete")
                 case_id = c["case_id"]
                 physical_case_id = c["physical_case_id"]
+                lineage_group_id = c["lineage_group_id"]
+                lineage_owner = (family, c["split"])
+                previous_scope_lineage_owner = scope_lineage_owners.get(lineage_group_id)
+                if (previous_scope_lineage_owner is not None
+                        and previous_scope_lineage_owner != lineage_owner):
+                    raise ValueError(
+                        "lineage group crosses family/split boundaries: "
+                        f"{lineage_group_id}"
+                    )
+                scope_lineage_owners[lineage_group_id] = lineage_owner
                 previous_scope = registered_case_owners.get(case_id)
                 if previous_scope is not None:
                     raise ValueError(
@@ -667,6 +688,13 @@ def completion(registry, data_root):
                 if previous_physical_scope is not None:
                     raise ValueError(
                         f"physical case id is registered in multiple scopes: {physical_case_id}"
+                    )
+                previous_lineage_owner = registered_lineage_owners.get(lineage_group_id)
+                if (previous_lineage_owner is not None
+                        and previous_lineage_owner != lineage_owner):
+                    raise ValueError(
+                        "lineage group crosses family/split boundaries: "
+                        f"{lineage_group_id}"
                     )
                 audit = load_evidence(c["audit"], data_root)
                 _reject_nonformal_or_nonroot(audit, "case audit")
@@ -715,6 +743,8 @@ def completion(registry, data_root):
             for c in accepted:
                 registered_case_owners[c["case_id"]] = sid
                 registered_physical_case_owners[c["physical_case_id"]] = sid
+                registered_lineage_owners[c["lineage_group_id"]] = (
+                    family, c["split"])
             families.setdefault(family, set()).update(ids)
             eval_ids.update(evaluation)
             if scope.get("material_qualification"):

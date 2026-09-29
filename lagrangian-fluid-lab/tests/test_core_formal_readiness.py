@@ -182,6 +182,39 @@ def test_build_readiness_blocks_synthetic_admission_without_counting_gate_fields
     assert "ADMISSION_SCHEMA" in {item["code"] for item in report["blockers"]}
 
 
+def test_schema_valid_but_unbound_admission_cannot_satisfy_readiness(
+    tmp_path: Path,
+) -> None:
+    admission_path = tmp_path / "malformed-admission.json"
+    admission_path.write_text(json.dumps({
+        "schema": "core.formal_admission_audit.v1",
+        "record_id": "malformed-ready-admission",
+        "status": "ready",
+        "formal_admission": True,
+        "formal_job_count": 0,
+        "required_formal_job_count": 9,
+        "family_summary": {
+            "t1_families": {"F3": True, "F4": True, "F8": True},
+            "validation_counts": {"F3": 4, "F4": 4, "F8": 4},
+        },
+        "formal_protocol": {},
+        "blockers": [],
+    }), encoding="utf-8")
+
+    report = build_readiness(
+        data_root=ROOT,
+        phase_plan=PHASE_PLAN,
+        admission_audit=admission_path,
+        registry=REGISTRY,
+    )
+
+    assert report["status"] == "blocked"
+    assert report["admission_audit"]["schema_valid"] is True
+    assert report["admission_audit"]["contract_valid"] is False
+    assert "ADMISSION_CONTRACT" in {item["code"] for item in report["blockers"]}
+    assert report["checks"]["upstream_admission"] is False
+
+
 def test_cli_is_portable_and_does_not_mutate_registry(tmp_path: Path, monkeypatch) -> None:
     before = _sha256(REGISTRY)
     monkeypatch.chdir(tmp_path)
