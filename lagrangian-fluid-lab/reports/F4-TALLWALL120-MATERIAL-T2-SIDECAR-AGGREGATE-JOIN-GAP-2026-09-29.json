@@ -1,0 +1,139 @@
+{
+  "artifact_class": "gap_report",
+  "audit_basis": {
+    "bounded_json_only": true,
+    "collection_manifest_sha256": "808fe201c4df28f2be9b48a514f338689c38bcb96db0b0c0590946b79fb9ad09",
+    "existing_aggregate_contract": {
+      "path": "scripts/f4_tallwall120_material_sidecar_matrix_contract_v1.py",
+      "schema": "core.material.f4.tallwall120.sidecar_matrix_contract.v1",
+      "sha256": "384b0115badd3e1c053ee8c3a8de49ad05f11701127cb96fbc672d53240b7dfe"
+    },
+    "input_bindings": [
+      {
+        "path": "reports/F4-TALLWALL120-MATERIAL-SIDECAR-MATRIX-CONTRACT-V1-2026-09-28.json",
+        "role": "existing source-bound 32-case aggregate contract report",
+        "schema": "core.material.f4.tallwall120.sidecar_matrix_contract.v1",
+        "sha256": "cfac3968a19f9b08a469a8a4d9df9f516de7d116bb09ad512598acf248b7456d"
+      },
+      {
+        "path": "reports/F4-TALLWALL120-MATERIAL-READINESS-PROJECTION-V1-2026-09-28.json",
+        "role": "existing T2 readiness projection",
+        "schema": "core.material.f4.tallwall120.material_readiness_projection.v1",
+        "sha256": "f4bbf0786031ef88536d79f0921ed403083d06c31fbe7439b886aeae545d0138"
+      },
+      {
+        "path": "reports/F4-TALLWALL120-MATERIAL-COARSE-T2-RERUN3-GAP-2026-09-29.json",
+        "role": "existing read-only T2 gap audit",
+        "schema": "core.material.f4.tallwall120.coarse_t2.rerun3_gap_audit.v1",
+        "sha256": "c387f13fabe0048b48a1cf01dc794ee3550c6d5232348e29b67f383596db857d"
+      },
+      {
+        "path": "tests/test_f4_tallwall120_material_sidecar_matrix_contract_v1.py",
+        "role": "existing focused aggregate contract tests",
+        "sha256": "25060cbaf8f834e0c0bb34b8e3db5645cf773e045c753ff5363a3e4c2bc3dd2c"
+      }
+    ],
+    "production_hdf5_hashed": false,
+    "production_hdf5_opened": false,
+    "read_only_audit": true
+  },
+  "aggregate_join": {
+    "contract_present": true,
+    "contract_reimplemented": false,
+    "join_key": "case_id",
+    "source_binding": {
+      "per_case_source_path_and_sha_join_present": true,
+      "required_archive_variant": "archives-v2",
+      "current_collection_archive_variant_counts": {
+        "archives-v1": 32
+      },
+      "current_source_exact_case_count": 0,
+      "current_source_drift_case_count": 32,
+      "reader_manifest_sha_exact": false,
+      "receipt_path_exact": false
+    },
+    "sidecar_readiness": {
+      "expected_case_count": 32,
+      "denominator_complete": true,
+      "observed_sidecar_count": 0,
+      "complete_sidecar_count": 0,
+      "missing_case_count": 32,
+      "formal_acceptance_receipt_count": 0,
+      "matrix_ready": false
+    },
+    "status": "implemented_but_blocked"
+  },
+  "blocking_gaps": [
+    {
+      "id": "F4-T2-SIDECAR-JOIN-SOURCE-DRIFT",
+      "evidence": "the collection remains archives-v1 while the sidecar contract requires archives-v2, across all 32 cases",
+      "required_next_evidence": "authoritative archives-v2 collection and reader refresh with exact path and SHA bindings"
+    },
+    {
+      "id": "F4-T2-SIDECAR-JOIN-MISSING-MATRIX",
+      "evidence": "the existing aggregate reports 0 observed and 0 complete material sidecars out of 32",
+      "required_next_evidence": "one fresh source-bound terminal material sidecar for every fixed case, with complete event-window markers"
+    },
+    {
+      "id": "F4-T2-SIDECAR-JOIN-AUTHORITY",
+      "evidence": "fresh root/scheduler authority, scheduler-owned host-I/O reservation, and terminal evidence are absent",
+      "required_next_evidence": "producer-issued, cross-bound, one-use authority receipts followed by read-only sidecar intake"
+    }
+  ],
+  "finding": {
+    "genuine_missing_additive_aggregate_join": false,
+    "duplicate_contract_not_created": true,
+    "decision": "read_only_gap_report_only",
+    "reason": "The checked-in sidecar matrix contract already performs the required bounded source-bound aggregate join. Adding another matrix or external-receipt adapter would duplicate an existing contract and could not repair the missing authority, source refresh, or 32 sidecars.",
+    "repair_applied": false
+  },
+  "execution_boundary": {
+    "read_only_audit": true,
+    "fresh_namespace_created": false,
+    "scheduler_spec_created": false,
+    "queue_submitted": false,
+    "queue_started": false,
+    "worker_started": false,
+    "solver_started": false,
+    "gpu_started": false,
+    "production_hdf5_opened": false,
+    "production_hdf5_content_read": false,
+    "production_hdf5_hash_recomputed": false,
+    "registry_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "completion_mutations": 0,
+    "plan_mutations": 0,
+    "historical_receipts_modified": false
+  },
+  "observed_at_utc": "2026-09-29T00:00:00Z",
+  "policy": {
+    "subagent_model": "gpt-5.6-luna",
+    "reasoning_effort": "max",
+    "coarse_to_fine": true,
+    "fail_closed": true,
+    "parallel_worker_scope": "F4 Tallwall120 material T2 sidecar aggregate join audit"
+  },
+  "qualification": {
+    "readiness_status": "blocked_fail_closed",
+    "formal": false,
+    "T1": false,
+    "T2": false,
+    "T2_macro": false,
+    "qualification": false,
+    "credit": 0,
+    "qualification_credit": 0
+  },
+  "record_id": "f4-tallwall120-material-t2-sidecar-aggregate-join-gap-2026-09-29",
+  "schema": "core.material.f4.tallwall120.t2_sidecar_aggregate_join_gap.v1",
+  "scope": {
+    "case_id_pattern": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_00..DEV_31",
+    "family": "F4",
+    "required_case_count": 32,
+    "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1",
+    "source_hdf5": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+    "source_hdf5_content_boundary": "metadata-only; content excluded"
+  },
+  "status": "blocked_fail_closed"
+}
