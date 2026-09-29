@@ -423,12 +423,25 @@ def inspect_capacity_evidence(
         _record_failure(failures, "CAPACITY_CHECKPOINT_SEMANTICS", "receipt has no final checkpoint reference")
     milestone_refs = receipt_payload.get("milestone_checkpoints")
     by_update: dict[int, Mapping[str, Any]] = {}
+    milestone_updates = [
+        item.get("update")
+        for item in milestone_refs
+    ] if isinstance(milestone_refs, list) and all(
+        isinstance(item, Mapping) for item in milestone_refs
+    ) else []
+    milestone_shape_valid = (
+        isinstance(milestone_refs, list)
+        and len(milestone_refs) == len(MILESTONES)
+        and all(type(update) is int for update in milestone_updates)
+        and len(set(milestone_updates)) == len(MILESTONES)
+        and set(milestone_updates) == set(MILESTONES)
+    )
+    if not milestone_shape_valid:
+        _record_failure(failures, "CAPACITY_CHECKPOINT_SEMANTICS", "receipt must bind exactly the four 8k/16k/24k/32k milestone checkpoints")
     if isinstance(milestone_refs, list):
         for item in milestone_refs:
-            if isinstance(item, Mapping) and isinstance(item.get("update"), int):
-                by_update[int(item["update"])] = item
-    if set(by_update) != set(MILESTONES):
-        _record_failure(failures, "CAPACITY_CHECKPOINT_SEMANTICS", "receipt must bind exactly the four 8k/16k/24k/32k milestone checkpoints")
+            if isinstance(item, Mapping) and type(item.get("update")) is int:
+                by_update[item["update"]] = item
     for update in MILESTONES:
         if update in by_update:
             checkpoint_refs.append((update, by_update[update], f"milestone checkpoint {update}"))

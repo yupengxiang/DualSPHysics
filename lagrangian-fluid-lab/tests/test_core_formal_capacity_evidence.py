@@ -201,6 +201,20 @@ def test_checkpoint_hash_or_milestone_tamper_fails_closed(tmp_path: Path) -> Non
     assert final_path.is_file()
 
 
+def test_duplicate_milestone_checkpoint_rows_are_rejected(tmp_path: Path) -> None:
+    receipt, execution, manifest, closure, _ = _fixture(tmp_path)
+    broken = copy.deepcopy(receipt)
+    broken["milestone_checkpoints"].append(
+        copy.deepcopy(broken["milestone_checkpoints"][0])
+    )
+    report = inspect_capacity_evidence(
+        broken, execution=execution, manifest=manifest,
+        source_closure=closure, data_root=tmp_path, code_root=ROOT,
+    )
+    assert report["formal_capacity_evidence"] is False
+    assert "CAPACITY_CHECKPOINT_SEMANTICS" in report["blocker_codes"]
+
+
 def test_admission_consumes_only_a_hash_bound_capacity_record(tmp_path: Path) -> None:
     receipt, execution, manifest, closure, _ = _fixture(tmp_path)
     receipt_path = tmp_path / "training.json"
@@ -233,6 +247,19 @@ def test_admission_consumes_only_a_hash_bound_capacity_record(tmp_path: Path) ->
     assert audit["resource_profile"]["formal_capacity_evidence"] is True
     assert "RESOURCE_FRONTIER_UNPROVEN" not in {item["code"] for item in audit["blockers"]}
     assert audit["formal_job_count"] == 0
+
+    broken_adapter = copy.deepcopy(adapted)
+    broken_adapter["checkpoints"].append(
+        copy.deepcopy(broken_adapter["checkpoints"][0])
+    )
+    broken_audit = audit_admission(
+        [manifest], data_root=tmp_path, code_root=ROOT,
+        capacity_evidence=broken_adapter,
+    )
+    assert broken_audit["capacity_evidence"]["valid"] is False
+    assert "RESOURCE_CAPACITY_EVIDENCE_INVALID" in {
+        item["code"] for item in broken_audit["blockers"]
+    }
 
 
 def test_32000_synthetic_profile_stays_diagnostic(tmp_path: Path) -> None:

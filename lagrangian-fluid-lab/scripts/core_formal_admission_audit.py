@@ -501,6 +501,38 @@ def _capacity_evidence_observation(source: Path | Mapping[str, Any] | None, *, r
         "solver_started": False,
         "submitted": False,
     }
+    checkpoint_rows_are_objects = (
+        isinstance(checkpoints, list)
+        and all(isinstance(item, Mapping) for item in checkpoints)
+    )
+    checkpoint_roles = [item.get("role") for item in checkpoints] if checkpoint_rows_are_objects else []
+    final_rows = [
+        item for item in checkpoints
+        if checkpoint_rows_are_objects and item.get("role") == "final checkpoint"
+    ]
+    milestone_rows = [
+        item for item in checkpoints
+        if checkpoint_rows_are_objects and item.get("role") != "final checkpoint"
+    ]
+    expected_milestone_roles = {f"milestone checkpoint {update}" for update in (8000, 16000, 24000, 32000)}
+    milestone_updates = [item.get("update") for item in milestone_rows]
+    checkpoints_exact = (
+        checkpoint_rows_are_objects
+        and len(checkpoints) == 5
+        and all(isinstance(role, str) for role in checkpoint_roles)
+        and len(checkpoint_roles) == len(set(checkpoint_roles))
+        and set(checkpoint_roles) == {"final checkpoint", *expected_milestone_roles}
+        and len(final_rows) == 1
+        and final_rows[0].get("update") == FORMAL_UPDATES
+        and len(milestone_rows) == 4
+        and all(type(update) is int for update in milestone_updates)
+        and len(set(milestone_updates)) == 4
+        and set(milestone_updates) == {8000, 16000, 24000, 32000}
+        and all(
+            item.get("role") == f"milestone checkpoint {item.get('update')}"
+            for item in milestone_rows
+        )
+    )
     valid = bool(
         payload.get("schema") == "core.formal_capacity_evidence.v1"
         and payload.get("status") == "ready"
@@ -512,10 +544,7 @@ def _capacity_evidence_observation(source: Path | Mapping[str, Any] | None, *, r
         and payload.get("observed_update_frontier") == FORMAL_UPDATES
         and manifest.get("valid") is True
         and closure.get("valid") is True
-        and isinstance(checkpoints, list)
-        and {item.get("update") for item in checkpoints if isinstance(item, Mapping)} == {
-            8000, 16000, 24000, 32000
-        }
+        and checkpoints_exact
         and isinstance(receipt, Mapping) and isinstance(receipt.get("sha256"), str)
         and isinstance(execution, Mapping) and isinstance(execution.get("sha256"), str)
         and all(constraints.get(key) == value for key, value in required_constraints.items())
