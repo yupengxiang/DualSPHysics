@@ -261,6 +261,24 @@ def test_admission_consumes_only_a_hash_bound_capacity_record(tmp_path: Path) ->
         item["code"] for item in broken_audit["blockers"]
     }
 
+    forged_receipt_path = tmp_path / "forged-training.json"
+    forged_receipt_path.write_text("{}\n", encoding="utf-8")
+    forged_adapter = copy.deepcopy(adapted)
+    forged_adapter["receipt"] = {
+        "path": forged_receipt_path.name,
+        "sha256": hashlib.sha256(forged_receipt_path.read_bytes()).hexdigest(),
+        "bytes": forged_receipt_path.stat().st_size,
+    }
+    forged_audit = audit_admission(
+        [manifest], data_root=tmp_path, code_root=ROOT,
+        capacity_evidence=forged_adapter,
+    )
+    assert forged_audit["capacity_evidence"]["valid"] is False
+    assert forged_audit["capacity_evidence"]["revalidation"]["attempted"] is True
+    assert "RESOURCE_CAPACITY_EVIDENCE_INVALID" in {
+        item["code"] for item in forged_audit["blockers"]
+    }
+
 
 def test_32000_synthetic_profile_stays_diagnostic(tmp_path: Path) -> None:
     profile = tmp_path / "synthetic-profile.json"

@@ -454,6 +454,7 @@ def _source_closure(code_root: Path, preprofile_index: Path | None,
 
 
 def _capacity_evidence_observation(source: Path | Mapping[str, Any] | None, *, root: Path,
+                                   code_root: Path,
                                    manifest_hashes: set[str]) -> dict[str, Any]:
     """Bind the output of the real-capacity adapter without re-running it.
 
@@ -467,6 +468,7 @@ def _capacity_evidence_observation(source: Path | Mapping[str, Any] | None, *, r
         return {
             "bound": False, "valid": False, "formal_capacity_evidence": False,
             "formal_runs_counted": 0,
+            "revalidation": {"attempted": False, "valid": False},
         }
     try:
         path = _resolve(source, root=root) if isinstance(source, (str, Path)) else None
@@ -481,11 +483,13 @@ def _capacity_evidence_observation(source: Path | Mapping[str, Any] | None, *, r
         return {
             "bound": True, "valid": False, "formal_capacity_evidence": False,
             "formal_runs_counted": 0, "error": str(error),
+            "revalidation": {"attempted": False, "valid": False},
         }
     if not isinstance(payload, Mapping):
         return {
             "bound": True, "valid": False, "formal_capacity_evidence": False,
             "formal_runs_counted": 0, "error": "capacity evidence is not a JSON object",
+            "revalidation": {"attempted": False, "valid": False},
         }
     constraints = payload.get("execution_constraints", {})
     manifest = payload.get("manifest", {})
@@ -549,6 +553,60 @@ def _capacity_evidence_observation(source: Path | Mapping[str, Any] | None, *, r
         and isinstance(execution, Mapping) and isinstance(execution.get("sha256"), str)
         and all(constraints.get(key) == value for key, value in required_constraints.items())
     )
+    revalidation: dict[str, Any] = {"attempted": False, "valid": False}
+    bound_inputs = {
+        "receipt": receipt,
+        "execution": execution,
+        "manifest": manifest,
+        "source_closure": closure,
+    }
+    paths_are_bound = all(
+        isinstance(reference, Mapping)
+        and isinstance(reference.get("path"), str)
+        and reference.get("path")
+        and not str(reference["path"]).startswith("<")
+        for reference in bound_inputs.values()
+    )
+    if not paths_are_bound:
+        valid = False
+        revalidation["error"] = "capacity evidence must carry path-bound receipt, execution, manifest, and source closure inputs"
+    else:
+        try:
+            from scripts.core_formal_capacity_evidence import inspect_capacity_evidence
+
+            verified = inspect_capacity_evidence(
+                receipt["path"],
+                execution=execution["path"],
+                manifest=manifest["path"],
+                source_closure=closure["path"],
+                data_root=root,
+                code_root=code_root,
+            )
+            compared_fields = (
+                "receipt", "execution", "manifest", "source_closure",
+                "checkpoints", "observed_update_frontier", "formal_update_target",
+                "formal_training", "formal_job_count", "formal_runs_counted",
+                "diagnostic_runs_counted_as_formal", "execution_constraints",
+            )
+            matches_verified = all(
+                payload.get(field) == verified.get(field)
+                for field in compared_fields
+            )
+            revalidation = {
+                "attempted": True,
+                "valid": verified.get("valid") is True and matches_verified,
+                "blocker_codes": list(verified.get("blocker_codes", ())),
+                "matches_verified_summary": matches_verified,
+            }
+            if not revalidation["valid"]:
+                valid = False
+        except Exception as error:  # any verifier failure must remain fail-closed
+            valid = False
+            revalidation = {
+                "attempted": True,
+                "valid": False,
+                "error": str(error),
+            }
     manifest_sha = manifest.get("sha256")
     if manifest_sha not in manifest_hashes:
         valid = False
@@ -582,6 +640,7 @@ def _capacity_evidence_observation(source: Path | Mapping[str, Any] | None, *, r
         "checkpoints": list(checkpoints) if isinstance(checkpoints, list) else checkpoints,
         "references": refs,
         "execution_constraints": dict(constraints) if isinstance(constraints, Mapping) else constraints,
+        "revalidation": revalidation,
     }
 
 
@@ -996,7 +1055,7 @@ def audit_admission(
     capacity = _capacity_evidence_observation(
         _resolve(capacity_evidence, root=root)
         if isinstance(capacity_evidence, (str, Path)) else capacity_evidence,
-        root=root, manifest_hashes=manifest_hashes)
+        root=root, code_root=code, manifest_hashes=manifest_hashes)
     resource = _resource_observation(
         _resolve(resource_profile, root=root) if resource_profile is not None else None,
         root=root, capacity=capacity)
