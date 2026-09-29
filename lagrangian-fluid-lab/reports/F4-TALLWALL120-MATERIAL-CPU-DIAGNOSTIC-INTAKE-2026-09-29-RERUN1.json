@@ -1,0 +1,353 @@
+{
+  "artifact_class": "diagnostic_intake_readiness",
+  "authorization": {
+    "T1": false,
+    "T2": false,
+    "T2_macro": false,
+    "credit": 0,
+    "diagnostic_only": true,
+    "formal": false,
+    "formal_eligible": false,
+    "launch_admitted": false,
+    "qualification": false,
+    "worker_launch_authorized": false
+  },
+  "blocking_reasons": [
+    "fresh_root_receipt_missing_or_invalid",
+    "scheduler_owned_host_io_reservation_missing_or_invalid",
+    "fresh_terminal_evidence_missing_or_incomplete",
+    "DEV_07_material_case_sidecar_missing",
+    "material_sidecar_matrix_incomplete",
+    "archive_reader_source_identity_drift"
+  ],
+  "checks": {
+    "all_execution_prerequisites_closed": false,
+    "blocker_projection_nonempty": true,
+    "core_runtime_entry_contract_valid": true,
+    "fresh_root_receipt_present": false,
+    "gap_report_current_and_valid": true,
+    "launch_admitted": false,
+    "material_case_sidecar_present": false,
+    "material_entry_contract_valid": true,
+    "scheduler_host_io_receipt_present": false,
+    "selected_input_case_bound": true,
+    "selected_json_input_readable": true,
+    "sidecar_entry_contract_valid": true,
+    "sidecar_matrix_complete": false,
+    "source_metadata_only_valid": true,
+    "terminal_entry_contract_valid": true,
+    "terminal_sidecar_present": false
+  },
+  "current_gap_binding": {
+    "blocking": {
+      "fresh_root": {
+        "launch_allowed": false,
+        "present": false,
+        "valid": false
+      },
+      "gap_evidence": [
+        {
+          "evidence": "fresh root authorization and scheduler-owned host-I/O reservation are absent",
+          "id": "F4-T2-RERUN3-GAP-ROOT-SCHEDULER-AUTHORITY",
+          "required_next_evidence": "producer-issued, cross-bound, one-use fresh-root and scheduler host-I/O receipts"
+        },
+        {
+          "evidence": "fresh terminal evidence and the DEV_07 material case sidecar are missing",
+          "id": "F4-T2-RERUN3-GAP-TERMINAL-SIDECAR",
+          "required_next_evidence": "fresh namespace-bound terminal sidecar with complete event window, then read-only intake"
+        },
+        {
+          "evidence": "archive/reader source drift remains unresolved and all 32 material sidecars are absent",
+          "id": "F4-T2-RERUN3-GAP-SOURCE-MATRIX",
+          "required_next_evidence": "authoritative archives-v2 collection/reader refresh and the complete 32-case sidecar matrix"
+        }
+      ],
+      "gap_ids": [
+        "F4-T2-RERUN3-GAP-ROOT-SCHEDULER-AUTHORITY",
+        "F4-T2-RERUN3-GAP-TERMINAL-SIDECAR",
+        "F4-T2-RERUN3-GAP-SOURCE-MATRIX"
+      ],
+      "material_sidecar": {
+        "credit": 0,
+        "present": false,
+        "status": "missing"
+      },
+      "root_scheduler": {
+        "launch_admitted": false,
+        "status": "blocked_missing_fresh_root_scheduler_receipts",
+        "worker_launch_authorized": false
+      },
+      "scheduler_host_io": {
+        "launch_admitted": false,
+        "present": false,
+        "valid": false,
+        "worker_launch_authorized": false
+      },
+      "sidecar_intake": {
+        "blocking_reasons": [
+          "missing_material_case_sidecar"
+        ],
+        "present": false,
+        "status": "missing"
+      },
+      "sidecar_matrix": {
+        "expected_case_count": 32,
+        "formal_acceptance_receipt_count": 0,
+        "matrix_ready": false,
+        "missing_case_count": 32
+      },
+      "terminal": {
+        "event_window_complete": false,
+        "present": false,
+        "status": "blocked_fail_closed"
+      }
+    },
+    "gap_errors": [],
+    "report": {
+      "bytes": 17086,
+      "content_read": true,
+      "exists": true,
+      "path": "reports/F4-TALLWALL120-MATERIAL-COARSE-T2-RERUN3-GAP-2026-09-29.json",
+      "role": "current F4 RERUN3 gap audit",
+      "sha256": "c387f13fabe0048b48a1cf01dc794ee3550c6d5232348e29b67f383596db857d"
+    },
+    "schema": "core.material.f4.tallwall120.coarse_t2.rerun3_gap_audit.v1",
+    "status": "blocked_fail_closed"
+  },
+  "execution_boundary": {
+    "completion_mutations": 0,
+    "denominator_mutations": 0,
+    "diagnostic_executed": false,
+    "fresh_namespace_created": false,
+    "gate_mutations": 0,
+    "gpu_started": false,
+    "history_rewritten": false,
+    "ledger_mutations": 0,
+    "material_sidecar_written": false,
+    "native_started": false,
+    "plan_mutations": 0,
+    "queue_started": false,
+    "registry_mutations": 0,
+    "runner_invoked": false,
+    "solver_started": false,
+    "source_hdf5_hash_recomputed": false,
+    "source_hdf5_opened": false,
+    "source_hdf5_read": false,
+    "terminal_receipt_created": false,
+    "worker_started": false
+  },
+  "next_safe_action": "仅在外部 producer 提供当前 source-bound、one-use fresh-root receipt 与 scheduler-owned host-I/O reservation，且 terminal event window/DEV_07 sidecar/source-reader identity 完整后，重新运行 intake；随后才可由受控入口执行 CPU-only diagnostic。",
+  "observed_at_utc": "2026-09-29T00:00:00Z",
+  "planned_diagnostic": {
+    "dp_m": 0.0075,
+    "executed": false,
+    "execution_reason": "pre-execution fresh-root/host-I/O/terminal prerequisites are blocking",
+    "expected_output": "fresh namespace-bound material.h5 plus terminal material_case_sidecar.json",
+    "mode": "CPU-only",
+    "neighbour_variant": "baseline24",
+    "q": 0.5,
+    "seeds": 512,
+    "substeps": 2
+  },
+  "receipt_created": false,
+  "record_id": "f4-tallwall120-material-cpu-diagnostic-intake-v1",
+  "runtime_entry_binding": {
+    "case_sidecar_entry": {
+      "checks": {
+        "ast_parse": true,
+        "bounded_source_read": true,
+        "entrypoints": true,
+        "markers": true
+      },
+      "entrypoints": {
+        "build_report": true,
+        "evaluate_sidecar": true,
+        "main": true,
+        "validate_report": true
+      },
+      "markers": {
+        "credit": true,
+        "diagnostic_only": true,
+        "hdf5_content_outside_bounded_json_boundary": true
+      },
+      "reference": {
+        "bytes": 46220,
+        "content_read": true,
+        "exists": true,
+        "path": "scripts/f4_tallwall120_material_case_sidecar_intake_v1.py",
+        "role": "F4 material case-sidecar intake entry",
+        "sha256": "f59870f339adaec84163bb3b625cfd86dd9753c0391635fdcc35826440330ae6"
+      }
+    },
+    "controlled_flow": "fresh root receipt + scheduler host-I/O reservation -> core_runtime one-shot validation -> F4 material CPU entry -> read-only sidecar intake",
+    "core_runtime": {
+      "checks": {
+        "ast_parse": true,
+        "bounded_source_read": true,
+        "entrypoints": true,
+        "markers": true
+      },
+      "entrypoints": {
+        "consume_scheduler_reservation": true,
+        "launch": true,
+        "prepare_launch": true,
+        "validate_scheduler_binding": true,
+        "worker": true
+      },
+      "markers": {
+        "RESERVATION_CONSUME_SCHEMA": true,
+        "SCHEDULER_BINDING_SCHEMA": true,
+        "check_runtime_identity=True": true
+      },
+      "reference": {
+        "bytes": 80948,
+        "content_read": true,
+        "exists": true,
+        "path": "scripts/core_runtime.py",
+        "role": "current scheduler-owned core_runtime",
+        "sha256": "a4c6e03a13cb1ff80c0da7f7f9bd442e5e2de4d64e23551bf92a0220c6afa8c4"
+      }
+    },
+    "entry_is_authorizing": false,
+    "material_entry": {
+      "checks": {
+        "ast_parse": true,
+        "bounded_source_read": true,
+        "entrypoints": true,
+        "markers": true
+      },
+      "entrypoints": {
+        "main": true,
+        "trace_tallwall120": true
+      },
+      "markers": {
+        "--output": true,
+        "--seeds": true,
+        "--source": true,
+        "--substeps": true,
+        "h5py.File": true
+      },
+      "reference": {
+        "bytes": 24647,
+        "content_read": true,
+        "exists": true,
+        "path": "scripts/f4_tallwall120_material.py",
+        "role": "F4 CPU material diagnostic entry",
+        "sha256": "dc3c06e5b689eb64b7c3c7ee87b022699cfed19483d38662031570ea24b66f26"
+      }
+    },
+    "terminal_evidence_entry": {
+      "checks": {
+        "ast_parse": true,
+        "bounded_source_read": true,
+        "entrypoints": true,
+        "markers": true
+      },
+      "entrypoints": {
+        "build_report": true,
+        "main": true,
+        "write_outputs": true
+      },
+      "markers": {
+        "HDF5 content is outside the intake boundary": true,
+        "credit": true,
+        "terminal evidence": true
+      },
+      "reference": {
+        "bytes": 44060,
+        "content_read": true,
+        "exists": true,
+        "path": "scripts/f4_tallwall120_material_terminal_evidence_intake_v1.py",
+        "role": "F4 terminal evidence intake entry",
+        "sha256": "782beb5c9378e077de156a11372f315117b65d35cc1da8959604900cee26a780"
+      }
+    }
+  },
+  "schema": "core.material.f4.tallwall120.cpu_diagnostic_intake.v1",
+  "scope": {
+    "case_id": "F4_resting_pool_laminar_tallwall120_x_v1_DEV_07",
+    "direction": "material_coarse_T2",
+    "excluded_families": [
+      "F1",
+      "F2",
+      "F3",
+      "F6",
+      "F7",
+      "F8",
+      "A8"
+    ],
+    "family": "F4",
+    "representative_case": "DEV_07",
+    "scope_id": "F4_resting_pool_laminar_tallwall120_x_v1"
+  },
+  "selected_input": {
+    "diagnostic": {
+      "checks": {
+        "case_identity": true,
+        "diagnostic_only": true,
+        "event_window_complete": false,
+        "formal_admission_closed": true,
+        "parameter_binding": true,
+        "reliable_coverage": false,
+        "report_readable": true,
+        "schema": true,
+        "source_identity": true,
+        "unknown_gate": false
+      },
+      "decision": {
+        "T1": false,
+        "T2": false,
+        "classification": "diagnostic_negative",
+        "credit": 0,
+        "formal_admission": false
+      },
+      "fresh_attempt": false,
+      "historical_negative_only": true,
+      "may_authorize_execution": false,
+      "parameters": {
+        "dp_m": 0.0075,
+        "neighbour_variant": "baseline24",
+        "neighbours": 24,
+        "q": 0.5,
+        "seeds": 512,
+        "substeps": 2
+      },
+      "reference": {
+        "bytes": 6017,
+        "content_read": true,
+        "exists": true,
+        "path": "reports/F4-TALLWALL120-DEV07-MATERIAL-BASELINE24-DIAGNOSTIC-2026-09-28.json",
+        "role": "existing DEV_07 material diagnostic",
+        "sha256": "edbd46f4723c067c3fcca00bd148d10e8ac06016b50a04328e1302410a2dc900"
+      },
+      "status": "completed_diagnostic_only",
+      "trace": {
+        "committed_frame": 217,
+        "common_reliable_path_coverage": 0.0,
+        "event_window_complete": false,
+        "event_window_status": "right_censored_or_unresolved",
+        "frame_count": 218,
+        "mass_closed": true,
+        "status": "completed",
+        "transition_count": 217,
+        "unknown_fraction_max": 1.0,
+        "unknown_gate_pass": false
+      }
+    },
+    "kind": "existing_negative_diagnostic_plus_source_metadata",
+    "selection_reason": "DEV_07 is the current F4 material/T2 RERUN3 representative case and has a bounded readable diagnostic JSON; its HDF5 remains metadata-only until trusted fresh execution authority exists.",
+    "source_hdf5": {
+      "bytes": 2067911708,
+      "content_opened": false,
+      "content_read": false,
+      "declared_bytes": 2067911708,
+      "declared_sha256": "6ae8ca7062e1fa15779fc9ad491d1117455700315c6a1ef4a12326458f0976ae",
+      "exists": true,
+      "hash_recomputed": false,
+      "metadata_contract_valid": true,
+      "path": "campaigns/core-v1/cfd/f4-tallwall120-production-archives-v2/f4-tallwall120-production-dev-07/product/trajectory.h5",
+      "regular_file": true
+    }
+  },
+  "status": "blocked_before_execution"
+}
