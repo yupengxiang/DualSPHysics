@@ -81,7 +81,12 @@ def infer_dimension(path: str | None) -> str:
         return "unknown"
 
 
-def compact_quality(audit: dict[str, Any], path: str | None) -> dict[str, Any]:
+def compact_quality(
+    audit: dict[str, Any],
+    path: str | None,
+    fallback: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    fallback = fallback or {}
     valid_shape = audit.get("valid_shape")
     active_initial = audit.get("active_initial", audit.get("active_count_initial"))
     active_final = audit.get("active_final", audit.get("active_count_final"))
@@ -90,9 +95,13 @@ def compact_quality(audit: dict[str, Any], path: str | None) -> dict[str, Any]:
         active_initial = audit.get("particles_initial")
     if active_final is None:
         active_final = audit.get("particles_final")
-    retention = audit.get("identity_retention")
+    retention = audit.get("identity_retention", fallback.get("identity_retention"))
+    retention_basis = "stored_identity_audit" if audit.get("identity_retention") is not None else (
+        "prior_trajectory_audit" if fallback.get("identity_retention") is not None else None
+    )
     if retention is None and active_initial is not None and active_final is not None:
         retention = float(active_final) / max(1, int(active_initial))
+        retention_basis = "active_count_ratio_fallback"
     return {
         "quality_level": "Q-I",
         "q_i_status": audit.get("status", "not_audited"),
@@ -105,6 +114,7 @@ def compact_quality(audit: dict[str, Any], path: str | None) -> dict[str, Any]:
         "active_initial": active_initial,
         "active_final": active_final,
         "identity_retention": retention,
+        "identity_retention_basis": retention_basis,
         "introduced_after_initial": audit.get("introduced_after_initial", audit.get("identities_introduced_after_initial")),
         "initial_missing_at_final": audit.get("initial_missing_at_final"),
         "finite_active": audit.get("finite_active", {
@@ -155,7 +165,7 @@ def official_records() -> list[dict[str, Any]]:
             "run_tree_sha256": item.get("run_tree_sha256"),
             "raw_output": relative_path(item.get("generated_case_prefix")),
             "normalized_hdf5": relative_path(h5),
-            "quality": compact_quality(audit, h5),
+            "quality": compact_quality(audit, h5, item.get("prior_trajectory_audit")),
             "scope_audit_note": item.get("provenance_status"),
         })
     return records
