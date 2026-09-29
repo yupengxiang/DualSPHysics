@@ -8,11 +8,11 @@ execution paths.  The only permitted write is an explicitly requested,
 exclusive JSON audit report.
 
 This is a non-authorizing review.  It records the controls closed by
-``8758be98``/``d88c1118`` and keeps ``launch_allowed`` and all formal credit
-fields false/zero.  The signed scheduler-authority protocol and runner
-hardening are source controls, not production scheduler evidence; a synthetic
-test fixture is never treated as a deployed trust anchor or terminal
-execution proof.
+``8f498b70``/``5e83a8af``/``36d072d5`` and keeps ``launch_allowed`` and all
+formal credit fields false/zero.  The signed scheduler-authority protocol,
+rollout snapshot controls, and runner hardening are source controls, not
+production scheduler or runtime evidence; a synthetic test fixture is never
+treated as a deployed trust anchor or terminal execution proof.
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ REPORT_SCHEMA = (
     "core.f3.graph_raw.hidden16.diagnostic_admission_v3.security_reaudit.report.v1"
 )
 REPORT_ID = "f3-graph-raw-hidden16-diagnostic-admission-v3-security-reaudit-v1"
-AUDITED_COMMITS = ("8758be98", "d88c1118")
+AUDITED_COMMITS = ("8f498b70", "5e83a8af", "36d072d5")
 MAX_SOURCE_BYTES = 8 * 1024 * 1024
 SHA256_HEX = 64
 
@@ -435,9 +435,9 @@ def _static_checks(
         )
     )
     launcher_path_reopen = not launcher_stable_preflight
-    # The launcher snapshot is read safely, but the admission mint currently
-    # does not compare the later stable descriptors with the exact file
-    # digests captured in RolloutPlan before it accepts the signed plan.
+    # The launcher snapshot is read safely, but the admission flow still does
+    # not compare the later stable descriptors with the exact file digests
+    # captured in RolloutPlan before it accepts the signed plan.
     admission_cross_binds_launcher_receipt = all(
         needle in admission_mint
         for needle in (
@@ -463,10 +463,20 @@ def _static_checks(
             "_ReservedOutput",
         )
     )
-    descriptor_bound_child_output = (
-        "pass_fds=reservations.pass_fds" in runner_popen
-        and "pathname-only" not in runner_output_contract
-        and "_fail(" not in runner_output_contract
+    descriptor_bound_child_output = all(
+        needle in runner_output_contract
+        for needle in (
+            "_validate_descriptor_publication_contract(",
+            "child_contract_supported",
+            "_reject_unsupported_descriptor_publication",
+        )
+    ) and all(
+        needle in runner_popen
+        for needle in (
+            "pass_fds=reservations.pass_fds",
+            "_capture_runtime_identity(",
+            "_validate_descriptor_publication_contract(",
+        )
     )
     hdf5_nonhard_and_vds_closed = all(
         needle in runner_hdf5
@@ -574,13 +584,20 @@ def _static_checks(
     terminal_report_is_bound = all(
         needle in runner_report_validator
         for needle in (
-            '"diagnostic_terminal_verified"',
+            'if status == "diagnostic_terminal_verified":',
             '"popen_attempted"',
             '"wait_attempted"',
+            "_validate_terminal_receipt_binding(report, terminal)",
+            "terminal_receipt_sha256",
+            "TERMINAL_RECEIPT_SCHEMA",
         )
     ) and all(
-        needle in runner_report_validator
-        for needle in ("terminal_receipt_sha256", "TERMINAL_RECEIPT_SCHEMA")
+        needle in runner
+        for needle in (
+            "def _validate_terminal_receipt_binding(",
+            "_validate_report_descriptor_publication(",
+            "_validate_recorded_descriptor_publication(",
+        )
     )
     dangerous_calls = {
         role: _dangerous_calls(tree)
@@ -941,6 +958,7 @@ def _control_matrix(checks: Mapping[str, Any]) -> dict[str, Any]:
                 if not checks["gpu_uuid_pci_logical_shape_bound"]
                 or not checks["gpu_probe_emits_uuid_pci_identity"]
                 or not checks["child_runtime_gpu_attestation"]
+                or not checks["gpu_runtime_identity_observed"]
                 else "closed_non_authorizing_pending_terminal_proof"
             ),
         },
@@ -961,7 +979,10 @@ def _control_matrix(checks: Mapping[str, Any]) -> dict[str, Any]:
             "stable_fd": checks["runner_stable_fd_artifact_reads"],
             "path_reopen_flag_false": checks["runner_stable_fd_artifact_reads"],
             "output_reservation": checks["runner_output_atomic_reservation_before_popen"],
-            "verdict": "closed_for_reads_pending_descriptor_bound_child_publication",
+            "descriptor_bound_child_output_publication": checks[
+                "descriptor_bound_child_output_publication"
+            ],
+            "verdict": "closed_for_reads_and_descriptor_publication_pending_terminal_proof",
         },
         "formal_credit_isolation": {
             "zero_credit_and_launch_false": checks["formal_credit_isolation"],
@@ -1032,9 +1053,7 @@ def build_audit_report() -> dict[str, Any]:
         "blocked_reasons": [
             "signed external scheduler authority and local one-shot claim protocol are source-present, but no production scheduler-owned trust anchor/consume witness was supplied",
             "launcher preflight uses bounded stable reads, but the exact RolloutPlan file digests are not compared with the later admission reread",
-            "evaluator outputs are O_EXCL-reserved, but the pathname-only core child lacks descriptor-bound publication and is therefore blocked before Popen",
             "GPU UUID/PCI live-probe and child-attestation controls are source-present but no runtime observation was performed by this read-only audit",
-            "terminal receipt report binding remains incomplete and independent terminal proof was intentionally not executed",
         ],
         **ZERO_CREDIT,
     }

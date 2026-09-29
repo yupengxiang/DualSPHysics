@@ -63,9 +63,7 @@
   "blocked_reasons": [
     "signed external scheduler authority and local one-shot claim protocol are source-present, but no production scheduler-owned trust anchor/consume witness was supplied",
     "launcher preflight uses bounded stable reads, but the exact RolloutPlan file digests are not compared with the later admission reread",
-    "evaluator outputs are O_EXCL-reserved, but the pathname-only core child lacks descriptor-bound publication and is therefore blocked before Popen",
-    "GPU UUID/PCI live-probe and child-attestation controls are source-present but no runtime observation was performed by this read-only audit",
-    "terminal receipt report binding remains incomplete and independent terminal proof was intentionally not executed"
+    "GPU UUID/PCI live-probe and child-attestation controls are source-present but no runtime observation was performed by this read-only audit"
   ],
   "contract_date": "2026-09-29",
   "control_matrix": {
@@ -92,7 +90,7 @@
       "live_probe_identity": true,
       "receipt_shape_bound": true,
       "runtime_observed_by_this_audit": false,
-      "verdict": "closed_non_authorizing_pending_terminal_proof"
+      "verdict": "P1_blocked"
     },
     "owner_inode_nonce": {
       "external_owner_attestation": true,
@@ -114,10 +112,11 @@
       "verdict": "closed_non_authorizing_pending_external_terminal_proof"
     },
     "stable_fd_artifact_validation": {
+      "descriptor_bound_child_output_publication": true,
       "output_reservation": true,
       "path_reopen_flag_false": true,
       "stable_fd": true,
-      "verdict": "closed_for_reads_pending_descriptor_bound_child_publication"
+      "verdict": "closed_for_reads_and_descriptor_publication_pending_terminal_proof"
     },
     "symlink_hardlink_external_vds": {
       "artifact_stable_fd_and_single_link": true,
@@ -281,8 +280,9 @@
   "schema": "core.f3.graph_raw.hidden16.diagnostic_admission_v3.security_reaudit.report.v1",
   "scope": {
     "audited_commits": [
-      "8758be98",
-      "d88c1118"
+      "8f498b70",
+      "5e83a8af",
+      "36d072d5"
     ],
     "no_audited_module_import": true,
     "no_gpu_or_nvidia_smi": true,
