@@ -330,12 +330,22 @@ def verify_qualification_receipt(
     """Load a v2 qualification receipt only after source/evidence hash checks."""
     path = Path(receipt_path).resolve()
     receipt = _load(path)
+    # Report a cross-scope substitution before generic schema errors only when
+    # both sides name known registered scopes.  An unregistered/synthetic
+    # object must still fail at the schema boundary before any scope guard.
+    declared_scope = receipt.get("scope_id")
+    matrix_design = matrix.get("design") if isinstance(matrix, Mapping) else None
+    matrix_scope = matrix_design.get("scope_id") if isinstance(matrix_design, Mapping) else None
+    if (declared_scope in SCOPE_PROTOCOLS
+            and isinstance(matrix_scope, str)
+            and declared_scope != matrix_scope):
+        raise VerificationError("qualification receipt belongs to another registered scope")
     receipt_schema = receipt.get("schema")
     if type(receipt_schema) is not str or receipt_schema != "core.qualification.v1":
         raise VerificationError("qualification receipt schema/family mismatch")
     if receipt.get("family") != FAMILY:
         raise VerificationError("qualification receipt schema/family mismatch")
-    _new_scope_guard(receipt.get("scope_id"))
+    _new_scope_guard(declared_scope)
     if receipt.get("scope_id") != matrix["design"]["scope_id"]:
         raise VerificationError("qualification receipt belongs to another registered scope")
     if receipt.get("design_sha256") != matrix["design_sha256"]:
