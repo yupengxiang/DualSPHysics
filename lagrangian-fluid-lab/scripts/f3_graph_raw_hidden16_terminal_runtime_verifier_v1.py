@@ -53,6 +53,9 @@ EVALUATION_IDENTITY_SCHEMA = "core.f3.graph_raw.hidden16.evaluation_identity.v1"
 PROCESS_PRODUCER_SCHEMA = "core.f3.graph_raw.hidden16.process_proof_producer.v1"
 PROCESS_PRODUCER_ID = "f3-graph-raw-hidden16-diagnostic-runtime-proof-v1"
 PROCESS_ATTESTATION_SCHEMA = "core.f3.graph_raw.hidden16.exit_attestation.v1"
+SCHEDULER_ATTESTATION_SCHEMA = "core.f3.graph_raw.hidden16.external_scheduler_attestation.v1"
+ONE_SHOT_CONSUME_SCHEMA = "core.f3.graph_raw.hidden16.one_shot_consume_witness.v1"
+RUNTIME_IDENTITY_SCHEMA = "core.f3.graph_raw.hidden16.runtime_identity_observation.v1"
 
 SEEDS = (17, 29, 43)
 MODEL_KIND = "graph_raw"
@@ -70,6 +73,11 @@ MAX_JSON_DEPTH = 64
 MAX_JSON_ARRAY_ITEMS = 4096
 MAX_DECLARED_BYTES = 1 << 50
 CHECKPOINT_SUFFIXES = frozenset({".pt", ".pth", ".ckpt"})
+GPU_UUID_RE = re.compile(r"^GPU-[0-9A-Fa-f-]{8,}$")
+PCI_BUS_RE = re.compile(r"^[0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-9a-f]$")
+UTC_TIMESTAMP_RE = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$"
+)
 
 
 # This is the one evaluator argv contract accepted by the graph_raw diagnostic
@@ -127,6 +135,14 @@ ALLOWED_AUTHORITY_KEYS = frozenset(
         "progress_or_pid_is_not_completion",
         "manifest_formal_release",
         "validation_formal_eligible",
+        "authority_id",
+        "trust_anchor_sha256",
+        "signature_sha256",
+        "resource_snapshot_sha256",
+        "scheduler_attestation",
+        "one_shot_consume_witness",
+        "runtime_identity",
+        "process_identity_sha256",
     }
 )
 ARTIFACT_KEYS = frozenset({"path", "sha256", "bytes"})
@@ -220,6 +236,20 @@ def _sha256(value: Any, name: str) -> str:
     text = _string(value, name)
     if SHA256_RE.fullmatch(text) is None:
         _fail(f"{name} must be a lowercase SHA-256 hexadecimal digest")
+    return text
+
+
+def _non_placeholder_sha256(value: Any, name: str) -> str:
+    text = _sha256(value, name)
+    if len(set(text)) == 1:
+        _fail(f"{name} must not be a placeholder digest")
+    return text
+
+
+def _utc_timestamp(value: Any, name: str) -> str:
+    text = _string(value, name)
+    if UTC_TIMESTAMP_RE.fullmatch(text) is None:
+        _fail(f"{name} must be an RFC3339 UTC timestamp ending in Z")
     return text
 
 
@@ -947,10 +977,407 @@ def _validate_launcher_command(
     return observed, _command_sha256(observed)
 
 
+def _launcher_physical_index(argv: Sequence[str], name: str) -> int:
+    """Return the physical GPU selector from the sealed launcher argv.
+
+    A direct evaluator argv leaves ``cuda:0``'s physical mapping implicit, so
+    it is intentionally insufficient for a positive runtime observation.  The
+    fixed no-shell ``env`` wrapper must carry exactly one numeric
+    ``CUDA_VISIBLE_DEVICES`` assignment.
+    """
+
+    if len(argv) < 3 or list(argv[:2]) != [CANONICAL_ENV, CANONICAL_ENV_ASSIGNMENT]:
+        _fail(f"{name} must use the fixed /usr/bin/env wrapper for physical GPU binding")
+    selectors = [item for item in argv[2:] if item.startswith("CUDA_VISIBLE_DEVICES=")]
+    if len(selectors) != 1:
+        _fail(f"{name} must contain exactly one CUDA_VISIBLE_DEVICES assignment")
+    value = selectors[0].removeprefix("CUDA_VISIBLE_DEVICES=")
+    if not value.isdigit():
+        _fail(f"{name}.CUDA_VISIBLE_DEVICES must be a decimal physical index")
+    physical_index = int(value)
+    if not 0 <= physical_index < 8:
+        _fail(f"{name}.CUDA_VISIBLE_DEVICES is outside the fixed eight-device bound")
+    return physical_index
+
+
+def _runtime_gpu_identity(value: Any, name: str) -> dict[str, Any]:
+    gpu = _mapping(value, name)
+    _reject_unknown(
+        gpu,
+        {
+            "physical_index",
+            "uuid",
+            "pci_bus_id",
+            "logical_device",
+            "cuda_visible_devices",
+            "cuda_device_order",
+            "memory_total_mib",
+            "memory_used_mib",
+            "memory_free_mib",
+            "identity_sha256",
+        },
+        name,
+    )
+    physical_index = _strict_int(gpu.get("physical_index"), f"{name}.physical_index")
+    if physical_index >= 8:
+        _fail(f"{name}.physical_index is outside the fixed eight-device bound")
+    uuid = _string(gpu.get("uuid"), f"{name}.uuid")
+    if GPU_UUID_RE.fullmatch(uuid) is None or len(set(uuid[4:].lower())) <= 2:
+        _fail(f"{name}.uuid is not a stable non-placeholder GPU UUID")
+    pci_bus_id = _string(gpu.get("pci_bus_id"), f"{name}.pci_bus_id")
+    if PCI_BUS_RE.fullmatch(pci_bus_id) is None:
+        _fail(f"{name}.pci_bus_id is not a canonical PCI bus identity")
+    _check_exact(gpu, "logical_device", CANONICAL_DEVICE, name)
+    _check_exact(gpu, "cuda_visible_devices", str(physical_index), name)
+    _check_exact(gpu, "cuda_device_order", "PCI_BUS_ID", name)
+    total = _strict_int(gpu.get("memory_total_mib"), f"{name}.memory_total_mib", 1)
+    used = _strict_int(gpu.get("memory_used_mib"), f"{name}.memory_used_mib")
+    free = _strict_int(gpu.get("memory_free_mib"), f"{name}.memory_free_mib")
+    if used + free > total:
+        _fail(f"{name} memory used/free exceeds the observed total")
+    core = {
+        "physical_index": physical_index,
+        "uuid": uuid,
+        "pci_bus_id": pci_bus_id,
+        "logical_device": CANONICAL_DEVICE,
+        "cuda_visible_devices": str(physical_index),
+        "cuda_device_order": "PCI_BUS_ID",
+        "memory_total_mib": total,
+        "memory_used_mib": used,
+        "memory_free_mib": free,
+    }
+    identity_sha256 = _non_placeholder_sha256(gpu.get("identity_sha256"), f"{name}.identity_sha256")
+    if identity_sha256 != _digest(core):
+        _fail(f"{name}.identity_sha256 does not bind the observed UUID/PCI/memory identity")
+    return {**core, "identity_sha256": identity_sha256}
+
+
+def _process_plan_digest(
+    shared: Mapping[str, Any],
+    evaluation: Mapping[str, Any],
+    evaluator_command_sha256: str,
+    launcher_command_sha256: str,
+) -> str:
+    return _digest(
+        {
+            "seed": shared["seed"],
+            "run_id": shared["run_id"],
+            "namespace": shared["namespace"],
+            "namespace_nonce": shared["namespace_nonce"],
+            "checkpoint": shared["checkpoint"],
+            "training_receipt": shared["training_receipt"],
+            "manifest": shared["manifest"],
+            "evaluation_artifact": evaluation,
+            "trajectory": shared["trajectory"],
+            "evaluator_command_sha256": evaluator_command_sha256,
+            "launcher_command_sha256": launcher_command_sha256,
+        }
+    )
+
+
+def _validate_runtime_identity(
+    value: Any,
+    *,
+    seed: int,
+    shared: Mapping[str, Any],
+    evaluation: Mapping[str, Any],
+    plan_sha256: str,
+    launcher_physical_index: int,
+    name: str,
+) -> dict[str, Any]:
+    runtime = _mapping(value, name)
+    _reject_unknown(
+        runtime,
+        {
+            "schema",
+            "status",
+            "source",
+            "external_observation",
+            "scheduler_owned",
+            "observed_during_execution",
+            "observed_after_exit",
+            "plan_sha256",
+            "namespace",
+            "namespace_nonce",
+            "gpu",
+            "child",
+            "terminal",
+            "observed_at_utc",
+            "identity_sha256",
+        },
+        name,
+    )
+    for key, expected in (
+        ("schema", RUNTIME_IDENTITY_SCHEMA),
+        ("status", "observed"),
+        ("source", "scheduler_owned_live_probe"),
+        ("external_observation", True),
+        ("scheduler_owned", True),
+        ("observed_during_execution", True),
+        ("observed_after_exit", True),
+        ("plan_sha256", plan_sha256),
+        ("namespace", shared["namespace"]),
+        ("namespace_nonce", shared["namespace_nonce"]),
+    ):
+        _check_exact(runtime, key, expected, name)
+    gpu = _runtime_gpu_identity(runtime.get("gpu"), f"{name}.gpu")
+    if gpu["physical_index"] != launcher_physical_index:
+        _fail(f"{name}.gpu physical index drifts from CUDA_VISIBLE_DEVICES")
+    child = _mapping(runtime.get("child"), f"{name}.child")
+    _reject_unknown(
+        child,
+        {
+            "observed",
+            "child_runtime_attested",
+            "gpu_uuid",
+            "logical_device",
+            "probe_tool",
+            "process_identity_sha256",
+        },
+        f"{name}.child",
+    )
+    for key, expected in (
+        ("observed", True),
+        ("child_runtime_attested", True),
+        ("gpu_uuid", gpu["uuid"]),
+        ("logical_device", CANONICAL_DEVICE),
+        ("probe_tool", "nvidia-smi"),
+    ):
+        _check_exact(child, key, expected, f"{name}.child")
+    process_identity_sha256 = _non_placeholder_sha256(
+        child.get("process_identity_sha256"), f"{name}.child.process_identity_sha256"
+    )
+    terminal = _mapping(runtime.get("terminal"), f"{name}.terminal")
+    _reject_unknown(
+        terminal,
+        {
+            "observed",
+            "status",
+            "transitions",
+            "frames",
+            "namespace",
+            "namespace_nonce",
+            "evaluation_sha256",
+            "trajectory_sha256",
+        },
+        f"{name}.terminal",
+    )
+    for key, expected in (
+        ("observed", True),
+        ("status", "completed"),
+        ("transitions", TRANSITIONS),
+        ("frames", FRAMES),
+        ("namespace", shared["namespace"]),
+        ("namespace_nonce", shared["namespace_nonce"]),
+        ("evaluation_sha256", evaluation["sha256"]),
+        ("trajectory_sha256", shared["trajectory"]["sha256"]),
+    ):
+        _check_exact(terminal, key, expected, f"{name}.terminal")
+    observed_at_utc = _utc_timestamp(runtime.get("observed_at_utc"), f"{name}.observed_at_utc")
+    core = {
+        "schema": RUNTIME_IDENTITY_SCHEMA,
+        "status": "observed",
+        "source": "scheduler_owned_live_probe",
+        "external_observation": True,
+        "scheduler_owned": True,
+        "observed_during_execution": True,
+        "observed_after_exit": True,
+        "plan_sha256": plan_sha256,
+        "namespace": shared["namespace"],
+        "namespace_nonce": shared["namespace_nonce"],
+        "gpu": gpu,
+        "child": {
+            "observed": True,
+            "child_runtime_attested": True,
+            "gpu_uuid": gpu["uuid"],
+            "logical_device": CANONICAL_DEVICE,
+            "probe_tool": "nvidia-smi",
+            "process_identity_sha256": process_identity_sha256,
+        },
+        "terminal": {
+            "observed": True,
+            "status": "completed",
+            "transitions": TRANSITIONS,
+            "frames": FRAMES,
+            "namespace": shared["namespace"],
+            "namespace_nonce": shared["namespace_nonce"],
+            "evaluation_sha256": evaluation["sha256"],
+            "trajectory_sha256": shared["trajectory"]["sha256"],
+        },
+        "observed_at_utc": observed_at_utc,
+    }
+    identity_sha256 = _non_placeholder_sha256(runtime.get("identity_sha256"), f"{name}.identity_sha256")
+    if identity_sha256 != _digest(core):
+        _fail(f"{name}.identity_sha256 does not bind the live GPU and terminal observation")
+    return {**core, "identity_sha256": identity_sha256}
+
+
+def _validate_scheduler_attestation(
+    value: Any,
+    *,
+    shared: Mapping[str, Any],
+    plan_sha256: str,
+    runtime_identity: Mapping[str, Any],
+    name: str,
+) -> dict[str, Any]:
+    attestation = _mapping(value, name)
+    _reject_unknown(
+        attestation,
+        {
+            "schema",
+            "status",
+            "external_scheduler",
+            "one_shot",
+            "authority_id",
+            "trust_anchor_sha256",
+            "signature_algorithm",
+            "signature_sha256",
+            "signature_verified",
+            "plan_sha256",
+            "namespace",
+            "namespace_nonce",
+            "resource_snapshot_sha256",
+            "gpu_identity_sha256",
+            "observed_at_utc",
+            "local_self_attestation_accepted",
+            "digest",
+        },
+        name,
+    )
+    for key, expected in (
+        ("schema", SCHEDULER_ATTESTATION_SCHEMA),
+        ("status", "authorized"),
+        ("external_scheduler", True),
+        ("one_shot", True),
+        ("signature_algorithm", "ed25519"),
+        ("signature_verified", True),
+        ("plan_sha256", plan_sha256),
+        ("namespace", shared["namespace"]),
+        ("namespace_nonce", shared["namespace_nonce"]),
+        ("gpu_identity_sha256", runtime_identity["gpu"]["identity_sha256"]),
+        ("local_self_attestation_accepted", False),
+    ):
+        _check_exact(attestation, key, expected, name)
+    authority_id = _non_placeholder_sha256(attestation.get("authority_id"), f"{name}.authority_id")
+    trust_anchor_sha256 = _non_placeholder_sha256(attestation.get("trust_anchor_sha256"), f"{name}.trust_anchor_sha256")
+    signature_sha256 = _non_placeholder_sha256(attestation.get("signature_sha256"), f"{name}.signature_sha256")
+    resource_snapshot_sha256 = _non_placeholder_sha256(
+        attestation.get("resource_snapshot_sha256"), f"{name}.resource_snapshot_sha256"
+    )
+    observed_at_utc = _utc_timestamp(attestation.get("observed_at_utc"), f"{name}.observed_at_utc")
+    core = {
+        "schema": SCHEDULER_ATTESTATION_SCHEMA,
+        "status": "authorized",
+        "external_scheduler": True,
+        "one_shot": True,
+        "authority_id": authority_id,
+        "trust_anchor_sha256": trust_anchor_sha256,
+        "signature_algorithm": "ed25519",
+        "signature_sha256": signature_sha256,
+        "signature_verified": True,
+        "plan_sha256": plan_sha256,
+        "namespace": shared["namespace"],
+        "namespace_nonce": shared["namespace_nonce"],
+        "resource_snapshot_sha256": resource_snapshot_sha256,
+        "gpu_identity_sha256": runtime_identity["gpu"]["identity_sha256"],
+        "observed_at_utc": observed_at_utc,
+        "local_self_attestation_accepted": False,
+    }
+    digest = _non_placeholder_sha256(attestation.get("digest"), f"{name}.digest")
+    if digest != _digest(core):
+        _fail(f"{name}.digest does not bind the external scheduler attestation")
+    return {**core, "digest": digest}
+
+
+def _validate_one_shot_consume_witness(
+    value: Any,
+    *,
+    shared: Mapping[str, Any],
+    plan_sha256: str,
+    runtime_identity: Mapping[str, Any],
+    scheduler_attestation: Mapping[str, Any],
+    name: str,
+) -> dict[str, Any]:
+    witness = _mapping(value, name)
+    _reject_unknown(
+        witness,
+        {
+            "schema",
+            "status",
+            "external_scheduler",
+            "one_shot",
+            "replay_free",
+            "atomic_compare_and_swap",
+            "authority_id",
+            "trust_anchor_sha256",
+            "scheduler_attestation_sha256",
+            "plan_sha256",
+            "namespace",
+            "namespace_nonce",
+            "gpu_identity_sha256",
+            "consume_id",
+            "reservation_sha256",
+            "previous_state",
+            "new_state",
+            "observed_at_utc",
+            "local_self_attestation_accepted",
+            "digest",
+        },
+        name,
+    )
+    for key, expected in (
+        ("schema", ONE_SHOT_CONSUME_SCHEMA),
+        ("status", "consumed"),
+        ("external_scheduler", True),
+        ("one_shot", True),
+        ("replay_free", True),
+        ("atomic_compare_and_swap", True),
+        ("authority_id", scheduler_attestation["authority_id"]),
+        ("trust_anchor_sha256", scheduler_attestation["trust_anchor_sha256"]),
+        ("scheduler_attestation_sha256", scheduler_attestation["digest"]),
+        ("plan_sha256", plan_sha256),
+        ("namespace", shared["namespace"]),
+        ("namespace_nonce", shared["namespace_nonce"]),
+        ("gpu_identity_sha256", runtime_identity["gpu"]["identity_sha256"]),
+        ("previous_state", "reserved"),
+        ("new_state", "consumed"),
+        ("local_self_attestation_accepted", False),
+    ):
+        _check_exact(witness, key, expected, name)
+    consume_id = _non_placeholder_sha256(witness.get("consume_id"), f"{name}.consume_id")
+    reservation_sha256 = _non_placeholder_sha256(witness.get("reservation_sha256"), f"{name}.reservation_sha256")
+    observed_at_utc = _utc_timestamp(witness.get("observed_at_utc"), f"{name}.observed_at_utc")
+    core = {
+        "schema": ONE_SHOT_CONSUME_SCHEMA,
+        "status": "consumed",
+        "external_scheduler": True,
+        "one_shot": True,
+        "replay_free": True,
+        "atomic_compare_and_swap": True,
+        "authority_id": scheduler_attestation["authority_id"],
+        "trust_anchor_sha256": scheduler_attestation["trust_anchor_sha256"],
+        "scheduler_attestation_sha256": scheduler_attestation["digest"],
+        "plan_sha256": plan_sha256,
+        "namespace": shared["namespace"],
+        "namespace_nonce": shared["namespace_nonce"],
+        "gpu_identity_sha256": runtime_identity["gpu"]["identity_sha256"],
+        "consume_id": consume_id,
+        "reservation_sha256": reservation_sha256,
+        "previous_state": "reserved",
+        "new_state": "consumed",
+        "observed_at_utc": observed_at_utc,
+        "local_self_attestation_accepted": False,
+    }
+    digest = _non_placeholder_sha256(witness.get("digest"), f"{name}.digest")
+    if digest != _digest(core):
+        _fail(f"{name}.digest does not bind the external one-shot consume witness")
+    return {**core, "digest": digest}
+
+
 PROCESS_PRODUCER_KEYS = frozenset({"schema", "id", "version", "source_bound", "synthetic_only", "digest"})
 PROCESS_COMPONENT_KEYS = frozenset({"alive", "returncode", "reaped", "command", "command_sha256"})
 PROCESS_ARTIFACT_BINDING_KEYS = frozenset({"seed", "run_id", "namespace", "namespace_nonce", "checkpoint", "training_receipt", "manifest", "evaluation_artifact", "trajectory"})
-PROCESS_ATTESTATION_KEYS = frozenset({"schema", "status", "source_bound", "synthetic_only", "natural_exit", "observed_after_exit", "producer_digest", "evaluator", "launcher", "artifact_bindings", "artifact_bindings_sha256", "digest"})
+PROCESS_ATTESTATION_KEYS = frozenset({"schema", "status", "source_bound", "synthetic_only", "natural_exit", "observed_after_exit", "producer_digest", "evaluator", "launcher", "artifact_bindings", "artifact_bindings_sha256", "scheduler_attestation", "one_shot_consume_witness", "runtime_identity", "digest"})
 
 
 def _validate_process_component(value: Any, name: str) -> tuple[dict[str, Any], list[str], str]:
@@ -1117,6 +1544,40 @@ def _validate_process(value: Mapping[str, Any], seed: int, name: str) -> dict[st
         "command": canonical_launcher,
         "command_sha256": canonical_launcher_sha256,
     }
+    launcher_physical_index = _launcher_physical_index(
+        canonical_launcher,
+        f"{name}.exit_attestation.launcher.command",
+    )
+    plan_sha256 = _process_plan_digest(
+        shared,
+        evaluation,
+        canonical_evaluator_sha256,
+        canonical_launcher_sha256,
+    )
+    runtime_identity = _validate_runtime_identity(
+        attestation.get("runtime_identity"),
+        seed=seed,
+        shared=shared,
+        evaluation=evaluation,
+        plan_sha256=plan_sha256,
+        launcher_physical_index=launcher_physical_index,
+        name=f"{name}.exit_attestation.runtime_identity",
+    )
+    scheduler_attestation = _validate_scheduler_attestation(
+        attestation.get("scheduler_attestation"),
+        shared=shared,
+        plan_sha256=plan_sha256,
+        runtime_identity=runtime_identity,
+        name=f"{name}.exit_attestation.scheduler_attestation",
+    )
+    one_shot_consume_witness = _validate_one_shot_consume_witness(
+        attestation.get("one_shot_consume_witness"),
+        shared=shared,
+        plan_sha256=plan_sha256,
+        runtime_identity=runtime_identity,
+        scheduler_attestation=scheduler_attestation,
+        name=f"{name}.exit_attestation.one_shot_consume_witness",
+    )
 
     bindings = _mapping(attestation.get("artifact_bindings"), f"{name}.exit_attestation.artifact_bindings")
     _reject_unknown(bindings, PROCESS_ARTIFACT_BINDING_KEYS, f"{name}.exit_attestation.artifact_bindings")
@@ -1150,6 +1611,9 @@ def _validate_process(value: Mapping[str, Any], seed: int, name: str) -> dict[st
         "launcher": launcher,
         "artifact_bindings": normalized_bindings,
         "artifact_bindings_sha256": bindings_digest,
+        "runtime_identity": runtime_identity,
+        "scheduler_attestation": scheduler_attestation,
+        "one_shot_consume_witness": one_shot_consume_witness,
     }
     attestation_digest = _digest(normalized_attestation_core)
     _check_exact(attestation, "digest", attestation_digest, f"{name}.exit_attestation")
@@ -1561,6 +2025,9 @@ def _evaluate(
         _check("rollout_identity_envelopes", all(row["status"] == "independently_verified" or row["sources"].get("rollout_identity", {}).get("exists") is True for row in rows), "all seeds have bounded full835 rollout identities"),
         _check("process_exit_proofs", all(row["status"] == "independently_verified" or row["sources"].get("process_exit_proof", {}).get("exists") is True for row in rows), "all seeds have closed evaluator/launcher exit proofs"),
         _check("independent_hdf5_validator_receipts", all(row["status"] == "independently_verified" or row["sources"].get("validator_receipt", {}).get("exists") is True for row in rows), "all seeds have independent HDF5 validator receipts"),
+        _check("external_scheduler_trust_anchor_witnesses", all_verified, "every seed has an externally attested scheduler trust-anchor witness bound to its plan"),
+        _check("one_shot_consume_witnesses", all_verified, "every seed has an externally consumed, replay-free one-shot witness"),
+        _check("runtime_gpu_terminal_identity_observations", all_verified, "every seed binds live GPU UUID/PCI, child logical device, and terminal artifact identity"),
         _check("cross_file_path_sha_bytes_identity", all_verified, "run, nonce, manifest, training, checkpoint, evaluation, and trajectory identities agree"),
         _check("terminal_835_transitions_836_frames", all_verified, "every seed is terminal at exactly 835 transitions and 836 frames"),
         _check("terminal_zero_credit_boundary", all_verified, "formal/T1/T2/qualification are false and credit is zero"),
@@ -1591,7 +2058,7 @@ def _evaluate(
             "split": SPLIT,
             "transitions": TRANSITIONS,
             "frames": FRAMES,
-            "required_evidence_classes": ["training_matrix", "terminal_matrix", "rollout_identity", "process_exit_proof", "hdf5_validator_receipt"],
+            "required_evidence_classes": ["training_matrix", "terminal_matrix", "rollout_identity", "process_exit_proof", "hdf5_validator_receipt", "external_scheduler_attestation", "one_shot_consume_witness", "runtime_identity_observation"],
             "fresh_32_hex_nonce": True,
             "declared_artifacts_are_not_opened": True,
             "zero_credit_only": True,
@@ -1604,7 +2071,9 @@ def _evaluate(
         "side_effects": _empty_side_effects(),
         "input_boundary": _empty_input_boundary(),
         "interpretation": (
-            "This additive verifier consumes bounded JSON receipts only. It never opens "
+            "This additive verifier consumes bounded JSON receipts only. It requires "
+            "external scheduler trust-anchor/one-shot-consume witnesses and a live "
+            "GPU/terminal identity observation in every positive process envelope. It never opens "
             "manifest, checkpoint, evaluation, progress, trajectory/HDF5, solver, or "
             "runtime artifacts and never starts/stops/restarts an evaluator. A positive "
             "result remains diagnostic-only and contributes zero formal/T1/T2 credit."
@@ -1784,7 +2253,7 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
         if source_bound != all_verified:
             _fail("report.source_bound does not match the deeply validated three-seed evidence chain")
         checks = report.get("checks")
-        expected_checks = ["three_seed_training_matrix", "full835_terminal_completion_matrix", "rollout_identity_envelopes", "process_exit_proofs", "independent_hdf5_validator_receipts", "cross_file_path_sha_bytes_identity", "terminal_835_transitions_836_frames", "terminal_zero_credit_boundary"]
+        expected_checks = ["three_seed_training_matrix", "full835_terminal_completion_matrix", "rollout_identity_envelopes", "process_exit_proofs", "independent_hdf5_validator_receipts", "external_scheduler_trust_anchor_witnesses", "one_shot_consume_witnesses", "runtime_gpu_terminal_identity_observations", "cross_file_path_sha_bytes_identity", "terminal_835_transitions_836_frames", "terminal_zero_credit_boundary"]
         if not isinstance(checks, list) or len(checks) != len(expected_checks) or [item.get("check") for item in checks if isinstance(item, Mapping)] != expected_checks:
             _fail("report.checks have an unexpected identity")
         for item in checks:

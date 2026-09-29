@@ -201,7 +201,12 @@ def _envelopes(training: dict[str, object], terminal: dict[str, object]) -> dict
             "--output", projection["evaluation"]["path"],
             "--diagnostic",
         ]
-        launcher_command = [verifier.CANONICAL_ENV, verifier.CANONICAL_ENV_ASSIGNMENT, *evaluator_command]
+        launcher_command = [
+            verifier.CANONICAL_ENV,
+            verifier.CANONICAL_ENV_ASSIGNMENT,
+            "CUDA_VISIBLE_DEVICES=2",
+            *evaluator_command,
+        ]
         evaluator = {
             "alive": False,
             "returncode": 0,
@@ -227,6 +232,108 @@ def _envelopes(training: dict[str, object], terminal: dict[str, object]) -> dict
             "evaluation_artifact": {key: projection["evaluation"][key] for key in ("path", "sha256", "bytes")},
             "trajectory": common["trajectory"],
         }
+        evaluation_artifact = {key: projection["evaluation"][key] for key in ("path", "sha256", "bytes")}
+        plan_sha256 = verifier._process_plan_digest(
+            common,
+            evaluation_artifact,
+            evaluator["command_sha256"],
+            launcher["command_sha256"],
+        )
+        gpu_core = {
+            "physical_index": 2,
+            "uuid": "GPU-12345678-90ab-cdef-1234-567890abcdef",
+            "pci_bus_id": "0000:02:00.0",
+            "logical_device": verifier.CANONICAL_DEVICE,
+            "cuda_visible_devices": "2",
+            "cuda_device_order": "PCI_BUS_ID",
+            "memory_total_mib": 49152,
+            "memory_used_mib": 1024,
+            "memory_free_mib": 48128,
+        }
+        gpu = {**gpu_core, "identity_sha256": verifier._digest(gpu_core)}
+        runtime_core = {
+            "schema": verifier.RUNTIME_IDENTITY_SCHEMA,
+            "status": "observed",
+            "source": "scheduler_owned_live_probe",
+            "external_observation": True,
+            "scheduler_owned": True,
+            "observed_during_execution": True,
+            "observed_after_exit": True,
+            "plan_sha256": plan_sha256,
+            "namespace": common["namespace"],
+            "namespace_nonce": common["namespace_nonce"],
+            "gpu": gpu,
+            "child": {
+                "observed": True,
+                "child_runtime_attested": True,
+                "gpu_uuid": gpu["uuid"],
+                "logical_device": verifier.CANONICAL_DEVICE,
+                "probe_tool": "nvidia-smi",
+                "process_identity_sha256": _sha(f"raw-process-identity-{seed}"),
+            },
+            "terminal": {
+                "observed": True,
+                "status": "completed",
+                "transitions": verifier.TRANSITIONS,
+                "frames": verifier.FRAMES,
+                "namespace": common["namespace"],
+                "namespace_nonce": common["namespace_nonce"],
+                "evaluation_sha256": evaluation_artifact["sha256"],
+                "trajectory_sha256": common["trajectory"]["sha256"],
+            },
+            "observed_at_utc": "2026-09-29T00:00:00Z",
+        }
+        runtime_identity = {
+            **runtime_core,
+            "identity_sha256": verifier._digest(runtime_core),
+        }
+        scheduler_core = {
+            "schema": verifier.SCHEDULER_ATTESTATION_SCHEMA,
+            "status": "authorized",
+            "external_scheduler": True,
+            "one_shot": True,
+            "authority_id": _sha(f"raw-authority-{seed}"),
+            "trust_anchor_sha256": _sha("raw-scheduler-trust-anchor"),
+            "signature_algorithm": "ed25519",
+            "signature_sha256": _sha(f"raw-scheduler-signature-{seed}"),
+            "signature_verified": True,
+            "plan_sha256": plan_sha256,
+            "namespace": common["namespace"],
+            "namespace_nonce": common["namespace_nonce"],
+            "resource_snapshot_sha256": _sha(f"raw-resource-snapshot-{seed}"),
+            "gpu_identity_sha256": gpu["identity_sha256"],
+            "observed_at_utc": "2026-09-29T00:00:00Z",
+            "local_self_attestation_accepted": False,
+        }
+        scheduler_attestation = {
+            **scheduler_core,
+            "digest": verifier._digest(scheduler_core),
+        }
+        consume_core = {
+            "schema": verifier.ONE_SHOT_CONSUME_SCHEMA,
+            "status": "consumed",
+            "external_scheduler": True,
+            "one_shot": True,
+            "replay_free": True,
+            "atomic_compare_and_swap": True,
+            "authority_id": scheduler_attestation["authority_id"],
+            "trust_anchor_sha256": scheduler_attestation["trust_anchor_sha256"],
+            "scheduler_attestation_sha256": scheduler_attestation["digest"],
+            "plan_sha256": plan_sha256,
+            "namespace": common["namespace"],
+            "namespace_nonce": common["namespace_nonce"],
+            "gpu_identity_sha256": gpu["identity_sha256"],
+            "consume_id": _sha(f"raw-consume-{seed}"),
+            "reservation_sha256": _sha(f"raw-reservation-{seed}"),
+            "previous_state": "reserved",
+            "new_state": "consumed",
+            "observed_at_utc": "2026-09-29T00:00:00Z",
+            "local_self_attestation_accepted": False,
+        }
+        one_shot_consume_witness = {
+            **consume_core,
+            "digest": verifier._digest(consume_core),
+        }
         producer_core = {
             "schema": verifier.PROCESS_PRODUCER_SCHEMA,
             "id": verifier.PROCESS_PRODUCER_ID,
@@ -247,6 +354,9 @@ def _envelopes(training: dict[str, object], terminal: dict[str, object]) -> dict
             "launcher": launcher,
             "artifact_bindings": bindings,
             "artifact_bindings_sha256": verifier._digest(bindings),
+            "runtime_identity": runtime_identity,
+            "scheduler_attestation": scheduler_attestation,
+            "one_shot_consume_witness": one_shot_consume_witness,
         }
         attestation = {**attestation_core, "digest": verifier._digest(attestation_core)}
         rollout = {
@@ -254,7 +364,7 @@ def _envelopes(training: dict[str, object], terminal: dict[str, object]) -> dict
             "schema": f"core.f3.graph_raw.hidden16.seed{seed}.rollout_identity.v1",
             "report_id": f"f3-graph-raw-hidden16-seed{seed}-full835-rollout-identity-v1",
             "status": "completed_diagnostic",
-            "evaluation_artifact": {key: projection["evaluation"][key] for key in ("path", "sha256", "bytes")},
+            "evaluation_artifact": evaluation_artifact,
             "terminal_markers": {"terminal": True, "execution_complete": True, "finite_rollout_complete": True, "terminal_status": "completed", "future_state_inputs": False},
         }
         process = {
@@ -267,7 +377,7 @@ def _envelopes(training: dict[str, object], terminal: dict[str, object]) -> dict
             "evaluator_returncode": 0,
             "launcher_returncode": 0,
             "returncode": 0,
-            "evaluation_artifact": {key: projection["evaluation"][key] for key in ("path", "sha256", "bytes")},
+            "evaluation_artifact": evaluation_artifact,
             "producer": producer,
             "exit_attestation": attestation,
         }
@@ -353,6 +463,56 @@ def test_missing_process_proof_is_not_terminal_verified(tmp_path: Path) -> None:
     report = verifier.build_report(tmp_path, training_matrix_path=payloads["training_path"], terminal_matrix_path=payloads["terminal_path"], rollout_paths=paths["rollout"], process_paths=paths["process"], validator_paths=paths["validator"])
     assert report["source_bound"] is False
     assert any("process_exit_proof" in reason or "missing required" in reason for reason in report["blocked_reasons"])
+
+
+@pytest.mark.parametrize("field", ["scheduler_attestation", "one_shot_consume_witness", "runtime_identity"])
+def test_external_scheduler_and_runtime_witnesses_are_required(tmp_path: Path, field: str) -> None:
+    _report, paths, payloads = _build_complete(tmp_path)
+    process = json.loads(paths["process"][17].read_text(encoding="utf-8"))
+    process["exit_attestation"].pop(field)
+    _write_json(paths["process"][17], process)
+    report = verifier.build_report(
+        tmp_path,
+        training_matrix_path=payloads["training_path"],
+        terminal_matrix_path=payloads["terminal_path"],
+        rollout_paths=paths["rollout"],
+        process_paths=paths["process"],
+        validator_paths=paths["validator"],
+    )
+    assert report["source_bound"] is False
+    assert any(field in reason for reason in report["blocked_reasons"])
+
+
+def test_gpu_and_terminal_identity_observations_are_cross_bound(tmp_path: Path) -> None:
+    _report, paths, payloads = _build_complete(tmp_path)
+    process = json.loads(paths["process"][17].read_text(encoding="utf-8"))
+    process["exit_attestation"]["runtime_identity"]["gpu"]["pci_bus_id"] = "0000:03:00.0"
+    _write_json(paths["process"][17], process)
+    report = verifier.build_report(
+        tmp_path,
+        training_matrix_path=payloads["training_path"],
+        terminal_matrix_path=payloads["terminal_path"],
+        rollout_paths=paths["rollout"],
+        process_paths=paths["process"],
+        validator_paths=paths["validator"],
+    )
+    assert report["source_bound"] is False
+    assert any("identity_sha256" in reason or "pci_bus_id" in reason for reason in report["blocked_reasons"])
+
+    _report, paths, payloads = _build_complete(tmp_path / "terminal")
+    process = json.loads(paths["process"][17].read_text(encoding="utf-8"))
+    process["exit_attestation"]["runtime_identity"]["terminal"]["evaluation_sha256"] = _sha("drifted-evaluation")
+    _write_json(paths["process"][17], process)
+    report = verifier.build_report(
+        tmp_path / "terminal",
+        training_matrix_path=payloads["training_path"],
+        terminal_matrix_path=payloads["terminal_path"],
+        rollout_paths=paths["rollout"],
+        process_paths=paths["process"],
+        validator_paths=paths["validator"],
+    )
+    assert report["source_bound"] is False
+    assert any("evaluation_sha256" in reason or "terminal" in reason for reason in report["blocked_reasons"])
 
 
 @pytest.mark.parametrize("field", ["evaluator_alive", "launcher_alive", "returncode", "evaluator_returncode", "launcher_returncode"])
