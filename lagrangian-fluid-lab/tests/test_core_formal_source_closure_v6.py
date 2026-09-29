@@ -84,6 +84,14 @@ def test_explicit_v7_namespace_is_planning_only_and_live_bound(tmp_path: Path) -
     assert verification["ok"] is True
     assert verification["checks"]["required_file_count"] is True
     assert verification["checks"]["launch_is_closed"] is True
+
+    tampered = {**closure, "files": [*closure["files"], None]}
+    tampered_verification = verify_source_closure(
+        tampered, data_root=ROOT, namespace=namespace
+    )
+    assert tampered_verification["ok"] is False
+    assert tampered_verification["checks"]["declared_rows_are_objects"] is False
+
     closure_path.write_text(json.dumps(closure), encoding="utf-8")
     audit = build_audit(
         data_root=ROOT,

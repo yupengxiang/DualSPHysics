@@ -10,6 +10,7 @@ from scripts.core_formal_source_closure_admission import (
     REQUIRED_CODE_FILES,
     _gate_snapshot,
     main,
+    materialize_source_closure,
     verify_admission,
     verify_source_closure,
 )
@@ -61,6 +62,16 @@ def test_v5_closure_is_preserved_and_fails_closed_against_current_sources() -> N
 
     assert closure["source_snapshot_policy"] == "fresh_code_closure_at_formal_admission"
     assert closure["generator"]["path"] == "scripts/core_formal_source_closure_admission.py"
+
+
+def test_v5_closure_rejects_non_object_declared_file_rows() -> None:
+    closure = materialize_source_closure(data_root=ROOT)
+    closure["files"] = [*closure["files"], None]
+
+    result = verify_source_closure(closure, data_root=ROOT)
+
+    assert result["ok"] is False
+    assert result["checks"]["declared_rows_are_objects"] is False
 
 
 def test_root_receipt_binds_v5_hash_and_preserves_formal_holds() -> None:

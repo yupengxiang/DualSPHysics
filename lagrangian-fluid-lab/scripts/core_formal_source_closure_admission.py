@@ -141,6 +141,10 @@ def verify_source_closure(payload: Mapping[str, Any], *, data_root: str | Path,
     declared_files = payload.get("files")
     current_files = current["files"]
     declared_rows = declared_files if isinstance(declared_files, list) else []
+    declared_rows_are_objects = (
+        isinstance(declared_files, list)
+        and all(isinstance(row, Mapping) for row in declared_files)
+    )
     declared_by_name = {
         row.get("relative_path"): row
         for row in declared_rows
@@ -160,6 +164,7 @@ def verify_source_closure(payload: Mapping[str, Any], *, data_root: str | Path,
         "schema": payload.get("schema") == CLOSURE_SCHEMA,
         "closure_version": payload.get("closure_version") == CLOSURE_VERSION,
         "required_file_set": payload.get("required_files") == list(REQUIRED_CODE_FILES),
+        "declared_rows_are_objects": declared_rows_are_objects,
         "declared_order_and_set": declared_names == list(REQUIRED_CODE_FILES),
         "complete": payload.get("complete") is True and not payload.get("missing_files"),
         "all_workspace_hashes_match": not mismatch_files and declared_by_name == current_by_name,

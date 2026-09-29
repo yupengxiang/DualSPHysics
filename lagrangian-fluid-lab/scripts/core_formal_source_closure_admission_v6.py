@@ -141,6 +141,11 @@ def verify_source_closure(payload: Mapping[str, Any], *, data_root: str | Path,
     """Verify metadata and every declared hash against the live workspace."""
     current = materialize_source_closure(
         data_root=data_root, code_root=code_root, namespace=namespace)
+    declared_files = payload.get("files")
+    declared_rows_are_objects = (
+        isinstance(declared_files, list)
+        and all(isinstance(row, Mapping) for row in declared_files)
+    )
     declared = _declared_rows(payload)
     declared_by_name = {
         row.get("relative_path"): dict(row)
@@ -160,6 +165,7 @@ def verify_source_closure(payload: Mapping[str, Any], *, data_root: str | Path,
         "closure_version": payload.get("closure_version") == namespace,
         "required_file_set": payload.get("required_files") == list(current["required_files"]),
         "required_file_count": payload.get("required_file_count") == len(current["required_files"]),
+        "declared_rows_are_objects": declared_rows_are_objects,
         "declared_order_and_set": declared_names == list(current["required_files"]),
         "complete": payload.get("complete") is True and not payload.get("missing_files"),
         "all_workspace_hashes_match": not mismatch_files and declared_by_name == current_by_name,
