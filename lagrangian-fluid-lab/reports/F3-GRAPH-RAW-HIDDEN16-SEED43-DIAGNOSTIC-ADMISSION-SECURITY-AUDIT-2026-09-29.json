@@ -1,0 +1,162 @@
+{
+  "schema": "core.f3.graph_raw.hidden16.seed43.diagnostic_admission.security_audit.report.v1",
+  "report_id": "f3-graph-raw-hidden16-seed43-diagnostic-admission-security-audit-2026-09-29",
+  "contract_date": "2026-09-29",
+  "status": "closed_minimal_fail_closed",
+  "audit_mode": "bounded_read_only_security_audit",
+  "scope": {
+    "model_kind": "graph_raw",
+    "hidden": 16,
+    "seed": 43,
+    "primary_admission": "scripts/f3_graph_raw_hidden16_seed43_diagnostic_admission_v1.py",
+    "primary_runner": "scripts/f3_graph_raw_hidden16_seed43_diagnostic_runner_v2.py",
+    "real_call_data_flow": [
+      "_build_reserved_plan -> launcher.build_plan reads the manifest, training receipt, and checkpoint into one RolloutPlan",
+      "_reconcile_plan_reread -> launcher.reconcile_plan_snapshot runs before external authority validation and namespace state writes",
+      "_plan_binding/_identity_core carry the launcher rollout snapshot and sealed snapshot digest",
+      "load/validate_receipt -> _validate_identity_shape -> _reconcile_receipt_snapshot rereads and reconciles the bound inputs",
+      "runner.build_plan -> admission.load_receipt/revalidate_receipt, so the runner validates the snapshot before using the plan",
+      "runner terminal artifact helpers remain non-authorizing because the internal execution capability is absent"
+    ],
+    "reference_control": "raw seed17 SA-003 behavior-level cross-binding only; seed43 call/data flow was independently inspected",
+    "synthetic_scheduler_fixture_is_not_production_authority": true,
+    "no_gpu_or_nvidia_smi": true,
+    "no_popen_or_wait": true,
+    "no_solver": true,
+    "no_registry_ledger_denominator_gate_completion_writes": true,
+    "launcher_dependency_modified": false
+  },
+  "baseline_findings": [
+    {
+      "id": "F3-RAW-H16-S43-SA-003",
+      "title": "Rollout snapshot/digest was not behaviorally cross-bound through seed43 admission",
+      "before": "seed43 plan and identity binding did not carry the launcher snapshot/digest, minting reread inputs without launcher reconciliation before authority/state handling, and receipt validation did not reread the sealed snapshot",
+      "disposition": "closed_minimal_fail_closed",
+      "evidence": [
+        "seed43 plan binding and identity now carry rollout_snapshot and rollout_snapshot_sha256",
+        "final manifest, training receipt, and checkpoint descriptors are reconciled before external authority validation and namespace state writes",
+        "identity validation reconstructs plan_sha256 from the validated snapshot and cross-binds seed, run_id, root, namespace, nonce, command, environment, and input descriptors",
+        "receipt validation rereads and reconciles the snapshot, and runner.build_plan reaches that validation before plan use"
+      ],
+      "tests": [
+        "test_receipt_binds_seed43_rollout_snapshot_and_plan_digest",
+        "test_final_reread_rejects_cross_bound_training_before_authority_or_state_write",
+        "test_snapshot_cross_seed_forgery_fails_closed_even_with_recomputed_receipt_hashes",
+        "test_runner_revalidates_rollout_snapshot_before_plan_use"
+      ]
+    },
+    {
+      "id": "F3-RAW-H16-S43-DESC-001",
+      "title": "Descriptor-bound artifact and input checks remain fail-closed",
+      "before": "seed43 runner already rejected pathname-only output and used stable artifact descriptors; no new production child-publication capability was present for this audit to authorize",
+      "disposition": "closed_existing_fail_closed",
+      "evidence": [
+        "existing seed43 runner descriptor gates reject unstable/pathname-only artifacts",
+        "the runner's execution capability remains absent and no descriptor authority is inferred from receipt fields"
+      ]
+    },
+    {
+      "id": "F3-RAW-H16-S43-TERM-001",
+      "title": "Terminal proof remains non-authorizing without an internal execution capability",
+      "before": "seed43 has descriptor-bound terminal artifact helpers, but its runner cannot reach production execution or mint an independent terminal proof under the current capability configuration",
+      "disposition": "closed_fail_closed_no_change",
+      "evidence": [
+        "terminal artifact receipts bind the plan and stable artifact descriptors and remain zero-credit",
+        "_DIAGNOSTIC_EXECUTION_CAPABILITY is absent, so terminal success is not inferred from report fields",
+        "no live child, GPU, Popen/wait, or terminal proof was observed by this audit"
+      ]
+    }
+  ],
+  "control_matrix": {
+    "rollout_plan_snapshot_cross_binding": true,
+    "final_stable_reread_before_authority_and_namespace_state": true,
+    "manifest_canonical_and_file_digest_cross_binding": true,
+    "training_receipt_canonical_and_file_digest_cross_binding": true,
+    "checkpoint_descriptor_and_metadata_cross_binding": true,
+    "snapshot_seed_run_id_root_namespace_nonce_command_environment_cross_binding": true,
+    "receipt_snapshot_reconciled_when_files_are_checked": true,
+    "runner_revalidates_receipt_before_plan_use": true,
+    "pathname_only_child_output_rejected": true,
+    "descriptor_bound_terminal_artifact_helper": true,
+    "terminal_receipt_minted_by_runner": false,
+    "production_scheduler_trust_anchor_attested": false,
+    "runtime_gpu_identity_observed": false,
+    "launch_allowed": false,
+    "formal_credit": 0
+  },
+  "audited_files": [
+    {
+      "path": "scripts/f3_graph_raw_hidden16_seed43_diagnostic_admission_v1.py",
+      "role": "seed43 admission after minimal snapshot/digest hardening",
+      "sha256": "0ec53a54c4e05c591361675bb8b344d5d8f23780a8434dcf73a06f3e1b6ee578"
+    },
+    {
+      "path": "scripts/f3_graph_raw_hidden16_seed43_diagnostic_runner_v2.py",
+      "role": "seed43 runner read-only call-chain audit target",
+      "sha256": "c7eedd5fd672e9109664218fa0069b2ee672903d785a5fe075c95c1607dc5598"
+    },
+    {
+      "path": "tests/test_f3_graph_raw_hidden16_seed43_diagnostic_admission_v1.py",
+      "role": "seed43 admission regression and hardening tests",
+      "sha256": "8df3c9e626b1d086f4cc60c7674eb2c037215248ac2c4a85645a7c570ec1a6a6"
+    },
+    {
+      "path": "tests/test_f3_graph_raw_hidden16_seed43_diagnostic_runner_v2.py",
+      "role": "seed43 runner snapshot revalidation regression",
+      "sha256": "16ba451bcdd61bb01095069d2c11c6a77d72fe43ce8e508740ed7da50ed99407"
+    }
+  ],
+  "tests": [
+    {
+      "command": ".venv/bin/pytest -q tests/test_f3_graph_raw_hidden16_seed43_diagnostic_admission_v1.py tests/test_f3_graph_raw_hidden16_seed43_diagnostic_runner_v2.py",
+      "result": "35 passed"
+    },
+    {
+      "command": ".venv/bin/pytest -q tests/test_f3_graph_raw_hidden16_seed17_diagnostic_admission_v1.py tests/test_f3_graph_raw_hidden16_seed17_diagnostic_runner_v2.py tests/test_f3_graph_raw_hidden16_seed29_diagnostic_admission_v1.py tests/test_f3_graph_raw_hidden16_seed29_diagnostic_runner_v2.py tests/test_f3_graph_raw_hidden16_seed43_diagnostic_admission_v1.py tests/test_f3_graph_raw_hidden16_seed43_diagnostic_runner_v2.py",
+      "result": "101 passed"
+    },
+    {
+      "command": ".venv/bin/python scripts/f3_graph_raw_hidden16_seed43_diagnostic_admission_v1.py --report-output <temporary report>",
+      "result": "exit 2; blocked_fail_closed; no scheduler-owned GPU snapshot supplied; no Popen/GPU/solver"
+    },
+    {
+      "command": ".venv/bin/python scripts/f3_graph_raw_hidden16_seed43_diagnostic_runner_v2.py --report-output <temporary report>",
+      "result": "exit 2; blocked_fail_closed because no admission receipt was supplied; no Popen/GPU/solver"
+    }
+  ],
+  "readiness": {
+    "diagnostic_only": true,
+    "launch_allowed": false,
+    "popen_attempted": false,
+    "wait_attempted": false,
+    "gpu_execution_observed": false,
+    "independent_terminal_proof": false,
+    "production_authority_present": false,
+    "blocked_reasons": [
+      "no production scheduler-owned trust anchor or one-shot consume witness was supplied",
+      "no runtime GPU UUID/PCI or child terminal observation was performed by this bounded audit"
+    ]
+  },
+  "side_effects": {
+    "gpu_used_for_execution": false,
+    "popen_attempts": 0,
+    "wait_attempts": 0,
+    "solver_started": false,
+    "registry_writes": 0,
+    "ledger_writes": 0,
+    "denominator_writes": 0,
+    "gate_writes": 0,
+    "completion_writes": 0,
+    "plan_writes": 0,
+    "production_artifacts_opened": 0,
+    "source_files_written": 3,
+    "security_report_writes": 2
+  },
+  "write_set": [
+    "scripts/f3_graph_raw_hidden16_seed43_diagnostic_admission_v1.py",
+    "tests/test_f3_graph_raw_hidden16_seed43_diagnostic_admission_v1.py",
+    "tests/test_f3_graph_raw_hidden16_seed43_diagnostic_runner_v2.py",
+    "reports/F3-GRAPH-RAW-HIDDEN16-SEED43-DIAGNOSTIC-ADMISSION-SECURITY-AUDIT-2026-09-29.json",
+    "reports/F3-GRAPH-RAW-HIDDEN16-SEED43-DIAGNOSTIC-ADMISSION-SECURITY-AUDIT-2026-09-29.zh-CN.md"
+  ]
+}

@@ -271,6 +271,80 @@ def test_receipt_binds_all_identity_domains_and_stays_zero_credit(tmp_path: Path
     assert stat.S_IMODE(marker.parent.stat().st_mode) == 0o700
 
 
+def test_receipt_binds_seed43_rollout_snapshot_and_plan_digest(tmp_path: Path) -> None:
+    receipt, _fixture_data = _mint(tmp_path, nonce="0" * 31 + "1")
+    identity = receipt["identity"]
+    snapshot = identity["rollout_snapshot"]
+
+    assert snapshot["seed"] == admission.SEED
+    assert snapshot["run_id"] == identity["run_id"]
+    assert snapshot["manifest"]["path"] == identity["manifest"]["path"]
+    assert snapshot["training_receipt"]["path"] == identity["training_receipt"]["path"]
+    assert snapshot["checkpoint"]["path"] == identity["checkpoint"]["path"]
+    assert identity["rollout_snapshot_sha256"] == admission.canonical_digest(snapshot)
+    assert identity["plan_sha256"] == admission.canonical_digest(
+        admission._plan_binding_from_snapshot(snapshot)
+    )
+
+
+def test_final_reread_rejects_cross_bound_training_before_authority_or_state_write(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fixture = _fixture(tmp_path)
+    nonce = "1" * 32
+    authority_path = _write_external_authority(fixture, nonce)
+    original = admission._build_reserved_plan
+
+    def build_then_drift(*args: object, **kwargs: object):
+        plan = original(*args, **kwargs)
+        training = Path(str(fixture["training"]))
+        training.write_bytes(training.read_bytes() + b"\n")
+        return plan
+
+    monkeypatch.setattr(admission, "_build_reserved_plan", build_then_drift)
+    with pytest.raises(
+        (admission.AdmissionError, admission.launcher.ContractError),
+        match="training receipt file digest drifted from the RolloutPlan snapshot",
+    ):
+        admission.mint_admission(
+            fixture["root"],
+            manifest=fixture["manifest"],
+            training_receipt=fixture["training"],
+            checkpoint=fixture["checkpoint"],
+            nonce=nonce,
+            output_root=fixture["output_root"],
+            resource_admission=fixture["resource"],
+            external_authority=authority_path,
+        )
+
+    namespace = Path(fixture["output_root"]) / (
+        f"f3-graph_raw500-hidden16-currentmanifest-seed{admission.SEED}"
+        f"-full835-nonce{nonce}"
+    )
+    assert not (namespace / admission.NAMESPACE_MARKER_NAME).exists()
+    assert not (namespace / admission.STATE_NAME).exists()
+    assert not Path(admission._mapping(json.loads(authority_path.read_text()), "authority")["consume_path"]).exists()
+
+
+def test_snapshot_cross_seed_forgery_fails_closed_even_with_recomputed_receipt_hashes(
+    tmp_path: Path,
+) -> None:
+    receipt, _fixture_data = _mint(tmp_path, nonce="2" * 32)
+    forged = copy.deepcopy(receipt)
+    forged["identity"]["rollout_snapshot"]["seed"] = 17
+    forged["identity"]["rollout_snapshot_sha256"] = admission.canonical_digest(
+        forged["identity"]["rollout_snapshot"]
+    )
+    forged["identity_sha256"] = admission.canonical_digest(forged["identity"])
+    forged["receipt_sha256"] = admission.canonical_digest(
+        {key: value for key, value in forged.items() if key not in {"receipt_sha256", "receipt_file"}}
+    )
+
+    errors = admission.validate_receipt(forged, check_files=False)
+    assert errors
+    assert "identity.rollout_snapshot.seed must be 43" in errors[0]
+
+
 def test_receipt_consumption_is_atomic_and_not_reusable(tmp_path: Path) -> None:
     receipt, _fixture_data = _mint(tmp_path, nonce="b" * 32)
     receipt_path = Path(receipt["receipt_path"])

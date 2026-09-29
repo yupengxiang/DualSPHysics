@@ -300,6 +300,19 @@ def test_source_drift_fails_closed_before_any_runtime_path(tmp_path: Path, monke
     assert report["popen_attempted"] is False
 
 
+def test_runner_revalidates_rollout_snapshot_before_plan_use(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    receipt = json.loads(Path(fixture["receipt"]).read_text(encoding="utf-8"))
+    training = Path(receipt["identity"]["training_receipt"]["path"])
+    training.write_bytes(training.read_bytes() + b"\n")
+
+    with pytest.raises(
+        (admission.AdmissionError, admission.launcher.ContractError),
+        match="training receipt file digest drifted from the RolloutPlan snapshot",
+    ):
+        runner.build_plan(fixture["receipt"], resource_admission=fixture["resource"])
+
+
 def test_report_verify_cli_accepts_blocked_contract(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     report = runner.build_report(fixture["receipt"], execute_requested=True)
