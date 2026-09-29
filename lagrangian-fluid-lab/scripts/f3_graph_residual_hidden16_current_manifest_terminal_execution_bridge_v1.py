@@ -32,6 +32,7 @@ import math
 import os
 from pathlib import Path
 import secrets
+import stat
 import sys
 from typing import Any
 
@@ -989,11 +990,124 @@ def render_zh_report(report: Mapping[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _open_output_parent(path: Path, name: str) -> tuple[int, list[int]]:
+    """Open/create an output parent without following a directory symlink."""
+
+    candidate = Path(os.path.abspath(os.fspath(path)))
+    if not candidate.is_absolute() or candidate.name in {"", ".", ".."}:
+        _fail(f"{name} must identify a file below an absolute directory")
+    nofollow = getattr(os, "O_NOFOLLOW", 0)
+    directory = getattr(os, "O_DIRECTORY", 0)
+    if not nofollow or not directory:
+        _fail("platform does not provide O_NOFOLLOW/O_DIRECTORY")
+    flags = os.O_RDONLY | directory | getattr(os, "O_CLOEXEC", 0) | nofollow
+    opened: list[int] = []
+    try:
+        current = os.open(os.sep, flags)
+        opened.append(current)
+        for component in candidate.parent.parts[1:]:
+            while True:
+                try:
+                    next_fd = os.open(component, flags, dir_fd=current)
+                except FileNotFoundError:
+                    try:
+                        os.mkdir(component, 0o755, dir_fd=current)
+                    except FileExistsError:
+                        continue
+                    continue
+                opened.append(next_fd)
+                current = next_fd
+                break
+        return current, opened
+    except (OSError, BridgeError) as error:
+        for descriptor in reversed(opened):
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+        if isinstance(error, BridgeError):
+            raise
+        _fail(f"{name} parent contains a symlink or unsafe directory: {error}")
+
+
 def _write_new(path: Path, content: str) -> None:
-    if path.exists() or path.is_symlink():
-        _fail(f"refusing to overwrite existing output: {path}")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")
+    """Create a new output atomically without a leaf/parent TOCTOU window."""
+
+    candidate = Path(os.path.abspath(os.fspath(path)))
+    parent_fd, opened = _open_output_parent(candidate, "output path")
+    temporary_name: str | None = None
+    descriptor = -1
+    try:
+        try:
+            existing = os.stat(candidate.name, dir_fd=parent_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            existing = None
+        if existing is not None:
+            if stat.S_ISLNK(existing.st_mode):
+                _fail(f"refusing to write through output symlink: {candidate}")
+            _fail(f"refusing to overwrite existing output: {candidate}")
+
+        raw = content.encode("utf-8")
+        for _ in range(16):
+            temporary_name = f".{candidate.name}.{secrets.token_hex(12)}.tmp"
+            try:
+                descriptor = os.open(
+                    temporary_name,
+                    os.O_WRONLY
+                    | os.O_CREAT
+                    | os.O_EXCL
+                    | getattr(os, "O_CLOEXEC", 0)
+                    | getattr(os, "O_NOFOLLOW", 0),
+                    0o644,
+                    dir_fd=parent_fd,
+                )
+                break
+            except FileExistsError:
+                temporary_name = None
+        else:
+            _fail("could not allocate a temporary output path")
+
+        try:
+            offset = 0
+            while offset < len(raw):
+                written = os.write(descriptor, raw[offset:])
+                if written <= 0:
+                    _fail("short output write")
+                offset += written
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+            descriptor = -1
+
+        try:
+            os.link(
+                temporary_name,
+                candidate.name,
+                src_dir_fd=parent_fd,
+                dst_dir_fd=parent_fd,
+                follow_symlinks=False,
+            )
+        except FileExistsError:
+            _fail("output path appeared during atomic publication")
+        os.unlink(temporary_name, dir_fd=parent_fd)
+        temporary_name = None
+        os.fsync(parent_fd)
+    finally:
+        if descriptor >= 0:
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+        if temporary_name is not None:
+            try:
+                os.unlink(temporary_name, dir_fd=parent_fd)
+            except OSError:
+                pass
+        for file_descriptor in reversed(opened):
+            try:
+                os.close(file_descriptor)
+            except OSError:
+                pass
 
 
 def _parse_nonces(values: Sequence[str]) -> dict[int, str]:

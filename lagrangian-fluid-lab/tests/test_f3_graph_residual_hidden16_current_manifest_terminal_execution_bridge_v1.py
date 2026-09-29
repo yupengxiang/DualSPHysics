@@ -327,3 +327,41 @@ def test_cli_verify_report_remains_fail_closed(tmp_path: Path, capsys: pytest.Ca
     report_path.write_text(json.dumps(report), encoding="utf-8")
     assert bridge.main(["--verify-report", str(report_path)]) == 0
     assert json.loads(capsys.readouterr().out)["valid"] is True
+
+
+def test_report_writer_rejects_leaf_and_parent_symlink_destinations(tmp_path: Path) -> None:
+    target = tmp_path / "sentinel.txt"
+    target.write_text("sentinel", encoding="utf-8")
+    leaf = tmp_path / "report.json"
+    leaf.symlink_to(target)
+    with pytest.raises(bridge.BridgeError, match="symlink"):
+        bridge._write_new(leaf, "must not follow")
+    assert target.read_text(encoding="utf-8") == "sentinel"
+
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    parent_link = tmp_path / "parent-link"
+    parent_link.symlink_to(outside, target_is_directory=True)
+    with pytest.raises(bridge.BridgeError, match="symlink|unsafe directory"):
+        bridge._write_new(parent_link / "report.json", "must not escape")
+    assert not (outside / "report.json").exists()
+
+
+def test_report_writer_rejects_leaf_created_after_preflight(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    output = tmp_path / "report.json"
+    target = tmp_path / "sentinel.txt"
+    target.write_text("sentinel", encoding="utf-8")
+    original_link = bridge.os.link
+    injected = False
+
+    def link_and_inject(source: object, destination: object, *args: object, **kwargs: object) -> object:
+        nonlocal injected
+        if not injected:
+            output.symlink_to(target)
+            injected = True
+        return original_link(source, destination, *args, **kwargs)
+
+    monkeypatch.setattr(bridge.os, "link", link_and_inject)
+    with pytest.raises(bridge.BridgeError, match="appeared during atomic publication"):
+        bridge._write_new(output, "must not follow")
+    assert target.read_text(encoding="utf-8") == "sentinel"

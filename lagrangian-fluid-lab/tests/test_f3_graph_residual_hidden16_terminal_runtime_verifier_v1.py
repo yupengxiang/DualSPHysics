@@ -274,6 +274,29 @@ def test_complete_positive_binds_all_four_evidence_classes_without_hdf5(tmp_path
     assert report["input_boundary"]["hdf5_content_opened"] is False
 
 
+def test_positive_report_revalidates_all_declared_sources(tmp_path: Path) -> None:
+    report, _paths = _build_complete(tmp_path)
+    assert verifier.verify_report_sources(report, lab_root=tmp_path) == []
+
+    # Structural validation alone must not authorize a forged normalized
+    # evidence object; the verifier must recompute it from the source JSON.
+    report["seed_matrix"][0]["evidence"]["process_exit_proof"]["returncode"] = 1
+    assert verifier.validate_report(report) == []
+    errors = verifier.verify_report_sources(report, lab_root=tmp_path)
+    assert any("source-bound recomputation" in reason for reason in errors)
+
+
+def test_cli_verify_report_rebinds_positive_sources(tmp_path: Path) -> None:
+    report, _paths = _build_complete(tmp_path)
+    report_path = tmp_path / "report.json"
+    report_path.write_text(verifier.canonical_json(report), encoding="utf-8")
+    assert verifier.main(["--root", str(tmp_path), "--verify-report", str(report_path)]) == 0
+
+    report["seed_matrix"][1]["evidence"]["validator_receipt"]["frames_executed"] = verifier.FRAMES - 1
+    report_path.write_text(verifier.canonical_json(report), encoding="utf-8")
+    assert verifier.main(["--root", str(tmp_path), "--verify-report", str(report_path)]) == 1
+
+
 def test_missing_exit_proof_is_not_terminal_verified(tmp_path: Path) -> None:
     complete, paths = _build_complete(tmp_path)
     paths["process"][17].unlink()
@@ -416,6 +439,40 @@ def test_duplicate_nonfinite_and_toctou_are_rejected(tmp_path: Path, monkeypatch
     monkeypatch.setattr(verifier.os, "fstat", fstat_with_drift)
     with pytest.raises(verifier.VerifierError, match="TOCTOU"):
         verifier._read_bounded_json(tmp_path, path, "synthetic JSON")
+
+
+@pytest.mark.parametrize("field", ["st_nlink", "st_ctime_ns", "st_mode"])
+def test_bounded_read_rejects_metadata_identity_drift(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, field: str
+) -> None:
+    path = tmp_path / "metadata-drift.json"
+    path.write_text("{}", encoding="utf-8")
+    real_fstat = verifier.os.fstat
+    regular_calls = 0
+
+    class DriftedStat:
+        def __init__(self, base: os.stat_result) -> None:
+            self._base = base
+
+        def __getattr__(self, name: str) -> object:
+            if name == field:
+                if field == "st_mode":
+                    return self._base.st_mode ^ stat.S_IWUSR
+                return getattr(self._base, field) + 1
+            return getattr(self._base, name)
+
+    def fstat_with_metadata_drift(fd: int) -> object:
+        nonlocal regular_calls
+        result = real_fstat(fd)
+        if stat.S_ISREG(result.st_mode):
+            regular_calls += 1
+            if regular_calls == 2:
+                return DriftedStat(result)
+        return result
+
+    monkeypatch.setattr(verifier.os, "fstat", fstat_with_metadata_drift)
+    with pytest.raises(verifier.VerifierError, match="TOCTOU"):
+        verifier._read_bounded_json(tmp_path, path, "metadata JSON")
 
 
 def test_report_writer_is_confined_to_fixed_destinations(tmp_path: Path) -> None:

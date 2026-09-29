@@ -370,6 +370,20 @@ def _open_directory_chain(root: Path, components: Sequence[str], name: str) -> t
         _fail(f"{name} contains a symlink or unsafe directory: {error}")
 
 
+def _filesystem_identity(info: os.stat_result) -> tuple[int, int, int, int, int, int, int]:
+    """Return every metadata field that can change a bounded source identity."""
+
+    return (
+        int(info.st_dev),
+        int(info.st_ino),
+        int(info.st_mode),
+        int(info.st_nlink),
+        int(info.st_size),
+        int(info.st_mtime_ns),
+        int(info.st_ctime_ns),
+    )
+
+
 def _read_bounded_json(root: Path, value: Path | str, name: str) -> tuple[dict[str, Any], dict[str, Any]]:
     """Read one bounded JSON file with descriptor-relative no-follow checks."""
 
@@ -409,20 +423,20 @@ def _read_bounded_json(root: Path, value: Path | str, name: str) -> tuple[dict[s
             if total > MAX_JSON_BYTES:
                 _fail(f"{name} exceeds bounded limit {MAX_JSON_BYTES} bytes")
         after = os.fstat(file_fd)
-        identity_fields = (
-            "st_dev",
-            "st_ino",
-            "st_mode",
-            "st_nlink",
-            "st_size",
-            "st_mtime_ns",
-            "st_ctime_ns",
-        )
-        if any(getattr(before, field) != getattr(after, field) for field in identity_fields):
+        if _filesystem_identity(before) != _filesystem_identity(after):
             _fail(f"{name} changed while it was being read (TOCTOU)")
         raw = b"".join(chunks)
         if len(raw) != after.st_size:
             _fail(f"{name} size changed while it was being read")
+        try:
+            after_path = os.stat(components[-1], dir_fd=parent_fd, follow_symlinks=False)
+        except OSError as error:
+            _fail(f"{name} path changed after bounded read: {error}")
+        if (
+            not stat.S_ISREG(after_path.st_mode)
+            or _filesystem_identity(after_path) != _filesystem_identity(after)
+        ):
+            _fail(f"{name} path identity drifted after bounded read (TOCTOU)")
         try:
             payload = json.loads(
                 raw.decode("utf-8"),
@@ -1128,6 +1142,68 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
     return list(dict.fromkeys(errors))
 
 
+def verify_report_sources(
+    report: Mapping[str, Any],
+    *,
+    lab_root: Path | str = LAB_ROOT,
+) -> list[str]:
+    """Re-read every source named by a positive report and recompute it.
+
+    ``validate_report`` is intentionally a structural validator for an
+    in-memory report.  It must not be treated as provenance verification: a
+    caller could otherwise forge the normalized ``seed_matrix.evidence``
+    object without changing the source files.  This helper binds a positive
+    report back to its four bounded JSON sources and compares the complete
+    deterministic recomputation, including each source digest and artifact
+    identity.  A blocked report has no terminal claim to re-open and is
+    therefore checked structurally only.
+    """
+
+    errors = validate_report(report)
+    if errors or not report.get("source_bound"):
+        return errors
+    try:
+        root = Path(os.path.abspath(os.fspath(lab_root)))
+        matrix_source = _mapping(report.get("matrix_source"), "report.matrix_source")
+        matrix_path = _string(matrix_source.get("path"), "report.matrix_source.path")
+        rows = report.get("seed_matrix")
+        if not isinstance(rows, list) or len(rows) != len(SEEDS):
+            _fail("report.seed_matrix must contain exactly three rows")
+        process_paths: dict[int, str] = {}
+        evaluation_paths: dict[int, str] = {}
+        validator_paths: dict[int, str] = {}
+        for row in rows:
+            row_map = _mapping(row, "report.seed_matrix row")
+            seed = row_map.get("seed")
+            if seed not in SEEDS:
+                _fail("report.seed_matrix contains an invalid seed")
+            sources = _mapping(row_map.get("sources"), f"report.seed{seed}.sources")
+            for source_name, destination in (
+                ("process_exit_proof", process_paths),
+                ("evaluation_identity", evaluation_paths),
+                ("validator_receipt", validator_paths),
+            ):
+                source = _mapping(sources.get(source_name), f"report.seed{seed}.sources.{source_name}")
+                _check_exact(source, "exists", True, f"report.seed{seed}.sources.{source_name}")
+                _check_exact(source, "opened", True, f"report.seed{seed}.sources.{source_name}")
+                destination[int(seed)] = _string(
+                    source.get("path"), f"report.seed{seed}.sources.{source_name}.path"
+                )
+        rebuilt = build_report(
+            root,
+            matrix_path=matrix_path,
+            process_paths=process_paths,
+            evaluation_paths=evaluation_paths,
+            validator_paths=validator_paths,
+            observed_at_utc=_string(report.get("observed_at_utc"), "report.observed_at_utc"),
+        )
+        if canonical_json(rebuilt) != canonical_json(report):
+            _fail("positive report does not match a fresh source-bound recomputation")
+    except (VerifierError, KeyError, TypeError, ValueError, OSError, RecursionError) as error:
+        errors.append(str(error))
+    return list(dict.fromkeys(errors))
+
+
 def _report_output_components(root: Path, output: Path | str, name: str) -> tuple[Path, tuple[str, ...]]:
     candidate, components = _lexical_path(root, output, name)
     if len(components) != 2 or components[0] != "reports" or candidate.name not in REPORT_OUTPUT_FILENAMES:
@@ -1223,10 +1299,29 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--process-exit-proof", action="append", default=[], metavar="SEED=PATH")
     parser.add_argument("--evaluation-identity", action="append", default=[], metavar="SEED=PATH")
     parser.add_argument("--validator-receipt", action="append", default=[], metavar="SEED=PATH")
+    parser.add_argument("--verify-report", type=Path, default=None)
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--markdown-output", type=Path, default=None)
     parser.add_argument("--observed-at-utc", default="2026-09-28T00:00:00Z")
     args = parser.parse_args(argv)
+    root = Path(os.path.abspath(os.fspath(args.root)))
+    if args.verify_report is not None:
+        payload: Mapping[str, Any] | None = None
+        try:
+            payload, _source = _read_bounded_json(root, args.verify_report, "report")
+            errors = verify_report_sources(payload, lab_root=root)
+        except (VerifierError, OSError, ValueError, TypeError, RecursionError) as error:
+            errors = [str(error)]
+        print(
+            canonical_json(
+                {
+                    "valid": not errors,
+                    "source_bound": bool(payload.get("source_bound")) if payload is not None else False,
+                    "errors": errors,
+                }
+            )
+        )
+        return 0 if not errors else 1
     process_paths = {
         seed: args.root
         / "reports"
@@ -1249,7 +1344,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     }
     validator_paths.update(_parse_seed_paths(args.validator_receipt, "--validator-receipt"))
     report = build_report(
-        args.root,
+        root,
         matrix_path=args.matrix_report,
         process_paths=process_paths,
         evaluation_paths=evaluation_paths,

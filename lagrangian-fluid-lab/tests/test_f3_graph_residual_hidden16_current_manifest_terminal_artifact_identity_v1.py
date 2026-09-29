@@ -287,3 +287,41 @@ def test_execute_plan_has_no_capability_or_injectable_popen_surface(current_plan
     assert "_TERMINAL_CAPABILITY_TOKEN" not in vars(identity)
     with pytest.raises(identity.IdentityError, match="not implemented/admitted"):
         identity.execute_plan(current_plan)
+
+
+def test_report_writer_rejects_leaf_and_parent_symlink_destinations(tmp_path: Path) -> None:
+    target = tmp_path / "sentinel.txt"
+    target.write_text("sentinel", encoding="utf-8")
+    leaf = tmp_path / "report.json"
+    leaf.symlink_to(target)
+    with pytest.raises(identity.IdentityError, match="symlink"):
+        identity._write_json(leaf, {"must": "not follow"})
+    assert target.read_text(encoding="utf-8") == "sentinel"
+
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    parent_link = tmp_path / "parent-link"
+    parent_link.symlink_to(outside, target_is_directory=True)
+    with pytest.raises(identity.IdentityError, match="symlink|unsafe directory"):
+        identity._write_json(parent_link / "report.json", {"must": "not escape"})
+    assert not (outside / "report.json").exists()
+
+
+def test_report_writer_rejects_leaf_created_after_preflight(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    output = tmp_path / "report.json"
+    target = tmp_path / "sentinel.txt"
+    target.write_text("sentinel", encoding="utf-8")
+    original_link = identity.os.link
+    injected = False
+
+    def link_and_inject(source: object, destination: object, *args: object, **kwargs: object) -> object:
+        nonlocal injected
+        if not injected:
+            output.symlink_to(target)
+            injected = True
+        return original_link(source, destination, *args, **kwargs)
+
+    monkeypatch.setattr(identity.os, "link", link_and_inject)
+    with pytest.raises(identity.IdentityError, match="appeared during atomic publication"):
+        identity._write_json(output, {"must": "not follow"})
+    assert target.read_text(encoding="utf-8") == "sentinel"
